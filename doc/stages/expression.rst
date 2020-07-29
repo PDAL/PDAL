@@ -20,7 +20,7 @@ Instead, you must write:
 
 ::
 
-  ((Intensity > 0 && (Classification != 0))
+  ((Intensity > 0) && (Classification != 0))
 
 Mathematical Operators
 ----------------------
