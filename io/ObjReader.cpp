@@ -154,13 +154,7 @@ PointId ObjReader::addPoint(PointViewPtr view, VTN vertex) {
 
 bool ObjReader::newVertex(PointViewPtr view, double x, double y, double z)
 {
-	std::cout << "adding vertex (" << x << ", " << y << ", " << z << ")" << std::endl;
 	m_vertices.push_back({x, y, z});
-	//auto point = view->point(m_index);
-	//m_index++;
-	//point.setField(Dimension::Id::X, x);
-	//point.setField(Dimension::Id::Y, y);
-	//point.setField(Dimension::Id::Z, z);
 	return false;
 }
 
@@ -195,7 +189,6 @@ bool ObjReader::readFace(TRI vertices, PointViewPtr view)
 		if(line.length() == 0) continue;
 		//std::string lineType = line.substr(0, line.find(' '));
 		StringList fields = Utils::split2(line, ' ');
-		std::cout << "line " << debugCtr << ": " << line;
 		if(Utils::startsWith(line, "#")) {
 			// Coment
 			// Do nothing
@@ -237,51 +230,11 @@ bool ObjReader::readFace(TRI vertices, PointViewPtr view)
 			// Face
 			// Do something...
 			// PointId x, y, z;
-			PointId vertex1CoordIndex, vertex1NormalIndex, vertex1TextureIndex,
-					vertex2CoordIndex, vertex2NormalIndex, vertex2TextureIndex,
-					vertex3CoordIndex, vertex3NormalIndex, vertex3TextureIndex;
 
-			StringList vertex1data = Utils::split(fields[1], '/');
-			Utils::fromString(vertex1data[0], vertex1CoordIndex);
-			std::cout << "vertex1data length: " << vertex1data.size() << std::endl << std::flush;
-			if(vertex1data.size() > 1)
-				Utils::fromString(vertex1data[2], vertex1TextureIndex);
-			else
-				vertex1TextureIndex = -1;
-			if(vertex1data.size() > 2)
-				Utils::fromString(vertex1data[1], vertex1NormalIndex);
-			else
-				vertex1NormalIndex  = -1; 
-			VTN vertex1 = {vertex1CoordIndex - 1, vertex1TextureIndex - 1, vertex1NormalIndex - 1};
-
-			StringList vertex2data = Utils::split(fields[2], '/');
-			Utils::fromString(vertex2data[0], vertex2CoordIndex);
-			if(vertex2data.size() > 1)
-				Utils::fromString(vertex2data[2], vertex2TextureIndex);
-			else
-				vertex2TextureIndex = -1;
-			if(vertex2data.size() > 2)
-				Utils::fromString(vertex2data[1], vertex2NormalIndex);
-			else
-				vertex2NormalIndex  = -1;
-			VTN vertex2 = {vertex2CoordIndex - 1, vertex2TextureIndex - 1, vertex2NormalIndex - 1};
-
-			StringList vertex3data = Utils::split(fields[3], '/');
-			Utils::fromString(vertex3data[0], vertex3CoordIndex);
-			if(vertex3data.size() > 1)
-				Utils::fromString(vertex3data[2], vertex3TextureIndex);
-			else
-				vertex3TextureIndex = -1;
-			if(vertex3data.size() > 2)
-				Utils::fromString(vertex3data[1], vertex3NormalIndex);
-			else
-				vertex3NormalIndex  = -1;
-			VTN vertex3 = {vertex3CoordIndex - 1, vertex3TextureIndex - 1, vertex3NormalIndex - 1};
-			
-
-			vertices = {vertex1, vertex2, vertex3};
-			newTriangle(vertices);
-			break;
+            if (fields.size() < 4)
+                throwError("Not enough vertices in face specification.");
+            StringList vertices(fields.begin() + 1, fields.end());
+            extractFace(vertices);
 		}
 		else if(Utils::startsWith(line, "o")) {
 		}
@@ -296,6 +249,48 @@ bool ObjReader::readFace(TRI vertices, PointViewPtr view)
 		std::cout << std::endl;
 	}
 	return true;
+}
+
+void ObjReader::extractFace(StringList fields)
+{
+    TRI tri;
+
+    for (size_t i = 0; i < 3; ++i)
+        tri[i] = extractVertex(fields[0]);
+    newTriangle(tri);
+}
+
+ObjReader::VTN ObjReader::extractVertex(const std::string& vstring)
+{
+    size_t len;
+    VTN vtn = { -1, -1, -1 };
+    StringList parts = Utils::split(vstring, '/');
+
+    if (parts.size() > 3)
+        throwError("Too many items in vertex specification.");
+
+    std::get<0>(vtn) = std::stoi(parts[0], &len);
+    if (len != parts[0].size())
+        throwError("Invalid index in face specification.");
+
+    if (parts.size() > 1)
+    {
+        int i = std::stoi(parts[1], &len);
+        if (len != 0 && len != parts[1].size())
+            throwError("Invalid index in face specification.");
+        if (i)
+            std::get<1>(vtn) = i;
+    }
+
+    if (parts.size() > 2)
+    {
+        int i = std::stoi(parts[1], &len);
+        if (len != 0 && len != parts[1].size())
+            throwError("Invalid index in face specification.");
+        if (i)
+            std::get<2>(vtn) = i;
+    }
+    return vtn;
 }
 
 } // namespace pdal
