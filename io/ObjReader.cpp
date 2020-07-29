@@ -84,7 +84,7 @@ point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)
 
 		PointId pointId1, pointId2, pointId3;
 		auto it = m_points.find(tri[0]);
-        if (it != m_points.end())
+        if (it == m_points.end())
         {
             //pointId1 = view->point((point_count_t)pointId1);;
 			//PointRef pt = view->point(m_index);
@@ -95,7 +95,7 @@ point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)
         else
             pointId1 = it->second;
         it = m_points.find(tri[1]);
-        if (it != m_points.end())
+        if (it == m_points.end())
         {
             //pointId2 = view->point(pointId2);
 			//PointRef pt = view->point(m_index);
@@ -106,7 +106,7 @@ point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)
         else
             pointId2 = it->second;
         it = m_points.find(tri[2]);
-        if (it != m_points.end())
+        if (it == m_points.end())
         {
             //pointId3 = view->point(pointId3);
 			//PointRef pt = view->point(m_index);
@@ -137,16 +137,16 @@ PointId ObjReader::addPoint(PointViewPtr view, VTN vertex) {
 	int64_t textureIndex = std::get<1>(vertex);
 	if(textureIndex >= 0) {
 		t = m_textureVertices.at(textureIndex);
-		pt.setField(Dimension::Id::NormalX, n.x);
-		pt.setField(Dimension::Id::NormalY, n.y);
-		pt.setField(Dimension::Id::NormalZ, n.z);
+		pt.setField(Dimension::Id::TextureX, t.x);
+		pt.setField(Dimension::Id::TextureY, t.y);
 	}
 
 	int64_t normalIndex = std::get<2>(vertex);
 	if(normalIndex >= 0) {
 		n = m_normalVertices.at(normalIndex);
-		pt.setField(Dimension::Id::TextureX, t.x);
-		pt.setField(Dimension::Id::TextureY, t.y);
+		pt.setField(Dimension::Id::NormalX, n.x);
+		pt.setField(Dimension::Id::NormalY, n.y);
+		pt.setField(Dimension::Id::NormalZ, n.z);
 	}
 
 	return pt.pointId();
@@ -241,57 +241,46 @@ bool ObjReader::readFace(TRI vertices, PointViewPtr view)
 					vertex2CoordIndex, vertex2NormalIndex, vertex2TextureIndex,
 					vertex3CoordIndex, vertex3NormalIndex, vertex3TextureIndex;
 
-			StringList vertex1data = Utils::split2(fields[1], '/');
+			StringList vertex1data = Utils::split(fields[1], '/');
 			Utils::fromString(vertex1data[0], vertex1CoordIndex);
 			std::cout << "vertex1data length: " << vertex1data.size() << std::endl << std::flush;
-			//Utils::fromString(vertex1data[1], vertex1NormalIndex);
-			//Utils::fromString(vertex1data[2], vertex1TextureIndex);
-			vertex1TextureIndex = -1;
-			vertex1NormalIndex  = -1;
+			if(vertex1data.size() > 1)
+				Utils::fromString(vertex1data[2], vertex1TextureIndex);
+			else
+				vertex1TextureIndex = -1;
+			if(vertex1data.size() > 2)
+				Utils::fromString(vertex1data[1], vertex1NormalIndex);
+			else
+				vertex1NormalIndex  = -1; 
 			VTN vertex1 = {vertex1CoordIndex - 1, vertex1TextureIndex - 1, vertex1NormalIndex - 1};
 
-			StringList vertex2data = Utils::split2(fields[2], '/');
+			StringList vertex2data = Utils::split(fields[2], '/');
 			Utils::fromString(vertex2data[0], vertex2CoordIndex);
-			//Utils::fromString(vertex2data[1], vertex2NormalIndex);
-			//Utils::fromString(vertex2data[2], vertex2TextureIndex);
-			vertex2TextureIndex = -1;
-			vertex2NormalIndex  = -1;
+			if(vertex2data.size() > 1)
+				Utils::fromString(vertex2data[2], vertex2TextureIndex);
+			else
+				vertex2TextureIndex = -1;
+			if(vertex2data.size() > 2)
+				Utils::fromString(vertex2data[1], vertex2NormalIndex);
+			else
+				vertex2NormalIndex  = -1;
 			VTN vertex2 = {vertex2CoordIndex - 1, vertex2TextureIndex - 1, vertex2NormalIndex - 1};
 
-			StringList vertex3data = Utils::split2(fields[3], '/');
+			StringList vertex3data = Utils::split(fields[3], '/');
 			Utils::fromString(vertex3data[0], vertex3CoordIndex);
-			//Utils::fromString(vertex3data[1], vertex3NormalIndex);
-			//Utils::fromString(vertex3data[2], vertex3TextureIndex);
-			vertex3TextureIndex = -1;
-			vertex3NormalIndex  = -1;
+			if(vertex3data.size() > 1)
+				Utils::fromString(vertex3data[2], vertex3TextureIndex);
+			else
+				vertex3TextureIndex = -1;
+			if(vertex3data.size() > 2)
+				Utils::fromString(vertex3data[1], vertex3NormalIndex);
+			else
+				vertex3NormalIndex  = -1;
 			VTN vertex3 = {vertex3CoordIndex - 1, vertex3TextureIndex - 1, vertex3NormalIndex - 1};
-
-/*
-			XYZ vertex1Coords = m_vertices.at(vertex1CoordIndex);
-			XYZ vertex2Coords = m_vertices.at(vertex2CoordIndex);
-			XYZ vertex3Coords = m_vertices.at(vertex3CoordIndex);
 			
-			XYZ vertex1Normals = m_vertices.at(vertex1NormalIndex);
-			XYZ vertex2Normals = m_vertices.at(vertex2NormalIndex);
-			XYZ vertex3Normals = m_vertices.at(vertex3NormalIndex);
 
-			XYZ vertex1Texture = m_vertices.at(vertex1TextureIndex);
-			XYZ vertex2Texture = m_vertices.at(vertex2TextureIndex);
-			XYZ vertex3Texture = m_vertices.at(vertex3TextureIndex);
-*/
-			/*
-			Utils::fromString(vertex1data[1], x);
-			Utils::fromString(fields[2], y);
-			Utils::fromString(fields[3], z);
-			newTriangle( {x, y, z} );
-			*/
-			/*
-			vertices[0] = vertex1;
-			vertices[1] = vertex2;
-			vertices[2] = vertex3;
-			*/
 			vertices = {vertex1, vertex2, vertex3};
-			newTriangle({vertex1, vertex2, vertex3});
+			newTriangle(vertices);
 			break;
 		}
 		else if(Utils::startsWith(line, "o")) {
