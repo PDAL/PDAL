@@ -377,9 +377,47 @@ class PgpointcloudReaderTest : public PgpointcloudTest
 // make sure Pgpointcloud readers supports streaming
 TEST_F(PgpointcloudReaderTest, streaming )
 {
+    if (shouldSkipTests())
+    {
+        return;
+    }
+    executeOnTestDb("CREATE SCHEMA \"4dal-\"\"test\"\"-schema\"");
+    
+    // write sample data (las/1.2-with.color.las)
+    // to newly created schema
+    Options ops;
+    ops = getDbOptions();
+    optionsWrite(ops);
+
+
     StageFactory factory;
     Stage* reader(factory.createStage("readers.pgpointcloud"));
+    reader->setOptions(ops);
+
+    // make sure pipeline is streamble
     EXPECT_TRUE(reader->pipelineStreamable());
+
+    // execute pipeline
+    PointTable table;
+
+    reader->prepare(table);
+    PointViewSet pws = reader->execute(table);
+    PointViewPtr pwsPtr = *pws.begin();
+
+
+    // Returned dataset should have the same bounds
+    // and point count as the LAS-file we inserted
+    EXPECT_EQ(pwsPtr->size(), 1065U);
+
+    BOX3D bbox_las = BOX3D(635619.85, 848899.7, 406.59, 638982.55, 853535.43, 586.38);
+    BOX3D bbox_pg;
+    pwsPtr->calculateBounds(bbox_pg);
+    EXPECT_FLOAT_EQ(bbox_pg.maxx, bbox_las.maxx);
+    EXPECT_FLOAT_EQ(bbox_pg.maxy, bbox_las.maxy);
+    EXPECT_FLOAT_EQ(bbox_pg.maxz, bbox_las.maxz);
+    EXPECT_FLOAT_EQ(bbox_pg.minx, bbox_las.minx);
+    EXPECT_FLOAT_EQ(bbox_pg.miny, bbox_las.miny);
+    EXPECT_FLOAT_EQ(bbox_pg.minz, bbox_las.minz);
 }
 
 

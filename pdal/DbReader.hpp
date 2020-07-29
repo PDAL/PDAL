@@ -49,10 +49,7 @@ protected:
     void loadSchema(PointLayoutPtr layout, const std::string& schemaString);
     void loadSchema(PointLayoutPtr layout, const XMLSchema& schema);
     void updateSchema(const XMLSchema& schema);
-    void writeField(PointView& view, const char *pos, const DimType& dim,
-        PointId idx);
     void writeField(PointRef& point, const char *pos, const DimType& dim);
-    void writePoint(PointView& view, PointId idx, const char *buf);
     void writePoint(PointRef& point, const char *buf);
     size_t packedPointSize() const
         { return m_packedPointSize; }

@@ -102,24 +102,6 @@ size_t DbReader::dimOffset(Dimension::Id id) const
 }
 
 
-void DbReader::writeField(PointView& view, const char *pos, const DimType& dim,
-    PointId idx)
-{
-    using namespace Dimension;
-
-    if (dim.m_id == Id::X || dim.m_id == Id::Y || dim.m_id == Id::Z)
-    {
-        Everything e;
-
-        memcpy(&e, pos, Dimension::size(dim.m_type));
-        double d = Utils::toDouble(e, dim.m_type);
-        d = (d * dim.m_xform.m_scale.m_val) + dim.m_xform.m_offset.m_val;
-        view.setField(dim.m_id, idx, d);
-    }
-    else
-        view.setField(dim.m_id, dim.m_type, idx, pos);
-}
-
 void DbReader::writeField(PointRef& point, const char *pos, const DimType &dim)
 {
     using namespace Dimension;
@@ -137,20 +119,10 @@ void DbReader::writeField(PointRef& point, const char *pos, const DimType &dim)
         point.setField(dim.m_id, dim.m_type, pos);
 }
 
+
 /// Write a point's packed data into a buffer.
-/// \param[in] view PointView to write to.
-/// \param[in] idx  Index of point to write.
+/// \param[in] point PointRef to write to.
 /// \param[in] buf  Pointer to packed DB point data.
-void DbReader::writePoint(PointView& view, PointId idx, const char *buf)
-{
-    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-    {
-        writeField(view, buf, di->m_dimType, idx);
-        buf += Dimension::size(di->m_dimType.m_type);
-    }
-}
-
-
 void DbReader::writePoint(PointRef& point, const char *buf)
 {
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
