@@ -2,6 +2,7 @@
 
 #include "AssignParser.hpp"
 #include "ConditionalExpression.hpp"
+#include "IdentExpression.hpp"
 #include "MathExpression.hpp"
 #include "Lexer.hpp"
 
@@ -13,12 +14,25 @@ namespace expr
 class AssignExpression : public Expression
 {
 public:
-    Expression& valueExpr();
-    Expression& conditionalExpr();
+    AssignExpression() = default;
+    AssignExpression(const AssignExpression&) = default;
+    AssignExpression(AssignExpression&&) = default;
+    AssignExpression& operator=(const AssignExpression&) = default;
 
-    virtual Utils::StatusWithReason prepare(PointLayoutPtr layout);
+    virtual ~AssignExpression()
+    {}
+
+    MathExpression& valueExpr();
+    IdentExpression& identExpr();
+    ConditionalExpression& conditionalExpr();
+    bool valid() const;
+    operator bool() const;
+
+    std::string print() const;
+    Utils::StatusWithReason prepare(PointLayoutPtr layout);
 
 private:
+    IdentExpression m_identExpr;
     MathExpression m_valueExpr;
     ConditionalExpression m_conditionalExpr;
 };

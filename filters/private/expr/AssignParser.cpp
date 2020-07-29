@@ -20,7 +20,7 @@ bool AssignParser::assignment(AssignExpression& expr)
         setError("Expected dimension name for assignment.");
         return false;
     }
-    expr.pushNode(NodePtr(new VarNode(curToken().sval())));
+    expr.identExpr().pushNode(NodePtr(new VarNode(curToken().sval())));
 
     if (!match(TokenType::Assign))
     {

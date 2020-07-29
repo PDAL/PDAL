@@ -205,6 +205,7 @@ public:
     virtual std::string print() const;
     virtual Utils::StatusWithReason prepare(PointLayoutPtr l);
     virtual Result eval(PointRef& p) const;
+    Dimension::Id eval() const;
 
 private:
     std::string m_name;
@@ -215,18 +216,20 @@ class Expression
 {
 public:
     Expression();
-    ~Expression();
+    virtual ~Expression();
     Expression(const Expression& expr);
+    Expression(Expression&& expr) noexcept;
+    Expression& operator=(Expression&& expr);
     Expression& operator=(const Expression& expr);
 
     void clear();
-    bool parse(const std::string& s);
+    bool valid() const;
     std::string error() const;
-    std::string print() const;
     NodePtr popNode();
     void pushNode(NodePtr node);
     Node *topNode();
     const Node *topNode() const;
+    virtual std::string print() const;
     virtual Utils::StatusWithReason prepare(PointLayoutPtr layout) = 0;
 
 private:

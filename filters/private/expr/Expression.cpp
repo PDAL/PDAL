@@ -317,6 +317,11 @@ Result VarNode::eval(PointRef& p) const
     return p.getFieldAs<double>(m_id);
 }
 
+Dimension::Id VarNode::eval() const
+{
+    return m_id;
+}
+
 Utils::StatusWithReason VarNode::prepare(PointLayoutPtr l)
 {
     m_id = l->findDim(m_name);
@@ -341,7 +346,24 @@ Expression::~Expression()
 // In order to copy, we'd actually have to deep-copy the nodes, but there is
 // no way to do that right now.
 Expression::Expression(const Expression& expr)
+{
+    if (m_nodes.size())
+        throw pdal_error("Attempting to copy expression with nodes.");
+}
+
+// noexcept is important here. Without, vector won't call the move ctor when
+//   resizing. Instead, it will call the copy ctor, which is bad, since our
+//   copy ctor is busted.
+Expression::Expression(Expression&& expr) noexcept :
+    m_error(expr.m_error), m_nodes(std::move(expr.m_nodes))
 {}
+
+Expression& Expression::operator=(Expression&& expr)
+{
+    m_error = expr.m_error;
+    m_nodes = std::move(expr.m_nodes);
+    return *this;
+}
 
 // This is a strange assignment operator that ignores the source.  At this point we
 // don't need it to do anything, but we do need the an expression to
@@ -350,8 +372,14 @@ Expression::Expression(const Expression& expr)
 // no way to do that right now.
 Expression& Expression::operator=(const Expression& expr)
 {
-    clear();
+    if (m_nodes.size())
+        throw pdal_error("Attempting to assign expression with nodes.");
     return *this;
+}
+
+bool Expression::valid() const
+{
+    return m_nodes.size();
 }
 
 void Expression::clear()
@@ -368,7 +396,9 @@ std::string Expression::error() const
 
 std::string Expression::print() const
 {
-    return m_nodes.top()->print();
+    if (m_nodes.size())
+        return m_nodes.top()->print();
+    return std::string();
 }
 
 NodePtr Expression::popNode()
@@ -391,6 +421,13 @@ Node *Expression::topNode()
 const Node *Expression::topNode() const
 {
     return m_nodes.size() ? m_nodes.top().get() : nullptr;
+}
+
+Utils::StatusWithReason Expression::prepare(PointLayoutPtr layout)
+{
+    if (m_nodes.size())
+        return m_nodes.top()->prepare(layout);
+    return true;
 }
 
 std::ostream& operator<<(std::ostream& out, const Expression& expr)
