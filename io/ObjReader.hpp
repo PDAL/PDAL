@@ -78,15 +78,19 @@ private:
     using VTN = std::tuple<int64_t, int64_t, int64_t>;
     std::map<VTN, PointId> m_points;
     using TRI = std::array<VTN, 3>;
+    using FACE = std::vector<VTN>;
 
     bool newVertex(PointViewPtr view, double x, double y, double z);
     bool newTextureVertex(double x, double y, double z);
     bool newNormalVertex(double x, double y, double z);
     bool newTriangle(TRI vertices);
-    bool readFace(TRI& vertices, PointViewPtr view);
+    bool readFace(FACE& vertices, PointViewPtr view);
     TRI extractFace(StringList fields);
+    void extractEntireFace(StringList fields, FACE& face);
     VTN extractVertex(const std::string& vstring);
+    std::vector<TRI> triangulate(FACE face);
     PointId addPoint(PointViewPtr view, VTN vertex);
+    void addTriangle(PointViewPtr view, TRI tri);
     std::istream *m_istream;
     point_count_t m_index;
 };
