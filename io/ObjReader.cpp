@@ -336,7 +336,11 @@ ObjReader::VTN ObjReader::extractVertex(const std::string& vstring)
     if (parts.size() > 3)
         throwError("Too many items in vertex specification.");
 
-    std::get<0>(vtn) = std::stoi(parts[0], &len);
+    auto index = std::stoi(parts[0], &len);
+	if(index < 0)
+		std::get<0>(vtn) = m_vertices.size() - index;
+	else
+		std::get<0>(vtn) = index;
     if (len != parts[0].size())
         throwError("Invalid index in face specification.");
 
@@ -345,8 +349,10 @@ ObjReader::VTN ObjReader::extractVertex(const std::string& vstring)
         int i = std::stoi(parts[1], &len);
         if (len != 0 && len != parts[1].size())
             throwError("Invalid index in face specification.");
-        if (i)
-            std::get<1>(vtn) = i;
+			if(i < 0)
+				std::get<1>(vtn) = m_vertices.size() - i;
+			else
+				std::get<1>(vtn) = i;
     }
 
     if (parts.size() > 2)
@@ -354,8 +360,12 @@ ObjReader::VTN ObjReader::extractVertex(const std::string& vstring)
         int i = std::stoi(parts[2], &len);
         if (len != 0 && len != parts[1].size())
             throwError("Invalid index in face specification.");
-        if (i)
-            std::get<2>(vtn) = i;
+        if (i) {
+			if(i < 0)
+				std::get<2>(vtn) = m_vertices.size() - i;
+			else
+				std::get<2>(vtn) = i;
+		}
     }
     return vtn;
 }
