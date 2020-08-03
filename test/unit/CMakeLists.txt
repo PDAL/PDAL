@@ -31,7 +31,6 @@ PDAL_ADD_TEST(pdal_config_test FILES ConfigTest.cpp)
 PDAL_ADD_TEST(pdal_eigen_test
     FILES
         EigenTest.cpp
-        ${PDAL_SRC_DIR}/private/MathUtils.cpp
     INCLUDES
         ${PDAL_VENDOR_DIR}/eigen
 )
@@ -174,7 +173,15 @@ PDAL_ADD_TEST(pdal_io_las_writer_test
         ${NLOHMANN_INCLUDE_DIR}
 )
 
+PDAL_ADD_TEST(pdal_io_obj_reader_test
+    FILES
+        io/ObjReaderTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}
+)
+
 PDAL_ADD_TEST(pdal_io_optech_test FILES io/OptechReaderTest.cpp)
+
 PDAL_ADD_TEST(pdal_io_pcd_reader_test
     FILES
         io/PcdReaderTest.cpp
@@ -261,7 +268,6 @@ PDAL_ADD_TEST(pdal_filters_mongoexpression_test
         ${NLOHMANN_INCLUDE_DIR}
 )
 
-PDAL_ADD_TEST(pdal_filters_faceraster_test FILES filters/FaceRasterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_ferry_test FILES filters/FerryFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_groupby_test FILES filters/GroupByFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_hag_test FILES filters/HAGFilterTest.cpp)
