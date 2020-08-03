@@ -344,13 +344,15 @@ void EsriReader::ready(PointTableRef table)
     -texture data: <node-url>/textures/<texture-data-bundle-id>
     */
 
-    // Build the node list that will tell us which nodes overlap with bounds
-    std::string filename = "nodepages/0";
-    std::string s = fetchJson(filename);
-    NL::json initJson = i3s::parse(s,
-        "Invalid json in file '" + filename + "'.");
-    log()->get(LogLevel::Debug) << "Traversing metadata" << std::endl;
-    traverseTree(initJson, 0, 0, 0);
+    // Before version 2, page indexes were the first item on the page, rather than the
+    // actual page number, so we use the page size (m_nodeCap) as a factor from the page
+    // index to get the proper filename for a page.
+    int indexFactor = m_version >= Version("2.0") ? 1 : m_nodeCap;
+    i3s::FetchFunction fetch = std::bind(&EsriReader::fetchJson, this, std::placeholders::_1);
+    m_pageManager.reset(new PageManager(100, 4, indexFactor, fetch));
+    PagePtr p = m_pageManager->getPage(0);
+    traverseTree(p, 0);
+    m_pool->await();
 
     // If we're running in standard mode, queue up all the requests for data.
     // In streaming mode, queue up at most 4 to avoid having a ton of data
@@ -539,21 +541,25 @@ bool EsriReader::processPoint(PointRef& dst, const TileContents& tile)
 // the tree and test if it overlaps with the bounds created by user.
 // If it's a leaf node(the highest resolution) and it overlaps, add
 // it to the list of nodes to be pulled later.
-void EsriReader::traverseTree(NL::json page, int index, int depth,
-    int pageIndex)
+void EsriReader::traverseTree(PagePtr page, int node)
 {
+    std::cerr << "Traverse tree for node = " << node << "!\n";
+    int index = node % m_nodeCap;
+    int pageIndex = node / m_nodeCap;
+
     // find node information
-    int firstNode = page["nodes"][0]["resourceId"].get<int>();
-    int name = page["nodes"][index]["resourceId"].get<int>();
-    int firstChild = page["nodes"][index]["firstChild"].get<int>();
-    int cCount = page["nodes"][index]["childCount"].get<int>();
+    NL::json& j = *page;
+    int firstNode = j["nodes"][0]["resourceId"].get<int>();
+    int name = j["nodes"][index]["resourceId"].get<int>();
+    int firstChild = j["nodes"][index]["firstChild"].get<int>();
+    int cCount = j["nodes"][index]["childCount"].get<int>();
 
     // find density information
-    double area = page["nodes"][index][
+    double area = j["nodes"][index][
         m_version >= Version("2.0") ?
             "lodThreshold" :
             "effectiveArea" ].get<double>();
-    int pCount = page["nodes"][index][
+    int pCount = j["nodes"][index][
         m_version >= Version("2.0") ?
             "vertexCount" :
             "pointCount" ].get<int>();
@@ -568,7 +574,7 @@ void EsriReader::traverseTree(NL::json page, int index, int depth,
 
     try
     {
-        Obb obb(page["nodes"][index]["obb"]);
+        Obb obb(j["nodes"][index]["obb"]);
         if (m_ecefTransform)
             obb.transform(*m_ecefTransform);
         if (m_args->obb.valid() && !obb.intersect(m_args->obb))
@@ -589,48 +595,28 @@ void EsriReader::traverseTree(NL::json page, int index, int depth,
         m_nodes.push_back(name);
         return;
     }
-    else
+    if (density < m_args->max_density && density > m_args->min_density)
+        m_nodes.push_back(name);
+
+    // if we've already reached the last node, stop the process, otherwise
+    // increment depth and begin looking at child nodes
+    if (name == m_maxNode || cCount == 0)
+        return;
+
+    for (int i = 0; i < cCount; ++i)
     {
-        if (density < m_args->max_density && density > m_args->min_density)
-        {
-            m_nodes.push_back(name);
-        }
-        // if we've already reached the last node, stop the process, otherwise
-        // increment depth and begin looking at child nodes
-        if (name == m_maxNode)
-            return;
+        int node = firstChild + i;
+        if (i == 0 || node % m_nodeCap == 0)
+            m_pageManager->fetchPage(node / m_nodeCap);
+    }
 
-        ++depth;
-        for (int i = 0; i < cCount; ++i)
-        {
-            if ((firstChild + i) > (firstNode + m_nodeCap - 1))
-            {
-                pageIndex =
-                    (m_version >= Version("2.0") ?
-                        (firstChild + i) / m_nodeCap :
-                        ((firstChild + i) / m_nodeCap) * m_nodeCap);
-
-                if (m_nodepages.find(pageIndex) != m_nodepages.end())
-                    page = m_nodepages[pageIndex];
-                else
-                {
-                    std::string filename = "nodepages/" +
-                        std::to_string(pageIndex);
-                    std::string s = fetchJson(filename);
-                    page = i3s::parse(s,
-                        "Invalid JSON in file '" + filename + "'.");
-                    m_nodepages[pageIndex] = page;
-                }
-            }
-            if (pageIndex != 0)
-                index =
-                    (m_version >= Version("2.0") ?
-                        (firstChild + i) % (m_nodeCap * pageIndex):
-                        (firstChild + i) % (pageIndex));
-            else
-                index = firstChild + i;
-            traverseTree(page, index, depth, pageIndex);
-        }
+    for (int i = 0; i < cCount; ++i)
+    {
+        node = firstChild + i;
+        if (i == 0 || node % m_nodeCap == 0)
+            page = m_pageManager->getPage(node / m_nodeCap);
+//        m_pool->add([this, page, node](){traverseTree(page, node);});
+traverseTree(page, node);
     }
 }
 

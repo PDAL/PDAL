@@ -49,6 +49,7 @@
 #include <pdal/util/Bounds.hpp>
 
 #include "EsriUtil.hpp"
+#include "PageManager.hpp"
 
 namespace pdal
 {
@@ -81,11 +82,11 @@ private:
     int m_maxNode = 0;
     i3s::Version m_version;
     SpatialReference m_nativeSrs;
+    std::unique_ptr<i3s::PageManager> m_pageManager;
     std::unique_ptr<SrsTransform> m_ecefTransform;
     std::unique_ptr<ThreadPool> m_pool;
     std::vector<DimData> m_esriDims;
     size_t m_extraDimCount;
-    std::map<int, NL::json> m_nodepages;
     std::vector<int> m_nodes;
     size_t m_curNodeIdx;
     size_t m_tilesToProcess;
@@ -102,7 +103,7 @@ private:
     virtual point_count_t read(PointViewPtr view, point_count_t count) override;
     virtual bool processOne(PointRef&) override;
     void createView(std::string localUrl, int nodeIndex,  PointView& view);
-    void traverseTree(NL::json page, int index, int depth, int pageIndex);
+    void traverseTree(i3s::PagePtr page, int node);
     void load(int nodeId);
     TileContents loadPath(const std::string& url);
     void checkTile(const TileContents& tile);

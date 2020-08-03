@@ -438,7 +438,7 @@ void EptReader::ready(PointTableRef table)
     }
 
     // Ten million is a silly-large number for the number of tiles.
-    m_pool.reset(new ThreadPool(m_pool->numThreads(), 10000000));
+    m_pool.reset(new ThreadPool(m_pool->numThreads()));
     m_pointId = 0;
     m_tileCount = m_hierarchy->size();
 
