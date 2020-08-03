@@ -79,7 +79,6 @@ private:
     std::unique_ptr<Args> m_args;
     NL::json m_info;
     int m_nodeCap;
-    int m_maxNode = 0;
     i3s::Version m_version;
     SpatialReference m_nativeSrs;
     std::unique_ptr<i3s::PageManager> m_pageManager;

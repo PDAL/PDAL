@@ -543,9 +543,7 @@ bool EsriReader::processPoint(PointRef& dst, const TileContents& tile)
 // it to the list of nodes to be pulled later.
 void EsriReader::traverseTree(PagePtr page, int node)
 {
-    std::cerr << "Traverse tree for node = " << node << "!\n";
     int index = node % m_nodeCap;
-    int pageIndex = node / m_nodeCap;
 
     // find node information
     NL::json& j = *page;
@@ -565,12 +563,6 @@ void EsriReader::traverseTree(PagePtr page, int node)
             "pointCount" ].get<int>();
 
     double density = pCount / area;
-
-    // update maximum node to stop reading files at the right time
-    if ((firstChild + cCount - 1) > m_maxNode)
-    {
-        m_maxNode = firstChild + cCount - 1;
-    }
 
     try
     {
@@ -592,15 +584,18 @@ void EsriReader::traverseTree(PagePtr page, int node)
     // if it's a child node and we're fetching full density, add leaf nodes
     if (m_args->max_density == -1 && m_args->min_density == -1 && cCount == 0)
     {
+        std::unique_lock<std::mutex> lock(m_mutex);
         m_nodes.push_back(name);
         return;
     }
     if (density < m_args->max_density && density > m_args->min_density)
+    {
+        std::unique_lock<std::mutex> lock(m_mutex);
         m_nodes.push_back(name);
+    }
 
-    // if we've already reached the last node, stop the process, otherwise
-    // increment depth and begin looking at child nodes
-    if (name == m_maxNode || cCount == 0)
+    // if have no children, we're done this branch,.
+    if (cCount == 0)
         return;
 
     for (int i = 0; i < cCount; ++i)
@@ -615,8 +610,7 @@ void EsriReader::traverseTree(PagePtr page, int node)
         node = firstChild + i;
         if (i == 0 || node % m_nodeCap == 0)
             page = m_pageManager->getPage(node / m_nodeCap);
-//        m_pool->add([this, page, node](){traverseTree(page, node);});
-traverseTree(page, node);
+        m_pool->add([this, page, node](){traverseTree(page, node);});
     }
 }
 

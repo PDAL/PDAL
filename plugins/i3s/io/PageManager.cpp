@@ -86,6 +86,10 @@ void PageManager::fetchPage(int index)
 
 PagePtr PageManager::getPage(int index)
 {
+    // In case someone forgot to call fetchPage() before calling this function or in the
+    // case a cached page were to get evicted since the time fetchPage() was called,
+    // we loop and try to fetch again if we couldn't get the page that we expected to
+    // be around.
     while (true)
     {
         PagePtr p = getPageLocked(index);
