@@ -150,7 +150,10 @@ bool OverlayFilter::processOne(PointRef& point)
         double x = point.getFieldAs<double>(Dimension::Id::X);
         double y = point.getFieldAs<double>(Dimension::Id::Y);
         if (poly.geom.contains(x, y))
+        {
             point.setField(m_dim, poly.val);
+            break;
+        }
     }
     return true;
 }

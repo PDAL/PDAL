@@ -41,3 +41,6 @@ Options
 
 cell
   Cell size in the ``X``, ``Y``, and ``Z`` dimension. [Default: 1.0]
+
+.. include:: filter_opts.rst
+

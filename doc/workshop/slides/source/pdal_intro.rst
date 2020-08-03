@@ -132,7 +132,7 @@ Filters (cont)
 ================================================================================
 
 * :ref:`Ground classification<filters.smrf>`
-* :ref:`Normalized heights <filters.hag>`
+* :ref:`Normalized heights <filters.hag_nn>`
 * :ref:`Sorting <filters.sort>`
 * :ref:`Spatial curve sorting <filters.mortonorder>`
 * :ref:`Noise filtering <filters.outlier>`

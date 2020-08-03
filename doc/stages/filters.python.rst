@@ -277,5 +277,7 @@ _`pdalargs`
   A JSON dictionary of items you wish to pass into the modules globals as the
   ``pdalargs`` object.
 
+.. include:: filter_opts.rst
+
 .. _Python: http://python.org/
 .. _NumPy: http://www.numpy.org/

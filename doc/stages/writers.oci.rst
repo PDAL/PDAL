@@ -156,5 +156,7 @@ tolerance
   Oracle geometry tolerance. X, Y, and Z dimensions are all
   currently specified as a single value [Default: 0.05]
 
+.. include:: writer_opts.rst
+
 .. _Oracle point cloud: http://docs.oracle.com/cd/B28359_01/appdev.111/b28400/sdo_pc_pkg_ref.htm
 

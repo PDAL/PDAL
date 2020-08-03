@@ -182,6 +182,8 @@ width
 height
   Number of cells in the Y direction. [Default: None]
 
+.. include:: writer_opts.rst
+
 .. note::
     You may use the 'bounds' option, or 'origin_x', 'origin_y', 'width'
     and 'height', but not both.

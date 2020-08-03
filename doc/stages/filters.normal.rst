@@ -85,3 +85,6 @@ _`always_up`
 _`refine`
   A flag indicating whether or not to reorient normals using minimum spanning
   tree propagation. [Default: false]
+
+.. include:: filter_opts.rst
+

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2014, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -32,40 +32,68 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include "StageRunner.hpp"
 
 #include <pdal/Filter.hpp>
-
-#include <cstdint>
-#include <memory>
-#include <string>
 
 namespace pdal
 {
 
-class Options;
-class PointLayout;
-class PointView;
-
-class PDAL_DLL HAGFilter : public Filter
+StageRunner::StageRunner(Stage *s, PointViewPtr view) : m_stage(s)
 {
-public:
-    HAGFilter();
-    HAGFilter& operator=(const HAGFilter&) = delete;
-    HAGFilter(const HAGFilter&) = delete;
+    m_keeps = view->makeNew();
+    Filter *f = dynamic_cast<Filter *>(m_stage);
+    if (f)
+    {
+        m_skips = view->makeNew();
+        f->splitView(view, m_keeps, m_skips);
+    }
+    else
+        m_keeps = view;
+}
 
-    std::string getName() const;
+PointViewPtr StageRunner::keeps()
+{
+    return m_keeps;
+}
 
-private:
-    virtual void addArgs(ProgramArgs& args);
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void prepared(PointTableRef table);
-    virtual void filter(PointView& view);
+// For now this is all synchronous
+void StageRunner::run()
+{
+    point_count_t keepSize = m_keeps->size();
+    m_viewSet = m_stage->run(m_keeps);
 
-    bool m_allowExtrapolation;
-    bool m_delaunay;
-    double m_maxDistance;
-    point_count_t m_count;
-};
+    Filter *f = dynamic_cast<Filter *>(m_stage);
+    if (!f || !m_skips || m_skips->size() == 0)
+        return;
+
+    if (f->mergeMode() == Filter::WhereMergeMode::True)
+    {
+        if (m_viewSet.size())
+        {
+            (*m_viewSet.begin())->append(*m_skips);
+                return;
+        }
+    }
+    else if (f->mergeMode() == Filter::WhereMergeMode::Auto)
+    {
+        if (m_viewSet.size() == 1)
+        {
+            PointViewPtr keeps = *m_viewSet.begin();
+            if (keeps.get() == m_keeps.get() && keepSize == keeps->size())
+            {
+                keeps->append(*m_skips);
+                return;
+            }
+        }
+    }
+    m_viewSet.insert(m_skips);
+}
+
+PointViewSet StageRunner::wait()
+{
+    return m_viewSet;
+}
 
 } // namespace pdal
+

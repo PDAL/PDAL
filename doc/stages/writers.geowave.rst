@@ -40,10 +40,12 @@ Options
 -------
 
 zookeeper_url
-  The comma-delimited URLs for all zookeeper servers, this will be directly used to instantiate a ZookeeperInstance. [Required]
+  The comma-delimited URLs for all zookeeper servers, this will be directly used to
+  instantiate a ZookeeperInstance. [Required]
 
 instance_name
-  The zookeeper instance name, this will be directly used to instantiate a ZookeeperInstance. [Required]
+  The zookeeper instance name, this will be directly used to instantiate a
+  ZookeeperInstance. [Required]
 
 username
   The username for the account to establish an Accumulo connector. [Required]
@@ -58,11 +60,14 @@ feature_type_name
   The feature type name to be used when ineracting GeoWave. [Default: PDAL_Point]
 
 data_adapter
-  FeatureCollectionDataAdapter stores multiple points per Accumulo entry. FeatureDataAdapter stores a single point per Accumulo entry. [Default: FeatureCollectionDataAdapter]
+  FeatureCollectionDataAdapter stores multiple points per Accumulo entry. FeatureDataAdapter
+  stores a single point per Accumulo entry. [Default: FeatureCollectionDataAdapter]
 
 points_per_entry
-  Sets the maximum number of points per Accumulo entry when using FeatureCollectionDataAdapter. [Default: 5000u]
+  Sets the maximum number of points per Accumulo entry when using
+  FeatureCollectionDataAdapter. [Default: 5000u]
 
+.. include:: writer_opts.rst
 
 .. _GeoWave: https://github.com/locationtech/geowave
 
