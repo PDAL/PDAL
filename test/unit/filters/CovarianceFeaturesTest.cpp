@@ -54,6 +54,7 @@ TEST(DimensionalityTest, Linearity)
     CovarianceFeaturesFilter filter;
     Options ops;
     ops.add("knn", 3);
+    ops.add("feature_set", "Dimensionality,Omnivariance,Anisotropy,Eigenentropy,EigenvalueSum,SurfaceVariation,DemantkeVerticality");
     filter.setInput(bufferReader);
     filter.setOptions(ops);
     filter.prepare(table);
@@ -73,17 +74,18 @@ TEST(DimensionalityTest, Linearity)
     PointViewSet viewSet = filter.execute(table);
     PointViewPtr outView = *viewSet.begin();
 
-    Dimension::Id planarity = table.layout()->findDim("Planarity");
-    Dimension::Id verticality = table.layout()->findDim("Verticality");
-    Dimension::Id linearity = table.layout()->findDim("Linearity");
-    Dimension::Id scattering = table.layout()->findDim("Scattering");
-
     for (point_count_t i =0; i < outView->size(); i++)
     {
-        ASSERT_FLOAT_EQ(outView->getFieldAs<float>(linearity, i) ,1);
-        ASSERT_FLOAT_EQ(outView->getFieldAs<float>(verticality, i) ,1);
-        ASSERT_FLOAT_EQ(outView->getFieldAs<float>(planarity, i) ,0);
-        ASSERT_FLOAT_EQ(outView->getFieldAs<float>(scattering, i) ,0);
+        ASSERT_FLOAT_EQ(outView->getFieldAs<float>(Id::Linearity, i) ,1);
+        ASSERT_FLOAT_EQ(outView->getFieldAs<float>(Id::Verticality, i) ,1);
+        ASSERT_FLOAT_EQ(outView->getFieldAs<float>(Id::Planarity, i) ,0);
+        ASSERT_FLOAT_EQ(outView->getFieldAs<float>(Id::Scattering, i) ,0);
+        ASSERT_FLOAT_EQ(outView->getFieldAs<float>(Id::Omnivariance, i), 0);
+        ASSERT_FLOAT_EQ(outView->getFieldAs<float>(Id::Anisotropy, i), 1);
+        ASSERT_TRUE(std::isnan(outView->getFieldAs<float>(Id::Eigenentropy, i)));
+        ASSERT_FLOAT_EQ(outView->getFieldAs<float>(Id::EigenvalueSum, i), 1);
+        ASSERT_FLOAT_EQ(outView->getFieldAs<float>(Id::SurfaceVariation, i), 0);
+        ASSERT_FLOAT_EQ(outView->getFieldAs<float>(Id::DemantkeVerticality, i), 1);
     }
 }
 
@@ -97,7 +99,9 @@ TEST(DimensionalityTest, Planarity)
     BufferReader bufferReader;
     CovarianceFeaturesFilter filter;
     Options ops;
+    ops.add("feature_set", "Dimensionality,Omnivariance,Anisotropy,Eigenentropy,EigenvalueSum,SurfaceVariation,DemantkeVerticality");
     filter.setInput(bufferReader);
+    filter.setOptions(ops);
     filter.prepare(table);
 
     PointViewPtr view(new PointView(table));
@@ -120,17 +124,18 @@ TEST(DimensionalityTest, Planarity)
     PointViewSet viewSet = filter.execute(table);
     PointViewPtr outView = *viewSet.begin();
 
-    Dimension::Id planarity = table.layout()->findDim("Planarity");
-    Dimension::Id verticality = table.layout()->findDim("Verticality");
-    Dimension::Id linearity = table.layout()->findDim("Linearity");
-    Dimension::Id scattering = table.layout()->findDim("Scattering");
-
     for (point_count_t i =0; i < outView->size(); i++)
     {
-        ASSERT_LE(outView->getFieldAs<float>(linearity, i) ,0.5);
-        ASSERT_FLOAT_EQ(outView->getFieldAs<float>(verticality, i) ,0);
-        ASSERT_FLOAT_EQ(outView->getFieldAs<float>(planarity, i) ,1);
-        ASSERT_FLOAT_EQ(outView->getFieldAs<float>(scattering, i) ,0);
+        ASSERT_LE(outView->getFieldAs<float>(Id::Linearity, i) ,0.5);
+        ASSERT_FLOAT_EQ(outView->getFieldAs<float>(Id::Verticality, i) ,0);
+        ASSERT_FLOAT_EQ(outView->getFieldAs<float>(Id::Planarity, i) ,1);
+        ASSERT_FLOAT_EQ(outView->getFieldAs<float>(Id::Scattering, i) ,0);
+        ASSERT_FLOAT_EQ(outView->getFieldAs<float>(Id::Omnivariance, i), 0);
+        ASSERT_FLOAT_EQ(outView->getFieldAs<float>(Id::Anisotropy, i), 1);
+        ASSERT_TRUE(std::isnan(outView->getFieldAs<float>(Id::Eigenentropy, i)));
+        ASSERT_NEAR(outView->getFieldAs<float>(Id::EigenvalueSum, i), 0.667, 0.001);
+        ASSERT_FLOAT_EQ(outView->getFieldAs<float>(Id::SurfaceVariation, i), 0);
+        ASSERT_FLOAT_EQ(outView->getFieldAs<float>(Id::DemantkeVerticality, i), 0);
     }
 }
 
@@ -144,7 +149,9 @@ TEST(DimensionalityTest, Scattering)
     BufferReader bufferReader;
     CovarianceFeaturesFilter filter;
     Options ops;
+    ops.add("feature_set", "Dimensionality,Omnivariance,Anisotropy,Eigenentropy,EigenvalueSum,SurfaceVariation,DemantkeVerticality");
     filter.setInput(bufferReader);
+    filter.setOptions(ops);
     filter.prepare(table);
 
     PointViewPtr view(new PointView(table));
@@ -167,17 +174,18 @@ TEST(DimensionalityTest, Scattering)
     PointViewSet viewSet = filter.execute(table);
     PointViewPtr outView = *viewSet.begin();
 
-    Dimension::Id planarity = table.layout()->findDim("Planarity");
-    Dimension::Id verticality = table.layout()->findDim("Verticality");
-    Dimension::Id linearity = table.layout()->findDim("Linearity");
-    Dimension::Id scattering = table.layout()->findDim("Scattering");
-
     for (point_count_t i =0; i < outView->size(); i++)
     {
-        ASSERT_LE(outView->getFieldAs<float>(linearity, i) ,0.5);
-        ASSERT_GE(outView->getFieldAs<float>(verticality, i) ,0.5);
-        ASSERT_LE(outView->getFieldAs<float>(planarity, i) ,1);
-        ASSERT_GE(outView->getFieldAs<float>(scattering, i) ,0.1);
+        ASSERT_LE(outView->getFieldAs<float>(Id::Linearity, i) ,0.5);
+        ASSERT_GE(outView->getFieldAs<float>(Id::Verticality, i) ,0.5);
+        ASSERT_LE(outView->getFieldAs<float>(Id::Planarity, i) ,1);
+        ASSERT_GE(outView->getFieldAs<float>(Id::Scattering, i) ,0.1);
+        ASSERT_NEAR(outView->getFieldAs<float>(Id::Omnivariance, i), 0.458, 0.001);
+        ASSERT_NEAR(outView->getFieldAs<float>(Id::Anisotropy, i), 0.864, 0.001);
+        ASSERT_NEAR(outView->getFieldAs<float>(Id::Eigenentropy, i), 0.488, 0.001);
+        ASSERT_NEAR(outView->getFieldAs<float>(Id::EigenvalueSum, i), 1.583, 0.001);
+        ASSERT_NEAR(outView->getFieldAs<float>(Id::SurfaceVariation, i), 0.095, 0.001);
+        ASSERT_NEAR(outView->getFieldAs<float>(Id::DemantkeVerticality, i), 0.492, 0.001);
     }
 }
 
