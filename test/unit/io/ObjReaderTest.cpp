@@ -85,7 +85,7 @@ TEST(ObjReader, ReadBinary)
 
 TEST(ObjReader, ReadBinaryStream)
 {
-    class Checker : public Filter
+    class Checker : public Filter, public Streamable
     {
     public:
         std::string getName() const
