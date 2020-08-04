@@ -66,8 +66,9 @@ void ObjReader::addDimensions(PointLayoutPtr layout) {
 }
 void ObjReader::ready(PointTableRef table) {
 	m_istream = Utils::openFile(m_filename, false);
-	std::cout << "opening file: " << m_filename << std::endl;
-	std::cout.flush();
+	//std::cerr << "opening file: " << m_filename << std::endl;
+    if (!m_istream)
+        throwError("Couldn't open '" + m_filename + "'.");
 	m_index = 0;
 }
 //point_count_t ObjReader::read(PointViewPtr view, point_count_t numPts){}
