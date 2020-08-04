@@ -11,15 +11,15 @@ namespace pdal
 namespace expr
 {
 
-class AssignExpression : public Expression
+class AssignStatement
 {
 public:
-    AssignExpression() = default;
-    AssignExpression(const AssignExpression&) = default;
-    AssignExpression(AssignExpression&&) = default;
-    AssignExpression& operator=(const AssignExpression&) = default;
+    AssignStatement() = default;
+    AssignStatement(const AssignStatement&) = default;
+    AssignStatement(AssignStatement&&) = default;
+    AssignStatement& operator=(const AssignStatement&) = default;
 
-    virtual ~AssignExpression()
+    virtual ~AssignStatement()
     {}
 
     MathExpression& valueExpr();
@@ -35,6 +35,7 @@ private:
     IdentExpression m_identExpr;
     MathExpression m_valueExpr;
     ConditionalExpression m_conditionalExpr;
+    std::string m_error;
 };
 
 } // namespace expr
@@ -44,12 +45,12 @@ namespace Utils
 
 template<>
 inline StatusWithReason fromString(const std::string& from,
-    pdal::expr::AssignExpression& expr)
+    pdal::expr::AssignStatement& stmt)
 {
     expr::Lexer lexer(from);
     expr::AssignParser parser(lexer);
-    bool ok = parser.expression(expr) && parser.checkEnd();
-    return { ok ? 0 : -1, expr.error() };
+    bool ok = parser.statement(stmt) && parser.checkEnd();
+    return { ok ? 0 : -1, parser.error() };
 }
 
 } // namespace Util

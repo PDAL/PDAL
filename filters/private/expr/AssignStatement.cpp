@@ -1,41 +1,36 @@
-#include "AssignExpression.hpp"
+#include "AssignStatement.hpp"
 
 namespace pdal
 {
 namespace expr
 {
 
-/**
-AssignExpression::~AssignExpression()
-{}
-**/
-
-MathExpression& AssignExpression::valueExpr()
+MathExpression& AssignStatement::valueExpr()
 {
     return m_valueExpr;
 }
 
-ConditionalExpression& AssignExpression::conditionalExpr()
+ConditionalExpression& AssignStatement::conditionalExpr()
 {
     return m_conditionalExpr;
 }
 
-IdentExpression& AssignExpression::identExpr()
+IdentExpression& AssignStatement::identExpr()
 {
     return m_identExpr;
 }
 
-bool AssignExpression::valid() const
+bool AssignStatement::valid() const
 {
     return m_identExpr.valid();
 }
 
-AssignExpression::operator bool() const
+AssignStatement::operator bool() const
 {
     return valid();
 }
 
-std::string AssignExpression::print() const
+std::string AssignStatement::print() const
 {
     std::string s;
     s = "Ident = " + m_identExpr.print() + "\n";
@@ -44,7 +39,7 @@ std::string AssignExpression::print() const
     return s;
 }
 
-Utils::StatusWithReason AssignExpression::prepare(PointLayoutPtr layout)
+Utils::StatusWithReason AssignStatement::prepare(PointLayoutPtr layout)
 {
     return m_identExpr.prepare(layout) &&
         m_valueExpr.prepare(layout) && m_conditionalExpr.prepare(layout);

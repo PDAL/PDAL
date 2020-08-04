@@ -1,5 +1,5 @@
 #include "AssignParser.hpp"
-#include "AssignExpression.hpp"
+#include "AssignStatement.hpp"
 #include "ConditionalParser.hpp"
 #include "MathParser.hpp"
 
@@ -8,12 +8,12 @@ namespace pdal
 namespace expr
 {
 
-bool AssignParser::expression(AssignExpression& expr)
+bool AssignParser::statement(AssignStatement& expr)
 {
     return assignment(expr);
 }
 
-bool AssignParser::assignment(AssignExpression& expr)
+bool AssignParser::assignment(AssignStatement& expr)
 {
     if (!match(TokenType::Identifier))
     {
@@ -38,7 +38,7 @@ bool AssignParser::assignment(AssignExpression& expr)
     return where(expr);
 }
 
-bool AssignParser::where(AssignExpression& expr)
+bool AssignParser::where(AssignStatement& expr)
 {
     if (match(TokenType::Eof))
         return true;
