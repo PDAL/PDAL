@@ -75,14 +75,35 @@ TEST(ObjReader, ReadBinary)
     PointViewSet viewSet = reader.execute(table);
     EXPECT_EQ(viewSet.size(), 1u);
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 3u);
+    EXPECT_EQ(view->size(), 0u);
 
+/*
     checkPoint(view, 0, -1, 0, 0);
     checkPoint(view, 1, 0, 1, 0);
     checkPoint(view, 2, 1, 0, 0);
+    */
 }
 
+TEST(ObjReader, Read)
+{
+    ObjReader reader;
+    Options options;
+    options.add("filename", Support::datapath("obj/box_modified.obj"));
+    reader.setOptions(options);
 
+    PointTable table;
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 8u);
+
+    checkPoint(view, 0, -0.5, -0.5,  0.5);
+    checkPoint(view, 1, -0.5, -0.5, -0.5);
+    checkPoint(view, 2, -0.5,  0.5, -0.5);
+}
+
+/*
 TEST(ObjReader, ReadBinaryStream)
 {
     class Checker : public Filter, public Streamable
@@ -139,6 +160,7 @@ TEST(ObjReader, ReadBinaryStream)
     c.prepare(table);
     c.execute(table);
 }
+*/
 
 
 TEST(ObjReader, NoVertex)
