@@ -282,24 +282,26 @@ std::string getcwd()
 }
 
 
-/***
-// Non-boost alternative.  Requires file existence.
-std::string toAbsolutePath(const std::string& filename)
+std::string toCanonicalPath(std::string filename)
 {
     std::string result;
 
 #ifdef _WIN32
-    char buf[MAX_PATH]
+    filename = addTrailingSlash(filename);
+    char buf[MAX_PATH];
     if (GetFullPathName(filename.c_str(), MAX_PATH, buf, NULL))
         result = buf;
 #else
-    char buf[PATH_MAX];
-    if (realpath(filename.c_str(), buf))
+    char *buf = realpath(filename.c_str(), NULL);
+    if (buf)
+    {
         result = buf;
+        free(buf);
+    }
 #endif
     return result;
 }
-***/
+
 
 // if the filename is an absolute path, just return it
 // otherwise, make it absolute (relative to current working dir) and return that

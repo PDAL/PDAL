@@ -56,7 +56,11 @@ struct DummyPlugin : Filter
 
     static PF_ExitFunc initPlugin() // PF_InitFunc
     {
-        PluginInfo pi { "filters.dummytest", "A dummy plugin registered at run-time", "http://somewhere" };
+        PluginInfo pi {
+            "filters.dummytest",
+            "A dummy plugin registered at run-time",
+            "http://somewhere"
+        };
         pdal::PluginManager<Stage>::registerPlugin<DummyPlugin>(pi);
     }
 
@@ -81,41 +85,6 @@ TEST(PluginManagerTest, CreateObject)
     EXPECT_NE(p.get(), nullptr);
 }
 
-TEST(PluginManagerTest, SearchPaths)
-{
-    std::string curPath;
-    int set = Utils::getenv("PDAL_DRIVER_PATH", curPath);
-    Utils::unsetenv("PDAL_DRIVER_PATH");
-
-    StringList paths = PluginDirectory::test_pluginSearchPaths();
-    EXPECT_TRUE(Utils::contains(paths, "./lib"));
-    EXPECT_TRUE(Utils::contains(paths, "../lib"));
-    EXPECT_TRUE(Utils::contains(paths, "../bin"));
-    EXPECT_TRUE(Utils::contains(paths, Config::pluginInstallPath()));
-
-#ifdef _WIN32
-    Utils::setenv("PDAL_DRIVER_PATH", "C:\foo\bar;D:\baz");
-#else
-    Utils::setenv("PDAL_DRIVER_PATH", "/foo/bar://baz");
-#endif
-    paths = PluginDirectory::test_pluginSearchPaths();
-    EXPECT_EQ(paths.size(), 2U);
-
-#ifdef _WIN32
-    EXPECT_TRUE(Utils::contains(paths, "C:\foo\bar"));
-    EXPECT_TRUE(Utils::contains(paths, "D:\baz"));
-#else
-    EXPECT_TRUE(Utils::contains(paths, "/foo/bar"));
-    EXPECT_TRUE(Utils::contains(paths, "//baz"));
-#endif
-    Utils::setenv("PDAL_DRIVER_PATH", "/this/is/a/path");
-    paths = PluginDirectory::test_pluginSearchPaths();
-    EXPECT_EQ(paths.size(), 1U);
-    EXPECT_TRUE(Utils::contains(paths, "/this/is/a/path"));
-
-    if (set == 0)
-        Utils::setenv("PDAL_DRIVER_PATH", curPath);
-}
 
 TEST(PluginManagerTest, validnames)
 {
