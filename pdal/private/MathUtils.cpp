@@ -384,6 +384,14 @@ void writeMatrix(Eigen::MatrixXd data, const std::string& filename,
 }
 #pragma warning (pop)
 
+Eigen::Vector3d rotate(const Eigen::Vector3d& v, const Eigen::Quaterniond& rot)
+{
+    Eigen::Quaterniond p;
+    p.w() = 0;
+    p.vec() = v;
+    p = rot * p * rot.inverse();
+    return p.vec();
+}
 
 // https://en.wikipedia.org/wiki/Barycentric_coordinate_system
 // http://blackpawn.com/texts/pointinpoly/default.html

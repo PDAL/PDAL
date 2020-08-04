@@ -49,7 +49,7 @@ namespace pdal
 class Connector;
 class EptInfo;
 class Key;
-class Pool;
+class ThreadPool;
 
 class PDAL_DLL EptAddonWriter : public Writer
 {
@@ -78,7 +78,7 @@ private:
     Dimension::Id m_pointIdDim = Dimension::Id::Unknown;
 
     std::unique_ptr<Connector> m_connector;
-    std::unique_ptr<Pool> m_pool;
+    std::unique_ptr<ThreadPool> m_pool;
     std::unique_ptr<EptInfo> m_info;
     AddonList m_addons;
     std::unique_ptr<Hierarchy> m_hierarchy;

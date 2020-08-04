@@ -42,12 +42,12 @@
 #include <pdal/Polygon.hpp>
 #include <pdal/SrsBounds.hpp>
 #include <pdal/pdal_features.hpp>
+#include <pdal/util/ThreadPool.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
 
 #include "private/ept/Connector.hpp"
 #include "private/ept/EptArtifact.hpp"
 #include "private/ept/EptSupport.hpp"
-#include "private/ept/Pool.hpp"
 #include "private/ept/TileContents.hpp"
 
 namespace pdal
@@ -177,7 +177,7 @@ void EptReader::initialize()
         log()->get(LogLevel::Warning) << "Using a large thread count: " <<
             threads << " threads" << std::endl;
     }
-    m_pool.reset(new Pool(threads));
+    m_pool.reset(new ThreadPool(threads));
 
     StringMap headers;
     StringMap query;
@@ -470,7 +470,7 @@ void EptReader::ready(PointTableRef table)
     }
 
     // Ten million is a silly-large number for the number of tiles.
-    m_pool.reset(new Pool(m_pool->numThreads(), 10000000));
+    m_pool.reset(new ThreadPool(m_pool->numThreads(), 10000000));
     m_pointId = 0;
     m_tileCount = m_hierarchy->size();
 
@@ -741,10 +741,10 @@ void EptReader::process(PointViewPtr dstView, const TileContents& tile,
     PointRef dstPoint(*dstView);
     for (PointId idx = 0; idx < tile.size(); ++idx)
     {
+        if (count-- == 0)
+            return;
         dstPoint.setPointId(dstView->size());
         processPoint(dstPoint, tile);
-        if (--count == 0)
-            return;
     }
 }
 

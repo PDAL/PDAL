@@ -43,7 +43,6 @@
 #else
 #include <io.h>
 #include <codecvt>
-#include <Windows.h>
 #endif
 
 #include <boost/filesystem.hpp>
