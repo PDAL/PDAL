@@ -43,3 +43,6 @@ assignment
 condition
   A list of :ref:`ranges <ranges>` that a point's values must pass in order
   for the assignment to be performed. [Default: none]
+
+.. include:: filter_opts.rst
+

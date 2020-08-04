@@ -143,5 +143,7 @@ function
 _`add_dimension`
   A dimension name or an array of dimension names to add to the pipeline that do not already exist.
 
+.. include:: filter_opts.rst
+
 .. _Julia: https://julialang.org/
 .. _TypedTables: https://github.com/JuliaData/TypedTables.jl

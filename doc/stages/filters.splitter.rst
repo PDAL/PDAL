@@ -43,11 +43,14 @@ length
   [Default: 1000]
 
 _`origin_x`
-  X Origin of the tiles.  [Default: none (chosen arbitarily)]
+  X Origin of the tiles.  [Default: none (chosen arbitrarily)]
 
 _`origin_y`
-  Y Origin of the tiles.  [Default: none (chosen arbitarily)]
+  Y Origin of the tiles.  [Default: none (chosen arbitrarily)]
 
 buffer
   Amount of overlap to include in each tile. This buffer is added onto
   length in both the x and the y direction.  [Default: 0]
+
+.. include:: filter_opts.rst
+

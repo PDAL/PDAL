@@ -180,6 +180,29 @@ TriangularMesh *PointView::mesh(const std::string& name)
 }
 
 
+Rasterd *PointView::createRaster(const std::string& name, const RasterLimits& limits)
+{
+    if (Utils::contains(m_rasters, name))
+        return nullptr;
+    auto res = m_rasters.insert(std::make_pair(name,
+        std::unique_ptr<Rasterd>(new Rasterd(limits))));
+    if (res.second)
+        return res.first->second.get();
+    return nullptr;
+}
+
+
+Rasterd *PointView::raster(const std::string& name)
+{
+    auto it = m_rasters.find(name);
+    if (it != m_rasters.end())
+        return it->second.get();
+    if (name.empty() && m_rasters.size())
+        return m_rasters.begin()->second.get();
+    return nullptr;
+}
+
+
 void PointView::invalidateProducts()
 {
     m_index2.reset();

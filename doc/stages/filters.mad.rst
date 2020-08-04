@@ -23,9 +23,8 @@ Example
 
 The sample pipeline below uses filters.mad to automatically crop the ``Z``
 dimension and remove possible outliers. The number of deviations from the
-median has been adjusted to be less agressive and to only crop those
-outliers that are
-greater than four deviations from the median.
+median has been adjusted to be less aggressive and to only crop those outliers
+that are greater than four deviations from the median.
 
 .. code-block:: json
 
@@ -47,3 +46,6 @@ k
 
 _`dimension`
   The name of the dimension to filter.
+
+.. include:: filter_opts.rst
+

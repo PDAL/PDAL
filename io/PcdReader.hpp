@@ -48,8 +48,7 @@ class PDAL_DLL PcdReader : public Reader, public Streamable
 public:
     std::string getName() const;
 
-    PcdReader() : Reader()
-    {}
+    PcdReader();
 
 private:
     virtual QuickInfo inspect();

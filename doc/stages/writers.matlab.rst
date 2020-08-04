@@ -47,3 +47,6 @@ output_dims
 
 struct
   Array structure name to read [Default: "PDAL"]
+
+.. include:: writer_opts.rst
+

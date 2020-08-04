@@ -38,6 +38,8 @@ returns to the output file.
 Options
 -------------------------------------------------------------------------------
 
+.. include:: filter_opts.rst
+
 .. note::
 
     The Skewness Balancing method is touted as being threshold-free. We may

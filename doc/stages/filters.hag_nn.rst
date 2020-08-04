@@ -129,3 +129,6 @@ allow_extrapolation
     ground points, its ``HeightAboveGround`` is set to 0.  If true,
     extrapolation is used to assign the ``HeightAboveGround`` value.  [Default:
     false]
+
+.. include:: filter_opts.rst
+

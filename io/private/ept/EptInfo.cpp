@@ -58,6 +58,12 @@ EptInfo::EptInfo(const std::string& info)
 EptInfo::EptInfo(const std::string& filename, const Connector& connector) :
     m_filename(filename)
 {
+    if (Utils::startsWith(m_filename, "ept://"))
+    {
+        m_filename = m_filename.substr(6);
+        if (!Utils::endsWith(m_filename, "/ept.json"))
+            m_filename += "/ept.json";
+    }
     m_info = connector.getJson(m_filename);
     initialize();
 }
