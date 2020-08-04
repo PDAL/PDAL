@@ -74,6 +74,8 @@ void ObjReader::ready(PointTableRef table) {
 void ObjReader::done(PointTableRef table){}
 point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)
 {
+	m_mesh = view->createMesh("obj");
+
     while (true)
     {
         //TRI tri;
@@ -123,7 +125,7 @@ void ObjReader::addTriangle(PointViewPtr view, TRI tri) {
 	else
 		pointId3 = it->second;
 	// TODO test this 
-	//m_mesh->add(pointId1, pointId2, pointId3);
+	m_mesh->add(pointId1, pointId2, pointId3);
 }
 
 PointId ObjReader::addPoint(PointViewPtr view, VTN vertex) {
