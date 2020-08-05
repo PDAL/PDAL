@@ -83,10 +83,9 @@ private:
     bool newVertex(PointViewPtr view, double x, double y, double z);
     bool newTextureVertex(double x, double y, double z);
     bool newNormalVertex(double x, double y, double z);
-    bool newTriangle(TRI vertices);
     bool readFace(FACE& vertices, PointViewPtr view);
     TRI extractFace(StringList fields);
-    void extractEntireFace(StringList fields, FACE& face);
+    void extractFace(StringList fields, FACE& face);
     VTN extractVertex(const std::string& vstring);
     std::vector<TRI> triangulate(FACE face);
     PointId addPoint(PointViewPtr view, VTN vertex);

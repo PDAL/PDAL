@@ -50,19 +50,15 @@ CREATE_STATIC_STAGE(ObjReader, s_info)
 std::string ObjReader::getName() const { return s_info.name; }
 void ObjReader::addArgs(ProgramArgs& args) {}
 void ObjReader::addDimensions(PointLayoutPtr layout) {
+	//layout->registerDims({Dimension::Id::X,Dimension::Id::Y,Dimension::Id::Z});
 	layout->registerDim(Dimension::Id::X);
 	layout->registerDim(Dimension::Id::Y);
 	layout->registerDim(Dimension::Id::Z);
-	/*
 	layout->registerDim(Dimension::Id::NormalX);
 	layout->registerDim(Dimension::Id::NormalY);
 	layout->registerDim(Dimension::Id::NormalZ);
 	layout->registerDim(Dimension::Id::TextureX);
 	layout->registerDim(Dimension::Id::TextureY);
-	layout->registerDim(Dimension::Id::Red);
-	layout->registerDim(Dimension::Id::Green);
-	layout->registerDim(Dimension::Id::Blue);
-	*/
 }
 void ObjReader::ready(PointTableRef table) {
 	m_istream = Utils::openFile(m_filename, false);
@@ -185,34 +181,24 @@ bool ObjReader::newNormalVertex(double x, double y, double z)
 	return false;
 }
 
-bool ObjReader::newTriangle(TRI vertices)
-{
-	// Check if 
-	// TODO add to m_mesh
-	return false;
-}
-
 bool ObjReader::readFace(FACE& face, PointViewPtr view)
 {
-	int debugCtr = 0;
 	while(true) {
 		if(m_istream->peek() == EOF)
             return false;
+
 		std::string line;
-		std::cout.flush();
 		std::getline(*m_istream, line);
 		Utils::trim(line);
 		if(line.length() == 0) continue;
-		//std::string lineType = line.substr(0, line.find(' '));
+
 		StringList fields = Utils::split2(line, ' ');
-        if (fields.size() < 1)
-            continue;
+        if (fields.size() < 1) continue;
 
         std::string key = fields[0];
 		if (key == "#")
         {
-			// Comment
-			// Do nothing
+			// Comment: Do nothing
 		}
 		else if (key == "v")
         {
@@ -231,7 +217,6 @@ bool ObjReader::readFace(FACE& face, PointViewPtr view)
 			Utils::fromString(fields[2], y);
 			Utils::fromString(fields[3], z);
 			newTextureVertex( x, y, z );
-
 		}
 		else if (key == "vn")
         {
@@ -244,22 +229,17 @@ bool ObjReader::readFace(FACE& face, PointViewPtr view)
 		}
 		else if (key == "f")
         {
-			// Face
-			// Do something...
-			// PointId x, y, z;
-
+            // Face
             if (fields.size() < 4)
                 throwError("Not enough vertices in face specification.");
             StringList vertices(fields.begin() + 1, fields.end());
-            extractEntireFace(vertices, face);
+            extractFace(vertices, face);
             return true;
 		}
-		debugCtr++;
 	}
-	return true;
 }
 
-void ObjReader::extractEntireFace(StringList fields, ObjReader::FACE& face)
+void ObjReader::extractFace(StringList fields, ObjReader::FACE& face)
 {
 	//FACE face;
 	//std::vector<VTN> vertices;
@@ -321,39 +301,51 @@ ObjReader::VTN ObjReader::extractVertex(const std::string& vstring)
     if (parts.size() > 3)
         throwError("Too many items in vertex specification.");
 
-    auto index = std::stoi(parts[0], &len);
-	if (index < 0)
-		std::get<0>(vtn) = m_vertices.size() - index;
-	else 
-		std::get<0>(vtn) = index;
-    if (len != parts[0].size())
-        throwError("Invalid index in face specification.");
+    try {
+        auto index = std::stoi(parts[0], &len);
+        if (index < 0)
+            std::get<0>(vtn) = m_vertices.size() - index;
+        else 
+            std::get<0>(vtn) = index;
+        if (len != parts[0].size())
+            throwError("Invalid index in face specification.");
+    } catch (const std::invalid_argument e) {
+        throwError("Invalid index in face specification");
+    }
 
     if (parts.size() > 1)
     {
 		if (parts[1].length() > 0)
 		{
-			int i = std::stoi(parts[1], &len);
-			if (len != 0 && len != parts[1].size())
-				throwError("Invalid index in face specification.");
-			if(i < 0)
-				std::get<1>(vtn) = m_vertices.size() - i;
-			else
-				std::get<1>(vtn) = i;
+            try {
+                int i = std::stoi(parts[1], &len);
+                if (len != 0 && len != parts[1].size())
+                    throwError("Invalid index in face specification.");
+                if(i < 0)
+                    std::get<1>(vtn) = m_vertices.size() - i;
+                else
+                    std::get<1>(vtn) = i;
+            } catch (const std::invalid_argument e) {
+                throwError("Invalid index in face specification");
+            }
 		}
     }
 
     if (parts.size() > 2)
     {
-        int i = std::stoi(parts[2], &len);
-        if (len != 0 && len != parts[2].size())
-            throwError("Invalid index in face specification.");
-        if (i) {
-			if(i < 0)
-				std::get<2>(vtn) = m_vertices.size() - i;
-			else
-				std::get<2>(vtn) = i;
-		}
+        try {
+            int i = std::stoi(parts[2], &len);
+            if (len != 0 && len != parts[2].size())
+                throwError("Invalid index in face specification.");
+            if (i) {
+                if(i < 0)
+                    std::get<2>(vtn) = m_vertices.size() - i;
+                else
+                    std::get<2>(vtn) = i;
+            }
+        } catch (const std::invalid_argument e) {
+            throwError("Invalid index in face specification");
+        }
     }
     return vtn;
 }
