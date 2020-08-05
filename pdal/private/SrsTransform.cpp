@@ -93,14 +93,14 @@ OGRCoordinateTransformation *SrsTransform::get() const
 }
 
 
-bool SrsTransform::transform(double& x, double& y, double& z)
+bool SrsTransform::transform(double& x, double& y, double& z) const
 {
     return m_transform && m_transform->Transform(1, &x, &y, &z);
 }
 
 
 bool SrsTransform::transform(std::vector<double>& x, std::vector<double>& y,
-    std::vector<double>& z)
+    std::vector<double>& z) const
 {
     if (x.size() != y.size() && y.size() != z.size())
         throw pdal_error("SrsTransform::called with vectors of different "

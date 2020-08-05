@@ -55,7 +55,7 @@ namespace pdal
 class Connector;
 class EptInfo;
 class Key;
-class Pool;
+class ThreadPool;
 class TileContents;
 using StringMap = std::map<std::string, std::string>;
 
@@ -109,7 +109,7 @@ private:
 
     BOX3D m_queryBounds;
     int64_t m_queryOriginId = -1;
-    std::unique_ptr<Pool> m_pool;
+    std::unique_ptr<ThreadPool> m_pool;
     AddonList m_addons;
 
     mutable std::mutex m_mutex;
