@@ -20,6 +20,7 @@ public:
 
 protected:
     bool match(TokenType type);
+    Token peekToken();
     Token curToken() const;
     Token lastToken() const;
     void setError(const std::string& err);

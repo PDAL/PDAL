@@ -31,7 +31,7 @@ bool AssignParser::assignment(AssignStatement& expr)
     MathParser parser(lexer());
     if (!parser.expression(expr.valueExpr()))
     {
-        setError("No value for assignment.");
+        setError(parser.error());
         return false;
     }
 
@@ -53,7 +53,10 @@ bool AssignParser::where(AssignStatement& expr)
         }
     }
     ConditionalParser parser(lexer());
-    return parser.expression(expr.conditionalExpr());
+    bool status = parser.expression(expr.conditionalExpr());
+    if (!status)
+        setError(parser.error());
+    return status;
 }
 
 } // namespace expr

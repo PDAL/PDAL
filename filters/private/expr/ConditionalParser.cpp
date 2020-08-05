@@ -309,14 +309,18 @@ bool ConditionalParser::primary(Expression& expr)
         return true;
     }
 
+    // Check if this is the start of a paren-expression.
+    if (!match(TokenType::Lparen))
+    {
+        setError("Expected identifier or value and instead found '" + peekToken().sval() + "'.");
+        return false;
+    }
+
     return parexpr(expr);
 }
 
 bool ConditionalParser::parexpr(Expression& expr)
 {
-    if (!match(TokenType::Lparen))
-        return false;
-
     if (!expression(expr))
     {
         setError("Expected expression following '('.");

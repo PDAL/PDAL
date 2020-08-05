@@ -41,8 +41,15 @@ std::string AssignStatement::print() const
 
 Utils::StatusWithReason AssignStatement::prepare(PointLayoutPtr layout)
 {
-    return m_identExpr.prepare(layout) &&
-        m_valueExpr.prepare(layout) && m_conditionalExpr.prepare(layout);
+    auto status = m_identExpr.prepare(layout);
+    if (!status)
+        return {-1, m_identExpr.error()};
+
+    status = m_valueExpr.prepare(layout);
+    if (!status)
+        return {-1, m_identExpr.error()};
+
+    return m_conditionalExpr.prepare(layout);
 }
 
 } // namespace expr

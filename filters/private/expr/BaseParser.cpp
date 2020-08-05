@@ -17,6 +17,13 @@ bool BaseParser::checkEnd()
     return true;
 }
 
+Token BaseParser::peekToken()
+{
+    Token t = m_lexer.get();
+    m_lexer.put(t);
+    return t;
+}
+
 Token BaseParser::curToken() const
 {
     return m_curTok;
