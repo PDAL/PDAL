@@ -50,23 +50,23 @@ CREATE_STATIC_STAGE(ObjReader, s_info)
 std::string ObjReader::getName() const { return s_info.name; }
 void ObjReader::addArgs(ProgramArgs& args) {}
 void ObjReader::addDimensions(PointLayoutPtr layout) {
-    layout->registerDims({ Dimension::Id::X,
+    layout->registerDims( {
+        Dimension::Id::X,
         Dimension::Id::Y,
         Dimension::Id::Z,
         Dimension::Id::NormalX,
         Dimension::Id::NormalY,
         Dimension::Id::NormalZ,
         Dimension::Id::TextureX,
-        Dimension::Id::TextureY });
+        Dimension::Id::TextureY
+    });
 }
 void ObjReader::ready(PointTableRef table) {
     m_istream = Utils::openFile(m_filename, false);
-    //std::cerr << "opening file: " << m_filename << std::endl;
     if (!m_istream)
         throwError("Couldn't open '" + m_filename + "'.");
     m_index = 0;
 }
-//point_count_t ObjReader::read(PointViewPtr view, point_count_t numPts){}
 void ObjReader::done(PointTableRef table){}
 point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)
 {
@@ -78,7 +78,6 @@ point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)
 
     while (true)
     {
-        //TRI tri;
         FACE face;
         bool ok = readFace(face, view);
         if (!ok)
@@ -86,21 +85,13 @@ point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)
 
         auto triangles = triangulate(face);
         for(const auto& tri : triangles) {
-            /*
-            for (size_t i = 0; i < 3; ++i)
-            {
-                std::cerr << std::get<0>(tri[i]) << "/" <<
-                    std::get<1>(tri[i]) << "/" <<
-                    std::get<2>(tri[i]) << " ";
-            }
-            */
             newTriangle(view, tri);
         }
     }
     return m_index;
 }
 
-bool ObjReader::newTriangle(PointViewPtr view, TRI tri) {
+void ObjReader::newTriangle(PointViewPtr view, TRI tri) {
     // checks if a point exists yet, if not, adds it to the point table via addPoint()
     auto insertPoint = [view, this](VTN vertex) {
         PointId id;
@@ -115,7 +106,6 @@ bool ObjReader::newTriangle(PointViewPtr view, TRI tri) {
         return id;
     };
     m_mesh->add(insertPoint(tri[0]), insertPoint(tri[1]), insertPoint(tri[2]));
-    return false;
 }
 
 // adds a point to the point table
@@ -157,23 +147,19 @@ PointId ObjReader::addPoint(PointViewPtr view, VTN vertex) {
     return pt.pointId();
 }
 
-bool ObjReader::newVertex(double x, double y, double z)
+void ObjReader::newVertex(double x, double y, double z)
 {
     m_vertices.push_back({x, y, z});
-    //std::cerr << x << ", " << y << ", " << z << std::endl;
-    return false;
 }
 
-bool ObjReader::newTextureVertex(double x, double y, double z)
+void ObjReader::newTextureVertex(double x, double y, double z)
 {
     m_textureVertices.push_back({x, y, z});
-    return false;
 }
 
-bool ObjReader::newNormalVertex(double x, double y, double z)
+void ObjReader::newNormalVertex(double x, double y, double z)
 {
     m_normalVertices.push_back({x, y, z});
-    return false;
 }
 
 bool ObjReader::readFace(FACE& face, PointViewPtr view)
@@ -262,39 +248,16 @@ bool ObjReader::readFace(FACE& face, PointViewPtr view)
 
 void ObjReader::extractFace(StringList fields, ObjReader::FACE& face)
 {
-    //FACE face;
-    //std::vector<VTN> vertices;
-
-    //std::cerr << "TRI = ";
     size_t l = fields.size();
     for (size_t i = 0; i < l; ++i)
     {
-        //vertices.push_back(extractVertex(fields[i]));
         face.push_back(extractVertex(fields[i]));
-        /*
-        std::cerr << std::get<0>(tri[i]) << "/" <<
-            std::get<1>(tri[i]) << "/" <<
-            std::get<2>(tri[i]) << " ";
-            */
     }
-    //std::cerr << "\n";
-
-    //return face;
 }
 
 std::vector<ObjReader::TRI> ObjReader::triangulate(FACE face)
 {
     std::vector<TRI> triangles;
-    /*
-    std::cerr << "Number of vertices passed to triangulate() => " << face.size() << std::endl;
-    std::cerr << "Face: ";
-    for( const auto& vt : face) {
-        // useful for when we get to normals & textures
-        std::cerr << "(" << std::get<0>(vt) << ", " << std::get<1>(vt) << ", " << std::get<2>(vt) << ")";
-        std::cerr << std::get<0>(vt) << ", ";
-    }
-    std::cerr << std::endl;
-    */
     if(face.size() < 3) {
         throwError("Too few vertices to traingulate");
     }
@@ -315,10 +278,8 @@ ObjReader::VTN ObjReader::extractVertex(const std::string& vstring)
     std::string s(vstring);
     Utils::trim(s);
     StringList parts = Utils::split(s, '/');
-    /*
     for(auto& part : parts)
         Utils::trim(part);
-        */
 
     if (parts.size() > 3)
         throwError("Too many items in vertex specification.");
