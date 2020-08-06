@@ -323,7 +323,6 @@ std::vector<ObjReader::TRI> ObjReader::triangulate(FACE face)
 
 ObjReader::VTN ObjReader::extractVertex(const std::string& vstring)
 {
-    size_t len;
     VTN vtn = { -1, -1, -1 };
 	std::string s(vstring);
 	Utils::trim(s);
@@ -336,59 +335,39 @@ ObjReader::VTN ObjReader::extractVertex(const std::string& vstring)
     if (parts.size() > 3)
         throwError("Too many items in vertex specification.");
 
-    try
-    {
-        auto index = std::stoi(parts[0], &len);
-        if (index < 0)
-            std::get<0>(vtn) = m_vertices.size() - index;
-        else 
-            std::get<0>(vtn) = index;
-        if (len != parts[0].size())
-            throwError("Invalid index in face specification.");
-    }
-    catch (const std::invalid_argument e)
-    {
-        throwError("Invalid index in face specification");
-    }
+    long index = std::strtoll(parts[0].c_str(), nullptr, 0);
+    if (index == 0)
+        throwError("Invalid index in face specification.");
+    else if (index < 0)
+        std::get<0>(vtn) = m_vertices.size() - index;
+    else
+        std::get<0>(vtn) = index;
 
     if (parts.size() > 1)
     {
 		if (parts[1].length() > 0)
 		{
-            try
-            {
-                int i = std::stoi(parts[1], &len);
-                if (len != 0 && len != parts[1].size())
-                    throwError("Invalid index in face specification.");
-                if(i < 0)
-                    std::get<1>(vtn) = m_vertices.size() - i;
-                else
-                    std::get<1>(vtn) = i;
-            }
-            catch (const std::invalid_argument e)
-            {
-                throwError("Invalid index in face specification");
-            }
+            index = std::strtoll(parts[1].c_str(), nullptr, 0);
+            if (index == 0)
+                throwError("Invalid index in face specification.");
+            else if(index < 0)
+                std::get<1>(vtn) = m_vertices.size() - index;
+            else
+                std::get<1>(vtn) = index;
 		}
     }
 
     if (parts.size() > 2)
     {
-        try
-        {
-            int i = std::stoi(parts[2], &len);
-            if (len != 0 && len != parts[2].size())
+		if (parts[2].length() > 0)
+		{
+            index = std::strtol(parts[2].c_str(), nullptr, 10);
+            if (index == 0)
                 throwError("Invalid index in face specification.");
-            if (i) {
-                if(i < 0)
-                    std::get<2>(vtn) = m_vertices.size() - i;
-                else
-                    std::get<2>(vtn) = i;
-            }
-        }
-        catch (const std::invalid_argument e)
-        {
-            throwError("Invalid index in face specification");
+            else if(index < 0)
+                std::get<2>(vtn) = m_vertices.size() - index;
+            else
+                std::get<2>(vtn) = index;
         }
     }
     return vtn;
