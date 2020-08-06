@@ -100,37 +100,26 @@ point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)
 	return m_index;
 }
 
+// checks if a point exists yet, if not, adds it to the point table via addPoint()
+PointId ObjReader::insertPoint(PointViewPtr view, VTN vertex) {
+    PointId id;
+    auto it = m_points.find(vertex);
+	if (it == m_points.end())
+	{
+		id = addPoint(view, vertex);
+		m_points.insert({vertex, id});
+	}
+	else
+		id = it->second; 
+    return id;
+}
+
 bool ObjReader::newTriangle(PointViewPtr view, TRI tri) {
-	PointId pointId1, pointId2, pointId3;
-	auto it = m_points.find(tri[0]);
-	if (it == m_points.end())
-	{
-		pointId1 = addPoint(view, tri[0]);
-		m_points.insert({tri[0], pointId1});
-	}
-	else
-		pointId1 = it->second; 
-	it = m_points.find(tri[1]);
-	if (it == m_points.end())
-	{
-		pointId2 = addPoint(view, tri[1]);
-		m_points.insert({tri[1], pointId2});
-	}
-	else
-		pointId2 = it->second;
-	it = m_points.find(tri[2]);
-	if (it == m_points.end())
-	{
-		pointId3 = addPoint(view, tri[2]);
-		m_points.insert({tri[2], pointId3});
-	}
-	else
-		pointId3 = it->second;
-	// TODO test this 
-	m_mesh->add(pointId1, pointId2, pointId3);
+	m_mesh->add(insertPoint(view, tri[0]), insertPoint(view, tri[1]), insertPoint(view, tri[2]));
     return false;
 }
 
+// adds a point to the point table
 PointId ObjReader::addPoint(PointViewPtr view, VTN vertex) {
 	XYZ v, t, n;
 	PointRef pt = view->point(m_index);
