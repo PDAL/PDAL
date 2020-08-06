@@ -61,9 +61,7 @@ TEST(ObjReader, Constructor)
     EXPECT_TRUE(reader2);
 }
 
-
-
-TEST(ObjReader, NoFaces)
+TEST(ObjReader, NoFace)
 {
     ObjReader reader;
     Options options;
@@ -77,27 +75,6 @@ TEST(ObjReader, NoFaces)
     PointViewPtr view = *viewSet.begin();
     EXPECT_EQ(view->size(), 0u);
 }
-
-TEST(ObjReader, Read)
-{
-    ObjReader reader;
-    Options options;
-    options.add("filename", Support::datapath("obj/box.obj"));
-    reader.setOptions(options);
-
-    PointTable table;
-    reader.prepare(table);
-    PointViewSet viewSet = reader.execute(table);
-    EXPECT_EQ(viewSet.size(), 1u);
-    PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 8u);
-
-    // Order isn't garanteed, need a better way to test this...
-    checkPoint(view, 0, -0.5,  0.5,  0.5);
-    checkPoint(view, 1, -0.5,  0.5, -0.5);
-    checkPoint(view, 2, -0.5, -0.5, -0.5);
-}
-
 
 TEST(ObjReader, NoVertex)
 {
@@ -115,7 +92,27 @@ TEST(ObjReader, NoVertex)
 
 }
 
-TEST(ObjReader, LargeTest)
+TEST(ObjReader, Read)
+{
+    ObjReader reader;
+    Options options;
+    options.add("filename", Support::datapath("obj/box.obj"));
+    reader.setOptions(options);
+
+    PointTable table;
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 8u);
+
+    // TODO Order isn't garanteed, need a better way to test this...
+    checkPoint(view, 0, -0.5,  0.5,  0.5);
+    checkPoint(view, 1, -0.5,  0.5, -0.5);
+    checkPoint(view, 2, -0.5, -0.5, -0.5);
+}
+
+TEST(ObjReader, LargeFile)
 {
     ObjReader reader;
     Options options;
@@ -128,7 +125,26 @@ TEST(ObjReader, LargeTest)
     EXPECT_EQ(viewSet.size(), 1u);
     PointViewPtr view = *viewSet.begin();
     EXPECT_EQ(view->size(), 911u);
+    // TODO test some of the points, keeping in mind they can be out-of-order
+}
 
+TEST(ObjReader, Mesh)
+{
+    /*
+        TODO test that:
+        - a mesh is properly created
+        - no vertex is duplicated, even if it exists on multiple faces
+        - polygons are correctly triangulated
+    */
+}
+
+TEST(ObjReader, ExtraneousAttributes)
+{
+    /*
+        TODO
+        test that extra obj attributes, like RGB in vertices or points, lines, curves, etc,
+        don't cause errors in the reading of vertices
+    */
 }
 
 }
