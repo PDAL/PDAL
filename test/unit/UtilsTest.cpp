@@ -216,6 +216,10 @@ TEST(UtilsTest, splitChar)
     EXPECT_EQ(result[6], "test");
     EXPECT_EQ(result[7], "");
     EXPECT_EQ(result[8], "");
+
+    input = "";
+    result = Utils::split(input, ' ');
+    EXPECT_EQ(result.size(), 0U);
 }
 
 TEST(UtilsTest, split2)
@@ -267,6 +271,10 @@ TEST(UtilsTest, split2Char)
     EXPECT_EQ(result[1], "is");
     EXPECT_EQ(result[2], "a");
     EXPECT_EQ(result[3], "test");
+
+    input = "";
+    result = Utils::split2(input, ' ');
+    EXPECT_EQ(result.size(), 0U);
 }
 
 TEST(UtilsTest, case)
