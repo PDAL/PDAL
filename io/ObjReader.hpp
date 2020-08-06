@@ -86,7 +86,6 @@ private:
     bool newTriangle(PointViewPtr view, TRI tri);
     bool readFace(FACE& vertices, PointViewPtr view);
     //TRI extractFace(StringList fields);
-    PointId insertPoint(PointViewPtr view, VTN vertex);
     void extractFace(StringList fields, FACE& face);
     VTN extractVertex(const std::string& vstring);
     std::vector<TRI> triangulate(FACE face);
