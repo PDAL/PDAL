@@ -63,7 +63,7 @@ TEST(ObjReader, Constructor)
 
 
 
-TEST(ObjReader, ReadBinary)
+TEST(ObjReader, NoFaces)
 {
     ObjReader reader;
     Options options;
@@ -76,19 +76,13 @@ TEST(ObjReader, ReadBinary)
     EXPECT_EQ(viewSet.size(), 1u);
     PointViewPtr view = *viewSet.begin();
     EXPECT_EQ(view->size(), 0u);
-
-/*
-    checkPoint(view, 0, -1, 0, 0);
-    checkPoint(view, 1, 0, 1, 0);
-    checkPoint(view, 2, 1, 0, 0);
-    */
 }
 
 TEST(ObjReader, Read)
 {
     ObjReader reader;
     Options options;
-    options.add("filename", Support::datapath("obj/box_modified.obj"));
+    options.add("filename", Support::datapath("obj/box.obj"));
     reader.setOptions(options);
 
     PointTable table;
@@ -98,69 +92,11 @@ TEST(ObjReader, Read)
     PointViewPtr view = *viewSet.begin();
     EXPECT_EQ(view->size(), 8u);
 
-    checkPoint(view, 0, -0.5, -0.5,  0.5);
-    checkPoint(view, 1, -0.5, -0.5, -0.5);
-    checkPoint(view, 2, -0.5,  0.5, -0.5);
+    // Order isn't garanteed, need a better way to test this...
+    checkPoint(view, 0, -0.5,  0.5,  0.5);
+    checkPoint(view, 1, -0.5,  0.5, -0.5);
+    checkPoint(view, 2, -0.5, -0.5, -0.5);
 }
-
-/*
-TEST(ObjReader, ReadBinaryStream)
-{
-    class Checker : public Filter, public Streamable
-    {
-    public:
-        std::string getName() const
-            { return "checker"; }
-    private:
-        bool processOne(PointRef& point)
-        {
-            static int cnt = 0;
-            if (cnt == 0)
-            {
-                EXPECT_DOUBLE_EQ(-1,
-                    point.getFieldAs<double>(Dimension::Id::X));
-                EXPECT_DOUBLE_EQ(0,
-                    point.getFieldAs<double>(Dimension::Id::Y));
-                EXPECT_DOUBLE_EQ(0,
-                    point.getFieldAs<double>(Dimension::Id::Z));
-            }
-            if (cnt == 1)
-            {
-                EXPECT_DOUBLE_EQ(0,
-                    point.getFieldAs<double>(Dimension::Id::X));
-                EXPECT_DOUBLE_EQ(1,
-                    point.getFieldAs<double>(Dimension::Id::Y));
-                EXPECT_DOUBLE_EQ(0,
-                    point.getFieldAs<double>(Dimension::Id::Z));
-            }
-            if (cnt == 2)
-            {
-                EXPECT_DOUBLE_EQ(1,
-                    point.getFieldAs<double>(Dimension::Id::X));
-                EXPECT_DOUBLE_EQ(0,
-                    point.getFieldAs<double>(Dimension::Id::Y));
-                EXPECT_DOUBLE_EQ(0,
-                    point.getFieldAs<double>(Dimension::Id::Z));
-            }
-            cnt++;
-            return true;
-        }
-    };
-
-    ObjReader reader;
-    Options options;
-    options.add("filename", Support::datapath("obj/simple_binary.obj"));
-    reader.setOptions(options);
-
-    FixedPointTable table(10);
-
-    Checker c;
-    c.setInput(reader);
-
-    c.prepare(table);
-    c.execute(table);
-}
-*/
 
 
 TEST(ObjReader, NoVertex)
@@ -176,6 +112,22 @@ TEST(ObjReader, NoVertex)
     EXPECT_EQ(viewSet.size(), 1u);
     PointViewPtr view = *viewSet.begin();
     EXPECT_EQ(view->size(), 0u);
+
+}
+
+TEST(ObjReader, LargeTest)
+{
+    ObjReader reader;
+    Options options;
+    options.add("filename", Support::datapath("obj/1.2-with-color.obj"));
+    reader.setOptions(options);
+
+    PointTable table;
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 911u);
 
 }
 
