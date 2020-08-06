@@ -48,309 +48,269 @@ static StaticPluginInfo const s_info
 CREATE_STATIC_STAGE(ObjReader, s_info)
 
 std::string ObjReader::getName() const { return s_info.name; }
-void ObjReader::addArgs(ProgramArgs& args) {}
-void ObjReader::addDimensions(PointLayoutPtr layout) {
-	layout->registerDim(Dimension::Id::X);
-	layout->registerDim(Dimension::Id::Y);
-	layout->registerDim(Dimension::Id::Z);
-	/*
-	layout->registerDim(Dimension::Id::NormalX);
-	layout->registerDim(Dimension::Id::NormalY);
-	layout->registerDim(Dimension::Id::NormalZ);
-	layout->registerDim(Dimension::Id::TextureX);
-	layout->registerDim(Dimension::Id::TextureY);
-	layout->registerDim(Dimension::Id::Red);
-	layout->registerDim(Dimension::Id::Green);
-	layout->registerDim(Dimension::Id::Blue);
-	*/
+
+void ObjReader::addDimensions(PointLayoutPtr layout)
+{
+    layout->registerDims( {
+        Dimension::Id::X,
+        Dimension::Id::Y,
+        Dimension::Id::Z,
+        Dimension::Id::NormalX,
+        Dimension::Id::NormalY,
+        Dimension::Id::NormalZ,
+        Dimension::Id::TextureX,
+        Dimension::Id::TextureY
+    });
 }
-void ObjReader::ready(PointTableRef table) {
-	m_istream = Utils::openFile(m_filename, false);
-	std::cout << "opening file: " << m_filename << std::endl;
-	std::cout.flush();
-	m_index = 0;
+
+void ObjReader::ready(PointTableRef table)
+{
+    m_istream = Utils::openFile(m_filename, false);
+    if (!m_istream)
+        throwError("Couldn't open '" + m_filename + "'.");
+    m_index = 0;
 }
-//point_count_t ObjReader::read(PointViewPtr view, point_count_t numPts){}
-void ObjReader::done(PointTableRef table){}
+
 point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)
 {
+    m_mesh = view->createMesh("obj");
+    if (!m_mesh)
+    {
+        throwError("Failed to create mesh");
+    }
+
     while (true)
     {
-        //TRI tri;
-		FACE face;
-        bool ok = readFace(face, view);
-        if (!ok)
+        FACE face;
+        if (!readFace(face, view))
             break;
 
-		auto triangles = triangulate(face);
-		for(const auto& tri : triangles) {
-			for (size_t i = 0; i < 3; ++i)
-			{
-				std::cerr << std::get<0>(tri[i]) << "/" <<
-					std::get<1>(tri[i]) << "/" <<
-					std::get<2>(tri[i]) << " ";
-			}
-			addTriangle(view, tri);
-		}
-	}
-	return m_index;
+        auto triangles = triangulate(face);
+        for(const auto& tri : triangles) {
+            newTriangle(view, tri);
+        }
+    }
+    return m_index;
 }
 
-void ObjReader::addTriangle(PointViewPtr view, TRI tri) {
-	PointId pointId1, pointId2, pointId3;
-	auto it = m_points.find(tri[0]);
-	if (it == m_points.end())
-	{
-		pointId1 = addPoint(view, tri[0]);
-		m_points.insert({tri[0], pointId1});
-	}
-	else
-		pointId1 = it->second; 
-	it = m_points.find(tri[1]);
-	if (it == m_points.end())
-	{
-		pointId2 = addPoint(view, tri[1]);
-		m_points.insert({tri[1], pointId2});
-	}
-	else
-		pointId2 = it->second;
-	it = m_points.find(tri[2]);
-	if (it == m_points.end())
-	{
-		pointId3 = addPoint(view, tri[2]);
-		m_points.insert({tri[2], pointId3});
-	}
-	else
-		pointId3 = it->second;
-	// TODO test this 
-	//m_mesh->add(pointId1, pointId2, pointId3);
+void ObjReader::newTriangle(PointViewPtr view, TRI tri)
+{
+    // checks if a point exists yet, if not, adds it to the point table via addPoint()
+    auto insertPoint = [view, this](VTN vertex) {
+        PointId id;
+        auto it = m_points.find(vertex);
+        if (it == m_points.end())
+        {
+            id = addPoint(view, vertex);
+            m_points.insert({vertex, id});
+        }
+        else
+            id = it->second;
+        return id;
+    };
+    m_mesh->add(insertPoint(tri[0]), insertPoint(tri[1]), insertPoint(tri[2]));
 }
 
-PointId ObjReader::addPoint(PointViewPtr view, VTN vertex) {
-	XYZ v, t, n;
-	PointRef pt = view->point(m_index);
-	m_index++;
+// adds a point to the point table
+PointId ObjReader::addPoint(PointViewPtr view, VTN vertex)
+{
+    XYZ v, t, n;
+    PointRef pt = view->point(m_index);
+    m_index++;
 
-	int64_t vertexIndex = std::get<0>(vertex) - 1;
+    int64_t vertexIndex = std::get<0>(vertex) - 1;
     if (vertexIndex < 0 || (size_t)vertexIndex >= m_vertices.size())
         throwError("Vertex index '" + std::to_string(vertexIndex + 1) + "` specified "
             "for face doesn't exist.");
-	v = m_vertices.at(vertexIndex);
-	pt.setField(Dimension::Id::X, v.x);
-	pt.setField(Dimension::Id::Y, v.y);
-	pt.setField(Dimension::Id::Z, v.z);
+    v = m_vertices.at(vertexIndex);
+    pt.setField(Dimension::Id::X, v.x);
+    pt.setField(Dimension::Id::Y, v.y);
+    pt.setField(Dimension::Id::Z, v.z);
 
-	int64_t textureIndex = std::get<1>(vertex) - 1;
-	if (textureIndex >=  0) {
+    int64_t textureIndex = std::get<1>(vertex) - 1;
+    if (textureIndex >=  0) {
         if ((size_t)textureIndex >= m_textureVertices.size())
             throwError("Texture vertex index '" + std::to_string(textureIndex + 1) + "' specified "
                 "for face doesn't exist.");
-		t = m_textureVertices.at(textureIndex);
-		pt.setField(Dimension::Id::TextureX, t.x);
-		pt.setField(Dimension::Id::TextureY, t.y);
-	}
+        t = m_textureVertices.at(textureIndex);
+        pt.setField(Dimension::Id::TextureX, t.x);
+        pt.setField(Dimension::Id::TextureY, t.y);
+    }
 
-	int64_t normalIndex = std::get<2>(vertex) - 1;
-	if (normalIndex >= 0) {
+    int64_t normalIndex = std::get<2>(vertex) - 1;
+    if (normalIndex >= 0) {
         if ((size_t)normalIndex >= m_normalVertices.size())
             throwError("Normal vertex index '" + std::to_string(normalIndex + 1) + "' specified "
                 "for face doesn't exist.");
-		n = m_normalVertices.at(normalIndex);
-		pt.setField(Dimension::Id::NormalX, n.x);
-		pt.setField(Dimension::Id::NormalY, n.y);
-		pt.setField(Dimension::Id::NormalZ, n.z);
-	}
+        n = m_normalVertices.at(normalIndex);
+        pt.setField(Dimension::Id::NormalX, n.x);
+        pt.setField(Dimension::Id::NormalY, n.y);
+        pt.setField(Dimension::Id::NormalZ, n.z);
+    }
 
-	return pt.pointId();
+    return pt.pointId();
 }
 
-bool ObjReader::newVertex(PointViewPtr view, double x, double y, double z)
+void ObjReader::newVertex(double x, double y, double z)
 {
-	m_vertices.push_back({x, y, z});
-	return false;
+    m_vertices.push_back({x, y, z});
 }
 
-bool ObjReader::newTextureVertex(double x, double y, double z)
+void ObjReader::newTextureVertex(double x, double y, double z)
 {
-	m_textureVertices.push_back({x, y, z});
-	return false;
+    m_textureVertices.push_back({x, y, z});
 }
 
-bool ObjReader::newNormalVertex(double x, double y, double z)
+void ObjReader::newNormalVertex(double x, double y, double z)
 {
-	m_normalVertices.push_back({x, y, z});
-	return false;
-}
-
-bool ObjReader::newTriangle(TRI vertices)
-{
-	// Check if 
-	// TODO add to m_mesh
-	return false;
+    m_normalVertices.push_back({x, y, z});
 }
 
 bool ObjReader::readFace(FACE& face, PointViewPtr view)
 {
-	int debugCtr = 0;
-	while(true) {
-		if(m_istream->peek() == EOF)
+    long long lineOfFile = 0;
+    while(true) {
+        if(m_istream->peek() == EOF)
             return false;
-		std::string line;
-		std::cout.flush();
-		std::getline(*m_istream, line);
-		Utils::trim(line);
-		if(line.length() == 0) continue;
-		//std::string lineType = line.substr(0, line.find(' '));
-		StringList fields = Utils::split2(line, ' ');
-        if (fields.size() < 1)
+
+        std::string line;
+        std::getline(*m_istream, line);
+        lineOfFile++;
+        Utils::trim(line);
+        if (line.length() == 0)
             continue;
 
+        StringList fields = Utils::split2(line, ' ');
         std::string key = fields[0];
-		if (key == "#")
+        if (key == "#")
         {
-			// Comment
-			// Do nothing
-		}
-		else if (key == "v")
+            // Comment: Do nothing
+        }
+        else if (key == "v")
         {
-			// Vertex
-			double x, y, z;
-			Utils::fromString(fields[1], x);
-			Utils::fromString(fields[2], y);
-			Utils::fromString(fields[3], z);
-			newVertex( view, x, y, z );
-		}
-		else if (key == "vt")
+            // Vertex
+            double x, y, z;
+            if (Utils::fromString(fields[1], x) && Utils::fromString(fields[2], y) &&
+                Utils::fromString(fields[3], z))
+                newVertex( x, y, z );
+            else
+            {
+                std::stringstream ss;
+                ss << "Could not convert vertex specification to double on line #"
+                    << lineOfFile << ": '" << line << "'" << std::endl;
+                throwError(ss.str());
+            }
+        }
+        else if (key == "vt")
         {
-			// Vertex texture
-			double x, y, z;
-			Utils::fromString(fields[1], x);
-			Utils::fromString(fields[2], y);
-			Utils::fromString(fields[3], z);
-			newTextureVertex( x, y, z );
-
-		}
-		else if (key == "vn")
+            // Vertex texture
+            double x, y, z;
+            if (Utils::fromString(fields[1], x) && Utils::fromString(fields[2], y) &&
+                Utils::fromString(fields[3], z))
+                newTextureVertex( x, y, z );
+            else
+            {
+                std::stringstream ss;
+                ss << "Could not convert texture vertex specification to double on line #"
+                    << lineOfFile << ": '" << line << "'" << std::endl;
+                throwError(ss.str());
+            }
+        }
+        else if (key == "vn")
         {
-			// Vertex texture
-			double x, y, z;
-			Utils::fromString(fields[1], x);
-			Utils::fromString(fields[2], y);
-			Utils::fromString(fields[3], z);
-			newNormalVertex( x, y, z );
-		}
-		else if (key == "f")
+            // Vertex normal
+            double x, y, z;
+            if (Utils::fromString(fields[1], x) && Utils::fromString(fields[2], y) &&
+                Utils::fromString(fields[3], z))
+                newNormalVertex( x, y, z );
+            else
+            {
+                std::stringstream ss;
+                ss << "Could not convert texture vertex specification to double on line #"
+                    << lineOfFile << ": '" << line << "'" << std::endl;
+                throwError(ss.str());
+            }
+        }
+        else if (key == "f")
         {
-			// Face
-			// Do something...
-			// PointId x, y, z;
-
+            // Face
             if (fields.size() < 4)
                 throwError("Not enough vertices in face specification.");
             StringList vertices(fields.begin() + 1, fields.end());
-            extractEntireFace(vertices, face);
+            extractFace(vertices, face);
             return true;
-		}
-		debugCtr++;
-	}
-	return true;
+        }
+    }
 }
 
-void ObjReader::extractEntireFace(StringList fields, ObjReader::FACE& face)
+void ObjReader::extractFace(StringList fields, ObjReader::FACE& face)
 {
-	//FACE face;
-	//std::vector<VTN> vertices;
-
-    std::cerr << "TRI = ";
-	size_t l = fields.size();
-    for (size_t i = 0; i < l; ++i)
-    {
-        //vertices.push_back(extractVertex(fields[i]));
-        face.push_back(extractVertex(fields[i]));
-		/*
-        std::cerr << std::get<0>(tri[i]) << "/" <<
-            std::get<1>(tri[i]) << "/" <<
-            std::get<2>(tri[i]) << " ";
-			*/
-    }
-    std::cerr << "\n";
-
-    //return face;
+    for (const std::string& field : fields)
+        face.push_back(extractVertex(field));
 }
 
 std::vector<ObjReader::TRI> ObjReader::triangulate(FACE face)
 {
-	std::vector<TRI> triangles;
-	TRI tri;
-	std::cerr << "Number of vertices passed to triangulate() => " << face.size() << std::endl;
-	std::cerr << "Face: ";
-	for( const auto& vt : face) {
-		// useful for when we get to normals & textures
-		// std::cerr << "(" << std::get<0>(vt) << ", " << std::get<1>(vt) << ", " << std::get<2>(vt) << ")";
-		std::cerr << std::get<0>(vt) << ", ";
-	}
-	std::cerr << std::endl;
-	if(face.size() < 3) {
-		throwError("Too few vertices to traingulate");
-	}
-	unsigned int totalTriangles = face.size() - 2;
-	while(triangles.size() < totalTriangles) {
-		tri[0] = face[0];
-		tri[1] = face[triangles.size()+1];
-		tri[2] = face[triangles.size()+2];
-		triangles.push_back(tri);
-	}
-	return triangles;
+    std::vector<TRI> triangles;
+
+    unsigned int totalTriangles = face.size() - 2;
+    while(triangles.size() < totalTriangles)
+    {
+        TRI tri;
+        tri[0] = face[0];
+        tri[1] = face[triangles.size()+1];
+        tri[2] = face[triangles.size()+2];
+        triangles.push_back(tri);
+    }
+    return triangles;
 }
 
 ObjReader::VTN ObjReader::extractVertex(const std::string& vstring)
 {
-    size_t len;
     VTN vtn = { -1, -1, -1 };
-	std::string s(vstring);
-	Utils::trim(s);
+    std::string s(vstring);
+    Utils::trim(s);
     StringList parts = Utils::split(s, '/');
-	/*
-	for(auto& part : parts)
-		Utils::trim(part);
-		*/
+    for(auto& part : parts)
+        Utils::trim(part);
 
     if (parts.size() > 3)
         throwError("Too many items in vertex specification.");
 
-    auto index = std::stoi(parts[0], &len);
-	if (index < 0)
-		std::get<0>(vtn) = m_vertices.size() - index;
-	else 
-		std::get<0>(vtn) = index;
-    if (len != parts[0].size())
+    long index = std::strtoll(parts[0].c_str(), nullptr, 0);
+    if (index == 0)
         throwError("Invalid index in face specification.");
+    else if (index < 0)
+        std::get<0>(vtn) = m_vertices.size() - index;
+    else
+        std::get<0>(vtn) = index;
 
     if (parts.size() > 1)
     {
-		if (parts[1].length() > 0)
-		{
-			int i = std::stoi(parts[1], &len);
-			if (len != 0 && len != parts[1].size())
-				throwError("Invalid index in face specification.");
-			if(i < 0)
-				std::get<1>(vtn) = m_vertices.size() - i;
-			else
-				std::get<1>(vtn) = i;
-		}
+        if (parts[1].length() > 0)
+        {
+            index = std::strtoll(parts[1].c_str(), nullptr, 0);
+            if (index == 0)
+                throwError("Invalid index in face specification.");
+            else if(index < 0)
+                std::get<1>(vtn) = m_vertices.size() - index;
+            else
+                std::get<1>(vtn) = index;
+        }
     }
 
     if (parts.size() > 2)
     {
-        int i = std::stoi(parts[2], &len);
-        if (len != 0 && len != parts[2].size())
-            throwError("Invalid index in face specification.");
-        if (i) {
-			if(i < 0)
-				std::get<2>(vtn) = m_vertices.size() - i;
-			else
-				std::get<2>(vtn) = i;
-		}
+        if (parts[2].length() > 0)
+        {
+            index = std::strtol(parts[2].c_str(), nullptr, 10);
+            if (index == 0)
+                throwError("Invalid index in face specification.");
+            else if(index < 0)
+                std::get<2>(vtn) = m_vertices.size() - index;
+            else
+                std::get<2>(vtn) = index;
+        }
     }
     return vtn;
 }
