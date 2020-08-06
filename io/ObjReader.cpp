@@ -284,8 +284,9 @@ ObjReader::VTN ObjReader::extractVertex(const std::string& vstring)
     if (parts.size() > 3)
         throwError("Too many items in vertex specification.");
 
-    long index = std::strtoll(parts[0].c_str(), nullptr, 0);
-    if (index == 0)
+    char* p;
+    long index = std::strtoll(parts[0].c_str(), &p, 0);
+    if (index == 0 || p != parts[0].c_str() + parts[0].size())
         throwError("Invalid index in face specification.");
     else if (index < 0)
         std::get<0>(vtn) = m_vertices.size() - index;
@@ -296,8 +297,8 @@ ObjReader::VTN ObjReader::extractVertex(const std::string& vstring)
     {
         if (parts[1].length() > 0)
         {
-            index = std::strtoll(parts[1].c_str(), nullptr, 0);
-            if (index == 0)
+            index = std::strtoll(parts[1].c_str(), &p, 0);
+            if (index == 0 || p != parts[1].c_str() + parts[1].size())
                 throwError("Invalid index in face specification.");
             else if(index < 0)
                 std::get<1>(vtn) = m_vertices.size() - index;
@@ -310,8 +311,8 @@ ObjReader::VTN ObjReader::extractVertex(const std::string& vstring)
     {
         if (parts[2].length() > 0)
         {
-            index = std::strtol(parts[2].c_str(), nullptr, 10);
-            if (index == 0)
+            index = std::strtol(parts[2].c_str(), &p, 10);
+            if (index == 0 || p != parts[2].c_str() + parts[2].size())
                 throwError("Invalid index in face specification.");
             else if(index < 0)
                 std::get<2>(vtn) = m_vertices.size() - index;
