@@ -266,7 +266,7 @@ std::vector<ObjReader::TRI> ObjReader::triangulate(FACE face)
 
 ObjReader::VTN ObjReader::extractVertex(const std::string& vstring)
 {
-    VTN vtn({ -1, -1, -1 });
+    VTN vtn{ -1, -1, -1 };
     std::string s(vstring);
     Utils::trim(s);
     StringList parts = Utils::split(s, '/');
