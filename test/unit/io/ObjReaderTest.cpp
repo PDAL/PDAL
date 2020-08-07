@@ -109,7 +109,7 @@ TEST(ObjReader, Read)
     // Test mesh size, which will let us know if triangulation worked
     EXPECT_EQ(view->mesh("obj")->size(), 12u);
 
-    // TODO Order isn't garanteed, need a better way to test this...
+    // Order isn't garanteed
     checkPoint(view, 0, -0.5,  0.5,  0.5);
     checkPoint(view, 1, -0.5,  0.5, -0.5);
     checkPoint(view, 2, -0.5, -0.5, -0.5);
