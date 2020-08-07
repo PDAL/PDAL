@@ -5,7 +5,7 @@ readers.obj
 
 The **OBJ reader** reads data from files in the OBJ format.
 This reader constructs a mesh from the faces specified in the OBJ file, ignoring
-vertices that are not associated with any face. Vertices, vertex normals and vertex
+vertices that are not associated with any face. Faces, vertices, vertex normals and vertex
 textures are read, while all other obj elements (such as lines and curves) are ignored.
 
 .. plugin::

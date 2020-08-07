@@ -106,6 +106,9 @@ TEST(ObjReader, Read)
     PointViewPtr view = *viewSet.begin();
     EXPECT_EQ(view->size(), 8u);
 
+    // Test mesh size, which will let us know if triangulation worked
+    EXPECT_EQ(view->mesh("obj")->size(), 12u);
+
     // TODO Order isn't garanteed, need a better way to test this...
     checkPoint(view, 0, -0.5,  0.5,  0.5);
     checkPoint(view, 1, -0.5,  0.5, -0.5);
@@ -125,26 +128,10 @@ TEST(ObjReader, LargeFile)
     EXPECT_EQ(viewSet.size(), 1u);
     PointViewPtr view = *viewSet.begin();
     EXPECT_EQ(view->size(), 911u);
-    // TODO test some of the points, keeping in mind they can be out-of-order
-}
-
-TEST(ObjReader, Mesh)
-{
-    /*
-        TODO test that:
-        - a mesh is properly created
-        - no vertex is duplicated, even if it exists on multiple faces
-        - polygons are correctly triangulated
-    */
-}
-
-TEST(ObjReader, ExtraneousAttributes)
-{
-    /*
-        TODO
-        test that extra obj attributes, like RGB in vertices or points, lines, curves, etc,
-        don't cause errors in the reading of vertices
-    */
+    // keep in mind they can be out-of-order
+    checkPoint(view, 0, 637342.0l, 849088.1875l, 411.579987l);
+    checkPoint(view, 1, 637337.75l, 848956.25l, 422.540009l);
+    checkPoint(view, 2, 637257.0625l, 849161.75l, 411.089996l);
 }
 
 }
