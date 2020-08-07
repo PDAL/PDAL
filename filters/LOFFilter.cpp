@@ -36,15 +36,11 @@
 
 #include <pdal/KDIndex.hpp>
 
-#include <Eigen/Sparse>
-
 #include <string>
 #include <vector>
 
 namespace pdal
 {
-
-using namespace Eigen;
 
 static StaticPluginInfo const s_info
 {
@@ -87,8 +83,10 @@ void LOFFilter::filter(PointView& view)
     // The k-distance is the Euclidean distance to k-th nearest neighbor.
     log()->get(LogLevel::Debug) << "Computing k-distances...\n";
 
-    SparseMatrix<double> mat(view.size(), view.size());
-    mat.reserve(VectorXi::Constant(view.size(), m_minpts));
+    typedef std::pair<PointId, size_t> PointIdKPair;
+    typedef std::pair<PointId, double> PointIdDistPair;
+    typedef std::map<PointIdKPair, PointIdDistPair> AdjacencyMap;
+    AdjacencyMap mat;
 
     for (PointId i = 0; i < view.size(); ++i)
     {
@@ -97,12 +95,10 @@ void LOFFilter::filter(PointView& view)
         index.knnSearch(i, m_minpts, &indices, &sqr_dists);
 
         for (size_t j = 0; j < m_minpts; ++j)
-            mat.insert(indices[j], i) = std::sqrt(sqr_dists[j]);
+            mat[std::make_pair(i, j)] = std::make_pair(indices[j], std::sqrt(sqr_dists[j]));
 
         view.setField(m_kdist, i, std::sqrt(sqr_dists[m_minpts - 1]));
     }
-
-    mat.makeCompressed();
 
     // Second pass: Compute the local reachability distance for each point.
     // For each neighbor point, the reachability distance is the maximum value
@@ -110,14 +106,15 @@ void LOFFilter::filter(PointView& view)
     // the current point. The lrd is the inverse of the mean of the reachability
     // distances.
     log()->get(LogLevel::Debug) << "Computing lrd...\n";
-    for (int i = 0; i < mat.outerSize(); ++i)
+    for (PointId i = 0; i < view.size(); ++i)
     {
         double M1 = 0.0;
         point_count_t n = 0;
-        for (SparseMatrix<double>::InnerIterator it(mat, i); it; ++it)
+        for (size_t j = 0; j < m_minpts; ++j)
         {
-            double k = view.getFieldAs<double>(m_kdist, it.index());
-            double reachdist = (std::max)(k, it.value());
+            auto val = mat[std::make_pair(i, j)];
+            double k = view.getFieldAs<double>(m_kdist, val.first);
+            double reachdist = (std::max)(k, val.second);
             M1 += (reachdist - M1) / ++n;
         }
         view.setField(m_lrd, i, 1.0 / M1);
@@ -126,14 +123,15 @@ void LOFFilter::filter(PointView& view)
     // Third pass: Compute the local outlier factor for each point.
     // The LOF is the average of the lrd's for a neighborhood of points.
     log()->get(LogLevel::Debug) << "Computing LOF...\n";
-    for (int i = 0; i < mat.outerSize(); ++i)
+    for (PointId i = 0; i < view.size(); ++i)
     {
         double lrdp = view.getFieldAs<double>(m_lrd, i);
         double M1 = 0.0;
         point_count_t n = 0;
-        for (SparseMatrix<double>::InnerIterator it(mat, i); it; ++it)
+        for (size_t j = 0; j < m_minpts; ++j)
         {
-            M1 += (view.getFieldAs<double>(m_lrd, it.index()) / lrdp - M1) / ++n;
+            auto val = mat[std::make_pair(i, j)];
+            M1 += (view.getFieldAs<double>(m_lrd, val.first) / lrdp - M1) / ++n;
         }
         view.setField(m_lof, i, M1);
     }
