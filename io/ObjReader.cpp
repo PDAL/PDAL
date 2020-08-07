@@ -108,7 +108,10 @@ void ObjReader::newTriangle(PointViewPtr view, TRI tri)
             id = it->second;
         return id;
     };
-    m_mesh->add(insertPoint(tri[0]), insertPoint(tri[1]), insertPoint(tri[2]));
+    PointId p1 = insertPoint(tri[0]);
+    PointId p2 = insertPoint(tri[1]);
+    PointId p3 = insertPoint(tri[2]);
+    m_mesh->add(p1, p2, p3);
 }
 
 // adds a point to the point table
