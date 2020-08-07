@@ -13,7 +13,7 @@ alignment.
 .. note::
 
     CPD is computationally intensive and can be slow when working with many
-    points (i.e. > 10,000).  Nonrigid is significatly slower
+    points (i.e. > 10,000).  Nonrigid is significantly slower
     than rigid and affine.
 
 The first input to the change filter are considered the "fixed" points, and all
@@ -93,6 +93,8 @@ _`method`
     Change detection method to use.
     Valid values are "rigid", "affine", and "nonrigid".
     [Default: "rigid""]
+
+.. include:: filter_opts.rst
 
 .. _Coherent Point Drift (CPD): https://github.com/gadomski/cpd
 

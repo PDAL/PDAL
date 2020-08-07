@@ -26,5 +26,5 @@ Example
 Options
 -------
 
-None.
+.. include:: filter_opts.rst
 

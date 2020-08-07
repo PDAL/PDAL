@@ -119,7 +119,7 @@ philosophy in a number of important ways:
 4. PDAL is coordinated by users with its declarative :ref:`JSON <pipeline>`
    syntax. LAStools is coordinated by linking lots of small, specialized
    command line utilities together with intricate arguments.
-5. PDAL is an open source project, with all of its development activites
+5. PDAL is an open source project, with all of its development activities
    available online at https://github.com/PDAL/PDAL
 
 .. _about_pcl:
@@ -134,30 +134,27 @@ processing suite for point cloud data. The developer community of the PCL
 library is focused on algorithm development, robotic and computer vision, and
 real-time laser scanner processing. PDAL can read and write PCL's PCD format.
 
-Greyhound and Entwine
+Entwine
 ................................................................................
 
-.. index:: Greyhound, Entwine
+.. index:: Entwine
 
-`Greyhound`_ is an open source software from `Hobu, Inc.`_ that allows clients
-to query and stream progressive point cloud data over the network.  `Entwine`_
-is open source software from Hobu, Inc. that organizes massive point cloud
-collections into `Greyhound`_-streamable data services. These two software
-projects allow province-scale LiDAR collections to be organized and served
-via HTTP clients over the internet. PDAL provides :ref:`readers.greyhound` to
-allow users to read data into PDAL processes from that server.
 
+ `Entwine`_ is open source software from Hobu, Inc. that organizes massive
+ point cloud collections into streamable data services. These two software
+ projects allow province-scale LiDAR collections to be organized and served via
+ HTTP clients over the internet. PDAL provides :ref:`readers.ept` to allow
+ users to read data from those `Entwine Point Tile`_ collections that Entwine
+ produces..
+
+.. _`Entwine Point Tile`: https://entwine.io/entwine-point-tile.html
 .. _`Hobu, Inc.`: https://hobu.co
 
 .. _`Entwine`: https://entwine.io
 .. _`Greyhound`: http://greyhound.io
 
-plas.io and Potree
+Potree
 ................................................................................
-
-`plas.io`_ is a `WebGL`_ HTML5 point cloud renderer that speaks `ASPRS LAS`_ and
-`LASzip`_ compressed LAS. You can find the software for it at plasiojs.io and
-https://github.com/hobu/plasio-ui
 
 `Potree`_ is a `WebGL`_ HTML5 point cloud renderer that speaks `ASPRS LAS`_ and
 `LASzip`_ compressed LAS. You can find the software at
@@ -165,10 +162,9 @@ https://github.com/potree/potree/
 
 .. note::
 
-    Both renderers can now consume data from Greyhound. See them in action at
-    http://speck.ly and http://potree.entwine.io
+    See Potree in action using the USGS 3DEP AWS Public Dataset at
+    https://usgs.entwine.io
 
-.. _`plas.io`: http://plas.io
 .. _`WebGL`: https://en.wikipedia.org/wiki/WebGL
 .. _`Potree`: http://potree.org
 .. _`LASzip`: http://laszip.org
@@ -196,7 +192,7 @@ might find useful bits of functionality in them. These other tools include:
 
 .. note::
 
-    The `libLAS`_ project is an open source project that pre-dates PDAL, and
+    The `libLAS`_ project is an open source project that predates PDAL, and
     provides some of the processing capabilities provided by PDAL. It is
     currently in maintenance mode due to its dependence on LAS, the release of
     relevant LAStools capabilities as open source, and the completion of

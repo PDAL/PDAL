@@ -173,7 +173,7 @@ void SMRFilter::ready(PointTableRef table)
 
 PointViewSet SMRFilter::run(PointViewPtr view)
 {
-    PointViewSet viewSet;
+    PointViewSet viewSet{view};
     if (!view->size())
         return viewSet;
 
@@ -196,10 +196,10 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     bool rnOneZero(false);
     bool nrAllZero(true);
     bool rnAllZero(true);
-    for (PointId i = 0; i < realView->size(); ++i)
+    for (PointRef p : *realView)
     {
-        uint8_t nr = realView->getFieldAs<uint8_t>(Id::NumberOfReturns, i);
-        uint8_t rn = realView->getFieldAs<uint8_t>(Id::ReturnNumber, i);
+        uint8_t nr = p.getFieldAs<uint8_t>(Id::NumberOfReturns);
+        uint8_t rn = p.getFieldAs<uint8_t>(Id::ReturnNumber);
         if ((nr == 0) && !nrOneZero)
             nrOneZero = true;
         if ((rn == 0) && !rnOneZero)
@@ -229,18 +229,15 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     {
         Segmentation::segmentReturns(realView, inlierView, outlierView,
                                      m_args->m_returns);
-        ignoredView->append(*outlierView);
     }
 
     if (!inlierView->size())
-    {
         throwError("No returns to process.");
-    }
 
     // Classify remaining points with value of 1. SMRF processing will mark
     // ground returns as 2.
-    for (PointId i = 0; i < inlierView->size(); ++i)
-        inlierView->setField(Id::Classification, i, ClassLabel::Unclassified);
+    for (PointRef p : *inlierView)
+        p.setField(Id::Classification, ClassLabel::Unclassified);
 
     m_srs = inlierView->spatialReference();
 
@@ -280,15 +277,6 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     // Classify ground returns by comparing elevation values to the provisional
     // DEM.
     classifyGround(inlierView, ZIpro);
-
-    PointViewPtr outView = view->makeNew();
-    // ignoredView is appended to the output untouched.
-    outView->append(*ignoredView);
-    outView->append(*syntheticView);
-    // inlierView is appended to the output, the only PointView whose
-    // classifications may have been altered.
-    outView->append(*inlierView);
-    viewSet.insert(outView);
 
     return viewSet;
 }
@@ -348,11 +336,11 @@ void SMRFilter::classifyGround(PointViewPtr view, std::vector<double>& ZIpro)
 
     point_count_t ng(0);
     point_count_t g(0);
-    for (PointId i = 0; i < view->size(); ++i)
+    for (PointRef p : *view)
     {
-        double x = view->getFieldAs<double>(Id::X, i);
-        double y = view->getFieldAs<double>(Id::Y, i);
-        double z = view->getFieldAs<double>(Id::Z, i);
+        double x = p.getFieldAs<double>(Id::X);
+        double y = p.getFieldAs<double>(Id::Y);
+        double z = p.getFieldAs<double>(Id::Z);
 
         int c = static_cast<int>(floor((x - m_bounds.minx) / m_args->m_cell));
         int r = static_cast<int>(floor((y - m_bounds.miny) / m_args->m_cell));
@@ -381,12 +369,12 @@ void SMRFilter::classifyGround(PointViewPtr view, std::vector<double>& ZIpro)
         if (std::fabs(ZIpro[cell] - z) > thresh(r, c))
         {
             ng++;
-            view->setField(Id::Classification, i, ClassLabel::Unclassified);
+            p.setField(Id::Classification, ClassLabel::Unclassified);
         }
         else
         {
             g++;
-            view->setField(Id::Classification, i, ClassLabel::Ground);
+            p.setField(Id::Classification, ClassLabel::Ground);
         }
     }
     double p(100.0 * double(ng) / double(view->size()));
@@ -480,11 +468,11 @@ std::vector<double> SMRFilter::createZImin(PointViewPtr view)
     std::vector<double> ZIminV(m_rows * m_cols,
                                std::numeric_limits<double>::quiet_NaN());
 
-    for (PointId i = 0; i < view->size(); ++i)
+    for (PointRef p : *view)
     {
-        double x = view->getFieldAs<double>(Id::X, i);
-        double y = view->getFieldAs<double>(Id::Y, i);
-        double z = view->getFieldAs<double>(Id::Z, i);
+        double x = p.getFieldAs<double>(Id::X);
+        double y = p.getFieldAs<double>(Id::Y);
+        double z = p.getFieldAs<double>(Id::Z);
 
         int c = static_cast<int>(floor((x - m_bounds.minx) / m_args->m_cell));
         int r = static_cast<int>(floor((y - m_bounds.miny) / m_args->m_cell));
@@ -620,12 +608,10 @@ void SMRFilter::knnfill(PointViewPtr view, std::vector<double>& cz)
             if (std::isnan(val))
                 continue;
 
-            temp->setField(Id::X, i,
-                           m_bounds.minx + (c + 0.5) * m_args->m_cell);
-            temp->setField(Id::Y, i,
-                           m_bounds.miny + (r + 0.5) * m_args->m_cell);
-            temp->setField(Id::Z, i, val);
-            i++;
+            PointRef p = temp->point(i++);
+            p.setField(Id::X, m_bounds.minx + (c + 0.5) * m_args->m_cell);
+            p.setField(Id::Y, m_bounds.miny + (r + 0.5) * m_args->m_cell);
+            p.setField(Id::Z, val);
         }
     }
 

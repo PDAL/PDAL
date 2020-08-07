@@ -117,6 +117,7 @@ endif()
 if (PDAL_HAVE_ZSTD)
 PDAL_ADD_TEST(pdal_zstd_test FILES ZstdTest.cpp)
 endif()
+PDAL_ADD_TEST(pdal_where_test FILES WhereTest.cpp)
 
 #
 # sources for the native io

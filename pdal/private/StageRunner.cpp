@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2018, Hobu Inc. (info@hobu.co)
+* Copyright (c) 2014, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -32,40 +32,68 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include "StageRunner.hpp"
 
-#include <string>
+#include <pdal/Filter.hpp>
 
 namespace pdal
 {
 
-class slpk_error
+StageRunner::StageRunner(Stage *s, PointViewPtr view) : m_stage(s)
 {
-public:
-    slpk_error(const std::string& error) : m_error(error)
-    {}
+    m_keeps = view->makeNew();
+    Filter *f = dynamic_cast<Filter *>(m_stage);
+    if (f)
+    {
+        m_skips = view->makeNew();
+        f->splitView(view, m_keeps, m_skips);
+    }
+    else
+        m_keeps = view;
+}
 
-    std::string what() const
-        { return m_error; }
-
-    std::string m_error;
-};
-
-class ILeStream;
-
-class SlpkExtractor
+PointViewPtr StageRunner::keeps()
 {
-public:
-    SlpkExtractor (const std::string& filename, const std::string& directory) :
-        m_filename(filename), m_directory(directory)
-    {}
-    void extract() const;
-    
-private:
-    std::string m_filename;
-    std::string m_directory;
+    return m_keeps;
+}
 
-    void writeFile(std::string filename, ILeStream& in, size_t count) const;
-};
+// For now this is all synchronous
+void StageRunner::run()
+{
+    point_count_t keepSize = m_keeps->size();
+    m_viewSet = m_stage->run(m_keeps);
+
+    Filter *f = dynamic_cast<Filter *>(m_stage);
+    if (!f || !m_skips || m_skips->size() == 0)
+        return;
+
+    if (f->mergeMode() == Filter::WhereMergeMode::True)
+    {
+        if (m_viewSet.size())
+        {
+            (*m_viewSet.begin())->append(*m_skips);
+                return;
+        }
+    }
+    else if (f->mergeMode() == Filter::WhereMergeMode::Auto)
+    {
+        if (m_viewSet.size() == 1)
+        {
+            PointViewPtr keeps = *m_viewSet.begin();
+            if (keeps.get() == m_keeps.get() && keepSize == keeps->size())
+            {
+                keeps->append(*m_skips);
+                return;
+            }
+        }
+    }
+    m_viewSet.insert(m_skips);
+}
+
+PointViewSet StageRunner::wait()
+{
+    return m_viewSet;
+}
 
 } // namespace pdal
+

@@ -34,10 +34,13 @@
 
 #include "I3SReader.hpp"
 #include "EsriUtil.hpp"
+
 #include <thread>
 
 namespace pdal
 {
+
+using namespace i3s;
 
 static PluginInfo const i3sInfo
 {
@@ -50,31 +53,35 @@ CREATE_SHARED_STAGE(I3SReader, i3sInfo)
 
 std::string I3SReader::getName() const { return i3sInfo.name; }
 
-void I3SReader::initInfo()
+NL::json I3SReader::initInfo()
 {
+    NL::json info;
     try
     {
-        m_info = EsriUtil::parse(m_arbiter->get(m_filename));
+        std::string s = fetchJson("");
+        info = i3s::parse(s, "Invalid JSON in file '" + m_filename + "'.");
 
-        if (m_info.empty())
+        if (info.empty())
             throwError(std::string("Incorrect Json object"));
-        if (!m_info.contains("layers"))
+        if (!info.contains("layers"))
             throwError(std::string("Json object contains no layers"));
 
-        m_info = m_info["layers"][0];
+        info = info["layers"][0];
     }
-    catch(EsriUtil::json_parse_error& e)
+    catch(i3s::EsriError& e)
     {
         throwError(std::string("Error parsing Json object: ") + e.what());
     }
 
     m_filename += "/layers/0";
+    return info;
 }
 
 
-NL::json I3SReader::fetchJson(std::string filepath)
+std::string I3SReader::fetchJson(std::string filepath)
 {
-    return EsriUtil::parse(m_arbiter->get(filepath));
+    filepath = m_filename + "/" + filepath;
+    return m_arbiter->get(filepath);
 }
 
 
@@ -84,18 +91,19 @@ std::vector<char> I3SReader::fetchBinary(std::string url,
     const int NumRetries(5);
     int retry = 0;
 
+    std::string filepath = m_filename + "/" + url + attNum;
     // For the REST I3S endpoint there are no file extensions.
     std::vector<char> result;
     while (true)
     {
-        auto data = m_arbiter->tryGetBinary(url + attNum);
+        auto data = m_arbiter->tryGetBinary(filepath);
         if (data)
         {
             result = std::move(*data);
             break;
         }
         if (++retry == NumRetries)
-            throwError(std::string("Failed to fetch: " + url + attNum));
+            throw EsriError(std::string("Failed to fetch: " + filepath));
         std::this_thread::sleep_for(std::chrono::milliseconds(250));
     }
     return result;

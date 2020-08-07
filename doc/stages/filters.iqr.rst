@@ -25,7 +25,7 @@ Example
 
 The sample pipeline below uses the filter to automatically crop the Z
 dimension and remove possible outliers. The multiplier to determine high/low
-thresholds has been adjusted to be less agressive and to only crop those
+thresholds has been adjusted to be less aggressive and to only crop those
 outliers that are greater than the third quartile plus 3 times the IQR or are
 less than the first quartile minus 3 times the IQR.
 
@@ -49,4 +49,6 @@ k
 
 dimension
   The name of the dimension to filter.
+
+.. include:: filter_opts.rst
 

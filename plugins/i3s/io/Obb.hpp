@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2020, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -34,38 +34,81 @@
 
 #pragma once
 
-#include <pdal/Filter.hpp>
+#include <Eigen/Geometry>
+#include <pdal/JsonFwd.hpp>
+#include <pdal/util/Utils.hpp>
 
-#include <cstdint>
-#include <memory>
-#include <string>
+#include "EsriUtil.hpp"
 
 namespace pdal
 {
+class SrsTransform;
 
-class Options;
-class PointLayout;
-class PointView;
-
-class PDAL_DLL HAGFilter : public Filter
+namespace i3s
 {
-public:
-    HAGFilter();
-    HAGFilter& operator=(const HAGFilter&) = delete;
-    HAGFilter(const HAGFilter&) = delete;
+using Segment = std::pair<Eigen::Vector3d, Eigen::Vector3d>;
 
-    std::string getName() const;
+class Obb
+{
+    FRIEND_TEST(ObbTest, obb);
+public:
+    // Can throw EsriError.
+    Obb();
+    Obb(const NL::json& spec);
+    void parse(NL::json spec);
+    bool intersect(Obb clip);
+    void transform(const SrsTransform& xform);
+    bool valid() const;
+    Eigen::Vector3d center() const;
+    Eigen::Quaterniond quat() const;
+    BOX3D bounds() const;
 
 private:
-    virtual void addArgs(ProgramArgs& args);
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void prepared(PointTableRef table);
-    virtual void filter(PointView& view);
+    void verifyArray(const NL::json& spec, const std::string& name, size_t cnt);
+    bool intersectNormalized(const Segment& seg);
+    Eigen::Vector3d corner(size_t pos);
+    Segment segment(size_t pos);
+    // Test support
+    void setCenter(const Eigen::Vector3d& center);
 
-    bool m_allowExtrapolation;
-    bool m_delaunay;
-    double m_maxDistance;
-    point_count_t m_count;
+    bool m_valid;
+    Eigen::Vector3d m_p;
+    double m_hx;
+    double m_hy;
+    double m_hz;    
+    Eigen::Quaterniond m_quat;
+
+    friend std::ostream& operator<<(std::ostream&, const Obb&);
 };
 
-} // namespace pdal
+} //namespace i3s
+
+namespace Utils
+{
+
+template<>
+inline StatusWithReason fromString(const std::string& from,
+    pdal::i3s::Obb& obb)
+{
+    NL::json spec;
+    try
+    {
+        spec = NL::json::parse(from);
+    }
+    catch (const NL::json::exception& ex)
+    {
+        return { -1, ex.what() };
+    }
+    try
+    {
+        obb.parse(spec);
+    }
+    catch (const i3s::EsriError& err)
+    {
+        return { -1, err.what() };
+    }
+    return true;
+}
+
+} // namespace Utils
+} // namespace pdal 

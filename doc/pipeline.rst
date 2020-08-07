@@ -321,7 +321,7 @@ code at `hag.py`_.
 
 .. seealso::
 
-    :ref:`filters.hag` describes using a specific filter to do
+    :ref:`filters.hag_nn` describes using a specific filter to do
     this job in more detail.
 
 .. code-block:: json

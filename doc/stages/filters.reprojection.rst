@@ -25,7 +25,7 @@ Example 1
 --------------------------------------------------------------------------------
 
 This pipeline reprojects terrain points with Z-values between 0 and 100 by first
-applying a range filter and then specifing both the input and output spatial
+applying a range filter and then specifying both the input and output spatial
 reference as EPSG-codes. The X and Y dimensions are scaled to allow enough
 precision in the output coordinates.
 
@@ -102,12 +102,12 @@ out_srs
   string. [Required]
 
 in_axis_ordering
-  An array of numbers that override the axis order for the in_srs (or if 
-  not specified, the inferred SRS from the previous Stage). "2, 1" for 
-  example would swap X and Y, which may be commonly needed for 
-  something like "EPSG:4326". 
-  
+  An array of numbers that override the axis order for the in_srs (or if
+  not specified, the inferred SRS from the previous Stage). "2, 1" for
+  example would swap X and Y, which may be commonly needed for
+  something like "EPSG:4326".
+
 out_axis_ordering
-  An array of numbers that override the axis order for the out_srs. 
-  "2, 1" for example would swap X and Y, which may be commonly needed for 
-  something like "EPSG:4326". 
+  An array of numbers that override the axis order for the out_srs.
+  "2, 1" for example would swap X and Y, which may be commonly needed for
+  something like "EPSG:4326".

@@ -91,3 +91,6 @@ dimensions
 
   Note: the old syntax that used '=' instead of '=>' between dimension names
   is still supported.
+
+.. include:: filter_opts.rst
+

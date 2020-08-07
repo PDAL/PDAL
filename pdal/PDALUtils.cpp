@@ -42,6 +42,10 @@
 #include <pdal/Options.hpp>
 #include <pdal/util/FileUtils.hpp>
 
+#ifndef _WIN32
+#include <dlfcn.h>
+#endif
+
 using namespace std;
 
 namespace pdal
@@ -399,6 +403,32 @@ double computeHausdorff(PointViewPtr srcView, PointViewPtr candView)
     maxDistCandToSrc = std::sqrt(maxDistCandToSrc);
 
     return (std::max)(maxDistSrcToCand, maxDistCandToSrc);
+}
+
+
+std::string dllDir()
+{
+    std::string s;
+
+#ifdef _WIN32
+    HMODULE hm = NULL;
+
+    if (GetModuleHandleEx(
+        GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+        GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+        (LPCSTR)&dllDir, &hm))
+    {
+        char path[MAX_PATH];
+        DWORD cnt = GetModuleFileNameA(hm, path, sizeof(path));
+        if (cnt > 0 && cnt < MAX_PATH)
+            s = path;
+    }
+#else
+    Dl_info info;
+    if (dladdr((const void *)dllDir, &info))
+        s = info.dli_fname;
+#endif
+    return FileUtils::getDirectory(s);
 }
 
 } // namespace Utils

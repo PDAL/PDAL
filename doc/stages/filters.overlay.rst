@@ -92,5 +92,7 @@ _`query`
   The entire layer is fetched if no query is provided.  [Default: none]
 
 layer
-  The data source's layer to use. [Defalt: first layer]
+  The data source's layer to use. [Default: first layer]
+
+.. include:: filter_opts.rst
 

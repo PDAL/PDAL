@@ -24,7 +24,7 @@ Metadata nodes are reference types that can be copied cheaply.  Metadata nodes
 are annotated with the original data type to allow better interpretation of
 the data.
 For example, when binary data is stored in a base 64-encoded
-format, knowing that the data doesn't ulitmately represent a string can allow
+format, knowing that the data doesn't ultimately represent a string can allow
 algorithms to convert it back to its binary representation when desired.
 Similarly, knowing that data is numeric allows it
 to be written as a JSON numeric type rather than as a string.
@@ -39,7 +39,7 @@ overloading, but there are instances where this is impossible and the
 programmer must call a specific function to set the type of the metadata node.
 Binary data that has been converted to a string by base 64 encoding can
 be tagged as a such by calling addEncoded().  Programmers can specify the
-type of a node explictly by calling addWithType().  Currently supported
+type of a node explicitly by calling addWithType().  Currently supported
 types are: "boolean", "string", "float", "double", "bounds",
 "nonNegativeInteger", "integer", "uuid" and "base64Binary".
 
