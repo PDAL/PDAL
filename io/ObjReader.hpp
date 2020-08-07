@@ -40,7 +40,6 @@
 #include <vector>
 
 #include <pdal/Reader.hpp>
-#include <pdal/PDALUtils.hpp>
 
 namespace pdal
 {
@@ -57,12 +56,9 @@ private:
 
       \param table  Point table being initialized.
     */
-    //virtual QuickInfo inspect();
-    virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t numPts);
-    virtual void done(PointTableRef table);
 
 private:
     struct XYZ
@@ -77,6 +73,9 @@ private:
     TriangularMesh *m_mesh;
     using VTN = std::tuple<int64_t, int64_t, int64_t>;
     std::map<VTN, PointId> m_points;
+    std::istream *m_istream;
+    point_count_t m_index;
+
     using TRI = std::array<VTN, 3>;
     using FACE = std::vector<VTN>;
 
@@ -89,8 +88,6 @@ private:
     VTN extractVertex(const std::string& vstring);
     std::vector<TRI> triangulate(FACE face);
     PointId addPoint(PointViewPtr view, VTN vertex);
-    std::istream *m_istream;
-    point_count_t m_index;
 };
 
 } // namespace pdal

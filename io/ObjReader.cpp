@@ -48,8 +48,9 @@ static StaticPluginInfo const s_info
 CREATE_STATIC_STAGE(ObjReader, s_info)
 
 std::string ObjReader::getName() const { return s_info.name; }
-void ObjReader::addArgs(ProgramArgs& args) {}
-void ObjReader::addDimensions(PointLayoutPtr layout) {
+
+void ObjReader::addDimensions(PointLayoutPtr layout)
+{
     layout->registerDims( {
         Dimension::Id::X,
         Dimension::Id::Y,
@@ -61,17 +62,19 @@ void ObjReader::addDimensions(PointLayoutPtr layout) {
         Dimension::Id::TextureY
     });
 }
-void ObjReader::ready(PointTableRef table) {
+
+void ObjReader::ready(PointTableRef table)
+{
     m_istream = Utils::openFile(m_filename, false);
     if (!m_istream)
         throwError("Couldn't open '" + m_filename + "'.");
     m_index = 0;
 }
-void ObjReader::done(PointTableRef table){}
+
 point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)
 {
     m_mesh = view->createMesh("obj");
-    if(!m_mesh)
+    if (!m_mesh)
     {
         throwError("Failed to create mesh");
     }
@@ -79,8 +82,7 @@ point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)
     while (true)
     {
         FACE face;
-        bool ok = readFace(face, view);
-        if (!ok)
+        if (!readFace(face, view))
             break;
 
         auto triangles = triangulate(face);
@@ -91,7 +93,8 @@ point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)
     return m_index;
 }
 
-void ObjReader::newTriangle(PointViewPtr view, TRI tri) {
+void ObjReader::newTriangle(PointViewPtr view, TRI tri)
+{
     // checks if a point exists yet, if not, adds it to the point table via addPoint()
     auto insertPoint = [view, this](VTN vertex) {
         PointId id;
@@ -109,7 +112,8 @@ void ObjReader::newTriangle(PointViewPtr view, TRI tri) {
 }
 
 // adds a point to the point table
-PointId ObjReader::addPoint(PointViewPtr view, VTN vertex) {
+PointId ObjReader::addPoint(PointViewPtr view, VTN vertex)
+{
     XYZ v, t, n;
     PointRef pt = view->point(m_index);
     m_index++;
@@ -143,7 +147,6 @@ PointId ObjReader::addPoint(PointViewPtr view, VTN vertex) {
         pt.setField(Dimension::Id::NormalY, n.y);
         pt.setField(Dimension::Id::NormalZ, n.z);
     }
-
     return pt.pointId();
 }
 
@@ -173,11 +176,10 @@ bool ObjReader::readFace(FACE& face, PointViewPtr view)
         std::getline(*m_istream, line);
         lineOfFile++;
         Utils::trim(line);
-        if(line.length() == 0) continue;
+        if (line.length() == 0)
+            continue;
 
-        StringList fields = Utils::split2(line, ' '); // split or split2 ? what if there are multiple spaces between each number?
-        // if (fields.size() < 1) continue; // should be redundant
-
+        StringList fields = Utils::split2(line, ' ');
         std::string key = fields[0];
         if (key == "#")
         {
@@ -187,10 +189,8 @@ bool ObjReader::readFace(FACE& face, PointViewPtr view)
         {
             // Vertex
             double x, y, z;
-            bool xConverted = Utils::fromString(fields[1], x);
-            bool yConverted = Utils::fromString(fields[2], y);
-            bool zConverted = Utils::fromString(fields[3], z);
-            if(xConverted && yConverted && zConverted )
+            if (Utils::fromString(fields[1], x) && Utils::fromString(fields[2], y) &&
+                Utils::fromString(fields[3], z))
                 newVertex( x, y, z );
             else
             {
@@ -204,10 +204,8 @@ bool ObjReader::readFace(FACE& face, PointViewPtr view)
         {
             // Vertex texture
             double x, y, z;
-            bool xConverted = Utils::fromString(fields[1], x);
-            bool yConverted = Utils::fromString(fields[2], y);
-            bool zConverted = Utils::fromString(fields[3], z);
-            if(xConverted && yConverted && zConverted )
+            if (Utils::fromString(fields[1], x) && Utils::fromString(fields[2], y) &&
+                Utils::fromString(fields[3], z))
                 newTextureVertex( x, y, z );
             else
             {
@@ -221,10 +219,8 @@ bool ObjReader::readFace(FACE& face, PointViewPtr view)
         {
             // Vertex normal
             double x, y, z;
-            bool xConverted = Utils::fromString(fields[1], x);
-            bool yConverted = Utils::fromString(fields[2], y);
-            bool zConverted = Utils::fromString(fields[3], z);
-            if(xConverted && yConverted && zConverted )
+            if (Utils::fromString(fields[1], x) && Utils::fromString(fields[2], y) &&
+                Utils::fromString(fields[3], z))
                 newNormalVertex( x, y, z );
             else
             {
@@ -248,21 +244,17 @@ bool ObjReader::readFace(FACE& face, PointViewPtr view)
 
 void ObjReader::extractFace(StringList fields, ObjReader::FACE& face)
 {
-    size_t l = fields.size();
-    for (size_t i = 0; i < l; ++i)
-    {
-        face.push_back(extractVertex(fields[i]));
-    }
+    for (const std::string& field : fields)
+        face.push_back(extractVertex(field));
 }
 
 std::vector<ObjReader::TRI> ObjReader::triangulate(FACE face)
 {
     std::vector<TRI> triangles;
-    if(face.size() < 3) {
-        throwError("Too few vertices to traingulate");
-    }
+
     unsigned int totalTriangles = face.size() - 2;
-    while(triangles.size() < totalTriangles) {
+    while(triangles.size() < totalTriangles)
+    {
         TRI tri;
         tri[0] = face[0];
         tri[1] = face[triangles.size()+1];
@@ -285,7 +277,7 @@ ObjReader::VTN ObjReader::extractVertex(const std::string& vstring)
         throwError("Too many items in vertex specification.");
 
     char* p;
-    long index = std::strtoll(parts[0].c_str(), &p, 0);
+    long index = std::strtol(parts[0].c_str(), &p, 10);
     if (index == 0 || p != parts[0].c_str() + parts[0].size())
         throwError("Invalid index in face specification.");
     else if (index < 0)
@@ -297,7 +289,7 @@ ObjReader::VTN ObjReader::extractVertex(const std::string& vstring)
     {
         if (parts[1].length() > 0)
         {
-            index = std::strtoll(parts[1].c_str(), &p, 0);
+            index = std::strtol(parts[1].c_str(), &p, 10);
             if (index == 0 || p != parts[1].c_str() + parts[1].size())
                 throwError("Invalid index in face specification.");
             else if(index < 0)
