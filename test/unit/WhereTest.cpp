@@ -187,8 +187,8 @@ TEST(WhereTest, t1)
     exec2("X<50 && Y < 2.5", 25, 2, Filter::WhereMergeMode::False);
 
     exec3("X<50", 50, 3);
-    exec3("X<50 && Y < 2.5", 25, 3);
-    exec3("X<50 && Y < 2.5", 25, 2, Filter::WhereMergeMode::True);
+    exec3("X<50 && Y < (1 + 1.5)", 25, 3);
+    exec3("X<50 && Y < 2 + 0.5", 25, 2, Filter::WhereMergeMode::True);
     exec3("X<50 && Y < 2.5", 25, 3, Filter::WhereMergeMode::False);
 }
 

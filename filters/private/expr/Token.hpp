@@ -13,6 +13,8 @@ enum class TokenType
     Eof,
     Error,
 
+    Assign,
+
     Plus,
     Dash,
     Slash,

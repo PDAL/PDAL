@@ -39,5 +39,11 @@ Options
 filename
     BPF file to read [Required]
 
+fix_dims
+    BPF files may contain dimension names that aren't allowed by PDAL. When this
+    option is 'true', invalid characters in dimension names are replaced by '_' in
+    order to make the names valid.
+    [Default: true]
+
 .. include:: reader_opts.rst
 

@@ -205,6 +205,7 @@ public:
     virtual std::string print() const;
     virtual Utils::StatusWithReason prepare(PointLayoutPtr l);
     virtual Result eval(PointRef& p) const;
+    Dimension::Id eval() const;
 
 private:
     std::string m_name;
@@ -215,18 +216,21 @@ class Expression
 {
 public:
     Expression();
+    virtual ~Expression();
     Expression(const Expression& expr);
+    Expression(Expression&& expr) noexcept;
+    Expression& operator=(Expression&& expr);
     Expression& operator=(const Expression& expr);
-    ~Expression();
 
     void clear();
-    bool parse(const std::string& s);
+    bool valid() const;
     std::string error() const;
-    std::string print() const;
     NodePtr popNode();
     void pushNode(NodePtr node);
-    Utils::StatusWithReason prepare(PointLayoutPtr layout);
-    bool eval(PointRef& p) const;
+    Node *topNode();
+    const Node *topNode() const;
+    virtual std::string print() const;
+    virtual Utils::StatusWithReason prepare(PointLayoutPtr layout) = 0;
 
 private:
     std::string m_error;
@@ -236,18 +240,4 @@ private:
 };
 
 } // namespace expr
-
-namespace Utils
-{
-
-template<>
-inline StatusWithReason fromString(const std::string& from,
-    pdal::expr::Expression& expr)
-{
-    bool ok = expr.parse(from);
-    return { ok ? 0 : -1, expr.error() };
-}
-
-} // namespace Util
-
 } // namespace pdal

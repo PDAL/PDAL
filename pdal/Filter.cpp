@@ -33,14 +33,14 @@
 ****************************************************************************/
 
 #include "Filter.hpp"
-#include "../filters/private/expr/Expression.hpp"
+#include "../filters/private/expr/ConditionalExpression.hpp"
 
 namespace pdal
 {
 
 struct Filter::Args
 {
-    expr::Expression m_where;
+    expr::ConditionalExpression m_where;
     Arg *m_whereArg;
     Filter::WhereMergeMode m_whereMerge;
     Arg *m_whereMergeArg;
