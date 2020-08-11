@@ -222,7 +222,7 @@ namespace pdal
         Options options;
         options.add("array_name", pth);
         options.add("compression", "zstd");
-        options.add("compression_level", 50);
+        options.add("compression_level", 7);
 
         if (vfs.is_dir(pth))
         {
@@ -246,7 +246,7 @@ namespace pdal
         EXPECT_EQ(f.filter_type(), TILEDB_FILTER_ZSTD);
         int32_t compressionLevel;
         f.get_option(TILEDB_COMPRESSION_LEVEL, &compressionLevel);
-        EXPECT_EQ(compressionLevel, 50);
+        EXPECT_EQ(compressionLevel, 7);
     }
 
     TEST_F(TileDBWriterTest, write_options)
@@ -261,7 +261,7 @@ namespace pdal
         // add an array filter
         jsonOptions["coords"] = {
             {{"compression", "bit-shuffle"}},
-            {{"compression", "zstd"}, {"compression_level", 50}}
+            {{"compression", "zstd"}, {"compression_level", 7}}
         };
         jsonOptions["OffsetTime"]["compression"] = "rle";
 
@@ -292,7 +292,7 @@ namespace pdal
         EXPECT_EQ(f2.filter_type(), TILEDB_FILTER_ZSTD);
         int32_t compressionLevel;
         f2.get_option(TILEDB_COMPRESSION_LEVEL, &compressionLevel);
-        EXPECT_EQ(compressionLevel, 50);
+        EXPECT_EQ(compressionLevel, 7);
 
         tiledb::Attribute att = array.schema().attributes().begin()->second;
         tiledb::FilterList flAtts = att.filter_list();
@@ -318,7 +318,7 @@ namespace pdal
 
         options.add("array_name", pth);
         options.add("compression", "zstd");
-        options.add("compression_level", 50);
+        options.add("compression_level", 7);
         options.add("filters", jsonOptions);
 
         if (vfs.is_dir(pth))

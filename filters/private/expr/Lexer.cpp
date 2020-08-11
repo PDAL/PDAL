@@ -175,8 +175,7 @@ Token Lexer::equal()
     if (c == '=')
         return Token(TokenType::Equal, m_tokPos, m_pos, "==");
     putChar();
-    return Token(TokenType::Error, m_tokPos, m_pos, "'=' invalid in this "
-        "context");
+    return Token(TokenType::Assign, m_tokPos, m_pos, "=");
 }
 
 Token Lexer::less()

@@ -385,6 +385,18 @@
     "description": "Distance metric related to a point's nearest neighbors."
     },
     {
+    "name": "TextureX",
+    "alt_names": ["tx", "texture_x", "texturex" ],
+    "type": "double",
+    "description": "X component of a texture location at this point"
+    },
+    {
+    "name": "TextureY",
+    "alt_names": ["ty", "texture_y", "texturey" ],
+    "type": "double",
+    "description": "Y component of a texture location at this point"
+    },
+    {
     "name": "Linearity",
     "type": "double",
     "description": "Linearity of a point; larger values indicate more linear regions."
