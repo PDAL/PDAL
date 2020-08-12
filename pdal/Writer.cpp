@@ -48,6 +48,23 @@ Writer::Writer()
 Writer::~Writer()
 {}
 
+void Writer::l_initialize(PointTableRef table)
+{
+    Stage::l_initialize(table);
+}
+
+// This is here so that we can make the function final and make sure it
+// it isn't used by any subclasses.
+void Writer::l_addArgs(ProgramArgs& args)
+{
+    Stage::l_addArgs(args);
+}
+
+void Writer::l_prepared(PointTableRef table)
+{
+    Stage::l_prepared(table);
+}
+
 std::string::size_type Writer::handleFilenameTemplate(
     const std::string& filename)
 {

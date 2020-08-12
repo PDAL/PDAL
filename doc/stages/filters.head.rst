@@ -70,3 +70,6 @@ Options
 
 count
   Number of points to return. [Default: 10]
+
+.. include:: filter_opts.rst
+

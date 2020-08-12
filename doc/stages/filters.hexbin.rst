@@ -123,3 +123,6 @@ preserve_topology
 
 smooth
   Use GEOS simplify operations to smooth boundary to a tolerance [Default: true]
+
+.. include:: filter_opts.rst
+

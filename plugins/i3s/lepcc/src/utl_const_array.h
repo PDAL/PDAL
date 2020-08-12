@@ -27,7 +27,6 @@ Contributors:  Ronald Poirrier
 
 #ifndef _NOEXCEPT
 #define _NOEXCEPT	noexcept //c++ 11
-//#define _NOEXCEPT	throw ()
 #endif
 
 #define LEPCC_ASSERT assert

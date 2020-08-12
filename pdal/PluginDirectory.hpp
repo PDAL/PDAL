@@ -69,7 +69,6 @@ public:
 
 private:
     static PluginDirectory *m_instance;
-    PDAL_DLL static StringList test_pluginSearchPaths();
     PDAL_DLL static std::string test_validPlugin(const std::string& path,
         const StringList& types);
 };

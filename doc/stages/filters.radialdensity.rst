@@ -45,3 +45,5 @@ Options
 _`radius`
   Radius. [Default: 1.0]
 
+.. include:: filter_opts.rst
+

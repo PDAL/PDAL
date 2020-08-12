@@ -87,3 +87,6 @@ threshold
 
 window
   Max window size. [Default: **18.0**]
+
+.. include:: filter_opts.rst
+

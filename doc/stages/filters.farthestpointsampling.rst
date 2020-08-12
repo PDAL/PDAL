@@ -25,3 +25,6 @@ Options
 
 count
   Desired number of output samples. [Default: 1000]
+
+.. include:: filter_opts.rst
+

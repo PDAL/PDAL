@@ -194,9 +194,32 @@ inline std::size_t extractName(const std::string& s, std::string::size_type p)
         return 0;
     auto isvalid = [](int c)
     {
-        return std::isalpha(c) || std::isdigit(c) || c == '_' || c == '/';
+        return std::isalpha(c) || std::isdigit(c) || c == '_';
     };
     return Utils::extract(s, p, isvalid) + 1;
+}
+
+inline std::string fixName(std::string name)
+{
+    size_t pos = 0;
+    while (true)
+    {
+        pos = extractName(name, 0);
+        if (pos == name.size())
+            break;
+        name[pos] = '_';
+    }
+    return name;
+}
+
+inline bool nameValid(std::string name)
+{
+    name = Utils::toupper(name);
+    if (extractName(name, 0) != name.size())
+        return false;
+    if (name == "WHERE")
+        return false;
+    return true;
 }
 
 inline std::istream& operator>>(std::istream& in, Dimension::Type& type)
