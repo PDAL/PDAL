@@ -58,7 +58,7 @@ std::string LOFFilter::getName() const
 
 void LOFFilter::addArgs(ProgramArgs& args)
 {
-    args.add("minpts", "Minimum number of points", m_minpts, 10);
+    args.add("minpts", "Minimum number of points", m_minpts, (size_t)10);
 }
 
 void LOFFilter::addDimensions(PointLayoutPtr layout)
