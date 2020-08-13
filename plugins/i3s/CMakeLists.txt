@@ -8,6 +8,7 @@ PDAL_ADD_PLUGIN(i3s_reader_libname reader i3s
         io/EsriUtil.cpp
         io/EsriReader.cpp
         io/Obb.cpp
+        io/PageManager.cpp
         ${PDAL_SRC_DIR}/private/MathUtils.cpp
     LINK_WITH
         ${WINSOCK_LIBRARY}
@@ -30,6 +31,7 @@ PDAL_ADD_PLUGIN(slpk_reader_libname reader slpk
         io/EsriUtil.cpp
         io/EsriReader.cpp
         io/Obb.cpp
+        io/PageManager.cpp
         ${PDAL_SRC_DIR}/private/MathUtils.cpp
     LINK_WITH
         ${WINSOCK_LIBRARY}
