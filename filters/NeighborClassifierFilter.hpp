@@ -37,9 +37,6 @@
 #include <pdal/Filter.hpp>
 #include <pdal/KDIndex.hpp>
 
-extern "C" int32_t NeighborClassifierFilter_ExitFunc();
-extern "C" PF_ExitFunc NeighborClassifierFilter_InitPlugin();
-
 namespace pdal
 {
 
@@ -49,28 +46,26 @@ class PDAL_DLL NeighborClassifierFilter : public Filter
 {
 public:
     NeighborClassifierFilter();
+    NeighborClassifierFilter& operator=(const NeighborClassifierFilter&) = delete;
+    NeighborClassifierFilter(const NeighborClassifierFilter&) = delete;
     ~NeighborClassifierFilter();
 
-    static void * create();
-    static int32_t destroy(void *);
     std::string getName() const { return "filters.neighborclassifier"; }
 
 private:
     virtual void addArgs(ProgramArgs& args);
-    virtual void prepared(PointTableRef table);
-    bool doOne(PointRef& point, PointRef& temp, KD3Index &kdi);
-    virtual void filter(PointView& view);
     virtual void initialize();
+    virtual void prepared(PointTableRef table);
+    virtual void filter(PointView& view);
+    virtual void ready(PointTableRef table);
+
+    bool doOne(PointRef& point, PointRef& temp, KD3Index &kdi);
     void doOneNoDomain(PointRef &point, PointRef& temp, KD3Index &kdi);
     PointViewPtr loadSet(const std::string &candFileName, PointTableRef table);
-    NeighborClassifierFilter& operator=(
-        const NeighborClassifierFilter&) = delete;
-    NeighborClassifierFilter(const NeighborClassifierFilter&) = delete;
-    StringList m_domainSpec;
+
     std::vector<DimRange> m_domain;
     int m_k;
-    Dimension::Id m_dim;
-    std::string m_dimName;
+    std::map<PointId, int> m_newClass;
     std::string m_candidateFile;
 };
 
