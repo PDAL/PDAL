@@ -185,9 +185,10 @@ TEST(NeighborClassifierFilterTest, candidate)
     Stage& r = *(factory.createStage("readers.las"));
     r.setOptions(ro);
 
-    // NeighborClassifier used to be broken because it would change voting point classifications while
-    // it was running. This mean it would create different classifications if the order was different.
-    // Adding this filter should quickly expose this case if it were to reappear.
+    // NeighborClassifier used to be broken because it would change voting point
+    // classifications while it was running. This mean it would create different
+    // classifications if the point order was different.
+    // Randomizing the data should quickly expose this case if it were to reappear.
     Stage& rfilter = *(factory.createStage("filters.randomize"));
     rfilter.setInput(r);
 

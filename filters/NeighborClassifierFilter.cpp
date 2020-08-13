@@ -117,7 +117,6 @@ void NeighborClassifierFilter::doOneNoDomain(PointRef &point, PointRef &temp,
         [](CountMap::const_reference p1, CountMap::const_reference p2)
         { return p1.second < p2.second; });
 
-    // update point
     if (pr.second > iSrc.size() / 2.0)
     {
         int oldclass = point.getFieldAs<int>(Dimension::Id::Classification);
