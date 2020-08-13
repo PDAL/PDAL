@@ -59,6 +59,10 @@ void ThreadPool::work()
             m_produceCv.notify_all();
 
             std::string err;
+
+            task();
+
+            /**
             try
             {
                 task();
@@ -71,6 +75,7 @@ void ThreadPool::work()
             {
                 err = "Unknown error";
             }
+            **/
 
             lock.lock();
             --m_outstanding;
