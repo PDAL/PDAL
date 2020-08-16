@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2020, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -34,35 +34,49 @@
 
 #pragma once
 
-#include <pdal/Filter.hpp>
-
+#include <list>
 #include <memory>
+#include <mutex>
+#include <condition_variable>
+
+#include <pdal/JsonFwd.hpp>
+#include <pdal/util/ThreadPool.hpp>
 
 namespace pdal
 {
-
-class PointLayout;
-class PointView;
-class ProgramArgs;
-
-class PDAL_DLL LOFFilter : public Filter
+namespace i3s
 {
-public:
-    LOFFilter() : Filter()
-    {}
 
-    std::string getName() const;
+using Page = NL::json;
+using PagePtr = std::shared_ptr<NL::json>;
+using FetchFunction = std::function<std::string(std::string)>;
+
+class PageManager
+{
+    struct PageEntry
+    {
+        int index;
+        PagePtr page;
+    };
+
+public:
+    PageManager(int cacheSize, int threads, int indexFactor, FetchFunction fetch);
+
+    void fetchPage(int index);
+    PagePtr getPage(int index);
 
 private:
-    Dimension::Id m_kdist, m_lrd, m_lof;
-    size_t m_minpts;
+    ThreadPool m_pool;
+    size_t m_cacheSize;
+    int m_indexFactor;
+    FetchFunction m_fetch;
+    std::list<PageEntry> m_cache;
+    std::mutex m_mutex;
+    std::condition_variable m_cv;
 
-    virtual void addArgs(ProgramArgs& args);
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void filter(PointView& view);
-
-    LOFFilter& operator=(const LOFFilter&); // not implemented
-    LOFFilter(const LOFFilter&); // not implemented
+    PagePtr getPageLocked(int index);
+    void evict();
 };
 
-} // namespace pdal
+} //namespace i3s
+} // namespace pdal 
