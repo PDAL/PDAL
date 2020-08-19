@@ -140,7 +140,7 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
     // be reasonable to alternately accept an initial guess.
     Matrix4d final_transformation;
     if (m_matrixArg->set())
-        final_transformation = Map<const Matrix4d>(m_vec.data());
+        final_transformation = Eigen::Map<const Matrix4d>(m_vec.data());
     else
         final_transformation = Matrix4d::Identity();
 
@@ -200,7 +200,7 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
         // current translation in X and Y.
         auto A = math::pointViewToEigen(*tempFixed, fixed_idx);
         auto B = math::pointViewToEigen(*tempMovingTransformed, moving_idx);
-        auto T = umeyama(B.transpose(), A.transpose(), false);
+        auto T = Eigen::umeyama(B.transpose(), A.transpose(), false);
         log()->get(LogLevel::Debug2) << "Current dx: " << T.coeff(0, 3) << ", "
                                      << "dy: " << T.coeff(1, 3) << std::endl;
 
@@ -307,8 +307,8 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
 
     // Populate metadata nodes to capture the final transformation, convergence
     // status, and MSE.
-    IOFormat MetadataFmt(FullPrecision, DontAlignCols, " ", "\n", "", "", "",
-                         "");
+    Eigen::IOFormat MetadataFmt(Eigen::FullPrecision, Eigen::DontAlignCols, " ",
+                                "\n", "", "", "", "");
     MetadataNode root = getMetadata();
     std::stringstream ss;
     ss << final_transformation.format(MetadataFmt);
