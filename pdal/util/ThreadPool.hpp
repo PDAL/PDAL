@@ -139,7 +139,7 @@ public:
 
         m_produceCv.wait(lock, [this]()
         {
-            return m_queueSize < 0 || m_tasks.size() < m_queueSize;
+            return m_queueSize < 0 || m_tasks.size() < (size_t)m_queueSize;
         });
 
         m_tasks.emplace(task);
@@ -157,7 +157,7 @@ private:
     // Worker thread function.  Wait for a task and run it.
     void work();
 
-    std::size_t m_queueSize;
+    int64_t m_queueSize;
     std::size_t m_numThreads;
     bool m_verbose;
     std::vector<std::thread> m_threads;
