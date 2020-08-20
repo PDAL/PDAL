@@ -18,7 +18,7 @@ is kept in tact (the same cannot be said for :ref:`filters.voxelgrid`).
 
 .. seealso::
 
-    :ref:`filters.decimation`, :ref:`filters.farthestpointsampling` and
+    :ref:`filters.decimation`, :ref:`filters.fps` and
     :ref:`filters.relaxationdartthrowing` also perform decimation.
 
 .. note::

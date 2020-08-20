@@ -367,13 +367,13 @@ Resampling
    :hidden:
 
    filters.decimation
-   filters.farthestpointsampling
+   filters.fps
    filters.sample
 
 :ref:`filters.decimation`
     Keep every Nth point.
 
-:ref:`filters.farthestpointsampling`
+:ref:`filters.fps`
     The Farthest Point Sampling Filter adds points from the input to the output
     PointView one at a time by selecting the point from the input cloud that is
     farthest from any point currently in the output.

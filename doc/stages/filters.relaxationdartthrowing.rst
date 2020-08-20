@@ -11,8 +11,8 @@ output points is reached.
 
 .. seealso::
 
-    :ref:`filters.decimation`, :ref:`filters.farthestpointsampling` and
-    :ref:`filters.sample` all perform some form of thinning or resampling.
+    :ref:`filters.decimation`, :ref:`filters.fps` and :ref:`filters.sample` all
+    perform some form of thinning or resampling.
 
 .. note::
 
