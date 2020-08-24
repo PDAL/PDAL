@@ -74,6 +74,9 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.ept`.
 :ref:`readers.geowave`
     Read point cloud data from Accumulo.
 
+:ref:`readers.hdf`
+   Read data from files in the HDF5 format.
+
 :ref:`readers.i3s`
     Read data stored in the Esri I3S format.  The data is read from an
     appropriate server.
