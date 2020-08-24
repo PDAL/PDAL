@@ -116,7 +116,23 @@ public:
     NL::json m_ogr;
 };
 
-EptReader::EptReader() : m_args(new EptReader::Args), m_artifactMgr(nullptr)
+struct EptReader::Private
+{
+public:
+    std::unique_ptr<Connector> connector;
+    std::unique_ptr<EptInfo> info;
+    std::unique_ptr<ThreadPool> pool;
+    std::unique_ptr<TileContents> currentTile;
+    std::unique_ptr<Hierarchy> hierarchy;
+    std::queue<TileContents> contents;
+    Hierarchy::const_iterator hierarchyIter;
+    AddonList addons;
+    std::mutex mutex;
+    std::condition_variable contentsCv;
+};
+
+EptReader::EptReader() : m_args(new EptReader::Args), m_p(new EptReader::Private),
+    m_artifactMgr(nullptr)
 {}
 
 EptReader::~EptReader()
@@ -177,18 +193,18 @@ void EptReader::initialize()
         log()->get(LogLevel::Warning) << "Using a large thread count: " <<
             threads << " threads" << std::endl;
     }
-    m_pool.reset(new ThreadPool(threads));
+    m_p->pool.reset(new ThreadPool(threads));
 
     StringMap headers;
     StringMap query;
     setForwards(headers, query);
-    m_connector.reset(new Connector(headers, query));
+    m_p->connector.reset(new Connector(headers, query));
 
     try
     {
-        m_info.reset(new EptInfo(m_filename, *m_connector));
-        setSpatialReference(m_info->srs());
-        m_addons = Addon::load(*m_connector, m_args->m_addons);
+        m_p->info.reset(new EptInfo(m_filename, *m_p->connector));
+        setSpatialReference(m_p->info->srs());
+        m_p->addons = Addon::load(*m_p->connector, m_args->m_addons);
     }
     catch (const arbiter::ArbiterError& err)
     {
@@ -204,7 +220,7 @@ void EptReader::initialize()
 
     // Transform query bounds to match point source SRS.
     const SpatialReference& boundsSrs = m_args->m_bounds.spatialReference();
-    if (!m_info->srs().valid() && boundsSrs.valid())
+    if (!m_p->info->srs().valid() && boundsSrs.valid())
         throwError("Can't use bounds with SRS with data source that has "
             "no SRS.");
     m_queryBounds = m_args->m_bounds.to3d();
@@ -244,7 +260,7 @@ void EptReader::initialize()
     if (queryResolution)
     {
         double currentResolution =
-            (m_info->bounds().maxx - m_info->bounds().minx) / m_info->span();
+            (m_p->info->bounds().maxx - m_p->info->bounds().minx) / m_p->info->span();
 
         debug << "Root resolution: " << currentResolution << std::endl;
 
@@ -264,7 +280,7 @@ void EptReader::initialize()
     }
 
     debug << "Query bounds: " << m_queryBounds << "\n";
-    debug << "Threads: " << m_pool->size() << std::endl;
+    debug << "Threads: " << m_p->pool->size() << std::endl;
 }
 
 void EptReader::handleOriginQuery()
@@ -277,11 +293,11 @@ void EptReader::handleOriginQuery()
     log()->get(LogLevel::Debug) << "Searching sources for " << search <<
         std::endl;
 
-    std::string filename = m_info->sourcesDir() + "list.json";
+    std::string filename = m_p->info->sourcesDir() + "list.json";
     NL::json sources;
     try
     {
-        sources = m_connector->getJson(filename);
+        sources = m_p->connector->getJson(filename);
     }
     catch (const arbiter::ArbiterError& err)
     {
@@ -357,11 +373,11 @@ QuickInfo EptReader::inspect()
 
     initialize();
 
-    qi.m_bounds = m_info->boundsConforming();
-    qi.m_srs = m_info->srs();
-    qi.m_pointCount = m_info->points();
+    qi.m_bounds = m_p->info->boundsConforming();
+    qi.m_srs = m_p->info->srs();
+    qi.m_pointCount = m_p->info->points();
 
-    for (auto& el : m_info->dims())
+    for (auto& el : m_p->info->dims())
         qi.m_dimNames.push_back(el.first);
 
     // If there is a spatial query from an explicit --bounds, an origin query,
@@ -372,13 +388,13 @@ QuickInfo EptReader::inspect()
         log()->get(LogLevel::Debug) <<
             "Determining overlapping point count" << std::endl;
 
-        m_hierarchy.reset(new Hierarchy);
+        m_p->hierarchy.reset(new Hierarchy);
         overlaps();
 
         // If we've passed a spatial query, determine an upper bound on the
         // point count based on the hierarchy.
         qi.m_pointCount = 0;
-        for (const Overlap& overlap : *m_hierarchy)
+        for (const Overlap& overlap : *m_p->hierarchy)
             qi.m_pointCount += overlap.m_count;
 
         // Also clip the resulting bounds to the intersection of:
@@ -403,7 +419,7 @@ QuickInfo EptReader::inspect()
 
 void EptReader::addDimensions(PointLayoutPtr layout)
 {
-    for (auto& el : m_info->dims())
+    for (auto& el : m_p->info->dims())
     {
         const std::string& name = el.first;
         DimType& dt = el.second;
@@ -414,7 +430,7 @@ void EptReader::addDimensions(PointLayoutPtr layout)
             layout->registerOrAssignDim(name, dt.m_type);
     }
 
-    for (Addon& addon : m_addons)
+    for (Addon& addon : m_p->addons)
         addon.setExternalId(
             layout->registerOrAssignDim(addon.name(), addon.type()));
 }
@@ -424,17 +440,17 @@ void EptReader::addDimensions(PointLayoutPtr layout)
 // stick the tile on the queue and notify the main thread.
 void EptReader::load(const Overlap& overlap)
 {
-    m_pool->add([this, overlap]()
+    m_p->pool->add([this, overlap]()
         {
             // Read the tile.
-            TileContents tile(overlap, *m_info, *m_connector, m_addons);
+            TileContents tile(overlap, *m_p->info, *m_p->connector, m_p->addons);
             tile.read();
 
             // Put the tile on the output queue.
-            std::unique_lock<std::mutex> l(m_mutex);
-            m_contents.push(std::move(tile));
+            std::unique_lock<std::mutex> l(m_p->mutex);
+            m_p->contents.push(std::move(tile));
             l.unlock();
-            m_contentsCv.notify_one();
+            m_p->contentsCv.notify_one();
         }
     );
 }
@@ -447,7 +463,7 @@ void EptReader::ready(PointTableRef table)
     m_nodeIdDim = table.layout()->findDim("EptNodeId");
     m_pointIdDim = table.layout()->findDim("EptPointId");
 
-    m_hierarchy.reset(new Hierarchy);
+    m_p->hierarchy.reset(new Hierarchy);
 
     // Determine all overlapping data files we'll need to fetch.
     try
@@ -460,7 +476,7 @@ void EptReader::ready(PointTableRef table)
     }
 
     point_count_t overlapPoints(0);
-    for (const Overlap& overlap : *m_hierarchy)
+    for (const Overlap& overlap : *m_p->hierarchy)
         overlapPoints += overlap.m_count;
 
     if (overlapPoints > 1e8)
@@ -470,9 +486,9 @@ void EptReader::ready(PointTableRef table)
     }
 
     // Ten million is a silly-large number for the number of tiles.
-    m_pool.reset(new ThreadPool(m_pool->numThreads()));
+    m_p->pool.reset(new ThreadPool(m_p->pool->numThreads()));
     m_pointId = 0;
-    m_tileCount = m_hierarchy->size();
+    m_tileCount = m_p->hierarchy->size();
 
     // If we're running in standard mode, queue up all the requests for data.
     // In streaming mode, queue up at most 4 to avoid having a ton of data
@@ -481,16 +497,16 @@ void EptReader::ready(PointTableRef table)
     if (table.supportsView())
     {
         m_artifactMgr = &table.artifactManager();
-        for (const Overlap& overlap : *m_hierarchy)
+        for (const Overlap& overlap : *m_p->hierarchy)
             load(overlap);
     }
     else
     {
         int count = 4;
-        m_hierarchyIter = m_hierarchy->cbegin();
-        while (m_hierarchyIter != m_hierarchy->cend() && count)
+        m_p->hierarchyIter = m_p->hierarchy->cbegin();
+        while (m_p->hierarchyIter != m_p->hierarchy->cend() && count)
         {
-            load(*m_hierarchyIter++);
+            load(*m_p->hierarchyIter++);
             count--;
         }
     }
@@ -506,31 +522,29 @@ void EptReader::overlaps()
     // Because this may require fetching lots of JSON files, it'll run in our
     // thread pool.
     Key key;
-    key.b = m_info->bounds();
+    key.b = m_p->info->bounds();
 
     {
         m_nodeId = 1;
-        std::string filename =
-            m_info->hierarchyDir() + key.toString() + ".json";
+        std::string filename = m_p->info->hierarchyDir() + key.toString() + ".json";
 
         // First, determine the overlapping nodes from the EPT resource.
-        overlaps(*m_hierarchy, m_connector->getJson(filename), key);
+        overlaps(*m_p->hierarchy, m_p->connector->getJson(filename), key);
     }
-    m_pool->await();
+    m_p->pool->await();
 
     // Determine the addons that exist to correspond to tiles.
-    for (auto& addon : m_addons)
+    for (auto& addon : m_p->addons)
     {
         m_nodeId = 1;
         std::string filename = addon.hierarchyDir() + key.toString() + ".json";
-        overlaps(addon.hierarchy(), m_connector->getJson(filename), key);
-        m_pool->await();
+        overlaps(addon.hierarchy(), m_p->connector->getJson(filename), key);
+        m_p->pool->await();
     }
 }
 
 
-void EptReader::overlaps(Hierarchy& target, const NL::json& hier,
-    const Key& key)
+void EptReader::overlaps(Hierarchy& target, const NL::json& hier, const Key& key)
 {
     // If this key doesn't overlap our query
     // we can skip
@@ -577,12 +591,12 @@ void EptReader::overlaps(Hierarchy& target, const NL::json& hier,
 
         // If the hierarchy points value here is -1, then we need to fetch the
         // hierarchy subtree corresponding to this root.
-        m_pool->add([this, &target, key]()
+        m_p->pool->add([this, &target, key]()
         {
             try
             {
-                std::string filename = m_info->hierarchyDir() + key.toString() + ".json";
-                const auto subRoot(m_connector->getJson(filename));
+                std::string filename = m_p->info->hierarchyDir() + key.toString() + ".json";
+                const auto subRoot(m_p->connector->getJson(filename));
                 overlaps(target, subRoot, key);
             }
             catch (const arbiter::ArbiterError& err)
@@ -601,7 +615,7 @@ void EptReader::overlaps(Hierarchy& target, const NL::json& hier,
         // not match the base hierarchy, but it doesn't matter since
         // they are never used.
         {
-            std::lock_guard<std::mutex> lock(m_mutex);
+            std::lock_guard<std::mutex> lock(m_p->mutex);
             target.emplace(key, (point_count_t)numPoints, m_nodeId++);
         }
 
@@ -614,7 +628,7 @@ void EptReader::checkTile(const TileContents& tile)
 {
     if (tile.error().size())
     {
-        m_pool->stop();
+        m_p->pool->stop();
         throwError("Error reading tile: " + tile.error());
     }
 }
@@ -653,7 +667,7 @@ bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
     if (!m_queryBounds.contains(x, y, z) || !passesPolyFilter(x, y))
         return false;
 
-    for (auto& el : m_info->dims())
+    for (auto& el : m_p->info->dims())
     {
         DimType& dt = el.second;
         if (dt.m_id != Dimension::Id::X &&
@@ -671,7 +685,7 @@ bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
     dst.setField(Id::Z, z);
     dst.setField(m_nodeIdDim, tile.nodeId());
     dst.setField(m_pointIdDim, pointId);
-    for (Addon& addon : m_addons)
+    for (Addon& addon : m_p->addons)
     {
         Dimension::Id srcId = addon.localId();
         BasePointTable *t = tile.addonTable(srcId);
@@ -689,7 +703,7 @@ bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
 point_count_t EptReader::read(PointViewPtr view, point_count_t count)
 {
 #ifndef PDAL_HAVE_ZSTD
-    if (m_info->dataType() == EptInfo::DataType::Zstandard)
+    if (m_p->info->dataType() == EptInfo::DataType::Zstandard)
         throwError("Cannot read Zstandard dataType: "
             "PDAL must be configured with WITH_ZSTD=On");
 #endif
@@ -700,11 +714,11 @@ point_count_t EptReader::read(PointViewPtr view, point_count_t count)
     // Exit when we've handled all the tiles or we've read enough points.
     do
     {
-        std::unique_lock<std::mutex> l(m_mutex);
-        if (m_contents.size())
+        std::unique_lock<std::mutex> l(m_p->mutex);
+        if (m_p->contents.size())
         {
-            TileContents tile = std::move(m_contents.front());
-            m_contents.pop();
+            TileContents tile = std::move(m_p->contents.front());
+            m_p->contents.pop();
             l.unlock();
             checkTile(tile);
             process(view, tile, count - numRead);
@@ -712,20 +726,20 @@ point_count_t EptReader::read(PointViewPtr view, point_count_t count)
             m_tileCount--;
         }
         else
-            m_contentsCv.wait(l);
+            m_p->contentsCv.wait(l);
     } while (m_tileCount && numRead <= count);
 
     // Wait for any running threads to finish and don't start any others.
     // Only relevant if we hit the count limit before reading all the tiles.
-    m_pool->stop();
+    m_p->pool->stop();
 
     // If we're using the addon writer, transfer the info and hierarchy
     // to that stage.
     if (m_nodeIdDim != Dimension::Id::Unknown)
     {
         EptArtifactPtr artifact
-            (new EptArtifact(std::move(m_info), std::move(m_hierarchy),
-                std::move(m_connector), m_hierarchyStep));
+            (new EptArtifact(std::move(m_p->info), std::move(m_p->hierarchy),
+                std::move(m_p->connector), m_hierarchyStep));
         m_artifactMgr->put("ept", artifact);
     }
 
@@ -757,36 +771,35 @@ top:
 
     // If there is no active tile, grab one off the queue and ask for
     // another if there are more.  If none are available, wait.
-    if (!m_currentTile)
+    if (!m_p->currentTile)
     {
         do
         {
-            std::unique_lock<std::mutex> l(m_mutex);
-            if (m_contents.size())
+            std::unique_lock<std::mutex> l(m_p->mutex);
+            if (m_p->contents.size())
             {
-                m_currentTile.reset(
-                    new TileContents(std::move(m_contents.front())));
-                m_contents.pop();
+                m_p->currentTile.reset(new TileContents(std::move(m_p->contents.front())));
+                m_p->contents.pop();
                 l.unlock();
-                if (m_hierarchyIter != m_hierarchy->cend())
-                    load(*m_hierarchyIter++);
+                if (m_p->hierarchyIter != m_p->hierarchy->cend())
+                    load(*m_p->hierarchyIter++);
                 break;
             }
             else
-                m_contentsCv.wait(l);
+                m_p->contentsCv.wait(l);
         } while (true);
-        checkTile(*m_currentTile);
+        checkTile(*m_p->currentTile);
     }
 
-    bool ok = processPoint(point, *m_currentTile);
+    bool ok = processPoint(point, *m_p->currentTile);
 
     // If we've processed all the points in the current tile, pop it.
     // If we've processed all the tiles, return false to indicate that
     // we're done.
-    if (m_pointId == m_currentTile->size())
+    if (m_pointId == m_p->currentTile->size())
     {
         m_pointId = 0;
-        m_currentTile.reset();
+        m_p->currentTile.reset();
         --m_tileCount;
     }
 

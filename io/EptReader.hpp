@@ -36,18 +36,13 @@
 
 #include <map>
 #include <string>
-#include <list>
-#include <queue>
 #include <memory>
-#include <mutex>
-#include <condition_variable>
+#include <unordered_set>
 
+#include <pdal/JsonFwd.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
 #include <pdal/util/Bounds.hpp>
-
-#include "private/ept/Addon.hpp"
-#include "private/ept/Overlap.hpp"
 
 namespace pdal
 {
@@ -55,8 +50,9 @@ namespace pdal
 class Connector;
 class EptInfo;
 class Key;
-class ThreadPool;
 class TileContents;
+struct Overlap;
+using Hierarchy = std::unordered_set<Overlap>;
 using StringMap = std::map<std::string, std::string>;
 
 class PDAL_DLL EptReader : public Reader, public Streamable
@@ -89,31 +85,19 @@ private:
     // downloaded during the 'read' section.
     void overlaps();
     void overlaps(Hierarchy& target, const NL::json& current, const Key& key);
-    void process(PointViewPtr dstView, const TileContents& tile,
-        point_count_t count);
+    void process(PointViewPtr dstView, const TileContents& tile, point_count_t count);
     bool processPoint(PointRef& dst, const TileContents& tile);
     void load(const Overlap& overlap);
     void checkTile(const TileContents& tile);
 
-    std::unique_ptr<Connector> m_connector;
-    std::unique_ptr<EptInfo> m_info;
-    // This is a list-based queue so that we don't need to expose TileContents
-    // here as you do with a deque.
-    std::queue<TileContents, std::list<TileContents>> m_contents;
-    uint64_t m_tileCount;
-    std::unique_ptr<Hierarchy> m_hierarchy;
-    Hierarchy::const_iterator m_hierarchyIter;
-
     struct Args;
     std::unique_ptr<Args> m_args;
+    struct Private;
+    std::unique_ptr<Private> m_p;
 
+    uint64_t m_tileCount;
     BOX3D m_queryBounds;
     int64_t m_queryOriginId = -1;
-    std::unique_ptr<ThreadPool> m_pool;
-    AddonList m_addons;
-
-    mutable std::mutex m_mutex;
-    mutable std::condition_variable m_contentsCv;
 
     uint64_t m_depthEnd = 0;    // Zero indicates selection of all depths.
     uint64_t m_hierarchyStep = 0;
@@ -121,9 +105,7 @@ private:
     Dimension::Id m_nodeIdDim = Dimension::Id::Unknown;
     Dimension::Id m_pointIdDim = Dimension::Id::Unknown;
 
-    std::unique_ptr<TileContents> m_currentTile;
     ArtifactManager *m_artifactMgr;
-
     PointId m_pointId = 0;
     uint64_t m_nodeId;
 };

@@ -36,12 +36,11 @@
 
 #include <cstddef>
 #include <memory>
+#include <unordered_set>
 #include <vector>
 
 #include <pdal/JsonFwd.hpp>
 #include <pdal/Writer.hpp>
-
-#include "private/ept/Addon.hpp"
 
 namespace pdal
 {
@@ -50,6 +49,10 @@ class Connector;
 class EptInfo;
 class Key;
 class ThreadPool;
+class Addon;
+struct Overlap;
+using Hierarchy = std::unordered_set<Overlap>;
+using AddonList = std::vector<Addon>;
 
 class PDAL_DLL EptAddonWriter : public Writer
 {
@@ -80,8 +83,8 @@ private:
     std::unique_ptr<Connector> m_connector;
     std::unique_ptr<ThreadPool> m_pool;
     std::unique_ptr<EptInfo> m_info;
-    AddonList m_addons;
     std::unique_ptr<Hierarchy> m_hierarchy;
+    AddonList m_addons;
     uint64_t m_hierarchyStep = 0;
 };
 
