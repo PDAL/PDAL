@@ -36,6 +36,7 @@
 
 #include <pdal/util/Utils.hpp>
 #include <pdal/private/MathUtils.hpp>
+#include <pdal/private/Raster.hpp>
 
 namespace pdal
 {
@@ -55,19 +56,19 @@ std::string FaceRasterFilter::getName() const
 }
 
 
-FaceRasterFilter::FaceRasterFilter()
+FaceRasterFilter::FaceRasterFilter() : m_limits(new RasterLimits)
 {}
 
 
 void FaceRasterFilter::addArgs(ProgramArgs& args)
 {
-    m_limits.addArgs(args);
+    m_limits->addArgs(args);
     args.add("mesh", "Mesh name", m_meshName);
 }
 
 void FaceRasterFilter::prepared(PointTableRef)
 {
-    int cnt = m_limits.checkArgs();
+    int cnt = m_limits->checkArgs();
     if (cnt != 0 && cnt != 4)
         throwError("Must specify all or none of 'origin_x', 'origin_y', 'width' and 'height'.");
     m_computeLimits = (cnt == 0);
@@ -76,20 +77,20 @@ void FaceRasterFilter::prepared(PointTableRef)
 
 void FaceRasterFilter::filter(PointView& v)
 {
-    double halfEdge = m_limits.edgeLength / 2;
-    double edgeBit = m_limits.edgeLength * .000001;
+    double halfEdge = m_limits->edgeLength / 2;
+    double edgeBit = m_limits->edgeLength * .000001;
 
     // If the user hasn't set bounds, set them based on the data.
     if (m_computeLimits)
     {
         BOX2D bounds;
         v.calculateBounds(bounds);
-        m_limits.xOrigin = bounds.minx - halfEdge;
-        m_limits.yOrigin = bounds.miny - halfEdge;
-        m_limits.width = ((bounds.maxx - m_limits.xOrigin) / m_limits.edgeLength) + 1;
-        m_limits.height = ((bounds.maxy - m_limits.yOrigin) / m_limits.edgeLength) + 1;
+        m_limits->xOrigin = bounds.minx - halfEdge;
+        m_limits->yOrigin = bounds.miny - halfEdge;
+        m_limits->width = ((bounds.maxx - m_limits->xOrigin) / m_limits->edgeLength) + 1;
+        m_limits->height = ((bounds.maxy - m_limits->yOrigin) / m_limits->edgeLength) + 1;
     }
-    Rasterd *raster = v.createRaster("faceraster", m_limits);
+    Rasterd *raster = v.createRaster("faceraster", *m_limits);
     if (!raster)
         throwError("Raster already exists");
 
@@ -129,10 +130,10 @@ void FaceRasterFilter::filter(PointView& v)
         int bx = raster->xCell(xmax + halfEdge);
         int by = raster->yCell(ymax + halfEdge);
 
-        ax = Utils::clamp(ax, 0, (int)m_limits.width);
-        bx = Utils::clamp(bx, 0, (int)m_limits.width);
-        ay = Utils::clamp(ay, 0, (int)m_limits.height);
-        by = Utils::clamp(by, 0, (int)m_limits.height);
+        ax = Utils::clamp(ax, 0, (int)m_limits->width);
+        bx = Utils::clamp(bx, 0, (int)m_limits->width);
+        ay = Utils::clamp(ay, 0, (int)m_limits->height);
+        by = Utils::clamp(by, 0, (int)m_limits->height);
 
         for (int xi = ax; xi < bx; ++xi)
             for (int yi = ay; yi < by; ++yi)

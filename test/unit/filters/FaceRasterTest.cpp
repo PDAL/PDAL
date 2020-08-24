@@ -35,6 +35,7 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/StageFactory.hpp>
+#include <pdal/private/Raster.hpp>
 
 #include "Support.hpp"
 

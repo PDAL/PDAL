@@ -34,14 +34,15 @@
 
 #pragma once
 
+#include <memory>
+#include <string>
+
 #include <pdal/Filter.hpp>
-#include <pdal/private/Raster.hpp>
 
 namespace pdal
 {
 
-template <typename T>
-class Raster;
+struct RasterLimits;
 
 class PDAL_DLL FaceRasterFilter : public pdal::Filter
 {
@@ -57,7 +58,7 @@ private:
     virtual void prepared(PointTableRef);
     virtual void filter(PointView& view);
 
-    RasterLimits m_limits;
+    std::unique_ptr<RasterLimits> m_limits;
     std::string m_meshName;
     bool m_computeLimits;
 };
