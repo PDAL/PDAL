@@ -240,7 +240,7 @@ bool ObjReader::readFace(FACE& face, PointViewPtr view)
                 else
                     throwVertexError();
             }
-            else if(numDims == 4) {
+            else if(numDims > 3) {
                 double x, y, z, w;
                 if (Utils::fromString(fields[1], x) && Utils::fromString(fields[2], y) &&
                     Utils::fromString(fields[3], z) && Utils::fromString(fields[4], w))
@@ -248,13 +248,6 @@ bool ObjReader::readFace(FACE& face, PointViewPtr view)
                 else
                     throwVertexError();
             }
-            else {
-                std::stringstream errorMessage;
-                errorMessage << "Vertex specification can only have 3 or 4 fields, but " << numDims << " were found on line #"
-                    << lineOfFile << ": '" << line << "'" << std::endl;
-                throwError(errorMessage.str());
-            }
-
         }
         else if (key == "vt")
         {
