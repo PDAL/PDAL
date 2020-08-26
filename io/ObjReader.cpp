@@ -207,16 +207,19 @@ bool ObjReader::readFace(FACE& face, PointViewPtr view)
         {
             // Vertex texture
             double x, y, z;
-            if (Utils::fromString(fields[1], x) && Utils::fromString(fields[2], y) &&
-                Utils::fromString(fields[3], z))
-                newTextureVertex( x, y, z );
-            else
+            if (!Utils::fromString(fields[1], x))
             {
                 std::stringstream ss;
                 ss << "Could not convert texture vertex specification to double on line #"
                     << lineOfFile << ": '" << line << "'" << std::endl;
                 throwError(ss.str());
             }
+            if(!Utils::fromString(fields[2], y))
+                y = 0;
+            if(!Utils::fromString(fields[2], z))
+                z = 0;
+                newTextureVertex( x, y, z );
+
         }
         else if (key == "vn")
         {
