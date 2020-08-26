@@ -70,8 +70,6 @@ void ObjReader::ready(PointTableRef table)
     if (!m_istream)
         throwError("Couldn't open '" + m_filename + "'.");
     m_index = 0;
-    m_vertexWidth = 3;
-    m_vertextTextureWidth = 0;
 }
 
 point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)
@@ -133,9 +131,7 @@ PointId ObjReader::addPoint(PointViewPtr view, VTN vertex)
     pt.setField(Dimension::Id::X, v.x);
     pt.setField(Dimension::Id::Y, v.y);
     pt.setField(Dimension::Id::Z, v.z);
-    if(m_vertexWidth == 4) {
-        pt.setField(Dimension::Id::W, v.w);
-    }
+    pt.setField(Dimension::Id::W, v.w);
 
     int64_t textureIndex = std::get<1>(vertex) - 1;
     if (textureIndex >=  0) {
@@ -144,10 +140,8 @@ PointId ObjReader::addPoint(PointViewPtr view, VTN vertex)
                 "for face doesn't exist.");
         t = m_textureVertices.at(textureIndex);
         pt.setField(Dimension::Id::TextureU, t.x);
-        if(m_vertextTextureWidth >= 2)
-            pt.setField(Dimension::Id::TextureV, t.y);
-        if(m_vertextTextureWidth >= 3)
-            pt.setField(Dimension::Id::TextureW, t.z);
+        pt.setField(Dimension::Id::TextureV, t.y);
+        pt.setField(Dimension::Id::TextureW, t.z);
     }
 
     int64_t normalIndex = std::get<2>(vertex) - 1;
@@ -171,26 +165,22 @@ void ObjReader::newVertex(double x, double y, double z)
 
 void ObjReader::newVertex(double x, double y, double z, double w)
 {
-    m_vertexWidth = 4;
     m_vertices.push_back({x, y, z, w});
 }
 
 // undefined texture values default to 0 according to https://en.wikipedia.org/wiki/Wavefront_.obj_file
 void ObjReader::newTextureVertex(double x)
 {
-    m_vertextTextureWidth = std::max(m_vertextTextureWidth, 1);
     m_textureVertices.push_back({x, 0, 0, 0});
 }
 
 void ObjReader::newTextureVertex(double x, double y)
 {
-    m_vertextTextureWidth = std::max(m_vertextTextureWidth, 2);
     m_textureVertices.push_back({x, y, 0, 0});
 }
 
 void ObjReader::newTextureVertex(double x, double y, double z)
 {
-    m_vertextTextureWidth = 3;
     m_textureVertices.push_back({x, y, z, 0});
 }
 

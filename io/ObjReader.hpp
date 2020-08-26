@@ -71,7 +71,6 @@ private:
     std::vector<XYZW> m_vertices;
     std::vector<XYZW> m_textureVertices;
     std::vector<XYZW> m_normalVertices;
-    int m_vertexWidth, m_vertextTextureWidth;
     TriangularMesh *m_mesh;
     using VTN = std::tuple<int64_t, int64_t, int64_t>;
     std::map<VTN, PointId> m_points;
