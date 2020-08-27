@@ -223,7 +223,10 @@ bool ObjReader::readFace(FACE& face, PointViewPtr view)
                 throwError(errorMessage.str()); 
             };
 
-            if(numDims == 3) {
+            if(numDims < 3) {
+                throwVertexError();
+            }
+            else if(numDims == 3) {
                 double x, y, z;
                 if (Utils::fromString(fields[1], x) && Utils::fromString(fields[2], y) &&
                     Utils::fromString(fields[3], z))
@@ -278,8 +281,8 @@ bool ObjReader::readFace(FACE& face, PointViewPtr view)
         {
             // Vertex normal
             double x, y, z;
-            if (Utils::fromString(fields[1], x) && Utils::fromString(fields[2], y) &&
-                Utils::fromString(fields[3], z))
+            if (fields.size() >= 4 && Utils::fromString(fields[1], x) &&
+                Utils::fromString(fields[2], y) && Utils::fromString(fields[3], z))
                 newNormalVertex( x, y, z );
             else
             {
