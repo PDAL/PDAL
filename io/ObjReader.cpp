@@ -55,6 +55,7 @@ void ObjReader::addDimensions(PointLayoutPtr layout)
         Dimension::Id::X,
         Dimension::Id::Y,
         Dimension::Id::Z,
+        Dimension::Id::W,
         Dimension::Id::TextureU,
         Dimension::Id::TextureV,
         Dimension::Id::TextureW,
@@ -226,7 +227,7 @@ bool ObjReader::readFace(FACE& face, PointViewPtr view)
                 double x, y, z;
                 if (Utils::fromString(fields[1], x) && Utils::fromString(fields[2], y) &&
                     Utils::fromString(fields[3], z))
-                    newVertex( x, y, z);
+                    newVertex(x, y, z);
                 else
                     throwVertexError();
             }
@@ -234,7 +235,7 @@ bool ObjReader::readFace(FACE& face, PointViewPtr view)
                 double x, y, z, w;
                 if (Utils::fromString(fields[1], x) && Utils::fromString(fields[2], y) &&
                     Utils::fromString(fields[3], z) && Utils::fromString(fields[4], w))
-                    newVertex( x, y, z, w);
+                    newVertex(x, y, z, w);
                 else
                     throwVertexError();
             }
