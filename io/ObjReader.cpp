@@ -92,11 +92,11 @@ void ObjReader::initialize(PointTableRef table)
         unsigned long numDims = fields.size() - 1;
         if(key == "vt") {
             // find the widest texture
-            m_vertexTextureWidth = std::max(numDims, m_vertexTextureWidth);
+            m_vertexTextureWidth = (std::max)(numDims, m_vertexTextureWidth);
         }
         if(key == "v") {
             // find the widest texture
-            m_vertexWidth = std::max(numDims, m_vertexWidth);
+            m_vertexWidth = (std::max)(numDims, m_vertexWidth);
         }
         if(key == "vn")
             m_hasNormal = true;
