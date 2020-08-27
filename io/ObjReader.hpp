@@ -58,6 +58,7 @@ private:
     */
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
+    virtual void initialize(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t numPts);
 
 private:
@@ -71,6 +72,8 @@ private:
     std::vector<XYZW> m_vertices;
     std::vector<XYZW> m_textureVertices;
     std::vector<XYZW> m_normalVertices;
+    unsigned long m_vertexWidth, m_vertexTextureWidth;
+    bool m_hasNormal;
     TriangularMesh *m_mesh;
     using VTN = std::tuple<int64_t, int64_t, int64_t>;
     std::map<VTN, PointId> m_points;

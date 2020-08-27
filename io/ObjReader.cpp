@@ -55,13 +55,52 @@ void ObjReader::addDimensions(PointLayoutPtr layout)
         Dimension::Id::X,
         Dimension::Id::Y,
         Dimension::Id::Z,
-        Dimension::Id::TextureU,
-        Dimension::Id::TextureV,
-        Dimension::Id::TextureW,
-        Dimension::Id::NormalX,
-        Dimension::Id::NormalY,
-        Dimension::Id::NormalZ,
     });
+    if(m_vertexWidth > 3)
+        layout->registerDim(Dimension::Id::W);
+    if(m_hasNormal)
+        layout->registerDims({
+            Dimension::Id::NormalX,
+            Dimension::Id::NormalY,
+            Dimension::Id::NormalZ,
+        });
+    if(m_vertexTextureWidth >= 1)
+        layout->registerDim(Dimension::Id::TextureU);
+    if(m_vertexTextureWidth >= 2)
+        layout->registerDim(Dimension::Id::TextureV);
+    if(m_vertexTextureWidth >= 3)
+        layout->registerDim(Dimension::Id::TextureW);
+}
+
+void ObjReader::initialize(PointTableRef table)
+{
+    std::istream *is = Utils::openFile(m_filename, false);
+    if (!is)
+        throwError("Couldn't open '" + m_filename + "'.");
+    m_vertexWidth = 3;
+    m_vertexTextureWidth = 0;
+    m_hasNormal = false;
+    while(is->peek() != EOF) {
+        std::string line;
+        std::getline(*is, line);
+        Utils::trim(line);
+        if (line.length() == 0)
+            continue;
+
+        StringList fields = Utils::split2(line, ' ');
+        std::string key = fields[0];
+        unsigned long numDims = fields.size() - 1;
+        if(key == "vt") {
+            // find the widest texture
+            m_vertexTextureWidth = std::max(numDims, m_vertexTextureWidth);
+        }
+        if(key == "v") {
+            // find the widest texture
+            m_vertexWidth = std::max(numDims, m_vertexWidth);
+        }
+        if(key == "vn")
+            m_hasNormal = true;
+    }
 }
 
 void ObjReader::ready(PointTableRef table)
