@@ -51,6 +51,22 @@ void checkPoint(const PointViewPtr& view, point_count_t idx,
     EXPECT_DOUBLE_EQ(z, view->getFieldAs<double>(Dimension::Id::Z, idx));
 }
 
+void checkPoint(const PointViewPtr& view, point_count_t idx,
+        double x, double y, double z,
+        double tu, double tv, double tw,
+        double nx, double ny, double nz)
+{
+    EXPECT_DOUBLE_EQ(x, view->getFieldAs<double>(Dimension::Id::X, idx));
+    EXPECT_DOUBLE_EQ(y, view->getFieldAs<double>(Dimension::Id::Y, idx));
+    EXPECT_DOUBLE_EQ(z, view->getFieldAs<double>(Dimension::Id::Z, idx));
+    EXPECT_DOUBLE_EQ(nx, view->getFieldAs<double>(Dimension::Id::NormalX, idx));
+    EXPECT_DOUBLE_EQ(ny, view->getFieldAs<double>(Dimension::Id::NormalY, idx));
+    EXPECT_DOUBLE_EQ(nz, view->getFieldAs<double>(Dimension::Id::NormalZ, idx));
+    EXPECT_DOUBLE_EQ(tu, view->getFieldAs<double>(Dimension::Id::TextureU, idx));
+    EXPECT_DOUBLE_EQ(tv, view->getFieldAs<double>(Dimension::Id::TextureV, idx));
+    EXPECT_DOUBLE_EQ(tw, view->getFieldAs<double>(Dimension::Id::TextureW, idx));
+}
+
 
 TEST(ObjReader, Constructor)
 {
@@ -113,6 +129,55 @@ TEST(ObjReader, Read)
     checkPoint(view, 0, -0.5,  0.5,  0.5);
     checkPoint(view, 1, -0.5,  0.5, -0.5);
     checkPoint(view, 2, -0.5, -0.5, -0.5);
+}
+
+TEST(ObjReader, FourDimensionRead)
+{
+    ObjReader reader;
+    Options options;
+    options.add("filename", Support::datapath("obj/hyper_box.obj"));
+    reader.setOptions(options);
+
+    PointTable table;
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 16u);
+
+    // Test mesh size, which will let us know if triangulation worked
+    EXPECT_EQ(view->mesh("obj")->size(), 24u);
+
+    // Order isn't garanteed
+    checkPoint(view, 0, -0.5,  0.5,  0.5);
+    EXPECT_DOUBLE_EQ(0.5, view->getFieldAs<double>(Dimension::Id::W, 0)); 
+    checkPoint(view, 1, -0.5,  0.5, -0.5);
+    EXPECT_DOUBLE_EQ(0.5, view->getFieldAs<double>(Dimension::Id::W, 1)); 
+    checkPoint(view, 2, -0.5, -0.5, -0.5);
+    EXPECT_DOUBLE_EQ(0.5, view->getFieldAs<double>(Dimension::Id::W, 2)); 
+}
+ 
+TEST(ObjReader, TexturesAndNormals)
+{
+    ObjReader reader;
+    Options options;
+    options.add("filename", Support::datapath("obj/box_texture.obj"));
+    reader.setOptions(options);
+
+    PointTable table;
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 8u);
+
+    // Test mesh size, which will let us know if triangulation worked
+    EXPECT_EQ(view->mesh("obj")->size(), 12u);
+
+    // Order isn't garanteed
+    checkPoint(view, 0, -0.5,  0.5,  0.5, -0.5,  0.5, 0, -0.5,  0.5,  0.5);
+    checkPoint(view, 1, -0.5,  0.5, -0.5, -0.5,  0.5, 0, -0.5,  0.5, -0.5);
+    checkPoint(view, 2, -0.5, -0.5, -0.5, -0.5, -0.5, 0, -0.5, -0.5, -0.5);
 }
 
 TEST(ObjReader, LargeFile)
