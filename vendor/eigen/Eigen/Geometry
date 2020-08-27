@@ -10,6 +10,8 @@
 
 #include "Core"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-copy"
 #include "src/Core/util/DisableStupidWarnings.h"
 
 #include "SVD"
@@ -56,6 +58,7 @@
 #endif
 
 #include "src/Core/util/ReenableStupidWarnings.h"
+#pragma GCC diagnostic pop
 
 #endif // EIGEN_GEOMETRY_MODULE_H
 /* vim: set filetype=cpp et sw=2 ts=2 ai: */
