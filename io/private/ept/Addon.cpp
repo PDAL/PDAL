@@ -75,7 +75,7 @@ AddonList Addon::store(const Connector& connector, const NL::json& spec,
             Dimension::Id id = layout.findDim(dimName);
             if (id == Dimension::Id::Unknown)
                 throw pdal_error("Invalid dimension '" + dimName + "' in "
-                    "addon specificiation. Does not exist in source data.");
+                    "addon specification. Does not exist in source data.");
             Dimension::Type type = layout.dimType(id);
             std::string typestring = Dimension::toName(Dimension::base(type));
             size_t size = Dimension::size(type);
