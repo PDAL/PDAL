@@ -91,7 +91,7 @@ void IterativeClosestPoint::prepared(PointTableRef table)
             m_vec.push_back(val);
         if (m_vec.size() != 16)
             throwError("Expecting exactly 16 values in 'init' got " +
-                       m_vec.size());
+                std::to_string(m_vec.size()));
     }
 }
 

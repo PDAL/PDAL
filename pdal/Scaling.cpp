@@ -66,7 +66,7 @@ void Scaling::setAutoXForm(const PointViewSet& pvSet)
     double zmin = (std::numeric_limits<double>::max)();
     double zmax = (std::numeric_limits<double>::lowest)();
 
-    for (const PointViewPtr view : pvSet)
+    for (const PointViewPtr& view : pvSet)
     {
         if (xmod)
             for (PointId idx = 0; idx < view->size(); idx++)

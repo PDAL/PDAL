@@ -55,11 +55,13 @@ void ObjReader::addDimensions(PointLayoutPtr layout)
         Dimension::Id::X,
         Dimension::Id::Y,
         Dimension::Id::Z,
+        Dimension::Id::W,
+        Dimension::Id::TextureU,
+        Dimension::Id::TextureV,
+        Dimension::Id::TextureW,
         Dimension::Id::NormalX,
         Dimension::Id::NormalY,
         Dimension::Id::NormalZ,
-        Dimension::Id::TextureX,
-        Dimension::Id::TextureY
     });
 }
 
@@ -96,7 +98,8 @@ point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)
 void ObjReader::newTriangle(PointViewPtr view, TRI tri)
 {
     // checks if a point exists yet, if not, adds it to the point table via addPoint()
-    auto insertPoint = [view, this](VTN vertex) {
+    auto insertPoint = [view, this](VTN vertex)
+    {
         PointId id;
         auto it = m_points.find(vertex);
         if (it == m_points.end())
@@ -117,7 +120,7 @@ void ObjReader::newTriangle(PointViewPtr view, TRI tri)
 // adds a point to the point table
 PointId ObjReader::addPoint(PointViewPtr view, VTN vertex)
 {
-    XYZ v, t, n;
+    XYZW v, t, n;
     PointRef pt = view->point(m_index);
     m_index++;
 
@@ -129,6 +132,7 @@ PointId ObjReader::addPoint(PointViewPtr view, VTN vertex)
     pt.setField(Dimension::Id::X, v.x);
     pt.setField(Dimension::Id::Y, v.y);
     pt.setField(Dimension::Id::Z, v.z);
+    pt.setField(Dimension::Id::W, v.w);
 
     int64_t textureIndex = std::get<1>(vertex) - 1;
     if (textureIndex >=  0) {
@@ -136,8 +140,9 @@ PointId ObjReader::addPoint(PointViewPtr view, VTN vertex)
             throwError("Texture vertex index '" + std::to_string(textureIndex + 1) + "' specified "
                 "for face doesn't exist.");
         t = m_textureVertices.at(textureIndex);
-        pt.setField(Dimension::Id::TextureX, t.x);
-        pt.setField(Dimension::Id::TextureY, t.y);
+        pt.setField(Dimension::Id::TextureU, t.x);
+        pt.setField(Dimension::Id::TextureV, t.y);
+        pt.setField(Dimension::Id::TextureW, t.z);
     }
 
     int64_t normalIndex = std::get<2>(vertex) - 1;
@@ -155,17 +160,34 @@ PointId ObjReader::addPoint(PointViewPtr view, VTN vertex)
 
 void ObjReader::newVertex(double x, double y, double z)
 {
-    m_vertices.push_back({x, y, z});
+    // w defaults to 1 according to https://en.wikipedia.org/wiki/Wavefront_.obj_file
+    m_vertices.push_back({x, y, z, 1});
+}
+
+void ObjReader::newVertex(double x, double y, double z, double w)
+{
+    m_vertices.push_back({x, y, z, w});
+}
+
+// undefined texture values default to 0 according to https://en.wikipedia.org/wiki/Wavefront_.obj_file
+void ObjReader::newTextureVertex(double x)
+{
+    m_textureVertices.push_back({x, 0, 0, 0});
+}
+
+void ObjReader::newTextureVertex(double x, double y)
+{
+    m_textureVertices.push_back({x, y, 0, 0});
 }
 
 void ObjReader::newTextureVertex(double x, double y, double z)
 {
-    m_textureVertices.push_back({x, y, z});
+    m_textureVertices.push_back({x, y, z, 0});
 }
 
 void ObjReader::newNormalVertex(double x, double y, double z)
 {
-    m_normalVertices.push_back({x, y, z});
+    m_normalVertices.push_back({x, y, z, 0});
 }
 
 bool ObjReader::readFace(FACE& face, PointViewPtr view)
@@ -191,44 +213,81 @@ bool ObjReader::readFace(FACE& face, PointViewPtr view)
         else if (key == "v")
         {
             // Vertex
-            double x, y, z;
-            if (Utils::fromString(fields[1], x) && Utils::fromString(fields[2], y) &&
-                Utils::fromString(fields[3], z))
-                newVertex( x, y, z );
-            else
+            size_t numDims = fields.size() - 1;
+
+            auto throwVertexError = [this, line, lineOfFile]()
             {
-                std::stringstream ss;
-                ss << "Could not convert vertex specification to double on line #"
+                std::stringstream errorMessage;
+                errorMessage << "Could not convert vertex specification to double on line #"
                     << lineOfFile << ": '" << line << "'" << std::endl;
-                throwError(ss.str());
+                throwError(errorMessage.str()); 
+            };
+
+            if(numDims < 3) {
+                throwVertexError();
+            }
+            else if(numDims == 3) {
+                double x, y, z;
+                if (Utils::fromString(fields[1], x) && Utils::fromString(fields[2], y) &&
+                    Utils::fromString(fields[3], z))
+                    newVertex(x, y, z);
+                else
+                    throwVertexError();
+            }
+            else if(numDims > 3) {
+                double x, y, z, w;
+                if (Utils::fromString(fields[1], x) && Utils::fromString(fields[2], y) &&
+                    Utils::fromString(fields[3], z) && Utils::fromString(fields[4], w))
+                    newVertex(x, y, z, w);
+                else
+                    throwVertexError();
             }
         }
         else if (key == "vt")
         {
-            // Vertex texture
-            double x, y, z;
-            if (Utils::fromString(fields[1], x) && Utils::fromString(fields[2], y) &&
-                Utils::fromString(fields[3], z))
-                newTextureVertex( x, y, z );
-            else
+            auto throwTextureError = [this, line, lineOfFile]()
             {
                 std::stringstream ss;
                 ss << "Could not convert texture vertex specification to double on line #"
                     << lineOfFile << ": '" << line << "'" << std::endl;
                 throwError(ss.str());
+            };
+            // Vertex texture
+            if(fields.size() == 4) {
+                double x, y, z;
+                if (Utils::fromString(fields[1], x) && Utils::fromString(fields[2], y) &&
+                    Utils::fromString(fields[3], z))
+                    newTextureVertex( x, y, z );
+                else
+                    throwTextureError();
             }
+            else if(fields.size() == 3) {
+                double x, y;
+                if (Utils::fromString(fields[1], x) && Utils::fromString(fields[2], y))
+                    newTextureVertex( x, y );
+                else
+                    throwTextureError();
+            }
+            else if(fields.size() == 2) {
+                double x;
+                if (Utils::fromString(fields[1], x))
+                    newTextureVertex( x );
+                else
+                    throwTextureError();
+            }
+
         }
         else if (key == "vn")
         {
             // Vertex normal
             double x, y, z;
-            if (Utils::fromString(fields[1], x) && Utils::fromString(fields[2], y) &&
-                Utils::fromString(fields[3], z))
+            if (fields.size() >= 4 && Utils::fromString(fields[1], x) &&
+                Utils::fromString(fields[2], y) && Utils::fromString(fields[3], z))
                 newNormalVertex( x, y, z );
             else
             {
                 std::stringstream ss;
-                ss << "Could not convert texture vertex specification to double on line #"
+                ss << "Could not convert normal vertex specification to double on line #"
                     << lineOfFile << ": '" << line << "'" << std::endl;
                 throwError(ss.str());
             }
