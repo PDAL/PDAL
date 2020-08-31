@@ -733,21 +733,6 @@ TEST(GDALWriterTest, issue_2074)
     EXPECT_EQ(raster3.height(), 7);
 }
 
-TEST(GDALWriterTest, issue_2095)
-{
-    GDALGrid grid(0, 0, 5, 5, 1, .7, GDALGrid::statCount | GDALGrid::statMin, 0, 1.0);
-
-    //ABELL
-    /**
-    EXPECT_EQ(grid.verticalIndex(0), 4);
-    EXPECT_EQ(grid.verticalIndex(.5), 4);
-    EXPECT_EQ(grid.verticalIndex(1), 3);
-    EXPECT_EQ(grid.verticalIndex(1.5), 3);
-    EXPECT_EQ(grid.verticalIndex(4), 0);
-    EXPECT_EQ(grid.verticalIndex(4.5), 0);
-    **/
-}
-
 // If the radius is sufficiently large, make sure the grid is filled.
 TEST(GDALWriterTest, issue_2545)
 {
