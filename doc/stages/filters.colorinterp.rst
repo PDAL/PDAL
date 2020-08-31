@@ -151,6 +151,4 @@ _`mad_multiplier`
 
 .. include:: filter_opts.rst
 
-.. include:: filter_opts.rst
-
 .. _`GDAL`: http://www.gdal.org

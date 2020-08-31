@@ -96,5 +96,3 @@ layer
 
 .. include:: filter_opts.rst
 
-.. include:: filter_opts.rst
-

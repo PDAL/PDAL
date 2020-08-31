@@ -123,8 +123,6 @@ optimized
 
 .. include:: filter_opts.rst
 
-.. include:: filter_opts.rst
-
 .. _dimensionality:
 
 Dimensionality feature set
