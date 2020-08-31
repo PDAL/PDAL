@@ -8,7 +8,7 @@ PDAL - Point Data Abstraction Library
    :alt: PDAL logo
    :align: right
 
-PDAL is a C++ `BSD`_ library for translating and manipulating `point cloud
+PDAL is a C++ library for translating and manipulating `point cloud
 data`_.  It is very much like the `GDAL`_ library which handles raster and
 vector data.  The :ref:`about` page provides high level overview of the library
 and its philosophy. Visit :ref:`readers` and :ref:`writers` to list data
@@ -89,6 +89,7 @@ Drivers
    :glob:
 
    pipeline
+   stages/stages
    stages/readers
    stages/writers
    stages/filters

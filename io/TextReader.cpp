@@ -157,7 +157,8 @@ void TextReader::parseUnquotedHeader(const std::string& header)
     {
         // Scan string for some character not a number or letter.
         for (size_t i = 0; i < header.size(); ++i)
-            if (isspecial(header[i]))
+            // Parenthesis around special to prevent macro expansion, see #3190
+            if ((isspecial)(header[i]))
             {
                 m_separator = header[i];
                 break;

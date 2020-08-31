@@ -5,7 +5,7 @@
 
 // See http://www.boost.org/libs/iostreams for documentation.
 
-// Recent changes to Boost.Optional involving assigment broke Boost.Iostreams,
+// Recent changes to Boost.Optional involving assignment broke Boost.Iostreams,
 // in a way which could be remedied only by relying on the deprecated reset
 // functions; with VC6, even reset didn't work. Until this problem is 
 // understood, Iostreams will use a private version of optional with a smart 

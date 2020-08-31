@@ -216,7 +216,7 @@ bool BpfHeader::write(OLeStream& stream)
 }
 
 
-bool BpfHeader::readDimensions(ILeStream& stream, BpfDimensionList& dims)
+bool BpfHeader::readDimensions(ILeStream& stream, BpfDimensionList& dims, bool fixNames)
 {
     size_t staticCnt = m_staticDims.size();
 
@@ -248,7 +248,7 @@ bool BpfHeader::readDimensions(ILeStream& stream, BpfDimensionList& dims)
     bool x = false;
     bool y = false;
     bool z = false;
-    for (auto d : dims)
+    for (auto& d : dims)
     {
         if (d.m_label == "X")
             x = true;
@@ -256,6 +256,9 @@ bool BpfHeader::readDimensions(ILeStream& stream, BpfDimensionList& dims)
             y = true;
         if (d.m_label == "Z")
             z = true;
+
+        if (fixNames)
+            d.m_label = Dimension::fixName(d.m_label);
     }
     if (!x || !y || !z)
         throw error("BPF file missing at least one of X, Y or Z dimensions.");

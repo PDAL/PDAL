@@ -12,7 +12,7 @@ given a ``TreeID`` of 0.
 .. note::
 
   The filter differs only slightly from the paper in the addition of a few
-  conditions on size of tree, minimm height above ground for tree seeding, and
+  conditions on size of tree, minimum height above ground for tree seeding, and
   flexible radius for non-tree seed insertion.
 
 .. embed::

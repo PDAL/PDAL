@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2018, Hobu Inc. (info@hobu.co)
+* Copyright (c) 2020, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -34,38 +34,49 @@
 
 #pragma once
 
-#include <string>
+#include <list>
+#include <memory>
+#include <mutex>
+#include <condition_variable>
+
+#include <pdal/JsonFwd.hpp>
+#include <pdal/util/ThreadPool.hpp>
 
 namespace pdal
 {
-
-class slpk_error
+namespace i3s
 {
-public:
-    slpk_error(const std::string& error) : m_error(error)
-    {}
 
-    std::string what() const
-        { return m_error; }
+using Page = NL::json;
+using PagePtr = std::shared_ptr<NL::json>;
+using FetchFunction = std::function<std::string(std::string)>;
 
-    std::string m_error;
-};
-
-class ILeStream;
-
-class SlpkExtractor
+class PageManager
 {
+    struct PageEntry
+    {
+        int index;
+        PagePtr page;
+    };
+
 public:
-    SlpkExtractor (const std::string& filename, const std::string& directory) :
-        m_filename(filename), m_directory(directory)
-    {}
-    void extract() const;
-    
+    PageManager(int cacheSize, int threads, int indexFactor, FetchFunction fetch);
+
+    void fetchPage(int index);
+    PagePtr getPage(int index);
+
 private:
-    std::string m_filename;
-    std::string m_directory;
+    ThreadPool m_pool;
+    size_t m_cacheSize;
+    int m_indexFactor;
+    FetchFunction m_fetch;
+    std::list<PageEntry> m_cache;
+    std::mutex m_mutex;
+    std::condition_variable m_cv;
 
-    void writeFile(std::string filename, ILeStream& in, size_t count) const;
+    PagePtr getPageLocked(int index);
+    void evict();
 };
 
-} // namespace pdal
+} //namespace i3s
+} // namespace pdal 

@@ -34,6 +34,9 @@
 
 #include "EsriUtil.hpp"
 
+//ABELL
+#include <iostream>
+
 #include <nlohmann/json.hpp>
 
 #include "../lepcc/src/include/lepcc_c_api.h"
@@ -41,11 +44,17 @@
 
 namespace pdal
 {
-namespace EsriUtil
+namespace i3s
 {
 
 /*Return value of data in json format*/
 NL::json parse(const std::string& data)
+{
+    return parse(data, "Error during parsing: ");
+}
+
+
+NL::json parse(const std::string& data, const std::string& error)
 {
     NL::json j;
 
@@ -55,10 +64,9 @@ NL::json parse(const std::string& data)
         {
             j = NL::json::parse(data);
         }
-        catch (const NL::json::parse_error& err)
+        catch (const NL::json::exception& err)
         {
-            throw json_parse_error(std::string("Error during parsing: ") +
-                err.what());
+            throw EsriError(error + err.what());
         }
     }
     return j;
@@ -88,13 +96,13 @@ std::vector<lepcc::Point3D> decompressXYZ(std::vector<char>* compData)
         const lepcc::Byte* pByte = compressed;
         stat = lepcc_getPointCount(ctx, pByte, nBytes, &xyzPts);
         if (stat != (lepcc_status) lepcc::ErrCode::Ok)
-            throw decompression_error("LEPCC point count fetch failed");
+            throw EsriError("LEPCC point count fetch failed");
 
         decVec.resize(xyzPts);
         stat = lepcc_decodeXYZ(ctx, &pByte, nBytes, &xyzPts,
             (double*)(&decVec[0]));
         if (stat != (lepcc_status) lepcc::ErrCode::Ok)
-            throw decompression_error("LEPCC decompression failed");
+            throw EsriError("LEPCC decompression failed");
     }
     return decVec;
 }
@@ -125,13 +133,13 @@ std::vector<lepcc::RGB_t> decompressRGB(std::vector<char>* compData)
         const lepcc::Byte* pByte = compressed;
         stat = lepcc_getRGBCount(ctx, pByte, nBytes, &nPts);
         if (stat != (lepcc_status) lepcc::ErrCode::Ok)
-            throw decompression_error("RGB point count fetch failed");
+            throw EsriError("RGB point count fetch failed");
 
         rgbVec.resize(nPts);
         stat = lepcc_decodeRGB(
                 ctx, &pByte, nBytes, &nPts, (lepcc::Byte*)(&rgbVec[0]));
         if (stat != (lepcc_status) lepcc::ErrCode::Ok)
-            throw decompression_error("RGB decompression failed");
+            throw EsriError("RGB decompression failed");
     }
     return rgbVec;
 }
@@ -160,15 +168,15 @@ std::vector<uint16_t> decompressIntensity(std::vector<char>* compData)
         const lepcc::Byte* pByte = compressed;
         stat = lepcc_getIntensityCount(ctx, pByte, nBytes, &nPts);
         if (stat != (lepcc_status) lepcc::ErrCode::Ok)
-            throw decompression_error("Intensity point count fetch failed");
+            throw EsriError("Intensity point count fetch failed");
         intVec.resize(nPts);
         stat = lepcc_decodeIntensity(
                 ctx, &pByte, nBytes, &nPts, (unsigned short*)(&intVec[0]));
         if (stat != (lepcc_status) lepcc::ErrCode::Ok)
-            throw decompression_error("Intensity decompression failed");
+            throw EsriError("Intensity decompression failed");
     }
     return intVec;
 }
 
-} // namespace EsriUtil
+} // namespace i3s
 } // namespace pdal

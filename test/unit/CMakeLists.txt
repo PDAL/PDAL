@@ -32,6 +32,7 @@ PDAL_ADD_TEST(pdal_eigen_test
     FILES
         EigenTest.cpp
         ${PDAL_SRC_DIR}/private/MathUtils.cpp
+
     INCLUDES
         ${PDAL_VENDOR_DIR}/eigen
 )
@@ -118,6 +119,7 @@ endif()
 if (PDAL_HAVE_ZSTD)
 PDAL_ADD_TEST(pdal_zstd_test FILES ZstdTest.cpp)
 endif()
+PDAL_ADD_TEST(pdal_where_test FILES WhereTest.cpp)
 
 #
 # sources for the native io
@@ -174,7 +176,15 @@ PDAL_ADD_TEST(pdal_io_las_writer_test
         ${NLOHMANN_INCLUDE_DIR}
 )
 
+PDAL_ADD_TEST(pdal_io_obj_reader_test
+    FILES
+        io/ObjReaderTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}
+)
+
 PDAL_ADD_TEST(pdal_io_optech_test FILES io/OptechReaderTest.cpp)
+
 PDAL_ADD_TEST(pdal_io_pcd_reader_test
     FILES
         io/PcdReaderTest.cpp

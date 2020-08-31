@@ -80,9 +80,9 @@ with a 268mb :ref:`readers.las` file will take nearly 1:54.
 
     [hobu@pyro knudsen (master)]$ time ~/dev/git/pdal/bin/pdal pipeline -i striped.json
 
-    real	1m53.477s
-    user	1m20.018s
-    sys	0m33.397s
+    real    1m53.477s
+    user    1m20.018s
+    sys 0m33.397s
 
 
 Setting the ``GDAL_CACHEMAX`` variable to a size larger than the TIFF file
@@ -93,9 +93,9 @@ dramatically speeds up the color fetching:
     [hobu@pyro knudsen (master)]$ export GDAL_CACHEMAX=500
     [hobu@pyro knudsen (master)]$ time ~/dev/git/pdal/bin/pdal pipeline striped.json
 
-    real	0m19.034s
-    user	0m15.557s
-    sys	0m1.102s
+    real    0m19.034s
+    user    0m15.557s
+    sys 0m1.102s
 
 Options
 -------

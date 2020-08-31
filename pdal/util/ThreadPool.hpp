@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <cassert>
 #include <condition_variable>
 #include <functional>
 #include <queue>
@@ -44,25 +45,25 @@
 namespace pdal
 {
 
-class PDAL_DLL Pool
+class PDAL_DLL ThreadPool
 {
 public:
     // After numThreads tasks are actively running, and queueSize tasks have
     // been enqueued to wait for an available worker thread, subsequent calls
     // to Pool::add will block until an enqueued task has been popped from the
     // queue.
-    Pool(
-            std::size_t numThreads,
-            std::size_t queueSize = 1,
-            bool verbose = true)
-        : m_verbose(verbose)
-        , m_numThreads(std::max<std::size_t>(numThreads, 1))
-        , m_queueSize(std::max<std::size_t>(queueSize, 1))
+    ThreadPool(std::size_t numThreads, int64_t queueSize = -1, bool verbose = true) :
+        m_queueSize(queueSize) , m_numThreads(std::max<std::size_t>(numThreads, 1)),
+        m_verbose(verbose)
     {
+        assert(m_queueSize != 0);
         go();
     }
 
-    ~Pool() { join(); }
+    ~ThreadPool() { join(); }
+
+    ThreadPool(const ThreadPool& other) = delete;
+    ThreadPool& operator=(const ThreadPool& other) = delete;
 
     // Start worker threads.
     void go()
@@ -133,12 +134,12 @@ public:
         std::unique_lock<std::mutex> lock(m_mutex);
         if (!m_running)
         {
-            throw pdal_error("Attempted to add a task to a stopped Pool");
+            throw pdal_error("Attempted to add a task to a stopped ThreadPool");
         }
 
         m_produceCv.wait(lock, [this]()
         {
-            return m_tasks.size() < m_queueSize;
+            return m_queueSize < 0 || m_tasks.size() < (size_t)m_queueSize;
         });
 
         m_tasks.emplace(task);
@@ -156,9 +157,9 @@ private:
     // Worker thread function.  Wait for a task and run it.
     void work();
 
-    bool m_verbose;
+    int64_t m_queueSize;
     std::size_t m_numThreads;
-    std::size_t m_queueSize;
+    bool m_verbose;
     std::vector<std::thread> m_threads;
     std::queue<std::function<void()>> m_tasks;
 
@@ -171,10 +172,6 @@ private:
     mutable std::mutex m_mutex;
     std::condition_variable m_produceCv;
     std::condition_variable m_consumeCv;
-
-    // Disable copy/assignment.
-    Pool(const Pool& other);
-    Pool& operator=(const Pool& other);
 };
 
 } // namespace pdal

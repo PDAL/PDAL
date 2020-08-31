@@ -4,7 +4,7 @@ readers.terrasolid
 ==================
 
 The **Terrasolid Reader** loads points from `Terrasolid`_ files (.bin).
-It supports boths Terrasolid format 1 and format 2.
+It supports both Terrasolid format 1 and format 2.
 
 Example
 -------

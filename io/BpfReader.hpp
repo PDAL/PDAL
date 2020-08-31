@@ -54,12 +54,15 @@ namespace pdal
 
 class PDAL_DLL BpfReader : public Reader, public Streamable
 {
+    struct Args;
 public:
+    BpfReader();
+    ~BpfReader();
+
     std::string getName() const;
 
     virtual point_count_t numPoints() const
         { return (point_count_t)m_header.m_numPts; }
-    ~BpfReader();
 
 private:
     std::istream* m_istreamPtr;
@@ -79,6 +82,7 @@ private:
     std::vector<char> m_deflateBuf;
     /// Streambuf for deflated data.
     Charbuf m_charbuf;
+    std::unique_ptr<Args> m_args;
 
     // For dimension-major point-at-a-time usage.
     std::vector<std::unique_ptr<ILeStream>> m_streams;
@@ -87,6 +91,7 @@ private:
     virtual QuickInfo inspect();
     virtual void initialize();
     virtual void addDimensions(PointLayoutPtr Layout);
+    virtual void addArgs(ProgramArgs& args);
     virtual void ready(PointTableRef table);
     virtual bool processOne(PointRef& point);
     virtual point_count_t read(PointViewPtr data, point_count_t num);

@@ -52,7 +52,7 @@ if (BUILD_PGPOINTCLOUD_TESTS)
 
 	PDAL_ADD_TEST(pgpointcloudtest
         FILES
-            test/PgpointcloudWriterTest.cpp
+            test/PgpointcloudTest.cpp
         LINK_WITH
             ${reader_libname}
             ${writer_libname}

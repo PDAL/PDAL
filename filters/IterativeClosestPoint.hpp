@@ -53,8 +53,14 @@ private:
     double m_rotation_threshold;
     double m_translation_threshold;
     double m_mse_abs;
+    Arg *m_maxdistArg;
+    double m_maxdist;
+    Arg *m_matrixArg;
+    std::string m_matrixStr;
+    std::vector<double> m_vec;
 
     virtual void addArgs(ProgramArgs& args);
+    virtual void prepared(PointTableRef table);
     virtual PointViewSet run(PointViewPtr view);
     virtual void done(PointTableRef _);
     PointViewPtr icp(PointViewPtr fixed, PointViewPtr moving) const;

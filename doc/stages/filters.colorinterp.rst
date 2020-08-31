@@ -147,7 +147,9 @@ _`mad`
 
 _`mad_multiplier`
   MAD threshold multiplier. Used in conjunction with k_ to threshold the
-  diferencing. [Default: 1.4862]
+  differencing. [Default: 1.4862]
+
+.. include:: filter_opts.rst
 
 .. include:: filter_opts.rst
 

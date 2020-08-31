@@ -50,7 +50,7 @@ dimensions
     Esri name, rather than the PDAL dimension name.
 
         =============== ===============
-        Esri            Pdal
+        Esri            PDAL
         =============== ===============
         INTENSITY       Intensity
         CLASS_CODE      ClassFlags

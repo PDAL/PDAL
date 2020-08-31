@@ -83,7 +83,7 @@ private:
                        && int(OuterStride)!=Dynamic && int(OuterStride)%int(InnerPacketSize)==0
                        && (EIGEN_UNALIGNED_VECTORIZE  || int(JointAlignment)>=int(InnerRequiredAlignment)),
     MayLinearize = bool(StorageOrdersAgree) && (int(DstFlags) & int(SrcFlags) & LinearAccessBit),
-    MayLinearVectorize = bool(MightVectorize) && MayLinearize && DstHasDirectAccess
+    MayLinearVectorize = bool(MightVectorize) && MayLinearize && bool(DstHasDirectAccess)
                        && (EIGEN_UNALIGNED_VECTORIZE || (int(DstAlignment)>=int(LinearRequiredAlignment)) || MaxSizeAtCompileTime == Dynamic),
       /* If the destination isn't aligned, we have to do runtime checks and we don't unroll,
          so it's only good for large enough sizes. */
