@@ -80,7 +80,7 @@ public:
     // Compute final values after all points have been added.
     void finalize();
 
-    int width() const; 
+    int width() const;
     int height() const;
     double xOrigin() const;
     double yOrigin() const;

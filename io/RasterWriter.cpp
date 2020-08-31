@@ -122,7 +122,7 @@ void RasterWriter::done(PointTableRef table)
         {
             log()->get(LogLevel::Error) << getName() << ": Ignoring raster '" <<
                 r->name() << "'.  Raster limits don't match that of raster '" <<
-                    m_rasters.front()->name() << "'." << std::endl; 
+                    m_rasters.front()->name() << "'." << std::endl;
             continue;
         }
         rasters.push_back(r);

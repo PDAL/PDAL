@@ -36,6 +36,7 @@
 
 #include <pdal/StageFactory.hpp>
 #include <pdal/private/Raster.hpp>
+#include <pdal/private/gdal/Raster.hpp>
 
 #include "Support.hpp"
 
@@ -88,37 +89,19 @@ TEST(FaceRasterTest, basic)
     int row = 0;
     int col = 0;
 
-    size_t size = raster.width() * raster.height();
-    for (size_t i = 0; i < size; ++i)
-    {
-        std::cerr << data[i] << "\t";
-        if ((i + 1) % raster.width() == 0)
-            std::cerr << "\n";
-    }
-    std::cerr << "\n";
-
-    /**
-    PointTable t1;
-    f.prepare(t1);
-    PointViewSet s = f.execute(t1);
-    PointViewPtr v = *s.begin();
-
     const std::vector<double> expected
     {
-        0, 10, 0, 0, 0, 0,
-        0, 9, 7, 0, 0, 0,
-        10, 8, 6, 4, 0, 0,
-        6.66667, 4.66667, 2.66667, 6, 7, 0,
-        3.33333, 1.33333, 4.66667, 8, 9, 10,
-        0, 3.33333, 6.66667, 10, 0, 0 
+        -9999,   10,      -9999,   -9999,   -9999, -9999,
+        -9999,   9,       7,       -9999,   -9999, -9999,
+        10,      8,       6,       4,       -9999, -9999,
+        6.66667, 4.66667, 2.66667, 6,       7,     -9999,
+        3.33333, 1.33333, 4.66667, 8,       9,     10,
+        0,       3.33333, 6.66667, 10,      -9999, -9999
     };
-    const double *k = expected.data();
 
-    Rasterd *raster = v->raster();
-    for (int j = raster->height() - 1; j >= 0; j--)
-        for (int i = 0; i < raster->width(); ++i)
-            EXPECT_NEAR(raster->at(i, j), *k++, .00001);
-    **/
+    size_t size = raster.width() * raster.height();
+    for (size_t i = 0; i < size; ++i)
+        EXPECT_NEAR(expected[i], data[i], .00001);
 }
 
 } // namespace pdal
