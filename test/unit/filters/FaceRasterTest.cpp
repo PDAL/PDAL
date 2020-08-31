@@ -35,8 +35,7 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/StageFactory.hpp>
-//ABELL
-#include <pdal/private/gdal/Raster.hpp>
+#include <pdal/private/Raster.hpp>
 
 #include "Support.hpp"
 

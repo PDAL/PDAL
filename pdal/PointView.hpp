@@ -41,7 +41,6 @@
 #include <pdal/PointLayout.hpp>
 #include <pdal/PointTable.hpp>
 #include <pdal/PointRef.hpp>
-#include <pdal/private/Raster.hpp>
 
 #include <memory>
 #include <queue>
@@ -64,6 +63,10 @@ class KD2Index;
 class KD3Index;
 class BOX2D;
 class BOX3D;
+
+struct RasterLimits;
+template <class T> class Raster;
+using Rasterd = Raster<double>;
 
 typedef std::shared_ptr<PointView> PointViewPtr;
 typedef std::set<PointViewPtr, PointViewLess> PointViewSet;

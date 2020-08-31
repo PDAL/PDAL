@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2020, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -34,38 +34,64 @@
 
 #pragma once
 
-#include <pdal/Filter.hpp>
+#include <istream>
+#include <map>
+#include <tuple>
+#include <vector>
 
-#include <cstdint>
-#include <memory>
-#include <string>
+#include <pdal/Reader.hpp>
 
 namespace pdal
 {
 
-class Options;
-class PointLayout;
-class PointView;
-
-class PDAL_DLL HAGFilter : public Filter
+class PDAL_DLL ObjReader : public Reader
 {
 public:
-    HAGFilter();
-    HAGFilter& operator=(const HAGFilter&) = delete;
-    HAGFilter(const HAGFilter&) = delete;
-
     std::string getName() const;
 
 private:
-    virtual void addArgs(ProgramArgs& args);
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void prepared(PointTableRef table);
-    virtual void filter(PointView& view);
+    /**
+      Retrieve summary information for the file. NOTE - entire file must
+      be read to retrieve summary for obj files.
 
-    bool m_allowExtrapolation;
-    bool m_delaunay;
-    double m_maxDistance;
-    point_count_t m_count;
+      \param table  Point table being initialized.
+    */
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void ready(PointTableRef table);
+    virtual point_count_t read(PointViewPtr view, point_count_t numPts);
+
+private:
+    struct XYZW
+    {
+        double x;
+        double y;
+        double z;
+        double w;
+    };
+    std::vector<XYZW> m_vertices;
+    std::vector<XYZW> m_textureVertices;
+    std::vector<XYZW> m_normalVertices;
+    TriangularMesh *m_mesh;
+    using VTN = std::tuple<int64_t, int64_t, int64_t>;
+    std::map<VTN, PointId> m_points;
+    std::istream *m_istream;
+    point_count_t m_index;
+
+    using TRI = std::array<VTN, 3>;
+    using FACE = std::vector<VTN>;
+
+    void newVertex(double x, double y, double z);
+    void newVertex(double x, double y, double z, double w);
+    void newTextureVertex(double x);
+    void newTextureVertex(double x, double y);
+    void newTextureVertex(double x, double y, double z);
+    void newNormalVertex(double x, double y, double z);
+    void newTriangle(PointViewPtr view, TRI tri);
+    bool readFace(FACE& vertices, PointViewPtr view);
+    void extractFace(StringList fields, FACE& face);
+    VTN extractVertex(const std::string& vstring);
+    std::vector<TRI> triangulate(FACE face);
+    PointId addPoint(PointViewPtr view, VTN vertex);
 };
 
 } // namespace pdal

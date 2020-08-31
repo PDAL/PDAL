@@ -43,27 +43,6 @@
 namespace pdal
 {
 
-namespace
-{
-
-const std::vector<std::string> protocols { "i3s" };
-
-std::string getDriverProtocol(std::string filename)
-{
-    const auto protocol = std::find_if(protocols.begin(), protocols.end(),
-            [&filename](std::string protocol)
-            {
-                const std::string search(protocol + "://");
-                return Utils::startsWith(filename, search);
-            });
-
-    if (protocol != protocols.end())
-        return *protocol;
-    return "";
-}
-
-}
-
 /**
   Find the default reader for a file.
 
@@ -74,16 +53,14 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
 {
     std::string ext;
 
-    if (Utils::endsWith(filename, "ept.json"))
+    if (Utils::endsWith(filename, "ept.json") || Utils::startsWith(filename, "ept://"))
         return "readers.ept";
+    if (Utils::startsWith(filename, "i3s://"))
+        return "readers.i3s";
 
-    const std::string driverProtocol = getDriverProtocol(filename);
-    if (!driverProtocol.empty())
-        ext = "." + driverProtocol;
-    else
-        ext = FileUtils::extension(filename);
+    ext = FileUtils::extension(filename);
     // Strip off '.' and make lowercase.
-    if (ext.length())
+    if (ext.length() > 1)
         ext = Utils::tolower(ext.substr(1));
 
     return PluginManager<Stage>::extensions().defaultReader(ext);
@@ -98,8 +75,6 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
 */
 std::string StageFactory::inferWriterDriver(const std::string& filename)
 {
-    const std::string driverProtocol = getDriverProtocol(filename);
-
     std::string lFilename = Utils::tolower(filename);
     if (lFilename == "devnull" || lFilename == "/dev/null")
         return "writers.null";
@@ -107,12 +82,10 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
     std::string ext;
     if (lFilename == "stdout")
         ext = ".txt";
-    else if (!driverProtocol.empty())
-        ext = "." + driverProtocol;
     else
         ext = Utils::tolower(FileUtils::extension(lFilename));
     // Strip off '.' and make lowercase.
-    if (ext.length())
+    if (ext.length() > 1)
         ext = Utils::tolower(ext.substr(1));
 
     return PluginManager<Stage>::extensions().defaultWriter(ext);

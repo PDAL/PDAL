@@ -58,7 +58,7 @@ std::string LOFFilter::getName() const
 
 void LOFFilter::addArgs(ProgramArgs& args)
 {
-    args.add("minpts", "Minimum number of points", m_minpts, 10);
+    args.add("minpts", "Minimum number of points", m_minpts, (size_t)10);
 }
 
 void LOFFilter::addDimensions(PointLayoutPtr layout)
@@ -82,12 +82,22 @@ void LOFFilter::filter(PointView& view)
     // First pass: Compute the k-distance for each point.
     // The k-distance is the Euclidean distance to k-th nearest neighbor.
     log()->get(LogLevel::Debug) << "Computing k-distances...\n";
+
+    typedef std::pair<PointId, size_t> PointIdKPair;
+    typedef std::pair<PointId, double> PointIdDistPair;
+    typedef std::map<PointIdKPair, PointIdDistPair> AdjacencyMap;
+    AdjacencyMap mat;
+
     for (PointId i = 0; i < view.size(); ++i)
     {
         PointIdList indices(m_minpts);
         std::vector<double> sqr_dists(m_minpts);
         index.knnSearch(i, m_minpts, &indices, &sqr_dists);
-        view.setField(m_kdist, i, std::sqrt(sqr_dists[m_minpts-1]));
+
+        for (size_t j = 0; j < m_minpts; ++j)
+            mat[std::make_pair(i, j)] = std::make_pair(indices[j], std::sqrt(sqr_dists[j]));
+
+        view.setField(m_kdist, i, std::sqrt(sqr_dists[m_minpts - 1]));
     }
 
     // Second pass: Compute the local reachability distance for each point.
@@ -98,15 +108,13 @@ void LOFFilter::filter(PointView& view)
     log()->get(LogLevel::Debug) << "Computing lrd...\n";
     for (PointId i = 0; i < view.size(); ++i)
     {
-        PointIdList indices(m_minpts);
-        std::vector<double> sqr_dists(m_minpts);
-        index.knnSearch(i, m_minpts, &indices, &sqr_dists);
         double M1 = 0.0;
         point_count_t n = 0;
-        for (PointId j = 0; j < indices.size(); ++j)
+        for (size_t j = 0; j < m_minpts; ++j)
         {
-            double k = view.getFieldAs<double>(m_kdist, indices[j]);
-            double reachdist = (std::max)(k, std::sqrt(sqr_dists[j]));
+            auto val = mat[std::make_pair(i, j)];
+            double k = view.getFieldAs<double>(m_kdist, val.first);
+            double reachdist = (std::max)(k, val.second);
             M1 += (reachdist - M1) / ++n;
         }
         view.setField(m_lrd, i, 1.0 / M1);
@@ -118,14 +126,12 @@ void LOFFilter::filter(PointView& view)
     for (PointId i = 0; i < view.size(); ++i)
     {
         double lrdp = view.getFieldAs<double>(m_lrd, i);
-        PointIdList indices(m_minpts);
-        std::vector<double> sqr_dists(m_minpts);
-        index.knnSearch(i, m_minpts, &indices, &sqr_dists);
         double M1 = 0.0;
         point_count_t n = 0;
-        for (auto const& j : indices)
+        for (size_t j = 0; j < m_minpts; ++j)
         {
-            M1 += (view.getFieldAs<double>(m_lrd, j) / lrdp - M1) / ++n;
+            auto val = mat[std::make_pair(i, j)];
+            M1 += (view.getFieldAs<double>(m_lrd, val.first) / lrdp - M1) / ++n;
         }
         view.setField(m_lof, i, M1);
     }

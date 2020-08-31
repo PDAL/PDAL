@@ -50,6 +50,8 @@ _`capacity`
   Maximum number of points in each output view.  Views will contain
   approximately equal numbers of points.  [Default: none]
 
+.. include:: filter_opts.rst
+
 .. warning::
 
     You must specify exactly one of either count_ or capacity_.

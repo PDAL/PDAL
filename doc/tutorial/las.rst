@@ -298,9 +298,9 @@ Extra Dimensions
 
 A LAS Point Format ID defines the fixed set of
 :ref:`dimensions <dimensions>` a file must
-store, but softwares are allowed to store extra data beyond that fixed set.
+store, but programs are allowed to store extra data beyond that fixed set.
 This feature of the format was regularized in LAS 1.4 as something called
-"extra bytes" or "extra dims", but previos versions can
+"extra bytes" or "extra dims", but previous versions can
 also store these extra per-point attributes.
 
 Extra Dimension Example
@@ -397,7 +397,7 @@ LAS stores coordinates as 32 bit integers. It is the user's responsibility to
 ensure that the coordinate domain required by the data in the file fits within
 the 32 bit integer domain.  Most coordinate values have digits to the right
 of the decimal point that must be preserved for sufficient accuracy.
-Using the scale factor allows for integers to be interprested as floating
+Using the scale factor allows for integers to be interpreted as floating
 point values when read by software.
 
 When writing data to LAS, choosing an appropriate scale factor should take

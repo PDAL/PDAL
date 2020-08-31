@@ -45,7 +45,7 @@ Invoke the following command, substituting accordingly, in your `Conda Shell`:
     :linenos:
 
 .. literalinclude:: ./meshing-win.txt
-    :linenos:    
+    :linenos:
 
 .. image:: ../../../images/meshing.png
     :target: ../../../../_images/meshing.png
@@ -60,7 +60,7 @@ Filtering
 ................................................................................
 
 If we want to just mesh a building, or just terrain, or both we can apply a `range`
-filter based on point classification. These data have ground labelled as class 2,
+filter based on point classification. These data have ground labeled as class 2,
 and buildings as 6.
 
 In this exercise we will create a poisson mesh surface of a building and the ground

@@ -57,3 +57,6 @@ _`knn`
 
 _`thresh`
   The threshold used to identify nonzero singular values. [Default: 0.01]
+
+.. include:: filter_opts.rst
+

@@ -34,6 +34,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include <pdal/Stage.hpp>
 
 namespace pdal
@@ -46,23 +48,39 @@ class FilterWrapper;
 class PDAL_DLL Filter : public virtual Stage
 {
     friend class FilterWrapper;
+
+    struct Args;
+
 public:
-    Filter()
-        {}
+    enum class WhereMergeMode
+    {
+        True,
+        False,
+        Auto
+    };
+
+    Filter();
+    ~Filter();
+
+    Filter& operator=(const Filter&) = delete;
+    Filter(const Filter&) = delete;
+
+    void splitView(const PointViewPtr& views, PointViewPtr& keeps, PointViewPtr& skips);
+    WhereMergeMode mergeMode() const;
+    bool eval(PointRef& p) const;
 
 private:
-    virtual PointViewSet run(PointViewPtr view)
-    {
-        PointViewSet viewSet;
-        filter(*view);
-        viewSet.insert(view);
-        return viewSet;
-    }
+    virtual void l_initialize(PointTableRef table) final;
+    virtual void l_addArgs(ProgramArgs& args) final;
+    virtual void l_prepared(PointTableRef table) final;
+    virtual PointViewSet run(PointViewPtr view);
     virtual void filter(PointView& /*view*/)
     {}
 
-    Filter& operator=(const Filter&); // not implemented
-    Filter(const Filter&); // not implemented
+    friend PDAL_DLL std::istream& operator>>(std::istream& in, Filter::WhereMergeMode& mode);
+    friend PDAL_DLL std::ostream& operator<<(std::ostream& out, const Filter::WhereMergeMode& mode);
+
+    std::unique_ptr<Args> m_args;
 };
 
 }  // namespace pdal

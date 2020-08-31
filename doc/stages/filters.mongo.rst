@@ -51,10 +51,12 @@ Options
 -------
 
 expression
-    A JSON query :ref:`expression` containing a combination of query comparisons
+    A JSON query :ref:`expression <Mongo expression>` containing a combination of query comparisons
     and logical operators.
 
-.. _expression:
+.. include:: filter_opts.rst
+
+.. _Mongo expression:
 
 Expression
 --------------------------------------------------------------------------------

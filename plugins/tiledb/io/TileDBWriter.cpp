@@ -83,8 +83,8 @@ std::string attributeDefaults(R"(
         {"compression": "gzip", "compression_level": 9}
     ],
     "Intensity":{"compression": "bzip2", "compression_level": 5},
-    "ReturnNumber": {"compression": "zstd", "compression_level": 75},
-    "NumberOfReturns": {"compression": "zstd", "compression_level": 75},
+    "ReturnNumber": {"compression": "zstd", "compression_level": 7},
+    "NumberOfReturns": {"compression": "zstd", "compression_level": 7},
     "ScanDirectionFlag": {"compression": "bzip2", "compression_level": 5},
     "EdgeOfFlightLine": {"compression": "bzip2", "compression_level": 5},
     "Classification": {"compression": "gzip", "compression_level": 9},
@@ -96,7 +96,7 @@ std::string attributeDefaults(R"(
     "Blue": {"compression": "rle"},
     "GpsTime": [
         {"compression": "bit-shuffle"},
-        {"compression": "zstd", "compression_level": 75}
+        {"compression": "zstd", "compression_level": 7}
     ]
 })");
 

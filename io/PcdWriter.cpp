@@ -57,6 +57,9 @@ std::string PcdWriter::getName() const
     return s_info.name;
 }
 
+PcdWriter::PcdWriter()
+{}
+
 void PcdWriter::addArgs(ProgramArgs& args)
 {
     args.add("filename", "PCD output filename", m_filename).setPositional();

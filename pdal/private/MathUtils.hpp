@@ -43,6 +43,7 @@
 #endif
 
 #include <Eigen/Dense>
+#include <Eigen/Geometry>
 
 #if (__GNUC__ > 9)
 #pragma GCC diagnostic pop
@@ -95,6 +96,16 @@ double barycentricInterpolation(double x1, double y1, double z1,
 */
 Eigen::Vector3d computeCentroid(const PointView& view,
     const PointIdList& ids);
+
+/**
+    Rotate a point using the given quaternion.
+    NOTE: quaternion must be normalized before this call.
+
+    \param p     Point to rotate about origin.
+    \param quat  Quaternion specification for rotation.
+    \return  Coordinates of rotated point.
+*/
+Eigen::Vector3d rotate(const Eigen::Vector3d& p, const Eigen::Quaterniond& rot);
 
 /**
   Compute the covariance matrix of a collection of points.

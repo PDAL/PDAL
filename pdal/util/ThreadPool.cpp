@@ -32,12 +32,12 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "Pool.hpp"
+#include "ThreadPool.hpp"
 
 namespace pdal
 {
 
-void Pool::work()
+void ThreadPool::work()
 {
     while (true)
     {
@@ -59,6 +59,10 @@ void Pool::work()
             m_produceCv.notify_all();
 
             std::string err;
+
+            task();
+
+            /**
             try
             {
                 task();
@@ -71,6 +75,7 @@ void Pool::work()
             {
                 err = "Unknown error";
             }
+            **/
 
             lock.lock();
             --m_outstanding;

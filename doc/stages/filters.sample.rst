@@ -28,3 +28,6 @@ Options
 
 radius
   Minimum distance between samples. [Default: 1.0]
+
+.. include:: filter_opts.rst
+

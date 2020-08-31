@@ -47,3 +47,5 @@ offset
 limit
   Point index at which sampling should stop (exclusive).  [Default: No limit]
 
+.. include:: filter_opts.rst
+

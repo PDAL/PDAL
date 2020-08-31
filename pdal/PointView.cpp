@@ -38,6 +38,8 @@
 #include <pdal/PointView.hpp>
 #include <pdal/util/Algorithm.hpp>
 
+#include "private/Raster.hpp"
+
 namespace pdal
 {
 

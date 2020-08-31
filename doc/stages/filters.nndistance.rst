@@ -41,3 +41,5 @@ _`mode`
 _`k`
   The number of k nearest neighbors to consider. [Default: **10**]
 
+.. include:: filter_opts.rst
+
