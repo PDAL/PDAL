@@ -185,3 +185,35 @@ TEST(TextWriterTest, precision)
     EXPECT_NE(out.find("3,3,3,3"), std::string::npos);
 }
 
+TEST(TextWriterTest, geojson)
+{
+    std::string outfile(Support::temppath("utm17.geojson"));
+    std::string comparefile(Support::datapath("text/utm17_1.geojson"));
+    std::string infile(Support::datapath("text/utm17_1.txt"));
+
+    FileUtils::deleteFile(outfile);
+
+    TextReader r;
+    Options ro;
+
+    ro.add("filename", infile);
+    r.setOptions(ro);
+
+    TextWriter w;
+    Options wo;
+
+    wo.add("filename", outfile);
+    wo.add("format", "geojson");
+    wo.add("order", "X,Y,Z");
+    wo.add("write_header", true);
+    wo.add("precision", 2);
+    w.setOptions(wo);
+    w.setInput(r);
+
+    PointTable t;
+
+    w.prepare(t);
+    w.execute(t);
+
+    EXPECT_EQ(Support::compare_text_files(comparefile, outfile), true);
+}
