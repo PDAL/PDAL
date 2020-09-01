@@ -31,6 +31,7 @@ dimension type, while others only understand fixed dimension names.
    writers.pcd
    writers.pgpointcloud
    writers.ply
+   writers.raster
    writers.sbet
    writers.sqlite
    writers.text
@@ -84,6 +85,9 @@ dimension type, while others only understand fixed dimension names.
 
 :ref:`writers.ply`
     Write points as PLY vertices. Can also emit a mesh as a set of faces.
+
+:ref:`writers.raster`
+    Writes rasters using GDAL. Rasters must be created using a PDAL filter.
 
 :ref:`writers.sbet`
     Write data in the SBET format.
