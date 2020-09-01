@@ -8,7 +8,7 @@ normalize common dimension types, like X, Y, Z, or Intensity, which are often
 found in LiDAR point clouds. Not all dimension types need to be fixed, however.
 Database drivers typically return unstructured lists of dimensions.  A reader
 might provide a simple file type, like :ref:`readers.text`, a complex database
-like :ref:`readers.oci`, or a network service like :ref:`readers.ept`.
+like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
 
 
 .. toctree::
@@ -111,7 +111,7 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.ept`.
     Read point cloud data from Numpy ``.npy`` files.
 
 :ref:`readers.oci`
-    Read data from Oracle point cloud databases.
+    Read data from Oracle point cloud databases. [deprecated]
 
 :ref:`readers.optech`
     Read Optech Corrected Sensor Data (.csd) files.

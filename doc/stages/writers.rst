@@ -71,7 +71,7 @@ dimension type, while others only understand fixed dimension names.
     output to /dev/null.
 
 :ref:`writers.oci`
-    Write data to Oracle point cloud databases.
+    Write data to Oracle point cloud databases. [deprecated]
 
 :ref:`writers.ogr`
     Write a point cloud as a set of OGR points/multipoints
