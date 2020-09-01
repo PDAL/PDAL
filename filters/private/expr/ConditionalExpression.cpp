@@ -15,7 +15,7 @@ Utils::StatusWithReason ConditionalExpression::prepare(PointLayoutPtr layout)
         {
             if (top->isValue())
                 status =
-                    { -1, "Expression evalutes to a value, not a boolean." };
+                    { -1, "Expression evaluates to a value, not a boolean." };
             else
             {
                 ConstLogicalNode *n = dynamic_cast<ConstLogicalNode *>(top);
