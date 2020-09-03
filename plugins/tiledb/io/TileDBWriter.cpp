@@ -328,7 +328,9 @@ void TileDBWriter::initialize()
             {
                 opts = m_args->m_defaults["coords"];
             }
-
+#if TILEDB_VERSION_MAJOR > 1
+            m_schema->set_allows_dups(true);
+#endif
             m_schema->set_coords_filter_list(
                 *createFilterList(*m_ctx, opts));
         }
