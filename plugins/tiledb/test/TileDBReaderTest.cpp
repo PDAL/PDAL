@@ -193,11 +193,9 @@ class TileDBReaderTest : public ::testing::Test
         c.setInput(reader);
         c.prepare(table);
         c.execute(table);
-        // test using a sidecar file
-        EXPECT_EQ(reader.getSpatialReference(), utm16);
+        EXPECT_TRUE(reader.getSpatialReference().equals(utm16));
     }
 
-#if TILEDB_VERSION_MAJOR >= 1 && TILEDB_VERSION_MINOR >= 7
     TEST_F(TileDBReaderTest, spatial_reference)
     {
         tiledb::Context ctx;
@@ -233,8 +231,7 @@ class TileDBReaderTest : public ::testing::Test
         FixedPointTable table2(100);
         rdr.prepare(table2);
         rdr.execute(table2);
-        EXPECT_EQ(rdr.getSpatialReference(), utm16);
+        EXPECT_TRUE(rdr.getSpatialReference().equals(utm16));
     }
-#endif
 }
 

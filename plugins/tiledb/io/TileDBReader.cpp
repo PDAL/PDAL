@@ -295,7 +295,7 @@ void TileDBReader::localReady()
     // read spatial reference
     NL::json meta = nullptr;
 
-#if TILEDB_VERSION_MAJOR >= 1 && TILEDB_VERSION_MINOR >= 7
+#if TILEDB_VERSION_MAJOR > 1 || TILEDB_VERSION_MINOR >= 7
     tiledb_datatype_t v_type = TILEDB_UINT8;
     const void* v_r;
     uint32_t v_num;
@@ -310,7 +310,7 @@ void TileDBReader::localReady()
         tiledb::VFS::filebuf fbuf(vfs);
         std::string metaFName = m_filename + pathSeparator + "pdal.json";
 
-        if (vfs.is_dir(m_filename))
+        if (vfs.is_file(metaFName))
         {
             auto nBytes = vfs.file_size(metaFName);
             tiledb::VFS::filebuf fbuf(vfs);
