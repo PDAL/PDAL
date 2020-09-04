@@ -97,6 +97,8 @@ Enhancements
    directory.
 -  ``filters.assign`` added the ``value`` option to allow standard
    expression-based conditional assignment of values.(#1468)
+- ``readers.tiledb`` and ``writers.tiledb`` now support TileDB version
+  2 and duplicate points when using version 2 of TileDB. (#3030, #3047)
 
 Bug Fixes
 =========
