@@ -85,6 +85,13 @@ LasHeader::LasHeader() : m_fileSig(FILE_SIGNATURE), m_sourceId(0),
 }
 
 
+void LasHeader::initialize(LogPtr log, uintmax_t fileSize)
+{
+    m_log = log;
+    m_fileSize = fileSize;
+}
+
+
 void LasHeader::setSummary(const LasSummaryData& summary)
 {
     m_pointCount = summary.getTotalNumPoints();
@@ -381,12 +388,22 @@ ILeStream& operator>>(ILeStream& in, LasHeader& h)
             in >> h.m_pointCountByReturn[i];
     }
 
+    if (!h.compressed() && h.m_pointOffset > h.m_fileSize)
+        throw LasHeader::error("Invalid point offset - exceeds file size.");
+    if (!h.compressed() && h.m_pointOffset + h.m_pointCount * h.m_pointLen > h.m_fileSize)
+        throw LasHeader::error("Invalid point count. Number of points exceeds file size.");
+    if (h.m_vlrOffset > h.m_fileSize)
+        throw LasHeader::error("Invalid VLR offset - exceeds file size.");
+    if (h.m_eVlrOffset > h.m_fileSize)
+        throw LasHeader::error("Invalid extended VLR offset - exceeds file size.");
+
     // Read regular VLRs.
     in.seek(h.m_vlrOffset);
     for (size_t i = 0; i < h.m_vlrCount; ++i)
     {
         LasVLR r;
-        in >> r;
+        if (!r.read(in, h.m_pointOffset))
+            throw LasHeader::error("Invalid VLR - exceeds specified file range.");
         h.m_vlrs.push_back(std::move(r));
     }
 
@@ -397,7 +414,8 @@ ILeStream& operator>>(ILeStream& in, LasHeader& h)
         for (size_t i = 0; i < h.m_eVlrCount; ++i)
         {
             ExtLasVLR r;
-            in >> r;
+            if (!r.read(in, h.m_fileSize))
+                throw LasHeader::error("Invalid Extended VLR size - exceeds file size.");
             h.m_vlrs.push_back(std::move(r));
         }
     }
