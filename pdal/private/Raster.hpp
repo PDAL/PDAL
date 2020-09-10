@@ -49,7 +49,7 @@ public:
         xOrigin(xOrigin), yOrigin(yOrigin), width(width), height(height), edgeLength(edgeLength)
     {}
 
-    RasterLimits()
+    RasterLimits() : xOrigin(0), yOrigin(0), width(-1), height(-1), edgeLength(0)
     {}
 
     void addArgs(ProgramArgs& args)
@@ -61,7 +61,10 @@ public:
          m_heightArg = &args.add("height", "Number of cells in the Y direction", height);
     }
 
-    int checkArgs()
+    bool valid() const
+        { return width > 0; }
+
+    int checkArgs() const
     {
         int args = 0;
         if (m_xOriginArg->set())
@@ -89,6 +92,17 @@ private:
     Arg *m_heightArg;
 };
 
+inline bool operator==(const RasterLimits& l, const RasterLimits& r)
+{
+    return l.xOrigin == r.xOrigin && l.yOrigin == r.yOrigin &&
+        l.width == r.width && l.height == r.height &&
+        l.edgeLength == r.edgeLength;
+}
+
+inline bool operator!=(const RasterLimits& l, const RasterLimits& r)
+{ return !(l == r); }
+
+
 // This is a raw raster suitable for sticking into GDAL. X goes right to left, Y goes from
 // top to bottom.
 template <typename T>
@@ -99,12 +113,23 @@ public:
     using iterator = typename DataVec::iterator;
     using const_iterator = typename DataVec::const_iterator;
 
-    Raster(const T& initializer = T()) : m_initializer(initializer)
+    Raster(const T& initializer = T()) : Raster("", initializer)
     {}
 
-    Raster(const RasterLimits& limits, const T& initializer = T()) :
-        m_limits(limits), m_data(width() * height(), initializer), m_initializer(initializer)
+    Raster(const std::string& name, const T& initializer = T()) :
+        m_name(name), m_initializer(initializer)
     {}
+
+    Raster(const RasterLimits& limits, const T& initializer = T()) : Raster(limits, "", initializer)
+    {}
+
+    Raster(const RasterLimits& limits, const std::string& name, const T& initializer = T()) :
+        m_name(name), m_limits(limits), m_data(width() * height(), initializer),
+        m_initializer(initializer)
+    {}
+
+    std::string name() const
+        { return m_name; }
 
     int width() const
         { return m_limits.width; }
@@ -120,6 +145,9 @@ public:
 
     double yOrigin() const
         { return m_limits.yOrigin; }
+
+    T initializer() const
+        { return m_initializer; }
 
     int xCell(double x) const
         { return std::floor((x - m_limits.xOrigin) / m_limits.edgeLength); }
@@ -181,6 +209,7 @@ public:
         { return m_data.size(); }
 
 private:
+    std::string m_name;
     RasterLimits m_limits;
     DataVec m_data;
     T m_initializer;

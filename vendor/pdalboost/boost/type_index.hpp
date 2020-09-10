@@ -234,7 +234,7 @@ inline type_index type_id_with_cvr() BOOST_NOEXCEPT {
 
 /// Function that works exactly like C++ typeid(rtti_val) call, but returns pdalboost::type_index.
 ///
-/// Retunrs runtime information about specified type.
+/// Returns runtime information about specified type.
 ///
 /// \b Requirements: RTTI available or Base and Derived classes must be marked with BOOST_TYPE_INDEX_REGISTER_CLASS.
 ///

@@ -58,7 +58,47 @@ static StaticPluginInfo const s_info
 
 CREATE_STATIC_STAGE(BpfReader, s_info)
 
+struct BpfReader::Args
+{
+    bool m_fixNames;
+};
+
 std::string BpfReader::getName() const { return s_info.name; }
+
+BpfReader::BpfReader() : m_args(new BpfReader::Args)
+{}
+
+
+BpfReader::~BpfReader()
+{
+#ifdef PDAL_HAVE_ZLIB
+    if (m_header.m_compression)
+    {
+        for( auto& stream: m_streams )
+        {
+            delete stream->popStream();
+        }
+    }
+#endif
+}
+
+
+void BpfReader::addArgs(ProgramArgs& args)
+{
+    args.add("fix_dims", "Make invalid dimension names valid by changing "
+        "invalid characters to '_'", m_args->m_fixNames, true);
+}
+
+
+void BpfReader::addDimensions(PointLayoutPtr layout)
+{
+    for (size_t i = 0; i < m_dims.size(); ++i)
+    {
+        BpfDimension& dim = m_dims[i];
+        dim.m_id = layout->registerOrAssignDim(dim.m_label, Dimension::Type::Float);
+    }
+}
+
 
 QuickInfo BpfReader::inspect()
 {
@@ -115,7 +155,7 @@ void BpfReader::initialize()
     {
         if (!m_header.read(m_stream))
             return;
-        if (!m_header.readDimensions(m_stream, m_dims))
+        if (!m_header.readDimensions(m_stream, m_dims, m_args->m_fixNames))
             return;
     }
     catch (const BpfHeader::error& err)
@@ -189,17 +229,6 @@ void BpfReader::initialize()
         throwError("BPF Header length exceeded that reported by file.");
     m_stream.close();
     Utils::closeFile(m_istreamPtr);
-}
-
-
-void BpfReader::addDimensions(PointLayoutPtr layout)
-{
-    for (size_t i = 0; i < m_dims.size(); ++i)
-    {
-        BpfDimension& dim = m_dims[i];
-        dim.m_id = layout->registerOrAssignDim(dim.m_label,
-            Dimension::Type::Float);
-    }
 }
 
 
@@ -402,19 +431,6 @@ point_count_t BpfReader::readPointMajor(PointViewPtr view, point_count_t count)
     return numRead;
 }
 
-
-BpfReader::~BpfReader()
-{
-#ifdef PDAL_HAVE_ZLIB
-    if (m_header.m_compression)
-    {
-        for( auto& stream: m_streams )
-        {
-            delete stream->popStream();
-        }
-    }
-#endif
-}
 
 void BpfReader::readDimMajor(PointRef& point)
 {

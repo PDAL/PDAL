@@ -11,6 +11,9 @@
 #ifndef EIGEN_CORE_H
 #define EIGEN_CORE_H
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-copy"
+
 // first thing Eigen does: stop the compiler from committing suicide
 #include "src/Core/util/DisableStupidWarnings.h"
 
@@ -533,5 +536,7 @@ using std::ptrdiff_t;
 #include "src/Core/GlobalFunctions.h"
 
 #include "src/Core/util/ReenableStupidWarnings.h"
+
+#pragma GCC diagnostic pop
 
 #endif // EIGEN_CORE_H

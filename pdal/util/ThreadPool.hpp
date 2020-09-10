@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <cassert>
 #include <condition_variable>
 #include <functional>
 #include <queue>
@@ -51,14 +52,11 @@ public:
     // been enqueued to wait for an available worker thread, subsequent calls
     // to Pool::add will block until an enqueued task has been popped from the
     // queue.
-    ThreadPool(
-            std::size_t numThreads,
-            std::size_t queueSize = 1,
-            bool verbose = true)
-        : m_verbose(verbose)
-        , m_numThreads(std::max<std::size_t>(numThreads, 1))
-        , m_queueSize(std::max<std::size_t>(queueSize, 1))
+    ThreadPool(std::size_t numThreads, int64_t queueSize = -1, bool verbose = true) :
+        m_queueSize(queueSize) , m_numThreads(std::max<std::size_t>(numThreads, 1)),
+        m_verbose(verbose)
     {
+        assert(m_queueSize != 0);
         go();
     }
 
@@ -141,7 +139,7 @@ public:
 
         m_produceCv.wait(lock, [this]()
         {
-            return m_tasks.size() < m_queueSize;
+            return m_queueSize < 0 || m_tasks.size() < (size_t)m_queueSize;
         });
 
         m_tasks.emplace(task);
@@ -159,9 +157,9 @@ private:
     // Worker thread function.  Wait for a task and run it.
     void work();
 
-    bool m_verbose;
+    int64_t m_queueSize;
     std::size_t m_numThreads;
-    std::size_t m_queueSize;
+    bool m_verbose;
     std::vector<std::thread> m_threads;
     std::queue<std::function<void()>> m_tasks;
 

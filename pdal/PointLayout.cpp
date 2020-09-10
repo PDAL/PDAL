@@ -100,6 +100,8 @@ void PointLayout::registerDim(Dimension::Id id, Dimension::Type type)
 Dimension::Id PointLayout::assignDim(const std::string& name,
     Dimension::Type type)
 {
+    if (!Dimension::nameValid(name))
+        throw pdal_error("Can't create dimension with invalid name '" + name + "'.");
     if (m_nextFree == Dimension::COUNT)
         throw pdal_error("No dimension IDs remaining for assignment.");
     Dimension::Id id = (Dimension::Id)m_nextFree;

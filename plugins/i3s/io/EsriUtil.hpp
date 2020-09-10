@@ -98,7 +98,14 @@ public:
     { return !(*this < other); }
     bool operator > (const Version& other)
     { return !(*this < other) && !(*this == other); }
+
+    friend std::ostream& operator<<(std::ostream& out, const Version & v);
 };
+inline std::ostream& operator<<(std::ostream& out, const Version & v)
+{
+    out << v.major << "." << v.minor << "." << v.patch;
+    return out;
+}
 
 class EsriError : public std::runtime_error
 {

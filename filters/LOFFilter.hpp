@@ -55,7 +55,7 @@ public:
 
 private:
     Dimension::Id m_kdist, m_lrd, m_lof;
-    int m_minpts;
+    size_t m_minpts;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);

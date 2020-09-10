@@ -102,3 +102,14 @@ that in this case the parentheses are necessary.
 
 Selects points with an X between 2500 and 4700 and a positive Y value.
 
+::
+
+    (NumberOfReturns > 1 && ReturnNumber == 1)
+
+Selects "first" returns from a laser pulse.
+
+::
+
+    !(NumberOfReturns == 1)
+
+Selects only those points where the laser pulse generated multiple returns.

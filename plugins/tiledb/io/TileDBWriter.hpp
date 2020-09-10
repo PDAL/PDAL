@@ -80,9 +80,10 @@ private:
     std::unique_ptr<tiledb::Context> m_ctx;
     std::unique_ptr<tiledb::ArraySchema> m_schema;
     std::unique_ptr<tiledb::Array> m_array;
-    std::unique_ptr<tiledb::Query> m_query;
     std::vector<DimBuffer> m_attrs;
-    std::vector<double> m_coords;
+    std::vector<double> m_xs;
+    std::vector<double> m_ys;
+    std::vector<double> m_zs;
 
     TileDBWriter(const TileDBWriter&) = delete;
     TileDBWriter& operator=(const TileDBWriter&) = delete;

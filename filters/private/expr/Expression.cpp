@@ -1,5 +1,4 @@
 #include "Expression.hpp"
-#include "Parser.hpp"
 
 namespace pdal
 {
@@ -318,25 +317,24 @@ Result VarNode::eval(PointRef& p) const
     return p.getFieldAs<double>(m_id);
 }
 
+Dimension::Id VarNode::eval() const
+{
+    return m_id;
+}
+
 Utils::StatusWithReason VarNode::prepare(PointLayoutPtr l)
 {
     m_id = l->findDim(m_name);
     if (m_id == Dimension::Id::Unknown)
-        return { -1, "Unknown dimension '" + m_name + "' in assigment." };
+        return { -1, "Unknown dimension '" + m_name + "' in assignment." };
     return true;
 }
 
 //
 // Expression
 //
-Expression::Expression()
-{}
 
-// This is a strange copy ctor that ignores the source.  At this point we
-// don't need it to do anything, but we do need the an expression to
-// be copyable.  In order to copy, we'd actually have to deep-copy the
-// nodes, but there is no way to do that right now.
-Expression::Expression(const Expression& expr)
+Expression::Expression()
 {}
 
 Expression::~Expression()
@@ -344,12 +342,44 @@ Expression::~Expression()
 
 // This is a strange copy ctor that ignores the source.  At this point we
 // don't need it to do anything, but we do need the an expression to
-// be copyable.  In order to copy, we'd actually have to deep-copy the
-// nodes, but there is no way to do that right now.
+// be copyable in order to be used by ProgramArgs.
+// In order to copy, we'd actually have to deep-copy the nodes, but there is
+// no way to do that right now.
+Expression::Expression(const Expression& expr)
+{
+    if (m_nodes.size())
+        throw pdal_error("Attempting to copy expression with nodes.");
+}
+
+// noexcept is important here. Without, vector won't call the move ctor when
+//   resizing. Instead, it will call the copy ctor, which is bad, since our
+//   copy ctor is busted.
+Expression::Expression(Expression&& expr) noexcept :
+    m_error(expr.m_error), m_nodes(std::move(expr.m_nodes))
+{}
+
+Expression& Expression::operator=(Expression&& expr)
+{
+    m_error = expr.m_error;
+    m_nodes = std::move(expr.m_nodes);
+    return *this;
+}
+
+// This is a strange assignment operator that ignores the source.  At this point we
+// don't need it to do anything, but we do need the an expression to
+// be assigned in order to be used by ProgramArgs.
+// In order to copy, we'd actually have to deep-copy the nodes, but there is
+// no way to do that right now.
 Expression& Expression::operator=(const Expression& expr)
 {
-    clear();
+    if (m_nodes.size())
+        throw pdal_error("Attempting to assign expression with nodes.");
     return *this;
+}
+
+bool Expression::valid() const
+{
+    return m_nodes.size();
 }
 
 void Expression::clear()
@@ -359,16 +389,6 @@ void Expression::clear()
     m_error.clear();
 }
 
-bool Expression::parse(const std::string& s)
-{
-    clear();
-    Parser p(*this);
-    bool ok = p.parse(s);
-    if (!ok)
-        m_error = p.error();
-    return ok;
-}
-
 std::string Expression::error() const
 {
     return m_error;
@@ -376,7 +396,9 @@ std::string Expression::error() const
 
 std::string Expression::print() const
 {
-    return m_nodes.top()->print();
+    if (m_nodes.size())
+        return m_nodes.top()->print();
+    return std::string();
 }
 
 NodePtr Expression::popNode()
@@ -391,37 +413,21 @@ void Expression::pushNode(NodePtr node)
     m_nodes.push(std::move(node));
 }
 
+Node *Expression::topNode()
+{
+    return m_nodes.size() ? m_nodes.top().get() : nullptr;
+}
+
+const Node *Expression::topNode() const
+{
+    return m_nodes.size() ? m_nodes.top().get() : nullptr;
+}
+
 Utils::StatusWithReason Expression::prepare(PointLayoutPtr layout)
 {
     if (m_nodes.size())
-    {
-        Node *top = m_nodes.top().get();
-        auto status = top->prepare(layout);
-        if (status)
-        {
-            if (top->isValue())
-                status =
-                    { -1, "Expression evalutes to a value, not a boolean." };
-            else
-            {
-                ConstLogicalNode *n = dynamic_cast<ConstLogicalNode *>(top);
-                if (n)
-                {
-                    if (n->value())
-                        status = { -1, "Expression is always true." };
-                    else
-                        status = { -1, "Expression is always false." };
-                }
-            }
-        }
-        return status;
-    }
+        return m_nodes.top()->prepare(layout);
     return true;
-}
-
-bool Expression::eval(PointRef& p) const
-{
-    return m_nodes.top()->eval(p).m_bval;
 }
 
 std::ostream& operator<<(std::ostream& out, const Expression& expr)
