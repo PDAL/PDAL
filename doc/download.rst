@@ -30,6 +30,7 @@ Past Releases
 * **2018-05-13** `PDAL-1.7.2-src.tar.gz`_
 * **2018-04-06** `PDAL-1.7.1-src.tar.gz`_
 
+.. _`PDAL-2.2.0-src.tar.gz`: https://github.com/PDAL/PDAL/releases/download/2.2.0/PDAL-2.2.0-src.tar.gz
 .. _`PDAL-2.1.0-src.tar.gz`: https://github.com/PDAL/PDAL/releases/download/2.1.0/PDAL-2.1.0-src.tar.gz
 .. _`PDAL-2.0.1-src.tar.gz`: https://github.com/PDAL/PDAL/releases/download/2.0.1/PDAL-2.0.1-src.tar.gz
 .. _`PDAL-1.9.1-src.tar.gz`: https://github.com/PDAL/PDAL/releases/download/1.9.1/PDAL-1.9.1-src.tar.gz
