@@ -3,8 +3,6 @@ name: Windows
 on:
   push:
     branches: '*'
-  pull_request:
-    branches: '*'
 
 jobs:
   build:
@@ -20,20 +18,25 @@ jobs:
       with:
         channels: conda-forge
         auto-update-conda: true
+        python-version: '3.8'
     - name: Setup
       shell: cmd /C CALL {0}
       run: |
           echo %PATH%
           cd
-          conda install -c conda-forge pdal --only-deps -y
-          conda install -c conda-forge cmake ninja compilers -y
+          where python
+          where cmake
+          conda install pdal --only-deps -y
+          conda install cmake ninja compilers -y
           mkdir build
+          cmake --version
           cd build
           cd
     - name: CMake
       shell: cmd /C CALL {0}
       run: |
           cd
+          where cmake
           set CC=cl.exe
           set CXX=cl.exe
           mkdir build
