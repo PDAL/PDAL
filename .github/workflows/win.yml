@@ -26,7 +26,7 @@ jobs:
           cd
           where python
           where cmake
-          conda activate test
+          call conda activate test
           conda install pdal --only-deps -y
           conda install cmake ninja compilers -y
           mkdir build
@@ -38,7 +38,7 @@ jobs:
       run: |
           cd
           where conda
-          conda activate test
+          call conda activate test
           where cmake
           set CC=cl.exe
           set CXX=cl.exe
@@ -84,15 +84,13 @@ jobs:
     - name: Compile
       shell: cmd /C CALL {0}
       run: |
-          conda activate test
+          call conda activate test
           ninja -v
           ninja install
-      working-directory: .\build
     - name: Test
       shell: cmd /C CALL {0}
       run: |
-          conda activate test
+          call conda activate test
           ctest -VV --output-on-failure
-      working-directory: .\build
 
 
