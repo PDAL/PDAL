@@ -41,5 +41,7 @@ raster
 band
   GDAL Band number to read (count from 1) [Default: 1]
 
+.. include:: filter_opts.rst
+
 .. _`GDAL`: http://gdal.org
 .. _`GDAL readable raster`: http://www.gdal.org/formats_list.html

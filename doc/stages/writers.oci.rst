@@ -3,6 +3,10 @@
 writers.oci
 ===========
 
+.. note::
+
+    The OCI writer is deprecated and will be removed in a future release.
+
 The OCI writer is used to write data to `Oracle point cloud`_ databases.
 
 .. plugin::
@@ -155,6 +159,8 @@ output_dims
 tolerance
   Oracle geometry tolerance. X, Y, and Z dimensions are all
   currently specified as a single value [Default: 0.05]
+
+.. include:: writer_opts.rst
 
 .. _Oracle point cloud: http://docs.oracle.com/cd/B28359_01/appdev.111/b28400/sdo_pc_pkg_ref.htm
 

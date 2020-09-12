@@ -106,6 +106,7 @@ void runGdalWriter(const Options& wo, const std::string& infile,
         raster.readBand(data, 1);
         int row = 0;
         int col = 0;
+
         for (size_t i = 0; i < arr.size(); ++i)
         {
             EXPECT_NEAR(arr[i], data[i], .001) << "Error row/col = " <<
@@ -730,18 +731,6 @@ TEST(GDALWriterTest, issue_2074)
     }
     EXPECT_EQ(raster3.width(), 7);
     EXPECT_EQ(raster3.height(), 7);
-}
-
-TEST(GDALWriterTest, issue_2095)
-{
-    GDALGrid grid(5, 5, 1, .7, GDALGrid::statCount | GDALGrid::statMin, 0, 1.0);
-
-    EXPECT_EQ(grid.verticalIndex(0), 4);
-    EXPECT_EQ(grid.verticalIndex(.5), 4);
-    EXPECT_EQ(grid.verticalIndex(1), 3);
-    EXPECT_EQ(grid.verticalIndex(1.5), 3);
-    EXPECT_EQ(grid.verticalIndex(4), 0);
-    EXPECT_EQ(grid.verticalIndex(4.5), 0);
 }
 
 // If the radius is sufficiently large, make sure the grid is filled.

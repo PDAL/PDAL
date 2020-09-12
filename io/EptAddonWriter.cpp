@@ -39,11 +39,11 @@
 #include <nlohmann/json.hpp>
 
 #include <pdal/ArtifactManager.hpp>
+#include <pdal/util/ThreadPool.hpp>
 
 #include "private/ept/Addon.hpp"
 #include "private/ept/EptArtifact.hpp"
 #include "private/ept/Connector.hpp"
-#include "private/ept/Pool.hpp"
 
 namespace pdal
 {
@@ -98,7 +98,7 @@ void EptAddonWriter::prepared(PointTableRef table)
         log()->get(LogLevel::Warning) << "Using a large thread count: " <<
             threads << " threads" << std::endl;
     }
-    m_pool.reset(new Pool(threads));
+    m_pool.reset(new ThreadPool(threads));
 
     // Note that we use a generic connector here.  In ready() we steal
     // the connector that was used in the EptReader that uses any

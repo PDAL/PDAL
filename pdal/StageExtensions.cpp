@@ -60,6 +60,7 @@ static const Extensions readerExtensions =
   { "readers.fbx", { "fbx" } },
   { "readers.slpk", { "slpk" } },
   { "readers.i3s", { "i3s" } },
+  { "readers.obj", { "obj" } },
   { "readers.e57", { "e57" } }
 };
 

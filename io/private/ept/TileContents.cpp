@@ -131,9 +131,8 @@ void TileContents::readZstandard()
     transform();
 }
 #else
-void TileContents::readZstandard() const
-{
-}
+void TileContents::readZstandard()
+{}
 #endif // PDAL_HAVE_ZSTD
 
 void TileContents::readAddon(const Addon& addon)

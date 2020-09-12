@@ -74,12 +74,16 @@ _`coord_op`
   multiple step string starting with +proj=pipeline),
   a WKT2 string describing a CoordinateOperation,
   or a “urn:ogc:def:coordinateOperation:EPSG::XXXX” URN.
+
 _`reverse_transfo`
   Boolean, Whether the coordinate operation should be evaluated
   in the reverse path [Default: false]
+
 _`out_srs`
   The spatial reference system of the file to be written.
   Can be an EPSG string (e.g. “EPSG:26910”) or a WKT string.
   No check is done to ensure the compliance with the specified coordinate
   operation [Default: Not set]
+
+.. include:: filter_opts.rst
 

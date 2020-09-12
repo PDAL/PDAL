@@ -63,5 +63,7 @@ precision
   See the `printf`_ reference for more information.
   [Default: g-style formatting (variable precision)]
 
+.. include:: writer_opts.rst
+
 .. _polygon file format: http://paulbourke.net/dataformats/ply/
 .. _printf: https://en.cppreference.com/w/cpp/io/c/fprintf

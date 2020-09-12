@@ -64,9 +64,9 @@ protected:
 private:
     std::string::size_type m_hashPos;
 
-    virtual void writerInitialize(PointTableRef table)
+    virtual void l_initialize(PointTableRef table) final
     {
-        Writer::writerInitialize(table);
+        Writer::l_initialize(table);
         try {
             m_hashPos = handleFilenameTemplate(m_filename);
         }

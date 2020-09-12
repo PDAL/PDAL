@@ -39,3 +39,5 @@ _`query`
   nearest to the location are returned.  The query_ option can't be used
   with the point_ option. [Default: no points are selected.]
 
+.. include:: filter_opts.rst
+

@@ -88,3 +88,6 @@ allow_extrapolation
     and ``delaunay`` is set, the ``HeightAboveGround`` is set to the
     difference between the heights of the non-ground point and nearest
     ground point.  [Default: false]
+
+.. include:: filter_opts.rst
+

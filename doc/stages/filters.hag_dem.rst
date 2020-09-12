@@ -82,3 +82,5 @@ zero_ground
     ``Z`` value to raster DEM.
     [Default: true]
 
+.. include:: filter_opts.rst
+

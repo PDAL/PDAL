@@ -35,6 +35,7 @@
 #include <iterator>
 
 #include <pdal/Streamable.hpp>
+#include <pdal/Filter.hpp>
 #include <pdal/Reader.hpp>
 
 namespace pdal
@@ -240,11 +241,13 @@ void Streamable::execute(StreamPointTable& table,
                 srsMap[s] = srs;
             }
             s->startLogging();
+
+            Filter *f = dynamic_cast<Filter *>(s);
             for (PointId idx = 0; idx < pointLimit; idx++)
             {
-                if (table.skip(idx))
-                    continue;
                 point.setPointId(idx);
+                if (table.skip(idx) || (f && !f->eval(point)))
+                    continue;
                 if (!s->processOne(point))
                     table.setSkip(idx);
             }

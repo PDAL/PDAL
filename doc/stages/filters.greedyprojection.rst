@@ -56,3 +56,6 @@ max_angle
 
 eps_angle
   Maximum normal difference angle for triangulation consideration. [Default: 45 degrees]
+
+.. include:: filter_opts.rst
+

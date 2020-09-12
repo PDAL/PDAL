@@ -218,10 +218,10 @@ TEST(BpfTestBase, inspect)
         "GPSTime",
         "Green",
         "Intensity",
-        "Number of Returns",
+        "Number_of_Returns",
         "Red",
-        "Return Information",
-        "Return Number",
+        "Return_Information",
+        "Return_Number",
         "X",
         "Y",
         "Z"
