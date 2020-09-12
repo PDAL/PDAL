@@ -29,10 +29,6 @@ jobs:
           where cmake
           conda install pdal --only-deps -y
           conda install cmake ninja compilers -y
-          mkdir build
-          cmake --version
-          cd build
-          cd
     - name: CMake
       shell: bash -l {0}
       run: |
