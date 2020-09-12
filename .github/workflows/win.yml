@@ -14,19 +14,19 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - uses: ilammy/msvc-dev-cmd@v1
     - uses: goanpeca/setup-miniconda@v1
       with:
         channels: conda-forge
         auto-update-conda: true
         python-version: '3.8'
     - name: Setup
-      shell: cmd /C CALL {0}
+      shell: bash -l {0}
       run: |
           echo %PATH%
           cd
           where python
           where cmake
-          call conda activate test
           conda install pdal --only-deps -y
           conda install cmake ninja compilers -y
           mkdir build
@@ -34,11 +34,10 @@ jobs:
           cd build
           cd
     - name: CMake
-      shell: cmd /C CALL {0}
+      shell: bash -l {0}
       run: |
           cd
           where conda
-          call conda activate test
           where cmake
           set CC=cl.exe
           set CXX=cl.exe
@@ -82,15 +81,13 @@ jobs:
               -DCMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING ^
               ..
     - name: Compile
-      shell: cmd /C CALL {0}
+      shell: bash -l {0}
       run: |
-          call conda activate test
           ninja -v
           ninja install
     - name: Test
-      shell: cmd /C CALL {0}
+      shell: bash -l {0}
       run: |
-          call conda activate test
           ctest -VV --output-on-failure
 
 
