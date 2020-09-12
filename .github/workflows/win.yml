@@ -24,20 +24,21 @@ jobs:
       shell: bash -l {0}
       run: |
           echo $PATH
-          cd
+          pwd
           where python
           where cmake
           conda install pdal --only-deps -y
           conda install cmake ninja compilers -y
+          mkdir build
     - name: CMake
       shell: bash -l {0}
       run: |
           pwd
+          ls
           where conda
           where cmake
-          set CC=cl.exe
-          set CXX=cl.exe
-          mkdir build
+          export CC=cl.exe
+          export CXX=cl.exe
           cd build
           cmake -G "Ninja"
               -DCMAKE_BUILD_TYPE=Debug
@@ -60,7 +61,7 @@ jobs:
               -DENABLE_CTEST=OFF
               -DWITH_LAZPERF=ON
               -DWITH_LZMA=ON
-              -DLIBLZMA_LIBRARY:FILEPATH=$CONDA_PREFIX\Library\lib\liblzma.lib
+              -DLIBLZMA_LIBRARY:FILEPATH=$CONDA_PREFIX/Library/lib/liblzma.lib
               -DWITH_LASZIP=ON
               -DORACLE_INCLUDE_DIR=$CONDA_PREFIX/include
               -DORACLE_LIBRARY=$CONDA_PREFIX/libs/oci.lib
