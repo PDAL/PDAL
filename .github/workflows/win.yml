@@ -34,15 +34,9 @@ jobs:
       shell: bash -l {0}
       run: |
           pwd
-          ls
-          where conda
-          where cmake
           export CC=cl.exe
           export CXX=cl.exe
           cd build
-          ls
-          ls ..
-          env
           cmake .. -G "Ninja" \
               -DCMAKE_BUILD_TYPE=Debug \
               -DCMAKE_INSTALL_PREFIX="$CONDA_PREFIX" \
@@ -50,7 +44,7 @@ jobs:
               -DCMAKE_VERBOSE_MAKEFILE=OFF \
               -DCMAKE_LIBRARY_PATH:FILEPATH="$CONDA_PREFIX/Library/lib" \
               -DCMAKE_INCLUDE_PATH:FILEPATH="$CONDA_PREFIX/Library/include" \
-              -DOPENSSL_ROOT_DIR=$CONDA_PREFIX/Library \
+              -DOPENSSL_ROOT_DIR="$CONDA_PREFIX/Library" \
               -DPython3_ROOT_DIR:FILEPATH="$CONDA_PREFIX" \
               -DPython3_FIND_STRATEGY=LOCATION \
               -DBUILD_PLUGIN_CPD=OFF \
@@ -65,17 +59,16 @@ jobs:
               -DENABLE_CTEST=OFF \
               -DWITH_LAZPERF=ON \
               -DWITH_LZMA=ON \
-              -DLIBLZMA_LIBRARY:FILEPATH=$CONDA_PREFIX/Library/lib/liblzma.lib \
+              -DLIBLZMA_LIBRARY:FILEPATH="$CONDA_PREFIX/Library/lib/liblzma.lib" \
               -DWITH_LASZIP=ON \
-              -DLazperf_DIR:FILEPATH=$CONDA_PREFIX/Library/cmake \
-              -DHDF5_DIR:FILEPATH=$CONDA_PREFIX/Library/cmake \
-              -DLazperf_DIR:FILEPATH=$CONDA_PREFIX/Library/cmake \
+              -DLazperf_DIR:FILEPATH="$CONDA_PREFIX/Library/cmake" \
+              -DHDF5_DIR:FILEPATH="$CONDA_PREFIX/Library/cmake" \
+              -DLazperf_DIR:FILEPATH="$CONDA_PREFIX/Library/cmake" \
               -DWITH_ZLIB=ON \
               -Dgtest_force_shared_crt=ON \
               -DBUILD_PGPOINTCLOUD_TESTS=OFF \
               -DBUILD_I3S_TESTS=ON \
-              -DBUILD_OCI_TESTS=OFF \
-              -DCMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING
+              -DBUILD_OCI_TESTS=OFF
 
     - name: Compile
       shell: bash -l {0}
