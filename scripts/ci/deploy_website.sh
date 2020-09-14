@@ -7,8 +7,13 @@ DATE=$(date +'%y.%m.%d %H:%M:%S')
 
 #git clone git@github.com:PDAL/pdal.github.io.git $destdir
 cd ..
+pwd
+ls
 git clone https://${API_TOKEN_GITHUB}:x-oauth-basic@github.com/PDAL/pdal.github.io.git
+ls $builddir
+ls $destdir
 
+cd $destdir
 git checkout -f -b $branch
 
 cd $builddir/html
