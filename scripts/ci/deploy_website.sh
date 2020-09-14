@@ -6,7 +6,7 @@ branch="gh-action"
 DATE=$(date +'%y.%m.%d %H:%M:%S')
 
 #git clone git@github.com:PDAL/pdal.github.io.git $destdir
-cd $destdir/..
+cd ..
 git clone https://${API_TOKEN_GITHUB}:x-oauth-basic@github.com/PDAL/pdal.github.io.git
 
 git checkout -f -b $branch
