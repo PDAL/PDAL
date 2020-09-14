@@ -23,64 +23,21 @@ jobs:
     - name: Setup
       shell: bash -l {0}
       run: |
-          echo $PATH
-          pwd
-          where python
-          where cmake
-          conda install pdal --only-deps -y
-          conda install cmake ninja compilers -y
-          mkdir build
+          ./scripts/ci/win/setup.sh
     - name: CMake
       shell: bash -l {0}
+      working-directory: ./build
       run: |
-          pwd
-          where cl.exe
-          export CC=cl.exe
-          export CXX=cl.exe
-          cd build
-          cmake .. -G "Ninja" \
-              -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-              -DCMAKE_INSTALL_PREFIX="$CONDA_PREFIX" \
-              -DWITH_TESTS=ON \
-              -DCMAKE_VERBOSE_MAKEFILE=OFF \
-              -DCMAKE_LIBRARY_PATH:FILEPATH="$CONDA_PREFIX/Library/lib" \
-              -DCMAKE_INCLUDE_PATH:FILEPATH="$CONDA_PREFIX/Library/include" \
-              -DOPENSSL_ROOT_DIR="$CONDA_PREFIX/Library" \
-              -DPython3_ROOT_DIR:FILEPATH="$CONDA_PREFIX" \
-              -DPython3_FIND_STRATEGY=LOCATION \
-              -DBUILD_PLUGIN_CPD=OFF \
-              -DBUILD_PLUGIN_ICEBRIDGE=ON \
-              -DBUILD_PLUGIN_HDF=ON \
-              -DBUILD_PLUGIN_MRSID=OFF \
-              -DBUILD_PLUGIN_NITF=ON \
-              -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
-              -DBUILD_PLUGIN_OCI=OFF \
-              -DBUILD_PLUGIN_I3S=ON \
-              -DBUILD_PLUGIN_RIVLIB=OFF \
-              -DENABLE_CTEST=OFF \
-              -DWITH_LAZPERF=ON \
-              -DWITH_LZMA=ON \
-              -DLIBLZMA_LIBRARY:FILEPATH="$CONDA_PREFIX/Library/lib/liblzma.lib" \
-              -DWITH_LASZIP=ON \
-              -DLazperf_DIR:FILEPATH="$CONDA_PREFIX/Library/cmake" \
-              -DHDF5_DIR:FILEPATH="$CONDA_PREFIX/Library/cmake" \
-              -DLazperf_DIR:FILEPATH="$CONDA_PREFIX/Library/cmake" \
-              -DWITH_ZLIB=ON \
-              -Dgtest_force_shared_crt=ON \
-              -DBUILD_PGPOINTCLOUD_TESTS=OFF \
-              -DBUILD_I3S_TESTS=ON \
-              -DBUILD_OCI_TESTS=OFF
-
+          ./scripts/ci/win/cmake.sh
     - name: Compile
       shell: bash -l {0}
+      working-directory: ./build
       run: |
-          cd build
-          ninja -v
-          ninja install
+          ./scripts/ci/win/compile.sh
     - name: Test
       shell: bash -l {0}
+      working-directory: ./build
       run: |
-          cd build
-          ctest -VV --output-on-failure
+          ./scripts/ci/win/test.sh
 
 

@@ -1,9 +1,7 @@
-name: Conda OSX and Linux
+name: OSX and Linux
 
 on:
   push:
-    branches: '*'
-  pull_request:
     branches: '*'
 
 jobs:
@@ -22,57 +20,32 @@ jobs:
       with:
         channels: conda-forge
         auto-update-conda: true
+
     - name: Setup
       shell: bash -l {0}
       run: |
-          conda install -c conda-forge pdal --only-deps -y
-          conda install -c conda-forge cmake ninja compilers -y
-          mkdir build
+          ./scripts/ci/unix/setup.sh
+
     - name: CMake
       shell: bash -l {0}
       run: |
-          cmake .. \
-          -G Ninja \
-          -DCMAKE_BUILD_TYPE=Debug \
-          -DCMAKE_INSTALL_PREFIX=`pwd`/../install \
-          -DBUILD_PLUGIN_I3S=ON \
-          -DBUILD_PLUGIN_NITF=ON \
-          -DBUILD_PLUGIN_TILEDB=ON \
-          -DBUILD_PLUGIN_ICEBRIDGE=ON \
-          -DBUILD_PLUGIN_HDF=ON \
-          -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
-          -DBUILD_PLUGIN_E57=ON \
-          -DBUILD_PGPOINTCLOUD_TESTS=OFF \
-          -DWITH_LAZPERF=ON \
-          -DWITH_LASZIP=ON \
-          -DWITH_ZSTD=ON \
-          -DWITH_ZLIB=ON \
-          -DWITH_TESTS=ON
+          ./scripts/ci/unix/cmake.sh
       working-directory: ./build
+
     - name: Compile
       shell: bash -l {0}
       run: |
-          ninja
-          ninja install
+          ./scripts/ci/unix/compile.sh
       working-directory: ./build
+
     - name: Test
       shell: bash -l {0}
       run: |
-          ctest -V
+          ./scripts/ci/unix/test.sh
       working-directory: ./build
 
     - name: Examples
       shell: bash -l {0}
       run: |
-          ctest -V
-
-          export BASE=`pwd`
-          for EXAMPLE in writing writing-filter writing-kernel \
-              writing-reader writing-writer
-          do
-              cd $BASE/examples/$EXAMPLE
-              mkdir -p _build || exit 1
-              cd _build || exit 1
-              cmake -G "Ninja" .. -DPDAL_DIR=$BASE/install/lib/cmake/PDAL && ninja
-          done
+          ./scripts/ci/unix/examples.sh
 

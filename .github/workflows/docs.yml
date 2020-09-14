@@ -3,8 +3,6 @@ name: Docs
 on:
   push:
     branches: '*'
-  pull_request:
-    branches: '*'
 
 jobs:
   docs:
