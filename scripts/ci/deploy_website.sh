@@ -1,7 +1,7 @@
 #!/bin/bash
 
 builddir=$(pwd)/doc/build
-destdir=$(pwd)/../pdal.github.io.git
+destdir=$(pwd)/../pdal.github.io
 branch="gh-action"
 DATE=$(date +'%y.%m.%d %H:%M:%S')
 
