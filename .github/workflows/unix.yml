@@ -24,28 +24,28 @@ jobs:
     - name: Setup
       shell: bash -l {0}
       run: |
-          ./scripts/ci/unix/setup.sh
+          source ./scripts/ci/unix/setup.sh
 
     - name: CMake
       shell: bash -l {0}
       run: |
-          ../scripts/ci/unix/cmake.sh
+          source ../scripts/ci/unix/cmake.sh
       working-directory: ./build
 
     - name: Compile
       shell: bash -l {0}
       run: |
-          ../scripts/ci/unix/compile.sh
+          source ../scripts/ci/unix/compile.sh
       working-directory: ./build
 
     - name: Test
       shell: bash -l {0}
       run: |
-          ../scripts/ci/unix/test.sh
+          source ../scripts/ci/unix/test.sh
       working-directory: ./build
 
     - name: Examples
       shell: bash -l {0}
       run: |
-          ./scripts/ci/unix/examples.sh
+          source ./scripts/ci/unix/examples.sh
 

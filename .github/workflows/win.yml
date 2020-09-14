@@ -23,21 +23,21 @@ jobs:
     - name: Setup
       shell: bash -l {0}
       run: |
-          ./scripts/ci/win/setup.sh
+          source ./scripts/ci/win/setup.sh
     - name: CMake
       shell: bash -l {0}
       working-directory: ./build
       run: |
-          ../scripts/ci/win/cmake.sh
+          source ../scripts/ci/win/cmake.sh
     - name: Compile
       shell: bash -l {0}
       working-directory: ./build
       run: |
-          ../scripts/ci/win/compile.sh
+          source ../scripts/ci/win/compile.sh
     - name: Test
       shell: bash -l {0}
       working-directory: ./build
       run: |
-          ../scripts/ci/win/test.sh
+          source ../scripts/ci/win/test.sh
 
 

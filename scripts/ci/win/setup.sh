@@ -1,5 +1,6 @@
 #!/bin/bash
 
+conda activate test
 echo $PATH
 pwd
 where python
