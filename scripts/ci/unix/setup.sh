@@ -1,5 +1,6 @@
 #!/bin/bash
 
-conda install -c conda-forge pdal --only-deps -y
-conda install -c conda-forge cmake ninja compilers -y
+conda update -n base -c defaults conda
+conda install pdal --only-deps -y
+conda install cmake ninja compilers -y
 mkdir build
