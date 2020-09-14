@@ -29,19 +29,19 @@ jobs:
     - name: CMake
       shell: bash -l {0}
       run: |
-          ./scripts/ci/unix/cmake.sh
+          ../scripts/ci/unix/cmake.sh
       working-directory: ./build
 
     - name: Compile
       shell: bash -l {0}
       run: |
-          ./scripts/ci/unix/compile.sh
+          ../scripts/ci/unix/compile.sh
       working-directory: ./build
 
     - name: Test
       shell: bash -l {0}
       run: |
-          ./scripts/ci/unix/test.sh
+          ../scripts/ci/unix/test.sh
       working-directory: ./build
 
     - name: Examples

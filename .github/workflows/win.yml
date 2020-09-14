@@ -28,16 +28,16 @@ jobs:
       shell: bash -l {0}
       working-directory: ./build
       run: |
-          ./scripts/ci/win/cmake.sh
+          ../scripts/ci/win/cmake.sh
     - name: Compile
       shell: bash -l {0}
       working-directory: ./build
       run: |
-          ./scripts/ci/win/compile.sh
+          ../scripts/ci/win/compile.sh
     - name: Test
       shell: bash -l {0}
       working-directory: ./build
       run: |
-          ./scripts/ci/win/test.sh
+          ../scripts/ci/win/test.sh
 
 
