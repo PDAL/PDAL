@@ -34,11 +34,12 @@ jobs:
       shell: bash -l {0}
       run: |
           pwd
+          where cl.exe
           export CC=cl.exe
           export CXX=cl.exe
           cd build
           cmake .. -G "Ninja" \
-              -DCMAKE_BUILD_TYPE=Debug \
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo \
               -DCMAKE_INSTALL_PREFIX="$CONDA_PREFIX" \
               -DWITH_TESTS=ON \
               -DCMAKE_VERBOSE_MAKEFILE=OFF \
