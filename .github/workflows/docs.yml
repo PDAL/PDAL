@@ -58,11 +58,11 @@ jobs:
         name: Misspelled
         path: doc/build/spelling/output.txt
 
-     - name: Deploy docs
-       env:
-         API_TOKEN_GITHUB: ${{ secrets.DOCS_SECRET_KEY}}
-       shell: bash -l {0}
-       run: |
+    - name: Deploy docs
+      env:
+        API_TOKEN_GITHUB: ${{ secrets.DOCS_SECRET_KEY}}
+      shell: bash -l {0}
+      run: |
         ./scripts/ci/deploy_website.sh
 
 
