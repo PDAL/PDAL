@@ -1,13 +1,14 @@
 #!/bin/bash
 
 builddir=$(pwd)/doc/build
-destdir=$(pwd)/../pdal.github.io
+destdir=$(pwd)/../pdal.github.io.git
 branch="gh-action"
 DATE=$(date +'%y.%m.%d %H:%M:%S')
 
 #git clone git@github.com:PDAL/pdal.github.io.git $destdir
-git clone https://${API_TOKEN_GITHUB}:x-oauth-basic@github.com
 cd $destdir/..
+git clone https://${API_TOKEN_GITHUB}:x-oauth-basic@github.com/PDAL/pdal.github.io.git
+
 git checkout -f -b $branch
 
 cd $builddir/html
