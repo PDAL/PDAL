@@ -10,7 +10,6 @@ git clone https://${API_TOKEN_GITHUB}:x-oauth-basic@github.com
 cd $destdir
 git checkout -f -b $branch
 
-
 cd $builddir/html
 cp -rf * $destdir/
 
