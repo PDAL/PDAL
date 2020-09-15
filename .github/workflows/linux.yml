@@ -1,4 +1,4 @@
-name: OSX and Linux
+name: Linux
 
 on:
   push:
@@ -6,13 +6,15 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.os }}
+    name: Linux ${{ matrix.type }}
 
-    runs-on: ${{ matrix.os }}
+    runs-on: 'ubuntu-latest'
     strategy:
       fail-fast: true
       matrix:
-        os: ['ubuntu-latest', 'macos-latest' ]
+        type: ['floating','fixed']
+    env:
+      BUILD_TYPE: ${{ matrix.type }}
 
     steps:
     - uses: actions/checkout@v2
@@ -24,28 +26,28 @@ jobs:
     - name: Setup
       shell: bash -l {0}
       run: |
-          source ./scripts/ci/unix/setup.sh
+          source ./scripts/ci/linux/setup.sh
 
     - name: CMake
       shell: bash -l {0}
       run: |
-          source ../scripts/ci/unix/cmake.sh
+          source ../scripts/ci/linux/cmake.sh
       working-directory: ./build
 
     - name: Compile
       shell: bash -l {0}
       run: |
-          source ../scripts/ci/unix/compile.sh
+          source ../scripts/ci/linux/compile.sh
       working-directory: ./build
 
     - name: Test
       shell: bash -l {0}
       run: |
-          source ../scripts/ci/unix/test.sh
+          source ../scripts/ci/linux/test.sh
       working-directory: ./build
 
     - name: Examples
       shell: bash -l {0}
       run: |
-          source ./scripts/ci/unix/examples.sh
+          source ./scripts/ci/linux/examples.sh
 
