@@ -2,7 +2,7 @@
 
 mkdir build
 
-conda config --set channel_priority strict
+#conda config --set channel_priority strict
 conda update -n base -c defaults conda
 conda install cmake ninja conda-build compilers -y
 
