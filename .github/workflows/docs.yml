@@ -65,6 +65,6 @@ jobs:
       if: contains(github.ref, '2.2-maintenance')
 
       run: |
-        ./scripts/ci/deploy_website.sh
+        ./scripts/ci/docs/deploy_website.sh
 
 
