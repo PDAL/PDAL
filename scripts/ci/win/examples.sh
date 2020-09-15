@@ -1,6 +1,8 @@
 #!/bin/bash
 
 export BASE=`pwd`
+export CC=cl.exe
+export CXX=cl.exe
 for EXAMPLE in writing writing-filter writing-kernel \
     writing-reader writing-writer
 do
