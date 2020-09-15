@@ -14,8 +14,10 @@ if [ "$BUILD_TYPE" == "fixed" ]; then
 
 else
 
-    conda install gdal=3.0.2=py37hbb6b9fb_8 python=3.7 abseil-cpp -y
-    conda install pdal --only-deps -y
+    conda config --set channel_priority strict
+    conda install --yes --quiet -c conda-forge gdal=3.0.2=py37hbb6b9fb_8 python=3.7 abseil-cpp  -y
+    conda install --yes --quiet -c conda-forge pdal  --only-deps -y
+
 
 fi
 
