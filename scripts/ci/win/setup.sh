@@ -1,10 +1,7 @@
 #!/bin/bash
 
-conda activate test
-echo $PATH
-pwd
-where python
-where cmake
+conda update -n base -c defaults conda
 conda install pdal --only-deps -y
 conda install cmake ninja compilers -y
+
 mkdir build
