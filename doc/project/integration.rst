@@ -12,24 +12,26 @@ PDAL :ref:`regression tests <pdal_test>` are run on a per-commit basis using
 Status
 --------------------------------------------------------------------------------
 
-|linuxstatus|
-|osxstatus|
-|windowstatus|
-|docsstatus|
+.. only:: html
+
+    |linuxstatus|
+    |osxstatus|
+    |windowstatus|
+    |docsstatus|
 
 
 
-.. |linuxstatus| image:: https://github.com/PDAL/PDAL/workflows/Linux/badge.svg
-   :target: https://github.com/PDAL/PDAL/actions?query=workflow%3ALinux
+    .. |linuxstatus| image:: https://github.com/PDAL/PDAL/workflows/Linux/badge.svg
+       :target: https://github.com/PDAL/PDAL/actions?query=workflow%3ALinux
 
-.. |osxstatus| image:: https://github.com/PDAL/PDAL/workflows/OSX/badge.svg
-   :target: https://github.com/PDAL/PDAL/actions?query=workflow%3AOSX
+    .. |osxstatus| image:: https://github.com/PDAL/PDAL/workflows/OSX/badge.svg
+       :target: https://github.com/PDAL/PDAL/actions?query=workflow%3AOSX
 
-.. |windowstatus| image:: https://github.com/PDAL/PDAL/workflows/Windows/badge.svg
-   :target: https://github.com/PDAL/PDAL/actions?query=workflow%3AWindows
+    .. |windowstatus| image:: https://github.com/PDAL/PDAL/workflows/Windows/badge.svg
+       :target: https://github.com/PDAL/PDAL/actions?query=workflow%3AWindows
 
-.. |docsstatus| image:: https://github.com/PDAL/PDAL/workflows/Docs/badge.svg
-   :target: https://github.com/PDAL/PDAL/actions?query=workflow%3ADocs
+    .. |docsstatus| image:: https://github.com/PDAL/PDAL/workflows/Docs/badge.svg
+       :target: https://github.com/PDAL/PDAL/actions?query=workflow%3ADocs
 
 Configuration
 --------------------------------------------------------------------------------
