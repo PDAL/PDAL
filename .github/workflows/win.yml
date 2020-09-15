@@ -11,6 +11,10 @@ jobs:
     runs-on: 'windows-latest'
     strategy:
       fail-fast: true
+      matrix:
+        type: ['floating','fixed']
+    env:
+      BUILD_TYPE: ${{ matrix.type }}
 
     steps:
     - uses: actions/checkout@v2
