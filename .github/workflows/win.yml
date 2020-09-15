@@ -51,6 +51,6 @@ jobs:
     - name: Examples
       shell: bash -l {0}
       run: |
-          source ../scripts/ci/win/examples.sh
+          source ./scripts/ci/win/examples.sh
 
 
