@@ -18,5 +18,5 @@ else
 
 fi
 
-gdal-config --version
+gdalinfo --version
 
