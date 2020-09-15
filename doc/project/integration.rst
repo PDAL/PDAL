@@ -17,11 +17,6 @@ Status
 |windowstatus|
 |docsstatus|
 
-![OSX](https://github.com/PDAL/PDAL/workflows/OSX/badge.svg)
-![Linux](https://github.com/PDAL/PDAL/workflows/Linux/badge.svg)
-![Windows](https://github.com/PDAL/PDAL/workflows/Windows/badge.svg)
-![Docs](https://github.com/PDAL/PDAL/workflows/Docs/badge.svg)
-
 
 
 .. |linuxstatus| image:: https://github.com/PDAL/PDAL/workflows/Linux/badge.svg
