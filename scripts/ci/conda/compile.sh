@@ -3,7 +3,6 @@
 pwd
 ls
 
-conda build recipe
 conda build recipe --clobber-file recipe/recipe_clobber.yaml
 conda install recipe
 
