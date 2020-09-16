@@ -7,9 +7,10 @@ PDAL
 
 ## Build Status
 
-![OSX](https://github.com/PDAL/PDAL/workflows/OSX/badge.svg)
-![Linux](https://github.com/PDAL/PDAL/workflows/Linux/badge.svg)
-![Windows](https://github.com/PDAL/PDAL/workflows/Windows/badge.svg)
-![Docs](https://github.com/PDAL/PDAL/workflows/Docs/badge.svg)
+[![OSX](https://github.com/PDAL/PDAL/workflows/OSX/badge.svg)](https://github.com/PDAL/PDAL/actions?query=workflow%3AOSX)
+[![Linux](https://github.com/PDAL/PDAL/workflows/Linux/badge.svg)](https://github.com/PDAL/PDAL/actions?query=workflow%3ALinux)
+[![Windows](https://github.com/PDAL/PDAL/workflows/Windows/badge.svg)](https://github.com/PDAL/PDAL/actions?query=workflow%3AWindows)
+[![Docs](https://github.com/PDAL/PDAL/workflows/Docs/badge.svg)](https://github.com/PDAL/PDAL/actions?query=workflow%3ADocs)
+[![Conda](https://github.com/PDAL/PDAL/workflows/Conda/badge.svg)](https://github.com/PDAL/PDAL/actions?query=workflow%3AConda)
 
 See https://pdal.io/ for more info

@@ -13,6 +13,9 @@ source:
   git_rev: ${GITHUB_SHA}
   url:
   sha256:
+
+build:
+  number: 2112
 EOL
 
 ls recipe
