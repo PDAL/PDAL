@@ -1,7 +1,7 @@
 #!/bin/bash
 
 conda update -n base -c defaults conda
-conda install conda-build -y
+conda install conda-build ninja compilers -y
 pwd
 ls
 git clone https://github.com/conda-forge/pdal-feedstock.git
