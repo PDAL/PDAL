@@ -1,9 +1,8 @@
 #!/bin/bash
 
-pwd
-ls
+mkdir packages
 
-conda build recipe --clobber-file recipe/recipe_clobber.yaml
-conda install pdal
+conda build recipe --clobber-file recipe/recipe_clobber.yaml --output-folder packages
+conda install pdal -c packages
 
 pdal --version
