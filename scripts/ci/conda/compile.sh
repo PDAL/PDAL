@@ -4,4 +4,7 @@ pwd
 ls
 
 conda build recipe
-conda install recipe
+conda build recipe --clobber-file recipe/recipe_clobber.yaml
+conda install recipe --clobber-file recipe/recipe_clobber.yaml
+
+pdal --version
