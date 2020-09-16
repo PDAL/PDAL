@@ -14,6 +14,9 @@ jobs:
       matrix:
         platform: ['ubuntu-latest','windows-latest','macos-latest']
 
+    env:
+      PLATFORM: ${{ matrix.platform }}
+
     steps:
     - uses: actions/checkout@v2
     - uses: goanpeca/setup-miniconda@v1

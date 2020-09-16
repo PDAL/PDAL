@@ -1,6 +1,14 @@
 #!/bin/bash
 
 export BASE=`pwd`
+
+if [ "$BUILD_TYPE" == "windows-latest" ]; then
+
+export CC=cl.exe
+export CXX=cl.exe
+
+fi
+
 for EXAMPLE in writing writing-filter writing-kernel \
     writing-reader writing-writer
 do
