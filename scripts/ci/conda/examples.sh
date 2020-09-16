@@ -2,7 +2,7 @@
 
 export BASE=`pwd`
 
-if [ "$BUILD_TYPE" == "windows-latest" ]; then
+if [ "$PLATFORM" == "windows-latest" ]; then
 
 export CC=cl.exe
 export CXX=cl.exe
