@@ -11,6 +11,8 @@ cat > recipe/recipe_clobber.yaml <<EOL
 source:
   git_url: git@github.com:PDAL/PDAL.git
   git_rev: ${GITHUB_SHA}
+  url:
+  sha256:
 EOL
 
 ls recipe
