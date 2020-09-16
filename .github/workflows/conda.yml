@@ -8,7 +8,7 @@ jobs:
   build:
     name: Conda ${{ matrix.platform }}
 
-    runs-on: 'ubuntu-latest'
+    runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: true
       matrix:
