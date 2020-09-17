@@ -128,7 +128,7 @@ void EigenvaluesFilter::filter(PointView& view)
             // anyway, it may be okay to silently return without setting any of
             // the computed features?
             if (ids.size() < (size_t)m_args->m_minK)
-                return;
+                continue;
         }
         else
         {
