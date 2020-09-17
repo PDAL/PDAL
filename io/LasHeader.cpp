@@ -195,8 +195,6 @@ Dimension::IdList LasHeader::usedDims() const
 
 void LasHeader::setSrs()
 {
-    bool useWkt = false;
-
     if (incompatibleSrs())
     {
         m_log->get(LogLevel::Error) << "Global encoding WKT flag not set "
@@ -208,12 +206,10 @@ void LasHeader::setSrs()
         m_log->get(LogLevel::Debug) << "File contains both "
             "WKT and GeoTiff VLRs which is disallowed." << std::endl;
     }
-    else
-        useWkt = (m_versionMinor >= 4);
 
     try
     {
-        if (useWkt)
+        if (useWkt())
             setSrsFromWkt();
         else
             setSrsFromGeotiff();
