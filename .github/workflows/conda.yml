@@ -19,8 +19,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - uses: ilammy/msvc-dev-cmd@v1
-      if: matrix.platform == 'windows-latest'
+
     - uses: goanpeca/setup-miniconda@v1
       with:
         channels: conda-forge
@@ -37,6 +36,8 @@ jobs:
           source ../scripts/ci/conda/compile.sh
       working-directory: ./pdal-feedstock
 
+    - uses: ilammy/msvc-dev-cmd@v1
+      if: matrix.platform == 'windows-latest'
     - name: Test
       shell: bash -l {0}
       run: |

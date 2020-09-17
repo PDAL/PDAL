@@ -4,9 +4,10 @@ export BASE=`pwd`
 
 if [ "$PLATFORM" == "windows-latest" ]; then
 
+conda install compilers ninja -y
 export CC=cl.exe
 export CXX=cl.exe
-
+where cl
 fi
 
 for EXAMPLE in writing writing-filter writing-kernel \
