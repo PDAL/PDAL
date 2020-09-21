@@ -1,4 +1,12 @@
 
+cmake_minimum_required(VERSION 3.1)
+set(ROOT_DIR "../../${PROJECT_SOURCE_DIR}")
+include(../../cmake/common.cmake NO_POLICY_SCOPE)
+include(FeatureSummary)
+
+
+find_package(PDAL COMPONENTS REQUIRED)
+
 find_package(rdb COMPONENTS REQUIRED)
 set_package_properties(rdb PROPERTIES
     TYPE REQUIRED
@@ -11,11 +19,15 @@ PDAL_ADD_PLUGIN(libname reader rdb
         io/RdbReader.cpp
     LINK_WITH
         rdbcpp
+        ${PDAL_LIBRARIES}
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
         ${RDB_INCLUDE_CPP_DIR}
+        ${PDAL_INCLUDE_DIRS}
 )
 target_include_directories(${libname} PRIVATE "${PDAL_VENDOR_DIR}/eigen")
+target_include_directories(${libname} PUBLIC "${CMAKE_CURRENT_LIST_DIR}/../../vendor/nlohmann/")
+target_include_directories(${libname} PUBLIC "${CMAKE_CURRENT_LIST_DIR}/../../vendor/eigen/")
 
 # windows requires explicit linking against
 # rdbcpp
