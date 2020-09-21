@@ -40,9 +40,11 @@ jobs:
       - name: Build image
         uses: docker/build-push-action@v2
         with:
+          push: true
           builder: ${{ steps.buildx.outputs.name }}
           context: .
           file: ./scripts/docker/ubuntu/Dockerfile
+          platforms: linux/amd64
           tags: |
             docker.io/pdal/pdal:${{ steps.prep.outputs.VERSION }}
             ghcr.io/pdal/pdal:${{ steps.prep.outputs.VERSION }}
