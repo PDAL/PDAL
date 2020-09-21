@@ -3,6 +3,7 @@ name: Docker
 on:
   push:
     branches: '*'
+  workflow_dispatch:
 
 # adapted from https://raw.githubusercontent.com/stefanprodan/podinfo/master/.github/workflows/release.yml
 #
