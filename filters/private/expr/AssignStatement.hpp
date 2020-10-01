@@ -50,7 +50,6 @@ inline StatusWithReason fromString(const std::string& from,
     expr::Lexer lexer(from);
     expr::AssignParser parser(lexer);
     bool ok = parser.statement(stmt) && parser.checkEnd();
-    std::cerr << "Parser error = " << parser.error() << "!\n";
     return { ok ? 0 : -1, parser.error() };
 }
 
