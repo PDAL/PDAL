@@ -203,7 +203,6 @@ PointViewSet CSFilter::run(PointViewPtr view)
         throwError("No returns to process.");
 
     csf::PointCloud csfPC;
-    for (PointId i = 0; i < firstView->size(); ++i)
     for (PointRef point : *firstView)
     {
         csf::Point p;
