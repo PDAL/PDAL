@@ -1241,7 +1241,8 @@ std::vector<std::string> glob(std::string path)
         const auto pre(path.substr(0, recPos));     // Cut off before the '*'.
         const auto post(path.substr(recPos + 1));   // Includes the second '*'.
 
-        for (const auto d : walk(pre)) dirs.push_back(d + post);
+        for (const std::string& d : walk(pre))
+            dirs.push_back(d + post);
     }
     else
     {

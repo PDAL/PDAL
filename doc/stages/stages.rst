@@ -28,6 +28,9 @@ pattern:
 Where <plugin type> is "reader", "writer" or "filter" and <shared library extension> is
 ".dll" on Windows, ".dylib" on OSX and ".so" on UNIX systems.
 
+The <plugin name> must start with a letter or number, which can be followed by letters,
+numbers, or an underscore ('_').
+
 PDAL looks for plugins in the directory that contains the PDAL library itself, as well
 as the directories ``.``, ``./lib``, ``../lib``, ``./bin``, ``../bin``. Those paths
 are relative to the current working directory.  These locations can be overridden by

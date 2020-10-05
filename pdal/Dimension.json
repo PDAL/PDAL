@@ -15,6 +15,11 @@
     "description": "Z coordinate"
     },
     {
+    "name": "W",
+    "type": "double",
+    "description": "W coordinate"
+    },
+    {
     "name": "Intensity",
     "type": "uint16",
     "description": "Representation of the pulse return magnitude"
@@ -142,7 +147,7 @@
     {
     "name": "Deviation",
     "type": "float",
-    "description": "Difference between the shape of the reference pulse and the retun pulse. A larger value for deviation indicates larger distortion."
+    "description": "Difference between the shape of the reference pulse and the return pulse. A larger value for deviation indicates larger distortion."
     },
     {
     "name": "PassiveSignal",
@@ -385,16 +390,22 @@
     "description": "Distance metric related to a point's nearest neighbors."
     },
     {
-    "name": "TextureX",
-    "alt_names": ["tx", "texture_x", "texturex" ],
+    "name": "TextureU",
+    "alt_names": ["tu", "texture_u", "textureu" ],
     "type": "double",
-    "description": "X component of a texture location at this point"
+    "description": "U component of a texture location at this point"
     },
     {
-    "name": "TextureY",
-    "alt_names": ["ty", "texture_y", "texturey" ],
+    "name": "TextureV",
+    "alt_names": ["tv", "texture_v", "texturev" ],
     "type": "double",
-    "description": "Y component of a texture location at this point"
+    "description": "V component of a texture location at this point"
+    },
+    {
+    "name": "TextureW",
+    "alt_names": ["tw", "texture_w", "texturew" ],
+    "type": "double",
+    "description": "W component of a texture location at this point"
     },
     {
     "name": "Linearity",

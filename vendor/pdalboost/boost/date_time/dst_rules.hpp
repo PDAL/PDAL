@@ -94,7 +94,7 @@ namespace pdalboost {
        *  @param dst_start_offset Time offset within day for dst boundary
        *  @param dst_end_day    Ending day of dst for the given locality
        *  @param dst_end_offset Time offset within day given in dst for dst boundary
-       *  @param dst_length lenght of dst adjusment
+       *  @param dst_length length of dst adjusment
        *  @retval The time is either ambiguous, invalid, in dst, or not in dst
        */
       static time_is_dst_result 

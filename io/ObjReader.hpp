@@ -61,15 +61,16 @@ private:
     virtual point_count_t read(PointViewPtr view, point_count_t numPts);
 
 private:
-    struct XYZ
+    struct XYZW
     {
         double x;
         double y;
         double z;
+        double w;
     };
-    std::vector<XYZ> m_vertices;
-    std::vector<XYZ> m_textureVertices;
-    std::vector<XYZ> m_normalVertices;
+    std::vector<XYZW> m_vertices;
+    std::vector<XYZW> m_textureVertices;
+    std::vector<XYZW> m_normalVertices;
     TriangularMesh *m_mesh;
     using VTN = std::tuple<int64_t, int64_t, int64_t>;
     std::map<VTN, PointId> m_points;
@@ -80,6 +81,9 @@ private:
     using FACE = std::vector<VTN>;
 
     void newVertex(double x, double y, double z);
+    void newVertex(double x, double y, double z, double w);
+    void newTextureVertex(double x);
+    void newTextureVertex(double x, double y);
     void newTextureVertex(double x, double y, double z);
     void newNormalVertex(double x, double y, double z);
     void newTriangle(PointViewPtr view, TRI tri);

@@ -3,8 +3,6 @@ name: Docs
 on:
   push:
     branches: '*'
-  pull_request:
-    branches: '*'
 
 jobs:
   docs:
@@ -59,5 +57,14 @@ jobs:
       with:
         name: Misspelled
         path: doc/build/spelling/output.txt
+
+    - name: Deploy docs
+      env:
+        API_TOKEN_GITHUB: ${{ secrets.DOCS_SECRET_KEY}}
+      shell: bash -l {0}
+      if: contains(github.ref, '2.2-maintenance')
+
+      run: |
+        ./scripts/ci/docs/deploy_website.sh
 
 

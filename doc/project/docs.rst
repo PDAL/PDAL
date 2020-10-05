@@ -86,14 +86,9 @@ Website
 ================================================================================
 
 The http://pdal.io website is regenerated from the ``*-maintenance`` branch using
-:ref:`travis`. It will be committed by the ``PDAL-docs`` `GitHub`_ user and pushed
+Github Actions. It will be committed by the ``PDAL-docs`` `GitHub`_ user and pushed
 to the https://github.com/PDAL/pdal.github.io repository. The website
 is then served via `GitHub Pages`_.
-
-.. note::
-
-    The website is regenerated and pushed only on the ``after_success`` :ref:`travis`
-    call. If the tests aren't passing, the website won't be updated.
 
 
 .. _`GitHub Pages`: https://pages.github.com/

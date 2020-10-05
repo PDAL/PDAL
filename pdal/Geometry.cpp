@@ -129,7 +129,7 @@ void Geometry::update(const std::string& wkt_or_json)
 Geometry& Geometry::operator=(const Geometry& input)
 {
     if (m_geom != input.m_geom)
-        *m_geom = *input.m_geom;
+        m_geom.reset(input.m_geom->clone());
     modified();
     return *this;
 }

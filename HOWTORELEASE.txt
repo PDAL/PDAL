@@ -35,9 +35,9 @@ Release Process
         git push origin 2.0-maintenance
 
 
-  - Increment the doc build branch of .travis.yml:
+  - Increment the doc build branch of .github/workflows/docs.yml:
 
-    "$TRAVIS_BRANCH" = "2.0-maintenance"
+    if: github.ref == 'refs/heads/2.2-maintenance'
 
   - Make DockerHub build entry for new release branch.
 
