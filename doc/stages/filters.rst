@@ -367,16 +367,22 @@ Resampling
    :hidden:
 
    filters.decimation
-   filters.farthestpointsampling
+   filters.fps
+   filters.relaxationdartthrowing
    filters.sample
 
 :ref:`filters.decimation`
     Keep every Nth point.
 
-:ref:`filters.farthestpointsampling`
+:ref:`filters.fps`
     The Farthest Point Sampling Filter adds points from the input to the output
     PointView one at a time by selecting the point from the input cloud that is
     farthest from any point currently in the output.
+
+:ref:`filters.relaxationdartthrowing`
+    Relaxation dart throwing is a hierarchical variant of Poisson disk
+    sampling, shrinking the minimum radius between iterations until the target
+    number of output points is achieved.
 
 :ref:`filters.sample`
     Perform Poisson sampling and return only a subset of the input points.

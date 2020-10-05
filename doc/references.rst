@@ -58,6 +58,8 @@ Reference
 
 .. [Lloyd1982] Lloyd, Stuart. "Least squares quantization in PCM." IEEE transactions on information theory 28.2 (1982): 129-137.
 
+.. [McCool1992] McCool, Michael, and Eugene Fiume. "Hierarchical Poisson disk sampling distributions." Proceedings of the conference on Graphics interface. Vol. 92. 1992.
+
 .. [Mesh2009] ALoopingIcon. "Meshing Point Clouds." *MESHLAB STUFF*. n.p., 7 Sept. 2009. Web. 13 Nov. 2015.
 
 .. [Pingel2013] Pingel, Thomas J., Keith C. Clarke, and William A. McBride. “An Improved Simple Morphological Filter for the Terrain Classification of Airborne LIDAR Data.” ISPRS Journal of Photogrammetry and Remote Sensing 77 (2013): 21–30.

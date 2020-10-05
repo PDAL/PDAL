@@ -38,6 +38,9 @@
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/Utils.hpp>
 
+#include <chrono>
+#include <numeric>
+#include <random>
 #include <string>
 #include <vector>
 
@@ -61,13 +64,9 @@ std::string SampleFilter::getName() const
 
 void SampleFilter::addArgs(ProgramArgs& args)
 {
-    args.add("radius", "Radius", m_radius, 1.0);
-}
-
-
-void SampleFilter::addDimensions(PointLayoutPtr layout)
-{
-    layout->registerDim(Dimension::Id::Classification);
+    args.add("radius", "Minimum radius", m_radius, 1.0);
+    args.add("shuffle", "Shuffle points prior to sampling?", m_shuffle, true);
+    m_seedArg = &args.add("seed", "Random number generator seed", m_seed);
 }
 
 
@@ -85,12 +84,23 @@ PointViewSet SampleFilter::run(PointViewPtr inView)
     // Build the 3D KD-tree.
     KD3Index& index = inView->build3dIndex();
 
+    PointIdList shuffledIds(np);
+    std::iota(shuffledIds.begin(), shuffledIds.end(), 0);
+    if (m_shuffle)
+    {
+        if (!m_seedArg->set())
+            m_seed =
+                std::chrono::system_clock::now().time_since_epoch().count();
+        std::shuffle(shuffledIds.begin(), shuffledIds.end(),
+                     std::mt19937(m_seed));
+    }
+
     // All points are marked as kept (1) by default. As they are masked by
     // neighbors within the user-specified radius, their value is changed to 0.
     std::vector<int> keep(np, 1);
 
     // We are able to subsample in a single pass over the shuffled indices.
-    for (PointId i = 0; i < np; ++i)
+    for (PointId const& i : shuffledIds)
     {
         // If a point is masked, it is forever masked, and cannot be part of the
         // sampled cloud. Otherwise, the current index is appended to the output
@@ -101,8 +111,8 @@ PointViewSet SampleFilter::run(PointViewPtr inView)
 
         // We now proceed to mask all neighbors within m_radius of the kept
         // point.
-        auto ids = index.radius(i, m_radius);
-        for (auto const& id : ids)
+        PointIdList ids = index.radius(i, m_radius);
+        for (PointId const& id : ids)
             keep[id] = 0;
     }
 

@@ -1,6 +1,6 @@
-.. _filters.farthestpointsampling:
+.. _filters.fps:
 
-filters.farthestpointsampling
+filters.fps
 ===============================================================================
 
 The **Farthest Point Sampling Filter** adds points from the input to the output
@@ -14,9 +14,9 @@ farthest from any point currently in the output.
     :ref:`filters.sample` produces a similar result, but while
     ``filters.sample`` allows us to target a desired separation of points via
     the ``radius`` parameter at the expense of knowing the number of points in
-    the output, ``filters.farthestpointsampling`` allows us to specify exactly
-    the number of output points at the expense of knowing beforehand the
-    spacing between points.
+    the output, ``filters.fps`` allows us to specify exactly the number of
+    output points at the expense of knowing beforehand the spacing between
+    points.
 
 .. embed::
 

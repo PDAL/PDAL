@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2020, Bradley J Chambers (brad.chambers@gmail.com)
  *
  * All rights reserved.
  *
@@ -43,18 +43,19 @@ namespace pdal
 
 class Options;
 
-class PDAL_DLL SampleFilter : public pdal::Filter
+class PDAL_DLL RelaxationDartThrowing : public pdal::Filter
 {
 public:
-    SampleFilter() : Filter()
-    {}
-    SampleFilter& operator=(const SampleFilter&) = delete;
-    SampleFilter(const SampleFilter&) = delete;
+    RelaxationDartThrowing() : Filter() {}
+    RelaxationDartThrowing& operator=(const RelaxationDartThrowing&) = delete;
+    RelaxationDartThrowing(const RelaxationDartThrowing&) = delete;
 
     std::string getName() const;
 
 private:
-    double m_radius;
+    double m_decay;
+    double m_startRadius;
+    point_count_t m_maxSize;
     bool m_shuffle;
     Arg* m_seedArg;
     unsigned m_seed;
