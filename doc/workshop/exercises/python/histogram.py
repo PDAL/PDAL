@@ -32,7 +32,7 @@ def make_plot(ins, outs):
 
         # histogram the current dimension with 30 bins
         n, bins, patches = ax.hist( dimension, 30,
-                                    normed=0,
+                                    density=0,
                                     facecolor='grey',
                                     alpha=0.75,
                                     align='mid',
