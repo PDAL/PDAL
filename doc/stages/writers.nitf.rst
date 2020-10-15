@@ -121,4 +121,6 @@ acftb
   (Aircraft Information) TRE record (format name:value). Required:
   SENSOR_ID, SENSOR_ID_TYPE [Default: NITF defaults]
 
+.. include:: writer_opts.rst
+
 .. _NITF: http://en.wikipedia.org/wiki/National_Imagery_Transmission_Format

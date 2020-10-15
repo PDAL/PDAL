@@ -96,19 +96,7 @@ public:
         { return m_header.pointCount(); }
 
 protected:
-    virtual void createStream()
-    {
-        if (m_streamIf)
-            std::cerr << "Attempt to create stream twice!\n";
-        m_streamIf.reset(new LasStreamIf(m_filename));
-        if (!m_streamIf->m_istream)
-        {
-            std::ostringstream oss;
-            oss << "Unable to open stream for '"
-                << m_filename <<"' with error '" << strerror(errno) <<"'";
-            throw pdal_error(oss.str());
-        }
-    }
+    virtual void createStream();
 
     std::unique_ptr<LasStreamIf> m_streamIf;
 

@@ -4,19 +4,17 @@ set(PDAL_VERSION_MAJOR @PDAL_VERSION_MAJOR@)
 set(PDAL_VERSION_MINOR @PDAL_VERSION_MINOR@)
 set(PDAL_VERSION_PATCH @PDAL_VERSION_PATCH@)
 
-set(PDAL_INCLUDE_DIRS)
-set(PDAL_LIBRARY_DIRS)
-foreach(_dir @PDAL_CONFIG_INCLUDE_DIRS@)
-  set_and_check(_foo ${_dir})
-  list(APPEND PDAL_INCLUDE_DIRS ${_foo})
-endforeach(_dir)
-foreach(_dir @PDAL_CONFIG_LIBRARY_DIRS@)
-  set_and_check(_foo ${_dir})
-  list(APPEND PDAL_LIBRARY_DIRS ${_foo})
-endforeach(_dir)
+set_and_check(PDAL_INCLUDE_DIRS "@PACKAGE_INCLUDE_INSTALL_DIR@")
+set_and_check(PDAL_LIBRARY_DIRS "@PACKAGE_LIB_INSTALL_DIR@")
 
 include("${CMAKE_CURRENT_LIST_DIR}/PDALTargets.cmake")
 
-set(PDAL_LIBRARIES @PDAL_BASE_LIB_NAME@ @PDAL_UTIL_LIB_NAME@) 
+#
+# Note: One should be able to just link libpdalcpp.so/dylib/lib.  But
+#   I can't find a way to use @PDAL_LIB_NAME@ because it's not
+#   an actual library that cmake knows about.  If you can figure this out,
+#   a change would be nice.
+#
+set(PDAL_LIBRARIES @PDAL_BASE_LIB_NAME@ @PDAL_UTIL_LIB_NAME@)
 
 check_required_components(PDAL)

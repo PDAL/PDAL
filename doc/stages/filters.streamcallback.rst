@@ -15,5 +15,5 @@ programmers extending PDAL functionality and isn't useful to end users.
 Options
 -------
 
-None.
+.. include:: filter_opts.rst
 

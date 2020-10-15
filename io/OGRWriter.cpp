@@ -37,9 +37,10 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wredundant-decls"
-#include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/private/gdal/ErrorHandler.hpp>
 
 #include <ogr_core.h>
 #include <ogrsf_frmts.h>

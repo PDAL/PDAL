@@ -58,7 +58,31 @@ class TileDBReaderTest : public ::testing::Test
     protected:
         virtual void SetUp()
         {
+            tiledb::Context ctx;
+            FauxReader rdr;
+            TileDBWriter writer;
+            Options writer_options;
+            Options reader_options;
+
+            if (Utils::fileExists(data_path))
+                 tiledb::Object::remove(ctx, data_path);
+
+            writer_options.add("array_name", data_path);
+
+            reader_options.add("mode", "ramp");
+            reader_options.add("count", 100);
+            rdr.setOptions(reader_options);
+
+            writer.setOptions(writer_options);
+            writer.setInput(rdr);
+            writer.setSpatialReference(utm16);
+
+            FixedPointTable table(10);
+            writer.prepare(table);
+            writer.execute(table);
         }
+
+        std::string data_path = Support::temppath("tiledb_array");
     };
 
     TEST_F(TileDBReaderTest, constructor)
@@ -78,9 +102,8 @@ class TileDBReaderTest : public ::testing::Test
     {
         tiledb::Context ctx;
         tiledb::VFS vfs(ctx);
-        std::string pth(Support::datapath("tiledb/array"));
         Options options;
-        options.add("array_name", pth);
+        options.add("array_name", data_path);
         options.add("bbox3d", "([0, 0.5], [0, 0.5], [0, 0.5])");
 
         TileDBReader reader;
@@ -90,6 +113,23 @@ class TileDBReaderTest : public ::testing::Test
         reader.prepare(table);
         reader.execute(table);
         EXPECT_EQ(table.numPoints(), 50);
+    }
+
+    TEST_F(TileDBReaderTest, read_zero_bbox)
+    {
+        tiledb::Context ctx;
+        tiledb::VFS vfs(ctx);
+        Options options;
+        options.add("array_name", data_path);
+        options.add("bbox3d", "([1.1, 1.2], [1.1, 1.2], [1.1, 1.2])");
+
+        TileDBReader reader;
+        reader.setOptions(options);
+
+        FixedPointTable table(100);
+        reader.prepare(table);
+        reader.execute(table);
+        EXPECT_EQ(table.numPoints(), 0);
     }
 
     TEST_F(TileDBReaderTest, read)
@@ -143,11 +183,10 @@ class TileDBReaderTest : public ::testing::Test
 
         tiledb::Context ctx;
         tiledb::VFS vfs(ctx);
-        std::string pth(Support::datapath("tiledb/array"));
         Options options;
-        options.add("array_name", pth);
+        options.add("array_name", data_path);
 
-        tiledb::Array array(ctx, pth, TILEDB_READ);
+        tiledb::Array array(ctx, data_path, TILEDB_READ);
         auto domain = array.non_empty_domain<double>();
         std::vector<double> subarray;
 
@@ -175,11 +214,9 @@ class TileDBReaderTest : public ::testing::Test
         c.setInput(reader);
         c.prepare(table);
         c.execute(table);
-        // test using a sidecar file
-        EXPECT_EQ(reader.getSpatialReference(), utm16);
+        EXPECT_TRUE(reader.getSpatialReference().equals(utm16));
     }
 
-#if TILEDB_VERSION_MAJOR >= 1 && TILEDB_VERSION_MINOR >= 7
     TEST_F(TileDBReaderTest, spatial_reference)
     {
         tiledb::Context ctx;
@@ -215,8 +252,7 @@ class TileDBReaderTest : public ::testing::Test
         FixedPointTable table2(100);
         rdr.prepare(table2);
         rdr.execute(table2);
-        EXPECT_EQ(rdr.getSpatialReference(), utm16);
+        EXPECT_TRUE(rdr.getSpatialReference().equals(utm16));
     }
-#endif
 }
 

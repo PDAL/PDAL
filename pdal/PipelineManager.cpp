@@ -46,7 +46,7 @@ namespace pdal
 
 PipelineManager::PipelineManager(point_count_t streamLimit) :
     m_factory(new StageFactory),
-    m_tablePtr(new PointTable()), m_table(*m_tablePtr),
+    m_tablePtr(new ColumnPointTable()), m_table(*m_tablePtr),
     m_streamTablePtr(new FixedPointTable(streamLimit)),
     m_streamTable(*m_streamTablePtr),
     m_progressFd(-1), m_input(nullptr)

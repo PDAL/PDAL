@@ -42,7 +42,6 @@ namespace pdal
 {
 
 class ProgramArgs;
-class PointTable;
 class PointView;
 
 class PDAL_DLL MADFilter : public Filter

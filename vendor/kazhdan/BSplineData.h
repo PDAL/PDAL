@@ -64,7 +64,7 @@ struct BSplineElementCoefficients
 template< int Degree >
 struct BSplineElements : public std::vector< BSplineElementCoefficients< Degree > >
 {
-	static const bool _Primal = (Degree&1)==1;
+	static const bool _Primal = (Degree&1);
 	static const int _Off = (Degree+1)/2;
 	static int _ReflectLeft ( int offset , int res );
 	static int _ReflectRight( int offset , int res );

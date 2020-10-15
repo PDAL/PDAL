@@ -35,154 +35,80 @@
 #pragma once
 
 #include <vector>
+#include <list>
 #include <map>
-#include <math.h>
+#include <queue>
+#include <mutex>
+#include <condition_variable>
 
 #include <arbiter/arbiter.hpp>
 
 #include <pdal/Reader.hpp>
+#include <pdal/Streamable.hpp>
+#include <pdal/Streamable.hpp>
 #include <pdal/util/Bounds.hpp>
-#include <pdal/util/IStream.hpp>
+
+#include "EsriUtil.hpp"
+#include "PageManager.hpp"
 
 namespace pdal
 {
-namespace
-{
-std::map<std::string, pdal::Dimension::Id> const esriDims
-{
-    {"INTENSITY",   Dimension::Id::Intensity},
-    {"CLASS_CODE",  Dimension::Id::ClassFlags},
-    {"FLAGS",       Dimension::Id::Flag},
-    {"RETURNS",     Dimension::Id::NumberOfReturns},
-    {"USER_DATA",   Dimension::Id::UserData},
-    {"POINT_SRC_ID",Dimension::Id::PointSourceId},
-    {"GPS_TIME",    Dimension::Id::GpsTime},
-    {"SCAN_ANGLE",  Dimension::Id::ScanAngleRank},
-    {"RGB",         Dimension::Id::Red}
-};
-std::map<std::string, pdal::Dimension::Type> const dimTypes
-{
-    {"UInt8", Dimension::Type::Unsigned8},
-    {"UInt16", Dimension::Type::Unsigned16},
-    {"UInt32", Dimension::Type::Unsigned32},
-    {"UInt64", Dimension::Type::Unsigned64},
-    {"Int8", Dimension::Type::Signed8},
-    {"Int16", Dimension::Type::Signed16},
-    {"Int32", Dimension::Type::Signed32},
-    {"Int64", Dimension::Type::Signed64},
-    {"Float64", Dimension::Type::Double},
-    {"Float32", Dimension::Type::Float}
-};
-}
 
 class SrsTransform;
+class ThreadPool;
 
-class PDAL_DLL EsriReader : public Reader
+class PDAL_DLL EsriReader : public Reader, public Streamable
 {
 public:
     EsriReader();
     ~EsriReader();
 
 protected:
-    virtual void initInfo() = 0;
+    std::unique_ptr<arbiter::Arbiter> m_arbiter;
+
+    virtual NL::json initInfo() = 0;
     virtual std::vector<char> fetchBinary(std::string url, std::string attNum,
             std::string ext) const = 0;
-    virtual NL::json fetchJson(std::string) = 0;
+    virtual std::string fetchJson(std::string) = 0;
 
-    struct EsriArgs
-    {
-        Bounds bounds;
-        uint16_t threads = 8;
-        std::vector<std::string> dimensions;
-        double min_density;
-        double max_density;
-    };
+private:
+    struct Args;
+    struct DimData;
+    class TileContents;
 
-    struct Version
-    {
-        int major = 0;
-        int minor = 0;
-        int patch = 0;
-        Version(){};
-        Version(std::string vString)
-        {
-            std::istringstream iss(vString);
-            std::string token;
-            if(std::getline(iss, token, '.'))
-                if(!token.empty())
-                    major = std::stoi(token);
-            if(std::getline(iss, token, '.'))
-                if(!token.empty())
-                    minor = std::stoi(token);
-            if(std::getline(iss, token, '.'))
-                if(!token.empty())
-                    patch = std::stoi(token);
-        }
-        bool operator<(const Version& other)
-        {
-            if(this->major < other.major)
-                return true;
-            if(this->minor < other.minor && this->major == other.major)
-                return true;
-            if(this->patch < other.patch &&
-                    this->major == other.major &&
-                    this->minor == other.minor)
-                return true;
-            return false;
-        }
-        bool operator==(const Version& other)
-        {
-            return (this->patch == other.patch && this->major == other.major &&
-                this->minor == other.minor);
-        }
-        bool operator <=(const Version& other)
-            { return *this < other || *this == other; }
-        bool operator >=(const Version& other)
-            { return !(*this < other); }
-        bool operator > (const Version& other)
-            { return !(*this < other) && !(*this == other); }
-    };
-
-    std::unique_ptr<ILeStream> m_stream;
-    std::unique_ptr<arbiter::Arbiter> m_arbiter;
-    arbiter::gzip::Decompressor m_decomp;
-
-    EsriArgs m_args;
+    std::unique_ptr<Args> m_args;
     NL::json m_info;
-    std::mutex m_mutex;
-    BOX3D m_bounds;
-    BOX3D m_ecefBounds;
-    std::map<std::string, Dimension::Id> m_dimensions;
     int m_nodeCap;
-    int m_maxNode = 0;
-    Version m_version;
+    i3s::Version m_version;
     SpatialReference m_nativeSrs;
+    std::unique_ptr<i3s::PageManager> m_pageManager;
     std::unique_ptr<SrsTransform> m_ecefTransform;
-
-    struct dimData
-    {
-        int key;
-        std::string dataType;
-        Dimension::Type dimType;
-        std::string name;
-    };
-    std::map<Dimension::Id, dimData> m_dimMap;
-    std::map<int, NL::json> m_nodepages;
+    std::unique_ptr<ThreadPool> m_pool;
+    std::vector<DimData> m_esriDims;
+    size_t m_extraDimCount;
+    std::vector<int> m_nodes;
+    size_t m_curNodeIdx;
+    size_t m_tilesToProcess;
+    PointId m_pointId;
+    std::queue<TileContents, std::list<TileContents>> m_contents;
+    std::unique_ptr<TileContents> m_currentTile;
+    mutable std::mutex m_mutex;
+    mutable std::condition_variable m_contentsCv;
 
     virtual void addArgs(ProgramArgs& args) override;
     virtual void initialize(PointTableRef table) override;
     virtual void addDimensions(PointLayoutPtr layout) override;
     virtual void ready(PointTableRef table) override;
     virtual point_count_t read(PointViewPtr view, point_count_t count) override;
-    virtual void done(PointTableRef table) override;
+    virtual bool processOne(PointRef&) override;
     void createView(std::string localUrl, int nodeIndex,  PointView& view);
-    BOX3D createCube(const NL::json& base);
-    BOX3D parseBox(const NL::json& base);
-    void traverseTree(NL::json page, int index, std::vector<int>& nodes,
-        int depth, int pageIndex);
-
-private:
-    void createBounds();
+    void traverseTree(i3s::PagePtr page, int node);
+    void load(int nodeId);
+    TileContents loadPath(const std::string& url);
+    void checkTile(const TileContents& tile);
+    void process(PointViewPtr dstView, const TileContents& tile,
+        point_count_t count);
+    bool processPoint(PointRef& dst, const TileContents& tile);
 };
 
 } // namespace pdal

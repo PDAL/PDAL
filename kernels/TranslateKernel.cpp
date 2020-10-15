@@ -172,7 +172,7 @@ void TranslateKernel::makeArgPipeline()
 
     // add each filter provided on the command-line,
     // updating the stage pointer
-    for (auto const f : m_filterType)
+    for (auto const& f : m_filterType)
     {
         std::string filter_name(f);
 

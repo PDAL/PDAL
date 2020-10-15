@@ -407,13 +407,20 @@ public:
         }
 
         m_rawVal = s;
-        if (!Utils::fromString(s, m_var))
+        auto status = Utils::fromString(s, m_var);
+        if (!status)
         {
             std::string error(m_error);
 
             if (error.empty())
-                error = "Invalid value '" + s + "' for argument '" +
-                    m_longname + "'.";
+            {
+                if (status.what().size())
+                    error = "Invalid value for argument '" + m_longname +
+                        "': " + status.what();
+                else
+                    error = "Invalid value '" + s + "' for argument '" +
+                        m_longname + "'.";
+            }
             throw arg_val_error(error);
         }
         m_set = true;
@@ -755,17 +762,25 @@ public:
         T var;
 
         m_rawVal = s;
-        if (!Utils::fromString(s, var))
+        auto status = Utils::fromString(s, var);
+        if (!status)
         {
             std::string error(m_error);
 
             if (error.empty())
-                error = "Invalid value for argument '" + m_longname + "'.";
+            {
+                if (status.what().size())
+                    error = "Invalid value for argument '" + m_longname +
+                        "': " + status.what();
+                else
+                    error = "Invalid value '" + s + "' for argument '" +
+                        m_longname + "'.";
+            }
             throw arg_val_error(error);
         }
         if (!m_set)
             m_var.clear();
-        m_var.push_back(var);
+        m_var.push_back(std::move(var));
         m_set = true;
     }
 
@@ -1261,9 +1276,9 @@ public:
                 out << name << std::string(postNameSpacing, ' ') <<
                     descrip[0] << std::endl;
             }
-            for (size_t i = 1; i < descrip.size(); ++i)
+            for (size_t ii = 1; ii < descrip.size(); ++ii)
                 out << std::string(secondIndent, ' ') <<
-                    descrip[i] << std::endl;
+                    descrip[ii] << std::endl;
         }
     }
 

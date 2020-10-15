@@ -35,3 +35,6 @@ _`dimension`
 
 minmax
   Whether to return the minimum or maximum value in the dimension.
+
+.. include:: filter_opts.rst
+

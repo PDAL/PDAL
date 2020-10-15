@@ -39,6 +39,7 @@ RUN    \
     rm /usr/bin/h5*;
 
 FROM alpine:3.11
+RUN apk add --no-cache ca-certificates
 
 COPY --from=builder /usr/ /usr/
 COPY --from=builder /lib/ /lib/

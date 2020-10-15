@@ -77,7 +77,7 @@ PointViewSet GroupByFilter::run(PointViewPtr inView)
 
     for (PointId idx = 0; idx < inView->size(); idx++)
     {
-        uint64_t val = inView->getFieldAs<uint64_t>(m_dimId, idx);
+        int64_t val = inView->getFieldAs<int64_t>(m_dimId, idx);
         PointViewPtr& outView = m_viewMap[val];
         if (!outView)
             outView = inView->makeNew();

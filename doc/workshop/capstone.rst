@@ -41,7 +41,7 @@ Given the following pipeline for fetching the data, complete the rest of the tas
 * Thin it by 1.0 meter spacing using :ref:`filters.sample` (See :ref:`workshop-thinning`)
 * Filter out noise using :ref:`filters.outlier` (See :ref:`workshop-denoising`)
 * Classify ground points using :ref:`filters.smrf` (See :ref:`workshop-ground`)
-* Compute height above ground using :ref:`filters.hag`
+* Compute height above ground using :ref:`filters.hag_nn`
 * Generate a digital terrain model (DTM) using :ref:`writers.gdal` (See :ref:`workshop-dtm`)
 * Generate a average vegetative height model using :ref:`writers.gdal`
 

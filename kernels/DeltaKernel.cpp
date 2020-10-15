@@ -69,7 +69,7 @@ void DeltaKernel::addSwitches(ProgramArgs& args)
 
 
 PointViewPtr DeltaKernel::loadSet(const std::string& filename,
-    PointTable& table)
+    PointTableRef table)
 {
     Stage& reader = makeReader(filename, m_driverOverride);
     reader.prepare(table);
@@ -81,8 +81,8 @@ PointViewPtr DeltaKernel::loadSet(const std::string& filename,
 
 int DeltaKernel::execute()
 {
-    PointTable srcTable;
-    PointTable candTable;
+    ColumnPointTable srcTable;
+    ColumnPointTable candTable;
     DimIndexMap dims;
 
     PointViewPtr srcView = loadSet(m_sourceFile, srcTable);
@@ -180,8 +180,8 @@ MetadataNode DeltaKernel::dump(PointViewPtr& srcView, PointViewPtr& candView,
 void DeltaKernel::accumulate(DimIndex& d, double v)
 {
     d.m_cnt++;
-    d.m_min = std::min(v, d.m_min);
-    d.m_max = std::max(v, d.m_max);
+    d.m_min = (std::min)(v, d.m_min);
+    d.m_max = (std::max)(v, d.m_max);
     d.m_avg += (v - d.m_avg) / d.m_cnt;
 }
 

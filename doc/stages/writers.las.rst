@@ -19,7 +19,7 @@ VLRs
 -------
 
 VLRs can be created by providing a JSON node called `vlrs` with objects
-containing `user_id` and `data` items.
+containing `user_id` and `data` (or `filename`) items.
 
 .. code-block:: json
 
@@ -40,11 +40,17 @@ containing `user_id` and `data` items.
               "description": "A description under 32 bytes",
               "record_id": 43,
               "user_id": "hobu",
-              "data": "dGhpcyBpcyBzb21lIG1vcmUgdGV4dA=="
+              "filename": "path-to-my-file.input"
               }],
           "filename":"outputfile.las"
       }
   ]
+
+.. note::
+
+    `data` or `filename` must be specified. Data must always be
+    provided as base64 encoded strings, but content of `filename`
+    is expected to be raw data.
 
 Example
 -------
@@ -208,6 +214,8 @@ extra_dims
 pdal_metadata
   Write two VLRs containing `JSON`_ output with both the :ref:`metadata` and
   :ref:`pipeline` serialization. [Default: false]
+
+.. include:: writer_opts.rst
 
 .. _`JSON`: http://www.json.org/
 .. _LAS format: http://asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html

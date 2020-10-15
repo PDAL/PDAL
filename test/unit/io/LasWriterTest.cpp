@@ -89,7 +89,7 @@ TEST(LasWriterTest, srs)
 
     LasTester tester;
     SpatialReference srs = tester.srs(writer);
-    EXPECT_EQ(srs, SpatialReference("EPSG:26915"));
+    EXPECT_EQ(srs, "EPSG:26915");
 }
 
 
@@ -114,7 +114,7 @@ TEST(LasWriterTest, srs2)
 
     LasTester tester;
     SpatialReference srs = tester.srs(writer);
-    EXPECT_EQ(srs, SpatialReference("EPSG:32615"));
+    EXPECT_EQ(srs, "EPSG:32615");
 }
 
 
@@ -1164,8 +1164,7 @@ TEST(LasWriterTest, pdal_add_vlr)
           "description": "A description under 32 bytes",
           "record_id": 43,
           "user_id": "hobu",
-          "data": "dGhpcyBpcyBzb21lIG1vcmUgdGV4dA=="
-         })"
+          "filename": ")" + Support::datapath("las/vlr-43.bin") + R"("})"
     );
 
     Options writerOpts;
@@ -1195,8 +1194,18 @@ TEST(LasWriterTest, pdal_add_vlr)
 
     auto pred = [](MetadataNode temp)
         { return Utils::startsWith(temp.name(), "vlr_"); };
-    MetadataNodeList nodes = forward.findChildren(pred);
-    EXPECT_EQ(nodes.size(), 2UL);
+
+    MetadataNode root = reader2.getMetadata();
+    MetadataNodeList nodes = root.findChildren(pred);
+    EXPECT_EQ(nodes.size(), 2u);
+
+    MetadataNode node = nodes[1].findChild("data");
+    std::vector<uint8_t> buf =
+        Utils::base64_decode(node.value());
+
+
+    EXPECT_EQ(memcmp(buf.data(), "this is some more text",
+        buf.size() - 1), 0);
 }
 
 // Make sure we can read an array of VLRs in a pipeline.

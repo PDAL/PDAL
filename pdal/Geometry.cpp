@@ -32,8 +32,12 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <ogr_api.h>
+#include <ogr_geometry.h>
+
 #include <pdal/Geometry.hpp>
-#include <pdal/GDALUtils.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
+
 #include "private/SrsTransform.hpp"
 
 namespace pdal
@@ -125,7 +129,7 @@ void Geometry::update(const std::string& wkt_or_json)
 Geometry& Geometry::operator=(const Geometry& input)
 {
     if (m_geom != input.m_geom)
-        *m_geom = *input.m_geom;
+        m_geom.reset(input.m_geom->clone());
     modified();
     return *this;
 }
@@ -138,20 +142,25 @@ bool Geometry::srsValid() const
 }
 
 
-void Geometry::transform(const SpatialReference& out)
+Utils::StatusWithReason Geometry::transform(SpatialReference out)
 {
+    using namespace Utils;
+
     if (!srsValid() && out.empty())
-        return;
+        return StatusWithReason();
 
     if (!srsValid())
-        throw pdal_error("Geometry::transform() failed.  NULL source SRS.");
+        return StatusWithReason(-2,
+            "Geometry::transform() failed.  NULL source SRS.");
     if (out.empty())
-        throw pdal_error("Geometry::transform() failed.  NULL target SRS.");
+        return StatusWithReason(-2,
+            "Geometry::transform() failed.  NULL target SRS.");
 
     SrsTransform transform(getSpatialReference(), out);
     if (m_geom->transform(transform.get()) != OGRERR_NONE)
-        throw pdal_error("Geometry::transform() failed.");
+        return StatusWithReason(-1, "Geometry::transform() failed.");
     modified();
+    return StatusWithReason();
 }
 
 

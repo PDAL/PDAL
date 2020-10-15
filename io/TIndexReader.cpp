@@ -33,8 +33,13 @@
 ****************************************************************************/
 
 #include "TIndexReader.hpp"
-#include <pdal/GDALUtils.hpp>
+
+#include <ogr_api.h>
+
+#include <pdal/Polygon.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
+#include <pdal/private/gdal/SpatialRef.hpp>
 
 namespace pdal
 {
@@ -62,10 +67,8 @@ TIndexReader::FieldIndexes TIndexReader::getFields()
     if (indexes.m_filename < 0)
         throwError("Unable to find field '" + m_tileIndexColumnName +
             "' in file '" + m_filename + "'.");
-    indexes.m_srs = OGR_FD_GetFieldIndex(fDefn, m_srsColumnName.c_str());
-    if (indexes.m_srs < 0)
-        throwError("Unable to find field '" + m_srsColumnName + "' in file '" +
-            m_filename + "'.");
+    if (m_srsColumnName.size())
+        indexes.m_srs = OGR_FD_GetFieldIndex(fDefn, m_srsColumnName.c_str());
 
     indexes.m_ctime = OGR_FD_GetFieldIndex(fDefn, "created");
     indexes.m_mtime = OGR_FD_GetFieldIndex(fDefn, "modified");
@@ -90,8 +93,12 @@ std::vector<TIndexReader::FileInfo> TIndexReader::getFiles()
         FileInfo fileInfo;
         fileInfo.m_filename =
             OGR_F_GetFieldAsString(feature, indexes.m_filename);
-        fileInfo.m_srs =
-            OGR_F_GetFieldAsString(feature, indexes.m_srs);
+
+        if (m_srsColumnName.size())
+        {
+            fileInfo.m_srs =
+                OGR_F_GetFieldAsString(feature, indexes.m_srs);
+        }
         output.push_back(fileInfo);
 
         OGR_F_Destroy(feature);
@@ -105,7 +112,7 @@ void TIndexReader::addArgs(ProgramArgs& args)
 {
     args.add("lyr_name", "OGR layer name from which to read tile index layer",
         m_layerName, "pdal");
-    args.add("srs_column", "Column to use for SRS", m_srsColumnName, "srs");
+    args.add("srs_column", "Column to use to override a file's SRS", m_srsColumnName, "");
     args.add("tindex_name", "OGR column name from which to read tile "
         "index location", m_tileIndexColumnName, "location");
     args.add("sql", "OGR-compatible SQL statement for querying tile "
@@ -177,25 +184,20 @@ void TIndexReader::initialize()
     if (getSpatialReference().empty())
         setSpatialReference(SpatialReference(m_out_ref->wkt()));
 
-    std::unique_ptr<gdal::Geometry> wkt_g;
-
     // If the user set either explicit 'polygon' or 'boundary' options
     // we will filter by that geometry. The user can set a 'filter_srs'
     // option to override the SRS of the input geometry and we will
     // reproject to the output projection as needed.
+    Polygon poly;
     if (m_wkt.size())
     {
         // Reproject the given wkt to the output SRS so
         // filtering/cropping works
-        gdal::SpatialRef assign(m_filterSRS);
-        gdal::Geometry before(m_wkt, assign);
-        before.transform(*m_out_ref);
+        poly = Polygon(m_wkt, m_filterSRS);
+        poly.transform(m_out_ref->wkt());
 
-        wkt_g.reset (new gdal::Geometry(before.wkt(), *m_out_ref));
-
-        geometry = wkt_g->get();
-        m_wkt = wkt_g->wkt();
-        OGR_L_SetSpatialFilter(m_layer, geometry);
+        m_wkt = poly.wkt();
+        OGR_L_SetSpatialFilter(m_layer, poly.getOGRHandle());
     }
 
     if (m_attributeFilter.size())
@@ -226,17 +228,19 @@ void TIndexReader::initialize()
         reader->setOptions(readerOptions);
         Stage *premerge = reader;
 
-        if (m_tgtSrsString != f.m_srs &&
-            (m_tgtSrsString.size() && f.m_srs.size()))
+        if (m_tgtSrsString.size() )
         {
             Stage *repro = m_factory.createStage("filters.reprojection");
             repro->setInput(*reader);
             Options reproOptions;
             reproOptions.add("out_srs", m_tgtSrsString);
-            reproOptions.add("in_srs", f.m_srs);
-            log()->get(LogLevel::Debug2) << "Repro = "
-                                         << m_tgtSrsString << "/"
-                                         << f.m_srs << "!\n";
+            if (m_srsColumnName.size())
+            {
+                reproOptions.add("in_srs", f.m_srs);
+                log()->get(LogLevel::Debug2) << "Repro = "
+                                             << m_tgtSrsString << "/"
+                                             << f.m_srs << "!\n";
+            }
             repro->setOptions(reproOptions);
             premerge = repro;
         }

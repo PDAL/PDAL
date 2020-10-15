@@ -38,6 +38,7 @@
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "private/DimRange.hpp"
+#include "private/expr/AssignStatement.hpp"
 
 namespace pdal
 {
@@ -61,6 +62,7 @@ struct AssignArgs
 {
     std::vector<AssignRange> m_assignments;
     DimRange m_condition;
+    std::vector<expr::AssignStatement> m_statements;
 };
 
 void AssignRange::parse(const std::string& r)
@@ -128,9 +130,11 @@ AssignFilter::~AssignFilter()
 void AssignFilter::addArgs(ProgramArgs& args)
 {
     args.add("assignment", "Values to assign to dimensions based on range.",
-        m_args->m_assignments).setPositional();
+        m_args->m_assignments);
     args.add("condition", "Condition for assignment based on range.",
         m_args->m_condition);
+    args.add("value", "Value to assign to dimension based on expression.",
+        m_args->m_statements);
 }
 
 
@@ -146,6 +150,12 @@ void AssignFilter::prepared(PointTableRef table)
             throwError("Invalid dimension name in 'assignment' option: '" +
                 r.m_name + "'.");
     }
+    for (expr::AssignStatement& expr : m_args->m_statements)
+    {
+        auto status = expr.prepare(layout);
+        if (!status)
+            throwError(status.what());
+    }
 }
 
 
@@ -160,6 +170,10 @@ bool AssignFilter::processOne(PointRef& point)
     for (AssignRange& r : m_args->m_assignments)
         if (r.valuePasses(point.getFieldAs<double>(r.m_id)))
             point.setField(r.m_id, r.m_value);
+    for (expr::AssignStatement& expr : m_args->m_statements)
+        if (expr.conditionalExpr().eval(point))
+            point.setField(expr.identExpr().eval(), expr.valueExpr().eval(point));
+
     return true;
 }
 

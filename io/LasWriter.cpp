@@ -505,7 +505,8 @@ void LasWriter::addGeotiffVlrs()
 /// \return  Whether the VLR was added.
 bool LasWriter::addWktVlr()
 {
-    std::string wkt = m_srs.getWKT();
+    // LAS 1.4 requires WKTv1
+    std::string wkt = m_srs.getWKT1();
     if (wkt.empty())
         return false;
 

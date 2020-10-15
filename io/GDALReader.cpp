@@ -36,8 +36,8 @@
 
 #include <sstream>
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/private/gdal/Raster.hpp>
 
 namespace pdal
 {
@@ -72,8 +72,6 @@ GDALReader::~GDALReader()
 
 void GDALReader::initialize()
 {
-    gdal::registerDrivers();
-
     m_raster.reset(new gdal::Raster(m_filename));
     if (m_raster->open() == gdal::GDALError::CantOpen)
         throwError("Couldn't open raster file '" + m_filename + "'.");
@@ -85,23 +83,31 @@ void GDALReader::initialize()
     m_height = m_raster->height();
     m_bandTypes = m_raster->getPDALDimensionTypes();
 
-    std::unique_ptr<PointLayout> layout(new PointLayout());
-    addDimensions(layout.get());
-
-    auto p = std::find(m_bandIds.begin(), m_bandIds.end(), Dimension::Id::Z);
-
-    int nBand(1);
-    if (p != m_bandIds.end())
+    m_dimNames.clear();
+    if (m_header.size())
     {
-        // Bands are 1-based.
-        nBand = (int) std::distance(m_bandIds.begin(), p) + 1;
+        m_dimNames = Utils::split(m_header, ',');
+        if (m_dimNames.size() != m_bandTypes.size())
+            throwError("Dimension names are not the same count as "
+                "raster bands.");
+    }
+    else
+    {
+        for (size_t i = 0; i < m_bandTypes.size(); ++i)
+            m_dimNames.push_back("band_" + std::to_string(i + 1));
     }
 
-    m_dimNames.clear();
-    Dimension::IdList dims = layout->dims();
-    for (auto di = dims.begin(); di != dims.end(); ++di)
-        m_dimNames.push_back(layout->dimName(*di));
-    m_bounds = m_raster->bounds(nBand);
+    int zBand = 1;
+    for (size_t i = 0; i < m_bandIds.size(); ++i)
+        if (m_bandIds[i] == Dimension::Id::Z)
+        {
+            zBand = i + 1;
+            break;
+        }
+
+    // Bounds is only used in inspect.  We calculate it here so that
+    // the raster can be released.
+    m_bounds = m_raster->bounds(zBand);
 
     m_raster.reset();
 }
@@ -127,21 +133,11 @@ void GDALReader::addDimensions(PointLayoutPtr layout)
     layout->registerDim(pdal::Dimension::Id::X);
     layout->registerDim(pdal::Dimension::Id::Y);
 
-    std::vector<std::string> dimNames;
-    if (m_header.size())
-    {
-        dimNames = Utils::split(m_header, ',');
-        if (dimNames.size() != m_bandTypes.size())
-            throwError("Dimension names are not the same count as "
-                "raster bands.");
-    }
-
     for (size_t i = 0; i < m_bandTypes.size(); ++i)
     {
-        std::ostringstream oss;
-        oss << "band-" << (i + 1);
-        std::string name(dimNames.empty() ? oss.str() : dimNames[i]);
-        m_bandIds.push_back(layout->registerOrAssignDim(name, m_bandTypes[i]));
+        const std::string& name = m_dimNames[i];
+        Dimension::Type type = m_bandTypes[i];
+        m_bandIds.push_back(layout->registerOrAssignDim(name, type));
     }
 }
 

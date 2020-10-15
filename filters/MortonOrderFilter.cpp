@@ -10,8 +10,7 @@
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in
- *       the documentation and/or other materials provided
+ *       notice, this list of conditions and the following disclaimer in *       the documentation and/or other materials provided
  *       with the distribution.
  *     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
  *       names of its contributors may be used to endorse or promote
@@ -33,8 +32,6 @@
  ****************************************************************************/
 
 #include "MortonOrderFilter.hpp"
-
-#include <pdal/EigenUtils.hpp>
 
 #include <climits>
 #include <iostream>
@@ -141,7 +138,7 @@ PointViewSet MortonOrderFilter::reverseMorton(PointViewPtr inView)
 
     // compute range
     BOX2D buffer_bounds;
-    calculateBounds(*inView, buffer_bounds);
+    inView->calculateBounds(buffer_bounds);
     const double xrange = buffer_bounds.maxx - buffer_bounds.minx;
     const double yrange = buffer_bounds.maxy - buffer_bounds.miny;
 
@@ -192,7 +189,7 @@ PointViewSet MortonOrderFilter::morton(PointViewPtr inView)
     std::multimap<Coord, PointId, CmpZOrder> sorted(compare);
 
     BOX2D buffer_bounds;
-    calculateBounds(*inView, buffer_bounds);
+    inView->calculateBounds(buffer_bounds);
     double xrange = buffer_bounds.maxx - buffer_bounds.minx;
     double yrange = buffer_bounds.maxy - buffer_bounds.miny;
 

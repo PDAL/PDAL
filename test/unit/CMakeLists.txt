@@ -31,6 +31,8 @@ PDAL_ADD_TEST(pdal_config_test FILES ConfigTest.cpp)
 PDAL_ADD_TEST(pdal_eigen_test
     FILES
         EigenTest.cpp
+        ${PDAL_SRC_DIR}/private/MathUtils.cpp
+
     INCLUDES
         ${PDAL_VENDOR_DIR}/eigen
 )
@@ -95,6 +97,7 @@ PDAL_ADD_TEST(pdal_spatial_reference_test
         SpatialReferenceTest.cpp
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
+        ${GDAL_INCLUDE_DIR}
     LINK_WITH
         ${GDAL_LIBRARY}
 )
@@ -116,6 +119,7 @@ endif()
 if (PDAL_HAVE_ZSTD)
 PDAL_ADD_TEST(pdal_zstd_test FILES ZstdTest.cpp)
 endif()
+PDAL_ADD_TEST(pdal_where_test FILES WhereTest.cpp)
 
 #
 # sources for the native io
@@ -130,15 +134,14 @@ if (PDAL_HAVE_LASZIP)
         FILES
             io/EptReaderTest.cpp
         LINK_WITH
-            ${GDAL_LIBRARY} # EptReaderTest uses the crop filter.
+            ${GDAL_LIBRARY}
         INCLUDES
+            ${GDAL_INCLUDE_DIR}
             ${NLOHMANN_INCLUDE_DIR}
     )
     PDAL_ADD_TEST(pdal_io_ept_addon_writer_test
         FILES
             io/EptAddonWriterTest.cpp
-        LINK_WITH
-            ${GDAL_LIBRARY} # EptAddonWriterTest uses the crop filter.
         INCLUDES
             ${NLOHMANN_INCLUDE_DIR}
     )
@@ -173,7 +176,15 @@ PDAL_ADD_TEST(pdal_io_las_writer_test
         ${NLOHMANN_INCLUDE_DIR}
 )
 
+PDAL_ADD_TEST(pdal_io_obj_reader_test
+    FILES
+        io/ObjReaderTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}
+)
+
 PDAL_ADD_TEST(pdal_io_optech_test FILES io/OptechReaderTest.cpp)
+
 PDAL_ADD_TEST(pdal_io_pcd_reader_test
     FILES
         io/PcdReaderTest.cpp
@@ -209,6 +220,7 @@ PDAL_ADD_TEST(pdal_io_text_reader_test
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
+PDAL_ADD_TEST(pdal_io_gltf_writer_test FILES io/GltfWriterTest.cpp)
 
 #
 # sources for the native filters
@@ -240,6 +252,8 @@ PDAL_ADD_TEST(pdal_filters_colorization_test
 PDAL_ADD_TEST(pdal_filters_crop_test
     FILES
         filters/CropFilterTest.cpp
+    INCLUDES
+        ${GDAL_INCLUDE_DIR}
     LINK_WITH
         ${GDAL_LIBRARY}
 )
@@ -257,6 +271,7 @@ PDAL_ADD_TEST(pdal_filters_mongoexpression_test
         ${NLOHMANN_INCLUDE_DIR}
 )
 
+PDAL_ADD_TEST(pdal_filters_faceraster_test FILES filters/FaceRasterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_ferry_test FILES filters/FerryFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_groupby_test FILES filters/GroupByFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_hag_test FILES filters/HAGFilterTest.cpp)
@@ -269,9 +284,11 @@ PDAL_ADD_TEST(pdal_filters_icp_test
         ${PDAL_VENDOR_DIR}/eigen
 )
 PDAL_ADD_TEST(pdal_filters_info_test FILES filters/InfoFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_lloydkmeans_test FILES filters/LloydKMeansFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_neighborclassifier_test FILES filters/NeighborClassifierFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_locate_test FILES filters/LocateFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_merge_test FILES filters/MergeTest.cpp)
+PDAL_ADD_TEST(pdal_filters_miniball_test FILES filters/MiniballFilterTest.cpp)
 PDAL_ADD_TEST(pdal_morton_order_test FILES filters/MortonOrderTest.cpp)
 PDAL_ADD_TEST(pdal_filters_additional_merge_test
     FILES
@@ -281,6 +298,11 @@ PDAL_ADD_TEST(pdal_filters_additional_merge_test
 )
 PDAL_ADD_TEST(pdal_filters_normal_test FILES filters/NormalFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_overlay_test FILES filters/OverlayFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_planefit_test
+    FILES
+        filters/PlaneFitFilterTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/eigen)
 PDAL_ADD_TEST(pdal_filters_pmf_test FILES filters/PMFFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_reprojection_test FILES
     filters/ReprojectionFilterTest.cpp)
@@ -317,6 +339,7 @@ PDAL_ADD_TEST(pdal_app_test FILES apps/AppTest.cpp)
 PDAL_ADD_TEST(pdal_app_plugin_test FILES apps/AppPluginTest.cpp)
 PDAL_ADD_TEST(pdal_info_test FILES apps/InfoTest.cpp)
 PDAL_ADD_TEST(pdal_tile_test FILES apps/TileTest.cpp)
+
 PDAL_ADD_TEST(pdal_tindex_test FILES apps/TIndexTest.cpp)
 if (LASZIP_FOUND)
     PDAL_ADD_TEST(pdal_merge_test FILES apps/MergeTest.cpp)

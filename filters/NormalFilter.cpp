@@ -43,9 +43,9 @@
 #include "NormalFilter.hpp"
 #include "private/Point.hpp"
 
-#include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/private/MathUtils.hpp>
 
 #include <Eigen/Dense>
 
@@ -90,7 +90,7 @@ void NormalFilter::addArgs(ProgramArgs& args)
              m_args->m_up, true);
     args.add("refine",
              "Refine normals using minimum spanning tree propagation?",
-             m_args->m_refine, true);
+             m_args->m_refine, false);
 }
 
 void NormalFilter::addDimensions(PointLayoutPtr layout)
@@ -132,7 +132,7 @@ void NormalFilter::compute(PointView& view, KD3Index& kdi)
         // Perform eigen decomposition of covariance matrix computed from
         // neighborhood composed of k-nearest neighbors.
         PointIdList neighbors = kdi.neighbors(p.pointId(), m_args->m_knn);
-        auto B = computeCovariance(view, neighbors);
+        auto B = math::computeCovariance(view, neighbors);
         SelfAdjointEigenSolver<Matrix3d> solver(B);
         if (solver.info() != Success)
             throwError("Cannot perform eigen decomposition.");

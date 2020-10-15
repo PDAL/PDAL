@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: ca8bf63974b7614eec6dd3cb414a7e2b07345820
+// Git SHA: e9f91be5d7b36213e82bab86c1810f9bcc9225d3
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -3185,6 +3185,8 @@ namespace ARBITER_CUSTOM_NAMESPACE
 namespace arbiter
 {
 
+using StringMap = std::map<std::string, std::string>;
+
 /** @brief Exception class for all internally thrown runtime errors. */
 class ArbiterError : public std::runtime_error
 {
@@ -3196,10 +3198,10 @@ namespace http
 {
 
 /** HTTP header fields. */
-using Headers = std::map<std::string, std::string>;
+using Headers = StringMap;
 
 /** HTTP query parameters. */
-using Query = std::map<std::string, std::string>;
+using Query = StringMap;
 
 /** @cond arbiter_internal */
 
@@ -5144,6 +5146,9 @@ class ARBITER_DLL Endpoint
     friend class Arbiter;
 
 public:
+    Endpoint() : m_driver(nullptr)
+    {}
+
     /** Returns root directory name without any type-prefixing, and will
      * always end with the character `/`.  For example `~/data/`, or
      * `my-bucket/nested-directory/`.
@@ -5591,6 +5596,16 @@ public:
     LocalHandle getLocalHandle(
             std::string path,
             std::string tempPath = "") const;
+
+    /** @brief Get a LocalHandle to a possibly remote file.
+     *
+     * If @p tempPath is not specified, the environment will be searched for a
+     * temporary location.
+     */
+    LocalHandle getLocalHandle(
+            std::string path,
+            http::Headers headers,
+            http::Query query = http::Query()) const;
 
     /** Fetch the common HTTP pool, which may be useful when dynamically
      * constructing adding a Driver via Arbiter::addDriver.

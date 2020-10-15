@@ -105,37 +105,49 @@ public:
         Everything e;
         Dimension::Type type = m_layout->dimDetail(dim)->type();
 
-        m_container->getFieldInternal(dim, m_idx, &e);
+        // We don't hoist getFieldInternal() out of the switch stmt.
+        // because we don't want to call if the type is bad.  We also
+        // don't want an extra check on type.
         switch (type)
         {
         case Dimension::Type::Unsigned8:
+            m_container->getFieldInternal(dim, m_idx, &e);
             success = Utils::numericCast(e.u8, val);
             break;
         case Dimension::Type::Unsigned16:
+            m_container->getFieldInternal(dim, m_idx, &e);
             success = Utils::numericCast(e.u16, val);
             break;
         case Dimension::Type::Unsigned32:
+            m_container->getFieldInternal(dim, m_idx, &e);
             success = Utils::numericCast(e.u32, val);
             break;
         case Dimension::Type::Unsigned64:
+            m_container->getFieldInternal(dim, m_idx, &e);
             success = Utils::numericCast(e.u64, val);
             break;
         case Dimension::Type::Signed8:
+            m_container->getFieldInternal(dim, m_idx, &e);
             success = Utils::numericCast(e.s8, val);
             break;
         case Dimension::Type::Signed16:
+            m_container->getFieldInternal(dim, m_idx, &e);
             success = Utils::numericCast(e.s16, val);
             break;
         case Dimension::Type::Signed32:
+            m_container->getFieldInternal(dim, m_idx, &e);
             success = Utils::numericCast(e.s32, val);
             break;
         case Dimension::Type::Signed64:
+            m_container->getFieldInternal(dim, m_idx, &e);
             success = Utils::numericCast(e.s64, val);
             break;
         case Dimension::Type::Float:
+            m_container->getFieldInternal(dim, m_idx, &e);
             success = Utils::numericCast(e.f, val);
             break;
         case Dimension::Type::Double:
+            m_container->getFieldInternal(dim, m_idx, &e);
             success = Utils::numericCast(e.d, val);
             break;
         case Dimension::Type::None:
@@ -329,6 +341,7 @@ inline void PointRef::getField(char *val, Dimension::Id d,
         e.u64 = getFieldAs<uint64_t>(d);
         break;
     case Dimension::Type::None:
+        e.u64 = 0;
         break;
     }
     memcpy(val, &e, Dimension::size(type));

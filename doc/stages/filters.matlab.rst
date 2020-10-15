@@ -60,4 +60,6 @@ add_dimension
 struct
   Array structure name to read [Default: "PDAL"]
 
+.. include:: filter_opts.rst
+
 .. _Matlab: https://www.mathworks.com/products/matlab.html

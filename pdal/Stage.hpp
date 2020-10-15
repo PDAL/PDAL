@@ -73,6 +73,10 @@ class PDAL_DLL Stage
     friend class StageWrapper;
     friend class StageRunner;
     friend class Streamable;
+    friend class Reader;
+    friend class Filter;
+    friend class Writer;
+
 public:
     Stage();
     virtual ~Stage();
@@ -224,7 +228,7 @@ public:
 
       \param log  Log pointer.
     */
-    void setLog(LogPtr& log)
+    void setLog(const LogPtr& log)
         { m_log = log; }
 
     /**
@@ -364,21 +368,16 @@ private:
     // we stick in ProgramArgs so that it shows up in help and an options list.
     std::string m_optionFile;
 
-    Stage& operator=(const Stage&); // not implemented
-    Stage(const Stage&); // not implemented
+    Stage& operator=(const Stage&) = delete;
+    Stage(const Stage&) = delete;
 
     void setupLog();
     void handleOptions();
+    void countElements(const PointViewSet& views);
 
-    void l_addArgs(ProgramArgs& args);
-    virtual void readerAddArgs(ProgramArgs& /*args*/)
-        {}
-    virtual void readerInitialize(PointTableRef /*table*/)
-        {}
-    virtual void writerInitialize(PointTableRef /*table*/)
-        {}
-
-    void l_initialize(PointTableRef table);
+    virtual void l_addArgs(ProgramArgs& args);
+    virtual void l_initialize(PointTableRef table);
+    virtual void l_prepared(PointTableRef table);
 
     /**
       Get basic metadata (avoids reading points).  Implement in subclass.

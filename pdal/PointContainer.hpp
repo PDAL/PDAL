@@ -43,7 +43,6 @@ namespace pdal
 
 class PDAL_DLL PointContainer
 {
-    friend class PointTable;
     friend class PointView;
     friend class PointRef;
 private:

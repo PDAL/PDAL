@@ -36,6 +36,7 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/KDIndex.hpp>
+#include <unordered_map>
 
 extern "C" int32_t NeighborClassifierFilter_ExitFunc();
 extern "C" PF_ExitFunc NeighborClassifierFilter_InitPlugin();
@@ -61,9 +62,11 @@ private:
     bool doOne(PointRef& point, PointRef& temp, KD3Index &kdi);
     virtual void filter(PointView& view);
     virtual void initialize();
+    virtual void ready(PointTableRef);
     void doOneNoDomain(PointRef &point, PointRef& temp, KD3Index &kdi);
-    PointViewPtr loadSet(const std::string &candFileName, PointTable &table);
-    NeighborClassifierFilter& operator=(const NeighborClassifierFilter&) = delete;
+    PointViewPtr loadSet(const std::string &candFileName, PointTableRef table);
+    NeighborClassifierFilter& operator=(
+        const NeighborClassifierFilter&) = delete;
     NeighborClassifierFilter(const NeighborClassifierFilter&) = delete;
     StringList m_domainSpec;
     std::vector<DimRange> m_domain;
@@ -71,6 +74,7 @@ private:
     Dimension::Id m_dim;
     std::string m_dimName;
     std::string m_candidateFile;
+    std::unordered_map<PointId, int> m_newClass;
 };
 
 } // namespace pdal

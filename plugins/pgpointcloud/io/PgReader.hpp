@@ -38,6 +38,7 @@
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/XMLSchema.hpp>
+#include <pdal/Streamable.hpp>
 
 #include "PgCommon.hpp"
 
@@ -46,7 +47,7 @@
 namespace pdal
 {
 
-class PDAL_DLL PgReader : public DbReader
+class PDAL_DLL PgReader : public DbReader, public Streamable
 {
     class Patch
     {
@@ -100,6 +101,7 @@ private:
     virtual void ready(PointTableRef table);
     virtual void initialize();
     virtual point_count_t read(PointViewPtr view, point_count_t count);
+    virtual bool processOne(PointRef& point);
     virtual void done(PointTableRef table);
     virtual bool eof()
         { return m_atEnd; }
@@ -107,6 +109,7 @@ private:
     SpatialReference fetchSpatialReference() const;
     uint32_t fetchPcid() const;
     point_count_t readPgPatch(PointViewPtr view, point_count_t numPts);
+    bool readPgPatch(PointRef& point);
 
     // Internal functions for managing scroll cursor
     void CursorSetup();

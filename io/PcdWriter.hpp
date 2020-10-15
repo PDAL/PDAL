@@ -61,8 +61,9 @@ class PDAL_DLL PcdWriter : public Writer
 public:
     std::string getName() const;
 
-    PcdWriter()
-    {}
+    PcdWriter();
+    PcdWriter& operator=(const PcdWriter&) = delete;
+    PcdWriter(const PcdWriter&) = delete;
 
 private:
     virtual void addArgs(ProgramArgs& args);
@@ -86,9 +87,6 @@ private:
     DimSpec m_xDim;
     DimSpec m_yDim;
     DimSpec m_zDim;
-
-    PcdWriter& operator=(const PcdWriter&); // not implemented
-    PcdWriter(const PcdWriter&);            // not implemented
 };
 
 } // namespaces

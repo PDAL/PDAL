@@ -38,8 +38,7 @@ filename
 
 storage_mode
   Type of ply file to write. Valid values are 'ascii', 'little endian',
-  'big endian', and 'default'. 'default' is binary output in the endianness
-  of the machine. [Default: "ascii"]
+  'big endian'.  [Default: "ascii"]
 
 dims
   List of dimensions (and :ref:`types`) in the format
@@ -63,6 +62,8 @@ precision
   using f-style formatting.  Only permitted when 'storage_mode' is 'ascii'.
   See the `printf`_ reference for more information.
   [Default: g-style formatting (variable precision)]
+
+.. include:: writer_opts.rst
 
 .. _polygon file format: http://paulbourke.net/dataformats/ply/
 .. _printf: https://en.cppreference.com/w/cpp/io/c/fprintf

@@ -96,8 +96,6 @@ std::string makeFilename(const std::string& s, int i)
 
 int SplitKernel::execute()
 {
-    PointTable table;
-
     Stage& reader = makeReader(m_inputFile, m_driverOverride);
 
     Options filterOpts;
@@ -113,6 +111,8 @@ int SplitKernel::execute()
         filterOpts.add("capacity", m_capacity);
     }
     Stage& f = makeFilter(driver, reader, filterOpts);
+
+    ColumnPointTable table;
     f.prepare(table);
     PointViewSet pvSet = f.execute(table);
 

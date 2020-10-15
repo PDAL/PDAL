@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/GDALUtils.hpp>
+#include <ogr_geometry.h>
 
 #include "Ilvis2MetadataReader.hpp"
 

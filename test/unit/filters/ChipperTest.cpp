@@ -34,7 +34,6 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-#include <pdal/EigenUtils.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/StageWrapper.hpp>
 #include <filters/ChipperFilter.hpp>
@@ -79,8 +78,8 @@ TEST(ChipperTest, test_construction)
             BOX2D b1;
             BOX2D b2;
 
-            calculateBounds(*p1, b1);
-            calculateBounds(*p2, b2);
+            p1->calculateBounds(b1);
+            p2->calculateBounds(b2);
 
             return b1.minx < b2.minx ?  true :
                 b1.minx > b2.minx ? false :
@@ -91,7 +90,7 @@ TEST(ChipperTest, test_construction)
 
         PointViewPtr view = views[2];
         BOX2D bounds;
-        calculateBounds(*view, bounds);
+        view->calculateBounds(bounds);
 
         EXPECT_NEAR(bounds.minx, 635674.05, 0.05);
         EXPECT_NEAR(bounds.maxx, 635993.93, 0.05);

@@ -34,6 +34,8 @@
 
 #include "FarthestPointSamplingFilter.hpp"
 
+#include "private/Segmentation.hpp"
+
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
@@ -73,53 +75,11 @@ PointViewSet FarthestPointSamplingFilter::run(PointViewPtr inView)
     if (!inView->size() || (inView->size() < m_count))
         return viewSet;
 
-    // Otherwise, make a new output PointView.
+    PointIdList ids = Segmentation::farthestPointSampling(*inView, m_count);
+
     PointViewPtr outView = inView->makeNew();
-
-    // Construct a KD-tree of the input view.
-    KD3Index& kdi = inView->build3dIndex();
-
-    // Seed the output view with the first point in the current sorting.
-    PointId seedId(0);
-    outView->appendPoint(*inView, seedId);
-
-    // Compute distances from seedId to all other points.
-    PointIdList indices(inView->size());
-    std::vector<double> sqr_dists(inView->size());
-    kdi.knnSearch(seedId, inView->size(), &indices, &sqr_dists);
-
-    // Sort distances by PointId.
-    std::vector<double> min_dists(inView->size());
-    for (PointId i = 0; i < inView->size(); ++i)
-        min_dists[indices[i]] = sqr_dists[i];
-
-    // Proceed until we have m_count points in the output PointView.
-    for (PointId i = 1; i < m_count; ++i)
-    {
-        // Find the max distance in min_dists, this is the farthest point from
-        // any point currently in the output PointView.
-        auto it = std::max_element(min_dists.begin(), min_dists.end());
-
-        // Record the PointId of the farthest point and add it to the output
-        // PointView.
-        PointId idx(it - min_dists.begin());
-        outView->appendPoint(*inView, idx);
-
-        log()->get(LogLevel::Debug)
-            << "Adding PointId " << idx << " with distance "
-            << std::sqrt(min_dists[idx]) << std::endl;
-
-        // Compute distances from idx to all other points.
-        kdi.knnSearch(idx, inView->size(), &indices, &sqr_dists);
-
-        // Update distances.
-        for (PointId j = 0; j < inView->size(); ++j)
-        {
-            if (sqr_dists[j] < min_dists[indices[j]])
-                min_dists[indices[j]] = sqr_dists[j];
-        }
-    }
-
+    for (auto const& id : ids)
+        outView->appendPoint(*inView, id);
     viewSet.insert(outView);
     return viewSet;
 }

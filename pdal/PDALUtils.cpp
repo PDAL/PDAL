@@ -42,6 +42,10 @@
 #include <pdal/Options.hpp>
 #include <pdal/util/FileUtils.hpp>
 
+#ifndef _WIN32
+#include <dlfcn.h>
+#endif
+
 using namespace std;
 
 namespace pdal
@@ -248,11 +252,11 @@ std::ostream *createFile(const std::string& path, bool asBinary)
 {
     ostream *ofs(nullptr);
 
-    arbiter::Arbiter a;
-    const bool remote(a.hasDriver(path) && a.isRemote(path));
-
-    if (remote)
+    if (isRemote(path))
     {
+        arbiter::Arbiter a;
+        if (!a.hasDriver(path))
+            return ofs;
         try
         {
             ofs = new ArbiterOutStream(tempFilename(path), path,
@@ -282,9 +286,15 @@ std::ostream *createFile(const std::string& path, bool asBinary)
 
 bool isRemote(const std::string& path)
 {
-    arbiter::Arbiter a;
-    return a.isRemote(path);
+    const StringList prefixes
+        { "s3://", "gs://", "dropbox://", "http://", "https://" };
+
+    for (const string& prefix : prefixes)
+        if (Utils::startsWith(path, prefix))
+            return true;
+    return false;
 }
+
 
 std::string fetchRemote(const std::string& path)
 {
@@ -296,9 +306,11 @@ std::string fetchRemote(const std::string& path)
 
 std::istream *openFile(const std::string& path, bool asBinary)
 {
-    arbiter::Arbiter a;
-    if (a.hasDriver(path) && a.isRemote(path))
+    if (isRemote(path))
     {
+        arbiter::Arbiter a;
+        if (!a.hasDriver(path))
+            return nullptr;
         try
         {
             return new ArbiterInStream(tempFilename(path), path,
@@ -342,10 +354,10 @@ void closeFile(std::istream *in)
 */
 bool fileExists(const std::string& path)
 {
-    arbiter::Arbiter a;
-    if (a.hasDriver(path) && a.isRemote(path) && a.exists(path))
+    if (isRemote(path))
     {
-        return true;
+        arbiter::Arbiter a;
+        return (a.hasDriver(path) && a.exists(path));
     }
 
     // Arbiter doesn't handle our STDIN hacks.
@@ -391,6 +403,32 @@ double computeHausdorff(PointViewPtr srcView, PointViewPtr candView)
     maxDistCandToSrc = std::sqrt(maxDistCandToSrc);
 
     return (std::max)(maxDistSrcToCand, maxDistCandToSrc);
+}
+
+
+std::string dllDir()
+{
+    std::string s;
+
+#ifdef _WIN32
+    HMODULE hm = NULL;
+
+    if (GetModuleHandleEx(
+        GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+        GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+        (LPCSTR)&dllDir, &hm))
+    {
+        char path[MAX_PATH];
+        DWORD cnt = GetModuleFileNameA(hm, path, sizeof(path));
+        if (cnt > 0 && cnt < MAX_PATH)
+            s = path;
+    }
+#else
+    Dl_info info;
+    if (dladdr((const void *)dllDir, &info))
+        s = info.dli_fname;
+#endif
+    return FileUtils::getDirectory(s);
 }
 
 } // namespace Utils

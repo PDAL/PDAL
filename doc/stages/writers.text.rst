@@ -63,6 +63,9 @@ quote_header
   When producing CSV, should the column header named by quoted?
   [Default: true]
 
+write_header
+  Whether a header should be written. [Default: true]
+
 newline
   When producing CSV, what newline character should be used? (For Windows,
   ``\\r\\n`` is common.) [Default: "\\n"]
@@ -70,6 +73,7 @@ newline
 delimiter
   When producing CSV, what character to use as a delimiter? [Default: ","]
 
+.. include:: writer_opts.rst
 
 .. _GeoJSON: http://geojson.org
 .. _CSV: http://en.wikipedia.org/wiki/Comma-separated_values

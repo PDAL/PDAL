@@ -37,7 +37,7 @@
 #include <string>
 #include <vector>
 
-#include <pdal/GDALUtils.hpp>
+#include <pdal/private/gdal/Raster.hpp>
 #include "private/DimRange.hpp"
 
 namespace pdal
@@ -88,21 +88,20 @@ void DEMFilter::addArgs(ProgramArgs& args)
 
 void DEMFilter::ready(PointTableRef table)
 {
-    // open GDAL
-    gdal::registerDrivers();
     m_raster.reset(new gdal::Raster(m_args->m_raster));
-
     m_raster->open();
 }
+
 
 void DEMFilter::prepared(PointTableRef table)
 {
     const PointLayoutPtr layout(table.layout());
     m_args->m_dim = layout->findDim(m_args->m_range.m_name);
     if (m_args->m_dim == Dimension::Id::Unknown)
-        throwError("Missing dimension with name '" + m_args->m_range.m_name + "'in input PointView.");
+        throwError("Missing dimension with name '" + m_args->m_range.m_name +
+            "'in input PointView.");
     if (m_args->m_band <= 0)
-        throwError("Band must be greater than 1!");
+        throwError("Band must be greater than 0");
 
 }
 

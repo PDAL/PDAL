@@ -185,16 +185,22 @@ TEST(NeighborClassifierFilterTest, candidate)
     Stage& r = *(factory.createStage("readers.las"));
     r.setOptions(ro);
 
+    // NeighborClassifier used to be broken because it would change voting point
+    // classifications while it was running. This mean it would create different
+    // classifications if the point order was different.
+    // Randomizing the data should quickly expose this case if it were to reappear.
+    Stage& rfilter = *(factory.createStage("filters.randomize"));
+    rfilter.setInput(r);
+
     std::vector<unsigned int> kvals = {1};
     for (auto &k : kvals) {
 
         Options fo;
-        //fo.add("dimension", "Classification");
         fo.add("candidate", Support::datapath("las/sample_c_thin.las"));
         fo.add("k", k);
 
         Stage& f = *(factory.createStage("filters.neighborclassifier"));
-        f.setInput(r);
+        f.setInput(rfilter);
         f.setOptions(fo);
 
         PointTable table;
@@ -207,15 +213,10 @@ TEST(NeighborClassifierFilterTest, candidate)
 
         stats::Summary::EnumMap NewClassifications = GetClassifications(f);
 
-        //std::cout << "****   K = " << k << "   ****** " << std::endl;
         for (auto& p : OrigClassifications)
         {
             if (p.first == 6)
-            {
                 EXPECT_TRUE(NewClassifications[p.first] == 12441 && OrigClassifications[p.first] == 12525);
-            }
-            //std::cout << "  OrigClassifications["<< p.first << "] = " << OrigClassifications[p.first] <<
-            //" --> " << "NewClassifications[" << p.first << "] = " << NewClassifications[p.first] << std::endl;
         }
     }
 }

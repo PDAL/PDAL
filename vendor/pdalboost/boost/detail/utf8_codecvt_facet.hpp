@@ -93,7 +93,7 @@ namespace std {
 }
 #endif
 
-// maximum lenght of a multibyte string
+// maximum length of a multibyte string
 #define MB_LENGTH_MAX 8
 
 BOOST_UTF8_BEGIN_NAMESPACE

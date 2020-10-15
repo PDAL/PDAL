@@ -230,6 +230,16 @@ public:
     }
 
     /**
+      Change from offset to order.  Only call during finalize.
+    */
+    void orderDimensions()
+    {
+        int order = 0;
+        for (Dimension::Id id : m_used)
+            m_detail[Utils::toNative(id)].setOrder(order++);
+    }
+
+    /**
         Convert the point layout to a metadata format.
 
         \return  A metadata node that contains the layout information.

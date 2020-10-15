@@ -59,7 +59,7 @@ public:
     /// \param y  Y coordinate
     /// \param z  Z coordinate
     /// \return  True if the transformation was successful
-    bool transform(double& x, double& y, double& z);
+    bool transform(double& x, double& y, double& z) const;
 
     /// Transform a set of points in place.
     /// \param x  X coordinates
@@ -67,7 +67,7 @@ public:
     /// \param z  Z coordinates
     /// \return  True if the transformation was successful
     bool transform(std::vector<double>& x, std::vector<double>& y,
-        std::vector<double>& z);
+        std::vector<double>& z) const;
 
 private:
     std::unique_ptr<OGRCoordinateTransformation> m_transform;

@@ -33,11 +33,11 @@
 ****************************************************************************/
 
 #include <pdal/pdal_features.hpp>
-#include <pdal/GDALUtils.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/compression/LazPerfCompression.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
 
 #include "OciReader.hpp"
 
@@ -286,9 +286,11 @@ point_count_t OciReader::readDimMajor(PointView& view, BlockPtr block,
         char *pos = seekDimMajor(*di, block);
         blockRemaining = numRemaining;
         numRead = 0;
+        PointRef p(view);
         while (numRead < numPts && blockRemaining > 0)
         {
-            writeField(view, pos, *di, nextId);
+            p.setPointId(nextId);
+            writeField(p, pos, *di);
             pos += Dimension::size(di->m_type);
 
             if (di->m_id == Id::PointSourceId && m_updatePointSourceId)
@@ -318,7 +320,8 @@ point_count_t OciReader::readPointMajor(PointView& view,
 #ifdef PDAL_HAVE_LAZPERF
         auto cb = [this, &view, &nextId, &numRead](char *buf, size_t bufsize)
         {
-            writePoint(view, nextId, buf);
+            PointRef p(view, nextId);
+            writePoint(p, buf);
             if (m_cb)
                 m_cb(view, nextId);
             nextId++;
@@ -337,9 +340,11 @@ point_count_t OciReader::readPointMajor(PointView& view,
         char *pos = seekPointMajor(block);
 
         size_t cnt = block->numRemaining();
+        PointRef p(view);
         while (numRead < numPts && cnt--)
         {
-            writePoint(view, nextId, pos);
+            p.setPointId(nextId);
+            writePoint(p, pos);
 
             if (m_cb)
                 m_cb(view, nextId);

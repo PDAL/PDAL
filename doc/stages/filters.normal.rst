@@ -36,13 +36,13 @@ normal flipping.
   regardless of the always_up_ flag. To disable all normal flipping, do not
   provide a viewpoint_ and set `always_up`_ to false.
 
-In addition to always_up_ and viewpoint_, users can run a refinement step (on
+In addition to always_up_ and viewpoint_, users can run a refinement step (off
 by default) that propagates normals using a minimum spanning tree. The
 propagated normals can lead to much more consistent results across the dataset.
 
 .. note::
 
-  To disable normal propagation, users can set refine_ to `false`.
+  To enable normal propagation, users can set refine_ to `true`.
 
 .. embed::
 
@@ -84,4 +84,7 @@ _`always_up`
 
 _`refine`
   A flag indicating whether or not to reorient normals using minimum spanning
-  tree propagation. [Default: true]
+  tree propagation. [Default: false]
+
+.. include:: filter_opts.rst
+

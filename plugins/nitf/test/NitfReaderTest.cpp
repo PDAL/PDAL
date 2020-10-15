@@ -37,7 +37,7 @@
 #include <pdal/PointView.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/StageFactory.hpp>
-#include <io/LasWriter.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 #include "Support.hpp"
 
@@ -134,7 +134,7 @@ TEST(NitfReaderTest, optionSrs)
     Options lasOpts;
     lasOpts.add("filename", outfile);
 
-    LasWriter writer;
+    Stage& writer = *f.createStage("writers.las");
 
     writer.setInput(*nitfReader);
     writer.setOptions(lasOpts);;
@@ -146,3 +146,46 @@ TEST(NitfReaderTest, optionSrs)
     EXPECT_EQ("", writer.getSpatialReference().getWKT());
     EXPECT_EQ(sr, table.spatialReference().getWKT());
 }
+
+/**
+// Crashes on Alpine.  Seems related to allocation in Nitro.
+TEST(NitfReaderTest, issue3010)
+{
+    std::string filename(Support::temppath("issue3010.ntf"));
+    StageFactory factory;
+
+    {
+        Stage& r = *factory.createStage("readers.faux");
+        Options ro;
+        ro.add("mode", "uniform");
+        ro.add("seed", 12341234);
+        ro.add("count", 75000);
+        r.setOptions(ro);
+
+        Stage& w = *factory.createStage("writers.nitf");
+        Options wo;
+        wo.add("filename", filename);
+        wo.add("compression", "true");
+        w.setOptions(wo);
+        w.setInput(r);
+
+        PointTable t;
+        w.prepare(t);
+        w.execute(t);
+    }
+
+    {
+        Stage& r = *factory.createStage("readers.nitf");
+        Options ro;
+        ro.add("filename", filename);
+        r.setOptions(ro);
+
+        PointTable t;
+        r.prepare(t);
+        PointViewSet vs = r.execute(t);
+        PointViewPtr v = *vs.begin();
+        EXPECT_EQ(v->size(), 75000u);
+    }
+    FileUtils::deleteFile(filename);
+}
+**/

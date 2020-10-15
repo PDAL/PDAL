@@ -73,8 +73,13 @@ add_library(E57Format STATIC
     contrib/CRCpp/inc/CRC.h
 )
 pdal_target_compile_settings(E57Format)
+if (WIN32)
+target_compile_options(E57Format PRIVATE
+    /wd4244
+    )
+endif()
 target_link_libraries(E57Format
-    PUBLIC
+    PRIVATE
         ${XercesC_LIBRARIES}
 )
 
@@ -83,6 +88,7 @@ target_include_directories(E57Format
     PRIVATE
         include
         contrib/CRCpp/inc
+        ${XercesC_INCLUDE_DIR}
 )
 
 target_compile_definitions(E57Format

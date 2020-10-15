@@ -147,7 +147,7 @@ protected:
 
         PointTable t;
         gr.prepare(t);
-        Dimension::Id b1 = t.layout()->findDim("band-1");
+        Dimension::Id b1 = t.layout()->findDim("band_1");
         PointViewSet s = gr.execute(t);
         PointViewPtr v = *s.begin();
 

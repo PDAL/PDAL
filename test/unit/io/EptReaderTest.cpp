@@ -44,6 +44,8 @@
 #include <filters/ReprojectionFilter.hpp>
 #include <pdal/SrsBounds.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
+
 #include "Support.hpp"
 
 namespace pdal
@@ -66,21 +68,42 @@ namespace
     const std::string sourceFilePath(
             Support::datapath("ept/source/lone-star.laz"));
     const std::string eptLaszipPath(
-            "ept://" + Support::datapath("ept/lone-star-laszip"));
+            Support::datapath("ept/lone-star-laszip/ept.json"));
     const std::string eptAutzenPath(
-            "ept://" + Support::datapath("ept/1.2-with-color"));
+            Support::datapath("ept/1.2-with-color/ept.json"));
     const std::string attributesPath(
             Support::datapath("autzen/attributes.json"));
 
     // Also test a basic read of binary/zstandard versions of a smaller dataset.
     const std::string ellipsoidEptBinaryPath(
-            "ept://" + Support::datapath("ept/ellipsoid-binary"));
+            Support::datapath("ept/ellipsoid-binary/ept.json"));
     const std::string ellipsoidEptZstandardPath(
-            "ept://" + Support::datapath("ept/ellipsoid-zstandard"));
+            Support::datapath("ept/ellipsoid-zstandard/ept.json"));
 
     const point_count_t ellipsoidNumPoints(100000);
     const BOX3D ellipsoidBoundsConforming(-8242746, 4966506, -50,
             -8242446, 4966706, 50);
+}
+
+TEST(EptReaderTest, protocol)
+{
+    Options opts;
+    opts.add("filename", "ept://http://testfile");
+
+    EptReader reader;
+    reader.setOptions(opts);
+
+    bool gotEx = false;
+    try
+    {
+        reader.preview();
+    }
+    catch (const pdal_error& err)
+    {
+        EXPECT_TRUE(strstr(err.what(), "ept.json"));
+        gotEx = true;
+    }
+    EXPECT_TRUE(gotEx);
 }
 
 TEST(EptReaderTest, inspect)
@@ -96,8 +119,12 @@ TEST(EptReaderTest, inspect)
     EXPECT_TRUE(qi.valid());
     EXPECT_EQ(qi.m_bounds, expBoundsConforming);
     EXPECT_EQ(qi.m_pointCount, expNumPoints);
-    EXPECT_TRUE(std::equal(qi.m_dimNames.cbegin(), qi.m_dimNames.cend(),
-                expDimNames.cbegin()));
+    std::vector<std::string> dimNamesA(expDimNames);
+    std::vector<std::string> dimNamesB(qi.m_dimNames);
+    std::sort(dimNamesA.begin(), dimNamesA.end());
+    std::sort(dimNamesB.begin(), dimNamesB.end());
+    EXPECT_TRUE(std::equal(dimNamesA.cbegin(), dimNamesA.cend(),
+        dimNamesB.cbegin()));
 
     std::string wkt = qi.m_srs.getWKT();
     // Sometimes we get back "metre" when we're execting "meter".
@@ -263,11 +290,10 @@ TEST(EptReaderTest, resolutionLimit)
 
 TEST(EptReaderTest, bounds2dXform)
 {
-    SrsBounds eptBounds(BOX2D(515380, 4918360, 515390, 4918370));
-    SrsBounds boxBounds(
-        BOX2D(-110.80680478060, 44.418368816508,
-              -110.80667887010, 44.418458631945),
-        SpatialReference("EPSG:4326"));
+    BOX2D b(515380, 4918360, 515390, 4918370);
+    SrsBounds eptBounds(b);
+    gdal::reprojectBounds(b, "EPSG:26912", "EPSG:4326");
+    SrsBounds boxBounds(b, "EPSG:4326");
 
     PointViewPtr v1;
     PointViewPtr v2;
@@ -294,7 +320,9 @@ TEST(EptReaderTest, bounds2dXform)
         v2 = *vset.begin();
     }
 
-    EXPECT_EQ(v1->size(), v2->size());
+    // There is some small error when we round-trip the bounds, so allow us
+    // to be off by 15 points.
+    EXPECT_NEAR(v1->size(), v2->size(), 15u);
 }
 
 TEST(EptReaderTest, boundedRead2d)
@@ -465,51 +493,6 @@ TEST(EptReaderTest, badOriginQuery)
     reader.setOptions(options);
     PointTable table;
     EXPECT_THROW(reader.prepare(table), pdal_error);
-}
-
-TEST(EptReaderTest, getRemoteType)
-{
-    NL::json j = {{ "type", "signed" }, { "size", 4 }, { "scale", 1.0 }};
-    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::Signed32);
-    j = {{ "scale", "foo" }};
-    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::None);
-    j = {{ "type", "float"}, {"size", 2}};
-    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::None);
-    j = {{ "type", "float"}, {"size", 4}};
-    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::Float);
-    j = {{ "type", "unsigned"}, {"size", 4}};
-    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::Unsigned32);
-    j = {{ "type", "signed"}, {"size", 2}};
-    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::Signed16);
-    j = {{ "tope", "signed"}, {"size", 2}};
-    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::None);
-    j = {{ "type", "signed"}, {"size", 3}};
-    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::None);
-    j = {{ "type", "signed"}};
-    EXPECT_EQ(EptReader::getRemoteTypeTest(j), Dimension::Type::None);
-}
-
-TEST(EptReaderTest, getCoercedType)
-{
-    // Scaled attributes are coerced to doubles regardless of schema type.
-    NL::json j = {{ "type", "signed" }, { "size", 4 }, { "scale", 1.0 }};
-    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::Double);
-    j = {{ "scale", "foo" }};
-    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::None);
-    j = {{ "type", "float"}, {"size", 2}};
-    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::None);
-    j = {{ "type", "float"}, {"size", 4}};
-    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::Float);
-    j = {{ "type", "unsigned"}, {"size", 4}};
-    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::Unsigned32);
-    j = {{ "type", "signed"}, {"size", 2}};
-    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::Signed16);
-    j = {{ "tope", "signed"}, {"size", 2}};
-    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::None);
-    j = {{ "type", "signed"}, {"size", 3}};
-    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::None);
-    j = {{ "type", "signed"}};
-    EXPECT_EQ(EptReader::getCoercedTypeTest(j), Dimension::Type::None);
 }
 
 void streamTest(const std::string src)

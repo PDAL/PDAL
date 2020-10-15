@@ -34,7 +34,6 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-#include <pdal/EigenUtils.hpp>
 #include <pdal/StageFactory.hpp>
 #include <io/LasReader.hpp>
 #include <io/FauxReader.hpp>
@@ -73,7 +72,7 @@ TEST(SplitterTest, test_tile_filter)
     {
         BOX2D b;
         PointViewPtr v = *it;
-        calculateBounds(*v, b);
+        v->calculateBounds(b);
         EXPECT_TRUE(b.maxx - b.minx <= 1000);    
         EXPECT_TRUE(b.maxy - b.miny <= 1000);    
 
@@ -130,7 +129,7 @@ TEST(SplitterTest, test_buffer)
     {
         BOX2D b;
         PointViewPtr v = *it;
-        calculateBounds(*v, b);
+        v->calculateBounds(b);
         EXPECT_TRUE(b.maxx - b.minx <= 1040);    
         EXPECT_TRUE(b.maxy - b.miny <= 1040);
         bounds[v] = b;
@@ -187,7 +186,7 @@ TEST(SplitterTest, test_buffer2)
     for (PointViewPtr v : s)
     {
         BOX2D b;
-        calculateBounds(*v, b);
+        v->calculateBounds(b);
         bounds[v] = b;
         vvec.push_back(v);
     }
