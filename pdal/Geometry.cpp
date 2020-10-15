@@ -34,8 +34,6 @@
 
 #include <ogr_api.h>
 #include <ogr_geometry.h>
-#include <cpl_conv.h>
-#include <cpl_string.h>
 
 #include <pdal/Geometry.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>

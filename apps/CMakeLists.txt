@@ -23,7 +23,6 @@ target_link_libraries(${PDAL_APP}
         ${PDAL_UTIL_LIB_NAME}
         ${GDAL_LIBRARY}
         ${WINSOCK_LIBRARY}
-        ${LASZIP_LIBRARIES}
 )
 target_include_directories(${PDAL_APP} PRIVATE
     ${NLOHMANN_INCLUDE_DIR}
