@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <ogr_geometry.h>
+#include <cpl_conv.h>
 
 #include "Ilvis2MetadataReader.hpp"
 

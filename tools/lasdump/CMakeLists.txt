@@ -32,7 +32,8 @@ if (LASZIP_FOUND)
         ${LASZIP_LIBRARIES}
     )
     target_include_directories(lasdump PRIVATE
-        ${PDAL_INCLUDE_DIR})
+        ${PDAL_INCLUDE_DIR}
+        ${LASZIP_INCLUDE_DIR})
     if (WIN32)
         target_link_libraries(lasdump PRIVATE wsock32 ws2_32)
     endif()
