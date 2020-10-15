@@ -63,6 +63,15 @@ public:
     std::string getName() const;
     void setOrigin(double xOrigin, double yOrigin);
     void processPoint(PointRef& p, PointAdder adder);
+    PointViewPtr view(const Coord& c);
+
+    // Return the bounds of a tile.
+    BOX2D bounds(const Coord& c) const;
+    // Return the buffered bounds of a tile.
+    BOX2D bufferedBounds(const Coord& c) const;
+    // Return the coordinate extent of tiles.  Note that the return type
+    // will contain integer-valued doubles.
+    BOX2D extent() const;
 
 private:
     double m_length;

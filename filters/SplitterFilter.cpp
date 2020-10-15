@@ -57,6 +57,57 @@ SplitterFilter::SplitterFilter() : m_viewMap(CoordCompare())
 
 std::string SplitterFilter::getName() const { return s_info.name; }
 
+
+PointViewPtr SplitterFilter::view(const Coord& coord)
+{
+    auto vi = m_viewMap.find(coord);
+    if (vi == m_viewMap.end())
+        return nullptr;
+    return vi->second;
+}
+
+
+BOX2D SplitterFilter::bounds(const Coord& coord) const
+{
+    const int& xpos = coord.first;
+    const int& ypos = coord.second;
+
+    double minx = m_xOrigin + xpos * m_length;
+    double maxx = minx + m_length;
+    double miny = m_yOrigin + ypos * m_length;
+    double maxy = miny + m_length;
+
+    return BOX2D(minx, miny, maxx, maxy);
+}
+
+
+BOX2D SplitterFilter::bufferedBounds(const Coord& coord) const
+{
+    const int& xpos = coord.first;
+    const int& ypos = coord.second;
+
+    double minx = m_xOrigin + xpos * m_length - m_buffer;
+    double maxx = minx + m_length + 2 * m_buffer;
+    double miny = m_yOrigin + ypos * m_length - m_buffer;
+    double maxy = miny + m_length + 2 * m_buffer;
+
+    return BOX2D(minx, miny, maxx, maxy);
+}
+
+
+BOX2D SplitterFilter::extent() const
+{
+    BOX2D box;
+
+    for (auto& i : m_viewMap)
+    {
+        const Coord& c = i.first;
+        box.grow(c.first, c.second);
+    }
+    return box;
+}
+
+
 void SplitterFilter::addArgs(ProgramArgs& args)
 {
     args.add("length", "Edge length of cell", m_length, 1000.0);
