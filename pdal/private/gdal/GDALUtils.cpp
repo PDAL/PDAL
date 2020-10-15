@@ -42,6 +42,7 @@
 #include <gdal_priv.h>
 #include <ogr_api.h>
 #include <ogr_geometry.h>
+#include <ogr_p.h>
 #include <ogrsf_frmts.h>
 
 #include <nlohmann/json.hpp>
