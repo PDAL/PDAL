@@ -12,11 +12,6 @@ option(BUILD_PLUGIN_CPD
 add_feature_info("CPD plugin" BUILD_PLUGIN_CPD
     "Coherent Point Drift (CPD) computes rigid or nonrigid transformations between point sets")
 
-option(BUILD_PLUGIN_GEOWAVE
-    "Choose if GeoWave support should be built" FALSE)
-add_feature_info("GeoWave plugin" BUILD_PLUGIN_GEOWAVE
-    "Read and Write data using GeoWave")
-
 option(BUILD_PLUGIN_I3S
     "Choose if I3S and SLPK support should be built" FALSE)
 add_feature_info("I3S plugin" BUILD_PLUGIN_I3S
