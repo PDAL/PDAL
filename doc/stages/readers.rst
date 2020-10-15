@@ -22,7 +22,6 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
    readers.e57
    readers.faux
    readers.gdal
-   readers.geowave
    readers.hdf
    readers.i3s
    readers.ilvis2
@@ -70,9 +69,6 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
 
 :ref:`readers.gdal`
     Read GDAL readable raster data sources as point clouds.
-
-:ref:`readers.geowave`
-    Read point cloud data from Accumulo.
 
 :ref:`readers.hdf`
    Read data from files in the HDF5 format.

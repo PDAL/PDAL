@@ -20,7 +20,6 @@ dimension type, while others only understand fixed dimension names.
    writers.ept_addon
    writers.e57
    writers.gdal
-   writers.geowave
    writers.gltf
    writers.las
    writers.matlab
@@ -48,9 +47,6 @@ dimension type, while others only understand fixed dimension names.
 
 :ref:`writers.gdal`
     Create a raster from a point cloud using an interpolation algorithm.
-
-:ref:`writers.geowave`
-    Write point cloud data to Accumulo.
 
 :ref:`writers.gltf`
     Write mesh data in GLTF format.  Point clouds without meshes cannot be
