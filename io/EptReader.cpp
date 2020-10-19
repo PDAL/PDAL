@@ -710,24 +710,27 @@ point_count_t EptReader::read(PointViewPtr view, point_count_t count)
 
     point_count_t numRead = 0;
 
-    // Pop tiles until there are no more, or wait for them to appear.
-    // Exit when we've handled all the tiles or we've read enough points.
-    do
+    if (m_p->hierarchy->size())
     {
-        std::unique_lock<std::mutex> l(m_p->mutex);
-        if (m_p->contents.size())
+        // Pop tiles until there are no more, or wait for them to appear.
+        // Exit when we've handled all the tiles or we've read enough points.
+        do
         {
-            TileContents tile = std::move(m_p->contents.front());
-            m_p->contents.pop();
-            l.unlock();
-            checkTile(tile);
-            process(view, tile, count - numRead);
-            numRead += tile.size();
-            m_tileCount--;
-        }
-        else
-            m_p->contentsCv.wait(l);
-    } while (m_tileCount && numRead <= count);
+            std::unique_lock<std::mutex> l(m_p->mutex);
+            if (m_p->contents.size())
+            {
+                TileContents tile = std::move(m_p->contents.front());
+                m_p->contents.pop();
+                l.unlock();
+                checkTile(tile);
+                process(view, tile, count - numRead);
+                numRead += tile.size();
+                m_tileCount--;
+            }
+            else
+                m_p->contentsCv.wait(l);
+        } while (m_tileCount && numRead <= count);
+    }
 
     // Wait for any running threads to finish and don't start any others.
     // Only relevant if we hit the count limit before reading all the tiles.
