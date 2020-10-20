@@ -4,13 +4,19 @@ filters.teaser
 ==============
 
 The **TEASER filter** uses the Truncated least squares Estimation And
-SEmidefinite Relaxation (TEASER) algorithm to calculate a **rigid**
+SEmidefinite Relaxation (TEASER) algorithm [Yang2020]_ to calculate a **rigid**
 transformation that best aligns two datasets. The first input to the ICP filter
 is considered the "fixed" points, and all subsequent points are "moving"
 points. The output from the filter are the "moving" points after the calculated
 transformation has been applied, one point view per input. The transformation
 matrix is inserted into the stage's metadata.
 
+.. seealso::
+
+    The plugin wraps the TEASER++ library, which can be found at
+    https://github.com/MIT-SPARK/TEASER-plusplus.
+
+.. plugin::
 
 Examples
 --------
