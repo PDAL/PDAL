@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/PipelineManager.hpp>
+#include <pdal/Reader.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/PipelineReaderJSON.hpp>
 #include <pdal/PDALUtils.hpp>
@@ -184,6 +185,12 @@ bool PipelineManager::pipelineStreamable() const
     if (s)
         streamable = s->pipelineStreamable();
     return streamable;
+}
+
+
+bool PipelineManager::hasReader() const
+{
+    return (dynamic_cast<Reader *>(m_stages.front()));
 }
 
 
