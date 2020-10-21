@@ -34,8 +34,8 @@ users of this filter should find instructive.
 
 .. note::
 
-  In earlier PDAL releases, ``NNDistance`` was stored in the ``KDistance``
-  Dimemsion.
+  In earlier PDAL releases (up to v2.2.0), ``NNDistance`` was stored in the
+  ``KDistance`` Dimemsion.
 
 .. embed::
 

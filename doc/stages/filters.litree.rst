@@ -17,8 +17,8 @@ given a ``ClusterID`` of 0.
 
 .. note::
 
-  In earlier PDAL releases, ``ClusterID`` was stored in the ``TreeID``
-  Dimemsion.
+  In earlier PDAL releases (up to v2.2.0), ``ClusterID`` was stored in the
+  ``TreeID`` Dimemsion.
 
 .. embed::
 
