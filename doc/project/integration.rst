@@ -14,12 +14,16 @@ Status
 
 .. only:: html
 
+    |alpinestatus|
     |linuxstatus|
     |osxstatus|
     |windowstatus|
     |docsstatus|
+    |dockerstatus|
 
 
+    .. |alpinestatus| image:: https://github.com/PDAL/PDAL/workflows/Alpine/badge.svg
+       :target: https://github.com/PDAL/PDAL/actions?query=workflow%3AAlpine
 
     .. |linuxstatus| image:: https://github.com/PDAL/PDAL/workflows/Linux/badge.svg
        :target: https://github.com/PDAL/PDAL/actions?query=workflow%3ALinux
@@ -32,6 +36,9 @@ Status
 
     .. |docsstatus| image:: https://github.com/PDAL/PDAL/workflows/Docs/badge.svg
        :target: https://github.com/PDAL/PDAL/actions?query=workflow%3ADocs
+
+    .. |dockerstatus| image:: https://github.com/PDAL/PDAL/workflows/Docker/badge.svg
+       :target: https://github.com/PDAL/PDAL/actions?query=workflow%3ADocker
 
 Configuration
 --------------------------------------------------------------------------------
@@ -50,9 +57,9 @@ Dependencies
 
 All of the tests use Conda Forge for dependencies.
 
-The Linux builder has a "fixed"
-configuration that pins GDAL to a specific version to prevent the rest of the
-dependency tree from floating according to Conda Forge's package dependency rules.
+The Linux builder has a "fixed" configuration that pins GDAL to a specific
+version to prevent the rest of the dependency tree from floating according to
+Conda Forge's package dependency rules.
 
 Docs
 --------------------------------------------------------------------------------
