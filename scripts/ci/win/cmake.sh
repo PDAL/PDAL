@@ -26,9 +26,11 @@ cmake .. -G "Ninja" \
     -DENABLE_CTEST=OFF \
     -DWITH_LAZPERF=ON \
     -DWITH_LZMA=ON \
+    -DWITH_DRACO=ON \
     -DLIBLZMA_LIBRARY:FILEPATH="$CONDA_PREFIX/Library/lib/liblzma.lib" \
     -DWITH_LASZIP=ON \
     -DLazperf_DIR:FILEPATH="$CONDA_PREFIX/Library/cmake" \
+    -DDraco_DIR:FILEPATH="$CONDA_PREFIX/Library/cmake" \
     -DHDF5_DIR:FILEPATH="$CONDA_PREFIX/Library/cmake" \
     -DLazperf_DIR:FILEPATH="$CONDA_PREFIX/Library/cmake" \
     -DWITH_ZLIB=ON \

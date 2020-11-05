@@ -14,6 +14,7 @@ cmake .. \
       -DBUILD_PGPOINTCLOUD_TESTS=OFF \
       -DWITH_LAZPERF=ON \
       -DWITH_LASZIP=ON \
+      -DWITH_DRACO=ON \
       -DWITH_ZSTD=ON \
       -DWITH_ZLIB=ON \
       -DWITH_TESTS=ON
