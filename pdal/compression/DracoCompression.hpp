@@ -38,3 +38,42 @@
 #include <pdal/DimType.hpp>
 
 
+namespace pdal
+{
+
+class DracoCompressorImpl;
+
+class DracoCompressor : public Compressor
+{
+public:
+    PDAL_DLL DracoCompressor(BlockCb cb, const DimTypeList& dims);
+    PDAL_DLL ~DracoCompressor();
+
+    PDAL_DLL void compress(const char *buf, size_t bufsize);
+    PDAL_DLL void done();
+
+private:
+    std::unique_ptr<DracoCompressorImpl> m_impl;
+};
+
+
+class DracoDecompressorImpl;
+
+// NOTE - The DracoDecompressor is different from others, even though the
+//   interface is the same, in that it always executes the callback after
+//   a point's worth of data is read.
+class DracoDecompressor : public Decompressor
+{
+public:
+    PDAL_DLL DracoDecompressor(BlockCb cb, const DimTypeList& dims,
+        size_t numPoints);
+    PDAL_DLL ~DracoDecompressor();
+
+    PDAL_DLL void decompress(const char *buf, size_t bufsize);
+
+private:
+    std::unique_ptr<DracoDecompressorImpl> m_impl;
+};
+
+
+} // pdal

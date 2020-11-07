@@ -254,7 +254,7 @@ if (NOT PDAL_HAVE_LAZPERF)
 endif()
 if (NOT PDAL_HAVE_DRACO)
     file(GLOB DRACO_SRCS
-        ${PDAL_SRC_DIR}/compression/Draco.cpp)
+        ${PDAL_SRC_DIR}/compression/DracoCompression.cpp)
     list(REMOVE_ITEM SRCS ${DRACO_SRCS})
 endif()
 
@@ -293,6 +293,7 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${ZLIB_LIBRARIES}
         ${LIBLZMA_LIBRARIES}
         ${ZSTD_LIBRARIES}
+        ${DRACO_LIBRARY}
         ${WINSOCK_LIBRARY}
         ${PDAL_REEXPORT}
         ${PDAL_UTIL_LIB_NAME}
