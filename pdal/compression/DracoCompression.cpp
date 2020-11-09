@@ -49,6 +49,8 @@
 
 #include "DracoCompression.hpp"
 
+#include <draco/point_cloud/point_cloud_builder.h>
+
 namespace pdal
 {
 
@@ -59,39 +61,42 @@ template<typename DracoEngine>
 size_t addFields(DracoEngine& engine, const DimTypeList& dims)
 {
     using namespace Dimension;
+    using namespace draco;
 
     size_t pointSize = 0;
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
         switch (di->m_type)
         {
+        case Type::Double:
+            engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_FLOAT64);
+            break;
+        case Type::Float:
+            engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_FLOAT32);
+            break;
         case Type::Signed64:
-            engine->template add_field<int32_t>();
-            engine->template add_field<int32_t>();
+            engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_INT64);
             break;
         case Type::Signed32:
-        case Type::Float:
-            engine->template add_field<int32_t>();
+            engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_INT32);
             break;
         case Type::Signed16:
-            engine->template add_field<int16_t>();
+            engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_INT16);
             break;
         case Type::Signed8:
-            engine->template add_field<int8_t>();
+            engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_INT8);
             break;
         case Type::Unsigned64:
-        case Type::Double:
-            engine->template add_field<uint32_t>();
-            engine->template add_field<uint32_t>();
+            engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_UINT64);
             break;
         case Type::Unsigned32:
-            engine->template add_field<uint32_t>();
+            engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_UINT32);
             break;
         case Type::Unsigned16:
-            engine->template add_field<uint16_t>();
+            engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_UINT16);
             break;
         case Type::Unsigned8:
-            engine->template add_field<uint8_t>();
+            engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_UINT8);
             break;
         default:
             return 0;
@@ -110,11 +115,11 @@ public:
     DracoCompressorImpl(BlockCb cb, const DimTypeList& dims) :
         m_cb(cb),
 //         m_encoder(*this),
-//         m_compressor(laszip::formats::make_dynamic_compressor(m_encoder)),
         m_pointSize(0),
         m_avail(CHUNKSIZE)
     {
-//         m_pointSize = addFields(m_compressor, dims);
+        m_compressor.Start(CHUNKSIZE);
+        m_pointSize = addFields(m_compressor, dims);
     }
 
     void putBytes(const uint8_t* buf, size_t bufsize)
@@ -156,7 +161,7 @@ public:
 
     void done()
     {
-//         m_encoder.done();
+        m_encoder.Finalize(false);
         if (m_avail != CHUNKSIZE)
             m_cb(reinterpret_cast<char *>(m_tmpbuf), CHUNKSIZE - m_avail);
         m_avail = CHUNKSIZE;
@@ -164,11 +169,7 @@ public:
 
 private:
     BlockCb m_cb;
-//     typedef laszip::encoders::arithmetic<DracoCompressorImpl> Encoder;
-//     Encoder m_encoder;
-//     typedef typename laszip::formats::dynamic_field_compressor<Encoder>::ptr
-//             Compressor;
-//     Compressor m_compressor;
+    draco::EncoderBuffer m_compressor;
     size_t m_pointSize;
     unsigned char m_tmpbuf[CHUNKSIZE];
     size_t m_avail;
