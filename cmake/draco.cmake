@@ -10,6 +10,7 @@ if (WITH_DRACO)
         set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES}
             "draco")
         set(PDAL_HAVE_DRACO 1)
+        set(BUILD_PLUGIN_DRACO 1)
         set(DRACO_LIBRARY "draco")
     else()
         set(WITH_DRACO FALSE)

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2020, Howard Butler (howard@hobu.co)
+* Copyright (c) 2020 Hobu, Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -31,49 +31,24 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
-#pragma once
 
-#include "Compression.hpp"
+#define NOMINMAX
 
-#include <pdal/DimType.hpp>
+#include <pdal/Filter.hpp>
+#include <pdal/pdal_test_main.hpp>
+
+#include <pdal/PointView.hpp>
+#include <pdal/PipelineManager.hpp>
+#include <pdal/StageFactory.hpp>
+#include <io/FauxReader.hpp>
+
+#include "Support.hpp"
+
+#include "../io/DracoReader.hpp"
+#include "../io/DracoWriter.hpp"
 
 
 namespace pdal
 {
 
-class DracoCompressorImpl;
-
-class DracoCompressor : public Compressor
-{
-public:
-    PDAL_DLL DracoCompressor(BlockCb cb, const DimTypeList& dims);
-    PDAL_DLL ~DracoCompressor();
-
-    PDAL_DLL void compress(const char *buf, size_t bufsize);
-    PDAL_DLL void done();
-
-private:
-    std::unique_ptr<DracoCompressorImpl> m_impl;
-};
-
-
-class DracoDecompressorImpl;
-
-// NOTE - The DracoDecompressor is different from others, even though the
-//   interface is the same, in that it always executes the callback after
-//   a point's worth of data is read.
-class DracoDecompressor : public Decompressor
-{
-public:
-    PDAL_DLL DracoDecompressor(BlockCb cb, const DimTypeList& dims,
-        size_t numPoints);
-    PDAL_DLL ~DracoDecompressor();
-
-    PDAL_DLL void decompress(const char *buf, size_t bufsize);
-
-private:
-    std::unique_ptr<DracoDecompressorImpl> m_impl;
-};
-
-
-} // pdal
+}

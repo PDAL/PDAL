@@ -12,6 +12,10 @@ if(BUILD_PLUGIN_CPD)
     add_subdirectory(cpd)
 endif(BUILD_PLUGIN_CPD)
 
+if(BUILD_PLUGIN_DRACO)
+    add_subdirectory(draco)
+endif(BUILD_PLUGIN_DRACO)
+
 if(BUILD_PLUGIN_ICEBRIDGE)
     if (NOT PDAL_HAVE_LIBXML2)
         message(FATAL_ERROR "Can't build icebridge plugin without libxml2")

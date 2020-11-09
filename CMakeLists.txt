@@ -252,11 +252,6 @@ if (NOT PDAL_HAVE_LAZPERF)
         ${PDAL_SRC_DIR}/compression/LazPerfVlrCompression.cpp)
     list(REMOVE_ITEM SRCS ${LAZPERF_SRCS})
 endif()
-if (NOT PDAL_HAVE_DRACO)
-    file(GLOB DRACO_SRCS
-        ${PDAL_SRC_DIR}/compression/DracoCompression.cpp)
-    list(REMOVE_ITEM SRCS ${DRACO_SRCS})
-endif()
 
 if (GDAL_VERSION VERSION_LESS 3.0.0)
     file(GLOB PROJPIPELINE_FILTER_SRCS
@@ -293,7 +288,6 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${ZLIB_LIBRARIES}
         ${LIBLZMA_LIBRARIES}
         ${ZSTD_LIBRARIES}
-        ${DRACO_LIBRARY}
         ${WINSOCK_LIBRARY}
         ${PDAL_REEXPORT}
         ${PDAL_UTIL_LIB_NAME}
@@ -346,9 +340,6 @@ if (NOT PDAL_HAVE_LZMA)
 endif()
 if (NOT PDAL_HAVE_LAZPERF)
     set(LAZPERF_EXCLUDES PATTERN pdal/compression/LazPerf* EXCLUDE)
-endif()
-if (NOT PDAL_HAVE_DRACO)
-    set(DRACO_EXCLUDES PATTERN pdal/compression/Draco* EXCLUDE)
 endif()
 
 install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
