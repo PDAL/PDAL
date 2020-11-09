@@ -286,7 +286,7 @@ namespace FileUtils
         { return m_error; }
 
         int m_fd;
-        size_t m_size;
+        uint64_t m_size;
         void *m_addr;
         std::string m_error;
 #ifdef _WIN32
@@ -303,7 +303,7 @@ namespace FileUtils
          any error message.  addr() returns nullptr on error.
     */
     PDAL_DLL MapContext mapFile(const std::string& filename, bool readOnly,
-        size_t pos, size_t size);
+        uint64_t pos, uint64_t size);
 
     /**
       Unmap a previously mapped file.

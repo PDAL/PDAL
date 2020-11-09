@@ -450,7 +450,7 @@ std::vector<std::string> glob(std::string path)
 
 
 MapContext mapFile(const std::string& filename, bool readOnly,
-    size_t pos, size_t size)
+    uint64_t pos, uint64_t size)
 {
     MapContext ctx;
 
