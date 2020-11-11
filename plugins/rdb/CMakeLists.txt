@@ -1,4 +1,5 @@
 
+if (STANDALONE)
 cmake_minimum_required(VERSION 3.1)
 set(ROOT_DIR "../../${PROJECT_SOURCE_DIR}")
 include(../../cmake/common.cmake NO_POLICY_SCOPE)
@@ -6,6 +7,7 @@ include(FeatureSummary)
 
 
 find_package(PDAL COMPONENTS REQUIRED)
+endif(STANDALONE)
 
 find_package(rdb COMPONENTS REQUIRED)
 set_package_properties(rdb PROPERTIES
