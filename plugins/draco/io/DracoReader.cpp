@@ -35,13 +35,12 @@
 #include <algorithm>
 
 #include "DracoReader.hpp"
-#include <draco/point_cloud/point_cloud.h>
 
 namespace pdal {
 
 static PluginInfo const s_info
 {
-        "readers.tiledb",
+        "readers.draco",
         "Read data from a Draco array.",
         "http://pdal.io/stages/readers.draco.html"
 };
@@ -113,63 +112,82 @@ void DracoReader::addDimensions(PointLayoutPtr layout)
 
 void DracoReader::ready(PointTableRef)
 {
-}
+    m_istreamPtr = Utils::openFile(m_filename, true);
+    m_data.assign(std::istreambuf_iterator<char>(*m_istreamPtr),
+                std::istreambuf_iterator<char>());
+    Utils::closeFile(m_istreamPtr);
+
+    std::cerr << "size: " << m_data.size()  << std::endl;
+
+    m_draco_buffer.Init(m_data.data(), m_data.size());
 
 
-namespace
-{
-
-template<typename DracoEngine>
-size_t addFields(DracoEngine& engine, const DimTypeList& dims)
-{
-    using namespace Dimension;
-    using namespace draco;
-
-    size_t pointSize = 0;
-    for (auto di = dims.begin(); di != dims.end(); ++di)
+    draco::Decoder decoder;
+    auto statusor = decoder.DecodePointCloudFromBuffer(&m_draco_buffer);
+    auto type_statusor = draco::Decoder::GetEncodedGeometryType(&m_draco_buffer);
+    if (!type_statusor.ok())
     {
-        switch (di->m_type)
-        {
-        case Type::Double:
-            engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_FLOAT64);
-            break;
-        case Type::Float:
-            engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_FLOAT32);
-            break;
-        case Type::Signed64:
-            engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_INT64);
-            break;
-        case Type::Signed32:
-            engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_INT32);
-            break;
-        case Type::Signed16:
-            engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_INT16);
-            break;
-        case Type::Signed8:
-            engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_INT8);
-            break;
-        case Type::Unsigned64:
-            engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_UINT64);
-            break;
-        case Type::Unsigned32:
-            engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_UINT32);
-            break;
-        case Type::Unsigned16:
-            engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_UINT16);
-            break;
-        case Type::Unsigned8:
-            engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_UINT8);
-            break;
-        default:
-            return 0;
-        }
-        pointSize += Dimension::size(di->m_type);
+        return throwError(type_statusor.status().error_msg());
     }
-    return pointSize;
+    const draco::EncodedGeometryType geom_type = type_statusor.value();
+
 }
 
-} // anonymous namespace
 
+// namespace
+// {
+//
+// template<typename DracoEngine>
+// size_t addFields(DracoEngine& engine, const DimTypeList& dims)
+// {
+//     using namespace Dimension;
+//     using namespace draco;
+//
+//     size_t pointSize = 0;
+//     for (auto di = dims.begin(); di != dims.end(); ++di)
+//     {
+//         switch (di->m_type)
+//         {
+//         case Type::Double:
+//             engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_FLOAT64);
+//             break;
+//         case Type::Float:
+//             engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_FLOAT32);
+//             break;
+//         case Type::Signed64:
+//             engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_INT64);
+//             break;
+//         case Type::Signed32:
+//             engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_INT32);
+//             break;
+//         case Type::Signed16:
+//             engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_INT16);
+//             break;
+//         case Type::Signed8:
+//             engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_INT8);
+//             break;
+//         case Type::Unsigned64:
+//             engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_UINT64);
+//             break;
+//         case Type::Unsigned32:
+//             engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_UINT32);
+//             break;
+//         case Type::Unsigned16:
+//             engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_UINT16);
+//             break;
+//         case Type::Unsigned8:
+//             engine.AddAttribute(GeometryAttribute::GENERIC, 1, DT_UINT8);
+//             break;
+//         default:
+//             return 0;
+//         }
+//         pointSize += Dimension::size(di->m_type);
+//     }
+//     return pointSize;
+// }
+//
+// } // anonymous namespace
+//
 
 
 bool DracoReader::processOne(PointRef& point)

@@ -40,6 +40,8 @@
 
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
+#include <draco/point_cloud/point_cloud.h>
+#include <draco/compression/decode.h>
 
 namespace pdal
 {
@@ -62,6 +64,11 @@ private:
 
     DracoReader(const DracoReader&) = delete;
     DracoReader& operator=(const DracoReader&) = delete;
+
+    std::istream* m_istreamPtr;
+    std::vector<char> m_data;
+    draco::DecoderBuffer m_draco_buffer;
+    std::unique_ptr<draco::PointCloud> m_pc;
 
 };
 

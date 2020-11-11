@@ -51,4 +51,47 @@
 namespace pdal
 {
 
+void checkPoint(const PointViewPtr& view, point_count_t idx,
+        double x, double y, double z)
+{
+    EXPECT_DOUBLE_EQ(x, view->getFieldAs<double>(Dimension::Id::X, idx));
+    EXPECT_DOUBLE_EQ(y, view->getFieldAs<double>(Dimension::Id::Y, idx));
+    EXPECT_DOUBLE_EQ(z, view->getFieldAs<double>(Dimension::Id::Z, idx));
+}
+
+
+TEST(DracoReader, Constructor)
+{
+    DracoReader reader1;
+
+    StageFactory f;
+    Stage* reader2(f.createStage("readers.draco"));
+    EXPECT_TRUE(reader2);
+}
+
+
+
+TEST(DracoReaderTest, test_sequential)
+{
+    PointTable table;
+
+    Options ops1;
+    ops1.add("filename", Support::datapath("draco/1.2-with-color.drc"));
+    ops1.add("count", 103);
+    DracoReader reader;
+    reader.setOptions(ops1);
+
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    Support::check_p0_p1_p2(*view);
+    PointViewPtr view2 = view->makeNew();
+    view2->appendPoint(*view, 100);
+    view2->appendPoint(*view, 101);
+    view2->appendPoint(*view, 102);
+    Support::check_p100_p101_p102(*view2);
+}
+
+
 }
