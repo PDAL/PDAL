@@ -6,6 +6,10 @@ mkdir build
 conda update -n base -c defaults conda
 conda install cmake ninja compilers -y
 
+# can remove this line once Draco is added to the
+# PDAL recipe
+conda install -c conda-forge draco -y
+
 if [ "$BUILD_TYPE" == "fixed" ]; then
 
     conda config --set channel_priority strict
