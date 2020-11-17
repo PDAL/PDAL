@@ -77,7 +77,6 @@ TEST(DracoReaderTest, test_sequential)
 
     Options ops1;
     ops1.add("filename", Support::datapath("draco/1.2-with-color.drc"));
-    ops1.add("count", 103);
     DracoReader reader;
     reader.setOptions(ops1);
 
@@ -86,11 +85,7 @@ TEST(DracoReaderTest, test_sequential)
     EXPECT_EQ(viewSet.size(), 1u);
     PointViewPtr view = *viewSet.begin();
     Support::check_p0_p1_p2(*view);
-    PointViewPtr view2 = view->makeNew();
-    view2->appendPoint(*view, 100);
-    view2->appendPoint(*view, 101);
-    view2->appendPoint(*view, 102);
-    Support::check_p100_p101_p102(*view2);
+
 }
 
 

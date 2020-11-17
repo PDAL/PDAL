@@ -39,14 +39,13 @@
 #include <iostream>
 
 #include <pdal/Reader.hpp>
-#include <pdal/Streamable.hpp>
 #include <draco/point_cloud/point_cloud.h>
 #include <draco/compression/decode.h>
 
 namespace pdal
 {
 
-class PDAL_DLL DracoReader : public Reader, public Streamable
+class PDAL_DLL DracoReader : public Reader
 {
 public:
 
@@ -69,6 +68,10 @@ private:
     std::vector<char> m_data;
     draco::DecoderBuffer m_draco_buffer;
     std::unique_ptr<draco::PointCloud> m_pc;
+    std::vector<double> m_positions;
+    std::vector<uint16_t> m_colors;
+    std::vector<double> m_normals;
+    std::vector<double> m_textures;
 
 };
 
