@@ -241,7 +241,7 @@ TEST(FauxReaderTest, uniform)
 {
     Options ops;
 
-    ops.add("bounds", BOX3D(0, 100, 0, 100, 0, 100));
+    ops.add("bounds", BOX3D(0, 0, 0, 100, 100, 100));
     ops.add("count", 1000);
     ops.add("seed", 2121212);
     ops.add("mode", "uniform");
@@ -268,7 +268,7 @@ TEST(FauxReaderTest, uniform)
     }
 
     int xtot[] = { 117, 95, 94, 93, 90, 118, 102, 97, 102, 92 };
-    int ytot[] = { 97, 108, 93, 83, 114, 98, 100, 105, 110, 92 };
+    int ytot[] = { 92, 110, 105, 100, 98, 114, 83, 93, 108, 97 };
     int ztot[] = { 92, 99, 106, 100, 105, 106, 109, 88, 84, 111 };
 
     for (size_t i = 0; i < 10; ++i)
