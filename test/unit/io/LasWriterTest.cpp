@@ -1507,6 +1507,35 @@ TEST(LasWriterTest, issue2663)
     EXPECT_EQ(h.scaleZ(), .001);
 }
 
+// Make sure that we don't crash when writing scan angle values >90 && <-90 in point
+// formats 6 or higher.
+TEST(LasWriterTest, issue3288)
+{
+    point_count_t cnt;
+
+    std::string infile(Support::datapath("text/largescan.txt"));
+    std::string tmpfile(Support::temppath("out.laz"));
+    FileUtils::deleteFile(tmpfile);
+    {
+        Options wopts;
+        wopts.add("dataformat_id", 6);
+        wopts.add("minor_version", 4);
+
+        PipelineManager mgr;
+        Stage& r = mgr.makeReader(infile, "readers.text");
+
+        mgr.makeWriter(tmpfile, "writers.las", r, wopts);
+        cnt = mgr.execute();
+    }
+
+    {
+        PipelineManager mgr;
+        mgr.makeReader(tmpfile, "readers.las");
+        EXPECT_EQ(cnt, mgr.execute());
+    }
+}
+
+
 #if defined(PDAL_HAVE_LASZIP)
 // Make sure that we can translate this special test data to 1.4, dataformat 6.
 TEST(LasWriterTest, issue2320)
