@@ -43,19 +43,16 @@ endif()
 
 if (WITH_TESTS)
 
-    # Need to fix this #2596
-    IF (NOT APPLE)
-        PDAL_ADD_TEST(pdal_io_tiledb_writer_test
-            FILES
-                test/TileDBWriterTest.cpp
-            LINK_WITH
-                ${writer_libname}
-                ${TILEDB_LIBRARIES}
-            INCLUDES
-                ${TILEDB_INCLUDE_DIR}
-                ${NLOHMANN_INCLUDE_DIR}
-        )
-    ENDIF()
+    PDAL_ADD_TEST(pdal_io_tiledb_writer_test
+        FILES
+            test/TileDBWriterTest.cpp
+        LINK_WITH
+            ${writer_libname}
+            ${TILEDB_LIBRARIES}
+        INCLUDES
+            ${TILEDB_INCLUDE_DIR}
+            ${NLOHMANN_INCLUDE_DIR}
+    )
 
     PDAL_ADD_TEST(pdal_io_tiledb_reader_test
         FILES
