@@ -8,7 +8,7 @@ jobs:
 
     runs-on: 'ubuntu-latest'
     strategy:
-      fail-fast: true
+#      fail-fast: true
       matrix:
         type: ['floating','fixed']
     env:

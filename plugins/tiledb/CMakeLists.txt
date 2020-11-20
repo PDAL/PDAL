@@ -42,7 +42,6 @@ if (WIN32)
 endif()
 
 if (WITH_TESTS)
-
     PDAL_ADD_TEST(pdal_io_tiledb_writer_test
         FILES
             test/TileDBWriterTest.cpp
@@ -61,6 +60,8 @@ if (WITH_TESTS)
             ${reader_libname}
             ${writer_libname}
             ${TILEDB_LIBRARIES}
+        INCLUDES
+            ${TILEDB_INCLUDE_DIR}
     )
 
 if (WIN32)
