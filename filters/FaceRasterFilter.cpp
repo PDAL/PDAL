@@ -88,8 +88,8 @@ void FaceRasterFilter::filter(PointView& v)
         v.calculateBounds(bounds);
         m_limits->xOrigin = bounds.minx - halfEdge;
         m_limits->yOrigin = bounds.miny - halfEdge;
-        m_limits->width = ((bounds.maxx - m_limits->xOrigin) / m_limits->edgeLength) + 1;
-        m_limits->height = ((bounds.maxy - m_limits->yOrigin) / m_limits->edgeLength) + 1;
+        m_limits->width = (int)(((bounds.maxx - m_limits->xOrigin) / m_limits->edgeLength) + 1);
+        m_limits->height = (int)(((bounds.maxy - m_limits->yOrigin) / m_limits->edgeLength) + 1);
     }
     Rasterd *raster = v.createRaster("faceraster", *m_limits, m_noData);
     if (!raster)

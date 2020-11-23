@@ -274,15 +274,15 @@ namespace FileUtils
     PDAL_DLL std::vector<std::string> glob(std::string filespec);
 
 
-    struct PDAL_DLL MapContext
+    struct MapContext
     {
     public:
         MapContext() : m_fd(-1), m_addr(nullptr)
         {}
 
-        void *addr() const
+        PDAL_DLL void *addr() const
         { return m_addr; }
-        std::string what() const
+        PDAL_DLL std::string what() const
         { return m_error; }
 
         int m_fd;
