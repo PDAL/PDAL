@@ -71,7 +71,6 @@ namespace pdal
         TileDBWriter writer;
     }
 
-    /**
     TEST_F(TileDBWriterTest, findStage)
     {
         StageFactory factory;
@@ -80,6 +79,7 @@ namespace pdal
         EXPECT_TRUE(stage->pipelineStreamable());
     }
 
+    /**
     TEST_F(TileDBWriterTest, write)
     {
         tiledb::Context ctx;
