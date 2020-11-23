@@ -69,10 +69,12 @@ namespace pdal
         **/
     };
 
+    /**
     TEST_F(TileDBWriterTest, constructor)
     {
         TileDBWriter writer;
     }
+    **/
 
     TEST_F(TileDBWriterTest, findStage)
     {
