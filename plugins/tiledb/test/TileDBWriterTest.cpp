@@ -54,11 +54,13 @@ namespace pdal
     protected:
         virtual void SetUp()
         {
+            /**
             Options options;
             options.add("mode", "ramp");
             options.add("count", count);
             m_reader.setOptions(options);
             m_reader2.setOptions(options);
+            **/
         }
 
         /**
