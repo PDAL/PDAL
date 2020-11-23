@@ -61,9 +61,10 @@ namespace pdal
             m_reader2.setOptions(options);
         }
 
+        /**
         FauxReader m_reader;
         FauxReader m_reader2;
-
+        **/
     };
 
     TEST_F(TileDBWriterTest, constructor)
