@@ -54,27 +54,21 @@ namespace pdal
     protected:
         virtual void SetUp()
         {
-            /**
             Options options;
             options.add("mode", "ramp");
             options.add("count", count);
             m_reader.setOptions(options);
             m_reader2.setOptions(options);
-            **/
         }
 
-        /**
         FauxReader m_reader;
         FauxReader m_reader2;
-        **/
     };
 
-    /**
     TEST_F(TileDBWriterTest, constructor)
     {
         TileDBWriter writer;
     }
-    **/
 
     TEST_F(TileDBWriterTest, findStage)
     {
@@ -84,7 +78,6 @@ namespace pdal
         EXPECT_TRUE(stage->pipelineStreamable());
     }
 
-    /**
     TEST_F(TileDBWriterTest, write)
     {
         tiledb::Context ctx;
@@ -449,5 +442,4 @@ namespace pdal
             EXPECT_EQ(v, 1.0);
     }
 #endif
-    **/
 }
