@@ -39,6 +39,7 @@
 #include <stdexcept>
 
 #include <pdal/pdal_internal.hpp>
+#include <pdal/private/Raster.hpp>
 
 namespace pdal
 {
@@ -61,10 +62,11 @@ public:
     };
 
     // Exported for testing.
-    PDAL_DLL GDALGrid(size_t width, size_t height,
-        double edgeLength, double radius, int outputTypes, size_t windowSize, double power);
+    PDAL_DLL GDALGrid(double xOrigin, double yOrigin, size_t width, size_t height,
+        double edgeLength, double radius, int outputTypes, size_t windowSize,
+        double power);
 
-    void expand(size_t width, size_t height, size_t xshift, size_t yshift);
+    void expandToInclude(double x, double y);
 
     // Get the number of bands represented by this grid.
     int numBands() const;
@@ -78,22 +80,18 @@ public:
     // Compute final values after all points have been added.
     void finalize();
 
-    size_t width() const
-        { return m_width; }
-
-    size_t height() const
-        { return m_height; }
+    int width() const;
+    int height() const;
+    double xOrigin() const;
+    double yOrigin() const;
 
 private:
-    size_t m_width;
-    size_t m_height;
-    size_t m_windowSize;
+    int m_windowSize;
     double m_edgeLength;
     double m_radius;
     double m_power;
 
-    typedef std::vector<double> DataVec;
-    typedef std::unique_ptr<DataVec> DataPtr;
+    typedef std::unique_ptr<Rasterd> DataPtr;
     DataPtr m_count;
     DataPtr m_min;
     DataPtr m_max;
@@ -104,44 +102,17 @@ private:
 
     int m_outputTypes;
 
-    // Find an index into the actual storage given a grid coordinate.
-    size_t index(size_t i, size_t j) const
-        { return (j * m_width) + i; }
-
     // Determine if a cell i, j has no associated points.
     bool empty(size_t i, size_t j) const
-        { return empty(index(i, j)); }
+        { return m_count->at(i, j) <= 0; }
 
     // Determine if a cell with index \c idx has no associated points.
     bool empty(size_t idx) const
-        { return ((*m_count)[idx] <= 0); }
-
-    // Convert an absolute X position to a horizontal cell index.
-    int horizontalIndex(double x) const
-        { return (int)(x / m_edgeLength); }
-
-    // Convert an absolute Y position to a vertical cell index.
-    int verticalIndex(double y) const
-        { return m_height - (int)(y / m_edgeLength) - 1; }
-
-    // Return the absolute horizontal position of the center of a cell given
-    // the cell i index.
-    double horizontalPos(size_t i) const
-        { return (i + .5) * m_edgeLength; }
-
-    // Return the absolute vertical position of the center of a cell given
-    // the cell j index.
-    double verticalPos(size_t j) const
-        { return (m_height - (j + .5)) * m_edgeLength; }
+        { return (m_count->at(idx) <= 0); }
 
     // Determine the distance from the center of cell at coordinate i, j to
     // a point at absolute coordinate x, y.
-    double distance(size_t i, size_t j, double x, double y) const
-    {
-        double x1 = horizontalPos(i);
-        double y1 = verticalPos(j);
-        return sqrt(pow(x1 - x, 2) + pow(y1 - y, 2));
-    }
+    double distance(int i, int j, double x, double y) const;
 
     // Update cells in the Nth quadrant about point at (x, y, z)
     void updateFirstQuadrant(double x, double y, double z);
@@ -153,25 +124,21 @@ private:
     void update(size_t i, size_t j, double val, double dist);
 
     // Fill cell at index \c i with the nondata value.
-    void fillNodata(size_t i);
+    // \i  I coordinate.
+    // \j  J coordinate.
+    void fillNodata(int i, int j);
 
     // Fill an empty cell with a value inverse-distance averaged from
     // surrounding cells.
-    void windowFill()
-    {
-        for (size_t i = 0; i < width(); ++i)
-            for (size_t j = 0; j < height(); ++j)
-                if (empty(i, j))
-                    windowFill(i, j);
-    }
+    void windowFill();
 
     // Fill empty cell at dstI, dstJ with inverse-distance weighted values
     // from neighboring cells.
-    void windowFill(size_t dstI, size_t dstJ);
+    void windowFill(int dstI, int dstJ);
 
     // Cumulate data from a source cell to a destination cell when doing
     // a window fill.
-    void windowFillCell(size_t srcIdx, size_t dstIdx, double distance);
+    void windowFillCell(int srcI, int srcJ, int dstI, int dstJ, double distance);
 };
 
 } //namespace pdal

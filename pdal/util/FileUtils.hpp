@@ -43,6 +43,10 @@
 #include <string>
 #include <vector>
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
 #include "pdal_util_export.hpp"
 
 namespace pdal
@@ -205,6 +209,16 @@ namespace FileUtils
     PDAL_DLL bool isDirectory(const std::string& path);
 
     /**
+      Return the path with all ".", ".." and symbolic links removed.
+      The file must exist.
+
+      \param filename  Name of file to convert to canonical path.
+      \return  Canonical version of provided filename, or empty string.
+    */
+    PDAL_DLL std::string toCanonicalPath(std::string filename);
+
+
+    /**
       If the filename is an absolute path, just return it otherwise,
       make it absolute (relative to current working dir) and return it.
 
@@ -258,6 +272,45 @@ namespace FileUtils
       \return  List of files that correspond to provided file specification.
     */
     PDAL_DLL std::vector<std::string> glob(std::string filespec);
-}
 
+
+    struct MapContext
+    {
+    public:
+        MapContext() : m_fd(-1), m_addr(nullptr)
+        {}
+
+        PDAL_DLL void *addr() const
+        { return m_addr; }
+        PDAL_DLL std::string what() const
+        { return m_error; }
+
+        int m_fd;
+        size_t m_size;
+        void *m_addr;
+        std::string m_error;
+#ifdef _WIN32
+        HANDLE m_handle;
+#endif
+    };
+    /**
+      Map a file to memory.
+      \param filename  Filename to map.
+      \param readOnly  Must be true at this time.
+      \param pos       Starting position of file to map.
+      \param size      Number of bytes in file to map.
+      \return  MapContext.  addr() gets the mapped address.  what() gets
+         any error message.  addr() returns nullptr on error.
+    */
+    PDAL_DLL MapContext mapFile(const std::string& filename, bool readOnly,
+        size_t pos, size_t size);
+
+    /**
+      Unmap a previously mapped file.
+      \param ctx  Previously returned MapContext
+      \return  MapContext indicating current state of the file mapping.
+    */
+    PDAL_DLL MapContext unmapFile(MapContext ctx);
+
+} // namespace FileUtils
 } // namespace pdal

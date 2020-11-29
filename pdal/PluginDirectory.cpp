@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/PluginDirectory.hpp>
+#include <pdal/util/Algorithm.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/pdal_config.hpp>
 
@@ -53,14 +54,15 @@ StringList pluginSearchPaths()
         searchPaths = Utils::split2(envOverride, Utils::pathListSeparator);
     else
     {
-        StringList standardPaths { ".", "./lib", "../lib", "./bin", "../bin" };
-        for (std::string& s : standardPaths)
+        StringList possiblePaths { ".", "./lib", "../lib", "./bin", "../bin", Utils::dllDir(),
+            Config::pluginInstallPath() };
+
+        for (std::string s : possiblePaths)
         {
-            if (FileUtils::toAbsolutePath(s) !=
-                FileUtils::toAbsolutePath(Config::pluginInstallPath()))
+            s = FileUtils::toCanonicalPath(s);
+            if (s.size() && !Utils::contains(searchPaths, s))
                 searchPaths.push_back(s);
         }
-        searchPaths.push_back(Config::pluginInstallPath());
     }
     return searchPaths;
 }
@@ -135,11 +137,6 @@ PluginDirectory::PluginDirectory()
                 m_drivers.insert(std::make_pair(plugin, file));
         }
     }
-}
-
-StringList PluginDirectory::test_pluginSearchPaths()
-{
-    return pluginSearchPaths();
 }
 
 std::string PluginDirectory::test_validPlugin(const std::string& path,

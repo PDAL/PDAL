@@ -29,3 +29,6 @@ filename
 angles_are_degrees
   Convert all angular values from degrees to radians before write.
   [Default: true]
+
+.. include:: writer_opts.rst
+

@@ -33,8 +33,8 @@
 ****************************************************************************/
 
 #include <pdal/pdal_test_main.hpp>
-#include <pdal/GDALUtils.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/private/gdal/Raster.hpp>
 #include <filters/RangeFilter.hpp>
 #include <io/BufferReader.hpp>
 #include <io/FauxReader.hpp>
@@ -85,8 +85,6 @@ void runGdalWriter(const Options& wo, const std::string& infile,
             w.execute(t);
         }
 
-        using namespace gdal;
-
         std::istringstream iss(values);
 
         std::vector<double> arr;
@@ -99,9 +97,8 @@ void runGdalWriter(const Options& wo, const std::string& infile,
             arr.push_back(d);
         }
 
-        registerDrivers();
-        Raster raster(outfile, "GTiff");
-        if (raster.open() != GDALError::None)
+        gdal::Raster raster(outfile, "GTiff");
+        if (raster.open() != gdal::GDALError::None)
         {
             throw pdal_error(raster.errorMsg());
         }
@@ -109,6 +106,7 @@ void runGdalWriter(const Options& wo, const std::string& infile,
         raster.readBand(data, 1);
         int row = 0;
         int col = 0;
+
         for (size_t i = 0; i < arr.size(); ++i)
         {
             EXPECT_NEAR(arr[i], data[i], .001) << "Error row/col = " <<
@@ -176,9 +174,8 @@ void runGdalWriter2(const Options& wo, const std::string& outfile,
         arr.push_back(d);
     }
 
-    registerDrivers();
-    Raster raster(outfile, "GTiff");
-    if (raster.open() != GDALError::None)
+    gdal::Raster raster(outfile, "GTiff");
+    if (raster.open() != gdal::GDALError::None)
     {
         throw pdal_error(raster.errorMsg());
     }
@@ -581,9 +578,8 @@ TEST(GDALWriterTest, btint)
         arr.push_back(d);
     }
 
-    registerDrivers();
-    Raster raster(outfile, "BT");
-    if (raster.open() != GDALError::None)
+    gdal::Raster raster(outfile, "BT");
+    if (raster.open() != gdal::GDALError::None)
     {
         throw pdal_error(raster.errorMsg());
     }
@@ -697,7 +693,6 @@ TEST(GDALWriterTest, issue_2074)
     w.prepare(t);
     w.execute(t);
 
-    gdal::registerDrivers();
     gdal::Raster raster(Support::temppath("gdal1.tif"), "GTiff");
     if (raster.open() != gdal::GDALError::None)
     {
@@ -736,18 +731,6 @@ TEST(GDALWriterTest, issue_2074)
     }
     EXPECT_EQ(raster3.width(), 7);
     EXPECT_EQ(raster3.height(), 7);
-}
-
-TEST(GDALWriterTest, issue_2095)
-{
-    GDALGrid grid(5, 5, 1, .7, GDALGrid::statCount | GDALGrid::statMin, 0, 1.0);
-
-    EXPECT_EQ(grid.verticalIndex(0), 4);
-    EXPECT_EQ(grid.verticalIndex(.5), 4);
-    EXPECT_EQ(grid.verticalIndex(1), 3);
-    EXPECT_EQ(grid.verticalIndex(1.5), 3);
-    EXPECT_EQ(grid.verticalIndex(4), 0);
-    EXPECT_EQ(grid.verticalIndex(4.5), 0);
 }
 
 // If the radius is sufficiently large, make sure the grid is filled.
@@ -860,12 +843,57 @@ TEST(GDALWriterTest, alternate_grid)
         w.prepare(t);
         w.execute(t);
 
-        gdal::registerDrivers();
         gdal::Raster raster(outfile, "GTiff");
         raster.open();
         EXPECT_EQ(raster.width(), 10);
         EXPECT_EQ(raster.height(), 5);
     }
+}
+
+TEST(GDALWriterTest, srs)
+{
+    auto test = [](const std::string& sourceSrs, const std::string& defaultSrs,
+        const std::string& overrideSrs, const std::string& testSrs)
+    {
+        std::string outfile(Support::temppath("out.tif"));
+
+        TextReader t;
+        Options to;
+        to.add("filename", Support::datapath("text/with_edgeofflightline.txt"));
+        if (sourceSrs.size())
+            to.add("override_srs", sourceSrs);
+        t.setOptions(to);
+
+        GDALWriter w;
+        Options wo;
+        wo.add("filename", outfile);
+        wo.add("origin_x", 0);
+        wo.add("origin_y", 0);
+        wo.add("width", 1000);
+        wo.add("height", 1000);
+        wo.add("resolution", 10);
+        if (defaultSrs.size())
+            wo.add("default_srs", defaultSrs);
+        if (overrideSrs.size())
+            wo.add("override_srs", overrideSrs);
+        w.setOptions(wo);
+        w.setInput(t);
+
+        FileUtils::deleteFile(outfile);
+        PointTable table;
+        w.prepare(table);
+        w.execute(table);
+
+        gdal::Raster raster(outfile);
+        raster.open();
+        EXPECT_EQ(raster.getSpatialRef(), testSrs);
+    };
+
+    test("", "EPSG:4326", "", "EPSG:4326");
+    test("", "", "EPSG:4326", "EPSG:4326");
+    test("EPSG:4326", "EPSG:2030", "", "EPSG:4326");
+    test("EPSG:4326", "", "EPSG:2030", "EPSG:2030");
+    EXPECT_THROW(test("EPSG:4326", "EPSG:4326", "EPSG:2030", "EPSG:2030"), pdal_error);
 }
 
 } // namespace pdal

@@ -34,9 +34,9 @@
 
 #include "EigenvaluesFilter.hpp"
 
-#include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/private/MathUtils.hpp>
 
 #include <Eigen/Dense>
 
@@ -55,24 +55,59 @@ static StaticPluginInfo const s_info
 
 CREATE_STATIC_STAGE(EigenvaluesFilter, s_info)
 
+struct EigenvalueArgs
+{
+    int m_knn;
+    bool m_normalize;
+    size_t m_stride;
+    double m_radius;
+    Arg* m_radiusArg;
+    int m_minK;
+};
+
+EigenvaluesFilter::EigenvaluesFilter() : m_args(new EigenvalueArgs) {}
+
 std::string EigenvaluesFilter::getName() const
 {
     return s_info.name;
 }
 
-
 void EigenvaluesFilter::addArgs(ProgramArgs& args)
 {
-    args.add("knn", "k-Nearest neighbors", m_knn, 8);
-    args.add("normalize", "Normalize eigenvalues?", m_normalize, false);
+    args.add("knn", "k-Nearest neighbors", m_args->m_knn, 8);
+    args.add("normalize", "Normalize eigenvalues?", m_args->m_normalize, false);
+    args.add("stride", "Compute features on strided neighbors",
+             m_args->m_stride, size_t(1));
+    m_args->m_radiusArg = &args.add(
+        "radius", "Radius for nearest neighbor search", m_args->m_radius);
+    args.add("min_k", "Minimum number of neighbors in radius", m_args->m_minK,
+             3);
 }
-
 
 void EigenvaluesFilter::addDimensions(PointLayoutPtr layout)
 {
     m_e0 = layout->registerOrAssignDim("Eigenvalue0", Dimension::Type::Double);
     m_e1 = layout->registerOrAssignDim("Eigenvalue1", Dimension::Type::Double);
     m_e2 = layout->registerOrAssignDim("Eigenvalue2", Dimension::Type::Double);
+}
+
+void EigenvaluesFilter::prepared(PointTableRef table)
+{
+    if (m_args->m_radiusArg->set())
+    {
+        log()->get(LogLevel::Warning)
+            << "Radius has been set. Ignoring knn and stride values."
+            << std::endl;
+        if (m_args->m_radius <= 0.0)
+            log()->get(LogLevel::Error)
+                << "Radius must be greater than 0." << std::endl;
+    }
+    else
+    {
+        log()->get(LogLevel::Warning) << "No radius specified. Proceeding with "
+                                         "knn and stride, but ignoring min_k."
+                                      << std::endl;
+    }
 }
 
 void EigenvaluesFilter::filter(PointView& view)
@@ -83,11 +118,25 @@ void EigenvaluesFilter::filter(PointView& view)
 
     for (PointId i = 0; i < view.size(); ++i)
     {
-        // find the k-nearest neighbors
-        auto ids = kdi.neighbors(i, m_knn);
+        // find neighbors, either by radius or k nearest neighbors
+        PointIdList ids;
+        if (m_args->m_radiusArg->set())
+        {
+            ids = kdi.radius(i, m_args->m_radius);
+
+            // if insufficient number of neighbors, eigen solver will fail
+            // anyway, it may be okay to silently return without setting any of
+            // the computed features?
+            if (ids.size() < (size_t)m_args->m_minK)
+                continue;
+        }
+        else
+        {
+            ids = kdi.neighbors(i, m_args->m_knn + 1, m_args->m_stride);
+        }
 
         // compute covariance of the neighborhood
-        auto B = computeCovariance(view, ids);
+        auto B = math::computeCovariance(view, ids);
 
         // perform the eigen decomposition
         SelfAdjointEigenSolver<Matrix3d> solver(B);
@@ -95,7 +144,7 @@ void EigenvaluesFilter::filter(PointView& view)
             throwError("Cannot perform eigen decomposition.");
         auto ev = solver.eigenvalues();
 
-        if (m_normalize)
+        if (m_args->m_normalize)
         {
             double sum = ev[0] + ev[1] + ev[2];
             ev /= sum;

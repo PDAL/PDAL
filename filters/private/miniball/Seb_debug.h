@@ -57,7 +57,7 @@ namespace SEB_NAMESPACE {
   //   created and started.  Otherwise, the timer with name name is
   //   restarted.
   //
-  // - lapse(name): Retuns the number of seconds which have elapsed
+  // - lapse(name): Returns the number of seconds which have elapsed
   //   since start(name) was called last.
   //   Precondition: start(name) has been called once.
   {

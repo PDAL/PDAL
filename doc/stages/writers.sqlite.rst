@@ -75,5 +75,7 @@ output_dims
   If specified, limits the dimensions written for each point.  Dimensions
   are listed by name and separated by commas.
 
+.. include:: writer_opts.rst
+
 .. _SQLite: http://sqlite.org
 .. _LAZperf: https://github.com/hobu/laz-perf

@@ -5,7 +5,7 @@ filters.hag
 
 .. warning::
 
-    The HAG filter is deprecated and has been replaced by :ref:`filters.hag_nn`,
+    The HAG filter has been eliminated was replaced by :ref:`filters.hag_nn`,
     :ref:`filters.hag_dem` and :ref:`filters.hag_delaunay`.  Please use
     the new filter
     that matches your needs as this filter will be removed in a future release.
@@ -42,7 +42,7 @@ of at least 3.
 
 The filter creates a delaunay triangulation of the `count`_ ground points
 closest to the non-ground point in question.  If the non-ground point is
-within the trianulated area, the assigned ``HeightAboveGround`` is the
+within the triangulated area, the assigned ``HeightAboveGround`` is the
 difference between its ``Z`` value and a ground height interpolated from
 the three vertices of the containing triangle.  If the non-ground point
 is outside of the triangulated area, its ``HeightAboveGround`` is calculated

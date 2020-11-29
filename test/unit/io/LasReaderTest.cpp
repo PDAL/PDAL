@@ -477,7 +477,7 @@ TEST(LasReaderTest, stream)
 
 // The header of 1.2-with-color-clipped says that it has 1065 points,
 // but it really only has 1064.
-TEST(LasReaderTest, LasHeaderIncorrentPointcount)
+TEST(LasReaderTest, LasHeaderIncorrectPointcount)
 {
     PointTable table;
 
@@ -486,11 +486,7 @@ TEST(LasReaderTest, LasHeaderIncorrentPointcount)
     LasReader reader;
     reader.setOptions(readOps);
 
-    reader.prepare(table);
-    PointViewSet viewSet = reader.execute(table);
-    PointViewPtr view = *viewSet.begin();
-
-    EXPECT_EQ(1064u, view->size());
+    EXPECT_THROW(reader.prepare(table), pdal_error);
 }
 
 TEST(LasReaderTest, EmptyGeotiffVlr)

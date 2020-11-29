@@ -36,6 +36,7 @@
 
 #include <cstdint>
 #include <sstream>
+#include <stdexcept>
 
 #include "pdal_util_export.hpp"
 
@@ -285,7 +286,7 @@ public:
     }
 
     /**
-      Return a staticly-allocated Bounds extent that represents infinity
+      Return a statically-allocated Bounds extent that represents infinity
 
       \return  A bounds box with infinite bounds,
     */
@@ -592,7 +593,7 @@ public:
     }
 
     /**
-      Return a staticly-allocated Bounds extent that represents infinity
+      Return a statically-allocated Bounds extent that represents infinity
 
       \return  A bounds box with infinite bounds,
     */

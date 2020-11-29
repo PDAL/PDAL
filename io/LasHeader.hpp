@@ -384,8 +384,7 @@ public:
     const LasVLR *findVlr(const std::string& userId, uint16_t recordId) const;
     void removeVLR(const std::string& userId, uint16_t recordId);
     void removeVLR(const std::string& userId);
-    void setLog(LogPtr log)
-        { m_log = log; }
+    void initialize(LogPtr log, uintmax_t fileSize);
     const VlrList& vlrs() const
         { return m_vlrs; }
 
@@ -394,6 +393,7 @@ public:
     friend std::ostream& operator<<(std::ostream& ostr, const LasHeader& h);
 
 private:
+    uintmax_t m_fileSize;
     std::string m_fileSig;
     uint16_t m_sourceId;
     uint16_t m_globalEncoding;

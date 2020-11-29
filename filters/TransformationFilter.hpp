@@ -66,6 +66,7 @@ private:
 
     std::unique_ptr<Transform> m_matrix;
     SpatialReference m_overrideSrs;
+    bool m_invert;
 };
 
 class TransformationFilter::Transform

@@ -8,7 +8,7 @@ normalize common dimension types, like X, Y, Z, or Intensity, which are often
 found in LiDAR point clouds. Not all dimension types need to be fixed, however.
 Database drivers typically return unstructured lists of dimensions.  A reader
 might provide a simple file type, like :ref:`readers.text`, a complex database
-like :ref:`readers.oci`, or a network service like :ref:`readers.ept`.
+like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
 
 
 .. toctree::
@@ -22,7 +22,6 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.ept`.
    readers.e57
    readers.faux
    readers.gdal
-   readers.geowave
    readers.hdf
    readers.i3s
    readers.ilvis2
@@ -71,8 +70,8 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.ept`.
 :ref:`readers.gdal`
     Read GDAL readable raster data sources as point clouds.
 
-:ref:`readers.geowave`
-    Read point cloud data from Accumulo.
+:ref:`readers.hdf`
+   Read data from files in the HDF5 format.
 
 :ref:`readers.i3s`
     Read data stored in the Esri I3S format.  The data is read from an
@@ -108,7 +107,7 @@ like :ref:`readers.oci`, or a network service like :ref:`readers.ept`.
     Read point cloud data from Numpy ``.npy`` files.
 
 :ref:`readers.oci`
-    Read data from Oracle point cloud databases.
+    Read data from Oracle point cloud databases. [deprecated]
 
 :ref:`readers.optech`
     Read Optech Corrected Sensor Data (.csd) files.

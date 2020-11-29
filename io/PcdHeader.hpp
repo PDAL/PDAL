@@ -35,8 +35,9 @@
 
 #pragma once
 
+#include <Eigen/Dense>
+
 #include <pdal/Dimension.hpp>
-#include <pdal/EigenUtils.hpp>
 #include <pdal/util/OStream.hpp>
 
 namespace pdal
@@ -95,11 +96,9 @@ typedef std::vector<PcdField> PcdFieldList;
 
 struct PcdHeader
 {
-    PcdHeader()
-        : m_version(PcdVersion::PCD_V6), m_width(1), m_height(0),
-          m_pointCount(0), m_origin(0, 0, 0, 0), m_orientation(1, 0, 0, 0)
-    {
-    }
+    PcdHeader();
+
+    void clear();
 
     PcdVersion m_version;
     PcdFieldList m_fields;
@@ -114,7 +113,10 @@ struct PcdHeader
     std::istream::pos_type m_dataOffset;
     size_t m_numLines;
 };
+
 std::istream& operator>>(std::istream& in, PcdHeader& header);
 std::ostream& operator<<(std::ostream& out, PcdHeader& header);
 OLeStream& operator<<(OLeStream& out, PcdHeader& header);
-}
+
+} // namespace pdal
+

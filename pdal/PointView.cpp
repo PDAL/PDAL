@@ -34,10 +34,11 @@
 
 #include <iomanip>
 
-#include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/util/Algorithm.hpp>
+
+#include "private/Raster.hpp"
 
 namespace pdal
 {
@@ -177,6 +178,30 @@ TriangularMesh *PointView::mesh(const std::string& name)
         return it->second.get();
     if (name.empty() && m_meshes.size())
         return m_meshes.begin()->second.get();
+    return nullptr;
+}
+
+
+Rasterd *PointView::createRaster(const std::string& name, const RasterLimits& limits,
+    double nodata)
+{
+    if (Utils::contains(m_rasters, name))
+        return nullptr;
+    Rasterd *r = new Rasterd(limits, name, nodata);
+    auto res = m_rasters.insert(std::make_pair(name, std::unique_ptr<Rasterd>(r)));
+    if (res.second)
+        return res.first->second.get();
+    return nullptr;
+}
+
+
+Rasterd *PointView::raster(const std::string& name)
+{
+    auto it = m_rasters.find(name);
+    if (it != m_rasters.end())
+        return it->second.get();
+    if (name.empty() && m_rasters.size())
+        return m_rasters.begin()->second.get();
     return nullptr;
 }
 

@@ -32,8 +32,15 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#pragma warning(push)
+#pragma warning(disable: 4251)
+#include <ogr_api.h>
+#include <ogr_geometry.h>
+#pragma warning(pop)
+
 #include <pdal/Geometry.hpp>
-#include <pdal/GDALUtils.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
+
 #include "private/SrsTransform.hpp"
 
 namespace pdal
@@ -125,7 +132,7 @@ void Geometry::update(const std::string& wkt_or_json)
 Geometry& Geometry::operator=(const Geometry& input)
 {
     if (m_geom != input.m_geom)
-        *m_geom = *input.m_geom;
+        m_geom.reset(input.m_geom->clone());
     modified();
     return *this;
 }

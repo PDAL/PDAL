@@ -33,9 +33,13 @@
 ****************************************************************************/
 
 #include "TIndexReader.hpp"
-#include <pdal/GDALUtils.hpp>
+
+#include <ogr_api.h>
+
 #include <pdal/Polygon.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
+#include <pdal/private/gdal/SpatialRef.hpp>
 
 namespace pdal
 {

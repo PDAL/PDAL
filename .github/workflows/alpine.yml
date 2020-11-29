@@ -1,0 +1,39 @@
+name: Alpine
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    container: pdal/alpinebase:latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup
+      shell: bash -l {0}
+      run: |
+          source ./scripts/ci/alpine/setup.sh
+
+    - name: CMake
+      shell: bash -l {0}
+      run: |
+          source ../scripts/ci/alpine/cmake.sh
+      working-directory: ./build
+
+    - name: Compile
+      shell: bash -l {0}
+      run: |
+          source ../scripts/ci/alpine/compile.sh
+      working-directory: ./build
+
+    - name: Test
+      shell: bash -l {0}
+      run: |
+          source ../scripts/ci/alpine/test.sh
+      working-directory: ./build
+
+    - name: Examples
+      shell: bash -l {0}
+      run: |
+          source ./scripts/ci/alpine/examples.sh

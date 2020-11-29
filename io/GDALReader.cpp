@@ -36,8 +36,8 @@
 
 #include <sstream>
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/private/gdal/Raster.hpp>
 
 namespace pdal
 {
@@ -72,8 +72,6 @@ GDALReader::~GDALReader()
 
 void GDALReader::initialize()
 {
-    gdal::registerDrivers();
-
     m_raster.reset(new gdal::Raster(m_filename));
     if (m_raster->open() == gdal::GDALError::CantOpen)
         throwError("Couldn't open raster file '" + m_filename + "'.");
@@ -96,7 +94,7 @@ void GDALReader::initialize()
     else
     {
         for (size_t i = 0; i < m_bandTypes.size(); ++i)
-            m_dimNames.push_back("band-" + std::to_string(i + 1));
+            m_dimNames.push_back("band_" + std::to_string(i + 1));
     }
 
     int zBand = 1;

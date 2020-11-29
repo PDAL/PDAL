@@ -6,7 +6,7 @@ filters.dem
 The **DEM filter** uses a source raster to keep point cloud data within
 a each cell within a computed range.
 For example, atmospheric or MTA noise in a scene can be quickly
-removed by keeping all data within 100m above and 20m below a pre-existing
+removed by keeping all data within 100m above and 20m below a preexisting
 elevation model.
 
 .. embed::
@@ -40,6 +40,8 @@ raster
 
 band
   GDAL Band number to read (count from 1) [Default: 1]
+
+.. include:: filter_opts.rst
 
 .. _`GDAL`: http://gdal.org
 .. _`GDAL readable raster`: http://www.gdal.org/formats_list.html

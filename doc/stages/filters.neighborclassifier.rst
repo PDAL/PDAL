@@ -71,3 +71,6 @@ _`domain`
 _`k`
   An integer which specifies the number of neighbors which vote on each
   selected point.
+
+.. include:: filter_opts.rst
+

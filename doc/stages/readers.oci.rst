@@ -3,6 +3,10 @@
 readers.oci
 ===========
 
+.. note::
+
+    The OCI reader is deprecated and will be removed in a future release.
+
 The OCI reader is used to read data from `Oracle point cloud`_ databases.
 
 .. plugin::

@@ -327,10 +327,11 @@ bool E57Reader::fillPoint(PointRef& point)
 point_count_t E57Reader::read(PointViewPtr view, point_count_t count)
 {
     point_count_t numPoints = e57plugin::numPoints(*m_data3D);
+    PointRef point(*view);
     for (PointId counter = 0, nextId = view->size(); counter < numPoints;
             ++counter, ++nextId)
     {
-        PointRef point(view->point(nextId));
+        point.setPointId(nextId);
         fillPoint(point);
     }
 

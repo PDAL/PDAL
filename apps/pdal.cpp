@@ -33,12 +33,12 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/Kernel.hpp>
 #include <pdal/PluginManager.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_config.hpp>
 #include <pdal/util/Backtrace.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
 
 #include <iomanip>
 #include <iostream>

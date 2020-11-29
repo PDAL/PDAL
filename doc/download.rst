@@ -62,7 +62,7 @@ below is intended to provide an overview of some of the differences between the
 various distributions, as not all features can be enabled in every
 distribution. This table only summarizes the differences between distributions,
 and there are several plugins that are not built for any of the distributions.
-These include Delaunay, GeoWave, MATLAB, MBIO, MRSID, OpenSceneGraph, RDBLIB,
+These include Delaunay, MATLAB, MBIO, MRSID, OpenSceneGraph, RDBLIB,
 and RiVLib. To enable any of these plugins, the reader will need to install any
 required dependencies and build PDAL from source.
 

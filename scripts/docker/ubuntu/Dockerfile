@@ -21,6 +21,7 @@ RUN . /opt/conda/etc/profile.d/conda.sh && \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
         -DBUILD_PLUGIN_HDF=ON \
         -DBUILD_PLUGIN_TILEDB=ON \
+        -DBUILD_PLUGIN_E57=ON \
         -DBUILD_PGPOINTCLOUD_TESTS=OFF \
         -DWITH_LAZPERF=ON \
         -DWITH_ZSTD=ON \
@@ -68,7 +69,7 @@ ARG PDAL_CONDA=/opt/conda/envs/pdal
 
 RUN apt-get update --fix-missing && \
     apt-get install -y \
-        sudo && \
+        sudo ca-certificates && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

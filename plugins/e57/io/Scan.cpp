@@ -65,7 +65,7 @@ bool Scan::hasPose() const
     return m_hasPose;
 }
 
-void Scan::transformPoint(pdal::PointRef pt) const
+void Scan::transformPoint(pdal::PointRef& pt) const
 {
     auto x = pt.getFieldAs<double>(pdal::Dimension::Id::X);
     auto y = pt.getFieldAs<double>(pdal::Dimension::Id::Y);

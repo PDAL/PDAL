@@ -56,3 +56,5 @@ knn
 threads
   The number of threads used for computing the plane fit criterion. [Default: 1]
 
+.. include:: filter_opts.rst
+

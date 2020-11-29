@@ -39,7 +39,6 @@
 
 #include "CSFilter.hpp"
 
-#include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
@@ -116,7 +115,7 @@ void CSFilter::prepared(PointTableRef table)
     for (auto& r : m_args->m_ignored)
     {
         r.m_id = layout->findDim(r.m_name);
-        if (r.m_id == Dimension::Id::Unknown)
+        if (r.m_id == Id::Unknown)
             throwError("Invalid dimension name in 'ignored' option: '" +
                        r.m_name + "'.");
     }
@@ -132,8 +131,8 @@ void CSFilter::prepared(PointTableRef table)
             }
         }
 
-        if (!layout->hasDim(Dimension::Id::ReturnNumber) ||
-            !layout->hasDim(Dimension::Id::NumberOfReturns))
+        if (!layout->hasDim(Id::ReturnNumber) ||
+            !layout->hasDim(Id::NumberOfReturns))
         {
             log()->get(LogLevel::Warning) << "Could not find ReturnNumber and "
                                              "NumberOfReturns. Skipping "
@@ -146,7 +145,7 @@ void CSFilter::prepared(PointTableRef table)
 
 PointViewSet CSFilter::run(PointViewPtr view)
 {
-    PointViewSet viewSet;
+    PointViewSet viewSet{view};
     if (!view->size())
         return viewSet;
 
@@ -164,12 +163,10 @@ PointViewSet CSFilter::run(PointViewPtr view)
     bool rnOneZero(false);
     bool nrAllZero(true);
     bool rnAllZero(true);
-    for (PointId i = 0; i < keptView->size(); ++i)
+    for (PointRef p : *keptView)
     {
-        uint8_t nr =
-            keptView->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, i);
-        uint8_t rn =
-            keptView->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, i);
+        uint8_t nr = p.getFieldAs<uint8_t>(Id::NumberOfReturns);
+        uint8_t rn = p.getFieldAs<uint8_t>(Id::ReturnNumber);
         if ((nr == 0) && !nrOneZero)
             nrOneZero = true;
         if ((rn == 0) && !rnOneZero)
@@ -203,20 +200,15 @@ PointViewSet CSFilter::run(PointViewPtr view)
     }
 
     if (!firstView->size())
-    {
         throwError("No returns to process.");
-    }
-
-    for (PointId i = 0; i < secondView->size(); ++i)
-        secondView->setField(Dimension::Id::Classification, i, 1);
 
     csf::PointCloud csfPC;
-    for (PointId i = 0; i < firstView->size(); ++i)
+    for (PointRef point : *firstView)
     {
         csf::Point p;
-        p.x = firstView->getFieldAs<double>(Dimension::Id::X, i);
-        p.y = firstView->getFieldAs<double>(Dimension::Id::Y, i);
-        p.z = firstView->getFieldAs<double>(Dimension::Id::Z, i);
+        p.x = point.getFieldAs<double>(Id::X);
+        p.y = point.getFieldAs<double>(Id::Y);
+        p.z = point.getFieldAs<double>(Id::Z);
         csfPC.push_back(p);
     }
 
@@ -240,15 +232,9 @@ PointViewSet CSFilter::run(PointViewPtr view)
     }
 
     for (auto const& i : groundIdx)
-        firstView->setField(Dimension::Id::Classification, i, 2);
+        firstView->setField(Id::Classification, i, 2);
     for (auto const& i : offGroundIdx)
-        firstView->setField(Dimension::Id::Classification, i, 1);
-
-    PointViewPtr outView = view->makeNew();
-    outView->append(*ignoredView);
-    outView->append(*secondView);
-    outView->append(*firstView);
-    viewSet.insert(outView);
+        firstView->setField(Id::Classification, i, 1);
 
     return viewSet;
 }

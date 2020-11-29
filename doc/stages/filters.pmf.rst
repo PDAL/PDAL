@@ -69,7 +69,7 @@ Notes
 .. note::
 
     [Zhang2003]_ describes the consequences and relationships of the parameters
-    in more detail and is the canonnical resource on the topic.
+    in more detail and is the canonical resource on the topic.
 
 Options
 -------------------------------------------------------------------------------
@@ -99,3 +99,6 @@ _`max_window_size`
 
 _`slope`
   Slope. [Default: 1.0]
+
+.. include:: filter_opts.rst
+

@@ -48,7 +48,7 @@ EptInfo::EptInfo(const std::string& info)
     {
         m_info = NL::json::parse(info);
     }
-    catch(NL::json::parse_error& err)
+    catch(NL::json::parse_error&)
     {
         throw pdal_error("Unable to parse EPT info as JSON.");
     }
@@ -58,6 +58,12 @@ EptInfo::EptInfo(const std::string& info)
 EptInfo::EptInfo(const std::string& filename, const Connector& connector) :
     m_filename(filename)
 {
+    if (Utils::startsWith(m_filename, "ept://"))
+    {
+        m_filename = m_filename.substr(6);
+        if (!Utils::endsWith(m_filename, "/ept.json"))
+            m_filename += "/ept.json";
+    }
     m_info = connector.getJson(m_filename);
     initialize();
 }

@@ -64,6 +64,10 @@ class KD3Index;
 class BOX2D;
 class BOX3D;
 
+struct RasterLimits;
+template <class T> class Raster;
+using Rasterd = Raster<double>;
+
 typedef std::shared_ptr<PointView> PointViewPtr;
 typedef std::set<PointViewPtr, PointViewLess> PointViewSet;
 
@@ -287,6 +291,24 @@ public:
     */
     TriangularMesh *mesh(const std::string& name = "");
 
+    /**
+      Creates a raster with the specified name.
+
+      \param name  Name of the raster.
+      \param limits  Limits of the raster to create.
+      \return  Pointer to the new raster.  Null is returned if the raster already exists.
+    */
+    Rasterd *createRaster(const std::string& name, const RasterLimits& limits,
+        double noData = 0);
+
+    /**
+      Get a pointer to a raster.
+
+      \param name  Name of the raster.
+      \return  Pointer to the New raster. Null
+    */
+    Rasterd *raster(const std::string& name = "");
+
     KD3Index& build3dIndex();
     KD2Index& build2dIndex();
 
@@ -301,6 +323,7 @@ protected:
     std::queue<PointId> m_temps;
     SpatialReference m_spatialReference;
     std::map<std::string, std::unique_ptr<TriangularMesh>> m_meshes;
+    std::map<std::string, std::unique_ptr<Rasterd>> m_rasters;
     std::unique_ptr<KD3Index> m_index3;
     std::unique_ptr<KD2Index> m_index2;
 
@@ -643,22 +666,20 @@ public:
     difference_type operator-(const PointViewIter& i) const
         { return static_cast<difference_type>(m_id - i.m_id); }
 
-    bool operator==(const PointViewIter& i)
+    bool operator==(const PointViewIter& i) const
         { return m_id == i.m_id; }
-    bool operator!=(const PointViewIter& i)
+    bool operator!=(const PointViewIter& i) const
         { return m_id != i.m_id; }
-    bool operator<(const PointViewIter& i)
+    bool operator<(const PointViewIter& i) const
         { return m_id < i.m_id; }
-    bool operator<=(const PointViewIter& i)
+    bool operator<=(const PointViewIter& i) const
         { return m_id <= i.m_id; }
-    bool operator>(const PointViewIter& i)
+    bool operator>(const PointViewIter& i) const
         { return m_id > i.m_id; }
-    bool operator>=(const PointViewIter& i)
+    bool operator>=(const PointViewIter& i) const
         { return m_id >= i.m_id; }
 
-    reference operator*()
-        { return PointRef(*m_view, m_id); }
-    const reference operator*() const
+    reference operator*() const
         { return PointRef(*m_view, m_id); }
     pointer operator->()
         { return nullptr; }

@@ -39,3 +39,6 @@ Options
 _`groups`
   Comma-separated list of return number groupings. Valid options are "first",
   "last", "intermediate" or "only". [Default: "last"]
+
+.. include:: filter_opts.rst
+

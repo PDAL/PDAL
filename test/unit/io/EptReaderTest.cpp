@@ -42,9 +42,10 @@
 #include <io/LasReader.hpp>
 #include <filters/CropFilter.hpp>
 #include <filters/ReprojectionFilter.hpp>
-#include <pdal/GDALUtils.hpp>
 #include <pdal/SrsBounds.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
+
 #include "Support.hpp"
 
 namespace pdal
@@ -82,6 +83,27 @@ namespace
     const point_count_t ellipsoidNumPoints(100000);
     const BOX3D ellipsoidBoundsConforming(-8242746, 4966506, -50,
             -8242446, 4966706, 50);
+}
+
+TEST(EptReaderTest, protocol)
+{
+    Options opts;
+    opts.add("filename", "ept://http://testfile");
+
+    EptReader reader;
+    reader.setOptions(opts);
+
+    bool gotEx = false;
+    try
+    {
+        reader.preview();
+    }
+    catch (const pdal_error& err)
+    {
+        EXPECT_TRUE(strstr(err.what(), "ept.json"));
+        gotEx = true;
+    }
+    EXPECT_TRUE(gotEx);
 }
 
 TEST(EptReaderTest, inspect)
@@ -300,7 +322,7 @@ TEST(EptReaderTest, bounds2dXform)
 
     // There is some small error when we round-trip the bounds, so allow us
     // to be off by 15 points.
-    EXPECT_NEAR(v1->size(), v2->size(), 15u);
+    EXPECT_NEAR((double)v1->size(), (double)v2->size(), 15u);
 }
 
 TEST(EptReaderTest, boundedRead2d)

@@ -55,8 +55,10 @@ public:
 
 private:
     double m_radius;
+    bool m_shuffle;
+    Arg* m_seedArg;
+    unsigned m_seed;
 
-    virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs& args);
     virtual PointViewSet run(PointViewPtr view);
 };

@@ -52,10 +52,10 @@ public:
         const StringList tokens(Utils::split(s, '-'));
         if (tokens.size() != 4)
             throw pdal_error("Invalid EPT KEY: " + s);
-        d = std::stoull(tokens[0]);
-        x = std::stoull(tokens[1]);
-        y = std::stoull(tokens[2]);
-        z = std::stoull(tokens[3]);
+        d = std::stoi(tokens[0]);
+        x = std::stoi(tokens[1]);
+        y = std::stoi(tokens[2]);
+        z = std::stoi(tokens[3]);
     }
 
     BOX3D b;

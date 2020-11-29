@@ -39,10 +39,10 @@
 
 #include "SMRFilter.hpp"
 
-#include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/private/MathUtils.hpp>
 
 #include "private/DimRange.hpp"
 #include "private/Segmentation.hpp"
@@ -173,7 +173,7 @@ void SMRFilter::ready(PointTableRef table)
 
 PointViewSet SMRFilter::run(PointViewPtr view)
 {
-    PointViewSet viewSet;
+    PointViewSet viewSet{view};
     if (!view->size())
         return viewSet;
 
@@ -196,10 +196,10 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     bool rnOneZero(false);
     bool nrAllZero(true);
     bool rnAllZero(true);
-    for (PointId i = 0; i < realView->size(); ++i)
+    for (PointRef p : *realView)
     {
-        uint8_t nr = realView->getFieldAs<uint8_t>(Id::NumberOfReturns, i);
-        uint8_t rn = realView->getFieldAs<uint8_t>(Id::ReturnNumber, i);
+        uint8_t nr = p.getFieldAs<uint8_t>(Id::NumberOfReturns);
+        uint8_t rn = p.getFieldAs<uint8_t>(Id::ReturnNumber);
         if ((nr == 0) && !nrOneZero)
             nrOneZero = true;
         if ((rn == 0) && !rnOneZero)
@@ -229,18 +229,15 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     {
         Segmentation::segmentReturns(realView, inlierView, outlierView,
                                      m_args->m_returns);
-        ignoredView->append(*outlierView);
     }
 
     if (!inlierView->size())
-    {
         throwError("No returns to process.");
-    }
 
     // Classify remaining points with value of 1. SMRF processing will mark
     // ground returns as 2.
-    for (PointId i = 0; i < inlierView->size(); ++i)
-        inlierView->setField(Id::Classification, i, ClassLabel::Unclassified);
+    for (PointRef p : *inlierView)
+        p.setField(Id::Classification, ClassLabel::Unclassified);
 
     m_srs = inlierView->spatialReference();
 
@@ -281,15 +278,6 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     // DEM.
     classifyGround(inlierView, ZIpro);
 
-    PointViewPtr outView = view->makeNew();
-    // ignoredView is appended to the output untouched.
-    outView->append(*ignoredView);
-    outView->append(*syntheticView);
-    // inlierView is appended to the output, the only PointView whose
-    // classifications may have been altered.
-    outView->append(*inlierView);
-    viewSet.insert(outView);
-
     return viewSet;
 }
 
@@ -310,8 +298,8 @@ void SMRFilter::classifyGround(PointViewPtr view, std::vector<double>& ZIpro)
         MatrixXd ZIproM = Map<MatrixXd>(ZIpro.data(), m_rows, m_cols);
         MatrixXd scaled = ZIproM / m_args->m_cell;
 
-        MatrixXd gx = gradX(scaled);
-        MatrixXd gy = gradY(scaled);
+        MatrixXd gx = math::gradX(scaled);
+        MatrixXd gy = math::gradY(scaled);
         gsurfs = (gx.cwiseProduct(gx) + gy.cwiseProduct(gy)).cwiseSqrt();
         std::vector<double> gsurfsV(gsurfs.data(),
                                     gsurfs.data() + gsurfs.size());
@@ -328,32 +316,31 @@ void SMRFilter::classifyGround(PointViewPtr view, std::vector<double>& ZIpro)
         {
             std::string fname =
                 FileUtils::toAbsolutePath("gx.tif", m_args->m_dir);
-            writeMatrix(gx, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
+            math::writeMatrix(gx, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
 
             fname = FileUtils::toAbsolutePath("gy.tif", m_args->m_dir);
-            writeMatrix(gy, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
+            math::writeMatrix(gy, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
 
             fname = FileUtils::toAbsolutePath("gsurfs.tif", m_args->m_dir);
-            writeMatrix(gsurfs, fname, "GTiff", m_args->m_cell, m_bounds,
-                        m_srs);
+            math::writeMatrix(gsurfs, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
 
             fname = FileUtils::toAbsolutePath("gsurfs_fill.tif", m_args->m_dir);
             MatrixXd gsurfs_fill =
                 Map<MatrixXd>(gsurfs_fillV.data(), m_rows, m_cols);
-            writeMatrix(gsurfs_fill, fname, "GTiff", m_args->m_cell, m_bounds,
-                        m_srs);
+            math::writeMatrix(gsurfs_fill, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
 
             fname = FileUtils::toAbsolutePath("thresh.tif", m_args->m_dir);
-            writeMatrix(thresh, fname, "GTiff", m_args->m_cell, m_bounds,
-                        m_srs);
+            math::writeMatrix(thresh, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
         }
     }
 
-    for (PointId i = 0; i < view->size(); ++i)
+    point_count_t ng(0);
+    point_count_t g(0);
+    for (PointRef p : *view)
     {
-        double x = view->getFieldAs<double>(Id::X, i);
-        double y = view->getFieldAs<double>(Id::Y, i);
-        double z = view->getFieldAs<double>(Id::Z, i);
+        double x = p.getFieldAs<double>(Id::X);
+        double y = p.getFieldAs<double>(Id::Y);
+        double z = p.getFieldAs<double>(Id::Z);
 
         int c = static_cast<int>(floor((x - m_bounds.minx) / m_args->m_cell));
         int r = static_cast<int>(floor((y - m_bounds.miny) / m_args->m_cell));
@@ -380,10 +367,21 @@ void SMRFilter::classifyGround(PointViewPtr view, std::vector<double>& ZIpro)
         // vertical distance between each LIDAR point and the provisional
         // DEM, and applying a threshold calculation."
         if (std::fabs(ZIpro[cell] - z) > thresh(r, c))
-            view->setField(Id::Classification, i, ClassLabel::Unclassified);
+        {
+            ng++;
+            p.setField(Id::Classification, ClassLabel::Unclassified);
+        }
         else
-            view->setField(Id::Classification, i, ClassLabel::Ground);
+        {
+            g++;
+            p.setField(Id::Classification, ClassLabel::Ground);
+        }
     }
+    double p(100.0 * double(ng) / double(view->size()));
+    log()->floatPrecision(2);
+    log()->get(LogLevel::Debug) << "\t" << g << " ground points"
+                                << "\t" << ng << " non-ground points"
+                                << "\t(" << p << "% classified as ground)\n";
 }
 
 std::vector<int> SMRFilter::createLowMask(std::vector<double> const& ZImin)
@@ -404,8 +402,7 @@ std::vector<int> SMRFilter::createLowMask(std::vector<double> const& ZImin)
         std::string fname =
             FileUtils::toAbsolutePath("zilow.tif", m_args->m_dir);
         MatrixXi Low = Map<MatrixXi>(LowV.data(), m_rows, m_cols);
-        writeMatrix(Low.cast<double>(), fname, "GTiff", m_args->m_cell,
-                    m_bounds, m_srs);
+        math::writeMatrix(Low.cast<double>(), fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
     }
 
     return LowV;
@@ -457,8 +454,7 @@ std::vector<int> SMRFilter::createObjMask(std::vector<double> const& ZImin)
         std::string fname =
             FileUtils::toAbsolutePath("ziobj.tif", m_args->m_dir);
         MatrixXi Obj = Map<MatrixXi>(ObjV.data(), m_rows, m_cols);
-        writeMatrix(Obj.cast<double>(), fname, "GTiff", m_args->m_cell,
-                    m_bounds, m_srs);
+        math::writeMatrix(Obj.cast<double>(), fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
     }
 
     return ObjV;
@@ -472,11 +468,11 @@ std::vector<double> SMRFilter::createZImin(PointViewPtr view)
     std::vector<double> ZIminV(m_rows * m_cols,
                                std::numeric_limits<double>::quiet_NaN());
 
-    for (PointId i = 0; i < view->size(); ++i)
+    for (PointRef p : *view)
     {
-        double x = view->getFieldAs<double>(Id::X, i);
-        double y = view->getFieldAs<double>(Id::Y, i);
-        double z = view->getFieldAs<double>(Id::Z, i);
+        double x = p.getFieldAs<double>(Id::X);
+        double y = p.getFieldAs<double>(Id::Y);
+        double z = p.getFieldAs<double>(Id::Z);
 
         int c = static_cast<int>(floor((x - m_bounds.minx) / m_args->m_cell));
         int r = static_cast<int>(floor((y - m_bounds.miny) / m_args->m_cell));
@@ -501,12 +497,11 @@ std::vector<double> SMRFilter::createZImin(PointViewPtr view)
         std::string fname =
             FileUtils::toAbsolutePath("zimin.tif", m_args->m_dir);
         MatrixXd ZImin = Map<MatrixXd>(ZIminV.data(), m_rows, m_cols);
-        writeMatrix(ZImin, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
+        math::writeMatrix(ZImin, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
 
         fname = FileUtils::toAbsolutePath("zimin_fill.tif", m_args->m_dir);
         MatrixXd ZImin_fill = Map<MatrixXd>(ZImin_fillV.data(), m_rows, m_cols);
-        writeMatrix(ZImin_fill, fname, "GTiff", m_args->m_cell, m_bounds,
-                    m_srs);
+        math::writeMatrix(ZImin_fill, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
     }
 
     return ZImin_fillV;
@@ -527,8 +522,8 @@ std::vector<double> SMRFilter::createZInet(std::vector<double> const& ZImin,
     {
         std::vector<double> dilated = ZImin;
         int v = ceil<int>(m_args->m_cut / m_args->m_cell);
-        erodeDiamond(dilated, m_rows, m_cols, 2 * v);
-        dilateDiamond(dilated, m_rows, m_cols, 2 * v);
+        math::erodeDiamond(dilated, m_rows, m_cols, 2 * v);
+        math::dilateDiamond(dilated, m_rows, m_cols, 2 * v);
         for (auto c = 0; c < m_cols; ++c)
         {
             for (auto r = 0; r < m_rows; ++r)
@@ -546,7 +541,7 @@ std::vector<double> SMRFilter::createZInet(std::vector<double> const& ZImin,
         std::string fname =
             FileUtils::toAbsolutePath("zinet.tif", m_args->m_dir);
         MatrixXd ZInet = Map<MatrixXd>(ZInetV.data(), m_rows, m_cols);
-        writeMatrix(ZInet, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
+        math::writeMatrix(ZInet, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
     }
 
     return ZInetV;
@@ -581,12 +576,11 @@ std::vector<double> SMRFilter::createZIpro(PointViewPtr view,
         std::string fname =
             FileUtils::toAbsolutePath("zipro.tif", m_args->m_dir);
         MatrixXd ZIpro = Map<MatrixXd>(ZIproV.data(), m_rows, m_cols);
-        writeMatrix(ZIpro, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
+        math::writeMatrix(ZIpro, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
 
         fname = FileUtils::toAbsolutePath("zipro_fill.tif", m_args->m_dir);
         MatrixXd ZIpro_fill = Map<MatrixXd>(ZIpro_fillV.data(), m_rows, m_cols);
-        writeMatrix(ZIpro_fill, fname, "GTiff", m_args->m_cell, m_bounds,
-                    m_srs);
+        math::writeMatrix(ZIpro_fill, fname, "GTiff", m_args->m_cell, m_bounds, m_srs);
     }
 
     return ZIpro_fillV;
@@ -614,12 +608,10 @@ void SMRFilter::knnfill(PointViewPtr view, std::vector<double>& cz)
             if (std::isnan(val))
                 continue;
 
-            temp->setField(Id::X, i,
-                           m_bounds.minx + (c + 0.5) * m_args->m_cell);
-            temp->setField(Id::Y, i,
-                           m_bounds.miny + (r + 0.5) * m_args->m_cell);
-            temp->setField(Id::Z, i, val);
-            i++;
+            PointRef p = temp->point(i++);
+            p.setField(Id::X, m_bounds.minx + (c + 0.5) * m_args->m_cell);
+            p.setField(Id::Y, m_bounds.miny + (r + 0.5) * m_args->m_cell);
+            p.setField(Id::Z, val);
         }
     }
 
@@ -680,9 +672,9 @@ std::vector<int> SMRFilter::progressiveFilter(std::vector<double> const& ZImin,
     {
         // "On the first iteration, the minimum surface (ZImin) is opened using
         // a disk-shaped structuring element with a radius of one pixel."
-        erodeDiamond(erosion, m_rows, m_cols, 1);
+        math::erodeDiamond(erosion, m_rows, m_cols, 1);
         std::vector<double> curOpening = erosion;
-        dilateDiamond(curOpening, m_rows, m_cols, radius);
+        math::dilateDiamond(curOpening, m_rows, m_cols, radius);
 
         // "An elevation threshold is then calculated, where the value is equal
         // to the supplied slope tolerance parameter multiplied by the product
@@ -719,9 +711,9 @@ std::vector<int> SMRFilter::progressiveFilter(std::vector<double> const& ZImin,
         double p(100.0 * double(ng) / double(Obj.size()));
         log()->floatPrecision(2);
         log()->get(LogLevel::Debug) << "progressiveFilter: radius = " << radius
-                                    << "\t" << g << " ground"
-                                    << "\t" << ng << " non-ground"
-                                    << "\t(" << p << "%)\n";
+                                    << "\t" << g << " ground cells"
+                                    << "\t" << ng << " non-ground cells"
+                                    << "\t(" << p << "% of cells contain ground)\n";
     }
 
     return Obj;

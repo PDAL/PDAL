@@ -39,15 +39,17 @@
 
 #include "PMFFilter.hpp"
 
-#include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/private/MathUtils.hpp>
 
 #include "private/DimRange.hpp"
 #include "private/Segmentation.hpp"
 
 namespace pdal
 {
+
+using namespace Dimension;
 
 static StaticPluginInfo const s_info{"filters.pmf",
                                      "Progressive morphological filter",
@@ -94,7 +96,7 @@ void PMFFilter::addArgs(ProgramArgs& args)
 
 void PMFFilter::addDimensions(PointLayoutPtr layout)
 {
-    layout->registerDim(Dimension::Id::Classification);
+    layout->registerDim(Id::Classification);
 }
 
 void PMFFilter::prepared(PointTableRef table)
@@ -104,7 +106,7 @@ void PMFFilter::prepared(PointTableRef table)
     for (auto& r : m_args->m_ignored)
     {
         r.m_id = layout->findDim(r.m_name);
-        if (r.m_id == Dimension::Id::Unknown)
+        if (r.m_id == Id::Unknown)
             throwError("Invalid dimension name in 'ignored' option: '" +
                        r.m_name + "'.");
     }
@@ -121,8 +123,8 @@ void PMFFilter::prepared(PointTableRef table)
             }
         }
 
-        if (!layout->hasDim(Dimension::Id::ReturnNumber) ||
-            !layout->hasDim(Dimension::Id::NumberOfReturns))
+        if (!layout->hasDim(Id::ReturnNumber) ||
+            !layout->hasDim(Id::NumberOfReturns))
         {
             log()->get(LogLevel::Warning) << "Could not find ReturnNumber and "
                                              "NumberOfReturns. Skipping "
@@ -135,7 +137,7 @@ void PMFFilter::prepared(PointTableRef table)
 
 PointViewSet PMFFilter::run(PointViewPtr input)
 {
-    PointViewSet viewSet;
+    PointViewSet viewSet{input};
     if (!input->size())
         return viewSet;
 
@@ -154,12 +156,10 @@ PointViewSet PMFFilter::run(PointViewPtr input)
     bool rnOneZero(false);
     bool nrAllZero(true);
     bool rnAllZero(true);
-    for (PointId i = 0; i < keptView->size(); ++i)
+    for (PointRef p : *keptView)
     {
-        uint8_t nr =
-            keptView->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, i);
-        uint8_t rn =
-            keptView->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, i);
+        uint8_t nr = p.getFieldAs<uint8_t>(Id::NumberOfReturns);
+        uint8_t rn = p.getFieldAs<uint8_t>(Id::ReturnNumber);
         if ((nr == 0) && !nrOneZero)
             nrOneZero = true;
         if ((rn == 0) && !rnOneZero)
@@ -189,31 +189,18 @@ PointViewSet PMFFilter::run(PointViewPtr input)
     {
         Segmentation::segmentReturns(keptView, inlierView, outlierView,
                                      m_args->m_returns);
-        ignoredView->append(*outlierView);
     }
 
     if (!inlierView->size())
-    {
         throwError("No returns to process.");
-    }
 
     // Classify remaining points with value of 1. processGround will mark ground
     // returns as 2.
-    for (PointId i = 0; i < inlierView->size(); ++i)
-        inlierView->setField(Dimension::Id::Classification, i,
-                             ClassLabel::Unclassified);
+    for (PointRef p : *inlierView)
+        p.setField(Id::Classification, ClassLabel::Unclassified);
 
     // Run the actual PMF algorithm.
     processGround(inlierView);
-
-    // Prepare the output PointView.
-    PointViewPtr outView = input->makeNew();
-    // ignoredView is appended to the output untouched.
-    outView->append(*ignoredView);
-    // inlierView is appended to the output, the only PointView whose
-    // classifications may have been altered.
-    outView->append(*inlierView);
-    viewSet.insert(outView);
 
     return viewSet;
 }
@@ -234,11 +221,11 @@ void PMFFilter::processGround(PointViewPtr view)
 
     // loop through all points, identifying minimum Z value for each populated
     // cell
-    for (PointId i = 0; i < view->size(); ++i)
+    for (PointRef p : *view)
     {
-        double x = view->getFieldAs<double>(Dimension::Id::X, i);
-        double y = view->getFieldAs<double>(Dimension::Id::Y, i);
-        double z = view->getFieldAs<double>(Dimension::Id::Z, i);
+        double x = p.getFieldAs<double>(Id::X);
+        double y = p.getFieldAs<double>(Id::Y);
+        double z = p.getFieldAs<double>(Id::Z);
         int c = static_cast<int>(floor(x - bounds.minx) / m_args->m_cellSize);
         int r = static_cast<int>(floor(y - bounds.miny) / m_args->m_cellSize);
         size_t idx = c * rows + r;
@@ -253,15 +240,14 @@ void PMFFilter::processGround(PointViewPtr view)
     {
         for (size_t r = 0; r < rows; ++r)
         {
-            size_t idx = c * rows + r;
-            if (std::isnan(ZImin[idx]))
+            size_t cell = c * rows + r;
+            double val = ZImin[cell];
+            if (std::isnan(val))
                 continue;
-            double x = bounds.minx + (c + 0.5) * m_args->m_cellSize;
-            double y = bounds.miny + (r + 0.5) * m_args->m_cellSize;
-            temp->setField(Dimension::Id::X, i, x);
-            temp->setField(Dimension::Id::Y, i, y);
-            temp->setField(Dimension::Id::Z, i, ZImin[idx]);
-            i++;
+            PointRef p = temp->point(i++);
+            p.setField(Id::X, bounds.minx + (c + 0.5) * m_args->m_cellSize);
+            p.setField(Id::Y, bounds.miny + (r + 0.5) * m_args->m_cellSize);
+            p.setField(Id::Z, val);
         }
     }
 
@@ -284,7 +270,7 @@ void PMFFilter::processGround(PointViewPtr view)
             PointIdList neighbors(k);
             std::vector<double> sqr_dists(k);
             kdi.knnSearch(x, y, k, &neighbors, &sqr_dists);
-            out[idx] = temp->getFieldAs<double>(Dimension::Id::Z, neighbors[0]);
+            out[idx] = temp->getFieldAs<double>(Id::Z, neighbors[0]);
         }
     }
 
@@ -336,15 +322,16 @@ void PMFFilter::processGround(PointViewPtr view)
             << ", window size = " << wsvec[j] << ")...\n";
 
         int iters = static_cast<int>(0.5 * (wsvec[j] - 1));
-        erodeDiamond(ZImin, rows, cols, iters);
-        dilateDiamond(ZImin, rows, cols, iters);
+        math::erodeDiamond(ZImin, rows, cols, iters);
+        math::dilateDiamond(ZImin, rows, cols, iters);
 
         PointIdList groundNewIdx;
-        for (auto p_idx : groundIdx)
+        for (PointId const& p_idx : groundIdx)
         {
-            double x = view->getFieldAs<double>(Dimension::Id::X, p_idx);
-            double y = view->getFieldAs<double>(Dimension::Id::Y, p_idx);
-            double z = view->getFieldAs<double>(Dimension::Id::Z, p_idx);
+            PointRef p = view->point(p_idx);
+            double x = p.getFieldAs<double>(Id::X);
+            double y = p.getFieldAs<double>(Id::Y);
+            double z = p.getFieldAs<double>(Id::Z);
 
             int c =
                 static_cast<int>(floor((x - bounds.minx) / m_args->m_cellSize));
@@ -365,8 +352,8 @@ void PMFFilter::processGround(PointViewPtr view)
 
     // set the classification label of ground returns as 2
     // (corresponding to ASPRS LAS specification)
-    for (const auto& i : groundIdx)
-        view->setField(Dimension::Id::Classification, i, ClassLabel::Ground);
+    for (PointId const& i : groundIdx)
+        view->setField(Id::Classification, i, ClassLabel::Ground);
 }
 
 } // namespace pdal

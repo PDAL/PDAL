@@ -55,3 +55,6 @@ rigidness
 
 iterations
   Maximum number of iterations. [Default: **500**]
+
+.. include:: filter_opts.rst
+
