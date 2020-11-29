@@ -485,7 +485,7 @@ std::string SpatialReference::getWKT1() const
     if (srs)
     {
         char *buf = nullptr;
-        const char* apszOptions[] = { "FORMAT=WKT1_GDAL", nullptr };
+        const char* apszOptions[] = { ["FORMAT=WKT1_GDAL", "ALLOW_ELLIPSOIDAL_HEIGHT_AS_VERTICAL_CRS=YES"], nullptr };
 
         srs->exportToWkt(&buf, apszOptions);
         if (buf)
