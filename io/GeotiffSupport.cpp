@@ -77,6 +77,8 @@ void VSIFree(void *data);
 int PDALGeoTIFFPrint(char* data, void* aux)
 {
     pdal::geotiff_dir_printer* printer = reinterpret_cast<pdal::geotiff_dir_printer*>(aux);
+    if (!printer)
+        return 0;
     (*printer)(data, 0);
     return static_cast<int>(printer->size());
 }
