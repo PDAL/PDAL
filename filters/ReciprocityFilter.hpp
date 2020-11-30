@@ -36,14 +36,11 @@
 
 #include <pdal/Filter.hpp>
 
-#include <cstdint>
-#include <memory>
 #include <string>
 
 namespace pdal
 {
 
-class Options;
 class PointLayout;
 class PointView;
 
@@ -60,14 +57,12 @@ public:
 private:
     int m_knn;
     int m_threads;
-    Dimension::Id m_reciprocity;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs& args);
     virtual void filter(PointView& view);
 
-    void setReciprocity(PointView& view, const PointId& i,
-                        const KD3Index& kdi);
+    void setReciprocity(PointView& view, const PointId& i);
 };
 
 } // namespace pdal

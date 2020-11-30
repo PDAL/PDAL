@@ -70,7 +70,7 @@ void LiTreeFilter::addArgs(ProgramArgs& args)
 
 void LiTreeFilter::addDimensions(PointLayoutPtr layout)
 {
-    m_id = layout->registerOrAssignDim("TreeID", Type::Signed64);
+    layout->registerDim(Id::ClusterID);
 }
 
 void LiTreeFilter::prepared(PointTableRef table)
@@ -118,8 +118,11 @@ PointId LiTreeFilter::locateDummyPoint(PointView& view, PointIdList const& Ui,
     return n0;
 }
 
-void LiTreeFilter::computeLocalMax(KD2Index& kdi, PointView& view)
+void LiTreeFilter::computeLocalMax(PointView& view)
 {
+    // Build the 2D KD-tree, which is used throughout.
+    const KD2Index& kdi = view.build2dIndex();
+
     // Each point in the view will be marked as a local max or not.
     m_localMax.resize(view.size());
     for (PointRef p : view)
@@ -205,7 +208,7 @@ void LiTreeFilter::classifyPoint(PointId ui, PointView& view, PointIdList& Ni,
     }
 }
 
-void LiTreeFilter::segmentTree(KD2Index& kdi, PointView& view, PointIdList& Ui,
+void LiTreeFilter::segmentTree(PointView& view, PointIdList& Ui,
                                int64_t& tree_id)
 {
     // "The proposed segmentation algorithm isolates trees individually and
@@ -252,7 +255,7 @@ void LiTreeFilter::segmentTree(KD2Index& kdi, PointView& view, PointIdList& Ui,
     if (Pi.size() >= m_minSize)
     {
         for (PointId const& i : Pi)
-            view.setField(m_id, i, tree_id);
+            view.setField(Id::ClusterID, i, tree_id);
         tree_id++;
     }
     else
@@ -264,12 +267,9 @@ void LiTreeFilter::segmentTree(KD2Index& kdi, PointView& view, PointIdList& Ui,
 
 void LiTreeFilter::filter(PointView& view)
 {
-    // Build the 2D KD-tree, which is used throughout.
-    KD2Index& kdi = view.build2dIndex();
-
     // Preprocess cloud to determine which points are locally maximal with
     // respect to HeightAboveGround.
-    computeLocalMax(kdi, view);
+    computeLocalMax(view);
 
     // "Let Ui denote a set of points to be segmented."
     PointIdList Ui(view.size());
@@ -280,7 +280,7 @@ void LiTreeFilter::filter(PointView& view)
     point_count_t prevSize(Ui.size());
     while (Ui.size() > 1)
     {
-        segmentTree(kdi, view, Ui, tree_id);
+        segmentTree(view, Ui, tree_id);
 
         // Ui now contains all points not yet labeled with a TreeID. If it
         // remains unchanged between two iterations, it will be unable to
