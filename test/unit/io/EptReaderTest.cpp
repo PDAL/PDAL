@@ -322,7 +322,7 @@ TEST(EptReaderTest, bounds2dXform)
 
     // There is some small error when we round-trip the bounds, so allow us
     // to be off by 15 points.
-    EXPECT_NEAR(v1->size(), v2->size(), 15u);
+    EXPECT_NEAR((double)v1->size(), (double)v2->size(), 15u);
 }
 
 TEST(EptReaderTest, boundedRead2d)

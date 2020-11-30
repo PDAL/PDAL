@@ -89,8 +89,7 @@ PointViewSet SampleFilter::run(PointViewPtr inView)
     if (m_shuffle)
     {
         if (!m_seedArg->set())
-            m_seed =
-                std::chrono::system_clock::now().time_since_epoch().count();
+            m_seed = (int)std::chrono::system_clock::now().time_since_epoch().count();
         std::shuffle(shuffledIds.begin(), shuffledIds.end(),
                      std::mt19937(m_seed));
     }

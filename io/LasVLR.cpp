@@ -165,7 +165,7 @@ std::istream& operator>>(std::istream& in, LasVLR& v)
         recordId = 1;
 
     v.m_userId = userId;
-    v.m_recordId = recordId;
+    v.m_recordId = (uint16_t)recordId;
     v.m_description = description;
     v.m_data = std::move(data);
     return in;

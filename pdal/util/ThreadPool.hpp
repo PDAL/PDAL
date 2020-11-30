@@ -45,42 +45,34 @@
 namespace pdal
 {
 
-class PDAL_DLL ThreadPool
+class ThreadPool
 {
 public:
     // After numThreads tasks are actively running, and queueSize tasks have
     // been enqueued to wait for an available worker thread, subsequent calls
     // to Pool::add will block until an enqueued task has been popped from the
     // queue.
-    ThreadPool(std::size_t numThreads, int64_t queueSize = -1, bool verbose = true) :
-        m_queueSize(queueSize) , m_numThreads(std::max<std::size_t>(numThreads, 1)),
-        m_verbose(verbose)
+    PDAL_DLL ThreadPool(std::size_t numThreads, int64_t queueSize = -1,
+            bool verbose = true) :
+        m_queueSize(queueSize),
+        m_numThreads(std::max<std::size_t>(numThreads, 1)), m_verbose(verbose)
     {
         assert(m_queueSize != 0);
         go();
     }
 
-    ~ThreadPool() { join(); }
+    PDAL_DLL ~ThreadPool()
+    { join(); }
 
     ThreadPool(const ThreadPool& other) = delete;
     ThreadPool& operator=(const ThreadPool& other) = delete;
 
     // Start worker threads.
-    void go()
-    {
-        std::lock_guard<std::mutex> lock(m_mutex);
-        if (m_running) return;
-        m_running = true;
-
-        for (std::size_t i(0); i < m_numThreads; ++i)
-        {
-            m_threads.emplace_back([this]() { work(); });
-        }
-    }
+    PDAL_DLL void go();
 
     // Disallow the addition of new tasks and wait for all currently running
     // tasks to complete.
-    void join()
+    PDAL_DLL void join()
     {
         std::unique_lock<std::mutex> lock(m_mutex);
         if (!m_running) return;
@@ -93,7 +85,7 @@ public:
     }
 
     // join() and empty the queue of tasks that may have been waiting to run.
-    void stop()
+    PDAL_DLL void stop()
     {
         join();
 
@@ -104,7 +96,7 @@ public:
 
     // Wait for all current tasks to complete.  As opposed to join, tasks may
     // continue to be added while a thread is await()-ing the queue to empty.
-    void await()
+    PDAL_DLL void await()
     {
         std::unique_lock<std::mutex> lock(m_mutex);
         m_produceCv.wait(lock, [this]()
@@ -114,10 +106,11 @@ public:
     }
 
     // Join and restart.
-    void cycle() { join(); go(); }
+    PDAL_DLL void cycle()
+    { join(); go(); }
 
     // Change the number of threads.  Current threads will be joined.
-    void resize(const std::size_t numThreads)
+    PDAL_DLL void resize(const std::size_t numThreads)
     {
         join();
         m_numThreads = numThreads;
@@ -125,11 +118,12 @@ public:
     }
 
     // Not thread-safe, pool should be joined before calling.
-    const std::vector<std::string>& errors() const { return m_errors; }
+    const std::vector<std::string>& errors() const
+    { return m_errors; }
 
     // Add a threaded task, blocking until a thread is available.  If join() is
     // called, add() may not be called again until go() is called and completes.
-    void add(std::function<void()> task)
+    PDAL_DLL void add(std::function<void()> task)
     {
         std::unique_lock<std::mutex> lock(m_mutex);
         if (!m_running)
@@ -149,9 +143,11 @@ public:
         m_consumeCv.notify_all();
     }
 
+    PDAL_DLL std::size_t size() const
+    { return m_numThreads; }
 
-    std::size_t size() const { return m_numThreads; }
-    std::size_t numThreads() const { return m_numThreads; }
+    PDAL_DLL std::size_t numThreads() const
+    { return m_numThreads; }
 
 private:
     // Worker thread function.  Wait for a task and run it.

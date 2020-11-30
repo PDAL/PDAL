@@ -666,22 +666,20 @@ public:
     difference_type operator-(const PointViewIter& i) const
         { return static_cast<difference_type>(m_id - i.m_id); }
 
-    bool operator==(const PointViewIter& i)
+    bool operator==(const PointViewIter& i) const
         { return m_id == i.m_id; }
-    bool operator!=(const PointViewIter& i)
+    bool operator!=(const PointViewIter& i) const
         { return m_id != i.m_id; }
-    bool operator<(const PointViewIter& i)
+    bool operator<(const PointViewIter& i) const
         { return m_id < i.m_id; }
-    bool operator<=(const PointViewIter& i)
+    bool operator<=(const PointViewIter& i) const
         { return m_id <= i.m_id; }
-    bool operator>(const PointViewIter& i)
+    bool operator>(const PointViewIter& i) const
         { return m_id > i.m_id; }
-    bool operator>=(const PointViewIter& i)
+    bool operator>=(const PointViewIter& i) const
         { return m_id >= i.m_id; }
 
-    reference operator*()
-        { return PointRef(*m_view, m_id); }
-    const reference operator*() const
+    reference operator*() const
         { return PointRef(*m_view, m_id); }
     pointer operator->()
         { return nullptr; }

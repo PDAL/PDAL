@@ -6,14 +6,19 @@ filters.litree
 
 The purpose of the Li tree filter is to segment individual trees from an input
 ``PointView``. In the output ``PointView`` points that are deemed to be part of
-a tree are labeled with a ``TreeID``. Tree IDs start at 1, with non-tree points
-given a ``TreeID`` of 0.
+a tree are labeled with a ``ClusterID``. Tree IDs start at 1, with non-tree points
+given a ``ClusterID`` of 0.
 
 .. note::
 
   The filter differs only slightly from the paper in the addition of a few
   conditions on size of tree, minimum height above ground for tree seeding, and
   flexible radius for non-tree seed insertion.
+
+.. note::
+
+  In earlier PDAL releases (up to v2.2.0), ``ClusterID`` was stored in the
+  ``TreeID`` Dimemsion.
 
 .. embed::
 

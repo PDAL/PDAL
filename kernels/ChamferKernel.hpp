@@ -34,27 +34,27 @@
 
 #pragma once
 
-#include <pdal/Filter.hpp>
+#include <pdal/Kernel.hpp>
+#include <pdal/Stage.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 namespace pdal
 {
 
-class PDAL_DLL OptimalNeighborhood : public Filter
+class PointView;
+
+class PDAL_DLL ChamferKernel : public Kernel
 {
 public:
-    OptimalNeighborhood();
-
-    OptimalNeighborhood& operator=(const OptimalNeighborhood&) = delete;
-    OptimalNeighborhood(const OptimalNeighborhood&) = delete;
-
     std::string getName() const;
+    int execute(); // overrride
 
 private:
-    point_count_t m_kMin, m_kMax;
+    virtual void addSwitches(ProgramArgs& args);
+    PointViewPtr loadSet(const std::string& filename, PointTableRef table);
 
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void addArgs(ProgramArgs& args);
-    virtual void filter(PointView& view);
+    std::string m_sourceFile;
+    std::string m_candidateFile;
 };
 
 } // namespace pdal

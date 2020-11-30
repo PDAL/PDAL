@@ -32,8 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#pragma warning(push)
+#pragma warning(disable: 4251)
 #include <gdal.h>
 #include <gdal_priv.h>
+#pragma warning(pop)
 
 #include "Raster.hpp"
 
