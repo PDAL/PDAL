@@ -32,29 +32,64 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#pragma once
+#include <string>
 
-#include <pdal/Filter.hpp>
+#include <pdal/PDALUtils.hpp>
+#include <pdal/PointView.hpp>
+#include <pdal/pdal_test_main.hpp>
 
-namespace pdal
+#include "Support.hpp"
+
+using namespace pdal;
+
+TEST(Chamfer, kernel)
 {
+    std::string A = Support::datapath("autzen/autzen-thin.las");
+    std::string B = Support::datapath("las/autzen_trim.las");
+    std::string output;
 
-class PDAL_DLL OptimalNeighborhood : public Filter
+    const std::string cmd =
+        Support::binpath(Support::exename("pdal")) + " chamfer " + A + " " + B;
+
+    EXPECT_EQ(Utils::run_shell_command(cmd, output), 0);
+    EXPECT_TRUE(output.find("\"chamfer\": 5.907628766e+10") !=
+                std::string::npos);
+}
+
+TEST(Chamfer, distance)
 {
-public:
-    OptimalNeighborhood();
+    PointTable table;
+    PointLayoutPtr layout(table.layout());
 
-    OptimalNeighborhood& operator=(const OptimalNeighborhood&) = delete;
-    OptimalNeighborhood(const OptimalNeighborhood&) = delete;
+    layout->registerDim(Dimension::Id::X);
+    layout->registerDim(Dimension::Id::Y);
+    layout->registerDim(Dimension::Id::Z);
 
-    std::string getName() const;
+    PointViewPtr src(new PointView(table));
+    src->setField(Dimension::Id::X, 0, 0.0);
+    src->setField(Dimension::Id::Y, 0, 0.0);
+    src->setField(Dimension::Id::Z, 0, 0.0);
 
-private:
-    point_count_t m_kMin, m_kMax;
+    PointViewPtr cand(new PointView(table));
+    cand->setField(Dimension::Id::X, 0, 1.0);
+    cand->setField(Dimension::Id::Y, 0, 0.0);
+    cand->setField(Dimension::Id::Z, 0, 0.0);
 
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void addArgs(ProgramArgs& args);
-    virtual void filter(PointView& view);
-};
+    cand->setField(Dimension::Id::X, 1, 0.0);
+    cand->setField(Dimension::Id::Y, 1, 2.0);
+    cand->setField(Dimension::Id::Z, 1, 0.0);
 
-} // namespace pdal
+    EXPECT_EQ(6.0, Utils::computeChamfer(src, cand));
+
+    cand->setField(Dimension::Id::X, 1, 0.0);
+    cand->setField(Dimension::Id::Y, 1, 0.0);
+    cand->setField(Dimension::Id::Z, 1, 3.0);
+
+    EXPECT_EQ(11.0, Utils::computeChamfer(src, cand));
+
+    src->setField(Dimension::Id::X, 0, 1.0);
+    src->setField(Dimension::Id::Y, 0, 1.0);
+    src->setField(Dimension::Id::Z, 0, 1.0);
+
+    EXPECT_EQ(10.0, Utils::computeChamfer(src, cand));
+}

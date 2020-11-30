@@ -202,8 +202,8 @@ int GDALWriter::height() const
 
 void GDALWriter::createGrid(BOX2D bounds)
 {
-    int width = std::floor((bounds.maxx - bounds.minx) / m_edgeLength) + 1;
-    int height = std::floor((bounds.maxy - bounds.miny) / m_edgeLength) + 1;
+    int width = (int)std::floor((bounds.maxx - bounds.minx) / m_edgeLength) + 1;
+    int height = (int)std::floor((bounds.maxy - bounds.miny) / m_edgeLength) + 1;
 
     try
     {

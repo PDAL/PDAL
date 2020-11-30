@@ -91,10 +91,8 @@ PointViewSet RelaxationDartThrowing::run(PointViewPtr inView)
     if (m_shuffle)
     {
         if (!m_seedArg->set())
-            m_seed =
-                std::chrono::system_clock::now().time_since_epoch().count();
-        std::shuffle(shuffledIds.begin(), shuffledIds.end(),
-                     std::mt19937(m_seed));
+            m_seed = (int)std::chrono::system_clock::now().time_since_epoch().count();
+        std::shuffle(shuffledIds.begin(), shuffledIds.end(), std::mt19937(m_seed));
     }
 
     using SqrDistList = std::vector<double>;

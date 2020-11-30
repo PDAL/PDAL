@@ -32,29 +32,64 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#pragma once
+#include "ChamferKernel.hpp"
 
-#include <pdal/Filter.hpp>
+#include <memory>
+
+#include <pdal/PDALUtils.hpp>
+#include <pdal/PointView.hpp>
+#include <pdal/pdal_config.hpp>
 
 namespace pdal
 {
 
-class PDAL_DLL OptimalNeighborhood : public Filter
+static StaticPluginInfo const s_info{"kernels.chamfer", "Chamfer Kernel",
+                                     "http://pdal.io/apps/chamfer.html"};
+
+CREATE_STATIC_KERNEL(ChamferKernel, s_info)
+
+std::string ChamferKernel::getName() const
 {
-public:
-    OptimalNeighborhood();
+    return s_info.name;
+}
 
-    OptimalNeighborhood& operator=(const OptimalNeighborhood&) = delete;
-    OptimalNeighborhood(const OptimalNeighborhood&) = delete;
+void ChamferKernel::addSwitches(ProgramArgs& args)
+{
+    Arg& source = args.add("source", "Source filename", m_sourceFile);
+    source.setPositional();
+    Arg& candidate =
+        args.add("candidate", "Candidate filename", m_candidateFile);
+    candidate.setPositional();
+}
 
-    std::string getName() const;
+PointViewPtr ChamferKernel::loadSet(const std::string& filename,
+                                    PointTableRef table)
+{
+    Stage& reader = makeReader(filename, "");
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    assert(viewSet.size() == 1);
+    return *viewSet.begin();
+}
 
-private:
-    point_count_t m_kMin, m_kMax;
+int ChamferKernel::execute()
+{
+    ColumnPointTable srcTable;
+    PointViewPtr srcView = loadSet(m_sourceFile, srcTable);
 
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void addArgs(ProgramArgs& args);
-    virtual void filter(PointView& view);
-};
+    ColumnPointTable candTable;
+    PointViewPtr candView = loadSet(m_candidateFile, candTable);
+
+    double chamfer = Utils::computeChamfer(srcView, candView);
+
+    MetadataNode root;
+    root.add("filenames", m_sourceFile);
+    root.add("filenames", m_candidateFile);
+    root.add("chamfer", chamfer);
+    root.add("pdal_version", Config::fullVersionString());
+    Utils::toJSON(root, std::cout);
+
+    return 0;
+}
 
 } // namespace pdal

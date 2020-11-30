@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2020, Bradley J Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2020 Bradley J Chambers (brad.chambers@gmail.com)
  *
  * All rights reserved.
  *
@@ -36,25 +36,35 @@
 
 #include <pdal/Filter.hpp>
 
+#include <Eigen/Dense>
+
 namespace pdal
 {
 
-class PDAL_DLL OptimalNeighborhood : public Filter
+class PDAL_DLL TeaserFilter : public Filter
 {
 public:
-    OptimalNeighborhood();
-
-    OptimalNeighborhood& operator=(const OptimalNeighborhood&) = delete;
-    OptimalNeighborhood(const OptimalNeighborhood&) = delete;
+    TeaserFilter() : Filter(), m_fixed(nullptr), m_complete(false) {}
 
     std::string getName() const;
 
-private:
-    point_count_t m_kMin, m_kMax;
+    TeaserFilter& operator=(const TeaserFilter&) = delete;
+    TeaserFilter(const TeaserFilter&) = delete;
 
-    virtual void addDimensions(PointLayoutPtr layout);
+private:
+    double m_nr, m_fr, m_scale;
+    bool m_fpfh;
+    BOX3D m_bounds;
+
     virtual void addArgs(ProgramArgs& args);
-    virtual void filter(PointView& view);
+    virtual PointViewSet run(PointViewPtr view);
+    virtual void done(PointTableRef _);
+    void teaser();
+    Eigen::Affine3d fpfh();
+    Eigen::Affine3d nofpfh();
+
+    PointViewPtr m_fixed, m_moving;
+    bool m_complete;
 };
 
 } // namespace pdal

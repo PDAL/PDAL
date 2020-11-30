@@ -36,14 +36,11 @@
 
 #include <pdal/Filter.hpp>
 
-#include <cstdint>
-#include <memory>
 #include <string>
 
 namespace pdal
 {
 
-class Options;
 class PointLayout;
 class PointView;
 struct EigenvalueArgs;
@@ -59,7 +56,6 @@ public:
 
 private:
     std::unique_ptr<EigenvalueArgs> m_args;
-    Dimension::Id m_e0, m_e1, m_e2;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs& args);

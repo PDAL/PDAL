@@ -716,13 +716,13 @@ TEST(LasWriterTest, lazperf)
     EXPECT_EQ(view1->pointSize(), view2->pointSize());
 
    // Validate some point data.
-    std::unique_ptr<char> buf1(new char[pointSize]);
-    std::unique_ptr<char> buf2(new char[pointSize]);
+    std::vector<char> buf1(pointSize);
+    std::vector<char> buf2(pointSize);
     for (PointId i = 0; i < view1->pointSize(); i += 100)
     {
-       view1->getPackedPoint(dims, i, buf1.get());
-       view2->getPackedPoint(dims, i, buf2.get());
-       EXPECT_EQ(memcmp(buf1.get(), buf2.get(), pointSize), 0);
+       view1->getPackedPoint(dims, i, buf1.data());
+       view2->getPackedPoint(dims, i, buf2.data());
+       EXPECT_EQ(memcmp(buf1.data(), buf2.data(), pointSize), 0);
     }
 }
 #endif
@@ -784,13 +784,13 @@ TEST(LasWriterTest, laszip)
     EXPECT_EQ(view1->pointSize(), view2->pointSize());
 
    // Validate some point data.
-    std::unique_ptr<char> buf1(new char[pointSize]);
-    std::unique_ptr<char> buf2(new char[pointSize]);
+    std::vector<char> buf1(pointSize);
+    std::vector<char> buf2(pointSize);
     for (PointId i = 0; i < view1->size(); i += 100)
     {
-       view1->getPackedPoint(dims, i, buf1.get());
-       view2->getPackedPoint(dims, i, buf2.get());
-       EXPECT_EQ(memcmp(buf1.get(), buf2.get(), pointSize), 0);
+       view1->getPackedPoint(dims, i, buf1.data());
+       view2->getPackedPoint(dims, i, buf2.data());
+       EXPECT_EQ(memcmp(buf1.data(), buf2.data(), pointSize), 0);
     }
 }
 
@@ -854,14 +854,14 @@ TEST(LasWriterTest, laszip1_4)
     EXPECT_EQ(view1->pointSize(), view2->pointSize());
 
    // Validate some point data.
-    std::unique_ptr<char> buf1(new char[pointSize]);
-    std::unique_ptr<char> buf2(new char[pointSize]);
+    std::vector<char> buf1(pointSize);
+    std::vector<char> buf2(pointSize);
     for (PointId idx = 0; idx < view1->size(); idx++)
     {
-       view1->getPackedPoint(dims, idx, buf1.get());
-       view2->getPackedPoint(dims, idx, buf2.get());
-       char *b1 = buf1.get();
-       char *b2 = buf2.get();
+       view1->getPackedPoint(dims, idx, buf1.data());
+       view2->getPackedPoint(dims, idx, buf2.data());
+       char *b1 = buf1.data();
+       char *b2 = buf2.data();
        // Uncomment this to figure out the exact byte at which things are
        // broken.
        /**
@@ -882,7 +882,7 @@ TEST(LasWriterTest, laszip1_4)
            }
        }
        **/
-       EXPECT_EQ(memcmp(buf1.get(), buf2.get(), pointSize), 0);
+       EXPECT_EQ(memcmp(buf1.data(), buf2.data(), pointSize), 0);
     }
 }
 
