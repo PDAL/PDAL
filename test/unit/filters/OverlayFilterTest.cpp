@@ -153,12 +153,104 @@ void testOverlay(int numReaders, bool stream)
         EXPECT_EQ(v->getFieldAs<uint8_t>(Dimension::Id::Classification, i), ClassLabel::Building);
 }
 
-TEST(OverlayFilterTest, nostream)
+// test overlaying a 64-bit integer
+void testOverlay64(bool stream)
 {
-    testOverlay(10, false);
+    Options ro;
+    ro.add("filename", Support::datapath("autzen/autzen-dd.las"));
+
+    StageFactory factory;
+
+    LogPtr l(Log::makeLog("readers.las", "stderr"));
+    Stage& r = *(factory.createStage("readers.las"));
+    r.setLog(l);
+    r.setOptions(ro);
+
+    // create a new dimension as there are no existing uint64 Dimensions
+    Stage& ferry = *(factory.createStage("filters.ferry"));
+    Options ferry_op;
+    ferry_op.add("dimensions","=>BldId");
+    ferry.setOptions(ferry_op);
+    ferry.setInput(r);
+
+    Options fo;
+    fo.add("dimension", "BldId");
+    fo.add("column", "cls_64");
+    fo.add("datasource", Support::datapath("autzen/attributes.gpkg"));
+
+    Stage& f = *(factory.createStage("filters.overlay"));
+
+    f.setInput(ferry);
+    f.setOptions(fo);
+
+    std::string tempfile(Support::temppath("out.las"));
+
+    Options wo;
+    wo.add("filename", tempfile);
+    wo.add("extra_dims","BldId=uint64");
+
+    Stage& w = *(factory.createStage("writers.las"));
+    w.setInput(f);
+    w.setOptions(wo);
+
+    FileUtils::deleteFile(tempfile);
+    if (stream)
+    {
+        FixedPointTable t(100);
+        w.prepare(t);
+        w.execute(t);
+    }
+    else
+    {
+        PointTable t;
+        w.prepare(t);
+        w.execute(t);
+    }
+//
+    Options testOptions;
+    testOptions.add("filename", tempfile);
+    testOptions.add("use_eb_vlr",true);
+
+    Stage& test = *(factory.createStage("readers.las"));
+    test.setOptions(testOptions);
+
+    Stage& c = *(factory.createStage("filters.crop"));
+    c.setInput(test);
+
+    Options o1;
+    o1.add("polygon", "POLYGON ((-123.067019000727967 44.059524946819884,-123.066697831944637 44.059771500882199,-123.065494970755537 44.059838504937517,-123.064074882074451 44.059742872480356,-123.063707784110264 44.059184772926969,-123.06401206144227 44.05752667418929,-123.065925935478475 44.057786669839672,-123.065745673821624 44.058221493390228,-123.06633379431868 44.058264073197797,-123.066237450902648 44.058593303895073,-123.06633104847343 44.058966114097124,-123.06667192031054 44.059429072738524,-123.067019000727967 44.059524946819884))");
+
+    c.setOptions(o1);
+
+    PointTable t1;
+    c.prepare(t1);
+    PointViewSet s = c.execute(t1);
+    PointViewPtr v = *s.begin();
+    // circular polygon has ID 2147483652
+    for (PointId i = 0; i < v->size(); ++i)
+    {
+        uint64_t e;
+        EXPECT_EQ(v->getFieldAs<uint64_t>(Dimension::Id::Unknown, i), 2147483652);
+
+    }
 }
 
 TEST(OverlayFilterTest, stream)
 {
     testOverlay(10, true);
+}
+
+TEST(OverlayFilterTest, nostream)
+{
+    testOverlay(10, false);
+}
+
+TEST(OverlayFilterTest64, stream)
+{
+    testOverlay64(true);
+}
+
+TEST(OverlayFilterTest64, nostream)
+{
+    testOverlay64(false);
 }

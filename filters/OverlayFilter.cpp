@@ -119,7 +119,7 @@ void OverlayFilter::ready(PointTableRef table)
     do
     {
         OGRGeometryH geom = OGR_F_GetGeometryRef(feature.get());
-        int32_t fieldVal = OGR_F_GetFieldAsInteger(feature.get(), field_index);
+        int64_t fieldVal = OGR_F_GetFieldAsInteger64(feature.get(), field_index);
 
         m_polygons.push_back(
             { Polygon(geom, table.anySpatialReference()), fieldVal} );

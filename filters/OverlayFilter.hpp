@@ -63,7 +63,7 @@ class PDAL_DLL OverlayFilter : public Filter, public Streamable
     struct PolyVal
     {
         Polygon geom;
-        int32_t val;
+        int64_t val;
     };
 
 public:
