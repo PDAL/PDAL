@@ -67,7 +67,7 @@ LasHeader::LasHeader() : m_fileSig(FILE_SIGNATURE), m_sourceId(0),
     m_globalEncoding(0), m_versionMinor(2), m_systemId(getSystemIdentifier()),
     m_createDOY(0), m_createYear(0), m_vlrOffset(0), m_pointOffset(0),
     m_vlrCount(0), m_pointFormat(0), m_pointLen(0), m_pointCount(0),
-    m_isCompressed(false), m_eVlrOffset(0), m_eVlrCount(0), m_geotiff_print("")
+    m_isCompressed(false), m_eVlrOffset(0), m_eVlrCount(0)
 {
     std::time_t now;
     std::time(&now);

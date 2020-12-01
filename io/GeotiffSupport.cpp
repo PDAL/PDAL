@@ -77,8 +77,6 @@ void VSIFree(void *data);
 int PDALGeoTIFFPrint(char* data, void* aux)
 {
     pdal::geotiff_dir_printer* printer = reinterpret_cast<pdal::geotiff_dir_printer*>(aux);
-    if (!printer)
-        return 0;
     (*printer)(data, 0);
     return static_cast<int>(printer->size());
 }
@@ -126,7 +124,7 @@ struct Entry
 
 GeotiffSrs::GeotiffSrs(const std::vector<uint8_t>& directoryRec,
     const std::vector<uint8_t>& doublesRec,
-    const std::vector<uint8_t>& asciiRec, LogPtr log) : m_log(log), m_gtiff_print_string("")
+    const std::vector<uint8_t>& asciiRec, LogPtr log) : m_log(log)
 {
     GeotiffCtx ctx;
 
