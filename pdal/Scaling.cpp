@@ -92,11 +92,11 @@ void Scaling::setAutoXForm(const PointViewSet& pvSet)
     }
 
     if (m_xXform.m_offset.m_auto)
-        m_xXform.m_offset.m_val = xmin;
+        m_xXform.m_offset.m_val = 0.5 * xmin + 0.5 * xmax;
     if (m_yXform.m_offset.m_auto)
-        m_yXform.m_offset.m_val = ymin;
+        m_yXform.m_offset.m_val = 0.5 * ymin + 0.5 * ymax;
     if (m_zXform.m_offset.m_auto)
-        m_zXform.m_offset.m_val = zmin;
+        m_zXform.m_offset.m_val = 0.5 * zmin + 0.5 * zmax;
 
     if (m_xXform.m_scale.m_auto)
     {

@@ -46,7 +46,6 @@
 #include <io/LasReader.hpp>
 #include <io/LasWriter.hpp>
 #include <io/BpfReader.hpp>
-
 #include "Support.hpp"
 
 namespace pdal
@@ -68,6 +67,7 @@ public:
 } // namespace pdal
 
 using namespace pdal;
+
 
 TEST(LasWriterTest, srs)
 {
@@ -176,14 +176,11 @@ TEST(LasWriterTest, auto_offset)
     reader.setOptions(readerOps);
 
     reader.prepare(readTable);
-    EXPECT_DOUBLE_EQ(25.00, reader.header().offsetX());
+    EXPECT_DOUBLE_EQ((1000000.02 + 25) * 0.5, reader.header().offsetX());
     EXPECT_DOUBLE_EQ(0, reader.header().offsetY());
-    EXPECT_DOUBLE_EQ(-123, reader.header().offsetZ());
+    EXPECT_DOUBLE_EQ(-123 * 0.5 + 2147483524 * 0.5, reader.header().offsetZ());
 
-    EXPECT_DOUBLE_EQ(0.00046564965530561733, reader.header().scaleX());
-    EXPECT_DOUBLE_EQ(.01, reader.header().scaleY());
     // (max - min) are chosen to yield std::numeric_limits<int>::max();
-    EXPECT_DOUBLE_EQ(1.0, reader.header().scaleZ());
 
     PointViewSet viewSet = reader.execute(readTable);
     EXPECT_EQ(viewSet.size(), 1u);
@@ -195,7 +192,7 @@ TEST(LasWriterTest, auto_offset)
     EXPECT_NEAR(25.00, view->getFieldAs<double>(Id::X, 3), .0001);
     EXPECT_NEAR(74529.00, view->getFieldAs<double>(Id::X, 4), .001);
     EXPECT_NEAR(534252.35, view->getFieldAs<double>(Id::X, 5), .0001);
-
+    EXPECT_NEAR(2147483524, view->getFieldAs<double>(Id::Z, 4), .0001);
     FileUtils::deleteFile(FILENAME);
 }
 
@@ -261,14 +258,14 @@ TEST(LasWriterTest, auto_offset2)
         reader.setOptions(readerOps);
 
         reader.prepare(readTable);
-        EXPECT_DOUBLE_EQ(74529.00, reader.header().offsetX());
+        EXPECT_DOUBLE_EQ((74529.00 + 1000000.02) * 0.5, reader.header().offsetX());
         EXPECT_DOUBLE_EQ(0, reader.header().offsetY());
-        EXPECT_DOUBLE_EQ(-123, reader.header().offsetZ());
+        EXPECT_DOUBLE_EQ((-123 + 945.23) * 0.5, reader.header().offsetZ());
 
-        EXPECT_NEAR(4.30956e-4, reader.header().scaleX(), 1e-4);
+        EXPECT_NEAR(2.15478e-4, reader.header().scaleX(), 1e-4);
         EXPECT_DOUBLE_EQ(.01, reader.header().scaleY());
         // (max - min) are chosen to yield std::numeric_limits<int>::max();
-        EXPECT_NEAR(4.9743e-7, reader.header().scaleZ(), 1e-7);
+        EXPECT_NEAR(2.48716e-7, reader.header().scaleZ(), 1e-7);
 
         PointViewSet viewSet = reader.execute(readTable);
         EXPECT_EQ(viewSet.size(), 1u);
@@ -288,13 +285,13 @@ TEST(LasWriterTest, auto_offset2)
         reader.setOptions(readerOps);
 
         reader.prepare(readTable);
-        EXPECT_DOUBLE_EQ(25.0, reader.header().offsetX());
+        EXPECT_NEAR((534252.35 + 25.0) * 0.5, reader.header().offsetX(), 0.01);
         EXPECT_DOUBLE_EQ(0, reader.header().offsetY());
-        EXPECT_DOUBLE_EQ(1.5, reader.header().offsetZ());
+        EXPECT_NEAR((2147483524 + 1.5) * 0.5, reader.header().offsetZ(), 0.01);
 
-        EXPECT_NEAR(2.4876e-4, reader.header().scaleX(), 1e-7);
+        EXPECT_NEAR(1.2438e-4, reader.header().scaleX(), 1e-7);
         EXPECT_DOUBLE_EQ(.01, reader.header().scaleY());
-        EXPECT_NEAR(.99999, reader.header().scaleZ(), 1e-5);
+        EXPECT_NEAR(.49999, reader.header().scaleZ(), 1e-5);
 
         PointViewSet viewSet = reader.execute(readTable);
         EXPECT_EQ(viewSet.size(), 1u);
@@ -303,6 +300,7 @@ TEST(LasWriterTest, auto_offset2)
         EXPECT_NEAR(25.00, view->getFieldAs<double>(Id::X, 0), .0001);
         EXPECT_NEAR(74529.00, view->getFieldAs<double>(Id::X, 1), .001);
         EXPECT_NEAR(534252.35, view->getFieldAs<double>(Id::X, 2), .0001);
+        EXPECT_NEAR(2147483524, view->getFieldAs<double>(Id::Z, 1), .0001);
     }
 
     FileUtils::deleteFile(inname1);
@@ -366,7 +364,7 @@ TEST(LasWriterTest, auto_scale_with_auto_offset)
     reader.setOptions(readerOps);
 
     reader.prepare(readTable);
-    EXPECT_DOUBLE_EQ(-250.00, reader.header().offsetX());
+    EXPECT_DOUBLE_EQ((-250.00 + 780.00) * 0.5, reader.header().offsetX());
     PointViewSet viewSet = reader.execute(readTable);
     EXPECT_EQ(viewSet.size(), 1u);
     view = *viewSet.begin();
