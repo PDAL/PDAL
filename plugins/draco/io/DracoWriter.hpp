@@ -36,14 +36,21 @@
 
 #define NOMINMAX
 
-#include <pdal/Streamable.hpp>
+// #include <iostream>
+
+// #include <pdal/Streamable.hpp>
 #include <pdal/Writer.hpp>
 
+#include <draco/point_cloud/point_cloud.h>
+#include <draco/compression/encode.h>
+#include <draco/attributes/geometry_attribute.h>
+#include <draco/attributes/point_attribute.h>
 
 namespace pdal
 {
+    typedef std::shared_ptr<std::ostream> FileStreamPtr;
 
-class PDAL_DLL DracoWriter : public Writer, public Streamable
+class PDAL_DLL DracoWriter : public Writer/*, public Streamable*/
 {
 public:
 
@@ -52,7 +59,8 @@ public:
     std::string getName() const;
 private:
     virtual void addArgs(ProgramArgs& args);
-    virtual void initialize();
+    virtual void initialize(PointTableRef table);
+    // virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr view);
     virtual bool processOne(PointRef& point);
@@ -62,9 +70,19 @@ private:
 
     struct Args;
     std::unique_ptr<DracoWriter::Args> m_args;
+    //arguments
+    std::string m_filename;
+    std::map<std::string, std::string> m_dimensions;
+    int m_precision;
+
+    FileStreamPtr m_stream;
+    draco::EncoderBuffer m_draco_buffer;
+    std::unique_ptr<draco::PointCloud> m_draco_pc;
+    std::vector<draco::GeometryAttribute::Type> m_dims;
+    std::map<std::string> m_genericDims;
+    std::unique_ptr<draco::DataBuffer> m_buffer;
 
     size_t m_current_idx;
-
 
     DracoWriter(const DracoWriter&) = delete;
     DracoWriter& operator=(const DracoWriter&) = delete;
