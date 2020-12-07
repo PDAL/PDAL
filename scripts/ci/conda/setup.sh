@@ -9,10 +9,9 @@ git clone https://github.com/conda-forge/pdal-feedstock.git
 cd pdal-feedstock
 cat > recipe/recipe_clobber.yaml <<EOL
 source:
-  path: ../../../pdal
+  path: ../../pdal
   url:
   sha256:
-  patches
 
 build:
   number: 2112
