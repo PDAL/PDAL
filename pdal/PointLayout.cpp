@@ -226,9 +226,11 @@ size_t PointLayout::pointSize() const
 bool PointLayout::update(Dimension::Detail dd, const std::string& name)
 {
     if (m_finalized)
-    {
         throw pdal_error("Can't update layout after points have been added.");
-    }
+
+    // If we have a list of allowed dimensions and this dimension isn't listed, return false.
+    if (m_allowedDimNames.size() && !Utils::contains(m_allowedDimNames, Utils::toupper(name)))
+        return false;
 
     Dimension::DetailList detail;
 
@@ -340,6 +342,19 @@ MetadataNode PointLayout::toMetadata() const
     }
 
     return root;
+}
+
+void PointLayout::setAllowedDims(StringList dimNames)
+{
+    if (dimNames.empty())
+        return;
+
+    for (std::string& s : dimNames)
+        s = Utils::toupper(s);
+    for (const std::string& xyz : { "X", "Y", "Z" })
+        if (!Utils::contains(dimNames, xyz))
+            dimNames.push_back(xyz);
+    m_allowedDimNames = dimNames;
 }
 
 } // namespace pdal
