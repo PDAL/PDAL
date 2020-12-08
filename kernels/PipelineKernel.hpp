@@ -65,6 +65,7 @@ private:
     bool m_stream;
     bool m_noStream;
     ExecMode m_mode;
+    StringList m_dimNames;
 };
 
 } // pdal

@@ -16,6 +16,8 @@ more information.
 ::
 
   --input, -i               Input filename
+  --dims                    Limit loaded dimensions to this list. Note that X, Y and Z are
+      always loaded.
   --pipeline-serialization  Output file for pipeline serialization
   --validate                Validate but do not process the pipeline.
       Also reports whether a pipeline can be streamed.
