@@ -45,6 +45,12 @@
 #include <draco/compression/encode.h>
 #include <draco/attributes/geometry_attribute.h>
 #include <draco/attributes/point_attribute.h>
+#include "draco/point_cloud/point_cloud_builder.h"
+#include <draco/core/vector_d.h>
+#include "draco/compression/decode.h"
+#include "draco/compression/expert_encode.h"
+#include "draco/compression/encode.h"
+#include "draco/attributes/attribute_quantization_transform.h"
 
 namespace pdal
 {
@@ -63,10 +69,18 @@ private:
     // virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr view);
-    virtual bool processOne(PointRef& point);
+    // virtual bool processOne(PointRef& point);
     virtual void done(PointTableRef table);
 
     bool flushCache(size_t size);
+
+    std::map<std::string, int> m_quantDefaults = {
+        { "POSITION", 11 },
+        { "NORMAL", 7 },
+        { "TEX_COORD", 10 },
+        { "COLOR", 8 },
+        { "GENERIC", 8 }
+    };
 
     struct Args;
     std::unique_ptr<DracoWriter::Args> m_args;
@@ -79,8 +93,8 @@ private:
     draco::EncoderBuffer m_draco_buffer;
     std::unique_ptr<draco::PointCloud> m_draco_pc;
     std::vector<draco::GeometryAttribute::Type> m_dims;
-    std::map<std::string> m_genericDims;
-    std::unique_ptr<draco::DataBuffer> m_buffer;
+    std::vector<std::string> m_genericDims;
+    // std::unique_ptr<draco::DataBuffer> m_buffer;
 
     size_t m_current_idx;
 

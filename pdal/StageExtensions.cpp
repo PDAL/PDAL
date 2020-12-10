@@ -67,6 +67,7 @@ static const Extensions readerExtensions =
 
 static const Extensions writerExtensions =
 {
+  { "writers.draco", { "drc" } },
   { "writers.matlab", { "mat" } },
   { "writers.nitf", { "nitf", "nsf", "ntf" } },
   { "writers.pcd", { "pcd" } },
