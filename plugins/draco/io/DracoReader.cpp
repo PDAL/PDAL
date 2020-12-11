@@ -196,11 +196,6 @@ void DracoReader::addDimensions(PointLayoutPtr layout)
                                     << GeometryAttribute::TypeToString(at)
                                     << " subcomponents: " << (int)nc << std::endl;;
         std::string name;
-
-        std::cout << "full? " << attr << std::endl;
-        std::cout << "attribute " << at << std::endl;
-        std::cout << "datatype " << dt << std::endl;
-
         if (attr_metatata)
         {
             log()->get(LogLevel::Debug) << "number of metadata: "

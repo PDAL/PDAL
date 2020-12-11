@@ -251,61 +251,33 @@ void DracoWriter::write(const PointViewPtr view)
     // pa.Init(draco::GeometryAttribute::POSITION, 1, draco::DT_FLOAT32, false, view->size());
 
     PointRef point(*view, 0);
-    std::vector<float> position;
+    std::vector<float> position(view->size()*3, 0.f);
     for (PointId idx = 0; idx < view->size(); ++idx)
     {
         point.setPointId(idx);
         const auto pointId = draco::PointIndex(idx);
-        position.push_back(point.getFieldAs<float>(Dimension::Id::X));
-        position.push_back(point.getFieldAs<float>(Dimension::Id::Y));
-        position.push_back(point.getFieldAs<float>(Dimension::Id::Z));
-        // const auto vector = draco::Vector3f(x, y, z);
-        // const auto data = vector.data();
-
-
-        std::cout << "point: " << pointId << std::endl;
-        std::cout << "x: " << position[0] << std::endl;
-        std::cout << "y: " << position[1] << std::endl;
-        std::cout << "z: " << position[2] << std::endl;
-        std::cout << "vector: " << *position.data() << std::endl;
-        // std::cout << "data: " << *data << std::endl << std::endl;
-
-
-        // pa.SetAttributeValue(draco::AttributeValueIndex(idx), &position);
+        position[idx * 3 + 0] = point.getFieldAs<float>(Dimension::Id::X);
+        position[idx * 3 + 1] = point.getFieldAs<float>(Dimension::Id::Y);
+        position[idx * 3 + 2] = point.getFieldAs<float>(Dimension::Id::Z);
     }
     pc_builder.SetAttributeValuesForAllPoints(posId, position.data(), 0);
-
     std::unique_ptr<draco::PointCloud> pc = pc_builder.Finalize(false);
-    std::cout << "numpoints: " << pc->num_points() << std::endl;
-    //check bounding box?
-    draco::BoundingBox box = pc->ComputeBoundingBox();
-    std::cout << "boxmin: " << box.GetMinPoint() << std::endl;
-    std::cout << "boxmax: " << box.GetMaxPoint() << std::endl;
 
-    if (pc == nullptr)
-        std::cout << "I'm null" << std::endl;
     draco::EncoderBuffer buffer;
     draco::Encoder encoder;
+
     encoder.SetEncodingMethod(draco::POINT_CLOUD_KD_TREE_ENCODING);
     encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, 11);
-    if(encoder.EncodePointCloudToBuffer(*pc, &buffer).ok()) {
-        std::cout << "Number of encoded points " << encoder.num_encoded_points() << std::endl;
-        std::cout << "Buffer size " << buffer.size() << std::endl;
-    }
+    const auto status = encoder.EncodePointCloudToBuffer(*pc, &buffer);
 
-    //try decoding and make sure it's okay?
-    draco::DecoderBuffer decoder_buffer;
-    decoder_buffer.Init(buffer.data(), buffer.size());
-    draco::Decoder decoder;
-    auto maybe_pc = decoder.DecodePointCloudFromBuffer(&decoder_buffer);
-    if (!maybe_pc.ok())
-        std::cout << "NOT OKAY" << std::endl;
-    auto decoded_pc = std::move(maybe_pc).value();
-    std::cout << "Number of decoded points " << decoded_pc->num_points() << std::endl;
-    std::cout << "Size of decoded pointcloud " << decoded_pc->num_points() << std::endl;
+    //TODO add error message from draco status?
+    if (!status.ok())
+        throw pdal_error("Error encoding draco pointcloud");
 
-
-    *m_stream << buffer.data();
+    const auto bufferSize = buffer.size();
+    std::vector<char> *output = buffer.buffer();
+    for (auto &i : *output)
+        *m_stream << i;
 }
 
 
