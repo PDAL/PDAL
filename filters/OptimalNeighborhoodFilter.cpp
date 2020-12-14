@@ -66,14 +66,14 @@ void OptimalNeighborhood::addArgs(ProgramArgs& args)
 
 void OptimalNeighborhood::addDimensions(PointLayoutPtr layout)
 {
-    m_kOpt = layout->registerOrAssignDim("OptimalKNN", Type::Unsigned64);
-    m_rOpt = layout->registerOrAssignDim("OptimalRadius", Type::Double);
+    layout->registerDim(Id::OptimalKNN);
+    layout->registerDim(Id::OptimalRadius);
 }
 
 void OptimalNeighborhood::filter(PointView& view)
 {
     // Build the 3D KD-tree.
-    KD3Index& index = view.build3dIndex();
+    const KD3Index& index = view.build3dIndex();
 
     for (PointRef p : view)
     {
@@ -133,10 +133,10 @@ void OptimalNeighborhood::filter(PointView& view)
             B(1, 2) = B(2, 1) = B(2, 1) + s * dy * dz;
 
             // perform the eigen decomposition
-            SelfAdjointEigenSolver<Matrix3d> solver(B / (n - 1));
-            if (solver.info() != Success)
+	    Eigen::SelfAdjointEigenSolver<Matrix3d> solver(B / (n - 1));
+            if (solver.info() != Eigen::Success)
                 throwError("Cannot perform eigen decomposition.");
-            auto ev = solver.eigenvalues();
+            Vector3d ev = solver.eigenvalues();
 
             std::vector<double> lambda = {((std::max)(ev[2], 0.0)),
                                           ((std::max)(ev[1], 0.0)),
@@ -158,8 +158,8 @@ void OptimalNeighborhood::filter(PointView& view)
             }
         }
 
-        p.setField(m_kOpt, kopt);
-        p.setField(m_rOpt, std::sqrt(ropt));
+        p.setField(Id::OptimalKNN, kopt);
+        p.setField(Id::OptimalRadius, std::sqrt(ropt));
     }
 }
 

@@ -36,7 +36,6 @@
 
 #include <pdal/Filter.hpp>
 
-#include <memory>
 #include <string>
 
 namespace pdal
@@ -55,13 +54,12 @@ public:
 private:
     int m_knn;
     int m_threads;
-    Dimension::Id m_miniball;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void filter(PointView& view);
 
-    void setMiniball(PointView& view, const PointId& i, const KD3Index& kdi);
+    void setMiniball(PointView& view, const PointId& i);
 };
 
 } // namespace pdal

@@ -1,6 +1,7 @@
 
 #include <cassert>
 #include <cctype>
+#include <cstdlib>
 
 #include "Lexer.hpp"
 

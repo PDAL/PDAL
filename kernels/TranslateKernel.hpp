@@ -69,6 +69,7 @@ private:
     bool m_noStream;
     bool m_stream;
     ExecMode m_mode;
+    StringList m_dimNames;
 };
 
 } // namespace pdal

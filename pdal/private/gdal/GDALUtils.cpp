@@ -32,17 +32,16 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-/**
-#pragma warning(disable: 4127)  // conditional expression is constant
-**/
-
 #include <mutex>
 
+#pragma warning(push)
+#pragma warning(disable: 4251)
 #include <gdal.h>
 #include <gdal_priv.h>
 #include <ogr_api.h>
 #include <ogr_geometry.h>
 #include <ogrsf_frmts.h>
+#pragma warning(pop)
 
 #include <nlohmann/json.hpp>
 #include <pdal/Polygon.hpp>

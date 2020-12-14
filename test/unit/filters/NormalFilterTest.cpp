@@ -196,10 +196,10 @@ TEST(NormalFilterTest, RampPlane)
     double expected = std::sqrt(2.0) / 2.0;
     for (auto const& p : *outView)
     {
-        ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), -expected);
-        ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), 0.0);
-        ASSERT_FLOAT_EQ(p.getFieldAs<float>(nz), expected);
-        ASSERT_FLOAT_EQ(p.getFieldAs<float>(c), 0.0);
+        ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), (float)-expected);
+        ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), 0.0f);
+        ASSERT_FLOAT_EQ(p.getFieldAs<float>(nz), (float)expected);
+        ASSERT_FLOAT_EQ(p.getFieldAs<float>(c), 0.0f);
     }
 }
 
@@ -244,10 +244,10 @@ TEST(NormalFilterTest, RampPlane2)
     double expected = std::sqrt(2.0) / 2.0;
     for (auto const& p : *outView)
     {
-        ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), 0.0);
-        ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), -expected);
-        ASSERT_FLOAT_EQ(p.getFieldAs<float>(nz), expected);
-        ASSERT_FLOAT_EQ(p.getFieldAs<float>(c), 0.0);
+        ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), 0.0f);
+        ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), (float)-expected);
+        ASSERT_FLOAT_EQ(p.getFieldAs<float>(nz), (float)expected);
+        ASSERT_FLOAT_EQ(p.getFieldAs<float>(c), 0.0f);
     }
 }
 

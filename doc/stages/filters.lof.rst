@@ -8,15 +8,15 @@ of determining the degree to which an object is an outlier. This filter
 is an implementation of the method
 described in [Breunig2000]_.
 
-The filter creates three new dimensions, ``KDistance``,
+The filter creates three new dimensions, ``NNDistance``,
 ``LocalReachabilityDistance`` and ``LocalOutlierFactor``, all of which are
-double-precision floating values. The ``KDistance`` dimension records the
+double-precision floating values. The ``NNDistance`` dimension records the
 Euclidean distance between a point and it's k-th nearest neighbor (the number
 of k neighbors is set with the minpts_ option). The
 ``LocalReachabilityDistance`` is the inverse of the mean
 of all reachability distances for a neighborhood of points. This reachability
 distance is defined as the max of the Euclidean distance to a neighboring point
-and that neighbor's own previously computed ``KDistance``. Finally, each point
+and that neighbor's own previously computed ``NNDistance``. Finally, each point
 has a ``LocalOutlierFactor`` which is the mean of all
 ``LocalReachabilityDistance`` values for the neighborhood. In each case, the
 neighborhood is the set of k nearest neighbors.
@@ -31,6 +31,11 @@ users of this filter should find instructive.
 
   To inspect the newly created, non-standard dimensions, be sure to write to an
   output format that can support arbitrary dimensions, such as BPF.
+
+.. note::
+
+  In earlier PDAL releases (up to v2.2.0), ``NNDistance`` was stored in the
+  ``KDistance`` Dimemsion.
 
 .. embed::
 

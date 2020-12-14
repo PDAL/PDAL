@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/KDIndex.hpp>
 
 namespace pdal
 {
@@ -50,7 +49,6 @@ public:
     std::string getName() const;
 
 private:
-    Dimension::Id m_id;
     std::vector<int> m_localMax;
     point_count_t m_minSize;
     double m_minHag;
@@ -64,11 +62,10 @@ private:
     PointId locateHighestPoint(PointView& view, PointIdList const& Ui);
     PointId locateDummyPoint(PointView& view, PointIdList const& Ui,
                              PointId t0);
-    void segmentTree(KD2Index& kdi, PointView& view, PointIdList& Ui,
-                     int64_t& tree_id);
+    void segmentTree(PointView& view, PointIdList& Ui, int64_t& tree_id);
     void classifyPoint(PointId ui, PointView& view, PointIdList& Ni,
                        PointIdList& Pi);
-    void computeLocalMax(KD2Index& kdi, PointView& view);
+    void computeLocalMax(PointView& view);
 };
 
 } // namespace pdal
