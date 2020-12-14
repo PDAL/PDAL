@@ -86,6 +86,7 @@ void LasReader::addArgs(ProgramArgs& args)
     args.add("use_eb_vlr", "Use extra bytes VLR for 1.0 - 1.3 files",
         m_useEbVlr);
     args.add("ignore_vlr", "VLR userid/recordid to ignore", m_ignoreVLROption);
+    args.add("start", "Point at which reading should start (1-indexed).", m_start);
 }
 
 
@@ -217,6 +218,9 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
             m_header.removeVLR(i.m_userId);
     }
 
+    if (m_start > m_pointCount)
+        throwError("'start' value of " + std::to_string(m_start) + " is too large. "
+            "File contains " + std::to_string(m_pointCount) + " points.");
     if (m_header.compressed())
         handleCompressionOption();
 #ifdef PDAL_HAVE_LASZIP
@@ -292,7 +296,10 @@ void LasReader::ready(PointTableRef table)
 #endif
     }
     else
+    {
+
         stream->seekg(m_header.pointOffset());
+    }
 }
 
 
