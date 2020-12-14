@@ -73,30 +73,52 @@ private:
     virtual void done(PointTableRef table);
 
     bool flushCache(size_t size);
+    int components(Dimension::IdList &list, Dimension::IdList typeVector);
+    void addAttribute(draco::GeometryAttribute::Type t, int n);
+    void addAttribute(draco::GeometryAttribute::Type t, Dimension::Id pt, int n);
 
-    std::map<std::string, int> m_quantDefaults = {
-        { "POSITION", 11 },
-        { "NORMAL", 7 },
-        { "TEX_COORD", 10 },
-        { "COLOR", 8 },
-        { "GENERIC", 8 }
+    std::map<draco::GeometryAttribute::Type, int> m_quantDefaults = {
+        { draco::GeometryAttribute::POSITION,  11 },
+        { draco::GeometryAttribute::NORMAL,     7 },
+        { draco::GeometryAttribute::TEX_COORD, 10 },
+        { draco::GeometryAttribute::COLOR,      8 },
+        { draco::GeometryAttribute::GENERIC,    8 }
+    };
+
+    std::map<Dimension::Type, draco::DataType> m_dracoTypeMap = {
+        { Dimension::Type::Double, draco::DataType::DT_FLOAT64 },
+        { Dimension::Type::Float, draco::DataType::DT_FLOAT32 },
+        { Dimension::Type::Signed8, draco::DataType::DT_INT8 },
+        { Dimension::Type::Unsigned8, draco::DataType::DT_UINT8 },
+        { Dimension::Type::Signed16, draco::DataType::DT_INT16 },
+        { Dimension::Type::Unsigned16, draco::DataType::DT_UINT16 },
+        { Dimension::Type::Signed32, draco::DataType::DT_INT32 },
+        { Dimension::Type::Unsigned32, draco::DataType::DT_UINT32 },
+        { Dimension::Type::Signed64, draco::DataType::DT_INT64 },
+        { Dimension::Type::Unsigned64, draco::DataType::DT_UINT64 },
     };
 
     struct Args;
     std::unique_ptr<DracoWriter::Args> m_args;
     //arguments
     std::string m_filename;
-    std::map<std::string, std::string> m_dimensions;
+    //dimension map eg. {"position":"float","texture":"double")
+    // enum attributeTypes
+    // {
+    //     position,
+    //     normal,
+    //     textures,
+    //     color
+    // };
+    // std::map<attributeTypes, std::string> m_dimensions;
+    draco::PointCloudBuilder m_pc;
+    std::map<draco::GeometryAttribute::Type, int> m_attMap;
     int m_precision;
 
-    FileStreamPtr m_stream;
-    draco::EncoderBuffer m_draco_buffer;
-    std::unique_ptr<draco::PointCloud> m_draco_pc;
-    std::vector<draco::GeometryAttribute::Type> m_dims;
-    std::vector<std::string> m_genericDims;
-    // std::unique_ptr<draco::DataBuffer> m_buffer;
 
-    size_t m_current_idx;
+    FileStreamPtr m_stream;
+    std::map<draco::GeometryAttribute::Type, int> m_dims;
+    Dimension::IdList m_genericDims;
 
     DracoWriter(const DracoWriter&) = delete;
     DracoWriter& operator=(const DracoWriter&) = delete;

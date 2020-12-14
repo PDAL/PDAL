@@ -125,7 +125,7 @@ void DracoWriter::addArgs(ProgramArgs& args)
     // TODO add dimension map as an argument
     // args.add("dimensions", "Map of pdal to draco dimensions ", m_dimensions);
     // TODO add quantization as an argument
-    // args.add("precision", "Degree of precision on float and double values", m_precision);
+    // args.add("quantization", "Amount of quantization during draco encoding", m_quantization);
 }
 
 struct FileStreamDeleter
@@ -141,21 +141,6 @@ struct FileStreamDeleter
     }
 };
 
-// std::vector<std::string> DracoWriter::getHeaders(PointTableRef table) {
-//     const PointLayoutPtr layout(table.layout());
-//     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-//     {
-//         if (di != m_dims.begin())
-//             *m_stream << m_delimiter;
-
-//         if (m_quoteHeader)
-//             *m_stream << "\"" << layout->dimName(di->id) << "\"";
-//         else
-//             *m_stream << layout->dimName(di->id);
-//     }
-//     *m_stream << m_newline;
-
-// }
 
 void DracoWriter::initialize(PointTableRef table)
 {
@@ -166,7 +151,6 @@ void DracoWriter::initialize(PointTableRef table)
 
 }
 
-
 void DracoWriter::ready(pdal::BasePointTable &table)
 {
     *m_stream << std::fixed;
@@ -176,8 +160,7 @@ void DracoWriter::ready(pdal::BasePointTable &table)
     //   void Init(Type attribute_type, DataBuffer *buffer, int8_t num_components,
     //             DataType data_type, bool normalized, int64_t byte_stride,
     //             int64_t byte_offset);
-    auto dimensions = layout->dims();
-    const auto numComponents = dimensions.size();
+    pdal::Dimension::IdList dimensions = layout->dims();
 
     for (auto& dim : dimensions)
     {
@@ -187,16 +170,27 @@ void DracoWriter::ready(pdal::BasePointTable &table)
         // we can add the name at the same time. After this loop we'll remove
         // duplicates of the known attributes and then add those to the
         // point_attribute.
+        int numComponents(0);
+
+        //run through each one dimension, if it's a part of a group then check
+        //for the others and remove them if they already exist
+        //num components - eg. Position incorporates X, Y, Z. So 3 components.
         switch (dim)
         {
             case Dimension::Id::X:
-                m_dims.push_back(draco::GeometryAttribute::POSITION);
+                m_dims[draco::GeometryAttribute::POSITION] = components(dimensions,
+                    Dimension::IdList{ Dimension::Id::Y, Dimension::Id::Z });
+                addAttribute(draco::GeometryAttribute::POSITION, numComponents);
                 break;
             case Dimension::Id::Y:
-                m_dims.push_back(draco::GeometryAttribute::POSITION);
+                numComponents = components(dimensions,
+                    Dimension::IdList{ Dimension::Id::X, Dimension::Id::Z });
+                addAttribute(draco::GeometryAttribute::POSITION, numComponents);
                 break;
             case Dimension::Id::Z:
-                m_dims.push_back(draco::GeometryAttribute::POSITION);
+                numComponents = components(dimensions,
+                    Dimension::IdList{ Dimension::Id::X, Dimension::Id::Y });
+                addAttribute(draco::GeometryAttribute::POSITION, numComponents);
                 break;
             case Dimension::Id::NormalX:
                 m_dims.push_back(draco::GeometryAttribute::NORMAL);
@@ -228,16 +222,53 @@ void DracoWriter::ready(pdal::BasePointTable &table)
                 break;
             //for generic attributes, add them to the point_attribute now
             default:
-                m_genericDims.push_back(Dimension::name(dim));
+                m_genericDims.push_back(dim);
                 break;
         }
     }
-
-    m_dims.erase( std::unique( m_dims.begin(), m_dims.end() ), m_dims.end() );
-    //each point_attribute needs to be added to the pointcloud
-    m_current_idx = 0;
 }
 
+int DracoWriter::components(Dimension::IdList &list, Dimension::IdList typeVector)
+{
+    int numComponents(0);
+    for (auto &t: typeVector)
+    {
+        auto it = std::find(list.begin(), list.end(), t);
+        if (it != list.end())
+        {
+            list.erase(it);
+            ++numComponents;
+        }
+    }
+    return numComponents;
+}
+
+void DracoWriter::addAttribute(draco::GeometryAttribute::Type t, Dimension::Id pt, int n) {
+    //get pdal dimension data type
+    Dimension::Type pdalDataType = Dimension::defaultType(pt);
+    //get corresponding draco data type
+    draco::DataType dracoDataType = m_dracoTypeMap[pdalDataType];
+    //add it to the pointcloud attributes
+    m_pc.AddAttribute(t, n, dracoDataType);
+}
+
+void DracoWriter::addAttribute(draco::GeometryAttribute::Type t, int n) {
+    //get straight lookup working first, then add lookup for datatype
+    draco::DataType dataType = draco::DT_INVALID;
+    if (t == draco::GeometryAttribute::POSITION) {
+        dataType = draco::DT_FLOAT32;
+    }
+    if (t == draco::GeometryAttribute::NORMAL) {
+        dataType = draco::DT_FLOAT32;
+    }
+    if (t == draco::GeometryAttribute::TEX_COORD) {
+        dataType = draco::DT_FLOAT64;
+    }
+    if (t == draco::GeometryAttribute::COLOR) {
+        dataType = draco::DT_FLOAT64;
+    }
+    m_pc.AddAttribute(t, n, dataType);
+}
 
 void DracoWriter::write(const PointViewPtr view)
 {
