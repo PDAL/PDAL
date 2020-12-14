@@ -339,17 +339,9 @@ TEST(IcpFilterTest, RecoverTranslationWithBadGuess)
     
     auto filter = newFilter();
     Options icpOptions;
-    //ABELL
+
     // Provide a bad initial guess for the tranformation.
-    //icpOptions.add("init", "0.996 0 0.087 -50 0 1 0 100 0.996 0 0.087 -300 0 0 0 1");
-    //icpOptions.add("init", "0.996 0 0.087 100 "
-    //                       "0 1 0 200 "
-    //                       "0 0 1.087 300 "
-    //                       "0 0 0 1");
-    //icpOptions.add("init", "1 0 0 100 "
-    //                       "0 1 0 102 "
-    //                       "0 0 1 103 "
-    //                       "0 0 0 1");
+    icpOptions.add("init", "0.996 0 0.087 -50 0 1 0 100 0.996 0 0.087 -300 0 0 0 1");
     filter->setInput(reader1);
     filter->setInput(reader2);
     filter->setOptions(icpOptions);
@@ -360,6 +352,9 @@ TEST(IcpFilterTest, RecoverTranslationWithBadGuess)
     MetadataNode root = filter->getMetadata();
     Eigen::MatrixXd transform =
         root.findChild("transform").value<Eigen::MatrixXd>();
+    //ABELL - Eigen 3.3.9 broke this. Not sure why. After some research, chambbj and I
+    // decided to comment this out until people felt it was important.
+    //
     // No reason to check exact values, only that they are LT/GT the expected values.
     EXPECT_GT(-1.0, transform(0, 3));
     EXPECT_LT(-2.0, transform(1, 3));
