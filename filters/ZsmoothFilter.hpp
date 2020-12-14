@@ -1,4 +1,4 @@
-/**
+/***************************************************************************
  * Copyright (c) 2020, University Nevada, Reno
  * All rights reserved.
  *
@@ -26,7 +26,6 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  ****************************************************************************/
-**/
 
 #include <memory>
 
