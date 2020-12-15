@@ -36,9 +36,6 @@
 
 #define NOMINMAX
 
-// #include <iostream>
-
-// #include <pdal/Streamable.hpp>
 #include <pdal/Writer.hpp>
 
 #include <draco/point_cloud/point_cloud.h>
@@ -76,8 +73,10 @@ private:
     int components(Dimension::IdList &list, Dimension::IdList typeVector);
     void addAttribute(draco::GeometryAttribute::Type t, int n);
     void addAttribute(draco::GeometryAttribute::Type t, Dimension::Id pt, int n);
+    Dimension::IdList searchDims(draco::GeometryAttribute::Type t);
 
-    std::map<draco::GeometryAttribute::Type, int> m_quantDefaults = {
+    std::map<draco::GeometryAttribute::Type, int> m_quantDefaults =
+    {
         { draco::GeometryAttribute::POSITION,  11 },
         { draco::GeometryAttribute::NORMAL,     7 },
         { draco::GeometryAttribute::TEX_COORD, 10 },
@@ -85,7 +84,8 @@ private:
         { draco::GeometryAttribute::GENERIC,    8 }
     };
 
-    std::map<Dimension::Type, draco::DataType> m_dracoTypeMap = {
+    std::map<Dimension::Type, draco::DataType> m_typeMap =
+    {
         { Dimension::Type::Double, draco::DataType::DT_FLOAT64 },
         { Dimension::Type::Float, draco::DataType::DT_FLOAT32 },
         { Dimension::Type::Signed8, draco::DataType::DT_INT8 },
@@ -98,27 +98,34 @@ private:
         { Dimension::Type::Unsigned64, draco::DataType::DT_UINT64 },
     };
 
+    std::map<Dimension::Id, draco::GeometryAttribute::Type> m_dimMap =
+    {
+        { Dimension::Id::X,         draco::GeometryAttribute::POSITION },
+        { Dimension::Id::Y,         draco::GeometryAttribute::POSITION },
+        { Dimension::Id::Z,         draco::GeometryAttribute::POSITION },
+        { Dimension::Id::NormalX,   draco::GeometryAttribute::NORMAL },
+        { Dimension::Id::NormalY,   draco::GeometryAttribute::NORMAL },
+        { Dimension::Id::NormalZ,   draco::GeometryAttribute::NORMAL },
+        { Dimension::Id::Red,       draco::GeometryAttribute::COLOR },
+        { Dimension::Id::Green,     draco::GeometryAttribute::COLOR },
+        { Dimension::Id::Blue,      draco::GeometryAttribute::COLOR },
+        { Dimension::Id::TextureU,  draco::GeometryAttribute::TEX_COORD },
+        { Dimension::Id::TextureV,  draco::GeometryAttribute::TEX_COORD },
+        { Dimension::Id::TextureW,  draco::GeometryAttribute::TEX_COORD }
+    };
+
     struct Args;
     std::unique_ptr<DracoWriter::Args> m_args;
-    //arguments
+
     std::string m_filename;
-    //dimension map eg. {"position":"float","texture":"double")
-    // enum attributeTypes
-    // {
-    //     position,
-    //     normal,
-    //     textures,
-    //     color
-    // };
-    // std::map<attributeTypes, std::string> m_dimensions;
-    draco::PointCloudBuilder m_pc;
-    std::map<draco::GeometryAttribute::Type, int> m_attMap;
-    int m_precision;
-
-
     FileStreamPtr m_stream;
+
     std::map<draco::GeometryAttribute::Type, int> m_dims;
+    std::map<draco::GeometryAttribute::Type, int> m_attMap;
     Dimension::IdList m_genericDims;
+
+    draco::PointCloudBuilder m_pc;
+    int m_precision;
 
     DracoWriter(const DracoWriter&) = delete;
     DracoWriter& operator=(const DracoWriter&) = delete;

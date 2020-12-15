@@ -156,76 +156,43 @@ void DracoWriter::ready(pdal::BasePointTable &table)
     *m_stream << std::fixed;
     auto layout = table.layout();
 
-    //pointcloud initialization
-    //   void Init(Type attribute_type, DataBuffer *buffer, int8_t num_components,
-    //             DataType data_type, bool normalized, int64_t byte_stride,
-    //             int64_t byte_offset);
     pdal::Dimension::IdList dimensions = layout->dims();
 
     for (auto& dim : dimensions)
     {
-        //add point_attributes to draco pointcloud
-        //For known dimensions, add them to the draco geometry attribute vector
-        //For generics, directly add them to the draco point_attribute so that
-        // we can add the name at the same time. After this loop we'll remove
-        // duplicates of the known attributes and then add those to the
-        // point_attribute.
-        int numComponents(0);
-
-        //run through each one dimension, if it's a part of a group then check
-        //for the others and remove them if they already exist
-        //num components - eg. Position incorporates X, Y, Z. So 3 components.
-        switch (dim)
+        //create list of dimensions we need
+        int numComponents(1);
+        try
         {
-            case Dimension::Id::X:
-                m_dims[draco::GeometryAttribute::POSITION] = components(dimensions,
-                    Dimension::IdList{ Dimension::Id::Y, Dimension::Id::Z });
-                addAttribute(draco::GeometryAttribute::POSITION, numComponents);
-                break;
-            case Dimension::Id::Y:
-                numComponents = components(dimensions,
-                    Dimension::IdList{ Dimension::Id::X, Dimension::Id::Z });
-                addAttribute(draco::GeometryAttribute::POSITION, numComponents);
-                break;
-            case Dimension::Id::Z:
-                numComponents = components(dimensions,
-                    Dimension::IdList{ Dimension::Id::X, Dimension::Id::Y });
-                addAttribute(draco::GeometryAttribute::POSITION, numComponents);
-                break;
-            case Dimension::Id::NormalX:
-                m_dims.push_back(draco::GeometryAttribute::NORMAL);
-                break;
-            case Dimension::Id::NormalY:
-                m_dims.push_back(draco::GeometryAttribute::NORMAL);
-                break;
-            case Dimension::Id::NormalZ:
-                m_dims.push_back(draco::GeometryAttribute::NORMAL);
-                break;
-            case Dimension::Id::Red:
-                m_dims.push_back(draco::GeometryAttribute::COLOR);
-                break;
-            case Dimension::Id::Green:
-                m_dims.push_back(draco::GeometryAttribute::COLOR);
-                break;
-            case Dimension::Id::Blue:
-                m_dims.push_back(draco::GeometryAttribute::COLOR);
-                break;
-            //TODO Account for possibily that it's just TextureU and TextureV
-            case Dimension::Id::TextureU:
-                m_dims.push_back(draco::GeometryAttribute::TEX_COORD);
-                break;
-            case Dimension::Id::TextureV:
-                m_dims.push_back(draco::GeometryAttribute::TEX_COORD);
-                break;
-            case Dimension::Id::TextureW:
-                m_dims.push_back(draco::GeometryAttribute::TEX_COORD);
-                break;
-            //for generic attributes, add them to the point_attribute now
-            default:
-                m_genericDims.push_back(dim);
-                break;
+            //get draco type associated with the current dimension in loop
+            draco::GeometryAttribute::Type dracoType = m_dimMap.at(dim);
+
+            //find other pdal dimensions that fit that draco type
+            Dimension::IdList associatedDims = searchDims(dracoType);
+
+            //look for those dimensions in the IdList we've been given
+            //this adds to the number of components that need to be added
+            //to the pointcloud
+            int numComponents = components(dimensions, associatedDims);
+
+            m_dims[dracoType] = numComponents;
+        }
+        catch (const std::out_of_range &e)
+        {
+            m_genericDims.push_back(dim);
         }
     }
+}
+
+Dimension::IdList DracoWriter::searchDims(draco::GeometryAttribute::Type t)
+{
+    std::vector<Dimension::Id> found;
+    for (auto &one: m_dimMap)
+    {
+        if (one.second == t)
+            found.push_back(one.first);
+    }
+    return found;
 }
 
 int DracoWriter::components(Dimension::IdList &list, Dimension::IdList typeVector)
@@ -247,7 +214,7 @@ void DracoWriter::addAttribute(draco::GeometryAttribute::Type t, Dimension::Id p
     //get pdal dimension data type
     Dimension::Type pdalDataType = Dimension::defaultType(pt);
     //get corresponding draco data type
-    draco::DataType dracoDataType = m_dracoTypeMap[pdalDataType];
+    draco::DataType dracoDataType = m_typeMap[pdalDataType];
     //add it to the pointcloud attributes
     m_pc.AddAttribute(t, n, dracoDataType);
 }
