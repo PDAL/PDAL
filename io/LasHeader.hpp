@@ -378,6 +378,9 @@ public:
     SpatialReference srs() const
         { return m_srs; }
 
+    std::string geotiffPrint()
+        { return m_geotiff_print; }
+
     void setSummary(const LasSummaryData& summary);
     bool valid() const;
     Dimension::IdList usedDims() const;
@@ -419,6 +422,7 @@ private:
     std::string m_compressionInfo;
     LogPtr m_log;
     SpatialReference m_srs;
+    std::string m_geotiff_print;
     VlrList m_vlrs;
     VlrList m_eVlrs;
 
