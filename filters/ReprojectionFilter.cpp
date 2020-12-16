@@ -68,6 +68,8 @@ void ReprojectionFilter::addArgs(ProgramArgs& args)
     args.add("in_srs", "Input spatial reference", m_inSRS);
     args.add("in_axis_ordering", "Axis ordering override for in_srs", m_inAxisOrderingArg, {} );
     args.add("out_axis_ordering", "Axis ordering override for out_srs", m_outAxisOrderingArg, {} );
+    args.add("error_on_failure", "Throw an exception if we can't reproject any point",
+        m_errorOnFailure);
 }
 
 
@@ -193,6 +195,11 @@ bool ReprojectionFilter::processOne(PointRef& point)
         point.setField(Dimension::Id::Y, y);
         point.setField(Dimension::Id::Z, z);
     }
+    else if (m_errorOnFailure)
+        throwError("Couldn't reproject point with X/Y/Z coordinates of (" +
+            std::to_string(point.getFieldAs<double>(Dimension::Id::X)) + ", " +
+            std::to_string(point.getFieldAs<double>(Dimension::Id::Y)) + ", " +
+            std::to_string(point.getFieldAs<double>(Dimension::Id::Z)) + ").");
     return ok;
 }
 
