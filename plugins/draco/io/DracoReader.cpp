@@ -187,7 +187,7 @@ void DracoReader::addDimensions(PointLayoutPtr layout)
     for (int i=0; i < m_pc->num_attributes(); ++i)
     {
         const PointAttribute* attr = m_pc->GetAttributeByUniqueId(i);
-        const AttributeMetadata* attr_metatata = m_pc->GetAttributeMetadataByAttributeId(i);
+        const AttributeMetadata* attr_metadata = m_pc->GetAttributeMetadataByAttributeId(i);
         DataType dt = attr->data_type();
         GeometryAttribute::Type at = attr->attribute_type();
 
@@ -196,12 +196,12 @@ void DracoReader::addDimensions(PointLayoutPtr layout)
                                     << GeometryAttribute::TypeToString(at)
                                     << " subcomponents: " << (int)nc << std::endl;;
         std::string name;
-        if (attr_metatata)
+        if (attr_metadata)
         {
             log()->get(LogLevel::Debug) << "number of metadata: "
-                                        << attr_metatata->num_entries()
+                                        << attr_metadata->num_entries()
                                         << std::endl;;
-            attr_metatata->GetEntryString("name", &name);
+            attr_metadata->GetEntryString("name", &name);
         }
         switch (at)
         {
