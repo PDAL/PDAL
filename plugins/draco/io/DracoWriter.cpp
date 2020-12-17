@@ -131,13 +131,29 @@ void DracoWriter::ready(pdal::BasePointTable &table)
     }
 }
 
-void DracoWriter::addAttribute(Dimension::Id pt, int n) {
+void DracoWriter::addGeneric(Dimension::Id pt, int n) {
     //get pdal dimension data type
     Dimension::Type pdalDataType = Dimension::defaultType(pt);
     //get corresponding draco data type
     draco::DataType dracoDataType = typeMap.at(pdalDataType);
-    //add it to the pointcloud attributes
-    m_pc.AddAttribute(draco::GeometryAttribute::GENERIC, n, dracoDataType);
+
+    //add generic type to the pointcloud builder
+    draco::GeometryAttribute ga;
+    ga.Init(draco::GeometryAttribute::GENERIC, nullptr, n, dracoDataType,
+            false, draco::DataTypeLength(dracoDataType) * n, 0);
+    auto attId = m_pc->AddAttribute(ga, true, m_pc->num_points());
+    //add generic attribute to map with its id
+    m_genericMap[pt] = attId;
+
+    //create metadata object and add dimension string as name
+    draco::Metadata metadata;
+    const std::string attName = "name";
+    const std::string name = Dimension::name(pt);
+    metadata.AddEntryString(attName, name);
+    std::unique_ptr<draco::AttributeMetadata> metaPtr(new draco::AttributeMetadata(metadata));
+
+    //attach metadata to generic attribute in pointcloud
+    m_pc->AddAttributeMetadata(attId, std::move(metaPtr));
 }
 
 void DracoWriter::addAttribute(draco::GeometryAttribute::Type t, int n) {
@@ -157,30 +173,47 @@ void DracoWriter::addAttribute(draco::GeometryAttribute::Type t, int n) {
     draco::DataType dataType = draco::DT_INVALID;
     if (it != dimMap.end())
         dataType = typeMap.at(pdalType);
-    m_attMap[t] = m_pc.AddAttribute(t, n, dataType);
+
+    //create geometry attribute and add to pointcloud
+    draco::GeometryAttribute ga;
+    ga.Init(t, nullptr, n, dataType, false, draco::DataTypeLength(dataType) * n, 0);
+    m_attMap[t] = m_pc->AddAttribute(ga, true, m_pc->num_points());
+
+    // m_attMap[t] = m_pc.AddAttribute(t, n, dataType);
 }
 
-void DracoWriter::initPointCloud()
+void DracoWriter::initPointCloud(point_count_t size)
 {
+    m_pc->set_num_points(size);
     //go through known draco attributes and add to the pointcloud
     for (auto &dim: m_dims)
     {
         addAttribute(dim.first, dim.second);
     }
+    for (auto &dim: m_genericDims)
+    {
+        addGeneric(dim, 1);
+    }
+}
+
+void DracoWriter::addPoint(int attId, draco::PointIndex idx, void *pointData) {
+    draco::PointAttribute *const att = m_pc->attribute(attId);
+    att->SetAttributeValue(att->mapped_index(idx), pointData);
+}
+
+void DracoWriter::addPointGeneric(int attId, draco::PointIndex idx, void *pointData) {
+    draco::PointAttribute *const att = m_pc->attribute(attId);
+    att->SetAttributeValue(att->mapped_index(idx), pointData);
+    uint16_t* ptr;
+    att->GetValue(att->mapped_index(idx), &ptr);
 }
 
 void DracoWriter::write(const PointViewPtr view)
 {
     //initialize pointcloud builder
-    m_pc.Start(view->size());
-    initPointCloud();
-    // pc_builder.Start(view->size());
-    // const int32_t posId = pc_builder.AddAttribute(draco::GeometryAttribute::POSITION, 3, draco::DT_FLOAT32);
-    // pa.Init(draco::GeometryAttribute::POSITION, 1, draco::DT_FLOAT32, false, view->size());
+    initPointCloud(view->size());
 
     PointRef point(*view, 0);
-    std::vector<double> position(view->size()*3, 0.f);
-    std::vector<uint16_t> color(view->size()*3, 0.f);
     for (PointId idx = 0; idx < view->size(); ++idx)
     {
         point.setPointId(idx);
@@ -193,42 +226,49 @@ void DracoWriter::write(const PointViewPtr view)
             pos[0] = point.getFieldAs<double>(Dimension::Id::X);
             pos[1] = point.getFieldAs<double>(Dimension::Id::Y);
             pos[2] = point.getFieldAs<double>(Dimension::Id::Z);
-            m_pc.SetAttributeValueForPoint(id, pointId, pos.data());
+            addPoint(id, pointId, pos.data());
         }
 
         if (m_attMap.find(draco::GeometryAttribute::COLOR) != m_attMap.end())
         {
-            std::vector<uint16_t> rgb(3, 0.f);
+            std::vector<uint16_t> rgb(3, 0);
             const int id = m_attMap[draco::GeometryAttribute::COLOR];
             rgb[0] = point.getFieldAs<uint16_t>(Dimension::Id::Red);
             rgb[1] = point.getFieldAs<uint16_t>(Dimension::Id::Green);
             rgb[2] = point.getFieldAs<uint16_t>(Dimension::Id::Blue);
-            m_pc.SetAttributeValueForPoint(id, pointId, rgb.data());
+            addPoint(id, pointId, rgb.data());
         }
 
         if (m_attMap.find(draco::GeometryAttribute::TEX_COORD) != m_attMap.end())
         {
-            std::vector<double> tex(3, 0.f);
+            const int n = m_dims[draco::GeometryAttribute::TEX_COORD];
+            std::vector<double> tex(n, 0.0);
             const int id = m_attMap[draco::GeometryAttribute::TEX_COORD];
             tex[0] = point.getFieldAs<double>(Dimension::Id::TextureU);
             tex[1] = point.getFieldAs<double>(Dimension::Id::TextureV);
             tex[2] = point.getFieldAs<double>(Dimension::Id::TextureW);
-            m_pc.SetAttributeValueForPoint(id, pointId, tex.data());
+            addPoint(id, pointId, tex.data());
         }
 
         if (m_attMap.find(draco::GeometryAttribute::NORMAL) != m_attMap.end())
         {
-            std::vector<double> norm(3, 0.f);
+            std::vector<double> norm(3, 0.0);
             const int id = m_attMap[draco::GeometryAttribute::NORMAL];
             norm[0] = point.getFieldAs<double>(Dimension::Id::NormalX);
             norm[1] = point.getFieldAs<double>(Dimension::Id::NormalY);
             norm[2] = point.getFieldAs<double>(Dimension::Id::NormalZ);
-            m_pc.SetAttributeValueForPoint(id, pointId, norm.data());
+            addPoint(id, pointId, norm.data());
+        }
+
+        for (auto& dim: m_genericMap)
+        {
+            std::vector<uint16_t> data(1, 0);
+            data[0] = point.getFieldAs<uint16_t>(dim.first);
+            std::cout << "dim: " << Dimension::name(dim.first) << std::endl;
+            std::cout << "val: " << data[0] << std::endl << std::endl;
+            addPointGeneric(dim.second, pointId, data.data());
         }
     }
-    // m_pc.SetAttributeValuesForAllPoints(0, position.data(), 0);
-    // m_pc.SetAttributeValuesForAllPoints(1, color.data(), 0);
-    std::unique_ptr<draco::PointCloud> pc = m_pc.Finalize(false);
 
     draco::EncoderBuffer buffer;
     draco::Encoder encoder;
@@ -237,7 +277,7 @@ void DracoWriter::write(const PointViewPtr view)
     encoder.SetEncodingMethod(draco::POINT_CLOUD_SEQUENTIAL_ENCODING);
     encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, 11);
     encoder.SetAttributeQuantization(draco::GeometryAttribute::COLOR, 8);
-    const auto status = encoder.EncodePointCloudToBuffer(*pc, &buffer);
+    const auto status = encoder.EncodePointCloudToBuffer(*m_pc, &buffer);
 
     //TODO add error message from draco status?
     if (!status.ok()) {
@@ -256,7 +296,5 @@ void DracoWriter::done(PointTableRef table)
 {
 
 }
-
-
 
 } // namespace pdal

@@ -114,11 +114,13 @@ private:
 
     bool flushCache(size_t size);
     void addAttribute(draco::GeometryAttribute::Type t, int n);
-    void addAttribute(Dimension::Id pt, int n);
-    void initPointCloud();
-    struct attribute<T> {
+    void addGeneric(Dimension::Id pt, int n);
+    void addPointGeneric(int attId, draco::PointIndex idx, void *pointData);
+    void initPointCloud(point_count_t size);
+    void addPoint(int attId, draco::PointIndex idx, void *pointData);
+    // struct attribute<T> {
 
-    }
+    // }
 
 
     struct Args;
@@ -129,10 +131,12 @@ private:
 
     std::map<draco::GeometryAttribute::Type, int> m_dims;
     std::map<draco::GeometryAttribute::Type, int32_t> m_attMap;
+    std::map<Dimension::Id, int32_t> m_genericMap;
     Dimension::IdList m_genericDims;
 
 
-    draco::PointCloudBuilder m_pc;
+    std::unique_ptr<draco::PointCloud> m_pc =
+        std::unique_ptr<draco::PointCloud>(new draco::PointCloud());
     int m_precision;
 
     DracoWriter(const DracoWriter&) = delete;
