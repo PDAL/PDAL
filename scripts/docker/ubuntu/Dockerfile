@@ -15,7 +15,7 @@ RUN . /opt/conda/etc/profile.d/conda.sh && \
     cd pdal/build  && \
     cmake -G Ninja  \
         -DCMAKE_INSTALL_PREFIX=/usr \
-        -DBUILD_PLUGIN_CPD=ON \
+        -DBUILD_PLUGIN_CPD=OFF \
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
