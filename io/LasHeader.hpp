@@ -222,7 +222,7 @@ public:
     }
 
     /// The length in bytes of each point.  All points in the file are
-    /// considered to be fixed in size, and the PointFormatName is used
+    /// considered to be fixed in size, and the point format is used
     /// to determine the fixed portion of the dimensions in the point.
     uint16_t pointLen() const
         { return m_pointLen; }

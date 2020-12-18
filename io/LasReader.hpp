@@ -116,6 +116,7 @@ private:
     std::string m_compression;
     StringList m_ignoreVLROption;
     bool m_useEbVlr;
+    point_count_t m_start;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize(PointTableRef table)
