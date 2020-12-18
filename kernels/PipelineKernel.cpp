@@ -106,6 +106,7 @@ void PipelineKernel::addSwitches(ProgramArgs& args)
         m_stream);
     args.add("nostream", "Run in standard mode.", m_noStream);
     args.add("metadata", "Metadata filename", m_metadataFile);
+    args.add("dims", "Dimensions to be stored", m_dimNames);
 }
 
 
@@ -144,6 +145,7 @@ int PipelineKernel::execute()
     }
 
     m_manager.readPipeline(m_inputFile);
+    m_manager.pointTable().layout()->setAllowedDims(m_dimNames);
     if (m_manager.execute(m_mode).m_mode == ExecMode::None)
         throw pdal_error("Couldn't run pipeline in requested execution mode.");
 

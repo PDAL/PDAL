@@ -182,8 +182,18 @@ width
 height
   Number of cells in the Y direction. [Default: None]
 
+override_srs
+  Write the raster with the provided SRS. [Default: None]
+
+default_srs
+  Write the raster with the provided SRS if none exists. [Default: None]
+
 .. include:: writer_opts.rst
 
 .. note::
     You may use the 'bounds' option, or 'origin_x', 'origin_y', 'width'
     and 'height', but not both.
+
+.. note::
+    Unless the raster being written is empty, the spatial reference will automatically
+    come from the data and does not need to be set with 'override_srs' or 'default_srs'.

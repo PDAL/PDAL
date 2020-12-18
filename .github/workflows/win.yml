@@ -1,8 +1,6 @@
 name: Windows
 
-on:
-  push:
-    branches: '*'
+on: [push, pull_request]
 
 jobs:
   build:
@@ -19,7 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: ilammy/msvc-dev-cmd@v1
-    - uses: goanpeca/setup-miniconda@v1
+    - uses: conda-incubator/setup-miniconda@v2
       with:
         channels: conda-forge
         auto-update-conda: true

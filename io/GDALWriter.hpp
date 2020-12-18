@@ -105,6 +105,8 @@ private:
     Dimension::Type m_dataType;
     bool m_expandByPoint;
     bool m_fixedGrid;
+    SpatialReference m_defaultSrs;
+    SpatialReference m_overrideSrs;
 };
 
 }

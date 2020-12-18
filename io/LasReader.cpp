@@ -48,7 +48,6 @@
 #include <pdal/util/IStream.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-#include "GeotiffSupport.hpp"
 #include "LasHeader.hpp"
 #include "LasVLR.hpp"
 
@@ -438,6 +437,9 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
     m.add<point_count_t>("count",
         m_header.pointCount(), "This field contains the total "
         "number of point records within the file.");
+
+    m.add<std::string>("gtiff", m_header.geotiffPrint(),
+        "GTifPrint output of GeoTIFF keys");
 
     // PDAL metadata VLR
     const LasVLR *vlr = m_header.findVlr("PDAL", 12);

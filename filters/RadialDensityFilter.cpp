@@ -37,10 +37,11 @@
 #include <pdal/KDIndex.hpp>
 
 #include <string>
-#include <vector>
 
 namespace pdal
 {
+
+using namespace Dimension;
 
 static StaticPluginInfo const s_info
 {
@@ -63,26 +64,23 @@ void RadialDensityFilter::addArgs(ProgramArgs& args)
 
 void RadialDensityFilter::addDimensions(PointLayoutPtr layout)
 {
-    using namespace Dimension;
-    m_rdens = layout->registerOrAssignDim("RadialDensity", Type::Double);
+    layout->registerDim(Id::RadialDensity);
 }
 
 void RadialDensityFilter::filter(PointView& view)
 {
-    using namespace Dimension;
-
     // Build the 3D KD-tree.
-    KD3Index& index = view.build3dIndex();
+    const KD3Index& index = view.build3dIndex();
 
     // Search for neighboring points within the specified radius. The number of
     // neighbors (which includes the query point) is normalized by the volume
     // of the search sphere and recorded as the density.
     log()->get(LogLevel::Debug) << "Computing densities...\n";
     double factor = 1.0 / ((4.0 / 3.0) * 3.14159 * (m_rad * m_rad * m_rad));
-    for (PointId i = 0; i < view.size(); ++i)
+    for (PointRef p : view)
     {
-        PointIdList pts = index.radius(i, m_rad);
-        view.setField(m_rdens, i, pts.size() * factor);
+        PointIdList pts = index.radius(p, m_rad);
+        p.setField(Id::RadialDensity, pts.size() * factor);
     }
 }
 

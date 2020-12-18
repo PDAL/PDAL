@@ -51,7 +51,6 @@ public:
 
 private:
     point_count_t m_kMin, m_kMax;
-    Dimension::Id m_kOpt, m_rOpt;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs& args);

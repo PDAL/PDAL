@@ -233,10 +233,13 @@ void EptReader::initialize()
     for (Polygon& poly : m_args->m_polys)
     {
         if (!poly.valid())
-            throwError("Geometrically invalid polyon in option 'polygon'.");
-        auto ok = poly.transform(getSpatialReference());
-        if (!ok)
-            throwError(ok.what());
+            throwError("Geometrically invalid polygon in option 'polygon'.");
+        if (poly.srsValid())
+        {
+            auto ok = poly.transform(getSpatialReference());
+            if (!ok)
+                throwError(ok.what());
+        }
         std::vector<Polygon> polys = poly.polygons();
         exploded.insert(exploded.end(),
             std::make_move_iterator(polys.begin()),

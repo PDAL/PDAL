@@ -2,8 +2,6 @@ FROM pdal/ubuntubase:latest as builder
 MAINTAINER Andrew Bell <andrew@hobu.co>
 
 SHELL ["/bin/bash", "-c"]
-ENV CC gcc-6
-ENV CXX g++-6
 
 RUN . /opt/conda/etc/profile.d/conda.sh && \
     conda activate pdal && \
@@ -15,7 +13,7 @@ RUN . /opt/conda/etc/profile.d/conda.sh && \
     cd pdal/build  && \
     cmake -G Ninja  \
         -DCMAKE_INSTALL_PREFIX=/usr \
-        -DBUILD_PLUGIN_CPD=ON \
+        -DBUILD_PLUGIN_CPD=OFF \
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
@@ -43,7 +41,7 @@ RUN . /opt/conda/etc/profile.d/conda.sh && \
     cd pdal/build  && \
     ninja install
 
-RUN apt-get -y remove unzip bzip2 gcc-6 g++-6 ca-certificates && \
+RUN apt-get -y remove unzip bzip2 gcc g++ ca-certificates && \
    apt-get -y autoremove
 
 RUN . /opt/conda/etc/profile.d/conda.sh && \

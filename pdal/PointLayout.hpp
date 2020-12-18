@@ -246,6 +246,11 @@ public:
     */
     PDAL_DLL MetadataNode toMetadata() const;
 
+    /**
+        Set the names of dimensions to which the layout is restricted.
+    */
+    PDAL_DLL void setAllowedDims(StringList dimNames);
+
 private:
     PDAL_DLL virtual bool update(Dimension::Detail dd, const std::string& name);
 
@@ -259,6 +264,7 @@ protected:
     int m_nextFree;
     std::size_t m_pointSize;
     bool m_finalized;
+    StringList m_allowedDimNames;
 };
 
 typedef PointLayout* PointLayoutPtr;
