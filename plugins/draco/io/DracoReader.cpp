@@ -257,6 +257,7 @@ void DracoReader::ready(PointTableRef)
         const PointAttribute* attr = m_pc->GetAttributeByUniqueId(at_id);
         DataType dt = attr->data_type();
         GeometryAttribute::Type at = attr->attribute_type();
+        Dimension::Type pdalType = dracoTypeMap[at];
 
         switch (at)
         {
@@ -273,6 +274,7 @@ void DracoReader::ready(PointTableRef)
                 break;
 
             case GeometryAttribute::GENERIC:
+                CopyAttributeData<double>(1, attr, m_generics[pdalType]);
                 break;
 
             default:

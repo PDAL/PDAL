@@ -184,6 +184,7 @@ void DracoWriter::addAttribute(draco::GeometryAttribute::Type t, int n) {
 
 void DracoWriter::initPointCloud(point_count_t size)
 {
+    //begin initialization of the point cloud with the point count
     m_pc->set_num_points(size);
     //go through known draco attributes and add to the pointcloud
     for (auto &dim: m_dims)
@@ -201,13 +202,6 @@ void DracoWriter::addPoint(int attId, draco::PointIndex idx, void *pointData) {
     att->SetAttributeValue(att->mapped_index(idx), pointData);
 }
 
-void DracoWriter::addPointGeneric(int attId, draco::PointIndex idx, void *pointData) {
-    draco::PointAttribute *const att = m_pc->attribute(attId);
-    att->SetAttributeValue(att->mapped_index(idx), pointData);
-    uint16_t* ptr;
-    att->GetValue(att->mapped_index(idx), &ptr);
-}
-
 void DracoWriter::write(const PointViewPtr view)
 {
     //initialize pointcloud builder
@@ -219,6 +213,8 @@ void DracoWriter::write(const PointViewPtr view)
         point.setPointId(idx);
         const auto pointId = draco::PointIndex(idx);
 
+        //TODO get typing fixed so that user can specify a map of draco dimensions
+        //to the types they want with them.
         if (m_attMap.find(draco::GeometryAttribute::POSITION) != m_attMap.end())
         {
             std::vector<double> pos(3, 0.f);
@@ -239,6 +235,7 @@ void DracoWriter::write(const PointViewPtr view)
             addPoint(id, pointId, rgb.data());
         }
 
+        //TODO account for possibility that textureW is not there
         if (m_attMap.find(draco::GeometryAttribute::TEX_COORD) != m_attMap.end())
         {
             const int n = m_dims[draco::GeometryAttribute::TEX_COORD];
@@ -265,8 +262,8 @@ void DracoWriter::write(const PointViewPtr view)
             std::vector<uint16_t> data(1, 0);
             data[0] = point.getFieldAs<uint16_t>(dim.first);
             std::cout << "dim: " << Dimension::name(dim.first) << std::endl;
-            std::cout << "val: " << data[0] << std::endl << std::endl;
-            addPointGeneric(dim.second, pointId, data.data());
+            std::cout << "val: " << data[0] << std::endl;
+            addPoint(dim.second, pointId, data.data());
         }
     }
 
@@ -275,6 +272,8 @@ void DracoWriter::write(const PointViewPtr view)
 
     //TODO make encoding method a writer argument?
     encoder.SetEncodingMethod(draco::POINT_CLOUD_SEQUENTIAL_ENCODING);
+    //TODO add quantization for all other geometry attributes
+    //TODO make quants variable based on user input, use defaults otherwise
     encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, 11);
     encoder.SetAttributeQuantization(draco::GeometryAttribute::COLOR, 8);
     const auto status = encoder.EncodePointCloudToBuffer(*m_pc, &buffer);

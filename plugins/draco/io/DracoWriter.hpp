@@ -115,7 +115,6 @@ private:
     bool flushCache(size_t size);
     void addAttribute(draco::GeometryAttribute::Type t, int n);
     void addGeneric(Dimension::Id pt, int n);
-    void addPointGeneric(int attId, draco::PointIndex idx, void *pointData);
     void initPointCloud(point_count_t size);
     void addPoint(int attId, draco::PointIndex idx, void *pointData);
     // struct attribute<T> {
