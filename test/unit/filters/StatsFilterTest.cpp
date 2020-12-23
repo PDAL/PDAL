@@ -36,6 +36,7 @@
 
 #include <pdal/PDALUtils.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/util/Utils.hpp>
 #include <filters/StatsFilter.hpp>
 #include <io/BufferReader.hpp>
 #include <io/FauxReader.hpp>
@@ -434,4 +435,72 @@ TEST(Stats, global)
 	EXPECT_DOUBLE_EQ(statsZ.minimum(), 0.0);
 	EXPECT_DOUBLE_EQ(statsZ.maximum(), 1000.0);
 
+}
+
+TEST(Stats, merge)
+{
+    {
+        using SummaryPtr = std::unique_ptr<stats::Summary>;
+        std::array<SummaryPtr, 10> parts;
+
+        for (SummaryPtr& part : parts)
+            part.reset(new stats::Summary("test", stats::Summary::NoEnum, true));
+        stats::Summary whole("test", stats::Summary::NoEnum, true);
+
+        Utils::random_seed(314159);
+
+        stats::Summary* part = parts[0].get();
+        for (size_t i = 0; i < 10000; ++i)
+        {
+            stats::Summary& part = *(parts[i / 1000].get());
+
+            double d = Utils::random(0, 100000);
+            whole.insert(d);
+            part.insert(d);
+        }
+
+        for (size_t i = 1; i < 10; ++i)
+            parts[0]->merge(*parts[i]);
+
+        stats::Summary& p = *parts[0];
+
+        EXPECT_DOUBLE_EQ(whole.minimum(), p.minimum());
+        EXPECT_DOUBLE_EQ(whole.maximum(), p.maximum());
+        EXPECT_DOUBLE_EQ(whole.average(), p.average());
+        EXPECT_DOUBLE_EQ(whole.populationVariance(), p.populationVariance());
+        EXPECT_FLOAT_EQ((float)whole.skewness(), (float)p.skewness());
+        EXPECT_FLOAT_EQ((float)whole.kurtosis(), (float)p.kurtosis());
+    }
+
+    {
+        using SummaryPtr = std::unique_ptr<stats::Summary>;
+        std::array<SummaryPtr, 10> parts;
+
+        for (SummaryPtr& part : parts)
+            part.reset(new stats::Summary("test", stats::Summary::Enumerate, false));
+        stats::Summary whole("test", stats::Summary::Enumerate, false);
+
+        Utils::random_seed(314159);
+
+        stats::Summary* part = parts[0].get();
+        for (size_t i = 0; i < 10000; ++i)
+        {
+            stats::Summary& part = *(parts[i / 1000].get());
+
+            double d = std::floor(Utils::random(0, 100));
+            whole.insert(d);
+            part.insert(d);
+        }
+
+        for (size_t i = 1; i < 10; ++i)
+            parts[0]->merge(*parts[i]);
+
+        stats::Summary& p = *parts[0];
+
+        stats::Summary::EnumMap wm = whole.values();
+        stats::Summary::EnumMap pm = p.values();
+        EXPECT_EQ(wm.size(), pm.size());
+        for (size_t i = 0; i < 100; ++i)
+            EXPECT_EQ(wm[(double)i], pm[(double)i]);
+    }
 }
