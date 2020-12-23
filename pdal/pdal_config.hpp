@@ -53,9 +53,11 @@ enum class Feature
     ZLIB,
     LZMA,
     LIBXML2,
+    LAS_START,
 };
 
 PDAL_DLL bool hasFeature(Feature f);
+PDAL_DLL bool hasFeature(const std::string& s);
 PDAL_DLL std::string fullVersionString();
 PDAL_DLL std::string versionString();
 PDAL_DLL int versionInteger();

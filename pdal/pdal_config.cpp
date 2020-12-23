@@ -93,6 +93,9 @@ bool hasFeature(Feature f)
         enabled = true;
 #endif
         break;
+    case Feature::LAS_START:
+        enabled = true;
+        break;
     default:
         break;
     }
