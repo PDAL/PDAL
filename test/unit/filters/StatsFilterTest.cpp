@@ -34,9 +34,10 @@
 
 #include <pdal/pdal_test_main.hpp>
 
+#include <random>
+
 #include <pdal/PDALUtils.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/util/Utils.hpp>
 #include <filters/StatsFilter.hpp>
 #include <io/BufferReader.hpp>
 #include <io/FauxReader.hpp>
@@ -439,7 +440,9 @@ TEST(Stats, global)
 
 TEST(Stats, merge)
 {
+    std::mt19937 gen(314159);
     {
+        std::uniform_real_distribution<double> dis(0, 100000);
         using SummaryPtr = std::unique_ptr<stats::Summary>;
         std::array<SummaryPtr, 10> parts;
 
@@ -447,14 +450,12 @@ TEST(Stats, merge)
             part.reset(new stats::Summary("test", stats::Summary::NoEnum, true));
         stats::Summary whole("test", stats::Summary::NoEnum, true);
 
-        Utils::random_seed(314159);
-
         stats::Summary* part = parts[0].get();
         for (size_t i = 0; i < 10000; ++i)
         {
             stats::Summary& part = *(parts[i / 1000].get());
 
-            double d = Utils::random(0, 100000);
+            double d = dis(gen);
             whole.insert(d);
             part.insert(d);
         }
@@ -466,13 +467,14 @@ TEST(Stats, merge)
 
         EXPECT_DOUBLE_EQ(whole.minimum(), p.minimum());
         EXPECT_DOUBLE_EQ(whole.maximum(), p.maximum());
-        EXPECT_DOUBLE_EQ(whole.average(), p.average());
-        EXPECT_DOUBLE_EQ(whole.populationVariance(), p.populationVariance());
+        EXPECT_FLOAT_EQ((float)whole.average(), (float)p.average());
+        EXPECT_FLOAT_EQ((float)whole.populationVariance(), (float)p.populationVariance());
         EXPECT_FLOAT_EQ((float)whole.skewness(), (float)p.skewness());
         EXPECT_FLOAT_EQ((float)whole.kurtosis(), (float)p.kurtosis());
     }
 
     {
+        std::uniform_int_distribution<double> dis(0, 100);
         using SummaryPtr = std::unique_ptr<stats::Summary>;
         std::array<SummaryPtr, 10> parts;
 
@@ -487,7 +489,7 @@ TEST(Stats, merge)
         {
             stats::Summary& part = *(parts[i / 1000].get());
 
-            double d = std::floor(Utils::random(0, 100));
+            double d = dis(gen);
             whole.insert(d);
             part.insert(d);
         }
