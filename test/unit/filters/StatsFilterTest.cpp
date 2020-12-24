@@ -474,15 +474,13 @@ TEST(Stats, merge)
     }
 
     {
-        std::uniform_int_distribution<double> dis(0, 100);
+        std::uniform_int_distribution<int> dis(0, 100);
         using SummaryPtr = std::unique_ptr<stats::Summary>;
         std::array<SummaryPtr, 10> parts;
 
         for (SummaryPtr& part : parts)
             part.reset(new stats::Summary("test", stats::Summary::Enumerate, false));
         stats::Summary whole("test", stats::Summary::Enumerate, false);
-
-        Utils::random_seed(314159);
 
         stats::Summary* part = parts[0].get();
         for (size_t i = 0; i < 10000; ++i)
