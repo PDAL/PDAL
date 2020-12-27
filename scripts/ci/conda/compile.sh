@@ -2,20 +2,23 @@
 
 mkdir packages
 
-CI_SUPPORT=""
-if [ "$PLATFORM" == "windows-latest" ]; then
-    CI_SUPPORT="win_64_.yaml"
+export CI_PLAT=""
+if grep -q "windows" <<< "$PLATFORM"; then
+    CI_PLAT="win"
 fi
 
-if [ "$PLATFORM" == "ubuntu-latest" ]; then
-    CI_SUPPORT="linux_64_.yaml"
+if grep -q "ubuntu" <<< "$PLATFORM"; then
+    CI_PLAT="linux"
 fi
 
-if [ "$PLATFORM" == "macos-latest" ]; then
-    CI_SUPPORT="osx_64_.yaml"
+if grep -q "macos" <<< "$PLATFORM"; then
+    CI_PLAT="osx"
 fi
 
-conda build recipe --clobber-file recipe/recipe_clobber.yaml --output-folder packages -m .ci_support/$CI_SUPPORT
-conda install -c ./packages pdal
+conda build recipe --clobber-file recipe/recipe_clobber.yaml --output-folder packages -m ".ci_support/${CI_PLAT}_64_.yaml"
+conda create -y -n test -c ./packages python=3.8 pdal
+conda deactivate
 
+conda activate test
 pdal --version
+conda deactivate
