@@ -34,5 +34,7 @@ fi
 
 echo "Anaconda token is available, attempting to upload"
 
+conda install -c conda-forge anaconda-client -y
+
 find . -name "*pdal*.bz2" -exec anaconda -t "$ANACONDA_TOKEN" upload --force --no-progress --user pdal-master  {} \;
 
