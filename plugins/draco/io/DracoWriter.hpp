@@ -47,6 +47,8 @@
 #include "draco/compression/decode.h"
 #include "draco/compression/expert_encode.h"
 #include "draco/compression/encode.h"
+#include "draco/io/obj_encoder.h"
+#include "draco/io/ply_encoder.h"
 #include "draco/attributes/attribute_quantization_transform.h"
 
 namespace

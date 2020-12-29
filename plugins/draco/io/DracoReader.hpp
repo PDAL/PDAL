@@ -55,6 +55,7 @@ namespace {
         { draco::DataType::DT_INT64, pdal::Dimension::Type::Signed64 },
         { draco::DataType::DT_UINT64, pdal::Dimension::Type::Unsigned64 }
     };
+
 };
 
 namespace pdal

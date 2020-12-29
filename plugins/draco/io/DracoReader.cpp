@@ -206,32 +206,47 @@ void DracoReader::addDimensions(PointLayoutPtr layout)
         switch (at)
         {
             case GeometryAttribute::POSITION:
+            {
                 layout->registerDim(Dimension::Id::X);
                 layout->registerDim(Dimension::Id::Y);
                 layout->registerDim(Dimension::Id::Z);
                 break;
+            }
             case GeometryAttribute::NORMAL:
+            {
                 layout->registerDim(Dimension::Id::NormalX);
                 layout->registerDim(Dimension::Id::NormalY);
                 layout->registerDim(Dimension::Id::NormalZ);
                 break;
+            }
             case GeometryAttribute::COLOR:
+            {
                 layout->registerDim(Dimension::Id::Red);
                 layout->registerDim(Dimension::Id::Green);
                 layout->registerDim(Dimension::Id::Blue);
+            }
             case GeometryAttribute::TEX_COORD:
+            {
                 layout->registerDim(Dimension::Id::TextureU);
                 layout->registerDim(Dimension::Id::TextureV);
                 layout->registerDim(Dimension::Id::TextureW);
                 break;
+            }
 
             case GeometryAttribute::GENERIC:
-                layout->registerOrAssignDim(name, getPdalType(dt));
+            {
+                Dimension::Id id = pdal::Dimension::id(name);
+                if (id != Dimension::Id::Unknown) {
+                    m_generics[id] = std::vector<double>(m_pc->num_points(), 0.0);
+                    layout->registerOrAssignDim(name, getPdalType(dt));
+                }
                 break;
+            }
 
             default:
                 // Not supported draco domain types
                 throw pdal_error("Unknown Geometry Attribute Type");
+                break;
         }
 
 //         for (draco::PointIndex pi(0); pi < m_count; ++pi) {
@@ -255,9 +270,18 @@ void DracoReader::ready(PointTableRef)
     for (int at_id=0; at_id < m_pc->num_attributes(); ++at_id)
     {
         const PointAttribute* attr = m_pc->GetAttributeByUniqueId(at_id);
-        DataType dt = attr->data_type();
-        GeometryAttribute::Type at = attr->attribute_type();
-        Dimension::Type pdalType = dracoTypeMap[at];
+        draco::DataType dt = attr->data_type();
+        draco::GeometryAttribute::Type at = attr->attribute_type();
+
+        std::string name;
+        const AttributeMetadata* attr_metadata = m_pc->GetAttributeMetadataByAttributeId(at_id);
+        if (attr_metadata)
+        {
+            log()->get(LogLevel::Debug) << "number of metadata: "
+                                        << attr_metadata->num_entries()
+                                        << std::endl;;
+            attr_metadata->GetEntryString("name", &name);
+        }
 
         switch (at)
         {
@@ -273,8 +297,17 @@ void DracoReader::ready(PointTableRef)
                 CopyAttributeData<double>(m_count, attr, m_textures);
                 break;
 
+            //TODO add generic attribute reading
+            //Should be able to read in an attribute and its associated datatype,
+            // add it to to the point table with the corresponding pdal datatype
             case GeometryAttribute::GENERIC:
-                CopyAttributeData<double>(1, attr, m_generics[pdalType]);
+                if (name.length() > 0)
+                {
+                    Dimension::Id id = Dimension::id(name);
+                    CopyAttributeData<double>(1, attr, m_generics.at(id));
+                    std::cout << "id " << Dimension::name(id) << std::endl;
+                }
+
                 break;
 
             default:
@@ -322,6 +355,11 @@ bool DracoReader::processOne(PointRef& point)
         point.setField(Dimension::Id::Red, m_colors[pid*3]);
         point.setField(Dimension::Id::Green, m_colors[pid*3+1]);
         point.setField(Dimension::Id::Blue, m_colors[pid*3+2]);
+    }
+    //TODO go through each generic attribute and add the point data for it
+    for (auto& g: m_generics)
+    {
+
     }
     return true;
 }

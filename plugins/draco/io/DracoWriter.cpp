@@ -261,8 +261,6 @@ void DracoWriter::write(const PointViewPtr view)
         {
             std::vector<uint16_t> data(1, 0);
             data[0] = point.getFieldAs<uint16_t>(dim.first);
-            std::cout << "dim: " << Dimension::name(dim.first) << std::endl;
-            std::cout << "val: " << data[0] << std::endl;
             addPoint(dim.second, pointId, data.data());
         }
     }
@@ -286,6 +284,7 @@ void DracoWriter::write(const PointViewPtr view)
 
     const auto bufferSize = buffer.size();
     std::vector<char> *output = buffer.buffer();
+
     for (auto &i : *output)
         *m_stream << i;
 }
