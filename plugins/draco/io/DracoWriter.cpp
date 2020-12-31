@@ -77,9 +77,9 @@ void DracoWriter::addArgs(ProgramArgs& args)
 {
     args.add("filename", "Output filename", m_filename).setPositional();
     // TODO add dimension map as an argument
-    // args.add("dimensions", "Map of pdal to draco dimensions ", m_dimensions);
+    // args.add("dimensions", "Map of pdal to draco dimensions ", m_userDimJson);
     // TODO add quantization as an argument
-    // args.add("quantization", "Amount of quantization during draco encoding", m_quantization);
+    // args.add("quantization", "Amount of quantization during draco encoding", m_userQuant);
 }
 
 struct FileStreamDeleter
@@ -103,7 +103,32 @@ void DracoWriter::initialize(PointTableRef table)
     if (!m_stream)
         throwError("Couldn't open '" + m_filename + "' for output.");
 
+    // parseDimensions();
 }
+
+// void DracoWriter::parseDimensions()
+// {
+//     if(!m_userDimJson.is_object()) {
+//         throw pdal_error("Option 'dimensions' must be a JSON object, not a " +
+//             std::string(m_userDimJson.type_name()));
+//     }
+
+//     for(auto& entry : m_userDimJson.items()) {
+//         std::string dimName = entry.key();
+//         auto datasetName = entry.value();
+//         log()->get(LogLevel::Info) << "Key: " << dimName << ", Value: "
+//             << datasetName << ", Type: " << datasetName.type_name() << std::endl;
+
+//         if(!datasetName.is_string()) {
+//             throw pdal_error("Every value in 'dimensions' must be a string. Key '"
+//                 + dimName + "' has value with type '" +
+//                 std::string(datasetName.type_name()) + "'");
+//         } else {
+//             m_userDimMap[dimName] = datasetName.get<std::string>();
+//         }
+//     }
+
+// }
 
 void DracoWriter::ready(pdal::BasePointTable &table)
 {
@@ -235,7 +260,6 @@ void DracoWriter::write(const PointViewPtr view)
             addPoint(id, pointId, rgb.data());
         }
 
-        //TODO account for possibility that textureW is not there
         if (m_attMap.find(draco::GeometryAttribute::TEX_COORD) != m_attMap.end())
         {
             const int n = m_dims[draco::GeometryAttribute::TEX_COORD];
@@ -243,7 +267,8 @@ void DracoWriter::write(const PointViewPtr view)
             const int id = m_attMap[draco::GeometryAttribute::TEX_COORD];
             tex[0] = point.getFieldAs<double>(Dimension::Id::TextureU);
             tex[1] = point.getFieldAs<double>(Dimension::Id::TextureV);
-            tex[2] = point.getFieldAs<double>(Dimension::Id::TextureW);
+            if (n == 3)
+                tex[2] = point.getFieldAs<double>(Dimension::Id::TextureW);
             addPoint(id, pointId, tex.data());
         }
 
@@ -267,9 +292,8 @@ void DracoWriter::write(const PointViewPtr view)
 
     draco::EncoderBuffer buffer;
     draco::Encoder encoder;
-
-    //TODO make encoding method a writer argument?
     encoder.SetEncodingMethod(draco::POINT_CLOUD_SEQUENTIAL_ENCODING);
+
     //TODO add quantization for all other geometry attributes
     //TODO make quants variable based on user input, use defaults otherwise
     encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, 11);

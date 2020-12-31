@@ -42,22 +42,6 @@
 #include <draco/point_cloud/point_cloud.h>
 #include <draco/compression/decode.h>
 
-namespace {
-    const std::map<draco::DataType, pdal::Dimension::Type> dracoTypeMap =
-    {
-        { draco::DataType::DT_FLOAT64, pdal::Dimension::Type::Double },
-        { draco::DataType::DT_FLOAT32, pdal::Dimension::Type::Float },
-        { draco::DataType::DT_INT8, pdal::Dimension::Type::Signed8 },
-        { draco::DataType::DT_INT16, pdal::Dimension::Type::Signed16 },
-        { draco::DataType::DT_UINT16, pdal::Dimension::Type::Unsigned16 },
-        { draco::DataType::DT_INT32, pdal::Dimension::Type::Signed32 },
-        { draco::DataType::DT_UINT32, pdal::Dimension::Type::Unsigned32 },
-        { draco::DataType::DT_INT64, pdal::Dimension::Type::Signed64 },
-        { draco::DataType::DT_UINT64, pdal::Dimension::Type::Unsigned64 }
-    };
-
-};
-
 namespace pdal
 {
 
@@ -88,6 +72,8 @@ private:
     std::vector<uint16_t> m_colors;
     std::vector<double> m_normals;
     std::vector<double> m_textures;
+    bool m_textureW;
+
     std::map<Dimension::Id, std::vector<double>> m_generics;
 
 };

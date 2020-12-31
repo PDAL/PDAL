@@ -34,9 +34,8 @@
 
 #pragma once
 
-#define NOMINMAX
-
 #include <pdal/Writer.hpp>
+#include <nlohmann/json.hpp>
 
 #include <draco/point_cloud/point_cloud.h>
 #include <draco/compression/encode.h>
@@ -47,21 +46,10 @@
 #include "draco/compression/decode.h"
 #include "draco/compression/expert_encode.h"
 #include "draco/compression/encode.h"
-#include "draco/io/obj_encoder.h"
-#include "draco/io/ply_encoder.h"
 #include "draco/attributes/attribute_quantization_transform.h"
 
 namespace
 {
-    const std::map<draco::GeometryAttribute::Type, int> quantDefaults =
-    {
-        { draco::GeometryAttribute::POSITION,  11 },
-        { draco::GeometryAttribute::NORMAL,     7 },
-        { draco::GeometryAttribute::TEX_COORD, 10 },
-        { draco::GeometryAttribute::COLOR,      8 },
-        { draco::GeometryAttribute::GENERIC,    8 }
-    };
-
     const std::map<pdal::Dimension::Type, draco::DataType> typeMap =
     {
         { pdal::Dimension::Type::Double, draco::DataType::DT_FLOAT64 },
@@ -119,16 +107,27 @@ private:
     void addGeneric(Dimension::Id pt, int n);
     void initPointCloud(point_count_t size);
     void addPoint(int attId, draco::PointIndex idx, void *pointData);
-    // struct attribute<T> {
-
-    // }
-
+    // void parseDimensions();
 
     struct Args;
     std::unique_ptr<DracoWriter::Args> m_args;
 
     std::string m_filename;
     FileStreamPtr m_stream;
+
+    //these are the default quanitization levels, can be overridden in args
+    std::map<draco::GeometryAttribute::Type, int> m_userQuant;
+    std::map<draco::GeometryAttribute::Type, int> m_quant =
+    {
+        { draco::GeometryAttribute::POSITION,  11 },
+        { draco::GeometryAttribute::NORMAL,     7 },
+        { draco::GeometryAttribute::TEX_COORD, 10 },
+        { draco::GeometryAttribute::COLOR,      8 },
+        { draco::GeometryAttribute::GENERIC,    8 }
+    };
+
+    // NL::json m_userDimJson;
+    std::map<draco::GeometryAttribute::Type, int> m_userDimMap;
 
     std::map<draco::GeometryAttribute::Type, int> m_dims;
     std::map<draco::GeometryAttribute::Type, int32_t> m_attMap;

@@ -52,7 +52,6 @@ static PluginInfo const s_info
 CREATE_SHARED_STAGE(DracoReader, s_info)
 std::string DracoReader::getName() const { return s_info.name; }
 
-//                 CopyAttributeData<double>(m_count, attr, m_position);
 // Returns the attribute data in |attr| as an array of type T.
 template <typename T>
 bool CopyAttributeData(int num_points,
@@ -198,10 +197,13 @@ void DracoReader::addDimensions(PointLayoutPtr layout)
         std::string name;
         if (attr_metadata)
         {
-            log()->get(LogLevel::Debug) << "number of metadata: "
+            log()->get(LogLevel::Debug) << "number of metadata entries: "
                                         << attr_metadata->num_entries()
-                                        << std::endl;;
+                                        << std::endl;
             attr_metadata->GetEntryString("name", &name);
+            log()->get(LogLevel::Debug) << "metadata name: "
+                                        << name
+                                        << std::endl;
         }
         switch (at)
         {
@@ -229,7 +231,11 @@ void DracoReader::addDimensions(PointLayoutPtr layout)
             {
                 layout->registerDim(Dimension::Id::TextureU);
                 layout->registerDim(Dimension::Id::TextureV);
-                layout->registerDim(Dimension::Id::TextureW);
+                if (nc == 3)
+                {
+                    m_textureW = true;
+                    layout->registerDim(Dimension::Id::TextureW);
+                }
                 break;
             }
 
@@ -248,20 +254,7 @@ void DracoReader::addDimensions(PointLayoutPtr layout)
                 throw pdal_error("Unknown Geometry Attribute Type");
                 break;
         }
-
-//         for (draco::PointIndex pi(0); pi < m_count; ++pi) {
-//             std::vector<float> results = CopyAttributeData<float>(m_count, attr);
-//             for (std::vector<float>::size_type t = 0; t < results.size();)
-//             {
-//                 std::cout << "t: " << t <<  "xyz: " << results[t] << "," << results[t+1] << "," << results[t+2] << std::endl;
-//                 t = t + nc;
-//             }
-//             m_pc->attribute(i)->GetMappedValue(pi, results.data());
-//             std::cout << "xyz: " << results[0] << "," << results[1] << "," << results[2] << std::endl;
-//        }
-
     }
-
 }
 
 void DracoReader::ready(PointTableRef)
@@ -277,9 +270,6 @@ void DracoReader::ready(PointTableRef)
         const AttributeMetadata* attr_metadata = m_pc->GetAttributeMetadataByAttributeId(at_id);
         if (attr_metadata)
         {
-            log()->get(LogLevel::Debug) << "number of metadata: "
-                                        << attr_metadata->num_entries()
-                                        << std::endl;;
             attr_metadata->GetEntryString("name", &name);
         }
 
@@ -297,36 +287,25 @@ void DracoReader::ready(PointTableRef)
                 CopyAttributeData<double>(m_count, attr, m_textures);
                 break;
 
-            //TODO add generic attribute reading
-            //Should be able to read in an attribute and its associated datatype,
-            // add it to to the point table with the corresponding pdal datatype
             case GeometryAttribute::GENERIC:
                 if (name.length() > 0)
                 {
                     Dimension::Id id = Dimension::id(name);
                     CopyAttributeData<double>(1, attr, m_generics.at(id));
-                    std::cout << "id " << Dimension::name(id) << std::endl;
                 }
 
                 break;
 
             default:
-                // Not supported draco domain types
+                // Unsupported draco domain types
                 throw pdal_error("Unknown Geometry Attribute Type");
         }
     }
-
-//     for (int i=0; i < m_count; ++i)
-//     {
-//         std::cout << m_positions[i*3] << "," << m_positions[i*3+1] << ", " << m_positions[i*3+2] << std::endl;
-//     }
-
 }
 
 
 bool DracoReader::processOne(PointRef& point)
 {
-
     point_count_t pid = point.pointId();
 
     if (m_positions.size())
@@ -343,11 +322,13 @@ bool DracoReader::processOne(PointRef& point)
         point.setField(Dimension::Id::NormalZ, m_normals[pid*3+2]);
     }
 
+    //TODO account for possibility of texture not being 3 dimensions
     if (m_textures.size())
     {
         point.setField(Dimension::Id::TextureU, m_textures[pid*3]);
         point.setField(Dimension::Id::TextureV, m_textures[pid*3+1]);
-        point.setField(Dimension::Id::TextureW, m_textures[pid*3+2]);
+        if (m_textureW)
+            point.setField(Dimension::Id::TextureW, m_textures[pid*3+2]);
     }
 
     if (m_colors.size())
@@ -356,10 +337,9 @@ bool DracoReader::processOne(PointRef& point)
         point.setField(Dimension::Id::Green, m_colors[pid*3+1]);
         point.setField(Dimension::Id::Blue, m_colors[pid*3+2]);
     }
-    //TODO go through each generic attribute and add the point data for it
-    for (auto& g: m_generics)
+    for (auto& generic : m_generics)
     {
-
+        point.setField(generic.first, generic.second[pid]);
     }
     return true;
 }
