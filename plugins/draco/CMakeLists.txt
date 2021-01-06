@@ -55,12 +55,15 @@ if (WITH_TESTS)
 
     PDAL_ADD_TEST(pdal_io_draco_reader_test
         FILES
-         test/DracoReaderTest.cpp
+            test/DracoReaderTest.cpp
         LINK_WITH
-         ${reader_libname}
-         ${writer_libname}
-         ${DRACO_LIBRARY}
-         )
+            ${reader_libname}
+            ${writer_libname}
+            ${DRACO_LIBRARY}
+        INCLUDES
+            ${draco_INCLUDE_DIR}
+            ${NLOHMANN_INCLUDE_DIR}
+    )
 
 
 if (WIN32)

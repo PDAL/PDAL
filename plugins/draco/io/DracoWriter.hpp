@@ -52,16 +52,16 @@ namespace
 {
     const std::map<pdal::Dimension::Type, draco::DataType> typeMap =
     {
-        { pdal::Dimension::Type::Double, draco::DataType::DT_FLOAT64 },
-        { pdal::Dimension::Type::Float, draco::DataType::DT_FLOAT32 },
-        { pdal::Dimension::Type::Signed8, draco::DataType::DT_INT8 },
-        { pdal::Dimension::Type::Unsigned8, draco::DataType::DT_UINT8 },
-        { pdal::Dimension::Type::Signed16, draco::DataType::DT_INT16 },
-        { pdal::Dimension::Type::Unsigned16, draco::DataType::DT_UINT16 },
-        { pdal::Dimension::Type::Signed32, draco::DataType::DT_INT32 },
-        { pdal::Dimension::Type::Unsigned32, draco::DataType::DT_UINT32 },
-        { pdal::Dimension::Type::Signed64, draco::DataType::DT_INT64 },
-        { pdal::Dimension::Type::Unsigned64, draco::DataType::DT_UINT64 },
+        { pdal::Dimension::Type::Double,      draco::DataType::DT_FLOAT64 },
+        { pdal::Dimension::Type::Float,       draco::DataType::DT_FLOAT32 },
+        { pdal::Dimension::Type::Signed8,     draco::DataType::DT_INT8 },
+        { pdal::Dimension::Type::Unsigned8,   draco::DataType::DT_UINT8 },
+        { pdal::Dimension::Type::Signed16,    draco::DataType::DT_INT16 },
+        { pdal::Dimension::Type::Unsigned16,  draco::DataType::DT_UINT16 },
+        { pdal::Dimension::Type::Signed32,    draco::DataType::DT_INT32 },
+        { pdal::Dimension::Type::Unsigned32,  draco::DataType::DT_UINT32 },
+        { pdal::Dimension::Type::Signed64,    draco::DataType::DT_INT64 },
+        { pdal::Dimension::Type::Unsigned64,  draco::DataType::DT_UINT64 },
     };
 
     const std::map<pdal::Dimension::Id, draco::GeometryAttribute::Type> dimMap =
@@ -107,7 +107,9 @@ private:
     void addGeneric(Dimension::Id pt, int n);
     void initPointCloud(point_count_t size);
     void addPoint(int attId, draco::PointIndex idx, void *pointData);
-    // void parseDimensions();
+    draco::GeometryAttribute::Type getGeometryAttribute(std::string s);
+    void parseDimensions();
+    void parseQuants();
 
     struct Args;
     std::unique_ptr<DracoWriter::Args> m_args;
@@ -115,19 +117,20 @@ private:
     std::string m_filename;
     FileStreamPtr m_stream;
 
-    //these are the default quanitization levels, can be overridden in args
-    std::map<draco::GeometryAttribute::Type, int> m_userQuant;
-    std::map<draco::GeometryAttribute::Type, int> m_quant =
+    //these are the default quanitization levels. They will be overridden by any
+    //quantization levels specified in the json argument "quantization"
+    NL::json m_userQuant;
+    std::map<std::string, int> m_quant =
     {
-        { draco::GeometryAttribute::POSITION,  11 },
-        { draco::GeometryAttribute::NORMAL,     7 },
-        { draco::GeometryAttribute::TEX_COORD, 10 },
-        { draco::GeometryAttribute::COLOR,      8 },
-        { draco::GeometryAttribute::GENERIC,    8 }
+        { "POSITION",  11 },
+        { "NORMAL",     7 },
+        { "TEX_COORD", 10 },
+        { "COLOR",      8 },
+        { "GENERIC",    8 }
     };
 
-    // NL::json m_userDimJson;
-    std::map<draco::GeometryAttribute::Type, int> m_userDimMap;
+    NL::json m_userDimJson;
+    std::map<Dimension::Id, std::string> m_userDimMap;
 
     std::map<draco::GeometryAttribute::Type, int> m_dims;
     std::map<draco::GeometryAttribute::Type, int32_t> m_attMap;

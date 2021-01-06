@@ -36,8 +36,6 @@
 #include <cctype>
 #include <limits>
 
-#include <nlohmann/json.hpp>
-
 #include <pdal/util/FileUtils.hpp>
 
 #include "DracoWriter.hpp"
@@ -77,9 +75,9 @@ void DracoWriter::addArgs(ProgramArgs& args)
 {
     args.add("filename", "Output filename", m_filename).setPositional();
     // TODO add dimension map as an argument
-    // args.add("dimensions", "Map of pdal to draco dimensions ", m_userDimJson);
+    args.add("dimensions", "Map of pdal to draco dimensions ", m_userDimJson);
     // TODO add quantization as an argument
-    // args.add("quantization", "Amount of quantization during draco encoding", m_userQuant);
+    args.add("quantization", "Amount of quantization during draco encoding", m_userQuant);
 }
 
 struct FileStreamDeleter
@@ -103,32 +101,85 @@ void DracoWriter::initialize(PointTableRef table)
     if (!m_stream)
         throwError("Couldn't open '" + m_filename + "' for output.");
 
-    // parseDimensions();
+    parseDimensions();
+    parseQuants();
 }
 
-// void DracoWriter::parseDimensions()
-// {
-//     if(!m_userDimJson.is_object()) {
-//         throw pdal_error("Option 'dimensions' must be a JSON object, not a " +
-//             std::string(m_userDimJson.type_name()));
-//     }
+void DracoWriter::parseQuants() {
+    if(!m_userQuant.is_object()) {
+        throw pdal_error("Option 'quantization' must be a JSON object, not a " +
+            std::string(m_userQuant.type_name()));
+    }
+    //Quantization levels are available for POSITION, NORMAL, TEX_COORD, COLOR,
+    //and GENERIC types
+    for (auto& entry : m_userQuant.items()) {
+        const std::string attribute = entry.key();
+        const int quant = entry.value().get<int>();
+        if (m_quant.find(attribute) == m_quant.end())
+            throw pdal_error("Quantization attribute " + attribute +
+                " is not a valid Draco Goemetry Attribute");
+        m_quant[attribute] = quant;
+    }
 
-//     for(auto& entry : m_userDimJson.items()) {
-//         std::string dimName = entry.key();
-//         auto datasetName = entry.value();
-//         log()->get(LogLevel::Info) << "Key: " << dimName << ", Value: "
-//             << datasetName << ", Type: " << datasetName.type_name() << std::endl;
+}
 
-//         if(!datasetName.is_string()) {
-//             throw pdal_error("Every value in 'dimensions' must be a string. Key '"
-//                 + dimName + "' has value with type '" +
-//                 std::string(datasetName.type_name()) + "'");
-//         } else {
-//             m_userDimMap[dimName] = datasetName.get<std::string>();
-//         }
-//     }
+void DracoWriter::parseDimensions()
+{
+    if(!m_userDimJson.is_object()) {
+        throw pdal_error("Option 'dimensions' must be a JSON object, not a " +
+            std::string(m_userDimJson.type_name()));
+    }
 
-// }
+    //TODO check that x,y,z are all the same types
+    //TODO same for textures
+    //TODO same for normals
+    for(auto& entry : m_userDimJson.items()) {
+        std::string dimString = entry.key();
+        auto datasetName = entry.value();
+
+        if(!datasetName.is_string()) {
+            throw pdal_error("Every value in 'dimensions' must be a string. Key '"
+                + dimString + "' has value with type '"
+                + std::string(datasetName.type_name()) + "'");
+        } else {
+            log()->get(LogLevel::Info) << "Key: " << dimString << ", Value: "
+                << datasetName << std::endl;
+
+            Dimension::Id dimType = Dimension::id(dimString);
+            m_userDimMap[dimType] = datasetName.get<std::string>();
+        }
+    }
+    //account for possible errors in dimensions
+    //x, y, z must all be specified if one of them is
+    // if (m_userDimMap.find(Dimension::Id::X) != m_userDimMap.end())
+    // {
+    //     if (m_userDimMap.at(Dimension::Id::X) != m_userDimMap.at(Dimension::Id::Y))
+    //         throw pdal_error("X, Y, and Z dimensions must be of the same type");
+    //     if (m_userDimMap.at(Dimension::Id::X) != m_userDimMap.at(Dimension::Id::Y))
+    //         throw pdal_error("X, Y, and Z dimensions must be of the same type");
+    //     if (m_userDimMap.at(Dimension::Id::Y) != m_userDimMap.at(Dimension::Id::Z))
+    //         throw pdal_error("X, Y, and Z dimensions must be of the same type");
+    // }
+    // //normal x, y, z must all be specified if one of them is
+    // if (m_userDimMap.find(Dimension::Id::NormalX) != m_userDimMap.end())
+    // {
+    //     if (m_userDimMap.at(Dimension::Id::NormalX) != m_userDimMap.at(Dimension::Id::NormalY))
+    //         throw pdal_error("Normal X, Y, and Z dimensions must be of the same type");
+    //     if (m_userDimMap.at(Dimension::Id::NormalX) != m_userDimMap.at(Dimension::Id::NormalY))
+    //         throw pdal_error("Normal X, Y, and Z dimensions must be of the same type");
+    //     if (m_userDimMap.at(Dimension::Id::NormalY) != m_userDimMap.at(Dimension::Id::NormalZ))
+    //         throw pdal_error("Normal X, Y, and Z dimensions must be of the same type");
+    // }
+    // if (userDimMap.find(Dimension::Id::TextureU) != userDimMap.end())
+    // {
+    //     if (userDimMap.at(Dimension::Id::TextureU) != userDimMap.at(Dimension::Id::TextureV))
+    //         throw pdal_error("X, Y, and Z dimensions must be of the same type");
+    //     if (userDimMap.at(Dimension::Id::TextureU) != userDimMap.at(Dimension::Id::TextureW))
+    //         throw pdal_error("X, Y, and Z dimensions must be of the same type");
+    //     if (userDimMap.at(Dimension::Id::TextureU) != userDimMap.at(Dimension::Id::NormalZ))
+    //         throw pdal_error("X, Y, and Z dimensions must be of the same type");
+    // }
+}
 
 void DracoWriter::ready(pdal::BasePointTable &table)
 {
@@ -222,10 +273,27 @@ void DracoWriter::initPointCloud(point_count_t size)
     }
 }
 
-void DracoWriter::addPoint(int attId, draco::PointIndex idx, void *pointData) {
-    draco::PointAttribute *const att = m_pc->attribute(attId);
-    att->SetAttributeValue(att->mapped_index(idx), pointData);
-}
+// void DracoWriter::addPoint(int attId, draco::PointIndex idx, void *pointData) {
+//     draco::PointAttribute *const att = m_pc->attribute(attId);
+//     att->SetAttributeValue(att->mapped_index(idx), pointData);
+// }
+
+// template <typename T>
+// void DracoWriter::addPoint<T>(int attId, Dimension::IdList idList, PointRef &point, PointId idx)
+// {
+//     point.setPointId(idx);
+//     const auto pointId = draco::PointIndex(idx);
+//     //get point information, N dimensional?
+//     std::vector<T> pointData;
+//     for (int i = 0; i < idList.size(); ++i) {
+//         T data = point.getFieldAs<T>(idList[i]);
+//         pointData.pushBack(data);
+//     }
+//     // addPoint(attId, pointId, pointData.data());
+
+//     draco::PointAttribute *const att = m_pc->attribute(attId);
+//     att->SetAttributeValue(att->mapped_index(idx), pointData);
+// }
 
 void DracoWriter::write(const PointViewPtr view)
 {
@@ -242,52 +310,58 @@ void DracoWriter::write(const PointViewPtr view)
         //to the types they want with them.
         if (m_attMap.find(draco::GeometryAttribute::POSITION) != m_attMap.end())
         {
-            std::vector<double> pos(3, 0.f);
+            // std::vector<double> pos(3, 0.f);
             const int id = m_attMap[draco::GeometryAttribute::POSITION];
-            pos[0] = point.getFieldAs<double>(Dimension::Id::X);
-            pos[1] = point.getFieldAs<double>(Dimension::Id::Y);
-            pos[2] = point.getFieldAs<double>(Dimension::Id::Z);
-            addPoint(id, pointId, pos.data());
+            // pos[0] = point.getFieldAs<double>(Dimension::Id::X);
+            // pos[1] = point.getFieldAs<double>(Dimension::Id::Y);
+            // pos[2] = point.getFieldAs<double>(Dimension::Id::Z);
+            // addPoint(id, pointId, pos.data());
+            Dimension::IdList idList {
+                Dimension::Id::X,
+                Dimension::Id::Y,
+                Dimension::Id::Z
+            };
+            DracoWriter::addToPointCloud<double>(id, idList, point, idx);
         }
 
-        if (m_attMap.find(draco::GeometryAttribute::COLOR) != m_attMap.end())
-        {
-            std::vector<uint16_t> rgb(3, 0);
-            const int id = m_attMap[draco::GeometryAttribute::COLOR];
-            rgb[0] = point.getFieldAs<uint16_t>(Dimension::Id::Red);
-            rgb[1] = point.getFieldAs<uint16_t>(Dimension::Id::Green);
-            rgb[2] = point.getFieldAs<uint16_t>(Dimension::Id::Blue);
-            addPoint(id, pointId, rgb.data());
-        }
+    //     if (m_attMap.find(draco::GeometryAttribute::COLOR) != m_attMap.end())
+    //     {
+    //         std::vector<uint16_t> rgb(3, 0);
+    //         const int id = m_attMap[draco::GeometryAttribute::COLOR];
+    //         rgb[0] = point.getFieldAs<uint16_t>(Dimension::Id::Red);
+    //         rgb[1] = point.getFieldAs<uint16_t>(Dimension::Id::Green);
+    //         rgb[2] = point.getFieldAs<uint16_t>(Dimension::Id::Blue);
+    //         addPoint(id, pointId, rgb.data());
+    //     }
 
-        if (m_attMap.find(draco::GeometryAttribute::TEX_COORD) != m_attMap.end())
-        {
-            const int n = m_dims[draco::GeometryAttribute::TEX_COORD];
-            std::vector<double> tex(n, 0.0);
-            const int id = m_attMap[draco::GeometryAttribute::TEX_COORD];
-            tex[0] = point.getFieldAs<double>(Dimension::Id::TextureU);
-            tex[1] = point.getFieldAs<double>(Dimension::Id::TextureV);
-            if (n == 3)
-                tex[2] = point.getFieldAs<double>(Dimension::Id::TextureW);
-            addPoint(id, pointId, tex.data());
-        }
+    //     if (m_attMap.find(draco::GeometryAttribute::TEX_COORD) != m_attMap.end())
+    //     {
+    //         const int n = m_dims[draco::GeometryAttribute::TEX_COORD];
+    //         std::vector<double> tex(n, 0.0);
+    //         const int id = m_attMap[draco::GeometryAttribute::TEX_COORD];
+    //         tex[0] = point.getFieldAs<double>(Dimension::Id::TextureU);
+    //         tex[1] = point.getFieldAs<double>(Dimension::Id::TextureV);
+    //         if (n == 3)
+    //             tex[2] = point.getFieldAs<double>(Dimension::Id::TextureW);
+    //         addPoint(id, pointId, tex.data());
+    //     }
 
-        if (m_attMap.find(draco::GeometryAttribute::NORMAL) != m_attMap.end())
-        {
-            std::vector<double> norm(3, 0.0);
-            const int id = m_attMap[draco::GeometryAttribute::NORMAL];
-            norm[0] = point.getFieldAs<double>(Dimension::Id::NormalX);
-            norm[1] = point.getFieldAs<double>(Dimension::Id::NormalY);
-            norm[2] = point.getFieldAs<double>(Dimension::Id::NormalZ);
-            addPoint(id, pointId, norm.data());
-        }
+    //     if (m_attMap.find(draco::GeometryAttribute::NORMAL) != m_attMap.end())
+    //     {
+    //         std::vector<double> norm(3, 0.0);
+    //         const int id = m_attMap[draco::GeometryAttribute::NORMAL];
+    //         norm[0] = point.getFieldAs<double>(Dimension::Id::NormalX);
+    //         norm[1] = point.getFieldAs<double>(Dimension::Id::NormalY);
+    //         norm[2] = point.getFieldAs<double>(Dimension::Id::NormalZ);
+    //         addPoint(id, pointId, norm.data());
+    //     }
 
-        for (auto& dim: m_genericMap)
-        {
-            std::vector<uint16_t> data(1, 0);
-            data[0] = point.getFieldAs<uint16_t>(dim.first);
-            addPoint(dim.second, pointId, data.data());
-        }
+    //     for (auto& dim: m_genericMap)
+    //     {
+    //         std::vector<uint16_t> data(1, 0);
+    //         data[0] = point.getFieldAs<uint16_t>(dim.first);
+    //         addPoint(dim.second, pointId, data.data());
+    //     }
     }
 
     draco::EncoderBuffer buffer;
@@ -296,8 +370,11 @@ void DracoWriter::write(const PointViewPtr view)
 
     //TODO add quantization for all other geometry attributes
     //TODO make quants variable based on user input, use defaults otherwise
-    encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, 11);
-    encoder.SetAttributeQuantization(draco::GeometryAttribute::COLOR, 8);
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, m_quant.at("POSITION"));
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::COLOR, m_quant.at("NORMAL"));
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, m_quant.at("TEX_COORD"));
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, m_quant.at("COLOR"));
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::GENERIC, m_quant.at("GENERIC"));
     const auto status = encoder.EncodePointCloudToBuffer(*m_pc, &buffer);
 
     //TODO add error message from draco status?
