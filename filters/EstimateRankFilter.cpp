@@ -35,7 +35,6 @@
 #include "EstimateRankFilter.hpp"
 
 #include <string>
-#include <vector>
 
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/ProgramArgs.hpp>
@@ -43,6 +42,8 @@
 
 namespace pdal
 {
+
+using namespace Dimension;
 
 static StaticPluginInfo const s_info
 {
@@ -68,19 +69,17 @@ void EstimateRankFilter::addArgs(ProgramArgs& args)
 
 void EstimateRankFilter::addDimensions(PointLayoutPtr layout)
 {
-    m_rank = layout->registerOrAssignDim("Rank", Dimension::Type::Unsigned8);
+    layout->registerDim(Id::Rank);
 }
 
 void EstimateRankFilter::filter(PointView& view)
 {
-    KD3Index& kdi = view.build3dIndex();
+    const KD3Index& kdi = view.build3dIndex();
 
-    for (PointId i = 0; i < view.size(); ++i)
+    for (PointRef p : view)
     {
-        // find the k-nearest neighbors
-        auto ids = kdi.neighbors(i, m_knn);
-
-        view.setField(m_rank, i, math::computeRank(view, ids, m_thresh));
+        PointIdList ids = kdi.neighbors(p, m_knn);
+        p.setField(Id::Rank, math::computeRank(view, ids, m_thresh));
     }
 }
 

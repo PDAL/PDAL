@@ -42,6 +42,8 @@
 namespace pdal
 {
 
+using namespace Dimension;
+
 static StaticPluginInfo const s_info
 {
     "filters.lof",
@@ -63,17 +65,14 @@ void LOFFilter::addArgs(ProgramArgs& args)
 
 void LOFFilter::addDimensions(PointLayoutPtr layout)
 {
-    using namespace Dimension;
-    m_kdist = layout->registerOrAssignDim("KDistance", Type::Double);
-    m_lrd = layout->registerOrAssignDim("LocalReachabilityDistance", Type::Double);
-    m_lof = layout->registerOrAssignDim("LocalOutlierFactor", Type::Double);
+    layout->registerDim(Id::NNDistance);
+    layout->registerDim(Id::LocalReachabilityDistance);
+    layout->registerDim(Id::LocalOutlierFactor);
 }
 
 void LOFFilter::filter(PointView& view)
 {
-    using namespace Dimension;
-
-    KD3Index& index = view.build3dIndex();
+    const KD3Index& index = view.build3dIndex();
 
     // Increment the minimum number of points, as knnSearch will be returning
     // the neighbors along with the query point.
@@ -97,7 +96,7 @@ void LOFFilter::filter(PointView& view)
         for (size_t j = 0; j < m_minpts; ++j)
             mat[std::make_pair(i, j)] = std::make_pair(indices[j], std::sqrt(sqr_dists[j]));
 
-        view.setField(m_kdist, i, std::sqrt(sqr_dists[m_minpts - 1]));
+        view.setField(Id::NNDistance, i, std::sqrt(sqr_dists[m_minpts - 1]));
     }
 
     // Second pass: Compute the local reachability distance for each point.
@@ -113,11 +112,11 @@ void LOFFilter::filter(PointView& view)
         for (size_t j = 0; j < m_minpts; ++j)
         {
             auto val = mat[std::make_pair(i, j)];
-            double k = view.getFieldAs<double>(m_kdist, val.first);
+            double k = view.getFieldAs<double>(Id::NNDistance, val.first);
             double reachdist = (std::max)(k, val.second);
             M1 += (reachdist - M1) / ++n;
         }
-        view.setField(m_lrd, i, 1.0 / M1);
+        view.setField(Id::LocalReachabilityDistance, i, 1.0 / M1);
     }
 
     // Third pass: Compute the local outlier factor for each point.
@@ -125,15 +124,18 @@ void LOFFilter::filter(PointView& view)
     log()->get(LogLevel::Debug) << "Computing LOF...\n";
     for (PointId i = 0; i < view.size(); ++i)
     {
-        double lrdp = view.getFieldAs<double>(m_lrd, i);
+        double lrdp = view.getFieldAs<double>(Id::LocalReachabilityDistance, i);
         double M1 = 0.0;
         point_count_t n = 0;
         for (size_t j = 0; j < m_minpts; ++j)
         {
             auto val = mat[std::make_pair(i, j)];
-            M1 += (view.getFieldAs<double>(m_lrd, val.first) / lrdp - M1) / ++n;
+            PointRef p = view.point(val.first);
+            double ratio =
+                p.getFieldAs<double>(Id::LocalReachabilityDistance) / lrdp;
+            M1 += (ratio - M1) / ++n;
         }
-        view.setField(m_lof, i, M1);
+        view.setField(Id::LocalOutlierFactor, i, M1);
     }
 }
 
