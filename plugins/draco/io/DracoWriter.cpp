@@ -151,15 +151,19 @@ void DracoWriter::parseDimensions()
     }
     //account for possible errors in dimensions
     //x, y, z must all be specified if one of them is
-    // if (m_userDimMap.find(Dimension::Id::X) != m_userDimMap.end())
-    // {
-    //     if (m_userDimMap.at(Dimension::Id::X) != m_userDimMap.at(Dimension::Id::Y))
-    //         throw pdal_error("X, Y, and Z dimensions must be of the same type");
-    //     if (m_userDimMap.at(Dimension::Id::X) != m_userDimMap.at(Dimension::Id::Y))
-    //         throw pdal_error("X, Y, and Z dimensions must be of the same type");
-    //     if (m_userDimMap.at(Dimension::Id::Y) != m_userDimMap.at(Dimension::Id::Z))
-    //         throw pdal_error("X, Y, and Z dimensions must be of the same type");
-    // }
+    if (m_userDimMap.find(Dimension::Id::X) != m_userDimMap.end())
+    {
+        auto x = m_userDimMap.at(Dimension::Id::X);
+        auto y = m_userDimMap.at(Dimension::Id::Y);
+        auto z = m_userDimMap.at(Dimension::Id::Z);
+
+        if (m_userDimMap.at(Dimension::Id::X) != m_userDimMap.at(Dimension::Id::Y))
+            throw pdal_error("X, Y, and Z dimensions must be of the same type");
+        if (m_userDimMap.at(Dimension::Id::X) != m_userDimMap.at(Dimension::Id::Y))
+            throw pdal_error("X, Y, and Z dimensions must be of the same type");
+        if (m_userDimMap.at(Dimension::Id::Y) != m_userDimMap.at(Dimension::Id::Z))
+            throw pdal_error("X, Y, and Z dimensions must be of the same type");
+    }
     // //normal x, y, z must all be specified if one of them is
     // if (m_userDimMap.find(Dimension::Id::NormalX) != m_userDimMap.end())
     // {
@@ -273,28 +277,6 @@ void DracoWriter::initPointCloud(point_count_t size)
     }
 }
 
-// void DracoWriter::addPoint(int attId, draco::PointIndex idx, void *pointData) {
-//     draco::PointAttribute *const att = m_pc->attribute(attId);
-//     att->SetAttributeValue(att->mapped_index(idx), pointData);
-// }
-
-// template <typename T>
-// void DracoWriter::addPoint<T>(int attId, Dimension::IdList idList, PointRef &point, PointId idx)
-// {
-//     point.setPointId(idx);
-//     const auto pointId = draco::PointIndex(idx);
-//     //get point information, N dimensional?
-//     std::vector<T> pointData;
-//     for (int i = 0; i < idList.size(); ++i) {
-//         T data = point.getFieldAs<T>(idList[i]);
-//         pointData.pushBack(data);
-//     }
-//     // addPoint(attId, pointId, pointData.data());
-
-//     draco::PointAttribute *const att = m_pc->attribute(attId);
-//     att->SetAttributeValue(att->mapped_index(idx), pointData);
-// }
-
 void DracoWriter::write(const PointViewPtr view)
 {
     //initialize pointcloud builder
@@ -310,12 +292,7 @@ void DracoWriter::write(const PointViewPtr view)
         //to the types they want with them.
         if (m_attMap.find(draco::GeometryAttribute::POSITION) != m_attMap.end())
         {
-            // std::vector<double> pos(3, 0.f);
             const int id = m_attMap[draco::GeometryAttribute::POSITION];
-            // pos[0] = point.getFieldAs<double>(Dimension::Id::X);
-            // pos[1] = point.getFieldAs<double>(Dimension::Id::Y);
-            // pos[2] = point.getFieldAs<double>(Dimension::Id::Z);
-            // addPoint(id, pointId, pos.data());
             Dimension::IdList idList {
                 Dimension::Id::X,
                 Dimension::Id::Y,
@@ -324,44 +301,52 @@ void DracoWriter::write(const PointViewPtr view)
             DracoWriter::addToPointCloud<double>(id, idList, point, idx);
         }
 
-    //     if (m_attMap.find(draco::GeometryAttribute::COLOR) != m_attMap.end())
-    //     {
-    //         std::vector<uint16_t> rgb(3, 0);
-    //         const int id = m_attMap[draco::GeometryAttribute::COLOR];
-    //         rgb[0] = point.getFieldAs<uint16_t>(Dimension::Id::Red);
-    //         rgb[1] = point.getFieldAs<uint16_t>(Dimension::Id::Green);
-    //         rgb[2] = point.getFieldAs<uint16_t>(Dimension::Id::Blue);
-    //         addPoint(id, pointId, rgb.data());
-    //     }
+        if (m_attMap.find(draco::GeometryAttribute::COLOR) != m_attMap.end())
+        {
+            const int id = m_attMap[draco::GeometryAttribute::COLOR];
+            Dimension::IdList idList {
+                Dimension::Id::Red,
+                Dimension::Id::Green,
+                Dimension::Id::Blue
+            };
+            DracoWriter::addToPointCloud<uint16_t>(id, idList, point, idx);
+        }
 
-    //     if (m_attMap.find(draco::GeometryAttribute::TEX_COORD) != m_attMap.end())
-    //     {
-    //         const int n = m_dims[draco::GeometryAttribute::TEX_COORD];
-    //         std::vector<double> tex(n, 0.0);
-    //         const int id = m_attMap[draco::GeometryAttribute::TEX_COORD];
-    //         tex[0] = point.getFieldAs<double>(Dimension::Id::TextureU);
-    //         tex[1] = point.getFieldAs<double>(Dimension::Id::TextureV);
-    //         if (n == 3)
-    //             tex[2] = point.getFieldAs<double>(Dimension::Id::TextureW);
-    //         addPoint(id, pointId, tex.data());
-    //     }
+        if (m_attMap.find(draco::GeometryAttribute::TEX_COORD) != m_attMap.end())
+        {
+            const int n = m_dims[draco::GeometryAttribute::TEX_COORD];
+            const int id = m_attMap[draco::GeometryAttribute::TEX_COORD];
+            Dimension::IdList idList {
+                Dimension::Id::TextureU,
+                Dimension::Id::TextureV
+            };
+            if (n > 2)
+                idList.push_back(Dimension::Id::TextureW);
+            DracoWriter::addToPointCloud<double>(id, idList, point, idx);
+        }
 
-    //     if (m_attMap.find(draco::GeometryAttribute::NORMAL) != m_attMap.end())
-    //     {
-    //         std::vector<double> norm(3, 0.0);
-    //         const int id = m_attMap[draco::GeometryAttribute::NORMAL];
-    //         norm[0] = point.getFieldAs<double>(Dimension::Id::NormalX);
-    //         norm[1] = point.getFieldAs<double>(Dimension::Id::NormalY);
-    //         norm[2] = point.getFieldAs<double>(Dimension::Id::NormalZ);
-    //         addPoint(id, pointId, norm.data());
-    //     }
+        if (m_attMap.find(draco::GeometryAttribute::NORMAL) != m_attMap.end())
+        {
+            const int id = m_attMap[draco::GeometryAttribute::NORMAL];
+            Dimension::IdList idList {
+                Dimension::Id::NormalX,
+                Dimension::Id::NormalY,
+                Dimension::Id::NormalZ
+            };
+            DracoWriter::addToPointCloud<double>(id, idList, point, idx);
+        }
 
-    //     for (auto& dim: m_genericMap)
-    //     {
-    //         std::vector<uint16_t> data(1, 0);
-    //         data[0] = point.getFieldAs<uint16_t>(dim.first);
-    //         addPoint(dim.second, pointId, data.data());
-    //     }
+        //go through list of added dimensions and get the associated data
+        for (auto& dim: m_genericMap)
+        {
+            const int id = dim.second;
+            Dimension::IdList idList {
+                dim.first
+            };
+
+            DracoWriter::addToPointCloud<uint16_t>(id, idList, point, idx);
+        }
+
     }
 
     draco::EncoderBuffer buffer;

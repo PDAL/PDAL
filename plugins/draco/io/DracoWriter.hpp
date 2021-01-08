@@ -106,10 +106,27 @@ private:
     void addAttribute(draco::GeometryAttribute::Type t, int n);
     void addGeneric(Dimension::Id pt, int n);
     void initPointCloud(point_count_t size);
-    void addPoint(int attId, draco::PointIndex idx, void *pointData);
+    // void addPoint(int attId, draco::PointIndex idx, void *pointData);
     draco::GeometryAttribute::Type getGeometryAttribute(std::string s);
     void parseDimensions();
     void parseQuants();
+
+    template <typename T>
+    void addToPointCloud(int attId, Dimension::IdList idList, PointRef &point, PointId idx)
+    {
+        point.setPointId(idx);
+        const auto pointId = draco::PointIndex(idx);
+        //get point information, N dimensional?
+        std::vector<T> pointData;
+        for (size_t i = 0; i < idList.size(); ++i) {
+            T data = point.getFieldAs<T>(idList[i]);
+            pointData.push_back(data);
+        }
+        // addPoint(attId, pointId, pointData.data());
+
+        draco::PointAttribute *const att = m_pc->attribute(attId);
+        att->SetAttributeValue(att->mapped_index(pointId), pointData.data());
+    }
 
     struct Args;
     std::unique_ptr<DracoWriter::Args> m_args;

@@ -61,23 +61,6 @@ private:
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual void done(PointTableRef table);
 
-    template <typename T>
-    void addToPointCloud(int attId, Dimension::IdList idList, PointRef &point, PointId idx)
-    {
-        point.setPointId(idx);
-        const auto pointId = draco::PointIndex(idx);
-        //get point information, N dimensional?
-        std::vector<T> pointData;
-        for (int i = 0; i < idList.size(); ++i) {
-            T data = point.getFieldAs<T>(idList[i]);
-            pointData.pushBack(data);
-        }
-        // addPoint(attId, pointId, pointData.data());
-
-        draco::PointAttribute *const att = m_pc->attribute(attId);
-        att->SetAttributeValue(att->mapped_index(pointId), pointData.data());
-    }
-
     DracoReader(const DracoReader&) = delete;
     DracoReader& operator=(const DracoReader&) = delete;
 
