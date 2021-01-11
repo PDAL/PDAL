@@ -74,9 +74,7 @@ std::string DracoWriter::getName() const { return s_info.name; }
 void DracoWriter::addArgs(ProgramArgs& args)
 {
     args.add("filename", "Output filename", m_filename).setPositional();
-    // TODO add dimension map as an argument
     args.add("dimensions", "Map of pdal to draco dimensions ", m_userDimJson);
-    // TODO add quantization as an argument
     args.add("quantization", "Amount of quantization during draco encoding", m_userQuant);
 }
 
@@ -153,36 +151,43 @@ void DracoWriter::parseDimensions()
     //x, y, z must all be specified if one of them is
     if (m_userDimMap.find(Dimension::Id::X) != m_userDimMap.end())
     {
-        auto x = m_userDimMap.at(Dimension::Id::X);
-        auto y = m_userDimMap.at(Dimension::Id::Y);
-        auto z = m_userDimMap.at(Dimension::Id::Z);
-
-        if (m_userDimMap.at(Dimension::Id::X) != m_userDimMap.at(Dimension::Id::Y))
+        std::string x, y, z
+        try {
+            x = m_userDimMap.at(Dimension::Id::X);
+            y = m_userDimMap.at(Dimension::Id::Y);
+            z = m_userDimMap.at(Dimension::Id::Z);
+        } catch(std::out_of_range e) {
+            throw pdal_error("X, Y, and Z dimensions must all be specified if one is.");
+        }
+        if ( x != y || y != z || x != z ) {
             throw pdal_error("X, Y, and Z dimensions must be of the same type");
-        if (m_userDimMap.at(Dimension::Id::X) != m_userDimMap.at(Dimension::Id::Y))
-            throw pdal_error("X, Y, and Z dimensions must be of the same type");
-        if (m_userDimMap.at(Dimension::Id::Y) != m_userDimMap.at(Dimension::Id::Z))
-            throw pdal_error("X, Y, and Z dimensions must be of the same type");
+        }
     }
     // //normal x, y, z must all be specified if one of them is
-    // if (m_userDimMap.find(Dimension::Id::NormalX) != m_userDimMap.end())
-    // {
-    //     if (m_userDimMap.at(Dimension::Id::NormalX) != m_userDimMap.at(Dimension::Id::NormalY))
-    //         throw pdal_error("Normal X, Y, and Z dimensions must be of the same type");
-    //     if (m_userDimMap.at(Dimension::Id::NormalX) != m_userDimMap.at(Dimension::Id::NormalY))
-    //         throw pdal_error("Normal X, Y, and Z dimensions must be of the same type");
-    //     if (m_userDimMap.at(Dimension::Id::NormalY) != m_userDimMap.at(Dimension::Id::NormalZ))
-    //         throw pdal_error("Normal X, Y, and Z dimensions must be of the same type");
-    // }
-    // if (userDimMap.find(Dimension::Id::TextureU) != userDimMap.end())
-    // {
-    //     if (userDimMap.at(Dimension::Id::TextureU) != userDimMap.at(Dimension::Id::TextureV))
-    //         throw pdal_error("X, Y, and Z dimensions must be of the same type");
-    //     if (userDimMap.at(Dimension::Id::TextureU) != userDimMap.at(Dimension::Id::TextureW))
-    //         throw pdal_error("X, Y, and Z dimensions must be of the same type");
-    //     if (userDimMap.at(Dimension::Id::TextureU) != userDimMap.at(Dimension::Id::NormalZ))
-    //         throw pdal_error("X, Y, and Z dimensions must be of the same type");
-    // }
+    if (m_userDimMap.find(Dimension::Id::NormalX) != m_userDimMap.end())
+    {
+        std::string nx, ny, nz
+        try {
+            nx = m_userDimMap.at(Dimension::Id::NormalX);
+            ny = m_userDimMap.at(Dimension::Id::NormalY);
+            nz = m_userDimMap.at(Dimension::Id::NormalZ);
+        } catch(std::out_of_range e) {
+            throw pdal_error("NormalX, Y, and Z dimensions must all be specified if one is.");
+        }
+        if ( nx != ny || ny != nz || nx != nz ) {
+            throw pdal_error("NormalX, Y, and Z dimensions must be of the same type");
+        }
+    }
+    if (userDimMap.find(Dimension::Id::TextureU) != userDimMap.end())
+    {
+        std::string tu, tv, tw
+        if (userDimMap.at(Dimension::Id::TextureU) != userDimMap.at(Dimension::Id::TextureV))
+            throw pdal_error("X, Y, and Z dimensions must be of the same type");
+        if (userDimMap.at(Dimension::Id::TextureU) != userDimMap.at(Dimension::Id::TextureW))
+            throw pdal_error("X, Y, and Z dimensions must be of the same type");
+        if (userDimMap.at(Dimension::Id::TextureU) != userDimMap.at(Dimension::Id::NormalZ))
+            throw pdal_error("X, Y, and Z dimensions must be of the same type");
+    }
 }
 
 void DracoWriter::ready(pdal::BasePointTable &table)
