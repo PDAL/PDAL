@@ -202,21 +202,26 @@ Dimension::IdList LasHeader::usedDims() const
 
 void LasHeader::setSrs()
 {
-    if (incompatibleSrs())
+    if (has14Format() && !useWkt())
     {
         m_log->get(LogLevel::Error) << "Global encoding WKT flag not set "
             "for point format 6 - 10." << std::endl;
     }
-    else if (findVlr(TRANSFORM_USER_ID, WKT_RECORD_ID) &&
+    if (findVlr(TRANSFORM_USER_ID, WKT_RECORD_ID) &&
         findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID))
     {
         m_log->get(LogLevel::Debug) << "File contains both "
             "WKT and GeoTiff VLRs which is disallowed." << std::endl;
     }
 
+    // We always use WKT for formats 6+, regardless of the WKT global encoding bit (warning
+    // issued above.)
+    // Otherwise (formats 0-5), we only use it of the WKT bit is set and it's version 1.4 
+    // or better.  For valid files the WKT bit won't be set for files < version 1.4, but
+    // we can't be sure, so we check here.
     try
     {
-        if (useWkt())
+        if ((useWkt() && m_versionMinor >= 4) || has14Format())
             setSrsFromWkt();
         else
             setSrsFromGeotiff();
