@@ -38,18 +38,18 @@
 
 #include <Eigen/Dense>
 
-#include <memory>
 #include <string>
 
 namespace pdal
 {
 
+using namespace Eigen;
+
 class PDAL_DLL PlaneFitFilter : public Filter
 {
 public:
-    PlaneFitFilter()
-    {
-    }
+    PlaneFitFilter() : Filter()
+    {}
     PlaneFitFilter& operator=(const PlaneFitFilter&) = delete;
     PlaneFitFilter(const PlaneFitFilter&) = delete;
 
@@ -58,15 +58,14 @@ public:
 private:
     int m_knn;
     int m_threads;
-    Dimension::Id m_planefit;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void filter(PointView& view);
 
-    void setPlaneFit(PointView& view, const PointId& i, const KD3Index& kdi);
+    void setPlaneFit(PointView& view, const PointId& i);
     double absDistance(PointView& view, const PointId& i,
-                       Eigen::Vector3d& centroid, Eigen::Vector3d& normal);
+                       Vector3d& centroid, Vector3d& normal);
 };
 
 } // namespace pdal

@@ -45,21 +45,22 @@ namespace pdal
 
 const uint16_t LasVLR::MAX_DATA_SIZE = 65535;
 
-ILeStream& operator>>(ILeStream& in, LasVLR& v)
+bool LasVLR::read(ILeStream& in, size_t limit)
 {
     uint16_t reserved;
     uint16_t dataLen;
 
     in >> reserved;
-    in.get(v.m_userId, 16);
-    in >> v.m_recordId >> dataLen;
-    in.get(v.m_description, 32);
-    v.m_data.resize(dataLen);
-    if (v.m_data.size() > 0) {
-        in.get(v.m_data);
-    }
+    in.get(m_userId, 16);
+    in >> m_recordId >> dataLen;
+    if ((size_t)in.position() + dataLen > limit)
+        return false;
+    in.get(m_description, 32);
+    m_data.resize(dataLen);
+    if (m_data.size() > 0)
+        in.get(m_data);
 
-    return in;
+    return true;
 }
 
 
@@ -164,7 +165,7 @@ std::istream& operator>>(std::istream& in, LasVLR& v)
         recordId = 1;
 
     v.m_userId = userId;
-    v.m_recordId = recordId;
+    v.m_recordId = (uint16_t)recordId;
     v.m_description = description;
     v.m_data = std::move(data);
     return in;
@@ -208,20 +209,20 @@ OLeStream& operator<<(OLeStream& out, const LasVLR& v)
 }
 
 
-ILeStream& operator>>(ILeStream& in, ExtLasVLR& v)
+bool ExtLasVLR::read(ILeStream& in, uintmax_t limit)
 {
     uint64_t dataLen;
 
-    in >> v.m_recordSig;
-    in.get(v.m_userId, 16);
-    in >> v.m_recordId >> dataLen;
-    in.get(v.m_description, 32);
-    v.m_data.resize(dataLen);
-    if (v.m_data.size() > 0) {
-        in.get(v.m_data);
-    }
-
-    return in;
+    in >> m_recordSig;
+    in.get(m_userId, 16);
+    in >> m_recordId >> dataLen;
+    if (uintmax_t(in.position()) + dataLen > limit)
+        return false;
+    in.get(m_description, 32);
+    m_data.resize(dataLen);
+    if (m_data.size() > 0)
+        in.get(m_data);
+    return true;
 }
 
 

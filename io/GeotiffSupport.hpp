@@ -59,9 +59,14 @@ public:
         const std::vector<uint8_t>& asciiRec, LogPtr log);
     SpatialReference srs() const
         { return m_srs; }
+
+    std::string const& gtiffPrintString()
+        { return m_gtiff_print_string; }
+
 private:
     SpatialReference m_srs;
     LogPtr m_log;
+    std::string m_gtiff_print_string;
 
     void validateDirectory(const Entry *ent, size_t numEntries,
         size_t numDoubles, size_t asciiSize);

@@ -41,10 +41,12 @@
 #include <Eigen/Dense>
 
 #include <string>
-#include <vector>
 
 namespace pdal
 {
+
+using namespace Dimension;
+using namespace Eigen;
 
 static StaticPluginInfo const s_info
 {
@@ -86,9 +88,9 @@ void EigenvaluesFilter::addArgs(ProgramArgs& args)
 
 void EigenvaluesFilter::addDimensions(PointLayoutPtr layout)
 {
-    m_e0 = layout->registerOrAssignDim("Eigenvalue0", Dimension::Type::Double);
-    m_e1 = layout->registerOrAssignDim("Eigenvalue1", Dimension::Type::Double);
-    m_e2 = layout->registerOrAssignDim("Eigenvalue2", Dimension::Type::Double);
+    layout->registerDim(Id::Eigenvalue0);
+    layout->registerDim(Id::Eigenvalue1);
+    layout->registerDim(Id::Eigenvalue2);
 }
 
 void EigenvaluesFilter::prepared(PointTableRef table)
@@ -112,37 +114,35 @@ void EigenvaluesFilter::prepared(PointTableRef table)
 
 void EigenvaluesFilter::filter(PointView& view)
 {
-    using namespace Eigen;
+    const KD3Index& kdi = view.build3dIndex();
 
-    KD3Index& kdi = view.build3dIndex();
-
-    for (PointId i = 0; i < view.size(); ++i)
+    for (PointRef p : view)
     {
         // find neighbors, either by radius or k nearest neighbors
         PointIdList ids;
         if (m_args->m_radiusArg->set())
         {
-            ids = kdi.radius(i, m_args->m_radius);
+            ids = kdi.radius(p, m_args->m_radius);
 
             // if insufficient number of neighbors, eigen solver will fail
             // anyway, it may be okay to silently return without setting any of
             // the computed features?
             if (ids.size() < (size_t)m_args->m_minK)
-                return;
+                continue;
         }
         else
         {
-            ids = kdi.neighbors(i, m_args->m_knn + 1, m_args->m_stride);
+            ids = kdi.neighbors(p, m_args->m_knn + 1, m_args->m_stride);
         }
 
         // compute covariance of the neighborhood
-        auto B = math::computeCovariance(view, ids);
+        Matrix3d B = math::computeCovariance(view, ids);
 
         // perform the eigen decomposition
-        SelfAdjointEigenSolver<Matrix3d> solver(B);
-        if (solver.info() != Success)
+        Eigen::SelfAdjointEigenSolver<Matrix3d> solver(B);
+        if (solver.info() != Eigen::Success)
             throwError("Cannot perform eigen decomposition.");
-        auto ev = solver.eigenvalues();
+        Vector3d ev = solver.eigenvalues();
 
         if (m_args->m_normalize)
         {
@@ -150,9 +150,9 @@ void EigenvaluesFilter::filter(PointView& view)
             ev /= sum;
         }
 
-        view.setField(m_e0, i, ev[0]);
-        view.setField(m_e1, i, ev[1]);
-        view.setField(m_e2, i, ev[2]);
+        p.setField(Id::Eigenvalue0, ev[0]);
+        p.setField(Id::Eigenvalue1, ev[1]);
+        p.setField(Id::Eigenvalue2, ev[2]);
     }
 }
 

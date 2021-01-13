@@ -99,8 +99,8 @@ public:
     void setDataLen(uint64_t size)
         { m_data.resize((size_t)size); }
     void write(OLeStream& out, uint16_t recordSig);
+    bool read(ILeStream& in, size_t limit);
 
-    friend ILeStream& operator>>(ILeStream& in, LasVLR& v);
     friend OLeStream& operator<<(OLeStream& out, const LasVLR& v);
     friend std::istream& operator>>(std::istream& in, LasVLR& v);
     friend std::ostream& operator<<(std::ostream& out, const LasVLR& v);
@@ -123,9 +123,9 @@ public:
     ExtLasVLR()
     {}
 
-    friend ILeStream& operator>>(ILeStream& in, ExtLasVLR& v);
-    friend OLeStream& operator<<(OLeStream& out,
-        const ExtLasVLR& v);
+    bool read(ILeStream& in, uintmax_t limit);
+
+    friend OLeStream& operator<<(OLeStream& out, const ExtLasVLR& v);
     friend std::istream& operator>>(std::istream& in, ExtLasVLR& v);
     friend std::ostream& operator<<(std::ostream& out, const ExtLasVLR& v);
 };

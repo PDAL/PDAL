@@ -466,5 +466,60 @@
     "name": "OptimalRadius",
     "type": "double",
     "description": "Radius corresponding to optimal k nearest neighbors, such that eigenentropy is minimized."
+    },
+    {
+    "name": "Coplanar",
+    "type": "uint8",
+    "description": "Indicator of whether or not a point is part of a coplanar neighborhood."
+    },
+    {
+    "name": "LocalReachabilityDistance",
+    "type": "double",
+    "description": "Reachability metric based on the NNDistance of a point's nearest neighbors."
+    },
+    {
+    "name": "LocalOutlierFactor",
+    "type": "double",
+    "description": "Outlier factor based on the LocalReachabilityDistance of a point's nearest neighbors."
+    },
+    {
+    "name": "Miniball",
+    "type": "double",
+    "description": "Metric capturing distance from a point to the center of the smallest enclosing ball encapsulating k-nearest neighbors, scaled by radius of the ball."
+    },
+    {
+    "name": "Reciprocity",
+    "type": "double",
+    "description": "Metric capturing percentage of k-nearest neighbors that also contain the current point in their k-neighborhood."
+    },
+    {
+    "name": "Rank",
+    "type": "uint8",
+    "description": "Estimated rank of neighborhood of points."
+    },
+    {
+    "name": "Eigenvalue0",
+    "type": "double",
+    "description": "Smallest eigenvalue obtained form covariance of XYZ coordinates in k-neighborhood."
+    },
+    {
+    "name": "Eigenvalue1",
+    "type": "double",
+    "description": "Middle eigenvalue obtained form covariance of XYZ coordinates in k-neighborhood."
+    },
+    {
+    "name": "Eigenvalue2",
+    "type": "double",
+    "description": "Largest eigenvalue obtained form covariance of XYZ coordinates in k-neighborhood."
+    },
+    {
+    "name": "PlaneFit",
+    "type": "double",
+    "description": "Metric capturing current point's point to plane distance compared to those in the same k-neighborhood used to estimate the plane."
+    },
+    {
+    "name": "RadialDensity",
+    "type": "double",
+    "description": "Estimate of radial point density"
     }
 ] }

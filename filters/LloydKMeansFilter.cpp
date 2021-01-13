@@ -103,6 +103,7 @@ void LloydKMeansFilter::filter(PointView& view)
     ColumnPointTable table;
     table.layout()->registerDims({Id::X, Id::Y, Id::Z});
     table.layout()->registerDims(m_dimIdList);
+    table.finalize();
 
     // create view of initial cluster centers
     PointViewPtr centers(new PointView(table));

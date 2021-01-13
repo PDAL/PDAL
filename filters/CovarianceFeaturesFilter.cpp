@@ -332,11 +332,11 @@ void CovarianceFeaturesFilter::setDimensionality(PointView &view, const PointId 
 
         if (dim == Id::Density)
         {
-            double kopt = p.getFieldAs<uint64_t>(Id::OptimalKNN);
+            double kopt = p.getFieldAs<double>(Id::OptimalKNN);
             double ropt = p.getFieldAs<double>(Id::OptimalRadius);
-	    double pi = 3.14159265;
+    	    double pi = 3.14159265;
             p.setField(Id::Density,
-                       (kopt + 1) / ((4 / 3) * pi * std::pow(ropt, 3)));
+                (kopt + 1.0) / ((4.0 / 3.0) * pi * std::pow(ropt, 3)));
         }
     }
 }

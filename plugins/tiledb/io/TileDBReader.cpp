@@ -252,15 +252,16 @@ void TileDBReader::localReady()
     int numDims = m_array->schema().domain().dimensions().size();
 
     m_query.reset(new tiledb::Query(*m_ctx, *m_array));
+    m_query->set_layout( TILEDB_UNORDERED );
 
     // Build the buffer for the dimensions.
     auto it = std::find_if(m_dims.begin(), m_dims.end(),
         [](DimInfo& di){ return di.m_dimCategory == DimCategory::Dimension; });
 
     DimInfo& di = *it;
-    Buffer *dimBuf = new Buffer(di.m_tileType, m_chunkSize * numDims);
 
 #if TILEDB_VERSION_MAJOR == 1
+    Buffer *dimBuf = new Buffer(di.m_tileType, m_chunkSize * numDims);
     m_query->set_coordinates(dimBuf->get<double>(), dimBuf->count());
     m_buffers.push_back(std::unique_ptr<Buffer>(dimBuf));
 #endif

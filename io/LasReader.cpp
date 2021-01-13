@@ -44,10 +44,10 @@
 #include <pdal/PointView.hpp>
 #include <pdal/QuickInfo.hpp>
 #include <pdal/util/Extractor.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/util/IStream.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-#include "GeotiffSupport.hpp"
 #include "LasHeader.hpp"
 #include "LasVLR.hpp"
 
@@ -157,6 +157,20 @@ void LasReader::handleCompressionOption()
     m_compression = compression;
 }
 
+void LasReader::createStream()
+{
+    if (m_streamIf)
+        std::cerr << "Attempt to create stream twice!\n";
+    m_streamIf.reset(new LasStreamIf(m_filename));
+    if (!m_streamIf->m_istream)
+    {
+        std::ostringstream oss;
+        oss << "Unable to open stream for '"
+            << m_filename <<"' with error '" << strerror(errno) <<"'";
+        throw pdal_error(oss.str());
+    }
+}
+
 
 void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 {
@@ -178,8 +192,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
         throwError(err.what());
     }
 
-    m_header.setLog(log());
-
+    m_header.initialize(log(), FileUtils::fileSize(m_filename));
     createStream();
     std::istream *stream(m_streamIf->m_istream);
 
@@ -424,6 +437,9 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
     m.add<point_count_t>("count",
         m_header.pointCount(), "This field contains the total "
         "number of point records within the file.");
+
+    m.add<std::string>("gtiff", m_header.geotiffPrint(),
+        "GTifPrint output of GeoTIFF keys");
 
     // PDAL metadata VLR
     const LasVLR *vlr = m_header.findVlr("PDAL", 12);

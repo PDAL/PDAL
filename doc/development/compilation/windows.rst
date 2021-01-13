@@ -6,7 +6,7 @@ Building Under Windows
 
 :Author: Howard Butler
 :Contact: howard at hobu.co
-:Date: 03/20/2019
+:Date: 11/20/2020
 
 .. note::
 
@@ -26,10 +26,10 @@ the scope of the document.
 
 .. note::
 
-    The AppVeyor build system uses the PDAL project's configuration on the Conda Forge
+    The GitHub Action build system uses the PDAL project's configuration on the Conda Forge
     system. It contains a rich resource of known working examples. See
-    https://github.com/PDAL/PDAL/blob/master/appveyor.yml and
-    https://github.com/PDAL/PDAL/tree/master/scripts/appveyor for inspiration.
+    https://github.com/PDAL/PDAL/blob/master/.github/workflows/win.yml and
+    https://github.com/PDAL/PDAL/tree/master/scripts/ci/win for inspiration.
 
 Required Compiler
 ------------------------------------------------------------------------------
@@ -46,17 +46,17 @@ with good support for those features is required.
 Prerequisite Libraries
 ------------------------------------------------------------------------------
 
-PDAL uses the `AppVeyor`_ continuous integration platform for building and
+PDAL uses the `GitHub Actions`_ continuous integration platform for building and
 testing itself on Windows. The configuration that PDAL uses is valuable
 raw materials for configuring your own environment because the PDAL
 team must keep it up to date with both the :ref:`conda` environment and
 the Microsoft compiler situation.
 
-You can see the current AppVeyor configuration at
-https://github.com/PDAL/PDAL/blob/master/appveyor.yml The most interesting bits
-are the ``install`` section, the ``config.cmd``, and the ``build.cmd`` scripts.
-The AppVeyor configuration already has Miniconda installed, and the
-``config.cmd`` script installs all of PDAL's prerequisites via the command
+You can see the current configuration at
+https://github.com/PDAL/PDAL/blob/master/.github/workflows/win.yml The most interesting bits
+are the ``Setup`` step, the ``CMake`` step, and the ``Compile`` scripts.
+The configuration already has Miniconda installed, and the
+``setup.sh`` script installs all of PDAL's prerequisites via the command
 line.
 
 
@@ -70,10 +70,10 @@ line.
 .. note::
 
     The package list here might change over time. The canonnical location
-    to learn the  prerequisite list for PDAL is the ``scripts/appveyor/test/build.cmd``
-    file in PDAL's source tree.
+    to learn the  prerequisite list for PDAL is the ``scripts/ci/win``
+    directory in PDAL's source tree.
 
-.. _`AppVeyor`: https://ci.appveyor.com/project/hobu/pdal/history
+.. _`GitHub Actions`: https://github.com/PDAL/PDAL/actions
 
 
 Fetching the Source
@@ -115,12 +115,7 @@ Invoke your ``cmake`` command to configure the PDAL.
     cmake -G "NMake Makefiles" .
 
 A fully-featured build will require more specification of libraries, enabled
-features, and their locations. There are two places in the source tree
-for inspiration on this topic.
-
-1. The AppVeyor build configuration https://github.com/PDAL/PDAL/blob/master/scripts/appveyor/config.cmd#L26
-
-2. Howard Butler's example build configuration https://github.com/PDAL/PDAL/blob/master/scripts/conda/win64.bat
+features, and their locations. For more information on this, users can refer to the ``examples.sh`` step in the Action.
 
 
 .. note::

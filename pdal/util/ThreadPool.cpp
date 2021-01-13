@@ -37,6 +37,20 @@
 namespace pdal
 {
 
+PDAL_DLL void ThreadPool::go()
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (m_running)
+        return;
+
+    m_running = true;
+
+    for (std::size_t i(0); i < m_numThreads; ++i)
+    {
+        m_threads.emplace_back([this]() { work(); });
+    }
+}
+
 void ThreadPool::work()
 {
     while (true)

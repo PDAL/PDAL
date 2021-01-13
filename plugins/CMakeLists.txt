@@ -12,10 +12,6 @@ if(BUILD_PLUGIN_CPD)
     add_subdirectory(cpd)
 endif(BUILD_PLUGIN_CPD)
 
-if(BUILD_PLUGIN_GEOWAVE)
-    add_subdirectory(geowave)
-endif(BUILD_PLUGIN_GEOWAVE)
-
 if(BUILD_PLUGIN_ICEBRIDGE)
     if (NOT PDAL_HAVE_LIBXML2)
         message(FATAL_ERROR "Can't build icebridge plugin without libxml2")
@@ -72,6 +68,10 @@ endif(BUILD_PLUGIN_RIVLIB)
 if (BUILD_PLUGIN_FBX)
     add_subdirectory(fbx)
 endif()
+
+if(BUILD_PLUGIN_TEASER)
+    add_subdirectory(teaser)
+endif(BUILD_PLUGIN_TEASER)
 
 if(BUILD_PLUGIN_TILEDB)
     add_subdirectory(tiledb)
