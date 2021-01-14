@@ -42,9 +42,12 @@
 #include <pdal/pdal_test_main.hpp>
 #include <io/FauxReader.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 #include "Support.hpp"
 #include "../io/DracoWriter.hpp"
+#include "../io/DracoReader.hpp"
+#include <io/LasReader.hpp>
 
 namespace pdal
 {
@@ -76,26 +79,160 @@ namespace pdal
         StageFactory factory;
         Stage* stage(factory.createStage("writers.draco"));
         EXPECT_TRUE(stage);
-        EXPECT_TRUE(stage->pipelineStreamable());
     }
 
     TEST_F(DracoWriterTest, write)
     {
-        std::string pth = Support::temppath("draco_test_out");
-
         Options options;
-//         options.add("chunk_size", 80);
-
-
+        options.add("filename", Support::temppath("out.drc"));
         DracoWriter writer;
         writer.setOptions(options);
         writer.setInput(m_reader);
 
-        FixedPointTable table(100);
+        PointTable table;
         writer.prepare(table);
         writer.execute(table);
+    }
 
+    void compareFiles(const std::string& name1, const std::string& name2)
+    {
+        Options o1;
+        o1.add("filename", name1);
+
+        LasReader r1;
+        r1.setOptions(o1);
+
+        PointTable t1;
+        r1.prepare(t1);
+        PointViewSet s1 = r1.execute(t1);
+        PointViewPtr v1 = *s1.begin();
+        DimTypeList d1 = v1->dimTypes();
+        size_t size1 = v1->pointSize();
+        std::vector<char> buf1(size1);
+
+
+        Options o2;
+        o2.add("filename", name2);
+
+        DracoReader r2;
+        r2.setOptions(o2);
+
+        PointTable t2;
+        r2.prepare(t2);
+        PointViewSet s2 = r2.execute(t2);
+        // PointViewPtr v2 = *s2.begin();
+        // DimTypeList d2 = v2->dimTypes();
+        // size_t size2 = v2->pointSize();
+        // std::vector<char> buf2(size2);
+
+        // EXPECT_EQ(v1->size(), v2->size());
+        // EXPECT_EQ(d1.size(), d2.size());
+        // EXPECT_EQ(size1, size2);
+
+        // for (PointId i = 0; i < (std::min)(size1, size2); i += 1)
+        // {
+        //     v1->getPackedPoint(d1, i, buf1.data());
+        //     v2->getPackedPoint(d2, i, buf2.data());
+        //     EXPECT_EQ(memcmp(buf1.data(), buf2.data(), (std::min)(size1, size2)), 0);
+        // }
+    }
+
+    TEST_F(DracoWriterTest, output)
+    {
+        std::string inFile = Support::datapath("las/1.2-with-color.las");
+        std::string outFile = Support::temppath("draco_test.drc");
+        FileUtils::deleteFile(outFile);
+
+        //setup reader
+        Options readerOptions;
+        readerOptions.add("filename", inFile);
+        readerOptions.add("count", 1065);
+        LasReader reader;
+        reader.setOptions(readerOptions);
+
+        PointTable table1;
+        reader.prepare(table1);
+        reader.execute(table1);
+
+        //setup writer
+        Options writerOptions;
+        writerOptions.add("filename", outFile);
+        readerOptions.add("count", 1065);
+        DracoWriter writer;
+        writer.setOptions(writerOptions);
+        writer.setInput(reader);
+
+        PointTable table2;
+        writer.prepare(table2);
+        writer.execute(table2);
+
+        compareFiles(inFile, outFile);
+    }
+
+    void testDimensions(NL::json dimensions, bool pass)
+    {
+        std::string inFile = Support::datapath("las/1.2-with-color.las");
+        std::string outFile = Support::temppath("draco_test.drc");
+        FileUtils::deleteFile(outFile);
+
+        //setup reader
+        Options readerOptions;
+        readerOptions.add("filename", inFile);
+        readerOptions.add("count", 1065);
+        FauxReader reader;
+        reader.setOptions(readerOptions);
+
+        Options options;
+        options.add("filename", outFile);
+        options.add("dimensions", dimensions);
+
+        DracoWriter writer;
+        writer.setOptions(options);
+        writer.setInput(reader);
+
+        PointTable table;
+        writer.prepare(table);
+
+        if (pass) writer.execute(table);
+        else EXPECT_THROW(writer.execute(table), pdal_error);
+    }
+
+    TEST_F(DracoWriterTest, dimensions)
+    {
+        NL::json dims;
+        //test position
+        dims = { {"X", "double"}, {"Y", "double"}, {"Z", "float"} };
+        testDimensions(dims, false);
+        dims = { {"X", "double"} };
+        testDimensions(dims, false);
+        dims = { {"X", "double"}, {"Y", "double"}, {"Z", "double"} };
+        testDimensions(dims, true);
+
+        //test normals
+        dims = { {"NormalX", "double"}, {"NormalY", "double"}, {"NormalZ", "float"} };
+        testDimensions(dims, false);
+        dims = { {"NormalX", "double"} };
+        testDimensions(dims, false);
+        dims = { {"NormalX", "double"}, {"NormalY", "double"}, {"NormalZ", "double"} };
+        testDimensions(dims, true);
+
+        //test RGB
+        dims = { {"Red", "double"}, {"Green", "double"}, {"Blue", "float"} };
+        testDimensions(dims, false);
+        dims = { {"Red", "double"} };
+        testDimensions(dims, false);
+        dims = { {"Red", "double"}, {"Green", "double"}, {"Blue", "double"} };
+        testDimensions(dims, true);
+
+        //test textures
+        // dims = { {"TextureU", "double"}, {"TextureV", "double"}, {"TextureW", "float"} };
+        // testDimensions(dims, false);
+        // dims = { {"TextureU", "double"} };
+        // testDimensions(dims, false);
+        // dims = { {"TextureU", "double"}, {"TextureV", "double"}, {"TextureW", "double"} };
+        // testDimensions(dims, true);
 
     }
+
 
 }

@@ -99,17 +99,17 @@ void DracoWriter::initialize(PointTableRef table)
     if (!m_stream)
         throwError("Couldn't open '" + m_filename + "' for output.");
 
-    parseDimensions();
     parseQuants();
 }
 
 void DracoWriter::parseQuants() {
-    if(!m_userQuant.is_object()) {
+    if (!m_userQuant.is_object()) {
+        if (std::string(m_userQuant.type_name()) == "null") return;
         throw pdal_error("Option 'quantization' must be a JSON object, not a " +
             std::string(m_userQuant.type_name()));
     }
     //Quantization levels are available for POSITION, NORMAL, TEX_COORD, COLOR,
-    //and GENERIC types
+    //and GENERIC draco types
     for (auto& entry : m_userQuant.items()) {
         const std::string attribute = entry.key();
         const int quant = entry.value().get<int>();
@@ -124,13 +124,11 @@ void DracoWriter::parseQuants() {
 void DracoWriter::parseDimensions()
 {
     if(!m_userDimJson.is_object()) {
+        if (std::string(m_userQuant.type_name()) == "null") return;
         throw pdal_error("Option 'dimensions' must be a JSON object, not a " +
             std::string(m_userDimJson.type_name()));
     }
 
-    //TODO check that x,y,z are all the same types
-    //TODO same for textures
-    //TODO same for normals
     for(auto& entry : m_userDimJson.items()) {
         std::string dimString = entry.key();
         auto datasetName = entry.value();
@@ -151,7 +149,7 @@ void DracoWriter::parseDimensions()
     //x, y, z must all be specified if one of them is
     if (m_userDimMap.find(Dimension::Id::X) != m_userDimMap.end())
     {
-        std::string x, y, z
+        std::string x, y, z;
         try {
             x = m_userDimMap.at(Dimension::Id::X);
             y = m_userDimMap.at(Dimension::Id::Y);
@@ -163,10 +161,25 @@ void DracoWriter::parseDimensions()
             throw pdal_error("X, Y, and Z dimensions must be of the same type");
         }
     }
-    // //normal x, y, z must all be specified if one of them is
+    //red, green, and blue must all be specified if one of them is
+    if (m_userDimMap.find(Dimension::Id::Red) != m_userDimMap.end())
+    {
+        std::string r, g, b;
+        try {
+            r = m_userDimMap.at(Dimension::Id::Red);
+            g = m_userDimMap.at(Dimension::Id::Green);
+            b = m_userDimMap.at(Dimension::Id::Blue);
+        } catch(std::out_of_range e) {
+            throw pdal_error("Red, Green, and Blue dimensions must all be specified if one is.");
+        }
+        if ( r != g || g != b || r != b ) {
+            throw pdal_error("Red, Green, and Blue dimensions must be of the same type");
+        }
+    }
+    //normals x, y, z must all be specified if one of them is
     if (m_userDimMap.find(Dimension::Id::NormalX) != m_userDimMap.end())
     {
-        std::string nx, ny, nz
+        std::string nx, ny, nz;
         try {
             nx = m_userDimMap.at(Dimension::Id::NormalX);
             ny = m_userDimMap.at(Dimension::Id::NormalY);
@@ -178,15 +191,23 @@ void DracoWriter::parseDimensions()
             throw pdal_error("NormalX, Y, and Z dimensions must be of the same type");
         }
     }
-    if (userDimMap.find(Dimension::Id::TextureU) != userDimMap.end())
+    //make sure textures u, v, w are all the same, but it's possible there are
+    //only u and v, so make sure we know how many dimensions are in the file first
+    if (m_userDimMap.find(Dimension::Id::TextureU) != m_userDimMap.end())
     {
-        std::string tu, tv, tw
-        if (userDimMap.at(Dimension::Id::TextureU) != userDimMap.at(Dimension::Id::TextureV))
-            throw pdal_error("X, Y, and Z dimensions must be of the same type");
-        if (userDimMap.at(Dimension::Id::TextureU) != userDimMap.at(Dimension::Id::TextureW))
-            throw pdal_error("X, Y, and Z dimensions must be of the same type");
-        if (userDimMap.at(Dimension::Id::TextureU) != userDimMap.at(Dimension::Id::NormalZ))
-            throw pdal_error("X, Y, and Z dimensions must be of the same type");
+        std::string tu, tv, tw;
+        int texNum = m_dims.at(draco::GeometryAttribute::TEX_COORD);
+        try {
+            tu = m_userDimMap.at(Dimension::Id::TextureU);
+            tv = m_userDimMap.at(Dimension::Id::TextureV);
+            if (texNum == 3) tw = m_userDimMap.at(Dimension::Id::TextureW);
+            else tw = tv;
+        } catch(std::out_of_range e) {
+            throw pdal_error("TextureU, V, and W dimensions don't match the file.");
+        }
+        if ( tu != tv || tv != tw || tu != tw ) {
+            throw pdal_error("TextureU, V, and W dimensions must be of the same type");
+        }
     }
 }
 
@@ -227,6 +248,7 @@ void DracoWriter::addGeneric(Dimension::Id pt, int n) {
     ga.Init(draco::GeometryAttribute::GENERIC, nullptr, n, dracoDataType,
             false, draco::DataTypeLength(dracoDataType) * n, 0);
     auto attId = m_pc->AddAttribute(ga, true, m_pc->num_points());
+
     //add generic attribute to map with its id
     m_genericMap[pt] = attId;
 
@@ -263,8 +285,6 @@ void DracoWriter::addAttribute(draco::GeometryAttribute::Type t, int n) {
     draco::GeometryAttribute ga;
     ga.Init(t, nullptr, n, dataType, false, draco::DataTypeLength(dataType) * n, 0);
     m_attMap[t] = m_pc->AddAttribute(ga, true, m_pc->num_points());
-
-    // m_attMap[t] = m_pc.AddAttribute(t, n, dataType);
 }
 
 void DracoWriter::initPointCloud(point_count_t size)
@@ -282,10 +302,64 @@ void DracoWriter::initPointCloud(point_count_t size)
     }
 }
 
+void DracoWriter::addPoint(int attId, Dimension::IdList idList, PointRef &point, PointId idx)
+{
+    //get first id in list. All ids in any given list should be the same datatype
+    Dimension::Id dim = idList[0];
+    Dimension::Type type;
+
+    if (m_userDimMap.find(dim) != m_userDimMap.end()) {
+        std::string typeStr = m_userDimMap.at(dim);
+        type = Dimension::type(typeStr);
+    } else {
+        type = Dimension::defaultType(dim);
+    }
+
+    //call addToPointCloud with appropriate datatype
+    switch (type) {
+        case Dimension::Type::Signed8:
+            addToPointCloud<int8_t>(attId, idList, point, idx);
+            break;
+        case Dimension::Type::Unsigned8:
+            addToPointCloud<uint8_t>(attId, idList, point, idx);
+            break;
+        case Dimension::Type::Signed16:
+            addToPointCloud<int16_t>(attId, idList, point, idx);
+            break;
+        case Dimension::Type::Unsigned16:
+            addToPointCloud<uint16_t>(attId, idList, point, idx);
+            break;
+        case Dimension::Type::Signed32:
+            addToPointCloud<int32_t>(attId, idList, point, idx);
+            break;
+        case Dimension::Type::Unsigned32:
+            addToPointCloud<uint32_t>(attId, idList, point, idx);
+            break;
+        case Dimension::Type::Signed64:
+            addToPointCloud<int64_t>(attId, idList, point, idx);
+            break;
+        case Dimension::Type::Unsigned64:
+            addToPointCloud<uint64_t>(attId, idList, point, idx);
+            break;
+        case Dimension::Type::Float:
+            addToPointCloud<float>(attId, idList, point, idx);
+            break;
+        case Dimension::Type::Double:
+            addToPointCloud<double>(attId, idList, point, idx);
+            break;
+        default:
+            throw pdal_error("Invalid type for pdal dimension " + Dimension::name(dim));
+            break;
+    }
+
+}
+
 void DracoWriter::write(const PointViewPtr view)
 {
     //initialize pointcloud builder
     initPointCloud(view->size());
+    //we don't know how many texture dimensions are available until here
+    parseDimensions();
 
     PointRef point(*view, 0);
     for (PointId idx = 0; idx < view->size(); ++idx)
@@ -293,8 +367,6 @@ void DracoWriter::write(const PointViewPtr view)
         point.setPointId(idx);
         const auto pointId = draco::PointIndex(idx);
 
-        //TODO get typing fixed so that user can specify a map of draco dimensions
-        //to the types they want with them.
         if (m_attMap.find(draco::GeometryAttribute::POSITION) != m_attMap.end())
         {
             const int id = m_attMap[draco::GeometryAttribute::POSITION];
@@ -303,7 +375,7 @@ void DracoWriter::write(const PointViewPtr view)
                 Dimension::Id::Y,
                 Dimension::Id::Z
             };
-            DracoWriter::addToPointCloud<double>(id, idList, point, idx);
+            addPoint(id, idList, point, idx);
         }
 
         if (m_attMap.find(draco::GeometryAttribute::COLOR) != m_attMap.end())
@@ -314,7 +386,7 @@ void DracoWriter::write(const PointViewPtr view)
                 Dimension::Id::Green,
                 Dimension::Id::Blue
             };
-            DracoWriter::addToPointCloud<uint16_t>(id, idList, point, idx);
+            addPoint(id, idList, point, idx);
         }
 
         if (m_attMap.find(draco::GeometryAttribute::TEX_COORD) != m_attMap.end())
@@ -327,7 +399,7 @@ void DracoWriter::write(const PointViewPtr view)
             };
             if (n > 2)
                 idList.push_back(Dimension::Id::TextureW);
-            DracoWriter::addToPointCloud<double>(id, idList, point, idx);
+            addPoint(id, idList, point, idx);
         }
 
         if (m_attMap.find(draco::GeometryAttribute::NORMAL) != m_attMap.end())
@@ -338,7 +410,7 @@ void DracoWriter::write(const PointViewPtr view)
                 Dimension::Id::NormalY,
                 Dimension::Id::NormalZ
             };
-            DracoWriter::addToPointCloud<double>(id, idList, point, idx);
+            addPoint(id, idList, point, idx);
         }
 
         //go through list of added dimensions and get the associated data
@@ -349,7 +421,7 @@ void DracoWriter::write(const PointViewPtr view)
                 dim.first
             };
 
-            DracoWriter::addToPointCloud<uint16_t>(id, idList, point, idx);
+            addPoint(id, idList, point, idx);
         }
 
     }
@@ -358,8 +430,6 @@ void DracoWriter::write(const PointViewPtr view)
     draco::Encoder encoder;
     encoder.SetEncodingMethod(draco::POINT_CLOUD_SEQUENTIAL_ENCODING);
 
-    //TODO add quantization for all other geometry attributes
-    //TODO make quants variable based on user input, use defaults otherwise
     encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, m_quant.at("POSITION"));
     encoder.SetAttributeQuantization(draco::GeometryAttribute::COLOR, m_quant.at("NORMAL"));
     encoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, m_quant.at("TEX_COORD"));
@@ -367,10 +437,9 @@ void DracoWriter::write(const PointViewPtr view)
     encoder.SetAttributeQuantization(draco::GeometryAttribute::GENERIC, m_quant.at("GENERIC"));
     const auto status = encoder.EncodePointCloudToBuffer(*m_pc, &buffer);
 
-    //TODO add error message from draco status?
     if (!status.ok()) {
-        std::cout << "Error: " << status.error_msg() << std::endl;
-        throw pdal_error("Error encoding draco pointcloud");
+        const std::string err = status.error_msg();
+        throw pdal_error("Error encoding draco pointcloud. " + err);
     }
 
     const auto bufferSize = buffer.size();

@@ -106,7 +106,7 @@ private:
     void addAttribute(draco::GeometryAttribute::Type t, int n);
     void addGeneric(Dimension::Id pt, int n);
     void initPointCloud(point_count_t size);
-    // void addPoint(int attId, draco::PointIndex idx, void *pointData);
+    void addPoint(int attId, Dimension::IdList idList, PointRef &point, PointId idx);
     draco::GeometryAttribute::Type getGeometryAttribute(std::string s);
     void parseDimensions();
     void parseQuants();

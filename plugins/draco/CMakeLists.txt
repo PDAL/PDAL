@@ -47,6 +47,7 @@ if (WITH_TESTS)
             test/DracoWriterTest.cpp
         LINK_WITH
             ${writer_libname}
+            ${reader_libname}
             ${DRACO_LIBRARY}
         INCLUDES
             ${draco_INCLUDE_DIR}
