@@ -291,7 +291,10 @@ void LasHeader::setSrsFromWkt()
     const char *c = vlr->data() + len - 1;
     if (*c == 0)
         len--;
-    m_srs.set(std::string(vlr->data(), len));
+    std::string wkt(vlr->data(), len);
+    // Strip any excess NULL bytes from the WKT.
+    wkt.erase(std::find(wkt.begin(), wkt.end(), '\0'), wkt.end());
+    m_srs.set(wkt);
 }
 
 
