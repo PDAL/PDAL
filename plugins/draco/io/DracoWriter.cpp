@@ -53,7 +53,6 @@ static PluginInfo const s_info
 struct DracoWriter::Args
 {
     std::string m_filename;
-    // std::map<std::string, std::string> m_dimMap;
 };
 
 
@@ -62,7 +61,6 @@ CREATE_SHARED_STAGE(DracoWriter, s_info)
 DracoWriter::DracoWriter():
     m_args(new DracoWriter::Args)
 {
-//     m_args->m_defaults = NL::json::parse(attributeDefaults);
 }
 
 

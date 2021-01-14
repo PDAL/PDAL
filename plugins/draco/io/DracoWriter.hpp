@@ -96,10 +96,8 @@ public:
 private:
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize(PointTableRef table);
-    // virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr view);
-    // virtual bool processOne(PointRef& point);
     virtual void done(PointTableRef table);
 
     bool flushCache(size_t size);
@@ -132,8 +130,8 @@ private:
     std::unique_ptr<DracoWriter::Args> m_args;
 
     std::string m_filename;
-    FileStreamPtr m_stream;
-
+    NL::json m_userDimJson;
+    std::map<Dimension::Id, std::string> m_userDimMap;
     //these are the default quanitization levels. They will be overridden by any
     //quantization levels specified in the json argument "quantization"
     NL::json m_userQuant;
@@ -146,14 +144,14 @@ private:
         { "GENERIC",    8 }
     };
 
-    NL::json m_userDimJson;
-    std::map<Dimension::Id, std::string> m_userDimMap;
+    FileStreamPtr m_stream;
+
+
 
     std::map<draco::GeometryAttribute::Type, int> m_dims;
     std::map<draco::GeometryAttribute::Type, int32_t> m_attMap;
     std::map<Dimension::Id, int32_t> m_genericMap;
     Dimension::IdList m_genericDims;
-
 
     std::unique_ptr<draco::PointCloud> m_pc =
         std::unique_ptr<draco::PointCloud>(new draco::PointCloud());

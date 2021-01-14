@@ -96,6 +96,7 @@ namespace pdal
 
     void compareFiles(const std::string& name1, const std::string& name2)
     {
+        //read las file
         Options o1;
         o1.add("filename", name1);
 
@@ -105,12 +106,13 @@ namespace pdal
         PointTable t1;
         r1.prepare(t1);
         PointViewSet s1 = r1.execute(t1);
+
         PointViewPtr v1 = *s1.begin();
         DimTypeList d1 = v1->dimTypes();
-        size_t size1 = v1->pointSize();
+        point_count_t size1 = v1->size();
         std::vector<char> buf1(size1);
 
-
+        //read draco file
         Options o2;
         o2.add("filename", name2);
 
@@ -120,21 +122,45 @@ namespace pdal
         PointTable t2;
         r2.prepare(t2);
         PointViewSet s2 = r2.execute(t2);
-        // PointViewPtr v2 = *s2.begin();
-        // DimTypeList d2 = v2->dimTypes();
-        // size_t size2 = v2->pointSize();
-        // std::vector<char> buf2(size2);
 
-        // EXPECT_EQ(v1->size(), v2->size());
-        // EXPECT_EQ(d1.size(), d2.size());
-        // EXPECT_EQ(size1, size2);
+        PointViewPtr v2 = *s2.begin();
+        DimTypeList d2 = v2->dimTypes();
+        point_count_t size2 = v2->size();
+        std::vector<char> buf2(size2);
 
-        // for (PointId i = 0; i < (std::min)(size1, size2); i += 1)
-        // {
-        //     v1->getPackedPoint(d1, i, buf1.data());
-        //     v2->getPackedPoint(d2, i, buf2.data());
-        //     EXPECT_EQ(memcmp(buf1.data(), buf2.data(), (std::min)(size1, size2)), 0);
-        // }
+
+        //compare the two point clouds point count
+        EXPECT_EQ(size1, size2);
+
+        //Iterate through all the dimensions in the las file to make sure they
+        //all exist in the draco file. Because draco adds texture dims to their
+        //files we can't do a straight comparison.
+        bool flag = true;
+        for (auto& dim1: d1) {
+            for (unsigned long i = 0; i < d2.size(); ++i) {
+                //dimension is found, break
+                if (dim1.m_id == d2[i].m_id && dim1.m_type == d2[i].m_type) break;
+                //if not, and we're at the end of the vector, set flag to false
+                if (i == (d2.size() - 1)) flag = false;
+            }
+            if (flag == false) break;
+        }
+        EXPECT_TRUE(flag);
+
+        //go through all position points and make sure XYZ are the same
+        for (PointId i = 0; i < (std::min)(size1, size2); i += 1) {
+            std::vector<double> data1(3, 0.0);
+            data1[0] = v1->getFieldAs<double>(Dimension::Id::X, i);
+            data1[1] = v1->getFieldAs<double>(Dimension::Id::Y, i);
+            data1[2] = v1->getFieldAs<double>(Dimension::Id::Z, i);
+
+            std::vector<double> data2(3, 0.0);
+            data2[0] = v2->getFieldAs<double>(Dimension::Id::X, i);
+            data2[1] = v2->getFieldAs<double>(Dimension::Id::Y, i);
+            data2[2] = v2->getFieldAs<double>(Dimension::Id::Z, i);
+
+            EXPECT_EQ(data1, data2);
+        }
     }
 
     TEST_F(DracoWriterTest, output)
@@ -160,14 +186,18 @@ namespace pdal
 
         writer.prepare(table);
         writer.execute(table);
-
-        compareFiles(inFile, outFile);
     }
 
-    void testDimensions(NL::json dimensions, bool pass)
+    TEST_F(DracoWriterTest, compare)
     {
         std::string inFile = Support::datapath("las/1.2-with-color.las");
         std::string outFile = Support::temppath("draco_test.drc");
+        compareFiles(inFile, outFile);
+    }
+    void testDimensions(NL::json dimensions, bool pass)
+    {
+        std::string inFile = Support::datapath("las/1.2-with-color.las");
+        std::string outFile = Support::temppath("draco_test_dims.drc");
         FileUtils::deleteFile(outFile);
 
         //setup reader

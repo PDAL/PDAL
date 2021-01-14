@@ -170,8 +170,6 @@ void DracoReader::initialize()
     m_pc = std::move(pc_status).value();
 
     m_count = m_pc->num_points();
-
-
 }
 
 
