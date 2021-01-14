@@ -157,7 +157,6 @@ namespace pdal
         //setup writer
         Options writerOptions;
         writerOptions.add("filename", outFile);
-        readerOptions.add("count", 1065);
         DracoWriter writer;
         writer.setOptions(writerOptions);
         writer.setInput(reader);
