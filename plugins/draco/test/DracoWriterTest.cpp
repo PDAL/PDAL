@@ -150,20 +150,16 @@ namespace pdal
         LasReader reader;
         reader.setOptions(readerOptions);
 
-        PointTable table1;
-        reader.prepare(table1);
-        reader.execute(table1);
-
         //setup writer
+        PointTable table;
         Options writerOptions;
         writerOptions.add("filename", outFile);
         DracoWriter writer;
         writer.setOptions(writerOptions);
         writer.setInput(reader);
 
-        PointTable table2;
-        writer.prepare(table2);
-        writer.execute(table2);
+        writer.prepare(table);
+        writer.execute(table);
 
         compareFiles(inFile, outFile);
     }
