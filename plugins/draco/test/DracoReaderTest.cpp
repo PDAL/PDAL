@@ -98,18 +98,46 @@ TEST(DracoReaderTest, accuracy)
 
     //  RTC_CENTER: [ -0.015410084428367554, -0.35363949998281896, 92.70944035355933 ]
     PipelineManager pipeline;
+    //bounding box for original red-rocks.laz this file was created from
+    BOX3D bounds(-105.2091581, 39.66130695, 1843.98, -105.2009355, 39.669282, 2029.41);
 
     Options readOptions;
     std::string path = Support::datapath("draco/redrocks.drc");
     Stage& reader = pipeline.makeReader(path, "readers.draco");
 
-    Options filterOptions;
-    filterOptions.add("matrix", "0.9649933973123795 -0.26227417551774335 0 0 0.16741023360918053 0.6159575938289551 0.7697857210207032 0 -0.20189491530603648 -0.742838138130328 0.6383023920624428 0 -1289846.4516338364 -4745771.507684133 4050624.605121021 1");
-    Stage& filter = pipeline.makeFilter("filters.transformation", reader);
-    filter.setOptions(filterOptions);
+    //transform by tileset from cesium
+    Options filterOptions1;
+    filterOptions1.add("matrix", "0.9649933973123795 0.16741023360918053 -0.20189491530603648 -1289846.4516338364 -0.26227417551774335 0.6159575938289551 -0.742838138130328 -4745771.507684133 0 0.7697857210207032 0.6383023920624428 4050624.605121021 0 0 0 1");
+    Stage& filter1 = pipeline.makeFilter("filters.transformation", reader);
+    filter1.setOptions(filterOptions1);
+
+    //transform by RTC center
+    std::string xOff = "-0.015410084428367554";
+    std::string yOff = "-0.35363949998281896";
+    std::string zOff = "92.70944035355933";
+    Options filterOptions2;
+    filterOptions2.add("matrix", "1 0 0 "+xOff+" 0 1 0 "+yOff+" 0 0 1 "+zOff+" 0 0 0 1");
+    Stage& filter2 = pipeline.makeFilter("filters.transformation", filter1);
+    filter2.setOptions(filterOptions2);
+
+    //set up projection so we can use it against our bounding box
+    Options projectionOptions;
+    projectionOptions.add("in_srs", "EPSG:4978");
+    projectionOptions.add("out_srs", "EPSG:4326");
+    Stage& projection = pipeline.makeFilter("filters.reprojection", filter2);
+    projection.setOptions(projectionOptions);
 
     point_count_t count = pipeline.execute();
-    std::cout << "Point count " << count << std::endl;
+
+    PointViewSet set = pipeline.views();
+    PointViewPtr v = *set.begin();
+
+    for (PointId i = 0; i < count; i += 1) {
+        double x = v->getFieldAs<double>(Dimension::Id::X, i);
+        double y = v->getFieldAs<double>(Dimension::Id::Y, i);
+        double z = v->getFieldAs<double>(Dimension::Id::Z, i);
+        EXPECT_TRUE(bounds.contains(x, y, z));
+    }
 
 }
 
