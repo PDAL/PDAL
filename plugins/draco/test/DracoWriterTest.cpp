@@ -186,14 +186,10 @@ namespace pdal
 
         writer.prepare(table);
         writer.execute(table);
-    }
 
-    TEST_F(DracoWriterTest, compare)
-    {
-        std::string inFile = Support::datapath("las/1.2-with-color.las");
-        std::string outFile = Support::temppath("draco_test.drc");
         compareFiles(inFile, outFile);
     }
+
     void testDimensions(NL::json dimensions, bool pass)
     {
         std::string inFile = Support::datapath("las/1.2-with-color.las");

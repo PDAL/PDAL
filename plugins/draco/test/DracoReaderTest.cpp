@@ -44,6 +44,7 @@
 
 #include "Support.hpp"
 
+#include <pdal/PipelineManager.hpp>
 #include "../io/DracoReader.hpp"
 #include "../io/DracoWriter.hpp"
 
@@ -88,5 +89,28 @@ TEST(DracoReaderTest, test_sequential)
 
 }
 
+TEST(DracoReaderTest, accuracy)
+{
+    //create pipeline that reads draco file and transforms it via
+    //filters.transformation. Then apply the offset from RTC_CENTER from
+    //the pnts file. Check that the results of this fall within the bounds of
+    //red-rocks.laz
+
+    //  RTC_CENTER: [ -0.015410084428367554, -0.35363949998281896, 92.70944035355933 ]
+    PipelineManager pipeline;
+
+    Options readOptions;
+    std::string path = Support::datapath("draco/redrocks.drc");
+    Stage& reader = pipeline.makeReader(path, "readers.draco");
+
+    Options filterOptions;
+    filterOptions.add("matrix", "0.9649933973123795 -0.26227417551774335 0 0 0.16741023360918053 0.6159575938289551 0.7697857210207032 0 -0.20189491530603648 -0.742838138130328 0.6383023920624428 0 -1289846.4516338364 -4745771.507684133 4050624.605121021 1");
+    Stage& filter = pipeline.makeFilter("filters.transformation", reader);
+    filter.setOptions(filterOptions);
+
+    point_count_t count = pipeline.execute();
+    std::cout << "Point count " << count << std::endl;
+
+}
 
 }

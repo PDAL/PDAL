@@ -450,7 +450,7 @@ void DracoWriter::write(const PointViewPtr view)
 
 void DracoWriter::done(PointTableRef table)
 {
-
+    m_stream.reset();
 }
 
 } // namespace pdal
