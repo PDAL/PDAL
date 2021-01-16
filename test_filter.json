@@ -1,0 +1,10 @@
+[
+    "../test_pts.txt",
+    {
+        "type":"filters.gpstimeconvert",
+        "conversion":"ws2gst",
+        "start_date":"2020-12-12",
+        "wrapped":"true"
+    },
+    "../test_pts_out.txt"
+]
