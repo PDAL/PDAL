@@ -66,7 +66,6 @@ DracoWriter::DracoWriter():
 
 DracoWriter::~DracoWriter(){}
 
-
 std::string DracoWriter::getName() const { return s_info.name; }
 
 void DracoWriter::addArgs(ProgramArgs& args)
@@ -241,7 +240,7 @@ void DracoWriter::addGeneric(Dimension::Id pt, int n) {
     //get corresponding draco data type
     draco::DataType dracoDataType = typeMap.at(pdalDataType);
 
-    //add generic type to the pointcloud builder
+    //add generic type to the pointcloud
     draco::GeometryAttribute ga;
     ga.Init(draco::GeometryAttribute::GENERIC, nullptr, n, dracoDataType,
             false, draco::DataTypeLength(dracoDataType) * n, 0);

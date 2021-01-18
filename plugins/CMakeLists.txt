@@ -13,7 +13,6 @@ if(BUILD_PLUGIN_CPD)
 endif(BUILD_PLUGIN_CPD)
 
 if(BUILD_PLUGIN_DRACO)
-    message("Draco plugin added")
     add_subdirectory(draco)
 endif(BUILD_PLUGIN_DRACO)
 

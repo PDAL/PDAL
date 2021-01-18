@@ -41,10 +41,8 @@
 #include <draco/compression/encode.h>
 #include <draco/attributes/geometry_attribute.h>
 #include <draco/attributes/point_attribute.h>
-#include "draco/point_cloud/point_cloud_builder.h"
 #include <draco/core/vector_d.h>
 #include "draco/compression/decode.h"
-#include "draco/compression/expert_encode.h"
 #include "draco/compression/encode.h"
 #include "draco/attributes/attribute_quantization_transform.h"
 
@@ -114,13 +112,12 @@ private:
     {
         point.setPointId(idx);
         const auto pointId = draco::PointIndex(idx);
-        //get point information, N dimensional?
+        //get point information, N dimensional
         std::vector<T> pointData;
         for (size_t i = 0; i < idList.size(); ++i) {
             T data = point.getFieldAs<T>(idList[i]);
             pointData.push_back(data);
         }
-        // addPoint(attId, pointId, pointData.data());
 
         draco::PointAttribute *const att = m_pc->attribute(attId);
         att->SetAttributeValue(att->mapped_index(pointId), pointData.data());
@@ -145,8 +142,6 @@ private:
     };
 
     FileStreamPtr m_stream;
-
-
 
     std::map<draco::GeometryAttribute::Type, int> m_dims;
     std::map<draco::GeometryAttribute::Type, int32_t> m_attMap;
