@@ -30,7 +30,8 @@ cmake .. -G "Ninja" \
     -DLIBLZMA_LIBRARY:FILEPATH="$CONDA_PREFIX/Library/lib/liblzma.lib" \
     -DWITH_LASZIP=ON \
     -DLazperf_DIR:FILEPATH="$CONDA_PREFIX/Library/cmake" \
-    -DDraco_DIR:FILEPATH="$CONDA_PREFIX/Library/cmake" \
+    -DDraco_DIR:FILEPATH="$CONDA_PREFIX/Library/lib/draco/cmake" \
+    -DDRACO_LIBRARY:FILEPATH="$CONDA_PREFIX/Library/lib/draco/cmake" \
     -DHDF5_DIR:FILEPATH="$CONDA_PREFIX/Library/cmake" \
     -DLazperf_DIR:FILEPATH="$CONDA_PREFIX/Library/cmake" \
     -DWITH_ZLIB=ON \
