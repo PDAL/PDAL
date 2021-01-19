@@ -233,7 +233,7 @@ void EptReader::initialize()
     for (Polygon& poly : m_args->m_polys)
     {
         if (!poly.valid())
-            throwError("Geometrically invalid polyon in option 'polygon'.");
+            throwError("Geometrically invalid polygon in option 'polygon'.");
         if (poly.srsValid())
         {
             auto ok = poly.transform(getSpatialReference());

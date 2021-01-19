@@ -73,6 +73,10 @@ if (BUILD_PLUGIN_FBX)
     add_subdirectory(fbx)
 endif()
 
+if(BUILD_PLUGIN_TEASER)
+    add_subdirectory(teaser)
+endif(BUILD_PLUGIN_TEASER)
+
 if(BUILD_PLUGIN_TILEDB)
     add_subdirectory(tiledb)
 endif()

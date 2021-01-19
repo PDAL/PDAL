@@ -68,6 +68,8 @@ Reference
 
 .. [Weyrich2004] Weyrich, T et al. “Post-Processing of Scanned 3D Surface Data.” Proceedings of Eurographics Symposium on Point-Based Graphics 2004 (2004): 85–94. Print.
 
+.. [Yang2020] Yang, Heng, Jingnan Shi, and Luca Carlone, "TEASER: Fast and Certifiable Point Cloud Registraton," arXiv preprint, arXiv:2001.07715, 2020.
+
 .. [Zhang2003] Zhang, Keqi, et al. "A progressive morphological filter for removing nonground measurements from airborne LIDAR data." Geoscience and Remote Sensing, IEEE Transactions on 41.4 (2003): 872-882.
 
 .. [Zhang2016] Zhang, Wuming, et al. "An easy-to-use airborne LiDAR data filtering method based on cloth simulation." Remote Sensing 8.6 (2016): 501.

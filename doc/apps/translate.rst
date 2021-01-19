@@ -24,6 +24,7 @@ if possible, standard mode if not.
     --metadata, -m     Dump metadata output to the specified file
     --reader, -r       Reader type
     --writer, -w       Writer type
+    --dims             Limit loaded dimensions to this list. Note that X, Y and Z are always loaded.
     --stream           Run in stream mode.  If not possible, exit.
     --nostream         Run in standard mode.
 

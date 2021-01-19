@@ -186,11 +186,11 @@ void GltfWriter::write(const PointViewPtr v)
 
         if (m_colorVertices) {
             float colorR =
-                v->getFieldAs<float>(Dimension::Id::Red, i) / 255.0;
+                v->getFieldAs<float>(Dimension::Id::Red, i) / 255.0f;
             float colorG =
-                v->getFieldAs<float>(Dimension::Id::Green, i) / 255.0;
+                v->getFieldAs<float>(Dimension::Id::Green, i) / 255.0f;
             float colorB =
-                v->getFieldAs<float>(Dimension::Id::Blue, i) / 255.0;
+                v->getFieldAs<float>(Dimension::Id::Blue, i) / 255.0f;
 
             out << colorR << colorG << colorB;
         }

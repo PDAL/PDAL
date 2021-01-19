@@ -32,7 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#pragma warning(push)
+#pragma warning(disable: 4251)
 #include <ogr_geometry.h>
+#pragma warning(pop)
 
 #include "Ilvis2MetadataReader.hpp"
 

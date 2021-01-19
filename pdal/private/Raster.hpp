@@ -150,10 +150,10 @@ public:
         { return m_initializer; }
 
     int xCell(double x) const
-        { return std::floor((x - m_limits.xOrigin) / m_limits.edgeLength); }
+        { return (int)std::floor((x - m_limits.xOrigin) / m_limits.edgeLength); }
 
     int yCell(double y) const
-        { return std::floor((y - m_limits.yOrigin) / m_limits.edgeLength); }
+        { return (int)std::floor((y - m_limits.yOrigin) / m_limits.edgeLength); }
 
     double xCellPos(size_t i) const
         { return m_limits.xOrigin + (i + .5) * edgeLength(); }

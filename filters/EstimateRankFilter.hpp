@@ -36,14 +36,11 @@
 
 #include <pdal/Filter.hpp>
 
-#include <cstdint>
-#include <memory>
 #include <string>
 
 namespace pdal
 {
 
-class Options;
 class PointLayout;
 class PointView;
 
@@ -60,7 +57,6 @@ public:
 private:
     int m_knn;
     double m_thresh;
-    Dimension::Id m_rank;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs& args);

@@ -58,6 +58,7 @@ private:
     */
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
+    virtual void done(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t numPts);
 
 private:

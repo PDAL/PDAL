@@ -48,7 +48,6 @@
 #include <pdal/util/IStream.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-#include "GeotiffSupport.hpp"
 #include "LasHeader.hpp"
 #include "LasVLR.hpp"
 
@@ -86,6 +85,8 @@ void LasReader::addArgs(ProgramArgs& args)
     args.add("use_eb_vlr", "Use extra bytes VLR for 1.0 - 1.3 files",
         m_useEbVlr);
     args.add("ignore_vlr", "VLR userid/recordid to ignore", m_ignoreVLROption);
+    args.add("fix_dims", "Make invalid dimension names valid by changing "
+        "invalid characters to '_'", m_fixNames, true);
 }
 
 
@@ -439,6 +440,9 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
         m_header.pointCount(), "This field contains the total "
         "number of point records within the file.");
 
+    m.add<std::string>("gtiff", m_header.geotiffPrint(),
+        "GTifPrint output of GeoTIFF keys");
+
     // PDAL metadata VLR
     const LasVLR *vlr = m_header.findVlr("PDAL", 12);
     if (vlr)
@@ -582,6 +586,8 @@ void LasReader::addDimensions(PointLayoutPtr layout)
             continue;
         if (dim.m_dimType.m_xform.nonstandard())
             type = Dimension::Type::Double;
+        if (m_fixNames)
+            dim.m_name = Dimension::fixName(dim.m_name);
         dim.m_dimType.m_id = layout->registerOrAssignDim(dim.m_name, type);
     }
 }

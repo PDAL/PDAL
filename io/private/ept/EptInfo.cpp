@@ -48,7 +48,7 @@ EptInfo::EptInfo(const std::string& info)
     {
         m_info = NL::json::parse(info);
     }
-    catch(NL::json::parse_error& err)
+    catch(NL::json::parse_error&)
     {
         throw pdal_error("Unable to parse EPT info as JSON.");
     }
