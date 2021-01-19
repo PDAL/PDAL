@@ -19,7 +19,7 @@ PDAL_ADD_PLUGIN(reader_libname reader draco
 )
 
 if (WIN32)
-    target_compile_definitions(${reader_libname} PRIVATE -DNONMINMAX)
+    target_compile_definitions(${reader_libname} PRIVATE -DNONMINMAX=1)
 endif()
 
 #
@@ -37,7 +37,7 @@ PDAL_ADD_PLUGIN(writer_libname writer draco
 )
 
 if (WIN32)
-    target_compile_definitions(${writer_libname} PRIVATE -DNONMINMAX)
+    target_compile_definitions(${writer_libname} PRIVATE -DNONMINMAX=1)
 endif()
 
 if (WITH_TESTS)
@@ -68,8 +68,8 @@ if (WITH_TESTS)
 
 
 if (WIN32)
-    target_compile_definitions(pdal_io_draco_writer_test PRIVATE -DNONMINMAX)
-    target_compile_definitions(pdal_io_draco_reader_test PRIVATE -DNONMINMAX)
+    target_compile_definitions(pdal_io_draco_writer_test PRIVATE -DNONMINMAX=1)
+    target_compile_definitions(pdal_io_draco_reader_test PRIVATE -DNONMINMAX=1)
 endif()
 
 endif()
