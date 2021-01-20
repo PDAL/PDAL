@@ -32,8 +32,6 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#define NOMINMAX
-
 #include <stdio.h>
 #include <sys/types.h>
 

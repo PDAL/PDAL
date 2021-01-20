@@ -34,8 +34,6 @@
 
 #pragma once
 
-#define NOMINMAX
-
 #include <iostream>
 
 #include <pdal/Reader.hpp>
