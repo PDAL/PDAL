@@ -117,6 +117,7 @@ private:
     StringList m_ignoreVLROption;
     bool m_useEbVlr;
     point_count_t m_start;
+    bool m_fixNames;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize(PointTableRef table)

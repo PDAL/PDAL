@@ -49,3 +49,12 @@ jobs:
       with:
         name: ${{ matrix.platform }}-conda-package
         path: ./pdal-feedstock/packages/
+
+    - name: Deploy to pdal-master Conda channel
+      if: github.ref == 'refs/heads/master'
+      shell: bash -l {0}
+      env:
+        ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+      run: |
+          source ../scripts/ci/conda/upload.sh || true
+      working-directory: ./pdal-feedstock

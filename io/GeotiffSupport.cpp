@@ -39,6 +39,33 @@
 #include <geo_normalize.h>
 #include <geo_simpletags.h>
 
+namespace pdal
+{
+
+
+// Utility functor with accompanying to print GeoTIFF directory.
+struct geotiff_dir_printer
+{
+    geotiff_dir_printer() {}
+
+    std::string output() const { return m_oss.str(); }
+    std::string::size_type size() const { return m_oss.str().size(); }
+
+    void operator()(char* data, void* /*aux*/)
+    {
+
+        if (0 != data)
+        {
+            m_oss << data;
+        }
+    }
+
+private:
+    std::stringstream m_oss;
+};
+
+}
+
 PDAL_C_START
 
 // These functions are available from GDAL, but they
@@ -47,13 +74,19 @@ char PDAL_DLL * GTIFGetOGISDefn(GTIF*, GTIFDefn*);
 int PDAL_DLL GTIFSetFromOGISDefn(GTIF*, const char*);
 void VSIFree(void *data);
 
+int PDALGeoTIFFPrint(char* data, void* aux)
+{
+    pdal::geotiff_dir_printer* printer = reinterpret_cast<pdal::geotiff_dir_printer*>(aux);
+    (*printer)(data, 0);
+    return static_cast<int>(printer->size());
+}
+
 PDAL_C_END
 
 #include <io/LasVLR.hpp>
 
 namespace pdal
 {
-
 namespace
 {
 
@@ -152,6 +185,12 @@ GeotiffSrs::GeotiffSrs(const std::vector<uint8_t>& directoryRec,
             VSIFree(wkt);
         }
     }
+
+    geotiff_dir_printer geotiff_printer;
+    GTIFPrint(ctx.gtiff, PDALGeoTIFFPrint, &geotiff_printer);
+
+    m_gtiff_print_string = geotiff_printer.output();
+
 }
 
 
