@@ -57,84 +57,51 @@ std::string GpsTimeConvert::getName() const
 
 void GpsTimeConvert::addArgs(ProgramArgs& args)
 {
-    args.add("conversion", "time conversion type", m_inputType).setPositional();
-    args.add("start_date", "GMT start date of data collect", m_inputDate, "");
+    args.add("conversion", "time conversion type",
+            m_conversion).setPositional();
+    args.add("start_date", "GMT start date of data collect",
+            m_strDate, "");
     args.add("wrap", "reset output week seconds to zero on Sundays",
-             m_inputWrap, "False");
+             m_wrap, false);
     args.add("wrapped", "input weeks seconds reset to zero on Sundays",
-             m_inputWrapped, "False");
+             m_wrapped, false);
 }
 
 
 void GpsTimeConvert::initialize()
 {
-    // check for valid conversion type
-    if (Utils::iequals(m_inputType, "ws2gst"))
-        m_validType = "ws2gst";
-    else if (Utils::iequals(m_inputType, "ws2gt"))
-        m_validType = "ws2gt";
-    else if (Utils::iequals(m_inputType, "gst2ws"))
-        m_validType = "gst2ws";
-    else if (Utils::iequals(m_inputType, "gt2ws"))
-        m_validType = "gt2ws";
-    else if (Utils::iequals(m_inputType, "gst2gt"))
-        m_validType = "gst2gt";
-    else if (Utils::iequals(m_inputType, "gt2gst"))
-        m_validType = "gt2gst";
+    // clean input conversion type
+    if (Utils::iequals(m_conversion, "ws2gst"))
+        m_conversion = "ws2gst";
+    else if (Utils::iequals(m_conversion, "ws2gt"))
+        m_conversion = "ws2gt";
+    else if (Utils::iequals(m_conversion, "gst2ws"))
+        m_conversion = "gst2ws";
+    else if (Utils::iequals(m_conversion, "gt2ws"))
+        m_conversion = "gt2ws";
+    else if (Utils::iequals(m_conversion, "gst2gt"))
+        m_conversion = "gst2gt";
+    else if (Utils::iequals(m_conversion, "gt2gst"))
+        m_conversion = "gt2gst";
     else
         throwError("Invalid conversion type.");
 
     // if converting from week seconds, 'start_date' is required and must be in
     // YYYY-MM-DD format
-    if ((m_validType == "ws2gst") || (m_validType == "ws2gt"))
+    if ((m_conversion == "ws2gst") || (m_conversion == "ws2gt"))
     {
-        if (m_inputDate == "")
+        if (m_strDate == "")
             Stage::throwError("'start_date' option is required.");
 
-        m_validDate = {};
-        std::istringstream ss(m_inputDate);
-        ss >> std::get_time(&m_validDate, "%Y-%m-%d");
+        m_tmDate = {};
+        std::istringstream ss(m_strDate);
+        ss >> std::get_time(&m_tmDate, "%Y-%m-%d");
         if (ss.fail())
             Stage::throwError("'start_date' must be in YYYY-MM-DD format.");
         else
-            std::mktime(&m_validDate);
-    }
-
-    // option to wrap output week seconds must be 'true' or 'false'
-    if ((m_validType == "gst2ws") || (m_validType == "gt2ws"))
-    {
-        if (Utils::iequals(m_inputWrap, "true"))
-            m_validWrap = true;
-        else if (Utils::iequals(m_inputWrap, "false"))
-            m_validWrap = false;
-        else
-            throwError("wrap option must be either 'true' or 'false'.");
-    }
-
-    // option specifying whether input week seconds are wrapped
-    // must be 'true' or 'false'
-    if ((m_validType == "ws2gst") || (m_validType == "ws2gt"))
-    {
-        if (Utils::iequals(m_inputWrapped, "true"))
-            m_validWrapped = true;
-        else if (Utils::iequals(m_inputWrapped, "false"))
-            m_validWrapped = false;
-        else
-            throwError("wrapped option must be either 'true' or 'false'.");
+            std::mktime(&m_tmDate);
     }
 }
-
-
-// bool GpsTimeConvert::isNegative(double delta)
-// {
-//     return (delta < 0);
-// }
-
-
-// bool GpsTimeConvert::isGreaterEqual(double second)
-// {
-//     return (second >= 60*60*24*7);
-// }
 
 
 std::tm GpsTimeConvert::gpsTime2Date(const double seconds)
@@ -159,6 +126,7 @@ std::tm GpsTimeConvert::gpsTime2Date(const double seconds)
 
     return gpsZero;
 }
+
 
 int GpsTimeConvert::weekStartGpsSeconds(std::tm date)
 {
@@ -189,143 +157,115 @@ int GpsTimeConvert::weekStartGpsSeconds(std::tm date)
     return duration.count();
 }
 
-void GpsTimeConvert::unwrapWeekSeconds(std::vector<double> &times)
+
+void GpsTimeConvert::unwrapWeekSeconds(PointView& view)
 {
-    auto isNegative = [] (double delta)
+    // any decrease in time is interpreted as a week rollover
+    for (PointId i = 0; i < (view.size()-1); ++i)
     {
-        return (delta < 0);
-    };
-
-    // check for time decrease
-    std::vector<double> deltas;
-    deltas.resize(m_numPoints);
-
-    std::adjacent_difference (times.begin(), times.end(), deltas.begin());
-    std::vector<double>::iterator it = std::find_if(deltas.begin(),
-                                       deltas.end(),
-                                       isNegative);
-
-    // following a time decrease, increment all times by 604800
-    PointId idx = std::distance(deltas.begin(), it);
-    while (it != deltas.end())
-    {
-        for (PointId i=idx; i<m_numPoints; i++)
-            times[i] += 60*60*24*7;
-
-        // check for time decrease again
-        std::adjacent_difference (times.begin(), times.end(), deltas.begin());
-        it = std::find_if(deltas.begin(), deltas.end(), isNegative);
-        idx = std::distance(deltas.begin(), it);
+        if (view.getFieldAs<double>(Dimension::Id::GpsTime, i+1) <
+            view.getFieldAs<double>(Dimension::Id::GpsTime, i))
+        {
+            for (PointId j = i+1; j < view.size(); ++j)
+            {
+                double t = view.getFieldAs<double>(Dimension::Id::GpsTime, j);
+                view.setField(Dimension::Id::GpsTime, j, t+604800);
+            }
+            --i; // decrement to re-check if the condition still exists
+        }
     }
 }
 
-void GpsTimeConvert::wrapWeekSeconds(std::vector<double> &times)
+
+void GpsTimeConvert::wrapWeekSeconds(PointView& view)
 {
-    auto isGreaterEqual = [] (double second)
+    // a time greater than or equal to 604800 indicates a new week has started
+    for (PointId i = 0; i < view.size(); ++i)
     {
-        return (second >= 60*60*24*7);
-    };
-
-    std::vector<double>::iterator it = std::find_if(times.begin(),
-                                       times.end(),
-                                       isGreaterEqual);
-
-    // following a time greater than 604800, decrement all times by 604800
-    PointId idx = std::distance(times.begin(), it);
-    while (it != times.end())
-    {
-        for (PointId i=idx; i<m_numPoints; i++)
-            times[i] -= 60*60*24*7;
-
-        // check for excess time again
-        it = std::find_if(times.begin(), times.end(), isGreaterEqual);
-        idx = std::distance(times.begin(), it);
+        if (view.getFieldAs<double>(Dimension::Id::GpsTime, i) >= 604800)
+        {
+            for (PointId j = i; j < view.size(); ++j)
+            {
+                double t = view.getFieldAs<double>(Dimension::Id::GpsTime, j);
+                view.setField(Dimension::Id::GpsTime, j, t-604800);
+            }
+            --i; // decrement to re-check if the condition still exists
+        }
     }
 }
 
-void GpsTimeConvert::weekSeconds2GpsTime(std::vector<double> &times)
+
+void GpsTimeConvert::weekSeconds2GpsTime(PointView& view)
 {
-    // handle any new week time resets
-    if (m_validWrapped)
-        unwrapWeekSeconds(times);
+    // handle wrapped week seconds
+    if (m_wrapped)
+        unwrapWeekSeconds(view);
 
     // seconds from GPS zero to first day of week
-    int numSeconds = weekStartGpsSeconds(m_validDate);
+    int numSeconds = weekStartGpsSeconds(m_tmDate);
 
     // adjust for gps standard time
-    if (Utils::iequals(m_validType, "ws2gst"))
+    if (m_conversion == "ws2gst")
         numSeconds -= 1000000000;
 
     // add to week seconds
-    for (PointId i=0; i<m_numPoints; i++)
-        times[i] += numSeconds;
+    for (PointId i = 0; i < view.size(); ++i)
+    {
+        double t = view.getFieldAs<double>(Dimension::Id::GpsTime, i);
+        view.setField(Dimension::Id::GpsTime, i, t+numSeconds);
+    }
 }
 
-void GpsTimeConvert::gpsTime2WeekSeconds(std::vector<double> &times)
+
+void GpsTimeConvert::gpsTime2WeekSeconds(PointView& view)
 {
-    // gps standard time --> gps time
-    if (Utils::iequals(m_validType, "gst2ws"))
-    {
-        for (PointId i=0; i<m_numPoints; i++)
-            times[i] += 1000000000;
-    }
+    int tOffset = 0;
+    if (m_conversion == "gst2ws")
+        tOffset = 1000000000;
 
     // date of first time
-    std::tm firstDate = gpsTime2Date(times[0]);
+    double t = view.getFieldAs<double>(Dimension::Id::GpsTime, 0) + tOffset;
+    std::tm firstDate = gpsTime2Date(t);
 
     // seconds from GPS zero to first day of week
-    const int numSeconds = weekStartGpsSeconds(firstDate);
+    int numSeconds = weekStartGpsSeconds(firstDate);
+    numSeconds -= tOffset;
 
     // strip off time to first day of week
-    for (PointId i=0; i<m_numPoints; i++)
-        times[i] -= numSeconds;
+    for (PointId i = 0; i < view.size(); ++i)
+    {
+        double t = view.getFieldAs<double>(Dimension::Id::GpsTime, i);
+        view.setField(Dimension::Id::GpsTime, i, t-numSeconds);
+    }
 
-    // reset week seconds to zero if >= 604800
-    if (m_validWrap)
-        wrapWeekSeconds(times);
+    // wrap week seconds
+    if (m_wrap)
+        wrapWeekSeconds(view);
 }
 
-void GpsTimeConvert::gpsTime2GpsTime(std::vector<double> &times)
+
+void GpsTimeConvert::gpsTime2GpsTime(PointView& view)
 {
-    if (Utils::iequals(m_validType, "gst2gt"))
+    double tOffset = 1000000000;
+    if (m_conversion == "gt2gst")
+        tOffset *= -1;
+
+    for (PointId i = 0; i < view.size(); ++i)
     {
-        for (PointId i=0; i<m_numPoints; i++)
-            times[i] += 1000000000;
-    }
-    if (Utils::iequals(m_validType, "gt2gst"))
-    {
-        for (PointId i=0; i<m_numPoints; i++)
-            times[i] -= 1000000000;
+        double t = view.getFieldAs<double>(Dimension::Id::GpsTime, i);
+        view.setField(Dimension::Id::GpsTime, i, t+tOffset);
     }
 }
 
-PointViewSet GpsTimeConvert::run(PointViewPtr inView)
+
+void GpsTimeConvert::filter(PointView& view)
 {
-    // get times
-    std::vector<double> times;
-    m_numPoints = inView->size();
-    times.reserve(m_numPoints);
-    for (PointId i=0; i<m_numPoints; i++)
-        times.push_back(inView->point(i).getFieldAs<double>(Dimension::Id::GpsTime));
-
-    // convert times
-    if (Utils::iequals(m_validType, "ws2gst")
-            || Utils::iequals(m_validType, "ws2gt"))
-        weekSeconds2GpsTime(times);
-    else if (Utils::iequals(m_validType, "gst2ws")
-             || Utils::iequals(m_validType, "gt2ws"))
-        gpsTime2WeekSeconds(times);
-    else
-        gpsTime2GpsTime(times);
-
-    // update inView times
-    for (PointId i=0; i<m_numPoints; i++)
-        inView->setField(Dimension::Id::GpsTime, i, times[i]);
-
-    PointViewSet outViewSet;
-    outViewSet.insert(inView);
-
-    return outViewSet;
+    if (m_conversion == "ws2gst" || m_conversion == "ws2gt")
+        weekSeconds2GpsTime(view);
+    else if (m_conversion == "gst2ws" || m_conversion == "gt2ws")
+        gpsTime2WeekSeconds(view);
+    else if (m_conversion == "gst2gt" || m_conversion == "gt2gst")
+        gpsTime2GpsTime(view);
 }
 
 } // namespace pdal

@@ -47,34 +47,24 @@ public:
     std::string getName() const;
 
 private:
-    std::string m_inputType;
-    std::string m_inputDate;
-    std::string m_inputWrap;
-    std::string m_inputWrapped;
+    std::string m_conversion;
+    std::string m_strDate;
+    std::tm m_tmDate;
+    bool m_wrap;
+    bool m_wrapped;
 
-    std::string m_validType;
-    std::tm m_validDate;
-    bool m_validWrap;
-    bool m_validWrapped;
-
-    PointId m_numPoints;
-
-    void weekSeconds2GpsTime(std::vector<double>& times);
-    void gpsTime2WeekSeconds(std::vector<double>& times);
-    void gpsTime2GpsTime(std::vector<double>& times);
+    void weekSeconds2GpsTime(PointView& view);
+    void gpsTime2WeekSeconds(PointView& view);
+    void gpsTime2GpsTime(PointView& view);
 
     std::tm gpsTime2Date(const double seconds);
     int weekStartGpsSeconds(std::tm date);
-    //static bool isNegative(double delta);
-    //static bool isGreaterEqual(double second);
-    void unwrapWeekSeconds(std::vector<double>& times);
-    void wrapWeekSeconds(std::vector<double>& times);
+    void unwrapWeekSeconds(PointView& view);
+    void wrapWeekSeconds(PointView& view);
 
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
-    virtual PointViewSet run(PointViewPtr view);
-    //virtual void filter(PointView& view);
-    //virtual bool processOne(PointRef& point);
+    virtual void filter(PointView& view);
 
     GpsTimeConvert& operator=(const GpsTimeConvert&); // not implemented
     GpsTimeConvert(const GpsTimeConvert&); // not implemented
