@@ -108,7 +108,7 @@ LasReader::LasReader() : m_args(new Args), m_p(new Private)
 LasReader::~LasReader()
 {
 #ifdef PDAL_HAVE_LAZPERF
-    delete m_decompressor;
+    delete m_p->decompressor;
 #endif
 }
 
@@ -324,15 +324,15 @@ void LasReader::ready(PointTableRef table)
 #ifdef PDAL_HAVE_LAZPERF
         if (m_compression == "LAZPERF")
         {
-            delete m_decompressor;
+            delete m_p->decompressor;
 
             const LasVLR *vlr = m_p->header.findVlr(LASZIP_USER_ID,
                 LASZIP_RECORD_ID);
             if (!vlr)
                 throwError("LAZ file missing required laszip VLR.");
-            m_decompressor = new LazPerfVlrDecompressor(*stream,
+            m_p->decompressor = new LazPerfVlrDecompressor(*stream,
                 vlr->data(), m_p->header.pointOffset());
-            m_decompressorBuf.resize(m_decompressor->pointSize());
+            m_p->decompressorBuf.resize(m_p->decompressor->pointSize());
         }
 #endif
 
@@ -660,8 +660,8 @@ bool LasReader::processOne(PointRef& point)
 #ifdef PDAL_HAVE_LAZPERF
         if (m_compression == "LAZPERF")
         {
-            m_decompressor->decompress(m_decompressorBuf.data());
-            loadPoint(point, m_decompressorBuf.data(), pointLen);
+            m_p->decompressor->decompress(m_p->decompressorBuf.data());
+            loadPoint(point, m_p->decompressorBuf.data(), pointLen);
         }
 #endif
 #if !defined(PDAL_HAVE_LAZPERF) && !defined(PDAL_HAVE_LASZIP)
