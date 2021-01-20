@@ -41,6 +41,7 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/pdal_features.hpp>
 #include <io/LasReader.hpp>
+#include <io/LasHeader.hpp>
 #include "Support.hpp"
 
 using namespace pdal;

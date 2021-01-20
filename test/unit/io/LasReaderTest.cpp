@@ -39,6 +39,7 @@
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/Streamable.hpp>
+#include <io/LasHeader.hpp>
 #include <io/LasReader.hpp>
 #include "Support.hpp"
 
