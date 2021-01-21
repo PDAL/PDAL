@@ -85,6 +85,8 @@ void LasReader::addArgs(ProgramArgs& args)
     args.add("use_eb_vlr", "Use extra bytes VLR for 1.0 - 1.3 files",
         m_useEbVlr);
     args.add("ignore_vlr", "VLR userid/recordid to ignore", m_ignoreVLROption);
+    args.add("fix_dims", "Make invalid dimension names valid by changing "
+        "invalid characters to '_'", m_fixNames, true);
 }
 
 
@@ -584,6 +586,8 @@ void LasReader::addDimensions(PointLayoutPtr layout)
             continue;
         if (dim.m_dimType.m_xform.nonstandard())
             type = Dimension::Type::Double;
+        if (m_fixNames)
+            dim.m_name = Dimension::fixName(dim.m_name);
         dim.m_dimType.m_id = layout->registerOrAssignDim(dim.m_name, type);
     }
 }
