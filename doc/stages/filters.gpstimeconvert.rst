@@ -44,7 +44,7 @@ Convert from GPS time to GPS standard time.
           "type":"filters.gpstimeconvert",
           "conversion":"gt2gst"
       },
-      "output".las
+      "output.las"
   ]
 
 Example #2
@@ -57,12 +57,12 @@ Convert from GPS standard time to unwrapped GPS week seconds.
       "input.las",
       {
           "type":"filters.sort",
-          "dimension:"GpsTime",
+          "dimension":"GpsTime",
           "order":"ASC"
       },
       {
           "type":"filters.gpstimeconvert",
-          "conversion:"gst2gws",
+          "conversion":"gst2gws",
           "wrap":false
       }
   ]
