@@ -34,8 +34,6 @@
 
 #include "GpsTimeConvert.hpp"
 
-#include <numeric>
-
 namespace pdal
 {
 
@@ -43,7 +41,7 @@ static PluginInfo const s_info
 {
     "filters.gpstimeconvert",
     "Convert between GPS Time, GPS Standard Time, and GPS Week Seconds",
-    "http://link/to/documentation"
+    "http://pdal.io/stages/filters.gpstimeconvert.html"
 };
 
 CREATE_STATIC_STAGE(GpsTimeConvert, s_info)
@@ -59,7 +57,7 @@ void GpsTimeConvert::addArgs(ProgramArgs& args)
 {
     args.add("conversion", "time conversion type",
             m_conversion).setPositional();
-    args.add("start_date", "GMT start date of data collect",
+    args.add("start_date", "GMT start date of data in 'YYYY-MM-DD' format",
             m_strDate, "");
     args.add("wrap", "reset output week seconds to zero on Sundays",
              m_wrap, false);
@@ -71,14 +69,14 @@ void GpsTimeConvert::addArgs(ProgramArgs& args)
 void GpsTimeConvert::initialize()
 {
     // clean input conversion type
-    if (Utils::iequals(m_conversion, "ws2gst"))
-        m_conversion = "ws2gst";
-    else if (Utils::iequals(m_conversion, "ws2gt"))
-        m_conversion = "ws2gt";
-    else if (Utils::iequals(m_conversion, "gst2ws"))
-        m_conversion = "gst2ws";
-    else if (Utils::iequals(m_conversion, "gt2ws"))
-        m_conversion = "gt2ws";
+    if (Utils::iequals(m_conversion, "gws2gst"))
+        m_conversion = "gws2gst";
+    else if (Utils::iequals(m_conversion, "gws2gt"))
+        m_conversion = "gws2gt";
+    else if (Utils::iequals(m_conversion, "gst2gws"))
+        m_conversion = "gst2gws";
+    else if (Utils::iequals(m_conversion, "gt2gws"))
+        m_conversion = "gt2gws";
     else if (Utils::iequals(m_conversion, "gst2gt"))
         m_conversion = "gst2gt";
     else if (Utils::iequals(m_conversion, "gt2gst"))
@@ -88,7 +86,7 @@ void GpsTimeConvert::initialize()
 
     // if converting from week seconds, 'start_date' is required and must be in
     // YYYY-MM-DD format
-    if ((m_conversion == "ws2gst") || (m_conversion == "ws2gt"))
+    if ((m_conversion == "gws2gst") || (m_conversion == "gws2gt"))
     {
         if (m_strDate == "")
             Stage::throwError("'start_date' option is required.");
@@ -205,7 +203,7 @@ void GpsTimeConvert::weekSeconds2GpsTime(PointView& view)
     int numSeconds = weekStartGpsSeconds(m_tmDate);
 
     // adjust for gps standard time
-    if (m_conversion == "ws2gst")
+    if (m_conversion == "gws2gst")
         numSeconds -= 1000000000;
 
     // add to week seconds
@@ -220,7 +218,7 @@ void GpsTimeConvert::weekSeconds2GpsTime(PointView& view)
 void GpsTimeConvert::gpsTime2WeekSeconds(PointView& view)
 {
     int tOffset = 0;
-    if (m_conversion == "gst2ws")
+    if (m_conversion == "gst2gws")
         tOffset = 1000000000;
 
     // date of first time
@@ -260,9 +258,9 @@ void GpsTimeConvert::gpsTime2GpsTime(PointView& view)
 
 void GpsTimeConvert::filter(PointView& view)
 {
-    if (m_conversion == "ws2gst" || m_conversion == "ws2gt")
+    if (m_conversion == "gws2gst" || m_conversion == "gws2gt")
         weekSeconds2GpsTime(view);
-    else if (m_conversion == "gst2ws" || m_conversion == "gt2ws")
+    else if (m_conversion == "gst2gws" || m_conversion == "gt2gws")
         gpsTime2WeekSeconds(view);
     else if (m_conversion == "gst2gt" || m_conversion == "gt2gst")
         gpsTime2GpsTime(view);

@@ -61,7 +61,7 @@ TEST(ws2gtTest, HandlesWrappedWeekSeconds)
     reader.addView(inView);
 
     Options options;
-    options.add("conversion", "ws2gt");
+    options.add("conversion", "gws2gt");
     options.add("start_date", "2020-12-12");
     options.add("wrapped", true);
 
@@ -92,7 +92,7 @@ TEST(ws2gtTest, HandlesUnwrappedWeekSeconds)
     reader.addView(view);
 
     Options options;
-    options.add("conversion", "ws2gt");
+    options.add("conversion", "gws2gt");
     options.add("start_date", "2020-12-12");
     options.add("wrapped", false);
 
@@ -123,7 +123,7 @@ TEST(ws2gstTest, HandlesWrappedWeekSeconds)
     reader.addView(inView);
 
     Options options;
-    options.add("conversion", "ws2gst");
+    options.add("conversion", "gws2gst");
     options.add("start_date", "2020-12-12");
     options.add("wrapped", true);
 
@@ -154,7 +154,7 @@ TEST(ws2gstTest, HandlesUnwrappedWeekSeconds)
     reader.addView(view);
 
     Options options;
-    options.add("conversion", "ws2gst");
+    options.add("conversion", "gws2gst");
     options.add("start_date", "2020-12-12");
     options.add("wrapped", false);
 
@@ -185,7 +185,7 @@ TEST(gt2wsTest, WrapsWeekSeconds)
     reader.addView(view);
 
     Options options;
-    options.add("conversion", "gt2ws");
+    options.add("conversion", "gt2gws");
     options.add("wrap", true);
 
     GpsTimeConvert filter;
@@ -215,7 +215,7 @@ TEST(gt2wsTest, DoesNotWrapWeekSeconds)
     reader.addView(view);
 
     Options options;
-    options.add("conversion", "gt2ws");
+    options.add("conversion", "gt2gws");
     options.add("wrap", false);
 
     GpsTimeConvert filter;
@@ -245,7 +245,7 @@ TEST(gst2wsTest, WrapsWeekSeconds)
     reader.addView(view);
 
     Options options;
-    options.add("conversion", "gst2ws");
+    options.add("conversion", "gst2gws");
     options.add("wrap", true);
 
     GpsTimeConvert filter;
@@ -275,7 +275,7 @@ TEST(gst2wsTest, DoesNotWrapWeekSeconds)
     reader.addView(view);
 
     Options options;
-    options.add("conversion", "gst2ws");
+    options.add("conversion", "gst2gws");
     options.add("wrap", false);
 
     GpsTimeConvert filter;
