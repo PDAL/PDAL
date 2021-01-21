@@ -56,9 +56,9 @@ std::string GpsTimeConvert::getName() const
 void GpsTimeConvert::addArgs(ProgramArgs& args)
 {
     args.add("conversion", "time conversion type",
-            m_conversion).setPositional();
+             m_conversion).setPositional();
     args.add("start_date", "GMT start date of data in 'YYYY-MM-DD' format",
-            m_strDate, "");
+             m_strDate, "");
     args.add("wrap", "reset output week seconds to zero on Sundays",
              m_wrap, false);
     args.add("wrapped", "input weeks seconds reset to zero on Sundays",
@@ -162,7 +162,7 @@ void GpsTimeConvert::unwrapWeekSeconds(PointView& view)
     for (PointId i = 0; i < (view.size()-1); ++i)
     {
         if (view.getFieldAs<double>(Dimension::Id::GpsTime, i+1) <
-            view.getFieldAs<double>(Dimension::Id::GpsTime, i))
+                view.getFieldAs<double>(Dimension::Id::GpsTime, i))
         {
             for (PointId j = i+1; j < view.size(); ++j)
             {

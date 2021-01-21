@@ -46,7 +46,7 @@ void checkTime(PointViewPtr view, int index, double expected)
     EXPECT_DOUBLE_EQ(expected, actual);
 }
 
-TEST(ws2gtTest, HandlesWrappedWeekSeconds)
+TEST(gws2gtTest, HandlesWrappedWeekSeconds)
 {
     using namespace Dimension;
 
@@ -77,7 +77,7 @@ TEST(ws2gtTest, HandlesWrappedWeekSeconds)
     checkTime(outView, 1, 1291852800.5);
 }
 
-TEST(ws2gtTest, HandlesUnwrappedWeekSeconds)
+TEST(gws2gtTest, HandlesUnwrappedWeekSeconds)
 {
     using namespace Dimension;
 
@@ -108,7 +108,7 @@ TEST(ws2gtTest, HandlesUnwrappedWeekSeconds)
     checkTime(outView, 1, 1291852800.5);
 }
 
-TEST(ws2gstTest, HandlesWrappedWeekSeconds)
+TEST(gws2gstTest, HandlesWrappedWeekSeconds)
 {
     using namespace Dimension;
 
@@ -139,7 +139,7 @@ TEST(ws2gstTest, HandlesWrappedWeekSeconds)
     checkTime(outView, 1, 291852800.5);
 }
 
-TEST(ws2gstTest, HandlesUnwrappedWeekSeconds)
+TEST(gws2gstTest, HandlesUnwrappedWeekSeconds)
 {
     using namespace Dimension;
 
@@ -170,7 +170,7 @@ TEST(ws2gstTest, HandlesUnwrappedWeekSeconds)
     checkTime(outView, 1, 291852800.5);
 }
 
-TEST(gt2wsTest, WrapsWeekSeconds)
+TEST(gt2gwsTest, WrapsWeekSeconds)
 {
     using namespace Dimension;
 
@@ -200,7 +200,7 @@ TEST(gt2wsTest, WrapsWeekSeconds)
     checkTime(outView, 1, 0.5);
 }
 
-TEST(gt2wsTest, DoesNotWrapWeekSeconds)
+TEST(gt2gwsTest, DoesNotWrapWeekSeconds)
 {
     using namespace Dimension;
 
@@ -230,7 +230,7 @@ TEST(gt2wsTest, DoesNotWrapWeekSeconds)
     checkTime(outView, 1, 604800.5);
 }
 
-TEST(gst2wsTest, WrapsWeekSeconds)
+TEST(gst2gwsTest, WrapsWeekSeconds)
 {
     using namespace Dimension;
 
@@ -260,7 +260,7 @@ TEST(gst2wsTest, WrapsWeekSeconds)
     checkTime(outView, 1, 0.5);
 }
 
-TEST(gst2wsTest, DoesNotWrapWeekSeconds)
+TEST(gst2gwsTest, DoesNotWrapWeekSeconds)
 {
     using namespace Dimension;
 
