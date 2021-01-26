@@ -176,12 +176,10 @@ void DracoReader::addOneDimension(Dimension::Id id, const draco::PointAttribute*
     draco::GeometryAttribute::Type dracoAtt = attr->attribute_type();
     Dimension::Type pdalType = getPdalType(dt);
     int offset = draco::DataTypeLength(dt);
-    const uint8_t *address = attr->GetAddressOfMappedIndex(draco::PointIndex(0));
     layout->registerDim(id);
 
-    const DimensionInfo dimInfo = { id, dracoAtt, pdalType, index, offset, attNum, address };
+    const DimensionInfo dimInfo = { id, attr, pdalType, attNum };
     m_dimensions.push_back(dimInfo);
-
 }
 
 void DracoReader::addDimensions(PointLayoutPtr layout)
@@ -317,30 +315,21 @@ void DracoReader::ready(PointTableRef)
 }
 
 
-bool DracoReader::processOne(PointViewPtr view, point_count_t pid)
-{
-
-    // point_count_t pid = point.pointId();
-    for (auto& dim: m_dimensions)
-    {
-        //should get the attribute regardless of if it's a multi-dim attribute
-        const int offset = dim.typeLength * (pid + dim.attNum);
-        view->setField(dim.pdalId, dim.pdalType, pid, dim.address+offset);
-    }
-
-    return true;
-}
-
-
 point_count_t DracoReader::read(PointViewPtr view, point_count_t count)
 {
-    PointRef point = view->point(0);
-    PointId id;
-    for (id = 0; id < count; ++id)
+    PointId id = view->size();
+    point_count_t numRead = 0;
+
+    while (numRead < count)
     {
-        point.setPointId(id);
-        if (!processOne(view, point.pointId()))
-            break;
+        for (auto& dim: m_dimensions)
+        {
+            const uint8_t *src = dim.attr->GetAddressOfMappedIndex(draco::PointIndex(numRead)) +
+                draco::DataTypeLength(dim.attr->data_type()) * dim.attNum;
+            view->setField(dim.pdalId, dim.pdalType, id, src);
+        }
+        ++id;
+        ++numRead;
     }
     return id;
 }

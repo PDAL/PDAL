@@ -56,8 +56,6 @@ private:
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void prepared(PointTableRef);
     virtual void ready(PointTableRef);
-    // virtual bool processOne(PointRef& point);
-    bool processOne(PointViewPtr view, point_count_t pid);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual void done(PointTableRef table);
 
@@ -66,12 +64,9 @@ private:
     //to that structure
     struct DimensionInfo {
         Dimension::Id pdalId;
-        draco::GeometryAttribute::Type dracoAtt;
+        const draco::PointAttribute *attr;
         Dimension::Type pdalType;
-        int attIndex;//draco attribute index
-        int typeLength;
         int attNum;//eg POSITION = [ X, Y, Z ], Y attNum would be 1
-        const uint8_t *address;
     };
     std::vector<DimensionInfo> m_dimensions;
     DracoReader(const DracoReader&) = delete;
@@ -84,7 +79,6 @@ private:
     bool m_textureW;
 
     std::map<Dimension::Id, std::vector<double>> m_generics;
-
 };
 
 } // namespace pdal

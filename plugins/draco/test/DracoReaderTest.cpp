@@ -154,9 +154,6 @@ TEST(DracoReaderTest, accuracy)
         double x = v->getFieldAs<double>(Dimension::Id::X, i);
         double y = v->getFieldAs<double>(Dimension::Id::Y, i);
         double z = v->getFieldAs<double>(Dimension::Id::Z, i);
-        std::cout << "x " << x << std::endl;
-        std::cout << "y " << y << std::endl;
-        std::cout << "z " << z << std::endl;
         EXPECT_TRUE(bounds.contains(x, y, z));
     }
 
