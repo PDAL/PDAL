@@ -71,8 +71,8 @@ std::string DracoWriter::getName() const { return s_info.name; }
 void DracoWriter::addArgs(ProgramArgs& args)
 {
     args.add("filename", "Output filename", m_filename).setPositional();
-    args.add("dimensions", "Map of pdal to draco dimensions ", m_userDimJson);
-    args.add("quantization", "Amount of quantization during draco encoding", m_userQuant);
+    args.add("dimensions", "Json mapping of pdal dimensions to desired data types", m_userDimJson);
+    args.add("quantization", "Json mapping of Draco Attributes to desired quantization level", m_userQuant);
 }
 
 struct FileStreamDeleter
