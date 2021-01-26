@@ -52,45 +52,6 @@ static PluginInfo const s_info
 CREATE_SHARED_STAGE(DracoReader, s_info)
 std::string DracoReader::getName() const { return s_info.name; }
 
-// Returns the attribute data in |attr| as an array of type T.
-template <typename T>
-bool CopyAttributeData(point_count_t num_points,
-                  const draco::PointAttribute *attr,
-                  std::vector<T>& data)
-{
-    const int num_components = attr->num_components();
-    data.resize(num_points * num_components, T(0));
-
-    for (draco::PointIndex i(0); i < num_points; ++i) {
-        const draco::AttributeValueIndex val_index = attr->mapped_index(i);
-        bool got_data = false;
-        switch (num_components) {
-            case 1:
-                got_data = attr->ConvertValue<T, 1>(val_index,
-                                        data.data() + i.value() * num_components);
-                break;
-            case 2:
-                got_data = attr->ConvertValue<T, 2>(val_index,
-                                        data.data() + i.value() * num_components);
-                break;
-            case 3:
-                got_data = attr->ConvertValue<T, 3>(val_index,
-                                        data.data() + i.value() * num_components);
-                break;
-            case 4:
-                got_data = attr->ConvertValue<T, 4>(val_index,
-                                        data.data() + i.value() * num_components);
-                break;
-            default:
-            break;
-    }
-    if (!got_data)
-       throw pdal_error("CopyAttributeData unable to read data for point ");
-    }
-
-    return true;
-}
-
 Dimension::Type getPdalType(draco::DataType t)
 {
     using namespace draco;
@@ -174,8 +135,9 @@ void DracoReader::addOneDimension(Dimension::Id id, const draco::PointAttribute*
     draco::GeometryAttribute::Type dracoAtt = attr->attribute_type();
     Dimension::Type pdalType = getPdalType(dt);
     int offset = draco::DataTypeLength(dt);
-    layout->registerDim(id);
 
+    //add to pdal layout and dim vector
+    layout->registerDim(id);
     const DimensionInfo dimInfo = { id, attr, pdalType, attNum };
     m_dimensions.push_back(dimInfo);
 }
@@ -265,53 +227,9 @@ void DracoReader::addDimensions(PointLayoutPtr layout)
     }
 }
 
-
 void DracoReader::ready(PointTableRef)
 {
-    // using namespace draco;
-    // for (int at_id=0; at_id < m_pc->num_attributes(); ++at_id)
-    // {
-    //     const PointAttribute* attr = m_pc->GetAttributeByUniqueId(at_id);
-    //     draco::DataType dt = attr->data_type();
-    //     draco::GeometryAttribute::Type at = attr->attribute_type();
-
-    //     std::string name;
-    //     const AttributeMetadata* attr_metadata = m_pc->GetAttributeMetadataByAttributeId(at_id);
-    //     if (attr_metadata)
-    //     {
-    //         attr_metadata->GetEntryString("name", &name);
-    //     }
-
-    //     switch (at)
-    //     {
-    //         case GeometryAttribute::POSITION:
-    //             CopyAttributeData<double>(m_count, attr, m_positions);
-    //             break;
-    //         case GeometryAttribute::NORMAL:
-    //             CopyAttributeData<double>(m_count, attr, m_normals);
-    //             break;
-    //         case GeometryAttribute::COLOR:
-    //             CopyAttributeData<uint16_t>(m_count, attr, m_colors);
-    //         case GeometryAttribute::TEX_COORD:
-    //             CopyAttributeData<double>(m_count, attr, m_textures);
-    //             break;
-
-    //         case GeometryAttribute::GENERIC:
-    //             if (name.length() > 0)
-    //             {
-    //                 Dimension::Id id = Dimension::id(name);
-    //                 CopyAttributeData<double>(1, attr, m_generics.at(id));
-    //             }
-
-    //             break;
-
-    //         default:
-    //             // Unsupported draco domain types
-    //             throw pdal_error("Unknown Geometry Attribute Type");
-    //     }
-    // }
 }
-
 
 point_count_t DracoReader::read(PointViewPtr view, point_count_t count)
 {

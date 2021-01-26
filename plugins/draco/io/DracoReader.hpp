@@ -59,14 +59,11 @@ private:
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual void done(PointTableRef table);
 
-    //TODO create structure like { Dimension::Id, DracoDimension, DracoTypeCovertedToPdalType, offset }
-    //when going through initialize step make sure to add the correct dimensions
-    //to that structure
     struct DimensionInfo {
         Dimension::Id pdalId;
         const draco::PointAttribute *attr;
         Dimension::Type pdalType;
-        int attNum;//eg POSITION = [ X, Y, Z ], Y attNum would be 1
+        int attNum;//eg POSITION = [ X, Y, Z ], Y's attNum would be 1
     };
     std::vector<DimensionInfo> m_dimensions;
     DracoReader(const DracoReader&) = delete;
@@ -78,7 +75,6 @@ private:
     std::unique_ptr<draco::PointCloud> m_pc;
     bool m_textureW;
 
-    std::map<Dimension::Id, std::vector<double>> m_generics;
 };
 
 } // namespace pdal
