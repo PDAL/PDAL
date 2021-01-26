@@ -54,7 +54,7 @@ std::string DracoReader::getName() const { return s_info.name; }
 
 // Returns the attribute data in |attr| as an array of type T.
 template <typename T>
-bool CopyAttributeData(int num_points,
+bool CopyAttributeData(point_count_t num_points,
                   const draco::PointAttribute *attr,
                   std::vector<T>& data)
 {
@@ -62,27 +62,27 @@ bool CopyAttributeData(int num_points,
     data.resize(num_points * num_components, T(0));
 
     for (draco::PointIndex i(0); i < num_points; ++i) {
-    const draco::AttributeValueIndex val_index = attr->mapped_index(i);
-    bool got_data = false;
-    switch (num_components) {
-        case 1:
-            got_data = attr->ConvertValue<T, 1>(val_index,
-                                                data.data() + i.value() * num_components);
+        const draco::AttributeValueIndex val_index = attr->mapped_index(i);
+        bool got_data = false;
+        switch (num_components) {
+            case 1:
+                got_data = attr->ConvertValue<T, 1>(val_index,
+                                        data.data() + i.value() * num_components);
+                break;
+            case 2:
+                got_data = attr->ConvertValue<T, 2>(val_index,
+                                        data.data() + i.value() * num_components);
+                break;
+            case 3:
+                got_data = attr->ConvertValue<T, 3>(val_index,
+                                        data.data() + i.value() * num_components);
+                break;
+            case 4:
+                got_data = attr->ConvertValue<T, 4>(val_index,
+                                        data.data() + i.value() * num_components);
+                break;
+            default:
             break;
-        case 2:
-            got_data = attr->ConvertValue<T, 2>(val_index,
-                                                data.data() + i.value() * num_components);
-            break;
-        case 3:
-            got_data = attr->ConvertValue<T, 3>(val_index,
-                                                data.data() + i.value() * num_components);
-            break;
-        case 4:
-            got_data = attr->ConvertValue<T, 4>(val_index,
-                                                data.data() + i.value() * num_components);
-            break;
-        default:
-        break;
     }
     if (!got_data)
        throw pdal_error("CopyAttributeData unable to read data for point ");
@@ -134,7 +134,6 @@ void DracoReader::prepared(PointTableRef table)
             "not provided.");
 }
 
-
 void DracoReader::initialize()
 {
     if (!FileUtils::fileExists(m_filename))
@@ -148,20 +147,19 @@ void DracoReader::initialize()
                 std::istreambuf_iterator<char>());
     Utils::closeFile(m_istreamPtr);
 
-    m_draco_buffer.Init(m_data.data(), m_data.size());
+    draco::DecoderBuffer draco_buffer;
+    draco_buffer.Init(m_data.data(), m_data.size());
 
     draco::Decoder decoder;
-    auto geom_status = draco::Decoder::GetEncodedGeometryType(&m_draco_buffer);
+
+    auto geom_status = draco::Decoder::GetEncodedGeometryType(&draco_buffer);
     if (!geom_status.ok())
     {
         return throwError(geom_status.status().error_msg());
     }
-
     const draco::EncodedGeometryType geom_type = geom_status.value();
+    draco::StatusOr<std::unique_ptr<draco::PointCloud>> pc_status = decoder.DecodePointCloudFromBuffer(&draco_buffer);
 
-    draco::Decoder::GetEncodedGeometryType(&m_draco_buffer);
-
-    draco::StatusOr<std::unique_ptr<draco::PointCloud>> pc_status = decoder.DecodePointCloudFromBuffer(&m_draco_buffer);
     if (!pc_status.ok())
     {
         return throwError(pc_status.status().error_msg());
@@ -172,6 +170,19 @@ void DracoReader::initialize()
     m_count = m_pc->num_points();
 }
 
+void DracoReader::addOneDimension(Dimension::Id id, const draco::PointAttribute* attr, PointLayoutPtr layout, int index, int attNum)
+{
+    draco::DataType dt = attr->data_type();
+    draco::GeometryAttribute::Type dracoAtt = attr->attribute_type();
+    Dimension::Type pdalType = getPdalType(dt);
+    int offset = draco::DataTypeLength(dt);
+    uint8_t *address = (attr->buffer())->data();
+    layout->registerDim(id);
+
+    const DimensionInfo dimInfo = { id, dracoAtt, pdalType, index, offset, attNum, address };
+    m_dimensions.push_back(dimInfo);
+
+}
 
 void DracoReader::addDimensions(PointLayoutPtr layout)
 {
@@ -184,6 +195,8 @@ void DracoReader::addDimensions(PointLayoutPtr layout)
     for (int i=0; i < m_pc->num_attributes(); ++i)
     {
         const PointAttribute* attr = m_pc->GetAttributeByUniqueId(i);
+        if (attr == nullptr)
+            throw new pdal_error("Invalid draco attribute configuration");
         const AttributeMetadata* attr_metadata = m_pc->GetAttributeMetadataByAttributeId(i);
         DataType dt = attr->data_type();
         GeometryAttribute::Type at = attr->attribute_type();
@@ -207,32 +220,32 @@ void DracoReader::addDimensions(PointLayoutPtr layout)
         {
             case GeometryAttribute::POSITION:
             {
-                layout->registerDim(Dimension::Id::X);
-                layout->registerDim(Dimension::Id::Y);
-                layout->registerDim(Dimension::Id::Z);
+                addOneDimension(Dimension::Id::X, attr, layout, i, 0);
+                addOneDimension(Dimension::Id::Y, attr, layout, i, 1);
+                addOneDimension(Dimension::Id::Z, attr, layout, i, 2);
                 break;
             }
             case GeometryAttribute::NORMAL:
             {
-                layout->registerDim(Dimension::Id::NormalX);
-                layout->registerDim(Dimension::Id::NormalY);
-                layout->registerDim(Dimension::Id::NormalZ);
+                addOneDimension(Dimension::Id::NormalX, attr, layout, i, 0);
+                addOneDimension(Dimension::Id::NormalY, attr, layout, i, 1);
+                addOneDimension(Dimension::Id::NormalZ, attr, layout, i, 2);
                 break;
             }
             case GeometryAttribute::COLOR:
             {
-                layout->registerDim(Dimension::Id::Red);
-                layout->registerDim(Dimension::Id::Green);
-                layout->registerDim(Dimension::Id::Blue);
+                addOneDimension(Dimension::Id::Red, attr, layout, i, 0);
+                addOneDimension(Dimension::Id::Green, attr, layout, i, 1);
+                addOneDimension(Dimension::Id::Blue, attr, layout, i, 2);
             }
             case GeometryAttribute::TEX_COORD:
             {
-                layout->registerDim(Dimension::Id::TextureU);
-                layout->registerDim(Dimension::Id::TextureV);
+                addOneDimension(Dimension::Id::TextureU, attr, layout, i, 0);
+                addOneDimension(Dimension::Id::TextureV, attr, layout, i, 1);
                 if (nc == 3)
                 {
                     m_textureW = true;
-                    layout->registerDim(Dimension::Id::TextureW);
+                    addOneDimension(Dimension::Id::TextureW, attr, layout, i, 2);
                 }
                 break;
             }
@@ -241,104 +254,114 @@ void DracoReader::addDimensions(PointLayoutPtr layout)
             {
                 Dimension::Id id = pdal::Dimension::id(name);
                 if (id != Dimension::Id::Unknown) {
-                    m_generics[id] = std::vector<double>(m_pc->num_points(), 0.0);
-                    layout->registerOrAssignDim(name, getPdalType(dt));
+                    // m_generics[id] = std::vector<double>(m_pc->num_points(), 0.0);
+                    addOneDimension(id, attr, layout, i, 0);
                 }
                 break;
             }
 
             default:
                 // Not supported draco domain types
-                throw pdal_error("Unknown Geometry Attribute Type");
+                std::string attStr = GeometryAttribute::TypeToString(at);
+                throw pdal_error("Gometry Attribute " +
+                                    attStr + " is not a valid Draco attribute");
                 break;
         }
     }
 }
+
 
 void DracoReader::ready(PointTableRef)
 {
-    using namespace draco;
-    for (int at_id=0; at_id < m_pc->num_attributes(); ++at_id)
-    {
-        const PointAttribute* attr = m_pc->GetAttributeByUniqueId(at_id);
-        draco::DataType dt = attr->data_type();
-        draco::GeometryAttribute::Type at = attr->attribute_type();
+    // using namespace draco;
+    // for (int at_id=0; at_id < m_pc->num_attributes(); ++at_id)
+    // {
+    //     const PointAttribute* attr = m_pc->GetAttributeByUniqueId(at_id);
+    //     draco::DataType dt = attr->data_type();
+    //     draco::GeometryAttribute::Type at = attr->attribute_type();
 
-        std::string name;
-        const AttributeMetadata* attr_metadata = m_pc->GetAttributeMetadataByAttributeId(at_id);
-        if (attr_metadata)
-        {
-            attr_metadata->GetEntryString("name", &name);
-        }
+    //     std::string name;
+    //     const AttributeMetadata* attr_metadata = m_pc->GetAttributeMetadataByAttributeId(at_id);
+    //     if (attr_metadata)
+    //     {
+    //         attr_metadata->GetEntryString("name", &name);
+    //     }
 
-        switch (at)
-        {
-            case GeometryAttribute::POSITION:
-                CopyAttributeData<double>(m_count, attr, m_positions);
-                break;
-            case GeometryAttribute::NORMAL:
-                CopyAttributeData<double>(m_count, attr, m_normals);
-                break;
-            case GeometryAttribute::COLOR:
-                CopyAttributeData<uint16_t>(m_count, attr, m_colors);
-            case GeometryAttribute::TEX_COORD:
-                CopyAttributeData<double>(m_count, attr, m_textures);
-                break;
+    //     switch (at)
+    //     {
+    //         case GeometryAttribute::POSITION:
+    //             CopyAttributeData<double>(m_count, attr, m_positions);
+    //             break;
+    //         case GeometryAttribute::NORMAL:
+    //             CopyAttributeData<double>(m_count, attr, m_normals);
+    //             break;
+    //         case GeometryAttribute::COLOR:
+    //             CopyAttributeData<uint16_t>(m_count, attr, m_colors);
+    //         case GeometryAttribute::TEX_COORD:
+    //             CopyAttributeData<double>(m_count, attr, m_textures);
+    //             break;
 
-            case GeometryAttribute::GENERIC:
-                if (name.length() > 0)
-                {
-                    Dimension::Id id = Dimension::id(name);
-                    CopyAttributeData<double>(1, attr, m_generics.at(id));
-                }
+    //         case GeometryAttribute::GENERIC:
+    //             if (name.length() > 0)
+    //             {
+    //                 Dimension::Id id = Dimension::id(name);
+    //                 CopyAttributeData<double>(1, attr, m_generics.at(id));
+    //             }
 
-                break;
+    //             break;
 
-            default:
-                // Unsupported draco domain types
-                throw pdal_error("Unknown Geometry Attribute Type");
-        }
-    }
+    //         default:
+    //             // Unsupported draco domain types
+    //             throw pdal_error("Unknown Geometry Attribute Type");
+    //     }
+    // }
 }
 
 
-bool DracoReader::processOne(PointRef& point)
+bool DracoReader::processOne(PointViewPtr view, point_count_t pid)
 {
-    point_count_t pid = point.pointId();
 
-    if (m_positions.size())
+    // point_count_t pid = point.pointId();
+    for (auto& dim: m_dimensions)
     {
-        point.setField(Dimension::Id::X, m_positions[pid*3]);
-        point.setField(Dimension::Id::Y, m_positions[pid*3+1]);
-        point.setField(Dimension::Id::Z, m_positions[pid*3+2]);
-    }
-
-    if (m_normals.size())
-    {
-        point.setField(Dimension::Id::NormalX, m_normals[pid*3]);
-        point.setField(Dimension::Id::NormalY, m_normals[pid*3+1]);
-        point.setField(Dimension::Id::NormalZ, m_normals[pid*3+2]);
+        //should get the attribute regardless of if it's a multi-dim attribute
+        const int offset = dim.typeLength * (pid + dim.attNum);
+        view->setField(dim.pdalId, dim.pdalType, pid, dim.address+offset);
     }
 
-    //TODO account for possibility of texture not being 3 dimensions
-    if (m_textures.size())
-    {
-        point.setField(Dimension::Id::TextureU, m_textures[pid*3]);
-        point.setField(Dimension::Id::TextureV, m_textures[pid*3+1]);
-        if (m_textureW)
-            point.setField(Dimension::Id::TextureW, m_textures[pid*3+2]);
-    }
 
-    if (m_colors.size())
-    {
-        point.setField(Dimension::Id::Red, m_colors[pid*3]);
-        point.setField(Dimension::Id::Green, m_colors[pid*3+1]);
-        point.setField(Dimension::Id::Blue, m_colors[pid*3+2]);
-    }
-    for (auto& generic : m_generics)
-    {
-        point.setField(generic.first, generic.second[pid]);
-    }
+    // if (m_positions.size())
+    // {
+    //     point.setField(Dimension::Id::X, m_positions[pid*3]);
+    //     point.setField(Dimension::Id::Y, m_positions[pid*3+1]);
+    //     point.setField(Dimension::Id::Z, m_positions[pid*3+2]);
+    // }
+
+    // if (m_normals.size())
+    // {
+    //     point.setField(Dimension::Id::NormalX, m_normals[pid*3]);
+    //     point.setField(Dimension::Id::NormalY, m_normals[pid*3+1]);
+    //     point.setField(Dimension::Id::NormalZ, m_normals[pid*3+2]);
+    // }
+
+    // if (m_textures.size())
+    // {
+    //     point.setField(Dimension::Id::TextureU, m_textures[pid*3]);
+    //     point.setField(Dimension::Id::TextureV, m_textures[pid*3+1]);
+    //     if (m_textureW)
+    //         point.setField(Dimension::Id::TextureW, m_textures[pid*3+2]);
+    // }
+
+    // if (m_colors.size())
+    // {
+    //     point.setField(Dimension::Id::Red, m_colors[pid*3]);
+    //     point.setField(Dimension::Id::Green, m_colors[pid*3+1]);
+    //     point.setField(Dimension::Id::Blue, m_colors[pid*3+2]);
+    // }
+    // for (auto& generic : m_generics)
+    // {
+    //     point.setField(generic.first, generic.second[pid]);
+    // }
     return true;
 }
 
@@ -350,7 +373,7 @@ point_count_t DracoReader::read(PointViewPtr view, point_count_t count)
     for (id = 0; id < count; ++id)
     {
         point.setPointId(id);
-        if (!processOne(point))
+        if (!processOne(view, point.pointId()))
             break;
     }
     return id;

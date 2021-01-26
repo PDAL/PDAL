@@ -1,6 +1,6 @@
 #
 option(WITH_DRACO "Choose if Draco support should be built" TRUE)
-find_package(Draco QUIET 1.3.6)
+find_package(Draco EXACT 1.3.6)
 
 if (WITH_DRACO)
     set_package_properties(Draco PROPERTIES TYPE RECOMMENDED

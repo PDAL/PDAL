@@ -52,13 +52,28 @@ public:
 private:
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
+    void addOneDimension(Dimension::Id id, const draco::PointAttribute* attr, PointLayoutPtr layout, int index, int attNum);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void prepared(PointTableRef);
     virtual void ready(PointTableRef);
-    virtual bool processOne(PointRef& point);
+    // virtual bool processOne(PointRef& point);
+    bool processOne(PointViewPtr view, point_count_t pid);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual void done(PointTableRef table);
 
+    //TODO create structure like { Dimension::Id, DracoDimension, DracoTypeCovertedToPdalType, offset }
+    //when going through initialize step make sure to add the correct dimensions
+    //to that structure
+    struct DimensionInfo {
+        Dimension::Id pdalId;
+        draco::GeometryAttribute::Type dracoAtt;
+        Dimension::Type pdalType;
+        int attIndex;//draco attribute index
+        int typeLength;
+        int attNum;//eg POSITION = [ X, Y, Z ], Y attNum would be 1
+        uint8_t *address;
+    };
+    std::vector<DimensionInfo> m_dimensions;
     DracoReader(const DracoReader&) = delete;
     DracoReader& operator=(const DracoReader&) = delete;
 
