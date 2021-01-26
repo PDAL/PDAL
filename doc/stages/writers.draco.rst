@@ -70,4 +70,5 @@ quantization
 
 
 
-_PDAL's Type specification: https://github.com/PDAL/PDAL/blob/master/pdal/DimUtil.hpp
+.. _PDAL's Type specification: https://github.com/PDAL/PDAL/blob/master/pdal/DimUtil.hpp
+.. _Draco: https://github.com/google/draco
