@@ -71,7 +71,7 @@ private:
         int attIndex;//draco attribute index
         int typeLength;
         int attNum;//eg POSITION = [ X, Y, Z ], Y attNum would be 1
-        uint8_t *address;
+        const uint8_t *address;
     };
     std::vector<DimensionInfo> m_dimensions;
     DracoReader(const DracoReader&) = delete;
@@ -81,10 +81,6 @@ private:
     std::vector<char> m_data;
     draco::DecoderBuffer m_draco_buffer;
     std::unique_ptr<draco::PointCloud> m_pc;
-    std::vector<double> m_positions;
-    std::vector<uint16_t> m_colors;
-    std::vector<double> m_normals;
-    std::vector<double> m_textures;
     bool m_textureW;
 
     std::map<Dimension::Id, std::vector<double>> m_generics;

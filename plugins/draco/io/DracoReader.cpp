@@ -176,7 +176,7 @@ void DracoReader::addOneDimension(Dimension::Id id, const draco::PointAttribute*
     draco::GeometryAttribute::Type dracoAtt = attr->attribute_type();
     Dimension::Type pdalType = getPdalType(dt);
     int offset = draco::DataTypeLength(dt);
-    uint8_t *address = (attr->buffer())->data();
+    const uint8_t *address = attr->GetAddressOfMappedIndex(draco::PointIndex(0));
     layout->registerDim(id);
 
     const DimensionInfo dimInfo = { id, dracoAtt, pdalType, index, offset, attNum, address };
@@ -254,7 +254,6 @@ void DracoReader::addDimensions(PointLayoutPtr layout)
             {
                 Dimension::Id id = pdal::Dimension::id(name);
                 if (id != Dimension::Id::Unknown) {
-                    // m_generics[id] = std::vector<double>(m_pc->num_points(), 0.0);
                     addOneDimension(id, attr, layout, i, 0);
                 }
                 break;
@@ -329,39 +328,6 @@ bool DracoReader::processOne(PointViewPtr view, point_count_t pid)
         view->setField(dim.pdalId, dim.pdalType, pid, dim.address+offset);
     }
 
-
-    // if (m_positions.size())
-    // {
-    //     point.setField(Dimension::Id::X, m_positions[pid*3]);
-    //     point.setField(Dimension::Id::Y, m_positions[pid*3+1]);
-    //     point.setField(Dimension::Id::Z, m_positions[pid*3+2]);
-    // }
-
-    // if (m_normals.size())
-    // {
-    //     point.setField(Dimension::Id::NormalX, m_normals[pid*3]);
-    //     point.setField(Dimension::Id::NormalY, m_normals[pid*3+1]);
-    //     point.setField(Dimension::Id::NormalZ, m_normals[pid*3+2]);
-    // }
-
-    // if (m_textures.size())
-    // {
-    //     point.setField(Dimension::Id::TextureU, m_textures[pid*3]);
-    //     point.setField(Dimension::Id::TextureV, m_textures[pid*3+1]);
-    //     if (m_textureW)
-    //         point.setField(Dimension::Id::TextureW, m_textures[pid*3+2]);
-    // }
-
-    // if (m_colors.size())
-    // {
-    //     point.setField(Dimension::Id::Red, m_colors[pid*3]);
-    //     point.setField(Dimension::Id::Green, m_colors[pid*3+1]);
-    //     point.setField(Dimension::Id::Blue, m_colors[pid*3+2]);
-    // }
-    // for (auto& generic : m_generics)
-    // {
-    //     point.setField(generic.first, generic.second[pid]);
-    // }
     return true;
 }
 
