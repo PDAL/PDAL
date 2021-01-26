@@ -166,8 +166,6 @@ void DracoReader::initialize()
     }
 
     m_pc = std::move(pc_status).value();
-
-    m_count = m_pc->num_points();
 }
 
 void DracoReader::addOneDimension(Dimension::Id id, const draco::PointAttribute* attr, PointLayoutPtr layout, int index, int attNum)
@@ -320,6 +318,7 @@ point_count_t DracoReader::read(PointViewPtr view, point_count_t count)
     PointId id = view->size();
     point_count_t numRead = 0;
 
+    count = (std::min)(count, (point_count_t)m_pc->num_points());
     while (numRead < count)
     {
         for (auto& dim: m_dimensions)
