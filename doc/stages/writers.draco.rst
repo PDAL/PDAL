@@ -49,7 +49,10 @@ filename
 
 dimensions
     A json map of PDAL dimensions to desired data types. Data types must be string
-    and must be available in `PDAL's Type specification`_.
+    and must be available in `PDAL's Type specification`_. Any dimension that
+    combine to make one Draco dimension must all have the same type (eg. POSITION is
+    made up of X, Y, and Z. All 3 of these dimensions must be the same type in the
+    option.
 
 quantization
     A json map of Draco attributes to desired quantization levels. These levels

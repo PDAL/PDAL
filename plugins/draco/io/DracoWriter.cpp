@@ -286,7 +286,8 @@ void DracoWriter::addAttribute(draco::GeometryAttribute::Type t, int n) {
 void DracoWriter::initPointCloud(point_count_t size)
 {
     //begin initialization of the point cloud with the point count
-    m_pc->set_num_points(size);
+    unsigned int sizeInt = size;
+    m_pc->set_num_points(sizeInt);
     //go through known draco attributes and add to the pointcloud
     for (auto &dim: m_dims)
     {
