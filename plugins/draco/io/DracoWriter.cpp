@@ -210,7 +210,6 @@ void DracoWriter::parseDimensions()
 
 void DracoWriter::ready(pdal::BasePointTable &table)
 {
-    *m_stream << std::fixed;
     auto layout = table.layout();
 
     pdal::Dimension::IdList dimensions = layout->dims();
@@ -293,6 +292,7 @@ void DracoWriter::initPointCloud(point_count_t size)
     {
         addAttribute(dim.first, dim.second);
     }
+    //do the same for generic attributes
     for (auto &dim: m_genericDims)
     {
         addGeneric(dim, 1);
@@ -427,6 +427,7 @@ void DracoWriter::write(const PointViewPtr view)
     draco::Encoder encoder;
     encoder.SetEncodingMethod(draco::POINT_CLOUD_SEQUENTIAL_ENCODING);
 
+    //set quantization levels based on either defaults or user specifications
     encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, m_quant.at("POSITION"));
     encoder.SetAttributeQuantization(draco::GeometryAttribute::COLOR, m_quant.at("NORMAL"));
     encoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, m_quant.at("TEX_COORD"));

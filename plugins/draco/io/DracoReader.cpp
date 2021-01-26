@@ -131,10 +131,9 @@ void DracoReader::initialize()
 
 void DracoReader::addOneDimension(Dimension::Id id, const draco::PointAttribute* attr, PointLayoutPtr layout, int index, int attNum)
 {
+    //find corresponding pdal data type
     draco::DataType dt = attr->data_type();
-    draco::GeometryAttribute::Type dracoAtt = attr->attribute_type();
     Dimension::Type pdalType = getPdalType(dt);
-    int offset = draco::DataTypeLength(dt);
 
     //add to pdal layout and dim vector
     layout->registerDim(id);
@@ -146,31 +145,32 @@ void DracoReader::addDimensions(PointLayoutPtr layout)
 {
     using namespace draco;
 
-    log()->get(LogLevel::Debug) << "draco pc num_attributes: "
+    log()->get(LogLevel::Debug) << "Number of attributes in point cloud: "
                                 << m_pc->num_attributes() << std::endl;;
 
-    const GeometryMetadata *metadata = m_pc->GetMetadata();
+    //iterate and collect information on draco attributes
     for (int i=0; i < m_pc->num_attributes(); ++i)
     {
         const PointAttribute* attr = m_pc->GetAttributeByUniqueId(i);
         if (attr == nullptr)
             throw new pdal_error("Invalid draco attribute configuration");
         const AttributeMetadata* attr_metadata = m_pc->GetAttributeMetadataByAttributeId(i);
+
+        //get types
         DataType dt = attr->data_type();
+        Dimension::Type pt = getPdalType(dt);
         GeometryAttribute::Type at = attr->attribute_type();
 
         int8_t nc = attr->num_components();
-        log()->get(LogLevel::Debug) << "named component: "
+        log()->get(LogLevel::Debug) << "Dimension read: "
                                     << GeometryAttribute::TypeToString(at)
-                                    << " subcomponents: " << (int)nc << std::endl;;
+                                    << ", Data type: " << Dimension::interpretationName(pt)
+                                    << std::endl;;
         std::string name;
         if (attr_metadata)
         {
-            log()->get(LogLevel::Debug) << "number of metadata entries: "
-                                        << attr_metadata->num_entries()
-                                        << std::endl;
             attr_metadata->GetEntryString("name", &name);
-            log()->get(LogLevel::Debug) << "metadata name: "
+            log()->get(LogLevel::Debug) << "  Generic type name: "
                                         << name
                                         << std::endl;
         }
