@@ -106,60 +106,60 @@ TEST(DracoReaderTest, test_sequential)
 }
 
 
-// TEST(DracoReaderTest, accuracy)
-// {
-//     //create pipeline that reads draco file and transforms it via
-//     //filters.transformation. Then apply the offset from RTC_CENTER from
-//     //the pnts file. Check that the results of this fall within the bounds of
-//     //red-rocks.laz
+TEST(DracoReaderTest, accuracy)
+{
+    //create pipeline that reads draco file and transforms it via
+    //filters.transformation. Then apply the offset from RTC_CENTER from
+    //the pnts file. Check that the results of this fall within the bounds of
+    //red-rocks.laz
 
-//     PipelineManager pipeline;
-//     //bounding box for original red-rocks.laz this file was created from
-//     BOX3D bounds(482060.5, 4390187.5, 1843.98, 482763.78, 4391071, 2029.41);
-//     bounds.grow(1);
+    PipelineManager pipeline;
+    //bounding box for original red-rocks.laz this file was created from
+    BOX3D bounds(482060.5, 4390187.5, 1843.98, 482763.78, 4391071, 2029.41);
+    bounds.grow(1);
 
-//     Options readOptions;
-//     std::string path = Support::datapath("draco/redrocks.drc");
-//     Stage& reader = pipeline.makeReader(path, "readers.draco");
+    Options readOptions;
+    std::string path = Support::datapath("draco/redrocks.drc");
+    Stage& reader = pipeline.makeReader(path, "readers.draco");
 
-//     //transform by RTC center
-//     std::string xOff = "-0.015410084428367554";
-//     std::string yOff = "-0.35363949998281896";
-//     std::string zOff = "92.70944035355933";
-//     Options rtcOptions;
-//     rtcOptions.add("matrix", "1 0 0 "+xOff+" 0 1 0 "+yOff+" 0 0 1 "+zOff+" 0 0 0 1");
-//     Stage& rtcTransformationFilter = pipeline.makeFilter("filters.transformation", reader);
-//     rtcTransformationFilter.setOptions(rtcOptions);
+    //transform by RTC center
+    std::string xOff = "-0.015410084428367554";
+    std::string yOff = "-0.35363949998281896";
+    std::string zOff = "92.70944035355933";
+    Options rtcOptions;
+    rtcOptions.add("matrix", "1 0 0 "+xOff+" 0 1 0 "+yOff+" 0 0 1 "+zOff+" 0 0 0 1");
+    Stage& rtcTransformationFilter = pipeline.makeFilter("filters.transformation", reader);
+    rtcTransformationFilter.setOptions(rtcOptions);
 
-//     //transform by tileset from cesium
-//     Options tilesetOptions;
-//     tilesetOptions.add("matrix", "0.9649933973123795 0.16741023360918053 -0.20189491530603648 -1289846.4516338364 -0.26227417551774335 0.6159575938289551 -0.742838138130328 -4745771.507684133 0 0.7697857210207032 0.6383023920624428 4050624.605121021 0 0 0 1");
-//     Stage& tilesetTransformationFilter = pipeline.makeFilter("filters.transformation", rtcTransformationFilter);
-//     tilesetTransformationFilter.setOptions(tilesetOptions);
+    //transform by tileset from cesium
+    Options tilesetOptions;
+    tilesetOptions.add("matrix", "0.9649933973123795 0.16741023360918053 -0.20189491530603648 -1289846.4516338364 -0.26227417551774335 0.6159575938289551 -0.742838138130328 -4745771.507684133 0 0.7697857210207032 0.6383023920624428 4050624.605121021 0 0 0 1");
+    Stage& tilesetTransformationFilter = pipeline.makeFilter("filters.transformation", rtcTransformationFilter);
+    tilesetTransformationFilter.setOptions(tilesetOptions);
 
 
-//     //set up projection so we can use it against our bounding box
-//     Options reprojectionOptions;
-//     reprojectionOptions.add("in_srs", "EPSG:4978");
-//     reprojectionOptions.add("out_srs", "EPSG:26913");
-//     Stage& reprojectionFilter = pipeline.makeFilter("filters.reprojection", tilesetTransformationFilter);
-//     reprojectionFilter.setOptions(reprojectionOptions);
+    //set up projection so we can use it against our bounding box
+    Options reprojectionOptions;
+    reprojectionOptions.add("in_srs", "EPSG:4978");
+    reprojectionOptions.add("out_srs", "EPSG:26913");
+    Stage& reprojectionFilter = pipeline.makeFilter("filters.reprojection", tilesetTransformationFilter);
+    reprojectionFilter.setOptions(reprojectionOptions);
 
-//     point_count_t count = pipeline.execute();
+    point_count_t count = pipeline.execute();
 
-//     PointViewSet set = pipeline.views();
-//     PointViewPtr v = *set.begin();
+    PointViewSet set = pipeline.views();
+    PointViewPtr v = *set.begin();
 
-//     for (PointId i = 0; i < count; i += 1) {
-//         double x = v->getFieldAs<double>(Dimension::Id::X, i);
-//         double y = v->getFieldAs<double>(Dimension::Id::Y, i);
-//         double z = v->getFieldAs<double>(Dimension::Id::Z, i);
-//         std::cout << "x " << x << std::endl;
-//         std::cout << "y " << y << std::endl;
-//         std::cout << "z " << z << std::endl;
-//         EXPECT_TRUE(bounds.contains(x, y, z));
-//     }
+    for (PointId i = 0; i < count; i += 1) {
+        double x = v->getFieldAs<double>(Dimension::Id::X, i);
+        double y = v->getFieldAs<double>(Dimension::Id::Y, i);
+        double z = v->getFieldAs<double>(Dimension::Id::Z, i);
+        std::cout << "x " << x << std::endl;
+        std::cout << "y " << y << std::endl;
+        std::cout << "z " << z << std::endl;
+        EXPECT_TRUE(bounds.contains(x, y, z));
+    }
 
-// }
+}
 
 }
