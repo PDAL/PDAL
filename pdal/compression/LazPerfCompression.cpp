@@ -47,7 +47,6 @@
 #include <laz-perf/compressor.hpp>
 #include <laz-perf/decompressor.hpp>
 
-#include <laz-perf/encoder.hpp>
 #include <laz-perf/decoder.hpp>
 #include <laz-perf/formats.hpp>
 #include <laz-perf/io.hpp>
@@ -118,8 +117,7 @@ class LazPerfCompressorImpl
 public:
     LazPerfCompressorImpl(BlockCb cb, const DimTypeList& dims) :
         m_cb(cb),
-        m_encoder(*this),
-        m_compressor(laszip::formats::make_dynamic_compressor(m_encoder)),
+        m_compressor(laszip::formats::make_dynamic_compressor(*this)),
         m_pointSize(0),
         m_avail(CHUNKSIZE)
     { m_pointSize = addFields(m_compressor, dims); }
@@ -163,7 +161,7 @@ public:
 
     void done()
     {
-        m_encoder.done();
+        m_compressor->done();
         if (m_avail != CHUNKSIZE)
             m_cb(reinterpret_cast<char *>(m_tmpbuf), CHUNKSIZE - m_avail);
         m_avail = CHUNKSIZE;
@@ -171,10 +169,7 @@ public:
 
 private:
     BlockCb m_cb;
-    typedef laszip::encoders::arithmetic<LazPerfCompressorImpl> Encoder;
-    Encoder m_encoder;
-    typedef typename laszip::formats::dynamic_field_compressor<Encoder>::ptr
-            Compressor;
+    using Compressor = laszip::formats::dynamic_field_compressor<LazPerfCompressorImpl>::ptr;
     Compressor m_compressor;
     size_t m_pointSize;
     unsigned char m_tmpbuf[CHUNKSIZE];
@@ -208,8 +203,7 @@ class LazPerfDecompressorImpl
 public:
     LazPerfDecompressorImpl(BlockCb cb, const DimTypeList& dims,
             size_t numPoints) :
-        m_decoder(*this),
-        m_decompressor(laszip::formats::make_dynamic_decompressor(m_decoder)),
+        m_decompressor(laszip::formats::make_dynamic_decompressor(*this)),
         m_cb(cb),
         m_numPoints(numPoints)
     { m_pointSize = addFields(m_decompressor, dims); }
@@ -248,9 +242,7 @@ public:
     }
 
 private:
-    typedef laszip::decoders::arithmetic<LazPerfDecompressorImpl> Decoder;
-    Decoder m_decoder;
-    typedef typename laszip::formats::dynamic_field_decompressor<Decoder>::ptr
+    typedef typename laszip::formats::dynamic_field_decompressor<LazPerfDecompressorImpl>::ptr
         Decompressor;
     Decompressor m_decompressor;
     BlockCb m_cb;

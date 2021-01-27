@@ -86,17 +86,12 @@ CREATE_STATIC_STAGE(LasWriter, s_info)
 
 std::string LasWriter::getName() const { return s_info.name; }
 
-LasWriter::LasWriter() : m_compressor(nullptr), m_ostream(NULL),
-    m_compression(LasCompression::None), m_srsCnt(0)
+LasWriter::LasWriter() : m_ostream(NULL), m_compression(LasCompression::None), m_srsCnt(0)
 {}
 
 
 LasWriter::~LasWriter()
-{
-#ifdef PDAL_HAVE_LAZPERF
-    delete m_compressor;
-#endif
-}
+{}
 
 
 void LasWriter::addArgs(ProgramArgs& args)
@@ -710,23 +705,30 @@ void LasWriter::readyLasZipCompression()
 void LasWriter::readyLazPerfCompression()
 {
 #ifdef PDAL_HAVE_LAZPERF
-    if (m_lasHeader.versionAtLeast(1, 4))
-        throwError("Can't write version 1.4 output with LAZperf.");
-
     laszip::factory::record_schema schema;
-    schema.push(laszip::factory::record_item::POINT10);
-    if (m_lasHeader.hasTime())
-        schema.push(laszip::factory::record_item::GPSTIME);
-    if (m_lasHeader.hasColor())
-        schema.push(laszip::factory::record_item::RGB12);
+
+    if (m_lasHeader.versionEquals(1, 4))
+    {
+        if (m_lasHeader.pointFormat() != 6 || m_extraByteLen != 0)
+            throwError("Can't write version 1.4 without simple PDRF 6.");
+        schema.push(laszip::factory::record_item::point14());
+    }
+    else
+    {
+        schema.push(laszip::factory::record_item::point());
+        if (m_lasHeader.hasTime())
+            schema.push(laszip::factory::record_item::gpstime());
+        if (m_lasHeader.hasColor())
+            schema.push(laszip::factory::record_item::rgb());
+        if (m_extraByteLen)
+            schema.push(laszip::factory::record_item::eb(m_extraByteLen));
+    }
     laszip::io::laz_vlr zipvlr = laszip::io::laz_vlr::from_schema(schema);
     std::vector<uint8_t> data(zipvlr.size());
     zipvlr.extract((char *)data.data());
     addVlr(LASZIP_USER_ID, LASZIP_RECORD_ID, "http://laszip.org", data);
 
-    delete m_compressor;
-    m_compressor = new LazPerfVlrCompressor(*m_ostream, schema,
-        zipvlr.chunk_size);
+    m_compressor.reset(new LazPerfVlrCompressor(*m_ostream, schema, zipvlr.chunk_size));
 #endif
 }
 

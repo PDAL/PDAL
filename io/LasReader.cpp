@@ -282,7 +282,7 @@ void LasReader::ready(PointTableRef table)
             if (!vlr)
                 throwError("LAZ file missing required laszip VLR.");
             m_decompressor = new LazPerfVlrDecompressor(*stream,
-                vlr->data(), m_header.pointOffset());
+                vlr->data(), m_header.pointOffset(), m_header.pointLen());
             m_decompressorBuf.resize(m_decompressor->pointSize());
         }
 #endif

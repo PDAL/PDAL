@@ -73,7 +73,7 @@ class LazPerfVlrCompressorImpl
 {
     typedef laszip::io::__ofstream_wrapper<std::ostream> OutputStream;
     typedef laszip::encoders::arithmetic<OutputStream> Encoder;
-    typedef laszip::formats::dynamic_compressor Compressor;
+    typedef laszip::formats::las_compressor Compressor;
     typedef laszip::factory::record_schema Schema;
 
 public:
@@ -84,18 +84,10 @@ public:
         m_chunkOffset(0)
     {}
 
-    ~LazPerfVlrCompressorImpl()
-    {
-        if (m_encoder)
-            std::cerr << "LazPerfVlrCompressor destroyed without a call "
-               "to done()";
-    }
-
-
     void compress(const char *inbuf)
     {
         // First time through.
-        if (!m_encoder || !m_compressor)
+        if (!m_compressor)
         {
             // Get the position
             m_chunkInfoPos = m_stream.tellp();
@@ -116,8 +108,7 @@ public:
     void done()
     {
         // Close and clear the point encoder.
-        m_encoder->done();
-        m_encoder.reset();
+        m_compressor->done();
 
         newChunk();
 
@@ -154,10 +145,9 @@ public:
 private:
     void resetCompressor()
     {
-        if (m_encoder)
-            m_encoder->done();
-        m_encoder.reset(new Encoder(m_outputStream));
-        m_compressor = laszip::factory::build_compressor(*m_encoder, m_schema);
+        if (m_compressor)
+            m_compressor->done();
+        m_compressor = laszip::factory::build_las_compressor(m_outputStream, m_schema);
     }
 
     void newChunk()
@@ -170,7 +160,6 @@ private:
 
     std::ostream& m_stream;
     OutputStream m_outputStream;
-    std::unique_ptr<Encoder> m_encoder;
     Compressor::ptr m_compressor;
     Schema m_schema;
     uint32_t m_chunksize;
@@ -207,13 +196,13 @@ class LazPerfVlrDecompressorImpl
 {
 public:
     LazPerfVlrDecompressorImpl(std::istream& stream, const char *vlrData,
-        std::streamoff pointOffset) :
+        std::streamoff pointOffset, size_t pointSize) :
         m_stream(stream), m_inputStream(stream), m_chunksize(0),
         m_chunkPointsRead(0)
     {
         laszip::io::laz_vlr zipvlr(vlrData);
         m_chunksize = zipvlr.chunk_size;
-        m_schema = laszip::io::laz_vlr::to_schema(zipvlr);
+        m_schema = laszip::io::laz_vlr::to_schema(zipvlr, pointSize);
         m_stream.seekg(pointOffset + sizeof(int64_t));
     }
 
@@ -222,7 +211,7 @@ public:
 
     void decompress(char *outbuf)
     {
-        if (m_chunkPointsRead == m_chunksize || !m_decoder || !m_decompressor)
+        if (m_chunkPointsRead == m_chunksize || !m_decompressor)
         {
             resetDecompressor();
             m_chunkPointsRead = 0;
@@ -234,19 +223,16 @@ public:
 private:
     void resetDecompressor()
     {
-        m_decoder.reset(new Decoder(m_inputStream));
         m_decompressor =
-            laszip::factory::build_decompressor(*m_decoder, m_schema);
+            laszip::factory::build_las_decompressor(m_inputStream, m_schema);
     }
 
     typedef laszip::io::__ifstream_wrapper<std::istream> InputStream;
-    typedef laszip::decoders::arithmetic<InputStream> Decoder;
-    typedef laszip::formats::dynamic_decompressor Decompressor;
+    typedef laszip::formats::las_decompressor Decompressor;
     typedef laszip::factory::record_schema Schema;
 
     std::istream& m_stream;
     InputStream m_inputStream;
-    std::unique_ptr<Decoder> m_decoder;
     Decompressor::ptr m_decompressor;
     Schema m_schema;
     uint32_t m_chunksize;
@@ -254,8 +240,8 @@ private:
 };
 
 LazPerfVlrDecompressor::LazPerfVlrDecompressor(std::istream& stream,
-        const char *vlrData, std::streamoff pointOffset) :
-    m_impl(new LazPerfVlrDecompressorImpl(stream, vlrData, pointOffset))
+        const char *vlrData, std::streamoff pointOffset, uint32_t pointLength) :
+    m_impl(new LazPerfVlrDecompressorImpl(stream, vlrData, pointOffset, pointLength))
 {}
 
 
