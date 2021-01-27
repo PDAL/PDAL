@@ -309,10 +309,6 @@ void TileDBWriter::initialize()
         {
             NL::json opts;
 
-            if (tiledb::Object::object(*m_ctx, m_args->m_arrayName).type() ==
-                    tiledb::Object::Type::Array)
-                throwError("Array already exists.");
-
             m_schema.reset(new tiledb::ArraySchema(*m_ctx, TILEDB_SPARSE));
 
             if (m_args->m_filters.count("coords") > 0)
