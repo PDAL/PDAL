@@ -322,7 +322,7 @@ void LasReader::ready(PointTableRef table)
 #endif
 
 #ifdef PDAL_HAVE_LAZPERF
-        if (m_compression == "LAZPERF")
+        if (m_args->m_compression == "LAZPERF")
         {
             delete m_p->decompressor;
 
@@ -658,7 +658,7 @@ bool LasReader::processOne(PointRef& point)
 #endif
 
 #ifdef PDAL_HAVE_LAZPERF
-        if (m_compression == "LAZPERF")
+        if (m_args->m_compression == "LAZPERF")
         {
             m_p->decompressor->decompress(m_p->decompressorBuf.data());
             loadPoint(point, m_p->decompressorBuf.data(), pointLen);
