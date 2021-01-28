@@ -43,6 +43,36 @@
 
 namespace pdal {
 
+const std::map<pdal::Dimension::Type, draco::DataType> typeMap =
+{
+    { pdal::Dimension::Type::Double,      draco::DataType::DT_FLOAT64 },
+    { pdal::Dimension::Type::Float,       draco::DataType::DT_FLOAT32 },
+    { pdal::Dimension::Type::Signed8,     draco::DataType::DT_INT8 },
+    { pdal::Dimension::Type::Unsigned8,   draco::DataType::DT_UINT8 },
+    { pdal::Dimension::Type::Signed16,    draco::DataType::DT_INT16 },
+    { pdal::Dimension::Type::Unsigned16,  draco::DataType::DT_UINT16 },
+    { pdal::Dimension::Type::Signed32,    draco::DataType::DT_INT32 },
+    { pdal::Dimension::Type::Unsigned32,  draco::DataType::DT_UINT32 },
+    { pdal::Dimension::Type::Signed64,    draco::DataType::DT_INT64 },
+    { pdal::Dimension::Type::Unsigned64,  draco::DataType::DT_UINT64 },
+};
+
+const std::map<pdal::Dimension::Id, draco::GeometryAttribute::Type> dimMap =
+{
+    { pdal::Dimension::Id::X,         draco::GeometryAttribute::POSITION },
+    { pdal::Dimension::Id::Y,         draco::GeometryAttribute::POSITION },
+    { pdal::Dimension::Id::Z,         draco::GeometryAttribute::POSITION },
+    { pdal::Dimension::Id::NormalX,   draco::GeometryAttribute::NORMAL },
+    { pdal::Dimension::Id::NormalY,   draco::GeometryAttribute::NORMAL },
+    { pdal::Dimension::Id::NormalZ,   draco::GeometryAttribute::NORMAL },
+    { pdal::Dimension::Id::Red,       draco::GeometryAttribute::COLOR },
+    { pdal::Dimension::Id::Green,     draco::GeometryAttribute::COLOR },
+    { pdal::Dimension::Id::Blue,      draco::GeometryAttribute::COLOR },
+    { pdal::Dimension::Id::TextureU,  draco::GeometryAttribute::TEX_COORD },
+    { pdal::Dimension::Id::TextureV,  draco::GeometryAttribute::TEX_COORD },
+    { pdal::Dimension::Id::TextureW,  draco::GeometryAttribute::TEX_COORD }
+};
+
 static PluginInfo const s_info
 {
     "writers.draco",
@@ -50,19 +80,11 @@ static PluginInfo const s_info
     "http://pdal.io/stages/writers.draco.html"
 };
 
-struct DracoWriter::Args
-{
-    std::string m_filename;
-};
-
-
 CREATE_SHARED_STAGE(DracoWriter, s_info)
 
-DracoWriter::DracoWriter():
-    m_args(new DracoWriter::Args)
+DracoWriter::DracoWriter()
 {
 }
-
 
 DracoWriter::~DracoWriter(){}
 
@@ -112,10 +134,9 @@ void DracoWriter::parseQuants() {
         const int quant = entry.value().get<int>();
         if (m_quant.find(attribute) == m_quant.end())
             throw pdal_error("Quantization attribute " + attribute +
-                " is not a valid Draco Goemetry Attribute");
+                " is not a valid Draco Geometry Attribute");
         m_quant[attribute] = quant;
     }
-
 }
 
 void DracoWriter::parseDimensions()
@@ -125,21 +146,21 @@ void DracoWriter::parseDimensions()
         throw pdal_error("Option 'dimensions' must be a JSON object, not a " +
             std::string(m_userDimJson.type_name()));
     }
-
     for(auto& entry : m_userDimJson.items()) {
         std::string dimString = entry.key();
-        auto datasetName = entry.value();
+        auto dataType = entry.value();
 
-        if(!datasetName.is_string()) {
+        if(!dataType.is_string()) {
             throw pdal_error("Every value in 'dimensions' must be a string. Key '"
                 + dimString + "' has value with type '"
-                + std::string(datasetName.type_name()) + "'");
+                + std::string(dataType.type_name()) + "'");
         } else {
             log()->get(LogLevel::Info) << "Key: " << dimString << ", Value: "
-                << datasetName << std::endl;
+                << dataType << std::endl;
 
-            Dimension::Id dimType = Dimension::id(dimString);
-            m_userDimMap[dimType] = datasetName.get<std::string>();
+            //TODO allow for non standard pdal types?
+            Dimension::Id dimId = Dimension::id(dimString);
+            m_userDimMap[dimId] = dataType.get<std::string>();
         }
     }
     //account for possible errors in dimensions
@@ -208,32 +229,7 @@ void DracoWriter::parseDimensions()
     }
 }
 
-void DracoWriter::ready(pdal::BasePointTable &table)
-{
-    auto layout = table.layout();
-
-    pdal::Dimension::IdList dimensions = layout->dims();
-
-    for (auto& dim : dimensions)
-    {
-        //create list of dimensions needed
-        int numComponents(1);
-        const auto it = dimMap.find(dim);
-        if (it != dimMap.end())
-        {
-            //get draco type associated with the current dimension in loop
-            draco::GeometryAttribute::Type dracoType = it->second;
-            if (!m_dims.count(dracoType)) m_dims[dracoType] = 1;
-            else ++m_dims.at(dracoType);
-        }
-        else
-        {
-            m_genericDims.push_back(dim);
-        }
-    }
-}
-
-void DracoWriter::addGeneric(Dimension::Id pt, int n) {
+void DracoWriter::addGeneric(Dimension::Id pt) {
     //get pdal dimension data type
     Dimension::Type pdalDataType = Dimension::defaultType(pt);
     //get corresponding draco data type
@@ -241,8 +237,8 @@ void DracoWriter::addGeneric(Dimension::Id pt, int n) {
 
     //add generic type to the pointcloud
     draco::GeometryAttribute ga;
-    ga.Init(draco::GeometryAttribute::GENERIC, nullptr, n, dracoDataType,
-            false, draco::DataTypeLength(dracoDataType) * n, 0);
+    ga.Init(draco::GeometryAttribute::GENERIC, nullptr, 1, dracoDataType,
+            false, draco::DataTypeLength(dracoDataType) * 1, 0);
     auto attId = m_pc->AddAttribute(ga, true, m_pc->num_points());
 
     //add generic attribute to map with its id
@@ -258,6 +254,31 @@ void DracoWriter::addGeneric(Dimension::Id pt, int n) {
     //attach metadata to generic attribute in pointcloud
     m_pc->AddAttributeMetadata(attId, std::move(metaPtr));
 }
+
+void DracoWriter::ready(pdal::BasePointTable &table)
+{
+    auto layout = table.layout();
+
+    pdal::Dimension::IdList dimensions = layout->dims();
+
+    for (auto& dim : dimensions)
+    {
+        //create list of dimensions needed
+        int numComponents(1);
+        const auto it = dimMap.find(dim);
+        if (it != dimMap.end())
+        {
+            //get draco type associated with the current dimension in loop
+            draco::GeometryAttribute::Type dracoType = it->second;
+            m_dims[dracoType]++;
+        }
+        else
+        {
+            m_genericDims.push_back(dim);
+        }
+    }
+}
+
 
 void DracoWriter::addAttribute(draco::GeometryAttribute::Type t, int n) {
     // - iterate over values in dimMap, which are draco dimensions
@@ -293,10 +314,10 @@ void DracoWriter::initPointCloud(point_count_t size)
     {
         addAttribute(dim.first, dim.second);
     }
-    //do the same for generic attributes
+    // //do the same for generic attributes
     for (auto &dim: m_genericDims)
     {
-        addGeneric(dim, 1);
+        addGeneric(dim);
     }
 }
 
@@ -349,7 +370,6 @@ void DracoWriter::addPoint(int attId, Dimension::IdList idList, PointRef &point,
             throw pdal_error("Invalid type for pdal dimension " + Dimension::name(dim));
             break;
     }
-
 }
 
 void DracoWriter::write(const PointViewPtr view)
@@ -363,63 +383,63 @@ void DracoWriter::write(const PointViewPtr view)
     for (PointId idx = 0; idx < view->size(); ++idx)
     {
         point.setPointId(idx);
-        const auto pointId = draco::PointIndex(idx);
+        const auto pointId = draco::PointIndex((uint32_t)idx);
 
         if (m_attMap.find(draco::GeometryAttribute::POSITION) != m_attMap.end())
         {
-            const int id = m_attMap[draco::GeometryAttribute::POSITION];
+            const int attId = m_attMap[draco::GeometryAttribute::POSITION];
             Dimension::IdList idList {
                 Dimension::Id::X,
                 Dimension::Id::Y,
                 Dimension::Id::Z
             };
-            addPoint(id, idList, point, idx);
+            addPoint(attId, idList, point, idx);
         }
 
         if (m_attMap.find(draco::GeometryAttribute::COLOR) != m_attMap.end())
         {
-            const int id = m_attMap[draco::GeometryAttribute::COLOR];
+            const int attId = m_attMap[draco::GeometryAttribute::COLOR];
             Dimension::IdList idList {
                 Dimension::Id::Red,
                 Dimension::Id::Green,
                 Dimension::Id::Blue
             };
-            addPoint(id, idList, point, idx);
+            addPoint(attId, idList, point, idx);
         }
 
         if (m_attMap.find(draco::GeometryAttribute::TEX_COORD) != m_attMap.end())
         {
             const int n = m_dims[draco::GeometryAttribute::TEX_COORD];
-            const int id = m_attMap[draco::GeometryAttribute::TEX_COORD];
+            const int attId = m_attMap[draco::GeometryAttribute::TEX_COORD];
             Dimension::IdList idList {
                 Dimension::Id::TextureU,
                 Dimension::Id::TextureV
             };
             if (n > 2)
                 idList.push_back(Dimension::Id::TextureW);
-            addPoint(id, idList, point, idx);
+            addPoint(attId, idList, point, idx);
         }
 
         if (m_attMap.find(draco::GeometryAttribute::NORMAL) != m_attMap.end())
         {
-            const int id = m_attMap[draco::GeometryAttribute::NORMAL];
+            const int attId = m_attMap[draco::GeometryAttribute::NORMAL];
             Dimension::IdList idList {
                 Dimension::Id::NormalX,
                 Dimension::Id::NormalY,
                 Dimension::Id::NormalZ
             };
-            addPoint(id, idList, point, idx);
+            addPoint(attId, idList, point, idx);
         }
 
         //go through list of added dimensions and get the associated data
         for (auto& dim: m_genericMap)
         {
-            const int id = dim.second;
+            const int attId = dim.second;
             Dimension::IdList idList {
                 dim.first
             };
 
-            addPoint(id, idList, point, idx);
+            addPoint(attId, idList, point, idx);
         }
 
     }
@@ -441,7 +461,6 @@ void DracoWriter::write(const PointViewPtr view)
         throw pdal_error("Error encoding draco pointcloud. " + err);
     }
 
-    const auto bufferSize = buffer.size();
     std::vector<char> *output = buffer.buffer();
 
     for (auto &i : *output)

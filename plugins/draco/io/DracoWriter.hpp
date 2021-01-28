@@ -46,40 +46,6 @@
 #include "draco/compression/encode.h"
 #include "draco/attributes/attribute_quantization_transform.h"
 
-namespace
-{
-    const std::map<pdal::Dimension::Type, draco::DataType> typeMap =
-    {
-        { pdal::Dimension::Type::Double,      draco::DataType::DT_FLOAT64 },
-        { pdal::Dimension::Type::Float,       draco::DataType::DT_FLOAT32 },
-        { pdal::Dimension::Type::Signed8,     draco::DataType::DT_INT8 },
-        { pdal::Dimension::Type::Unsigned8,   draco::DataType::DT_UINT8 },
-        { pdal::Dimension::Type::Signed16,    draco::DataType::DT_INT16 },
-        { pdal::Dimension::Type::Unsigned16,  draco::DataType::DT_UINT16 },
-        { pdal::Dimension::Type::Signed32,    draco::DataType::DT_INT32 },
-        { pdal::Dimension::Type::Unsigned32,  draco::DataType::DT_UINT32 },
-        { pdal::Dimension::Type::Signed64,    draco::DataType::DT_INT64 },
-        { pdal::Dimension::Type::Unsigned64,  draco::DataType::DT_UINT64 },
-    };
-
-    const std::map<pdal::Dimension::Id, draco::GeometryAttribute::Type> dimMap =
-    {
-        { pdal::Dimension::Id::X,         draco::GeometryAttribute::POSITION },
-        { pdal::Dimension::Id::Y,         draco::GeometryAttribute::POSITION },
-        { pdal::Dimension::Id::Z,         draco::GeometryAttribute::POSITION },
-        { pdal::Dimension::Id::NormalX,   draco::GeometryAttribute::NORMAL },
-        { pdal::Dimension::Id::NormalY,   draco::GeometryAttribute::NORMAL },
-        { pdal::Dimension::Id::NormalZ,   draco::GeometryAttribute::NORMAL },
-        { pdal::Dimension::Id::Red,       draco::GeometryAttribute::COLOR },
-        { pdal::Dimension::Id::Green,     draco::GeometryAttribute::COLOR },
-        { pdal::Dimension::Id::Blue,      draco::GeometryAttribute::COLOR },
-        { pdal::Dimension::Id::TextureU,  draco::GeometryAttribute::TEX_COORD },
-        { pdal::Dimension::Id::TextureV,  draco::GeometryAttribute::TEX_COORD },
-        { pdal::Dimension::Id::TextureW,  draco::GeometryAttribute::TEX_COORD }
-    };
-
-};
-
 namespace pdal
 {
     typedef std::shared_ptr<std::ostream> FileStreamPtr;
@@ -100,7 +66,7 @@ private:
 
     bool flushCache(size_t size);
     void addAttribute(draco::GeometryAttribute::Type t, int n);
-    void addGeneric(Dimension::Id pt, int n);
+    void addGeneric(Dimension::Id pt);
     void initPointCloud(point_count_t size);
     void addPoint(int attId, Dimension::IdList idList, PointRef &point, PointId idx);
     draco::GeometryAttribute::Type getGeometryAttribute(std::string s);
@@ -123,9 +89,6 @@ private:
         att->SetAttributeValue(att->mapped_index(pointId), pointData.data());
     }
 
-    struct Args;
-    std::unique_ptr<DracoWriter::Args> m_args;
-
     std::string m_filename;
     NL::json m_userDimJson;
     std::map<Dimension::Id, std::string> m_userDimMap;
@@ -142,9 +105,12 @@ private:
     };
 
     FileStreamPtr m_stream;
-
+    //map of known draco attributes to the number of dimensions associated
+    //eg m_dims[POSITION]=3
     std::map<draco::GeometryAttribute::Type, int> m_dims;
+    //map of draco attributes to their attribute id
     std::map<draco::GeometryAttribute::Type, int32_t> m_attMap;
+    //map of generic attributes to their attribute id
     std::map<Dimension::Id, int32_t> m_genericMap;
     Dimension::IdList m_genericDims;
 

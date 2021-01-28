@@ -73,7 +73,6 @@ private:
     std::vector<char> m_data;
     draco::DecoderBuffer m_draco_buffer;
     std::unique_ptr<draco::PointCloud> m_pc;
-    bool m_textureW;
 
 };
 

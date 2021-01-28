@@ -103,13 +103,13 @@ void DracoReader::initialize()
     m_istreamPtr = Utils::openFile(m_filename, true);
     if (!m_istreamPtr)
         throwError("Unable to open file '" + m_filename + "' ");
-
-    m_data.assign(std::istreambuf_iterator<char>(*m_istreamPtr),
+    std::vector<char> data;
+    data.assign(std::istreambuf_iterator<char>(*m_istreamPtr),
                 std::istreambuf_iterator<char>());
     Utils::closeFile(m_istreamPtr);
 
     draco::DecoderBuffer draco_buffer;
-    draco_buffer.Init(m_data.data(), m_data.size());
+    draco_buffer.Init(data.data(), data.size());
 
     draco::Decoder decoder;
 
@@ -202,7 +202,6 @@ void DracoReader::addDimensions(PointLayoutPtr layout)
                 addOneDimension(Dimension::Id::TextureV, attr, layout, i, 1);
                 if (nc == 3)
                 {
-                    m_textureW = true;
                     addOneDimension(Dimension::Id::TextureW, attr, layout, i, 2);
                 }
                 break;
@@ -213,6 +212,8 @@ void DracoReader::addDimensions(PointLayoutPtr layout)
                 Dimension::Id id = pdal::Dimension::id(name);
                 if (id != Dimension::Id::Unknown) {
                     addOneDimension(id, attr, layout, i, 0);
+                } else {
+                    layout->assignDim(name, pt);
                 }
                 break;
             }

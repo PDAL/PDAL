@@ -50,7 +50,6 @@ if (WITH_TESTS)
         LINK_WITH
             ${writer_libname}
             ${reader_libname}
-            ${DRACO_LIBRARY}
         INCLUDES
             ${draco_INCLUDE_DIR}
             ${NLOHMANN_INCLUDE_DIR}
@@ -63,7 +62,6 @@ if (WITH_TESTS)
         LINK_WITH
             ${reader_libname}
             ${writer_libname}
-            ${DRACO_LIBRARY}
         INCLUDES
             ${draco_INCLUDE_DIR}
             ${NLOHMANN_INCLUDE_DIR}
