@@ -64,34 +64,25 @@ private:
     virtual void write(const PointViewPtr view);
     virtual void done(PointTableRef table);
 
+    struct DimensionInfo {
+        draco::GeometryAttribute::Type dracoAtt;
+        int attId;
+        DimTypeList pdalDims;
+    };
+
     bool flushCache(size_t size);
     void addAttribute(draco::GeometryAttribute::Type t, int n);
     void addGeneric(Dimension::Id pt);
     void initPointCloud(point_count_t size);
-    void addPoint(int attId, Dimension::IdList idList, PointRef &point, PointId idx);
-    draco::GeometryAttribute::Type getGeometryAttribute(std::string s);
+    void addPoint(DimensionInfo dim, PointRef &point, PointId idx);
     void parseDimensions();
     void parseQuants();
+    DimensionInfo *findDimInfo(draco::GeometryAttribute::Type dt);
+    DimensionInfo *findDimInfo(Dimension::Id pt);
 
-    template <typename T>
-    void addToPointCloud(int attId, Dimension::IdList idList, PointRef &point, PointId idx)
-    {
-        point.setPointId(idx);
-        const auto pointId = draco::PointIndex(idx);
-        //get point information, N dimensional
-        std::vector<T> pointData;
-        for (size_t i = 0; i < idList.size(); ++i) {
-            T data = point.getFieldAs<T>(idList[i]);
-            pointData.push_back(data);
-        }
-
-        draco::PointAttribute *const att = m_pc->attribute(attId);
-        att->SetAttributeValue(att->mapped_index(pointId), pointData.data());
-    }
-
+    std::vector<DimensionInfo> m_dims;
     std::string m_filename;
     NL::json m_userDimJson;
-    std::map<Dimension::Id, std::string> m_userDimMap;
     //these are the default quanitization levels. They will be overridden by any
     //quantization levels specified in the json argument "quantization"
     NL::json m_userQuant;
@@ -104,15 +95,8 @@ private:
         { "GENERIC",    8 }
     };
 
+
     FileStreamPtr m_stream;
-    //map of known draco attributes to the number of dimensions associated
-    //eg m_dims[POSITION]=3
-    std::map<draco::GeometryAttribute::Type, int> m_dims;
-    //map of draco attributes to their attribute id
-    std::map<draco::GeometryAttribute::Type, int32_t> m_attMap;
-    //map of generic attributes to their attribute id
-    std::map<Dimension::Id, int32_t> m_genericMap;
-    Dimension::IdList m_genericDims;
 
     std::unique_ptr<draco::PointCloud> m_pc =
         std::unique_ptr<draco::PointCloud>(new draco::PointCloud());

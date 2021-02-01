@@ -220,36 +220,39 @@ namespace pdal
     {
         NL::json dims;
         //test position
-        dims = { {"X", "double"}, {"Y", "double"}, {"Z", "float"} };
+        dims = { {"X", "uint16"}, {"Y", "uint16"}, {"Z", "float"} };
         testDimensions(dims, false);
-        dims = { {"X", "double"} };
+        dims = { {"X", "uint16"} };
         testDimensions(dims, false);
-        dims = { {"X", "double"}, {"Y", "double"}, {"Z", "double"} };
+        dims = { {"X", "uint16"}, {"Y", "uint16"}, {"Z", "uint16"} };
         testDimensions(dims, true);
 
-        //test normals
-        dims = { {"NormalX", "double"}, {"NormalY", "double"}, {"NormalZ", "float"} };
-        testDimensions(dims, false);
-        dims = { {"NormalX", "double"} };
-        testDimensions(dims, false);
-        dims = { {"NormalX", "double"}, {"NormalY", "double"}, {"NormalZ", "double"} };
-        testDimensions(dims, true);
 
         //test RGB
-        dims = { {"Red", "double"}, {"Green", "double"}, {"Blue", "float"} };
+        dims = { {"Red", "double"}, {"Green", "double"}, {"Blue", "uint16"} };
         testDimensions(dims, false);
         dims = { {"Red", "double"} };
         testDimensions(dims, false);
         dims = { {"Red", "double"}, {"Green", "double"}, {"Blue", "double"} };
         testDimensions(dims, true);
 
-        //test textures
-        // dims = { {"TextureU", "double"}, {"TextureV", "double"}, {"TextureW", "float"} };
+        // test textures
+        dims = { {"TextureU", "double"}, {"TextureV", "double"}, {"TextureW", "float"} };
+        testDimensions(dims, false);
+        dims = { {"TextureU", "double"} };
+        testDimensions(dims, false);
+        dims = { {"TextureU", "double"}, {"TextureV", "double"}, {"TextureW", "double"} };
+        testDimensions(dims, true);
+
+        //test file doesn't currently use these types
+        //test normals
+        // dims = { {"NormalX", "double"}, {"NormalY", "double"}, {"NormalZ", "float"} };
         // testDimensions(dims, false);
-        // dims = { {"TextureU", "double"} };
+        // dims = { {"NormalX", "double"} };
         // testDimensions(dims, false);
-        // dims = { {"TextureU", "double"}, {"TextureV", "double"}, {"TextureW", "double"} };
+        // dims = { {"NormalX", "double"}, {"NormalY", "double"}, {"NormalZ", "double"} };
         // testDimensions(dims, true);
+
 
     }
 

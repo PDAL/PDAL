@@ -139,6 +139,24 @@ void DracoWriter::parseQuants() {
     }
 }
 
+DracoWriter::DimensionInfo *DracoWriter::findDimInfo(draco::GeometryAttribute::Type dt) {
+    for (auto &dim: m_dims) {
+        if (dim.dracoAtt == dt) return &dim;
+    }
+    throw pdal_error("Draco attribute " + draco::GeometryAttribute::TypeToString(dt) +
+        " doesn't exist in this file.");
+}
+
+DracoWriter::DimensionInfo *DracoWriter::findDimInfo(Dimension::Id pt) {
+    for (auto &dim: m_dims) {
+        for (auto &dimType: dim.pdalDims) {
+            if (dimType.m_id == pt) return &dim;
+        }
+    }
+    throw pdal_error("Dimension Id " + Dimension::name(pt) +
+        " doesn't exist in this file.");
+}
+
 void DracoWriter::parseDimensions()
 {
     if(!m_userDimJson.is_object()) {
@@ -146,6 +164,7 @@ void DracoWriter::parseDimensions()
         throw pdal_error("Option 'dimensions' must be a JSON object, not a " +
             std::string(m_userDimJson.type_name()));
     }
+    //insert updated types to the m_dims
     for(auto& entry : m_userDimJson.items()) {
         std::string dimString = entry.key();
         auto dataType = entry.value();
@@ -158,101 +177,37 @@ void DracoWriter::parseDimensions()
             log()->get(LogLevel::Info) << "Key: " << dimString << ", Value: "
                 << dataType << std::endl;
 
-            //TODO allow for non standard pdal types?
+            //TODO allow for non standard pdal ids?
             Dimension::Id dimId = Dimension::id(dimString);
-            m_userDimMap[dimId] = dataType.get<std::string>();
+            DimensionInfo *dimInfo = findDimInfo(dimId);
+
+            std::string typeStr = dataType.get<std::string>();
+            Dimension::Type newType = Dimension::type(typeStr);
+            if (newType == Dimension::Type::None)
+                throw pdal_error("Type " + typeStr + "is not a valid data type.");
+
+            for (auto &dimType: dimInfo->pdalDims) {
+                if (dimType.m_id == dimId) dimType.m_type = newType;
+            }
         }
     }
-    //account for possible errors in dimensions
-    //x, y, z must all be specified if one of them is
-    if (m_userDimMap.find(Dimension::Id::X) != m_userDimMap.end())
-    {
-        std::string x, y, z;
-        try {
-            x = m_userDimMap.at(Dimension::Id::X);
-            y = m_userDimMap.at(Dimension::Id::Y);
-            z = m_userDimMap.at(Dimension::Id::Z);
-        } catch(std::out_of_range e) {
-            throw pdal_error("X, Y, and Z dimensions must all be specified if one is.");
-        }
-        if ( x != y || y != z || x != z ) {
-            throw pdal_error("X, Y, and Z dimensions must be of the same type");
+    //go through types of m_dims pdal ids and make sure they're consistent
+    for (auto &dimInfo: m_dims) {
+        int numDims = dimInfo.pdalDims.size();
+        //start with first type
+        DimType preType = dimInfo.pdalDims[0];
+        //go through following types and make sure they match
+        for (int i = 1; i < numDims; ++i) {
+            DimType curType = dimInfo.pdalDims[i];
+            std::string curName = Dimension::name(curType.m_id);
+            std::string preName = Dimension::name(preType.m_id);
+
+            if (curType.m_type != preType.m_type)
+                throw pdal_error("Ids " + curName + " and " + preName +
+                    " are not matching types, but are part of the same draco attribute.");
+            preType = dimInfo.pdalDims[i];
         }
     }
-    //red, green, and blue must all be specified if one of them is
-    if (m_userDimMap.find(Dimension::Id::Red) != m_userDimMap.end())
-    {
-        std::string r, g, b;
-        try {
-            r = m_userDimMap.at(Dimension::Id::Red);
-            g = m_userDimMap.at(Dimension::Id::Green);
-            b = m_userDimMap.at(Dimension::Id::Blue);
-        } catch(std::out_of_range e) {
-            throw pdal_error("Red, Green, and Blue dimensions must all be specified if one is.");
-        }
-        if ( r != g || g != b || r != b ) {
-            throw pdal_error("Red, Green, and Blue dimensions must be of the same type");
-        }
-    }
-    //normals x, y, z must all be specified if one of them is
-    if (m_userDimMap.find(Dimension::Id::NormalX) != m_userDimMap.end())
-    {
-        std::string nx, ny, nz;
-        try {
-            nx = m_userDimMap.at(Dimension::Id::NormalX);
-            ny = m_userDimMap.at(Dimension::Id::NormalY);
-            nz = m_userDimMap.at(Dimension::Id::NormalZ);
-        } catch(std::out_of_range e) {
-            throw pdal_error("NormalX, Y, and Z dimensions must all be specified if one is.");
-        }
-        if ( nx != ny || ny != nz || nx != nz ) {
-            throw pdal_error("NormalX, Y, and Z dimensions must be of the same type");
-        }
-    }
-    //make sure textures u, v, w are all the same, but it's possible there are
-    //only u and v, so make sure we know how many dimensions are in the file first
-    if (m_userDimMap.find(Dimension::Id::TextureU) != m_userDimMap.end())
-    {
-        std::string tu, tv, tw;
-        int texNum = m_dims.at(draco::GeometryAttribute::TEX_COORD);
-        try {
-            tu = m_userDimMap.at(Dimension::Id::TextureU);
-            tv = m_userDimMap.at(Dimension::Id::TextureV);
-            if (texNum == 3) tw = m_userDimMap.at(Dimension::Id::TextureW);
-            else tw = tv;
-        } catch(std::out_of_range e) {
-            throw pdal_error("TextureU, V, and W dimensions don't match the file.");
-        }
-        if ( tu != tv || tv != tw || tu != tw ) {
-            throw pdal_error("TextureU, V, and W dimensions must be of the same type");
-        }
-    }
-}
-
-void DracoWriter::addGeneric(Dimension::Id pt) {
-    //get pdal dimension data type
-    Dimension::Type pdalDataType = Dimension::defaultType(pt);
-    //get corresponding draco data type
-    draco::DataType dracoDataType = typeMap.at(pdalDataType);
-
-    //add generic type to the pointcloud
-    draco::GeometryAttribute ga;
-    ga.Init(draco::GeometryAttribute::GENERIC, nullptr, 1, dracoDataType,
-            false, draco::DataTypeLength(dracoDataType) * 1, 0);
-    auto attId = m_pc->AddAttribute(ga, true, m_pc->num_points());
-
-    //add generic attribute to map with its id
-    m_genericMap[pt] = attId;
-
-    //create metadata object and add dimension string as name
-    draco::Metadata metadata;
-    const std::string attName = "name";
-    const std::string name = Dimension::name(pt);
-    metadata.AddEntryString(attName, name);
-    std::unique_ptr<draco::AttributeMetadata> metaPtr(new draco::AttributeMetadata(metadata));
-
-    //attach metadata to generic attribute in pointcloud
-    m_pc->AddAttributeMetadata(attId, std::move(metaPtr));
 }
 
 void DracoWriter::ready(pdal::BasePointTable &table)
@@ -270,17 +225,77 @@ void DracoWriter::ready(pdal::BasePointTable &table)
         {
             //get draco type associated with the current dimension in loop
             draco::GeometryAttribute::Type dracoType = it->second;
-            m_dims[dracoType]++;
+            //search through DimInfo vector to see if we already have the draco attribute
+            bool found = false;
+            for (auto &dimInfo: m_dims) {
+                if (dimInfo.dracoAtt == dracoType) {
+                    dimInfo.pdalDims.push_back(DimType(dim, Dimension::defaultType(dim)));
+                    found = true;
+                    break;
+                }
+            }
+            //if it's not there, add it to the vector
+            if (!found) {
+                DimensionInfo d = {
+                    dracoType,
+                    -1, //default attribute id to -1
+                    { DimType(dim, Dimension::defaultType(dim)) }
+                };
+                m_dims.push_back(d);
+            }
+
         }
-        else
+        else //not a "known" draco type
         {
-            m_genericDims.push_back(dim);
+            //add generic dimension to DimensionInfo vector
+            DimensionInfo d = {
+                draco::GeometryAttribute::GENERIC,
+                -1, //default attribute id to -1
+                { DimType(dim, Dimension::defaultType(dim)) }
+            };
+            m_dims.push_back(d);
         }
     }
 }
 
+void DracoWriter::addGeneric(Dimension::Id pt)
+{
+    //get pdal dimension data type
+    Dimension::Type pdalDataType = Dimension::defaultType(pt);
+    //get corresponding draco data type
+    draco::DataType dracoDataType = typeMap.at(pdalDataType);
 
-void DracoWriter::addAttribute(draco::GeometryAttribute::Type t, int n) {
+    //add generic type to the pointcloud
+    draco::GeometryAttribute ga;
+    ga.Init(draco::GeometryAttribute::GENERIC, nullptr, 1, dracoDataType,
+            false, draco::DataTypeLength(dracoDataType) * 1, 0);
+    auto attId = m_pc->AddAttribute(ga, true, m_pc->num_points());
+
+    //create metadata object and add dimension string as name
+    draco::Metadata metadata;
+    const std::string attName = "name";
+    const std::string name = Dimension::name(pt);
+    metadata.AddEntryString(attName, name);
+    std::unique_ptr<draco::AttributeMetadata> metaPtr(new draco::AttributeMetadata(metadata));
+
+    //attach metadata to generic attribute in pointcloud
+    m_pc->AddAttributeMetadata(attId, std::move(metaPtr));
+
+    //update attribute id
+    for (auto &dimInfo: m_dims) {
+        if (dimInfo.dracoAtt == draco::GeometryAttribute::GENERIC) {
+            for (auto &dimType: dimInfo.pdalDims) {
+                if (dimType.m_id == pt) {
+                    dimInfo.attId = attId;
+                    return;
+                }
+            }
+        }
+    }
+}
+
+void DracoWriter::addAttribute(draco::GeometryAttribute::Type t, int n)
+{
     // - iterate over values in dimMap, which are draco dimensions
     // - use the pdal type associated with it to get the pdal data type
     // - use map of pdal types to draco types to get the correct draco type
@@ -301,75 +316,45 @@ void DracoWriter::addAttribute(draco::GeometryAttribute::Type t, int n) {
     //create geometry attribute and add to pointcloud
     draco::GeometryAttribute ga;
     ga.Init(t, nullptr, n, dataType, false, draco::DataTypeLength(dataType) * n, 0);
-    m_attMap[t] = m_pc->AddAttribute(ga, true, m_pc->num_points());
+    int attId = m_pc->AddAttribute(ga, true, m_pc->num_points());
+
+    //update attribute id
+    for (auto &dimInfo: m_dims) {
+        if (dimInfo.dracoAtt == t) {
+            dimInfo.attId = attId;
+            return;
+        }
+    }
 }
 
 void DracoWriter::initPointCloud(point_count_t size)
 {
     //begin initialization of the point cloud with the point count
-    unsigned int sizeInt = size;
-    m_pc->set_num_points(sizeInt);
+    m_pc->set_num_points((uint32_t)size);
     //go through known draco attributes and add to the pointcloud
-    for (auto &dim: m_dims)
-    {
-        addAttribute(dim.first, dim.second);
-    }
-    // //do the same for generic attributes
-    for (auto &dim: m_genericDims)
-    {
-        addGeneric(dim);
+    for (auto &dim: m_dims) {
+        if (dim.dracoAtt == draco::GeometryAttribute::GENERIC) {
+            addGeneric(dim.pdalDims[0].m_id);
+        }
+        else {
+            addAttribute(dim.dracoAtt, dim.pdalDims.size());
+        }
     }
 }
 
-void DracoWriter::addPoint(int attId, Dimension::IdList idList, PointRef &point, PointId idx)
+void DracoWriter::addPoint(DimensionInfo dim, PointRef &point, PointId idx)
 {
-    //get first id in list. All ids in any given list should be the same datatype
-    Dimension::Id dim = idList[0];
-    Dimension::Type type;
+    const auto pointId = draco::PointIndex(idx);
 
-    if (m_userDimMap.find(dim) != m_userDimMap.end()) {
-        std::string typeStr = m_userDimMap.at(dim);
-        type = Dimension::type(typeStr);
-    } else {
-        type = Dimension::defaultType(dim);
-    }
-
-    //call addToPointCloud with appropriate datatype
-    switch (type) {
-        case Dimension::Type::Signed8:
-            addToPointCloud<int8_t>(attId, idList, point, idx);
-            break;
-        case Dimension::Type::Unsigned8:
-            addToPointCloud<uint8_t>(attId, idList, point, idx);
-            break;
-        case Dimension::Type::Signed16:
-            addToPointCloud<int16_t>(attId, idList, point, idx);
-            break;
-        case Dimension::Type::Unsigned16:
-            addToPointCloud<uint16_t>(attId, idList, point, idx);
-            break;
-        case Dimension::Type::Signed32:
-            addToPointCloud<int32_t>(attId, idList, point, idx);
-            break;
-        case Dimension::Type::Unsigned32:
-            addToPointCloud<uint32_t>(attId, idList, point, idx);
-            break;
-        case Dimension::Type::Signed64:
-            addToPointCloud<int64_t>(attId, idList, point, idx);
-            break;
-        case Dimension::Type::Unsigned64:
-            addToPointCloud<uint64_t>(attId, idList, point, idx);
-            break;
-        case Dimension::Type::Float:
-            addToPointCloud<float>(attId, idList, point, idx);
-            break;
-        case Dimension::Type::Double:
-            addToPointCloud<double>(attId, idList, point, idx);
-            break;
-        default:
-            throw pdal_error("Invalid type for pdal dimension " + Dimension::name(dim));
-            break;
-    }
+    //find data type and create buffer
+    Dimension::Type dataType = dim.pdalDims[0].m_type;
+    size_t size = Dimension::size(dataType) * dim.pdalDims.size();
+    char buffer [size];
+    //fill buffer
+    point.getPackedData(dim.pdalDims, buffer);
+    //add to draco pointcloud
+    draco::PointAttribute *const att = m_pc->attribute(dim.attId);
+    att->SetAttributeValue(att->mapped_index(pointId), &buffer);
 }
 
 void DracoWriter::write(const PointViewPtr view)
@@ -384,64 +369,9 @@ void DracoWriter::write(const PointViewPtr view)
     {
         point.setPointId(idx);
         const auto pointId = draco::PointIndex((uint32_t)idx);
-
-        if (m_attMap.find(draco::GeometryAttribute::POSITION) != m_attMap.end())
-        {
-            const int attId = m_attMap[draco::GeometryAttribute::POSITION];
-            Dimension::IdList idList {
-                Dimension::Id::X,
-                Dimension::Id::Y,
-                Dimension::Id::Z
-            };
-            addPoint(attId, idList, point, idx);
+        for (auto &dim: m_dims) {
+            addPoint(dim, point, idx);
         }
-
-        if (m_attMap.find(draco::GeometryAttribute::COLOR) != m_attMap.end())
-        {
-            const int attId = m_attMap[draco::GeometryAttribute::COLOR];
-            Dimension::IdList idList {
-                Dimension::Id::Red,
-                Dimension::Id::Green,
-                Dimension::Id::Blue
-            };
-            addPoint(attId, idList, point, idx);
-        }
-
-        if (m_attMap.find(draco::GeometryAttribute::TEX_COORD) != m_attMap.end())
-        {
-            const int n = m_dims[draco::GeometryAttribute::TEX_COORD];
-            const int attId = m_attMap[draco::GeometryAttribute::TEX_COORD];
-            Dimension::IdList idList {
-                Dimension::Id::TextureU,
-                Dimension::Id::TextureV
-            };
-            if (n > 2)
-                idList.push_back(Dimension::Id::TextureW);
-            addPoint(attId, idList, point, idx);
-        }
-
-        if (m_attMap.find(draco::GeometryAttribute::NORMAL) != m_attMap.end())
-        {
-            const int attId = m_attMap[draco::GeometryAttribute::NORMAL];
-            Dimension::IdList idList {
-                Dimension::Id::NormalX,
-                Dimension::Id::NormalY,
-                Dimension::Id::NormalZ
-            };
-            addPoint(attId, idList, point, idx);
-        }
-
-        //go through list of added dimensions and get the associated data
-        for (auto& dim: m_genericMap)
-        {
-            const int attId = dim.second;
-            Dimension::IdList idList {
-                dim.first
-            };
-
-            addPoint(attId, idList, point, idx);
-        }
-
     }
 
     draco::EncoderBuffer buffer;
