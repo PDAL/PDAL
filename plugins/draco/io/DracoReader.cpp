@@ -242,7 +242,7 @@ point_count_t DracoReader::read(PointViewPtr view, point_count_t count)
     {
         for (auto& dim: m_dimensions)
         {
-            const uint8_t *src = dim.attr->GetAddressOfMappedIndex(draco::PointIndex(numRead)) +
+            const uint8_t *src = dim.attr->GetAddressOfMappedIndex(draco::PointIndex((uint32_t)numRead)) +
                 draco::DataTypeLength(dim.attr->data_type()) * dim.attNum;
             view->setField(dim.pdalId, dim.pdalType, id, src);
         }

@@ -332,17 +332,17 @@ void DracoWriter::initPointCloud(point_count_t size)
 
 void DracoWriter::addPoint(DimensionInfo dim, PointRef &point, PointId idx)
 {
-    const auto pointId = draco::PointIndex(idx);
+    const auto pointId = draco::PointIndex((uint32_t)idx);
 
     //find data type and create buffer
     Dimension::Type dataType = dim.pdalDims[0].m_type;
     size_t size = Dimension::size(dataType) * dim.pdalDims.size();
-    char buffer [size];
+    std::vector<char> buffer(size, 0);
     //fill buffer
-    point.getPackedData(dim.pdalDims, buffer);
+    point.getPackedData(dim.pdalDims, buffer.data());
     //add to draco pointcloud
     draco::PointAttribute *const att = m_pc->attribute(dim.attId);
-    att->SetAttributeValue(att->mapped_index(pointId), &buffer);
+    att->SetAttributeValue(att->mapped_index(pointId), buffer.data());
 }
 
 void DracoWriter::write(const PointViewPtr view)
