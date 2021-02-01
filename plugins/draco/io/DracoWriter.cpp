@@ -160,7 +160,7 @@ DracoWriter::DimensionInfo *DracoWriter::findDimInfo(Dimension::Id pt) {
 void DracoWriter::parseDimensions()
 {
     if(!m_userDimJson.is_object()) {
-        if (std::string(m_userQuant.type_name()) == "null") return;
+        if (std::string(m_userDimJson.type_name()) == "null") return;
         throw pdal_error("Option 'dimensions' must be a JSON object, not a " +
             std::string(m_userDimJson.type_name()));
     }
@@ -282,16 +282,8 @@ void DracoWriter::addGeneric(Dimension::Id pt)
     m_pc->AddAttributeMetadata(attId, std::move(metaPtr));
 
     //update attribute id
-    for (auto &dimInfo: m_dims) {
-        if (dimInfo.dracoAtt == draco::GeometryAttribute::GENERIC) {
-            for (auto &dimType: dimInfo.pdalDims) {
-                if (dimType.m_id == pt) {
-                    dimInfo.attId = attId;
-                    return;
-                }
-            }
-        }
-    }
+    DimensionInfo *dimInfo = findDimInfo(pt);
+    dimInfo->attId = attId;
 }
 
 void DracoWriter::addAttribute(draco::GeometryAttribute::Type t, int n)
@@ -319,12 +311,8 @@ void DracoWriter::addAttribute(draco::GeometryAttribute::Type t, int n)
     int attId = m_pc->AddAttribute(ga, true, m_pc->num_points());
 
     //update attribute id
-    for (auto &dimInfo: m_dims) {
-        if (dimInfo.dracoAtt == t) {
-            dimInfo.attId = attId;
-            return;
-        }
-    }
+    DimensionInfo *dimInfo = findDimInfo(t);
+    dimInfo->attId = attId;
 }
 
 void DracoWriter::initPointCloud(point_count_t size)
