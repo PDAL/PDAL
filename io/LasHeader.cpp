@@ -398,7 +398,7 @@ ILeStream& operator>>(ILeStream& in, LasHeader& h)
         throw LasHeader::error("Invalid point count. Number of points exceeds file size.");
     if (h.m_vlrOffset > h.m_fileSize)
         throw LasHeader::error("Invalid VLR offset - exceeds file size.");
-    if (h.m_eVlrOffset > h.m_fileSize)
+    if (!h.compressed() && h.m_eVlrOffset > h.m_fileSize)
         throw LasHeader::error("Invalid extended VLR offset - exceeds file size.");
 
     // Read regular VLRs.
