@@ -195,6 +195,7 @@ void DracoReader::addDimensions(PointLayoutPtr layout)
                 addOneDimension(Dimension::Id::Red, attr, layout, i, 0);
                 addOneDimension(Dimension::Id::Green, attr, layout, i, 1);
                 addOneDimension(Dimension::Id::Blue, attr, layout, i, 2);
+                break;
             }
             case GeometryAttribute::TEX_COORD:
             {
