@@ -343,7 +343,7 @@ void LasWriter::prepOutput(std::ostream *outStream, const SpatialReference& srs)
     OLeStream out(m_ostream);
     out << m_lasHeader;
 
-    m_lasHeader.setVlrOffset(m_vlrs.size() ? (uint32_t)m_ostream->tellp() : 0);
+    m_lasHeader.setVlrOffset((uint32_t)m_ostream->tellp());
 
     for (auto vi = m_vlrs.begin(); vi != m_vlrs.end(); ++vi)
     {
