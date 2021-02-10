@@ -216,24 +216,43 @@ namespace pdal
         else EXPECT_THROW(writer.execute(table), pdal_error);
     }
 
+    void testZeroFill() {
+        std::string inFile = Support::temppath("draco_test_dims.drc");
+
+        //setup reader
+        Options readerOptions;
+        readerOptions.add("filename", inFile);
+        // readerOptions.add("count", 1065);
+        DracoReader reader;
+        reader.setOptions(readerOptions);
+
+        PointTable table;
+        PointViewSet viewSet = reader.execute(table);
+        PointViewPtr view = *viewSet.begin();
+        float y = view->getFieldAs<float>(Dimension::Id::Y, 0);
+        float z = view->getFieldAs<float>(Dimension::Id::Z, 0);
+        EXPECT_EQ(y, 0);
+        EXPECT_EQ(z, 0);
+
+    }
+
     TEST_F(DracoWriterTest, dimensions)
     {
         NL::json dims;
         //test position
         dims = { {"X", "float"}, {"Y", "float"}, {"Z", "double"} };
         testDimensions(dims, false);
-        dims = { {"X", "float"} };
-        testDimensions(dims, false);
         dims = { {"X", "float"}, {"Y", "float"}, {"Z", "float"} };
         testDimensions(dims, true);
+        dims = { {"X", "double"} };
+        testDimensions(dims, true);
+        testZeroFill();
 
 
         //test RGB
         dims = { {"Red", "double"}, {"Green", "double"}, {"Blue", "double"} };
         testDimensions(dims, true);
         dims = { {"Red", "double"}, {"Green", "double"}, {"Blue", "uint16"} };
-        testDimensions(dims, false);
-        dims = { {"Red", "double"} };
         testDimensions(dims, false);
 
 

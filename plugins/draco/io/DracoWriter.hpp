@@ -68,6 +68,7 @@ private:
         draco::GeometryAttribute::Type dracoAtt;
         int attId;
         DimTypeList pdalDims;
+        std::vector<bool> zeroFill;
     };
 
     bool flushCache(size_t size);
@@ -75,8 +76,10 @@ private:
     void addGeneric(Dimension::Id pt);
     void initPointCloud(point_count_t size);
     void addPoint(DimensionInfo dim, PointRef &point, PointId idx);
-    void parseDimensions();
+    Dimension::IdList getDimensions(draco::GeometryAttribute::Type dt);
+    void parseDimensions(BasePointTable &table);
     void parseQuants();
+    void createDims(BasePointTable &table);
     DimensionInfo *findDimInfo(draco::GeometryAttribute::Type dt);
     DimensionInfo *findDimInfo(Dimension::Id pt);
 

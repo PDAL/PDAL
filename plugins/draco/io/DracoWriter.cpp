@@ -139,6 +139,7 @@ void DracoWriter::parseQuants() {
     }
 }
 
+
 DracoWriter::DimensionInfo *DracoWriter::findDimInfo(draco::GeometryAttribute::Type dt) {
     for (auto &dim: m_dims) {
         if (dim.dracoAtt == dt) return &dim;
@@ -147,7 +148,8 @@ DracoWriter::DimensionInfo *DracoWriter::findDimInfo(draco::GeometryAttribute::T
         " doesn't exist in this file.");
 }
 
-DracoWriter::DimensionInfo *DracoWriter::findDimInfo(Dimension::Id pt) {
+DracoWriter::DimensionInfo *DracoWriter::findDimInfo(Dimension::Id pt)
+{
     for (auto &dim: m_dims) {
         for (auto &dimType: dim.pdalDims) {
             if (dimType.m_id == pt) return &dim;
@@ -157,40 +159,70 @@ DracoWriter::DimensionInfo *DracoWriter::findDimInfo(Dimension::Id pt) {
         " doesn't exist in this file.");
 }
 
-void DracoWriter::parseDimensions()
+Dimension::IdList DracoWriter::getDimensions(draco::GeometryAttribute::Type dt)
 {
-    if(!m_userDimJson.is_object()) {
-        if (std::string(m_userDimJson.type_name()) == "null") return;
-        throw pdal_error("Option 'dimensions' must be a JSON object, not a " +
-            std::string(m_userDimJson.type_name()));
+    Dimension::IdList returnList;
+    for (auto &dim: dimMap) {
+        if (dim.second == dt) returnList.push_back(dim.first);
     }
-    //insert updated types to the m_dims
-    for(auto& entry : m_userDimJson.items()) {
-        std::string dimString = entry.key();
-        auto dataType = entry.value();
+    return returnList;
+}
 
-        if(!dataType.is_string()) {
-            throw pdal_error("Every value in 'dimensions' must be a string. Key '"
-                + dimString + "' has value with type '"
-                + std::string(dataType.type_name()) + "'");
-        } else {
-            log()->get(LogLevel::Info) << "Key: " << dimString << ", Value: "
-                << dataType << std::endl;
+void DracoWriter::parseDimensions(BasePointTable &table)
+{
+    PointLayoutPtr layout = table.layout();
+    pdal::Dimension::IdList dimensions = layout->dims();
+    for (auto& dim : dimensions)
+    {
+        std::string dimString = Dimension::name(dim);
+        //if it doesn't exist in the json, then skip it
+        if (!m_userDimJson.contains(dimString)) continue;
+        //else add it to the list
+        auto dataType = m_userDimJson[dimString].get<std::string>();
 
-            //TODO allow for non standard pdal ids?
-            Dimension::Id dimId = Dimension::id(dimString);
-            DimensionInfo *dimInfo = findDimInfo(dimId);
-
-            std::string typeStr = dataType.get<std::string>();
-            Dimension::Type newType = Dimension::type(typeStr);
-            if (newType == Dimension::Type::None)
-                throw pdal_error("Type " + typeStr + "is not a valid data type.");
-
-            for (auto &dimType: dimInfo->pdalDims) {
-                if (dimType.m_id == dimId) dimType.m_type = newType;
+        log()->get(LogLevel::Info) << "Key: " << dimString << ", Value: "
+            << dataType << std::endl;
+        const auto it = dimMap.find(dim);
+        Dimension::Type pdalType = Dimension::type(dataType);
+        if (it != dimMap.end())
+        {
+            //get draco type associated with the current dimension in loop
+            draco::GeometryAttribute::Type dracoType = it->second;
+            //search through DimInfo vector to see if we already have the draco attribute
+            bool found = false;
+            for (auto &dimInfo: m_dims) {
+                if (dimInfo.dracoAtt == dracoType) {
+                    dimInfo.pdalDims.push_back(DimType(dim, pdalType));
+                    dimInfo.zeroFill.push_back(false);
+                    found = true;
+                    break;
+                }
+            }
+            //if it's not there, add it to the vector
+            if (!found) {
+                DimensionInfo d = {
+                    dracoType,
+                    -1, //default attribute id to -1
+                    { DimType(dim, pdalType) },
+                    { false }
+                };
+                m_dims.push_back(d);
             }
         }
+        else //not a "known" draco type
+        {
+            //add generic dimension to DimensionInfo vector
+            DimensionInfo d = {
+                draco::GeometryAttribute::GENERIC,
+                -1, //default attribute id to -1
+                { DimType(dim, pdalType) },
+                { false }
+            };
+            m_dims.push_back(d);
+        }
+
     }
+
     //go through types of m_dims pdal ids and make sure they're consistent
     for (auto &dimInfo: m_dims) {
         int numDims = dimInfo.pdalDims.size();
@@ -208,18 +240,33 @@ void DracoWriter::parseDimensions()
             preType = dimInfo.pdalDims[i];
         }
     }
+
+    //add dimensions that should be there with zero fill boolean?
+    for (auto &dimInfo: m_dims) {
+        int numDims = dimInfo.pdalDims.size();
+        auto idList = getDimensions(dimInfo.dracoAtt);
+        //we can assume that all dimensions here have the same type
+        //and that at the very least the first entry will be filled
+        Dimension::Type pdalType = dimInfo.pdalDims[0].m_type;
+
+        for (size_t i = numDims; i < idList.size(); ++i) {
+            DimType d(Dimension::Id::Unknown, pdalType);
+            dimInfo.pdalDims.push_back(d);
+            dimInfo.zeroFill.push_back(true);
+        }
+    }
+
 }
 
-void DracoWriter::ready(pdal::BasePointTable &table)
-{
-    auto layout = table.layout();
-
+void DracoWriter::createDims(BasePointTable &table) {
+    PointLayoutPtr layout = table.layout();
     pdal::Dimension::IdList dimensions = layout->dims();
-
     for (auto& dim : dimensions)
     {
-        //create list of dimensions needed
-        int numComponents(1);
+        //check that dimension exists in the dimension argument
+        std::string dimStr = Dimension::name(dim);
+        Dimension::Type pdalType = layout->dimType(dim);
+        //create list of dimensions needed int numComponents(1);
         const auto it = dimMap.find(dim);
         if (it != dimMap.end())
         {
@@ -229,7 +276,8 @@ void DracoWriter::ready(pdal::BasePointTable &table)
             bool found = false;
             for (auto &dimInfo: m_dims) {
                 if (dimInfo.dracoAtt == dracoType) {
-                    dimInfo.pdalDims.push_back(DimType(dim, Dimension::defaultType(dim)));
+                    dimInfo.pdalDims.push_back(DimType(dim, pdalType));
+                    dimInfo.zeroFill.push_back(false);
                     found = true;
                     break;
                 }
@@ -239,7 +287,8 @@ void DracoWriter::ready(pdal::BasePointTable &table)
                 DimensionInfo d = {
                     dracoType,
                     -1, //default attribute id to -1
-                    { DimType(dim, Dimension::defaultType(dim)) }
+                    { DimType(dim, pdalType) },
+                    { false }
                 };
                 m_dims.push_back(d);
             }
@@ -251,11 +300,18 @@ void DracoWriter::ready(pdal::BasePointTable &table)
             DimensionInfo d = {
                 draco::GeometryAttribute::GENERIC,
                 -1, //default attribute id to -1
-                { DimType(dim, Dimension::defaultType(dim)) }
+                { DimType(dim, pdalType) },
+                { false }
             };
             m_dims.push_back(d);
         }
     }
+}
+
+void DracoWriter::ready(pdal::BasePointTable &table)
+{
+    if(m_userDimJson.is_object()) parseDimensions(table);
+    else createDims(table);
 }
 
 void DracoWriter::addGeneric(Dimension::Id pt)
@@ -337,6 +393,7 @@ void DracoWriter::addPoint(DimensionInfo dim, PointRef &point, PointId idx)
     //find data type and create buffer
     Dimension::Type dataType = dim.pdalDims[0].m_type;
     size_t size = Dimension::size(dataType) * dim.pdalDims.size();
+
     std::vector<char> buffer(size, 0);
     //fill buffer
     point.getPackedData(dim.pdalDims, buffer.data());
@@ -349,8 +406,7 @@ void DracoWriter::write(const PointViewPtr view)
 {
     //initialize pointcloud builder
     initPointCloud(view->size());
-    //we don't know how many texture dimensions are available until here
-    parseDimensions();
+    // parseDimensions();
 
     PointRef point(*view, 0);
     for (PointId idx = 0; idx < view->size(); ++idx)
