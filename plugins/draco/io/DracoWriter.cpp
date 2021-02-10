@@ -193,7 +193,6 @@ void DracoWriter::parseDimensions(BasePointTable &table)
             for (auto &dimInfo: m_dims) {
                 if (dimInfo.dracoAtt == dracoType) {
                     dimInfo.pdalDims.push_back(DimType(dim, pdalType));
-                    dimInfo.zeroFill.push_back(false);
                     found = true;
                     break;
                 }
@@ -203,8 +202,7 @@ void DracoWriter::parseDimensions(BasePointTable &table)
                 DimensionInfo d = {
                     dracoType,
                     -1, //default attribute id to -1
-                    { DimType(dim, pdalType) },
-                    { false }
+                    { DimType(dim, pdalType) }
                 };
                 m_dims.push_back(d);
             }
@@ -215,8 +213,7 @@ void DracoWriter::parseDimensions(BasePointTable &table)
             DimensionInfo d = {
                 draco::GeometryAttribute::GENERIC,
                 -1, //default attribute id to -1
-                { DimType(dim, pdalType) },
-                { false }
+                { DimType(dim, pdalType) }
             };
             m_dims.push_back(d);
         }
@@ -241,18 +238,17 @@ void DracoWriter::parseDimensions(BasePointTable &table)
         }
     }
 
-    //add dimensions that should be there with zero fill boolean?
+    //add dimensions that should be there with zero fill
     for (auto &dimInfo: m_dims) {
         int numDims = dimInfo.pdalDims.size();
         auto idList = getDimensions(dimInfo.dracoAtt);
         //we can assume that all dimensions here have the same type
-        //and that at the very least the first entry will be filled
+        //and that the first entry will be filled
         Dimension::Type pdalType = dimInfo.pdalDims[0].m_type;
 
         for (size_t i = numDims; i < idList.size(); ++i) {
             DimType d(Dimension::Id::Unknown, pdalType);
             dimInfo.pdalDims.push_back(d);
-            dimInfo.zeroFill.push_back(true);
         }
     }
 
@@ -277,7 +273,6 @@ void DracoWriter::createDims(BasePointTable &table) {
             for (auto &dimInfo: m_dims) {
                 if (dimInfo.dracoAtt == dracoType) {
                     dimInfo.pdalDims.push_back(DimType(dim, pdalType));
-                    dimInfo.zeroFill.push_back(false);
                     found = true;
                     break;
                 }
@@ -287,8 +282,7 @@ void DracoWriter::createDims(BasePointTable &table) {
                 DimensionInfo d = {
                     dracoType,
                     -1, //default attribute id to -1
-                    { DimType(dim, pdalType) },
-                    { false }
+                    { DimType(dim, pdalType) }
                 };
                 m_dims.push_back(d);
             }
@@ -300,8 +294,7 @@ void DracoWriter::createDims(BasePointTable &table) {
             DimensionInfo d = {
                 draco::GeometryAttribute::GENERIC,
                 -1, //default attribute id to -1
-                { DimType(dim, pdalType) },
-                { false }
+                { DimType(dim, pdalType) }
             };
             m_dims.push_back(d);
         }
@@ -406,7 +399,6 @@ void DracoWriter::write(const PointViewPtr view)
 {
     //initialize pointcloud builder
     initPointCloud(view->size());
-    // parseDimensions();
 
     PointRef point(*view, 0);
     for (PointId idx = 0; idx < view->size(); ++idx)

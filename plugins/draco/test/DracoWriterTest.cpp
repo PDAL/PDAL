@@ -227,12 +227,17 @@ namespace pdal
         reader.setOptions(readerOptions);
 
         PointTable table;
+        reader.prepare(table);
         PointViewSet viewSet = reader.execute(table);
         PointViewPtr view = *viewSet.begin();
-        float y = view->getFieldAs<float>(Dimension::Id::Y, 0);
-        float z = view->getFieldAs<float>(Dimension::Id::Z, 0);
-        EXPECT_EQ(y, 0);
-        EXPECT_EQ(z, 0);
+        point_count_t count = view->size();
+
+        for (PointId i = 0; i < count; i += 1) {
+            float y = view->getFieldAs<float>(Dimension::Id::Y, i);
+            float z = view->getFieldAs<float>(Dimension::Id::Z, i);
+            EXPECT_EQ(y, 0);
+            EXPECT_EQ(z, 0);
+        }
 
     }
 

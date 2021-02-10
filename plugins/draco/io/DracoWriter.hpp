@@ -68,7 +68,6 @@ private:
         draco::GeometryAttribute::Type dracoAtt;
         int attId;
         DimTypeList pdalDims;
-        std::vector<bool> zeroFill;
     };
 
     bool flushCache(size_t size);
