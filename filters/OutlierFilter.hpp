@@ -67,9 +67,11 @@ private:
     int m_meanK;
     double m_multiplier;
     uint8_t m_class;
+    unsigned int m_threads;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs& args);
+    virtual void ready(PointTableRef table);
     Indices processRadius(PointViewPtr inView);
     Indices processStatistical(PointViewPtr inView);
     virtual PointViewSet run(PointViewPtr view);

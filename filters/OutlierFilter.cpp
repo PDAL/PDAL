@@ -38,7 +38,10 @@
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/Utils.hpp>
 
+#include <numeric>
+#include <mutex>
 #include <string>
+#include <thread>
 #include <vector>
 
 namespace pdal
@@ -60,18 +63,40 @@ std::string OutlierFilter::getName() const
 
 void OutlierFilter::addArgs(ProgramArgs& args)
 {
-    args.add("method", "Method [default: statistical]", m_method,
-             "statistical");
+    args.add("method", "Method [default: statistical]", m_method, "statistical");
     args.add("min_k", "Minimum number of neighbors in radius", m_minK, 2);
     args.add("radius", "Radius", m_radius, 1.0);
     args.add("mean_k", "Mean number of neighbors", m_meanK, 8);
     args.add("multiplier", "Standard deviation threshold", m_multiplier, 2.0);
     args.add("class", "Class to use for noise points", m_class, ClassLabel::LowPoint);
+    args.add("threads", "Number of threads used to run this filter", m_threads, 1U);
 }
 
 void OutlierFilter::addDimensions(PointLayoutPtr layout)
 {
     layout->registerDim(Dimension::Id::Classification);
+}
+
+void OutlierFilter::ready(BasePointTable &table)
+{
+    if (m_threads < 1)
+    {
+        log()->get(LogLevel::Warning)
+            << "Number of threads < 1 ("
+            << m_threads << "). Setting to 1."
+            << std::endl;
+        m_threads = 1;
+    }
+
+    unsigned int hw_concurrency = std::thread::hardware_concurrency();
+    if (m_threads > hw_concurrency)
+    {
+        log()->get(LogLevel::Warning)
+            << "Number of threads (" << m_threads << ") "
+            << "greater than available processors (" << hw_concurrency << "). "
+            << "This can degrade performance."
+            << std::endl;
+    }
 }
 
 Indices OutlierFilter::processRadius(PointViewPtr inView)
@@ -83,15 +108,47 @@ Indices OutlierFilter::processRadius(PointViewPtr inView)
 
     PointIdList inliers, outliers;
 
-    for (PointId i = 0; i < np; ++i)
-    {
-        auto ids = index.radius(i, m_radius);
-        if (ids.size() > size_t(m_minK))
-            inliers.push_back(i);
-        else
-            outliers.push_back(i);
-    }
+    std::deque<pdal::PointId> point_indices(np);
+    std::iota(point_indices.begin(), point_indices.end(), 0);
 
+    std::mutex queue_lock, indices_lock;
+    std::vector<std::thread> thread_pool;
+    thread_pool.reserve(m_threads);
+
+    for (unsigned int i = 0; i < m_threads; i++)
+    {
+        thread_pool.emplace_back([&] {
+          for (;;)
+          {
+              pdal::PointId idx;
+              {
+                  // Get a point idx to process
+                  std::lock_guard<std::mutex> lock(queue_lock);
+                  if (point_indices.empty())
+                      break;
+                  idx = point_indices.front();
+                  point_indices.pop_front();
+              }
+
+              // Do expensive work.
+              auto ids = index.radius(idx, m_radius);
+
+              {
+                  // Put point into appropriate container.
+                  std::lock_guard<std::mutex> lock(indices_lock);
+                  if (ids.size() > size_t(m_minK))
+                      inliers.push_back(idx);
+                  else
+                      outliers.push_back(idx);
+              }
+          }
+        });
+    }
+    for (std::thread &t : thread_pool)
+    {
+        if (t.joinable())
+            t.join();
+    }
     return Indices{inliers, outliers};
 }
 
@@ -104,25 +161,57 @@ Indices OutlierFilter::processStatistical(PointViewPtr inView)
 
     PointIdList inliers, outliers;
 
+    std::deque<pdal::PointId> point_indices(np);
+    std::iota(point_indices.begin(), point_indices.end(), 0);
+
     std::vector<double> distances(np, 0.0);
 
     // we increase the count by one because the query point itself will
     // be included with a distance of 0
     point_count_t count = m_meanK + 1;
-    PointIdList indices(count);
-    std::vector<double> sqr_dists(count);
-    for (PointId i = 0; i < np; ++i)
+
+    std::mutex queue_lock, distances_lock;
+
+    std::vector<std::thread> thread_pool;
+    thread_pool.reserve(m_threads);
+
+    for (unsigned int i = 0; i < m_threads; i++)
     {
+        thread_pool.emplace_back([&] {
+            for (;;) {
+                pdal::PointId idx;
+                {
+                    // Get a point idx to process
+                    std::lock_guard<std::mutex> lock(queue_lock);
+                    if (point_indices.empty())
+                        break;
 
-        index.knnSearch(i, count, &indices, &sqr_dists);
+                    idx = point_indices.front();
+                    point_indices.pop_front();
+                }
 
-        for (size_t j = 1; j < count; ++j)
-        {
-            double delta = std::sqrt(sqr_dists[j]) - distances[i];
-            distances[i] += (delta / j);
-        }
-        indices.clear(); indices.resize(count);
-        sqr_dists.clear(); sqr_dists.resize(count);
+                // Do expensive work.
+                PointIdList indices(count);
+                std::vector<double> sqr_dists(count);
+                index.knnSearch(idx, count, &indices, &sqr_dists);
+
+                {
+                    // Lock distances vector and update it
+                    std::lock_guard<std::mutex> lock(distances_lock);
+                    for (size_t j = 1; j < count; ++j)
+                    {
+                        double delta = std::sqrt(sqr_dists[j]) - distances[idx];
+                        distances[idx] += (delta / j);
+                    }
+                }
+            }
+        });
+    }
+
+    for (std::thread &t : thread_pool)
+    {
+        if (t.joinable())
+            t.join();
     }
 
     size_t n(0);

@@ -148,5 +148,8 @@ _`mean_k`
 _`multiplier`
   Standard deviation threshold (statistical method only). [Default: 2.0]
 
+_`threads`
+  Number of threads to use for processing. [Default: 1]
+
 .. include:: filter_opts.rst
 
