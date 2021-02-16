@@ -37,6 +37,7 @@
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/Utils.hpp>
+#include <pdal/util/ThreadPool.hpp>
 
 #include <numeric>
 #include <mutex>
@@ -112,27 +113,23 @@ Indices OutlierFilter::processRadius(PointViewPtr inView)
     std::iota(point_indices.begin(), point_indices.end(), 0);
 
     std::mutex queue_lock, indices_lock;
-    std::vector<std::thread> thread_pool;
-    thread_pool.reserve(m_threads);
 
-    for (unsigned int i = 0; i < m_threads; i++)
-    {
-        thread_pool.emplace_back([&] {
-          for (;;)
-          {
+    std::unique_ptr<ThreadPool> thread_pool(new ThreadPool(m_threads));
+
+    for (unsigned int i = 0; i < m_threads; i++) {
+        thread_pool->add([&] {
+          for (;;) {
               pdal::PointId idx;
               {
                   // Get a point idx to process
                   std::lock_guard<std::mutex> lock(queue_lock);
                   if (point_indices.empty())
-                      break;
+                      return;
                   idx = point_indices.front();
                   point_indices.pop_front();
               }
-
               // Do expensive work.
               auto ids = index.radius(idx, m_radius);
-
               {
                   // Put point into appropriate container.
                   std::lock_guard<std::mutex> lock(indices_lock);
@@ -144,11 +141,9 @@ Indices OutlierFilter::processRadius(PointViewPtr inView)
           }
         });
     }
-    for (std::thread &t : thread_pool)
-    {
-        if (t.joinable())
-            t.join();
-    }
+    thread_pool->go();
+    thread_pool->join();
+
     return Indices{inliers, outliers};
 }
 
@@ -172,47 +167,43 @@ Indices OutlierFilter::processStatistical(PointViewPtr inView)
 
     std::mutex queue_lock, distances_lock;
 
-    std::vector<std::thread> thread_pool;
-    thread_pool.reserve(m_threads);
+    std::unique_ptr<ThreadPool> thread_pool(new ThreadPool(m_threads));
 
     for (unsigned int i = 0; i < m_threads; i++)
     {
-        thread_pool.emplace_back([&] {
-            for (;;) {
-                pdal::PointId idx;
-                {
-                    // Get a point idx to process
-                    std::lock_guard<std::mutex> lock(queue_lock);
-                    if (point_indices.empty())
-                        break;
+        thread_pool->add([&] {
+          for (;;) {
+              pdal::PointId idx;
+              {
+                  // Get a point idx to process
+                  std::lock_guard<std::mutex> lock(queue_lock);
+                  if (point_indices.empty())
+                      return;
 
-                    idx = point_indices.front();
-                    point_indices.pop_front();
-                }
+                  idx = point_indices.front();
+                  point_indices.pop_front();
+              }
 
-                // Do expensive work.
-                PointIdList indices(count);
-                std::vector<double> sqr_dists(count);
-                index.knnSearch(idx, count, &indices, &sqr_dists);
+              // Do expensive work.
+              PointIdList indices(count);
+              std::vector<double> sqr_dists(count);
+              index.knnSearch(idx, count, &indices, &sqr_dists);
+              double tmp_distance = distances[idx];
+              for (size_t j = 1; j < count; ++j) {
+                  double delta = std::sqrt(sqr_dists[j]) - tmp_distance;
+                  tmp_distance += (delta / j);
+              }
 
-                {
-                    // Lock distances vector and update it
-                    std::lock_guard<std::mutex> lock(distances_lock);
-                    for (size_t j = 1; j < count; ++j)
-                    {
-                        double delta = std::sqrt(sqr_dists[j]) - distances[idx];
-                        distances[idx] += (delta / j);
-                    }
-                }
-            }
+              {
+                  // Lock distances vector and update it
+                  std::lock_guard<std::mutex> lock(distances_lock);
+                  distances[idx] = tmp_distance;
+              }
+          }
         });
     }
-
-    for (std::thread &t : thread_pool)
-    {
-        if (t.joinable())
-            t.join();
-    }
+    thread_pool->go();
+    thread_pool->join();
 
     size_t n(0);
     double M1(0.0);
