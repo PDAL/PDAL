@@ -340,7 +340,7 @@ void DracoWriter::addGeneric(Dimension::Id pt)
 void DracoWriter::addAttribute(draco::GeometryAttribute::Type t, int n)
 {
     // - iterate over values in dimMap, which are draco dimensions
-    // - use the pdal type associated with it to get the pdal data type
+    // - use the pdal dim associated with it to get the pdal data type
     // - use map of pdal types to draco types to get the correct draco type
     // - add it to the point cloud and add attribute id to attMap with dim as key
     const auto it = std::find_if(
