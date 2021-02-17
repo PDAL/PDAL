@@ -86,12 +86,13 @@ int HausdorffKernel::execute()
     ColumnPointTable candTable;
     PointViewPtr candView = loadSet(m_candidateFile, candTable);
 
-    double hausdorff = Utils::computeHausdorff(srcView, candView);
+    std::pair<double, double> result = Utils::computeHausdorff(srcView, candView);
 
     MetadataNode root;
     root.add("filenames", m_sourceFile);
     root.add("filenames", m_candidateFile);
-    root.add("hausdorff", hausdorff);
+    root.add("hausdorff", result.first);
+    root.add("modified_hausdorff", result.second);
     root.add("pdal_version", Config::fullVersionString());
     Utils::toJSON(root, std::cout);
 
