@@ -238,7 +238,9 @@ void DracoWriter::parseDimensions(BasePointTable &table)
         }
     }
 
-    //add dimensions that should be there with zero fill
+    //add dimensions that should be there (eg POSITION = X, Y, Z) with zero fill
+    //If a dimension isn't specified, but is necessary for multi-dimensional
+    //Geometry Attributes, fill it with zeros
     for (auto &dimInfo: m_dims) {
         int numDims = dimInfo.pdalDims.size();
         auto idList = getDimensions(dimInfo.dracoAtt);
