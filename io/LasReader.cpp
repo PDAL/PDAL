@@ -246,7 +246,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
         throwError(err.what());
     }
 
-    m_p->header.initialize(log(), FileUtils::fileSize(m_filename));
+    m_p->header.initialize(log(), Utils::fileSize(m_filename));
     createStream();
     std::istream *stream(m_streamIf->m_istream);
 

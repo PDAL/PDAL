@@ -255,7 +255,8 @@ bool fileExists(const std::string& name)
 
 uintmax_t fileSize(const std::string& file)
 {
-    return pdalboost::filesystem::file_size(toNative(file));
+    pdalboost::system::error_code ec;
+    return pdalboost::filesystem::file_size(toNative(file), ec);
 }
 
 
