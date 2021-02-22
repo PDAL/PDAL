@@ -65,6 +65,10 @@ void EvalKernel::addSwitches(ProgramArgs& args)
     args.add("labels",
              "Comma-separated list of classification labels to evaluate",
              m_labelStrList);
+    args.add("prediction_dim", "Dimension containing predicted labels",
+             m_predictedDimName, "Classification");
+    args.add("truth_dim", "Dimension containing truth labels", m_truthDimName,
+             "Classification");
 }
 
 void EvalKernel::validateSwitches(ProgramArgs& args)
@@ -88,9 +92,19 @@ int EvalKernel::execute()
 {
     ColumnPointTable predictedTable;
     PointViewPtr predictedView = loadSet(m_predictedFile, predictedTable);
+    PointLayoutPtr predictedLayout(predictedTable.layout());
+    m_predictedDimId = predictedLayout->findDim(m_predictedDimName);
+    if (m_predictedDimId == Dimension::Id::Unknown)
+        throw pdal_error("Predicted dimension '" + m_predictedDimName +
+                         "' does not exist.");
 
     ColumnPointTable truthTable;
     PointViewPtr truthView = loadSet(m_truthFile, truthTable);
+    PointLayoutPtr truthLayout(truthTable.layout());
+    m_truthDimId = truthLayout->findDim(m_truthDimName);
+    if (m_truthDimId == Dimension::Id::Unknown)
+        throw pdal_error("Truth dimension '" + m_truthDimName +
+                         "' does not exist.");
 
     assert(predictedView->size() == truthView->size());
 
@@ -118,8 +132,8 @@ int EvalKernel::execute()
         // nearest point and reject or otherwise report distances greater than
         // 0.0, indicating some sort of mismatch between files.
 
-        int pc = p.getFieldAs<int>(Id::Classification);
-        int qc = q.getFieldAs<int>(Id::Classification);
+        int pc = p.getFieldAs<int>(m_predictedDimId);
+        int qc = q.getFieldAs<int>(m_truthDimId);
 
         auto it = std::find(labelList.begin(), labelList.end(), qc);
         size_t qci;

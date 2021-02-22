@@ -187,6 +187,11 @@ private:
     std::string m_predictedFile;
     std::string m_truthFile;
     StringList m_labelStrList;
+
+    std::string m_predictedDimName;
+    std::string m_truthDimName;
+    Dimension::Id m_predictedDimId;
+    Dimension::Id m_truthDimId;
 };
 
 } // namespace pdal
