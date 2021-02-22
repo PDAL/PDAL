@@ -86,7 +86,7 @@ int HausdorffKernel::execute()
     ColumnPointTable candTable;
     PointViewPtr candView = loadSet(m_candidateFile, candTable);
 
-    std::pair<double, double> result = Utils::computeHausdorff(srcView, candView);
+    std::pair<double, double> result = Utils::computeHausdorffPair(srcView, candView);
 
     MetadataNode root;
     root.add("filenames", m_sourceFile);

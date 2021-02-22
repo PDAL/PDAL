@@ -378,8 +378,44 @@ bool fileExists(const std::string& path)
     return FileUtils::fileExists(path);
 }
 
-std::pair<double, double> computeHausdorff(PointViewPtr viewA,
-                                           PointViewPtr viewB)
+double computeHausdorff(PointViewPtr srcView, PointViewPtr candView)
+{
+    using namespace Dimension;
+
+    KD3Index &srcIndex = srcView->build3dIndex();
+    KD3Index &candIndex = candView->build3dIndex();
+
+    double maxDistSrcToCand = std::numeric_limits<double>::lowest();
+    double maxDistCandToSrc = std::numeric_limits<double>::lowest();
+
+    for (PointRef p : *srcView)
+    {
+        PointIdList indices(1);
+        std::vector<double> sqr_dists(1);
+        candIndex.knnSearch(p, 1, &indices, &sqr_dists);
+
+        if (sqr_dists[0] > maxDistSrcToCand)
+            maxDistSrcToCand = sqr_dists[0];
+    }
+
+    for (PointRef q : *candView)
+    {
+        PointIdList indices(1);
+        std::vector<double> sqr_dists(1);
+        srcIndex.knnSearch(q, 1, &indices, &sqr_dists);
+
+        if (sqr_dists[0] > maxDistCandToSrc)
+            maxDistCandToSrc = sqr_dists[0];
+    }
+
+    maxDistSrcToCand = std::sqrt(maxDistSrcToCand);
+    maxDistCandToSrc = std::sqrt(maxDistCandToSrc);
+
+    return (std::max)(maxDistSrcToCand, maxDistCandToSrc);
+}
+
+std::pair<double, double> computeHausdorffPair(PointViewPtr viewA,
+                                               PointViewPtr viewB)
 {
     // Computes both the max and mean of all nearest neighbor distances from
     // each point in the PointView to those in the KD3Index.
