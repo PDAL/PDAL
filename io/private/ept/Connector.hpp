@@ -46,10 +46,11 @@ class Connector
     std::unique_ptr<arbiter::Arbiter> m_arbiter;
     StringMap m_headers;
     StringMap m_query;
+    bool m_useCache;
 
 public:
     Connector();
-    Connector(const StringMap& headers, const StringMap& query);
+    Connector(const StringMap& headers, const StringMap& query, bool useCache = true);
 
     std::string get(const std::string& path) const;
     NL::json getJson(const std::string& path) const;
@@ -58,6 +59,10 @@ public:
     void put(const std::string& path, const std::vector<char>& data) const;
     void put(const std::string& path, const std::string& data) const;
     void makeDir(const std::string& path) const;
+private:
+    std::string getUniquePath() const;
+    std::string getCache(const std::string& path) const;
+    std::string getBinaryCache(const std::string& path) const;
 };
 
 } // namespace pdal

@@ -35,21 +35,81 @@
 #include "Connector.hpp"
 
 #include <pdal/pdal_types.hpp>
+#include <boost/filesystem.hpp>
+#include <random>
 
 namespace pdal
 {
 
+unsigned char random_char()
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, 255);
+    return static_cast<unsigned char>(dis(gen));
+}
+
+std::string generate_hex(const unsigned int len)
+{
+    std::stringstream ss;
+    for (unsigned int i = 0; i < len; i++)
+    {
+        auto rc = random_char();
+        std::stringstream hexstream;
+        hexstream << std::hex << int(rc);
+        auto hex = hexstream.str();
+        ss << (hex.length() < 2 ? '0' + hex : hex);
+    }
+    return ss.str();
+}
+
+std::string generate_uuid()
+{
+    return generate_hex(4) + '-' + generate_hex(2) + "-" + generate_hex(2) +
+           "-" + generate_hex(2) + "-" + generate_hex(6);
+}
+
+StringMap s_cache;
+std::string s_uuid = generate_uuid();
+std::mutex s_cacheMutex;
+
 Connector::Connector() : m_arbiter(new arbiter::Arbiter())
 {}
 
-Connector::Connector(const StringMap& headers, const StringMap& query) :
-    m_arbiter(new arbiter::Arbiter), m_headers(headers), m_query(query)
-{}    
+Connector::Connector(const StringMap& headers, const StringMap& query, bool useCache) :
+    m_arbiter(new arbiter::Arbiter), m_headers(headers), m_query(query), m_useCache(useCache)
+{}
+
+std::string Connector::getUniquePath() const
+{
+    auto ret(pdalboost::filesystem::temp_directory_path());
+    ret /= "pdalcache";
+    ret /= s_uuid;
+    makeDir(ret.string());
+    ret /= generate_uuid(); //should we keep extension ?
+    return ret.string(); //should check if exists or not
+}
+
+std::string Connector::getCache(const std::string & path) const
+{
+    std::lock_guard<std::mutex> guard(s_cacheMutex);
+    if (!s_cache.count(path))
+    {
+        s_cache.insert(std::make_pair(path,getUniquePath()));
+        put(s_cache[path],m_arbiter->get(path,m_headers,m_query));
+    }
+    return s_cache[path];
+}
 
 std::string Connector::get(const std::string& path) const
 {
     if (m_arbiter->isLocal(path))
         return m_arbiter->get(path);
+    else if (m_useCache)
+    {
+
+        return get(getCache(path));
+    }
     else
         return m_arbiter->get(path, m_headers, m_query);
 }
@@ -67,11 +127,24 @@ NL::json Connector::getJson(const std::string& path) const
     }
 }
 
+std::string Connector::getBinaryCache(const std::string & path) const
+{
+    std::lock_guard<std::mutex> guard(s_cacheMutex);
+    if (!s_cache.count(path))
+    {
+        s_cache.insert(std::make_pair(path,getUniquePath()));
+        put(s_cache[path],m_arbiter->getBinary(path,m_headers,m_query));
+    }
+    return s_cache[path];
+}
+
 std::vector<char> Connector::getBinary(const std::string& path) const
 {
     if (m_arbiter->isLocal(path))
         return m_arbiter->getBinary(path);
-    else
+    else if (m_useCache)
+        return getBinary(getBinaryCache(path));
+    else 
         return m_arbiter->getBinary(path, m_headers, m_query);
 }
 
@@ -80,6 +153,8 @@ arbiter::LocalHandle Connector::getLocalHandle(const std::string& path) const
 {
     if (m_arbiter->isLocal(path))
         return m_arbiter->getLocalHandle(path);
+    else if (m_useCache && !s_cache.count(path))
+        return getLocalHandle(s_cache[path]);
     else
         return m_arbiter->getLocalHandle(path, m_headers, m_query);
 }
