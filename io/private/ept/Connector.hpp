@@ -60,10 +60,10 @@ public:
     void put(const std::string& path, const std::string& data) const;
     void makeDir(const std::string& path) const;
 private:
-    std::string getUniquePath() const;
+    std::string getUniquePath(const std::string & path) const;
     std::string getCache(const std::string& path) const;
     std::string getBinaryCache(const std::string& path) const;
+    arbiter::LocalHandle getLocalHandleCache(const std::string& path) const;
 };
 
 } // namespace pdal
-
