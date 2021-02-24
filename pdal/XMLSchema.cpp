@@ -305,8 +305,6 @@ bool XMLSchema::loadMetadata(xmlNode *startNode, MetadataNode& input)
         {
             char *fieldname =
                 (char*)xmlGetProp(node, (const xmlChar*)"name");
-            char *etype =
-                (char*)xmlGetProp(node, (const xmlChar*)"type");
             char *description =
                 (char*)xmlGetProp(node, (const xmlChar*) "description");
             char *text = (char*)xmlNodeGetContent(node);
@@ -323,7 +321,6 @@ bool XMLSchema::loadMetadata(xmlNode *startNode, MetadataNode& input)
                     description ? description : "");
             }
             xmlFree(fieldname);
-            xmlFree(etype);
             xmlFree(description);
             xmlFree(text);
         }
