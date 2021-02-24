@@ -47,6 +47,12 @@ static StaticPluginInfo const s_info
 
 CREATE_STATIC_STAGE(ObjReader, s_info)
 
+ObjReader::~ObjReader()
+{
+    if (m_istream != nullptr)
+        Utils::closeFile(m_istream);
+}
+
 std::string ObjReader::getName() const { return s_info.name; }
 
 void ObjReader::addDimensions(PointLayoutPtr layout)
@@ -76,6 +82,7 @@ void ObjReader::ready(PointTableRef)
 void ObjReader::done(PointTableRef)
 {
     Utils::closeFile(m_istream);
+    m_istream = nullptr;
 }
 
 point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)

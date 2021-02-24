@@ -47,6 +47,7 @@ namespace pdal
 class PDAL_DLL ObjReader : public Reader
 {
 public:
+    virtual ~ObjReader();
     std::string getName() const;
 
 private:
@@ -72,11 +73,11 @@ private:
     std::vector<XYZW> m_vertices;
     std::vector<XYZW> m_textureVertices;
     std::vector<XYZW> m_normalVertices;
-    TriangularMesh *m_mesh;
+    TriangularMesh *m_mesh = nullptr;
     using VTN = std::tuple<int64_t, int64_t, int64_t>;
     std::map<VTN, PointId> m_points;
-    std::istream *m_istream;
-    point_count_t m_index;
+    std::istream *m_istream = nullptr;
+    point_count_t m_index = 0;
 
     using TRI = std::array<VTN, 3>;
     using FACE = std::vector<VTN>;
