@@ -303,13 +303,13 @@ bool XMLSchema::loadMetadata(xmlNode *startNode, MetadataNode& input)
             continue;
         if (std::string((const char*)node->name) == "Metadata")
         {
-            const char *fieldname =
-                (const char*)xmlGetProp(node, (const xmlChar*)"name");
-            const char *etype =
-                (const char*)xmlGetProp(node, (const xmlChar*)"type");
-            const char *description =
-                (const char*)xmlGetProp(node, (const xmlChar*) "description");
-            const char *text = (const char*)xmlNodeGetContent(node);
+            char *fieldname =
+                (char*)xmlGetProp(node, (const xmlChar*)"name");
+            char *etype =
+                (char*)xmlGetProp(node, (const xmlChar*)"type");
+            char *description =
+                (char*)xmlGetProp(node, (const xmlChar*) "description");
+            char *text = (char*)xmlNodeGetContent(node);
 
             if (!Utils::iequals(fieldname, "root"))
             {
@@ -322,6 +322,10 @@ bool XMLSchema::loadMetadata(xmlNode *startNode, MetadataNode& input)
                 input.add(fieldname, text ? text : "",
                     description ? description : "");
             }
+            xmlFree(fieldname);
+            xmlFree(etype);
+            xmlFree(description);
+            xmlFree(text);
         }
         loadMetadata(node->children, input);
     }
