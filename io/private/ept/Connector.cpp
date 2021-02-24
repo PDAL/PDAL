@@ -34,47 +34,13 @@
 
 #include "Connector.hpp"
 
-#include <boost/filesystem.hpp>
-#include <boost/system/error_code.hpp>
-
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/pdal_types.hpp>
-#include <random>
 
 namespace pdal
 {
 
-unsigned char random_char()
-{
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(0, 255);
-    return static_cast<unsigned char>(dis(gen));
-}
-
-std::string generate_hex(const unsigned int len)
-{
-    std::stringstream ss;
-    for (unsigned int i = 0; i < len; i++)
-    {
-        auto rc = random_char();
-        std::stringstream hexstream;
-        hexstream << std::hex << int(rc);
-        auto hex = hexstream.str();
-        ss << (hex.length() < 2 ? '0' + hex : hex);
-    }
-    return ss.str();
-}
-
-std::string generate_uuid()
-{
-    return generate_hex(4) + '-' + generate_hex(2) + "-" + generate_hex(2) +
-           "-" + generate_hex(2) + "-" + generate_hex(6);
-}
-
-StringMap s_cache;
-std::string s_uuid = generate_uuid();
-std::mutex s_cacheMutex;
+std::string cacheStructureFile(FileUtils::tmpDirectory() + "map.json");
 
 Connector::Connector() : m_arbiter(new arbiter::Arbiter()) {}
 
@@ -85,26 +51,55 @@ Connector::Connector(const StringMap& headers, const StringMap& query,
 {
 }
 
-std::string Connector::getUniquePath(const std::string& path) const
+NL::json Connector::getCacheList() const
 {
-    auto ret(pdalboost::filesystem::temp_directory_path());
-    ret /= "pdalcache";
-    ret /= s_uuid;
-    makeDir(ret.string());
-    ret /= generate_uuid();
-    ret += FileUtils::extension(path);
-    return ret.string(); // should check if exists or not
+    FileUtils::LockFile lockFile("connector");
+    if (lockFile.isLocked())
+    {
+        if (FileUtils::fileExists(cacheStructureFile))
+        {
+            std::istream *in = FileUtils::openFile(cacheStructureFile,false);
+            NL::json list = NL::json::parse(*in);
+            FileUtils::closeFile(in);
+            return list;
+        }
+    }
+
+    return NL::json::array();
 }
 
-std::string Connector::getCache(const std::string& path) const
+void Connector::writeCacheList(const NL::json& list) const
 {
-    std::lock_guard<std::mutex> guard(s_cacheMutex);
-    if (!s_cache.count(path))
+    FileUtils::LockFile lockFile("connector");
+    if (lockFile.isLocked())
     {
-        s_cache.insert(std::make_pair(path, getUniquePath(path)));
-        put(s_cache[path], m_arbiter->get(path, m_headers, m_query));
+        std::ostream *out = FileUtils::createFile(cacheStructureFile,false);
+        *out << list.dump();
+        FileUtils::closeFile(out);
     }
-    return s_cache[path];
+}
+
+std::string Connector::getCacheFile(const std::string& path) const
+{
+    auto list = getCacheList();
+    if (!list.is_array())
+        throw pdal::pdal_error("cache map should be an array " + list.dump());
+
+
+    for (size_t i = 0; i < list.size(); ++i)
+    {
+        const NL::json& el = list.at(i);
+        if (el["origin"].get<std::string>().compare(path) == 0)
+            return el["local"].get<std::string>();
+    }
+    std::string tmpFileName(FileUtils::tmpFileName(FileUtils::extension(path)));
+    put(tmpFileName,m_arbiter->getBinary(path, m_headers, m_query));
+    NL::json newEl;
+    newEl["origin"] = path;
+    newEl["local"] = tmpFileName;
+    list.push_back(newEl);
+    writeCacheList(list);
+    return tmpFileName;
 }
 
 std::string Connector::get(const std::string& path) const
@@ -112,10 +107,7 @@ std::string Connector::get(const std::string& path) const
     if (m_arbiter->isLocal(path))
         return m_arbiter->get(path);
     else if (m_useCache)
-    {
-
-        return get(getCache(path));
-    }
+        return get(getCacheFile(path));
     else
         return m_arbiter->get(path, m_headers, m_query);
 }
@@ -133,36 +125,14 @@ NL::json Connector::getJson(const std::string& path) const
     }
 }
 
-std::string Connector::getBinaryCache(const std::string& path) const
-{
-    std::lock_guard<std::mutex> guard(s_cacheMutex);
-    if (!s_cache.count(path))
-    {
-        s_cache.insert(std::make_pair(path, getUniquePath(path)));
-        put(s_cache[path], m_arbiter->getBinary(path, m_headers, m_query));
-    }
-    return s_cache[path];
-}
-
 std::vector<char> Connector::getBinary(const std::string& path) const
 {
     if (m_arbiter->isLocal(path))
         return m_arbiter->getBinary(path);
     else if (m_useCache)
-        return getBinary(getBinaryCache(path));
+        return getBinary(getCacheFile(path));
     else
         return m_arbiter->getBinary(path, m_headers, m_query);
-}
-
-arbiter::LocalHandle Connector::getLocalHandleCache(const std::string & path) const
-{
-	std::lock_guard<std::mutex> guard(s_cacheMutex);
-    if (!s_cache.count(path))
-    {
-        s_cache.insert(std::make_pair(path, getUniquePath(path)));
-        put(s_cache[path], m_arbiter->getBinary(path, m_headers, m_query));
-    }
-    return getLocalHandle(s_cache[path]);
 }
 
 arbiter::LocalHandle Connector::getLocalHandle(const std::string& path) const
@@ -170,7 +140,7 @@ arbiter::LocalHandle Connector::getLocalHandle(const std::string& path) const
     if (m_arbiter->isLocal(path))
         return m_arbiter->getLocalHandle(path);
     else if (m_useCache)
-        return getLocalHandleCache(path);
+        return getLocalHandle(getCacheFile(path));
     else
         return m_arbiter->getLocalHandle(path, m_headers, m_query);
 }
