@@ -62,8 +62,7 @@ void checkFile(int i, int j, int lines, double xoff = 0, double yoff = 0)
         EXPECT_LT(x, xoff + ((i + 1) * 10));
         EXPECT_GE(y, yoff + (j * 10));
         EXPECT_LT(y, yoff + ((j + 1) * 10));
-        if (in)
-            count++;
+        count++;
     }
     EXPECT_EQ(count, lines);
 }
