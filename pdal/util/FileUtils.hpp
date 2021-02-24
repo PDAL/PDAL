@@ -274,6 +274,21 @@ namespace FileUtils
     PDAL_DLL std::vector<std::string> glob(std::string filespec);
 
 
+    /**
+      Return a temporary directory for pdal related stuff
+
+      \return  a tmp directory path.
+    */
+    PDAL_DLL std::string tmpDirectory();
+
+    /**
+      Return temporary filename for pdal related stuff
+
+      \param extension  File extension required.
+      \return  a non already existing filename in tmp directory with the given extension.
+    */
+    PDAL_DLL std::string tmpFileName(const std::string& extension);
+
     struct MapContext
     {
     public:
@@ -311,6 +326,69 @@ namespace FileUtils
       \return  MapContext indicating current state of the file mapping.
     */
     PDAL_DLL MapContext unmapFile(MapContext ctx);
+
+    /**
+      This class is used to create a "named" lock entity that can be used to control access to a resource between multiple processes.
+  
+      The posix implimentation uses a pidfile and the win32 version uses a globally visible mutex.
+
+      From commoncpp <https://www.gnu.org/software/commoncpp/docs/refman/html/classLockfile.html>
+      \author David Sugar <dyfet@ostel.com>
+      \short System-wide named lock
+    */
+    class PDAL_DLL LockFile
+    {
+    #ifdef  WIN32
+        HANDLE  m_mutex;
+        bool    m_flagged;
+    #else
+        char * m_path;
+    #endif
+    
+    public:
+        
+        /**
+          Create a lock under a known name.
+          
+          \param name of system-wide lock to create.
+        */
+        LockFile(const char *name);
+        
+        /**
+          Create a new lock object that can be used to make locks.
+        */
+        LockFile();
+
+        /**
+          Destroy the current lock and release it.
+        */
+        ~LockFile()
+        {
+          unlock();
+        };
+
+        /**
+          Lock a system-wide name for this process.  If the lock
+          is successful, return true.  If an existing lock was
+          already acquired, release it first.
+          
+          \return true if lock successful.
+          \param name system-wide lock to use.
+        */
+        bool lock(const char *name);
+
+        /**
+          Release an acquired lock.
+        */
+        void unlock();
+        
+        /**
+          Flag if the current process has aqcuired a lock.
+          
+          \return true if we have the lock.
+        */
+        bool isLocked();
+    };
 
 } // namespace FileUtils
 } // namespace pdal

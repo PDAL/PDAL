@@ -37,9 +37,13 @@
 
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 #ifndef _WIN32
 #include <glob.h>
 #include <sys/mman.h>
+#include <signal.h>
+#include <thread>
+#include <chrono>
 #else
 #include <io.h>
 #include <codecvt>
@@ -450,6 +454,50 @@ std::vector<std::string> glob(std::string path)
 }
 
 
+std::string tmpDirectory()
+{
+    pdalboost::filesystem::path path = pdalboost::filesystem::temp_directory_path();
+    path /= "pdal";
+    if (!directoryExists(path.string()))
+        createDirectory(path.string());
+        
+    return addTrailingSlash(path.string());
+}
+
+std::string tmpFileName(const std::string& extension)
+{
+    const size_t length = 16;
+    auto randchar = []() -> char
+    {
+        const char charset[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+        const size_t max_index = (sizeof(charset) - 1);
+        return charset[ rand() % max_index ];
+    };
+    std::string filename(length,0);
+    std::generate_n( filename.begin(), length, randchar );
+
+    if (!extension.empty()) //if user wants an extension
+    {
+        if (extension.rfind(".", 0) == 0)
+           filename.append(extension);
+        else
+            filename.append(".").append(extension);
+    }
+
+    pdalboost::filesystem::path path = tmpDirectory();
+
+    path /= filename;
+
+    if (fileExists(path.string()))
+       return tmpFileName(extension);
+
+    return path.string();
+}
+
+
 MapContext mapFile(const std::string& filename, bool readOnly,
     size_t pos, size_t size)
 {
@@ -521,6 +569,201 @@ MapContext unmapFile(MapContext ctx)
 #endif
     return ctx;
 }
+
+  
+#ifdef  WIN32
+ 
+LockFile::LockFile()
+{
+    m_mutex = INVALID_HANDLE_VALUE;
+    m_flagged = false;
+}
+ 
+LockFile::LockFile(const char *name)
+{
+    m_mutex = INVALID_HANDLE_VALUE;
+    m_flagged = false;
+    lock(name);
+}
+ 
+bool LockFile::lock(const char *name)
+{
+    char mname[65];
+    char *ext = strrchr((char *)name, '/');
+ 
+    if(ext)
+        name = ++ext;
+ 
+    unlock();
+    snprintf(mname, sizeof(mname) - 4, "_lock_%s", name);
+    ext = strrchr(mname, '.');
+    if(ext && !strcasecmp(ext, ".lock"))
+    {
+        *ext = 0;
+        ext = NULL;
+    }
+    if(!ext)
+        addString(mname, sizeof(mname), ".lck");
+    m_mutex = CreateMutex(NULL, FALSE, mname);
+    if(WaitForSingleObject(m_mutex, 200) == WAIT_OBJECT_0)
+        m_flagged = true;
+    return m_flagged;
+}
+ 
+void LockFile::unlock()
+{
+    if(m_mutex == INVALID_HANDLE_VALUE)
+        return;
+ 
+    if(m_flagged)
+        ReleaseMutex(m_mutex);
+    CloseHandle(m_mutex);
+    m_flagged = false;
+    m_mutex = INVALID_HANDLE_VALUE;
+}
+ 
+bool LockFile::isLocked()
+{
+    return m_flagged;
+}
+ 
+#else
+ 
+LockFile::LockFile()
+{
+    m_path = NULL;
+}
+ 
+LockFile::LockFile(const char *name)
+{
+    m_path = NULL;
+    lock(name);
+}
+ 
+bool LockFile::lock(const char *name)
+{
+    struct stat ino;
+    int fd, pid, status;
+    const char *ext;
+    char buffer[128];
+    bool rtn = true;
+ 
+    unlock();
+ 
+    ext = strrchr(name, '/');
+    if(ext)
+        ext = strrchr(ext, '.');
+    else
+        ext = strrchr(name, '.');
+ 
+    if(strchr(name, '/'))
+    {
+        m_path = new char[strlen(name) + 1];
+        strcpy(m_path, name);
+    }
+    else if(ext && !strcasecmp(ext, ".pid"))
+    {
+        if(stat("/var/run", &ino))
+            snprintf(buffer, sizeof(buffer), "/tmp/.%s", name);
+        else
+            snprintf(buffer, sizeof(buffer), "/var/run/%s", name);
+        m_path = new char[strlen(buffer) + 1];
+        strcpy(m_path, buffer);
+    }
+    else
+    {
+        if(!ext)
+            ext = ".lock";
+        if(stat("/var/lock", &ino))
+            snprintf(buffer, sizeof(buffer), "/tmp/.%s%s", name, ext);
+        else
+            snprintf(buffer, sizeof(buffer), "/var/lock/%s%s", name, ext);
+ 
+        m_path = new char[strlen(buffer) + 1];
+        strcpy(m_path, buffer);
+    }
+ 
+    for(;;)
+    {
+        fd = ::open(m_path, O_WRONLY | O_CREAT | O_EXCL, 0660);
+        if(fd > 0)
+        {
+            pid = getpid();
+            snprintf(buffer, sizeof(buffer), "%d\n", pid);
+            if(::write(fd, buffer, strlen(buffer)))
+                rtn = false;
+            ::close(fd);
+            return rtn;
+        }
+        if(fd < 0 && errno != EEXIST)
+        {
+            delete[] m_path;
+            m_path = NULL;
+            return false;
+        }
+ 
+        fd = ::open(m_path, O_RDONLY);
+        if(fd < 0)
+        {
+            if(errno == ENOENT)
+                continue;
+            delete[] m_path;
+            m_path = NULL;
+            return false;
+        }
+ 
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        status = ::read(fd, buffer, sizeof(buffer) - 1);
+        if(status < 1) {
+            ::close(fd);
+            continue;
+        }
+ 
+        buffer[status] = 0;
+        pid = atoi(buffer);
+        if(pid)
+        {
+            if(pid == getpid())
+            {
+                status = -1;
+                errno = 0;
+            }
+            else
+                status = kill(pid, 0);
+ 
+            if(!status || (errno == EPERM))
+            {
+                ::close(fd);
+                delete[] m_path;
+                m_path = NULL;
+                return false;
+            }
+        }
+        ::close(fd);
+        ::unlink(m_path);
+    }
+}
+ 
+void LockFile::unlock()
+{
+    if(m_path)
+    {
+        pdalboost::filesystem::remove(toNative(m_path));
+        delete[] m_path;
+        m_path = NULL;
+    }
+}
+ 
+bool LockFile::isLocked()
+{
+    if(m_path)
+        return true;
+ 
+    return false;
+}
+ 
+#endif
+
 
 } // namespace FileUtils
 } // namespace pdal
