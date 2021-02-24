@@ -196,6 +196,11 @@ Dimension::IdList LasHeader::usedDims() const
     }
     if (hasInfrared())
         ids.push_back(Id::Infrared);
+    if (has14Format())
+    {
+        ids.push_back(Id::ScanChannel);
+        ids.push_back(Id::ClassFlags);
+    }
 
     return ids;
 }

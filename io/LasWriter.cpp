@@ -112,7 +112,8 @@ void LasWriter::addArgs(ProgramArgs& args)
         m_extraDimSpec);
     args.add("forward", "Dimensions to forward from LAS reader", m_forwardSpec);
 
-    args.add("filesource_id", "File source ID number.", m_filesourceId);
+    args.add("filesource_id", "File source ID number.", m_filesourceId,
+        decltype(m_filesourceId)(0));
     args.add("major_version", "LAS major version", m_majorVersion,
         decltype(m_majorVersion)(1));
     args.add("minor_version", "LAS minor version", m_minorVersion,
@@ -160,11 +161,16 @@ void LasWriter::initialize()
         setSpatialReference(m_aSrs);
     if (m_compression != LasCompression::None)
         m_lasHeader.setCompressed(true);
-#if !defined(PDAL_HAVE_LASZIP) && !defined(PDAL_HAVE_LAZPERF)
-    if (m_compression != LasCompression::None)
-        throwError("Can't write LAZ output.  PDAL not built with "
-            "LASzip or LAZperf.");
+
+#if !defined(PDAL_HAVE_LASZIP)
+    if (m_compression == LasCompression::LasZip)
+        throwError("Can't write LAZ output. PDAL not built with LASzip.");
 #endif
+#if !defined(PDAL_HAVE_LAZPERF)
+    if (m_compression == LasCompression::LazPerf)
+        throwError("Can't write LAZ output. PDAL not built with LAZperf.");
+#endif
+
     try
     {
         m_extraDims = LasUtils::parse(m_extraDimSpec, true);
@@ -709,9 +715,13 @@ void LasWriter::readyLazPerfCompression()
 
     if (m_lasHeader.versionEquals(1, 4))
     {
-        if (m_lasHeader.pointFormat() != 6 || m_extraByteLen != 0)
-            throwError("Can't write version 1.4 without simple PDRF 6.");
         schema.push(laszip::factory::record_item::point14());
+        if (m_lasHeader.pointFormat() == 7)
+            schema.push(laszip::factory::record_item::rgb14());
+        else if (m_lasHeader.pointFormat() == 8)
+            schema.push(laszip::factory::record_item::rgbnir14());
+        if (m_extraByteLen)
+            schema.push(laszip::factory::record_item::eb14(m_extraByteLen));
     }
     else
     {
@@ -936,8 +946,13 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
 
     if (has14Format)
     {
-        p.classification = (classification & 0x1F) | (classFlags << 5);
-        p.scan_angle_rank = point.getFieldAs<int8_t>(Id::ScanAngleRank);
+        if (classification > 31)
+            p.classification = 0;
+        else
+            p.classification = classification;
+        p.extended_classification = classification;
+        p.extended_classification_flags = classFlags;
+        // The API takes care of writing scan_angle_rank.
         p.number_of_returns = (std::min)((uint8_t)7, numberOfReturns);
         p.return_number = (std::min)((uint8_t)7, returnNumber);
 
@@ -946,8 +961,6 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
             std::round(point.getFieldAs<float>(Id::ScanAngleRank) / .006f));
         p.extended_point_type = 1;
         p.extended_scanner_channel = scanChannel;
-        p.extended_classification_flags = classFlags;
-        p.extended_classification = classification;
         p.extended_return_number = returnNumber;
         p.extended_number_of_returns = numberOfReturns;
     }
@@ -1061,17 +1074,20 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
     ostream << point.getFieldAs<uint16_t>(Id::Intensity);
 
     uint8_t scanChannel = point.getFieldAs<uint8_t>(Id::ScanChannel);
-    uint8_t scanDirectionFlag =
-        point.getFieldAs<uint8_t>(Id::ScanDirectionFlag);
-    uint8_t edgeOfFlightLine =
-        point.getFieldAs<uint8_t>(Id::EdgeOfFlightLine);
+    uint8_t scanDirectionFlag = point.getFieldAs<uint8_t>(Id::ScanDirectionFlag);
+    uint8_t edgeOfFlightLine = point.getFieldAs<uint8_t>(Id::EdgeOfFlightLine);
+    uint8_t classification = point.getFieldAs<uint8_t>(Id::Classification);
 
     if (has14Format)
     {
         uint8_t bits = returnNumber | (numberOfReturns << 4);
         ostream << bits;
 
-        uint8_t classFlags = point.getFieldAs<uint8_t>(Id::ClassFlags);
+        uint8_t classFlags;
+        if (point.hasDim(Id::ClassFlags))
+            classFlags = point.getFieldAs<uint8_t>(Id::ClassFlags);
+        else
+            classFlags = classification >> 5;
         bits = (classFlags & 0x0F) |
             ((scanChannel & 0x03) << 4) |
             ((scanDirectionFlag & 0x01) << 6) |
@@ -1085,7 +1101,7 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
         ostream << bits;
     }
 
-    ostream << point.getFieldAs<uint8_t>(Id::Classification);
+    ostream << classification;
 
     uint8_t userData = point.getFieldAs<uint8_t>(Id::UserData);
     if (has14Format)
