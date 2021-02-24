@@ -57,6 +57,7 @@ void checkFile(int i, int j, int lines, double xoff = 0, double yoff = 0)
         double x, y, z;
 
         in >> x >> c >> y >> c >> z;
+        if (!in.good()) break;
         EXPECT_GE(x, xoff + (i * 10));
         EXPECT_LT(x, xoff + ((i + 1) * 10));
         EXPECT_GE(y, yoff + (j * 10));
