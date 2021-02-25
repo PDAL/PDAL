@@ -713,7 +713,7 @@ void LasWriter::readyLazPerfCompression()
 #ifdef PDAL_HAVE_LAZPERF
     laszip::factory::record_schema schema;
 
-    if (m_lasHeader.versionEquals(1, 4))
+    if (m_lasHeader.pointFormat() >= 6)
     {
         schema.push(laszip::factory::record_item::point14());
         if (m_lasHeader.pointFormat() == 7)
