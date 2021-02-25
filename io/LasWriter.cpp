@@ -713,7 +713,7 @@ void LasWriter::readyLazPerfCompression()
 #ifdef PDAL_HAVE_LAZPERF
     laszip::factory::record_schema schema;
 
-    if (m_lasHeader.pointFormat() >= 6)
+    if (m_lasHeader.has14PointFormat())
     {
         schema.push(laszip::factory::record_item::point14());
         if (m_lasHeader.pointFormat() == 7)
@@ -876,7 +876,7 @@ void LasWriter::writeView(const PointViewPtr view)
 bool LasWriter::writeLasZipBuf(PointRef& point)
 {
 #ifdef PDAL_HAVE_LASZIP
-    const bool has14Format = m_lasHeader.has14Format();
+    const bool has14PointFormat = m_lasHeader.has14PointFormat();
     const size_t maxReturnCount = m_lasHeader.maxReturnCount();
 
     // we always write the base fields
@@ -944,7 +944,7 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
     p.user_data = point.getFieldAs<uint8_t>(Id::UserData);
     p.point_source_ID = point.getFieldAs<uint16_t>(Id::PointSourceId);
 
-    if (has14Format)
+    if (has14PointFormat)
     {
         if (classification > 31)
             p.classification = 0;
@@ -1025,7 +1025,7 @@ void LasWriter::writeLazPerfBuf(char *pos, size_t pointLen,
 
 bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
 {
-    bool has14Format = m_lasHeader.has14Format();
+    bool has14PointFormat = m_lasHeader.has14PointFormat();
     static const size_t maxReturnCount = m_lasHeader.maxReturnCount();
 
     // we always write the base fields
@@ -1078,7 +1078,7 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
     uint8_t edgeOfFlightLine = point.getFieldAs<uint8_t>(Id::EdgeOfFlightLine);
     uint8_t classification = point.getFieldAs<uint8_t>(Id::Classification);
 
-    if (has14Format)
+    if (has14PointFormat)
     {
         uint8_t bits = returnNumber | (numberOfReturns << 4);
         ostream << bits;
@@ -1104,7 +1104,7 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
     ostream << classification;
 
     uint8_t userData = point.getFieldAs<uint8_t>(Id::UserData);
-    if (has14Format)
+    if (has14PointFormat)
     {
          // Guaranteed to fit if scan angle rank isn't wonky.
         int16_t scanAngleRank =

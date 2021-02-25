@@ -573,7 +573,7 @@ void LasReader::addDimensions(PointLayoutPtr layout)
     }
     if (m_header.hasInfrared())
         layout->registerDim(Id::Infrared);
-    if (m_header.has14Format())
+    if (m_header.has14PointFormat())
     {
         layout->registerDim(Id::ScanChannel);
         layout->registerDim(Id::ClassFlags);
@@ -722,7 +722,7 @@ point_count_t LasReader::readFileBlock(std::vector<char>& buf,
 #ifdef PDAL_HAVE_LASZIP
 void LasReader::loadPoint(PointRef& point, laszip_point& p)
 {
-    if (m_header.has14Format())
+    if (m_header.has14PointFormat())
         loadPointV14(point, p);
     else
         loadPointV10(point, p);
@@ -732,7 +732,7 @@ void LasReader::loadPoint(PointRef& point, laszip_point& p)
 
 void LasReader::loadPoint(PointRef& point, char *buf, size_t bufsize)
 {
-    if (m_header.has14Format())
+    if (m_header.has14PointFormat())
         loadPointV14(point, buf, bufsize);
     else
         loadPointV10(point, buf, bufsize);

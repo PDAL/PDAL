@@ -338,7 +338,7 @@ public:
         return f == 8;
     }
 
-    bool has14Format() const
+    bool has14PointFormat() const
     {
         PointFormat f = pointFormat();
         return f > 5;
@@ -348,7 +348,7 @@ public:
         { return (bool)((m_globalEncoding >> 4) & 1); }
 
     bool incompatibleSrs() const
-        { return !useWkt() && has14Format(); }
+        { return !useWkt() && has14PointFormat(); }
 
     /// Returns true iff the file is compressed (laszip),
     /// as determined by the high bit in the point type

@@ -196,7 +196,7 @@ Dimension::IdList LasHeader::usedDims() const
     }
     if (hasInfrared())
         ids.push_back(Id::Infrared);
-    if (has14Format())
+    if (has14PointFormat())
     {
         ids.push_back(Id::ScanChannel);
         ids.push_back(Id::ClassFlags);
