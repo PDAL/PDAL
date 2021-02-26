@@ -33,18 +33,18 @@
         {
             "filename": "iowa.laz",
             "inputs": [ "classify" ],
-            "tag": "writerslas",
             "type": "writers.las"
         },
         {
             "filename": "iowa.tif",
             "gdalopts": "tiled=yes,     compress=deflate",
-            "inputs": [ "writerslas" ],
+            "inputs": [ "classify" ],
             "nodata": -9999,
             "output_type": "idw",
-            "resolution": 1,
-            "type": "writers.gdal",
-            "window_size": 6
+            "radius": 0.7071,
+            "resolution": 1.0,
+            "window_size": 6,
+            "type": "writers.gdal"
         }
     ]
 }
