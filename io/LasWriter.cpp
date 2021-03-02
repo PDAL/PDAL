@@ -35,20 +35,6 @@
 #include <pdal/pdal_features.hpp>
 
 #include <pdal/compression/LazPerfVlrCompression.hpp>
-#ifdef PDAL_HAVE_LAZPERF
-#pragma push_macro("min")
-#pragma push_macro("max")
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
-#include <laz-perf/factory.hpp>
-#include <laz-perf/io.hpp>
-#pragma pop_macro("max")
-#pragma pop_macro("min")
-#endif
 
 #include "LasWriter.hpp"
 
@@ -711,34 +697,10 @@ void LasWriter::readyLasZipCompression()
 void LasWriter::readyLazPerfCompression()
 {
 #ifdef PDAL_HAVE_LAZPERF
-    laszip::factory::record_schema schema;
-
-    if (m_lasHeader.has14PointFormat())
-    {
-        schema.push(laszip::factory::record_item::point14());
-        if (m_lasHeader.pointFormat() == 7)
-            schema.push(laszip::factory::record_item::rgb14());
-        else if (m_lasHeader.pointFormat() == 8)
-            schema.push(laszip::factory::record_item::rgbnir14());
-        if (m_extraByteLen)
-            schema.push(laszip::factory::record_item::eb14(m_extraByteLen));
-    }
-    else
-    {
-        schema.push(laszip::factory::record_item::point());
-        if (m_lasHeader.hasTime())
-            schema.push(laszip::factory::record_item::gpstime());
-        if (m_lasHeader.hasColor())
-            schema.push(laszip::factory::record_item::rgb());
-        if (m_extraByteLen)
-            schema.push(laszip::factory::record_item::eb(m_extraByteLen));
-    }
-    laszip::io::laz_vlr zipvlr = laszip::io::laz_vlr::from_schema(schema);
-    std::vector<uint8_t> data(zipvlr.size());
-    zipvlr.extract((char *)data.data());
-    addVlr(LASZIP_USER_ID, LASZIP_RECORD_ID, "http://laszip.org", data);
-
-    m_compressor.reset(new LazPerfVlrCompressor(*m_ostream, schema, zipvlr.chunk_size));
+    int ebCount = m_lasHeader.pointLen() - m_lasHeader.basePointLen();
+    m_compressor.reset(new LazPerfVlrCompressor(*m_ostream, m_lasHeader.pointFormat(), ebCount));
+    std::vector<uint8_t> vlrdata = m_compressor->vlrData();
+    addVlr(LASZIP_USER_ID, LASZIP_RECORD_ID, "http://laszip.org", vlrdata);
 #endif
 }
 

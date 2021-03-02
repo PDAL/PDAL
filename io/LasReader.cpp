@@ -281,9 +281,10 @@ void LasReader::ready(PointTableRef table)
                 LASZIP_RECORD_ID);
             if (!vlr)
                 throwError("LAZ file missing required laszip VLR.");
-            m_decompressor = new LazPerfVlrDecompressor(*stream,
-                vlr->data(), m_header.pointOffset(), m_header.pointLen());
-            m_decompressorBuf.resize(m_decompressor->pointSize());
+            int ebCount = m_header.pointLen() - m_header.basePointLen();
+            m_decompressor = new LazPerfVlrDecompressor(*stream, m_header.pointFormat(),
+                ebCount, m_header.pointOffset(), vlr->data());
+            m_decompressorBuf.resize(m_header.pointLen());
         }
 #endif
 

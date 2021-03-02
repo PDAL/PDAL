@@ -36,14 +36,6 @@
 #include <memory>
 #include <pdal/util/OStream.hpp>
 
-namespace laszip
-{
-namespace factory
-{
-    struct record_schema;
-}
-}
-
 namespace pdal
 {
     class LazPerfVlrCompressorImpl;
@@ -60,13 +52,13 @@ namespace pdal
 // handled as part of the compression process itself.
 class LazPerfVlrCompressor
 {
-    typedef laszip::factory::record_schema Schema;
-
 public:
-    PDAL_DLL LazPerfVlrCompressor(std::ostream& stream, const Schema& schema,
+    PDAL_DLL LazPerfVlrCompressor(std::ostream& stream, int format, int ebCount);
+    PDAL_DLL LazPerfVlrCompressor(std::ostream& stream, int format, int ebCount,
         uint32_t chunksize);
     PDAL_DLL ~LazPerfVlrCompressor();
 
+    PDAL_DLL std::vector<uint8_t> vlrData() const;
     PDAL_DLL void compress(const char *inbuf);
     PDAL_DLL void done();
 
@@ -80,8 +72,8 @@ class LazPerfVlrDecompressorImpl;
 class LazPerfVlrDecompressor
 {
 public:
-    PDAL_DLL LazPerfVlrDecompressor(std::istream& stream, const char *vlrData,
-        std::streamoff pointOffset, uint32_t pointLength);
+    PDAL_DLL LazPerfVlrDecompressor(std::istream& stream, int format, int ebCount,
+        std::streamoff pointOffset, const char *vlrData);
     PDAL_DLL ~LazPerfVlrDecompressor();
 
     PDAL_DLL size_t pointSize() const;
