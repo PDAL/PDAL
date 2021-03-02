@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, 2020 Bradley J Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2021, Preston J. Hartzell (preston.hartzell@gmail.com)
  *
  * All rights reserved.
  *
@@ -35,42 +35,39 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/Streamable.hpp>
 
 namespace pdal
 {
 
-class PDAL_DLL SampleFilter : public Filter, public Streamable
+class PDAL_DLL GpsTimeConvert : public Filter
 {
-    using Voxel = std::tuple<int, int, int>;
-    using Coord = std::tuple<double, double, double>;
-    using CoordList = std::vector<Coord>;
-
 public:
-    SampleFilter() : Filter() {}
-    SampleFilter& operator=(const SampleFilter&) = delete;
-    SampleFilter(const SampleFilter&) = delete;
-
+    GpsTimeConvert() : Filter()
+    {}
     std::string getName() const;
 
 private:
-    double m_cell;
-    Arg* m_cellArg;
-    double m_radius;
-    double m_radiusSqr;
-    Arg* m_radiusArg;
-    double m_originX;
-    double m_originY;
-    double m_originZ;
-    std::map<Voxel, CoordList> m_populatedVoxels;
+    std::string m_conversion;
+    std::string m_strDate;
+    std::tm m_tmDate;
+    bool m_wrap;
+    bool m_wrapped;
+
+    void weekSeconds2GpsTime(PointView& view);
+    void gpsTime2WeekSeconds(PointView& view);
+    void gpsTime2GpsTime(PointView& view);
+
+    std::tm gpsTime2Date(const double seconds);
+    int weekStartGpsSeconds(std::tm date);
+    void unwrapWeekSeconds(PointView& view);
+    void wrapWeekSeconds(PointView& view);
 
     virtual void addArgs(ProgramArgs& args);
-    virtual void prepared(PointTableRef table);
-    virtual bool processOne(PointRef& point);
-    virtual void ready(PointTableRef);
-    virtual PointViewSet run(PointViewPtr view);
+    virtual void initialize();
+    virtual void filter(PointView& view);
 
-    bool voxelize(PointRef& point);
+    GpsTimeConvert& operator=(const GpsTimeConvert&); // not implemented
+    GpsTimeConvert(const GpsTimeConvert&); // not implemented
 };
 
 } // namespace pdal

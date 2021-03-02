@@ -403,8 +403,11 @@ ILeStream& operator>>(ILeStream& in, LasHeader& h)
         throw LasHeader::error("Invalid point count. Number of points exceeds file size.");
     if (h.m_vlrOffset > h.m_fileSize)
         throw LasHeader::error("Invalid VLR offset - exceeds file size.");
+    // There was a bug in PDAL where it didn't write the VLR offset :(
+    /**
     if (h.m_eVlrOffset > h.m_fileSize)
         throw LasHeader::error("Invalid extended VLR offset - exceeds file size.");
+    **/
 
     // Read regular VLRs.
     in.seek(h.m_vlrOffset);

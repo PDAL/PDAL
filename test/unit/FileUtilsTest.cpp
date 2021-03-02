@@ -252,10 +252,11 @@ TEST(FileUtilsTest, glob)
     EXPECT_NO_THROW(FileUtils::glob(TP("foo1~.glob")));
 #endif
 
-    FileUtils::deleteFile("temp.glob");
-    FileUtils::closeFile(FileUtils::createFile("temp.glob"));
-    EXPECT_EQ(FileUtils::glob("temp.glob").size(), 1u);
-    FileUtils::deleteFile("temp.glob");
+    std::string temp_filename = Support::temppath("temp.glob");
+    FileUtils::deleteFile(temp_filename);
+    FileUtils::closeFile(FileUtils::createFile(temp_filename));
+    EXPECT_EQ(FileUtils::glob(temp_filename).size(), 1u);
+    FileUtils::deleteFile(temp_filename);
 }
 
 TEST(FileUtilsTest, test_file_ops_with_unicode_paths)

@@ -46,7 +46,7 @@ protected:
     T m_defVal;
     bool m_valSet;
 
-    BaseHeaderVal() : m_val(T()), m_valSet(false)
+    BaseHeaderVal() : m_val(T()), m_defVal(T()), m_valSet(false)
     {}
 
     BaseHeaderVal(const T& t) : m_val(T()), m_defVal(t), m_valSet(false)
@@ -226,4 +226,3 @@ inline std::ostream& operator<<(std::ostream& out, const UuidHeaderVal& h)
 }
 
 } // namespace pdal
-
