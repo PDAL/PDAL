@@ -915,7 +915,7 @@ const drivers::Http& Endpoint::getHttpDriver() const
 #include <sys/stat.h>
 #else
 #define UNICODE
-#include <Shlwapi.h>
+#include <shlwapi.h>
 #include <iterator>
 #include <locale>
 #include <codecvt>
