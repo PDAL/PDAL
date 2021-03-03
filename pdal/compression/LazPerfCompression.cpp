@@ -34,26 +34,11 @@
 
 #include <pdal/util/OStream.hpp>
 
-#pragma push_macro("min")
-#pragma push_macro("max")
-#ifdef min
-#undef min
+// This will only exist for version 1.3+, so this is a sufficient check for now.
+#include <laz-perf/lazperf.hpp>
+#ifndef LAZPERF_VERSION
+#error "LAZperf version 1.3 (supporting LAS version 1.4) not found
 #endif
-#ifdef max
-#undef max
-#endif
-
-#include <laz-perf/common/common.hpp>
-#include <laz-perf/compressor.hpp>
-#include <laz-perf/decompressor.hpp>
-
-#include <laz-perf/decoder.hpp>
-#include <laz-perf/formats.hpp>
-#include <laz-perf/io.hpp>
-#include <laz-perf/las.hpp>
-
-#pragma pop_macro("max")
-#pragma pop_macro("min")
 
 #include "LazPerfCompression.hpp"
 

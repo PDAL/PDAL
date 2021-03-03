@@ -334,14 +334,14 @@ void LasReader::ready(PointTableRef table)
         {
             delete m_p->decompressor;
 
-            if (m_args->start != 0)
-                throwError("LAZperf does not support the 'start' option.");
             const LasVLR *vlr = m_p->header.findVlr(LASZIP_USER_ID, LASZIP_RECORD_ID);
             if (!vlr)
                 throwError("LAZ file missing required laszip VLR.");
             int ebCount = m_p->header.pointLen() - m_p->header.basePointLen();
             m_p->decompressor = new LazPerfVlrDecompressor(*stream, m_p->header.pointFormat(),
-                ebCount, m_p->header.pointOffset(), vlr->data());
+                ebCount, m_p->header.pointOffset());
+            if (m_args->start > 0)
+                m_p->decompressor->seek(m_args->start);
             m_p->decompressorBuf.resize(m_p->header.pointLen());
         }
 #endif

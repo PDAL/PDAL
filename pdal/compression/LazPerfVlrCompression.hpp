@@ -73,9 +73,10 @@ class LazPerfVlrDecompressor
 {
 public:
     PDAL_DLL LazPerfVlrDecompressor(std::istream& stream, int format, int ebCount,
-        std::streamoff pointOffset, const char *vlrData);
+        std::streamoff pointOffset);
     PDAL_DLL ~LazPerfVlrDecompressor();
 
+    PDAL_DLL bool seek(int64_t record);
     PDAL_DLL size_t pointSize() const;
     PDAL_DLL void decompress(char *outbuf);
 

@@ -32,27 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma push_macro("min")
-#pragma push_macro("max")
-#ifdef min
-#undef min
+// This only exist in version 1.3+, so is an acceptable version test for now.
+#include <laz-perf/lazperf.hpp>
+#ifndef LAZPERF_VERSION
+#error "LAZperf version 1.3 (supporting LAS version 1.4) not found
 #endif
-#ifdef max
-#undef max
-#endif
-
-#include <laz-perf/common/common.hpp>
-#include <laz-perf/compressor.hpp>
-#include <laz-perf/decompressor.hpp>
-
-#include <laz-perf/encoder.hpp>
-#include <laz-perf/decoder.hpp>
-#include <laz-perf/formats.hpp>
-#include <laz-perf/io.hpp>
-#include <laz-perf/las.hpp>
-
-#pragma pop_macro("max")
-#pragma pop_macro("min")
 
 #include "LazPerfVlrCompression.hpp"
 
@@ -212,16 +196,41 @@ class LazPerfVlrDecompressorImpl
 {
 public:
     LazPerfVlrDecompressorImpl(std::istream& stream, int format, int ebCount,
-        std::streamoff pointOffset, uint32_t chunksize) :
+            std::streamoff pointOffset) :
         m_stream(stream), m_inputStream(stream), m_format(format), m_ebCount(ebCount),
-        m_chunksize(chunksize), m_chunkPointsRead(0)
+        m_chunkPointsRead(0)
     {
+        // Get the chunk offsets to allow seeking.
+        laszip::io::reader::basic_file<std::istream> file(m_stream);
+        m_chunkOffsets = file.chunkOffsets();
+        m_chunkSize = file.chunkSize();
+        m_numPoints = file.numPoints();
+        m_pointSize = file.pointSize();
+
+        resetDecompressor();
+
         m_stream.seekg(pointOffset + sizeof(int64_t));
+    }
+
+    
+    bool seek(int64_t record)
+    {
+        if (record > m_numPoints || record < 0)
+            return false;
+        std::vector<char> buf(m_pointSize);
+        int64_t chunk = record / m_chunkSize;
+        int64_t offset = record % m_chunkSize;
+
+        m_stream.seekg(m_chunkOffsets[chunk]);
+        m_chunkPointsRead = offset;
+        while (offset > 0)
+            decompress(buf.data());
+        return true;
     }
 
     void decompress(char *outbuf)
     {
-        if (m_chunkPointsRead == m_chunksize || !m_decompressor)
+        if (m_chunkPointsRead == m_chunkSize)
         {
             resetDecompressor();
             m_chunkPointsRead = 0;
@@ -245,14 +254,18 @@ private:
     Decompressor::ptr m_decompressor;
     int m_format;
     int m_ebCount;
-    uint32_t m_chunksize;
+    uint32_t m_pointSize;
+    uint32_t m_chunkSize;
     uint32_t m_chunkPointsRead;
+    int64_t m_numPoints;
+    // Note that these offsets are actual file offsets. The values stored in the chunk table
+    // are offsets from the start of the previous chunk.
+    std::vector<uint64_t> m_chunkOffsets;
 };
 
 LazPerfVlrDecompressor::LazPerfVlrDecompressor(std::istream& stream, int format,
-        int ebCount, std::streamoff pointOffset, const char *vlrData) :
-    m_impl(new LazPerfVlrDecompressorImpl(stream, format, ebCount, pointOffset,
-            laszip::laz_vlr(vlrData).chunk_size))
+        int ebCount, std::streamoff pointOffset) :
+    m_impl(new LazPerfVlrDecompressorImpl(stream, format, ebCount, pointOffset))
 {}
 
 
@@ -263,6 +276,11 @@ LazPerfVlrDecompressor::~LazPerfVlrDecompressor()
 void LazPerfVlrDecompressor::decompress(char *outbuf)
 {
     m_impl->decompress(outbuf);
+}
+
+bool LazPerfVlrDecompressor::seek(int64_t record)
+{
+    return m_impl->seek(record);
 }
 
 } // namespace pdal
