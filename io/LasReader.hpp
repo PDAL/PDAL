@@ -34,23 +34,15 @@
 
 #pragma once
 
+#include <memory>
+
 #include <pdal/pdal_export.hpp>
 #include <pdal/pdal_features.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
 
-#ifdef PDAL_HAVE_LASZIP
-#include <laszip/laszip_api.h>
-#else
-using laszip_POINTER = void *;
-using laszip_point_struct = void *;
-struct laszip_point;
-#endif
-
-#include "LasError.hpp"
-#include "LasHeader.hpp"
-#include "LasUtils.hpp"
+//#include "LasError.hpp"
 
 namespace pdal
 {
@@ -87,13 +79,13 @@ protected:
 public:
     LasReader();
     ~LasReader();
+    LasReader& operator=(const LasReader&) = delete;
+    LasReader(const LasReader&) = delete;
 
     std::string getName() const;
 
-    const LasHeader& header() const
-        { return m_header; }
-    point_count_t getNumPoints() const
-        { return m_header.pointCount(); }
+    const LasHeader& header() const;
+    point_count_t getNumPoints() const;
 
 protected:
     virtual void createStream();
@@ -101,27 +93,8 @@ protected:
     std::unique_ptr<LasStreamIf> m_streamIf;
 
 private:
-    typedef std::vector<LasUtils::IgnoreVLR> IgnoreVLRList;
-
-    LasHeader m_header;
-    laszip_POINTER m_laszip;
-    laszip_point_struct *m_laszipPoint;
-
-    LazPerfVlrDecompressor *m_decompressor;
-    std::vector<char> m_decompressorBuf;
-    point_count_t m_index;
-    StringList m_extraDimSpec;
-    std::vector<ExtraDim> m_extraDims;
-    IgnoreVLRList m_ignoreVLRs;
-    std::string m_compression;
-    StringList m_ignoreVLROption;
-    bool m_useEbVlr;
-    point_count_t m_start;
-    bool m_fixNames;
-
     virtual void addArgs(ProgramArgs& args);
-    virtual void initialize(PointTableRef table)
-        { initializeLocal(table, m_metadata); }
+    virtual void initialize(PointTableRef table);
     virtual void initializeLocal(PointTableRef table, MetadataNode& m);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual QuickInfo inspect();
@@ -129,17 +102,16 @@ private:
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual bool processOne(PointRef& point);
     virtual void done(PointTableRef table);
-    virtual bool eof()
-        { return m_index >= getNumPoints(); }
+    virtual bool eof();
 
     void handleCompressionOption();
     void setSrs(MetadataNode& m);
     void readExtraBytesVlr();
     void extractHeaderMetadata(MetadataNode& forward, MetadataNode& m);
     void extractVlrMetadata(MetadataNode& forward, MetadataNode& m);
-    void loadPoint(PointRef& point, laszip_point& p);
-    void loadPointV10(PointRef& point, laszip_point& p);
-    void loadPointV14(PointRef& point, laszip_point& p);
+    void loadPoint(PointRef& point);
+    void loadPointV10(PointRef& point);
+    void loadPointV14(PointRef& point);
     void loadPoint(PointRef& point, char *buf, size_t bufsize);
     void loadPointV10(PointRef& point, char *buf, size_t bufsize);
     void loadPointV14(PointRef& point, char *buf, size_t bufsize);
@@ -148,8 +120,11 @@ private:
         point_count_t maxPoints);
     void handleLaszip(int result);
 
-    LasReader& operator=(const LasReader&); // not implemented
-    LasReader(const LasReader&); // not implemented
+    struct Args;
+    std::unique_ptr<Args> m_args;
+
+    struct Private;
+    std::unique_ptr<Private> m_p;
 };
 
 } // namespace pdal

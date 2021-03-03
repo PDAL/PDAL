@@ -51,8 +51,8 @@ RGB values of an `ASPRS LAS`_ file using :ref:`writers.las`.
           "header": "Red, Green, Blue"
       },
       {
-          "type":"writers.text",
-          "filename":"outputfile.txt"
+          "type":"writers.las",
+          "filename":"outputfile.las"
       }
   ]
 

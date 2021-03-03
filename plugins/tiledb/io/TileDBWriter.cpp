@@ -309,10 +309,6 @@ void TileDBWriter::initialize()
         {
             NL::json opts;
 
-            if (tiledb::Object::object(*m_ctx, m_args->m_arrayName).type() ==
-                    tiledb::Object::Type::Array)
-                throwError("Array already exists.");
-
             m_schema.reset(new tiledb::ArraySchema(*m_ctx, TILEDB_SPARSE));
 
             if (m_args->m_filters.count("coords") > 0)
@@ -359,13 +355,26 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
         double dimMin = std::numeric_limits<double>::lowest();
         double dimMax = std::numeric_limits<double>::max();
 
-        domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X",
-            {{dimMin, dimMax}}, m_args->m_x_tile_size))
-            .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Y",
-            {{dimMin, dimMax}}, m_args->m_y_tile_size))
-            .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
-            {{dimMin, dimMax}}, m_args->m_z_tile_size));
-
+        if ( (m_args->m_x_tile_size > 0) &&
+             (m_args->m_y_tile_size > 0) &&
+             (m_args->m_z_tile_size > 0) )
+            domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X",
+                {{dimMin, dimMax}}, m_args->m_x_tile_size))
+                .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Y",
+                {{dimMin, dimMax}}, m_args->m_y_tile_size))
+                .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
+                {{dimMin, dimMax}}, m_args->m_z_tile_size));
+#if TILEDB_VERSION_MAJOR >= 2
+    #if ((TILEDB_VERSION_MINOR > 1) || (TILEDB_VERSION_MAJOR > 2))
+        else
+            domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X",
+                {{dimMin, dimMax}}))
+                .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Y",
+                {{dimMin, dimMax}}))
+                .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
+                {{dimMin, dimMax}}));
+    #endif
+#endif
         m_schema->set_domain(domain).set_order(
             {{TILEDB_ROW_MAJOR, TILEDB_ROW_MAJOR}});
         m_schema->set_capacity(m_args->m_tile_capacity);

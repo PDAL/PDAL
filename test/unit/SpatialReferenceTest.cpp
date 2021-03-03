@@ -44,6 +44,8 @@
 
 #include <gdal_version.h>
 
+#include <pdal/pdal_features.hpp>
+
 #include "Support.hpp"
 
 namespace pdal
@@ -468,50 +470,6 @@ TEST(SpatialReferenceTest, issue_1989)
     SpatialReference south("EPSG:32732");
     EXPECT_EQ(-32, south.getUTMZone());
 }
-
-// Ilvis needs XML2
-#ifdef PDAL_HAVE_LIBXML2
-TEST(SpatialReferenceTest, set_srs)
-{
-    StageFactory factory;
-
-    Options ops;
-    ops.add("spatialreference", "EPSG:4326");
-    ops.add("filename", Support::datapath("text/file3.txt"));
-
-    Stage *s = factory.createStage("readers.text");
-    s->setOptions(ops);
-
-    PointTable t;
-    s->prepare(t);
-
-    MetadataNode m = s->getMetadata().findChild("spatialreference");
-    EXPECT_NE(m.value().find("AUTHORITY[\"EPSG\",\"4326\"]]"),
-        std::string::npos);
-
-    //
-    Options ops2;
-    ops2.add("filename", Support::datapath("ilvis2/ILVIS_TEST_FILE.txt"));
-
-    s = factory.createStage("readers.ilvis2");
-    s->setOptions(ops2);
-
-    s->prepare(t);
-    m = s->getMetadata().findChild("spatialreference");
-    EXPECT_NE(m.value().find("AUTHORITY[\"EPSG\",\"4326\"]]"),
-        std::string::npos);
-
-    //
-    s = factory.createStage("readers.ilvis2");
-    ops2.add("spatialreference", "EPSG:2029");
-    s->setOptions(ops2);
-    s->prepare(t);
-    m = s->getMetadata().findChild("spatialreference");
-    EXPECT_NE(m.value().find("AUTHORITY[\"EPSG\",\"2029\"]]"),
-        std::string::npos);
-}
-
-#endif // PDAL_HAVE_LIBXML2
 
 #if GDAL_VERSION_MAJOR >= 3
 // Test setting EPSG:4326 from User string
