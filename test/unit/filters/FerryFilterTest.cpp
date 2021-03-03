@@ -122,7 +122,7 @@ TEST(FerryFilterTest, test_ferry_copy_json)
     // proj 5 will consider +ellps=GRS80 +towgs84=0,0,0 to be slighly different
     // than +datum=WGS84
     EXPECT_NEAR(-117.25013, lon, 1e-4);
-    EXPECT_NEAR(49.34107, lat, 1e-5);
+    EXPECT_NEAR(49.34107, lat, 1e-4);
     EXPECT_DOUBLE_EQ(637012.24, x);
     EXPECT_DOUBLE_EQ(849028.31, y);
 }
