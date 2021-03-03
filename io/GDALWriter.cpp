@@ -202,9 +202,15 @@ int GDALWriter::height() const
 
 void GDALWriter::createGrid(BOX2D bounds)
 {
-    int width = (int)std::floor((bounds.maxx - bounds.minx) / m_edgeLength) + 1;
-    int height = (int)std::floor((bounds.maxy - bounds.miny) / m_edgeLength) + 1;
-
+    // Validating before casting avoids float-cast-overflow undefined behavior.
+    double d_width = std::floor((bounds.maxx - bounds.minx) / m_edgeLength) + 1;
+    double d_height = std::floor((bounds.maxy - bounds.miny) / m_edgeLength) + 1;
+    if (d_width < 0.0 || d_width > (std::numeric_limits<int>::max)())
+        throwError("Grid width out of range.");
+    if (d_height < 0.0 || d_height > (std::numeric_limits<int>::max)())
+        throwError("Grid height out of range.");
+    int width = static_cast<int>(d_width);
+    int height = static_cast<int>(d_height);
     try
     {
         m_grid.reset(new GDALGrid(bounds.minx, bounds.miny, width, height, m_edgeLength,

@@ -83,6 +83,7 @@ public:
     bool useEbVlr;
     StringList ignoreVLROption;
     bool fixNames;
+    PointId start;
 };
 
 struct LasReader::Private
@@ -119,9 +120,9 @@ void LasReader::addArgs(ProgramArgs& args)
     args.add("extra_dims", "Dimensions to assign to extra byte data",
         m_args->extraDimSpec);
     args.add("compression", "Decompressor to use", m_args->compression, "EITHER");
-    args.add("use_eb_vlr", "Use extra bytes VLR for 1.0 - 1.3 files",
-        m_args->useEbVlr);
+    args.add("use_eb_vlr", "Use extra bytes VLR for 1.0 - 1.3 files", m_args->useEbVlr);
     args.add("ignore_vlr", "VLR userid/recordid to ignore", m_args->ignoreVLROption);
+    args.add("start", "Point at which reading should start (0-indexed).", m_args->start);
     args.add("fix_dims", "Make invalid dimension names valid by changing "
         "invalid characters to '_'", m_args->fixNames, true);
 }
@@ -270,6 +271,9 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
             m_p->header.removeVLR(i.m_userId);
     }
 
+    if (m_args->start > m_p->header.pointCount())
+        throwError("'start' value of " + std::to_string(m_args->start) + " is too large. "
+            "File contains " + std::to_string(m_p->header.pointCount()) + " points.");
     if (m_p->header.compressed())
         handleCompressionOption();
 #ifdef PDAL_HAVE_LASZIP
@@ -321,6 +325,7 @@ void LasReader::ready(PointTableRef table)
             handleLaszip(laszip_open_reader_stream(m_p->laszip, *stream,
                 &compressed));
             handleLaszip(laszip_get_point_pointer(m_p->laszip, &m_p->laszipPoint));
+            handleLaszip(laszip_seek_point(m_p->laszip, m_args->start));
         }
 #endif
 
@@ -329,8 +334,9 @@ void LasReader::ready(PointTableRef table)
         {
             delete m_p->decompressor;
 
-            const LasVLR *vlr = m_p->header.findVlr(LASZIP_USER_ID,
-                LASZIP_RECORD_ID);
+            if (m_args->start != 0)
+                throwError("LAZperf does not support the 'start' option.");
+            const LasVLR *vlr = m_p->header.findVlr(LASZIP_USER_ID, LASZIP_RECORD_ID);
             if (!vlr)
                 throwError("LAZ file missing required laszip VLR.");
             int ebCount = m_p->header.pointLen() - m_p->header.basePointLen();
@@ -346,7 +352,11 @@ void LasReader::ready(PointTableRef table)
 #endif
     }
     else
-        stream->seekg(m_p->header.pointOffset());
+    {
+        std::istream::pos_type start = m_p->header.pointOffset() +
+            (m_args->start * m_p->header.pointLen());
+        stream->seekg(start);
+    }
 }
 
 

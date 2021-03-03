@@ -725,7 +725,7 @@ bool LasWriter::processOne(PointRef& point)
         {
             if (scale.m_auto)
                 log()->get(LogLevel::Warning) << "Auto scale for " << name <<
-                "requested in stream mode.  Using value of 1.0." << std::endl;
+                " requested in stream mode.  Using value of 1.0." << std::endl;
         };
 
         doScale(m_scaling.m_xXform.m_scale, "X");
@@ -739,7 +739,7 @@ bool LasWriter::processOne(PointRef& point)
             {
                 offset.m_val = val;
                 log()->get(LogLevel::Warning) << "Auto offset for " << name <<
-                    "requested in stream mode.  Using value of " <<
+                    " requested in stream mode.  Using value of " <<
                     offset.m_val << "." << std::endl;
             }
         };
