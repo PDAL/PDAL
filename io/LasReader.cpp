@@ -148,7 +148,7 @@ const LasHeader& LasReader::header() const
 
 point_count_t LasReader::getNumPoints() const
 {
-    return m_p->header.pointCount();
+    return m_p->header.pointCount() - m_args->start;
 }
 
 void LasReader::initialize(PointTableRef table)
