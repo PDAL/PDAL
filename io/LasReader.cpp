@@ -334,7 +334,7 @@ void LasReader::ready(PointTableRef table)
         {
             delete m_p->decompressor;
 
-            if (m_arg->start != 0)
+            if (m_args->start != 0)
                 throwError("LAZperf does not support the 'start' option.");
             const LasVLR *vlr = m_p->header.findVlr(LASZIP_USER_ID, LASZIP_RECORD_ID);
             if (!vlr)
