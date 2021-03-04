@@ -339,9 +339,13 @@ void LasReader::ready(PointTableRef table)
                 throwError("LAZ file missing required laszip VLR.");
             int ebCount = m_p->header.pointLen() - m_p->header.basePointLen();
             m_p->decompressor = new LazPerfVlrDecompressor(*stream, m_p->header.pointFormat(),
-                ebCount, m_p->header.pointOffset());
+                ebCount, m_p->header.pointOffset(), vlr->data());
             if (m_args->start > 0)
+            {
+                if (m_args->start > m_p->header.pointCount())
+                    throwError("'start' option set past end of file.");
                 m_p->decompressor->seek(m_args->start);
+            }
             m_p->decompressorBuf.resize(m_p->header.pointLen());
         }
 #endif

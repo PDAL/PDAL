@@ -569,6 +569,7 @@ TEST(LasReaderTest, Start)
         Stage *las = f.createStage("writers.las");
         Options opts2;
         opts2.add("filename", source);
+//opts2.add("compression", "lazperf");
         las->setOptions(opts2);
         las->setInput(*faux);
 
@@ -577,11 +578,13 @@ TEST(LasReaderTest, Start)
         las->execute(t);
     }
 
+    auto test1 = [source, &f](const std::string& compression)
     {
         Stage *las = f.createStage("readers.las");
         Options opts;
         opts.add("filename", source);
         opts.add("start", 62520);
+        opts.add("compression", compression);
         las->setOptions(opts);
 
         PointTable t;
@@ -591,13 +594,14 @@ TEST(LasReaderTest, Start)
         EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::X, 0), 62520);
         EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::Y, 0), 62620);
         EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::Z, 0), 63020);
-    }
-
+    };
+    auto test2 = [source, &f](const std::string& compression)
     {
         Stage *las = f.createStage("readers.las");
         Options opts;
         opts.add("filename", source);
         opts.add("start", 2525);
+        opts.add("compression", "lazperf");
         las->setOptions(opts);
 
         PointTable t;
@@ -607,7 +611,11 @@ TEST(LasReaderTest, Start)
         EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::X, 0), 2525);
         EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::Y, 0), 2625);
         EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::Z, 0), 3025);
-    }
+    };
+    test1("laszip");
+    test1("lazperf");
+    test2("laszip");
+    test2("lazperf");
 
     // Delete the created file.
     FileUtils::deleteFile(source);

@@ -34,7 +34,6 @@
 #pragma once
 
 #include <memory>
-#include <pdal/util/OStream.hpp>
 
 namespace pdal
 {
@@ -53,14 +52,14 @@ namespace pdal
 class LazPerfVlrCompressor
 {
 public:
-    PDAL_DLL LazPerfVlrCompressor(std::ostream& stream, int format, int ebCount);
-    PDAL_DLL LazPerfVlrCompressor(std::ostream& stream, int format, int ebCount,
+    LazPerfVlrCompressor(std::ostream& stream, int format, int ebCount);
+    LazPerfVlrCompressor(std::ostream& stream, int format, int ebCount,
         uint32_t chunksize);
-    PDAL_DLL ~LazPerfVlrCompressor();
+    ~LazPerfVlrCompressor();
 
-    PDAL_DLL std::vector<uint8_t> vlrData() const;
-    PDAL_DLL void compress(const char *inbuf);
-    PDAL_DLL void done();
+    std::vector<uint8_t> vlrData() const;
+    void compress(const char *inbuf);
+    void done();
 
 private:
     std::unique_ptr<LazPerfVlrCompressorImpl> m_impl;
@@ -72,13 +71,13 @@ class LazPerfVlrDecompressorImpl;
 class LazPerfVlrDecompressor
 {
 public:
-    PDAL_DLL LazPerfVlrDecompressor(std::istream& stream, int format, int ebCount,
-        std::streamoff pointOffset);
-    PDAL_DLL ~LazPerfVlrDecompressor();
+    LazPerfVlrDecompressor(std::istream& stream, int format, int ebCount,
+        std::streamoff pointOffset, const char *virdata);
+    ~LazPerfVlrDecompressor();
 
-    PDAL_DLL bool seek(int64_t record);
-    PDAL_DLL size_t pointSize() const;
-    PDAL_DLL void decompress(char *outbuf);
+    bool seek(int64_t record);
+    size_t pointSize() const;
+    void decompress(char *outbuf);
 
 private:
     std::unique_ptr<LazPerfVlrDecompressorImpl> m_impl;
