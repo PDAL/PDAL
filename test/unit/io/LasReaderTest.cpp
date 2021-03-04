@@ -569,7 +569,6 @@ TEST(LasReaderTest, Start)
         Stage *las = f.createStage("writers.las");
         Options opts2;
         opts2.add("filename", source);
-//opts2.add("compression", "lazperf");
         las->setOptions(opts2);
         las->setInput(*faux);
 
@@ -601,7 +600,7 @@ TEST(LasReaderTest, Start)
         Options opts;
         opts.add("filename", source);
         opts.add("start", 2525);
-        opts.add("compression", "lazperf");
+        opts.add("compression", compression);
         las->setOptions(opts);
 
         PointTable t;
