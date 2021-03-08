@@ -41,6 +41,7 @@
 #include <pdal/Streamable.hpp>
 #include <io/LasHeader.hpp>
 #include <io/LasReader.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
@@ -550,4 +551,64 @@ TEST(LasReaderTest, SyntheticPoints)
     PointViewPtr outView = *viewSet.begin();
 
     EXPECT_EQ(ClassLabel::CreatedNeverClassified | ClassLabel::Synthetic, outView->getFieldAs<uint8_t>(Id::Classification, 0));
+}
+
+TEST(LasReaderTest, Start)
+{
+    // Create a LAZ file that increments XYZ
+    std::string source = Support::temppath("increment.laz");
+    StageFactory f;
+    {
+        Stage *faux = f.createStage("readers.faux");
+        Options opts;
+        opts.add("mode", "ramp");
+        opts.add("bounds", "([0, 69999],[100,70099],[500,70499])");
+        opts.add("count", 70000);
+        faux->setOptions(opts);
+
+        Stage *las = f.createStage("writers.las");
+        Options opts2;
+        opts2.add("filename", source);
+        las->setOptions(opts2);
+        las->setInput(*faux);
+
+        PointTable t;
+        las->prepare(t);
+        las->execute(t);
+    }
+
+    {
+        Stage *las = f.createStage("readers.las");
+        Options opts;
+        opts.add("filename", source);
+        opts.add("start", 62520);
+        las->setOptions(opts);
+
+        PointTable t;
+        las->prepare(t);
+        PointViewSet s = las->execute(t);
+        PointViewPtr v = *s.begin();
+        EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::X, 0), 62520);
+        EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::Y, 0), 62620);
+        EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::Z, 0), 63020);
+    }
+
+    {
+        Stage *las = f.createStage("readers.las");
+        Options opts;
+        opts.add("filename", source);
+        opts.add("start", 2525);
+        las->setOptions(opts);
+
+        PointTable t;
+        las->prepare(t);
+        PointViewSet s = las->execute(t);
+        PointViewPtr v = *s.begin();
+        EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::X, 0), 2525);
+        EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::Y, 0), 2625);
+        EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::Z, 0), 3025);
+    }
+
+    // Delete the created file.
+    FileUtils::deleteFile(source);
 }
