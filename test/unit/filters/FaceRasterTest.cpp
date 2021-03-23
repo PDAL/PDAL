@@ -70,8 +70,10 @@ TEST(FaceRasterTest, basic)
     f.setInput(d);
     f.setOptions(fo);
 
+    const std::string output_file = Support::temppath("test.tif");
+
     Options wo;
-    wo.add("filename", "test.tif");
+    wo.add("filename", output_file);
     Stage& w = *(factory.createStage("writers.raster"));
     w.setInput(f);
     w.setOptions(wo);
@@ -81,7 +83,7 @@ TEST(FaceRasterTest, basic)
     PointViewSet s = w.execute(t1);
     PointViewPtr v = *s.begin();
 
-    gdal::Raster raster("test.tif", "GTiff");
+    gdal::Raster raster(output_file, "GTiff");
     if (raster.open() != gdal::GDALError::None)
         throw pdal_error(raster.errorMsg());
     std::vector<double> data;

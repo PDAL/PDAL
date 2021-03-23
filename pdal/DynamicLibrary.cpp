@@ -38,7 +38,7 @@
 // The original work was released under the Apache License v2.
 
 #ifdef _WIN32
-  #include <Windows.h>
+  #include <windows.h>
 #else
   #include <dlfcn.h>
 #endif
