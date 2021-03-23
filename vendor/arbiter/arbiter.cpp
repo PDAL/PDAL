@@ -1392,11 +1392,9 @@ std::unique_ptr<std::size_t> Http::tryGetSize(std::string path) const
     auto http(m_pool.acquire());
     Response res(http.head(typedPath(path)));
 
-    if (res.ok() && res.headers().count("Content-Length"))
-    {
-        const std::string& str(res.headers().at("Content-Length"));
-        size.reset(new std::size_t(std::stoul(str)));
-    }
+    std::string val;
+    if (res.ok() && findEntry(res.headers(), "Content-Length", val))
+        size.reset(new std::size_t(std::stoul(val)));
 
     return size;
 }
@@ -2040,12 +2038,9 @@ std::unique_ptr<std::size_t> S3::tryGetSize(std::string rawPath) const
     drivers::Http http(m_pool);
     Response res(http.internalHead(resource.url(), apiV4.headers()));
 
-    if (res.ok() && res.headers().count("Content-Length"))
-    {
-        const std::string& str(res.headers().at("Content-Length"));
-        size.reset(new std::size_t(std::stoul(str)));
-    }
-
+    std::string val;
+    if (res.ok() && findEntry(res.headers(), "Content-Length", val))
+        size.reset(new std::size_t(std::stoul(val)));
     return size;
 }
 
@@ -2767,11 +2762,9 @@ std::unique_ptr<std::size_t> AZ::tryGetSize(std::string rawPath) const
     drivers::Http http(m_pool);
     Response res(http.internalHead(resource.url(), ApiV1.headers()));
 
-    if (res.ok() && res.headers().count("Content-Length"))
-    {
-        const std::string& str(res.headers().at("Content-Length"));
-        size.reset(new std::size_t(std::stoul(str)));
-    }
+    std::string val;
+    if (res.ok() && findEntry(res.headers(), "Content-Length", val))
+        size.reset(new std::size_t(std::stoul(val)));
 
     return size;
 }
@@ -3282,19 +3275,9 @@ std::unique_ptr<std::size_t> Google::tryGetSize(const std::string path) const
     const auto res(
             https.internalHead(resource.endpoint(), headers, altMediaQuery));
 
-    if (res.ok())
-    {
-        if (res.headers().count("Content-Length"))
-        {
-            const auto& s(res.headers().at("Content-Length"));
-            return makeUnique<std::size_t>(std::stoull(s));
-        }
-        else if (res.headers().count("content-length"))
-        {
-            const auto& s(res.headers().at("content-length"));
-            return makeUnique<std::size_t>(std::stoull(s));
-        }
-    }
+    std::string val;
+    if (res.ok() && findEntry(res.headers(), "Content-Length", val))
+        return makeUnique<std::size_t>(std::stoull(val));
 
     return std::unique_ptr<std::size_t>();
 }
