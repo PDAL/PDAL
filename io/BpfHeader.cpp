@@ -187,8 +187,9 @@ bool BpfHeader::readV1(ILeStream& stream)
     zDim.m_label = "Z";
 
     stream >> xDim.m_offset >> yDim.m_offset >> zDim.m_offset;
-    stream >> xDim.m_min >> yDim.m_min >> zDim.m_min;
-    stream >> xDim.m_max >> yDim.m_max >> zDim.m_max;
+    stream >> xDim.m_min >> xDim.m_max;
+    stream >> yDim.m_min >> yDim.m_max;
+    stream >> zDim.m_min >> zDim.m_max;
 
     m_staticDims.resize(3);
     m_staticDims[0] = xDim;
