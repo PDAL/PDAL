@@ -1,4 +1,4 @@
-FROM pdal/ubuntubase:latest as builder
+FROM pdal/ubuntubase:latest as build
 MAINTAINER Andrew Bell <andrew@hobu.co>
 
 SHELL ["conda", "run", "-n", "pdal", "/bin/bash", "-c"]
@@ -32,37 +32,25 @@ RUN cd pdal/build  && \
 RUN cd pdal/build  && \
     ninja install
 
-RUN conda remove -c conda-forge git cmake ninja conda-forge-ci-setup
 
-RUN rm /opt/conda/envs/pdal/lib/*.a && \
-    rm /opt/conda/envs/pdal/include/H5*.h && \
-    rm /opt/conda/envs/pdal/include/h5*.mod && \
-    rm /opt/conda/envs/pdal/include/tcl*.h && \
-    rm /opt/conda/envs/pdal/include/itcl*.h && \
-    rm /opt/conda/envs/pdal/include/tk*.h && \
-    rm -rf /opt/conda/envs/pdal/include/spatialite && \
-    rm -rf /opt/conda/envs/pdal/include/freetype2 && \
-    rm -rf /opt/conda/envs/pdal/include/informix && \
-    rm -rf /opt/conda/envs/pdal/include/fontconfig && \
-    rm -rf /opt/conda/envs/pdal/include/X11 && \
-    rm -rf /opt/conda/envs/pdal/lib/cmake
 
-FROM ubuntu:bionic
+RUN conda-pack -n pdal --dest-prefix=/opt/conda/envs/pdal -o  /tmp/env.tar && \
+     mkdir /venv && cd /venv && tar xf /tmp/env.tar  && \
+     rm /tmp/env.tar
 
-ARG PDAL_CONDA=/opt/conda/envs/pdal
+FROM continuumio/miniconda3
 
-RUN apt-get update --fix-missing && \
-    apt-get install -y \
-        sudo ca-certificates && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+ENV CONDAENV "/opt/conda/envs/pdal"
+COPY --from=build /venv "/opt/conda/envs/pdal"
 
-COPY --from=builder /usr/ /usr/
-COPY --from=builder /lib/ /lib/
-COPY --from=builder /${PDAL_CONDA}/lib/ /usr/lib/
-COPY --from=builder /${PDAL_CONDA}/include/ /usr/include/
-COPY --from=builder /${PDAL_CONDA}/share/ /usr/share/
+ENV PROJ_NETWORK=TRUE
+ENV PATH $PATH:${CONDAENV}/bin
+ENV DTED_APPLY_PIXEL_IS_POINT=TRUE
+ENV GTIFF_POINT_GEO_IGNORE=TRUE
+ENV GTIFF_REPORT_COMPD_CS=TRUE
+ENV REPORT_COMPD_CS=TRUE
+ENV OAMS_TRADITIONAL_GIS_ORDER=TRUE
 
-ENV GDAL_DATA=/usr/share/gdal
-ENV PDAL_DRIVER_PATH=/usr/lib
-ENV PROJ_LIB=/usr/share/proj
+SHELL ["conda", "run", "--no-capture-output", "/bin/sh", "-c"]
+
+

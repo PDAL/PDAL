@@ -8,12 +8,6 @@ RUN apt-get update -q && \
         bzip2 \
         ca-certificates \
         git \
-        libglib2.0-0 \
-        libsm6 \
-        libxext6 \
-        libxrender1 \
-        mercurial \
-        subversion \
         wget \
     && apt-get clean
 
@@ -41,7 +35,8 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}
 
 
 
-RUN conda create -n pdal -y && conda install -c conda-forge compilers git cmake ninja && \
-    conda install --yes --name pdal -c conda-forge pdal --only-deps
+RUN conda create -n pdal -y && conda install -c conda-forge compilers conda-pack git cmake ninja && \
+    conda install --yes --name pdal -c conda-forge pdal --only-deps && \
+    conda install --yes --name pdal -c conda-forge conda jq
 
 
