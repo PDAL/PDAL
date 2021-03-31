@@ -1,17 +1,14 @@
 FROM pdal/ubuntubase:latest as builder
 MAINTAINER Andrew Bell <andrew@hobu.co>
 
-SHELL ["/bin/bash", "-c"]
+SHELL ["conda", "run", "-n", "pdal", "/bin/bash", "-c"]
 
-RUN . /opt/conda/etc/profile.d/conda.sh && \
-    conda activate pdal && \
-    git clone http://github.com/PDAL/PDAL.git pdal
-
-RUN . /opt/conda/etc/profile.d/conda.sh && \
-    conda activate pdal && \
+RUN git clone http://github.com/PDAL/PDAL.git pdal && \
     mkdir -p pdal/build && \
     cd pdal/build  && \
-    cmake -G Ninja  \
+    LDFLAGS="-Wl,-rpath-link,$CONDA_PREFIX/lib" cmake -G Ninja  \
+        -DCMAKE_LIBRARY_PATH:FILEPATH="$CONDA_PREFIX/lib" \
+        -DCMAKE_INCLUDE_PATH:FILEPATH="$CONDA_PREFIX/include" \
         -DCMAKE_INSTALL_PREFIX=/usr \
         -DBUILD_PLUGIN_CPD=OFF \
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
@@ -26,27 +23,16 @@ RUN . /opt/conda/etc/profile.d/conda.sh && \
         -DWITH_LASZIP=ON \
         ..
 
-RUN . /opt/conda/etc/profile.d/conda.sh && \
-    conda activate pdal && \
-    cd pdal/build  && \
+RUN cd pdal/build  && \
     ninja
 
-RUN . /opt/conda/etc/profile.d/conda.sh && \
-    conda activate pdal && \
-    cd pdal/build  && \
+RUN cd pdal/build  && \
     ctest -V
 
-RUN . /opt/conda/etc/profile.d/conda.sh && \
-    conda activate pdal && \
-    cd pdal/build  && \
+RUN cd pdal/build  && \
     ninja install
 
-RUN apt-get -y remove unzip bzip2 gcc g++ ca-certificates && \
-   apt-get -y autoremove
-
-RUN . /opt/conda/etc/profile.d/conda.sh && \
-    conda activate pdal && \
-    conda remove -c conda-forge git cmake ninja conda-forge-ci-setup
+RUN conda remove -c conda-forge git cmake ninja conda-forge-ci-setup
 
 RUN rm /opt/conda/envs/pdal/lib/*.a && \
     rm /opt/conda/envs/pdal/include/H5*.h && \
