@@ -34,8 +34,8 @@ DAMAGE.
 //ABELL - Necessary?
 /**
 #if defined( _WIN32 ) || defined( _WIN64 )
-#include <Windows.h>
-#include <Psapi.h>
+#include <windows.h>
+#include <psapi.h>
 #endif // _WIN32 || _WIN64
 **/
 

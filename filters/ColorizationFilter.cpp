@@ -215,9 +215,11 @@ bool ColorizationFilter::processOne(PointRef& point)
             point.setField(b.m_dim, data[i] * b.m_scale);
             ++i;
         }
-        return true;
     }
-    return false;
+
+    // always return true to retain all points inside OR outside the raster. the output bands of
+    // any points outside the raster are ignored.
+    return true;
 }
 
 
