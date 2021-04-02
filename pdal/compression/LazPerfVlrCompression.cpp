@@ -33,7 +33,9 @@
 ****************************************************************************/
 
 // This only exist in version 1.3+, so is an acceptable version test for now.
-#include <laz-perf/lazperf.hpp>
+#include <lazperf/lazperf.hpp>
+#include <lazperf/filestream.hpp>
+#include <lazperf/vlr.hpp>
 #ifndef LAZPERF_VERSION
 #error "LAZperf version 1.3 (supporting LAS version 1.4) not found
 #endif
@@ -86,20 +88,15 @@ size_t baseCount(int format)
 // handled as part of the compression process itself.
 class LazPerfVlrCompressorImpl
 {
-    typedef laszip::io::__ofstream_wrapper<std::ostream> OutputStream;
-    typedef laszip::encoders::arithmetic<OutputStream> Encoder;
-    typedef laszip::formats::las_compressor Compressor;
-
 public:
-    LazPerfVlrCompressorImpl(std::ostream& stream, int format, int ebCount, uint32_t chunksize) :
+    LazPerfVlrCompressorImpl(std::ostream& stream, int format, int ebCount) :
         m_stream(stream), m_outputStream(stream), m_format(format), m_ebCount(ebCount),
-        m_chunksize(chunksize), m_chunkPointsWritten(0), m_chunkInfoPos(0),
-        m_chunkOffset(0)
+        m_chunksize(50000), m_chunkPointsWritten(0), m_chunkInfoPos(0), m_chunkOffset(0)
     {}
 
-    std::vector<uint8_t> vlrData() const
+    std::vector<char> vlrData() const
     {
-        laszip::laz_vlr vlr(m_format, m_ebCount, m_chunksize);
+        lazperf::laz_vlr vlr(m_format, m_ebCount, m_chunksize);
         return vlr.data();
     }
 
@@ -122,7 +119,6 @@ public:
         }
         m_compressor->compress(inbuf);
         m_chunkPointsWritten++;
-cnt++;
     }
 
     void done()
@@ -146,20 +142,8 @@ cnt++;
         out << (uint32_t)0;  // Version (?)
         out << (uint32_t)m_chunkTable.size();
 
-        // Encode and write the chunk table.
-        OutputStream outputStream(m_stream);
-        Encoder encoder(outputStream);
-        laszip::compressors::integer compressor(32, 2);
-        compressor.init();
-
-        uint32_t predictor = 0;
-        for (uint32_t offset : m_chunkTable)
-        {
-            offset = htole32(offset);
-            compressor.compress(encoder, predictor, offset, 1);
-            predictor = offset;
-        }
-        encoder.done();
+        lazperf::OutFileStream stream(m_stream);
+        lazperf::compress_chunk_table(stream.cb(), m_chunkTable);
     }
 
 private:
@@ -167,7 +151,7 @@ private:
     {
         if (m_compressor)
             m_compressor->done();
-        m_compressor = laszip::factory::build_las_compressor(m_outputStream, m_format, m_ebCount);
+        m_compressor = lazperf::build_las_compressor(m_outputStream.cb(), m_format, m_ebCount);
     }
 
     void newChunk()
@@ -178,10 +162,9 @@ private:
         m_chunkPointsWritten = 0;
     }
 
-uint64_t cnt = 0;
     std::ostream& m_stream;
-    OutputStream m_outputStream;
-    Compressor::ptr m_compressor;
+    lazperf::OutFileStream m_outputStream;
+    lazperf::las_compressor::ptr m_compressor;
     int m_format;
     int m_ebCount;
     uint32_t m_chunksize;
@@ -192,14 +175,8 @@ uint64_t cnt = 0;
 };
 
 
-LazPerfVlrCompressor::LazPerfVlrCompressor(std::ostream& stream, int format, int ebCount,
-        uint32_t chunksize) :
-    m_impl(new LazPerfVlrCompressorImpl(stream, format, ebCount, chunksize))
-{}
-
-
 LazPerfVlrCompressor::LazPerfVlrCompressor(std::ostream& stream, int format, int ebCount) :
-    m_impl(new LazPerfVlrCompressorImpl(stream, format, ebCount, DefaultChunkSize))
+    m_impl(new LazPerfVlrCompressorImpl(stream, format, ebCount))
 {}
 
 
@@ -207,7 +184,7 @@ LazPerfVlrCompressor::~LazPerfVlrCompressor()
 {}
 
 
-std::vector<uint8_t> LazPerfVlrCompressor::vlrData() const
+std::vector<char> LazPerfVlrCompressor::vlrData() const
 {
     return m_impl->vlrData();
 }
@@ -227,14 +204,10 @@ void LazPerfVlrCompressor::done()
 
 class LazPerfVlrDecompressorImpl
 {
-    typedef laszip::io::__ifstream_wrapper<std::istream> InputStream;
-    typedef laszip::decoders::arithmetic<InputStream> Decoder;
-    typedef laszip::formats::las_decompressor Decompressor;
-
 public:
     LazPerfVlrDecompressorImpl(std::istream& stream, int format, int ebCount,
             std::streamoff pointOffset, const char *vlrdata) :
-        m_stream(stream), m_inputStream(stream), m_format(format), m_ebCount(ebCount),
+        m_stream(stream), m_fileStream(stream), m_format(format), m_ebCount(ebCount),
         m_chunkPointsRead(0), m_vlr(vlrdata)
     {
         m_stream.seekg(pointOffset);
@@ -250,21 +223,18 @@ public:
         in >> numChunks;
 
         assert(version == 0);
-        Decoder decoder(m_inputStream);
-        laszip::decompressors::integer decomp(32, 2);
-        decoder.readInitBytes();
-        decomp.init();
 
+        std::vector<uint32_t> chunks =
+            lazperf::decompress_chunk_table(m_fileStream.cb(), numChunks);
         m_chunkOffsets.push_back(pointOffset + sizeof(uint64_t));
-        int32_t predictor = 0;
-        for (size_t i = 0; i < numChunks - 1; ++i)
-        {
-            predictor = decomp.decompress(decoder, predictor, 1);
-            m_chunkOffsets.push_back(predictor + m_chunkOffsets.back());
-        }
+        for (uint32_t chunkSize : chunks)
+            m_chunkOffsets.push_back(m_chunkOffsets.back() + chunkSize);
+
+        // Clear EOF
         m_stream.clear();
         resetDecompressor();
         m_stream.seekg(m_chunkOffsets[0]);
+        m_fileStream.reset();
     }
 
     
@@ -278,7 +248,7 @@ public:
         int64_t offset = record % m_vlr.chunk_size;
 
         m_stream.seekg(m_chunkOffsets[chunk]);
-        m_inputStream.reset(); 
+        m_fileStream.reset();
         while (offset > 0)
         {
             decompress(buf.data());
@@ -301,19 +271,18 @@ public:
 private:
     void resetDecompressor()
     {
-        m_decompressor =
-            laszip::factory::build_las_decompressor(m_inputStream, m_format, m_ebCount);
+        m_decompressor = lazperf::build_las_decompressor(m_fileStream.cb(), m_format, m_ebCount);
     }
 
     std::istream& m_stream;
-    InputStream m_inputStream;
-    Decompressor::ptr m_decompressor;
+    lazperf::InFileStream m_fileStream;
+    lazperf::las_decompressor::ptr m_decompressor;
     int m_format;
     int m_ebCount;
     uint32_t m_chunkPointsRead;
-    laszip::laz_vlr m_vlr;
+    lazperf::laz_vlr m_vlr;
     // Note that these offsets are actual file offsets. The values stored in the chunk table
-    // are offsets from the start of the previous chunk.
+    // are chunk sizes.
     std::vector<uint64_t> m_chunkOffsets;
 };
 

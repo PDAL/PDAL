@@ -57,7 +57,7 @@ public:
         uint32_t chunksize);
     ~LazPerfVlrCompressor();
 
-    std::vector<uint8_t> vlrData() const;
+    std::vector<char> vlrData() const;
     void compress(const char *inbuf);
     void done();
 
@@ -76,7 +76,6 @@ public:
     ~LazPerfVlrDecompressor();
 
     bool seek(int64_t record);
-    size_t pointSize() const;
     void decompress(char *outbuf);
 
 private:

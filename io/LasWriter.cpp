@@ -699,7 +699,8 @@ void LasWriter::readyLazPerfCompression()
 #ifdef PDAL_HAVE_LAZPERF
     int ebCount = m_lasHeader.pointLen() - m_lasHeader.basePointLen();
     m_compressor.reset(new LazPerfVlrCompressor(*m_ostream, m_lasHeader.pointFormat(), ebCount));
-    std::vector<uint8_t> vlrdata = m_compressor->vlrData();
+    std::vector<char> lazVlrData = m_compressor->vlrData();
+    std::vector<uint8_t> vlrdata(lazVlrData.begin(), lazVlrData.end());
     addVlr(LASZIP_USER_ID, LASZIP_RECORD_ID, "http://laszip.org", vlrdata);
 #endif
 }

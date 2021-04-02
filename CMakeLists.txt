@@ -248,7 +248,6 @@ if (NOT PDAL_HAVE_LZMA)
 endif()
 if (NOT PDAL_HAVE_LAZPERF)
     file(GLOB LAZPERF_SRCS
-        ${PDAL_SRC_DIR}/compression/LazPerfCompression.cpp
         ${PDAL_SRC_DIR}/compression/LazPerfVlrCompression.cpp)
     list(REMOVE_ITEM SRCS ${LAZPERF_SRCS})
 endif()
@@ -292,6 +291,7 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${PDAL_UTIL_LIB_NAME}
         ${PDAL_ARBITER_LIB_NAME}
         ${PDAL_KAZHDAN_LIB_NAME}
+        ${LAZPERF_LIBRARY}
     INTERFACE
         ${PDAL_LIBDIR}
 )
