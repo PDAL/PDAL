@@ -9,7 +9,7 @@ RUN git clone http://github.com/PDAL/PDAL.git pdal && \
     LDFLAGS="-Wl,-rpath-link,$CONDA_PREFIX/lib" cmake -G Ninja  \
         -DCMAKE_LIBRARY_PATH:FILEPATH="$CONDA_PREFIX/lib" \
         -DCMAKE_INCLUDE_PATH:FILEPATH="$CONDA_PREFIX/include" \
-        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_INSTALL_PREFIX="$CONDA_PREFIX" \
         -DBUILD_PLUGIN_CPD=OFF \
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
         -DBUILD_PLUGIN_NITF=ON \
@@ -51,6 +51,6 @@ ENV GTIFF_REPORT_COMPD_CS=TRUE
 ENV REPORT_COMPD_CS=TRUE
 ENV OAMS_TRADITIONAL_GIS_ORDER=TRUE
 
-SHELL ["conda", "run", "--no-capture-output", "/bin/sh", "-c"]
+SHELL ["conda", "run", "--no-capture-output", "-n", "pdal", "/bin/sh", "-c"]
 
 
