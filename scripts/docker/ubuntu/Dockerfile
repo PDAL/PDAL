@@ -53,4 +53,3 @@ ENV OAMS_TRADITIONAL_GIS_ORDER=TRUE
 
 SHELL ["conda", "run", "--no-capture-output", "-n", "pdal", "/bin/sh", "-c"]
 
-

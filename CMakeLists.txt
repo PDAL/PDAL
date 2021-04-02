@@ -129,6 +129,7 @@ include(${PDAL_CMAKE_DIR}/gdal.cmake)
 include(${PDAL_CMAKE_DIR}/geotiff.cmake)  # Optional (not really)
 include(${PDAL_CMAKE_DIR}/lazperf.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/laszip.cmake)  # Optional
+include(${PDAL_CMAKE_DIR}/draco.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/threads.cmake)
 include(${PDAL_CMAKE_DIR}/zlib.cmake)
 include(${PDAL_CMAKE_DIR}/lzma.cmake)
@@ -251,6 +252,7 @@ if (NOT PDAL_HAVE_LAZPERF)
         ${PDAL_SRC_DIR}/compression/LazPerfVlrCompression.cpp)
     list(REMOVE_ITEM SRCS ${LAZPERF_SRCS})
 endif()
+
 if (GDAL_VERSION VERSION_LESS 3.0.0)
     file(GLOB PROJPIPELINE_FILTER_SRCS
         ${PDAL_FILTERS_DIR}/ProjPipelineFilter.cpp)

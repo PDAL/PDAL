@@ -173,15 +173,21 @@ Segment Obb::segment(size_t pos)
 // system.
 bool Obb::intersect(Obb c)
 {
+    return halfIntersect(*this, c) || halfIntersect(c, *this);
+}
+
+// This is really only a half intersection test.
+bool Obb::halfIntersect(const Obb& a, Obb b)
+{
     // Translate both boxes so that this box is at the origin.
-    c.m_p -= m_p;
+    b.m_p -= a.m_p;
 
     // Rotate the clip box by the inverse of this box's rotation to
     // bring it to the same relative location as this box unrotated.
-    c.m_p = math::rotate(c.m_p, m_quat.inverse());
+    b.m_p = math::rotate(b.m_p, a.m_quat.inverse());
 
     // BOX3D representation of this OBB (translated to 0, 0, 0)
-    BOX3D box(-m_hx, -m_hy, -m_hz, m_hx, m_hy, m_hz);
+    BOX3D box(-a.m_hx, -a.m_hy, -a.m_hz, a.m_hx, a.m_hy, a.m_hz);
 
     // If any of the clip box corners are in this box, we're done.
     // While we're at it, store the min/max of corner points.
@@ -193,7 +199,7 @@ bool Obb::intersect(Obb c)
         (std::numeric_limits<double>::lowest)());
     for (size_t i = 0; i < 8; ++i)
     {
-        Eigen::Vector3d corner = c.corner(i);
+        Eigen::Vector3d corner = b.corner(i);
         if (box.contains(corner.x(), corner.y(), corner.z()))
             return true;
 
@@ -206,17 +212,17 @@ bool Obb::intersect(Obb c)
     }
 
     // If the clip box surrounds this box, we're done.
-    if (pmax.x() > m_hx && pmin.x() < -m_hx &&
-        pmax.y() > m_hy && pmin.y() < -m_hy &&
-        pmax.z() > m_hz && pmin.z() < -m_hz)
+    if (pmax.x() >= a.m_hx && pmin.x() <= -a.m_hx &&
+        pmax.y() >= a.m_hy && pmin.y() <= -a.m_hy &&
+        pmax.z() >= a.m_hz && pmin.z() <= -a.m_hz)
         return true;
 
     // If any of the segments that make up the clip region intersect
     // this normalized box, we're done.
     for (size_t i = 0; i < 12; ++i)
     {
-        Segment s = c.segment(i);
-        if (intersectNormalized(s))
+        Segment s = b.segment(i);
+        if (a.intersectNormalized(s))
             return true;
     }
 
@@ -227,7 +233,7 @@ bool Obb::intersect(Obb c)
 // Note that this is just here to support the above.  The box we're
 // testing is treated as centered at the origin with faces parallel to
 // planes formed by the axes.
-bool Obb::intersectNormalized(const Segment& seg)
+bool Obb::intersectNormalized(const Segment& seg) const
 {
     Eigen::Vector3d p0 = seg.first;
     Eigen::Vector3d p1 = seg.second;
