@@ -38,6 +38,7 @@
 #include <io/LasReader.hpp>
 #include <filters/ColorizationFilter.hpp>
 #include <filters/StreamCallbackFilter.hpp>
+#include <filters/TransformationFilter.hpp>
 
 #include "Support.hpp"
 
@@ -187,4 +188,48 @@ TEST(ColorizationFilterTest, test4)
     EXPECT_THROW(testFile(options, dims, 210, 205, 47175), pdal_error);
 }
 
+// Check input point count is equal to output point count when there are input points outside the
+// raster area and we are running in stream mode.
+TEST(ColorizationFilterTest, test5)
+{
+    // setup las reader.
+    Options readerOps;
+    readerOps.add("filename", Support::datapath("autzen/autzen-point-format-3.las"));
+    LasReader reader;
+    reader.setOptions(readerOps);
 
+    // setup transformation filter to translate points away from input raster image by about half
+    // of its bounding box size in positive x,y and z directions. this is so that we have points
+    // inside the raster and outside the raster area. translating by the z direction isn't really
+    // necessary since it shouldn't effect the colourisation output, but I did it for fun.
+    Options transformationFilterOps;
+    transformationFilterOps.add("matrix", "1 0 0 1600 0 1 0 2200 0 0 1 60 0 0 0 1");
+    TransformationFilter transformationFilter;
+    transformationFilter.setOptions(transformationFilterOps);
+    transformationFilter.setInput(reader);
+
+    // setup colourisation filter.
+    Options colourisationFilterOps;
+    colourisationFilterOps.add("raster", Support::datapath("autzen/autzen.jpg"));
+    ColorizationFilter colourisationFilter;
+    colourisationFilter.setOptions(colourisationFilterOps);
+    colourisationFilter.setInput(transformationFilter);
+
+    // setup stream callback filter to count streamed output points.
+    point_count_t pointCount{0};
+    StreamCallbackFilter streamCallbackFilter;
+    streamCallbackFilter.setCallback([&pointCount](PointRef& point)
+    {
+        ++pointCount;
+        return false;
+    });
+    streamCallbackFilter.setInput(colourisationFilter);
+
+    FixedPointTable table{50};
+    streamCallbackFilter.prepare(table);
+    streamCallbackFilter.execute(table);
+
+    // expect input points that were translated out of the raster image area are not filtered out.
+    EXPECT_NE(pointCount, 23u);
+    EXPECT_EQ(pointCount, 106u);
+}

@@ -11,6 +11,7 @@ $CONDA_EXE install  -y laz-perf \
                 libunwind \
                 geotiff \
                 sqlite \
+                draco \
                 libxml2 \
                 nitro \
                 curl \

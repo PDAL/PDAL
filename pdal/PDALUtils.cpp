@@ -241,6 +241,20 @@ public:
 
 }  // unnamed namespace
 
+uintmax_t fileSize(const std::string& path)
+{
+    uintmax_t size = 0;
+    if (isRemote(path))
+    {
+        std::unique_ptr<std::size_t> pSize = arbiter::Arbiter().tryGetSize(path);
+        if (pSize)
+            size = *pSize;
+    }
+    else
+        size = FileUtils::fileSize(path);
+    return size;
+}
+
 /**
   Create a file (may be on a supported remote filesystem).
 

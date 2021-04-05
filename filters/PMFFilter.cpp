@@ -171,7 +171,7 @@ PointViewSet PMFFilter::run(PointViewPtr input)
     }
 
     if ((nrOneZero || rnOneZero) && !(nrAllZero && rnAllZero))
-        throwError("Some NumberOfReturns or ReternNumber values were 0, but "
+        throwError("Some NumberOfReturns or ReturnNumber values were 0, but "
                    "not all. Check that all values in the input file are >= "
                    "1.");
 

@@ -264,6 +264,7 @@ inline void writeProgress(int fd, const std::string& type,
 std::string dllDir();
 std::string PDAL_DLL toJSON(const MetadataNode& m);
 void PDAL_DLL toJSON(const MetadataNode& m, std::ostream& o);
+uintmax_t PDAL_DLL fileSize(const std::string& path);
 std::istream PDAL_DLL *openFile(const std::string& path, bool asBinary = true);
 std::ostream PDAL_DLL *createFile(const std::string& path,
     bool asBinary = true);

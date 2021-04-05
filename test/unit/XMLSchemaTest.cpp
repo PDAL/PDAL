@@ -52,7 +52,7 @@ std::string ReadXML(std::string filename)
     std::istream* infile = FileUtils::openFile(filename);
     std::ifstream::pos_type size;
     std::vector<char> data;
-    if (infile->good())
+    if (infile && infile->good())
     {
         infile->seekg(0, std::ios::end);
         size = infile->tellg();
