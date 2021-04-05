@@ -36,6 +36,7 @@
 
 #include <cstdint>
 #include <sstream>
+#include <stdexcept>
 
 #include "pdal_util_export.hpp"
 

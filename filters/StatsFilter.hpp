@@ -61,6 +61,9 @@ public:
         m_name(name), m_enumerate(enumerate), m_advanced(advanced)
     { reset(); }
 
+    // Merge another summary with this one. 'name', 'enumerate' and 'advanced' must match
+    // or false is returned and no merge occurs.
+    bool merge(const Summary& s);
     double minimum() const
         { return m_min; }
     double maximum() const

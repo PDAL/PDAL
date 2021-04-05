@@ -77,14 +77,11 @@ void MiniballFilter::addArgs(ProgramArgs& args)
 
 void MiniballFilter::addDimensions(PointLayoutPtr layout)
 {
-    m_miniball =
-        layout->registerOrAssignDim("Miniball", Dimension::Type::Double);
+    layout->registerDim(Id::Miniball);
 }
 
 void MiniballFilter::filter(PointView& view)
 {
-    KD3Index& kdi = view.build3dIndex();
-
     point_count_t nloops = view.size();
     std::vector<std::thread> threadList(m_threads);
     for (int t = 0; t < m_threads; t++)
@@ -92,7 +89,7 @@ void MiniballFilter::filter(PointView& view)
         threadList[t] = std::thread(std::bind(
             [&](const PointId start, const PointId end) {
                 for (PointId i = start; i < end; i++)
-                    setMiniball(view, i, kdi);
+                    setMiniball(view, i);
             },
             t * nloops / m_threads,
             (t + 1) == m_threads ? nloops : (t + 1) * nloops / m_threads));
@@ -101,8 +98,7 @@ void MiniballFilter::filter(PointView& view)
         t.join();
 }
 
-void MiniballFilter::setMiniball(PointView& view, const PointId& i,
-                                 const KD3Index& kdi)
+void MiniballFilter::setMiniball(PointView& view, const PointId& i)
 {
     typedef double FT;
     typedef Seb::Point<FT> Point;
@@ -114,11 +110,12 @@ void MiniballFilter::setMiniball(PointView& view, const PointId& i,
     double Z = view.getFieldAs<double>(Dimension::Id::Z, i);
 
     // Find k-nearest neighbors of i.
-    auto ni = kdi.neighbors(i, m_knn + 1);
+    const KD3Index& kdi = view.build3dIndex();
+    PointIdList ni = kdi.neighbors(i, m_knn + 1);
 
     PointVector S;
     std::vector<double> coords(3);
-    for (auto const& j : ni)
+    for (PointId const& j : ni)
     {
         if (j == i)
             continue;
@@ -145,7 +142,7 @@ void MiniballFilter::setMiniball(PointView& view, const PointId& i,
         std::sqrt((X - x) * (X - x) + (Y - y) * (Y - y) + (Z - z) * (Z - z));
 
     double miniball = d / (d + 2 * radius / (std::sqrt(3)));
-    view.setField(m_miniball, i, miniball);
+    view.setField(Id::Miniball, i, miniball);
 }
 
 } // namespace pdal

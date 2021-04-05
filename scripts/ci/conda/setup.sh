@@ -1,7 +1,6 @@
 #!/bin/bash
 
-conda update -n base -c defaults conda
-conda install conda-build ninja compilers -y
+conda install -c conda-forge conda-build anaconda-client -y
 pwd
 ls
 git clone https://github.com/conda-forge/pdal-feedstock.git
@@ -9,8 +8,7 @@ git clone https://github.com/conda-forge/pdal-feedstock.git
 cd pdal-feedstock
 cat > recipe/recipe_clobber.yaml <<EOL
 source:
-  git_url: https://github.com/PDAL/PDAL.git
-  git_rev: ${GITHUB_SHA}
+  path: ../../
   url:
   sha256:
 

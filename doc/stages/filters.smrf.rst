@@ -49,7 +49,7 @@ optimized parameters for Sample 1 given in Table 3 of [Pingel2013]_.
       {
           "type":"filters.range",
           "limits":"Classification[2:2]"
-      }
+      },
       "output.laz"
   ]
 

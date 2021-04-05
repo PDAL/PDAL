@@ -1,8 +1,6 @@
 name: Docs
 
-on:
-  push:
-    branches: '*'
+on: [push, pull_request]
 
 jobs:
   docs:

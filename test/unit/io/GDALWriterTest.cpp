@@ -850,4 +850,50 @@ TEST(GDALWriterTest, alternate_grid)
     }
 }
 
+TEST(GDALWriterTest, srs)
+{
+    auto test = [](const std::string& sourceSrs, const std::string& defaultSrs,
+        const std::string& overrideSrs, const std::string& testSrs)
+    {
+        std::string outfile(Support::temppath("out.tif"));
+
+        TextReader t;
+        Options to;
+        to.add("filename", Support::datapath("text/with_edgeofflightline.txt"));
+        if (sourceSrs.size())
+            to.add("override_srs", sourceSrs);
+        t.setOptions(to);
+
+        GDALWriter w;
+        Options wo;
+        wo.add("filename", outfile);
+        wo.add("origin_x", 0);
+        wo.add("origin_y", 0);
+        wo.add("width", 1000);
+        wo.add("height", 1000);
+        wo.add("resolution", 10);
+        if (defaultSrs.size())
+            wo.add("default_srs", defaultSrs);
+        if (overrideSrs.size())
+            wo.add("override_srs", overrideSrs);
+        w.setOptions(wo);
+        w.setInput(t);
+
+        FileUtils::deleteFile(outfile);
+        PointTable table;
+        w.prepare(table);
+        w.execute(table);
+
+        gdal::Raster raster(outfile);
+        raster.open();
+        EXPECT_EQ(raster.getSpatialRef(), testSrs);
+    };
+
+    test("", "EPSG:4326", "", "EPSG:4326");
+    test("", "", "EPSG:4326", "EPSG:4326");
+    test("EPSG:4326", "EPSG:2030", "", "EPSG:4326");
+    test("EPSG:4326", "", "EPSG:2030", "EPSG:2030");
+    EXPECT_THROW(test("EPSG:4326", "EPSG:4326", "EPSG:2030", "EPSG:2030"), pdal_error);
+}
+
 } // namespace pdal

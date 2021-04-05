@@ -88,6 +88,13 @@ void GDALWriter::addArgs(ProgramArgs& args)
         m_width);
     m_heightArg = &args.add("height", "Number of cells in the Y direction.",
         m_height);
+
+    args.add("override_srs", "Spatial reference to apply to data",
+        m_overrideSrs);
+    args.addSynonym("override_srs", "spatialreference");
+
+    args.add("default_srs", "Spatial reference to apply to data if one cannot be inferred",
+        m_defaultSrs);
 }
 
 
@@ -116,6 +123,9 @@ void GDALWriter::initialize()
         else
             throwError("Invalid output type: '" + ts + "'.");
     }
+
+    if (m_overrideSrs.valid() && m_defaultSrs.valid())
+        throwError("Can't set both 'override_srs' and 'default_srs'.");
 
     if (!m_radiusArg->set())
         m_radius = m_edgeLength * sqrt(2.0);
@@ -168,6 +178,10 @@ void GDALWriter::readyFile(const std::string& filename,
 {
     m_outputFilename = filename;
     m_srs = srs;
+    if (!m_overrideSrs.empty())
+        m_srs = m_overrideSrs;
+    if (m_srs.empty())
+        m_srs = m_defaultSrs;
     m_grid.reset();
     if (m_fixedGrid)
         createGrid(m_bounds.to2d());
@@ -188,9 +202,15 @@ int GDALWriter::height() const
 
 void GDALWriter::createGrid(BOX2D bounds)
 {
-    int width = std::floor((bounds.maxx - bounds.minx) / m_edgeLength) + 1;
-    int height = std::floor((bounds.maxy - bounds.miny) / m_edgeLength) + 1;
-
+    // Validating before casting avoids float-cast-overflow undefined behavior.
+    double d_width = std::floor((bounds.maxx - bounds.minx) / m_edgeLength) + 1;
+    double d_height = std::floor((bounds.maxy - bounds.miny) / m_edgeLength) + 1;
+    if (d_width < 0.0 || d_width > (std::numeric_limits<int>::max)())
+        throwError("Grid width out of range.");
+    if (d_height < 0.0 || d_height > (std::numeric_limits<int>::max)())
+        throwError("Grid height out of range.");
+    int width = static_cast<int>(d_width);
+    int height = static_cast<int>(d_height);
     try
     {
         m_grid.reset(new GDALGrid(bounds.minx, bounds.miny, width, height, m_edgeLength,

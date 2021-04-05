@@ -7,7 +7,10 @@ endif()
 set(GOOGLETEST_VERSION 1.10.0)
 add_subdirectory(vendor/gtest)
 
+set(FPHSA_NAME_MISMATCHED 1) # Suppress warnings, see https://cmake.org/cmake/help/v3.17/module/FindPackageHandleStandardArgs.html
 find_package(absl QUIET)
+set(FPHSA_NAME_MISMATCHED 0)
+
 if (absl_FOUND)
     if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13.0")
         cmake_policy(SET CMP0079 NEW)

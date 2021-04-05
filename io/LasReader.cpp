@@ -34,7 +34,9 @@
 
 #include <pdal/compression/LazPerfVlrCompression.hpp>
 
+#include "LasHeader.hpp"
 #include "LasReader.hpp"
+#include "LasUtils.hpp"
 
 #include <sstream>
 #include <string.h>
@@ -48,9 +50,16 @@
 #include <pdal/util/IStream.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-#include "GeotiffSupport.hpp"
 #include "LasHeader.hpp"
 #include "LasVLR.hpp"
+
+#ifdef PDAL_HAVE_LASZIP
+#include <laszip/laszip_api.h>
+#else
+using laszip_POINTER = void *;
+using laszip_point_struct = void *;
+struct laszip_point;
+#endif
 
 namespace pdal
 {
@@ -66,14 +75,42 @@ struct invalid_stream : public std::runtime_error
 
 } // unnamed namespace
 
-LasReader::LasReader() : m_decompressor(nullptr), m_index(0)
+struct LasReader::Args
+{
+public:
+    StringList extraDimSpec;
+    std::string compression;
+    bool useEbVlr;
+    StringList ignoreVLROption;
+    bool fixNames;
+    PointId start;
+};
+
+struct LasReader::Private
+{
+    typedef std::vector<LasUtils::IgnoreVLR> IgnoreVLRList;
+
+    LasHeader header;
+    laszip_POINTER laszip;
+    laszip_point_struct *laszipPoint;
+    LazPerfVlrDecompressor *decompressor;
+    std::vector<char> decompressorBuf;
+    point_count_t index;
+    IgnoreVLRList ignoreVLRs;
+    std::vector<ExtraDim> extraDims;
+
+    Private() : decompressor(nullptr), index(0)
+    {}
+};
+
+LasReader::LasReader() : m_args(new Args), m_p(new Private)
 {}
 
 
 LasReader::~LasReader()
 {
 #ifdef PDAL_HAVE_LAZPERF
-    delete m_decompressor;
+    delete m_p->decompressor;
 #endif
 }
 
@@ -81,11 +118,13 @@ LasReader::~LasReader()
 void LasReader::addArgs(ProgramArgs& args)
 {
     args.add("extra_dims", "Dimensions to assign to extra byte data",
-        m_extraDimSpec);
-    args.add("compression", "Decompressor to use", m_compression, "EITHER");
-    args.add("use_eb_vlr", "Use extra bytes VLR for 1.0 - 1.3 files",
-        m_useEbVlr);
-    args.add("ignore_vlr", "VLR userid/recordid to ignore", m_ignoreVLROption);
+        m_args->extraDimSpec);
+    args.add("compression", "Decompressor to use", m_args->compression, "EITHER");
+    args.add("use_eb_vlr", "Use extra bytes VLR for 1.0 - 1.3 files", m_args->useEbVlr);
+    args.add("ignore_vlr", "VLR userid/recordid to ignore", m_args->ignoreVLROption);
+    args.add("start", "Point at which reading should start (0-indexed).", m_args->start);
+    args.add("fix_dims", "Make invalid dimension names valid by changing "
+        "invalid characters to '_'", m_args->fixNames, true);
 }
 
 
@@ -102,6 +141,21 @@ CREATE_STATIC_STAGE(LasReader, s_info)
 
 std::string LasReader::getName() const { return s_info.name; }
 
+const LasHeader& LasReader::header() const
+{
+    return m_p->header;
+}
+
+point_count_t LasReader::getNumPoints() const
+{
+    return m_p->header.pointCount() - m_args->start;
+}
+
+void LasReader::initialize(PointTableRef table)
+{
+    initializeLocal(table, m_metadata);
+}
+
 QuickInfo LasReader::inspect()
 {
     QuickInfo qi;
@@ -114,9 +168,9 @@ QuickInfo LasReader::inspect()
     Dimension::IdList dims = layout->dims();
     for (auto di = dims.begin(); di != dims.end(); ++di)
         qi.m_dimNames.push_back(layout->dimName(*di));
-    if (!Utils::numericCast(m_header.pointCount(), qi.m_pointCount))
+    if (!Utils::numericCast(m_p->header.pointCount(), qi.m_pointCount))
         qi.m_pointCount = (std::numeric_limits<point_count_t>::max)();
-    qi.m_bounds = m_header.getBounds();
+    qi.m_bounds = m_p->header.getBounds();
     qi.m_srs = getSpatialReference();
     qi.m_valid = true;
 
@@ -128,7 +182,7 @@ QuickInfo LasReader::inspect()
 
 void LasReader::handleCompressionOption()
 {
-    std::string compression = Utils::toupper(m_compression);
+    std::string compression = Utils::toupper(m_args->compression);
 #if defined(PDAL_HAVE_LAZPERF) && defined(PDAL_HAVE_LASZIP)
     if (compression == "EITHER")
         compression = "LASZIP";
@@ -151,11 +205,11 @@ void LasReader::handleCompressionOption()
 #if defined(PDAL_HAVE_LAZPERF) || defined(PDAL_HAVE_LASZIP)
     if (compression != "LAZPERF" && compression != "LASZIP")
         throwError("Invalid value for option for compression: '" +
-            m_compression + "'.  Value values are 'lazperf' and 'laszip'.");
+            m_args->compression + "'.  Value values are 'lazperf' and 'laszip'.");
 #endif
 
     // Set case-corrected value.
-    m_compression = compression;
+    m_args->compression = compression;
 }
 
 void LasReader::createStream()
@@ -177,7 +231,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 {
     try
     {
-        m_extraDims = LasUtils::parse(m_extraDimSpec, false);
+        m_p->extraDims = LasUtils::parse(m_args->extraDimSpec, false);
     }
     catch (const LasUtils::error& err)
     {
@@ -186,14 +240,14 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 
     try
     {
-        m_ignoreVLRs = LasUtils::parseIgnoreVLRs(m_ignoreVLROption);
+        m_p->ignoreVLRs = LasUtils::parseIgnoreVLRs(m_args->ignoreVLROption);
     }
     catch (const LasUtils::error& err)
     {
         throwError(err.what());
     }
 
-    m_header.initialize(log(), FileUtils::fileSize(m_filename));
+    m_p->header.initialize(log(), Utils::fileSize(m_filename));
     createStream();
     std::istream *stream(m_streamIf->m_istream);
 
@@ -202,32 +256,35 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     try
     {
         // This also reads the extended VLRs at the end of the data.
-        in >> m_header;
+        in >> m_p->header;
     }
     catch (const LasHeader::error& e)
     {
         throwError(e.what());
     }
 
-    for (auto i: m_ignoreVLRs)
+    for (auto i: m_p->ignoreVLRs)
     {
         if (i.m_recordId)
-            m_header.removeVLR(i.m_userId, i.m_recordId);
+            m_p->header.removeVLR(i.m_userId, i.m_recordId);
         else
-            m_header.removeVLR(i.m_userId);
+            m_p->header.removeVLR(i.m_userId);
     }
 
-    if (m_header.compressed())
+    if (m_args->start > m_p->header.pointCount())
+        throwError("'start' value of " + std::to_string(m_args->start) + " is too large. "
+            "File contains " + std::to_string(m_p->header.pointCount()) + " points.");
+    if (m_p->header.compressed())
         handleCompressionOption();
 #ifdef PDAL_HAVE_LASZIP
-    m_laszip = nullptr;
+    m_p->laszip = nullptr;
 #endif
 
-    if (!m_header.pointFormatSupported())
+    if (!m_p->header.pointFormatSupported())
         throwError("Unsupported LAS input point format: " +
-            Utils::toString((int)m_header.pointFormat()) + ".");
+            Utils::toString((int)m_p->header.pointFormat()) + ".");
 
-    if (m_header.versionAtLeast(1, 4) || m_useEbVlr)
+    if (m_p->header.versionAtLeast(1, 4) || m_args->useEbVlr)
         readExtraBytesVlr();
     setSrs(m);
     MetadataNode forward = table.privateMetadata("lasforward");
@@ -244,7 +301,7 @@ void LasReader::handleLaszip(int result)
     if (result)
     {
         char *buf;
-        laszip_get_error(m_laszip, &buf);
+        laszip_get_error(m_p->laszip, &buf);
         throwError(buf);
     }
 #endif
@@ -256,33 +313,35 @@ void LasReader::ready(PointTableRef table)
     createStream();
     std::istream *stream(m_streamIf->m_istream);
 
-    m_index = 0;
-    if (m_header.compressed())
+    m_p->index = 0;
+    if (m_p->header.compressed())
     {
 #ifdef PDAL_HAVE_LASZIP
-        if (m_compression == "LASZIP")
+        if (m_args->compression == "LASZIP")
         {
             laszip_BOOL compressed;
 
-            handleLaszip(laszip_create(&m_laszip));
-            handleLaszip(laszip_open_reader_stream(m_laszip, *stream,
+            handleLaszip(laszip_create(&m_p->laszip));
+            handleLaszip(laszip_open_reader_stream(m_p->laszip, *stream,
                 &compressed));
-            handleLaszip(laszip_get_point_pointer(m_laszip, &m_laszipPoint));
+            handleLaszip(laszip_get_point_pointer(m_p->laszip, &m_p->laszipPoint));
+            handleLaszip(laszip_seek_point(m_p->laszip, m_args->start));
         }
 #endif
 
 #ifdef PDAL_HAVE_LAZPERF
-        if (m_compression == "LAZPERF")
+        if (m_args->compression == "LAZPERF")
         {
-            delete m_decompressor;
+            delete m_p->decompressor;
 
-            const LasVLR *vlr = m_header.findVlr(LASZIP_USER_ID,
-                LASZIP_RECORD_ID);
+            if (m_args->start != 0)
+                throwError("LAZperf does not support the 'start' option.");
+            const LasVLR *vlr = m_p->header.findVlr(LASZIP_USER_ID, LASZIP_RECORD_ID);
             if (!vlr)
                 throwError("LAZ file missing required laszip VLR.");
-            m_decompressor = new LazPerfVlrDecompressor(*stream,
-                vlr->data(), m_header.pointOffset());
-            m_decompressorBuf.resize(m_decompressor->pointSize());
+            m_p->decompressor = new LazPerfVlrDecompressor(*stream,
+                vlr->data(), m_p->header.pointOffset());
+            m_p->decompressorBuf.resize(m_p->decompressor->pointSize());
         }
 #endif
 
@@ -292,7 +351,11 @@ void LasReader::ready(PointTableRef table)
 #endif
     }
     else
-        stream->seekg(m_header.pointOffset());
+    {
+        std::istream::pos_type start = m_p->header.pointOffset() +
+            (m_args->start * m_p->header.pointLen());
+        stream->seekg(start);
+    }
 }
 
 
@@ -346,101 +409,104 @@ void addForwardMetadata(MetadataNode& forward, MetadataNode& m,
 
 void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
 {
-    m.add<bool>("compressed", m_header.compressed(),
+    m.add<bool>("compressed", m_p->header.compressed(),
         "true if this LAS file is compressed");
 
-    addForwardMetadata(forward, m, "major_version", m_header.versionMajor(),
+    addForwardMetadata(forward, m, "major_version", m_p->header.versionMajor(),
         "The major LAS version for the file, always 1 for now");
-    addForwardMetadata(forward, m, "minor_version", m_header.versionMinor(),
+    addForwardMetadata(forward, m, "minor_version", m_p->header.versionMinor(),
         "The minor LAS version for the file");
-    addForwardMetadata(forward, m, "dataformat_id", m_header.pointFormat(),
+    addForwardMetadata(forward, m, "dataformat_id", m_p->header.pointFormat(),
         "LAS Point Data Format");
-    if (m_header.versionAtLeast(1, 1))
+    if (m_p->header.versionAtLeast(1, 1))
         addForwardMetadata(forward, m, "filesource_id",
-            m_header.fileSourceId(), "File Source ID (Flight Line Number "
+            m_p->header.fileSourceId(), "File Source ID (Flight Line Number "
             "if this file was derived from an original flight line).");
-    if (m_header.versionAtLeast(1, 2))
+    if (m_p->header.versionAtLeast(1, 2))
     {
         // For some reason we've written global encoding as a base 64
         // encoded value in the past.  In an effort to standardize things,
         // I'm writing this as a special value, and will also write
         // global_encoding like we write all other header metadata.
-        uint16_t globalEncoding = m_header.globalEncoding();
+        uint16_t globalEncoding = m_p->header.globalEncoding();
         m.addEncoded("global_encoding_base64", (uint8_t *)&globalEncoding,
             sizeof(globalEncoding),
             "Global Encoding: general property bit field.");
 
         addForwardMetadata(forward, m, "global_encoding",
-            m_header.globalEncoding(),
+            m_p->header.globalEncoding(),
             "Global Encoding: general property bit field.");
     }
 
-    addForwardMetadata(forward, m, "project_id", m_header.projectId(),
+    addForwardMetadata(forward, m, "project_id", m_p->header.projectId(),
         "Project ID.");
-    addForwardMetadata(forward, m, "system_id", m_header.systemId(),
+    addForwardMetadata(forward, m, "system_id", m_p->header.systemId(),
         "Generating system ID.");
-    addForwardMetadata(forward, m, "software_id", m_header.softwareId(),
+    addForwardMetadata(forward, m, "software_id", m_p->header.softwareId(),
         "Generating software description.");
-    addForwardMetadata(forward, m, "creation_doy", m_header.creationDOY(),
+    addForwardMetadata(forward, m, "creation_doy", m_p->header.creationDOY(),
         "Day, expressed as an unsigned short, on which this file was created. "
         "Day is computed as the Greenwich Mean Time (GMT) day. January 1 is "
         "considered day 1.");
-    addForwardMetadata(forward, m, "creation_year", m_header.creationYear(),
+    addForwardMetadata(forward, m, "creation_year", m_p->header.creationYear(),
         "The year, expressed as a four digit number, in which the file was "
         "created.");
-    addForwardMetadata(forward, m, "scale_x", m_header.scaleX(),
+    addForwardMetadata(forward, m, "scale_x", m_p->header.scaleX(),
         "The scale factor for X values.", 15);
-    addForwardMetadata(forward, m, "scale_y", m_header.scaleY(),
+    addForwardMetadata(forward, m, "scale_y", m_p->header.scaleY(),
         "The scale factor for Y values.", 15);
-    addForwardMetadata(forward, m, "scale_z", m_header.scaleZ(),
+    addForwardMetadata(forward, m, "scale_z", m_p->header.scaleZ(),
         "The scale factor for Z values.", 15);
-    addForwardMetadata(forward, m, "offset_x", m_header.offsetX(),
+    addForwardMetadata(forward, m, "offset_x", m_p->header.offsetX(),
         "The offset for X values.", 15);
-    addForwardMetadata(forward, m, "offset_y", m_header.offsetY(),
+    addForwardMetadata(forward, m, "offset_y", m_p->header.offsetY(),
         "The offset for Y values.", 15);
-    addForwardMetadata(forward, m, "offset_z", m_header.offsetZ(),
+    addForwardMetadata(forward, m, "offset_z", m_p->header.offsetZ(),
         "The offset for Z values.", 15);
 
-    m.add("point_length", m_header.pointLen(),
+    m.add("point_length", m_p->header.pointLen(),
         "The size, in bytes, of each point records.");
-    m.add("header_size", m_header.vlrOffset(),
+    m.add("header_size", m_p->header.vlrOffset(),
         "The size, in bytes, of the header block, including any extension "
         "by specific software.");
-    m.add("dataoffset", m_header.pointOffset(),
+    m.add("dataoffset", m_p->header.pointOffset(),
         "The actual number of bytes from the beginning of the file to the "
         "first field of the first point record data field. This data offset "
         "must be updated if any software adds data from the Public Header "
         "Block or adds/removes data to/from the Variable Length Records.");
-    m.add<double>("minx", m_header.minX(),
+    m.add<double>("minx", m_p->header.minX(),
         "The max and min data fields are the actual unscaled extents of the "
         "LAS point file data, specified in the coordinate system of the LAS "
         "data.");
-    m.add<double>("miny", m_header.minY(),
+    m.add<double>("miny", m_p->header.minY(),
         "The max and min data fields are the actual unscaled extents of the "
         "LAS point file data, specified in the coordinate system of the LAS "
         "data.");
-    m.add<double>("minz", m_header.minZ(),
+    m.add<double>("minz", m_p->header.minZ(),
         "The max and min data fields are the actual unscaled extents of the "
         "LAS point file data, specified in the coordinate system of the LAS "
         "data.");
-    m.add<double>("maxx", m_header.maxX(),
+    m.add<double>("maxx", m_p->header.maxX(),
         "The max and min data fields are the actual unscaled extents of the "
         "LAS point file data, specified in the coordinate system of the LAS "
         "data.");
-    m.add<double>("maxy", m_header.maxY(),
+    m.add<double>("maxy", m_p->header.maxY(),
         "The max and min data fields are the actual unscaled extents of the "
         "LAS point file data, specified in the coordinate system of the LAS "
         "data.");
-    m.add<double>("maxz", m_header.maxZ(),
+    m.add<double>("maxz", m_p->header.maxZ(),
         "The max and min data fields are the actual unscaled extents of the "
         "LAS point file data, specified in the coordinate system of the LAS "
         "data.");
     m.add<point_count_t>("count",
-        m_header.pointCount(), "This field contains the total "
+        m_p->header.pointCount(), "This field contains the total "
         "number of point records within the file.");
 
+    m.add<std::string>("gtiff", m_p->header.geotiffPrint(),
+        "GTifPrint output of GeoTIFF keys");
+
     // PDAL metadata VLR
-    const LasVLR *vlr = m_header.findVlr("PDAL", 12);
+    const LasVLR *vlr = m_p->header.findVlr("PDAL", 12);
     if (vlr)
     {
         const char *pos = vlr->data();
@@ -450,7 +516,7 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
     }
     //
     // PDAL pipeline VLR
-    vlr = m_header.findVlr("PDAL", 13);
+    vlr = m_p->header.findVlr("PDAL", 13);
     if (vlr)
     {
         const char *pos = vlr->data();
@@ -463,7 +529,7 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
 
 void LasReader::readExtraBytesVlr()
 {
-    const LasVLR *vlr = m_header.findVlr(SPEC_USER_ID,
+    const LasVLR *vlr = m_p->header.findVlr(SPEC_USER_ID,
         EXTRA_BYTES_RECORD_ID);
     if (!vlr)
         return;
@@ -492,17 +558,17 @@ void LasReader::readExtraBytesVlr()
        for (auto& ed : eds)
            extraDims.push_back(std::move(ed));
     }
-    if (m_extraDims.size() && m_extraDims != extraDims)
+    if (m_p->extraDims.size() && m_p->extraDims != extraDims)
         log()->get(LogLevel::Warning) << "Extra byte dimensions specified "
             "in pipeline and VLR don't match.  Ignoring pipeline-specified "
             "dimensions";
-    m_extraDims = extraDims;
+    m_p->extraDims = extraDims;
 }
 
 
 void LasReader::setSrs(MetadataNode& m)
 {
-    setSpatialReference(m, m_header.srs());
+    setSpatialReference(m, m_p->header.srs());
 }
 
 
@@ -511,7 +577,7 @@ void LasReader::extractVlrMetadata(MetadataNode& forward, MetadataNode& m)
     static const size_t DATA_LEN_MAX = 1000000;
 
     int i = 0;
-    for (auto vlr : m_header.vlrs())
+    for (auto vlr : m_p->header.vlrs())
     {
         if (vlr.dataLen() > DATA_LEN_MAX)
             continue;
@@ -559,29 +625,31 @@ void LasReader::addDimensions(PointLayoutPtr layout)
     layout->registerDim(Id::UserData, Type::Unsigned8);
     layout->registerDim(Id::PointSourceId, Type::Unsigned16);
 
-    if (m_header.hasTime())
+    if (m_p->header.hasTime())
         layout->registerDim(Id::GpsTime, Type::Double);
-    if (m_header.hasColor())
+    if (m_p->header.hasColor())
     {
         layout->registerDim(Id::Red, Type::Unsigned16);
         layout->registerDim(Id::Green, Type::Unsigned16);
         layout->registerDim(Id::Blue, Type::Unsigned16);
     }
-    if (m_header.hasInfrared())
+    if (m_p->header.hasInfrared())
         layout->registerDim(Id::Infrared);
-    if (m_header.has14Format())
+    if (m_p->header.has14Format())
     {
         layout->registerDim(Id::ScanChannel);
         layout->registerDim(Id::ClassFlags);
     }
 
-    for (auto& dim : m_extraDims)
+    for (auto& dim : m_p->extraDims)
     {
         Dimension::Type type = dim.m_dimType.m_type;
         if (type == Dimension::Type::None)
             continue;
         if (dim.m_dimType.m_xform.nonstandard())
             type = Dimension::Type::Double;
+        if (m_args->fixNames)
+            dim.m_name = Dimension::fixName(dim.m_name);
         dim.m_dimType.m_id = layout->registerOrAssignDim(dim.m_name, type);
     }
 }
@@ -589,26 +657,26 @@ void LasReader::addDimensions(PointLayoutPtr layout)
 
 bool LasReader::processOne(PointRef& point)
 {
-    if (m_index >= getNumPoints())
+    if (m_p->index >= getNumPoints())
         return false;
 
-    size_t pointLen = m_header.pointLen();
+    size_t pointLen = m_p->header.pointLen();
 
-    if (m_header.compressed())
+    if (m_p->header.compressed())
     {
 #ifdef PDAL_HAVE_LASZIP
-        if (m_compression == "LASZIP")
+        if (m_args->compression == "LASZIP")
         {
-            handleLaszip(laszip_read_point(m_laszip));
-            loadPoint(point, *m_laszipPoint);
+            handleLaszip(laszip_read_point(m_p->laszip));
+            loadPoint(point);
         }
 #endif
 
 #ifdef PDAL_HAVE_LAZPERF
-        if (m_compression == "LAZPERF")
+        if (m_args->compression == "LAZPERF")
         {
-            m_decompressor->decompress(m_decompressorBuf.data());
-            loadPoint(point, m_decompressorBuf.data(), pointLen);
+            m_p->decompressor->decompress(m_p->decompressorBuf.data());
+            loadPoint(point, m_p->decompressorBuf.data(), pointLen);
         }
 #endif
 #if !defined(PDAL_HAVE_LAZPERF) && !defined(PDAL_HAVE_LASZIP)
@@ -618,26 +686,26 @@ bool LasReader::processOne(PointRef& point)
     } // compression
     else
     {
-        std::vector<char> buf(m_header.pointLen());
+        std::vector<char> buf(m_p->header.pointLen());
 
         m_streamIf->m_istream->read(buf.data(), pointLen);
         loadPoint(point, buf.data(), pointLen);
     }
-    m_index++;
+    m_p->index++;
     return true;
 }
 
 
 point_count_t LasReader::read(PointViewPtr view, point_count_t count)
 {
-    size_t pointLen = m_header.pointLen();
-    count = (std::min)(count, getNumPoints() - m_index);
+    size_t pointLen = m_p->header.pointLen();
+    count = (std::min)(count, getNumPoints() - m_p->index);
 
     PointId i = 0;
-    if (m_header.compressed())
+    if (m_p->header.compressed())
     {
 #if defined(PDAL_HAVE_LAZPERF) || defined(PDAL_HAVE_LASZIP)
-        if (m_compression == "LASZIP" || m_compression == "LAZPERF")
+        if (m_args->compression == "LASZIP" || m_args->compression == "LAZPERF")
         {
             for (i = 0; i < count; i++)
             {
@@ -684,7 +752,7 @@ point_count_t LasReader::read(PointViewPtr view, point_count_t count)
         catch (invalid_stream&)
         {}
     }
-    m_index += i;
+    m_p->index += i;
     return (point_count_t)i;
 }
 
@@ -694,7 +762,7 @@ point_count_t LasReader::readFileBlock(std::vector<char>& buf,
 {
     std::istream *stream(m_streamIf->m_istream);
 
-    size_t ptLen = m_header.pointLen();
+    size_t ptLen = m_p->header.pointLen();
     point_count_t blockpoints = buf.size() / ptLen;
 
     blockpoints = (std::min)(maxpoints, blockpoints);
@@ -714,19 +782,19 @@ point_count_t LasReader::readFileBlock(std::vector<char>& buf,
 
 
 #ifdef PDAL_HAVE_LASZIP
-void LasReader::loadPoint(PointRef& point, laszip_point& p)
+void LasReader::loadPoint(PointRef& point)
 {
-    if (m_header.has14Format())
-        loadPointV14(point, p);
+    if (m_p->header.has14Format())
+        loadPointV14(point);
     else
-        loadPointV10(point, p);
+        loadPointV10(point);
 }
 #endif // PDAL_HAVE_LASZIP
 
 
 void LasReader::loadPoint(PointRef& point, char *buf, size_t bufsize)
 {
-    if (m_header.has14Format())
+    if (m_p->header.has14Format())
         loadPointV14(point, buf, bufsize);
     else
         loadPointV10(point, buf, bufsize);
@@ -734,9 +802,12 @@ void LasReader::loadPoint(PointRef& point, char *buf, size_t bufsize)
 
 
 #ifdef PDAL_HAVE_LASZIP
-void LasReader::loadPointV10(PointRef& point, laszip_point& p)
+void LasReader::loadPointV10(PointRef& point)
 {
-    const LasHeader& h = m_header;
+    // We used to pass the laszip point as an argument, but this allows us to keep
+    // any laszip information out of LasReader.hpp.
+    laszip_point& p = *m_p->laszipPoint;
+    const LasHeader& h = m_p->header;
 
     double x = p.X * h.scaleX() + h.offsetX();
     double y = p.Y * h.scaleY() + h.offsetY();
@@ -767,7 +838,7 @@ void LasReader::loadPointV10(PointRef& point, laszip_point& p)
         point.setField(Dimension::Id::Blue, p.rgb[2]);
     }
 
-    if (m_extraDims.size())
+    if (m_p->extraDims.size())
     {
         LeExtractor extractor((const char *)p.extra_bytes, p.num_extra_bytes);
         loadExtraDims(extractor, point);
@@ -782,7 +853,7 @@ void LasReader::loadPointV10(PointRef& point, char *buf, size_t bufsize)
     int32_t xi, yi, zi;
     istream >> xi >> yi >> zi;
 
-    const LasHeader& h = m_header;
+    const LasHeader& h = m_p->header;
 
     double x = xi * h.scaleX() + h.offsetX();
     double y = yi * h.scaleY() + h.offsetY();
@@ -832,15 +903,18 @@ void LasReader::loadPointV10(PointRef& point, char *buf, size_t bufsize)
         point.setField(Dimension::Id::Blue, blue);
     }
 
-    if (m_extraDims.size())
+    if (m_p->extraDims.size())
         loadExtraDims(istream, point);
 }
 
 
 #ifdef PDAL_HAVE_LASZIP
-void LasReader::loadPointV14(PointRef& point, laszip_point& p)
+void LasReader::loadPointV14(PointRef& point)
 {
-    const LasHeader& h = m_header;
+    // We used to pass the laszip point as an argument, but this allows us to keep
+    // any laszip information out of LasReader.hpp.
+    laszip_point& p = *m_p->laszipPoint;
+    const LasHeader& h = m_p->header;
 
     double x = p.X * h.scaleX() + h.offsetX();
     double y = p.Y * h.scaleY() + h.offsetY();
@@ -875,7 +949,7 @@ void LasReader::loadPointV14(PointRef& point, laszip_point& p)
         point.setField(Dimension::Id::Infrared, p.rgb[3]);
     }
 
-    if (m_extraDims.size())
+    if (m_p->extraDims.size())
     {
         LeExtractor extractor((const char *)p.extra_bytes, p.num_extra_bytes);
         loadExtraDims(extractor, point);
@@ -891,7 +965,7 @@ void LasReader::loadPointV14(PointRef& point, char *buf, size_t bufsize)
     int32_t xi, yi, zi;
     istream >> xi >> yi >> zi;
 
-    const LasHeader& h = m_header;
+    const LasHeader& h = m_p->header;
 
     double x = xi * h.scaleX() + h.offsetX();
     double y = yi * h.scaleY() + h.offsetY();
@@ -949,14 +1023,14 @@ void LasReader::loadPointV14(PointRef& point, char *buf, size_t bufsize)
         point.setField(Dimension::Id::Infrared, nearInfraRed);
     }
 
-    if (m_extraDims.size())
+    if (m_p->extraDims.size())
         loadExtraDims(istream, point);
 }
 
 
 void LasReader::loadExtraDims(LeExtractor& istream, PointRef& point)
 {
-    for (auto& dim : m_extraDims)
+    for (auto& dim : m_p->extraDims)
     {
         // Dimension type of None is undefined and unprocessed
         if (dim.m_dimType.m_type == Dimension::Type::None)
@@ -982,13 +1056,19 @@ void LasReader::loadExtraDims(LeExtractor& istream, PointRef& point)
 void LasReader::done(PointTableRef)
 {
 #ifdef PDAL_HAVE_LASZIP
-    if (m_laszip)
+    if (m_p->laszip)
     {
-        handleLaszip(laszip_close_reader(m_laszip));
-        handleLaszip(laszip_destroy(m_laszip));
+        handleLaszip(laszip_close_reader(m_p->laszip));
+        handleLaszip(laszip_destroy(m_p->laszip));
     }
 #endif
     m_streamIf.reset();
 }
+
+bool LasReader::eof()
+{
+    return m_p->index >= getNumPoints();
+}
+
 
 } // namespace pdal

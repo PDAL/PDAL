@@ -241,6 +241,20 @@ public:
 
 }  // unnamed namespace
 
+uintmax_t fileSize(const std::string& path)
+{
+    uintmax_t size = 0;
+    if (isRemote(path))
+    {
+        std::unique_ptr<std::size_t> pSize = arbiter::Arbiter().tryGetSize(path);
+        if (pSize)
+            size = *pSize;
+    }
+    else
+        size = FileUtils::fileSize(path);
+    return size;
+}
+
 /**
   Create a file (may be on a supported remote filesystem).
 
@@ -368,32 +382,27 @@ double computeHausdorff(PointViewPtr srcView, PointViewPtr candView)
 {
     using namespace Dimension;
 
-    KD3Index srcIndex(*srcView);
-    srcIndex.build();
-
-    KD3Index candIndex(*candView);
-    candIndex.build();
+    KD3Index &srcIndex = srcView->build3dIndex();
+    KD3Index &candIndex = candView->build3dIndex();
 
     double maxDistSrcToCand = std::numeric_limits<double>::lowest();
     double maxDistCandToSrc = std::numeric_limits<double>::lowest();
 
-    for (PointId i = 0; i < srcView->size(); ++i)
+    for (PointRef p : *srcView)
     {
         PointIdList indices(1);
         std::vector<double> sqr_dists(1);
-        PointRef srcPoint = srcView->point(i);
-        candIndex.knnSearch(srcPoint, 1, &indices, &sqr_dists);
+        candIndex.knnSearch(p, 1, &indices, &sqr_dists);
 
         if (sqr_dists[0] > maxDistSrcToCand)
             maxDistSrcToCand = sqr_dists[0];
     }
 
-    for (PointId i = 0; i < candView->size(); ++i)
+    for (PointRef q : *candView)
     {
         PointIdList indices(1);
         std::vector<double> sqr_dists(1);
-        PointRef candPoint = candView->point(i);
-        srcIndex.knnSearch(candPoint, 1, &indices, &sqr_dists);
+        srcIndex.knnSearch(q, 1, &indices, &sqr_dists);
 
         if (sqr_dists[0] > maxDistCandToSrc)
             maxDistCandToSrc = sqr_dists[0];
@@ -429,6 +438,35 @@ std::string dllDir()
         s = info.dli_fname;
 #endif
     return FileUtils::getDirectory(s);
+}
+
+
+double computeChamfer(PointViewPtr srcView, PointViewPtr candView)
+{
+    using namespace Dimension;
+
+    KD3Index &srcIndex = srcView->build3dIndex();
+    KD3Index &candIndex = candView->build3dIndex();
+
+    double sum1(0.0);
+    for (PointRef p : *srcView)
+    {
+        PointIdList indices(1);
+        std::vector<double> sqr_dists(1);
+        candIndex.knnSearch(p, 1, &indices, &sqr_dists);
+        sum1 += sqr_dists[0];
+    }
+
+    double sum2(0.0);
+    for (PointRef q : *candView)
+    {
+        PointIdList indices(1);
+        std::vector<double> sqr_dists(1);
+        srcIndex.knnSearch(q, 1, &indices, &sqr_dists);
+        sum2 += sqr_dists[0];
+    }
+
+    return sum1 + sum2;
 }
 
 } // namespace Utils

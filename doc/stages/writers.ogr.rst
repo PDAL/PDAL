@@ -23,7 +23,7 @@ Example
       "inputfile.las",
       {
           "type": "writers.ogr",
-          "filename" "outfile.geojson",
+          "filename": "outfile.geojson",
           "measure_dim": "Compression"
       }
   ]

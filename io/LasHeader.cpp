@@ -291,7 +291,10 @@ void LasHeader::setSrsFromWkt()
     const char *c = vlr->data() + len - 1;
     if (*c == 0)
         len--;
-    m_srs.set(std::string(vlr->data(), len));
+    std::string wkt(vlr->data(), len);
+    // Strip any excess NULL bytes from the WKT.
+    wkt.erase(std::find(wkt.begin(), wkt.end(), '\0'), wkt.end());
+    m_srs.set(wkt);
 }
 
 
@@ -327,6 +330,7 @@ void LasHeader::setSrsFromGeotiff()
     std::vector<uint8_t> asciiRec(data, data + dataLen);
 
     GeotiffSrs geotiff(directoryRec, doublesRec, asciiRec, m_log);
+    m_geotiff_print = geotiff.gtiffPrintString();
     SpatialReference gtiffSrs = geotiff.srs();
     if (!gtiffSrs.empty())
         m_srs = gtiffSrs;
@@ -394,8 +398,11 @@ ILeStream& operator>>(ILeStream& in, LasHeader& h)
         throw LasHeader::error("Invalid point count. Number of points exceeds file size.");
     if (h.m_vlrOffset > h.m_fileSize)
         throw LasHeader::error("Invalid VLR offset - exceeds file size.");
+    // There was a bug in PDAL where it didn't write the VLR offset :(
+    /**
     if (h.m_eVlrOffset > h.m_fileSize)
         throw LasHeader::error("Invalid extended VLR offset - exceeds file size.");
+    **/
 
     // Read regular VLRs.
     in.seek(h.m_vlrOffset);

@@ -63,7 +63,6 @@ namespace pdal
 
         FauxReader m_reader;
         FauxReader m_reader2;
-
     };
 
     TEST_F(TileDBWriterTest, constructor)
@@ -442,5 +441,46 @@ namespace pdal
         for (const double& v : coords)
             EXPECT_EQ(v, 1.0);
     }
+#endif
+
+#if TILEDB_VERSION_MAJOR >= 2
+    #if ((TILEDB_VERSION_MINOR > 1) || (TILEDB_VERSION_MAJOR > 2))
+    TEST_F(TileDBWriterTest, sf_curve)
+    {
+        Options reader_options;
+        FauxReader reader;
+        BOX3D bounds(1.0, 1.0, 1.0, 2.0, 2.0, 2.0);
+        reader_options.add("bounds", bounds);
+        reader_options.add("mode", "constant");
+        reader_options.add("count", count);
+        reader.setOptions(reader_options);
+
+        tiledb::Context ctx;
+        tiledb::VFS vfs(ctx);
+        std::string pth = Support::temppath("tiledb_test_sf_curve");
+
+        Options writer_options;
+        writer_options.add("array_name", pth);
+        writer_options.add("x_tile_size", 0);
+        writer_options.add("y_tile_size", 0);
+        writer_options.add("z_tile_size", 0);
+
+        if (vfs.is_dir(pth))
+        {
+            vfs.remove_dir(pth);
+        }
+
+        TileDBWriter writer;
+        writer.setOptions(writer_options);
+        writer.setInput(reader);
+
+        FixedPointTable table(count);
+        writer.prepare(table);
+        writer.execute(table);
+
+        EXPECT_EQ(true,
+            tiledb::Object::object(ctx, pth).type() == tiledb::Object::Type::Array);
+    }
+    #endif
 #endif
 }

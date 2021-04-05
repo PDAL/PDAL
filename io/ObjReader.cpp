@@ -65,12 +65,17 @@ void ObjReader::addDimensions(PointLayoutPtr layout)
     });
 }
 
-void ObjReader::ready(PointTableRef table)
+void ObjReader::ready(PointTableRef)
 {
     m_istream = Utils::openFile(m_filename, false);
     if (!m_istream)
         throwError("Couldn't open '" + m_filename + "'.");
     m_index = 0;
+}
+
+void ObjReader::done(PointTableRef)
+{
+    Utils::closeFile(m_istream);
 }
 
 point_count_t ObjReader::read(PointViewPtr view, point_count_t cnt)

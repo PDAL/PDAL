@@ -49,6 +49,8 @@
 namespace pdal
 {
 
+using namespace Dimension;
+
 static StaticPluginInfo const s_info
 {
     "filters.reciprocity",
@@ -73,14 +75,11 @@ void ReciprocityFilter::addArgs(ProgramArgs& args)
 
 void ReciprocityFilter::addDimensions(PointLayoutPtr layout)
 {
-    m_reciprocity =
-        layout->registerOrAssignDim("Reciprocity", Dimension::Type::Double);
+    layout->registerDim(Id::Reciprocity);
 }
 
 void ReciprocityFilter::filter(PointView& view)
 {
-    KD3Index& kdi = view.build3dIndex();
-
     point_count_t nloops = view.size();
     std::vector<std::thread> threadList(m_threads);
     for (int t = 0; t < m_threads; t++)
@@ -88,7 +87,7 @@ void ReciprocityFilter::filter(PointView& view)
         threadList[t] = std::thread(std::bind(
             [&](const PointId start, const PointId end) {
                 for (PointId i = start; i < end; i++)
-                    setReciprocity(view, i, kdi);
+                    setReciprocity(view, i);
             },
             t * nloops / m_threads,
             (t + 1) == m_threads ? nloops : (t + 1) * nloops / m_threads));
@@ -97,18 +96,18 @@ void ReciprocityFilter::filter(PointView& view)
         t.join();
 }
 
-void ReciprocityFilter::setReciprocity(PointView& view, const PointId& i,
-                                       const KD3Index& kdi)
+void ReciprocityFilter::setReciprocity(PointView& view, const PointId& i)
 {
     // Find k-nearest neighbors of i.
-    auto ni = kdi.neighbors(i, m_knn + 1);
+    const KD3Index& kdi = view.build3dIndex();
+    PointIdList ni = kdi.neighbors(i, m_knn + 1);
 
     // Initialize number of unidirectional neighbors to 0.
     point_count_t uni(0);
 
     // Visit each neighbor of i, finding its k-nearest neighbors. If i is
     // not a nearest neighbor of one of its neighbors, increment uni.
-    for (auto const& j : ni)
+    for (PointId const& j : ni)
     {
         // The query point itself will always show up as a neighbor and can
         // be skipped.
@@ -116,7 +115,7 @@ void ReciprocityFilter::setReciprocity(PointView& view, const PointId& i,
             continue;
 
         // Find k-nearest neighbors of j.
-        auto nj = kdi.neighbors(j, m_knn + 1);
+        PointIdList nj = kdi.neighbors(j, m_knn + 1);
 
         // If i is not a neighbor of j, increment uni.
         if (std::find(nj.begin(), nj.end(), i) == nj.end())
@@ -126,7 +125,7 @@ void ReciprocityFilter::setReciprocity(PointView& view, const PointId& i,
     // Compute reciprocity as percentage of neighbors that do NOT contain
     // id as a neighbor.
     double reciprocity = 100.0 * uni / m_knn;
-    view.setField(m_reciprocity, i, reciprocity);
+    view.setField(Id::Reciprocity, i, reciprocity);
 }
 
 } // namespace pdal
