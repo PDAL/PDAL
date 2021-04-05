@@ -85,7 +85,7 @@ private:
     LasHeader m_lasHeader;
     std::unique_ptr<LasSummaryData> m_summaryData;
     laszip_POINTER m_laszip;
-    std::unique_ptr<LazPerfVlrCompressor> m_compressor;
+    LazPerfVlrCompressor *m_compressor;
     bool m_discardHighReturnNumbers;
     std::map<std::string, std::string> m_headerVals;
     std::vector<VlrOptionInfo> m_optionInfos;

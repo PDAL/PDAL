@@ -72,12 +72,17 @@ CREATE_STATIC_STAGE(LasWriter, s_info)
 
 std::string LasWriter::getName() const { return s_info.name; }
 
-LasWriter::LasWriter() : m_ostream(NULL), m_compression(LasCompression::None), m_srsCnt(0)
+LasWriter::LasWriter() : m_compressor(nullptr), m_ostream(NULL),
+    m_compression(LasCompression::None), m_srsCnt(0)
 {}
 
 
 LasWriter::~LasWriter()
-{}
+{
+#ifdef PDAL_HAVE_LAZPERF
+    delete m_compressor;
+#endif
+}
 
 
 void LasWriter::addArgs(ProgramArgs& args)
@@ -698,7 +703,7 @@ void LasWriter::readyLazPerfCompression()
 {
 #ifdef PDAL_HAVE_LAZPERF
     int ebCount = m_lasHeader.pointLen() - m_lasHeader.basePointLen();
-    m_compressor.reset(new LazPerfVlrCompressor(*m_ostream, m_lasHeader.pointFormat(), ebCount));
+    m_compressor = new LazPerfVlrCompressor(*m_ostream, m_lasHeader.pointFormat(), ebCount);
     std::vector<char> lazVlrData = m_compressor->vlrData();
     std::vector<uint8_t> vlrdata(lazVlrData.begin(), lazVlrData.end());
     addVlr(LASZIP_USER_ID, LASZIP_RECORD_ID, "http://laszip.org", vlrdata);
