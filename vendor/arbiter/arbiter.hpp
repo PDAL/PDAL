@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: e9f91be5d7b36213e82bab86c1810f9bcc9225d3
+// Git SHA: 8143feb534f3766ce2878ce9295f5b72f3ed67c5
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -3427,6 +3427,7 @@ private:
     bool m_verifyPeer = true;
     std::unique_ptr<std::string> m_caPath;
     std::unique_ptr<std::string> m_caInfo;
+    std::unique_ptr<std::string> m_proxy;
 
     std::vector<char> m_data;
 };
@@ -3649,6 +3650,7 @@ class ARBITER_DLL Time
 {
 public:
     static const std::string iso8601;
+    static const std::string rfc822;
     static const std::string iso8601NoSeparators;
     static const std::string dateNoSeparators;
 
@@ -3851,6 +3853,8 @@ ARBITER_DLL std::string encodeBase64(
         const std::vector<char>& data,
         bool pad = true);
 ARBITER_DLL std::string encodeBase64(const std::string& data, bool pad = true);
+
+ARBITER_DLL std::string decodeBase64(const std::string& data);
 
 ARBITER_DLL std::string encodeAsHex(const std::vector<char>& data);
 ARBITER_DLL std::string encodeAsHex(const std::string& data);
@@ -4842,6 +4846,224 @@ private:
 
 
 // //////////////////////////////////////////////////////////////////////
+// Beginning of content of file: arbiter/drivers/az.hpp
+// //////////////////////////////////////////////////////////////////////
+
+#pragma once
+
+#include <memory>
+#include <string>
+#include <vector>
+
+#ifndef ARBITER_IS_AMALGAMATION
+#include <arbiter/util/time.hpp>
+#include <arbiter/util/util.hpp>
+#include <arbiter/drivers/http.hpp>
+#endif
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+namespace ARBITER_CUSTOM_NAMESPACE
+{
+#endif
+
+namespace arbiter
+{
+
+namespace drivers
+{
+
+/** @brief Microsoft %Azure blob driver. */
+class AZ : public Http
+{
+    class AuthFields;
+    class Config;
+
+public:
+    AZ(
+            http::Pool& pool,
+            std::string profile,
+            std::unique_ptr<Config> config);
+
+    /** Try to construct an Azure blob driver.  The configuration/credential discovery
+     * follows, in order:
+     *      - Environment settings.
+     *      - Arbiter JSON configuration.
+     */
+    static std::vector<std::unique_ptr<AZ>> create(
+            http::Pool& pool,
+            std::string j);
+
+    static std::unique_ptr<AZ> createOne(http::Pool& pool, std::string j);
+
+    // Overrides.
+    virtual std::string type() const override;
+
+    virtual std::unique_ptr<std::size_t> tryGetSize(
+            std::string path) const override;
+
+    /** Inherited from Drivers::Http. */
+    virtual void put(
+            std::string path,
+            const std::vector<char>& data,
+            http::Headers headers,
+            http::Query query) const override;
+
+    virtual void copy(std::string src, std::string dst) const override;
+
+private:
+    static std::string extractProfile(std::string j);
+
+    /*
+    static std::unique_ptr<Config> extractConfig(
+            std::string j,
+            std::string profile);
+
+            */
+    /** Inherited from Drivers::Http. */
+    virtual bool get(
+            std::string path,
+            std::vector<char>& data,
+            http::Headers headers,
+            http::Query query) const override;
+
+    virtual std::vector<std::string> glob(
+            std::string path,
+            bool verbose) const override;
+
+    class ApiV1;
+    class Resource;
+
+    std::string m_profile;
+    std::unique_ptr<Config> m_config;
+};
+
+class AZ::AuthFields
+{
+public:
+    AuthFields(std::string account, std::string key="")
+        : m_storageAccount(account), m_storageAccessKey(key)
+    { }
+
+    const std::string& account() const { return m_storageAccount; }
+    const std::string& key() const { return m_storageAccessKey; }
+
+private:
+    std::string m_storageAccount;
+    std::string m_storageAccessKey;
+};
+
+class AZ::Config
+{
+
+public:
+    Config(std::string j, std::string profile);
+
+    const std::string& service() const { return m_service; }
+    const std::string& storageAccount() const { return m_storageAccount; }
+    const std::string& endpoint() const { return m_endpoint; }
+    const std::string& baseUrl() const { return m_baseUrl; }
+    const http::Headers& baseHeaders() const { return m_baseHeaders; }
+    bool precheck() const { return m_precheck; }
+
+    AuthFields authFields() const { return AuthFields(m_storageAccount, m_storageAccessKey); }
+
+private:
+    static std::string extractService(std::string j, std::string profile);
+    static std::string extractEndpoint(std::string j, std::string profile);
+    static std::string extractBaseUrl(std::string j, std::string endpoint, std::string service, std::string account);
+    static std::string extractStorageAccount(std::string j, std::string profile);
+    static std::string extractStorageAccessKey(std::string j, std::string profile);
+
+    const std::string m_service;
+    const std::string m_storageAccount;
+    const std::string m_storageAccessKey;
+    const std::string m_endpoint;
+    const std::string m_baseUrl;
+    http::Headers m_baseHeaders;
+    bool m_precheck;
+};
+
+
+
+class AZ::Resource
+{
+public:
+    Resource(std::string baseUrl, std::string fullPath);
+
+    std::string url() const;
+    std::string host() const;
+    std::string baseUrl() const;
+    std::string bucket() const;
+    std::string object() const;
+    std::string storageAccount() const;
+
+private:
+    std::string m_baseUrl;
+    std::string m_bucket;
+    std::string m_object;
+    std::string m_storageAccount;
+};
+
+class AZ::ApiV1
+{
+public:
+    ApiV1(
+            std::string verb,
+            const Resource& resource,
+            const AZ::AuthFields authFields,
+            const http::Query& query,
+            const http::Headers& headers,
+            const std::vector<char>& data);
+
+    const http::Headers& headers() const { return m_headers; }
+    const http::Query& query() const { return m_query; }
+
+private:
+    std::string buildCanonicalResource(
+            const Resource& resource,
+            const http::Query& query) const;
+
+    std::string buildCanonicalHeader(
+            http::Headers & msHeaders,
+            const http::Headers & existingHeaders) const;
+
+    std::string buildStringToSign(
+            const std::string& verb,
+            const http::Headers& headers,
+            const std::string& canonicalHeaders,
+            const std::string& canonicalRequest) const;
+
+    std::string calculateSignature(
+            const std::string& stringToSign) const;
+
+    std::string getAuthHeader(
+            const std::string& signedHeadersString) const;
+
+    const AZ::AuthFields m_authFields;
+    const Time m_time;
+
+    http::Headers m_headers;
+    http::Query m_query;
+};
+
+} // namespace drivers
+} // namespace arbiter
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+}
+#endif
+
+
+// //////////////////////////////////////////////////////////////////////
+// End of content of file: arbiter/drivers/az.hpp
+// //////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+// //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: arbiter/drivers/google.hpp
 // //////////////////////////////////////////////////////////////////////
 
@@ -5346,6 +5568,7 @@ private:
 #include <arbiter/drivers/google.hpp>
 #include <arbiter/drivers/http.hpp>
 #include <arbiter/drivers/s3.hpp>
+#include <arbiter/drivers/az.hpp>
 #include <arbiter/drivers/test.hpp>
 #include <arbiter/util/exports.hpp>
 #include <arbiter/util/types.hpp>

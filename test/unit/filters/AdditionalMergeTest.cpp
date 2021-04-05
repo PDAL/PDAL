@@ -47,7 +47,8 @@ using namespace pdal;
 
 TEST(AdditionalMergeTest, merge_filter_and_reader_with_manager)
 {
-    const char * outfile = "merge_filter_and_reader_with_manager.las";
+    std::string outfile =
+        Support::temppath("merge_filter_and_reader_with_manager.las");
     FileUtils::deleteFile(outfile);
 
     PipelineManager mgr;
@@ -85,7 +86,8 @@ TEST(AdditionalMergeTest, merge_filter_and_reader_with_manager)
 
 TEST(AdditionalMergeTest, merge_reader_and_filter_with_manager)
 {
-    const char * outfile = "merge_reader_and_filter_with_manager.las";
+    std::string outfile =
+        Support::temppath("merge_reader_and_filter_with_manager.las");
     FileUtils::deleteFile(outfile);
 
     PipelineManager mgr;
@@ -123,7 +125,8 @@ TEST(AdditionalMergeTest, merge_reader_and_filter_with_manager)
 
 TEST(AdditionalMergeTest, merge_filter_and_reader_without_manager)
 {
-    const char * outfile = "merge_filter_and_reader_without_manager.las";
+    std::string outfile =
+        Support::temppath("merge_filter_and_reader_without_manager.las");
     FileUtils::deleteFile(outfile);
 
     Options optsR;
@@ -164,7 +167,8 @@ TEST(AdditionalMergeTest, merge_filter_and_reader_without_manager)
 
 TEST(AdditionalMergeTest, merge_reader_and_filter_without_manager)
 {
-    const char * outfile = "merge_reader_and_filter_without_manager.las";
+    std::string outfile =
+        Support::temppath("merge_reader_and_filter_without_manager.las");
     FileUtils::deleteFile(outfile);
 
     Options optsR;
@@ -205,7 +209,8 @@ TEST(AdditionalMergeTest, merge_reader_and_filter_without_manager)
 
 TEST(AdditionalMergeTest, filter_and_reader_writer_inputs_with_manager)
 {
-    const char * outfile = "filter_and_reader_writer_inputs_with_manager.las";
+    std::string outfile =
+        Support::temppath("filter_and_reader_writer_inputs_with_manager.las");
     FileUtils::deleteFile(outfile);
 
     PipelineManager mgr;
@@ -240,7 +245,8 @@ TEST(AdditionalMergeTest, filter_and_reader_writer_inputs_with_manager)
 
 TEST(AdditionalMergeTest, reader_and_filter_writer_inputs_with_manager)
 {
-    const char * outfile = "reader_and_filter_writer_inputs_with_manager.las";
+    std::string outfile =
+        Support::temppath("reader_and_filter_writer_inputs_with_manager.las");
     FileUtils::deleteFile(outfile);
 
     PipelineManager mgr;
@@ -275,7 +281,8 @@ TEST(AdditionalMergeTest, reader_and_filter_writer_inputs_with_manager)
 
 TEST(AdditionalMergeTest, filter_and_reader_writer_inputs_without_manager)
 {
-    const char * outfile = "filter_and_reader_writer_inputs_without_manager.las";
+    std::string outfile =
+        Support::temppath("filter_and_reader_writer_inputs_without_manager.las");
     FileUtils::deleteFile(outfile);
 
     Options optsR;
@@ -317,7 +324,8 @@ TEST(AdditionalMergeTest, filter_and_reader_writer_inputs_without_manager)
 
 TEST(AdditionalMergeTest, reader_and_filter_writer_inputs_without_manager)
 {
-    const char * outfile = "reader_and_filter_writer_inputs_without_manager.las";
+    std::string outfile =
+        Support::temppath("reader_and_filter_writer_inputs_without_manager.las");
     FileUtils::deleteFile(outfile);
 
     Options optsR;
@@ -359,7 +367,8 @@ TEST(AdditionalMergeTest, reader_and_filter_writer_inputs_without_manager)
 
 TEST(AdditionalMergeTest, merge_two_filters_with_manager)
 {
-    const char * outfile = "merge_two_filters_with_manager.las";
+    std::string outfile =
+        Support::temppath("merge_two_filters_with_manager.las");
     FileUtils::deleteFile(outfile);
 
     PipelineManager mgr;
@@ -404,7 +413,8 @@ TEST(AdditionalMergeTest, merge_two_filters_with_manager)
 
 TEST(AdditionalMergeTest, merge_two_filters_without_manager)
 {
-    const char * outfile = "merge_two_filters_without_manager.las";
+    std::string outfile =
+        Support::temppath("merge_two_filters_without_manager.las");
     FileUtils::deleteFile(outfile);
 
     Options optsR;
@@ -452,7 +462,8 @@ TEST(AdditionalMergeTest, merge_two_filters_without_manager)
 
 TEST(AdditionalMergeTest, two_filters_writer_inputs_with_manager)
 {
-    const char * outfile = "two_filters_writer_inputs_with_manager.las";
+    std::string outfile =
+        Support::temppath("two_filters_writer_inputs_with_manager.las");
     FileUtils::deleteFile(outfile);
 
     PipelineManager mgr;
@@ -494,7 +505,8 @@ TEST(AdditionalMergeTest, two_filters_writer_inputs_with_manager)
 
 TEST(AdditionalMergeTest, two_filters_writer_inputs_without_manager)
 {
-    const char * outfile = "two_filters_writer_inputs_without_manager.las";
+    std::string outfile =
+        Support::temppath("two_filters_writer_inputs_without_manager.las");
     FileUtils::deleteFile(outfile);
 
     Options optsR;

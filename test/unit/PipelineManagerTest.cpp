@@ -45,7 +45,7 @@ using namespace pdal;
 
 TEST(PipelineManagerTest, basic)
 {
-    const char * outfile = "temp.las";
+    std::string outfile = Support::temppath("temp.las");
     FileUtils::deleteFile(outfile);
 
     PipelineManager mgr;
