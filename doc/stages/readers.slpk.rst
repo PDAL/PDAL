@@ -20,15 +20,31 @@ through PDAL's command line interface or through the pipeline.
       {
           "type": "readers.slpk",
           "filename": "PDAL/test/data/i3s/SMALL_AUTZEN_LAS_All.slpk",
-          "bounds": "([-123.075542,-123.06196],[44.049719,44.06278])"
+          "obb": {
+              "center": [
+                  636590,
+                  849216,
+                  460
+              ],
+              "halfSize": [
+                  590,
+                  281,
+                  60
+              ],
+              "quaternion":
+              [
+                  0,
+                  0,
+                  0,
+                  1
+              ]
+          }
       }
   ]
 
 ::
 
-    pdal traslate  PDAL/test/data/i3s/SMALL_AUTZEN_LAS_All.slpk \
-        autzen.las \
-        --readers.slpk.bounds="([-123.075542,-123.06196],[44.049719,44.06278])"``
+    pdal traslate  PDAL/test/data/i3s/SMALL_AUTZEN_LAS_All.slpk autzen.las
 
 Options
 --------------------------------------------------------------------------------
@@ -38,12 +54,9 @@ filename
 
 .. include:: reader_opts.rst
 
-bounds
-    The bounds refers to the extents of the resource in X, Y, Z
-    coordinates with the Z dimension being optional. This must be input
-    as a string.
-
-    Example:``readers.slpk.bounds="([xmin,xmax],[ymin,ymax],[zmin,zmax])"``
+obb
+    An oriented bounding box used to filter the data being retrieved.  The obb
+    is specified as JSON exactly as described by the `I3S specification`_.
 
 dimensions
     Comma-separated list of dimensions that should be read.  Specify the
@@ -76,3 +89,4 @@ min_density and max_density
     Example: ``--readers.slpk.min_density=2 --readers.slpk.max_density=2.5``
 
 .. _Scene Layer Packages (SLPK): https://github.com/Esri/i3s-spec/blob/master/format/Indexed%203d%20Scene%20Layer%20Format%20Specification.md#_8_1
+.. _I3S specification: https://github.com/Esri/i3s-spec/blob/master/docs/2.0/obb.cmn.md

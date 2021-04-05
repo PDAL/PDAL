@@ -1,21 +1,16 @@
-FROM pdal/ubuntubase:latest as builder
+FROM pdal/ubuntubase:latest as build
 MAINTAINER Andrew Bell <andrew@hobu.co>
 
-SHELL ["/bin/bash", "-c"]
-ENV CC gcc-6
-ENV CXX g++-6
+SHELL ["conda", "run", "-n", "pdal", "/bin/bash", "-c"]
 
-RUN . /opt/conda/etc/profile.d/conda.sh && \
-    conda activate pdal && \
-    git clone http://github.com/PDAL/PDAL.git pdal
-
-RUN . /opt/conda/etc/profile.d/conda.sh && \
-    conda activate pdal && \
+RUN git clone http://github.com/PDAL/PDAL.git pdal && \
     mkdir -p pdal/build && \
     cd pdal/build  && \
-    cmake -G Ninja  \
-        -DCMAKE_INSTALL_PREFIX=/usr \
-        -DBUILD_PLUGIN_CPD=ON \
+    LDFLAGS="-Wl,-rpath-link,$CONDA_PREFIX/lib" cmake -G Ninja  \
+        -DCMAKE_LIBRARY_PATH:FILEPATH="$CONDA_PREFIX/lib" \
+        -DCMAKE_INCLUDE_PATH:FILEPATH="$CONDA_PREFIX/include" \
+        -DCMAKE_INSTALL_PREFIX="$CONDA_PREFIX" \
+        -DBUILD_PLUGIN_CPD=OFF \
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
@@ -28,57 +23,33 @@ RUN . /opt/conda/etc/profile.d/conda.sh && \
         -DWITH_LASZIP=ON \
         ..
 
-RUN . /opt/conda/etc/profile.d/conda.sh && \
-    conda activate pdal && \
-    cd pdal/build  && \
+RUN cd pdal/build  && \
     ninja
 
-RUN . /opt/conda/etc/profile.d/conda.sh && \
-    conda activate pdal && \
-    cd pdal/build  && \
+RUN cd pdal/build  && \
     ctest -V
 
-RUN . /opt/conda/etc/profile.d/conda.sh && \
-    conda activate pdal && \
-    cd pdal/build  && \
+RUN cd pdal/build  && \
     ninja install
 
-RUN apt-get -y remove unzip bzip2 gcc-6 g++-6 ca-certificates && \
-   apt-get -y autoremove
 
-RUN . /opt/conda/etc/profile.d/conda.sh && \
-    conda activate pdal && \
-    conda remove -c conda-forge git cmake ninja conda-forge-ci-setup
 
-RUN rm /opt/conda/envs/pdal/lib/*.a && \
-    rm /opt/conda/envs/pdal/include/H5*.h && \
-    rm /opt/conda/envs/pdal/include/h5*.mod && \
-    rm /opt/conda/envs/pdal/include/tcl*.h && \
-    rm /opt/conda/envs/pdal/include/itcl*.h && \
-    rm /opt/conda/envs/pdal/include/tk*.h && \
-    rm -rf /opt/conda/envs/pdal/include/spatialite && \
-    rm -rf /opt/conda/envs/pdal/include/freetype2 && \
-    rm -rf /opt/conda/envs/pdal/include/informix && \
-    rm -rf /opt/conda/envs/pdal/include/fontconfig && \
-    rm -rf /opt/conda/envs/pdal/include/X11 && \
-    rm -rf /opt/conda/envs/pdal/lib/cmake
+RUN conda-pack -n pdal --dest-prefix=/opt/conda/envs/pdal -o  /tmp/env.tar && \
+     mkdir /venv && cd /venv && tar xf /tmp/env.tar  && \
+     rm /tmp/env.tar
 
-FROM ubuntu:bionic
+FROM continuumio/miniconda3
 
-ARG PDAL_CONDA=/opt/conda/envs/pdal
+ENV CONDAENV "/opt/conda/envs/pdal"
+COPY --from=build /venv "/opt/conda/envs/pdal"
 
-RUN apt-get update --fix-missing && \
-    apt-get install -y \
-        sudo ca-certificates && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+ENV PROJ_NETWORK=TRUE
+ENV PATH $PATH:${CONDAENV}/bin
+ENV DTED_APPLY_PIXEL_IS_POINT=TRUE
+ENV GTIFF_POINT_GEO_IGNORE=TRUE
+ENV GTIFF_REPORT_COMPD_CS=TRUE
+ENV REPORT_COMPD_CS=TRUE
+ENV OAMS_TRADITIONAL_GIS_ORDER=TRUE
 
-COPY --from=builder /usr/ /usr/
-COPY --from=builder /lib/ /lib/
-COPY --from=builder /${PDAL_CONDA}/lib/ /usr/lib/
-COPY --from=builder /${PDAL_CONDA}/include/ /usr/include/
-COPY --from=builder /${PDAL_CONDA}/share/ /usr/share/
+SHELL ["conda", "run", "--no-capture-output", "-n", "pdal", "/bin/sh", "-c"]
 
-ENV GDAL_DATA=/usr/share/gdal
-ENV PDAL_DRIVER_PATH=/usr/lib
-ENV PROJ_LIB=/usr/share/proj

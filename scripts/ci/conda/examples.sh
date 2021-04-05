@@ -2,9 +2,11 @@
 
 export BASE=`pwd`
 
+conda activate test
+conda install compilers cmake ninja -y
+
 if [ "$PLATFORM" == "windows-latest" ]; then
 
-conda install compilers ninja -y
 export CC=cl.exe
 export CXX=cl.exe
 where cl

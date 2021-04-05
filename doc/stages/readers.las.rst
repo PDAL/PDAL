@@ -103,3 +103,10 @@ compression
   support for the decompressor being requested.  The LazPerf decompressor
   doesn't support version 1 LAZ files or version 1.4 of LAS. [Default: 'none']
 
+ignore_vlr
+  A comma-separated list of "userid/record_id" pairs specifying VLR records that should
+  not be loaded.
+
+fix_dims
+  Make invalid dimension names valid by converting disallowed characters to '_'. Only
+  applies to names specified in an extra-bytes VLR. [Default: true]

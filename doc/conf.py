@@ -77,6 +77,7 @@ copyright = u'%d' % year
 
 
 spelling_word_list_filename='spelling_wordlist.txt'
+bibtex_bibfiles = ['./stages/references.bib','./workshop/bibliography.bib']
 
 
 # The version info for the project you're documenting, acts as replacement for

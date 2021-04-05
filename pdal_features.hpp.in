@@ -29,6 +29,7 @@
 #cmakedefine PDAL_HAVE_ZLIB
 #cmakedefine PDAL_HAVE_LZMA
 #cmakedefine PDAL_HAVE_LIBXML2
+#define PDAL_LAS_START
 
 /*
  * Debug or Release build?
