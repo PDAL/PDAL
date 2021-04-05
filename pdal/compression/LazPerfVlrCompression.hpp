@@ -66,9 +66,7 @@ private:
     std::unique_ptr<LazPerfVlrCompressorImpl> m_impl;
 };
 
-
 class LazPerfVlrDecompressorImpl;
-
 class LazPerfVlrDecompressor
 {
 public:
