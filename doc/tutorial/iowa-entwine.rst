@@ -110,6 +110,12 @@ it a URL to the root of the resource in the ``filename`` option, and we also
 give it a ``bounds`` object to define the window in which we should select data
 from.
 
+.. note::
+
+    The full URL to the EPT root file (``ept.json``)) must be given
+    to the filename parameter for PDAL 2.2+. This was a change in
+    behavior of the :ref:`readers.ept` driver.
+
 The ``bounds`` object is in the form ``([minx, maxx], [miny, maxy])``.
 
 .. warning::

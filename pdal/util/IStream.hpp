@@ -212,10 +212,12 @@ public:
         // Could do this by appending to a string with a stream, but this
         // is probably fast enough for now (there's only a simple increment
         // to advance an istream iterator, which you'd have to call in a loop).
-        std::unique_ptr<char[]> buf(new char[size+1]);
-        m_stream->read(buf.get(), size);
-        buf[size] = '\0';
-        s = buf.get();
+
+        // Zero-fill for null termination and to avoid reading uninitiallized
+        // memory when, for example, trying to read an empty file.
+        std::vector<char> buf(size + 1, 0);
+        m_stream->read(buf.data(), size);
+        s = buf.data();
     }
 
     /**

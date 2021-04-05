@@ -23,6 +23,7 @@ TEST(ObbTest, obb)
             }
         )"_json;
         Obb b(base);
+        EXPECT_EQ(b.intersect(c), c.intersect(b));
         return b.intersect(c);
     };
 

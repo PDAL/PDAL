@@ -111,3 +111,7 @@ out_axis_ordering
   An array of numbers that override the axis order for the out_srs.
   "2, 1" for example would swap X and Y, which may be commonly needed for
   something like "EPSG:4326".
+
+error_on_failure
+  If true and reprojection of any point fails, throw an exception that terminates
+  PDAL . [Default: false]
