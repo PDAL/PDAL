@@ -612,9 +612,11 @@ TEST(LasReaderTest, Start)
         EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::Z, 0), 3025);
     };
     test1("laszip");
-    test1("lazperf");
     test2("laszip");
+#ifdef PDAL_HAVE_LAZPERF
+    test1("lazperf");
     test2("lazperf");
+#endif PDAL_HAVE_LAZPERF
 
     // Delete the created file.
     FileUtils::deleteFile(source);
