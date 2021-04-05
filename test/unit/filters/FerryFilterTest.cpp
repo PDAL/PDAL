@@ -119,10 +119,10 @@ TEST(FerryFilterTest, test_ferry_copy_json)
     double x = view->getFieldAs<double>(state_plane_x, 0);
     double y = view->getFieldAs<double>(state_plane_y, 0);
 
-    EXPECT_DOUBLE_EQ(-117.2501328350574, lon);
     // proj 5 will consider +ellps=GRS80 +towgs84=0,0,0 to be slighly different
-    // than +datum=WGS84 and return 49.341077823260804.
-    EXPECT_NEAR(49.341077824192915, lat, 1e-9);
+    // than +datum=WGS84
+    EXPECT_NEAR(-117.25013, lon, 1e-4);
+    EXPECT_NEAR(49.34107, lat, 1e-4);
     EXPECT_DOUBLE_EQ(637012.24, x);
     EXPECT_DOUBLE_EQ(849028.31, y);
 }

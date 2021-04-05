@@ -412,12 +412,12 @@ TEST_F(PgpointcloudReaderTest, streaming )
     BOX3D bbox_las = BOX3D(635619.85, 848899.7, 406.59, 638982.55, 853535.43, 586.38);
     BOX3D bbox_pg;
     pwsPtr->calculateBounds(bbox_pg);
-    EXPECT_FLOAT_EQ(bbox_pg.maxx, bbox_las.maxx);
-    EXPECT_FLOAT_EQ(bbox_pg.maxy, bbox_las.maxy);
-    EXPECT_FLOAT_EQ(bbox_pg.maxz, bbox_las.maxz);
-    EXPECT_FLOAT_EQ(bbox_pg.minx, bbox_las.minx);
-    EXPECT_FLOAT_EQ(bbox_pg.miny, bbox_las.miny);
-    EXPECT_FLOAT_EQ(bbox_pg.minz, bbox_las.minz);
+    EXPECT_FLOAT_EQ((float)bbox_pg.maxx, (float)bbox_las.maxx);
+    EXPECT_FLOAT_EQ((float)bbox_pg.maxy, (float)bbox_las.maxy);
+    EXPECT_FLOAT_EQ((float)bbox_pg.maxz, (float)bbox_las.maxz);
+    EXPECT_FLOAT_EQ((float)bbox_pg.minx, (float)bbox_las.minx);
+    EXPECT_FLOAT_EQ((float)bbox_pg.miny, (float)bbox_las.miny);
+    EXPECT_FLOAT_EQ((float)bbox_pg.minz, (float)bbox_las.minz);
 }
 
 

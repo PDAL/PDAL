@@ -112,8 +112,7 @@ bool DimBuilder::parseArgs(int argc, char *argv[])
     }
     catch (arg_error& err)
     {
-        std::cerr << err.m_error << "\n";
-        return false;
+        throw dimbuilder_error(err.what());
     }
     return true;
 }
@@ -124,7 +123,7 @@ bool DimBuilder::execute()
     std::ifstream in(m_input);
 
     if (!in)
-        return false;
+        throw dimbuilder_error("Can't open input file.");
 
     NL::json root;
     try
@@ -133,8 +132,7 @@ bool DimBuilder::execute()
     }
     catch (NL::json::parse_error& err)
     {
-        std::cerr << err.what() << "\n";
-        return false;
+        throw dimbuilder_error(err.what());
     }
 
     NL::json dims;

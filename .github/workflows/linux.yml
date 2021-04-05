@@ -1,7 +1,6 @@
 name: Linux
 
-on:
-  push:
+on: [push, pull_request]
 
 jobs:
   build:
@@ -9,7 +8,7 @@ jobs:
 
     runs-on: 'ubuntu-latest'
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         type: ['floating','fixed']
     env:
@@ -17,7 +16,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - uses: goanpeca/setup-miniconda@v1
+    - uses: conda-incubator/setup-miniconda@v2
       with:
         channels: conda-forge
         auto-update-conda: true

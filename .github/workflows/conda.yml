@@ -1,7 +1,6 @@
 name: Conda
 
-on:
-  push:
+on: [push, pull_request]
 
 jobs:
   build:
@@ -19,7 +18,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - uses: goanpeca/setup-miniconda@v1
+    - name: Support longpaths
+      run: git config --system core.longpaths true
+      if: matrix.platform == 'windows-latest'
+
+    - uses: conda-incubator/setup-miniconda@v2
       with:
         channels: conda-forge
         auto-update-conda: true
@@ -46,3 +49,12 @@ jobs:
       with:
         name: ${{ matrix.platform }}-conda-package
         path: ./pdal-feedstock/packages/
+
+    - name: Deploy to pdal-master Conda channel
+      if: github.ref == 'refs/heads/master'
+      shell: bash -l {0}
+      env:
+        ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+      run: |
+          source ../scripts/ci/conda/upload.sh || true
+      working-directory: ./pdal-feedstock

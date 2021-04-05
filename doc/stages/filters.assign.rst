@@ -42,7 +42,7 @@ that provides for assignment of values to points. The generic expression is:
 
 .. code-block::
 
-    "values" : "Dimension = ValueExpression [WHERE ConditionalExpression)]"
+    "value" : "Dimension = ValueExpression [WHERE ConditionalExpression)]"
 
 ``Dimension`` is the name of a PDAL dimension.
 

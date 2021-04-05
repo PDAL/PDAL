@@ -79,6 +79,11 @@ option(BUILD_PLUGIN_FBX
 add_feature_info("FBX plugin" BUILD_PLUGIN_FBX
     "add features that depend on FBX")
 
+option(BUILD_PLUGIN_TEASER
+    "Choose if TEASER++ support should be built" FALSE)
+add_feature_info("TEASER++ plugin" BUILD_PLUGIN_TEASER
+    "TEASER++ computes transformations between point sets")
+
 option(BUILD_PLUGIN_TILEDB
     "Choose if TileDB support should be built" FALSE)
 add_feature_info("TileDB plugin" BUILD_PLUGIN_TILEDB

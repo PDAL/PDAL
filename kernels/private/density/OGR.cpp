@@ -45,8 +45,8 @@
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/gdal/SpatialRef.hpp>
 
-#include "../filters/private/hexer/HexGrid.hpp"
-#include "../filters/private/hexer/HexIter.hpp"
+#include <filters/private/hexer/HexGrid.hpp>
+#include <filters/private/hexer/HexIter.hpp>
 
 using namespace std;
 

@@ -36,8 +36,6 @@
 
 #include <pdal/Filter.hpp>
 
-#include <memory>
-
 namespace pdal
 {
 
@@ -50,19 +48,17 @@ class PDAL_DLL RadialDensityFilter : public Filter
 public:
     RadialDensityFilter() : Filter()
     {}
+    RadialDensityFilter& operator=(const RadialDensityFilter&) = delete;
+    RadialDensityFilter(const RadialDensityFilter&) = delete;
 
     std::string getName() const;
 
 private:
-    Dimension::Id m_rdens;
     double m_rad;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void filter(PointView& view);
-
-    RadialDensityFilter& operator=(const RadialDensityFilter&); // not implemented
-    RadialDensityFilter(const RadialDensityFilter&); // not implemented
 };
 
 } // namespace pdal
