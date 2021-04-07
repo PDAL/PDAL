@@ -117,11 +117,13 @@ void BpfWriter::initialize()
 
         size_t size = FileUtils::fileSize(file);
         if (size > (std::numeric_limits<uint32_t>::max)())
-            throwError("Bundledfile '" + file + "' too large.");
+            throwError("Bundled file '" + file + "' too large.");
+        if (size == 0)
+            throwError("Bundled file '" + file + "' empty or otherwise invalid.");
 
         BpfUlemFile ulemFile(size, FileUtils::getFilename(file), file);
         if (ulemFile.m_filename.length() > 32)
-            throwError("Bundledfile '" + file + "' name exceeds "
+            throwError("Bundled file '" + file + "' name exceeds "
                 "maximum length of 32.");
         m_bundledFiles.push_back(ulemFile);
     }
