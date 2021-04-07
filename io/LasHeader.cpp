@@ -92,6 +92,30 @@ void LasHeader::initialize(LogPtr log, uintmax_t fileSize)
 }
 
 
+std::string LasHeader::versionString() const
+{
+    return "1." + std::to_string(m_versionMinor);
+}
+
+
+Utils::StatusWithReason LasHeader::pointFormatSupported() const
+{
+    if (hasWave())
+        return { -1, "PDAL does not support point formats with waveform data (4, 5, 9 and 10)" };
+    if (versionAtLeast(1, 4))
+    {
+        if (pointFormat() > 10)
+            return { -1, "LAS version " + versionString() + " only supports point formats 0-10." };
+    }
+    else
+    {
+        if (pointFormat() > 5)
+            return { -1, "LAS version '" + versionString() + " only supports point formats 0-5." };
+    }
+    return true;
+}
+
+
 void LasHeader::setSummary(const LasSummaryData& summary)
 {
     m_pointCount = summary.getTotalNumPoints();

@@ -659,9 +659,9 @@ void LasWriter::fillHeader()
         globalEncoding |= WKT_MASK;
     m_lasHeader.setGlobalEncoding(globalEncoding);
 
-    if (!m_lasHeader.pointFormatSupported())
-        throwError("Unsupported LAS output point format: " +
-            Utils::toString((int)m_lasHeader.pointFormat()) + ".");
+    auto ok = m_lasHeader.pointFormatSupported();
+    if (!ok)
+        throwError(ok.what());
 }
 
 

@@ -121,6 +121,8 @@ public:
     uint8_t versionMinor() const
         { return m_versionMinor; }
 
+    std::string versionString() const;
+
     /// Set minor component of version of LAS format.
     /// \exception std::out_of_range - invalid value given.
     /// \param v - value between eVersionMinorMin and eVersionMinorMax.
@@ -213,13 +215,7 @@ public:
     /// Get identifier of point data (record) format.
     uint8_t pointFormat() const
         { return m_pointFormat; }
-    bool pointFormatSupported() const
-    {
-        if (versionAtLeast(1, 4))
-            return m_pointFormat <= 10 && !hasWave();
-        else
-            return m_pointFormat <= 5 && !hasWave();
-    }
+    Utils::StatusWithReason pointFormatSupported() const;
 
     /// The length in bytes of each point.  All points in the file are
     /// considered to be fixed in size, and the point format is used
