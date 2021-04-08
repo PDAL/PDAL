@@ -396,8 +396,8 @@ private:
       Potentially split a point view into keeps and skips based on a where clause.
 
       \param view  Point view to split.
-      \param keep  PointView to hold the kept points. 
-      \param skip  PointView to hold the skipped points. 
+      \param keep  PointView to hold the kept points.
+      \param skip  PointView to hold the skipped points.
     */
     void splitView(const PointViewPtr& view, PointViewPtr& keep, PointViewPtr& skip);
 

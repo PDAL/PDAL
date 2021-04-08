@@ -248,7 +248,9 @@ void Streamable::execute(StreamPointTable& table,
             for (PointId idx = 0; idx < pointLimit; idx++)
             {
                 point.setPointId(idx);
-                if (table.skip(idx) || (!where || !where->eval(point)))
+                if (table.skip(idx))
+                    continue;
+                if (where && !where->eval(point))
                     continue;
                 if (!s->processOne(point))
                     table.setSkip(idx);
