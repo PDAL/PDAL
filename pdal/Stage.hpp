@@ -58,6 +58,11 @@ class StageRunner;
 class StageWrapper;
 class Streamable;
 
+namespace expr
+{
+    class ConditionalExpression;
+}
+
 /**
   A stage performs the actual processing in PDAL.  Stages may read data,
   modify or filter read data, create metadata or write processed data.
@@ -78,9 +83,15 @@ class PDAL_DLL Stage
     friend class Writer;
 
 public:
+    enum class WhereMergeMode
+    {
+        Auto,
+        True,
+        False
+    };
+
     Stage();
     virtual ~Stage();
-
     /**
       Add a stage to the input list of this stage.
 
@@ -371,6 +382,8 @@ private:
     Stage& operator=(const Stage&) = delete;
     Stage(const Stage&) = delete;
 
+    virtual const expr::ConditionalExpression *whereExpr() const = 0;
+    virtual WhereMergeMode mergeMode() const = 0;
     void setupLog();
     void handleOptions();
     void countElements(const PointViewSet& views);
@@ -378,6 +391,15 @@ private:
     virtual void l_addArgs(ProgramArgs& args);
     virtual void l_initialize(PointTableRef table);
     virtual void l_prepared(PointTableRef table);
+
+    /**
+      Potentially split a point view into keeps and skips based on a where clause.
+
+      \param view  Point view to split.
+      \param keep  PointView to hold the kept points. 
+      \param skip  PointView to hold the skipped points. 
+    */
+    void splitView(const PointViewPtr& view, PointViewPtr& keep, PointViewPtr& skip);
 
     /**
       Get basic metadata (avoids reading points).  Implement in subclass.
@@ -489,6 +511,9 @@ private:
     */
     const Options& getOptions() const
         { return m_options; }
+
+    friend PDAL_DLL std::istream& operator>>(std::istream& in, WhereMergeMode& mode);
+    friend PDAL_DLL std::ostream& operator<<(std::ostream& out, const WhereMergeMode& mode);
 };
 
 } // namespace pdal
