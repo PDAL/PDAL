@@ -89,3 +89,4 @@ nodata
     [Default: depends on the data_type_.  -9999 for double, float, int and short, 9999 for
     unsigned int and unsigned short, 255 for unsigned char and -128 for char]
 
+.. include:: writer_opts.rst
