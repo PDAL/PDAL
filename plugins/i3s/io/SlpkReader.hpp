@@ -61,7 +61,6 @@ protected:
 
 private:
     LocationMap m_locMap;
-    arbiter::gzip::Decompressor m_decomp;
     FileUtils::MapContext m_ctx;
 
     void unarchive();
