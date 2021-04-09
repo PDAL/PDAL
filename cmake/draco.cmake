@@ -1,5 +1,5 @@
 #
-option(WITH_DRACO "Choose if Draco support should be built" TRUE)
+option(WITH_DRACO "Choose if Draco support should be built" FALSE)
 if (WITH_DRACO)
 
     # the `pkg_check_modules` function is created with this call
