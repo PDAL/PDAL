@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include "DeflateCompression.hpp"
+#include "GzipCompression.hpp"
 
 #include <zlib.h>
 
@@ -149,14 +150,14 @@ void DeflateCompressor::done()
 class DeflateDecompressorImpl
 {
 public:
-    DeflateDecompressorImpl(BlockCb cb) : m_cb(cb)
+    DeflateDecompressorImpl(BlockCb cb, int windowBits = 15) : m_cb(cb)
     {
         m_strm.zalloc = Z_NULL;
         m_strm.zfree = Z_NULL;
         m_strm.opaque = Z_NULL;
         m_strm.avail_in = 0;
         m_strm.next_in = Z_NULL;
-        switch (inflateInit(&m_strm))
+        switch (inflateInit2(&m_strm, windowBits))
         {
         case Z_OK:
             return;
@@ -249,5 +250,27 @@ void DeflateDecompressor::done()
 {
     m_impl->done();
 }
+
+// GZIP
+
+GzipDecompressor::GzipDecompressor(BlockCb cb) : m_impl(new DeflateDecompressorImpl(cb, 47))
+{}
+
+
+GzipDecompressor::~GzipDecompressor()
+{}
+
+
+void GzipDecompressor::decompress(const char *buf, size_t bufsize)
+{
+    m_impl->decompress(buf, bufsize);
+}
+
+
+void GzipDecompressor::done()
+{
+    m_impl->done();
+}
+
 
 } // namespace pdal
