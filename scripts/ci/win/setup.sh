@@ -12,7 +12,7 @@ conda install -c conda-forge draco=1.3.6 -y
 if [ "$BUILD_TYPE" == "fixed" ]; then
 
     conda config --set channel_priority strict
-    conda install --yes --quiet gdal=3.0.4=py38h3ba59e7_9 python=3.8 -y
+    conda install --yes --quiet gdal=3.2.2=py38hacca965_1 python=3.8 -y
     conda install --yes --quiet pdal  --only-deps -y
 
 else
