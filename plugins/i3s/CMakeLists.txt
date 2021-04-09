@@ -1,5 +1,9 @@
 include(${PDAL_CMAKE_DIR}/zlib.cmake)
 
+if (NOT ZLIB_FOUND)
+    message(FATAL_ERROR "ZLIB can't be found. Can't build SLPK/I3S without ZLIB support")
+endif()
+
 add_subdirectory(lepcc)
 
 PDAL_ADD_PLUGIN(i3s_reader_libname reader i3s
@@ -12,7 +16,6 @@ PDAL_ADD_PLUGIN(i3s_reader_libname reader i3s
         ${PDAL_SRC_DIR}/private/MathUtils.cpp
     LINK_WITH
         ${WINSOCK_LIBRARY}
-        ${ZLIB_LIBRARY}
         lepcc
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
@@ -21,7 +24,6 @@ PDAL_ADD_PLUGIN(i3s_reader_libname reader i3s
 )
 target_compile_definitions(${i3s_reader_libname}
     PRIVATE
-        ARBITER_ZLIB
         ARBITER_DLL_IMPORT
 )
 
@@ -35,7 +37,6 @@ PDAL_ADD_PLUGIN(slpk_reader_libname reader slpk
         ${PDAL_SRC_DIR}/private/MathUtils.cpp
     LINK_WITH
         ${WINSOCK_LIBRARY}
-        ${ZLIB_LIBRARY}
         lepcc
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
@@ -44,7 +45,6 @@ PDAL_ADD_PLUGIN(slpk_reader_libname reader slpk
 )
 target_compile_definitions(${slpk_reader_libname}
     PRIVATE
-        ARBITER_ZLIB
         ARBITER_DLL_IMPORT
 )
 

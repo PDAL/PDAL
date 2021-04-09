@@ -3935,12 +3935,6 @@ std::vector<std::string> Dropbox::glob(std::string path, bool verbose) const
 #include <arbiter/util/http.hpp>
 #include <arbiter/util/util.hpp>
 #include <arbiter/util/json.hpp>
-
-
-#ifdef ARBITER_ZLIB
-#include <arbiter/third/gzip/decompress.hpp>
-#endif
-
 #endif
 
 #ifdef ARBITER_CURL
@@ -4180,6 +4174,9 @@ void Curl::init(
     // Substantially faster DNS lookups without IPv6.
     curl_easy_setopt(m_curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 
+    // Only accept raw (identity) encoding.
+    curl_easy_setopt(m_curl, CURLOPT_ACCEPT_ENCODING, "");
+
     // Don't wait forever.  Use the low-speed options instead of the timeout
     // option to make the timeout a sliding window instead of an absolute.
     curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_LIMIT, 1L);
@@ -4260,16 +4257,6 @@ Response Curl::get(
         std::string& v(h.second);
         while (v.size() && v.front() == ' ') v = v.substr(1);
         while (v.size() && v.back() == ' ') v.pop_back();
-    }
-
-    if (receivedHeaders["Content-Encoding"] == "gzip")
-    {
-#ifdef ARBITER_ZLIB
-        std::string s(gzip::decompress(data.data(), data.size()));
-        data.assign(s.begin(), s.end());
-#else
-        throw ArbiterError("Cannot decompress zlib");
-#endif
     }
 
     return Response(httpCode, data, receivedHeaders);
