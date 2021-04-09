@@ -1168,7 +1168,7 @@ void LasWriter::finishOutput()
     OLeStream out(m_ostream);
 
     // addVlr prevents any eVlrs from being added before version 1.4.
-    m_lasHeader.setEVlrOffset((uint32_t)m_ostream->tellp());
+    m_lasHeader.setEVlrOffset(m_eVlrs.size() ? (uint32_t)m_ostream->tellp() : 0);
     for (auto vi = m_eVlrs.begin(); vi != m_eVlrs.end(); ++vi)
     {
         ExtLasVLR evlr = *vi;
