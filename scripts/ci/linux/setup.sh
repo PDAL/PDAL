@@ -8,7 +8,7 @@ conda install cmake ninja -y
 
 # can remove this line once Draco is added to the
 # PDAL recipe
-conda install -c conda-forge draco=1.3.6 -y
+conda install -c conda-forge draco pkgconfig -y
 
 
 if [ "$BUILD_TYPE" == "fixed" ]; then
