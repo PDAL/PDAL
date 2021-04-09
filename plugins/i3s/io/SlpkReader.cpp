@@ -34,6 +34,7 @@
 
 #include "SlpkReader.hpp"
 #include <pdal/util/IStream.hpp>
+#include <pdal/compression/GzipCompression.hpp>
 
 #include "EsriUtil.hpp"
 
@@ -145,7 +146,10 @@ std::string SlpkReader::fetchJson(std::string filepath)
 
     std::string output;
     const char *c = reinterpret_cast<const char *>(m_ctx.addr()) + loc.m_pos;
-    m_decomp.decompress<std::string>(output, c, loc.m_length);
+    GzipDecompressor decomp(
+        [&output](char *buf, size_t bufsize){output.append(buf, buf + bufsize);});
+    decomp.decompress(c, loc.m_length);
+    decomp.done();
     return output;
 }
 
@@ -158,19 +162,22 @@ std::vector<char> SlpkReader::fetchBinary(std::string url, std::string attNum,
     url += attNum + ext;
 
     auto li = m_locMap.find(url);
-    if (li == m_locMap.end())
-        return output;
-
-    const Location& loc = li->second;
-
-    const char *c = reinterpret_cast<const char *>(m_ctx.addr()) + loc.m_pos;
-    if (FileUtils::extension(url) != ".gz")
+    if (li != m_locMap.end())
     {
-        output.assign(c, c + loc.m_length);
-        return output;
-    }
+        const Location& loc = li->second;
 
-    m_decomp.decompress<std::vector<char>>(output, c, loc.m_length);
+        const char *c = reinterpret_cast<const char *>(m_ctx.addr()) + loc.m_pos;
+        if (FileUtils::extension(url) != ".gz")
+            output.assign(c, c + loc.m_length);
+        else
+        {
+            GzipDecompressor decomp(
+                [&output](char *buf, size_t bufsize)
+                    {output.insert(output.end(), buf, buf + bufsize);});
+            decomp.decompress(c, loc.m_length);
+            decomp.done();
+        }
+    }
     return output;
 }
 
