@@ -935,7 +935,6 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
     if (has14Format)
     {
         p.classification = (classification & 0x1F) | (classFlags << 5);
-        p.scan_angle_rank = point.getFieldAs<int8_t>(Id::ScanAngleRank);
         p.number_of_returns = (std::min)((uint8_t)7, numberOfReturns);
         p.return_number = (std::min)((uint8_t)7, returnNumber);
 
