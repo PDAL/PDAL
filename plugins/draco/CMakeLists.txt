@@ -19,7 +19,7 @@ PDAL_ADD_PLUGIN(reader_libname reader draco
     FILES
         io/DracoReader.cpp
     LINK_WITH
-        ${DRACO_LIBRARY}
+        ${DRACO_LIBRARIES}
     INCLUDES
         ${DRACO_INCLUDE_DIRS}
         ${NLOHMANN_INCLUDE_DIR}
@@ -36,7 +36,7 @@ PDAL_ADD_PLUGIN(writer_libname writer draco
     FILES
         io/DracoWriter.cpp
     LINK_WITH
-        ${DRACO_LIBRARY}
+        ${DRACO_LIBRARIES}
     INCLUDES
         ${DRACO_INCLUDE_DIRS}
         ${NLOHMANN_INCLUDE_DIR}
