@@ -1,6 +1,8 @@
 #
 # Draco plugin CMake configuration
 #
+include (${PDAL_CMAKE_DIR}/draco.cmake)
+
 if (NOT PDAL_HAVE_DRACO)
     message(FATAL_ERROR "Can't find Draco support required.")
 endif()
