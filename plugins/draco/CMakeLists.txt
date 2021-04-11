@@ -43,7 +43,6 @@ PDAL_ADD_PLUGIN(writer_libname writer draco
 )
 
 target_link_directories(${writer_libname} PRIVATE ${DRACO_LIBRARY_DIRS})
-target_link_libraries(${writer_libname}  PRIVATE ${DRACO_LIBRARY})
 
 
 if (WITH_TESTS)
@@ -59,7 +58,7 @@ if (WITH_TESTS)
             ${NLOHMANN_INCLUDE_DIR}
     )
     target_link_directories(pdal_io_draco_writer_test PRIVATE ${DRACO_LIBRARY_DIRS})
-    target_link_libraries(pdal_io_draco_writer_test  PRIVATE ${DRACO_LIBRARY})
+    target_link_libraries(pdal_io_draco_writer_test  PRIVATE ${DRACO_LIBRARIES})
 
     PDAL_ADD_TEST(pdal_io_draco_reader_test
         FILES
@@ -72,7 +71,7 @@ if (WITH_TESTS)
             ${NLOHMANN_INCLUDE_DIR}
     )
     target_link_directories(pdal_io_draco_reader_test PRIVATE ${DRACO_LIBRARY_DIRS})
-    target_link_libraries(pdal_io_draco_reader_test  PRIVATE ${DRACO_LIBRARY})
+    target_link_libraries(pdal_io_draco_reader_test  PRIVATE ${DRACO_LIBRARIES})
 
 
 endif()
