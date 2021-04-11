@@ -3,7 +3,7 @@
 echo "Configuring build type '$BUILD_TYPE'"
 mkdir build
 
-conda update -n base -c defaults conda
+conda update -n base -c defaults conda pkgconfig
 conda install cmake ninja compilers -y
 
 # can remove this after CF PDAL recipe adds Draco
