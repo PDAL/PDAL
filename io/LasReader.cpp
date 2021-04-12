@@ -641,8 +641,13 @@ void LasReader::addDimensions(PointLayoutPtr layout)
         layout->registerDim(Id::ClassFlags);
     }
 
+    size_t ebLen = m_p->header.pointLen() - m_p->header.basePointLen();
     for (auto& dim : m_p->extraDims)
     {
+        if (dim.m_size > ebLen)
+            throwError("Extra byte specification exceeds point length beyond base format length.");
+        ebLen -= dim.m_size;
+
         Dimension::Type type = dim.m_dimType.m_type;
         if (type == Dimension::Type::None)
             continue;
