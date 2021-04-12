@@ -122,8 +122,6 @@ TEST(UtilsTest, test_base64)
 
     EXPECT_EQ(decoded.size(), data.size());
     EXPECT_EQ(size, begin_size);
-
-    EXPECT_THROW(Utils::base64_decode("Thisisatest"), std::runtime_error);
 }
 
 TEST(UtilsTest, blanks)
