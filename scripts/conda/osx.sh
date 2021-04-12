@@ -28,7 +28,6 @@ CFLAGS= CXXFLAGS= CC=/usr/bin/cc CXX=/usr/bin/c++ cmake   -G "$CONFIG"  \
         -DWITH_LAZPERF=ON \
         -DWITH_ZSTD=ON \
         -DWITH_LASZIP=ON \
-        -DDraco_DIR="$CONDA_PREFIX/lib/draco/cmake" \
         -DWITH_DRACO=ON \
         ..
 
