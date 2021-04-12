@@ -935,7 +935,6 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
     if (has14Format)
     {
         p.classification = (classification & 0x1F) | (classFlags << 5);
-        p.scan_angle_rank = point.getFieldAs<int8_t>(Id::ScanAngleRank);
         p.number_of_returns = (std::min)((uint8_t)7, numberOfReturns);
         p.return_number = (std::min)((uint8_t)7, returnNumber);
 
@@ -1169,7 +1168,7 @@ void LasWriter::finishOutput()
     OLeStream out(m_ostream);
 
     // addVlr prevents any eVlrs from being added before version 1.4.
-    m_lasHeader.setEVlrOffset((uint32_t)m_ostream->tellp());
+    m_lasHeader.setEVlrOffset(m_eVlrs.size() ? (uint32_t)m_ostream->tellp() : 0);
     for (auto vi = m_eVlrs.begin(); vi != m_eVlrs.end(); ++vi)
     {
         ExtLasVLR evlr = *vi;

@@ -151,6 +151,7 @@ void EptInfo::initialize()
         double scale = element.value("scale", 1.0);
         double offset = element.value("offset", 0);
 
+        name = Dimension::fixName(name);
         Dimension::Id id = m_remoteLayout.registerOrAssignFixedDim(name, type);
         m_dims[name] = DimType(id, type, scale, offset);
     }
