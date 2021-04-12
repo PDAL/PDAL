@@ -45,7 +45,7 @@ namespace pdal
 static PluginInfo const s_info
 {
     "readers.mrsid",
-    "MrSID Reader",
+    "MrSID Reader [deprecated]",
     "http://pdal.io/stages/readers.mrsid.html"
 };
 
