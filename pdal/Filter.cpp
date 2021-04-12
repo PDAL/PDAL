@@ -86,68 +86,20 @@ void Filter::l_prepared(PointTableRef table)
         throwError("Can't set 'where_merge' options without also setting 'where' option.");
 }
 
-void Filter::splitView(const PointViewPtr& view, PointViewPtr& keep, PointViewPtr& skip)
+
+const expr::ConditionalExpression *Filter::whereExpr() const
 {
-    if (m_args->m_whereArg->set())
-    {
-        PointView *k = keep.get();
-        PointView *s = skip.get();
-        for (PointRef p : *view)
-        {
-            PointView *active = m_args->m_where.eval(p) ? k : s;
-            active->appendPoint(*view, p.pointId());
-        }
-    }
-    else
-        keep = view;
+    if (!m_args->m_where.valid())
+        return nullptr;
+    return &(m_args->m_where);
 }
 
-Filter::WhereMergeMode Filter::mergeMode() const
+
+Stage::WhereMergeMode Filter::mergeMode() const
 {
     return m_args->m_whereMerge;
 }
 
-bool Filter::eval(PointRef& p) const
-{
-    if (!m_args->m_whereArg->set())
-        return true;
-    return m_args->m_where.eval(p);
-}
-
-std::istream& operator>>(std::istream& in, Filter::WhereMergeMode& mode)
-{
-    std::string s;
-    in >> s;
-
-    s = Utils::tolower(s);
-    if (s == "auto")
-        mode = Filter::WhereMergeMode::Auto;
-    else if (s == "true")
-        mode = Filter::WhereMergeMode::True;
-    else if (s == "false")
-        mode = Filter::WhereMergeMode::False;
-    else
-        in.setstate(std::ios_base::failbit);
-    return in;
-}
-
-std::ostream& operator<<(std::ostream& out, const Filter::WhereMergeMode& mode)
-{
-    switch (mode)
-    {
-    case Filter::WhereMergeMode::Auto:
-        out << "auto";
-        break;
-    case Filter::WhereMergeMode::True:
-        out << "true";
-        break;
-    case Filter::WhereMergeMode::False:
-        out << "false";
-        break;
-    }
-
-    return out;
-}
 
 } // namespace pdal
 
