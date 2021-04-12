@@ -64,6 +64,8 @@ NL::json SlpkReader::initInfo()
     unarchive();
 
     size_t fileSize = FileUtils::fileSize(m_filename);
+    if (fileSize == 0)
+        throwError("Empty or invalid SLPK file '" + m_filename + "'.");
     m_ctx = FileUtils::mapFile(m_filename, true, 0 , fileSize);
     if (m_ctx.addr() == nullptr)
         throwError("Error mapping file SLPK file '" + m_filename +
