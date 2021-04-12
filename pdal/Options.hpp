@@ -63,14 +63,16 @@ public:
     template <typename T>
     Option(std::string const& name, const T& value) : m_name(name)
     {
-        std::ostringstream oss;
-        oss << value;
-        m_value = oss.str();
+        m_value = Utils::toString(value);
     }
 
-    Option(std::string const& name, const std::string& value) :
-        m_name(name), m_value(value)
+    Option(std::string const& name, const std::string& value) : m_name(name), m_value(value)
     {}
+
+    Option(std::string const& name, const double& value) : m_name(name)
+    {
+        m_value = Utils::toString(value, 15);
+    }
 
     Option(std::string const& name, const bool& value) :
         m_name(name)

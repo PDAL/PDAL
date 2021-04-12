@@ -163,4 +163,20 @@ TEST(OptionsTest, nan)
     EXPECT_NO_THROW(args.parse(cmdline));
 }
 
+TEST(OptionsTest, doublepreicison)
+{
+    ProgramArgs args;
+    double testVal = 1.23456789012345;
+    double value;
+
+    args.add("test", "Test", value);
+
+    Options ops;
+    ops.add("test", testVal);
+
+    StringList cmdline = ops.toCommandLine();
+    args.parse(ops.toCommandLine());
+    EXPECT_EQ(value, testVal);
+}
+
 } // namespace pdal
