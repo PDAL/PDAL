@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2018, Kyle Mann (kyle@hobu.co)
+* Copyright (c) 2014, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -31,40 +31,29 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
-
 #pragma once
 
-#include <pdal/util/FileUtils.hpp>
-
-#include "EsriReader.hpp"
+#include "Compression.hpp"
 
 namespace pdal
 {
-class PDAL_DLL SlpkReader : public EsriReader
+
+class DeflateDecompressorImpl;
+
+// We only support decompression for now.
+// The implementation is in DeflateCompression.cpp.
+class GzipDecompressor : public Decompressor
 {
-    struct Location
-    {
-        size_t m_pos;
-        size_t m_length;
-    };
-    using LocationMap = std::map<std::string, Location>;
-
 public:
-    virtual ~SlpkReader();
-    std::string getName() const override;
+    PDAL_DLL GzipDecompressor(BlockCb cb);
+    PDAL_DLL ~GzipDecompressor();
 
-protected:
-    virtual NL::json initInfo() override;
-    virtual std::vector<char> fetchBinary(std::string url, std::string attNum,
-            std::string ext) const override;
-    virtual std::string fetchJson(std::string) override;
+    PDAL_DLL void decompress(const char *buf, size_t bufsize);
+    PDAL_DLL void done();
 
 private:
-    LocationMap m_locMap;
-    FileUtils::MapContext m_ctx;
-
-    void unarchive();
+    // Gzip uses deflate.
+    std::unique_ptr<DeflateDecompressorImpl> m_impl;
 };
 
 } // namespace pdal
-
