@@ -347,9 +347,6 @@ public:
     bool useWkt() const
         { return (bool)((m_globalEncoding >> 4) & 1); }
 
-    bool incompatibleSrs() const
-        { return !useWkt() && has14Format(); }
-
     /// Returns true iff the file is compressed (laszip),
     /// as determined by the high bit in the point type
     bool compressed() const
