@@ -72,7 +72,7 @@ quantization
     "GENERIC": 8
 }
 
-
+.. include:: writer_opts.rst
 
 .. _PDAL's Type specification: https://github.com/PDAL/PDAL/blob/master/pdal/DimUtil.hpp
 .. _Draco: https://github.com/google/draco

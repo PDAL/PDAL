@@ -52,27 +52,18 @@ class PDAL_DLL Filter : public virtual Stage
     struct Args;
 
 public:
-    enum class WhereMergeMode
-    {
-        True,
-        False,
-        Auto
-    };
-
     Filter();
     ~Filter();
 
     Filter& operator=(const Filter&) = delete;
     Filter(const Filter&) = delete;
 
-    void splitView(const PointViewPtr& views, PointViewPtr& keeps, PointViewPtr& skips);
-    WhereMergeMode mergeMode() const;
-    bool eval(PointRef& p) const;
-
 private:
     virtual void l_initialize(PointTableRef table) final;
     virtual void l_addArgs(ProgramArgs& args) final;
     virtual void l_prepared(PointTableRef table) final;
+    virtual const expr::ConditionalExpression *whereExpr() const;
+    virtual WhereMergeMode mergeMode() const;
     virtual PointViewSet run(PointViewPtr view);
     virtual void filter(PointView& /*view*/)
     {}

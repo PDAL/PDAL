@@ -102,7 +102,7 @@ void GpsTimeConvert::initialize()
 }
 
 
-std::tm GpsTimeConvert::gpsTime2Date(const double seconds)
+std::tm GpsTimeConvert::gpsTime2Date(int seconds)
 {
     std::tm gpsZero = {};
     gpsZero.tm_year = 80;
@@ -110,9 +110,7 @@ std::tm GpsTimeConvert::gpsTime2Date(const double seconds)
     gpsZero.tm_mday = 6;
     gpsZero.tm_hour = 0;
     gpsZero.tm_min = 0;
-    gpsZero.tm_sec = 0;
-
-    gpsZero.tm_sec += seconds;
+    gpsZero.tm_sec = seconds;
 
     // refresh struct
     std::mktime(&gpsZero);

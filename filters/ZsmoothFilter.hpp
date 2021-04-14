@@ -1,6 +1,5 @@
-/******************************************************************************
- * Copyright (c) 2021, Preston J. Hartzell (preston.hartzell@gmail.com)
- *
+/***************************************************************************
+ * Copyright (c) 2020, University Nevada, Reno
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -13,10 +12,6 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided
  *       with the distribution.
- *     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
- *       names of its contributors may be used to endorse or promote
- *       products derived from this software without specific prior
- *       written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -32,42 +27,31 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#pragma once
+#include <memory>
 
 #include <pdal/Filter.hpp>
 
 namespace pdal
 {
 
-class PDAL_DLL GpsTimeConvert : public Filter
+class ZsmoothFilter : public Filter
 {
+    struct Private;
+
 public:
-    GpsTimeConvert() : Filter()
-    {}
     std::string getName() const;
 
+    ZsmoothFilter();
+    ~ZsmoothFilter();
+
 private:
-    std::string m_conversion;
-    std::string m_strDate;
-    std::tm m_tmDate;
-    bool m_wrap;
-    bool m_wrapped;
+    void addArgs(ProgramArgs& args);
+    void addDimensions(PointLayoutPtr layout);
+    void prepared(PointTableRef table);
+    void filter(PointView& view);
 
-    void weekSeconds2GpsTime(PointView& view);
-    void gpsTime2WeekSeconds(PointView& view);
-    void gpsTime2GpsTime(PointView& view);
-
-    std::tm gpsTime2Date(int seconds);
-    int weekStartGpsSeconds(std::tm date);
-    void unwrapWeekSeconds(PointView& view);
-    void wrapWeekSeconds(PointView& view);
-
-    virtual void addArgs(ProgramArgs& args);
-    virtual void initialize();
-    virtual void filter(PointView& view);
-
-    GpsTimeConvert& operator=(const GpsTimeConvert&); // not implemented
-    GpsTimeConvert(const GpsTimeConvert&); // not implemented
+    std::unique_ptr<Private> m_p;
 };
 
 } // namespace pdal
+

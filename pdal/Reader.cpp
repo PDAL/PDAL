@@ -38,6 +38,18 @@
 namespace pdal
 {
 
+const expr::ConditionalExpression* Reader::whereExpr() const
+{
+    return nullptr;
+}
+
+
+Stage::WhereMergeMode Reader::mergeMode() const
+{
+    return WhereMergeMode::True;
+}
+
+
 void Reader::l_addArgs(ProgramArgs& args)
 {
     Stage::l_addArgs(args);

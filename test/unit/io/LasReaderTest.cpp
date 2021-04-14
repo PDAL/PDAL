@@ -334,6 +334,19 @@ TEST(LasReaderTest, extraBytes)
     }
 }
 
+TEST(LasReaderTest, noextra)
+{
+    Options ro;
+    ro.add("filename", Support::datapath("las/autzen_trim.las"));
+    ro.add("extra_dims", "Foo=uint32_t");
+
+    LasReader r;
+    r.setOptions(ro);
+
+    PointTable t;
+    EXPECT_THROW(r.prepare(t), pdal_error);
+}
+
 TEST(LasReaderTest, callback)
 {
     PointTable table;
@@ -616,7 +629,7 @@ TEST(LasReaderTest, Start)
 #ifdef PDAL_HAVE_LAZPERF
     test1("lazperf");
     test2("lazperf");
-#endif PDAL_HAVE_LAZPERF
+#endif
 
     // Delete the created file.
     FileUtils::deleteFile(source);

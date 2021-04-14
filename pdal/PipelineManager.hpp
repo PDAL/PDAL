@@ -129,6 +129,7 @@ public:
     void executeStream(StreamPointTable& table);
     void validateStageOptions() const;
     bool pipelineStreamable() const;
+    bool hasReader() const;
 
     // Get the resulting point views.
     const PointViewSet& views() const

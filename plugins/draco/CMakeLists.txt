@@ -1,7 +1,9 @@
 #
 # Draco plugin CMake configuration
 #
-if (NOT Draco_FOUND)
+include (${PDAL_CMAKE_DIR}/draco.cmake)
+
+if (NOT PDAL_HAVE_DRACO)
     message(FATAL_ERROR "Can't find Draco support required.")
 endif()
 
@@ -17,13 +19,14 @@ PDAL_ADD_PLUGIN(reader_libname reader draco
     FILES
         io/DracoReader.cpp
     LINK_WITH
-        ${DRACO_LIBRARY}
+        ${DRACO_LIBRARIES}
     INCLUDES
-        ${draco_INCLUDE_DIR}
+        ${DRACO_INCLUDE_DIRS}
         ${NLOHMANN_INCLUDE_DIR}
 )
 
-target_link_directories(${reader_libname} PRIVATE ${draco_LIBRARY_DIR})
+target_link_libraries(${reader_libname}  PRIVATE ${DRACO_LIBRARY})
+target_link_directories(${reader_libname} PRIVATE ${DRACO_LIBRARY_DIRS})
 
 #
 # Draco Writer
@@ -33,13 +36,13 @@ PDAL_ADD_PLUGIN(writer_libname writer draco
     FILES
         io/DracoWriter.cpp
     LINK_WITH
-        ${DRACO_LIBRARY}
+        ${DRACO_LIBRARIES}
     INCLUDES
-        ${draco_INCLUDE_DIR}
+        ${DRACO_INCLUDE_DIRS}
         ${NLOHMANN_INCLUDE_DIR}
 )
 
-target_link_directories(${writer_libname} PRIVATE ${draco_LIBRARY_DIR})
+target_link_directories(${writer_libname} PRIVATE ${DRACO_LIBRARY_DIRS})
 
 
 if (WITH_TESTS)
@@ -50,12 +53,12 @@ if (WITH_TESTS)
         LINK_WITH
             ${writer_libname}
             ${reader_libname}
-            ${DRACO_LIBRARY}
         INCLUDES
-            ${draco_INCLUDE_DIR}
+            ${DRACO_INCLUDE_DIRS}
             ${NLOHMANN_INCLUDE_DIR}
     )
-    target_link_directories(pdal_io_draco_writer_test PRIVATE ${draco_LIBRARY_DIR})
+    target_link_directories(pdal_io_draco_writer_test PRIVATE ${DRACO_LIBRARY_DIRS})
+    target_link_libraries(pdal_io_draco_writer_test  PRIVATE ${DRACO_LIBRARIES})
 
     PDAL_ADD_TEST(pdal_io_draco_reader_test
         FILES
@@ -63,12 +66,12 @@ if (WITH_TESTS)
         LINK_WITH
             ${reader_libname}
             ${writer_libname}
-            ${DRACO_LIBRARY}
         INCLUDES
-            ${draco_INCLUDE_DIR}
+            ${DRACO_INCLUDE_DIRS}
             ${NLOHMANN_INCLUDE_DIR}
     )
-    target_link_directories(pdal_io_draco_reader_test PRIVATE ${draco_LIBRARY_DIR})
+    target_link_directories(pdal_io_draco_reader_test PRIVATE ${DRACO_LIBRARY_DIRS})
+    target_link_libraries(pdal_io_draco_reader_test  PRIVATE ${DRACO_LIBRARIES})
 
 
 endif()

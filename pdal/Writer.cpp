@@ -36,17 +36,40 @@
 #include <pdal/Stage.hpp>
 
 #include <pdal/util/ProgramArgs.hpp>
+#include "../filters/private/expr/ConditionalExpression.hpp"
 
 #pragma warning(disable: 4127)  // conditional expression is constant
 
 namespace pdal
 {
 
-Writer::Writer()
+struct Writer::Args
+{
+    expr::ConditionalExpression m_where;
+    Arg *m_whereArg;
+    Stage::WhereMergeMode m_whereMerge;
+    Arg *m_whereMergeArg;
+};
+
+Writer::Writer() : m_args(new Args)
 {}
 
 Writer::~Writer()
 {}
+
+const expr::ConditionalExpression* Writer::whereExpr() const
+{
+    if (!m_args->m_where.valid())
+        return nullptr;
+    return &(m_args->m_where);
+}
+
+
+Stage::WhereMergeMode Writer::mergeMode() const
+{
+    return m_args->m_whereMerge;
+}
+
 
 void Writer::l_initialize(PointTableRef table)
 {
@@ -58,11 +81,22 @@ void Writer::l_initialize(PointTableRef table)
 void Writer::l_addArgs(ProgramArgs& args)
 {
     Stage::l_addArgs(args);
+    m_args->m_whereArg = &args.add("where",
+        "Expression describing points to be passed to this "
+        "filter", m_args->m_where);
+    m_args->m_whereMergeArg = &args.add("where_merge", "If 'where' option is set, describes "
+        "how skipped points should be merged with kept points in standard mode.",
+        m_args->m_whereMerge, WhereMergeMode::Auto);
 }
 
 void Writer::l_prepared(PointTableRef table)
 {
     Stage::l_prepared(table);
+    auto status = m_args->m_where.prepare(table.layout());
+    if (!status)
+        throwError("Invalid 'where': " + status.what());
+    if (m_args->m_whereMergeArg->set() && !m_args->m_whereArg->set())
+        throwError("Can't set 'where_merge' options without also setting 'where' option.");
 }
 
 std::string::size_type Writer::handleFilenameTemplate(
