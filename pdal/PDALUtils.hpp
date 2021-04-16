@@ -275,6 +275,7 @@ bool PDAL_DLL isRemote(const std::string& path);
 bool PDAL_DLL fileExists(const std::string& path);
 std::vector<std::string> PDAL_DLL maybeGlob(const std::string& path);
 double PDAL_DLL computeHausdorff(PointViewPtr srcView, PointViewPtr candView);
+std::pair<double, double> PDAL_DLL computeHausdorffPair(PointViewPtr srcView, PointViewPtr candView);
 double PDAL_DLL computeChamfer(PointViewPtr srcView, PointViewPtr candView);
 
 } // namespace Utils
