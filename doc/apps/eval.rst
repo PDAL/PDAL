@@ -8,7 +8,7 @@ The ``eval`` command is used to compare the ``Classification`` dimensions of two
 point clouds.
 ::
 
-    $ pdal eval predicted truth --labels LABELS
+    $ pdal eval <predicted> <truth> --labels <labels>
 
 ::
 
