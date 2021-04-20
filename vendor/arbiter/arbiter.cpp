@@ -2855,7 +2855,7 @@ void AZ::copy(const std::string src, const std::string dst) const
 {
     Headers headers;
     const Resource resource(m_config->baseUrl(), src);
-    headers["x-ms-copy-source"] = resource.bucket() + '/' + resource.object();
+    headers["x-ms-copy-source"] = resource.object();
     put(dst, std::vector<char>(), headers, Query());
 }
 
@@ -2869,7 +2869,7 @@ std::vector<std::string> AZ::glob(std::string path, bool verbose) const
 
     const Resource resource(m_config->baseUrl(), path);
     const std::string& bucket(resource.bucket());
-    const std::string& object(resource.object());
+    const std::string& object(resource.blob());
 
     Query query;
 
@@ -2882,7 +2882,7 @@ std::vector<std::string> AZ::glob(std::string path, bool verbose) const
 
     if (verbose) std::cout << "." << std::flush;
 
-    if (!get(resource.bucket() + "/", data, Headers(), query))
+    if (!get(resource.bucket(), data, Headers(), query))
     {
         throw ArbiterError("Couldn't AZ GET " + resource.bucket());
     }
@@ -2902,40 +2902,43 @@ std::vector<std::string> AZ::glob(std::string path, bool verbose) const
     //read https://docs.microsoft.com/en-us/rest/api/storageservices/list-blobs
     if (XmlNode* topNode = xml.first_node("EnumerationResults"))
     {
-        if (XmlNode* conNode = topNode->first_node("Blobs"))
+        if (XmlNode* blobsNode = topNode->first_node("Blobs"))
         {
-            for ( ; conNode; conNode = conNode->next_sibling())
+            if (XmlNode* conNode = blobsNode->first_node("Blob"))
             {
-                if (XmlNode* keyNode = conNode->first_node("Name"))
+                for ( ; conNode; conNode = conNode->next_sibling())
                 {
-                    std::string key(keyNode->value());
-                    const bool isSubdir(
-                            key.find('/', object.size()) !=
-                            std::string::npos);
-
-                    // The prefix may contain slashes (i.e. is a sub-dir)
-                    // but we only want to traverse into subdirectories
-                    // beyond the prefix if recursive is true.
-                    if (recursive || !isSubdir)
+                    if (XmlNode* keyNode = conNode->first_node("Name"))
                     {
-                        results.push_back(
-                                type() + "://" + bucket + "/" + key);
+                        std::string key(keyNode->value());
+                        const bool isSubdir(
+                                key.find('/', object.size()) !=
+                                std::string::npos);
+
+                        // The prefix may contain slashes (i.e. is a sub-dir)
+                        // but we only want to traverse into subdirectories
+                        // beyond the prefix if recursive is true.
+                        if (recursive || !isSubdir)
+                        {
+                            results.push_back(
+                                    type() + "://" + bucket + "/" + key);
+                        }
                     }
                 }
-                else
-                {
-                    throw ArbiterError(badAZResponse);
-                }
+            }
+            else
+            {
+                throw ArbiterError("No blob node");
             }
         }
         else
         {
-            throw ArbiterError(badAZResponse);
+                throw ArbiterError("No blobs node");
         }
     }
     else
     {
-            throw ArbiterError(badAZResponse);
+            throw ArbiterError("No EnumerationResults node");
     }
 
     xml.clear();
@@ -2966,8 +2969,10 @@ AZ::ApiV1::ApiV1(
         {
             m_headers["Content-Type"] = "application/octet-stream";
         }
+        m_headers["Content-Length"] = std::to_string(data.size());
         m_headers.erase("Transfer-Encoding");
         m_headers.erase("Expect");
+        msHeaders["x-ms-blob-type"] = "BlockBlob";
     }
 
     const std::string canonicalHeaders(buildCanonicalHeader(msHeaders,m_headers));
@@ -2981,6 +2986,7 @@ AZ::ApiV1::ApiV1(
     m_headers["Authorization"] = getAuthHeader(signature);
     m_headers["x-ms-date"] = msHeaders["x-ms-date"];
     m_headers["x-ms-version"] = msHeaders["x-ms-version"];
+    m_headers["x-ms-blob-type"] = msHeaders["x-ms-blob-type"];
 }
 
 std::string AZ::ApiV1::buildCanonicalHeader(
@@ -3033,9 +3039,9 @@ std::string AZ::ApiV1::buildCanonicalResource(
     {
         const std::string keyVal(
                 sanitize(q.first, "") + ":" +
-                sanitize(q.second, ""));
+                q.second);
 
-        return s + (s.size() ? "\n" : "") + keyVal;
+        return s + "\n" + keyVal;
     });
 
     const std::string canonicalQuery(
@@ -3134,6 +3140,11 @@ std::string AZ::Resource::url() const
 std::string AZ::Resource::object() const
 {
     return m_bucket + "/" + m_object;
+}
+
+std::string AZ::Resource::blob() const
+{
+    return m_object;
 }
 
 std::string AZ::Resource::host() const
@@ -3275,9 +3286,19 @@ std::unique_ptr<std::size_t> Google::tryGetSize(const std::string path) const
     const auto res(
             https.internalHead(resource.endpoint(), headers, altMediaQuery));
 
-    std::string val;
-    if (res.ok() && findEntry(res.headers(), "Content-Length", val))
-        return makeUnique<std::size_t>(std::stoull(val));
+    if (res.ok())
+    {
+        if (res.headers().count("Content-Length"))
+        {
+            const auto& s(res.headers().at("Content-Length"));
+            return makeUnique<std::size_t>(std::stoull(s));
+        }
+        else if (res.headers().count("content-length"))
+        {
+            const auto& s(res.headers().at("content-length"));
+            return makeUnique<std::size_t>(std::stoull(s));
+        }
+    }
 
     return std::unique_ptr<std::size_t>();
 }
