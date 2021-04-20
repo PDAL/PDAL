@@ -79,7 +79,7 @@ void PcdReader::ready(PointTableRef table)
     switch (m_header.m_dataStorage)
     {
     case PcdDataStorage::ASCII:
-        m_istreamPtr = Utils::openFile(m_filename, false);
+        m_istreamPtr = Utils::openFile(m_filename, true);
         if (!m_istreamPtr)
             throwError("Unable to open ASCII PCD file '" + m_filename + "'.");
         m_istreamPtr->seekg(m_header.m_dataOffset);
@@ -243,7 +243,7 @@ void PcdReader::initialize()
     if (m_filename.empty())
         throwError("Can't read PCD file without filename.");
 
-    m_istreamPtr = Utils::openFile(m_filename, false);
+    m_istreamPtr = Utils::openFile(m_filename, true);
     if (!m_istreamPtr)
         throwError("Can't open file '" + m_filename + "'.");
     try
