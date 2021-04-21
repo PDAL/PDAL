@@ -159,7 +159,8 @@ Utils::StatusWithReason Geometry::transform(SpatialReference out)
         return StatusWithReason(-2,
             "Geometry::transform() failed.  NULL target SRS.");
 
-    SrsTransform transform(getSpatialReference(), out);
+    OGRSpatialReference *inSrs = m_geom->getSpatialReference();
+    SrsTransform transform(*inSrs, OGRSpatialReference(out.getWKT().data()));
     if (m_geom->transform(transform.get()) != OGRERR_NONE)
         return StatusWithReason(-1, "Geometry::transform() failed.");
     modified();
@@ -187,7 +188,8 @@ SpatialReference Geometry::getSpatialReference() const
     if (srsValid())
     {
         char *buf;
-        m_geom->getSpatialReference()->exportToWkt(&buf);
+        const char *options[] = { "WKT2_2019", nullptr };
+        m_geom->getSpatialReference()->exportToWkt(&buf, options);
         srs.set(buf);
         CPLFree(buf);
     }
