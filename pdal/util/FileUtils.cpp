@@ -454,8 +454,7 @@ std::vector<std::string> glob(std::string path)
 }
 
 
-MapContext mapFile(const std::string& filename, bool readOnly,
-    uint64_t pos, uint64_t size)
+MapContext mapFile(const std::string& filename, bool readOnly, uintmax_t pos, uintmax_t size)
 {
     MapContext ctx;
 
@@ -465,7 +464,17 @@ MapContext mapFile(const std::string& filename, bool readOnly,
         return ctx;
     }
 
-#ifndef WIN32
+    if (size == 0)
+    {
+        size = FileUtils::fileSize(filename);
+        if (size == 0)
+        {
+            ctx.m_error = "File doesn't exist or isn't a regular file. Perhaps provide a size?";
+            return ctx;
+        }
+    }
+
+#ifndef _WIN32
     ctx.m_fd = ::open(filename.c_str(), readOnly ? O_RDONLY : O_RDWR);
 #else
     ctx.m_fd = ::_open(filename.c_str(), readOnly ? O_RDONLY : O_RDWR);

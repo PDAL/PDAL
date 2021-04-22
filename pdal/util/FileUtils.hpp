@@ -286,7 +286,7 @@ namespace FileUtils
         { return m_error; }
 
         int m_fd;
-        uint64_t m_size;
+        uintmax_t m_size;
         void *m_addr;
         std::string m_error;
 #ifdef _WIN32
@@ -302,8 +302,8 @@ namespace FileUtils
       \return  MapContext.  addr() gets the mapped address.  what() gets
          any error message.  addr() returns nullptr on error.
     */
-    PDAL_DLL MapContext mapFile(const std::string& filename, bool readOnly,
-        uint64_t pos, uint64_t size);
+    PDAL_DLL MapContext mapFile(const std::string& filename, bool readOnly = true,
+        uintmax_t pos = 0, uintmax_t size = 0);
 
     /**
       Unmap a previously mapped file.
