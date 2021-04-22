@@ -253,10 +253,14 @@ bool fileExists(const std::string& name)
 }
 
 
+/// \return  0 on error or invalid file type.
 uintmax_t fileSize(const std::string& file)
 {
     pdalboost::system::error_code ec;
-    return pdalboost::filesystem::file_size(toNative(file), ec);
+    uintmax_t size = pdalboost::filesystem::file_size(toNative(file), ec);
+    if (ec)
+        size = 0;
+    return size;
 }
 
 

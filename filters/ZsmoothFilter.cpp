@@ -119,7 +119,7 @@ void ZsmoothFilter::filter(PointView& view)
         else
         {
             double pos = m_p->pos * (valList.size() - 1);
-            size_t low = std::floor(pos);
+            size_t low = (size_t)std::floor(pos);
             size_t high = low + 1;
             double highfrac = pos - low;
             double lowfrac = 1 - highfrac;

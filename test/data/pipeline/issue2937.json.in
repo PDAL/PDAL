@@ -1,4 +1,5 @@
 [
+    "@CMAKE_SOURCE_DIR@/test/data/las/autzen_trim.las",
     {
         "type": "writers.las",
         "filename": "@CMAKE_SOURCE_DIR@/test/temp/issue2937_out.las",

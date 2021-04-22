@@ -57,7 +57,7 @@ private:
     void gpsTime2WeekSeconds(PointView& view);
     void gpsTime2GpsTime(PointView& view);
 
-    std::tm gpsTime2Date(const double seconds);
+    std::tm gpsTime2Date(int seconds);
     int weekStartGpsSeconds(std::tm date);
     void unwrapWeekSeconds(PointView& view);
     void wrapWeekSeconds(PointView& view);

@@ -42,14 +42,8 @@ namespace pdal
 StageRunner::StageRunner(Stage *s, PointViewPtr view) : m_stage(s)
 {
     m_keeps = view->makeNew();
-    Filter *f = dynamic_cast<Filter *>(m_stage);
-    if (f)
-    {
-        m_skips = view->makeNew();
-        f->splitView(view, m_keeps, m_skips);
-    }
-    else
-        m_keeps = view;
+    m_skips = view->makeNew();
+    m_stage->splitView(view, m_keeps, m_skips);
 }
 
 PointViewPtr StageRunner::keeps()
@@ -63,19 +57,16 @@ void StageRunner::run()
     point_count_t keepSize = m_keeps->size();
     m_viewSet = m_stage->run(m_keeps);
 
-    Filter *f = dynamic_cast<Filter *>(m_stage);
-    if (!f || !m_skips || m_skips->size() == 0)
+    if (m_skips->size() == 0)
         return;
 
-    if (f->mergeMode() == Filter::WhereMergeMode::True)
+    if (m_stage->mergeMode() == Filter::WhereMergeMode::True)
     {
         if (m_viewSet.size())
-        {
             (*m_viewSet.begin())->append(*m_skips);
                 return;
-        }
     }
-    else if (f->mergeMode() == Filter::WhereMergeMode::Auto)
+    else if (m_stage->mergeMode() == Filter::WhereMergeMode::Auto)
     {
         if (m_viewSet.size() == 1)
         {

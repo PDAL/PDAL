@@ -71,7 +71,7 @@ void SbetReader::ready(PointTableRef)
 {
     size_t fileSize = FileUtils::fileSize(m_filename);
     size_t pointSize = sbet::fileDimensions().size() * sizeof(double);
-    if (fileSize % pointSize != 0)
+    if ((fileSize == 0)|| (fileSize % pointSize != 0))
         throwError("Invalid file size.");
     m_numPts = fileSize / pointSize;
     m_index = 0;

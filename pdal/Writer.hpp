@@ -34,6 +34,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include <pdal/Options.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/Stage.hpp>
@@ -42,6 +44,11 @@ namespace pdal
 {
 
 class UserCallback;
+
+namespace expr
+{
+    class ConditionalExpression;
+}
 
 /**
   A Writer is a terminal stage for a PDAL pipeline.  It usually writes output
@@ -53,6 +60,8 @@ class PDAL_DLL Writer : public virtual Stage
     friend class WriterWrapper;
     friend class DbWriter;
     friend class FlexWriter;
+
+    struct Args;
 
 public:
     Writer();
@@ -79,12 +88,16 @@ private:
     virtual void l_initialize(PointTableRef table);
     virtual void l_prepared(PointTableRef table) final;
 
+    virtual const expr::ConditionalExpression *whereExpr() const;
+    virtual WhereMergeMode mergeMode() const;
     /**
       Write the point in a PointView.  This is a simplification of the
       \ref run() interface for convenience.  Impelment in subclass if desired.
     */
     virtual void write(const PointViewPtr /*view*/)
         { std::cerr << "Can't write with stage = " << getName() << "!\n"; }
+
+    std::unique_ptr<Args> m_args;
 };
 
 } // namespace pdal

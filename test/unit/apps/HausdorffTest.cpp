@@ -78,17 +78,20 @@ TEST(Hausdorff, distance)
     cand->setField(Dimension::Id::Y, 1, 2.0);
     cand->setField(Dimension::Id::Z, 1, 0.0);
 
-    EXPECT_EQ(2.0, Utils::computeHausdorff(src, cand));
+    std::pair<double, double> result = Utils::computeHausdorffPair(src, cand);
+    EXPECT_EQ(2.0, result.first);
 
     cand->setField(Dimension::Id::X, 1, 0.0);
     cand->setField(Dimension::Id::Y, 1, 0.0);
     cand->setField(Dimension::Id::Z, 1, 3.0);
 
-    EXPECT_EQ(3.0, Utils::computeHausdorff(src, cand));
+    result = Utils::computeHausdorffPair(src, cand);
+    EXPECT_EQ(3.0, result.first);
 
     src->setField(Dimension::Id::X, 0, 1.0);
     src->setField(Dimension::Id::Y, 0, 1.0);
     src->setField(Dimension::Id::Z, 0, 1.0);
 
-    EXPECT_EQ(std::sqrt(6.0), Utils::computeHausdorff(src, cand));
+    result = Utils::computeHausdorffPair(src, cand);
+    EXPECT_EQ(std::sqrt(6.0), result.first);
 }

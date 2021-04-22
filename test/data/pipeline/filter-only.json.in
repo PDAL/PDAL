@@ -1,0 +1,6 @@
+[
+    {
+        "type": "filters.reprojection",
+        "out_srs": "EPSG:4326"
+    }
+]

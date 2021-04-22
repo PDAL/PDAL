@@ -469,4 +469,12 @@ TEST(json, issue_2438)
     EXPECT_TRUE(FileUtils::fileExists(file2));
 }
 
+//
+// Make sure that we throw an error if we use pipeline without a reader.
+//
+TEST(json, issue_3233)
+{
+    run_bad_pipeline("pipeline/filter-only.json", "", "start with a reader");
+}
+
 } // namespace pdal

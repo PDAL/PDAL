@@ -37,6 +37,7 @@
 #include <pdal/Streamable.hpp>
 #include <pdal/Filter.hpp>
 #include <pdal/Reader.hpp>
+#include "../filters/private/expr/ConditionalExpression.hpp"
 
 namespace pdal
 {
@@ -229,6 +230,7 @@ void Streamable::execute(StreamPointTable& table,
         if (!srs.empty())
             table.setSpatialReference(srs);
 
+        // Note again that we're treating writers as filters.
         // When we get a false back from a filter, we're filtering out a
         // point, so add it to the list of skips so that it doesn't get
         // processed by subsequent filters.
@@ -242,11 +244,13 @@ void Streamable::execute(StreamPointTable& table,
             }
             s->startLogging();
 
-            Filter *f = dynamic_cast<Filter *>(s);
+            const expr::ConditionalExpression* where = s->whereExpr();
             for (PointId idx = 0; idx < pointLimit; idx++)
             {
                 point.setPointId(idx);
-                if (table.skip(idx) || (f && !f->eval(point)))
+                if (table.skip(idx))
+                    continue;
+                if (where && !where->eval(point))
                     continue;
                 if (!s->processOne(point))
                     table.setSkip(idx);
