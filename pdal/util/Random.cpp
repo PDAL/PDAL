@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2021, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2021, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
