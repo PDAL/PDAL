@@ -188,7 +188,7 @@ SpatialReference Geometry::getSpatialReference() const
     if (srsValid())
     {
         char *buf;
-        const char *options[] = { "WKT2_2019", nullptr };
+        const char *options[] = { "FORMAT=WKT2", nullptr };
         m_geom->getSpatialReference()->exportToWkt(&buf, options);
         srs.set(buf);
         CPLFree(buf);
