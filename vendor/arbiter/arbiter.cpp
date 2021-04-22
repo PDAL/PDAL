@@ -3286,19 +3286,9 @@ std::unique_ptr<std::size_t> Google::tryGetSize(const std::string path) const
     const auto res(
             https.internalHead(resource.endpoint(), headers, altMediaQuery));
 
-    if (res.ok())
-    {
-        if (res.headers().count("Content-Length"))
-        {
-            const auto& s(res.headers().at("Content-Length"));
-            return makeUnique<std::size_t>(std::stoull(s));
-        }
-        else if (res.headers().count("content-length"))
-        {
-            const auto& s(res.headers().at("content-length"));
-            return makeUnique<std::size_t>(std::stoull(s));
-        }
-    }
+    std::string val;
+    if (res.ok() && findEntry(res.headers(), "Content-Length", val))
+        return makeUnique<std::size_t>(std::stoull(val));
 
     return std::unique_ptr<std::size_t>();
 }
