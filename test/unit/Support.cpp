@@ -396,7 +396,8 @@ Tempfile::Tempfile()
     m_name = temppath() + "tmp";
     for (size_t i = 0; i < 20; ++i)
     {
-        uint8_t v = std::uniform_int_distribution<uint8_t>(0, 61)(r.generator());
+        // 10 numbers + 26 lowercase + 26 uppercase = 62 values.
+        uint8_t v = (uint8_t)std::uniform_int_distribution<>(0, 61)(r.generator());
         if (v < 10)
             m_name += ('0' + v);
         else if (v < 36)
