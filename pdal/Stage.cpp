@@ -39,6 +39,7 @@
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/private/gdal/ErrorHandler.hpp>
+#include "../filters/private/expr/ConditionalExpression.hpp"
 
 #include "private/StageRunner.hpp"
 
@@ -55,6 +56,24 @@ Stage::Stage() : m_progressFd(-1), m_verbose(0), m_pointCount(0),
 
 Stage::~Stage()
 {}
+
+
+void Stage::splitView(const PointViewPtr& view, PointViewPtr& keep, PointViewPtr& skip)
+{
+    const expr::ConditionalExpression *where = whereExpr();
+    if (where)
+    {
+        PointView *k = keep.get();
+        PointView *s = skip.get();
+        for (PointRef p : *view)
+        {
+            PointView *active = where->eval(p) ? k : s;
+            active->appendPoint(*view, p.pointId());
+        }
+    }
+    else
+        keep = view;
+}
 
 
 void Stage::addConditionalOptions(const Options& opts)
@@ -421,6 +440,41 @@ void Stage::startLogging() const
 void Stage::stopLogging() const
 {
     m_log->popLeader();
+}
+
+std::istream& operator>>(std::istream& in, Stage::WhereMergeMode& mode)
+{
+    std::string s;
+    in >> s;
+
+    s = Utils::tolower(s);
+    if (s == "auto")
+        mode = Stage::WhereMergeMode::Auto;
+    else if (s == "true")
+        mode = Stage::WhereMergeMode::True;
+    else if (s == "false")
+        mode = Stage::WhereMergeMode::False;
+    else
+        in.setstate(std::ios_base::failbit);
+    return in;
+}
+
+std::ostream& operator<<(std::ostream& out, const Stage::WhereMergeMode& mode)
+{
+    switch (mode)
+    {
+    case Stage::WhereMergeMode::Auto:
+        out << "auto";
+        break;
+    case Stage::WhereMergeMode::True:
+        out << "true";
+        break;
+    case Stage::WhereMergeMode::False:
+        out << "false";
+        break;
+    }
+
+    return out;
 }
 
 } // namespace pdal

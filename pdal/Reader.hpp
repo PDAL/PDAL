@@ -44,6 +44,11 @@ namespace pdal
 
 class Reader;
 
+namespace expr
+{
+    class ConditionalExpression;
+}
+
 class PDAL_DLL Reader : public virtual Stage
 {
 public:
@@ -86,6 +91,8 @@ private:
     virtual void l_addArgs(ProgramArgs& args) final;
     virtual void l_prepared(PointTableRef table) final;
 
+    virtual const expr::ConditionalExpression* whereExpr() const;
+    virtual WhereMergeMode mergeMode() const;
     virtual point_count_t read(PointViewPtr /*view*/, point_count_t /*num*/)
         { return 0; }
 };
