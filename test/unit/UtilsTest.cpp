@@ -35,12 +35,15 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <sstream>
-
-#include <pdal/util/Utils.hpp>
-
 #include <vector>
 
-using namespace pdal;
+#include <pdal/util/portable_endian.hpp>
+#include <pdal/util/FileUtils.hpp>
+#include <pdal/util/Utils.hpp>
+#include "Support.hpp"
+
+namespace pdal
+{
 
 TEST(UtilsTest, test_random)
 {
@@ -468,4 +471,41 @@ TEST(UtilsTest, escapeJSON)
 {
     std::string escaped = Utils::escapeJSON("\u0001\t\f\n\\\"\u0016");
     EXPECT_EQ(escaped, "\\u0001\\t\\f\\n\\\\\\\"\\u0016");
+}
+
+TEST(UtilsTest, map)
+{
+    Support::Tempfile temp;
+
+    std::string filename = temp.filename();
+    std::ostream *out = FileUtils::createFile(filename);
+    out->seekp(50000);
+    *out << 1234;
+    out->write("Test", 4);
+    out->seekp(0x10FFFFFFFF);
+    *out << 5678;
+    out->write("Another.", 9);
+    FileUtils::closeFile(out);
+    auto ctx = FileUtils::mapFile(filename);
+    assert(ctx.addr());
+    char *c = reinterpret_cast<char *>(ctx.addr()) + 50000;
+
+    EXPECT_EQ(*c++, '1');
+    EXPECT_EQ(*c++, '2');
+    EXPECT_EQ(*c++, '3');
+    EXPECT_EQ(*c++, '4');
+    EXPECT_EQ(*c++, 'T');
+    EXPECT_EQ(*c++, 'e');
+    EXPECT_EQ(*c++, 's');
+    EXPECT_EQ(*c++, 't');
+
+    c = reinterpret_cast<char *>(ctx.addr()) + 0x10FFFFFFFF;
+    EXPECT_EQ(*c++, '5');
+    EXPECT_EQ(*c++, '6');
+    EXPECT_EQ(*c++, '7');
+    EXPECT_EQ(*c++, '8');
+    EXPECT_EQ(std::string(c), "Another.");
+    FileUtils::unmapFile(ctx);
+}
+
 }
