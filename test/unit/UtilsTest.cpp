@@ -483,6 +483,7 @@ TEST(UtilsTest, map)
 
     std::string filename = temp.filename();
 
+    std::ostream *out;
     // This turns on sparse file support. Otherwise, we're going to make a huge
     // file that won't fit on many filesystems and an error will occur. If we
     // can't set the file to sparse, we just return.  UNIX filesystems I'm
@@ -501,9 +502,11 @@ TEST(UtilsTest, map)
     CloseHandle(f);
     if (!ok)
         return;
+    out = FileUtils::openExisting(filename);
+#else
+    out = FileUtils::createFile(filename);
 #endif
 
-    std::ostream *out = FileUtils::openExisting(filename);
     out->seekp(50000);
     *out << 1234;
     out->write("Test", 4);
