@@ -42,6 +42,10 @@
 #include <pdal/util/Utils.hpp>
 #include "Support.hpp"
 
+#ifdef _WIN32
+#include <winioctl.h>
+#endif
+
 namespace pdal
 {
 
@@ -478,7 +482,28 @@ TEST(UtilsTest, map)
     Support::Tempfile temp;
 
     std::string filename = temp.filename();
-    std::ostream *out = FileUtils::createFile(filename);
+
+    // This turns on sparse file support. Otherwise, we're going to make a huge
+    // file that won't fit on many filesystems and an error will occur. If we
+    // can't set the file to sparse, we just return.  UNIX filesystems I'm
+    // aware of support sparse files without this mess.
+#ifdef _WIN32
+    auto f = CreateFileA(filename.data(), GENERIC_READ | GENERIC_WRITE,
+        0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+    DWORD flags;
+    GetVolumeInformationByHandleW(f, NULL, 0, NULL, NULL, &flags, NULL, 0);
+    bool ok = false;
+    if (flags & FILE_SUPPORTS_SPARSE_FILES)
+    {
+        DWORD tmp;
+        ok = DeviceIoControl(f, FSCTL_SET_SPARSE, NULL, 0, NULL, 0, &tmp, NULL);
+    }
+    CloseHandle(f);
+    if (!ok)
+        return;
+#endif
+
+    std::ostream *out = FileUtils::openExisting(filename);
     out->seekp(50000);
     *out << 1234;
     out->write("Test", 4);
@@ -486,6 +511,7 @@ TEST(UtilsTest, map)
     *out << 5678;
     out->write("Another.", 9);
     FileUtils::closeFile(out);
+
     auto ctx = FileUtils::mapFile(filename);
     assert(ctx.addr());
     char *c = reinterpret_cast<char *>(ctx.addr()) + 50000;

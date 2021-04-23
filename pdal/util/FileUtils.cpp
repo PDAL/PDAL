@@ -148,6 +148,22 @@ std::ostream *createFile(std::string const& name, bool asBinary)
 }
 
 
+std::ostream *openExisting(const std::string& name, bool asBinary)
+{
+    std::ios::openmode mode = std::ios::out | std::ios::in;
+    if (asBinary)
+        mode |= std::ios::binary;
+
+    std::ostream *ofs = new std::ofstream(toNative(name), mode);
+    if (!ofs->good())
+    {
+        delete ofs;
+        return nullptr;
+    }
+    return ofs;
+}
+
+
 bool directoryExists(const std::string& dirname)
 {
     //ABELL - Seems we should be calling is_directory
@@ -498,7 +514,7 @@ MapContext mapFile(const std::string& filename, bool readOnly, uintmax_t pos, ui
     ctx.m_handle = CreateFileMapping((HANDLE)_get_osfhandle(ctx.m_fd),
         NULL, PAGE_READONLY, 0, 0, NULL);
     uint32_t low = pos & 0xFFFFFFFF;
-    uint32_t high = (pos >> 8);
+    uint32_t high = (uint32_t)(pos >> 8);
     ctx.m_addr = MapViewOfFile(ctx.m_handle, FILE_MAP_READ, high, low,
         ctx.m_size);
     if (ctx.m_addr == nullptr)
