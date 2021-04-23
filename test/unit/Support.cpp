@@ -45,42 +45,46 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/util/FileUtils.hpp>
+#include <pdal/util/Random.hpp>
 #include "TestConfig.hpp"
 
-using namespace pdal;
-using namespace std;
+namespace pdal
+{
+namespace Support
+{
 
-string Support::datapath()
+std::string datapath()
 {
     return TestConfig::dataPath();
 }
 
-std::string Support::datapath(const std::string& file)
+std::string datapath(const std::string& file)
 {
     return datapath() + file;
 }
 
-string Support::configuredpath()
+std::string configuredpath()
 {
     return TestConfig::configuredPath();
 }
 
-std::string Support::configuredpath(const std::string& file)
+std::string configuredpath(const std::string& file)
 {
     return configuredpath() + file;
 }
 
-std::string Support::temppath()
+std::string temppath()
 {
     return TestConfig::dataPath() + "../temp/";
 }
 
-std::string Support::temppath(const std::string& file)
+std::string temppath(const std::string& file)
 {
     return temppath() + file;
 }
 
-std::string Support::binpath()
+std::string binpath()
 {
     std::string binpath = TestConfig::binaryPath();
 
@@ -91,12 +95,12 @@ std::string Support::binpath()
 #endif
 }
 
-std::string Support::binpath(const std::string& file)
+std::string binpath(const std::string& file)
 {
     return binpath() + file;
 }
 
-std::string Support::exename(const std::string& name)
+std::string exename(const std::string& name)
 {
 #ifdef _WIN32
     return name + ".exe";
@@ -107,24 +111,22 @@ std::string Support::exename(const std::string& name)
 
 
 // do a comparison by line of two (text) files, ignoring CRLF differences
-uint32_t Support::diff_text_files(const std::string& file1,
-    const std::string& file2, int32_t ignoreLine1)
+uint32_t diff_text_files(const std::string& file1, const std::string& file2, int32_t ignoreLine1)
 {
-    if (!pdal::Utils::fileExists(file1) || !pdal::Utils::fileExists(file2))
+    if (!Utils::fileExists(file1) || !Utils::fileExists(file2))
         return (std::numeric_limits<uint32_t>::max)();
 
-    std::istream* str1 = pdal::Utils::openFile(file1, false);
-    std::istream* str2 = pdal::Utils::openFile(file2, false);
+    std::istream* str1 = Utils::openFile(file1, false);
+    std::istream* str2 = Utils::openFile(file2, false);
 
     int32_t diffs = diff_text_files(*str1, *str2, ignoreLine1);
 
-    pdal::Utils::closeFile(str1);
-    pdal::Utils::closeFile(str2);
+    Utils::closeFile(str1);
+    Utils::closeFile(str2);
     return diffs;
 }
 
-uint32_t Support::diff_text_files(std::istream& str1, std::istream& str2,
-    int32_t ignoreLine1)
+uint32_t diff_text_files(std::istream& str1, std::istream& str2, int32_t ignoreLine1)
 {
     uint32_t numdiffs = 0;
     int32_t currLine = 1;
@@ -181,8 +183,7 @@ uint32_t Support::diff_text_files(std::istream& str1, std::istream& str2,
 }
 
 
-uint32_t Support::diff_files(const std::string& file1,
-    const std::string& file2, uint32_t ignorable_start,
+uint32_t diff_files(const std::string& file1, const std::string& file2, uint32_t ignorable_start,
     uint32_t ignorable_length)
 {
     uint32_t start[] = { ignorable_start };
@@ -192,28 +193,25 @@ uint32_t Support::diff_files(const std::string& file1,
 
 
 // do a byte-wise comparison of two (binary) files
-uint32_t Support::diff_files(const std::string& file1,
-    const std::string& file2, uint32_t* ignorable_start,
+uint32_t diff_files(const std::string& file1, const std::string& file2, uint32_t* ignorable_start,
     uint32_t* ignorable_length, uint32_t num_ignorables)
 {
-    if (!pdal::Utils::fileExists(file1) || !pdal::Utils::fileExists(file2))
+    if (!Utils::fileExists(file1) || !Utils::fileExists(file2))
         return (std::numeric_limits<uint32_t>::max)();
 
-    std::istream* str1 = pdal::Utils::openFile(file1);
-    std::istream* str2 = pdal::Utils::openFile(file2);
+    std::istream* str1 = Utils::openFile(file1);
+    std::istream* str2 = Utils::openFile(file2);
 
-    uint32_t ret = diff_files(*str1, *str2, ignorable_start, ignorable_length,
-        num_ignorables);
+    uint32_t ret = diff_files(*str1, *str2, ignorable_start, ignorable_length, num_ignorables);
 
-    pdal::Utils::closeFile(str1);
-    pdal::Utils::closeFile(str2);
+    Utils::closeFile(str1);
+    Utils::closeFile(str2);
     return ret;
 }
 
 
-uint32_t Support::diff_files(std::istream& str1, std::istream& str2,
-    uint32_t* ignorable_start, uint32_t* ignorable_length,
-    uint32_t num_ignorables)
+uint32_t diff_files(std::istream& str1, std::istream& str2, uint32_t* ignorable_start,
+    uint32_t* ignorable_length, uint32_t num_ignorables)
 {
     uint32_t numdiffs = 0;
     char p, q;
@@ -257,35 +255,32 @@ uint32_t Support::diff_files(std::istream& str1, std::istream& str2,
 }
 
 
-uint32_t Support::diff_files(const std::string& file1,
-    const std::string& file2)
+uint32_t diff_files(const std::string& file1, const std::string& file2)
 {
     return diff_files(file1, file2, NULL, NULL, 0);
 }
 
-uint32_t Support::diff_files(std::istream& str1, std::istream& str2)
+uint32_t diff_files(std::istream& str1, std::istream& str2)
 {
     return diff_files(str1, str2, NULL, NULL, 0);
 }
 
-bool Support::compare_files(const std::string& file1, const std::string& file2)
+bool compare_files(const std::string& file1, const std::string& file2)
 {
     return diff_files(file1, file2) == 0;
 }
 
-bool Support::compare_text_files(const std::string& file1,
-    const std::string& file2)
+bool compare_text_files(const std::string& file1, const std::string& file2)
 {
     return diff_text_files(file1, file2) == 0;
 }
 
-bool Support::compare_text_files(std::istream& str1, std::istream& str2)
+bool compare_text_files(std::istream& str1, std::istream& str2)
 {
     return diff_text_files(str1, str2) == 0;
 }
 
-
-void Support::checkXYZ(const std::string& file1, const std::string& file2)
+void checkXYZ(const std::string& file1, const std::string& file2)
 {
     StageFactory f;
 
@@ -334,8 +329,7 @@ void Support::checkXYZ(const std::string& file1, const std::string& file2)
 }
 
 
-void Support::check_pN(const pdal::PointView& data, PointId index,
-    double xref, double yref, double zref)
+void check_pN(const PointView& data, PointId index, double xref, double yref, double zref)
 {
     float x0 = data.getFieldAs<float>(Dimension::Id::X, index);
     float y0 = data.getFieldAs<float>(Dimension::Id::Y, index);
@@ -347,9 +341,8 @@ void Support::check_pN(const pdal::PointView& data, PointId index,
 }
 
 
-void Support::check_pN(const PointView& data, PointId index,
-    double xref, double yref, double zref, double tref,
-    uint16_t rref, uint16_t gref, uint16_t bref)
+void check_pN(const PointView& data, PointId index, double xref, double yref, double zref,
+    double tref, uint16_t rref, uint16_t gref, uint16_t bref)
 {
     check_pN(data, index, xref, yref, zref);
 
@@ -371,39 +364,22 @@ void Support::check_pN(const PointView& data, PointId index,
 }
 
 
-void Support::check_p0_p1_p2(const pdal::PointView& data)
+void check_p0_p1_p2(const PointView& data)
 {
-    Support::check_pN(data, 0, 637012.240000, 849028.310000, 431.660000);
-    Support::check_pN(data, 1, 636896.330000, 849087.700000, 446.390000);
-    Support::check_pN(data, 2, 636784.740000, 849106.660000, 426.710000);
+    check_pN(data, 0, 637012.240000, 849028.310000, 431.660000);
+    check_pN(data, 1, 636896.330000, 849087.700000, 446.390000);
+    check_pN(data, 2, 636784.740000, 849106.660000, 426.710000);
 }
 
 
-void Support::check_p100_p101_p102(const pdal::PointView& data)
+void check_p100_p101_p102(const PointView& data)
 {
-    Support::check_pN(data, 0, 636661.060000, 849854.130000, 424.900000);
-    Support::check_pN(data, 1, 636568.180000, 850179.490000, 441.800000);
-    Support::check_pN(data, 2, 636554.630000, 850040.030000, 499.110000);
+    check_pN(data, 0, 636661.060000, 849854.130000, 424.900000);
+    check_pN(data, 1, 636568.180000, 850179.490000, 441.800000);
+    check_pN(data, 2, 636554.630000, 850040.030000, 499.110000);
 }
 
-
-void Support::check_p355_p356_p357(const pdal::PointView& data)
-{
-    Support::check_pN(data, 0, 636462.600000, 850566.110000, 432.610000);
-    Support::check_pN(data, 1, 636356.140000, 850530.480000, 432.680000);
-    Support::check_pN(data, 2, 636227.530000, 850592.060000, 428.670000);
-}
-
-
-void Support::check_p710_p711_p712(const pdal::PointView& data)
-{
-    Support::check_pN(data, 0, 638720.670000, 850926.640000, 417.320000);
-    Support::check_pN(data, 1, 638672.380000, 851081.660000, 420.670000);
-    Support::check_pN(data, 2, 638598.880000, 851445.370000, 422.150000);
-}
-
-
-void Support::compareBounds(const BOX3D& p, const BOX3D& q)
+void compareBounds(const BOX3D& p, const BOX3D& q)
 {
     EXPECT_DOUBLE_EQ(p.minx, q.minx);
     EXPECT_DOUBLE_EQ(p.miny, q.miny);
@@ -413,3 +389,33 @@ void Support::compareBounds(const BOX3D& p, const BOX3D& q)
     EXPECT_DOUBLE_EQ(p.maxz, q.maxz);
 }
 
+// This provides no guarantees but is highly likely to work, and it's just for test purposes.
+Tempfile::Tempfile()
+{
+    Utils::Random r;
+    m_name = temppath() + "tmp";
+    for (size_t i = 0; i < 20; ++i)
+    {
+        // 10 numbers + 26 lowercase + 26 uppercase = 62 values.
+        uint8_t v = (uint8_t)std::uniform_int_distribution<>(0, 61)(r.generator());
+        if (v < 10)
+            m_name += ('0' + v);
+        else if (v < 36)
+            m_name += ('a' + v - 10);
+        else
+            m_name += ('A' + v - 36);
+    }
+}
+
+Tempfile::~Tempfile()
+{
+    FileUtils::deleteFile(m_name);
+}
+
+std::string Tempfile::filename()
+{
+    return m_name;
+}
+
+} // namespace Support
+} // namespace pdal

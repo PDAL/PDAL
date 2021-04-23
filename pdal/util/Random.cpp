@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Hobu Inc., (info@hobu.co)
+* Copyright (c) 2021, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,9 +13,10 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. nor the names of contributors
-*       may be used to endorse or promote products derived from this
-*       software without specific prior written permission.
+*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*       names of its contributors may be used to endorse or promote
+*       products derived from this software without specific prior
+*       written permission.
 *
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -31,30 +32,67 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <string>
-
-#include <pdal/pdal_test_main.hpp>
-
-#include "Support.hpp"
+#include "Random.hpp"
 
 namespace pdal
 {
-
-namespace
+namespace Utils
 {
-std::string appName()
-{
-    return Support::binpath("pdal");
-}
-} // unnamed namespace
 
-// The Cmake file makes sure we're building the hexbin plugin.
-TEST(PdalAppPlugin, load)
+Random::Random()
 {
-    std::string output;
-
-    Utils::run_shell_command(appName() + " fauxplugin 2>&1", output);
-    EXPECT_TRUE(output.find("kernels.fauxplugin") != std::string::npos);
+    std::vector<int32_t> seed;
+    std::random_device rd;
+    for (size_t i = 0; i < std::mt19937::state_size; ++i)
+        seed.push_back(rd());
+    std::seed_seq seedSeq(seed.begin(), seed.end());
+    m_generator.seed(seedSeq);
 }
 
-} // unnamed namespace
+Random::Random(int32_t seed)
+{
+    std::seed_seq seedSeq {seed};
+    m_generator.seed(seedSeq);
+}
+
+Random::Random(const std::vector<int32_t> seed)
+{
+    std::seed_seq seedSeq(seed.begin(), seed.end());
+    m_generator.seed(seedSeq);
+}
+
+Random::Random(const std::string& seed)
+{
+    std::vector<int32_t> v;
+    int32_t s = 0;
+    int i = 0;
+    for (char c : seed)
+    {
+        s |= c << (8 * i++);
+        if (i == 4)
+        {
+            v.push_back(s);
+            i = 0;
+            s = 0;
+        }
+    }
+    if (i)
+        v.push_back(s);
+    std::seed_seq seedSeq(v.begin(), v.end());
+    m_generator.seed(seedSeq);
+}
+
+std::mt19937& Random::generator()
+{
+    return m_generator;
+}
+
+unsigned int Random::quick()
+{
+    std::random_device rd;
+
+    return rd();
+}
+
+} // namespace Utils
+} // namespace pdal

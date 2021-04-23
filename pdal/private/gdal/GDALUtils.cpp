@@ -359,7 +359,7 @@ std::vector<Polygon> getPolygons(const NL::json& ogr)
                 ds->ReleaseResultSet(poLayer);
 
                 poly.update(options.at("geometry").get<std::string>());
-                if (poly.getSpatialReference().valid())
+                if (poly.srsValid())
                 {
                     auto ok = poly.transform(sref.wkt());
                     if (!ok)
