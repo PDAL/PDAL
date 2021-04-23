@@ -39,6 +39,8 @@
 #include <string>
 #include <vector>
 
+#include "pdal_util_export.hpp"
+
 namespace pdal
 {
 namespace Utils
@@ -47,14 +49,14 @@ namespace Utils
 class Random
 {
 public:
-    Random();
-    Random(int32_t seed);
-    Random(const std::vector<int32_t> seed);
-    Random(const std::string& seed);
+    PDAL_DLL Random();
+    PDAL_DLL Random(int32_t seed);
+    PDAL_DLL Random(const std::vector<int32_t> seed);
+    PDAL_DLL Random(const std::string& seed);
 
-    std::mt19937& generator();
+    PDAL_DLL std::mt19937& generator();
 
-    static unsigned int quick();
+    PDAL_DLL static unsigned int quick();
 
 private:
     std::mt19937 m_generator;

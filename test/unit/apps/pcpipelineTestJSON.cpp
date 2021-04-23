@@ -46,6 +46,9 @@
 #include <sstream>
 #include <string>
 
+namespace pdal
+{
+
 namespace
 {
 
@@ -106,9 +109,6 @@ void run_pipeline_stdin(std::string const& pipelineFile)
 }
 
 } // unnamed namespace
-
-namespace pdal
-{
 
 TEST(pipelineBaseTest, no_input)
 {
