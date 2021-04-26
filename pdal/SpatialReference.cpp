@@ -364,11 +364,7 @@ std::vector<int> SpatialReference::getAxisOrdering() const
 {
     std::vector<int> output;
     OGRScopedSpatialReference current = ogrCreateSrs(m_wkt);
-
-
-#if GDAL_VERSION_MAJOR >= 3
     output = current.get()->GetDataAxisToSRSAxisMapping();
-#endif
     return output;
 }
 
@@ -473,9 +469,6 @@ std::string SpatialReference::prettyWkt(const std::string& wkt)
 
 std::string SpatialReference::getWKT1() const
 {
-#if GDAL_VERSION_MAJOR < 3
-    return getWKT();
-#else
     std::string wkt = getWKT();
     if (wkt.empty())
         return wkt;
@@ -485,7 +478,8 @@ std::string SpatialReference::getWKT1() const
     if (srs)
     {
         char *buf = nullptr;
-        const char* apszOptions[] = { "FORMAT=WKT1_GDAL", "ALLOW_ELLIPSOIDAL_HEIGHT_AS_VERTICAL_CRS=YES", nullptr };
+        const char* apszOptions[] =
+            { "FORMAT=WKT1_GDAL", "ALLOW_ELLIPSOIDAL_HEIGHT_AS_VERTICAL_CRS=YES", nullptr };
 
         srs->exportToWkt(&buf, apszOptions);
         if (buf)
@@ -495,10 +489,8 @@ std::string SpatialReference::getWKT1() const
         }
     }
     if (wkt1.empty())
-        throw pdal_error("Couldn't convert spatial reference to WKT "
-            "version 1.");
+        throw pdal_error("Couldn't convert spatial reference to WKT version 1.");
     return wkt1;
-#endif
 }
 
 
