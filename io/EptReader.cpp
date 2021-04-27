@@ -782,17 +782,33 @@ top:
         do
         {
             std::unique_lock<std::mutex> l(m_p->mutex);
+            static int outstanding = std::distance(m_p->hierarchy->cbegin(), m_p->hierarchyIter);
             if (m_p->contents.size())
             {
+                size_t backlog = m_p->contents.size();
+                outstanding--;
+                std::cerr << "Outstanding = " << outstanding << "!\n";
+                std::cerr << "Backlog = " << backlog << "!\n";
                 m_p->currentTile.reset(new TileContents(std::move(m_p->contents.front())));
                 m_p->contents.pop();
                 l.unlock();
-                if (m_p->hierarchyIter != m_p->hierarchy->cend())
+                if (backlog < 4 && m_p->hierarchyIter != m_p->hierarchy->cend())
+                {
+                    outstanding++;
                     load(*m_p->hierarchyIter++);
+                }
                 break;
             }
             else
+            {
+                // If there is nothing to process, assume we're too slow and add an extra request.
+                if (m_p->hierarchyIter != m_p->hierarchy->cend())
+                {
+                    outstanding++;
+                    load(*m_p->hierarchyIter++);
+                }
                 m_p->contentsCv.wait(l);
+            }
         } while (true);
         checkTile(*m_p->currentTile);
     }
