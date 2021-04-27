@@ -271,16 +271,12 @@ OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs)
     // Just send the JSON stuff to the OGR function.
     std::string ss = s.substr(0, pos);
 
-std::cerr << "JSON part = " << ss << "!\n";
     OGRGeometry *newGeom = OGRGeometryFactory::createFromGeoJson(ss.data());
     if (!newGeom)
         throw pdal_error("Couldn't convert GeoJSON to geometry.");
 
-std::cerr << "Pos = " << pos << "!\n";
     srs = s.substr(pos);
-std::cerr << "Following part = " << srs << "!\n";
 	pos = Utils::extractSpaces(srs, 0);
-std::cerr << "Pos after extract = " << pos << "!\n";
 	if (pos == srs.size())
 		srs.clear();
     else
