@@ -8,7 +8,7 @@ jobs:
   containers:
     runs-on: ubuntu-latest
     env:
-      PUSH_PACKAGES: ${{ github.repository_owner == 'PDAL' }}
+      PUSH_PACKAGES: ${{ github.repository_owner == 'PDAL' && github.event_name != 'pull_request'  }}
     steps:
       - uses: actions/checkout@v2
       - name: Lint
