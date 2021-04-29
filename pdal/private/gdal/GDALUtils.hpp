@@ -40,8 +40,6 @@
 
 class OGRGeometry;
 typedef void *OGRGeometryH;
-class GDALDataset;
-class OGRLayer;
 
 #include <vector>
 

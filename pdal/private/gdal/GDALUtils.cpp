@@ -53,12 +53,6 @@
 namespace pdal
 {
 
-namespace oldgdalsupport
-{
-	OGRGeometry* createFromGeoJson(char **s);
-} // namespace oldgdalsupport
-
-
 namespace gdal
 {
 
@@ -204,22 +198,6 @@ OGRGeometry *createFromWkt(const std::string& s, std::string& srs)
     }
 
     return newGeom;
-}
-
-
-/**
-  Create OGR geometry given a GEOjson text string.
-  \param s  GEOjson string to convert to OGR Geometry.
-  \return  Pointer to new geometry.
-*/
-OGRGeometry *createFromGeoJson(const char *s)
-{
-#if ((GDAL_VERSION_MAJOR == 2) && GDAL_VERSION_MINOR < 3)
-    char* p = const_cast<char*>(s);
-    return oldgdalsupport::createFromGeoJson((char**)&p);
-#else
-    return OGRGeometryFactory::createFromGeoJson(s);
-#endif
 }
 
 
@@ -399,12 +377,4 @@ std::vector<Polygon> getPolygons(const NL::json& ogr)
 }
 
 } // namespace gdal
-
-namespace oldgdalsupport
-{
-
-
-
-} // namespace oldgdalsupport
-
 } // namespace pdal
