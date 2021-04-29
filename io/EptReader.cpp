@@ -488,8 +488,6 @@ void EptReader::ready(PointTableRef table)
             " will be downloaded" << std::endl;
     }
 
-    // Ten million is a silly-large number for the number of tiles.
-    m_p->pool.reset(new ThreadPool(m_p->pool->numThreads()));
     m_pointId = 0;
     m_tileCount = m_p->hierarchy->size();
 
@@ -499,13 +497,15 @@ void EptReader::ready(PointTableRef table)
     // are handled.
     if (table.supportsView())
     {
+        m_p->pool.reset(new ThreadPool(m_p->pool->numThreads()));
         m_artifactMgr = &table.artifactManager();
         for (const Overlap& overlap : *m_p->hierarchy)
             load(overlap);
     }
     else
     {
-        int count = 4;
+        int count = 4; // Initial number of requests.
+        m_p->pool.reset(new ThreadPool(100));
         m_p->hierarchyIter = m_p->hierarchy->cbegin();
         while (m_p->hierarchyIter != m_p->hierarchy->cend() && count)
         {
@@ -788,7 +788,7 @@ top:
                 size_t backlog = m_p->contents.size();
                 outstanding--;
                 std::cerr << "Outstanding = " << outstanding << "!\n";
-                std::cerr << "Backlog = " << backlog << "!\n";
+                std::cerr << "Received backlog = " << backlog << "!\n";
                 m_p->currentTile.reset(new TileContents(std::move(m_p->contents.front())));
                 m_p->contents.pop();
                 l.unlock();
