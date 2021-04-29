@@ -84,6 +84,7 @@ public:
     StringList ignoreVLROption;
     bool fixNames;
     PointId start;
+    bool nosrs;
 };
 
 struct LasReader::Private
@@ -125,6 +126,7 @@ void LasReader::addArgs(ProgramArgs& args)
     args.add("start", "Point at which reading should start (0-indexed).", m_args->start);
     args.add("fix_dims", "Make invalid dimension names valid by changing "
         "invalid characters to '_'", m_args->fixNames, true);
+    args.add("nosrs", "Skip reading/processing file SRS", m_args->nosrs);
 }
 
 
@@ -247,7 +249,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
         throwError(err.what());
     }
 
-    m_p->header.initialize(log(), Utils::fileSize(m_filename));
+    m_p->header.initialize(log(), Utils::fileSize(m_filename), m_args->nosrs);
     createStream();
     std::istream *stream(m_streamIf->m_istream);
 
