@@ -380,7 +380,7 @@ public:
     const LasVLR *findVlr(const std::string& userId, uint16_t recordId) const;
     void removeVLR(const std::string& userId, uint16_t recordId);
     void removeVLR(const std::string& userId);
-    void initialize(LogPtr log, uintmax_t fileSize);
+    void initialize(LogPtr log, uintmax_t fileSize, bool nosrs);
     const VlrList& vlrs() const
         { return m_vlrs; }
 
@@ -418,6 +418,7 @@ private:
     std::string m_geotiff_print;
     VlrList m_vlrs;
     VlrList m_eVlrs;
+    bool m_nosrs;
 
     void setSrs();
     void setSrsFromWkt();
