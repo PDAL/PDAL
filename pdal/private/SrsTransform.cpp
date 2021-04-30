@@ -36,25 +36,36 @@
 namespace pdal
 {
 
-SrsTransform::SrsTransform(const SpatialReference& src, const SpatialReference& dst) :
-    SrsTransform(OGRSpatialReference(src.getWKT().data()),
-                 OGRSpatialReference(dst.getWKT().data()))
+SrsTransform::SrsTransform()
+{}
+
+SrsTransform::SrsTransform(const SrsTransform& src) : m_transform(src.m_transform->Clone())
 {}
 
 
-SrsTransform::SrsTransform(OGRSpatialReference srcRef, OGRSpatialReference dstRef)
+SrsTransform::SrsTransform(SrsTransform&& src) : m_transform(std::move(src.m_transform))
+{}
+
+
+SrsTransform::~SrsTransform()
+{}
+
+
+SrsTransform& SrsTransform::operator=(SrsTransform&& src)
 {
-// Starting with version 3 of GDAL, the axes (X, Y, Z or lon, lat, h or whatever)
-// are mapped according to the WKT definition.  In particular, this means
-// that for EPSG:4326 the mapping is X -> lat, Y -> lon, rather than the
-// more conventional X -> lon, Y -> lat.  Setting this flag reverses things
-// such that the traditional ordering is maintained.  There are other
-// SRSes where this comes up.  See "axis order issues" in the GDAL WKT2
-// discussion for more info.
-//
-    srcRef.SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
-    dstRef.SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
-    m_transform.reset(OGRCreateCoordinateTransformation(&srcRef, &dstRef));
+    m_transform = std::move(src.m_transform);
+    return *this;
+}
+
+SrsTransform::SrsTransform(const SpatialReference& src, const SpatialReference& dst)
+{
+    set(src, dst);
+}
+
+
+SrsTransform::SrsTransform(const OGRSpatialReference& srcRef, const OGRSpatialReference& dstRef)
+{
+    set(srcRef, dstRef);
 }
 
 
@@ -81,8 +92,26 @@ SrsTransform::SrsTransform(const SpatialReference& src,
     m_transform.reset(OGRCreateCoordinateTransformation(&srcRef, &dstRef));
 }
 
-SrsTransform::~SrsTransform()
-{}
+void SrsTransform::set(const SpatialReference& src, const SpatialReference& dst)
+{
+    set(OGRSpatialReference(src.getWKT().data()), OGRSpatialReference(dst.getWKT().data()));
+}
+
+
+void SrsTransform::set(OGRSpatialReference src, OGRSpatialReference dst)
+{
+// Starting with version 3 of GDAL, the axes (X, Y, Z or lon, lat, h or whatever)
+// are mapped according to the WKT definition.  In particular, this means
+// that for EPSG:4326 the mapping is X -> lat, Y -> lon, rather than the
+// more conventional X -> lon, Y -> lat.  Setting this flag reverses things
+// such that the traditional ordering is maintained.  There are other
+// SRSes where this comes up.  See "axis order issues" in the GDAL WKT2
+// discussion for more info.
+//
+    src.SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
+    dst.SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
+    m_transform.reset(OGRCreateCoordinateTransformation(&src, &dst));
+}
 
 
 OGRCoordinateTransformation *SrsTransform::get() const

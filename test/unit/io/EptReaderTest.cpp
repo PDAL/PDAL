@@ -292,8 +292,6 @@ TEST(EptReaderTest, bounds2dXform)
 {
     BOX2D b(515380, 4918360, 515390, 4918370);
     SrsBounds eptBounds(b);
-    gdal::reprojectBounds(b, "EPSG:26912", "EPSG:4326");
-    SrsBounds boxBounds(b, "EPSG:4326");
 
     PointViewPtr v1;
     PointViewPtr v2;
@@ -308,6 +306,9 @@ TEST(EptReaderTest, bounds2dXform)
         auto vset = reader.execute(eptTable);
         v1 = *vset.begin();
     }
+
+    gdal::reprojectBounds(b, "EPSG:26912", "EPSG:4326");
+    SrsBounds boxBounds(b, "EPSG:4326");
     {
         EptReader reader;
         Options options;
@@ -622,8 +623,7 @@ TEST(EptReaderTest, boundedCrop)
     {
         Options options;
         options.add("filename", eptAutzenPath);
-        std::string overrides(wkt + "/ EPSG:3644");
-        Option polygon("polygon", overrides);
+        Option polygon("polygon", wkt + "/ EPSG:3644");
         options.add(polygon);
         reader.setOptions(options);
     }
@@ -647,9 +647,8 @@ TEST(EptReaderTest, boundedCrop)
     }
     CropFilter crop;
     {
-        std::string overrides(wkt + "/ EPSG:3644");
         Options options;
-        Option polygon("polygon", overrides);
+        Option polygon("polygon", wkt + "/ EPSG:3644");
         options.add(polygon);
         crop.setOptions(options);
         crop.setInput(source);
@@ -734,7 +733,6 @@ TEST(EptReaderTest, boundedCropReprojection)
 
 TEST(EptReaderTest, ogrCrop)
 {
-
     EptReader reader;
     {
         Options options;
@@ -754,9 +752,7 @@ TEST(EptReaderTest, ogrCrop)
 
     uint64_t eptNp(0);
     for (const PointViewPtr& view : reader.execute(eptTable))
-    {
         eptNp += view->size();
-    }
 
     // Now we'll check the result against a crop filter of the source file with
     // the same bounds.
@@ -770,15 +766,11 @@ TEST(EptReaderTest, ogrCrop)
     source.prepare(sourceTable);
     uint64_t sourceNp(0);
     for (const PointViewPtr& view : source.execute(sourceTable))
-    {
         sourceNp += view->size();
-    }
 
     EXPECT_EQ(eptNp, sourceNp);
     EXPECT_EQ(eptNp, 86u);
     EXPECT_EQ(sourceNp, 86u);
 }
-
-
 
 } // namespace pdal
