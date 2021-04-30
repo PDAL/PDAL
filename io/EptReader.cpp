@@ -144,19 +144,16 @@ void EptReader::addArgs(ProgramArgs& args)
 {
     args.add("bounds", "Bounds to fetch", m_args->m_bounds);
     args.add("origin", "Origin of source file to fetch", m_args->m_origin);
-    args.add("threads", "Number of worker threads", m_args->m_threads, 15);
+    args.add("threads", "Number of worker threads", m_args->m_threads, (size_t)15);
     args.add("resolution", "Resolution limit", m_args->m_resolution);
     args.add("addons", "Mapping of addon dimensions to their output directory",
         m_args->m_addons);
     args.add("polygon", "Bounding polygon(s) to crop requests",
         m_args->m_polys).setErrorText("Invalid polygon specification. "
             "Must be valid GeoJSON/WKT");
-    args.add("header", "Header fields to forward with HTTP requests",
-        m_args->m_headers);
-    args.add("query", "Query parameters to forward with HTTP requests",
-        m_args->m_query);
-    args.add("ogr", "OGR filter geometries",
-        m_args->m_ogr);
+    args.add("header", "Header fields to forward with HTTP requests", m_args->m_headers);
+    args.add("query", "Query parameters to forward with HTTP requests", m_args->m_query);
+    args.add("ogr", "OGR filter geometries", m_args->m_ogr);
 }
 
 
@@ -502,6 +499,7 @@ void EptReader::ready(PointTableRef table)
     }
     else
     {
+        int count = m_p->pool->numThreads();
         m_p->hierarchyIter = m_p->hierarchy->cbegin();
         while (m_p->hierarchyIter != m_p->hierarchy->cend() && count)
         {
@@ -592,7 +590,6 @@ void EptReader::overlaps(Hierarchy& target, const NL::json& hier, const Key& key
         // hierarchy subtree corresponding to this root.
         m_p->pool->add([this, &target, key]()
         {
-            std::cerr << "Queue subtree!\n";
             try
             {
                 std::string filename = m_p->info->hierarchyDir() + key.toString() + ".json";
@@ -779,7 +776,6 @@ top:
         do
         {
             std::unique_lock<std::mutex> l(m_p->mutex);
-            static int outstanding = std::distance(m_p->hierarchy->cbegin(), m_p->hierarchyIter);
             if (m_p->contents.size())
             {
                 m_p->currentTile.reset(new TileContents(std::move(m_p->contents.front())));
