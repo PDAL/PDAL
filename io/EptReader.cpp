@@ -125,7 +125,6 @@ public:
     std::unique_ptr<TileContents> currentTile;
     std::unique_ptr<Hierarchy> hierarchy;
     std::queue<TileContents> contents;
-    Hierarchy::const_iterator hierarchyIter;
     AddonList addons;
     std::mutex mutex;
     std::condition_variable contentsCv;
@@ -491,22 +490,10 @@ void EptReader::ready(PointTableRef table)
     // show up at once. Others requests will be queued as the results
     // are handled.
     m_p->pool.reset(new ThreadPool(m_p->pool->numThreads()));
+    for (const Overlap& overlap : *m_p->hierarchy)
+        load(overlap);
     if (table.supportsView())
-    {
         m_artifactMgr = &table.artifactManager();
-        for (const Overlap& overlap : *m_p->hierarchy)
-            load(overlap);
-    }
-    else
-    {
-        int count = m_p->pool->numThreads();
-        m_p->hierarchyIter = m_p->hierarchy->cbegin();
-        while (m_p->hierarchyIter != m_p->hierarchy->cend() && count)
-        {
-            load(*m_p->hierarchyIter++);
-            count--;
-        }
-    }
 }
 
 
@@ -780,9 +767,6 @@ top:
             {
                 m_p->currentTile.reset(new TileContents(std::move(m_p->contents.front())));
                 m_p->contents.pop();
-                l.unlock();
-                if (m_p->hierarchyIter != m_p->hierarchy->cend())
-                    load(*m_p->hierarchyIter++);
                 break;
             }
             else
