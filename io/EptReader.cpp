@@ -143,7 +143,8 @@ void EptReader::addArgs(ProgramArgs& args)
 {
     args.add("bounds", "Bounds to fetch", m_args->m_bounds);
     args.add("origin", "Origin of source file to fetch", m_args->m_origin);
-    args.add("threads", "Number of worker threads", m_args->m_threads, (size_t)15);
+    args.add("requests", "Number of worker threads", m_args->m_threads, (size_t)15);
+    args.addSynonym("requests", "threads");
     args.add("resolution", "Resolution limit", m_args->m_resolution);
     args.add("addons", "Mapping of addon dimensions to their output directory",
         m_args->m_addons);
