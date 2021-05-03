@@ -109,6 +109,24 @@ polygon
 
     When using ``pdal info --summary``, using the ``polygon`` option will cause the resulting bounds to be clipped to the maximal extents of all provided polygons, and the resulting number of points to be an upper bound for this polygon selection.
 
+ogr
+  A JSON object representing an OGR query to fetch polygons to use for filtering. The polygons
+  fetched from the query are treated exactly like those specified in the ``polygon`` option.
+  The JSON object takes the looks like the following:
+
+  .. code-block:: json
+
+    {
+        "drivers": "OGR drivers to use",
+        "openoptions": "Options to pass to the OGR open function [optional]",
+        "layer": "OGR layer from which to fetch polygons [optional]",
+        "sql": "SQL query to use to filter the polygons in the layer [optional]",
+        "options":
+        {
+            "geometry", "WKT or GeoJSON geomtry used to filter query [optional]"
+        }
+    }
+
 threads
     Number of worker threads used to download and process EPT data.  A
     minimum of 4 will be used no matter what value is specified.
