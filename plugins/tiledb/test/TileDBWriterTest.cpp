@@ -461,9 +461,6 @@ namespace pdal
 
         Options writer_options;
         writer_options.add("array_name", pth);
-        writer_options.add("x_tile_size", 0);
-        writer_options.add("y_tile_size", 0);
-        writer_options.add("z_tile_size", 0);
 
         if (vfs.is_dir(pth))
         {
@@ -480,6 +477,11 @@ namespace pdal
 
         EXPECT_EQ(true,
             tiledb::Object::object(ctx, pth).type() == tiledb::Object::Type::Array);
+
+        tiledb::Array array(ctx, pth, TILEDB_READ);
+        EXPECT_EQ(true,
+            array.schema().cell_order() == TILEDB_HILBERT);
+        array.close();
     }
     #endif
 #endif
