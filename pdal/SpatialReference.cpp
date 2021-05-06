@@ -98,12 +98,9 @@ bool SpatialReference::empty() const
 
 bool SpatialReference::valid() const
 {
-    OGRScopedSpatialReference current(ogrCreateSrs(m_wkt));
-    if (!current)
-        return false;
+    OGRSpatialReference current(m_wkt.data());
 
-    OGRErr err = OSRValidate(current.get());
-    return err == OGRERR_NONE;
+    return OSRValidate(&current) == OGRERR_NONE;
 }
 
 

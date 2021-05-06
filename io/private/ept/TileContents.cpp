@@ -87,15 +87,12 @@ void TileContents::readLaszip()
     Options options;
     options.add("filename", handle.localPath());
     options.add("use_eb_vlr", true);
+    options.add("nosrs", true);
 
     LasReader reader;
     reader.setOptions(options);
 
-    static std::mutex s_mutex;
-    std::unique_lock<std::mutex> lock(s_mutex);
-    reader.prepare(*m_table);  // Geotiff SRS initialization is not thread-safe.
-    lock.unlock();
-
+    reader.prepare(*m_table);
     reader.execute(*m_table);
 }
 

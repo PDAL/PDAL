@@ -109,9 +109,8 @@ polygon
 
     When using ``pdal info --summary``, using the ``polygon`` option will cause the resulting bounds to be clipped to the maximal extents of all provided polygons, and the resulting number of points to be an upper bound for this polygon selection.
 
-threads
-    Number of worker threads used to download and process EPT data.  A
-    minimum of 4 will be used no matter what value is specified.
+requests
+    Maximum number of simultaneous requests for EPT data. [Minimum: 4] [Default: 15]
 
 .. _Entwine Point Tile: https://entwine.io/entwine-point-tile.html
 .. _Entwine: https://entwine.io/
