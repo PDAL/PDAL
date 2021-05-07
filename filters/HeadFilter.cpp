@@ -59,11 +59,6 @@ void HeadFilter::addArgs(ProgramArgs& args)
         "to skip from the beginning.", m_invert, false);
 }
 
-void HeadFilter::ready(PointTableRef table)
-{
-    m_index = 0;
-}
-
 bool HeadFilter::processOne(PointRef& point)
 {
 
@@ -81,17 +76,18 @@ bool HeadFilter::processOne(PointRef& point)
 
 PointViewSet HeadFilter::run(PointViewPtr inView)
 {
+    m_index = 0;
+
     PointViewSet viewSet;
     if (!inView->size())
         return viewSet;
 
     PointViewPtr outView = inView->makeNew();
 
-    for (PointId i = 0; i < inView->size(); ++i)
+    for (PointRef point : *inView)
     {
-        PointRef point = inView->point(i);
         if (processOne(point))
-            outView->appendPoint(*inView, i);
+            outView->appendPoint(*inView, point.pointId());
     }
 
     viewSet.insert(outView);
