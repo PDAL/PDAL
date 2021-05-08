@@ -165,7 +165,7 @@ public:
 
     std::string toBox(uint32_t precision = 8) const
     {
-        std::stringstream oss;
+        Utils::StringStreamClassicLocale oss;
 
         oss.precision(precision);
         oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
@@ -233,16 +233,15 @@ inline std::ostream& operator << (std::ostream& ostr, const BOX4D& bounds)
         ostr << "()";
         return ostr;
     }
-
-    auto savedPrec = ostr.precision();
-    ostr.precision(16); // or..?
-    ostr << "(";
-    ostr << "[" << bounds.minx << ", " << bounds.maxx << "], " <<
+    Utils::StringStreamClassicLocale ss;
+    ss.precision(16); // or..?
+    ss << "(";
+    ss << "[" << bounds.minx << ", " << bounds.maxx << "], " <<
     "[" << bounds.miny << ", " << bounds.maxy << "], " <<
     "[" << bounds.minz << ", " << bounds.maxz << "], " <<
     "[" << bounds.mintm << ", " << bounds.maxtm << "]";
-    ostr << ")";
-    ostr.precision(savedPrec);
+    ss << ")";
+    ostr << ss.str();
     return ostr;
 }
 
@@ -259,7 +258,7 @@ inline StatusWithReason fromString(const std::string& s, BOX4D& bounds)
 {
     try
     {
-        std::istringstream iss(s);
+        Utils::IStringStreamClassicLocale iss(s);
         iss >> bounds;
     }
     catch (BOX4D::error& error)
@@ -275,7 +274,7 @@ inline StatusWithReason fromString(const std::string& s, Bounds4D& bounds)
 {
     try
     {
-        std::istringstream iss(s);
+        Utils::IStringStreamClassicLocale iss(s);
         iss >> bounds;
     }
     catch (Bounds4D::error& error)

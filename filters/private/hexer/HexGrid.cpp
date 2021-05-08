@@ -42,6 +42,8 @@
 #include "Processor.hpp"
 #include "Segment.hpp"
 
+#include "pdal/util/Utils.hpp"
+
 using namespace std;
 
 namespace hexer
@@ -370,21 +372,24 @@ void HexGrid::cleanPossibleRoot(Segment s, Path *p)
 
 void HexGrid::toWKT(std::ostream& out) const
 {
-    auto writePath = [this, &out](size_t pathNum)
+    pdal::Utils::StringStreamClassicLocale ss;
+
+    auto writePath = [this, &ss](size_t pathNum)
     {
-       rootPaths()[pathNum]->toWKT(out);
+       rootPaths()[pathNum]->toWKT(ss);
     };
 
-    out << "MULTIPOLYGON (";
+    ss << "MULTIPOLYGON (";
 
     if (rootPaths().size())
         writePath(0);
     for (size_t pi = 1; pi < rootPaths().size(); ++pi)
     {
-        out << ",";
+        ss << ",";
         writePath(pi);
     }
-    out << ")";
+    ss << ")";
+    out << ss.str();
 }
 
 size_t HexGrid::densePointCount() const

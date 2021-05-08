@@ -47,7 +47,7 @@ void checkFile(int i, int j, int lines, double xoff = 0, double yoff = 0)
     std::string header;
     std::string t(Support::temppath("tile/out" +
         std::to_string(i) + "_" + std::to_string(j) + ".txt"));
-    std::ifstream in(t);
+    Utils::ClassicLocaleStream<std::ifstream> in(t);
     std::getline(in, header);
 
     int count = 0;

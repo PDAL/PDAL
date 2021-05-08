@@ -180,8 +180,7 @@ std::istream& operator>>(std::istream& in, PcdHeader& header)
 
         if (line.empty() || line.substr(0, 1) == "#")
             continue;
-        std::stringstream line_stream(line);
-        line_stream.imbue(std::locale::classic());
+        Utils::StringStreamClassicLocale line_stream(line);
 
         std::string line_type;
         line_stream >> line_type;

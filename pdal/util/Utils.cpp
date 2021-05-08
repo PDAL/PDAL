@@ -439,7 +439,7 @@ StringList Utils::wordWrap(std::string const& s, size_t lineLength,
 
     size_t len = firstLength;
 
-    std::istringstream iss(s);
+    StringStreamClassicLocale iss(s);
     std::string line;
     do
     {

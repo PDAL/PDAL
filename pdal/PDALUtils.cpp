@@ -46,6 +46,8 @@
 #include <dlfcn.h>
 #endif
 
+#include <locale>
+
 using namespace std;
 
 namespace pdal
@@ -154,7 +156,7 @@ namespace Utils
 
 std::string toJSON(const MetadataNode& m)
 {
-    std::ostringstream o;
+    Utils::OStringStreamClassicLocale o;
 
     toJSON(m, o);
     return o.str();
@@ -201,12 +203,13 @@ private:
     std::string m_filename;
 };
 
-class ArbiterOutStream : public std::ofstream
+class ArbiterOutStream : public ClassicLocaleStream<std::ofstream>
 {
 public:
     ArbiterOutStream(const std::string& localPath,
             const std::string& remotePath, std::ios::openmode mode) :
-        std::ofstream(localPath, mode), m_remotePath(remotePath),
+        ClassicLocaleStream<std::ofstream>(localPath, mode),
+        m_remotePath(remotePath),
         m_localFile(localPath)
     {}
 
@@ -221,7 +224,7 @@ public:
     TempFile m_localFile;
 };
 
-class ArbiterInStream : public std::ifstream
+class ArbiterInStream : public ClassicLocaleStream<std::ifstream>
 {
 public:
     ArbiterInStream(const std::string& localPath, const std::string& remotePath,
