@@ -34,6 +34,9 @@
 
 #include <pdal/Log.hpp>
 
+#include <cpl_conv.h>
+#include <cpl_error.h>
+
 namespace pdal
 {
 namespace gdal
@@ -66,6 +69,12 @@ public:
       \param doDebug  Debug state of the error handler.
     */
     void set(LogPtr log, bool doDebug);
+
+
+    /**
+      Clear an error handler.
+    */
+    void clear();
 
     /**
       Set the log to which error/debug messages should be written.
@@ -101,6 +110,7 @@ private:
     pdal::LogPtr m_log;
     mutable int m_errorNum;
     bool m_cplSet;
+    CPLErrorHandler m_prevHandler;
 };
 
 class ErrorHandlerSuspender

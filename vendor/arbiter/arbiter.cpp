@@ -100,7 +100,7 @@ namespace
 
         return merge(in, config);
     }
-    
+
     inline bool iequals(const std::string& s, const std::string& s2)
     {
         if (s.length() != s2.length())
@@ -683,7 +683,7 @@ LocalHandle Endpoint::getLocalHandle(
         const std::string local(tmp + basename);
         if (isHttpDerived())
         {
-            if (auto fileSize = tryGetSize(subpath))
+            if (auto fileSize = tryGetSize(subpath, headers, query))
             {
                 std::ofstream stream(local, streamFlags);
                 if (!stream.good())
@@ -803,6 +803,22 @@ std::unique_ptr<std::vector<char>> Endpoint::tryGetBinary(
         const http::Query query) const
 {
     return getHttpDriver().tryGetBinary(fullPath(subpath), headers, query);
+}
+
+std::size_t Endpoint::getSize(
+        const std::string subpath,
+        const http::Headers headers,
+        const http::Query query) const
+{
+    return getHttpDriver().getSize(fullPath(subpath), headers, query);
+}
+
+std::unique_ptr<std::size_t> Endpoint::tryGetSize(
+        const std::string subpath,
+        const http::Headers headers,
+        const http::Query query) const
+{
+    return getHttpDriver().tryGetSize(fullPath(subpath), headers, query);
 }
 
 void Endpoint::put(
@@ -1268,7 +1284,7 @@ std::vector<std::string> glob(std::string path)
         const auto pre(path.substr(0, recPos));     // Cut off before the '*'.
         const auto post(path.substr(recPos + 1));   // Includes the second '*'.
 
-        for (const auto d : walk(pre)) dirs.push_back(d + post);
+        for (const auto& d : walk(pre)) dirs.push_back(d + post);
     }
     else
     {
@@ -1387,14 +1403,37 @@ std::unique_ptr<Http> Http::create(Pool& pool)
 
 std::unique_ptr<std::size_t> Http::tryGetSize(std::string path) const
 {
+    return tryGetSize(path, http::Headers());
+}
+
+std::size_t Http::getSize(
+        std::string path,
+        Headers headers,
+        Query query) const
+{
+    auto s = tryGetSize(path, headers, query);
+    if (!s)
+    {
+        throw ArbiterError("Could not get size from " + path);
+    }
+    return *s;
+}
+
+std::unique_ptr<std::size_t> Http::tryGetSize(
+        std::string path,
+        Headers headers,
+        Query query) const
+{
     std::unique_ptr<std::size_t> size;
 
     auto http(m_pool.acquire());
-    Response res(http.head(typedPath(path)));
+    Response res(http.head(typedPath(path), headers, query));
 
     std::string val;
     if (res.ok() && findEntry(res.headers(), "Content-Length", val))
+    {
         size.reset(new std::size_t(std::stoul(val)));
+    }
 
     return size;
 }
@@ -2647,7 +2686,7 @@ std::string AZ::Config::extractStorageAccount(
     {
         return *p;
     }
-    
+
     if (!c.is_null() && c.value("verbose", false))
     {
         std::cout << "account not found" << std::endl;
@@ -3027,7 +3066,7 @@ std::string AZ::ApiV1::buildCanonicalHeader(
        canonicalizeHeaders));
 
    return  canonicalHeader;
-}   
+}
 
 std::string AZ::ApiV1::buildCanonicalResource(
         const Resource& resource,
@@ -3069,7 +3108,7 @@ std::string AZ::ApiV1::buildStringToSign(
         headerValues += makeLine("");
     else
         headerValues += makeLine(h["Content-Length"]);
-    
+
     headerValues += makeLine(h["Content-MD5"]);
     headerValues += makeLine(h["Content-Type"]);
     headerValues += makeLine(h["Date"]);
@@ -3077,8 +3116,8 @@ std::string AZ::ApiV1::buildStringToSign(
     headerValues += makeLine(h["If-Match"]);
     headerValues += makeLine(h["If-None-Match"]);
     headerValues += makeLine(h["If-Unmodified-Since"]);
-    headerValues += h["Range"];  
-    
+    headerValues += h["Range"];
+
 
     return
         makeLine(verb) +
@@ -3096,7 +3135,7 @@ std::string AZ::ApiV1::calculateSignature(
 std::string AZ::ApiV1::getAuthHeader(
         const std::string& signedHeadersString) const
 {
-    return "SharedKey " + 
+    return "SharedKey " +
          m_authFields.account() + ":" +
             signedHeadersString;
 }
@@ -5204,7 +5243,7 @@ namespace
      //
      // Return the position of chr within base64_encode()
      //
-    
+
         if      (chr >= 'A' && chr <= 'Z') return chr - 'A';
         else if (chr >= 'a' && chr <= 'z') return chr - 'a' + ('Z' - 'A')               + 1;
         else if (chr >= '0' && chr <= '9') return chr - '0' + ('Z' - 'A') + ('z' - 'a') + 2;

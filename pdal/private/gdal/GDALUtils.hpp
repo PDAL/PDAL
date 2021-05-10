@@ -40,8 +40,6 @@
 
 class OGRGeometry;
 typedef void *OGRGeometryH;
-class GDALDataset;
-class OGRLayer;
 
 #include <vector>
 
@@ -64,11 +62,8 @@ PDAL_DLL bool reproject(double& x, double& y, double& z,
     const SpatialReference& srcSrs, const SpatialReference& dstSrs);
 PDAL_DLL std::string lastError();
 
-OGRGeometry *createFromWkt(const char *s);
-OGRGeometry *createFromGeoJson(const char *s);
-
 // New signatures to support extraction of SRS from the end of geometry
-// specifications..
+// specifications.
 OGRGeometry *createFromWkt(const std::string& s, std::string& srs);
 OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs);
 

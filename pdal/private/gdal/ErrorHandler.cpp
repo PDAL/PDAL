@@ -34,9 +34,6 @@
 
 #include <mutex>
 
-#include <cpl_conv.h>
-#include <cpl_error.h>
-
 #include "ErrorHandler.hpp"
 
 namespace pdal
@@ -56,10 +53,6 @@ ErrorHandler& ErrorHandler::getGlobalErrorHandler()
     return s_gdalErrorHandler;
 }
 
-namespace
-{
-}
-
 namespace {
 
 //ABELL - No idea why this is __stdcall
@@ -77,7 +70,7 @@ void trampoline(::CPLErr code, int num, char const* msg)
 /**
   Constructor for a GDAL error handler.
 */
-ErrorHandler::ErrorHandler() : m_errorNum(0)
+ErrorHandler::ErrorHandler() : m_errorNum(0), m_prevHandler(nullptr)
 {
     std::string value;
 
@@ -85,9 +78,6 @@ ErrorHandler::ErrorHandler() : m_errorNum(0)
     const char* set = CPLGetConfigOption("CPL_DEBUG", "");
     m_cplSet = (bool)set;
     m_debug = m_cplSet;
-
-    // Push on a thread-local error handler
-    CPLSetErrorHandler(&trampoline);
 }
 
 
@@ -95,9 +85,7 @@ ErrorHandler::ErrorHandler() : m_errorNum(0)
   Destructor for a GDAL error handler.
 */
 ErrorHandler::~ErrorHandler()
-{
-    CPLSetErrorHandler(nullptr);
-}
+{}
 
 
 /**
@@ -107,8 +95,21 @@ ErrorHandler::~ErrorHandler()
 */
 void ErrorHandler::set(LogPtr log, bool debug)
 {
+    // Set an error handler
+    if (m_prevHandler == nullptr)
+        m_prevHandler = CPLSetErrorHandler(&trampoline);
     setLog(log);
     setDebug(debug);
+}
+
+
+/**
+  Clear the PDAL error handler.
+*/
+void ErrorHandler::clear()
+{
+    CPLSetErrorHandler(m_prevHandler);
+    m_prevHandler = nullptr;
 }
 
 
