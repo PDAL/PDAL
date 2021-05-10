@@ -36,6 +36,7 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/SrsBounds.hpp>
 #include <pdal/util/Bounds.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 using namespace pdal;
 
@@ -371,6 +372,16 @@ TEST(BoundsTest, b1)
     EXPECT_TRUE(sb.spatialReference().valid());
     EXPECT_NE(std::string::npos,
         sb.spatialReference().getWKT().find("Ordnance Datum Newlyn"));
+}
+
+TEST(BoundsTest, fromstring)
+{
+    ProgramArgs a;
+    BOX2D box;
+    a.add("bounds", "BOX", box);
+
+    std::string badbox("[0, 1]");
+    EXPECT_THROW(a.parse({"--bounds", badbox}), arg_error);
 }
 
 TEST(BoundsTest, b2)
