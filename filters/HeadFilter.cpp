@@ -59,6 +59,11 @@ void HeadFilter::addArgs(ProgramArgs& args)
         "to skip from the beginning.", m_invert, false);
 }
 
+void HeadFilter::ready(PointTableRef table)
+{
+    m_index = 0;
+}
+
 bool HeadFilter::processOne(PointRef& point)
 {
 

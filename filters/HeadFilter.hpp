@@ -58,6 +58,7 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual bool processOne(PointRef& point);
     virtual PointViewSet run(PointViewPtr view);
+    virtual void ready(PointTableRef table);
 
 };
 
