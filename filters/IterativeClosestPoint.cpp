@@ -156,6 +156,7 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
     bool converged(false);
     double prev_mse(0.0);
     int num_similar(0);
+    double sqr_maxdist = m_maxdist * m_maxdist;
     for (int iter = 0; iter < m_max_iters; ++iter)
     {
         // At the beginning of each iteration, transform our centered, moving
@@ -169,7 +170,6 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
         fixed_idx.reserve(tempMovingTransformed->size());
         moving_idx.reserve(tempMovingTransformed->size());
         double mse(0.0);
-        double sqr_maxdist = m_maxdist * m_maxdist;
 
         // For every point in the centered, moving PointView, find the nearest
         // neighbor in the centered fixed PointView. Record the indices of each
@@ -182,8 +182,7 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
             std::vector<double> sqr_dists(1);
             kd_fixed.knnSearch(p, 1, &indices, &sqr_dists);
 
-            // In the PCL code, there would've been a check that the square
-            // distance did not exceed a threshold value.
+            // Check that the distance does not exceed a threshold.
             if (m_maxdistArg->set())
             {
                 if (sqr_dists[0] > sqr_maxdist)
@@ -193,7 +192,7 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
             // Store the indices of the correspondence and update the MSE.
             moving_idx.push_back(p.pointId());
             fixed_idx.push_back(indices[0]);
-            mse += std::sqrt(sqr_dists[0]);
+            mse += sqr_dists[0];
         }
 
         // Finalize and log the MSE.
@@ -233,7 +232,7 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
             if (num_similar >= m_max_similar)
             {
                 converged = true;
-                log()->get(LogLevel::Debug2) << "converged via absolute MSE\n";
+                log()->get(LogLevel::Debug2) << "converged via absolute change in MSE\n";
                 break;
             }
             is_similar = true;
@@ -285,15 +284,23 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
     // Compute the MSE one last time, using the unaltered, fixed PointView and
     // the transformed, moving PointView.
     double mse(0.0);
+    size_t n(0);
     KD3Index& kd_fixed_orig = fixed->build3dIndex();
     for (PointRef p : *moving)
     {
         PointIdList indices(1);
         std::vector<double> sqr_dists(1);
         kd_fixed_orig.knnSearch(p, 1, &indices, &sqr_dists);
-        mse += std::sqrt(sqr_dists[0]);
+        // Distance threshold check.
+        if (m_maxdistArg->set())
+        {
+            if (sqr_dists[0] > sqr_maxdist)
+                continue;
+        }
+        n++;
+        mse += sqr_dists[0];
     }
-    mse /= moving->size();
+    mse /= n;
     log()->get(LogLevel::Debug2) << "MSE: " << mse << std::endl;
 
     // Transformation to demean coords
