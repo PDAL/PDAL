@@ -73,6 +73,8 @@ void IterativeClosestPoint::addArgs(ProgramArgs& args)
     args.add("max_similar",
              "Max number of similar transforms to consider converged",
              m_max_similar, 0);
+    args.add("scale", "Include scale factor in solved transformation",
+             m_scale, false);
     m_maxdistArg =
         &args.add("max_dist", "Maximum correspondence distance", m_maxdist);
     m_matrixArg =
@@ -126,7 +128,14 @@ void IterativeClosestPoint::done(PointTableRef _)
 PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
                                         PointViewPtr moving) const
 {
-    // Compute centroid of fixed PointView such that both the fixed an moving
+    // Apply initial guess to moving PointView
+    if (m_matrixArg->set())
+    {
+        Matrix4d initial_transformation = Eigen::Map<const Matrix4d>(m_vec.data());
+        math::transformInPlace(*moving, initial_transformation.data());
+    }
+
+    // Compute centroid of fixed PointView such that both the fixed and moving
     // PointViews can be centered.
     PointIdList ids(fixed->size());
     std::iota(ids.begin(), ids.end(), 0);
@@ -136,13 +145,8 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
     PointViewPtr tempFixed = math::demeanPointView(*fixed, centroid.data());
     PointViewPtr tempMoving = math::demeanPointView(*moving, centroid.data());
 
-    // Initialize the final_transformation to identity. In the future, it would
-    // be reasonable to alternately accept an initial guess.
-    Matrix4d final_transformation;
-    if (m_matrixArg->set())
-        final_transformation = Eigen::Map<const Matrix4d>(m_vec.data());
-    else
-        final_transformation = Matrix4d::Identity();
+    // Initialize the final_transformation to identity.
+    Matrix4d final_transformation = Matrix4d::Identity();;
 
     // Construct 3D KD-tree of the centered, fixed PointView to facilitate
     // nearest neighbor searches in each iteration.

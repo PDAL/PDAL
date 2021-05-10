@@ -53,6 +53,7 @@ private:
     double m_rotation_threshold;
     double m_translation_threshold;
     double m_mse_abs;
+    bool m_scale;
     Arg *m_maxdistArg;
     double m_maxdist;
     Arg *m_matrixArg;
