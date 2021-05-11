@@ -208,7 +208,7 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
                                      << "dy: " << T.coeff(1, 3) << std::endl;
 
         // Update the final_transformation and log the X and Y translations.
-        final_transformation = final_transformation * T;
+        final_transformation = T * final_transformation;
         log()->get(LogLevel::Debug2)
             << "Cumulative dx: " << final_transformation.coeff(0, 3) << ", "
             << "dy: " << final_transformation.coeff(1, 3) << std::endl;
