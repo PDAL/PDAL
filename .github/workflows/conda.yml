@@ -38,7 +38,7 @@ jobs:
           source ../scripts/ci/conda/compile.sh
       working-directory: ./pdal-feedstock
 
-    - uses: ilammy/msvc-dev-cmd@v1
+    - uses: ilammy/msvc-dev-cmd@v1.7.0
       if: matrix.platform == 'windows-latest'
     - name: Test
       shell: bash -l {0}
