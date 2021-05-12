@@ -3,15 +3,15 @@
 mkdir packages
 
 export CI_PLAT=""
-if grep -q "windows" <<< "$PLATFORM"; then
+if grep -q "windows" <<< "$PDAL_PLATFORM"; then
     CI_PLAT="win"
 fi
 
-if grep -q "ubuntu" <<< "$PLATFORM"; then
+if grep -q "ubuntu" <<< "$PDAL_PLATFORM"; then
     CI_PLAT="linux"
 fi
 
-if grep -q "macos" <<< "$PLATFORM"; then
+if grep -q "macos" <<< "$PDAL_PLATFORM"; then
     CI_PLAT="osx"
 fi
 

@@ -5,7 +5,7 @@ export BASE=`pwd`
 conda activate test
 conda install cmake ninja -y
 
-if [ "$PLATFORM" == "windows-latest" ]; then
+if [ "$PDAL_PLATFORM" == "windows-latest" ]; then
 
 export CC=cl.exe
 export CXX=cl.exe
