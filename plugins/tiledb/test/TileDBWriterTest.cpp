@@ -88,6 +88,9 @@ namespace pdal
         std::string sidecar = pth + "/pdal.json";
         options.add("array_name", pth);
         options.add("chunk_size", 80);
+        options.add("x_tile_size", 1);
+        options.add("y_tile_size", 1);
+        options.add("z_tile_size", 1);
 
         if (vfs.is_dir(pth))
         {
@@ -154,6 +157,9 @@ namespace pdal
         std::string sidecar = pth + "/pdal.json";
         options.add("array_name", pth);
         options.add("chunk_size", 80);
+        options.add("x_tile_size", 1);
+        options.add("y_tile_size", 1);
+        options.add("z_tile_size", 1);
 
         if (vfs.is_dir(pth))
         {
@@ -222,6 +228,9 @@ namespace pdal
         options.add("array_name", pth);
         options.add("compression", "zstd");
         options.add("compression_level", 7);
+        options.add("x_tile_size", 1);
+        options.add("y_tile_size", 1);
+        options.add("z_tile_size", 1);
 
         if (vfs.is_dir(pth))
         {
@@ -266,6 +275,9 @@ namespace pdal
 
         options.add("array_name", pth);
         options.add("filters", jsonOptions);
+        options.add("x_tile_size", 1);
+        options.add("y_tile_size", 1);
+        options.add("z_tile_size", 1);
 
         if (vfs.is_dir(pth))
         {
@@ -319,6 +331,9 @@ namespace pdal
         options.add("compression", "zstd");
         options.add("compression_level", 7);
         options.add("filters", jsonOptions);
+        options.add("x_tile_size", 1);
+        options.add("y_tile_size", 1);
+        options.add("z_tile_size", 1);
 
         if (vfs.is_dir(pth))
         {
@@ -355,6 +370,9 @@ namespace pdal
 
         Options options;
         options.add("array_name", pth);
+        options.add("x_tile_size", 1);
+        options.add("y_tile_size", 1);
+        options.add("z_tile_size", 1);
 
         if (vfs.is_dir(pth))
         {
@@ -385,49 +403,6 @@ namespace pdal
         tiledb::Attribute att = array.schema().attributes().begin()->second;
         tiledb::FilterList flAtts = att.filter_list();
         EXPECT_EQ(flAtts.nfilters(), 0U);
-    }
-
-    TEST_F(TileDBWriterTest, tile_sizes)
-    {
-        Options reader_options;
-        FauxReader reader;
-        BOX3D bounds(1.0, 1.0, 1.0, 2.0, 2.0, 2.0);
-        reader_options.add("bounds", bounds);
-        reader_options.add("mode", "constant");
-        reader_options.add("count", count);
-        reader.setOptions(reader_options);
-
-        tiledb::Context ctx;
-        tiledb::VFS vfs(ctx);
-        std::string pth = Support::temppath("tiledb_test_sf_curve");
-
-        Options writer_options;
-        writer_options.add("array_name", pth);
-        writer_options.add("x_tile_size", 1);
-        writer_options.add("y_tile_size", 1);
-        writer_options.add("z_tile_size", 1);
-
-
-        if (vfs.is_dir(pth))
-        {
-            vfs.remove_dir(pth);
-        }
-
-        TileDBWriter writer;
-        writer.setOptions(writer_options);
-        writer.setInput(reader);
-
-        FixedPointTable table(count);
-        writer.prepare(table);
-        writer.execute(table);
-
-        EXPECT_EQ(true,
-            tiledb::Object::object(ctx, pth).type() == tiledb::Object::Type::Array);
-
-        tiledb::Array array(ctx, pth, TILEDB_READ);
-        EXPECT_EQ(true,
-            array.schema().cell_order() == TILEDB_ROW_MAJOR);
-        array.close();
     }
 
 #if TILEDB_VERSION_MAJOR > 1
@@ -524,6 +499,49 @@ namespace pdal
         tiledb::Array array(ctx, pth, TILEDB_READ);
         EXPECT_EQ(true,
             array.schema().cell_order() == TILEDB_HILBERT);
+        array.close();
+    }
+
+    TEST_F(TileDBWriterTest, tile_sizes)
+    {
+        Options reader_options;
+        FauxReader reader;
+        BOX3D bounds(1.0, 1.0, 1.0, 2.0, 2.0, 2.0);
+        reader_options.add("bounds", bounds);
+        reader_options.add("mode", "constant");
+        reader_options.add("count", count);
+        reader.setOptions(reader_options);
+
+        tiledb::Context ctx;
+        tiledb::VFS vfs(ctx);
+        std::string pth = Support::temppath("tiledb_test_sf_curve");
+
+        Options writer_options;
+        writer_options.add("array_name", pth);
+        writer_options.add("x_tile_size", 1);
+        writer_options.add("y_tile_size", 1);
+        writer_options.add("z_tile_size", 1);
+
+
+        if (vfs.is_dir(pth))
+        {
+            vfs.remove_dir(pth);
+        }
+
+        TileDBWriter writer;
+        writer.setOptions(writer_options);
+        writer.setInput(reader);
+
+        FixedPointTable table(count);
+        writer.prepare(table);
+        writer.execute(table);
+
+        EXPECT_EQ(true,
+            tiledb::Object::object(ctx, pth).type() == tiledb::Object::Type::Array);
+
+        tiledb::Array array(ctx, pth, TILEDB_READ);
+        EXPECT_EQ(true,
+            array.schema().cell_order() == TILEDB_ROW_MAJOR);
         array.close();
     }
     #endif
