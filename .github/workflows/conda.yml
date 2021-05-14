@@ -13,7 +13,7 @@ jobs:
         platform: ['ubuntu-latest','windows-latest','macos-latest']
 
     env:
-      PLATFORM: ${{ matrix.platform }}
+      PDAL_PLATFORM: ${{ matrix.platform }}
 
     steps:
     - uses: actions/checkout@v2
