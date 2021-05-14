@@ -10,7 +10,7 @@ Creating surface meshes
 This exercise uses PDAL to create surface meshes. PDAL is able to use a number of
 meshing filters: https://pdal.io/stages/filters.html#mesh. Three of these are 'in
 the box', without needing plugins compiled. These are 2D Delaunay triangulation,
-Greedy projection meshing, and Poisson surface meshing.
+Greedy projection meshing and Poisson surface meshing.
 
 In this exercise we'll create a Poisson surface mesh - a watertight isosurface -
 from our input point cloud.
