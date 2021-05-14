@@ -76,30 +76,6 @@ struct TileDBWriter::Args
     bool m_append;
 };
 
-std::string attributeDefaults(R"(
-{
-    "coords":[
-        {"compression": "bit-shuffle"},
-        {"compression": "gzip", "compression_level": 9}
-    ],
-    "Intensity":{"compression": "bzip2", "compression_level": 5},
-    "ReturnNumber": {"compression": "zstd", "compression_level": 7},
-    "NumberOfReturns": {"compression": "zstd", "compression_level": 7},
-    "ScanDirectionFlag": {"compression": "bzip2", "compression_level": 5},
-    "EdgeOfFlightLine": {"compression": "bzip2", "compression_level": 5},
-    "Classification": {"compression": "gzip", "compression_level": 9},
-    "ScanAngleRank": {"compression": "bzip2", "compression_level": 5},
-    "UserData": {"compression": "gzip", "compression_level": 9},
-    "PointSourceId": {"compression": "bzip2"},
-    "Red": {"compression": "rle"},
-    "Green": {"compression": "rle"},
-    "Blue": {"compression": "rle"},
-    "GpsTime": [
-        {"compression": "bit-shuffle"},
-        {"compression": "zstd", "compression_level": 7}
-    ]
-})");
-
 CREATE_SHARED_STAGE(TileDBWriter, s_info)
 
 void writeAttributeValue(TileDBWriter::DimBuffer& dim,
@@ -253,6 +229,30 @@ std::unique_ptr<tiledb::FilterList> createFilterList(const tiledb::Context& ctx,
 TileDBWriter::TileDBWriter(): 
     m_args(new TileDBWriter::Args)
 {
+    std::string attributeDefaults(R"(
+    {
+        "coords":[
+            {"compression": "bit-shuffle"},
+            {"compression": "gzip", "compression_level": 9}
+        ],
+        "Intensity":{"compression": "bzip2", "compression_level": 5},
+        "ReturnNumber": {"compression": "zstd", "compression_level": 7},
+        "NumberOfReturns": {"compression": "zstd", "compression_level": 7},
+        "ScanDirectionFlag": {"compression": "bzip2", "compression_level": 5},
+        "EdgeOfFlightLine": {"compression": "bzip2", "compression_level": 5},
+        "Classification": {"compression": "gzip", "compression_level": 9},
+        "ScanAngleRank": {"compression": "bzip2", "compression_level": 5},
+        "UserData": {"compression": "gzip", "compression_level": 9},
+        "PointSourceId": {"compression": "bzip2"},
+        "Red": {"compression": "rle"},
+        "Green": {"compression": "rle"},
+        "Blue": {"compression": "rle"},
+        "GpsTime": [
+            {"compression": "bit-shuffle"},
+            {"compression": "zstd", "compression_level": 7}
+        ]
+    })");
+
     m_args->m_defaults = NL::json::parse(attributeDefaults);
 }
 
@@ -273,11 +273,11 @@ void TileDBWriter::addArgs(ProgramArgs& args)
     args.add("data_tile_capacity", "TileDB tile capacity",
         m_args->m_tile_capacity, size_t(100000));
     args.add("x_tile_size", "TileDB tile size", m_args->m_x_tile_size,
-        size_t(1000));
+        size_t(0));
     args.add("y_tile_size", "TileDB tile size", m_args->m_y_tile_size,
-        size_t(1000));
+        size_t(0));
     args.add("z_tile_size", "TileDB tile size", m_args->m_z_tile_size,
-        size_t(1000));
+        size_t(0));
     args.add("chunk_size", "Point cache size for chunked writes",
         m_args->m_cache_size, size_t(10000));
     args.add("stats", "Dump TileDB query stats to stdout", m_args->m_stats,
@@ -367,16 +367,18 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
 #if TILEDB_VERSION_MAJOR >= 2
     #if ((TILEDB_VERSION_MINOR > 1) || (TILEDB_VERSION_MAJOR > 2))
         else
+        {
             domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X",
                 {{dimMin, dimMax}}))
                 .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Y",
                 {{dimMin, dimMax}}))
                 .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
                 {{dimMin, dimMax}}));
+            m_schema->set_cell_order(TILEDB_HILBERT);
+        }
     #endif
 #endif
-        m_schema->set_domain(domain).set_order(
-            {{TILEDB_ROW_MAJOR, TILEDB_ROW_MAJOR}});
+        m_schema->set_domain(domain);
         m_schema->set_capacity(m_args->m_tile_capacity);
     }
     else
