@@ -14,7 +14,7 @@
             "compression": "true",
             "minor_version": "2",
             "dataformat_id": "3",
-            "filename":"./exercises/analysis/thinning/uncompahgre-colored.laz"
+            "filename":"./exercises/analysis/colorization/uncompahgre-colored.laz"
         }
     ]
 }
