@@ -3,7 +3,7 @@
     {
         "type":"readers.ept",
         "filename":"ept://http://na-c.entwine.io/dk/ept.json",
-        "bounds":"([1402800, 1408800], [7478000, 7483000])",
+        "bounds":"([1401016, 1410670], [7476527, 7484590])",
         "resolution": 5 
     },
     {
