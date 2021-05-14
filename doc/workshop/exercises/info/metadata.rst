@@ -59,7 +59,7 @@ JSON parsing tool like ``jq`` provide a powerful inspection combination.
 For example, we might only care about the ``system_id`` and ``compressed``
 flag for this particular file. Our simple ``pdal info --metadata`` command
 gives us that, but it also gives us a bunch of other stuff we don't need
-at the moment either. Let's focus on extracting what we want using the
+at the moment. Let's focus on extracting what we want using the
 ``jq`` command.
 
 .. literalinclude:: ./metadata-command-jq.txt

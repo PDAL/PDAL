@@ -45,7 +45,7 @@ point cloud file we're going to read.
 
 ::
 
-    "./exercises/analysis/colorization/uncompahgre.laz",
+    "./exercises/analysis/thinning/uncompahgre.laz",
 
 2. :ref:`filters.colorization`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
