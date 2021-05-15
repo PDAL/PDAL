@@ -231,8 +231,7 @@ void EptReader::initialize()
         m_p->boundsXform = SrsTransform(m_p->info->srs(), boundsSrs);
     m_queryBounds = m_args->m_bounds.to3d();
 
-    // Transform polygons and bounds to point source SRS.
-    std::vector <Polygon> exploded;
+    // Create transform from the point source SRS to the poly SRS.
     for (Polygon& poly : m_args->m_polys)
     {
         if (!poly.valid())
@@ -685,13 +684,17 @@ bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
         return m_queryBounds.contains(x, y, z);
     };
 
-    auto passesPolyFilter = [this](double x, double y, double z)
+    auto passesPolyFilter = [this](double xo, double yo, double zo)
     {
         if (m_p->polys.empty())
             return true;
 
         for (PolySrs& ps : m_p->polys)
         {
+            double x = xo;
+            double y = yo;
+            double z = zo;
+
             ps.xform.transform(x, y, z);
             if (ps.poly.contains(x, y))
                 return true;
