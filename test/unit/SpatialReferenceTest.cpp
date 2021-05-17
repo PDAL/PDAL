@@ -248,8 +248,7 @@ TEST(SpatialReferenceTest, test_writing_vlr)
         LasReader readerx;
         Options readerOpts;
 
-        readerOpts.add("filename",
-            ::Support::datapath("las/1.2-with-color.las"));
+        readerOpts.add("filename", Support::datapath("las/1.2-with-color.las"));
         readerx.setOptions(readerOpts);
 
         Options writerOpts;

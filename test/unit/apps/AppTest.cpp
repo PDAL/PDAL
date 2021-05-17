@@ -37,6 +37,9 @@
 
 #include "Support.hpp"
 
+namespace pdal
+{
+
 namespace
 {
 std::string appName()
@@ -44,9 +47,6 @@ std::string appName()
     return Support::binpath("pdal");
 }
 } // unnamed namespace
-
-namespace pdal
-{
 
 TEST(PdalApp, load)
 {

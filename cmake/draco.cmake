@@ -1,19 +1,6 @@
 #
-option(WITH_DRACO "Choose if Draco support should be built" TRUE)
-find_package(Draco EXACT 1.3.6)
+# the `pkg_check_modules` function is created with this call
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(DRACO REQUIRED draco>1.4.0)
 
-if (WITH_DRACO)
-    set_package_properties(Draco PROPERTIES TYPE RECOMMENDED
-        PURPOSE "Provides Draco compression")
-    if(Draco_FOUND)
-        include_directories(${draco_INCLUDE_DIR})
-        set(CMAKE_REQUIRED_LIBRARIES ${draco_LIBRARIES})
-        set(PDAL_HAVE_DRACO 1)
-        set(BUILD_PLUGIN_DRACO 1)
-        set(DRACO_LIBRARY "draco")
-    else()
-        set(WITH_DRACO FALSE)
-    endif()
-else()
-        set(WITH_DRACO FALSE)
-endif()
+set(PDAL_HAVE_DRACO 1)

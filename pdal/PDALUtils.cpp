@@ -414,6 +414,50 @@ double computeHausdorff(PointViewPtr srcView, PointViewPtr candView)
     return (std::max)(maxDistSrcToCand, maxDistCandToSrc);
 }
 
+std::pair<double, double> computeHausdorffPair(PointViewPtr viewA,
+                                               PointViewPtr viewB)
+{
+    // Computes both the max and mean of all nearest neighbor distances from
+    // each point in the PointView to those in the KD3Index.
+    auto compute = [](PointViewPtr view, KD3Index& index) {
+        double max_distance = std::numeric_limits<double>::lowest();
+        double M1(0.0);
+        for (PointRef p : *view)
+        {
+            PointIdList indices(1);
+            std::vector<double> sqr_dists(1);
+            index.knnSearch(p, 1, &indices, &sqr_dists);
+
+            if (sqr_dists[0] > max_distance)
+                max_distance = sqr_dists[0];
+
+            double delta = std::sqrt(sqr_dists[0]) - M1;
+            double delta_n = delta / (p.pointId() + 1);
+            M1 += delta_n;
+        }
+        max_distance = std::sqrt(max_distance);
+        return std::pair<double, double>{max_distance, M1};
+    };
+
+    // First, test from view A to view B...
+    KD3Index& indexB = viewB->build3dIndex();
+    std::pair<double, double> a2b = compute(viewA, indexB);
+
+    // then recompute from view B to view A.
+    KD3Index& indexA = viewA->build3dIndex();
+    std::pair<double, double> b2a = compute(viewB, indexA);
+
+    // The original Hausdorff metric is the max of the max distances from A to B
+    // and vice versa.
+    double original = (std::max)(a2b.first, b2a.first);
+
+    // The modified Hausdorff metric is the max of the mean distances from A to
+    // B and vice versa.
+    double modified = (std::max)(a2b.second, b2a.second);
+
+    // Return both the original and modified metrics.
+    return std::pair<double, double>{original, modified};
+}
 
 std::string dllDir()
 {

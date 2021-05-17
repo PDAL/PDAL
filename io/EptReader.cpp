@@ -125,7 +125,6 @@ public:
     std::unique_ptr<TileContents> currentTile;
     std::unique_ptr<Hierarchy> hierarchy;
     std::queue<TileContents> contents;
-    Hierarchy::const_iterator hierarchyIter;
     AddonList addons;
     std::mutex mutex;
     std::condition_variable contentsCv;
@@ -144,19 +143,17 @@ void EptReader::addArgs(ProgramArgs& args)
 {
     args.add("bounds", "Bounds to fetch", m_args->m_bounds);
     args.add("origin", "Origin of source file to fetch", m_args->m_origin);
-    args.add("threads", "Number of worker threads", m_args->m_threads);
+    args.add("requests", "Number of worker threads", m_args->m_threads, (size_t)15);
+    args.addSynonym("requests", "threads");
     args.add("resolution", "Resolution limit", m_args->m_resolution);
     args.add("addons", "Mapping of addon dimensions to their output directory",
         m_args->m_addons);
     args.add("polygon", "Bounding polygon(s) to crop requests",
         m_args->m_polys).setErrorText("Invalid polygon specification. "
             "Must be valid GeoJSON/WKT");
-    args.add("header", "Header fields to forward with HTTP requests",
-        m_args->m_headers);
-    args.add("query", "Query parameters to forward with HTTP requests",
-        m_args->m_query);
-    args.add("ogr", "OGR filter geometries",
-        m_args->m_ogr);
+    args.add("header", "Header fields to forward with HTTP requests", m_args->m_headers);
+    args.add("query", "Query parameters to forward with HTTP requests", m_args->m_query);
+    args.add("ogr", "OGR filter geometries", m_args->m_ogr);
 }
 
 
@@ -189,10 +186,8 @@ void EptReader::initialize()
 
     const std::size_t threads((std::max)(m_args->m_threads, size_t(4)));
     if (threads > 100)
-    {
         log()->get(LogLevel::Warning) << "Using a large thread count: " <<
             threads << " threads" << std::endl;
-    }
     m_p->pool.reset(new ThreadPool(threads));
 
     StringMap headers;
@@ -488,8 +483,6 @@ void EptReader::ready(PointTableRef table)
             " will be downloaded" << std::endl;
     }
 
-    // Ten million is a silly-large number for the number of tiles.
-    m_p->pool.reset(new ThreadPool(m_p->pool->numThreads()));
     m_pointId = 0;
     m_tileCount = m_p->hierarchy->size();
 
@@ -497,22 +490,11 @@ void EptReader::ready(PointTableRef table)
     // In streaming mode, queue up at most 4 to avoid having a ton of data
     // show up at once. Others requests will be queued as the results
     // are handled.
+    m_p->pool.reset(new ThreadPool(m_p->pool->numThreads()));
+    for (const Overlap& overlap : *m_p->hierarchy)
+        load(overlap);
     if (table.supportsView())
-    {
         m_artifactMgr = &table.artifactManager();
-        for (const Overlap& overlap : *m_p->hierarchy)
-            load(overlap);
-    }
-    else
-    {
-        int count = 4;
-        m_p->hierarchyIter = m_p->hierarchy->cbegin();
-        while (m_p->hierarchyIter != m_p->hierarchy->cend() && count)
-        {
-            load(*m_p->hierarchyIter++);
-            count--;
-        }
-    }
 }
 
 
@@ -786,9 +768,6 @@ top:
             {
                 m_p->currentTile.reset(new TileContents(std::move(m_p->contents.front())));
                 m_p->contents.pop();
-                l.unlock();
-                if (m_p->hierarchyIter != m_p->hierarchy->cend())
-                    load(*m_p->hierarchyIter++);
                 break;
             }
             else

@@ -21,8 +21,8 @@ distance :math:`d_{CD}(X,Y)` is
 
 ::
 
-    --source arg     Non-positional option for specifying filename of source file.
-    --candidate arg  Non-positional option for specifying filename to test against source.
+    --source arg     Source filename
+    --candidate arg  Candidate filename
 
 The algorithm makes no distinction between source and candidate files (i.e.,
 they can be transposed with no affect on the computed distance).

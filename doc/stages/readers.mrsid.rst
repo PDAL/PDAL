@@ -3,6 +3,10 @@
 readers.mrsid
 =============
 
+.. note::
+
+    The MrSID reader is deprecated and will be removed in a future release.
+
 Implements MrSID 4.0 LiDAR Compressor. It requires the `Lidar_DSDK`_ to be able to
 decompress and read data.
 

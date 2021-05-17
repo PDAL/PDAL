@@ -83,16 +83,18 @@ inline std::ostream& operator<<(std::ostream& out, const LasCompression& c)
 struct ExtraDim
 {
     ExtraDim(const std::string name, Dimension::Type type,
-            double scale = 1.0, double offset = 0.0) :
-        m_name(name), m_dimType(Dimension::Id::Unknown, type, scale, offset),
-        m_size(0)
+        double scale = 1.0, double offset = 0.0) :
+            m_name(name), m_dimType(Dimension::Id::Unknown, type, scale, offset)
+        { m_size = (uint8_t)Dimension::size(type); }
+    ExtraDim(const std::string name, uint8_t size) : m_name(name),
+        m_dimType(Dimension::Id::Unknown, Dimension::Type::None), m_size(size)
     {}
 
     friend bool operator == (const ExtraDim& ed1, const ExtraDim& ed2);
 
     std::string m_name;
     DimType m_dimType;
-    size_t m_size;  // Only set when type is None.
+    size_t m_size;
 };
 
 inline bool operator == (const ExtraDim& ed1, const ExtraDim& ed2)

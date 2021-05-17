@@ -62,8 +62,7 @@ static StaticPluginInfo const s_info
 {
     "writers.las",
     "ASPRS LAS 1.0 - 1.4 writer. LASzip support is also \n" \
-        "available if enabled at compile-time. Note that LAZ \n" \
-        "does not provide LAS 1.4 support at this time.",
+        "available if enabled at compile-time.",
     "http://pdal.io/stages/writers.las.html",
     { "las", "laz" }
 };
@@ -651,9 +650,9 @@ void LasWriter::fillHeader()
         globalEncoding |= WKT_MASK;
     m_lasHeader.setGlobalEncoding(globalEncoding);
 
-    if (!m_lasHeader.pointFormatSupported())
-        throwError("Unsupported LAS output point format: " +
-            Utils::toString((int)m_lasHeader.pointFormat()) + ".");
+    auto ok = m_lasHeader.pointFormatSupported();
+    if (!ok)
+        throwError(ok.what());
 }
 
 
@@ -1155,7 +1154,7 @@ void LasWriter::finishOutput()
     OLeStream out(m_ostream);
 
     // addVlr prevents any eVlrs from being added before version 1.4.
-    m_lasHeader.setEVlrOffset((uint32_t)m_ostream->tellp());
+    m_lasHeader.setEVlrOffset(m_eVlrs.size() ? (uint32_t)m_ostream->tellp() : 0);
     for (auto vi = m_eVlrs.begin(); vi != m_eVlrs.end(); ++vi)
     {
         ExtLasVLR evlr = *vi;

@@ -110,3 +110,8 @@ ignore_vlr
 fix_dims
   Make invalid dimension names valid by converting disallowed characters to '_'. Only
   applies to names specified in an extra-bytes VLR. [Default: true]
+
+nosrs
+  Don't read the SRS VLRs. The data will not be assigned an SRS. This option is
+  for use only in special cases where processing the SRS could cause performance
+  issues. [Default: false]

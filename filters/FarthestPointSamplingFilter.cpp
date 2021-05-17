@@ -72,8 +72,15 @@ PointViewSet FarthestPointSamplingFilter::run(PointViewPtr inView)
 {
     // Return empty PointViewSet if the input PointView has no points.
     PointViewSet viewSet;
-    if (!inView->size() || (inView->size() < m_count))
+    if (!inView->size())
         return viewSet;
+
+    // Return inView if input PointView has fewer than count points.
+    if (inView->size() < m_count)
+    {
+        viewSet.insert(inView);
+        return viewSet;
+    }
 
     PointIdList ids = Segmentation::farthestPointSampling(*inView, m_count);
 

@@ -121,6 +121,8 @@ public:
     uint8_t versionMinor() const
         { return m_versionMinor; }
 
+    std::string versionString() const;
+
     /// Set minor component of version of LAS format.
     /// \exception std::out_of_range - invalid value given.
     /// \param v - value between eVersionMinorMin and eVersionMinorMax.
@@ -213,13 +215,7 @@ public:
     /// Get identifier of point data (record) format.
     uint8_t pointFormat() const
         { return m_pointFormat; }
-    bool pointFormatSupported() const
-    {
-        if (versionAtLeast(1, 4))
-            return m_pointFormat <= 10 && !hasWave();
-        else
-            return m_pointFormat <= 5 && !hasWave();
-    }
+    Utils::StatusWithReason pointFormatSupported() const;
 
     /// The length in bytes of each point.  All points in the file are
     /// considered to be fixed in size, and the point format is used
@@ -347,9 +343,6 @@ public:
     bool useWkt() const
         { return (bool)((m_globalEncoding >> 4) & 1); }
 
-    bool incompatibleSrs() const
-        { return !useWkt() && has14PointFormat(); }
-
     /// Returns true iff the file is compressed (laszip),
     /// as determined by the high bit in the point type
     bool compressed() const
@@ -387,7 +380,7 @@ public:
     const LasVLR *findVlr(const std::string& userId, uint16_t recordId) const;
     void removeVLR(const std::string& userId, uint16_t recordId);
     void removeVLR(const std::string& userId);
-    void initialize(LogPtr log, uintmax_t fileSize);
+    void initialize(LogPtr log, uintmax_t fileSize, bool nosrs);
     const VlrList& vlrs() const
         { return m_vlrs; }
 
@@ -425,6 +418,7 @@ private:
     std::string m_geotiff_print;
     VlrList m_vlrs;
     VlrList m_eVlrs;
+    bool m_nosrs;
 
     void setSrs();
     void setSrsFromWkt();

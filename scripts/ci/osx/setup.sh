@@ -4,15 +4,15 @@ echo "Configuring build type '$BUILD_TYPE'"
 mkdir build
 
 conda update -n base -c defaults conda
-conda install cmake ninja compilers -y
+conda install cmake ninja -y
 
 # can remove this after CF PDAL recipe adds Draco
-conda install -c conda-forge draco=1.3.6 -y
+conda install -c conda-forge draco pkgconfig -y
 
 if [ "$BUILD_TYPE" == "fixed" ]; then
 
     conda config --set channel_priority strict
-    conda install --yes --quiet gdal=3.0.4=py38h9f7df5a_9 python=3.8  -y
+    conda install --yes --quiet gdal=3.2.2=py38h140b4a6_2 python=3.8  -y
     conda install --yes --quiet pdal  --only-deps -y
 
 else

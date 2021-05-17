@@ -272,12 +272,7 @@ std::vector<uint8_t> Utils::base64_decode(std::string const& encoded_string)
     unsigned char char_array_4[4], char_array_3[3];
     std::vector<uint8_t> ret;
 
-    if (in_len % 4)
-        throw std::runtime_error("Can't decode base64 string whose length "
-            "is not divisible by 4");
-
-    while (in_len-- && (encoded_string[in_] != '=') &&
-        is_base64(encoded_string[in_]))
+    while (in_len-- && (encoded_string[in_] != '=') && is_base64(encoded_string[in_]))
     {
         char_array_4[i++] = encoded_string[in_];
         in_++;
@@ -305,15 +300,11 @@ std::vector<uint8_t> Utils::base64_decode(std::string const& encoded_string)
             char_array_4[j] = 0;
 
         for (j = 0; j <4; j++)
-            char_array_4[j] =
-                static_cast<unsigned char>(base64_chars.find(char_array_4[j]));
+            char_array_4[j] = static_cast<unsigned char>(base64_chars.find(char_array_4[j]));
 
-        char_array_3[0] = (char_array_4[0] << 2) +
-            ((char_array_4[1] & 0x30) >> 4);
-        char_array_3[1] = ((char_array_4[1] & 0xf) << 4) +
-            ((char_array_4[2] & 0x3c) >> 2);
-        char_array_3[2] = ((char_array_4[2] & 0x3) << 6) +
-            char_array_4[3];
+        char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
+        char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
+        char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
 
         for (j = 0; (j < i - 1); j++)
             ret.push_back(char_array_3[j]);
