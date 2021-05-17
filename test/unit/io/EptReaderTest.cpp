@@ -288,43 +288,6 @@ TEST(EptReaderTest, resolutionLimit)
     EXPECT_EQ(np, expectedCount);
 }
 
-TEST(EptReaderTest, bounds2dXform)
-{
-    BOX2D b(515380, 4918360, 515390, 4918370);
-    SrsBounds eptBounds(b);
-
-    PointViewPtr v1;
-    PointViewPtr v2;
-    {
-        EptReader reader;
-        Options options;
-        options.add("filename", eptLaszipPath);
-        options.add("bounds", eptBounds);
-        reader.setOptions(options);
-        PointTable eptTable;
-        reader.prepare(eptTable);
-        auto vset = reader.execute(eptTable);
-        v1 = *vset.begin();
-    }
-
-    gdal::reprojectBounds(b, "EPSG:26912", "EPSG:4326");
-    SrsBounds boxBounds(b, "EPSG:4326");
-    {
-        EptReader reader;
-        Options options;
-        options.add("filename", eptLaszipPath);
-        options.add("bounds", boxBounds);
-        reader.setOptions(options);
-        PointTable eptTable;
-        reader.prepare(eptTable);
-        auto vset = reader.execute(eptTable);
-        v2 = *vset.begin();
-    }
-
-    // There is some small error when we round-trip the bounds, so allow us
-    // to be off by 15 points.
-    EXPECT_NEAR((double)v1->size(), (double)v2->size(), 15u);
-}
 
 TEST(EptReaderTest, boundedRead2d)
 {

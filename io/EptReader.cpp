@@ -575,6 +575,9 @@ void EptReader::overlaps(Hierarchy& target, const NL::json& hier, const Key& key
     };
 
     {
+        // This lock is here because if a bunch of threads are using the transform
+        // at the same time, it seems to get corrupted. There may be other instances
+        // that need to be locked.
         std::lock_guard<std::mutex> lock(m_p->mutex);
         // If the reprojected source bounds doesn't overlap our query bounds, we're done.
         if (!reproject(key.b, m_p->boundsXform).overlaps(m_queryBounds))
@@ -587,6 +590,9 @@ void EptReader::overlaps(Hierarchy& target, const NL::json& hier, const Key& key
     {
         if (m_p->polys.empty())
             return true;
+
+        // Could have multiple threads using the same xform at the same time, so lock.
+        std::lock_guard<std::mutex> lock(m_p->mutex);
         for (auto& ps : m_p->polys)
             if (!ps.poly.disjoint(reproject(key.b, ps.xform)))
                 return true;
@@ -663,6 +669,7 @@ void EptReader::checkTile(const TileContents& tile)
 }
 
 
+// This code runs in a single thread, so doesn't need locking.
 bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
 {
     using namespace Dimension;
