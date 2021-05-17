@@ -236,7 +236,7 @@ void LasHeader::setSrs()
     if (m_nosrs)
         return;
 
-    if (has14Format() && !useWkt())
+    if (has14PointFormat() && !useWkt())
     {
         m_log->get(LogLevel::Error) << "Global encoding WKT flag not set "
             "for point format 6 - 10." << std::endl;
@@ -255,7 +255,7 @@ void LasHeader::setSrs()
     // we can't be sure, so we check here.
     try
     {
-        if ((useWkt() && m_versionMinor >= 4) || has14Format())
+        if ((useWkt() && m_versionMinor >= 4) || has14PointFormat())
             setSrsFromWkt();
         else
             setSrsFromGeotiff();
