@@ -37,110 +37,105 @@
 // support functions for unit testing
 
 #include <pdal/pdal_types.hpp>
+#include <string>
 
 namespace pdal
 {
     class PointView;
     class Stage;
     class BOX3D;
-}
 
-#include <string>
+namespace Support
+{
+// this is where the reference files (input data) live
+std::string datapath();
 
-class Support
+// returns "datapath + / + file"
+std::string datapath(const std::string& file);
+
+// this is where the reference files (input data) live
+std::string configuredpath();
+
+// returns "configuredpath + / + file"
+std::string configuredpath(const std::string& file);
+
+// this is where the temporary output files go
+std::string temppath();
+
+// returns "temppath + / + file"
+std::string temppath(const std::string& file);
+
+// this is where the pdal executables live
+std::string binpath();
+
+// return "bindir + / + file"
+std::string binpath(const std::string& file);
+
+// returns "name" on unix and "name + .exe" on windows
+std::string exename(const std::string& name);
+
+// returns number of bytes different for two binary files (or maxint
+// if a file doesn't exist)
+uint32_t diff_files(const std::string& file1, const std::string& file2);
+uint32_t diff_files(std::istream& str1, std::istream& str2);
+
+// same as diff_files, but allows for a region of the file be to be ignored
+// (region is specified with a starting offset and a length)
+uint32_t diff_files(const std::string& file1, const std::string& file2, uint32_t ignorable_start,
+    uint32_t ignorable_length);
+
+// same as above diff_files with ignorable region, but for multiple regions
+uint32_t diff_files(const std::string& file1, const std::string& file2, uint32_t* ignorable_start,
+    uint32_t* ignorable_length, uint32_t num_ignorables);
+
+// same as above diff_files with ignorable region, but for multiple regions
+uint32_t diff_files(std::istream& str1, std::istream& str2, uint32_t* ignorable_start,
+    uint32_t* ignorable_length, uint32_t num_ignorables);
+
+// returns number of lines different for two text files (or maxint
+// if a file doesn't exist) if ignoreLine is not -1, that line will
+// be "ignored" when comparing the two files
+uint32_t diff_text_files(const std::string& file1, const std::string& file2,
+    int32_t ignoreLine1=-1);
+uint32_t diff_text_files(std::istream& str1, std::istream& str2, int32_t ignoreLine1=-1);
+
+// returns true iff the two (binary or ascii) files are the same,
+// using the above diff_files/diff_text_files functions
+bool compare_files(const std::string& file1, const std::string& file2);
+bool compare_text_files(const std::string& file1, const std::string& file2);
+bool compare_text_files(std::istream& str1, std::istream& str2);
+
+void checkXYZ(const std::string& file1, const std::string& file2);
+
+// validate a point's XYZ values
+void check_pN(const pdal::PointView& data, pdal::PointId index,
+    double xref, double yref, double zref);
+
+// validate a point's XYZ, Time, and Color values
+void check_pN(const pdal::PointView& data,
+    PointId index, double xref, double yref, double zref,
+    double tref, uint16_t rref, uint16_t gref, uint16_t bref);
+
+// these are for the 1.2-with-color image
+void check_p0_p1_p2(const pdal::PointView& data);
+void check_p100_p101_p102(const pdal::PointView& data);
+
+void compareBounds(const pdal::BOX3D& p, const pdal::BOX3D& q);
+
+// This provides a reasonable temp filename. The file will be deleted (if it exists) when
+// the instance goes out of scope.
+class Tempfile
 {
 public:
-    // this is where the reference files (input data) live
-    static std::string datapath();
+    Tempfile();
+    ~Tempfile();
 
-    // returns "datapath + / + file"
-    static std::string datapath(const std::string& file);
+    std::string filename();
 
-    // this is where the reference files (input data) live
-    static std::string configuredpath();
-
-    // returns "configuredpath + / + file"
-    static std::string configuredpath(const std::string& file);
-
-
-    // this is where the temporary output files go
-    static std::string temppath();
-
-    // returns "temppath + / + file"
-    static std::string temppath(const std::string& file);
-
-    // this is where the pdal executables live
-    static std::string binpath();
-
-    // return "bindir + / + file"
-    static std::string binpath(const std::string& file);
-
-    // returns "name" on unix and "name + .exe" on windows
-    static std::string exename(const std::string& name);
-
-    // returns number of bytes different for two binary files (or maxint
-    // if a file doesn't exist)
-    static uint32_t diff_files(const std::string& file1,
-       const std::string& file2);
-    static uint32_t diff_files(std::istream& str1, std::istream& str2);
-
-    // same as diff_files, but allows for a region of the file be to be ignored
-    // (region is specified with a starting offset and a length)
-    static uint32_t diff_files(const std::string& file1,
-        const std::string& file2, uint32_t ignorable_start,
-        uint32_t ignorable_length);
-
-    // same as above diff_files with ignorable region, but for multiple regions
-    static uint32_t diff_files(const std::string& file1,
-        const std::string& file2, uint32_t* ignorable_start,
-        uint32_t* ignorable_length, uint32_t num_ignorables);
-
-    // same as above diff_files with ignorable region, but for multiple regions
-    static uint32_t diff_files(std::istream& str1, std::istream& str2,
-        uint32_t* ignorable_start, uint32_t* ignorable_length,
-        uint32_t num_ignorables);
-
-    // returns number of lines different for two text files (or maxint
-    // if a file doesn't exist) if ignoreLine is not -1, that line will
-    // be "ignored" when comparing the two files
-    static uint32_t diff_text_files(const std::string& file1,
-        const std::string& file2, int32_t ignoreLine1=-1);
-    static uint32_t diff_text_files(std::istream& str1, std::istream& str2,
-        int32_t ignoreLine1=-1);
-
-    // returns true iff the two (binary or ascii) files are the same,
-    // using the above diff_files/diff_text_files functions
-
-    static bool compare_files(const std::string& file1,
-        const std::string& file2);
-    static bool compare_text_files(const std::string& file1,
-        const std::string& file2);
-    static bool compare_text_files(std::istream& str1, std::istream& str2);
-
-    static void checkXYZ(const std::string& file1, const std::string& file2);
-
-    // validate a point's XYZ values
-    static void check_pN(const pdal::PointView& data,
-                         pdal::PointId index,
-                         double xref, double yref, double zref);
-
-    // validate a point's XYZ, Time, and Color values
-    static void check_pN(const pdal::PointView& data,
-        pdal::PointId index, double xref, double yref, double zref,
-        double tref, uint16_t rref, uint16_t gref, uint16_t bref);
-
-    // these are for the 1.2-with-color image
-    static void check_p0_p1_p2(const pdal::PointView& data);
-    static void check_p100_p101_p102(const pdal::PointView& data);
-    static void check_p355_p356_p357(const pdal::PointView& data);
-    static void check_p710_p711_p712(const pdal::PointView& data);
-
-    static void compareBounds(const pdal::BOX3D& p,
-        const pdal::BOX3D& q);
-
-    // executes "cmd" via popen, copying stdout into output and returning
-    // the status code note: under windows, all "/" characrters in cmd will
-    // be converted to "\\" for you
-    // static int run_command(const std::string& cmd, std::string& output);
+private:
+    std::string m_name;
 };
+
+} // namespace Support
+} // namespace pdal
 

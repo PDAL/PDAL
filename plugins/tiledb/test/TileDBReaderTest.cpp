@@ -68,6 +68,9 @@ class TileDBReaderTest : public ::testing::Test
                  tiledb::Object::remove(ctx, data_path);
 
             writer_options.add("array_name", data_path);
+            writer_options.add("x_tile_size", 1);
+            writer_options.add("y_tile_size", 1);
+            writer_options.add("z_tile_size", 1);
 
             reader_options.add("mode", "ramp");
             reader_options.add("count", 100);
@@ -227,6 +230,13 @@ class TileDBReaderTest : public ::testing::Test
         options.add("array_name", pth);
         options.add("chunk_size", 80);
 
+        Options writer_options;
+        writer_options.add("array_name", pth);
+        writer_options.add("chunk_size", 80);
+        writer_options.add("x_tile_size", 1);
+        writer_options.add("y_tile_size", 1);
+        writer_options.add("z_tile_size", 1);
+
         if (vfs.is_dir(pth))
         {
             vfs.remove_dir(pth);
@@ -239,7 +249,7 @@ class TileDBReaderTest : public ::testing::Test
         reader.addOptions(reader_options);
 
         TileDBWriter writer;
-        writer.setOptions(options);
+        writer.setOptions(writer_options);
         writer.setInput(reader);
         writer.setSpatialReference(utm16);
 

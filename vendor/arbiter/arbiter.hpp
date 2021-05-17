@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: 8143feb534f3766ce2878ce9295f5b72f3ed67c5
+// Git SHA: 18a41e535a428de1cb907b65601abd18d1d4b9b6
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -4059,6 +4059,18 @@ public:
             http::Headers headers = http::Headers(),
             http::Query query = http::Query()) const;
 
+    /* Perform an HTTP HEAD request. */
+    std::size_t getSize(
+            std::string path,
+            http::Headers headers,
+            http::Query query = http::Query()) const;
+
+    /* Perform an HTTP HEAD request. */
+    std::unique_ptr<std::size_t> tryGetSize(
+            std::string path,
+            http::Headers headers,
+            http::Query query = http::Query()) const;
+
     /** Perform an HTTP GET request. */
     std::vector<char> getBinary(
             std::string path,
@@ -4579,6 +4591,7 @@ public:
     std::string baseUrl() const;
     std::string bucket() const;
     std::string object() const;
+    std::string blob() const;
     std::string storageAccount() const;
 
 private:
@@ -5044,6 +5057,22 @@ public:
             std::string path,
             http::Headers headers,
             http::Query query = http::Query()) const;
+
+    /** Passthrough to
+     * drivers::Http::getSize(std::string, http::Headers, http::Query) const.
+     */
+    std::size_t getSize(
+            std::string subpath,
+            http::Headers headers,
+            http::Query = http::Query()) const;
+
+    /** Passthrough to
+     * drivers::Http::tryGetSize(std::string, http::Headers, http::Query) const.
+     */
+    std::unique_ptr<std::size_t> tryGetSize(
+            std::string subpath,
+            http::Headers headers,
+            http::Query = http::Query()) const;
 
     /** Passthrough to
      * drivers::Http::put(std::string, const std::string&, http::Headers, http::Query) const.

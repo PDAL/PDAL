@@ -67,7 +67,7 @@ LasHeader::LasHeader() : m_fileSig(FILE_SIGNATURE), m_sourceId(0),
     m_globalEncoding(0), m_versionMinor(2), m_systemId(getSystemIdentifier()),
     m_createDOY(0), m_createYear(0), m_vlrOffset(0), m_pointOffset(0),
     m_vlrCount(0), m_pointFormat(0), m_pointLen(0), m_pointCount(0),
-    m_isCompressed(false), m_eVlrOffset(0), m_eVlrCount(0)
+    m_isCompressed(false), m_eVlrOffset(0), m_eVlrCount(0), m_nosrs(false)
 {
     std::time_t now;
     std::time(&now);
@@ -85,10 +85,11 @@ LasHeader::LasHeader() : m_fileSig(FILE_SIGNATURE), m_sourceId(0),
 }
 
 
-void LasHeader::initialize(LogPtr log, uintmax_t fileSize)
+void LasHeader::initialize(LogPtr log, uintmax_t fileSize, bool nosrs)
 {
     m_log = log;
     m_fileSize = fileSize;
+    m_nosrs = nosrs;
 }
 
 
@@ -231,6 +232,10 @@ Dimension::IdList LasHeader::usedDims() const
 
 void LasHeader::setSrs()
 {
+    // If we're not processing SRS, just return.
+    if (m_nosrs)
+        return;
+
     if (has14PointFormat() && !useWkt())
     {
         m_log->get(LogLevel::Error) << "Global encoding WKT flag not set "

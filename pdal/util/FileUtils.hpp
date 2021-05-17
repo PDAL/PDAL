@@ -65,7 +65,7 @@ namespace FileUtils
         bool asBinary=true);
 
     /**
-      Create a file and open for writing.
+      Create/truncate a file and open for writing.
 
       \param filename  Filename.
       \param asBinary  Write as binary file (don't convert /n to /r/n)
@@ -73,6 +73,17 @@ namespace FileUtils
     */
     PDAL_DLL std::ostream* createFile(std::string const& filename,
         bool asBinary=true);
+
+    /**
+      Open an existing file for write
+
+      \param filename  Filename.
+      \param asBinary  Write as binary file (don't convert /n to /r/n)
+      \return  Point to opened stream.
+    */
+    PDAL_DLL std::ostream* openExisting(std::string const& filename,
+        bool asBinary=true);
+
 
     /**
       Determine if a directory exists.
@@ -286,7 +297,7 @@ namespace FileUtils
         { return m_error; }
 
         int m_fd;
-        size_t m_size;
+        uintmax_t m_size;
         void *m_addr;
         std::string m_error;
 #ifdef _WIN32
@@ -302,8 +313,8 @@ namespace FileUtils
       \return  MapContext.  addr() gets the mapped address.  what() gets
          any error message.  addr() returns nullptr on error.
     */
-    PDAL_DLL MapContext mapFile(const std::string& filename, bool readOnly,
-        size_t pos, size_t size);
+    PDAL_DLL MapContext mapFile(const std::string& filename, bool readOnly = true,
+        uintmax_t pos = 0, uintmax_t size = 0);
 
     /**
       Unmap a previously mapped file.

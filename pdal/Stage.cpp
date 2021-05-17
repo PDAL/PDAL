@@ -440,6 +440,7 @@ void Stage::startLogging() const
 void Stage::stopLogging() const
 {
     m_log->popLeader();
+    gdal::ErrorHandler::getGlobalErrorHandler().clear();
 }
 
 std::istream& operator>>(std::istream& in, Stage::WhereMergeMode& mode)

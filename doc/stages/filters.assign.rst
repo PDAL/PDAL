@@ -23,8 +23,8 @@ assignment
   to the dimension value as set when the filter began processing. [Required]
 
 condition
-  A list of :ref:`ranges <ranges>` that a point's values must pass in order
-  for the assignment to be performed. [Default: none]
+  A single :ref:`ranges <ranges>` that a point's values must pass in order
+  for the assignment to be performed. [Default: none] [Deprecated - use 'value']
 
 value
   A list of :ref:`assignment expressions <Assignment Expressions>` to be applied to points.

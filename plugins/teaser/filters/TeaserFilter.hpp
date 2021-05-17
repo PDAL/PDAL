@@ -41,6 +41,16 @@
 namespace pdal
 {
 
+// To enable compilation with C++11, we can implement the workaround documented
+// at https://stackoverflow.com/a/17903225/1620549 to provide support for
+// std::make_unique.
+template<typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args&&... args)
+{
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
+
 class PDAL_DLL TeaserFilter : public Filter
 {
 public:

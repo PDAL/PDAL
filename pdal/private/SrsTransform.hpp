@@ -32,6 +32,7 @@
 #include <pdal/pdal_internal.hpp>
 
 class OGRCoordinateTransformation;
+class OGRSpatialReference;
 
 namespace pdal
 {
@@ -43,6 +44,7 @@ class PDAL_DLL SrsTransform
 public:
     /// Object that performs transformation from a \src spatial reference
     /// to a \dest spatial reference.
+    SrsTransform(OGRSpatialReference src, OGRSpatialReference dst);
     SrsTransform(const SpatialReference& src, const SpatialReference& dst);
     SrsTransform(const SpatialReference& src,
                  std::vector<int> srcOrder,

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Hobu Inc., (info@hobu.co)
+* Copyright (c) 2021, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -13,9 +13,10 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. nor the names of contributors
-*       may be used to endorse or promote products derived from this
-*       software without specific prior written permission.
+*     * Neither the name of Hobu, Inc. nor the
+*       names of its contributors may be used to endorse or promote
+*       products derived from this software without specific prior
+*       written permission.
 *
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -31,30 +32,35 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#pragma once
+
+#include <cstdint>
+#include <random>
 #include <string>
+#include <vector>
 
-#include <pdal/pdal_test_main.hpp>
-
-#include "Support.hpp"
+#include "pdal_util_export.hpp"
 
 namespace pdal
 {
-
-namespace
+namespace Utils
 {
-std::string appName()
+
+class Random
 {
-    return Support::binpath("pdal");
-}
-} // unnamed namespace
+public:
+    PDAL_DLL Random();
+    PDAL_DLL Random(int32_t seed);
+    PDAL_DLL Random(const std::vector<int32_t> seed);
+    PDAL_DLL Random(const std::string& seed);
 
-// The Cmake file makes sure we're building the hexbin plugin.
-TEST(PdalAppPlugin, load)
-{
-    std::string output;
+    PDAL_DLL std::mt19937& generator();
 
-    Utils::run_shell_command(appName() + " fauxplugin 2>&1", output);
-    EXPECT_TRUE(output.find("kernels.fauxplugin") != std::string::npos);
-}
+    PDAL_DLL static unsigned int quick();
 
-} // unnamed namespace
+private:
+    std::mt19937 m_generator;
+};
+
+} // namespace Utils
+} // namespace pdal

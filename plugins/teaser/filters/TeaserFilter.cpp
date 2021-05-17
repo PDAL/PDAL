@@ -44,7 +44,7 @@
 #include <Eigen/Dense>
 
 #include <teaser/matcher.h>
-#include "registration.h"
+#include <teaser/registration.h>
 
 #include <numeric>
 
