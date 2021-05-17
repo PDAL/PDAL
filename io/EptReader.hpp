@@ -97,7 +97,6 @@ private:
     std::unique_ptr<Private> m_p;
 
     uint64_t m_tileCount;
-    BOX3D m_queryBounds;
     int64_t m_queryOriginId = -1;
 
     uint64_t m_depthEnd = 0;    // Zero indicates selection of all depths.

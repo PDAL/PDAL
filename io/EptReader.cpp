@@ -138,6 +138,7 @@ public:
     std::condition_variable contentsCv;
     std::vector<PolySrs> polys;
     SrsTransform boundsXform;
+    BOX3D queryBounds;
 };
 
 EptReader::EptReader() : m_args(new EptReader::Args), m_p(new EptReader::Private),
@@ -229,7 +230,7 @@ void EptReader::initialize()
         throwError("Can't use bounds with SRS with data source that has no SRS.");
     if (boundsSrs.valid())
         m_p->boundsXform = SrsTransform(m_p->info->srs(), boundsSrs);
-    m_queryBounds = m_args->m_bounds.to3d();
+    m_p->queryBounds = m_args->m_bounds.to3d();
 
     // Create transform from the point source SRS to the poly SRS.
     for (Polygon& poly : m_args->m_polys)
@@ -284,9 +285,10 @@ void EptReader::initialize()
         debug << "Depth end: " << m_depthEnd << "\n";
     }
 
-    debug << "Query bounds: " << m_queryBounds << "\n";
+    debug << "Query bounds: " << m_p->queryBounds << "\n";
     debug << "Threads: " << m_p->pool->size() << std::endl;
 }
+
 
 void EptReader::handleOriginQuery()
 {
@@ -360,7 +362,7 @@ void EptReader::handleOriginQuery()
 
         // Clip the bounds to the queried origin bounds.  Don't just overwrite
         // it - it's possible that both a bounds and an origin are specified.
-        m_queryBounds.clip(q);
+        m_p->queryBounds.clip(q);
 
         log()->get(LogLevel::Debug) << "Query origin " << m_queryOriginId <<
             ": " << found["id"].get<std::string>() << std::endl;
@@ -388,7 +390,7 @@ QuickInfo EptReader::inspect()
     // If there is a spatial query from an explicit --bounds, an origin query,
     // or polygons, then we'll limit our number of points to be an upper bound,
     // and clip our bounds to the selected region.
-    if (!m_queryBounds.contains(qi.m_bounds) || m_args->m_polys.size())
+    if (!m_p->queryBounds.contains(qi.m_bounds) || m_args->m_polys.size())
     {
         log()->get(LogLevel::Debug) <<
             "Determining overlapping point count" << std::endl;
@@ -402,19 +404,21 @@ QuickInfo EptReader::inspect()
         for (const Overlap& overlap : *m_p->hierarchy)
             qi.m_pointCount += overlap.m_count;
 
-        // Also clip the resulting bounds to the intersection of:
+        //ABELL - This is wrong since we're not transforming the tile bounds to the
+        //  SRS of each clip region, but that seems like a lot of mess for
+        //  little value. Wait until someone complains. (Note that's it's a bit
+        //  different from queryOverlaps or we'd just call that.)
+        // Clip the resulting bounds to the intersection of:
         //  - the query bounds (from an explicit bounds or an origin query)
         //  - the extents of the polygon selection
-        qi.m_bounds.clip(m_queryBounds);
-        if (m_args->m_polys.size())
-        {
-            BOX3D b;
-            for (const auto& poly : m_args->m_polys)
-            {
-                b.grow(poly.bounds());
-            }
+        BOX3D b;
+        if (m_p->queryBounds != EptBounds().to3d())
+            b.grow(m_p->queryBounds);
+        for (const auto& poly : m_args->m_polys)
+            b.grow(poly.bounds());
+
+        if (b.valid())
             qi.m_bounds.clip(b);
-        }
     }
     qi.m_valid = true;
 
@@ -579,7 +583,7 @@ bool EptReader::queryOverlaps(const BOX3D& tileBounds) const
     auto boxOverlaps = [this, &reproject, &tileBounds]() -> bool
     {
         // If the reprojected source bounds doesn't overlap our query bounds, we're done.
-        return reproject(tileBounds, m_p->boundsXform).overlaps(m_queryBounds);
+        return reproject(tileBounds, m_p->boundsXform).overlaps(m_p->queryBounds);
     };
 
     // Check the box of the key against our query polygon(s). If it doesn't overlap,
@@ -696,7 +700,7 @@ bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
     auto passesBoundsFilter = [this](double x, double y, double z)
     {
         m_p->boundsXform.transform(x, y, z);
-        return m_queryBounds.contains(x, y, z);
+        return m_p->queryBounds.contains(x, y, z);
     };
 
     auto passesPolyFilter = [this](double xo, double yo, double zo)
