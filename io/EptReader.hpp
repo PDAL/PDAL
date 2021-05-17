@@ -85,6 +85,7 @@ private:
     // downloaded during the 'read' section.
     void overlaps();
     void overlaps(Hierarchy& target, const NL::json& current, const Key& key);
+    bool queryOverlaps(const BOX3D& tileBounds) const;
     void process(PointViewPtr dstView, const TileContents& tile, point_count_t count);
     bool processPoint(PointRef& dst, const TileContents& tile);
     void load(const Overlap& overlap);

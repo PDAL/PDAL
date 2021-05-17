@@ -549,8 +549,10 @@ void EptReader::overlaps()
 }
 
 
-void EptReader::overlaps(Hierarchy& target, const NL::json& hier, const Key& key)
+// Determine if an EPT tile overlaps our query boundary
+bool EptReader::queryOverlaps(const BOX3D& tileBounds) const
 {
+    // Reproject the tile bounds to the largest rect. solid that contains all the corners.
     auto reproject = [](BOX3D src, SrsTransform& xform) -> BOX3D
     {
         if (!xform.valid())
@@ -574,19 +576,15 @@ void EptReader::overlaps(Hierarchy& target, const NL::json& hier, const Key& key
         return b;
     };
 
+    auto boxOverlaps = [this, &reproject, &tileBounds]() -> bool
     {
-        // This lock is here because if a bunch of threads are using the transform
-        // at the same time, it seems to get corrupted. There may be other instances
-        // that need to be locked.
-        std::lock_guard<std::mutex> lock(m_p->mutex);
         // If the reprojected source bounds doesn't overlap our query bounds, we're done.
-        if (!reproject(key.b, m_p->boundsXform).overlaps(m_queryBounds))
-            return;
-    }
+        return reproject(tileBounds, m_p->boundsXform).overlaps(m_queryBounds);
+    };
 
     // Check the box of the key against our query polygon(s). If it doesn't overlap,
     // we can skip
-    auto polysOverlap = [this, &reproject, &key]()
+    auto polysOverlap = [this, &reproject, &tileBounds]() -> bool
     {
         if (m_p->polys.empty())
             return true;
@@ -594,22 +592,32 @@ void EptReader::overlaps(Hierarchy& target, const NL::json& hier, const Key& key
         // Could have multiple threads using the same xform at the same time, so lock.
         std::lock_guard<std::mutex> lock(m_p->mutex);
         for (auto& ps : m_p->polys)
-            if (!ps.poly.disjoint(reproject(key.b, ps.xform)))
+            if (!ps.poly.disjoint(reproject(tileBounds, ps.xform)))
                 return true;
         return false;
     };
 
-    if (!polysOverlap())
-        return;
+    // This lock is here because if a bunch of threads are using the transform
+    // at the same time, it seems to get corrupted. There may be other instances
+    // that need to be locked.
+    std::lock_guard<std::mutex> lock(m_p->mutex);
+    return boxOverlaps() || polysOverlap();
+}
 
-    if (m_depthEnd && key.d >= m_depthEnd)
-        return;
 
+void EptReader::overlaps(Hierarchy& target, const NL::json& hier, const Key& key)
+{
     // If our key isn't in the hierarchy, we've totally traversed this tree
     // branch (there are no lower nodes).
     auto it = hier.find(key.toString());
     if (it == hier.end())
         return;
+
+    // If our query geometry doesn't overlap the tile or we're past the end of the requested
+    // depth, return.
+    if (!queryOverlaps(key.b) || (m_depthEnd && key.d >= m_depthEnd))
+        return;
+
 
     int64_t numPoints(-2);  // -2 will trigger an error below
     try
