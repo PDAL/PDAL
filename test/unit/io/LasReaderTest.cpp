@@ -629,7 +629,7 @@ TEST(LasReaderTest, Start)
 #ifdef PDAL_HAVE_LAZPERF
     test1("lazperf");
     test2("lazperf");
-#endif PDAL_HAVE_LAZPERF
+#endif
 
     // Delete the created file.
     FileUtils::deleteFile(source);
