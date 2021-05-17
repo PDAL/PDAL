@@ -53,13 +53,6 @@
 namespace pdal
 {
 
-namespace oldgdalsupport
-{
-	OGRErr createFromWkt(char **s, OGRGeometry **newGeom);
-	OGRGeometry* createFromGeoJson(char **s);
-} // namespace oldgdalsupport
-
-
 namespace gdal
 {
 
@@ -178,24 +171,6 @@ void unregisterDrivers()
 
 
 /**
-  Create OGR geometry given a well-known text string.
-  \param s  WKT string to convert to OGR Geometry.
-  \return  Pointer to new geometry.
-*/
-OGRGeometry *createFromWkt(const char *s)
-{
-    OGRGeometry *newGeom;
-#if ((GDAL_VERSION_MAJOR == 2) && GDAL_VERSION_MINOR < 3)
-    char *cs = const_cast<char *>(s);
-    oldgdalsupport::createFromWkt(&cs, &newGeom);
-#else
-    OGRGeometryFactory::createFromWkt(s, nullptr, &newGeom);
-#endif
-    return newGeom;
-}
-
-
-/**
   Create OGR geometry given a well-known text string and text SRS.
   \param s  WKT string to convert to OGR Geometry.
   \param srs  Text representation of coordinate reference system.
@@ -205,14 +180,10 @@ OGRGeometry *createFromWkt(const std::string& s, std::string& srs)
 {
     OGRGeometry *newGeom;
 	char *buf = const_cast<char *>(s.data());
-#if ((GDAL_VERSION_MAJOR == 2) && GDAL_VERSION_MINOR < 3)
-    oldgdalsupport::createFromWkt(&buf, &newGeom);
-#else
     OGRGeometryFactory::createFromWkt(&buf, nullptr, &newGeom);
     if (!newGeom)
         throw pdal_error("Couldn't convert WKT string to geometry.");
     srs = buf;
-#endif
 
 	std::string::size_type pos = 0;
 	pos = Utils::extractSpaces(srs, pos);
@@ -231,22 +202,6 @@ OGRGeometry *createFromWkt(const std::string& s, std::string& srs)
 
 
 /**
-  Create OGR geometry given a GEOjson text string.
-  \param s  GEOjson string to convert to OGR Geometry.
-  \return  Pointer to new geometry.
-*/
-OGRGeometry *createFromGeoJson(const char *s)
-{
-#if ((GDAL_VERSION_MAJOR == 2) && GDAL_VERSION_MINOR < 3)
-    char* p = const_cast<char*>(s);
-    return oldgdalsupport::createFromGeoJson((char**)&p);
-#else
-    return OGRGeometryFactory::createFromGeoJson(s);
-#endif
-}
-
-
-/**
   Create OGR geometry given a GEOjson text string and text SRS.
   \param s  GEOjson string to convert to OGR Geometry.
   \param srs  Text representation of coordinate reference system.
@@ -254,17 +209,52 @@ OGRGeometry *createFromGeoJson(const char *s)
 */
 OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs)
 {
-// Call this function instead after we've past supporting GDAL 2.2
-//    return OGRGeometryFactory::createFromGeoJson(s);
+    // Go through a supposed JSON object string, looking for the
+    // closing brace.  Return just past its position.
+    auto findEnd = [](const std::string& s, std::string::size_type pos)
+    {
+        bool inString(false);
+        std::string check("{}\"");
+        std::string::size_type startPos(pos);
+        pos = Utils::extractSpaces(s, pos);
+        if (s[pos++] != '{')
+            return std::string::npos;
+        int cnt = 1;
+        while (cnt && pos != std::string::npos)
+        {
+            pos = s.find_first_of(check, pos);
+            if (pos == std::string::npos)
+                return pos;
+            if (s[pos] == '"')
+            {
+                // We're guaranteed that the beginning seq. of chars is such
+                // we won't check an invalid ref.
+                if (!inString || s[pos - 1] != '\\' || s[pos - 2] == '\\')
+                    inString = !inString;
+            }
+            else if (!inString && s[pos] == '{')
+                cnt++;
+            else if (!inString && s[pos] == '}')
+                cnt--;
+            pos++;
+        }
+        if (cnt != 0)
+            return std::string::npos;
+        return pos;
+    };
 
-    char *cs = const_cast<char *>(s.data());
-    OGRGeometry *newGeom = oldgdalsupport::createFromGeoJson(&cs);
+    // Search the string for the end of the JSON.
+    std::string::size_type pos = findEnd(s, 0);
+
+    // Just send the JSON stuff to the OGR function.
+    std::string ss = s.substr(0, pos);
+
+    OGRGeometry *newGeom = OGRGeometryFactory::createFromGeoJson(ss.data());
     if (!newGeom)
         throw pdal_error("Couldn't convert GeoJSON to geometry.");
-    srs = cs;
 
-	std::string::size_type pos = 0;
-	pos = Utils::extractSpaces(srs, pos);
+    srs = s.substr(pos);
+	pos = Utils::extractSpaces(srs, 0);
 	if (pos == srs.size())
 		srs.clear();
     else
@@ -387,188 +377,4 @@ std::vector<Polygon> getPolygons(const NL::json& ogr)
 }
 
 } // namespace gdal
-
-namespace oldgdalsupport
-{
-
-/**
-  Create an OGRGeometry from a WKT string.
-  
-  \param s Pointer to an array of characters to parse as WKT.
-  \param ppoReturn  Address in which to place a pointer to a created
-    OGRGeometry.
-*/
-#if (GDAL_VERSION_MAJOR == 2) && (GDAL_VERSION_MINOR < 3)
-OGRErr createFromWkt(char **s, OGRGeometry **ppoReturn )
-{
-    const char *pszInput = *s;
-    *ppoReturn = nullptr;
-
-/* -------------------------------------------------------------------- */
-/*      Get the first token, which should be the geometry type.         */
-/* -------------------------------------------------------------------- */
-    char szToken[1000] = {};
-    if( OGRWktReadToken( pszInput, szToken ) == nullptr )
-        return OGRERR_CORRUPT_DATA;
-
-/* -------------------------------------------------------------------- */
-/*      Instantiate a geometry of the appropriate type.                 */
-/* -------------------------------------------------------------------- */
-    OGRGeometry *poGeom = nullptr;
-    if( STARTS_WITH_CI(szToken, "POINT") )
-    {
-        poGeom = new OGRPoint();
-    }
-    else if( STARTS_WITH_CI(szToken, "LINESTRING") )
-    {
-        poGeom = new OGRLineString();
-    }
-    else if( STARTS_WITH_CI(szToken, "POLYGON") )
-    {
-        poGeom = new OGRPolygon();
-    }
-    else if( STARTS_WITH_CI(szToken,"TRIANGLE") )
-    {
-        poGeom = new OGRTriangle();
-    }
-    else if( STARTS_WITH_CI(szToken, "GEOMETRYCOLLECTION") )
-    {
-        poGeom = new OGRGeometryCollection();
-    }
-    else if( STARTS_WITH_CI(szToken, "MULTIPOLYGON") )
-    {
-        poGeom = new OGRMultiPolygon();
-    }
-    else if( STARTS_WITH_CI(szToken, "MULTIPOINT") )
-    {
-        poGeom = new OGRMultiPoint();
-    }
-    else if( STARTS_WITH_CI(szToken, "MULTILINESTRING") )
-    {
-        poGeom = new OGRMultiLineString();
-    }
-    else if( STARTS_WITH_CI(szToken, "CIRCULARSTRING") )
-    {
-        poGeom = new OGRCircularString();
-    }
-    else if( STARTS_WITH_CI(szToken, "COMPOUNDCURVE") )
-    {
-        poGeom = new OGRCompoundCurve();
-    }
-    else if( STARTS_WITH_CI(szToken, "CURVEPOLYGON") )
-    {
-        poGeom = new OGRCurvePolygon();
-    }
-    else if( STARTS_WITH_CI(szToken, "MULTICURVE") )
-    {
-        poGeom = new OGRMultiCurve();
-    }
-    else if( STARTS_WITH_CI(szToken, "MULTISURFACE") )
-    {
-        poGeom = new OGRMultiSurface();
-    }
-
-    else if( STARTS_WITH_CI(szToken,"POLYHEDRALSURFACE") )
-    {
-        poGeom = new OGRPolyhedralSurface();
-    }
-
-    else if( STARTS_WITH_CI(szToken,"TIN") )
-    {
-        poGeom = new OGRTriangulatedSurface();
-    }
-
-    else
-    {
-        return OGRERR_UNSUPPORTED_GEOMETRY_TYPE;
-    }
-
-/* -------------------------------------------------------------------- */
-/*      Do the import.                                                  */
-/* -------------------------------------------------------------------- */
-    const OGRErr eErr = poGeom->importFromWkt(s);
-
-/* -------------------------------------------------------------------- */
-/*      Assign spatial reference system.                                */
-/* -------------------------------------------------------------------- */
-    if( eErr == OGRERR_NONE )
-    {
-        if( poGeom->hasCurveGeometry() &&
-            CPLTestBool(CPLGetConfigOption("OGR_STROKE_CURVE", "FALSE")) )
-        {
-            OGRGeometry* poNewGeom = poGeom->getLinearGeometry();
-            delete poGeom;
-            poGeom = poNewGeom;
-        }
-        *ppoReturn = poGeom;
-    }
-    else
-    {
-        delete poGeom;
-    }
-
-    return eErr;
-}
-#endif // GDAL version limit
-
-
-/**
-  Create an OGRGeometry given a GEOjson string.
-  \param s  Pointer to GEOjson string to be parsed.  The string is updated
-    such that s points just past the extracted JSON.
-  \return  Pointer to created OGRGeometry.
-*/
-OGRGeometry *createFromGeoJson(char **s)
-{
-    // Go through a supposed JSON object string, looking for the
-    // closing brace.  Return just past its position.
-    auto findEnd = [](std::string s, std::string::size_type pos)
-    {
-        bool inString(false);
-        std::string check("{}\"");
-        std::string::size_type startPos(pos);
-        pos = Utils::extractSpaces(s, pos);
-        if (s[pos++] != '{')
-            return std::string::npos;
-        int cnt = 1;
-        while (cnt && pos != std::string::npos)
-        {
-            pos = s.find_first_of(check, pos);
-            if (pos == std::string::npos)
-                return pos;
-            if (s[pos] == '"')
-            {
-                // We're guaranteed that the beginning seq. of chars is such
-                // we won't check an invalid ref.
-                if (!inString || s[pos - 1] != '\\' || s[pos - 2] == '\\')
-                    inString = !inString;
-            }
-            else if (!inString && s[pos] == '{')
-                cnt++;
-            else if (!inString && s[pos] == '}')
-                cnt--;
-            pos++;
-        }
-        if (cnt != 0)
-            return std::string::npos;
-        return pos;
-    };
-
-    std::string ss(*s);
-    // Search the string for the end of the JSON.
-    std::string::size_type pos = findEnd(ss, 0);
-    if (pos == std::string::npos)
-        return nullptr;
-
-    // Just send the JSON stuff to the OGR function.
-    ss = ss.substr(0, pos);
-    OGRGeometryH h = OGR_G_CreateGeometryFromJson(ss.c_str());
-
-    // Increment the initial string pointer to just past the JSON.
-    *s += pos;
-    return (reinterpret_cast<OGRGeometry *>(h));
-}
-
-} // namespace oldgdalsupport
-
 } // namespace pdal

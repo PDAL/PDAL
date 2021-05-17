@@ -80,7 +80,8 @@ public:
         lock.unlock();
 
         m_consumeCv.notify_all();
-        for (auto& t : m_threads) t.join();
+        for (auto& t : m_threads)
+            t.join();
         m_threads.clear();
     }
 

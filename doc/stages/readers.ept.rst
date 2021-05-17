@@ -127,9 +127,8 @@ ogr
         }
     }
 
-threads
-    Number of worker threads used to download and process EPT data.  A
-    minimum of 4 will be used no matter what value is specified.
+requests
+    Maximum number of simultaneous requests for EPT data. [Minimum: 4] [Default: 15]
 
 .. _Entwine Point Tile: https://entwine.io/entwine-point-tile.html
 .. _Entwine: https://entwine.io/
