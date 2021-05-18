@@ -578,8 +578,6 @@ bool EptReader::queryOverlaps(const BOX3D& tileBounds) const
         if (m_p->polys.empty())
             return true;
 
-        // Could have multiple threads using the same xform at the same time, so lock.
-        std::lock_guard<std::mutex> lock(m_p->mutex);
         for (auto& ps : m_p->polys)
             if (!ps.poly.disjoint(reproject(tileBounds, ps.xform)))
                 return true;
