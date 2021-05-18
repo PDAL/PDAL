@@ -39,8 +39,10 @@ namespace pdal
 SrsTransform::SrsTransform()
 {}
 
-SrsTransform::SrsTransform(const SrsTransform& src) : m_transform(src.m_transform->Clone())
-{}
+SrsTransform::SrsTransform(const SrsTransform& src)
+{
+    set(*(src.m_transform->GetSourceCS()), *(src.m_transform->GetTargetCS()));
+}    
 
 
 SrsTransform::SrsTransform(SrsTransform&& src) : m_transform(std::move(src.m_transform))
