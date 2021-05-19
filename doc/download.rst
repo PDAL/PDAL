@@ -71,17 +71,16 @@ required dependencies and build PDAL from source.
    :widths: 20, 20, 20, 20, 20, 20
 
    "Platform(s)", "linux", "linux", "linux", "linux", "win64, mac, linux"
-   "CPD", "X", "", "", "X", ""
-   "Greyhound", "X", "", "X", "X", "X"
-   "Icebridge", "X",  "X", "X", "X", "X"
-   "laszip", "X",  "X", "", "X", "X"
-   "laz-perf", "X",  "", "", "X", "X"
-   "NITF", "X",  "", "", "X", "X"
-   "OCI", "",  "", "", "", ""
-   "PCL", "",  "X", "", "", "X"
-   "pgpointcloud", "X",  "X", "X", "X", "X"
-   "Python", "X",  "", "X", "X", "X"
-   "SQLite", "X",  "", "X", "X", "X"
+   "PDAL version", "2.3", "", "", "2.2", "2.2"
+   "CPD", "", "", "", "X", ""
+   "E57", "X", "", "", "", "X"
+   "HDF", "X", "", "", "", "X"
+   "I3S", "", "", "", "", "X"
+   "Icebridge", "X",  "", "", "X", "X"
+   "NITF", "X",  "", "", "", "X (except Windows)"
+   "pgpointcloud", "X",  "", "", "X", "X"
+   "SLPK", "", "", "", "", "X"
+   "TileDB", "X", "", "", "", "X (except Windows)"
 
 
 Windows
@@ -124,7 +123,7 @@ building their own software that will link against PDAL.
 
 3. ``py-pdal`` will install the PDAL Python extension.
 
-Note that all of these packages reside in Alpine's ``edge/testing`` repository,
+Note that the PDAL package now resides in Alpine's ``edge/community`` repository,
 which must be added to your Alpine repositories list. Information on adding and
 updating repositories can be found in the Alpine documentation.
 

@@ -336,14 +336,19 @@ void LasReader::ready(PointTableRef table)
         {
             delete m_p->decompressor;
 
-            if (m_args->start != 0)
-                throwError("LAZperf does not support the 'start' option.");
             const LasVLR *vlr = m_p->header.findVlr(LASZIP_USER_ID, LASZIP_RECORD_ID);
             if (!vlr)
                 throwError("LAZ file missing required laszip VLR.");
-            m_p->decompressor = new LazPerfVlrDecompressor(*stream,
-                vlr->data(), m_p->header.pointOffset());
-            m_p->decompressorBuf.resize(m_p->decompressor->pointSize());
+            int ebCount = m_p->header.pointLen() - m_p->header.basePointLen();
+            m_p->decompressor = new LazPerfVlrDecompressor(*stream, m_p->header.pointFormat(),
+                ebCount, m_p->header.pointOffset(), vlr->data());
+            if (m_args->start > 0)
+            {
+                if (m_args->start > m_p->header.pointCount())
+                    throwError("'start' option set past end of file.");
+                m_p->decompressor->seek(m_args->start);
+            }
+            m_p->decompressorBuf.resize(m_p->header.pointLen());
         }
 #endif
 
@@ -637,7 +642,7 @@ void LasReader::addDimensions(PointLayoutPtr layout)
     }
     if (m_p->header.hasInfrared())
         layout->registerDim(Id::Infrared);
-    if (m_p->header.has14Format())
+    if (m_p->header.has14PointFormat())
     {
         layout->registerDim(Id::ScanChannel);
         layout->registerDim(Id::ClassFlags);
@@ -791,7 +796,7 @@ point_count_t LasReader::readFileBlock(std::vector<char>& buf,
 #ifdef PDAL_HAVE_LASZIP
 void LasReader::loadPoint(PointRef& point)
 {
-    if (m_p->header.has14Format())
+    if (m_p->header.has14PointFormat())
         loadPointV14(point);
     else
         loadPointV10(point);
@@ -801,7 +806,7 @@ void LasReader::loadPoint(PointRef& point)
 
 void LasReader::loadPoint(PointRef& point, char *buf, size_t bufsize)
 {
-    if (m_p->header.has14Format())
+    if (m_p->header.has14PointFormat())
         loadPointV14(point, buf, bufsize);
     else
         loadPointV10(point, buf, bufsize);
