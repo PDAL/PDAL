@@ -630,7 +630,10 @@ public:
 
     BOX3D to3d() const;
     BOX2D to2d() const;
+    bool is2d() const;
     bool is3d() const;
+    bool valid() const;
+    bool empty() const;
     void reset(const BOX3D& box);
     void reset(const BOX2D& box);
     void grow(double x, double y);

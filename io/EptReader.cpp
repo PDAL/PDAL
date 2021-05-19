@@ -44,6 +44,7 @@
 #include <pdal/pdal_features.hpp>
 #include <pdal/util/ThreadPool.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
+#include <pdal/private/SrsTransform.hpp>
 
 #include "private/ept/Connector.hpp"
 #include "private/ept/EptArtifact.hpp"
@@ -68,43 +69,22 @@ const StaticPluginInfo s_info
 
 CREATE_STATIC_STAGE(EptReader, s_info);
 
-class EptBounds : public SrsBounds
+struct PolyXform
 {
-public:
-    static constexpr double LOWEST = (std::numeric_limits<double>::lowest)();
-    static constexpr double HIGHEST = (std::numeric_limits<double>::max)();
-
-    EptBounds() : SrsBounds(BOX3D(LOWEST, LOWEST, LOWEST,
-        HIGHEST, HIGHEST, HIGHEST))
-    {}
-    EptBounds(const SrsBounds& b) : SrsBounds(b)
-    {}
+    Polygon poly;
+    SrsTransform xform;
 };
 
-namespace Utils
+struct BoxXform
 {
-    template<>
-    StatusWithReason fromString(const std::string& s, EptBounds& bounds)
-    {
-        if (!fromString(s, (SrsBounds&)bounds))
-            return false;
-
-        // If we're setting 2D bounds, grow to 3D by explicitly setting
-        // Z dimensions.
-        if (!bounds.is3d())
-        {
-            BOX2D box = bounds.to2d();
-            bounds.grow(box.minx, box.miny, EptBounds::LOWEST);
-            bounds.grow(box.maxx, box.maxy, EptBounds::HIGHEST);
-        }
-        return true;
-    }
-}
+    BOX3D box;
+    SrsTransform xform;
+};
 
 struct EptReader::Args
 {
 public:
-    EptBounds m_bounds;
+    SrsBounds m_bounds;
     std::string m_origin;
     std::size_t m_threads = 0;
     double m_resolution = 0;
@@ -128,6 +108,8 @@ public:
     AddonList addons;
     std::mutex mutex;
     std::condition_variable contentsCv;
+    std::vector<PolyXform> polys;
+    BoxXform bounds;
 };
 
 EptReader::EptReader() : m_args(new EptReader::Args), m_p(new EptReader::Private),
@@ -146,8 +128,7 @@ void EptReader::addArgs(ProgramArgs& args)
     args.add("requests", "Number of worker threads", m_args->m_threads, (size_t)15);
     args.addSynonym("requests", "threads");
     args.add("resolution", "Resolution limit", m_args->m_resolution);
-    args.add("addons", "Mapping of addon dimensions to their output directory",
-        m_args->m_addons);
+    args.add("addons", "Mapping of addon dimensions to their output directory", m_args->m_addons);
     args.add("polygon", "Bounding polygon(s) to crop requests",
         m_args->m_polys).setErrorText("Invalid polygon specification. "
             "Must be valid GeoJSON/WKT");
@@ -213,34 +194,41 @@ void EptReader::initialize()
         plist.insert(plist.end(), ogrPolys.begin(), ogrPolys.end());
     }
 
-    // Transform query bounds to match point source SRS.
-    const SpatialReference& boundsSrs = m_args->m_bounds.spatialReference();
-    if (!m_p->info->srs().valid() && boundsSrs.valid())
-        throwError("Can't use bounds with SRS with data source that has "
-            "no SRS.");
-    m_queryBounds = m_args->m_bounds.to3d();
-    if (boundsSrs.valid())
-        gdal::reprojectBounds(m_queryBounds,
-            boundsSrs.getWKT(), getSpatialReference().getWKT());
+    // Create transformations from our source data to the bounds SRS.
+    if (m_args->m_bounds.valid())
+    {
+        if (m_args->m_bounds.is2d())
+        {
+            m_p->bounds.box = BOX3D(m_args->m_bounds.to2d());
+            m_p->bounds.box.minz = (std::numeric_limits<double>::lowest)();
+            m_p->bounds.box.maxz = (std::numeric_limits<double>::max)();
+        }
+        else
+            m_p->bounds.box = m_args->m_bounds.to3d();
+        const SpatialReference& boundsSrs = m_args->m_bounds.spatialReference();
+        if (!m_p->info->srs().valid() && boundsSrs.valid())
+            throwError("Can't use bounds with SRS with data source that has no SRS.");
+        if (boundsSrs.valid())
+            m_p->bounds.xform = SrsTransform(m_p->info->srs(), boundsSrs);
+    }
 
-    // Transform polygons and bounds to point source SRS.
-    std::vector <Polygon> exploded;
+    // Create transform from the point source SRS to the poly SRS.
     for (Polygon& poly : m_args->m_polys)
     {
         if (!poly.valid())
             throwError("Geometrically invalid polygon in option 'polygon'.");
+
+        // Get the sub-polygons from a multi-polygon.
+        std::vector<Polygon> exploded = poly.polygons();
+        SrsTransform xform;
         if (poly.srsValid())
+            xform.set(m_p->info->srs(), poly.getSpatialReference());
+        for (Polygon& p : exploded)
         {
-            auto ok = poly.transform(getSpatialReference());
-            if (!ok)
-                throwError(ok.what());
+            PolyXform ps { std::move(p), xform };
+            m_p->polys.push_back(ps);
         }
-        std::vector<Polygon> polys = poly.polygons();
-        exploded.insert(exploded.end(),
-            std::make_move_iterator(polys.begin()),
-            std::make_move_iterator(polys.end()));
     }
-    m_args->m_polys = std::move(exploded);
 
     try
     {
@@ -277,9 +265,10 @@ void EptReader::initialize()
         debug << "Depth end: " << m_depthEnd << "\n";
     }
 
-    debug << "Query bounds: " << m_queryBounds << "\n";
+    debug << "Query bounds: " << m_p->bounds.box << "\n";
     debug << "Threads: " << m_p->pool->size() << std::endl;
 }
+
 
 void EptReader::handleOriginQuery()
 {
@@ -351,9 +340,10 @@ void EptReader::handleOriginQuery()
     {
         BOX3D q(toBox3d(found["bounds"]));
 
-        // Clip the bounds to the queried origin bounds.  Don't just overwrite
-        // it - it's possible that both a bounds and an origin are specified.
-        m_queryBounds.clip(q);
+        if (m_p->bounds.box.valid())
+            m_p->bounds.box.clip(q);
+        else
+            m_p->bounds.box = q;
 
         log()->get(LogLevel::Debug) << "Query origin " << m_queryOriginId <<
             ": " << found["id"].get<std::string>() << std::endl;
@@ -378,10 +368,10 @@ QuickInfo EptReader::inspect()
     for (auto& el : m_p->info->dims())
         qi.m_dimNames.push_back(el.first);
 
-    // If there is a spatial query from an explicit --bounds, an origin query,
+    // If there is a spatial filter from an explicit --bounds, an origin query,
     // or polygons, then we'll limit our number of points to be an upper bound,
     // and clip our bounds to the selected region.
-    if (!m_queryBounds.contains(qi.m_bounds) || m_args->m_polys.size())
+    if (hasSpatialFilter())
     {
         log()->get(LogLevel::Debug) <<
             "Determining overlapping point count" << std::endl;
@@ -389,25 +379,26 @@ QuickInfo EptReader::inspect()
         m_p->hierarchy.reset(new Hierarchy);
         overlaps();
 
-        // If we've passed a spatial query, determine an upper bound on the
+        // If we've passed a spatial filter, determine an upper bound on the
         // point count based on the hierarchy.
         qi.m_pointCount = 0;
         for (const Overlap& overlap : *m_p->hierarchy)
             qi.m_pointCount += overlap.m_count;
 
-        // Also clip the resulting bounds to the intersection of:
+        //ABELL - This is wrong since we're not transforming the tile bounds to the
+        //  SRS of each clip region, but that seems like a lot of mess for
+        //  little value. Wait until someone complains. (Note that's it's a bit
+        //  different from queryOverlaps or we'd just call that.)
+        // Clip the resulting bounds to the intersection of:
         //  - the query bounds (from an explicit bounds or an origin query)
         //  - the extents of the polygon selection
-        qi.m_bounds.clip(m_queryBounds);
-        if (m_args->m_polys.size())
-        {
-            BOX3D b;
-            for (const auto& poly : m_args->m_polys)
-            {
-                b.grow(poly.bounds());
-            }
+        BOX3D b;
+        b.grow(m_p->bounds.box);
+        for (const auto& poly : m_args->m_polys)
+            b.grow(poly.bounds());
+
+        if (b.valid())
             qi.m_bounds.clip(b);
-        }
     }
     qi.m_valid = true;
 
@@ -529,37 +520,83 @@ void EptReader::overlaps()
 }
 
 
-void EptReader::overlaps(Hierarchy& target, const NL::json& hier, const Key& key)
+bool EptReader::hasSpatialFilter() const
 {
-    // If this key doesn't overlap our query
-    // we can skip
-    if (!key.b.overlaps(m_queryBounds))
-        return;
+    return !m_p->polys.empty() || m_p->bounds.box.valid();
+}
 
-    // Check the box of the key against our
-    // query polygon(s). If it doesn't overlap,
-    // we can skip
-    auto polysOverlap = [this, &key]()
+
+// Determine if an EPT tile overlaps our query boundary
+bool EptReader::passesSpatialFilter(const BOX3D& tileBounds) const
+{
+    // Reproject the tile bounds to the largest rect. solid that contains all the corners.
+    auto reproject = [](BOX3D src, SrsTransform& xform) -> BOX3D
     {
-        if (m_args->m_polys.empty())
-            return true;
-        for (auto& p: m_args->m_polys)
-            if (!p.disjoint(key.b))
+        if (!xform.valid())
+            return src;
+
+        BOX3D b;
+        auto reprogrow = [&b, &xform](double x, double y, double z)
+        {
+            xform.transform(x, y, z);
+            b.grow(x, y, z);
+        };
+
+        reprogrow(src.minx, src.miny, src.minz);
+        reprogrow(src.maxx, src.miny, src.minz);
+        reprogrow(src.minx, src.maxy, src.minz);
+        reprogrow(src.maxx, src.maxy, src.minz);
+        reprogrow(src.minx, src.miny, src.maxz);
+        reprogrow(src.maxx, src.miny, src.maxz);
+        reprogrow(src.minx, src.maxy, src.maxz);
+        reprogrow(src.maxx, src.maxy, src.maxz);
+        return b;
+    };
+
+    auto boxOverlaps = [this, &reproject, &tileBounds]() -> bool
+    {
+        if (!m_p->bounds.box.valid())
+            return false;
+
+        // If the reprojected source bounds doesn't overlap our query bounds, we're done.
+        return reproject(tileBounds, m_p->bounds.xform).overlaps(m_p->bounds.box);
+    };
+
+    // Check the box of the key against our query polygon(s). If it doesn't overlap,
+    // we can skip
+    auto polysOverlap = [this, &reproject, &tileBounds]() -> bool
+    {
+        for (auto& ps : m_p->polys)
+            if (!ps.poly.disjoint(reproject(tileBounds, ps.xform)))
                 return true;
         return false;
     };
 
-    if (!polysOverlap())
-        return;
+    // If there's no spatial filter, we always overlap.
+    if (!hasSpatialFilter())
+        return true;
 
-    if (m_depthEnd && key.d >= m_depthEnd)
-        return;
+    // This lock is here because if a bunch of threads are using the transform
+    // at the same time, it seems to get corrupted. There may be other instances
+    // that need to be locked.
+    std::lock_guard<std::mutex> lock(m_p->mutex);
+    return boxOverlaps() || polysOverlap();
+}
 
+
+void EptReader::overlaps(Hierarchy& target, const NL::json& hier, const Key& key)
+{
     // If our key isn't in the hierarchy, we've totally traversed this tree
     // branch (there are no lower nodes).
     auto it = hier.find(key.toString());
     if (it == hier.end())
         return;
+
+    // If our query geometry doesn't overlap the tile or we're past the end of the requested
+    // depth, return.
+    if (!passesSpatialFilter(key.b) || (m_depthEnd && key.d >= m_depthEnd))
+        return;
+
 
     int64_t numPoints(-2);  // -2 will trigger an error below
     try
@@ -619,6 +656,7 @@ void EptReader::checkTile(const TileContents& tile)
 }
 
 
+// This code runs in a single thread, so doesn't need locking.
 bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
 {
     using namespace Dimension;
@@ -634,14 +672,26 @@ bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
     if (m_queryOriginId != -1 && originId != m_queryOriginId)
         return false;
 
-    auto passesPolyFilter = [this](double x, double y)
+    auto passesBoundsFilter = [this](double x, double y, double z)
     {
-        if (m_args->m_polys.empty())
-            return true;
+        if (!m_p->bounds.box.valid())
+            return false;
+        m_p->bounds.xform.transform(x, y, z);
+        return m_p->bounds.box.contains(x, y, z);
+    };
 
-        for (Polygon& poly : m_args->m_polys)
-            if (poly.contains(x, y))
+    auto passesPolyFilter = [this](double xo, double yo, double zo)
+    {
+        for (PolyXform& ps : m_p->polys)
+        {
+            double x = xo;
+            double y = yo;
+            double z = zo;
+
+            ps.xform.transform(x, y, z);
+            if (ps.poly.contains(x, y))
                 return true;
+        }
         return false;
     };
 
@@ -649,8 +699,10 @@ bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
     double y = p.getFieldAs<double>(Id::Y);
     double z = p.getFieldAs<double>(Id::Z);
 
-    if (!m_queryBounds.contains(x, y, z) || !passesPolyFilter(x, y))
-        return false;
+    // If there is a spatial filter, make sure it passes.
+    if (hasSpatialFilter())
+        if (!passesBoundsFilter(x, y, z) && !passesPolyFilter(x, y, z))
+            return false;
 
     for (auto& el : m_p->info->dims())
     {

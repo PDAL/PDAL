@@ -169,9 +169,28 @@ BOX2D Bounds::to2d() const
     return m_box.to2d();
 }
 
+
+bool Bounds::is2d() const
+{
+    return (valid() && !is3d());
+}
+
+
 bool Bounds::is3d() const
 {
     return (m_box.minz != HIGHEST || m_box.maxz != LOWEST);
+}
+
+
+bool Bounds::valid() const
+{
+    return m_box.valid();
+}
+
+
+bool Bounds::empty() const
+{
+    return m_box.empty();
 }
 
 

@@ -85,6 +85,8 @@ private:
     // downloaded during the 'read' section.
     void overlaps();
     void overlaps(Hierarchy& target, const NL::json& current, const Key& key);
+    bool hasSpatialFilter() const;
+    bool passesSpatialFilter(const BOX3D& tileBounds) const;
     void process(PointViewPtr dstView, const TileContents& tile, point_count_t count);
     bool processPoint(PointRef& dst, const TileContents& tile);
     void load(const Overlap& overlap);
@@ -96,7 +98,6 @@ private:
     std::unique_ptr<Private> m_p;
 
     uint64_t m_tileCount;
-    BOX3D m_queryBounds;
     int64_t m_queryOriginId = -1;
 
     uint64_t m_depthEnd = 0;    // Zero indicates selection of all depths.
