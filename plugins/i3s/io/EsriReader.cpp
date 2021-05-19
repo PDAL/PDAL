@@ -227,7 +227,7 @@ void EsriReader::initialize(PointTableRef table)
     }
     else if (wkid.is_number())
     {
-        system = wkid.get<int64_t>();
+        system = (int)wkid.get<int64_t>();
         if (system < 2000)
             throwError("Invalid wkid value '" + std::to_string(system) +
                 "' for spatial reference.");
