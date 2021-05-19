@@ -334,7 +334,7 @@ public:
         return f == 8;
     }
 
-    bool has14Format() const
+    bool has14PointFormat() const
     {
         PointFormat f = pointFormat();
         return f > 5;

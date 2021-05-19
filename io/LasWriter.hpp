@@ -178,8 +178,9 @@ private:
     void finishLazPerfOutput();
     bool processPoint(PointRef& point);
 
-    LasWriter& operator=(const LasWriter&); // not implemented
-    LasWriter(const LasWriter&); // not implemented
+    LasWriter& operator=(const LasWriter&) = delete;
+    LasWriter(const LasWriter&) = delete;
+    LasWriter(const LasWriter&&) = delete;
 };
 
 } // namespace pdal

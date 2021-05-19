@@ -1384,7 +1384,7 @@ TEST(LasWriterTest, badVlr)
     );
 }
 
-TEST(LasWriterTest, evlroffset)
+TEST(LasWriterTest, evlrOffset)
 {
     std::string outfile(Support::temppath("evlr.las"));
 
