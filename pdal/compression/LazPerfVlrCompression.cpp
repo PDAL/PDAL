@@ -42,6 +42,7 @@
 
 #include <pdal/util/IStream.hpp>
 #include <pdal/util/OStream.hpp>
+#include <pdal/pdal_types.hpp>
 
 #include "LazPerfVlrCompression.hpp"
 
@@ -222,7 +223,8 @@ public:
         in >> version;
         in >> numChunks;
 
-        assert(version == 0);
+        if (version != 0)
+            throw pdal_error("Invalid version " + std::to_string(version) + " found in LAZ VLR.");
 
         std::vector<uint32_t> chunks =
             lazperf::decompress_chunk_table(m_fileStream.cb(), numChunks);
