@@ -73,7 +73,7 @@ namespace Utils
     }
 }
 
-PDAL_DLL std::ostream& operator << (std::ostream& out, const Bounds& bounds);
+PDAL_DLL std::ostream& operator << (std::ostream& out, const SrsBounds& bounds);
 
 } // namespace pdal
 
