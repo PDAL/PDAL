@@ -351,7 +351,7 @@ void PointLayout::setAllowedDims(StringList dimNames)
 
     for (std::string& s : dimNames)
         s = Utils::toupper(s);
-    for (const std::string& xyz : { "X", "Y", "Z" })
+    for (const std::string& xyz : StringList { "X", "Y", "Z" })
         if (!Utils::contains(dimNames, xyz))
             dimNames.push_back(xyz);
     m_allowedDimNames = dimNames;
