@@ -477,6 +477,8 @@ TEST(UtilsTest, escapeJSON)
     EXPECT_EQ(escaped, "\\u0001\\t\\f\\n\\\\\\\"\\u0016");
 }
 
+// Don't run if we are WIN32
+#if !defined(_WIN32) || defined(_WIN64)
 TEST(UtilsTest, map)
 {
     Support::Tempfile temp;
@@ -536,5 +538,6 @@ TEST(UtilsTest, map)
     EXPECT_EQ(std::string(c), "Another.");
     FileUtils::unmapFile(ctx);
 }
+#endif // guard for 32-bit windows
 
 }
