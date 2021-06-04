@@ -131,7 +131,8 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
     // Apply initial guess to moving PointView
     if (m_matrixArg->set())
     {
-        Matrix4d initial_transformation = Eigen::Map<const Matrix4d>(m_vec.data());
+        Matrix4d initial_transformation =
+            Eigen::Map<const Matrix4d>(m_vec.data());
         math::transformInPlace(*moving, initial_transformation.data());
     }
 
@@ -236,7 +237,8 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
             if (num_similar >= m_max_similar)
             {
                 converged = true;
-                log()->get(LogLevel::Debug2) << "converged via absolute change in MSE\n";
+                log()->get(LogLevel::Debug2)
+                    << "converged via absolute change in MSE\n";
                 break;
             }
             is_similar = true;
@@ -272,17 +274,17 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
         double y = p.getFieldAs<double>(Id::Y) - centroid.y();
         double z = p.getFieldAs<double>(Id::Z) - centroid.z();
         p.setField(Id::X, x * final_transformation.coeff(0, 0) +
-                              y * final_transformation.coeff(0, 1) +
-                              z * final_transformation.coeff(0, 2) +
-                              final_transformation.coeff(0, 3) + centroid.x());
+                          y * final_transformation.coeff(0, 1) +
+                          z * final_transformation.coeff(0, 2) +
+                          final_transformation.coeff(0, 3) + centroid.x());
         p.setField(Id::Y, x * final_transformation.coeff(1, 0) +
-                              y * final_transformation.coeff(1, 1) +
-                              z * final_transformation.coeff(1, 2) +
-                              final_transformation.coeff(1, 3) + centroid.y());
+                          y * final_transformation.coeff(1, 1) +
+                          z * final_transformation.coeff(1, 2) +
+                          final_transformation.coeff(1, 3) + centroid.y());
         p.setField(Id::Z, x * final_transformation.coeff(2, 0) +
-                              y * final_transformation.coeff(2, 1) +
-                              z * final_transformation.coeff(2, 2) +
-                              final_transformation.coeff(2, 3) + centroid.z());
+                          y * final_transformation.coeff(2, 1) +
+                          z * final_transformation.coeff(2, 2) +
+                          final_transformation.coeff(2, 3) + centroid.z());
     }
 
     // Compute the MSE one last time, using the unaltered, fixed PointView and
@@ -320,12 +322,14 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
     Matrix4d composed_transformation =
         posttrans * final_transformation * pretrans;
 
-    // Update the composed_transformation if an initial transformation was 
+    // Update the composed_transformation if an initial transformation was
     // supplied.
     if (m_matrixArg->set())
     {
-        Matrix4d initial_transformation = Eigen::Map<const Matrix4d>(m_vec.data());
-        composed_transformation = composed_transformation * initial_transformation;
+        Matrix4d initial_transformation =
+            Eigen::Map<const Matrix4d>(m_vec.data());
+        composed_transformation =
+            composed_transformation * initial_transformation;
     }
 
     // Populate metadata nodes to capture the final transformation, convergence
