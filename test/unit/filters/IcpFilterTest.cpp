@@ -437,6 +437,69 @@ TEST(IcpFilterTest, RecoverRotation)
     checkPointsEqualReader(pointViewSet, tolerance2);
 }
 
+TEST(IcpFilterTest, RecoverScale)
+{
+    auto reader1 = newReader();
+    auto reader2 = newReader();
+
+    // We don't want to apply a test scale to large valued coordinates or the
+    // fixed and moving clouds will be too far away to converge. Therefore, the 
+    // centroid is removed prior to scale application and ICP. It is added back
+    // back after the ICP filter so we can compare to original points.
+
+    // Zero-mean (fixed points)
+    TransformationFilter removeCentroidFilter;
+    Options removeCentroidOptions;
+    removeCentroidOptions.add("matrix", "1 0 0 -637357.34\n0 1 0 -851359.17\n0 0 1 -433.46\n0 0 0 1");
+    removeCentroidFilter.setOptions(removeCentroidOptions);
+    removeCentroidFilter.setInput(*reader1);
+
+    // Zero-mean and scale by 0.9 (moving points)
+    TransformationFilter removeCentroidScaleFilter;
+    Options removeCentroidScaleOptions;
+    removeCentroidScaleOptions.add("matrix", "0.9 0 0 -573621.606\n0 0.9 0 -766223.253\n0 0 0.9 -390.114\n0 0 0 1");
+    removeCentroidScaleFilter.setOptions(removeCentroidScaleOptions);
+    removeCentroidScaleFilter.setInput(*reader2);
+
+    // ICP
+    auto icpFilter = newFilter();
+    Options icpOptions;
+    icpOptions.add("scale", true);
+    icpFilter->setOptions(icpOptions);
+    icpFilter->setInput(removeCentroidFilter);
+    icpFilter->setInput(removeCentroidScaleFilter);
+
+    // Add centroid back
+    TransformationFilter addCentroidFilter;
+    Options addCentroidOptions;
+    addCentroidOptions.add("matrix", "1 0 0 637357.34\n0 1 0 851359.17\n0 0 1 433.46\n0 0 0 1");
+    addCentroidFilter.setOptions(addCentroidOptions);
+    addCentroidFilter.setInput(*icpFilter);
+
+    PointTable table;
+    addCentroidFilter.prepare(table);
+    PointViewSet pointViewSet = addCentroidFilter.execute(table);
+
+    MetadataNode root = icpFilter->getMetadata();
+    Eigen::MatrixXd transform =
+        root.findChild("transform").value<Eigen::MatrixXd>();
+    double tolerance = 0.001;
+    std::cout << transform << std::endl;
+    // Solved scale should be inverse of 0.9 = 1.1111...
+    // All other components should be zero
+    EXPECT_NEAR(1.111, transform(0, 0), tolerance);
+    EXPECT_NEAR(1.111, transform(1, 1), tolerance);
+    EXPECT_NEAR(1.111, transform(2, 2), tolerance);
+    EXPECT_NEAR(0, transform(0, 1), tolerance);
+    EXPECT_NEAR(0, transform(0, 2), tolerance);
+    EXPECT_NEAR(0, transform(1, 2), tolerance);
+    EXPECT_NEAR(0, transform(0, 3), tolerance);
+    EXPECT_NEAR(0, transform(1, 3), tolerance);
+    EXPECT_NEAR(0, transform(2, 3), tolerance);
+    double tolerance2 = 0.5;
+    checkPointsEqualReader(pointViewSet, tolerance2);
+}
+
 TEST(IcpFilterTest, TooFewInputs)
 {
     auto reader = newReader();

@@ -120,21 +120,23 @@ max_iter
 max_similar
   Maximum number of similar transforms to consider converged. [Default: **0**]
 
-max_dist
-  Maximum distance between closest points to be included. [Default: no maximum]
-
-init
-  Initial transformation matrix guess. A whitespace-delimited matrix presented in row-major order. Only matrices with sixteen elements are allowed. [Default: no guess]
-
 mse_abs
-  Absolute change in MSE threshold. [Default: **1e-12**]
+  Absolute change in MSE convergence threshold. [Default: **1e-12**]
 
 rt
-  Rotation threshold. [Default: **0.99999**]
+  Rotation convergence threshold. [Default: **0.99999**]
 
 tt
-  Translation threshold. [Default: **9e-8**]
+  Translation convergence threshold. [Default: **9e-8**]
 
+max_dist
+  Maximum distance between closest points to be included in the transformation solution. [Default: no maximum]
+
+init
+  Initial transformation matrix guess. A whitespace-delimited matrix presented in row-major order. Only matrices with sixteen elements are allowed. [Default: no initial transformation matrix]
+
+scale
+  Include a scale factor in the transformation solution. [Default: `false`]
 
 
 .. include:: filter_opts.rst

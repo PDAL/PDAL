@@ -203,7 +203,11 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
         // current translation in X and Y.
         auto A = math::pointViewToEigen(*tempFixed, fixed_idx);
         auto B = math::pointViewToEigen(*tempMovingTransformed, moving_idx);
-        auto T = Eigen::umeyama(B.transpose(), A.transpose(), false);
+        Matrix4d T;
+        if (m_scale)
+            T = Eigen::umeyama(B.transpose(), A.transpose(), true);
+        else
+            T = Eigen::umeyama(B.transpose(), A.transpose(), false);
         log()->get(LogLevel::Debug2) << "Current dx: " << T.coeff(0, 3) << ", "
                                      << "dy: " << T.coeff(1, 3) << std::endl;
 
@@ -315,6 +319,14 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
     // operations.
     Matrix4d composed_transformation =
         posttrans * final_transformation * pretrans;
+
+    // Update the composed_transformation if an initial transformation was 
+    // supplied.
+    if (m_matrixArg->set())
+    {
+        Matrix4d initial_transformation = Eigen::Map<const Matrix4d>(m_vec.data());
+        composed_transformation = composed_transformation * initial_transformation;
+    }
 
     // Populate metadata nodes to capture the final transformation, convergence
     // status, and MSE.
