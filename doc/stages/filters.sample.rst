@@ -3,8 +3,8 @@
 filters.sample
 ===============================================================================
 
-The **Sample Filter** performs Poisson sampling of the input ``PointView``. The
-The practice of performing Poisson sampling via "Dart Throwing" was introduced
+The **Sample Filter** performs Poisson sampling of the input ``PointView``. The 
+practice of performing Poisson sampling via "Dart Throwing" was introduced
 in the mid-1980's by [Cook1986]_ and [Dippe1985]_, and has been applied to
 point clouds in other software [Mesh2009]_.
 
