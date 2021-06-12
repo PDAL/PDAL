@@ -178,8 +178,7 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
             std::vector<double> sqr_dists(1);
             kd_fixed.knnSearch(p, 1, &indices, &sqr_dists);
 
-            // In the PCL code, there would've been a check that the square
-            // distance did not exceed a threshold value.
+            // Check that the square distance does not exceed threshold value.
             if (m_maxdistArg->set())
             {
                 if (sqr_dists[0] > sqr_maxdist)
@@ -281,15 +280,24 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
     // Compute the MSE one last time, using the unaltered, fixed PointView and
     // the transformed, moving PointView.
     double mse(0.0);
+    size_t mse_n(0);
+    double sqr_maxdist = m_maxdist * m_maxdist;
     KD3Index& kd_fixed_orig = fixed->build3dIndex();
     for (PointRef p : *moving)
     {
         PointIdList indices(1);
         std::vector<double> sqr_dists(1);
         kd_fixed_orig.knnSearch(p, 1, &indices, &sqr_dists);
+        // Check that the square distance does not exceed threshold value.
+        if (m_maxdistArg->set())
+        {
+            if (sqr_dists[0] > sqr_maxdist)
+                continue;
+        }
+        mse_n++;
         mse += std::sqrt(sqr_dists[0]);
     }
-    mse /= moving->size();
+    mse /= mse_n;
     log()->get(LogLevel::Debug2) << "MSE: " << mse << std::endl;
 
     // Transformation to demean coords
