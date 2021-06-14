@@ -165,7 +165,11 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
         fixed_idx.reserve(tempMovingTransformed->size());
         moving_idx.reserve(tempMovingTransformed->size());
         double mse(0.0);
-        double sqr_maxdist = m_maxdist * m_maxdist;
+        double sqr_maxdist;
+        if (m_maxdistArg->set())
+            sqr_maxdist = m_maxdist * m_maxdist;
+        else
+            sqr_maxdist = std::numeric_limits<double>::max();
 
         // For every point in the centered, moving PointView, find the nearest
         // neighbor in the centered fixed PointView. Record the indices of each
@@ -179,16 +183,13 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
             kd_fixed.knnSearch(p, 1, &indices, &sqr_dists);
 
             // Check that the square distance does not exceed threshold value.
-            if (m_maxdistArg->set())
+            if (sqr_dists[0] < sqr_maxdist)
             {
-                if (sqr_dists[0] > sqr_maxdist)
-                    continue;
+                // Store the indices of the correspondence and update the MSE.
+                moving_idx.push_back(p.pointId());
+                fixed_idx.push_back(indices[0]);
+                mse += std::sqrt(sqr_dists[0]);
             }
-
-            // Store the indices of the correspondence and update the MSE.
-            moving_idx.push_back(p.pointId());
-            fixed_idx.push_back(indices[0]);
-            mse += std::sqrt(sqr_dists[0]);
         }
 
         // Finalize and log the MSE.
@@ -281,21 +282,24 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
     // the transformed, moving PointView.
     double mse(0.0);
     size_t mse_n(0);
-    double sqr_maxdist = m_maxdist * m_maxdist;
+    double sqr_maxdist;
+    if (m_maxdistArg->set())
+        sqr_maxdist = m_maxdist * m_maxdist;
+    else
+        sqr_maxdist = std::numeric_limits<double>::max();
     KD3Index& kd_fixed_orig = fixed->build3dIndex();
     for (PointRef p : *moving)
     {
         PointIdList indices(1);
         std::vector<double> sqr_dists(1);
         kd_fixed_orig.knnSearch(p, 1, &indices, &sqr_dists);
+
         // Check that the square distance does not exceed threshold value.
-        if (m_maxdistArg->set())
+        if (sqr_dists[0] < sqr_maxdist)
         {
-            if (sqr_dists[0] > sqr_maxdist)
-                continue;
+            mse_n++;
+            mse += std::sqrt(sqr_dists[0]);
         }
-        mse_n++;
-        mse += std::sqrt(sqr_dists[0]);
     }
     mse /= mse_n;
     log()->get(LogLevel::Debug2) << "MSE: " << mse << std::endl;
