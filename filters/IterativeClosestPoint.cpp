@@ -169,7 +169,7 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
         if (m_maxdistArg->set())
             sqr_maxdist = m_maxdist * m_maxdist;
         else
-            sqr_maxdist = std::numeric_limits<double>::max();
+            sqr_maxdist = (std::numeric_limits<double>::max)();
 
         // For every point in the centered, moving PointView, find the nearest
         // neighbor in the centered fixed PointView. Record the indices of each
@@ -286,7 +286,7 @@ PointViewPtr IterativeClosestPoint::icp(PointViewPtr fixed,
     if (m_maxdistArg->set())
         sqr_maxdist = m_maxdist * m_maxdist;
     else
-        sqr_maxdist = std::numeric_limits<double>::max();
+        sqr_maxdist = (std::numeric_limits<double>::max)();
     KD3Index& kd_fixed_orig = fixed->build3dIndex();
     for (PointRef p : *moving)
     {
