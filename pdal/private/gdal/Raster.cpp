@@ -654,8 +654,15 @@ MetadataNode Raster::getMetadata(std::string domain) const
          i++ )
     {
         std::vector<std::string> v = Utils::split(papszMetadata[i], '=');
+        if (!v.size())
+            throw pdal_error("Metadata must be defined in 'key=value,key2=value2' arrangement");
+
         std::string name = v[0];
-        std::string value = v[1];
+
+        std::string value("");
+        if (v.size() == 2 )
+            value = v[1];
+
         output.add(name, value);
 
     }

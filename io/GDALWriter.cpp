@@ -333,7 +333,11 @@ void GDALWriter::doneFile()
 
         std::vector<std::string> item = Utils::split(v, '=');
         std::string name = item[0];
-        std::string value = item[1];
+
+
+        std::string value("");
+        if (item.size() == 2 )
+            value = item[1];
 
         std::string domain;
         raster.addMetadata(name, value, domain);

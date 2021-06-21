@@ -907,7 +907,7 @@ TEST(GDALWriterTest, testMetadata)
     wo.add("output_type", "max");
     wo.add("resolution", 1);
     wo.add("radius", .7071);
-    wo.add("metadata", "AREA_OR_PIXEL=Pixel");
+    wo.add("metadata", "AREA_OR_PIXEL=Pixel,empty==");
     wo.add("filename", outfile);
     wo.add("window_size", 2);
 
@@ -926,6 +926,11 @@ TEST(GDALWriterTest, testMetadata)
     MetadataNode l = raster.getMetadata().findChild("AREA_OR_PIXEL");
     if (l.empty())
         FAIL() << "Couldn't find raster metadata AREA_OR_PIXEL";
+
+
+    l = raster.getMetadata().findChild("empty");
+    if (!l.empty())
+        FAIL() << "Empty metadata should not be added";
 
 
 }
