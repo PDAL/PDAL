@@ -926,7 +926,6 @@ TEST(GDALWriterTest, testMetadata)
     MetadataNode l = raster.getMetadata().findChild("AREA_OR_PIXEL");
     if (l.empty())
         FAIL() << "Couldn't find raster metadata AREA_OR_PIXEL";
-    FileUtils::deleteFile(outfile);
 
 
 }
