@@ -896,4 +896,39 @@ TEST(GDALWriterTest, srs)
     EXPECT_THROW(test("EPSG:4326", "EPSG:4326", "EPSG:2030", "EPSG:2030"), pdal_error);
 }
 
+
+TEST(GDALWriterTest, testMetadata)
+{
+    std::string infile = Support::datapath("gdal/grid.txt");
+    std::string outfile = Support::temppath("metadata.tif");
+
+    Options wo;
+    wo.add("gdaldriver", "GTiff");
+    wo.add("output_type", "max");
+    wo.add("resolution", 1);
+    wo.add("radius", .7071);
+    wo.add("metadata", "AREA_OR_PIXEL=Pixel");
+    wo.add("filename", outfile);
+    wo.add("window_size", 2);
+
+    const std::string output =
+        "5.000     5.500     7.000     8.000     9.100 "
+        "4.000     4.942     6.000     7.000     8.000 "
+        "3.000     4.000     5.000     6.000     7.000 "
+        "2.000     3.000     4.400     5.400     6.400 "
+        "1.000     2.000     3.000     4.400     5.400 ";
+
+    runGdalWriter(wo, infile, outfile, output);
+
+
+    gdal::Raster raster(outfile);
+    raster.open();
+    MetadataNode l = raster.getMetadata().findChild("AREA_OR_PIXEL");
+    if (l.empty())
+        FAIL() << "Couldn't find raster metadata AREA_OR_PIXEL";
+    FileUtils::deleteFile(outfile);
+
+
+}
+
 } // namespace pdal

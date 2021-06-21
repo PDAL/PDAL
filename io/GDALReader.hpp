@@ -70,6 +70,7 @@ private:
     std::unique_ptr<gdal::Raster> m_raster;
     std::vector<Dimension::Type> m_bandTypes;
     std::vector<Dimension::Id> m_bandIds;
+    std::vector<std::string> m_GDAL_metadata;
     std::string m_header;
     int m_width;
     int m_height;

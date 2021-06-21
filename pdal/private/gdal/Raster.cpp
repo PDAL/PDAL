@@ -639,5 +639,39 @@ GDALError Raster::statistics(int nBand, double *minimum, double *maximum,
     return GDALError::None;
 }
 
+
+MetadataNode Raster::getMetadata(std::string domain) const
+{
+    char **papszMetadata = NULL;
+
+    MetadataNode output("raster");
+
+    // m_ds owns this
+    papszMetadata = m_ds->GetMetadata(domain.c_str());
+
+    for( int i = 0;
+         papszMetadata != NULL && papszMetadata[i] != NULL;
+         i++ )
+    {
+        std::vector<std::string> v = Utils::split(papszMetadata[i], '=');
+        std::string name = v[0];
+        std::string value = v[1];
+        output.add(name, value);
+
+    }
+
+    return output;
+}
+
+GDALError Raster::addMetadata(std::string name,
+                              std::string value,
+                              std::string domain)
+{
+    CPLErr e = m_ds->SetMetadataItem(name.c_str(),
+                                     value.c_str(),
+                                     domain.c_str());
+    return GDALError(e);
+}
+
 } // namespace gdal
 } // namespace pdal

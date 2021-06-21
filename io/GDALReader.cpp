@@ -38,6 +38,7 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/private/gdal/Raster.hpp>
+#include <pdal/util/Utils.hpp>
 
 namespace pdal
 {
@@ -82,6 +83,8 @@ void GDALReader::initialize()
     m_width = m_raster->width();
     m_height = m_raster->height();
     m_bandTypes = m_raster->getPDALDimensionTypes();
+    m_metadata.addList(m_raster->getMetadata());
+
 
     m_dimNames.clear();
     if (m_header.size())

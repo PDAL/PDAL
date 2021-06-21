@@ -95,6 +95,8 @@ void GDALWriter::addArgs(ProgramArgs& args)
 
     args.add("default_srs", "Spatial reference to apply to data if one cannot be inferred",
         m_defaultSrs);
+    args.add("metadata", "GDAL metadata to set on the raster, in the form 'NAME=VALUE,NAME2=VALUE2,NAME3=VALUE3'",
+        m_GDAL_metadata);
 }
 
 
@@ -161,6 +163,9 @@ void GDALWriter::initialize()
     // don't expand by point if we're running in standard mode.  That's
     // set later in writeView.
     m_expandByPoint = !m_fixedGrid;
+
+
+
 }
 
 
@@ -321,6 +326,21 @@ void GDALWriter::doneFile()
         throwError(raster.errorMsg());
 
     getMetadata().addList("filename", m_filename);
+
+    std::vector<std::string> gdalitems = Utils::split(m_GDAL_metadata, ',');
+    for (auto& v: gdalitems)
+    {
+
+        std::vector<std::string> item = Utils::split(v, '=');
+        std::string name = item[0];
+        std::string value = item[1];
+
+        std::string domain;
+        raster.addMetadata(name, value, domain);
+
+    }
+    getMetadata().addList(raster.getMetadata());
+
 }
 
 } // namespace pdal

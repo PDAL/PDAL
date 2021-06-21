@@ -168,6 +168,10 @@ protected:
             EXPECT_DOUBLE_EQ(m_xyzPoints[i].m_y, m_gdalPoints[i].m_y);
             EXPECT_DOUBLE_EQ(m_xyzPoints[i].m_z, m_gdalPoints[i].m_z);
         }
+
+        MetadataNode l = gr.getMetadata().findChild("raster");
+        if (l.empty())
+            FAIL() << "Couldn't find raster metadata";
     }
 
 private:

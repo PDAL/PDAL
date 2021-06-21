@@ -107,6 +107,7 @@ private:
     bool m_fixedGrid;
     SpatialReference m_defaultSrs;
     SpatialReference m_overrideSrs;
+    std::string m_GDAL_metadata;
 };
 
 }
