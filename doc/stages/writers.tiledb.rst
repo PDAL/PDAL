@@ -20,6 +20,9 @@ Example
           "array_name":"input.las"
       },
       {
+          "type":"filters.stats"
+      },
+      {
           "type":"writers.tiledb",
           "array_name":"output_array"
       }
@@ -39,13 +42,31 @@ tile_data_capacity
   Number of points per tile [Optional]
 
 x_tile_size
-  Tile size (x) in a Cartesian projection [Optional]
+  Tile size (x) [Optional]
 
 y_tile_size
-  Tile size (y) in a Cartesian projection [Optional]
+  Tile size (y) [Optional]
 
 z_tile_size
-  Tile size (z) in a Cartesian projection [Optional]
+  Tile size (z) [Optional]
+
+x_domain_st
+  Domain minimum in x [Optional]
+
+x_domain_end
+  Domain maximum in x [Optional]
+
+y_domain_st
+  Domain minimum in y [Optional]
+
+y_domain_end
+  Domain maximum in y [Optional]
+
+z_domain_st
+  Domain minimum in z [Optional]
+
+z_domain_end
+  Domain maximum in z [Optional]
 
 chunk_size
   Point cache size for chunked writes [Optional]
@@ -73,24 +94,22 @@ By default TileDB will use the following set of compression filters for coordina
 
   {
       "coords":[
-          {"compression": "bit-shuffle"},
-          {"compression": "gzip", "compression_level": 9}
+        {"compression": "zstd", "compression_level": 7}
       ],
       "Intensity":{"compression": "bzip2", "compression_level": 5},
-      "ReturnNumber": {"compression": "zstd", "compression_level": 75},
-      "NumberOfReturns": {"compression": "zstd", "compression_level": 75},
+      "ReturnNumber": {"compression": "zstd", "compression_level": 7},
+      "NumberOfReturns": {"compression": "zstd", "compression_level": 7},
       "ScanDirectionFlag": {"compression": "bzip2", "compression_level": 5},
       "EdgeOfFlightLine": {"compression": "bzip2", "compression_level": 5},
       "Classification": {"compression": "gzip", "compression_level": 9},
       "ScanAngleRank": {"compression": "bzip2", "compression_level": 5},
       "UserData": {"compression": "gzip", "compression_level": 9},
       "PointSourceId": {"compression": "bzip2"},
-      "Red": {"compression": "rle"},
-      "Green": {"compression": "rle"},
-      "Blue": {"compression": "rle"},
-      "GpsTime": [
-          {"compression": "bit-shuffle"},
-          {"compression": "zstd", "compression_level": 75}
+      "Red": {"compression": "zstd", "compression_level": 7},
+      "Green": {{"compression": "zstd", "compression_level": 7},
+      "Blue": {{"compression": "zstd", "compression_level": 7},
+      "GpsTime": [  
+        {"compression": "zstd", "compression_level": 7}
       ]
   }
 

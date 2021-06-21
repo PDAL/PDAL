@@ -67,6 +67,12 @@ struct TileDBWriter::Args
     size_t m_x_tile_size;
     size_t m_y_tile_size;
     size_t m_z_tile_size;
+    float m_x_domain_st;
+    float m_x_domain_end;
+    float m_y_domain_st;
+    float m_y_domain_end;
+    float m_z_domain_st;
+    float m_z_domain_end;
     size_t m_cache_size;
     bool m_stats;
     std::string m_compressor;
@@ -232,8 +238,7 @@ TileDBWriter::TileDBWriter():
     std::string attributeDefaults(R"(
     {
         "coords":[
-            {"compression": "bit-shuffle"},
-            {"compression": "gzip", "compression_level": 9}
+            {"compression": "zstd", "compression_level": 7}
         ],
         "Intensity":{"compression": "bzip2", "compression_level": 5},
         "ReturnNumber": {"compression": "zstd", "compression_level": 7},
@@ -244,11 +249,10 @@ TileDBWriter::TileDBWriter():
         "ScanAngleRank": {"compression": "bzip2", "compression_level": 5},
         "UserData": {"compression": "gzip", "compression_level": 9},
         "PointSourceId": {"compression": "bzip2"},
-        "Red": {"compression": "rle"},
-        "Green": {"compression": "rle"},
-        "Blue": {"compression": "rle"},
+        "Red": {"compression": "zstd", "compression_level": 7},
+        "Green": {"compression": "zstd", "compression_level": 7},
+        "Blue": {"compression": "zstd", "compression_level": 7},
         "GpsTime": [
-            {"compression": "bit-shuffle"},
             {"compression": "zstd", "compression_level": 7}
         ]
     })");
@@ -278,6 +282,12 @@ void TileDBWriter::addArgs(ProgramArgs& args)
         size_t(0));
     args.add("z_tile_size", "TileDB tile size", m_args->m_z_tile_size,
         size_t(0));
+    args.add("x_domain_st", "TileDB start of domain in X", m_args->m_x_domain_st, 0.f);
+    args.add("x_domain_end", "TileDB end of domain in X", m_args->m_x_domain_end, 0.f);
+    args.add("y_domain_st", "TileDB start of domain in Y", m_args->m_y_domain_st, 0.f);
+    args.add("y_domain_end", "TileDB end of domain in Y", m_args->m_y_domain_end, 0.f);
+    args.add("z_domain_st", "TileDB start of domain in Z", m_args->m_z_domain_st, 0.f);
+    args.add("z_domain_end", "TileDB end of domain in Z", m_args->m_z_domain_end, 0.f);
     args.add("chunk_size", "Point cache size for chunked writes",
         m_args->m_cache_size, size_t(10000));
     args.add("stats", "Dump TileDB query stats to stdout", m_args->m_stats,
@@ -342,6 +352,9 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
 {
     auto layout = table.layout();
     auto all = layout->dims();
+    MetadataNode m = table.metadata();
+
+    m = m.findChild("filters.stats:bbox:native:bbox");
 
     if (m_args->m_stats)
         tiledb::Stats::enable();
@@ -358,22 +371,76 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
         if ( (m_args->m_x_tile_size > 0) &&
              (m_args->m_y_tile_size > 0) &&
              (m_args->m_z_tile_size > 0) )
-            domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X",
-                {{dimMin, dimMax}}, m_args->m_x_tile_size))
-                .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Y",
-                {{dimMin, dimMax}}, m_args->m_y_tile_size))
-                .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
-                {{dimMin, dimMax}}, m_args->m_z_tile_size));
+        {
+            if ( ((m_args->m_x_domain_end  - m_args->m_x_domain_st ) > 0) &&
+                 ((m_args->m_y_domain_end  - m_args->m_y_domain_st ) > 0) &&
+                 ((m_args->m_z_domain_end  - m_args->m_z_domain_st ) > 0) )
+            {
+                domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X",
+                    {{m_args->m_x_domain_st, m_args->m_x_domain_end}}, m_args->m_x_tile_size))
+                    .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Y",
+                    {{m_args->m_y_domain_st, m_args->m_y_domain_end}}, m_args->m_y_tile_size))
+                    .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
+                    {{m_args->m_z_domain_st, m_args->m_z_domain_end}}, m_args->m_z_tile_size));
+            }
+            else
+            {
+                // read from table.metadata and if not available then use dimMin, dimMax
+                if (m.valid())
+                {
+                    domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X",
+                            {{m.findChild("minx").value<double>() - 1., m.findChild("maxx").value<double>() + 1.}},
+                            m_args->m_x_tile_size))
+                        .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Y",
+                            {{m.findChild("miny").value<double>() - 1., m.findChild("maxy").value<double>() + 1.}},
+                            m_args->m_y_tile_size))
+                        .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
+                            {{m.findChild("minz").value<double>() - 1., m.findChild("maxz").value<double>() + 1.}},
+                            m_args->m_z_tile_size));
+                }
+                else
+                {
+                   domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X",
+                            {{dimMin, dimMax}},m_args->m_x_tile_size))
+                        .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Y",
+                            {{dimMin, dimMax}}, m_args->m_y_tile_size))
+                        .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
+                            {{dimMin, dimMax}}, m_args->m_z_tile_size)); 
+                }
+            }
+        }
 #if TILEDB_VERSION_MAJOR >= 2
     #if ((TILEDB_VERSION_MINOR > 1) || (TILEDB_VERSION_MAJOR > 2))
         else
         {
-            domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X",
-                {{dimMin, dimMax}}))
-                .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Y",
-                {{dimMin, dimMax}}))
-                .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
-                {{dimMin, dimMax}}));
+            if ( ((m_args->m_x_domain_end  - m_args->m_x_domain_st ) > 0) &&
+                 ((m_args->m_y_domain_end  - m_args->m_y_domain_st ) > 0) &&
+                 ((m_args->m_z_domain_end  - m_args->m_z_domain_st ) > 0) )
+            {
+                domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X",
+                    {{m_args->m_x_domain_st, m_args->m_x_domain_end}}))
+                    .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Y",
+                    {{m_args->m_y_domain_st, m_args->m_y_domain_end}}))
+                    .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
+                    {{m_args->m_z_domain_st, m_args->m_z_domain_end}}));
+            }
+            else
+            {
+                // read from table.metadata and if not available then throw error
+                if (m.valid())
+                {
+                    domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X",
+                            {{m.findChild("minx").value<double>() - 1., m.findChild("maxx").value<double>() + 1.}}))
+                        .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Y",
+                            {{m.findChild("miny").value<double>() - 1., m.findChild("maxy").value<double>() + 1.}}))
+                        .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
+                            {{m.findChild("minz").value<double>() - 1., m.findChild("maxz").value<double>() + 1.}}));
+                }
+                else
+                {
+                    throwError("Using TileDB Hilbert ordering, must specify a domain extent or execute a prior stats filter stage."); 
+                }
+            }
             m_schema->set_cell_order(TILEDB_HILBERT);
         }
     #endif

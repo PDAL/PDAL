@@ -39,6 +39,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include <filters/StatsFilter.hpp>
 #include <pdal/pdal_test_main.hpp>
 #include <io/FauxReader.hpp>
 #include <pdal/StageFactory.hpp>
@@ -48,6 +49,24 @@
 
 namespace pdal
 {
+
+    Options getTileDBOptions()
+    {
+        Options options;
+
+        options.add("x_tile_size", 1);
+        options.add("y_tile_size", 1);
+        options.add("z_tile_size", 1);
+        options.add("x_domain_st", 0.);
+        options.add("x_domain_end", 1.);
+        options.add("y_domain_st", 0.);
+        options.add("y_domain_end", 1.);
+        options.add("z_domain_st", 0.);
+        options.add("z_domain_end", 1.);
+
+        return options;
+    }
+
     size_t count = 100;
     class TileDBWriterTest : public ::testing::Test
     {
@@ -84,13 +103,10 @@ namespace pdal
         tiledb::VFS vfs(ctx);
         std::string pth = Support::temppath("tiledb_test_out");
 
-        Options options;
+        Options options = getTileDBOptions();
         std::string sidecar = pth + "/pdal.json";
         options.add("array_name", pth);
         options.add("chunk_size", 80);
-        options.add("x_tile_size", 1);
-        options.add("y_tile_size", 1);
-        options.add("z_tile_size", 1);
 
         if (vfs.is_dir(pth))
         {
@@ -153,13 +169,10 @@ namespace pdal
         tiledb::VFS vfs(ctx);
         std::string pth = Support::temppath("tiledb_test_append_out");
 
-        Options options;
+        Options options = getTileDBOptions();
         std::string sidecar = pth + "/pdal.json";
         options.add("array_name", pth);
         options.add("chunk_size", 80);
-        options.add("x_tile_size", 1);
-        options.add("y_tile_size", 1);
-        options.add("z_tile_size", 1);
 
         if (vfs.is_dir(pth))
         {
@@ -224,13 +237,10 @@ namespace pdal
         tiledb::VFS vfs(ctx);
         std::string pth = Support::temppath("tiledb_test_compress_simple_out");
 
-        Options options;
+        Options options = getTileDBOptions();
         options.add("array_name", pth);
         options.add("compression", "zstd");
         options.add("compression_level", 7);
-        options.add("x_tile_size", 1);
-        options.add("y_tile_size", 1);
-        options.add("z_tile_size", 1);
 
         if (vfs.is_dir(pth))
         {
@@ -263,7 +273,7 @@ namespace pdal
         tiledb::VFS vfs(ctx);
         std::string pth = Support::temppath("tiledb_test_write_options");
 
-        Options options;
+        Options options = getTileDBOptions();
         NL::json jsonOptions;
 
         // add an array filter
@@ -275,9 +285,6 @@ namespace pdal
 
         options.add("array_name", pth);
         options.add("filters", jsonOptions);
-        options.add("x_tile_size", 1);
-        options.add("y_tile_size", 1);
-        options.add("z_tile_size", 1);
 
         if (vfs.is_dir(pth))
         {
@@ -318,7 +325,7 @@ namespace pdal
         tiledb::VFS vfs(ctx);
         std::string pth = Support::temppath("tiledb_test_write_options");
 
-        Options options;
+        Options options = getTileDBOptions();
         NL::json jsonOptions;
 
         // add an array filter
@@ -331,9 +338,6 @@ namespace pdal
         options.add("compression", "zstd");
         options.add("compression_level", 7);
         options.add("filters", jsonOptions);
-        options.add("x_tile_size", 1);
-        options.add("y_tile_size", 1);
-        options.add("z_tile_size", 1);
 
         if (vfs.is_dir(pth))
         {
@@ -368,11 +372,8 @@ namespace pdal
         tiledb::VFS vfs(ctx);
         std::string pth = Support::temppath("tiledb_test_write_options");
 
-        Options options;
+        Options options = getTileDBOptions();
         options.add("array_name", pth);
-        options.add("x_tile_size", 1);
-        options.add("y_tile_size", 1);
-        options.add("z_tile_size", 1);
 
         if (vfs.is_dir(pth))
         {
@@ -390,15 +391,13 @@ namespace pdal
         tiledb::Array array(ctx, pth, TILEDB_READ);
 
         tiledb::FilterList fl = array.schema().coords_filter_list();
-        EXPECT_EQ(fl.nfilters(), 2U);
+        EXPECT_EQ(fl.nfilters(), 1U);
 
         tiledb::Filter f1 = fl.filter(0);
-        EXPECT_EQ(f1.filter_type(), TILEDB_FILTER_BITSHUFFLE);
-        tiledb::Filter f2 = fl.filter(1);
-        EXPECT_EQ(f2.filter_type(), TILEDB_FILTER_GZIP);
+        EXPECT_EQ(f1.filter_type(), TILEDB_FILTER_ZSTD);
         int32_t compressionLevel;
-        f2.get_option(TILEDB_COMPRESSION_LEVEL, &compressionLevel);
-        EXPECT_EQ(compressionLevel, 9);
+        f1.get_option(TILEDB_COMPRESSION_LEVEL, &compressionLevel);
+        EXPECT_EQ(compressionLevel, 7);
 
         tiledb::Attribute att = array.schema().attributes().begin()->second;
         tiledb::FilterList flAtts = att.filter_list();
@@ -420,7 +419,7 @@ namespace pdal
         tiledb::VFS vfs(ctx);
         std::string pth = Support::temppath("tiledb_test_dups");
 
-        Options writer_options;
+        Options writer_options = getTileDBOptions();
         writer_options.add("array_name", pth);
 
         if (vfs.is_dir(pth))
@@ -491,15 +490,9 @@ namespace pdal
 
         FixedPointTable table(count);
         writer.prepare(table);
-        writer.execute(table);
 
-        EXPECT_EQ(true,
-            tiledb::Object::object(ctx, pth).type() == tiledb::Object::Type::Array);
-
-        tiledb::Array array(ctx, pth, TILEDB_READ);
-        EXPECT_EQ(true,
-            array.schema().cell_order() == TILEDB_HILBERT);
-        array.close();
+        // check that error is thrown if the tile size or domain is not specified
+        EXPECT_THROW(writer.execute(table), pdal_error);
     }
 
     TEST_F(TileDBWriterTest, tile_sizes)
@@ -514,14 +507,10 @@ namespace pdal
 
         tiledb::Context ctx;
         tiledb::VFS vfs(ctx);
-        std::string pth = Support::temppath("tiledb_test_sf_curve");
+        std::string pth = Support::temppath("tiledb_test_sf_curve_ts");
 
-        Options writer_options;
+        Options writer_options = getTileDBOptions();
         writer_options.add("array_name", pth);
-        writer_options.add("x_tile_size", 1);
-        writer_options.add("y_tile_size", 1);
-        writer_options.add("z_tile_size", 1);
-
 
         if (vfs.is_dir(pth))
         {
@@ -542,6 +531,42 @@ namespace pdal
         tiledb::Array array(ctx, pth, TILEDB_READ);
         EXPECT_EQ(true,
             array.schema().cell_order() == TILEDB_ROW_MAJOR);
+        array.close();
+    }
+
+    TEST_F(TileDBWriterTest, sf_curve_stats)
+    {
+        tiledb::Context ctx;
+        tiledb::VFS vfs(ctx);
+        std::string pth = Support::temppath("tiledb_test_sf_curve_stats");
+
+        if (vfs.is_dir(pth))
+        {
+            vfs.remove_dir(pth);
+        }
+
+        PipelineManager mgr;
+
+        Options optsR;
+        optsR.add("filename", Support::datapath("las/1.2-with-color.las"));
+        Stage& reader = mgr.addReader("readers.las");
+        reader.setOptions(optsR);
+
+        Stage& filter = mgr.addFilter("filters.stats");
+        filter.setInput(reader);
+
+        Options optsW;
+        optsW.add("array_name", pth);
+        Stage& writer = mgr.addWriter("writers.tiledb");
+        writer.setInput(filter);
+        writer.setOptions(optsW);
+
+        point_count_t np = mgr.execute();
+        EXPECT_EQ(1065U, np);
+
+        tiledb::Array array(ctx, pth, TILEDB_READ);
+        EXPECT_EQ(true,
+            array.schema().cell_order() == TILEDB_HILBERT);
         array.close();
     }
     #endif
