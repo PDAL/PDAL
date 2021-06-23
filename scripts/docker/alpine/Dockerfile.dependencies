@@ -1,4 +1,4 @@
-FROM alpine:3.11
+FROM alpine:3.13
 
 #
 # Nitro looks for unistd.h in the wrong place.
@@ -11,6 +11,7 @@ RUN \
     echo "http://mirror.clarkson.edu/alpine/edge/main" >> /etc/apk/repositories; \
     echo "http://mirror.clarkson.edu/alpine/edge/community" >> /etc/apk/repositories; \
     echo "@edgetesting http://mirror.clarkson.edu/alpine/edge/testing" >> /etc/apk/repositories; \
+    echo "@edgecommunity http://mirror.clarkson.edu/alpine/edge/community" >> /etc/apk/repositories; \
     apk update; \
     apk add --no-cache \
         git \
@@ -34,37 +35,13 @@ RUN \
         xerces-c-dev \
         proj-dev \
         proj-datumgrid \
-        libspatialite-dev@edgetesting \
-        libgeotiff-dev@edgetesting \
+        hdf5-dev \
+        laszip-dev@edgecommunity \
+        libspatialite-dev@edgecommunity \
+        libgeotiff-dev@edgecommunity \
+        laz-perf-dev@edgecommunity \
+        fgt-dev@edgecommunity \
+        cpd-dev@edgecommunity \
         nitro@edgetesting \
         nitro-dev@edgetesting \
-        laszip-dev@edgetesting \
-        laz-perf-dev@edgetesting \
-        hdf5-dev@edgetesting \
     ; \
-#
-# These use PDAL's vendor/eigen
-#
-    git clone https://github.com/gadomski/fgt.git; \
-    cd fgt; \
-    mkdir build; \
-    cd build; \
-    cmake .. \
-        -G Ninja \
-        -DCMAKE_BUILD_TYPE=Release \
-    ; \
-    ninja install; \
-    cd /; \
-    rm -rf fgt; \
-    \
-    git clone https://github.com/gadomski/cpd.git; \
-    cd cpd; \
-    mkdir build; \
-    cd build; \
-    cmake .. \
-        -G Ninja \
-        -DCMAKE_BUILD_TYPE=Release \
-    ; \
-    ninja install; \
-    cd /; \
-    rm -rf cpd;
