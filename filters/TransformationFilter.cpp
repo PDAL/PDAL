@@ -190,15 +190,16 @@ bool TransformationFilter::processOne(PointRef& point)
     double x = point.getFieldAs<double>(Dimension::Id::X);
     double y = point.getFieldAs<double>(Dimension::Id::Y);
     double z = point.getFieldAs<double>(Dimension::Id::Z);
+    double s = x * matrix[12] + y * matrix[13] + z * matrix[14] + matrix[15];
 
     point.setField(Dimension::Id::X,
-        x * matrix[0] + y * matrix[1] + z * matrix[2] + matrix[3]);
+       (x * matrix[0] + y * matrix[1] + z * matrix[2] + matrix[3]) / s);
 
     point.setField(Dimension::Id::Y,
-        x * matrix[4] + y * matrix[5] + z * matrix[6] + matrix[7]);
+       (x * matrix[4] + y * matrix[5] + z * matrix[6] + matrix[7]) / s);
 
     point.setField(Dimension::Id::Z,
-        x * matrix[8] + y * matrix[9] + z * matrix[10] + matrix[11]);
+       (x * matrix[8] + y * matrix[9] + z * matrix[10] + matrix[11]) / s);
     return true;
 }
 
