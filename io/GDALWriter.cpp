@@ -37,6 +37,7 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/private/gdal/Raster.hpp>
+#include <pdal/util/Utils.hpp>
 
 #include "private/GDALGrid.hpp"
 
@@ -97,6 +98,8 @@ void GDALWriter::addArgs(ProgramArgs& args)
         m_defaultSrs);
     args.add("metadata", "GDAL metadata to set on the raster, in the form 'NAME=VALUE,NAME2=VALUE2,NAME3=VALUE3'",
         m_GDAL_metadata);
+    args.add("pdal_metadata", "Write PDAL metadata as to GDAL PAM XML Metadata?",
+        m_writePDALMetadata, decltype(m_writePDALMetadata)(false));
 }
 
 
@@ -330,21 +333,41 @@ void GDALWriter::doneFile()
     std::vector<std::string> gdalitems = Utils::split(m_GDAL_metadata, ',');
     for (auto& v: gdalitems)
     {
-
-        std::vector<std::string> item = Utils::split(v, '=');
-        std::string name = item[0];
-
-
-        std::string value("");
-        if (item.size() == 2 )
-            value = item[1];
-
-        std::string domain;
-        raster.addMetadata(name, value, domain);
-
+        const std::size_t pos = v.find_first_of("=");
+        if (pos != std::string::npos)
+        {
+            const std::string name = v.substr(0, pos);
+            const std::string value = pos != std::string::npos ? v.substr(pos + 1) : "";
+            raster.addMetadata(name, value);
+        }
     }
+
     getMetadata().addList(raster.getMetadata());
+}
+
+void GDALWriter::readyTable(PointTableRef table)
+{
+    // Add these as GDAL metadata
+    if(m_writePDALMetadata)
+    {
+        MetadataNode m = table.metadata();
+        std::string json = Utils::toJSON(m);
+        std::vector<uint8_t> metadata(json.begin(), json.end());
+        std::string b64 = Utils::base64_encode(metadata.data(), metadata.size());
+        if (m_GDAL_metadata.size())
+            m_GDAL_metadata += ",";
+
+        m_GDAL_metadata += "pdal_metadata=" + b64;
+
+        std::ostringstream ostr;
+        PipelineWriter::writePipeline(this, ostr);
+        json = ostr.str();
+        std::vector<uint8_t> pipeline(json.begin(), json.end());
+        b64 = Utils::base64_encode(pipeline.data(), pipeline.size());
+        m_GDAL_metadata += ",pdal_pipeline=" + b64;
+    }
 
 }
+
 
 } // namespace pdal

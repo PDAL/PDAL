@@ -907,7 +907,7 @@ TEST(GDALWriterTest, testMetadata)
     wo.add("output_type", "max");
     wo.add("resolution", 1);
     wo.add("radius", .7071);
-    wo.add("metadata", "AREA_OR_PIXEL=Pixel,empty==");
+    wo.add("metadata", "AREA_OR_PIXEL=Pixel,empty=,equals=some_more_equals===");
     wo.add("filename", outfile);
     wo.add("window_size", 2);
 
@@ -923,14 +923,19 @@ TEST(GDALWriterTest, testMetadata)
 
     gdal::Raster raster(outfile);
     raster.open();
+
     MetadataNode l = raster.getMetadata().findChild("AREA_OR_PIXEL");
     if (l.empty())
         FAIL() << "Couldn't find raster metadata AREA_OR_PIXEL";
 
-
     l = raster.getMetadata().findChild("empty");
-    if (!l.empty())
-        FAIL() << "Empty metadata should not be added";
+    EXPECT_EQ(l.value(), "");
+
+    l = raster.getMetadata().findChild("equals");
+    if (l.empty())
+        FAIL() << "Couldn't find raster metadata equals";
+
+    EXPECT_EQ(l.value(), "some_more_equals===");
 
 
 }
