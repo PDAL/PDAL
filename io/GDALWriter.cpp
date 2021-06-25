@@ -167,8 +167,6 @@ void GDALWriter::initialize()
     // set later in writeView.
     m_expandByPoint = !m_fixedGrid;
 
-
-
 }
 
 
