@@ -190,10 +190,10 @@ default_srs
 
 metadata:
   Add or set GDAL metadata to set on the raster, in the form
-  ``NAME=VALUE,NAME2=VALUE2,NAME3=VALUE3``
+  ``NAME=VALUE,NAME2=VALUE2,NAME3=VALUE3`` [Default: None]
 
 pdal_metadata:
-  Write PDAL's pipeline and metadata as base64 to the GDAL PAM metadata
+  Write PDAL's pipeline and metadata as base64 to the GDAL PAM metadata [Default: False]
 
 
 .. include:: writer_opts.rst
