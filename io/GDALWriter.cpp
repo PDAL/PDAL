@@ -340,7 +340,7 @@ void GDALWriter::doneFile()
         }
     }
 
-    getMetadata().addList(raster.getMetadata());
+    getMetadata().add(raster.getMetadata());
 }
 
 void GDALWriter::readyTable(PointTableRef table)

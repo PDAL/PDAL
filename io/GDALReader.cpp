@@ -83,7 +83,7 @@ void GDALReader::initialize()
     m_width = m_raster->width();
     m_height = m_raster->height();
     m_bandTypes = m_raster->getPDALDimensionTypes();
-    m_metadata.addList(m_raster->getMetadata());
+    m_metadata.add(m_raster->getMetadata());
 
 
     m_dimNames.clear();
