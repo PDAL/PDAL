@@ -37,7 +37,7 @@
 #include <lazperf/filestream.hpp>
 #include <lazperf/vlr.hpp>
 #ifndef LAZPERF_VERSION
-#error "LAZperf version 2+ (supporting LAS version 1.4) not found
+#error "LAZperf version 2+ (supporting LAS version 1.4) not found"
 #endif
 
 #include <pdal/util/IStream.hpp>

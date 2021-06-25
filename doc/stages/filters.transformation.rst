@@ -3,11 +3,8 @@
 filters.transformation
 ======================
 
-The transformation filter applies an arbitrary rotation+translation
+The transformation filter applies an arbitrary homography
 transformation, represented as a 4x4 matrix_, to each xyz triplet.
-
-The filter does *no* checking to ensure the matrix is a valid affine
-transformation.
 
 .. note::
 
@@ -59,10 +56,11 @@ A full tutorial about transformation matrices is beyond the scope of this
 documentation. Instead, we will provide a few pointers to introduce core
 concepts, especially as pertains to PDAL's handling of the ``matrix`` argument.
 
-Transformations in a 3-dimensional coordinate system can be represented as an
-affine transformation using homogeneous coordinates. This 4x4 matrix can
-represent transformations describing operations like translation, rotation, and
-scaling of coordinates.
+Transformations in a 3-dimensional coordinate system can be represented
+as a homography transformation using homogeneous coordinates. This 4x4
+matrix can represent affine transformations describing operations like
+translation, rotation, and scaling of coordinates.  In addition it can
+represent perspective transformations modeling a pinhole camera.
 
 The transformation filter's ``matrix`` argument is a space delimited, 16
 element string. This string is simply a row-major representation of the 4x4

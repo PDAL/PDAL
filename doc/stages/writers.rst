@@ -25,7 +25,6 @@ dimension type, while others only understand fixed dimension names.
    writers.matlab
    writers.nitf
    writers.null
-   writers.oci
    writers.ogr
    writers.pcd
    writers.pgpointcloud
@@ -65,9 +64,6 @@ dimension type, while others only understand fixed dimension names.
 :ref:`writers.null`
     Provides a sink for points in a pipeline. It's the same as sending pipeline
     output to /dev/null.
-
-:ref:`writers.oci`
-    Write data to Oracle point cloud databases. [deprecated]
 
 :ref:`writers.ogr`
     Write a point cloud as a set of OGR points/multipoints

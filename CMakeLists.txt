@@ -50,7 +50,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Name of C++ library
-
 #
 # To facilitate one-library linking, we do special things for various platforms.
 #

@@ -44,4 +44,4 @@ min_k
 
 max_k
   The maximum number of k nearest neighbors to consider for optimal
-  neighborhood selection. [Default: 100]
+  neighborhood selection. [Default: 14]
