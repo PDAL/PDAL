@@ -52,3 +52,13 @@ TEST(UuidTest, test)
     for (size_t i = 0; i < 16; ++i)
         EXPECT_EQ(id[i], buf[i]);
 }
+
+TEST(UuidTest, initialization)
+{
+    Uuid uuid;
+
+    EXPECT_TRUE(uuid.isNull());
+
+    Uuid uuid2(std::string("foo"));
+    EXPECT_TRUE(uuid2.isNull());
+}
