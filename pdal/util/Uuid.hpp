@@ -70,6 +70,9 @@ namespace pdal
 #pragma pack(1)
 struct uuid
 {
+    uuid() : time_low(0), time_mid(0), time_hi_and_version(0), clock_seq(0), node {}
+    {}
+
     uint32_t time_low;
     uint16_t time_mid;
     uint16_t time_hi_and_version;
@@ -97,7 +100,7 @@ class PDAL_DLL Uuid
     friend inline bool operator < (const Uuid& u1, const Uuid& u2);
 public:
     Uuid()
-        { clear(); }
+        {}
     Uuid(const char *c)
         { unpack(c); }
     Uuid(const std::string& s)
