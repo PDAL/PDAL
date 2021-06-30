@@ -185,19 +185,24 @@ for the in-scope :ref:`filters.python` :cpp:class:`pdal::Stage`.
        outs = ins
        return True
 
-Updating metadata
+Setting stage metadata
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The filter can update the global ``metadata`` dictionary as needed,
-define it as a
-**global** Python variable for the function's scope, and the updates will be
-reflected back into the pipeline from that stage forward.
+.. note::
+    The name of the output metadata variable has changed from ``metadata`` to ``out_metadata``.
+
+Stage metadata can be created by using the ``out_metadata`` dictionary **global** variable.
+The ``name`` key must be set. The type of the ``value`` can usually be inferred, but
+can be set to one of ``integer``, ``nonNegativeInteger``, ``double``, ``bounds``,
+``boolean``, ``spatialreference``, ``uuid`` or ``string``.
+
+Children may be set using the ``children`` key whose value is a list of dictionaries.
 
 .. code-block:: python
 
    def myfunc(ins,outs):
-     global metadata
-     metadata = {'name': 'root', 'value': 'a string', 'type': 'string', 'description': 'a description', 'children': [{'name': 'filters.python', 'value': 52, 'type': 'integer', 'description': 'a filter description', 'children': []}, {'name': 'readers.faux', 'value': 'another string', 'type': 'string', 'description': 'a reader description', 'children': []}]}
+     global out_metadata
+     out_metadata = {'name': 'root', 'value': 'a string', 'type': 'string', 'description': 'a description', 'children': [{'name': 'somekey', 'value': 52, 'type': 'integer', 'description': 'a filter description', 'children': []}, {'name': 'readers.faux', 'value': 'another string', 'type': 'string', 'description': 'a reader description', 'children': []}]}
      return True
 
 Passing Python objects
