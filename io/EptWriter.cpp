@@ -93,7 +93,6 @@ void EptWriter::write(const PointViewPtr v)
 
     Grid grid;
     grid.expand(box, count);
-    std::cerr << "Max level = " << grid.maxLevel() << "\n";
 
     CellManager mgr(v);
 

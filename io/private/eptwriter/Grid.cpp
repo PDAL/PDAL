@@ -17,8 +17,6 @@
 #include "Ept.hpp"
 #include "Grid.hpp"
 
-using namespace pdal;
-
 namespace pdal
 {
 namespace ept
@@ -30,7 +28,6 @@ void Grid::expand(const BOX3D& bounds, size_t points)
     double xside = m_bounds.maxx - m_bounds.minx;
     double yside = m_bounds.maxy - m_bounds.miny;
     double zside = m_bounds.maxz - m_bounds.minz;
-    std::cerr << "X/Y/Z len = " << xside << "/" << yside << "/" << zside << "!\n";
     double side = (std::max)(xside, (std::max)(yside, zside));
     m_cubicBounds = BOX3D(m_bounds.minx, m_bounds.miny, m_bounds.minz,
         m_bounds.minx + side, m_bounds.miny + side, m_bounds.minz + side);
@@ -50,7 +47,6 @@ int Grid::calcLevel()
 
     double side = (std::max)(xside, (std::max)(yside, zside));
 
-    std::cerr << "Million = " << mp << "!\n";
     while (mp > MaxPointsPerNode / 1000000.0)
     {
         if (m_cubic)

@@ -1,3 +1,15 @@
+/*****************************************************************************
+ *   Copyright (c) 2021, Hobu, Inc. (info@hobu.co)                           *
+ *                                                                           *
+ *   All rights reserved.                                                    *
+ *                                                                           *
+ *   This program is free software; you can redistribute it and/or modify    *
+ *   it under the terms of the GNU General Public License as published by    *
+ *   the Free Software Foundation; either version 3 of the License, or       *
+ *   (at your option) any later version.                                     *
+ *                                                                           *
+ ****************************************************************************/
+
 #pragma once
 
 #include <stdint.h>
@@ -13,18 +25,15 @@ namespace pdal
 namespace ept
 {
 
+/**
 struct Options
 {
     std::string outputDir;
-    StringList inputFiles;
-    std::string tempDir;
     bool doCube;
-    size_t fileLimit;
     int level;
-    int progressFd;
     StringList dimNames;
-    bool stats;
 };
+**/
 
 struct BaseInfo
 {

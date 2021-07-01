@@ -61,9 +61,9 @@ inline std::ostream& operator << (std::ostream& out, const Exception& ex)
 
 inline uint32_t cksum(const void *c, size_t size)
 {
-    unt32_t sum = 0;
+    uint32_t sum = 0;
 
-    const unt32_t *p = static_cast<const uint32_t *>(c);
+    const uint32_t *p = static_cast<const uint32_t *>(c);
     while (size)
     {
         uint32_t val = 0;
@@ -76,12 +76,12 @@ inline uint32_t cksum(const void *c, size_t size)
     return sum;
 }
 
-inline unt32_t cksum(const std::vector<char>& v)
+inline uint32_t cksum(const std::vector<char>& v)
 {
     return cksum(static_cast<const void *>(v.data()), v.size());
 }
 
-inline unt32_t cksum(const std::vector<unsigned char>& v)
+inline uint32_t cksum(const std::vector<unsigned char>& v)
 {
     return cksum(static_cast<const void *>(v.data()), v.size());
 }

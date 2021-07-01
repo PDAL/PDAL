@@ -36,8 +36,6 @@ public:
     void run(CellManager& cells);
 
 private:
-    void getInputFiles();
-    void readBaseInfo();
     size_t queueWork(CellManager& cells);
     void writeInfo();
 
