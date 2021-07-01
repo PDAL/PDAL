@@ -639,5 +639,49 @@ GDALError Raster::statistics(int nBand, double *minimum, double *maximum,
     return GDALError::None;
 }
 
+
+MetadataNode Raster::getMetadata(std::string domain) const
+{
+    char **papszMetadata = NULL;
+
+    MetadataNode output("raster");
+
+    // m_ds owns this
+    papszMetadata = m_ds->GetMetadata(domain.c_str());
+
+    for( int i = 0;
+         papszMetadata != NULL && papszMetadata[i] != NULL;
+         i++ )
+    {
+        std::string v(papszMetadata[i]);
+
+        const std::size_t pos = v.find_first_of("=");
+        if (pos != std::string::npos)
+        {
+            const std::string name = v.substr(0, pos);
+            const std::string value = pos != std::string::npos ? v.substr(pos + 1) : "";
+            output.add(name, value);
+        }
+        else
+        {
+            throw pdal_error("Metadata must be defined in 'key=value,key2=value2' arrangement");
+        }
+
+
+    }
+
+    return output;
+}
+
+GDALError Raster::addMetadata(std::string name,
+                              std::string value,
+                              std::string domain)
+{
+    CPLErr e = m_ds->SetMetadataItem(name.c_str(),
+                                     value.c_str(),
+                                     domain.c_str());
+    return GDALError(e);
+}
+
 } // namespace gdal
 } // namespace pdal

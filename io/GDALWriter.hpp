@@ -68,6 +68,7 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
     virtual void prepared(PointTableRef table);
+    virtual void readyTable(PointTableRef table);
     virtual void readyFile(const std::string& filename,
         const SpatialReference& srs);
     virtual void writeView(const PointViewPtr view);
@@ -107,6 +108,8 @@ private:
     bool m_fixedGrid;
     SpatialReference m_defaultSrs;
     SpatialReference m_overrideSrs;
+    std::string m_GDAL_metadata;
+    bool m_writePDALMetadata;
 };
 
 }
