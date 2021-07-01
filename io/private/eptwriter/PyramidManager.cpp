@@ -16,19 +16,19 @@
 
 #include <pdal/util/FileUtils.hpp>
 
-#include "../untwine/ProgressWriter.hpp"
-#include "../untwine/VoxelKey.hpp"
-
 #include "Processor.hpp"
 #include "PyramidManager.hpp"
 #include "VoxelInfo.hpp"
+#include "VoxelKey.hpp"
 
-namespace untwine
+namespace pdal
 {
-namespace bu
+namespace ept
 {
 
-PyramidManager::PyramidManager(const BaseInfo& b) : m_b(b), m_pool(10), m_totalPoints(0)
+//ABELL
+//PyramidManager::PyramidManager(const BaseInfo& b) : m_b(b), m_pool(10), m_totalPoints(0)
+PyramidManager::PyramidManager(const BaseInfo& b) : m_b(b), m_pool(1), m_totalPoints(0)
 {}
 
 
@@ -75,14 +75,14 @@ void PyramidManager::run()
 // remove the items from the complete list and queue a Processor job.
 void PyramidManager::process(const OctantInfo& o)
 {
-    VoxelKey pk = o.key().parent();
+    VoxelKey parentKey = o.key().parent();
     addComplete(o);
-    if (!childrenComplete(pk))
+    if (!childrenComplete(parentKey))
         return;
 
-    VoxelInfo vi(m_b.bounds, pk);
+    VoxelInfo vi(m_b.bounds, parentKey);
     for (int i = 0; i < 8; ++i)
-        vi[i] = removeComplete(pk.child(i));
+        vi.child(i) = removeComplete(parentKey.child(i));
 
     // If there are no points in this voxel, just queue it as a child.
     if (!vi.hasPoints())
@@ -127,23 +127,10 @@ OctantInfo PyramidManager::removeComplete(const VoxelKey& k)
 }
 
 
-void PyramidManager::logOctant(const VoxelKey& k, int cnt, const IndexedStats& istats)
+void PyramidManager::logOctant(const VoxelKey& k, int cnt)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    for (auto is : istats)
-    {
-        Stats& s = is.second;
-
-        auto it = m_stats.find(s.name());
-        if (it != m_stats.end())
-        {
-            Stats& cur = it->second;
-            cur.merge(s);
-        }
-        else
-            m_stats.insert({s.name(), s});
-    }
     m_written.insert({k, cnt});
     m_totalPoints += cnt;
 }
@@ -234,6 +221,7 @@ std::deque<VoxelKey> PyramidManager::emit(const VoxelKey& p, int stopLevel, Entr
 }
 
 
+/**
 Stats *PyramidManager::stats(const std::string& name)
 {
     auto si = m_stats.find(name);
@@ -241,6 +229,7 @@ Stats *PyramidManager::stats(const std::string& name)
         return nullptr;
     return &si->second;
 }
+**/
 
-} // namespace bu
-} // namespace untwine
+} // namespace ept
+} // namespace pdal

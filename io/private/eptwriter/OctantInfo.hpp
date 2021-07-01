@@ -14,10 +14,11 @@
 #pragma once
 
 #include "VoxelKey.hpp"
+#include <pdal/PointView.hpp>
 
-namespace untwine
+namespace pdal
 {
-namespace bu
+namespace ept
 {
 
 class OctantInfo
@@ -31,18 +32,18 @@ public:
 
     void appendSource(PointViewPtr source)
     {
+        if (!source)
+            return;
         if (!m_source)
             m_source = source;
         else
-            m_source.append(source);
+            m_source->append(*source);
     }
 
-/**
-    PointViewPtr newSource() const
+    PointViewPtr& source()
     {
-        return m_source ? m_source->nameNew() : PointViewPtr();
+        return m_source;
     }
-**/
 
     size_t numPoints() const
     {
@@ -64,5 +65,5 @@ private:
     bool m_mustWrite;
 };
 
-} // namespace bu
-} // namespace untwine
+} // namespace ept
+} // namespace pdal

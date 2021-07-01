@@ -8,15 +8,28 @@
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "BuPyramid.hpp"
-#include "FileInfo.hpp"
 #include "OctantInfo.hpp"
-#include "../untwine/Common.hpp"
-#include "../untwine/ProgressWriter.hpp"
 
-namespace untwine
+namespace pdal
 {
-namespace bu
+namespace ept
 {
+
+namespace
+{
+
+void createDirs(const std::string& outputDir)
+{
+    //ABELL - Check for errors. createDirectory() returns bool.
+    FileUtils::createDirectory(outputDir);
+    FileUtils::deleteFile(outputDir + "/ept.json");
+    FileUtils::deleteDirectory(outputDir + "/ept-data");
+    FileUtils::deleteDirectory(outputDir + "/ept-hierarchy");
+    FileUtils::createDirectory(outputDir + "/ept-data");
+    FileUtils::createDirectory(outputDir + "/ept-hierarchy");
+}
+
+}
 
 /// BuPyramid
 
@@ -26,11 +39,8 @@ BuPyramid::BuPyramid(BaseInfo& common) : m_b(common), m_manager(m_b)
 
 void BuPyramid::run(CellManager& cells)
 {
-    m_b.outputDir = options.outputDir;
-    m_b.stats = options.stats;
-
-    size_t count = queueWork(cells);
-    
+    createDirs(m_b.outputDir);
+    queueWork(cells);
     std::thread runner(&PyramidManager::run, &m_manager);
     runner.join();
     writeInfo();
@@ -81,46 +91,35 @@ void BuPyramid::writeInfo()
     out << "\"span\": 128,\n";
     out << "\"version\": \"1.0.0\",\n";
     out << "\"schema\": [\n";
-    for (auto di = m_b.dimInfo.begin(); di != m_b.dimInfo.end(); ++di)
-    {
-        const FileDimInfo& fdi = *di;
 
+    PointLayoutPtr l = m_b.table.layout();
+    Dimension::IdList ids = l->dims();
+    for (auto it = ids.begin(); it != ids.end(); ++it)
+    {
+        Dimension::Id id = *it;
         out << "\t{";
-            out << "\"name\": \"" << fdi.name << "\", ";
-            out << "\"type\": \"" << typeString(pdal::Dimension::base(fdi.type)) << "\", ";
-            if (fdi.name == "X")
-                out << "\"scale\": " << m_b.scale[0] << ", \"offset\": " << m_b.offset[0] << ", ";
-            if (fdi.name == "Y")
-                out << "\"scale\": " << m_b.scale[1] << ", \"offset\": " << m_b.offset[1] << ", ";
-            if (fdi.name == "Z")
-                out << "\"scale\": " << m_b.scale[2] << ", \"offset\": " << m_b.offset[2] << ", ";
-            out << "\"size\": " << pdal::Dimension::size(fdi.type);
-            const Stats *stats = m_manager.stats(fdi.name);
-            if (stats)
+            out << "\"name\": \"" << l->dimName(id) << "\", ";
+            int o = -1;
+            if (id == Dimension::Id::X)
+                o = 0;
+            else if (id == Dimension::Id::Y)
+                o = 1;
+            else if (id == Dimension::Id::Z)
+                o = 2;
+            // X, Y or Z
+            if (o >= 0)
             {
-                const Stats::EnumMap& v = stats->values();
-                out << ", ";
-                if (v.size())
-                {
-                    out << "\"counts\": [ ";
-                    for (auto ci = v.begin(); ci != v.end(); ++ci)
-                    {
-                        auto c = *ci;
-                        if (ci != v.begin())
-                            out << ", ";
-                        out << "{\"value\": " << c.first << ", \"count\": " << c.second << "}";
-                    }
-                    out << "], ";
-                }
-                out << "\"count\": " << m_manager.totalPoints() << ", ";
-                out << "\"maximum\": " << stats->maximum() << ", ";
-                out << "\"minimum\": " << stats->minimum() << ", ";
-                out << "\"mean\": " << stats->average() << ", ";
-                out << "\"stddev\": " << stats->stddev() << ", ";
-                out << "\"variance\": " << stats->variance();
+                out << "\"type\": \"signed\", ";
+                out << "\"scale\": " << m_b.scale[o] << ", \"offset\": " << m_b.offset[o] << ", ";
+                out << "\"size\": 4";
+            }
+            else
+            {
+                out << "\"type\": \"" << typeString(Dimension::base(l->dimType(id))) << "\", ";
+                out << "\"size\": " << l->dimSize(id);
             }
         out << "}";
-        if (di + 1 != m_b.dimInfo.end())
+        if (it + 1 != ids.end())
             out << ",";
         out << "\n";
     }
@@ -137,21 +136,21 @@ void BuPyramid::writeInfo()
 }
 
 
-size_t BuPyramid::queueWork()
+size_t BuPyramid::queueWork(CellManager& cells)
 {
     std::set<VoxelKey> needed;
     std::set<VoxelKey> parentsToProcess;
     std::vector<OctantInfo> have;
     const VoxelKey root;
 
-    for (auto& kv : m_cells)
+    for (auto& kv : cells)
     {
         VoxelKey k = kv.first;
-        PointViewPtr cell = kv.second;
+        PointViewPtr v = kv.second;
 
         // Stick an OctantInfo for this cell in the 'have' list.
         OctantInfo o(k);
-        o.appendCell(cell);
+        o.appendSource(v);
         have.push_back(o);
 
         // Walk up the tree and make sure that we're populated for all children necessary
@@ -181,11 +180,12 @@ size_t BuPyramid::queueWork()
     // Queue what we have.
     for (const OctantInfo& o : have)
         m_manager.queue(o);
+
     // Queue what we need but have no data for.
     for (const VoxelKey& k : needed)
         m_manager.queue(OctantInfo(k));
     return parentsToProcess.size();
 }
 
-} // namespace bu
-} // namespace untwine
+} // namespace ept
+} // namespace pdal

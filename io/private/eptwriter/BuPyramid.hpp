@@ -17,40 +17,33 @@
 #include <unordered_map>
 #include <vector>
 
+#include "CellManager.hpp"
+#include "Common.hpp"
 #include "PyramidManager.hpp"
 
 namespace pdal
 {
-    class ProgramArgs;
-}
+class ProgramArgs;
+class Options;
 
-namespace untwine
+namespace ept
 {
-
-struct Options;
-class ProgressWriter;
-
-namespace bu
-{
-
-class FileInfo;
 
 class BuPyramid
 {
 public:
     BuPyramid(BaseInfo& common);
-    void run(const Options& options, ProgressWriter& progress);
+    void run(CellManager& cells);
 
 private:
     void getInputFiles();
     void readBaseInfo();
-    size_t queueWork();
+    size_t queueWork(CellManager& cells);
     void writeInfo();
 
     BaseInfo m_b;
     PyramidManager m_manager;
-    std::unordered_map<VoxelKey, FileInfo> m_allFiles;
 };
 
-} // namespace bu
-} // namespace untwine
+} // namespace ept
+} // namespace pdal

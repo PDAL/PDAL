@@ -34,6 +34,7 @@
 
 #include "EptWriter.hpp"
 
+#include "private/eptwriter/BuPyramid.hpp"
 #include "private/eptwriter/Ept.hpp"
 #include "private/eptwriter/CellManager.hpp"
 #include "private/eptwriter/Grid.hpp"
@@ -60,7 +61,7 @@ CREATE_STATIC_STAGE(EptWriter, s_info);
 struct EptWriter::Args
 {
 public:
-    std::string m_outputDir;
+    std::string outputDir;
 };
 
 struct EptWriter::Private
@@ -78,7 +79,7 @@ std::string EptWriter::getName() const { return s_info.name; }
 
 void EptWriter::addArgs(ProgramArgs& args)
 {
-    args.add("directory", "Directory in which to write the EPT output.", m_args->m_outputDir);
+    args.add("directory", "Directory in which to write the EPT output.", m_args->outputDir);
 }
 
 
@@ -89,17 +90,19 @@ void EptWriter::write(const PointViewPtr v)
     BOX3D box;
     size_t count = v->size();
     v->calculateBounds(box);
-/**
+
     Grid grid;
     grid.expand(box, count);
+    std::cerr << "Max level = " << grid.maxLevel() << "\n";
 
     CellManager mgr(v);
 
     for (PointRef p : *v)
     {
         double x = p.getFieldAs<double>(Dimension::Id::X);
-        double y = p.getFieldAs<double>(Dimension::Id::X);
+        double y = p.getFieldAs<double>(Dimension::Id::Y);
         double z = p.getFieldAs<double>(Dimension::Id::Z);
+
         VoxelKey key = grid.key(x, y, z);
         PointViewPtr& cell = mgr.get(key);
         cell->appendPoint(*v, p.pointId());
@@ -124,9 +127,16 @@ void EptWriter::write(const PointViewPtr v)
     }
     mgr.merge(std::move(reprocessMgr));
 
-    BuPyramid bu;
+    BaseInfo common(v->table());
+    common.bounds = grid.processingBounds();
+    common.trueBounds = grid.conformingBounds();
+    common.outputDir = m_args->outputDir;
+    common.srs = v->spatialReference();
+    grid.offset(common.offset);
+    grid.scale(common.scale);
+
+    BuPyramid bu(common);
     bu.run(mgr);
-**/
 }
 
 

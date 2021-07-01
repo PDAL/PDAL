@@ -56,7 +56,7 @@ void Reprocessor::run()
         double z = p.getFieldAs<double>(Dimension::Id::Z);
         VoxelKey k = m_grid.key(x, y, z);
         PointViewPtr& cell = m_mgr.get(k);
-        cell->appendPoint(*cell, p.pointId());
+        cell->appendPoint(*m_srcView, p.pointId());
     }
 }
 

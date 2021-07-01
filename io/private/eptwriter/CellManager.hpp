@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include <pdal/PointView.hpp>
+
 #include "VoxelKey.hpp"
 
 #include <unordered_map>
@@ -21,6 +23,7 @@ namespace pdal
 namespace ept
 {
 
+// This simply holds the point view for each voxel.
 class CellManager
 {
 public:

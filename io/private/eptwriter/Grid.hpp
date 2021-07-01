@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <array>
+
 #include <pdal/util/Bounds.hpp>
 
 #include "VoxelKey.hpp"
@@ -38,6 +40,8 @@ public:
         { return m_cubicBounds; }
     pdal::BOX3D conformingBounds() const
         { return m_bounds; }
+    void scale(std::array<double, 3>& vals);
+    void offset(std::array<double, 3>& vals);
 
     int maxLevel() const
         { return m_maxLevel; }
@@ -58,3 +62,4 @@ private:
 
 } // namespace ept
 } // namespace pdal
+

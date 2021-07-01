@@ -13,18 +13,15 @@
 #pragma once
 
 #include <array>
-#include <unordered_map>
+#include <unordered_set>
 
-#include "../untwine/FileDimInfo.hpp"
-#include "../untwine/GridKey.hpp"
-#include "../untwine/Point.hpp"
-#include "../untwine/VoxelKey.hpp"
-
+#include "GridKey.hpp"
+#include "VoxelKey.hpp"
 #include "OctantInfo.hpp"
 
-namespace untwine
+namespace pdal
 {
-namespace bu
+namespace ept
 {
 
 class VoxelInfo
@@ -74,12 +71,29 @@ public:
     VoxelKey key() const
         { return m_octant.key(); }
 
+    void initParentOctant()
+    {
+        if (m_octant.source())
+            return;
+        for (int i = 0; i < 8; ++i)
+        {
+            OctantInfo& o = child(i);
+            if (o.source())
+            {
+                m_octant.source() = o.source()->makeNew();
+                return;
+            }
+        }
+        //ABELL - Should throw an excpetion.
+    }
+
     OctantInfo& child(int dir)
         { return m_children[dir]; }
 
     OctantInfo& octant()
         { return m_octant; }
 
+    /**
     size_t numPoints() const
     {
         size_t cnt = 0;
@@ -87,11 +101,14 @@ public:
             cnt += oi.numPoints();
         return cnt;
     }
+    **/
 
     bool hasPoints() const
     {
+        if (m_octant.numPoints())
+            return true;
         for (const OctantInfo& oi : m_children)
-            if (oi.hasPoints())
+            if (oi.numPoints())
                 return true;
         return false;
     }
@@ -162,5 +179,5 @@ private:
     Grid m_grid;
 };
 
-} // namespace bu
-} // namespace untwine
+} // namespace ept
+} // namespace pdal

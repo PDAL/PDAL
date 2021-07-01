@@ -15,18 +15,15 @@
 #include <pdal/PointTable.hpp>
 #include <pdal/PointView.hpp>
 
-#include "PointAccessor.hpp"
-#include "Stats.hpp"
+#include "Common.hpp"
 #include "VoxelInfo.hpp"
 
-namespace untwine
+namespace pdal
+{
+namespace ept
 {
 
 class GridKey;
-
-namespace bu
-{
-
 class OctantInfo;
 class PyramidManager;
 
@@ -38,25 +35,15 @@ public:
     void run();
 
 private:
-    void sample(Index& accepted, Index& rejected);
-    void write(Index& accepted, Index& rejected);
-    bool acceptable(int pointId, GridKey key);
-    bool tooClose(pdal::PointId id1, pdal::PointId id2);
-
-    void appendRemainder(Index& index);
-    void writeBinOutput(Index& index);
-    void writeCompressedOutput(Index& index);
-    IndexIter writeOctantCompressed(const OctantInfo& o, Index& index, IndexIter pos);
-    void appendCompressed(pdal::PointViewPtr view, const DimInfoList& dims, const FileInfo& fi,
-        IndexIter begin, IndexIter end);
-    void flushCompressed(pdal::PointTableRef table, pdal::PointViewPtr view,
-        const OctantInfo& oi, IndexedStats& stats);
+    void sample();
+    bool acceptable(GridKey key);
+    void writeCompressed(VoxelKey k, PointViewPtr v);
+    void writeCompressed(const std::string& filename, PointViewPtr v);
 
     VoxelInfo m_vi;
     const BaseInfo& m_b;
     PyramidManager& m_manager;
-    PointAccessor m_points;
 };
 
-} // namespace bu
-} // namespace untwine
+} // namespace ept
+} // namespace pdal

@@ -30,6 +30,7 @@ void Grid::expand(const BOX3D& bounds, size_t points)
     double xside = m_bounds.maxx - m_bounds.minx;
     double yside = m_bounds.maxy - m_bounds.miny;
     double zside = m_bounds.maxz - m_bounds.minz;
+    std::cerr << "X/Y/Z len = " << xside << "/" << yside << "/" << zside << "!\n";
     double side = (std::max)(xside, (std::max)(yside, zside));
     m_cubicBounds = BOX3D(m_bounds.minx, m_bounds.miny, m_bounds.minz,
         m_bounds.minx + side, m_bounds.miny + side, m_bounds.minz + side);
@@ -49,6 +50,7 @@ int Grid::calcLevel()
 
     double side = (std::max)(xside, (std::max)(yside, zside));
 
+    std::cerr << "Million = " << mp << "!\n";
     while (mp > MaxPointsPerNode / 1000000.0)
     {
         if (m_cubic)
@@ -99,6 +101,32 @@ VoxelKey Grid::key(double x, double y, double z)
     zi = (std::min)((std::max)(0, zi), m_gridSize - 1);
 
     return VoxelKey(xi, yi, zi, m_maxLevel);
+}
+
+void Grid::offset(std::array<double, 3>& vals)
+{
+    // Divide before sum to avoid overflow.
+    vals[0] = m_bounds.maxx / 2 + m_bounds.minx / 2;
+    vals[1] = m_bounds.maxy / 2 + m_bounds.miny / 2;
+    vals[2] = m_bounds.maxz / 2 + m_bounds.minz / 2;
+}
+
+void Grid::scale(std::array<double, 3>& vals)
+{
+    auto calcScale = [](double low, double high)
+    {
+        // 2 billion is a little less than the int limit.  We center the data around 0 with the
+        // offset, so we're applying the scale to half the range of the data.
+        double val = high / 2 - low / 2;
+        double power = std::ceil(std::log10(val / 2000000000.0));
+
+        // Set an arbitrary limit on scale of 1e10-4.
+        return std::pow(10, (std::max)(power, -4.0));
+    };
+
+    vals[0] = calcScale(m_bounds.minx, m_bounds.maxx);
+    vals[1] = calcScale(m_bounds.miny, m_bounds.maxy);
+    vals[2] = calcScale(m_bounds.minz, m_bounds.maxz);
 }
 
 } // namespace ept
