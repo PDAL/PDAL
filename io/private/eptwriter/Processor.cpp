@@ -38,7 +38,6 @@ void Processor::run()
 {
     m_vi.initParentOctant();
 
-/**
     size_t totalPoints = 0;
     for (int i = 0; i < 8; ++i)
     {
@@ -55,7 +54,6 @@ void Processor::run()
             OctantInfo& child = m_vi.child(i);
             m_vi.octant().appendSource(child.source());
         }
-**/
 
     sample();
     m_manager.queue(m_vi.octant());

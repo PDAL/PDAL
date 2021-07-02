@@ -26,9 +26,7 @@ namespace pdal
 namespace ept
 {
 
-//ABELL
-//PyramidManager::PyramidManager(const BaseInfo& b) : m_b(b), m_pool(10), m_totalPoints(0)
-PyramidManager::PyramidManager(const BaseInfo& b) : m_b(b), m_pool(1), m_totalPoints(0)
+PyramidManager::PyramidManager(const BaseInfo& b) : m_b(b), m_pool(10), m_totalPoints(0)
 {}
 
 
@@ -220,16 +218,6 @@ std::deque<VoxelKey> PyramidManager::emit(const VoxelKey& p, int stopLevel, Entr
     return roots;
 }
 
-
-/**
-Stats *PyramidManager::stats(const std::string& name)
-{
-    auto si = m_stats.find(name);
-    if (si == m_stats.end())
-        return nullptr;
-    return &si->second;
-}
-**/
 
 } // namespace ept
 } // namespace pdal

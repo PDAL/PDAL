@@ -52,7 +52,6 @@ public:
         m_bounds.maxz = m_bounds.minz + m_zWidth;
 
         // Determine spacing between points.
-//        m_spacing = minWidth() / 128.0;
         m_spacing = maxWidth() / 128.0;
 
         // Make the spacing smaller than what we expect as the final spacing since we're
@@ -92,16 +91,6 @@ public:
 
     OctantInfo& octant()
         { return m_octant; }
-
-    /**
-    size_t numPoints() const
-    {
-        size_t cnt = 0;
-        for (const OctantInfo& oi : m_children)
-            cnt += oi.numPoints();
-        return cnt;
-    }
-    **/
 
     bool hasPoints() const
     {
@@ -143,8 +132,6 @@ public:
         return GridKey((int)(x / m_gridCellWidth), (int)(y / m_gridCellWidth),
             (int)(z / m_gridCellWidth));
     }
-
-    //ABELL - Really torn WRT making Grid its own thing.
 
     Grid& grid()
         { return m_grid; }

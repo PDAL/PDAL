@@ -109,6 +109,9 @@ void EptWriter::write(const PointViewPtr v)
 
     // New cells from reprocessing go on the reprocessing manager. They get merged
     // at the end.
+    //ABELL - This should be threaded. These reprocessors should be able to run independently
+    // since their data doesn't overlap spatially. Probably need a separate CellManager
+    // for each that is merged under lock at completion.
     CellManager reprocessMgr(v);
     auto it = mgr.begin();
     while (it != mgr.end())
