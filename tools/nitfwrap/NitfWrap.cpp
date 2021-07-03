@@ -36,7 +36,7 @@
 #include <vector>
 
 #include <pdal/Dimension.hpp>
-#include <pdal/GDALUtils.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/IStream.hpp>
 #include <io/BpfHeader.hpp>
