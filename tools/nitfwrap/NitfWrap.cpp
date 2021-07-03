@@ -260,7 +260,7 @@ bool NitfWrap::verifyBpf(ILeStream& in, BOX3D& bounds)
 
     if (!h.read(in))
         return false;
-    if (!h.readDimensions(in, dims))
+    if (!h.readDimensions(in, dims, true))
         return false;
     for (auto d : dims)
     {
