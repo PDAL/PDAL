@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: e9f91be5d7b36213e82bab86c1810f9bcc9225d3
+// Git SHA: 18a41e535a428de1cb907b65601abd18d1d4b9b6
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -2705,422 +2705,6 @@ namespace Xml = rapidxml;
 // End of content of file: arbiter/third/xml/xml.hpp
 // //////////////////////////////////////////////////////////////////////
 
-
-
-
-
-
-// //////////////////////////////////////////////////////////////////////
-// Beginning of content of file: arbiter/third/gzip/config.hpp
-// //////////////////////////////////////////////////////////////////////
-
-#pragma once
-
-#ifdef ARBITER_ZLIB
-
-#ifndef ZLIB_CONST
-#define ZLIB_CONST
-#endif
-
-#endif
-
-
-// //////////////////////////////////////////////////////////////////////
-// End of content of file: arbiter/third/gzip/config.hpp
-// //////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-// //////////////////////////////////////////////////////////////////////
-// Beginning of content of file: arbiter/third/gzip/utils.hpp
-// //////////////////////////////////////////////////////////////////////
-
-#pragma once
-
-#ifdef ARBITER_ZLIB
-
-#include <cstdint>
-#include <cstdlib>
-
-#ifdef ARBITER_CUSTOM_NAMESPACE
-namespace ARBITER_CUSTOM_NAMESPACE
-{
-#endif
-
-namespace arbiter
-{
-
-namespace gzip {
-
-// These live in gzip.hpp because it doesnt need to use deps.
-// Otherwise, they would need to live in impl files if these methods used
-// zlib structures or functions like inflate/deflate)
-inline bool is_compressed(const char* data, std::size_t size)
-{
-    return size > 2 &&
-           (
-               // zlib
-               (
-                   static_cast<uint8_t>(data[0]) == 0x78 &&
-                   (static_cast<uint8_t>(data[1]) == 0x9C ||
-                    static_cast<uint8_t>(data[1]) == 0x01 ||
-                    static_cast<uint8_t>(data[1]) == 0xDA ||
-                    static_cast<uint8_t>(data[1]) == 0x5E)) ||
-               // gzip
-               (static_cast<uint8_t>(data[0]) == 0x1F && static_cast<uint8_t>(data[1]) == 0x8B));
-}
-} // namespace gzip
-
-} // namespace arbiter
-
-#ifdef ARBITER_CUSTOM_NAMESPACE
-}
-#endif
-
-
-#endif
-
-
-// //////////////////////////////////////////////////////////////////////
-// End of content of file: arbiter/third/gzip/utils.hpp
-// //////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-// //////////////////////////////////////////////////////////////////////
-// Beginning of content of file: arbiter/third/gzip/version.hpp
-// //////////////////////////////////////////////////////////////////////
-
-#pragma once
-
-#ifdef ARBITER_ZLIB
-
-/// The major version number
-#define GZIP_VERSION_MAJOR 1
-
-/// The minor version number
-#define GZIP_VERSION_MINOR 0
-
-/// The patch number
-#define GZIP_VERSION_PATCH 0
-
-/// The complete version number
-#define GZIP_VERSION_CODE (GZIP_VERSION_MAJOR * 10000 + GZIP_VERSION_MINOR * 100 + GZIP_VERSION_PATCH)
-
-/// Version number as string
-#define GZIP_VERSION_STRING "1.0.0"
-
-#endif
-
-
-// //////////////////////////////////////////////////////////////////////
-// End of content of file: arbiter/third/gzip/version.hpp
-// //////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-// //////////////////////////////////////////////////////////////////////
-// Beginning of content of file: arbiter/third/gzip/compress.hpp
-// //////////////////////////////////////////////////////////////////////
-
-#pragma once
-
-#ifdef ARBITER_ZLIB
-
-#ifndef ARBITER_IS_AMALGAMATION
-#include "config.hpp"
-#endif
-
-// zlib
-#include <zlib.h>
-
-// std
-#include <limits>
-#include <stdexcept>
-#include <string>
-
-#ifdef ARBITER_CUSTOM_NAMESPACE
-namespace ARBITER_CUSTOM_NAMESPACE
-{
-#endif
-
-namespace arbiter
-{
-
-namespace gzip {
-
-class Compressor
-{
-    std::size_t max_;
-    int level_;
-
-  public:
-    Compressor(int level = Z_DEFAULT_COMPRESSION,
-               std::size_t max_bytes = 2000000000) // by default refuse operation if uncompressed data is > 2GB
-        : max_(max_bytes),
-          level_(level)
-    {
-    }
-
-    template <typename InputType>
-    void compress(InputType& output,
-                  const char* data,
-                  std::size_t size) const
-    {
-
-#ifdef DEBUG
-        // Verify if size input will fit into unsigned int, type used for zlib's avail_in
-        if (size > std::numeric_limits<unsigned int>::max())
-        {
-            throw std::runtime_error("size arg is too large to fit into unsigned int type");
-        }
-#endif
-        if (size > max_)
-        {
-            throw std::runtime_error("size may use more memory than intended when decompressing");
-        }
-
-        z_stream deflate_s;
-        deflate_s.zalloc = Z_NULL;
-        deflate_s.zfree = Z_NULL;
-        deflate_s.opaque = Z_NULL;
-        deflate_s.avail_in = 0;
-        deflate_s.next_in = Z_NULL;
-
-        // The windowBits parameter is the base two logarithm of the window size (the size of the history buffer).
-        // It should be in the range 8..15 for this version of the library.
-        // Larger values of this parameter result in better compression at the expense of memory usage.
-        // This range of values also changes the decoding type:
-        //  -8 to -15 for raw deflate
-        //  8 to 15 for zlib
-        // (8 to 15) + 16 for gzip
-        // (8 to 15) + 32 to automatically detect gzip/zlib header (decompression/inflate only)
-        constexpr int window_bits = 15 + 16; // gzip with windowbits of 15
-
-        constexpr int mem_level = 8;
-        // The memory requirements for deflate are (in bytes):
-        // (1 << (window_bits+2)) +  (1 << (mem_level+9))
-        // with a default value of 8 for mem_level and our window_bits of 15
-        // this is 128Kb
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-        if (deflateInit2(&deflate_s, level_, Z_DEFLATED, window_bits, mem_level, Z_DEFAULT_STRATEGY) != Z_OK)
-        {
-            throw std::runtime_error("deflate init failed");
-        }
-#pragma GCC diagnostic pop
-
-        deflate_s.next_in = reinterpret_cast<z_const Bytef*>(data);
-        deflate_s.avail_in = static_cast<unsigned int>(size);
-
-        std::size_t size_compressed = 0;
-        do
-        {
-            size_t increase = size / 2 + 1024;
-            if (output.size() < (size_compressed + increase))
-            {
-                output.resize(size_compressed + increase);
-            }
-            // There is no way we see that "increase" would not fit in an unsigned int,
-            // hence we use static cast here to avoid -Wshorten-64-to-32 error
-            deflate_s.avail_out = static_cast<unsigned int>(increase);
-            deflate_s.next_out = reinterpret_cast<Bytef*>((&output[0] + size_compressed));
-            // From http://www.zlib.net/zlib_how.html
-            // "deflate() has a return value that can indicate errors, yet we do not check it here.
-            // Why not? Well, it turns out that deflate() can do no wrong here."
-            // Basically only possible error is from deflateInit not working properly
-            deflate(&deflate_s, Z_FINISH);
-            size_compressed += (increase - deflate_s.avail_out);
-        } while (deflate_s.avail_out == 0);
-
-        deflateEnd(&deflate_s);
-        output.resize(size_compressed);
-    }
-};
-
-inline std::string compress(const char* data,
-                            std::size_t size,
-                            int level = Z_DEFAULT_COMPRESSION)
-{
-    Compressor comp(level);
-    std::string output;
-    comp.compress(output, data, size);
-    return output;
-}
-
-} // namespace gzip
-
-} // namespace arbiter
-
-#ifdef ARBITER_CUSTOM_NAMESPACE
-}
-#endif
-
-#endif // ARBITER_ZLIB
-
-
-// //////////////////////////////////////////////////////////////////////
-// End of content of file: arbiter/third/gzip/compress.hpp
-// //////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-// //////////////////////////////////////////////////////////////////////
-// Beginning of content of file: arbiter/third/gzip/decompress.hpp
-// //////////////////////////////////////////////////////////////////////
-
-#pragma once
-
-#ifdef ARBITER_ZLIB
-
-#ifndef ARBITER_IS_AMALGAMATION
-#include "config.hpp"
-#endif
-
-// zlib
-#include <zlib.h>
-
-// std
-#include <cstdint>
-#include <limits>
-#include <stdexcept>
-#include <string>
-
-#ifdef ARBITER_CUSTOM_NAMESPACE
-namespace ARBITER_CUSTOM_NAMESPACE
-{
-#endif
-
-namespace arbiter
-{
-
-namespace gzip {
-
-class Decompressor
-{
-    std::size_t max_;
-
-  public:
-    Decompressor(std::size_t max_bytes = 1000000000) // by default refuse operation if compressed data is > 1GB
-        : max_(max_bytes)
-    {
-    }
-
-    template <typename OutputType>
-    void decompress(OutputType& output,
-                    const char* data,
-                    std::size_t size) const
-    {
-        z_stream inflate_s;
-
-        inflate_s.zalloc = Z_NULL;
-        inflate_s.zfree = Z_NULL;
-        inflate_s.opaque = Z_NULL;
-        inflate_s.avail_in = 0;
-        inflate_s.next_in = Z_NULL;
-
-        // The windowBits parameter is the base two logarithm of the window size (the size of the history buffer).
-        // It should be in the range 8..15 for this version of the library.
-        // Larger values of this parameter result in better compression at the expense of memory usage.
-        // This range of values also changes the decoding type:
-        //  -8 to -15 for raw deflate
-        //  8 to 15 for zlib
-        // (8 to 15) + 16 for gzip
-        // (8 to 15) + 32 to automatically detect gzip/zlib header
-        constexpr int window_bits = 15 + 32; // auto with windowbits of 15
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-        if (inflateInit2(&inflate_s, window_bits) != Z_OK)
-        {
-            throw std::runtime_error("inflate init failed");
-        }
-#pragma GCC diagnostic pop
-        inflate_s.next_in = reinterpret_cast<z_const Bytef*>(data);
-
-#ifdef DEBUG
-        // Verify if size (long type) input will fit into unsigned int, type used for zlib's avail_in
-        std::uint64_t size_64 = size * 2;
-        if (size_64 > std::numeric_limits<unsigned int>::max())
-        {
-            inflateEnd(&inflate_s);
-            throw std::runtime_error("size arg is too large to fit into unsigned int type x2");
-        }
-#endif
-        if (size > max_ || (size * 2) > max_)
-        {
-            inflateEnd(&inflate_s);
-            throw std::runtime_error("size may use more memory than intended when decompressing");
-        }
-        inflate_s.avail_in = static_cast<unsigned int>(size);
-        std::size_t size_uncompressed = 0;
-        do
-        {
-            std::size_t resize_to = size_uncompressed + 2 * size;
-            if (resize_to > max_)
-            {
-                inflateEnd(&inflate_s);
-                throw std::runtime_error("size of output string will use more memory then intended when decompressing");
-            }
-            output.resize(resize_to);
-            inflate_s.avail_out = static_cast<unsigned int>(2 * size);
-            inflate_s.next_out = reinterpret_cast<Bytef*>(&output[0] + size_uncompressed);
-            int ret = inflate(&inflate_s, Z_FINISH);
-            if (ret != Z_STREAM_END && ret != Z_OK && ret != Z_BUF_ERROR)
-            {
-                std::string error_msg = inflate_s.msg;
-                inflateEnd(&inflate_s);
-                throw std::runtime_error(error_msg);
-            }
-
-            size_uncompressed += (2 * size - inflate_s.avail_out);
-        } while (inflate_s.avail_out == 0);
-        inflateEnd(&inflate_s);
-        output.resize(size_uncompressed);
-    }
-};
-
-inline std::string decompress(const char* data, std::size_t size)
-{
-    Decompressor decomp;
-    std::string output;
-    decomp.decompress(output, data, size);
-    return output;
-}
-
-} // namespace gzip
-
-} // namespace arbiter
-
-#ifdef ARBITER_CUSTOM_NAMESPACE
-}
-#endif
-
-#endif // ARBITER_ZLIB
-
-
-// //////////////////////////////////////////////////////////////////////
-// End of content of file: arbiter/third/gzip/decompress.hpp
-// //////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
 #include <nlohmann/json.hpp>
 
 
@@ -3185,6 +2769,8 @@ namespace ARBITER_CUSTOM_NAMESPACE
 namespace arbiter
 {
 
+using StringMap = std::map<std::string, std::string>;
+
 /** @brief Exception class for all internally thrown runtime errors. */
 class ArbiterError : public std::runtime_error
 {
@@ -3196,10 +2782,10 @@ namespace http
 {
 
 /** HTTP header fields. */
-using Headers = std::map<std::string, std::string>;
+using Headers = StringMap;
 
 /** HTTP query parameters. */
-using Query = std::map<std::string, std::string>;
+using Query = StringMap;
 
 /** @cond arbiter_internal */
 
@@ -3425,6 +3011,7 @@ private:
     bool m_verifyPeer = true;
     std::unique_ptr<std::string> m_caPath;
     std::unique_ptr<std::string> m_caInfo;
+    std::unique_ptr<std::string> m_proxy;
 
     std::vector<char> m_data;
 };
@@ -3647,6 +3234,7 @@ class ARBITER_DLL Time
 {
 public:
     static const std::string iso8601;
+    static const std::string rfc822;
     static const std::string iso8601NoSeparators;
     static const std::string dateNoSeparators;
 
@@ -3849,6 +3437,8 @@ ARBITER_DLL std::string encodeBase64(
         const std::vector<char>& data,
         bool pad = true);
 ARBITER_DLL std::string encodeBase64(const std::string& data, bool pad = true);
+
+ARBITER_DLL std::string decodeBase64(const std::string& data);
 
 ARBITER_DLL std::string encodeAsHex(const std::vector<char>& data);
 ARBITER_DLL std::string encodeAsHex(const std::string& data);
@@ -4469,6 +4059,18 @@ public:
             http::Headers headers = http::Headers(),
             http::Query query = http::Query()) const;
 
+    /* Perform an HTTP HEAD request. */
+    std::size_t getSize(
+            std::string path,
+            http::Headers headers,
+            http::Query query = http::Query()) const;
+
+    /* Perform an HTTP HEAD request. */
+    std::unique_ptr<std::size_t> tryGetSize(
+            std::string path,
+            http::Headers headers,
+            http::Query query = http::Query()) const;
+
     /** Perform an HTTP GET request. */
     std::vector<char> getBinary(
             std::string path,
@@ -4840,6 +4442,225 @@ private:
 
 
 // //////////////////////////////////////////////////////////////////////
+// Beginning of content of file: arbiter/drivers/az.hpp
+// //////////////////////////////////////////////////////////////////////
+
+#pragma once
+
+#include <memory>
+#include <string>
+#include <vector>
+
+#ifndef ARBITER_IS_AMALGAMATION
+#include <arbiter/util/time.hpp>
+#include <arbiter/util/util.hpp>
+#include <arbiter/drivers/http.hpp>
+#endif
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+namespace ARBITER_CUSTOM_NAMESPACE
+{
+#endif
+
+namespace arbiter
+{
+
+namespace drivers
+{
+
+/** @brief Microsoft %Azure blob driver. */
+class AZ : public Http
+{
+    class AuthFields;
+    class Config;
+
+public:
+    AZ(
+            http::Pool& pool,
+            std::string profile,
+            std::unique_ptr<Config> config);
+
+    /** Try to construct an Azure blob driver.  The configuration/credential discovery
+     * follows, in order:
+     *      - Environment settings.
+     *      - Arbiter JSON configuration.
+     */
+    static std::vector<std::unique_ptr<AZ>> create(
+            http::Pool& pool,
+            std::string j);
+
+    static std::unique_ptr<AZ> createOne(http::Pool& pool, std::string j);
+
+    // Overrides.
+    virtual std::string type() const override;
+
+    virtual std::unique_ptr<std::size_t> tryGetSize(
+            std::string path) const override;
+
+    /** Inherited from Drivers::Http. */
+    virtual void put(
+            std::string path,
+            const std::vector<char>& data,
+            http::Headers headers,
+            http::Query query) const override;
+
+    virtual void copy(std::string src, std::string dst) const override;
+
+private:
+    static std::string extractProfile(std::string j);
+
+    /*
+    static std::unique_ptr<Config> extractConfig(
+            std::string j,
+            std::string profile);
+
+            */
+    /** Inherited from Drivers::Http. */
+    virtual bool get(
+            std::string path,
+            std::vector<char>& data,
+            http::Headers headers,
+            http::Query query) const override;
+
+    virtual std::vector<std::string> glob(
+            std::string path,
+            bool verbose) const override;
+
+    class ApiV1;
+    class Resource;
+
+    std::string m_profile;
+    std::unique_ptr<Config> m_config;
+};
+
+class AZ::AuthFields
+{
+public:
+    AuthFields(std::string account, std::string key="")
+        : m_storageAccount(account), m_storageAccessKey(key)
+    { }
+
+    const std::string& account() const { return m_storageAccount; }
+    const std::string& key() const { return m_storageAccessKey; }
+
+private:
+    std::string m_storageAccount;
+    std::string m_storageAccessKey;
+};
+
+class AZ::Config
+{
+
+public:
+    Config(std::string j, std::string profile);
+
+    const std::string& service() const { return m_service; }
+    const std::string& storageAccount() const { return m_storageAccount; }
+    const std::string& endpoint() const { return m_endpoint; }
+    const std::string& baseUrl() const { return m_baseUrl; }
+    const http::Headers& baseHeaders() const { return m_baseHeaders; }
+    bool precheck() const { return m_precheck; }
+
+    AuthFields authFields() const { return AuthFields(m_storageAccount, m_storageAccessKey); }
+
+private:
+    static std::string extractService(std::string j, std::string profile);
+    static std::string extractEndpoint(std::string j, std::string profile);
+    static std::string extractBaseUrl(std::string j, std::string endpoint, std::string service, std::string account);
+    static std::string extractStorageAccount(std::string j, std::string profile);
+    static std::string extractStorageAccessKey(std::string j, std::string profile);
+
+    const std::string m_service;
+    const std::string m_storageAccount;
+    const std::string m_storageAccessKey;
+    const std::string m_endpoint;
+    const std::string m_baseUrl;
+    http::Headers m_baseHeaders;
+    bool m_precheck;
+};
+
+
+
+class AZ::Resource
+{
+public:
+    Resource(std::string baseUrl, std::string fullPath);
+
+    std::string url() const;
+    std::string host() const;
+    std::string baseUrl() const;
+    std::string bucket() const;
+    std::string object() const;
+    std::string blob() const;
+    std::string storageAccount() const;
+
+private:
+    std::string m_baseUrl;
+    std::string m_bucket;
+    std::string m_object;
+    std::string m_storageAccount;
+};
+
+class AZ::ApiV1
+{
+public:
+    ApiV1(
+            std::string verb,
+            const Resource& resource,
+            const AZ::AuthFields authFields,
+            const http::Query& query,
+            const http::Headers& headers,
+            const std::vector<char>& data);
+
+    const http::Headers& headers() const { return m_headers; }
+    const http::Query& query() const { return m_query; }
+
+private:
+    std::string buildCanonicalResource(
+            const Resource& resource,
+            const http::Query& query) const;
+
+    std::string buildCanonicalHeader(
+            http::Headers & msHeaders,
+            const http::Headers & existingHeaders) const;
+
+    std::string buildStringToSign(
+            const std::string& verb,
+            const http::Headers& headers,
+            const std::string& canonicalHeaders,
+            const std::string& canonicalRequest) const;
+
+    std::string calculateSignature(
+            const std::string& stringToSign) const;
+
+    std::string getAuthHeader(
+            const std::string& signedHeadersString) const;
+
+    const AZ::AuthFields m_authFields;
+    const Time m_time;
+
+    http::Headers m_headers;
+    http::Query m_query;
+};
+
+} // namespace drivers
+} // namespace arbiter
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+}
+#endif
+
+
+// //////////////////////////////////////////////////////////////////////
+// End of content of file: arbiter/drivers/az.hpp
+// //////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+// //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: arbiter/drivers/google.hpp
 // //////////////////////////////////////////////////////////////////////
 
@@ -5144,6 +4965,9 @@ class ARBITER_DLL Endpoint
     friend class Arbiter;
 
 public:
+    Endpoint() : m_driver(nullptr)
+    {}
+
     /** Returns root directory name without any type-prefixing, and will
      * always end with the character `/`.  For example `~/data/`, or
      * `my-bucket/nested-directory/`.
@@ -5233,6 +5057,22 @@ public:
             std::string path,
             http::Headers headers,
             http::Query query = http::Query()) const;
+
+    /** Passthrough to
+     * drivers::Http::getSize(std::string, http::Headers, http::Query) const.
+     */
+    std::size_t getSize(
+            std::string subpath,
+            http::Headers headers,
+            http::Query = http::Query()) const;
+
+    /** Passthrough to
+     * drivers::Http::tryGetSize(std::string, http::Headers, http::Query) const.
+     */
+    std::unique_ptr<std::size_t> tryGetSize(
+            std::string subpath,
+            http::Headers headers,
+            http::Query = http::Query()) const;
 
     /** Passthrough to
      * drivers::Http::put(std::string, const std::string&, http::Headers, http::Query) const.
@@ -5341,6 +5181,7 @@ private:
 #include <arbiter/drivers/google.hpp>
 #include <arbiter/drivers/http.hpp>
 #include <arbiter/drivers/s3.hpp>
+#include <arbiter/drivers/az.hpp>
 #include <arbiter/drivers/test.hpp>
 #include <arbiter/util/exports.hpp>
 #include <arbiter/util/types.hpp>
@@ -5591,6 +5432,16 @@ public:
     LocalHandle getLocalHandle(
             std::string path,
             std::string tempPath = "") const;
+
+    /** @brief Get a LocalHandle to a possibly remote file.
+     *
+     * If @p tempPath is not specified, the environment will be searched for a
+     * temporary location.
+     */
+    LocalHandle getLocalHandle(
+            std::string path,
+            http::Headers headers,
+            http::Query query = http::Query()) const;
 
     /** Fetch the common HTTP pool, which may be useful when dynamically
      * constructing adding a Driver via Arbiter::addDriver.

@@ -182,6 +182,26 @@ width
 height
   Number of cells in the Y direction. [Default: None]
 
+override_srs
+  Write the raster with the provided SRS. [Default: None]
+
+default_srs
+  Write the raster with the provided SRS if none exists. [Default: None]
+
+metadata:
+  Add or set GDAL metadata to set on the raster, in the form
+  ``NAME=VALUE,NAME2=VALUE2,NAME3=VALUE3`` [Default: None]
+
+pdal_metadata:
+  Write PDAL's pipeline and metadata as base64 to the GDAL PAM metadata [Default: False]
+
+
+.. include:: writer_opts.rst
+
 .. note::
     You may use the 'bounds' option, or 'origin_x', 'origin_y', 'width'
     and 'height', but not both.
+
+.. note::
+    Unless the raster being written is empty, the spatial reference will automatically
+    come from the data and does not need to be set with 'override_srs' or 'default_srs'.

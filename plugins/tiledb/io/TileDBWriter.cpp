@@ -76,30 +76,6 @@ struct TileDBWriter::Args
     bool m_append;
 };
 
-std::string attributeDefaults(R"(
-{
-    "coords":[
-        {"compression": "bit-shuffle"},
-        {"compression": "gzip", "compression_level": 9}
-    ],
-    "Intensity":{"compression": "bzip2", "compression_level": 5},
-    "ReturnNumber": {"compression": "zstd", "compression_level": 75},
-    "NumberOfReturns": {"compression": "zstd", "compression_level": 75},
-    "ScanDirectionFlag": {"compression": "bzip2", "compression_level": 5},
-    "EdgeOfFlightLine": {"compression": "bzip2", "compression_level": 5},
-    "Classification": {"compression": "gzip", "compression_level": 9},
-    "ScanAngleRank": {"compression": "bzip2", "compression_level": 5},
-    "UserData": {"compression": "gzip", "compression_level": 9},
-    "PointSourceId": {"compression": "bzip2"},
-    "Red": {"compression": "rle"},
-    "Green": {"compression": "rle"},
-    "Blue": {"compression": "rle"},
-    "GpsTime": [
-        {"compression": "bit-shuffle"},
-        {"compression": "zstd", "compression_level": 75}
-    ]
-})");
-
 CREATE_SHARED_STAGE(TileDBWriter, s_info)
 
 void writeAttributeValue(TileDBWriter::DimBuffer& dim,
@@ -253,6 +229,30 @@ std::unique_ptr<tiledb::FilterList> createFilterList(const tiledb::Context& ctx,
 TileDBWriter::TileDBWriter(): 
     m_args(new TileDBWriter::Args)
 {
+    std::string attributeDefaults(R"(
+    {
+        "coords":[
+            {"compression": "bit-shuffle"},
+            {"compression": "gzip", "compression_level": 9}
+        ],
+        "Intensity":{"compression": "bzip2", "compression_level": 5},
+        "ReturnNumber": {"compression": "zstd", "compression_level": 7},
+        "NumberOfReturns": {"compression": "zstd", "compression_level": 7},
+        "ScanDirectionFlag": {"compression": "bzip2", "compression_level": 5},
+        "EdgeOfFlightLine": {"compression": "bzip2", "compression_level": 5},
+        "Classification": {"compression": "gzip", "compression_level": 9},
+        "ScanAngleRank": {"compression": "bzip2", "compression_level": 5},
+        "UserData": {"compression": "gzip", "compression_level": 9},
+        "PointSourceId": {"compression": "bzip2"},
+        "Red": {"compression": "rle"},
+        "Green": {"compression": "rle"},
+        "Blue": {"compression": "rle"},
+        "GpsTime": [
+            {"compression": "bit-shuffle"},
+            {"compression": "zstd", "compression_level": 7}
+        ]
+    })");
+
     m_args->m_defaults = NL::json::parse(attributeDefaults);
 }
 
@@ -273,11 +273,11 @@ void TileDBWriter::addArgs(ProgramArgs& args)
     args.add("data_tile_capacity", "TileDB tile capacity",
         m_args->m_tile_capacity, size_t(100000));
     args.add("x_tile_size", "TileDB tile size", m_args->m_x_tile_size,
-        size_t(1000));
+        size_t(0));
     args.add("y_tile_size", "TileDB tile size", m_args->m_y_tile_size,
-        size_t(1000));
+        size_t(0));
     args.add("z_tile_size", "TileDB tile size", m_args->m_z_tile_size,
-        size_t(1000));
+        size_t(0));
     args.add("chunk_size", "Point cache size for chunked writes",
         m_args->m_cache_size, size_t(10000));
     args.add("stats", "Dump TileDB query stats to stdout", m_args->m_stats,
@@ -309,10 +309,6 @@ void TileDBWriter::initialize()
         {
             NL::json opts;
 
-            if (tiledb::Object::object(*m_ctx, m_args->m_arrayName).type() ==
-                    tiledb::Object::Type::Array)
-                throwError("Array already exists.");
-
             m_schema.reset(new tiledb::ArraySchema(*m_ctx, TILEDB_SPARSE));
 
             if (m_args->m_filters.count("coords") > 0)
@@ -328,7 +324,9 @@ void TileDBWriter::initialize()
             {
                 opts = m_args->m_defaults["coords"];
             }
-
+#if TILEDB_VERSION_MAJOR > 1
+            m_schema->set_allows_dups(true);
+#endif
             m_schema->set_coords_filter_list(
                 *createFilterList(*m_ctx, opts));
         }
@@ -345,6 +343,9 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
     auto layout = table.layout();
     auto all = layout->dims();
 
+    if (m_args->m_stats)
+        tiledb::Stats::enable();
+
     // get a list of all the dimensions & their types and add to schema
     // x,y,z will be tiledb dimensions other pdal dimensions will be
     // tiledb attributes
@@ -354,15 +355,30 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
         double dimMin = std::numeric_limits<double>::lowest();
         double dimMax = std::numeric_limits<double>::max();
 
-        domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X",
-            {{dimMin, dimMax}}, m_args->m_x_tile_size))
-            .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Y",
-            {{dimMin, dimMax}}, m_args->m_y_tile_size))
-            .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
-            {{dimMin, dimMax}}, m_args->m_z_tile_size));
-
-        m_schema->set_domain(domain).set_order(
-            {{TILEDB_ROW_MAJOR, TILEDB_ROW_MAJOR}});
+        if ( (m_args->m_x_tile_size > 0) &&
+             (m_args->m_y_tile_size > 0) &&
+             (m_args->m_z_tile_size > 0) )
+            domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X",
+                {{dimMin, dimMax}}, m_args->m_x_tile_size))
+                .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Y",
+                {{dimMin, dimMax}}, m_args->m_y_tile_size))
+                .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
+                {{dimMin, dimMax}}, m_args->m_z_tile_size));
+#if TILEDB_VERSION_MAJOR >= 2
+    #if ((TILEDB_VERSION_MINOR > 1) || (TILEDB_VERSION_MAJOR > 2))
+        else
+        {
+            domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X",
+                {{dimMin, dimMax}}))
+                .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Y",
+                {{dimMin, dimMax}}))
+                .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
+                {{dimMin, dimMax}}));
+            m_schema->set_cell_order(TILEDB_HILBERT);
+        }
+    #endif
+#endif
+        m_schema->set_domain(domain);
         m_schema->set_capacity(m_args->m_tile_capacity);
     }
     else
@@ -427,8 +443,6 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
             TILEDB_WRITE));
     }
 
-    m_query.reset(new tiledb::Query(*m_ctx, *m_array));
-    m_query->set_layout(TILEDB_UNORDERED);
     m_current_idx = 0;
 }
 
@@ -442,9 +456,9 @@ bool TileDBWriter::processOne(PointRef& point)
     for (auto& a : m_attrs)
         writeAttributeValue(a, point, m_current_idx);
 
-    m_coords.push_back(x);
-    m_coords.push_back(y);
-    m_coords.push_back(z);
+    m_xs.push_back(x);
+    m_ys.push_back(y);
+    m_zs.push_back(z);
 
     if (++m_current_idx == m_args->m_cache_size)
     {
@@ -524,7 +538,25 @@ void TileDBWriter::done(PointTableRef table)
 
 bool TileDBWriter::flushCache(size_t size)
 {
-    m_query->set_coordinates(m_coords);
+    tiledb::Query query(*m_ctx, *m_array);
+    query.set_layout(TILEDB_UNORDERED);
+
+#if TILEDB_VERSION_MAJOR == 1
+    // backwards compatibility requires a copy
+    std::vector<double> coords;
+
+    for(unsigned i = 0; i < m_xs.size(); i++)
+    {
+        coords.push_back(m_xs[i]);
+        coords.push_back(m_ys[i]);
+        coords.push_back(m_zs[i]);
+    }
+    query.set_coordinates(coords);
+#else
+    query.set_buffer("X", m_xs);
+    query.set_buffer("Y", m_ys);
+    query.set_buffer("Z", m_zs);
+#endif
 
     // set tiledb buffers
     for (const auto& a : m_attrs)
@@ -533,43 +565,43 @@ bool TileDBWriter::flushCache(size_t size)
         switch (a.m_type)
         {
         case Dimension::Type::Double:
-            m_query->set_buffer(a.m_name, reinterpret_cast<double *>(buf),
+            query.set_buffer(a.m_name, reinterpret_cast<double *>(buf),
                 size);
             break;
         case Dimension::Type::Float:
-            m_query->set_buffer(a.m_name, reinterpret_cast<float *>(buf),
+            query.set_buffer(a.m_name, reinterpret_cast<float *>(buf),
                 size);
             break;
         case Dimension::Type::Signed8:
-            m_query->set_buffer(a.m_name, reinterpret_cast<int8_t *>(buf),
+            query.set_buffer(a.m_name, reinterpret_cast<int8_t *>(buf),
                 size);
             break;
         case Dimension::Type::Signed16:
-            m_query->set_buffer(a.m_name, reinterpret_cast<int16_t *>(buf),
+            query.set_buffer(a.m_name, reinterpret_cast<int16_t *>(buf),
                 size);
             break;
         case Dimension::Type::Signed32:
-            m_query->set_buffer(a.m_name, reinterpret_cast<int32_t *>(buf),
+            query.set_buffer(a.m_name, reinterpret_cast<int32_t *>(buf),
                 size);
             break;
         case Dimension::Type::Signed64:
-            m_query->set_buffer(a.m_name, reinterpret_cast<int64_t *>(buf),
+            query.set_buffer(a.m_name, reinterpret_cast<int64_t *>(buf),
                 size);
             break;
         case Dimension::Type::Unsigned8:
-            m_query->set_buffer(a.m_name, reinterpret_cast<uint8_t *>(buf),
+            query.set_buffer(a.m_name, reinterpret_cast<uint8_t *>(buf),
                 size);
             break;
         case Dimension::Type::Unsigned16:
-            m_query->set_buffer(a.m_name, reinterpret_cast<uint16_t *>(buf),
+            query.set_buffer(a.m_name, reinterpret_cast<uint16_t *>(buf),
                 size);
             break;
         case Dimension::Type::Unsigned32:
-            m_query->set_buffer(a.m_name, reinterpret_cast<uint32_t *>(buf),
+            query.set_buffer(a.m_name, reinterpret_cast<uint32_t *>(buf),
                 size);
             break;
         case Dimension::Type::Unsigned64:
-            m_query->set_buffer(a.m_name, reinterpret_cast<uint64_t *>(buf),
+            query.set_buffer(a.m_name, reinterpret_cast<uint64_t *>(buf),
                 size);
             break;
         case Dimension::Type::None:
@@ -578,19 +610,18 @@ bool TileDBWriter::flushCache(size_t size)
         }
     }
 
-    if (m_args->m_stats)
-        tiledb::Stats::enable();
-
-    tiledb::Query::Status status = m_query->submit();
+    tiledb::Query::Status status = query.submit();
 
     if (m_args->m_stats)
     {
         tiledb::Stats::dump(stdout);
-        tiledb::Stats::disable();
+        tiledb::Stats::reset();
     }
 
     m_current_idx = 0;
-    m_coords.clear();
+    m_xs.clear();
+    m_ys.clear();
+    m_zs.clear();
 
     if (status == tiledb::Query::Status::FAILED)
         return false;

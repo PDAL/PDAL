@@ -145,9 +145,11 @@ void HagNnFilter::filter(PointView& view)
     gView->calculateBounds(gBounds);
 
     // Bail if there weren't any points classified as ground.
-    if (gView->size() == 0)
-        throwError("Input PointView does not have any points classified "
-            "as ground");
+    if (gView->size() == 0) {
+        log()->get(LogLevel::Error) << "Input PointView does not have "
+            "any points classified as ground.\n";
+        return;
+    }
 
     // Build the 2D KD-tree.
     const KD2Index& kdi = gView->build2dIndex();

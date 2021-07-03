@@ -117,7 +117,7 @@ public:
 				remains=state.remains;
 			}
 			else{
-				for(int j=0;j<state.remains;j<remains){
+				for(int j=0;j<state.remains;j++){
 					memory[index][j].~T();
 					new(&memory[index][j]) T();
 				}
@@ -143,21 +143,16 @@ public:
 	  */
 	T* newElements( int elements=1 )
 	{
-		T* mem;
-		if( !elements ) return NULL;
-		if( elements>blockSize ) fprintf( stderr , "[ERROR] Allocator: elements bigger than block-size: %d>%d\n" , elements , blockSize ) , exit( 0 );
+		if( elements == 0 || elements > blockSize)
+            return nullptr;
 		if( remains<elements )
 		{
 			if( index==(int)(memory.size()-1))
-			{
-				mem = new T[blockSize];
-				if( !mem ) fprintf( stderr , "[ERROR] Failed to allocate memory\n" ) , exit(0);
-				memory.push_back( mem );
-			}
+				memory.push_back( new T[blockSize] );
 			index++;
 			remains = blockSize;
 		}
-		mem = &(memory[index][blockSize-remains]);
+		T *mem = &(memory[index][blockSize-remains]);
 		remains -= elements;
 		return mem;
 	}

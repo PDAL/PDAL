@@ -66,7 +66,7 @@ void VoxelCenterNearestNeighborFilter::addArgs(ProgramArgs& args)
 PointViewSet VoxelCenterNearestNeighborFilter::run(PointViewPtr view)
 {
     BOX3D bounds;
-    calculateBounds(*view, bounds);
+    view->calculateBounds(bounds);
 
     // Find distance from voxel center to point.  If the distance is less
     // than previous (or is the first one for the voxel), store the

@@ -1,6 +1,6 @@
 {
     "pipeline": [
-        "./exercises/analysis/colorization/uncompahgre.laz",
+        "./exercises/analysis/thinning/uncompahgre.laz",
         {
             "type": "filters.colorization",
             "raster": "./exercises/analysis/colorization/casi-2015-04-29-weekly-mosaic.tif"

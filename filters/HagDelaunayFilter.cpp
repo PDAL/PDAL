@@ -32,6 +32,7 @@
 #include "HagDelaunayFilter.hpp"
 
 #include <pdal/KDIndex.hpp>
+#include <pdal/private/MathUtils.hpp>
 
 #include "private/delaunator.hpp"
 
@@ -44,52 +45,6 @@ namespace pdal
 
 namespace
 {
-
-// https://en.wikipedia.org/wiki/Barycentric_coordinate_system
-// http://blackpawn.com/texts/pointinpoly/default.html
-//
-// If x/y is in the triangle, we'll return a valid distance.
-// If not, we return infinity.  If the determinant is 0, the input points
-// aren't a triangle (they're collinear).
-double distance_along_z(double x1, double y1, double z1,
-    double x2, double y2, double z2,
-    double x3, double y3, double z3,
-    double x, double y)
-{
-    double z = std::numeric_limits<double>::infinity();
-
-    double detT = ((y2-y3) * (x1-x3)) + ((x3-x2) * (y1-y3));
-
-    //ABELL - should probably check something close to 0, rather than
-    // exactly 0.
-    if (detT != 0.0)
-    {
-        // Compute the barycentric coordinates of x,y (relative to
-        // x1/y1, x2/y2, x3/y3).  Essentially the weight that each
-        // corner of the triangle contributes to the point in question.
-
-        // Another way to think about this is that we're making a basis
-        // for the system with the basis vectors being two sides of
-        // the triangle.  You can rearrange the z calculation below in
-        // terms of lambda1 and lambda2 to see this.  Also note that
-        // since lambda1 and lambda2 are coefficients of the basis vectors,
-        // any values outside of the range [0,1] are necessarily out of the
-        // triangle.
-        double lambda1 = ((y2-y3) * (x-x3) + (x3-x2) * (y-y3)) / detT;
-        double lambda2 = ((y3-y1) * (x-x3) + (x1-x3) * (y-y3)) / detT;
-        if (lambda1 >= 0 && lambda1 <= 1 && lambda2 >= 0 && lambda2 <= 1)
-        {
-            double sum = lambda1 + lambda2;
-            if (sum <= 1)
-            {
-                double lambda3 = 1 - sum;
-                z = (lambda1 * z1) + (lambda2 * z2) + (lambda3 * z3);
-            }
-        }
-    }
-    return z;
-}
-
 
 // The non-ground point (x0, y0) is in exactly 0 or 1 of the triangles of
 // the ground triangulation, so when we find a triangle containing the point,
@@ -131,7 +86,7 @@ double delaunay_interp_ground(double x0, double y0, PointViewPtr gView,
         double cz = gView->getFieldAs<double>(Id::Z, ids[ci]);
 
         // Returns infinity unless the point x0/y0 is in the triangle.
-        double z1 = distance_along_z(ax, ay, az, bx, by, bz,
+        double z1 = math::barycentricInterpolation(ax, ay, az, bx, by, bz,
                 cx, cy, cz, x0, y0);
         if (z1 != std::numeric_limits<double>::infinity())
             return z1;
@@ -216,8 +171,8 @@ void HagDelaunayFilter::filter(PointView& view)
 
     // Bail if there weren't any points classified as ground.
     if (gView->size() == 0)
-        throwError("Input PointView does not have any points classified "
-            "as ground");
+        log()->get(LogLevel::Error) << "Input PointView does not have any "
+            "points classified as ground.\n";
 
     // Build the 2D KD-tree.
     const KD2Index& kdi = gView->build2dIndex();

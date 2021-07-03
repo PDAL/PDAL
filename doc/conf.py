@@ -56,7 +56,7 @@ sys.path.insert(0, os.path.abspath('.'))
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['breathe', 'sphinx.ext.autodoc',
               'sphinx.ext.mathjax', 'sphinx.ext.intersphinx',
-              'sphinxcontrib.bibtex', 'embed']
+              'sphinxcontrib.bibtex', 'embed','sphinxcontrib.spelling']
 
 
 # Add any paths that contain templates here, relative to this directory.
@@ -74,6 +74,10 @@ master_doc = 'index'
 # General information about the project.
 project = u'PDAL'
 copyright = u'%d' % year
+
+
+spelling_word_list_filename='spelling_wordlist.txt'
+bibtex_bibfiles = ['./stages/references.bib','./workshop/bibliography.bib']
 
 
 # The version info for the project you're documenting, acts as replacement for

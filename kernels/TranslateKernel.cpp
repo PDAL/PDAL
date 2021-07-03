@@ -89,6 +89,7 @@ void TranslateKernel::addSwitches(ProgramArgs& args)
     args.add("writer,w", "Writer type", m_writerType);
     args.add("nostream", "Run in standard mode", m_noStream);
     args.add("stream", "Run in stream mode.  Error if not possible.", m_stream);
+    args.add("dims", "Dimensions to store", m_dimNames);
 }
 
 
@@ -172,7 +173,7 @@ void TranslateKernel::makeArgPipeline()
 
     // add each filter provided on the command-line,
     // updating the stage pointer
-    for (auto const f : m_filterType)
+    for (auto const& f : m_filterType)
     {
         std::string filter_name(f);
 
@@ -223,6 +224,7 @@ int TranslateKernel::execute()
         return 0;
     }
 
+    m_manager.pointTable().layout()->setAllowedDims(m_dimNames);
     if (m_manager.execute(m_mode).m_mode == ExecMode::None)
         throw pdal_error("Couldn't run translation pipeline in requested "
             "execution mode.");

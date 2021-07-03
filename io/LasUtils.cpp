@@ -156,8 +156,7 @@ std::vector<ExtraDim> ExtraBytesIf::toExtraDims()
 
     if (m_type == Dimension::Type::None)
     {
-        ExtraDim ed(m_name, Dimension::Type::None);
-        ed.m_size = m_size;
+        ExtraDim ed(m_name, m_size);
         eds.push_back(ed);
     }
     else if (m_fieldCnt == 1)
@@ -169,8 +168,7 @@ std::vector<ExtraDim> ExtraBytesIf::toExtraDims()
     {
         for (size_t i = 0; i < m_fieldCnt; ++i)
         {
-            ExtraDim ed(m_name + std::to_string(i), m_type,
-                m_scale[i], m_offset[i]);
+            ExtraDim ed(m_name + std::to_string(i), m_type, m_scale[i], m_offset[i]);
             eds.push_back(ed);
         }
     }

@@ -33,12 +33,12 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/Kernel.hpp>
 #include <pdal/PluginManager.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_config.hpp>
 #include <pdal/util/Backtrace.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
 
 #include <iomanip>
 #include <iostream>
@@ -323,7 +323,7 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
     catch (arg_val_error const& e)
     {
         Utils::printError(e.what());
-        return -1;
+        return 1;
     }
 
     log = Log::makeLog("PDAL", m_log, m_logtiming);
@@ -371,8 +371,11 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
             gdal::unregisterDrivers();
         }
         else
+        {
             log->get(LogLevel::Error) << "Command '" << m_command <<
                 "' not recognized" << std::endl << std::endl;
+            ret = 1;
+        }
         return ret;
     }
 
@@ -381,7 +384,7 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
     if (cmdArgs.size())
     {
         Utils::printError("Unexpected argument '" + cmdArgs[0] + "'.");
-        return -1;
+        return 1;
     }
 
     if (m_showVersion)

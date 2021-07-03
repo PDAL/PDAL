@@ -35,20 +35,6 @@
 #include <pdal/pdal_features.hpp>
 
 #include <pdal/compression/LazPerfVlrCompression.hpp>
-#ifdef PDAL_HAVE_LAZPERF
-#pragma push_macro("min")
-#pragma push_macro("max")
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
-#include <laz-perf/factory.hpp>
-#include <laz-perf/io.hpp>
-#pragma pop_macro("max")
-#pragma pop_macro("min")
-#endif
 
 #include "LasWriter.hpp"
 
@@ -76,8 +62,7 @@ static StaticPluginInfo const s_info
 {
     "writers.las",
     "ASPRS LAS 1.0 - 1.4 writer. LASzip support is also \n" \
-        "available if enabled at compile-time. Note that LAZ \n" \
-        "does not provide LAS 1.4 support at this time.",
+        "available if enabled at compile-time.",
     "http://pdal.io/stages/writers.las.html",
     { "las", "laz" }
 };
@@ -117,7 +102,8 @@ void LasWriter::addArgs(ProgramArgs& args)
         m_extraDimSpec);
     args.add("forward", "Dimensions to forward from LAS reader", m_forwardSpec);
 
-    args.add("filesource_id", "File source ID number.", m_filesourceId);
+    args.add("filesource_id", "File source ID number.", m_filesourceId,
+        decltype(m_filesourceId)(0));
     args.add("major_version", "LAS major version", m_majorVersion,
         decltype(m_majorVersion)(1));
     args.add("minor_version", "LAS minor version", m_minorVersion,
@@ -165,11 +151,16 @@ void LasWriter::initialize()
         setSpatialReference(m_aSrs);
     if (m_compression != LasCompression::None)
         m_lasHeader.setCompressed(true);
-#if !defined(PDAL_HAVE_LASZIP) && !defined(PDAL_HAVE_LAZPERF)
-    if (m_compression != LasCompression::None)
-        throwError("Can't write LAZ output.  PDAL not built with "
-            "LASzip or LAZperf.");
+
+#if !defined(PDAL_HAVE_LASZIP)
+    if (m_compression == LasCompression::LasZip)
+        throwError("Can't write LAZ output. PDAL not built with LASzip.");
 #endif
+#if !defined(PDAL_HAVE_LAZPERF)
+    if (m_compression == LasCompression::LazPerf)
+        throwError("Can't write LAZ output. PDAL not built with LAZperf.");
+#endif
+
     try
     {
         m_extraDims = LasUtils::parse(m_extraDimSpec, true);
@@ -659,9 +650,9 @@ void LasWriter::fillHeader()
         globalEncoding |= WKT_MASK;
     m_lasHeader.setGlobalEncoding(globalEncoding);
 
-    if (!m_lasHeader.pointFormatSupported())
-        throwError("Unsupported LAS output point format: " +
-            Utils::toString((int)m_lasHeader.pointFormat()) + ".");
+    auto ok = m_lasHeader.pointFormatSupported();
+    if (!ok)
+        throwError(ok.what());
 }
 
 
@@ -710,23 +701,11 @@ void LasWriter::readyLasZipCompression()
 void LasWriter::readyLazPerfCompression()
 {
 #ifdef PDAL_HAVE_LAZPERF
-    if (m_lasHeader.versionAtLeast(1, 4))
-        throwError("Can't write version 1.4 output with LAZperf.");
-
-    laszip::factory::record_schema schema;
-    schema.push(laszip::factory::record_item::POINT10);
-    if (m_lasHeader.hasTime())
-        schema.push(laszip::factory::record_item::GPSTIME);
-    if (m_lasHeader.hasColor())
-        schema.push(laszip::factory::record_item::RGB12);
-    laszip::io::laz_vlr zipvlr = laszip::io::laz_vlr::from_schema(schema);
-    std::vector<uint8_t> data(zipvlr.size());
-    zipvlr.extract((char *)data.data());
-    addVlr(LASZIP_USER_ID, LASZIP_RECORD_ID, "http://laszip.org", data);
-
-    delete m_compressor;
-    m_compressor = new LazPerfVlrCompressor(*m_ostream, schema,
-        zipvlr.chunk_size);
+    int ebCount = m_lasHeader.pointLen() - m_lasHeader.basePointLen();
+    m_compressor = new LazPerfVlrCompressor(*m_ostream, m_lasHeader.pointFormat(), ebCount);
+    std::vector<char> lazVlrData = m_compressor->vlrData();
+    std::vector<uint8_t> vlrdata(lazVlrData.begin(), lazVlrData.end());
+    addVlr(LASZIP_USER_ID, LASZIP_RECORD_ID, "http://laszip.org", vlrdata);
 #endif
 }
 
@@ -751,7 +730,7 @@ bool LasWriter::processOne(PointRef& point)
         {
             if (scale.m_auto)
                 log()->get(LogLevel::Warning) << "Auto scale for " << name <<
-                "requested in stream mode.  Using value of 1.0." << std::endl;
+                " requested in stream mode.  Using value of 1.0." << std::endl;
         };
 
         doScale(m_scaling.m_xXform.m_scale, "X");
@@ -765,7 +744,7 @@ bool LasWriter::processOne(PointRef& point)
             {
                 offset.m_val = val;
                 log()->get(LogLevel::Warning) << "Auto offset for " << name <<
-                    "requested in stream mode.  Using value of " <<
+                    " requested in stream mode.  Using value of " <<
                     offset.m_val << "." << std::endl;
             }
         };
@@ -864,7 +843,7 @@ void LasWriter::writeView(const PointViewPtr view)
 bool LasWriter::writeLasZipBuf(PointRef& point)
 {
 #ifdef PDAL_HAVE_LASZIP
-    const bool has14Format = m_lasHeader.has14Format();
+    const bool has14PointFormat = m_lasHeader.has14PointFormat();
     const size_t maxReturnCount = m_lasHeader.maxReturnCount();
 
     // we always write the base fields
@@ -932,10 +911,15 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
     p.user_data = point.getFieldAs<uint8_t>(Id::UserData);
     p.point_source_ID = point.getFieldAs<uint16_t>(Id::PointSourceId);
 
-    if (has14Format)
+    if (has14PointFormat)
     {
-        p.classification = (classification & 0x1F) | (classFlags << 5);
-        p.scan_angle_rank = point.getFieldAs<int8_t>(Id::ScanAngleRank);
+        if (classification > 31)
+            p.classification = 0;
+        else
+            p.classification = classification;
+        p.extended_classification = classification;
+        p.extended_classification_flags = classFlags;
+        // The API takes care of writing scan_angle_rank.
         p.number_of_returns = (std::min)((uint8_t)7, numberOfReturns);
         p.return_number = (std::min)((uint8_t)7, returnNumber);
 
@@ -944,8 +928,6 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
             std::round(point.getFieldAs<float>(Id::ScanAngleRank) / .006f));
         p.extended_point_type = 1;
         p.extended_scanner_channel = scanChannel;
-        p.extended_classification_flags = classFlags;
-        p.extended_classification = classification;
         p.extended_return_number = returnNumber;
         p.extended_number_of_returns = numberOfReturns;
     }
@@ -1010,7 +992,7 @@ void LasWriter::writeLazPerfBuf(char *pos, size_t pointLen,
 
 bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
 {
-    bool has14Format = m_lasHeader.has14Format();
+    bool has14PointFormat = m_lasHeader.has14PointFormat();
     static const size_t maxReturnCount = m_lasHeader.maxReturnCount();
 
     // we always write the base fields
@@ -1059,17 +1041,20 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
     ostream << point.getFieldAs<uint16_t>(Id::Intensity);
 
     uint8_t scanChannel = point.getFieldAs<uint8_t>(Id::ScanChannel);
-    uint8_t scanDirectionFlag =
-        point.getFieldAs<uint8_t>(Id::ScanDirectionFlag);
-    uint8_t edgeOfFlightLine =
-        point.getFieldAs<uint8_t>(Id::EdgeOfFlightLine);
+    uint8_t scanDirectionFlag = point.getFieldAs<uint8_t>(Id::ScanDirectionFlag);
+    uint8_t edgeOfFlightLine = point.getFieldAs<uint8_t>(Id::EdgeOfFlightLine);
+    uint8_t classification = point.getFieldAs<uint8_t>(Id::Classification);
 
-    if (has14Format)
+    if (has14PointFormat)
     {
         uint8_t bits = returnNumber | (numberOfReturns << 4);
         ostream << bits;
 
-        uint8_t classFlags = point.getFieldAs<uint8_t>(Id::ClassFlags);
+        uint8_t classFlags;
+        if (point.hasDim(Id::ClassFlags))
+            classFlags = point.getFieldAs<uint8_t>(Id::ClassFlags);
+        else
+            classFlags = classification >> 5;
         bits = (classFlags & 0x0F) |
             ((scanChannel & 0x03) << 4) |
             ((scanDirectionFlag & 0x01) << 6) |
@@ -1083,10 +1068,10 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
         ostream << bits;
     }
 
-    ostream << point.getFieldAs<uint8_t>(Id::Classification);
+    ostream << classification;
 
     uint8_t userData = point.getFieldAs<uint8_t>(Id::UserData);
-    if (has14Format)
+    if (has14PointFormat)
     {
          // Guaranteed to fit if scan angle rank isn't wonky.
         int16_t scanAngleRank =
@@ -1169,7 +1154,7 @@ void LasWriter::finishOutput()
     OLeStream out(m_ostream);
 
     // addVlr prevents any eVlrs from being added before version 1.4.
-    m_lasHeader.setEVlrOffset((uint32_t)m_ostream->tellp());
+    m_lasHeader.setEVlrOffset(m_eVlrs.size() ? (uint32_t)m_ostream->tellp() : 0);
     for (auto vi = m_eVlrs.begin(); vi != m_eVlrs.end(); ++vi)
     {
         ExtLasVLR evlr = *vi;

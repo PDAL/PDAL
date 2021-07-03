@@ -1,0 +1,60 @@
+name: Conda
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Conda ${{ matrix.platform }}
+
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: true
+      matrix:
+        platform: ['ubuntu-latest','windows-latest','macos-latest']
+
+    env:
+      PDAL_PLATFORM: ${{ matrix.platform }}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Support longpaths
+      run: git config --system core.longpaths true
+      if: matrix.platform == 'windows-latest'
+
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+        channels: conda-forge
+        auto-update-conda: true
+
+    - name: Setup
+      shell: bash -l {0}
+      run: |
+          source ./scripts/ci/conda/setup.sh
+
+    - name: Build
+      shell: bash -l {0}
+      run: |
+          source ../scripts/ci/conda/compile.sh
+      working-directory: ./pdal-feedstock
+
+    - uses: ilammy/msvc-dev-cmd@v1
+      if: matrix.platform == 'windows-latest'
+    - name: Test
+      shell: bash -l {0}
+      run: |
+          source ./scripts/ci/conda/examples.sh
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: ${{ matrix.platform }}-conda-package
+        path: ./pdal-feedstock/packages/
+
+    - name: Deploy to pdal-master Conda channel
+      if: github.ref == 'refs/heads/master'
+      shell: bash -l {0}
+      env:
+        ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+      run: |
+          source ../scripts/ci/conda/upload.sh || true
+      working-directory: ./pdal-feedstock

@@ -4,53 +4,78 @@
 Continuous Integration
 ================================================================================
 
-PDAL :ref:`regression tests <pdal_test>` are run on a per-commit basis by at
-least two continuous integration platforms.
+PDAL :ref:`regression tests <pdal_test>` are run on a per-commit basis using
+`GitHub Actions`_
+
+.. _`GitHub Actions`: https://github.com/features/actions
 
 Status
 --------------------------------------------------------------------------------
 
-|travisstatus|
-|appveyorstatus|
+.. only:: html
 
-.. |travisstatus| image:: https://travis-ci.org/PDAL/PDAL.png?branch=master
-   :target: https://travis-ci.org/PDAL/PDAL
+    |alpinestatus|
+    |linuxstatus|
+    |osxstatus|
+    |windowstatus|
+    |docsstatus|
+    |dockerstatus|
 
-.. |appveyorstatus| image:: https://ci.appveyor.com/api/projects/status/6dehrm0v22cw58d3
-   :target: https://ci.appveyor.com/project/hobu/pdal
 
-.. _travis:
+    .. |alpinestatus| image:: https://github.com/PDAL/PDAL/workflows/Alpine/badge.svg
+       :target: https://github.com/PDAL/PDAL/actions?query=workflow%3AAlpine
 
-Travis
+    .. |linuxstatus| image:: https://github.com/PDAL/PDAL/workflows/Linux/badge.svg
+       :target: https://github.com/PDAL/PDAL/actions?query=workflow%3ALinux
+
+    .. |osxstatus| image:: https://github.com/PDAL/PDAL/workflows/OSX/badge.svg
+       :target: https://github.com/PDAL/PDAL/actions?query=workflow%3AOSX
+
+    .. |windowstatus| image:: https://github.com/PDAL/PDAL/workflows/Windows/badge.svg
+       :target: https://github.com/PDAL/PDAL/actions?query=workflow%3AWindows
+
+    .. |docsstatus| image:: https://github.com/PDAL/PDAL/workflows/Docs/badge.svg
+       :target: https://github.com/PDAL/PDAL/actions?query=workflow%3ADocs
+
+    .. |dockerstatus| image:: https://github.com/PDAL/PDAL/workflows/Docker/badge.svg
+       :target: https://github.com/PDAL/PDAL/actions?query=workflow%3ADocker
+
+Configuration
 --------------------------------------------------------------------------------
 
-The Travis continuous integration platform runs the PDAL test suite on Alpine
-Linux. The build status and other supporting information can be found at
-https://travis-ci.org/PDAL/PDAL Its configuration can be found at
-https://github.com/PDAL/PDAL/blob/master/.travis.yml All administrators of the
-GitHub `PDAL` group have rights to modify the Travis configuration.
+Continuous integration configuration is modified by manipulating configuration
+files in to locations:
 
-It uses the ``alpine:edge`` Docker image found at
-https://hub.docker.com/_/alpine/ as a base platform. If you want to add new
-functionality based on a dependency, you will need to ensure that the dependency
-is available in https://pkgs.alpinelinux.org/packages and update the Travis
-configuration YAML accordingly.
+* ``./github/workflows``
+* ``./scripts/ci``
 
-.. _appveyor:
+Linux, OSX, and Windows builds are all configured separately with scripts in the
+``./scripts/ci`` directory.
 
-AppVeyor
+Dependencies
 --------------------------------------------------------------------------------
 
-PDAL uses the AppVeyor continuous integration platform to run the PDAL
-compilation and test suite on Windows. The build status and other supporting
-information can be found at https://ci.appveyor.com/project/hobu/pdal Its
-configuration can be found at
-https://github.com/PDAL/PDAL/blob/master/appveyor.yml All administrators of the
-GitHub `PDAL` group have rights to modify the AppVeyor configuration.
+All of the tests use Conda Forge for dependencies.
 
-`Howard Butler`_ currently pays the bill to run in the AppVeyor upper
-performance processing tier. The AppVeyor configuration depends on :ref:`conda`
-for dependencies. If you want to add new test functionality based on a
-dependency, you will need to update :ref:`conda` with a new package to do so.
+The Linux builder has a "fixed" configuration that pins GDAL to a specific
+version to prevent the rest of the dependency tree from floating according to
+Conda Forge's package dependency rules.
 
-.. _`Howard Butler`: http://github.com/hobu
+Docs
+--------------------------------------------------------------------------------
+
+Docs are always built and doc artifacts are attached to the build:
+
+* HTML
+* PDF
+* Misspelled words
+
+Push to pdal.io
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Docs are pushed to pdal.io under the following conditions:
+
+* Doc building succeeds
+* The push branch denoted in ``./github/workflows/docs.yaml`` matches the current
+  ``*-maintenance`` branch.
+

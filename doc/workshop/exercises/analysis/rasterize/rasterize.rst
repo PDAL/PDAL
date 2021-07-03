@@ -87,19 +87,19 @@ Basic interpolation of data with :ref:`writers.gdal` will output raw
 classification values into the resulting raster file. We will need to add a
 color ramp to the data for a satisfactory preview.
 
-Unfortunately, this doesn’t give us a very satisfactory image to view. The
+Unfortunately, this does not give us a very satisfactory image to view. The
 reason is there is no color ramp associated with the file, and we’re looking at
 pixel values with values from 0-31 according to the ASPRS LAS specification.
 
 We want colors that correspond to the classification values a bit more
 directly. We can use a color ramp to assign explicit values. :ref:`qgis` allows us to
 create a text file color ramp that gdaldem can consume to apply colors to the
-data. 
+data.
 
 .. literalinclude:: ./ramp.txt
    :linenos:
 
-With this ramp, you can load the color values into QGIS as a color ramp if you 
+With this ramp, you can load the color values into QGIS as a color ramp if you
 change the layer to Palatted/Unique Values, and then load the color ramp file:
 
 

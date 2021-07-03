@@ -35,9 +35,9 @@
 
 #include <sstream>
 
-#include <pdal/EigenUtils.hpp>
-#include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/private/gdal/Raster.hpp>
+#include <pdal/util/Utils.hpp>
 
 #include "private/GDALGrid.hpp"
 
@@ -89,6 +89,17 @@ void GDALWriter::addArgs(ProgramArgs& args)
         m_width);
     m_heightArg = &args.add("height", "Number of cells in the Y direction.",
         m_height);
+
+    args.add("override_srs", "Spatial reference to apply to data",
+        m_overrideSrs);
+    args.addSynonym("override_srs", "spatialreference");
+
+    args.add("default_srs", "Spatial reference to apply to data if one cannot be inferred",
+        m_defaultSrs);
+    args.add("metadata", "GDAL metadata to set on the raster, in the form 'NAME=VALUE,NAME2=VALUE2,NAME3=VALUE3'",
+        m_GDAL_metadata);
+    args.add("pdal_metadata", "Write PDAL metadata as to GDAL PAM XML Metadata?",
+        m_writePDALMetadata, decltype(m_writePDALMetadata)(false));
 }
 
 
@@ -117,6 +128,9 @@ void GDALWriter::initialize()
         else
             throwError("Invalid output type: '" + ts + "'.");
     }
+
+    if (m_overrideSrs.valid() && m_defaultSrs.valid())
+        throwError("Can't set both 'override_srs' and 'default_srs'.");
 
     if (!m_radiusArg->set())
         m_radius = m_edgeLength * sqrt(2.0);
@@ -153,7 +167,6 @@ void GDALWriter::initialize()
     // set later in writeView.
     m_expandByPoint = !m_fixedGrid;
 
-    gdal::registerDrivers();
 }
 
 
@@ -171,77 +184,47 @@ void GDALWriter::readyFile(const std::string& filename,
 {
     m_outputFilename = filename;
     m_srs = srs;
+    if (!m_overrideSrs.empty())
+        m_srs = m_overrideSrs;
+    if (m_srs.empty())
+        m_srs = m_defaultSrs;
     m_grid.reset();
     if (m_fixedGrid)
         createGrid(m_bounds.to2d());
 }
 
 
-GDALWriter::Cell GDALWriter::cell(double x, double y)
+int GDALWriter::width() const
 {
-    Cell c;
-    c.x = static_cast<long>(std::floor((x - m_origin.x) / m_edgeLength));
-    c.y = static_cast<long>(std::floor((y - m_origin.y) / m_edgeLength));
-    return c;
+    return m_grid->width();
 }
 
 
-long GDALWriter::width() const
+int GDALWriter::height() const
 {
-    return static_cast<long>(m_grid->width());
-}
-
-
-long GDALWriter::height() const
-{
-    return static_cast<long>(m_grid->height());
+    return m_grid->height();
 }
 
 
 void GDALWriter::createGrid(BOX2D bounds)
 {
-    m_origin = { bounds.minx, bounds.miny };
-    Cell c = cell(bounds.maxx, bounds.maxy);
-
+    // Validating before casting avoids float-cast-overflow undefined behavior.
+    double d_width = std::floor((bounds.maxx - bounds.minx) / m_edgeLength) + 1;
+    double d_height = std::floor((bounds.maxy - bounds.miny) / m_edgeLength) + 1;
+    if (d_width < 0.0 || d_width > (std::numeric_limits<int>::max)())
+        throwError("Grid width out of range.");
+    if (d_height < 0.0 || d_height > (std::numeric_limits<int>::max)())
+        throwError("Grid height out of range.");
+    int width = static_cast<int>(d_width);
+    int height = static_cast<int>(d_height);
     try
     {
-        m_grid.reset(new GDALGrid(c.x + 1, c.y + 1, m_edgeLength,
+        m_grid.reset(new GDALGrid(bounds.minx, bounds.miny, width, height, m_edgeLength,
             m_radius, m_outputTypes, m_windowSize, m_power));
     }
     catch (GDALGrid::error& err)
     {
         throwError(err.what());
-    }
-}
-
-
-void GDALWriter::expandGrid(BOX2D bounds)
-{
-    Cell low = cell(bounds.minx, bounds.miny);
-    Cell high = cell(bounds.maxx, bounds.maxy);
-
-    long w = (std::max)(width(), high.x + 1);
-    long h = (std::max)(height(), high.y + 1);
-    long xshift = (std::max)(-low.x, 0L);
-    long yshift = (std::max)(-low.y, 0L);
-    if (xshift)
-    {
-        w += xshift;
-        m_origin.x -= xshift * m_edgeLength;
-    }
-    if (yshift)
-    {
-        h += yshift;
-        m_origin.y -= yshift * m_edgeLength;
-    }
-
-    try
-    {
-        m_grid->expand(w, h, xshift, yshift);
-    }
-    catch (const GDALGrid::error& err)
-    {
-        throwError(err.what()); // Add the stage name onto the error text.
     }
 }
 
@@ -256,11 +239,14 @@ void GDALWriter::writeView(const PointViewPtr view)
     if (!m_fixedGrid)
     {
         BOX2D bounds;
-        calculateBounds(*view, bounds);
+        view->calculateBounds(bounds);
         if (!m_grid)
             createGrid(bounds);
         else
-            expandGrid(bounds);
+        {
+            m_grid->expandToInclude(bounds.minx, bounds.miny);
+            m_grid->expandToInclude(bounds.maxx, bounds.maxy);
+        }
     }
 
     PointRef point(*view, 0);
@@ -280,15 +266,11 @@ bool GDALWriter::processOne(PointRef& point)
 
     if (m_expandByPoint)
     {
-        Cell c = cell(x, y);
         if (!m_grid)
             createGrid(BOX2D(x, y, x, y));
-        else if (c.x < 0 || c.y < 0 ||
-                 c.x >= width() || c.y >= height())
-            expandGrid(BOX2D(x, y, x, y));
+        else
+            m_grid->expandToInclude(x, y);
     }
-    x -= m_origin.x;
-    y -= m_origin.y;
 
     m_grid->addPoint(x, y, z);
     return true;
@@ -303,10 +285,10 @@ void GDALWriter::doneFile()
 
     std::array<double, 6> pixelToPos;
 
-    pixelToPos[0] = m_origin.x;
+    pixelToPos[0] = m_grid->xOrigin();
     pixelToPos[1] = m_edgeLength;
     pixelToPos[2] = 0;
-    pixelToPos[3] = m_origin.y + (m_edgeLength * m_grid->height());
+    pixelToPos[3] = m_grid->yOrigin() + (m_edgeLength * m_grid->height());
     pixelToPos[4] = 0;
     pixelToPos[5] = -m_edgeLength;
     gdal::Raster raster(m_outputFilename, m_drivername, m_srs, pixelToPos);
@@ -345,6 +327,45 @@ void GDALWriter::doneFile()
         throwError(raster.errorMsg());
 
     getMetadata().addList("filename", m_filename);
+
+    std::vector<std::string> gdalitems = Utils::split(m_GDAL_metadata, ',');
+    for (auto& v: gdalitems)
+    {
+        const std::size_t pos = v.find_first_of("=");
+        if (pos != std::string::npos)
+        {
+            const std::string name = v.substr(0, pos);
+            const std::string value = pos != std::string::npos ? v.substr(pos + 1) : "";
+            raster.addMetadata(name, value);
+        }
+    }
+
+    getMetadata().add(raster.getMetadata());
 }
+
+void GDALWriter::readyTable(PointTableRef table)
+{
+    // Add these as GDAL metadata
+    if(m_writePDALMetadata)
+    {
+        MetadataNode m = table.metadata();
+        std::string json = Utils::toJSON(m);
+        std::vector<uint8_t> metadata(json.begin(), json.end());
+        std::string b64 = Utils::base64_encode(metadata.data(), metadata.size());
+        if (m_GDAL_metadata.size())
+            m_GDAL_metadata += ",";
+
+        m_GDAL_metadata += "pdal_metadata=" + b64;
+
+        std::ostringstream ostr;
+        PipelineWriter::writePipeline(this, ostr);
+        json = ostr.str();
+        std::vector<uint8_t> pipeline(json.begin(), json.end());
+        b64 = Utils::base64_encode(pipeline.data(), pipeline.size());
+        m_GDAL_metadata += ",pdal_pipeline=" + b64;
+    }
+
+}
+
 
 } // namespace pdal

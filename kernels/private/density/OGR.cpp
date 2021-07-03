@@ -38,10 +38,15 @@
 #include <sstream>
 #include <functional>
 
-#include <pdal/util/FileUtils.hpp>
+#include <gdal.h>
+#include <ogr_api.h>
 
-#include "../filters/private/hexer/HexGrid.hpp"
-#include "../filters/private/hexer/HexIter.hpp"
+#include <pdal/util/FileUtils.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
+#include <pdal/private/gdal/SpatialRef.hpp>
+
+#include <filters/private/hexer/HexGrid.hpp>
+#include <filters/private/hexer/HexIter.hpp>
 
 using namespace std;
 
@@ -112,16 +117,15 @@ OGRGeometryH collectHexagon(hexer::HexInfo const& info,
 } // unnamed namespace
 
 
-OGR::OGR(std::string const& filename, std::string srs, std::string driver,
-        std::string layerName)
+OGR::OGR(std::string const& filename, const std::string& wkt,
+        std::string driver, std::string layerName)
     : m_filename(filename)
     , m_driver(driver)
-    , m_srs(srs)
     , m_ds(0)
     , m_layer(0)
     , m_layerName(layerName)
 {
-    createLayer();
+    createLayer(wkt);
 }
 
 
@@ -131,8 +135,9 @@ OGR::~OGR()
 }
 
 
-void OGR::createLayer()
+void OGR::createLayer(const std::string& wkt)
 {
+    gdal::registerDrivers();
     OGRSFDriverH driver = OGRGetDriverByName(m_driver.c_str());
     if (driver == NULL)
     {
@@ -151,7 +156,8 @@ void OGR::createLayer()
 
     if (m_layerName.empty())
         m_layerName = m_filename;
-    m_layer = GDALDatasetCreateLayer(m_ds, m_layerName.c_str(), m_srs.get(),
+    gdal::SpatialRef srs(wkt);
+    m_layer = GDALDatasetCreateLayer(m_ds, m_layerName.c_str(), srs.get(),
         wkbMultiPolygon, NULL);
     if (m_layer == NULL)
         throw pdal_error("Layer creation was null!");

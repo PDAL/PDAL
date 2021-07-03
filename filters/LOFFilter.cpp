@@ -42,6 +42,8 @@
 namespace pdal
 {
 
+using namespace Dimension;
+
 static StaticPluginInfo const s_info
 {
     "filters.lof",
@@ -58,22 +60,19 @@ std::string LOFFilter::getName() const
 
 void LOFFilter::addArgs(ProgramArgs& args)
 {
-    args.add("minpts", "Minimum number of points", m_minpts, 10);
+    args.add("minpts", "Minimum number of points", m_minpts, (size_t)10);
 }
 
 void LOFFilter::addDimensions(PointLayoutPtr layout)
 {
-    using namespace Dimension;
-    m_kdist = layout->registerOrAssignDim("KDistance", Type::Double);
-    m_lrd = layout->registerOrAssignDim("LocalReachabilityDistance", Type::Double);
-    m_lof = layout->registerOrAssignDim("LocalOutlierFactor", Type::Double);
+    layout->registerDim(Id::NNDistance);
+    layout->registerDim(Id::LocalReachabilityDistance);
+    layout->registerDim(Id::LocalOutlierFactor);
 }
 
 void LOFFilter::filter(PointView& view)
 {
-    using namespace Dimension;
-
-    KD3Index& index = view.build3dIndex();
+    const KD3Index& index = view.build3dIndex();
 
     // Increment the minimum number of points, as knnSearch will be returning
     // the neighbors along with the query point.
@@ -82,12 +81,22 @@ void LOFFilter::filter(PointView& view)
     // First pass: Compute the k-distance for each point.
     // The k-distance is the Euclidean distance to k-th nearest neighbor.
     log()->get(LogLevel::Debug) << "Computing k-distances...\n";
+
+    typedef std::pair<PointId, size_t> PointIdKPair;
+    typedef std::pair<PointId, double> PointIdDistPair;
+    typedef std::map<PointIdKPair, PointIdDistPair> AdjacencyMap;
+    AdjacencyMap mat;
+
     for (PointId i = 0; i < view.size(); ++i)
     {
         PointIdList indices(m_minpts);
         std::vector<double> sqr_dists(m_minpts);
         index.knnSearch(i, m_minpts, &indices, &sqr_dists);
-        view.setField(m_kdist, i, std::sqrt(sqr_dists[m_minpts-1]));
+
+        for (size_t j = 0; j < m_minpts; ++j)
+            mat[std::make_pair(i, j)] = std::make_pair(indices[j], std::sqrt(sqr_dists[j]));
+
+        view.setField(Id::NNDistance, i, std::sqrt(sqr_dists[m_minpts - 1]));
     }
 
     // Second pass: Compute the local reachability distance for each point.
@@ -98,18 +107,16 @@ void LOFFilter::filter(PointView& view)
     log()->get(LogLevel::Debug) << "Computing lrd...\n";
     for (PointId i = 0; i < view.size(); ++i)
     {
-        PointIdList indices(m_minpts);
-        std::vector<double> sqr_dists(m_minpts);
-        index.knnSearch(i, m_minpts, &indices, &sqr_dists);
         double M1 = 0.0;
         point_count_t n = 0;
-        for (PointId j = 0; j < indices.size(); ++j)
+        for (size_t j = 0; j < m_minpts; ++j)
         {
-            double k = view.getFieldAs<double>(m_kdist, indices[j]);
-            double reachdist = (std::max)(k, std::sqrt(sqr_dists[j]));
+            auto val = mat[std::make_pair(i, j)];
+            double k = view.getFieldAs<double>(Id::NNDistance, val.first);
+            double reachdist = (std::max)(k, val.second);
             M1 += (reachdist - M1) / ++n;
         }
-        view.setField(m_lrd, i, 1.0 / M1);
+        view.setField(Id::LocalReachabilityDistance, i, 1.0 / M1);
     }
 
     // Third pass: Compute the local outlier factor for each point.
@@ -117,17 +124,18 @@ void LOFFilter::filter(PointView& view)
     log()->get(LogLevel::Debug) << "Computing LOF...\n";
     for (PointId i = 0; i < view.size(); ++i)
     {
-        double lrdp = view.getFieldAs<double>(m_lrd, i);
-        PointIdList indices(m_minpts);
-        std::vector<double> sqr_dists(m_minpts);
-        index.knnSearch(i, m_minpts, &indices, &sqr_dists);
+        double lrdp = view.getFieldAs<double>(Id::LocalReachabilityDistance, i);
         double M1 = 0.0;
         point_count_t n = 0;
-        for (auto const& j : indices)
+        for (size_t j = 0; j < m_minpts; ++j)
         {
-            M1 += (view.getFieldAs<double>(m_lrd, j) / lrdp - M1) / ++n;
+            auto val = mat[std::make_pair(i, j)];
+            PointRef p = view.point(val.first);
+            double ratio =
+                p.getFieldAs<double>(Id::LocalReachabilityDistance) / lrdp;
+            M1 += (ratio - M1) / ++n;
         }
-        view.setField(m_lof, i, M1);
+        view.setField(Id::LocalOutlierFactor, i, M1);
     }
 }
 

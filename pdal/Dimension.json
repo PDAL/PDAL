@@ -15,6 +15,11 @@
     "description": "Z coordinate"
     },
     {
+    "name": "W",
+    "type": "double",
+    "description": "W coordinate"
+    },
+    {
     "name": "Intensity",
     "type": "uint16",
     "description": "Representation of the pulse return magnitude"
@@ -142,7 +147,7 @@
     {
     "name": "Deviation",
     "type": "float",
-    "description": "A larger value for deviation indicates larger distortion."
+    "description": "Difference between the shape of the reference pulse and the return pulse. A larger value for deviation indicates larger distortion."
     },
     {
     "name": "PassiveSignal",
@@ -376,12 +381,145 @@
     },
     {
     "name": "ClusterID",
-    "type": "uint64_t",
+    "type": "int64_t",
     "description": "ID assigned to a point by a point-clustering algorithm."
     },
     {
     "name": "NNDistance",
     "type": "double",
     "description": "Distance metric related to a point's nearest neighbors."
+    },
+    {
+    "name": "TextureU",
+    "alt_names": ["tu", "texture_u", "textureu" ],
+    "type": "double",
+    "description": "U component of a texture location at this point"
+    },
+    {
+    "name": "TextureV",
+    "alt_names": ["tv", "texture_v", "texturev" ],
+    "type": "double",
+    "description": "V component of a texture location at this point"
+    },
+    {
+    "name": "TextureW",
+    "alt_names": ["tw", "texture_w", "texturew" ],
+    "type": "double",
+    "description": "W component of a texture location at this point"
+    },
+    {
+    "name": "Linearity",
+    "type": "double",
+    "description": "Linearity of a point; larger values indicate more linear regions."
+    },
+    {
+    "name": "Planarity",
+    "type": "double",
+    "description": "Planarity of a point; larger values indicate more planar regions."
+    },
+    {
+    "name": "Scattering",
+    "type": "double",
+    "description": "Scattering of a point; larger values incidate complex (scattered) 3D regions."
+    },
+    {
+    "name": "Verticality",
+    "type": "double",
+    "description": "Verticality of a point; larger values indicate vertical structure."
+    },
+    {
+    "name": "Omnivariance",
+    "type": "double",
+    "description": "Omnivariance of a point; cube root of the product of all eigenvalues."
+    },
+    {
+    "name": "Anisotropy",
+    "type": "double",
+    "description": "Anisotropy of a point; larger values indicate strong variance in multiple dimensions."
+    },
+    {
+    "name": "Eigenentropy",
+    "type": "double",
+    "description": "Eigenentropy of a point; small values indicate more ordered regions, while large values indicate disorder."
+    },
+    {
+    "name": "EigenvalueSum",
+    "type": "double",
+    "description": "Sum of computed eigenvalues."
+    },
+    {
+    "name": "SurfaceVariation",
+    "type": "double",
+    "description": "Surface variation of a point; larger values indicate higher surface variation."
+    },
+    {
+    "name": "DemantkeVerticality",
+    "type": "double",
+    "description": "Verticality of a point; larger values indicate vertical structure (Demantke's variation)."
+    },
+    {
+    "name": "OptimalKNN",
+    "type": "uint64",
+    "description": "Optimal number of k nearest neighbors, such that eigenentropy is minimized."
+    },
+    {
+    "name": "OptimalRadius",
+    "type": "double",
+    "description": "Radius corresponding to optimal k nearest neighbors, such that eigenentropy is minimized."
+    },
+    {
+    "name": "Coplanar",
+    "type": "uint8",
+    "description": "Indicator of whether or not a point is part of a coplanar neighborhood."
+    },
+    {
+    "name": "LocalReachabilityDistance",
+    "type": "double",
+    "description": "Reachability metric based on the NNDistance of a point's nearest neighbors."
+    },
+    {
+    "name": "LocalOutlierFactor",
+    "type": "double",
+    "description": "Outlier factor based on the LocalReachabilityDistance of a point's nearest neighbors."
+    },
+    {
+    "name": "Miniball",
+    "type": "double",
+    "description": "Metric capturing distance from a point to the center of the smallest enclosing ball encapsulating k-nearest neighbors, scaled by radius of the ball."
+    },
+    {
+    "name": "Reciprocity",
+    "type": "double",
+    "description": "Metric capturing percentage of k-nearest neighbors that also contain the current point in their k-neighborhood."
+    },
+    {
+    "name": "Rank",
+    "type": "uint8",
+    "description": "Estimated rank of neighborhood of points."
+    },
+    {
+    "name": "Eigenvalue0",
+    "type": "double",
+    "description": "Smallest eigenvalue obtained form covariance of XYZ coordinates in k-neighborhood."
+    },
+    {
+    "name": "Eigenvalue1",
+    "type": "double",
+    "description": "Middle eigenvalue obtained form covariance of XYZ coordinates in k-neighborhood."
+    },
+    {
+    "name": "Eigenvalue2",
+    "type": "double",
+    "description": "Largest eigenvalue obtained form covariance of XYZ coordinates in k-neighborhood."
+    },
+    {
+    "name": "PlaneFit",
+    "type": "double",
+    "description": "Metric capturing current point's point to plane distance compared to those in the same k-neighborhood used to estimate the plane."
+    },
+    {
+    "name": "RadialDensity",
+    "type": "double",
+    "description": "Estimate of radial point density"
     }
 ] }

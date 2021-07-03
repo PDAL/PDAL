@@ -3,11 +3,8 @@
 filters.transformation
 ======================
 
-The transformation filter applies an arbitrary rotation+translation
+The transformation filter applies an arbitrary homography
 transformation, represented as a 4x4 matrix_, to each xyz triplet.
-
-The filter does *no* checking to ensure the matrix is a valid affine
-transformation.
 
 .. note::
 
@@ -41,10 +38,16 @@ This example rotates the points around the z-axis while translating them.
 Options
 -------
 
+invert
+  If set to true, applies the inverse of the provided transformation matrix.
+  [Default: false]
+
 _`matrix`
   A whitespace-delimited transformation matrix.
   The matrix is assumed to be presented in row-major order.
   Only matrices with sixteen elements are allowed.
+
+.. include:: filter_opts.rst
 
 Further details
 ---------------
@@ -53,10 +56,11 @@ A full tutorial about transformation matrices is beyond the scope of this
 documentation. Instead, we will provide a few pointers to introduce core
 concepts, especially as pertains to PDAL's handling of the ``matrix`` argument.
 
-Transformations in a 3-dimensional coordinate system can be represented as an
-affine transformation using homogeneous coordinates. This 4x4 matrix can
-represent transformations describing operations like translation, rotation, and
-scaling of coordinates.
+Transformations in a 3-dimensional coordinate system can be represented
+as a homography transformation using homogeneous coordinates. This 4x4
+matrix can represent affine transformations describing operations like
+translation, rotation, and scaling of coordinates.  In addition it can
+represent perspective transformations modeling a pinhole camera.
 
 The transformation filter's ``matrix`` argument is a space delimited, 16
 element string. This string is simply a row-major representation of the 4x4
@@ -93,7 +97,7 @@ The JSON syntax required for such a translation is written as follows for :math:
           "matrix":"1  0  0  7  0  1  0  8  0  0  1  9  0  0  0  1"
       }
   ]
-   
+
 Scaling
 .......
 
@@ -126,7 +130,7 @@ transformation. In the example, X and Y are not scaled at all (i.e.,
 Rotation
 ........
 
-A rotation of coordinates by :math:`\theta` radians counter-clockswise about
+A rotation of coordinates by :math:`\theta` radians counter-clockwise about
 the z-axis is accomplished with the following matrix.
 
 .. math::

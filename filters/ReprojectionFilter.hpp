@@ -73,6 +73,7 @@ private:
     std::vector<std::string> m_outAxisOrderingArg;
     std::vector<int> m_inAxisOrdering;
     std::vector<int> m_outAxisOrdering;
+    bool m_errorOnFailure;
 };
 
 } // namespace pdal

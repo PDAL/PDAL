@@ -7,6 +7,7 @@ if(EXISTS)
 endif()
 
 include(${PDAL_CMAKE_DIR}/execinfo.cmake)
+include(${PDAL_CMAKE_DIR}/threads.cmake)
 include(${PDAL_CMAKE_DIR}/unwind.cmake)
 
 if(LIBUNWIND_FOUND)
@@ -24,8 +25,10 @@ set(PDAL_UTIL_SOURCES
     "${PDAL_UTIL_DIR}/Charbuf.cpp"
     "${PDAL_UTIL_DIR}/FileUtils.cpp"
     "${PDAL_UTIL_DIR}/Georeference.cpp"
+    "${PDAL_UTIL_DIR}/ThreadPool.cpp"
     "${PDAL_UTIL_DIR}/Utils.cpp"
     "${PDAL_UTIL_DIR}/Backtrace.cpp"
+    "${PDAL_UTIL_DIR}/Random.cpp"
     "${PDAL_UTIL_DIR}/private/${BACKTRACE_SOURCE}"
 )
 
@@ -35,6 +38,7 @@ target_link_libraries(${PDAL_UTIL_LIB_NAME}
         ${BACKTRACE_LIBRARIES}
         ${PDAL_BOOST_LIB_NAME}
         ${CMAKE_DL_LIBS}
+        ${CMAKE_THREAD_LIBS_INIT}
 )
 target_include_directories(${PDAL_UTIL_LIB_NAME} PRIVATE
     ${PDAL_VENDOR_DIR}/pdalboost)

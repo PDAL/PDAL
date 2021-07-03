@@ -76,3 +76,6 @@ _`class`
 
 _`threshold`
   Threshold value to identify low noise points. [Default: 1.0]
+
+.. include:: filter_opts.rst
+

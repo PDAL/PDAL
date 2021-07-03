@@ -36,34 +36,30 @@
 
 #include <pdal/Filter.hpp>
 
-#include <cstdint>
-#include <memory>
 #include <string>
 
 namespace pdal
 {
 
-class Options;
 class PointLayout;
 class PointView;
+struct EigenvalueArgs;
 
 class PDAL_DLL EigenvaluesFilter : public Filter
 {
 public:
-    EigenvaluesFilter() : Filter()
-    {}
+    EigenvaluesFilter();
     EigenvaluesFilter& operator=(const EigenvaluesFilter&) = delete;
     EigenvaluesFilter(const EigenvaluesFilter&) = delete;
 
     std::string getName() const;
 
 private:
-    int m_knn;
-    Dimension::Id m_e0, m_e1, m_e2;
-    bool m_normalize;
+    std::unique_ptr<EigenvalueArgs> m_args;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs& args);
+    virtual void prepared(PointTableRef table);
     virtual void filter(PointView& view);
 };
 

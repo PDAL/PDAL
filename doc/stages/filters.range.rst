@@ -58,6 +58,7 @@ limits
   1, 2, 6 or 7 and have a blue value or 25-75 and have a red value of
   1-50 or 75-255.  In this case, all values are inclusive.
 
+.. include:: filter_opts.rst
 
 .. _ranges:
 

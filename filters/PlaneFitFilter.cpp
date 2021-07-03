@@ -39,9 +39,9 @@
 
 #include "PlaneFitFilter.hpp"
 
-#include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/private/MathUtils.hpp>
 
 #include <Eigen/Dense>
 
@@ -53,6 +53,7 @@ namespace pdal
 {
 
 using namespace Dimension;
+using namespace Eigen;
 
 static StaticPluginInfo const s_info
 {
@@ -77,14 +78,11 @@ void PlaneFitFilter::addArgs(ProgramArgs& args)
 
 void PlaneFitFilter::addDimensions(PointLayoutPtr layout)
 {
-    m_planefit =
-        layout->registerOrAssignDim("PlaneFit", Dimension::Type::Double);
+    layout->registerDim(Id::PlaneFit);
 }
 
 void PlaneFitFilter::filter(PointView& view)
 {
-    KD3Index& kdi = view.build3dIndex();
-
     point_count_t nloops = view.size();
     std::vector<std::thread> threadList(m_threads);
     for (int t = 0; t < m_threads; t++)
@@ -92,7 +90,7 @@ void PlaneFitFilter::filter(PointView& view)
         threadList[t] = std::thread(std::bind(
             [&](const PointId start, const PointId end) {
                 for (PointId i = start; i < end; i++)
-                    setPlaneFit(view, i, kdi);
+                    setPlaneFit(view, i);
             },
             t * nloops / m_threads,
             (t + 1) == m_threads ? nloops : (t + 1) * nloops / m_threads));
@@ -102,22 +100,22 @@ void PlaneFitFilter::filter(PointView& view)
 }
 
 double PlaneFitFilter::absDistance(PointView& view, const PointId& i,
-                                   Eigen::Vector3d& centroid,
-                                   Eigen::Vector3d& normal)
+                                   Vector3d& centroid,
+                                   Vector3d& normal)
 {
-    double x = view.getFieldAs<double>(Dimension::Id::X, i);
-    double y = view.getFieldAs<double>(Dimension::Id::Y, i);
-    double z = view.getFieldAs<double>(Dimension::Id::Z, i);
-    Eigen::Vector3d p;
+    double x = view.getFieldAs<double>(Id::X, i);
+    double y = view.getFieldAs<double>(Id::Y, i);
+    double z = view.getFieldAs<double>(Id::Z, i);
+    Vector3d p;
     p << x - centroid[0], y - centroid[1], z - centroid[2];
     double d = normal.dot(p);
     return std::fabs(d);
 }
 
-void PlaneFitFilter::setPlaneFit(PointView& view, const PointId& i,
-                                 const KD3Index& kdi)
+void PlaneFitFilter::setPlaneFit(PointView& view, const PointId& i)
 {
     // Find k-nearest neighbors of i.
+    const KD3Index& kdi = view.build3dIndex();
     PointIdList ni = kdi.neighbors(i, m_knn + 1);
 
     // Normal based only on neighbors, so exclude first point.
@@ -126,31 +124,31 @@ void PlaneFitFilter::setPlaneFit(PointView& view, const PointId& i,
     // Covariance and normal are based off demeaned coordinates, so we record
     // the centroid to properly offset the coordinates when computing point to
     // plance distance.
-    auto centroid = computeCentroid(view, neighbors);
+    Vector3d centroid = math::computeCentroid(view, neighbors);
 
     // Compute covariance of the neighbors.
-    auto B = computeCovariance(view, neighbors);
+    Matrix3d B = math::computeCovariance(view, neighbors);
 
     // Perform the eigen decomposition, using the eigenvector of the smallest
     // eigenvalue as the normal.
-    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> solver(B);
+    Eigen::SelfAdjointEigenSolver<Matrix3d> solver(B);
     if (solver.info() != Eigen::Success)
         throwError("Cannot perform eigen decomposition.");
-    Eigen::Vector3d normal = solver.eigenvectors().col(0);
+    Vector3d normal = solver.eigenvectors().col(0);
 
     // Compute point to plane distance of the query point.
     double d = absDistance(view, i, centroid, normal);
 
     // Compute mean point to plane distance of neighbors.
     double d_sum(0.0);
-    for (auto const& j : neighbors)
+    for (PointId const& j : neighbors)
     {
         d_sum += absDistance(view, j, centroid, normal);
     }
     double d_bar(d_sum / m_knn);
 
     // Compute and set the plane fit criterion.
-    view.setField(m_planefit, i, d / (d + d_bar));
+    view.setField(Id::PlaneFit, i, d / (d + d_bar));
 }
 
 } // namespace pdal

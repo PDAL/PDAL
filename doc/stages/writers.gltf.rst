@@ -61,3 +61,5 @@ double_sided
     visible from the initial observation point (positive normal vector).
     [Default: false]
 
+.. include:: writer_opts.rst
+

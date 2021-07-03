@@ -51,7 +51,7 @@ public:
 
 private:
     virtual void addSwitches(ProgramArgs& args);
-    PointViewPtr loadSet(const std::string& filename, PointTable& table);
+    PointViewPtr loadSet(const std::string& filename, PointTableRef table);
 
     std::string m_sourceFile;
     std::string m_candidateFile;

@@ -121,6 +121,8 @@ public:
     uint8_t versionMinor() const
         { return m_versionMinor; }
 
+    std::string versionString() const;
+
     /// Set minor component of version of LAS format.
     /// \exception std::out_of_range - invalid value given.
     /// \param v - value between eVersionMinorMin and eVersionMinorMax.
@@ -213,16 +215,10 @@ public:
     /// Get identifier of point data (record) format.
     uint8_t pointFormat() const
         { return m_pointFormat; }
-    bool pointFormatSupported() const
-    {
-        if (versionAtLeast(1, 4))
-            return m_pointFormat <= 10 && !hasWave();
-        else
-            return m_pointFormat <= 5 && !hasWave();
-    }
+    Utils::StatusWithReason pointFormatSupported() const;
 
     /// The length in bytes of each point.  All points in the file are
-    /// considered to be fixed in size, and the PointFormatName is used
+    /// considered to be fixed in size, and the point format is used
     /// to determine the fixed portion of the dimensions in the point.
     uint16_t pointLen() const
         { return m_pointLen; }
@@ -338,7 +334,7 @@ public:
         return f == 8;
     }
 
-    bool has14Format() const
+    bool has14PointFormat() const
     {
         PointFormat f = pointFormat();
         return f > 5;
@@ -346,9 +342,6 @@ public:
 
     bool useWkt() const
         { return (bool)((m_globalEncoding >> 4) & 1); }
-
-    bool incompatibleSrs() const
-        { return !useWkt() && has14Format(); }
 
     /// Returns true iff the file is compressed (laszip),
     /// as determined by the high bit in the point type
@@ -378,14 +371,16 @@ public:
     SpatialReference srs() const
         { return m_srs; }
 
+    std::string geotiffPrint()
+        { return m_geotiff_print; }
+
     void setSummary(const LasSummaryData& summary);
     bool valid() const;
     Dimension::IdList usedDims() const;
     const LasVLR *findVlr(const std::string& userId, uint16_t recordId) const;
     void removeVLR(const std::string& userId, uint16_t recordId);
     void removeVLR(const std::string& userId);
-    void setLog(LogPtr log)
-        { m_log = log; }
+    void initialize(LogPtr log, uintmax_t fileSize, bool nosrs);
     const VlrList& vlrs() const
         { return m_vlrs; }
 
@@ -394,6 +389,7 @@ public:
     friend std::ostream& operator<<(std::ostream& ostr, const LasHeader& h);
 
 private:
+    uintmax_t m_fileSize;
     std::string m_fileSig;
     uint16_t m_sourceId;
     uint16_t m_globalEncoding;
@@ -419,8 +415,10 @@ private:
     std::string m_compressionInfo;
     LogPtr m_log;
     SpatialReference m_srs;
+    std::string m_geotiff_print;
     VlrList m_vlrs;
     VlrList m_eVlrs;
+    bool m_nosrs;
 
     void setSrs();
     void setSrsFromWkt();

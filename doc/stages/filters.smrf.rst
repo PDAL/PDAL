@@ -49,7 +49,7 @@ optimized parameters for Sample 1 given in Table 3 of [Pingel2013]_.
       {
           "type":"filters.range",
           "limits":"Classification[2:2]"
-      }
+      },
       "output.laz"
   ]
 
@@ -58,6 +58,10 @@ Options
 
 cell
   Cell size. [Default: 1.0]
+
+classbits
+  Selectively ignore points marked as "synthetic", "keypoint", or "withheld".
+  [Default: empty string, use all points]
 
 cut
   Cut net size (``cut=0`` skips the net cutting step). [Default: 0.0]
@@ -83,3 +87,6 @@ threshold
 
 window
   Max window size. [Default: **18.0**]
+
+.. include:: filter_opts.rst
+

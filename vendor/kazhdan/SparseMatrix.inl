@@ -178,10 +178,7 @@ template<class T>
 void SparseMatrix< T >::SetRowSize( int row , int count )
 {
 	if( _contiguous )
-	{
-		if( count>_maxEntriesPerRow ) fprintf( stderr , "[ERROR] Cannot set row size on contiguous matrix: %d<=%d\n" , count , _maxEntriesPerRow ) , exit( 0 );
 		rowSizes[row] = count;
-	}
 	else if( row>=0 && row<rows )
 	{
 		if( rowSizes[row] ) FreePointer( m_ppElements[row] );

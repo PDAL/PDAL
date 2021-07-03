@@ -97,44 +97,6 @@ inline Point circumcenter(
 }
 
 
-struct compare {
-
-    std::vector<double> const& coords;
-    std::vector<double> dists;
-
-    compare(std::vector<double> const& coords, const Point& center) :
-        coords(coords)
-    {
-        size_t n = coords.size() / 2;
-        dists.reserve(n);
-        double const *xcoord = coords.data();
-        double const *ycoord = coords.data() + 1;
-        while (n--)
-        {
-            dists.push_back(dist(*xcoord, *ycoord, center.x(), center.y()));
-            xcoord += 2;
-            ycoord += 2;
-        }
-    }
-
-    bool operator()(std::size_t i, std::size_t j)
-    {
-        const double diff1 = dists[i] - dists[j];
-        const double diff2 = coords[2 * i] - coords[2 * j];
-        const double diff3 = coords[2 * i + 1] - coords[2 * j + 1];
-
-        //ABELL - Not sure why we're not just checking != 0 here.
-        if (diff1 > 0.0 || diff1 < 0.0) {
-            return diff1 < 0;
-        } else if (diff2 > 0.0 || diff2 < 0.0) {
-            return diff2 < 0;
-        } else {
-            return diff3 < 0;
-        }
-    }
-};
-
-
 inline bool in_circle(
     const double ax,
     const double ay,
@@ -265,7 +227,7 @@ Delaunator::Delaunator(std::vector<double> const& in_coords)
     }
 
     if (!(min_radius < (std::numeric_limits<double>::max()))) {
-        throw std::runtime_error("not triangulation");
+        throw std::runtime_error("All points collinear");
     }
 
     double i2x = coords[2 * i2];
@@ -279,8 +241,24 @@ Delaunator::Delaunator(std::vector<double> const& in_coords)
 
     m_center = circumcenter(i0x, i0y, i1x, i1y, i2x, i2y);
 
+    // Calculate the distances from the center once to avoid having to
+    // calculate for each compare.  This used to be done in the comparator,
+    // but GCC 7.5+ would copy the comparator to iterators used in the
+    // sort, and this was excruciatingly slow when there were many points
+    // because you had to copy the vector of distances.
+    std::vector<double> dists;
+    dists.reserve(n);
+    for (size_t i = 0; i < n; i++)
+    {    
+        const double& x = coords[2 * i];
+        const double& y = coords[2 * i + 1];
+        dists.push_back(dist(x, y, m_center.x(), m_center.y()));
+    }
+
     // sort the points by distance from the seed triangle circumcenter
-    std::sort(ids.begin(), ids.end(), compare{ coords, m_center });
+    std::sort(ids.begin(), ids.end(),
+        [&dists](std::size_t i, std::size_t j)
+            { return dists[i] < dists[j]; });
 
     // initialize a hash table for storing edges of the advancing convex hull
     m_hash_size = static_cast<std::size_t>(std::llround(std::ceil(std::sqrt(n))));

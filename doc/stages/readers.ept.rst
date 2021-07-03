@@ -14,10 +14,12 @@ with `Potree`_ or `Plasio`_.
 
 .. embed::
 
+.. streamable::
+
 Example
 --------------------------------------------------------------------------------
 
-This example downloads a small area around the the Statue of Liberty from the New York City data set (4.7 billion points) which can be viewed in its entirety in `Potree`_ or `Plasio`_.
+This example downloads a small area around the the Statue of Liberty from the New York City data set (4.7 billion points) which can be viewed in its entirety in `Potree`_.
 
 .. code-block:: json
 
@@ -53,7 +55,7 @@ Options
 --------------------------------------------------------------------------------
 
 filename
-    EPT resource from which to read.  Because EPT resources do not have a file extension, to specify an EPT resource as a string, it must be prefixed with ``ept://``.  For example, ``pdal translate ept://http://na.entwine.io/autzen autzen.laz``. [Required]
+    Path to the EPT resource from which to read, ending with ``ept.json``.  For example, ``/Users/connor/entwine/autzen/ept.json`` or ``http://na.entwine.io/autzen/ept.json``. [Required]
 
 spatialreference
     Spatial reference to apply to the data.  Overrides any SRS in the input
@@ -94,23 +96,46 @@ origin
     dimension, which can be determined from  the file's position in EPT
     metadata file ``entwine-files.json``.
 
+.. note::
+
+    When using ``pdal info --summary``, using the ``origin`` option will cause the resulting bounds to be clipped to those of the selected origin, and the resulting number of points to be an upper bound for this selection.
+
 polygon
   The clipping polygon, expressed in a well-known text string,
   eg: "POLYGON((0 0, 5000 10000, 10000 0, 0 0))".  This option can be
   specified more than once by placing values in an array.
 
+.. note::
 
-threads
-    Number of worker threads used to download and process EPT data.  A
-    minimum of 4 will be used no matter what value is specified.
+    When using ``pdal info --summary``, using the ``polygon`` option will cause the resulting bounds to be clipped to the maximal extents of all provided polygons, and the resulting number of points to be an upper bound for this polygon selection.
+
+ogr
+  A JSON object representing an OGR query to fetch polygons to use for filtering. The polygons
+  fetched from the query are treated exactly like those specified in the ``polygon`` option.
+  The JSON object takes the looks like the following:
+
+  .. code-block:: json
+
+    {
+        "drivers": "OGR drivers to use",
+        "openoptions": "Options to pass to the OGR open function [optional]",
+        "layer": "OGR layer from which to fetch polygons [optional]",
+        "sql": "SQL query to use to filter the polygons in the layer [optional]",
+        "options":
+        {
+            "geometry", "WKT or GeoJSON geomtry used to filter query [optional]"
+        }
+    }
+
+requests
+    Maximum number of simultaneous requests for EPT data. [Minimum: 4] [Default: 15]
 
 .. _Entwine Point Tile: https://entwine.io/entwine-point-tile.html
 .. _Entwine: https://entwine.io/
 .. _Potree: http://potree.entwine.io/data/nyc.html
-.. _Plasio: http://speck.ly/?s=http%3A%2F%2Fc%5B0-7%5D.greyhound.io&r=ept%3A%2F%2Fna.entwine.io%2Fnyc&ca=-0&ce=49.06&ct=-8239196%2C4958509.308%2C337&cd=42640.943&cmd=125978.13&ps=2&pa=0.1&ze=1&c0s=remote%3A%2F%2Fimagery%3Furl%3Dhttp%3A%2F%2Fserver.arcgisonline.com%2FArcGIS%2Frest%2Fservices%2FWorld_Imagery%2FMapServer%2Ftile%2F%7B%7Bz%7D%7D%2F%7B%7By%7D%7D%2F%7B%7Bx%7D%7D.jpg
 .. _Schema: https://entwine.io/entwine-point-tile.html#schema
 
-headers
+header
     HTTP headers to forward for remote EPT endpoints, structured as a JSON
     object of key/value string pairs.
 

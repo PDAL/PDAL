@@ -9,7 +9,7 @@ containing waveform data (4, 5, 9 and 10).
 
 The reader also supports compressed LAS files, known as LAZ files or
 `LASzip`_ files.
-In order to use compresed LAS (LAZ), your version of PDAL must be built
+In order to use compressed LAS (LAZ), your version of PDAL must be built
 with one of the two supported decompressors, `LASzip`_ or `LAZperf`_.
 See the :ref:`compression <las_compression>` option below for more information.
 
@@ -103,3 +103,15 @@ compression
   support for the decompressor being requested.  The LazPerf decompressor
   doesn't support version 1 LAZ files or version 1.4 of LAS. [Default: 'none']
 
+ignore_vlr
+  A comma-separated list of "userid/record_id" pairs specifying VLR records that should
+  not be loaded.
+
+fix_dims
+  Make invalid dimension names valid by converting disallowed characters to '_'. Only
+  applies to names specified in an extra-bytes VLR. [Default: true]
+
+nosrs
+  Don't read the SRS VLRs. The data will not be assigned an SRS. This option is
+  for use only in special cases where processing the SRS could cause performance
+  issues. [Default: false]

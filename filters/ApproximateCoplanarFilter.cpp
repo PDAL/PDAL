@@ -34,17 +34,19 @@
 
 #include "ApproximateCoplanarFilter.hpp"
 
-#include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/private/MathUtils.hpp>
 
 #include <Eigen/Dense>
 
 #include <string>
-#include <vector>
 
 namespace pdal
 {
+
+using namespace Dimension;
+using namespace Eigen;
 
 static StaticPluginInfo const s_info
 {
@@ -71,35 +73,33 @@ void ApproximateCoplanarFilter::addArgs(ProgramArgs& args)
 
 void ApproximateCoplanarFilter::addDimensions(PointLayoutPtr layout)
 {
-    m_coplanar = layout->registerOrAssignDim("Coplanar",
-        Dimension::Type::Unsigned8);
+    layout->registerDim(Id::Coplanar);
 }
+
 
 void ApproximateCoplanarFilter::filter(PointView& view)
 {
-    using namespace Eigen;
+    const KD3Index& kdi = view.build3dIndex();
 
-    KD3Index& kdi = view.build3dIndex();
-
-    for (PointId i = 0; i < view.size(); ++i)
+    for (PointRef p : view)
     {
         // find the k-nearest neighbors
-        auto ids = kdi.neighbors(i, m_knn);
+        PointIdList ids = kdi.neighbors(p, m_knn);
 
         // compute covariance of the neighborhood
-        auto B = computeCovariance(view, ids);
+        Matrix3d B = math::computeCovariance(view, ids);
 
         // perform the eigen decomposition
-        SelfAdjointEigenSolver<Matrix3d> solver(B);
-        if (solver.info() != Success)
+        Eigen::SelfAdjointEigenSolver<Matrix3d> solver(B);
+        if (solver.info() != Eigen::Success)
             throwError("Cannot perform eigen decomposition.");
-        auto ev = solver.eigenvalues();
+        Vector3d ev = solver.eigenvalues();
 
         // test eigenvalues to label points that are approximately coplanar
         if ((ev[1] > m_thresh1 * ev[0]) && (m_thresh2 * ev[1] > ev[2]))
-            view.setField(m_coplanar, i, 1u);
+            p.setField(Id::Coplanar, 1u);
         else
-            view.setField(m_coplanar, i, 0u);
+            p.setField(Id::Coplanar, 0u);
     }
 }
 

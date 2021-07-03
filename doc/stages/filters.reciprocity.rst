@@ -11,12 +11,12 @@ the valid point's k-neighborhood.
 The author suggests that the Nearest-Neighbor Reciprocity Criterion is more
 robust than both the :ref:`Plane Fit <filters.planefit>` and :ref:`Miniball
 <filters.miniball>` Criterion, being equally sensitive around smooth and
-detailed regions. The criterion does however produce invalid reslts near
+detailed regions. The criterion does however produce invalid results near
 manifold borders.
 
 The filter creates a single new dimension, ``Reciprocity``, that records the
 percentage of points(in the range 0 to 100) that are considered uni-directional
-neighbors of the current point. 
+neighbors of the current point.
 
 .. note::
 
@@ -52,4 +52,6 @@ Options
 
 knn
   The number of k nearest neighbors. [Default: 8]
+
+.. include:: filter_opts.rst
 

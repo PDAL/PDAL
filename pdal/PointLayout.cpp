@@ -100,6 +100,8 @@ void PointLayout::registerDim(Dimension::Id id, Dimension::Type type)
 Dimension::Id PointLayout::assignDim(const std::string& name,
     Dimension::Type type)
 {
+    if (!Dimension::nameValid(name))
+        throw pdal_error("Can't create dimension with invalid name '" + name + "'.");
     if (m_nextFree == Dimension::COUNT)
         throw pdal_error("No dimension IDs remaining for assignment.");
     Dimension::Id id = (Dimension::Id)m_nextFree;
@@ -224,9 +226,11 @@ size_t PointLayout::pointSize() const
 bool PointLayout::update(Dimension::Detail dd, const std::string& name)
 {
     if (m_finalized)
-    {
         throw pdal_error("Can't update layout after points have been added.");
-    }
+
+    // If we have a list of allowed dimensions and this dimension isn't listed, return false.
+    if (m_allowedDimNames.size() && !Utils::contains(m_allowedDimNames, Utils::toupper(name)))
+        return false;
 
     Dimension::DetailList detail;
 
@@ -338,6 +342,19 @@ MetadataNode PointLayout::toMetadata() const
     }
 
     return root;
+}
+
+void PointLayout::setAllowedDims(StringList dimNames)
+{
+    if (dimNames.empty())
+        return;
+
+    for (std::string& s : dimNames)
+        s = Utils::toupper(s);
+    for (const std::string& xyz : StringList { "X", "Y", "Z" })
+        if (!Utils::contains(dimNames, xyz))
+            dimNames.push_back(xyz);
+    m_allowedDimNames = dimNames;
 }
 
 } // namespace pdal

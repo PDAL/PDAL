@@ -36,8 +36,6 @@
 
 #include <pdal/Filter.hpp>
 
-#include <memory>
-
 namespace pdal
 {
 
@@ -50,19 +48,17 @@ class PDAL_DLL LOFFilter : public Filter
 public:
     LOFFilter() : Filter()
     {}
+    LOFFilter& operator=(const LOFFilter&) = delete;
+    LOFFilter(const LOFFilter&) = delete;
 
     std::string getName() const;
 
 private:
-    Dimension::Id m_kdist, m_lrd, m_lof;
-    int m_minpts;
+    size_t m_minpts;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void filter(PointView& view);
-
-    LOFFilter& operator=(const LOFFilter&); // not implemented
-    LOFFilter(const LOFFilter&); // not implemented
 };
 
 } // namespace pdal

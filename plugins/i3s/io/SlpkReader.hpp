@@ -34,21 +34,36 @@
 
 #pragma once
 
+#include <pdal/util/FileUtils.hpp>
+
 #include "EsriReader.hpp"
 
 namespace pdal
 {
 class PDAL_DLL SlpkReader : public EsriReader
 {
+    struct Location
+    {
+        size_t m_pos;
+        size_t m_length;
+    };
+    using LocationMap = std::map<std::string, Location>;
+
 public:
+    virtual ~SlpkReader();
     std::string getName() const override;
 
 protected:
-    virtual void initInfo() override;
+    virtual NL::json initInfo() override;
     virtual std::vector<char> fetchBinary(std::string url, std::string attNum,
             std::string ext) const override;
-    virtual NL::json fetchJson(std::string) override;
+    virtual std::string fetchJson(std::string) override;
 
+private:
+    LocationMap m_locMap;
+    FileUtils::MapContext m_ctx;
+
+    void unarchive();
 };
 
 } // namespace pdal

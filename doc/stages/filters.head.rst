@@ -47,7 +47,7 @@ Compute height above ground and extract the ten highest points.
           "type":"filters.smrf"
       },
       {
-          "type":"filters.hag"
+          "type":"filters.hag_nn"
       },
       {
           "type":"filters.sort",
@@ -70,3 +70,6 @@ Options
 
 count
   Number of points to return. [Default: 10]
+
+.. include:: filter_opts.rst
+

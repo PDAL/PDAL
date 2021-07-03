@@ -114,10 +114,6 @@ void TextReader::parseHeader(const std::string& header)
 
 void TextReader::parseQuotedHeader(const std::string& header)
 {
-    if (m_separatorArg->set())
-        throwError("Separator option not supported with a header line "
-            "containing quoted dimension names.");
-
     // We know there's a double quote at position 0.
     std::string::size_type pos = 1;
     while (true)
@@ -132,6 +128,18 @@ void TextReader::parseQuotedHeader(const std::string& header)
 
         // Skip everything other than a double quote.
         count = Utils::extract(header, pos, [](char c){ return c != '"'; });
+
+        // Find a separator.
+        if (!m_separatorArg->set())
+        {
+            std::string sep = header.substr(pos, count);
+            Utils::trim(sep);
+            if (sep.size() > 1)
+                throwError("Found separator longer than a single character.");
+            if (sep.size() == 0)
+                sep = ' ';
+            m_separatorArg->setValue(sep);
+        }
         pos += count;
         if (header[pos++] != '"')
             break;
@@ -149,7 +157,8 @@ void TextReader::parseUnquotedHeader(const std::string& header)
     {
         // Scan string for some character not a number or letter.
         for (size_t i = 0; i < header.size(); ++i)
-            if (isspecial(header[i]))
+            // Parenthesis around special to prevent macro expansion, see #3190
+            if ((isspecial)(header[i]))
             {
                 m_separator = header[i];
                 break;

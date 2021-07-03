@@ -43,6 +43,10 @@
 #include <string>
 #include <vector>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include "pdal_util_export.hpp"
 
 namespace pdal
@@ -61,7 +65,7 @@ namespace FileUtils
         bool asBinary=true);
 
     /**
-      Create a file and open for writing.
+      Create/truncate a file and open for writing.
 
       \param filename  Filename.
       \param asBinary  Write as binary file (don't convert /n to /r/n)
@@ -69,6 +73,17 @@ namespace FileUtils
     */
     PDAL_DLL std::ostream* createFile(std::string const& filename,
         bool asBinary=true);
+
+    /**
+      Open an existing file for write
+
+      \param filename  Filename.
+      \param asBinary  Write as binary file (don't convert /n to /r/n)
+      \return  Point to opened stream.
+    */
+    PDAL_DLL std::ostream* openExisting(std::string const& filename,
+        bool asBinary=true);
+
 
     /**
       Determine if a directory exists.
@@ -205,6 +220,16 @@ namespace FileUtils
     PDAL_DLL bool isDirectory(const std::string& path);
 
     /**
+      Return the path with all ".", ".." and symbolic links removed.
+      The file must exist.
+
+      \param filename  Name of file to convert to canonical path.
+      \return  Canonical version of provided filename, or empty string.
+    */
+    PDAL_DLL std::string toCanonicalPath(std::string filename);
+
+
+    /**
       If the filename is an absolute path, just return it otherwise,
       make it absolute (relative to current working dir) and return it.
 
@@ -258,6 +283,45 @@ namespace FileUtils
       \return  List of files that correspond to provided file specification.
     */
     PDAL_DLL std::vector<std::string> glob(std::string filespec);
-}
 
+
+    struct MapContext
+    {
+    public:
+        MapContext() : m_fd(-1), m_addr(nullptr)
+        {}
+
+        PDAL_DLL void *addr() const
+        { return m_addr; }
+        PDAL_DLL std::string what() const
+        { return m_error; }
+
+        int m_fd;
+        uintmax_t m_size;
+        void *m_addr;
+        std::string m_error;
+#ifdef _WIN32
+        HANDLE m_handle;
+#endif
+    };
+    /**
+      Map a file to memory.
+      \param filename  Filename to map.
+      \param readOnly  Must be true at this time.
+      \param pos       Starting position of file to map.
+      \param size      Number of bytes in file to map.
+      \return  MapContext.  addr() gets the mapped address.  what() gets
+         any error message.  addr() returns nullptr on error.
+    */
+    PDAL_DLL MapContext mapFile(const std::string& filename, bool readOnly = true,
+        uintmax_t pos = 0, uintmax_t size = 0);
+
+    /**
+      Unmap a previously mapped file.
+      \param ctx  Previously returned MapContext
+      \return  MapContext indicating current state of the file mapping.
+    */
+    PDAL_DLL MapContext unmapFile(MapContext ctx);
+
+} // namespace FileUtils
 } // namespace pdal

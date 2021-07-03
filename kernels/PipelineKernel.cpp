@@ -106,6 +106,7 @@ void PipelineKernel::addSwitches(ProgramArgs& args)
         m_stream);
     args.add("nostream", "Run in standard mode.", m_noStream);
     args.add("metadata", "Metadata filename", m_metadataFile);
+    args.add("dims", "Dimensions to be stored", m_dimNames);
 }
 
 
@@ -127,6 +128,8 @@ int PipelineKernel::execute()
         try
         {
             m_manager.readPipeline(m_inputFile);
+            if (!m_manager.hasReader())
+                throw pdal_error("Pipeline does not start with a reader.");
             m_manager.prepare();
             root["valid"] = true;
             root["error_detail"] = "";
@@ -144,6 +147,9 @@ int PipelineKernel::execute()
     }
 
     m_manager.readPipeline(m_inputFile);
+    if (!m_manager.hasReader())
+        throw pdal_error("Pipeline does not start with a reader.");
+    m_manager.pointTable().layout()->setAllowedDims(m_dimNames);
     if (m_manager.execute(m_mode).m_mode == ExecMode::None)
         throw pdal_error("Couldn't run pipeline in requested execution mode.");
 

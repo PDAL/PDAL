@@ -32,15 +32,17 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <fcntl.h>
 #include <sys/stat.h>
 
 #include <iostream>
 #include <sstream>
 #ifndef _WIN32
 #include <glob.h>
+#include <sys/mman.h>
 #else
+#include <io.h>
 #include <codecvt>
-#include <Windows.h>
 #endif
 
 #include <boost/filesystem.hpp>
@@ -133,6 +135,22 @@ std::ostream *createFile(std::string const& name, bool asBinary)
         return &std::cout;
 
     std::ios::openmode mode = std::ios::out;
+    if (asBinary)
+        mode |= std::ios::binary;
+
+    std::ostream *ofs = new std::ofstream(toNative(name), mode);
+    if (!ofs->good())
+    {
+        delete ofs;
+        return nullptr;
+    }
+    return ofs;
+}
+
+
+std::ostream *openExisting(const std::string& name, bool asBinary)
+{
+    std::ios::openmode mode = std::ios::out | std::ios::in;
     if (asBinary)
         mode |= std::ios::binary;
 
@@ -251,9 +269,14 @@ bool fileExists(const std::string& name)
 }
 
 
+/// \return  0 on error or invalid file type.
 uintmax_t fileSize(const std::string& file)
 {
-    return pdalboost::filesystem::file_size(toNative(file));
+    pdalboost::system::error_code ec;
+    uintmax_t size = pdalboost::filesystem::file_size(toNative(file), ec);
+    if (ec)
+        size = 0;
+    return size;
 }
 
 
@@ -279,24 +302,26 @@ std::string getcwd()
 }
 
 
-/***
-// Non-boost alternative.  Requires file existence.
-std::string toAbsolutePath(const std::string& filename)
+std::string toCanonicalPath(std::string filename)
 {
     std::string result;
 
 #ifdef _WIN32
-    char buf[MAX_PATH]
+    filename = addTrailingSlash(filename);
+    char buf[MAX_PATH];
     if (GetFullPathName(filename.c_str(), MAX_PATH, buf, NULL))
         result = buf;
 #else
-    char buf[PATH_MAX];
-    if (realpath(filename.c_str(), buf))
+    char *buf = realpath(filename.c_str(), NULL);
+    if (buf)
+    {
         result = buf;
+        free(buf);
+    }
 #endif
     return result;
 }
-***/
+
 
 // if the filename is an absolute path, just return it
 // otherwise, make it absolute (relative to current working dir) and return that
@@ -444,7 +469,88 @@ std::vector<std::string> glob(std::string path)
     return filenames;
 }
 
-} // namespace FileUtils
 
+MapContext mapFile(const std::string& filename, bool readOnly, uintmax_t pos, uintmax_t size)
+{
+    MapContext ctx;
+
+    if (!readOnly)
+    {
+        ctx.m_error = "readOnly must be true.";
+        return ctx;
+    }
+
+    if (size == 0)
+    {
+        size = FileUtils::fileSize(filename);
+        if (size == 0)
+        {
+            ctx.m_error = "File doesn't exist or isn't a regular file. Perhaps provide a size?";
+            return ctx;
+        }
+    }
+
+#ifndef _WIN32
+    ctx.m_fd = ::open(filename.c_str(), readOnly ? O_RDONLY : O_RDWR);
+#else
+    ctx.m_fd = ::_open(filename.c_str(), readOnly ? O_RDONLY : O_RDWR);
+#endif
+
+    if (ctx.m_fd == -1)
+    {
+        ctx.m_error = "Mapped file couldn't be opened.";
+        return ctx;
+    }
+    ctx.m_size = size;
+
+#ifndef _WIN32
+    ctx.m_addr = ::mmap(0, size, PROT_READ, MAP_SHARED, ctx.m_fd, (off_t)pos);
+    if (ctx.m_addr == MAP_FAILED)
+    {
+        ctx.m_addr = nullptr;
+        ctx.m_error = "Couldn't map file";
+    }
+#else
+    ctx.m_handle = CreateFileMapping((HANDLE)_get_osfhandle(ctx.m_fd),
+        NULL, PAGE_READONLY, 0, 0, NULL);
+    uint32_t low = pos & 0xFFFFFFFF;
+    uint32_t high = (uint32_t)(pos >> 8);
+    ctx.m_addr = MapViewOfFile(ctx.m_handle, FILE_MAP_READ, high, low,
+        ctx.m_size);
+    if (ctx.m_addr == nullptr)
+        ctx.m_error = "Couldn't map file";
+#endif
+
+    return ctx;
+}
+
+MapContext unmapFile(MapContext ctx)
+{
+#ifndef _WIN32
+    if (::munmap(ctx.m_addr, ctx.m_size) == -1)
+        ctx.m_error = "Couldn't unmap file.";
+    else
+    {
+        ctx.m_addr = nullptr;
+        ctx.m_size = 0;
+        ctx.m_error = "";
+    }
+    ::close(ctx.m_fd);
+#else
+    if (UnmapViewOfFile(ctx.m_addr) == 0)
+        ctx.m_error = "Couldn't unmap file.";
+    else
+    {
+        ctx.m_addr = nullptr;
+        ctx.m_size = 0;
+        ctx.m_error = "";
+    }
+    CloseHandle(ctx.m_handle);
+    ::_close(ctx.m_fd);
+#endif
+    return ctx;
+}
+
+} // namespace FileUtils
 } // namespace pdal
 

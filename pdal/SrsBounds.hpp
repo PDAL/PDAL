@@ -64,7 +64,7 @@ private:
 namespace Utils
 {
     template<>
-    inline bool fromString<SrsBounds>(const std::string& s,
+    inline StatusWithReason fromString(const std::string& s,
         SrsBounds& srsBounds)
     {
         std::string::size_type pos(0);
@@ -73,7 +73,7 @@ namespace Utils
     }
 }
 
-PDAL_DLL std::ostream& operator << (std::ostream& out, const Bounds& bounds);
+PDAL_DLL std::ostream& operator << (std::ostream& out, const SrsBounds& bounds);
 
 } // namespace pdal
 

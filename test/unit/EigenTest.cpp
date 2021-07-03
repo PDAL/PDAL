@@ -34,8 +34,8 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-#include <pdal/EigenUtils.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/private/MathUtils.hpp>
 
 #include <Eigen/Dense>
 
@@ -95,7 +95,7 @@ TEST(EigenTest, PointViewToEigen)
     pointView.setField(Dimension::Id::Z, 0, 3.0);
     Eigen::MatrixXd expected(1, 3);
     expected << 1.0, 2.0, 3.0;
-    Eigen::MatrixXd actual = pointViewToEigen(pointView);
+    Eigen::MatrixXd actual = math::pointViewToEigen(pointView);
     ASSERT_EQ(1, actual.rows());
     ASSERT_EQ(3, actual.cols());
     EXPECT_EQ(expected, actual);
@@ -111,7 +111,7 @@ TEST(EigenTest, ComputeValues)
 
     double spacing(1.4);
 
-    MatrixXd out = gradX(A);
+    MatrixXd out = math::gradX(A);
 
     Matrix3d gx;
     gx << -1.5151, -0.7457, 0.0238, 0.9511, 2.9186, 4.8861, -1.2958, 0.9536,
@@ -120,7 +120,7 @@ TEST(EigenTest, ComputeValues)
     for (size_t i = 0; i < 9; ++i)
         EXPECT_NEAR(gx(i), out(i), 0.0001);
 
-    MatrixXd out2 = gradY(A);
+    MatrixXd out2 = math::gradY(A);
 
     Matrix3d gy;
     gy << -4.0927, -1.6265, 3.2358, -0.4859, -0.3762, 1.2134, 3.1210, 0.8741,
@@ -139,8 +139,10 @@ TEST(EigenTest, Morphological)
         0;
     std::vector<double> Cv(C.data(), C.data() + C.size());
 
-    std::vector<double> Dv = dilateDiamond(Cv, 5, 5, 1);
-    std::vector<double> Dv2 = dilateDiamond(Cv, 5, 5, 2);
+    std::vector<double> Dv = Cv;
+    math::dilateDiamond(Dv, 5, 5, 1);
+    std::vector<double> Dv2 = Cv;
+    math::dilateDiamond(Dv2, 5, 5, 2);
 
     EXPECT_EQ(0, Dv[0]);
     EXPECT_EQ(1, Dv[1]);
@@ -154,8 +156,10 @@ TEST(EigenTest, Morphological)
         0;
     std::vector<double> Ev(E.data(), E.data() + E.size());
 
-    std::vector<double> Fv = erodeDiamond(Ev, 5, 5, 1);
-    std::vector<double> Fv2 = erodeDiamond(Ev, 5, 5, 2);
+    std::vector<double> Fv = Ev;
+    math::erodeDiamond(Fv, 5, 5, 1);
+    std::vector<double> Fv2 = Ev;
+    math::erodeDiamond(Fv2, 5, 5, 2);
 
     EXPECT_EQ(0, Fv[16]);
     EXPECT_EQ(1, Fv[12]);
@@ -192,7 +196,7 @@ TEST(EigenTest, calcBounds)
     const double lim_max = (std::numeric_limits<double>::max)();
     PointViewPtr b0(new PointView(table));
     BOX3D box_b0;
-    calculateBounds(*b0, box_b0);
+    b0->calculateBounds(box_b0);
     check_bounds(box_b0, lim_max, lim_min, lim_max, lim_min, lim_max, lim_min);
 
     PointViewPtr b1(new PointView(table));
@@ -208,11 +212,11 @@ TEST(EigenTest, calcBounds)
     bs.insert(b2);
 
     BOX3D box_b1;
-    calculateBounds(*b1, box_b1);
+    b1->calculateBounds(box_b1);
     check_bounds(box_b1, 0.0, 2.0, 0.0, 2.0, 0.0, 2.0);
 
     BOX3D box_b2;
-    calculateBounds(*b2, box_b2);
+    b2->calculateBounds(box_b2);
     check_bounds(box_b2, 1.0, 3.0, 1.0, 3.0, 1.0, 3.0);
 }
 
@@ -220,7 +224,7 @@ TEST(EigenTest, demeanTest)
 {
     PointTable table;
     PointViewPtr view = makeTestView(table);
-    PointViewPtr demeanView = demeanPointView(*view);
+    PointViewPtr demeanView = math::demeanPointView(*view);
     EXPECT_EQ(-80, demeanView->getFieldAs<double>(Dimension::Id::X, 0));
     EXPECT_EQ(-800, demeanView->getFieldAs<double>(Dimension::Id::Y, 0));
 }
@@ -231,7 +235,7 @@ TEST(EigenTest, computeCentroid)
     PointViewPtr view = makeTestView(table);
     PointIdList ids(view->size());
     std::iota(ids.begin(), ids.end(), 0);
-    auto centroid = computeCentroid(*view, ids);
+    auto centroid = math::computeCentroid(*view, ids);
     EXPECT_EQ(80, centroid.x());
     EXPECT_EQ(800, centroid.y());
 }

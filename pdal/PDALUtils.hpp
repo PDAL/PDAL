@@ -261,8 +261,10 @@ inline void writeProgress(int fd, const std::string& type,
 #endif
 }
 
+std::string dllDir();
 std::string PDAL_DLL toJSON(const MetadataNode& m);
 void PDAL_DLL toJSON(const MetadataNode& m, std::ostream& o);
+uintmax_t PDAL_DLL fileSize(const std::string& path);
 std::istream PDAL_DLL *openFile(const std::string& path, bool asBinary = true);
 std::ostream PDAL_DLL *createFile(const std::string& path,
     bool asBinary = true);
@@ -273,6 +275,8 @@ bool PDAL_DLL isRemote(const std::string& path);
 bool PDAL_DLL fileExists(const std::string& path);
 std::vector<std::string> PDAL_DLL maybeGlob(const std::string& path);
 double PDAL_DLL computeHausdorff(PointViewPtr srcView, PointViewPtr candView);
+std::pair<double, double> PDAL_DLL computeHausdorffPair(PointViewPtr srcView, PointViewPtr candView);
+double PDAL_DLL computeChamfer(PointViewPtr srcView, PointViewPtr candView);
 
 } // namespace Utils
 } // namespace pdal

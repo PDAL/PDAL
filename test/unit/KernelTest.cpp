@@ -60,27 +60,35 @@ TEST(KernelTest, parseOption)
     std::string stage;
     std::string option;
     std::string value;
-    bool ok;
+    Kernel::ParseStageResult res;
 
-    ok = Kernel::test_parseStageOption("--readers.p2g.foobar=baz",
+    res = Kernel::test_parseStageOption("--readers.p2g.foobar=baz",
         stage, option, value);
-    EXPECT_TRUE(ok);
+    EXPECT_EQ(res, Kernel::ParseStageResult::Ok);
     EXPECT_EQ(stage, "readers.p2g");
     EXPECT_EQ(option, "foobar");
     EXPECT_EQ(value, "baz");
 
-    ok = Kernel::test_parseStageOption("--readers.2pg.foobar=baz",
+    res = Kernel::test_parseStageOption("--readers.2pg.foobar=baz",
         stage, option, value);
-    EXPECT_FALSE(ok);
+    EXPECT_EQ(res, Kernel::ParseStageResult::Unknown);
 
-    ok = Kernel::test_parseStageOption("--read1ers.las.foobar=baz",
+    res = Kernel::test_parseStageOption("--read1ers.las.foobar=baz",
         stage, option, value);
-    EXPECT_FALSE(ok);
+    EXPECT_EQ(res, Kernel::ParseStageResult::Unknown);
 
-    ok = Kernel::test_parseStageOption("--readers.p2g.foobar",
+    res = Kernel::test_parseStageOption("--readers.p2g.foobar",
         stage, option, value);
-    EXPECT_TRUE(ok);
+    EXPECT_EQ(res, Kernel::ParseStageResult::Ok);
     EXPECT_EQ(value, "");
+
+    res = Kernel::test_parseStageOption("--readers.p2g.foobar=",
+        stage, option, value);
+    EXPECT_EQ(res, Kernel::ParseStageResult::Invalid);
+
+    res = Kernel::test_parseStageOption("--readers.p2g.foobar!",
+        stage, option, value);
+    EXPECT_EQ(res, Kernel::ParseStageResult::Invalid);
 }
 
 }

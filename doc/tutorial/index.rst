@@ -21,5 +21,4 @@ This section provides a collection of tutorials on how to use the PDAL
    las
    clipping/index
    ground-filters
-
-
+   grid-shift

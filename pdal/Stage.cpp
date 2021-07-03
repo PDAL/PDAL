@@ -32,13 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/private/gdal/ErrorHandler.hpp>
+#include "../filters/private/expr/ConditionalExpression.hpp"
 
 #include "private/StageRunner.hpp"
 
@@ -55,6 +56,24 @@ Stage::Stage() : m_progressFd(-1), m_verbose(0), m_pointCount(0),
 
 Stage::~Stage()
 {}
+
+
+void Stage::splitView(const PointViewPtr& view, PointViewPtr& keep, PointViewPtr& skip)
+{
+    const expr::ConditionalExpression *where = whereExpr();
+    if (where)
+    {
+        PointView *k = keep.get();
+        PointView *s = skip.get();
+        for (PointRef p : *view)
+        {
+            PointView *active = where->eval(p) ? k : s;
+            active->appendPoint(*view, p.pointId());
+        }
+    }
+    else
+        keep = view;
+}
 
 
 void Stage::addConditionalOptions(const Options& opts)
@@ -151,6 +170,7 @@ void Stage::prepare(PointTableRef table)
     l_initialize(table);
     initialize(table);
     addDimensions(table.layout());
+    l_prepared(table);
     prepared(table);
     stopLogging();
 }
@@ -246,35 +266,35 @@ PointViewSet Stage::execute(PointTableRef table, PointViewSet& views)
     for (auto it = views.rbegin(); it != views.rend(); it++)
         table.addSpatialReference((*it)->spatialReference());
 
-    // Count the number of views and the number of points and faces so they're
-    // available to stages.
-    m_pointCount = 0;
-    m_faceCount = 0;
-    for (auto const& it : views)
-    {
-        m_pointCount += it->size();
-        auto m = it->mesh();
-        if (m)
-            m_faceCount += m->size();
-    }
+    countElements(views);
+
     // Do the ready operation and then start running all the views
     // through the stage.
     ready(table);
-    prerun(views);
-    for (auto const& it : views)
+
+    // Create a runner for each view.
+    for (PointViewPtr v : views)
     {
-        StageRunnerPtr runner(new StageRunner(this, it));
+        StageRunnerPtr runner(new StageRunner(this, v));
         runners.push_back(runner);
-        runner->run();
     }
+
+    // The stage runner separates the point view into keeps and skips. We put all the
+    // kept points together to pass to prerun().
+    PointViewSet keeps;
+    for (StageRunnerPtr r : runners)
+        keeps.insert(r->keeps());
+    prerun(keeps);
+
+    for (StageRunnerPtr r : runners)
+        r->run();
 
     // As the stages complete (synchronously at this time), propagate the
     // spatial reference and merge the output views.
     srs = getSpatialReference();
-    for (auto const& it : runners)
+    for (StageRunnerPtr r : runners)
     {
-        StageRunnerPtr runner(it);
-        PointViewSet temp = runner->wait();
+        PointViewSet temp = r->wait();
 
         // If our stage has a spatial reference, the view takes it on once
         // the stage has been run.
@@ -283,6 +303,7 @@ PointViewSet Stage::execute(PointTableRef table, PointViewSet& views)
                 v->setSpatialReference(srs);
         outViews.insert(temp.begin(), temp.end());
     }
+
     done(table);
     stopLogging();
     m_pointCount = 0;
@@ -290,19 +311,20 @@ PointViewSet Stage::execute(PointTableRef table, PointViewSet& views)
     return outViews;
 }
 
-
-void Stage::l_addArgs(ProgramArgs& args)
+void Stage::countElements(const PointViewSet& views)
 {
-    args.add("user_data", "User JSON", m_userDataJSON);
-    args.add("log", "Debug output filename", m_logname);
-    // We never really bind anything to this variable.  We extract the option
-    // before parsing the command line.  This entry allows a line in the
-    // help and options list.
-    args.add("option_file", "File from which to read additional options",
-        m_optionFile);
-    readerAddArgs(args);
+    // Count the number of views and the number of points and faces so they're
+    // available to stages.
+    m_pointCount = 0;
+    m_faceCount = 0;
+    for (auto const& v : views)
+    {
+        m_pointCount += v->size();
+        auto m = v->mesh();
+        if (m)
+            m_faceCount += m->size();
+    }
 }
-
 
 void Stage::setupLog()
 {
@@ -329,12 +351,26 @@ void Stage::setupLog()
 }
 
 
+void Stage::l_addArgs(ProgramArgs& args)
+{
+    args.add("user_data", "User JSON", m_userDataJSON);
+    args.add("log", "Debug output filename", m_logname);
+    // We never really bind anything to this variable.  We extract the option
+    // before parsing the command line.  This entry allows a line in the
+    // help and options list.
+    args.add("option_file", "File from which to read additional options",
+        m_optionFile);
+}
+
+
 void Stage::l_initialize(PointTableRef table)
 {
     m_metadata = table.metadata().add(getName());
-    readerInitialize(table);
-    writerInitialize(table);
 }
+
+
+void Stage::l_prepared(PointTableRef table)
+{}
 
 
 const SpatialReference& Stage::getSpatialReference() const
@@ -404,6 +440,42 @@ void Stage::startLogging() const
 void Stage::stopLogging() const
 {
     m_log->popLeader();
+    gdal::ErrorHandler::getGlobalErrorHandler().clear();
+}
+
+std::istream& operator>>(std::istream& in, Stage::WhereMergeMode& mode)
+{
+    std::string s;
+    in >> s;
+
+    s = Utils::tolower(s);
+    if (s == "auto")
+        mode = Stage::WhereMergeMode::Auto;
+    else if (s == "true")
+        mode = Stage::WhereMergeMode::True;
+    else if (s == "false")
+        mode = Stage::WhereMergeMode::False;
+    else
+        in.setstate(std::ios_base::failbit);
+    return in;
+}
+
+std::ostream& operator<<(std::ostream& out, const Stage::WhereMergeMode& mode)
+{
+    switch (mode)
+    {
+    case Stage::WhereMergeMode::Auto:
+        out << "auto";
+        break;
+    case Stage::WhereMergeMode::True:
+        out << "true";
+        break;
+    case Stage::WhereMergeMode::False:
+        out << "false";
+        break;
+    }
+
+    return out;
 }
 
 } // namespace pdal

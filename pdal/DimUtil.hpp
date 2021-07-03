@@ -103,8 +103,8 @@ inline BaseType base(Type t)
     return BaseType(Utils::toNative(t) & 0xFF00);
 }
 
-static const int COUNT = (std::numeric_limits<uint16_t>::max)();
-static const int PROPRIETARY = 0xF000;
+static const int COUNT = 1024;
+static const int PROPRIETARY = 512;
 
 /// Get a string reresentation of a datatype.
 /// \param[in] dimtype  Dimension type.
@@ -194,9 +194,32 @@ inline std::size_t extractName(const std::string& s, std::string::size_type p)
         return 0;
     auto isvalid = [](int c)
     {
-        return std::isalpha(c) || std::isdigit(c) || c == '_' || c == '/';
+        return std::isalpha(c) || std::isdigit(c) || c == '_';
     };
     return Utils::extract(s, p, isvalid) + 1;
+}
+
+inline std::string fixName(std::string name)
+{
+    size_t pos = 0;
+    while (true)
+    {
+        pos = extractName(name, 0);
+        if (pos == name.size())
+            break;
+        name[pos] = '_';
+    }
+    return name;
+}
+
+inline bool nameValid(std::string name)
+{
+    name = Utils::toupper(name);
+    if (extractName(name, 0) != name.size())
+        return false;
+    if (name == "WHERE")
+        return false;
+    return true;
 }
 
 inline std::istream& operator>>(std::istream& in, Dimension::Type& type)

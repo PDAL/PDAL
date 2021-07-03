@@ -99,3 +99,6 @@ output_dims
     If specified, limits the dimensions written for each point.  Dimensions
     are listed by name and separated by commas.  X, Y and Z are required and
     must be explicitly listed.
+
+.. include:: writer_opts.rst
+

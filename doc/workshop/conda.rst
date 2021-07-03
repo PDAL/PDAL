@@ -15,7 +15,7 @@ What is Conda
 --------------------------------------------------------------------------------
 
 Conda is an open source package management system and environment management system that runs
-on Windows, macOS and Linux. Conda quickly installs, runs and updates packages and their dependencies.
+on Windows, macOS and Linux. Conda quickly installs, runs, and updates packages and their dependencies.
 Conda easily creates, saves, loads and switches between environments on your local computer.
 It was created for Python programs, but it can package and distribute software for any language..
 
@@ -36,7 +36,7 @@ so much, and provides it for Windows, Linux, and macOS.
 
     Not everyone uses Conda. Another alternative to get a known configuration
     is to go through the workshop using :ref:`docker` as your platform. A
-    previous edition of the workshop was provided as Docker, but it was
+    previous edition of the workshop was provided using Docker, but it was
     found to be a bit too difficult to follow.
 
 Installing Conda

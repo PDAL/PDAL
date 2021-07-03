@@ -143,13 +143,16 @@ template< class NodeData >
 int OctNode< NodeData >::initChildren( void (*Initializer)( OctNode& ) )
 {
 	{
-		if( UseAlloc ) children = NodeAllocator.newElements( Cube::CORNERS );
+		if( UseAlloc )
+            children = NodeAllocator.newElements( Cube::CORNERS );
 		else
 		{
-			if( children ) delete[] children;
+			if( children )
+                delete[] children;
 			children = new OctNode[Cube::CORNERS];
 		}
-		if( !children ) fprintf( stderr , "[ERROR] OctNode::initChildren: Failed to initialize children in OctNode::initChildren\n" ) , exit(0);
+		assert(children );
+
 		int d , off[3];
 		depthAndOffset( d , off );
 		for( int i=0 ; i<2 ; i++ ) for( int j=0 ; j<2 ; j++ ) for( int k=0 ; k<2 ; k++ )

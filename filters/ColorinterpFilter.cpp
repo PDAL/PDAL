@@ -34,13 +34,17 @@
 
 #include "ColorinterpFilter.hpp"
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/util/Utils.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
+#include <pdal/private/gdal/Raster.hpp>
 
 #include <array>
 #include <algorithm>
 #include <cmath>
+
+#include <cpl_vsi.h>
 
 #include "ColorInterpRamps.hpp"
 
@@ -78,9 +82,10 @@ std::string ColorinterpFilter::getName() const { return s_info.name; }
         location = name; \
         size = sizeof(name); \
         rampFilename = "/vsimem/" + std::string(#name) + ".png"; \
-        auto tmp(VSIFileFromMemBuffer(rampFilename.c_str(), location, size, FALSE)); \
+        auto tmp(VSIFileFromMemBuffer(rampFilename.c_str(), location, size, false)); \
     }
 //
+
 std::shared_ptr<gdal::Raster> openRamp(std::string& rampFilename)
 {
     // If the user selected a default ramp name, it will be opened by
@@ -111,6 +116,9 @@ void ColorinterpFilter::addArgs(ProgramArgs& args)
         std::numeric_limits<double>::quiet_NaN());
     args.add("maximum", "Maximum value to use for scaling", m_max,
         std::numeric_limits<double>::quiet_NaN());
+    args.add("clamp",
+        "Clamp and color values outside the range [minimum, maximum]",
+        m_clamp, false);
     args.add("ramp", "GDAL-readable color ramp image to use", m_colorramp,
         "pestel_shades");
     args.add("invert", "Invert the ramp direction", m_invertRamp, false);
@@ -269,13 +277,28 @@ bool ColorinterpFilter::processOne(PointRef& point)
 {
     double v = point.getFieldAs<double>(m_interpDim);
 
-    // Don't color points that aren't in the min/max range.
-    if (v < m_min || v >= m_max)
+    if (m_clamp)
+    {
+         v = Utils::clamp(v, m_min, m_max);
+    }
+
+    // Don't color points that aren't in the min/max range
+    // unless they've been clamped. Allow v == m_max so that
+    // if the user wants to clamp all values outside m_min
+    // and m_max the values greater than m_max are colored
+    // as expected.
+    if (v < m_min || v > m_max)
+    {
         return true;
+    }
 
     double factor = (v - m_min) / (m_max - m_min);
     size_t img_width = m_redBand.size();
     size_t position = size_t(std::floor(factor * img_width));
+
+    // Handle the case that v == m_max (position == img_width) by clamping
+    // position to img_width - 1
+    position = (std::min)(position, img_width - 1);
 
     if (m_invertRamp)
         position = (img_width - 1) - position;

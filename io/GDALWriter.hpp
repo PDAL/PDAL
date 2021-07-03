@@ -68,6 +68,7 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
     virtual void prepared(PointTableRef table);
+    virtual void readyTable(PointTableRef table);
     virtual void readyFile(const std::string& filename,
         const SpatialReference& srs);
     virtual void writeView(const PointViewPtr view);
@@ -75,15 +76,13 @@ private:
     virtual void doneFile();
     void createGrid(BOX2D bounds);
     void expandGrid(BOX2D bounds);
-    Cell cell(double x, double y);
-    long width() const;
-    long height() const;
+    int width() const;
+    int height() const;
 
     std::string m_outputFilename;
     std::string m_drivername;
     SpatialReference m_srs;
     Bounds m_bounds;
-    Position m_origin;
     double m_edgeLength;
     Arg *m_radiusArg;
     double m_xOrigin;
@@ -107,6 +106,10 @@ private:
     Dimension::Type m_dataType;
     bool m_expandByPoint;
     bool m_fixedGrid;
+    SpatialReference m_defaultSrs;
+    SpatialReference m_overrideSrs;
+    std::string m_GDAL_metadata;
+    bool m_writePDALMetadata;
 };
 
 }

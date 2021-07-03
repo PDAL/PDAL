@@ -23,7 +23,7 @@ Example
       "inputfile.las",
       {
           "type": "writers.ogr",
-          "filename" "outfile.geojson",
+          "filename": "outfile.geojson",
           "measure_dim": "Compression"
       }
   ]
@@ -66,6 +66,8 @@ measure_dim
 ogrdriver
   The OGR driver to use for output.  This option overrides any inference made
   about output drivers from filename_.
+
+.. include:: writer_opts.rst
 
 .. _vector formats: http://www.gdal.org/ogr_formats.html
 

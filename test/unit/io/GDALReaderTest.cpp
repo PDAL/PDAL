@@ -147,7 +147,7 @@ protected:
 
         PointTable t;
         gr.prepare(t);
-        Dimension::Id b1 = t.layout()->findDim("band-1");
+        Dimension::Id b1 = t.layout()->findDim("band_1");
         PointViewSet s = gr.execute(t);
         PointViewPtr v = *s.begin();
 
@@ -168,6 +168,10 @@ protected:
             EXPECT_DOUBLE_EQ(m_xyzPoints[i].m_y, m_gdalPoints[i].m_y);
             EXPECT_DOUBLE_EQ(m_xyzPoints[i].m_z, m_gdalPoints[i].m_z);
         }
+
+        MetadataNode l = gr.getMetadata().findChild("raster");
+        if (l.empty())
+            FAIL() << "Couldn't find raster metadata";
     }
 
 private:

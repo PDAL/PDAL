@@ -50,7 +50,8 @@ using Extensions = std::map<std::string, StringList>;
 
 static const Extensions readerExtensions =
 {
-  {"readers.icebridge", { "icebridge", "h5" } },
+  { "readers.draco", { "drc" } },
+  { "readers.icebridge", { "icebridge", "h5" } },
   { "readers.matlab", { "mat" } },
   { "readers.nitf", { "nitf", "nsf", "ntf" } },
   { "readers.pcd", { "pcd" } },
@@ -60,11 +61,13 @@ static const Extensions readerExtensions =
   { "readers.fbx", { "fbx" } },
   { "readers.slpk", { "slpk" } },
   { "readers.i3s", { "i3s" } },
+  { "readers.obj", { "obj" } },
   { "readers.e57", { "e57" } }
 };
 
 static const Extensions writerExtensions =
 {
+  { "writers.draco", { "drc" } },
   { "writers.matlab", { "mat" } },
   { "writers.nitf", { "nitf", "nsf", "ntf" } },
   { "writers.pcd", { "pcd" } },

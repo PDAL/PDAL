@@ -34,9 +34,9 @@
 
 #include "ColorizationFilter.hpp"
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/private/gdal/Raster.hpp>
 
 #include <array>
 
@@ -141,8 +141,6 @@ void ColorizationFilter::addArgs(ProgramArgs& args)
 
 void ColorizationFilter::initialize()
 {
-    gdal::registerDrivers();
-
     m_raster.reset(new gdal::Raster(m_rasterFilename));
     auto bandTypes = m_raster->getPDALDimensionTypes();
     m_raster->close();
@@ -217,9 +215,11 @@ bool ColorizationFilter::processOne(PointRef& point)
             point.setField(b.m_dim, data[i] * b.m_scale);
             ++i;
         }
-        return true;
     }
-    return false;
+
+    // always return true to retain all points inside OR outside the raster. the output bands of
+    // any points outside the raster are ignored.
+    return true;
 }
 
 

@@ -31,3 +31,6 @@ Options
 
 _`dimension`
   The dimension containing data to be grouped.
+
+.. include:: filter_opts.rst
+

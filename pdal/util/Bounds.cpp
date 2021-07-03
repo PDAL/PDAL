@@ -138,6 +138,23 @@ Bounds::Bounds(const BOX2D& box) : m_box(box)
     m_box.maxz = LOWEST;
 }
 
+void Bounds::reset(const BOX3D& box)
+{
+    m_box = box;
+}
+
+
+void Bounds::reset(const BOX2D& box)
+{
+    m_box.minx = box.minx;
+    m_box.maxx = box.maxx;
+    m_box.miny = box.miny;
+    m_box.maxy = box.maxy;
+    m_box.minz = HIGHEST;
+    m_box.maxz = LOWEST;
+}
+
+
 // We don't allow implicit conversion from a BOX2D to BOX3D.  Use the explicit
 // BOX3D ctor that takes a BOX2D if that's what you want.
 BOX3D Bounds::to3d() const
@@ -152,9 +169,28 @@ BOX2D Bounds::to2d() const
     return m_box.to2d();
 }
 
+
+bool Bounds::is2d() const
+{
+    return (valid() && !is3d());
+}
+
+
 bool Bounds::is3d() const
 {
     return (m_box.minz != HIGHEST || m_box.maxz != LOWEST);
+}
+
+
+bool Bounds::valid() const
+{
+    return m_box.valid();
+}
+
+
+bool Bounds::empty() const
+{
+    return m_box.empty();
 }
 
 

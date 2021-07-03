@@ -44,7 +44,7 @@ namespace Dimension
 class Detail
 {
 public:
-    Detail() : m_id(Id::Unknown), m_offset(-1), m_type(Type::None)
+    Detail() : m_id(Id::Unknown), m_offsetOrOrder(-1), m_type(Type::None)
     {}
     //NOTE - This is strange, but for some reason things run faster with
     // this NOOP virtual dtor.  Perhaps it has something to do with
@@ -55,7 +55,9 @@ public:
     {}
 
     void setOffset(int offset)
-        { m_offset = offset; }
+        { m_offsetOrOrder = offset; }
+    void setOrder(int order)
+        { m_offsetOrOrder = order; }
     void setType(Type type)
         { m_type = type; }
     void setId(Id id)
@@ -63,7 +65,9 @@ public:
     Id id() const
         { return m_id; }
     int offset() const
-        { return m_offset; }
+        { return m_offsetOrOrder; }
+    int order() const
+        { return m_offsetOrOrder; }
     Type type() const
         { return m_type; }
     size_t size() const
@@ -73,7 +77,7 @@ public:
 
 private:
     Id m_id;
-    int m_offset;
+    int m_offsetOrOrder;
     Type m_type;
 };
 typedef std::vector<Detail> DetailList;

@@ -42,6 +42,10 @@
 #include <pdal/Options.hpp>
 #include <pdal/util/FileUtils.hpp>
 
+#ifndef _WIN32
+#include <dlfcn.h>
+#endif
+
 using namespace std;
 
 namespace pdal
@@ -237,6 +241,20 @@ public:
 
 }  // unnamed namespace
 
+uintmax_t fileSize(const std::string& path)
+{
+    uintmax_t size = 0;
+    if (isRemote(path))
+    {
+        std::unique_ptr<std::size_t> pSize = arbiter::Arbiter().tryGetSize(path);
+        if (pSize)
+            size = *pSize;
+    }
+    else
+        size = FileUtils::fileSize(path);
+    return size;
+}
+
 /**
   Create a file (may be on a supported remote filesystem).
 
@@ -364,32 +382,27 @@ double computeHausdorff(PointViewPtr srcView, PointViewPtr candView)
 {
     using namespace Dimension;
 
-    KD3Index srcIndex(*srcView);
-    srcIndex.build();
-
-    KD3Index candIndex(*candView);
-    candIndex.build();
+    KD3Index &srcIndex = srcView->build3dIndex();
+    KD3Index &candIndex = candView->build3dIndex();
 
     double maxDistSrcToCand = std::numeric_limits<double>::lowest();
     double maxDistCandToSrc = std::numeric_limits<double>::lowest();
 
-    for (PointId i = 0; i < srcView->size(); ++i)
+    for (PointRef p : *srcView)
     {
         PointIdList indices(1);
         std::vector<double> sqr_dists(1);
-        PointRef srcPoint = srcView->point(i);
-        candIndex.knnSearch(srcPoint, 1, &indices, &sqr_dists);
+        candIndex.knnSearch(p, 1, &indices, &sqr_dists);
 
         if (sqr_dists[0] > maxDistSrcToCand)
             maxDistSrcToCand = sqr_dists[0];
     }
 
-    for (PointId i = 0; i < candView->size(); ++i)
+    for (PointRef q : *candView)
     {
         PointIdList indices(1);
         std::vector<double> sqr_dists(1);
-        PointRef candPoint = candView->point(i);
-        srcIndex.knnSearch(candPoint, 1, &indices, &sqr_dists);
+        srcIndex.knnSearch(q, 1, &indices, &sqr_dists);
 
         if (sqr_dists[0] > maxDistCandToSrc)
             maxDistCandToSrc = sqr_dists[0];
@@ -399,6 +412,105 @@ double computeHausdorff(PointViewPtr srcView, PointViewPtr candView)
     maxDistCandToSrc = std::sqrt(maxDistCandToSrc);
 
     return (std::max)(maxDistSrcToCand, maxDistCandToSrc);
+}
+
+std::pair<double, double> computeHausdorffPair(PointViewPtr viewA,
+                                               PointViewPtr viewB)
+{
+    // Computes both the max and mean of all nearest neighbor distances from
+    // each point in the PointView to those in the KD3Index.
+    auto compute = [](PointViewPtr view, KD3Index& index) {
+        double max_distance = std::numeric_limits<double>::lowest();
+        double M1(0.0);
+        for (PointRef p : *view)
+        {
+            PointIdList indices(1);
+            std::vector<double> sqr_dists(1);
+            index.knnSearch(p, 1, &indices, &sqr_dists);
+
+            if (sqr_dists[0] > max_distance)
+                max_distance = sqr_dists[0];
+
+            double delta = std::sqrt(sqr_dists[0]) - M1;
+            double delta_n = delta / (p.pointId() + 1);
+            M1 += delta_n;
+        }
+        max_distance = std::sqrt(max_distance);
+        return std::pair<double, double>{max_distance, M1};
+    };
+
+    // First, test from view A to view B...
+    KD3Index& indexB = viewB->build3dIndex();
+    std::pair<double, double> a2b = compute(viewA, indexB);
+
+    // then recompute from view B to view A.
+    KD3Index& indexA = viewA->build3dIndex();
+    std::pair<double, double> b2a = compute(viewB, indexA);
+
+    // The original Hausdorff metric is the max of the max distances from A to B
+    // and vice versa.
+    double original = (std::max)(a2b.first, b2a.first);
+
+    // The modified Hausdorff metric is the max of the mean distances from A to
+    // B and vice versa.
+    double modified = (std::max)(a2b.second, b2a.second);
+
+    // Return both the original and modified metrics.
+    return std::pair<double, double>{original, modified};
+}
+
+std::string dllDir()
+{
+    std::string s;
+
+#ifdef _WIN32
+    HMODULE hm = NULL;
+
+    if (GetModuleHandleEx(
+        GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+        GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+        (LPCSTR)&dllDir, &hm))
+    {
+        char path[MAX_PATH];
+        DWORD cnt = GetModuleFileNameA(hm, path, sizeof(path));
+        if (cnt > 0 && cnt < MAX_PATH)
+            s = path;
+    }
+#else
+    Dl_info info;
+    if (dladdr((const void *)dllDir, &info))
+        s = info.dli_fname;
+#endif
+    return FileUtils::getDirectory(s);
+}
+
+
+double computeChamfer(PointViewPtr srcView, PointViewPtr candView)
+{
+    using namespace Dimension;
+
+    KD3Index &srcIndex = srcView->build3dIndex();
+    KD3Index &candIndex = candView->build3dIndex();
+
+    double sum1(0.0);
+    for (PointRef p : *srcView)
+    {
+        PointIdList indices(1);
+        std::vector<double> sqr_dists(1);
+        candIndex.knnSearch(p, 1, &indices, &sqr_dists);
+        sum1 += sqr_dists[0];
+    }
+
+    double sum2(0.0);
+    for (PointRef q : *candView)
+    {
+        PointIdList indices(1);
+        std::vector<double> sqr_dists(1);
+        srcIndex.knnSearch(q, 1, &indices, &sqr_dists);
+        sum2 += sqr_dists[0];
+    }
+
+    return sum1 + sum2;
 }
 
 } // namespace Utils

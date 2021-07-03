@@ -32,8 +32,15 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#pragma warning(push)
+#pragma warning(disable: 4251)
+#include <ogr_api.h>
+#include <ogr_geometry.h>
+#pragma warning(pop)
+
 #include <pdal/Geometry.hpp>
-#include <pdal/GDALUtils.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
+
 #include "private/SrsTransform.hpp"
 
 namespace pdal
@@ -125,7 +132,7 @@ void Geometry::update(const std::string& wkt_or_json)
 Geometry& Geometry::operator=(const Geometry& input)
 {
     if (m_geom != input.m_geom)
-        *m_geom = *input.m_geom;
+        m_geom.reset(input.m_geom->clone());
     modified();
     return *this;
 }
@@ -138,8 +145,10 @@ bool Geometry::srsValid() const
 }
 
 
-StatusWithReason Geometry::transform(SpatialReference out)
+Utils::StatusWithReason Geometry::transform(SpatialReference out)
 {
+    using namespace Utils;
+
     if (!srsValid() && out.empty())
         return StatusWithReason();
 
@@ -150,7 +159,8 @@ StatusWithReason Geometry::transform(SpatialReference out)
         return StatusWithReason(-2,
             "Geometry::transform() failed.  NULL target SRS.");
 
-    SrsTransform transform(getSpatialReference(), out);
+    OGRSpatialReference *inSrs = m_geom->getSpatialReference();
+    SrsTransform transform(*inSrs, OGRSpatialReference(out.getWKT().data()));
     if (m_geom->transform(transform.get()) != OGRERR_NONE)
         return StatusWithReason(-1, "Geometry::transform() failed.");
     modified();
@@ -178,7 +188,8 @@ SpatialReference Geometry::getSpatialReference() const
     if (srsValid())
     {
         char *buf;
-        m_geom->getSpatialReference()->exportToWkt(&buf);
+        const char *options[] = { "FORMAT=WKT2", nullptr };
+        m_geom->getSpatialReference()->exportToWkt(&buf, options);
         srs.set(buf);
         CPLFree(buf);
     }

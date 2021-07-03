@@ -105,6 +105,13 @@ void NeighborClassifierFilter::prepared(PointTableRef table)
     std::sort(m_domain.begin(), m_domain.end());
 }
 
+
+void NeighborClassifierFilter::ready(PointTableRef)
+{
+    m_newClass.clear();
+}
+
+
 void NeighborClassifierFilter::doOneNoDomain(PointRef &point, PointRef &temp,
     KD3Index &kdi)
 {
@@ -130,9 +137,7 @@ void NeighborClassifierFilter::doOneNoDomain(PointRef &point, PointRef &temp,
     auto oldclass = point.getFieldAs<double>(m_dim);
     auto newclass = pr.first;
     if (pr.second > thresh && oldclass != newclass)
-    {
-        point.setField(m_dim, newclass);
-    }
+        m_newClass[point.pointId()] = newclass;
 }
 
 // update point.  kdi and temp both reference the NN point cloud
@@ -155,7 +160,7 @@ bool NeighborClassifierFilter::doOne(PointRef& point, PointRef &temp,
 
 
 PointViewPtr NeighborClassifierFilter::loadSet(const std::string& filename,
-    PointTable& table)
+    PointTableRef table)
 {
     PipelineManager mgr;
 
@@ -181,7 +186,7 @@ void NeighborClassifierFilter::filter(PointView& view)
     }
     else
     {   // NN comes from candidate file
-        PointTable candTable;
+        ColumnPointTable candTable;
         PointViewPtr candView = loadSet(m_candidateFile, candTable);
         KD3Index& kdiCand = candView->build3dIndex();
         PointRef point_nn(*candView, 0);
@@ -191,6 +196,9 @@ void NeighborClassifierFilter::filter(PointView& view)
             doOne(point_src, point_nn, kdiCand);
         }
     }
+
+    for (auto& p : m_newClass)
+        view.setField(m_dim, p.first, p.second);
 }
 
 } // namespace pdal

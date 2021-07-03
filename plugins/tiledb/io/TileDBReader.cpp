@@ -127,6 +127,9 @@ void TileDBReader::initialize()
 
     try
     {
+        if (m_stats)
+            tiledb::Stats::enable();
+
         m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ));
     }
     catch (const tiledb::TileDBError& err)
@@ -149,8 +152,13 @@ void TileDBReader::addDimensions(PointLayoutPtr layout)
         DimInfo di;
 
         di.m_name = dim.name();
+#if TILEDB_VERSION_MAJOR == 1
         di.m_offset = i;
         di.m_span = dims.size();
+#else
+        di.m_offset = 0;
+        di.m_span = 1;
+#endif
         di.m_dimCategory = DimCategory::Dimension;
         di.m_tileType = dim.type();
         di.m_type = getPdalType(di.m_tileType);
@@ -244,29 +252,35 @@ void TileDBReader::localReady()
     int numDims = m_array->schema().domain().dimensions().size();
 
     m_query.reset(new tiledb::Query(*m_ctx, *m_array));
+    m_query->set_layout( TILEDB_UNORDERED );
 
     // Build the buffer for the dimensions.
     auto it = std::find_if(m_dims.begin(), m_dims.end(),
         [](DimInfo& di){ return di.m_dimCategory == DimCategory::Dimension; });
 
     DimInfo& di = *it;
+
+#if TILEDB_VERSION_MAJOR == 1
     Buffer *dimBuf = new Buffer(di.m_tileType, m_chunkSize * numDims);
     m_query->set_coordinates(dimBuf->get<double>(), dimBuf->count());
     m_buffers.push_back(std::unique_ptr<Buffer>(dimBuf));
+#endif
 
     for (DimInfo& di : m_dims)
     {
         // All dimensions use the same buffer.
+#if TILEDB_VERSION_MAJOR == 1 
         if (di.m_dimCategory == DimCategory::Dimension)
-            di.m_buffer = dimBuf;
-        else
         {
-            std::unique_ptr<Buffer> dimBuf(
-                new Buffer(di.m_tileType, m_chunkSize));
-            di.m_buffer = dimBuf.get();
-            m_buffers.push_back(std::move(dimBuf));
-            setQueryBuffer(di);
+            di.m_buffer = dimBuf;
+            continue;
         }
+#endif
+        std::unique_ptr<Buffer> dimBuf(
+            new Buffer(di.m_tileType, m_chunkSize));
+        di.m_buffer = dimBuf.get();
+        m_buffers.push_back(std::move(dimBuf));
+        setQueryBuffer(di);
     }
 
     // Set the extent of the query.
@@ -295,7 +309,7 @@ void TileDBReader::localReady()
     // read spatial reference
     NL::json meta = nullptr;
 
-#if TILEDB_VERSION_MAJOR >= 1 && TILEDB_VERSION_MINOR >= 7
+#if TILEDB_VERSION_MAJOR > 1 || TILEDB_VERSION_MINOR >= 7
     tiledb_datatype_t v_type = TILEDB_UINT8;
     const void* v_r;
     uint32_t v_num;
@@ -310,7 +324,7 @@ void TileDBReader::localReady()
         tiledb::VFS::filebuf fbuf(vfs);
         std::string metaFName = m_filename + pathSeparator + "pdal.json";
 
-        if (vfs.is_dir(m_filename))
+        if (vfs.is_file(metaFName))
         {
             auto nBytes = vfs.file_size(metaFName);
             tiledb::VFS::filebuf fbuf(vfs);
@@ -412,13 +426,13 @@ bool TileDBReader::processPoint(PointRef& point)
         else
         {
             tiledb::Query::Status status;
-            if (m_stats)
-                tiledb::Stats::enable();
+
             m_query->submit();
+
             if (m_stats)
             {
                 tiledb::Stats::dump(stdout);
-                tiledb::Stats::disable();
+                tiledb::Stats::reset();
             }
 
             status = m_query->query_status();
@@ -427,10 +441,13 @@ bool TileDBReader::processPoint(PointRef& point)
             // returned by the query for dimensions.  So if there are three
             // dimensions, the number of points returned is the buffer count
             // divided by the number of dimensions.
+#if TILEDB_VERSION_MAJOR == 1
             m_resultSize =
                 (int)m_query->result_buffer_elements()[TILEDB_COORDS].second /
                 m_array->schema().domain().dimensions().size();
-
+#else
+            m_resultSize = (int)m_query->result_buffer_elements()["X"].second;
+#endif
             if (status == tiledb::Query::Status::INCOMPLETE &&
                     m_resultSize == 0)
                 throwError("Need to increase chunk_size for reader.");

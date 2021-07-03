@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2016, 2020 Bradley J Chambers (brad.chambers@gmail.com)
  *
  * All rights reserved.
  *
@@ -35,30 +35,42 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-
-#include <string>
+#include <pdal/Streamable.hpp>
 
 namespace pdal
 {
 
-class Options;
-
-class PDAL_DLL SampleFilter : public pdal::Filter
+class PDAL_DLL SampleFilter : public Filter, public Streamable
 {
+    using Voxel = std::tuple<int, int, int>;
+    using Coord = std::tuple<double, double, double>;
+    using CoordList = std::vector<Coord>;
+
 public:
-    SampleFilter() : Filter()
-    {}
+    SampleFilter() : Filter() {}
     SampleFilter& operator=(const SampleFilter&) = delete;
     SampleFilter(const SampleFilter&) = delete;
 
     std::string getName() const;
 
 private:
+    double m_cell;
+    Arg* m_cellArg;
     double m_radius;
+    double m_radiusSqr;
+    Arg* m_radiusArg;
+    double m_originX;
+    double m_originY;
+    double m_originZ;
+    std::map<Voxel, CoordList> m_populatedVoxels;
 
-    virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs& args);
+    virtual void prepared(PointTableRef table);
+    virtual bool processOne(PointRef& point);
+    virtual void ready(PointTableRef);
     virtual PointViewSet run(PointViewPtr view);
+
+    bool voxelize(PointRef& point);
 };
 
 } // namespace pdal

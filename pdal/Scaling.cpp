@@ -66,7 +66,7 @@ void Scaling::setAutoXForm(const PointViewSet& pvSet)
     double zmin = (std::numeric_limits<double>::max)();
     double zmax = (std::numeric_limits<double>::lowest)();
 
-    for (const PointViewPtr view : pvSet)
+    for (const PointViewPtr& view : pvSet)
     {
         if (xmod)
             for (PointId idx = 0; idx < view->size(); idx++)
@@ -92,26 +92,33 @@ void Scaling::setAutoXForm(const PointViewSet& pvSet)
     }
 
     if (m_xXform.m_offset.m_auto)
-    {
-        m_xXform.m_offset.m_val = xmin;
-        xmax -= xmin;
-    }
+        m_xXform.m_offset.m_val = 0.5 * xmin + 0.5 * xmax;
     if (m_yXform.m_offset.m_auto)
-    {
-        m_yXform.m_offset.m_val = ymin;
-        ymax -= ymin;
-    }
+        m_yXform.m_offset.m_val = 0.5 * ymin + 0.5 * ymax;
     if (m_zXform.m_offset.m_auto)
-    {
-        m_zXform.m_offset.m_val = zmin;
-        zmax -= zmin;
-    }
+        m_zXform.m_offset.m_val = 0.5 * zmin + 0.5 * zmax;
+
     if (m_xXform.m_scale.m_auto)
-        m_xXform.m_scale.m_val = xmax / (std::numeric_limits<int>::max)();
+    {
+        xmax = (std::max)(std::abs(xmax - m_xXform.m_offset.m_val),
+                          std::abs(xmin - m_xXform.m_offset.m_val));
+        m_xXform.m_scale.m_val
+            = xmax ? xmax / (std::numeric_limits<int>::max)() : 1.;
+    }
     if (m_yXform.m_scale.m_auto)
-        m_yXform.m_scale.m_val = ymax / (std::numeric_limits<int>::max)();
+    {
+        ymax = (std::max)(std::abs(ymax - m_yXform.m_offset.m_val),
+                          std::abs(ymin - m_yXform.m_offset.m_val));
+        m_yXform.m_scale.m_val
+            = ymax ? ymax / (std::numeric_limits<int>::max)() : 1.;
+    }
     if (m_zXform.m_scale.m_auto)
-        m_zXform.m_scale.m_val = zmax / (std::numeric_limits<int>::max)();
+    {
+        zmax = (std::max)(std::abs(zmax - m_zXform.m_offset.m_val),
+                          std::abs(zmin - m_zXform.m_offset.m_val));
+        m_zXform.m_scale.m_val
+            = zmax ? zmax / (std::numeric_limits<int>::max)() : 1.;
+    }
 }
 
 

@@ -28,12 +28,13 @@ struct traits<Ref<_PlainObjectType, _Options, _StrideType> >
 
   template<typename Derived> struct match {
     enum {
+      IsVectorAtCompileTime = PlainObjectType::IsVectorAtCompileTime || Derived::IsVectorAtCompileTime,
       HasDirectAccess = internal::has_direct_access<Derived>::ret,
-      StorageOrderMatch = PlainObjectType::IsVectorAtCompileTime || Derived::IsVectorAtCompileTime || ((PlainObjectType::Flags&RowMajorBit)==(Derived::Flags&RowMajorBit)),
+      StorageOrderMatch = IsVectorAtCompileTime || ((PlainObjectType::Flags&RowMajorBit)==(Derived::Flags&RowMajorBit)),
       InnerStrideMatch = int(StrideType::InnerStrideAtCompileTime)==int(Dynamic)
                       || int(StrideType::InnerStrideAtCompileTime)==int(Derived::InnerStrideAtCompileTime)
                       || (int(StrideType::InnerStrideAtCompileTime)==0 && int(Derived::InnerStrideAtCompileTime)==1),
-      OuterStrideMatch = Derived::IsVectorAtCompileTime
+      OuterStrideMatch = IsVectorAtCompileTime
                       || int(StrideType::OuterStrideAtCompileTime)==int(Dynamic) || int(StrideType::OuterStrideAtCompileTime)==int(Derived::OuterStrideAtCompileTime),
       // NOTE, this indirection of evaluator<Derived>::Alignment is needed
       // to workaround a very strange bug in MSVC related to the instantiation
@@ -95,6 +96,8 @@ protected:
   template<typename Expression>
   EIGEN_DEVICE_FUNC void construct(Expression& expr)
   {
+    EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(PlainObjectType,Expression);
+
     if(PlainObjectType::RowsAtCompileTime==1)
     {
       eigen_assert(expr.rows()==1 || expr.cols()==1);
@@ -184,6 +187,8 @@ protected:
   * void foo(const Ref<MatrixXf,0,Stride<> >& A) { foo_impl(A); }
   * \endcode
   *
+  * See also the following stackoverflow questions for further references:
+  *  - <a href="http://stackoverflow.com/questions/21132538/correct-usage-of-the-eigenref-class">Correct usage of the Eigen::Ref<> class</a>
   *
   * \sa PlainObjectBase::Map(), \ref TopicStorageOrders
   */

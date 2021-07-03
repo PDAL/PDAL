@@ -67,7 +67,7 @@ LasHeader::LasHeader() : m_fileSig(FILE_SIGNATURE), m_sourceId(0),
     m_globalEncoding(0), m_versionMinor(2), m_systemId(getSystemIdentifier()),
     m_createDOY(0), m_createYear(0), m_vlrOffset(0), m_pointOffset(0),
     m_vlrCount(0), m_pointFormat(0), m_pointLen(0), m_pointCount(0),
-    m_isCompressed(false), m_eVlrOffset(0), m_eVlrCount(0)
+    m_isCompressed(false), m_eVlrOffset(0), m_eVlrCount(0), m_nosrs(false)
 {
     std::time_t now;
     std::time(&now);
@@ -82,6 +82,38 @@ LasHeader::LasHeader() : m_fileSig(FILE_SIGNATURE), m_sourceId(0),
     m_pointCountByReturn.fill(0);
     m_scales.fill(1.0);
     m_offsets.fill(0.0);
+}
+
+
+void LasHeader::initialize(LogPtr log, uintmax_t fileSize, bool nosrs)
+{
+    m_log = log;
+    m_fileSize = fileSize;
+    m_nosrs = nosrs;
+}
+
+
+std::string LasHeader::versionString() const
+{
+    return "1." + std::to_string(m_versionMinor);
+}
+
+
+Utils::StatusWithReason LasHeader::pointFormatSupported() const
+{
+    if (hasWave())
+        return { -1, "PDAL does not support point formats with waveform data (4, 5, 9 and 10)" };
+    if (versionAtLeast(1, 4))
+    {
+        if (pointFormat() > 10)
+            return { -1, "LAS version " + versionString() + " only supports point formats 0-10." };
+    }
+    else
+    {
+        if (pointFormat() > 5)
+            return { -1, "LAS version '" + versionString() + " only supports point formats 0-5." };
+    }
+    return true;
 }
 
 
@@ -189,31 +221,41 @@ Dimension::IdList LasHeader::usedDims() const
     }
     if (hasInfrared())
         ids.push_back(Id::Infrared);
+    if (has14PointFormat())
+    {
+        ids.push_back(Id::ScanChannel);
+        ids.push_back(Id::ClassFlags);
+    }
 
     return ids;
 }
 
 void LasHeader::setSrs()
 {
-    bool useWkt = false;
+    // If we're not processing SRS, just return.
+    if (m_nosrs)
+        return;
 
-    if (incompatibleSrs())
+    if (has14PointFormat() && !useWkt())
     {
         m_log->get(LogLevel::Error) << "Global encoding WKT flag not set "
             "for point format 6 - 10." << std::endl;
     }
-    else if (findVlr(TRANSFORM_USER_ID, WKT_RECORD_ID) &&
+    if (findVlr(TRANSFORM_USER_ID, WKT_RECORD_ID) &&
         findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID))
     {
         m_log->get(LogLevel::Debug) << "File contains both "
             "WKT and GeoTiff VLRs which is disallowed." << std::endl;
     }
-    else
-        useWkt = (m_versionMinor >= 4);
 
+    // We always use WKT for formats 6+, regardless of the WKT global encoding bit (warning
+    // issued above.)
+    // Otherwise (formats 0-5), we only use it of the WKT bit is set and it's version 1.4 
+    // or better.  For valid files the WKT bit won't be set for files < version 1.4, but
+    // we can't be sure, so we check here.
     try
     {
-        if (useWkt)
+        if ((useWkt() && m_versionMinor >= 4) || has14PointFormat())
             setSrsFromWkt();
         else
             setSrsFromGeotiff();
@@ -284,7 +326,10 @@ void LasHeader::setSrsFromWkt()
     const char *c = vlr->data() + len - 1;
     if (*c == 0)
         len--;
-    m_srs.set(std::string(vlr->data(), len));
+    std::string wkt(vlr->data(), len);
+    // Strip any excess NULL bytes from the WKT.
+    wkt.erase(std::find(wkt.begin(), wkt.end(), '\0'), wkt.end());
+    m_srs.set(wkt);
 }
 
 
@@ -320,6 +365,7 @@ void LasHeader::setSrsFromGeotiff()
     std::vector<uint8_t> asciiRec(data, data + dataLen);
 
     GeotiffSrs geotiff(directoryRec, doublesRec, asciiRec, m_log);
+    m_geotiff_print = geotiff.gtiffPrintString();
     SpatialReference gtiffSrs = geotiff.srs();
     if (!gtiffSrs.empty())
         m_srs = gtiffSrs;
@@ -381,12 +427,25 @@ ILeStream& operator>>(ILeStream& in, LasHeader& h)
             in >> h.m_pointCountByReturn[i];
     }
 
+    if (!h.compressed() && h.m_pointOffset > h.m_fileSize)
+        throw LasHeader::error("Invalid point offset - exceeds file size.");
+    if (!h.compressed() && h.m_pointOffset + h.m_pointCount * h.m_pointLen > h.m_fileSize)
+        throw LasHeader::error("Invalid point count. Number of points exceeds file size.");
+    if (h.m_vlrOffset > h.m_fileSize)
+        throw LasHeader::error("Invalid VLR offset - exceeds file size.");
+    // There was a bug in PDAL where it didn't write the VLR offset :(
+    /**
+    if (h.m_eVlrOffset > h.m_fileSize)
+        throw LasHeader::error("Invalid extended VLR offset - exceeds file size.");
+    **/
+
     // Read regular VLRs.
     in.seek(h.m_vlrOffset);
     for (size_t i = 0; i < h.m_vlrCount; ++i)
     {
         LasVLR r;
-        in >> r;
+        if (!r.read(in, h.m_pointOffset))
+            throw LasHeader::error("Invalid VLR - exceeds specified file range.");
         h.m_vlrs.push_back(std::move(r));
     }
 
@@ -397,7 +456,8 @@ ILeStream& operator>>(ILeStream& in, LasHeader& h)
         for (size_t i = 0; i < h.m_eVlrCount; ++i)
         {
             ExtLasVLR r;
-            in >> r;
+            if (!r.read(in, h.m_fileSize))
+                throw LasHeader::error("Invalid Extended VLR size - exceeds file size.");
             h.m_vlrs.push_back(std::move(r));
         }
     }

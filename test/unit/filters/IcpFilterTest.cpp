@@ -35,11 +35,12 @@
 #include "Support.hpp"
 #include <Eigen/Dense>
 #include <filters/TransformationFilter.hpp>
+#include <io/BufferReader.hpp>
 #include <io/LasReader.hpp>
 #include <memory>
 #include <pdal/pdal_test_main.hpp>
-#include <pdal/EigenUtils.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/private/MathUtils.hpp>
 
 namespace pdal
 {
@@ -103,7 +104,7 @@ TEST(IcpFilterTest, DefaultIdentity)
 
     MetadataNode root = filter->getMetadata();
     MetadataNode transform = root.findChild("transform");
-    EXPECT_EQ("matrix", transform.type());
+    EXPECT_EQ("string", transform.type());
     Eigen::MatrixXd transformMatrix = transform.value<Eigen::MatrixXd>();
     EXPECT_TRUE(transformMatrix.isApprox(Eigen::MatrixXd::Identity(4, 4), 1.0));
 }
@@ -134,6 +135,306 @@ TEST(IcpFilterTest, RecoverTranslation)
     EXPECT_NEAR(-2.0, transform(1, 3), tolerance);
     EXPECT_NEAR(-3.0, transform(2, 3), tolerance);
     checkPointsEqualReader(pointViewSet, tolerance);
+}
+
+TEST(IcpFilterTest, RecoverTranslationWithNoise)
+{
+    // Create two views, the second being translated by (1, 2, 3), but with a
+    // large amount of noise added to the second X value. Test that max_dist
+    // argument rejects this match and we come up with the correct translation.
+    using namespace Dimension;
+
+    PointTable table;
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z});
+
+    BufferReader reader1;
+    BufferReader reader2;
+
+    PointViewPtr view1(new PointView(table));
+    view1->setField(Id::X, 0, 0);
+    view1->setField(Id::X, 1, 10);
+    view1->setField(Id::X, 2, 0);
+    view1->setField(Id::Y, 0, 0);
+    view1->setField(Id::Y, 1, 0);
+    view1->setField(Id::Y, 2, 10);
+    view1->setField(Id::Z, 0, 0);
+    view1->setField(Id::Z, 1, 0);
+    view1->setField(Id::Z, 2, 0);
+    reader1.addView(view1);
+
+    PointViewPtr view2(new PointView(table));
+    view2->setField(Id::X, 0, 1);
+    view2->setField(Id::X, 1, 16);
+    view2->setField(Id::X, 2, 1);
+    view2->setField(Id::Y, 0, 2);
+    view2->setField(Id::Y, 1, 2);
+    view2->setField(Id::Y, 2, 12);
+    view2->setField(Id::Z, 0, 3);
+    view2->setField(Id::Z, 1, 3);
+    view2->setField(Id::Z, 2, 3);
+    reader2.addView(view2);
+    
+    auto filter = newFilter();
+    Options icpOptions;
+    icpOptions.add("max_dist", 5.0);
+    filter->setInput(reader1);
+    filter->setInput(reader2);
+    filter->setOptions(icpOptions);
+
+    filter->prepare(table);
+    PointViewSet pointViewSet = filter->execute(table);
+
+    MetadataNode root = filter->getMetadata();
+    Eigen::MatrixXd transform =
+        root.findChild("transform").value<Eigen::MatrixXd>();
+    double tolerance = 1.5;
+    EXPECT_NEAR(-1.0, transform(0, 3), tolerance);
+    EXPECT_NEAR(-2.0, transform(1, 3), tolerance);
+    EXPECT_NEAR(-3.0, transform(2, 3), tolerance);
+}
+
+TEST(IcpFilterTest, RecoverTranslationWithNoise2)
+{
+    // Create two views, the second being translated by (1, 2, 3), but with a
+    // large amount of noise added to the second X value. Test that without the
+    // max_dist argument the X component of the translation is incorrect.
+    using namespace Dimension;
+
+    PointTable table;
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z});
+
+    BufferReader reader1;
+    BufferReader reader2;
+
+    PointViewPtr view1(new PointView(table));
+    view1->setField(Id::X, 0, 0);
+    view1->setField(Id::X, 1, 10);
+    view1->setField(Id::X, 2, 0);
+    view1->setField(Id::Y, 0, 0);
+    view1->setField(Id::Y, 1, 0);
+    view1->setField(Id::Y, 2, 10);
+    view1->setField(Id::Z, 0, 0);
+    view1->setField(Id::Z, 1, 0);
+    view1->setField(Id::Z, 2, 0);
+    reader1.addView(view1);
+
+    PointViewPtr view2(new PointView(table));
+    view2->setField(Id::X, 0, 1);
+    view2->setField(Id::X, 1, 16);
+    view2->setField(Id::X, 2, 1);
+    view2->setField(Id::Y, 0, 2);
+    view2->setField(Id::Y, 1, 2);
+    view2->setField(Id::Y, 2, 12);
+    view2->setField(Id::Z, 0, 3);
+    view2->setField(Id::Z, 1, 3);
+    view2->setField(Id::Z, 2, 3);
+    reader2.addView(view2);
+    
+    auto filter = newFilter();
+    filter->setInput(reader1);
+    filter->setInput(reader2);
+
+    filter->prepare(table);
+    PointViewSet pointViewSet = filter->execute(table);
+
+    MetadataNode root = filter->getMetadata();
+    Eigen::MatrixXd transform =
+        root.findChild("transform").value<Eigen::MatrixXd>();
+    double tolerance = 1.5;
+    EXPECT_GT(-1.0, transform(0, 3));
+    EXPECT_NEAR(-2.0, transform(1, 3), tolerance);
+    EXPECT_NEAR(-3.0, transform(2, 3), tolerance);
+}
+
+TEST(IcpFilterTest, RecoverTranslationWithGuess)
+{
+    using namespace Dimension;
+
+    PointTable table;
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z});
+
+    BufferReader reader1;
+    BufferReader reader2;
+
+    PointViewPtr view1(new PointView(table));
+    view1->setField(Id::X, 0, 0);
+    view1->setField(Id::X, 1, 10);
+    view1->setField(Id::X, 2, 0);
+    view1->setField(Id::Y, 0, 0);
+    view1->setField(Id::Y, 1, 0);
+    view1->setField(Id::Y, 2, 10);
+    view1->setField(Id::Z, 0, 0);
+    view1->setField(Id::Z, 1, 0);
+    view1->setField(Id::Z, 2, 0);
+    reader1.addView(view1);
+
+    PointViewPtr view2(new PointView(table));
+    view2->setField(Id::X, 0, 1);
+    view2->setField(Id::X, 1, 11);
+    view2->setField(Id::X, 2, 1);
+    view2->setField(Id::Y, 0, 2);
+    view2->setField(Id::Y, 1, 2);
+    view2->setField(Id::Y, 2, 12);
+    view2->setField(Id::Z, 0, 3);
+    view2->setField(Id::Z, 1, 3);
+    view2->setField(Id::Z, 2, 3);
+    reader2.addView(view2);
+    
+    auto filter = newFilter();
+    Options icpOptions;
+    // Start with the actual transformation for the initial guess.
+    icpOptions.add("init", "1 0 0 -1 0 1 0 -2 0 0 1 -3 0 0 0 1");
+    filter->setInput(reader1);
+    filter->setInput(reader2);
+    filter->setOptions(icpOptions);
+
+    filter->prepare(table);
+    PointViewSet pointViewSet = filter->execute(table);
+
+    MetadataNode root = filter->getMetadata();
+    Eigen::MatrixXd transform =
+        root.findChild("transform").value<Eigen::MatrixXd>();
+    double tolerance = 1.5;
+    EXPECT_NEAR(-1.0, transform(0, 3), tolerance);
+    EXPECT_NEAR(-2.0, transform(1, 3), tolerance);
+    EXPECT_NEAR(-3.0, transform(2, 3), tolerance);
+}
+
+//ABELL - This broke when an update happened to Eigen. Not sure why and not sure I want to
+// investigate since this seems a pointless test anyway.
+/**
+TEST(IcpFilterTest, RecoverTranslationWithBadGuess)
+{
+    using namespace Dimension;
+
+    PointTable table;
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z});
+
+    BufferReader reader1;
+    BufferReader reader2;
+
+    PointViewPtr view1(new PointView(table));
+    view1->setField(Id::X, 0, 0);
+    view1->setField(Id::X, 1, 10);
+    view1->setField(Id::X, 2, 0);
+    view1->setField(Id::Y, 0, 0);
+    view1->setField(Id::Y, 1, 0);
+    view1->setField(Id::Y, 2, 10);
+    view1->setField(Id::Z, 0, 0);
+    view1->setField(Id::Z, 1, 0);
+    view1->setField(Id::Z, 2, 0);
+    reader1.addView(view1);
+
+    PointViewPtr view2(new PointView(table));
+    view2->setField(Id::X, 0, 1);
+    view2->setField(Id::X, 1, 11);
+    view2->setField(Id::X, 2, 1);
+    view2->setField(Id::Y, 0, 2);
+    view2->setField(Id::Y, 1, 2);
+    view2->setField(Id::Y, 2, 12);
+    view2->setField(Id::Z, 0, 3);
+    view2->setField(Id::Z, 1, 3);
+    view2->setField(Id::Z, 2, 3);
+    reader2.addView(view2);
+    
+    auto filter = newFilter();
+    Options icpOptions;
+
+    // Provide a bad initial guess for the tranformation.
+    icpOptions.add("init", "0.996 0 0.087 -50 0 1 0 100 0.996 0 0.087 -300 0 0 0 1");
+    filter->setInput(reader1);
+    filter->setInput(reader2);
+    filter->setOptions(icpOptions);
+
+    filter->prepare(table);
+    PointViewSet pointViewSet = filter->execute(table);
+
+    MetadataNode root = filter->getMetadata();
+    Eigen::MatrixXd transform =
+        root.findChild("transform").value<Eigen::MatrixXd>();
+    //ABELL - Eigen 3.3.9 broke this. Not sure why. After some research, chambbj and I
+    // decided to comment this out until people felt it was important.
+    //
+    // No reason to check exact values, only that they are LT/GT the expected values.
+    EXPECT_GT(-1.0, transform(0, 3));
+    EXPECT_LT(-2.0, transform(1, 3));
+    EXPECT_GT(-3.0, transform(2, 3));
+}
+**/
+
+TEST(IcpFilterTest, RecoverTranslationWithMalformedGuess)
+{
+    using namespace Dimension;
+
+    PointTable table;
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z});
+
+    BufferReader reader1;
+    BufferReader reader2;
+
+    PointViewPtr view1(new PointView(table));
+    view1->setField(Id::X, 0, 0);
+    view1->setField(Id::X, 1, 10);
+    view1->setField(Id::X, 2, 0);
+    view1->setField(Id::Y, 0, 0);
+    view1->setField(Id::Y, 1, 0);
+    view1->setField(Id::Y, 2, 10);
+    view1->setField(Id::Z, 0, 0);
+    view1->setField(Id::Z, 1, 0);
+    view1->setField(Id::Z, 2, 0);
+    reader1.addView(view1);
+
+    PointViewPtr view2(new PointView(table));
+    view2->setField(Id::X, 0, 1);
+    view2->setField(Id::X, 1, 11);
+    view2->setField(Id::X, 2, 1);
+    view2->setField(Id::Y, 0, 2);
+    view2->setField(Id::Y, 1, 2);
+    view2->setField(Id::Y, 2, 12);
+    view2->setField(Id::Z, 0, 3);
+    view2->setField(Id::Z, 1, 3);
+    view2->setField(Id::Z, 2, 3);
+    reader2.addView(view2);
+    
+    auto filter = newFilter();
+    Options icpOptions;
+    // Provide a malformed initial guess (too many entries).
+    icpOptions.add("init", "7 1 0 0 -1 0 1 0 -2 0 0 1 -3 0 0 0 1");
+    filter->setInput(reader1);
+    filter->setInput(reader2);
+    filter->setOptions(icpOptions);
+
+    EXPECT_THROW(filter->prepare(table), pdal_error);
+}
+
+TEST(IcpFilterTest, RecoverRotation)
+{
+    auto reader1 = newReader();
+    auto reader2 = newReader();
+    TransformationFilter transformationFilter;
+    Options transformationOptions;
+    transformationOptions.add("matrix", "0.996 0 0.087 0\n0 1 0 0\n-0.087 0 0.996 0\n0 0 0 1");
+    transformationFilter.setOptions(transformationOptions);
+    transformationFilter.setInput(*reader2);
+
+    auto filter = newFilter();
+    filter->setInput(*reader1);
+    filter->setInput(transformationFilter);
+
+    PointTable table;
+    filter->prepare(table);
+    PointViewSet pointViewSet = filter->execute(table);
+
+    MetadataNode root = filter->getMetadata();
+    Eigen::MatrixXd transform =
+        root.findChild("transform").value<Eigen::MatrixXd>();
+    double tolerance = 0.001;
+    EXPECT_NEAR(0.996, transform(0, 0), tolerance);
+    EXPECT_NEAR(-0.087, transform(0, 2), tolerance);
+    EXPECT_NEAR(0.087, transform(2, 0), tolerance);
+    EXPECT_NEAR(0.996, transform(2, 2), tolerance);
+    double tolerance2 = 0.5;
+    checkPointsEqualReader(pointViewSet, tolerance2);
 }
 
 TEST(IcpFilterTest, TooFewInputs)

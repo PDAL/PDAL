@@ -79,7 +79,7 @@ target_compile_options(E57Format PRIVATE
     )
 endif()
 target_link_libraries(E57Format
-    PUBLIC
+    PRIVATE
         ${XercesC_LIBRARIES}
 )
 
@@ -88,6 +88,7 @@ target_include_directories(E57Format
     PRIVATE
         include
         contrib/CRCpp/inc
+        ${XercesC_INCLUDE_DIR}
 )
 
 target_compile_definitions(E57Format

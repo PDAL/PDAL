@@ -20,17 +20,16 @@ dimension type, while others only understand fixed dimension names.
    writers.ept_addon
    writers.e57
    writers.gdal
-   writers.geowave
    writers.gltf
    writers.las
    writers.matlab
    writers.nitf
    writers.null
-   writers.oci
    writers.ogr
    writers.pcd
    writers.pgpointcloud
    writers.ply
+   writers.raster
    writers.sbet
    writers.sqlite
    writers.text
@@ -47,9 +46,6 @@ dimension type, while others only understand fixed dimension names.
 
 :ref:`writers.gdal`
     Create a raster from a point cloud using an interpolation algorithm.
-
-:ref:`writers.geowave`
-    Write point cloud data to Accumulo.
 
 :ref:`writers.gltf`
     Write mesh data in GLTF format.  Point clouds without meshes cannot be
@@ -69,9 +65,6 @@ dimension type, while others only understand fixed dimension names.
     Provides a sink for points in a pipeline. It's the same as sending pipeline
     output to /dev/null.
 
-:ref:`writers.oci`
-    Write data to Oracle point cloud databases.
-
 :ref:`writers.ogr`
     Write a point cloud as a set of OGR points/multipoints
 
@@ -84,6 +77,9 @@ dimension type, while others only understand fixed dimension names.
 
 :ref:`writers.ply`
     Write points as PLY vertices. Can also emit a mesh as a set of faces.
+
+:ref:`writers.raster`
+    Writes rasters using GDAL. Rasters must be created using a PDAL filter.
 
 :ref:`writers.sbet`
     Write data in the SBET format.
