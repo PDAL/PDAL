@@ -36,7 +36,7 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/Streamable.hpp>
-#include <filters/StatsFilter.hpp>
+#include <pdal/filters/StatsFilter.hpp>
 
 #include <map>
 
