@@ -62,7 +62,6 @@ SOFTWARE.
 #endif
 
 #include <algorithm>
-#include <cctype>
 #include <cstdlib>
 #include <sstream>
 
@@ -99,27 +98,6 @@ namespace
         if (config.is_null()) config = json::object();
 
         return merge(in, config);
-    }
-
-    inline bool iequals(const std::string& s, const std::string& s2)
-    {
-        if (s.length() != s2.length())
-            return false;
-        for (size_t i = 0; i < s.length(); ++i)
-            if (std::toupper(s[i]) != std::toupper(s2[i]))
-                return false;
-        return true;
-    }
-
-    inline bool findEntry(const StringMap& map, const std::string& key, std::string& val)
-    {
-        for (auto& p : map)
-            if (iequals(p.first, key))
-            {
-                val = p.second;
-                return true;
-            }
-        return false;
     }
 }
 
@@ -761,6 +739,22 @@ std::unique_ptr<std::size_t> Endpoint::tryGetSize(
     return m_driver->tryGetSize(fullPath(subpath));
 }
 
+std::size_t Endpoint::getSize(
+        const std::string subpath,
+        const http::Headers headers,
+        const http::Query query) const
+{
+    return getHttpDriver().getSize(fullPath(subpath), headers, query);
+}
+
+std::unique_ptr<std::size_t> Endpoint::tryGetSize(
+        const std::string subpath,
+        const http::Headers headers,
+        const http::Query query) const
+{
+    return getHttpDriver().tryGetSize(fullPath(subpath), headers, query);
+}
+
 void Endpoint::put(const std::string subpath, const std::string& data) const
 {
     m_driver->put(fullPath(subpath), data);
@@ -803,22 +797,6 @@ std::unique_ptr<std::vector<char>> Endpoint::tryGetBinary(
         const http::Query query) const
 {
     return getHttpDriver().tryGetBinary(fullPath(subpath), headers, query);
-}
-
-std::size_t Endpoint::getSize(
-        const std::string subpath,
-        const http::Headers headers,
-        const http::Query query) const
-{
-    return getHttpDriver().getSize(fullPath(subpath), headers, query);
-}
-
-std::unique_ptr<std::size_t> Endpoint::tryGetSize(
-        const std::string subpath,
-        const http::Headers headers,
-        const http::Query query) const
-{
-    return getHttpDriver().tryGetSize(fullPath(subpath), headers, query);
 }
 
 void Endpoint::put(
@@ -1365,6 +1343,7 @@ LocalHandle::~LocalHandle()
 #ifndef ARBITER_IS_AMALGAMATION
 #include <arbiter/arbiter.hpp>
 #include <arbiter/drivers/http.hpp>
+#include <arbiter/util/util.hpp>
 #endif
 
 #ifdef ARBITER_WINDOWS
@@ -1383,6 +1362,9 @@ namespace ARBITER_CUSTOM_NAMESPACE
 
 namespace arbiter
 {
+
+using namespace internal;
+
 namespace drivers
 {
 
@@ -1424,18 +1406,16 @@ std::unique_ptr<std::size_t> Http::tryGetSize(
         Headers headers,
         Query query) const
 {
-    std::unique_ptr<std::size_t> size;
-
     auto http(m_pool.acquire());
     Response res(http.head(typedPath(path), headers, query));
 
-    std::string val;
-    if (res.ok() && findEntry(res.headers(), "Content-Length", val))
+    if (res.ok())
     {
-        size.reset(new std::size_t(std::stoul(val)));
+        const auto cl = findHeader(res.headers(), "Content-Length");
+        if (cl) return makeUnique<std::size_t>(std::stoull(*cl));
     }
 
-    return size;
+    return std::unique_ptr<std::size_t>();
 }
 
 std::string Http::get(
@@ -1581,7 +1561,7 @@ Response Http::internalPost(
         Headers headers,
         const Query query) const
 {
-    if (!headers.count("Content-Length"))
+    if (!findHeader(headers, "Content-Length"))
     {
         headers["Content-Length"] = std::to_string(data.size());
     }
@@ -1641,6 +1621,7 @@ std::string Http::typedPath(const std::string& p) const
 #include <arbiter/util/md5.hpp>
 #include <arbiter/util/sha256.hpp>
 #include <arbiter/util/transforms.hpp>
+#include <arbiter/util/util.hpp>
 #endif
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
@@ -1663,9 +1644,12 @@ namespace
 
     // See:
     // https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html
-    const std::string credIp("169.254.169.254/");
-    const std::string credBase(
-            credIp + "latest/meta-data/iam/security-credentials/");
+    const std::string ec2CredIp("169.254.169.254");
+    const std::string ec2CredBase(
+            ec2CredIp + "/latest/meta-data/iam/security-credentials");
+
+    // https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html
+    const std::string fargateCredIp("169.254.170.2");
 
     std::string line(const std::string& data) { return data + "\n"; }
     const std::vector<char> empty;
@@ -1834,6 +1818,7 @@ std::unique_ptr<S3::Auth> S3::Auth::create(
     {
         const std::string accessKey("aws_access_key_id");
         const std::string hiddenKey("aws_secret_access_key");
+        const std::string tokenKey("aws_session_token");
         const ini::Contents creds(ini::parse(*c));
         if (creds.count(profile))
         {
@@ -1842,12 +1827,20 @@ std::unique_ptr<S3::Auth> S3::Auth::create(
             {
                 const auto access(section.at(accessKey));
                 const auto hidden(section.at(hiddenKey));
+                if (section.count(tokenKey))
+                {
+                    const auto token(section.at(tokenKey));
+                    return makeUnique<Auth>(access, hidden, token);
+                }
                 return makeUnique<Auth>(access, hidden);
-            }
+           }
         }
     }
 
 #ifdef ARBITER_CURL
+    http::Pool pool;
+    drivers::Http httpDriver(pool);
+
     // Nothing found in the environment or on the filesystem.  However we may
     // be running in an EC2 instance with an instance profile set up.
     //
@@ -1855,17 +1848,20 @@ std::unique_ptr<S3::Auth> S3::Auth::create(
     // an HTTP request on every Arbiter construction - but if we're allowed,
     // see if we can request an instance profile configuration.
     if (
-            (!config.is_null() &&
-                config.value("allowInstanceProfile", false)) ||
-            env("AWS_ALLOW_INSTANCE_PROFILE"))
+        (!config.is_null() && config.value("allowInstanceProfile", false)) ||
+        env("AWS_ALLOW_INSTANCE_PROFILE"))
     {
-        http::Pool pool;
-        drivers::Http httpDriver(pool);
-
-        if (const auto iamRole = httpDriver.tryGet(credBase))
+        if (const auto iamRole = httpDriver.tryGet(ec2CredBase))
         {
-            return makeUnique<Auth>(*iamRole);
+            return makeUnique<Auth>(ec2CredBase + "/" + *iamRole);
         }
+    }
+
+    // We also may be running in Fargate, which looks very similar but with a
+    // different IP.
+    if (const auto relUri = env("AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"))
+    {
+        return makeUnique<Auth>(fargateCredIp + "/" + *relUri);
     }
 #endif
 
@@ -2017,7 +2013,7 @@ std::string S3::Config::extractBaseUrl(
 S3::AuthFields S3::Auth::fields() const
 {
 #ifdef ARBITER_CURL
-    if (m_role)
+    if (m_credUrl)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -2027,7 +2023,7 @@ S3::AuthFields S3::Auth::fields() const
             http::Pool pool;
             drivers::Http httpDriver(pool);
 
-            const json creds(json::parse(httpDriver.get(credBase + *m_role)));
+            const json creds(json::parse(httpDriver.get(*m_credUrl)));
             m_access = creds.at("AccessKeyId").get<std::string>();
             m_hidden = creds.at("SecretAccessKey").get<std::string>();
             m_token = creds.at("Token").get<std::string>();
@@ -2059,8 +2055,6 @@ std::string S3::type() const
 
 std::unique_ptr<std::size_t> S3::tryGetSize(std::string rawPath) const
 {
-    std::unique_ptr<std::size_t> size;
-
     Headers headers(m_config->baseHeaders());
     headers.erase("x-amz-server-side-encryption");
 
@@ -2077,10 +2071,13 @@ std::unique_ptr<std::size_t> S3::tryGetSize(std::string rawPath) const
     drivers::Http http(m_pool);
     Response res(http.internalHead(resource.url(), apiV4.headers()));
 
-    std::string val;
-    if (res.ok() && findEntry(res.headers(), "Content-Length", val))
-        size.reset(new std::size_t(std::stoul(val)));
-    return size;
+    if (res.ok())
+    {
+        const auto cl = findHeader(res.headers(), "Content-Length");
+        if (cl) return makeUnique<std::size_t>(std::stoull(*cl));
+    }
+
+    return std::unique_ptr<std::size_t>();
 }
 
 bool S3::get(
@@ -2453,6 +2450,10 @@ S3::Resource::Resource(std::string base, std::string fullPath)
 
     // Dots in bucket name limitation with virtual-hosting over HTTPS:
     // https://docs.aws.amazon.com/AmazonS3/latest/dev/VirtualHosting.html#VirtualHostingLimitations
+
+    // 2021 note: the deprecation date got delayed, and buckets containing
+    // dots still has no fix - see the note at the top of the first link above.
+    // So for the time being, we'll keep this forked logic below.
     m_virtualHosted = m_bucket.find_first_of('.') == std::string::npos;
 }
 
@@ -2543,6 +2544,7 @@ std::string S3::Resource::host() const
 #include <arbiter/util/md5.hpp>
 #include <arbiter/util/sha256.hpp>
 #include <arbiter/util/transforms.hpp>
+#include <arbiter/util/util.hpp>
 #endif
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
@@ -2616,12 +2618,17 @@ std::vector<std::unique_ptr<AZ>> AZ::create(Pool& pool, const std::string s)
 
 std::unique_ptr<AZ> AZ::createOne(Pool& pool, const std::string s)
 {
-    const json j(s.size() ? json::parse(s) : json());
-    const std::string profile(extractProfile(j.dump()));
+    try
+    {
+        const json j(s.size() ? json::parse(s) : json());
+        const std::string profile(extractProfile(j.dump()));
 
-    std::unique_ptr<Config> config(new Config(j.dump(), profile));
-    auto az = makeUnique<AZ>(pool, profile, std::move(config));
-    return az;
+        std::unique_ptr<Config> config(new Config(j.dump(), profile));
+        return makeUnique<AZ>(pool, profile, std::move(config));
+    }
+    catch (...) { }
+
+    return std::unique_ptr<AZ>();
 }
 
 std::string AZ::extractProfile(const std::string s)
@@ -2687,12 +2694,7 @@ std::string AZ::Config::extractStorageAccount(
         return *p;
     }
 
-    if (!c.is_null() && c.value("verbose", false))
-    {
-        std::cout << "account not found" << std::endl;
-    }
-
-    return "";
+   throw ArbiterError("Couldn't find Azure Storage account value - this is mandatory");
 }
 
 std::string AZ::Config::extractStorageAccessKey(
@@ -2785,8 +2787,6 @@ std::string AZ::type() const
 
 std::unique_ptr<std::size_t> AZ::tryGetSize(std::string rawPath) const
 {
-    std::unique_ptr<std::size_t> size;
-
     Headers headers(m_config->baseHeaders());
 
     const Resource resource(m_config->baseUrl(), rawPath);
@@ -2801,11 +2801,13 @@ std::unique_ptr<std::size_t> AZ::tryGetSize(std::string rawPath) const
     drivers::Http http(m_pool);
     Response res(http.internalHead(resource.url(), ApiV1.headers()));
 
-    std::string val;
-    if (res.ok() && findEntry(res.headers(), "Content-Length", val))
-        size.reset(new std::size_t(std::stoul(val)));
+    if (res.ok())
+    {
+        const auto cl = findHeader(res.headers(), "Content-Length");
+        if (cl) return makeUnique<std::size_t>(std::stoull(*cl));
+    }
 
-    return size;
+    return std::unique_ptr<std::size_t>();
 }
 
 bool AZ::get(
@@ -3004,7 +3006,7 @@ AZ::ApiV1::ApiV1(
 
     if (verb == "PUT" || verb == "POST")
     {
-        if (!m_headers.count("Content-Type"))
+        if (!findHeader(m_headers, "Content-Type"))
         {
             m_headers["Content-Type"] = "application/octet-stream";
         }
@@ -3236,6 +3238,7 @@ std::string AZ::Resource::host() const
 #include <arbiter/drivers/fs.hpp>
 #include <arbiter/util/json.hpp>
 #include <arbiter/util/transforms.hpp>
+#include <arbiter/util/util.hpp>
 #endif
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
@@ -3325,9 +3328,11 @@ std::unique_ptr<std::size_t> Google::tryGetSize(const std::string path) const
     const auto res(
             https.internalHead(resource.endpoint(), headers, altMediaQuery));
 
-    std::string val;
-    if (res.ok() && findEntry(res.headers(), "Content-Length", val))
-        return makeUnique<std::size_t>(std::stoull(val));
+    if (res.ok())
+    {
+        const auto cl = findHeader(res.headers(), "Content-Length");
+        if (cl) return makeUnique<std::size_t>(std::stoull(*cl));
+    }
 
     return std::unique_ptr<std::size_t>();
 }
@@ -4224,7 +4229,12 @@ void Curl::init(
     // Substantially faster DNS lookups without IPv6.
     curl_easy_setopt(m_curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 
-    // Only accept raw (identity) encoding.
+    // See https://curl.se/libcurl/c/CURLOPT_ACCEPT_ENCODING.html
+    //
+    // To aid applications not having to bother about what specific algorithms
+    // this particular libcurl build supports, libcurl allows a zero-length
+    // string to be set ("") to ask for an Accept-Encoding: header to be used
+    // that contains all built-in supported encodings.
     curl_easy_setopt(m_curl, CURLOPT_ACCEPT_ENCODING, "");
 
     // Don't wait forever.  Use the low-speed options instead of the timeout
@@ -5243,7 +5253,7 @@ namespace
      //
      // Return the position of chr within base64_encode()
      //
-
+    
         if      (chr >= 'A' && chr <= 'Z') return chr - 'A';
         else if (chr >= 'a' && chr <= 'z') return chr - 'a' + ('Z' - 'A')               + 1;
         else if (chr >= '0' && chr <= '9') return chr - '0' + ('Z' - 'A') + ('z' - 'a') + 2;
@@ -5525,6 +5535,7 @@ int64_t Time::asUnix() const
 #include <cctype>
 #include <mutex>
 #include <random>
+#include <string>
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
@@ -5534,6 +5545,8 @@ namespace ARBITER_CUSTOM_NAMESPACE
 namespace arbiter
 {
 
+using namespace internal;
+
 namespace
 {
     const std::string protocolDelimiter("://");
@@ -5542,6 +5555,31 @@ namespace
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<unsigned long long> distribution;
+
+    bool iequals(const std::string& s, const std::string& s2)
+    {
+        if (s.length() != s2.length())
+            return false;
+        for (std::size_t i = 0; i < s.length(); ++i)
+        {
+            if (std::tolower(s[i]) != std::tolower(s2[i])) return false;
+        }
+        return true;
+    }
+}
+
+std::unique_ptr<std::string> findHeader(
+        const http::Headers& headers,
+        const std::string key)
+{
+    for (const auto& p : headers)
+    {
+        if (iequals(p.first, key))
+        {
+            return makeUnique<std::string>(p.second);
+        }
+    }
+    return std::unique_ptr<std::string>();
 }
 
 uint64_t randomNumber()
@@ -5574,11 +5612,7 @@ std::string getBasename(const std::string fullPath)
     const std::string stripped(stripPostfixing(stripProtocol(fullPath)));
 
     // Now do the real slash searching.
-    std::size_t pos(stripped.rfind('/'));
-
-    // Maybe windows
-    if (pos == std::string::npos)
-        pos = stripped.rfind('\\');
+    std::size_t pos(stripped.find_last_of("/\\"));
 
     if (pos != std::string::npos)
     {
@@ -5596,7 +5630,7 @@ std::string getDirname(const std::string fullPath)
     const std::string stripped(stripPostfixing(stripProtocol(fullPath)));
 
     // Now do the real slash searching.
-    const std::size_t pos(stripped.rfind('/'));
+    std::size_t pos(stripped.find_last_of("/\\"));
 
     if (pos != std::string::npos)
     {
