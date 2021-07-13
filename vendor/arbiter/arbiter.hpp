@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: e2905cda465b7e47f1df3647c6a6c06ce3079889
+// Git SHA: ad091a5d5a1ce6ce005d13cfd2abe2372f832c2d
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -4973,6 +4973,9 @@ class ARBITER_DLL Endpoint
     friend class Arbiter;
 
 public:
+    Endpoint() : m_driver(nullptr)
+    {}
+
     /** Returns root directory name without any type-prefixing, and will
      * always end with the character `/`.  For example `~/data/`, or
      * `my-bucket/nested-directory/`.
