@@ -580,7 +580,7 @@ bool EptReader::passesSpatialFilter(const BOX3D& tileBounds) const
     // at the same time, it seems to get corrupted. There may be other instances
     // that need to be locked.
     std::lock_guard<std::mutex> lock(m_p->mutex);
-    return boxOverlaps() || polysOverlap();
+    return boxOverlaps() && polysOverlap();
 }
 
 
@@ -701,7 +701,7 @@ bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
 
     // If there is a spatial filter, make sure it passes.
     if (hasSpatialFilter())
-        if (!passesBoundsFilter(x, y, z) && !passesPolyFilter(x, y, z))
+        if (!passesBoundsFilter(x, y, z) || !passesPolyFilter(x, y, z))
             return false;
 
     for (auto& el : m_p->info->dims())
