@@ -20,8 +20,8 @@ drivers and their options:
 ::
 
     $ pdal info --help
-    $ pdal translate --drivers
-    $ pdal pipeline --options writers.las
+    $ pdal --drivers
+    $ pdal --options writers.las
 
 
 All commands support the following options:
