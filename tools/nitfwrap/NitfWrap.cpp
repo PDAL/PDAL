@@ -36,7 +36,7 @@
 #include <vector>
 
 #include <pdal/Dimension.hpp>
-#include <pdal/GDALUtils.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/IStream.hpp>
 #include <io/BpfHeader.hpp>
@@ -260,7 +260,7 @@ bool NitfWrap::verifyBpf(ILeStream& in, BOX3D& bounds)
 
     if (!h.read(in))
         return false;
-    if (!h.readDimensions(in, dims))
+    if (!h.readDimensions(in, dims, true))
         return false;
     for (auto d : dims)
     {

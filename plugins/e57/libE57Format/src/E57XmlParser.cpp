@@ -24,6 +24,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#include <limits>
 #include <xercesc/sax2/Attributes.hpp>
 #include <xercesc/sax2/XMLReaderFactory.hpp>
 
@@ -146,7 +147,7 @@ XMLSize_t E57FileInputStream::readBytes(       XMLByte* const  toFill
         available_size = static_cast<size_t>(available);
     else {
         /// size_t is smaller than int64_t, Calc max that size_t can hold
-        const int64_t size_max = std::numeric_limits<size_t>::max();
+        const int64_t size_max = (std::numeric_limits<size_t>::max)();
 
         /// read smaller of size_max, available
         ///??? redo
