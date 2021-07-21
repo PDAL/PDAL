@@ -372,9 +372,7 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
              (m_args->m_y_tile_size > 0) &&
              (m_args->m_z_tile_size > 0) )
         {
-            if ( ((m_args->m_x_domain_end  - m_args->m_x_domain_st ) > 0) &&
-                 ((m_args->m_y_domain_end  - m_args->m_y_domain_st ) > 0) &&
-                 ((m_args->m_z_domain_end  - m_args->m_z_domain_st ) > 0) )
+            if (isValidDomain(*m_args))
             {
                 domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X",
                     {{m_args->m_x_domain_st, m_args->m_x_domain_end}}, m_args->m_x_tile_size))
@@ -413,9 +411,7 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
     #if ((TILEDB_VERSION_MINOR > 1) || (TILEDB_VERSION_MAJOR > 2))
         else
         {
-            if ( ((m_args->m_x_domain_end  - m_args->m_x_domain_st ) > 0) &&
-                 ((m_args->m_y_domain_end  - m_args->m_y_domain_st ) > 0) &&
-                 ((m_args->m_z_domain_end  - m_args->m_z_domain_st ) > 0) )
+            if (isValidDomain(*m_args))
             {
                 domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X",
                     {{m_args->m_x_domain_st, m_args->m_x_domain_end}}))
@@ -600,6 +596,14 @@ void TileDBWriter::done(PointTableRef table)
     else{
         throwError("Unable to flush points to TileDB array");
     }
+}
+
+
+bool TileDBWriter::isValidDomain(TileDBWriter::Args& args)
+{
+    return ((( args.m_x_domain_end  - args.m_x_domain_st ) > 0) &&
+            (( args.m_y_domain_end  - args.m_y_domain_st ) > 0) &&
+            (( args.m_z_domain_end  - args.m_z_domain_st ) > 0));
 }
 
 
