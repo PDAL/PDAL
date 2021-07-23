@@ -457,7 +457,7 @@ namespace pdal
         filter2.setInput(rdr2);
         EXPECT_EQ(200U, mgr2.execute());
 
-#if TILEDB_VERSION_MAJOR > 1 || TILEDB_VERSION_MINOR >= 3
+#if TILEDB_VERSION_MAJOR > 1 && TILEDB_VERSION_MINOR >= 3
         PipelineManager mgrSlice;
         optsR.remove(Option("timestamp", 2));
         optsR.add("start_timestamp", 2);

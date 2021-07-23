@@ -139,7 +139,7 @@ void TileDBReader::initialize()
 
         if (m_endTimeStamp)
         {
-#if TILEDB_VERSION_MAJOR > 1 || TILEDB_VERSION_MINOR >= 3
+#if TILEDB_VERSION_MAJOR > 1 && TILEDB_VERSION_MINOR >= 3
             if (m_startTimeStamp)
             {
                 m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ));
