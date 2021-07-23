@@ -105,6 +105,13 @@ void TileDBReader::addArgs(ProgramArgs& args)
     args.add("stats", "Dump TileDB query stats to stdout", m_stats, false);
     args.add("bbox3d", "Bounding box subarray to read from TileDB in format "
         "([minx, maxx], [miny, maxy], [minz, maxz])", m_bbox);
+    args.add("end_timestamp", "TileDB array timestamp", m_endTimeStamp,
+        point_count_t(0));
+    args.addSynonym("end_timestamp", "timestamp");
+#if TILEDB_VERSION_MAJOR > 1 || TILEDB_VERSION_MINOR >= 3
+    args.add("start_timestamp", "TileDB array timestamp", m_startTimeStamp,
+        point_count_t(0));
+#endif
 }
 
 void TileDBReader::prepared(PointTableRef table)
@@ -130,7 +137,23 @@ void TileDBReader::initialize()
         if (m_stats)
             tiledb::Stats::enable();
 
-        m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ));
+        if (m_endTimeStamp)
+        {
+#if TILEDB_VERSION_MAJOR > 1 || TILEDB_VERSION_MINOR >= 3
+            if (m_startTimeStamp)
+            {
+                m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ));
+                m_array->set_open_timestamp_start(m_startTimeStamp);
+                m_array->set_open_timestamp_end(m_endTimeStamp);
+                m_array->reopen();
+            }
+            else
+#endif
+            m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ, m_endTimeStamp));
+        }
+        else
+            m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ));
+
     }
     catch (const tiledb::TileDBError& err)
     {
