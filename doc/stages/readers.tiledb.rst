@@ -47,10 +47,10 @@ bbox3d
 timestamp
   Opens the array at a particular TileDB timestamp [Optional]
 
-start_timestamp
+end_timestamp
   Opens the array at a particular TileDB timestamp [Optional]
 
-end_timestamp
+start_timestamp
   Opens the array between a timestamp range of start_timestamp and end_timestamp [Optional]
 
 .. include:: reader_opts.rst
