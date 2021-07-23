@@ -80,7 +80,7 @@ struct uuid
     uint8_t node[6];
 
     void clear()
-    { memset(this, 0, sizeof(this); }
+    { memset(this, 0, sizeof(struct uuid)); }
 };
 #pragma pack(pop)
 
