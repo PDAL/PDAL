@@ -404,6 +404,7 @@ namespace pdal
         EXPECT_EQ(flAtts.nfilters(), 0U);
     }
 
+#if TILEDB_VERSION_MAJOR >= 2
     TEST_F(TileDBWriterTest, write_timestamp)
     {
         tiledb::Context ctx;
@@ -457,7 +458,7 @@ namespace pdal
         filter2.setInput(rdr2);
         EXPECT_EQ(200U, mgr2.execute());
 
-#if TILEDB_VERSION_MAJOR > 1 && TILEDB_VERSION_MINOR >= 3
+#if TILEDB_VERSION_MAJOR >= 2 && TILEDB_VERSION_MINOR >= 3
         PipelineManager mgrSlice;
         optsR.remove(Option("timestamp", 2));
         optsR.add("start_timestamp", 2);
@@ -470,6 +471,7 @@ namespace pdal
         EXPECT_EQ(100U, mgrSlice.execute());
 #endif
     }
+#endif
 
 
 #if TILEDB_VERSION_MAJOR > 1

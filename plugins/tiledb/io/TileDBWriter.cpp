@@ -301,8 +301,10 @@ void TileDBWriter::addArgs(ProgramArgs& args)
         m_args->m_filters, NL::json({}));
     args.add("append", "Append to existing TileDB array",
         m_args->m_append, false);
+#if TILEDB_VERSION_MAJOR >= 2
     args.add("timestamp", "TileDB array timestamp", m_args->m_timeStamp,
         point_count_t(0));
+#endif
 }
 
 
