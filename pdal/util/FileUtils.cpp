@@ -76,17 +76,21 @@ std::string addTrailingSlash(std::string path)
 }
 
 #ifdef _WIN32
+class chs_codecvt : public std::codecvt_byname<wchar_t, char, std::mbstate_t>
+{
+public:
+    chs_codecvt() : codecvt_byname("CHS") {}
+};
 inline std::string fromNative(std::wstring const& in)
 {
     // TODO: C++11 define convert with static thread_local
-    std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
-    auto p = reinterpret_cast<unsigned short const*>(in.data());
-    return convert.to_bytes(p, p + in.size());
+    std::wstring_convert<chs_codecvt> convert;
+    return convert.to_bytes(in);
 }
 inline std::wstring toNative(std::string const& in)
 {
     // TODO: C++11 define convert with static thread_local
-    std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
+    std::wstring_convert<chs_codecvt> convert;
     auto s = convert.from_bytes(in);
     auto p = reinterpret_cast<wchar_t const*>(s.data());
     return std::wstring(p, p + s.size());
