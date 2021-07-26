@@ -80,7 +80,7 @@ struct TileDBWriter::Args
     NL::json m_filters;
     NL::json m_defaults;
     bool m_append;
-    point_count_t m_timeStamp;
+    point_count_t m_timeStamp = 0;
 };
 
 CREATE_SHARED_STAGE(TileDBWriter, s_info)
