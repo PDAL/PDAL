@@ -80,6 +80,7 @@ struct TileDBWriter::Args
     NL::json m_filters;
     NL::json m_defaults;
     bool m_append;
+    point_count_t m_timeStamp = 0;
 };
 
 CREATE_SHARED_STAGE(TileDBWriter, s_info)
@@ -300,6 +301,10 @@ void TileDBWriter::addArgs(ProgramArgs& args)
         m_args->m_filters, NL::json({}));
     args.add("append", "Append to existing TileDB array",
         m_args->m_append, false);
+#if TILEDB_VERSION_MAJOR >= 2
+    args.add("timestamp", "TileDB array timestamp", m_args->m_timeStamp,
+        point_count_t(0));
+#endif
 }
 
 
@@ -446,8 +451,12 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
     }
     else
     {
-        m_array.reset(new tiledb::Array(*m_ctx, m_args->m_arrayName,
-            TILEDB_WRITE));
+        if (m_args->m_timeStamp)
+            m_array.reset(new tiledb::Array(*m_ctx, m_args->m_arrayName,
+                TILEDB_WRITE, m_args->m_timeStamp));
+        else
+            m_array.reset(new tiledb::Array(*m_ctx, m_args->m_arrayName,
+                TILEDB_WRITE));
     }
 
     for (const auto& d : all)
@@ -502,8 +511,13 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
     if (!m_args->m_append)
     {
         tiledb::Array::create(m_args->m_arrayName, *m_schema);
-        m_array.reset(new tiledb::Array(*m_ctx, m_args->m_arrayName,
-            TILEDB_WRITE));
+
+        if (m_args->m_timeStamp)
+            m_array.reset(new tiledb::Array(*m_ctx, m_args->m_arrayName,
+                TILEDB_WRITE, m_args->m_timeStamp));
+        else
+            m_array.reset(new tiledb::Array(*m_ctx, m_args->m_arrayName,
+                TILEDB_WRITE));
     }
 
     m_current_idx = 0;

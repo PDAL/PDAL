@@ -404,6 +404,76 @@ namespace pdal
         EXPECT_EQ(flAtts.nfilters(), 0U);
     }
 
+#if TILEDB_VERSION_MAJOR >= 2
+    TEST_F(TileDBWriterTest, write_timestamp)
+    {
+        tiledb::Context ctx;
+        tiledb::VFS vfs(ctx);
+        std::string pth = Support::temppath("tiledb_test_ts_out");
+
+        if (vfs.is_dir(pth))
+        {
+            vfs.remove_dir(pth);
+        }
+
+        Options options = getTileDBOptions();
+        options.add("array_name", pth);
+        options.add("timestamp", 1);
+
+        TileDBWriter writer;
+        writer.setOptions(options);
+        writer.setInput(m_reader);
+
+        FixedPointTable table(100);
+        writer.prepare(table);
+        writer.execute(table);
+
+        options.replace("timestamp", 2);
+        options.add("append", true);
+        TileDBWriter append_writer;
+        append_writer.setOptions(options);
+        append_writer.setInput(m_reader2);
+
+        FixedPointTable table2(100);
+        append_writer.prepare(table2);
+        append_writer.execute(table2);
+
+        PipelineManager mgr1;
+        PipelineManager mgr2;
+
+        Options optsR;
+        optsR.add("filename", pth);
+        optsR.add("timestamp", 1);
+        Stage& rdr1 = mgr1.addReader("readers.tiledb");
+        rdr1.setOptions(optsR);
+        Stage& filter1 = mgr1.addFilter("filters.stats");
+        filter1.setInput(rdr1);
+        EXPECT_EQ(100U, mgr1.execute());
+
+        optsR.replace("timestamp", 2);
+
+        Stage& rdr2 = mgr2.addReader("readers.tiledb");
+        rdr2.setOptions(optsR);
+        Stage& filter2 = mgr2.addFilter("filters.stats");
+        filter2.setInput(rdr2);
+        EXPECT_EQ(200U, mgr2.execute());
+
+#if TILEDB_VERSION_MAJOR > 2 || (TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR >= 3)
+        PipelineManager mgrSlice;
+        optsR.remove(Option("timestamp", 2));
+        optsR.add("start_timestamp", 2);
+        optsR.add("end_timestamp", 2);
+
+        Stage& rdrSlice = mgrSlice.addReader("readers.tiledb");
+        rdrSlice.setOptions(optsR);
+        Stage& filterSlice = mgrSlice.addFilter("filters.stats");
+        filterSlice.setInput(rdrSlice);
+        EXPECT_EQ(100U, mgrSlice.execute());
+#endif
+    }
+#endif
+
+
 #if TILEDB_VERSION_MAJOR > 1
     TEST_F(TileDBWriterTest, dup_points)
     {

@@ -86,6 +86,9 @@ stats
 filters
   JSON array or object of compression filters for either `coords` or `attributes` of the form {coords/attributename : {"compression": name, compression_options: value, ...}} [Optional]
 
+timestamp
+  Sets the TileDB timestamp for this write
+
 .. include:: writer_opts.rst
 
 By default TileDB will use the following set of compression filters for coordinates and attributes;
