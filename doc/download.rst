@@ -71,7 +71,7 @@ required dependencies and build PDAL from source.
    :widths: 20, 20, 20, 20, 20, 20
 
    "Platform(s)", "linux", "linux", "linux", "linux", "win64, mac, linux"
-   "PDAL version", "2.3", "", "", "2.2", "2.2"
+   "PDAL version", "2.3", "", "", "2.2", "2.3"
    "CPD", "", "", "", "X", ""
    "E57", "X", "", "", "", "X"
    "HDF", "X", "", "", "", "X"
