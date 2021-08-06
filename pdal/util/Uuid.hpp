@@ -70,14 +70,17 @@ namespace pdal
 #pragma pack(1)
 struct uuid
 {
-    uuid() : time_low(0), time_mid(0), time_hi_and_version(0), clock_seq(0), node {}
-    {}
+    uuid()
+    { clear(); }
 
     uint32_t time_low;
     uint16_t time_mid;
     uint16_t time_hi_and_version;
     uint16_t clock_seq;
     uint8_t node[6];
+
+    void clear()
+    { memset(this, 0, sizeof(struct uuid)); }
 };
 #pragma pack(pop)
 
@@ -107,8 +110,7 @@ public:
         { parse(s); }
 
     void clear()
-        { memset(&m_data, 0, sizeof(m_data)); }
-
+        { m_data.clear(); }
     void unpack(const char *c)
     {
         BeExtractor e(c, 10);

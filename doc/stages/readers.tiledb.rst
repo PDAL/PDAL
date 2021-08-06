@@ -44,6 +44,15 @@ stats
 bbox3d
   TileDB subarray to read in format ([minx, maxx], [miny, maxy], [minz, maxz]) [Optional]
 
+timestamp
+  Opens the array at a particular TileDB timestamp [Optional]
+
+end_timestamp
+  Opens the array at a particular TileDB timestamp [Optional]
+
+start_timestamp
+  Opens the array between a timestamp range of start_timestamp and end_timestamp [Optional]
+
 .. include:: reader_opts.rst
 
 .. _TileDB: https://tiledb.io
