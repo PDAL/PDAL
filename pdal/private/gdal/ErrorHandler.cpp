@@ -56,7 +56,7 @@ ErrorHandler& ErrorHandler::getGlobalErrorHandler()
 namespace {
 
 //ABELL - No idea why this is __stdcall
-#ifdef _WIN32
+#ifdef _MSC_VER
 void __stdcall trampoline(::CPLErr code, int num, char const* msg)
 #else
 void trampoline(::CPLErr code, int num, char const* msg)
