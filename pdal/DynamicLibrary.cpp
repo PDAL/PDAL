@@ -37,7 +37,7 @@
 // http://www.drdobbs.com/cpp/building-your-own-plugin-framework-part/206503957
 // The original work was released under the Apache License v2.
 
-#ifdef _WIN32
+#ifdef _MSC_VER
   #include <windows.h>
 #else
   #include <dlfcn.h>
@@ -55,7 +55,7 @@ DynamicLibrary::~DynamicLibrary()
 {
     if (m_handle)
     {
-#ifndef _WIN32
+#ifndef _MSC_VER
         ::dlclose(m_handle);
 #else
         ::FreeLibrary((HMODULE)m_handle);
@@ -81,7 +81,7 @@ DynamicLibrary *DynamicLibrary::load(const std::string &name,
 
     void *handle = NULL;
 
-#ifdef _WIN32
+#ifdef _MSC_VER
     handle = ::LoadLibraryA(name.c_str());
     if (handle == NULL)
     {
@@ -116,7 +116,7 @@ void *DynamicLibrary::getSymbol(const std::string& symbol)
         return NULL;
 
     void *sym;
-#ifdef _WIN32
+#ifdef _MSC_VER
     sym = ::GetProcAddress((HMODULE)m_handle, symbol.c_str());
 #else
     sym = ::dlsym(m_handle, symbol.c_str());

@@ -293,6 +293,17 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
     INTERFACE
         ${PDAL_LIBDIR}
 )
+
+if (MINGW)
+  find_library (DL_LIBS NAMES dl)
+  set (CMAKE_DL_LIBS ${DL_LIBS})
+endif ()
+if (CMAKE_DL_LIBS)
+  target_link_libraries(${PDAL_BASE_LIB_NAME}
+      PRIVATE
+          ${CMAKE_DL_LIBS})
+endif ()
+
 target_compile_definitions(${PDAL_BASE_LIB_NAME}
     PRIVATE
         ${LASZIP_DEFINES}
