@@ -54,6 +54,14 @@
 #   include <winsock2.h>
                      
 #   if BYTE_ORDER == LITTLE_ENDIAN
+
+// Add missing definitions for MinGW.
+#ifndef htonll
+  #define htonll(x) ((1==htonl(1)) ? (x) : (((uint64_t)htonl((x) & 0xFFFFFFFFUL)) << 32) | htonl((uint32_t)((x) >> 32)))
+#endif
+#ifndef ntohll
+  #define ntohll(x) ((1==ntohl(1)) ? (x) : (((uint64_t)ntohl((x) & 0xFFFFFFFFUL)) << 32) | ntohl((uint32_t)((x) >> 32)))
+#endif
                       
 #       define htobe16 htons
 #       define htole16(x) (x)
