@@ -306,11 +306,11 @@ template<class T2>
 int SparseMatrix<T>::SolveGS( const std::vector< std::vector< int > >& mcIndices , const SparseMatrix<T>& M , ConstPointer( T2 ) diagonal , ConstPointer( T2 ) b , Pointer( T2 ) x , bool forward , int threads )
 {
 	int sum=0;
-#ifdef _WIN32
+#ifdef _MSC_VER
 #define SetOMPParallel __pragma( omp parallel for num_threads( threads ) )
-#else // !_WIN32
+#else // !_MSC_VER
 #define SetOMPParallel _Pragma( "omp parallel for num_threads( threads )" )
-#endif // _WIN32
+#endif // _MSC_VER
 #if ZERO_TESTING_JACOBI
 #define ITERATE( indices )                                                        \
 	{                                                                             \
