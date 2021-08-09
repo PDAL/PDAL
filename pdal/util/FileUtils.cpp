@@ -47,9 +47,9 @@
 
 #if __cplusplus >= 201703L
 #include <filesystem>
-namespace pdalboost { namespace filesystem = std::filesystem; namespace system = std; }
 #else
 #include <boost/filesystem.hpp>
+namespace std { namespace filesystem = pdalboost::filesystem; }
 #endif
 
 #include <pdal/util/FileUtils.hpp>
@@ -88,7 +88,7 @@ inline std::string fromNative(std::wstring const& in)
     auto p = reinterpret_cast<unsigned short const*>(in.data());
     return convert.to_bytes(p, p + in.size());
 }
-inline pdalboost::filesystem::path toNative(std::string const& in)
+inline std::filesystem::path toNative(std::string const& in)
 {
     // TODO: C++11 define convert with static thread_local
     std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
@@ -187,25 +187,25 @@ std::ostream *openExisting(const std::string& name, bool asBinary)
 bool directoryExists(const std::string& dirname)
 {
     //ABELL - Seems we should be calling is_directory
-    return pdalboost::filesystem::exists(toNative(dirname));
+    return std::filesystem::exists(toNative(dirname));
 }
 
 
 bool createDirectory(const std::string& dirname)
 {
-    return pdalboost::filesystem::create_directory(toNative(dirname));
+    return std::filesystem::create_directory(toNative(dirname));
 }
 
 
 bool createDirectories(const std::string& dirname)
 {
-    return pdalboost::filesystem::create_directories(toNative(dirname));
+    return std::filesystem::create_directories(toNative(dirname));
 }
 
 
 void deleteDirectory(const std::string& dirname)
 {
-    pdalboost::filesystem::remove_all(toNative(dirname));
+    std::filesystem::remove_all(toNative(dirname));
 }
 
 
@@ -215,15 +215,15 @@ std::vector<std::string> directoryList(const std::string& dir)
 
     try
     {
-        pdalboost::filesystem::directory_iterator it(dir);
-        pdalboost::filesystem::directory_iterator end;
+        std::filesystem::directory_iterator it(dir);
+        std::filesystem::directory_iterator end;
         while (it != end)
         {
             files.push_back(it->path().string());
             it++;
         }
     }
-    catch (pdalboost::filesystem::filesystem_error&)
+    catch (std::filesystem::filesystem_error&)
     {
         files.clear();
     }
@@ -263,13 +263,13 @@ void closeFile(std::istream* in)
 
 bool deleteFile(const std::string& file)
 {
-    return pdalboost::filesystem::remove(toNative(file));
+    return std::filesystem::remove(toNative(file));
 }
 
 
 void renameFile(const std::string& dest, const std::string& src)
 {
-    pdalboost::filesystem::rename(toNative(src), toNative(dest));
+    std::filesystem::rename(toNative(src), toNative(dest));
 }
 
 
@@ -280,9 +280,9 @@ bool fileExists(const std::string& name)
 
     try
     {
-        return pdalboost::filesystem::exists(toNative(name));
+        return std::filesystem::exists(toNative(name));
     }
-    catch (pdalboost::filesystem::filesystem_error&)
+    catch (std::filesystem::filesystem_error&)
     {
     }
     return false;
@@ -292,8 +292,8 @@ bool fileExists(const std::string& name)
 /// \return  0 on error or invalid file type.
 uintmax_t fileSize(const std::string& file)
 {
-    pdalboost::system::error_code ec;
-    uintmax_t size = pdalboost::filesystem::file_size(toNative(file), ec);
+    std::error_code ec;
+    uintmax_t size = std::filesystem::file_size(toNative(file), ec);
     if (ec)
         size = 0;
     return size;
@@ -317,7 +317,7 @@ std::string readFileIntoString(const std::string& filename)
 
 std::string getcwd()
 {
-    const pdalboost::filesystem::path p = pdalboost::filesystem::current_path();
+    const std::filesystem::path p = std::filesystem::current_path();
     return addTrailingSlash(p.string());
 }
 
@@ -347,7 +347,7 @@ std::string toCanonicalPath(std::string filename)
 // otherwise, make it absolute (relative to current working dir) and return that
 std::string toAbsolutePath(const std::string& filename)
 {
-    return pdalboost::filesystem::absolute(toNative(filename)).string();
+    return std::filesystem::absolute(toNative(filename)).string();
 }
 
 
@@ -361,7 +361,7 @@ std::string toAbsolutePath(const std::string& filename, const std::string base)
     if (toNative(filename).is_absolute())
         return toNative(filename).string();
     else
-        return (pdalboost::filesystem::absolute(base) / toNative(filename)).string();
+        return (std::filesystem::absolute(base) / toNative(filename)).string();
 }
 
 
@@ -383,8 +383,8 @@ std::string getFilename(const std::string& path)
 // Get the directory part of a filename.
 std::string getDirectory(const std::string& path)
 {
-    const pdalboost::filesystem::path dir =
-         pdalboost::filesystem::path(toNative(path)).parent_path();
+    const std::filesystem::path dir =
+         std::filesystem::path(toNative(path)).parent_path();
     return addTrailingSlash(dir.string());
 }
 
@@ -405,13 +405,13 @@ std::string stem(const std::string& path)
 // Determine if the path represents a directory.
 bool isDirectory(const std::string& path)
 {
-    return pdalboost::filesystem::is_directory(toNative(path));
+    return std::filesystem::is_directory(toNative(path));
 }
 
 // Determine if the path is an absolute path
 bool isAbsolutePath(const std::string& path)
 {
-    return pdalboost::filesystem::path(toNative(path)).is_absolute();
+    return std::filesystem::path(toNative(path)).is_absolute();
 }
 
 
