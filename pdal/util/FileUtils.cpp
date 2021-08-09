@@ -79,14 +79,14 @@ std::string addTrailingSlash(std::string path)
 inline std::string fromNative(std::wstring const& in)
 {
     // TODO: C++11 define convert with static thread_local
-    std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
-    auto p = reinterpret_cast<unsigned short const*>(in.data());
+    std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
+    auto p = reinterpret_cast<char16_t const*>(in.data());
     return convert.to_bytes(p, p + in.size());
 }
 inline std::wstring toNative(std::string const& in)
 {
     // TODO: C++11 define convert with static thread_local
-    std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
+    std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
     auto s = convert.from_bytes(in);
     auto p = reinterpret_cast<wchar_t const*>(s.data());
     return std::wstring(p, p + s.size());
