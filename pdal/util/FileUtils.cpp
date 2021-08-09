@@ -45,7 +45,12 @@
 #include <codecvt>
 #endif
 
+#if __cplusplus >= 201703L
+#include <filesystem>
+namespace pdalboost { namespace filesystem = std::filesystem; namespace system = std; }
+#else
 #include <boost/filesystem.hpp>
+#endif
 
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
@@ -83,7 +88,7 @@ inline std::string fromNative(std::wstring const& in)
     auto p = reinterpret_cast<unsigned short const*>(in.data());
     return convert.to_bytes(p, p + in.size());
 }
-inline std::wstring toNative(std::string const& in)
+inline pdalboost::filesystem::path toNative(std::string const& in)
 {
     // TODO: C++11 define convert with static thread_local
     std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
@@ -119,7 +124,12 @@ std::istream *openFile(std::string const& filename, bool asBinary)
     if (asBinary)
         mode |= std::ios::binary;
 
+#if __cplusplus >= 201703L
+    std::filesystem::path native(toNative(name));
+    ifs = new std::ifstream(native, mode);
+#else
     ifs = new std::ifstream(toNative(name), mode);
+#endif
     if (!ifs->good())
     {
         delete ifs;
@@ -138,7 +148,12 @@ std::ostream *createFile(std::string const& name, bool asBinary)
     if (asBinary)
         mode |= std::ios::binary;
 
+#if __cplusplus >= 201703L
+    std::filesystem::path native(toNative(name));
+    std::ostream *ofs = new std::ofstream(native, mode);
+#else
     std::ostream *ofs = new std::ofstream(toNative(name), mode);
+#endif
     if (!ofs->good())
     {
         delete ofs;
@@ -154,7 +169,12 @@ std::ostream *openExisting(const std::string& name, bool asBinary)
     if (asBinary)
         mode |= std::ios::binary;
 
+#if __cplusplus >= 201703L
+    std::filesystem::path native(toNative(name));
+    std::ostream *ofs = new std::ofstream(native, mode);
+#else
     std::ostream *ofs = new std::ofstream(toNative(name), mode);
+#endif
     if (!ofs->good())
     {
         delete ofs;
@@ -338,9 +358,10 @@ std::string toAbsolutePath(const std::string& filename)
 // toAbsolutePath(base)
 std::string toAbsolutePath(const std::string& filename, const std::string base)
 {
-    const std::string newbase = toAbsolutePath(base);
-    return pdalboost::filesystem::absolute(toNative(filename),
-        toNative(newbase)).string();
+    if (toNative(filename).is_absolute())
+        return toNative(filename).string();
+    else
+        return (pdalboost::filesystem::absolute(base) / toNative(filename)).string();
 }
 
 
