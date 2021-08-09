@@ -295,7 +295,7 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
 )
 target_compile_definitions(${PDAL_BASE_LIB_NAME}
     PRIVATE
-        ${LASZIP_DEFINES}
+        ${LASZIP_DEFINES} _USE_MATH_DEFINES
 )
 set_target_properties(${PDAL_BASE_LIB_NAME} PROPERTIES
     VERSION ${PDAL_BUILD_VERSION}

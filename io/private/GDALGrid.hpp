@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <math.h>
+#include <cmath>
 #include <memory>
 #include <string>
 #include <vector>

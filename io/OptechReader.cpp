@@ -32,7 +32,6 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#define _USE_MATH_DEFINES
 #include "OptechReader.hpp"
 
 #include <cmath>
