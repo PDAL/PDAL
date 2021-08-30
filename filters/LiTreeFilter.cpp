@@ -167,16 +167,16 @@ void LiTreeFilter::classifyPoint(PointId ui, PointView& view, PointIdList& Ni,
         double ux = view.getFieldAs<double>(Id::X, ui);
         double uy = view.getFieldAs<double>(Id::Y, ui);
 
-        std::vector<double> dists;
+        double mindist = std::numeric_limits<double>::max();
         for (PointId const& i : idx)
         {
             double nx = view.getFieldAs<double>(Id::X, i);
             double ny = view.getFieldAs<double>(Id::Y, i);
-            double dist =
-                std::sqrt((nx - ux) * (nx - ux) + (ny - uy) * (ny - uy));
-            dists.emplace_back(dist);
+            double dist = (nx - ux) * (nx - ux) + (ny - uy) * (ny - uy);
+            if (dist < mindist)
+                mindist = dist;
         }
-        return *std::min_element(dists.begin(), dists.end());
+        return std::sqrt(mindist);
     };
     double dmin1 = mindist(Pi);
     double dmin2 = mindist(Ni);
@@ -242,8 +242,8 @@ void LiTreeFilter::segmentTree(PointView& view, PointIdList& Ui,
     {
         double ux = view.getFieldAs<double>(Id::X, ui);
         double uy = view.getFieldAs<double>(Id::Y, ui);
-        double d = std::sqrt((ux - tx) * (ux - tx) + (uy - ty) * (uy - ty));
-        if (d < 10.0)
+        double d = (ux - tx) * (ux - tx) + (uy - ty) * (uy - ty);
+        if (d < 100.0)
             classifyPoint(ui, view, Ni, Pi);
         else
             Ni.push_back(ui);
