@@ -103,11 +103,18 @@ origin
 polygon
   The clipping polygon, expressed in a well-known text string,
   eg: "POLYGON((0 0, 5000 10000, 10000 0, 0 0))".  This option can be
-  specified more than once by placing values in an array.
+  specified more than once by placing values in an array, in which case all of
+  them will be unioned together, acting as a single multipolygon.
 
 .. note::
 
     When using ``pdal info --summary``, using the ``polygon`` option will cause the resulting bounds to be clipped to the maximal extents of all provided polygons, and the resulting number of points to be an upper bound for this polygon selection.
+
+.. note::
+
+    When a ``bounds`` option is specified alongside the ``polygon`` option, only
+    the points that fall within *both* the bounds and the polygon(s) will be
+    returned.
 
 ogr
   A JSON object representing an OGR query to fetch polygons to use for filtering. The polygons
