@@ -66,7 +66,8 @@ private:
 
 }
 
-PDAL_C_START
+extern "C"
+{
 
 // These functions are available from GDAL, but they
 // aren't exported.
@@ -81,7 +82,7 @@ int PDALGeoTIFFPrint(char* data, void* aux)
     return static_cast<int>(printer->size());
 }
 
-PDAL_C_END
+} // extern "C"
 
 #include <io/LasVLR.hpp>
 

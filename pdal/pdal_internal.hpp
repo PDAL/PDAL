@@ -48,23 +48,15 @@
 friend class test_case_name##_##test_name##_Test
 #endif
 
-// See http://stackoverflow.com/questions/1814548/boostsystem-category-defined-but-not-used
-#ifndef BOOST_SYSTEM_NO_DEPRECATED
-#define BOOST_SYSTEM_NO_DEPRECATED 1
-#endif
-
-
-#define PDAL_CURRENT_BOOST_MINOR_VERSION BOOST_VERSION/100%1000
-#ifdef __cplusplus
-#  define PDAL_C_START           extern "C" {
-#  define PDAL_C_END             }
-#else
-#  define PDAL_C_START
-#  define PDAL_C_END
-#endif
-
-
 #ifdef _WIN32
-#  pragma warning(disable: 4068)  // ignore unknown pragmas (due to boost's use of GCC pragmas)
+#ifdef _MSC_VER
+#define PDAL_MSVC       // Using the MSVC compiler for WIN32.
+#define PDAL_WIN32_STL    // When you're using the MSVC compiler, you can use MSVC STL extensions
+#else
+#ifndef __MINGW32__
+#error "WIN32 without MSVC. Expected __MINGW32__ but not found."
 #endif
-
+#define PDAL_MINGW      // MinGW runs on WIN32 but isn't MSVC. It uses libc++std.
+// MinGW use libstdc++
+#endif // _MSC_VER
+#endif // _WIN32
