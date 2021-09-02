@@ -224,9 +224,9 @@ public:
         { return m_pointLen; }
 	void setPointLen(uint16_t v)
         { m_pointLen = v; }
-    uint16_t basePointLen()
+    uint16_t basePointLen() const
         { return basePointLen(m_pointFormat); }
-    uint16_t basePointLen(uint8_t format);
+    uint16_t basePointLen(uint8_t format) const;
 
     /// Set the number of points.
     /// \param pointCount  Number of points in the file.

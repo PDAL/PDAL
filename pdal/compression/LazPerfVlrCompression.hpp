@@ -38,7 +38,7 @@
 
 namespace pdal
 {
-    class LazPerfVlrCompressorImpl;
+    class LasHeader;
 
 // This compressor write data in chunks to a stream. At the beginning of the
 // data is an offset to the end of the data, where the chunk table is
@@ -50,6 +50,7 @@ namespace pdal
 // The compressor uses the schema of the point data in order to compress
 // the point stream.  The schema is also stored in a VLR that isn't
 // handled as part of the compression process itself.
+class LazPerfVlrCompressorImpl;
 class LazPerfVlrCompressor
 {
 public:
@@ -70,11 +71,10 @@ class LazPerfVlrDecompressorImpl;
 class LazPerfVlrDecompressor
 {
 public:
-    LazPerfVlrDecompressor(std::istream& stream, int format, int ebCount,
-        std::streamoff pointOffset, const char *virdata);
+    LazPerfVlrDecompressor(std::istream& stream, const LasHeader& header, const char *vlrdata);
     ~LazPerfVlrDecompressor();
 
-    bool seek(int64_t record);
+    bool seek(uint64_t record);
     void decompress(char *outbuf);
 
 private:
