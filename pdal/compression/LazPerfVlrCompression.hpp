@@ -75,7 +75,7 @@ public:
     ~LazPerfVlrDecompressor();
 
     bool seek(uint64_t record);
-    void decompress(char *outbuf);
+    bool decompress(char *outbuf);
 
 private:
     std::unique_ptr<LazPerfVlrDecompressorImpl> m_impl;

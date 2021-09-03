@@ -685,7 +685,9 @@ bool LasReader::processOne(PointRef& point)
 #ifdef PDAL_HAVE_LAZPERF
         if (m_args->compression == "LAZPERF")
         {
-            m_p->decompressor->decompress(m_p->decompressorBuf.data());
+            if (!m_p->decompressor->decompress(m_p->decompressorBuf.data()))
+                throwError("Error reading point " + std::to_string(m_p->index) +
+                    " from " + m_filename + ". Invalid/corrupt file.");
             loadPoint(point, m_p->decompressorBuf.data(), pointLen);
         }
 #endif

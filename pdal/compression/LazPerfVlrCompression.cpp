@@ -215,8 +215,15 @@ public:
         // If the chunk size is fixed, set the counts to the chunk size since
         // they aren't stored in the chunk table..
         if (!variable)
+        {
+            uint64_t remaining = m_pointCount;
             for (lazperf::chunk& chunk : m_chunks)
-                chunk.count = m_vlr.chunk_size;
+            {
+                chunk.count = (std::min)((uint64_t)m_vlr.chunk_size, remaining);
+                remaining -= chunk.count;
+            }
+            assert(remaining == 0);
+        }
 
         // Add a chunk at the beginning that has a count of 0 and an offset of the
         // start of the first chunk.
@@ -246,33 +253,37 @@ public:
             return false;
 
         // Search for the chunk containing the requested record.
-        auto ci = std::lower_bound(m_chunks.begin(), m_chunks.end(), record,
-            [](const lazperf::chunk& c, uint64_t record) {  return c.count < record; });
+        auto ci = std::upper_bound(m_chunks.begin(), m_chunks.end(), record,
+            [](uint64_t record, const lazperf::chunk& c) {  return record < c.count; });
 
-        if (ci == m_chunks.end()) // Should never happen.
+        if (ci == m_chunks.begin()) // Should never happen.
             return false;
+
+        ci--;
 
         // Calculate the number of points we need to skip in the located chunk.
         setChunk(ci);
-        m_chunkPointsRead = record - ci->count;
+        uint64_t toRead = record - ci->count;
         m_stream.seekg(ci->offset);
         m_fileStream.reset();
         std::vector<char> buf(m_pointLen);
-        for (int i = 0; i < m_chunkPointsRead; ++i)
-            decompress(buf.data());
+        while (toRead--)
+            if (!decompress(buf.data()))
+                return false;
         return true;
     }
 
-    void decompress(char *outbuf)
+    bool decompress(char *outbuf)
     {
         if (chunkDone())
         {
-            resetDecompressor();
             if (!nextChunk())
-                return;
+                return false;
+            resetDecompressor();
         }
         m_decompressor->decompress(outbuf);
         m_chunkPointsRead++;
+        return true;
     }
 
 private:
@@ -283,26 +294,27 @@ private:
 
     bool nextChunk()
     {
-        m_curChunk++;
         if (m_curChunk == m_chunks.end())
             return false;
-        setChunk(m_curChunk);
+        if (!setChunk(m_curChunk + 1))
+            return false;
         m_chunkPointsRead = 0;
         return true;
     }
 
-    void setChunk(ChunkIter chunk)
+    bool setChunk(ChunkIter chunk)
     {
         m_curChunk = chunk;
-        if (chunk == m_chunks.end())
-            return;
-
         auto nextChunk = chunk + 1;
-        if (nextChunk == m_chunks.end())
-            m_chunkPointsTotal = m_pointCount - chunk->count;
-        else
-            m_chunkPointsTotal = nextChunk->count - chunk->count;
-        std::cerr << "Chunk points total = " << m_chunkPointsTotal << "!\n";
+        // The chunk table entries are written at the *end* of a creating a chunk. When we
+        // read the chunk table, we stick an entry at the front indicating the start of
+        // the first chunk. The last chunk table entry points to the end of the chunks
+        // and has a count value equal to the total number of points.
+        if (chunk == m_chunks.end() || nextChunk == m_chunks.end())
+            return false;
+
+        m_chunkPointsTotal = nextChunk->count - chunk->count;
+        return true;
     }
 
     bool chunkDone() const
@@ -333,9 +345,9 @@ LazPerfVlrDecompressor::~LazPerfVlrDecompressor()
 {}
 
 
-void LazPerfVlrDecompressor::decompress(char *outbuf)
+bool LazPerfVlrDecompressor::decompress(char *outbuf)
 {
-    m_impl->decompress(outbuf);
+    return m_impl->decompress(outbuf);
 }
 
 bool LazPerfVlrDecompressor::seek(uint64_t record)
