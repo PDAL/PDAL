@@ -205,11 +205,6 @@ public:
 
         bool variable = (m_vlr.chunk_size == lazperf::VariableChunkSize);
 
-        //NOTE: There is no chunk in the table for the first chunk.
-        //NOTE: The offset in the chunk table is the number of bytes in the *previous*
-        //  chunk.
-        //NOTE: The count in the chunk table, if it exists, is the number of points in
-        // the *previous* chunk.
         m_chunks = lazperf::decompress_chunk_table(m_fileStream.cb(), numChunks, variable);
 
         // If the chunk size is fixed, set the counts to the chunk size since
@@ -231,7 +226,16 @@ public:
 
         // Fix up the chunk table such that the offsets are absolute offsets to the
         // chunk and the counts are cumulative counts of points before the chunk.
-        // NOTE: There is no count of the total cumulative points.
+        // When we're done, the chunk table looks like this, where N is the number of chunks:
+
+        // Chunk table entry 1: offset to chunk 1, count of 0
+        // Chunk table entry 2: offset to chunk 2, count of chunk 1
+        // Chunk table entry 3: offset to chunk 3, count of chunk 1 + 2
+        // ...
+        // Chunk table entry N: offset to chunk N, count of chunk 1 + ... + N
+        // Chunk table entry N + 1: offset to end of chunks (start of chunk table),
+        //   count is the total number of points in all chunks.
+
         for (size_t i = 1; i < m_chunks.size(); ++i)
         {
             m_chunks[i].offset += m_chunks[i - 1].offset;
