@@ -37,9 +37,9 @@
 // http://www.drdobbs.com/cpp/building-your-own-plugin-framework-part/206503957
 // The original work was released under the Apache License v2.
 
-#ifdef _WIN32
+#ifdef PDAL_MSVC
   #include <windows.h>
-#else
+#else // Unix and MinGW
   #include <dlfcn.h>
 #endif
 
