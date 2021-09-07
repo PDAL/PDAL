@@ -157,7 +157,7 @@ void LasHeader::setScaling(const Scaling& scaling)
 }
 
 
-uint16_t LasHeader::basePointLen(uint8_t type)
+uint16_t LasHeader::basePointLen(uint8_t type) const
 {
     const uint16_t len[] = { 20, 28, 26, 34, 57, 63, 30, 36, 38, 59, 67 };
     const size_t numTypes = sizeof(len) / sizeof(len[0]);
