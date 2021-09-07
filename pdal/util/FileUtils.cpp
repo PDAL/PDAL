@@ -75,15 +75,8 @@ std::string addTrailingSlash(std::string path)
     return path;
 }
 
-#ifdef _WIN32
-inline std::string fromNative(std::wstring const& in)
-{
-    // TODO: C++11 define convert with static thread_local
-    std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
-    auto p = reinterpret_cast<unsigned short const*>(in.data());
-    return convert.to_bytes(p, p + in.size());
-}
-inline std::wstring toNative(std::string const& in)
+#ifdef PDAL_WIN32_STL
+std::wstring toNative(std::string const& in)
 {
     // TODO: C++11 define convert with static thread_local
     std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
@@ -91,9 +84,11 @@ inline std::wstring toNative(std::string const& in)
     auto p = reinterpret_cast<wchar_t const*>(s.data());
     return std::wstring(p, p + s.size());
 }
-#else
-// inline std::string const& fromNative(std::string const& in) { return in; }
-inline std::string const& toNative(std::string const& in) { return in; }
+#else // Unix, OSX, MinGW
+std::string const& toNative(std::string const& in)
+{
+    return in;
+}    
 #endif
 
 } // unnamed namespace
@@ -434,7 +429,14 @@ std::vector<std::string> glob(std::string path)
     if (path[0] == '~')
         throw pdal::pdal_error("PDAL does not support shell expansion");
 
-#ifdef _WIN32
+#ifdef PDAL_WIN32_STL
+    auto fromNative = [](std::wstring const& in) => std::wstring
+    {
+        std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
+        auto p = reinterpret_cast<unsigned short const*>(in.data());
+        return convert.to_bytes(p, p + in.size());
+    };
+
     std::wstring wpath(toNative(path));
     WIN32_FIND_DATAW ffd;
     HANDLE handle = FindFirstFileW(wpath.c_str(), &ffd);
