@@ -162,28 +162,29 @@ void LiTreeFilter::classifyPoint(PointId ui, PointView& view, PointIdList& Ni,
     PointRef u = view.point(ui);
     double Zu = u.getFieldAs<double>(Id::HeightAboveGround);
 
-    PointViewPtr Nview = view.makeNew();
-    for (PointId const& n : Ni)
-        Nview->appendPoint(view, n);
-    KD2Index& Ntree = Nview->build2dIndex();
+    // compute dmin1 and dmin2 (nearest neighbor in each set)
+    auto mindist = [&ui, &view](PointIdList idx) {
+        double ux = view.getFieldAs<double>(Id::X, ui);
+        double uy = view.getFieldAs<double>(Id::Y, ui);
 
-    PointViewPtr Pview = view.makeNew();
-    for (PointId const& p : Pi)
-        Pview->appendPoint(view, p);
-    KD2Index& Ptree = Pview->build2dIndex();
+        double mindist = (std::numeric_limits<double>::max)();
+        for (PointId const& i : idx)
+        {
+            double nx = view.getFieldAs<double>(Id::X, i);
+            double ny = view.getFieldAs<double>(Id::Y, i);
+            double dist = (nx - ux) * (nx - ux) + (ny - uy) * (ny - uy);
+            if (dist < mindist)
+                mindist = dist;
+        }
+        return std::sqrt(mindist);
+    };
+    double dmin1 = mindist(Pi);
+    double dmin2 = mindist(Ni);
 
     // determine appropriate threshold based on HAG of current point
     double dt = 1.5;
     if (Zu > 15)
         dt = 2.0;
-
-    // compute dmin1 and dmin2 (nearest neighbor in each set)
-    PointIdList idx(1);
-    std::vector<double> sqr_dists(1);
-    Ptree.knnSearch(u, 1, &idx, &sqr_dists);
-    double dmin1 = sqr_dists[0];
-    Ntree.knnSearch(u, 1, &idx, &sqr_dists);
-    double dmin2 = sqr_dists[0];
 
     if (!m_localMax[ui])
     {
@@ -209,7 +210,7 @@ void LiTreeFilter::classifyPoint(PointId ui, PointView& view, PointIdList& Ni,
 }
 
 void LiTreeFilter::segmentTree(PointView& view, PointIdList& Ui,
-                               int64_t& tree_id)
+                               int64_t& tree_id, PointId t0)
 {
     // "The proposed segmentation algorithm isolates trees individually and
     // sequentially from the point cloud, from the tallest tree to the
@@ -227,15 +228,6 @@ void LiTreeFilter::segmentTree(PointView& view, PointIdList& Ui,
     // points corresponding to this target tree are removed from the point
     // cloud."
 
-    // "We find the highest point t0 (global maximum) in Ui, which is assumed
-    // to be the top of the tallest tree i in Ui."
-    PointId t0 = locateHighestPoint(view, Ui);
-    if (view.getFieldAs<double>(Id::HeightAboveGround, t0) < m_minHag)
-    {
-        log()->get(LogLevel::Debug)
-            << "Minimum height above ground not met; terminating.\n";
-        return;
-    }
     Pi.push_back(t0);
 
     // "We then insert a dummy point n0 that is far away (e.g., 100m) from t0
@@ -244,8 +236,18 @@ void LiTreeFilter::segmentTree(PointView& view, PointIdList& Ui,
     Ni.push_back(n0);
 
     // "For iteration i, we classify each point in Ui as Pi or Ni."
+    double tx = view.getFieldAs<double>(Id::X, t0);
+    double ty = view.getFieldAs<double>(Id::Y, t0);
     for (PointId const& ui : Ui)
-        classifyPoint(ui, view, Ni, Pi);
+    {
+        double ux = view.getFieldAs<double>(Id::X, ui);
+        double uy = view.getFieldAs<double>(Id::Y, ui);
+        double d = (ux - tx) * (ux - tx) + (uy - ty) * (uy - ty);
+        if (d < 100.0)
+            classifyPoint(ui, view, Ni, Pi);
+        else
+            Ni.push_back(ui);
+    }
 
     log()->get(LogLevel::Debug3)
         << "|Pi| = " << Pi.size() << ", |Ni| = " << Ni.size() << std::endl;
@@ -277,17 +279,19 @@ void LiTreeFilter::filter(PointView& view)
 
     // "...stop when Ui is empty."
     int64_t tree_id(1);
-    point_count_t prevSize(Ui.size());
     while (Ui.size() > 1)
     {
-        segmentTree(view, Ui, tree_id);
-
-        // Ui now contains all points not yet labeled with a TreeID. If it
-        // remains unchanged between two iterations, it will be unable to
-        // segment any further.
-        if (Ui.size() == prevSize)
+        // "We find the highest point t0 (global maximum) in Ui, which is assumed
+        // to be the top of the tallest tree i in Ui."
+        PointId t0 = locateHighestPoint(view, Ui);
+        if (view.getFieldAs<double>(Id::HeightAboveGround, t0) < m_minHag)
+        {
+            log()->get(LogLevel::Debug)
+                << "Minimum height above ground not met; terminating.\n";
             break;
-        prevSize = Ui.size();
+        }
+
+        segmentTree(view, Ui, tree_id, t0);
     }
 }
 

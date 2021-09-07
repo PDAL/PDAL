@@ -62,7 +62,8 @@ private:
     PointId locateHighestPoint(PointView& view, PointIdList const& Ui);
     PointId locateDummyPoint(PointView& view, PointIdList const& Ui,
                              PointId t0);
-    void segmentTree(PointView& view, PointIdList& Ui, int64_t& tree_id);
+    void segmentTree(PointView& view, PointIdList& Ui, int64_t& tree_id,
+                     PointId t0);
     void classifyPoint(PointId ui, PointView& view, PointIdList& Ni,
                        PointIdList& Pi);
     void computeLocalMax(PointView& view);
