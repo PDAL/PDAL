@@ -167,7 +167,7 @@ void LiTreeFilter::classifyPoint(PointId ui, PointView& view, PointIdList& Ni,
         double ux = view.getFieldAs<double>(Id::X, ui);
         double uy = view.getFieldAs<double>(Id::Y, ui);
 
-        double mindist = std::numeric_limits<double>::max();
+        double mindist = (std::numeric_limits<double>::max)();
         for (PointId const& i : idx)
         {
             double nx = view.getFieldAs<double>(Id::X, i);
