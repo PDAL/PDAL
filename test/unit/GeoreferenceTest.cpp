@@ -32,12 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#define _USE_MATH_DEFINES
 #include <pdal/pdal_test_main.hpp>
 #include <pdal/util/Georeference.hpp>
 
 #include <cmath>
-
 
 namespace pdal
 {

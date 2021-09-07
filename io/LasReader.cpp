@@ -339,9 +339,7 @@ void LasReader::ready(PointTableRef table)
             const LasVLR *vlr = m_p->header.findVlr(LASZIP_USER_ID, LASZIP_RECORD_ID);
             if (!vlr)
                 throwError("LAZ file missing required laszip VLR.");
-            int ebCount = m_p->header.pointLen() - m_p->header.basePointLen();
-            m_p->decompressor = new LazPerfVlrDecompressor(*stream, m_p->header.pointFormat(),
-                ebCount, m_p->header.pointOffset(), vlr->data());
+            m_p->decompressor = new LazPerfVlrDecompressor(*stream, m_p->header, vlr->data());
             if (m_args->start > 0)
             {
                 if (m_args->start > m_p->header.pointCount())
@@ -687,7 +685,9 @@ bool LasReader::processOne(PointRef& point)
 #ifdef PDAL_HAVE_LAZPERF
         if (m_args->compression == "LAZPERF")
         {
-            m_p->decompressor->decompress(m_p->decompressorBuf.data());
+            if (!m_p->decompressor->decompress(m_p->decompressorBuf.data()))
+                throwError("Error reading point " + std::to_string(m_p->index) +
+                    " from " + m_filename + ". Invalid/corrupt file.");
             loadPoint(point, m_p->decompressorBuf.data(), pointLen);
         }
 #endif

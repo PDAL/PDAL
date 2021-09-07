@@ -556,7 +556,7 @@ bool EptReader::passesSpatialFilter(const BOX3D& tileBounds) const
     auto boxOverlaps = [this, &reproject, &tileBounds]() -> bool
     {
         if (!m_p->bounds.box.valid())
-            return false;
+            return true;
 
         // If the reprojected source bounds doesn't overlap our query bounds, we're done.
         return reproject(tileBounds, m_p->bounds.xform).overlaps(m_p->bounds.box);
@@ -566,6 +566,9 @@ bool EptReader::passesSpatialFilter(const BOX3D& tileBounds) const
     // we can skip
     auto polysOverlap = [this, &reproject, &tileBounds]() -> bool
     {
+        if (m_p->polys.empty())
+            return true;
+
         for (auto& ps : m_p->polys)
             if (!ps.poly.disjoint(reproject(tileBounds, ps.xform)))
                 return true;
@@ -580,7 +583,7 @@ bool EptReader::passesSpatialFilter(const BOX3D& tileBounds) const
     // at the same time, it seems to get corrupted. There may be other instances
     // that need to be locked.
     std::lock_guard<std::mutex> lock(m_p->mutex);
-    return boxOverlaps() || polysOverlap();
+    return boxOverlaps() && polysOverlap();
 }
 
 
@@ -675,13 +678,16 @@ bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
     auto passesBoundsFilter = [this](double x, double y, double z)
     {
         if (!m_p->bounds.box.valid())
-            return false;
+            return true;
         m_p->bounds.xform.transform(x, y, z);
         return m_p->bounds.box.contains(x, y, z);
     };
 
     auto passesPolyFilter = [this](double xo, double yo, double zo)
     {
+        if (m_p->polys.empty())
+            return true;
+
         for (PolyXform& ps : m_p->polys)
         {
             double x = xo;
@@ -701,7 +707,7 @@ bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
 
     // If there is a spatial filter, make sure it passes.
     if (hasSpatialFilter())
-        if (!passesBoundsFilter(x, y, z) && !passesPolyFilter(x, y, z))
+        if (!passesBoundsFilter(x, y, z) || !passesPolyFilter(x, y, z))
             return false;
 
     for (auto& el : m_p->info->dims())
