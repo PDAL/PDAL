@@ -81,7 +81,7 @@ std::string addTrailingSlash(std::string path)
 std::wstring toNative(std::string const& in)
 {
     // TODO: C++11 define convert with static thread_local
-    std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
+    std::wstring_convert<std::codecvt_utf8_utf16<uint16_t>, uint16_t> convert;
     auto s = convert.from_bytes(in);
     auto p = reinterpret_cast<wchar_t const*>(s.data());
     return std::wstring(p, p + s.size());
