@@ -39,8 +39,8 @@
 namespace pdal
 {
 
-class PDAL_DLL BOX3D;
-class PDAL_DLL MetadataNode;
+class BOX3D;
+class MetadataNode;
 
 /// A SpatialReference defines a model of the earth that is used to describe
 /// the location of points.
