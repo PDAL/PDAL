@@ -37,7 +37,6 @@ target_link_libraries(${PDAL_UTIL_LIB_NAME}
     PRIVATE
         ${BACKTRACE_LIBRARIES}
         ${PDAL_BOOST_LIB_NAME}
-        ${CMAKE_DL_LIBS}
         ${CMAKE_THREAD_LIBS_INIT}
 )
 target_include_directories(${PDAL_UTIL_LIB_NAME} PRIVATE
