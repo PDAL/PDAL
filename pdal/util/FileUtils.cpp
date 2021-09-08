@@ -432,7 +432,7 @@ std::vector<std::string> glob(std::string path)
         throw pdal::pdal_error("PDAL does not support shell expansion");
 
 #ifdef PDAL_WIN32_STL
-    auto fromNative = [](std::wstring const& in) -> std::wstring
+    auto fromNative = [](std::wstring const& in) -> std::string
     {
         std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
         auto p = reinterpret_cast<unsigned short const*>(in.data());
