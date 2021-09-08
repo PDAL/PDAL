@@ -51,6 +51,8 @@
 #include <pdal/util/Utils.hpp>
 #include <pdal/pdal_types.hpp>
 
+#include "pdal_util_internal.hpp"
+
 namespace pdal
 {
 

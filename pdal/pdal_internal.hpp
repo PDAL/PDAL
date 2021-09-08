@@ -40,6 +40,7 @@
 
 #include <pdal/pdal_export.hpp>
 #include <pdal/pdal_types.hpp>
+#include <pdal/util/pdal_util_internal.hpp>
 
 // This is an extraction from the gtest header.  It allows us to make test
 // functions friends of classes without including the gtest headers.
@@ -47,16 +48,3 @@
 #define FRIEND_TEST(test_case_name, test_name)\
 friend class test_case_name##_##test_name##_Test
 #endif
-
-#ifdef _WIN32
-#ifdef _MSC_VER
-#define PDAL_MSVC       // Using the MSVC compiler for WIN32.
-#define PDAL_WIN32_STL    // When you're using the MSVC compiler, you can use MSVC STL extensions
-#else
-#ifndef __MINGW32__
-#error "WIN32 without MSVC. Expected __MINGW32__ but not found."
-#endif
-#define PDAL_MINGW      // MinGW runs on WIN32 but isn't MSVC. It uses libc++std.
-// MinGW use libstdc++
-#endif // _MSC_VER
-#endif // _WIN32
