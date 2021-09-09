@@ -395,9 +395,14 @@ void fileTimes(const std::string& filename, struct tm *createTime,
     struct tm *modTime)
 {
 #ifdef _WIN32
-    std::wstring const wfilename(toNative(filename));
     struct _stat statbuf;
+#ifdef PDAL_WIN32_STL
+    std::wstring const wfilename(toNative(filename));
     _wstat(wfilename.c_str(), &statbuf);
+#else
+    std::string const wfilename(toNative(filename));
+    _stat(wfilename.c_str(), &statbuf);
+#endif
 
     if (createTime)
         *createTime = *gmtime(&statbuf.st_ctime);
@@ -431,6 +436,7 @@ std::vector<std::string> glob(std::string path)
     if (path[0] == '~')
         throw pdal::pdal_error("PDAL does not support shell expansion");
 
+#ifdef _WIN32
 #ifdef PDAL_WIN32_STL
     auto fromNative = [](std::wstring const& in) -> std::string
     {
@@ -459,6 +465,27 @@ std::vector<std::string> glob(std::string path)
 
     } while (FindNextFileW(handle, &ffd) != 0);
     FindClose(handle);
+#else
+    WIN32_FIND_DATA ffd;
+    HANDLE handle = FindFirstFileA(path.c_str(), &ffd);
+
+    if (INVALID_HANDLE_VALUE == handle)
+        return filenames;
+
+    size_t found = path.find_last_of("/\\");
+    do
+    {
+        // Ignore files starting with '.' to be consistent with UNIX.
+        if (ffd.cFileName[0] == '.')
+            continue;
+        if (found == std::wstring::npos)
+            filenames.push_back(ffd.cFileName);
+        else
+            filenames.push_back(path.substr(0, found) + "\\" + ffd.cFileName);
+
+    } while (FindNextFileA(handle, &ffd) != 0);
+    FindClose(handle);
+#endif
 #else
     glob_t glob_result;
 
