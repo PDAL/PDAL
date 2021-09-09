@@ -129,6 +129,7 @@ bool MathParser::uminus(Expression& expr)
     }
 
     NodePtr sub = expr.popNode();
+    assert(sub.get());
     ConstValueNode *node = dynamic_cast<ConstValueNode *>(sub.get());
     if (node)
     {
@@ -137,7 +138,7 @@ bool MathParser::uminus(Expression& expr)
     }
     else
     {
-        if (node->isBool())
+        if (sub->isBool())
         {
             setError("Can't apply '-' to logical expression '" +
                 sub->print() + "'.");
