@@ -214,13 +214,14 @@ For more on PDAL stages and their options, check the PDAL documentation on
   array of strings. Each element in the array is the tag of another stage to be
   set as input to the current stage.
 
-* Reader stages will disregard the ``inputs`` member.
+* Reader stages will disregard the ``inputs`` member.  When the current stage is a reader
+  it is added to the default input list.
 
-* If ``inputs`` is not specified for the first non-reader stage, all reader
-  stages leading up to the current stage will be used as inputs.
+* If ``inputs`` is specified for a writer or filter, those inputs are used
+  for the current stage. The default input list is cleared and replaced with the current stage.
 
-* If ``inputs`` is not specified for any subsequent non-reader stages, the
-  previous stage in the array will be used as input.
+* If ``inputs`` is not specified for a writer or filter, the default input list is used and
+  is replaced with the current stage.
 
 * A ``tag`` mentioned in another stage's ``inputs``  must have been previously
   defined in the ``pipeline`` array.
