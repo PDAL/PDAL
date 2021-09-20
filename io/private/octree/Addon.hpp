@@ -34,43 +34,67 @@
 
 #pragma once
 
-#include <unordered_set>
+#include <list>
+#include <string>
 
-#include "Key.hpp"
+#include <pdal/JsonFwd.hpp>
+#include <pdal/PointLayout.hpp>
+
+#include "Accessor.hpp"
 
 namespace pdal
 {
 
-struct Overlap
-{
-    Overlap(const Key& key) : m_key(key), m_count(0), m_nodeId(0)
-    {}
-    Overlap(const Key& key, point_count_t count, uint64_t nodeId) :
-        m_key(key), m_count(count), m_nodeId(nodeId)
-    {}
+class Addon;
+class Connector;
+using AddonList = std::vector<Addon>;
 
-    Key m_key;
-    point_count_t m_count;
-    uint64_t m_nodeId;
+class Addon
+{
+public:
+    Addon(const std::string& dimName, const std::string& filename,
+            Dimension::Type type) :
+        m_name(dimName), m_filename(filename), m_type(type), m_hierarchy(hierarchyDir())
+    { m_localId = m_layout.registerOrAssignDim(dimName, type); }
+
+    std::string name() const
+        { return m_name; }
+    std::string filename() const
+        { return m_filename; }
+    Dimension::Type type() const
+        { return m_type; }
+    // Id for the local (internal) layout
+    Dimension::Id localId() const
+        { return m_localId; }
+    // Id for the layout to which we'll copy data (ultimate PDAL ID).
+    Dimension::Id externalId() const
+        { return m_externalId; }
+    void setExternalId(Dimension::Id externalId)
+        { m_externalId = externalId; }
+    Hierarchy& hierarchy()
+        { return m_hierarchy; }
+    PointLayout& layout() const
+        { return const_cast<PointLayout &>(m_layout); }
+    point_count_t points(const Key& key) const;
+    std::string dataDir() const;
+    std::string hierarchyDir() const;
+    static AddonList store(const Connector& connector, const NL::json& spec,
+        const PointLayout& layout);        
+    static AddonList load(const Connector& connector, const NL::json& spec);
+
+private:
+    std::string m_name;
+    std::string m_filename;
+    Dimension::Type m_type;
+    Dimension::Id m_localId;
+    Dimension::Id m_externalId;
+
+    Hierarchy m_hierarchy;
+    PointLayout m_layout;
+
+    static Addon loadAddon(const Connector& connector,
+        const std::string& dimName, const std::string& filename);
 };
-using Hierarchy = std::unordered_set<Overlap>;
-
-inline bool operator==(const Overlap& a, const Overlap& b)
-{
-    return a.m_key == b.m_key;
-}
 
 } // namespace pdal
-
-namespace std
-{
-    template<>
-    struct hash<pdal::Overlap>
-    {
-        std::size_t operator()(const pdal::Overlap& o) const noexcept
-        {
-            return std::hash<pdal::Key>{}(o.m_key);
-        }
-    };
-}
 

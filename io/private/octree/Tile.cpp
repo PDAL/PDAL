@@ -37,13 +37,15 @@
 
 #include "Connector.hpp"
 #include "EptInfo.hpp"
-#include "TileContents.hpp"
+#include "Tile.hpp"
 #include "VectorPointTable.hpp"
 
 namespace pdal
 {
 
-void TileContents::read()
+// EptTile
+
+void EptTile::read()
 {
     try
     {
@@ -74,7 +76,7 @@ void TileContents::read()
     }
 }
 
-void TileContents::readLaszip()
+void EptTile::readLaszip()
 {
     // If the file is remote (HTTP, S3, Dropbox, etc.), getLocalHandle will
     // download the file and `localPath` will return the location of the
@@ -94,9 +96,10 @@ void TileContents::readLaszip()
 
     reader.prepare(*m_table);
     reader.execute(*m_table);
+    transform(true);
 }
 
-void TileContents::readBinary()
+void EptTile::readBinary()
 {
     std::string filename = m_info.dataDir() + key().toString() + ".bin";
     auto data(m_connector.getBinary(filename));
@@ -105,11 +108,11 @@ void TileContents::readBinary()
     vpt->buffer() = std::move(data);
     m_table.reset(vpt);
 
-    transform();
+    transform(false);
 }
 
 #ifdef PDAL_HAVE_ZSTD
-void TileContents::readZstandard()
+void EptTile::readZstandard()
 {
     std::string filename = m_info.dataDir() + key().toString() + ".zst";
     auto compressed(m_connector.getBinary(filename));
@@ -125,14 +128,14 @@ void TileContents::readZstandard()
     vpt->buffer() = std::move(data);
     m_table.reset(vpt);
 
-    transform();
+    transform(false);
 }
 #else
-void TileContents::readZstandard()
+void EptTile::readZstandard()
 {}
 #endif // PDAL_HAVE_ZSTD
 
-void TileContents::readAddon(const Addon& addon)
+void EptTile::readAddon(const Addon& addon)
 {
     m_addonTables[addon.localId()] = nullptr;
 
@@ -155,29 +158,36 @@ void TileContents::readAddon(const Addon& addon)
     m_addonTables[addon.localId()] = BasePointTablePtr(vpt);
 }
 
-void TileContents::transform()
+
+void EptTile::transform(bool skipxyz)
 {
+    // Shorten long name.
     using D = Dimension::Id;
 
-    // Shorten long name.
-    const XForm& xf = m_info.dimType(Dimension::Id::X).m_xform;
-    const XForm& yf = m_info.dimType(Dimension::Id::Y).m_xform;
-    const XForm& zf = m_info.dimType(Dimension::Id::Z).m_xform;
-
-    PointRef p(*m_table);
-    for (PointId i = 0; i < size(); ++i)
+    for (const auto& dimIt : m_info.dims())
     {
-        p.setPointId(i);
+        const DimType& dt = dimIt.second;
+        const XForm& xf = dt.m_xform;
+        Dimension::Id id = dt.m_id;
 
-        // Scale the XYZ values.
-        p.setField(D::X, p.getFieldAs<double>(D::X) * xf.m_scale.m_val +
-            xf.m_offset.m_val);
-        p.setField(D::Y, p.getFieldAs<double>(D::Y) * yf.m_scale.m_val +
-            yf.m_offset.m_val);
-        p.setField(D::Z, p.getFieldAs<double>(D::Z) * zf.m_scale.m_val +
-            zf.m_offset.m_val);
+        if (skipxyz && (id == D::X || id == D::X || id == D::Z))
+            continue;
+        PointRef p(*m_table);
+        for (PointId i = 0; i < size(); ++i)
+        {
+            p.setPointId(i);
+            p.setField(id, p.getFieldAs<double>(id) * xf.m_scale.m_val + xf.m_offset.m_val);
+        }
     }
 }
+
+/// CopcTile
+/**
+void CopcTile::read()
+{
+    //ABELL - Do something.
+}
+**/
 
 } // namespace pdal
 

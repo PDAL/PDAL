@@ -58,14 +58,14 @@ public:
     EptInfo(const std::string& info);
     EptInfo(const std::string& filename, const Connector& connector);
 
-    const BOX3D& bounds() const { return m_bounds; }
-    const BOX3D& boundsConforming() const { return m_boundsConforming; }
+    BOX3D rootExtent() const { return m_rootExtent; }
+    BOX3D pointBounds() const { return m_pointBounds; }
     uint64_t points() const { return m_points; }
     uint64_t span() const { return m_span; }
     DataType dataType() const { return m_dataType; }
     const SpatialReference& srs() const { return m_srs; }
     const NL::json& json() { return m_info; }
-    std::map<std::string, DimType>& dims() { return m_dims; }
+    const std::map<std::string, DimType>& dims() const { return m_dims; }
     DimType dimType(Dimension::Id id) const;
     PointLayout& remoteLayout() const { return m_remoteLayout; }
     std::string dataDir() const;
@@ -76,14 +76,14 @@ private:
     // Info comes from the values here:
     // https://entwine.io/entwine-point-tile.html#ept-json
     NL::json m_info;
-    BOX3D m_bounds;
-    BOX3D m_boundsConforming;
+    BOX3D m_rootExtent;
+    BOX3D m_pointBounds;
     uint64_t m_points = 0;
     std::map<std::string, DimType> m_dims;
 
-    // The span is the length, width, and depth of the octree grid.  For
-    // example, a dataset oriented as a 256*256*256 octree grid would have a
-    // span of 256.
+    // Each tile/voxel/file in an EPT dataset is divided into a bunch of subcells. The
+    // target is that there is no more than one point in each of these subcells.
+    // The span is the number of subcells in each direction X/Y/Z.
     //
     // See: https://entwine.io/entwine-point-tile.html#span
     uint64_t m_span = 0;

@@ -41,37 +41,69 @@ namespace pdal
 
 class PDAL_DLL Key
 {
-    // An EPT key representation (see https://git.io/fAiBh).  A depth/X/Y/Z key
-    // representing a data node, as well as the bounds of the contained data.
+    // A depth/X/Y/Z key representing a data node, as well as the bounds of the contained data.
 public:
     Key()
     {}
 
     Key(const std::string& s)
     {
+        fill(s);
+    }
+
+
+    bool valid() const
+    {
+        return d != -1;
+    }
+
+    BOX3D bounds() const
+    {
+        return b;
+    }
+
+    bool fill(const std::string& s)
+    {
+        d = -1;
         const StringList tokens(Utils::split(s, '-'));
         if (tokens.size() != 4)
-            throw pdal_error("Invalid EPT KEY: " + s);
-        d = std::stoi(tokens[0]);
-        x = std::stoi(tokens[1]);
-        y = std::stoi(tokens[2]);
-        z = std::stoi(tokens[3]);
+            return false;
+
+        size_t cnt;
+        d = std::stoi(tokens[0], &cnt);
+        if (cnt != tokens[0].size())
+            return false;
+        x = std::stoi(tokens[1], &cnt);
+        if (cnt != tokens[1].size())
+            return false;
+        y = std::stoi(tokens[2], &cnt);
+        if (cnt != tokens[2].size())
+            return false;
+        z = std::stoi(tokens[3], &cnt);
+        if (cnt != tokens[3].size())
+            return false;
+        return true;
     }
 
     BOX3D b;
 
-    uint32_t d = 0;
-    uint32_t x = 0;
-    uint32_t y = 0;
-    uint32_t z = 0;
+    int32_t d = 0;
+    int32_t x = 0;
+    int32_t y = 0;
+    int32_t z = 0;
 
     std::string toString() const
+    {
+        return (std::string)(*this);
+    }
+    
+    operator std::string() const
     {
         return std::to_string(d) + '-' + std::to_string(x) + '-' +
             std::to_string(y) + '-' + std::to_string(z);
     }
 
-    double& operator[](uint64_t i)
+    double& operator[](int32_t i)
     {
         switch (i)
         {
@@ -85,18 +117,21 @@ public:
         }
     }
 
-    uint32_t& idAt(uint64_t i)
+    int32_t& idAt(int32_t i)
     {
         switch (i)
         {
-            case 0: return x;
-            case 1: return y;
-            case 2: return z;
+            case 0:
+                return x;
+            case 1:
+                return y;
+            case 2:
+                return z;
             default: throw pdal_error("Invalid Key::idAt index");
         }
     }
 
-    Key bisect(uint64_t direction) const
+    Key bisect(int32_t direction) const
     {
         Key key(*this);
         ++key.d;
@@ -123,11 +158,27 @@ public:
 
         return key;
     }
+
+    static Key invalid()
+    {
+        static Key badkey = Key(-1, 0, 0, 0);
+
+        return badkey;
+    }
+
+private:
+    Key(int d, int x, int y, int z) : d(d), x(x), y(y), z(z)
+    {}
 };
 
 inline bool operator==(const Key& a, const Key& b)
 {
     return a.d == b.d && a.x == b.x && a.y == b.y && a.z == b.z;
+}
+
+inline bool operator!=(const Key& a, const Key& b)
+{
+    return !(a == b);
 }
 
 inline bool operator<(const Key& a, const Key& b)

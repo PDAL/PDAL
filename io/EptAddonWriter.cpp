@@ -41,9 +41,9 @@
 #include <pdal/ArtifactManager.hpp>
 #include <pdal/util/ThreadPool.hpp>
 
-#include "private/ept/Addon.hpp"
-#include "private/ept/EptArtifact.hpp"
-#include "private/ept/Connector.hpp"
+#include "private/octree/Addon.hpp"
+#include "private/octree/EptArtifact.hpp"
+#include "private/octree/Connector.hpp"
 
 namespace pdal
 {
@@ -143,11 +143,14 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
     // Create an addon buffer for each node we're going to write.
 
     size_t itemSize = Dimension::size(addon.type());
+//ABELL
+/**
     for (const Overlap& overlap : *m_hierarchy)
     {
         std::vector<char>& b = buffers[overlap.m_nodeId - 1];
         b.resize(overlap.m_count * itemSize);
     }
+**/
 
     // Fill in our buffers with the data from the view.
     PointRef pr(*view);
@@ -176,6 +179,8 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
     m_connector->makeDir(dataDir);
 
     // Write the binary dimension data for the addon.
+//ABELL
+/**
     for (const Overlap& overlap : *m_hierarchy)
     {
         std::vector<char>& buffer = buffers.at(overlap.m_nodeId - 1);
@@ -185,13 +190,14 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
             m_connector->put(filename, buffer);
         });
     }
+**/
 
     m_pool->await();
 
     // Write the addon hierarchy data.
     NL::json h;
     Key key;
-    key.b = m_info->bounds();
+    key.b = m_info->rootExtent();
 
     std::string hierarchyDir = addon.hierarchyDir();
     m_connector->makeDir(hierarchyDir);
@@ -215,6 +221,8 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
 void EptAddonWriter::writeHierarchy(const std::string& directory,
     NL::json& curr, const Key& key) const
 {
+//ABELL
+/**
     auto it = m_hierarchy->find(key);
     if (it == m_hierarchy->end())
         return;
@@ -247,6 +255,7 @@ void EptAddonWriter::writeHierarchy(const std::string& directory,
         for (uint64_t dir(0); dir < 8; ++dir)
             writeHierarchy(directory, curr, key.bisect(dir));
     }
+**/
 }
 
 }

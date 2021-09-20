@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2018, Connor Manning
+ * Copyright (c) 2021, Hobu Inc.
  *
  * All rights reserved.
  *
@@ -34,67 +34,80 @@
 
 #pragma once
 
-#include <list>
-#include <string>
+#include <nlohmann/json.hpp>
 
-#include <pdal/JsonFwd.hpp>
-#include <pdal/PointLayout.hpp>
+#include <pdal/Polygon.hpp>
+#include <pdal/SrsBounds.hpp>
+#include <pdal/util/ThreadPool.hpp>
+#include <pdal/private/SrsTransform.hpp>
 
-#include "Overlap.hpp"
+#include "Tile.hpp"
 
 namespace pdal
 {
 
-class Addon;
-class Connector;
-using AddonList = std::vector<Addon>;
-
-class Addon
+struct OctArgs
 {
 public:
-    Addon(const std::string& dimName, const std::string& filename,
-            Dimension::Type type) :
-        m_name(dimName), m_filename(filename), m_type(type)
-    { m_localId = m_layout.registerOrAssignDim(dimName, type); }
+    SrsBounds clip;
+    std::size_t threads = 0;
+    double resolution = 0;
+    std::vector<Polygon> polys;
+    NL::json ogr;
+};
 
-    std::string name() const
-        { return m_name; }
-    std::string filename() const
-        { return m_filename; }
-    Dimension::Type type() const
-        { return m_type; }
-    // Id for the local (internal) layout
-    Dimension::Id localId() const
-        { return m_localId; }
-    // Id for the layout to which we'll copy data (ultimate PDAL ID).
-    Dimension::Id externalId() const
-        { return m_externalId; }
-    void setExternalId(Dimension::Id externalId)
-        { m_externalId = externalId; }
-    Hierarchy& hierarchy()
-        { return m_hierarchy; }
-    PointLayout& layout() const
-        { return const_cast<PointLayout &>(m_layout); }
-    point_count_t points(const Key& key) const;
-    std::string dataDir() const;
-    std::string hierarchyDir() const;
-    static AddonList store(const Connector& connector, const NL::json& spec,
-        const PointLayout& layout);        
-    static AddonList load(const Connector& connector, const NL::json& spec);
+struct EptArgs
+{
+public:
+    std::string origin;
+    NL::json addons;
+    NL::json query;
+    NL::json headers;
+};
 
-private:
-    std::string m_name;
-    std::string m_filename;
-    Dimension::Type m_type;
-    Dimension::Id m_localId;
-    Dimension::Id m_externalId;
+struct PolyXform
+{
+    Polygon poly;
+    SrsTransform xform;
+};
 
-    Hierarchy m_hierarchy;
-    PointLayout m_layout;
+struct BoxXform
+{
+    BOX3D box;
+    SrsTransform xform;
+};
 
-    static Addon loadAddon(const Connector& connector,
-        const std::string& dimName, const std::string& filename);
+struct OctPrivate
+{
+public:
+    OctPrivate();
+    ~OctPrivate();
+
+    std::unique_ptr<Connector> connector;
+    std::unique_ptr<EptInfo> info;
+    std::unique_ptr<ThreadPool> pool;
+    TilePtr currentTile;
+    std::unique_ptr<Hierarchy> hierarchy;
+    //ABELL - This needs a better name.
+    std::queue<TilePtr> contents;
+    std::mutex mutex;
+    std::condition_variable contentsCv;
+    std::vector<PolyXform> polys;
+    BoxXform clip;
+    PointId tilePoints = 0;
+    size_t tileCount = 0;
+    int32_t depthEnd = 0;
+};
+
+struct EptPrivate : public OctPrivate
+{
+    EptPrivate();
+    ~EptPrivate();
+
+    AddonList addons;
+    int64_t queryOriginId = -1;
+    PointId lastPointId = 0;
+    int32_t hierarchyStep = 0;
 };
 
 } // namespace pdal
-

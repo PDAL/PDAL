@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2018, Connor Manning
+ * Copyright (c) 2020, Hobu Inc.
  *
  * All rights reserved.
  *
@@ -32,34 +32,25 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#pragma once
+#include <pdal/util/ThreadPool.hpp>
 
-#include <memory>
-
-#include <pdal/Artifact.hpp>
+#include "Types.hpp"
 #include "Connector.hpp"
 #include "EptInfo.hpp"
-#include "Overlap.hpp"
 
 namespace pdal
 {
 
-class EptArtifact : public Artifact
-{
-public:
-    EptArtifact(std::unique_ptr<EptInfo> info,
-            std::unique_ptr<Hierarchy> hierarchy,
-            std::unique_ptr<Connector> connector, size_t hierarchyStep) :
-        m_info(std::move(info)), m_hierarchy(std::move(hierarchy)),
-        m_connector(std::move(connector)), m_hierarchyStep(hierarchyStep)
-    {}
+OctPrivate::OctPrivate()
+{}
 
-    std::unique_ptr<EptInfo> m_info;
-    std::unique_ptr<Hierarchy> m_hierarchy;
-    std::unique_ptr<Connector> m_connector;
-    size_t m_hierarchyStep;
-};
-using EptArtifactPtr = std::shared_ptr<EptArtifact>;
+OctPrivate::~OctPrivate()
+{}
+
+EptPrivate::EptPrivate()
+{}
+
+EptPrivate::~EptPrivate()
+{}
 
 } // namespace pdal
-

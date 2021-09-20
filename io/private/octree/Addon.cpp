@@ -44,8 +44,8 @@ namespace pdal
 
 point_count_t Addon::points(const Key& key) const
 {
-    auto it = m_hierarchy.find(key);
-    return (it == m_hierarchy.end() ? 0 : it->m_count);
+    const Accessor& acc = m_hierarchy.find(key);
+    return (acc.valid() ? acc.pointCount() : 0);
 }
 
 std::string Addon::dataDir() const
