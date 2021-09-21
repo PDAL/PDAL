@@ -204,6 +204,8 @@ void OctReader::readyBase(PointTableRef table)
         log()->get(LogLevel::Warning) << downloadPoints << " will be downloaded" << std::endl;
 
     m_p->tileCount = m_p->hierarchy->size();
+std::cerr << "Tile size/point count = " << m_p->tileCount << "/" << downloadPoints << "!\n";
+
     m_p->pool.reset(new ThreadPool(m_p->pool->numThreads()));
     for (const Accessor& acc : *m_p->hierarchy)
         load(acc);
@@ -213,9 +215,12 @@ void OctReader::readyBase(PointTableRef table)
 void OctReader::load(const Accessor& accessor)
 {
     TilePtr tilep = makeTile(accessor);
+
     m_p->pool->add([this, &tilep]()
         {
-            tilep->read();
+            //ABELL - This isn't quite right because we may not want the provided filename
+            //  because of the ept:// thing, but this will do for the moment.
+            tilep->read(*m_p->connector, m_filename);
 
             // Put the tile on the output queue.
             std::unique_lock<std::mutex> l(m_p->mutex);

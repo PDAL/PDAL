@@ -174,8 +174,7 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
         pr.getField(dst, addon.externalId(), addon.type());
     }
 
-    std::string dataDir = addon.dataDir();
-
+    std::string dataDir = ept::dataDir(addon.filename());
     m_connector->makeDir(dataDir);
 
     // Write the binary dimension data for the addon.
@@ -199,7 +198,7 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
     Key key;
     key.b = m_info->rootExtent();
 
-    std::string hierarchyDir = addon.hierarchyDir();
+    std::string hierarchyDir = ept::hierarchyDir(addon.filename());
     m_connector->makeDir(hierarchyDir);
 
     writeHierarchy(hierarchyDir, h, key);

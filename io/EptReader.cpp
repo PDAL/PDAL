@@ -123,13 +123,22 @@ void EptReader::initialize()
     StringMap headers;
     StringMap query;
     setForwards(headers, query);
-    m_e->connector.reset(new Connector(headers, query));
+    m_p->connector.reset(new Connector(headers, query));
 
     try
     {
-        m_e->info.reset(new EptInfo(m_filename, *m_e->connector));
+        std::cerr << "Initialize with filename = " << m_filename << "!\n";
+        m_e->adjFilename = m_filename;
+        if (Utils::startsWith(m_e->adjFilename, "ept://"))
+        {
+            m_e->adjFilename = m_e->adjFilename.substr(6);
+            if (!Utils::endsWith(m_e->adjFilename, "/ept.json"))
+                m_e->adjFilename += "/ept.json";
+        }
+        std::cerr << "#2 Initialize with filename = " << m_e->adjFilename << "!\n";
+        m_e->info.reset(new EptInfo(m_p->connector->getJson(m_e->adjFilename)));
         setSpatialReference(m_e->info->srs());
-        m_e->addons = Addon::load(*m_e->connector, m_eptArgs->addons);
+        m_e->addons = Addon::load(*m_p->connector, m_eptArgs->addons);
     }
     catch (const arbiter::ArbiterError& err)
     {
@@ -155,12 +164,11 @@ void EptReader::handleOriginQuery()
         return;
 
     log()->get(LogLevel::Debug) << "Searching sources for " << search << std::endl;
-
-    std::string filename = m_e->info->sourcesDir() + "list.json";
+    std::string filename = ept::sourcesDir(m_e->adjFilename) + "list.json";
     NL::json sources;
     try
     {
-        sources = m_e->connector->getJson(filename);
+        sources = m_p->connector->getJson(filename);
     }
     catch (const arbiter::ArbiterError& err)
     {
@@ -206,7 +214,7 @@ void EptReader::handleOriginQuery()
 
     try
     {
-        BOX3D q(toBox3d(found["bounds"]));
+        BOX3D q(ept::toBox3d(found["bounds"]));
 
         if (m_p->clip.box.valid())
             m_p->clip.box.clip(q);
@@ -225,7 +233,7 @@ void EptReader::handleOriginQuery()
 
 void EptReader::addDimensions(PointLayoutPtr layout)
 {
-    for (auto& el : m_p->info->dims())
+    for (auto& el : m_e->info->dims())
     {
         const std::string& name = el.first;
         const DimType& dt = el.second;
@@ -259,11 +267,12 @@ void EptReader::calcOverlaps()
     auto rootAccessor = [this]()
     {
         Key k;
-        k.b = m_p->info->rootExtent();
+        k.b = m_e->info->rootExtent();
         return AccessorPtr(new EptAccessor(k, 0));
     };
 
-    m_p->hierarchy.reset(new Hierarchy(m_p->info->hierarchyDir()));
+std::cerr << "Calc overlaps for " << ept::hierarchyDir(m_e->adjFilename) << "!\n";
+    m_p->hierarchy.reset(new Hierarchy(ept::hierarchyDir(m_e->adjFilename)));
     baseCalcOverlaps(*m_p->hierarchy, *rootAccessor());
 
     for (auto& addon : m_e->addons)
@@ -280,6 +289,7 @@ HierarchyPage EptReader::fetchHierarchyPage(Hierarchy& hierarchy, const Accessor
     try
     {
         std::string filename = hierarchy.source() + acc.key().toString() + ".json";
+std::cerr << "Fetch page = " << filename << "!\n";
         j = m_p->connector->getJson(filename);
     }
     catch (const arbiter::ArbiterError& err)
@@ -377,7 +387,7 @@ StringList EptReader::dimNames() const
 TilePtr EptReader::makeTile(const Accessor& accessor) const
 {
     const EptAccessor& eptAccessor = static_cast<const EptAccessor &>(accessor);
-    return TilePtr(new EptTile(eptAccessor, *m_e->info, *m_e->connector, m_e->addons));
+    return TilePtr(new EptTile(eptAccessor, *m_e->info, m_e->addons));
 }
 
 
@@ -422,7 +432,7 @@ bool EptReader::processPoint(PointRef& dst, const Tile& tile)
 point_count_t EptReader::read(PointViewPtr view, point_count_t count)
 {
 #ifndef PDAL_HAVE_ZSTD
-    if (m_p->info->dataType() == EptInfo::DataType::Zstandard)
+    if (m_e->info->dataType() == EptInfo::DataType::Zstandard)
         throwError("Cannot read Zstandard dataType: "
             "PDAL must be configured with WITH_ZSTD=On");
 #endif
@@ -434,8 +444,8 @@ point_count_t EptReader::read(PointViewPtr view, point_count_t count)
     if (m_nodeIdDim != Dimension::Id::Unknown)
     {
         EptArtifactPtr artifact
-            (new EptArtifact(std::move(m_p->info), std::move(m_p->hierarchy),
-                std::move(m_p->connector), m_p->hierarchyStep));
+            (new EptArtifact(std::move(m_e->info), std::move(m_p->hierarchy),
+                std::move(m_p->connector), m_e->hierarchyStep));
         m_artifactMgr->put("ept", artifact);
     }
 

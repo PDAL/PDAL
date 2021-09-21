@@ -84,7 +84,6 @@ public:
     ~OctPrivate();
 
     std::unique_ptr<Connector> connector;
-    std::unique_ptr<EptInfo> info;
     std::unique_ptr<ThreadPool> pool;
     TilePtr currentTile;
     std::unique_ptr<Hierarchy> hierarchy;
@@ -99,11 +98,15 @@ public:
     int32_t depthEnd = 0;
 };
 
-struct EptPrivate : public OctPrivate
+struct EptPrivate
 {
     EptPrivate();
     ~EptPrivate();
 
+    // m_filename, adjusted for historic silliness. m_filename is maintained in case we need
+    // it for user feedback in some case.
+    std::string adjFilename;
+    std::unique_ptr<EptInfo> info;
     AddonList addons;
     int64_t queryOriginId = -1;
     PointId lastPointId = 0;

@@ -45,17 +45,17 @@ namespace pdal
 
 // EptTile
 
-void EptTile::read()
+void EptTile::read(const Connector& connector, const std::string& baseFile)
 {
     try
     {
         if (m_info.dataType() == EptInfo::DataType::Laszip)
-            readLaszip();
+            readLaszip(connector, baseFile);
         else if (m_info.dataType() == EptInfo::DataType::Binary)
-            readBinary();
+            readBinary(connector, baseFile);
 #ifdef PDAL_HAVE_ZSTD
         else if (m_info.dataType() == EptInfo::DataType::Zstandard)
-            readZstandard();
+            readZstandard(connector, baseFile);
 #endif
         else
             throw pdal_error("Unrecognized EPT dataType");
@@ -64,7 +64,7 @@ void EptTile::read()
         // Read addon information after the native data, we'll possibly
         // overwrite attributes.
         for (const Addon& addon : m_addons)
-            readAddon(addon);
+            readAddon(connector, addon);
     }
     catch (const std::exception& ex)
     {
@@ -76,13 +76,13 @@ void EptTile::read()
     }
 }
 
-void EptTile::readLaszip()
+void EptTile::readLaszip(const Connector& connector, const std::string& baseFile)
 {
     // If the file is remote (HTTP, S3, Dropbox, etc.), getLocalHandle will
     // download the file and `localPath` will return the location of the
     // downloaded file in a temporary directory.  Otherwise it's a no-op.
-    std::string filename = m_info.dataDir() + key().toString() + ".laz";
-    auto handle = m_connector.getLocalHandle(filename);
+    std::string filename = ept::dataDir(baseFile) + key().toString() + ".laz";
+    auto handle = connector.getLocalHandle(filename);
 
     m_table.reset(new ColumnPointTable);
 
@@ -99,10 +99,10 @@ void EptTile::readLaszip()
     transform(true);
 }
 
-void EptTile::readBinary()
+void EptTile::readBinary(const Connector& connector, const std::string& baseFile)
 {
-    std::string filename = m_info.dataDir() + key().toString() + ".bin";
-    auto data(m_connector.getBinary(filename));
+    std::string filename = ept::dataDir(baseFile) + key().toString() + ".bin";
+    auto data(connector.getBinary(filename));
 
     VectorPointTable *vpt = new VectorPointTable(m_info.remoteLayout());
     vpt->buffer() = std::move(data);
@@ -112,10 +112,10 @@ void EptTile::readBinary()
 }
 
 #ifdef PDAL_HAVE_ZSTD
-void EptTile::readZstandard()
+void EptTile::readZstandard(const Connector& connector, const std::string& baseFile)
 {
-    std::string filename = m_info.dataDir() + key().toString() + ".zst";
-    auto compressed(m_connector.getBinary(filename));
+    std::string filename = ept::dataDir(baseFile) + key().toString() + ".zst";
+    auto compressed(connector.getBinary(filename));
     std::vector<char> data;
     pdal::ZstdDecompressor dec([&data](char* pos, std::size_t size)
     {
@@ -135,7 +135,7 @@ void EptTile::readZstandard()
 {}
 #endif // PDAL_HAVE_ZSTD
 
-void EptTile::readAddon(const Addon& addon)
+void EptTile::readAddon(const Connector& connector, const Addon& addon)
 {
     m_addonTables[addon.localId()] = nullptr;
 
@@ -147,8 +147,8 @@ void EptTile::readAddon(const Addon& addon)
     if (addonPoints != size())
         throw pdal_error("Invalid addon hierarchy");
 
-    std::string filename = addon.dataDir() + key().toString() + ".bin";
-    const auto data(m_connector.getBinary(filename));
+    std::string filename = ept::dataDir(addon.filename()) + key().toString() + ".bin";
+    const auto data(connector.getBinary(filename));
 
     if (size() * Dimension::size(addon.type()) != data.size())
         throw pdal_error("Invalid addon content length");

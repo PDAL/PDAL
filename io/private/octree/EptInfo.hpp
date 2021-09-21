@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/DimType.hpp>
+#include <pdal/JsonFwd.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/util/Bounds.hpp>
 
@@ -42,8 +43,6 @@
 
 namespace pdal
 {
-
-class Connector;
 
 class EptInfo
 {
@@ -56,7 +55,7 @@ public:
     };
 
     EptInfo(const std::string& info);
-    EptInfo(const std::string& filename, const Connector& connector);
+    EptInfo(const NL::json& info);
 
     BOX3D rootExtent() const { return m_rootExtent; }
     BOX3D pointBounds() const { return m_pointBounds; }

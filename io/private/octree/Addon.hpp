@@ -41,6 +41,7 @@
 #include <pdal/PointLayout.hpp>
 
 #include "Accessor.hpp"
+#include "EptSupport.hpp"
 
 namespace pdal
 {
@@ -52,9 +53,9 @@ using AddonList = std::vector<Addon>;
 class Addon
 {
 public:
-    Addon(const std::string& dimName, const std::string& filename,
-            Dimension::Type type) :
-        m_name(dimName), m_filename(filename), m_type(type), m_hierarchy(hierarchyDir())
+    Addon(const std::string& dimName, const std::string& filename, Dimension::Type type) :
+        m_name(dimName), m_filename(filename), m_type(type),
+        m_hierarchy(ept::hierarchyDir(filename))
     { m_localId = m_layout.registerOrAssignDim(dimName, type); }
 
     std::string name() const

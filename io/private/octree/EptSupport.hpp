@@ -36,9 +36,28 @@
 
 #include <nlohmann/json.hpp>
 #include <pdal/util/Bounds.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 namespace pdal
 {
+namespace ept
+{
+
+// getDirectory() seems to work with URLs
+inline std::string dataDir(const std::string& filename)
+{
+    return FileUtils::getDirectory(filename) + "ept-data/";
+}
+
+inline std::string hierarchyDir(const std::string& filename)
+{
+    return FileUtils::getDirectory(filename) + "ept-hierarchy/";
+}
+
+inline std::string sourcesDir(const std::string& filename)
+{
+    return FileUtils::getDirectory(filename) + "ept-sources/";
+}
 
 inline BOX3D toBox3d(const NL::json& b)
 {
@@ -51,5 +70,6 @@ inline BOX3D toBox3d(const NL::json& b)
             b[3].get<double>(), b[4].get<double>(), b[5].get<double>());
 }
 
+} // namespace ept
 } // namespace pdal
 

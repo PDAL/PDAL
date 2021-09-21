@@ -48,16 +48,6 @@ point_count_t Addon::points(const Key& key) const
     return (acc.valid() ? acc.pointCount() : 0);
 }
 
-std::string Addon::dataDir() const
-{
-    return FileUtils::getDirectory(m_filename) + "ept-data/";
-}
-
-std::string Addon::hierarchyDir() const
-{
-    return FileUtils::getDirectory(m_filename) + "ept-hierarchy/";
-}
-
 AddonList Addon::store(const Connector& connector, const NL::json& spec,
     const PointLayout& layout)
 {

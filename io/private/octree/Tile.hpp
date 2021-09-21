@@ -53,8 +53,7 @@ using BasePointTablePtr = std::unique_ptr<BasePointTable>;
 class Tile
 {
 public:
-    Tile(const Accessor& accessor, const Connector& connector) :
-        m_accessor(accessor), m_connector(connector)
+    Tile(const Accessor& accessor) : m_accessor(accessor)
     {}
     virtual ~Tile()
     {}
@@ -64,17 +63,17 @@ public:
     Key key() const
         { return m_accessor.key(); }
     //ABELL - Fix this so that it uses actual counts or something.
+    //  If this is fixed, access can be replaced with key.
     point_count_t size() const
         { return m_accessor.pointCount(); }
     const std::string& error() const
         { return m_error; }
-    virtual void read() = 0;
+    virtual void read(const Connector& connector, const std::string& baseFile) = 0;
 
 private:
     const Accessor& m_accessor;
 
 protected:
-    const Connector& m_connector;
     std::string m_error;
     // Table for the base point data.
     BasePointTablePtr m_table;
@@ -83,28 +82,27 @@ protected:
 class EptTile : public Tile
 {
 public:
-    EptTile(const EptAccessor& accessor, const EptInfo& info, const Connector& connector,
-        const AddonList& addons) : Tile(m_eptAccessor, connector),
-        m_eptAccessor(accessor), m_addons(addons), m_info(info)
+    EptTile(const EptAccessor& accessor, const EptInfo& info, const AddonList& addons) :
+        Tile(m_eptAccessor), m_eptAccessor(accessor), m_info(info), m_addons(addons)
     {}
 
     BasePointTable *addonTable(Dimension::Id id) const
         { return const_cast<EptTile *>(this)->m_addonTables[id].get(); }
     point_count_t nodeId() const
         { return m_eptAccessor.nodeId(); }
-    virtual void read();
+    virtual void read(const Connector& connector, const std::string& baseFile);
 
 private:
     EptAccessor m_eptAccessor;
+    const EptInfo& m_info;
     const AddonList& m_addons;
     // Tables for the add on data.
     std::map<Dimension::Id, BasePointTablePtr> m_addonTables;
-    const EptInfo& m_info;
 
-    void readLaszip();
-    void readBinary();
-    void readZstandard();
-    void readAddon(const Addon& addon);
+    void readLaszip(const Connector& connector, const std::string& baseFile);
+    void readBinary(const Connector& connector, const std::string& baseFile);
+    void readZstandard(const Connector& connector, const std::string& baseFile);
+    void readAddon(const Connector& connector, const Addon& addon);
     void transform(bool skipxyz);
 };
 

@@ -55,23 +55,15 @@ EptInfo::EptInfo(const std::string& info)
     initialize();
 }
 
-EptInfo::EptInfo(const std::string& filename, const Connector& connector) :
-    m_filename(filename)
+EptInfo::EptInfo(const NL::json& info) : m_info(info)
 {
-    if (Utils::startsWith(m_filename, "ept://"))
-    {
-        m_filename = m_filename.substr(6);
-        if (!Utils::endsWith(m_filename, "/ept.json"))
-            m_filename += "/ept.json";
-    }
-    m_info = connector.getJson(m_filename);
     initialize();
 }
 
 void EptInfo::initialize()
 {
-    m_rootExtent = toBox3d(m_info.at("bounds"));
-    m_pointBounds = toBox3d(m_info.at("boundsConforming"));
+    m_rootExtent = ept::toBox3d(m_info.at("bounds"));
+    m_pointBounds = ept::toBox3d(m_info.at("boundsConforming"));
     m_points = m_info.value<uint64_t>("points", 0);
     m_span = m_info.at("span").get<uint64_t>();
 
@@ -165,21 +157,6 @@ DimType EptInfo::dimType(Dimension::Id id) const
         if (it->second.m_id == id)
             return it->second;
     return DimType();
-}
-
-std::string EptInfo::dataDir() const
-{
-    return FileUtils::getDirectory(m_filename) + "ept-data/";
-}
-
-std::string EptInfo::hierarchyDir() const
-{
-    return FileUtils::getDirectory(m_filename) + "ept-hierarchy/";
-}
-
-std::string EptInfo::sourcesDir() const
-{
-    return FileUtils::getDirectory(m_filename) + "ept-sources/";
 }
 
 } // namespace pdal
