@@ -86,18 +86,22 @@ public:
         Tile(m_eptAccessor), m_eptAccessor(accessor), m_info(info), m_addons(addons)
     {}
 
-    BasePointTable *addonTable(Dimension::Id id) const
-        { return const_cast<EptTile *>(this)->m_addonTables[id].get(); }
     point_count_t nodeId() const
         { return m_eptAccessor.nodeId(); }
     virtual void read(const Connector& connector, const std::string& baseFile);
+    BasePointTable *addonTable(Dimension::Id id) const
+    {
+        auto it = m_addonTables.find(id);
+        return (it == m_addonTables.end() ? nullptr : it->second.get());
+    }
 
 private:
     EptAccessor m_eptAccessor;
     const EptInfo& m_info;
     const AddonList& m_addons;
     // Tables for the add on data.
-    std::map<Dimension::Id, BasePointTablePtr> m_addonTables;
+    using AddonTableMap = std::map<Dimension::Id, BasePointTablePtr>;
+    AddonTableMap m_addonTables;
 
     void readLaszip(const Connector& connector, const std::string& baseFile);
     void readBinary(const Connector& connector, const std::string& baseFile);

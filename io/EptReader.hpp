@@ -77,13 +77,14 @@ private:
     virtual void ready(PointTableRef table) override;
     virtual point_count_t read(PointViewPtr view, point_count_t count) override;
     virtual bool passesPointFilter(PointRef& p, double x, double y, double z) const override;
-    virtual bool processPoint(PointRef& dst, const Tile& tile) override;
+    virtual bool processPoint(const Tile& tile, PointRef& src, PointRef& dst) override;
     virtual TilePtr makeTile(const Accessor& accessor) const override;
     virtual HierarchyPage fetchHierarchyPage(Hierarchy& hierarchy,
         const Accessor& k) const override;
     virtual double rootNodeHalfWidth() const override;
     virtual void rootNodeCenter(double& x, double& y, double &z) const override;
     virtual double rootNodeSpacing() const override;
+    virtual BOX3D rootNodeExtent() const override;
     virtual BOX3D pointBounds() const override;
     virtual point_count_t pointCount() const override;
     virtual StringList dimNames() const override;

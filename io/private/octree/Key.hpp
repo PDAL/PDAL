@@ -51,15 +51,9 @@ public:
         fill(s);
     }
 
-
     bool valid() const
     {
         return d != -1;
-    }
-
-    BOX3D bounds() const
-    {
-        return b;
     }
 
     bool fill(const std::string& s)
@@ -85,8 +79,6 @@ public:
         return true;
     }
 
-    BOX3D b;
-
     int32_t d = 0;
     int32_t x = 0;
     int32_t y = 0;
@@ -103,60 +95,28 @@ public:
             std::to_string(y) + '-' + std::to_string(z);
     }
 
-    double& operator[](int32_t i)
+    Key child(int32_t dir) const
     {
-        switch (i)
-        {
-            case 0: return b.minx;
-            case 1: return b.miny;
-            case 2: return b.minz;
-            case 3: return b.maxx;
-            case 4: return b.maxy;
-            case 5: return b.maxz;
-            default: throw pdal_error("Invalid Key[] index");
-        }
+        return Key(d + 1,
+            (x << 1) | (dir & 0x1),
+            (y << 1) | ((dir >> 1) & 0x1),
+            (z << 1) | ((dir >> 2) & 0x1));
     }
 
-    int32_t& idAt(int32_t i)
+    BOX3D bounds(const BOX3D& root) const
     {
-        switch (i)
-        {
-            case 0:
-                return x;
-            case 1:
-                return y;
-            case 2:
-                return z;
-            default: throw pdal_error("Invalid Key::idAt index");
-        }
-    }
+        BOX3D cellBounds;
 
-    Key bisect(int32_t direction) const
-    {
-        Key key(*this);
-        ++key.d;
-
-        auto step([&key, direction](uint8_t i)
-        {
-            key.idAt(i) *= 2;
-
-            const double mid(key[i] + (key[i + 3] - key[i]) / 2.0);
-            const bool positive(direction & (((uint64_t)1) << i));
-            if (positive)
-            {
-                key[i] = mid;
-                ++key.idAt(i);
-            }
-            else
-            {
-                key[i + 3] = mid;
-            }
-        });
-
-        for (uint8_t i(0); i < 3; ++i)
-            step(i);
-
-        return key;
+        double cellWidth = (root.maxx - root.minx) / pow(2, d);
+        // The test in each of these is to avoid unnecessary rounding errors when
+        // we know the actual value.
+        cellBounds.minx = (x == 0 ? root.minx : root.minx + (cellWidth * x));
+        cellBounds.maxx = (x == d ? root.maxx : root.minx + (cellWidth * (x + 1)));
+        cellBounds.miny = (y == 0 ? root.miny : root.miny + (cellWidth * y));
+        cellBounds.maxy = (y == d ? root.maxy : root.miny + (cellWidth * (y + 1)));
+        cellBounds.minz = (z == 0 ? root.minz : root.minz + (cellWidth * z));
+        cellBounds.maxz = (z == d ? root.maxz : root.minz + (cellWidth * (z + 1)));
+        return cellBounds;
     }
 
     static Key invalid()
@@ -194,6 +154,12 @@ inline bool operator<(const Key& a, const Key& b)
 
     if (a.z < b.z) return true;
     return false;
+}
+
+inline std::ostream& operator<<(std::ostream& out, const Key& k)
+{
+    out << k.toString();
+    return out;
 }
 
 } // namespace pdal

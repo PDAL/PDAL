@@ -39,6 +39,7 @@
 #include <nlohmann/json.hpp>
 
 #include <pdal/ArtifactManager.hpp>
+#include <pdal/pdal_features.hpp>
 
 #include "private/octree/Connector.hpp"
 #include "private/octree/EptArtifact.hpp"
@@ -118,8 +119,6 @@ QuickInfo EptReader::inspect()
 
 void EptReader::initialize()
 {
-    initializeBase();
-
     StringMap headers;
     StringMap query;
     setForwards(headers, query);
@@ -127,7 +126,6 @@ void EptReader::initialize()
 
     try
     {
-        std::cerr << "Initialize with filename = " << m_filename << "!\n";
         m_e->adjFilename = m_filename;
         if (Utils::startsWith(m_e->adjFilename, "ept://"))
         {
@@ -135,8 +133,14 @@ void EptReader::initialize()
             if (!Utils::endsWith(m_e->adjFilename, "/ept.json"))
                 m_e->adjFilename += "/ept.json";
         }
-        std::cerr << "#2 Initialize with filename = " << m_e->adjFilename << "!\n";
         m_e->info.reset(new EptInfo(m_p->connector->getJson(m_e->adjFilename)));
+#ifndef PDAL_HAVE_ZSTD
+        if (m_e->info->dataType() == EptInfo::DataType::Zstandard)
+        {
+            throwError("Cannot read Zstandard dataType: "
+                "PDAL must be configured with WITH_ZSTD=On");
+        }
+#endif
         setSpatialReference(m_e->info->srs());
         m_e->addons = Addon::load(*m_p->connector, m_eptArgs->addons);
     }
@@ -153,6 +157,8 @@ void EptReader::initialize()
     {
         throwError(e.what());
     }
+
+    initializeBase();
 }
 
 
@@ -264,22 +270,17 @@ void EptReader::ready(PointTableRef table)
 
 void EptReader::calcOverlaps()
 {
-    auto rootAccessor = [this]()
-    {
-        Key k;
-        k.b = m_e->info->rootExtent();
-        return AccessorPtr(new EptAccessor(k, 0));
-    };
+    EptAccessor rootAccessor(Key(), 0);
 
-std::cerr << "Calc overlaps for " << ept::hierarchyDir(m_e->adjFilename) << "!\n";
     m_p->hierarchy.reset(new Hierarchy(ept::hierarchyDir(m_e->adjFilename)));
-    baseCalcOverlaps(*m_p->hierarchy, *rootAccessor());
+    baseCalcOverlaps(*m_p->hierarchy, rootAccessor);
 
     for (auto& addon : m_e->addons)
-        baseCalcOverlaps(addon.hierarchy(), *rootAccessor());
+        baseCalcOverlaps(addon.hierarchy(), rootAccessor);
 }
 
 
+//ABELL - Can't throw from these calls because they may execute in a worker thread. Fix.
 HierarchyPage EptReader::fetchHierarchyPage(Hierarchy& hierarchy, const Accessor& acc) const
 {
     NL::json j;
@@ -289,7 +290,6 @@ HierarchyPage EptReader::fetchHierarchyPage(Hierarchy& hierarchy, const Accessor
     try
     {
         std::string filename = hierarchy.source() + acc.key().toString() + ".json";
-std::cerr << "Fetch page = " << filename << "!\n";
         j = m_p->connector->getJson(filename);
     }
     catch (const arbiter::ArbiterError& err)
@@ -362,6 +362,12 @@ double EptReader::rootNodeSpacing() const
 }
 
 
+BOX3D EptReader::rootNodeExtent() const
+{
+    return m_e->info->rootExtent();
+}
+
+
 BOX3D EptReader::pointBounds() const
 {
     return m_e->info->pointBounds();
@@ -402,28 +408,35 @@ bool EptReader::passesPointFilter(PointRef& p, double x, double y, double z) con
 
 
 // This code runs in a single thread, so doesn't need locking.
-bool EptReader::processPoint(PointRef& dst, const Tile& tile)
+bool EptReader::processPoint(const Tile& tile, PointRef& src, PointRef& dst)
 {
-    PointId pointId = m_e->lastPointId++;
+    using namespace Dimension;
 
-    if (!baseProcessPoint(dst, tile))
+    if (!passesPointFilter(src, src.getFieldAs<double>(Id::X), src.getFieldAs<double>(Id::Y),
+            src.getFieldAs<double>(Id::Z)))
         return false;
 
-    const EptTile& eptTile = static_cast<const EptTile&>(tile);
-    BasePointTable& t = eptTile.table();
-
+    for (auto& el : m_e->info->dims())
+    {
+        const DimType& dt = el.second;
+        dst.setField(dt.m_id, src.getFieldAs<double>(dt.m_id));
+    }
+    // Special EPT fields.
+    const EptTile& eptTile = static_cast<const EptTile &>(tile);
     dst.setField(m_nodeIdDim, eptTile.nodeId());
-    dst.setField(m_pointIdDim, pointId);
+    dst.setField(m_pointIdDim, src.pointId());
+
     for (Addon& addon : m_e->addons)
     {
         Dimension::Id srcId = addon.localId();
+
+        //ABELL - It's dumb where we have to do a map search for each addon. Fix somehow.
         BasePointTable *t = eptTile.addonTable(srcId);
-        if (t)
-        {
-            PointRef addonPoint(*t, pointId);
-            double val = addonPoint.getFieldAs<double>(srcId);
-            dst.setField(addon.externalId(), val);
-        }
+        if (!t)
+            continue;
+        PointRef addonPoint(*t, src.pointId());
+        double val = addonPoint.getFieldAs<double>(srcId);
+        dst.setField(addon.externalId(), val);
     }
     return true;
 }
@@ -431,12 +444,6 @@ bool EptReader::processPoint(PointRef& dst, const Tile& tile)
 
 point_count_t EptReader::read(PointViewPtr view, point_count_t count)
 {
-#ifndef PDAL_HAVE_ZSTD
-    if (m_e->info->dataType() == EptInfo::DataType::Zstandard)
-        throwError("Cannot read Zstandard dataType: "
-            "PDAL must be configured with WITH_ZSTD=On");
-#endif
-
     point_count_t numRead = baseRead(view, count);
 
     // If we're using the addon writer, transfer the info and hierarchy

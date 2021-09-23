@@ -68,24 +68,29 @@ public:
         { return m_pointCount >= 0; }
     bool valid() const
         { return m_key.valid(); }
-    virtual AccessorPtr clone() const
+    virtual AccessorPtr clone(int32_t /*hierarchyIndex*/) const
         { return AccessorPtr(new Accessor(*this)); }
 };
 
 class EptAccessor : public Accessor
 {
 public:
+    EptAccessor(const EptAccessor& src, int32_t nodeId) : Accessor(src), m_nodeId(nodeId)
+    {}
     EptAccessor(const Key& key, int32_t pointCount) : Accessor(key, pointCount)
     {}
 
     point_count_t nodeId() const
         { return m_nodeId; }
 
-    virtual AccessorPtr clone() const
-    { return AccessorPtr(new EptAccessor(*this)); }
+    virtual AccessorPtr clone(int32_t hierarchyIndex) const
+    {
+        EptAccessor *eptAcc = new EptAccessor(*this, hierarchyIndex);
+        return (AccessorPtr(eptAcc));
+    }
 
 private:
-    point_count_t m_nodeId;
+    int32_t m_nodeId;
 };
 
 /**
@@ -169,6 +174,11 @@ public:
     void insert(AccessorPtr&& acc)
     {
         m_accessors.insert(std::move(acc));
+    }
+
+    void insertFinalized(const Accessor& acc)
+    {
+        insert(acc.clone((int32_t)(size() + 1)));
     }
 
     size_t size() const

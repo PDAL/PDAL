@@ -93,8 +93,8 @@ public:
     std::condition_variable contentsCv;
     std::vector<PolyXform> polys;
     BoxXform clip;
-    PointId tilePoints = 0;
-    size_t tileCount = 0;
+    PointId tilePointNum = 0;
+    int32_t remainingTiles = 0;
     int32_t depthEnd = 0;
 };
 
@@ -109,7 +109,6 @@ struct EptPrivate
     std::unique_ptr<EptInfo> info;
     AddonList addons;
     int64_t queryOriginId = -1;
-    PointId lastPointId = 0;
     int32_t hierarchyStep = 0;
 };
 

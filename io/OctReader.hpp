@@ -63,7 +63,6 @@ protected:
     void readyBase(PointTableRef table);
     void baseCalcOverlaps(Hierarchy& hierarchy, const Accessor& acc);
     bool passesBasePointFilter(PointRef& p, double x, double y, double z) const;
-    bool baseProcessPoint(PointRef& dst, const Tile& tile);
     point_count_t baseRead(PointViewPtr view, point_count_t count);
 
     std::unique_ptr<OctArgs> m_args;
@@ -74,11 +73,12 @@ private:
     virtual bool processOne(PointRef& point) override;
     virtual bool passesHierarchyFilter(const Key& k) const;
     virtual bool passesPointFilter(PointRef& p, double x, double y, double z) const;
-    virtual bool processPoint(PointRef& dst, const Tile& tile);
+    virtual bool processPoint(const Tile& tile, PointRef& src, PointRef& dst) = 0;
     virtual TilePtr makeTile(const Accessor& accessor) const = 0;
     virtual HierarchyPage fetchHierarchyPage(Hierarchy& hierarchy, const Accessor& key) const = 0;
     virtual double rootNodeHalfWidth() const = 0;
     virtual void rootNodeCenter(double& x, double& y, double& z) const = 0;
+    virtual BOX3D rootNodeExtent() const = 0;
     virtual double rootNodeSpacing() const = 0;
     virtual BOX3D pointBounds() const = 0;
     virtual point_count_t pointCount() const = 0;

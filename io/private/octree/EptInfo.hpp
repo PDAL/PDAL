@@ -67,9 +67,6 @@ public:
     const std::map<std::string, DimType>& dims() const { return m_dims; }
     DimType dimType(Dimension::Id id) const;
     PointLayout& remoteLayout() const { return m_remoteLayout; }
-    std::string dataDir() const;
-    std::string hierarchyDir() const;
-    std::string sourcesDir() const;
 
 private:
     // Info comes from the values here:

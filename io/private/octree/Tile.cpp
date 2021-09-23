@@ -53,12 +53,9 @@ void EptTile::read(const Connector& connector, const std::string& baseFile)
             readLaszip(connector, baseFile);
         else if (m_info.dataType() == EptInfo::DataType::Binary)
             readBinary(connector, baseFile);
-#ifdef PDAL_HAVE_ZSTD
         else if (m_info.dataType() == EptInfo::DataType::Zstandard)
             readZstandard(connector, baseFile);
-#endif
-        else
-            throw pdal_error("Unrecognized EPT dataType");
+
 //ABELL - Should check that we read the number of points specified in the
 //  overlap.
         // Read addon information after the native data, we'll possibly
@@ -131,7 +128,7 @@ void EptTile::readZstandard(const Connector& connector, const std::string& baseF
     transform(false);
 }
 #else
-void EptTile::readZstandard()
+void EptTile::readZstandard(const Connector&, const std::string&)
 {}
 #endif // PDAL_HAVE_ZSTD
 
@@ -170,7 +167,9 @@ void EptTile::transform(bool skipxyz)
         const XForm& xf = dt.m_xform;
         Dimension::Id id = dt.m_id;
 
-        if (skipxyz && (id == D::X || id == D::X || id == D::Z))
+        if (!xf.nonstandard())
+            continue;
+        if (skipxyz && (id == D::X || id == D::Y || id == D::Z))
             continue;
         PointRef p(*m_table);
         for (PointId i = 0; i < size(); ++i)

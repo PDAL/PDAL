@@ -38,7 +38,6 @@
 
 #include <pdal/Polygon.hpp>
 #include <pdal/SrsBounds.hpp>
-#include <pdal/pdal_features.hpp>
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/ThreadPool.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
@@ -84,11 +83,8 @@ void OctReader::initializeBase()
     if (m_args->resolution < 0)
         throwError("Can't set `resolution` to a value less than 0.");
     m_p->depthEnd = m_args->resolution ?
-        (std::min)(1, (int)ceil(log2(rootNodeSpacing() / m_args->resolution)) + 1) :
+        (std::max)(1, (int)ceil(log2(rootNodeSpacing() / m_args->resolution)) + 1) :
         0;
-
-    log()->get(LogLevel::Debug) << "Query bounds: " << m_p->clip.box << "\n";
-    log()->get(LogLevel::Debug) << "Threads: " << m_p->pool->size() << std::endl;
 }
 
 
@@ -118,7 +114,7 @@ void OctReader::createSpatialFilters()
     {
         auto& plist = m_args->polys;
         std::vector<Polygon> ogrPolys = gdal::getPolygons(m_args->ogr);
-        plist.insert(plist.end(), m_args->polys.begin(), m_args->polys.end());
+        plist.insert(plist.end(), ogrPolys.begin(), ogrPolys.end());
     }
 
     // Create transform from the point source SRS to the poly SRS.
@@ -203,8 +199,7 @@ void OctReader::readyBase(PointTableRef table)
     if (downloadPoints > 1e8)
         log()->get(LogLevel::Warning) << downloadPoints << " will be downloaded" << std::endl;
 
-    m_p->tileCount = m_p->hierarchy->size();
-std::cerr << "Tile size/point count = " << m_p->tileCount << "/" << downloadPoints << "!\n";
+    m_p->remainingTiles = (int32_t)m_p->hierarchy->size();
 
     m_p->pool.reset(new ThreadPool(m_p->pool->numThreads()));
     for (const Accessor& acc : *m_p->hierarchy)
@@ -214,10 +209,9 @@ std::cerr << "Tile size/point count = " << m_p->tileCount << "/" << downloadPoin
 
 void OctReader::load(const Accessor& accessor)
 {
-    TilePtr tilep = makeTile(accessor);
-
-    m_p->pool->add([this, &tilep]()
+    m_p->pool->add([this, &accessor]()
         {
+            TilePtr tilep = makeTile(accessor);
             //ABELL - This isn't quite right because we may not want the provided filename
             //  because of the ept:// thing, but this will do for the moment.
             tilep->read(*m_p->connector, m_filename);
@@ -240,14 +234,14 @@ bool OctReader::hasSpatialFilter() const
 
 bool OctReader::passesHierarchyFilter(const Key& k) const
 {
-    return passesSpatialFilter(k) && (m_p->depthEnd && k.d >= m_p->depthEnd);
+    return passesSpatialFilter(k) && (m_p->depthEnd == 0 || k.d < m_p->depthEnd);
 }
 
 
 // Determine if an EPT tile overlaps our query boundary
 bool OctReader::passesSpatialFilter(const Key& key) const
 {
-    const BOX3D& tileBounds = key.bounds();
+    const BOX3D& tileBounds = key.bounds(rootNodeExtent());
 
     // Reproject the tile bounds to the largest rect. solid that contains all the corners.
     auto reproject = [](BOX3D src, SrsTransform& xform) -> BOX3D
@@ -290,8 +284,10 @@ bool OctReader::passesSpatialFilter(const Key& key) const
             return true;
 
         for (auto& ps : m_p->polys)
+        {
             if (!ps.poly.disjoint(reproject(tileBounds, ps.xform)))
                 return true;
+        }
         return false;
     };
 
@@ -313,9 +309,10 @@ void OctReader::baseCalcOverlaps(Hierarchy& hierarchy, const Accessor& rootAcces
     if (!passesHierarchyFilter(rootAccessor.key()))
         return;
     const HierarchyPage& page = fetchHierarchyPage(hierarchy, rootAccessor);
-    if (!page.find(rootAccessor.key()).valid())
+    const Accessor& rootDataAccessor = page.find(rootAccessor);
+    if (!rootDataAccessor.valid())
         throwError("Root hierarchy page missing root entry.");
-    calcOverlaps(hierarchy, page, rootAccessor);
+    calcOverlaps(hierarchy, page, rootDataAccessor);
     m_p->pool->await();
 }
 
@@ -326,15 +323,14 @@ void OctReader::calcOverlaps(Hierarchy& hierarchy, const HierarchyPage& page, co
     {
         for (int i = 0; i < 8; ++i)
         {
-            Key k = acc.key().bisect(i);
+            Key k = acc.key().child(i);
             const Accessor& e = page.find(k);
             if (e.valid() && passesHierarchyFilter(k))
                 calcOverlaps(hierarchy, page, e);
         }
-        // Unfortunately you can't move something out of a set/unordered_set in C++11.
-        // C++17 has merge.
+    
         std::lock_guard<std::mutex> lock(m_p->mutex);
-        hierarchy.insert(acc.clone());
+        hierarchy.insertFinalized(acc);
     }
     else // Sub-hierarchy accessor.
     {
@@ -343,10 +339,11 @@ void OctReader::calcOverlaps(Hierarchy& hierarchy, const HierarchyPage& page, co
             try
             {
                 const HierarchyPage& page = fetchHierarchyPage(hierarchy, acc);
-                if (!page.find(acc).valid())
+                const Accessor& pageRootAcc = page.find(acc);
+                if (!pageRootAcc.valid())
                     throwError(std::string("Hierarchy page ") + acc.key().toString() +
                         " missing root entry.");
-                calcOverlaps(hierarchy, page, acc);
+                calcOverlaps(hierarchy, page, pageRootAcc);
             }
             catch (const arbiter::ArbiterError& err)
             {
@@ -411,32 +408,6 @@ bool OctReader::passesBasePointFilter(PointRef& p, double x, double y, double z)
 }
 
 
-bool OctReader::processPoint(PointRef& dst, const Tile& tile)
-{
-    return baseProcessPoint(dst, tile);
-}
-
-
-// This code runs in a single thread, so doesn't need locking.
-bool OctReader::baseProcessPoint(PointRef& dst, const Tile& tile)
-{
-    using namespace Dimension;
-
-    PointRef p(tile.table(), m_p->tilePoints++);
-
-    double x = p.getFieldAs<double>(Id::X);
-    double y = p.getFieldAs<double>(Id::Y);
-    double z = p.getFieldAs<double>(Id::Z);
-    if (!passesPointFilter(p, x, y, z))
-        return false;
-
-    dst.setField(Id::X, x);
-    dst.setField(Id::Y, y);
-    dst.setField(Id::Z, z);
-    return true;
-}
-
-
 point_count_t OctReader::read(PointViewPtr view, point_count_t count)
 {
     return baseRead(view, count);
@@ -461,12 +432,12 @@ point_count_t OctReader::baseRead(PointViewPtr view, point_count_t count)
                 checkTile(tile);
                 process(view, tile, count - numRead);
                 numRead += tile.size();
-                m_p->tileCount--;
                 m_p->contents.pop();
+                m_p->remainingTiles--;
             }
             else
                 m_p->contentsCv.wait(l);
-        } while (m_p->tileCount && numRead <= count);
+        } while (m_p->remainingTiles && numRead <= count);
     }
 
     // Wait for any running threads to finish and don't start any others.
@@ -480,22 +451,20 @@ point_count_t OctReader::baseRead(PointViewPtr view, point_count_t count)
 // Put the contents of a tile into the destination point view.
 void OctReader::process(PointViewPtr dstView, const Tile& tile, point_count_t count)
 {
-    m_p->tilePoints = 0;
-    PointRef dstPoint(*dstView);
-    for (PointId idx = 0; idx < tile.size(); ++idx)
+    for (m_p->tilePointNum = 0; count && m_p->tilePointNum < tile.size(); ++m_p->tilePointNum)
     {
-        if (count-- == 0)
-            return;
-        dstPoint.setPointId(dstView->size());
-        processPoint(dstPoint, tile);
+        PointRef dstPoint(*dstView, dstView->size());
+        PointRef srcPoint(tile.table(), m_p->tilePointNum);
+        if (processPoint(tile, srcPoint, dstPoint))
+            count--;
     }
 }
 
 
-bool OctReader::processOne(PointRef& point)
+bool OctReader::processOne(PointRef& dstPoint)
 {
 top:
-    if (m_p->tileCount == 0)
+    if (!m_p->remainingTiles)
         return false;
 
     // If there is no active tile, grab one off the queue and ask for
@@ -515,18 +484,21 @@ top:
                 m_p->contentsCv.wait(l);
         } while (true);
         checkTile(*m_p->currentTile);
+        m_p->tilePointNum = 0;
     }
 
-    bool ok = processPoint(point, *m_p->currentTile);
+    PointRef srcPoint(m_p->currentTile->table(), m_p->tilePointNum);
+    bool ok = processPoint(*m_p->currentTile, srcPoint, dstPoint);
+    m_p->tilePointNum++;
 
     // If we've processed all the points in the current tile, pop it.
     // If we've processed all the tiles, return false to indicate that
     // we're done.
-    if (m_p->tilePoints == m_p->currentTile->size())
+    if (m_p->tilePointNum == m_p->currentTile->size())
     {
-        m_p->tilePoints = 0;
+        m_p->tilePointNum = 0;
         m_p->currentTile.reset();
-        --m_p->tileCount;
+        m_p->remainingTiles--;
     }
 
     // If we didn't pass a point, try again.
