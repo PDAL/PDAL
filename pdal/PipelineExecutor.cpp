@@ -39,11 +39,13 @@ namespace pdal
 {
 
 
-PipelineExecutor::PipelineExecutor(std::string const& json)
-    : m_json(json)
+PipelineExecutor::PipelineExecutor(std::string const& json, point_count_t streamLimit)
+    : m_managerPtr(new pdal::PipelineManager(streamLimit))
     , m_executed(false)
-    , m_logLevel(pdal::LogLevel::Error)
 {
+    std::stringstream strm;
+    strm << json;
+    m_managerPtr->readPipeline(strm);
 }
 
 
@@ -53,7 +55,7 @@ std::string PipelineExecutor::getPipeline() const
         throw pdal_error("Pipeline has not been executed!");
 
     std::stringstream strm;
-    pdal::PipelineWriter::writePipeline(m_manager.getStage(), strm);
+    pdal::PipelineWriter::writePipeline(m_managerPtr->getStage(), strm);
     return strm.str();
 }
 
@@ -64,7 +66,7 @@ std::string PipelineExecutor::getMetadata() const
         throw pdal_error("Pipeline has not been executed!");
 
     std::stringstream strm;
-    MetadataNode root = m_manager.getMetadata().clone("metadata");
+    MetadataNode root = m_managerPtr->getMetadata().clone("metadata");
     pdal::Utils::toJSON(root, strm);
     return strm.str();
 }
@@ -76,42 +78,32 @@ std::string PipelineExecutor::getSchema() const
         throw pdal_error("Pipeline has not been executed!");
 
     std::stringstream strm;
-    MetadataNode root = m_manager.pointTable().layout()->toMetadata().clone("schema");
+    MetadataNode root = m_managerPtr->pointTable().layout()->toMetadata().clone("schema");
     pdal::Utils::toJSON(root, strm);
     return strm.str();
 }
 
 
+const PointViewSet& PipelineExecutor::views() const {
+    if (!m_executed)
+        throw pdal_error("Pipeline has not been executed!");
+
+    return m_managerPtr->views();
+}
+
+
 bool PipelineExecutor::validate()
 {
-    std::stringstream strm;
-    strm << m_json;
-    m_manager.readPipeline(strm);
-    m_manager.prepare();
-
+    m_managerPtr->prepare();
     return true;
 }
 
-int64_t PipelineExecutor::execute()
-{
-    std::stringstream strm;
-    strm << m_json;
-    m_manager.readPipeline(strm);
-    point_count_t count = m_manager.execute();
 
+point_count_t PipelineExecutor::execute()
+{
+    point_count_t count = m_managerPtr->execute();
     m_executed = true;
-
     return count;
-}
-
-
-void PipelineExecutor::setLogStream(std::ostream& strm)
-{
-
-    LogPtr log(Log::makeLog("pypipeline", &strm));
-    log->setLevel(m_logLevel);
-    m_manager.setLog(log);
-
 }
 
 
@@ -120,22 +112,32 @@ void PipelineExecutor::setLogLevel(int level)
     if (level < 0 || level > 8)
         throw pdal_error("log level must be between 0 and 8!");
 
-    m_logLevel = static_cast<pdal::LogLevel>(level);
-    setLogStream(m_logStream);
+    std::ostream* logStream;
+    if (m_managerPtr->log())
+        logStream = m_managerPtr->log()->getLogStream();
+    else
+        logStream = std::shared_ptr<std::ostream>(new std::stringstream()).get();
+    LogPtr log(Log::makeLog("pypipeline", logStream));
+    log->setLevel(static_cast<pdal::LogLevel>(level));
+    m_managerPtr->setLog(log);
 }
 
 
 int PipelineExecutor::getLogLevel() const
 {
-    return static_cast<int>(m_logLevel);
+    auto level = (m_managerPtr->log() ? m_managerPtr->log()->getLevel()
+                                      : pdal::LogLevel::Error);
+    return static_cast<int>(level);
 }
 
 
 std::string PipelineExecutor::getLog() const
 {
-    return m_logStream.str();
+    if (!m_managerPtr->log())
+        return "";
+    auto logStream = m_managerPtr->log()->getLogStream();
+    return static_cast<std::stringstream*>(logStream)->str();
 }
 
 
 } //namespace pdal
-

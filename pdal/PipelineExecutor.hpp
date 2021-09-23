@@ -36,7 +36,7 @@
 
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineWriter.hpp>
-#include <pdal/util/FileUtils.hpp>
+#include <pdal/Streamable.hpp>
 #include <pdal/pdal_export.hpp>
 
 #include <string>
@@ -51,27 +51,22 @@ namespace pdal
   It is constructed with JSON defining a pipeline.
 */
 
-class PDAL_DLL PipelineExecutor {
+class PDAL_DLL PipelineExecutor
+{
 public:
-
     /**
       Construct a PipelineExecutor
 
       \param json Pipeline JSON defining the PDAL operations
     */
-    PipelineExecutor(std::string const& json);
-
-    /**
-      dtor
-    */
-    ~PipelineExecutor(){};
+    PipelineExecutor(std::string const& json, point_count_t streamLimit = 0);
 
     /**
       Execute the pipeline
 
       \return total number of points produced by the pipeline.
     */
-    int64_t execute();
+    virtual point_count_t execute();
 
     /**
       Validate the pipeline
@@ -114,31 +109,21 @@ public:
     /**
       \return has the pipeline been executed
     */
-    inline bool executed() const
-    {
-        return m_executed;
-    }
-
+    bool executed() const { return m_executed;}
 
     /**
-      \return a const reference to the pipeline manager
+      \return the resulting views.
     */
-    PipelineManager const& getManagerConst() const { return m_manager; }
+    const PointViewSet& views() const;
 
     /**
       \return a reference to the pipeline manager
     */
-    PipelineManager & getManager() { return m_manager; }
+    PipelineManager & getManager() { return *m_managerPtr; }
 
 private:
-    void setLogStream(std::ostream& strm);
-
-    std::string m_json;
-    pdal::PipelineManager m_manager;
+    pdal::PipelineManagerPtr m_managerPtr;
     bool m_executed;
-    std::stringstream m_logStream;
-    pdal::LogLevel m_logLevel;
-
 };
 
 }
