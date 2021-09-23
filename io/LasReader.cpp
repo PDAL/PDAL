@@ -615,36 +615,7 @@ void LasReader::extractVlrMetadata(MetadataNode& forward, MetadataNode& m)
 
 void LasReader::addDimensions(PointLayoutPtr layout)
 {
-    using namespace Dimension;
-
-    layout->registerDim(Id::X, Type::Double);
-    layout->registerDim(Id::Y, Type::Double);
-    layout->registerDim(Id::Z, Type::Double);
-    layout->registerDim(Id::Intensity, Type::Unsigned16);
-    layout->registerDim(Id::ReturnNumber, Type::Unsigned8);
-    layout->registerDim(Id::NumberOfReturns, Type::Unsigned8);
-    layout->registerDim(Id::ScanDirectionFlag, Type::Unsigned8);
-    layout->registerDim(Id::EdgeOfFlightLine, Type::Unsigned8);
-    layout->registerDim(Id::Classification, Type::Unsigned8);
-    layout->registerDim(Id::ScanAngleRank, Type::Float);
-    layout->registerDim(Id::UserData, Type::Unsigned8);
-    layout->registerDim(Id::PointSourceId, Type::Unsigned16);
-
-    if (m_p->header.hasTime())
-        layout->registerDim(Id::GpsTime, Type::Double);
-    if (m_p->header.hasColor())
-    {
-        layout->registerDim(Id::Red, Type::Unsigned16);
-        layout->registerDim(Id::Green, Type::Unsigned16);
-        layout->registerDim(Id::Blue, Type::Unsigned16);
-    }
-    if (m_p->header.hasInfrared())
-        layout->registerDim(Id::Infrared);
-    if (m_p->header.has14PointFormat())
-    {
-        layout->registerDim(Id::ScanChannel);
-        layout->registerDim(Id::ClassFlags);
-    }
+    layout->registerDims(LasUtils::pdrfDims(m_p->header.pointFormat()));
 
     size_t ebLen = m_p->header.pointLen() - m_p->header.basePointLen();
     for (auto& dim : m_p->extraDims)

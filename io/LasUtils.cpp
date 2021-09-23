@@ -178,6 +178,48 @@ std::vector<ExtraDim> ExtraBytesIf::toExtraDims()
 namespace LasUtils
 {
 
+using D = Dimension::Id;
+const std::vector<D>& pdrfDims(int pdrf)
+{
+    if (pdrf < 0 || pdrf > 10)
+        pdrf = 10;
+    static const std::vector<D> dims[11]
+    {
+        // 0
+        { D::X, D::Y, D::Z, D::Intensity, D::ReturnNumber, D::NumberOfReturns, D::ScanDirectionFlag,
+          D::EdgeOfFlightLine, D::Classification, D::ScanAngleRank, D::UserData, D::PointSourceId },
+        // 1
+        { D::X, D::Y, D::Z, D::Intensity, D::ReturnNumber, D::NumberOfReturns, D::ScanDirectionFlag,
+          D::EdgeOfFlightLine, D::Classification, D::ScanAngleRank, D::UserData, D::PointSourceId,
+          D::GpsTime },
+        // 2
+        { D::X, D::Y, D::Z, D::Intensity, D::ReturnNumber, D::NumberOfReturns, D::ScanDirectionFlag,
+          D::EdgeOfFlightLine, D::Classification, D::ScanAngleRank, D::UserData, D::PointSourceId,
+          D::Red, D::Green, D::Blue },
+        // 3
+        { D::X, D::Y, D::Z, D::Intensity, D::ReturnNumber, D::NumberOfReturns, D::ScanDirectionFlag,
+          D::EdgeOfFlightLine, D::Classification, D::ScanAngleRank, D::UserData, D::PointSourceId,
+          D::GpsTime, D::Red, D::Green, D::Blue },
+        {},
+        {},
+        // 6
+        { D::X, D::Y, D::Z, D::Intensity, D::ReturnNumber, D::NumberOfReturns, D::ScanDirectionFlag,
+          D::EdgeOfFlightLine, D::Classification, D::ScanAngleRank, D::UserData, D::PointSourceId,
+          D::GpsTime, D::ScanChannel, D::ClassFlags },
+        // 7
+        { D::X, D::Y, D::Z, D::Intensity, D::ReturnNumber, D::NumberOfReturns, D::ScanDirectionFlag,
+          D::EdgeOfFlightLine, D::Classification, D::ScanAngleRank, D::UserData, D::PointSourceId,
+          D::GpsTime, D::ScanChannel, D::ClassFlags, D::Red, D::Green, D::Blue },
+        // 8
+        { D::X, D::Y, D::Z, D::Intensity, D::ReturnNumber, D::NumberOfReturns, D::ScanDirectionFlag,
+          D::EdgeOfFlightLine, D::Classification, D::ScanAngleRank, D::UserData, D::PointSourceId,
+          D::GpsTime, D::ScanChannel, D::ClassFlags, D::Red, D::Green, D::Blue, D::Infrared },
+        {},
+        {}
+    };
+    return dims[pdrf];
+}
+
 std::vector<IgnoreVLR> parseIgnoreVLRs(const StringList& ignored)
 {
     std::vector<IgnoreVLR> ignoredVLRs;
