@@ -180,9 +180,6 @@ void Streamable::execute(StreamPointTable& table)
 void Streamable::execute(StreamPointTable& table,
     std::list<Streamable *>& stages, SrsMap& srsMap)
 {
-    std::list<Streamable *> filters;
-    SpatialReference srs;
-
     // Separate out the first stage.
     Streamable *reader = stages.front();
 
@@ -193,80 +190,84 @@ void Streamable::execute(StreamPointTable& table,
 
     // Build a list of all stages except the first.  We may have a writer in
     // this list in addition to filters, but we treat them in the same way.
+    std::list<Streamable *> filters;
     auto begin = stages.begin();
     begin++;
     std::copy(begin, stages.end(), std::back_inserter(filters));
 
     // Loop until we're finished.  We handle the number of points up to
     // the capacity of the StreamPointTable that we've been provided.
-
-    bool finished = false;
-    while (!finished)
-    {
-        // Clear the spatial reference when processing starts.
-        table.clearSpatialReferences();
-        PointId idx = 0;
-        PointRef point(table, idx);
-        point_count_t pointLimit = (std::min)(count, table.capacity());
-
-        reader->startLogging();
-        // When we get false back from a reader, we're done, so set
-        // the point limit to the number of points processed in this loop
-        // of the table.
-        if (!pointLimit)
-            finished = true;
-
-        for (PointId idx = 0; idx < pointLimit; idx++)
-        {
-            point.setPointId(idx);
-            finished = !reader->processOne(point);
-            if (finished)
-                pointLimit = idx;
-        }
-        count -= pointLimit;
-
-        reader->stopLogging();
-        srs = reader->getSpatialReference();
-        if (!srs.empty())
-            table.setSpatialReference(srs);
-
-        // Note again that we're treating writers as filters.
-        // When we get a false back from a filter, we're filtering out a
-        // point, so add it to the list of skips so that it doesn't get
-        // processed by subsequent filters.
-        for (Streamable *s : filters)
-        {
-            auto si = srsMap.find(s);
-            if (si == srsMap.end() || si->second != srs)
-            {
-                s->spatialReferenceChanged(srs);
-                srsMap[s] = srs;
-            }
-            s->startLogging();
-
-            const expr::ConditionalExpression* where = s->whereExpr();
-            for (PointId idx = 0; idx < pointLimit; idx++)
-            {
-                point.setPointId(idx);
-                if (table.skip(idx))
-                    continue;
-                if (where && !where->eval(point))
-                    continue;
-                if (!s->processOne(point))
-                    table.setSkip(idx);
-            }
-            const SpatialReference& tempSrs = s->getSpatialReference();
-            if (!tempSrs.empty())
-            {
-                srs = tempSrs;
-                table.setSpatialReference(srs);
-            }
-            s->stopLogging();
-        }
-
-        table.clear(pointLimit);
+    while (count) {
+        count = execute(table, srsMap, reader, filters, count);
     }
 }
 
-} // namespace pdal
 
+point_count_t Streamable::execute(StreamPointTable& table, SrsMap& srsMap,
+    Streamable *reader, const std::list<Streamable *>& filters,
+    point_count_t count) {
+    // Clear the spatial reference when processing starts.
+    table.clearSpatialReferences();
+    PointRef point(table);
+    point_count_t pointLimit = (std::min)(count, table.capacity());
+
+    reader->startLogging();
+    bool finished = false;
+    if (!pointLimit)
+        finished = true;
+    for (PointId idx = 0; idx < pointLimit; idx++)
+    {
+        point.setPointId(idx);
+        // When we get false back from a reader, we're done, so set
+        // the point limit to the number of points processed in this loop
+        // of the table.
+        finished = !reader->processOne(point);
+        if (finished)
+            pointLimit = idx;
+    }
+    reader->stopLogging();
+
+    SpatialReference srs = reader->getSpatialReference();
+    if (!srs.empty())
+        table.setSpatialReference(srs);
+
+    // Note again that we're treating writers as filters.
+    // When we get a false back from a filter, we're filtering out a
+    // point, so add it to the list of skips so that it doesn't get
+    // processed by subsequent filters.
+    for (Streamable *s : filters)
+    {
+        auto si = srsMap.find(s);
+        if (si == srsMap.end() || si->second != srs)
+        {
+            s->spatialReferenceChanged(srs);
+            srsMap[s] = srs;
+        }
+        s->startLogging();
+
+        const expr::ConditionalExpression* where = s->whereExpr();
+        for (PointId idx = 0; idx < pointLimit; idx++)
+        {
+            point.setPointId(idx);
+            if (table.skip(idx))
+                continue;
+            if (where && !where->eval(point))
+                continue;
+            if (!s->processOne(point))
+                table.setSkip(idx);
+        }
+        const SpatialReference& tempSrs = s->getSpatialReference();
+        if (!tempSrs.empty())
+        {
+            srs = tempSrs;
+            table.setSpatialReference(srs);
+        }
+        s->stopLogging();
+    }
+
+    table.clear(pointLimit);
+
+    return !finished ? count - pointLimit : 0;
+}
+
+} // namespace pdal

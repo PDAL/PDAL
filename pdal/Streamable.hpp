@@ -115,6 +115,12 @@ protected:
         a pointer to the first found stage that's not streamable.
     */
     const Stage *findNonstreamable() const;
+
+private:
+    point_count_t execute(StreamPointTable& table, SrsMap& srsMap,
+        Streamable *reader, const std::list<Streamable *>& filters,
+        point_count_t count);
+
 };
 
 } // namespace pdal
