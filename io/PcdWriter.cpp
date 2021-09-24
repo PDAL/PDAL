@@ -75,12 +75,6 @@ void PcdWriter::addArgs(ProgramArgs& args)
              static_cast<uint32_t>(2));
 }
 
-void PcdWriter::initialize(PointTableRef table)
-{
-    m_ostream = Utils::createFile(m_filename, false);
-    if (!m_ostream)
-        throwError("Couldn't open '" + m_filename + "' for output.");
-}
 
 PcdWriter::DimSpec PcdWriter::extractDim(std::string dim, PointTableRef table)
 {
@@ -201,6 +195,10 @@ bool PcdWriter::findDim(Id id, DimSpec& ds)
 
 void PcdWriter::ready(PointTableRef table)
 {
+    m_ostream = Utils::createFile(m_filename, false);
+    if (!m_ostream)
+        throwError("Couldn't open '" + m_filename + "' for output.");
+
     PcdField field;
     field.m_label = table.layout()->dimName(Id::X);
     field.m_id = Id::X;
