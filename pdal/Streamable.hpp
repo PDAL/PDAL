@@ -45,6 +45,17 @@ class StreamableWrapper;
 class PDAL_DLL Streamable : public virtual Stage
 {
     friend class StreamableWrapper;
+    struct List : public std::list<Streamable *>
+    {
+        List operator - (const List& other) const;
+        void ready(PointTableRef& table);
+        void done(PointTableRef& table);
+    };
+    using SrsMap = std::map<Streamable *, SpatialReference>;
+    point_count_t execute(StreamPointTable& table, SrsMap& srsMap,
+        Streamable *reader, const std::list<Streamable *>& filters,
+        point_count_t count);
+
 public:
     Streamable();
 
@@ -78,8 +89,6 @@ protected:
     Streamable& operator=(const Streamable&) = delete;
     Streamable(const Streamable&); // not implemented
 
-    using SrsMap = std::map<Streamable *, SpatialReference>;
-
     /**
       Process a single point (streaming mode).  Implement in subclass.
 
@@ -112,12 +121,6 @@ protected:
         a pointer to the first found stage that's not streamable.
     */
     const Stage *findNonstreamable() const;
-
-private:
-    point_count_t execute(StreamPointTable& table, SrsMap& srsMap,
-        Streamable *reader, const std::list<Streamable *>& filters,
-        point_count_t count);
-
 };
 
 } // namespace pdal

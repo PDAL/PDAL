@@ -74,47 +74,6 @@ void Streamable::execute(StreamPointTable& table)
 {
     m_log->get(LogLevel::Debug) << "Executing pipeline in stream mode." <<
         std::endl;
-    struct StreamableList : public std::list<Streamable *>
-    {
-        StreamableList operator - (const StreamableList& other) const
-        {
-            StreamableList resultList;
-            auto ti = rbegin();
-            auto oi = other.rbegin();
-
-            while (oi != other.rend() && ti != rend() && *ti == *oi)
-            {
-                oi++;
-                ti++;
-            }
-            while (ti != rend())
-                resultList.push_front(*ti++);
-            return resultList;
-        };
-
-        void ready(PointTableRef& table)
-        {
-            for (auto s : *this)
-            {
-                s->startLogging();
-                s->ready(table);
-                s->stopLogging();
-                SpatialReference srs = s->getSpatialReference();
-                if (!srs.empty())
-                    table.setSpatialReference(srs);
-            }
-        }
-
-        void done(PointTableRef& table)
-        {
-            for (auto s : *this)
-            {
-                s->startLogging();
-                s->done(table);
-                s->stopLogging();
-            }
-        }
-    };
 
     const Stage *nonstreaming = findNonstreamable();
     if (nonstreaming)
@@ -122,9 +81,9 @@ void Streamable::execute(StreamPointTable& table)
             "stage that doesn't support streaming.");
 
     SpatialReference srs;
-    std::list<StreamableList> lists;
-    StreamableList stages;
-    StreamableList lastRunStages;
+    std::list<Streamable::List> lists;
+    Streamable::List stages;
+    Streamable::List lastRunStages;
 
     table.finalize();
 
@@ -181,7 +140,7 @@ void Streamable::execute(StreamPointTable& table)
         {
             for (auto bi = s->m_inputs.rbegin(); bi != s->m_inputs.rend(); bi++)
             {
-                StreamableList newStages(stages);
+                Streamable::List newStages(stages);
                 newStages.push_front(dynamic_cast<Streamable *>(*bi));
                 lists.push_front(newStages);
             }
@@ -263,6 +222,47 @@ point_count_t Streamable::execute(StreamPointTable& table, SrsMap& srsMap,
     table.clear(pointLimit);
 
     return !finished ? count - pointLimit : 0;
+}
+
+
+Streamable::List Streamable::List::operator - (const Streamable::List& other) const
+{
+    auto ti = rbegin();
+    auto oi = other.rbegin();
+    while (oi != other.rend() && ti != rend() && *ti == *oi)
+    {
+        oi++;
+        ti++;
+    }
+    Streamable::List resultList;
+    while (ti != rend())
+        resultList.push_front(*ti++);
+    return resultList;
+};
+
+
+void Streamable::List::ready(PointTableRef& table)
+{
+    for (auto s : *this)
+    {
+        s->startLogging();
+        s->ready(table);
+        s->stopLogging();
+        SpatialReference srs = s->getSpatialReference();
+        if (!srs.empty())
+            table.setSpatialReference(srs);
+    }
+}
+
+
+void Streamable::List::done(PointTableRef& table)
+{
+    for (auto s : *this)
+    {
+        s->startLogging();
+        s->done(table);
+        s->stopLogging();
+    }
 }
 
 } // namespace pdal
