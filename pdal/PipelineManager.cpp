@@ -37,6 +37,7 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/PipelineReaderJSON.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/Streamable.hpp>
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/FileUtils.hpp>
 
@@ -289,15 +290,17 @@ point_count_t PipelineManager::execute()
 }
 
 
-void PipelineManager::executeStream(StreamPointTable& table)
+StreamableIterator* PipelineManager::executeStream()
 {
     validateStageOptions();
     Stage *s = getStage();
     if (!s)
-        return;
-
-    s->prepare(table);
-    s->execute(table);
+        return new StreamableIterator(m_streamTable);
+    s->assertStreamable();
+    Streamable *streamable = dynamic_cast<Streamable *>(s);
+    streamable->prepare(m_streamTable);
+    m_streamTable.finalize();
+    return new StreamableIterator(m_streamTable, streamable);
 }
 
 

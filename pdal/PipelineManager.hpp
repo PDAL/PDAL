@@ -39,8 +39,8 @@
 #include <pdal/Options.hpp>
 #include <pdal/Log.hpp>
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace pdal
 {
@@ -48,6 +48,7 @@ namespace pdal
 struct QuickInfo;
 class Stage;
 class StageFactory;
+class StreamableIterator;
 
 struct StageCreationOptions
 {
@@ -127,7 +128,7 @@ public:
     void prepare() const;
     ExecResult execute(ExecMode mode);
     point_count_t execute();
-    void executeStream(StreamPointTable& table);
+    StreamableIterator* executeStream();
     void validateStageOptions() const;
     bool pipelineStreamable() const;
     bool hasReader() const;

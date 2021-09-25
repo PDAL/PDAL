@@ -51,24 +51,20 @@ bool Streamable::pipelineStreamable() const
     return true;
 }
 
-
 void Streamable::execute(StreamPointTable& table)
-{
-    for (auto it = executeStream(table); it; ++it);
-}
-
-Streamable::Iterator Streamable::executeStream(StreamPointTable& table)
 {
     assertStreamable();
     m_log->get(LogLevel::Debug)
         << "Executing pipeline in stream mode." << std::endl;
     table.finalize();
-    return Iterator(table, *this);
+    for (auto it = Iterator(table, this); it; ++it);
 }
 
 void Streamable::Iterator::populateLists(Streamable* stage,
                                          Streamable::List& currentStages)
 {
+    if (!stage)
+        return;
     currentStages.push_front(stage);
     if (stage->m_inputs.empty())
         lists.push_front(currentStages);

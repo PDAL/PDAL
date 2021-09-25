@@ -44,7 +44,6 @@ class PDAL_DLL Streamable : public virtual Stage
 {
     friend class StreamableWrapper;
     struct List;
-    class Iterator;
 
 public:
     Streamable() {}
@@ -67,29 +66,6 @@ public:
     */
     virtual void execute(StreamPointTable& table);
 
-    /**
-      Iterator-based version of \ref execute that executes the pipeline when
-      iterated.
-
-        Streamable::Iterator it = stage.executeStream(table);
-        while (it) {
-            PointViewPtr view = *it;
-            ++it;
-            // do something with view
-        }
-
-      At each iteration, points are processed up to the capacity of the provided
-      StreamPointTable. If the iterator is dereferenced, it creates a \ref
-      PointView of the current batch of processed points. This PointView is
-      valid only for the current iteration and should be used before the
-      iterator is forwarded. If the iterator is not dereferenced, the same
-      points are processed but no PointView is created.
-
-      \param table  Streaming point table used for stage pipeline. This must be
-        the same \ref table used in the \ref prepare function.
-    */
-    Iterator executeStream(StreamPointTable& table);
-
     using Stage::execute;
 
     /**
@@ -98,6 +74,8 @@ public:
       \return Whether the pipeline is streamable.
     */
     virtual bool pipelineStreamable() const;
+
+    class Iterator;
 
 protected:
     Streamable& operator=(const Streamable&) = delete;
@@ -157,11 +135,11 @@ class Streamable::Iterator
     point_count_t execute(Streamable::List& stages, point_count_t count);
 
 public:
-    Iterator(StreamPointTable& table) : table(table) {}
-    Iterator(StreamPointTable& table, Streamable& stage) : table(table)
+    Iterator(StreamPointTable& table, Streamable* stagePtr = nullptr)
+        : table(table)
     {
         Streamable::List stages;
-        populateLists(&stage, stages);
+        populateLists(stagePtr, stages);
     }
     ~Iterator() { table.clear(lastReadCount); }
 
@@ -170,4 +148,12 @@ public:
     Iterator& operator++();
 };
 
+
+//  XXX: Work around the lack of forward declarations of nested classes
+class StreamableIterator : public Streamable::Iterator
+{
+public:
+    StreamableIterator(StreamPointTable& table, Streamable* stagePtr = nullptr)
+        : Streamable::Iterator(table, stagePtr) {}
+};
 } // namespace pdal

@@ -252,7 +252,8 @@ R"(
     PipelineManager mgr;
     mgr.readPipeline(iss);
     FixedPointTable t(10000);
-    mgr.executeStream(t);
+    mgr.getStage()->prepare(t);
+    mgr.getStage()->execute(t);
     Utils::restore(std::cout, ctx);
     std::string output(oss.str());
     EXPECT_NE(output.find("DBAGEBAHEBAFBACA"), std::string::npos);
@@ -509,7 +510,8 @@ R"(
         PipelineManager mgr;
         mgr.readPipeline(iss);
         FixedPointTable t(10000);
-        mgr.executeStream(t);
+        mgr.getStage()->prepare(t);
+        mgr.getStage()->execute(t);
         Utils::restore(std::cout, ctx);
         std::string output(oss.str());
         EXPECT_NE(output.find("DBADCA"), std::string::npos);
