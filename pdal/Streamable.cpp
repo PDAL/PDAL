@@ -153,7 +153,28 @@ void Streamable::execute(StreamPointTable& table)
             (lastRunStages - stages).done(table);
             // Call ready on all the stages we didn't run last time.
             (stages - lastRunStages).ready(table);
-            execute(table, stages, srsMap);
+
+            // Separate out the first stage.
+            Streamable *reader = stages.front();
+
+            // We may be limited in the number of points requested.
+            point_count_t count = (std::numeric_limits<point_count_t>::max)();
+            if (Reader *r = dynamic_cast<Reader *>(reader))
+                count = r->count();
+
+            // Build a list of all stages except the first.  We may have a writer in
+            // this list in addition to filters, but we treat them in the same way.
+            std::list<Streamable *> filters;
+            auto begin = stages.begin();
+            begin++;
+            std::copy(begin, stages.end(), std::back_inserter(filters));
+
+            // Loop until we're finished.  We handle the number of points up to
+            // the capacity of the StreamPointTable that we've been provided.
+            while (count) {
+                count = execute(table, srsMap, reader, filters, count);
+            }
+
             lastRunStages = stages;
         }
         else
@@ -173,32 +194,6 @@ void Streamable::execute(StreamPointTable& table)
         stages = lists.front();
         lists.pop_front();
         s = stages.front();
-    }
-}
-
-
-void Streamable::execute(StreamPointTable& table,
-    std::list<Streamable *>& stages, SrsMap& srsMap)
-{
-    // Separate out the first stage.
-    Streamable *reader = stages.front();
-
-    // We may be limited in the number of points requested.
-    point_count_t count = (std::numeric_limits<point_count_t>::max)();
-    if (Reader *r = dynamic_cast<Reader *>(reader))
-        count = r->count();
-
-    // Build a list of all stages except the first.  We may have a writer in
-    // this list in addition to filters, but we treat them in the same way.
-    std::list<Streamable *> filters;
-    auto begin = stages.begin();
-    begin++;
-    std::copy(begin, stages.end(), std::back_inserter(filters));
-
-    // Loop until we're finished.  We handle the number of points up to
-    // the capacity of the StreamPointTable that we've been provided.
-    while (count) {
-        count = execute(table, srsMap, reader, filters, count);
     }
 }
 
