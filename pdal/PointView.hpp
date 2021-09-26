@@ -97,6 +97,7 @@ public:
     bool empty() const
         { return m_size == 0; }
 
+    inline void appendPoint(PointId rawId);
     inline void appendPoint(const PointView& buffer, PointId id);
     void append(const PointView& buf)
     {
@@ -596,13 +597,17 @@ void PointView::setField(Dimension::Id dim, PointId idx, T val)
     }
 }
 
-inline void PointView::appendPoint(const PointView& buffer, PointId id)
+inline void PointView::appendPoint(PointId rawId)
 {
-    // Invalid 'id' is a programmer error.
-    PointId rawId = buffer.m_index[id];
     m_index.push_back(rawId);
     m_size++;
     assert(m_temps.empty());
+}
+
+inline void PointView::appendPoint(const PointView& buffer, PointId id)
+{
+    // Invalid 'id' is a programmer error.
+    appendPoint(buffer.m_index[id]);
 }
 
 

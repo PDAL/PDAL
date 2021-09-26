@@ -40,24 +40,14 @@
 namespace pdal
 {
 
-class StreamableWrapper;
-
 class PDAL_DLL Streamable : public virtual Stage
 {
     friend class StreamableWrapper;
-    struct List : public std::list<Streamable *>
-    {
-        List operator - (const List& other) const;
-        void ready(PointTableRef& table);
-        void done(PointTableRef& table);
-    };
-    using SrsMap = std::map<Streamable *, SpatialReference>;
-    point_count_t execute(StreamPointTable& table, SrsMap& srsMap,
-        Streamable *reader, const std::list<Streamable *>& filters,
-        point_count_t count);
+    struct List;
+    class Iterator;
 
 public:
-    Streamable();
+    Streamable() {}
 
     /**
       Execute a prepared pipeline (linked set of stages) in streaming mode.
@@ -76,6 +66,30 @@ public:
 
     */
     virtual void execute(StreamPointTable& table);
+
+    /**
+      Iterator-based version of \ref execute that executes the pipeline when
+      iterated.
+
+        Streamable::Iterator it = stage.executeStream(table);
+        while (it) {
+            PointViewPtr view = *it;
+            ++it;
+            // do something with view
+        }
+
+      At each iteration, points are processed up to the capacity of the provided
+      StreamPointTable. If the iterator is dereferenced, it creates a \ref
+      PointView of the current batch of processed points. This PointView is
+      valid only for the current iteration and should be used before the
+      iterator is forwarded. If the iterator is not dereferenced, the same
+      points are processed but no PointView is created.
+
+      \param table  Streaming point table used for stage pipeline. This must be
+        the same \ref table used in the \ref prepare function.
+    */
+    Iterator executeStream(StreamPointTable& table);
+
     using Stage::execute;
 
     /**
@@ -111,8 +125,7 @@ protected:
 
        \param srs  New spatial reference.
     */
-    virtual void spatialReferenceChanged(const SpatialReference& /*srs*/)
-    {}
+    virtual void spatialReferenceChanged(const SpatialReference& /*srs*/) {}
 
     /**
       Find the first nonstreamable stage in a pipeline.
@@ -120,7 +133,40 @@ protected:
       \return  NULL if the pipeline is streamable, otherwise return
         a pointer to the first found stage that's not streamable.
     */
-    const Stage *findNonstreamable() const;
+    const Stage* findNonstreamable() const;
+};
+
+struct Streamable::List : public std::list<Streamable*>
+{
+    List operator-(const List& other) const;
+    void ready(PointTableRef& table);
+    void done(PointTableRef& table);
+};
+
+class Streamable::Iterator
+{
+    StreamPointTable& table;
+    std::map<Streamable*, SpatialReference> srsMap;
+    std::list<Streamable::List> lists;
+    Streamable::List lastRunStages;
+    point_count_t toReadCount = 0;
+    point_count_t lastReadCount = 0;
+
+    void populateLists(Streamable* stage, Streamable::List& currentStages);
+    point_count_t execute(Streamable::List& stages, point_count_t count);
+
+public:
+    Iterator(StreamPointTable& table) : table(table) {}
+    Iterator(StreamPointTable& table, Streamable& stage) : table(table)
+    {
+        Streamable::List stages;
+        populateLists(&stage, stages);
+    }
+    ~Iterator() { table.clear(lastReadCount); }
+
+    operator bool() const { return !lists.empty(); }
+    PointViewPtr operator*() const;
+    Iterator& operator++();
 };
 
 } // namespace pdal

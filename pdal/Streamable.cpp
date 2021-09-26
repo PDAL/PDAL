@@ -42,9 +42,6 @@
 namespace pdal
 {
 
-Streamable::Streamable()
-{}
-
 
 bool Streamable::pipelineStreamable() const
 {
@@ -68,129 +65,112 @@ const Stage *Streamable::findNonstreamable() const
     return nullptr;
 }
 
-
-// Streamed execution.
 void Streamable::execute(StreamPointTable& table)
 {
-    m_log->get(LogLevel::Debug) << "Executing pipeline in stream mode." <<
-        std::endl;
-
-    const Stage *nonstreaming = findNonstreamable();
-    if (nonstreaming)
-        nonstreaming->throwError("Attempting to use stream mode with a "
-            "stage that doesn't support streaming.");
-
-    SpatialReference srs;
-    std::list<Streamable::List> lists;
-    Streamable::List stages;
-    Streamable::List lastRunStages;
-
-    table.finalize();
-
-    // Walk from the current stage backwards.  As we add each input, copy
-    // the list of stages and push it on a list.  We then pull a list from the
-    // back of list and keep going.  Pushing on the front and pulling from the
-    // back insures that the stages will be executed in the order that they
-    // were added.  If we hit stage with no previous stages, we execute
-    // the stage list.
-    // All this often amounts to a bunch of list copying for
-    // no reason, but it's more simple than what we might otherwise do and
-    // this should be a nit in the grand scheme of execution time.
-    //
-    // As an example, if there are four paths from the end stage (writer) to
-    // reader stages, there will be four stage lists and execute(table, stages)
-    // will be called four times.
-    SrsMap srsMap;
-    Streamable *s = this;
-    stages.push_front(s);
-    while (true)
-    {
-        if (s->m_inputs.empty())
-        {
-            // Call done on all the stages we ran last time and aren't
-            // using this time.
-            (lastRunStages - stages).done(table);
-            // Call ready on all the stages we didn't run last time.
-            (stages - lastRunStages).ready(table);
-
-            // Separate out the first stage.
-            Streamable *reader = stages.front();
-
-            // We may be limited in the number of points requested.
-            point_count_t count = (std::numeric_limits<point_count_t>::max)();
-            if (Reader *r = dynamic_cast<Reader *>(reader))
-                count = r->count();
-
-            // Build a list of all stages except the first.  We may have a writer in
-            // this list in addition to filters, but we treat them in the same way.
-            std::list<Streamable *> filters;
-            auto begin = stages.begin();
-            begin++;
-            std::copy(begin, stages.end(), std::back_inserter(filters));
-
-            // Loop until we're finished.  We handle the number of points up to
-            // the capacity of the StreamPointTable that we've been provided.
-            while (count) {
-                count = execute(table, srsMap, reader, filters, count);
-            }
-
-            lastRunStages = stages;
-        }
-        else
-        {
-            for (auto bi = s->m_inputs.rbegin(); bi != s->m_inputs.rend(); bi++)
-            {
-                Streamable::List newStages(stages);
-                newStages.push_front(dynamic_cast<Streamable *>(*bi));
-                lists.push_front(newStages);
-            }
-        }
-        if (lists.empty())
-        {
-            lastRunStages.done(table);
-            break;
-        }
-        stages = lists.front();
-        lists.pop_front();
-        s = stages.front();
-    }
+    for (auto it = executeStream(table); it; ++it);
 }
 
+Streamable::Iterator Streamable::executeStream(StreamPointTable& table)
+{
+    m_log->get(LogLevel::Debug)
+        << "Executing pipeline in stream mode." << std::endl;
 
-point_count_t Streamable::execute(StreamPointTable& table, SrsMap& srsMap,
-    Streamable *reader, const std::list<Streamable *>& filters,
-    point_count_t count) {
-    // Clear the spatial reference when processing starts.
+    const Stage* nonstreaming = findNonstreamable();
+    if (nonstreaming)
+        nonstreaming->throwError("Attempting to use stream mode with a "
+                                 "stage that doesn't support streaming.");
+
+    table.finalize();
+    return Iterator(table, *this);
+}
+
+void Streamable::Iterator::populateLists(Streamable* stage,
+                                         Streamable::List& currentStages)
+{
+    currentStages.push_front(stage);
+    if (stage->m_inputs.empty())
+        lists.push_front(currentStages);
+    else
+        for (auto bi = stage->m_inputs.rbegin(); bi != stage->m_inputs.rend(); bi++)
+        {
+            Streamable::List newStages(currentStages);
+            populateLists(dynamic_cast<Streamable*>(*bi), newStages);
+        }
+}
+
+PointViewPtr Streamable::Iterator::operator*() const
+{
+    auto view = new PointView(table, table.spatialReference());
+    for (PointId idx = 0; idx < lastReadCount; idx++)
+        if (!table.skip(idx))
+            view->appendPoint(idx);
+    return PointViewPtr(view);
+}
+
+Streamable::Iterator& Streamable::Iterator::operator++()
+{
+    if (!*this)
+        throw pdal_error("Cannot forward Streamable::Iterator past the end");
+
+    Streamable::List& stages = lists.front();
+    if (!toReadCount)
+    {
+        // Call done on all the stages we ran last time and aren't using this time.
+        (lastRunStages - stages).done(table);
+        // Call ready on all the stages we didn't run last time.
+        (stages - lastRunStages).ready(table);
+        // The first stage should be a reader.
+        Reader* r = dynamic_cast<Reader*>(stages.front());
+        // We may be limited in the number of points requested.
+        toReadCount = r ? r->count() : (std::numeric_limits<point_count_t>::max)();
+    }
+    toReadCount = execute(stages, toReadCount);
+    if (!toReadCount)
+    {
+        lastRunStages = stages;
+        lists.pop_front();
+        if (lists.empty())
+            lastRunStages.done(table);
+    }
+    return *this;
+}
+
+point_count_t Streamable::Iterator::execute(Streamable::List& stages,
+                                            point_count_t count)
+{
+    // Clear any previous read points and the spatial reference when processing starts.
+    table.clear(lastReadCount);
     table.clearSpatialReferences();
+
     PointRef point(table);
     point_count_t pointLimit = (std::min)(count, table.capacity());
 
-    reader->startLogging();
-    bool finished = false;
-    if (!pointLimit)
-        finished = true;
+    auto it = stages.begin();
+    Streamable* s = *it++;
+
+    s->startLogging();
     for (PointId idx = 0; idx < pointLimit; idx++)
     {
         point.setPointId(idx);
-        // When we get false back from a reader, we're done, so set
-        // the point limit to the number of points processed in this loop
-        // of the table.
-        finished = !reader->processOne(point);
-        if (finished)
+        // When we get false back from a reader, we're done, so set the point
+        // limit to the number of points processed in this loop of the table.
+        if (!s->processOne(point))
             pointLimit = idx;
     }
-    reader->stopLogging();
+    s->stopLogging();
 
-    SpatialReference srs = reader->getSpatialReference();
+    SpatialReference srs = s->getSpatialReference();
     if (!srs.empty())
         table.setSpatialReference(srs);
 
-    // Note again that we're treating writers as filters.
+    // Iterate over all stages except the first.  We may have a writer in
+    // addition to filters, but we treat them in the same way.
     // When we get a false back from a filter, we're filtering out a
     // point, so add it to the list of skips so that it doesn't get
     // processed by subsequent filters.
-    for (Streamable *s : filters)
+    while (it != stages.end())
     {
+        s = *it++;
         auto si = srsMap.find(s);
         if (si == srsMap.end() || si->second != srs)
         {
@@ -219,13 +199,11 @@ point_count_t Streamable::execute(StreamPointTable& table, SrsMap& srsMap,
         s->stopLogging();
     }
 
-    table.clear(pointLimit);
-
-    return !finished ? count - pointLimit : 0;
+    lastReadCount = pointLimit;
+    return pointLimit == table.capacity() ? count - pointLimit : 0;
 }
 
-
-Streamable::List Streamable::List::operator - (const Streamable::List& other) const
+Streamable::List Streamable::List::operator-(const Streamable::List& other) const
 {
     auto ti = rbegin();
     auto oi = other.rbegin();
@@ -240,7 +218,6 @@ Streamable::List Streamable::List::operator - (const Streamable::List& other) co
     return resultList;
 };
 
-
 void Streamable::List::ready(PointTableRef& table)
 {
     for (auto s : *this)
@@ -253,7 +230,6 @@ void Streamable::List::ready(PointTableRef& table)
             table.setSpatialReference(srs);
     }
 }
-
 
 void Streamable::List::done(PointTableRef& table)
 {
