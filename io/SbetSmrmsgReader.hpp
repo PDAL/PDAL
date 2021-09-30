@@ -54,7 +54,7 @@ public:
 private:
     std::unique_ptr<ILeStream> m_stream;
     // Number of points in the file.
-    // point_count_t m_numPts;
+    point_count_t m_numPts;
     point_count_t m_index;
     Dimension::IdList m_dims;
 
