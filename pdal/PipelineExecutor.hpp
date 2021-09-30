@@ -121,9 +121,31 @@ public:
     */
     PipelineManager & getManager() { return *m_managerPtr; }
 
-private:
+protected:
     pdal::PipelineManagerPtr m_managerPtr;
     bool m_executed;
 };
 
-}
+class PDAL_DLL PipelineStreamableExecutor : public PipelineExecutor
+{
+
+public:
+    PipelineStreamableExecutor(std::string const& json,
+                               point_count_t streamLimit = 10000)
+        : PipelineExecutor(json, streamLimit), m_itPtr(nullptr) {}
+
+    virtual point_count_t execute();
+
+    /**
+      Execute the pipeline
+
+    \return a point view to next batch of processed points,
+        or null if execution has finished.
+    */
+    PointViewPtr executeNext();
+
+private:
+    std::unique_ptr<StreamableIterator> m_itPtr;
+};
+
+} // namespace pdal

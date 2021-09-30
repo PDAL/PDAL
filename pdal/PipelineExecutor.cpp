@@ -140,4 +140,28 @@ std::string PipelineExecutor::getLog() const
 }
 
 
+point_count_t PipelineStreamableExecutor::execute()
+{
+    point_count_t count = 0;
+    while (PointViewPtr view = executeNext())
+        count += view->size();
+    return count;
+}
+
+
+PointViewPtr PipelineStreamableExecutor::executeNext()
+{
+    if (!m_itPtr)
+        m_itPtr = std::unique_ptr<StreamableIterator>(m_managerPtr->executeStream());
+
+    StreamableIterator& it = *m_itPtr;
+    if (!it) {
+        m_executed = true;
+        return nullptr;
+    }
+    ++it;
+    return *it;
+}
+
+
 } //namespace pdal
