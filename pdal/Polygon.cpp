@@ -406,4 +406,9 @@ std::vector<Polygon::Ring> Polygon::interiorRings() const
     return rings;
 }
 
+Polygon Polygon::intersection(const pdal::Polygon& p) const
+{
+    return Polygon(m_geom->Intersection(p.m_geom.get()));
+}
+
 } // namespace pdal

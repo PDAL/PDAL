@@ -62,6 +62,7 @@ public:
     Polygon(OGRGeometryH g, const SpatialReference& srs);
     Polygon(const Polygon& poly);
     Polygon& operator=(const Polygon& src);
+    Polygon intersection(const Polygon& p) const;
 
     virtual void modified() override;
     virtual void clear() override;
