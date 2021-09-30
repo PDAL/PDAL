@@ -64,6 +64,11 @@ option(BUILD_PLUGIN_RIVLIB
 add_feature_info("RiVLib plugin" BUILD_PLUGIN_RIVLIB
     "read data in the RXP format")
 
+option(BUILD_PLUGIN_CACHEDEPT
+    "Choose if cached ept support should be built" FALSE)
+add_feature_info("CachedEpt plugin" BUILD_PLUGIN_CACHEDEPT
+    "read and cache entwine data")
+
 option(BUILD_PLUGIN_RDBLIB
     "Choose if rdblib support should be built" FALSE)
 add_feature_info("rdblib plugin" BUILD_PLUGIN_RDBLIB

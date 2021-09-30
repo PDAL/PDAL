@@ -67,7 +67,7 @@ PDAL_DLL std::string lastError();
 OGRGeometry *createFromWkt(const std::string& s, std::string& srs);
 OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs);
 
-std::vector<Polygon> getPolygons(const NL::json& ogr);
+PDAL_DLL std::vector<Polygon> getPolygons(const NL::json& ogr);
 
 inline OGRGeometry *fromHandle(OGRGeometryH geom)
 { return reinterpret_cast<OGRGeometry *>(geom); }
