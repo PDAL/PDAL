@@ -1,10 +1,10 @@
-.. _readers.sbet:
+.. _readers.smrmsg:
 
-readers.sbet
+readers.smrmsg
 ============
 
 The **SMRMSG reader** read from POSPac MMS post-processed accuracy files, used to describes the accuracy of the post-processed solution (SBET file) and 
-contains the position, orientation and velocity RMS after smoothing.
+contains the position, orientation and velocity RMS after smoothing. See :ref:`writers.sbet`.
 
 .. embed::
 
