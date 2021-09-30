@@ -47,6 +47,7 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
    readers.text
    readers.tiledb
    readers.tindex
+   readers.lruept
 
 :ref:`readers.bpf`
     Read BPF files encoded as version 1, 2, or 3. BPF is an NGA specification
