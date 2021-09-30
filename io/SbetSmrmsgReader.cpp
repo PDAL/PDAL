@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "SmrmsgReader.hpp"
+#include "SbetSmrmsgReader.hpp"
 #include "SbetCommon.hpp"
 
 #include <pdal/PointRef.hpp>
