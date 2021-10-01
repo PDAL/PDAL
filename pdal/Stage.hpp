@@ -156,8 +156,10 @@ public:
       \return  nullptr if the stage is streamable, a pointer to this stage
         otherwise.
     */
-    virtual const Stage *findNonstreamable() const
-    { return this; }
+    virtual void assertStreamable() const
+    { throwError("Attempting to use stream mode with a stage that doesn't "
+                 "support streaming.");
+    }
 
     /**
       Set the spatial reference of a stage.

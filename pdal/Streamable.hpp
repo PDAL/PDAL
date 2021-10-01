@@ -133,7 +133,8 @@ protected:
       \return  NULL if the pipeline is streamable, otherwise return
         a pointer to the first found stage that's not streamable.
     */
-    const Stage* findNonstreamable() const;
+    void assertStreamable() const
+    { for (auto s : m_inputs) s->assertStreamable(); }
 };
 
 struct Streamable::List : public std::list<Streamable*>

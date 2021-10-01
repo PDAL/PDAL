@@ -52,19 +52,6 @@ bool Streamable::pipelineStreamable() const
 }
 
 
-const Stage *Streamable::findNonstreamable() const
-{
-    const Stage *nonstreamable;
-
-    for (const Stage *s : m_inputs)
-    {
-        nonstreamable = s->findNonstreamable();
-        if (nonstreamable)
-            return nonstreamable;
-    }
-    return nullptr;
-}
-
 void Streamable::execute(StreamPointTable& table)
 {
     for (auto it = executeStream(table); it; ++it);
@@ -72,14 +59,9 @@ void Streamable::execute(StreamPointTable& table)
 
 Streamable::Iterator Streamable::executeStream(StreamPointTable& table)
 {
+    assertStreamable();
     m_log->get(LogLevel::Debug)
         << "Executing pipeline in stream mode." << std::endl;
-
-    const Stage* nonstreaming = findNonstreamable();
-    if (nonstreaming)
-        nonstreaming->throwError("Attempting to use stream mode with a "
-                                 "stage that doesn't support streaming.");
-
     table.finalize();
     return Iterator(table, *this);
 }
