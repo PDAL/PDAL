@@ -105,6 +105,10 @@ void TileDBReader::addArgs(ProgramArgs& args)
     args.add("stats", "Dump TileDB query stats to stdout", m_stats, false);
     args.add("bbox3d", "Bounding box subarray to read from TileDB in format "
         "([minx, maxx], [miny, maxy], [minz, maxz])", m_bbox);
+    args.add("bbox4d", "Bounding box subarray to read from TileDB in format "
+                       "([minx, maxx], [miny, maxy], [minz, maxz], [min_gpstime, max_gpstime] )", m_bbox);
+    args.add("use_time_dim", "Use GpsTime coordinate data as array dimension", m_use_time, false);
+    args.addSynonym("use_time_dim", "use_time");
     args.add("end_timestamp", "TileDB array timestamp", m_endTimeStamp,
         point_count_t(0));
     args.addSynonym("end_timestamp", "timestamp");
@@ -214,7 +218,7 @@ void TileDBReader::addDimensions(PointLayoutPtr layout)
 template <typename T>
 void TileDBReader::setQueryBuffer(const DimInfo& di)
 {
-    m_query->set_buffer(di.m_name, di.m_buffer->get<T>(), di.m_buffer->count());
+        m_query->set_buffer(di.m_name, di.m_buffer->get<T>(), di.m_buffer->count());
 }
 
 void TileDBReader::setQueryBuffer(const DimInfo& di)
@@ -312,6 +316,10 @@ void TileDBReader::localReady()
         if (numDims == 2)
             m_query->set_subarray({m_bbox.minx, m_bbox.maxx,
                 m_bbox.miny, m_bbox.maxy});
+        else if (numDims == 4 && m_use_time)
+            m_query->set_subarray({m_bbox.minx, m_bbox.maxx,
+                m_bbox.miny, m_bbox.maxy, m_bbox.minz, m_bbox.maxz,
+                m_bbox.mintm, m_bbox.maxtm});
         else
             m_query->set_subarray({m_bbox.minx, m_bbox.maxx,
                 m_bbox.miny, m_bbox.maxy, m_bbox.minz, m_bbox.maxz});

@@ -67,12 +67,15 @@ struct TileDBWriter::Args
     size_t m_x_tile_size;
     size_t m_y_tile_size;
     size_t m_z_tile_size;
+    size_t m_time_tile_size;
     float m_x_domain_st;
     float m_x_domain_end;
     float m_y_domain_st;
     float m_y_domain_end;
     float m_z_domain_st;
     float m_z_domain_end;
+    float m_time_domain_st;
+    float m_time_domain_end;
     size_t m_cache_size;
     bool m_stats;
     std::string m_compressor;
@@ -252,11 +255,12 @@ TileDBWriter::TileDBWriter():
         "PointSourceId": {"compression": "bzip2"},
         "Red": {"compression": "zstd", "compression_level": 7},
         "Green": {"compression": "zstd", "compression_level": 7},
-        "Blue": {"compression": "zstd", "compression_level": 7},
-        "GpsTime": [
-            {"compression": "zstd", "compression_level": 7}
-        ]
+        "Blue": {"compression": "zstd", "compression_level": 7}
     })");
+
+//    "GpsTime": [
+//        {"compression": "zstd", "compression_level": 7}
+//    ]
 
     m_args->m_defaults = NL::json::parse(attributeDefaults);
 }
@@ -283,12 +287,16 @@ void TileDBWriter::addArgs(ProgramArgs& args)
         size_t(0));
     args.add("z_tile_size", "TileDB tile size", m_args->m_z_tile_size,
         size_t(0));
+    args.add("time_tile_size", "TileDB tile size", m_args->m_time_tile_size,
+             size_t(0));
     args.add("x_domain_st", "TileDB start of domain in X", m_args->m_x_domain_st, 0.f);
     args.add("x_domain_end", "TileDB end of domain in X", m_args->m_x_domain_end, 0.f);
     args.add("y_domain_st", "TileDB start of domain in Y", m_args->m_y_domain_st, 0.f);
     args.add("y_domain_end", "TileDB end of domain in Y", m_args->m_y_domain_end, 0.f);
     args.add("z_domain_st", "TileDB start of domain in Z", m_args->m_z_domain_st, 0.f);
     args.add("z_domain_end", "TileDB end of domain in Z", m_args->m_z_domain_end, 0.f);
+    args.add("time_domain_st", "TileDB start of domain in GpsTime", m_args->m_time_domain_st, 0.f);
+    args.add("time_domain_end", "TileDB end of domain in GpsTime", m_args->m_time_domain_end, 0.f);
     args.add("chunk_size", "Point cache size for chunked writes",
         m_args->m_cache_size, size_t(10000));
     args.add("stats", "Dump TileDB query stats to stdout", m_args->m_stats,
@@ -301,6 +309,8 @@ void TileDBWriter::addArgs(ProgramArgs& args)
         m_args->m_filters, NL::json({}));
     args.add("append", "Append to existing TileDB array",
         m_args->m_append, false);
+    args.add("use_time_dim", "Use GpsTime coordinate data as array dimension", m_use_time, false);
+    args.addSynonym("use_time_dim", "use_time");
 #if TILEDB_VERSION_MAJOR >= 2
     args.add("timestamp", "TileDB array timestamp", m_args->m_timeStamp,
         point_count_t(0));
@@ -375,7 +385,8 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
 
         if ( (m_args->m_x_tile_size > 0) &&
              (m_args->m_y_tile_size > 0) &&
-             (m_args->m_z_tile_size > 0) )
+             (m_args->m_z_tile_size > 0) &&
+             (!m_use_time || m_args->m_time_tile_size > 0))
         {
             if (isValidDomain(*m_args))
             {
@@ -385,6 +396,10 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
                     {{m_args->m_y_domain_st, m_args->m_y_domain_end}}, m_args->m_y_tile_size))
                     .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
                     {{m_args->m_z_domain_st, m_args->m_z_domain_end}}, m_args->m_z_tile_size));
+                if (m_use_time) {
+                    domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "GpsTime",
+                        {{m_args->m_time_domain_st, m_args->m_time_domain_end}}, m_args->m_time_tile_size));
+                }
             }
             else
             {
@@ -400,6 +415,11 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
                         .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
                             {{m.findChild("minz").value<double>() - 1., m.findChild("maxz").value<double>() + 1.}},
                             m_args->m_z_tile_size));
+                    if (m_use_time) {
+                        domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "GpsTime",
+                           {{m.findChild("mintm").value<double>() - 1, m.findChild("maxtm").value<double>() + 1}},
+                           m_args->m_time_tile_size));
+                    }
                 }
                 else
                 {
@@ -408,7 +428,11 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
                         .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Y",
                             {{dimMin, dimMax}}, m_args->m_y_tile_size))
                         .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
-                            {{dimMin, dimMax}}, m_args->m_z_tile_size)); 
+                            {{dimMin, dimMax}}, m_args->m_z_tile_size));
+                   if (m_use_time) {
+                       domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "GpsTime",
+                          {{dimMin, dimMax}}, m_args->m_time_tile_size));
+                   }
                 }
             }
         }
@@ -424,6 +448,10 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
                     {{m_args->m_y_domain_st, m_args->m_y_domain_end}}))
                     .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
                     {{m_args->m_z_domain_st, m_args->m_z_domain_end}}));
+                if (m_use_time) {
+                    domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "GpsTime",
+                    {{m_args->m_time_domain_st, m_args->m_time_domain_end}}));
+                }
             }
             else
             {
@@ -436,6 +464,10 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
                             {{m.findChild("miny").value<double>() - 1., m.findChild("maxy").value<double>() + 1.}}))
                         .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
                             {{m.findChild("minz").value<double>() - 1., m.findChild("maxz").value<double>() + 1.}}));
+                    if (m_use_time) {
+                        domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "GpsTime",
+                           {{m.findChild("mintm").value<double>() - 1,m.findChild("maxtm").value<double>() + 1}}));
+                    }
                 }
                 else
                 {
@@ -463,7 +495,7 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
     {
         std::string dimName = layout->dimName(d);
 
-        if ((dimName != "X") && (dimName != "Y") && (dimName != "Z"))
+        if ((dimName != "X") && (dimName != "Y") && (dimName != "Z") && (dimName != "GpsTime"))
         {
             Dimension::Type type = layout->dimType(d);
             if (!m_args->m_append)
@@ -526,9 +558,18 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
 
 bool TileDBWriter::processOne(PointRef& point)
 {
+    m_array->close();
+    m_array->open(TILEDB_READ);
+    bool has_time_dim = (m_use_time && m_array->non_empty_domain<double>().size() == 4);
+    m_array->close();
+    m_array->open(TILEDB_WRITE);
+
     double x = point.getFieldAs<double>(Dimension::Id::X);
     double y = point.getFieldAs<double>(Dimension::Id::Y);
     double z = point.getFieldAs<double>(Dimension::Id::Z);
+    double tm(0);
+    if (has_time_dim)
+        tm = point.getFieldAs<double>(Dimension::Id::GpsTime);
 
     for (auto& a : m_attrs)
         writeAttributeValue(a, point, m_current_idx);
@@ -536,6 +577,8 @@ bool TileDBWriter::processOne(PointRef& point)
     m_xs.push_back(x);
     m_ys.push_back(y);
     m_zs.push_back(z);
+    if (has_time_dim)
+        m_tms.push_back(tm);
 
     if (++m_current_idx == m_args->m_cache_size)
     {
@@ -623,6 +666,11 @@ bool TileDBWriter::isValidDomain(TileDBWriter::Args& args)
 
 bool TileDBWriter::flushCache(size_t size)
 {
+    m_array->close();
+    m_array->open(TILEDB_READ);
+    bool has_time_dim = (m_use_time && m_array->non_empty_domain<double>().size() >= 4);
+    m_array->close();
+    m_array->open(TILEDB_WRITE);
     tiledb::Query query(*m_ctx, *m_array);
     query.set_layout(TILEDB_UNORDERED);
 
@@ -635,12 +683,16 @@ bool TileDBWriter::flushCache(size_t size)
         coords.push_back(m_xs[i]);
         coords.push_back(m_ys[i]);
         coords.push_back(m_zs[i]);
+        if (has_time_dim)
+            coords.push_back(m_tms[i]);
     }
     query.set_coordinates(coords);
 #else
     query.set_buffer("X", m_xs);
     query.set_buffer("Y", m_ys);
     query.set_buffer("Z", m_zs);
+    if (has_time_dim)
+        query.set_buffer("GpsTime", m_tms);
 #endif
 
     // set tiledb buffers
@@ -695,6 +747,7 @@ bool TileDBWriter::flushCache(size_t size)
         }
     }
 
+
     tiledb::Query::Status status = query.submit();
 
     if (m_args->m_stats)
@@ -707,6 +760,7 @@ bool TileDBWriter::flushCache(size_t size)
     m_xs.clear();
     m_ys.clear();
     m_zs.clear();
+    m_tms.clear();
 
     if (status == tiledb::Query::Status::FAILED)
         return false;

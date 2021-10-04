@@ -85,6 +85,8 @@ private:
     std::vector<double> m_xs;
     std::vector<double> m_ys;
     std::vector<double> m_zs;
+    std::vector<double> m_tms;
+    bool m_use_time;
 
     TileDBWriter(const TileDBWriter&) = delete;
     TileDBWriter& operator=(const TileDBWriter&) = delete;

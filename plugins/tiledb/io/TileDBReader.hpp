@@ -104,9 +104,10 @@ private:
     point_count_t m_endTimeStamp;
     bool m_complete;
     bool m_stats;
-    BOX3D m_bbox;
+    BOX4D m_bbox;
     std::vector<std::unique_ptr<Buffer>> m_buffers;
     std::vector<DimInfo> m_dims;
+    bool m_use_time;
 
     std::unique_ptr<tiledb::Context> m_ctx;
     std::unique_ptr<tiledb::Array> m_array;
@@ -118,6 +119,9 @@ private:
     template<typename T>
     void setQueryBuffer(const DimInfo& di);
     void setQueryBuffer(const DimInfo& di);
+
+public:
+    bool getUseTime(){return m_use_time;};
 };
 
 } // namespace pdal
