@@ -14,9 +14,9 @@ namespace pdal
 {
 
 static StaticPluginInfo const s_info{
-    "readers.xyztimefaux",
+    "readers.XYZTimeFauxReader",
     "XYZ time Faux Reader",
-    "http://google.com"
+    "none"
 };
 
 
@@ -89,6 +89,7 @@ private:
        double y(0);
        double z(0);
        double tm(0);
+       double density = 1.0;
 
        if (m_index >= m_count)
            return false;
@@ -111,7 +112,7 @@ private:
        point.setField(Dimension::Id::Y, y);
        point.setField(Dimension::Id::Z, z);
        point.setField(Dimension::Id::GpsTime, tm);
-       point.setField(Dimension::Id::Density, 1.0);
+       point.setField(Dimension::Id::Density, density);
        m_index++;
        return true;
     }

@@ -131,6 +131,7 @@ void writeAttributeValue(TileDBWriter::DimBuffer& dim,
 
     size_t size = Dimension::size(dim.m_type);
     memcpy(dim.m_buffer.data() + (idx * size), &e, size);
+
 }
 
 
@@ -497,7 +498,9 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
 
         if ((dimName != "X") && (dimName != "Y") && (dimName != "Z") && (dimName != "GpsTime"))
         {
+            std::cout << dimName << std::endl;
             Dimension::Type type = layout->dimType(d);
+            std::cout << type << std::endl;
             if (!m_args->m_append)
             {
                 NL::json opts;
@@ -558,17 +561,12 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
 
 bool TileDBWriter::processOne(PointRef& point)
 {
-    m_array->close();
-    m_array->open(TILEDB_READ);
-    bool has_time_dim = (m_use_time && m_array->non_empty_domain<double>().size() == 4);
-    m_array->close();
-    m_array->open(TILEDB_WRITE);
 
     double x = point.getFieldAs<double>(Dimension::Id::X);
     double y = point.getFieldAs<double>(Dimension::Id::Y);
     double z = point.getFieldAs<double>(Dimension::Id::Z);
     double tm(0);
-    if (has_time_dim)
+    if (m_use_time)
         tm = point.getFieldAs<double>(Dimension::Id::GpsTime);
 
     for (auto& a : m_attrs)
@@ -577,7 +575,7 @@ bool TileDBWriter::processOne(PointRef& point)
     m_xs.push_back(x);
     m_ys.push_back(y);
     m_zs.push_back(z);
-    if (has_time_dim)
+    if (m_use_time)
         m_tms.push_back(tm);
 
     if (++m_current_idx == m_args->m_cache_size)
@@ -666,11 +664,6 @@ bool TileDBWriter::isValidDomain(TileDBWriter::Args& args)
 
 bool TileDBWriter::flushCache(size_t size)
 {
-    m_array->close();
-    m_array->open(TILEDB_READ);
-    bool has_time_dim = (m_use_time && m_array->non_empty_domain<double>().size() >= 4);
-    m_array->close();
-    m_array->open(TILEDB_WRITE);
     tiledb::Query query(*m_ctx, *m_array);
     query.set_layout(TILEDB_UNORDERED);
 
@@ -691,7 +684,7 @@ bool TileDBWriter::flushCache(size_t size)
     query.set_buffer("X", m_xs);
     query.set_buffer("Y", m_ys);
     query.set_buffer("Z", m_zs);
-    if (has_time_dim)
+    if (m_use_time)
         query.set_buffer("GpsTime", m_tms);
 #endif
 
