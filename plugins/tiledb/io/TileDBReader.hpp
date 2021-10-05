@@ -107,7 +107,7 @@ private:
     BOX4D m_bbox;
     std::vector<std::unique_ptr<Buffer>> m_buffers;
     std::vector<DimInfo> m_dims;
-    bool m_use_time;
+    bool m_has_time = false;
 
     std::unique_ptr<tiledb::Context> m_ctx;
     std::unique_ptr<tiledb::Array> m_array;

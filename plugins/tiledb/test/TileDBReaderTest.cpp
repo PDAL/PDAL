@@ -308,21 +308,46 @@ protected:
 
 TEST_F(TDBRdrTimeDimTest, set_dims)
 {
-//    tiledb::Context ctx;
-//    tiledb::VFS vfs(ctx);
-//
-//    tiledb::Array array(ctx, tm_data_path, TILEDB_READ);
-//    std::cout << array.schema().domain().ndim();
-//    std::vector<std::string> dim_names{"X", "Y", "Z", "GpsTime"};
-//    for (size_t i(0); i != 3; ++i)
-//        EXPECT_EQ(domain.at(i).first, dim_names[i]);
-}
-//    Options reader_options;
-//    reader_options.add("array_name", tm_data_path);
-//    reader_options.add("use_time", true);
-//
-//    TileDBReader reader;
+    tiledb::Context ctx;
+    tiledb::VFS vfs(ctx);
 
+    tiledb::Array array(ctx, tm_data_path, TILEDB_READ);
+    tiledb::Domain domain(array.schema().domain());
+    std::vector<std::string> dim_names{"X", "Y", "Z", "GpsTime"};
+    for (size_t i(0); i != 4; ++i)
+        EXPECT_EQ(domain.dimension(i).name(), dim_names[i]);
+}
+
+
+TEST_F(TDBRdrTimeDimTest, read_bbox) {
+    tiledb::Context ctx;
+    tiledb::VFS vfs(ctx);
+
+    Options options;
+    options.add("array_name", tm_data_path);
+    options.add("bbox4d", "([0., 1.], [0., 1.], [0., 1.], [1314489618., 1314489618.])");
+
+    TileDBReader reader;
+    reader.setOptions(options);
+
+    FixedPointTable table(100);
+    reader.prepare(table);
+    reader.execute(table);
+
+    EXPECT_EQ(table.numPoints(), 0);
+}
+
+TEST_F(TDBRdrTimeDimTest, rdr_has_time)
+{
+    tiledb::Context ctx;
+    tiledb::VFS vfs(ctx);
+
+    Options options;
+    options.add("array_name", tm_data_path);
+
+
+
+}
 
 
 }; //pdal namespace

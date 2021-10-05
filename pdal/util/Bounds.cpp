@@ -129,34 +129,34 @@ const BOX3D& BOX3D::getDefaultSpatialExtent()
 }
 
 
-void BOX4D::clear()
-{
-    BOX3D::clear();
-    mintm = HIGHEST;
-    maxtm = LOWEST;
-}
+//void BOX4D::clear()
+//{
+//    BOX3D::clear();
+//    mintm = HIGHEST;
+//    maxtm = LOWEST;
+//}
 
-bool BOX4D::empty() const
-{
-    return  BOX3D::empty() && mintm == HIGHEST && maxtm == LOWEST;
-}
+//bool BOX4D::empty() const
+//{
+//    return  BOX3D::empty() && mintm == HIGHEST && maxtm == LOWEST;
+//}
+//
+//bool BOX4D::valid() const
+//{
+//    return !empty();
+//}
 
-bool BOX4D::valid() const
-{
-    return !empty();
-}
-
-BOX4D& BOX4D::grow(double x, double y, double z, double tm)
-{
-    BOX3D::grow(x, y, z);
-    if (tm < mintm) mintm = tm;
-    if (tm > maxtm) maxtm = tm;
-    return *this;
-}
+//BOX4D& BOX4D::grow(double x, double y, double z, double tm)
+//{
+//    BOX3D::grow(x, y, z);
+//    if (tm < mintm) mintm = tm;
+//    if (tm > maxtm) maxtm = tm;
+//    return *this;
+//}
 
 
-Bounds::Bounds(const BOX4D& box) : m_box(box)
-{}
+//Bounds::Bounds(const BOX4D& box) : m_box(box)
+//{}
 
 Bounds::Bounds(const BOX3D& box)
 {
