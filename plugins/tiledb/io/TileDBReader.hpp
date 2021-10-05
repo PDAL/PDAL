@@ -40,6 +40,7 @@
 
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
+#include "../test/XYZTmUtils.hpp"
 #include <tiledb/tiledb>
 
 namespace pdal
@@ -121,7 +122,7 @@ private:
     void setQueryBuffer(const DimInfo& di);
 
 public:
-    bool getUseTime(){return m_use_time;};
+    bool hasTime(){return m_has_time;};
 };
 
 } // namespace pdal

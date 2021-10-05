@@ -43,14 +43,14 @@ public:
 
     explicit BOX4D(const BOX3D& box) : BOX3D(box), mintm(0), maxtm(0) {}
 
-    explicit BOX4D(const BOX2D& box) : BOX3D(box), mintm(0), maxtm(0) {}
+    explicit BOX4D(const BOX2D& box) : BOX3D(box.minx, box.miny, 0, box.maxx, box.maxy, 0), mintm(0), maxtm(0) {}
 
     BOX4D(double minx, double miny, double minz, double mintm, double maxx,
           double maxy, double maxz, double maxtm)
           : BOX3D(minx, miny, minz, maxx, maxy, maxz), mintm(mintm), maxtm(maxtm)
           {}
 
-          bool empty() const;
+    bool empty() const;
 
     bool valid() const;
 
@@ -128,7 +128,92 @@ public:
 };
 
 
+class PDAL_DLL Bounds4D : public Bounds
+{
+public:
 
+    explicit Bounds4D(const BOX4D& box);
+    explicit Bounds4D(const BOX3D& box) : Bounds(box)
+    {}
+    explicit Bounds4D(const BOX2D& box) : Bounds(box)
+    {}
+
+    BOX4D to4d() const;
+    bool is4d() const;
+    void reset(const BOX4D& box);
+    void grow(double x, double y, double z, double tm);
+
+    friend PDAL_DLL std::istream& operator >> (std::istream& in,
+        Bounds& bounds);
+    friend PDAL_DLL std::ostream& operator << (std::ostream& out,
+        const Bounds& bounds);
+
+private:
+    BOX4D m_box;
+
+    void set(const BOX4D& box);
+};
+
+inline std::ostream& operator << (std::ostream& ostr, const BOX4D& bounds)
+{
+    if (bounds.empty())
+    {
+        ostr << "()";
+        return ostr;
+    }
+
+    auto savedPrec = ostr.precision();
+    ostr.precision(16); // or..?
+    ostr << "(";
+    ostr << "[" << bounds.minx << ", " << bounds.maxx << "], " <<
+    "[" << bounds.miny << ", " << bounds.maxy << "], " <<
+    "[" << bounds.minz << ", " << bounds.maxz << "], " <<
+    "[" << bounds.mintm << ", " << bounds.maxtm << "]";
+    ostr << ")";
+    ostr.precision(savedPrec);
+    return ostr;
+}
+
+extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX4D& bounds);
+
+PDAL_DLL std::istream& operator >> (std::istream& in, Bounds4D& bounds);
+
+PDAL_DLL std::ostream& operator << (std::ostream& out, const Bounds4D& bounds);
+
+namespace Utils
+{
+    template<>
+    inline StatusWithReason fromString(const std::string& s, BOX4D& bounds)
+    {
+        try
+        {
+            std::istringstream iss(s);
+            iss >> bounds;
+        }
+        catch (BOX4D::error& error)
+        {
+            std::string msg = "Error parsing '" + s + "': " + error.what();
+            return StatusWithReason(-1, msg);
+        }
+        return true;
+    }
+
+    template<>
+    inline StatusWithReason fromString(const std::string& s, Bounds4D& bounds)
+    {
+        try
+        {
+            std::istringstream iss(s);
+            iss >> bounds;
+        }
+        catch (Bounds4D::error& error)
+        {
+            std::string msg = "Error parsing '" + s + "': " + error.what();
+            return StatusWithReason(-1, msg);
+        }
+        return true;
+    }
+}
 
 class PDAL_DLL XYZTimeFauxReader : public Reader, public Streamable
 {

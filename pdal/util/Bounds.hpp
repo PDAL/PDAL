@@ -740,24 +740,24 @@ public:
     Bounds()
     {}
 
-    explicit Bounds(const BOX4D& box);
+//    explicit Bounds(const BOX4D& box);
     explicit Bounds(const BOX3D& box);
     explicit Bounds(const BOX2D& box);
 
-    BOX4D to4d() const;
+//    BOX4D to4d() const;
     BOX3D to3d() const;
     BOX2D to2d() const;
     bool is2d() const;
     bool is3d() const;
-    bool is4d() const;
+//    bool is4d() const;
     bool valid() const;
     bool empty() const;
-    void reset(const BOX4D& box);
+//    void reset(const BOX4D& box);
     void reset(const BOX3D& box);
     void reset(const BOX2D& box);
     void grow(double x, double y);
     void grow(double x, double y, double z);
-    void grow(double x, double y, double z, double tm);
+//    void grow(double x, double y, double z, double tm);
     void parse(const std::string& s, std::string::size_type& pos);
 
     friend PDAL_DLL std::istream& operator >> (std::istream& in,
@@ -766,9 +766,9 @@ public:
         const Bounds& bounds);
 
 private:
-    BOX4D m_box;
+    BOX3D m_box;
 
-    void set(const BOX4D& box);
+//    void set(const BOX4D& box);
     void set(const BOX3D& box);
     void set(const BOX2D& box);
 };
@@ -823,25 +823,25 @@ inline std::ostream& operator << (std::ostream& ostr, const BOX3D& bounds)
     return ostr;
 }
 
-inline std::ostream& operator << (std::ostream& ostr, const BOX4D& bounds)
-{
-    if (bounds.empty())
-    {
-        ostr << "()";
-        return ostr;
-    }
-
-    auto savedPrec = ostr.precision();
-    ostr.precision(16); // or..?
-    ostr << "(";
-    ostr << "[" << bounds.minx << ", " << bounds.maxx << "], " <<
-            "[" << bounds.miny << ", " << bounds.maxy << "], " <<
-            "[" << bounds.minz << ", " << bounds.maxz << "], " <<
-            "[" << bounds.mintm << ", " << bounds.maxtm << "]";
-    ostr << ")";
-    ostr.precision(savedPrec);
-    return ostr;
-}
+//inline std::ostream& operator << (std::ostream& ostr, const BOX4D& bounds)
+//{
+//    if (bounds.empty())
+//    {
+//        ostr << "()";
+//        return ostr;
+//    }
+//
+//    auto savedPrec = ostr.precision();
+//    ostr.precision(16); // or..?
+//    ostr << "(";
+//    ostr << "[" << bounds.minx << ", " << bounds.maxx << "], " <<
+//            "[" << bounds.miny << ", " << bounds.maxy << "], " <<
+//            "[" << bounds.minz << ", " << bounds.maxz << "], " <<
+//            "[" << bounds.mintm << ", " << bounds.maxtm << "]";
+//    ostr << ")";
+//    ostr.precision(savedPrec);
+//    return ostr;
+//}
 
 /**
   Read a 2D bounds box from a stream in a format provided by PDAL options.
@@ -860,7 +860,7 @@ extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX2D& bounds);
 extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX3D& bounds);
 
 
-extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX4D& bounds);
+//extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX4D& bounds);
 
 /**
   Read a Bounds (2D/3D) box from a stream in a format provided by PDAL options.

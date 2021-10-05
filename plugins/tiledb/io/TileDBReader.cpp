@@ -103,9 +103,9 @@ void TileDBReader::addArgs(ProgramArgs& args)
     args.add("chunk_size", "TileDB read chunk size", m_chunkSize,
         point_count_t(1000000));
     args.add("stats", "Dump TileDB query stats to stdout", m_stats, false);
-    args.add("bbox3d", "Bounding box subarray to read from TileDB in format "
-        "([minx, maxx], [miny, maxy], [minz, maxz])", m_bbox);
-    args.add("bbox4d", "Bounding box subarray to read from TileDB in format "
+    args.add("bbox3d", "Bounding box subarray to read from TileDB in format"
+                       "([minx, maxx], [miny, maxy], [minz, maxz])", m_bbox);
+    args.add("bbox4d", "Bounding box subarray to read from TileDB in format"
                        "([minx, maxx], [miny, maxy], [minz, maxz], [min_gpstime, max_gpstime] )", m_bbox);
     args.add("end_timestamp", "TileDB array timestamp", m_endTimeStamp,
         point_count_t(0));
