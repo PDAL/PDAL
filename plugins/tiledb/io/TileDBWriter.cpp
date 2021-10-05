@@ -498,9 +498,7 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
 
         if ((dimName != "X") && (dimName != "Y") && (dimName != "Z") && (dimName != "GpsTime"))
         {
-            std::cout << dimName << std::endl;
             Dimension::Type type = layout->dimType(d);
-            std::cout << type << std::endl;
             if (!m_args->m_append)
             {
                 NL::json opts;

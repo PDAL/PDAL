@@ -121,42 +121,46 @@ const BOX2D& BOX2D::getDefaultSpatialExtent()
     return v;
 }
 
-
 const BOX3D& BOX3D::getDefaultSpatialExtent()
 {
     static BOX3D v(LOWEST, LOWEST, LOWEST, HIGHEST, HIGHEST, HIGHEST);
     return v;
 }
 
+void BOX4D::clear()
+{
+    BOX3D::clear();
+    mintm = HIGHEST;
+    maxtm = LOWEST;
+}
 
-//void BOX4D::clear()
-//{
-//    BOX3D::clear();
-//    mintm = HIGHEST;
-//    maxtm = LOWEST;
-//}
+bool BOX4D::empty() const
+{
+    return  BOX3D::empty() && mintm == HIGHEST && maxtm == LOWEST;
+}
 
-//bool BOX4D::empty() const
-//{
-//    return  BOX3D::empty() && mintm == HIGHEST && maxtm == LOWEST;
-//}
-//
-//bool BOX4D::valid() const
-//{
-//    return !empty();
-//}
+bool BOX4D::valid() const
+{
+    return !empty();
+}
 
-//BOX4D& BOX4D::grow(double x, double y, double z, double tm)
-//{
-//    BOX3D::grow(x, y, z);
-//    if (tm < mintm) mintm = tm;
-//    if (tm > maxtm) maxtm = tm;
-//    return *this;
-//}
+BOX4D& BOX4D::grow(double x, double y, double z, double tm)
+{
+    BOX3D::grow(x, y, z);
+    if (tm < mintm) mintm = tm;
+    if (tm > maxtm) maxtm = tm;
+    return *this;
+}
 
+const BOX4D& BOX4D::getDefaultSpatialExtent()
+{
+    static BOX4D v(LOWEST, LOWEST, LOWEST, LOWEST,
+                   HIGHEST, HIGHEST, HIGHEST, HIGHEST);
+    return v;
+}
 
-//Bounds::Bounds(const BOX4D& box) : m_box(box)
-//{}
+Bounds::Bounds(const BOX4D& box) : m_box(box)
+{}
 
 Bounds::Bounds(const BOX3D& box)
 {
@@ -166,8 +170,6 @@ Bounds::Bounds(const BOX3D& box)
     m_box.maxy = box.maxy;
     m_box.minz = box.minz;
     m_box.maxz = box.maxz;
-//    m_box.mintm = HIGHEST;
-//    m_box.maxtm = LOWEST;
 }
 
 
@@ -179,14 +181,8 @@ Bounds::Bounds(const BOX2D& box)
     m_box.maxy = box.maxy;
     m_box.minz = HIGHEST;
     m_box.maxz = LOWEST;
-//    m_box.mintm = HIGHEST;
-//    m_box.maxtm = LOWEST;
 }
 
-//void Bounds::reset(const BOX4D& box)
-//{
-//    m_box = box;
-//}
 
 void Bounds::reset(const BOX3D& box)
 {
@@ -221,7 +217,7 @@ void Bounds::reset(const BOX2D& box)
 
 BOX3D Bounds::to3d() const
 {
-    if (!is3d())
+    if (is2d())
         return BOX3D();
     return m_box;
 }
@@ -234,13 +230,13 @@ BOX2D Bounds::to2d() const
 
 bool Bounds::is2d() const
 {
-    return (valid() && !is3d());
+    return (valid() && !is4d() && !is3d());
 }
 
 
 bool Bounds::is3d() const
 {
-    return (m_box.minz != HIGHEST || m_box.maxz != LOWEST);
+    return ((m_box.minz != HIGHEST || m_box.maxz != LOWEST) && !is4d());
 }
 
 //bool Bounds::is4d() const
@@ -291,12 +287,14 @@ void Bounds::grow(double x, double y, double z)
 void Bounds::set(const BOX3D& box)
 {
     m_box = box;
-
 }
 
 void Bounds::set(const BOX2D& box)
 {
-    m_box = BOX3D(box);
+    m_box.minx = box.minx;
+    m_box.maxx = box.maxx;
+    m_box.miny = box.miny;
+    m_box.maxy = box.maxy;
     m_box.minz = HIGHEST;
     m_box.maxz = LOWEST;
 }
@@ -339,35 +337,6 @@ void parsePair(const std::string& s, std::string::size_type& pos,
                }
 
 }
-
-//void BOX4D::parse(const std::string& s, std::string::size_type& pos)
-//{
-//    pos += Utils::extractSpaces(s, pos);
-//    if (s[pos++] != '(')
-//        throw error("No opening '('.");
-//    parsePair<BOX4D>(s, pos, minx, maxx);
-//
-//    pos += Utils::extractSpaces(s, pos);
-//    if (s[pos++] != ',')
-//        throw error("No comma separating 'X' and 'Y' dimensions.");
-//    parsePair<BOX4D>(s, pos, miny, maxy);
-//
-//    pos += Utils::extractSpaces(s, pos);
-//    if (s[pos++] != ',')
-//        throw error("No comma separating 'Y' and 'Z' dimensions.");
-//    parsePair<BOX4D>(s, pos, minz, maxz);
-//
-//    pos += Utils::extractSpaces(s, pos);
-//    if (s[pos] != ',' && s[pos] != ')')
-//        throw error("No comma separating 'Z' and 'time' dimensions.");
-//    else if (s[pos++] != ')')
-//    {
-//        parsePair<BOX4D>(s, pos, mintm, maxtm);
-//        pos++;
-//    }
-//
-//    pos += Utils::extractSpaces(s, pos);
-//}
 
 // This parses the guts of a 2D range.
 void BOX2D::parse(const std::string& s, std::string::size_type& pos)
@@ -441,19 +410,6 @@ std::istream& operator>>(std::istream& in, BOX3D& box)
         throw BOX3D::error("Invalid characters following valid 3d-bounds.");
     return in;
 }
-
-//std::istream& operator>>(std::istream& in, BOX4D& box)
-//{
-//    std::string s;
-//
-//    std::getline(in, s);
-//    std::string::size_type pos(0);
-//
-//    box.parse(s, pos);
-//    if (pos != s.size())
-//        throw BOX4D::error("Invalid characters following valid 4d-bounds.");
-//    return in;
-//}
 
 void Bounds::parse(const std::string& s, std::string::size_type& pos)
 {

@@ -61,5 +61,16 @@ if (WITH_TESTS)
             ${TILEDB_INCLUDE_DIR}
     )
 
+    PDAL_ADD_TEST(pdal_io_tiledb_time_reader_test
+            FILES
+            test/TileDBReaderTimeDimTest.cpp
+            LINK_WITH
+            ${reader_libname}
+            ${writer_libname}
+            ${TILEDB_LIBRARIES}
+            INCLUDES
+            ${TILEDB_INCLUDE_DIR}
+            )
+
 
 endif()

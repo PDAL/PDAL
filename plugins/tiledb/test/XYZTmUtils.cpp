@@ -168,7 +168,7 @@ void Bounds4D::reset(const BOX2D& box)
 
 void Bounds4D::grow(double x, double y)
 {
-    if (!is4d())
+    if (!is4d() && !is3d())
     {
         m_box.minx = (std::min)(x, m_box.minx);
         m_box.miny = (std::min)(y, m_box.miny);
