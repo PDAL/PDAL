@@ -37,70 +37,73 @@
 #include <stdio.h>
 #include <sys/types.h>
 
+
 #include <filters/StatsFilter.hpp>
 #include <pdal/pdal_test_main.hpp>
 #include <io/FauxReader.hpp>
 #include <pdal/StageFactory.hpp>
 
 #include "Support.hpp"
+
+#include "../io/TileDBReader.hpp"
 #include "../io/TileDBWriter.hpp"
 #include "XYZTmUtils.hpp"
 
 namespace pdal
 {
 
-    class TDBReaderTimeDimTest : public ::testing::Test
+class TDBReaderTimeDimTest : public ::testing::Test
+{
+protected:
+    virtual void SetUp()
     {
-    protected:
-        virtual void SetUp()
-        {
-            tiledb::Context ctx;
-            XYZTimeFauxReader rdr;
-            TileDBWriter writer;
-            Options reader_options;
-            Options writer_options;
+        tiledb::Context ctx;
+        XYZTimeFauxReader rdr;
+        TileDBWriter writer;
+        Options reader_options;
+        Options writer_options;
 
-            if (Utils::fileExists(tm_data_path))
-                tiledb::Object::remove(ctx, tm_data_path);
+        if (Utils::fileExists(tm_data_path))
+            tiledb::Object::remove(ctx, tm_data_path);
 
-            writer_options.add("array_name", tm_data_path);
-            writer_options.add("use_time_dim", true);
-            writer_options.add("x_tile_size", 2.f);
-            writer_options.add("y_tile_size", 2.f);
-            writer_options.add("z_tile_size", 2.f);
-            writer_options.add("time_tile_size", 777600.f);
+        writer_options.add("array_name", tm_data_path);
+        writer_options.add("use_time_dim", true);
+        writer_options.add("x_tile_size", 2.f);
+        writer_options.add("y_tile_size", 2.f);
+        writer_options.add("z_tile_size", 2.f);
+        writer_options.add("time_tile_size", 777600.f);
 
-            reader_options.add("bounds", BOX4D(0., 0., 0., 1314489618., 2., 2., 2., 1315267218.)); //sep 1 - sep 10 2021 gpstime
-            reader_options.add("count", 10);
-            rdr.setOptions(reader_options);
+        reader_options.add("bounds", BOX4D(0., 0., 0., 1314489618., 2., 2., 2., 1315267218.)); //sep 1 - sep 10 2021 gpstime
+        reader_options.add("count", 10);
+        rdr.setOptions(reader_options);
 
-            writer.setOptions(writer_options);
-            writer.setInput(rdr);
+        writer.setOptions(writer_options);
+        writer.setInput(rdr);
 
-            FixedPointTable table(100);
-            writer.prepare(table);
-            writer.execute(table);
-        }
-        std::string tm_data_path = Support::temppath("test_time_dim_write");
-
-    };
-
-    TEST_F(TDBReaderTimeDimTest, set_dims)
-    {
-        //    tiledb::Context ctx;
-        //    tiledb::VFS vfs(ctx);
-        //
-        //    tiledb::Array array(ctx, tm_data_path, TILEDB_READ);
-        //    std::cout << array.schema().domain().ndim();
-        //    std::vector<std::string> dim_names{"X", "Y", "Z", "GpsTime"};
-        //    for (size_t i(0); i != 3; ++i)
-        //        EXPECT_EQ(domain.at(i).first, dim_names[i]);
+        FixedPointTable table(100);
+        writer.prepare(table);
+        writer.execute(table);
     }
-    //    Options reader_options;
-    //    reader_options.add("array_name", tm_data_path);
-    //    reader_options.add("use_time", true);
+    std::string tm_data_path = Support::temppath("test_time_dim_write");
+
+};
+
+TEST_F(TDBReaderTimeDimTest, set_dims)
+{
+    //    tiledb::Context ctx;
+    //    tiledb::VFS vfs(ctx);
     //
-    //    TileDBReader reader;
+    //    tiledb::Array array(ctx, tm_data_path, TILEDB_READ);
+    //    std::cout << array.schema().domain().ndim();
+    //    std::vector<std::string> dim_names{"X", "Y", "Z", "GpsTime"};
+    //    for (size_t i(0); i != 3; ++i)
+    //        EXPECT_EQ(domain.at(i).first, dim_names[i]);
+}
+//    Options reader_options;
+//    reader_options.add("array_name", tm_data_path);
+//    reader_options.add("use_time", true);
+//
+//    TileDBReader reader;
 
 
 
