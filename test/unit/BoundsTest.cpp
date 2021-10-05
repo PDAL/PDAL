@@ -42,11 +42,11 @@ using namespace pdal;
 
 TEST(BoundsTest, test_ctor)
 {
-    BOX3D b1;
+    BOX4D b1;
     EXPECT_TRUE(b1.empty());
 
     b1.clear();
-    BOX3D b2;
+    BOX4D b2;
     EXPECT_EQ(b1, b2);
 }
 
@@ -70,6 +70,16 @@ TEST(BoundsTest, test_equals)
     EXPECT_TRUE(b5 == b4);
     EXPECT_TRUE(b4 != b6);
     EXPECT_TRUE(b6 == b6);
+
+    BOX4D b7(1,2,3,4,5,6,7,8);
+    BOX4D b8(1,2,3,4,5,6,7,8);
+    BOX4D b9(1,2,3,4,5,6,7,9);
+
+    EXPECT_TRUE(b7 == b7);
+    EXPECT_TRUE(b7 == b8);
+    EXPECT_TRUE(b8 == b7);
+    EXPECT_TRUE(b7 != b9);
+    EXPECT_TRUE(b9 == b9);
 }
 
 TEST(BoundsTest, test_copy)
@@ -80,7 +90,11 @@ TEST(BoundsTest, test_copy)
 
     BOX3D b3(1,2,3,4,5,6);
     BOX3D b4(b3);
-    EXPECT_TRUE(b1==b2);
+    EXPECT_TRUE(b3==b4);
+
+    BOX4D b5(1,2,3,4,5,6,7,8);
+    BOX4D b6(b5);
+    EXPECT_TRUE(b6==b5);
 }
 
 TEST(BoundsTest, test_accessor)
@@ -98,6 +112,16 @@ TEST(BoundsTest, test_accessor)
 	EXPECT_DOUBLE_EQ(b2.maxx, 4.0);
 	EXPECT_DOUBLE_EQ(b2.maxy, 5.0);
 	EXPECT_DOUBLE_EQ(b2.maxz, 6.0);
+
+    BOX4D b3(1,2,3,4,5,6,7,8);
+    EXPECT_DOUBLE_EQ(b3.minx, 1.0);
+    EXPECT_DOUBLE_EQ(b3.miny, 2.0);
+    EXPECT_DOUBLE_EQ(b3.minz, 3.0);
+    EXPECT_DOUBLE_EQ(b3.mintm, 4.0);
+    EXPECT_DOUBLE_EQ(b3.maxx, 5.0);
+    EXPECT_DOUBLE_EQ(b3.maxy, 6.0);
+    EXPECT_DOUBLE_EQ(b3.maxz, 7.0);
+    EXPECT_DOUBLE_EQ(b3.maxtm, 8.0);
 }
 
 TEST(BoundsTest, test_clip)
@@ -180,6 +204,17 @@ TEST(BoundsTest, test_static)
     EXPECT_DOUBLE_EQ(u.maxy, maxd);
     EXPECT_DOUBLE_EQ(u.minz, mind);
     EXPECT_DOUBLE_EQ(u.maxz, maxd);
+
+
+    BOX4D tm = BOX4D::getDefaultSpatialExtent();
+    EXPECT_DOUBLE_EQ(tm.minx, mind);
+    EXPECT_DOUBLE_EQ(tm.maxx, maxd);
+    EXPECT_DOUBLE_EQ(tm.miny, mind);
+    EXPECT_DOUBLE_EQ(tm.maxy, maxd);
+    EXPECT_DOUBLE_EQ(tm.minz, mind);
+    EXPECT_DOUBLE_EQ(tm.maxz, maxd);
+    EXPECT_DOUBLE_EQ(tm.mintm, mind);
+    EXPECT_DOUBLE_EQ(tm.maxtm, maxd);
 }
 
 TEST(BoundsTest, test_invalid)
@@ -199,35 +234,48 @@ TEST(BoundsTest, test_invalid)
     EXPECT_DOUBLE_EQ(u.maxy, mind);
     EXPECT_DOUBLE_EQ(u.minz, maxd);
     EXPECT_DOUBLE_EQ(u.maxz, mind);
+
+    BOX4D tm;
+    EXPECT_DOUBLE_EQ(tm.minx, maxd);
+    EXPECT_DOUBLE_EQ(tm.maxx, mind);
+    EXPECT_DOUBLE_EQ(tm.miny, maxd);
+    EXPECT_DOUBLE_EQ(tm.maxy, mind);
+    EXPECT_DOUBLE_EQ(tm.minz, maxd);
+    EXPECT_DOUBLE_EQ(tm.maxz, mind);
 }
 
 TEST(BoundsTest, test_output)
 {
     const BOX2D b2(1,2,101,102);
     const BOX3D b3(1.1,2.2,3.3,101.1,102.2,103.3);
+    const BOX4D b4(1.1,2.2,3.3,4.4, 101.1,102.2,103.3, 104.4);
 
     std::stringstream ss2(std::stringstream::in | std::stringstream::out);
     std::stringstream ss3(std::stringstream::in | std::stringstream::out);
+    std::stringstream ss4(std::stringstream::in | std::stringstream::out);
 
     ss2 << b2;
     ss3 << b3;
+    ss4 << b4;
 
     const std::string out2 = ss2.str();
     const std::string out3 = ss3.str();
+    const std::string out4 = ss4.str();
 
     EXPECT_EQ(out2, "([1, 101], [2, 102])");
     EXPECT_EQ(out3, "([1.1, 101.1], [2.2, 102.2], [3.3, 103.3])");
+    EXPECT_EQ(out4, "([1.1, 101.1], [2.2, 102.2], [3.3, 103.3], [4.4, 104.4])");
 }
 
 
 TEST(BoundsTest, test_input)
 {
-    std::stringstream ss("([1.1, 101.1], [2.2, 102.2], [3.3, 103.3])",
+    std::stringstream ss("([1.1, 101.1], [2.2, 102.2], [3.3, 103.3], [4.4, 104.4])",
         std::stringstream::in | std::stringstream::out);
 
-    BOX3D rr;
+    BOX4D rr;
     ss >> rr;
-    BOX3D r(1.1,2.2,3.3,101.1,102.2,103.3);
+    BOX4D r(1.1,2.2,3.3, 4.4,101.1,102.2,103.3, 104.4);
     EXPECT_TRUE(r == rr);
 }
 
@@ -236,13 +284,21 @@ TEST(BoundsTest, test_parse)
     std::istringstream iss1("([1,101],[2,102],[3,103])");
     std::istringstream iss2("([1, 101], [2, 102], [3, 103])");
 
-    BOX3D b1;
-    BOX3D b2;
+    std::istringstream iss3("([1,101],[2,102],[3,103],[4,104])");
+    std::istringstream iss4("([1, 101], [2, 102], [3, 103], [4, 104])");
+
+    BOX4D b1;
+    BOX4D b2;
+    BOX4D b3;
+    BOX4D b4;
 
     iss1 >> b1;
     iss2 >> b2;
+    iss3 >> b3;
+    iss4 >> b4;
 
     EXPECT_EQ(b1, b2);
+    EXPECT_EQ(b3, b4);
 }
 
 TEST(BoundsTest, test_wkt)
@@ -386,25 +442,48 @@ TEST(BoundsTest, fromstring)
 
 TEST(BoundsTest, b2)
 {
-    std::string s("([0,1],[0,1], [0,2])");
+    double mind = (std::numeric_limits<double>::lowest)();
+    double maxd = (std::numeric_limits<double>::max)();
+
+    std::string s("([0,1],[0,1],[0,2],[0,3])");
     Bounds b;
 
     Utils::fromString(s, b);
-    EXPECT_TRUE(b.is3d());
+    EXPECT_TRUE(b.is4d());
 
     BOX2D box = b.to2d();
-    EXPECT_EQ(box.minx, 0.0);
-    EXPECT_EQ(box.miny, 0.0);
+    EXPECT_EQ(box.minx, 0);
+    EXPECT_EQ(box.miny, 0);
     EXPECT_EQ(box.maxx, 1.0);
     EXPECT_EQ(box.maxy, 1.0);
 
+    BOX2D box2 = b.to2d();
+    Bounds b_2(box2);
+    BOX3D box2_3d = b_2.to3d();
+    EXPECT_EQ(box2_3d.minx, maxd);
+    EXPECT_EQ(box2_3d.miny, maxd);
+    EXPECT_EQ(box2_3d.maxx, mind);
+    EXPECT_EQ(box2_3d.maxy, mind);
+    EXPECT_EQ(box2_3d.minz, maxd);
+    EXPECT_EQ(box2_3d.maxz, mind);
+
     BOX3D box3 = b.to3d();
-    EXPECT_EQ(box3.minx, 0.0);
-    EXPECT_EQ(box3.miny, 0.0);
+    EXPECT_EQ(box3.minx, 0);
+    EXPECT_EQ(box3.miny, 0);
     EXPECT_EQ(box3.maxx, 1.0);
     EXPECT_EQ(box3.maxy, 1.0);
-    EXPECT_EQ(box3.minz, 0.0);
+    EXPECT_EQ(box3.minz, 0);
     EXPECT_EQ(box3.maxz, 2.0);
+
+    BOX4D box4 = b.to4d();
+    EXPECT_EQ(box4.minx, 0.0);
+    EXPECT_EQ(box4.miny, 0.0);
+    EXPECT_EQ(box4.maxx, 1.0);
+    EXPECT_EQ(box4.maxy, 1.0);
+    EXPECT_EQ(box4.minz, 0.0);
+    EXPECT_EQ(box4.maxz, 2.0);
+    EXPECT_EQ(box4.mintm, 0.0);
+    EXPECT_EQ(box4.maxtm, 3.0);
 
     SrsBounds sb;
     std::string t("([+0,1],[0,1.0000], [-0e0,2]) / EPSG:2596");
