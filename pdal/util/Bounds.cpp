@@ -121,20 +121,11 @@ const BOX2D& BOX2D::getDefaultSpatialExtent()
     return v;
 }
 
-
 const BOX3D& BOX3D::getDefaultSpatialExtent()
 {
     static BOX3D v(LOWEST, LOWEST, LOWEST, HIGHEST, HIGHEST, HIGHEST);
     return v;
 }
-
-const BOX4D& BOX4D::getDefaultSpatialExtent()
-{
-    static BOX4D v(LOWEST, LOWEST, LOWEST, LOWEST,
-                   HIGHEST, HIGHEST, HIGHEST, HIGHEST);
-    return v;
-}
-
 
 void BOX4D::clear()
 {
@@ -161,6 +152,12 @@ BOX4D& BOX4D::grow(double x, double y, double z, double tm)
     return *this;
 }
 
+const BOX4D& BOX4D::getDefaultSpatialExtent()
+{
+    static BOX4D v(LOWEST, LOWEST, LOWEST, LOWEST,
+                   HIGHEST, HIGHEST, HIGHEST, HIGHEST);
+    return v;
+}
 
 Bounds::Bounds(const BOX4D& box) : m_box(box)
 {}
@@ -232,7 +229,7 @@ BOX4D Bounds::to4d() const
 
 BOX3D Bounds::to3d() const
 {
-    if (!is3d())
+    if (is2d())
         return BOX3D();
     return m_box.to3d();
 }
@@ -245,13 +242,13 @@ BOX2D Bounds::to2d() const
 
 bool Bounds::is2d() const
 {
-    return (valid() && !is3d());
+    return (valid() && !is4d() && !is3d());
 }
 
 
 bool Bounds::is3d() const
 {
-    return (m_box.minz != HIGHEST || m_box.maxz != LOWEST);
+    return ((m_box.minz != HIGHEST || m_box.maxz != LOWEST) && !is4d());
 }
 
 bool Bounds::is4d() const
@@ -274,7 +271,7 @@ bool Bounds::empty() const
 
 void Bounds::grow(double x, double y)
 {
-    if (!is4d())
+    if (!is4d() && !is3d())
     {
         m_box.minx = (std::min)(x, m_box.minx);
         m_box.miny = (std::min)(y, m_box.miny);
@@ -309,7 +306,12 @@ void Bounds::set(const BOX4D& box)
 
 void Bounds::set(const BOX3D& box)
 {
-    m_box = BOX4D(box);
+    m_box.minx = box.minx;
+    m_box.maxx = box.maxx;
+    m_box.miny = box.miny;
+    m_box.maxy = box.maxy;
+    m_box.minz = box.minz;
+    m_box.maxz = box.maxz;
     m_box.mintm = HIGHEST;
     m_box.maxtm = LOWEST;
 
@@ -317,7 +319,10 @@ void Bounds::set(const BOX3D& box)
 
 void Bounds::set(const BOX2D& box)
 {
-    m_box = BOX4D(box);
+    m_box.minx = box.minx;
+    m_box.maxx = box.maxx;
+    m_box.miny = box.miny;
+    m_box.maxy = box.maxy;
     m_box.minz = HIGHEST;
     m_box.maxz = LOWEST;
     m_box.mintm = HIGHEST;
@@ -388,10 +393,7 @@ void BOX4D::parse(const std::string& s, std::string::size_type& pos)
         parsePair<BOX4D>(s, pos, mintm, maxtm);
         pos++;
     }
-
     pos += Utils::extractSpaces(s, pos);
-
-
 }
 
 // This parses the guts of a 2D range.

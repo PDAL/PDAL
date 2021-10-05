@@ -442,24 +442,37 @@ TEST(BoundsTest, fromstring)
 
 TEST(BoundsTest, b2)
 {
+    double mind = (std::numeric_limits<double>::lowest)();
+    double maxd = (std::numeric_limits<double>::max)();
+
     std::string s("([0,1],[0,1],[0,2],[0,3])");
     Bounds b;
 
     Utils::fromString(s, b);
-    EXPECT_TRUE(b.is3d());
+    EXPECT_TRUE(b.is4d());
 
     BOX2D box = b.to2d();
-    EXPECT_EQ(box.minx, 0.0);
-    EXPECT_EQ(box.miny, 0.0);
+    EXPECT_EQ(box.minx, 0);
+    EXPECT_EQ(box.miny, 0);
     EXPECT_EQ(box.maxx, 1.0);
     EXPECT_EQ(box.maxy, 1.0);
 
+    BOX2D box2 = b.to2d();
+    Bounds b_2(box2);
+    BOX3D box2_3d = b_2.to3d();
+    EXPECT_EQ(box2_3d.minx, maxd);
+    EXPECT_EQ(box2_3d.miny, maxd);
+    EXPECT_EQ(box2_3d.maxx, mind);
+    EXPECT_EQ(box2_3d.maxy, mind);
+    EXPECT_EQ(box2_3d.minz, maxd);
+    EXPECT_EQ(box2_3d.maxz, mind);
+
     BOX3D box3 = b.to3d();
-    EXPECT_EQ(box3.minx, 0.0);
-    EXPECT_EQ(box3.miny, 0.0);
+    EXPECT_EQ(box3.minx, 0);
+    EXPECT_EQ(box3.miny, 0);
     EXPECT_EQ(box3.maxx, 1.0);
     EXPECT_EQ(box3.maxy, 1.0);
-    EXPECT_EQ(box3.minz, 0.0);
+    EXPECT_EQ(box3.minz, 0);
     EXPECT_EQ(box3.maxz, 2.0);
 
     BOX4D box4 = b.to4d();
