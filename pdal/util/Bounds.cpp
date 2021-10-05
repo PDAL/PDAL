@@ -128,6 +128,13 @@ const BOX3D& BOX3D::getDefaultSpatialExtent()
     return v;
 }
 
+const BOX4D& BOX4D::getDefaultSpatialExtent()
+{
+    static BOX4D v(LOWEST, LOWEST, LOWEST, LOWEST,
+                   HIGHEST, HIGHEST, HIGHEST, HIGHEST);
+    return v;
+}
+
 
 void BOX4D::clear()
 {

@@ -726,6 +726,13 @@ class PDAL_DLL BOX4D : public BOX3D
         }
 
         void parse(const std::string& s, std::string::size_type& pos);
+
+        /**
+            Return a statically-allocated Bounds extent that represents infinity
+
+            \return  A bounds box with infinite bounds,
+        */
+        static const BOX4D& getDefaultSpatialExtent();
     };
 
 class PDAL_DLL Bounds
