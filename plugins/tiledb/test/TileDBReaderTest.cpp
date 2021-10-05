@@ -102,6 +102,7 @@ TEST_F(TileDBReaderTest, read_bbox)
 {
     tiledb::Context ctx;
     tiledb::VFS vfs(ctx);
+  
     Options options;
     options.add("array_name", data_path);
     options.add("bbox3d", "([0, 0.5], [0, 0.5], [0, 0.5])");
@@ -261,5 +262,6 @@ TEST_F(TileDBReaderTest, spatial_reference)
     rdr.execute(table2);
     EXPECT_TRUE(rdr.getSpatialReference().equals(utm16));
 };
+
 
 }; //pdal namespace

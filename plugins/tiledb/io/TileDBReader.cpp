@@ -107,8 +107,6 @@ void TileDBReader::addArgs(ProgramArgs& args)
         "([minx, maxx], [miny, maxy], [minz, maxz])", m_bbox);
     args.add("bbox4d", "Bounding box subarray to read from TileDB in format "
                        "([minx, maxx], [miny, maxy], [minz, maxz], [min_gpstime, max_gpstime] )", m_bbox);
-    args.add("use_time_dim", "Use GpsTime coordinate data as array dimension", m_use_time, false);
-    args.addSynonym("use_time_dim", "use_time");
     args.add("end_timestamp", "TileDB array timestamp", m_endTimeStamp,
         point_count_t(0));
     args.addSynonym("end_timestamp", "timestamp");
@@ -179,6 +177,8 @@ void TileDBReader::addDimensions(PointLayoutPtr layout)
         DimInfo di;
 
         di.m_name = dim.name();
+        if (di.m_name == "GpsTime")
+            m_has_time = true;
 #if TILEDB_VERSION_MAJOR == 1
         di.m_offset = i;
         di.m_span = dims.size();
@@ -200,6 +200,8 @@ void TileDBReader::addDimensions(PointLayoutPtr layout)
         DimInfo di;
 
         di.m_name = a.first;
+        if (di.m_name == "GpsTime")
+            m_has_time = true;
         di.m_offset = 0;
         di.m_span = 1;
         di.m_dimCategory = DimCategory::Attribute;

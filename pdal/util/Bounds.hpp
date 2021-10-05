@@ -616,7 +616,6 @@ public:
   to facilitate streaming either a BOX2D or BOX3D
 */
 
-
 class PDAL_DLL BOX4D : public BOX3D
 {
 public:
