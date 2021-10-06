@@ -424,7 +424,7 @@ public:
     */
     bool equal(const BOX3D& other) const
     {
-        return  BOX2D::contains(other) &&
+        return  BOX2D::equal(other) &&
             minz == other.minz && maxz == other.maxz;
     }
 
@@ -489,8 +489,8 @@ public:
     void clip(const BOX3D& other)
     {
         BOX2D::clip(other);
-        if (other.minz < minz) minz = other.minz;
-        if (other.maxz > maxz) maxz = other.maxz;
+        if (other.minz > minz) minz = other.minz;
+        if (other.maxz < maxz) maxz = other.maxz;
     }
 
     /**
