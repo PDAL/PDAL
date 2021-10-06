@@ -250,7 +250,8 @@ TEST(CropFilterTest, test_crop_polygon_reprojection)
     PointViewSet viewSet = crop.execute(table);
     EXPECT_EQ(viewSet.size(), 1u);
     view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 47u);
+    EXPECT_GE(view->size(), 45u);
+    EXPECT_LE(view->size(), 47u);
 
     FileUtils::closeFile(wkt_stream);
 }
