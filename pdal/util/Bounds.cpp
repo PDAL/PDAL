@@ -121,77 +121,26 @@ const BOX2D& BOX2D::getDefaultSpatialExtent()
     return v;
 }
 
+
 const BOX3D& BOX3D::getDefaultSpatialExtent()
 {
     static BOX3D v(LOWEST, LOWEST, LOWEST, HIGHEST, HIGHEST, HIGHEST);
     return v;
 }
 
-void BOX4D::clear()
-{
-    BOX3D::clear();
-    mintm = HIGHEST;
-    maxtm = LOWEST;
-}
-
-bool BOX4D::empty() const
-{
-    return  BOX3D::empty() && mintm == HIGHEST && maxtm == LOWEST;
-}
-
-bool BOX4D::valid() const
-{
-    return !empty();
-}
-
-BOX4D& BOX4D::grow(double x, double y, double z, double tm)
-{
-    BOX3D::grow(x, y, z);
-    if (tm < mintm) mintm = tm;
-    if (tm > maxtm) maxtm = tm;
-    return *this;
-}
-
-const BOX4D& BOX4D::getDefaultSpatialExtent()
-{
-    static BOX4D v(LOWEST, LOWEST, LOWEST, LOWEST,
-                   HIGHEST, HIGHEST, HIGHEST, HIGHEST);
-    return v;
-}
-
-Bounds::Bounds(const BOX4D& box) : m_box(box)
+Bounds::Bounds(const BOX3D& box) : m_box(box)
 {}
 
-Bounds::Bounds(const BOX3D& box)
-{
-    m_box.minx = box.minx;
-    m_box.maxx = box.maxx;
-    m_box.miny = box.miny;
-    m_box.maxy = box.maxy;
-    m_box.minz = box.minz;
-    m_box.maxz = box.maxz;
-}
 
-
-Bounds::Bounds(const BOX2D& box)
+Bounds::Bounds(const BOX2D& box) : m_box(box)
 {
-    m_box.minx = box.minx;
-    m_box.maxx = box.maxx;
-    m_box.miny = box.miny;
-    m_box.maxy = box.maxy;
     m_box.minz = HIGHEST;
     m_box.maxz = LOWEST;
 }
 
-
 void Bounds::reset(const BOX3D& box)
 {
-    m_box.minx = box.minx;
-    m_box.maxx = box.maxx;
-    m_box.miny = box.miny;
-    m_box.maxy = box.maxy;
-    m_box.minz = box.minz;
-    m_box.maxz = box.maxz;
+    m_box = box;
 }
 
 
@@ -208,16 +157,9 @@ void Bounds::reset(const BOX2D& box)
 
 // We don't allow implicit conversion from a BOX2D to BOX3D.  Use the explicit
 // BOX3D ctor that takes a BOX2D if that's what you want.
-//BOX4D Bounds::to4d() const
-//{
-//    if (!is4d())
-//        return BOX4D();
-//    return m_box;
-//}
-
 BOX3D Bounds::to3d() const
 {
-    if (is2d())
+    if (!is3d())
         return BOX3D();
     return m_box;
 }
@@ -230,19 +172,14 @@ BOX2D Bounds::to2d() const
 
 bool Bounds::is2d() const
 {
-    return (valid() && !is4d() && !is3d());
+    return (valid() && !is3d());
 }
 
 
 bool Bounds::is3d() const
 {
-    return ((m_box.minz != HIGHEST || m_box.maxz != LOWEST) && !is4d());
+    return (m_box.minz != HIGHEST || m_box.maxz != LOWEST);
 }
-
-//bool Bounds::is4d() const
-//{
-//    return (m_box.mintm != HIGHEST || m_box.maxtm != LOWEST);
-//}
 
 
 bool Bounds::valid() const
@@ -268,43 +205,33 @@ void Bounds::grow(double x, double y)
     }
 }
 
+
 void Bounds::grow(double x, double y, double z)
 {
-    m_box.minx = (std::min)(x, m_box.minx);
-    m_box.miny = (std::min)(y, m_box.miny);
-    m_box.minz = (std::min)(z, m_box.minz);
-    m_box.maxx = (std::max)(x, m_box.maxx);
-    m_box.maxy = (std::max)(y, m_box.maxy);
-    m_box.maxz = (std::max)(z, m_box.maxz);
+    m_box.grow(x, y, z);
 }
 
-
-//void Bounds::set(const BOX4D& box)
-//{
-//    m_box = box;
-//}
 
 void Bounds::set(const BOX3D& box)
 {
     m_box = box;
 }
 
+
 void Bounds::set(const BOX2D& box)
 {
-    m_box.minx = box.minx;
-    m_box.maxx = box.maxx;
-    m_box.miny = box.miny;
-    m_box.maxy = box.maxy;
+    m_box = BOX3D(box);
     m_box.minz = HIGHEST;
     m_box.maxz = LOWEST;
 }
 
 namespace
 {
+
 template <typename T>
 void parsePair(const std::string& s, std::string::size_type& pos,
-               double& low, double& high)
-               {
+    double& low, double& high)
+{
     low = high = 0;
     const char *start;
     char *end;
@@ -334,9 +261,10 @@ void parsePair(const std::string& s, std::string::size_type& pos,
     pos += Utils::extractSpaces(s, pos);
     if (s[pos++] != ']')
         throw typename T::error("No closing ']' in range.");
-               }
-
 }
+
+} // unnamed namespace
+
 
 // This parses the guts of a 2D range.
 void BOX2D::parse(const std::string& s, std::string::size_type& pos)

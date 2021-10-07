@@ -95,17 +95,6 @@ std::string Metadata::inferType(const std::string& val)
     catch (BOX3D::error)
     {}
 
-    BOX4D b4d;
-    std::istringstream iss3(val);
-    try
-    {
-        iss3 >> b4d;
-        if (iss3.good())
-            return "bounds";
-    }
-    catch (BOX4D::error)
-    {}
-
     if (val == "true" || val == "false")
         return "boolean";
 

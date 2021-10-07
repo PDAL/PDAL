@@ -307,8 +307,7 @@ public:
 /**
   BOX3D represents a three-dimensional box with double-precision bounds.
 */
-
-class PDAL_DLL BOX3D : public BOX2D
+class PDAL_DLL BOX3D : private BOX2D
 {
 public:
     struct error : public std::runtime_error
@@ -615,126 +614,6 @@ public:
   Wrapper for BOX3D and BOX2D to allow extraction as either.  Typically used
   to facilitate streaming either a BOX2D or BOX3D
 */
-
-class PDAL_DLL BOX4D : public BOX3D
-{
-public:
-    struct error : public std::runtime_error
-        {
-        error(const std::string& err) : std::runtime_error(err) {}
-        };
-
-    using BOX3D::maxx;
-    using BOX3D::maxy;
-    using BOX3D::maxz;
-    using BOX3D::minx;
-    using BOX3D::miny;
-    using BOX3D::minz;
-    double mintm; ///< Minimum time value.
-    double maxtm; ///< Maximum time value.
-
-    BOX4D()
-    {
-        clear();
-    }
-
-    BOX4D(const BOX4D& box) : BOX3D(box), mintm(box.mintm), maxtm(box.maxtm) {}
-
-    BOX4D& operator=(const BOX4D& box) = default;
-
-    explicit BOX4D(const BOX3D& box) : BOX3D(box), mintm(0), maxtm(0) {}
-
-    explicit BOX4D(const BOX2D& box) : BOX3D(box.minx, box.maxx, box.miny, box.maxy, 0, 0), mintm(0), maxtm(0) {}
-
-    BOX4D(double minx, double miny, double minz, double mintm, double maxx,
-          double maxy, double maxz, double maxtm)
-          : BOX3D(minx, miny, minz, maxx, maxy, maxz), mintm(mintm), maxtm(maxtm)
-    {}
-
-    bool empty() const;
-
-    bool valid() const;
-
-    BOX4D& grow(double x, double y, double z, double tm);
-
-    void clear();
-
-    bool contains(double x, double y, double z, double tm) const
-    {
-        return BOX3D::contains(x, y, z) && mintm <= tm && tm <= maxtm;
-    }
-
-    bool contains(const BOX4D& other) const
-    {
-        return BOX3D::contains(other) &&
-        mintm <= other.mintm && other.maxtm <= maxtm;
-    }
-
-    bool equal(const BOX4D& other) const
-    {
-        return  BOX3D::contains(other) &&
-        mintm == other.mintm && maxtm == other.maxtm;
-    }
-
-    bool operator==(BOX4D const& rhs) const
-    {
-        return equal(rhs);
-    }
-
-    bool operator!=(BOX4D const& rhs) const
-    {
-        return (!equal(rhs));
-    }
-
-    BOX3D& grow(const BOX3D& other)
-    {
-        BOX2D::grow(other);
-        if (other.minz < minz) minz = other.minz;
-        if (other.maxz > maxz) maxz = other.maxz;
-        return *this;
-    }
-
-    BOX3D& grow(double dist)
-    {
-        BOX2D::grow(dist);
-        minz -= dist;
-        maxz += dist;
-        return *this;
-    }
-
-    void clip(const BOX3D& other)
-    {
-        BOX2D::clip(other);
-        if (other.minz < minz) minz = other.minz;
-        if (other.maxz > maxz) maxz = other.maxz;
-    }
-
-    bool overlaps(const BOX3D& other) const
-    {
-        return BOX2D::overlaps(other) &&
-        minz <= other.maxz && maxz >= other.minz;
-    }
-
-    BOX3D to3d() const
-    {
-        return *this;
-    }
-
-    BOX2D to2d() const
-    {
-        return *this;
-    }
-
-    void parse(const std::string& s, std::string::size_type& pos);
-
-    /**
-        Return a statically-allocated Bounds extent that represents infinity
-
-        \return  A bounds box with infinite bounds,
-    */
-    static const BOX4D& getDefaultSpatialExtent();
-};
-
 class PDAL_DLL Bounds
 {
 public:
@@ -798,7 +677,6 @@ inline std::ostream& operator << (std::ostream& ostr, const BOX2D& bounds)
     return ostr;
 }
 
-
 /**
   Write a 3D bounds box to a stream in a format used by PDAL options.
 
@@ -839,9 +717,6 @@ extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX2D& bounds);
   \param bounds  Bounds box to populate.
 */
 extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX3D& bounds);
-
-
-//extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX4D& bounds);
 
 /**
   Read a Bounds (2D/3D) box from a stream in a format provided by PDAL options.
