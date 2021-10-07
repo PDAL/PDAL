@@ -73,7 +73,7 @@ protected:
         writer_options.add("z_tile_size", 2.f);
         writer_options.add("time_tile_size", 777600.f);
 
-        reader_options.add("bounds", BOX4D(0., 0., 0., 1314489618., 2., 2., 2., 1315267218.)); //sep 1 - sep 10 2021 gpstime
+        reader_options.add("bounds", BOX4D(0., 0., 0., 1314489618., 10., 10., 10., 1315353618.)); //sep 1 - sep 11 00:00:00 UTC 2021 -> gpstime
         reader_options.add("count", 10);
         rdr.setOptions(reader_options);
 
@@ -90,22 +90,35 @@ protected:
 
 TEST_F(TDBReaderTimeDimTest, set_dims)
 {
-    //    tiledb::Context ctx;
-    //    tiledb::VFS vfs(ctx);
-    //
-    //    tiledb::Array array(ctx, tm_data_path, TILEDB_READ);
-    //    std::cout << array.schema().domain().ndim();
-    //    std::vector<std::string> dim_names{"X", "Y", "Z", "GpsTime"};
-    //    for (size_t i(0); i != 3; ++i)
-    //        EXPECT_EQ(domain.at(i).first, dim_names[i]);
+        tiledb::Context ctx;
+
+        tiledb::Array array(ctx, tm_data_path, TILEDB_READ);
+        tiledb::Domain domain(array.schema().domain());
+        std::vector<std::string> dim_names{"X", "Y", "Z", "GpsTime"};
+        for (size_t i(0); i != 3; ++i)
+            EXPECT_EQ(domain.dimension(i).name(), dim_names[i]);
 }
-//    Options reader_options;
-//    reader_options.add("array_name", tm_data_path);
-//    reader_options.add("use_time", true);
-//
-//    TileDBReader reader;
+
+TEST_F(TDBReaderTimeDimTest, test_has_time)
+{
+    tiledb::Context ctx;
+    tiledb::VFS vfs(ctx);
+
+    Options options;
+    options.add("array_name", tm_data_path);
+    options.add("bbox4d", "([2., 8.], [2., 8.], [2., 8.], [1314662418., 1315180818.])"); // sep 3 - sep 9
+
+    TileDBReader reader;
+    reader.setOptions(options);
+
+    FixedPointTable table(100);
+    reader.prepare(table);
+    reader.execute(table);
+
+    EXPECT_TRUE(reader.hasTime());
 
 
+}
 
 } // pdal namespace
 

@@ -16,6 +16,7 @@ endif()
 PDAL_ADD_PLUGIN(reader_libname reader tiledb
     FILES
         io/TileDBReader.cpp
+        io/Bounds4D.cpp
     LINK_WITH
         ${TILEDB_LIBRARIES}
     INCLUDES
@@ -30,11 +31,21 @@ PDAL_ADD_PLUGIN(reader_libname reader tiledb
 PDAL_ADD_PLUGIN(writer_libname writer tiledb
     FILES
         io/TileDBWriter.cpp
+        io/Bounds4D.cpp
     LINK_WITH
         ${TILEDB_LIBRARIES}
     INCLUDES
         ${TILEDB_INCLUDE_DIR}
         ${NLOHMANN_INCLUDE_DIR}
+)
+
+PDAL_ADD_PLUGIN(bounds4d_libname Bounds4D tiledb
+    FILES
+        io/Bounds4D.cpp
+    LINK_WITH
+        ${TILEDB_LIBRARIES}
+    INCLUDES
+        ${TILEDB_INCLUDE_DIR}
 )
 
 
@@ -59,18 +70,30 @@ if (WITH_TESTS)
             ${TILEDB_LIBRARIES}
         INCLUDES
             ${TILEDB_INCLUDE_DIR}
+            ${NLOHMANN_INLCUDE_DIR}
     )
 
     PDAL_ADD_TEST(pdal_io_tiledb_time_reader_test
-            FILES
+        FILES
             test/TileDBReaderTimeDimTest.cpp
-            LINK_WITH
+            test/XYZTmUtils.cpp
+        LINK_WITH
             ${reader_libname}
             ${writer_libname}
             ${TILEDB_LIBRARIES}
-            INCLUDES
+        INCLUDES
             ${TILEDB_INCLUDE_DIR}
-            )
+    )
+
+    PDAL_ADD_TEST(pdal_io_tiledb_bounds4d_test
+        FILES
+            test/Bounds4DTest.cpp
+        LINK_WITH
+            ${bounds4d_libname}
+            ${TILEDB_LIBRARIES}
+        INCLUDES
+            ${TILEDB_INCLUDE_DIR}
+    )
 
 
 endif()

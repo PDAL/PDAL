@@ -40,7 +40,7 @@
 
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
-#include "../test/XYZTmUtils.hpp"
+#include "Bounds4D.hpp"
 #include <tiledb/tiledb>
 
 namespace pdal
