@@ -250,6 +250,15 @@ TEST(CropFilterTest, test_crop_polygon_reprojection)
     PointViewSet viewSet = crop.execute(table);
     EXPECT_EQ(viewSet.size(), 1u);
     view = *viewSet.begin();
+//ABELL - I'd like to do the following, but we don't necessarily have proj.h
+/**
+#if defined(PROJ_VERSION_NUMBER) && PROJ_VERSION_NUMBER > 80101
+    EXPECT_EQ(view->size(), 45u);
+#else
+    EXPECT_EQ(view->size(), 47u);
+#endif
+**/
+// So instead...
     EXPECT_GE(view->size(), 45u);
     EXPECT_LE(view->size(), 47u);
 

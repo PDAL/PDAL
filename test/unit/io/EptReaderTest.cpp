@@ -625,8 +625,21 @@ TEST(EptReaderTest, boundedCrop)
     }
 
     EXPECT_EQ(eptNp, sourceNp);
+
+//ABELL - A change in proj changed the numbers, but we don't necessarily have proj.h
+/**
+#if defined(PROJ_VERSION_NUMBER) && PROJ_VERSION_NUMBER > 80101
+    EXPECT_EQ(eptNp, 45u);
+    EXPECT_EQ(sourceNp, 45u);
+#else
     EXPECT_EQ(eptNp, 47u);
     EXPECT_EQ(sourceNp, 47u);
+#endif
+**/
+    EXPECT_GE(eptNp, 45u);
+    EXPECT_GE(sourceNp, 45u);
+    EXPECT_LE(eptNp, 47u);
+    EXPECT_LE(sourceNp, 47u);
 }
 
 TEST(EptReaderTest, polygonAndBoundsCrop)
@@ -769,8 +782,20 @@ TEST(EptReaderTest, boundedCropReprojection)
         sourceNp += view->size();
 
     EXPECT_EQ(eptNp, sourceNp);
+//ABELL - We don't necessarily have proj.h, so we can't do this:
+/**
+#if defined(PROJ_VERSION_NUMBER) && PROJ_VERSION_NUMBER > 80101
+    EXPECT_EQ(eptNp, 45u);
+    EXPECT_EQ(sourceNp, 45u);
+#else
     EXPECT_EQ(eptNp, 47u);
     EXPECT_EQ(sourceNp, 47u);
+#endif
+**/
+    EXPECT_GE(eptNp, 45u);
+    EXPECT_GE(sourceNp, 45u);
+    EXPECT_LE(eptNp, 47u);
+    EXPECT_LE(sourceNp, 47u);
 }
 
 
@@ -812,8 +837,20 @@ TEST(EptReaderTest, ogrCrop)
         sourceNp += view->size();
 
     EXPECT_EQ(eptNp, sourceNp);
+// We don't necessarily have proj.h, so can't do the following:
+/**
+#if defined(PROJ_VERSION_NUMBER) && PROJ_VERSION_NUMBER > 80101
+    EXPECT_EQ(eptNp, 89u);
+    EXPECT_EQ(sourceNp, 89u);
+#else
     EXPECT_EQ(eptNp, 86u);
     EXPECT_EQ(sourceNp, 86u);
+#endif
+**/
+    EXPECT_LE(eptNp, 89u);
+    EXPECT_LE(sourceNp, 89u);
+    EXPECT_GE(eptNp, 86u);
+    EXPECT_GE(sourceNp, 86u);
 }
 
 } // namespace pdal
