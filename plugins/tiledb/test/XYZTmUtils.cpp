@@ -28,6 +28,8 @@ void XYZTimeFauxReader::addArgs(ProgramArgs& args)
     args.add("bounds", "X/Y/Z/time limits",
                  m_bounds, BOX4D(0., 0., 0., 0.,
                                         1., 1., 1., 1));
+    args.add("xyz_mode", "mode for distribution of xyz dimension values", m_xyz_mode, Mode::Uniform);
+    args.add("time_mode", "mode for distribution of time dimension values", m_tm_mode, Mode::Ramp);
 }
 
 void XYZTimeFauxReader::prepared(PointTableRef table)
@@ -39,10 +41,46 @@ void XYZTimeFauxReader::prepared(PointTableRef table)
 
 void XYZTimeFauxReader::initialize()
 {
+
     m_generator.seed((uint32_t)std::time(NULL));
-    m_uniformX.reset(new urd(m_bounds.minx, m_bounds.maxx));
-    m_uniformY.reset(new urd(m_bounds.miny, m_bounds.maxy));
-    m_uniformZ.reset(new urd(m_bounds.minz, m_bounds.maxz));
+
+    if (m_xyz_mode == Mode::Uniform)
+    {
+        m_uniformX.reset(new urd(m_bounds.minx, m_bounds.maxx));
+        m_uniformY.reset(new urd(m_bounds.miny, m_bounds.maxy));
+        m_uniformZ.reset(new urd(m_bounds.minz, m_bounds.maxz));
+    }
+    else if (m_xyz_mode == Mode::Ramp)
+    {
+        if (m_count > 1)
+        {
+            m_delX = (m_bounds.maxx - m_bounds.minx) / (m_count - 1);
+            m_delY = (m_bounds.maxy - m_bounds.miny) / (m_count - 1);
+            m_delZ = (m_bounds.maxz - m_bounds.minz) / (m_count - 1);
+        }
+        else
+        {
+            m_delX = 0;
+            m_delY = 0;
+            m_delZ = 0;
+        }
+    }
+
+    if (m_tm_mode == Mode::Uniform)
+    {
+        m_uniformTm.reset(new urd(m_bounds.mintm, m_bounds.maxtm));
+    }
+    else if (m_tm_mode == Mode::Ramp)
+    {
+        if (m_count > 1)
+        {
+            m_delTm = (m_bounds.maxtm - m_bounds.mintm) / (m_count - 1);
+        }
+        else
+        {
+            m_delTm = 0;
+        }
+    }
 }
 
 void XYZTimeFauxReader::addDimensions(PointLayoutPtr layout)
@@ -74,13 +112,33 @@ bool XYZTimeFauxReader::processOne(PointRef& point)
     if (m_index >= m_count)
         return false;
 
-    x = (*m_uniformX)(m_generator);
-    y = (*m_uniformY)(m_generator);
-    z = (*m_uniformZ)(m_generator);
-    if (m_count > 1)
-        tm = m_bounds.mintm + ((m_bounds.maxtm - m_bounds.mintm) / (m_count - 1)) * m_index;
-    else
-        tm = m_bounds.mintm;
+    switch (m_xyz_mode)
+    {
+    case Mode::Uniform:
+        x = (*m_uniformX)(m_generator);
+        y = (*m_uniformY)(m_generator);
+        z = (*m_uniformZ)(m_generator);
+        break;
+    case Mode::Ramp:
+        x = m_bounds.minx + m_delX * m_index;
+        y = m_bounds.miny + m_delY * m_index;
+        z = m_bounds.minz + m_delZ * m_index;
+        break;
+    default:
+        throwError("Invalid mode: only 'uniform' and 'ramp' implemented");
+    }
+
+    switch (m_tm_mode)
+    {
+    case Mode::Uniform:
+        tm = (*m_uniformTm)(m_generator);
+        break;
+    case Mode::Ramp:
+        tm = m_bounds.mintm + m_delTm * m_index;
+        break;
+    default:
+        throwError("Invalid mode: only 'uniform' and 'ramp' implemented");
+    }
 
     point.setField(Dimension::Id::X, x);
     point.setField(Dimension::Id::Y, y);

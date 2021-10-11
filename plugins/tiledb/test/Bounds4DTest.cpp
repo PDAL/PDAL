@@ -17,10 +17,14 @@ namespace pdal
 
 class BOX4DTest : public ::testing::Test
 {
+public:
+    BOX4DTest() :
+    b(0, 0, 0, 0, 10, 10, 10, 10)
+    {}
 protected:
     virtual void SetUp()
     {}
-    BOX4D b{0., 0., 0., 0., 10., 10., 10., 10.};
+    BOX4D b;
 };
 
 TEST_F(BOX4DTest, test_bbox4d)

@@ -54,6 +54,9 @@ namespace pdal
 
 class TDBReaderTimeDimTest : public ::testing::Test
 {
+public:
+    TDBReaderTimeDimTest() : data_path(Support::temppath("xyztm_tdb_array"))
+    {}
 protected:
     virtual void SetUp()
     {
@@ -63,10 +66,10 @@ protected:
         Options reader_options;
         Options writer_options;
 
-        if (Utils::fileExists(tm_data_path))
-            tiledb::Object::remove(ctx, tm_data_path);
+        if (Utils::fileExists(data_path))
+            tiledb::Object::remove(ctx, data_path);
 
-        writer_options.add("array_name", tm_data_path);
+        writer_options.add("array_name", data_path);
         writer_options.add("use_time_dim", true);
         writer_options.add("x_tile_size", 2.f);
         writer_options.add("y_tile_size", 2.f);
@@ -84,7 +87,7 @@ protected:
         writer.prepare(table);
         writer.execute(table);
     }
-    std::string tm_data_path = Support::temppath("test_time_dim_write");
+    std::string data_path;
 
 };
 
@@ -92,7 +95,7 @@ TEST_F(TDBReaderTimeDimTest, set_dims)
 {
         tiledb::Context ctx;
 
-        tiledb::Array array(ctx, tm_data_path, TILEDB_READ);
+        tiledb::Array array(ctx, data_path, TILEDB_READ);
         tiledb::Domain domain(array.schema().domain());
         std::vector<std::string> dim_names{"X", "Y", "Z", "GpsTime"};
         for (size_t i(0); i != 3; ++i)
@@ -105,7 +108,7 @@ TEST_F(TDBReaderTimeDimTest, test_has_time)
     tiledb::VFS vfs(ctx);
 
     Options options;
-    options.add("array_name", tm_data_path);
+    options.add("array_name", data_path);
     options.add("bbox4d", "([2., 8.], [2., 8.], [2., 8.], [1314662418., 1315180818.])"); // sep 3 - sep 9
 
     TileDBReader reader;
@@ -116,8 +119,6 @@ TEST_F(TDBReaderTimeDimTest, test_has_time)
     reader.execute(table);
 
     EXPECT_TRUE(reader.hasTime());
-
-
 }
 
 } // pdal namespace

@@ -62,6 +62,7 @@ public:
     TileDBWriter();
     ~TileDBWriter();
     std::string getName() const;
+
 private:
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();

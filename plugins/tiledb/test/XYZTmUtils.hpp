@@ -61,7 +61,14 @@ private:
     std::unique_ptr<urd> m_uniformX;
     std::unique_ptr<urd> m_uniformY;
     std::unique_ptr<urd> m_uniformZ;
+    std::unique_ptr<urd> m_uniformTm;
+    double m_delX;
+    double m_delY;
+    double m_delZ;
+    double m_delTm;
     BOX4D m_bounds;
+    Mode m_xyz_mode;
+    Mode m_tm_mode;
 
     virtual void addArgs(ProgramArgs& args);
 

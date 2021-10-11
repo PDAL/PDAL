@@ -9,7 +9,7 @@
 namespace pdal
 {
 
-class PDAL_DLL BOX4D : public BOX3D
+class PDAL_DLL BOX4D : private BOX3D
 {
 public:
     struct error : public std::runtime_error
