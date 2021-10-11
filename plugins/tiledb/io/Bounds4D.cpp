@@ -265,7 +265,7 @@ void Bounds4D::parse(const std::string& s, std::string::size_type& pos)
             try
             {
                 pos = 0;
-                BOX2D box2d;
+                BOX2D_ box2d;
                 box2d.parse(s, pos);
                 set(box2d);
             }
@@ -289,7 +289,7 @@ void Bounds4D::set(const BOX3D& box)
     m_box.maxtm = LOWEST;
 }
 
-void Bounds4D::set(const BOX2D& box)
+void Bounds4D::set(const BOX2D_& box)
 {
     m_box = BOX4D(box);
     m_box.minz = HIGHEST;

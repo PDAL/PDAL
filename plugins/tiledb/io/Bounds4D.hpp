@@ -9,6 +9,15 @@
 namespace pdal
 {
 
+class PDAL_DLL BOX2D_ : public BOX2D
+{
+public:
+    BOX2D_() : BOX2D()
+    {}
+    BOX2D_(const BOX3D& box) : BOX2D(box.minx, box.miny, box.maxx, box.maxy)
+    {}
+};
+
 class PDAL_DLL BOX4D : private BOX3D
 {
 public:
@@ -38,7 +47,7 @@ public:
     explicit BOX4D(const BOX3D& box) :
     BOX3D(box), mintm(0), maxtm(0) {}
 
-    explicit BOX4D(const BOX2D& box) :
+    explicit BOX4D(const BOX2D_& box) :
     BOX3D(box.minx, box.miny, 0, box.maxx, box.maxy, 0), mintm(0), maxtm(0) {}
 
     BOX4D(double minx, double miny, double minz, double mintm, double maxx,
@@ -115,9 +124,9 @@ public:
         return *this;
     }
 
-    BOX2D to2d() const
+    BOX2D_ to2d() const
     {
-        return *this;
+        return this->to3d();
     }
 
     std::string toBox(uint32_t precision = 8) const
@@ -350,7 +359,7 @@ private:
 
     void set(const BOX4D& box);
     void set(const BOX3D& box);
-    void set(const BOX2D& box);
+    void set(const BOX2D_& box);
 };
 
 inline std::ostream& operator << (std::ostream& ostr, const BOX4D& bounds)
