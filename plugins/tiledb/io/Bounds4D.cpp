@@ -171,6 +171,11 @@ BOX3D Bounds4D::to3d() const
     return m_box.to3d();
 }
 
+BOX2D Bounds4D::to2d() const
+{
+    return m_box.to2d();
+}
+
 bool Bounds4D::is4d() const
 {
     return (m_box.mintm != HIGHEST || m_box.maxtm != LOWEST);

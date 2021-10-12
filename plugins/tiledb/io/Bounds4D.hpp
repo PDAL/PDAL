@@ -338,6 +338,7 @@ public:
 
     BOX4D to4d() const;
     BOX3D to3d() const;
+    BOX2D to2d() const;
     bool is4d() const;
     bool is3d() const;
     bool is2d() const;

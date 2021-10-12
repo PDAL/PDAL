@@ -107,9 +107,22 @@ TEST_F(Bounds4DTest, test_clip)
     EXPECT_TRUE(b1 == b7);
 }
 
-TEST_F(Bounds4DTest, test_box2d_constructor)
+TEST_F(Bounds4DTest, test_to4d)
 {
-    BOX2D b1(b.to2d());
+    BOX4D b1(bounds.to4d());
+    EXPECT_TRUE(b1 == b);
+}
+
+TEST_F(Bounds4DTest, test_to3d)
+{
+    BOX3D b1(bounds.to3d());
+    BOX3D b2(b.minx, b.miny, b.minz, b.maxx, b.maxy, b.maxz);
+    EXPECT_TRUE(b1 == b2);
+}
+
+TEST_F(Bounds4DTest, test_to2d)
+{
+    BOX2D b1(bounds.to2d());
     BOX2D b2(b.minx, b.miny, b.maxx, b.maxy);
     EXPECT_TRUE(b1 == b2);
 }
