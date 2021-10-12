@@ -180,7 +180,34 @@ TEST(BoundsTest, test_grow)
 
     BOX2D r3(0,1,100,201);
     EXPECT_TRUE(r1 == r3);
-//ABELL - Need BOX3D example.
+
+    BOX3D r4(50, 51, 52, 100, 101, 102);
+    BOX3D r5(0, 1, 100, 90, 201, 202);
+    r4.grow(r5);
+
+    BOX3D r6(0, 1, 52, 100, 201, 202);
+    EXPECT_TRUE(r4 == r6);
+}
+
+TEST(BoundsTest, test_bounds_grow_2_3_args)
+{
+    BOX2D b1(50, 51, 100, 101);
+    BOX3D b2(50, 51, 52, 100, 101, 102);
+    Bounds bounds2d(b1);
+    Bounds bounds3d(b2);
+
+    bounds2d.grow(0, 201);
+
+    BOX2D b3(0, 51, 100, 201);
+    EXPECT_TRUE(bounds2d.to2d() == b3);
+
+    bounds2d.grow(-10, 301, 202);
+    EXPECT_TRUE(bounds2d.is2d());
+    EXPECT_TRUE(bounds2d.to2d() == b3);
+
+    bounds3d.grow(0, 201, 202);
+    BOX3D b4(0, 51, 52, 100, 201, 202);
+    EXPECT_TRUE(bounds3d.to3d() == b4);
 }
 
 TEST(BoundsTest, test_static)
