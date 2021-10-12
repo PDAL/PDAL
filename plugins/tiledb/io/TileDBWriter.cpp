@@ -311,6 +311,7 @@ void TileDBWriter::addArgs(ProgramArgs& args)
         m_args->m_append, false);
     args.add("use_time_dim", "Use GpsTime coordinate data as array dimension", m_use_time, false);
     args.addSynonym("use_time_dim", "use_time");
+    args.add("time_first", "If writing 4D array with XYZ and Time, choose to put time dim first or last (default)", m_time_first, false);
 #if TILEDB_VERSION_MAJOR >= 2
     args.add("timestamp", "TileDB array timestamp", m_args->m_timeStamp,
         point_count_t(0));
@@ -390,13 +391,18 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
         {
             if (isValidDomain(*m_args))
             {
+                if (m_use_time && m_time_first)
+                {
+                    domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "GpsTime",
+                       {{m_args->m_time_domain_st, m_args->m_time_domain_end}}, m_args->m_time_tile_size));
+                }
                 domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X",
                     {{m_args->m_x_domain_st, m_args->m_x_domain_end}}, m_args->m_x_tile_size))
                     .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Y",
                     {{m_args->m_y_domain_st, m_args->m_y_domain_end}}, m_args->m_y_tile_size))
                     .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
                     {{m_args->m_z_domain_st, m_args->m_z_domain_end}}, m_args->m_z_tile_size));
-                if (m_use_time) {
+                if (m_use_time && !m_time_first) {
                     domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "GpsTime",
                         {{m_args->m_time_domain_st, m_args->m_time_domain_end}}, m_args->m_time_tile_size));
                 }
@@ -406,6 +412,11 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
                 // read from table.metadata and if not available then use dimMin, dimMax
                 if (m.valid())
                 {
+                    if (m_use_time && m_time_first) {
+                        domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "GpsTime",
+                            {{m.findChild("mintm").value<double>() - 1, m.findChild("maxtm").value<double>() + 1}},
+                             m_args->m_time_tile_size));
+                    }
                     domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X",
                             {{m.findChild("minx").value<double>() - 1., m.findChild("maxx").value<double>() + 1.}},
                             m_args->m_x_tile_size))
@@ -415,7 +426,7 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
                         .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
                             {{m.findChild("minz").value<double>() - 1., m.findChild("maxz").value<double>() + 1.}},
                             m_args->m_z_tile_size));
-                    if (m_use_time) {
+                    if (m_use_time && !m_time_first) {
                         domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "GpsTime",
                            {{m.findChild("mintm").value<double>() - 1, m.findChild("maxtm").value<double>() + 1}},
                            m_args->m_time_tile_size));
@@ -423,13 +434,17 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
                 }
                 else
                 {
+                   if (m_use_time && m_time_first) {
+                        domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "GpsTime",
+                            {{dimMin, dimMax}}, m_args->m_time_tile_size));
+                   }
                    domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X",
                             {{dimMin, dimMax}},m_args->m_x_tile_size))
                         .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Y",
                             {{dimMin, dimMax}}, m_args->m_y_tile_size))
                         .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
                             {{dimMin, dimMax}}, m_args->m_z_tile_size));
-                   if (m_use_time) {
+                   if (m_use_time && !m_time_first) {
                        domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "GpsTime",
                           {{dimMin, dimMax}}, m_args->m_time_tile_size));
                    }
@@ -442,13 +457,17 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
         {
             if (isValidDomain(*m_args))
             {
+                if (m_use_time && m_time_first) {
+                    domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "GpsTime",
+                    {{m_args->m_time_domain_st, m_args->m_time_domain_end}}));
+                }
                 domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X",
                     {{m_args->m_x_domain_st, m_args->m_x_domain_end}}))
                     .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Y",
                     {{m_args->m_y_domain_st, m_args->m_y_domain_end}}))
                     .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
                     {{m_args->m_z_domain_st, m_args->m_z_domain_end}}));
-                if (m_use_time) {
+                if (m_use_time && !m_time_first) {
                     domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "GpsTime",
                     {{m_args->m_time_domain_st, m_args->m_time_domain_end}}));
                 }
@@ -458,13 +477,17 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
                 // read from table.metadata and if not available then throw error
                 if (m.valid())
                 {
+                    if (m_use_time && m_time_first) {
+                        domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "GpsTime",
+                            {{m.findChild("mintm").value<double>() - 1,m.findChild("maxtm").value<double>() + 1}}));
+                    }
                     domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "X",
                             {{m.findChild("minx").value<double>() - 1., m.findChild("maxx").value<double>() + 1.}}))
                         .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Y",
                             {{m.findChild("miny").value<double>() - 1., m.findChild("maxy").value<double>() + 1.}}))
                         .add_dimension(tiledb::Dimension::create<double>(*m_ctx, "Z",
                             {{m.findChild("minz").value<double>() - 1., m.findChild("maxz").value<double>() + 1.}}));
-                    if (m_use_time) {
+                    if (m_use_time && !m_time_first) {
                         domain.add_dimension(tiledb::Dimension::create<double>(*m_ctx, "GpsTime",
                            {{m.findChild("mintm").value<double>() - 1,m.findChild("maxtm").value<double>() + 1}}));
                     }
