@@ -220,7 +220,7 @@ void TileDBReader::addDimensions(PointLayoutPtr layout)
 template <typename T>
 void TileDBReader::setQueryBuffer(const DimInfo& di)
 {
-        m_query->set_buffer(di.m_name, di.m_buffer->get<T>(), di.m_buffer->count());
+    m_query->set_buffer(di.m_name, di.m_buffer->get<T>(), di.m_buffer->count());
 }
 
 void TileDBReader::setQueryBuffer(const DimInfo& di)

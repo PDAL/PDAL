@@ -256,12 +256,11 @@ TileDBWriter::TileDBWriter():
         "PointSourceId": {"compression": "bzip2"},
         "Red": {"compression": "zstd", "compression_level": 7},
         "Green": {"compression": "zstd", "compression_level": 7},
-        "Blue": {"compression": "zstd", "compression_level": 7}
+        "Blue": {"compression": "zstd", "compression_level": 7},
+        "GpsTime": [
+            {"compression": "zstd", "compression_level": 7}
+        ]
     })");
-
-//    "GpsTime": [
-//        {"compression": "zstd", "compression_level": 7}
-//    ]
 
     m_args->m_defaults = NL::json::parse(attributeDefaults);
 }
@@ -496,7 +495,8 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
     {
         std::string dimName = layout->dimName(d);
 
-        if ((dimName != "X") && (dimName != "Y") && (dimName != "Z") && (dimName != "GpsTime"))
+        if ((dimName != "X") && (dimName != "Y") && (dimName != "Z") &&
+            ((m_use_time && dimName != "GpsTime") || !m_use_time))
         {
             Dimension::Type type = layout->dimType(d);
             if (!m_args->m_append)
