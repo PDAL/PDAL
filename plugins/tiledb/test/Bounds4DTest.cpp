@@ -30,7 +30,7 @@ protected:
     BOX4D b;
 };
 
-TEST(Bounds4D, test_ctor4D)
+TEST(Bounds4D, test_box_ctor_empty)
 {
     BOX4D b1;
     EXPECT_TRUE(b1.empty());
@@ -38,6 +38,14 @@ TEST(Bounds4D, test_ctor4D)
     b1.clear();
     BOX4D b2;
     EXPECT_EQ(b1, b2);
+}
+
+TEST_F(Bounds4DTest, test_bounds_ctor_empty)
+{
+    Bounds4D bounds1;
+    EXPECT_TRUE(bounds1.empty());
+    Bounds4D * bds1_ptr(&bounds1);
+    EXPECT_TRUE(dynamic_cast<const Bounds4D*>(bds1_ptr) != nullptr);
 }
 
 TEST(Bounds4D, test_equals)
@@ -126,5 +134,86 @@ TEST_F(Bounds4DTest, test_to2d)
     BOX2D b2(b.minx, b.miny, b.maxx, b.maxy);
     EXPECT_TRUE(b1 == b2);
 }
+
+TEST_F(Bounds4DTest, test_ctor_box4d)
+{
+    Bounds4D bounds1(b);
+    Bounds4D * bds1_ptr(&bounds1);
+    EXPECT_TRUE(dynamic_cast<const Bounds4D*>(bds1_ptr) != nullptr);
+}
+
+TEST_F(Bounds4DTest, test_ctor_box3d)
+{
+    Bounds4D bounds1(b.to3d());
+    Bounds4D * bds1_ptr(&bounds1);
+    EXPECT_TRUE(dynamic_cast<const Bounds4D*>(bds1_ptr) != nullptr);
+}
+
+TEST_F(Bounds4DTest, test_ctor_box2d)
+{
+    Bounds4D bounds1(b.to2d());
+    Bounds4D * bds1_ptr(&bounds1);
+    EXPECT_TRUE(dynamic_cast<const Bounds4D*>(bds1_ptr) != nullptr);
+}
+
+//TEST_F(Bounds4DTest, test_bounds_to2d)
+//{
+//    BOX2D b1(bounds.to2d());
+//    BOX2D b2(b.minx, b.miny, b.maxx, b.maxy);
+//    EXPECT_TRUE(b1 == b2);
+//}
+
+TEST_F(Bounds4DTest, test_bounds_empty)
+{
+    Bounds4D bounds1;
+    EXPECT_TRUE(bounds1.empty());
+}
+
+TEST_F(Bounds4DTest, test_bounds_valid)
+{
+    Bounds4D bounds1;
+    EXPECT_FALSE(bounds1.valid());
+    bounds1 = bounds;
+    EXPECT_TRUE(bounds1.valid());
+}
+
+TEST_F(Bounds4DTest, test_is4d_3d_2d)
+{
+    Bounds4D bounds4d(bounds);
+    Bounds4D bounds3d(bounds.to3d());
+    Bounds4D bounds2d(bounds.to2d());
+
+    EXPECT_TRUE(bounds4d.is4d());
+    EXPECT_TRUE(bounds3d.is3d());
+    EXPECT_TRUE(bounds2d.is2d());
+}
+
+TEST_F(Bounds4DTest, test_reset)
+{
+    Bounds4D bounds1(b);
+    BOX4D b1(1, 2, 3, 4,
+             5, 6, 7, 8);
+    bounds1.reset(b1);
+    EXPECT_TRUE(bounds1.is4d());
+    EXPECT_FALSE(bounds1.is3d());
+    EXPECT_FALSE(bounds1.is2d());
+    EXPECT_TRUE(bounds1.to4d() == b1);
+
+    BOX3D b2(2, 3, 4, 5, 6, 7);
+    bounds1.reset(b2);
+    EXPECT_TRUE(bounds1.is3d());
+    EXPECT_FALSE(bounds1.is4d());
+    EXPECT_FALSE(bounds1.is2d());
+    EXPECT_TRUE(bounds1.to3d() == b2);
+
+    BOX2D b3(3, 4, 5, 6);
+    bounds1.reset(b3);
+    EXPECT_TRUE(bounds1.is2d());
+    EXPECT_FALSE(bounds1.is3d());
+    EXPECT_FALSE(bounds1.is4d());
+    EXPECT_TRUE(bounds1.to2d() == b3);
+}
+
+
 
 }

@@ -16,6 +16,10 @@ public:
     {}
     BOX2D_(const BOX3D& box) : BOX2D(box.minx, box.miny, box.maxx, box.maxy)
     {}
+    using BOX2D::maxx;
+    using BOX2D::maxy;
+    using BOX2D::minx;
+    using BOX2D::miny;
 };
 
 class PDAL_DLL BOX4D : private BOX3D
@@ -342,6 +346,8 @@ public:
     bool is4d() const;
     bool is3d() const;
     bool is2d() const;
+    bool empty() const;
+    bool valid() const;
     void reset(const BOX4D& box);
     void reset(const BOX3D& box);
     void reset(const BOX2D& box);

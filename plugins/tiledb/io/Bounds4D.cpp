@@ -191,6 +191,16 @@ bool Bounds4D::is2d() const
     return (valid() && !is4d() && !is3d());
 }
 
+bool Bounds4D::empty() const
+{
+    return m_box.empty();
+}
+
+bool Bounds4D::valid() const
+{
+    return m_box.valid();
+}
+
 void Bounds4D::reset(const BOX4D& box)
 {
     m_box = box;
@@ -326,9 +336,9 @@ std::ostream& operator<<(std::ostream& out, const Bounds4D& bounds)
 }
 
 class Metadata4D : public Metadata
-    {
-    std::string inferType(const std::string& val);
-    };
+{
+std::string inferType(const std::string& val);
+};
 
 std::string Metadata4D::inferType(const std::string& val)
 {
