@@ -243,7 +243,7 @@ void Bounds4D::grow(double x, double y)
 
 void Bounds4D::grow(double x, double y, double z)
 {
-    if (!is4d())
+    if (!is4d() && !is2d())
     {
         m_box.minx = (std::min)(x, m_box.minx);
         m_box.miny = (std::min)(y, m_box.miny);
@@ -256,7 +256,10 @@ void Bounds4D::grow(double x, double y, double z)
 
 void Bounds4D::grow(double x, double y, double z, double tm)
 {
-    m_box.grow(x, y, z, tm);
+    if (!is3d() && !is2d())
+    {
+        m_box.grow(x, y, z, tm);
+    }
 }
 
 void Bounds4D::parse(const std::string& s, std::string::size_type& pos)

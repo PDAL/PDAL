@@ -9,7 +9,7 @@
 namespace pdal
 {
 
-class PDAL_DLL BOX2D_ : public BOX2D
+class BOX2D_ : public BOX2D
 {
 public:
     BOX2D_() : BOX2D()
@@ -22,7 +22,7 @@ public:
     using BOX2D::miny;
 };
 
-class PDAL_DLL BOX4D : private BOX3D
+class BOX4D : private BOX3D
 {
 public:
     struct error : public std::runtime_error
@@ -324,7 +324,7 @@ public:
 };
 
 
-class PDAL_DLL Bounds4D : public Bounds
+class Bounds4D : public Bounds
 {
 public:
     struct error : public std::runtime_error
@@ -389,11 +389,11 @@ inline std::ostream& operator << (std::ostream& ostr, const BOX4D& bounds)
     return ostr;
 }
 
-extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX4D& bounds);
+extern std::istream& operator>>(std::istream& istr, BOX4D& bounds);
 
-PDAL_DLL std::istream& operator >> (std::istream& in, Bounds4D& bounds);
+std::istream& operator >> (std::istream& in, Bounds4D& bounds);
 
-PDAL_DLL std::ostream& operator << (std::ostream& out, const Bounds4D& bounds);
+std::ostream& operator << (std::ostream& out, const Bounds4D& bounds);
 
 namespace Utils
 {
