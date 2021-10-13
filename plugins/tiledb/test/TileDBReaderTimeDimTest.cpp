@@ -54,9 +54,6 @@ namespace pdal
 
 class TDBReaderTimeDimTest : public ::testing::Test
 {
-public:
-    TDBReaderTimeDimTest() : data_path(Support::temppath("xyztm_tdb_array"))
-    {}
 protected:
     virtual void SetUp()
     {
@@ -66,18 +63,23 @@ protected:
         Options reader_options;
         Options writer_options;
 
+        data_path = Support::temppath("xyztm_tdb_array");
+
         if (Utils::fileExists(data_path))
             tiledb::Object::remove(ctx, data_path);
 
         writer_options.add("array_name", data_path);
         writer_options.add("use_time_dim", true);
-        writer_options.add("x_tile_size", 2.f);
-        writer_options.add("y_tile_size", 2.f);
-        writer_options.add("z_tile_size", 2.f);
+        writer_options.add("x_tile_size", 10.f);
+        writer_options.add("y_tile_size", 10.f);
+        writer_options.add("z_tile_size", 10.f);
         writer_options.add("time_tile_size", 777600.f);
+        writer_options.add("use_time_dim", true);
 
         reader_options.add("bounds", BOX4D(0., 0., 0., 1314489618., 10., 10., 10., 1315353618.)); //sep 1 - sep 11 00:00:00 UTC 2021 -> gpstime
-        reader_options.add("count", 10);
+        reader_options.add("count", 100);
+        reader_options.add("xyz_mode", "ramp");
+        reader_options.add("time_mode", "ramp");
         rdr.setOptions(reader_options);
 
         writer.setOptions(writer_options);
@@ -93,23 +95,23 @@ protected:
 
 TEST_F(TDBReaderTimeDimTest, set_dims)
 {
-        tiledb::Context ctx;
+    tiledb::Context ctx;
 
-        tiledb::Array array(ctx, data_path, TILEDB_READ);
-        tiledb::Domain domain(array.schema().domain());
-        std::vector<std::string> dim_names{"X", "Y", "Z", "GpsTime"};
-        for (size_t i(0); i != 3; ++i)
-            EXPECT_EQ(domain.dimension(i).name(), dim_names[i]);
+    tiledb::Array array(ctx, data_path, TILEDB_READ);
+    tiledb::Domain domain(array.schema().domain());
+    std::vector<std::string> dim_names{"X", "Y", "Z", "GpsTime"};
+    for (size_t i(0); i != 3; ++i)
+        EXPECT_EQ(domain.dimension(i).name(), dim_names[i]);
 }
 
-TEST_F(TDBReaderTimeDimTest, test_has_time)
+TEST_F(TDBReaderTimeDimTest, read_bbox4d)
 {
     tiledb::Context ctx;
     tiledb::VFS vfs(ctx);
 
     Options options;
     options.add("array_name", data_path);
-    options.add("bbox4d", "([2., 8.], [2., 8.], [2., 8.], [1314662418., 1315180818.])"); // sep 3 - sep 9
+    options.add("bbox4d", "([2., 7.], [2., 7.], [2., 7.], [1314662418., 1315094418.])"); // sep 3 - sep 8
 
     TileDBReader reader;
     reader.setOptions(options);
@@ -118,10 +120,97 @@ TEST_F(TDBReaderTimeDimTest, test_has_time)
     reader.prepare(table);
     reader.execute(table);
 
-    EXPECT_TRUE(reader.hasTime());
+    EXPECT_EQ(table.numPoints(), 50);
 }
 
-TEST_F()
+TEST_F(TDBReaderTimeDimTest, read_4d)
+{
+    class Checker4D : public Filter, public Streamable
+    {
+    public:
+        std::string getName() const
+        {
+            return "checker4d";
+        }
+
+    private:
+        bool processOne(PointRef& point)
+        {
+            static int cnt = 0;
+            if (cnt == 0)
+            {
+                EXPECT_NEAR(0.f, point.getFieldAs<double>(Dimension::Id::X),
+                            1e-1);
+                EXPECT_NEAR(0.f, point.getFieldAs<double>(Dimension::Id::Y),
+                            1e-1);
+                EXPECT_NEAR(0.f, point.getFieldAs<double>(Dimension::Id::Z),
+                            1e-1);
+                EXPECT_NEAR(1314489618, point.getFieldAs<double>(Dimension::Id::GpsTime),
+                            10);
+                EXPECT_DOUBLE_EQ(1.0f, point.getFieldAs<double>(Dimension::Id::Density));
+            }
+            if (cnt == 1)
+            {
+                EXPECT_NEAR(0.101f, point.getFieldAs<double>(Dimension::Id::X),
+                            1e-1);
+                EXPECT_NEAR(0.101f, point.getFieldAs<double>(Dimension::Id::Y),
+                            1e-1);
+                EXPECT_NEAR(0.101f, point.getFieldAs<double>(Dimension::Id::Z),
+                            1e-1);
+                EXPECT_NEAR(1314498345, point.getFieldAs<double>(Dimension::Id::GpsTime),
+                            10);
+                EXPECT_DOUBLE_EQ(1.0, point.getFieldAs<double>(Dimension::Id::Density));
+            }
+            if (cnt == 2)
+            {
+                EXPECT_NEAR(0.202f, point.getFieldAs<double>(Dimension::Id::X),
+                            1e-1);
+                EXPECT_NEAR(0.202f, point.getFieldAs<double>(Dimension::Id::Y),
+                            1e-1);
+                EXPECT_NEAR(0.202f, point.getFieldAs<double>(Dimension::Id::Z),
+                            1e-1);
+                EXPECT_NEAR(1314507072, point.getFieldAs<double>(Dimension::Id::GpsTime),
+                            10);
+                EXPECT_DOUBLE_EQ(1.0, point.getFieldAs<double>(Dimension::Id::Density));
+            }
+            cnt++;
+            return true;
+        }
+    };
+    tiledb::Context ctx;
+    tiledb::VFS vfs(ctx);
+    Options options;
+    options.add("array_name", data_path);
+
+    tiledb::Array array(ctx, data_path, TILEDB_READ);
+    auto domain = array.non_empty_domain<double>();
+    std::vector<double> subarray;
+
+    for (const auto& kv : domain)
+    {
+        subarray.push_back(kv.second.first);
+        subarray.push_back(kv.second.second);
+    }
+
+    tiledb::Query q(ctx, array, TILEDB_READ);
+    q.set_subarray(subarray);
+
+    auto max_el = array.max_buffer_elements(subarray);
+    std::vector<double> coords(max_el[TILEDB_COORDS].second);
+    q.set_coordinates(coords);
+    q.submit();
+    array.close();
+
+    TileDBReader reader;
+    reader.setOptions(options);
+
+    FixedPointTable table(100);
+
+    Checker4D c4d;
+    c4d.setInput(reader);
+    c4d.prepare(table);
+    c4d.execute(table);
+}
 
 } // pdal namespace
 
