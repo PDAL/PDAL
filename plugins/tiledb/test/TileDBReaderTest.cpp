@@ -263,5 +263,4 @@ TEST_F(TileDBReaderTest, spatial_reference)
     EXPECT_TRUE(rdr.getSpatialReference().equals(utm16));
 };
 
-
 }; //pdal namespace

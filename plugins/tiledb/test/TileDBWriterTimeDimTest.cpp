@@ -470,6 +470,4 @@ TEST_F(TDBWriterTimeDimTest, append_write_with_time)
     array.close();
 }
 
-
-
 }
