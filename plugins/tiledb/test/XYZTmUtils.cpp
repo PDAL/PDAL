@@ -60,6 +60,8 @@ void XYZTimeFauxReader::addArgs(ProgramArgs& args)
                                         1., 1., 1., 1));
     args.add("xyz_mode", "mode for distribution of xyz dimension values", m_xyz_mode, Mode::Uniform);
     args.add("time_mode", "mode for distribution of time dimension values", m_tm_mode, Mode::Ramp);
+    args.add("use_time", "Add a time dimension in addition to XYZ (default true)", m_use_time, true);
+    args.add("density", "Double value to set density dimension in points", m_density, 1.0);
 }
 
 void XYZTimeFauxReader::prepared(PointTableRef table)
@@ -96,32 +98,49 @@ void XYZTimeFauxReader::initialize()
         }
     }
 
-    if (m_tm_mode == Mode::Uniform)
+    if (m_use_time)
     {
-        m_uniformTm.reset(new urd(m_bounds.mintm, m_bounds.maxtm));
-    }
-    else if (m_tm_mode == Mode::Ramp)
-    {
-        if (m_count > 1)
+        if (m_tm_mode == Mode::Uniform)
         {
-            m_delTm = (m_bounds.maxtm - m_bounds.mintm) / (m_count - 1);
+            m_uniformTm.reset(new urd(m_bounds.mintm, m_bounds.maxtm));
         }
-        else
+        else if (m_tm_mode == Mode::Ramp)
         {
-            m_delTm = 0;
+            if (m_count > 1)
+            {
+                m_delTm = (m_bounds.maxtm - m_bounds.mintm) / (m_count - 1);
+            }
+            else
+            {
+                m_delTm = 0;
+            }
         }
     }
 }
 
 void XYZTimeFauxReader::addDimensions(PointLayoutPtr layout)
 {
-    Dimension::IdList ids = {
-        Dimension::Id::X,
-        Dimension::Id::Y,
-        Dimension::Id::Z,
-        Dimension::Id::GpsTime,
-        Dimension::Id::Density
-    };
+    Dimension::IdList ids;
+    if (m_use_time)
+    {
+        ids = {
+            Dimension::Id::X,
+            Dimension::Id::Y,
+            Dimension::Id::Z,
+            Dimension::Id::GpsTime,
+            Dimension::Id::Density
+        };
+    }
+    else
+    {
+        ids = {
+            Dimension::Id::X,
+            Dimension::Id::Y,
+            Dimension::Id::Z,
+            Dimension::Id::Density
+        };
+    }
+
     layout->registerDims(ids);
 }
 
@@ -137,7 +156,6 @@ bool XYZTimeFauxReader::processOne(PointRef& point)
     double y(0);
     double z(0);
     double tm(0);
-    double density = 1.0;
 
     if (m_index >= m_count)
         return false;
@@ -158,23 +176,27 @@ bool XYZTimeFauxReader::processOne(PointRef& point)
         throwError("Invalid mode: only 'uniform' and 'ramp' implemented");
     }
 
-    switch (m_tm_mode)
+    if (m_use_time)
     {
-    case Mode::Uniform:
-        tm = (*m_uniformTm)(m_generator);
-        break;
-    case Mode::Ramp:
-        tm = m_bounds.mintm + m_delTm * m_index;
-        break;
-    default:
-        throwError("Invalid mode: only 'uniform' and 'ramp' implemented");
+        switch (m_tm_mode)
+        {
+        case Mode::Uniform:
+            tm = (*m_uniformTm)(m_generator);
+            break;
+        case Mode::Ramp:
+            tm = m_bounds.mintm + m_delTm * m_index;
+            break;
+        default:
+            throwError("Invalid mode: only 'uniform' and 'ramp' implemented");
+        }
     }
 
     point.setField(Dimension::Id::X, x);
     point.setField(Dimension::Id::Y, y);
     point.setField(Dimension::Id::Z, z);
-    point.setField(Dimension::Id::GpsTime, tm);
-    point.setField(Dimension::Id::Density, density);
+    if (m_use_time)
+        point.setField(Dimension::Id::GpsTime, tm);
+    point.setField(Dimension::Id::Density, m_density);
     m_index++;
     return true;
 }

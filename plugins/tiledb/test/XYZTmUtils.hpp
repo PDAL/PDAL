@@ -66,9 +66,11 @@ private:
     double m_delY;
     double m_delZ;
     double m_delTm;
+    double m_density;
     BOX4D m_bounds;
     Mode m_xyz_mode;
     Mode m_tm_mode;
+    bool m_use_time;
 
     virtual void addArgs(ProgramArgs& args);
 

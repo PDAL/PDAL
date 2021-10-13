@@ -256,11 +256,12 @@ TileDBWriter::TileDBWriter():
         "PointSourceId": {"compression": "bzip2"},
         "Red": {"compression": "zstd", "compression_level": 7},
         "Green": {"compression": "zstd", "compression_level": 7},
-        "Blue": {"compression": "zstd", "compression_level": 7},
-        "GpsTime": [
-            {"compression": "zstd", "compression_level": 7}
-        ]
+        "Blue": {"compression": "zstd", "compression_level": 7}
     })");
+
+//    "GpsTime": [
+//        {"compression": "zstd", "compression_level": 7}
+//    ]
 
     m_args->m_defaults = NL::json::parse(attributeDefaults);
 }
@@ -512,6 +513,8 @@ void TileDBWriter::ready(pdal::BasePointTable &table)
         else
             m_array.reset(new tiledb::Array(*m_ctx, m_args->m_arrayName,
                 TILEDB_WRITE));
+        if (m_array->schema().domain().has_dimension("GpsTime"))
+            m_use_time = true;
     }
 
     for (const auto& d : all)

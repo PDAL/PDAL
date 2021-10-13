@@ -62,7 +62,7 @@ Options getTileDBOptions()
     return options;
 }
 
-size_t count = 100;
+size_t count = 10;
 BOX4D rdr_bounds(0, 0, 0, 0, 10, 10, 10, 10);
 
 class TDBWriterTimeDimTest : public ::testing::Test
@@ -400,6 +400,101 @@ TEST_F(TDBWriterTimeDimTest, time_first_or_last)
     std::string last_dim_name = domain2.at(3).first;
 
     EXPECT_EQ(last_dim_name, "GpsTime");
+}
+
+TEST_F(TDBWriterTimeDimTest, append_write_with_time)
+{
+    tiledb::Context ctx;
+    tiledb::VFS vfs(ctx);
+
+    std::string out_path = Support::temppath("xyztm_append");
+
+    if (vfs.is_dir(out_path))
+    {
+        vfs.remove_dir(out_path);
+    }
+
+    Options options1 = getTileDBOptions();
+    options1.add("array_name", out_path);
+    options1.add("use_time_dim", true);
+    options1.add("time_first", false);
+
+    TileDBWriter writer1;
+    writer1.setOptions(options1);
+    writer1.setInput(m_reader);
+
+    FixedPointTable table1(100);
+    writer1.prepare(table1);
+    writer1.execute(table1);
+
+    Options reader_options;
+    reader_options.add("count", 10);
+    reader_options.add("xyz_mode", "ramp");
+    reader_options.add("bounds", rdr_bounds);
+    reader_options.add("density", 2.0);
+    reader_options.add("use_time", false);
+
+    XYZTimeFauxReader reader;
+    reader.setOptions(reader_options);
+
+    Options options2 = getTileDBOptions();
+    options2.add("array_name", out_path);
+    options2.add("append", true);
+
+    TileDBWriter writer2;
+    writer2.setOptions(options2);
+    writer2.setInput(reader);
+
+    FixedPointTable table2(100);
+    writer2.prepare(table2);
+    writer2.execute(table2);
+
+    tiledb::Array array(ctx, out_path, TILEDB_READ);
+    auto domain = array.non_empty_domain<double>();
+    std::vector<double> subarray;
+    for (const auto& kv: domain)
+    {
+        subarray.push_back(kv.second.first);
+        subarray.push_back(kv.second.second);
+    }
+
+    auto max_el = array.max_buffer_elements(subarray);
+    std::vector<double> coords(max_el[TILEDB_COORDS].second);
+    std::vector<double> d1(20);
+    std::vector<double> d2(20);
+    std::vector<double> d3(20);
+    std::vector<double> d4(20);
+    std::vector<double> d5(20);
+
+    tiledb::Query q(ctx, array, TILEDB_READ);
+    q.set_subarray(subarray)
+        .set_buffer("X", d1)
+        .set_buffer("Y", d2)
+        .set_buffer("Z", d3)
+        .set_buffer("GpsTime", d4)
+        .set_buffer("Density", d5);
+    q.submit();
+    
+    std::cout << "[ " << d1.at(0) << ", " << d2.at(0) << ", " << d3.at(0) << ", " << d4.at(0) << ", " << d5.at(0) << " ]" << std::endl;
+    std::cout << "[ " << d1.at(1) << ", " << d2.at(1) << ", " << d3.at(1) << ", " << d4.at(1) << ", " << d5.at(1) << " ]" << std::endl;
+    std::cout << "[ " << d1.at(2) << ", " << d2.at(2) << ", " << d3.at(2) << ", " << d4.at(2) << ", " << d5.at(2) << " ]" << std::endl;
+    std::cout << "[ " << d1.at(3) << ", " << d2.at(3) << ", " << d3.at(3) << ", " << d4.at(3) << ", " << d5.at(3) << " ]" << std::endl;
+    std::cout << "[ " << d1.at(4) << ", " << d2.at(4) << ", " << d3.at(4) << ", " << d4.at(4) << ", " << d5.at(4) << " ]" << std::endl;
+    std::cout << "[ " << d1.at(5) << ", " << d2.at(5) << ", " << d3.at(5) << ", " << d4.at(5) << ", " << d5.at(5) << " ]" << std::endl;
+    std::cout << "[ " << d1.at(6) << ", " << d2.at(6) << ", " << d3.at(6) << ", " << d4.at(6) << ", " << d5.at(6) << " ]" << std::endl;
+    std::cout << "[ " << d1.at(7) << ", " << d2.at(7) << ", " << d3.at(7) << ", " << d4.at(7) << ", " << d5.at(7) << " ]" << std::endl;
+    std::cout << "[ " << d1.at(8) << ", " << d2.at(8) << ", " << d3.at(8) << ", " << d4.at(8) << ", " << d5.at(8) << " ]" << std::endl;
+    std::cout << "[ " << d1.at(9) << ", " << d2.at(9) << ", " << d3.at(9) << ", " << d4.at(9) << ", " << d5.at(9) << " ]" << std::endl;
+    std::cout << "[ " << d1.at(10) << ", " << d2.at(10) << ", " << d3.at(10) << ", " << d4.at(10) << ", " << d5.at(10) << " ]" << std::endl;
+    std::cout << "[ " << d1.at(11) << ", " << d2.at(11) << ", " << d3.at(11) << ", " << d4.at(11) << ", " << d5.at(11) << " ]" << std::endl;
+    std::cout << "[ " << d1.at(12) << ", " << d2.at(12) << ", " << d3.at(12) << ", " << d4.at(12) << ", " << d5.at(12) << " ]" << std::endl;
+    std::cout << "[ " << d1.at(13) << ", " << d2.at(13) << ", " << d3.at(13) << ", " << d4.at(13) << ", " << d5.at(13) << " ]" << std::endl;
+    std::cout << "[ " << d1.at(14) << ", " << d2.at(14) << ", " << d3.at(14) << ", " << d4.at(14) << ", " << d5.at(14) << " ]" << std::endl;
+    std::cout << "[ " << d1.at(15) << ", " << d2.at(15) << ", " << d3.at(15) << ", " << d4.at(15) << ", " << d5.at(15) << " ]" << std::endl;
+    std::cout << "[ " << d1.at(16) << ", " << d2.at(16) << ", " << d3.at(16) << ", " << d4.at(16) << ", " << d5.at(16) << " ]" << std::endl;
+    std::cout << "[ " << d1.at(17) << ", " << d2.at(17) << ", " << d3.at(17) << ", " << d4.at(17) << ", " << d5.at(17) << " ]" << std::endl;
+    std::cout << "[ " << d1.at(18) << ", " << d2.at(18) << ", " << d3.at(18) << ", " << d4.at(18) << ", " << d5.at(18) << " ]" << std::endl;
+    std::cout << "[ " << d1.at(19) << ", " << d2.at(19) << ", " << d3.at(19) << ", " << d4.at(19) << ", " << d5.at(19) << " ]" << std::endl;
 }
 
 }
