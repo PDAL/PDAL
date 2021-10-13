@@ -256,12 +256,11 @@ TileDBWriter::TileDBWriter():
         "PointSourceId": {"compression": "bzip2"},
         "Red": {"compression": "zstd", "compression_level": 7},
         "Green": {"compression": "zstd", "compression_level": 7},
-        "Blue": {"compression": "zstd", "compression_level": 7}
+        "Blue": {"compression": "zstd", "compression_level": 7},
+        "GpsTime": [
+        {"compression": "zstd", "compression_level": 7}
+        ]
     })");
-
-//    "GpsTime": [
-//        {"compression": "zstd", "compression_level": 7}
-//    ]
 
     m_args->m_defaults = NL::json::parse(attributeDefaults);
 }

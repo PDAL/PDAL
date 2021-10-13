@@ -121,7 +121,7 @@ TEST_F(TDBReaderTimeDimTest, test_has_time)
     EXPECT_TRUE(reader.hasTime());
 }
 
-
+TEST_F()
 
 } // pdal namespace
 
