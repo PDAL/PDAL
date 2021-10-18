@@ -538,17 +538,17 @@
     "description": "Beam origin Z coordinate of current laser shot"
     },
     {
-    "name": "BeamDirectoyX",
+    "name": "BeamDirectionX",
     "type": "double",
     "description": "Beam direction unit vector X coordinate"
     },
     {
-    "name": "BeamDirectoyY",
+    "name": "BeamDirectionY",
     "type": "double",
     "description": "Beam direction unit vector Y coordinate"
     },
     {
-    "name": "BeamDirectoyZ",
+    "name": "BeamDirectionZ",
     "type": "double",
     "description": "Beam direction unit vector Z coordinate"
     }

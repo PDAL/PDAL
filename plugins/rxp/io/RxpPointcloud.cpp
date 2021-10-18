@@ -133,12 +133,12 @@ void RxpPointcloud::copyPoint(const Point& from, PointRef& to) const {
     to.setField(Id::BackgroundRadiation, from.target.background_radiation);
     to.setField(Id::IsPpsLocked, from.target.is_pps_locked);
     to.setField(Id::EdgeOfFlightLine, from.edgeOfFlightLine ? 1 : 0);
-    to.setField(Id::BeamDirectionX,beamDirectionX);
-    to.setField(Id::BeamDirectionY,beamDirectionY);
-    to.setField(Id::BeamDirectionZ,beamDirectionZ);
-    to.setField(Id::BeamOriginX,beamOriginX);
-    to.setField(Id::BeamOriginY,beamOriginY);
-    to.setField(Id::BeamOriginZ,beamOriginZ);
+    to.setField(Id::BeamDirectionX, from.beamDirectionX);
+    to.setField(Id::BeamDirectionY, from.beamDirectionY);
+    to.setField(Id::BeamDirectionZ, from.beamDirectionZ);
+    to.setField(Id::BeamOriginX, from.beamOriginX);
+    to.setField(Id::BeamOriginY, from.beamOriginY);
+    to.setField(Id::BeamOriginZ, from.beamOriginZ);
 
     if (m_reflectanceAsIntensity) {
         uint16_t intensity;
