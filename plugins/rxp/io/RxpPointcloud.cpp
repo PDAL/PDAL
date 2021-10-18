@@ -52,11 +52,27 @@ Dimension::Id getTimeDimensionId(bool syncToPps)
 }
 
 
-Point::Point(scanlib::target target, unsigned int returnNumber, unsigned int numberOfReturns, bool edgeOfFlightLine)
+Point::Point(
+        scanlib::target target,
+        unsigned int returnNumber,
+        unsigned int numberOfReturns,
+        bool edgeOfFlightLine,
+        double beamOriginX,
+        double beamOriginY,
+        double beamOriginZ,
+        double beamDirectionX,
+        double beamDirectionY,
+        double beamDirectionZ)
     : target(target)
     , returnNumber(returnNumber)
     , numberOfReturns(numberOfReturns)
     , edgeOfFlightLine(edgeOfFlightLine)
+    , beamOriginX(beamOriginX)
+    , beamOriginY(beamOriginY)
+    , beamOriginZ(beamOriginZ)
+    , beamDirectionX(beamDirectionX)
+    , beamDirectionY(beamDirectionY)
+    , beamDirectionZ(beamDirectionZ)
 {}
 
 
@@ -174,7 +190,7 @@ void RxpPointcloud::on_echo_transformed(echo_type echo)
     {
         //Only first return is marked as edge of flight line
         m_points.emplace_back(targets[i], returnNumber, target_count, m_edge, beam_origin[0], 
-        beam_origin[1], beam_origin[2], , beam_direction[0], beam_direction[1], beam_direction[2]);
+        beam_origin[1], beam_origin[2], beam_direction[0], beam_direction[1], beam_direction[2]);
         if (m_edge)
             m_edge = false;
     }
