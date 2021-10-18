@@ -60,6 +60,8 @@ struct Point {
     unsigned int returnNumber;
     unsigned int numberOfReturns;
     bool edgeOfFlightLine;
+    double beamOriginX, beamOriginY, beamOriginZ;
+    double beamDirectionX, beamDirectionY, beamDirectionZ;
 };
 
 

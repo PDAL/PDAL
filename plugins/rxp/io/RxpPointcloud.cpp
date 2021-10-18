@@ -133,6 +133,12 @@ void RxpPointcloud::copyPoint(const Point& from, PointRef& to) const {
     to.setField(Id::BackgroundRadiation, from.target.background_radiation);
     to.setField(Id::IsPpsLocked, from.target.is_pps_locked);
     to.setField(Id::EdgeOfFlightLine, from.edgeOfFlightLine ? 1 : 0);
+    to.setField(Id::BeamDirectionX,beamDirectionX);
+    to.setField(Id::BeamDirectionY,beamDirectionY);
+    to.setField(Id::BeamDirectionZ,beamDirectionZ);
+    to.setField(Id::BeamOriginX,beamOriginX);
+    to.setField(Id::BeamOriginY,beamOriginY);
+    to.setField(Id::BeamOriginZ,beamOriginZ);
 
     if (m_reflectanceAsIntensity) {
         uint16_t intensity;
@@ -167,7 +173,8 @@ void RxpPointcloud::on_echo_transformed(echo_type echo)
     for (scanlib::pointcloud::target_count_type i = 0; i < target_count; ++i, ++returnNumber)
     {
         //Only first return is marked as edge of flight line
-        m_points.emplace_back(targets[i], returnNumber, target_count, m_edge);
+        m_points.emplace_back(targets[i], returnNumber, target_count, m_edge, beam_origin[0], 
+        beam_origin[1], beam_origin[2], , beam_direction[0], beam_direction[1], beam_direction[2]);
         if (m_edge)
             m_edge = false;
     }
