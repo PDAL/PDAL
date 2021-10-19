@@ -36,7 +36,6 @@
 
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineWriter.hpp>
-#include <pdal/util/FileUtils.hpp>
 #include <pdal/pdal_export.hpp>
 
 #include <string>
@@ -64,7 +63,7 @@ public:
     /**
       dtor
     */
-    ~PipelineExecutor(){};
+    virtual ~PipelineExecutor() = default;
 
     /**
       Read the pipeline
@@ -119,11 +118,7 @@ public:
     /**
       \return has the pipeline been executed
     */
-    inline bool executed() const
-    {
-        return m_executed;
-    }
-
+    bool executed() const { return m_executed; }
 
     /**
       \return a const reference to the pipeline manager
@@ -135,16 +130,16 @@ public:
     */
     PipelineManager & getManager() { return m_manager; }
 
+protected:
+    pdal::PipelineManager m_manager;
+    bool m_executed;
+
 private:
-    void setLogStream(std::ostream& strm);
+    void setLogLevel(pdal::LogLevel level);
 
     std::string m_json;
-    pdal::PipelineManager m_manager;
     bool m_read;
-    bool m_executed;
     std::stringstream m_logStream;
-    pdal::LogLevel m_logLevel;
-
 };
 
 }

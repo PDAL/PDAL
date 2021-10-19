@@ -40,11 +40,12 @@ namespace pdal
 
 
 PipelineExecutor::PipelineExecutor(std::string const& json)
-    : m_json(json)
-    , m_read(false)
+    : m_manager(0)
     , m_executed(false)
-    , m_logLevel(pdal::LogLevel::Error)
+    , m_json(json)
+    , m_read(false)
 {
+    setLogLevel(pdal::LogLevel::Error);
 }
 
 
@@ -111,13 +112,11 @@ void PipelineExecutor::read()
 }
 
 
-void PipelineExecutor::setLogStream(std::ostream& strm)
+void PipelineExecutor::setLogLevel(pdal::LogLevel level)
 {
-
-    LogPtr log(Log::makeLog("pypipeline", &strm));
-    log->setLevel(m_logLevel);
+    LogPtr log(Log::makeLog("pypipeline", &m_logStream));
+    log->setLevel(level);
     m_manager.setLog(log);
-
 }
 
 
@@ -125,15 +124,13 @@ void PipelineExecutor::setLogLevel(int level)
 {
     if (level < 0 || level > 8)
         throw pdal_error("log level must be between 0 and 8!");
-
-    m_logLevel = static_cast<pdal::LogLevel>(level);
-    setLogStream(m_logStream);
+    setLogLevel(static_cast<pdal::LogLevel>(level));
 }
 
 
 int PipelineExecutor::getLogLevel() const
 {
-    return static_cast<int>(m_logLevel);
+    return static_cast<int>(m_manager.log()->getLevel());
 }
 
 
