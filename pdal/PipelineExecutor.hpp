@@ -67,11 +67,16 @@ public:
     ~PipelineExecutor(){};
 
     /**
+      Read the pipeline
+    */
+    void read();
+
+    /**
       Execute the pipeline
 
       \return total number of points produced by the pipeline.
     */
-    int64_t execute();
+    point_count_t execute();
 
     /**
       Validate the pipeline
@@ -135,6 +140,7 @@ private:
 
     std::string m_json;
     pdal::PipelineManager m_manager;
+    bool m_read;
     bool m_executed;
     std::stringstream m_logStream;
     pdal::LogLevel m_logLevel;

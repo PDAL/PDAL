@@ -41,6 +41,7 @@ namespace pdal
 
 PipelineExecutor::PipelineExecutor(std::string const& json)
     : m_json(json)
+    , m_read(false)
     , m_executed(false)
     , m_logLevel(pdal::LogLevel::Error)
 {
@@ -84,24 +85,29 @@ std::string PipelineExecutor::getSchema() const
 
 bool PipelineExecutor::validate()
 {
-    std::stringstream strm;
-    strm << m_json;
-    m_manager.readPipeline(strm);
+    read();
     m_manager.prepare();
-
     return true;
 }
 
-int64_t PipelineExecutor::execute()
+point_count_t PipelineExecutor::execute()
 {
-    std::stringstream strm;
-    strm << m_json;
-    m_manager.readPipeline(strm);
+    read();
     point_count_t count = m_manager.execute();
-
     m_executed = true;
-
     return count;
+}
+
+
+void PipelineExecutor::read()
+{
+    if (!m_read)
+    {
+        std::stringstream strm;
+        strm << m_json;
+        m_manager.readPipeline(strm);
+        m_read = true;
+    }
 }
 
 
@@ -138,4 +144,3 @@ std::string PipelineExecutor::getLog() const
 
 
 } //namespace pdal
-
