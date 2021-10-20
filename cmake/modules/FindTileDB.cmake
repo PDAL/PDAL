@@ -10,6 +10,9 @@
 # TILEDB_LIBRARY     = where to find the hexer library.
 # TILEDB_VERSION     = version of library which was found, e.g. "1.4.1"
 #
+# IMPORTED targets
+# This module defines the following IMPORTED target: ``TileDB::TileDB``
+#
 # Copyright (c) 2019 TileDB, Inc
 #
 # Redistribution and use is allowed according to the terms of the BSD license.
@@ -17,7 +20,7 @@
 #
 ###############################################################################
 
-IF(TILEDB_INCLUDE_DIR)
+IF(TILEDB_FOUND)
     # Already in cache, be silent
     SET(TILEDB_FIND_QUIETLY TRUE)
 ENDIF()
@@ -29,16 +32,14 @@ ENDIF()
 FIND_PATH(TILEDB_INCLUDE_DIR
         tiledb
         PATHS
-        /usr/include
-        /usr/local/include
-        ${TILEDB_HOME}/dist/include)
+        ${TILEDB_HOME}/dist/include
+        ${TILEDB_ROOT}/include)
 
 FIND_LIBRARY(TILEDB_LIBRARY
         NAMES tiledb
         PATHS
-        /usr/lib
-        /usr/local/lib
-        ${TILEDB_HOME}/dist/lib)
+        ${TILEDB_HOME}/dist/lib
+        ${TILEDB_ROOT}/lib)
 
 SET(TILEDB_VERSION_H "${TILEDB_INCLUDE_DIR}/tiledb/tiledb_version.h")
 IF(TILEDB_INCLUDE_DIR AND EXISTS ${TILEDB_VERSION_H})
@@ -78,4 +79,13 @@ SET(TILEDB_LIBRARIES ${TILEDB_LIBRARY})
 # Handle the QUIETLY and REQUIRED arguments and set TILEDB_FOUND to TRUE
 # if all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(TILEDB DEFAULT_MSG TILEDB_LIBRARY TILEDB_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(TileDB DEFAULT_MSG TILEDB_LIBRARY TILEDB_INCLUDE_DIR)
+
+if(TILEDB_FOUND)
+  if(NOT TARGET TileDB::TileDB)
+    add_library(TileDB::TileDB UNKNOWN IMPORTED)
+    set_target_properties(TileDB::TileDB PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${TILEDB_INCLUDE_DIR})
+    set_target_properties(TileDB::TileDB PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
+        IMPORTED_LOCATION "${TILEDB_LIBRARY}")
+  endif()
+endif()
