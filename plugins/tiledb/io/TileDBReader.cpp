@@ -34,7 +34,6 @@
 
 #include <algorithm>
 
-#include <pdal/PDALUtils.hpp>
 #include <nlohmann/json.hpp>
 
 #include "TileDBReader.hpp"
