@@ -197,12 +197,7 @@ bool XYZTimeFauxReader::processOne(PointRef& point)
     point.setField(Dimension::Id::Y, y);
     point.setField(Dimension::Id::Z, z);
     if (m_use_time)
-    {
-        if (m_dim4_name == "GpsTime")
-            point.setField(Dimension::Id::GpsTime, tm);
-        else
-            point.setField(Dimension::id(m_dim4_name), tm);
-    }
+        point.setField(Dimension::id(m_dim4_name), tm);
     point.setField(Dimension::Id::Density, m_density);
     m_index++;
     return true;
