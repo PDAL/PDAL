@@ -74,7 +74,6 @@ protected:
         writer_options.add("y_tile_size", 10.f);
         writer_options.add("z_tile_size", 10.f);
         writer_options.add("time_tile_size", 777600.f);
-        writer_options.add("use_time_dim", true);
 
         reader_options.add("bounds", BOX4D(0., 0., 0., 1314489618., 10., 10., 10., 1315353618.)); //sep 1 - sep 11 00:00:00 UTC 2021 -> gpstime
         reader_options.add("count", 100);
@@ -210,6 +209,25 @@ TEST_F(TDBReaderTimeDimTest, read_4d)
     c4d.setInput(reader);
     c4d.prepare(table);
     c4d.execute(table);
+}
+
+TEST(TileDBReaderTimeDimTest, test_dim4_change_name)
+{
+    Options input_options;
+    input_options.add("bounds", BOX4D(0., 0., 0., 0., 10., 10., 10., 10.));
+    input_options.add("count", 100);
+    input_options.add("xyz_mode", "ramp");
+    input_options.add("time_mode", "ramp");
+    input_options.add("dim4_name", "something");
+
+    XYZTimeFauxReader faux_reader;
+    faux_reader.setOptions(input_options);
+
+    FixedPointTable table(100);
+    faux_reader.prepare(table);
+    faux_reader.execute(table);
+
+    EXPECT_TRUE(table.layout()->dimName(table.layout()->findDim("something")) == "something");
 }
 
 } // pdal namespace

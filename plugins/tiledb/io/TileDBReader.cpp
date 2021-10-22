@@ -34,6 +34,7 @@
 
 #include <algorithm>
 
+#include <pdal/PDALUtils.hpp>
 #include <nlohmann/json.hpp>
 
 #include "TileDBReader.hpp"
@@ -318,10 +319,10 @@ void TileDBReader::localReady()
         if (numDims == 2)
             m_query->set_subarray({m_bbox.minx, m_bbox.maxx,
                 m_bbox.miny, m_bbox.maxy});
-        else if (numDims == 4 && m_has_time)
+        else if (numDims == 4)
             m_query->set_subarray({m_bbox.minx, m_bbox.maxx,
-                m_bbox.miny, m_bbox.maxy, m_bbox.minz, m_bbox.maxz,
-                m_bbox.mintm, m_bbox.maxtm});
+               m_bbox.miny, m_bbox.maxy, m_bbox.minz, m_bbox.maxz,
+               m_bbox.mintm, m_bbox.maxtm});
         else
             m_query->set_subarray({m_bbox.minx, m_bbox.maxx,
                 m_bbox.miny, m_bbox.maxy, m_bbox.minz, m_bbox.maxz});

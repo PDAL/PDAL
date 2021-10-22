@@ -699,7 +699,7 @@ bool TileDBWriter::flushCache(size_t size)
         coords.push_back(m_xs[i]);
         coords.push_back(m_ys[i]);
         coords.push_back(m_zs[i]);
-        if (has_time_dim)
+        if (m_use_time)
             coords.push_back(m_tms[i]);
     }
     query.set_coordinates(coords);

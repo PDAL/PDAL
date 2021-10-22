@@ -71,6 +71,7 @@ private:
     Mode m_xyz_mode;
     Mode m_tm_mode;
     bool m_use_time;
+    std::string m_dim4_name;
 
     virtual void addArgs(ProgramArgs& args);
 

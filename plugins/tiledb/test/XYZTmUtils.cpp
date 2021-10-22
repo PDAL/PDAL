@@ -61,6 +61,7 @@ void XYZTimeFauxReader::addArgs(ProgramArgs& args)
     args.add("xyz_mode", "mode for distribution of xyz dimension values", m_xyz_mode, Mode::Uniform);
     args.add("time_mode", "mode for distribution of time dimension values", m_tm_mode, Mode::Ramp);
     args.add("use_time", "Add a time dimension in addition to XYZ (default true)", m_use_time, true);
+    args.add("dim4_name", "Use this to change the name of the 4th dimension from 'GpsTime'", m_dim4_name, "GpsTime");
     args.add("density", "Double value to set density dimension in points", m_density, 1.0);
 }
 
@@ -121,7 +122,7 @@ void XYZTimeFauxReader::initialize()
 void XYZTimeFauxReader::addDimensions(PointLayoutPtr layout)
 {
     Dimension::IdList ids;
-    if (m_use_time)
+    if (m_use_time && m_dim4_name == "GpsTime")
     {
         ids = {
             Dimension::Id::X,
@@ -140,8 +141,9 @@ void XYZTimeFauxReader::addDimensions(PointLayoutPtr layout)
             Dimension::Id::Density
         };
     }
-
     layout->registerDims(ids);
+    if (m_use_time && m_dim4_name != "GpsTime")
+        layout->registerOrAssignDim(m_dim4_name, Dimension::Type::Double);
 }
 
 void XYZTimeFauxReader::ready(PointTableRef table)
@@ -195,7 +197,12 @@ bool XYZTimeFauxReader::processOne(PointRef& point)
     point.setField(Dimension::Id::Y, y);
     point.setField(Dimension::Id::Z, z);
     if (m_use_time)
-        point.setField(Dimension::Id::GpsTime, tm);
+    {
+        if (m_dim4_name == "GpsTime")
+            point.setField(Dimension::Id::GpsTime, tm);
+        else
+            point.setField(Dimension::id(m_dim4_name), tm);
+    }
     point.setField(Dimension::Id::Density, m_density);
     m_index++;
     return true;
