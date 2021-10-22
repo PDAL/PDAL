@@ -100,7 +100,7 @@ TEST_F(TDBReaderTimeDimTest, set_dims)
     tiledb::Domain domain(array.schema().domain());
     std::vector<std::string> dim_names{"X", "Y", "Z", "GpsTime"};
     for (size_t i(0); i != 3; ++i)
-        EXPECT_EQ(domain.dimension(i).name(), dim_names[i]);
+        EXPECT_EQ(domain.dimensions().at(i).name(), dim_names[i]);
 }
 
 TEST_F(TDBReaderTimeDimTest, read_bbox4d)
