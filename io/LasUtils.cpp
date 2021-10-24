@@ -178,12 +178,13 @@ std::vector<ExtraDim> ExtraBytesIf::toExtraDims()
 namespace LasUtils
 {
 
-using D = Dimension::Id;
-const std::vector<D>& pdrfDims(int pdrf)
+const Dimension::IdList& pdrfDims(int pdrf)
 {
     if (pdrf < 0 || pdrf > 10)
         pdrf = 10;
-    static const std::vector<D> dims[11]
+
+    using D = Dimension::Id;
+    static const Dimension::IdList dims[11]
     {
         // 0
         { D::X, D::Y, D::Z, D::Intensity, D::ReturnNumber, D::NumberOfReturns, D::ScanDirectionFlag,
