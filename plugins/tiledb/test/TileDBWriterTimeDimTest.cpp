@@ -58,6 +58,10 @@ Options getTileDBOptions()
     options.add("z_domain_end", 10);
     options.add("time_domain_st", 0);
     options.add("time_domain_end", 10);
+    options.add("x_tile_size", 10);
+    options.add("y_tile_size", 10);
+    options.add("z_tile_size", 10);
+    options.add("time_tile_size", 10);
 
     return options;
 }
