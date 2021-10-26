@@ -557,11 +557,15 @@ void LasReader::readExtraBytesVlr()
     }
 
     std::vector<ExtraDim> extraDims;
+    int byteOffset = 0;
     for (ExtraBytesIf& eb : ebList)
     {
-       std::vector<ExtraDim> eds = eb.toExtraDims();
+       std::vector<ExtraDim> eds = eb.toExtraDims(byteOffset);
        for (auto& ed : eds)
+       {
            extraDims.push_back(std::move(ed));
+           byteOffset += ed.m_size;
+       }
     }
     if (m_p->extraDims.size() && m_p->extraDims != extraDims)
         log()->get(LogLevel::Warning) << "Extra byte dimensions specified "

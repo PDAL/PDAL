@@ -44,7 +44,7 @@ namespace pdal
 {
 
 /**
-  Allow a data buffer to be used at a std::streambuf.
+  Allow a data buffer to be used as a std::streambuf.
 */
 class PDAL_DLL Charbuf : public std::streambuf
 {

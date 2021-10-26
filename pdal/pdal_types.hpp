@@ -124,6 +124,9 @@ struct XForm
     double toScaled(double val) const
         { return (val - m_offset.m_val) / m_scale.m_val; }
 
+    double fromScaled(double val) const
+        { return (val * m_scale.m_val) + m_offset.m_val; }
+
     bool nonstandard() const
     {
         return m_scale.m_auto || m_offset.m_auto ||

@@ -34,12 +34,16 @@
 
 #pragma once
 
+#include <string>
+
 #include <pdal/Dimension.hpp>
 #include <pdal/DimType.hpp>
-#include <string>
+#include <pdal/Scaling.hpp>
 
 namespace pdal
 {
+
+class PointRef;
 
 enum class LasCompression
 {
@@ -82,20 +86,24 @@ inline std::ostream& operator<<(std::ostream& out, const LasCompression& c)
 
 struct ExtraDim
 {
-    ExtraDim(const std::string name, Dimension::Type type,
-        double scale = 1.0, double offset = 0.0) :
-            m_name(name), m_dimType(Dimension::Id::Unknown, type, scale, offset)
-        { m_size = (uint8_t)Dimension::size(type); }
-    ExtraDim(const std::string name, uint8_t size) : m_name(name),
-        m_dimType(Dimension::Id::Unknown, Dimension::Type::None), m_size(size)
+    ExtraDim(const std::string name, Dimension::Type type, int byteOffset,
+             double scale = 1.0, double offset = 0.0) :
+        m_name(name), m_dimType(Dimension::Id::Unknown, type, scale, offset),
+        m_size((uint8_t)Dimension::size(type)), m_byteOffset(byteOffset)
+    {}
+    ExtraDim(const std::string name, uint8_t size, int byteOffset) : m_name(name),
+        m_dimType(Dimension::Id::Unknown, Dimension::Type::None), m_size(size),
+        m_byteOffset(byteOffset)
     {}
 
     friend bool operator == (const ExtraDim& ed1, const ExtraDim& ed2);
 
     std::string m_name;
     DimType m_dimType;
-    size_t m_size;
+    uint8_t m_size;
+    int32_t m_byteOffset;
 };
+using ExtraDims = std::vector<ExtraDim>;
 
 inline bool operator == (const ExtraDim& ed1, const ExtraDim& ed2)
 {
@@ -155,7 +163,7 @@ public:
     void readFrom(const char *buf);
     uint8_t lasType();
     void setType(uint8_t lastype);
-    std::vector<ExtraDim> toExtraDims();
+    std::vector<ExtraDim> toExtraDims(int byteOffset);
 
 private:
     Dimension::Type m_type;
@@ -187,6 +195,114 @@ struct IgnoreVLR
 std::vector<IgnoreVLR> parseIgnoreVLRs(const StringList& ignored);
 const std::vector<Dimension::Id>& pdrfDims(int pdrf);
 
-} // namespace LasUtils
+// Loader
 
+class LoaderDriver;
+
+class PointLoader
+{
+    friend class LoaderDriver;
+public:
+    virtual ~PointLoader() = default;
+
+private:
+    virtual void load(PointRef& point, const char *buf, int bufsize) = 0;
+};
+using PointLoaderPtr = std::unique_ptr<PointLoader>;
+
+class PointFilter
+{
+    friend class LoaderDriver;
+
+public:
+    virtual ~PointFilter() = default;
+
+private:
+    virtual bool passes(PointRef& point) = 0;
+};
+using PointFilterPtr = std::unique_ptr<PointFilter>;
+
+class V10BaseLoader : public PointLoader
+{
+public:
+    V10BaseLoader(const Scaling& scaling);
+
+private:
+    virtual void load(PointRef& point, const char *buf, int bufsize) override;
+
+    Scaling m_scaling;
+};
+
+class V14BaseLoader : public PointLoader
+{
+public:
+    V14BaseLoader(const Scaling& scaling);
+
+private:
+    virtual void load(PointRef& point, const char *buf, int bufsize) override;
+
+    Scaling m_scaling;
+};
+
+class GpstimeLoader : public PointLoader
+{
+public:
+    GpstimeLoader(int offset) : m_offset(offset)
+    {}
+
+private:
+    virtual void load(PointRef& point, const char *buf, int bufsize) override;
+
+    int m_offset;
+};
+
+class ColorLoader : public PointLoader
+{
+public:
+    ColorLoader(int offset) : m_offset(offset)
+    {}
+
+private:
+    virtual void load(PointRef& point, const char *buf, int bufsize) override;
+
+    int m_offset;
+};
+
+class NirLoader : public PointLoader
+{
+public:
+    NirLoader(int offset) : m_offset(offset)
+    {}
+
+private:
+    virtual void load(PointRef& point, const char *buf, int bufsize) override;
+
+    int m_offset;
+};
+
+class ExtraDimLoader : public PointLoader
+{
+public:
+    ExtraDimLoader(const ExtraDims& extraDims) : m_extraDims(extraDims)
+    {}
+
+private:
+    virtual void load(PointRef& point, const char *buf, int bufsize) override;
+
+    ExtraDims m_extraDims;
+};
+
+class LoaderDriver
+{
+public:
+    LoaderDriver() = default;
+    LoaderDriver(int pdrf, const Scaling& scaling, const ExtraDims& dims);
+
+    void init(int pdrf, const Scaling& scaling, const ExtraDims& dims);
+    bool load(PointRef& point, const char *buf, int bufsize);
+private:
+    std::vector<PointLoaderPtr> m_loaders;
+};
+
+} // namespace LasUtils
 } // namespace pdal

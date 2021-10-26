@@ -34,6 +34,8 @@
 
 #include "LasUtils.hpp"
 
+#include <pdal/PointRef.hpp>
+
 #include <pdal/util/Extractor.hpp>
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/Utils.hpp>
@@ -150,26 +152,27 @@ void ExtraBytesIf::readFrom(const char *buf)
 }
 
 
-std::vector<ExtraDim> ExtraBytesIf::toExtraDims()
+std::vector<ExtraDim> ExtraBytesIf::toExtraDims(int byteOffset)
 {
     std::vector<ExtraDim> eds;
 
     if (m_type == Dimension::Type::None)
     {
-        ExtraDim ed(m_name, m_size);
+        ExtraDim ed(m_name, m_size, byteOffset);
         eds.push_back(ed);
     }
     else if (m_fieldCnt == 1)
     {
-        ExtraDim ed(m_name, m_type, m_scale[0], m_offset[0]);
+        ExtraDim ed(m_name, m_type, byteOffset, m_scale[0], m_offset[0]);
         eds.push_back(ed);
     }
     else
     {
         for (size_t i = 0; i < m_fieldCnt; ++i)
         {
-            ExtraDim ed(m_name + std::to_string(i), m_type, m_scale[i], m_offset[i]);
+            ExtraDim ed(m_name + std::to_string(i), m_type, byteOffset, m_scale[i], m_offset[i]);
             eds.push_back(ed);
+            byteOffset += ed.m_size;
         }
     }
     return eds;
@@ -252,11 +255,13 @@ std::vector<IgnoreVLR> parseIgnoreVLRs(const StringList& ignored)
     return ignoredVLRs;
 
 }
+
 std::vector<ExtraDim> parse(const StringList& dimString, bool allOk)
 {
     std::vector<ExtraDim> extraDims;
     bool all = false;
 
+    int byteOffset = 0;
     for (auto& dim : dimString)
     {
         if (dim == "all")
@@ -282,8 +287,9 @@ std::vector<ExtraDim> parse(const StringList& dimString, bool allOk)
             throw error("Invalid extra dimension type specified: '" + dim +
                 "'.  Need <dimension>=<type>.  See documentation "
                 " for details.");
-        ExtraDim ed(s[0], type);
+        ExtraDim ed(s[0], type, byteOffset);
         extraDims.push_back(ed);
+        byteOffset += ed.m_size;
     }
 
     if (all)
@@ -291,12 +297,207 @@ std::vector<ExtraDim> parse(const StringList& dimString, bool allOk)
         if (extraDims.size())
             throw error("Can't specify specific extra dimensions with "
                 "special 'all' keyword.");
-        extraDims.push_back(ExtraDim("all", Dimension::Type::None));
+        extraDims.push_back(ExtraDim("all", Dimension::Type::None, 0));
     }
 
     return extraDims;
 }
 
-} // namespace LasUtils
+// LAS loader driver
 
+LoaderDriver::LoaderDriver(int pdrf, const Scaling& scaling, const ExtraDims& dims)
+{
+    init(pdrf, scaling, dims);
+}
+
+void LoaderDriver::init(int pdrf, const Scaling& scaling, const ExtraDims& dims)
+{
+    switch (pdrf)
+    {
+    case 0:
+        m_loaders.push_back(PointLoaderPtr(new V10BaseLoader(scaling)));
+        break;
+    case 1:
+        m_loaders.push_back(PointLoaderPtr(new V10BaseLoader(scaling)));
+        m_loaders.push_back(PointLoaderPtr(new GpstimeLoader(20)));
+        break;
+    case 2:
+        m_loaders.push_back(PointLoaderPtr(new V10BaseLoader(scaling)));
+        m_loaders.push_back(PointLoaderPtr(new ColorLoader(20)));
+        break;
+    case 3:
+        m_loaders.push_back(PointLoaderPtr(new V10BaseLoader(scaling)));
+        m_loaders.push_back(PointLoaderPtr(new GpstimeLoader(20)));
+        m_loaders.push_back(PointLoaderPtr(new ColorLoader(28)));
+        break;
+    case 6:
+        m_loaders.push_back(PointLoaderPtr(new V14BaseLoader(scaling)));
+        break;
+    case 7:
+        m_loaders.push_back(PointLoaderPtr(new V14BaseLoader(scaling)));
+        m_loaders.push_back(PointLoaderPtr(new ColorLoader(30)));
+        break;
+    case 8:
+        m_loaders.push_back(PointLoaderPtr(new V14BaseLoader(scaling)));
+        m_loaders.push_back(PointLoaderPtr(new ColorLoader(30)));
+        m_loaders.push_back(PointLoaderPtr(new NirLoader(36)));
+        break;
+    }
+    if (dims.size())
+        m_loaders.push_back(PointLoaderPtr(new ExtraDimLoader(dims)));
+}
+
+bool LoaderDriver::load(PointRef& point, const char *buf, int bufsize)
+{
+    for (PointLoaderPtr& l : m_loaders)
+        l->load(point, buf, bufsize);
+    return true;
+}
+
+V10BaseLoader::V10BaseLoader(const Scaling& scaling) : m_scaling(scaling)
+{}
+
+void V10BaseLoader::load(PointRef& point, const char *buf, int bufsize)
+{
+    LeExtractor istream(buf, bufsize);
+
+    int32_t xi, yi, zi;
+    istream >> xi >> yi >> zi;
+
+    double x = m_scaling.m_xXform.fromScaled(xi);
+    double y = m_scaling.m_yXform.fromScaled(yi);
+    double z = m_scaling.m_zXform.fromScaled(zi);
+
+    uint16_t intensity;
+    uint8_t flags;
+    uint8_t classification;
+    int8_t scanAngleRank;
+    uint8_t user;
+    uint16_t pointSourceId;
+
+    istream >> intensity >> flags >> classification >> scanAngleRank >> user >> pointSourceId;
+
+    uint8_t returnNum = flags & 0x07;
+    uint8_t numReturns = (flags >> 3) & 0x07;
+    uint8_t scanDirFlag = (flags >> 6) & 0x01;
+    uint8_t flight = (flags >> 7) & 0x01;
+
+    point.setField(Dimension::Id::X, x);
+    point.setField(Dimension::Id::Y, y);
+    point.setField(Dimension::Id::Z, z);
+    point.setField(Dimension::Id::Intensity, intensity);
+    point.setField(Dimension::Id::ReturnNumber, returnNum);
+    point.setField(Dimension::Id::NumberOfReturns, numReturns);
+    point.setField(Dimension::Id::ScanDirectionFlag, scanDirFlag);
+    point.setField(Dimension::Id::EdgeOfFlightLine, flight);
+    point.setField(Dimension::Id::Classification, classification);
+    point.setField(Dimension::Id::ScanAngleRank, scanAngleRank);
+    point.setField(Dimension::Id::UserData, user);
+    point.setField(Dimension::Id::PointSourceId, pointSourceId);
+}
+
+void GpstimeLoader::load(PointRef& point, const char *buf, int bufsize)
+{
+    buf += m_offset;
+    bufsize -= m_offset;
+
+    LeExtractor istream(buf, bufsize);
+
+    double time;
+    istream >> time;
+    point.setField(Dimension::Id::GpsTime, time);
+}
+
+void ColorLoader::load(PointRef& point, const char *buf, int bufsize)
+{
+    buf += m_offset;
+    bufsize -= m_offset;
+
+    LeExtractor istream(buf, bufsize);
+
+    uint16_t red, green, blue;
+    istream >> red >> green >> blue;
+    point.setField(Dimension::Id::Red, red);
+    point.setField(Dimension::Id::Green, green);
+    point.setField(Dimension::Id::Blue, blue);
+}
+
+V14BaseLoader::V14BaseLoader(const Scaling& scaling) : m_scaling(scaling)
+{}
+
+void V14BaseLoader::load(PointRef& point, const char *buf, int bufsize)
+{
+    LeExtractor istream(buf, bufsize);
+
+    int32_t xi, yi, zi;
+    istream >> xi >> yi >> zi;
+
+    double x = m_scaling.m_xXform.fromScaled(xi);
+    double y = m_scaling.m_yXform.fromScaled(yi);
+    double z = m_scaling.m_zXform.fromScaled(zi);
+
+    uint16_t intensity;
+    uint8_t returnInfo;
+    uint8_t flags;
+    uint8_t classification;
+    uint8_t user;
+    int16_t scanAngle;
+    uint16_t pointSourceId;
+    double gpsTime;
+
+    istream >> intensity >> returnInfo >> flags >> classification >> user >>
+        scanAngle >> pointSourceId >> gpsTime;
+
+    uint8_t returnNum = returnInfo & 0x0F;
+    uint8_t numReturns = (returnInfo >> 4) & 0x0F;
+    uint8_t classFlags = flags & 0x0F;
+    uint8_t scanChannel = (flags >> 4) & 0x03;
+    uint8_t scanDirFlag = (flags >> 6) & 0x01;
+    uint8_t flight = (flags >> 7) & 0x01;
+
+    point.setField(Dimension::Id::X, x);
+    point.setField(Dimension::Id::Y, y);
+    point.setField(Dimension::Id::Z, z);
+    point.setField(Dimension::Id::Intensity, intensity);
+    point.setField(Dimension::Id::ReturnNumber, returnNum);
+    point.setField(Dimension::Id::NumberOfReturns, numReturns);
+    point.setField(Dimension::Id::ClassFlags, classFlags);
+    point.setField(Dimension::Id::ScanChannel, scanChannel);
+    point.setField(Dimension::Id::ScanDirectionFlag, scanDirFlag);
+    point.setField(Dimension::Id::EdgeOfFlightLine, flight);
+    point.setField(Dimension::Id::Classification, classification);
+    point.setField(Dimension::Id::ScanAngleRank, scanAngle * .006);
+    point.setField(Dimension::Id::UserData, user);
+    point.setField(Dimension::Id::PointSourceId, pointSourceId);
+    point.setField(Dimension::Id::GpsTime, gpsTime);
+}
+
+void NirLoader::load(PointRef& point, const char *buf, int bufsize)
+{
+    buf += m_offset;
+    bufsize -= m_offset;
+
+    LeExtractor istream(buf, bufsize);
+
+    uint16_t nearInfraRed;
+
+    istream >> nearInfraRed;
+    point.setField(Dimension::Id::Infrared, nearInfraRed);
+}
+
+void ExtraDimLoader::load(PointRef& point, const char *buf, int bufsize)
+{
+    for (const ExtraDim& d : m_extraDims)
+    {
+        const DimType& dt = d.m_dimType;
+        LeExtractor istream(buf + d.m_byteOffset, bufsize - d.m_byteOffset);
+        Everything e = Utils::extractDim(istream, dt.m_type);
+        if (dt.m_xform.nonstandard())
+            point.setField(dt.m_id, dt.m_xform.fromScaled(Utils::toDouble(e, dt.m_type)));
+        else
+            point.setField(dt.m_id, dt.m_type, &e);
+    }
+}
+
+} // namespace LasUtils
 } // namespace pdal
