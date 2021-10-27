@@ -38,6 +38,8 @@
 
 namespace pdal
 {
+namespace ept
+{
 
 Connector::Connector() : m_arbiter(new arbiter::Arbiter())
 {}
@@ -106,4 +108,5 @@ void Connector::makeDir(const std::string& path) const
         arbiter::mkdirp(path);
 }
 
+} // namespace ept
 } // namespace pdal

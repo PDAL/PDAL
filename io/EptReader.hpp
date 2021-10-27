@@ -44,16 +44,20 @@
 #include <pdal/Streamable.hpp>
 #include <pdal/util/Bounds.hpp>
 
+using StringMap = std::map<std::string, std::string>;
+
 namespace pdal
 {
 
-class Connector;
-class EptInfo;
-class Key;
-class TileContents;
-struct Overlap;
-using Hierarchy = std::unordered_set<Overlap>;
-using StringMap = std::map<std::string, std::string>;
+namespace ept
+{
+    class Connector;
+    class EptInfo;
+    class Key;
+    class TileContents;
+    struct Overlap;
+    using Hierarchy = std::unordered_set<Overlap>;
+}
 
 class PDAL_DLL EptReader : public Reader, public Streamable
 {
@@ -84,13 +88,13 @@ private:
     // points from a walk through the hierarchy.  Each of these keys will be
     // downloaded during the 'read' section.
     void overlaps();
-    void overlaps(Hierarchy& target, const NL::json& current, const Key& key);
+    void overlaps(ept::Hierarchy& target, const NL::json& current, const ept::Key& key);
     bool hasSpatialFilter() const;
     bool passesSpatialFilter(const BOX3D& tileBounds) const;
-    void process(PointViewPtr dstView, const TileContents& tile, point_count_t count);
-    bool processPoint(PointRef& dst, const TileContents& tile);
-    void load(const Overlap& overlap);
-    void checkTile(const TileContents& tile);
+    void process(PointViewPtr dstView, const ept::TileContents& tile, point_count_t count);
+    bool processPoint(PointRef& dst, const ept::TileContents& tile);
+    void load(const ept::Overlap& overlap);
+    void checkTile(const ept::TileContents& tile);
 
     struct Args;
     std::unique_ptr<Args> m_args;
