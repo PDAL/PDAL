@@ -43,6 +43,8 @@
 
 namespace pdal
 {
+namespace copc
+{
 
 class PDAL_DLL Key
 {
@@ -173,14 +175,15 @@ inline std::ostream& operator<<(std::ostream& out, const Key& k)
     return out;
 }
 
+} // namespace copc
 } // namespace pdal
 
 namespace std
 {
     template<>
-    struct hash<pdal::Key>
+    struct hash<pdal::copc::Key>
     {
-        std::size_t operator()(pdal::Key const& k) const noexcept
+        std::size_t operator()(pdal::copc::Key const& k) const noexcept
         {
             std::hash<uint64_t> h;
 

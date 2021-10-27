@@ -36,6 +36,8 @@
 
 namespace pdal
 {
+namespace copc
+{
 
 Hierarchy::Hierarchy(const std::vector<char>& data)
 {
@@ -48,4 +50,5 @@ Hierarchy::Hierarchy(const std::vector<char>& data)
     }
 }
 
+} // namespace copc
 } // namespace pdal

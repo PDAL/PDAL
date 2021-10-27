@@ -38,21 +38,13 @@
 
 namespace pdal
 {
+namespace copc
+{
 
 Connector::Connector(const std::string& filename, const StringMap& headers,
         const StringMap& query) :
     m_filename(filename), m_headers(headers), m_query(query), m_arbiter(new arbiter::Arbiter)
 {}
-
-Connector& Connector::operator=(Connector&& c)
-{
-    m_filename = std::move(c.m_filename);
-    // There seems to be a bug in OSX when moving maps - this gets around it.
-    m_headers = c.m_headers;
-    m_query = c.m_query;
-    m_arbiter = std::move(c.m_arbiter);
-    return *this;
-}
 
 std::vector<char> Connector::getBinary(uint64_t offset, int32_t size) const
 {
@@ -77,14 +69,5 @@ std::vector<char> Connector::getBinary(uint64_t offset, int32_t size) const
     }
 }
 
-/**
-arbiter::LocalHandle Connector::getLocalHandle(const std::string& path) const
-{
-    if (m_arbiter->isLocal(path))
-        return m_arbiter->getLocalHandle(path);
-    else
-        return m_arbiter->getLocalHandle(path, m_headers, m_query);
-}
-**/
-
+} // namespace copc
 } // namespace pdal

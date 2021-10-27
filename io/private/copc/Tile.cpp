@@ -41,6 +41,8 @@
 
 namespace pdal
 {
+namespace copc
+{
 
 void Tile::read()
 {
@@ -71,5 +73,6 @@ void Tile::read()
     }
 }
 
+} // namespace copc
 } // namespace pdal
 

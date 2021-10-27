@@ -46,6 +46,8 @@ namespace lazperf
 
 namespace pdal
 {
+namespace copc
+{
 
 class Connector;
 
@@ -74,5 +76,6 @@ private:
     std::vector<char> m_data;
 };
 
+} // namespace copc
 } // namespace pdal
 

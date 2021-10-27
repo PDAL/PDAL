@@ -102,11 +102,11 @@ struct CopcReader::Private
 {
 public:
     std::unique_ptr<ThreadPool> pool;
-    std::unique_ptr<Tile> currentTile;
+    std::unique_ptr<copc::Tile> currentTile;
 
-    Connector connector;
-    std::queue<Tile> contents;
-    Hierarchy hierarchy;
+    copc::Connector connector;
+    std::queue<copc::Tile> contents;
+    copc::Hierarchy hierarchy;
     LasUtils::LoaderDriver loader;
     std::mutex mutex;
     std::condition_variable contentsCv;
@@ -187,7 +187,9 @@ void CopcReader::initialize()
     StringMap headers;
     StringMap query;
     setForwards(headers, query);
-    m_p->connector = Connector(m_filename, headers, query);
+    std::cerr << "Assign connector!\n";
+    m_p->connector =  copc::Connector(m_filename, headers, query);
+    std::cerr << "Done assign connector!\n";
 
     fetchHeader();
     // Fetch EB VLR.
@@ -394,7 +396,7 @@ void CopcReader::ready(PointTableRef table)
     }
 
     point_count_t totalPoints = 0;
-    for (const Entry& entry : m_p->hierarchy)
+    for (const copc::Entry& entry : m_p->hierarchy)
         totalPoints += entry.m_pointCount;
 
     if (totalPoints > 1e8)
@@ -403,7 +405,7 @@ void CopcReader::ready(PointTableRef table)
     m_p->tileCount = m_p->hierarchy.size();
 
     m_p->pool.reset(new ThreadPool(m_p->pool->numThreads()));
-    for (const Entry& entry : m_p->hierarchy)
+    for (const copc::Entry& entry : m_p->hierarchy)
         load(entry);
 }
 
@@ -412,14 +414,14 @@ void CopcReader::loadHierarchy()
 {
     // Determine all the keys that overlap the queried area by traversing the
     // hierarchy:
-    Key key;
+    copc::Key key;
 
     if (!passesFilter(key))
         return;
 
-    HierarchyPage page(fetch(m_p->copc_info.root_hier_offset, m_p->copc_info.root_hier_size));
+    copc::HierarchyPage page(fetch(m_p->copc_info.root_hier_offset, m_p->copc_info.root_hier_size));
 
-    Entry entry = page.find(key);
+    copc::Entry entry = page.find(key);
     if (!entry.valid())
         throwError("Root hierarchy page missing root entry.");
     loadHierarchy(m_p->hierarchy, page, entry);
@@ -427,16 +429,17 @@ void CopcReader::loadHierarchy()
 }
 
 
-void CopcReader::loadHierarchy(Hierarchy& hierarchy, const HierarchyPage& page, const Entry& entry)
+void CopcReader::loadHierarchy(copc::Hierarchy& hierarchy, const copc::HierarchyPage& page,
+    const copc::Entry& entry)
 {
     if (entry.isDataEntry())
     {
         for (int i = 0; i < 8; ++i)
         {
-            Key k = entry.m_key.child(i);
+            copc::Key k = entry.m_key.child(i);
             if (passesFilter(k))
             {
-                Entry entry = page.find(k);
+                copc::Entry entry = page.find(k);
                 if (entry.valid())
                     loadHierarchy(hierarchy, page, entry);
             }
@@ -452,8 +455,8 @@ void CopcReader::loadHierarchy(Hierarchy& hierarchy, const HierarchyPage& page, 
     {
         m_p->pool->add([this, &hierarchy, entry]()
         {
-            HierarchyPage page(fetch(entry.m_offset, entry.m_byteSize));
-            Entry rootDataEntry = page.find(entry.m_key);
+            copc::HierarchyPage page(fetch(entry.m_offset, entry.m_byteSize));
+            copc::Entry rootDataEntry = page.find(entry.m_key);
             if (!rootDataEntry.valid())
                 throwError("Hierarchy page " + entry.m_key.toString() + " missing root entry.");
             loadHierarchy(hierarchy, page, rootDataEntry);
@@ -462,13 +465,13 @@ void CopcReader::loadHierarchy(Hierarchy& hierarchy, const HierarchyPage& page, 
 }
 
 
-bool CopcReader::passesFilter(const Key& key) const
+bool CopcReader::passesFilter(const copc::Key& key) const
 {
     return ((m_p->depthEnd == 0 || key.d < m_p->depthEnd) && passesSpatialFilter(key));
 }
 
 
-bool CopcReader::passesSpatialFilter(const Key& key) const
+bool CopcReader::passesSpatialFilter(const copc::Key& key) const
 {
     const BOX3D& tileBounds = key.bounds(m_p->rootNodeExtent);
 
@@ -538,13 +541,12 @@ bool CopcReader::hasSpatialFilter() const
 }
 
 
-void CopcReader::load(const Entry& entry)
+void CopcReader::load(const copc::Entry& entry)
 {
     m_p->pool->add([this, entry]()
         {
             // Read the tile.
-            Tile tile(entry, m_p->connector, m_p->header);
-std::cerr << "Reading " << entry << "!\n";
+            copc::Tile tile(entry, m_p->connector, m_p->header);
             tile.read();
 
             // Put the tile on the output queue.
@@ -622,7 +624,7 @@ point_count_t CopcReader::read(PointViewPtr view, point_count_t count)
             std::unique_lock<std::mutex> l(m_p->mutex);
             if (m_p->contents.size())
             {
-                Tile tile = std::move(m_p->contents.front());
+                copc::Tile tile = std::move(m_p->contents.front());
                 m_p->contents.pop();
                 l.unlock();
                 checkTile(tile);
@@ -643,7 +645,7 @@ point_count_t CopcReader::read(PointViewPtr view, point_count_t count)
 }
 
 
-void CopcReader::checkTile(const Tile& tile)
+void CopcReader::checkTile(const copc::Tile& tile)
 {
     if (tile.error().size())
     {
@@ -654,7 +656,7 @@ void CopcReader::checkTile(const Tile& tile)
 
 
 // Put the contents of a tile into the destination point view.
-void CopcReader::process(PointViewPtr dstView, const Tile& tile, point_count_t count)
+void CopcReader::process(PointViewPtr dstView, const copc::Tile& tile, point_count_t count)
 {
     PointRef dstPoint(*dstView);
     const char *p = tile.dataPtr();
@@ -682,10 +684,9 @@ top:
         do
         {
             std::unique_lock<std::mutex> l(m_p->mutex);
-            std::cerr << "Contents size = " << m_p->contents.size() << "!\n";
             if (m_p->contents.size())
             {
-                m_p->currentTile.reset(new Tile(std::move(m_p->contents.front())));
+                m_p->currentTile.reset(new copc::Tile(std::move(m_p->contents.front())));
                 m_p->contents.pop();
                 break;
             }

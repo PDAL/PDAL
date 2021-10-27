@@ -53,14 +53,17 @@ namespace lazperf
 namespace pdal
 {
 
-class Connector;
-class EptInfo;
-class Key;
-class Tile;
-struct Entry;
-class Hierarchy;
-using HierarchyPage = Hierarchy;
 using StringMap = std::map<std::string, std::string>;
+
+namespace copc
+{
+    class Connector;
+    class Key;
+    class Tile;
+    struct Entry;
+    class Hierarchy;
+    using HierarchyPage = Hierarchy;
+}
 
 class PDAL_DLL CopcReader : public Reader, public Streamable
 {
@@ -86,14 +89,15 @@ private:
     void createSpatialFilters();
 
     void loadHierarchy();
-    void loadHierarchy(Hierarchy& hierarchy, const HierarchyPage& page, const Entry& key);
+    void loadHierarchy(copc::Hierarchy& hierarchy, const copc::HierarchyPage& page,
+        const copc::Entry& entry);
     bool hasSpatialFilter() const;
-    bool passesFilter(const Key& key) const;
-    bool passesSpatialFilter(const Key& key) const;
-    void process(PointViewPtr dstView, const Tile& tile, point_count_t count);
+    bool passesFilter(const copc::Key& key) const;
+    bool passesSpatialFilter(const copc::Key& key) const;
+    void process(PointViewPtr dstView, const copc::Tile& tile, point_count_t count);
     bool processPoint(const char *inbuf, PointRef& dst);
-    void load(const Entry& entry);
-    void checkTile(const Tile& tile);
+    void load(const copc::Entry& entry);
+    void checkTile(const copc::Tile& tile);
 
     struct Args;
     std::unique_ptr<Args> m_args;

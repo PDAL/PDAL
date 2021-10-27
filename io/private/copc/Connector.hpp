@@ -35,11 +35,15 @@
 #pragma once
 
 #include <arbiter/arbiter.hpp>
+#include <map>
+#include <string>
+
+using StringMap = std::map<std::string, std::string>;
 
 namespace pdal
 {
-
-using StringMap = std::map<std::string, std::string>;
+namespace copc
+{
 
 class Connector
 {
@@ -51,10 +55,10 @@ class Connector
 public:
     Connector() = default;
     Connector(const std::string& filename, const StringMap& headers, const StringMap& query);
-    Connector& operator=(Connector&& c);
 
     std::vector<char> getBinary(uint64_t offset, int32_t size) const;
 };
 
+} // namespace copc
 } // namespace pdal
 

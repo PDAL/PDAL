@@ -40,6 +40,8 @@
 
 namespace pdal
 {
+namespace copc
+{
 
 struct Entry
 {
@@ -71,21 +73,24 @@ inline std::ostream& operator<<(std::ostream& out, const Entry& e)
     return out;
 }
 
+} // namespace copc
 } // namespace pdal
 
 namespace std
 {
     template<>
-    struct hash<pdal::Entry>
+    struct hash<pdal::copc::Entry>
     {
-        std::size_t operator()(const pdal::Entry& entry) const noexcept
+        std::size_t operator()(const pdal::copc::Entry& entry) const noexcept
         {
-            return std::hash<pdal::Key>{}(entry.m_key);
+            return std::hash<pdal::copc::Key>{}(entry.m_key);
         }
     };
 }
 
 namespace pdal
+{
+namespace copc
 {
 
 class Hierarchy
@@ -130,4 +135,5 @@ inline bool operator==(const Entry& a, const Entry& b)
     return a.m_key == b.m_key;
 }
 
+} // namespace copc
 } // namespace pdal
