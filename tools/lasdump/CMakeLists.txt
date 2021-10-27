@@ -30,6 +30,7 @@ if (LASZIP_FOUND)
     target_link_libraries(lasdump PRIVATE
         ${PDAL_UTIL_LIB_NAME}
         ${LASZIP_LIBRARIES}
+        ${CMAKE_DL_LIBS}
     )
     target_include_directories(lasdump PRIVATE
         ${PDAL_INCLUDE_DIR})
@@ -38,4 +39,3 @@ if (LASZIP_FOUND)
     endif()
     PDAL_TARGET_COMPILE_SETTINGS(lasdump)
 endif()
-
