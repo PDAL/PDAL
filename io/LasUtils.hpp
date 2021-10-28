@@ -40,6 +40,8 @@
 #include <pdal/DimType.hpp>
 #include <pdal/Scaling.hpp>
 
+#include <pdal/util/ThreadPool.hpp>
+
 namespace pdal
 {
 
@@ -117,6 +119,7 @@ inline bool operator == (const ExtraDim& ed1, const ExtraDim& ed2)
 
 // This is the structure of each record in the extra bytes spec.  Not used
 // directly for storage, but here mostly for reference.
+#pragma pack(push, 1)
 struct ExtraBytesSpec
 {
     char m_reserved[2];
@@ -131,6 +134,8 @@ struct ExtraBytesSpec
     double m_offset[3]; // 24 = 3*8 bytes
     char m_description[32];
 };
+#pragma pack(pop)
+const int ExtraBytesSpecSize = sizeof(ExtraBytesSpec);
 
 class ExtraBytesIf
 {
@@ -163,7 +168,7 @@ public:
     void readFrom(const char *buf);
     uint8_t lasType();
     void setType(uint8_t lastype);
-    std::vector<ExtraDim> toExtraDims(int byteOffset);
+    static std::vector<ExtraDim> toExtraDims(const char *buf, size_t bufsize, int byteOffset);
 
 private:
     Dimension::Type m_type;
@@ -302,6 +307,37 @@ public:
     bool load(PointRef& point, const char *buf, int bufsize);
 private:
     std::vector<PointLoaderPtr> m_loaders;
+};
+
+// VLR Catalog
+
+class VlrCatalog
+{
+public:
+    using ReadFunc = std::function<std::vector<char>(uint64_t offset, int32_t size)>;
+    struct Entry
+    {
+        std::string userId;
+        uint16_t recordId;
+        uint64_t offset;
+        uint64_t length;
+    };
+
+    VlrCatalog(ReadFunc f);
+    VlrCatalog(uint64_t vlrOffset, uint32_t vlrCount, uint64_t evlrOffset, uint32_t evlrCount,
+        ReadFunc f);
+
+    void load(uint64_t vlrOffset, uint32_t vlrCount, uint64_t evlrOffset, uint32_t evlrCount);
+    std::vector<char> fetch(const std::string& userId, uint16_t recordId);
+
+private:
+    std::mutex m_mutex;
+    ReadFunc m_fetch;
+    std::deque<Entry> m_entries;
+
+    void walkVlrs(uint64_t vlrOffset, uint32_t vlrCount);
+    void walkEvlrs(uint64_t vlrOffset, uint32_t vlrCount);
+    void insert(const Entry& entry);
 };
 
 } // namespace LasUtils

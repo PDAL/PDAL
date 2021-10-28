@@ -534,44 +534,24 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
 
 void LasReader::readExtraBytesVlr()
 {
-    const LasVLR *vlr = m_p->header.findVlr(SPEC_USER_ID,
-        EXTRA_BYTES_RECORD_ID);
+    const LasVLR *vlr = m_p->header.findVlr(SPEC_USER_ID, EXTRA_BYTES_RECORD_ID);
     if (!vlr)
         return;
-    const char *pos = vlr->data();
-    size_t size = vlr->dataLen();
-    if (size % sizeof(ExtraBytesSpec) != 0)
+
+    if (vlr->dataLen() % ExtraBytesSpecSize != 0)
     {
-        log()->get(LogLevel::Warning) << "Bad size for extra bytes VLR.  "
-            "Ignoring.";
+        log()->get(LogLevel::Warning) << "Bad size for extra bytes VLR.  Ignoring.";
         return;
     }
-    size /= sizeof(ExtraBytesSpec);
-    std::vector<ExtraBytesIf> ebList;
-    while (size--)
-    {
-        ExtraBytesIf eb;
-        eb.readFrom(pos);
-        ebList.push_back(eb);
-        pos += sizeof(ExtraBytesSpec);
-    }
 
-    std::vector<ExtraDim> extraDims;
-    int byteOffset = 0;
-    for (ExtraBytesIf& eb : ebList)
-    {
-       std::vector<ExtraDim> eds = eb.toExtraDims(byteOffset);
-       for (auto& ed : eds)
-       {
-           extraDims.push_back(std::move(ed));
-           byteOffset += ed.m_size;
-       }
-    }
+    std::vector<ExtraDim> extraDims = ExtraBytesIf::toExtraDims(vlr->data(), vlr->dataLen(),
+        m_p->header.basePointLen());
+
     if (m_p->extraDims.size() && m_p->extraDims != extraDims)
         log()->get(LogLevel::Warning) << "Extra byte dimensions specified "
             "in pipeline and VLR don't match.  Ignoring pipeline-specified "
             "dimensions";
-    m_p->extraDims = extraDims;
+    m_p->extraDims = std::move(extraDims);
 }
 
 

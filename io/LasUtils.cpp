@@ -34,13 +34,17 @@
 
 #include "LasUtils.hpp"
 
+#include <string>
+
+#include <lazperf/header.hpp>
+#include <lazperf/vlr.hpp>
+
 #include <pdal/PointRef.hpp>
 
+#include <pdal/util/Charbuf.hpp>
 #include <pdal/util/Extractor.hpp>
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/Utils.hpp>
-
-#include <string>
 
 namespace pdal
 {
@@ -89,8 +93,8 @@ void ExtraBytesIf::setType(uint8_t lastype)
 void ExtraBytesIf::appendTo(std::vector<uint8_t>& ebBytes)
 {
     size_t offset = ebBytes.size();
-    ebBytes.resize(ebBytes.size() + sizeof(ExtraBytesSpec));
-    LeInserter inserter(ebBytes.data() + offset, sizeof(ExtraBytesSpec));
+    ebBytes.resize(ebBytes.size() + ExtraBytesSpecSize);
+    LeInserter inserter(ebBytes.data() + offset, ExtraBytesSpecSize);
 
     uint8_t lastype = lasType();
     uint8_t options = lastype ? 0 : m_size;
@@ -114,7 +118,7 @@ void ExtraBytesIf::appendTo(std::vector<uint8_t>& ebBytes)
 
 void ExtraBytesIf::readFrom(const char *buf)
 {
-    LeExtractor extractor(buf, sizeof(ExtraBytesSpec));
+    LeExtractor extractor(buf, ExtraBytesSpecSize);
     uint16_t dummy16;
     uint32_t dummy32;
     uint64_t dummy64;
@@ -152,28 +156,41 @@ void ExtraBytesIf::readFrom(const char *buf)
 }
 
 
-std::vector<ExtraDim> ExtraBytesIf::toExtraDims(int byteOffset)
+// NOTE: You must make sure that bufsize is a multiple of ExtraBytesSpecSize before calling.
+std::vector<ExtraDim> ExtraBytesIf::toExtraDims(const char *buf, size_t bufsize, int baseSize)
 {
     std::vector<ExtraDim> eds;
 
-    if (m_type == Dimension::Type::None)
+    int byteOffset = baseSize;
+    while (bufsize)
     {
-        ExtraDim ed(m_name, m_size, byteOffset);
-        eds.push_back(ed);
-    }
-    else if (m_fieldCnt == 1)
-    {
-        ExtraDim ed(m_name, m_type, byteOffset, m_scale[0], m_offset[0]);
-        eds.push_back(ed);
-    }
-    else
-    {
-        for (size_t i = 0; i < m_fieldCnt; ++i)
+        ExtraBytesIf spec;
+        spec.readFrom(buf);
+
+        if (spec.m_type == Dimension::Type::None)
         {
-            ExtraDim ed(m_name + std::to_string(i), m_type, byteOffset, m_scale[i], m_offset[i]);
+            ExtraDim ed(spec.m_name, spec.m_size, byteOffset);
             eds.push_back(ed);
             byteOffset += ed.m_size;
         }
+        else if (spec.m_fieldCnt == 1)
+        {
+            ExtraDim ed(spec.m_name, spec.m_type, byteOffset, spec.m_scale[0], spec.m_offset[0]);
+            eds.push_back(ed);
+            byteOffset += ed.m_size;
+        }
+        else
+        {
+            for (size_t i = 0; i < spec.m_fieldCnt; ++i)
+            {
+                ExtraDim ed(spec.m_name + std::to_string(i), spec.m_type, byteOffset,
+                    spec.m_scale[i], spec.m_offset[i]);
+                eds.push_back(ed);
+                byteOffset += ed.m_size;
+            }
+        }
+        bufsize -= ExtraBytesSpecSize;
+        buf += ExtraBytesSpecSize;
     }
     return eds;
 }
@@ -497,6 +514,95 @@ void ExtraDimLoader::load(PointRef& point, const char *buf, int bufsize)
         else
             point.setField(dt.m_id, dt.m_type, &e);
     }
+}
+
+// VLR Catalog
+
+
+VlrCatalog::VlrCatalog(VlrCatalog::ReadFunc f) : m_fetch(f)
+{}
+
+VlrCatalog::VlrCatalog(uint64_t vlrOffset, uint32_t vlrCount,
+    uint64_t evlrOffset, uint32_t evlrCount, VlrCatalog::ReadFunc f) : m_fetch(f)
+{
+    load(vlrOffset, vlrCount, evlrOffset, evlrCount);
+}
+
+void VlrCatalog::load(uint64_t vlrOffset, uint32_t vlrCount,
+    uint64_t evlrOffset, uint32_t evlrCount)
+{
+    auto vlrWalker = std::bind(&VlrCatalog::walkVlrs, this, vlrOffset, vlrCount);
+    auto evlrWalker = std::bind(&VlrCatalog::walkEvlrs, this, evlrOffset, evlrCount);
+
+    ThreadPool pool(2);
+
+    if (vlrCount)
+        pool.add(vlrWalker);
+    if (evlrCount)
+        pool.add(evlrWalker);
+    pool.await();
+}
+
+void VlrCatalog::walkVlrs(uint64_t vlrOffset, uint32_t vlrCount)
+{
+    while (vlrOffset && vlrCount)
+    {
+        std::vector<char> buf = m_fetch(vlrOffset, lazperf::vlr_header::Size);
+        Charbuf sbuf(buf.data(), buf.size());
+        std::istream in(&sbuf);
+
+        lazperf::vlr_header h = lazperf::vlr_header::create(in);
+        Entry entry { h.user_id, h.record_id, vlrOffset + lazperf::vlr_header::Size,
+            h.data_length };
+        insert(entry);
+        vlrOffset += lazperf::vlr_header::Size + h.data_length;
+        vlrCount--;
+    }
+}
+
+void VlrCatalog::walkEvlrs(uint64_t evlrOffset, uint32_t evlrCount)
+{
+    while (evlrOffset && evlrCount)
+    {
+        std::vector<char> buf = m_fetch(evlrOffset, lazperf::evlr_header::Size);
+        Charbuf sbuf(buf.data(), buf.size());
+        std::istream in(&sbuf);
+
+        lazperf::evlr_header h = lazperf::evlr_header::create(in);
+        Entry entry { h.user_id, h.record_id, evlrOffset + lazperf::evlr_header::Size,
+            h.data_length };
+        insert(entry);
+        evlrOffset += lazperf::evlr_header::Size + h.data_length;
+        evlrCount--;
+    }
+}
+
+void VlrCatalog::insert(const VlrCatalog::Entry& entry)
+{
+    std::unique_lock<std::mutex> l(m_mutex);
+
+    m_entries.push_back(entry);
+}
+
+std::vector<char> VlrCatalog::fetch(const std::string& userId, uint16_t recordId)
+{
+    uint64_t offset = 0;
+    uint32_t length = 0;
+
+    // We don't lock m_entries because we assume that the load has already occurred at the
+    // time you want to fetch.
+    for (const Entry& e : m_entries)
+        if (e.userId == userId && e.recordId == recordId)
+        {
+            offset = e.offset;
+            length = e.length;
+            break;
+        }
+
+    std::vector<char> vlrdata;
+    if (length > 0)
+        vlrdata = m_fetch(offset, length);
+    return vlrdata;
 }
 
 } // namespace LasUtils

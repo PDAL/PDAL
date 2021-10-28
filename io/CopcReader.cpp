@@ -34,6 +34,7 @@
 
 #include "CopcReader.hpp"
 
+#include <functional>
 #include <limits>
 
 #include <nlohmann/json.hpp>
@@ -187,12 +188,10 @@ void CopcReader::initialize()
     StringMap headers;
     StringMap query;
     setForwards(headers, query);
-    std::cerr << "Assign connector!\n";
     m_p->connector =  copc::Connector(m_filename, headers, query);
-    std::cerr << "Done assign connector!\n";
 
     fetchHeader();
-    // Fetch EB VLR.
+    fetchEbVlr();
 
     createSpatialFilters();
 
@@ -210,7 +209,6 @@ std::vector<char> CopcReader::fetch(uint64_t offset, int32_t size)
     return m_p->connector.getBinary(offset, size);
 }
 
-//ABELL - extra dims
 
 void CopcReader::fetchHeader()
 {
@@ -236,12 +234,32 @@ void CopcReader::fetchHeader()
         m_p->copc_info.center_y + m_p->copc_info.halfsize,
         m_p->copc_info.center_z + m_p->copc_info.halfsize);
 
-    //ABELL - fix
-    ExtraDims dims;
-    m_p->loader.init(m_p->header.pointFormat(), m_p->scaling, dims);
 
     validateHeader(m_p->header);
     validateVlrInfo(copc_info_header, m_p->copc_info);
+}
+
+
+void CopcReader::fetchEbVlr()
+{
+    using namespace std::placeholders;
+
+    LasUtils::VlrCatalog catalog(std::bind(&CopcReader::fetch, this, _1, _2));
+
+    catalog.load(m_p->header.header_size, m_p->header.vlr_count, m_p->header.evlr_offset,
+        m_p->header.evlr_count);
+
+    std::vector<char> buf = catalog.fetch("LASF_Spec", 4);
+    if (buf.empty())
+        return;
+
+    if (buf.size() % ExtraBytesSpecSize != 0)
+    {
+        log()->get(LogLevel::Warning) << "Bad size for extra bytes VLR.  Ignoring.";
+        return;
+    }
+    m_p->extraDims = ExtraBytesIf::toExtraDims(buf.data(), buf.size(),
+        lazperf::baseCount(m_p->header.pointFormat()));
 }
 
 
@@ -394,6 +412,9 @@ void CopcReader::ready(PointTableRef table)
     {
         throwError(e.what());
     }
+
+    // Can't init the loader until extra dim dimension IDs are determined.
+    m_p->loader.init(m_p->header.pointFormat(), m_p->scaling, m_p->extraDims);
 
     point_count_t totalPoints = 0;
     for (const copc::Entry& entry : m_p->hierarchy)
