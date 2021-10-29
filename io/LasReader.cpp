@@ -122,7 +122,7 @@ void LasReader::addArgs(ProgramArgs& args)
         m_args->extraDimSpec);
     args.add("compression", "Decompressor to use", m_args->compression, "EITHER");
     args.add("use_eb_vlr", "Use extra bytes VLR for 1.0 - 1.3 files", m_args->useEbVlr);
-    args.add("ignore_vlr", "VLR userid/recordid to ignore", m_args->ignoreVLROption);
+    args.add("ignore_vlr", "VLR userid/recordid to ignore", m_args->ignoreVLROption, {"copc" } );
     args.add("start", "Point at which reading should start (0-indexed).", m_args->start);
     args.add("fix_dims", "Make invalid dimension names valid by changing "
         "invalid characters to '_'", m_args->fixNames, true);
