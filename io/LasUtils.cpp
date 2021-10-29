@@ -223,7 +223,7 @@ const Dimension::IdList& pdrfDims(int pdrf)
 
 std::vector<IgnoreVLR> parseIgnoreVLRs(const StringList& ignored)
 {
-    std::vector<IgnoreVLR> ignoredVLRs;
+    std::vector<IgnoreVLR> ignoredVLRs {IgnoreVLR ({"copc", 0}) } ;
     for (auto& v: ignored)
     {
 
