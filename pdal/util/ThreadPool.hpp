@@ -52,10 +52,8 @@ public:
     // been enqueued to wait for an available worker thread, subsequent calls
     // to Pool::add will block until an enqueued task has been popped from the
     // queue.
-    PDAL_DLL ThreadPool(std::size_t numThreads, int64_t queueSize = -1,
-            bool verbose = true) :
-        m_queueSize(queueSize),
-        m_numThreads(std::max<std::size_t>(numThreads, 1)), m_verbose(verbose)
+    PDAL_DLL ThreadPool(std::size_t numThreads, int64_t queueSize = -1) :
+        m_queueSize(queueSize), m_numThreads(std::max<std::size_t>(numThreads, 1))
     {
         assert(m_queueSize != 0);
         go();
@@ -88,11 +86,11 @@ public:
     // join() and empty the queue of tasks that may have been waiting to run.
     PDAL_DLL void stop()
     {
-        join();
-
         // Effectively clear the queue.
         std::queue<std::function<void()>> q;
         m_tasks.swap(q);
+        join();
+
     }
 
     // Wait for all current tasks to complete.  As opposed to join, tasks may
@@ -156,7 +154,6 @@ private:
 
     int64_t m_queueSize;
     std::size_t m_numThreads;
-    bool m_verbose;
     std::vector<std::thread> m_threads;
     std::queue<std::function<void()>> m_tasks;
 

@@ -77,9 +77,10 @@ private:
     virtual void initialize() override;
     virtual QuickInfo inspect() override;
     virtual void addDimensions(PointLayoutPtr layout) override;
-    virtual void ready(PointTableRef table) override;
+    virtual void ready(PointTableRef) override;
     virtual point_count_t read(PointViewPtr view, point_count_t count) override;
     virtual bool processOne(PointRef& point) override;
+    virtual void done(PointTableRef) override;
 
     void setForwards(StringMap& headers, StringMap& query);
     std::vector<char> fetch(uint64_t offset, int32_t size);

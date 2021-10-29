@@ -111,6 +111,7 @@ public:
     LasUtils::LoaderDriver loader;
     std::mutex mutex;
     std::condition_variable contentsCv;
+    std::condition_variable consumedCv;
     std::vector<PolyXform> polys;
     BoxXform clip;
     int depthEnd;
@@ -572,6 +573,8 @@ void CopcReader::load(const copc::Entry& entry)
 
             // Put the tile on the output queue.
             std::unique_lock<std::mutex> l(m_p->mutex);
+            while (m_p->contents.size() >= (std::max)((size_t)10, m_p->pool->numThreads()))
+                m_p->consumedCv.wait(l);
             m_p->contents.push(std::move(tile));
             l.unlock();
             m_p->contentsCv.notify_one();
@@ -634,37 +637,34 @@ bool CopcReader::processPoint(const char *inbuf, PointRef& dst)
 
 point_count_t CopcReader::read(PointViewPtr view, point_count_t count)
 {
+    if (m_p->tileCount == 0)
+        return 0;
+
     point_count_t numRead = 0;
 
-    if (m_p->hierarchy.size())
+    // Pop tiles until there are no more, or wait for them to appear.
+    // Exit when we've handled all the tiles or we've read enough points.
+    // The mutex protects the tile queue (m_p->contents).
+    do
     {
-        // Pop tiles until there are no more, or wait for them to appear.
-        // Exit when we've handled all the tiles or we've read enough points.
-        do
+        std::unique_lock<std::mutex> l(m_p->mutex);
+        if (m_p->contents.size())
         {
-            std::unique_lock<std::mutex> l(m_p->mutex);
-            if (m_p->contents.size())
-            {
-                copc::Tile tile = std::move(m_p->contents.front());
-                m_p->contents.pop();
-                l.unlock();
-                checkTile(tile);
-                process(view, tile, count - numRead);
-                numRead += tile.size();
-                m_p->tileCount--;
-            }
-            else
-                m_p->contentsCv.wait(l);
-        } while (m_p->tileCount && numRead <= count);
-    }
-
-    // Wait for any running threads to finish and don't start any others.
-    // Only relevant if we hit the count limit before reading all the tiles.
-    m_p->pool->stop();
+            copc::Tile tile = std::move(m_p->contents.front());
+            m_p->contents.pop();
+            m_p->consumedCv.notify_one();
+            l.unlock();
+            checkTile(tile);
+            process(view, tile, count - numRead);
+            numRead += tile.size();
+            m_p->tileCount--;
+        }
+        else
+            m_p->contentsCv.wait(l);
+    } while (m_p->tileCount && numRead <= count);
 
     return numRead;
 }
-
 
 void CopcReader::checkTile(const copc::Tile& tile)
 {
@@ -714,6 +714,7 @@ top:
             else
                 m_p->contentsCv.wait(l);
         } while (true);
+        m_p->consumedCv.notify_one();
         checkTile(*m_p->currentTile);
         m_p->tilePointNum = 0;
     }
@@ -738,6 +739,12 @@ top:
         goto top;
 
     return true;
+}
+
+
+void CopcReader::done(PointTableRef)
+{
+    m_p->pool->stop();
 }
 
 } // namespace pdal
