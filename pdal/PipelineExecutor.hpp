@@ -59,6 +59,7 @@ public:
       \param json Pipeline JSON defining the PDAL operations
     */
     PipelineExecutor(std::string const& json);
+    PipelineExecutor(std::string const& json, SimplePointTable* tablePtr);
 
     /**
       dtor

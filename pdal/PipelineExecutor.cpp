@@ -39,14 +39,19 @@ namespace pdal
 {
 
 
-PipelineExecutor::PipelineExecutor(std::string const& json)
-    : m_manager(0)
+PipelineExecutor::PipelineExecutor(std::string const& json, SimplePointTable* tablePtr)
+    : m_manager(tablePtr, new FixedPointTable(0))
     , m_executed(false)
     , m_json(json)
     , m_read(false)
 {
     setLogLevel(pdal::LogLevel::Error);
 }
+
+
+PipelineExecutor::PipelineExecutor(std::string const& json) :
+    PipelineExecutor(json, new ColumnPointTable())
+{}
 
 
 std::string PipelineExecutor::getPipeline() const

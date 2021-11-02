@@ -75,6 +75,7 @@ public:
     };
 
     PipelineManager(point_count_t streamLimit = 10000);
+    PipelineManager(SimplePointTable* tablePtr, StreamPointTable* streamTablePtr);
     ~PipelineManager();
 
     void setProgressFd(int fd)
@@ -160,7 +161,7 @@ private:
     std::unique_ptr<StageFactory> m_factory;
     std::unique_ptr<SimplePointTable> m_tablePtr;
     PointTableRef m_table;
-    std::unique_ptr<FixedPointTable> m_streamTablePtr;
+    std::unique_ptr<StreamPointTable> m_streamTablePtr;
     StreamPointTable& m_streamTable;
     Options m_commonOptions;
     OptionsMap m_stageOptions;
