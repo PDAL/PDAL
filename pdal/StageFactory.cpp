@@ -57,6 +57,8 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
         return "readers.ept";
     if (Utils::startsWith(filename, "i3s://"))
         return "readers.i3s";
+    if (Utils::endsWith(filename, ".copc.laz"))
+        return "readers.copc";
 
     ext = FileUtils::extension(filename);
     // Strip off '.' and make lowercase.
