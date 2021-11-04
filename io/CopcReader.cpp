@@ -422,7 +422,6 @@ void CopcReader::ready(PointTableRef table)
         throwError(e.what());
     }
 
-    // Can't init the loader until extra dim dimension IDs are determined.
     m_p->loader.init(m_p->header.pointFormat(), m_p->scaling, m_p->extraDims);
 
     point_count_t totalPoints = 0;
@@ -703,6 +702,8 @@ void CopcReader::process(PointViewPtr dstView, const copc::Tile& tile, point_cou
 bool CopcReader::processOne(PointRef& point)
 {
 top:
+    // If we've processed all the tiles, return false to indicate that
+    // we're done.
     if (m_p->tileCount == 0)
         return false;
 
@@ -733,8 +734,6 @@ top:
     m_p->tilePointNum++;
 
     // If we've processed all the points in the current tile, pop it.
-    // If we've processed all the tiles, return false to indicate that
-    // we're done.
     if ((size_t)m_p->tilePointNum == m_p->currentTile->size())
     {
         m_p->tilePointNum = 0;
