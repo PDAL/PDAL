@@ -41,7 +41,8 @@ SrsTransform::SrsTransform()
 
 SrsTransform::SrsTransform(const SrsTransform& src)
 {
-    set(*(src.m_transform->GetSourceCS()), *(src.m_transform->GetTargetCS()));
+    if (src.valid())
+        set(*(src.m_transform->GetSourceCS()), *(src.m_transform->GetTargetCS()));
 }    
 
 

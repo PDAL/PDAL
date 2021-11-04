@@ -55,6 +55,11 @@ namespace pdal
 
 using StringMap = std::map<std::string, std::string>;
 
+namespace LasUtils
+{
+    class VlrCatalog;
+}
+
 namespace copc
 {
     class Connector;
@@ -85,7 +90,8 @@ private:
     void setForwards(StringMap& headers, StringMap& query);
     std::vector<char> fetch(uint64_t offset, int32_t size);
     void fetchHeader();
-    void fetchEbVlr();
+    void fetchSrsVlr(const LasUtils::VlrCatalog& catalog);
+    void fetchEbVlr(const LasUtils::VlrCatalog& catalog);
     void validateHeader(const lazperf::header14& h);
     void validateVlrInfo(const lazperf::vlr_header& h, const lazperf::copc_info_vlr& i);
     void createSpatialFilters();

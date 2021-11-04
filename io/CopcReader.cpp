@@ -192,7 +192,13 @@ void CopcReader::initialize()
     m_p->connector =  copc::Connector(m_filename, headers, query);
 
     fetchHeader();
-    fetchEbVlr();
+
+    using namespace std::placeholders;
+    LasUtils::VlrCatalog catalog(std::bind(&CopcReader::fetch, this, _1, _2));
+    catalog.load(m_p->header.header_size, m_p->header.vlr_count, m_p->header.evlr_offset,
+        m_p->header.evlr_count);
+    fetchEbVlr(catalog);
+    fetchSrsVlr(catalog);
 
     createSpatialFilters();
 
@@ -241,15 +247,17 @@ void CopcReader::fetchHeader()
 }
 
 
-void CopcReader::fetchEbVlr()
+void CopcReader::fetchSrsVlr(const LasUtils::VlrCatalog& catalog)
 {
-    using namespace std::placeholders;
+    std::vector<char> buf = catalog.fetch("LASF_Projection", 2112);
+    if (buf.empty())
+        return;
+    setSpatialReference(std::string(buf.begin(), buf.end()));
+}
 
-    LasUtils::VlrCatalog catalog(std::bind(&CopcReader::fetch, this, _1, _2));
 
-    catalog.load(m_p->header.header_size, m_p->header.vlr_count, m_p->header.evlr_offset,
-        m_p->header.evlr_count);
-
+void CopcReader::fetchEbVlr(const LasUtils::VlrCatalog& catalog)
+{
     std::vector<char> buf = catalog.fetch("LASF_Spec", 4);
     if (buf.empty())
         return;
@@ -298,9 +306,7 @@ void CopcReader::createSpatialFilters()
         else
             m_p->clip.box = m_args->clip.to3d();
         const SpatialReference& boundsSrs = m_args->clip.spatialReference();
-        if (!getSpatialReference().valid() && boundsSrs.valid())
-            throwError("Can't use bounds with SRS with data source that has no SRS.");
-        if (boundsSrs.valid())
+        if (getSpatialReference().valid() && boundsSrs.valid())
             m_p->clip.xform = SrsTransform(getSpatialReference(), boundsSrs);
     }
 
@@ -321,7 +327,7 @@ void CopcReader::createSpatialFilters()
         // Get the sub-polygons from a multi-polygon.
         std::vector<Polygon> exploded = poly.polygons();
         SrsTransform xform;
-        if (poly.srsValid())
+        if (poly.srsValid() && getSpatialReference().valid())
             xform.set(getSpatialReference(), poly.getSpatialReference());
         for (Polygon& p : exploded)
         {
@@ -338,13 +344,15 @@ QuickInfo CopcReader::inspect()
 
     initialize();
 
-    //ABELL - Fix.
-    //qi.m_bounds = m_p->header.pointBounds();
+    const lazperf::header14& h = m_p->header;
+    qi.m_bounds = BOX3D(h.minx, h.miny, h.minz, h.maxx, h.maxy, h.maxz);
     qi.m_srs = getSpatialReference();
-    //ABELL - Fix.
-    //qi.m_pointCount = pointCount();
-    //ABELL - Fix.
-    //qi.m_dimNames = dimNames();
+    qi.m_pointCount = h.point_count;
+
+    PointLayoutPtr layout(new PointLayout);
+    addDimensions(layout);
+    for (Dimension::Id dim : layout->dims())
+        qi.m_dimNames.push_back(layout->dimName(dim));
 
     // If there is a spatial filter from an explicit --bounds, an origin query,
     // or polygons, then we'll limit our number of points to be an upper bound,

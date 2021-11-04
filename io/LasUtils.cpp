@@ -585,7 +585,7 @@ void VlrCatalog::insert(const VlrCatalog::Entry& entry)
     m_entries.push_back(entry);
 }
 
-std::vector<char> VlrCatalog::fetch(const std::string& userId, uint16_t recordId)
+std::vector<char> VlrCatalog::fetch(const std::string& userId, uint16_t recordId) const
 {
     uint64_t offset = 0;
     uint32_t length = 0;
