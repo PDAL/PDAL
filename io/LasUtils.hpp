@@ -198,7 +198,7 @@ struct IgnoreVLR
     uint16_t m_recordId;
 };
 std::vector<IgnoreVLR> parseIgnoreVLRs(const StringList& ignored);
-const std::vector<Dimension::Id>& pdrfDims(int pdrf);
+const Dimension::IdList& pdrfDims(int pdrf);
 
 // Loader
 

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2019 TileDB, Inc
+* Copyright (c) 2021 TileDB, Inc
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -32,66 +32,66 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <ctime>
 
-#define NOMINMAX
-
+#include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
-#include <pdal/Writer.hpp>
+#include <io/FauxReader.hpp>
 
-#include <tiledb/tiledb>
+#include <pdal/PluginHelper.hpp>
+
+#include "../io/Bounds4D.hpp"
+
 
 namespace pdal
 {
 
-class PDAL_DLL TileDBWriter : public Writer, public Streamable
+class PDAL_DLL XYZTimeFauxReader : public Reader, public Streamable
 {
 public:
-    struct DimBuffer
-    {
-        std::string m_name;
-        Dimension::Id m_id;
-        Dimension::Type m_type;
-        std::vector<uint8_t> m_buffer;
+    XYZTimeFauxReader() {};
 
-        DimBuffer(const std::string& name, Dimension::Id id,
-            Dimension::Type type) : m_name(name), m_id(id), m_type(type)
-        {}
-    };
-
-    TileDBWriter();
-    ~TileDBWriter();
     std::string getName() const;
 
 private:
-    virtual void addArgs(ProgramArgs& args);
-    virtual void initialize();
-    virtual void ready(PointTableRef table);
-    virtual void write(const PointViewPtr view);
-    virtual bool processOne(PointRef& point);
-    virtual void done(PointTableRef table);
-
-    bool flushCache(size_t size);
-
-    struct Args;
-    bool isValidDomain(TileDBWriter::Args& args);
-    std::unique_ptr<TileDBWriter::Args> m_args;
-
-    size_t m_current_idx;
-
-    std::unique_ptr<tiledb::Context> m_ctx;
-    std::unique_ptr<tiledb::ArraySchema> m_schema;
-    std::unique_ptr<tiledb::Array> m_array;
-    std::vector<DimBuffer> m_attrs;
-    std::vector<double> m_xs;
-    std::vector<double> m_ys;
-    std::vector<double> m_zs;
-    std::vector<double> m_tms;
+    using urd = std::uniform_real_distribution<double>;
+    std::mt19937 m_generator;
+    int m_numReturns;
+    point_count_t m_index;
+    std::unique_ptr<urd> m_uniformX;
+    std::unique_ptr<urd> m_uniformY;
+    std::unique_ptr<urd> m_uniformZ;
+    std::unique_ptr<urd> m_uniformTm;
+    double m_delX;
+    double m_delY;
+    double m_delZ;
+    double m_delTm;
+    double m_density;
+    BOX4D m_bounds;
+    Mode m_xyz_mode;
+    Mode m_tm_mode;
     bool m_use_time;
-    bool m_time_first;
+    std::string m_dim4_name;
 
-    TileDBWriter(const TileDBWriter&) = delete;
-    TileDBWriter& operator=(const TileDBWriter&) = delete;
+    virtual void addArgs(ProgramArgs& args);
+
+    virtual void prepared(PointTableRef table);
+
+    virtual void initialize();
+
+    virtual void addDimensions(PointLayoutPtr layout);
+
+    virtual void ready(PointTableRef table);
+
+    virtual bool processOne(PointRef& point);
+
+    virtual point_count_t read(PointViewPtr view, point_count_t count);
+
+    virtual bool eof()
+        { return false; }
+
+    XYZTimeFauxReader& operator=(const XYZTimeFauxReader&);
+    XYZTimeFauxReader(const XYZTimeFauxReader&);
 };
 
-} // namespace pdal
+}

@@ -198,12 +198,13 @@ std::vector<ExtraDim> ExtraBytesIf::toExtraDims(const char *buf, size_t bufsize,
 namespace LasUtils
 {
 
-using D = Dimension::Id;
-const std::vector<D>& pdrfDims(int pdrf)
+const Dimension::IdList& pdrfDims(int pdrf)
 {
     if (pdrf < 0 || pdrf > 10)
         pdrf = 10;
-    static const std::vector<D> dims[11]
+
+    using D = Dimension::Id;
+    static const Dimension::IdList dims[11]
     {
         // 0
         { D::X, D::Y, D::Z, D::Intensity, D::ReturnNumber, D::NumberOfReturns, D::ScanDirectionFlag,
@@ -242,7 +243,7 @@ const std::vector<D>& pdrfDims(int pdrf)
 
 std::vector<IgnoreVLR> parseIgnoreVLRs(const StringList& ignored)
 {
-    std::vector<IgnoreVLR> ignoredVLRs;
+    std::vector<IgnoreVLR> ignoredVLRs {IgnoreVLR ({"copc", 0}) } ;
     for (auto& v: ignored)
     {
 
