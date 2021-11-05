@@ -48,7 +48,6 @@ Connector::Connector(const std::string& filename, const StringMap& headers,
 
 std::vector<char> Connector::getBinary(uint64_t offset, int32_t size) const
 {
-    //ABELL - Fixme.
     if (size <= 0)
         return std::vector<char>();
 
