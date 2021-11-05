@@ -208,7 +208,10 @@ void Bounds::grow(double x, double y)
 
 void Bounds::grow(double x, double y, double z)
 {
-    m_box.grow(x, y, z);
+    if (!is2d())
+    {
+        m_box.grow(x, y, z);
+    }
 }
 
 

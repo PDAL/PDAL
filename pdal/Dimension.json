@@ -521,5 +521,35 @@
     "name": "RadialDensity",
     "type": "double",
     "description": "Estimate of radial point density"
+    },
+    {
+    "name": "BeamOriginX",
+    "type": "double",
+    "description": "Beam origin X coordinate of current laser shot"
+    },
+    {
+    "name": "BeamOriginY",
+    "type": "double",
+    "description": "Beam origin Y coordinate of current laser shot"
+    },
+    {
+    "name": "BeamOriginZ",
+    "type": "double",
+    "description": "Beam origin Z coordinate of current laser shot"
+    },
+    {
+    "name": "BeamDirectionX",
+    "type": "double",
+    "description": "Beam direction unit vector X coordinate"
+    },
+    {
+    "name": "BeamDirectionY",
+    "type": "double",
+    "description": "Beam direction unit vector Y coordinate"
+    },
+    {
+    "name": "BeamDirectionZ",
+    "type": "double",
+    "description": "Beam direction unit vector Z coordinate"
     }
 ] }
