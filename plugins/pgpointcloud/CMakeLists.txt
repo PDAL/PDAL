@@ -10,7 +10,7 @@ PDAL_ADD_PLUGIN(reader_libname reader pgpointcloud
     FILES
         io/PgReader.cpp
     LINK_WITH
-        ${POSTGRESQL_LIBRARIES}
+        PostgreSQL::PostgreSQL
         ${LIBXML2_LIBRARIES}
     INCLUDES
         ${PDAL_VENDOR_DIR}/pdalboost
@@ -24,7 +24,7 @@ PDAL_ADD_PLUGIN(writer_libname writer pgpointcloud
     FILES
         io/PgWriter.cpp
     LINK_WITH
-        ${POSTGRESQL_LIBRARIES}
+        PostgreSQL::PostgreSQL
         ${LIBXML2_LIBRARIES}
     INCLUDES
         ${PDAL_VENDOR_DIR}/pdalboost
@@ -56,7 +56,7 @@ if (BUILD_PGPOINTCLOUD_TESTS)
         LINK_WITH
             ${reader_libname}
             ${writer_libname}
-            ${POSTGRESQL_LIBRARIES}
+            PostgreSQL::PostgreSQL
         INCLUDES
             ${CMAKE_CURRENT_BINARY_DIR}/include
     )
