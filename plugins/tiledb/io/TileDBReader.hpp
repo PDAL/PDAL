@@ -40,6 +40,7 @@
 
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
+#include "Bounds4D.hpp"
 #include <tiledb/tiledb>
 
 namespace pdal
@@ -104,9 +105,10 @@ private:
     point_count_t m_endTimeStamp;
     bool m_complete;
     bool m_stats;
-    BOX3D m_bbox;
+    BOX4D m_bbox;
     std::vector<std::unique_ptr<Buffer>> m_buffers;
     std::vector<DimInfo> m_dims;
+    bool m_has_time = false;
 
     std::unique_ptr<tiledb::Context> m_ctx;
     std::unique_ptr<tiledb::Array> m_array;
@@ -118,6 +120,9 @@ private:
     template<typename T>
     void setQueryBuffer(const DimInfo& di);
     void setQueryBuffer(const DimInfo& di);
+
+public:
+    bool hasTime(){return m_has_time;};
 };
 
 } // namespace pdal

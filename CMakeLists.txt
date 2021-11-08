@@ -277,6 +277,7 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
 target_link_libraries(${PDAL_BASE_LIB_NAME}
     PRIVATE
         ${CMAKE_THREAD_LIBS_INIT}
+        ${CMAKE_DL_LIBS}
         ${GDAL_LIBRARY}
         ${GEOTIFF_LIBRARY}
         ${LASZIP_LIBRARY}

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2019, Bradley J Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2020, Hobu Inc.
  *
  * All rights reserved.
  *
@@ -13,10 +13,10 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided
  *       with the distribution.
- *     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
- *       names of its contributors may be used to endorse or promote
- *       products derived from this software without specific prior
- *       written permission.
+ *     * Neither the name of the Martin Isenburg or Iowa Department
+ *       of Natural Resources nor the names of its contributors may be
+ *       used to endorse or promote products derived from this software
+ *       without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -32,60 +32,24 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+// This eliminates the need to include pdal base includes in code for the Util
+// library.
+
 #pragma once
 
-#include "PcdHeader.hpp"
+#define STDCALL
 
-#include <pdal/Writer.hpp>
+#ifdef _WIN32
+#ifdef _MSC_VER
+#define PDAL_MSVC       // Using the MSVC compiler for WIN32.
+#define PDAL_WIN32_STL    // When you're using the MSVC compiler, you can use MSVC STL extensions
+#define STDCALL __stdcall
+#else
+#ifndef __MINGW32__
+#error "WIN32 without MSVC. Expected __MINGW32__ but not found."
+#endif
+#define PDAL_MINGW      // MinGW runs on WIN32 but isn't MSVC. It uses libc++std.
+// MinGW use libstdc++
+#endif // _MSC_VER
+#endif // _WIN32
 
-namespace pdal
-{
-
-class PDAL_DLL PcdWriter : public Writer
-{
-    struct DimSpec
-    {
-        DimSpec() : m_field(PcdField()), m_precision(3)
-        {
-        }
-
-        DimSpec(PcdField field, uint32_t precision)
-        {
-            m_field = field;
-            m_precision = precision;
-        }
-        PcdField m_field;
-        uint32_t m_precision;
-    };
-
-public:
-    std::string getName() const;
-
-    PcdWriter();
-    PcdWriter& operator=(const PcdWriter&) = delete;
-    PcdWriter(const PcdWriter&) = delete;
-
-private:
-    virtual void addArgs(ProgramArgs& args);
-    virtual void ready(PointTableRef table);
-    virtual void write(const PointViewPtr view);
-    virtual void done(PointTableRef table);
-
-    DimSpec extractDim(std::string dim, PointTableRef table);
-    bool findDim(Dimension::Id id, DimSpec& ds);
-
-    PcdHeader m_header;
-    std::ostream* m_ostream;
-    std::string m_filename;
-    std::string m_compression_string;
-    bool m_writeAllDims;
-    std::string m_dimOrder;
-    uint32_t m_precision;
-
-    std::vector<DimSpec> m_dims;
-    DimSpec m_xDim;
-    DimSpec m_yDim;
-    DimSpec m_zDim;
-};
-
-} // namespaces

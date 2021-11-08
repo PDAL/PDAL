@@ -11,6 +11,7 @@ source:
   path: ../../
   url:
   sha256:
+  patches:
 
 build:
   number: 2112

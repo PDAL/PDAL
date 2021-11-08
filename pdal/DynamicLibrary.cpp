@@ -37,9 +37,11 @@
 // http://www.drdobbs.com/cpp/building-your-own-plugin-framework-part/206503957
 // The original work was released under the Apache License v2.
 
-#ifdef _WIN32
+#include "pdal_internal.hpp"
+
+#ifdef PDAL_MSVC
   #include <windows.h>
-#else
+#else // Unix and MinGW
   #include <dlfcn.h>
 #endif
 
@@ -55,10 +57,10 @@ DynamicLibrary::~DynamicLibrary()
 {
     if (m_handle)
     {
-#ifndef _WIN32
-        ::dlclose(m_handle);
-#else
+#ifdef PDAL_MSVC
         ::FreeLibrary((HMODULE)m_handle);
+#else // Unix and MinGW
+        ::dlclose(m_handle);
 #endif
     }
 }
@@ -81,7 +83,7 @@ DynamicLibrary *DynamicLibrary::load(const std::string &name,
 
     void *handle = NULL;
 
-#ifdef _WIN32
+#ifdef PDAL_MSVC
     handle = ::LoadLibraryA(name.c_str());
     if (handle == NULL)
     {
@@ -92,7 +94,7 @@ DynamicLibrary *DynamicLibrary::load(const std::string &name,
             << errorCode; 
         errorString = ss.str();
     }
-#else
+#else  // Unix and MinGW
     handle = ::dlopen(name.c_str(), RTLD_NOW);
     if (!handle) 
     {
@@ -116,9 +118,9 @@ void *DynamicLibrary::getSymbol(const std::string& symbol)
         return NULL;
 
     void *sym;
-#ifdef _WIN32
+#ifdef PDAL_MSVC
     sym = ::GetProcAddress((HMODULE)m_handle, symbol.c_str());
-#else
+#else // Unix and MinGW
     sym = ::dlsym(m_handle, symbol.c_str());
 #endif
     return sym;

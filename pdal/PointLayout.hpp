@@ -46,27 +46,27 @@
 namespace pdal
 {
 
-class  PointLayout
+class PDAL_DLL PointLayout
 {
 public:
     /**
       Default constructor.
     */
-    PDAL_DLL PointLayout();
-    PDAL_DLL virtual ~PointLayout() {}
+    PointLayout();
+    virtual ~PointLayout() {}
 
     /**
       Mark a layout as finalized.  Dimensions can't be added to a finalized
       PointLayout.
     */
-    PDAL_DLL void finalize();
+    void finalize();
 
     /**
       Determine if the PointLayout is finalized.
 
       \return  Whether the PointLayout is finalized.
     */
-    PDAL_DLL bool finalized() const
+    bool finalized() const
         { return m_finalized; }
 
     /**
@@ -74,7 +74,7 @@ public:
 
       \param ids  Vector of IDs to register.
     */
-    PDAL_DLL void registerDims(std::vector<Dimension::Id> ids);
+    void registerDims(std::vector<Dimension::Id> ids);
 
     /**
       Register a list of dimensions.
@@ -82,7 +82,7 @@ public:
       \param id  Pointer to list of IDs to register.  The last ID in the list
         must have the value Unknown.
     */
-    PDAL_DLL void registerDims(Dimension::Id *id);
+    void registerDims(Dimension::Id *id);
 
     /**
       Register use of a standard dimension (declare that a point will contain
@@ -90,7 +90,7 @@ public:
 
       \param id  ID of dimension to be registered.
     */
-    PDAL_DLL void registerDim(Dimension::Id id);
+    void registerDim(Dimension::Id id);
 
     /**
       Register use of a standard dimension (declare that a point will contain
@@ -101,7 +101,7 @@ public:
       \param id  ID of dimension to be registered.
       \param type  Minimum type to assign to the dimension.
     */
-    PDAL_DLL void registerDim(Dimension::Id id, Dimension::Type type);
+    void registerDim(Dimension::Id id, Dimension::Type type);
 
     /**
       Assign a non-existing (proprietary) dimension with the given name and
@@ -115,7 +115,7 @@ public:
       \param type  Minimum type to assign to the dimension.
       \return  ID of the new or existing dimension, or Unknown on failure.
     */
-    PDAL_DLL Dimension::Id assignDim(const std::string& name,
+    Dimension::Id assignDim(const std::string& name,
         Dimension::Type type);
 
     /**
@@ -127,7 +127,7 @@ public:
         accomodate values of this type.
       \return  ID of dimension registered or assigned.
     */
-    PDAL_DLL Dimension::Id registerOrAssignDim(const std::string name,
+    Dimension::Id registerOrAssignDim(const std::string name,
         Dimension::Type type);
 
     /**
@@ -135,7 +135,7 @@ public:
 
       \return  A list of DimType objects.
     */
-    PDAL_DLL DimTypeList dimTypes() const;
+    DimTypeList dimTypes() const;
 
     /**
       Get a DimType structure for a named dimension.
@@ -144,7 +144,7 @@ public:
       \return  A DimType associated with the named dimension.  Returns a
         DimType with an Unknown ID if the dimension isn't part of the layout.
     */
-    PDAL_DLL DimType findDimType(const std::string& name) const;
+    DimType findDimType(const std::string& name) const;
 
     /**
       Get the ID of a dimension (standard or proprietary) given its name.
@@ -152,7 +152,7 @@ public:
       \param name  Name of the dimension.
       \return  ID of the dimension or Unknown.
     */
-    PDAL_DLL Dimension::Id findDim(const std::string& name) const;
+    Dimension::Id findDim(const std::string& name) const;
 
     /**
       Get the ID of a proprietary dimension given its name.
@@ -160,7 +160,7 @@ public:
       \param name  Name of the dimension.
       \return  ID of the dimension or Unknown.
     */
-    PDAL_DLL Dimension::Id findProprietaryDim(const std::string& name) const;
+    Dimension::Id findProprietaryDim(const std::string& name) const;
 
     /**
       Get the name of a dimension give its ID.  A dimension may have more
@@ -169,7 +169,7 @@ public:
       \param id  ID of the dimension.
       \return  A name associated with the dimension, or a NULL string.
     */
-    PDAL_DLL std::string dimName(Dimension::Id id) const;
+    std::string dimName(Dimension::Id id) const;
 
     /**
       Determine if the PointLayout uses the dimension with the given ID.
@@ -177,14 +177,14 @@ public:
       \param id  ID of the dimension to check.
       \return \c true if the layout uses the dimension, \c false otherwise.
     */
-    PDAL_DLL bool hasDim(Dimension::Id id) const;
+    bool hasDim(Dimension::Id id) const;
 
     /**
       Get a reference to vector of the IDs of currently used dimensions.
 
       \return  Vector of IDs of dimensions that are part of the layout.
     */
-    PDAL_DLL const Dimension::IdList& dims() const;
+    const Dimension::IdList& dims() const;
 
     /**
       Get the type of a dimension.
@@ -192,7 +192,7 @@ public:
       \param id  ID of the dimension.
       \return  Type of the dimension.
     */
-    PDAL_DLL Dimension::Type dimType(Dimension::Id id) const;
+    Dimension::Type dimType(Dimension::Id id) const;
 
     /**
       Get the current size in bytes of the dimension.
@@ -200,7 +200,7 @@ public:
       \param id  ID of the dimension.
       \return  Size of the dimension in bytes.
     */
-    PDAL_DLL size_t dimSize(Dimension::Id id) const;
+    size_t dimSize(Dimension::Id id) const;
 
     /**
       Get the offset of the dimension in the layout.
@@ -208,7 +208,7 @@ public:
       \param id  ID of the dimension.
       \return  Offset of the dimension in bytes.
     */
-    PDAL_DLL size_t dimOffset(Dimension::Id id) const;
+    size_t dimOffset(Dimension::Id id) const;
 
     /**
       Get number of bytes that make up a point.  Returns the sum of the dimSize
@@ -216,7 +216,7 @@ public:
 
       \return  Size of a point in bytes.
     */
-    PDAL_DLL size_t pointSize() const;
+    size_t pointSize() const;
 
     /**
       Get a pointer to a dimension's detail information.
@@ -224,7 +224,7 @@ public:
       \param id  ID of the dimension.
       \return  A pointer a dimension's detail.
     */
-    PDAL_DLL const Dimension::Detail* dimDetail(Dimension::Id id) const
+    const Dimension::Detail* dimDetail(Dimension::Id id) const
     {
         return &(m_detail[Utils::toNative(id)]);
     }
@@ -244,15 +244,15 @@ public:
 
         \return  A metadata node that contains the layout information.
     */
-    PDAL_DLL MetadataNode toMetadata() const;
+    MetadataNode toMetadata() const;
 
     /**
         Set the names of dimensions to which the layout is restricted.
     */
-    PDAL_DLL void setAllowedDims(StringList dimNames);
+    void setAllowedDims(StringList dimNames);
 
 private:
-    PDAL_DLL virtual bool update(Dimension::Detail dd, const std::string& name);
+    virtual bool update(Dimension::Detail dd, const std::string& name);
 
     Dimension::Type resolveType( Dimension::Type t1,
         Dimension::Type t2);

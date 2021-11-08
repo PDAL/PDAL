@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Howard Butler (howard@hobu.co)
+* Copyright (c) 2021 TileDB, Inc
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -31,55 +31,67 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
-#pragma once
 
-#include <memory>
-#include <vector>
+#include <ctime>
+
+#include <pdal/Reader.hpp>
+#include <pdal/Streamable.hpp>
+#include <io/FauxReader.hpp>
+
+#include <pdal/PluginHelper.hpp>
+
+#include "../io/Bounds4D.hpp"
+
 
 namespace pdal
 {
-    class LasHeader;
 
-// This compressor write data in chunks to a stream. At the beginning of the
-// data is an offset to the end of the data, where the chunk table is
-// stored.  The chunk table keeps a list of the offsets to the beginning of
-// each chunk.  Chunks consist of a fixed number of points (last chunk may
-// have fewer points).  Each time a chunk starts, the compressor is reset.
-// This allows decompression of some set of points that's less than the
-// entire set when desired.
-// The compressor uses the schema of the point data in order to compress
-// the point stream.  The schema is also stored in a VLR that isn't
-// handled as part of the compression process itself.
-class LazPerfVlrCompressorImpl;
-class LazPerfVlrCompressor
+class PDAL_DLL XYZTimeFauxReader : public Reader, public Streamable
 {
 public:
-    LazPerfVlrCompressor(std::ostream& stream, int format, int ebCount);
-    LazPerfVlrCompressor(std::ostream& stream, int format, int ebCount,
-        uint32_t chunksize);
-    ~LazPerfVlrCompressor();
+    XYZTimeFauxReader() {};
 
-    std::vector<char> vlrData() const;
-    void compress(const char *inbuf);
-    void done();
+    std::string getName() const;
 
 private:
-    std::unique_ptr<LazPerfVlrCompressorImpl> m_impl;
+    using urd = std::uniform_real_distribution<double>;
+    std::mt19937 m_generator;
+    int m_numReturns;
+    point_count_t m_index;
+    std::unique_ptr<urd> m_uniformX;
+    std::unique_ptr<urd> m_uniformY;
+    std::unique_ptr<urd> m_uniformZ;
+    std::unique_ptr<urd> m_uniformTm;
+    double m_delX;
+    double m_delY;
+    double m_delZ;
+    double m_delTm;
+    double m_density;
+    BOX4D m_bounds;
+    Mode m_xyz_mode;
+    Mode m_tm_mode;
+    bool m_use_time;
+    std::string m_dim4_name;
+
+    virtual void addArgs(ProgramArgs& args);
+
+    virtual void prepared(PointTableRef table);
+
+    virtual void initialize();
+
+    virtual void addDimensions(PointLayoutPtr layout);
+
+    virtual void ready(PointTableRef table);
+
+    virtual bool processOne(PointRef& point);
+
+    virtual point_count_t read(PointViewPtr view, point_count_t count);
+
+    virtual bool eof()
+        { return false; }
+
+    XYZTimeFauxReader& operator=(const XYZTimeFauxReader&);
+    XYZTimeFauxReader(const XYZTimeFauxReader&);
 };
 
-class LazPerfVlrDecompressorImpl;
-class LazPerfVlrDecompressor
-{
-public:
-    LazPerfVlrDecompressor(std::istream& stream, const LasHeader& header, const char *vlrdata);
-    ~LazPerfVlrDecompressor();
-
-    bool seek(uint64_t record);
-    bool decompress(char *outbuf);
-
-private:
-    std::unique_ptr<LazPerfVlrDecompressorImpl> m_impl;
-};
-
-} // namespace pdal
-
+}

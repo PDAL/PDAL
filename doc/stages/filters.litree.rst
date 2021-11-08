@@ -25,10 +25,24 @@ given a ``ClusterID`` of 0.
 Example
 -------
 
+The Li tree algorithm expects to visit points in descending order of
+``HeightAboveGround``, which is also used in determining the minimum tree
+height to consider. As such, the following pipeline precomputes
+``HeightAboveGround`` using :ref:`filters.hag_delaunay` and subsequently sorts
+the ``PointView`` using this dimension.
+
 .. code-block:: json
 
   [
       "input.las",
+      {
+          "type":"filters.hag_delaunay"
+      },
+      {
+          "type":"filters.sort",
+          "dimension":"HeightAboveGround",
+          "order":"DESC"
+      },
       {
           "type":"filters.litree",
           "min_points":50,

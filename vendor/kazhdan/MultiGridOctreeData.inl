@@ -203,7 +203,8 @@ void Octree< Real >::_init( TreeOctNode* node , LocalDepth maxDepth , bool (*Ref
 		if( Refine( d , off ) )
 		{
 			node->initChildren( _NodeInitializer );
-			for( int c=0 ; c<Cube::CORNERS ; c++ ) _init( node->children + c , maxDepth , Refine );
+			for( int c=0 ; c<(int)Cube::CORNERS ; c++ )
+                _init( node->children + c , maxDepth , Refine );
 		}
 	}
 }

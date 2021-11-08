@@ -157,7 +157,7 @@ void LasHeader::setScaling(const Scaling& scaling)
 }
 
 
-uint16_t LasHeader::basePointLen(uint8_t type)
+uint16_t LasHeader::basePointLen(uint8_t type) const
 {
     const uint16_t len[] = { 20, 28, 26, 34, 57, 63, 30, 36, 38, 59, 67 };
     const size_t numTypes = sizeof(len) / sizeof(len[0]);
@@ -445,7 +445,12 @@ ILeStream& operator>>(ILeStream& in, LasHeader& h)
     {
         LasVLR r;
         if (!r.read(in, h.m_pointOffset))
-            throw LasHeader::error("Invalid VLR - exceeds specified file range.");
+        {
+            std::string err = "Invalid VLR #" + std::to_string(i + 1) +
+                " (" + r.userId()  + "/" + std::to_string(r.recordId()) +
+                ") - size exceeds specified file range.";
+            throw LasHeader::error(err);
+        }
         h.m_vlrs.push_back(std::move(r));
     }
 
