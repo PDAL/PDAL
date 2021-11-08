@@ -5,7 +5,7 @@ if(ENABLE_CTEST)
     if (WITH_TESTS)
         message(STATUS
             "Enable CTest to support submissions of results to CDash at http://cdash.org")
-        cmake_minimum_required(VERSION 2.8.0)
+        cmake_minimum_required(VERSION 3.5.0)
         #
         # Dashboard has been prepared for experiments
         # http://my.cdash.org/index.php?project=PDAL
