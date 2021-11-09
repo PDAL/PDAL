@@ -7,6 +7,7 @@ set(PDAL_VERSION_PATCH @PDAL_VERSION_PATCH@)
 set_and_check(PDAL_INCLUDE_DIRS "@PACKAGE_INCLUDE_INSTALL_DIR@")
 set_and_check(PDAL_LIBRARY_DIRS "@PACKAGE_LIB_INSTALL_DIR@")
 
+include("${CMAKE_CURRENT_LIST_DIR}/pluginmacros.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/PDALTargets.cmake")
 
 #
