@@ -445,7 +445,12 @@ ILeStream& operator>>(ILeStream& in, LasHeader& h)
     {
         LasVLR r;
         if (!r.read(in, h.m_pointOffset))
-            throw LasHeader::error("Invalid VLR - exceeds specified file range.");
+        {
+            std::string err = "Invalid VLR #" + std::to_string(i + 1) +
+                " (" + r.userId()  + "/" + std::to_string(r.recordId()) +
+                ") - size exceeds specified file range.";
+            throw LasHeader::error(err);
+        }
         h.m_vlrs.push_back(std::move(r));
     }
 

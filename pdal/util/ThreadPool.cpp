@@ -61,6 +61,8 @@ void ThreadPool::work()
             return m_tasks.size() || !m_running;
         });
 
+        if (!m_running)
+            break;
         if (m_tasks.size())
         {
             ++m_outstanding;
@@ -72,41 +74,14 @@ void ThreadPool::work()
             // Notify add(), which may be waiting for a spot in the queue.
             m_produceCv.notify_all();
 
-            std::string err;
-
             task();
-
-            /**
-            try
-            {
-                task();
-            }
-            catch (std::exception& e)
-            {
-                err = e.what();
-            }
-            catch (...)
-            {
-                err = "Unknown error";
-            }
-            **/
 
             lock.lock();
             --m_outstanding;
-            if (err.size())
-            {
-                if (m_verbose)
-                    std::cout << "Exception in pool task: " << err << std::endl;
-                m_errors.push_back(err);
-            }
             lock.unlock();
 
             // Notify await(), which may be waiting for a running task.
             m_produceCv.notify_all();
-        }
-        else if (!m_running)
-        {
-            return;
         }
     }
 }

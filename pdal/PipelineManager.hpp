@@ -121,6 +121,7 @@ public:
 
     // Set the log to be available to stages.
     void setLog(const LogPtr& log);
+    LogPtr log() const;
 
     QuickInfo preview() const;
     void prepare() const;

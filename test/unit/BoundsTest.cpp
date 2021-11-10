@@ -63,7 +63,7 @@ TEST(BoundsTest, test_equals)
 
     BOX3D b4(1,2,3,4,5,6);
     BOX3D b5(1,2,3,4,5,6);
-    BOX3D b6(1,2,3,4,5,7);
+    BOX3D b6(1,2,3,4,4,6);
 
     EXPECT_TRUE(b4 == b4);
     EXPECT_TRUE(b4 == b5);
@@ -114,19 +114,39 @@ TEST(BoundsTest, test_clip)
 
     EXPECT_TRUE(r1==r4);
 
-    BOX2D r5(20,40,60,80);
+    BOX2D r5(20,40,1,2);
     r1.clip(r5);
 
-    // BUG: seems wrong -- need to better define semantics of clip, etc
-    // .clip() can make an invalid bounds, this should be fixed.
-    BOX2D r6(20,6, 40,8);
+    EXPECT_TRUE(r1 == r4);
 
-	EXPECT_DOUBLE_EQ(r1.minx, 20);
-	EXPECT_DOUBLE_EQ(r1.maxx, 6);
-	EXPECT_DOUBLE_EQ(r1.miny, 40);
-	EXPECT_DOUBLE_EQ(r1.maxy, 8);
+    BOX2D r6(8, 5, 5, 2);
+    r1.clip(r6);
 
-//ABELL - Need BOX3D example.
+    BOX2D r7(2,5, 5,8);
+    EXPECT_TRUE(r1 == r7);;
+
+	BOX3D r8(0, 0, 0, 10, 10, 10);
+	BOX3D r9(1, 1, 1, 11, 11, 11);
+	r8.clip(r9);
+
+	BOX3D r10(1, 1, 1, 10, 10, 10);
+    EXPECT_TRUE(r8 == r10);
+
+    BOX3D r11(2, 3, 4, 7, 8, 9);
+    r8.clip(r11);
+
+    EXPECT_TRUE(r8 == r11);
+
+    BOX3D r12(8, 9, 10, 1, 2, 3);
+    r8.clip(r12);
+
+    EXPECT_TRUE(r8 == r11);
+
+    BOX3D r13(3, 9, 5, 1, 7, 3);
+    r8.clip(r13);
+
+    BOX3D r14(3, 3, 5, 7, 7, 9);
+    EXPECT_TRUE(r8 == r14);
 }
 
 TEST(BoundsTest, test_intersect)
@@ -160,7 +180,34 @@ TEST(BoundsTest, test_grow)
 
     BOX2D r3(0,1,100,201);
     EXPECT_TRUE(r1 == r3);
-//ABELL - Need BOX3D example.
+
+    BOX3D r4(50, 51, 52, 100, 101, 102);
+    BOX3D r5(0, 1, 100, 90, 201, 202);
+    r4.grow(r5);
+
+    BOX3D r6(0, 1, 52, 100, 201, 202);
+    EXPECT_TRUE(r4 == r6);
+}
+
+TEST(BoundsTest, test_bounds_grow_2_3_args)
+{
+    BOX2D b1(50, 51, 100, 101);
+    BOX3D b2(50, 51, 52, 100, 101, 102);
+    Bounds bounds2d(b1);
+    Bounds bounds3d(b2);
+
+    bounds2d.grow(0, 201);
+
+    BOX2D b3(0, 51, 100, 201);
+    EXPECT_TRUE(bounds2d.to2d() == b3);
+
+    bounds2d.grow(-10, 301, 202);
+    EXPECT_TRUE(bounds2d.is2d());
+    EXPECT_TRUE(bounds2d.to2d() == b3);
+
+    bounds3d.grow(0, 201, 202);
+    BOX3D b4(0, 51, 52, 100, 201, 202);
+    EXPECT_TRUE(bounds3d.to3d() == b4);
 }
 
 TEST(BoundsTest, test_static)

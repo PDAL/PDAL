@@ -122,7 +122,7 @@ void LasReader::addArgs(ProgramArgs& args)
         m_args->extraDimSpec);
     args.add("compression", "Decompressor to use", m_args->compression, "EITHER");
     args.add("use_eb_vlr", "Use extra bytes VLR for 1.0 - 1.3 files", m_args->useEbVlr);
-    args.add("ignore_vlr", "VLR userid/recordid to ignore", m_args->ignoreVLROption);
+    args.add("ignore_vlr", "VLR userid/recordid to ignore", m_args->ignoreVLROption );
     args.add("start", "Point at which reading should start (0-indexed).", m_args->start);
     args.add("fix_dims", "Make invalid dimension names valid by changing "
         "invalid characters to '_'", m_args->fixNames, true);
@@ -534,40 +534,24 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
 
 void LasReader::readExtraBytesVlr()
 {
-    const LasVLR *vlr = m_p->header.findVlr(SPEC_USER_ID,
-        EXTRA_BYTES_RECORD_ID);
+    const LasVLR *vlr = m_p->header.findVlr(SPEC_USER_ID, EXTRA_BYTES_RECORD_ID);
     if (!vlr)
         return;
-    const char *pos = vlr->data();
-    size_t size = vlr->dataLen();
-    if (size % sizeof(ExtraBytesSpec) != 0)
+
+    if (vlr->dataLen() % ExtraBytesSpecSize != 0)
     {
-        log()->get(LogLevel::Warning) << "Bad size for extra bytes VLR.  "
-            "Ignoring.";
+        log()->get(LogLevel::Warning) << "Bad size for extra bytes VLR.  Ignoring.";
         return;
     }
-    size /= sizeof(ExtraBytesSpec);
-    std::vector<ExtraBytesIf> ebList;
-    while (size--)
-    {
-        ExtraBytesIf eb;
-        eb.readFrom(pos);
-        ebList.push_back(eb);
-        pos += sizeof(ExtraBytesSpec);
-    }
 
-    std::vector<ExtraDim> extraDims;
-    for (ExtraBytesIf& eb : ebList)
-    {
-       std::vector<ExtraDim> eds = eb.toExtraDims();
-       for (auto& ed : eds)
-           extraDims.push_back(std::move(ed));
-    }
+    std::vector<ExtraDim> extraDims = ExtraBytesIf::toExtraDims(vlr->data(), vlr->dataLen(),
+        m_p->header.basePointLen());
+
     if (m_p->extraDims.size() && m_p->extraDims != extraDims)
         log()->get(LogLevel::Warning) << "Extra byte dimensions specified "
             "in pipeline and VLR don't match.  Ignoring pipeline-specified "
             "dimensions";
-    m_p->extraDims = extraDims;
+    m_p->extraDims = std::move(extraDims);
 }
 
 
@@ -615,36 +599,7 @@ void LasReader::extractVlrMetadata(MetadataNode& forward, MetadataNode& m)
 
 void LasReader::addDimensions(PointLayoutPtr layout)
 {
-    using namespace Dimension;
-
-    layout->registerDim(Id::X, Type::Double);
-    layout->registerDim(Id::Y, Type::Double);
-    layout->registerDim(Id::Z, Type::Double);
-    layout->registerDim(Id::Intensity, Type::Unsigned16);
-    layout->registerDim(Id::ReturnNumber, Type::Unsigned8);
-    layout->registerDim(Id::NumberOfReturns, Type::Unsigned8);
-    layout->registerDim(Id::ScanDirectionFlag, Type::Unsigned8);
-    layout->registerDim(Id::EdgeOfFlightLine, Type::Unsigned8);
-    layout->registerDim(Id::Classification, Type::Unsigned8);
-    layout->registerDim(Id::ScanAngleRank, Type::Float);
-    layout->registerDim(Id::UserData, Type::Unsigned8);
-    layout->registerDim(Id::PointSourceId, Type::Unsigned16);
-
-    if (m_p->header.hasTime())
-        layout->registerDim(Id::GpsTime, Type::Double);
-    if (m_p->header.hasColor())
-    {
-        layout->registerDim(Id::Red, Type::Unsigned16);
-        layout->registerDim(Id::Green, Type::Unsigned16);
-        layout->registerDim(Id::Blue, Type::Unsigned16);
-    }
-    if (m_p->header.hasInfrared())
-        layout->registerDim(Id::Infrared);
-    if (m_p->header.has14PointFormat())
-    {
-        layout->registerDim(Id::ScanChannel);
-        layout->registerDim(Id::ClassFlags);
-    }
+    layout->registerDims(LasUtils::pdrfDims(m_p->header.pointFormat()));
 
     size_t ebLen = m_p->header.pointLen() - m_p->header.basePointLen();
     for (auto& dim : m_p->extraDims)

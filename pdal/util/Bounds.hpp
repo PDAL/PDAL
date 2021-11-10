@@ -187,11 +187,11 @@ public:
     */
     void clip(const BOX2D& other)
     {
-        if (other.minx > minx) minx = other.minx;
-        if (other.maxx < maxx) maxx = other.maxx;
+        if (other.minx > minx && other.minx < maxx) minx = other.minx;
+        if (other.maxx < maxx && other.maxx > minx) maxx = other.maxx;
 
-        if (other.miny > miny) miny = other.miny;
-        if (other.maxy < maxy) maxy = other.maxy;
+        if (other.miny > miny && other.miny < maxy) miny = other.miny;
+        if (other.maxy < maxy && other.maxy > miny) maxy = other.maxy;
     }
 
     /**
@@ -424,7 +424,7 @@ public:
     */
     bool equal(const BOX3D& other) const
     {
-        return  BOX2D::contains(other) &&
+        return  BOX2D::equal(other) &&
             minz == other.minz && maxz == other.maxz;
     }
 
@@ -489,8 +489,8 @@ public:
     void clip(const BOX3D& other)
     {
         BOX2D::clip(other);
-        if (other.minz < minz) minz = other.minz;
-        if (other.maxz > maxz) maxz = other.maxz;
+        if (other.minz > minz && other.minz < maxz) minz = other.minz;
+        if (other.maxz < maxz && other.maxz > minz) maxz = other.maxz;
     }
 
     /**
