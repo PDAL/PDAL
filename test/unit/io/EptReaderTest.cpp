@@ -153,19 +153,18 @@ TEST(EptReaderTest, fullReadLaszip)
     double x, y, z;
     uint64_t o;
     uint64_t np(0);
-    for (const PointViewPtr& view : set)
+    ASSERT_EQ(set.size(), 1u);
+    const PointViewPtr& view = *set.begin();
+    for (point_count_t i(0); i < view->size(); ++i)
     {
-        for (point_count_t i(0); i < view->size(); ++i)
-        {
-            ++np;
+        ++np;
 
-            x = view->getFieldAs<double>(Dimension::Id::X, i);
-            y = view->getFieldAs<double>(Dimension::Id::Y, i);
-            z = view->getFieldAs<double>(Dimension::Id::Z, i);
-            o = view->getFieldAs<uint64_t>(Dimension::Id::OriginId, i);
-            ASSERT_TRUE(expBoundsConforming.contains(x, y, z));
-            ASSERT_TRUE(o < 4);
-        }
+        x = view->getFieldAs<double>(Dimension::Id::X, i);
+        y = view->getFieldAs<double>(Dimension::Id::Y, i);
+        z = view->getFieldAs<double>(Dimension::Id::Z, i);
+        o = view->getFieldAs<uint64_t>(Dimension::Id::OriginId, i);
+        ASSERT_TRUE(expBoundsConforming.contains(x, y, z));
+        ASSERT_TRUE(o < 4);
     }
 
     EXPECT_EQ(np, expNumPoints);
@@ -433,6 +432,7 @@ TEST(EptReaderTest, originRead)
         reader.prepare(table);
         const auto set(reader.execute(table));
 
+        PointViewPtr v = *set.begin();
         uint64_t o;
         for (const PointViewPtr& view : set)
         {
@@ -562,19 +562,19 @@ TEST(EptReaderTest, binaryStream)
     streamTest(ellipsoidEptBinaryPath);
 }
 
+#ifdef PDAL_HAVE_LASZIP
 TEST(EptReaderTest, laszipStream)
 {
-#ifdef PDAL_HAVE_LASZIP
     streamTest(eptLaszipPath);
-#endif
 }
+#endif
 
+#ifdef PDAL_HAVE_ZSTD
 TEST(EptReaderTest, zstandardStream)
 {
-#ifdef PDAL_HAVE_ZSTANDARD
     streamTest(ellipsoidEptZstandardPath);
-#endif
 }
+#endif
 
 TEST(EptReaderTest, boundedCrop)
 {
@@ -817,19 +817,19 @@ TEST(EptReaderTest, ogrCrop)
 
     PointTable eptTable;
     reader.prepare(eptTable);
+    PointViewSet s = reader.execute(eptTable);
+    EXPECT_EQ(s.size(), 1U);
+    PointViewPtr v = *s.begin();
 
-    uint64_t eptNp(0);
-    for (const PointViewPtr& view : reader.execute(eptTable))
-        eptNp += view->size();
+    point_count_t eptNp = v->size();
 
     // Now we'll check the result against a crop filter of the source file with
     // the same bounds.
     LasReader source;
-    {
-        Options options;
-        options.add("filename", Support::datapath("autzen/autzen-attribute-cropped.las"));
-        source.setOptions(options);
-    }
+    Options options;
+    options.add("filename", Support::datapath("autzen/autzen-attribute-cropped.las"));
+    source.setOptions(options);
+
     PointTable sourceTable;
     source.prepare(sourceTable);
     uint64_t sourceNp(0);

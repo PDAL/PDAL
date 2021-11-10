@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2020, Hobu Inc.
+ * Copyright (c) 2018, Connor Manning
  *
  * All rights reserved.
  *
@@ -34,64 +34,32 @@
 
 #pragma once
 
-#include <pdal/PointView.hpp>
-#include <pdal/pdal_types.hpp>
+#include <memory>
 
-#include "Addon.hpp"
-#include "Overlap.hpp"
+#include <pdal/Artifact.hpp>
+#include "Connector.hpp"
+#include "EptInfo.hpp"
+#include "Accessor.hpp"
 
 namespace pdal
 {
 
-class EptInfo;
-class Connector;
-class BasePointTable;
-using BasePointTablePtr = std::unique_ptr<BasePointTable>;
-
-class TileContents
+class EptArtifact : public Artifact
 {
 public:
-    TileContents(const Overlap& overlap, const EptInfo& info,
-            const Connector& connector, const AddonList& addons) :
-        m_overlap(overlap), m_info(info), m_connector(connector),
-        m_addons(addons)
+    EptArtifact(std::unique_ptr<EptInfo> info,
+            std::unique_ptr<Hierarchy> hierarchy,
+            std::unique_ptr<Connector> connector, size_t hierarchyStep) :
+        m_info(std::move(info)), m_hierarchy(std::move(hierarchy)),
+        m_connector(std::move(connector)), m_hierarchyStep(hierarchyStep)
     {}
 
-    BasePointTable& table() const
-        { return *m_table; }
-    const Key& key() const
-        { return m_overlap.m_key; }
-    point_count_t nodeId() const
-        { return m_overlap.m_nodeId; }
-    //ABELL - This is bad. We're assuming that the actual number of points we have matches
-    // what our index information told us. This may not be the case because of some
-    // issue. Downstream handling may depend on this being the actual number of points
-    // in the tile, rather than the number that were *supposed to be* in the tile.
-    point_count_t size() const
-        { return m_overlap.m_count; }
-    const std::string& error() const
-        { return m_error; }
-    BasePointTable *addonTable(Dimension::Id id) const
-        { return const_cast<TileContents *>(this)->m_addonTables[id].get(); }
-    void read();
-
-private:
-    Overlap m_overlap;
-    const EptInfo& m_info;
-    const Connector& m_connector;
-    const AddonList& m_addons;
-    std::string m_error;
-    // Table for the base point data.
-    BasePointTablePtr m_table;
-    // Tables for the add on data.
-    std::map<Dimension::Id, BasePointTablePtr> m_addonTables;
-
-    void readLaszip();
-    void readBinary();
-    void readZstandard();
-    void readAddon(const Addon& addon);
-    void transform();
+    std::unique_ptr<EptInfo> m_info;
+    std::unique_ptr<Hierarchy> m_hierarchy;
+    std::unique_ptr<Connector> m_connector;
+    size_t m_hierarchyStep;
 };
+using EptArtifactPtr = std::shared_ptr<EptArtifact>;
 
 } // namespace pdal
 

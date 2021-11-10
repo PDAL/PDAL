@@ -44,18 +44,22 @@
 #include <pdal/Streamable.hpp>
 #include <pdal/util/Bounds.hpp>
 
+#include "OctReader.hpp"
+
 namespace pdal
 {
 
 class Connector;
 class EptInfo;
 class Key;
-class TileContents;
-struct Overlap;
-using Hierarchy = std::unordered_set<Overlap>;
+class Tile;
+class Accessor;
+struct EptArgs;
+struct EptPrivate;
+using TilePtr = std::unique_ptr<Tile>;
 using StringMap = std::map<std::string, std::string>;
 
-class PDAL_DLL EptReader : public Reader, public Streamable
+class PDAL_DLL EptReader : public OctReader
 {
     FRIEND_TEST(EptReaderTest, getRemoteType);
     FRIEND_TEST(EptReaderTest, getCoercedType);
@@ -72,7 +76,19 @@ private:
     virtual void addDimensions(PointLayoutPtr layout) override;
     virtual void ready(PointTableRef table) override;
     virtual point_count_t read(PointViewPtr view, point_count_t count) override;
-    virtual bool processOne(PointRef& point) override;
+    virtual bool passesPointFilter(PointRef& p, double x, double y, double z) const override;
+    virtual bool processPoint(const Tile& tile, PointRef& src, PointRef& dst) override;
+    virtual TilePtr makeTile(const Accessor& accessor) const override;
+    virtual HierarchyPage fetchHierarchyPage(Hierarchy& hierarchy,
+        const Accessor& k) const override;
+    virtual double rootNodeHalfWidth() const override;
+    virtual void rootNodeCenter(double& x, double& y, double &z) const override;
+    virtual double rootNodeSpacing() const override;
+    virtual BOX3D rootNodeExtent() const override;
+    virtual BOX3D pointBounds() const override;
+    virtual point_count_t pointCount() const override;
+    virtual StringList dimNames() const override;
+    virtual void calcOverlaps() override;
 
     // If argument "origin" is specified, this function will clip the query
     // bounds to the bounds of the specified origin and set m_queryOriginId to
@@ -80,28 +96,10 @@ private:
     void handleOriginQuery();
     void setForwards(StringMap& headers, StringMap& query);
 
-    // Aggregate all EPT keys overlapping our query bounds and their number of
-    // points from a walk through the hierarchy.  Each of these keys will be
-    // downloaded during the 'read' section.
-    void overlaps();
-    void overlaps(Hierarchy& target, const NL::json& current, const Key& key);
-    bool hasSpatialFilter() const;
-    bool passesSpatialFilter(const BOX3D& tileBounds) const;
-    void process(PointViewPtr dstView, const TileContents& tile, point_count_t count);
-    bool processPoint(PointRef& dst, const TileContents& tile);
-    void load(const Overlap& overlap);
-    void checkTile(const TileContents& tile);
+    std::unique_ptr<EptArgs> m_eptArgs;
+    std::unique_ptr<EptPrivate> m_e;
 
-    struct Args;
-    std::unique_ptr<Args> m_args;
-    struct Private;
-    std::unique_ptr<Private> m_p;
-
-    uint64_t m_tileCount;
     int64_t m_queryOriginId = -1;
-
-    uint64_t m_depthEnd = 0;    // Zero indicates selection of all depths.
-    uint64_t m_hierarchyStep = 0;
 
     Dimension::Id m_nodeIdDim = Dimension::Id::Unknown;
     Dimension::Id m_pointIdDim = Dimension::Id::Unknown;

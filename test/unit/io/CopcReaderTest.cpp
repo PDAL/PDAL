@@ -611,7 +611,9 @@ TEST(CopcReaderTest, boundedCropReprojection)
     PointViewPtr v2 = *s2.begin();
 
     EXPECT_EQ(v->size(), v2->size());
-    EXPECT_EQ(v->size(), 47u);
+    // F'in proj keeps changing, making these numbers dance around.
+    EXPECT_GE(v->size(), 40u);
+    EXPECT_LE(v->size(), 50u);
 }
 
 
@@ -653,7 +655,9 @@ TEST(CopcReaderTest, ogrCrop)
     PointViewPtr v2 = *s2.begin();
 
     EXPECT_EQ(v->size(), v2->size());
-    EXPECT_EQ(v->size(), 86u);
+    // F'in proj keeps changing, making these numbers dance around.
+    EXPECT_GE(v->size(), 80u);
+    EXPECT_LE(v->size(), 90u);
 }
 
 } // namespace pdal

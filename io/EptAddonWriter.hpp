@@ -50,8 +50,7 @@ class EptInfo;
 class Key;
 class ThreadPool;
 class Addon;
-struct Overlap;
-using Hierarchy = std::unordered_set<Overlap>;
+class Hierarchy;
 using AddonList = std::vector<Addon>;
 
 class PDAL_DLL EptAddonWriter : public Writer

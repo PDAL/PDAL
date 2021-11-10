@@ -34,22 +34,68 @@
 
 #pragma once
 
-#include <nlohmann/json.hpp>
-#include <pdal/util/Bounds.hpp>
+#include <list>
+#include <string>
+
+#include <pdal/JsonFwd.hpp>
+#include <pdal/PointLayout.hpp>
+
+#include "Accessor.hpp"
+#include "EptSupport.hpp"
 
 namespace pdal
 {
 
-inline BOX3D toBox3d(const NL::json& b)
-{
-    if (!b.is_array() || b.size() != 6)
-    {
-        throw pdal_error("Invalid bounds specification: " + b.dump());
-    }
+class Addon;
+class Connector;
+using AddonList = std::vector<Addon>;
 
-    return BOX3D(b[0].get<double>(), b[1].get<double>(), b[2].get<double>(),
-            b[3].get<double>(), b[4].get<double>(), b[5].get<double>());
-}
+class Addon
+{
+public:
+    Addon(const std::string& dimName, const std::string& filename, Dimension::Type type) :
+        m_name(dimName), m_filename(filename), m_type(type),
+        m_hierarchy(ept::hierarchyDir(filename))
+    { m_localId = m_layout.registerOrAssignDim(dimName, type); }
+
+    std::string name() const
+        { return m_name; }
+    std::string filename() const
+        { return m_filename; }
+    Dimension::Type type() const
+        { return m_type; }
+    // Id for the local (internal) layout
+    Dimension::Id localId() const
+        { return m_localId; }
+    // Id for the layout to which we'll copy data (ultimate PDAL ID).
+    Dimension::Id externalId() const
+        { return m_externalId; }
+    void setExternalId(Dimension::Id externalId)
+        { m_externalId = externalId; }
+    Hierarchy& hierarchy()
+        { return m_hierarchy; }
+    PointLayout& layout() const
+        { return const_cast<PointLayout &>(m_layout); }
+    point_count_t points(const Key& key) const;
+    std::string dataDir() const;
+    std::string hierarchyDir() const;
+    static AddonList store(const Connector& connector, const NL::json& spec,
+        const PointLayout& layout);        
+    static AddonList load(const Connector& connector, const NL::json& spec);
+
+private:
+    std::string m_name;
+    std::string m_filename;
+    Dimension::Type m_type;
+    Dimension::Id m_localId;
+    Dimension::Id m_externalId;
+
+    Hierarchy m_hierarchy;
+    PointLayout m_layout;
+
+    static Addon loadAddon(const Connector& connector,
+        const std::string& dimName, const std::string& filename);
+};
 
 } // namespace pdal
 

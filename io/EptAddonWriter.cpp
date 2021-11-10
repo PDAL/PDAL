@@ -41,9 +41,9 @@
 #include <pdal/ArtifactManager.hpp>
 #include <pdal/util/ThreadPool.hpp>
 
-#include "private/ept/Addon.hpp"
-#include "private/ept/EptArtifact.hpp"
-#include "private/ept/Connector.hpp"
+#include "private/octree/Addon.hpp"
+#include "private/octree/EptArtifact.hpp"
+#include "private/octree/Connector.hpp"
 
 namespace pdal
 {
@@ -143,10 +143,11 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
     // Create an addon buffer for each node we're going to write.
 
     size_t itemSize = Dimension::size(addon.type());
-    for (const Overlap& overlap : *m_hierarchy)
+    for (const Accessor& acc : *m_hierarchy)
     {
-        std::vector<char>& b = buffers[overlap.m_nodeId - 1];
-        b.resize(overlap.m_count * itemSize);
+        const EptAccessor& eptAcc = static_cast<const EptAccessor &>(acc);
+        std::vector<char>& b = buffers[eptAcc.nodeId() - 1];
+        b.resize(eptAcc.pointCount() * itemSize);
     }
 
     // Fill in our buffers with the data from the view.
@@ -171,15 +172,16 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
         pr.getField(dst, addon.externalId(), addon.type());
     }
 
-    std::string dataDir = addon.dataDir();
-
+    std::string dataDir = ept::dataDir(addon.filename());
     m_connector->makeDir(dataDir);
 
     // Write the binary dimension data for the addon.
-    for (const Overlap& overlap : *m_hierarchy)
+    for (const Accessor& acc : *m_hierarchy)
     {
-        std::vector<char>& buffer = buffers.at(overlap.m_nodeId - 1);
-        std::string filename = dataDir + overlap.m_key.toString() + ".bin";
+        const EptAccessor& eptAcc = static_cast<const EptAccessor &>(acc);
+
+        std::vector<char>& buffer = buffers.at(eptAcc.nodeId() - 1);
+        std::string filename = dataDir + eptAcc.key().toString() + ".bin";
         m_pool->add([this, filename, &buffer]()
         {
             m_connector->put(filename, buffer);
@@ -191,9 +193,8 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
     // Write the addon hierarchy data.
     NL::json h;
     Key key;
-    key.b = m_info->bounds();
 
-    std::string hierarchyDir = addon.hierarchyDir();
+    std::string hierarchyDir = ept::hierarchyDir(addon.filename());
     m_connector->makeDir(hierarchyDir);
 
     writeHierarchy(hierarchyDir, h, key);
@@ -215,12 +216,8 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const Addon& addon) const
 void EptAddonWriter::writeHierarchy(const std::string& directory,
     NL::json& curr, const Key& key) const
 {
-    auto it = m_hierarchy->find(key);
-    if (it == m_hierarchy->end())
-        return;
-
-    const Overlap& overlap = *it;
-    if (!overlap.m_count)
+    const Accessor& accessor = m_hierarchy->find(key);
+    if (!accessor.valid() || accessor.pointCount() == 0)
         return;
 
     const std::string keyName = key.toString();
@@ -229,10 +226,10 @@ void EptAddonWriter::writeHierarchy(const std::string& directory,
         curr[keyName] = -1;
 
         // Create a new hierarchy subtree.
-        NL::json next {{ keyName, overlap.m_count }};
+        NL::json next {{ keyName, accessor.pointCount() }};
 
         for (uint64_t dir(0); dir < 8; ++dir)
-            writeHierarchy(directory, next, key.bisect(dir));
+            writeHierarchy(directory, next, key.child(dir));
 
         std::string filename = directory + keyName + ".json";
         std::string data = next.dump();
@@ -243,9 +240,9 @@ void EptAddonWriter::writeHierarchy(const std::string& directory,
     }
     else
     {
-        curr[keyName] = overlap.m_count;
+        curr[keyName] = accessor.pointCount();
         for (uint64_t dir(0); dir < 8; ++dir)
-            writeHierarchy(directory, curr, key.bisect(dir));
+            writeHierarchy(directory, curr, key.child(dir));
     }
 }
 

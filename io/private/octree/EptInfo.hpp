@@ -34,43 +34,62 @@
 
 #pragma once
 
-#include <unordered_set>
+#include <pdal/DimType.hpp>
+#include <pdal/JsonFwd.hpp>
+#include <pdal/SpatialReference.hpp>
+#include <pdal/util/Bounds.hpp>
 
-#include "Key.hpp"
+#include "FixedPointLayout.hpp"
 
 namespace pdal
 {
 
-struct Overlap
+class EptInfo
 {
-    Overlap(const Key& key) : m_key(key), m_count(0), m_nodeId(0)
-    {}
-    Overlap(const Key& key, point_count_t count, uint64_t nodeId) :
-        m_key(key), m_count(count), m_nodeId(nodeId)
-    {}
+public:
+    enum class DataType
+    {
+        Laszip,
+        Binary,
+        Zstandard
+    };
 
-    Key m_key;
-    point_count_t m_count;
-    uint64_t m_nodeId;
+    EptInfo(const std::string& info);
+    EptInfo(const NL::json& info);
+
+    BOX3D rootExtent() const { return m_rootExtent; }
+    BOX3D pointBounds() const { return m_pointBounds; }
+    uint64_t points() const { return m_points; }
+    uint64_t span() const { return m_span; }
+    DataType dataType() const { return m_dataType; }
+    const SpatialReference& srs() const { return m_srs; }
+    const NL::json& json() { return m_info; }
+    const std::map<std::string, DimType>& dims() const { return m_dims; }
+    DimType dimType(Dimension::Id id) const;
+    PointLayout& remoteLayout() const { return m_remoteLayout; }
+
+private:
+    // Info comes from the values here:
+    // https://entwine.io/entwine-point-tile.html#ept-json
+    NL::json m_info;
+    BOX3D m_rootExtent;
+    BOX3D m_pointBounds;
+    uint64_t m_points = 0;
+    std::map<std::string, DimType> m_dims;
+
+    // Each tile/voxel/file in an EPT dataset is divided into a bunch of subcells. The
+    // target is that there is no more than one point in each of these subcells.
+    // The span is the number of subcells in each direction X/Y/Z.
+    //
+    // See: https://entwine.io/entwine-point-tile.html#span
+    uint64_t m_span = 0;
+    DataType m_dataType;
+    SpatialReference m_srs;
+    std::string m_filename;
+    mutable FixedPointLayout m_remoteLayout;
+
+    void initialize();
 };
-using Hierarchy = std::unordered_set<Overlap>;
-
-inline bool operator==(const Overlap& a, const Overlap& b)
-{
-    return a.m_key == b.m_key;
-}
 
 } // namespace pdal
-
-namespace std
-{
-    template<>
-    struct hash<pdal::Overlap>
-    {
-        std::size_t operator()(const pdal::Overlap& o) const noexcept
-        {
-            return std::hash<pdal::Key>{}(o.m_key);
-        }
-    };
-}
 

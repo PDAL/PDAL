@@ -37,32 +37,31 @@
 
 #include "Connector.hpp"
 #include "EptInfo.hpp"
-#include "TileContents.hpp"
+#include "Tile.hpp"
 #include "VectorPointTable.hpp"
 
 namespace pdal
 {
 
-void TileContents::read()
+// EptTile
+
+void EptTile::read(const Connector& connector, const std::string& baseFile)
 {
     try
     {
         if (m_info.dataType() == EptInfo::DataType::Laszip)
-            readLaszip();
+            readLaszip(connector, baseFile);
         else if (m_info.dataType() == EptInfo::DataType::Binary)
-            readBinary();
-#ifdef PDAL_HAVE_ZSTD
+            readBinary(connector, baseFile);
         else if (m_info.dataType() == EptInfo::DataType::Zstandard)
-            readZstandard();
-#endif
-        else
-            throw pdal_error("Unrecognized EPT dataType");
+            readZstandard(connector, baseFile);
+
 //ABELL - Should check that we read the number of points specified in the
 //  overlap.
         // Read addon information after the native data, we'll possibly
         // overwrite attributes.
         for (const Addon& addon : m_addons)
-            readAddon(addon);
+            readAddon(connector, addon);
     }
     catch (const std::exception& ex)
     {
@@ -74,13 +73,13 @@ void TileContents::read()
     }
 }
 
-void TileContents::readLaszip()
+void EptTile::readLaszip(const Connector& connector, const std::string& baseFile)
 {
     // If the file is remote (HTTP, S3, Dropbox, etc.), getLocalHandle will
     // download the file and `localPath` will return the location of the
     // downloaded file in a temporary directory.  Otherwise it's a no-op.
-    std::string filename = m_info.dataDir() + key().toString() + ".laz";
-    auto handle = m_connector.getLocalHandle(filename);
+    std::string filename = ept::dataDir(baseFile) + key().toString() + ".laz";
+    auto handle = connector.getLocalHandle(filename);
 
     m_table.reset(new ColumnPointTable);
 
@@ -94,25 +93,26 @@ void TileContents::readLaszip()
 
     reader.prepare(*m_table);
     reader.execute(*m_table);
+    transform(true);
 }
 
-void TileContents::readBinary()
+void EptTile::readBinary(const Connector& connector, const std::string& baseFile)
 {
-    std::string filename = m_info.dataDir() + key().toString() + ".bin";
-    auto data(m_connector.getBinary(filename));
+    std::string filename = ept::dataDir(baseFile) + key().toString() + ".bin";
+    auto data(connector.getBinary(filename));
 
     VectorPointTable *vpt = new VectorPointTable(m_info.remoteLayout());
     vpt->buffer() = std::move(data);
     m_table.reset(vpt);
 
-    transform();
+    transform(false);
 }
 
 #ifdef PDAL_HAVE_ZSTD
-void TileContents::readZstandard()
+void EptTile::readZstandard(const Connector& connector, const std::string& baseFile)
 {
-    std::string filename = m_info.dataDir() + key().toString() + ".zst";
-    auto compressed(m_connector.getBinary(filename));
+    std::string filename = ept::dataDir(baseFile) + key().toString() + ".zst";
+    auto compressed(connector.getBinary(filename));
     std::vector<char> data;
     pdal::ZstdDecompressor dec([&data](char* pos, std::size_t size)
     {
@@ -125,14 +125,14 @@ void TileContents::readZstandard()
     vpt->buffer() = std::move(data);
     m_table.reset(vpt);
 
-    transform();
+    transform(false);
 }
 #else
-void TileContents::readZstandard()
+void EptTile::readZstandard(const Connector&, const std::string&)
 {}
 #endif // PDAL_HAVE_ZSTD
 
-void TileContents::readAddon(const Addon& addon)
+void EptTile::readAddon(const Connector& connector, const Addon& addon)
 {
     m_addonTables[addon.localId()] = nullptr;
 
@@ -144,8 +144,8 @@ void TileContents::readAddon(const Addon& addon)
     if (addonPoints != size())
         throw pdal_error("Invalid addon hierarchy");
 
-    std::string filename = addon.dataDir() + key().toString() + ".bin";
-    const auto data(m_connector.getBinary(filename));
+    std::string filename = ept::dataDir(addon.filename()) + key().toString() + ".bin";
+    const auto data(connector.getBinary(filename));
 
     if (size() * Dimension::size(addon.type()) != data.size())
         throw pdal_error("Invalid addon content length");
@@ -155,29 +155,38 @@ void TileContents::readAddon(const Addon& addon)
     m_addonTables[addon.localId()] = BasePointTablePtr(vpt);
 }
 
-void TileContents::transform()
+
+void EptTile::transform(bool skipxyz)
 {
+    // Shorten long name.
     using D = Dimension::Id;
 
-    // Shorten long name.
-    const XForm& xf = m_info.dimType(Dimension::Id::X).m_xform;
-    const XForm& yf = m_info.dimType(Dimension::Id::Y).m_xform;
-    const XForm& zf = m_info.dimType(Dimension::Id::Z).m_xform;
-
-    PointRef p(*m_table);
-    for (PointId i = 0; i < size(); ++i)
+    for (const auto& dimIt : m_info.dims())
     {
-        p.setPointId(i);
+        const DimType& dt = dimIt.second;
+        const XForm& xf = dt.m_xform;
+        Dimension::Id id = dt.m_id;
 
-        // Scale the XYZ values.
-        p.setField(D::X, p.getFieldAs<double>(D::X) * xf.m_scale.m_val +
-            xf.m_offset.m_val);
-        p.setField(D::Y, p.getFieldAs<double>(D::Y) * yf.m_scale.m_val +
-            yf.m_offset.m_val);
-        p.setField(D::Z, p.getFieldAs<double>(D::Z) * zf.m_scale.m_val +
-            zf.m_offset.m_val);
+        if (!xf.nonstandard())
+            continue;
+        if (skipxyz && (id == D::X || id == D::Y || id == D::Z))
+            continue;
+        PointRef p(*m_table);
+        for (PointId i = 0; i < size(); ++i)
+        {
+            p.setPointId(i);
+            p.setField(id, p.getFieldAs<double>(id) * xf.m_scale.m_val + xf.m_offset.m_val);
+        }
     }
 }
+
+/// CopcTile
+/**
+void CopcTile::read()
+{
+    //ABELL - Do something.
+}
+**/
 
 } // namespace pdal
 

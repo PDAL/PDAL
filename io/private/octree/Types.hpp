@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2018, Connor Manning
+ * Copyright (c) 2021, Hobu Inc.
  *
  * All rights reserved.
  *
@@ -34,32 +34,82 @@
 
 #pragma once
 
-#include <memory>
+#include <nlohmann/json.hpp>
 
-#include <pdal/Artifact.hpp>
-#include "Connector.hpp"
-#include "EptInfo.hpp"
-#include "Overlap.hpp"
+#include <pdal/Polygon.hpp>
+#include <pdal/SrsBounds.hpp>
+#include <pdal/util/ThreadPool.hpp>
+#include <pdal/private/SrsTransform.hpp>
+
+#include "Tile.hpp"
 
 namespace pdal
 {
 
-class EptArtifact : public Artifact
+struct OctArgs
 {
 public:
-    EptArtifact(std::unique_ptr<EptInfo> info,
-            std::unique_ptr<Hierarchy> hierarchy,
-            std::unique_ptr<Connector> connector, size_t hierarchyStep) :
-        m_info(std::move(info)), m_hierarchy(std::move(hierarchy)),
-        m_connector(std::move(connector)), m_hierarchyStep(hierarchyStep)
-    {}
-
-    std::unique_ptr<EptInfo> m_info;
-    std::unique_ptr<Hierarchy> m_hierarchy;
-    std::unique_ptr<Connector> m_connector;
-    size_t m_hierarchyStep;
+    SrsBounds clip;
+    std::size_t threads = 0;
+    double resolution = 0;
+    std::vector<Polygon> polys;
+    NL::json ogr;
 };
-using EptArtifactPtr = std::shared_ptr<EptArtifact>;
+
+struct EptArgs
+{
+public:
+    std::string origin;
+    NL::json addons;
+    NL::json query;
+    NL::json headers;
+};
+
+struct PolyXform
+{
+    Polygon poly;
+    SrsTransform xform;
+};
+
+struct BoxXform
+{
+    BOX3D box;
+    SrsTransform xform;
+};
+
+struct OctPrivate
+{
+public:
+    OctPrivate();
+    ~OctPrivate();
+
+    std::unique_ptr<Connector> connector;
+    std::unique_ptr<ThreadPool> pool;
+    TilePtr currentTile;
+    std::unique_ptr<Hierarchy> hierarchy;
+    //ABELL - This needs a better name.
+    std::queue<TilePtr> contents;
+    std::mutex mutex;
+    std::condition_variable contentsCv;
+    std::vector<PolyXform> polys;
+    BoxXform clip;
+    PointId tilePointNum = 0;
+    int32_t remainingTiles = 0;
+    int32_t depthEnd = 0;
+};
+
+struct EptPrivate
+{
+    EptPrivate();
+    ~EptPrivate();
+
+    // m_filename, adjusted for historic silliness. m_filename is maintained in case we need
+    // it for user feedback in some case.
+    std::string adjFilename;
+    std::unique_ptr<EptInfo> info;
+    AddonList addons;
+    int64_t queryOriginId = -1;
+    int32_t hierarchyStep = 0;
+};
 
 } // namespace pdal
-
