@@ -11,8 +11,9 @@ macro(PDAL_CREATE_PLUGIN)
     set(SOURCES "${PDAL_CREATE_PLUGIN_SOURCES}")
     if (NOT TYPE STREQUAL "reader" AND
         NOT TYPE STREQUAL "writer" AND
-        NOT TYPE STREQUAL "filter")
-        message(FATAL_ERROR "Invalid type '${TYPE}'. Must be 'reader', 'writer' or 'filter'.")
+        NOT TYPE STREQUAL "filter" AND
+        NOT TYPE STREQUAL "kernel")
+        message(FATAL_ERROR "Invalid plugin type '${TYPE}'. Must be 'reader', 'writer', 'filter' or 'kernel'.")
     endif()
     set(PROJECT_NAME ${NAME}_${TYPE})
     set(TARGET pdal_io_${TYPE}_${NAME})
