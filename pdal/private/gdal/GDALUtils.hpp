@@ -62,12 +62,13 @@ PDAL_DLL bool reproject(double& x, double& y, double& z,
     const SpatialReference& srcSrs, const SpatialReference& dstSrs);
 PDAL_DLL std::string lastError();
 
+// Exported for test support. Not sure why the above are exported.
+PDAL_DLL std::vector<Polygon> getPolygons(const NL::json& ogr);
+
 // New signatures to support extraction of SRS from the end of geometry
 // specifications.
 OGRGeometry *createFromWkt(const std::string& s, std::string& srs);
 OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs);
-
-std::vector<Polygon> getPolygons(const NL::json& ogr);
 
 inline OGRGeometry *fromHandle(OGRGeometryH geom)
 { return reinterpret_cast<OGRGeometry *>(geom); }
