@@ -45,7 +45,7 @@
 #include <filters/SortFilter.hpp>
 #include <pdal/SrsBounds.hpp>
 #include <pdal/util/FileUtils.hpp>
-//#include <pdal/private/gdal/GDALUtils.hpp>
+#include <pdal/private/gdal/GDALUtils.hpp>
 
 #include "Support.hpp"
 
@@ -621,16 +621,16 @@ TEST(CopcReaderTest, ogrCrop)
 {
     const std::string srs = R"(PROJCS["NAD_1983_HARN_Lambert_Conformal_Conic",GEOGCS["GCS_North_American_1983_HARN",DATUM["NAD83_High_Accuracy_Reference_Network",SPHEROID["GRS 1980",6378137,298.2572221010002,AUTHORITY["EPSG","7019"]],AUTHORITY["EPSG","6152"]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]],PROJECTION["Lambert_Conformal_Conic_2SP"],PARAMETER["standard_parallel_1",43],PARAMETER["standard_parallel_2",45.5],PARAMETER["latitude_of_origin",41.75],PARAMETER["central_meridian",-120.5],PARAMETER["false_easting",1312335.958005249],PARAMETER["false_northing",0],UNIT["foot",0.3048,AUTHORITY["EPSG","9002"]]])";
 
+    NL::json ogr;
+    ogr["drivers"] = {"GeoJSON"};
+    ogr["datasource"] = Support::datapath("autzen/attributes.json");
+    ogr["sql"] = "select \"_ogr_geometry_\" from attributes";
+
     CopcReader reader;
     {
         Options options;
         options.add("override_srs", srs);
         options.add("filename", copcAutzenPath);
-        NL::json ogr;
-        ogr["drivers"] = {"GeoJSON"};
-        ogr["datasource"] = Support::datapath("autzen/attributes.json");
-        ogr["sql"] = "select \"_ogr_geometry_\" from attributes";
-
         options.add("ogr", ogr);
 
         reader.setOptions(options);
@@ -646,13 +646,30 @@ TEST(CopcReaderTest, ogrCrop)
     LasReader source;
     {
         Options options;
-        options.add("filename", Support::datapath("autzen/autzen-attribute-cropped.las"));
+        options.add("override_srs", srs);
+        options.add("filename", copcAutzenPath);
         source.setOptions(options);
     }
+
+    std::vector<Polygon> polys = gdal::getPolygons(ogr);
+    for (Polygon& p : polys)
+        p.transform(srs);
     PointTable sourceTable;
     source.prepare(sourceTable);
     PointViewSet s2 = source.execute(sourceTable);
-    PointViewPtr v2 = *s2.begin();
+    PointViewPtr vTemp = *s2.begin();
+    PointViewPtr v2 = vTemp->makeNew();
+    for (PointId idx = 0; idx < vTemp->size(); ++idx)
+    {
+        double x = vTemp->getFieldAs<double>(Dimension::Id::X, idx);
+        double y = vTemp->getFieldAs<double>(Dimension::Id::Y, idx);
+        for (Polygon& poly : polys)
+            if (poly.contains(x, y))
+            {
+                v2->appendPoint(*vTemp, idx);
+                break;
+            }
+    }
 
     EXPECT_EQ(v->size(), v2->size());
     // F'in proj keeps changing, making these numbers dance around.
