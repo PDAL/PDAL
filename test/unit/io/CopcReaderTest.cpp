@@ -428,16 +428,17 @@ TEST(CopcReaderTest, stream)
         return (a.compare(Dimension::Id::GpsTime, b));
     };
     std::sort(normalView.begin(), normalView.end(), cmp);
+    std::sort(streamView.begin(), streamView.end(), cmp);
 
     for (PointId i(0); i < normalView.size(); ++i)
-    {
-        for (const auto& id : normalTable.layout()->dims())
+        for (const auto& dim : normalTable.layout()->dims())
         {
-            ASSERT_EQ(
-                normalView.getFieldAs<double>(id, i),
-                streamView.getFieldAs<double>(id, i));
+            double nval = normalView.getFieldAs<double>(dim, i);
+            double sval = streamView.getFieldAs<double>(dim, i);
+            ASSERT_EQ(nval, sval) <<
+                "Point ID: " << i << " dim: " << normalView.layout()->dimName(dim) <<
+                " don't match. Values normal/stream = " << nval << "/" << sval << ".";
         }
-    }
 }
 
 TEST(EptReaderTest, boundedCrop)
