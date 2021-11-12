@@ -43,8 +43,8 @@ PipelineExecutor::PipelineExecutor(std::string const& json)
     : m_json(json)
     , m_executed(false)
     , m_logLevel(pdal::LogLevel::Error)
-{
-}
+    , m_pipelineRead(false)
+{}
 
 
 std::string PipelineExecutor::getPipeline() const
@@ -81,12 +81,25 @@ std::string PipelineExecutor::getSchema() const
     return strm.str();
 }
 
+void PipelineExecutor::readPipeline()
+{
+    if (!m_pipelineRead)
+    {
+        std::stringstream strm;
+        strm << m_json;
+        m_manager.readPipeline(strm);
+        m_pipelineRead = true;
+    }
+}
+
+bool PipelineExecutor::pipelineRead() const
+{
+    return m_pipelineRead;
+}
 
 bool PipelineExecutor::validate()
 {
-    std::stringstream strm;
-    strm << m_json;
-    m_manager.readPipeline(strm);
+    readPipeline();
     m_manager.prepare();
 
     return true;
@@ -94,13 +107,9 @@ bool PipelineExecutor::validate()
 
 int64_t PipelineExecutor::execute()
 {
-    std::stringstream strm;
-    strm << m_json;
-    m_manager.readPipeline(strm);
+    readPipeline();
     point_count_t count = m_manager.execute();
-
     m_executed = true;
-
     return count;
 }
 

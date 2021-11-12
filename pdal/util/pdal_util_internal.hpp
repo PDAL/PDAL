@@ -37,10 +37,13 @@
 
 #pragma once
 
+#define STDCALL
+
 #ifdef _WIN32
 #ifdef _MSC_VER
 #define PDAL_MSVC       // Using the MSVC compiler for WIN32.
 #define PDAL_WIN32_STL    // When you're using the MSVC compiler, you can use MSVC STL extensions
+#define STDCALL __stdcall
 #else
 #ifndef __MINGW32__
 #error "WIN32 without MSVC. Expected __MINGW32__ but not found."

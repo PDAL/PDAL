@@ -28,10 +28,21 @@ The entire website is available as a single PDF at http://pdal.io/PDAL.pdf
 News
 --------------------------------------------------------------------------------
 
-**09-09-2020**
+**06-28-2021**
 ................................................................................
 
-PDAL 2.2.0 has been released. You can :ref:`download <download>` the source
+Howard Butler of `Hobu, Inc. <https://hobu.co>`__ was recently interviewed by the
+`MapScaping Podcast <https://mapscaping.com>`__. Listen to the episode where he
+talks about PDAL and point cloud processing.
+
+https://mapscaping.com/blogs/the-mapscaping-podcast/pdal-point-data-abstraction-library
+
+
+
+**05-19-2021**
+................................................................................
+
+PDAL 2.2.1 has been released. You can :ref:`download <download>` the source
 code or follow the :ref:`quickstart <quickstart>` to get going in a
 hurry with Conda.
 

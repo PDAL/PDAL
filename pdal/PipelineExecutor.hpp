@@ -119,6 +119,10 @@ public:
         return m_executed;
     }
 
+    /**
+      \return Whether the pipeline has been read (prepare or execute has been called)
+    */
+    bool pipelineRead() const;
 
     /**
       \return a const reference to the pipeline manager
@@ -131,6 +135,7 @@ public:
     PipelineManager & getManager() { return m_manager; }
 
 private:
+    void readPipeline();
     void setLogStream(std::ostream& strm);
 
     std::string m_json;
@@ -138,7 +143,7 @@ private:
     bool m_executed;
     std::stringstream m_logStream;
     pdal::LogLevel m_logLevel;
-
+    bool m_pipelineRead;
 };
 
 }

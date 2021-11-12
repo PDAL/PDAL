@@ -133,6 +133,20 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
         if (tag.size())
             tags[tag] = s;
     }
+
+    // Tell user if the pipeline seems wacky.
+    const std::vector<Stage *> llist = m_manager.leaves();
+    if (llist.size() > 1)
+    {
+        const LogPtr& log = m_manager.log();
+        log->get(LogLevel::Error) << "Pipeline has multiple leaf nodes.\n";
+        log->get(LogLevel::Error) << "Only the first of the following leaf nodes will be run.\n";
+        for (Stage *s : llist)
+        {
+            std::string name = s->tag().size() ? s->tag() : s->getName();
+            log->get(LogLevel::Error) << "    " << name << "\n";
+        }
+    }
 }
 
 
