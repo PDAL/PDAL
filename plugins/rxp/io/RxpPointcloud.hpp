@@ -54,12 +54,24 @@ namespace pdal
 Dimension::Id getTimeDimensionId(bool syncToPps);
 
 struct Point {
-    Point(scanlib::target target, unsigned int returnNumber, unsigned int numberOfReturns, bool edgeOfFlightLine);
+    Point(
+        scanlib::target target,
+        unsigned int returnNumber,
+        unsigned int numberOfReturns,
+        bool edgeOfFlightLine,
+        double beamOriginX,
+        double beamOriginY,
+        double beamOriginZ,
+        double beamDirectionX,
+        double beamDirectionY,
+        double beamDirectionZ);
 
     scanlib::target target;
     unsigned int returnNumber;
     unsigned int numberOfReturns;
     bool edgeOfFlightLine;
+    double beamOriginX, beamOriginY, beamOriginZ;
+    double beamDirectionX, beamDirectionY, beamDirectionZ;
 };
 
 

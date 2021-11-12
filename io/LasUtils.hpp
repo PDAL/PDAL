@@ -185,6 +185,7 @@ struct IgnoreVLR
     uint16_t m_recordId;
 };
 std::vector<IgnoreVLR> parseIgnoreVLRs(const StringList& ignored);
+const Dimension::IdList& pdrfDims(int pdrf);
 
 } // namespace LasUtils
 

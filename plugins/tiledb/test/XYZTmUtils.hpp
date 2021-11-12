@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2021 TileDB, Inc
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -32,79 +32,66 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <ctime>
 
+#include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
-#include <pdal/Writer.hpp>
+#include <io/FauxReader.hpp>
+
+#include <pdal/PluginHelper.hpp>
+
+#include "../io/Bounds4D.hpp"
+
 
 namespace pdal
 {
 
-typedef std::shared_ptr<std::ostream> FileStreamPtr;
-
-class PDAL_DLL TextWriter : public Writer, public Streamable
+class PDAL_DLL XYZTimeFauxReader : public Reader, public Streamable
 {
-    struct DimSpec
-    {
-        Dimension::Id id;
-        size_t precision;
-        std::string name;
-    };
-
-    enum class OutputType
-    {
-        CSV,
-        GEOJSON
-    };
-
-    friend std::istream& operator >> (std::istream& in, OutputType& type);
-    friend std::ostream& operator << (std::ostream& out,
-        const OutputType& type);
-
 public:
-    TextWriter()
-    {}
+    XYZTimeFauxReader() {};
 
     std::string getName() const;
 
 private:
+    using urd = std::uniform_real_distribution<double>;
+    std::mt19937 m_generator;
+    int m_numReturns;
+    point_count_t m_index;
+    std::unique_ptr<urd> m_uniformX;
+    std::unique_ptr<urd> m_uniformY;
+    std::unique_ptr<urd> m_uniformZ;
+    std::unique_ptr<urd> m_uniformTm;
+    double m_delX;
+    double m_delY;
+    double m_delZ;
+    double m_delTm;
+    double m_density;
+    BOX4D m_bounds;
+    Mode m_xyz_mode;
+    Mode m_tm_mode;
+    bool m_use_time;
+    std::string m_dim4_name;
+
     virtual void addArgs(ProgramArgs& args);
+
+    virtual void prepared(PointTableRef table);
+
+    virtual void initialize();
+
+    virtual void addDimensions(PointLayoutPtr layout);
+
     virtual void ready(PointTableRef table);
-    virtual void write(const PointViewPtr view);
-    virtual void done(PointTableRef table);
+
     virtual bool processOne(PointRef& point);
 
-    void writeHeader(PointTableRef table);
-    void writeFooter();
-    void writeGeoJSONHeader();
-    void writeCSVHeader(PointTableRef table);
-    void processOneCSV(PointRef& point);
-    void processOneGeoJSON(PointRef& point);
+    virtual point_count_t read(PointViewPtr view, point_count_t count);
 
-    DimSpec extractDim(std::string dim, PointTableRef table);
-    bool findDim(Dimension::Id id, DimSpec& ds);
+    virtual bool eof()
+        { return false; }
 
-    std::string m_filename;
-    OutputType m_outputType;
-    std::string m_callback;
-    bool m_writeAllDims;
-    std::string m_dimOrder;
-    bool m_writeHeader;
-    std::string m_newline;
-    std::string m_delimiter;
-    bool m_quoteHeader;
-    bool m_packRgb;
-    int m_precision;
-    PointId m_idx;
-
-    FileStreamPtr m_stream;
-    std::vector<DimSpec> m_dims;
-    DimSpec m_xDim;
-    DimSpec m_yDim;
-    DimSpec m_zDim;
-
-    TextWriter& operator=(const TextWriter&); // not implemented
-    TextWriter(const TextWriter&); // not implemented
+    XYZTimeFauxReader& operator=(const XYZTimeFauxReader&);
+    XYZTimeFauxReader(const XYZTimeFauxReader&);
 };
 
-} // namespace pdal
+}

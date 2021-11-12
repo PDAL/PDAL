@@ -113,15 +113,6 @@ void TextWriter::addArgs(ProgramArgs& args)
 }
 
 
-void TextWriter::initialize(PointTableRef table)
-{
-    m_stream = FileStreamPtr(Utils::createFile(m_filename, true),
-        FileStreamDeleter());
-    if (!m_stream)
-        throwError("Couldn't open '" + m_filename + "' for output.");
-}
-
-
 TextWriter::DimSpec TextWriter::extractDim(std::string dim, PointTableRef table)
 {
     Utils::trim(dim);
@@ -168,6 +159,10 @@ bool TextWriter::findDim(Dimension::Id id, DimSpec& ds)
 
 void TextWriter::ready(PointTableRef table)
 {
+    m_stream = FileStreamPtr(Utils::createFile(m_filename, true), FileStreamDeleter());
+    if (!m_stream)
+        throwError("Couldn't open '" + m_filename + "' for output.");
+
     *m_stream << std::fixed;
 
     m_xDim = { Dimension::Id::X, static_cast<size_t>(m_precision),
