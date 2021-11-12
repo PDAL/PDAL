@@ -1557,7 +1557,8 @@ int Octree< Real >::_getMatrixRowSize( const typename TreeOctNode::Neighbors< BS
 
 template< class Real >
 template< int FEMDegree1 , int FEMDegree2 >
-void Octree< Real >::_SetParentOverlapBounds( const TreeOctNode* node , int& startX , int& endX , int& startY , int& endY , int& startZ , int& endZ )
+void Octree< Real >::_SetParentOverlapBounds( const TreeOctNode* node,
+    int& startX , int& endX , int& startY , int& endY , int& startZ , int& endZ )
 {
 	const int OverlapStart = BSplineOverlapSizes< FEMDegree1 , FEMDegree2 >::OverlapStart;
 
@@ -1565,9 +1566,12 @@ void Octree< Real >::_SetParentOverlapBounds( const TreeOctNode* node , int& sta
 	{
 		int x , y , z , c = (int)( node - node->parent->children );
 		Cube::FactorCornerIndex( c , x , y , z );
-		startX = BSplineOverlapSizes< FEMDegree1 , FEMDegree2 >::ParentOverlapStart[x]-OverlapStart , endX = BSplineOverlapSizes< FEMDegree1 , FEMDegree2 >::ParentOverlapEnd[x]-OverlapStart+1;
-		startY = BSplineOverlapSizes< FEMDegree1 , FEMDegree2 >::ParentOverlapStart[y]-OverlapStart , endY = BSplineOverlapSizes< FEMDegree1 , FEMDegree2 >::ParentOverlapEnd[y]-OverlapStart+1;
-		startZ = BSplineOverlapSizes< FEMDegree1 , FEMDegree2 >::ParentOverlapStart[z]-OverlapStart , endZ = BSplineOverlapSizes< FEMDegree1 , FEMDegree2 >::ParentOverlapEnd[z]-OverlapStart+1;
+		startX = BSplineOverlapSizes< FEMDegree1 , FEMDegree2 >::ParentOverlapStart[x]-OverlapStart;
+        endX = BSplineOverlapSizes< FEMDegree1 , FEMDegree2 >::ParentOverlapEnd[x]-OverlapStart+1;
+		startY = BSplineOverlapSizes< FEMDegree1 , FEMDegree2 >::ParentOverlapStart[y]-OverlapStart;
+        endY = BSplineOverlapSizes< FEMDegree1 , FEMDegree2 >::ParentOverlapEnd[y]-OverlapStart+1;
+		startZ = BSplineOverlapSizes< FEMDegree1 , FEMDegree2 >::ParentOverlapStart[z]-OverlapStart;
+        endZ = BSplineOverlapSizes< FEMDegree1 , FEMDegree2 >::ParentOverlapEnd[z]-OverlapStart+1;
 	}
 }
 
@@ -1941,7 +1945,7 @@ void Octree< Real >::_addFEMConstraints( const FEMConstraintFunctor& F , const C
 		{
 			SupportKey& neighborKey = neighborKeys[ omp_get_thread_num() ];
 			TreeOctNode* node = _sNodes.treeNodes[i];
-			int startX , endX , startY , endY , startZ , endZ;
+			int startX = 0, endX = 0, startY = 0, endY = 0, startZ = 0, endZ = 0;
 			_SetParentOverlapBounds< FEMDegree , CDegree >( node , startX , endX , startY , endY , startZ , endZ );
 			typename TreeOctNode::Neighbors< CFEMOverlapSize > pNeighbors;
 			neighborKey.template getNeighbors< false , LeftFEMCOverlapRadius , RightFEMCOverlapRadius >( node->parent , pNeighbors );
@@ -2137,7 +2141,7 @@ double Octree< Real >::_dot( const DotFunctor& F , const InterpolationInfo< HasG
 					typename TreeOctNode::ConstNeighbors< OverlapSize > neighbors;
 					neighborKey.template getNeighbors< LeftOverlapRadius , RightOverlapRadius >( node->parent , neighbors );
 
-					int startX , endX , startY , endY , startZ , endZ;
+					int startX = 0, endX = 0, startY = 0, endY = 0, startZ = 0, endZ = 0;
 					_SetParentOverlapBounds< FEMDegree2 , FEMDegree1 >( node , startX , endX , startY , endY , startZ , endZ );
 					for( int x=startX ; x<endX ; x++ ) for( int y=startY ; y<endY ; y++ ) for( int z=startZ ; z<endZ ; z++ )
 					{
@@ -2201,7 +2205,7 @@ double Octree< Real >::_dot( const DotFunctor& F , const InterpolationInfo< HasG
 					typename TreeOctNode::ConstNeighbors< OverlapSize > neighbors;
 					neighborKey.template getNeighbors< LeftOverlapRadius , RightOverlapRadius >( node->parent , neighbors );
 
-					int startX , endX , startY , endY , startZ , endZ;
+					int startX = 0, endX = 0, startY = 0, endY = 0, startZ = 0, endZ = 0;
 					_SetParentOverlapBounds< FEMDegree1 , FEMDegree2 >( node , startX , endX , startY , endY , startZ , endZ );
 
 					for( int x=startX ; x<endX ; x++ ) for( int y=startY ; y<endY ; y++ ) for( int z=startZ ; z<endZ ; z++ )

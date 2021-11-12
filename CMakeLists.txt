@@ -374,6 +374,8 @@ install(DIRECTORY ${PDAL_FILTERS_DIR}
 install(FILES ${DIMENSION_OUTFILE} ${pdal_features_hpp}
   DESTINATION include/pdal
 )
+install(FILES ${PDAL_CMAKE_DIR}/pluginmacros.cmake
+    DESTINATION ${PDAL_LIB_INSTALL_DIR}/cmake/PDAL)
 
 #
 # CPACK
