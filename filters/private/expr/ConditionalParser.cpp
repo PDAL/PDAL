@@ -288,8 +288,7 @@ bool ConditionalParser::uminus(Expression& expr)
     {
         if (sub->isBool())
         {
-            setError("Can't apply '-' to logical expression '" +
-                sub->print() + "'.");
+            setError("Can't apply '-' to logical expression '" + sub->print() + "'.");
             return false;
         }
         expr.pushNode(NodePtr(new UnMathNode(NodeType::Negative, std::move(sub))));
