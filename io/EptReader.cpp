@@ -47,7 +47,7 @@
 #include <pdal/private/SrsTransform.hpp>
 
 #include "private/ept/Connector.hpp"
-#include "private/ept/EptArtifact.hpp"
+#include "private/ept/Artifact.hpp"
 #include "private/ept/EptSupport.hpp"
 #include "private/ept/TileContents.hpp"
 
@@ -99,13 +99,13 @@ public:
 struct EptReader::Private
 {
 public:
-    std::unique_ptr<Connector> connector;
-    std::unique_ptr<EptInfo> info;
+    std::unique_ptr<ept::Connector> connector;
+    std::unique_ptr<ept::EptInfo> info;
     std::unique_ptr<ThreadPool> pool;
-    std::unique_ptr<TileContents> currentTile;
-    std::unique_ptr<Hierarchy> hierarchy;
-    std::queue<TileContents> contents;
-    AddonList addons;
+    std::unique_ptr<ept::TileContents> currentTile;
+    std::unique_ptr<ept::Hierarchy> hierarchy;
+    std::queue<ept::TileContents> contents;
+    ept::AddonList addons;
     std::mutex mutex;
     std::condition_variable contentsCv;
     std::vector<PolyXform> polys;
@@ -174,13 +174,13 @@ void EptReader::initialize()
     StringMap headers;
     StringMap query;
     setForwards(headers, query);
-    m_p->connector.reset(new Connector(headers, query));
+    m_p->connector.reset(new ept::Connector(headers, query));
 
     try
     {
-        m_p->info.reset(new EptInfo(m_filename, *m_p->connector));
+        m_p->info.reset(new ept::EptInfo(m_filename, *m_p->connector));
         setSpatialReference(m_p->info->srs());
-        m_p->addons = Addon::load(*m_p->connector, m_args->m_addons);
+        m_p->addons = ept::Addon::load(*m_p->connector, m_args->m_addons);
     }
     catch (const arbiter::ArbiterError& err)
     {
@@ -374,13 +374,13 @@ QuickInfo EptReader::inspect()
         log()->get(LogLevel::Debug) <<
             "Determining overlapping point count" << std::endl;
 
-        m_p->hierarchy.reset(new Hierarchy);
+        m_p->hierarchy.reset(new ept::Hierarchy);
         overlaps();
 
         // If we've passed a spatial filter, determine an upper bound on the
         // point count based on the hierarchy.
         qi.m_pointCount = 0;
-        for (const Overlap& overlap : *m_p->hierarchy)
+        for (const ept::Overlap& overlap : *m_p->hierarchy)
             qi.m_pointCount += overlap.m_count;
 
         //ABELL - This is wrong since we're not transforming the tile bounds to the
@@ -417,7 +417,7 @@ void EptReader::addDimensions(PointLayoutPtr layout)
             layout->registerOrAssignDim(name, dt.m_type);
     }
 
-    for (Addon& addon : m_p->addons)
+    for (ept::Addon& addon : m_p->addons)
         addon.setExternalId(
             layout->registerOrAssignDim(addon.name(), addon.type()));
 }
@@ -425,12 +425,12 @@ void EptReader::addDimensions(PointLayoutPtr layout)
 
 // Start a thread to read an overlap.  When the data has been read,
 // stick the tile on the queue and notify the main thread.
-void EptReader::load(const Overlap& overlap)
+void EptReader::load(const ept::Overlap& overlap)
 {
     m_p->pool->add([this, overlap]()
         {
             // Read the tile.
-            TileContents tile(overlap, *m_p->info, *m_p->connector, m_p->addons);
+            ept::TileContents tile(overlap, *m_p->info, *m_p->connector, m_p->addons);
             tile.read();
 
             // Put the tile on the output queue.
@@ -450,7 +450,7 @@ void EptReader::ready(PointTableRef table)
     m_nodeIdDim = table.layout()->findDim("EptNodeId");
     m_pointIdDim = table.layout()->findDim("EptPointId");
 
-    m_p->hierarchy.reset(new Hierarchy);
+    m_p->hierarchy.reset(new ept::Hierarchy);
 
     // Determine all overlapping data files we'll need to fetch.
     try
@@ -463,7 +463,7 @@ void EptReader::ready(PointTableRef table)
     }
 
     point_count_t overlapPoints(0);
-    for (const Overlap& overlap : *m_p->hierarchy)
+    for (const ept::Overlap& overlap : *m_p->hierarchy)
         overlapPoints += overlap.m_count;
 
     if (overlapPoints > 1e8)
@@ -480,7 +480,7 @@ void EptReader::ready(PointTableRef table)
     // show up at once. Others requests will be queued as the results
     // are handled.
     m_p->pool.reset(new ThreadPool(m_p->pool->numThreads()));
-    for (const Overlap& overlap : *m_p->hierarchy)
+    for (const ept::Overlap& overlap : *m_p->hierarchy)
         load(overlap);
     if (table.supportsView())
         m_artifactMgr = &table.artifactManager();
@@ -495,7 +495,7 @@ void EptReader::overlaps()
     //
     // Because this may require fetching lots of JSON files, it'll run in our
     // thread pool.
-    Key key;
+    ept::Key key;
     key.b = m_p->info->bounds();
 
     {
@@ -585,7 +585,7 @@ bool EptReader::passesSpatialFilter(const BOX3D& tileBounds) const
 }
 
 
-void EptReader::overlaps(Hierarchy& target, const NL::json& hier, const Key& key)
+void EptReader::overlaps(ept::Hierarchy& target, const NL::json& hier, const ept::Key& key)
 {
     // If our key isn't in the hierarchy, we've totally traversed this tree
     // branch (there are no lower nodes).
@@ -647,7 +647,7 @@ void EptReader::overlaps(Hierarchy& target, const NL::json& hier, const Key& key
     }
 }
 
-void EptReader::checkTile(const TileContents& tile)
+void EptReader::checkTile(const ept::TileContents& tile)
 {
     if (tile.error().size())
     {
@@ -658,7 +658,7 @@ void EptReader::checkTile(const TileContents& tile)
 
 
 // This code runs in a single thread, so doesn't need locking.
-bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
+bool EptReader::processPoint(PointRef& dst, const ept::TileContents& tile)
 {
     using namespace Dimension;
 
@@ -726,7 +726,7 @@ bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
     dst.setField(Id::Z, z);
     dst.setField(m_nodeIdDim, tile.nodeId());
     dst.setField(m_pointIdDim, pointId);
-    for (Addon& addon : m_p->addons)
+    for (ept::Addon& addon : m_p->addons)
     {
         Dimension::Id srcId = addon.localId();
         BasePointTable *t = tile.addonTable(srcId);
@@ -744,7 +744,7 @@ bool EptReader::processPoint(PointRef& dst, const TileContents& tile)
 point_count_t EptReader::read(PointViewPtr view, point_count_t count)
 {
 #ifndef PDAL_HAVE_ZSTD
-    if (m_p->info->dataType() == EptInfo::DataType::Zstandard)
+    if (m_p->info->dataType() == ept::EptInfo::DataType::Zstandard)
         throwError("Cannot read Zstandard dataType: "
             "PDAL must be configured with WITH_ZSTD=On");
 #endif
@@ -760,7 +760,7 @@ point_count_t EptReader::read(PointViewPtr view, point_count_t count)
             std::unique_lock<std::mutex> l(m_p->mutex);
             if (m_p->contents.size())
             {
-                TileContents tile = std::move(m_p->contents.front());
+                ept::TileContents tile = std::move(m_p->contents.front());
                 m_p->contents.pop();
                 l.unlock();
                 checkTile(tile);
@@ -781,8 +781,8 @@ point_count_t EptReader::read(PointViewPtr view, point_count_t count)
     // to that stage.
     if (m_nodeIdDim != Dimension::Id::Unknown)
     {
-        EptArtifactPtr artifact
-            (new EptArtifact(std::move(m_p->info), std::move(m_p->hierarchy),
+        ept::ArtifactPtr artifact
+            (new ept::Artifact(std::move(m_p->info), std::move(m_p->hierarchy),
                 std::move(m_p->connector), m_hierarchyStep));
         m_artifactMgr->put("ept", artifact);
     }
@@ -792,7 +792,7 @@ point_count_t EptReader::read(PointViewPtr view, point_count_t count)
 
 
 // Put the contents of a tile into the destination point view.
-void EptReader::process(PointViewPtr dstView, const TileContents& tile,
+void EptReader::process(PointViewPtr dstView, const ept::TileContents& tile,
     point_count_t count)
 {
     m_pointId = 0;
@@ -822,7 +822,7 @@ top:
             std::unique_lock<std::mutex> l(m_p->mutex);
             if (m_p->contents.size())
             {
-                m_p->currentTile.reset(new TileContents(std::move(m_p->contents.front())));
+                m_p->currentTile.reset(new ept::TileContents(std::move(m_p->contents.front())));
                 m_p->contents.pop();
                 break;
             }
