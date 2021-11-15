@@ -206,9 +206,7 @@ void EptReader::initialize()
         else
             m_p->bounds.box = m_args->m_bounds.to3d();
         const SpatialReference& boundsSrs = m_args->m_bounds.spatialReference();
-        if (!m_p->info->srs().valid() && boundsSrs.valid())
-            throwError("Can't use bounds with SRS with data source that has no SRS.");
-        if (boundsSrs.valid())
+        if (boundsSrs.valid() && m_p->info->srs().valid())
             m_p->bounds.xform = SrsTransform(m_p->info->srs(), boundsSrs);
     }
 
@@ -221,7 +219,7 @@ void EptReader::initialize()
         // Get the sub-polygons from a multi-polygon.
         std::vector<Polygon> exploded = poly.polygons();
         SrsTransform xform;
-        if (poly.srsValid())
+        if (poly.srsValid() && poly.getSpatialReference().valid())
             xform.set(m_p->info->srs(), poly.getSpatialReference());
         for (Polygon& p : exploded)
         {
