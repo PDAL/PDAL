@@ -26,7 +26,7 @@ CFLAGS= CXXFLAGS= CC=/usr/bin/cc CXX=/usr/bin/c++ cmake   -G "$CONFIG"  \
         -DBUILD_PLUGIN_TILEDB=ON \
         -DWITH_LAZPERF=ON \
         -DWITH_ZSTD=ON \
-        -DWITH_LASZIP=ON \
+        -DWITH_LASZIP=OFF \
         ..
 
 

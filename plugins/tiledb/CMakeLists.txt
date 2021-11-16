@@ -44,6 +44,7 @@ if (WITH_TESTS)
     PDAL_ADD_TEST(pdal_io_tiledb_bounds4d_test
         FILES
             test/Bounds4DTest.cpp
+            io/Bounds4D.cpp
         LINK_WITH
             ${bounds4d_libname}
             ${TILEDB_LIBRARIES}
@@ -54,6 +55,7 @@ if (WITH_TESTS)
     PDAL_ADD_TEST(pdal_io_tiledb_writer_test
         FILES
             test/TileDBWriterTest.cpp
+            io/Bounds4D.cpp
         LINK_WITH
             ${writer_libname}
             ${TILEDB_LIBRARIES}
@@ -65,6 +67,7 @@ if (WITH_TESTS)
     PDAL_ADD_TEST(pdal_io_tiledb_reader_test
         FILES
             test/TileDBReaderTest.cpp
+            io/Bounds4D.cpp
         LINK_WITH
             ${reader_libname}
             ${writer_libname}
@@ -78,6 +81,7 @@ if (WITH_TESTS)
         FILES
             test/TileDBWriterTimeDimTest.cpp
             test/XYZTmUtils.cpp
+            io/Bounds4D.cpp
         LINK_WITH
             ${reader_libname}
             ${writer_libname}
@@ -90,6 +94,7 @@ if (WITH_TESTS)
         FILES
             test/TileDBReaderTimeDimTest.cpp
             test/XYZTmUtils.cpp
+            io/Bounds4D.cpp
         LINK_WITH
             ${reader_libname}
             ${writer_libname}
