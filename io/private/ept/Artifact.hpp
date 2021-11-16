@@ -43,11 +43,13 @@
 
 namespace pdal
 {
+namespace ept
+{
 
-class EptArtifact : public Artifact
+class Artifact : public pdal::Artifact
 {
 public:
-    EptArtifact(std::unique_ptr<EptInfo> info,
+    Artifact(std::unique_ptr<EptInfo> info,
             std::unique_ptr<Hierarchy> hierarchy,
             std::unique_ptr<Connector> connector, size_t hierarchyStep) :
         m_info(std::move(info)), m_hierarchy(std::move(hierarchy)),
@@ -59,7 +61,8 @@ public:
     std::unique_ptr<Connector> m_connector;
     size_t m_hierarchyStep;
 };
-using EptArtifactPtr = std::shared_ptr<EptArtifact>;
+using ArtifactPtr = std::shared_ptr<Artifact>;
 
+} // namespace ept
 } // namespace pdal
 
