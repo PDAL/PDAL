@@ -41,6 +41,8 @@
 
 namespace pdal
 {
+namespace ept
+{
 
 EptInfo::EptInfo(const std::string& info)
 {
@@ -182,5 +184,6 @@ std::string EptInfo::sourcesDir() const
     return FileUtils::getDirectory(m_filename) + "ept-sources/";
 }
 
+} // namespace ept
 } // namespace pdal
 

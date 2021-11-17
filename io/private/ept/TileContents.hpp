@@ -43,10 +43,14 @@
 namespace pdal
 {
 
-class EptInfo;
-class Connector;
 class BasePointTable;
 using BasePointTablePtr = std::unique_ptr<BasePointTable>;
+
+namespace ept
+{
+
+class EptInfo;
+class Connector;
 
 class TileContents
 {
@@ -93,5 +97,6 @@ private:
     void transform();
 };
 
+} // namespace ept
 } // namespace pdal
 

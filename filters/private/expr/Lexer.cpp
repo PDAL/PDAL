@@ -203,8 +203,8 @@ Token Lexer::number()
     char *end;
     double v = strtod(start, &end);
     m_pos = end - m_buf.data();
-    return Token(TokenType::Number, m_tokPos, m_pos,
-        m_buf.substr(m_tokPos, m_pos), v);
+    int len = end - start;
+    return Token(TokenType::Number, m_tokPos, m_pos, m_buf.substr(m_tokPos, len), v);
 }
 
 Token Lexer::letter()
