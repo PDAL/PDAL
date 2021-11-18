@@ -36,6 +36,7 @@
 
 #include <functional>
 #include <limits>
+#include <algorithm>
 
 #include <nlohmann/json.hpp>
 
