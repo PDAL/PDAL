@@ -242,7 +242,6 @@ void CopcReader::fetchHeader()
         m_p->copc_info.center_y + m_p->copc_info.halfsize,
         m_p->copc_info.center_z + m_p->copc_info.halfsize);
 
-
     validateHeader(m_p->header);
     validateVlrInfo(copc_info_header, m_p->copc_info);
 }
