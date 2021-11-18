@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2017, Connor Manning (connor@hobu.co)
+* Copyright (c) 2021, Hobu, Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -36,6 +36,7 @@
 
 #include <functional>
 #include <limits>
+#include <algorithm>
 
 #include <nlohmann/json.hpp>
 
