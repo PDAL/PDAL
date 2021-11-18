@@ -410,6 +410,7 @@ void CopcReader::addDimensions(PointLayoutPtr layout)
 }
 
 
+
 void CopcReader::ready(PointTableRef table)
 {
     // Determine all overlapping data files we'll need to fetch.
