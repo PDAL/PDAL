@@ -199,12 +199,13 @@ void LasWriter::prepared(PointTableRef table)
         m_extraDims.clear();
         Dimension::IdList ids = m_lasHeader.usedDims();
         DimTypeList dimTypes = layout->dimTypes();
+        int byteOffset = 0;
         for (auto& dt : dimTypes)
-        {
             if (!Utils::contains(ids, dt.m_id))
-                m_extraDims.push_back(
-                    ExtraDim(layout->dimName(dt.m_id), dt.m_type));
-        }
+            {
+                m_extraDims.push_back(ExtraDim(layout->dimName(dt.m_id), dt.m_type, byteOffset));
+                byteOffset += Dimension::size(dt.m_type);
+            }
     }
 
     m_extraByteLen = 0;

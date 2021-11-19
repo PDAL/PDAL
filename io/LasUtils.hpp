@@ -34,12 +34,18 @@
 
 #pragma once
 
+#include <string>
+
 #include <pdal/Dimension.hpp>
 #include <pdal/DimType.hpp>
-#include <string>
+#include <pdal/Scaling.hpp>
+
+#include <pdal/util/ThreadPool.hpp>
 
 namespace pdal
 {
+
+class PointRef;
 
 enum class LasCompression
 {
@@ -82,20 +88,24 @@ inline std::ostream& operator<<(std::ostream& out, const LasCompression& c)
 
 struct ExtraDim
 {
-    ExtraDim(const std::string name, Dimension::Type type,
-        double scale = 1.0, double offset = 0.0) :
-            m_name(name), m_dimType(Dimension::Id::Unknown, type, scale, offset)
-        { m_size = (uint8_t)Dimension::size(type); }
-    ExtraDim(const std::string name, uint8_t size) : m_name(name),
-        m_dimType(Dimension::Id::Unknown, Dimension::Type::None), m_size(size)
+    ExtraDim(const std::string name, Dimension::Type type, int byteOffset,
+             double scale = 1.0, double offset = 0.0) :
+        m_name(name), m_dimType(Dimension::Id::Unknown, type, scale, offset),
+        m_size((uint8_t)Dimension::size(type)), m_byteOffset(byteOffset)
+    {}
+    ExtraDim(const std::string name, uint8_t size, int byteOffset) : m_name(name),
+        m_dimType(Dimension::Id::Unknown, Dimension::Type::None), m_size(size),
+        m_byteOffset(byteOffset)
     {}
 
     friend bool operator == (const ExtraDim& ed1, const ExtraDim& ed2);
 
     std::string m_name;
     DimType m_dimType;
-    size_t m_size;
+    uint8_t m_size;
+    int32_t m_byteOffset;
 };
+using ExtraDims = std::vector<ExtraDim>;
 
 inline bool operator == (const ExtraDim& ed1, const ExtraDim& ed2)
 {
@@ -109,6 +119,7 @@ inline bool operator == (const ExtraDim& ed1, const ExtraDim& ed2)
 
 // This is the structure of each record in the extra bytes spec.  Not used
 // directly for storage, but here mostly for reference.
+#pragma pack(push, 1)
 struct ExtraBytesSpec
 {
     char m_reserved[2];
@@ -123,6 +134,8 @@ struct ExtraBytesSpec
     double m_offset[3]; // 24 = 3*8 bytes
     char m_description[32];
 };
+#pragma pack(pop)
+const int ExtraBytesSpecSize = sizeof(ExtraBytesSpec);
 
 class ExtraBytesIf
 {
@@ -155,7 +168,7 @@ public:
     void readFrom(const char *buf);
     uint8_t lasType();
     void setType(uint8_t lastype);
-    std::vector<ExtraDim> toExtraDims();
+    static std::vector<ExtraDim> toExtraDims(const char *buf, size_t bufsize, int byteOffset);
 
 private:
     Dimension::Type m_type;
@@ -187,6 +200,145 @@ struct IgnoreVLR
 std::vector<IgnoreVLR> parseIgnoreVLRs(const StringList& ignored);
 const Dimension::IdList& pdrfDims(int pdrf);
 
-} // namespace LasUtils
+// Loader
 
+class LoaderDriver;
+
+class PointLoader
+{
+    friend class LoaderDriver;
+public:
+    virtual ~PointLoader() = default;
+
+private:
+    virtual void load(PointRef& point, const char *buf, int bufsize) = 0;
+};
+using PointLoaderPtr = std::unique_ptr<PointLoader>;
+
+class PointFilter
+{
+    friend class LoaderDriver;
+
+public:
+    virtual ~PointFilter() = default;
+
+private:
+    virtual bool passes(PointRef& point) = 0;
+};
+using PointFilterPtr = std::unique_ptr<PointFilter>;
+
+class V10BaseLoader : public PointLoader
+{
+public:
+    V10BaseLoader(const Scaling& scaling);
+
+private:
+    virtual void load(PointRef& point, const char *buf, int bufsize) override;
+
+    Scaling m_scaling;
+};
+
+class V14BaseLoader : public PointLoader
+{
+public:
+    V14BaseLoader(const Scaling& scaling);
+
+private:
+    virtual void load(PointRef& point, const char *buf, int bufsize) override;
+
+    Scaling m_scaling;
+};
+
+class GpstimeLoader : public PointLoader
+{
+public:
+    GpstimeLoader(int offset) : m_offset(offset)
+    {}
+
+private:
+    virtual void load(PointRef& point, const char *buf, int bufsize) override;
+
+    int m_offset;
+};
+
+class ColorLoader : public PointLoader
+{
+public:
+    ColorLoader(int offset) : m_offset(offset)
+    {}
+
+private:
+    virtual void load(PointRef& point, const char *buf, int bufsize) override;
+
+    int m_offset;
+};
+
+class NirLoader : public PointLoader
+{
+public:
+    NirLoader(int offset) : m_offset(offset)
+    {}
+
+private:
+    virtual void load(PointRef& point, const char *buf, int bufsize) override;
+
+    int m_offset;
+};
+
+class ExtraDimLoader : public PointLoader
+{
+public:
+    ExtraDimLoader(const ExtraDims& extraDims) : m_extraDims(extraDims)
+    {}
+
+private:
+    virtual void load(PointRef& point, const char *buf, int bufsize) override;
+
+    ExtraDims m_extraDims;
+};
+
+class LoaderDriver
+{
+public:
+    LoaderDriver() = default;
+    LoaderDriver(int pdrf, const Scaling& scaling, const ExtraDims& dims);
+
+    void init(int pdrf, const Scaling& scaling, const ExtraDims& dims);
+    bool load(PointRef& point, const char *buf, int bufsize);
+private:
+    std::vector<PointLoaderPtr> m_loaders;
+};
+
+// VLR Catalog
+
+class VlrCatalog
+{
+public:
+    using ReadFunc = std::function<std::vector<char>(uint64_t offset, int32_t size)>;
+    struct Entry
+    {
+        std::string userId;
+        uint16_t recordId;
+        uint64_t offset;
+        uint64_t length;
+    };
+
+    VlrCatalog(ReadFunc f);
+    VlrCatalog(uint64_t vlrOffset, uint32_t vlrCount, uint64_t evlrOffset, uint32_t evlrCount,
+        ReadFunc f);
+
+    void load(uint64_t vlrOffset, uint32_t vlrCount, uint64_t evlrOffset, uint32_t evlrCount);
+    std::vector<char> fetch(const std::string& userId, uint16_t recordId) const;
+
+private:
+    std::mutex m_mutex;
+    ReadFunc m_fetch;
+    std::deque<Entry> m_entries;
+
+    void walkVlrs(uint64_t vlrOffset, uint32_t vlrCount);
+    void walkEvlrs(uint64_t vlrOffset, uint32_t vlrCount);
+    void insert(const Entry& entry);
+};
+
+} // namespace LasUtils
 } // namespace pdal
