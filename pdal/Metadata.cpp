@@ -81,7 +81,7 @@ std::string Metadata::inferType(const std::string& val)
         if (iss1.good())
             return "bounds";
     }
-    catch (BOX2D::error)
+    catch (const BOX2D::error&)
     {}
 
     BOX3D b3d;
@@ -92,7 +92,7 @@ std::string Metadata::inferType(const std::string& val)
         if (iss2.good())
             return "bounds";
     }
-    catch (BOX3D::error)
+    catch (const BOX3D::error&)
     {}
 
     if (val == "true" || val == "false")
