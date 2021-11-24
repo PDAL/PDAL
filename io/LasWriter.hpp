@@ -102,16 +102,13 @@ private:
     std::ostream *m_ostream;
     std::vector<LasVLR> m_vlrs;
     std::vector<ExtLasVLR> m_eVlrs;
-    StringList m_extraDimSpec;
     std::vector<las::ExtraDim> m_extraDims;
     uint16_t m_extraByteLen;
     SpatialReference m_srs;
     std::string m_curFilename;
-    StringList m_forwardSpec;
     std::set<std::string> m_forwards;
     bool m_forwardVlrs = false;
     std::vector<char> m_pointBuf;
-    SpatialReference m_aSrs;
     int m_srsCnt;
 
     MetadataNode m_forwardMetadata;
@@ -123,8 +120,7 @@ private:
     virtual void readyTable(PointTableRef table);
     virtual void readyFile(const std::string& filename,
         const SpatialReference& srs);
-    virtual bool srsOverridden() const
-        { return m_aSrs.valid(); }
+    virtual bool srsOverridden() const;
     void prerunFile(const PointViewSet& pvSet);
     virtual void writeView(const PointViewPtr view);
     virtual bool processOne(PointRef& point);

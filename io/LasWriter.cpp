@@ -178,8 +178,8 @@ void LasWriter::initialize()
 #endif
     }
 
-    if (!m_aSrs.empty())
-        setSpatialReference(m_aSrs);
+    if (!d->opts.aSrs.empty())
+        setSpatialReference(d->opts.aSrs);
     if (d->opts.compression != las::Compression::None)
         m_lasHeader.setCompressed(true);
 
@@ -194,7 +194,7 @@ void LasWriter::initialize()
 
     try
     {
-        m_extraDims = las::parse(m_extraDimSpec, true);
+        m_extraDims = las::parse(d->opts.extraDimSpec, true);
     }
     catch (const las::error& err)
     {
@@ -204,9 +204,15 @@ void LasWriter::initialize()
 }
 
 
+bool LasWriter::srsOverridden() const
+{
+    return d->opts.aSrs.valid();
+}
+
+
 void LasWriter::spatialReferenceChanged(const SpatialReference&)
 {
-    if (++m_srsCnt > 1 && m_aSrs.empty())
+    if (++m_srsCnt > 1 && d->opts.aSrs.empty())
         log()->get(LogLevel::Error) << getName() <<
             ": Attempting to write '" << m_filename << "' with multiple "
             "point spatial references." << std::endl;
@@ -280,7 +286,7 @@ void LasWriter::fillForwardList()
 
     // Build the forward list, replacing special keywords with the proper
     // field names.
-    for (auto& name : m_forwardSpec)
+    for (auto& name : d->opts.forwardSpec)
     {
         if (name == "all")
         {
