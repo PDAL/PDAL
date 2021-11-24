@@ -33,10 +33,16 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}
     /opt/conda/bin/conda clean -afy
 
 
-
-
 RUN conda create -n pdal -y && conda install -c conda-forge compilers conda-pack git cmake ninja && \
     conda install --yes --name pdal -c conda-forge pdal --only-deps && \
     conda install --yes --name pdal -c conda-forge conda jq
 
+RUN  git clone https://github.com/hobu/laz-perf.git lazperf; \
+    cd lazperf; \
+    mkdir build; \
+    cd build; \
+    cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release; \
+    ninja install; \
+    cd /; \
+    rm -rf lazperf;
 

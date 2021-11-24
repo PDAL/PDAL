@@ -36,50 +36,55 @@
 
 #include <string>
 
+#include <pdal/pdal_config.hpp>
 #include <pdal/Dimension.hpp>
 #include <pdal/DimType.hpp>
+#include <pdal/PointRef.hpp>
 #include <pdal/Scaling.hpp>
 
-#include <pdal/util/ThreadPool.hpp>
+#include <string>
 
 namespace pdal
 {
 
 class PointRef;
 
-enum class LasCompression
+namespace las
+{
+
+enum class Compression
 {
     LasZip,
     LazPerf,
     None
 };
 
-inline std::istream& operator>>(std::istream& in, LasCompression& c)
+inline std::istream& operator>>(std::istream& in, Compression& c)
 {
     std::string s;
 
     in >> s;
     s = Utils::toupper(s);
     if (s == "LASZIP"  || s == "TRUE")
-        c = LasCompression::LasZip;
+        c = Compression::LasZip;
     else if (s == "LAZPERF")
-        c = LasCompression::LazPerf;
+        c = Compression::LazPerf;
     else
-        c = LasCompression::None;
+        c = Compression::None;
     return in;
 }
 
-inline std::ostream& operator<<(std::ostream& out, const LasCompression& c)
+inline std::ostream& operator<<(std::ostream& out, const Compression& c)
 {
     switch (c)
     {
-    case LasCompression::LasZip:
+    case Compression::LasZip:
         out << "LasZip";
         break;
-    case LasCompression::LazPerf:
+    case Compression::LazPerf:
         out << "LazPerf";
         break;
-    case LasCompression::None:
+    case Compression::None:
         out << "None";
         break;
     }
@@ -180,17 +185,14 @@ private:
     size_t m_size;
 };
 
-namespace LasUtils
-{
-
 struct error : public std::runtime_error
 {
     error(const std::string& err) : std::runtime_error(err)
     {}
 };
 
+std::string generateSoftwareId();
 std::vector<ExtraDim> parse(const StringList& dimString, bool allOk);
-
 
 struct IgnoreVLR
 {
@@ -212,6 +214,7 @@ public:
 
 private:
     virtual void load(PointRef& point, const char *buf, int bufsize) = 0;
+    virtual void pack(const PointRef& point, char *buf, int bufsize) = 0;
 };
 using PointLoaderPtr = std::unique_ptr<PointLoader>;
 
@@ -234,6 +237,7 @@ public:
 
 private:
     virtual void load(PointRef& point, const char *buf, int bufsize) override;
+    virtual void pack(const PointRef& point, char *buf, int bufsize) override;
 
     Scaling m_scaling;
 };
@@ -245,6 +249,7 @@ public:
 
 private:
     virtual void load(PointRef& point, const char *buf, int bufsize) override;
+    virtual void pack(const PointRef& point, char *buf, int bufsize) override;
 
     Scaling m_scaling;
 };
@@ -257,6 +262,7 @@ public:
 
 private:
     virtual void load(PointRef& point, const char *buf, int bufsize) override;
+    virtual void pack(const PointRef& point, char *buf, int bufsize) override;
 
     int m_offset;
 };
@@ -269,6 +275,7 @@ public:
 
 private:
     virtual void load(PointRef& point, const char *buf, int bufsize) override;
+    virtual void pack(const PointRef& point, char *buf, int bufsize) override;
 
     int m_offset;
 };
@@ -281,6 +288,7 @@ public:
 
 private:
     virtual void load(PointRef& point, const char *buf, int bufsize) override;
+    virtual void pack(const PointRef& point, char *buf, int bufsize) override;
 
     int m_offset;
 };
@@ -293,6 +301,7 @@ public:
 
 private:
     virtual void load(PointRef& point, const char *buf, int bufsize) override;
+    virtual void pack(const PointRef& point, char *buf, int bufsize) override;
 
     ExtraDims m_extraDims;
 };
@@ -305,6 +314,7 @@ public:
 
     void init(int pdrf, const Scaling& scaling, const ExtraDims& dims);
     bool load(PointRef& point, const char *buf, int bufsize);
+    bool pack(const PointRef& point, char *buf, int bufsize);
 private:
     std::vector<PointLoaderPtr> m_loaders;
 };
@@ -340,5 +350,5 @@ private:
     void insert(const Entry& entry);
 };
 
-} // namespace LasUtils
+} // namespace las
 } // namespace pdal
