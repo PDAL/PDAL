@@ -34,6 +34,8 @@
 
 #pragma once
 
+#include <functional>
+#include <mutex>
 #include <string>
 
 #include <pdal/pdal_config.hpp>
