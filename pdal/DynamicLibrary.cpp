@@ -37,9 +37,11 @@
 // http://www.drdobbs.com/cpp/building-your-own-plugin-framework-part/206503957
 // The original work was released under the Apache License v2.
 
+#include "pdal_internal.hpp"
+
 #ifdef _WIN32
   #include <windows.h>
-#else
+#else // Unix
   #include <dlfcn.h>
 #endif
 
@@ -55,10 +57,10 @@ DynamicLibrary::~DynamicLibrary()
 {
     if (m_handle)
     {
-#ifndef _WIN32
-        ::dlclose(m_handle);
-#else
+#ifdef _WIN32
         ::FreeLibrary((HMODULE)m_handle);
+#else // Unix
+        ::dlclose(m_handle);
 #endif
     }
 }
@@ -92,7 +94,7 @@ DynamicLibrary *DynamicLibrary::load(const std::string &name,
             << errorCode; 
         errorString = ss.str();
     }
-#else
+#else  // Unix
     handle = ::dlopen(name.c_str(), RTLD_NOW);
     if (!handle) 
     {
@@ -117,8 +119,8 @@ void *DynamicLibrary::getSymbol(const std::string& symbol)
 
     void *sym;
 #ifdef _WIN32
-    sym = ::GetProcAddress((HMODULE)m_handle, symbol.c_str());
-#else
+    sym = (void*)::GetProcAddress((HMODULE)m_handle, symbol.c_str());
+#else // Unix
     sym = ::dlsym(m_handle, symbol.c_str());
 #endif
     return sym;

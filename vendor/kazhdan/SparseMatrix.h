@@ -30,8 +30,6 @@ DAMAGE.
 #define __SPARSEMATRIX_HPP
 
 #define NEW_SPARSE_MATRIX 1
-#define ZERO_TESTING_JACOBI 1
-
 
 #include "Array.h"
 

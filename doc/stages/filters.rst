@@ -581,6 +581,7 @@ existing KD-tree.
    filters.delaunay
    filters.greedyprojection
    filters.poisson
+   filters.faceraster
 
 :ref:`filters.delaunay`
     Create mesh using Delaunay triangulation.
@@ -592,6 +593,8 @@ existing KD-tree.
     Create mesh using the Poisson surface reconstruction algorithm
     [Kazhdan2006]_.
 
+:ref:`filters.faceraster`
+    Create a raster from an existing triangulation.
 
 Languages
 ---------

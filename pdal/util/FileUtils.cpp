@@ -51,6 +51,8 @@
 #include <pdal/util/Utils.hpp>
 #include <pdal/pdal_types.hpp>
 
+#include "pdal_util_internal.hpp"
+
 namespace pdal
 {
 
@@ -75,25 +77,20 @@ std::string addTrailingSlash(std::string path)
     return path;
 }
 
-#ifdef _WIN32
-inline std::string fromNative(std::wstring const& in)
+#ifdef PDAL_WIN32_STL
+std::wstring toNative(std::string const& in)
 {
     // TODO: C++11 define convert with static thread_local
-    std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
-    auto p = reinterpret_cast<unsigned short const*>(in.data());
-    return convert.to_bytes(p, p + in.size());
-}
-inline std::wstring toNative(std::string const& in)
-{
-    // TODO: C++11 define convert with static thread_local
-    std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
+    std::wstring_convert<std::codecvt_utf8_utf16<uint16_t>, uint16_t> convert;
     auto s = convert.from_bytes(in);
     auto p = reinterpret_cast<wchar_t const*>(s.data());
     return std::wstring(p, p + s.size());
 }
-#else
-// inline std::string const& fromNative(std::string const& in) { return in; }
-inline std::string const& toNative(std::string const& in) { return in; }
+#else // Unix, OSX, MinGW
+std::string const& toNative(std::string const& in)
+{
+    return in;
+}    
 #endif
 
 } // unnamed namespace
@@ -398,9 +395,14 @@ void fileTimes(const std::string& filename, struct tm *createTime,
     struct tm *modTime)
 {
 #ifdef _WIN32
-    std::wstring const wfilename(toNative(filename));
     struct _stat statbuf;
+#ifdef PDAL_WIN32_STL
+    std::wstring const wfilename(toNative(filename));
     _wstat(wfilename.c_str(), &statbuf);
+#else
+    std::string const wfilename(toNative(filename));
+    _stat(wfilename.c_str(), &statbuf);
+#endif
 
     if (createTime)
         *createTime = *gmtime(&statbuf.st_ctime);
@@ -435,6 +437,14 @@ std::vector<std::string> glob(std::string path)
         throw pdal::pdal_error("PDAL does not support shell expansion");
 
 #ifdef _WIN32
+#ifdef PDAL_WIN32_STL
+    auto fromNative = [](std::wstring const& in) -> std::string
+    {
+        std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
+        auto p = reinterpret_cast<unsigned short const*>(in.data());
+        return convert.to_bytes(p, p + in.size());
+    };
+
     std::wstring wpath(toNative(path));
     WIN32_FIND_DATAW ffd;
     HANDLE handle = FindFirstFileW(wpath.c_str(), &ffd);
@@ -455,6 +465,27 @@ std::vector<std::string> glob(std::string path)
 
     } while (FindNextFileW(handle, &ffd) != 0);
     FindClose(handle);
+#else
+    WIN32_FIND_DATA ffd;
+    HANDLE handle = FindFirstFileA(path.c_str(), &ffd);
+
+    if (INVALID_HANDLE_VALUE == handle)
+        return filenames;
+
+    size_t found = path.find_last_of("/\\");
+    do
+    {
+        // Ignore files starting with '.' to be consistent with UNIX.
+        if (ffd.cFileName[0] == '.')
+            continue;
+        if (found == std::wstring::npos)
+            filenames.push_back(ffd.cFileName);
+        else
+            filenames.push_back(path.substr(0, found) + "\\" + ffd.cFileName);
+
+    } while (FindNextFileA(handle, &ffd) != 0);
+    FindClose(handle);
+#endif
 #else
     glob_t glob_result;
 

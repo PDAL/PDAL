@@ -40,6 +40,7 @@
 #include <pdal/pdal_types.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/util/Bounds.hpp>
+#include <pdal/Metadata.hpp>
 
 #include "GDALError.hpp"
 
@@ -527,6 +528,9 @@ public:
 
     BOX2D bounds() const;
     BOX3D bounds(int nBand) const;
+
+    MetadataNode getMetadata(std::string domain="") const;
+    GDALError addMetadata(std::string name, std::string value, std::string domain="");
 
 private:
     std::string m_filename;

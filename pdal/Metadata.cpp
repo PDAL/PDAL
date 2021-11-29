@@ -75,15 +75,25 @@ std::string Metadata::inferType(const std::string& val)
 
     BOX2D b2d;
     std::istringstream iss1(val);
-    iss1 >> b2d;
-    if (iss1.good())
-        return "bounds";
+    try
+    {
+        iss1 >> b2d;
+        if (iss1.good())
+            return "bounds";
+    }
+    catch (const BOX2D::error&)
+    {}
 
     BOX3D b3d;
     std::istringstream iss2(val);
-    iss2 >> b3d;
-    if (iss2.good())
-        return "bounds";
+    try
+    {
+        iss2 >> b3d;
+        if (iss2.good())
+            return "bounds";
+    }
+    catch (const BOX3D::error&)
+    {}
 
     if (val == "true" || val == "false")
         return "boolean";

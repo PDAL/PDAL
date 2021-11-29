@@ -50,7 +50,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Name of C++ library
-
 #
 # To facilitate one-library linking, we do special things for various platforms.
 #
@@ -278,6 +277,7 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
 target_link_libraries(${PDAL_BASE_LIB_NAME}
     PRIVATE
         ${CMAKE_THREAD_LIBS_INIT}
+        ${CMAKE_DL_LIBS}
         ${GDAL_LIBRARY}
         ${GEOTIFF_LIBRARY}
         ${LASZIP_LIBRARY}
@@ -374,6 +374,8 @@ install(DIRECTORY ${PDAL_FILTERS_DIR}
 install(FILES ${DIMENSION_OUTFILE} ${pdal_features_hpp}
   DESTINATION include/pdal
 )
+install(FILES ${PDAL_CMAKE_DIR}/pluginmacros.cmake
+    DESTINATION ${PDAL_LIB_INSTALL_DIR}/cmake/PDAL)
 
 #
 # CPACK

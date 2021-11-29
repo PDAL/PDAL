@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: 18a41e535a428de1cb907b65601abd18d1d4b9b6
+// Git SHA: ad091a5d5a1ce6ce005d13cfd2abe2372f832c2d
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -2705,6 +2705,11 @@ namespace Xml = rapidxml;
 // End of content of file: arbiter/third/xml/xml.hpp
 // //////////////////////////////////////////////////////////////////////
 
+
+
+
+
+
 #include <nlohmann/json.hpp>
 
 
@@ -2769,8 +2774,6 @@ namespace ARBITER_CUSTOM_NAMESPACE
 namespace arbiter
 {
 
-using StringMap = std::map<std::string, std::string>;
-
 /** @brief Exception class for all internally thrown runtime errors. */
 class ArbiterError : public std::runtime_error
 {
@@ -2782,10 +2785,10 @@ namespace http
 {
 
 /** HTTP header fields. */
-using Headers = StringMap;
+using Headers = std::map<std::string, std::string>;
 
 /** HTTP query parameters. */
-using Query = StringMap;
+using Query = std::map<std::string, std::string>;
 
 /** @cond arbiter_internal */
 
@@ -3474,6 +3477,7 @@ ARBITER_DLL std::string encodeAsHex(const std::string& data);
 
 #ifndef ARBITER_IS_AMALGAMATION
 #include <arbiter/util/exports.hpp>
+#include <arbiter/util/types.hpp>
 #endif
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
@@ -3485,6 +3489,10 @@ namespace arbiter
 {
 
 /** General utilities. */
+
+ARBITER_DLL std::unique_ptr<std::string> findHeader(
+        const http::Headers& headers,
+        std::string key);
 
 /** Returns @p path, less any trailing glob indicators (one or two
  * asterisks) as well as any possible trailing slash.
@@ -4319,8 +4327,8 @@ public:
         , m_token(token)
     { }
 
-    Auth(std::string iamRole)
-        : m_role(internal::makeUnique<std::string>(iamRole))
+    Auth(std::string credUrl)
+        : m_credUrl(internal::makeUnique<std::string>(credUrl))
     { }
 
     static std::unique_ptr<Auth> create(std::string j, std::string profile);
@@ -4332,7 +4340,7 @@ private:
     mutable std::string m_hidden;
     mutable std::string m_token;
 
-    std::unique_ptr<std::string> m_role;
+    std::unique_ptr<std::string> m_credUrl;
     mutable std::unique_ptr<Time> m_expiration;
     mutable std::mutex m_mutex;
 };

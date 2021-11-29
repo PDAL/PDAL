@@ -188,6 +188,14 @@ override_srs
 default_srs
   Write the raster with the provided SRS if none exists. [Default: None]
 
+metadata:
+  Add or set GDAL metadata to set on the raster, in the form
+  ``NAME=VALUE,NAME2=VALUE2,NAME3=VALUE3`` [Default: None]
+
+pdal_metadata:
+  Write PDAL's pipeline and metadata as base64 to the GDAL PAM metadata [Default: False]
+
+
 .. include:: writer_opts.rst
 
 .. note::

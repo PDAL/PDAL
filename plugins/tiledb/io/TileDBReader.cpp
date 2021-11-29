@@ -103,8 +103,17 @@ void TileDBReader::addArgs(ProgramArgs& args)
     args.add("chunk_size", "TileDB read chunk size", m_chunkSize,
         point_count_t(1000000));
     args.add("stats", "Dump TileDB query stats to stdout", m_stats, false);
-    args.add("bbox3d", "Bounding box subarray to read from TileDB in format "
-        "([minx, maxx], [miny, maxy], [minz, maxz])", m_bbox);
+    args.add("bbox3d", "Bounding box subarray to read from TileDB in format"
+                       "([minx, maxx], [miny, maxy], [minz, maxz])", m_bbox);
+    args.add("bbox4d", "Bounding box subarray to read from TileDB in format"
+                       "([minx, maxx], [miny, maxy], [minz, maxz], [min_gpstime, max_gpstime] )", m_bbox);
+    args.add("end_timestamp", "TileDB array timestamp", m_endTimeStamp,
+        point_count_t(0));
+    args.addSynonym("end_timestamp", "timestamp");
+#if TILEDB_VERSION_MAJOR > 2 || (TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR >= 3)
+    args.add("start_timestamp", "TileDB array timestamp", m_startTimeStamp,
+        point_count_t(0));
+#endif
 }
 
 void TileDBReader::prepared(PointTableRef table)
@@ -130,7 +139,23 @@ void TileDBReader::initialize()
         if (m_stats)
             tiledb::Stats::enable();
 
-        m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ));
+        if (m_endTimeStamp)
+        {
+#if TILEDB_VERSION_MAJOR > 2 || (TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR >= 3)
+            if (m_startTimeStamp)
+            {
+                m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ));
+                m_array->set_open_timestamp_start(m_startTimeStamp);
+                m_array->set_open_timestamp_end(m_endTimeStamp);
+                m_array->reopen();
+            }
+            else
+#endif
+            m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ, m_endTimeStamp));
+        }
+        else
+            m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ));
+
     }
     catch (const tiledb::TileDBError& err)
     {
@@ -152,6 +177,8 @@ void TileDBReader::addDimensions(PointLayoutPtr layout)
         DimInfo di;
 
         di.m_name = dim.name();
+        if (di.m_name == "GpsTime")
+            m_has_time = true;
 #if TILEDB_VERSION_MAJOR == 1
         di.m_offset = i;
         di.m_span = dims.size();
@@ -173,6 +200,8 @@ void TileDBReader::addDimensions(PointLayoutPtr layout)
         DimInfo di;
 
         di.m_name = a.first;
+        if (di.m_name == "GpsTime")
+            m_has_time = true;
         di.m_offset = 0;
         di.m_span = 1;
         di.m_dimCategory = DimCategory::Attribute;
@@ -289,6 +318,10 @@ void TileDBReader::localReady()
         if (numDims == 2)
             m_query->set_subarray({m_bbox.minx, m_bbox.maxx,
                 m_bbox.miny, m_bbox.maxy});
+        else if (numDims == 4)
+            m_query->set_subarray({m_bbox.minx, m_bbox.maxx,
+               m_bbox.miny, m_bbox.maxy, m_bbox.minz, m_bbox.maxz,
+               m_bbox.mintm, m_bbox.maxtm});
         else
             m_query->set_subarray({m_bbox.minx, m_bbox.maxx,
                 m_bbox.miny, m_bbox.maxy, m_bbox.minz, m_bbox.maxz});

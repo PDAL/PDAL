@@ -20,19 +20,21 @@ target_compile_definitions(${PDAL_ARBITER_LIB_NAME}
     PRIVATE
         ARBITER_CURL)
 
-if (MSVC)
-    target_link_libraries(${PDAL_ARBITER_LIB_NAME} PRIVATE Shlwapi.lib)
+# Arbiter is built static but is included in a shared lib.
+set_target_properties(${PDAL_ARBITER_LIB_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
+if (WIN32)
+    target_link_libraries(${PDAL_ARBITER_LIB_NAME} PRIVATE shlwapi)
     target_compile_definitions(${PDAL_ARBITER_LIB_NAME}
         PRIVATE
             ARBITER_DLL_EXPORT)
-else()
-    #
-    # Arbiter is built static but is included in a shared lib.
-    #
-    target_compile_options(${PDAL_ARBITER_LIB_NAME}
-        PRIVATE
-            -fPIC)
-endif()
+endif ()
+
+# for dupenv_s
+if (MINGW)
+  target_link_libraries(${PDAL_ARBITER_LIB_NAME} PRIVATE ucrt)
+endif ()
+
 if (ZLIB_FOUND)
     target_compile_definitions(${PDAL_ARBITER_LIB_NAME}
         PRIVATE

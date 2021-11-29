@@ -590,12 +590,12 @@ TEST(LasReaderTest, Start)
         las->execute(t);
     }
 
-    auto test1 = [source, &f](const std::string& compression)
+    auto test1 = [source, &f](const std::string& compression, int start)
     {
         Stage *las = f.createStage("readers.las");
         Options opts;
         opts.add("filename", source);
-        opts.add("start", 62520);
+        opts.add("start", start);
         opts.add("compression", compression);
         las->setOptions(opts);
 
@@ -603,16 +603,16 @@ TEST(LasReaderTest, Start)
         las->prepare(t);
         PointViewSet s = las->execute(t);
         PointViewPtr v = *s.begin();
-        EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::X, 0), 62520);
-        EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::Y, 0), 62620);
-        EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::Z, 0), 63020);
+        EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::X, 0), start);
+        EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::Y, 0), start + 100);
+        EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::Z, 0), start + 500);
     };
     auto test2 = [source, &f](const std::string& compression)
     {
         Stage *las = f.createStage("readers.las");
         Options opts;
         opts.add("filename", source);
-        opts.add("start", 2525);
+        opts.add("start", 70000);
         opts.add("compression", compression);
         las->setOptions(opts);
 
@@ -620,15 +620,40 @@ TEST(LasReaderTest, Start)
         las->prepare(t);
         PointViewSet s = las->execute(t);
         PointViewPtr v = *s.begin();
-        EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::X, 0), 2525);
-        EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::Y, 0), 2625);
-        EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::Z, 0), 3025);
+        EXPECT_EQ(v->size(), (point_count_t)0);
     };
-    test1("laszip");
+    auto test3 = [&f](const std::string& compression, int start, float xval, float yval, float zval)
+    {
+        Stage *las = f.createStage("readers.las");
+        Options opts;
+        opts.add("filename", Support::datapath("laz/ellipsoid.copc.laz"));
+        opts.add("start", start);
+        opts.add("compression", compression);
+        las->setOptions(opts);
+
+        PointTable t;
+        las->prepare(t);
+        PointViewSet s = las->execute(t);
+        PointViewPtr v = *s.begin();
+        EXPECT_EQ(v->getFieldAs<float>(Dimension::Id::X, 0), xval);
+        EXPECT_EQ(v->getFieldAs<float>(Dimension::Id::Y, 0), yval);
+        EXPECT_EQ(v->getFieldAs<float>(Dimension::Id::Z, 0), zval);
+    };
+
+    std::vector<int> starts {0, 49999, 50000, 62520, 2525, 69999};
+    for (auto i : starts)
+        test1("laszip", i);
     test2("laszip");
+    test3("laszip", 66271, -8242595.58, 4966706, 0.28);
+    test3("laszip", 66272, -8242746, 4966605.44, -0.28);
+    test3("laszip", 96000, -8242474.88, 4966662.72, -8.1);
 #ifdef PDAL_HAVE_LAZPERF
-    test1("lazperf");
+    for (auto i : starts)
+        test1("lazperf", i);
     test2("lazperf");
+    test3("lazperf", 66271, -8242595.58, 4966706, 0.28);
+    test3("lazperf", 66272, -8242746, 4966605.44, -0.28);
+    test3("lazperf", 96000, -8242474.88, 4966662.72, -8.1);
 #endif
 
     // Delete the created file.

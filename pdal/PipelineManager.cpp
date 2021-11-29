@@ -118,6 +118,12 @@ void PipelineManager::setLog(const LogPtr& log)
 }
 
 
+LogPtr PipelineManager::log() const
+{
+    return m_log;
+}
+
+
 Stage& PipelineManager::addReader(const std::string& type)
 {
     Stage *reader = m_factory->createStage(type);

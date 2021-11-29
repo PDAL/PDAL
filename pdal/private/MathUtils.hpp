@@ -222,8 +222,8 @@ void erodeDiamond(std::vector<double>& data, size_t rows, size_t cols, int itera
 /**
   Converts a PointView into an Eigen::MatrixXd.
 
-  This method exists (as of this writing) purely as a convenience method in the
-  API. It is not currently used in the PDAL codebase itself.
+  \param view  Point view to convert.
+  \param ids  List of point IDs to convert to Eigen.
 */
 Eigen::MatrixXd pointViewToEigen(const PointView& view);
 Eigen::MatrixXd pointViewToEigen(const PointView& view, const PointIdList& ids);

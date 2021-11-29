@@ -39,10 +39,7 @@
 
 #pragma once
 
-// This is for M_PI on Windows.
-#define _USE_MATH_DEFINES
-#include <math.h>
-
+#include <cmath>
 #include <fstream>
 #include <iostream>
 
