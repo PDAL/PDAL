@@ -54,7 +54,8 @@ std::string SlpkReader::getName() const { return slpkInfo.name; }
 
 SlpkReader::~SlpkReader()
 {
-    FileUtils::unmapFile(m_ctx);
+    if (m_ctx.addr())
+        FileUtils::unmapFile(m_ctx);
 }
 
 
