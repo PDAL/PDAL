@@ -557,6 +557,11 @@ MapContext mapFile(const std::string& filename, bool readOnly, uintmax_t pos, ui
 
 MapContext unmapFile(MapContext ctx)
 {
+    if (!ctx.m_addr)
+    {
+	ctx.m_error = "File not mapped.";
+        return ctx;
+    }
 #ifndef _WIN32
     if (::munmap(ctx.m_addr, ctx.m_size) == -1)
         ctx.m_error = "Couldn't unmap file.";
