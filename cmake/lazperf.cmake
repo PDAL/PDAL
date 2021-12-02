@@ -1,6 +1,6 @@
 option(WITH_LAZPERF "Build PDAL with support for LAZ compression with LAZPERF" TRUE)
 if (WITH_LAZPERF)
-    find_package(LAZPERF 3.0 QUIET)
+    find_package(LAZPERF 3.0 REQUIRED)
     set_package_properties(LAZPERF PROPERTIES TYPE OPTIONAL)
     if (LAZPERF_FOUND)
         set(LAZPERF_LIBRARY "LAZPERF::lazperf")

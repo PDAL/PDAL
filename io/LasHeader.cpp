@@ -53,16 +53,6 @@ const size_t LasHeader::LEGACY_RETURN_COUNT;
 const size_t LasHeader::RETURN_COUNT;
 #endif
 
-std::string GetDefaultSoftwareId()
-{
-    std::string ver(Config::versionString());
-    std::stringstream oss;
-    std::ostringstream revs;
-    revs << Config::sha1();
-    oss << "PDAL " << ver << " (" << revs.str().substr(0, 6) <<")";
-    return oss.str();
-}
-
 LasHeader::LasHeader() : m_fileSig(FILE_SIGNATURE), m_sourceId(0),
     m_globalEncoding(0), m_versionMinor(2), m_systemId(getSystemIdentifier()),
     m_createDOY(0), m_createYear(0), m_vlrOffset(0), m_pointOffset(0),
@@ -199,36 +189,6 @@ void LasHeader::put(OLeStream& out, Uuid uuid)
     out.put(buf, uuid.size());
 }
 
-
-Dimension::IdList LasHeader::usedDims() const
-{
-    using namespace Dimension;
-
-    Dimension::Id dims[] = { Id::ReturnNumber, Id::NumberOfReturns,
-        Id::X, Id::Y, Id::Z, Id::Intensity, Id::ScanChannel,
-        Id::ScanDirectionFlag, Id::EdgeOfFlightLine, Id::Classification,
-        Id::UserData, Id::ScanAngleRank, Id::PointSourceId };
-
-    Dimension::IdList ids(std::begin(dims), std::end(dims));
-
-    if (hasTime())
-        ids.push_back(Id::GpsTime);
-    if (hasColor())
-    {
-        ids.push_back(Id::Red);
-        ids.push_back(Id::Green);
-        ids.push_back(Id::Blue);
-    }
-    if (hasInfrared())
-        ids.push_back(Id::Infrared);
-    if (has14PointFormat())
-    {
-        ids.push_back(Id::ScanChannel);
-        ids.push_back(Id::ClassFlags);
-    }
-
-    return ids;
-}
 
 void LasHeader::setSrs()
 {
