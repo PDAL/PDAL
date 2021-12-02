@@ -592,15 +592,19 @@ std::vector<char> VlrCatalog::fetch(const std::string& userId, uint16_t recordId
 
     // We don't lock m_entries because we assume that the load has already occurred at the
     // time you want to fetch.
+    std::vector<char> vlrdata;
     for (const Entry& e : m_entries)
         if (e.userId == userId && e.recordId == recordId)
         {
+            // We don't support VLRs with size > 4GB)
+            if (e.length > (std::numeric_limits<uint32_t>::max)())
+                return vlrdata;
+
             offset = e.offset;
-            length = e.length;
+            length = (uint32_t)e.length;
             break;
         }
 
-    std::vector<char> vlrdata;
     if (length > 0)
         vlrdata = m_fetch(offset, length);
     return vlrdata;

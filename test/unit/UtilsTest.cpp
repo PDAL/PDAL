@@ -464,10 +464,10 @@ TEST(UtilsTest, numeric_cast)
     EXPECT_TRUE(ok);
     EXPECT_TRUE(std::isnan(f));
 
-    d = (std::numeric_limits<float>::max)() * 2;
+    d = (std::numeric_limits<float>::max)() * 2.0;
     EXPECT_FALSE(Utils::numericCast(d, f));
 
-    d = (std::numeric_limits<float>::max)() / 2;
+    d = (std::numeric_limits<float>::max)() / 2.0;
     EXPECT_TRUE(Utils::numericCast(d, f));
 }
 
