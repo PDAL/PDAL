@@ -53,7 +53,6 @@ class OLeStream;
 class ILeStream;
 
 typedef uint8_t PointFormat;
-std::string GetDefaultSoftwareId();
 class LasSummaryData;
 class Scaling;
 
@@ -376,7 +375,6 @@ public:
 
     void setSummary(const LasSummaryData& summary);
     bool valid() const;
-    Dimension::IdList usedDims() const;
     const LasVLR *findVlr(const std::string& userId, uint16_t recordId) const;
     void removeVLR(const std::string& userId, uint16_t recordId);
     void removeVLR(const std::string& userId);

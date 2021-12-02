@@ -32,8 +32,6 @@ RUN cd pdal/build  && \
 RUN cd pdal/build  && \
     ninja install
 
-
-
 RUN conda-pack -n pdal --dest-prefix=/opt/conda/envs/pdal -o  /tmp/env.tar && \
      mkdir /venv && cd /venv && tar xf /tmp/env.tar  && \
      rm /tmp/env.tar
