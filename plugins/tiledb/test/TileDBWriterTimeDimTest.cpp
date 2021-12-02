@@ -66,10 +66,10 @@ Options getTileDBOptions()
     return options;
 }
 
-size_t count = 100;
+const size_t count = 100;
 BOX4D rdr_bounds(0, 0, 0, 0, 10, 10, 10, 10);
 
-class TDBWriterTimeDimTest : public ::testing::Test
+class TileDBWriterTimeDimTest : public ::testing::Test
 {
 protected:
     virtual void SetUp()
@@ -96,7 +96,7 @@ protected:
     XYZTimeFauxReader m_reader2;
 };
 
-TEST_F(TDBWriterTimeDimTest, test_dims_no_tm_and_use_tm)
+TEST_F(TileDBWriterTimeDimTest, test_dims_no_tm_and_use_tm)
 {
     tiledb::Context ctx;
     tiledb::VFS vfs(ctx);
@@ -115,7 +115,7 @@ TEST_F(TDBWriterTimeDimTest, test_dims_no_tm_and_use_tm)
     writer1.setOptions(options1);
     writer1.setInput(m_reader);
 
-    FixedPointTable table1(100);
+    FixedPointTable table1(count);
     writer1.prepare(table1);
     writer1.execute(table1);
 
@@ -139,7 +139,7 @@ TEST_F(TDBWriterTimeDimTest, test_dims_no_tm_and_use_tm)
     writer2.setOptions(options2);
     writer2.setInput(m_reader);
 
-    FixedPointTable table2(100);
+    FixedPointTable table2(count);
     writer2.prepare(table2);
     writer2.execute(table2);
 
@@ -163,7 +163,7 @@ TEST_F(TDBWriterTimeDimTest, test_dims_no_tm_and_use_tm)
     }
 }
 
-TEST_F(TDBWriterTimeDimTest, use_time_synonym)
+TEST_F(TileDBWriterTimeDimTest, use_time_synonym)
 {
     tiledb::Context ctx;
     tiledb::VFS vfs(ctx);
@@ -182,7 +182,7 @@ TEST_F(TDBWriterTimeDimTest, use_time_synonym)
     writer.setOptions(options);
     writer.setInput(m_reader);
 
-    FixedPointTable table(100);
+    FixedPointTable table(count);
     writer.prepare(table);
     writer.execute(table);
 
@@ -192,7 +192,7 @@ TEST_F(TDBWriterTimeDimTest, use_time_synonym)
     EXPECT_EQ(domain.at(3).first, "GpsTime");
 }
 
-TEST_F(TDBWriterTimeDimTest, write_with_time)
+TEST_F(TileDBWriterTimeDimTest, write_with_time)
 {
     tiledb::Context ctx;
     tiledb::VFS vfs(ctx);
@@ -212,7 +212,7 @@ TEST_F(TDBWriterTimeDimTest, write_with_time)
     writer.setOptions(options);
     writer.setInput(m_reader);
 
-    FixedPointTable table(100);
+    FixedPointTable table(count);
     writer.prepare(table);
     writer.execute(table);
 
@@ -227,15 +227,24 @@ TEST_F(TDBWriterTimeDimTest, write_with_time)
     }
 
     tiledb::Query q(ctx, array, TILEDB_READ);
-    q.set_subarray(subarray);
 
-    auto max_el = array.max_buffer_elements(subarray);
-    std::vector<double> coords(max_el[TILEDB_COORDS].second);
-    q.set_coordinates(coords);
+    std::vector<double> xs(count);
+    std::vector<double> ys(count);
+    std::vector<double> zs(count);
+    std::vector<double> ts(count);
+
+    q.set_subarray(subarray)
+        .set_data_buffer("X", xs)
+        .set_data_buffer("Y", ys)
+        .set_data_buffer("Z", zs)
+        .set_data_buffer("GpsTime", ts);
+
     q.submit();
     array.close();
 
-    EXPECT_EQ(m_reader.count() * 4, coords.size());
+    auto result_num = (int)q.result_buffer_elements()["X"].second;
+
+    EXPECT_EQ(m_reader.count(), result_num);
 
     ASSERT_DOUBLE_EQ(subarray[0], 0.0);
     ASSERT_DOUBLE_EQ(subarray[2], 0.0);
@@ -247,7 +256,7 @@ TEST_F(TDBWriterTimeDimTest, write_with_time)
     ASSERT_DOUBLE_EQ(subarray[7], 10.0);
 }
 
-TEST_F(TDBWriterTimeDimTest, write_append_with_time)
+TEST_F(TileDBWriterTimeDimTest, write_append_with_time)
 {
     tiledb::Context ctx;
     tiledb::VFS vfs(ctx);
@@ -267,7 +276,7 @@ TEST_F(TDBWriterTimeDimTest, write_append_with_time)
     writer.setOptions(options);
     writer.setInput(m_reader);
 
-    FixedPointTable table(100);
+    FixedPointTable table(count);
     writer.prepare(table);
     writer.execute(table);
 
@@ -276,7 +285,7 @@ TEST_F(TDBWriterTimeDimTest, write_append_with_time)
     append_writer.setOptions(options);
     append_writer.setInput(m_reader2);
 
-    FixedPointTable table2(100);
+    FixedPointTable table2(count);
     append_writer.prepare(table2);
     append_writer.execute(table2);
 
@@ -291,18 +300,26 @@ TEST_F(TDBWriterTimeDimTest, write_append_with_time)
     }
 
     tiledb::Query q(ctx, array, TILEDB_READ);
-    q.set_subarray(subarray);
+    // intentionally oversize buffers
+    std::vector<double> xs(count * 4);
+    std::vector<double> ys(count * 4);
+    std::vector<double> zs(count * 4);
+    std::vector<double> ts(count * 4);
 
-    auto max_el = array.max_buffer_elements(subarray);
-    std::vector<double> coords(max_el[TILEDB_COORDS].second);
-    q.set_coordinates(coords);
+    q.set_subarray(subarray)
+        .set_data_buffer("X", xs)
+        .set_data_buffer("Y", ys)
+        .set_data_buffer("Z", zs)
+        .set_data_buffer("GpsTime", ts);
+
     q.submit();
     array.close();
 
-    EXPECT_EQ((m_reader.count() * 4) + (m_reader2.count() * 4), coords.size());
+    auto result_num = (int)q.result_buffer_elements()["X"].second;
+    EXPECT_EQ(m_reader.count() + m_reader2.count(), result_num);
 }
 
-TEST_F(TDBWriterTimeDimTest, write_options_with_time_dim)
+TEST_F(TileDBWriterTimeDimTest, write_options_with_time_dim)
 {
     tiledb::Context ctx;
     tiledb::VFS vfs(ctx);
@@ -322,7 +339,7 @@ TEST_F(TDBWriterTimeDimTest, write_options_with_time_dim)
     writer1.setOptions(options);
     writer1.setInput(m_reader);
 
-    FixedPointTable table1(100);
+    FixedPointTable table1(count);
     writer1.prepare(table1);
     writer1.execute(table1);
 
@@ -340,7 +357,7 @@ TEST_F(TDBWriterTimeDimTest, write_options_with_time_dim)
     writer2.setOptions(writer_options);
     writer2.setInput(reader);
 
-    FixedPointTable table2(100);
+    FixedPointTable table2(count);
     writer2.prepare(table2);
     writer2.execute(table2);
 
@@ -349,7 +366,7 @@ TEST_F(TDBWriterTimeDimTest, write_options_with_time_dim)
     EXPECT_EQ(domain.size(), 4);
 }
 
-TEST_F(TDBWriterTimeDimTest, time_first_or_last)
+TEST_F(TileDBWriterTimeDimTest, time_first_or_last)
 {
     tiledb::Context ctx;
     tiledb::VFS vfs(ctx);
@@ -370,7 +387,7 @@ TEST_F(TDBWriterTimeDimTest, time_first_or_last)
     writer1.setOptions(options1);
     writer1.setInput(m_reader);
 
-    FixedPointTable table1(100);
+    FixedPointTable table1(count);
     writer1.prepare(table1);
     writer1.execute(table1);
 
@@ -395,7 +412,7 @@ TEST_F(TDBWriterTimeDimTest, time_first_or_last)
     writer2.setOptions(options2);
     writer2.setInput(m_reader);
 
-    FixedPointTable table2(100);
+    FixedPointTable table2(count);
     writer2.prepare(table2);
     writer2.execute(table2);
 
@@ -406,7 +423,7 @@ TEST_F(TDBWriterTimeDimTest, time_first_or_last)
     EXPECT_EQ(last_dim_name, "GpsTime");
 }
 
-TEST_F(TDBWriterTimeDimTest, append_write_with_time)
+TEST_F(TileDBWriterTimeDimTest, append_write_with_time)
 {
     tiledb::Context ctx;
     tiledb::VFS vfs(ctx);
@@ -426,12 +443,12 @@ TEST_F(TDBWriterTimeDimTest, append_write_with_time)
     writer1.setOptions(options1);
     writer1.setInput(m_reader);
 
-    FixedPointTable table1(100);
+    FixedPointTable table1(count);
     writer1.prepare(table1);
     writer1.execute(table1);
 
     Options reader_options;
-    reader_options.add("count", 100);
+    reader_options.add("count", count);
     reader_options.add("xyz_mode", "ramp");
     reader_options.add("bounds", rdr_bounds);
     reader_options.add("density", 2.0);
@@ -448,7 +465,7 @@ TEST_F(TDBWriterTimeDimTest, append_write_with_time)
     writer2.setOptions(options2);
     writer2.setInput(reader);
 
-    FixedPointTable table2(100);
+    FixedPointTable table2(count);
     writer2.prepare(table2);
     writer2.execute(table2);
 
@@ -462,16 +479,24 @@ TEST_F(TDBWriterTimeDimTest, append_write_with_time)
         subarray.push_back(kv.second.second);
     }
 
-    auto max_el = array.max_buffer_elements(subarray);
-    std::vector<double> coords(max_el[TILEDB_COORDS].second);
-
-    EXPECT_EQ(coords.size(), (reader.count() * 4) + (m_reader.count() * 4));
-
     tiledb::Query q(ctx, array, TILEDB_READ);
-    q.set_subarray(subarray);
-    q.set_coordinates(coords);
+     // intentionally oversize buffers
+    std::vector<double> xs(count * 4);
+    std::vector<double> ys(count * 4);
+    std::vector<double> zs(count * 4);
+    std::vector<double> ts(count * 4);
+
+    q.set_subarray(subarray)
+        .set_data_buffer("X", xs)
+        .set_data_buffer("Y", ys)
+        .set_data_buffer("Z", zs)
+        .set_data_buffer("GpsTime", ts);
+
     q.submit();
     array.close();
+
+    auto result_num = (int)q.result_buffer_elements()["X"].second;
+    EXPECT_EQ(result_num, reader.count() + m_reader.count());
 }
 
 }

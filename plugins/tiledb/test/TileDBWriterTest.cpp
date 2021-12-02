@@ -145,15 +145,21 @@ namespace pdal
         }
 
         tiledb::Query q(ctx, array, TILEDB_READ);
-        q.set_subarray(subarray);
 
-        auto max_el = array.max_buffer_elements(subarray);
-        std::vector<double> coords(max_el[TILEDB_COORDS].second);
-        q.set_coordinates(coords);
+        std::vector<double> xs(count);
+        std::vector<double> ys(count);
+        std::vector<double> zs(count);
+
+        q.set_subarray(subarray)
+            .set_data_buffer("X", xs)
+            .set_data_buffer("Y", ys)
+            .set_data_buffer("Z", zs);
+
         q.submit();
         array.close();
 
-        EXPECT_EQ(m_reader.count() * 3, coords.size());
+        auto result_num = (int)q.result_buffer_elements()["X"].second;
+        EXPECT_EQ(m_reader.count(), result_num);
 
         ASSERT_DOUBLE_EQ(subarray[0], 0.0);
         ASSERT_DOUBLE_EQ(subarray[2], 0.0);
@@ -192,7 +198,7 @@ namespace pdal
         append_writer.setOptions(options);
         append_writer.setInput(m_reader2);
 
-        FixedPointTable table2(100);
+        FixedPointTable table2(count);
         append_writer.prepare(table2);
         append_writer.execute(table2);
 
@@ -219,15 +225,21 @@ namespace pdal
         }
 
         tiledb::Query q(ctx, array, TILEDB_READ);
-        q.set_subarray(subarray);
 
-        auto max_el = array.max_buffer_elements(subarray);
-        std::vector<double> coords(max_el[TILEDB_COORDS].second);
-        q.set_coordinates(coords);
+        std::vector<double> xs(count*2);
+        std::vector<double> ys(count*2);
+        std::vector<double> zs(count*2);
+
+        q.set_subarray(subarray)
+            .set_data_buffer("X", xs)
+            .set_data_buffer("Y", ys)
+            .set_data_buffer("Z", zs);
+
         q.submit();
         array.close();
 
-        EXPECT_EQ((m_reader.count() * 3) + (m_reader2.count() * 3), coords.size());
+        auto result_num = (int)q.result_buffer_elements()["X"].second;
+        EXPECT_EQ(m_reader.count() + m_reader2.count(), result_num);
     }
 
 
@@ -516,17 +528,25 @@ namespace pdal
         }
 
         tiledb::Query q(ctx, array, TILEDB_READ);
-        q.set_subarray(subarray);
 
-        auto max_el = array.max_buffer_elements(subarray);
-        std::vector<double> coords(max_el[TILEDB_COORDS].second);
-        q.set_coordinates(coords);
+        // intentionally oversize buffers and check the result count
+        std::vector<double> xs(count*2);
+        std::vector<double> ys(count*2);
+        std::vector<double> zs(count*2);
+
+        q.set_subarray(subarray)
+            .set_data_buffer("X", xs)
+            .set_data_buffer("Y", ys)
+            .set_data_buffer("Z", zs);
+
         q.submit();
         array.close();
 
-        EXPECT_EQ(reader.count() * 3, coords.size());
-        for (const double& v : coords)
-            EXPECT_EQ(v, 1.0);
+        auto result_num = (int)q.result_buffer_elements()["X"].second;
+        EXPECT_EQ(reader.count(), result_num);
+
+        for (int i = 0; i < result_num; i++)
+            EXPECT_EQ(xs[i], 1.0); // points are always at the minimum of the box
     }
 #endif
 

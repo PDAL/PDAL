@@ -52,7 +52,9 @@
 namespace pdal
 {
 
-class TDBReaderTimeDimTest : public ::testing::Test
+const size_t count = 100;
+
+class TileDBReaderTimeDimTest : public ::testing::Test
 {
 protected:
     virtual void SetUp()
@@ -76,7 +78,7 @@ protected:
         writer_options.add("time_tile_size", 777600.f);
 
         reader_options.add("bounds", BOX4D(0., 0., 0., 1314489618., 10., 10., 10., 1315353618.)); //sep 1 - sep 11 00:00:00 UTC 2021 -> gpstime
-        reader_options.add("count", 100);
+        reader_options.add("count", count);
         reader_options.add("xyz_mode", "ramp");
         reader_options.add("time_mode", "ramp");
         rdr.setOptions(reader_options);
@@ -84,7 +86,7 @@ protected:
         writer.setOptions(writer_options);
         writer.setInput(rdr);
 
-        FixedPointTable table(100);
+        FixedPointTable table(count);
         writer.prepare(table);
         writer.execute(table);
     }
@@ -92,7 +94,7 @@ protected:
 
 };
 
-TEST_F(TDBReaderTimeDimTest, set_dims)
+TEST_F(TileDBReaderTimeDimTest, set_dims)
 {
     tiledb::Context ctx;
 
@@ -103,7 +105,7 @@ TEST_F(TDBReaderTimeDimTest, set_dims)
         EXPECT_EQ(domain.dimensions().at(i).name(), dim_names[i]);
 }
 
-TEST_F(TDBReaderTimeDimTest, read_bbox4d)
+TEST_F(TileDBReaderTimeDimTest, read_bbox4d)
 {
     tiledb::Context ctx;
     tiledb::VFS vfs(ctx);
@@ -115,14 +117,14 @@ TEST_F(TDBReaderTimeDimTest, read_bbox4d)
     TileDBReader reader;
     reader.setOptions(options);
 
-    FixedPointTable table(100);
+    FixedPointTable table(count);
     reader.prepare(table);
     reader.execute(table);
 
     EXPECT_EQ(table.numPoints(), 50);
 }
 
-TEST_F(TDBReaderTimeDimTest, read_4d)
+TEST_F(TileDBReaderTimeDimTest, read_4d)
 {
     class Checker4D : public Filter, public Streamable
     {
@@ -192,18 +194,24 @@ TEST_F(TDBReaderTimeDimTest, read_4d)
     }
 
     tiledb::Query q(ctx, array, TILEDB_READ);
-    q.set_subarray(subarray);
+    std::vector<double> xs(count);
+    std::vector<double> ys(count);
+    std::vector<double> zs(count);
+    std::vector<double> ts(count);
 
-    auto max_el = array.max_buffer_elements(subarray);
-    std::vector<double> coords(max_el[TILEDB_COORDS].second);
-    q.set_coordinates(coords);
+    q.set_subarray(subarray)
+        .set_data_buffer("X", xs)
+        .set_data_buffer("Y", ys)
+        .set_data_buffer("Z", zs)
+        .set_data_buffer("GpsTime", ts);
+
     q.submit();
     array.close();
 
     TileDBReader reader;
     reader.setOptions(options);
 
-    FixedPointTable table(100);
+    FixedPointTable table(count);
 
     Checker4D c4d;
     c4d.setInput(reader);
@@ -211,11 +219,11 @@ TEST_F(TDBReaderTimeDimTest, read_4d)
     c4d.execute(table);
 }
 
-TEST(TileDBReaderTimeDimTest, test_dim4_change_name)
+TEST_F(TileDBReaderTimeDimTest, test_dim4_change_name)
 {
     Options input_options;
     input_options.add("bounds", BOX4D(0., 0., 0., 0., 10., 10., 10., 10.));
-    input_options.add("count", 100);
+    input_options.add("count", count);
     input_options.add("xyz_mode", "ramp");
     input_options.add("time_mode", "ramp");
     input_options.add("dim4_name", "something");
@@ -223,7 +231,7 @@ TEST(TileDBReaderTimeDimTest, test_dim4_change_name)
     XYZTimeFauxReader faux_reader;
     faux_reader.setOptions(input_options);
 
-    FixedPointTable table(100);
+    FixedPointTable table(count);
     faux_reader.prepare(table);
     faux_reader.execute(table);
 
