@@ -54,7 +54,7 @@ static StaticPluginInfo const s_info
 CREATE_STATIC_STAGE(PlyReader, s_info)
 
 
-PlyReader::PlyReader() : m_vertexElt(nullptr)
+PlyReader::PlyReader() : m_vertexElt(nullptr), m_faceElt(nullptr)
 {}
 
 
@@ -279,6 +279,8 @@ void PlyReader::extractHeader()
     for (Element& elt : m_elements)
         if (elt.m_name == "vertex")
             m_vertexElt = &elt;
+        else if (elt.m_name == "face")
+            m_faceElt = &elt;
     if (!m_vertexElt)
         throwError("Can't read PLY file without a 'vertex' element.");
 }
@@ -343,6 +345,13 @@ bool PlyReader::readProperty(Property *prop, PointRef& point)
     return true;
 }
 
+bool PlyReader::readProperty(Property* prop, TriangularMesh* mesh)
+{
+    if (!m_stream->good())
+        return false;
+    prop->read(m_stream, m_format, mesh);
+    return true;
+}
 
 void PlyReader::SimpleProperty::read(std::istream *stream,
     PlyReader::Format format, PointRef& point)
@@ -367,6 +376,25 @@ void PlyReader::SimpleProperty::read(std::istream *stream,
     }
 }
 
+void PlyReader::SimpleProperty::read(std::istream* stream,
+    PlyReader::Format format, TriangularMesh* mesh)
+{
+    if (format == Format::Ascii)
+    {
+        double d;
+        *stream >> d;
+    }
+    else if (format == Format::BinaryLe)
+    {
+        ILeStream in(stream);
+        Utils::extractDim(in, m_type);
+    }
+    else if (format == Format::BinaryBe)
+    {
+        IBeStream in(stream);
+        Utils::extractDim(in, m_type);
+    }
+}
 
 // Right now we don't support list properties for point data.  We just
 // read the data and throw it away.
@@ -400,6 +428,50 @@ void PlyReader::ListProperty::read(std::istream *stream,
     }
 }
 
+void PlyReader::ListProperty::read(std::istream* stream, PlyReader::Format format,
+    TriangularMesh* mesh)
+{
+    std::vector<PointId> ids;
+    if (format == Format::Ascii)
+    {
+        size_t cnt;
+        *stream >> cnt;
+
+        PointId id;
+        while (cnt--)
+        {
+            *stream >> id;
+            ids.push_back(id);
+        }
+    }
+    else if (format == Format::BinaryLe)
+    {
+        ILeStream istream(stream);
+        Everything e = Utils::extractDim(istream, m_countType);
+        size_t cnt = (size_t)Utils::toDouble(e, m_countType);
+        while (cnt--)
+        {
+            Everything d = Utils::extractDim(istream, m_listType);
+            PointId id = (PointId)Utils::toDouble(d, m_listType);
+            ids.push_back(id);
+        }
+    }
+    else if (format == Format::BinaryBe)
+    {
+        IBeStream istream(stream);
+        Everything e = Utils::extractDim(istream, m_countType);
+        size_t cnt = (size_t)Utils::toDouble(e, m_countType);
+        while (cnt--)
+        {
+            Everything d = Utils::extractDim(istream, m_listType);
+            PointId id = (PointId)Utils::toDouble(d, m_listType);
+            ids.push_back(id);
+        }
+    }
+    
+    if (ids.size() == 3)
+        mesh->add(ids[0], ids[1], ids[2]);
+}
 
 void PlyReader::readElement(Element& elt, PointRef& point)
 {
@@ -409,6 +481,12 @@ void PlyReader::readElement(Element& elt, PointRef& point)
                 std::to_string(point.pointId()) + ".");
 }
 
+void PlyReader::readElement(Element& elt, TriangularMesh* mesh)
+{
+    for (auto& prop : elt.m_properties)
+        if (!readProperty(prop.get(), mesh))
+            throwError("Error reading data for face/element.");
+}
 
 void PlyReader::ready(PointTableRef table)
 {
@@ -419,6 +497,9 @@ void PlyReader::ready(PointTableRef table)
     {
         if (&elt == m_vertexElt)
             break;
+
+        if (&elt == m_faceElt)
+            continue;
 
         // We read an element into point 0.  Since the element's properties
         // weren't registered as dimensions, we'll try to write the data
@@ -447,7 +528,7 @@ bool PlyReader::processOne(PointRef& point)
 }
 
 
-// We're just reading the vertex element here.
+// We're just reading the vertex and face element here.
 point_count_t PlyReader::read(PointViewPtr view, point_count_t num)
 {
     point_count_t cnt(0);
@@ -458,6 +539,16 @@ point_count_t PlyReader::read(PointViewPtr view, point_count_t num)
         point.setPointId(idx);
         processOne(point);
         cnt++;
+    }
+
+    if (m_faceElt)
+    {
+        TriangularMesh* mesh = view->createMesh("face");
+        if (mesh)
+        {
+            for (PointId idx = 0; idx < m_faceElt->m_count; ++idx)
+                readElement(*m_faceElt, mesh);
+        }
     }
     return cnt;
 }
