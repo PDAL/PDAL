@@ -33,14 +33,14 @@
 ****************************************************************************/
 
 #include <pdal/PointView.hpp>
-#include <pdal/Writer.hpp>
+#include <pdal/FlexWriter.hpp>
 
 namespace pdal
 {
 
 class Triangle;
 
-class PDAL_DLL PlyWriter : public Writer
+class PDAL_DLL PlyWriter : public FlexWriter
 {
 public:
     enum class Format
@@ -57,18 +57,20 @@ public:
 private:
     virtual void addArgs(ProgramArgs& args);
     virtual void prepared(PointTableRef table);
-    virtual void ready(PointTableRef table);
-    virtual void write(const PointViewPtr data);
-    virtual void done(PointTableRef table);
+    virtual void readyTable(PointTableRef table);
+    virtual void doneTable(PointTableRef table);
+    virtual void readyFile(const std::string& filename,
+        const SpatialReference& srs);
+    virtual void writeView(const PointViewPtr data);
+    virtual void doneFile();
 
     std::string getType(Dimension::Type type) const;
-    void writeHeader(PointLayoutPtr layout) const;
+    void writeHeader(PointLayoutPtr layout, point_count_t pointCount) const;
     void writeValue(PointRef& point, Dimension::Id dim, Dimension::Type type);
     void writePoint(PointRef& point, PointLayoutPtr layout);
     void writeTriangle(const Triangle& t, size_t offset);
 
     std::ostream *m_stream;
-    std::string m_filename;
     Format m_format;
     bool m_faces;
     StringList m_dimNames;
@@ -77,6 +79,8 @@ private:
     bool m_sizedTypes;
     Arg *m_precisionArg;
     std::vector<PointViewPtr> m_views;
+    std::string m_curFilename;
+    PointLayoutPtr m_layout;
 };
 
 inline std::istream& operator>>(std::istream& in, PlyWriter::Format& f)
