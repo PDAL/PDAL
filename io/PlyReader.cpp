@@ -345,11 +345,11 @@ bool PlyReader::readProperty(Property *prop, PointRef& point)
     return true;
 }
 
-bool PlyReader::readProperty(Property* prop, TriangularMesh* mesh)
+bool PlyReader::readProperty(Property* prop, PointViewPtr view, TriangularMesh* mesh)
 {
     if (!m_stream->good())
         return false;
-    prop->read(m_stream, m_format, mesh);
+    prop->read(m_stream, m_format, view, mesh);
     return true;
 }
 
@@ -377,7 +377,7 @@ void PlyReader::SimpleProperty::read(std::istream *stream,
 }
 
 void PlyReader::SimpleProperty::read(std::istream* stream,
-    PlyReader::Format format, TriangularMesh* mesh)
+    PlyReader::Format format, PointViewPtr view, TriangularMesh* mesh)
 {
     if (format == Format::Ascii)
     {
@@ -429,7 +429,7 @@ void PlyReader::ListProperty::read(std::istream *stream,
 }
 
 void PlyReader::ListProperty::read(std::istream* stream, PlyReader::Format format,
-    TriangularMesh* mesh)
+    PointViewPtr view, TriangularMesh* mesh)
 {
     std::vector<PointId> ids;
     if (format == Format::Ascii)
@@ -437,11 +437,12 @@ void PlyReader::ListProperty::read(std::istream* stream, PlyReader::Format forma
         size_t cnt;
         *stream >> cnt;
 
-        PointId id;
+        point_count_t index;
         while (cnt--)
         {
-            *stream >> id;
-            ids.push_back(id);
+            *stream >> index;
+            PointRef pt = view->point(index);
+            ids.push_back(pt.pointId());
         }
     }
     else if (format == Format::BinaryLe)
@@ -452,8 +453,9 @@ void PlyReader::ListProperty::read(std::istream* stream, PlyReader::Format forma
         while (cnt--)
         {
             Everything d = Utils::extractDim(istream, m_listType);
-            PointId id = (PointId)Utils::toDouble(d, m_listType);
-            ids.push_back(id);
+            point_count_t index = (point_count_t)Utils::toDouble(d, m_listType);
+            PointRef pt = view->point(index);
+            ids.push_back(pt.pointId());
         }
     }
     else if (format == Format::BinaryBe)
@@ -464,8 +466,9 @@ void PlyReader::ListProperty::read(std::istream* stream, PlyReader::Format forma
         while (cnt--)
         {
             Everything d = Utils::extractDim(istream, m_listType);
-            PointId id = (PointId)Utils::toDouble(d, m_listType);
-            ids.push_back(id);
+            point_count_t index = (point_count_t)Utils::toDouble(d, m_listType);
+            PointRef pt = view->point(index);
+            ids.push_back(pt.pointId());
         }
     }
     
@@ -481,10 +484,10 @@ void PlyReader::readElement(Element& elt, PointRef& point)
                 std::to_string(point.pointId()) + ".");
 }
 
-void PlyReader::readElement(Element& elt, TriangularMesh* mesh)
+void PlyReader::readElement(Element& elt, PointViewPtr view, TriangularMesh* mesh)
 {
     for (auto& prop : elt.m_properties)
-        if (!readProperty(prop.get(), mesh))
+        if (!readProperty(prop.get(), view, mesh))
             throwError("Error reading data for face/element.");
 }
 
@@ -547,7 +550,7 @@ point_count_t PlyReader::read(PointViewPtr view, point_count_t num)
         if (mesh)
         {
             for (PointId idx = 0; idx < m_faceElt->m_count; ++idx)
-                readElement(*m_faceElt, mesh);
+                readElement(*m_faceElt, view, mesh);
         }
     }
     return cnt;

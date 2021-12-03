@@ -76,7 +76,7 @@ private:
         virtual void read(std::istream *stream, PlyReader::Format format,
             PointRef& point) = 0;
         virtual void read(std::istream* stream, PlyReader::Format format,
-            TriangularMesh* mesh) = 0;
+            PointViewPtr view, TriangularMesh* mesh) = 0;
     };
 
     struct SimpleProperty : public Property
@@ -91,7 +91,7 @@ private:
         virtual void read(std::istream *stream, PlyReader::Format format,
             PointRef& point) override;
         virtual void read(std::istream* stream, PlyReader::Format format,
-            TriangularMesh* mesh) override;
+            PointViewPtr view, TriangularMesh* mesh) override;
         virtual void setDim(Dimension::Id id) override
         { m_dim = id; }
     };
@@ -109,7 +109,7 @@ private:
         virtual void read(std::istream *stream, PlyReader::Format format,
             PointRef& point) override;
         virtual void read(std::istream* stream, PlyReader::Format format,
-            TriangularMesh* mesh) override;
+            PointViewPtr view, TriangularMesh* mesh) override;
     };
 
     struct Element
@@ -154,8 +154,8 @@ private:
     void extractHeader();
     void readElement(Element& elt, PointRef& point);
     bool readProperty(Property *prop, PointRef& point);
-    void readElement(Element& elt, TriangularMesh* mesh);
-    bool readProperty(Property* prop, TriangularMesh* mesh);
+    void readElement(Element& elt, PointViewPtr view, TriangularMesh* mesh);
+    bool readProperty(Property* prop, PointViewPtr view, TriangularMesh* mesh);
 };
 
 } // namespace pdal
