@@ -32,6 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <climits>
 #include <limits>
 
 #include "Utils.hpp"
@@ -229,7 +230,7 @@ std::pair<uint64_t, uint64_t> getPdalBounds(pdal::Dimension::Id id)
     if (typeName.find("uint") == 0)
     {
         uint64_t maxVal = ~0;
-	maxVal = maxVal >> (sizeof(uint64_t) - pdal::Dimension::size(type)) * CHAR_BIT;
+	    maxVal = maxVal >> (sizeof(uint64_t) - pdal::Dimension::size(type)) * CHAR_BIT;
         return {0, maxVal};
     }
     throw pdal_error("Cannot retrieve bounds for : " + typeName);
