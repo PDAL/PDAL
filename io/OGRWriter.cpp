@@ -60,7 +60,7 @@ static StaticPluginInfo const s_info
 CREATE_STATIC_STAGE(OGRWriter, s_info)
 
 OGRWriter::OGRWriter() : m_driver(nullptr), m_ds(nullptr), m_layer(nullptr),
-    m_feature(nullptr)
+    m_feature(nullptr), m_curCount(0), m_measureDim(Dimension::Id::Unknown)
 {}
 
 
@@ -154,11 +154,13 @@ bool OGRWriter::processOne(PointRef& point)
     double x = point.getFieldAs<double>(Dimension::Id::X);
     double y = point.getFieldAs<double>(Dimension::Id::Y);
     double z = point.getFieldAs<double>(Dimension::Id::Z);
-    double m = point.getFieldAs<double>(m_measureDim);
 
     OGRPoint pt(x, y, z);
     if (m_measureDim != Dimension::Id::Unknown)
+    {
+        double m = point.getFieldAs<double>(m_measureDim);
         pt.setM(m);
+    }
     m_curCount++;
 
     if (m_multiCount > 1)
