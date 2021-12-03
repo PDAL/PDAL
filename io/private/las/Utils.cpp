@@ -32,7 +32,7 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "LasUtils.hpp"
+#include "./Utils.hpp"
 
 #include <string>
 
@@ -44,6 +44,7 @@
 #include <pdal/util/Charbuf.hpp>
 #include <pdal/util/Extractor.hpp>
 #include <pdal/util/Inserter.hpp>
+#include <pdal/util/ThreadPool.hpp>
 #include <pdal/util/Utils.hpp>
 
 namespace pdal
@@ -58,6 +59,9 @@ namespace
         DT::Float, DT::Double
     };
 }
+
+namespace las
+{
 
 uint8_t ExtraBytesIf::lasType()
 {
@@ -195,8 +199,6 @@ std::vector<ExtraDim> ExtraBytesIf::toExtraDims(const char *buf, size_t bufsize,
     return eds;
 }
 
-namespace LasUtils
-{
 
 const Dimension::IdList& pdrfDims(int pdrf)
 {
@@ -239,6 +241,16 @@ const Dimension::IdList& pdrfDims(int pdrf)
         {}
     };
     return dims[pdrf];
+}
+
+std::string generateSoftwareId()
+{
+    std::string ver(Config::versionString());
+    std::stringstream oss;
+    std::ostringstream revs;
+    revs << Config::sha1();
+    oss << "PDAL " << ver << " (" << revs.str().substr(0, 6) <<")";
+    return oss.str();
 }
 
 std::vector<IgnoreVLR> parseIgnoreVLRs(const StringList& ignored)
@@ -372,6 +384,13 @@ bool LoaderDriver::load(PointRef& point, const char *buf, int bufsize)
     return true;
 }
 
+bool LoaderDriver::pack(const PointRef& point, char *buf, int bufsize)
+{
+    for (PointLoaderPtr& l : m_loaders)
+        l->pack(point, buf, bufsize);
+    return true;
+}
+
 V10BaseLoader::V10BaseLoader(const Scaling& scaling) : m_scaling(scaling)
 {}
 
@@ -414,6 +433,30 @@ void V10BaseLoader::load(PointRef& point, const char *buf, int bufsize)
     point.setField(Dimension::Id::PointSourceId, pointSourceId);
 }
 
+void V10BaseLoader::pack(const PointRef& point, char *buf, int bufsize)
+{
+    LeInserter ostream(buf, bufsize);
+
+    int32_t xi = m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::X));
+    int32_t yi = m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::Y));
+    int32_t zi = m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::Z));
+
+    ostream << xi << yi << zi;
+
+    int returnNum = point.getFieldAs<int>(Dimension::Id::ReturnNumber);
+    int numReturns = point.getFieldAs<int>(Dimension::Id::NumberOfReturns);
+    int scanDir = point.getFieldAs<int>(Dimension::Id::ScanDirectionFlag);
+    int eofFlag = point.getFieldAs<int>(Dimension::Id::EdgeOfFlightLine);
+
+    uint8_t flags = returnNum | (numReturns << 3) | (scanDir << 6) | (eofFlag << 7);
+    uint8_t classification = point.getFieldAs<uint8_t>(Dimension::Id::Classification);
+    int8_t scanAngleRank = point.getFieldAs<int8_t>(Dimension::Id::ScanAngleRank);
+    uint8_t user = point.getFieldAs<uint8_t>(Dimension::Id::UserData);
+    uint16_t pointSourceId = point.getFieldAs<uint16_t>(Dimension::Id::PointSourceId);
+
+    ostream << flags << classification << scanAngleRank << user << pointSourceId;
+}
+
 void GpstimeLoader::load(PointRef& point, const char *buf, int bufsize)
 {
     buf += m_offset;
@@ -424,6 +467,15 @@ void GpstimeLoader::load(PointRef& point, const char *buf, int bufsize)
     double time;
     istream >> time;
     point.setField(Dimension::Id::GpsTime, time);
+}
+
+void GpstimeLoader::pack(const PointRef& point, char *buf, int bufsize)
+{
+    buf += m_offset;
+    bufsize -= m_offset;
+    LeInserter ostream(buf, bufsize);
+
+    ostream << point.getFieldAs<double>(Dimension::Id::GpsTime);
 }
 
 void ColorLoader::load(PointRef& point, const char *buf, int bufsize)
@@ -438,6 +490,17 @@ void ColorLoader::load(PointRef& point, const char *buf, int bufsize)
     point.setField(Dimension::Id::Red, red);
     point.setField(Dimension::Id::Green, green);
     point.setField(Dimension::Id::Blue, blue);
+}
+
+void ColorLoader::pack(const PointRef& point, char *buf, int bufsize)
+{
+    buf += m_offset;
+    bufsize -= m_offset;
+    LeInserter ostream(buf, bufsize);
+
+    ostream << point.getFieldAs<uint16_t>(Dimension::Id::Red);
+    ostream << point.getFieldAs<uint16_t>(Dimension::Id::Green);
+    ostream << point.getFieldAs<uint16_t>(Dimension::Id::Blue);
 }
 
 V14BaseLoader::V14BaseLoader(const Scaling& scaling) : m_scaling(scaling)
@@ -490,6 +553,47 @@ void V14BaseLoader::load(PointRef& point, const char *buf, int bufsize)
     point.setField(Dimension::Id::GpsTime, gpsTime);
 }
 
+void V14BaseLoader::pack(const PointRef& point, char *buf, int bufsize)
+{
+    LeInserter ostream(buf, bufsize);
+    int32_t xi = m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::X));
+    int32_t yi = m_scaling.m_yXform.toScaled(point.getFieldAs<double>(Dimension::Id::Y));
+    int32_t zi = m_scaling.m_zXform.toScaled(point.getFieldAs<double>(Dimension::Id::Z));
+
+    ostream << xi << yi << zi;
+
+    uint16_t intensity = point.getFieldAs<uint16_t>(Dimension::Id::Intensity);
+    int returnNum = point.getFieldAs<int>(Dimension::Id::ReturnNumber);
+    int numReturns = point.getFieldAs<int>(Dimension::Id::NumberOfReturns);
+    uint8_t returnInfo = returnNum | (numReturns << 4);
+
+    uint8_t scanChannel = point.getFieldAs<uint8_t>(Dimension::Id::ScanChannel);
+    uint8_t scanDirFlag = point.getFieldAs<uint8_t>(Dimension::Id::ScanDirectionFlag);
+    uint8_t flight = point.getFieldAs<uint8_t>(Dimension::Id::EdgeOfFlightLine);
+    uint8_t classification = point.getFieldAs<uint8_t>(Dimension::Id::Classification);
+
+    uint8_t flags;
+    uint8_t classFlags = 0;
+    if (point.hasDim(Dimension::Id::ClassFlags))
+        classFlags = point.getFieldAs<uint8_t>(Dimension::Id::ClassFlags);
+    else
+        classFlags = classification >> 5;
+
+    flags = (classFlags & 0x0F) |
+            ((scanChannel & 0x03) << 4) |
+            ((scanDirFlag & 0x01) << 6) |
+            ((flight & 0x01) << 7);
+
+    uint8_t user = point.getFieldAs<uint8_t>(Dimension::Id::UserData);
+    int16_t scanAngle = static_cast<int16_t>(std::round(
+        point.getFieldAs<float>(Dimension::Id::ScanAngleRank) / .006f));
+    uint16_t pointSourceId = point.getFieldAs<uint16_t>(Dimension::Id::PointSourceId);
+    double gpsTime = point.getFieldAs<double>(Dimension::Id::GpsTime);
+
+    ostream << intensity << returnInfo << flags << classification << user <<
+        scanAngle << pointSourceId << gpsTime;
+}
+
 void NirLoader::load(PointRef& point, const char *buf, int bufsize)
 {
     buf += m_offset;
@@ -501,6 +605,16 @@ void NirLoader::load(PointRef& point, const char *buf, int bufsize)
 
     istream >> nearInfraRed;
     point.setField(Dimension::Id::Infrared, nearInfraRed);
+}
+
+void NirLoader::pack(const PointRef& point, char *buf, int bufsize)
+{
+    buf += m_offset;
+    bufsize -= m_offset;
+
+    LeInserter ostream(buf, bufsize);
+
+    ostream << point.getFieldAs<uint16_t>(Dimension::Id::Infrared);
 }
 
 void ExtraDimLoader::load(PointRef& point, const char *buf, int bufsize)
@@ -517,8 +631,23 @@ void ExtraDimLoader::load(PointRef& point, const char *buf, int bufsize)
     }
 }
 
-// VLR Catalog
+void ExtraDimLoader::pack(const PointRef& point, char *buf, int bufsize)
+{
+    Everything e;
+    for (const ExtraDim& d : m_extraDims)
+    {
+        const DimType& dt = d.m_dimType;
+        LeInserter ostream(buf + d.m_byteOffset, bufsize - d.m_byteOffset);
 
+        point.getField((char *)&e, d.m_dimType.m_id, d.m_dimType.m_type);
+        if (d.m_dimType.m_xform.nonstandard())
+            ostream << d.m_dimType.m_xform.toScaled(Utils::toDouble(e, d.m_dimType.m_type));
+        else
+            Utils::insertDim(ostream, d.m_dimType.m_type, e);
+    }
+}
+
+// VLR Catalog
 
 VlrCatalog::VlrCatalog(VlrCatalog::ReadFunc f) : m_fetch(f)
 {}
@@ -606,5 +735,5 @@ std::vector<char> VlrCatalog::fetch(const std::string& userId, uint16_t recordId
     return vlrdata;
 }
 
-} // namespace LasUtils
+} // namespace las
 } // namespace pdal
