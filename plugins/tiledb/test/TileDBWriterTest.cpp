@@ -43,6 +43,7 @@
 #include <pdal/pdal_test_main.hpp>
 #include <io/FauxReader.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 #include "Support.hpp"
 #include "../io/TileDBWriter.hpp"
@@ -100,18 +101,16 @@ namespace pdal
     TEST_F(TileDBWriterTest, write)
     {
         tiledb::Context ctx;
-        tiledb::VFS vfs(ctx);
         std::string pth = Support::temppath("tiledb_test_out");
+        int result_num = 0;
 
         Options options = getTileDBOptions();
         std::string sidecar = pth + "/pdal.json";
         options.add("array_name", pth);
         options.add("chunk_size", 80);
 
-        if (vfs.is_dir(pth))
-        {
-            vfs.remove_dir(pth);
-        }
+        if (FileUtils::directoryExists(pth))
+            FileUtils::deleteDirectory(pth);
 
         TileDBWriter writer;
         writer.setOptions(options);
@@ -145,20 +144,28 @@ namespace pdal
         }
 
         tiledb::Query q(ctx, array, TILEDB_READ);
+        q.set_subarray(subarray);
 
+#if TILEDB_VERSION_MAJOR == 1
+        std::vector<double> coords(count  * 3);
+        q.set_coordinates(coords);
+#else
         std::vector<double> xs(count);
         std::vector<double> ys(count);
         std::vector<double> zs(count);
-
-        q.set_subarray(subarray)
-            .set_data_buffer("X", xs)
+        
+        q.set_data_buffer("X", xs)
             .set_data_buffer("Y", ys)
             .set_data_buffer("Z", zs);
-
+#endif
         q.submit();
         array.close();
 
-        auto result_num = (int)q.result_buffer_elements()["X"].second;
+#if TILEDB_VERSION_MAJOR == 1
+    result_num = (int)q.result_buffer_elements()["__coords"].second / 3;
+#else
+    result_num = (int)q.result_buffer_elements()["X"].second;
+#endif
         EXPECT_EQ(m_reader.count(), result_num);
 
         ASSERT_DOUBLE_EQ(subarray[0], 0.0);
@@ -172,24 +179,22 @@ namespace pdal
     TEST_F(TileDBWriterTest, write_append)
     {
         tiledb::Context ctx;
-        tiledb::VFS vfs(ctx);
         std::string pth = Support::temppath("tiledb_test_append_out");
+        int result_num = 0;
 
         Options options = getTileDBOptions();
         std::string sidecar = pth + "/pdal.json";
         options.add("array_name", pth);
         options.add("chunk_size", 80);
 
-        if (vfs.is_dir(pth))
-        {
-            vfs.remove_dir(pth);
-        }
+        if (FileUtils::directoryExists(pth))
+            FileUtils::deleteDirectory(pth);
 
         TileDBWriter writer;
         writer.setOptions(options);
         writer.setInput(m_reader);
 
-        FixedPointTable table(100);
+        FixedPointTable table(count);
         writer.prepare(table);
         writer.execute(table);
 
@@ -225,20 +230,30 @@ namespace pdal
         }
 
         tiledb::Query q(ctx, array, TILEDB_READ);
+        q.set_subarray(subarray);
 
-        std::vector<double> xs(count*2);
-        std::vector<double> ys(count*2);
-        std::vector<double> zs(count*2);
-
-        q.set_subarray(subarray)
-            .set_data_buffer("X", xs)
+#if TILEDB_VERSION_MAJOR == 1
+        std::vector<double> coords(count * 2 * 3);
+        q.set_coordinates(coords);
+#else
+        std::vector<double> xs(count * 2);
+        std::vector<double> ys(count * 2);
+        std::vector<double> zs(count * 2);
+        
+        q.set_data_buffer("X", xs)
             .set_data_buffer("Y", ys)
             .set_data_buffer("Z", zs);
+#endif
 
         q.submit();
         array.close();
 
-        auto result_num = (int)q.result_buffer_elements()["X"].second;
+#if TILEDB_VERSION_MAJOR == 1
+        result_num = ((int)q.result_buffer_elements()["__coords"].second / 3) * 2;
+#else
+        result_num = (int)q.result_buffer_elements()["X"].second;
+#endif
+
         EXPECT_EQ(m_reader.count() + m_reader2.count(), result_num);
     }
 
@@ -246,7 +261,6 @@ namespace pdal
     TEST_F(TileDBWriterTest, write_simple_compression)
     {
         tiledb::Context ctx;
-        tiledb::VFS vfs(ctx);
         std::string pth = Support::temppath("tiledb_test_compress_simple_out");
 
         Options options = getTileDBOptions();
@@ -254,10 +268,9 @@ namespace pdal
         options.add("compression", "zstd");
         options.add("compression_level", 7);
 
-        if (vfs.is_dir(pth))
-        {
-            vfs.remove_dir(pth);
-        }
+
+        if (FileUtils::directoryExists(pth))
+            FileUtils::deleteDirectory(pth);
 
         TileDBWriter writer;
         writer.setOptions(options);
@@ -282,7 +295,6 @@ namespace pdal
     TEST_F(TileDBWriterTest, write_options)
     {
         tiledb::Context ctx;
-        tiledb::VFS vfs(ctx);
         std::string pth = Support::temppath("tiledb_test_write_options");
 
         Options options = getTileDBOptions();
@@ -298,10 +310,8 @@ namespace pdal
         options.add("array_name", pth);
         options.add("filters", jsonOptions);
 
-        if (vfs.is_dir(pth))
-        {
-            vfs.remove_dir(pth);
-        }
+        if (FileUtils::directoryExists(pth))
+            FileUtils::deleteDirectory(pth);
 
         TileDBWriter writer;
         writer.setOptions(options);
@@ -334,7 +344,6 @@ namespace pdal
    TEST_F(TileDBWriterTest, dup_options)
     {
         tiledb::Context ctx;
-        tiledb::VFS vfs(ctx);
         std::string pth = Support::temppath("tiledb_test_write_options");
 
         Options options = getTileDBOptions();
@@ -351,10 +360,8 @@ namespace pdal
         options.add("compression_level", 7);
         options.add("filters", jsonOptions);
 
-        if (vfs.is_dir(pth))
-        {
-            vfs.remove_dir(pth);
-        }
+        if (FileUtils::directoryExists(pth))
+            FileUtils::deleteDirectory(pth);
 
         TileDBWriter writer;
         writer.setOptions(options);
@@ -381,16 +388,13 @@ namespace pdal
     TEST_F(TileDBWriterTest, default_options)
     {
         tiledb::Context ctx;
-        tiledb::VFS vfs(ctx);
         std::string pth = Support::temppath("tiledb_test_write_options");
 
         Options options = getTileDBOptions();
         options.add("array_name", pth);
 
-        if (vfs.is_dir(pth))
-        {
-            vfs.remove_dir(pth);
-        }
+        if (FileUtils::directoryExists(pth))
+            FileUtils::deleteDirectory(pth);
 
         TileDBWriter writer;
         writer.setOptions(options);
@@ -419,14 +423,10 @@ namespace pdal
 #if TILEDB_VERSION_MAJOR >= 2
     TEST_F(TileDBWriterTest, write_timestamp)
     {
-        tiledb::Context ctx;
-        tiledb::VFS vfs(ctx);
         std::string pth = Support::temppath("tiledb_test_ts_out");
 
-        if (vfs.is_dir(pth))
-        {
-            vfs.remove_dir(pth);
-        }
+        if (FileUtils::directoryExists(pth))
+            FileUtils::deleteDirectory(pth);
 
         Options options = getTileDBOptions();
         options.add("array_name", pth);
@@ -498,16 +498,13 @@ namespace pdal
         reader.setOptions(reader_options);
 
         tiledb::Context ctx;
-        tiledb::VFS vfs(ctx);
         std::string pth = Support::temppath("tiledb_test_dups");
 
         Options writer_options = getTileDBOptions();
         writer_options.add("array_name", pth);
 
-        if (vfs.is_dir(pth))
-        {
-            vfs.remove_dir(pth);
-        }
+        if (FileUtils::directoryExists(pth))
+            FileUtils::deleteDirectory(pth);
 
         TileDBWriter writer;
         writer.setOptions(writer_options);
@@ -563,16 +560,13 @@ namespace pdal
         reader.setOptions(reader_options);
 
         tiledb::Context ctx;
-        tiledb::VFS vfs(ctx);
         std::string pth = Support::temppath("tiledb_test_sf_curve");
 
         Options writer_options;
         writer_options.add("array_name", pth);
 
-        if (vfs.is_dir(pth))
-        {
-            vfs.remove_dir(pth);
-        }
+        if (FileUtils::directoryExists(pth))
+            FileUtils::deleteDirectory(pth);
 
         TileDBWriter writer;
         writer.setOptions(writer_options);
@@ -596,16 +590,10 @@ namespace pdal
         reader.setOptions(reader_options);
 
         tiledb::Context ctx;
-        tiledb::VFS vfs(ctx);
         std::string pth = Support::temppath("tiledb_test_sf_curve_ts");
 
         Options writer_options = getTileDBOptions();
         writer_options.add("array_name", pth);
-
-        if (vfs.is_dir(pth))
-        {
-            vfs.remove_dir(pth);
-        }
 
         TileDBWriter writer;
         writer.setOptions(writer_options);
@@ -627,13 +615,10 @@ namespace pdal
     TEST_F(TileDBWriterTest, sf_curve_stats)
     {
         tiledb::Context ctx;
-        tiledb::VFS vfs(ctx);
         std::string pth = Support::temppath("tiledb_test_sf_curve_stats");
 
-        if (vfs.is_dir(pth))
-        {
-            vfs.remove_dir(pth);
-        }
+        if (FileUtils::directoryExists(pth))
+            FileUtils::deleteDirectory(pth);
 
         PipelineManager mgr;
 

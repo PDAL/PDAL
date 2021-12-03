@@ -41,6 +41,7 @@
 #include <filters/StatsFilter.hpp>
 #include <pdal/pdal_test_main.hpp>
 #include <io/FauxReader.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/StageFactory.hpp>
 
 #include "Support.hpp"
@@ -59,7 +60,6 @@ class TileDBReaderTimeDimTest : public ::testing::Test
 protected:
     virtual void SetUp()
     {
-        tiledb::Context ctx;
         XYZTimeFauxReader rdr;
         TileDBWriter writer;
         Options reader_options;
@@ -67,8 +67,8 @@ protected:
 
         data_path = Support::temppath("xyztm_tdb_array");
 
-        if (Utils::fileExists(data_path))
-            tiledb::Object::remove(ctx, data_path);
+        if (FileUtils::directoryExists(data_path))
+            FileUtils::deleteDirectory(data_path);
 
         writer_options.add("array_name", data_path);
         writer_options.add("use_time_dim", true);
@@ -107,9 +107,6 @@ TEST_F(TileDBReaderTimeDimTest, set_dims)
 
 TEST_F(TileDBReaderTimeDimTest, read_bbox4d)
 {
-    tiledb::Context ctx;
-    tiledb::VFS vfs(ctx);
-
     Options options;
     options.add("array_name", data_path);
     options.add("bbox4d", "([2., 7.], [2., 7.], [2., 7.], [1314662418., 1315094418.])"); // sep 3 - sep 8
@@ -179,7 +176,6 @@ TEST_F(TileDBReaderTimeDimTest, read_4d)
         }
     };
     tiledb::Context ctx;
-    tiledb::VFS vfs(ctx);
     Options options;
     options.add("array_name", data_path);
 
@@ -194,16 +190,22 @@ TEST_F(TileDBReaderTimeDimTest, read_4d)
     }
 
     tiledb::Query q(ctx, array, TILEDB_READ);
+    q.set_subarray(subarray);
+
+#if TILEDB_VERSION_MAJOR == 1
+    std::vector<double> coords(count  * 4);
+    q.set_coordinates(coords);
+#else
     std::vector<double> xs(count);
     std::vector<double> ys(count);
     std::vector<double> zs(count);
     std::vector<double> ts(count);
-
-    q.set_subarray(subarray)
-        .set_data_buffer("X", xs)
+    
+    q.set_data_buffer("X", xs)
         .set_data_buffer("Y", ys)
         .set_data_buffer("Z", zs)
         .set_data_buffer("GpsTime", ts);
+#endif
 
     q.submit();
     array.close();
