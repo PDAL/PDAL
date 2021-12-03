@@ -154,9 +154,9 @@ namespace pdal
         std::vector<double> ys(count);
         std::vector<double> zs(count);
         
-        q.set_data_buffer("X", xs)
-            .set_data_buffer("Y", ys)
-            .set_data_buffer("Z", zs);
+        q.set_buffer("X", xs)
+            .set_buffer("Y", ys)
+            .set_buffer("Z", zs);
 #endif
         q.submit();
         array.close();
@@ -240,9 +240,9 @@ namespace pdal
         std::vector<double> ys(count * 2);
         std::vector<double> zs(count * 2);
         
-        q.set_data_buffer("X", xs)
-            .set_data_buffer("Y", ys)
-            .set_data_buffer("Z", zs);
+        q.set_buffer("X", xs)
+            .set_buffer("Y", ys)
+            .set_buffer("Z", zs);
 #endif
 
         q.submit();
@@ -532,9 +532,9 @@ namespace pdal
         std::vector<double> zs(count*2);
 
         q.set_subarray(subarray)
-            .set_data_buffer("X", xs)
-            .set_data_buffer("Y", ys)
-            .set_data_buffer("Z", zs);
+            .set_buffer("X", xs)
+            .set_buffer("Y", ys)
+            .set_buffer("Z", zs);
 
         q.submit();
         array.close();
@@ -591,6 +591,9 @@ namespace pdal
 
         tiledb::Context ctx;
         std::string pth = Support::temppath("tiledb_test_sf_curve_ts");
+
+        if (FileUtils::directoryExists(pth))
+            FileUtils::deleteDirectory(pth);
 
         Options writer_options = getTileDBOptions();
         writer_options.add("array_name", pth);

@@ -204,9 +204,9 @@ TEST_F(TileDBReaderTest, read)
     std::vector<double> ys(count);
     std::vector<double> zs(count);
     
-    q.set_data_buffer("X", xs)
-        .set_data_buffer("Y", ys)
-        .set_data_buffer("Z", zs);
+    q.set_buffer("X", xs)
+        .set_buffer("Y", ys)
+        .set_buffer("Z", zs);
 #endif
 
     q.submit();
