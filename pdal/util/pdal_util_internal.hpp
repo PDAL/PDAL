@@ -37,8 +37,6 @@
 
 #pragma once
 
-#define STDCALL
-
 #ifdef _WIN32
 #ifdef _MSC_VER
 #define PDAL_MSVC       // Using the MSVC compiler for WIN32.
@@ -51,5 +49,7 @@
 #define PDAL_MINGW      // MinGW runs on WIN32 but isn't MSVC. It uses libc++std.
 // MinGW use libstdc++
 #endif // _MSC_VER
+#else
+#define STDCALL
 #endif // _WIN32
 
