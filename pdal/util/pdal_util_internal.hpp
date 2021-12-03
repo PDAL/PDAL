@@ -48,5 +48,7 @@
 #define PDAL_MINGW      // MinGW runs on WIN32 but isn't MSVC. It uses libc++std.
 // MinGW use libstdc++
 #endif // _MSC_VER
+#else
+#define STDCALL
 #endif // _WIN32
 

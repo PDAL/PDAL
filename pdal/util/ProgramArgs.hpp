@@ -1334,13 +1334,11 @@ public:
             out << "{\"name\":\"" << a->longname() << "\"";
 
             if (a->defaultProvided())
-                out << ",\"default\":\"" << a->defaultVal() << "\"";
+                out << ",\"default\":\"" << Utils::escapeJSON(a->defaultVal()) << "\"";
 
-            out << ",\"description\":\"" << a->description() << "\"}";
+            out << ",\"description\":\"" << Utils::escapeJSON(a->description()) << "\"}";
 
-            if (bFirst) bFirst = false;
-
-
+            bFirst = false;
         }
         out << "]";
     }

@@ -50,11 +50,11 @@
 #include <pdal/util/ThreadPool.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/SrsTransform.hpp>
-#include <io/LasUtils.hpp>
 
 #include "private/copc/Connector.hpp"
 #include "private/copc/Entry.hpp"
 #include "private/copc/Tile.hpp"
+#include "private/las/Utils.hpp"
 
 namespace pdal
 {
@@ -109,14 +109,14 @@ public:
     copc::Connector connector;
     std::queue<copc::Tile> contents;
     copc::Hierarchy hierarchy;
-    LasUtils::LoaderDriver loader;
+    las::LoaderDriver loader;
     std::mutex mutex;
     std::condition_variable contentsCv;
     std::condition_variable consumedCv;
     std::vector<PolyXform> polys;
     BoxXform clip;
     int depthEnd;
-    ExtraDims extraDims;
+    las::ExtraDims extraDims;
     BOX3D rootNodeExtent;
     Scaling scaling;
     uint64_t tileCount;
@@ -195,7 +195,7 @@ void CopcReader::initialize()
     fetchHeader();
 
     using namespace std::placeholders;
-    LasUtils::VlrCatalog catalog(std::bind(&CopcReader::fetch, this, _1, _2));
+    las::VlrCatalog catalog(std::bind(&CopcReader::fetch, this, _1, _2));
     catalog.load(m_p->header.header_size, m_p->header.vlr_count, m_p->header.evlr_offset,
         m_p->header.evlr_count);
     fetchEbVlr(catalog);
@@ -247,7 +247,7 @@ void CopcReader::fetchHeader()
 }
 
 
-void CopcReader::fetchSrsVlr(const LasUtils::VlrCatalog& catalog)
+void CopcReader::fetchSrsVlr(const las::VlrCatalog& catalog)
 {
     std::vector<char> buf = catalog.fetch("LASF_Projection", 2112);
     if (buf.empty())
@@ -256,18 +256,18 @@ void CopcReader::fetchSrsVlr(const LasUtils::VlrCatalog& catalog)
 }
 
 
-void CopcReader::fetchEbVlr(const LasUtils::VlrCatalog& catalog)
+void CopcReader::fetchEbVlr(const las::VlrCatalog& catalog)
 {
     std::vector<char> buf = catalog.fetch("LASF_Spec", 4);
     if (buf.empty())
         return;
 
-    if (buf.size() % ExtraBytesSpecSize != 0)
+    if (buf.size() % las::ExtraBytesSpecSize != 0)
     {
         log()->get(LogLevel::Warning) << "Bad size for extra bytes VLR.  Ignoring.";
         return;
     }
-    m_p->extraDims = ExtraBytesIf::toExtraDims(buf.data(), buf.size(),
+    m_p->extraDims = las::ExtraBytesIf::toExtraDims(buf.data(), buf.size(),
         lazperf::baseCount(m_p->header.pointFormat()));
 }
 
@@ -387,7 +387,7 @@ QuickInfo CopcReader::inspect()
 
 void CopcReader::addDimensions(PointLayoutPtr layout)
 {
-    layout->registerDims(LasUtils::pdrfDims(m_p->header.pointFormat()));
+    layout->registerDims(las::pdrfDims(m_p->header.pointFormat()));
 
     size_t ebLen = m_p->header.ebCount();
     for (auto& dim : m_p->extraDims)
