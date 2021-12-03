@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2018, Connor Manning
+ * Copyright (c) 2021, Hobu Inc.
  *
  * All rights reserved.
  *
@@ -32,34 +32,23 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#pragma once
-
-#include <memory>
-
-#include <pdal/Artifact.hpp>
-#include "Connector.hpp"
-#include "EptInfo.hpp"
-#include "Overlap.hpp"
+#include "Entry.hpp"
 
 namespace pdal
 {
-
-class EptArtifact : public Artifact
+namespace copc
 {
-public:
-    EptArtifact(std::unique_ptr<EptInfo> info,
-            std::unique_ptr<Hierarchy> hierarchy,
-            std::unique_ptr<Connector> connector, size_t hierarchyStep) :
-        m_info(std::move(info)), m_hierarchy(std::move(hierarchy)),
-        m_connector(std::move(connector)), m_hierarchyStep(hierarchyStep)
-    {}
 
-    std::unique_ptr<EptInfo> m_info;
-    std::unique_ptr<Hierarchy> m_hierarchy;
-    std::unique_ptr<Connector> m_connector;
-    size_t m_hierarchyStep;
-};
-using EptArtifactPtr = std::shared_ptr<EptArtifact>;
+Hierarchy::Hierarchy(const std::vector<char>& data)
+{
+    LeExtractor in(data.data(), data.size());
+    while (in)
+    {
+        Entry e;
+        in >> e.m_key >> e.m_offset >> e.m_byteSize >> e.m_pointCount;
+        m_entries.insert(e);
+    }
+}
 
+} // namespace copc
 } // namespace pdal
-

@@ -36,100 +36,122 @@
 
 #include <functional>  // for hash
 
+#include <pdal/pdal_types.hpp>
+
+#include <pdal/util/Bounds.hpp>
+#include <pdal/util/Extractor.hpp>
+
 namespace pdal
 {
-namespace ept
+namespace copc
 {
 
 class PDAL_DLL Key
 {
-    // An EPT key representation (see https://git.io/fAiBh).  A depth/X/Y/Z key
-    // representing a data node, as well as the bounds of the contained data.
+    // A depth/X/Y/Z key representing a data node, as well as the bounds of the contained data.
 public:
     Key()
     {}
 
     Key(const std::string& s)
     {
-        const StringList tokens(Utils::split(s, '-'));
-        if (tokens.size() != 4)
-            throw pdal_error("Invalid EPT KEY: " + s);
-        d = std::stoi(tokens[0]);
-        x = std::stoi(tokens[1]);
-        y = std::stoi(tokens[2]);
-        z = std::stoi(tokens[3]);
+        fill(s);
     }
 
-    BOX3D b;
+    bool valid() const
+    {
+        return d != -1;
+    }
 
-    uint32_t d = 0;
-    uint32_t x = 0;
-    uint32_t y = 0;
-    uint32_t z = 0;
+    bool fill(const std::string& s)
+    {
+        d = -1;
+        const StringList tokens(Utils::split(s, '-'));
+        if (tokens.size() != 4)
+            return false;
+
+        size_t cnt;
+        d = std::stoi(tokens[0], &cnt);
+        if (cnt != tokens[0].size())
+            return false;
+        x = std::stoi(tokens[1], &cnt);
+        if (cnt != tokens[1].size())
+            return false;
+        y = std::stoi(tokens[2], &cnt);
+        if (cnt != tokens[2].size())
+            return false;
+        z = std::stoi(tokens[3], &cnt);
+        if (cnt != tokens[3].size())
+            return false;
+        return true;
+    }
+
+    int32_t d = 0;
+    int32_t x = 0;
+    int32_t y = 0;
+    int32_t z = 0;
 
     std::string toString() const
+    {
+        return (std::string)(*this);
+    }
+    
+    operator std::string() const
     {
         return std::to_string(d) + '-' + std::to_string(x) + '-' +
             std::to_string(y) + '-' + std::to_string(z);
     }
 
-    double& operator[](uint64_t i)
+    Key child(int32_t dir) const
     {
-        switch (i)
-        {
-            case 0: return b.minx;
-            case 1: return b.miny;
-            case 2: return b.minz;
-            case 3: return b.maxx;
-            case 4: return b.maxy;
-            case 5: return b.maxz;
-            default: throw pdal_error("Invalid Key[] index");
-        }
+        return Key(d + 1,
+            (x << 1) | (dir & 0x1),
+            (y << 1) | ((dir >> 1) & 0x1),
+            (z << 1) | ((dir >> 2) & 0x1));
     }
 
-    uint32_t& idAt(uint64_t i)
+    BOX3D bounds(const BOX3D& root) const
     {
-        switch (i)
-        {
-            case 0: return x;
-            case 1: return y;
-            case 2: return z;
-            default: throw pdal_error("Invalid Key::idAt index");
-        }
+        BOX3D cellBounds;
+
+        double cellWidth = (root.maxx - root.minx) / pow(2, d);
+        // The test in each of these is to avoid unnecessary rounding errors when
+        // we know the actual value.
+        cellBounds.minx = (x == 0 ? root.minx : root.minx + (cellWidth * x));
+        cellBounds.maxx = (x == d ? root.maxx : root.minx + (cellWidth * (x + 1)));
+        cellBounds.miny = (y == 0 ? root.miny : root.miny + (cellWidth * y));
+        cellBounds.maxy = (y == d ? root.maxy : root.miny + (cellWidth * (y + 1)));
+        cellBounds.minz = (z == 0 ? root.minz : root.minz + (cellWidth * z));
+        cellBounds.maxz = (z == d ? root.maxz : root.minz + (cellWidth * (z + 1)));
+        return cellBounds;
     }
 
-    Key bisect(uint64_t direction) const
+    static Key invalid()
     {
-        Key key(*this);
-        ++key.d;
+        static Key badkey = Key(-1, 0, 0, 0);
 
-        auto step([&key, direction](uint8_t i)
-        {
-            key.idAt(i) *= 2;
-
-            const double mid(key[i] + (key[i + 3] - key[i]) / 2.0);
-            const bool positive(direction & (((uint64_t)1) << i));
-            if (positive)
-            {
-                key[i] = mid;
-                ++key.idAt(i);
-            }
-            else
-            {
-                key[i + 3] = mid;
-            }
-        });
-
-        for (uint8_t i(0); i < 3; ++i)
-            step(i);
-
-        return key;
+        return badkey;
     }
+
+private:
+    Key(int d, int x, int y, int z) : d(d), x(x), y(y), z(z)
+    {}
 };
+
+inline LeExtractor& operator>>(LeExtractor& in, Key& k)
+{
+    in >> k.d >> k.x >> k.y >> k.z;
+    return in;
+}
 
 inline bool operator==(const Key& a, const Key& b)
 {
     return a.d == b.d && a.x == b.x && a.y == b.y && a.z == b.z;
+}
+
+inline bool operator!=(const Key& a, const Key& b)
+{
+    return !(a == b);
 }
 
 inline bool operator<(const Key& a, const Key& b)
@@ -147,15 +169,21 @@ inline bool operator<(const Key& a, const Key& b)
     return false;
 }
 
-} // namespace ept
+inline std::ostream& operator<<(std::ostream& out, const Key& k)
+{
+    out << k.toString();
+    return out;
+}
+
+} // namespace copc
 } // namespace pdal
 
 namespace std
 {
     template<>
-    struct hash<pdal::ept::Key>
+    struct hash<pdal::copc::Key>
     {
-        std::size_t operator()(pdal::ept::Key const& k) const noexcept
+        std::size_t operator()(pdal::copc::Key const& k) const noexcept
         {
             std::hash<uint64_t> h;
 

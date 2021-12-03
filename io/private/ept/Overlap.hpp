@@ -40,6 +40,8 @@
 
 namespace pdal
 {
+namespace ept
+{
 
 struct Overlap
 {
@@ -60,16 +62,17 @@ inline bool operator==(const Overlap& a, const Overlap& b)
     return a.m_key == b.m_key;
 }
 
+} // namespace ept
 } // namespace pdal
 
 namespace std
 {
     template<>
-    struct hash<pdal::Overlap>
+    struct hash<pdal::ept::Overlap>
     {
-        std::size_t operator()(const pdal::Overlap& o) const noexcept
+        std::size_t operator()(const pdal::ept::Overlap& o) const noexcept
         {
-            return std::hash<pdal::Key>{}(o.m_key);
+            return std::hash<pdal::ept::Key>{}(o.m_key);
         }
     };
 }

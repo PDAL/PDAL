@@ -71,8 +71,8 @@ void RasterWriter::addArgs(ProgramArgs& args)
     args.add("gdalopts", "GDAL driver options (name=value,name=value...)",
         m_options);
     args.add("rasters", "List of raster names to write as bands.", m_rasterNames);
-    args.add("data_type", "Data type for output grid (\"int8\", \"uint64\", "
-        "\"float\", etc.)", m_dataType, Dimension::Type::Double);
+    args.add("data_type", "Data type for output grid ('int8', 'uint64', "
+        "'float', etc.)", m_dataType, Dimension::Type::Double);
     // Nan is a sentinal value to say that no value was set for nodata.
     args.add("nodata", "No data value", m_noData,
         std::numeric_limits<double>::quiet_NaN());

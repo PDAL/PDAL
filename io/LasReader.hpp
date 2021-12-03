@@ -120,11 +120,9 @@ private:
         point_count_t maxPoints);
     void handleLaszip(int result);
 
-    struct Args;
-    std::unique_ptr<Args> m_args;
-
+    struct Options;
     struct Private;
-    std::unique_ptr<Private> m_p;
+    std::unique_ptr<Private> d;
 };
 
 } // namespace pdal

@@ -37,6 +37,7 @@
 #include <pdal/compression/LazPerfVlrCompression.hpp>
 
 #include "LasWriter.hpp"
+#include "private/las/Utils.hpp"
 
 #include <climits>
 #include <iostream>
@@ -71,8 +72,39 @@ CREATE_STATIC_STAGE(LasWriter, s_info)
 
 std::string LasWriter::getName() const { return s_info.name; }
 
-LasWriter::LasWriter() : m_compressor(nullptr), m_ostream(NULL),
-    m_compression(LasCompression::None), m_srsCnt(0)
+struct LasWriter::Options
+{
+    SpatialReference aSrs;
+    las::Compression compression;
+    bool discardHighReturnNumbers;
+    StringList extraDimSpec;
+    StringList forwardSpec;
+    bool writePDALMetadata;
+    NumHeaderVal<uint16_t, 0, 65535> filesourceId;
+    NumHeaderVal<uint8_t, 1, 1> majorVersion;
+    NumHeaderVal<uint8_t, 1, 4> minorVersion;
+    NumHeaderVal<uint8_t, 0, 10> dataformatId;
+    NumHeaderVal<uint16_t, 0, 31> globalEncoding;
+    UuidHeaderVal projectId;
+    StringHeaderVal<32> systemId;
+    StringHeaderVal<32> softwareId;
+    NumHeaderVal<uint16_t, 0, 366> creationDoy;
+    NumHeaderVal<uint16_t, 0, 65535> creationYear;
+    StringHeaderVal<0> scaleX;
+    StringHeaderVal<0> scaleY;
+    StringHeaderVal<0> scaleZ;
+    StringHeaderVal<0> offsetX;
+    StringHeaderVal<0> offsetY;
+    StringHeaderVal<0> offsetZ;
+    std::vector<ExtLasVLR> userVLRs;
+};
+
+struct LasWriter::Private
+{
+    Options opts;
+};
+
+LasWriter::LasWriter() : d(new Private), m_compressor(nullptr), m_ostream(NULL), m_srsCnt(0)
 {}
 
 
@@ -93,79 +125,78 @@ void LasWriter::addArgs(ProgramArgs& args)
     uint16_t doy = ptm->tm_yday;
 
     args.add("filename", "Output filename", m_filename).setPositional();
-    args.add("a_srs", "Spatial reference to use to write output", m_aSrs);
+    args.add("a_srs", "Spatial reference to use to write output", d->opts.aSrs);
     args.add("compression", "Compression to use for output ('LASZIP' or "
-        "'LAZPERF')", m_compression, LasCompression::None);
+        "'LAZPERF')", d->opts.compression, las::Compression::None);
     args.add("discard_high_return_numbers", "Discard points with out-of-spec "
-        "return numbers.", m_discardHighReturnNumbers);
-    args.add("extra_dims", "Dimensions to write above those in point format",
-        m_extraDimSpec);
-    args.add("forward", "Dimensions to forward from LAS reader", m_forwardSpec);
+        "return numbers.", d->opts.discardHighReturnNumbers);
+    args.add("extra_dims", "Dimensions to write above those in point format", d->opts.extraDimSpec);
+    args.add("forward", "Dimensions to forward from LAS reader", d->opts.forwardSpec);
 
-    args.add("filesource_id", "File source ID number.", m_filesourceId,
-        decltype(m_filesourceId)(0));
-    args.add("major_version", "LAS major version", m_majorVersion,
-        decltype(m_majorVersion)(1));
-    args.add("minor_version", "LAS minor version", m_minorVersion,
-        decltype(m_minorVersion)(2));
-    args.add("dataformat_id", "Point format", m_dataformatId,
-        decltype(m_dataformatId)(3));
-    args.add("format", "Point format", m_dataformatId,
-        decltype(m_dataformatId)(3));
-    args.add("global_encoding", "Global encoding byte", m_globalEncoding,
-        decltype(m_globalEncoding)(0));
-    args.add("project_id", "Project ID", m_projectId);
-    args.add("system_id", "System ID", m_systemId,
-        decltype(m_systemId)(m_lasHeader.getSystemIdentifier()));
-    args.add("software_id", "Software ID", m_softwareId,
-        decltype(m_softwareId)(GetDefaultSoftwareId()));
-    args.add("creation_doy", "Creation day of year", m_creationDoy,
-        decltype(m_creationDoy)(doy));
-    args.add("creation_year", "Creation year", m_creationYear,
-        decltype(m_creationYear)(year));
-    args.add("pdal_metadata", "Write PDAL metadata as VLR?",
-        m_writePDALMetadata, decltype(m_writePDALMetadata)(false));
-    args.add("scale_x", "X scale factor", m_scaleX, decltype(m_scaleX)(".01"));
-    args.add("scale_y", "Y scale factor", m_scaleY, decltype(m_scaleY)(".01"));
-    args.add("scale_z", "Z scale factor", m_scaleZ, decltype(m_scaleZ)(".01"));
-    args.add("offset_x", "X offset", m_offsetX);
-    args.add("offset_y", "Y offset", m_offsetY);
-    args.add("offset_z", "Z offset", m_offsetZ);
-    args.add("vlrs", "List of VLRs to set", m_userVLRs);
+    args.add("filesource_id", "File source ID number.", d->opts.filesourceId,
+        decltype(d->opts.filesourceId)(0));
+    args.add("major_version", "LAS major version", d->opts.majorVersion,
+        decltype(d->opts.majorVersion)(1));
+    args.add("minor_version", "LAS minor version", d->opts.minorVersion,
+        decltype(d->opts.minorVersion)(2));
+    args.add("dataformat_id", "Point format", d->opts.dataformatId,
+        decltype(d->opts.dataformatId)(3));
+    args.add("format", "Point format", d->opts.dataformatId,
+        decltype(d->opts.dataformatId)(3));
+    args.add("global_encoding", "Global encoding byte", d->opts.globalEncoding,
+        decltype(d->opts.globalEncoding)(0));
+    args.add("project_id", "Project ID", d->opts.projectId);
+    args.add("system_id", "System ID", d->opts.systemId,
+        decltype(d->opts.systemId)(m_lasHeader.getSystemIdentifier()));
+    args.add("software_id", "Software ID", d->opts.softwareId,
+        decltype(d->opts.softwareId)(las::generateSoftwareId()));
+    args.add("creation_doy", "Creation day of year", d->opts.creationDoy,
+        decltype(d->opts.creationDoy)(doy));
+    args.add("creation_year", "Creation year", d->opts.creationYear,
+        decltype(d->opts.creationYear)(year));
+    args.add("pdal_metadata", "Write PDAL metadata as VLR?", d->opts.writePDALMetadata,
+        decltype(d->opts.writePDALMetadata)(false));
+    args.add("scale_x", "X scale factor", d->opts.scaleX, decltype(d->opts.scaleX)(".01"));
+    args.add("scale_y", "Y scale factor", d->opts.scaleY, decltype(d->opts.scaleY)(".01"));
+    args.add("scale_z", "Z scale factor", d->opts.scaleZ, decltype(d->opts.scaleZ)(".01"));
+    args.add("offset_x", "X offset", d->opts.offsetX);
+    args.add("offset_y", "Y offset", d->opts.offsetY);
+    args.add("offset_z", "Z offset", d->opts.offsetZ);
+    args.add("vlrs", "List of VLRs to set", d->opts.userVLRs);
 }
 
 void LasWriter::initialize()
 {
     std::string ext = FileUtils::extension(m_filename);
     ext = Utils::tolower(ext);
-    if ((ext == ".laz") && (m_compression == LasCompression::None))
+    if ((ext == ".laz") && (d->opts.compression == las::Compression::None))
     {
 #if defined(PDAL_HAVE_LASZIP)
-        m_compression = LasCompression::LasZip;
+        d->opts.compression = las::Compression::LasZip;
 #elif defined(PDAL_HAVE_LAZPERF)
-        m_compression = LasCompression::LazPerf;
+        d->opts.compression = las::Compression::LazPerf;
 #endif
     }
 
-    if (!m_aSrs.empty())
-        setSpatialReference(m_aSrs);
-    if (m_compression != LasCompression::None)
+    if (!d->opts.aSrs.empty())
+        setSpatialReference(d->opts.aSrs);
+    if (d->opts.compression != las::Compression::None)
         m_lasHeader.setCompressed(true);
 
 #if !defined(PDAL_HAVE_LASZIP)
-    if (m_compression == LasCompression::LasZip)
+    if (d->opts.compression == las::Compression::LasZip)
         throwError("Can't write LAZ output. PDAL not built with LASzip.");
 #endif
 #if !defined(PDAL_HAVE_LAZPERF)
-    if (m_compression == LasCompression::LazPerf)
+    if (d->opts.compression == las::Compression::LazPerf)
         throwError("Can't write LAZ output. PDAL not built with LAZperf.");
 #endif
 
     try
     {
-        m_extraDims = LasUtils::parse(m_extraDimSpec, true);
+        m_extraDims = las::parse(d->opts.extraDimSpec, true);
     }
-    catch (const LasUtils::error& err)
+    catch (const las::error& err)
     {
         throwError(err.what());
     }
@@ -173,9 +204,15 @@ void LasWriter::initialize()
 }
 
 
+bool LasWriter::srsOverridden() const
+{
+    return d->opts.aSrs.valid();
+}
+
+
 void LasWriter::spatialReferenceChanged(const SpatialReference&)
 {
-    if (++m_srsCnt > 1 && m_aSrs.empty())
+    if (++m_srsCnt > 1 && d->opts.aSrs.empty())
         log()->get(LogLevel::Error) << getName() <<
             ": Attempting to write '" << m_filename << "' with multiple "
             "point spatial references." << std::endl;
@@ -197,14 +234,16 @@ void LasWriter::prepared(PointTableRef table)
     if (m_extraDims.size() == 1 && m_extraDims[0].m_name == "all")
     {
         m_extraDims.clear();
-        Dimension::IdList ids = m_lasHeader.usedDims();
+        Dimension::IdList ids = las::pdrfDims(m_lasHeader.pointFormat());
         DimTypeList dimTypes = layout->dimTypes();
+        int byteOffset = 0;
         for (auto& dt : dimTypes)
-        {
             if (!Utils::contains(ids, dt.m_id))
+            {
                 m_extraDims.push_back(
-                    ExtraDim(layout->dimName(dt.m_id), dt.m_type));
-        }
+                    las::ExtraDim(layout->dimName(dt.m_id), dt.m_type, byteOffset));
+                byteOffset += Dimension::size(dt.m_type);
+            }
     }
 
     m_extraByteLen = 0;
@@ -226,7 +265,7 @@ void LasWriter::prepared(PointTableRef table)
 // Capture user-specified VLRs
 void LasWriter::addUserVlrs()
 {
-    for (const auto& v : m_userVLRs)
+    for (const auto& v : d->opts.userVLRs)
         addVlr(v);
 }
 
@@ -247,7 +286,7 @@ void LasWriter::fillForwardList()
 
     // Build the forward list, replacing special keywords with the proper
     // field names.
-    for (auto& name : m_forwardSpec)
+    for (auto& name : d->opts.forwardSpec)
     {
         if (name == "all")
         {
@@ -283,7 +322,7 @@ void LasWriter::readyTable(PointTableRef table)
 {
     m_firstPoint = true;
     m_forwardMetadata = table.privateMetadata("lasforward");
-    if(m_writePDALMetadata)
+    if(d->opts.writePDALMetadata)
     {
         MetadataNode m = table.metadata();
         addMetadataVlr(m);
@@ -346,7 +385,7 @@ void LasWriter::prepOutput(std::ostream *outStream, const SpatialReference& srs)
     if (m_lasHeader.versionEquals(1, 0))
         out << (uint16_t)0xCCDD;
     m_lasHeader.setPointOffset((uint32_t)m_ostream->tellp());
-    if (m_compression == LasCompression::LasZip)
+    if (d->opts.compression == las::Compression::LasZip)
         openCompression();
 
     // Set the point buffer size here in case we're using the streaming
@@ -524,7 +563,7 @@ void LasWriter::addExtraBytesVlr()
     std::vector<uint8_t> ebBytes;
     for (auto& dim : m_extraDims)
     {
-        ExtraBytesIf eb(dim.m_name, dim.m_dimType.m_type,
+        las::ExtraBytesIf eb(dim.m_name, dim.m_dimType.m_type,
             Dimension::description(dim.m_dimType.m_id));
         eb.appendTo(ebBytes);
     }
@@ -591,30 +630,30 @@ void LasWriter::handleHeaderForward(const std::string& s, T& headerVal,
 
 void LasWriter::handleHeaderForwards(MetadataNode& forward)
 {
-    handleHeaderForward("major_version", m_majorVersion, forward);
-    handleHeaderForward("minor_version", m_minorVersion, forward);
-    handleHeaderForward("dataformat_id", m_dataformatId, forward);
-    handleHeaderForward("filesource_id", m_filesourceId, forward);
-    handleHeaderForward("global_encoding", m_globalEncoding, forward);
-    handleHeaderForward("project_id", m_projectId, forward);
-    handleHeaderForward("system_id", m_systemId, forward);
-    handleHeaderForward("software_id", m_softwareId, forward);
-    handleHeaderForward("creation_doy", m_creationDoy, forward);
-    handleHeaderForward("creation_year", m_creationYear, forward);
+    handleHeaderForward("major_version", d->opts.majorVersion, forward);
+    handleHeaderForward("minor_version", d->opts.minorVersion, forward);
+    handleHeaderForward("dataformat_id", d->opts.dataformatId, forward);
+    handleHeaderForward("filesource_id", d->opts.filesourceId, forward);
+    handleHeaderForward("global_encoding", d->opts.globalEncoding, forward);
+    handleHeaderForward("project_id", d->opts.projectId, forward);
+    handleHeaderForward("system_id", d->opts.systemId, forward);
+    handleHeaderForward("software_id", d->opts.softwareId, forward);
+    handleHeaderForward("creation_doy", d->opts.creationDoy, forward);
+    handleHeaderForward("creation_year", d->opts.creationYear, forward);
 
-    handleHeaderForward("scale_x", m_scaleX, forward);
-    handleHeaderForward("scale_y", m_scaleY, forward);
-    handleHeaderForward("scale_z", m_scaleZ, forward);
-    handleHeaderForward("offset_x", m_offsetX, forward);
-    handleHeaderForward("offset_y", m_offsetY, forward);
-    handleHeaderForward("offset_z", m_offsetZ, forward);
+    handleHeaderForward("scale_x", d->opts.scaleX, forward);
+    handleHeaderForward("scale_y", d->opts.scaleY, forward);
+    handleHeaderForward("scale_z", d->opts.scaleZ, forward);
+    handleHeaderForward("offset_x", d->opts.offsetX, forward);
+    handleHeaderForward("offset_y", d->opts.offsetY, forward);
+    handleHeaderForward("offset_z", d->opts.offsetZ, forward);
 
-    m_scaling.m_xXform.m_scale.set(m_scaleX.val());
-    m_scaling.m_yXform.m_scale.set(m_scaleY.val());
-    m_scaling.m_zXform.m_scale.set(m_scaleZ.val());
-    m_scaling.m_xXform.m_offset.set(m_offsetX.val());
-    m_scaling.m_yXform.m_offset.set(m_offsetY.val());
-    m_scaling.m_zXform.m_offset.set(m_offsetZ.val());
+    m_scaling.m_xXform.m_scale.set(d->opts.scaleX.val());
+    m_scaling.m_yXform.m_scale.set(d->opts.scaleY.val());
+    m_scaling.m_zXform.m_scale.set(d->opts.scaleZ.val());
+    m_scaling.m_xXform.m_offset.set(d->opts.offsetX.val());
+    m_scaling.m_yXform.m_offset.set(d->opts.offsetY.val());
+    m_scaling.m_zXform.m_offset.set(d->opts.offsetZ.val());
 }
 
 /// Fill the LAS header with values as provided in options or forwarded
@@ -634,18 +673,18 @@ void LasWriter::fillHeader()
     m_lasHeader.setVlrCount(m_vlrs.size());
     m_lasHeader.setEVlrCount(m_eVlrs.size());
 
-    m_lasHeader.setPointFormat(m_dataformatId.val());
+    m_lasHeader.setPointFormat(d->opts.dataformatId.val());
     m_lasHeader.setPointLen(m_lasHeader.basePointLen() + m_extraByteLen);
-    m_lasHeader.setVersionMinor(m_minorVersion.val());
-    m_lasHeader.setCreationYear(m_creationYear.val());
-    m_lasHeader.setCreationDOY(m_creationDoy.val());
-    m_lasHeader.setSoftwareId(m_softwareId.val());
-    m_lasHeader.setSystemId(m_systemId.val());
-    m_lasHeader.setProjectId(m_projectId.val());
-    m_lasHeader.setFileSourceId(m_filesourceId.val());
+    m_lasHeader.setVersionMinor(d->opts.minorVersion.val());
+    m_lasHeader.setCreationYear(d->opts.creationYear.val());
+    m_lasHeader.setCreationDOY(d->opts.creationDoy.val());
+    m_lasHeader.setSoftwareId(d->opts.softwareId.val());
+    m_lasHeader.setSystemId(d->opts.systemId.val());
+    m_lasHeader.setProjectId(d->opts.projectId.val());
+    m_lasHeader.setFileSourceId(d->opts.filesourceId.val());
 
     // We always write a WKT VLR for version 1.4 and later.
-    uint16_t globalEncoding = m_globalEncoding.val();
+    uint16_t globalEncoding = d->opts.globalEncoding.val();
     if (m_lasHeader.versionAtLeast(1, 4))
         globalEncoding |= WKT_MASK;
     m_lasHeader.setGlobalEncoding(globalEncoding);
@@ -659,9 +698,9 @@ void LasWriter::fillHeader()
 void LasWriter::readyCompression()
 {
     deleteVlr(LASZIP_USER_ID, LASZIP_RECORD_ID);
-    if (m_compression == LasCompression::LasZip)
+    if (d->opts.compression == las::Compression::LasZip)
         readyLasZipCompression();
-    else if (m_compression == LasCompression::LazPerf)
+    else if (d->opts.compression == las::Compression::LazPerf)
         readyLazPerfCompression();
 }
 
@@ -766,12 +805,12 @@ bool LasWriter::processOne(PointRef& point)
 // called we know we're in stream mode.
 bool LasWriter::processPoint(PointRef& point)
 {
-    if (m_compression == LasCompression::LasZip)
+    if (d->opts.compression == las::Compression::LasZip)
     {
         if (!writeLasZipBuf(point))
             return false;
     }
-    else if (m_compression == LasCompression::LazPerf)
+    else if (d->opts.compression == las::Compression::LazPerf)
     {
         LeInserter ostream(m_pointBuf.data(), m_pointBuf.size());
         if (!fillPointBuf(point, ostream))
@@ -804,7 +843,7 @@ void LasWriter::writeView(const PointViewPtr view)
 
     // Since we use the LASzip API, we can't benefit from building
     // a buffer of multiple points, so loop.
-    if (m_compression == LasCompression::LasZip)
+    if (d->opts.compression == las::Compression::LasZip)
     {
         PointRef point(*view, 0);
         for (PointId idx = 0; idx < view->size(); ++idx)
@@ -829,7 +868,7 @@ void LasWriter::writeView(const PointViewPtr view)
             idx += filled;
             remaining -= filled;
 
-            if (m_compression == LasCompression::LazPerf)
+            if (d->opts.compression == las::Compression::LazPerf)
                 writeLazPerfBuf(m_pointBuf.data(), pointLen, filled);
             else
                 m_ostream->write(m_pointBuf.data(), filled * pointLen);
@@ -1142,9 +1181,9 @@ void LasWriter::doneFile()
 
 void LasWriter::finishOutput()
 {
-    if (m_compression == LasCompression::LasZip)
+    if (d->opts.compression == las::Compression::LasZip)
         finishLasZipOutput();
-    else if (m_compression == LasCompression::LazPerf)
+    else if (d->opts.compression == las::Compression::LazPerf)
         finishLazPerfOutput();
 
     log()->get(LogLevel::Debug) << "Wrote " <<

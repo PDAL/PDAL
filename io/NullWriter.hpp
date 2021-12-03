@@ -35,17 +35,20 @@
 #pragma once
 
 #include <pdal/Writer.hpp>
+#include <pdal/Streamable.hpp>
 
 namespace pdal
 {
 
-class PDAL_DLL NullWriter : public Writer
+class PDAL_DLL NullWriter : public Writer, public Streamable
 {
 public:
     std::string getName() const;
 private:
     virtual void write(const PointViewPtr /*view*/)
         {}
+    virtual bool processOne(PointRef& p)
+        { return true; }
 };
 
 } // namespace pdal

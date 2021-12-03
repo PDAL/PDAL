@@ -74,8 +74,8 @@ void GDALWriter::addArgs(ProgramArgs& args)
         m_options);
     args.add("output_type", "Statistics produced ('min', 'max', 'mean', "
         "'idw', 'count', 'stdev' or 'all')", m_outputTypeString, {"all"} );
-    args.add("data_type", "Data type for output grid (\"int8\", \"uint64\", "
-        "\"float\", etc.)", m_dataType, Dimension::Type::Double);
+    args.add("data_type", "Data type for output grid ('int8', 'uint64', "
+        "'float', etc.)", m_dataType, Dimension::Type::Double);
     args.add("window_size", "Cell distance for fallback interpolation",
         m_windowSize);
     // Nan is a sentinal value to say that no value was set for nodata.

@@ -41,7 +41,6 @@
 #include "HeaderVal.hpp"
 #include "LasError.hpp"
 #include "LasHeader.hpp"
-#include "LasUtils.hpp"
 #include "LasSummaryData.hpp"
 
 #ifdef PDAL_HAVE_LASZIP
@@ -58,6 +57,11 @@ class NitfWriter;
 class GeotiffSupport;
 class LazPerfVlrCompressor;
 
+namespace las
+{
+    struct ExtraDim;
+}
+
 struct VlrOptionInfo
 {
     std::string m_name;
@@ -71,6 +75,10 @@ class PDAL_DLL LasWriter : public FlexWriter, public Streamable
 {
     friend class LasTester;
     friend class NitfWriter;
+
+    struct Options;
+    struct Private;
+
 public:
     std::string getName() const;
 
@@ -82,6 +90,8 @@ protected:
     void finishOutput();
 
 private:
+    std::unique_ptr<Private> d;
+
     LasHeader m_lasHeader;
     std::unique_ptr<LasSummaryData> m_summaryData;
     laszip_POINTER m_laszip;
@@ -92,42 +102,16 @@ private:
     std::ostream *m_ostream;
     std::vector<LasVLR> m_vlrs;
     std::vector<ExtLasVLR> m_eVlrs;
-    StringList m_extraDimSpec;
-    std::vector<ExtraDim> m_extraDims;
+    std::vector<las::ExtraDim> m_extraDims;
     uint16_t m_extraByteLen;
     SpatialReference m_srs;
     std::string m_curFilename;
-    StringList m_forwardSpec;
     std::set<std::string> m_forwards;
     bool m_forwardVlrs = false;
-    LasCompression m_compression;
     std::vector<char> m_pointBuf;
-    SpatialReference m_aSrs;
     int m_srsCnt;
 
-    NumHeaderVal<uint8_t, 1, 1> m_majorVersion;
-    NumHeaderVal<uint8_t, 1, 4> m_minorVersion;
-    NumHeaderVal<uint8_t, 0, 10> m_dataformatId;
-    // MSVC doesn't see numeric_limits::max() as constexpr so doesn't allow
-    // it as defaults for templates.  Remove when possible.
-    NumHeaderVal<uint16_t, 0, 65535> m_filesourceId;
-    NumHeaderVal<uint16_t, 0, 31> m_globalEncoding;
-    UuidHeaderVal m_projectId;
-    StringHeaderVal<32> m_systemId;
-    StringHeaderVal<32> m_softwareId;
-    NumHeaderVal<uint16_t, 0, 366> m_creationDoy;
-    // MSVC doesn't see numeric_limits::max() as constexpr so doesn't allow
-    // them as defaults for templates.  Remove when possible.
-    NumHeaderVal<uint16_t, 0, 65535> m_creationYear;
-    StringHeaderVal<0> m_scaleX;
-    StringHeaderVal<0> m_scaleY;
-    StringHeaderVal<0> m_scaleZ;
-    StringHeaderVal<0> m_offsetX;
-    StringHeaderVal<0> m_offsetY;
-    StringHeaderVal<0> m_offsetZ;
     MetadataNode m_forwardMetadata;
-    bool m_writePDALMetadata;
-    std::vector<ExtLasVLR> m_userVLRs;
     bool m_firstPoint;
 
     virtual void addArgs(ProgramArgs& args);
@@ -136,8 +120,7 @@ private:
     virtual void readyTable(PointTableRef table);
     virtual void readyFile(const std::string& filename,
         const SpatialReference& srs);
-    virtual bool srsOverridden() const
-        { return m_aSrs.valid(); }
+    virtual bool srsOverridden() const;
     void prerunFile(const PointViewSet& pvSet);
     virtual void writeView(const PointViewPtr view);
     virtual bool processOne(PointRef& point);

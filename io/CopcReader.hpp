@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2018, Connor Manning (connor@hobu.co)
+* Copyright (c) 2021, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -39,34 +39,42 @@
 #include <memory>
 #include <unordered_set>
 
-#include <pdal/JsonFwd.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
 #include <pdal/util/Bounds.hpp>
 
-using StringMap = std::map<std::string, std::string>;
+namespace lazperf
+{
+    struct header14;
+    struct vlr_header;
+    struct copc_info_vlr;
+}
 
 namespace pdal
 {
 
-namespace ept
+using StringMap = std::map<std::string, std::string>;
+
+namespace las
 {
-    class Connector;
-    class EptInfo;
-    class Key;
-    class TileContents;
-    struct Overlap;
-    using Hierarchy = std::unordered_set<Overlap>;
+    class VlrCatalog;
 }
 
-class PDAL_DLL EptReader : public Reader, public Streamable
+namespace copc
 {
-    FRIEND_TEST(EptReaderTest, getRemoteType);
-    FRIEND_TEST(EptReaderTest, getCoercedType);
+    class Connector;
+    class Key;
+    class Tile;
+    struct Entry;
+    class Hierarchy;
+    using HierarchyPage = Hierarchy;
+}
 
+class PDAL_DLL CopcReader : public Reader, public Streamable
+{
 public:
-    EptReader();
-    virtual ~EptReader();
+    CopcReader();
+    virtual ~CopcReader();
     std::string getName() const override;
 
 private:
@@ -74,45 +82,35 @@ private:
     virtual void initialize() override;
     virtual QuickInfo inspect() override;
     virtual void addDimensions(PointLayoutPtr layout) override;
-    virtual void ready(PointTableRef table) override;
+    virtual void ready(PointTableRef) override;
     virtual point_count_t read(PointViewPtr view, point_count_t count) override;
     virtual bool processOne(PointRef& point) override;
+    virtual void done(PointTableRef) override;
 
-    // If argument "origin" is specified, this function will clip the query
-    // bounds to the bounds of the specified origin and set m_queryOriginId to
-    // the selected OriginId value.  If the selected origin is not found, throw.
-    void handleOriginQuery();
     void setForwards(StringMap& headers, StringMap& query);
+    std::vector<char> fetch(uint64_t offset, int32_t size);
+    void fetchHeader();
+    void fetchSrsVlr(const las::VlrCatalog& catalog);
+    void fetchEbVlr(const las::VlrCatalog& catalog);
+    void validateHeader(const lazperf::header14& h);
+    void validateVlrInfo(const lazperf::vlr_header& h, const lazperf::copc_info_vlr& i);
+    void createSpatialFilters();
 
-    // Aggregate all EPT keys overlapping our query bounds and their number of
-    // points from a walk through the hierarchy.  Each of these keys will be
-    // downloaded during the 'read' section.
-    void overlaps();
-    void overlaps(ept::Hierarchy& target, const NL::json& current, const ept::Key& key);
+    void loadHierarchy();
+    void loadHierarchy(copc::Hierarchy& hierarchy, const copc::HierarchyPage& page,
+        const copc::Entry& entry);
     bool hasSpatialFilter() const;
-    bool passesSpatialFilter(const BOX3D& tileBounds) const;
-    void process(PointViewPtr dstView, const ept::TileContents& tile, point_count_t count);
-    bool processPoint(PointRef& dst, const ept::TileContents& tile);
-    void load(const ept::Overlap& overlap);
-    void checkTile(const ept::TileContents& tile);
+    bool passesFilter(const copc::Key& key) const;
+    bool passesSpatialFilter(const copc::Key& key) const;
+    void process(PointViewPtr dstView, const copc::Tile& tile, point_count_t count);
+    bool processPoint(const char *inbuf, PointRef& dst);
+    void load(const copc::Entry& entry);
+    void checkTile(const copc::Tile& tile);
 
     struct Args;
     std::unique_ptr<Args> m_args;
     struct Private;
     std::unique_ptr<Private> m_p;
-
-    uint64_t m_tileCount;
-    int64_t m_queryOriginId = -1;
-
-    uint64_t m_depthEnd = 0;    // Zero indicates selection of all depths.
-    uint64_t m_hierarchyStep = 0;
-
-    Dimension::Id m_nodeIdDim = Dimension::Id::Unknown;
-    Dimension::Id m_pointIdDim = Dimension::Id::Unknown;
-
-    ArtifactManager *m_artifactMgr;
-    PointId m_pointId = 0;
-    uint64_t m_nodeId;
 };
 
 } // namespace pdal
