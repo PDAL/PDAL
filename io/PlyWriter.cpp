@@ -354,9 +354,9 @@ void PlyWriter::doneFile()
     for (auto& v : m_views)
         pointCount += v->size();
 
-    if (pointCount > std::numeric_limits<uint32_t>::max())
+    if (pointCount > (std::numeric_limits<uint32_t>::max)())
         throwError("Can't write PLY file.  Only " +
-            std::to_string(std::numeric_limits<uint32_t>::max()) +
+            std::to_string((std::numeric_limits<uint32_t>::max)()) +
             " points supported.");
 
     m_stream = Utils::createFile(m_curFilename, true);
