@@ -36,6 +36,7 @@
 
 #include <stdio.h>
 #include <pdal/pdal_test_main.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 #include "Support.hpp"
 
@@ -66,10 +67,10 @@ Options getTileDBOptions()
     return options;
 }
 
-size_t count = 100;
+const size_t count = 100;
 BOX4D rdr_bounds(0, 0, 0, 0, 10, 10, 10, 10);
 
-class TDBWriterTimeDimTest : public ::testing::Test
+class TileDBWriterTimeDimTest : public ::testing::Test
 {
 protected:
     virtual void SetUp()
@@ -96,17 +97,14 @@ protected:
     XYZTimeFauxReader m_reader2;
 };
 
-TEST_F(TDBWriterTimeDimTest, test_dims_no_tm_and_use_tm)
+TEST_F(TileDBWriterTimeDimTest, test_dims_no_tm_and_use_tm)
 {
     tiledb::Context ctx;
-    tiledb::VFS vfs(ctx);
 
     std::string out_path1 = Support::temppath("xyztm_tdb_no_tm");
 
-    if (vfs.is_dir(out_path1))
-    {
-        vfs.remove_dir(out_path1);
-    }
+    if (FileUtils::directoryExists(out_path1))
+        FileUtils::deleteDirectory(out_path1);
 
     Options options1 = getTileDBOptions();
     options1.add("array_name", out_path1);
@@ -115,7 +113,7 @@ TEST_F(TDBWriterTimeDimTest, test_dims_no_tm_and_use_tm)
     writer1.setOptions(options1);
     writer1.setInput(m_reader);
 
-    FixedPointTable table1(100);
+    FixedPointTable table1(count);
     writer1.prepare(table1);
     writer1.execute(table1);
 
@@ -126,10 +124,8 @@ TEST_F(TDBWriterTimeDimTest, test_dims_no_tm_and_use_tm)
 
     std::string out_path2 = Support::temppath("xyztm_tdb_use_tm");
 
-    if (vfs.is_dir(out_path2))
-    {
-        vfs.remove_dir(out_path2);
-    }
+    if (FileUtils::directoryExists(out_path2))
+        FileUtils::deleteDirectory(out_path2);
 
     Options options2 = getTileDBOptions();
     options2.add("array_name", out_path2);
@@ -139,7 +135,7 @@ TEST_F(TDBWriterTimeDimTest, test_dims_no_tm_and_use_tm)
     writer2.setOptions(options2);
     writer2.setInput(m_reader);
 
-    FixedPointTable table2(100);
+    FixedPointTable table2(count);
     writer2.prepare(table2);
     writer2.execute(table2);
 
@@ -163,16 +159,13 @@ TEST_F(TDBWriterTimeDimTest, test_dims_no_tm_and_use_tm)
     }
 }
 
-TEST_F(TDBWriterTimeDimTest, use_time_synonym)
+TEST_F(TileDBWriterTimeDimTest, use_time_synonym)
 {
     tiledb::Context ctx;
-    tiledb::VFS vfs(ctx);
     std::string out_path = Support::temppath("xyztm_tdb_array");
 
-    if (vfs.is_dir(out_path))
-    {
-        vfs.remove_dir(out_path);
-    }
+    if (FileUtils::directoryExists(out_path))
+        FileUtils::deleteDirectory(out_path);
 
     Options options = getTileDBOptions();
     options.add("array_name", out_path);
@@ -182,7 +175,7 @@ TEST_F(TDBWriterTimeDimTest, use_time_synonym)
     writer.setOptions(options);
     writer.setInput(m_reader);
 
-    FixedPointTable table(100);
+    FixedPointTable table(count);
     writer.prepare(table);
     writer.execute(table);
 
@@ -192,27 +185,25 @@ TEST_F(TDBWriterTimeDimTest, use_time_synonym)
     EXPECT_EQ(domain.at(3).first, "GpsTime");
 }
 
-TEST_F(TDBWriterTimeDimTest, write_with_time)
+TEST_F(TileDBWriterTimeDimTest, write_with_time)
 {
     tiledb::Context ctx;
-    tiledb::VFS vfs(ctx);
     std::string out_path = Support::temppath("xyztm_tdb_arr_write");
+    int result_num = 0;
 
     Options options = getTileDBOptions();
     options.add("array_name", out_path);
     options.add("chunk_size", 80);
     options.add("use_time_dim", true);
 
-    if (vfs.is_dir(out_path))
-    {
-        vfs.remove_dir(out_path);
-    }
+    if (FileUtils::directoryExists(out_path))
+        FileUtils::deleteDirectory(out_path);
 
     TileDBWriter writer;
     writer.setOptions(options);
     writer.setInput(m_reader);
 
-    FixedPointTable table(100);
+    FixedPointTable table(count);
     writer.prepare(table);
     writer.execute(table);
 
@@ -229,13 +220,31 @@ TEST_F(TDBWriterTimeDimTest, write_with_time)
     tiledb::Query q(ctx, array, TILEDB_READ);
     q.set_subarray(subarray);
 
-    auto max_el = array.max_buffer_elements(subarray);
-    std::vector<double> coords(max_el[TILEDB_COORDS].second);
+#if TILEDB_VERSION_MAJOR == 1
+    std::vector<double> coords(count  * 4);
     q.set_coordinates(coords);
+#else
+    std::vector<double> xs(count);
+    std::vector<double> ys(count);
+    std::vector<double> zs(count);
+    std::vector<double> ts(count);
+    
+    q.set_buffer("X", xs)
+        .set_buffer("Y", ys)
+        .set_buffer("Z", zs)
+        .set_buffer("GpsTime", ts);
+#endif
+
     q.submit();
     array.close();
 
-    EXPECT_EQ(m_reader.count() * 4, coords.size());
+#if TILEDB_VERSION_MAJOR == 1
+        result_num = ((int)q.result_buffer_elements()["__coords"].second / 4);
+#else
+        result_num = (int)q.result_buffer_elements()["X"].second;
+#endif
+
+    EXPECT_EQ(m_reader.count(), result_num);
 
     ASSERT_DOUBLE_EQ(subarray[0], 0.0);
     ASSERT_DOUBLE_EQ(subarray[2], 0.0);
@@ -247,27 +256,26 @@ TEST_F(TDBWriterTimeDimTest, write_with_time)
     ASSERT_DOUBLE_EQ(subarray[7], 10.0);
 }
 
-TEST_F(TDBWriterTimeDimTest, write_append_with_time)
+TEST_F(TileDBWriterTimeDimTest, write_append_with_time)
 {
     tiledb::Context ctx;
-    tiledb::VFS vfs(ctx);
     std::string out_path = Support::temppath("xyztm_tdb_test_append");
+    int result_num = 0;
 
     Options options = getTileDBOptions();
     options.add("array_name", out_path);
     options.add("chunk_size", 80);
     options.add("use_time_dim", true);
 
-    if (vfs.is_dir(out_path))
-    {
-        vfs.remove_dir(out_path);
-    }
+
+    if (FileUtils::directoryExists(out_path))
+        FileUtils::deleteDirectory(out_path);
 
     TileDBWriter writer;
     writer.setOptions(options);
     writer.setInput(m_reader);
 
-    FixedPointTable table(100);
+    FixedPointTable table(count);
     writer.prepare(table);
     writer.execute(table);
 
@@ -276,7 +284,7 @@ TEST_F(TDBWriterTimeDimTest, write_append_with_time)
     append_writer.setOptions(options);
     append_writer.setInput(m_reader2);
 
-    FixedPointTable table2(100);
+    FixedPointTable table2(count);
     append_writer.prepare(table2);
     append_writer.execute(table2);
 
@@ -293,26 +301,41 @@ TEST_F(TDBWriterTimeDimTest, write_append_with_time)
     tiledb::Query q(ctx, array, TILEDB_READ);
     q.set_subarray(subarray);
 
-    auto max_el = array.max_buffer_elements(subarray);
-    std::vector<double> coords(max_el[TILEDB_COORDS].second);
+#if TILEDB_VERSION_MAJOR == 1
+    std::vector<double> coords(count  * 2 * 4);
     q.set_coordinates(coords);
+#else
+    std::vector<double> xs(count * 2);
+    std::vector<double> ys(count * 2);
+    std::vector<double> zs(count * 2);
+    std::vector<double> ts(count * 2);
+    
+    q.set_buffer("X", xs)
+        .set_buffer("Y", ys)
+        .set_buffer("Z", zs)
+        .set_buffer("GpsTime", ts);
+#endif
+
     q.submit();
     array.close();
 
-    EXPECT_EQ((m_reader.count() * 4) + (m_reader2.count() * 4), coords.size());
+#if TILEDB_VERSION_MAJOR == 1
+    result_num = ((int)q.result_buffer_elements()["__coords"].second / 4) * 2;
+#else
+    result_num = (int)q.result_buffer_elements()["X"].second;
+#endif
+    EXPECT_EQ(m_reader.count() + m_reader2.count(), result_num);
 }
 
-TEST_F(TDBWriterTimeDimTest, write_options_with_time_dim)
+TEST_F(TileDBWriterTimeDimTest, write_options_with_time_dim)
 {
     tiledb::Context ctx;
-    tiledb::VFS vfs(ctx);
 
     std::string out_path = Support::temppath("xyztm_tdb_writer_options");
 
-    if (vfs.is_dir(out_path))
-    {
-        vfs.remove_dir(out_path);
-    }
+
+    if (FileUtils::directoryExists(out_path))
+        FileUtils::deleteDirectory(out_path);
 
     Options options = getTileDBOptions();
     options.add("array_name", data_path);
@@ -322,7 +345,7 @@ TEST_F(TDBWriterTimeDimTest, write_options_with_time_dim)
     writer1.setOptions(options);
     writer1.setInput(m_reader);
 
-    FixedPointTable table1(100);
+    FixedPointTable table1(count);
     writer1.prepare(table1);
     writer1.execute(table1);
 
@@ -340,7 +363,7 @@ TEST_F(TDBWriterTimeDimTest, write_options_with_time_dim)
     writer2.setOptions(writer_options);
     writer2.setInput(reader);
 
-    FixedPointTable table2(100);
+    FixedPointTable table2(count);
     writer2.prepare(table2);
     writer2.execute(table2);
 
@@ -349,17 +372,14 @@ TEST_F(TDBWriterTimeDimTest, write_options_with_time_dim)
     EXPECT_EQ(domain.size(), 4);
 }
 
-TEST_F(TDBWriterTimeDimTest, time_first_or_last)
+TEST_F(TileDBWriterTimeDimTest, time_first_or_last)
 {
     tiledb::Context ctx;
-    tiledb::VFS vfs(ctx);
 
     std::string out_path1 = Support::temppath("xyztm_tm_first");
 
-    if (vfs.is_dir(out_path1))
-    {
-        vfs.remove_dir(out_path1);
-    }
+    if (FileUtils::directoryExists(out_path1))
+        FileUtils::deleteDirectory(out_path1);
 
     Options options1 = getTileDBOptions();
     options1.add("array_name", out_path1);
@@ -370,7 +390,7 @@ TEST_F(TDBWriterTimeDimTest, time_first_or_last)
     writer1.setOptions(options1);
     writer1.setInput(m_reader);
 
-    FixedPointTable table1(100);
+    FixedPointTable table1(count);
     writer1.prepare(table1);
     writer1.execute(table1);
 
@@ -382,10 +402,9 @@ TEST_F(TDBWriterTimeDimTest, time_first_or_last)
 
     std::string out_path2 = Support::temppath("xyztm_tm_last");
 
-    if (vfs.is_dir(out_path2))
-    {
-        vfs.remove_dir(out_path2);
-    }
+
+    if (FileUtils::directoryExists(out_path2))
+        FileUtils::deleteDirectory(out_path2);
 
     Options options2 = getTileDBOptions();
     options2.add("array_name", out_path2);
@@ -395,7 +414,7 @@ TEST_F(TDBWriterTimeDimTest, time_first_or_last)
     writer2.setOptions(options2);
     writer2.setInput(m_reader);
 
-    FixedPointTable table2(100);
+    FixedPointTable table2(count);
     writer2.prepare(table2);
     writer2.execute(table2);
 
@@ -406,17 +425,16 @@ TEST_F(TDBWriterTimeDimTest, time_first_or_last)
     EXPECT_EQ(last_dim_name, "GpsTime");
 }
 
-TEST_F(TDBWriterTimeDimTest, append_write_with_time)
+#if TILEDB_VERSION_MAJOR > 1
+TEST_F(TileDBWriterTimeDimTest, append_write_with_time)
 {
     tiledb::Context ctx;
-    tiledb::VFS vfs(ctx);
+    int result_num = 0;
 
     std::string out_path = Support::temppath("xyztm_append");
 
-    if (vfs.is_dir(out_path))
-    {
-        vfs.remove_dir(out_path);
-    }
+    if (FileUtils::directoryExists(out_path))
+        FileUtils::deleteDirectory(out_path);
 
     Options options1 = getTileDBOptions();
     options1.add("array_name", out_path);
@@ -426,12 +444,12 @@ TEST_F(TDBWriterTimeDimTest, append_write_with_time)
     writer1.setOptions(options1);
     writer1.setInput(m_reader);
 
-    FixedPointTable table1(100);
+    FixedPointTable table1(count);
     writer1.prepare(table1);
     writer1.execute(table1);
 
     Options reader_options;
-    reader_options.add("count", 100);
+    reader_options.add("count", count);
     reader_options.add("xyz_mode", "ramp");
     reader_options.add("bounds", rdr_bounds);
     reader_options.add("density", 2.0);
@@ -448,7 +466,7 @@ TEST_F(TDBWriterTimeDimTest, append_write_with_time)
     writer2.setOptions(options2);
     writer2.setInput(reader);
 
-    FixedPointTable table2(100);
+    FixedPointTable table2(count);
     writer2.prepare(table2);
     writer2.execute(table2);
 
@@ -462,16 +480,26 @@ TEST_F(TDBWriterTimeDimTest, append_write_with_time)
         subarray.push_back(kv.second.second);
     }
 
-    auto max_el = array.max_buffer_elements(subarray);
-    std::vector<double> coords(max_el[TILEDB_COORDS].second);
-
-    EXPECT_EQ(coords.size(), (reader.count() * 4) + (m_reader.count() * 4));
-
     tiledb::Query q(ctx, array, TILEDB_READ);
     q.set_subarray(subarray);
-    q.set_coordinates(coords);
+
+    std::vector<double> xs(count * 2);
+    std::vector<double> ys(count * 2);
+    std::vector<double> zs(count * 2);
+    std::vector<double> ts(count * 2);
+    
+    q.set_buffer("X", xs)
+        .set_buffer("Y", ys)
+        .set_buffer("Z", zs)
+        .set_buffer("GpsTime", ts);
+
     q.submit();
     array.close();
+
+    result_num = (int)q.result_buffer_elements()["X"].second;
+
+    EXPECT_EQ(result_num, reader.count() + m_reader.count());
 }
+#endif
 
 }
