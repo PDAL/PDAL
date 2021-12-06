@@ -60,7 +60,7 @@ static StaticPluginInfo const s_info
 CREATE_STATIC_STAGE(OGRWriter, s_info)
 
 OGRWriter::OGRWriter() : m_driver(nullptr), m_ds(nullptr), m_layer(nullptr),
-    m_feature(nullptr)
+    m_feature(nullptr), m_curCount(0), m_measureDim(Dimension::Id::Unknown)
 {}
 
 
@@ -122,6 +122,7 @@ void OGRWriter::readyTable(PointTableRef table)
 void OGRWriter::readyFile(const std::string& filename,
     const SpatialReference& srs)
 {
+    m_curCount = 0;
     m_outputFilename = filename;
     m_ds = m_driver->Create(filename.data(), 0, 0, 0, GDT_Unknown, nullptr);
     if (!m_ds)
@@ -159,6 +160,7 @@ bool OGRWriter::processOne(PointRef& point)
     OGRPoint pt(x, y, z);
     if (m_measureDim != Dimension::Id::Unknown)
         pt.setM(m);
+    
     m_curCount++;
 
     if (m_multiCount > 1)
