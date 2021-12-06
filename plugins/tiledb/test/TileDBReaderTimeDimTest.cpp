@@ -201,10 +201,10 @@ TEST_F(TileDBReaderTimeDimTest, read_4d)
     std::vector<double> zs(count);
     std::vector<double> ts(count);
     
-    q.set_data_buffer("X", xs)
-        .set_data_buffer("Y", ys)
-        .set_data_buffer("Z", zs)
-        .set_data_buffer("GpsTime", ts);
+    q.set_buffer("X", xs)
+        .set_buffer("Y", ys)
+        .set_buffer("Z", zs)
+        .set_buffer("GpsTime", ts);
 #endif
 
     q.submit();

@@ -229,10 +229,10 @@ TEST_F(TileDBWriterTimeDimTest, write_with_time)
     std::vector<double> zs(count);
     std::vector<double> ts(count);
     
-    q.set_data_buffer("X", xs)
-        .set_data_buffer("Y", ys)
-        .set_data_buffer("Z", zs)
-        .set_data_buffer("GpsTime", ts);
+    q.set_buffer("X", xs)
+        .set_buffer("Y", ys)
+        .set_buffer("Z", zs)
+        .set_buffer("GpsTime", ts);
 #endif
 
     q.submit();
@@ -310,10 +310,10 @@ TEST_F(TileDBWriterTimeDimTest, write_append_with_time)
     std::vector<double> zs(count * 2);
     std::vector<double> ts(count * 2);
     
-    q.set_data_buffer("X", xs)
-        .set_data_buffer("Y", ys)
-        .set_data_buffer("Z", zs)
-        .set_data_buffer("GpsTime", ts);
+    q.set_buffer("X", xs)
+        .set_buffer("Y", ys)
+        .set_buffer("Z", zs)
+        .set_buffer("GpsTime", ts);
 #endif
 
     q.submit();
@@ -488,10 +488,10 @@ TEST_F(TileDBWriterTimeDimTest, append_write_with_time)
     std::vector<double> zs(count * 2);
     std::vector<double> ts(count * 2);
     
-    q.set_data_buffer("X", xs)
-        .set_data_buffer("Y", ys)
-        .set_data_buffer("Z", zs)
-        .set_data_buffer("GpsTime", ts);
+    q.set_buffer("X", xs)
+        .set_buffer("Y", ys)
+        .set_buffer("Z", zs)
+        .set_buffer("GpsTime", ts);
 
     q.submit();
     array.close();
