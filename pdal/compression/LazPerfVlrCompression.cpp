@@ -317,7 +317,7 @@ private:
         if (chunk == m_chunks.end() || nextChunk == m_chunks.end())
             return false;
 
-        m_chunkPointsTotal = nextChunk->count - chunk->count;
+        m_chunkPointsTotal = (int)(nextChunk->count - chunk->count);
         return true;
     }
 
