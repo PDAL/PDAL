@@ -157,7 +157,7 @@ std::string PlyWriter::getType(Dimension::Type type) const
 }
 
 
-void PlyWriter::writeHeader(PointLayoutPtr layout, point_count_t pointCount) const
+void PlyWriter::writeHeader(PointLayoutPtr layout, point_count_t pointCount, point_count_t faceCount) const
 {
     *m_stream << "ply" << std::endl;
     *m_stream << "format " << m_format << " 1.0" << std::endl;
@@ -174,7 +174,7 @@ void PlyWriter::writeHeader(PointLayoutPtr layout, point_count_t pointCount) con
     }
     if (m_faces)
     {
-        *m_stream << "element face " << faceCount() << std::endl;
+        *m_stream << "element face " << faceCount << std::endl;
         if (m_sizedTypes)
             *m_stream << "property list uint8 uint32 vertex_indices";
         else
@@ -351,8 +351,14 @@ void PlyWriter::writeTriangle(const Triangle& t, size_t offset)
 void PlyWriter::doneFile()
 {
     point_count_t pointCount = 0;
+    point_count_t faceCount = 0;
     for (auto& v : m_views)
+    {
         pointCount += v->size();
+        TriangularMesh* mesh = v->mesh();
+        if (mesh)
+            faceCount += mesh->size();
+    }
 
     if (pointCount > (std::numeric_limits<uint32_t>::max)())
         throwError("Can't write PLY file.  Only " +
@@ -363,7 +369,7 @@ void PlyWriter::doneFile()
     if (!m_stream)
         throwError("Couldn't open file '" + m_curFilename + "' for output.");
 
-    writeHeader(m_layout, pointCount);
+    writeHeader(m_layout, pointCount, faceCount);
     for (auto& v : m_views)
     {
         PointRef point(*v, 0);

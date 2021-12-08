@@ -65,7 +65,7 @@ private:
     virtual void doneFile();
 
     std::string getType(Dimension::Type type) const;
-    void writeHeader(PointLayoutPtr layout, point_count_t pointCount) const;
+    void writeHeader(PointLayoutPtr layout, point_count_t pointCount, point_count_t faceCount) const;
     void writeValue(PointRef& point, Dimension::Id dim, Dimension::Type type);
     void writePoint(PointRef& point, PointLayoutPtr layout);
     void writeTriangle(const Triangle& t, size_t offset);

@@ -272,23 +272,39 @@ TEST(PlyWriter, flex)
     table.layout()->registerDim(Dimension::Id::Z);
 
     PointViewPtr v1(new PointView(table));
+    v1->setField(Dimension::Id::X, 0, 1);
+    v1->setField(Dimension::Id::Y, 0, 1);
+    v1->setField(Dimension::Id::Z, 0, 1);
+
     PointViewPtr v2(new PointView(table));
+    v2->setField(Dimension::Id::X, 0, 1);
+    v2->setField(Dimension::Id::Y, 0, 1);
+    v2->setField(Dimension::Id::Z, 0, 2);
+
+    v2->setField(Dimension::Id::X, 1, 2);
+    v2->setField(Dimension::Id::Y, 1, 1);
+    v2->setField(Dimension::Id::Z, 1, 2);
+
     PointViewPtr v3(new PointView(table));
+    v3->setField(Dimension::Id::X, 0, 1);
+    v3->setField(Dimension::Id::Y, 0, 1);
+    v3->setField(Dimension::Id::Z, 0, 3);
+
+    v3->setField(Dimension::Id::X, 1, 2);
+    v3->setField(Dimension::Id::Y, 1, 1);
+    v3->setField(Dimension::Id::Z, 1, 3);
+
+    v3->setField(Dimension::Id::X, 2, 1);
+    v3->setField(Dimension::Id::Y, 2, 2);
+    v3->setField(Dimension::Id::Z, 2, 3);
+
+    TriangularMesh* mesh = v3->createMesh("foo");
+    mesh->add(0, 1, 2);
 
     std::vector<PointViewPtr> vs;
     vs.push_back(v1);
     vs.push_back(v2);
     vs.push_back(v3);
-
-    for (PointId i = 0; i < vs.size(); ++i)
-    {
-        for (PointId j=0; j<=i; ++j)
-        {
-            vs[i]->setField(Dimension::Id::X, j, 10);
-            vs[i]->setField(Dimension::Id::Y, j, 10);
-            vs[i]->setField(Dimension::Id::Z, j, 1);
-        }
-    }
 
     for (size_t i = 0; i < outname.size(); ++i)
         FileUtils::deleteFile(Support::temppath(outname[i]));
@@ -300,6 +316,7 @@ TEST(PlyWriter, flex)
 
     Options writerOps;
     writerOps.add("filename", Support::temppath("test_#.ply"));
+    writerOps.add("faces", true);
 
     PlyWriter writer;
     writer.setOptions(writerOps);
@@ -337,23 +354,39 @@ TEST(PlyWriter, flex2)
     table.layout()->registerDim(Dimension::Id::Z);
 
     PointViewPtr v1(new PointView(table));
+    v1->setField(Dimension::Id::X, 0, 1);
+    v1->setField(Dimension::Id::Y, 0, 1);
+    v1->setField(Dimension::Id::Z, 0, 1);
+
     PointViewPtr v2(new PointView(table));
+    v2->setField(Dimension::Id::X, 0, 1);
+    v2->setField(Dimension::Id::Y, 0, 1);
+    v2->setField(Dimension::Id::Z, 0, 2);
+
+    v2->setField(Dimension::Id::X, 1, 2);
+    v2->setField(Dimension::Id::Y, 1, 1);
+    v2->setField(Dimension::Id::Z, 1, 2);
+
     PointViewPtr v3(new PointView(table));
+    v3->setField(Dimension::Id::X, 0, 1);
+    v3->setField(Dimension::Id::Y, 0, 1);
+    v3->setField(Dimension::Id::Z, 0, 3);
+
+    v3->setField(Dimension::Id::X, 1, 2);
+    v3->setField(Dimension::Id::Y, 1, 1);
+    v3->setField(Dimension::Id::Z, 1, 3);
+
+    v3->setField(Dimension::Id::X, 2, 1);
+    v3->setField(Dimension::Id::Y, 2, 2);
+    v3->setField(Dimension::Id::Z, 2, 3);
+
+    TriangularMesh* mesh = v3->createMesh("foo");
+    mesh->add(0, 1, 2);
 
     std::vector<PointViewPtr> vs;
     vs.push_back(v1);
     vs.push_back(v2);
     vs.push_back(v3);
-
-    for (PointId i = 0; i < vs.size(); ++i)
-    {
-        for (PointId j = 0; j <= i; ++j)
-        {
-            vs[i]->setField(Dimension::Id::X, j, 10);
-            vs[i]->setField(Dimension::Id::Y, j, 10);
-            vs[i]->setField(Dimension::Id::Z, j, 1);
-        }
-    }
 
     std::string outfile(Support::temppath("test_flex.ply"));
     FileUtils::deleteFile(outfile);
@@ -365,6 +398,7 @@ TEST(PlyWriter, flex2)
 
     Options writerOps;
     writerOps.add("filename", outfile);
+    writerOps.add("faces", true);
 
     PlyWriter writer;
     writer.setOptions(writerOps);
