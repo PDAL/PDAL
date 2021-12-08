@@ -47,11 +47,6 @@ option(BUILD_PLUGIN_OPENSCENEGRAPH
 add_feature_info("OpenSceneGraph plugin" BUILD_PLUGIN_OPENSCENEGRAPH
     "read/write OpenSceneGraph objects")
 
-option(BUILD_PLUGIN_OCI
-    "Choose if OCI support should be built" FALSE)
-add_feature_info("Oracle OCI plugin" BUILD_PLUGIN_OCI
-    "Read/write point clould patches to Oracle")
-
 find_package(PostgreSQL QUIET)
 option(BUILD_PLUGIN_PGPOINTCLOUD
     "Choose if PostgreSQL PointCloud support should be built"
@@ -114,9 +109,6 @@ include(CMakeDependentOption)
 cmake_dependent_option(BUILD_PGPOINTCLOUD_TESTS
     "Choose if PostgreSQL PointCloud tests should be built"
     ON "BUILD_PLUGIN_PGPOINTCLOUD; WITH_TESTS" OFF)
-cmake_dependent_option(BUILD_OCI_TESTS
-    "Choose if OCI tests should be built"
-    ON "BUILD_PLUGIN_OCI; WITH_TESTS" OFF)
 cmake_dependent_option(BUILD_RIVLIB_TESTS
     "Choose if RiVLib tests should be built"
     ON "BUILD_PLUGIN_RIVLIB; WITH_TESTS" OFF)

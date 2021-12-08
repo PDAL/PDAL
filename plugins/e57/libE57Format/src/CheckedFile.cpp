@@ -67,10 +67,6 @@
 #define O_BINARY (0)
 #endif
 
-#ifndef _unlink
-#define _unlink unlink
-#endif
-
 using namespace e57;
 using namespace std;
 
@@ -554,7 +550,12 @@ void CheckedFile::unlink()
    close();
 
    /// Try to unlink the file, don't report a failure
-   int result = ::_unlink(fileName_.c_str()); //??? unicode support here
+   int result = 0;
+#ifdef _WIN32
+   result = ::_unlink(fileName_.c_str()); //??? unicode support here
+#else
+   result = ::unlink(fileName_.c_str()); //??? unicode support here
+#endif
 #ifdef E57_MAX_VERBOSE
    if (result < 0)
    {
