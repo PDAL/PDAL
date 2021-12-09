@@ -204,7 +204,6 @@ if (APPLE)
 endif()
 
 file(GLOB BASE_SRCS
-    ${CMAKE_CURRENT_BINARY_DIR}/pdal/gitsha.cpp
     ${PDAL_FILTERS_DIR}/*.cpp
     ${PDAL_IO_DIR}/*.cpp
     ${PDAL_KERNELS_DIR}/*.cpp
