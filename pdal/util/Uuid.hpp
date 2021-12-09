@@ -84,7 +84,7 @@ struct uuid
 };
 #pragma pack(pop)
 
-inline bool operator < (const uuid& u1, const uuid& u2)
+PDAL_DLL inline bool operator < (const uuid& u1, const uuid& u2)
 {
     if (u1.time_low != u2.time_low)
         return u1.time_low < u2.time_low;
@@ -98,20 +98,20 @@ inline bool operator < (const uuid& u1, const uuid& u2)
     return false;
 }
 
-class PDAL_DLL Uuid
+class Uuid
 {
-    friend inline bool operator < (const Uuid& u1, const Uuid& u2);
+    PDAL_DLL friend inline bool operator < (const Uuid& u1, const Uuid& u2);
 public:
-    Uuid()
+    PDAL_DLL Uuid()
         {}
-    Uuid(const char *c)
+    PDAL_DLL Uuid(const char *c)
         { unpack(c); }
-    Uuid(const std::string& s)
+    PDAL_DLL Uuid(const std::string& s)
         { parse(s); }
 
-    void clear()
+    PDAL_DLL void clear()
         { m_data.clear(); }
-    void unpack(const char *c)
+    PDAL_DLL void unpack(const char *c)
     {
         BeExtractor e(c, 10);
 
@@ -121,7 +121,7 @@ public:
         std::copy(c, c + 6, m_data.node);
     }
 
-    void pack(char *c) const
+    PDAL_DLL void pack(char *c) const
     {
         BeInserter i(c, 10);
 
@@ -131,7 +131,7 @@ public:
         std::copy(m_data.node, m_data.node + 6, c);
     }
 
-    bool parse(const std::string& s)
+    PDAL_DLL bool parse(const std::string& s)
     {
         if (s.length() != 36)
             return false;
@@ -167,7 +167,7 @@ public:
         return true;
     }
 
-    std::string unparse() const
+    PDAL_DLL std::string unparse() const
     {
         std::stringstream out;
 
@@ -182,13 +182,13 @@ public:
         return out.str();
     }
 
-    std::string toString() const
+    PDAL_DLL std::string toString() const
         { return unparse(); }
 
-    bool empty() const
+    PDAL_DLL bool empty() const
     { return isNull(); }
 
-    bool isNull() const
+    PDAL_DLL bool isNull() const
     {
         const char *c = (const char *)&m_data;
         for (size_t i = 0; i < sizeof(m_data); ++i)
@@ -197,30 +197,30 @@ public:
         return true;
     }
 
-    static constexpr size_t size()
+    PDAL_DLL static constexpr size_t size()
         { return sizeof(m_data); }
 
 private:
     uuid m_data;
 };
 
-inline bool operator == (const Uuid& u1, const Uuid& u2)
+PDAL_DLL inline bool operator == (const Uuid& u1, const Uuid& u2)
 {
     return !(u1 < u2) && !(u2 < u1);
 }
 
-inline bool operator < (const Uuid& u1, const Uuid& u2)
+PDAL_DLL inline bool operator < (const Uuid& u1, const Uuid& u2)
 {
     return u1.m_data < u2.m_data;
 }
 
-inline std::ostream& operator << (std::ostream& out, const Uuid& u)
+PDAL_DLL inline std::ostream& operator << (std::ostream& out, const Uuid& u)
 {
     out << u.toString();
     return out;
 }
 
-inline std::istream& operator >> (std::istream& in, Uuid& u)
+PDAL_DLL inline std::istream& operator >> (std::istream& in, Uuid& u)
 {
     std::string s;
     in >> s;

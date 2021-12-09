@@ -8,9 +8,7 @@ SO_EXT=dylib
 #CC=/usr/local/bin/gcc-5
 #CXX=/usr/local/bin/g++-5
 
-ORACLE_HOME=$HOME/oracle
 LAZPERF_HOME=$USR_LOCAL
-export ORACLE_HOME
 export GDAL_HOME=/usr/local/opt/gdal2
 
 CONFIG="Unix Makefiles"
@@ -23,10 +21,8 @@ fi
 CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=/Users/hobu/pdal-build \
-        -DBUILD_PLUGIN_OCI=ON \
         -DBUILD_PLUGIN_SQLITE=ON \
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
-        -DBUILD_OCI_TESTS=ON \
         -DBUILD_I3S_TESTS=ON \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_PYTHON=ON \
@@ -54,7 +50,6 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DPYTHON_EXECUTABLE=python \
         -DPYTHON_LIBRARY=/usr/local/Cellar/python/3.7.2_2/Frameworks/Python.framework/Versions/3.7/lib/libpython3.7.dylib \
         -DPYTHON_INCLUDE_DIR=/usr/local/Cellar/python/3.7.2_2/Frameworks/Python.framework/Versions/3.7/include/python3.7m/\
-        -DOCI_CONNECTION="lidar/lidar@localhost:1521/xe.oracle.docker" \
         -DPGPOINTCLOUD_TEST_DB_HOST="localhost"
 #        -DBUILD_PLUGIN_MATLAB=ON \
 #         -DMATLAB_MEX_LIBRARY=/Applications/MATLAB_R2017b.app/bin/maci64/libmex.dylib \

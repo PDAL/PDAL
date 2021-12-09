@@ -221,7 +221,7 @@ void GpsTimeConvert::gpsTime2WeekSeconds(PointView& view)
 
     // date of first time
     double t = view.getFieldAs<double>(Dimension::Id::GpsTime, 0) + tOffset;
-    std::tm firstDate = gpsTime2Date(t);
+    std::tm firstDate = gpsTime2Date((int)t);
 
     // seconds from GPS zero to first day of week
     int numSeconds = weekStartGpsSeconds(firstDate);

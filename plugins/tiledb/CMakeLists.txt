@@ -39,10 +39,6 @@ PDAL_ADD_PLUGIN(writer_libname writer tiledb
         ${NLOHMANN_INCLUDE_DIR}
 )
 
-#
-# Temporary until tests are fixed.
-#
-set(WITH_TESTS false)
 if (WITH_TESTS)
 
     PDAL_ADD_TEST(pdal_io_tiledb_bounds4d_test

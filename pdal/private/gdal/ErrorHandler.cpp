@@ -59,7 +59,11 @@ namespace {
 
 // Long ago the error handling functions were built with __stdcall for VB and
 // they're still there.
-void STDCALL trampoline(::CPLErr code, int num, char const* msg)
+#ifdef PDAL_MSVC
+void __stdcall trampoline(::CPLErr code, int num, char const* msg)
+#else
+void trampoline(::CPLErr code, int num, char const* msg)
+#endif
 {
     ErrorHandler::getGlobalErrorHandler().handle((int)code, num, msg);
 }
