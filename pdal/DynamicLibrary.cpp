@@ -41,6 +41,7 @@
 
 #ifdef _WIN32
   #include <windows.h>
+  #include <codecvt>
 #else // Unix
   #include <dlfcn.h>
 #endif
@@ -71,6 +72,16 @@ void DynamicLibrary::clear()
     m_handle = NULL;
 }
 
+#ifdef _WIN32
+std::wstring toNative(std::string const& in)
+{
+    // TODO: C++11 define convert with static thread_local
+    std::wstring_convert<std::codecvt_utf8_utf16<uint16_t>, uint16_t> convert;
+    auto s = convert.from_bytes(in);
+    auto p = reinterpret_cast<wchar_t const*>(s.data());
+    return std::wstring(p, p + s.size());
+}
+#endif
 
 DynamicLibrary *DynamicLibrary::load(const std::string &name, 
     std::string &errorString)
@@ -84,7 +95,7 @@ DynamicLibrary *DynamicLibrary::load(const std::string &name,
     void *handle = NULL;
 
 #ifdef _WIN32
-    handle = ::LoadLibraryA(name.c_str());
+    handle = ::LoadLibraryW(toNative(name).c_str());
     if (handle == NULL)
     {
         DWORD errorCode = ::GetLastError();

@@ -44,6 +44,9 @@
 
 #ifndef _WIN32
 #include <dlfcn.h>
+#else
+#include <locale>
+#include <codecvt>
 #endif
 
 using namespace std;
@@ -459,6 +462,16 @@ std::pair<double, double> computeHausdorffPair(PointViewPtr viewA,
     return std::pair<double, double>{original, modified};
 }
 
+#ifdef _WIN32
+std::string fromNative(std::wstring const& in)
+{
+    // TODO: C++11 define convert with static thread_local
+    std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
+    auto p = reinterpret_cast<unsigned short const*>(in.data());
+    return convert.to_bytes(p, p + in.size());
+}
+#endif
+
 std::string dllDir()
 {
     std::string s;
@@ -471,10 +484,10 @@ std::string dllDir()
         GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
         (LPCSTR)&dllDir, &hm))
     {
-        char path[MAX_PATH];
-        DWORD cnt = GetModuleFileNameA(hm, path, sizeof(path));
+        wchar_t path[MAX_PATH];
+        DWORD cnt = GetModuleFileNameW(hm, path, MAX_PATH);
         if (cnt > 0 && cnt < MAX_PATH)
-            s = path;
+            s = fromNative(path);
     }
 #else
     Dl_info info;

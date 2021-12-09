@@ -86,11 +86,29 @@ std::wstring toNative(std::string const& in)
     auto p = reinterpret_cast<wchar_t const*>(s.data());
     return std::wstring(p, p + s.size());
 }
+
+std::string fromNative(std::wstring const& in)
+{
+    // TODO: C++11 define convert with static thread_local
+    std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
+    auto p = reinterpret_cast<unsigned short const*>(in.data());
+    return convert.to_bytes(p, p + in.size());
+}
+
+std::string fromNative(pdalboost::filesystem::path const& path)
+{
+    return fromNative(path.wstring());
+}
 #else // Unix, OSX, MinGW
 std::string const& toNative(std::string const& in)
 {
     return in;
-}    
+}
+
+std::string fromNative(pdalboost::filesystem::path const& path)
+{
+    return path.string();
+}
 #endif
 
 } // unnamed namespace
@@ -192,11 +210,11 @@ std::vector<std::string> directoryList(const std::string& dir)
 
     try
     {
-        pdalboost::filesystem::directory_iterator it(dir);
+        pdalboost::filesystem::directory_iterator it(toNative(dir));
         pdalboost::filesystem::directory_iterator end;
         while (it != end)
         {
-            files.push_back(it->path().string());
+            files.push_back(fromNative(it->path()));
             it++;
         }
     }
@@ -295,7 +313,7 @@ std::string readFileIntoString(const std::string& filename)
 std::string getcwd()
 {
     const pdalboost::filesystem::path p = pdalboost::filesystem::current_path();
-    return addTrailingSlash(p.string());
+    return addTrailingSlash(fromNative(p));
 }
 
 
@@ -305,9 +323,9 @@ std::string toCanonicalPath(std::string filename)
 
 #ifdef _WIN32
     filename = addTrailingSlash(filename);
-    char buf[MAX_PATH];
-    if (GetFullPathName(filename.c_str(), MAX_PATH, buf, NULL))
-        result = buf;
+    wchar_t buf[MAX_PATH];
+    if (GetFullPathNameW(toNative(filename).c_str(), MAX_PATH, buf, NULL))
+        result = fromNative(std::wstring(buf));
 #else
     char *buf = realpath(filename.c_str(), NULL);
     if (buf)
@@ -324,7 +342,7 @@ std::string toCanonicalPath(std::string filename)
 // otherwise, make it absolute (relative to current working dir) and return that
 std::string toAbsolutePath(const std::string& filename)
 {
-    return pdalboost::filesystem::absolute(toNative(filename)).string();
+    return fromNative(pdalboost::filesystem::absolute(toNative(filename)));
 }
 
 
@@ -336,8 +354,8 @@ std::string toAbsolutePath(const std::string& filename)
 std::string toAbsolutePath(const std::string& filename, const std::string base)
 {
     const std::string newbase = toAbsolutePath(base);
-    return pdalboost::filesystem::absolute(toNative(filename),
-        toNative(newbase)).string();
+    return fromNative(pdalboost::filesystem::absolute(toNative(filename),
+        toNative(newbase)));
 }
 
 
@@ -361,7 +379,7 @@ std::string getDirectory(const std::string& path)
 {
     const pdalboost::filesystem::path dir =
          pdalboost::filesystem::path(toNative(path)).parent_path();
-    return addTrailingSlash(dir.string());
+    return addTrailingSlash(fromNative(dir));
 }
 
 
@@ -438,13 +456,6 @@ std::vector<std::string> glob(std::string path)
 
 #ifdef _WIN32
 #ifdef PDAL_WIN32_STL
-    auto fromNative = [](std::wstring const& in) -> std::string
-    {
-        std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
-        auto p = reinterpret_cast<unsigned short const*>(in.data());
-        return convert.to_bytes(p, p + in.size());
-    };
-
     std::wstring wpath(toNative(path));
     WIN32_FIND_DATAW ffd;
     HANDLE handle = FindFirstFileW(wpath.c_str(), &ffd);
@@ -459,9 +470,9 @@ std::vector<std::string> glob(std::string path)
         if (ffd.cFileName[0] == L'.')
             continue;
         if (found == std::wstring::npos)
-            filenames.push_back(fromNative(ffd.cFileName));
+            filenames.push_back(fromNative(std::wstring(ffd.cFileName)));
         else
-            filenames.push_back(fromNative(wpath.substr(0, found)) + "\\" + fromNative(ffd.cFileName));
+            filenames.push_back(fromNative(wpath.substr(0, found)) + "\\" + fromNative(std::wstring(ffd.cFileName)));
 
     } while (FindNextFileW(handle, &ffd) != 0);
     FindClose(handle);
