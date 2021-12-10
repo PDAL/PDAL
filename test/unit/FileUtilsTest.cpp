@@ -262,8 +262,8 @@ TEST(FileUtilsTest, glob)
 TEST(FileUtilsTest, test_file_ops_with_unicode_paths)
 {
     // 1. Read Unicode encoded word, ie. Japanese, from .txt file.
-    // 2. Create temporary directory named using the word.
-    // 3. Create a file in the directory.
+    // 2. Create temporary directory named using the word. /word/word
+    // 3. Create a file in the directory. /word/word/word.unicode
     // 4. Exercise the FileUtils using the Unicode-based path.
 
     for (std::string japanese_txt: {"japanese-pr2135.txt", "japanese-pr2227.txt"})
@@ -273,10 +273,18 @@ TEST(FileUtilsTest, test_file_ops_with_unicode_paths)
         auto const japanese = FileUtils::readFileIntoString(japanese_txt);
         EXPECT_FALSE(japanese.empty());
 
-        auto const japanese_dir = Support::temppath(japanese);
+        auto const japanese_root_dir = Support::temppath(japanese);
+        std::string tmp1(japanese_root_dir + "/" + japanese + "/" + japanese + ".unicode");
+        std::string japanese_dir = FileUtils::getDirectory(tmp1);
         EXPECT_TRUE(FileUtils::createDirectories(japanese_dir));
-        std::string tmp1(japanese_dir + "/06LC743.unicode");
         std::string tmp2(Support::temppath("nonunicode.tmp"));
+
+        // test directoryList
+        auto const dirs = FileUtils::directoryList(japanese_root_dir);
+        EXPECT_GE(dirs.size(), 1U);
+        auto const dircount = std::count_if(dirs.cbegin(), dirs.cend(),
+            [&japanese_dir](std::string const& d) { return normalize(d + "/") == normalize(japanese_dir); });
+        EXPECT_EQ(dircount, 1);
 
         // first, clean up from any previous test run
         FileUtils::deleteFile(tmp1);
@@ -294,7 +302,7 @@ TEST(FileUtilsTest, test_file_ops_with_unicode_paths)
         EXPECT_EQ(FileUtils::fileSize(tmp1), 3U);
 
         // glob for files with Unicode path
-        auto const filenames = FileUtils::glob(japanese_dir + "/*");
+        auto const filenames = FileUtils::glob(japanese_dir + "*");
         EXPECT_GE(filenames.size(), 1U);
         auto const tmp1count = std::count_if(filenames.cbegin(), filenames.cend(),
             [&tmp1](std::string const& f) { return normalize(f) == normalize(tmp1); });
@@ -315,7 +323,7 @@ TEST(FileUtilsTest, test_file_ops_with_unicode_paths)
         // delete test
         FileUtils::deleteFile(tmp2);
         EXPECT_FALSE(FileUtils::fileExists(tmp2));
-        FileUtils::deleteDirectory(japanese_dir);
-        EXPECT_FALSE(FileUtils::directoryExists(japanese_dir));
+        FileUtils::deleteDirectory(japanese_root_dir);
+        EXPECT_FALSE(FileUtils::directoryExists(japanese_root_dir));
     }
 }
