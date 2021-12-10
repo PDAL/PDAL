@@ -36,6 +36,7 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/pdal_test_main.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 #include <pdal/StageFactory.hpp>
 #include <io/FauxReader.hpp>
@@ -50,19 +51,20 @@ namespace pdal
 
 const SpatialReference utm16("EPSG:26916");
 
+const size_t count = 100;
+
 class TileDBReaderTest : public ::testing::Test
 {
 protected:
     virtual void SetUp()
     {
-        tiledb::Context ctx;
         FauxReader rdr;
         TileDBWriter writer;
         Options writer_options;
         Options reader_options;
 
-        if (Utils::fileExists(data_path))
-            tiledb::Object::remove(ctx, data_path);
+        if (FileUtils::directoryExists(data_path))
+            FileUtils::deleteDirectory(data_path);
 
         writer_options.add("array_name", data_path);
         writer_options.add("x_tile_size", 1);
@@ -70,7 +72,7 @@ protected:
         writer_options.add("z_tile_size", 1);
 
         reader_options.add("mode", "ramp");
-        reader_options.add("count", 100);
+        reader_options.add("count", count);
         rdr.setOptions(reader_options);
 
         writer.setOptions(writer_options);
@@ -99,10 +101,7 @@ TEST_F(TileDBReaderTest, findStage)
 }
 
 TEST_F(TileDBReaderTest, read_bbox)
-{
-    tiledb::Context ctx;
-    tiledb::VFS vfs(ctx);
-  
+{ 
     Options options;
     options.add("array_name", data_path);
     options.add("bbox3d", "([0, 0.5], [0, 0.5], [0, 0.5])");
@@ -110,7 +109,7 @@ TEST_F(TileDBReaderTest, read_bbox)
     TileDBReader reader;
     reader.setOptions(options);
 
-    FixedPointTable table(100);
+    FixedPointTable table(count);
     reader.prepare(table);
     reader.execute(table);
     EXPECT_EQ(table.numPoints(), 50);
@@ -118,8 +117,6 @@ TEST_F(TileDBReaderTest, read_bbox)
 
 TEST_F(TileDBReaderTest, read_zero_bbox)
 {
-    tiledb::Context ctx;
-    tiledb::VFS vfs(ctx);
     Options options;
     options.add("array_name", data_path);
     options.add("bbox3d", "([1.1, 1.2], [1.1, 1.2], [1.1, 1.2])");
@@ -127,7 +124,7 @@ TEST_F(TileDBReaderTest, read_zero_bbox)
     TileDBReader reader;
     reader.setOptions(options);
 
-    FixedPointTable table(100);
+    FixedPointTable table(count);
     reader.prepare(table);
     reader.execute(table);
     EXPECT_EQ(table.numPoints(), 0);
@@ -183,7 +180,6 @@ TEST_F(TileDBReaderTest, read)
     };
 
     tiledb::Context ctx;
-    tiledb::VFS vfs(ctx);
     Options options;
     options.add("array_name", data_path);
 
@@ -200,16 +196,27 @@ TEST_F(TileDBReaderTest, read)
     tiledb::Query q(ctx, array, TILEDB_READ);
     q.set_subarray(subarray);
 
-    auto max_el = array.max_buffer_elements(subarray);
-    std::vector<double> coords(max_el[TILEDB_COORDS].second);
+#if TILEDB_VERSION_MAJOR == 1
+    std::vector<double> coords(count  * 3);
     q.set_coordinates(coords);
+#else
+    std::vector<double> xs(count);
+    std::vector<double> ys(count);
+    std::vector<double> zs(count);
+    
+    q.set_buffer("X", xs)
+        .set_buffer("Y", ys)
+        .set_buffer("Z", zs);
+#endif
+
     q.submit();
     array.close();
+    auto result_num = (int)q.result_buffer_elements()["X"].second;
 
     TileDBReader reader;
     reader.setOptions(options);
 
-    FixedPointTable table(100);
+    FixedPointTable table(count);
 
     Checker c;
     c.setInput(reader);
@@ -220,8 +227,6 @@ TEST_F(TileDBReaderTest, read)
 
 TEST_F(TileDBReaderTest, spatial_reference)
 {
-    tiledb::Context ctx;
-    tiledb::VFS vfs(ctx);
     std::string pth = Support::temppath("tiledb_test_srs");
 
     Options options;
@@ -235,10 +240,8 @@ TEST_F(TileDBReaderTest, spatial_reference)
     writer_options.add("y_tile_size", 1);
     writer_options.add("z_tile_size", 1);
 
-    if (vfs.is_dir(pth))
-    {
-        vfs.remove_dir(pth);
-    }
+    if (FileUtils::directoryExists(pth))
+        FileUtils::deleteDirectory(pth);
 
     FauxReader reader;
     Options reader_options;
@@ -251,13 +254,13 @@ TEST_F(TileDBReaderTest, spatial_reference)
     writer.setInput(reader);
     writer.setSpatialReference(utm16);
 
-    FixedPointTable table(100);
+    FixedPointTable table(count);
     writer.prepare(table);
     writer.execute(table);
 
     TileDBReader rdr;
     rdr.setOptions(options);
-    FixedPointTable table2(100);
+    FixedPointTable table2(count);
     rdr.prepare(table2);
     rdr.execute(table2);
     EXPECT_TRUE(rdr.getSpatialReference().equals(utm16));
