@@ -160,11 +160,8 @@ QuickInfo Stage::preview()
 void Stage::prepare(PointTableRef table)
 {
     m_args.reset(new ProgramArgs);
-    for (size_t i = 0; i < m_inputs.size(); ++i)
-    {
-        Stage *prev = m_inputs[i];
+    for (Stage *prev : m_inputs)
         prev->prepare(table);
-    }
     handleOptions();
     startLogging();
     l_initialize(table);
