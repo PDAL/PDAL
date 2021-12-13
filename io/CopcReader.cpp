@@ -123,6 +123,8 @@ public:
     int32_t tilePointNum;
     lazperf::header14 header;
     lazperf::copc_info_vlr copc_info;
+    point_count_t hierarchyPointCount;
+    bool done;
 };
 
 CopcReader::CopcReader() : m_args(new CopcReader::Args), m_p(new CopcReader::Private)
@@ -435,6 +437,7 @@ void CopcReader::ready(PointTableRef table)
     m_p->tileCount = m_p->hierarchy.size();
 
     m_p->pool.reset(new ThreadPool(m_p->pool->numThreads()));
+    m_p->done = false;
     for (const copc::Entry& entry : m_p->hierarchy)
         load(entry);
 }
@@ -446,6 +449,8 @@ void CopcReader::loadHierarchy()
     // hierarchy:
     copc::Key key;
 
+    // In case a point count was specified, don't fetch more hierarchy than necessary.
+    m_p->hierarchyPointCount = count();
     if (!passesFilter(key))
         return;
 
@@ -465,6 +470,18 @@ void CopcReader::loadHierarchy(copc::Hierarchy& hierarchy, const copc::Hierarchy
 {
     if (entry.isDataEntry())
     {
+        {
+            std::lock_guard<std::mutex> lock(m_p->mutex);
+            if (m_p->hierarchyPointCount == 0)
+                return;
+            if (entry.m_pointCount)
+            {
+                m_p->hierarchyPointCount -=
+                    (std::min)((point_count_t)entry.m_pointCount, m_p->hierarchyPointCount);
+                hierarchy.insert(entry);
+            }
+        }
+
         for (int i = 0; i < 8; ++i)
         {
             copc::Key k = entry.m_key.child(i);
@@ -474,12 +491,6 @@ void CopcReader::loadHierarchy(copc::Hierarchy& hierarchy, const copc::Hierarchy
                 if (entry.valid())
                     loadHierarchy(hierarchy, page, entry);
             }
-        }
-
-        if (entry.m_pointCount)
-        {
-            std::lock_guard<std::mutex> lock(m_p->mutex);
-            hierarchy.insert(entry);
         }
     }
     else // New page
@@ -582,6 +593,8 @@ void CopcReader::load(const copc::Entry& entry)
 
             // Put the tile on the output queue.
             std::unique_lock<std::mutex> l(m_p->mutex);
+            if (m_p->done)
+                return;
             while (m_p->contents.size() >= (std::max)((size_t)10, m_p->pool->numThreads()))
                 m_p->consumedCv.wait(l);
             m_p->contents.push(std::move(tile));
@@ -753,6 +766,11 @@ top:
 
 void CopcReader::done(PointTableRef)
 {
+    {
+        std::unique_lock<std::mutex> l(m_p->mutex);
+        m_p->done = true;
+    }
+    m_p->consumedCv.notify_all();
     m_p->pool->stop();
 }
 
