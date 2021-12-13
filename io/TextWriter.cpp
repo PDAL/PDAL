@@ -105,7 +105,7 @@ void TextWriter::addArgs(ProgramArgs& args)
     args.add("order", "Dimension order", m_dimOrder);
     args.add("write_header", "Whether a header should be written",
         m_writeHeader, true);
-    args.add("newline", "String to use as newline", m_newline, "\\n");
+    args.add("newline", "String to use as newline", m_newline, "\n");
     args.add("delimiter", "Dimension delimiter", m_delimiter, ",");
     args.add("quote_header", "Whether a header should be quoted",
         m_quoteHeader, true);
