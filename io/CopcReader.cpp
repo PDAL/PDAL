@@ -449,7 +449,8 @@ void CopcReader::loadHierarchy()
     if (!passesFilter(key))
         return;
 
-    copc::HierarchyPage page(fetch(m_p->copc_info.root_hier_offset, m_p->copc_info.root_hier_size));
+    copc::HierarchyPage page(fetch(m_p->copc_info.root_hier_offset,
+        (uint32_t)m_p->copc_info.root_hier_size));
 
     copc::Entry entry = page.find(key);
     if (!entry.valid())

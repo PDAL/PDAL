@@ -644,16 +644,16 @@ TEST(LasReaderTest, Start)
     for (auto i : starts)
         test1("laszip", i);
     test2("laszip");
-    test3("laszip", 66271, -8242595.58, 4966706, 0.28);
-    test3("laszip", 66272, -8242746, 4966605.44, -0.28);
-    test3("laszip", 96000, -8242474.88, 4966662.72, -8.1);
+    test3("laszip", 66271, -8242595.58f, 4966706.0f, 0.28f);
+    test3("laszip", 66272, -8242746.0f, 4966605.44f, -0.28f);
+    test3("laszip", 96000, -8242474.88f, 4966662.72f, -8.1f);
 #ifdef PDAL_HAVE_LAZPERF
     for (auto i : starts)
         test1("lazperf", i);
     test2("lazperf");
-    test3("lazperf", 66271, -8242595.58, 4966706, 0.28);
-    test3("lazperf", 66272, -8242746, 4966605.44, -0.28);
-    test3("lazperf", 96000, -8242474.88, 4966662.72, -8.1);
+    test3("lazperf", 66271, -8242595.58f, 4966706.0f, 0.28f);
+    test3("lazperf", 66272, -8242746.0f, 4966605.44f, -0.28f);
+    test3("lazperf", 96000, -8242474.88f, 4966662.72f, -8.1f);
 #endif
 
     // Delete the created file.

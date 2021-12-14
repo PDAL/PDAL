@@ -150,7 +150,7 @@ void Scan::decodeHeader()
         {
             auto dim = pdal::e57plugin::e57ToPdal(field);
             m_rescaleFactors[(int)dim] =
-                pdal::e57plugin::getPdalBounds(dim).second / (minmax.second - minmax.first);
+                (float)(pdal::e57plugin::getPdalBounds(dim).second / (minmax.second - minmax.first));
         }
     }
 

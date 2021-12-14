@@ -43,13 +43,6 @@ if(BUILD_PLUGIN_NITF)
     add_subdirectory(nitf)
 endif()
 
-if(BUILD_PLUGIN_OCI)
-    if (NOT PDAL_HAVE_LIBXML2)
-        message(FATAL_ERROR "Can't build OCI plugin without libxml2")
-    endif()
-    add_subdirectory(oci)
-endif()
-
 if(BUILD_PLUGIN_PGPOINTCLOUD)
     if (NOT PDAL_HAVE_LIBXML2)
         message(FATAL_ERROR "Can't build pgpointcloud plugin without libxml2")

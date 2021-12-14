@@ -31,7 +31,6 @@ dimension type, while others only understand fixed dimension names.
    writers.ply
    writers.raster
    writers.sbet
-   writers.sqlite
    writers.text
    writers.tiledb
 
@@ -83,10 +82,6 @@ dimension type, while others only understand fixed dimension names.
 
 :ref:`writers.sbet`
     Write data in the SBET format.
-
-:ref:`writers.sqlite`
-    Write point cloud data in a scheme that matches the approach used in the
-    PostgreSQL Pointcloud and OCI readers.
 
 :ref:`writers.text`
     Write points in a text file. GeoJSON and CSV formats are supported.

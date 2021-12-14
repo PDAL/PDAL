@@ -72,7 +72,7 @@ void print_element_names(xmlNode * a_node)
 namespace pdal
 {
 
-void OCISchemaStructuredErrorHandler
+void SchemaStructuredErrorHandler
 (void * /*userData*/, xmlErrorPtr error)
 {
     std::ostringstream oss;
@@ -97,21 +97,21 @@ void OCISchemaStructuredErrorHandler
     std::cerr << oss.str() << std::endl;
 }
 
-void OCISchemaParserStructuredErrorHandler
+void SchemaParserStructuredErrorHandler
 (void * /*userData*/, xmlErrorPtr error)
 {
     std::cerr << "Schema parsing error: '" << error->message << "' " <<
         "on line " << error->line << std::endl;
 }
 
-void OCISchemaValidationStructuredErrorHandler
+void SchemaValidationStructuredErrorHandler
 (void * /*userData*/, xmlErrorPtr error)
 {
     std::cerr << "Schema validation error: '" << error->message << "' " <<
         "on line " << error->line << std::endl;
 }
 
-void OCISchemaValidityError
+void SchemaValidityError
 (void * /*ctx*/, const char* message, ...)
 {
     const int ERROR_MESSAGE_SIZE = 256;
@@ -125,7 +125,7 @@ void OCISchemaValidityError
     std::cerr << "Schema validity error: '" << error << "' " << std::endl;
 }
 
-void OCISchemaValidityDebug
+void SchemaValidityDebug
 (void * /*ctx*/, const char* message, ...)
 {
     const int ERROR_MESSAGE_SIZE = 256;
@@ -140,7 +140,7 @@ void OCISchemaValidityDebug
 }
 
 
-void OCISchemaGenericErrorHandler
+void SchemaGenericErrorHandler
 (void * /*ctx*/, const char* message, ...)
 {
     const int ERROR_MESSAGE_SIZE = 256;
@@ -229,9 +229,9 @@ xmlDocPtr XMLSchema::init(const std::string& xml, const std::string& xsd)
     LIBXML_TEST_VERSION
 
     xmlSetGenericErrorFunc(m_global_context,
-        (xmlGenericErrorFunc)&OCISchemaGenericErrorHandler);
+        (xmlGenericErrorFunc)&SchemaGenericErrorHandler);
     xmlSetStructuredErrorFunc(m_global_context,
-        (xmlStructuredErrorFunc)&OCISchemaStructuredErrorHandler);
+        (xmlStructuredErrorFunc)&SchemaStructuredErrorHandler);
 
     xmlDocPtr doc = xmlReadMemory(xml.c_str(), xml.size(), NULL, NULL,
         parserOption);
@@ -254,11 +254,11 @@ bool XMLSchema::validate(xmlDocPtr doc, const std::string& xsd)
         NULL, NULL, parserOption);
     xmlSchemaParserCtxtPtr parserCtxt = xmlSchemaNewDocParserCtxt(schemaDoc);
     xmlSchemaSetParserStructuredErrors(parserCtxt,
-        &OCISchemaParserStructuredErrorHandler, m_global_context);
+        &SchemaParserStructuredErrorHandler, m_global_context);
     xmlSchemaPtr schema = xmlSchemaParse(parserCtxt);
     xmlSchemaValidCtxtPtr validCtxt = xmlSchemaNewValidCtxt(schema);
-    xmlSchemaSetValidErrors(validCtxt, &OCISchemaValidityError,
-        &OCISchemaValidityDebug, m_global_context);
+    xmlSchemaSetValidErrors(validCtxt, &SchemaValidityError,
+        &SchemaValidityDebug, m_global_context);
     bool valid = (xmlSchemaValidateDoc(validCtxt, doc) == 0);
 
     xmlFreeDoc(schemaDoc);
