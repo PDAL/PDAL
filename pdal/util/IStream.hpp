@@ -88,7 +88,7 @@ public:
 
     PDAL_DLL ~IStream()
         {
-            if (m_fstream == NULL)
+            if (m_fstream != NULL)
                 FileUtils::closeFile(m_fstream);
         }
 
@@ -112,7 +112,7 @@ public:
     */
     PDAL_DLL void close()
     {
-        if (m_fstream == NULL)
+        if (m_fstream != NULL)
             FileUtils::closeFile(m_fstream);
         m_fstream = NULL;
         m_stream = NULL;

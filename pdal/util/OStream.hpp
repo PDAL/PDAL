@@ -59,7 +59,7 @@ public:
         {}
     PDAL_DLL ~OStream()
         {
-            if (m_fstream == NULL)
+            if (m_fstream != NULL)
                 FileUtils::closeFile(m_fstream);
         }
 
@@ -74,7 +74,7 @@ public:
     PDAL_DLL void close()
     {
         flush();
-        if (m_fstream == NULL)
+        if (m_fstream != NULL)
             FileUtils::closeFile(m_fstream);
         m_fstream = NULL;
         m_stream = NULL;
