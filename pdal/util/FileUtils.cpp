@@ -323,9 +323,15 @@ std::string toCanonicalPath(std::string filename)
 
 #ifdef _WIN32
     filename = addTrailingSlash(filename);
+#ifdef PDAL_WIN32_STL
     wchar_t buf[MAX_PATH];
     if (GetFullPathNameW(toNative(filename).c_str(), MAX_PATH, buf, NULL))
         result = fromNative(std::wstring(buf));
+#else
+    char buf[MAX_PATH];
+    if (GetFullPathName(filename.c_str(), MAX_PATH, buf, NULL))
+        result = buf;
+#endif
 #else
     char *buf = realpath(filename.c_str(), NULL);
     if (buf)
@@ -535,7 +541,11 @@ MapContext mapFile(const std::string& filename, bool readOnly, uintmax_t pos, ui
 #ifndef _WIN32
     ctx.m_fd = ::open(filename.c_str(), readOnly ? O_RDONLY : O_RDWR);
 #else
+#ifdef PDAL_WIN32_STL
     ctx.m_fd = ::_wopen(toNative(filename).c_str(), readOnly ? O_RDONLY : O_RDWR);
+#else
+    ctx.m_fd = ::_open(filename.c_str(), readOnly ? O_RDONLY : O_RDWR);
+#endif
 #endif
 
     if (ctx.m_fd == -1)
