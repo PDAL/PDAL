@@ -46,6 +46,7 @@
 
 #include "portable_endian.hpp"
 #include "pdal_util_export.hpp"
+#include "pdal/PDALUtils.hpp"
 
 namespace pdal
 {
@@ -86,7 +87,10 @@ public:
         {}
 
     PDAL_DLL ~IStream()
-        { delete m_fstream; }
+        {
+            if (m_fstream == NULL)
+                Utils::closeFile(m_fstream);
+        }
 
     /**
       Open a file to extract.
@@ -98,8 +102,8 @@ public:
     {
         if (m_stream)
              return -1;
-        m_stream = m_fstream = new std::ifstream(filename,
-            std::ios_base::in | std::ios_base::binary);
+        m_stream = Utils::openFile(filename);
+        m_fstream = dynamic_cast<std::ifstream*>(m_stream);
         return 0;
     }
 
@@ -108,7 +112,8 @@ public:
     */
     PDAL_DLL void close()
     {
-        delete m_fstream;
+        if (m_fstream == NULL)
+            Utils::closeFile(m_fstream);
         m_fstream = NULL;
         m_stream = NULL;
     }
