@@ -148,10 +148,6 @@ include(${PDAL_CMAKE_DIR}/openssl.cmake) # Optional
 include(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
-configure_file(
-  "${PROJECT_SOURCE_DIR}/gitsha.cpp.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/pdal/gitsha.cpp")
-
 # needs to come before configuration of pdal_features
 if(APPLE)
     option(PDAL_BUNDLE "Create PDAL as Application Bundle on OSX" FALSE)
@@ -204,7 +200,6 @@ if (APPLE)
 endif()
 
 file(GLOB BASE_SRCS
-    ${CMAKE_CURRENT_BINARY_DIR}/pdal/gitsha.cpp
     ${PDAL_FILTERS_DIR}/*.cpp
     ${PDAL_IO_DIR}/*.cpp
     ${PDAL_KERNELS_DIR}/*.cpp
@@ -344,7 +339,6 @@ endif()
 install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
     DESTINATION include
     FILES_MATCHING PATTERN "*.hpp"
-    PATTERN "gitsha.h"
 #    PATTERN "pdal/private" EXCLUDE
 #    PATTERN "pdal/io/private" EXCLUDE
 #    PATTERN "pdal/pdal/private" EXCLUDE

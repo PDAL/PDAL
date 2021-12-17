@@ -43,7 +43,6 @@
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/Uuid.hpp>
 #include <pdal/pdal_config.hpp>
-#include <pdal/gitsha.h>
 
 #include "LasVLR.hpp"
 

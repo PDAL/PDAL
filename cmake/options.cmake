@@ -32,11 +32,6 @@ option(BUILD_PLUGIN_MATLAB
 add_feature_info("Matlab plugin" BUILD_PLUGIN_MATLAB
     "write data to a .mat file")
 
-option(BUILD_PLUGIN_MRSID
-    "Choose if MrSID/LiDAR support should be built" FALSE)
-add_feature_info("MrSID plugin" BUILD_PLUGIN_MRSID
-    "read data in the MrSID format")
-
 option(BUILD_PLUGIN_NITF
     "Choose if NITF support should be built (only install supported is from http://github.com/hobu/nitro)" FALSE)
 add_feature_info("NITF plugin" BUILD_PLUGIN_NITF

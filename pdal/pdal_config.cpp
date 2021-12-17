@@ -40,8 +40,6 @@
 #include <sstream>
 #include <iomanip>
 
-#include <pdal/gitsha.h>
-
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wfloat-equal"
 #include <gdal.h>
@@ -102,35 +100,37 @@ bool hasFeature(Feature f)
 
 int versionMajor()
 {
-    return PDAL_VERSION_MAJOR;
+    return pdalVersionMajor;
 }
 
 
 int versionMinor()
 {
-    return PDAL_VERSION_MINOR;
+    return pdalVersionMinor;
 }
 
 
 int versionPatch()
 {
-    return PDAL_VERSION_PATCH;
+    return pdalVersionPatch;
 }
 
 
 std::string versionString()
 {
-    return std::string(PDAL_VERSION);
+    return pdalVersion;
 }
 
 int versionInteger()
 {
-    return PDAL_VERSION_INTEGER;
+    return versionMajor() * 100 * 100 +
+        versionMinor() * 100 +
+        versionPatch();
 }
 
 std::string sha1()
 {
-	return g_GIT_SHA1;
+	return pdalSha;
 }
 
 
@@ -143,7 +143,7 @@ std::string fullVersionString()
     if (!Utils::iequals(sha, "Release"))
         sha = sha.substr(0,6);
 
-    os << PDAL_VERSION << " (git-version: " << sha << ")";
+    os << pdalVersion << " (git-version: " << sha << ")";
 
     return os.str();
 }

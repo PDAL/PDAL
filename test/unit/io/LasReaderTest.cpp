@@ -641,12 +641,14 @@ TEST(LasReaderTest, Start)
     };
 
     std::vector<int> starts {0, 49999, 50000, 62520, 2525, 69999};
+#ifdef PDAL_HAVE_LASZIP
     for (auto i : starts)
         test1("laszip", i);
     test2("laszip");
     test3("laszip", 66271, -8242595.58f, 4966706.0f, 0.28f);
     test3("laszip", 66272, -8242746.0f, 4966605.44f, -0.28f);
     test3("laszip", 96000, -8242474.88f, 4966662.72f, -8.1f);
+#endif
 #ifdef PDAL_HAVE_LAZPERF
     for (auto i : starts)
         test1("lazperf", i);
