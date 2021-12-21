@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Howard Butler (howard@hobu.co)
+* Copyright (c) 2021, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -31,58 +31,29 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+
 #pragma once
 
-#include <memory>
-#include <vector>
+#include "Vlr.hpp"
+
+#include  <pdal/Log.hpp>
 
 namespace pdal
 {
 namespace las
 {
-    struct Header;
-}
 
-// This compressor write data in chunks to a stream. At the beginning of the
-// data is an offset to the end of the data, where the chunk table is
-// stored.  The chunk table keeps a list of the offsets to the beginning of
-// each chunk.  Chunks consist of a fixed number of points (last chunk may
-// have fewer points).  Each time a chunk starts, the compressor is reset.
-// This allows decompression of some set of points that's less than the
-// entire set when desired.
-// The compressor uses the schema of the point data in order to compress
-// the point stream.  The schema is also stored in a VLR that isn't
-// handled as part of the compression process itself.
-class LazPerfVlrCompressorImpl;
-class LazPerfVlrCompressor
+class Srs
 {
 public:
-    LazPerfVlrCompressor(std::ostream& stream, int format, int ebCount);
-    LazPerfVlrCompressor(std::ostream& stream, int format, int ebCount,
-        uint32_t chunksize);
-    ~LazPerfVlrCompressor();
-
-    std::vector<char> vlrData() const;
-    void compress(const char *inbuf);
-    void done();
+    void init(const VlrList& vlrs, bool useWkt, LogPtr log);
+    SpatialReference get() const;
+    std::string geotiffString() const;
 
 private:
-    std::unique_ptr<LazPerfVlrCompressorImpl> m_impl;
+    std::string m_geotiffString;
+    SpatialReference m_srs;
 };
 
-class LazPerfVlrDecompressorImpl;
-class LazPerfVlrDecompressor
-{
-public:
-    LazPerfVlrDecompressor(std::istream& stream, const las::Header& header, const char *vlrdata);
-    ~LazPerfVlrDecompressor();
-
-    bool seek(uint64_t record);
-    bool decompress(char *outbuf);
-
-private:
-    std::unique_ptr<LazPerfVlrDecompressorImpl> m_impl;
-};
-
+} // namespace las
 } // namespace pdal
-

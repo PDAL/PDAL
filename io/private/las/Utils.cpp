@@ -33,11 +33,9 @@
  ****************************************************************************/
 
 #include "./Utils.hpp"
+#include "Vlr.hpp"
 
 #include <string>
-
-#include <lazperf/header.hpp>
-#include <lazperf/vlr.hpp>
 
 #include <pdal/PointRef.hpp>
 
@@ -251,39 +249,6 @@ std::string generateSoftwareId()
     revs << Config::sha1();
     oss << "PDAL " << ver << " (" << revs.str().substr(0, 6) <<")";
     return oss.str();
-}
-
-std::vector<IgnoreVLR> parseIgnoreVLRs(const StringList& ignored)
-{
-    std::vector<IgnoreVLR> ignoredVLRs {IgnoreVLR ({"copc", 0}) } ;
-    for (auto& v: ignored)
-    {
-
-        StringList s = Utils::split2(v, '/');
-        if (s.size() == 2)
-        {
-            Utils::trim(s[0]);
-            Utils::trim(s[1]);
-            int i = std::stoi(s[1]);
-            uint16_t id = (uint16_t)i;
-            IgnoreVLR v;
-            v.m_userId = s[0];
-            v.m_recordId = id;
-            ignoredVLRs.push_back(v);
-        } else if (s.size() == 1)
-        {
-            Utils::trim(s[0]);
-            IgnoreVLR v;
-            v.m_userId = s[0];
-            v.m_recordId = 0;
-            ignoredVLRs.push_back(v);
-        } else
-        {
-            throw error("Invalid VLR user_id/record_id specified");
-        }
-    }
-    return ignoredVLRs;
-
 }
 
 std::vector<ExtraDim> parse(const StringList& dimString, bool allOk)
@@ -677,15 +642,13 @@ void VlrCatalog::walkVlrs(uint64_t vlrOffset, uint32_t vlrCount)
 {
     while (vlrOffset && vlrCount)
     {
-        std::vector<char> buf = m_fetch(vlrOffset, lazperf::vlr_header::Size);
-        Charbuf sbuf(buf.data(), buf.size());
-        std::istream in(&sbuf);
+        std::vector<char> buf = m_fetch(vlrOffset, Vlr::HeaderSize);
 
-        lazperf::vlr_header h = lazperf::vlr_header::create(in);
-        Entry entry { h.user_id, h.record_id, vlrOffset + lazperf::vlr_header::Size,
-            h.data_length };
+        Vlr vlr;
+        vlr.fillHeader(buf.data());
+        Entry entry { vlr.userId, vlr.recordId, vlrOffset + Vlr::HeaderSize, vlr.promisedDataSize };
         insert(entry);
-        vlrOffset += lazperf::vlr_header::Size + h.data_length;
+        vlrOffset += Vlr::HeaderSize + vlr.promisedDataSize;
         vlrCount--;
     }
 }
@@ -694,15 +657,14 @@ void VlrCatalog::walkEvlrs(uint64_t evlrOffset, uint32_t evlrCount)
 {
     while (evlrOffset && evlrCount)
     {
-        std::vector<char> buf = m_fetch(evlrOffset, lazperf::evlr_header::Size);
-        Charbuf sbuf(buf.data(), buf.size());
-        std::istream in(&sbuf);
+        std::vector<char> buf = m_fetch(evlrOffset, Evlr::HeaderSize);
 
-        lazperf::evlr_header h = lazperf::evlr_header::create(in);
-        Entry entry { h.user_id, h.record_id, evlrOffset + lazperf::evlr_header::Size,
-            h.data_length };
+        Evlr vlr;
+        vlr.fillHeader(buf.data());
+        Entry entry { vlr.userId, vlr.recordId, evlrOffset + Evlr::HeaderSize,
+            vlr.promisedDataSize };
         insert(entry);
-        evlrOffset += lazperf::evlr_header::Size + h.data_length;
+        evlrOffset += Evlr::HeaderSize + vlr.promisedDataSize;
         evlrCount--;
     }
 }

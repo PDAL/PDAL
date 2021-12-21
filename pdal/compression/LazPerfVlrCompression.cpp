@@ -42,8 +42,8 @@
 
 #include <pdal/util/IStream.hpp>
 #include <pdal/util/OStream.hpp>
-#include <io/LasHeader.hpp>
 #include <pdal/pdal_types.hpp>
+#include <io/private/las/Header.hpp>
 
 #include "LazPerfVlrCompression.hpp"
 
@@ -182,13 +182,14 @@ class LazPerfVlrDecompressorImpl
     using ChunkIter = std::vector<lazperf::chunk>::iterator;
 
 public:
-    LazPerfVlrDecompressorImpl(std::istream& stream, const LasHeader& header, const char *vlrdata) :
+    LazPerfVlrDecompressorImpl(std::istream& stream, const las::Header& header,
+            const char *vlrdata) :
         m_stream(stream), m_fileStream(stream), m_format(header.pointFormat()),
-        m_pointLen(header.pointLen()), m_ebCount(header.pointLen() - header.basePointLen()),
+        m_pointLen(header.pointSize), m_ebCount(header.ebCount()),
         m_pointCount(header.pointCount()), m_vlr(vlrdata), m_chunkPointsTotal(0),
         m_chunkPointsRead(0), m_curChunk(m_chunks.end())
     {
-        m_stream.seekg(header.pointOffset());
+        m_stream.seekg(header.pointOffset);
         ILeStream in(&stream);
 
         uint64_t chunkTablePos;
@@ -222,7 +223,7 @@ public:
 
         // Add a chunk at the beginning that has a count of 0 and an offset of the
         // start of the first chunk.
-        m_chunks.insert(m_chunks.begin(), {0, header.pointOffset() + sizeof(uint64_t)});
+        m_chunks.insert(m_chunks.begin(), {0, header.pointOffset + sizeof(uint64_t)});
 
         // Fix up the chunk table such that the offsets are absolute offsets to the
         // chunk and the counts are cumulative counts of points before the chunk.
@@ -340,7 +341,7 @@ private:
 };
 
 LazPerfVlrDecompressor::LazPerfVlrDecompressor(std::istream& stream,
-        const LasHeader& header, const char *vlrdata) :
+        const las::Header& header, const char *vlrdata) :
     m_impl(new LazPerfVlrDecompressorImpl(stream, header, vlrdata))
 {}
 

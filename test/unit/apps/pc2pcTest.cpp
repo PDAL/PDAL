@@ -41,7 +41,8 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/pdal_features.hpp>
 #include <io/LasReader.hpp>
-#include <io/LasHeader.hpp>
+#include <io/private/las/Header.hpp>
+
 #include "Support.hpp"
 
 using namespace pdal;
@@ -103,7 +104,7 @@ static bool fileIsCompressed(const std::string& name)
     std::shared_ptr<LasReader> reader(new LasReader);
     reader->setOptions(ops);
     reader->prepare(table);
-    return reader->header().compressed();
+    return reader->header().dataCompressed();
 }
 
 

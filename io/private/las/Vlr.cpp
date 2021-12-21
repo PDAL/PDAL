@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -32,17 +32,90 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "LasVLR.hpp"
+#include "Vlr.hpp"
 
-#include <limits>
-#include <nlohmann/json.hpp>
-
-#include <pdal/util/FileUtils.hpp>
-#include <pdal/util/Utils.hpp>
+#include <pdal/util/Extractor.hpp>
 
 namespace pdal
 {
+namespace las
+{
 
+VlrList parseIgnoreVLRs(const StringList& ignored, std::string& error)
+{
+    error.clear();
+
+    // Always ignore COPC VLRs and superseded VLRs.
+    VlrList ignoredVlrs { {"copc", 1}, {"copc", 1000}, {"LASF_Spec", 7} };
+    for (auto& v: ignored)
+    {
+        StringList s = Utils::split2(v, '/');
+        if (s.size() == 2)
+        {
+            Utils::trim(s[0]);
+            Utils::trim(s[1]);
+            int i = std::stoi(s[1]);
+            ignoredVlrs.emplace_back(s[0], (uint16_t)i);
+        }
+        else if (s.size() == 1)
+        {
+            Utils::trim(s[0]);
+            // Stick "ALL" in as a description since 0 is a valid record ID.
+            ignoredVlrs.emplace_back(s[0], 0, "ALL");
+        }
+        else
+        {
+            error = "Invalid VLR specification (" + v + ") to ignore.";
+            break;
+        }
+    }
+    return ignoredVlrs;
+}
+
+bool shouldIgnoreVlr(const Vlr& v, const VlrList& vlrs)
+{
+    // We ignore VLRs when the user IDs match and the test description is "ALL" or
+    // the record IDs match.
+    for (const Vlr& ignore : vlrs)
+    {
+        if ((v.userId == ignore.userId) &&
+            ((ignore.description == "ALL") || (v.recordId == ignore.recordId)))
+                return true;
+    }
+    return false;
+}
+
+const Vlr *findVlr(const std::string& userId, uint16_t recordId, const VlrList& vlrs)
+{
+    auto it = std::find(vlrs.begin(), vlrs.end(), Vlr(userId, recordId));
+    if (it == vlrs.end())
+        return nullptr;
+    return (&(*it));
+}
+
+void Vlr::fillHeader(const char *buf)
+{
+    LeExtractor in(buf, Vlr::HeaderSize);
+    uint16_t dataLen;
+
+    in >> recordSig;
+    in.get(userId, 16);
+    in >> recordId >> dataLen;
+    in.get(description, 32);
+    promisedDataSize = dataLen;
+}
+
+void Evlr::fillHeader(const char *buf)
+{
+    LeExtractor in(buf, Evlr::HeaderSize);
+
+    in >> recordSig;
+    in.get(userId, 16);
+    in >> recordId >> promisedDataSize;
+    in.get(description, 32);
+}
+
+/**
 const uint16_t LasVLR::MAX_DATA_SIZE = 65535;
 
 bool LasVLR::read(ILeStream& in, size_t limit)
@@ -242,5 +315,7 @@ void LasVLR::write(OLeStream& out, uint16_t recordSig)
     m_recordSig = recordSig;
     out << *this;
 }
+**/
 
+} // namespace las
 } // namespace pdal

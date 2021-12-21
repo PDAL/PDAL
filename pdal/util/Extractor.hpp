@@ -111,8 +111,9 @@ public:
     {
         s = std::string(m_gptr, size);
         m_gptr += size;
-        while (--size)
+        while (true)
         {
+            size--;
             if (s[size] != '\0')
                 break;
             else if (size == 0)

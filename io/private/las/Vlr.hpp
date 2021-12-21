@@ -44,83 +44,93 @@
 
 namespace pdal
 {
+namespace las
+{
 
-static const int WKT_RECORD_ID = 2112;
-static const uint16_t GEOTIFF_DIRECTORY_RECORD_ID = 34735;
-static const uint16_t GEOTIFF_DOUBLES_RECORD_ID = 34736;
-static const uint16_t GEOTIFF_ASCII_RECORD_ID = 34737;
-static const uint16_t LASZIP_RECORD_ID = 22204;
-static const uint16_t EXTRA_BYTES_RECORD_ID = 4;
-static const uint16_t PDAL_METADATA_RECORD_ID = 12;
-static const uint16_t PDAL_PIPELINE_RECORD_ID = 13;
+static const int WktRecordId = 2112;
+static const uint16_t GeotiffDirectoryRecordId = 34735;
+static const uint16_t GeotiffDoublesRecordId = 34736;
+static const uint16_t GeotiffAsciiRecordId = 34737;
+static const uint16_t LaszipRecordId = 22204;
+static const uint16_t ClassLookupRecordId = 0;
+static const uint16_t TextDescriptionRecordId = 3;
+static const uint16_t ExtraBytesRecordId = 4;
+static const uint16_t PdalMetadataRecordId = 12;
+static const uint16_t PdalPipelineRecordId = 13;
 
-static const char TRANSFORM_USER_ID[] = "LASF_Projection";
-static const char SPEC_USER_ID[] = "LASF_Spec";
-static const char LIBLAS_USER_ID[] = "liblas";
-static const char LASZIP_USER_ID[] = "laszip encoded";
-static const char PDAL_USER_ID[] = "PDAL";
+const std::string TransformUserId = "LASF_Projection";
+const std::string SpecUserId = "LASF_Spec";
+const std::string LiblasUserId = "liblas";
+const std::string LaszipUserId = "laszip encoded";
+const std::string PdalUserId = "PDAL";
 
-class LasVLR;
-typedef std::vector<LasVLR> VlrList;
+struct Vlr;
+using VlrList = std::vector<Vlr>;
 
-class PDAL_DLL LasVLR
+VlrList parseIgnoreVLRs(const StringList& ignored, std::string& error);
+const Vlr *findVlr(const std::string& userId, uint16_t recordId, const VlrList& vlrs);
+bool shouldIgnoreVlr(const Vlr& v, const VlrList& ignoreList);
+
+struct Vlr
 {
 public:
-    static const uint16_t MAX_DATA_SIZE;
+//ABELL
+//    static const uint16_t MAX_DATA_SIZE;
+    static const int HeaderSize {54};
 
-    LasVLR(const std::string& userId, uint16_t recordId,
-            const std::string& description, std::vector<uint8_t>& data) :
-        m_userId(userId), m_recordId(recordId), m_description(description),
-        m_data(std::move(data)), m_recordSig(0)
+    Vlr() = default;
+    Vlr(const std::string& userId, uint16_t recordId, const std::string& description) :
+        userId(userId), recordId(recordId), description(description)
     {}
-    LasVLR() : m_recordId(0), m_recordSig(0)
+    Vlr(const std::string& userId, uint16_t recordId) :
+        userId(userId), recordId(recordId)
     {}
 
-    std::string userId() const
-        { return m_userId;}
-    uint16_t recordId() const
-        { return m_recordId; }
-    std::string description() const
-        { return m_description; }
+    char *data()
+        { return (char *)(dataVec.data()); }
+    const char *data() const
+        { return (const char *)(dataVec.data()); }
+    size_t dataSize() const
+        { return dataVec.size(); }
+    size_t empty() const
+        { return dataVec.size() == 0; }
 
-    bool matches(const std::string& userId) const
-        { return userId == m_userId; }
-    bool matches(const std::string& userId, uint16_t recordId) const
-        { return matches(userId) && (recordId == m_recordId); }
-
-    const char* data() const
-        { return (const char *)m_data.data(); }
-    char* data()
-        { return (char *)m_data.data(); }
-    bool isEmpty() const
-        { return m_data.size() == 0; }
-    uint64_t dataLen() const
-        { return m_data.size(); }
-    void setDataLen(uint64_t size)
-        { m_data.resize((size_t)size); }
+    void fillHeader(const char *buf);
+    /**
     void write(OLeStream& out, uint16_t recordSig);
     bool read(ILeStream& in, size_t limit);
 
     friend OLeStream& operator<<(OLeStream& out, const LasVLR& v);
     friend std::istream& operator>>(std::istream& in, LasVLR& v);
     friend std::ostream& operator<<(std::ostream& out, const LasVLR& v);
+    **/
 
-protected:
-    std::string m_userId;
-    uint16_t m_recordId;
-    std::string m_description;
-    std::vector<uint8_t> m_data;
-    uint16_t m_recordSig;
+    uint16_t recordSig {};
+    std::string userId;
+    uint16_t recordId {};
+    uint64_t promisedDataSize;
+    std::string description;
+    std::vector<uint8_t> dataVec;
 };
 
-class ExtLasVLR : public LasVLR
+inline bool operator==(const Vlr& v1, const Vlr& v2)
 {
-public:
+    return v1.userId == v2.userId && v1.recordId == v2.recordId;
+}
+
+
+struct Evlr : public Vlr
+{
+    static const int HeaderSize {54};
+
+    Evlr() = default;
+
+    void fillHeader(const char *buf);
+
+    /**
     ExtLasVLR(const std::string& userId, uint16_t recordId,
             const std::string& description, std::vector<uint8_t>& data) :
         LasVLR(userId, recordId, description, data)
-    {}
-    ExtLasVLR()
     {}
 
     bool read(ILeStream& in, uintmax_t limit);
@@ -128,6 +138,8 @@ public:
     friend OLeStream& operator<<(OLeStream& out, const ExtLasVLR& v);
     friend std::istream& operator>>(std::istream& in, ExtLasVLR& v);
     friend std::ostream& operator<<(std::ostream& out, const ExtLasVLR& v);
+    **/
 };
 
+} // namespace las
 } // namespace pdal

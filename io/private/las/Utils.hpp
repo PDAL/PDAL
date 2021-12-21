@@ -46,6 +46,8 @@
 
 #include <string>
 
+#include "Vlr.hpp"
+
 namespace pdal
 {
 
@@ -91,6 +93,23 @@ inline std::ostream& operator<<(std::ostream& out, const Compression& c)
         break;
     }
     return out;
+}
+
+inline bool pointFormatSupported(int format)
+{
+    switch (format)
+    {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 6:
+    case 7:
+    case 8:
+        return true;
+    default:
+        return false; 
+    }
 }
 
 struct ExtraDim
@@ -195,13 +214,6 @@ struct error : public std::runtime_error
 
 std::string generateSoftwareId();
 std::vector<ExtraDim> parse(const StringList& dimString, bool allOk);
-
-struct IgnoreVLR
-{
-    std::string m_userId;
-    uint16_t m_recordId;
-};
-std::vector<IgnoreVLR> parseIgnoreVLRs(const StringList& ignored);
 const Dimension::IdList& pdrfDims(int pdrf);
 
 // Loader

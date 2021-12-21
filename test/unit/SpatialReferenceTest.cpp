@@ -41,6 +41,7 @@
 #include <filters/ReprojectionFilter.hpp>
 #include <io/LasWriter.hpp>
 #include <io/LasReader.hpp>
+#include <io/private/las/Header.hpp>
 
 #include <gdal_version.h>
 
@@ -275,7 +276,7 @@ TEST(SpatialReferenceTest, test_writing_vlr)
 
         SpatialReference result_ref = reader.getSpatialReference();
 
-        EXPECT_EQ(reader.header().vlrCount(), 2u);
+        EXPECT_EQ(reader.header().vlrCount, 2u);
         std::string wkt = result_ref.getWKT();
         EXPECT_NE(wkt.find(reference_wkt), std::string::npos);
     }
