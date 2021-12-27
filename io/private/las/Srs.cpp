@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <io/GeotiffSupport.hpp>
-
+#include "Geotiff.hpp"
 #include "Srs.hpp"
 #include "Utils.hpp"
 

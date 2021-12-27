@@ -50,12 +50,12 @@ namespace pdal
 {
 
 class PointRef;
-class LasSummaryData;
 
 namespace las
 {
 
 struct Header;
+class Summary;
 
 enum class Compression
 {
@@ -213,7 +213,7 @@ struct error : public std::runtime_error
     {}
 };
 
-void setSummary(las::Header& header, const LasSummaryData& summary);
+void setSummary(Header& header, const Summary& summary);
 std::string generateSoftwareId();
 std::vector<ExtraDim> parse(const StringList& dimString, bool allOk);
 const Dimension::IdList& pdrfDims(int pdrf);

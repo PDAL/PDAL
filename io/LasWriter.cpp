@@ -37,6 +37,7 @@
 #include <pdal/compression/LazPerfVlrCompression.hpp>
 
 #include "LasWriter.hpp"
+#include "private/las/Summary.hpp"
 #include "private/las/Utils.hpp"
 #include "private/las/Vlr.hpp"
 
@@ -55,7 +56,7 @@
 #include <pdal/util/Utils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-#include "GeotiffSupport.hpp"
+#include "private/las/Geotiff.hpp"
 
 namespace pdal
 {
@@ -106,6 +107,7 @@ struct LasWriter::Private
     las::Header header;
     bool forwardVlrs = false;
     std::string curFilename;
+    las::Summary summary;
 };
 
 LasWriter::LasWriter() : d(new Private), m_compressor(nullptr), m_ostream(NULL), m_srsCnt(0)
@@ -363,7 +365,7 @@ void LasWriter::prepOutput(std::ostream *outStream, const SpatialReference& srs)
     // Spatial reference can potentially change for multiple output files.
     addSpatialRefVlrs();
 
-    m_summaryData.reset(new LasSummaryData());
+    d->summary.clear();
     m_ostream = outStream;
     if (d->header.dataCompressed())
         readyCompression();
@@ -510,7 +512,7 @@ void LasWriter::addGeotiffVlrs()
 
     try
     {
-        GeotiffTags tags(m_srs);
+        las::GeotiffTags tags(m_srs);
 
         if (tags.directoryData().empty())
             throwError("Invalid spatial reference for writing GeoTiff VLR.");
@@ -524,7 +526,7 @@ void LasWriter::addGeotiffVlrs()
             addVlr(las::TransformUserId, las::GeotiffAsciiRecordId,
                 "GeoTiff GeoAsciiParamsTag", tags.asciiData());
     }
-    catch (Geotiff::error& err)
+    catch (las::Geotiff::error& err)
     {
         throwError(err.what());
     }
@@ -543,13 +545,12 @@ bool LasWriter::addWktVlr()
     std::vector<uint8_t> wktBytes(wkt.begin(), wkt.end());
     // This tacks a NULL to the end of the data, which is required by the spec.
     wktBytes.resize(wktBytes.size() + 1, 0);
-    addVlr(TRANSFORM_USER_ID, WKT_RECORD_ID, "OGC Transformation Record",
-        wktBytes);
+    addVlr(las::TransformUserId, las::WktRecordId, "OGC Transformation Record", wktBytes);
 
     // The data in the vector gets moved to the VLR, so we have to recreate it.
     std::vector<uint8_t> wktBytes2(wkt.begin(), wkt.end());
     wktBytes2.resize(wktBytes2.size() + 1, 0);
-    addVlr(LIBLAS_USER_ID, WKT_RECORD_ID, "OGR variant of OpenGIS WKT SRS", wktBytes2);
+    addVlr(las::LiblasUserId, las::WktRecordId, "OGR variant of OpenGIS WKT SRS", wktBytes2);
     return true;
 }
 
@@ -567,7 +568,7 @@ void LasWriter::addExtraBytesVlr()
         eb.appendTo(ebBytes);
     }
 
-    addVlr(SPEC_USER_ID, EXTRA_BYTES_RECORD_ID, "Extra Bytes Record", ebBytes);
+    addVlr(las::SpecUserId, las::ExtraBytesRecordId, "Extra Bytes Record", ebBytes);
 }
 
 
@@ -740,7 +741,7 @@ void LasWriter::readyLasZipCompression()
     // A VLR has 54 header bytes that we skip in order to get to the payload.
     std::vector<laszip_U8> vlrData(data + 54, data + size);
 
-    addVlr(LASZIP_USER_ID, LASZIP_RECORD_ID, "http://laszip.org", vlrData);
+    addVlr(las::LaszipUserId, las::LaszipRecordId, "http://laszip.org", vlrData);
 #endif
 }
 
@@ -1006,7 +1007,7 @@ bool LasWriter::writeLasZipBuf(PointRef& point)
     p.extra_bytes = (laszip_U8 *)m_pointBuf.data();
     p.num_extra_bytes = m_extraByteLen;
 
-    m_summaryData->addPoint(xOrig, yOrig, zOrig, returnNumber);
+    d->summary.addPoint(xOrig, yOrig, zOrig, returnNumber);
 
     handleLaszip(laszip_set_point(m_laszip, &p));
     handleLaszip(laszip_write_point(m_laszip));
@@ -1145,7 +1146,7 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
         Utils::insertDim(ostream, dim.m_dimType.m_type, e);
     }
 
-    m_summaryData->addPoint(xOrig, yOrig, zOrig, returnNumber);
+    d->summary.addPoint(xOrig, yOrig, zOrig, returnNumber);
     return true;
 }
 
@@ -1184,8 +1185,7 @@ void LasWriter::finishOutput()
         finishLasZipOutput();
     else if (d->opts.compression == las::Compression::LazPerf)
         finishLazPerfOutput();
-    log()->get(LogLevel::Debug) << "Wrote " <<
-        m_summaryData->getTotalNumPoints() <<
+    log()->get(LogLevel::Debug) << "Wrote " << d->summary.getTotalNumPoints() <<
         " points to the LAS file" << std::endl;
 
     // addVlr prevents any evlrs from being added before version 1.4.
@@ -1201,15 +1201,7 @@ void LasWriter::finishOutput()
     fillHeader();
 
     // The summary is calculated as points are written.
-    //ABELL - Can we get rid of the exception?
-    try
-    {
-        las::setSummary(d->header, *m_summaryData);
-    }
-    catch (const LasHeader::error& err)
-    {
-        throwError(err.what());
-    }
+    las::setSummary(d->header, d->summary);
 
     std::vector<char> buf = d->header.data();
     m_ostream->seekp(0);

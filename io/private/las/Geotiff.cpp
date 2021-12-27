@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "GeotiffSupport.hpp"
+#include "Geotiff.hpp"
 
 #include <sstream>
 
@@ -41,7 +41,8 @@
 
 namespace pdal
 {
-
+namespace las
+{
 
 // Utility functor with accompanying to print GeoTIFF directory.
 struct geotiff_dir_printer
@@ -64,30 +65,34 @@ private:
     std::stringstream m_oss;
 };
 
-}
+} // namespace las
+} // namespace pdal
 
 extern "C"
 {
 
-// These functions are available from GDAL, but they
-// aren't exported.
+// These functions are available from GDAL, but they aren't provided in a header file.
 char PDAL_DLL * GTIFGetOGISDefn(GTIF*, GTIFDefn*);
 int PDAL_DLL GTIFSetFromOGISDefn(GTIF*, const char*);
 void VSIFree(void *data);
 
 int PDALGeoTIFFPrint(char* data, void* aux)
 {
-    pdal::geotiff_dir_printer* printer = reinterpret_cast<pdal::geotiff_dir_printer*>(aux);
+    pdal::las::geotiff_dir_printer* printer =
+        reinterpret_cast<pdal::las::geotiff_dir_printer*>(aux);
     (*printer)(data, 0);
     return static_cast<int>(printer->size());
 }
 
 } // extern "C"
 
-#include <io/LasVLR.hpp>
+#include "Vlr.hpp"
 
 namespace pdal
 {
+namespace las
+{
+
 namespace
 {
 
@@ -110,7 +115,7 @@ public:
     GTIF *gtiff;
 };
 
-}
+} // unnamed namespace
 
 #pragma pack(push)
 #pragma pack(1)
@@ -153,13 +158,13 @@ GeotiffSrs::GeotiffSrs(const std::vector<uint8_t>& directoryRec,
         doublesRec.size() / sizeof(double), asciiRec.size());
 
     uint8_t *dirData = const_cast<uint8_t *>(directoryRec.data());
-    ST_SetKey(ctx.tiff, GEOTIFF_DIRECTORY_RECORD_ID,
+    ST_SetKey(ctx.tiff, GeotiffDirectoryRecordId,
         (1 + header->numKeys) * 4, STT_SHORT, (void *)dirData);
 
     if (doublesRec.size())
     {
         uint8_t *doubleData = const_cast<uint8_t *>(doublesRec.data());
-        ST_SetKey(ctx.tiff, GEOTIFF_DOUBLES_RECORD_ID,
+        ST_SetKey(ctx.tiff, GeotiffDoublesRecordId,
             doublesRec.size() / sizeof(double), STT_DOUBLE,
             (void *)doubleData);
     }
@@ -167,7 +172,7 @@ GeotiffSrs::GeotiffSrs(const std::vector<uint8_t>& directoryRec,
     if (asciiRec.size())
     {
         uint8_t *asciiData = const_cast<uint8_t *>(asciiRec.data());
-        ST_SetKey(ctx.tiff, GEOTIFF_ASCII_RECORD_ID,
+        ST_SetKey(ctx.tiff, GeotiffAsciiRecordId,
             asciiRec.size(), STT_ASCII, (void *)asciiData);
     }
 
@@ -207,12 +212,12 @@ void GeotiffSrs::validateDirectory(const Entry *ent, size_t numEntries,
             m_log->get(LogLevel::Error) << "Geotiff directory contains key " <<
                 ent->key << " with short entry and more than one value." <<
                 std::endl;
-        if (ent->location == GEOTIFF_DIRECTORY_RECORD_ID)
+        if (ent->location == GeotiffDirectoryRecordId)
             if (ent->offset + ent->count > numDoubles)
                 m_log->get(LogLevel::Error) << "Geotiff directory contains " <<
                     "key " << ent->key << " with count/offset outside of valid "
                     "range of doubles record." << std::endl;
-        if (ent->location == GEOTIFF_ASCII_RECORD_ID)
+        if (ent->location == GeotiffAsciiRecordId)
             if (ent->offset + ent->count > asciiSize)
                 m_log->get(LogLevel::Error) << "Geotiff directory contains " <<
                     " key " << ent->key << " with count/offset outside of "
@@ -249,21 +254,21 @@ GeotiffTags::GeotiffTags(const SpatialReference& srs)
     int count;
     int st_type;
     uint8_t *data;
-    if (ST_GetKey(ctx.tiff, GEOTIFF_DIRECTORY_RECORD_ID,
+    if (ST_GetKey(ctx.tiff, GeotiffDirectoryRecordId,
         &count, &st_type, (void **)&data))
     {
         size_t size = sizeFromType(st_type, count);
         m_directoryRec.resize(size);
         std::copy(data, data + size, m_directoryRec.begin());
     }
-    if (ST_GetKey(ctx.tiff, GEOTIFF_DOUBLES_RECORD_ID,
+    if (ST_GetKey(ctx.tiff, GeotiffDoublesRecordId,
         &count, &st_type, (void **)&data))
     {
         size_t size = sizeFromType(st_type, count);
         m_doublesRec.resize(size);
         std::copy(data, data + size, m_doublesRec.begin());
     }
-    if (ST_GetKey(ctx.tiff, GEOTIFF_ASCII_RECORD_ID,
+    if (ST_GetKey(ctx.tiff, GeotiffAsciiRecordId,
         &count, &st_type, (void **)&data))
     {
         size_t size = sizeFromType(st_type, count);
@@ -272,4 +277,5 @@ GeotiffTags::GeotiffTags(const SpatialReference& srs)
     }
 }
 
+} // namespace las
 } // namespace pdal

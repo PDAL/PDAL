@@ -33,6 +33,7 @@
  ****************************************************************************/
 
 #include "Header.hpp"
+#include "Summary.hpp"
 #include "Utils.hpp"
 #include "Vlr.hpp"
 
@@ -42,7 +43,6 @@
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/ThreadPool.hpp>
 #include <pdal/util/Utils.hpp>
-#include <io/LasSummaryData.hpp>
 
 namespace pdal
 {
@@ -60,7 +60,7 @@ namespace
 namespace las
 {
 
-void setSummary(las::Header& header, const LasSummaryData& summary)
+void setSummary(las::Header& header, const Summary& summary)
 {
     header.setPointCount(summary.getTotalNumPoints());
     for (int i = 0; i < Header::ReturnCount; ++i)

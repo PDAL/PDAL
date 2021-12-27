@@ -259,6 +259,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     if (stream->gcount() < (std::streamsize)las::Header::Size12)
         throwError("Couldn't read LAS header. File size insufficient.");
     d->header.fill(headerBuf, las::Header::Size14);
+
     StringList errors = d->header.validate(Utils::fileSize(m_filename));
     if (errors.size())
         throwError(errors.front());

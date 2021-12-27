@@ -127,7 +127,8 @@ StringList Header::validate(uint64_t fileSize) const
     if (!dataCompressed() && (pointOffset > fileSize))
         errors.push_back("Invalid point offset - exceeds file size.");
     if (!dataCompressed() && (pointOffset + pointCount() * pointSize > fileSize))
-        errors.push_back("Invalid point count. Number of points too large for file size.");
+        errors.push_back("Invalid point count: " + std::to_string(pointCount()) +
+            ". Number of points too large for file size.");
     if (vlrOffset > fileSize)
         errors.push_back("Invalid VLR offset - exceeds file size.");
     return errors;

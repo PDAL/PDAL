@@ -40,7 +40,6 @@
 
 #include "HeaderVal.hpp"
 #include "LasError.hpp"
-#include "LasSummaryData.hpp"
 #include "private/las/Header.hpp"
 #include "private/las/Vlr.hpp"
 
@@ -95,7 +94,6 @@ protected:
 private:
     std::unique_ptr<Private> d;
 
-    std::unique_ptr<LasSummaryData> m_summaryData;
     laszip_POINTER m_laszip;
     LazPerfVlrCompressor *m_compressor;
     std::ostream *m_ostream;
