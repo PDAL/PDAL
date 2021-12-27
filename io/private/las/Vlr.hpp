@@ -97,14 +97,6 @@ public:
 
     virtual void fillHeader(const char *buf);
     virtual std::vector<char> headerData() const;
-    /**
-    void write(OLeStream& out, uint16_t recordSig);
-    bool read(ILeStream& in, size_t limit);
-
-    friend OLeStream& operator<<(OLeStream& out, const LasVLR& v);
-    friend std::istream& operator>>(std::istream& in, LasVLR& v);
-    friend std::ostream& operator<<(std::ostream& out, const LasVLR& v);
-    **/
 
     uint16_t recordSig {};
     std::string userId;
@@ -135,11 +127,6 @@ struct Evlr : public Vlr
 
     friend std::istream& operator>>(std::istream& in, Evlr& v);
     friend std::ostream& operator<<(std::ostream& out, const Evlr& v);
-    /**
-    bool read(ILeStream& in, uintmax_t limit);
-
-    friend Evlr OLeStream& operator<<(OLeStream& out, const ExtLasVLR& v);
-    **/
 };
 
 } // namespace las
