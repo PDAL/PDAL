@@ -73,7 +73,13 @@ void Header::fill(const char *buf, size_t bufsize)
 
 std::vector<char> Header::data() const
 {
-    std::vector<char> buf(Header::Size);
+    size_t size = Size12;
+    if (versionMinor >= 4)
+        size = Size14;
+    else if (versionMinor == 3)
+        size = Size13;
+
+    std::vector<char> buf(size);
     LeInserter s(buf.data(), buf.size());
 
     s.put(magic, 4);
@@ -100,9 +106,11 @@ std::vector<char> Header::data() const
     {
         s << waveOffset;
         if (versionMinor >= 4)
+        {
             s << evlrOffset << evlrCount << ePointCount;
             for (const uint64_t& pbr : ePointsByReturn)
                 s << pbr;
+        }
     }
     return buf;
 }
@@ -125,6 +133,20 @@ StringList Header::validate(uint64_t fileSize) const
     return errors;
 }
 
+void Header::setPointCount(uint64_t pointCount)
+{
+    ePointCount = pointCount;
+    legacyPointCount =
+        (ePointCount <= (std::numeric_limits<uint32_t>::max)()) ? ePointCount : 0;
+}
+
+void Header::setPointsByReturn(int returnNum, uint64_t pointCount)
+{
+    ePointsByReturn[returnNum] = pointCount;
+    if (returnNum < LegacyReturnCount)
+        legacyPointsByReturn[returnNum] =
+            (pointCount <= (std::numeric_limits<uint32_t>::max)()) ? pointCount : 0;
+}
 
 } // namespace las
 } // namespace pdal

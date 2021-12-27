@@ -44,17 +44,18 @@
 #include <pdal/PointRef.hpp>
 #include <pdal/Scaling.hpp>
 
-#include <string>
-
 #include "Vlr.hpp"
 
 namespace pdal
 {
 
 class PointRef;
+class LasSummaryData;
 
 namespace las
 {
+
+struct Header;
 
 enum class Compression
 {
@@ -212,6 +213,7 @@ struct error : public std::runtime_error
     {}
 };
 
+void setSummary(las::Header& header, const LasSummaryData& summary);
 std::string generateSoftwareId();
 std::vector<ExtraDim> parse(const StringList& dimString, bool allOk);
 const Dimension::IdList& pdrfDims(int pdrf);

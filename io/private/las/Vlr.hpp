@@ -74,8 +74,7 @@ bool shouldIgnoreVlr(const Vlr& v, const VlrList& ignoreList);
 struct Vlr
 {
 public:
-//ABELL
-//    static const uint16_t MAX_DATA_SIZE;
+    static const uint16_t MaxDataSize {(std::numeric_limits<uint16_t>::max)()};
     static const int HeaderSize {54};
 
     Vlr() = default;
@@ -85,6 +84,7 @@ public:
     Vlr(const std::string& userId, uint16_t recordId) :
         userId(userId), recordId(recordId)
     {}
+    virtual ~Vlr() = default;
 
     char *data()
         { return (char *)(dataVec.data()); }
@@ -95,7 +95,8 @@ public:
     size_t empty() const
         { return dataVec.size() == 0; }
 
-    void fillHeader(const char *buf);
+    virtual void fillHeader(const char *buf);
+    virtual std::vector<char> headerData() const;
     /**
     void write(OLeStream& out, uint16_t recordSig);
     bool read(ILeStream& in, size_t limit);
@@ -121,23 +122,23 @@ inline bool operator==(const Vlr& v1, const Vlr& v2)
 
 struct Evlr : public Vlr
 {
-    static const int HeaderSize {54};
+    static const int HeaderSize {60};
 
     Evlr() = default;
-
-    void fillHeader(const char *buf);
-
-    /**
-    ExtLasVLR(const std::string& userId, uint16_t recordId,
+    Evlr(const std::string& userId, uint16_t recordId,
             const std::string& description, std::vector<uint8_t>& data) :
-        LasVLR(userId, recordId, description, data)
-    {}
+        Vlr(userId, recordId, description)
+    { dataVec = data; }
 
+    virtual void fillHeader(const char *buf) override;
+    virtual std::vector<char> headerData() const override;
+
+    friend std::istream& operator>>(std::istream& in, Evlr& v);
+    friend std::ostream& operator<<(std::ostream& out, const Evlr& v);
+    /**
     bool read(ILeStream& in, uintmax_t limit);
 
-    friend OLeStream& operator<<(OLeStream& out, const ExtLasVLR& v);
-    friend std::istream& operator>>(std::istream& in, ExtLasVLR& v);
-    friend std::ostream& operator<<(std::ostream& out, const ExtLasVLR& v);
+    friend Evlr OLeStream& operator<<(OLeStream& out, const ExtLasVLR& v);
     **/
 };
 

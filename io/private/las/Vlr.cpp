@@ -34,6 +34,9 @@
 
 #include "Vlr.hpp"
 
+#include <nlohmann/json.hpp>
+#include <pdal/util/FileUtils.hpp>
+#include <pdal/util/Inserter.hpp>
 #include <pdal/util/Extractor.hpp>
 
 namespace pdal
@@ -105,6 +108,20 @@ void Vlr::fillHeader(const char *buf)
     promisedDataSize = dataLen;
 }
 
+std::vector<char> Vlr::headerData() const
+{
+    std::vector<char> buf(HeaderSize);
+
+    assert(dataVec.size() <= (std::numeric_limits<uint16_t>::max)());
+    LeInserter out(buf.data(), HeaderSize);
+    out << recordSig;
+    out.put(userId, 16);
+    out << recordId << (uint16_t)(dataVec.size());
+    out.put(description, 32);
+
+    return buf;
+}
+
 void Evlr::fillHeader(const char *buf)
 {
     LeExtractor in(buf, Evlr::HeaderSize);
@@ -115,29 +132,20 @@ void Evlr::fillHeader(const char *buf)
     in.get(description, 32);
 }
 
-/**
-const uint16_t LasVLR::MAX_DATA_SIZE = 65535;
-
-bool LasVLR::read(ILeStream& in, size_t limit)
+std::vector<char> Evlr::headerData() const
 {
-    uint16_t reserved;
-    uint16_t dataLen;
+    std::vector<char> buf(HeaderSize);
 
-    in >> reserved;
-    in.get(m_userId, 16);
-    in >> m_recordId >> dataLen;
-    if ((size_t)in.position() + dataLen > limit)
-        return false;
-    in.get(m_description, 32);
-    m_data.resize(dataLen);
-    if (m_data.size() > 0)
-        in.get(m_data);
+    LeInserter out(buf.data(), HeaderSize);
+    out << recordSig;
+    out.put(userId, 16);
+    out << recordId << (uint64_t)dataVec.size();
+    out.put(description, 32);
 
-    return true;
+    return buf;
 }
 
-
-std::istream& operator>>(std::istream& in, LasVLR& v)
+std::istream& operator>>(std::istream& in, las::Evlr& v)
 {
     NL::json j;
     in >> j;
@@ -237,12 +245,47 @@ std::istream& operator>>(std::istream& in, LasVLR& v)
     if (std::isnan(recordId))
         recordId = 1;
 
-    v.m_userId = userId;
-    v.m_recordId = (uint16_t)recordId;
-    v.m_description = description;
-    v.m_data = std::move(data);
+    v.userId = userId;
+    v.recordId = (uint16_t)recordId;
+    v.description = description;
+    v.dataVec = std::move(data);
     return in;
 }
+
+std::ostream& operator<<(std::ostream& out, const las::Evlr& v)
+{
+    const unsigned char *d(reinterpret_cast<const unsigned char *>(v.data()));
+
+    out << "{\n";
+    out << "  \"description\": \"" << v.description << "\",\n";
+    out << "  \"record_id\": " << v.recordId << ",\n";
+    out << "  \"user_id\": \"" << v.userId << "\",\n";
+    out << "  \"data\": \"" <<Utils::base64_encode(d, v.dataSize()) << "\"\n";
+    out << "}\n";
+    return out;
+}
+
+/**
+const uint16_t LasVLR::MAX_DATA_SIZE = 65535;
+
+bool LasVLR::read(ILeStream& in, size_t limit)
+{
+    uint16_t reserved;
+    uint16_t dataLen;
+
+    in >> reserved;
+    in.get(m_userId, 16);
+    in >> m_recordId >> dataLen;
+    if ((size_t)in.position() + dataLen > limit)
+        return false;
+    in.get(m_description, 32);
+    m_data.resize(dataLen);
+    if (m_data.size() > 0)
+        in.get(m_data);
+
+    return true;
+}
+
 
 
 std::istream& operator>>(std::istream& in, ExtLasVLR& v)

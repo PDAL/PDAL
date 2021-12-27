@@ -71,10 +71,10 @@ struct Header
 
     static const int LegacyReturnCount {5};
     static const int ReturnCount {15};
-    static const size_t Size {375};
-    static const size_t Size12 {227};
-    static const size_t Size13 {235};
-    static const size_t Size14 {375};
+    static const int Size {375};
+    static const int Size12 {227};
+    static const int Size13 {235};
+    static const int Size14 {375};
     static const int FormatMask {0xF}; // Make as small as possible to improve? optimization.
     static const int CompressionMask {0x80};
     static const int WktMask {0x10};
@@ -119,8 +119,14 @@ struct Header
         { return las::baseCount(pointFormat()); }
     int pointFormat() const
         { return pointFormatBits & FormatMask; }
+    void setPointFormat(int format)
+        { pointFormatBits = format | (pointFormatBits & CompressionMask); }
     bool dataCompressed() const
         { return pointFormatBits & CompressionMask; }
+    void setDataCompressed()
+        { pointFormatBits |= CompressionMask; }
+    void setPointCount(uint64_t pointCount);
+    void setPointsByReturn(int returnNum, uint64_t pointCount);
     bool useWkt() const
         { return globalEncoding & WktMask; }
     // It's an error if the WKT flag isn't set and the point format > 5, but we roll with it.
@@ -128,12 +134,19 @@ struct Header
         { return (useWkt() && versionMinor >= 4) || has14PointFormat(); }
     uint64_t pointCount() const
         { return versionMinor >= 4 ? ePointCount : legacyPointCount; }
+    int maxReturnCount() const
+        { return versionMinor >= 4 ? ReturnCount : LegacyReturnCount; }
     bool versionAtLeast(int major, int minor) const
         { return versionMinor >= minor; } // Major is always 1.
     bool has14PointFormat() const
         { return pointFormat() > 5; }
     bool hasTime() const
         { return pointFormat() == 1 || pointFormat() >= 3; }
+    bool hasWave() const
+    {
+        int f = pointFormat();
+        return f == 4 || f == 5 || f == 9 || f == 10;
+    }
     bool hasColor() const
     {
         int f = pointFormat();

@@ -55,12 +55,17 @@
 namespace pdal
 {
 
+namespace las
+{
+    struct Header;
+}
+
 //ABELL - Should probably be moved to its own file.
 class LasTester
 {
 public:
-    LasHeader *header(LasWriter& w)
-        { return &w.m_lasHeader; }
+    const las::Header& header(LasWriter& w)
+        { return w.header(); }
     SpatialReference srs(LasWriter& w)
         { return w.m_srs; }
     void addVlr(LasWriter& w, const std::string& userId, uint16_t recordId,
@@ -409,8 +414,8 @@ TEST(LasWriterTest, extra_dims)
     PointViewSet viewSet = writer.execute(table);
 
     LasTester tester;
-    LasHeader *header = tester.header(writer);
-    EXPECT_EQ(header->pointLen(), header->basePointLen() + 10);
+    const las::Header& header = tester.header(writer);
+    EXPECT_EQ(header.pointSize, header.baseCount() + 10);
     PointViewPtr pb = *viewSet.begin();
 
     uint16_t colors[][3] = {
@@ -1410,10 +1415,10 @@ TEST(LasWriterTest, evlrOffset)
         w.prepare(t);
         w.execute(t);
         LasTester tester;
-        LasHeader* h = tester.header(w);
+        const las::Header& h = tester.header(w);
         // No points in the file
-        EXPECT_EQ(h->eVlrOffset(), h->pointOffset());
-        EXPECT_EQ(h->eVlrCount(), 1u);
+        EXPECT_EQ(h.evlrOffset, h.pointOffset);
+        EXPECT_EQ(h.evlrCount, 1u);
     }
 }
 
@@ -1538,11 +1543,11 @@ TEST(LasWriterTest, issue1940)
     w.execute(t);
 
     LasTester tester;
-    LasHeader *h = tester.header(w);
-    EXPECT_DOUBLE_EQ(h->offsetX(), 0);
-    EXPECT_DOUBLE_EQ(h->offsetY(), 55);
-    EXPECT_DOUBLE_EQ(h->scaleX(), 1.0);
-    EXPECT_DOUBLE_EQ(h->scaleY(), .01);
+    const las::Header& h = tester.header(w);
+    EXPECT_DOUBLE_EQ(h.offset.x, 0);
+    EXPECT_DOUBLE_EQ(h.offset.y, 55);
+    EXPECT_DOUBLE_EQ(h.scale.x, 1.0);
+    EXPECT_DOUBLE_EQ(h.scale.y, .01);
 }
 
 // Make sure that we can forward scale from multiple files if they match.

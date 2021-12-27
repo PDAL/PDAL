@@ -32,18 +32,17 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "./Utils.hpp"
+#include "Header.hpp"
+#include "Utils.hpp"
 #include "Vlr.hpp"
-
-#include <string>
 
 #include <pdal/PointRef.hpp>
 
-#include <pdal/util/Charbuf.hpp>
 #include <pdal/util/Extractor.hpp>
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/ThreadPool.hpp>
 #include <pdal/util/Utils.hpp>
+#include <io/LasSummaryData.hpp>
 
 namespace pdal
 {
@@ -60,6 +59,14 @@ namespace
 
 namespace las
 {
+
+void setSummary(las::Header& header, const LasSummaryData& summary)
+{
+    header.setPointCount(summary.getTotalNumPoints());
+    for (int i = 0; i < Header::ReturnCount; ++i)
+        header.setPointsByReturn(i, summary.getReturnCount(i));
+    header.bounds = summary.getBounds();
+}
 
 uint8_t ExtraBytesIf::lasType()
 {
