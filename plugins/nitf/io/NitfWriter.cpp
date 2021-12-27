@@ -128,7 +128,7 @@ void NitfWriter::doneFile()
     buf->sgetn(bytes.data(), size);
     m_oss.clear();
     m_nitf.wrapData(bytes.data(), size);
-    m_nitf.setBounds(reprojectBoxToDD(m_srs, m_lasHeader.getBounds()));
+    m_nitf.setBounds(reprojectBoxToDD(m_srs, header().bounds));
 
     try
     {
