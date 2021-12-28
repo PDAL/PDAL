@@ -46,15 +46,6 @@
 #include <codecvt>
 #endif
 
-// #if defined(__APPLE__) && defined(__MACH__)
-// #include <experimental/filesystem>
-// namespace std {
-//     namespace filesystem  = std::__fs::filesystem;
-// }
-// #else
-// #include <filesystem>
-// #endif
-
 #ifndef __has_include
   static_assert(false, "__has_include not supported");
 #else
