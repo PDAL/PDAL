@@ -37,11 +37,12 @@
 #include <pdal/Polygon.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/SpatialReference.hpp>
+#include <pdal/util/Algorithm.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <filters/ReprojectionFilter.hpp>
+#include <io/LasHeader.hpp>
 #include <io/LasWriter.hpp>
 #include <io/LasReader.hpp>
-#include <io/private/las/Header.hpp>
 
 #include <gdal_version.h>
 

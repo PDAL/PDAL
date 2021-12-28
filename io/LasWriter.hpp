@@ -39,8 +39,6 @@
 #include <pdal/Streamable.hpp>
 
 #include "HeaderVal.hpp"
-#include "LasError.hpp"
-#include "private/las/Header.hpp"
 #include "private/las/Vlr.hpp"
 
 #ifdef PDAL_HAVE_LASZIP
@@ -59,6 +57,7 @@ class LazPerfVlrCompressor;
 
 namespace las
 {
+    struct Header;
     struct Vlr;
     struct Evlr;
     struct ExtraDim;

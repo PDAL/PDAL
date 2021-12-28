@@ -45,16 +45,11 @@ namespace pdal
 namespace las
 {
 
-/**
-const uint32_t DefaultChunkSize = 50000;
-const uint32_t VariableChunkSize = (std::numeric_limits<uint32_t>::max)();
-**/
-
-int baseCount(int format);
+int PDAL_DLL baseCount(int format);
 
 // We currently export the whole struct because we have virtual functions and the vtable
 // doesn't get exported unless you export the struct/class. :(
-struct Header
+struct PDAL_DLL Header
 {
     struct xyz
     {

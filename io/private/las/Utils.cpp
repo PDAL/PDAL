@@ -32,7 +32,8 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "Header.hpp"
+#include <io/LasHeader.hpp>
+
 #include "Summary.hpp"
 #include "Utils.hpp"
 #include "Vlr.hpp"

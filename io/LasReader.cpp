@@ -35,7 +35,7 @@
 #include <pdal/compression/LazPerfVlrCompression.hpp>
 
 #include "LasReader.hpp"
-#include "private/las/Header.hpp"
+#include "LasHeader.hpp"
 #include "private/las/Srs.hpp"
 #include "private/las/Utils.hpp"
 #include "private/las/Vlr.hpp"

@@ -43,7 +43,7 @@
 #include <pdal/util/IStream.hpp>
 #include <pdal/util/OStream.hpp>
 #include <pdal/pdal_types.hpp>
-#include <io/private/las/Header.hpp>
+#include <io/LasHeader.hpp>
 
 #include "LazPerfVlrCompression.hpp"
 

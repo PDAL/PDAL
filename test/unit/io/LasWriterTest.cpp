@@ -44,9 +44,9 @@
 #include <pdal/util/FileUtils.hpp>
 #include <io/BufferReader.hpp>
 #include <io/LasReader.hpp>
+#include <io/LasHeader.hpp>
 #include <io/LasWriter.hpp>
 #include <io/BpfReader.hpp>
-#include <io/private/las/Header.hpp>
 #include <io/private/las/Vlr.hpp>
 
 #include "Support.hpp"

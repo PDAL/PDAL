@@ -40,8 +40,8 @@
 
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/pdal_features.hpp>
+#include <io/LasHeader.hpp>
 #include <io/LasReader.hpp>
-#include <io/private/las/Header.hpp>
 
 #include "Support.hpp"
 

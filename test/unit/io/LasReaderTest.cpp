@@ -39,9 +39,9 @@
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/Streamable.hpp>
-#include <io/LasReader.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include <io/private/las/Header.hpp>
+#include <io/LasHeader.hpp>
+#include <io/LasReader.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
