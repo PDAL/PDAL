@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <string>
+
 /*
  * version settings
  */
@@ -13,10 +15,16 @@
 #define PDAL_VERSION_MINOR @PDAL_VERSION_MINOR@
 #define PDAL_VERSION_PATCH @PDAL_VERSION_PATCH@
 
-#define PDAL_VERSION "@PDAL_VERSION@"
+namespace pdal
+{
 
-/* (note this will look yucky until we get to major>=1) */
-#define PDAL_VERSION_INTEGER ((PDAL_VERSION_MAJOR*100*100)+(PDAL_VERSION_MINOR*100)+PDAL_VERSION_PATCH)
+const int pdalVersionMajor { @PDAL_VERSION_MAJOR@ };
+const int pdalVersionMinor { @PDAL_VERSION_MINOR@ };
+const int pdalVersionPatch { @PDAL_VERSION_PATCH@ };
+const std::string pdalVersion { "@PDAL_VERSION@" };
+const std::string pdalSha { "@GIT_SHA1@" };
+
+} // namespace pdal
 
 #cmakedefine PDAL_PLUGIN_INSTALL_PATH "@PDAL_PLUGIN_INSTALL_PATH@"
 /*
@@ -40,4 +48,5 @@
  * built pdal app as application bundle on OSX?
  */
 #cmakedefine PDAL_APP_BUNDLE
+
 
