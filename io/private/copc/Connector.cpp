@@ -35,6 +35,7 @@
 #include "Connector.hpp"
 
 #include <pdal/pdal_types.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 namespace pdal
 {
@@ -55,6 +56,13 @@ std::vector<char> Connector::getBinary(uint64_t offset, int32_t size) const
     {
         std::vector<char> buf(size);
         std::ifstream in(m_filename, std::ios::binary);
+        if (in.fail() )
+        {
+            std::string message = "Unable to open '" + m_filename + "'.";
+            if (!pdal::FileUtils::fileExists(m_filename))
+                message += " File does not exist.";
+            throw pdal_error(message);
+        }
         in.seekg(offset);
         in.read(buf.data(), size);
         return buf;
