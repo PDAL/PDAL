@@ -355,8 +355,8 @@ std::string toAbsolutePath(const std::string& filename, const std::string base)
     fs::path f (toNative(filename));
     fs::path b (toNative(newbase));
 
-    fs::path fb = f / b;
-    return fs::absolute(fb).string();
+    fs::path fb = b / f ;
+    return fb.string();
 }
 
 
