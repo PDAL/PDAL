@@ -32,7 +32,10 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+#pragma warning (push)
+#pragma warning (disable: 4251)
 #include <lazperf/readers.hpp>
+#pragma warning (pop)
 
 #include <io/LasReader.hpp>
 

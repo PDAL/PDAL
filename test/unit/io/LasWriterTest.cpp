@@ -1033,11 +1033,11 @@ TEST(LasWriterTest, flex_vlr)
         PointTable t;
         r.prepare(t);
         r.execute(t);
-        const las::VlrList& vlrs = r.vlrs();
-        EXPECT_EQ(vlrs.size(), 3U);
-        EXPECT_TRUE(Utils::contains(vlrs, las::Vlr("laszip encoded", 22204)));
-        EXPECT_TRUE(Utils::contains(vlrs, las::Vlr("PDAL", 12)));
-        EXPECT_TRUE(Utils::contains(vlrs, las::Vlr("PDAL", 13)));
+
+	const char *data = nullptr;
+	EXPECT_TRUE(r.vlrData("laszip encoded", 22204, data) > 0);
+	EXPECT_TRUE(r.vlrData("PDAL", 12, data) > 0);
+	EXPECT_TRUE(r.vlrData("PDAL", 13, data) > 0);
     }
 }
 #endif // PDAL_HAVE_LASZIP

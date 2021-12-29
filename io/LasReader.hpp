@@ -89,7 +89,8 @@ public:
     std::string getName() const;
 
     const las::Header& header() const;
-    const las::VlrList& vlrs() const;
+//    const las::VlrList& vlrs() const;
+    uint64_t vlrData(const std::string& userId, uint16_t recordId, char const * & data);
     point_count_t getNumPoints() const;
 
 protected:

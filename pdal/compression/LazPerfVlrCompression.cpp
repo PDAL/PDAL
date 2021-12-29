@@ -32,10 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-// This only exist in version 1.3+, so is an acceptable version test for now.
+#pragma warning (push)
+#pragma warning (disable: 4251)
 #include <lazperf/lazperf.hpp>
 #include <lazperf/filestream.hpp>
 #include <lazperf/vlr.hpp>
+#pragma warning (pop)
+
+// This only exist in version 1.3+, so is an acceptable version test for now.
 #ifndef LAZPERF_VERSION
 #error "LAZperf version 2+ (supporting LAS version 1.4) not found"
 #endif
