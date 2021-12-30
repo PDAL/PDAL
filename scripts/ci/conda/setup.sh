@@ -3,7 +3,8 @@
 conda install -c conda-forge conda-build anaconda-client -y
 pwd
 ls
-git clone https://github.com/conda-forge/pdal-feedstock.git
+#git clone https://github.com/conda-forge/pdal-feedstock.git
+git clone https://github.com/hobu/pdal-feedstock.git
 
 cd pdal-feedstock
 cat > recipe/recipe_clobber.yaml <<EOL
