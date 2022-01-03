@@ -13,7 +13,6 @@ PDAL_ADD_PLUGIN(reader_libname reader pgpointcloud
         PostgreSQL::PostgreSQL
         ${LIBXML2_LIBRARIES}
     INCLUDES
-        ${PDAL_VENDOR_DIR}/pdalboost
         ${LIBXML2_INCLUDE_DIR}
 )
 
@@ -27,7 +26,6 @@ PDAL_ADD_PLUGIN(writer_libname writer pgpointcloud
         PostgreSQL::PostgreSQL
         ${LIBXML2_LIBRARIES}
     INCLUDES
-        ${PDAL_VENDOR_DIR}/pdalboost
         ${LIBXML2_INCLUDE_DIR}
 )
 #

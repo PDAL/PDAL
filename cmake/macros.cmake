@@ -59,6 +59,18 @@ macro(PDAL_ADD_LIBRARY _name)
         target_compile_definitions(${_name} PRIVATE PDAL_DLL_EXPORT)
     endif()
 
+    target_compile_features (${_name}
+      INTERFACE
+        # Enable C++17 standard compliance
+        cxx_std_17
+    )
+
+    set_property (TARGET ${_name}
+      PROPERTY
+        # Enable C++17 standard compliance
+        CXX_STANDARD 17
+    )
+
     install(TARGETS ${_name}
         EXPORT PDALTargets
         RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
@@ -78,6 +90,11 @@ macro(PDAL_ADD_FREE_LIBRARY _name _library_type)
     target_include_directories(${_name} PRIVATE
         ${PDAL_INCLUDE_DIR})
     pdal_target_compile_settings(${_name})
+    set_property (TARGET ${_name}
+      PROPERTY
+        # Enable C++17 standard compliance
+        CXX_STANDARD 17
+    )
 
     # Don't install static libraries - they're already built into libpdalXXX
     if (NOT ${_library_type} STREQUAL "STATIC")
@@ -125,6 +142,11 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
         ${PROJECT_BINARY_DIR}/include
         ${PDAL_INCLUDE_DIR}
         ${PDAL_ADD_PLUGIN_INCLUDES}
+    )
+    set_property (TARGET ${${_name}}
+      PROPERTY
+        # Enable C++17 standard compliance
+        CXX_STANDARD 17
     )
     target_compile_definitions(${${_name}} PRIVATE PDAL_DLL_EXPORT)
     if (PDAL_ADD_PLUGIN_SYSTEM_INCLUDES)
