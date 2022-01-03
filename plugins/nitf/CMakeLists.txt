@@ -19,6 +19,7 @@ if (WIN32)
     target_compile_definitions(${reader_libname}
         PRIVATE
             WIN32
+            _HAS_AUTO_PTR_ETC=1
     )
 endif()
 
@@ -38,6 +39,7 @@ if (WIN32)
     target_compile_definitions(${writer_libname}
         PRIVATE
             WIN32
+            _HAS_AUTO_PTR_ETC=1
     )
 endif()
 

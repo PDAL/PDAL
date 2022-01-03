@@ -37,6 +37,7 @@
 #include <pdal/pdal_types.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/Uuid.hpp>
+#include <pdal/pdal_config.hpp>
 
 #pragma once
 
