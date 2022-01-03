@@ -34,6 +34,7 @@
 
 #include <io/LasHeader.hpp>
 
+#include "Srs.hpp"
 #include "Summary.hpp"
 #include "Utils.hpp"
 #include "Vlr.hpp"
@@ -67,6 +68,134 @@ void setSummary(las::Header& header, const Summary& summary)
     for (int i = 0; i < Header::ReturnCount; ++i)
         header.setPointsByReturn(i, summary.getReturnCount(i));
     header.bounds = summary.getBounds();
+}
+
+
+void extractHeaderMetadata(const Header& h, MetadataNode& forward, MetadataNode& m)
+{
+    addForwardMetadata(forward, m, "major_version", h.versionMajor,
+        "The major LAS version for the file, always 1 for now");
+    addForwardMetadata(forward, m, "minor_version", h.versionMinor,
+        "The minor LAS version for the file");
+    addForwardMetadata(forward, m, "dataformat_id", h.pointFormat(),
+        "LAS Point Data Format");
+    addForwardMetadata(forward, m, "filesource_id", h.fileSourceId,
+        "File Source ID (Flight Line Number if this file was derived from an original "
+            "flight line).");
+    if (h.versionAtLeast(1, 2))
+    {
+        // For some reason we've written global encoding as a base 64
+        // encoded value in the past.  In an effort to standardize things,
+        // I'm writing this as a special value, and will also write
+        // global_encoding like we write all other header metadata.
+        uint16_t globalEncoding = h.globalEncoding;
+        m.addEncoded("global_encoding_base64", (uint8_t *)&globalEncoding, sizeof(globalEncoding),
+            "Global Encoding: general property bit field.");
+        addForwardMetadata(forward, m, "global_encoding", h.globalEncoding,
+            "Global Encoding: general property bit field.");
+    }
+
+    addForwardMetadata(forward, m, "project_id", h.projectGuid, "Project ID.");
+    addForwardMetadata(forward, m, "system_id", h.systemId, "Generating system ID.");
+    addForwardMetadata(forward, m, "software_id", h.softwareId, "Generating software description.");
+    addForwardMetadata(forward, m, "creation_doy", h.creationDoy,
+        "Day, expressed as an unsigned short, on which this file was created. "
+        "Day is computed as the Greenwich Mean Time (GMT) day. January 1 is "
+        "considered day 1.");
+    addForwardMetadata(forward, m, "creation_year", h.creationYear,
+        "The year, expressed as a four digit number, in which the file was created.");
+    addForwardMetadata(forward, m, "scale_x", h.scale.x, "The scale factor for X values.", 15);
+    addForwardMetadata(forward, m, "scale_y", h.scale.y, "The scale factor for Y values.", 15);
+    addForwardMetadata(forward, m, "scale_z", h.scale.z, "The scale factor for Z values.", 15);
+    addForwardMetadata(forward, m, "offset_x", h.offset.x, "The offset for X values.", 15);
+    addForwardMetadata(forward, m, "offset_y", h.offset.y, "The offset for Y values.", 15);
+    addForwardMetadata(forward, m, "offset_z", h.offset.z, "The offset for Z values.", 15);
+
+    m.add<bool>("compressed", h.dataCompressed(), "true if this LAS file is compressed");
+    m.add("point_length", h.pointSize, "The size, in bytes, of each point records.");
+    m.add("header_size", h.vlrOffset,
+        "The size, in bytes, of the header block, including any extension by specific software.");
+    m.add("dataoffset", h.pointOffset,
+        "The actual number of bytes from the beginning of the file to the "
+        "first field of the first point record data field. This data offset "
+        "must be updated if any software adds data from the Public Header "
+        "Block or adds/removes data to/from the Variable Length Records.");
+    m.add<double>("minx", h.bounds.minx,
+        "The max and min data fields are the actual unscaled extents of the "
+        "LAS point file data, specified in the coordinate system of the LAS "
+        "data.");
+    m.add<double>("miny", h.bounds.miny,
+        "The max and min data fields are the actual unscaled extents of the "
+        "LAS point file data, specified in the coordinate system of the LAS "
+        "data.");
+    m.add<double>("minz", h.bounds.minz,
+        "The max and min data fields are the actual unscaled extents of the "
+        "LAS point file data, specified in the coordinate system of the LAS "
+        "data.");
+    m.add<double>("maxx", h.bounds.maxx,
+        "The max and min data fields are the actual unscaled extents of the "
+        "LAS point file data, specified in the coordinate system of the LAS "
+        "data.");
+    m.add<double>("maxy", h.bounds.maxy,
+        "The max and min data fields are the actual unscaled extents of the "
+        "LAS point file data, specified in the coordinate system of the LAS "
+        "data.");
+    m.add<double>("maxz", h.bounds.maxz,
+        "The max and min data fields are the actual unscaled extents of the "
+        "LAS point file data, specified in the coordinate system of the LAS "
+        "data.");
+    m.add<point_count_t>("count", h.pointCount(),
+        "This field contains the total number of point records within the file.");
+}
+
+void extractSrsMetadata(const Srs& srs, MetadataNode& m)
+{
+    const std::string s = srs.geotiffString();
+    if (s.size())
+        m.add("gtiff", s, "GTifPrint output of GEOTIFF keys");
+}
+
+void extractVlrMetadata(const VlrList& vlrs, MetadataNode& forward, MetadataNode& m)
+{
+    const size_t DataLenMax = 1000000;
+
+    int i = 0;
+    for (auto vlr : vlrs)
+    {
+        // We don't extract metadata from large VLRs.
+        if (vlr.dataSize() > DataLenMax)
+            continue;
+
+        if (vlr.userId == PdalUserId)
+        {
+            std::string name;
+            if (vlr.recordId == las::PdalMetadataRecordId)
+                name = "pdal_metadata";
+            else if (vlr.recordId == las::PdalPipelineRecordId)
+                name = "pdal_pipeline";
+            m.addWithType(name, std::string(vlr.data(), vlr.dataSize()), "json",
+                vlr.description);
+            continue;
+        }
+        MetadataNode vlrNode("vlr_" + std::to_string(i++));
+        vlrNode.addEncoded("data",
+            (const uint8_t *)vlr.data(), vlr.dataSize(), vlr.description);
+        vlrNode.add("user_id", vlr.userId,
+            "User ID of the record or pre-defined value from the specification.");
+        vlrNode.add("record_id", vlr.recordId, "Record ID specified by the user.");
+        vlrNode.add("description", vlr.description);
+        m.add(vlrNode);
+
+        if (vlr.userId == las::TransformUserId ||
+            vlr.userId == las::LaszipUserId ||
+            vlr.userId == las::LiblasUserId)
+            continue;
+        if (vlr.userId == las::SpecUserId &&
+            vlr.recordId != las::ClassLookupRecordId &&
+            vlr.recordId != las::TextDescriptionRecordId)
+            continue;
+        forward.add(vlrNode);
+    }
 }
 
 uint8_t ExtraBytesIf::lasType()

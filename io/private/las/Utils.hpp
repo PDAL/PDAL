@@ -55,6 +55,7 @@ namespace las
 {
 
 struct Header;
+class Srs;
 class Summary;
 
 enum class Compression
@@ -112,6 +113,52 @@ inline bool pointFormatSupported(int format)
         return false; 
     }
 }
+
+// Metadata
+
+inline void addForwardMetadata(MetadataNode& forward, MetadataNode& m,
+    const std::string& name, double val, const std::string description,
+    size_t precision)
+{
+    MetadataNode n = m.add(name, val, description, precision);
+
+    // If the entry doesn't already exist, just add it.
+    MetadataNode f = forward.findChild(name);
+    if (!f.valid())
+    {
+        forward.add(n);
+        return;
+    }
+
+    // If the old value and new values aren't the same, set an invalid flag.
+    MetadataNode temp = f.addOrUpdate("temp", val, description, precision);
+    if (f.value<std::string>() != temp.value<std::string>())
+        forward.addOrUpdate(name + "INVALID", "");
+}
+
+// Store data in the normal metadata place.  Also store it in the private
+// lasforward metadata node.
+template <typename T>
+void addForwardMetadata(MetadataNode& forward, MetadataNode& m,
+    const std::string& name, T val, const std::string description)
+{
+    MetadataNode n = m.add(name, val, description);
+
+    // If the entry doesn't already exist, just add it.
+    MetadataNode f = forward.findChild(name);
+    if (!f.valid())
+    {
+        forward.add(n);
+        return;
+    }
+
+    // If the old value and new values aren't the same, set an invalid flag.
+    MetadataNode temp = f.addOrUpdate("temp", val);
+    if (f.value<std::string>() != temp.value<std::string>())
+        forward.addOrUpdate(name + "INVALID", "");
+}
+
+// Extra Dim
 
 struct ExtraDim
 {
@@ -207,16 +254,21 @@ private:
     size_t m_size;
 };
 
+// Function declarations
+
+void extractHeaderMetadata(const Header& h, MetadataNode& forward, MetadataNode& m);
+void extractSrsMetadata(const Srs& srs, MetadataNode& m);
+void extractVlrMetadata(const VlrList& vlrs, MetadataNode& forward, MetadataNode& m);
+void setSummary(Header& header, const Summary& summary);
+std::string generateSoftwareId();
+std::vector<ExtraDim> parse(const StringList& dimString, bool allOk);
+const Dimension::IdList& pdrfDims(int pdrf);
+
 struct error : public std::runtime_error
 {
     error(const std::string& err) : std::runtime_error(err)
     {}
 };
-
-void setSummary(Header& header, const Summary& summary);
-std::string generateSoftwareId();
-std::vector<ExtraDim> parse(const StringList& dimString, bool allOk);
-const Dimension::IdList& pdrfDims(int pdrf);
 
 // Loader
 

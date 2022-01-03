@@ -347,8 +347,9 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     //ABELL
     setSrs(m);
     MetadataNode forward = table.privateMetadata("lasforward");
-    extractHeaderMetadata(forward, m);
-    extractVlrMetadata(forward, m);
+    las::extractHeaderMetadata(d->header, forward, m);
+    las::extractSrsMetadata(d->srs, m);
+    las::extractVlrMetadata(d->vlrs, forward, m);
 
     m_streamIf.reset();
 }
@@ -421,156 +422,6 @@ void LasReader::ready(PointTableRef table)
 }
 
 
-namespace
-{
-
-void addForwardMetadata(MetadataNode& forward, MetadataNode& m,
-    const std::string& name, double val, const std::string description,
-    size_t precision)
-{
-    MetadataNode n = m.add(name, val, description, precision);
-
-    // If the entry doesn't already exist, just add it.
-    MetadataNode f = forward.findChild(name);
-    if (!f.valid())
-    {
-        forward.add(n);
-        return;
-    }
-
-    // If the old value and new values aren't the same, set an invalid flag.
-    MetadataNode temp = f.addOrUpdate("temp", val, description, precision);
-    if (f.value<std::string>() != temp.value<std::string>())
-        forward.addOrUpdate(name + "INVALID", "");
-}
-
-}
-
-// Store data in the normal metadata place.  Also store it in the private
-// lasforward metadata node.
-template <typename T>
-void addForwardMetadata(MetadataNode& forward, MetadataNode& m,
-    const std::string& name, T val, const std::string description)
-{
-    MetadataNode n = m.add(name, val, description);
-
-    // If the entry doesn't already exist, just add it.
-    MetadataNode f = forward.findChild(name);
-    if (!f.valid())
-    {
-        forward.add(n);
-        return;
-    }
-
-    // If the old value and new values aren't the same, set an invalid flag.
-    MetadataNode temp = f.addOrUpdate("temp", val);
-    if (f.value<std::string>() != temp.value<std::string>())
-        forward.addOrUpdate(name + "INVALID", "");
-}
-
-
-void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
-{
-    m.add<bool>("compressed", d->header.dataCompressed(),
-        "true if this LAS file is compressed");
-
-    addForwardMetadata(forward, m, "major_version", d->header.versionMajor,
-        "The major LAS version for the file, always 1 for now");
-    addForwardMetadata(forward, m, "minor_version", d->header.versionMinor,
-        "The minor LAS version for the file");
-    addForwardMetadata(forward, m, "dataformat_id", d->header.pointFormat(),
-        "LAS Point Data Format");
-    if (d->header.versionAtLeast(1, 1))
-        addForwardMetadata(forward, m, "filesource_id",
-            d->header.fileSourceId, "File Source ID (Flight Line Number "
-            "if this file was derived from an original flight line).");
-    if (d->header.versionAtLeast(1, 2))
-    {
-        // For some reason we've written global encoding as a base 64
-        // encoded value in the past.  In an effort to standardize things,
-        // I'm writing this as a special value, and will also write
-        // global_encoding like we write all other header metadata.
-        uint16_t globalEncoding = d->header.globalEncoding;
-        m.addEncoded("global_encoding_base64", (uint8_t *)&globalEncoding, sizeof(globalEncoding),
-            "Global Encoding: general property bit field.");
-
-        addForwardMetadata(forward, m, "global_encoding", d->header.globalEncoding,
-            "Global Encoding: general property bit field.");
-    }
-
-    addForwardMetadata(forward, m, "project_id", d->header.projectGuid, "Project ID.");
-    addForwardMetadata(forward, m, "system_id", d->header.systemId, "Generating system ID.");
-    addForwardMetadata(forward, m, "software_id", d->header.softwareId,
-        "Generating software description.");
-    addForwardMetadata(forward, m, "creation_doy", d->header.creationDoy,
-        "Day, expressed as an unsigned short, on which this file was created. "
-        "Day is computed as the Greenwich Mean Time (GMT) day. January 1 is "
-        "considered day 1.");
-    addForwardMetadata(forward, m, "creation_year", d->header.creationYear,
-        "The year, expressed as a four digit number, in which the file was created.");
-    addForwardMetadata(forward, m, "scale_x", d->header.scale.x,
-        "The scale factor for X values.", 15);
-    addForwardMetadata(forward, m, "scale_y", d->header.scale.y,
-        "The scale factor for Y values.", 15);
-    addForwardMetadata(forward, m, "scale_z", d->header.scale.z,
-        "The scale factor for Z values.", 15);
-    addForwardMetadata(forward, m, "offset_x", d->header.offset.x,
-        "The offset for X values.", 15);
-    addForwardMetadata(forward, m, "offset_y", d->header.offset.y,
-        "The offset for Y values.", 15);
-    addForwardMetadata(forward, m, "offset_z", d->header.offset.z,
-        "The offset for Z values.", 15);
-
-    m.add("point_length", d->header.pointSize, "The size, in bytes, of each point records.");
-    m.add("header_size", d->header.vlrOffset,
-        "The size, in bytes, of the header block, including any extension by specific software.");
-    m.add("dataoffset", d->header.pointOffset,
-        "The actual number of bytes from the beginning of the file to the "
-        "first field of the first point record data field. This data offset "
-        "must be updated if any software adds data from the Public Header "
-        "Block or adds/removes data to/from the Variable Length Records.");
-    m.add<double>("minx", d->header.bounds.minx,
-        "The max and min data fields are the actual unscaled extents of the "
-        "LAS point file data, specified in the coordinate system of the LAS "
-        "data.");
-    m.add<double>("miny", d->header.bounds.miny,
-        "The max and min data fields are the actual unscaled extents of the "
-        "LAS point file data, specified in the coordinate system of the LAS "
-        "data.");
-    m.add<double>("minz", d->header.bounds.minz,
-        "The max and min data fields are the actual unscaled extents of the "
-        "LAS point file data, specified in the coordinate system of the LAS "
-        "data.");
-    m.add<double>("maxx", d->header.bounds.maxx,
-        "The max and min data fields are the actual unscaled extents of the "
-        "LAS point file data, specified in the coordinate system of the LAS "
-        "data.");
-    m.add<double>("maxy", d->header.bounds.maxy,
-        "The max and min data fields are the actual unscaled extents of the "
-        "LAS point file data, specified in the coordinate system of the LAS "
-        "data.");
-    m.add<double>("maxz", d->header.bounds.maxz,
-        "The max and min data fields are the actual unscaled extents of the "
-        "LAS point file data, specified in the coordinate system of the LAS "
-        "data.");
-    m.add<point_count_t>("count", d->header.pointCount(),
-        "This field contains the total number of point records within the file.");
-
-    m.add<std::string>("gtiff", d->srs.geotiffString(), "GTifPrint output of GeoTIFF keys");
-
-    const las::Vlr *vlr = las::findVlr(las::PdalUserId, las::PdalMetadataRecordId, d->vlrs);
-    if (vlr)
-        m.addWithType("pdal_metadata", std::string(vlr->data(), vlr->dataSize()), "json",
-            "PDAL Processing Metadata");
-    //
-    // PDAL pipeline VLR
-    vlr = las::findVlr(las::PdalUserId, las::PdalPipelineRecordId, d->vlrs);
-    if (vlr)
-        m.addWithType("pdal_pipeline", std::string(vlr->data(), vlr->dataSize()), "json",
-            "PDAL Processing Pipeline");
-}
-
-
 void LasReader::readExtraBytesVlr()
 {
     const las::Vlr *vlr = las::findVlr(las::SpecUserId, las::ExtraBytesRecordId, d->vlrs);
@@ -599,42 +450,6 @@ void LasReader::readExtraBytesVlr()
 void LasReader::setSrs(MetadataNode& m)
 {
     setSpatialReference(m, d->srs.get());
-}
-
-
-void LasReader::extractVlrMetadata(MetadataNode& forward, MetadataNode& m)
-{
-    const size_t DataLenMax = 1000000;
-
-    int i = 0;
-    for (auto vlr : d->vlrs)
-    {
-        // We don't extract metadata from large VLRs.
-        if (vlr.dataSize() > DataLenMax)
-            continue;
-
-        std::ostringstream name;
-        name << "vlr_" << i++;
-        MetadataNode vlrNode(name.str());
-
-        vlrNode.addEncoded("data",
-            (const uint8_t *)vlr.data(), vlr.dataSize(), vlr.description);
-        vlrNode.add("user_id", vlr.userId,
-            "User ID of the record or pre-defined value from the specification.");
-        vlrNode.add("record_id", vlr.recordId, "Record ID specified by the user.");
-        vlrNode.add("description", vlr.description);
-        m.add(vlrNode);
-
-        if (vlr.userId == las::TransformUserId ||
-            vlr.userId == las::LaszipUserId ||
-            vlr.userId == las::LiblasUserId)
-            continue;
-        if (vlr.userId == las::SpecUserId &&
-            vlr.recordId != las::ClassLookupRecordId &&
-            vlr.recordId != las::TextDescriptionRecordId)
-            continue;
-        forward.add(vlrNode);
-    }
 }
 
 
