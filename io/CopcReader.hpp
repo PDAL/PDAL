@@ -43,13 +43,6 @@
 #include <pdal/Streamable.hpp>
 #include <pdal/util/Bounds.hpp>
 
-namespace lazperf
-{
-    struct header14;
-    struct vlr_header;
-    struct copc_info_vlr;
-}
-
 namespace pdal
 {
 
@@ -57,12 +50,15 @@ using StringMap = std::map<std::string, std::string>;
 
 namespace las
 {
+    struct Header;
+    struct Vlr;
     class VlrCatalog;
 }
 
 namespace copc
 {
     class Connector;
+    struct Info;
     class Key;
     class Tile;
     struct Entry;
@@ -92,8 +88,8 @@ private:
     void fetchHeader();
     void fetchSrsVlr(const las::VlrCatalog& catalog);
     void fetchEbVlr(const las::VlrCatalog& catalog);
-    void validateHeader(const lazperf::header14& h);
-    void validateVlrInfo(const lazperf::vlr_header& h, const lazperf::copc_info_vlr& i);
+    void validateHeader(const las::Header& h);
+    void validateVlrInfo(const las::Vlr& v, const copc::Info& i);
     void createSpatialFilters();
 
     void loadHierarchy();

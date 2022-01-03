@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2020, Hobu Inc.
+ * Copyright (c) 2018, Connor Manning
  *
  * All rights reserved.
  *
@@ -32,48 +32,40 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <lazperf/readers.hpp>
+#pragma once
 
-#include <io/LasHeader.hpp>
-#include <io/LasReader.hpp>
-
-#include "Connector.hpp"
-#include "Tile.hpp"
+#include <pdal/util/Extractor.hpp>
 
 namespace pdal
 {
 namespace copc
 {
 
-void Tile::read()
+struct Info
 {
-    try
-    {
-        std::vector<char> buf = m_connector.getBinary(m_entry.m_offset, m_entry.m_byteSize);
-        lazperf::reader::chunk_decompressor d(m_header.pointFormat(), m_header.ebCount(),
-            buf.data());
+public:
+    double center_x;
+    double center_y;
+    double center_z;
+    double halfsize;
+    double spacing;
+    uint64_t root_hier_offset;
+    uint64_t root_hier_size;
+    double gpstime_minimum;
+    double gpstime_maximum;
+    double reserved[11];
 
-        // Resize our vector to accommodate the decompressed data.
-        m_data.resize(m_entry.m_pointCount * m_header.pointSize);
+    void fill(const char *buf, size_t bufsize)
+    {
+        LeExtractor s(buf, bufsize);
 
-        int32_t cnt = m_entry.m_pointCount;
-        char *p = m_data.data();
-        while (cnt--)
-        {
-            d.decompress(p);
-            p += m_header.pointSize;
-        }
+        s >> center_x >> center_y >> center_z >> halfsize >> spacing;
+        s >> root_hier_offset >> root_hier_size;
+        s >> gpstime_minimum >> gpstime_minimum;
+        for (int i = 0; i < 11; ++i)
+            s >> reserved[i];
     }
-    catch (const std::exception& ex)
-    {
-        m_error = ex.what();
-    }
-    catch (...)
-    {
-        m_error = "Unknown exception when reading tile contents";
-    }
-}
+};
 
 } // namespace copc
 } // namespace pdal
-

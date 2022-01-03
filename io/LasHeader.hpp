@@ -105,6 +105,8 @@ struct PDAL_DLL Header
     std::vector<char> data() const;
     StringList validate(uint64_t fileSize) const;
 
+    int size() const
+        { return versionMinor >= 4 ? Size14 : versionMinor == 3 ? Size13 : Size12; }
     int ebCount() const
     {
         int base = baseCount();
