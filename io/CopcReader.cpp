@@ -95,6 +95,7 @@ public:
     double resolution = 0;
     std::vector<Polygon> polys;
     bool fixNames;
+    bool doVlrs;
 
     NL::json query;
     NL::json headers;
@@ -155,6 +156,7 @@ void CopcReader::addArgs(ProgramArgs& args)
     args.add("ogr", "OGR filter geometries", m_args->ogr);
     args.add("fix_dims", "Make invalid dimension names valid by changing invalid "
         "characters to '_'", m_args->fixNames, true);
+    args.add("vlr", "Read LAS VLRs and add to metadata.", m_args->doVlrs);
 }
 
 
@@ -182,7 +184,7 @@ void CopcReader::setForwards(StringMap& headers, StringMap& query)
 }
 
 
-void CopcReader::initialize()
+void CopcReader::initialize(PointTableRef table)
 {
     const std::size_t threads((std::max)(m_args->threads, size_t(4)));
     if (threads > 100)
@@ -201,8 +203,23 @@ void CopcReader::initialize()
     las::VlrCatalog catalog(std::bind(&CopcReader::fetch, this, _1, _2));
     catalog.load(las::Header::Size14, m_p->header.vlrCount, m_p->header.evlrOffset,
         m_p->header.evlrCount);
-    fetchEbVlr(catalog);
-    fetchSrsVlr(catalog);
+    las::Vlr ebVlr = fetchEbVlr(catalog);
+    las::Vlr srsVlr = fetchSrsVlr(catalog);
+
+    if (m_args->doVlrs)
+    {
+        MetadataNode forward = table.privateMetadata("lasforward");
+        MetadataNode m = getMetadata();
+        las::addVlrMetadata(ebVlr, "vlr_0", forward, m);
+        las::addVlrMetadata(srsVlr, "vlr_1", forward, m);
+        int i = 2;
+        for (las::VlrCatalog::Entry& e : catalog)
+        {
+            las::Vlr vlr(e.userId, e.recordId);
+            vlr.dataVec = catalog.fetchWithDescription(e.userId, e.recordId, vlr.description);
+            las::addVlrMetadata(vlr, "vlr_" + std::to_string(i++), forward, m); 
+        }
+    }
 
     createSpatialFilters();
 
@@ -258,28 +275,31 @@ void CopcReader::fetchHeader()
 }
 
 
-void CopcReader::fetchSrsVlr(const las::VlrCatalog& catalog)
+las::Vlr CopcReader::fetchSrsVlr(const las::VlrCatalog& catalog)
 {
-    std::vector<char> buf = catalog.fetch("LASF_Projection", 2112);
-    if (buf.empty())
-        return;
-    setSpatialReference(std::string(buf.begin(), buf.end()));
+    las::Vlr vlr("LASF_Projection", 2112);
+    vlr.dataVec = catalog.fetchWithDescription("LASF_Projection", 2112, vlr.description);
+    if (!vlr.empty())
+        setSpatialReference(std::string(vlr.data(), vlr.data() + vlr.dataSize()));
+    return vlr;
 }
 
 
-void CopcReader::fetchEbVlr(const las::VlrCatalog& catalog)
+las::Vlr CopcReader::fetchEbVlr(const las::VlrCatalog& catalog)
 {
-    std::vector<char> buf = catalog.fetch("LASF_Spec", 4);
-    if (buf.empty())
-        return;
+    las::Vlr vlr("LASF_Spec", 4);
+    vlr.dataVec = catalog.fetchWithDescription("LASF_Spec", 4, vlr.description);
+    if (vlr.dataVec.empty())
+        return vlr;
 
-    if (buf.size() % las::ExtraBytesSpecSize != 0)
+    if (vlr.dataVec.size() % las::ExtraBytesSpecSize != 0)
     {
         log()->get(LogLevel::Warning) << "Bad size for extra bytes VLR.  Ignoring.";
-        return;
+        return vlr;
     }
-    m_p->extraDims = las::ExtraBytesIf::toExtraDims(buf.data(), buf.size(),
+    m_p->extraDims = las::ExtraBytesIf::toExtraDims(vlr.data(), vlr.dataSize(),
         lazperf::baseCount(m_p->header.pointFormat()));
+    return vlr;
 }
 
 
@@ -351,9 +371,10 @@ void CopcReader::createSpatialFilters()
 
 QuickInfo CopcReader::inspect()
 {
+    PointTable t;
     QuickInfo qi;
 
-    initialize();
+    initialize(t);
 
     const las::Header& h = m_p->header;
     qi.m_bounds = h.bounds;

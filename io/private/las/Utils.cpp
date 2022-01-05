@@ -155,47 +155,40 @@ void extractSrsMetadata(const Srs& srs, MetadataNode& m)
         m.add("gtiff", s, "GTifPrint output of GEOTIFF keys");
 }
 
-void extractVlrMetadata(const VlrList& vlrs, MetadataNode& forward, MetadataNode& m)
+void addVlrMetadata(const Vlr& vlr, std::string name, MetadataNode& forward, MetadataNode& m)
 {
     const size_t DataLenMax = 1000000;
 
-    int i = 0;
-    for (auto vlr : vlrs)
+    // We don't extract metadata from large VLRs.
+    if (vlr.dataSize() > DataLenMax)
+        return;
+
+    if (vlr.userId == PdalUserId)
     {
-        // We don't extract metadata from large VLRs.
-        if (vlr.dataSize() > DataLenMax)
-            continue;
-
-        if (vlr.userId == PdalUserId)
-        {
-            std::string name;
-            if (vlr.recordId == las::PdalMetadataRecordId)
-                name = "pdal_metadata";
-            else if (vlr.recordId == las::PdalPipelineRecordId)
-                name = "pdal_pipeline";
-            m.addWithType(name, std::string(vlr.data(), vlr.dataSize()), "json",
-                vlr.description);
-            continue;
-        }
-        MetadataNode vlrNode("vlr_" + std::to_string(i++));
-        vlrNode.addEncoded("data",
-            (const uint8_t *)vlr.data(), vlr.dataSize(), vlr.description);
-        vlrNode.add("user_id", vlr.userId,
-            "User ID of the record or pre-defined value from the specification.");
-        vlrNode.add("record_id", vlr.recordId, "Record ID specified by the user.");
-        vlrNode.add("description", vlr.description);
-        m.add(vlrNode);
-
-        if (vlr.userId == las::TransformUserId ||
-            vlr.userId == las::LaszipUserId ||
-            vlr.userId == las::LiblasUserId)
-            continue;
-        if (vlr.userId == las::SpecUserId &&
-            vlr.recordId != las::ClassLookupRecordId &&
-            vlr.recordId != las::TextDescriptionRecordId)
-            continue;
-        forward.add(vlrNode);
+        if (vlr.recordId == las::PdalMetadataRecordId)
+            name = "pdal_metadata";
+        else if (vlr.recordId == las::PdalPipelineRecordId)
+            name = "pdal_pipeline";
+        m.addWithType(name, std::string(vlr.data(), vlr.dataSize()), "json", vlr.description);
+        return;
     }
+    MetadataNode vlrNode(name);
+    vlrNode.addEncoded("data", (const unsigned char *)vlr.data(), vlr.dataSize(), vlr.description);
+    vlrNode.add("user_id", vlr.userId, "User ID of the record or pre-defined value "
+        "from the specification.");
+    vlrNode.add("record_id", vlr.recordId, "Record ID specified by the user.");
+    vlrNode.add("description", vlr.description);
+    m.add(vlrNode);
+
+    if (vlr.userId == las::TransformUserId ||
+        vlr.userId == las::LaszipUserId ||
+        vlr.userId == las::LiblasUserId)
+        return;
+    if (vlr.userId == las::SpecUserId &&
+        vlr.recordId != las::ClassLookupRecordId &&
+        vlr.recordId != las::TextDescriptionRecordId)
+        return;
+    forward.add(vlrNode);
 }
 
 uint8_t ExtraBytesIf::lasType()
@@ -229,7 +222,7 @@ void ExtraBytesIf::setType(uint8_t lastype)
 }
 
 
-void ExtraBytesIf::appendTo(std::vector<uint8_t>& ebBytes)
+void ExtraBytesIf::appendTo(std::vector<char>& ebBytes)
 {
     size_t offset = ebBytes.size();
     ebBytes.resize(ebBytes.size() + ExtraBytesSpecSize);
@@ -835,6 +828,44 @@ std::vector<char> VlrCatalog::fetch(const std::string& userId, uint16_t recordId
 
     if (length > 0)
         vlrdata = m_fetch(offset, length);
+    return vlrdata;
+}
+
+std::vector<char> VlrCatalog::fetchWithDescription(const std::string& userId, uint16_t recordId,
+    std::string& outDescrip) const
+{
+    uint64_t offset = 0;
+    uint32_t length = 0;
+
+    // We don't lock m_entries because we assume that the load has already occurred at the
+    // time you want to fetch.
+    std::vector<char> vlrdata;
+    for (const Entry& e : m_entries)
+        if (e.userId == userId && e.recordId == recordId)
+        {
+            // We don't support VLRs with size > 4GB)
+            if (e.length > (std::numeric_limits<uint32_t>::max)())
+                return vlrdata;
+
+            offset = e.offset;
+            length = (uint32_t)e.length;
+            break;
+        }
+
+    // Load the data plus the description.
+    const int DescripLen = 32;
+    assert(offset > DescripLen);
+    // Add space for the description that precedes the data
+    std::vector<char> v = m_fetch(offset - DescripLen, length + DescripLen);
+
+    // Only make the string with non-null characters.
+    int len = DescripLen - 1;
+    while (v[len] == '\0')
+        len--;
+    outDescrip.assign(v.data(), v.data() + len + 1);
+
+    // Assign the payload of the VLR to the output VLR.
+    vlrdata.assign(v.data() + DescripLen, v.data() + v.size());
     return vlrdata;
 }
 

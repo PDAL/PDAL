@@ -168,7 +168,7 @@ std::istream& operator>>(std::istream& in, las::Evlr& v)
     std::string description;
     std::string b64data;
     std::string userId;
-    std::vector<uint8_t> data;
+    std::vector<char> data;
     double recordId(std::numeric_limits<double>::quiet_NaN());
     for (auto& el : j.items())
     {
@@ -212,7 +212,10 @@ std::istream& operator>>(std::istream& in, las::Evlr& v)
             if (!el.value().is_string())
                 throw pdal_error("LAS VLR data must be specified as "
                     "a base64-encoded string.");
-            data = Utils::base64_decode(el.value().get<std::string>());
+            //ABELL - Fix this.
+            std::vector<uint8_t> b64buf;
+            b64buf = Utils::base64_decode(el.value().get<std::string>());
+            data.insert(data.end(), (char *)b64buf.data(), (char *)(b64buf.data() + b64buf.size()));
         }
         else if (el.key() == "filename")
         {

@@ -103,7 +103,7 @@ public:
     uint16_t recordId {};
     uint64_t promisedDataSize;
     std::string description;
-    std::vector<uint8_t> dataVec;
+    std::vector<char> dataVec;
 };
 
 inline bool operator==(const Vlr& v1, const Vlr& v2)
@@ -118,7 +118,11 @@ struct Evlr : public Vlr
 
     Evlr() = default;
     Evlr(const std::string& userId, uint16_t recordId,
-            const std::string& description, std::vector<uint8_t>& data) :
+            const std::string& description, const std::vector<char>& data) :
+        Vlr(userId, recordId, description)
+    { dataVec = data; }
+    Evlr(const std::string& userId, uint16_t recordId,
+            const std::string& description, std::vector<char>&& data) :
         Vlr(userId, recordId, description)
     { dataVec = data; }
 

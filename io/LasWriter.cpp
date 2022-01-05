@@ -382,8 +382,8 @@ void LasWriter::prepOutput(std::ostream *outStream, const SpatialReference& srs)
     for (const las::Vlr& vlr : m_vlrs)
     {
         std::vector<char> buf = vlr.headerData();
-        m_ostream->write(buf.data(), buf.size());
-        m_ostream->write(vlr.data(), vlr.dataSize());
+        m_ostream->write((const char *)buf.data(), buf.size());
+        m_ostream->write((const char *)vlr.data(), vlr.dataSize());
     }
 
     d->header.pointOffset = (uint32_t)m_ostream->tellp();
@@ -437,7 +437,7 @@ void LasWriter::addMetadataVlr(MetadataNode& forward)
     }
     else
     {
-        std::vector<uint8_t> data(json.begin(), json.end());
+        std::vector<char> data(json.begin(), json.end());
         addVlr(las::PdalUserId, las::PdalMetadataRecordId, "PDAL metadata", data);
     }
 }
@@ -455,7 +455,7 @@ void LasWriter::addPipelineVlr()
     }
     else
     {
-        std::vector<uint8_t> data(json.begin(), json.end());
+        std::vector<char> data(json.begin(), json.end());
         addVlr(las::PdalUserId, las::PdalPipelineRecordId, "PDAL pipeline", data);
     }
 }
@@ -464,8 +464,6 @@ void LasWriter::addPipelineVlr()
 /// Add VLRs forwarded from the input.
 void LasWriter::addForwardVlrs()
 {
-    std::vector<uint8_t> data;
-
     if (!d->forwardVlrs)
         return;
 
@@ -480,9 +478,9 @@ void LasWriter::addForwardVlrs()
         if (recordIdNode.valid() && userIdNode.valid())
         {
             const MetadataNode& dataNode = n.findChild("data");
-            data = Utils::base64_decode(dataNode.value());
             uint16_t recordId = (uint16_t)std::stoi(recordIdNode.value());
-            addVlr(userIdNode.value(), recordId, n.description(), data);
+            addVlr(userIdNode.value(), recordId, n.description(),
+                Utils::base64_decode(dataNode.value()));
         }
     }
 }
@@ -542,13 +540,13 @@ bool LasWriter::addWktVlr()
     if (wkt.empty())
         return false;
 
-    std::vector<uint8_t> wktBytes(wkt.begin(), wkt.end());
+    std::vector<char> wktBytes(wkt.begin(), wkt.end());
     // This tacks a NULL to the end of the data, which is required by the spec.
     wktBytes.resize(wktBytes.size() + 1, 0);
     addVlr(las::TransformUserId, las::WktRecordId, "OGC Transformation Record", wktBytes);
 
     // The data in the vector gets moved to the VLR, so we have to recreate it.
-    std::vector<uint8_t> wktBytes2(wkt.begin(), wkt.end());
+    std::vector<char> wktBytes2(wkt.begin(), wkt.end());
     wktBytes2.resize(wktBytes2.size() + 1, 0);
     addVlr(las::LiblasUserId, las::WktRecordId, "OGR variant of OpenGIS WKT SRS", wktBytes2);
     return true;
@@ -560,7 +558,7 @@ void LasWriter::addExtraBytesVlr()
     if (m_extraDims.empty())
         return;
 
-    std::vector<uint8_t> ebBytes;
+    std::vector<char> ebBytes;
     for (auto& dim : m_extraDims)
     {
         las::ExtraBytesIf eb(dim.m_name, dim.m_dimType.m_type,
@@ -578,7 +576,30 @@ void LasWriter::addExtraBytesVlr()
 /// \param  description - VLR description
 /// \param  data - Raw VLR data
 void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
-   const std::string& description, std::vector<uint8_t>& data)
+   const std::string& description, const std::vector<uint8_t>& data)
+{
+    std::vector<char> v((const char *)data.data(), (const char *)(data.data() + data.size()));
+    addVlr(las::Evlr(userId, recordId, description, std::move(v)));
+}
+
+/// Add a standard or variable-length VLR depending on the data size.
+/// \param  userId - VLR user ID
+/// \param  recordId - VLR record ID
+/// \param  description - VLR description
+/// \param  data - Raw VLR data
+void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
+   const std::string& description, const std::vector<char>& data)
+{
+    addVlr(las::Evlr(userId, recordId, description, data));
+}
+
+/// Add a standard or variable-length VLR depending on the data size.
+/// \param  userId - VLR user ID
+/// \param  recordId - VLR record ID
+/// \param  description - VLR description
+/// \param  data - Raw VLR data
+void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
+   const std::string& description, std::vector<char>&& data)
 {
     addVlr(las::Evlr(userId, recordId, description, data));
 }
@@ -739,9 +760,9 @@ void LasWriter::readyLasZipCompression()
     handleLaszip(laszip_create_laszip_vlr(m_laszip, &data, &size));
 
     // A VLR has 54 header bytes that we skip in order to get to the payload.
-    std::vector<laszip_U8> vlrData(data + 54, data + size);
+    std::vector<char> vlrData((char *)data + 54, (char *)(data + size));
 
-    addVlr(las::LaszipUserId, las::LaszipRecordId, "http://laszip.org", vlrData);
+    addVlr(las::LaszipUserId, las::LaszipRecordId, "http://laszip.org", std::move(vlrData));
 #endif
 }
 
@@ -752,7 +773,7 @@ void LasWriter::readyLazPerfCompression()
     m_compressor = new LazPerfVlrCompressor(*m_ostream, d->header.pointFormat(),
         d->header.ebCount());
     std::vector<char> lazVlrData = m_compressor->vlrData();
-    std::vector<uint8_t> vlrdata(lazVlrData.begin(), lazVlrData.end());
+    std::vector<char> vlrdata(lazVlrData.begin(), lazVlrData.end());
     addVlr(las::LaszipUserId, las::LaszipRecordId, "http://laszip.org", vlrdata);
 #endif
 }
@@ -1193,8 +1214,8 @@ void LasWriter::finishOutput()
     for (const las::Evlr& evlr : m_evlrs)
     {
         std::vector<char> buf = evlr.headerData();
-        m_ostream->write(buf.data(), buf.size());
-        m_ostream->write(evlr.data(), evlr.dataSize());
+        m_ostream->write((const char *)buf.data(), buf.size());
+        m_ostream->write((const char *)evlr.data(), evlr.dataSize());
     }
 
     // Refill the header since the offset/scale may have been auto-computed.

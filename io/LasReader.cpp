@@ -279,7 +279,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     {
         las::Vlr vlr;
 
-        stream->read(vlrHeaderBuf, las::Vlr::HeaderSize);
+        stream->read((char *)vlrHeaderBuf, las::Vlr::HeaderSize);
         if (stream->gcount() != las::Vlr::HeaderSize)
             throwError("Couldn't read VLR " + std::to_string(i + 1) + ". End of file reached.");
         vlr.fillHeader(vlrHeaderBuf);
@@ -306,7 +306,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
         {
             las::Evlr evlr;
 
-            stream->read(evlrHeaderBuf, las::Evlr::HeaderSize);
+            stream->read((char *)evlrHeaderBuf, las::Evlr::HeaderSize);
             if (stream->gcount() != las::Evlr::HeaderSize)
                 throwError("Couldn't read EVLR " + std::to_string(i + 1) +
                     ". End of file reached.");
@@ -349,7 +349,8 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     MetadataNode forward = table.privateMetadata("lasforward");
     las::extractHeaderMetadata(d->header, forward, m);
     las::extractSrsMetadata(d->srs, m);
-    las::extractVlrMetadata(d->vlrs, forward, m);
+    for (int i = 0; i < d->vlrs.size(); ++i)
+        las::addVlrMetadata(d->vlrs[i], "vlr_" + std::to_string(i), forward, m);
 
     m_streamIf.reset();
 }

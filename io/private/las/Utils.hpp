@@ -238,7 +238,7 @@ public:
         m_fieldCnt = (m_type == Dimension::Type::None ? 0 : 1);
     }
 
-    void appendTo(std::vector<uint8_t>& ebBytes);
+    void appendTo(std::vector<char>& ebBytes);
     void readFrom(const char *buf);
     uint8_t lasType();
     void setType(uint8_t lastype);
@@ -258,7 +258,7 @@ private:
 
 void extractHeaderMetadata(const Header& h, MetadataNode& forward, MetadataNode& m);
 void extractSrsMetadata(const Srs& srs, MetadataNode& m);
-void extractVlrMetadata(const VlrList& vlrs, MetadataNode& forward, MetadataNode& m);
+void addVlrMetadata(const Vlr& vlr, std::string name, MetadataNode& forward, MetadataNode& m);
 void setSummary(Header& header, const Summary& summary);
 std::string generateSoftwareId();
 std::vector<ExtraDim> parse(const StringList& dimString, bool allOk);
@@ -401,18 +401,36 @@ public:
         uint64_t length;
     };
 
+private:
+    std::mutex m_mutex;
+    ReadFunc m_fetch;
+    std::deque<Entry> m_entries;
+
+public:
     VlrCatalog(ReadFunc f);
     VlrCatalog(uint64_t vlrOffset, uint32_t vlrCount, uint64_t evlrOffset, uint32_t evlrCount,
         ReadFunc f);
 
     void load(uint64_t vlrOffset, uint32_t vlrCount, uint64_t evlrOffset, uint32_t evlrCount);
     std::vector<char> fetch(const std::string& userId, uint16_t recordId) const;
+    std::vector<char> fetchWithDescription(const std::string& userId, uint16_t recordId,
+        std::string& outDescrip) const;
+
+    using iterator = decltype(m_entries)::iterator;
+    using const_iterator = decltype(m_entries)::const_iterator;
+
+    iterator begin()
+        { return m_entries.begin(); }
+    const_iterator begin() const
+        { return m_entries.begin(); }
+    iterator end()
+        { return m_entries.end(); }
+    const_iterator end() const
+        { return m_entries.end(); }
+    size_t size() const
+        { return m_entries.size(); }
 
 private:
-    std::mutex m_mutex;
-    ReadFunc m_fetch;
-    std::deque<Entry> m_entries;
-
     void walkVlrs(uint64_t vlrOffset, uint32_t vlrCount);
     void walkEvlrs(uint64_t vlrOffset, uint32_t vlrCount);
     void insert(const Entry& entry);
