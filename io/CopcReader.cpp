@@ -210,11 +210,15 @@ void CopcReader::initialize(PointTableRef table)
     {
         MetadataNode forward = table.privateMetadata("lasforward");
         MetadataNode m = getMetadata();
-        las::addVlrMetadata(ebVlr, "vlr_0", forward, m);
-        las::addVlrMetadata(srsVlr, "vlr_1", forward, m);
-        int i = 2;
+        int i = 0;
+        if (ebVlr.dataSize())
+            las::addVlrMetadata(ebVlr, "vlr_" + std::to_string(i++), forward, m);
+        if (srsVlr.dataSize())
+            las::addVlrMetadata(srsVlr, "vlr_" + std::to_string(i++), forward, m);
         for (las::VlrCatalog::Entry& e : catalog)
         {
+            if (e.userId == las::CopcUserId)
+                continue;
             las::Vlr vlr(e.userId, e.recordId);
             vlr.dataVec = catalog.fetchWithDescription(e.userId, e.recordId, vlr.description);
             las::addVlrMetadata(vlr, "vlr_" + std::to_string(i++), forward, m); 
@@ -316,9 +320,10 @@ void CopcReader::validateHeader(const las::Header& h)
 
 void CopcReader::validateVlrInfo(const las::Vlr& v, const copc::Info& i)
 {
-    if (v.userId != "copc" || v.recordId != 1)
+    if (v.userId != las::CopcUserId || v.recordId != las::CopcInfoRecordId)
         throwError("COPC VLR invalid. Found user ID '" + v.userId + "' and record ID '" +
-            std::to_string(v.recordId) + "'. Expected 'copc' and '1'.");
+            std::to_string(v.recordId) + "'. Expected '" + las::CopcUserId +"' and '" +
+            std::to_string(las::CopcInfoRecordId) + "'.");
 }
 
 

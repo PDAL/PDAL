@@ -359,7 +359,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     MetadataNode forward = table.privateMetadata("lasforward");
     las::extractHeaderMetadata(d->header, forward, m);
     las::extractSrsMetadata(d->srs, m);
-    for (int i = 0; i < d->vlrs.size(); ++i)
+    for (int i = 0; i < (int)d->vlrs.size(); ++i)
         las::addVlrMetadata(d->vlrs[i], "vlr_" + std::to_string(i), forward, m);
 
     m_streamIf.reset();

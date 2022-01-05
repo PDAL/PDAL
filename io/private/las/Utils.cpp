@@ -163,7 +163,7 @@ void addVlrMetadata(const Vlr& vlr, std::string name, MetadataNode& forward, Met
     if (vlr.dataSize() > DataLenMax)
         return;
 
-    if (vlr.userId == PdalUserId)
+    if (vlr.userId == las::PdalUserId)
     {
         if (vlr.recordId == las::PdalMetadataRecordId)
             name = "pdal_metadata";
@@ -851,6 +851,8 @@ std::vector<char> VlrCatalog::fetchWithDescription(const std::string& userId, ui
             length = (uint32_t)e.length;
             break;
         }
+    if (length == 0)
+        return vlrdata;
 
     // Load the data plus the description.
     const int DescripLen = 32;
@@ -860,8 +862,12 @@ std::vector<char> VlrCatalog::fetchWithDescription(const std::string& userId, ui
 
     // Only make the string with non-null characters.
     int len = DescripLen - 1;
-    while (v[len] == '\0')
+    while (len >= 0)
+    {
+        if (v[len])
+            break;
         len--;
+    }
     outDescrip.assign(v.data(), v.data() + len + 1);
 
     // Assign the payload of the VLR to the output VLR.

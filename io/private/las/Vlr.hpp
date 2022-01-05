@@ -47,7 +47,7 @@ namespace pdal
 namespace las
 {
 
-static const int WktRecordId = 2112;
+static const uint16_t WktRecordId = 2112;
 static const uint16_t GeotiffDirectoryRecordId = 34735;
 static const uint16_t GeotiffDoublesRecordId = 34736;
 static const uint16_t GeotiffAsciiRecordId = 34737;
@@ -57,12 +57,15 @@ static const uint16_t TextDescriptionRecordId = 3;
 static const uint16_t ExtraBytesRecordId = 4;
 static const uint16_t PdalMetadataRecordId = 12;
 static const uint16_t PdalPipelineRecordId = 13;
+static const uint16_t CopcInfoRecordId = 1;
+static const uint16_t CopcHierarchyRecordId = 1000;
 
 const std::string TransformUserId = "LASF_Projection";
 const std::string SpecUserId = "LASF_Spec";
 const std::string LiblasUserId = "liblas";
 const std::string LaszipUserId = "laszip encoded";
 const std::string PdalUserId = "PDAL";
+const std::string CopcUserId = "copc";
 
 struct Vlr;
 using VlrList = std::vector<Vlr>;
