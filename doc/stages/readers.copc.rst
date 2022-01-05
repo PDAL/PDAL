@@ -114,13 +114,16 @@ resolution
   Units match that of the data. [Default: no resolution limit]
 
 header
-    HTTP headers to forward for remote endpoints. Specify as a JSON
-    object of key/value string pairs.
+  HTTP headers to forward for remote endpoints. Specify as a JSON
+  object of key/value string pairs.
 
 query
-    HTTP query parameters to forward for remote endpoints. Specify as a JSON
-    object of key/value string pairs.
+  HTTP query parameters to forward for remote endpoints. Specify as a JSON
+  object of key/value string pairs.
 
+las
+  Read LAS VLRs and import as metadata. [Default: false]
+   
 fix_dims
   Make invalid dimension names valid by converting disallowed characters to '_'. Only
   applies to names specified in an extra-bytes VLR. [Default: true]
