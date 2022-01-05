@@ -155,12 +155,6 @@ uint64_t LasReader::vlrData(const std::string& userId, uint16_t recordId, char c
     data = vlr->data();
     return vlr->dataVec.size();
 }
-/**
-const las::VlrList& LasReader::vlrs() const
-{
-    return d->vlrs;
-}
-**/
 
 point_count_t LasReader::getNumPoints() const
 {
@@ -354,7 +348,6 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     if (d->header.versionAtLeast(1, 4) || d->opts.useEbVlr)
         readExtraBytesVlr();
 
-    //ABELL
     setSrs(m);
     MetadataNode forward = table.privateMetadata("lasforward");
     las::extractHeaderMetadata(d->header, forward, m);

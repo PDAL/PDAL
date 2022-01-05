@@ -274,5 +274,139 @@ std::ostream& operator<<(std::ostream& out, const las::Evlr& v)
     return out;
 }
 
+// VLR Catalog
+
+VlrCatalog::VlrCatalog(VlrCatalog::ReadFunc f) : m_fetch(f)
+{}
+
+VlrCatalog::VlrCatalog(uint64_t vlrOffset, uint32_t vlrCount,
+    uint64_t evlrOffset, uint32_t evlrCount, VlrCatalog::ReadFunc f) : m_fetch(f)
+{
+    load(vlrOffset, vlrCount, evlrOffset, evlrCount);
+}
+
+void VlrCatalog::load(uint64_t vlrOffset, uint32_t vlrCount,
+    uint64_t evlrOffset, uint32_t evlrCount)
+{
+    auto vlrWalker = std::bind(&VlrCatalog::walkVlrs, this, vlrOffset, vlrCount);
+    auto evlrWalker = std::bind(&VlrCatalog::walkEvlrs, this, evlrOffset, evlrCount);
+
+    ThreadPool pool(2);
+
+    if (vlrCount)
+        pool.add(vlrWalker);
+    if (evlrCount)
+        pool.add(evlrWalker);
+    pool.await();
+}
+
+void VlrCatalog::walkVlrs(uint64_t vlrOffset, uint32_t vlrCount)
+{
+    while (vlrOffset && vlrCount)
+    {
+        std::vector<char> buf = m_fetch(vlrOffset, Vlr::HeaderSize);
+
+        Vlr vlr;
+        vlr.fillHeader(buf.data());
+        Entry entry { vlr.userId, vlr.recordId, vlrOffset + Vlr::HeaderSize, vlr.promisedDataSize };
+        insert(entry);
+        vlrOffset += Vlr::HeaderSize + vlr.promisedDataSize;
+        vlrCount--;
+    }
+}
+
+void VlrCatalog::walkEvlrs(uint64_t evlrOffset, uint32_t evlrCount)
+{
+    while (evlrOffset && evlrCount)
+    {
+        std::vector<char> buf = m_fetch(evlrOffset, Evlr::HeaderSize);
+
+        Evlr vlr;
+        vlr.fillHeader(buf.data());
+        Entry entry { vlr.userId, vlr.recordId, evlrOffset + Evlr::HeaderSize,
+            vlr.promisedDataSize };
+        insert(entry);
+        evlrOffset += Evlr::HeaderSize + vlr.promisedDataSize;
+        evlrCount--;
+    }
+}
+
+void VlrCatalog::insert(const VlrCatalog::Entry& entry)
+{
+    std::unique_lock<std::mutex> l(m_mutex);
+
+    m_entries.push_back(entry);
+}
+
+std::vector<char> VlrCatalog::fetch(const std::string& userId, uint16_t recordId) const
+{
+    uint64_t offset = 0;
+    uint32_t length = 0;
+
+    // We don't lock m_entries because we assume that the load has already occurred at the
+    // time you want to fetch.
+    std::vector<char> vlrdata;
+    for (const Entry& e : m_entries)
+        if (e.userId == userId && e.recordId == recordId)
+        {
+            // We don't support VLRs with size > 4GB)
+            if (e.length > (std::numeric_limits<uint32_t>::max)())
+                return vlrdata;
+
+            offset = e.offset;
+            length = (uint32_t)e.length;
+            break;
+        }
+
+    if (length > 0)
+        vlrdata = m_fetch(offset, length);
+    return vlrdata;
+}
+
+std::vector<char> VlrCatalog::fetchWithDescription(const std::string& userId, uint16_t recordId,
+    std::string& outDescrip) const
+{
+    uint64_t offset = 0;
+    uint32_t length = 0;
+
+    // We don't lock m_entries because we assume that the load has already occurred at the
+    // time you want to fetch.
+    std::vector<char> vlrdata;
+    for (const Entry& e : m_entries)
+        if (e.userId == userId && e.recordId == recordId)
+        {
+            // We don't support VLRs with size > 4GB)
+            if (e.length > (std::numeric_limits<uint32_t>::max)())
+                return vlrdata;
+
+            offset = e.offset;
+            length = (uint32_t)e.length;
+            break;
+        }
+    if (length == 0)
+        return vlrdata;
+
+    // Load the data plus the description.
+    const int DescripLen = 32;
+    assert(offset > DescripLen);
+    // Add space for the description that precedes the data
+    std::vector<char> v = m_fetch(offset - DescripLen, length + DescripLen);
+
+    // Only make the string with non-null characters.
+    int len = DescripLen - 1;
+    while (len >= 0)
+    {
+        if (v[len])
+            break;
+        len--;
+    }
+    outDescrip.assign(v.data(), v.data() + len + 1);
+
+    // Assign the payload of the VLR to the output VLR.
+    vlrdata.assign(v.data() + DescripLen, v.data() + v.size());
+    return vlrdata;
+}
+
+
 } // namespace las
 } // namespace pdal

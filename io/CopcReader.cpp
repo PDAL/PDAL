@@ -56,6 +56,7 @@
 #include "private/copc/Info.hpp"
 #include "private/copc/Tile.hpp"
 #include "private/las/Utils.hpp"
+#include "private/las/Vlr.hpp"
 
 namespace pdal
 {
@@ -219,7 +220,7 @@ void CopcReader::initialize(PointTableRef table)
             las::addVlrMetadata(srsVlr, "vlr_" + std::to_string(i++), forward, m);
 
         las::VlrList ignored = las::parseIgnoreVlrs({});
-        for (las::VlrCatalog::Entry& e : catalog)
+        for (const las::VlrCatalog::Entry& e : catalog)
         {
             las::Vlr vlr(e.userId, e.recordId);
             if (las::shouldIgnoreVlr(vlr, ignored) || vlr == ebVlr || vlr == srsVlr)
@@ -285,8 +286,9 @@ void CopcReader::fetchHeader()
 
 las::Vlr CopcReader::fetchSrsVlr(const las::VlrCatalog& catalog)
 {
-    las::Vlr vlr("LASF_Projection", 2112);
-    vlr.dataVec = catalog.fetchWithDescription("LASF_Projection", 2112, vlr.description);
+    las::Vlr vlr(las::TransformUserId, las::WktRecordId);
+    vlr.dataVec = catalog.fetchWithDescription(las::TransformUserId, las::WktRecordId,
+        vlr.description);
     if (!vlr.empty())
         setSpatialReference(std::string(vlr.data(), vlr.data() + vlr.dataSize()));
     return vlr;
@@ -295,8 +297,9 @@ las::Vlr CopcReader::fetchSrsVlr(const las::VlrCatalog& catalog)
 
 las::Vlr CopcReader::fetchEbVlr(const las::VlrCatalog& catalog)
 {
-    las::Vlr vlr("LASF_Spec", 4);
-    vlr.dataVec = catalog.fetchWithDescription("LASF_Spec", 4, vlr.description);
+    las::Vlr vlr(las::SpecUserId, las::ExtraBytesRecordId);
+    vlr.dataVec = catalog.fetchWithDescription(las::SpecUserId, las::ExtraBytesRecordId,
+        vlr.description);
     if (vlr.dataVec.empty())
         return vlr;
 

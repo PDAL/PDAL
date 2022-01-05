@@ -39,8 +39,11 @@
 #include <vector>
 
 #include <pdal/SpatialReference.hpp>
+/**
 #include <pdal/util/IStream.hpp>
 #include <pdal/util/OStream.hpp>
+**/
+#include <pdal/util/ThreadPool.hpp>
 
 namespace pdal
 {
@@ -135,6 +138,53 @@ struct Evlr : public Vlr
 
     friend std::istream& operator>>(std::istream& in, Evlr& v);
     friend std::ostream& operator<<(std::ostream& out, const Evlr& v);
+};
+
+class VlrCatalog
+{
+public:
+    using ReadFunc = std::function<std::vector<char>(uint64_t offset, int32_t size)>;
+    struct Entry
+    {
+        std::string userId;
+        uint16_t recordId;
+        uint64_t offset;
+        uint64_t length;
+    };
+
+private:
+    std::mutex m_mutex;
+    ReadFunc m_fetch;
+    std::deque<Entry> m_entries;
+
+public:
+    VlrCatalog(ReadFunc f);
+    VlrCatalog(uint64_t vlrOffset, uint32_t vlrCount, uint64_t evlrOffset, uint32_t evlrCount,
+        ReadFunc f);
+
+    void load(uint64_t vlrOffset, uint32_t vlrCount, uint64_t evlrOffset, uint32_t evlrCount);
+    std::vector<char> fetch(const std::string& userId, uint16_t recordId) const;
+    std::vector<char> fetchWithDescription(const std::string& userId, uint16_t recordId,
+        std::string& outDescrip) const;
+
+    using iterator = decltype(m_entries)::iterator;
+    using const_iterator = decltype(m_entries)::const_iterator;
+
+    iterator begin()
+        { return m_entries.begin(); }
+    const_iterator begin() const
+        { return m_entries.begin(); }
+    iterator end()
+        { return m_entries.end(); }
+    const_iterator end() const
+        { return m_entries.end(); }
+    size_t size() const
+        { return m_entries.size(); }
+
+private:
+    void walkVlrs(uint64_t vlrOffset, uint32_t vlrCount);
+    void walkEvlrs(uint64_t vlrOffset, uint32_t vlrCount);
+    void insert(const Entry& entry);
 };
 
 } // namespace las
