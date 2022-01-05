@@ -18,6 +18,7 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
 
    readers.bpf
    readers.buffer
+   readers.copc
    readers.ept
    readers.e57
    readers.faux
