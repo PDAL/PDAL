@@ -138,7 +138,7 @@ void Header::setPointCount(uint64_t pointCount)
 {
     ePointCount = pointCount;
     legacyPointCount =
-        (ePointCount <= (std::numeric_limits<uint32_t>::max)()) ? ePointCount : 0;
+        (ePointCount <= (std::numeric_limits<uint32_t>::max)()) ? (uint32_t)ePointCount : 0;
 }
 
 void Header::setPointsByReturn(int returnNum, uint64_t pointCount)
@@ -146,7 +146,7 @@ void Header::setPointsByReturn(int returnNum, uint64_t pointCount)
     ePointsByReturn[returnNum] = pointCount;
     if (returnNum < LegacyReturnCount)
         legacyPointsByReturn[returnNum] =
-            (pointCount <= (std::numeric_limits<uint32_t>::max)()) ? pointCount : 0;
+            (pointCount <= (std::numeric_limits<uint32_t>::max)()) ? (uint32_t)pointCount : 0;
 }
 
 } // namespace las

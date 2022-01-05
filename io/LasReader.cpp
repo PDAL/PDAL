@@ -147,10 +147,20 @@ const las::Header& LasReader::header() const
     return d->header;
 }
 
+uint64_t LasReader::vlrData(const std::string& userId, uint16_t recordId, char const * & data)
+{
+    const las::Vlr *vlr = las::findVlr(userId, recordId, d->vlrs);
+    if (!vlr)
+	return 0;
+    data = vlr->data();
+    return vlr->dataVec.size();
+}
+/**
 const las::VlrList& LasReader::vlrs() const
 {
     return d->vlrs;
 }
+**/
 
 point_count_t LasReader::getNumPoints() const
 {

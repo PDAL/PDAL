@@ -37,9 +37,13 @@
 #include <pdal/pdal_types.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/Uuid.hpp>
-#include <pdal/pdal_config.hpp>
 
 #pragma once
+
+// Don't complain about DLL interface. If you want to use this out of the MS DLL, make sure
+// everthing is built consistently.
+#pragma warning (push)
+#pragma warning (disable: 4251)
 
 namespace pdal
 {
@@ -48,11 +52,9 @@ namespace las
 
 int PDAL_DLL baseCount(int format);
 
-// We currently export the whole struct because we have virtual functions and the vtable
-// doesn't get exported unless you export the struct/class. :(
 struct PDAL_DLL Header
 {
-    struct xyz
+    struct PDAL_DLL xyz
     {
         xyz() : x(0), y(0), z(0)
         {}
@@ -153,6 +155,8 @@ struct PDAL_DLL Header
     bool hasInfrared() const
         { return pointFormat() == 8; }
 };
+
+#pragma warning (pop)
 
 } // namespace las
 } // namespace pdal

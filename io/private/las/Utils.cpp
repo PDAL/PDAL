@@ -532,9 +532,9 @@ void V10BaseLoader::pack(const PointRef& point, char *buf, int bufsize)
 {
     LeInserter ostream(buf, bufsize);
 
-    int32_t xi = m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::X));
-    int32_t yi = m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::Y));
-    int32_t zi = m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::Z));
+    int32_t xi = (int32_t)m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::X));
+    int32_t yi = (int32_t)m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::Y));
+    int32_t zi = (int32_t)m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::Z));
 
     ostream << xi << yi << zi;
 
@@ -651,9 +651,9 @@ void V14BaseLoader::load(PointRef& point, const char *buf, int bufsize)
 void V14BaseLoader::pack(const PointRef& point, char *buf, int bufsize)
 {
     LeInserter ostream(buf, bufsize);
-    int32_t xi = m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::X));
-    int32_t yi = m_scaling.m_yXform.toScaled(point.getFieldAs<double>(Dimension::Id::Y));
-    int32_t zi = m_scaling.m_zXform.toScaled(point.getFieldAs<double>(Dimension::Id::Z));
+    int32_t xi = (int32_t)m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::X));
+    int32_t yi = (int32_t)m_scaling.m_yXform.toScaled(point.getFieldAs<double>(Dimension::Id::Y));
+    int32_t zi = (int32_t)m_scaling.m_zXform.toScaled(point.getFieldAs<double>(Dimension::Id::Z));
 
     ostream << xi << yi << zi;
 
