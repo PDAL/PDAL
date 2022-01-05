@@ -44,12 +44,18 @@ namespace pdal
 namespace las
 {
 
-VlrList parseIgnoreVLRs(const StringList& ignored, std::string& error)
+VlrList parseIgnoreVlrs(const StringList& ignored)
+{
+    std::string error;
+    return parseIgnoreVlrs(ignored, error);
+}
+
+VlrList parseIgnoreVlrs(const StringList& ignored, std::string& error)
 {
     error.clear();
 
     // Always ignore COPC VLRs and superseded VLRs.
-    VlrList ignoredVlrs { {"copc", 1}, {"copc", 1000}, {"LASF_Spec", 7} };
+    VlrList ignoredVlrs { {"copc", 1000}, {"LASF_Spec", 7} };
     for (auto& v: ignored)
     {
         StringList s = Utils::split2(v, '/');

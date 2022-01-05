@@ -255,7 +255,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     }
 
     std::string error;
-    d->ignoreVlrs = las::parseIgnoreVLRs(d->opts.ignoreVLROption, error);
+    d->ignoreVlrs = las::parseIgnoreVlrs(d->opts.ignoreVLROption, error);
     if (error.size())
         throwError(error);
 

@@ -197,7 +197,11 @@ void CopcReader::initialize(PointTableRef table)
     setForwards(headers, query);
     m_p->connector =  copc::Connector(m_filename, headers, query);
 
+    MetadataNode forward = table.privateMetadata("lasforward");
+    MetadataNode m = getMetadata();
+
     fetchHeader();
+    las::extractHeaderMetadata(m_p->header, forward, m);
 
     using namespace std::placeholders;
     las::VlrCatalog catalog(std::bind(&CopcReader::fetch, this, _1, _2));
@@ -208,18 +212,18 @@ void CopcReader::initialize(PointTableRef table)
 
     if (m_args->doVlrs)
     {
-        MetadataNode forward = table.privateMetadata("lasforward");
-        MetadataNode m = getMetadata();
         int i = 0;
         if (ebVlr.dataSize())
             las::addVlrMetadata(ebVlr, "vlr_" + std::to_string(i++), forward, m);
         if (srsVlr.dataSize())
             las::addVlrMetadata(srsVlr, "vlr_" + std::to_string(i++), forward, m);
+
+        las::VlrList ignored = las::parseIgnoreVlrs({});
         for (las::VlrCatalog::Entry& e : catalog)
         {
-            if (e.userId == las::CopcUserId)
-                continue;
             las::Vlr vlr(e.userId, e.recordId);
+            if (las::shouldIgnoreVlr(vlr, ignored) || vlr == ebVlr || vlr == srsVlr)
+                continue;
             vlr.dataVec = catalog.fetchWithDescription(e.userId, e.recordId, vlr.description);
             las::addVlrMetadata(vlr, "vlr_" + std::to_string(i++), forward, m); 
         }

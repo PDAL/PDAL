@@ -70,7 +70,8 @@ const std::string CopcUserId = "copc";
 struct Vlr;
 using VlrList = std::vector<Vlr>;
 
-VlrList parseIgnoreVLRs(const StringList& ignored, std::string& error);
+VlrList parseIgnoreVlrs(const StringList& ignored);
+VlrList parseIgnoreVlrs(const StringList& ignored, std::string& error);
 const Vlr *findVlr(const std::string& userId, uint16_t recordId, const VlrList& vlrs);
 bool shouldIgnoreVlr(const Vlr& v, const VlrList& ignoreList);
 
