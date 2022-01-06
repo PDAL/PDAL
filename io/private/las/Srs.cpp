@@ -70,30 +70,30 @@ SpatialReference srsFromGeotiff(const Vlr *vlr, const VlrList& vlrs, LogPtr log,
     if (!vlr)
         return SpatialReference();
 
-    const uint8_t *data = reinterpret_cast<const uint8_t *>(vlr->data());
+    const char *data = vlr->data();
     size_t dataLen = vlr->dataSize();
 
-    std::vector<uint8_t> directoryRec(data, data + dataLen);
+    std::vector<char> directoryRec(data, data + dataLen);
 
     vlr = findVlr(TransformUserId, GeotiffDoublesRecordId, vlrs);
     data = NULL;
     dataLen = 0;
     if (vlr && !vlr->empty())
     {
-        data = reinterpret_cast<const uint8_t *>(vlr->data());
+        data = vlr->data();
         dataLen = vlr->dataSize();
     }
-    std::vector<uint8_t> doublesRec(data, data + dataLen);
+    std::vector<char> doublesRec(data, data + dataLen);
 
     vlr = findVlr(TransformUserId, GeotiffAsciiRecordId, vlrs);
     data = NULL;
     dataLen = 0;
     if (vlr && !vlr->empty())
     {
-        data = reinterpret_cast<const uint8_t *>(vlr->data());
+        data = vlr->data();
         dataLen = vlr->dataSize();
     }
-    std::vector<uint8_t> asciiRec(data, data + dataLen);
+    std::vector<char> asciiRec(data, data + dataLen);
 
     SpatialReference srs;
     try

@@ -39,10 +39,6 @@
 #include <vector>
 
 #include <pdal/SpatialReference.hpp>
-/**
-#include <pdal/util/IStream.hpp>
-#include <pdal/util/OStream.hpp>
-**/
 #include <pdal/util/ThreadPool.hpp>
 
 namespace pdal

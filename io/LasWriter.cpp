@@ -382,8 +382,8 @@ void LasWriter::prepOutput(std::ostream *outStream, const SpatialReference& srs)
     for (const las::Vlr& vlr : m_vlrs)
     {
         std::vector<char> buf = vlr.headerData();
-        m_ostream->write((const char *)buf.data(), buf.size());
-        m_ostream->write((const char *)vlr.data(), vlr.dataSize());
+        m_ostream->write(buf.data(), buf.size());
+        m_ostream->write(vlr.data(), vlr.dataSize());
     }
 
     d->header.pointOffset = (uint32_t)m_ostream->tellp();

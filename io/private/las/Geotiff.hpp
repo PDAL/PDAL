@@ -56,9 +56,9 @@ struct Entry;
 class GeotiffSrs
 {
 public:
-    GeotiffSrs(const std::vector<uint8_t>& directoryRec,
-        const std::vector<uint8_t>& doublesRec,
-        const std::vector<uint8_t>& asciiRec, LogPtr log);
+    GeotiffSrs(const std::vector<char>& directoryRec,
+        const std::vector<char>& doublesRec,
+        const std::vector<char>& asciiRec, LogPtr log);
     SpatialReference srs() const
         { return m_srs; }
 
@@ -79,17 +79,17 @@ class GeotiffTags
 public:
     GeotiffTags(const SpatialReference& srs);
 
-    std::vector<uint8_t>& directoryData()
+    std::vector<char>& directoryData()
         { return m_directoryRec; }
-    std::vector<uint8_t>& doublesData()
+    std::vector<char>& doublesData()
         { return m_doublesRec; }
-    std::vector<uint8_t>& asciiData()
+    std::vector<char>& asciiData()
         { return m_asciiRec; }
 
 private:
-    std::vector<uint8_t> m_directoryRec;
-    std::vector<uint8_t> m_doublesRec;
-    std::vector<uint8_t> m_asciiRec;
+    std::vector<char> m_directoryRec;
+    std::vector<char> m_doublesRec;
+    std::vector<char> m_asciiRec;
 };
 
 } // namespace las

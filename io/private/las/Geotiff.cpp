@@ -128,9 +128,9 @@ struct Entry
 };
 #pragma pack(pop)
 
-GeotiffSrs::GeotiffSrs(const std::vector<uint8_t>& directoryRec,
-    const std::vector<uint8_t>& doublesRec,
-    const std::vector<uint8_t>& asciiRec, LogPtr log) : m_log(log)
+GeotiffSrs::GeotiffSrs(const std::vector<char>& directoryRec,
+    const std::vector<char>& doublesRec,
+    const std::vector<char>& asciiRec, LogPtr log) : m_log(log)
 {
     GeotiffCtx ctx;
 
@@ -157,13 +157,13 @@ GeotiffSrs::GeotiffSrs(const std::vector<uint8_t>& directoryRec,
     validateDirectory((const Entry *)(header + 1), header->numKeys,
         doublesRec.size() / sizeof(double), asciiRec.size());
 
-    uint8_t *dirData = const_cast<uint8_t *>(directoryRec.data());
+    char *dirData = const_cast<char *>(directoryRec.data());
     ST_SetKey(ctx.tiff, GeotiffDirectoryRecordId,
         (1 + header->numKeys) * 4, STT_SHORT, (void *)dirData);
 
     if (doublesRec.size())
     {
-        uint8_t *doubleData = const_cast<uint8_t *>(doublesRec.data());
+        char *doubleData = const_cast<char *>(doublesRec.data());
         ST_SetKey(ctx.tiff, GeotiffDoublesRecordId,
             doublesRec.size() / sizeof(double), STT_DOUBLE,
             (void *)doubleData);
@@ -171,7 +171,7 @@ GeotiffSrs::GeotiffSrs(const std::vector<uint8_t>& directoryRec,
 
     if (asciiRec.size())
     {
-        uint8_t *asciiData = const_cast<uint8_t *>(asciiRec.data());
+        char *asciiData = const_cast<char *>(asciiRec.data());
         ST_SetKey(ctx.tiff, GeotiffAsciiRecordId,
             asciiRec.size(), STT_ASCII, (void *)asciiData);
     }
@@ -196,7 +196,6 @@ GeotiffSrs::GeotiffSrs(const std::vector<uint8_t>& directoryRec,
     GTIFPrint(ctx.gtiff, PDALGeoTIFFPrint, &geotiff_printer);
 
     m_gtiff_print_string = geotiff_printer.output();
-
 }
 
 
@@ -253,7 +252,7 @@ GeotiffTags::GeotiffTags(const SpatialReference& srs)
 
     int count;
     int st_type;
-    uint8_t *data;
+    char *data;
     if (ST_GetKey(ctx.tiff, GeotiffDirectoryRecordId,
         &count, &st_type, (void **)&data))
     {

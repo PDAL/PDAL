@@ -43,7 +43,6 @@
 
 #include <pdal/util/Extractor.hpp>
 #include <pdal/util/Inserter.hpp>
-#include <pdal/util/ThreadPool.hpp>
 #include <pdal/util/Utils.hpp>
 
 namespace pdal
@@ -381,6 +380,7 @@ std::string generateSoftwareId()
     return oss.str();
 }
 
+// Throws las::error. Be sure to catch it.
 std::vector<ExtraDim> parse(const StringList& dimString, bool allOk)
 {
     std::vector<ExtraDim> extraDims;
