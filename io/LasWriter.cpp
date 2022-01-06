@@ -812,8 +812,8 @@ bool LasWriter::processOne(PointRef& point)
             if (offset.m_auto)
             {
                 offset.m_val = val;
-                log()->get(LogLevel::Warning) << "Auto offset for " << name <<
-                    " requested in stream mode.  Using value of " <<
+                log()->get(LogLevel::Warning) << "Auto offset for '" << name <<
+                    "' requested in stream mode.  Using value of " <<
                     offset.m_val << "." << std::endl;
             }
         };
