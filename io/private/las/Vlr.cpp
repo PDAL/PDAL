@@ -55,7 +55,7 @@ VlrList parseIgnoreVlrs(const StringList& ignored, std::string& error)
     error.clear();
 
     // Always ignore COPC VLRs and superseded VLRs.
-    VlrList ignoredVlrs { {"copc", 1000}, {"LASF_Spec", 7} };
+    VlrList ignoredVlrs { {"copc", 0, "ALL"}, {"LASF_Spec", 7} };
     for (auto& v: ignored)
     {
         StringList s = Utils::split2(v, '/');
