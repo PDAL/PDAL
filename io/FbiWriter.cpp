@@ -62,15 +62,15 @@ void buildHdrFromPoints(FbiHdr& hdr, const PointViewPtr view)
 {
     hdr.Version = 1;
     hdr.HdrSize = 1808; // by construction
-    hdr.TimeType = 1; // _ToDo_
+    hdr.TimeType = 1; // standard time by default
     hdr.Order = 0; // order is not know
     hdr.Reserved1 = 0; // Not use for now
     hdr.VlrCnt = 0; // no more varaibles
     hdr.VlrSize = 0; // idem
     hdr.RecSize = 0; // ?????
      
-    hdr.FastCnt = view->pointSize();
-    hdr.RecCnt = 0; // no more points
+    hdr.FastCnt = view->size();
+    hdr.RecCnt = 0; // no additional points
     
     BOX3D box;
     view->calculateBounds(box);
@@ -83,8 +83,7 @@ void buildHdrFromPoints(FbiHdr& hdr, const PointViewPtr view)
     hdr.MaxZ = box.maxz;
 
     // By default for now
-    // _ToDo_ : calc from points
-    hdr.UnitsXyz = 0;
+    hdr.UnitsXyz = 100;
     hdr.UnitsDistance = 0;
     
     hdr.OrgX = std::abs(hdr.MinX)-1;
@@ -124,29 +123,29 @@ void buildHdrFromPoints(FbiHdr& hdr, const PointViewPtr view)
     
     hdr.PosVlr = 0 ; // je ne sais pas ce que c'est
     hdr.PosXyz = hdr.HdrSize;
-    hdr.PosTime = hdr.PosXyz + 3*view->pointSize()*sizeof(UINT);
-    hdr.PosDistance = hdr.PosTime + view->pointSize()*hdr.BitsTime/8;
-    hdr.PosGroup = hdr.PosDistance + view->pointSize()*hdr.BitsDistance/8;
-    hdr.PosImage = hdr.PosGroup + view->pointSize()*hdr.BitsGroup/8;
-    hdr.PosNormal = hdr.PosImage + view->pointSize()*hdr.BitsImage/8;
-    hdr.PosColor = hdr.PosNormal + view->pointSize()*hdr.BitsNormal/8;
-    hdr.PosIntensity = hdr.PosColor + view->pointSize()*hdr.BitsColor/8;
-    hdr.PosLine = hdr.PosIntensity + view->pointSize()*hdr.BitsIntensity/8;
-    hdr.PosEchoLen = hdr.PosLine + view->pointSize()*hdr.BitsLine/8;
-    hdr.PosAmplitude = hdr.PosEchoLen + view->pointSize()*hdr.BitsEchoLen/8;
-    hdr.PosScanner = hdr.PosAmplitude + view->pointSize()*hdr.BitsAmplitude/8;
-    hdr.PosEcho = hdr.PosScanner + view->pointSize()*hdr.BitsScanner/8;
-    hdr.PosAngle = hdr.PosEcho + view->pointSize()*hdr.BitsEcho/8;
-    hdr.PosEchoNorm = hdr.PosAngle + view->pointSize()*hdr.BitsAngle/8;
-    hdr.PosClass = hdr.PosEchoNorm + view->pointSize()*hdr.BitsEchoNorm/8;
-    hdr.PosEchoPos = hdr.PosClass + view->pointSize()*hdr.BitsClass/8;
-    hdr.PosReflect = hdr.PosEchoPos + view->pointSize()*hdr.BitsEchoPos/8;
-    hdr.PosDeviation = hdr.PosReflect + view->pointSize()*hdr.BitsReflect/8;
-    hdr.PosReliab = hdr.PosDeviation + view->pointSize()*hdr.BitsDeviation/8;
-    hdr.PosImgNbr = hdr.PosReliab + view->pointSize()*hdr.BitsReliab/8;
-    hdr.PosRecord = hdr.PosImgNbr + view->pointSize()*hdr.BitsImage/8;
+    hdr.PosTime = hdr.PosXyz + 3*view->size()*sizeof(UINT);
+    hdr.PosDistance = hdr.PosTime + view->size()*hdr.BitsTime/8;
+    hdr.PosGroup = hdr.PosDistance + view->size()*hdr.BitsDistance/8;
+    hdr.PosImage = hdr.PosGroup + view->size()*hdr.BitsGroup/8;
+    hdr.PosNormal = hdr.PosImage + view->size()*hdr.BitsImage/8;
+    hdr.PosColor = hdr.PosNormal + view->size()*hdr.BitsNormal/8;
+    hdr.PosIntensity = hdr.PosColor + view->size()*hdr.BitsColor/8;
+    hdr.PosLine = hdr.PosIntensity + view->size()*hdr.BitsIntensity/8;
+    hdr.PosEchoLen = hdr.PosLine + view->size()*hdr.BitsLine/8;
+    hdr.PosAmplitude = hdr.PosEchoLen + view->size()*hdr.BitsEchoLen/8;
+    hdr.PosScanner = hdr.PosAmplitude + view->size()*hdr.BitsAmplitude/8;
+    hdr.PosEcho = hdr.PosScanner + view->size()*hdr.BitsScanner/8;
+    hdr.PosAngle = hdr.PosEcho + view->size()*hdr.BitsEcho/8;
+    hdr.PosEchoNorm = hdr.PosAngle + view->size()*hdr.BitsAngle/8;
+    hdr.PosClass = hdr.PosEchoNorm + view->size()*hdr.BitsEchoNorm/8;
+    hdr.PosEchoPos = hdr.PosClass + view->size()*hdr.BitsClass/8;
+    hdr.PosReflect = hdr.PosEchoPos + view->size()*hdr.BitsEchoPos/8;
+    hdr.PosDeviation = hdr.PosReflect + view->size()*hdr.BitsReflect/8;
+    hdr.PosReliab = hdr.PosDeviation + view->size()*hdr.BitsDeviation/8;
+    hdr.PosImgNbr = hdr.PosReliab + view->size()*hdr.BitsReliab/8;
+    hdr.PosRecord = hdr.PosImgNbr + view->size()*hdr.BitsImage/8;
 
-    hdr.ImgNbrCnt = 0; // _ToDo_ I don't know what to put here for now...
+    hdr.ImgNbrCnt = 0; //  I don't know what to put here for now...
     strcpy(hdr.Reserved6,""); // Not use for now
 }
 
@@ -251,12 +250,12 @@ void FbiWriter::write(const PointViewPtr view)
     {
         point.setPointId(i);
         double X = point.getFieldAs<double>(Dimension::Id::X);
-        double Y = point.getFieldAs<double>(Dimension::Id::X);
+        double Y = point.getFieldAs<double>(Dimension::Id::Y);
         double Z = point.getFieldAs<double>(Dimension::Id::Z);
-        
-        UINT xr = X/Mul + hdr->OrgX;
-        UINT yr = Y/Mul + hdr->OrgY;
-        UINT zr = Z/Mul + hdr->OrgZ;
+
+        UINT xr = (X - hdr->OrgX)*Mul;
+        UINT yr = (Y - hdr->OrgY)*Mul;
+        UINT zr = (Z - hdr->OrgZ)*Mul;
 
         ofFBI.write(reinterpret_cast<const char *>(&xr), sizeof(hdr->BitsX));
         ofFBI.write(reinterpret_cast<const char *>(&yr), sizeof(hdr->BitsY));

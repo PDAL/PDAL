@@ -48,7 +48,7 @@ static StaticPluginInfo const s_info
 {
     "readers.fbi",
     "Bbi Reader",
-    "http://pdal.io/stages/readers.fbi.html", // _ToDo_
+    "http://pdal.io/stages/readers.fbi.html",
     { "bin" }
 };
 
@@ -57,7 +57,6 @@ CREATE_STATIC_STAGE(FbiReader, s_info)
 void readFbiHeader(FbiHdr* hdr, std::ifstream* ifFbi)
 {
     ifFbi->read(reinterpret_cast<char *>(&hdr->Signature), sizeof(hdr->Signature));
-    
     assert(std::string(hdr->Signature)=="FASTBIN");
     
     ifFbi->read(reinterpret_cast<char *>(&hdr->Version), sizeof(hdr->Version));
@@ -71,7 +70,10 @@ void readFbiHeader(FbiHdr* hdr, std::ifstream* ifFbi)
     
     ifFbi->read(reinterpret_cast<char *>(&hdr->FastCnt), sizeof(hdr->FastCnt));
     ifFbi->read(reinterpret_cast<char *>(&hdr->RecCnt), sizeof(hdr->RecCnt));
+    
     ifFbi->read(reinterpret_cast<char *>(&hdr->UnitsXyz), sizeof(hdr->UnitsXyz));
+    assert(hdr->UnitsXyz!=0.);
+    
     ifFbi->read(reinterpret_cast<char *>(&hdr->UnitsDistance), sizeof(hdr->UnitsDistance));
     ifFbi->read(reinterpret_cast<char *>(&hdr->OrgX), sizeof(hdr->OrgX));
     ifFbi->read(reinterpret_cast<char *>(&hdr->OrgY), sizeof(hdr->OrgY));
@@ -197,6 +199,7 @@ point_count_t FbiReader::read(PointViewPtr view, point_count_t count)
 {
     ifFbi->seekg(hdr->PosXyz);
     double Mul = 1.0 / hdr->UnitsXyz;
+    
     for (size_t i(0); i<hdr->FastCnt; i++)
     {
         UINT xr,yr,zr;
@@ -204,11 +207,13 @@ point_count_t FbiReader::read(PointViewPtr view, point_count_t count)
         ifFbi->read(reinterpret_cast<char *>(&yr), hdr->BitsY/8);
         ifFbi->read(reinterpret_cast<char *>(&zr), hdr->BitsZ/8);
         
-        if (zr > 1e6) zr =0; // tmp due to debug file
-        
-        view->setField(Dimension::Id::X, i, static_cast<double>((xr - hdr->OrgX) * Mul));
-        view->setField(Dimension::Id::Y, i, static_cast<double>((yr - hdr->OrgY) * Mul));
-        view->setField(Dimension::Id::Z, i, static_cast<double>((zr - hdr->OrgZ) * Mul));
+        double X = static_cast<double>(xr*Mul + hdr->OrgX);
+        double Y = static_cast<double>(yr*Mul + hdr->OrgY);
+        double Z = static_cast<double>(zr*Mul + hdr->OrgZ);
+
+        view->setField(Dimension::Id::X, i, X);
+        view->setField(Dimension::Id::Y, i, Y);
+        view->setField(Dimension::Id::Z, i, Z);
     }
     
     if (hdr->BitsTime>0)
@@ -286,7 +291,7 @@ point_count_t FbiReader::read(PointViewPtr view, point_count_t count)
         {
             UINT echoLenght;
             ifFbi->read(reinterpret_cast<char *>(&echoLenght), hdr->BitsEchoLen/8);
-            view->setField(Dimension::Id::ReturnNumber, i, size_t(echoLenght));
+            view->setField(Dimension::Id::ReturnNumber, i, uint8_t(echoLenght));
         }
     }
     

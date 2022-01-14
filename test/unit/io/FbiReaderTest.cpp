@@ -47,7 +47,7 @@ namespace
 
 std::string getTestfilePath()
 {
-    return Support::datapath("fbi/test.fbi");
+    return Support::datapath("fbi/1.2-with-color.fbi");
 }
 
 class FbiReaderTest : public ::testing::Test
@@ -82,7 +82,7 @@ TEST_F(FbiReaderTest, Header)
 
     EXPECT_EQ(1808, header.HdrSize);
     EXPECT_EQ(1, header.Version);
-    EXPECT_EQ(204113, header.FastCnt);
+    EXPECT_EQ(1065, header.FastCnt);
     EXPECT_EQ(1808, header.PosXyz);
 
     //could add more test values
@@ -97,18 +97,17 @@ TEST_F(FbiReaderTest, ReadingPoints)
     
     //number of points
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 204113);
+    EXPECT_EQ(view->size(), 1065);
 
     //some tests on the first point
-    
-    EXPECT_DOUBLE_EQ(827491.6, view->getFieldAs<double>(Dimension::Id::X, 0));
-    EXPECT_DOUBLE_EQ(6307999.990, view->getFieldAs<double>(Dimension::Id::Y, 0));
-    EXPECT_DOUBLE_EQ(21.34, view->getFieldAs<double>(Dimension::Id::Z, 0));
-    EXPECT_DOUBLE_EQ(412393472, view->getFieldAs<double>(Dimension::Id::OffsetTime, 0));
-    EXPECT_EQ(2648, view->getFieldAs<uint16_t>(Dimension::Id::Intensity, 0));
-    EXPECT_EQ(20, view->getFieldAs<uint16_t>(Dimension::Id::PointSourceId, 0));
-    EXPECT_EQ(73, view->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 0));
+    EXPECT_NEAR(635618.98, view->getFieldAs<double>(Dimension::Id::X, 0),1e-4);
+    EXPECT_NEAR(848898.71, view->getFieldAs<double>(Dimension::Id::Y, 0),1e-4);
+    EXPECT_NEAR(405.59, view->getFieldAs<double>(Dimension::Id::Z, 0),1e-4);
+    EXPECT_DOUBLE_EQ(0, view->getFieldAs<double>(Dimension::Id::OffsetTime, 0));
+    EXPECT_EQ(55040, view->getFieldAs<uint16_t>(Dimension::Id::Intensity, 0));
+    EXPECT_EQ(0, view->getFieldAs<uint16_t>(Dimension::Id::PointSourceId, 0));
+    EXPECT_EQ(1, view->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 0));
     EXPECT_EQ(0, view->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, 0));
-    EXPECT_EQ(1, view->getFieldAs<uint8_t>(Dimension::Id::Classification, 0));
+    EXPECT_EQ(132, view->getFieldAs<uint8_t>(Dimension::Id::Classification, 0));
 }
 }
