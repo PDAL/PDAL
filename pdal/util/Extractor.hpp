@@ -111,17 +111,16 @@ public:
     {
         s = std::string(m_gptr, size);
         m_gptr += size;
-        while (--size)
+        while (size)
         {
+            size--;
             if (s[size] != '\0')
-                break;
-            else if (size == 0)
             {
-                s.clear();
+                s.resize(size + 1);
                 return;
             }
         }
-        s.resize(size + 1);
+        s.clear();
     }
 
     /**
