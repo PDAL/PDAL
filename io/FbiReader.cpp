@@ -60,6 +60,8 @@ void readFbiHeader(FbiHdr* hdr, std::ifstream* ifFbi)
     assert(std::string(hdr->Signature)=="FASTBIN");
     
     ifFbi->read(reinterpret_cast<char *>(&hdr->Version), sizeof(hdr->Version));
+    assert(hdr->Version==1);
+    
     ifFbi->read(reinterpret_cast<char *>(&hdr->HdrSize), sizeof(hdr->HdrSize));
     ifFbi->read(reinterpret_cast<char *>(&hdr->TimeType), sizeof(hdr->TimeType));
     ifFbi->read(reinterpret_cast<char *>(&hdr->Order), sizeof(hdr->Order));
