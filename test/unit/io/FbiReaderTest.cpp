@@ -108,6 +108,6 @@ TEST_F(FbiReaderTest, ReadingPoints)
     EXPECT_EQ(0, view->getFieldAs<uint16_t>(Dimension::Id::PointSourceId, 0));
     EXPECT_EQ(1, view->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 0));
     EXPECT_EQ(0, view->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, 0));
-    EXPECT_EQ(132, view->getFieldAs<uint8_t>(Dimension::Id::Classification, 0));
+    EXPECT_EQ(20, view->getFieldAs<uint8_t>(Dimension::Id::Classification, 0));
 }
 }

@@ -100,7 +100,11 @@ void buildHdrFromPoints(fbi::FbiHdr& hdr, const PointViewPtr view)
     hdr.BitsIntensity = ( view->hasDim(Dimension::Id::Intensity) ? 16 : 0 );
     hdr.BitsScanner = ( view->hasDim(Dimension::Id::UserData) ? 8 : 0 );
     hdr.BitsEcho = ( view->hasDim(Dimension::Id::ReturnNumber) ? 8 : 0 );
-    hdr.BitsAngle = ( view->hasDim(Dimension::Id::ScanAngleRank) ? 8 : 0 );
+    
+    // Fbi only accept 8 bits ScanAngleRank
+    hdr.BitsAngle = ( view->hasDim(Dimension::Id::ScanAngleRank)
+                     && view->dimType(Dimension::Id::ScanAngleRank)== Dimension::Type::Unsigned8 ? 8 : 0 );
+    
     hdr.BitsClass = ( view->hasDim(Dimension::Id::Classification) ? 8 : 0 );
     hdr.BitsLine = ( view->hasDim(Dimension::Id::PointSourceId) ? 16 : 0 );
     hdr.BitsEchoLen = ( view->hasDim(Dimension::Id::ReturnNumber) ? 16 : 0 );
@@ -345,8 +349,8 @@ void FbiWriter::write(const PointViewPtr view)
         for (PointId i = 0; i < view->size(); ++i)
         {
             point.setPointId(i);
-            uint8_t echoLenght = point.getFieldAs<uint8_t>(Dimension::Id::ReturnNumber);
-            ofFBI->write(reinterpret_cast<const char *>(&echoLenght), hdr->BitsEchoLen/8);
+            uint8_t echoLen = point.getFieldAs<uint8_t>(Dimension::Id::ReturnNumber);
+            ofFBI->write(reinterpret_cast<const char *>(&echoLen), hdr->BitsEchoLen/8);
         }
     }
 

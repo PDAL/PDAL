@@ -174,7 +174,10 @@ void FbiReader::addDimensions(PointLayoutPtr layout)
     
     if (hdr->BitsEcho > 0) layout->registerDim(Dimension::Id::ReturnNumber);
     if (hdr->BitsTime > 0) layout->registerDim(Dimension::Id::EchoRange);
-    if (hdr->BitsAngle > 0) layout->registerDim(Dimension::Id::ScanAngleRank);
+    
+    //Fbi assumes only uint8 for ScanAngleRank
+    if (hdr->BitsAngle > 0) layout->registerDim(Dimension::Id::ScanAngleRank, Dimension::Type::Unsigned8);
+    
     if (hdr->BitsClass > 0) layout->registerDim(Dimension::Id::Classification);
     if (hdr->BitsLine > 0) layout->registerDim(Dimension::Id::PointSourceId);
     if (hdr->BitsIntensity > 0) layout->registerDim(Dimension::Id::Intensity);
@@ -209,9 +212,9 @@ point_count_t FbiReader::read(PointViewPtr view, point_count_t count)
         m_istreamPtr->read(reinterpret_cast<char *>(&yr), hdr->BitsY/8);
         m_istreamPtr->read(reinterpret_cast<char *>(&zr), hdr->BitsZ/8);
         
-        double X = static_cast<double>(xr*Mul + hdr->OrgX);
-        double Y = static_cast<double>(yr*Mul + hdr->OrgY);
-        double Z = static_cast<double>(zr*Mul + hdr->OrgZ);
+        double X = xr*Mul + hdr->OrgX;
+        double Y = yr*Mul + hdr->OrgY;
+        double Z = zr*Mul + hdr->OrgZ;
 
         view->setField(Dimension::Id::X, i, X);
         view->setField(Dimension::Id::Y, i, Y);

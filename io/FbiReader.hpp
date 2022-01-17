@@ -53,7 +53,7 @@ public:
 
     point_count_t getNumPoints() const { return hdr->FastCnt; }
 
-    const fbi::FbiHdr& getHeader() const { return *hdr.get(); }
+    const fbi::FbiHdr& getHeader() const { return *hdr; }
 
     // this is called by the stage's iterator
     uint32_t processBuffer(PointViewPtr view, std::istream& stream,
