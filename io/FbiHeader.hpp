@@ -46,7 +46,7 @@ namespace fbi
 {
 
 //typedef from FBI documentation
-typedef unsigned int UINT;
+typedef uint32_t UINT;
 typedef uint64_t UINT64;
 typedef unsigned char BYTE ;
 
@@ -128,7 +128,7 @@ struct FbiHdr {
     UINT64 PosReliab ; // File position of reliability
     UINT64 PosImgNbr ; // File position of image number list
     UINT ImgNbrCnt ; // Number of 64 bit image numbers at PosImgNbr
-    char Reserved6[1260]; // Fill with zeroes
+    char Reserved6[1260]{}; // Fill with zeroes
     
     void dump(const LogPtr& log);
 };

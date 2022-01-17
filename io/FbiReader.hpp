@@ -61,7 +61,7 @@ public:
 
 private:
     std::unique_ptr<fbi::FbiHdr> hdr;
-    std::unique_ptr<std::ifstream> ifFbi;
+    std::istream *m_istreamPtr;
     
     virtual void initialize();
     virtual void addDimensions(PointLayoutPtr layout);

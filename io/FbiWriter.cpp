@@ -34,8 +34,9 @@
 
 #include "FbiWriter.hpp"
 
-using namespace pdal;
-using namespace pdal::fbi;
+#include <pdal/PDALUtils.hpp>
+
+namespace pdal {
 
 namespace
 {
@@ -50,7 +51,7 @@ namespace
 CREATE_STATIC_STAGE(FbiWriter, s_info)
 
 FbiWriter::FbiWriter():
-hdr(new FbiHdr())
+hdr(new fbi::FbiHdr())
 {}
 
 FbiWriter::~FbiWriter()
@@ -58,7 +59,7 @@ FbiWriter::~FbiWriter()
 
 std::string FbiWriter::getName() const { return s_info.name; }
 
-void buildHdrFromPoints(FbiHdr& hdr, const PointViewPtr view)
+void buildHdrFromPoints(fbi::FbiHdr& hdr, const PointViewPtr view)
 {
     hdr.Version = 1;
     hdr.HdrSize = 1808; // by construction
@@ -123,7 +124,7 @@ void buildHdrFromPoints(FbiHdr& hdr, const PointViewPtr view)
     
     hdr.PosVlr = 0 ; // je ne sais pas ce que c'est
     hdr.PosXyz = hdr.HdrSize;
-    hdr.PosTime = hdr.PosXyz + 3*view->size()*sizeof(UINT);
+    hdr.PosTime = hdr.PosXyz + 3*view->size()*sizeof(fbi::UINT);
     hdr.PosDistance = hdr.PosTime + view->size()*hdr.BitsTime/8;
     hdr.PosGroup = hdr.PosDistance + view->size()*hdr.BitsDistance/8;
     hdr.PosImage = hdr.PosGroup + view->size()*hdr.BitsGroup/8;
@@ -149,84 +150,84 @@ void buildHdrFromPoints(FbiHdr& hdr, const PointViewPtr view)
     strcpy(hdr.Reserved6,""); // Not use for now
 }
 
-void writeFbiHeader(const FbiHdr& hdr, std::ofstream& ofFBI)
+void writeFbiHeader(const fbi::FbiHdr& hdr, std::ostream* ofFBI)
 {
-    ofFBI.write(hdr.Signature, sizeof(hdr.Signature));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.Version), sizeof(hdr.Version));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.HdrSize), sizeof(hdr.HdrSize));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.TimeType), sizeof(hdr.TimeType));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.Order), sizeof(hdr.Order));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.Reserved1), sizeof(hdr.Reserved1));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.VlrCnt), sizeof(hdr.VlrCnt));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.VlrSize), sizeof(hdr.VlrSize));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.RecSize), sizeof(hdr.RecSize));
+    ofFBI->write(hdr.Signature, sizeof(hdr.Signature));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.Version), sizeof(hdr.Version));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.HdrSize), sizeof(hdr.HdrSize));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.TimeType), sizeof(hdr.TimeType));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.Order), sizeof(hdr.Order));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.Reserved1), sizeof(hdr.Reserved1));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.VlrCnt), sizeof(hdr.VlrCnt));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.VlrSize), sizeof(hdr.VlrSize));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.RecSize), sizeof(hdr.RecSize));
     
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.FastCnt), sizeof(hdr.FastCnt));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.RecCnt), sizeof(hdr.RecCnt));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.UnitsXyz), sizeof(hdr.UnitsXyz));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.UnitsDistance), sizeof(hdr.UnitsDistance));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.OrgX), sizeof(hdr.OrgX));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.OrgY), sizeof(hdr.OrgY));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.OrgZ), sizeof(hdr.OrgZ));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.MinX), sizeof(hdr.MinX));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.MaxX), sizeof(hdr.MaxX));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.MinY), sizeof(hdr.MinY));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.MaxY), sizeof(hdr.MaxY));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.MinZ), sizeof(hdr.MinZ));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.MaxZ), sizeof(hdr.MaxZ));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.System), sizeof(hdr.System));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.Software), sizeof(hdr.Software));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.Reserved2), sizeof(hdr.Reserved2));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.FastCnt), sizeof(hdr.FastCnt));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.RecCnt), sizeof(hdr.RecCnt));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.UnitsXyz), sizeof(hdr.UnitsXyz));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.UnitsDistance), sizeof(hdr.UnitsDistance));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.OrgX), sizeof(hdr.OrgX));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.OrgY), sizeof(hdr.OrgY));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.OrgZ), sizeof(hdr.OrgZ));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.MinX), sizeof(hdr.MinX));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.MaxX), sizeof(hdr.MaxX));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.MinY), sizeof(hdr.MinY));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.MaxY), sizeof(hdr.MaxY));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.MinZ), sizeof(hdr.MinZ));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.MaxZ), sizeof(hdr.MaxZ));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.System), sizeof(hdr.System));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.Software), sizeof(hdr.Software));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.Reserved2), sizeof(hdr.Reserved2));
     
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.BitsX), sizeof(hdr.BitsX));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.BitsY), sizeof(hdr.BitsY));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.BitsZ), sizeof(hdr.BitsZ));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.BitsTime), sizeof(hdr.BitsTime));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.BitsDistance), sizeof(hdr.BitsDistance));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.BitsGroup), sizeof(hdr.BitsGroup));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.BitsNormal), sizeof(hdr.BitsNormal));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.BitsColor), sizeof(hdr.BitsColor));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.BitsIntensity), sizeof(hdr.BitsIntensity));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.BitsLine), sizeof(hdr.BitsLine));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.BitsEchoLen), sizeof(hdr.BitsEchoLen));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.BitsAmplitude), sizeof(hdr.BitsAmplitude));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.BitsScanner), sizeof(hdr.BitsScanner));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.BitsEcho), sizeof(hdr.BitsEcho));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.BitsAngle), sizeof(hdr.BitsAngle));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.BitsEchoNorm), sizeof(hdr.BitsEchoNorm));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.BitsClass), sizeof(hdr.BitsClass));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.BitsEchoPos), sizeof(hdr.BitsEchoPos));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.BitsImage), sizeof(hdr.BitsImage));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.BitsReflect), sizeof(hdr.BitsReflect));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.BitsDeviation), sizeof(hdr.BitsDeviation));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.BitsReliab), sizeof(hdr.BitsReliab));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.Reserved5), sizeof(hdr.Reserved5));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsX), sizeof(hdr.BitsX));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsY), sizeof(hdr.BitsY));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsZ), sizeof(hdr.BitsZ));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsTime), sizeof(hdr.BitsTime));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsDistance), sizeof(hdr.BitsDistance));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsGroup), sizeof(hdr.BitsGroup));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsNormal), sizeof(hdr.BitsNormal));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsColor), sizeof(hdr.BitsColor));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsIntensity), sizeof(hdr.BitsIntensity));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsLine), sizeof(hdr.BitsLine));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsEchoLen), sizeof(hdr.BitsEchoLen));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsAmplitude), sizeof(hdr.BitsAmplitude));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsScanner), sizeof(hdr.BitsScanner));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsEcho), sizeof(hdr.BitsEcho));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsAngle), sizeof(hdr.BitsAngle));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsEchoNorm), sizeof(hdr.BitsEchoNorm));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsClass), sizeof(hdr.BitsClass));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsEchoPos), sizeof(hdr.BitsEchoPos));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsImage), sizeof(hdr.BitsImage));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsReflect), sizeof(hdr.BitsReflect));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsDeviation), sizeof(hdr.BitsDeviation));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsReliab), sizeof(hdr.BitsReliab));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.Reserved5), sizeof(hdr.Reserved5));
     
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.PosVlr), sizeof(hdr.PosVlr));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.PosXyz), sizeof(hdr.PosXyz));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.PosTime), sizeof(hdr.PosTime));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.PosDistance), sizeof(hdr.PosDistance));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.PosGroup), sizeof(hdr.PosGroup));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.PosNormal), sizeof(hdr.PosNormal));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.PosColor), sizeof(hdr.PosColor));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.PosIntensity), sizeof(hdr.PosIntensity));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.PosLine), sizeof(hdr.PosLine));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.PosEchoLen), sizeof(hdr.PosEchoLen));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.PosAmplitude), sizeof(hdr.PosAmplitude));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.PosScanner), sizeof(hdr.PosScanner));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.PosEcho), sizeof(hdr.PosEcho));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.PosAngle), sizeof(hdr.PosAngle));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.PosEchoNorm), sizeof(hdr.PosEchoNorm));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.PosClass), sizeof(hdr.PosClass));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.PosRecord), sizeof(hdr.PosRecord));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.PosEchoPos), sizeof(hdr.PosEchoPos));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.PosImage), sizeof(hdr.PosImage));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.PosReflect), sizeof(hdr.PosReflect));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.PosDeviation), sizeof(hdr.PosDeviation));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.PosReliab), sizeof(hdr.PosReliab));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.PosImgNbr), sizeof(hdr.PosImgNbr));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.ImgNbrCnt), sizeof(hdr.ImgNbrCnt));
-    ofFBI.write(reinterpret_cast<const char *>(&hdr.Reserved6), sizeof(hdr.Reserved6));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.PosVlr), sizeof(hdr.PosVlr));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.PosXyz), sizeof(hdr.PosXyz));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.PosTime), sizeof(hdr.PosTime));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.PosDistance), sizeof(hdr.PosDistance));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.PosGroup), sizeof(hdr.PosGroup));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.PosNormal), sizeof(hdr.PosNormal));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.PosColor), sizeof(hdr.PosColor));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.PosIntensity), sizeof(hdr.PosIntensity));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.PosLine), sizeof(hdr.PosLine));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.PosEchoLen), sizeof(hdr.PosEchoLen));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.PosAmplitude), sizeof(hdr.PosAmplitude));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.PosScanner), sizeof(hdr.PosScanner));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.PosEcho), sizeof(hdr.PosEcho));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.PosAngle), sizeof(hdr.PosAngle));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.PosEchoNorm), sizeof(hdr.PosEchoNorm));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.PosClass), sizeof(hdr.PosClass));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.PosRecord), sizeof(hdr.PosRecord));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.PosEchoPos), sizeof(hdr.PosEchoPos));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.PosImage), sizeof(hdr.PosImage));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.PosReflect), sizeof(hdr.PosReflect));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.PosDeviation), sizeof(hdr.PosDeviation));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.PosReliab), sizeof(hdr.PosReliab));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.PosImgNbr), sizeof(hdr.PosImgNbr));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.ImgNbrCnt), sizeof(hdr.ImgNbrCnt));
+    ofFBI->write(reinterpret_cast<const char *>(&hdr.Reserved6), sizeof(hdr.Reserved6));
 }
 
 void FbiWriter::addArgs(ProgramArgs& args)
@@ -236,14 +237,15 @@ void FbiWriter::addArgs(ProgramArgs& args)
 
 void FbiWriter::write(const PointViewPtr view)
 {
-    buildHdrFromPoints(*hdr.get(), view);
+    buildHdrFromPoints(*hdr, view);
     
     PointRef point(*view, 0);
     
-    std::ofstream ofFBI (m_filename,std::ios_base::binary);
-    
+    std::ostream* ofFBI = Utils::createFile(m_filename, true);
+        
     writeFbiHeader(*hdr.get(), ofFBI);
     
+    assert(hdr->UnitsXyz > 0);
     double Mul = 1.0 / hdr->UnitsXyz;
     
     for (PointId i = 0; i < view->size(); ++i)
@@ -253,51 +255,51 @@ void FbiWriter::write(const PointViewPtr view)
         double Y = point.getFieldAs<double>(Dimension::Id::Y);
         double Z = point.getFieldAs<double>(Dimension::Id::Z);
 
-        UINT xr = (X - hdr->OrgX)*Mul;
-        UINT yr = (Y - hdr->OrgY)*Mul;
-        UINT zr = (Z - hdr->OrgZ)*Mul;
+        fbi::UINT xr = (X - hdr->OrgX)*Mul;
+        fbi::UINT yr = (Y - hdr->OrgY)*Mul;
+        fbi::UINT zr = (Z - hdr->OrgZ)*Mul;
 
-        ofFBI.write(reinterpret_cast<const char *>(&xr), sizeof(hdr->BitsX));
-        ofFBI.write(reinterpret_cast<const char *>(&yr), sizeof(hdr->BitsY));
-        ofFBI.write(reinterpret_cast<const char *>(&zr), sizeof(hdr->BitsZ));
+        ofFBI->write(reinterpret_cast<const char *>(&xr), sizeof(hdr->BitsX));
+        ofFBI->write(reinterpret_cast<const char *>(&yr), sizeof(hdr->BitsY));
+        ofFBI->write(reinterpret_cast<const char *>(&zr), sizeof(hdr->BitsZ));
     }
     
-    if (hdr->BitsTime>0)
+    if (hdr->BitsTime > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
         {
             point.setPointId(i);
             uint64_t time = point.getFieldAs<uint64_t>(Dimension::Id::OffsetTime);
-            ofFBI.write(reinterpret_cast<const char *>(&time), hdr->BitsTime/8);
+            ofFBI->write(reinterpret_cast<const char *>(&time), hdr->BitsTime/8);
         }
     }
     
-    if (hdr->BitsDistance>0)
+    if (hdr->BitsDistance > 0)
     {
         //nothing to do for now
     }
 
-    if (hdr->BitsGroup>0)
+    if (hdr->BitsGroup > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
         {
             point.setPointId(i);
             uint64_t cluster = point.getFieldAs<uint64_t>(Dimension::Id::ClusterID);
-            ofFBI.write(reinterpret_cast<const char *>(&cluster), hdr->BitsGroup/8);
+            ofFBI->write(reinterpret_cast<const char *>(&cluster), hdr->BitsGroup/8);
         }
     }
     
-    if (hdr->BitsImage>0)
+    if (hdr->BitsImage > 0)
     {
         //nothing to do for now
     }
     
-    if (hdr->BitsNormal>0)
+    if (hdr->BitsNormal > 0)
     {
         //nothing to do for now
     }
     
-    if (hdr->BitsColor>0)
+    if (hdr->BitsColor > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
         {
@@ -306,118 +308,119 @@ void FbiWriter::write(const PointViewPtr view)
             uint16_t blue = point.getFieldAs<uint16_t>(Dimension::Id::Blue);
             uint16_t green = point.getFieldAs<uint16_t>(Dimension::Id::Green);
             uint16_t red = point.getFieldAs<uint16_t>(Dimension::Id::Red);
-            ofFBI.write(reinterpret_cast<const char *>(&blue), 2);
-            ofFBI.write(reinterpret_cast<const char *>(&green), 2);
-            ofFBI.write(reinterpret_cast<const char *>(&red), 2);
+            ofFBI->write(reinterpret_cast<const char *>(&blue), 2);
+            ofFBI->write(reinterpret_cast<const char *>(&green), 2);
+            ofFBI->write(reinterpret_cast<const char *>(&red), 2);
             
-            if (hdr->BitsColor>24)
+            if (hdr->BitsColor > 24)
             {
                 uint16_t alpha = point.getFieldAs<uint16_t>(Dimension::Id::Alpha);
-                ofFBI.write(reinterpret_cast<const char *>(&alpha), 2);
+                ofFBI->write(reinterpret_cast<const char *>(&alpha), 2);
             }
         }
     }
     
-    if (hdr->BitsIntensity>0)
+    if (hdr->BitsIntensity > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
         {
             point.setPointId(i);
             uint16_t intensity = point.getFieldAs<uint16_t>(Dimension::Id::Intensity);
-            ofFBI.write(reinterpret_cast<const char *>(&intensity), hdr->BitsIntensity/8);
+            ofFBI->write(reinterpret_cast<const char *>(&intensity), hdr->BitsIntensity/8);
         }
     }
     
-    if (hdr->BitsLine>0)
+    if (hdr->BitsLine > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
         {
             point.setPointId(i);
             uint16_t line = point.getFieldAs<uint16_t>(Dimension::Id::PointSourceId);
-            ofFBI.write(reinterpret_cast<const char *>(&line), hdr->BitsLine/8);
+            ofFBI->write(reinterpret_cast<const char *>(&line), hdr->BitsLine/8);
         }
     }
     
-    if (hdr->BitsEchoLen>0)
+    if (hdr->BitsEchoLen > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
         {
             point.setPointId(i);
             uint8_t echoLenght = point.getFieldAs<uint8_t>(Dimension::Id::ReturnNumber);
-            ofFBI.write(reinterpret_cast<const char *>(&echoLenght), hdr->BitsEchoLen/8);
+            ofFBI->write(reinterpret_cast<const char *>(&echoLenght), hdr->BitsEchoLen/8);
         }
     }
 
-    if (hdr->BitsAmplitude>0)
+    if (hdr->BitsAmplitude > 0)
     {
         //nothing to do for now
     }
     
-    if (hdr->BitsReflect>0)
+    if (hdr->BitsReflect > 0)
     {
         //nothing to do for now
     }
     
-    if (hdr->BitsDeviation>0)
+    if (hdr->BitsDeviation > 0)
     {
         //nothing to do for now
     }
     
-    if (hdr->BitsScanner>0)
+    if (hdr->BitsScanner > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
         {
             point.setPointId(i);
             uint8_t scanNbr = point.getFieldAs<uint8_t>(Dimension::Id::UserData);
-            ofFBI.write(reinterpret_cast<const char *>(&scanNbr), hdr->BitsScanner/8);
+            ofFBI->write(reinterpret_cast<const char *>(&scanNbr), hdr->BitsScanner/8);
         }
     }
     
-    if (hdr->BitsEcho>0)
+    if (hdr->BitsEcho > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
         {
             point.setPointId(i);
             uint8_t echo = point.getFieldAs<uint8_t>(Dimension::Id::ReturnNumber);
-            ofFBI.write(reinterpret_cast<const char *>(&echo), hdr->BitsEcho/8);
+            ofFBI->write(reinterpret_cast<const char *>(&echo), hdr->BitsEcho/8);
         }
     }
     
-    if (hdr->BitsAngle>0)
+    if (hdr->BitsAngle > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
         {
             point.setPointId(i);
             int8_t angle = point.getFieldAs<int8_t>(Dimension::Id::ScanAngleRank);
-            ofFBI.write(reinterpret_cast<const char *>(&angle), hdr->BitsAngle/8);
+            ofFBI->write(reinterpret_cast<const char *>(&angle), hdr->BitsAngle/8);
         }
     }
     
-    if (hdr->BitsEchoNorm>0)
+    if (hdr->BitsEchoNorm > 0)
     {
         //nothing to do for now
     }
 
-    if (hdr->BitsEchoPos>0)
+    if (hdr->BitsEchoPos > 0)
     {
         //nothing to do for now
     }
     
-    if (hdr->BitsReliab>0)
+    if (hdr->BitsReliab > 0)
     {
         //nothing to do for now
     }
     
-    if (hdr->BitsClass>0)
+    if (hdr->BitsClass > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
         {
             point.setPointId(i);
             uint8_t classif = point.getFieldAs<uint8_t>(Dimension::Id::Classification);
-            ofFBI.write(reinterpret_cast<const char *>(&classif), hdr->BitsClass/8);
+            ofFBI->write(reinterpret_cast<const char *>(&classif), hdr->BitsClass/8);
         }
     }
 
-    ofFBI.close();
+    Utils::closeFile(ofFBI);
 }
 
+}
