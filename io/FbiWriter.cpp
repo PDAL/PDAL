@@ -111,7 +111,7 @@ void buildHdrFromPoints(fbi::FbiHdr& hdr, const PointViewPtr view)
     
     hdr.BitsColor = 0;
     if ( view->hasDim(Dimension::Id::Red) && view->hasDim(Dimension::Id::Blue) && view->hasDim(Dimension::Id::Green) ) hdr.BitsColor = 24;
-    if ( view->hasDim(Dimension::Id::Alpha) ) hdr.BitsColor += 24;
+    if ( view->hasDim(Dimension::Id::Alpha) ) hdr.BitsColor += 32;
 
     //Not found quivalent in pdal for now
     hdr.BitsDistance = 0;
