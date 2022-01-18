@@ -264,7 +264,8 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
         throwError("Couldn't read LAS header. File size insufficient.");
     d->header.fill(headerBuf, las::Header::Size14);
 
-    StringList errors = d->header.validate(Utils::fileSize(m_filename));
+    uint64_t fileSize = Utils::fileSize(m_filename);
+    StringList errors = d->header.validate(fileSize);
     if (errors.size())
         throwError(errors.front());
 
@@ -272,7 +273,6 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     if (!las::pointFormatSupported(d->header.pointFormat()))
         throwError("Unsupported LAS input point format: " +
             Utils::toString((int)d->header.pointFormat()) + ".");
-
 
     // Read VLRs
     stream->seekg(d->header.headerSize);
@@ -287,6 +287,10 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
         if (stream->gcount() != las::Vlr::HeaderSize)
             throwError("Couldn't read VLR " + std::to_string(i + 1) + ". End of file reached.");
         vlr.fillHeader(vlrHeaderBuf);
+        if ((uint64_t)stream->tellg() + vlr.promisedDataSize > d->header.pointOffset)
+            throwError("VLR " + std::to_string(i + 1) +
+                "(" + vlr.userId + "/" + std::to_string(vlr.recordId) + ") "
+                "size too large -- flows into point data.");
         if (las::shouldIgnoreVlr(vlr, d->ignoreVlrs))
         {
             stream->seekg(vlr.promisedDataSize, std::ios::cur);
@@ -315,6 +319,11 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
                 throwError("Couldn't read EVLR " + std::to_string(i + 1) +
                     ". End of file reached.");
             evlr.fillHeader(evlrHeaderBuf);
+
+            if ((uint64_t)stream->tellg() + evlr.promisedDataSize > fileSize)
+                throwError("EVLR " + std::to_string(i + 1) +
+                    "(" + evlr.userId + "/" + std::to_string(evlr.recordId) + ") "
+                    "size too large -- exceeds file size.");
             if (las::shouldIgnoreVlr(evlr, d->ignoreVlrs))
             {
                 stream->seekg(evlr.promisedDataSize, std::ios::cur);
