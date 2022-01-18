@@ -98,9 +98,11 @@ public:
     void done()
     {
         // Close and clear the point encoder.
-        m_compressor->done();
-
-        newChunk();
+        if (m_compressor)
+        {
+            m_compressor->done();
+            newChunk();
+        }
 
         // Save our current position.  Go to the location where we need
         // to write the chunk table offset at the beginning of the point data.
