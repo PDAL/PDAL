@@ -480,35 +480,39 @@ TEST(UtilsTest, escapeJSON)
 
 TEST(UtilsTest, extractor)
 {
-    char const *buf = "ABCDEFG";
+    {
+        std::vector<char> buf(5);
+        LeExtractor ext(buf.data(), buf.size());
 
-    LeExtractor e(buf, 8);
-    std::string s;
-    e.get(s, 7);
-    EXPECT_EQ("ABCDEFG", s);
+        std::string s;
+        ext.get(s, 5);
+        EXPECT_EQ(s.size(), 0);
+    }
 
-    LeExtractor e2(buf, 8);
-    s.clear();
-    e2.get(s, 8);
-    EXPECT_EQ("ABCDEFG", s);
+    {
+        std::vector<char> buf { 'a', 'b', 'c', 0, 0 };
+        LeExtractor ext(buf.data(), buf.size());
 
-    LeExtractor e3(buf, 8);
-    s.clear();
-    e3.get(s, 3);
-    EXPECT_EQ("ABC", s);
+        std::string s;
+        ext.get(s, 5);
+        EXPECT_EQ(s.size(), 3);
+        EXPECT_EQ(s, "abc");
 
-    buf = "ABCDE ";
+        ext.seek(0);
+        ext.get(s, 3);
+        EXPECT_EQ(s.size(), 3);
+        EXPECT_EQ(s, "abc");
 
-    LeExtractor e4(buf, 8);
-    s.clear();
-    e4.get(s, 6);
-    EXPECT_EQ("ABCDE ", s);
+        ext.seek(0);
+        ext.get(s, 1);
+        EXPECT_EQ(s.size(), 1);
+        EXPECT_EQ(s, "a");
 
-    char b[5] {};
-    LeExtractor e5(b, 5);
-    s.clear();
-    e5.get(s, 5);
-    EXPECT_EQ("", s);
+        ext.seek(0);
+        ext.get(s, 0);
+        EXPECT_EQ(s.size(), 0);
+        EXPECT_TRUE(s.empty());
+    }
 }
 
 // Don't run if we are WIN32

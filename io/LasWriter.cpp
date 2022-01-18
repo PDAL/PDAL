@@ -628,7 +628,6 @@ void LasWriter::deleteVlr(const std::string& userId, uint16_t recordId)
 {
     las::Vlr v{userId, recordId};
 
-    //ABELL - Test.
     Utils::remove(m_vlrs, v);
     Utils::remove(m_evlrs, v);
 }
@@ -1227,7 +1226,8 @@ void LasWriter::finishOutput()
     std::vector<char> buf = d->header.data();
     m_ostream->seekp(0);
     m_ostream->write(buf.data(), buf.size());
-    m_ostream->seekp(d->header.pointOffset);  //ABELL ?
+    //ABELL - This seemingly unnecessary line may have been necessary for NITF or LASzip.
+    m_ostream->seekp(d->header.pointOffset);
     m_ostream->flush();
 }
 
