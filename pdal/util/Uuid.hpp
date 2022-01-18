@@ -68,7 +68,7 @@ namespace pdal
 
 #pragma pack(push)
 #pragma pack(1)
-struct uuid
+struct PDAL_DLL uuid
 {
     uuid()
     { clear(); }
@@ -98,20 +98,20 @@ PDAL_DLL inline bool operator < (const uuid& u1, const uuid& u2)
     return false;
 }
 
-class Uuid
+class PDAL_DLL Uuid
 {
     PDAL_DLL friend inline bool operator < (const Uuid& u1, const Uuid& u2);
 public:
-    PDAL_DLL Uuid()
+    Uuid()
         {}
-    PDAL_DLL Uuid(const char *c)
+    Uuid(const char *c)
         { unpack(c); }
-    PDAL_DLL Uuid(const std::string& s)
+    Uuid(const std::string& s)
         { parse(s); }
 
-    PDAL_DLL void clear()
+    void clear()
         { m_data.clear(); }
-    PDAL_DLL void unpack(const char *c)
+    void unpack(const char *c)
     {
         BeExtractor e(c, 10);
 
@@ -121,7 +121,7 @@ public:
         std::copy(c, c + 6, m_data.node);
     }
 
-    PDAL_DLL void pack(char *c) const
+    void pack(char *c) const
     {
         BeInserter i(c, 10);
 
@@ -131,7 +131,7 @@ public:
         std::copy(m_data.node, m_data.node + 6, c);
     }
 
-    PDAL_DLL bool parse(const std::string& s)
+    bool parse(const std::string& s)
     {
         if (s.length() != 36)
             return false;
@@ -167,7 +167,7 @@ public:
         return true;
     }
 
-    PDAL_DLL std::string unparse() const
+    std::string unparse() const
     {
         std::stringstream out;
 
@@ -182,13 +182,13 @@ public:
         return out.str();
     }
 
-    PDAL_DLL std::string toString() const
+    std::string toString() const
         { return unparse(); }
 
-    PDAL_DLL bool empty() const
+    bool empty() const
     { return isNull(); }
 
-    PDAL_DLL bool isNull() const
+    bool isNull() const
     {
         const char *c = (const char *)&m_data;
         for (size_t i = 0; i < sizeof(m_data); ++i)
@@ -197,7 +197,7 @@ public:
         return true;
     }
 
-    PDAL_DLL static constexpr size_t size()
+    static constexpr size_t size()
         { return sizeof(m_data); }
 
 private:

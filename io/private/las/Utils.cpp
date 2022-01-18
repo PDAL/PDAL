@@ -32,19 +32,17 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "./Utils.hpp"
+#include <io/LasHeader.hpp>
 
-#include <string>
-
-#include <lazperf/header.hpp>
-#include <lazperf/vlr.hpp>
+#include "Srs.hpp"
+#include "Summary.hpp"
+#include "Utils.hpp"
+#include "Vlr.hpp"
 
 #include <pdal/PointRef.hpp>
 
-#include <pdal/util/Charbuf.hpp>
 #include <pdal/util/Extractor.hpp>
 #include <pdal/util/Inserter.hpp>
-#include <pdal/util/ThreadPool.hpp>
 #include <pdal/util/Utils.hpp>
 
 namespace pdal
@@ -62,6 +60,135 @@ namespace
 
 namespace las
 {
+
+void setSummary(las::Header& header, const Summary& summary)
+{
+    header.setPointCount(summary.getTotalNumPoints());
+    for (int i = 0; i < Header::ReturnCount; ++i)
+        header.setPointsByReturn(i, summary.getReturnCount(i));
+    header.bounds = summary.getBounds();
+}
+
+
+void extractHeaderMetadata(const Header& h, MetadataNode& forward, MetadataNode& m)
+{
+    addForwardMetadata(forward, m, "major_version", h.versionMajor,
+        "The major LAS version for the file, always 1 for now");
+    addForwardMetadata(forward, m, "minor_version", h.versionMinor,
+        "The minor LAS version for the file");
+    addForwardMetadata(forward, m, "dataformat_id", h.pointFormat(),
+        "LAS Point Data Format");
+    addForwardMetadata(forward, m, "filesource_id", h.fileSourceId,
+        "File Source ID (Flight Line Number if this file was derived from an original "
+            "flight line).");
+    if (h.versionAtLeast(1, 2))
+    {
+        // For some reason we've written global encoding as a base 64
+        // encoded value in the past.  In an effort to standardize things,
+        // I'm writing this as a special value, and will also write
+        // global_encoding like we write all other header metadata.
+        uint16_t globalEncoding = h.globalEncoding;
+        m.addEncoded("global_encoding_base64", (uint8_t *)&globalEncoding, sizeof(globalEncoding),
+            "Global Encoding: general property bit field.");
+        addForwardMetadata(forward, m, "global_encoding", h.globalEncoding,
+            "Global Encoding: general property bit field.");
+    }
+
+    addForwardMetadata(forward, m, "project_id", h.projectGuid, "Project ID.");
+    addForwardMetadata(forward, m, "system_id", h.systemId, "Generating system ID.");
+    addForwardMetadata(forward, m, "software_id", h.softwareId, "Generating software description.");
+    addForwardMetadata(forward, m, "creation_doy", h.creationDoy,
+        "Day, expressed as an unsigned short, on which this file was created. "
+        "Day is computed as the Greenwich Mean Time (GMT) day. January 1 is "
+        "considered day 1.");
+    addForwardMetadata(forward, m, "creation_year", h.creationYear,
+        "The year, expressed as a four digit number, in which the file was created.");
+    addForwardMetadata(forward, m, "scale_x", h.scale.x, "The scale factor for X values.", 15);
+    addForwardMetadata(forward, m, "scale_y", h.scale.y, "The scale factor for Y values.", 15);
+    addForwardMetadata(forward, m, "scale_z", h.scale.z, "The scale factor for Z values.", 15);
+    addForwardMetadata(forward, m, "offset_x", h.offset.x, "The offset for X values.", 15);
+    addForwardMetadata(forward, m, "offset_y", h.offset.y, "The offset for Y values.", 15);
+    addForwardMetadata(forward, m, "offset_z", h.offset.z, "The offset for Z values.", 15);
+
+    m.add<bool>("compressed", h.dataCompressed(), "true if this LAS file is compressed");
+    m.add("point_length", h.pointSize, "The size, in bytes, of each point records.");
+    m.add("header_size", h.vlrOffset,
+        "The size, in bytes, of the header block, including any extension by specific software.");
+    m.add("dataoffset", h.pointOffset,
+        "The actual number of bytes from the beginning of the file to the "
+        "first field of the first point record data field. This data offset "
+        "must be updated if any software adds data from the Public Header "
+        "Block or adds/removes data to/from the Variable Length Records.");
+    m.add<double>("minx", h.bounds.minx,
+        "The max and min data fields are the actual unscaled extents of the "
+        "LAS point file data, specified in the coordinate system of the LAS "
+        "data.");
+    m.add<double>("miny", h.bounds.miny,
+        "The max and min data fields are the actual unscaled extents of the "
+        "LAS point file data, specified in the coordinate system of the LAS "
+        "data.");
+    m.add<double>("minz", h.bounds.minz,
+        "The max and min data fields are the actual unscaled extents of the "
+        "LAS point file data, specified in the coordinate system of the LAS "
+        "data.");
+    m.add<double>("maxx", h.bounds.maxx,
+        "The max and min data fields are the actual unscaled extents of the "
+        "LAS point file data, specified in the coordinate system of the LAS "
+        "data.");
+    m.add<double>("maxy", h.bounds.maxy,
+        "The max and min data fields are the actual unscaled extents of the "
+        "LAS point file data, specified in the coordinate system of the LAS "
+        "data.");
+    m.add<double>("maxz", h.bounds.maxz,
+        "The max and min data fields are the actual unscaled extents of the "
+        "LAS point file data, specified in the coordinate system of the LAS "
+        "data.");
+    m.add<point_count_t>("count", h.pointCount(),
+        "This field contains the total number of point records within the file.");
+}
+
+void extractSrsMetadata(const Srs& srs, MetadataNode& m)
+{
+    const std::string s = srs.geotiffString();
+    if (s.size())
+        m.add("gtiff", s, "GTifPrint output of GEOTIFF keys");
+}
+
+void addVlrMetadata(const Vlr& vlr, std::string name, MetadataNode& forward, MetadataNode& m)
+{
+    const size_t DataLenMax = 1000000;
+
+    // We don't extract metadata from large VLRs.
+    if (vlr.dataSize() > DataLenMax)
+        return;
+
+    if (vlr.userId == las::PdalUserId)
+    {
+        if (vlr.recordId == las::PdalMetadataRecordId)
+            name = "pdal_metadata";
+        else if (vlr.recordId == las::PdalPipelineRecordId)
+            name = "pdal_pipeline";
+        m.addWithType(name, std::string(vlr.data(), vlr.dataSize()), "json", vlr.description);
+        return;
+    }
+    MetadataNode vlrNode(name);
+    vlrNode.addEncoded("data", (const unsigned char *)vlr.data(), vlr.dataSize(), vlr.description);
+    vlrNode.add("user_id", vlr.userId, "User ID of the record or pre-defined value "
+        "from the specification.");
+    vlrNode.add("record_id", vlr.recordId, "Record ID specified by the user.");
+    vlrNode.add("description", vlr.description);
+    m.add(vlrNode);
+
+    if (vlr.userId == las::TransformUserId ||
+        vlr.userId == las::LaszipUserId ||
+        vlr.userId == las::LiblasUserId)
+        return;
+    if (vlr.userId == las::SpecUserId &&
+        vlr.recordId != las::ClassLookupRecordId &&
+        vlr.recordId != las::TextDescriptionRecordId)
+        return;
+    forward.add(vlrNode);
+}
 
 uint8_t ExtraBytesIf::lasType()
 {
@@ -94,7 +221,7 @@ void ExtraBytesIf::setType(uint8_t lastype)
 }
 
 
-void ExtraBytesIf::appendTo(std::vector<uint8_t>& ebBytes)
+void ExtraBytesIf::appendTo(std::vector<char>& ebBytes)
 {
     size_t offset = ebBytes.size();
     ebBytes.resize(ebBytes.size() + ExtraBytesSpecSize);
@@ -253,39 +380,7 @@ std::string generateSoftwareId()
     return oss.str();
 }
 
-std::vector<IgnoreVLR> parseIgnoreVLRs(const StringList& ignored)
-{
-    std::vector<IgnoreVLR> ignoredVLRs {IgnoreVLR ({"copc", 0}) } ;
-    for (auto& v: ignored)
-    {
-
-        StringList s = Utils::split2(v, '/');
-        if (s.size() == 2)
-        {
-            Utils::trim(s[0]);
-            Utils::trim(s[1]);
-            int i = std::stoi(s[1]);
-            uint16_t id = (uint16_t)i;
-            IgnoreVLR v;
-            v.m_userId = s[0];
-            v.m_recordId = id;
-            ignoredVLRs.push_back(v);
-        } else if (s.size() == 1)
-        {
-            Utils::trim(s[0]);
-            IgnoreVLR v;
-            v.m_userId = s[0];
-            v.m_recordId = 0;
-            ignoredVLRs.push_back(v);
-        } else
-        {
-            throw error("Invalid VLR user_id/record_id specified");
-        }
-    }
-    return ignoredVLRs;
-
-}
-
+// Throws las::error. Be sure to catch it.
 std::vector<ExtraDim> parse(const StringList& dimString, bool allOk)
 {
     std::vector<ExtraDim> extraDims;
@@ -437,9 +532,9 @@ void V10BaseLoader::pack(const PointRef& point, char *buf, int bufsize)
 {
     LeInserter ostream(buf, bufsize);
 
-    int32_t xi = m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::X));
-    int32_t yi = m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::Y));
-    int32_t zi = m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::Z));
+    int32_t xi = (int32_t)m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::X));
+    int32_t yi = (int32_t)m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::Y));
+    int32_t zi = (int32_t)m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::Z));
 
     ostream << xi << yi << zi;
 
@@ -556,9 +651,9 @@ void V14BaseLoader::load(PointRef& point, const char *buf, int bufsize)
 void V14BaseLoader::pack(const PointRef& point, char *buf, int bufsize)
 {
     LeInserter ostream(buf, bufsize);
-    int32_t xi = m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::X));
-    int32_t yi = m_scaling.m_yXform.toScaled(point.getFieldAs<double>(Dimension::Id::Y));
-    int32_t zi = m_scaling.m_zXform.toScaled(point.getFieldAs<double>(Dimension::Id::Z));
+    int32_t xi = (int32_t)m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::X));
+    int32_t yi = (int32_t)m_scaling.m_yXform.toScaled(point.getFieldAs<double>(Dimension::Id::Y));
+    int32_t zi = (int32_t)m_scaling.m_zXform.toScaled(point.getFieldAs<double>(Dimension::Id::Z));
 
     ostream << xi << yi << zi;
 
@@ -645,98 +740,6 @@ void ExtraDimLoader::pack(const PointRef& point, char *buf, int bufsize)
         else
             Utils::insertDim(ostream, d.m_dimType.m_type, e);
     }
-}
-
-// VLR Catalog
-
-VlrCatalog::VlrCatalog(VlrCatalog::ReadFunc f) : m_fetch(f)
-{}
-
-VlrCatalog::VlrCatalog(uint64_t vlrOffset, uint32_t vlrCount,
-    uint64_t evlrOffset, uint32_t evlrCount, VlrCatalog::ReadFunc f) : m_fetch(f)
-{
-    load(vlrOffset, vlrCount, evlrOffset, evlrCount);
-}
-
-void VlrCatalog::load(uint64_t vlrOffset, uint32_t vlrCount,
-    uint64_t evlrOffset, uint32_t evlrCount)
-{
-    auto vlrWalker = std::bind(&VlrCatalog::walkVlrs, this, vlrOffset, vlrCount);
-    auto evlrWalker = std::bind(&VlrCatalog::walkEvlrs, this, evlrOffset, evlrCount);
-
-    ThreadPool pool(2);
-
-    if (vlrCount)
-        pool.add(vlrWalker);
-    if (evlrCount)
-        pool.add(evlrWalker);
-    pool.await();
-}
-
-void VlrCatalog::walkVlrs(uint64_t vlrOffset, uint32_t vlrCount)
-{
-    while (vlrOffset && vlrCount)
-    {
-        std::vector<char> buf = m_fetch(vlrOffset, lazperf::vlr_header::Size);
-        Charbuf sbuf(buf.data(), buf.size());
-        std::istream in(&sbuf);
-
-        lazperf::vlr_header h = lazperf::vlr_header::create(in);
-        Entry entry { h.user_id, h.record_id, vlrOffset + lazperf::vlr_header::Size,
-            h.data_length };
-        insert(entry);
-        vlrOffset += lazperf::vlr_header::Size + h.data_length;
-        vlrCount--;
-    }
-}
-
-void VlrCatalog::walkEvlrs(uint64_t evlrOffset, uint32_t evlrCount)
-{
-    while (evlrOffset && evlrCount)
-    {
-        std::vector<char> buf = m_fetch(evlrOffset, lazperf::evlr_header::Size);
-        Charbuf sbuf(buf.data(), buf.size());
-        std::istream in(&sbuf);
-
-        lazperf::evlr_header h = lazperf::evlr_header::create(in);
-        Entry entry { h.user_id, h.record_id, evlrOffset + lazperf::evlr_header::Size,
-            h.data_length };
-        insert(entry);
-        evlrOffset += lazperf::evlr_header::Size + h.data_length;
-        evlrCount--;
-    }
-}
-
-void VlrCatalog::insert(const VlrCatalog::Entry& entry)
-{
-    std::unique_lock<std::mutex> l(m_mutex);
-
-    m_entries.push_back(entry);
-}
-
-std::vector<char> VlrCatalog::fetch(const std::string& userId, uint16_t recordId) const
-{
-    uint64_t offset = 0;
-    uint32_t length = 0;
-
-    // We don't lock m_entries because we assume that the load has already occurred at the
-    // time you want to fetch.
-    std::vector<char> vlrdata;
-    for (const Entry& e : m_entries)
-        if (e.userId == userId && e.recordId == recordId)
-        {
-            // We don't support VLRs with size > 4GB)
-            if (e.length > (std::numeric_limits<uint32_t>::max)())
-                return vlrdata;
-
-            offset = e.offset;
-            length = (uint32_t)e.length;
-            break;
-        }
-
-    if (length > 0)
-        vlrdata = m_fetch(offset, length);
-    return vlrdata;
 }
 
 } // namespace las

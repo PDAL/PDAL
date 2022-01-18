@@ -32,8 +32,12 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+#pragma warning (push)
+#pragma warning (disable: 4251)
 #include <lazperf/readers.hpp>
+#pragma warning (pop)
 
+#include <io/LasHeader.hpp>
 #include <io/LasReader.hpp>
 
 #include "Connector.hpp"
@@ -53,14 +57,14 @@ void Tile::read()
             buf.data());
 
         // Resize our vector to accommodate the decompressed data.
-        m_data.resize(m_entry.m_pointCount * m_header.point_record_length);
+        m_data.resize(m_entry.m_pointCount * m_header.pointSize);
 
         int32_t cnt = m_entry.m_pointCount;
         char *p = m_data.data();
         while (cnt--)
         {
             d.decompress(p);
-            p += m_header.point_record_length;
+            p += m_header.pointSize;
         }
     }
     catch (const std::exception& ex)

@@ -54,7 +54,7 @@ class Connector;
 class Tile
 {
 public:
-    Tile(const Entry& entry, const Connector& connector, const lazperf::header14& header) :
+    Tile(const Entry& entry, const Connector& connector, const las::Header& header) :
         m_entry(entry), m_connector(connector), m_header(header)
     {}
 
@@ -71,7 +71,7 @@ public:
 private:
     Entry m_entry;
     const Connector& m_connector;
-    const lazperf::header14& m_header; 
+    const las::Header& m_header; 
     std::string m_error;
     std::vector<char> m_data;
 };

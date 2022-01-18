@@ -44,8 +44,6 @@
 #include <pdal/PointRef.hpp>
 #include <pdal/Scaling.hpp>
 
-#include <string>
-
 namespace pdal
 {
 
@@ -53,6 +51,11 @@ class PointRef;
 
 namespace las
 {
+
+struct Header;
+class Srs;
+class Summary;
+struct Vlr;
 
 enum class Compression
 {
@@ -92,6 +95,69 @@ inline std::ostream& operator<<(std::ostream& out, const Compression& c)
     }
     return out;
 }
+
+inline bool pointFormatSupported(int format)
+{
+    switch (format)
+    {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 6:
+    case 7:
+    case 8:
+        return true;
+    default:
+        return false; 
+    }
+}
+
+// Metadata
+
+inline void addForwardMetadata(MetadataNode& forward, MetadataNode& m,
+    const std::string& name, double val, const std::string description,
+    size_t precision)
+{
+    MetadataNode n = m.add(name, val, description, precision);
+
+    // If the entry doesn't already exist, just add it.
+    MetadataNode f = forward.findChild(name);
+    if (!f.valid())
+    {
+        forward.add(n);
+        return;
+    }
+
+    // If the old value and new values aren't the same, set an invalid flag.
+    MetadataNode temp = f.addOrUpdate("temp", val, description, precision);
+    if (f.value<std::string>() != temp.value<std::string>())
+        forward.addOrUpdate(name + "INVALID", "");
+}
+
+// Store data in the normal metadata place.  Also store it in the private
+// lasforward metadata node.
+template <typename T>
+void addForwardMetadata(MetadataNode& forward, MetadataNode& m,
+    const std::string& name, T val, const std::string description)
+{
+    MetadataNode n = m.add(name, val, description);
+
+    // If the entry doesn't already exist, just add it.
+    MetadataNode f = forward.findChild(name);
+    if (!f.valid())
+    {
+        forward.add(n);
+        return;
+    }
+
+    // If the old value and new values aren't the same, set an invalid flag.
+    MetadataNode temp = f.addOrUpdate("temp", val);
+    if (f.value<std::string>() != temp.value<std::string>())
+        forward.addOrUpdate(name + "INVALID", "");
+}
+
+// Extra Dim
 
 struct ExtraDim
 {
@@ -171,7 +237,7 @@ public:
         m_fieldCnt = (m_type == Dimension::Type::None ? 0 : 1);
     }
 
-    void appendTo(std::vector<uint8_t>& ebBytes);
+    void appendTo(std::vector<char>& ebBytes);
     void readFrom(const char *buf);
     uint8_t lasType();
     void setType(uint8_t lastype);
@@ -187,22 +253,21 @@ private:
     size_t m_size;
 };
 
+// Function declarations
+
+void extractHeaderMetadata(const Header& h, MetadataNode& forward, MetadataNode& m);
+void extractSrsMetadata(const Srs& srs, MetadataNode& m);
+void addVlrMetadata(const Vlr& vlr, std::string name, MetadataNode& forward, MetadataNode& m);
+void setSummary(Header& header, const Summary& summary);
+std::string generateSoftwareId();
+std::vector<ExtraDim> parse(const StringList& dimString, bool allOk);
+const Dimension::IdList& pdrfDims(int pdrf);
+
 struct error : public std::runtime_error
 {
     error(const std::string& err) : std::runtime_error(err)
     {}
 };
-
-std::string generateSoftwareId();
-std::vector<ExtraDim> parse(const StringList& dimString, bool allOk);
-
-struct IgnoreVLR
-{
-    std::string m_userId;
-    uint16_t m_recordId;
-};
-std::vector<IgnoreVLR> parseIgnoreVLRs(const StringList& ignored);
-const Dimension::IdList& pdrfDims(int pdrf);
 
 // Loader
 
@@ -319,37 +384,6 @@ public:
     bool pack(const PointRef& point, char *buf, int bufsize);
 private:
     std::vector<PointLoaderPtr> m_loaders;
-};
-
-// VLR Catalog
-
-class VlrCatalog
-{
-public:
-    using ReadFunc = std::function<std::vector<char>(uint64_t offset, int32_t size)>;
-    struct Entry
-    {
-        std::string userId;
-        uint16_t recordId;
-        uint64_t offset;
-        uint64_t length;
-    };
-
-    VlrCatalog(ReadFunc f);
-    VlrCatalog(uint64_t vlrOffset, uint32_t vlrCount, uint64_t evlrOffset, uint32_t evlrCount,
-        ReadFunc f);
-
-    void load(uint64_t vlrOffset, uint32_t vlrCount, uint64_t evlrOffset, uint32_t evlrCount);
-    std::vector<char> fetch(const std::string& userId, uint16_t recordId) const;
-
-private:
-    std::mutex m_mutex;
-    ReadFunc m_fetch;
-    std::deque<Entry> m_entries;
-
-    void walkVlrs(uint64_t vlrOffset, uint32_t vlrCount);
-    void walkEvlrs(uint64_t vlrOffset, uint32_t vlrCount);
-    void insert(const Entry& entry);
 };
 
 } // namespace las

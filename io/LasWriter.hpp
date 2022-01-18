@@ -39,9 +39,7 @@
 #include <pdal/Streamable.hpp>
 
 #include "HeaderVal.hpp"
-#include "LasError.hpp"
-#include "LasHeader.hpp"
-#include "LasSummaryData.hpp"
+#include "private/las/Vlr.hpp"
 
 #ifdef PDAL_HAVE_LASZIP
 #include <laszip/laszip_api.h>
@@ -59,6 +57,9 @@ class LazPerfVlrCompressor;
 
 namespace las
 {
+    struct Header;
+    struct Vlr;
+    struct Evlr;
     struct ExtraDim;
 }
 
@@ -92,22 +93,15 @@ protected:
 private:
     std::unique_ptr<Private> d;
 
-    LasHeader m_lasHeader;
-    std::unique_ptr<LasSummaryData> m_summaryData;
     laszip_POINTER m_laszip;
     LazPerfVlrCompressor *m_compressor;
-    bool m_discardHighReturnNumbers;
-    std::map<std::string, std::string> m_headerVals;
-    std::vector<VlrOptionInfo> m_optionInfos;
     std::ostream *m_ostream;
-    std::vector<LasVLR> m_vlrs;
-    std::vector<ExtLasVLR> m_eVlrs;
+    std::vector<las::Vlr> m_vlrs;
+    std::vector<las::Evlr> m_evlrs;
     std::vector<las::ExtraDim> m_extraDims;
     uint16_t m_extraByteLen;
     SpatialReference m_srs;
-    std::string m_curFilename;
     std::set<std::string> m_forwards;
-    bool m_forwardVlrs = false;
     std::vector<char> m_pointBuf;
     int m_srsCnt;
 
@@ -152,14 +146,19 @@ private:
     void readyLazPerfCompression();
     void openCompression();
     void addVlr(const std::string& userId, uint16_t recordId,
-        const std::string& description, std::vector<uint8_t>& data);
-    void addVlr(const ExtLasVLR& evlr);
+        const std::string& description, const std::vector<char>& data);
+    void addVlr(const std::string& userId, uint16_t recordId,
+        const std::string& description, const std::vector<uint8_t>& data);
+    void addVlr(const std::string& userId, uint16_t recordId,
+        const std::string& description, std::vector<char>&& data);
+    void addVlr(const las::Evlr& evlr);
     void deleteVlr(const std::string& userId, uint16_t recordId);
     void addGeotiffVlrs();
     bool addWktVlr();
     void finishLasZipOutput();
     void finishLazPerfOutput();
     bool processPoint(PointRef& point);
+    const las::Header& header() const;
 
     LasWriter& operator=(const LasWriter&) = delete;
     LasWriter(const LasWriter&) = delete;

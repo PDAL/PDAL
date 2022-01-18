@@ -41,7 +41,6 @@
 #include <nlohmann/json.hpp>
 
 #include <lazperf/readers.hpp>
-#include <lazperf/vlr.hpp>
 
 #include <pdal/Polygon.hpp>
 #include <pdal/Scaling.hpp>
@@ -50,11 +49,14 @@
 #include <pdal/util/ThreadPool.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/SrsTransform.hpp>
+#include <io/LasHeader.hpp>
 
 #include "private/copc/Connector.hpp"
 #include "private/copc/Entry.hpp"
+#include "private/copc/Info.hpp"
 #include "private/copc/Tile.hpp"
 #include "private/las/Utils.hpp"
+#include "private/las/Vlr.hpp"
 
 namespace pdal
 {
@@ -94,6 +96,7 @@ public:
     double resolution = 0;
     std::vector<Polygon> polys;
     bool fixNames;
+    bool doVlrs;
 
     NL::json query;
     NL::json headers;
@@ -121,8 +124,8 @@ public:
     Scaling scaling;
     uint64_t tileCount;
     int32_t tilePointNum;
-    lazperf::header14 header;
-    lazperf::copc_info_vlr copc_info;
+    las::Header header;
+    copc::Info copc_info;
     point_count_t hierarchyPointCount;
     bool done;
 };
@@ -154,6 +157,7 @@ void CopcReader::addArgs(ProgramArgs& args)
     args.add("ogr", "OGR filter geometries", m_args->ogr);
     args.add("fix_dims", "Make invalid dimension names valid by changing invalid "
         "characters to '_'", m_args->fixNames, true);
+    args.add("vlr", "Read LAS VLRs and add to metadata.", m_args->doVlrs);
 }
 
 
@@ -181,7 +185,7 @@ void CopcReader::setForwards(StringMap& headers, StringMap& query)
 }
 
 
-void CopcReader::initialize()
+void CopcReader::initialize(PointTableRef table)
 {
     const std::size_t threads((std::max)(m_args->threads, size_t(4)));
     if (threads > 100)
@@ -194,14 +198,37 @@ void CopcReader::initialize()
     setForwards(headers, query);
     m_p->connector =  copc::Connector(m_filename, headers, query);
 
+    MetadataNode forward = table.privateMetadata("lasforward");
+    MetadataNode m = getMetadata();
+
     fetchHeader();
+    las::extractHeaderMetadata(m_p->header, forward, m);
 
     using namespace std::placeholders;
     las::VlrCatalog catalog(std::bind(&CopcReader::fetch, this, _1, _2));
-    catalog.load(m_p->header.header_size, m_p->header.vlr_count, m_p->header.evlr_offset,
-        m_p->header.evlr_count);
-    fetchEbVlr(catalog);
-    fetchSrsVlr(catalog);
+    catalog.load(las::Header::Size14, m_p->header.vlrCount, m_p->header.evlrOffset,
+        m_p->header.evlrCount);
+    las::Vlr ebVlr = fetchEbVlr(catalog);
+    las::Vlr srsVlr = fetchSrsVlr(catalog);
+
+    if (m_args->doVlrs)
+    {
+        int i = 0;
+        if (ebVlr.dataSize())
+            las::addVlrMetadata(ebVlr, "vlr_" + std::to_string(i++), forward, m);
+        if (srsVlr.dataSize())
+            las::addVlrMetadata(srsVlr, "vlr_" + std::to_string(i++), forward, m);
+
+        las::VlrList ignored = las::parseIgnoreVlrs({});
+        for (const las::VlrCatalog::Entry& e : catalog)
+        {
+            las::Vlr vlr(e.userId, e.recordId);
+            if (las::shouldIgnoreVlr(vlr, ignored) || vlr == ebVlr || vlr == srsVlr)
+                continue;
+            vlr.dataVec = catalog.fetchWithDescription(e.userId, e.recordId, vlr.description);
+            las::addVlrMetadata(vlr, "vlr_" + std::to_string(i++), forward, m); 
+        }
+    }
 
     createSpatialFilters();
 
@@ -223,19 +250,27 @@ std::vector<char> CopcReader::fetch(uint64_t offset, int32_t size)
 void CopcReader::fetchHeader()
 {
     // Read the LAS header, COPC info VLR header and COPC VLR
-    std::vector<char> data = fetch(0, 549);
-    Charbuf buf(data);
-    std::istream in(&buf);
+    int size = 549;
+    std::vector<char> data = fetch(0, size);
 
-    m_p->header.read(in);
+    const char *d = data.data();
+    m_p->header.fill(d, data.size());
     m_p->scaling.m_xXform = XForm(m_p->header.scale.x, m_p->header.offset.x);
     m_p->scaling.m_yXform = XForm(m_p->header.scale.y, m_p->header.offset.y);
     m_p->scaling.m_zXform = XForm(m_p->header.scale.z, m_p->header.offset.z);
 
-    lazperf::vlr_header copc_info_header;
-    copc_info_header.read(in);
+    d += m_p->header.size();
+    size -= m_p->header.size();
 
-    m_p->copc_info.read(in);
+    // Read the header - ignore the data.
+    las::Vlr vlr;
+    vlr.fillHeader(d);
+    
+    // Read VLR payload into COPC struct.
+    d += las::Vlr::HeaderSize;
+    size -= las::Vlr::HeaderSize;
+    m_p->copc_info.fill(d, size);
+
     m_p->rootNodeExtent = BOX3D(
         m_p->copc_info.center_x - m_p->copc_info.halfsize,
         m_p->copc_info.center_y - m_p->copc_info.halfsize,
@@ -245,38 +280,43 @@ void CopcReader::fetchHeader()
         m_p->copc_info.center_z + m_p->copc_info.halfsize);
 
     validateHeader(m_p->header);
-    validateVlrInfo(copc_info_header, m_p->copc_info);
+    validateVlrInfo(vlr, m_p->copc_info);
 }
 
 
-void CopcReader::fetchSrsVlr(const las::VlrCatalog& catalog)
+las::Vlr CopcReader::fetchSrsVlr(const las::VlrCatalog& catalog)
 {
-    std::vector<char> buf = catalog.fetch("LASF_Projection", 2112);
-    if (buf.empty())
-        return;
-    setSpatialReference(std::string(buf.begin(), buf.end()));
+    las::Vlr vlr(las::TransformUserId, las::WktRecordId);
+    vlr.dataVec = catalog.fetchWithDescription(las::TransformUserId, las::WktRecordId,
+        vlr.description);
+    if (!vlr.empty())
+        setSpatialReference(std::string(vlr.data(), vlr.data() + vlr.dataSize()));
+    return vlr;
 }
 
 
-void CopcReader::fetchEbVlr(const las::VlrCatalog& catalog)
+las::Vlr CopcReader::fetchEbVlr(const las::VlrCatalog& catalog)
 {
-    std::vector<char> buf = catalog.fetch("LASF_Spec", 4);
-    if (buf.empty())
-        return;
+    las::Vlr vlr(las::SpecUserId, las::ExtraBytesRecordId);
+    vlr.dataVec = catalog.fetchWithDescription(las::SpecUserId, las::ExtraBytesRecordId,
+        vlr.description);
+    if (vlr.dataVec.empty())
+        return vlr;
 
-    if (buf.size() % las::ExtraBytesSpecSize != 0)
+    if (vlr.dataVec.size() % las::ExtraBytesSpecSize != 0)
     {
         log()->get(LogLevel::Warning) << "Bad size for extra bytes VLR.  Ignoring.";
-        return;
+        return vlr;
     }
-    m_p->extraDims = las::ExtraBytesIf::toExtraDims(buf.data(), buf.size(),
+    m_p->extraDims = las::ExtraBytesIf::toExtraDims(vlr.data(), vlr.dataSize(),
         lazperf::baseCount(m_p->header.pointFormat()));
+    return vlr;
 }
 
 
-void CopcReader::validateHeader(const lazperf::header14& h)
+void CopcReader::validateHeader(const las::Header& h)
 {
-    if (std::string(h.magic, sizeof(h.magic)) != "LASF")
+    if (h.magic != "LASF")
         throwError("Invalid LAS header in COPC file");
     int pdrf = h.pointFormat();
     if (pdrf < 6 || pdrf > 8)
@@ -285,11 +325,12 @@ void CopcReader::validateHeader(const lazperf::header14& h)
 }
 
 
-void CopcReader::validateVlrInfo(const lazperf::vlr_header& h, const lazperf::copc_info_vlr& i)
+void CopcReader::validateVlrInfo(const las::Vlr& v, const copc::Info& i)
 {
-    if (h.user_id != "copc" || h.record_id != 1)
-        throwError("COPC VLR invalid. Found user ID '" + h.user_id + "' and record ID '" +
-            std::to_string(h.record_id) + "'. Expected 'copc' and '1'.");
+    if (v.userId != las::CopcUserId || v.recordId != las::CopcInfoRecordId)
+        throwError("COPC VLR invalid. Found user ID '" + v.userId + "' and record ID '" +
+            std::to_string(v.recordId) + "'. Expected '" + las::CopcUserId +"' and '" +
+            std::to_string(las::CopcInfoRecordId) + "'.");
 }
 
 
@@ -342,14 +383,15 @@ void CopcReader::createSpatialFilters()
 
 QuickInfo CopcReader::inspect()
 {
+    PointTable t;
     QuickInfo qi;
 
-    initialize();
+    initialize(t);
 
-    const lazperf::header14& h = m_p->header;
-    qi.m_bounds = BOX3D(h.minx, h.miny, h.minz, h.maxx, h.maxy, h.maxz);
+    const las::Header& h = m_p->header;
+    qi.m_bounds = h.bounds;
     qi.m_srs = getSpatialReference();
-    qi.m_pointCount = h.point_count;
+    qi.m_pointCount = h.pointCount();
 
     PointLayoutPtr layout(new PointLayout);
     addDimensions(layout);
@@ -611,7 +653,7 @@ bool CopcReader::processPoint(const char *inbuf, PointRef& dst)
     using namespace Dimension;
 
     // Extract XYZ to check if we want this point at all.
-    LeExtractor in(inbuf, m_p->header.point_record_length);
+    LeExtractor in(inbuf, m_p->header.pointSize);
 
     int32_t ix, iy, iz;
     in >> ix >> iy >> iz;
@@ -651,7 +693,7 @@ bool CopcReader::processPoint(const char *inbuf, PointRef& dst)
         if (!passesBoundsFilter(x, y, z) || !passesPolyFilter(x, y, z))
             return false;
 
-    m_p->loader.load(dst, inbuf, m_p->header.point_record_length);
+    m_p->loader.load(dst, inbuf, m_p->header.pointSize);
 
     return true;
 }
@@ -709,7 +751,7 @@ void CopcReader::process(PointViewPtr dstView, const copc::Tile& tile, point_cou
             return;
         dstPoint.setPointId(dstView->size());
         processPoint(p, dstPoint);
-        p += m_p->header.point_record_length;
+        p += m_p->header.pointSize;
     }
 }
 
@@ -743,8 +785,7 @@ top:
         m_p->tilePointNum = 0;
     }
 
-    const char *p = m_p->currentTile->dataPtr() +
-        (m_p->tilePointNum * m_p->header.point_record_length);
+    const char *p = m_p->currentTile->dataPtr() + (m_p->tilePointNum * m_p->header.pointSize);
     bool ok = processPoint(p, point);
     m_p->tilePointNum++;
 

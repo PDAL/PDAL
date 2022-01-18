@@ -40,23 +40,31 @@
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/StageWrapper.hpp>
+#include <pdal/util/Algorithm.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <io/BufferReader.hpp>
-#include <io/LasHeader.hpp>
 #include <io/LasReader.hpp>
+#include <io/LasHeader.hpp>
 #include <io/LasWriter.hpp>
 #include <io/BpfReader.hpp>
+#include <io/private/las/Vlr.hpp>
+
 #include "Support.hpp"
 
 namespace pdal
 {
 
+namespace las
+{
+    struct Header;
+}
+
 //ABELL - Should probably be moved to its own file.
 class LasTester
 {
 public:
-    LasHeader *header(LasWriter& w)
-        { return &w.m_lasHeader; }
+    const las::Header& header(LasWriter& w)
+        { return w.header(); }
     SpatialReference srs(LasWriter& w)
         { return w.m_srs; }
     void addVlr(LasWriter& w, const std::string& userId, uint16_t recordId,
@@ -176,9 +184,9 @@ TEST(LasWriterTest, auto_offset)
     reader.setOptions(readerOps);
 
     reader.prepare(readTable);
-    EXPECT_DOUBLE_EQ((1000000.02 + 25) * 0.5, reader.header().offsetX());
-    EXPECT_DOUBLE_EQ(0, reader.header().offsetY());
-    EXPECT_DOUBLE_EQ(-123 * 0.5 + 2147483524 * 0.5, reader.header().offsetZ());
+    EXPECT_DOUBLE_EQ((1000000.02 + 25) * 0.5, reader.header().offset.x);
+    EXPECT_DOUBLE_EQ(0, reader.header().offset.y);
+    EXPECT_DOUBLE_EQ(-123 * 0.5 + 2147483524 * 0.5, reader.header().offset.z);
 
     // (max - min) are chosen to yield std::numeric_limits<int>::max();
 
@@ -258,14 +266,14 @@ TEST(LasWriterTest, auto_offset2)
         reader.setOptions(readerOps);
 
         reader.prepare(readTable);
-        EXPECT_DOUBLE_EQ((74529.00 + 1000000.02) * 0.5, reader.header().offsetX());
-        EXPECT_DOUBLE_EQ(0, reader.header().offsetY());
-        EXPECT_DOUBLE_EQ((-123 + 945.23) * 0.5, reader.header().offsetZ());
+        EXPECT_DOUBLE_EQ((74529.00 + 1000000.02) * 0.5, reader.header().offset.x);
+        EXPECT_DOUBLE_EQ(0, reader.header().offset.y);
+        EXPECT_DOUBLE_EQ((-123 + 945.23) * 0.5, reader.header().offset.z);
 
-        EXPECT_NEAR(2.15478e-4, reader.header().scaleX(), 1e-4);
-        EXPECT_DOUBLE_EQ(.01, reader.header().scaleY());
+        EXPECT_NEAR(2.15478e-4, reader.header().scale.x, 1e-4);
+        EXPECT_DOUBLE_EQ(.01, reader.header().scale.y);
         // (max - min) are chosen to yield std::numeric_limits<int>::max();
-        EXPECT_NEAR(2.48716e-7, reader.header().scaleZ(), 1e-7);
+        EXPECT_NEAR(2.48716e-7, reader.header().scale.z, 1e-7);
 
         PointViewSet viewSet = reader.execute(readTable);
         EXPECT_EQ(viewSet.size(), 1u);
@@ -285,13 +293,13 @@ TEST(LasWriterTest, auto_offset2)
         reader.setOptions(readerOps);
 
         reader.prepare(readTable);
-        EXPECT_NEAR((534252.35 + 25.0) * 0.5, reader.header().offsetX(), 0.01);
-        EXPECT_DOUBLE_EQ(0, reader.header().offsetY());
-        EXPECT_NEAR((2147483524 + 1.5) * 0.5, reader.header().offsetZ(), 0.01);
+        EXPECT_NEAR((534252.35 + 25.0) * 0.5, reader.header().offset.x, 0.01);
+        EXPECT_DOUBLE_EQ(0, reader.header().offset.y);
+        EXPECT_NEAR((2147483524 + 1.5) * 0.5, reader.header().offset.z, 0.01);
 
-        EXPECT_NEAR(1.2438e-4, reader.header().scaleX(), 1e-7);
-        EXPECT_DOUBLE_EQ(.01, reader.header().scaleY());
-        EXPECT_NEAR(.49999, reader.header().scaleZ(), 1e-5);
+        EXPECT_NEAR(1.2438e-4, reader.header().scale.x, 1e-7);
+        EXPECT_DOUBLE_EQ(.01, reader.header().scale.y);
+        EXPECT_NEAR(.49999, reader.header().scale.z, 1e-5);
 
         PointViewSet viewSet = reader.execute(readTable);
         EXPECT_EQ(viewSet.size(), 1u);
@@ -364,7 +372,7 @@ TEST(LasWriterTest, auto_scale_with_auto_offset)
     reader.setOptions(readerOps);
 
     reader.prepare(readTable);
-    EXPECT_DOUBLE_EQ((-250.00 + 780.00) * 0.5, reader.header().offsetX());
+    EXPECT_DOUBLE_EQ((-250.00 + 780.00) * 0.5, reader.header().offset.x);
     PointViewSet viewSet = reader.execute(readTable);
     EXPECT_EQ(viewSet.size(), 1u);
     view = *viewSet.begin();
@@ -405,8 +413,8 @@ TEST(LasWriterTest, extra_dims)
     PointViewSet viewSet = writer.execute(table);
 
     LasTester tester;
-    LasHeader *header = tester.header(writer);
-    EXPECT_EQ(header->pointLen(), header->basePointLen() + 10);
+    const las::Header& header = tester.header(writer);
+    EXPECT_EQ(header.pointSize, header.baseCount() + 10);
     PointViewPtr pb = *viewSet.begin();
 
     uint16_t colors[][3] = {
@@ -1025,11 +1033,11 @@ TEST(LasWriterTest, flex_vlr)
         PointTable t;
         r.prepare(t);
         r.execute(t);
-        const VlrList& vlrs = r.header().vlrs();
-        EXPECT_EQ(vlrs.size(), 3U);
-        EXPECT_NE(r.header().findVlr("laszip encoded", 22204), nullptr);
-        EXPECT_NE(r.header().findVlr("PDAL", 12), nullptr);
-        EXPECT_NE(r.header().findVlr("PDAL", 13), nullptr);
+
+	const char *data = nullptr;
+	EXPECT_TRUE(r.vlrData("laszip encoded", 22204, data) > 0);
+	EXPECT_TRUE(r.vlrData("PDAL", 12, data) > 0);
+	EXPECT_TRUE(r.vlrData("PDAL", 13, data) > 0);
     }
 }
 #endif // PDAL_HAVE_LASZIP
@@ -1406,10 +1414,10 @@ TEST(LasWriterTest, evlrOffset)
         w.prepare(t);
         w.execute(t);
         LasTester tester;
-        LasHeader* h = tester.header(w);
+        const las::Header& h = tester.header(w);
         // No points in the file
-        EXPECT_EQ(h->eVlrOffset(), h->pointOffset());
-        EXPECT_EQ(h->eVlrCount(), 1u);
+        EXPECT_EQ(h.evlrOffset, h.pointOffset);
+        EXPECT_EQ(h.evlrCount, 1u);
     }
 }
 
@@ -1534,11 +1542,11 @@ TEST(LasWriterTest, issue1940)
     w.execute(t);
 
     LasTester tester;
-    LasHeader *h = tester.header(w);
-    EXPECT_DOUBLE_EQ(h->offsetX(), 0);
-    EXPECT_DOUBLE_EQ(h->offsetY(), 55);
-    EXPECT_DOUBLE_EQ(h->scaleX(), 1.0);
-    EXPECT_DOUBLE_EQ(h->scaleY(), .01);
+    const las::Header& h = tester.header(w);
+    EXPECT_DOUBLE_EQ(h.offset.x, 0);
+    EXPECT_DOUBLE_EQ(h.offset.y, 55);
+    EXPECT_DOUBLE_EQ(h.scale.x, 1.0);
+    EXPECT_DOUBLE_EQ(h.scale.y, .01);
 }
 
 // Make sure that we can forward scale from multiple files if they match.
@@ -1577,10 +1585,10 @@ TEST(LasWriterTest, issue2663)
     PointTable t;
     r.prepare(t);
 
-    const LasHeader& h = r.header();
-    EXPECT_EQ(h.scaleX(), .001);
-    EXPECT_EQ(h.scaleY(), .001);
-    EXPECT_EQ(h.scaleZ(), .001);
+    const las::Header& h = r.header();
+    EXPECT_EQ(h.scale.x, .001);
+    EXPECT_EQ(h.scale.y, .001);
+    EXPECT_EQ(h.scale.z, .001);
 }
 
 // Make sure that we don't crash when writing scan angle values >90 && <-90 in point
