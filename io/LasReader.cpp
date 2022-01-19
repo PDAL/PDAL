@@ -274,7 +274,9 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
         throwError("Unsupported LAS input point format: " +
             Utils::toString((int)d->header.pointFormat()) + ".");
 
-    // Read VLRs
+    // Read VLRs.  Clear the error state since we potentially over-read the header, leaving
+    // the stream in error, when things are really fine.
+    stream->clear();
     stream->seekg(d->header.headerSize);
 
     char vlrHeaderBuf[las::Vlr::HeaderSize];
@@ -299,7 +301,6 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
         vlr.dataVec.resize(vlr.promisedDataSize);
         stream->read(vlr.data(), vlr.promisedDataSize);
 
-        //ABELL - Better error message.
         if (stream->gcount() != (std::streamsize)vlr.promisedDataSize)
             throwError("Couldn't read VLR " + std::to_string(i + 1) + ". End of file reached.");
         d->vlrs.push_back(std::move(vlr));
