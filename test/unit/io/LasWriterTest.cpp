@@ -1619,7 +1619,6 @@ TEST(LasWriterTest, issue3288)
     }
 }
 
-
 #if defined(PDAL_HAVE_LASZIP)
 // Make sure that we can translate this special test data to 1.4, dataformat 6.
 TEST(LasWriterTest, issue2320)
@@ -1704,9 +1703,54 @@ TEST(LasWriterTest, synthetic_points)
     EXPECT_EQ(viewSet.size(), 1u);
     view = *viewSet.begin();
     EXPECT_EQ(view->size(), 1u);
-    EXPECT_EQ(ClassLabel::Ground | ClassLabel::Synthetic, view->getFieldAs<uint8_t>(Id::Classification, 0));
+    EXPECT_EQ(ClassLabel::Ground | ClassLabel::Synthetic,
+        view->getFieldAs<uint8_t>(Id::Classification, 0));
 
     FileUtils::deleteFile(FILENAME);
 }
 
+#if defined(PDAL_HAVE_LASZIP) || defined(PDAL_HAVE_LAZPERF)
+// Make sure that we can read and write 0-point files.
+TEST(LasWriterTest, issue3652)
+{
+    std::string outfile(Support::temppath("3652.laz"));
+
+    auto test = [&outfile](const std::string& compression)
+    {
+        FileUtils::deleteFile(outfile);
+        {
+            LasWriter w;
+            Options wo;
+            wo.add("filename", outfile);
+            wo.add("compression", compression);
+            w.setOptions(wo);
+
+            PointTable t;
+            w.prepare(t);
+            w.execute(t);
+        }
+
+        // Check that we can read.
+        {
+            LasReader r;
+            Options ro;
+            ro.add("filename", outfile);
+            r.setOptions(ro);
+
+            PointTable t;
+            r.prepare(t);
+            PointViewSet s = r.execute(t);
+            EXPECT_EQ(s.size(), 1U);
+            PointViewPtr v = *s.begin();
+            EXPECT_EQ(v->size(), 0U);
+        }
+    };
+#if defined(PDAL_HAVE_LAZPERF)
+    test("lazperf");
+#endif
+#if defined(PDAL_HAVE_LASZIP)
+    test("laszip");
+#endif
+}
+#endif
 
