@@ -12,7 +12,7 @@ Morphological Filter (SMRF)` technique.
 
 .. note::
 
-    This exercise is an adaptation of the :ref:`pcl_ground` tutorial on the
+    This exercise is an adaptation of the :ref:`ground-filters` tutorial on the
     PDAL website by Brad Chambers. You can find more detail and example
     invocations there.
 
@@ -64,7 +64,7 @@ Filtering
 We do not yet have a satisfactory surface for generating a DTM.  When we
 visualize the output of this ground operation, we notice there's still some
 noise. We can stack the call to SMRF with a call to a the `filters.outlier`
-technique we learned about in :ref:`denoising`.
+technique we learned about in :ref:`workshop-denoising`.
 
 1. Let us start by removing the non-ground data to just view the ground data:
 
