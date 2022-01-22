@@ -17,6 +17,7 @@ dimension type, while others only understand fixed dimension names.
    :hidden:
 
    writers.bpf
+   writers.draco
    writers.ept_addon
    writers.e57
    writers.gdal
@@ -36,6 +37,9 @@ dimension type, while others only understand fixed dimension names.
 
 :ref:`writers.bpf`
     Write BPF version 3 files. BPF is an NGA specification for point cloud data.
+
+:ref:`writers.draco`
+    Write a buffer in Google Draco format
 
 :ref:`writers.ept_addon`
     Append additional dimensions to Entwine resources.

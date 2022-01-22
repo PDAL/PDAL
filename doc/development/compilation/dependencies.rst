@@ -4,6 +4,13 @@
 Dependencies
 ==============================================================================
 
+
+.. note::
+
+    The absolute best source of build and configuration examples is the
+    PDAL GitHub repository. Specifically, the continuous integration
+    scripts at https://github.com/PDAL/PDAL/tree/master/scripts/ci
+
 PDAL depends on a number of libraries to do its work.  You should make sure
 those dependencies are installed on your system before installing PDAL
 or use a packaging system that will automatically ensure that prerequisites
@@ -75,7 +82,7 @@ point types and versions than does LASzip.
 libxml2  (2.7+)
 ..............................................................................
 
-libxml2_ is used to serialize PDAL dimension descriptions into XML for 
+libxml2_ is used to serialize PDAL dimension descriptions into XML for
 :ref:`readers.pgpointcloud`.::
 
     Source: http://www.xmlsoft.org/
@@ -96,16 +103,6 @@ files for :ref:`writers.nitf`.  You must use the specific version of Nitro
 referenced below for licensing and compatibility reasons.::
 
     Source: http://github.com/hobu/nitro
-
-PCL  (1.7.2+)
-..............................................................................
-
-The `Point Cloud Library (PCL)`_ is used by the :ref:`pcl_command`,
-:ref:`writers.pcd`, :ref:`readers.pcd`, and :ref:`filters.pclblock` to provide
-support for various PCL-related operations.::
-
-    Source: https://github.com/PointCloudLibrary/pcl
-    Conda: https://anaconda.org/conda-forge/pcl
 
 TileDB  (1.4.1+)
 ..............................................................................
