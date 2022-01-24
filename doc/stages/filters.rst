@@ -505,9 +505,13 @@ Dimension
    :glob:
    :hidden:
 
+   filters.gpstimeconvert
    filters.groupby
    filters.returns
    filters.separatescanline
+
+:ref:`filters.gpstimeconvert`
+    Convert between three LAS format GPS time standards
 
 :ref:`filters.groupby`
     Split data categorically by dimension.

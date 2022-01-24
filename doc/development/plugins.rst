@@ -30,7 +30,7 @@ PDAL kernel plugins must be named:
     libpdal_plugin_kernel_<plugin name>.<shared library extension>
 
 See the tutorials :ref:`writing-reader`, :ref:`writing-filter` or :ref:`writing-writer` for
-step-by-step instructions on creating a PDAL stage plugin. See :ref:`writer-kernel` for similar
+step-by-step instructions on creating a PDAL stage plugin. See :ref:`writing-kernel` for similar
 information on creating a PDAL kernel plugin.  The tutorials provide a sample
 CMakeLists.txt that can serve as a basis for building your plugin with a PDAL installation.
 A simple macro, ``PDAL_CREATE_PLUGIN``,  is now provided with PDAL that makes it even easier

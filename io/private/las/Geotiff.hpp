@@ -34,49 +34,63 @@
 
 #pragma once
 
-#include <ostream>
-#include <array>
-
-#include <pdal/pdal_internal.hpp>
-
-#include "LasHeader.hpp"
+#include <pdal/Log.hpp>
+#include <pdal/SpatialReference.hpp>
 
 namespace pdal
 {
-
-class PDAL_DLL LasSummaryData
+namespace las
 {
-public:
+
+namespace Geotiff
+{
     struct error : public std::runtime_error
     {
         error(const std::string& err) : std::runtime_error(err)
         {}
     };
+}
 
-    LasSummaryData();
+struct Entry;
 
-    void addPoint(double x, double y, double z, int returnNumber);
-    point_count_t getTotalNumPoints() const
-        { return m_totalNumPoints; }
-    BOX3D getBounds() const;
-    point_count_t getReturnCount(int returnNumber) const;
+class GeotiffSrs
+{
+public:
+    GeotiffSrs(const std::vector<char>& directoryRec,
+        const std::vector<char>& doublesRec,
+        const std::vector<char>& asciiRec, LogPtr log);
+    SpatialReference srs() const
+        { return m_srs; }
 
-    void dump(std::ostream&) const;
+    std::string const& gtiffPrintString()
+        { return m_gtiff_print_string; }
 
 private:
-    double m_minX;
-    double m_minY;
-    double m_minZ;
-    double m_maxX;
-    double m_maxY;
-    double m_maxZ;
-    std::array<point_count_t, LasHeader::RETURN_COUNT> m_returnCounts;
-    point_count_t m_totalNumPoints;
+    SpatialReference m_srs;
+    LogPtr m_log;
+    std::string m_gtiff_print_string;
 
-    LasSummaryData& operator=(const LasSummaryData&); // not implemented
-    LasSummaryData(const LasSummaryData&); // not implemented
+    void validateDirectory(const Entry *ent, size_t numEntries,
+        size_t numDoubles, size_t asciiSize);
 };
 
-PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const LasSummaryData&);
+class GeotiffTags
+{
+public:
+    GeotiffTags(const SpatialReference& srs);
 
+    std::vector<char>& directoryData()
+        { return m_directoryRec; }
+    std::vector<char>& doublesData()
+        { return m_doublesRec; }
+    std::vector<char>& asciiData()
+        { return m_asciiRec; }
+
+private:
+    std::vector<char> m_directoryRec;
+    std::vector<char> m_doublesRec;
+    std::vector<char> m_asciiRec;
+};
+
+} // namespace las
 } // namespace pdal

@@ -137,7 +137,7 @@ polygon
 ogr
   A JSON object representing an OGR query to fetch polygons to use for filtering. The polygons
   fetched from the query are treated exactly like those specified in the ``polygon`` option.
-  The JSON object looks like the following:
+  The JSON object is specified as follows:
 
   .. code-block:: json
 

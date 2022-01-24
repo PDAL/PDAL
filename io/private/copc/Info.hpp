@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2014, Hobu Inc., hobu@hobu.co
+ * Copyright (c) 2018, Connor Manning
  *
  * All rights reserved.
  *
@@ -13,9 +13,10 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided
  *       with the distribution.
- *     * Neither the name of the Hobu Inc. nor the names of contributors
- *       to this software may be used to endorse or promote products derived
- *       from this software without specific prior written permission.
+ *     * Neither the name of the Martin Isenburg or Iowa Department
+ *       of Natural Resources nor the names of its contributors may be
+ *       used to endorse or promote products derived from this software
+ *       without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -33,53 +34,38 @@
 
 #pragma once
 
-#include <vector>
-
-#include <pdal/util/Algorithm.hpp>
-#include <pdal/Log.hpp>
+#include <pdal/util/Extractor.hpp>
 
 namespace pdal
 {
+namespace copc
+{
 
-class LasError
+struct Info
 {
 public:
-    LasError() : m_filename("<unknown>")
-    {}
+    double center_x;
+    double center_y;
+    double center_z;
+    double halfsize;
+    double spacing;
+    uint64_t root_hier_offset;
+    uint64_t root_hier_size;
+    double gpstime_minimum;
+    double gpstime_maximum;
+    double reserved[11];
 
-    void setFilename(const std::string& filename)
-        { m_filename = filename; }
-
-    void setLog(LogPtr log) { m_log = log; }
-
-    void returnNumWarning(int returnNum)
+    void fill(const char *buf, size_t bufsize)
     {
-        static std::vector<int> warned;
+        LeExtractor s(buf, bufsize);
 
-        if (!Utils::contains(warned, returnNum))
-        {
-            warned.push_back(returnNum);
-            m_log->get(LogLevel::Warning) << m_filename <<
-                ": Found invalid value of '" << returnNum <<
-                "' for point's return number.\n";
-        }
+        s >> center_x >> center_y >> center_z >> halfsize >> spacing;
+        s >> root_hier_offset >> root_hier_size;
+        s >> gpstime_minimum >> gpstime_minimum;
+        for (int i = 0; i < 11; ++i)
+            s >> reserved[i];
     }
-
-    void numReturnsWarning(int numReturns)
-    {
-        static std::vector<int> warned;
-
-        if (!Utils::contains(warned, numReturns))
-        {
-            warned.push_back(numReturns);
-            m_log->get(LogLevel::Warning) << m_filename << ": Found invalid value "
-                "of '" << numReturns << "' for point's number of returns.\n";
-        }
-    }
-
-private:
-    std::string m_filename;
-    LogPtr m_log;
 };
 
+} // namespace copc
 } // namespace pdal

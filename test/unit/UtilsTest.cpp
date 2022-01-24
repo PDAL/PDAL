@@ -38,8 +38,8 @@
 #include <vector>
 
 #include <pdal/util/portable_endian.hpp>
-#include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Extractor.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
 #include "Support.hpp"
 

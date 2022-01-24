@@ -42,13 +42,17 @@
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
 
-//#include "LasError.hpp"
-
 namespace pdal
 {
 
+namespace las
+{
+    struct Header;
+    struct Vlr;
+    using VlrList = std::vector<Vlr>;
+};
+
 class NitfReader;
-class LasHeader;
 class LeExtractor;
 class PointDimensions;
 class LazPerfVlrDecompressor;
@@ -84,7 +88,9 @@ public:
 
     std::string getName() const;
 
-    const LasHeader& header() const;
+    const las::Header& header() const;
+//    const las::VlrList& vlrs() const;
+    uint64_t vlrData(const std::string& userId, uint16_t recordId, char const * & data);
     point_count_t getNumPoints() const;
 
 protected:

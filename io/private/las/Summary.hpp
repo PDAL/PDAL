@@ -34,60 +34,38 @@
 
 #pragma once
 
-#include <pdal/Log.hpp>
-#include <pdal/SpatialReference.hpp>
+#include <ostream>
+#include <array>
+
+#include <io/LasHeader.hpp>
 
 namespace pdal
 {
-
-namespace Geotiff
+namespace las
 {
-    struct error : public std::runtime_error
-    {
-        error(const std::string& err) : std::runtime_error(err)
-        {}
-    };
-}
 
-struct Entry;
-
-class GeotiffSrs
+class Summary
 {
 public:
-    GeotiffSrs(const std::vector<uint8_t>& directoryRec,
-        const std::vector<uint8_t>& doublesRec,
-        const std::vector<uint8_t>& asciiRec, LogPtr log);
-    SpatialReference srs() const
-        { return m_srs; }
+    Summary();
+    Summary& operator=(const Summary&) = delete;
+    Summary(const Summary&) = delete;
 
-    std::string const& gtiffPrintString()
-        { return m_gtiff_print_string; }
-
-private:
-    SpatialReference m_srs;
-    LogPtr m_log;
-    std::string m_gtiff_print_string;
-
-    void validateDirectory(const Entry *ent, size_t numEntries,
-        size_t numDoubles, size_t asciiSize);
-};
-
-class GeotiffTags
-{
-public:
-    GeotiffTags(const SpatialReference& srs);
-
-    std::vector<uint8_t>& directoryData()
-        { return m_directoryRec; }
-    std::vector<uint8_t>& doublesData()
-        { return m_doublesRec; }
-    std::vector<uint8_t>& asciiData()
-        { return m_asciiRec; }
+    void clear();
+    void addPoint(double x, double y, double z, int returnNumber);
+    point_count_t getTotalNumPoints() const
+        { return m_totalNumPoints; }
+    BOX3D getBounds() const;
+    point_count_t getReturnCount(int returnNumber) const;
+    void dump(std::ostream&) const;
 
 private:
-    std::vector<uint8_t> m_directoryRec;
-    std::vector<uint8_t> m_doublesRec;
-    std::vector<uint8_t> m_asciiRec;
+    BOX3D m_bounds;
+    std::array<point_count_t, las::Header::ReturnCount> m_returnCounts;
+    point_count_t m_totalNumPoints;
 };
 
+std::ostream& operator<<(std::ostream& ostr, const Summary&);
+
+} // namespace las
 } // namespace pdal
