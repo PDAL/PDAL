@@ -490,8 +490,8 @@ private:
 };
 
 /**
-  Description of a boolean argument.  Boolean arguments don't take values.
-  Setting a boolean argument inverts its default value.  Boolean arguments
+  Description of a boolean argument.  Boolean arguments only take the values "true" or "false".
+  Setting a boolean argument without a value inverts its default value.  Boolean arguments
   are normally 'false' by default.
 */
 template <>
