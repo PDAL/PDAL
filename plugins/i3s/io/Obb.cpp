@@ -292,7 +292,7 @@ bool Obb::intersectNormalized(const Segment& seg) const
         // face in 2d, ignoring the dimension in the direction of the normal.
         double coord[2];
         size_t pos = 0;
-        BOX2D *box;
+        BOX2D *box(0);
         for (size_t i = 0; i < 3; ++i)
         {
             if (face[i])
