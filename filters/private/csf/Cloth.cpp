@@ -60,7 +60,7 @@ Cloth::Cloth(const Vec3& _origin_pos,
         }
     }
 
-    saveToFile("initial-nodes.txt", m_outputDir);
+    saveToFile("initial-nodes.txt");
 
     // Connecting immediate neighbor particles with constraints
     // (distance 1 and sqrt(2) in the grid)
@@ -126,7 +126,7 @@ void Cloth::addForce(const Vec3 direction) {
     for (std::size_t i = 0; i < particles.size(); i++) {
         particles[i].addForce(direction);
     }
-    saveToFile("force-nodes.txt", m_outputDir);
+    saveToFile("force-nodes.txt");
 }
 
 void Cloth::terrCollision() {
@@ -140,7 +140,7 @@ void Cloth::terrCollision() {
             particles[i].makeUnmovable();
         }
     }
-    saveToFile("collision-notes.txt", m_outputDir);
+    saveToFile("collision-notes.txt");
 }
 
 void Cloth::movableFilter() {
@@ -366,7 +366,10 @@ void Cloth::handle_slop_connected(vector<int> edgePoints, vector<XY> connected, 
     }
 }
 
-void Cloth::saveToFile(string directory, string path) {
+void Cloth::saveToFile(string path) {
+    if (m_outputDir.empty())
+        return;
+
     string filepath = "cloth_nodes.txt";
 
     if (path == "") {
@@ -375,7 +378,7 @@ void Cloth::saveToFile(string directory, string path) {
         filepath = path;
     }
 
-    string outputFileName = pdal::FileUtils::toAbsolutePath(filepath, path);
+    string outputFileName = pdal::FileUtils::toAbsolutePath(filepath, m_outputDir);
 
     ofstream f1(outputFileName.c_str());
 

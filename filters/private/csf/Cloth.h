@@ -158,7 +158,7 @@ public:
                                       vector<XY>           connected,
                                       vector<vector<int> > neibors);
 
-    void saveToFile(string path = "", string directory = "");
+    void saveToFile(string path = "");
 
     void saveMovableToFile(string path = "");
 };
