@@ -1,5 +1,5 @@
 // ======================================================================================
-// Copyright 2017 State Key Laboratory of Remote Sensing Science, 
+// Copyright 2017 State Key Laboratory of Remote Sensing Science,
 // Institute of Remote Sensing Science and Engineering, Beijing Normal University
 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -85,6 +85,7 @@ private:
 
     double smoothThreshold;
     double heightThreshold;
+    string m_outputDir;
 
 public:
 
@@ -133,7 +134,8 @@ public:
           double      smoothThreshold,
           double      heightThreshold,
           int         rigidness,
-          double      time_step);
+          double      time_step,
+          string      output_dir);
 
     /* this is an important methods where the time is progressed one
      * time step for the entire cloth.  This includes calling

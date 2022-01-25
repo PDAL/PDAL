@@ -57,6 +57,7 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void prepared(PointTableRef table);
+    virtual void ready(PointTableRef table);
     virtual PointViewSet run(PointViewPtr view);
 
     void classifyGround(PointViewPtr, std::vector<double>&);

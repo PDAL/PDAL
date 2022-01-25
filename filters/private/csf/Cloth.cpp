@@ -1,5 +1,5 @@
 // ======================================================================================
-// Copyright 2017 State Key Laboratory of Remote Sensing Science, 
+// Copyright 2017 State Key Laboratory of Remote Sensing Science,
 // Institute of Remote Sensing Science and Engineering, Beijing Normal University
 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@
 
 #include "Cloth.h"
 #include <fstream>
+#include <pdal/util/FileUtils.hpp>
 
 
 Cloth::Cloth(const Vec3& _origin_pos,
@@ -27,10 +28,12 @@ Cloth::Cloth(const Vec3& _origin_pos,
              double      _smoothThreshold,
              double      _heightThreshold,
              int         rigidness,
-             double      time_step)
+             double      time_step,
+             string      output_dir)
     : constraint_iterations(rigidness),
     smoothThreshold(_smoothThreshold),
     heightThreshold(_heightThreshold),
+    m_outputDir(output_dir),
     origin_pos(_origin_pos),
     step_x(_step_x),
     step_y(_step_y),
@@ -249,7 +252,6 @@ void Cloth::movableFilter() {
 
 vector<int> Cloth::findUnmovablePoint(vector<XY> connected) {
     vector<int> edgePoints;
-
     for (size_t i = 0; i < connected.size(); i++) {
         int x         = connected[i].x;
         int y         = connected[i].y;
@@ -365,6 +367,9 @@ void Cloth::handle_slop_connected(vector<int> edgePoints, vector<XY> connected, 
 }
 
 void Cloth::saveToFile(string path) {
+    if (m_outputDir.empty())
+        return;
+
     string filepath = "cloth_nodes.txt";
 
     if (path == "") {
@@ -373,7 +378,9 @@ void Cloth::saveToFile(string path) {
         filepath = path;
     }
 
-    ofstream f1(filepath.c_str());
+    string outputFileName = pdal::FileUtils::toAbsolutePath(filepath, m_outputDir);
+
+    ofstream f1(outputFileName.c_str());
 
     if (!f1)
         return;
@@ -394,7 +401,9 @@ void Cloth::saveMovableToFile(string path) {
         filepath = path;
     }
 
-    ofstream f1(filepath.c_str());
+    string outputFileName = pdal::FileUtils::toAbsolutePath(filepath, path);
+
+    ofstream f1(outputFileName.c_str());
 
     if (!f1)
         return;

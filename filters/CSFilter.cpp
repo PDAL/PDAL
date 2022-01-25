@@ -79,6 +79,7 @@ struct CSArgs
     int m_iterations;
     std::vector<DimRange> m_ignored;
     StringList m_returns;
+    std::string m_dir;
 };
 
 CSFilter::CSFilter() : m_args(new CSArgs)
@@ -101,11 +102,21 @@ void CSFilter::addArgs(ProgramArgs& args)
     args.add("ignore", "Ignore values", m_args->m_ignored);
     args.add("returns", "Include last returns?", m_args->m_returns,
              {"last", "only"});
+    args.add("dir", "Optional output directory for debugging", m_args->m_dir);
 }
 
 void CSFilter::addDimensions(PointLayoutPtr layout)
 {
     layout->registerDim(Id::Classification);
+}
+
+void CSFilter::ready(PointTableRef table)
+{
+    if (m_args->m_dir.empty())
+        return;
+
+    if (!FileUtils::directoryExists(m_args->m_dir))
+        throwError("Output directory '" + m_args->m_dir + "' does not exist");
 }
 
 void CSFilter::prepared(PointTableRef table)
@@ -219,6 +230,7 @@ PointViewSet CSFilter::run(PointViewPtr view)
     c.params.cloth_resolution = m_args->m_resolution;
     c.params.rigidness = m_args->m_rigid;
     c.params.interations = m_args->m_iterations;
+    c.params.m_dir = m_args->m_dir;
     std::vector<int> groundIdx, offGroundIdx;
     c.setLog(log());
     c.setPointCloud(csfPC);
