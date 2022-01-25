@@ -38,6 +38,8 @@
 
 namespace pdal
 {
+namespace ept
+{
 
 class PDAL_DLL Key
 {
@@ -145,14 +147,15 @@ inline bool operator<(const Key& a, const Key& b)
     return false;
 }
 
+} // namespace ept
 } // namespace pdal
 
 namespace std
 {
     template<>
-    struct hash<pdal::Key>
+    struct hash<pdal::ept::Key>
     {
-        std::size_t operator()(pdal::Key const& k) const noexcept
+        std::size_t operator()(pdal::ept::Key const& k) const noexcept
         {
             std::hash<uint64_t> h;
 

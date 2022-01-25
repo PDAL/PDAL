@@ -59,9 +59,6 @@
 namespace pdal
 {
 
-void OCISchemaGenericErrorHandler(void * ctx, const char* message, ...);
-void OCISchemaStructuredErrorHandler(void * userData, xmlErrorPtr error);
-
 class XMLSchema;
 
 struct XMLDim

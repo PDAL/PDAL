@@ -38,7 +38,10 @@
 
 namespace pdal
 {
-    class LasHeader;
+namespace las
+{
+    struct Header;
+}
 
 // This compressor write data in chunks to a stream. At the beginning of the
 // data is an offset to the end of the data, where the chunk table is
@@ -71,7 +74,7 @@ class LazPerfVlrDecompressorImpl;
 class LazPerfVlrDecompressor
 {
 public:
-    LazPerfVlrDecompressor(std::istream& stream, const LasHeader& header, const char *vlrdata);
+    LazPerfVlrDecompressor(std::istream& stream, const las::Header& header, const char *vlrdata);
     ~LazPerfVlrDecompressor();
 
     bool seek(uint64_t record);

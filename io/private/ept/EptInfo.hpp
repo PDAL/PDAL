@@ -42,6 +42,8 @@
 
 namespace pdal
 {
+namespace ept
+{
 
 class Connector;
 
@@ -95,5 +97,6 @@ private:
     void initialize();
 };
 
+} // namespace ept
 } // namespace pdal
 

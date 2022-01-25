@@ -18,6 +18,8 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
 
    readers.bpf
    readers.buffer
+   readers.copc
+   readers.draco
    readers.ept
    readers.e57
    readers.faux
@@ -55,6 +57,9 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
 :ref:`readers.buffer`
     Special stage that allows you to read data from your own PointView rather
     than fetching data from a specific reader.
+
+:ref:`readers.draco`
+    Read a buffer in Google Draco format
 
 :ref:`readers.ept`
     Used for reading `Entwine Point Tile <https://entwine.io>`__ format.

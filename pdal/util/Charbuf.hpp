@@ -61,7 +61,7 @@ public:
       \param v  Byte vector to back streambuf.
       \param bufOffset  Offset in vector (ignore bytes before offset).
     */
-    Charbuf (std::vector<char>& v, pos_type bufOffset = 0)
+    Charbuf(std::vector<char>& v, pos_type bufOffset = 0)
         { initialize(v.data(), v.size(), bufOffset); }
 
     /**
@@ -71,7 +71,7 @@ public:
       \param count  Size of buffer.
       \param bufOffset  Offset in vector (ignore bytes before offset).
     */
-    Charbuf (char *buf, size_t count, pos_type bufOffset = 0)
+    Charbuf(char *buf, size_t count, pos_type bufOffset = 0)
         { initialize(buf, count, bufOffset); }
 
     /**

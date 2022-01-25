@@ -21,6 +21,7 @@ developing new code can be found in this section.
    errorhandling
    metadata
    writing
+   plugins
    writing-filter
    writing-kernel
    writing-reader

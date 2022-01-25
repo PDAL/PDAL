@@ -4,6 +4,13 @@
 Dependencies
 ==============================================================================
 
+
+.. note::
+
+    The absolute best source of build and configuration examples is the
+    PDAL GitHub repository. Specifically, the continuous integration
+    scripts at https://github.com/PDAL/PDAL/tree/master/scripts/ci
+
 PDAL depends on a number of libraries to do its work.  You should make sure
 those dependencies are installed on your system before installing PDAL
 or use a packaging system that will automatically ensure that prerequisites
@@ -20,7 +27,7 @@ GDAL (2.2+)
 ..............................................................................
 
 PDAL uses GDAL for spatial reference system description manipulation, and image
-reading supporting for the NITF driver, and :ref:`writers.oci` support. In
+reading supporting for the NITF driver. In
 conjunction with GeoTIFF_, GDAL is used to convert GeoTIFF keys and OGC WKT SRS
 description strings into formats required by specific drivers.  ::
 
@@ -67,8 +74,7 @@ laz-perf (Latest package/source recommended)
 
 laz-perf provides an alternative LAS compression/decompression engine that
 may be slightly faster in some circumstances.  laz-perf supports fewer LAS
-point types and versions than does LASzip.  It is also used as a
-compression type for :ref:`writers.oci` and :ref:`writers.sqlite`::
+point types and versions than does LASzip.
 
     Source: https://github.com/verma/laz-perf/
     Conda: https://anaconda.org/conda-forge/laz-perf
@@ -76,8 +82,7 @@ compression type for :ref:`writers.oci` and :ref:`writers.sqlite`::
 libxml2  (2.7+)
 ..............................................................................
 
-libxml2_ is used to serialize PDAL dimension descriptions into XML for the
-database drivers such as :ref:`writers.oci`, :ref:`readers.sqlite`, or
+libxml2_ is used to serialize PDAL dimension descriptions into XML for
 :ref:`readers.pgpointcloud`.::
 
     Source: http://www.xmlsoft.org/
@@ -90,19 +95,6 @@ PDAL comes with optional plugin stages that require other libraries in order
 to run.  Many of these libraries are licensed in a way incompatible with
 the PDAL license or they may be commercial products that require purchase.
 
-OCI (10g+)
-..............................................................................
-
-Obtain the `Oracle Instant Client`_ and install in a location on your system.
-Be sure to install both the "Basic" and the "SDK" modules. Set your
-``ORACLE_HOME`` environment variable system- or user-wide to point to this
-location so the CMake configuration can find your install. OCI is used by
-both :ref:`writers.oci` and :ref:`readers.oci` for Oracle
-Point Cloud read/write support.  In order to obtain the OCI libraries
-you must register with Oracle.::
-
-    Libraries: https://www.oracle.com/technetwork/database/database-technologies/instant-client/downloads/index.html
-
 Nitro (Requires specific source package)
 ..............................................................................
 
@@ -111,16 +103,6 @@ files for :ref:`writers.nitf`.  You must use the specific version of Nitro
 referenced below for licensing and compatibility reasons.::
 
     Source: http://github.com/hobu/nitro
-
-PCL  (1.7.2+)
-..............................................................................
-
-The `Point Cloud Library (PCL)`_ is used by the :ref:`pcl_command`,
-:ref:`writers.pcd`, :ref:`readers.pcd`, and :ref:`filters.pclblock` to provide
-support for various PCL-related operations.::
-
-    Source: https://github.com/PointCloudLibrary/pcl
-    Conda: https://anaconda.org/conda-forge/pcl
 
 TileDB  (1.4.1+)
 ..............................................................................
@@ -138,10 +120,6 @@ used by :ref:`writers.tiledb` and :ref:`readers.tiledb`.::
 .. _`LASzip`: http://laszip.org
 .. _`NITF`: http://en.wikipedia.org/wiki/National_Imagery_Transmission_Format
 .. _`Nitro`: http://nitro-nitf.sourceforge.net/wikka.php?wakka=HomePage
-
-.. _`Oracle Instant Client`: http://www.oracle.com/technology/tech/oci/instantclient/index.html
-.. _`OCI`: http://www.oracle.com/technology/tech/oci/index.html
-.. _`Oracle Point Cloud`: http://download.oracle.com/docs/cd/B28359_01/appdev.111/b28400/sdo_pc_pkg_ref.htm
 .. _`DebianGIS`: http://wiki.debian.org/DebianGis
 .. _`Debian`: http://www.debian.org
 .. _`Conda Forge`: https://anaconda.org/conda-forge/pdal
