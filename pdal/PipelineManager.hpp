@@ -75,6 +75,8 @@ public:
     };
 
     PipelineManager(point_count_t streamLimit = 10000);
+    PipelineManager(SimplePointTable& pointTable,
+                    FixedPointTable& fixedPointTable);
     ~PipelineManager();
 
     void setProgressFd(int fd)

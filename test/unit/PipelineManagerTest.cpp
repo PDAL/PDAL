@@ -238,3 +238,88 @@ TEST(PipelineManagerTest, replace)
     EXPECT_EQ(w2->getInputs().size(), 1U);
     EXPECT_EQ(w2->getInputs().front(), f2);
 }
+
+
+TEST(PipelineManagerTest, customTable)
+{
+
+    // copypasta from PointTableTest
+    class UserTable : public PointTable
+    {
+    private:
+        double m_x;
+        double m_y;
+        double m_z;
+
+    public:
+        PointId addPoint()
+            { return 0; }
+        char *getPoint(PointId idx)
+            { return NULL; }
+        void setFieldInternal(Dimension::Id id, PointId idx,
+            const void *value)
+        {
+            if (id == Dimension::Id::X)
+               m_x = *(const double *)value;
+            else if (id == Dimension::Id::Y)
+               m_y = *(const double *)value;
+            else if (id == Dimension::Id::Z)
+               m_z = *(const double *)value;
+        }
+        void getFieldInternal(Dimension::Id id, PointId idx,
+            void *value) const
+        {
+            if (id == Dimension::Id::X)
+               *(double *)value = m_x;
+            else if (id == Dimension::Id::Y)
+               *(double *)value = m_y;
+            else if (id == Dimension::Id::Z)
+               *(double *)value = m_z;
+        }
+    };
+
+    UserTable userTable;
+    FixedPointTable fixedTable(20);
+    PipelineManager mgr(userTable, fixedTable);
+
+    Stage& r = mgr.makeReader("in.las", "readers.las");
+    Stage& f = mgr.makeFilter("filters.crop", r);
+    Stage& w = mgr.makeWriter("out.las", "writers.las", f);
+
+    StageFactory factory;
+    Stage *r2 = factory.createStage("readers.bpf");
+    mgr.replace(&r, r2);
+    EXPECT_EQ(r2->getInputs().size(), 0U);
+
+    EXPECT_EQ(f.getInputs().size(), 1U);
+    EXPECT_EQ(f.getInputs().front(), r2);
+
+    EXPECT_EQ(w.getInputs().size(), 1U);
+    EXPECT_EQ(w.getInputs().front(), &f);
+
+    Stage *f2 = factory.createStage("filters.range");
+
+    mgr.replace(&f, f2);
+    EXPECT_EQ(r2->getInputs().size(), 0U);
+
+    EXPECT_EQ(f2->getInputs().size(), 1U);
+    EXPECT_EQ(f2->getInputs().front(), r2);
+
+    EXPECT_EQ(w.getInputs().size(), 1U);
+    EXPECT_EQ(w.getInputs().front(), f2);
+
+    Stage *w2 = factory.createStage("writers.bpf");
+
+    mgr.replace(&w, w2);
+    EXPECT_EQ(r2->getInputs().size(), 0U);
+
+    EXPECT_EQ(f2->getInputs().size(), 1U);
+    EXPECT_EQ(f2->getInputs().front(), r2);
+
+    EXPECT_EQ(w2->getInputs().size(), 1U);
+    EXPECT_EQ(w2->getInputs().front(), f2);
+}
+
+
+
+

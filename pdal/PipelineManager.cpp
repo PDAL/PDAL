@@ -53,6 +53,14 @@ PipelineManager::PipelineManager(point_count_t streamLimit) :
     m_progressFd(-1), m_input(nullptr)
 {}
 
+PipelineManager::PipelineManager(SimplePointTable& pointTable,
+                                FixedPointTable& fixedPointTable) :
+    m_factory(new StageFactory),
+    m_tablePtr(nullptr), m_table(pointTable),
+    m_streamTablePtr(nullptr),
+    m_streamTable(fixedPointTable),
+    m_progressFd(-1), m_input(nullptr)
+{}
 
 PipelineManager::~PipelineManager()
 {
@@ -229,7 +237,7 @@ PipelineManager::ExecResult PipelineManager::execute(ExecMode mode)
     Stage *s = getStage();
     if (!s)
         return result;
-                
+
     if (mode == ExecMode::PreferStream)
     {
         // If a pipeline isn't streamable before being prepared, it's not
@@ -260,7 +268,39 @@ PipelineManager::ExecResult PipelineManager::execute(ExecMode mode)
     next:
     if (mode == ExecMode::Stream)
     {
-        if (s->pipelineStreamable())
+        if (s->pipelineStreamable())    class UserTable : public PointTable
+    {
+    private:
+        double m_x;
+        double m_y;
+        double m_z;
+
+    public:
+        PointId addPoint()
+            { return 0; }
+        char *getPoint(PointId idx)
+            { return NULL; }
+        void setFieldInternal(Dimension::Id id, PointId idx,
+            const void *value)
+        {
+            if (id == Dimension::Id::X)
+               m_x = *(const double *)value;
+            else if (id == Dimension::Id::Y)
+               m_y = *(const double *)value;
+            else if (id == Dimension::Id::Z)
+               m_z = *(const double *)value;
+        }
+        void getFieldInternal(Dimension::Id id, PointId idx,
+            void *value) const
+        {
+            if (id == Dimension::Id::X)
+               *(double *)value = m_x;
+            else if (id == Dimension::Id::Y)
+               *(double *)value = m_y;
+            else if (id == Dimension::Id::Z)
+               *(double *)value = m_z;
+        }
+    };
         {
             s->prepare(m_streamTable);
             s->execute(m_streamTable);
