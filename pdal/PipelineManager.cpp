@@ -268,39 +268,7 @@ PipelineManager::ExecResult PipelineManager::execute(ExecMode mode)
     next:
     if (mode == ExecMode::Stream)
     {
-        if (s->pipelineStreamable())    class UserTable : public PointTable
-    {
-    private:
-        double m_x;
-        double m_y;
-        double m_z;
-
-    public:
-        PointId addPoint()
-            { return 0; }
-        char *getPoint(PointId idx)
-            { return NULL; }
-        void setFieldInternal(Dimension::Id id, PointId idx,
-            const void *value)
-        {
-            if (id == Dimension::Id::X)
-               m_x = *(const double *)value;
-            else if (id == Dimension::Id::Y)
-               m_y = *(const double *)value;
-            else if (id == Dimension::Id::Z)
-               m_z = *(const double *)value;
-        }
-        void getFieldInternal(Dimension::Id id, PointId idx,
-            void *value) const
-        {
-            if (id == Dimension::Id::X)
-               *(double *)value = m_x;
-            else if (id == Dimension::Id::Y)
-               *(double *)value = m_y;
-            else if (id == Dimension::Id::Z)
-               *(double *)value = m_z;
-        }
-    };
+        if (s->pipelineStreamable())
         {
             s->prepare(m_streamTable);
             s->execute(m_streamTable);
