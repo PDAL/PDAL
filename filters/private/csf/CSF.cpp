@@ -1,5 +1,5 @@
 // ======================================================================================
-// Copyright 2017 State Key Laboratory of Remote Sensing Science, 
+// Copyright 2017 State Key Laboratory of Remote Sensing Science,
 // Institute of Remote Sensing Science and Engineering, Beijing Normal University
 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -154,7 +154,8 @@ void CSF::do_filtering(std::vector<int>& groundIndexes,
         0.3,
         9999,
         params.rigidness,
-        params.time_step
+        params.time_step,
+        params.m_dir
     );
 
     log->get(pdal::LogLevel::Debug) << "[" << this->index << "] Rasterizing..." << endl;
