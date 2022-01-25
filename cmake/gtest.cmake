@@ -1,13 +1,13 @@
-if (MSVC)
-    # Since tests link CRT dynamically (/MD[d]), require gtest to
-    #link dynamically too (default is /MT[d])
-    option(gtest_force_shared_crt "Always use shared Visual C++ run-time DLL" ON)
-endif()
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  # Specify the commit you depend on and update it regularly.
+  URL https://github.com/google/googletest/archive/f45d5865ed0b2b8912244627cdf508a24cc6ccb4.zip
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
 
-set(GOOGLETEST_VERSION 1.10.0)
-add_subdirectory(vendor/gtest)
-
-set(FPHSA_NAME_MISMATCHED 1) # Suppress warnings, see https://cmake.org/cmake/help/v3.17/module/FindPackageHandleStandardArgs.html
 find_package(absl QUIET)
 set(FPHSA_NAME_MISMATCHED 0)
 

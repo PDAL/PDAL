@@ -16,6 +16,10 @@ foreach(infileName ${inFiles})
 endforeach()
 
 add_library(${PDAL_TEST_SUPPORT_OBJS} OBJECT Support.cpp)
+target_link_libraries(${PDAL_TEST_SUPPORT_OBJS}
+    PRIVATE
+        gtest_main
+)
 add_dependencies(${PDAL_TEST_SUPPORT_OBJS} generate_dimension_hpp)
 target_include_directories(${PDAL_TEST_SUPPORT_OBJS}
     PRIVATE
