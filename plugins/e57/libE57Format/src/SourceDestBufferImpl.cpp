@@ -147,21 +147,21 @@ void SourceDestBufferImpl::_setNextReal( T inValue )
       case E57_INT32:
          if (!doConversion_)
             throw E57_EXCEPTION2(E57_ERROR_CONVERSION_REQUIRED, "pathName=" + pathName_);
-         if (inValue < E57_INT32_MIN || E57_INT32_MAX < inValue)
+         if (inValue < T(E57_INT32_MIN) || T(E57_INT32_MAX) < inValue)
             throw E57_EXCEPTION2(E57_ERROR_VALUE_NOT_REPRESENTABLE, "pathName=" + pathName_ + " value=" + toString(inValue));
          *reinterpret_cast<int32_t*>(p) = static_cast<int32_t>(inValue);
          break;
       case E57_UINT32:
          if (!doConversion_)
             throw E57_EXCEPTION2(E57_ERROR_CONVERSION_REQUIRED, "pathName=" + pathName_);
-         if (inValue < E57_UINT32_MIN || E57_UINT32_MAX < inValue)
+         if (inValue < T(E57_UINT32_MIN) || T(E57_UINT32_MAX) < inValue)
             throw E57_EXCEPTION2(E57_ERROR_VALUE_NOT_REPRESENTABLE, "pathName=" + pathName_ + " value=" + toString(inValue));
          *reinterpret_cast<uint32_t*>(p) = static_cast<uint32_t>(inValue);
          break;
       case E57_INT64:
          if (!doConversion_)
             throw E57_EXCEPTION2(E57_ERROR_CONVERSION_REQUIRED, "pathName=" + pathName_);
-         if (inValue < E57_INT64_MIN || E57_INT64_MAX < inValue)
+         if (inValue < T(E57_INT64_MIN) || T(E57_INT64_MAX) < inValue)
             throw E57_EXCEPTION2(E57_ERROR_VALUE_NOT_REPRESENTABLE, "pathName=" + pathName_ + " value=" + toString(inValue));
          *reinterpret_cast<int64_t*>(p) = static_cast<int64_t>(inValue);
          break;
@@ -437,8 +437,9 @@ float SourceDestBufferImpl::getNextFloat()
             /// Check that exponent of user's value is not too large for single precision number in file.
             double d = *reinterpret_cast<double*>(p);
 
-            ///??? silently limit here?
-            if (d < E57_DOUBLE_MIN || E57_DOUBLE_MAX < d)
+            // The cast here eliminates a compiler warning because the MAX value can't be
+            // represented exactly as a double. It's rounded up, which is fine for our case
+            if (d < double(E57_DOUBLE_MIN) || double(E57_DOUBLE_MAX) < d)
                 throw E57_EXCEPTION2(E57_ERROR_REAL64_TOO_LARGE, "pathName=" + pathName_ + " value=" + toString(d));
             value = static_cast<float>(d);
             break;

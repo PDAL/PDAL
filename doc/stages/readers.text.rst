@@ -104,7 +104,7 @@ Options
 -------
 
 filename
-  text file to read [Required]
+  text file to read, or “STDIN” to read from standard in [Required]
 
 .. include:: reader_opts.rst
 

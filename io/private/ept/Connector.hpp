@@ -36,10 +36,12 @@
 
 #include <arbiter/arbiter.hpp>
 
+using StringMap = std::map<std::string, std::string>;
+
 namespace pdal
 {
-
-using StringMap = std::map<std::string, std::string>;
+namespace ept
+{
 
 class Connector
 {
@@ -60,5 +62,6 @@ public:
     void makeDir(const std::string& path) const;
 };
 
+} // namespace ept
 } // namespace pdal
 

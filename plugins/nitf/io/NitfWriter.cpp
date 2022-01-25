@@ -39,6 +39,7 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
+#include <io/LasHeader.hpp>
 
 #ifndef IMPORT_NITRO_API
 #define IMPORT_NITRO_API
@@ -128,7 +129,7 @@ void NitfWriter::doneFile()
     buf->sgetn(bytes.data(), size);
     m_oss.clear();
     m_nitf.wrapData(bytes.data(), size);
-    m_nitf.setBounds(reprojectBoxToDD(m_srs, m_lasHeader.getBounds()));
+    m_nitf.setBounds(reprojectBoxToDD(m_srs, header().bounds));
 
     try
     {

@@ -38,6 +38,7 @@
 #include <pdal/util/FileUtils.hpp>
 #include <io/BufferReader.hpp>
 #include <io/FauxReader.hpp>
+#include <io/PlyReader.hpp>
 #include <io/PlyWriter.hpp>
 #include "Support.hpp"
 
@@ -259,4 +260,166 @@ TEST(PlyWriter, dimtypes)
     }
 }
 
+// Test that data from three input views gets written to separate output files.
+TEST(PlyWriter, flex)
+{
+    std::array<std::string, 3> outname = {
+        {"test_1.ply", "test_2.ply", "test_3.ply"}};
+
+    PointTable table;
+    table.layout()->registerDim(Dimension::Id::X);
+    table.layout()->registerDim(Dimension::Id::Y);
+    table.layout()->registerDim(Dimension::Id::Z);
+
+    PointViewPtr v1(new PointView(table));
+    v1->setField(Dimension::Id::X, 0, 1);
+    v1->setField(Dimension::Id::Y, 0, 1);
+    v1->setField(Dimension::Id::Z, 0, 1);
+
+    PointViewPtr v2(new PointView(table));
+    v2->setField(Dimension::Id::X, 0, 1);
+    v2->setField(Dimension::Id::Y, 0, 1);
+    v2->setField(Dimension::Id::Z, 0, 2);
+
+    v2->setField(Dimension::Id::X, 1, 2);
+    v2->setField(Dimension::Id::Y, 1, 1);
+    v2->setField(Dimension::Id::Z, 1, 2);
+
+    PointViewPtr v3(new PointView(table));
+    v3->setField(Dimension::Id::X, 0, 1);
+    v3->setField(Dimension::Id::Y, 0, 1);
+    v3->setField(Dimension::Id::Z, 0, 3);
+
+    v3->setField(Dimension::Id::X, 1, 2);
+    v3->setField(Dimension::Id::Y, 1, 1);
+    v3->setField(Dimension::Id::Z, 1, 3);
+
+    v3->setField(Dimension::Id::X, 2, 1);
+    v3->setField(Dimension::Id::Y, 2, 2);
+    v3->setField(Dimension::Id::Z, 2, 3);
+
+    TriangularMesh* mesh = v3->createMesh("foo");
+    mesh->add(0, 1, 2);
+
+    std::vector<PointViewPtr> vs;
+    vs.push_back(v1);
+    vs.push_back(v2);
+    vs.push_back(v3);
+
+    for (size_t i = 0; i < outname.size(); ++i)
+        FileUtils::deleteFile(Support::temppath(outname[i]));
+
+    BufferReader reader;
+    reader.addView(v1);
+    reader.addView(v2);
+    reader.addView(v3);
+
+    Options writerOps;
+    writerOps.add("filename", Support::temppath("test_#.ply"));
+    writerOps.add("faces", true);
+
+    PlyWriter writer;
+    writer.setOptions(writerOps);
+    writer.setInput(reader);
+
+    writer.prepare(table);
+    writer.execute(table);
+
+    for (size_t i = 0; i < outname.size(); ++i)
+    {
+        std::string filename = Support::temppath(outname[i]);
+        EXPECT_TRUE(FileUtils::fileExists(filename));
+
+        Options ops;
+        ops.add("filename", filename);
+
+        PlyReader r;
+        r.setOptions(ops);
+
+        PointTable t;
+        r.prepare(t);
+        PointViewSet viewSet = r.execute(t);
+        EXPECT_EQ(viewSet.size(), 1u);
+        PointViewPtr view = *viewSet.begin();
+        EXPECT_EQ(view->size(), i+1);
+    }
+}
+
+// Test that data from three input views gets written to a single output file.
+TEST(PlyWriter, flex2)
+{
+    PointTable table;
+    table.layout()->registerDim(Dimension::Id::X);
+    table.layout()->registerDim(Dimension::Id::Y);
+    table.layout()->registerDim(Dimension::Id::Z);
+
+    PointViewPtr v1(new PointView(table));
+    v1->setField(Dimension::Id::X, 0, 1);
+    v1->setField(Dimension::Id::Y, 0, 1);
+    v1->setField(Dimension::Id::Z, 0, 1);
+
+    PointViewPtr v2(new PointView(table));
+    v2->setField(Dimension::Id::X, 0, 1);
+    v2->setField(Dimension::Id::Y, 0, 1);
+    v2->setField(Dimension::Id::Z, 0, 2);
+
+    v2->setField(Dimension::Id::X, 1, 2);
+    v2->setField(Dimension::Id::Y, 1, 1);
+    v2->setField(Dimension::Id::Z, 1, 2);
+
+    PointViewPtr v3(new PointView(table));
+    v3->setField(Dimension::Id::X, 0, 1);
+    v3->setField(Dimension::Id::Y, 0, 1);
+    v3->setField(Dimension::Id::Z, 0, 3);
+
+    v3->setField(Dimension::Id::X, 1, 2);
+    v3->setField(Dimension::Id::Y, 1, 1);
+    v3->setField(Dimension::Id::Z, 1, 3);
+
+    v3->setField(Dimension::Id::X, 2, 1);
+    v3->setField(Dimension::Id::Y, 2, 2);
+    v3->setField(Dimension::Id::Z, 2, 3);
+
+    TriangularMesh* mesh = v3->createMesh("foo");
+    mesh->add(0, 1, 2);
+
+    std::vector<PointViewPtr> vs;
+    vs.push_back(v1);
+    vs.push_back(v2);
+    vs.push_back(v3);
+
+    std::string outfile(Support::temppath("test_flex.ply"));
+    FileUtils::deleteFile(outfile);
+
+    BufferReader reader;
+    reader.addView(v1);
+    reader.addView(v2);
+    reader.addView(v3);
+
+    Options writerOps;
+    writerOps.add("filename", outfile);
+    writerOps.add("faces", true);
+
+    PlyWriter writer;
+    writer.setOptions(writerOps);
+    writer.setInput(reader);
+
+    writer.prepare(table);
+    writer.execute(table);
+
+    EXPECT_TRUE(FileUtils::fileExists(outfile));
+
+    Options ops;
+    ops.add("filename", outfile);
+
+    PlyReader r;
+    r.setOptions(ops);
+    
+    PointTable t;
+    r.prepare(t);
+    PointViewSet viewSet = r.execute(t);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 6u);
+}
 } // namespace pdal

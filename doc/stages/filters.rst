@@ -505,9 +505,13 @@ Dimension
    :glob:
    :hidden:
 
+   filters.gpstimeconvert
    filters.groupby
    filters.returns
    filters.separatescanline
+
+:ref:`filters.gpstimeconvert`
+    Convert between three LAS format GPS time standards
 
 :ref:`filters.groupby`
     Split data categorically by dimension.
@@ -581,6 +585,7 @@ existing KD-tree.
    filters.delaunay
    filters.greedyprojection
    filters.poisson
+   filters.faceraster
 
 :ref:`filters.delaunay`
     Create mesh using Delaunay triangulation.
@@ -592,6 +597,8 @@ existing KD-tree.
     Create mesh using the Poisson surface reconstruction algorithm
     [Kazhdan2006]_.
 
+:ref:`filters.faceraster`
+    Create a raster from an existing triangulation.
 
 Languages
 ---------

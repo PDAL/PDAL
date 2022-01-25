@@ -490,8 +490,8 @@ private:
 };
 
 /**
-  Description of a boolean argument.  Boolean arguments don't take values.
-  Setting a boolean argument inverts its default value.  Boolean arguments
+  Description of a boolean argument.  Boolean arguments only take the values "true" or "false".
+  Setting a boolean argument without a value inverts its default value.  Boolean arguments
   are normally 'false' by default.
 */
 template <>
@@ -1334,13 +1334,11 @@ public:
             out << "{\"name\":\"" << a->longname() << "\"";
 
             if (a->defaultProvided())
-                out << ",\"default\":\"" << a->defaultVal() << "\"";
+                out << ",\"default\":\"" << Utils::escapeJSON(a->defaultVal()) << "\"";
 
-            out << ",\"description\":\"" << a->description() << "\"}";
+            out << ",\"description\":\"" << Utils::escapeJSON(a->description()) << "\"}";
 
-            if (bFirst) bFirst = false;
-
-
+            bFirst = false;
         }
         out << "]";
     }

@@ -44,6 +44,8 @@
 
 namespace pdal
 {
+namespace ept
+{
 
 class Addon;
 class Connector;
@@ -96,5 +98,6 @@ private:
         const std::string& dimName, const std::string& filename);
 };
 
+} // namespace ept
 } // namespace pdal
 

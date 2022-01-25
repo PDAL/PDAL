@@ -41,6 +41,8 @@
 
 namespace pdal
 {
+namespace ept
+{
 
 point_count_t Addon::points(const Key& key) const
 {
@@ -137,5 +139,6 @@ Addon Addon::loadAddon(const Connector& connector,
     return Addon(dimName, filename, type);
 }
 
+} // namespace ept
 } // namespace pdal
 

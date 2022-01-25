@@ -45,14 +45,18 @@
 namespace pdal
 {
 
-class Connector;
-class EptInfo;
-class Key;
 class ThreadPool;
-class Addon;
-struct Overlap;
-using Hierarchy = std::unordered_set<Overlap>;
-using AddonList = std::vector<Addon>;
+
+namespace ept
+{
+    class Connector;
+    class EptInfo;
+    class Key;
+    class Addon;
+    struct Overlap;
+    using Hierarchy = std::unordered_set<Overlap>;
+    using AddonList = std::vector<Addon>;
+}
 
 class PDAL_DLL EptAddonWriter : public Writer
 {
@@ -72,19 +76,19 @@ private:
     virtual void ready(PointTableRef table) override;
     virtual void write(const PointViewPtr view) override;
 
-    void writeOne(const PointViewPtr view, const Addon& addon) const;
+    void writeOne(const PointViewPtr view, const ept::Addon& addon) const;
     void writeHierarchy(const std::string& hierarchyDir, NL::json& hier,
-        const Key& key) const;
+        const ept::Key& key) const;
     std::string getTypeString(Dimension::Type t) const;
 
     Dimension::Id m_nodeIdDim = Dimension::Id::Unknown;
     Dimension::Id m_pointIdDim = Dimension::Id::Unknown;
 
-    std::unique_ptr<Connector> m_connector;
+    std::unique_ptr<ept::Connector> m_connector;
     std::unique_ptr<ThreadPool> m_pool;
-    std::unique_ptr<EptInfo> m_info;
-    std::unique_ptr<Hierarchy> m_hierarchy;
-    AddonList m_addons;
+    std::unique_ptr<ept::EptInfo> m_info;
+    std::unique_ptr<ept::Hierarchy> m_hierarchy;
+    ept::AddonList m_addons;
     uint64_t m_hierarchyStep = 0;
 };
 

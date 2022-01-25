@@ -40,12 +40,16 @@
 #ifndef _WIN32
 #include <glob.h>
 #include <sys/mman.h>
+#include <unistd.h>
 #else
 #include <io.h>
 #include <codecvt>
 #endif
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
+namespace fs = std::filesystem;
+
+
 
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
@@ -90,7 +94,7 @@ std::wstring toNative(std::string const& in)
 std::string const& toNative(std::string const& in)
 {
     return in;
-}    
+}
 #endif
 
 } // unnamed namespace
@@ -164,25 +168,25 @@ std::ostream *openExisting(const std::string& name, bool asBinary)
 bool directoryExists(const std::string& dirname)
 {
     //ABELL - Seems we should be calling is_directory
-    return pdalboost::filesystem::exists(toNative(dirname));
+    return fs::exists(toNative(dirname));
 }
 
 
 bool createDirectory(const std::string& dirname)
 {
-    return pdalboost::filesystem::create_directory(toNative(dirname));
+    return fs::create_directory(toNative(dirname));
 }
 
 
 bool createDirectories(const std::string& dirname)
 {
-    return pdalboost::filesystem::create_directories(toNative(dirname));
+    return fs::create_directories(toNative(dirname));
 }
 
 
 void deleteDirectory(const std::string& dirname)
 {
-    pdalboost::filesystem::remove_all(toNative(dirname));
+    fs::remove_all(toNative(dirname));
 }
 
 
@@ -192,15 +196,15 @@ std::vector<std::string> directoryList(const std::string& dir)
 
     try
     {
-        pdalboost::filesystem::directory_iterator it(dir);
-        pdalboost::filesystem::directory_iterator end;
+        fs::directory_iterator it(dir);
+        fs::directory_iterator end;
         while (it != end)
         {
             files.push_back(it->path().string());
             it++;
         }
     }
-    catch (pdalboost::filesystem::filesystem_error&)
+    catch (fs::filesystem_error&)
     {
         files.clear();
     }
@@ -240,13 +244,13 @@ void closeFile(std::istream* in)
 
 bool deleteFile(const std::string& file)
 {
-    return pdalboost::filesystem::remove(toNative(file));
+    return fs::remove(toNative(file));
 }
 
 
 void renameFile(const std::string& dest, const std::string& src)
 {
-    pdalboost::filesystem::rename(toNative(src), toNative(dest));
+    fs::rename(toNative(src), toNative(dest));
 }
 
 
@@ -257,9 +261,9 @@ bool fileExists(const std::string& name)
 
     try
     {
-        return pdalboost::filesystem::exists(toNative(name));
+        return fs::exists(toNative(name));
     }
-    catch (pdalboost::filesystem::filesystem_error&)
+    catch (fs::filesystem_error&)
     {
     }
     return false;
@@ -269,8 +273,8 @@ bool fileExists(const std::string& name)
 /// \return  0 on error or invalid file type.
 uintmax_t fileSize(const std::string& file)
 {
-    pdalboost::system::error_code ec;
-    uintmax_t size = pdalboost::filesystem::file_size(toNative(file), ec);
+    std::error_code ec;
+    uintmax_t size = fs::file_size(toNative(file), ec);
     if (ec)
         size = 0;
     return size;
@@ -294,7 +298,7 @@ std::string readFileIntoString(const std::string& filename)
 
 std::string getcwd()
 {
-    const pdalboost::filesystem::path p = pdalboost::filesystem::current_path();
+    const fs::path p = fs::current_path();
     return addTrailingSlash(p.string());
 }
 
@@ -324,7 +328,7 @@ std::string toCanonicalPath(std::string filename)
 // otherwise, make it absolute (relative to current working dir) and return that
 std::string toAbsolutePath(const std::string& filename)
 {
-    return pdalboost::filesystem::absolute(toNative(filename)).string();
+    return fs::absolute(toNative(filename)).string();
 }
 
 
@@ -336,8 +340,11 @@ std::string toAbsolutePath(const std::string& filename)
 std::string toAbsolutePath(const std::string& filename, const std::string base)
 {
     const std::string newbase = toAbsolutePath(base);
-    return pdalboost::filesystem::absolute(toNative(filename),
-        toNative(newbase)).string();
+    fs::path f (toNative(filename));
+    fs::path b (toNative(newbase));
+
+    fs::path fb = b / f ;
+    return fb.string();
 }
 
 
@@ -359,8 +366,8 @@ std::string getFilename(const std::string& path)
 // Get the directory part of a filename.
 std::string getDirectory(const std::string& path)
 {
-    const pdalboost::filesystem::path dir =
-         pdalboost::filesystem::path(toNative(path)).parent_path();
+    const fs::path dir =
+         fs::path(toNative(path)).parent_path();
     return addTrailingSlash(dir.string());
 }
 
@@ -381,13 +388,13 @@ std::string stem(const std::string& path)
 // Determine if the path represents a directory.
 bool isDirectory(const std::string& path)
 {
-    return pdalboost::filesystem::is_directory(toNative(path));
+    return fs::is_directory(toNative(path));
 }
 
 // Determine if the path is an absolute path
 bool isAbsolutePath(const std::string& path)
 {
-    return pdalboost::filesystem::path(toNative(path)).is_absolute();
+    return fs::path(toNative(path)).is_absolute();
 }
 
 
@@ -395,9 +402,14 @@ void fileTimes(const std::string& filename, struct tm *createTime,
     struct tm *modTime)
 {
 #ifdef _WIN32
-    std::wstring const wfilename(toNative(filename));
     struct _stat statbuf;
+#ifdef PDAL_WIN32_STL
+    std::wstring const wfilename(toNative(filename));
     _wstat(wfilename.c_str(), &statbuf);
+#else
+    std::string const wfilename(toNative(filename));
+    _stat(wfilename.c_str(), &statbuf);
+#endif
 
     if (createTime)
         *createTime = *gmtime(&statbuf.st_ctime);
@@ -431,6 +443,7 @@ std::vector<std::string> glob(std::string path)
     if (path[0] == '~')
         throw pdal::pdal_error("PDAL does not support shell expansion");
 
+#ifdef _WIN32
 #ifdef PDAL_WIN32_STL
     auto fromNative = [](std::wstring const& in) -> std::string
     {
@@ -459,6 +472,27 @@ std::vector<std::string> glob(std::string path)
 
     } while (FindNextFileW(handle, &ffd) != 0);
     FindClose(handle);
+#else
+    WIN32_FIND_DATA ffd;
+    HANDLE handle = FindFirstFileA(path.c_str(), &ffd);
+
+    if (INVALID_HANDLE_VALUE == handle)
+        return filenames;
+
+    size_t found = path.find_last_of("/\\");
+    do
+    {
+        // Ignore files starting with '.' to be consistent with UNIX.
+        if (ffd.cFileName[0] == '.')
+            continue;
+        if (found == std::wstring::npos)
+            filenames.push_back(ffd.cFileName);
+        else
+            filenames.push_back(path.substr(0, found) + "\\" + ffd.cFileName);
+
+    } while (FindNextFileA(handle, &ffd) != 0);
+    FindClose(handle);
+#endif
 #else
     glob_t glob_result;
 
@@ -530,6 +564,11 @@ MapContext mapFile(const std::string& filename, bool readOnly, uintmax_t pos, ui
 
 MapContext unmapFile(MapContext ctx)
 {
+    if (!ctx.m_addr)
+    {
+    ctx.m_error = "File not mapped.";
+        return ctx;
+    }
 #ifndef _WIN32
     if (::munmap(ctx.m_addr, ctx.m_size) == -1)
         ctx.m_error = "Couldn't unmap file.";

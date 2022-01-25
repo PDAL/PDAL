@@ -39,9 +39,9 @@
 
 #include "pdal_internal.hpp"
 
-#ifdef PDAL_MSVC
+#ifdef _WIN32
   #include <windows.h>
-#else // Unix and MinGW
+#else // Unix
   #include <dlfcn.h>
 #endif
 
@@ -57,9 +57,9 @@ DynamicLibrary::~DynamicLibrary()
 {
     if (m_handle)
     {
-#ifdef PDAL_MSVC
+#ifdef _WIN32
         ::FreeLibrary((HMODULE)m_handle);
-#else // Unix and MinGW
+#else // Unix
         ::dlclose(m_handle);
 #endif
     }
@@ -83,7 +83,7 @@ DynamicLibrary *DynamicLibrary::load(const std::string &name,
 
     void *handle = NULL;
 
-#ifdef PDAL_MSVC
+#ifdef _WIN32
     handle = ::LoadLibraryA(name.c_str());
     if (handle == NULL)
     {
@@ -94,7 +94,7 @@ DynamicLibrary *DynamicLibrary::load(const std::string &name,
             << errorCode; 
         errorString = ss.str();
     }
-#else  // Unix and MinGW
+#else  // Unix
     handle = ::dlopen(name.c_str(), RTLD_NOW);
     if (!handle) 
     {
@@ -118,9 +118,9 @@ void *DynamicLibrary::getSymbol(const std::string& symbol)
         return NULL;
 
     void *sym;
-#ifdef PDAL_MSVC
-    sym = ::GetProcAddress((HMODULE)m_handle, symbol.c_str());
-#else // Unix and MinGW
+#ifdef _WIN32
+    sym = (void*)::GetProcAddress((HMODULE)m_handle, symbol.c_str());
+#else // Unix
     sym = ::dlsym(m_handle, symbol.c_str());
 #endif
     return sym;

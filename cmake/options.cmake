@@ -32,11 +32,6 @@ option(BUILD_PLUGIN_MATLAB
 add_feature_info("Matlab plugin" BUILD_PLUGIN_MATLAB
     "write data to a .mat file")
 
-option(BUILD_PLUGIN_MRSID
-    "Choose if MrSID/LiDAR support should be built" FALSE)
-add_feature_info("MrSID plugin" BUILD_PLUGIN_MRSID
-    "read data in the MrSID format")
-
 option(BUILD_PLUGIN_NITF
     "Choose if NITF support should be built (only install supported is from http://github.com/hobu/nitro)" FALSE)
 add_feature_info("NITF plugin" BUILD_PLUGIN_NITF
@@ -46,11 +41,6 @@ option(BUILD_PLUGIN_OPENSCENEGRAPH
     "Choose if OpenSceneGraph support should be built" FALSE)
 add_feature_info("OpenSceneGraph plugin" BUILD_PLUGIN_OPENSCENEGRAPH
     "read/write OpenSceneGraph objects")
-
-option(BUILD_PLUGIN_OCI
-    "Choose if OCI support should be built" FALSE)
-add_feature_info("Oracle OCI plugin" BUILD_PLUGIN_OCI
-    "Read/write point clould patches to Oracle")
 
 find_package(PostgreSQL QUIET)
 option(BUILD_PLUGIN_PGPOINTCLOUD
@@ -114,9 +104,6 @@ include(CMakeDependentOption)
 cmake_dependent_option(BUILD_PGPOINTCLOUD_TESTS
     "Choose if PostgreSQL PointCloud tests should be built"
     ON "BUILD_PLUGIN_PGPOINTCLOUD; WITH_TESTS" OFF)
-cmake_dependent_option(BUILD_OCI_TESTS
-    "Choose if OCI tests should be built"
-    ON "BUILD_PLUGIN_OCI; WITH_TESTS" OFF)
 cmake_dependent_option(BUILD_RIVLIB_TESTS
     "Choose if RiVLib tests should be built"
     ON "BUILD_PLUGIN_RIVLIB; WITH_TESTS" OFF)

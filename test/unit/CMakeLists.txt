@@ -146,6 +146,14 @@ if (PDAL_HAVE_LASZIP)
             ${NLOHMANN_INCLUDE_DIR}
     )
 endif(PDAL_HAVE_LASZIP)
+if (PDAL_HAVE_LAZPERF)
+    PDAL_ADD_TEST(pdal_io_copc_reader_test
+        FILES
+            io/CopcReaderTest.cpp
+        INCLUDES
+            ${NLOHMANN_INCLUDE_DIR}
+    )
+endif()
 PDAL_ADD_TEST(pdal_io_faux_test FILES io/FauxReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_gdal_reader_test
     FILES

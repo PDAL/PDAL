@@ -28,8 +28,7 @@ bool MathParser::addexpr(Expression& expr)
 
         if (!multexpr(expr))
         {
-            setError("Expected expression following '" +
-                curToken().sval() + "'.");
+            setError("Expected expression following '" + curToken().sval() + "'.");
             return false;
         }
 
@@ -128,23 +127,16 @@ bool MathParser::uminus(Expression& expr)
         return false;
     }
 
-    NodePtr sub = expr.popNode();
-    ConstValueNode *node = dynamic_cast<ConstValueNode *>(sub.get());
-    if (node)
+    NodePtr sub = expr.popNode();  // Pop the primary.
+    assert(sub.get());
+    ConstValueNode *constnode = dynamic_cast<ConstValueNode *>(sub.get());
+    if (constnode)
     {
-        double v = -(node->value());
+        double v = -(constnode->value());
         expr.pushNode(NodePtr(new ConstValueNode(v)));
     }
     else
-    {
-        if (node->isBool())
-        {
-            setError("Can't apply '-' to logical expression '" +
-                sub->print() + "'.");
-            return false;
-        }
         expr.pushNode(NodePtr(new UnMathNode(NodeType::Negative, std::move(sub))));
-    }
     return true;
 }
 

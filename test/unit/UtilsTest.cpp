@@ -38,6 +38,7 @@
 #include <vector>
 
 #include <pdal/util/portable_endian.hpp>
+#include <pdal/util/Extractor.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
 #include "Support.hpp"
@@ -464,10 +465,10 @@ TEST(UtilsTest, numeric_cast)
     EXPECT_TRUE(ok);
     EXPECT_TRUE(std::isnan(f));
 
-    d = (std::numeric_limits<float>::max)() * 2;
+    d = (std::numeric_limits<float>::max)() * 2.0;
     EXPECT_FALSE(Utils::numericCast(d, f));
 
-    d = (std::numeric_limits<float>::max)() / 2;
+    d = (std::numeric_limits<float>::max)() / 2.0;
     EXPECT_TRUE(Utils::numericCast(d, f));
 }
 
@@ -475,6 +476,43 @@ TEST(UtilsTest, escapeJSON)
 {
     std::string escaped = Utils::escapeJSON("\u0001\t\f\n\\\"\u0016");
     EXPECT_EQ(escaped, "\\u0001\\t\\f\\n\\\\\\\"\\u0016");
+}
+
+TEST(UtilsTest, extractor)
+{
+    {
+        std::vector<char> buf(5);
+        LeExtractor ext(buf.data(), buf.size());
+
+        std::string s;
+        ext.get(s, 5);
+        EXPECT_EQ(s.size(), 0);
+    }
+
+    {
+        std::vector<char> buf { 'a', 'b', 'c', 0, 0 };
+        LeExtractor ext(buf.data(), buf.size());
+
+        std::string s;
+        ext.get(s, 5);
+        EXPECT_EQ(s.size(), 3);
+        EXPECT_EQ(s, "abc");
+
+        ext.seek(0);
+        ext.get(s, 3);
+        EXPECT_EQ(s.size(), 3);
+        EXPECT_EQ(s, "abc");
+
+        ext.seek(0);
+        ext.get(s, 1);
+        EXPECT_EQ(s.size(), 1);
+        EXPECT_EQ(s, "a");
+
+        ext.seek(0);
+        ext.get(s, 0);
+        EXPECT_EQ(s.size(), 0);
+        EXPECT_TRUE(s.empty());
+    }
 }
 
 // Don't run if we are WIN32

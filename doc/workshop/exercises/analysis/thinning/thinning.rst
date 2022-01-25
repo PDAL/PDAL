@@ -25,10 +25,10 @@ provides capability for all three:
 
 * Random using a combination of :ref:`filters.decimation` and :ref:`filters.randomize`
 
-* Voxel using :ref:`filters.voxelgrid`
+* Voxel using :ref:`filters.voxelcentroidnearestneighbor`
 
 In this exercise, we are going to thin with the Poisson method, but the concept
-should operate similarly for the :ref:`filters.voxelgrid` approach.
+should operate similarly for the :ref:`filters.voxelcentroidnearestneighbor` approach.
 
 .. figure:: ../../../images/thinning-overview.png
     :target: ../../../../_images/thinning-overview.png

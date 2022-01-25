@@ -32,18 +32,22 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-// This only exist in version 1.3+, so is an acceptable version test for now.
+#pragma warning (push)
+#pragma warning (disable: 4251)
 #include <lazperf/lazperf.hpp>
 #include <lazperf/filestream.hpp>
 #include <lazperf/vlr.hpp>
+#pragma warning (pop)
+
+// This only exist in version 1.3+, so is an acceptable version test for now.
 #ifndef LAZPERF_VERSION
 #error "LAZperf version 2+ (supporting LAS version 1.4) not found"
 #endif
 
 #include <pdal/util/IStream.hpp>
 #include <pdal/util/OStream.hpp>
-#include <io/LasHeader.hpp>
 #include <pdal/pdal_types.hpp>
+#include <io/LasHeader.hpp>
 
 #include "LazPerfVlrCompression.hpp"
 
@@ -98,9 +102,11 @@ public:
     void done()
     {
         // Close and clear the point encoder.
-        m_compressor->done();
-
-        newChunk();
+        if (m_compressor)
+        {
+            m_compressor->done();
+            newChunk();
+        }
 
         // Save our current position.  Go to the location where we need
         // to write the chunk table offset at the beginning of the point data.
@@ -182,13 +188,14 @@ class LazPerfVlrDecompressorImpl
     using ChunkIter = std::vector<lazperf::chunk>::iterator;
 
 public:
-    LazPerfVlrDecompressorImpl(std::istream& stream, const LasHeader& header, const char *vlrdata) :
+    LazPerfVlrDecompressorImpl(std::istream& stream, const las::Header& header,
+            const char *vlrdata) :
         m_stream(stream), m_fileStream(stream), m_format(header.pointFormat()),
-        m_pointLen(header.pointLen()), m_ebCount(header.pointLen() - header.basePointLen()),
+        m_pointLen(header.pointSize), m_ebCount(header.ebCount()),
         m_pointCount(header.pointCount()), m_vlr(vlrdata), m_chunkPointsTotal(0),
         m_chunkPointsRead(0), m_curChunk(m_chunks.end())
     {
-        m_stream.seekg(header.pointOffset());
+        m_stream.seekg(header.pointOffset);
         ILeStream in(&stream);
 
         uint64_t chunkTablePos;
@@ -222,7 +229,7 @@ public:
 
         // Add a chunk at the beginning that has a count of 0 and an offset of the
         // start of the first chunk.
-        m_chunks.insert(m_chunks.begin(), {0, header.pointOffset() + sizeof(uint64_t)});
+        m_chunks.insert(m_chunks.begin(), {0, header.pointOffset + sizeof(uint64_t)});
 
         // Fix up the chunk table such that the offsets are absolute offsets to the
         // chunk and the counts are cumulative counts of points before the chunk.
@@ -317,7 +324,7 @@ private:
         if (chunk == m_chunks.end() || nextChunk == m_chunks.end())
             return false;
 
-        m_chunkPointsTotal = nextChunk->count - chunk->count;
+        m_chunkPointsTotal = (int)(nextChunk->count - chunk->count);
         return true;
     }
 
@@ -340,7 +347,7 @@ private:
 };
 
 LazPerfVlrDecompressor::LazPerfVlrDecompressor(std::istream& stream,
-        const LasHeader& header, const char *vlrdata) :
+        const las::Header& header, const char *vlrdata) :
     m_impl(new LazPerfVlrDecompressorImpl(stream, header, vlrdata))
 {}
 

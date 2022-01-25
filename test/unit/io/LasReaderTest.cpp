@@ -39,9 +39,9 @@
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/Streamable.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <io/LasHeader.hpp>
 #include <io/LasReader.hpp>
-#include <pdal/util/FileUtils.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
@@ -92,37 +92,36 @@ TEST(LasReaderTest, header)
 
     reader.prepare(table);
     // This tests the copy ctor, too.
-    LasHeader h = reader.header();
+    las::Header h = reader.header();
 
-    EXPECT_EQ(h.fileSignature(), "LASF");
-    EXPECT_EQ(h.fileSourceId(), 0);
-    EXPECT_TRUE(h.projectId().isNull());
-    EXPECT_EQ(h.versionMajor(), 1);
-    EXPECT_EQ(h.versionMinor(), 2);
-    EXPECT_EQ(h.creationDOY(), 0);
-    EXPECT_EQ(h.creationYear(), 0);
-    EXPECT_EQ(h.vlrOffset(), 227);
-    EXPECT_EQ(h.pointFormat(), 3);
+    EXPECT_EQ(h.magic, "LASF");
+    EXPECT_EQ(h.fileSourceId, 0);
+    EXPECT_TRUE(h.projectGuid.isNull());
+    EXPECT_EQ(h.versionMajor, 1);
+    EXPECT_EQ(h.versionMinor, 2);
+    EXPECT_EQ(h.creationDoy, 0);
+    EXPECT_EQ(h.creationYear, 0);
+    EXPECT_EQ(h.vlrOffset, 227);
+    EXPECT_EQ(h.pointFormatBits, 3);
     EXPECT_EQ(h.pointCount(), 1065u);
-    EXPECT_DOUBLE_EQ(h.scaleX(), .01);
-    EXPECT_DOUBLE_EQ(h.scaleY(), .01);
-    EXPECT_DOUBLE_EQ(h.scaleZ(), .01);
-    EXPECT_DOUBLE_EQ(h.offsetX(), 0);
-    EXPECT_DOUBLE_EQ(h.offsetY(), 0);
-    EXPECT_DOUBLE_EQ(h.offsetZ(), 0);
-    EXPECT_DOUBLE_EQ(h.maxX(), 638982.55);
-    EXPECT_DOUBLE_EQ(h.maxY(), 853535.43);
-    EXPECT_DOUBLE_EQ(h.maxZ(), 586.38);
-    EXPECT_DOUBLE_EQ(h.minX(), 635619.85);
-    EXPECT_DOUBLE_EQ(h.minY(), 848899.70);
-    EXPECT_DOUBLE_EQ(h.minZ(), 406.59);
-    EXPECT_EQ(h.compressed(), false);
-    EXPECT_EQ(h.compressionInfo(), "");
-    EXPECT_EQ(h.pointCountByReturn(0), 925u);
-    EXPECT_EQ(h.pointCountByReturn(1), 114u);
-    EXPECT_EQ(h.pointCountByReturn(2), 21u);
-    EXPECT_EQ(h.pointCountByReturn(3), 5u);
-    EXPECT_EQ(h.pointCountByReturn(4), 0u);
+    EXPECT_DOUBLE_EQ(h.scale.x, .01);
+    EXPECT_DOUBLE_EQ(h.scale.y, .01);
+    EXPECT_DOUBLE_EQ(h.scale.z, .01);
+    EXPECT_DOUBLE_EQ(h.offset.x, 0);
+    EXPECT_DOUBLE_EQ(h.offset.y, 0);
+    EXPECT_DOUBLE_EQ(h.offset.z, 0);
+    EXPECT_DOUBLE_EQ(h.bounds.maxx, 638982.55);
+    EXPECT_DOUBLE_EQ(h.bounds.maxy, 853535.43);
+    EXPECT_DOUBLE_EQ(h.bounds.maxz, 586.38);
+    EXPECT_DOUBLE_EQ(h.bounds.minx, 635619.85);
+    EXPECT_DOUBLE_EQ(h.bounds.miny, 848899.70);
+    EXPECT_DOUBLE_EQ(h.bounds.minz, 406.59);
+    EXPECT_EQ(h.dataCompressed(), false);
+    EXPECT_EQ(h.legacyPointsByReturn[0], 925u);
+    EXPECT_EQ(h.legacyPointsByReturn[1], 114u);
+    EXPECT_EQ(h.legacyPointsByReturn[2], 21u);
+    EXPECT_EQ(h.legacyPointsByReturn[3], 5u);
+    EXPECT_EQ(h.legacyPointsByReturn[4], 0u);
 }
 
 
@@ -163,9 +162,10 @@ static void test_a_format(const std::string& file, uint8_t majorVersion,
     reader.setOptions(ops1);
     reader.prepare(table);
 
-    EXPECT_EQ(reader.header().pointFormat(), pointFormat);
-    EXPECT_EQ(reader.header().versionMajor(), majorVersion);
-    EXPECT_EQ(reader.header().versionMinor(), minorVersion);
+    const las::Header& h = reader.header();
+    EXPECT_EQ(h.pointFormat(), pointFormat);
+    EXPECT_EQ(h.versionMajor, majorVersion);
+    EXPECT_EQ(h.versionMinor, minorVersion);
 
     PointViewSet viewSet = reader.execute(table);
     EXPECT_EQ(viewSet.size(), 1u);
@@ -179,10 +179,8 @@ TEST(LasReaderTest, test_different_formats)
 {
     test_a_format("las/permutations/1.0_0.las", 1, 0, 0, 470692.440000, 4602888.900000, 16.000000, 0, 0, 0, 0);
     test_a_format("las/permutations/1.0_1.las", 1, 0, 1, 470692.440000, 4602888.900000, 16.000000, 1205902800.000000, 0, 0, 0);
-
     test_a_format("las/permutations/1.1_0.las", 1, 1, 0, 470692.440000, 4602888.900000, 16.000000, 0, 0, 0, 0);
     test_a_format("las/permutations/1.1_1.las", 1, 1, 1, 470692.440000, 4602888.900000, 16.000000, 1205902800.000000, 0, 0, 0);
-
     test_a_format("las/permutations/1.2_0.las", 1, 2, 0, 470692.440000, 4602888.900000, 16.000000, 0, 0, 0, 0);
     test_a_format("las/permutations/1.2_1.las", 1, 2, 1, 470692.440000, 4602888.900000, 16.000000, 1205902800.000000, 0, 0, 0);
     test_a_format("las/permutations/1.2_2.las", 1, 2, 2, 470692.440000, 4602888.900000, 16.000000, 0, 255, 12, 234);
@@ -267,7 +265,7 @@ TEST(LasReaderTest, testInvalidFileSignature)
     LasReader reader;
     reader.setOptions(ops1);
 
-    EXPECT_TRUE(reader.header().valid());
+    EXPECT_EQ(reader.header().magic, "LASF");
 }
 
 TEST(LasReaderTest, extraBytes)
@@ -641,19 +639,21 @@ TEST(LasReaderTest, Start)
     };
 
     std::vector<int> starts {0, 49999, 50000, 62520, 2525, 69999};
+#ifdef PDAL_HAVE_LASZIP
     for (auto i : starts)
         test1("laszip", i);
     test2("laszip");
-    test3("laszip", 66271, -8242595.58, 4966706, 0.28);
-    test3("laszip", 66272, -8242746, 4966605.44, -0.28);
-    test3("laszip", 96000, -8242474.88, 4966662.72, -8.1);
+    test3("laszip", 66271, -8242595.58f, 4966706.0f, 0.28f);
+    test3("laszip", 66272, -8242746.0f, 4966605.44f, -0.28f);
+    test3("laszip", 96000, -8242474.88f, 4966662.72f, -8.1f);
+#endif
 #ifdef PDAL_HAVE_LAZPERF
     for (auto i : starts)
         test1("lazperf", i);
     test2("lazperf");
-    test3("lazperf", 66271, -8242595.58, 4966706, 0.28);
-    test3("lazperf", 66272, -8242746, 4966605.44, -0.28);
-    test3("lazperf", 96000, -8242474.88, 4966662.72, -8.1);
+    test3("lazperf", 66271, -8242595.58f, 4966706.0f, 0.28f);
+    test3("lazperf", 66272, -8242746.0f, 4966605.44f, -0.28f);
+    test3("lazperf", 96000, -8242474.88f, 4966662.72f, -8.1f);
 #endif
 
     // Delete the created file.

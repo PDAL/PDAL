@@ -5,7 +5,7 @@ filters.faceraster
 
 The **FaceRaster filter** creates a raster from a point cloud using an
 algorithm based on an existing triangulation.  Each raster cell
-is given a value that is an interpolation of the known values of containing
+is given a value that is an interpolation of the known values of the containing
 triangle.  If the raster cell center is outside of the triangulation, it is
 assigned the nodata_ value.  Use `writers.raster` to write the output.
 

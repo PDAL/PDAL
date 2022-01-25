@@ -277,6 +277,7 @@ bool ConditionalParser::uminus(Expression& expr)
     }
 
     NodePtr sub = expr.popNode();
+    assert(sub.get());
     ConstValueNode *node = dynamic_cast<ConstValueNode *>(sub.get());
     if (node)
     {
@@ -285,10 +286,9 @@ bool ConditionalParser::uminus(Expression& expr)
     }
     else
     {
-        if (node->isBool())
+        if (sub->isBool())
         {
-            setError("Can't apply '-' to logical expression '" +
-                sub->print() + "'.");
+            setError("Can't apply '-' to logical expression '" + sub->print() + "'.");
             return false;
         }
         expr.pushNode(NodePtr(new UnMathNode(NodeType::Negative, std::move(sub))));
