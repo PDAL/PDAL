@@ -34,55 +34,38 @@
 
 #pragma once
 
-#include <pdal/Dimension.hpp>
+#include <pdal/PointView.hpp>
+#include <pdal/Reader.hpp>
+#include <pdal/Streamable.hpp>
+#include <pdal/util/IStream.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
-namespace sbet
+
+class PDAL_DLL SmrmsgReader : public Reader, public Streamable
 {
+public:
+    SmrmsgReader() : Reader()
+        {}
 
-// This is static so as to be made local (internal linkage) in the translation
-// units in which it's included.
-static inline Dimension::IdList fileDimensions()
-{
-   // Data for each point is in the source file in the order these dimensions
-    // are listed, I would suppose.  Would be really nice to have a reference
-    // to the file spec.  I searched the Internet and found that it is from
-    // some company called Applanix (Trimble), but I can't find anything
-    // describing the file format on their website.
+    std::string getName() const;
 
-    using namespace Dimension;
-    return { Id::GpsTime, Id::Y, Id::X, Id::Z, Id::XVelocity, Id::YVelocity,
-        Id::ZVelocity, Id::Roll, Id::Pitch, Id::Azimuth, Id::WanderAngle,
-        Id::XBodyAccel, Id::YBodyAccel, Id::ZBodyAccel, Id::XBodyAngRate,
-        Id::YBodyAngRate, Id::ZBodyAngRate};
-}
+private:
+    std::unique_ptr<ILeStream> m_stream;
+    // Number of points in the file.
+    point_count_t m_numPts;
+    point_count_t m_index;
+    Dimension::IdList m_dims;
 
-static inline Dimension::IdList smrmsgFileDimensions()
-{
-    using namespace Dimension;
-    return {Id::GpsTime, Id::NorthPositionRMS, Id::EastPositionRMS,
-    Id::DownPositionRMS, Id::NorthVelocityRMS, Id::EastVelocityRMS,
-    Id::DownVelocityRMS, Id::RollRMS, Id::PitchRMS, Id::HeadingRMS};
-}
+    virtual bool processOne(PointRef& point);
+    virtual void addArgs(ProgramArgs& args);
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void ready(PointTableRef table);
+    virtual point_count_t read(PointViewPtr view, point_count_t count);
+    virtual bool eof();
 
-static inline bool isAngularDimension(Dimension::Id dimension) {
-    using namespace Dimension;
-    switch (dimension) {
-        case Id::X:
-        case Id::Y:
-        case Id::Roll:
-        case Id::Pitch:
-        case Id::Azimuth:
-        case Id::WanderAngle:
-        case Id::XBodyAngRate:
-        case Id::YBodyAngRate:
-        case Id::ZBodyAngRate:
-            return true;
-        default:
-            return false;
-    }
+    void seek(PointId idx);
 };
 
-} // namespace sbet
 } // namespace pdal

@@ -551,5 +551,50 @@
     "name": "BeamDirectionZ",
     "type": "double",
     "description": "Beam direction unit vector Z coordinate"
+    },
+    {
+    "name": "NorthPositionRMS",
+    "type": "double",
+    "description": "North position RMS error"
+    },
+    {
+    "name": "EastPositionRMS",
+    "type": "double",
+    "description": "East position RMS error"
+    },
+    {
+    "name": "DownPositionRMS",
+    "type": "double",
+    "description": "Down position RMS error"
+    },
+    {
+    "name": "NorthVelocityRMS",
+    "type": "double",
+    "description": "North velocity RMS error"
+    },
+    {
+    "name": "EastVelocityRMS",
+    "type": "double",
+    "description": "East velocity RMS error"
+    },
+    {
+    "name": "DownVelocityRMS",
+    "type": "double",
+    "description": "Down velocity RMS error"
+    },
+    {
+    "name": "RollRMS",
+    "type": "double",
+    "description": "Roll RMS error"
+    },
+    {
+    "name": "PitchRMS",
+    "type": "double",
+    "description": "Pitch RMS error"
+    },
+    {
+    "name": "HeadingRMS",
+    "type": "double",
+    "description": "Heading RMS error"
     }
 ] }
