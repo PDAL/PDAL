@@ -16,6 +16,7 @@ namespace nlohmann
 {
 /*!
 @brief default JSONSerializer template argument
+
 This serializer ignores the template arguments and uses ADL
 ([argument-dependent lookup](https://en.cppreference.com/w/cpp/language/adl))
 for serialization.
@@ -23,6 +24,8 @@ for serialization.
 template<typename T = void, typename SFINAE = void>
 struct adl_serializer;
 
+/// a class to store JSON values
+/// @sa https://json.nlohmann.me/api/basic_json/
 template<template<typename U, typename V, typename... Args> class ObjectType =
          std::map,
          template<typename U, typename... Args> class ArrayType = std::vector,
@@ -32,30 +35,33 @@ template<template<typename U, typename V, typename... Args> class ObjectType =
          class NumberFloatType = double,
          template<typename U> class AllocatorType = std::allocator,
          template<typename T, typename SFINAE = void> class JSONSerializer =
-         adl_serializer>
+         adl_serializer,
+         class BinaryType = std::vector<std::uint8_t>>
 class basic_json;
 
-/*!
-@brief JSON Pointer
-A JSON pointer defines a string syntax for identifying a specific value
-within a JSON document. It can be used with functions `at` and
-`operator[]`. Furthermore, JSON pointers are the base for JSON patches.
-@sa [RFC 6901](https://tools.ietf.org/html/rfc6901)
-@since version 2.0.0
-*/
+/// @brief JSON Pointer defines a string syntax for identifying a specific value within a JSON document
+/// @sa https://json.nlohmann.me/api/json_pointer/
 template<typename BasicJsonType>
 class json_pointer;
 
 /*!
-@brief default JSON class
-This type is the default specialization of the @ref basic_json class which
-uses the standard template types.
-@since version 1.0.0
+@brief default specialization
+@sa https://json.nlohmann.me/api/json/
 */
 using json = basic_json<>;
+
+/// @brief a minimal map-like container that preserves insertion order
+/// @sa https://json.nlohmann.me/api/ordered_map/
+template<class Key, class T, class IgnoredLess, class Allocator>
+struct ordered_map;
+
+/// @brief specialization that maintains the insertion order of object keys
+/// @sa https://json.nlohmann.me/api/ordered_json/
+using ordered_json = basic_json<nlohmann::ordered_map>;
+
 }  // namespace nlohmann
 
-#endif
+#endif  // INCLUDE_NLOHMANN_JSON_FWD_HPP_
 
 namespace NL = nlohmann;
 
