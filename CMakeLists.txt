@@ -125,8 +125,6 @@ set(PDAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 
 include(${PDAL_CMAKE_DIR}/gdal.cmake)
 include(${PDAL_CMAKE_DIR}/geotiff.cmake)  # Optional (not really)
-include(${PDAL_CMAKE_DIR}/lazperf.cmake)  # Optional
-include(${PDAL_CMAKE_DIR}/laszip.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/threads.cmake)
 include(${PDAL_CMAKE_DIR}/zlib.cmake)
 include(${PDAL_CMAKE_DIR}/lzma.cmake)
@@ -201,7 +199,9 @@ file(GLOB BASE_SRCS
     ${PDAL_IO_DIR}/*.cpp
     ${PDAL_KERNELS_DIR}/*.cpp
     ${PDAL_SRC_DIR}/*.cpp
-    ${PDAL_SRC_DIR}/compression/*.cpp)
+    ${PDAL_SRC_DIR}/compression/*.cpp
+    ${PDAL_VENDOR_DIR}/lazperf/*.cpp
+    ${PDAL_VENDOR_DIR}/lazperf/detail/*.cpp)
 file(GLOB_RECURSE PRIVATE_SRCS
     ${PDAL_FILTERS_DIR}/private/*.cpp
     ${PDAL_IO_DIR}/private/*.cpp
@@ -237,11 +237,6 @@ if (NOT PDAL_HAVE_LZMA)
         ${PDAL_SRC_DIR}/compression/LzmaCompression.cpp)
     list(REMOVE_ITEM SRCS ${LZMA_SRCS})
 endif()
-if (NOT PDAL_HAVE_LAZPERF)
-    file(GLOB LAZPERF_SRCS
-        ${PDAL_SRC_DIR}/compression/LazPerfVlrCompression.cpp)
-    list(REMOVE_ITEM SRCS ${LAZPERF_SRCS})
-endif()
 
 if (GDAL_VERSION VERSION_LESS 3.0.0)
     file(GLOB PROJPIPELINE_FILTER_SRCS
@@ -264,7 +259,6 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${ZSTD_INCLUDE_DIRS}
         ${NLOHMANN_INCLUDE_DIR}
         ${GDAL_INCLUDE_DIR}
-        ${LASZIP_INCLUDE_DIR}
 )
 target_link_libraries(${PDAL_BASE_LIB_NAME}
     PRIVATE
@@ -272,7 +266,6 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${CMAKE_DL_LIBS}
         ${GDAL_LIBRARY}
         ${GEOTIFF_LIBRARY}
-        ${LASZIP_LIBRARY}
         ${LIBXML2_LIBRARIES}
         ${ZLIB_LIBRARIES}
         ${LIBLZMA_LIBRARIES}
@@ -285,10 +278,6 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${LAZPERF_LIBRARY}
     INTERFACE
         ${PDAL_LIBDIR}
-)
-target_compile_definitions(${PDAL_BASE_LIB_NAME}
-    PRIVATE
-        ${LASZIP_DEFINES}
 )
 set_target_properties(${PDAL_BASE_LIB_NAME} PROPERTIES
     VERSION ${PDAL_BUILD_VERSION}

@@ -41,12 +41,6 @@
 #include "HeaderVal.hpp"
 #include "private/las/Vlr.hpp"
 
-#ifdef PDAL_HAVE_LASZIP
-#include <laszip/laszip_api.h>
-#else
-using laszip_POINTER = void *;
-#endif
-
 namespace pdal
 {
 class LeInserter;
@@ -93,7 +87,6 @@ protected:
 private:
     std::unique_ptr<Private> d;
 
-    laszip_POINTER m_laszip;
     LazPerfVlrCompressor *m_compressor;
     std::ostream *m_ostream;
     std::vector<las::Vlr> m_vlrs;

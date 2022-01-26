@@ -47,7 +47,6 @@ namespace Config
 
 enum class Feature
 {
-    LASZIP,
     LAZPERF,
     ZSTD,
     ZLIB,

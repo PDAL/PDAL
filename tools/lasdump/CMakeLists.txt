@@ -14,28 +14,17 @@ if(NOT ROOT_DIR)
     set(PDAL_UTIL_LIB_NAME pdal_util)
 endif()
 
-#
-# Add necessary modules.
-#
-include(${PDAL_CMAKE_DIR}/laszip.cmake)
-
-#
-# Right now we don't bother if we don't have LASzip.
-#
-if (LASZIP_FOUND)
-    add_executable(lasdump
-        Dumper.cpp
-        Header.cpp
-    )
-    target_link_libraries(lasdump PRIVATE
-        ${PDAL_UTIL_LIB_NAME}
-        ${LASZIP_LIBRARIES}
-    )
-    target_include_directories(lasdump PRIVATE
-        ${PDAL_INCLUDE_DIR})
-    if (WIN32)
-        target_link_libraries(lasdump PRIVATE wsock32 ws2_32)
-    endif()
-    PDAL_TARGET_COMPILE_SETTINGS(lasdump)
+add_executable(lasdump
+    Dumper.cpp
+    Header.cpp
+)
+target_link_libraries(lasdump PRIVATE
+    ${PDAL_UTIL_LIB_NAME}
+)
+target_include_directories(lasdump PRIVATE
+    ${PDAL_INCLUDE_DIR})
+if (WIN32)
+    target_link_libraries(lasdump PRIVATE wsock32 ws2_32)
 endif()
+PDAL_TARGET_COMPILE_SETTINGS(lasdump)
 
