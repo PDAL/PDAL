@@ -117,6 +117,7 @@ void basic_file::Private::readPoint(char *out)
     // read the next point
     else
     {
+        std::cerr << "Chunk point = " << chunk_point_num << "!\n";
         if (!pdecompressor || chunk_point_num == current_chunk->count)
         {
             pdecompressor = build_las_decompressor(stream->cb(), head12.point_format_id,
@@ -128,6 +129,7 @@ void basic_file::Private::readPoint(char *out)
             else
                 current_chunk++;
             chunk_point_num = 0;
+            std::cerr << "Chunk count = " << current_chunk->count << "!\n";
         }
 
         pdecompressor->decompress(out);
