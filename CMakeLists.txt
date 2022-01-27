@@ -135,6 +135,7 @@ include(${PDAL_CMAKE_DIR}/libxml2.cmake)
 include(${PDAL_CMAKE_DIR}/dimension.cmake)
 include(${PDAL_CMAKE_DIR}/arbiter.cmake)
 include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
+include(${PDAL_CMAKE_DIR}/lazperf.cmake)
 include(${PDAL_CMAKE_DIR}/openssl.cmake) # Optional
 
 #------------------------------------------------------------------------------
@@ -178,6 +179,7 @@ endif()
 add_subdirectory(dimbuilder)
 add_subdirectory(vendor/arbiter)
 add_subdirectory(vendor/kazhdan)
+add_subdirectory(vendor/lazperf)
 add_subdirectory(pdal/util)
 add_subdirectory(tools)
 add_subdirectory(apps)
@@ -199,9 +201,7 @@ file(GLOB BASE_SRCS
     ${PDAL_IO_DIR}/*.cpp
     ${PDAL_KERNELS_DIR}/*.cpp
     ${PDAL_SRC_DIR}/*.cpp
-    ${PDAL_SRC_DIR}/compression/*.cpp
-    ${PDAL_VENDOR_DIR}/lazperf/*.cpp
-    ${PDAL_VENDOR_DIR}/lazperf/detail/*.cpp)
+    ${PDAL_SRC_DIR}/compression/*.cpp)
 file(GLOB_RECURSE PRIVATE_SRCS
     ${PDAL_FILTERS_DIR}/private/*.cpp
     ${PDAL_IO_DIR}/private/*.cpp
@@ -275,7 +275,7 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${PDAL_UTIL_LIB_NAME}
         ${PDAL_ARBITER_LIB_NAME}
         ${PDAL_KAZHDAN_LIB_NAME}
-        ${LAZPERF_LIBRARY}
+        ${PDAL_LAZPERF_LIB_NAME}
     INTERFACE
         ${PDAL_LIBDIR}
 )
