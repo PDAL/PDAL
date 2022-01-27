@@ -103,7 +103,7 @@ void buildHdrFromPoints(fbi::FbiHdr& hdr, const PointViewPtr view)
     
     // Fbi only accept 8 bits ScanAngleRank
     hdr.BitsAngle = ( view->hasDim(Dimension::Id::ScanAngleRank)
-                     && view->dimType(Dimension::Id::ScanAngleRank)== Dimension::Type::Unsigned8 ? 8 : 0 );
+                     && view->dimType(Dimension::Id::ScanAngleRank)== Dimension::Type::Signed8 ? 8 : 0 );
     
     hdr.BitsClass = ( view->hasDim(Dimension::Id::Classification) ? 8 : 0 );
     hdr.BitsLine = ( view->hasDim(Dimension::Id::PointSourceId) ? 16 : 0 );
@@ -111,7 +111,7 @@ void buildHdrFromPoints(fbi::FbiHdr& hdr, const PointViewPtr view)
     
     hdr.BitsColor = 0;
     if ( view->hasDim(Dimension::Id::Red) && view->hasDim(Dimension::Id::Blue) && view->hasDim(Dimension::Id::Green) ) hdr.BitsColor = 24;
-    if ( view->hasDim(Dimension::Id::Alpha) ) hdr.BitsColor += 32;
+    if ( view->hasDim(Dimension::Id::Infrared) ) hdr.BitsColor += 32;
 
     //Not found quivalent in pdal for now
     hdr.BitsDistance = 0;
@@ -280,7 +280,12 @@ void FbiWriter::write(const PointViewPtr view)
     
     if (hdr->BitsDistance > 0)
     {
-        //nothing to do for now
+        for (PointId i = 0; i < view->size(); ++i)
+        {
+            point.setPointId(i);
+            uint8_t distance = point.getFieldAs<uint8_t>(Dimension::Id::NNDistance);
+            ofFBI->write(reinterpret_cast<const char *>(&distance), hdr->BitsDistance/8);
+        }
     }
 
     if (hdr->BitsGroup > 0)
@@ -318,8 +323,8 @@ void FbiWriter::write(const PointViewPtr view)
             
             if (hdr->BitsColor > 24)
             {
-                uint16_t alpha = point.getFieldAs<uint16_t>(Dimension::Id::Alpha);
-                ofFBI->write(reinterpret_cast<const char *>(&alpha), 2);
+                uint16_t infra = point.getFieldAs<uint16_t>(Dimension::Id::Infrared);
+                ofFBI->write(reinterpret_cast<const char *>(&infra), 2);
             }
         }
     }
@@ -349,24 +354,39 @@ void FbiWriter::write(const PointViewPtr view)
         for (PointId i = 0; i < view->size(); ++i)
         {
             point.setPointId(i);
-            uint8_t echoLen = point.getFieldAs<uint8_t>(Dimension::Id::ReturnNumber);
+            uint8_t echoLen = point.getFieldAs<uint8_t>(Dimension::Id::PulseWidth);
             ofFBI->write(reinterpret_cast<const char *>(&echoLen), hdr->BitsEchoLen/8);
         }
     }
 
     if (hdr->BitsAmplitude > 0)
     {
-        //nothing to do for now
+        for (PointId i = 0; i < view->size(); ++i)
+        {
+            point.setPointId(i);
+            uint16_t amplitude = point.getFieldAs<uint16_t>(Dimension::Id::Amplitude);
+            ofFBI->write(reinterpret_cast<const char *>(&amplitude), hdr->BitsAmplitude/8);
+        }
     }
     
     if (hdr->BitsReflect > 0)
     {
-        //nothing to do for now
+        for (PointId i = 0; i < view->size(); ++i)
+        {
+            point.setPointId(i);
+            uint16_t reflectance = point.getFieldAs<uint16_t>(Dimension::Id::Reflectance);
+            ofFBI->write(reinterpret_cast<const char *>(&reflectance), hdr->BitsReflect/8);
+        }
     }
     
     if (hdr->BitsDeviation > 0)
     {
-        //nothing to do for now
+        for (PointId i = 0; i < view->size(); ++i)
+        {
+            point.setPointId(i);
+            uint16_t deviation = point.getFieldAs<uint16_t>(Dimension::Id::Deviation);
+            ofFBI->write(reinterpret_cast<const char *>(&deviation), hdr->BitsDeviation/8);
+        }
     }
     
     if (hdr->BitsScanner > 0)
@@ -401,17 +421,32 @@ void FbiWriter::write(const PointViewPtr view)
     
     if (hdr->BitsEchoNorm > 0)
     {
-        //nothing to do for now
+        for (PointId i = 0; i < view->size(); ++i)
+        {
+            point.setPointId(i);
+            uint8_t echoNorm = point.getFieldAs<uint8_t>(Dimension::Id::EchoNorm);
+            ofFBI->write(reinterpret_cast<const char *>(&echoNorm), hdr->BitsEchoNorm/8);
+        }
     }
 
     if (hdr->BitsEchoPos > 0)
     {
-        //nothing to do for now
+        for (PointId i = 0; i < view->size(); ++i)
+        {
+            point.setPointId(i);
+            uint16_t echoPos = point.getFieldAs<uint16_t>(Dimension::Id::EchoPos);
+            ofFBI->write(reinterpret_cast<const char *>(&echoPos), hdr->BitsEchoPos/8);
+        }
     }
     
     if (hdr->BitsReliab > 0)
     {
-        //nothing to do for now
+        for (PointId i = 0; i < view->size(); ++i)
+        {
+            point.setPointId(i);
+            uint8_t reliability = point.getFieldAs<uint8_t>(Dimension::Id::Reliability);
+            ofFBI->write(reinterpret_cast<const char *>(&reliability), hdr->BitsReliab/8);
+        }
     }
     
     if (hdr->BitsClass > 0)

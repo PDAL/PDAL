@@ -596,5 +596,20 @@
     "name": "HeadingRMS",
     "type": "double",
     "description": "Heading RMS error"
+    },
+    {
+    "name": "Reliability",
+    "type": "double",
+    "description": "Reliability (or confidence) of points"
+    },
+    {
+    "name": "EchoPos",
+    "type": "double",
+    "description": "Difference in position of a peak of a return signal compared to a typical return from a hard surface"
+    },
+    {
+    "name": "EchoNorm",
+    "type": "double",
+    "description": "Difference in shape of a return signal compared to a typical return from a hard surface."
     }
 ] }
