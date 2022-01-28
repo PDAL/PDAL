@@ -1715,14 +1715,14 @@ TEST(LasWriterTest, issue3652)
 {
     std::string outfile(Support::temppath("3652.laz"));
 
-    auto test = [&outfile](const std::string& compression)
+    auto test = [&outfile](const std::string& writeCompression, const std::string& readCompression)
     {
         FileUtils::deleteFile(outfile);
         {
             LasWriter w;
             Options wo;
             wo.add("filename", outfile);
-            wo.add("compression", compression);
+            wo.add("compression", writeCompression);
             w.setOptions(wo);
 
             PointTable t;
@@ -1735,6 +1735,7 @@ TEST(LasWriterTest, issue3652)
             LasReader r;
             Options ro;
             ro.add("filename", outfile);
+            ro.add("compression", readCompression);
             r.setOptions(ro);
 
             PointTable t;
@@ -1746,10 +1747,14 @@ TEST(LasWriterTest, issue3652)
         }
     };
 #if defined(PDAL_HAVE_LAZPERF)
-    test("lazperf");
+    test("lazperf", "lazperf");
 #endif
 #if defined(PDAL_HAVE_LASZIP)
-    test("laszip");
+    test("laszip", "laszip");
+#endif
+#if defined(PDAL_HAVE_LAZPERF) && defined(PDAL_HAVE_LASZIP)
+    test("lazperf", "laszip");
+    test("laszip", "lazperf");
 #endif
 }
 #endif
