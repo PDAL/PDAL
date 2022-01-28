@@ -156,7 +156,9 @@ void PipelineReaderJSON::readPipeline(std::istream& input)
 
     try
     {
-        root = NL::json::parse(input);
+        root = NL::json::parse(input, /* callback */ nullptr,
+                                      /* allow exceptions */ true,
+                                      /* ignore_comments */ true);
     }
     catch (NL::json::parse_error& err)
     {

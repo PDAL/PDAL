@@ -43,6 +43,7 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
    readers.rdb
    readers.rxp
    readers.sbet
+   readers.smrmsg
    readers.sqlite
    readers.slpk
    readers.terrasolid

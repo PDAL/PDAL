@@ -1,5 +1,5 @@
 ﻿// ======================================================================================
-// Copyright 2017 State Key Laboratory of Remote Sensing Science, 
+// Copyright 2017 State Key Laboratory of Remote Sensing Science,
 // Institute of Remote Sensing Science and Engineering, Beijing Normal University
 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -50,6 +50,7 @@ struct Params {
     double cloth_resolution;
     int rigidness;
     int interations;
+    std::string m_dir;
 };
 
 #ifdef _CSF_DLL_EXPORT_
