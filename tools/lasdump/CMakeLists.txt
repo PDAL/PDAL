@@ -4,16 +4,6 @@
 #
 cmake_minimum_required(VERSION 3.5)
 
-set(MAKE_COLOR_MAKEFILE ON)
-
-if(NOT ROOT_DIR)
-    project(LASDUMP)
-    set(ROOT_DIR "${PROJECT_SOURCE_DIR}/../..")
-    include(FeatureSummary)
-    include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
-    set(PDAL_UTIL_LIB_NAME pdal_util)
-endif()
-
 add_executable(lasdump
     Dumper.cpp
     Header.cpp
@@ -25,8 +15,5 @@ target_link_libraries(lasdump PRIVATE
 target_include_directories(lasdump PRIVATE
     ${PDAL_VENDOR_DIR}
     ${PDAL_INCLUDE_DIR})
-if (WIN32)
-    target_link_libraries(lasdump PRIVATE wsock32 ws2_32)
-endif()
 PDAL_TARGET_COMPILE_SETTINGS(lasdump)
 
