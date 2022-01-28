@@ -1,7 +1,4 @@
-#
-# The seemingly strange arrangement of this cmake file allows you to build
-# lasdump as a standalone.
-#
+
 cmake_minimum_required(VERSION 3.5)
 
 add_executable(lasdump
@@ -15,5 +12,13 @@ target_link_libraries(lasdump PRIVATE
 target_include_directories(lasdump PRIVATE
     ${PDAL_VENDOR_DIR}
     ${PDAL_INCLUDE_DIR})
+
+#
+# For byte-ordering functions
+#
+if (WIN32)
+    target_link_libraries(lasdump PRIVATE wsock32 ws2_32)
+endif()
+
 PDAL_TARGET_COMPILE_SETTINGS(lasdump)
 
