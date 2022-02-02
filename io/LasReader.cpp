@@ -34,8 +34,9 @@
 
 #include <pdal/compression/LazPerfVlrCompression.hpp>
 
-#include "LasReader.hpp"
 #include "LasHeader.hpp"
+#include "LasReader.hpp"
+#include "private/las/Header.hpp"
 #include "private/las/Srs.hpp"
 #include "private/las/Utils.hpp"
 #include "private/las/Vlr.hpp"
@@ -89,6 +90,7 @@ struct LasReader::Private
 {
     Options opts;
     las::Header header;
+    LasHeader apiHeader;
     laszip_POINTER laszip;
     laszip_point_struct *laszipPoint;
     LazPerfVlrDecompressor *decompressor;
@@ -99,7 +101,7 @@ struct LasReader::Private
     las::Srs srs;
     std::vector<las::ExtraDim> extraDims;
 
-    Private() : decompressor(nullptr), index(0)
+    Private() : apiHeader(header, srs, vlrs), decompressor(nullptr), index(0)
     {}
 };
 
@@ -142,9 +144,9 @@ CREATE_STATIC_STAGE(LasReader, s_info)
 
 std::string LasReader::getName() const { return s_info.name; }
 
-const las::Header& LasReader::header() const
+const LasHeader& LasReader::header() const
 {
-    return d->header;
+    return d->apiHeader;
 }
 
 uint64_t LasReader::vlrData(const std::string& userId, uint16_t recordId, char const * & data)

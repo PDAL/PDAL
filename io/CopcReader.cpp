@@ -49,12 +49,12 @@
 #include <pdal/util/ThreadPool.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/SrsTransform.hpp>
-#include <io/LasHeader.hpp>
 
 #include "private/copc/Connector.hpp"
 #include "private/copc/Entry.hpp"
 #include "private/copc/Info.hpp"
 #include "private/copc/Tile.hpp"
+#include "private/las/Header.hpp"
 #include "private/las/Utils.hpp"
 #include "private/las/Vlr.hpp"
 

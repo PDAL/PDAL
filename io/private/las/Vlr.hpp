@@ -95,7 +95,7 @@ public:
         { return (const char *)(dataVec.data()); }
     size_t dataSize() const
         { return dataVec.size(); }
-    size_t empty() const
+    bool empty() const
         { return dataVec.size() == 0; }
 
     virtual void fillHeader(const char *buf);
