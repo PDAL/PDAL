@@ -42,15 +42,6 @@
 #include <pdal/Log.hpp>
 #include <pdal/util/Utils.hpp>
 
-/**
-#include <pdal/util/Bounds.hpp>
-#include <array>
-
-#include <pdal/util/Uuid.hpp>
-#include <pdal/pdal_config.hpp>
-#include <pdal/gitsha.h>
-**/
-
 #include "LasVLR.hpp"
 
 namespace pdal
@@ -94,7 +85,6 @@ public:
 
     /// Set file source identifier.
     /// \param v - should be set to a value between 1 and 65535.
-    /// \exception No throw
     [[deprecated]] void setFileSourceId(uint16_t v);
 
     uint16_t globalEncoding() const;
@@ -118,7 +108,6 @@ public:
     uint8_t versionMinor() const;
 
     /// Set minor component of version of LAS format.
-    /// \exception std::out_of_range - invalid value given.
     /// \param v - value between eVersionMinorMin and eVersionMinorMax.
     [[deprecated]] void setVersionMinor(uint8_t v);
 
@@ -160,14 +149,12 @@ public:
     uint16_t creationDOY() const;
 
     /// Set day of year of file creation date.
-    /// \exception std::out_of_range - given value is higher than number 366.
     [[deprecated]] void setCreationDOY(uint16_t v);
 
     /// Set year of file creation date.
     uint16_t creationYear() const;
 
     /// Get year of file creation date.
-    /// \exception std::out_of_range - given value is higher than number 9999.
     [[deprecated]] void setCreationYear(uint16_t v);
 
     /// Get number of bytes of generic verion of public header block storage.
