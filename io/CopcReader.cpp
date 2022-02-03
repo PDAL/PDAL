@@ -309,7 +309,7 @@ las::Vlr CopcReader::fetchEbVlr(const las::VlrCatalog& catalog)
         return vlr;
     }
     m_p->extraDims = las::ExtraBytesIf::toExtraDims(vlr.data(), vlr.dataSize(),
-        lazperf::baseCount(m_p->header.pointFormat()));
+        las::baseCount(m_p->header.pointFormat()));
     return vlr;
 }
 

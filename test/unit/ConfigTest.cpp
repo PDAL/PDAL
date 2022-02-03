@@ -40,17 +40,6 @@
 using namespace pdal;
 using namespace pdal::Config;
 
-TEST(ConfigTest, test_3rdparty_libs)
-{
-    bool laszip = hasFeature(Feature::LASZIP);
-
-#ifdef PDAL_HAVE_LASZIP
-    EXPECT_TRUE(laszip);
-#else
-    EXPECT_TRUE(!laszip);
-#endif
-}
-
 TEST(ConfigTest, test_version)
 {
     // just verify these functions can be called, don't worry about the values

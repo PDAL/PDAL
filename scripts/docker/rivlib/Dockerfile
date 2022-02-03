@@ -11,7 +11,6 @@ RUN CC="gcc" CXX="g++" git clone --depth=1 https://github.com/PDAL/PDAL \
 	&& cd build \
 	&& cmake \
 		-DBUILD_PLUGIN_CPD=ON \
-		-DBUILD_PLUGIN_GREYHOUND=ON \
 		-DBUILD_PLUGIN_ICEBRIDGE=ON \
 		-DBUILD_PLUGIN_MRSID=ON \
 		-DBUILD_PLUGIN_NITF=ON \
@@ -24,8 +23,6 @@ RUN CC="gcc" CXX="g++" git clone --depth=1 https://github.com/PDAL/PDAL \
 		-DCMAKE_INSTALL_PREFIX=/usr \
 		-DENABLE_CTEST=OFF \
 		-DWITH_APPS=ON \
-		-DWITH_LAZPERF=ON \
-		-DWITH_LASZIP=ON \
 		-DWITH_TESTS=ON \
 		-DCMAKE_BUILD_TYPE=Release \
 		.. \

@@ -218,7 +218,8 @@ public:
         in >> numChunks;
 
         if (version != 0)
-            throw pdal_error("Invalid version " + std::to_string(version) + " found in LAZ VLR.");
+            throw pdal_error("Invalid version " + std::to_string(version) +
+                " found in LAZ chunk table.");
 
         bool variable = (m_vlr.chunk_size == lazperf::VariableChunkSize);
 
