@@ -223,7 +223,8 @@ public:
 
         bool variable = (m_vlr.chunk_size == lazperf::VariableChunkSize);
 
-        m_chunks = lazperf::decompress_chunk_table(m_fileStream.cb(), numChunks, variable);
+        if (numChunks)
+            m_chunks = lazperf::decompress_chunk_table(m_fileStream.cb(), numChunks, variable);
 
         // If the chunk size is fixed, set the counts to the chunk size since
         // they aren't stored in the chunk table..
