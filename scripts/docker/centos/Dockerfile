@@ -71,35 +71,6 @@ RUN git clone --branch master https://github.com/OSGeo/gdal.git \
 #
 RUN ln -s /usr/bin/cmake3 /usr/bin/cmake
 
-
-
-
-RUN git clone https://github.com/LASzip/LASzip.git laszip; \
-    cd laszip; \
-    git checkout 3.2.9; \
-    cmake  \
-        -G Ninja \
-        -DCMAKE_INSTALL_PREFIX=/usr/ \
-        -DCMAKE_BUILD_TYPE="Release" \
-     . ; \
-    ninja-build ; \
-    ninja-build install; \
-    rm -rf laszip
-
-RUN git clone  https://github.com/hobu/laz-perf.git; \
-    cd laz-perf; \
-    mkdir build; \
-    cd build; \
-    cmake .. \
-        -G Ninja \
-        -DCMAKE_INSTALL_PREFIX=/usr \
-        -DCMAKE_BUILD_TYPE="Release" \
-    ; \
-    ninja-build; \
-    ninja-build install; \
-    rm -rf /laz-perf
-
-
 RUN mkdir /nitro; cd /nitro; \
     git clone https://github.com/hobu/nitro; \
     cd nitro; \
@@ -114,8 +85,6 @@ RUN mkdir /nitro; cd /nitro; \
 
 ARG PDAL_VERSION=hobu-catchup
 
-
-
 RUN pip3 install  numpy
 
 RUN git clone  --branch ${PDAL_VERSION}  https://github.com/PDAL/PDAL.git pdal-git; \
@@ -127,13 +96,10 @@ RUN git clone  --branch ${PDAL_VERSION}  https://github.com/PDAL/PDAL.git pdal-g
         -DCMAKE_INSTALL_PREFIX=/usr/ \
         -DCMAKE_PREFIX_PATH:FILEPATH="${DESTDIR}" \
         -DCMAKE_SYSTEM_PREFIX_PATH="${DESTDIR}/usr" \
-        -DBUILD_PLUGIN_GREYHOUND=ON \
         -DBUILD_PLUGIN_I3S=ON \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_PYTHON=ON \
         -DPYTHON_EXECUTABLE=/usr/bin/python3 \
-        -DWITH_LAZPERF=ON \
-        -DWITH_LASZIP=ON \
         -DWITH_ZLIB=ON \
         -DWITH_TESTS=ON \
         -DCMAKE_BUILD_TYPE=Release \
