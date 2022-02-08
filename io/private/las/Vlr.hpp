@@ -132,6 +132,7 @@ struct Evlr : public Vlr
     virtual void fillHeader(const char *buf) override;
     virtual std::vector<char> headerData() const override;
 
+    // These allow input and output of VLRs as JSON from streams.
     friend std::istream& operator>>(std::istream& in, Evlr& v);
     friend std::ostream& operator<<(std::ostream& out, const Evlr& v);
 };
