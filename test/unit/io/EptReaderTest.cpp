@@ -63,7 +63,7 @@ namespace
          "ScanAngleRank", "UserData", "PointSourceId", "GpsTime", "OriginId"
     };
 
-    // Most of our tests will exercise this laszip-based EPT dataset based on
+    // Most of our tests will exercise this laz-based EPT dataset based on
     // a 4-tile split of Lone Star Geyser.
     const std::string sourceFilePath(
             Support::datapath("ept/source/lone-star.laz"));
@@ -564,9 +564,7 @@ TEST(EptReaderTest, binaryStream)
 
 TEST(EptReaderTest, laszipStream)
 {
-#ifdef PDAL_HAVE_LASZIP
     streamTest(eptLaszipPath);
-#endif
 }
 
 TEST(EptReaderTest, zstandardStream)
