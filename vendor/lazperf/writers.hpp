@@ -24,7 +24,8 @@
 #pragma once
 
 #include <memory>
-#include <vector>
+
+#include "header.hpp"
 
 namespace lazperf
 {
@@ -48,7 +49,7 @@ public:
     LAZPERF_EXPORT virtual bool compressed() const;
 
 protected:
-    std::unique_ptr<Private> p_;
+    std::unique_ptr<Private> p_; 
 };
 
 class named_file : public basic_file
