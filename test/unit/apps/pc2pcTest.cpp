@@ -150,23 +150,19 @@ TEST(pc2pcTest, pc2pc_test_switches)
     EXPECT_TRUE(!fileIsCompressed(outputLas));
     EXPECT_TRUE(!fileHasSrs(outputLas));
 
-#ifdef PDAL_HAVE_LASZIP
     // does --compress make a compressed file?
     stat = Utils::run_shell_command(cmd + " --input=" + inputLas +
         " --output=" + outputLas + " --writers.las.compression=true", output);
     EXPECT_EQ(stat, 0);
     EXPECT_TRUE(fileIsOkay(outputLas));
     EXPECT_TRUE(fileIsCompressed(outputLas));
-#endif
 
-#ifdef PDAL_HAVE_LASZIP
     // does "--output foo.laz" make a compressed output?
     stat = Utils::run_shell_command(cmd + " --input=" + inputLas +
         " --output=" + outputLaz, output);
     EXPECT_EQ(stat, 0);
     EXPECT_TRUE(fileIsOkay(outputLaz));
     EXPECT_TRUE(fileIsCompressed(outputLaz));
-#endif
 
     // does --a_srs add an SRS?
     fullCmd = cmd + " --input=" + inputLas + " --output=" + outputLas +

@@ -108,6 +108,16 @@ public:
             newChunk();
         }
 
+        // If we didn't write any points, chunk info pos will be 0 and we need to
+        // set the chunk info pos. Could do this as an "else" case of the
+        // above, but this seems safer in case some other compressor creation logic
+        // comes about.
+        if (m_chunkInfoPos == 0)
+        {
+            m_chunkInfoPos = m_stream.tellp();
+            m_stream.seekp(sizeof(uint64_t), std::ios::cur);
+        }
+
         // Save our current position.  Go to the location where we need
         // to write the chunk table offset at the beginning of the point data.
         std::streampos chunkTablePos = m_stream.tellp();
@@ -208,11 +218,13 @@ public:
         in >> numChunks;
 
         if (version != 0)
-            throw pdal_error("Invalid version " + std::to_string(version) + " found in LAZ VLR.");
+            throw pdal_error("Invalid version " + std::to_string(version) +
+                " found in LAZ chunk table.");
 
         bool variable = (m_vlr.chunk_size == lazperf::VariableChunkSize);
 
-        m_chunks = lazperf::decompress_chunk_table(m_fileStream.cb(), numChunks, variable);
+        if (numChunks)
+            m_chunks = lazperf::decompress_chunk_table(m_fileStream.cb(), numChunks, variable);
 
         // If the chunk size is fixed, set the counts to the chunk size since
         // they aren't stored in the chunk table..

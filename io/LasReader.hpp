@@ -115,16 +115,11 @@ private:
     void readExtraBytesVlr();
     void extractHeaderMetadata(MetadataNode& forward, MetadataNode& m);
     void extractVlrMetadata(MetadataNode& forward, MetadataNode& m);
-    void loadPoint(PointRef& point);
-    void loadPointV10(PointRef& point);
-    void loadPointV14(PointRef& point);
     void loadPoint(PointRef& point, char *buf, size_t bufsize);
     void loadPointV10(PointRef& point, char *buf, size_t bufsize);
     void loadPointV14(PointRef& point, char *buf, size_t bufsize);
     void loadExtraDims(LeExtractor& istream, PointRef& data);
-    point_count_t readFileBlock(std::vector<char>& buf,
-        point_count_t maxPoints);
-    void handleLaszip(int result);
+    point_count_t readFileBlock(std::vector<char>& buf, point_count_t maxPoints);
 
     struct Options;
     struct Private;

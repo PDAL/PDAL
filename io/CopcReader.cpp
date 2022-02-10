@@ -309,7 +309,7 @@ las::Vlr CopcReader::fetchEbVlr(const las::VlrCatalog& catalog)
         return vlr;
     }
     m_p->extraDims = las::ExtraBytesIf::toExtraDims(vlr.data(), vlr.dataSize(),
-        lazperf::baseCount(m_p->header.pointFormat()));
+        las::baseCount(m_p->header.pointFormat()));
     return vlr;
 }
 
@@ -405,8 +405,7 @@ QuickInfo CopcReader::inspect()
     {
         loadHierarchy();
 
-        //ABELL - Fix.
-        //qi.m_pointCount = m_p->hierarchy->pointCount();
+        qi.m_pointCount = m_p->hierarchy.pointCount();
 
         //ABELL - This is wrong since we're not transforming the tile bounds to the
         //  SRS of each clip region, but that seems like a lot of mess for

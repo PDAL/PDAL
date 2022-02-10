@@ -366,7 +366,6 @@ TEST(LasReaderTest, callback)
     EXPECT_EQ(count, (point_count_t)1065);
 }
 
-#ifdef PDAL_HAVE_LAZPERF
 // LAZ files are normally written in chunks of 50,000, so a file of size
 // 110,000 ensures we read some whole chunks and a partial.
 TEST(LasReaderTest, lazperf)
@@ -411,13 +410,11 @@ TEST(LasReaderTest, lazperf)
        EXPECT_EQ(memcmp(buf1.get(), buf2.get(), pointSize), 0);
     }
 }
-#endif
 
-void streamTest(const std::string src, const std::string compression)
+void streamTest(const std::string src)
 {
     Options ops1;
     ops1.add("filename", src);
-    ops1.add("compression", compression);
 
     LasReader lasReader;
     lasReader.setOptions(ops1);
@@ -478,13 +475,8 @@ void streamTest(const std::string src, const std::string compression)
 TEST(LasReaderTest, stream)
 {
     // Compression option is ignored for non-compressed file.
-    streamTest(Support::datapath("las/autzen_trim.las"), "laszip");
-#ifdef PDAL_HAVE_LASZIP
-    streamTest(Support::datapath("laz/autzen_trim.laz"), "laszip");
-#endif
-#ifdef PDAL_HAVE_LAZPERF
-    streamTest(Support::datapath("laz/autzen_trim.laz"), "lazperf");
-#endif
+    streamTest(Support::datapath("las/autzen_trim.las"));
+    streamTest(Support::datapath("laz/autzen_trim.laz"));
 }
 
 
@@ -561,7 +553,8 @@ TEST(LasReaderTest, SyntheticPoints)
     PointViewSet viewSet = reader.execute(table);
     PointViewPtr outView = *viewSet.begin();
 
-    EXPECT_EQ(ClassLabel::CreatedNeverClassified | ClassLabel::Synthetic, outView->getFieldAs<uint8_t>(Id::Classification, 0));
+    EXPECT_EQ(ClassLabel::CreatedNeverClassified | ClassLabel::Synthetic,
+        outView->getFieldAs<uint8_t>(Id::Classification, 0));
 }
 
 TEST(LasReaderTest, Start)
@@ -588,13 +581,12 @@ TEST(LasReaderTest, Start)
         las->execute(t);
     }
 
-    auto test1 = [source, &f](const std::string& compression, int start)
+    auto test1 = [source, &f](int start)
     {
         Stage *las = f.createStage("readers.las");
         Options opts;
         opts.add("filename", source);
         opts.add("start", start);
-        opts.add("compression", compression);
         las->setOptions(opts);
 
         PointTable t;
@@ -605,13 +597,12 @@ TEST(LasReaderTest, Start)
         EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::Y, 0), start + 100);
         EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::Z, 0), start + 500);
     };
-    auto test2 = [source, &f](const std::string& compression)
+    auto test2 = [source, &f]()
     {
         Stage *las = f.createStage("readers.las");
         Options opts;
         opts.add("filename", source);
         opts.add("start", 70000);
-        opts.add("compression", compression);
         las->setOptions(opts);
 
         PointTable t;
@@ -620,13 +611,12 @@ TEST(LasReaderTest, Start)
         PointViewPtr v = *s.begin();
         EXPECT_EQ(v->size(), (point_count_t)0);
     };
-    auto test3 = [&f](const std::string& compression, int start, float xval, float yval, float zval)
+    auto test3 = [&f](int start, float xval, float yval, float zval)
     {
         Stage *las = f.createStage("readers.las");
         Options opts;
         opts.add("filename", Support::datapath("laz/ellipsoid.copc.laz"));
         opts.add("start", start);
-        opts.add("compression", compression);
         las->setOptions(opts);
 
         PointTable t;
@@ -639,22 +629,12 @@ TEST(LasReaderTest, Start)
     };
 
     std::vector<int> starts {0, 49999, 50000, 62520, 2525, 69999};
-#ifdef PDAL_HAVE_LASZIP
     for (auto i : starts)
-        test1("laszip", i);
-    test2("laszip");
-    test3("laszip", 66271, -8242595.58f, 4966706.0f, 0.28f);
-    test3("laszip", 66272, -8242746.0f, 4966605.44f, -0.28f);
-    test3("laszip", 96000, -8242474.88f, 4966662.72f, -8.1f);
-#endif
-#ifdef PDAL_HAVE_LAZPERF
-    for (auto i : starts)
-        test1("lazperf", i);
-    test2("lazperf");
-    test3("lazperf", 66271, -8242595.58f, 4966706.0f, 0.28f);
-    test3("lazperf", 66272, -8242746.0f, 4966605.44f, -0.28f);
-    test3("lazperf", 96000, -8242474.88f, 4966662.72f, -8.1f);
-#endif
+        test1(i);
+    test2();
+    test3(66271, -8242595.58f, 4966706.0f, 0.28f);
+    test3(66272, -8242746.0f, 4966605.44f, -0.28f);
+    test3(96000, -8242474.88f, 4966662.72f, -8.1f);
 
     // Delete the created file.
     FileUtils::deleteFile(source);
