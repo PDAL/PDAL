@@ -124,6 +124,29 @@ TEST(LasReaderTest, header)
     EXPECT_EQ(h.pointCountByReturn(4), 0);
 }
 
+TEST(LasReaderTest, vlr)
+{
+    Options ops1;
+    ops1.add("filename", Support::datapath("las/epsg_4326.las"));
+    ops1.add("count", 103);
+
+    LasReader reader;
+    reader.setOptions(ops1);
+
+    PointTable table;
+    reader.prepare(table);
+    reader.execute(table);
+
+    const LasHeader& h = reader.header();
+    const VlrList& vlrs = h.vlrs();
+    EXPECT_EQ(vlrs.size(), 3U);
+    EXPECT_EQ(vlrs[0].userId(), "LASF_Projection");
+    EXPECT_EQ(vlrs[0].recordId(), 34735);
+    EXPECT_EQ(vlrs[1].userId(), "LASF_Projection");
+    EXPECT_EQ(vlrs[1].recordId(), 34736);
+    EXPECT_EQ(vlrs[2].userId(), "LASF_Projection");
+    EXPECT_EQ(vlrs[2].recordId(), 34737);
+}
 
 TEST(LasReaderTest, test_sequential)
 {
@@ -639,3 +662,4 @@ TEST(LasReaderTest, Start)
     // Delete the created file.
     FileUtils::deleteFile(source);
 }
+
