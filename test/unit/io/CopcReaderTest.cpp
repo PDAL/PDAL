@@ -190,7 +190,7 @@ TEST(CopcReaderTest, resolutionLimit)
     Options options;
     options.add("filename", copcPath);
 
-    // Resolution for the first 
+    // Resolution for the first
     //      Depth 0: 0.31846
     //      Depth 1: 0.15923
     //      Depth 2: 0.079615
@@ -451,7 +451,7 @@ TEST(EptReaderTest, boundedCrop)
     {
         Options options;
         options.add("filename", copcAutzenPath);
-        Option polygon("polygon", wkt + "/ EPSG:3644");
+        Option polygon("polygon", wkt + "/ EPSG:2991");
         options.add(polygon);
         reader.setOptions(options);
     }
@@ -472,7 +472,7 @@ TEST(EptReaderTest, boundedCrop)
     CropFilter crop;
     {
         Options options;
-        Option polygon("polygon", wkt + "/ EPSG:3644");
+        Option polygon("polygon", wkt + "/ EPSG:2991");
         options.add(polygon);
         crop.setOptions(options);
         crop.setInput(source);
@@ -505,7 +505,7 @@ TEST(CopcReaderTest, polygonAndBoundsCrop)
     {
         Options options;
         options.add("filename", copcAutzenPath);
-        options.add("polygon", wkt + "/ EPSG:3644");
+        options.add("polygon", wkt + "/ EPSG:2991");
         options.add("bounds", boxstring);
         reader.setOptions(options);
     }
@@ -540,7 +540,7 @@ TEST(CopcReaderTest, polygonAndBoundsCrop)
     CropFilter polygonCrop;
     {
         Options options;
-        Option polygon("polygon", wkt + "/ EPSG:3644");
+        Option polygon("polygon", wkt + "/ EPSG:2991");
         options.add(polygon);
         polygonCrop.setOptions(options);
         polygonCrop.setInput(boundsCrop);
