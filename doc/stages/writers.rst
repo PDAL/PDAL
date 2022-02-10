@@ -17,6 +17,7 @@ dimension type, while others only understand fixed dimension names.
    :hidden:
 
    writers.bpf
+   writers.copc
    writers.draco
    writers.ept_addon
    writers.e57
@@ -37,6 +38,9 @@ dimension type, while others only understand fixed dimension names.
 
 :ref:`writers.bpf`
     Write BPF version 3 files. BPF is an NGA specification for point cloud data.
+
+:ref:`writers.copc`
+    Write COPC (spatially arranged LAZ) files.
 
 :ref:`writers.draco`
     Write a buffer in Google Draco format
