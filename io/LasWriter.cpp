@@ -587,25 +587,15 @@ void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
     addVlr(vlr);
 }
 
-    class Predicate
-    {
-    public:
-        Predicate(const std::string& name) : m_name(name)
-        {}
-
-        bool operator()(MetadataNode m)
-            { return m.name() == m_name; }
-    private:
-        std::string m_name;
-    };
 
 void LasWriter::addVlr(las::Evlr& evlr, MetadataNode m)
 {
-    auto pred = [evlr](MetadataNode n)
-        { return Utils::iequals(n.name(),  evlr.metadataId); };
-
-    auto setVlrDataFromMetadata = [m, pred, this](las::Evlr& v)
+    auto setVlrDataFromMetadata = [this](MetadataNode m, las::Evlr& v)
     {
+
+        auto pred = [v]( MetadataNode m)
+            { return Utils::iequals(m.name(),  v.metadataId); };
+
         // Check if the vlr has a metadataId set
         // if so, go find it in our metadata, copy it,
         // and then wipe the metadataId from the eVLR because
@@ -616,13 +606,23 @@ void LasWriter::addVlr(las::Evlr& evlr, MetadataNode m)
 
             if (node.valid())
             {
-                // Yuck
                 std::string s = node.value();
-                v.dataVec.insert(v.dataVec.end(), (char *)s.data(), (char *)(s.data() + s.size()));
+                std::string t = node.type();
+                if (t == "base64Binary")
+                {
+                    // Decode b64 data
+                    std::vector<uint8_t> decoded = Utils::base64_decode(s);
+                    v.dataVec.insert(v.dataVec.end(), decoded.data(),
+                            (decoded.data() + decoded.size()));
+                } else
+                {
+                    v.dataVec.insert(v.dataVec.end(), s.data(), (s.data() +
+                                s.size()));
+                }
 
                 // Wipe off our metadataId now that we have
                 // set the dataVect to it
-                v.metadataId = std::string("");
+                v.metadataId.clear();
             } else {
                 throwError("Unable to find valid metadata entry for metadataId '" +
                     v.metadataId + "'");
@@ -630,7 +630,7 @@ void LasWriter::addVlr(las::Evlr& evlr, MetadataNode m)
         }
     };
 
-    setVlrDataFromMetadata(evlr);
+    setVlrDataFromMetadata(m, evlr);
 
     if (evlr.dataSize() > las::Vlr::MaxDataSize)
     {
