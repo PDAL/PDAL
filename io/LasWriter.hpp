@@ -144,8 +144,8 @@ private:
         const std::string& description, const std::vector<uint8_t>& data);
     void addVlr(const std::string& userId, uint16_t recordId,
         const std::string& description, std::vector<char>&& data);
-    void addVlr(const las::Evlr& evlr);
-    void addVlr(const las::Evlr& evlr, MetadataNode m);
+    void addVlr(las::Evlr& evlr);
+    void addVlr(las::Evlr& evlr, MetadataNode m);
     void deleteVlr(const std::string& userId, uint16_t recordId);
     void addGeotiffVlrs();
     bool addWktVlr();

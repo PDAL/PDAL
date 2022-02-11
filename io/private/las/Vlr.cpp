@@ -255,7 +255,7 @@ std::istream& operator>>(std::istream& in, las::Evlr& v)
             throw pdal_error("Invalid key '" + el.key() + "' in VLR "
                 "specification.");
     }
-    if (data.size() == 0 || metadataId.size() == 0)
+    if (data.size() == 0 && metadataId.size() == 0)
         throw pdal_error("LAS VLR must contain 'data' or 'metadata' member.");
     if (userId.empty())
         throw pdal_error("LAS VLR must contain 'user_id' member.");

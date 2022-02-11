@@ -1181,10 +1181,18 @@ TEST(LasWriterTest, pdal_add_vlr)
           "user_id": "hobu",
           "filename": ")" + Support::datapath("las/vlr-43.bin") + R"("})"
     );
-
+    std::string vlr3(
+      R"({
+          "description": "A description under 32 bytes",
+          "record_id": 44,
+          "user_id": "hobu",
+          "metadata": "point_length"
+          })"
+    );
     Options writerOpts;
     writerOpts.add("vlrs", vlr1);
     writerOpts.add("vlrs", vlr2);
+    writerOpts.add("vlrs", vlr3);
     writerOpts.add("filename", outfile);
 
     LasReader reader;
@@ -1212,7 +1220,7 @@ TEST(LasWriterTest, pdal_add_vlr)
 
     MetadataNode root = reader2.getMetadata();
     MetadataNodeList nodes = root.findChildren(pred);
-    EXPECT_EQ(nodes.size(), 2u);
+    EXPECT_EQ(nodes.size(), 3u);
 
     MetadataNode node = nodes[1].findChild("data");
     std::vector<uint8_t> buf =
@@ -1220,6 +1228,12 @@ TEST(LasWriterTest, pdal_add_vlr)
 
 
     EXPECT_EQ(memcmp(buf.data(), "this is some more text",
+        buf.size() - 1), 0);
+
+    node = nodes[2].findChild("data");
+    buf = Utils::base64_decode(node.value());
+
+    EXPECT_EQ(memcmp(buf.data(), "34",
         buf.size() - 1), 0);
 }
 
