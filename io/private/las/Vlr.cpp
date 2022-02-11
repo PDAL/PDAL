@@ -247,8 +247,7 @@ std::istream& operator>>(std::istream& in, las::Evlr& v)
         else if (el.key() == "metadata")
         {
             if (!el.value().is_string())
-                throw pdal_error("LAS VLR metadata must be specified as a metadata "
-                    "key value as a string.");
+                throw pdal_error("LAS VLR metadata key must be specified as a  string.");
             metadataId = el.value().get<std::string>();
         }
         else
