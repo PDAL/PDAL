@@ -53,7 +53,7 @@ const StaticPluginInfo s_info
     "writers.copc",
     "COPC Writer",
     "http://pdal.io/stages/writer.copc.html",
-    { "ept" }
+    {}
 };
 
 }
@@ -330,13 +330,5 @@ void CopcWriter::write(const PointViewPtr v)
     BuPyramid bu(*b);
     bu.run(mgr);
 }
-
-
-/**
-bool CopcWriter::processOne(PointRef& point)
-{
-    return true;
-}
-**/
 
 } // namespace pdal

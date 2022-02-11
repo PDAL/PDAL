@@ -67,9 +67,6 @@ public:
         { return m_totalPoints; }
 
 private:
-    const int LevelBreak = 4;
-    const int MinHierarchySize = 50;
-
     const BaseInfo& m_b;
     std::mutex m_mutex;
     std::condition_variable m_cv;

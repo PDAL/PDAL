@@ -56,7 +56,6 @@ private:
     virtual void prepared(PointTableRef table) override;
     virtual void ready(PointTableRef table) override;
     virtual void write(const PointViewPtr view) override;
-    //virtual bool processOne(PointRef& point) override;
 
     void fillForwardList();
     template <typename T>

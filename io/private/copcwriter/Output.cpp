@@ -337,7 +337,7 @@ void Output::emitChildren(const VoxelKey& p, const CountMap& counts,
 
 void Output::writeEvlrs()
 {
-    m_f.seekp(m_header.evlr_offset);
+    m_f.seekp(0, std::ios_base::end);
 
     for (const Evlr& v : b.vlrs)
     {
