@@ -43,10 +43,11 @@
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <io/BufferReader.hpp>
-#include <io/LasReader.hpp>
 #include <io/LasHeader.hpp>
+#include <io/LasReader.hpp>
 #include <io/LasWriter.hpp>
 #include <io/BpfReader.hpp>
+#include <io/private/las/Header.hpp>
 #include <io/private/las/Vlr.hpp>
 
 #include "Support.hpp"
@@ -184,9 +185,9 @@ TEST(LasWriterTest, auto_offset)
     reader.setOptions(readerOps);
 
     reader.prepare(readTable);
-    EXPECT_DOUBLE_EQ((1000000.02 + 25) * 0.5, reader.header().offset.x);
-    EXPECT_DOUBLE_EQ(0, reader.header().offset.y);
-    EXPECT_DOUBLE_EQ(-123 * 0.5 + 2147483524 * 0.5, reader.header().offset.z);
+    EXPECT_DOUBLE_EQ((1000000.02 + 25) * 0.5, reader.header().offsetX());
+    EXPECT_DOUBLE_EQ(0, reader.header().offsetY());
+    EXPECT_DOUBLE_EQ(-123 * 0.5 + 2147483524 * 0.5, reader.header().offsetZ());
 
     // (max - min) are chosen to yield std::numeric_limits<int>::max();
 
@@ -266,14 +267,14 @@ TEST(LasWriterTest, auto_offset2)
         reader.setOptions(readerOps);
 
         reader.prepare(readTable);
-        EXPECT_DOUBLE_EQ((74529.00 + 1000000.02) * 0.5, reader.header().offset.x);
-        EXPECT_DOUBLE_EQ(0, reader.header().offset.y);
-        EXPECT_DOUBLE_EQ((-123 + 945.23) * 0.5, reader.header().offset.z);
+        EXPECT_DOUBLE_EQ((74529.00 + 1000000.02) * 0.5, reader.header().offsetX());
+        EXPECT_DOUBLE_EQ(0, reader.header().offsetY());
+        EXPECT_DOUBLE_EQ((-123 + 945.23) * 0.5, reader.header().offsetZ());
 
-        EXPECT_NEAR(2.15478e-4, reader.header().scale.x, 1e-4);
-        EXPECT_DOUBLE_EQ(.01, reader.header().scale.y);
+        EXPECT_NEAR(2.15478e-4, reader.header().scaleX(), 1e-4);
+        EXPECT_DOUBLE_EQ(.01, reader.header().scaleY());
         // (max - min) are chosen to yield std::numeric_limits<int>::max();
-        EXPECT_NEAR(2.48716e-7, reader.header().scale.z, 1e-7);
+        EXPECT_NEAR(2.48716e-7, reader.header().scaleZ(), 1e-7);
 
         PointViewSet viewSet = reader.execute(readTable);
         EXPECT_EQ(viewSet.size(), 1u);
@@ -293,13 +294,13 @@ TEST(LasWriterTest, auto_offset2)
         reader.setOptions(readerOps);
 
         reader.prepare(readTable);
-        EXPECT_NEAR((534252.35 + 25.0) * 0.5, reader.header().offset.x, 0.01);
-        EXPECT_DOUBLE_EQ(0, reader.header().offset.y);
-        EXPECT_NEAR((2147483524 + 1.5) * 0.5, reader.header().offset.z, 0.01);
+        EXPECT_NEAR((534252.35 + 25.0) * 0.5, reader.header().offsetX(), 0.01);
+        EXPECT_DOUBLE_EQ(0, reader.header().offsetY());
+        EXPECT_NEAR((2147483524 + 1.5) * 0.5, reader.header().offsetZ(), 0.01);
 
-        EXPECT_NEAR(1.2438e-4, reader.header().scale.x, 1e-7);
-        EXPECT_DOUBLE_EQ(.01, reader.header().scale.y);
-        EXPECT_NEAR(.49999, reader.header().scale.z, 1e-5);
+        EXPECT_NEAR(1.2438e-4, reader.header().scaleX(), 1e-7);
+        EXPECT_DOUBLE_EQ(.01, reader.header().scaleY());
+        EXPECT_NEAR(.49999, reader.header().scaleZ(), 1e-5);
 
         PointViewSet viewSet = reader.execute(readTable);
         EXPECT_EQ(viewSet.size(), 1u);
@@ -372,7 +373,7 @@ TEST(LasWriterTest, auto_scale_with_auto_offset)
     reader.setOptions(readerOps);
 
     reader.prepare(readTable);
-    EXPECT_DOUBLE_EQ((-250.00 + 780.00) * 0.5, reader.header().offset.x);
+    EXPECT_DOUBLE_EQ((-250.00 + 780.00) * 0.5, reader.header().offsetX());
     PointViewSet viewSet = reader.execute(readTable);
     EXPECT_EQ(viewSet.size(), 1u);
     view = *viewSet.begin();
@@ -413,8 +414,6 @@ TEST(LasWriterTest, extra_dims)
     PointViewSet viewSet = writer.execute(table);
 
     LasTester tester;
-    const las::Header& header = tester.header(writer);
-    EXPECT_EQ(header.pointSize, header.baseCount() + 10);
     PointViewPtr pb = *viewSet.begin();
 
     uint16_t colors[][3] = {
@@ -1516,10 +1515,10 @@ TEST(LasWriterTest, issue2663)
     PointTable t;
     r.prepare(t);
 
-    const las::Header& h = r.header();
-    EXPECT_EQ(h.scale.x, .001);
-    EXPECT_EQ(h.scale.y, .001);
-    EXPECT_EQ(h.scale.z, .001);
+    const LasHeader& h = r.header();
+    EXPECT_EQ(h.scaleX(), .001);
+    EXPECT_EQ(h.scaleY(), .001);
+    EXPECT_EQ(h.scaleZ(), .001);
 }
 
 // Make sure that we don't crash when writing scan angle values >90 && <-90 in point

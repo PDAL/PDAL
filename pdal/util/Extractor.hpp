@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <cstring>
 #include <vector>
 
 #include "pdal_util_export.hpp"

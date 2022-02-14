@@ -56,6 +56,7 @@ class NitfReader;
 class LeExtractor;
 class PointDimensions;
 class LazPerfVlrDecompressor;
+class LasHeader;
 
 class PDAL_DLL LasReader : public Reader, public Streamable
 {
@@ -88,8 +89,7 @@ public:
 
     std::string getName() const;
 
-    const las::Header& header() const;
-//    const las::VlrList& vlrs() const;
+    const LasHeader& header() const;
     uint64_t vlrData(const std::string& userId, uint16_t recordId, char const * & data);
     point_count_t getNumPoints() const;
 
