@@ -174,13 +174,14 @@ std::istream& operator>>(std::istream& in, las::Evlr& v)
     std::string description;
     std::string b64data;
     std::string userId;
+    std::string metadataId;
     std::vector<char> data;
     double recordId(std::numeric_limits<double>::quiet_NaN());
     for (auto& el : j.items())
     {
         if (el.key() == "description")
         {
-            if (!el.value().is_string()) 
+            if (!el.value().is_string())
                 throw pdal_error("LAS VLR description must be specified "
                     "as a string.");
             description = el.value().get<std::string>();
@@ -202,7 +203,7 @@ std::istream& operator>>(std::istream& in, las::Evlr& v)
         }
         else if (el.key() == "user_id")
         {
-            if (!el.value().is_string()) 
+            if (!el.value().is_string())
                 throw pdal_error("LAS VLR user ID must be specified "
                     "as a string.");
             userId = el.value().get<std::string>();
@@ -243,12 +244,18 @@ std::istream& operator>>(std::istream& in, las::Evlr& v)
                 throw pdal_error("Couldn't open file '" + filename + "' "
                     "from which to read VLR data: " + ctx.what());
         }
+        else if (el.key() == "metadata")
+        {
+            if (!el.value().is_string())
+                throw pdal_error("LAS VLR metadata key must be specified as a  string.");
+            metadataId = el.value().get<std::string>();
+        }
         else
             throw pdal_error("Invalid key '" + el.key() + "' in VLR "
                 "specification.");
     }
-    if (data.size() == 0)
-        throw pdal_error("LAS VLR must contain 'data' member.");
+    if (data.size() == 0 && metadataId.size() == 0)
+        throw pdal_error("LAS VLR must contain 'data' or 'metadata' member.");
     if (userId.empty())
         throw pdal_error("LAS VLR must contain 'user_id' member.");
     if (std::isnan(recordId))
@@ -257,6 +264,7 @@ std::istream& operator>>(std::istream& in, las::Evlr& v)
     v.userId = userId;
     v.recordId = (uint16_t)recordId;
     v.description = description;
+    v.metadataId = metadataId;
     v.dataVec = std::move(data);
     return in;
 }
