@@ -252,10 +252,10 @@ void LasWriter::prepared(PointTableRef table)
 
 
 // Capture user-specified VLRs
-void LasWriter::addUserVlrs()
+void LasWriter::addUserVlrs(MetadataNode m)
 {
-    for (const auto& v : d->opts.userVLRs)
-        addVlr(v);
+    for (auto& v : d->opts.userVLRs)
+        addVlr(v, m);
 }
 
 
@@ -311,14 +311,14 @@ void LasWriter::readyTable(PointTableRef table)
 {
     m_firstPoint = true;
     m_forwardMetadata = table.privateMetadata("lasforward");
+    MetadataNode m = table.metadata();
     if(d->opts.writePDALMetadata)
     {
-        MetadataNode m = table.metadata();
         addMetadataVlr(m);
         addPipelineVlr();
     }
     addExtraBytesVlr();
-    addUserVlrs();
+    addUserVlrs(m);
     addForwardVlrs();
 }
 
@@ -559,7 +559,8 @@ void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
    const std::string& description, const std::vector<uint8_t>& data)
 {
     std::vector<char> v((const char *)data.data(), (const char *)(data.data() + data.size()));
-    addVlr(las::Evlr(userId, recordId, description, std::move(v)));
+    las::Evlr vlr(userId, recordId, description, std::move(v));
+    addVlr(vlr);
 }
 
 /// Add a standard or variable-length VLR depending on the data size.
@@ -570,7 +571,8 @@ void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
 void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
    const std::string& description, const std::vector<char>& data)
 {
-    addVlr(las::Evlr(userId, recordId, description, data));
+    las::Evlr vlr(userId, recordId, description, data);
+    addVlr(vlr);
 }
 
 /// Add a standard or variable-length VLR depending on the data size.
@@ -581,14 +583,55 @@ void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
 void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
    const std::string& description, std::vector<char>&& data)
 {
-    addVlr(las::Evlr(userId, recordId, description, data));
+    las::Evlr vlr(userId, recordId, description, data);
+    addVlr(vlr);
 }
 
 
-/// Add a standard or variable-length VLR depending on the data size.
-/// \param  evlr  VLR to add.
-void LasWriter::addVlr(const las::Evlr& evlr)
+void LasWriter::addVlr(las::Evlr& evlr, MetadataNode m)
 {
+    auto setVlrDataFromMetadata = [this](MetadataNode m, las::Evlr& v)
+    {
+
+        auto pred = [v]( MetadataNode m)
+            { return Utils::iequals(m.name(),  v.metadataId); };
+
+        // Check if the vlr has a metadataId set
+        // if so, go find it in our metadata, copy it,
+        // and then wipe the metadataId from the eVLR because
+        // we cannot ever find/set that again
+        if (v.metadataId.size() > 0)
+        {
+            MetadataNode node = m.find(pred);
+
+            if (node.valid())
+            {
+                std::string s = node.value();
+                std::string t = node.type();
+                if (t == "base64Binary")
+                {
+                    // Decode b64 data
+                    std::vector<uint8_t> decoded = Utils::base64_decode(s);
+                    v.dataVec.insert(v.dataVec.end(), decoded.data(),
+                            (decoded.data() + decoded.size()));
+                } else
+                {
+                    v.dataVec.insert(v.dataVec.end(), s.data(), (s.data() +
+                                s.size()));
+                }
+
+                // Wipe off our metadataId now that we have
+                // set the dataVect to it
+                v.metadataId.clear();
+            } else {
+                throwError("Unable to find valid metadata entry for metadataId '" +
+                    v.metadataId + "'");
+            }
+        }
+    };
+
+    setVlrDataFromMetadata(m, evlr);
+
     if (evlr.dataSize() > las::Vlr::MaxDataSize)
     {
         if (d->header.versionAtLeast(1, 4))
@@ -600,6 +643,15 @@ void LasWriter::addVlr(const las::Evlr& evlr)
     }
     else
         m_vlrs.push_back(std::move(evlr));
+
+}
+
+/// Add a standard or variable-length VLR depending on the data size.
+/// \param  evlr  VLR to add.
+void LasWriter::addVlr(las::Evlr& evlr)
+{
+    MetadataNode m;
+    addVlr(evlr, m);
 }
 
 /// Delete a VLR from the vlr list.
