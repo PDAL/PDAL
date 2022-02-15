@@ -38,7 +38,7 @@ array_name
 config_file
   `TileDB`_ configuration file [Optional]
 
-tile_data_capacity
+data_tile_capacity
   Number of points per tile [Optional]
 
 x_tile_size
@@ -49,6 +49,9 @@ y_tile_size
 
 z_tile_size
   Tile size (z) [Optional]
+  
+time_tile_size  
+  Tile size (time) [Optional]
 
 x_domain_st
   Domain minimum in x [Optional]
@@ -68,6 +71,18 @@ z_domain_st
 z_domain_end
   Domain maximum in z [Optional]
 
+time_domain_st
+  Domain minimum in GpsTime [Optional]
+
+time_domain_end
+  Domain maximum in GpsTime [Optional]
+  
+use_time_dim
+  Use GpsTime coordinate data as array dimension [Optional]
+
+time_first
+  If writing 4D array with XYZ and Time, choose to put time dim first or last (default) [Optional]
+  
 chunk_size
   Point cache size for chunked writes [Optional]
 
