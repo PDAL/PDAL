@@ -2786,6 +2786,14 @@ std::string AZ::Config::extractService(
     {
         return *p;
     }
+    else if (auto p = env("AZ_SERVICE"))
+    {
+        return *p;
+    }
+    else if (auto p = env("AZ_DEFAULT_SERVICE"))
+    {
+        return *p;
+    }
 
     if (!c.is_null() && c.value("verbose", false))
     {
@@ -2806,6 +2814,10 @@ std::string AZ::Config::extractEndpoint(
         return c.at("endpoint").get<std::string>();
     }
     else if (auto p = env("AZURE_ENDPOINT"))
+    {
+        return *p;
+    }
+    else if (auto p = env("AZ_ENDPOINT"))
     {
         return *p;
     }
