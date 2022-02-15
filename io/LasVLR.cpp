@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Hobu Inc. (hobu@hobu.co)
 *
 * All rights reserved.
 *
@@ -32,40 +32,114 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include "LasVLR.hpp"
 
-#include <ostream>
-#include <array>
+#include <limits>
+#include <nlohmann/json.hpp>
 
-#include "Header.hpp"
+#include <pdal/util/FileUtils.hpp>
+#include <pdal/util/Utils.hpp>
+#include <io/private/las/Vlr.hpp>
 
 namespace pdal
 {
-namespace las
+
+struct LasVLR::Private
 {
+    Private(las::Vlr *v) : v(v)
+    {}
 
-class Summary
-{
-public:
-    Summary();
-    Summary& operator=(const Summary&) = delete;
-    Summary(const Summary&) = delete;
-
-    void clear();
-    void addPoint(double x, double y, double z, int returnNumber);
-    point_count_t getTotalNumPoints() const
-        { return m_totalNumPoints; }
-    BOX3D getBounds() const;
-    point_count_t getReturnCount(int returnNumber) const;
-    void dump(std::ostream&) const;
-
-private:
-    BOX3D m_bounds;
-    std::array<point_count_t, las::Header::ReturnCount> m_returnCounts;
-    point_count_t m_totalNumPoints;
+    las::Vlr *v;
 };
 
-std::ostream& operator<<(std::ostream& ostr, const Summary&);
+LasVLR::LasVLR(las::Vlr *v) : d(std::make_unique<Private>(v))
+{}
 
-} // namespace las
+LasVLR::LasVLR(LasVLR&& v) : d(std::move(v.d))
+{}
+
+LasVLR::~LasVLR()
+{}
+
+std::string LasVLR::userId() const
+{
+    return d->v->userId;
+}
+
+uint16_t LasVLR::recordId() const
+{
+    return d->v->recordId;
+}
+
+std::string LasVLR::description() const
+{
+    return d->v->description;
+}
+
+bool LasVLR::matches(const std::string& u) const
+{
+    return u == userId();
+}
+
+bool LasVLR::matches(const std::string& u, uint16_t r) const
+{
+    return u == userId() && r == recordId();
+}
+
+const char *LasVLR::data() const
+{
+    return d->v->data();
+}
+
+char *LasVLR::data()
+{
+    return nullptr;
+}
+
+bool LasVLR::isEmpty() const
+{
+    return d->v->empty();
+}
+
+uint64_t LasVLR::dataLen() const
+{
+    return (uint64_t)d->v->dataSize();
+}
+
+void LasVLR::setDataLen(uint64_t size)
+{
+    (void)size;
+}
+
+void LasVLR::write(OLeStream& out, uint16_t recordSig)
+{
+    (void)out;
+    (void)recordSig;
+}
+
+bool LasVLR::read(ILeStream& in, size_t limit)
+{
+    (void)in;
+    (void)limit;
+    return false;
+}
+
+OLeStream& operator<<(OLeStream& out, const LasVLR& v)
+{
+    (void)v;
+    return out;
+}
+
+std::istream& operator>>(std::istream& in, LasVLR& v)
+{
+    (void)v;
+    return in;
+}
+
+std::ostream& operator<<(std::ostream& out,  const LasVLR& v)
+{
+    (void)v;
+    return out;
+}
+
 } // namespace pdal

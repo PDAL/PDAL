@@ -95,7 +95,7 @@ public:
         { return (const char *)(dataVec.data()); }
     size_t dataSize() const
         { return dataVec.size(); }
-    size_t empty() const
+    bool empty() const
         { return dataVec.size() == 0; }
 
     virtual void fillHeader(const char *buf);
@@ -107,6 +107,7 @@ public:
     uint64_t promisedDataSize;
     std::string description;
     std::vector<char> dataVec;
+    std::string metadataId;
 };
 
 inline bool operator==(const Vlr& v1, const Vlr& v2)

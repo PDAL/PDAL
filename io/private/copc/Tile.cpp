@@ -37,8 +37,8 @@
 #include <lazperf/readers.hpp>
 #pragma warning (pop)
 
-#include <io/LasHeader.hpp>
 #include <io/LasReader.hpp>
+#include <io/private/las/Header.hpp>
 
 #include "Connector.hpp"
 #include "Tile.hpp"

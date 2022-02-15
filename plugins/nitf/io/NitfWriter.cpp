@@ -39,7 +39,7 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
-#include <io/LasHeader.hpp>
+#include <io/private/las/Header.hpp>
 
 #ifndef IMPORT_NITRO_API
 #define IMPORT_NITRO_API
