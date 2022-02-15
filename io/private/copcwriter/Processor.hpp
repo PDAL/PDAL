@@ -57,6 +57,7 @@ public:
 
 private:
     void sample();
+    void write();
     bool acceptable(GridKey key);
     void writeCompressed(VoxelKey k, PointViewPtr v);
 

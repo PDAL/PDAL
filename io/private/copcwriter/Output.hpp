@@ -52,7 +52,7 @@ struct BaseInfo;
 class Output
 {
 public:
-    struct Hierarchy
+    struct Entry
     {
         uint64_t offset;
         int32_t byteSize;
@@ -60,7 +60,7 @@ public:
     };
 
     using CountMap = std::unordered_map<VoxelKey, point_count_t>;
-    using Entries = std::vector<std::pair<VoxelKey, Hierarchy>>;
+    using Entries = std::vector<std::pair<VoxelKey, Entry>>;
 
     Output(const BaseInfo& b);
     void finish(const CountMap& childCounts);
@@ -75,13 +75,13 @@ private:
     std::vector<lazperf::chunk> m_chunkTable;
     uint64_t m_chunkOffsetPos;
     uint64_t m_pointPos;
-    std::unordered_map<VoxelKey, Hierarchy> m_hierarchy;
+    std::unordered_map<VoxelKey, Entry> m_hierarchy;
 
     void writeHeader();
     void writeVlrData();
     void writeChunkTable();
     void writeHierarchy(const CountMap& counts);
-    Hierarchy emitRoot(const VoxelKey& root, const CountMap& counts);
+    Entry emitRoot(const VoxelKey& root, const CountMap& counts);
     void emitChildren(const VoxelKey& root, const CountMap& counts,
         Entries& entries, int stopLevel);
     void setupVlrs();

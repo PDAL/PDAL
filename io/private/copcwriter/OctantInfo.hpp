@@ -60,10 +60,8 @@ public:
         if (!m_source)
             m_source = source;
         else
-        {
             m_source->append(*source);
-            source.reset();
-        }
+        source = m_source->makeNew(); // Make an empty point view for the source.
     }
 
     PointViewPtr& source()

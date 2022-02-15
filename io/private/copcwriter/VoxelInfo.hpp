@@ -95,17 +95,27 @@ public:
     void initParentOctant()
     {
         if (m_octant.source())
-            return;
-        for (int i = 0; i < 8; ++i)
+            std::cerr << "Parent octant '" << key() << "' had non-null source before expected.\n";
+
+        int i;
+        for (i = 0; i < 8; ++i)
         {
             OctantInfo& o = child(i);
             if (o.source())
             {
                 m_octant.source() = o.source()->makeNew();
-                return;
+                break;
             }
         }
-        //ABELL - Should throw an excpetion.
+        if (i == 8)
+            std::cerr << "No non-empty children with which to initialize parent octant '" <<
+                key() << "'.\n";
+        for (i = 0; i < 8; ++i)
+        {
+            OctantInfo& o = child(i);
+            if (!o.source())
+                o.source() = m_octant.source()->makeNew();
+        }
     }
 
     OctantInfo& child(int dir)

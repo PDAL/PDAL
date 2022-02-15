@@ -78,7 +78,26 @@ void Processor::run()
         }
 
     sample();
+    write();
     m_manager.queue(m_vi.octant());
+}
+
+void Processor::write()
+{
+    OctantInfo& parent = m_vi.octant();
+
+    for (int i = 0; i < 8; ++i)
+    {
+        OctantInfo& child = m_vi.child(i);
+        PointViewPtr& v = child.source();
+        if (v->size() || child.mustWrite())
+        {
+            writeCompressed(child.key(), child.source());
+            parent.setMustWrite(true);
+        }
+    }
+    if (m_vi.key() == VoxelKey(0, 0, 0, 0))
+        writeCompressed(parent.key(), parent.source());
 }
 
 
@@ -106,9 +125,7 @@ void Processor::sample()
     for (int i = 0; i < 8; ++i)
     {
         OctantInfo& child = m_vi.child(i);
-        if (child.mustWrite())
-            parent.setMustWrite(true);
-        if (!child.numPoints())
+        if (child.numPoints() == 0)
             continue;
 
         PointViewPtr& v = child.source();
@@ -129,14 +146,8 @@ void Processor::sample()
             else
                 rejected->appendPoint(*v, idx);
         }
-        if (child.mustWrite() || rejected->size())
-            writeCompressed(child.key(), rejected);
-
-        // Ditch the point view (to save memory?)
-        v.reset();
+        v = rejected;
     }
-    if (m_vi.key() == VoxelKey(0, 0, 0, 0))
-        writeCompressed(parent.key(), accepted);
 }
 
 

@@ -247,8 +247,6 @@ void Output::writeVlrData()
 
 void Output::writeChunkTable()
 {
-    m_chunkTable.resize(m_chunkTable.size());
-
     // Write chunk table offset
     pdal::OLeStream out(&m_f);
     out.seek(m_chunkOffsetPos);
@@ -264,8 +262,8 @@ void Output::writeChunkTable()
     lazperf::OutFileStream stream(m_f);
     lazperf::compress_chunk_table(stream.cb(), m_chunkTable, true);
 
-    // The ELVRs start after the chunk table.
-    m_header.evlr_count = b.vlrs.size();
+    // The ELVRs start after the chunk table. Add one for the hierarchy VLR.
+    m_header.evlr_count = b.vlrs.size() + 1;
     m_header.evlr_offset = out.position();
 }
 
@@ -275,7 +273,8 @@ void Output::writeHierarchy(const CountMap& counts)
     m_f.seekp(m_header.evlr_offset + lazperf::evlr_header::Size);
 
     uint64_t beginPos = m_f.tellp();
-    Hierarchy root = emitRoot(VoxelKey(0, 0, 0, 0), counts);
+
+    Entry root = emitRoot(VoxelKey(0, 0, 0, 0), counts);
     m_copcVlr.root_hier_offset = root.offset;
     m_copcVlr.root_hier_size = root.byteSize;
     uint64_t endPos = m_f.tellp();
@@ -286,7 +285,7 @@ void Output::writeHierarchy(const CountMap& counts)
     h.write(m_f);
 }
 
-Output::Hierarchy Output::emitRoot(const VoxelKey& root, const CountMap& counts)
+Output::Entry Output::emitRoot(const VoxelKey& root, const CountMap& counts)
 {
     const int LevelBreak = 4;
     Entries entries;
@@ -300,9 +299,9 @@ Output::Hierarchy Output::emitRoot(const VoxelKey& root, const CountMap& counts)
     for (auto it = entries.begin(); it != entries.end(); ++it)
     {
         VoxelKey& key = it->first;
-        Hierarchy& h = it->second;
+        Entry& e = it->second;
         out << key.level() << key.x() << key.y() << key.z();
-        out << h.offset << h.byteSize << h.pointCount;
+        out << e.offset << e.byteSize << e.pointCount;
     }
     uint64_t endPos = out.position();
 
