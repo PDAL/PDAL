@@ -38,6 +38,7 @@
 #include <string>
 #include <vector>
 
+#include <pdal/Metadata.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/util/ThreadPool.hpp>
 
@@ -132,6 +133,16 @@ struct Evlr : public Vlr
 
     virtual void fillHeader(const char *buf) override;
     virtual std::vector<char> headerData() const override;
+
+    using DataCreationFunc = std::function<void(Evlr&, MetadataNode)>;
+    DataCreationFunc dataFunc;
+
+    // Fill the VLR data using the data fetch function.
+    void fillData(MetadataNode n)
+    {
+        if (dataFunc)
+            dataFunc(*this, n);
+    }
 
     // These allow input and output of VLRs as JSON from streams.
     friend std::istream& operator>>(std::istream& in, Evlr& v);

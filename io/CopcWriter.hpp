@@ -62,6 +62,8 @@ private:
     void handleHeaderForward(const std::string& s, T& headerVal, const MetadataNode& base);
     void handleHeaderForwards(MetadataNode& forward);
     void handleForwardVlrs(MetadataNode& forward);
+    void handleUserVlrs(MetadataNode m);
+    void handlePipelineVlr();
 
     std::unique_ptr<copcwriter::BaseInfo> b;
 

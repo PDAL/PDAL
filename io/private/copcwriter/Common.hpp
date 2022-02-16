@@ -50,6 +50,7 @@
 #include <io/HeaderVal.hpp>
 
 #include <io/private/las/Utils.hpp>
+#include <io/private/las/Vlr.hpp>
 
 #include <lazperf/vlr.hpp>
 
@@ -96,13 +97,9 @@ struct Options
     StringHeaderVal<0> offsetX;
     StringHeaderVal<0> offsetY;
     StringHeaderVal<0> offsetZ;
+    std::vector<las::Evlr> userVlrs;
+    bool emitPipeline;
     bool fixedSeed;
-};
-
-struct Evlr
-{
-    lazperf::evlr_header header;
-    std::vector<char> data;
 };
 
 struct BaseInfo
@@ -119,7 +116,7 @@ struct BaseInfo
     Scaling scaling;
     std::set<std::string> forwards;
     bool forwardVlrs = false;
-    std::vector<Evlr> vlrs;
+    std::vector<las::Evlr> vlrs;
 
     std::array<stats::Summary, 5> stats
     {

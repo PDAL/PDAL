@@ -7,6 +7,49 @@ The **COPC Writer** supports writing to `COPC format`_ files.
 
 .. embed::
 
+VLRs
+----
+
+VLRs can be created by providing a JSON node called `vlrs` with objects
+as shown:
+
+.. code-block:: json
+
+  [
+      {
+          "type":"readers.las",
+          "filename":"inputfile.las"
+      },
+      {
+          "type":"writers.las",
+          "vlrs": [{
+              "description": "A description under 32 bytes",
+              "record_id": 42,
+              "user_id": "hobu",
+              "data": "dGhpcyBpcyBzb21lIHRleHQ="
+              },
+              {
+              "description": "A description under 32 bytes",
+              "record_id": 43,
+              "user_id": "hobu",
+              "filename": "path-to-my-file.input"
+              },
+              {
+              "description": "A description under 32 bytes",
+              "record_id": 44,
+              "user_id": "hobu",
+              "metadata": "metadata_keyname"
+              }],
+          "filename":"outputfile.las"
+      }
+  ]
+
+.. note::
+
+    One of `data`, `filename` or `metadata` must be specified. Data must be
+    specified as base64 encoded strings. The content of a file is inserted as
+    binary. The metadata key specified must refer to a string or base64 encoded data.
+
 Example
 -------
 
@@ -95,6 +138,12 @@ offset_x, offset_y, offset_z
 filesource_id
   The file source id number to use for this file (a value between
   0 and 65535 - 0 implies "unassigned") [Default: 0]
+
+pipeline
+  Write a JSON representation of the running pipeline as a VLR.
+
+vlrs
+    Add VLRS specified as json. See `VLRs`_ above for details.
 
 .. include:: writer_opts.rst
 

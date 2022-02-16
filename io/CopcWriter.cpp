@@ -102,6 +102,9 @@ void CopcWriter::addArgs(ProgramArgs& args)
     args.add("offset_x", "X offset", b->opts.offsetX);
     args.add("offset_y", "Y offset", b->opts.offsetY);
     args.add("offset_z", "Z offset", b->opts.offsetZ);
+    args.add("vlrs", "List of VLRs to set", b->opts.userVlrs);
+    args.add("pipeline", "Emit a JSON-represetation of the pipeline as a VLR",
+        b->opts.emitPipeline);
     args.add("fixed_seed", "Fix the random seed", b->opts.fixedSeed).setHidden();
 }
 
@@ -193,14 +196,12 @@ void CopcWriter::handleForwardVlrs(MetadataNode& forwards)
         const MetadataNode& recordIdNode = n.findChild("record_id");
         if (userIdNode.valid() && recordIdNode.valid())
         {
-            copcwriter::Evlr e;
-            std::vector<uint8_t> data = Utils::base64_decode(n.findChild("data").value());
 
-            e.header.user_id = userIdNode.value();
-            e.header.record_id = (uint16_t) std::stoi(recordIdNode.value());
-            e.header.description = n.description();
-            e.header.data_length = data.size();
-            e.data.insert(e.data.begin(), (char *)data.data(), (char *)data.data() + data.size());
+            const std::vector<uint8_t>& data = Utils::base64_decode(n.findChild("data").value());
+            const char *d = (const char *)data.data();
+            std::vector<char> buf(d, d + data.size());
+            las::Evlr e(userIdNode.value(), (uint16_t)std::stoi(recordIdNode.value()),
+                n.description(), std::move(buf));
             b->vlrs.push_back(e);
         }
     }
@@ -242,6 +243,32 @@ void CopcWriter::ready(PointTableRef table)
     MetadataNode forwardMetadata = table.privateMetadata("lasforward");
     handleHeaderForwards(forwardMetadata);
     handleForwardVlrs(forwardMetadata);
+
+    if (b->opts.emitPipeline)
+        handlePipelineVlr();
+    handleUserVlrs(table.metadata());
+}
+
+void CopcWriter::handlePipelineVlr()
+{
+    // Write a VLR with the PDAL pipeline.
+    std::ostringstream ostr;
+    PipelineWriter::writePipeline(this, ostr);
+
+    const std::string& json = ostr.str();
+    std::vector<char> data(json.begin(), json.end());
+
+    las::Evlr v(las::PdalUserId, las::PdalPipelineRecordId, "PDAL pipeline", std::move(data));
+    b->vlrs.push_back(v);
+}
+
+void CopcWriter::handleUserVlrs(MetadataNode m)
+{
+    for (las::Evlr& v : b->opts.userVlrs)
+    {
+        v.fillData(m);
+        b->vlrs.push_back(v);
+    }
 }
 
 void CopcWriter::write(const PointViewPtr v)

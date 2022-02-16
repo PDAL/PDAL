@@ -338,11 +338,11 @@ void Output::writeEvlrs()
 {
     m_f.seekp(0, std::ios_base::end);
 
-    for (const Evlr& v : b.vlrs)
+    for (const las::Evlr& v : b.vlrs)
     {
-        std::vector<char> header = v.header.data();
-        m_f.write((const char *)header.data(), header.size());
-        m_f.write((const char *)v.data.data(), v.data.size());
+        std::vector<char> header = v.headerData();
+        m_f.write(header.data(), header.size());
+        m_f.write(v.data(), v.dataSize());
     }
 }
 
