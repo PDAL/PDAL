@@ -36,6 +36,7 @@
 
 #include "CopcWriter.hpp"
 
+#include "private/las/Header.hpp"
 #include "private/las/Utils.hpp"
 #include "private/copcwriter/BuPyramid.hpp"
 #include "private/copcwriter/CellManager.hpp"
@@ -233,7 +234,8 @@ void CopcWriter::prepared(PointTableRef table)
     b->numExtraBytes = 0;
     for (Dimension::Id id : edIds)
     {
-        b->extraDims.emplace_back(layout->dimName(id), layout->dimType(id), b->numExtraBytes);
+        b->extraDims.emplace_back(layout->dimName(id), layout->dimType(id),
+            las::baseCount(b->pointFormatId) + b->numExtraBytes);
         b->numExtraBytes += Dimension::size(layout->dimType(id));
     }
 }
