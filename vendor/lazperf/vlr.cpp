@@ -415,6 +415,11 @@ void eb_vlr::addField()
     items.push_back(field);
 }
 
+void eb_vlr::addField(const eb_vlr::ebfield& field)
+{
+    items.push_back(field);
+}
+
 uint64_t eb_vlr::size() const
 {
     return 192 * items.size();

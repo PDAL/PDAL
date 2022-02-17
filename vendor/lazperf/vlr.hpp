@@ -163,7 +163,8 @@ public:
     virtual uint64_t size() const;
     virtual vlr_header header() const;
     virtual evlr_header eheader() const;
-    void addField();
+    [[deprecated]] void addField();
+    void addField(const ebfield& f);
 };
 
 struct LAZPERF_EXPORT wkt_vlr : public vlr

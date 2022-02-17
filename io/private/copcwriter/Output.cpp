@@ -181,7 +181,15 @@ void Output::addEbVlr()
     if (!b.numExtraBytes)
         return;
 
-    lazperf::eb_vlr eb(b.numExtraBytes);
+    lazperf::eb_vlr eb;
+
+    for (const las::ExtraDim& d : b.extraDims)
+    {
+        lazperf::eb_vlr::ebfield f;
+        f.name = d.m_name;
+        f.data_type = las::lasType(d.m_dimType.m_type, 1);
+        eb.addField(f);
+    }
 
     std::vector<char> buf = eb.header().data();
     m_vlrBuf.insert(m_vlrBuf.end(), buf.begin(), buf.end());
