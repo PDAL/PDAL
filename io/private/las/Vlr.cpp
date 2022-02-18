@@ -249,7 +249,7 @@ std::istream& operator>>(std::istream& in, las::Evlr& v)
 
     v.description.clear();
     v.userId.clear();
-    v.recordId = std::numeric_limits<double>::quiet_NaN();
+    v.recordId = 1;
     for (auto& el : j.items())
     {
         if (el.key() == "description")
@@ -319,8 +319,6 @@ std::istream& operator>>(std::istream& in, las::Evlr& v)
 
     if (v.userId.empty())
         throw pdal_error("LAS VLR must contain 'user_id' member.");
-    if (std::isnan(v.recordId))
-        v.recordId = 1;
     if (!v.dataFunc)
         throw pdal_error("LAS VLR must contain a 'data', 'metadata' or 'filename' member.");
     return in;
