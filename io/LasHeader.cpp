@@ -47,6 +47,7 @@ namespace pdal
 {
 
 const std::string LasHeader::FILE_SIGNATURE("LASF");
+const std::string LasHeader::COPC_SIGNATURE("copc");
 
 std::string GetDefaultSoftwareId()
 {
@@ -492,7 +493,7 @@ void LasHeader::initialize(LogPtr log, uintmax_t fileSize, bool nosrs)
 const VlrList& LasHeader::vlrs() const
 {
     d->interfaceVlrs.clear();
-    for (las::Vlr& v : d->vlrs) 
+    for (las::Vlr& v : d->vlrs)
         d->interfaceVlrs.emplace_back(&v);
     return d->interfaceVlrs;
 }

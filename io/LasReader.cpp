@@ -91,8 +91,9 @@ struct LasReader::Private
     las::VlrList vlrs;
     las::Srs srs;
     std::vector<las::ExtraDim> extraDims;
+    bool isCOPC;
 
-    Private() : apiHeader(header, srs, vlrs), decompressor(nullptr), index(0)
+    Private() : apiHeader(header, srs, vlrs), decompressor(nullptr), index(0), isCOPC(false)
     {}
 };
 
@@ -235,6 +236,15 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
         throwError("Unsupported LAS input point format: " +
             Utils::toString((int)d->header.pointFormat()) + ".");
 
+    // Go peek into header and see if we are COPC
+    stream->clear();
+    stream->seekg(377);
+
+    char copcBuf[4];
+    stream->read(copcBuf, 4);
+    if (Utils::iequals(copcBuf, "copc"))
+        d->isCOPC = true;
+
     // Read VLRs.  Clear the error state since we potentially over-read the header, leaving
     // the stream in error, when things are really fine.
     stream->clear();
@@ -319,6 +329,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     for (int i = 0; i < (int)d->vlrs.size(); ++i)
         las::addVlrMetadata(d->vlrs[i], "vlr_" + std::to_string(i), forward, m);
 
+    m.add("copc", d->isCOPC);
     m_streamIf.reset();
 }
 
