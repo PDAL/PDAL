@@ -73,7 +73,6 @@ public:
     static const size_t LEGACY_RETURN_COUNT {5};
     static const size_t RETURN_COUNT {15};
     static const std::string FILE_SIGNATURE;
-    static const std::string COPC_SIGNATURE;
 
     std::string getSystemIdentifier() const;
 
@@ -262,9 +261,6 @@ public:
     /// as determined by the high bit in the point type
     bool compressed() const;
 
-    /// Returns true if the file is of type COPC.io
-    bool copc() const;
-
     /// Sets whether or not the points are compressed.
     [[deprecated]] void setCompressed(bool b);
 
@@ -329,7 +325,6 @@ private:
     VlrList m_vlrs;
     VlrList m_eVlrs;
     bool m_nosrs;
-    bool m_isCOPC;
 
     void setSrs();
     void setSrsFromWkt();
