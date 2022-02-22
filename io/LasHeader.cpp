@@ -47,7 +47,6 @@ namespace pdal
 {
 
 const std::string LasHeader::FILE_SIGNATURE("LASF");
-const std::string LasHeader::COPC_SIGNATURE("copc");
 
 std::string GetDefaultSoftwareId()
 {
