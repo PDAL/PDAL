@@ -75,13 +75,15 @@ template<typename LeftIter, typename RightIter>
 
 TEST(LasReaderTest, string_header_val)
 {
+    using namespace std::string_literals;
+
     StringHeaderVal<5> foo;
 
     bool ok;
 
     ok = foo.setVal("F");
     EXPECT_TRUE(ok);
-    EXPECT_EQ(foo.val(), std::string("F", 5));
+    EXPECT_EQ(foo.val(), "F\0\0\0\0"s);
     EXPECT_TRUE(foo.valSet());
     ok = foo.setVal("FOOBAR");
     EXPECT_FALSE(ok);
