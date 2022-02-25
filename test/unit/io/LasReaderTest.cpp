@@ -40,6 +40,7 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/Streamable.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <io/HeaderVal.hpp>
 #include <io/LasHeader.hpp>
 #include <io/LasReader.hpp>
 #include "Support.hpp"
@@ -71,6 +72,39 @@ template<typename LeftIter, typename RightIter>
 }
 
 } // unnamed namespace
+
+TEST(LasReaderTest, string_header_val)
+{
+    StringHeaderVal<5> foo;
+
+    bool ok;
+
+    ok = foo.setVal("F");
+    EXPECT_TRUE(ok);
+    EXPECT_EQ(foo.val(), std::string("F", 5));
+    EXPECT_TRUE(foo.valSet());
+    ok = foo.setVal("FOOBAR");
+    EXPECT_FALSE(ok);
+    EXPECT_EQ(foo.val().size(), 5);
+    EXPECT_EQ(foo.val(), "FOOBA");
+    EXPECT_TRUE(foo.valSet());
+
+    StringHeaderVal<5> bar("BARFOO");
+
+    EXPECT_EQ(bar.val(), "BARFO");
+    EXPECT_FALSE(bar.valSet());
+    ok = bar.setVal("ZZZYYY");
+    EXPECT_FALSE(ok);
+    EXPECT_EQ(bar.val(), "ZZZYY");
+    EXPECT_TRUE(bar.valSet());
+
+    StringHeaderVal<0> baz;
+    EXPECT_FALSE(baz.valSet());
+    EXPECT_EQ(baz.val(), "");
+    ok = baz.setVal("TESTTEST");
+    EXPECT_TRUE(ok);
+    EXPECT_EQ(baz.val().size(), 8);
+}
 
 TEST(LasReaderTest, create)
 {
