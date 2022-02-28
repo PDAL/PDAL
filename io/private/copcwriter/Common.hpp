@@ -78,7 +78,11 @@ namespace copcwriter
 const int MaxPointsPerNode = 100000;
 const int MinimumPoints = 100;
 const int MinimumTotalPoints = 1500;
-const int CellCount = 128;  // Number of cells in each direction for a voxel.
+// Number of cells in each direction for a voxel, kinda.
+constexpr double Sqrt3 = 1.73205080757;
+// Number of cells in each direction when sampling points into pyramid layers
+constexpr int ChildCellCount = int(300 * Sqrt3);
+constexpr int RootCellCount = int(300 * Sqrt3 / 1.5);
 
 struct Options
 {

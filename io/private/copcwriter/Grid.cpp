@@ -44,7 +44,7 @@ namespace pdal
 namespace copcwriter
 {
 
-void Grid::expand(const BOX3D& bounds, size_t points)
+Grid::Grid(const BOX3D& bounds, size_t points) : m_gridSize(-1), m_cubic(true)
 {
     m_bounds.grow(bounds);
     double xside = m_bounds.maxx - m_bounds.minx;
@@ -53,7 +53,10 @@ void Grid::expand(const BOX3D& bounds, size_t points)
     double side = (std::max)(xside, (std::max)(yside, zside));
     m_cubicBounds = BOX3D(m_bounds.minx, m_bounds.miny, m_bounds.minz,
         m_bounds.minx + side, m_bounds.miny + side, m_bounds.minz + side);
-    m_millionPoints += size_t(points / 1000000.0);
+
+    // Here this function only gets called once, so this is simply a rounding to
+    // the N-million points.
+    m_millionPoints = size_t(points / 1'000'000.0);
 
     resetLevel(calcLevel());
 }
@@ -69,7 +72,7 @@ int Grid::calcLevel()
 
     double side = (std::max)(xside, (std::max)(yside, zside));
 
-    while (mp > MaxPointsPerNode / 1000000.0)
+    while (mp > MaxPointsPerNode / 1'000'000.0)
     {
         if (m_cubic)
         {
@@ -136,7 +139,7 @@ void Grid::scale(std::array<double, 3>& vals)
         // 2 billion is a little less than the int limit.  We center the data around 0 with the
         // offset, so we're applying the scale to half the range of the data.
         double val = high / 2 - low / 2;
-        double power = std::ceil(std::log10(val / 2000000000.0));
+        double power = std::ceil(std::log10(val / 2'000'000'000.0));
 
         // Set an arbitrary limit on scale of 1e10-4.
         return std::pow(10, (std::max)(power, -4.0));

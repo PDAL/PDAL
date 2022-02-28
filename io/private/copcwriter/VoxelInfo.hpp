@@ -49,8 +49,11 @@ namespace copcwriter
 class VoxelInfo
 {
 public:
-    //ABELL - This probably needs a data structure geared for sparse data as I *think* that many
-    // of our lookups will fail.
+    //ABELL - This probably needs a data structure geared for sparse data.
+    //ABELL - Probably the grid should simply be a bitset, but would have to test for
+    // tradeoffs with memory/cache since there are a bunch of threads going at once and so on and
+    // wouldn't want to burn too much memory. Could make another, more custom structure, but
+    // perhaps it's just best to wait until someone cares.
     using Grid = std::unordered_set<GridKey>;
 
     VoxelInfo(const pdal::BOX3D& fullBounds, const VoxelKey& key) :
@@ -74,16 +77,14 @@ public:
         m_bounds.maxz = m_bounds.minz + m_zWidth;
 
         // Determine spacing between points.
-        m_spacing = maxWidth() / 128.0;
 
-        // Make the spacing smaller than what we expect as the final spacing since we're
+        // We make the child spacing smaller than what we expect as the final spacing since we're
         // going to select points from the grid for the parent.
-        if (key != VoxelKey(0, 0, 0, 0))
-            m_spacing *= 1.5;
-        m_squareSpacing = m_spacing * m_spacing;
+        if (key == VoxelKey(0, 0, 0, 0))
+            m_gridCellWidth = maxWidth() / RootCellCount;
+        else
+            m_gridCellWidth = maxWidth() / ChildCellCount;
 
-        static const double sqrt3 = std::sqrt(3);
-        m_gridCellWidth = m_spacing / sqrt3;
         m_gridXCount = (int)std::ceil((m_bounds.maxx - m_bounds.minx) / m_gridCellWidth);
         m_gridYCount = (int)std::ceil((m_bounds.maxy - m_bounds.miny) / m_gridCellWidth);
         m_gridZCount = (int)std::ceil((m_bounds.maxz - m_bounds.minz) / m_gridCellWidth);
@@ -137,12 +138,6 @@ public:
         return false;
     }
 
-    double spacing() const
-        { return m_spacing; }
-
-    double squareSpacing() const
-        { return m_squareSpacing; }
-
     double minWidth() const
         { return (std::min)((std::min)(m_xWidth, m_yWidth), m_zWidth); }
 
@@ -195,8 +190,6 @@ private:
     int m_gridZCount;
     std::array<OctantInfo, 8> m_children;
     OctantInfo m_octant;
-    double m_spacing;
-    double m_squareSpacing;
 
     Grid m_grid;
 };

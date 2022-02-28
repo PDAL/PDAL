@@ -89,11 +89,9 @@ public:
         return m_cells.end();
     }
 
-    // Note that C++17 has functions to do this.
-    void merge(CellManager&& src)
+    void merge(CellManager& src)
     {
-        for (auto& kv : src)
-            m_cells.insert(std::move(kv));
+        m_cells.merge(std::move(src.m_cells));
     }
 
 private:

@@ -160,8 +160,7 @@ struct DataFunc
     void operator()(las::Evlr& v, MetadataNode)
     {
         std::vector<uint8_t> b64buf = Utils::base64_decode(m_data);
-        v.dataVec.insert(v.dataVec.end(),
-            (char *)b64buf.data(), (char *)(b64buf.data() + b64buf.size()));
+        v.dataVec.insert(v.dataVec.end(), b64buf.data(), (b64buf.data() + b64buf.size()));
     }
 
     std::string m_data;

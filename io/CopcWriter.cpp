@@ -78,9 +78,14 @@ void CopcWriter::addArgs(ProgramArgs& args)
 {
     std::time_t now;
     std::time(&now);
+    uint16_t year = 1900;
+    uint16_t doy = 0;
     std::tm* ptm = std::gmtime(&now);
-    uint16_t year = ptm->tm_year + 1900;
-    uint16_t doy = ptm->tm_yday;
+    if (ptm)
+    {
+        year += ptm->tm_year;
+        doy = ptm->tm_yday;
+    }
 
     args.add("filename", "Output filename.", b->opts.filename);
     args.add("forward", "Dimensions to forward from LAS reader", b->opts.forwardSpec);
@@ -278,11 +283,9 @@ void CopcWriter::write(const PointViewPtr v)
     using namespace copcwriter;
 
     BOX3D box;
-    size_t count = v->size();
     v->calculateBounds(box);
 
-    Grid grid;
-    grid.expand(box, count);
+    Grid grid(box, v->size());
 
     CellManager mgr(v);
 
@@ -324,7 +327,7 @@ void CopcWriter::write(const PointViewPtr v)
         else
             it++;
     }
-    mgr.merge(std::move(reprocessMgr));
+    mgr.merge(reprocessMgr);
 
     b->bounds = grid.processingBounds();
     b->trueBounds = grid.conformingBounds();

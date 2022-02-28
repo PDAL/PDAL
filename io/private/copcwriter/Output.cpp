@@ -131,13 +131,13 @@ void Output::setupVlrs()
 
 void Output::addCopcVlr()
 {
-    // The copc VLR isn't local because we need to fill in the hierarchy information
-    // when we know it.
+    // The copc VLR isn't local because we need to fill in the hierarchy root node
+    // offset/size when we know it.
     m_copcVlr.center_x = (b.bounds.maxx / 2) + (b.bounds.minx / 2);
     m_copcVlr.center_y = (b.bounds.maxy / 2) + (b.bounds.miny / 2);
     m_copcVlr.center_z = (b.bounds.maxz / 2) + (b.bounds.minz / 2);
     m_copcVlr.halfsize = (b.bounds.maxx - b.bounds.minx) / 2;
-    m_copcVlr.spacing = 2 * m_copcVlr.halfsize / CellCount;
+    m_copcVlr.spacing = (2.0 * m_copcVlr.halfsize) / RootCellCount;
     m_copcVlr.gpstime_minimum = b.stats[(int)stats::Index::GpsTime].minimum();
     m_copcVlr.gpstime_maximum = b.stats[(int)stats::Index::GpsTime].maximum();
 

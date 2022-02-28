@@ -124,9 +124,15 @@ void LasWriter::addArgs(ProgramArgs& args)
 {
     std::time_t now;
     std::time(&now);
+
+    uint16_t year = 1900;
+    uint16_t doy = 0;
     std::tm* ptm = std::gmtime(&now);
-    uint16_t year = ptm->tm_year + 1900;
-    uint16_t doy = ptm->tm_yday;
+    if (ptm)
+    {
+        year += ptm->tm_year;
+        doy = 0;
+    }
 
     args.add("filename", "Output filename", m_filename).setPositional();
     args.add("a_srs", "Spatial reference to use to write output", d->opts.aSrs);
@@ -553,7 +559,7 @@ void LasWriter::addExtraBytesVlr()
 }
 
 
-/// Add a standard or variable-length VLR depending on the data size.
+/// Add a standard or extended VLR depending on the data size.
 /// \param  userId - VLR user ID
 /// \param  recordId - VLR record ID
 /// \param  description - VLR description

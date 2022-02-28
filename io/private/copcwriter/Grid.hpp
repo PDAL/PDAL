@@ -50,10 +50,8 @@ namespace copcwriter
 class Grid
 {
 public:
-    Grid() : m_gridSize(-1), m_maxLevel(-1), m_millionPoints(0), m_cubic(true)
-    {}
+    Grid(const BOX3D& bounds, size_t points);
 
-    void expand(const pdal::BOX3D& bounds, size_t points);
     int calcLevel();
     void resetLevel(int level);
     VoxelKey key(double x, double y, double z);

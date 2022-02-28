@@ -102,8 +102,7 @@ software_id
   [Default: PDAL version num (build num)]"
 
 creation_doy
-  Number of the day of the year (January 1 == 0, Dec 31 == 365) this file is
-  being created.
+  Number of the day of the year (January 1 == 1) this file is being created.
 
 creation_year
   Year (Gregorian) this file is being created.

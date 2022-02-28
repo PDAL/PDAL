@@ -48,33 +48,14 @@ namespace pdal
 namespace copcwriter
 {
 
-namespace
-{
-
-void createDirs(const BaseInfo& b)
-{
-    //ABELL - For streaming.
-    /**
-    if (FileUtils::fileExists(b.tempDir) && !FileUtils::isDirectory(b.tempDir))
-        fatal("Can't use temp directory - exists as a regular or special file.");
-    if (b.cleanTempDir)
-        FileUtils::deleteDirectory(b.tempDir);
-    if (!FileUtils::createDirectory(b.tempDir))
-        fatal("Couldn't create temp directory: '" + b.tempDir + "'.");
-    **/
-}
-
-}
-
 /// BuPyramid
 
-BuPyramid::BuPyramid(BaseInfo& common) : m_b(common), m_manager(m_b)
+BuPyramid::BuPyramid(const BaseInfo& common) : m_manager(common)
 {}
 
 
 void BuPyramid::run(CellManager& cells)
 {
-    createDirs(m_b);
     queueWork(cells);
     std::thread runner(&PyramidManager::run, &m_manager);
     runner.join();
