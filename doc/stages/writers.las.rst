@@ -41,6 +41,11 @@ containing `user_id` and `data` (or `filename`) items.
               "record_id": 43,
               "user_id": "hobu",
               "filename": "path-to-my-file.input"
+              },{
+              "description": "A description under 32 bytes",
+              "record_id": 44,
+              "user_id": "hobu",
+              "metadata": "metadata_keyname"
               }],
           "filename":"outputfile.las"
       }

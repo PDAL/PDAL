@@ -107,6 +107,7 @@ public:
     uint64_t promisedDataSize;
     std::string description;
     std::vector<char> dataVec;
+    std::string metadataId;
 };
 
 inline bool operator==(const Vlr& v1, const Vlr& v2)
