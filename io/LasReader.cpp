@@ -91,9 +91,8 @@ struct LasReader::Private
     las::VlrList vlrs;
     las::Srs srs;
     std::vector<las::ExtraDim> extraDims;
-    bool isCOPC;
 
-    Private() : apiHeader(header, srs, vlrs), decompressor(nullptr), index(0), isCOPC(false)
+    Private() : apiHeader(header, srs, vlrs), decompressor(nullptr), index(0)
     {}
 };
 
@@ -237,16 +236,17 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
             Utils::toString((int)d->header.pointFormat()) + ".");
 
     // Go peek into header and see if we are COPC
+    // Clear the error state since we potentially over-read the header, leaving
+    // the stream in error, when things are really fine for zero-point file.
     stream->clear();
     stream->seekg(377);
-
-    char copcBuf[4];
+    char copcBuf[4] {};
     stream->read(copcBuf, 4);
-    if (Utils::iequals(copcBuf, "copc"))
-        d->isCOPC = true;
+    m.add("copc", ::memcmp(copcBuf, "copc", 4) == 0);
 
-    // Read VLRs.  Clear the error state since we potentially over-read the header, leaving
-    // the stream in error, when things are really fine.
+    // Read VLRs.
+    // Clear the error state since the seek or read above may have failed but the file could
+    // still be fine.
     stream->clear();
     stream->seekg(d->header.headerSize);
 
@@ -329,7 +329,6 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     for (int i = 0; i < (int)d->vlrs.size(); ++i)
         las::addVlrMetadata(d->vlrs[i], "vlr_" + std::to_string(i), forward, m);
 
-    m.add("copc", d->isCOPC);
     m_streamIf.reset();
 }
 
