@@ -370,17 +370,34 @@ class value_error
 template<typename T>
 T value(const std::string& type, const std::string& value)
 {
-    T t{};
-
     if (type == "base64Binary")
     {
         std::vector<uint8_t> encVal = Utils::base64_decode(value);
         encVal.resize(sizeof(T));
-        t = *(reinterpret_cast<T *>(encVal.data()));
+        return *(reinterpret_cast<T *>(encVal.data()));
     }
-    else if (!Utils::fromString(value, t))
+
+    T t{};
+    if (!Utils::fromString(value, t))
         throw value_error();
     return t;
+}
+
+template<>
+inline bool value(const std::string& type, const std::string& value)
+{
+    if (type == "boolean")
+    {
+        if (value == "true")
+            return true;
+        else if (value == "false")
+            return false;
+    }
+
+    bool b;
+    if (!Utils::fromString(value, b))
+        throw value_error();
+    return b;
 }
 
 template<>

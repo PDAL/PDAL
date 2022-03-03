@@ -235,8 +235,18 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
         throwError("Unsupported LAS input point format: " +
             Utils::toString((int)d->header.pointFormat()) + ".");
 
-    // Read VLRs.  Clear the error state since we potentially over-read the header, leaving
-    // the stream in error, when things are really fine.
+    // Go peek into header and see if we are COPC
+    // Clear the error state since we potentially over-read the header, leaving
+    // the stream in error, when things are really fine for zero-point file.
+    stream->clear();
+    stream->seekg(377);
+    char copcBuf[4] {};
+    stream->read(copcBuf, 4);
+    m.add("copc", ::memcmp(copcBuf, "copc", 4) == 0);
+
+    // Read VLRs.
+    // Clear the error state since the seek or read above may have failed but the file could
+    // still be fine.
     stream->clear();
     stream->seekg(d->header.headerSize);
 

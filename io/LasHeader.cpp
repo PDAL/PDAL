@@ -492,7 +492,7 @@ void LasHeader::initialize(LogPtr log, uintmax_t fileSize, bool nosrs)
 const VlrList& LasHeader::vlrs() const
 {
     d->interfaceVlrs.clear();
-    for (las::Vlr& v : d->vlrs) 
+    for (las::Vlr& v : d->vlrs)
         d->interfaceVlrs.emplace_back(&v);
     return d->interfaceVlrs;
 }
