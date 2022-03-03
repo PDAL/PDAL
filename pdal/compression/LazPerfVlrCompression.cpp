@@ -272,7 +272,7 @@ public:
     
     bool seek(uint64_t record)
     {
-        if (record < 0 || record >= m_pointCount || m_chunks.empty())
+        if (record >= m_pointCount || m_chunks.empty())
             return false;
 
         // Search for the chunk containing the requested record.
