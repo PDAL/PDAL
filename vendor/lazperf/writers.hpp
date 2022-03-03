@@ -24,7 +24,8 @@
 #pragma once
 
 #include <memory>
-#include <vector>
+
+#include "header.hpp"
 
 namespace lazperf
 {

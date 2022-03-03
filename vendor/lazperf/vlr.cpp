@@ -415,6 +415,11 @@ void eb_vlr::addField()
     items.push_back(field);
 }
 
+void eb_vlr::addField(const eb_vlr::ebfield& field)
+{
+    items.push_back(field);
+}
+
 uint64_t eb_vlr::size() const
 {
     return 192 * items.size();
@@ -514,7 +519,7 @@ void copc_info_vlr::fill(const char *buf, size_t bufsize)
 
     s >> center_x >> center_y >> center_z >> halfsize >> spacing;
     s >> root_hier_offset >> root_hier_size;
-    s >> gpstime_minimum >> gpstime_minimum;
+    s >> gpstime_minimum >> gpstime_maximum;
     for (int i = 0; i < 11; ++i)
         s >> reserved[i];
 }
@@ -532,7 +537,7 @@ std::vector<char> copc_info_vlr::data() const
 
     s << center_x << center_y << center_z << halfsize << spacing;
     s << root_hier_offset << root_hier_size;
-    s << gpstime_minimum << gpstime_minimum;
+    s << gpstime_minimum << gpstime_maximum;
     for (int i = 0; i < 11; ++i)
         s << reserved[i];
     return buf;
