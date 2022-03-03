@@ -8,11 +8,9 @@
       4966706.0,
       50.0
     ],
-    "id": "ellipsoid.laz",
-    "inserts": 100000,
     "path": "/Users/connor/code/entwine/test/data/ellipsoid.laz",
     "points": 100000,
-    "status": "inserted",
-    "url": "0.json"
+    "inserted": true,
+    "metadataPath": "ellipsoid.json"
   }
 ]

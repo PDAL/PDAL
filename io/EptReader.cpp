@@ -278,7 +278,27 @@ void EptReader::handleOriginQuery()
     log()->get(LogLevel::Debug) << "Searching sources for " << search <<
         std::endl;
 
-    std::string filename = m_p->info->sourcesDir() + "list.json";
+
+    // In the initial EPT version 1.0.0, a source-file summary was stored in
+    // "list.json", with detailed metadata for each file being stored together
+    // in chunks.  So, the list.json array entries contained both a URL (to the
+    // proper chunk) and an ID (for the key into that chunk object) in order to
+    // look up the detailed metadata for an entry.
+    //
+    // In version 1.1.0, this chunking indirection was removed, with each
+    // summary entry containing a "metadataPath" key pointing to detailed
+    // metadata for a single source file only.  This summary file is called
+    // "manifest.json", so the older version can coexist with the new version
+    // non-destructively.
+    //
+    // At the moment, we only care about the summary information, which contains
+    // both the original file path and the bounds, and in each of these summary
+    // formats, those specific entries are exactly the same.  So we just need to
+    // grab the right filename and can use the same logic thereafter.
+    std::string filename = m_p->info->version() == "1.0.0"
+        ? m_p->info->sourcesDir() + "list.json"
+        : m_p->info->sourcesDir() + "manifest.json";
+
     NL::json sources;
     try
     {
@@ -310,7 +330,10 @@ void EptReader::handleOriginQuery()
         for (size_t i = 0; i < sources.size(); ++i)
         {
             const NL::json& el = sources.at(i);
-            if (el["id"].get<std::string>().find(search) != std::string::npos)
+            if (
+                el.count("path") &&
+                el.at("path").get<std::string>().find(search) !=
+                    std::string::npos)
             {
                 if (m_queryOriginId != -1)
                     throwError("Origin search ID is not unique.");
@@ -336,7 +359,7 @@ void EptReader::handleOriginQuery()
 
     try
     {
-        BOX3D q(toBox3d(found["bounds"]));
+        BOX3D q(toBox3d(found.at("bounds")));
 
         if (m_p->bounds.box.valid())
             m_p->bounds.box.clip(q);
@@ -344,7 +367,7 @@ void EptReader::handleOriginQuery()
             m_p->bounds.box = q;
 
         log()->get(LogLevel::Debug) << "Query origin " << m_queryOriginId <<
-            ": " << found["id"].get<std::string>() << std::endl;
+            ": " << found.at("path").get<std::string>() << std::endl;
     }
     catch (std::exception& e)
     {
