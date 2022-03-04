@@ -318,7 +318,7 @@ PointViewSet PoissonFilter::run(PointViewPtr view)
 
     TransformationFilter().doFilter(*outView, transform);
 
-    // Rerun normals as it may be expected.
+    // Rerun normals as they may be expected.
     {
         NormalFilter f;
         f.setLog(log());

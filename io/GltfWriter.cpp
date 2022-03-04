@@ -97,7 +97,7 @@ void GltfWriter::prepared(PointTableRef table)
 
     if (!hasNormals && m_writeNormals)
     {
-        log()->get(LogLevel::Warning) << getName() << ": Option 'nromals' is set to "
+        log()->get(LogLevel::Warning) << getName() << ": Option 'normals' is set to "
             "true, but one or more of the normal dimensions are missing. Not writing vertex "
             "nromals." << std::endl;
         m_writeNormals = false;
@@ -109,8 +109,9 @@ void GltfWriter::prepared(PointTableRef table)
         table.layout()->hasDim(Dimension::Id::Green) &&
         table.layout()->hasDim(Dimension::Id::Blue);
 
-    if (!hasColors && m_colorVertices) {
-        log()->get(LogLevel::Warning) << getName() << ": Option 'color_vertices' is set to "
+    if (!hasColors && m_colorVertices)
+    {
+        log()->get(LogLevel::Warning) << getName() << ": Option 'colors' is set to "
             "true, but one or more color dimensions are missing. Not writing vertex "
             "colors." << std::endl;
         m_colorVertices = false;
@@ -122,13 +123,11 @@ void GltfWriter::ready(PointTableRef table)
 {
     m_stream.reset(new OLeStream(m_filename));
 
-    OLeStream& out = *m_stream;
-
     // We write the data before we write the header.  To facilitate, we seek
     // to a point where we're pretty darn sure that we can write the header
     // with no problem later.  We'll verify and throw an error if the
     // assumption is bad.
-    out.seek(HeaderSize + JsonChunkDataSize + (2 * ChunkHeaderSize));
+    m_stream->seek(HeaderSize + JsonChunkDataSize + (2 * ChunkHeaderSize));
     m_binSize = 0;
 }
 
