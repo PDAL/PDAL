@@ -99,7 +99,7 @@ void GltfWriter::prepared(PointTableRef table)
     {
         log()->get(LogLevel::Warning) << getName() << ": Option 'normals' is set to "
             "true, but one or more of the normal dimensions are missing. Not writing vertex "
-            "nromals." << std::endl;
+            "normals." << std::endl;
         m_writeNormals = false;
     }
 
