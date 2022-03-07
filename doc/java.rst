@@ -167,10 +167,7 @@ artifact postfix is published as well.
       "io.pdal" %% "pdal-scala" % "x.x.x"   // if scala core library (if required)
     )
 
-The latest version is: |Maven Central|
-
-.. |Maven Central| image:: https://maven-badges.herokuapp.com/maven-central/io.pdal/pdal/badge.png
-   :target: https://search.maven.org/search?q=g:io.pdal
+The latest version is: https://search.maven.org/search?q=g:io.pdal
 
 There is also an `example SBT PDAL Demo project <https://github.com/PDAL/java/tree/master/examples/pdal-jni>`_ in the
 bindings repository, that can be used for a quick start.
