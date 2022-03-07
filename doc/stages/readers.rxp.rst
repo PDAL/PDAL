@@ -24,8 +24,7 @@ To build PDAL with rxp support, set RiVLib_DIR to the path of your local
 RiVLib installation.  RiVLib can be obtained from the `RIEGL download pages`_
 with a properly enabled user account.  The RiVLib files do not need to be
 in a system-level directory, though they could be (e.g. they could be
-in ``/usr/local``, or just in your home directory somewhere).  For help
-building PDAL with optional libraries, see :ref:`the optional library documentation <optional-libraries>`.
+in ``/usr/local``, or just in your home directory somewhere).
 
 
 Example

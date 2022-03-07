@@ -34,6 +34,7 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
    readers.mrsid
    readers.nitf
    readers.numpy
+   readers.obj
    readers.optech
    readers.pcd
    readers.pgpointcloud
@@ -110,6 +111,9 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
 
 :ref:`readers.numpy`
     Read point cloud data from Numpy ``.npy`` files.
+
+:ref:`readers.obj`
+    Read points and a mesh from Wavefront OBJ files.
 
 :ref:`readers.optech`
     Read Optech Corrected Sensor Data (.csd) files.
