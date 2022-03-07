@@ -18,7 +18,8 @@ than the input point set.  Because the algorithm constructs new points, data
 associated with the original points set will be lost, as the algorithm has
 limited ability to impute associated data.  However, if color dimensions
 (red, green and blue) are present in the input, colors will be reconstructed
-in the output point set.
+in the output point set. This filter will also run the
+:ref:`normal filter <filters.normal>` on the output point set.
 
 This integration of the algorithm with PDAL only supports a limited set of
 the options available to the implementation.  If you need support for further
