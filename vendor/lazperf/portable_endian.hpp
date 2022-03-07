@@ -43,27 +43,26 @@
 #   define __PDP_ENDIAN    PDP_ENDIAN
 **/
 
-#elif defined(__OpenBSD__)|| defined(__FreeBSD__) 
+#elif defined(__OpenBSD__)|| defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
 
-#   include <sys/endian.h>
-
-#elif defined(__NetBSD__) || defined(__DragonFly__)
-
-#   define be16toh betoh16
-#   define le16toh letoh16
-
-#   define be32toh betoh32
-#   define le32toh letoh32
-
-#   define be64toh betoh64
-#   define le64toh letoh64
+#   if defined __has_include && __has_include (<sys/endian.h>)
+#       include <sys/endian.h>
+#   elif defined __has_include && __has_include (<endian.h>)
+#       include <endian.h>
+#   else
+#       define be16toh betoh16
+#       define le16toh letoh16
+#       define be32toh betoh32
+#       define le32toh letoh32
+#       define be64toh betoh64
+#       define le64toh letoh64
+#   endif
 
 #elif defined(__WINDOWS__)
 
 #   include <winsock2.h>
 
 #   if BYTE_ORDER == LITTLE_ENDIAN
-
 #       define htobe16 htons
 #       define htole16(x) (x)
 #       define be16toh ntohs

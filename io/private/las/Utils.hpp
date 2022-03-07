@@ -233,7 +233,6 @@ public:
 
     void appendTo(std::vector<char>& ebBytes);
     void readFrom(const char *buf);
-    uint8_t lasType();
     void setType(uint8_t lastype);
     static std::vector<ExtraDim> toExtraDims(const char *buf, size_t bufsize, int byteOffset);
 
@@ -256,6 +255,7 @@ void setSummary(Header& header, const Summary& summary);
 std::string generateSoftwareId();
 std::vector<ExtraDim> parse(const StringList& dimString, bool allOk);
 const Dimension::IdList& pdrfDims(int pdrf);
+uint8_t lasType(Dimension::Type type, int fieldCnt);
 
 struct error : public std::runtime_error
 {

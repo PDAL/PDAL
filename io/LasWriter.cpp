@@ -98,7 +98,7 @@ struct LasWriter::Options
     StringHeaderVal<0> offsetX;
     StringHeaderVal<0> offsetY;
     StringHeaderVal<0> offsetZ;
-    std::vector<las::Evlr> userVLRs;
+    std::vector<las::Evlr> userVlrs;
 };
 
 struct LasWriter::Private
@@ -124,9 +124,15 @@ void LasWriter::addArgs(ProgramArgs& args)
 {
     std::time_t now;
     std::time(&now);
+
+    uint16_t year = 1900;
+    uint16_t doy = 0;
     std::tm* ptm = std::gmtime(&now);
-    uint16_t year = ptm->tm_year + 1900;
-    uint16_t doy = ptm->tm_yday;
+    if (ptm)
+    {
+        year += ptm->tm_year;
+        doy = 0;
+    }
 
     args.add("filename", "Output filename", m_filename).setPositional();
     args.add("a_srs", "Spatial reference to use to write output", d->opts.aSrs);
@@ -166,7 +172,7 @@ void LasWriter::addArgs(ProgramArgs& args)
     args.add("offset_x", "X offset", d->opts.offsetX);
     args.add("offset_y", "Y offset", d->opts.offsetY);
     args.add("offset_z", "Z offset", d->opts.offsetZ);
-    args.add("vlrs", "List of VLRs to set", d->opts.userVLRs);
+    args.add("vlrs", "List of VLRs to set", d->opts.userVlrs);
 }
 
 void LasWriter::initialize()
@@ -254,8 +260,11 @@ void LasWriter::prepared(PointTableRef table)
 // Capture user-specified VLRs
 void LasWriter::addUserVlrs(MetadataNode m)
 {
-    for (auto& v : d->opts.userVLRs)
-        addVlr(v, m);
+    for (las::Evlr& v : d->opts.userVlrs)
+    {
+        v.fillData(m);
+        addVlr(v);
+    }
 }
 
 
@@ -550,7 +559,7 @@ void LasWriter::addExtraBytesVlr()
 }
 
 
-/// Add a standard or variable-length VLR depending on the data size.
+/// Add a standard or extended VLR depending on the data size.
 /// \param  userId - VLR user ID
 /// \param  recordId - VLR record ID
 /// \param  description - VLR description
@@ -587,51 +596,10 @@ void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
     addVlr(vlr);
 }
 
-
-void LasWriter::addVlr(las::Evlr& evlr, MetadataNode m)
+/// Add a standard or variable-length VLR depending on the data size.
+/// \param  evlr  VLR to add.
+void LasWriter::addVlr(const las::Evlr& evlr)
 {
-    auto setVlrDataFromMetadata = [this](MetadataNode m, las::Evlr& v)
-    {
-
-        auto pred = [v]( MetadataNode m)
-            { return Utils::iequals(m.name(),  v.metadataId); };
-
-        // Check if the vlr has a metadataId set
-        // if so, go find it in our metadata, copy it,
-        // and then wipe the metadataId from the eVLR because
-        // we cannot ever find/set that again
-        if (v.metadataId.size() > 0)
-        {
-            MetadataNode node = m.find(pred);
-
-            if (node.valid())
-            {
-                std::string s = node.value();
-                std::string t = node.type();
-                if (t == "base64Binary")
-                {
-                    // Decode b64 data
-                    std::vector<uint8_t> decoded = Utils::base64_decode(s);
-                    v.dataVec.insert(v.dataVec.end(), decoded.data(),
-                            (decoded.data() + decoded.size()));
-                } else
-                {
-                    v.dataVec.insert(v.dataVec.end(), s.data(), (s.data() +
-                                s.size()));
-                }
-
-                // Wipe off our metadataId now that we have
-                // set the dataVect to it
-                v.metadataId.clear();
-            } else {
-                throwError("Unable to find valid metadata entry for metadataId '" +
-                    v.metadataId + "'");
-            }
-        }
-    };
-
-    setVlrDataFromMetadata(m, evlr);
-
     if (evlr.dataSize() > las::Vlr::MaxDataSize)
     {
         if (d->header.versionAtLeast(1, 4))
@@ -643,15 +611,6 @@ void LasWriter::addVlr(las::Evlr& evlr, MetadataNode m)
     }
     else
         m_vlrs.push_back(std::move(evlr));
-
-}
-
-/// Add a standard or variable-length VLR depending on the data size.
-/// \param  evlr  VLR to add.
-void LasWriter::addVlr(las::Evlr& evlr)
-{
-    MetadataNode m;
-    addVlr(evlr, m);
 }
 
 /// Delete a VLR from the vlr list.
