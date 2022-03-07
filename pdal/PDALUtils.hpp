@@ -145,6 +145,8 @@ inline Everything extractDim(INPUT& ext, Dimension::Type type)
             ext >> e.d;
             break;
         case Type::None:
+        default:
+            e.u64 = 0;
             break;
     }
     return e;

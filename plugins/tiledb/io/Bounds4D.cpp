@@ -407,7 +407,7 @@ std::string Metadata4D::inferType(const std::string& val)
         if (iss1.good())
             return "bounds";
     }
-    catch (BOX2D::error)
+    catch (const BOX2D::error&)
     {}
 
     BOX3D b3d;
@@ -418,7 +418,7 @@ std::string Metadata4D::inferType(const std::string& val)
         if (iss2.good())
             return "bounds";
     }
-    catch (BOX3D::error)
+    catch (const BOX3D::error&)
     {}
 
     BOX4D b4d;
@@ -429,7 +429,7 @@ std::string Metadata4D::inferType(const std::string& val)
         if (iss3.good())
             return "bounds";
     }
-    catch (BOX4D::error)
+    catch (const BOX4D::error&)
     {}
 
     if (val == "true" || val == "false")

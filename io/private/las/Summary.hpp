@@ -37,7 +37,7 @@
 #include <ostream>
 #include <array>
 
-#include <io/LasHeader.hpp>
+#include "Header.hpp"
 
 namespace pdal
 {

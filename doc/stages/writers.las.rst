@@ -16,10 +16,10 @@ interchange file format for LIDAR data.
 .. streamable::
 
 VLRs
--------
+----
 
 VLRs can be created by providing a JSON node called `vlrs` with objects
-containing `user_id` and `data` (or `filename`) items.
+as shown:
 
 .. code-block:: json
 
@@ -41,6 +41,12 @@ containing `user_id` and `data` (or `filename`) items.
               "record_id": 43,
               "user_id": "hobu",
               "filename": "path-to-my-file.input"
+              },
+              {
+              "description": "A description under 32 bytes",
+              "record_id": 44,
+              "user_id": "hobu",
+              "metadata": "metadata_keyname"
               }],
           "filename":"outputfile.las"
       }
@@ -48,9 +54,10 @@ containing `user_id` and `data` (or `filename`) items.
 
 .. note::
 
-    `data` or `filename` must be specified. Data must always be
-    provided as base64 encoded strings, but content of `filename`
-    is expected to be raw data.
+    One of `data`, `filename` or `metadata` must be specified. Data must be
+    specified as base64 encoded strings. The content of a file is inserted as
+    binary. The metadata key specified must refer to a string or base64 encoded data.
+
 
 Example
 -------
@@ -122,8 +129,7 @@ software_id
   [Default: PDAL version num (build num)]"
 
 creation_doy
-  Number of the day of the year (January 1 == 0, Dec 31 == 365) this file is
-  being created.
+  Number of the day of the year (January 1 == 1) this file is being created.
 
 creation_year
   Year (Gregorian) this file is being created.
@@ -214,6 +220,9 @@ extra_dims
 pdal_metadata
   Write two VLRs containing `JSON`_ output with both the :ref:`metadata` and
   :ref:`pipeline` serialization. [Default: false]
+
+vlrs
+    Add VLRS specified as json. See `VLRs`_ above for details.
 
 .. include:: writer_opts.rst
 

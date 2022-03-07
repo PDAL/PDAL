@@ -40,6 +40,7 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/Streamable.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <io/HeaderVal.hpp>
 #include <io/LasHeader.hpp>
 #include <io/LasReader.hpp>
 #include "Support.hpp"
@@ -72,6 +73,41 @@ template<typename LeftIter, typename RightIter>
 
 } // unnamed namespace
 
+TEST(LasReaderTest, string_header_val)
+{
+    using namespace std::string_literals;
+
+    StringHeaderVal<5> foo;
+
+    bool ok;
+
+    ok = foo.setVal("F");
+    EXPECT_TRUE(ok);
+    EXPECT_EQ(foo.val(), "F\0\0\0\0"s);
+    EXPECT_TRUE(foo.valSet());
+    ok = foo.setVal("FOOBAR");
+    EXPECT_FALSE(ok);
+    EXPECT_EQ(foo.val().size(), 5);
+    EXPECT_EQ(foo.val(), "FOOBA");
+    EXPECT_TRUE(foo.valSet());
+
+    StringHeaderVal<5> bar("BARFOO");
+
+    EXPECT_EQ(bar.val(), "BARFO");
+    EXPECT_FALSE(bar.valSet());
+    ok = bar.setVal("ZZZYYY");
+    EXPECT_FALSE(ok);
+    EXPECT_EQ(bar.val(), "ZZZYY");
+    EXPECT_TRUE(bar.valSet());
+
+    StringHeaderVal<0> baz;
+    EXPECT_FALSE(baz.valSet());
+    EXPECT_EQ(baz.val(), "");
+    ok = baz.setVal("TESTTEST");
+    EXPECT_TRUE(ok);
+    EXPECT_EQ(baz.val().size(), 8);
+}
+
 TEST(LasReaderTest, create)
 {
     StageFactory f;
@@ -92,38 +128,61 @@ TEST(LasReaderTest, header)
 
     reader.prepare(table);
     // This tests the copy ctor, too.
-    las::Header h = reader.header();
+    const LasHeader& h = reader.header();
 
-    EXPECT_EQ(h.magic, "LASF");
-    EXPECT_EQ(h.fileSourceId, 0);
-    EXPECT_TRUE(h.projectGuid.isNull());
-    EXPECT_EQ(h.versionMajor, 1);
-    EXPECT_EQ(h.versionMinor, 2);
-    EXPECT_EQ(h.creationDoy, 0);
-    EXPECT_EQ(h.creationYear, 0);
-    EXPECT_EQ(h.vlrOffset, 227);
-    EXPECT_EQ(h.pointFormatBits, 3);
+    EXPECT_EQ(h.fileSignature(), "LASF");
+    EXPECT_EQ(h.fileSourceId(), 0);
+    EXPECT_TRUE(h.projectId().isNull());
+    EXPECT_EQ(h.versionMajor(), 1);
+    EXPECT_EQ(h.versionMinor(), 2);
+    EXPECT_EQ(h.creationDOY(), 0);
+    EXPECT_EQ(h.creationYear(), 0);
+    EXPECT_EQ(h.vlrOffset(), 227);
+    EXPECT_EQ(h.pointFormat(), 3);
     EXPECT_EQ(h.pointCount(), 1065u);
-    EXPECT_DOUBLE_EQ(h.scale.x, .01);
-    EXPECT_DOUBLE_EQ(h.scale.y, .01);
-    EXPECT_DOUBLE_EQ(h.scale.z, .01);
-    EXPECT_DOUBLE_EQ(h.offset.x, 0);
-    EXPECT_DOUBLE_EQ(h.offset.y, 0);
-    EXPECT_DOUBLE_EQ(h.offset.z, 0);
-    EXPECT_DOUBLE_EQ(h.bounds.maxx, 638982.55);
-    EXPECT_DOUBLE_EQ(h.bounds.maxy, 853535.43);
-    EXPECT_DOUBLE_EQ(h.bounds.maxz, 586.38);
-    EXPECT_DOUBLE_EQ(h.bounds.minx, 635619.85);
-    EXPECT_DOUBLE_EQ(h.bounds.miny, 848899.70);
-    EXPECT_DOUBLE_EQ(h.bounds.minz, 406.59);
-    EXPECT_EQ(h.dataCompressed(), false);
-    EXPECT_EQ(h.legacyPointsByReturn[0], 925u);
-    EXPECT_EQ(h.legacyPointsByReturn[1], 114u);
-    EXPECT_EQ(h.legacyPointsByReturn[2], 21u);
-    EXPECT_EQ(h.legacyPointsByReturn[3], 5u);
-    EXPECT_EQ(h.legacyPointsByReturn[4], 0u);
+    EXPECT_DOUBLE_EQ(h.scaleX(), .01);
+    EXPECT_DOUBLE_EQ(h.scaleY(), .01);
+    EXPECT_DOUBLE_EQ(h.scaleZ(), .01);
+    EXPECT_DOUBLE_EQ(h.offsetX(), 0);
+    EXPECT_DOUBLE_EQ(h.offsetY(), 0);
+    EXPECT_DOUBLE_EQ(h.offsetZ(), 0);
+    EXPECT_DOUBLE_EQ(h.maxX(), 638982.55);
+    EXPECT_DOUBLE_EQ(h.maxY(), 853535.43);
+    EXPECT_DOUBLE_EQ(h.maxZ(), 586.38);
+    EXPECT_DOUBLE_EQ(h.minX(), 635619.85);
+    EXPECT_DOUBLE_EQ(h.minY(), 848899.70);
+    EXPECT_DOUBLE_EQ(h.minZ(), 406.59);
+    EXPECT_EQ(h.compressed(), false);
+    EXPECT_EQ(h.pointCountByReturn(0), 925u);
+    EXPECT_EQ(h.pointCountByReturn(1), 114);
+    EXPECT_EQ(h.pointCountByReturn(2), 21);
+    EXPECT_EQ(h.pointCountByReturn(3), 5);
+    EXPECT_EQ(h.pointCountByReturn(4), 0);
 }
 
+TEST(LasReaderTest, vlr)
+{
+    Options ops1;
+    ops1.add("filename", Support::datapath("las/epsg_4326.las"));
+    ops1.add("count", 103);
+
+    LasReader reader;
+    reader.setOptions(ops1);
+
+    PointTable table;
+    reader.prepare(table);
+    reader.execute(table);
+
+    const LasHeader& h = reader.header();
+    const VlrList& vlrs = h.vlrs();
+    EXPECT_EQ(vlrs.size(), 3U);
+    EXPECT_EQ(vlrs[0].userId(), "LASF_Projection");
+    EXPECT_EQ(vlrs[0].recordId(), 34735);
+    EXPECT_EQ(vlrs[1].userId(), "LASF_Projection");
+    EXPECT_EQ(vlrs[1].recordId(), 34736);
+    EXPECT_EQ(vlrs[2].userId(), "LASF_Projection");
+    EXPECT_EQ(vlrs[2].recordId(), 34737);
+}
 
 TEST(LasReaderTest, test_sequential)
 {
@@ -162,10 +221,10 @@ static void test_a_format(const std::string& file, uint8_t majorVersion,
     reader.setOptions(ops1);
     reader.prepare(table);
 
-    const las::Header& h = reader.header();
+    const LasHeader& h = reader.header();
     EXPECT_EQ(h.pointFormat(), pointFormat);
-    EXPECT_EQ(h.versionMajor, majorVersion);
-    EXPECT_EQ(h.versionMinor, minorVersion);
+    EXPECT_EQ(h.versionMajor(), majorVersion);
+    EXPECT_EQ(h.versionMinor(), minorVersion);
 
     PointViewSet viewSet = reader.execute(table);
     EXPECT_EQ(viewSet.size(), 1u);
@@ -265,7 +324,7 @@ TEST(LasReaderTest, testInvalidFileSignature)
     LasReader reader;
     reader.setOptions(ops1);
 
-    EXPECT_EQ(reader.header().magic, "LASF");
+    EXPECT_EQ(reader.header().fileSignature(), "LASF");
 }
 
 TEST(LasReaderTest, extraBytes)
@@ -615,7 +674,7 @@ TEST(LasReaderTest, Start)
     {
         Stage *las = f.createStage("readers.las");
         Options opts;
-        opts.add("filename", Support::datapath("laz/ellipsoid.copc.laz"));
+        opts.add("filename", Support::datapath("copc/lone-star.copc.laz"));
         opts.add("start", start);
         las->setOptions(opts);
 
@@ -632,10 +691,39 @@ TEST(LasReaderTest, Start)
     for (auto i : starts)
         test1(i);
     test2();
-    test3(66271, -8242595.58f, 4966706.0f, 0.28f);
-    test3(66272, -8242746.0f, 4966605.44f, -0.28f);
-    test3(96000, -8242474.88f, 4966662.72f, -8.1f);
+    test3(84226, 515387.0385, 4918363.847, 2336.32075);
+    test3(84227, 515397.9628, 4918365.138, 2324.47825);
+    test3(518861, 515398.052, 4918371.589, 2325.831);
 
     // Delete the created file.
     FileUtils::deleteFile(source);
+}
+
+TEST(LasReaderTest, Copc)
+{
+    {
+        LasReader r;
+        Options o;
+        o.add("filename", Support::datapath("copc/1.2-with-color.copc.laz"));
+        r.setOptions(o);
+
+        PointTable t;
+        r.prepare(t);
+        MetadataNode m = r.getMetadata();
+        m = m.findChild("copc");
+        EXPECT_EQ(m.value<bool>(), true);
+    }
+
+    {
+        LasReader r;
+        Options o;
+        o.add("filename", Support::datapath("las/synthetic_test.las"));
+        r.setOptions(o);
+
+        PointTable t;
+        r.prepare(t);
+        MetadataNode m = r.getMetadata();
+        m = m.findChild("copc");
+        EXPECT_EQ(m.value<bool>(), false);
+    }
 }

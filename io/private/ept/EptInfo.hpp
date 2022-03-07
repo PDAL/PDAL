@@ -67,6 +67,7 @@ public:
     DataType dataType() const { return m_dataType; }
     const SpatialReference& srs() const { return m_srs; }
     const NL::json& json() { return m_info; }
+    std::string version() const { return m_version; }
     std::map<std::string, DimType>& dims() { return m_dims; }
     DimType dimType(Dimension::Id id) const;
     PointLayout& remoteLayout() const { return m_remoteLayout; }
@@ -78,6 +79,7 @@ private:
     // Info comes from the values here:
     // https://entwine.io/entwine-point-tile.html#ept-json
     NL::json m_info;
+    std::string m_version;
     BOX3D m_bounds;
     BOX3D m_boundsConforming;
     uint64_t m_points = 0;

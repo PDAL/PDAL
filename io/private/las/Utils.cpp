@@ -32,8 +32,7 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <io/LasHeader.hpp>
-
+#include "Header.hpp"
 #include "Srs.hpp"
 #include "Summary.hpp"
 #include "Utils.hpp"
@@ -190,19 +189,23 @@ void addVlrMetadata(const Vlr& vlr, std::string name, MetadataNode& forward, Met
     forward.add(vlrNode);
 }
 
-uint8_t ExtraBytesIf::lasType()
+uint8_t lasType(Dimension::Type type, int fieldCnt)
 {
-    uint8_t lastype = 0;
+    if (fieldCnt < 1 || fieldCnt > 3)
+        return 0;
 
+    uint8_t lastype = 0;
     for (size_t i = 0; i < sizeof(lastypes) / sizeof(lastypes[0]); ++i)
-        if (m_type == lastypes[i])
+        if (type == lastypes[i])
         {
             lastype = i;
             break;
         }
-    if (m_fieldCnt == 0 || lastype == 0)
+
+    // 0 is the "undocumented" type, which we don't really support.
+    if (lastype == 0)
         return 0;
-    return 10 * (m_fieldCnt - 1) + lastype;
+    return 10 * (fieldCnt - 1) + lastype;
 }
 
 
@@ -227,7 +230,7 @@ void ExtraBytesIf::appendTo(std::vector<char>& ebBytes)
     ebBytes.resize(ebBytes.size() + ExtraBytesSpecSize);
     LeInserter inserter(ebBytes.data() + offset, ExtraBytesSpecSize);
 
-    uint8_t lastype = lasType();
+    uint8_t lastype = lasType(m_type, m_fieldCnt);
     uint8_t options = lastype ? 0 : m_size;
 
     inserter << (uint16_t)0 << lastype << options;

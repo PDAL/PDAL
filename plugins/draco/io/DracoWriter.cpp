@@ -406,10 +406,8 @@ void DracoWriter::write(const PointViewPtr view)
     for (PointId idx = 0; idx < view->size(); ++idx)
     {
         point.setPointId(idx);
-        const auto pointId = draco::PointIndex((uint32_t)idx);
-        for (auto &dim: m_dims) {
+        for (auto &dim: m_dims)
             addPoint(dim, point, idx);
-        }
     }
 
     draco::EncoderBuffer buffer;

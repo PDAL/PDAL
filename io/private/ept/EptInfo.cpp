@@ -76,6 +76,7 @@ void EptInfo::initialize()
     m_boundsConforming = toBox3d(m_info.at("boundsConforming"));
     m_points = m_info.value<uint64_t>("points", 0);
     m_span = m_info.at("span").get<uint64_t>();
+    m_version = m_info.at("version").get<std::string>();
 
     auto iSrs = m_info.find("srs");
     if (iSrs != m_info.end() && iSrs->size())

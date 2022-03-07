@@ -98,7 +98,7 @@ struct LasWriter::Options
     StringHeaderVal<0> offsetX;
     StringHeaderVal<0> offsetY;
     StringHeaderVal<0> offsetZ;
-    std::vector<las::Evlr> userVLRs;
+    std::vector<las::Evlr> userVlrs;
 };
 
 struct LasWriter::Private
@@ -124,9 +124,15 @@ void LasWriter::addArgs(ProgramArgs& args)
 {
     std::time_t now;
     std::time(&now);
+
+    uint16_t year = 1900;
+    uint16_t doy = 0;
     std::tm* ptm = std::gmtime(&now);
-    uint16_t year = ptm->tm_year + 1900;
-    uint16_t doy = ptm->tm_yday;
+    if (ptm)
+    {
+        year += ptm->tm_year;
+        doy = 0;
+    }
 
     args.add("filename", "Output filename", m_filename).setPositional();
     args.add("a_srs", "Spatial reference to use to write output", d->opts.aSrs);
@@ -166,7 +172,7 @@ void LasWriter::addArgs(ProgramArgs& args)
     args.add("offset_x", "X offset", d->opts.offsetX);
     args.add("offset_y", "Y offset", d->opts.offsetY);
     args.add("offset_z", "Z offset", d->opts.offsetZ);
-    args.add("vlrs", "List of VLRs to set", d->opts.userVLRs);
+    args.add("vlrs", "List of VLRs to set", d->opts.userVlrs);
 }
 
 void LasWriter::initialize()
@@ -252,10 +258,13 @@ void LasWriter::prepared(PointTableRef table)
 
 
 // Capture user-specified VLRs
-void LasWriter::addUserVlrs()
+void LasWriter::addUserVlrs(MetadataNode m)
 {
-    for (const auto& v : d->opts.userVLRs)
+    for (las::Evlr& v : d->opts.userVlrs)
+    {
+        v.fillData(m);
         addVlr(v);
+    }
 }
 
 
@@ -311,14 +320,14 @@ void LasWriter::readyTable(PointTableRef table)
 {
     m_firstPoint = true;
     m_forwardMetadata = table.privateMetadata("lasforward");
+    MetadataNode m = table.metadata();
     if(d->opts.writePDALMetadata)
     {
-        MetadataNode m = table.metadata();
         addMetadataVlr(m);
         addPipelineVlr();
     }
     addExtraBytesVlr();
-    addUserVlrs();
+    addUserVlrs(m);
     addForwardVlrs();
 }
 
@@ -550,7 +559,7 @@ void LasWriter::addExtraBytesVlr()
 }
 
 
-/// Add a standard or variable-length VLR depending on the data size.
+/// Add a standard or extended VLR depending on the data size.
 /// \param  userId - VLR user ID
 /// \param  recordId - VLR record ID
 /// \param  description - VLR description
@@ -559,7 +568,8 @@ void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
    const std::string& description, const std::vector<uint8_t>& data)
 {
     std::vector<char> v((const char *)data.data(), (const char *)(data.data() + data.size()));
-    addVlr(las::Evlr(userId, recordId, description, std::move(v)));
+    las::Evlr vlr(userId, recordId, description, std::move(v));
+    addVlr(vlr);
 }
 
 /// Add a standard or variable-length VLR depending on the data size.
@@ -570,7 +580,8 @@ void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
 void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
    const std::string& description, const std::vector<char>& data)
 {
-    addVlr(las::Evlr(userId, recordId, description, data));
+    las::Evlr vlr(userId, recordId, description, data);
+    addVlr(vlr);
 }
 
 /// Add a standard or variable-length VLR depending on the data size.
@@ -581,9 +592,9 @@ void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
 void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
    const std::string& description, std::vector<char>&& data)
 {
-    addVlr(las::Evlr(userId, recordId, description, data));
+    las::Evlr vlr(userId, recordId, description, data);
+    addVlr(vlr);
 }
-
 
 /// Add a standard or variable-length VLR depending on the data size.
 /// \param  evlr  VLR to add.

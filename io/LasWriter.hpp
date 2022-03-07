@@ -116,7 +116,7 @@ private:
 
     void handleLaszip(int result);
     void fillForwardList();
-    void addUserVlrs();
+    void addUserVlrs(MetadataNode m);
     template <typename T>
     void handleHeaderForward(const std::string& s, T& headerVal,
         const MetadataNode& base);
