@@ -185,6 +185,7 @@ Pointwise Features
    filters.planefit
    filters.radialdensity
    filters.reciprocity
+   filters.zsmooth
 
 :ref:`filters.approximatecoplanar`
     Estimate pointwise planarity, based on k-nearest neighbors. Returns a new
@@ -229,6 +230,8 @@ Pointwise Features
     Compute the percentage of points that are considered uni-directional
     neighbors of a point.
 
+:ref:`filters.zsmooth`
+    Compute a smoothed 'Z' value based on the 'Z' value of neighboring points.
 
 Assignment
 ..........
@@ -304,6 +307,7 @@ Registration
 
    filters.cpd
    filters.icp
+   filters.teaser
 
 :ref:`filters.cpd`
     Compute and apply transformation between two point clouds using the
@@ -313,6 +317,8 @@ Registration
     Compute and apply transformation between two point clouds using the
     Iterative Closest Point algorithm.
 
+:ref:`filters.teaser`
+    Compute a rigid transformation between two point clouds using the teaser algorithm.
 
 Predefined
 ..........

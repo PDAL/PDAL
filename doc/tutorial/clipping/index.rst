@@ -152,8 +152,8 @@ apply to data as they are read, filtered, and written.
 Processing
 -------------------------------------------------------------------------------
 
-1) Save the pipeline to a file called ``shape-clip.json`` in the
-  same directory as your ``attributes.json`` and ``autzen.laz`` files.
+1) Save the pipeline to a file called ``shape-clip.json`` in the same directory
+   as your ``attributes.json`` and ``autzen.laz`` files.
 
 2) Run ``pdal pipeline`` on the json file.
 

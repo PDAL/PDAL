@@ -29,10 +29,6 @@ Example
       }
   ]
 
-.. seealso::
-
-    :ref:`filters.voxelgrid` provides grid-style point decimation.
-
 Options
 -------
 
