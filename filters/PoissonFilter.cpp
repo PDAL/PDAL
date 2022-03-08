@@ -317,6 +317,14 @@ PointViewSet PoissonFilter::run(PointViewPtr view)
             transform[i++] = xform.coords[r][c];
 
     TransformationFilter().doFilter(*outView, transform);
+
+    // Rerun normals as they may be expected.
+    {
+        NormalFilter f;
+        f.setLog(log());
+        f.doFilter(*outView);
+    }
+
     return s;
 }
 
