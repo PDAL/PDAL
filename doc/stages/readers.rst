@@ -45,7 +45,6 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
    readers.rxp
    readers.sbet
    readers.smrmsg
-   readers.sqlite
    readers.slpk
    readers.terrasolid
    readers.text
@@ -145,9 +144,6 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
 
 :ref:`readers.sbet`
     Read the SBET format.
-
-:ref:`readers.sqlite`
-    Read data stored in a SQLite database.
 
 :ref:`readers.slpk`
     Read data stored in an Esri SLPK file.
