@@ -28,7 +28,8 @@ Begin by creating a file named CMakeLists.txt that contains:
   include_directories(${PDAL_INCLUDE_DIRS})
   link_directories(${PDAL_LIBRARY_DIRS})
   add_definitions(${PDAL_DEFINITIONS})
-  set(CMAKE_CXX_FLAGS "-std=c++11")
+  set CMAKE_CXX_STANDARD 17)
+  set CMAKE_CXX_STANDARD_REQUIRED ON)
   add_executable(tutorial tutorial.cpp)
   target_link_libraries(tutorial PRIVATE ${PDAL_LIBRARIES})
 
@@ -73,10 +74,11 @@ If PDAL is found, the following variables will be set:
 
 .. code-block:: cmake
 
-  set(CMAKE_CXX_FLAGS "-std=c++11")
+  set CMAKE_CXX_STANDARD 17)
+  set CMAKE_CXX_STANDARD_REQUIRED ON)
 
 We haven't quite implemented the setting of *PDAL_DEFINITIONS* within the
-`PDALConfig.cmake` file, so for now you should specify the c++11 compiler flag,
+`PDALConfig.cmake` file, so for now you should specify the c++17 compiler flag,
 as we use it extensively throughout PDAL.
 
 .. code-block:: cmake

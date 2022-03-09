@@ -34,12 +34,8 @@ the scope of the document.
 Required Compiler
 ------------------------------------------------------------------------------
 
-PDAL is known to compile on `Visual Studio 2015`_, and 2013 *might* work with
-some source tree adjustments. PDAL makes heavy use of C++11, and a compiler
-with good support for those features is required.
-
-.. _`Visual Studio 2015`: https://www.visualstudio.com/vs/older-downloads/
-
+PDAL requires C++17 support to build, so you will need `Visual Studio 2017 (15.7)`_ or
+later.
 
 .. _CMake: http://www.cmake.org
 
@@ -59,13 +55,11 @@ The configuration already has Miniconda installed, and the
 ``setup.sh`` script installs all of PDAL's prerequisites via the command
 line.
 
-
 ::
 
-   conda install geotiff laszip nitro curl ^
-      gdal pcl cmake eigen ninja libgdal ^
-      zstd numpy xz libxml2 laz-perf qhull ^
-      sqlite hdf5 tiledb conda-build ninja -y
+   conda install geotiff nitro curl ^
+      gdal cmake ninja libgdal ^
+      zstd libxml2 tiledb conda-build ninja -y
 
 .. note::
 
@@ -93,7 +87,7 @@ Switch to the ``-maintenance`` branch.
 
    ::
 
-      c:\dev> git checkout 1.9-maintenance
+      c:\dev> git checkout 2.4-maintenance
 
 
    .. note::
@@ -132,9 +126,6 @@ invoke the build by calling **nmake**:
 
     nmake /f Makefile
 
-
-If you chose "Visual Studio 14 Win64" as your CMake generator, open ``PDAL.sln``
-and chose your configuration to build.
 
 Running
 ------------------------------------------------------------------------------

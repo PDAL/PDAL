@@ -83,16 +83,12 @@ used by :ref:`writers.tiledb` and :ref:`readers.tiledb`.::
     Conda: https://anaconda.org/conda-forge/tiledb
 
 .. _`ASPRS LAS`: http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
-.. _`LASzip`: http://laszip.org
 .. _`NITF`: http://en.wikipedia.org/wiki/National_Imagery_Transmission_Format
 .. _`Nitro`: http://nitro-nitf.sourceforge.net/wikka.php?wakka=HomePage
-.. _`DebianGIS`: http://wiki.debian.org/DebianGis
-.. _`Debian`: http://www.debian.org
 .. _`Conda Forge`: https://anaconda.org/conda-forge/pdal
 
 .. _GDAL: http://www.gdal.org
 .. _GeoTIFF: http://trac.osgeo.org/geotiff
 .. _libxml2: http://xmlsoft.org
 .. _CMake: http://www.cmake.org
-.. _`Point Cloud Library (PCL)`: http://pointclouds.org
 .. _`TileDB`: https://www.tiledb.io
