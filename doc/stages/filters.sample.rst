@@ -23,7 +23,7 @@ performing costly spatial searches.
     :ref:`filters.decimation`, :ref:`filters.fps`,
     :ref:`filters.relaxationdartthrowing`,
     :ref:`filters.voxelcenternearestneighbor`,
-    :ref:`filters.voxelcentroidnearestneighbor`, and :ref:`voxeldownsize` also
+    :ref:`filters.voxelcentroidnearestneighbor`, and :ref:`filters.voxeldownsize` also
     perform decimation.
 
 .. note::

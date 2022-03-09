@@ -172,7 +172,7 @@ Command Line Invocation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Using the above Python file with its ``load`` function, the following
-:ref:`pdal_info` invocation passes in the reference to the filename to load.
+:ref:`pdal info<info_command>` invocation passes in the reference to the filename to load.
 
 ::
 
@@ -186,7 +186,7 @@ Pipeline
 
 An example :ref:`pipeline` definition would follow:
 
-.. code-block:: json
+.. code-block::
 
     [
         {
@@ -195,7 +195,6 @@ An example :ref:`pipeline` definition would follow:
             "fargs": "threedim.npy",
             "type": "readers.numpy"
         },
-
         ...
     ]
 

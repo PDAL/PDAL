@@ -21,6 +21,7 @@ dimension type, while others only understand fixed dimension names.
    writers.draco
    writers.ept_addon
    writers.e57
+   writers.fbx
    writers.gdal
    writers.gltf
    writers.las
@@ -50,6 +51,9 @@ dimension type, while others only understand fixed dimension names.
 
 :ref:`writers.e57`
     Write data in the E57 format.
+
+:ref:`writers.fbx`
+    Write mesh output in the Adobe FBX format.
 
 :ref:`writers.gdal`
     Create a raster from a point cloud using an interpolation algorithm.
