@@ -105,19 +105,19 @@ void testWrite(bool writeNormals, bool writeColors, std::string path)
 
     if (writeColors)
     {
-        v->setField(Dimension::Id::Red, 0, 255);
+        v->setField(Dimension::Id::Red, 0, 255 << 8);
         v->setField(Dimension::Id::Blue, 0, 0);
         v->setField(Dimension::Id::Green, 0, 0);
 
         v->setField(Dimension::Id::Red, 1, 0);
-        v->setField(Dimension::Id::Blue, 1, 255);
+        v->setField(Dimension::Id::Blue, 1, 255 << 8);
         v->setField(Dimension::Id::Green, 1, 0);
 
         v->setField(Dimension::Id::Red, 2, 0);
         v->setField(Dimension::Id::Blue, 2, 0);
-        v->setField(Dimension::Id::Green, 2, 255);
+        v->setField(Dimension::Id::Green, 2, 255 << 8);
 
-        v->setField(Dimension::Id::Red, 3, 255);
+        v->setField(Dimension::Id::Red, 3, 255 << 8);
         v->setField(Dimension::Id::Blue, 3, 0);
         v->setField(Dimension::Id::Green, 3, 0);
     }
@@ -134,9 +134,8 @@ void testWrite(bool writeNormals, bool writeColors, std::string path)
 
     Options writerOptions;
     writerOptions.add("filename", path);
-    if (writeColors) {
-        writerOptions.add("color_vertices", true);
-    }
+    writerOptions.add("colors", writeColors);
+    writerOptions.add("normals", writeNormals);
     writer->setOptions(writerOptions);
     writer->setInput(r);
     writer->prepare(t);
@@ -152,7 +151,6 @@ TEST(GltfWriter, Write)
 }
 
 
-/**
 TEST(GltfWriter, WriteWithNormals)
 {
     std::string path = Support::temppath("out_normals.glb");
@@ -175,6 +173,5 @@ TEST(GltfWriter, WriteWithNormalsAndColors)
     testWrite(true, true, path);
     ASSERT_EQ(FileUtils::fileSize(path), 5196);
 }
-**/
 
 } // namespace pdal
