@@ -19,19 +19,21 @@ Example
 Compute the smoothed Z value as the median Z value of the neighbors within 2 units and
 assign the value back to the Z dimension.
 
-[
-    "input.las",
-    {
-        "type": "filters.zsmooth",
-        "radius": 2,
-        "dim": "Zadj"
-    },
-    {
-        "type": "filters.assign",
-        "value": "Z = Zadj"
-    },
-    "output.las"
-]
+.. code_block::json
+
+    [
+        "input.las",
+        {
+            "type": "filters.zsmooth",
+            "radius": 2,
+            "dim": "Zadj"
+        },
+        {
+            "type": "filters.assign",
+            "value": "Z = Zadj"
+        },
+        "output.las"
+    ]
 
 Options
 -------------------------------------------------------------------------------

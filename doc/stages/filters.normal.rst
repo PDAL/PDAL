@@ -1,7 +1,7 @@
 .. _filters.normal:
 
 filters.normal
-===============================================================================
+==============
 
 The **normal filter** returns the estimated normal and curvature for
 a collection

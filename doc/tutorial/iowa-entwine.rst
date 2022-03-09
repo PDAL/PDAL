@@ -141,7 +141,7 @@ value of ``7``.
    :scale: 50%
 
    The :ref:`filters.range` filter utilizes range selection to allow users to
-   select data for processing or removal. The :ref:`filters.mongoexpression`
+   select data for processing or removal. The :ref:`filters.mongo`
    filter can be used for even more complex logic operations.
 
 
