@@ -289,6 +289,28 @@ std::string PlyReader::getName() const
     return s_info.name;
 }
 
+QuickInfo PlyReader::inspect()
+{
+    QuickInfo qi;
+
+    initialize();
+
+    if (m_vertexElt)
+    {
+        // Get quick info information from the vertex element (if initialised). We ignore the bounds 
+        // since calculating that would require reading the entire file. We also ignore the spatial
+        // reference since we don't have that.
+
+        qi.m_valid = true;
+        qi.m_pointCount = static_cast<point_count_t>(m_vertexElt->m_count);
+        for (auto& prop : m_vertexElt->m_properties)
+        {
+            qi.m_dimNames.push_back(prop->m_name);
+        }
+    }
+
+    return qi;
+}
 
 void PlyReader::initialize()
 {
