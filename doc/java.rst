@@ -167,10 +167,7 @@ artifact postfix is published as well.
       "io.pdal" %% "pdal-scala" % "x.x.x"   // if scala core library (if required)
     )
 
-The latest version is: |Maven Central|
-
-.. |Maven Central| image:: https://maven-badges.herokuapp.com/maven-central/io.pdal/pdal/badge.png
-   :target: https://search.maven.org/search?q=g:io.pdal
+The latest version is: https://search.maven.org/search?q=g:io.pdal
 
 There is also an `example SBT PDAL Demo project <https://github.com/PDAL/java/tree/master/examples/pdal-jni>`_ in the
 bindings repository, that can be used for a quick start.
@@ -188,7 +185,9 @@ Development purposes (including binaries) compilation:
 Only Java development purposes compilation:
   1. Provide ``$LD_LIBRARY_PATH`` or ``$DYLD_LIBRARY_PATH``
   2. If you don't want to provide global variable you can pass ``-Djava.library.path=<path>`` into sbt:
+
     ``./sbt -Djava.library.path=<path>``
+
   3. Set ``PDAL_DEPEND_ON_NATIVE=false`` (to disable ``native`` project build)
   4. Run ``PDAL_DEPEND_ON_NATIVE=false ./sbt``
 

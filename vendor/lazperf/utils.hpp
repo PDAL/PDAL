@@ -38,7 +38,7 @@
 #include <cstdlib>
 #include <limits>
 
-#ifdef NDEBUG
+#ifdef PRINT_DEBUG
 #define LAZDEBUG(e) ((void)0)
 #else
 #define LAZDEBUG(e) (void)(e)

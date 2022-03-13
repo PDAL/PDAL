@@ -13,12 +13,12 @@ Example
 
 .. code-block:: json
 
-[
-    {
-        "type": "readers.draco",
-        "filename": "color.las"
-    }
-]
+    [
+        {
+            "type": "readers.draco",
+            "filename": "color.las"
+        }
+    ]
 
 Options
 -------

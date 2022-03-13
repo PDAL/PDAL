@@ -9,16 +9,7 @@ FAQ
 .. |nbsp| unicode:: 0xA0
    :trim:
 
-* How do you pronounce PDAL?
-
-  The proper spelling of the project name is PDAL, in uppercase. It is
-  pronounced to rhyme with "GDAL".
-
-  .. it is properly pronounced like the dog though :) -- hobu
-
-  |nbsp|
-
-* Why do I get the error "Couldn't create ... stage of type ..."?
+* Why do I get the error ``Couldn't create ... stage of type ...``?
 
   In almost all cases this error occurs because you're trying to run a stage
   that is built as a plugin and the plugin (a shared library file or DLL)
@@ -47,7 +38,13 @@ FAQ
 
   |nbsp|
 
-* Why do I get the error ``Unable to convert scaled value ... "
+* I'm missing the python filter/numpy reader. Where is it?
+
+  If you're building PDAL from source, you'll find the python filter and numpy
+  reader in a separate repository, https://github.com/PDAL/python-plugins. If you're
+  using a package, Python support may be in a separate package, often called "python-pdal".
+
+* Why do I get the error ``Unable to convert scaled value ...`` 
 
   This error usually occurs when writing LAS files, but can occur with other
   formats.
@@ -79,8 +76,18 @@ FAQ
   (notably :ref:`DEM creation<writers.gdal>`) can use large amounts of
   additional memory during processing before the output can be written.
   Depending on the operation, PDAL will attempt operate in
-  :ref:`stream mode <processing_modes>` to
-  limit memory consumption when possible.
+  :ref:`stream mode <processing_modes>` to limit memory consumption when possible.
+  If you want to limit the dimensions loaded, you may be able to use the ``dims`` option
+  that is available with some PDAL commands.
+
+  |nbsp|
+
+* How do you pronounce PDAL?
+
+  The proper spelling of the project name is PDAL, in uppercase. It is
+  pronounced to rhyme with "GDAL".
+
+  .. it is properly pronounced like the dog though :) -- hobu
 
   |nbsp|
 
