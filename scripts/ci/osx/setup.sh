@@ -14,7 +14,7 @@ if [ "$BUILD_TYPE" == "fixed" ]; then
 
 else
 
-    conda install pdal --only-deps -y
+    conda install pdal  gdal=3.4.1=py310h2eb646b_6 --only-deps -y
 
 fi
 
