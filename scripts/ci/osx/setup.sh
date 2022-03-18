@@ -9,10 +9,11 @@ if [ "$BUILD_TYPE" == "fixed" ]; then
 
     conda config --set channel_priority strict
     conda install --yes draco -y
-    conda install --yes --quiet gdal=3.4.1=py310h2eb646b_6  python=3.10  -y
+    conda install --yes --quiet gdal=3.4.1=py310h2eb646b_6
     conda install --yes --quiet pdal  --only-deps -y
 
 else
+    conda install --yes --quiet gdal=3.4.1=py310h2eb646b_6
     conda install pdal  --only-deps -y
 
 fi
