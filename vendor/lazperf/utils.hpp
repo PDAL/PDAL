@@ -39,9 +39,9 @@
 #include <limits>
 
 #ifdef PRINT_DEBUG
-#define LAZDEBUG(e) ((void)0)
-#else
 #define LAZDEBUG(e) (void)(e)
+#else
+#define LAZDEBUG(e) ((void)0)
 #endif
 
 namespace lazperf
