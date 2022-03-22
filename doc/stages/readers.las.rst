@@ -104,7 +104,7 @@ compression
   doesn't support version 1 LAZ files or version 1.4 of LAS. [Default: 'none']
 
 ignore_vlr
-  A comma-separated list of "userid/record_id" pairs specifying VLR records that should
+  A comma-separated list of "record_id/user_id" pairs specifying VLR records that should
   not be loaded.
 
 fix_dims
