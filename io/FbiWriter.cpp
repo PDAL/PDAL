@@ -66,12 +66,14 @@ void buildHdrFromPoints(fbi::FbiHdr& hdr, const PointViewPtr view)
     hdr.TimeType = 1; // standard time by default
     hdr.Order = 0; // order is not know
     hdr.Reserved1 = 0; // Not use for now
-    hdr.VlrCnt = 0; // no more varaibles
-    hdr.VlrSize = 0; // idem
-    hdr.RecSize = 0; // ?????
+    
+    // no additional values in this fbi export (for manage by terrascan for now)
+    hdr.VlrCnt = 0;
+    hdr.VlrSize = 0;
+    hdr.RecSize = 0;
      
     hdr.FastCnt = view->size();
-    hdr.RecCnt = 0; // no additional points
+    hdr.RecCnt = 0; // no additional points in this fbi export
     
     BOX3D box;
     view->calculateBounds(box);
@@ -109,32 +111,47 @@ void buildHdrFromPoints(fbi::FbiHdr& hdr, const PointViewPtr view)
     hdr.BitsLine = ( view->hasDim(Dimension::Id::PointSourceId) ? 16 : 0 );
     hdr.BitsEchoLen = ( view->hasDim(Dimension::Id::ReturnNumber) ? 16 : 0 );
     
-    hdr.BitsColor = 0;
-    if ( view->hasDim(Dimension::Id::Red) && view->hasDim(Dimension::Id::Blue) && view->hasDim(Dimension::Id::Green) ) hdr.BitsColor = 24;
-    if ( view->hasDim(Dimension::Id::Infrared) ) hdr.BitsColor += 32;
+    hdr.BitsColor = 0; int NbCanal (0);
+    if ( view->hasDim(Dimension::Id::Red) && view->hasDim(Dimension::Id::Blue) && view->hasDim(Dimension::Id::Green) )
+    {
+        hdr.BitsColor = 8*view->dimSize(Dimension::Id::Red);
+        assert ( hdr.BitsColor == 8*view->dimSize(Dimension::Id::Blue) );
+        assert ( hdr.BitsColor == 8*view->dimSize(Dimension::Id::Green) );
+        NbCanal = 3;
+    }
+    if ( view->hasDim(Dimension::Id::Infrared) )
+    {
+        if (hdr.BitsColor>0)
+            assert ( hdr.BitsColor == 8*view->dimSize(Dimension::Id::Infrared) );
+        else
+            hdr.BitsColor = 8*view->dimSize(Dimension::Id::Infrared);
+        NbCanal +=1;
+    }
 
+    hdr.BitsDistance = ( view->hasDim(Dimension::Id::NNDistance) ? 32 : 0 );
+    hdr.BitsAmplitude = ( view->hasDim(Dimension::Id::Amplitude) ? 16 : 0 );
+    hdr.BitsEchoNorm = ( view->hasDim(Dimension::Id::EchoNorm) ? 8 : 0 );
+    hdr.BitsEchoPos = ( view->hasDim(Dimension::Id::EchoPos) ? 16 : 0 );
+    hdr.BitsReflect = ( view->hasDim(Dimension::Id::Reflectance) ? 16 : 0 );
+    hdr.BitsDeviation = ( view->hasDim(Dimension::Id::Deviation) ? 16 : 0 );
+    hdr.BitsReliab = ( view->hasDim(Dimension::Id::Reliability) ? 8 : 0 );
+    
+    // why not 32 ?
+    hdr.BitsImage = ( view->hasDim(Dimension::Id::Image) ? 16 : 0 );
+    
     //Not found quivalent in pdal for now
-    hdr.BitsDistance = 0;
-    hdr.BitsNormal = 0;
-    hdr.BitsAmplitude = 0;
-    hdr.BitsEchoNorm = 0;
-    hdr.BitsEchoPos = 0;
-    hdr.BitsReflect = 0;
-    hdr.BitsDeviation = 0;
-    hdr.BitsReliab = 0;
-    hdr.BitsImage = 0;
-
+    //hdr.BitsNormal = ( view->hasDim(Dimension::Id::NormalX) ? 32 : 0 );
+    
     hdr.Reserved5 = 0;
     
-    hdr.PosVlr = 0 ; // je ne sais pas ce que c'est
+    hdr.PosVlr = 0 ; // not use in fbi files for now
     hdr.PosXyz = hdr.HdrSize;
     hdr.PosTime = hdr.PosXyz + 3*view->size()*sizeof(fbi::UINT);
     hdr.PosDistance = hdr.PosTime + view->size()*hdr.BitsTime/8;
     hdr.PosGroup = hdr.PosDistance + view->size()*hdr.BitsDistance/8;
-    hdr.PosImage = hdr.PosGroup + view->size()*hdr.BitsGroup/8;
-    hdr.PosNormal = hdr.PosImage + view->size()*hdr.BitsImage/8;
+    hdr.PosNormal =  hdr.PosGroup + view->size()*hdr.BitsGroup/8;
     hdr.PosColor = hdr.PosNormal + view->size()*hdr.BitsNormal/8;
-    hdr.PosIntensity = hdr.PosColor + view->size()*hdr.BitsColor/8;
+    hdr.PosIntensity = hdr.PosColor + NbCanal*view->size()*hdr.BitsColor/8;
     hdr.PosLine = hdr.PosIntensity + view->size()*hdr.BitsIntensity/8;
     hdr.PosEchoLen = hdr.PosLine + view->size()*hdr.BitsLine/8;
     hdr.PosAmplitude = hdr.PosEchoLen + view->size()*hdr.BitsEchoLen/8;
@@ -144,11 +161,12 @@ void buildHdrFromPoints(fbi::FbiHdr& hdr, const PointViewPtr view)
     hdr.PosEchoNorm = hdr.PosAngle + view->size()*hdr.BitsAngle/8;
     hdr.PosClass = hdr.PosEchoNorm + view->size()*hdr.BitsEchoNorm/8;
     hdr.PosEchoPos = hdr.PosClass + view->size()*hdr.BitsClass/8;
-    hdr.PosReflect = hdr.PosEchoPos + view->size()*hdr.BitsEchoPos/8;
+    hdr.PosImage = hdr.PosEchoPos + view->size()*hdr.BitsEchoPos/8;
+    hdr.PosReflect = hdr.PosImage + view->size()*hdr.BitsImage/8;
     hdr.PosDeviation = hdr.PosReflect + view->size()*hdr.BitsReflect/8;
     hdr.PosReliab = hdr.PosDeviation + view->size()*hdr.BitsDeviation/8;
     hdr.PosImgNbr = hdr.PosReliab + view->size()*hdr.BitsReliab/8;
-    hdr.PosRecord = hdr.PosImgNbr + view->size()*hdr.BitsImage/8;
+    hdr.PosRecord = hdr.PosImgNbr + view->size()*hdr.PosImgNbr/8;
 
     hdr.ImgNbrCnt = 0; //  I don't know what to put here for now...
     strcpy(hdr.Reserved6,""); // Not use for now
@@ -263,9 +281,9 @@ void FbiWriter::write(const PointViewPtr view)
         fbi::UINT yr = (Y - hdr->OrgY)*Mul;
         fbi::UINT zr = (Z - hdr->OrgZ)*Mul;
 
-        ofFBI->write(reinterpret_cast<const char *>(&xr), sizeof(hdr->BitsX));
-        ofFBI->write(reinterpret_cast<const char *>(&yr), sizeof(hdr->BitsY));
-        ofFBI->write(reinterpret_cast<const char *>(&zr), sizeof(hdr->BitsZ));
+        ofFBI->write(reinterpret_cast<const char *>(&xr), hdr->BitsX/8);
+        ofFBI->write(reinterpret_cast<const char *>(&yr), hdr->BitsY/8);
+        ofFBI->write(reinterpret_cast<const char *>(&zr), hdr->BitsZ/8);
     }
     
     if (hdr->BitsTime > 0)
@@ -283,7 +301,7 @@ void FbiWriter::write(const PointViewPtr view)
         for (PointId i = 0; i < view->size(); ++i)
         {
             point.setPointId(i);
-            uint8_t distance = point.getFieldAs<uint8_t>(Dimension::Id::NNDistance);
+            uint32_t distance = point.getFieldAs<uint32_t>(Dimension::Id::NNDistance);
             ofFBI->write(reinterpret_cast<const char *>(&distance), hdr->BitsDistance/8);
         }
     }
@@ -297,17 +315,19 @@ void FbiWriter::write(const PointViewPtr view)
             ofFBI->write(reinterpret_cast<const char *>(&cluster), hdr->BitsGroup/8);
         }
     }
-    
-    if (hdr->BitsImage > 0)
-    {
-        //nothing to do for now
-    }
-    
+        
     if (hdr->BitsNormal > 0)
     {
         //nothing to do for now
+        /*for (PointId i = 0; i < view->size(); ++i)
+        {
+            point.setPointId(i);
+            //uint32_t normal = 0;
+            //ofFBI->write(reinterpret_cast<const char *>(&normal), hdr->BitsNormal/8);
+        }*/
+
     }
-    
+        
     if (hdr->BitsColor > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
@@ -317,14 +337,15 @@ void FbiWriter::write(const PointViewPtr view)
             uint16_t blue = point.getFieldAs<uint16_t>(Dimension::Id::Blue);
             uint16_t green = point.getFieldAs<uint16_t>(Dimension::Id::Green);
             uint16_t red = point.getFieldAs<uint16_t>(Dimension::Id::Red);
-            ofFBI->write(reinterpret_cast<const char *>(&blue), 2);
-            ofFBI->write(reinterpret_cast<const char *>(&green), 2);
-            ofFBI->write(reinterpret_cast<const char *>(&red), 2);
             
-            if (hdr->BitsColor > 24)
+            ofFBI->write(reinterpret_cast<const char *>(&blue), hdr->BitsColor/8);
+            ofFBI->write(reinterpret_cast<const char *>(&green), hdr->BitsColor/8);
+            ofFBI->write(reinterpret_cast<const char *>(&red), hdr->BitsColor/8);
+            
+            if (view->hasDim(Dimension::Id::Infrared))
             {
                 uint16_t infra = point.getFieldAs<uint16_t>(Dimension::Id::Infrared);
-                ofFBI->write(reinterpret_cast<const char *>(&infra), 2);
+                ofFBI->write(reinterpret_cast<const char *>(&infra), hdr->BitsColor/8);
             }
         }
     }
@@ -368,27 +389,7 @@ void FbiWriter::write(const PointViewPtr view)
             ofFBI->write(reinterpret_cast<const char *>(&amplitude), hdr->BitsAmplitude/8);
         }
     }
-    
-    if (hdr->BitsReflect > 0)
-    {
-        for (PointId i = 0; i < view->size(); ++i)
-        {
-            point.setPointId(i);
-            uint16_t reflectance = point.getFieldAs<uint16_t>(Dimension::Id::Reflectance);
-            ofFBI->write(reinterpret_cast<const char *>(&reflectance), hdr->BitsReflect/8);
-        }
-    }
-    
-    if (hdr->BitsDeviation > 0)
-    {
-        for (PointId i = 0; i < view->size(); ++i)
-        {
-            point.setPointId(i);
-            uint16_t deviation = point.getFieldAs<uint16_t>(Dimension::Id::Deviation);
-            ofFBI->write(reinterpret_cast<const char *>(&deviation), hdr->BitsDeviation/8);
-        }
-    }
-    
+        
     if (hdr->BitsScanner > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
@@ -429,6 +430,16 @@ void FbiWriter::write(const PointViewPtr view)
         }
     }
 
+    if (hdr->BitsClass > 0)
+    {
+        for (PointId i = 0; i < view->size(); ++i)
+        {
+            point.setPointId(i);
+            uint8_t classif = point.getFieldAs<uint8_t>(Dimension::Id::Classification);
+            ofFBI->write(reinterpret_cast<const char *>(&classif), hdr->BitsClass/8);
+        }
+    }
+    
     if (hdr->BitsEchoPos > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
@@ -436,6 +447,36 @@ void FbiWriter::write(const PointViewPtr view)
             point.setPointId(i);
             uint16_t echoPos = point.getFieldAs<uint16_t>(Dimension::Id::EchoPos);
             ofFBI->write(reinterpret_cast<const char *>(&echoPos), hdr->BitsEchoPos/8);
+        }
+    }
+    
+    if (hdr->BitsImage > 0)
+    {
+        for (PointId i = 0; i < view->size(); ++i)
+        {
+            point.setPointId(i);
+            uint16_t image = point.getFieldAs<uint16_t>(Dimension::Id::Image);
+            ofFBI->write(reinterpret_cast<const char *>(&image), hdr->BitsImage/8);
+        }
+    }
+    
+    if (hdr->BitsReflect > 0)
+    {
+        for (PointId i = 0; i < view->size(); ++i)
+        {
+            point.setPointId(i);
+            uint16_t reflectance = point.getFieldAs<uint16_t>(Dimension::Id::Reflectance);
+            ofFBI->write(reinterpret_cast<const char *>(&reflectance), hdr->BitsReflect/8);
+        }
+    }
+    
+    if (hdr->BitsDeviation > 0)
+    {
+        for (PointId i = 0; i < view->size(); ++i)
+        {
+            point.setPointId(i);
+            uint16_t deviation = point.getFieldAs<uint16_t>(Dimension::Id::Deviation);
+            ofFBI->write(reinterpret_cast<const char *>(&deviation), hdr->BitsDeviation/8);
         }
     }
     
@@ -449,16 +490,11 @@ void FbiWriter::write(const PointViewPtr view)
         }
     }
     
-    if (hdr->BitsClass > 0)
+    if (hdr->ImgNbrCnt > 0)
     {
-        for (PointId i = 0; i < view->size(); ++i)
-        {
-            point.setPointId(i);
-            uint8_t classif = point.getFieldAs<uint8_t>(Dimension::Id::Classification);
-            ofFBI->write(reinterpret_cast<const char *>(&classif), hdr->BitsClass/8);
-        }
+        
     }
-
+    
     Utils::closeFile(ofFBI);
 }
 

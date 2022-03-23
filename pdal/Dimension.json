@@ -611,5 +611,15 @@
     "name": "EchoNorm",
     "type": "double",
     "description": "Difference in shape of a return signal compared to a typical return from a hard surface."
+    },
+    {
+    "name": "ImgNbr",
+    "type": "uint8",
+    "description": "Stores the number of the image from which it gets the color."
+    },
+    {
+    "name": "Image",
+    "type": "uint16",
+    "description": "Index of the image use for texturation."
     }
 ] }

@@ -1,36 +1,36 @@
 /******************************************************************************
-* Copyright (c) 2021, Antoine Lavenant, antoine.lavenant@ign.fr
-*
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following
-* conditions are met:
-*
-*     * Redistributions of source code must retain the above copyright
-*       notice, this list of conditions and the following disclaimer.
-*     * Redistributions in binary form must reproduce the above copyright
-*       notice, this list of conditions and the following disclaimer in
-*       the documentation and/or other materials provided
-*       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
-*       names of its contributors may be used to endorse or promote
-*       products derived from this software without specific prior
-*       written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-* "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-* LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-* FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-* COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-* BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
-* OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
-* AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
-* OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
-* OF SUCH DAMAGE.
-****************************************************************************/
+ * Copyright (c) 2021, Antoine Lavenant, antoine.lavenant@ign.fr
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following
+ * conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in
+ *       the documentation and/or other materials provided
+ *       with the distribution.
+ *     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+ *       names of its contributors may be used to endorse or promote
+ *       products derived from this software without specific prior
+ *       written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+ * OF SUCH DAMAGE.
+ ****************************************************************************/
 
 #include "FbiReader.hpp"
 
@@ -46,7 +46,7 @@ namespace pdal
 static StaticPluginInfo const s_info
 {
     "readers.fbi",
-    "Bbi Reader",
+    "Fbi Reader",
     "http://pdal.io/stages/readers.fbi.html",
     { "bin" }
 };
@@ -151,6 +151,8 @@ std::string FbiReader::getName() const { return s_info.name; }
 void FbiReader::initialize()
 {
     m_istreamPtr = Utils::openFile(m_filename, true);
+    if (!m_istreamPtr)
+        throwError("Couldn't open '" + m_filename + "'.");
     
     m_istreamPtr->seekg(0);
     
@@ -184,13 +186,32 @@ void FbiReader::addDimensions(PointLayoutPtr layout)
     if (hdr->BitsGroup > 0) layout->registerDim(Dimension::Id::ClusterID);
     if (hdr->BitsScanner > 0) layout->registerDim(Dimension::Id::UserData);
     if (hdr->BitsTime > 0) layout->registerDim(Dimension::Id::OffsetTime);
-
+    if (hdr->BitsDistance > 0) layout->registerDim(Dimension::Id::NNDistance);
+    if (hdr->BitsReliab > 0) layout->registerDim(Dimension::Id::Reliability);
+    if (hdr->BitsReflect > 0) layout->registerDim(Dimension::Id::Reflectance);
+    if (hdr->BitsDeviation > 0) layout->registerDim(Dimension::Id::Deviation);
+    if (hdr->BitsAmplitude > 0) layout->registerDim(Dimension::Id::Amplitude);
+    if (hdr->BitsEchoPos > 0) layout->registerDim(Dimension::Id::EchoPos);
+    if (hdr->BitsEchoNorm > 0) layout->registerDim(Dimension::Id::EchoNorm);
+    if (hdr->BitsEchoLen > 0) layout->registerDim(Dimension::Id::PulseWidth);
+    if (hdr->BitsImage > 0) layout->registerDim(Dimension::Id::Image);
+    
+    //if (hdr->BitsNormal > 0) layout->registerDim(Dimension::Id::);
+    
+    
     if (hdr->BitsColor > 0)
     {
+        // if (hdr->BitsColor == 24) : 3 bytes of RGB (1 byte by canal)
+        // if (hdr->BitsColor == 32) : 3 bytes of RGBI (1 byte by canal)
+        // if (hdr->BitsColor == 48) : 3*2 bytes of RGB (2 bytes by canal)
+        // if (hdr->BitsColor == 64) : 3*2 bytes of RGBI (2 bytes by canal)
+        
         layout->registerDim(Dimension::Id::Red);
         layout->registerDim(Dimension::Id::Green);
         layout->registerDim(Dimension::Id::Blue);
-        if (hdr->BitsColor > 24) layout->registerDim(Dimension::Id::Infrared);
+        if (hdr->BitsColor == 64 || hdr->BitsColor == 32) layout->registerDim(Dimension::Id::Infrared);
+        if (hdr->BitsColor == 24 || hdr->BitsColor == 48) NbBytesColor=8;
+        else NbBytesColor = 16;
     }
 }
 
@@ -233,15 +254,15 @@ point_count_t FbiReader::read(PointViewPtr view, point_count_t count)
     }
     
     if (hdr->BitsDistance > 0)
-   {
-       m_istreamPtr->seekg(hdr->PosDistance);
-       for (size_t i(0); i<hdr->FastCnt; i++)
-       {
-           fbi::UINT distance;
-           m_istreamPtr->read(reinterpret_cast<char *>(&distance), hdr->BitsDistance/8);
-           view->setField(Dimension::Id::NNDistance, i, uint32_t(distance));
-       }
-   }
+    {
+        m_istreamPtr->seekg(hdr->PosDistance);
+        for (size_t i(0); i<hdr->FastCnt; i++)
+        {
+            fbi::UINT distance;
+            m_istreamPtr->read(reinterpret_cast<char *>(&distance), hdr->BitsDistance/8);
+            view->setField(Dimension::Id::NNDistance, i, uint32_t(distance));
+        }
+    }
     
     if (hdr->BitsGroup > 0)
     {
@@ -253,7 +274,7 @@ point_count_t FbiReader::read(PointViewPtr view, point_count_t count)
             view->setField(Dimension::Id::ClusterID, i , uint32_t(grpId));
         }
     }
-      
+    
     if (hdr->BitsNormal > 0)
     {
         m_istreamPtr->seekg(hdr->PosNormal, std::ios::beg);
@@ -269,27 +290,28 @@ point_count_t FbiReader::read(PointViewPtr view, point_count_t count)
     if (hdr->BitsColor > 0)
     {
         m_istreamPtr->seekg(hdr->PosColor);
-        int rad ( hdr->BitsColor > 24 ? 8*4 : 8*3);
+        bool withIR = (view->layout()->hasDim(Dimension::Id::Infrared));
+        
         for (size_t i(0); i<hdr->FastCnt; i++)
         {
             fbi::UINT blue, green, red;
-            m_istreamPtr->read(reinterpret_cast<char *>(&red), hdr->BitsColor/rad);
-            m_istreamPtr->read(reinterpret_cast<char *>(&green), hdr->BitsColor/rad);
-            m_istreamPtr->read(reinterpret_cast<char *>(&blue), hdr->BitsColor/rad);
+            m_istreamPtr->read(reinterpret_cast<char *>(&red), NbBytesColor/8);
+            m_istreamPtr->read(reinterpret_cast<char *>(&green), NbBytesColor/8);
+            m_istreamPtr->read(reinterpret_cast<char *>(&blue), NbBytesColor/8);
             
-            view->setField(Dimension::Id::Red, i, uint8_t(red));
-            view->setField(Dimension::Id::Green, i, uint8_t(green));
-            view->setField(Dimension::Id::Blue, i, uint8_t(blue));
+            view->setField(Dimension::Id::Red, i, uint16_t(red));
+            view->setField(Dimension::Id::Green, i, uint16_t(green));
+            view->setField(Dimension::Id::Blue, i, uint16_t(blue));
             
-            if (hdr->BitsColor > 24)
+            if (withIR)
             {
                 fbi::UINT infra;
-                m_istreamPtr->read(reinterpret_cast<char *>(&infra), hdr->BitsColor/rad);
-                view->setField(Dimension::Id::Infrared, i, uint8_t(infra));
+                m_istreamPtr->read(reinterpret_cast<char *>(&infra), NbBytesColor/8);
+                view->setField(Dimension::Id::Infrared, i, uint16_t(infra));
             }
         }
     }
-        
+    
     if (hdr->BitsIntensity > 0)
     {
         m_istreamPtr->seekg(hdr->PosIntensity, std::ios::beg);
@@ -331,17 +353,6 @@ point_count_t FbiReader::read(PointViewPtr view, point_count_t count)
             fbi::UINT amplitude;
             m_istreamPtr->read(reinterpret_cast<char *>(&amplitude), hdr->BitsAmplitude/8);
             view->setField(Dimension::Id::Amplitude, i, uint16_t(amplitude));
-        }
-    }
-    
-    if (hdr->BitsReflect > 0)
-    {
-        m_istreamPtr->seekg(hdr->PosReflect);
-        for (size_t i(0); i<hdr->FastCnt; i++)
-        {
-            fbi::UINT reflectance;
-            m_istreamPtr->read(reinterpret_cast<char *>(&reflectance), hdr->BitsReflect/8);
-            view->setField(Dimension::Id::Reflectance, i, uint16_t(reflectance));
         }
     }
     
@@ -411,6 +422,17 @@ point_count_t FbiReader::read(PointViewPtr view, point_count_t count)
         }
     }
     
+    if (hdr->BitsImage > 0)
+    {
+        m_istreamPtr->seekg(hdr->PosImage);
+        for (size_t i(0); i<hdr->FastCnt; i++)
+        {
+            fbi::UINT id_image;
+            m_istreamPtr->read(reinterpret_cast<char *>(&id_image), hdr->BitsImage/8);
+            view->setField(Dimension::Id::Image, i , uint16_t(id_image));
+        }
+    }
+    
     if (hdr->BitsReliab > 0)
     {
         m_istreamPtr->seekg(hdr->PosReliab);
@@ -432,23 +454,25 @@ point_count_t FbiReader::read(PointViewPtr view, point_count_t count)
             view->setField(Dimension::Id::Classification, i , uint8_t(classif));
         }
     }
+    
+    if (hdr->ImgNbrCnt > 0)
+    {
+        m_istreamPtr->seekg(hdr->PosImgNbr);
+        for (size_t i(0); i<hdr->FastCnt; i++)
+        {
+            fbi::UINT64 imageNbr;
+            m_istreamPtr->read(reinterpret_cast<char *>(&imageNbr), hdr->BitsImage/8);
+            view->setField(Dimension::Id::ImgNbr, i , uint8_t(imageNbr));
+        }
+    }
+    
+    
+    // ToDo : read the additional points
+    for (size_t i(0); i<hdr->RecCnt; i++)
+    {
         
-    /*
-     Other Fbi contents - Not found equivalent in pdal model for now
-    x
-     
-     
-     if (hdr->BitsImage > 0)
-     {
-         m_istreamPtr->seekg(hdr->PosImage);
-         for (size_t i(0); i<hdr->FastCnt; i++)
-             m_istreamPtr->read(reinterpret_cast<char *>(&vPt[i].imNumber), hdr->BitsImage/8);
-     }
-     
-
-     
-     */
-
+    }
+    
     return hdr->FastCnt;
 }
 

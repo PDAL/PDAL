@@ -72,6 +72,10 @@ private:
     
     FbiReader& operator=(const FbiReader&); // not implemented
     FbiReader(const FbiReader&); // not implemented
+
+private:
+    int NbBytesColor; // deduce from BitsColor
+    
 };
 
 } // namespace pdal
