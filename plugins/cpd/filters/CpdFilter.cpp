@@ -147,10 +147,27 @@ PointViewPtr CpdFilter::change(PointViewPtr fixed, PointViewPtr moving)
     return moving;
 }
 
+namespace
+{
+
+cpd::Matrix pointViewToEigen(const PointViewPtr *view)
+{
+    Eigen::MatrixXd matrix(view->size(), 3);
+    for (PointId i = 0; i < view->size(); ++i)
+    {
+        matrix(i, 0) = view->getFieldAs<double>(Dimension::Id::X, i);
+        matrix(i, 1) = view->getFieldAs<double>(Dimension::Id::Y, i);
+        matrix(i, 2) = view->getFieldAs<double>(Dimension::Id::Z, i);
+    }
+    return matrix;
+}
+
+} // unnamed namespace
+
 void CpdFilter::cpd_rigid(PointViewPtr fixed, PointViewPtr moving)
 {
-    cpd::Matrix fixedMatrix = math::pointViewToEigen(*fixed);
-    cpd::Matrix movingMatrix = math::pointViewToEigen(*moving);
+    cpd::Matrix fixedMatrix = pointViewToEigen(fixed);
+    cpd::Matrix movingMatrix = pointViewToEigen(moving);
     cpd::RigidResult result = cpd::rigid(fixedMatrix, movingMatrix);
     movePoints(moving, result.points);
     addMetadata(this, static_cast<cpd::Result>(result));
@@ -160,8 +177,8 @@ void CpdFilter::cpd_rigid(PointViewPtr fixed, PointViewPtr moving)
 
 void CpdFilter::cpd_affine(PointViewPtr fixed, PointViewPtr moving)
 {
-    cpd::Matrix fixedMatrix = math::pointViewToEigen(*fixed);
-    cpd::Matrix movingMatrix = math::pointViewToEigen(*moving);
+    cpd::Matrix fixedMatrix = pointViewToEigen(fixed);
+    cpd::Matrix movingMatrix = pointViewToEigen(moving);
     cpd::AffineResult result = cpd::affine(fixedMatrix, movingMatrix);
     movePoints(moving, result.points);
     MetadataNode root = getMetadata();
