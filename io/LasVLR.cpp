@@ -55,8 +55,23 @@ struct LasVLR::Private
 LasVLR::LasVLR(las::Vlr *v) : d(std::make_unique<Private>(v))
 {}
 
+LasVLR::LasVLR(const LasVLR& src) : d(std::make_unique<Private>(src.d->v))
+{}
+
 LasVLR::LasVLR(LasVLR&& v) : d(std::move(v.d))
 {}
+
+LasVLR& LasVLR::operator=(const LasVLR& src)
+{
+    d->v = src.d->v;
+    return *this;
+}
+
+LasVLR& LasVLR::operator=(LasVLR&& src)
+{
+    d->v = src.d->v;
+    return *this;
+}
 
 LasVLR::~LasVLR()
 {}
