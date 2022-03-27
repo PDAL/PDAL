@@ -310,7 +310,7 @@ point_count_t PtxReader::read(PointViewPtr view, point_count_t numPts)
             // exact double comparisons here on purpose to ensure empty is
             // exactly empty!
 
-            if (values == std::array<double, 7>{ 0.0, 0.0, 0.0, 0.5, 0, 0, 0 })
+            if (values == std::array<double, 7>{ 0.0, 0.0, 0.0, 2048, 0, 0, 0 })
             {
                 log()->get(LogLevel::Debug) << "Line " << line << " in '" <<
                     m_filename << "' contains an empty point. Ignoring." << 
