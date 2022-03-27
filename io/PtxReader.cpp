@@ -242,16 +242,26 @@ point_count_t PtxReader::read(PointViewPtr view, point_count_t numPts)
             // In either case we expect now to read the next header. I wonder
             // if it makes sense to write a cloud index, or similar dimension?
 
-            if (m_istream->eof())
+            if (m_istream->peek() == EOF)
                 break; // We have reached the end of the file, so we break out!
-
-            line += 10;
-            countPerHeader = 0;
 
             // Read next header. This will throw on failure. We are a bit
             // stricter about this than we are with point read failures.
 
-            header = readHeader();
+            try
+            {
+                header = readHeader();
+            }
+            catch (...)
+            {
+                log()->get(LogLevel::Error) << "Line " << line <<
+                    " in '" << m_filename << "' contains an invalid header!"
+                    << std::endl;
+                throw;
+            }
+
+            line += 10;
+            countPerHeader = 0;
         }
 
         ++countPerHeader;
