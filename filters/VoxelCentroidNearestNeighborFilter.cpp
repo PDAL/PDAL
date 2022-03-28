@@ -134,7 +134,7 @@ PointViewSet VoxelCentroidNearestNeighborFilter::run(PointViewPtr view)
 
             // Compute distance from each point in the voxel to the centroid,
             // retaining only the closest.
-            PointId pmin;
+            PointId pmin = 0;
             double dmin((std::numeric_limits<double>::max)());
             for (auto const& p : t.second)
             {
