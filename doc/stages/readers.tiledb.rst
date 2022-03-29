@@ -3,7 +3,7 @@
 readers.tiledb
 ==============
 
-Implements `TileDB`_ 1.4.1+ storage.
+Implements `TileDB`_ 2.3.0+ storage.
 
 .. plugin::
 

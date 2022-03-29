@@ -122,17 +122,12 @@ namespace pdal
 
         tiledb::Array array(ctx, pth, TILEDB_READ);
 
-#if TILEDB_VERSION_MAJOR == 1 && TILEDB_VERSION_MINOR < 7
-        // check the sidecar exists
-        EXPECT_TRUE(pdal::Utils::fileExists(sidecar));
-#else
         tiledb_datatype_t v_type = TILEDB_UINT8;
         const void* v_r;
         uint32_t v_num;
         array.get_metadata("_pdal", &v_type, &v_num, &v_r);
         NL::json meta = NL::json::parse(static_cast<const char*>(v_r));
         EXPECT_TRUE(meta.count("writers.tiledb") > 0);
-#endif
 
         auto domain = array.non_empty_domain<double>();
         std::vector<double> subarray;
@@ -146,10 +141,6 @@ namespace pdal
         tiledb::Query q(ctx, array, TILEDB_READ);
         q.set_subarray(subarray);
 
-#if TILEDB_VERSION_MAJOR == 1
-        std::vector<double> coords(count  * 3);
-        q.set_coordinates(coords);
-#else
         std::vector<double> xs(count);
         std::vector<double> ys(count);
         std::vector<double> zs(count);
@@ -157,15 +148,12 @@ namespace pdal
         q.set_buffer("X", xs)
             .set_buffer("Y", ys)
             .set_buffer("Z", zs);
-#endif
+
         q.submit();
         array.close();
 
-#if TILEDB_VERSION_MAJOR == 1
-    result_num = (int)q.result_buffer_elements()["__coords"].second / 3;
-#else
-    result_num = (int)q.result_buffer_elements()["X"].second;
-#endif
+        result_num = (int)q.result_buffer_elements()["X"].second;
+
         EXPECT_EQ(m_reader.count(), result_num);
 
         ASSERT_DOUBLE_EQ(subarray[0], 0.0);
@@ -211,17 +199,12 @@ namespace pdal
         auto domain = array.non_empty_domain<double>();
         std::vector<double> subarray;
 
-#if TILEDB_VERSION_MAJOR == 1 && TILEDB_VERSION_MINOR < 7
-        // check the sidecar exists so that the execute has completed
-        EXPECT_TRUE(pdal::Utils::fileExists(sidecar));
-#else
         tiledb_datatype_t v_type = TILEDB_UINT8;
         const void* v_r;
         uint32_t v_num;
         array.get_metadata("_pdal", &v_type, &v_num, &v_r);
         NL::json meta = NL::json::parse(static_cast<const char*>(v_r));
         EXPECT_TRUE(meta.count("writers.tiledb") > 0);
-#endif
 
         for (const auto& kv: domain)
         {
@@ -232,10 +215,6 @@ namespace pdal
         tiledb::Query q(ctx, array, TILEDB_READ);
         q.set_subarray(subarray);
 
-#if TILEDB_VERSION_MAJOR == 1
-        std::vector<double> coords(count * 2 * 3);
-        q.set_coordinates(coords);
-#else
         std::vector<double> xs(count * 2);
         std::vector<double> ys(count * 2);
         std::vector<double> zs(count * 2);
@@ -243,16 +222,11 @@ namespace pdal
         q.set_buffer("X", xs)
             .set_buffer("Y", ys)
             .set_buffer("Z", zs);
-#endif
 
         q.submit();
         array.close();
 
-#if TILEDB_VERSION_MAJOR == 1
-        result_num = ((int)q.result_buffer_elements()["__coords"].second / 3) * 2;
-#else
         result_num = (int)q.result_buffer_elements()["X"].second;
-#endif
 
         EXPECT_EQ(m_reader.count() + m_reader2.count(), result_num);
     }
@@ -282,7 +256,7 @@ namespace pdal
 
         tiledb::Array array(ctx, pth, TILEDB_READ);
 
-        tiledb::FilterList fl = array.schema().coords_filter_list();
+        tiledb::FilterList fl = array.schema().domain().dimension("X").filter_list();
         EXPECT_EQ(fl.nfilters(), 1U);
 
         tiledb::Filter f = fl.filter(0);
@@ -301,7 +275,7 @@ namespace pdal
         NL::json jsonOptions;
 
         // add an array filter
-        jsonOptions["coords"] = {
+        jsonOptions["X"] = {
             {{"compression", "bit-shuffle"}},
             {{"compression", "zstd"}, {"compression_level", 7}}
         };
@@ -323,7 +297,7 @@ namespace pdal
 
         tiledb::Array array(ctx, pth, TILEDB_READ);
 
-        tiledb::FilterList fl = array.schema().coords_filter_list();
+        tiledb::FilterList fl = array.schema().domain().dimension("X").filter_list();
         EXPECT_EQ(fl.nfilters(), 2U);
 
         tiledb::Filter f1 = fl.filter(0);
@@ -350,7 +324,7 @@ namespace pdal
         NL::json jsonOptions;
 
         // add an array filter
-        jsonOptions["coords"] = {
+        jsonOptions["X"] = {
             {{"compression", "bit-shuffle"}},
             {{"compression", "gzip"}, {"compression_level", 9}}
         };
@@ -373,7 +347,7 @@ namespace pdal
 
         tiledb::Array array(ctx, pth, TILEDB_READ);
 
-        tiledb::FilterList fl = array.schema().coords_filter_list();
+        tiledb::FilterList fl = array.schema().domain().dimension("X").filter_list();
         EXPECT_EQ(fl.nfilters(), 2U);
 
         tiledb::Filter f1 = fl.filter(0);
@@ -406,7 +380,7 @@ namespace pdal
 
         tiledb::Array array(ctx, pth, TILEDB_READ);
 
-        tiledb::FilterList fl = array.schema().coords_filter_list();
+        tiledb::FilterList fl = array.schema().domain().dimension("X").filter_list();
         EXPECT_EQ(fl.nfilters(), 1U);
 
         tiledb::Filter f1 = fl.filter(0);
@@ -420,7 +394,6 @@ namespace pdal
         EXPECT_EQ(flAtts.nfilters(), 0U);
     }
 
-#if TILEDB_VERSION_MAJOR >= 2
     TEST_F(TileDBWriterTest, write_timestamp)
     {
         std::string pth = Support::temppath("tiledb_test_ts_out");
@@ -470,7 +443,6 @@ namespace pdal
         filter2.setInput(rdr2);
         EXPECT_EQ(200U, mgr2.execute());
 
-#if TILEDB_VERSION_MAJOR > 2 || (TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR >= 3)
         PipelineManager mgrSlice;
         optsR.remove(Option("timestamp", 2));
         optsR.add("start_timestamp", 2);
@@ -481,12 +453,8 @@ namespace pdal
         Stage& filterSlice = mgrSlice.addFilter("filters.stats");
         filterSlice.setInput(rdrSlice);
         EXPECT_EQ(100U, mgrSlice.execute());
-#endif
     }
-#endif
 
-
-#if TILEDB_VERSION_MAJOR > 1
     TEST_F(TileDBWriterTest, dup_points)
     {
         Options reader_options;
@@ -545,10 +513,7 @@ namespace pdal
         for (int i = 0; i < result_num; i++)
             EXPECT_EQ(xs[i], 1.0); // points are always at the minimum of the box
     }
-#endif
 
-#if TILEDB_VERSION_MAJOR >= 2
-    #if ((TILEDB_VERSION_MINOR > 1) || (TILEDB_VERSION_MAJOR > 2))
     TEST_F(TileDBWriterTest, sf_curve)
     {
         Options reader_options;
@@ -647,6 +612,4 @@ namespace pdal
             array.schema().cell_order() == TILEDB_HILBERT);
         array.close();
     }
-    #endif
-#endif
 }

@@ -110,10 +110,8 @@ void TileDBReader::addArgs(ProgramArgs& args)
     args.add("end_timestamp", "TileDB array timestamp", m_endTimeStamp,
         point_count_t(0));
     args.addSynonym("end_timestamp", "timestamp");
-#if TILEDB_VERSION_MAJOR > 2 || (TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR >= 3)
     args.add("start_timestamp", "TileDB array timestamp", m_startTimeStamp,
         point_count_t(0));
-#endif
 }
 
 void TileDBReader::prepared(PointTableRef table)
@@ -141,7 +139,6 @@ void TileDBReader::initialize()
 
         if (m_endTimeStamp)
         {
-#if TILEDB_VERSION_MAJOR > 2 || (TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR >= 3)
             if (m_startTimeStamp)
             {
                 m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ));
@@ -150,8 +147,7 @@ void TileDBReader::initialize()
                 m_array->reopen();
             }
             else
-#endif
-            m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ, m_endTimeStamp));
+                m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ, m_endTimeStamp));
         }
         else
             m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ));
@@ -179,13 +175,9 @@ void TileDBReader::addDimensions(PointLayoutPtr layout)
         di.m_name = dim.name();
         if (di.m_name == "GpsTime")
             m_has_time = true;
-#if TILEDB_VERSION_MAJOR == 1
-        di.m_offset = i;
-        di.m_span = dims.size();
-#else
+
         di.m_offset = 0;
         di.m_span = 1;
-#endif
         di.m_dimCategory = DimCategory::Dimension;
         di.m_tileType = dim.type();
         di.m_type = getPdalType(di.m_tileType);
@@ -289,22 +281,9 @@ void TileDBReader::localReady()
 
     DimInfo& di = *it;
 
-#if TILEDB_VERSION_MAJOR == 1
-    Buffer *dimBuf = new Buffer(di.m_tileType, m_chunkSize * numDims);
-    m_query->set_coordinates(dimBuf->get<double>(), dimBuf->count());
-    m_buffers.push_back(std::unique_ptr<Buffer>(dimBuf));
-#endif
-
     for (DimInfo& di : m_dims)
     {
         // All dimensions use the same buffer.
-#if TILEDB_VERSION_MAJOR == 1 
-        if (di.m_dimCategory == DimCategory::Dimension)
-        {
-            di.m_buffer = dimBuf;
-            continue;
-        }
-#endif
         std::unique_ptr<Buffer> dimBuf(
             new Buffer(di.m_tileType, m_chunkSize));
         di.m_buffer = dimBuf.get();
@@ -342,32 +321,12 @@ void TileDBReader::localReady()
     // read spatial reference
     NL::json meta = nullptr;
 
-#if TILEDB_VERSION_MAJOR > 1 || TILEDB_VERSION_MINOR >= 7
     tiledb_datatype_t v_type = TILEDB_UINT8;
     const void* v_r;
     uint32_t v_num;
     m_array->get_metadata("_pdal", &v_type, &v_num, &v_r);
     if (v_r != NULL)
         meta = NL::json::parse(static_cast<const char*>(v_r));
-#endif
-
-    if (meta == nullptr)
-    {
-        tiledb::VFS vfs(*m_ctx, m_ctx->config());
-        tiledb::VFS::filebuf fbuf(vfs);
-        std::string metaFName = m_filename + pathSeparator + "pdal.json";
-
-        if (vfs.is_file(metaFName))
-        {
-            auto nBytes = vfs.file_size(metaFName);
-            tiledb::VFS::filebuf fbuf(vfs);
-            fbuf.open(metaFName, std::ios::in);
-            std::istream is(&fbuf);
-            std::string s { std::istreambuf_iterator<char>(is), std::istreambuf_iterator<char>() };
-            fbuf.close();
-            meta = NL::json::parse(s);
-        }
-    }
 
     if ((meta != nullptr) &&
         (meta.count("writers.tiledb") > 0) &&
@@ -474,13 +433,8 @@ bool TileDBReader::processPoint(PointRef& point)
             // returned by the query for dimensions.  So if there are three
             // dimensions, the number of points returned is the buffer count
             // divided by the number of dimensions.
-#if TILEDB_VERSION_MAJOR == 1
-            m_resultSize =
-                (int)m_query->result_buffer_elements()[TILEDB_COORDS].second /
-                m_array->schema().domain().dimensions().size();
-#else
             m_resultSize = (int)m_query->result_buffer_elements()["X"].second;
-#endif
+
             if (status == tiledb::Query::Status::INCOMPLETE &&
                     m_resultSize == 0)
                 throwError("Need to increase chunk_size for reader.");
