@@ -610,6 +610,16 @@ namespace pdal
         tiledb::Array array(ctx, pth, TILEDB_READ);
         EXPECT_EQ(true,
             array.schema().cell_order() == TILEDB_HILBERT);
+
+        tiledb_datatype_t v_type = TILEDB_UINT8;
+        const void* v_r;
+        uint32_t v_num;
+        array.get_metadata("_pdal", &v_type, &v_num, &v_r);
+        NL::json metaDoc = NL::json::parse(static_cast<const char*>(v_r));
+
+        EXPECT_TRUE(metaDoc.contains("filters.stats"));
+        EXPECT_TRUE(metaDoc.contains("writers.tiledb"));
+
         array.close();
     }
 }
