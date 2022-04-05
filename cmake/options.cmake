@@ -12,6 +12,11 @@ option(BUILD_PLUGIN_CPD
 add_feature_info("CPD plugin" BUILD_PLUGIN_CPD
     "Coherent Point Drift (CPD) computes rigid or nonrigid transformations between point sets")
 
+option(BUILD_PLUGIN_TRAJECTORY
+    "Choose if LAS trajectory computation support should be built. Requires Ceres Solver." FALSE)
+add_feature_info("Trajectory plugin" BUILD_PLUGIN_TRAJECTORY
+    "Compute trajectory from LAS input")
+
 option(BUILD_PLUGIN_I3S
     "Choose if I3S and SLPK support should be built" FALSE)
 add_feature_info("I3S plugin" BUILD_PLUGIN_I3S
