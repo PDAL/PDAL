@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include "FbiWriter.hpp"
+#include "FbiHeader.hpp"
 
 #include <pdal/PDALUtils.hpp>
 
@@ -135,12 +136,10 @@ void buildHdrFromPoints(fbi::FbiHdr& hdr, const PointViewPtr view)
     hdr.BitsReflect = ( view->hasDim(Dimension::Id::Reflectance) ? 16 : 0 );
     hdr.BitsDeviation = ( view->hasDim(Dimension::Id::Deviation) ? 16 : 0 );
     hdr.BitsReliab = ( view->hasDim(Dimension::Id::Reliability) ? 8 : 0 );
-    
+    hdr.BitsNormal = ( view->hasDim(Dimension::Id::NormalX) ? 32 : 0 );
+
     // why not 32 ?
     hdr.BitsImage = ( view->hasDim(Dimension::Id::Image) ? 16 : 0 );
-    
-    //Not found quivalent in pdal for now
-    //hdr.BitsNormal = ( view->hasDim(Dimension::Id::NormalX) ? 32 : 0 );
     
     hdr.Reserved5 = 0;
     
@@ -257,6 +256,28 @@ void FbiWriter::addArgs(ProgramArgs& args)
     args.add("filename", "Output filename", m_filename).setPositional();
 }
 
+void NrmVecSet(fbi::NrmVec *Vp, int Dim, double X, double Y, double Z)
+{
+    double Hml = 32767.0 / fbi::hc_2pi ;
+    double Vml = 32767.0 / fbi::hc_pi ;
+    double Van = asin(Z);
+    int Vvl = std::floor( Vml * (Van + fbi::hc_piover2)) ;
+    Vvl = std::max( Vvl, 0) ;
+    Vvl = std::min( Vvl, 32767) ;
+    Vp->Dim     = Dim ;
+    Vp->VertAng = Vvl ;
+    Vp->HorzAng = 0;
+    if ((X) || (Y)) {
+        double Han = atan2( Y, X) ;
+        if (Han < 0.0)
+            Han += fbi::hc_2pi ;
+        int Hvl = std::floor( Hml * Han) ;
+        Hvl = std::max( Hvl, 0) ;
+        Hvl = std::min( Hvl, 32767) ;
+        Vp->HorzAng = Hvl ;
+    }
+}
+
 void FbiWriter::write(const PointViewPtr view)
 {
     buildHdrFromPoints(*hdr, view);
@@ -315,16 +336,20 @@ void FbiWriter::write(const PointViewPtr view)
             ofFBI->write(reinterpret_cast<const char *>(&cluster), hdr->BitsGroup/8);
         }
     }
-        
+    
     if (hdr->BitsNormal > 0)
     {
-        //nothing to do for now
-        /*for (PointId i = 0; i < view->size(); ++i)
+        for (PointId i = 0; i < view->size(); ++i)
         {
             point.setPointId(i);
-            //uint32_t normal = 0;
-            //ofFBI->write(reinterpret_cast<const char *>(&normal), hdr->BitsNormal/8);
-        }*/
+            uint8_t dim = point.getFieldAs<double>(Dimension::Id::Dimension);
+            double norm_x = point.getFieldAs<double>(Dimension::Id::NormalX);
+            double norm_y = point.getFieldAs<double>(Dimension::Id::NormalY);
+            double norm_z = point.getFieldAs<double>(Dimension::Id::NormalZ);
+            fbi::NrmVec normVec;
+            NrmVecSet(&normVec, dim, norm_x, norm_y, norm_z);
+            ofFBI->write(reinterpret_cast<const char *>(&normVec), hdr->BitsNormal/8);
+        }
 
     }
         

@@ -196,8 +196,13 @@ void FbiReader::addDimensions(PointLayoutPtr layout)
     if (hdr->BitsEchoLen > 0) layout->registerDim(Dimension::Id::PulseWidth);
     if (hdr->BitsImage > 0) layout->registerDim(Dimension::Id::Image);
     
-    //if (hdr->BitsNormal > 0) layout->registerDim(Dimension::Id::);
-    
+    if (hdr->BitsNormal > 0)
+    {
+        layout->registerDim(Dimension::Id::NormalX);
+        layout->registerDim(Dimension::Id::NormalY);
+        layout->registerDim(Dimension::Id::NormalZ);
+        layout->registerDim(Dimension::Id::Dimension);
+    }
     
     if (hdr->BitsColor > 0)
     {
@@ -219,6 +224,63 @@ void FbiReader::ready(PointTableRef)
 {
     m_istreamPtr = Utils::openFile(m_filename, true);
     m_istreamPtr->seekg( hdr->HdrSize );
+}
+
+// Normal vector lookup tables
+static int NrmTblInit=0;
+static double NrmHcos[32768];
+static double NrmHsin[32768];
+static double NrmVsin[32768];
+static double NrmVxml[32768];
+
+// ==================================================================
+// Fill lookup tables for NrmVecGetVector() routine.
+// ==================================================================
+
+void NrmVecFillLookups( void)
+{
+    double Hml = fbi::hc_2pi / 32767.0 ;
+    double Vml = fbi::hc_pi / 32767.0 ;
+    double Ang ;
+    double Xml ;
+    double Zvl ;
+
+    // Fill horizontal angle tables
+    for( int K(0) ; K < 32768 ; K++)
+    {
+        Ang = Hml * K ;
+        NrmHcos[K] = cos(Ang) ;
+        NrmHsin[K] = sin(Ang) ;
+    }
+
+    // Fill vertical angle tables
+    for( int K(0) ; K < 32768 ; K++)
+    {
+        Ang = (Vml * K) - fbi::hc_piover2 ;
+        Zvl = sin(Ang) ;
+        Xml = sqrt( 1.0 - (Zvl * Zvl)) ;
+        NrmVsin[K] = Zvl ;
+        NrmVxml[K] = Xml ;
+    }
+}
+ 
+// ==================================================================
+// Get normalized direction vector from NrmVec structure.
+// ==================================================================
+
+void NrmVecGetVector( double& norm_x, double& norm_y, double& norm_z, const fbi::NrmVec *Vp)
+{
+    if (!NrmTblInit) {
+        NrmTblInit = 1 ;
+        NrmVecFillLookups() ;
+    }
+
+    int H = Vp->HorzAng ;
+    int V = Vp->VertAng ;
+    double Xml = NrmVxml[V] ;
+    norm_x = Xml * NrmHcos[H] ;
+    norm_y = Xml * NrmHsin[H] ;
+    norm_z = NrmVsin[V] ;
 }
 
 point_count_t FbiReader::read(PointViewPtr view, point_count_t count)
@@ -280,10 +342,14 @@ point_count_t FbiReader::read(PointViewPtr view, point_count_t count)
         m_istreamPtr->seekg(hdr->PosNormal, std::ios::beg);
         for (size_t i(0); i<hdr->FastCnt; i++)
         {
-            fbi::UINT normVec;
+            fbi::NrmVec normVec;
             m_istreamPtr->read(reinterpret_cast<char *>(&normVec), hdr->BitsNormal/8);
-            //not clear for now...
-            //view->setField(Dimension::Id::Intensity, i, uint32_t(normVec));
+            double norm_x, norm_y, norm_z;
+            NrmVecGetVector(norm_x, norm_y, norm_z, &normVec);
+            view->setField(Dimension::Id::Dimension, i, uint8_t(normVec.Dim));
+            view->setField(Dimension::Id::NormalX, i, norm_x);
+            view->setField(Dimension::Id::NormalY, i, norm_y);
+            view->setField(Dimension::Id::NormalZ, i, norm_z);
         }
     }
     

@@ -50,6 +50,17 @@ typedef uint32_t UINT;
 typedef uint64_t UINT64;
 typedef unsigned char BYTE ;
 
+// Normal vector & dimensionality
+typedef struct {
+  unsigned Dim     :  2 ; // Dimension 0=unknown, 1=line, 2=plane, 3=random
+  unsigned HorzAng : 15 ; // Horizontal angle
+  unsigned VertAng : 15 ; // Vertical angle
+} NrmVec ;
+
+static double hc_pi = 3.1415926535897932384626433;
+static double hc_2pi = 2.0 * hc_pi ;
+static double hc_piover2 = 0.5 * hc_pi ;
+
 //struct from FBI documentation
 struct FbiHdr {
     
