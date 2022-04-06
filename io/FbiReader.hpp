@@ -75,6 +75,7 @@ private:
 
 private:
     int NbBytesColor; // deduce from BitsColor
+    std::vector<fbi::UINT64> indexNameImages;
     
 };
 

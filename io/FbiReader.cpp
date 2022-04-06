@@ -488,6 +488,7 @@ point_count_t FbiReader::read(PointViewPtr view, point_count_t count)
         }
     }
     
+    std::vector<fbi::UINT> indexImages;
     if (hdr->BitsImage > 0)
     {
         m_istreamPtr->seekg(hdr->PosImage);
@@ -495,7 +496,7 @@ point_count_t FbiReader::read(PointViewPtr view, point_count_t count)
         {
             fbi::UINT id_image;
             m_istreamPtr->read(reinterpret_cast<char *>(&id_image), hdr->BitsImage/8);
-            view->setField(Dimension::Id::Image, i , uint16_t(id_image));
+            indexImages.push_back(id_image);
         }
     }
     
@@ -524,21 +525,22 @@ point_count_t FbiReader::read(PointViewPtr view, point_count_t count)
     if (hdr->ImgNbrCnt > 0)
     {
         m_istreamPtr->seekg(hdr->PosImgNbr);
-        for (size_t i(0); i<hdr->FastCnt; i++)
+        for (size_t i(0); i<hdr->ImgNbrCnt; i++)
         {
             fbi::UINT64 imageNbr;
-            m_istreamPtr->read(reinterpret_cast<char *>(&imageNbr), hdr->BitsImage/8);
-            view->setField(Dimension::Id::ImgNbr, i , uint8_t(imageNbr));
+            m_istreamPtr->read(reinterpret_cast<char *>(&imageNbr), 64/8);
+            indexNameImages.push_back(imageNbr);
         }
+        
+        for (size_t i(0); i<hdr->FastCnt; i++)
+            view->setField(Dimension::Id::Image, i , uint16_t( indexNameImages[indexImages[i]] ));
     }
-    
     
     // ToDo : read the additional points
     for (size_t i(0); i<hdr->RecCnt; i++)
     {
-        
     }
-    
+        
     return hdr->FastCnt;
 }
 
