@@ -96,6 +96,8 @@ FAQ
   PDAL is not a workflow engine for processing point cloud data.
   PDAL is a library *for making* point cloud processing workflow engines.
 
+  |nbsp|
+
 * What is PDAL's relationship to PCL?
 
   PDAL is PCL's data translation cousin. PDAL is focused on providing a
