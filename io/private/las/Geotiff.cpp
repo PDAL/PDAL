@@ -35,6 +35,7 @@
 #include "Geotiff.hpp"
 
 #include <sstream>
+#include <cstdarg>
 
 #include <geo_normalize.h>
 #include <geo_simpletags.h>
