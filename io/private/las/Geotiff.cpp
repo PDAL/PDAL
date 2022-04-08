@@ -35,10 +35,10 @@
 #include "Geotiff.hpp"
 
 #include <sstream>
-#include <cstdarg>
 
 #include <geo_normalize.h>
 #include <geo_simpletags.h>
+#include <geo_tiffp.h>
 
 namespace pdal
 {
@@ -103,7 +103,7 @@ public:
     GeotiffCtx() : gtiff(nullptr)
     {
         tiff = ST_Create();
-        GTIFSetSimpleTagsMethods(methods);
+        GTIFSetSimpleTagsMethods(&methods);
     }
 
     ~GeotiffCtx()
@@ -115,7 +115,7 @@ public:
 
     ST_TIFF *tiff;
     GTIF *gtiff;
-    TIFFMethod *methods;
+    TIFFMethod methods;
 };
 
 static void PDALGTIFErrorFunction(GTIF* gt, int level, const char* msg, ...)
@@ -195,7 +195,7 @@ GeotiffSrs::GeotiffSrs(const std::vector<char>& directoryRec,
     }
 
     ctx.gtiff = GTIFNewWithMethodsEx(ctx.tiff,
-                                     ctx.methods,
+                                     &ctx.methods,
                                      PDALGTIFErrorFunction,
                                      (void*) this);
     if (!ctx.gtiff)
