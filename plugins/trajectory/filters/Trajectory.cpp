@@ -6,6 +6,7 @@
 #include <cmath>
 #include <Eigen/Dense>
 
+#include "Args.hpp"
 #include "PulseCollection.hpp"
 
 namespace pdal
@@ -13,19 +14,14 @@ namespace pdal
 
 static PluginInfo const s_info
 {
-    "filters.sritrajectory",
+    "filters.trajectory",
     "SRI Trajectory calculator",
     "http://link/to/documentation"
 };
 
-struct Trajectory::PrivateArgs
-{
-    StringList m_params;
-};
-
 CREATE_SHARED_STAGE(Trajectory, s_info)
 
-Trajectory::Trajectory() : m_args(new PrivateArgs)
+Trajectory::Trajectory() : m_args(new trajectory::Args)
 {}
 
 Trajectory::~Trajectory()
@@ -36,13 +32,15 @@ std::string Trajectory::getName() const
 
 void Trajectory::addArgs(ProgramArgs& args)
 {
-    args.add("params", "Set params on backend engine using "
-             "\"key1 = val1, key2 = val2, ...\".  Useful parameters "
-             "(and defaults) are: dt (0.0005 s) the sampling interval; "
-             "tblock (1 s) the spline block size; "
-             "tout (0.005 s) the time resolustion for the output trajectory; "
-             "dr (0.01 m) the resolution of the lidar positions.",
-             m_args->m_params, StringList(0));
+    args.add("dtr", "Multi-return sampling interval (secs) (inf = don't sample)",
+        m_args->dtr, .001);
+    args.add("dts", "Single return sampling interval (secs) (inf = don't sample)",
+        m_args->dts, .001);
+    args.add("minsep", "Minimum separation (meters) of returns considered",
+        m_args->minsep, .01);
+    args.add("tblock", "Block size for cubic spline (secs)",
+        m_args->tblock, 1.0);
+    args.add("tout", "Output data interfal (secs)", m_args->tout, .01);
 }
 
 void Trajectory::addDimensions(PointLayoutPtr layout)
@@ -64,7 +62,7 @@ PointViewSet Trajectory::run(PointViewPtr inView)
 
     PointViewPtr outView = inView->makeNew();
 
-    LidarTrajectory::PulseCollection coll;
+    trajectory::PulseCollection coll(*m_args);
 
     Eigen::Vector3d r;
     for (PointRef point : *inView)
@@ -81,22 +79,20 @@ PointViewSet Trajectory::run(PointViewPtr inView)
 
     coll.Solve();
 
-//    double tout = coll.params.lookup<double>("tout", 0.005);
-    double tout = .005;
     double tmin = inView->getFieldAs<double>(Dimension::Id::GpsTime, 0);
     double tmax = inView->getFieldAs<double>(Dimension::Id::GpsTime, inView->size() - 1);
 
-    tmin = std::floor(tmin / tout);
-    int nt = int(std::ceil(tmax / tout) - tmin);
-    tmin *= tout;
+    tmin = std::floor(tmin / m_args->tout);
+    int nt = int(std::ceil(tmax / m_args->tout) - tmin);
+    tmin *= m_args->tout;
 
-    Eigen::Vector3d pos, vel, accel;
-    Eigen::Vector2d att, attvel;
     for (int it = 0; it <= nt; ++it)
     {
-        double t = tmin + it * tout;
-        pos = coll.Trajectory(t, vel, accel);
-        att = coll.Attitude(t, attvel);
+        double t = tmin + it * m_args->tout;
+        Eigen::Vector3d vel, accel;
+        Eigen::Vector3d pos = coll.Trajectory(t, vel, accel);
+        Eigen::Vector2d attvel;
+        Eigen::Vector2d att = coll.Attitude(t, attvel);
   
         PointId idx = outView->size();
         outView->setField(Dimension::Id::GpsTime,      idx, t);

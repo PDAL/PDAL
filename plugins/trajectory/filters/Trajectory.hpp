@@ -7,10 +7,13 @@
 namespace pdal
 {
 
+namespace trajectory
+{
+    struct Args;
+}
+
 class PDAL_DLL Trajectory : public Filter
 {
-    struct PrivateArgs;
-
 public:
     Trajectory();
     ~Trajectory();
@@ -18,11 +21,11 @@ public:
     std::string getName() const;
 
 private:
-    std::unique_ptr<PrivateArgs> m_args;
-
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual PointViewSet run(PointViewPtr view);
+
+    std::unique_ptr<trajectory::Args> m_args;
 };
 
 } // namespace pdal

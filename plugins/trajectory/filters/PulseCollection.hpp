@@ -6,17 +6,19 @@
 #include <memory>
 #include <fstream>
 
+#include "Args.hpp"
 #include "Pulse.hpp"
 #include "SplineFit.hpp"
 
-namespace LidarTrajectory
+namespace pdal
+{
+namespace trajectory
 {
 
 class PulseCollection
 {
-    struct Args;
-
 private:
+    const Args& m_args;
     bool m_first;
     double m_lastAdjTime;
     double m_timeOrigin;
@@ -28,10 +30,11 @@ private:
     int m_lowhigh;
     std::vector<Pulse> m_multiBuf;
     std::vector<Pulse> m_singleBuf;
-    std::unique_ptr<Args> m_args;
 
     void addPoint(double time, const Eigen::Vector3d& startPos, const Eigen::Vector3d& endPos,
         double angle);
+    bool usingMulti() const;
+    bool usingSingle() const;
     void registerMulti(const std::vector<Pulse>& buf);
     void registerSingle(const std::vector<Pulse>& buf);
     
@@ -42,10 +45,8 @@ private:
     // Do the ceres solution
 
 public:
-    PulseCollection();
+    PulseCollection(const Args& args);
     ~PulseCollection();
-
-//    double tmin, tmax;
 
     std::vector<Pulse> pulses;
     SplineFit3 traj;
@@ -60,8 +61,7 @@ public:
     Eigen::Vector3d Trajectory(double t,
                                Eigen::Vector3d& v, Eigen::Vector3d& a) const;
     Eigen::Vector2d Attitude(double t, Eigen::Vector2d& v) const;
-    /* Return the environment variable SRI_QTM_CONFIG_DIR.  If it's
-     * not defined return ".". */
-    static std::string ConfigRoot();
-  };
-}
+};
+
+} // namespace trajectory
+} // namespace pdal

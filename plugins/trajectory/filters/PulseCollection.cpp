@@ -7,35 +7,12 @@
 
 #include "PulseCollection.hpp"
 
-namespace LidarTrajectory
+namespace pdal
+{
+namespace trajectory
 {
 
-struct PulseCollection::Args
-{
-    double flipScanAngle { 1.0 };
-    double dtr { 0.005 };
-    double dts { 0.005 };
-    double minsep { 0.5 };
-    double tblock { 1.0 };
-
-    double dr { 0.01 };
-    double accelweight { 0.5 };
-    double clampweight { 0.0001 };
-    double straddleweight { 0.0001 };
-    int estn { 20 };
-    int niter { 50 };
-    double dang { 1 };
-    double fixedpitch { std::numeric_limits<double>::quiet_NaN() };
-    double pitchweight { 1 };
-    double scanweight { .005 };
-    double scanweightest { 0.01 };
-    double multiweight { 5 };
-    double attaccelweight { .01 };
-    double attclampweight { .0001 };
-    double extrapitchclamp { 1 };
-};
-
-PulseCollection::PulseCollection() : m_first(true), m_args(new Args)
+PulseCollection::PulseCollection(const Args& args) : m_args(args), m_first(true), m_lowhigh(0)
 {}
 
 PulseCollection::~PulseCollection()
@@ -47,7 +24,7 @@ void PulseCollection::Add(double time, const Eigen::Vector3d& r, int nr, int rn,
     if (rn < 1 || rn > nr)
         return;
 
-    angle *= m_args->flipScanAngle;
+    angle *= m_args.flipScanAngle;
 
     if (m_first)
     {
@@ -63,7 +40,10 @@ void PulseCollection::Add(double time, const Eigen::Vector3d& r, int nr, int rn,
         throw std::runtime_error("PulseCollection: returns are not sorted in time");
 
     if (nr == 1)
+    {
         addPoint(adjTime, r - m_rOrigin, r - m_rOrigin, angle);
+        m_lowhigh = 0;     // In case we didn't get a good multi-return pulse. 
+    }
     else
     {
         if (rn == 1)
@@ -78,7 +58,7 @@ void PulseCollection::Add(double time, const Eigen::Vector3d& r, int nr, int rn,
         }
         if (m_lowhigh == 2)
         {
-            addPoint(adjTime, m_rlow - m_rOrigin, r - m_rhigh, angle);
+            addPoint(adjTime, m_rlow - m_rOrigin, m_rhigh - m_rOrigin, angle);
             m_lowhigh = 0;
         }
     }
@@ -86,49 +66,63 @@ void PulseCollection::Add(double time, const Eigen::Vector3d& r, int nr, int rn,
     m_timeMax = time;
 }
 
-void PulseCollection::addPoint(double time,
-    const Eigen::Vector3d& startPos, const Eigen::Vector3d& endPos, double angle)
+bool PulseCollection::usingMulti() const
 {
-    auto shouldRegister = [](const std::vector<Pulse>& buf, double interval) -> bool
+    return std::isfinite(m_args.dtr);
+}
+
+bool PulseCollection::usingSingle() const
+{
+    return std::isfinite(m_args.dts);
+}
+
+void PulseCollection::addPoint(double time, const Eigen::Vector3d& startPos,
+    const Eigen::Vector3d& endPos, double angle)
+{
+    auto shouldRegister = [](const std::vector<Pulse>& buf, double curTime, double interval) -> bool
     {
-        if (buf.size() < 2)
+        if (buf.empty())
             return false;
-        return std::floor(buf.front().t / interval) != std::floor(buf.back().t / interval);
+        return std::floor(buf.front().t / interval) != std::floor(curTime / interval);
     };
 
-    if (std::isfinite(m_args->dtr))
+    if (usingMulti())
     {
-        m_multiBuf.push_back(Pulse(time, startPos, endPos, angle));
-        if (shouldRegister(m_multiBuf, m_args->dtr))
+        if (shouldRegister(m_multiBuf, time, m_args.dtr))
         {
             registerMulti(m_multiBuf);
             m_multiBuf.clear();
         }
+        m_multiBuf.push_back(Pulse(time, startPos, endPos, angle));
     }
-    if (std::isfinite(m_args->dts))
+    if (usingSingle())
     {
-        m_singleBuf.push_back(Pulse(time, startPos, angle));
-        if (shouldRegister(m_singleBuf, m_args->dts))
+        if (shouldRegister(m_singleBuf, time, m_args.dts))
         {
             registerSingle(m_singleBuf);
             m_singleBuf.clear();
         }
+        m_singleBuf.push_back(Pulse(time, startPos, angle));
     }
 }
 
 void PulseCollection::registerMulti(const std::vector<Pulse>& buf)
 {
+    assert(buf.size());
+
     auto it = std::max_element(buf.begin(), buf.end(),
-        [](const Pulse& p1, const Pulse& p2){ return p1.d > p2.d; });
+        [](const Pulse& p1, const Pulse& p2){ return p1.d < p2.d; });
     const Pulse& p = *it;
 
     // Only include pulses if separation > minsep
-    if (p.d * 2 > m_args->minsep)
+    if (p.d * 2 > m_args.minsep)
         pulses.push_back(p);
 }
 
 void PulseCollection::registerSingle(const std::vector<Pulse>& buf)
 {
+    assert(buf.size());
+
     // Look for midpoint of a run of pulses with the same angle (on the
     // theory that this will have the smallest quantization error).
     if (buf.size() > std::numeric_limits<int>::max())
@@ -162,7 +156,7 @@ PulseCollection::EstimatedPositionVelocity(double t, Eigen::Vector3d& r, Eigen::
     // Extract pulses in a window around t. Adjust pulse times to be relative to t.
     for (const Pulse& p: pulses)
     {
-      if (p.t >= t - m_args->tblock && p.t <= t + m_args->tblock) {
+      if (p.t >= t - m_args.tblock && p.t <= t + m_args.tblock) {
         psub.push_back(p);
         psub.back().t -= t;
       }
@@ -192,7 +186,7 @@ PulseCollection::EstimatedPositionVelocity(double t, Eigen::Vector3d& r, Eigen::
     }
 
     int m = skipscan ? k - kscan : k;
-    if (m  < m_args->estn)
+    if (m  < m_args.estn)
         return false;
 
     // For multi-return pulses
@@ -234,7 +228,8 @@ PulseCollection::EstimatedPositionVelocity(double t, Eigen::Vector3d& r, Eigen::
         {
             nx = p.n(0); ny = p.n(1); nz = p.n(2);
             w = p.d;
-        } else
+        }
+        else
         {
             if (skipscan)
                 continue;
@@ -243,7 +238,7 @@ PulseCollection::EstimatedPositionVelocity(double t, Eigen::Vector3d& r, Eigen::
             nx = sang * sx;
             ny = sang * sy;
             nz = cang;
-            w = m_args->scanweightest;
+            w = m_args.scanweightest;
         }
         A(2*h+0, 0) = nz; A(2*h+0, 2) = -nx;
         A(2*h+1, 1) = nz; A(2*h+1, 2) = -ny;
@@ -268,25 +263,25 @@ void PulseCollection::InitializeTrajectory()
     if (pulses.empty())
         throw std::runtime_error("PulseCollection: no pulses for Solve");
 
-    double tstart = std::floor((m_timeMin - m_timeOrigin) / m_args->tblock);
-    int num = int(std::ceil((m_timeMax - m_timeOrigin) / m_args->tblock) - tstart) - 1;
+    double tstart = std::floor((m_timeMin - m_timeOrigin) / m_args.tblock);
+    int num = int(std::ceil((m_timeMax - m_timeOrigin) / m_args.tblock) - tstart) - 1;
     if (num < 1)
       throw std::runtime_error("PulseCollection: no time interval for Solve");
-    tstart *= m_args->tblock;
+    tstart *= m_args.tblock;
 
-    traj = SplineFit3(num, m_args->tblock, tstart);
-    attitude = SplineFit2(num, m_args->tblock, tstart);
+    traj = SplineFit3(num, m_args.tblock, tstart);
+    attitude = SplineFit2(num, m_args.tblock, tstart);
 
     for (int i = 0; i <= num; ++i)
     {
-        traj.missing[i] = !EstimatedPositionVelocity(tstart + i * m_args->tblock,
+        traj.missing[i] = !EstimatedPositionVelocity(tstart + i * m_args.tblock,
             traj.r[i], traj.v[i]);
-        traj.v[i] *= m_args->tblock;
+        traj.v[i] *= m_args.tblock;
     }
 
     if (!traj.fillmissing(true))
       throw std::runtime_error
-        ("PulseCollection: to few pulses for initial estimate of trajectory");
+        ("PulseCollection: too few pulses for initial estimate of trajectory");
 
     for (int i = 0; i <= num; ++i)
     {
@@ -296,7 +291,7 @@ void PulseCollection::InitializeTrajectory()
         // atan(dx, dy) to give clockwise from north convention
         attitude.r[i] = Eigen::Vector2d(std::atan2(traj.r[ip](0) - traj.r[im](0),
             traj.r[ip](1) - traj.r[im](1)),
-            std::isnan(m_args->fixedpitch) ? 0.0 : degreesToRadians(m_args->fixedpitch));
+            std::isnan(m_args.fixedpitch) ? 0.0 : degreesToRadians(m_args.fixedpitch));
         attitude.v[i] = Eigen::Vector2d::Zero();
     }
     // Make sure heading doesn't jump around
@@ -304,38 +299,20 @@ void PulseCollection::InitializeTrajectory()
     for (int i = 1; i <= num; ++i)
     {
         double ang1 = attitude.r[i](0);
-        attitude.r[i](0) = ang1 + normalizeRadians(ang1 - ang0);
+        attitude.r[i](0) = ang0 + normalizeRadians(ang1 - ang0);
     }
-
-/**
-    std::string dumpinittraj;
-    if (!dumpinittraj.empty())
-    {
-        std::ofstream str(dumpinittraj.c_str());
-        str << std::fixed << std::setprecision(3);
-        for (int i = 0; i <= num; ++i)
-            str << tstart + i * tblock + torg << " "
-            << traj.r[i](0) + rorg(0) << " "
-            << traj.r[i](1) + rorg(1) << " "
-            << traj.r[i](2) + rorg(2) << " "
-            << traj.v[i](0) / tblock << " "
-            << traj.v[i](1) / tblock << " "
-            << traj.v[i](2) / tblock << " "
-            << radiansToDegrees(attitude.r[i](0)) << " "
-            << radiansToDegrees(attitude.r[i](1)) << " "
-            << radiansToDegrees(attitude.v[i](0)) / tblock << " "
-            << radiansToDegrees(attitude.v[i](1)) / tblock << " "
-            << traj.missing[i] << "\n";
-    }
-**/
 }
 
 void PulseCollection::Solve()
 {
+    if (usingMulti() && m_multiBuf.size())
+        registerMulti(m_multiBuf);
+    if (usingSingle() && m_singleBuf.size())
+        registerSingle(m_singleBuf);
+
     InitializeTrajectory();
     int num = traj.num;
 
-    google::InitGoogleLogging("LidarTrajectory");
     ceres::Problem problem;
 
     // for debugging
@@ -348,22 +325,23 @@ void PulseCollection::Solve()
       auto tconv = traj.tconvert(p.t);
       int i = tconv.first;
       double t = tconv.second;
-      if (p.MultiReturn()) {
-        ceres::CostFunction* cost_function =
-          new ceres::AutoDiffCostFunction<FirstLastError,
-                                          2,       // number of residuals
-                                          3,3,3,3> // data for cubic fit
-          (new FirstLastError(p, t));
-        ceres::LossFunction* loss_function =
-          new ceres::ScaledLoss(new ceres::CauchyLoss(m_args->dr),
-                                m_args->multiweight,
-                                ceres::TAKE_OWNERSHIP);
-        problem.AddResidualBlock(cost_function, loss_function,
-                                 traj.r[i  ].data(),
-                                 traj.v[i  ].data(),
-                                 traj.r[i+1].data(),
-                                 traj.v[i+1].data());
-        numMultiReturnResidualBlocks++;
+      if (p.MultiReturn())
+      {
+          ceres::CostFunction* cost_function =
+              new ceres::AutoDiffCostFunction<FirstLastError,
+                  2,       // number of residuals
+                  3,3,3,3> // data for cubic fit
+                      (new FirstLastError(p, t));
+          ceres::LossFunction* loss_function =
+              new ceres::ScaledLoss(new ceres::CauchyLoss(m_args.dr),
+                      m_args.multiweight,
+                      ceres::TAKE_OWNERSHIP);
+          problem.AddResidualBlock(cost_function, loss_function,
+                  traj.r[i  ].data(),
+                  traj.v[i  ].data(),
+                  traj.r[i+1].data(),
+                  traj.v[i+1].data());
+          numMultiReturnResidualBlocks++;
       }
       else
       {
@@ -372,9 +350,9 @@ void PulseCollection::Solve()
                                           2,       // number of residuals
                                           3,3,3,3,
                                           2,2,2,2> // data for cubic fit
-          (new ScanAngleError(p, t, m_args->pitchweight, degreesToRadians(m_args->fixedpitch)));
+          (new ScanAngleError(p, t, m_args.pitchweight, degreesToRadians(m_args.fixedpitch)));
         ceres::LossFunction* loss_function = new ceres::ScaledLoss
-          (new ceres::CauchyLoss(degreesToRadians(m_args->dang)), m_args->scanweight,
+          (new ceres::CauchyLoss(degreesToRadians(m_args.dang)), m_args.scanweight,
           ceres::TAKE_OWNERSHIP);
         problem.AddResidualBlock(cost_function, loss_function,
                                  traj.r[i  ].data(),
@@ -390,16 +368,16 @@ void PulseCollection::Solve()
     }
 
     // The acceleration constraints for traj and attitude
-    if (m_args->accelweight > 0) {
+    if (m_args.accelweight > 0) {
       for (int i = 1; i < num; ++i) {
         ceres::CostFunction* cost_function =
           new ceres::AutoDiffCostFunction<AccelJumpConstraint<3>,
                                           3,       // number of residuals
                                           3,3,3,3,3> // data for cubic fit
-          (new AccelJumpConstraint<3>(m_args->tblock));
+          (new AccelJumpConstraint<3>(m_args.tblock));
         ceres::LossFunction* loss_function =
           (ceres::LossFunction*)
-          (new ceres::ScaledLoss(nullptr, m_args->accelweight,
+          (new ceres::ScaledLoss(nullptr, m_args.accelweight,
                                  ceres::TAKE_OWNERSHIP));
         problem.AddResidualBlock(cost_function, loss_function,
                                  traj.r[i-1].data(),
@@ -409,16 +387,16 @@ void PulseCollection::Solve()
                                  traj.v[i+1].data());
       }
     }
-    if (m_args->attaccelweight > 0) {
+    if (m_args.attaccelweight > 0) {
       for (int i = 1; i < num; ++i) {
         ceres::CostFunction* cost_function =
           new ceres::AutoDiffCostFunction<AccelJumpConstraint<2>,
                                           2,       // number of residuals
                                           2,2,2,2,2> // data for cubic fit
-          (new AccelJumpConstraint<2>(m_args->tblock));
+          (new AccelJumpConstraint<2>(m_args.tblock));
         ceres::LossFunction* loss_function =
           (ceres::LossFunction*)
-          (new ceres::ScaledLoss(nullptr, m_args->attaccelweight, ceres::TAKE_OWNERSHIP));
+          (new ceres::ScaledLoss(nullptr, m_args.attaccelweight, ceres::TAKE_OWNERSHIP));
         problem.AddResidualBlock(cost_function, loss_function,
                                  attitude.r[i-1].data(),
                                  attitude.v[i-1].data(),
@@ -432,18 +410,18 @@ void PulseCollection::Solve()
     // polynomials to be close to one another.  In general clampweight should
     // be "small".  straddleweight is a larger weight to enforce clamping where
     // there's a sparsity of data.
-    if (m_args->clampweight > 0 || m_args->straddleweight > 0)
+    if (m_args.clampweight > 0 || m_args.straddleweight > 0)
     {
         for (int i = 1; i < num; ++i)
         {
-            double w = traj.missing[i] ? m_args->straddleweight : m_args->clampweight;
+            double w = traj.missing[i] ? m_args.straddleweight : m_args.clampweight;
             if (w <= 0)
                 continue;
             ceres::CostFunction* cost_function =
                 new ceres::AutoDiffCostFunction<ClampConstraint<3>,
                     3,       // number of residuals
                     3,3,3,3,3> // data for cubic fit
-                        (new ClampConstraint<3>(m_args->tblock));
+                        (new ClampConstraint<3>(m_args.tblock));
             ceres::LossFunction* loss_function =
                 (ceres::LossFunction*)
                 (new ceres::ScaledLoss(nullptr, w,
@@ -458,18 +436,19 @@ void PulseCollection::Solve()
     }
     // The estimate of the pitch can sometimes oscillate too much.
     // extrapitchclamp is a way to suppress this.
-    if (m_args->attclampweight > 0)
+    if (m_args.attclampweight > 0)
     {
-        Eigen::Vector2d mult(1.0, m_args->extrapitchclamp);
-        for (int i = 1; i < num; ++i) {
+        Eigen::Vector2d mult(1.0, m_args.extrapitchclamp);
+        for (int i = 1; i < num; ++i)
+        {
             ceres::CostFunction* cost_function =
                 new ceres::AutoDiffCostFunction<ClampConstraint<2>,
                     2,       // number of residuals
                     2,2,2,2,2> // data for cubic fit
-                        (new ClampConstraint<2>(m_args->tblock, mult));
+                        (new ClampConstraint<2>(m_args.tblock, mult));
             ceres::LossFunction* loss_function =
                 (ceres::LossFunction*)
-                (new ceres::ScaledLoss(nullptr, m_args->attclampweight,
+                (new ceres::ScaledLoss(nullptr, m_args.attclampweight,
                                        ceres::TAKE_OWNERSHIP));
             problem.AddResidualBlock(cost_function, loss_function,
                     attitude.r[i-1].data(),
@@ -483,36 +462,10 @@ void PulseCollection::Solve()
     ceres::Solver::Options options;
     options.linear_solver_type = ceres::DENSE_SCHUR;
     options.logging_type = ceres::SILENT;
-    options.max_linear_solver_iterations = m_args->niter;
-    /**
-    if (vlevel > 0)
-        options.minimizer_progress_to_stdout = true;
-    **/
+    options.max_linear_solver_iterations = m_args.niter;
 
     ceres::Solver::Summary summary;
     ceres::Solve(options, &problem, &summary);
-    /**
-    if (vlevel > 0)
-      std::cerr << summary.FullReport() << "\n";
-    **/
-
-    // for debug - print out few lines of traj and attitude
-    /**
-    if (vlevel > 0)
-    {
-        std::cerr<<"Estimated traj and attitude (first few values)"<<std::endl;
-        for (int i = 0; i < std::min(10, traj.num); ++i)
-        {
-            std::cerr<<" traj "<<std::to_string(i)<<" ("
-                <<std::to_string(traj.r[i](0))<<", "
-                <<std::to_string(traj.r[i](1))<<", "
-                <<std::to_string(traj.r[i](2))<<") ";
-            std::cerr<<" attitude "<<std::to_string(i)<<" ("
-                <<std::to_string(attitude.r[i](0))<<", "
-                <<std::to_string(attitude.r[i](1))<<")"<<std::endl;
-        }
-    }
-    **/
 }
 
 Eigen::Vector3d
@@ -523,14 +476,10 @@ PulseCollection::Trajectory(double t, Eigen::Vector3d& v, Eigen::Vector3d& a) co
 
 Eigen::Vector2d PulseCollection::Attitude(double t, Eigen::Vector2d& v) const
 {
-    auto radiansToDegrees = [](Eigen::Vector2d v)
-    {
-        return v * (180 / M_PI);
-    };
-
     Eigen::Vector2d p = radiansToDegrees(attitude.position(t - m_timeOrigin, v));
     v = radiansToDegrees(v);
     return p;
 }
 
-}
+} // namespace trajectory
+} // namespace pdal

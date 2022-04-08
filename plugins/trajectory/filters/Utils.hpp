@@ -2,7 +2,9 @@
 
 #include <Eigen/Dense>
 
-namespace LidarTrajectory
+namespace pdal
+{
+namespace trajectory
 {
 
 inline double degreesToRadians(double deg)
@@ -15,11 +17,16 @@ inline double radiansToDegrees(double rad)
     return rad * 180.0 / M_PI;
 }
 
+inline Eigen::Vector2d radiansToDegrees(const Eigen::Vector2d& v)
+{
+    return v * 180 / M_PI;
+}
+
 // Normalize from (-M_PI, M_PI]
 // std::remainder calculates a remainder in the range [-N / 2, N / 2] where N is the divisor.
 inline double normalizeRadians(double r)
 {
-    return std::remainder(r, 2 * M_PI) == -180 ? 180 : r;
+    return std::remainder(r, 2 * M_PI);
 }
 
 inline Eigen::Matrix3d PerpProjector(const Eigen::Vector3d& v, double d)
@@ -41,4 +48,5 @@ inline Eigen::Matrix3d PerpProjector(const Eigen::Vector3d& v, double d)
       return M;
 }
 
-} // namespace LidarTrajectory
+} // namespace trajectory
+} // namespace pdal
