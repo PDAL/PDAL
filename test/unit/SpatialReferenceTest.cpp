@@ -524,7 +524,12 @@ TEST(SpatialReferenceTest, badGeoTIFFkeys)
 
     PointTable table1;
     repro1.prepare(table1);
+
+    // The bad data file isn't bad until libgeotiff 1.7.1
+    // when it got more strict about keys with 0s.
+#if LIBGEOTIFF_VERSION >= 1710
     EXPECT_THROW(repro1.execute(table1), pdal_error);
+#endif
 
 
 }
