@@ -38,6 +38,7 @@
 
 #include <geo_normalize.h>
 #include <geo_simpletags.h>
+#include <geo_tiffp.h>
 
 namespace pdal
 {
@@ -102,6 +103,7 @@ public:
     GeotiffCtx() : gtiff(nullptr)
     {
         tiff = ST_Create();
+        GTIFSetSimpleTagsMethods(&methods);
     }
 
     ~GeotiffCtx()
@@ -113,7 +115,23 @@ public:
 
     ST_TIFF *tiff;
     GTIF *gtiff;
+    TIFFMethod methods;
 };
+
+static void PDALGTIFErrorFunction(GTIF* gt, int level, const char* msg, ...)
+{
+    va_list list;
+    (void)gt;
+
+    va_start(list, msg);
+    if( level == LIBGEOTIFF_WARNING )
+        fprintf(stderr, "GEOTIFF Warning: ");
+    else if( level == LIBGEOTIFF_ERROR )
+        fprintf(stderr, "GEOTIFF Error: ");
+    vfprintf(stderr, msg, list);
+    fprintf(stderr, "\n");
+    va_end(list);
+}
 
 } // unnamed namespace
 
@@ -176,7 +194,10 @@ GeotiffSrs::GeotiffSrs(const std::vector<char>& directoryRec,
             asciiRec.size(), STT_ASCII, (void *)asciiData);
     }
 
-    ctx.gtiff = GTIFNewSimpleTags(ctx.tiff);
+    ctx.gtiff = GTIFNewWithMethodsEx(ctx.tiff,
+                                     &ctx.methods,
+                                     PDALGTIFErrorFunction,
+                                     (void*) this);
     if (!ctx.gtiff)
         throw Geotiff::error("Couldn't create Geotiff tags from "
             "Geotiff definition.");

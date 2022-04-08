@@ -100,6 +100,8 @@ SpatialReference srsFromGeotiff(const Vlr *vlr, const VlrList& vlrs, LogPtr log,
     {
         GeotiffSrs geotiffSrs(directoryRec, doublesRec, asciiRec, log);
         geotiff = geotiffSrs.gtiffPrintString();
+        if (log)
+            log->get(LogLevel::Debug3) << geotiff << std::endl;
         srs = geotiffSrs.srs();
     }
     catch (Geotiff::error& err)
