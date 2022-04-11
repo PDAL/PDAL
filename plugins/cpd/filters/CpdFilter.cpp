@@ -187,8 +187,8 @@ void CpdFilter::cpd_affine(PointViewPtr fixed, PointViewPtr moving)
 
 void CpdFilter::cpd_nonrigid(PointViewPtr fixed, PointViewPtr moving)
 {
-    cpd::Matrix fixedMatrix = math::pointViewToEigen(*fixed);
-    cpd::Matrix movingMatrix = math::pointViewToEigen(*moving);
+    cpd::Matrix fixedMatrix = pointViewToEigen(fixed);
+    cpd::Matrix movingMatrix = pointViewToEigen(moving);
     cpd::NonrigidResult result = cpd::nonrigid(fixedMatrix, movingMatrix);
     movePoints(moving, result.points);
 }
