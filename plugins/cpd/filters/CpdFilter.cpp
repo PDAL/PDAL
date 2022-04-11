@@ -150,7 +150,7 @@ PointViewPtr CpdFilter::change(PointViewPtr fixed, PointViewPtr moving)
 namespace
 {
 
-cpd::Matrix pointViewToEigen(const PointViewPtr *view)
+cpd::Matrix pointViewToEigen(PointViewPtr view)
 {
     Eigen::MatrixXd matrix(view->size(), 3);
     for (PointId i = 0; i < view->size(); ++i)
