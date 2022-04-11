@@ -60,7 +60,7 @@ jobs:
       env:
         API_TOKEN_GITHUB: ${{ secrets.DOCS_SECRET_KEY}}
       shell: bash -l {0}
-      if: contains(github.ref, '2.3-maintenance')
+      if: contains(github.ref, '2.4-maintenance')
 
       run: |
         ./scripts/ci/docs/deploy_website.sh

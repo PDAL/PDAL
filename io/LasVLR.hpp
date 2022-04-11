@@ -94,7 +94,10 @@ public:
     [[deprecated]] bool read(ILeStream& in, size_t limit);
 
     LasVLR(las::Vlr *v);
+    LasVLR(const LasVLR& v);
     LasVLR(LasVLR&& v);
+    LasVLR& operator=(const LasVLR& src);
+    LasVLR& operator=(LasVLR&& src);
     ~LasVLR();
 
     friend OLeStream& operator<<(OLeStream& out, const LasVLR& v);

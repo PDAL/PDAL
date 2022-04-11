@@ -182,6 +182,16 @@ TEST(LasReaderTest, vlr)
     EXPECT_EQ(vlrs[1].recordId(), 34736);
     EXPECT_EQ(vlrs[2].userId(), "LASF_Projection");
     EXPECT_EQ(vlrs[2].recordId(), 34737);
+
+    // Test copying and such.
+    LasHeader th = reader.header();
+    LasHeader ch = std::move(th);
+    EXPECT_EQ(ch.scaleX(), reader.header().scaleX());
+    EXPECT_EQ(ch.srs(), h.srs());
+    const VlrList cvlrs = ch.vlrs();
+    EXPECT_EQ(cvlrs.size(), 3U);
+    EXPECT_EQ(cvlrs[0].userId(), "LASF_Projection");
+    EXPECT_EQ(cvlrs[0].recordId(), 34735);
 }
 
 TEST(LasReaderTest, test_sequential)

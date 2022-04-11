@@ -288,48 +288,15 @@ public:
     friend std::ostream& operator<<(std::ostream& ostr, const LasHeader& h);
 
     LasHeader(las::Header& h, las::Srs& srs, las::VlrList& vlrs);
+    LasHeader(const LasHeader& src);
+    LasHeader(LasHeader&& src);
+    LasHeader& operator=(const LasHeader& src);
+    LasHeader& operator=(LasHeader&& src);
     ~LasHeader();
 
 private:
     struct Private;
     std::unique_ptr<Private> d;
-
-/**
-    uintmax_t m_fileSize;
-    std::string m_fileSig;
-    uint16_t m_sourceId;
-    uint16_t m_globalEncoding;
-    Uuid m_projectUuid;
-    uint8_t m_versionMinor;
-    std::string m_systemId;
-    std::string m_softwareId;
-    uint16_t m_createDOY;
-    uint16_t m_createYear;
-    uint16_t m_vlrOffset;  // Same as header size.
-    uint32_t m_pointOffset;
-    uint32_t m_vlrCount;
-    uint8_t m_pointFormat;
-    uint16_t m_pointLen;
-    uint64_t m_pointCount;
-    std::array<uint64_t, RETURN_COUNT> m_pointCountByReturn;
-    std::array<double, 3> m_scales;
-    std::array<double, 3> m_offsets;
-    bool m_isCompressed;
-    uint64_t m_eVlrOffset;
-    uint32_t m_eVlrCount;
-    BOX3D m_bounds;
-    std::string m_compressionInfo;
-    LogPtr m_log;
-    SpatialReference m_srs;
-    std::string m_geotiff_print;
-    VlrList m_vlrs;
-    VlrList m_eVlrs;
-    bool m_nosrs;
-
-    void setSrs();
-    void setSrsFromWkt();
-    void setSrsFromGeotiff();
-**/
 
     static void get(ILeStream& in, Uuid& uuid);
     static void put(OLeStream& in, Uuid uuid);
