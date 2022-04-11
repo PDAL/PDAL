@@ -1,3 +1,6 @@
+//
+// (c) 2022 SRI International
+//
 #include <cmath>
 #include <stdexcept>
 #include <iostream>

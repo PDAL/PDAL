@@ -1,4 +1,6 @@
-
+//
+// (c) 2022 SRI International
+//
 #include "Trajectory.hpp"
 
 #include <iostream>

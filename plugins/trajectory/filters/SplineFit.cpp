@@ -1,3 +1,6 @@
+//
+// (c) 2022 SRI International
+//
 #include "SplineFit.hpp"
 
 #include <cmath>

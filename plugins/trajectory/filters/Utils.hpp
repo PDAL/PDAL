@@ -1,3 +1,6 @@
+//
+// (c) 2022 SRI International
+//
 #pragma once
 
 #include <Eigen/Dense>
