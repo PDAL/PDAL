@@ -55,6 +55,10 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
     Read BPF files encoded as version 1, 2, or 3. BPF is an NGA specification
     for point cloud data.
 
+:ref:`readers.copc`
+    COPC, or Cloud Optimized Point Cloud is an LAZ 1.4 file stored as a
+    clustered octree.
+
 :ref:`readers.buffer`
     Special stage that allows you to read data from your own PointView rather
     than fetching data from a specific reader.

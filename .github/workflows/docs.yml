@@ -9,7 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
-    container: osgeo/proj-docs
+    container:
+      image: ghcr.io/osgeo/proj-docs:latest
 
     steps:
     - uses: actions/checkout@v2
@@ -60,7 +61,7 @@ jobs:
       env:
         API_TOKEN_GITHUB: ${{ secrets.DOCS_SECRET_KEY}}
       shell: bash -l {0}
-      if: contains(github.ref, '2.3-maintenance')
+      if: contains(github.ref, '2.4-maintenance')
 
       run: |
         ./scripts/ci/docs/deploy_website.sh
