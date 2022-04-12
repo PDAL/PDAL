@@ -7,7 +7,6 @@ plugins/pgpointcloud/Pgtest-Support.hpp
 #
 # rst outputs
 #
-*.pdf
 
 #
 # cmake stuff

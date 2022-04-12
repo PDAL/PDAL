@@ -42,7 +42,7 @@ void Trajectory::addArgs(ProgramArgs& args)
         m_args->minsep, .01);
     args.add("tblock", "Block size for cubic spline (secs)",
         m_args->tblock, 1.0);
-    args.add("tout", "Output data interfal (secs)", m_args->tout, .01);
+    args.add("tout", "Output data interval (secs)", m_args->tout, .01);
 }
 
 void Trajectory::addDimensions(PointLayoutPtr layout)
@@ -55,6 +55,21 @@ void Trajectory::addDimensions(PointLayoutPtr layout)
     layout->registerDim(D::XBodyAngRate); // dPitch/dt
     // YBodyAngRate - not set.
     layout->registerDim(D::ZBodyAngRate); // dAzimuth/dt
+}
+
+void Trajectory::prepared(PointTableRef table)
+{
+    using D = Dimension::Id;
+
+    std::vector<D> dims { D::GpsTime, D::ScanAngleRank, D::NumberOfReturns, D::ReturnNumber };
+
+    for (const D& dim : dims)
+        if (!table.layout()->hasDim(dim))
+        {
+            Dimension::name(dim);  // These are all well-defined dimensions.
+            throwError("Can't compute trajectory when data is missing dimension '" +
+                Dimension::name(dim) + "'.");
+        }
 }
 
 PointViewSet Trajectory::run(PointViewPtr inView)

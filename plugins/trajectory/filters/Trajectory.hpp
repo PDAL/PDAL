@@ -25,6 +25,7 @@ public:
 
 private:
     virtual void addArgs(ProgramArgs& args);
+    virtual void prepared(PointTableRef table);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual PointViewSet run(PointViewPtr view);
 
