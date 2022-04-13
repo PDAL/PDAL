@@ -325,14 +325,15 @@ void TileDBReader::localReady()
     const void* v_r;
     uint32_t v_num;
     m_array->get_metadata("_pdal", &v_type, &v_num, &v_r);
+
     if (v_r != NULL)
         meta = NL::json::parse(static_cast<const char*>(v_r));
 
-    if ((meta != nullptr) &&
-        (meta.count("writers.tiledb") > 0) &&
-        (meta["writers.tiledb"].count("spatialreference") > 0))
+    if ((meta != nullptr) && (meta.count("root") > 0) &&
+        (meta["root"].count("writers.tiledb") > 0) &&
+        (meta["root"]["writers.tiledb"].count("spatialreference") > 0))
     {
-        SpatialReference ref(meta["writers.tiledb"]["spatialreference"]);
+        SpatialReference ref(meta["root"]["writers.tiledb"]["spatialreference"]);
         setSpatialReference(ref);
     }
 

@@ -624,7 +624,16 @@ void TileDBWriter::done(PointTableRef table)
     {
         if (!m_args->m_append)
         {
+            if (!getSpatialReference().empty() && table.spatialReferenceUnique())
+            {
+                // The point view takes on the spatial reference of that stage,
+                // if it had one.
+                getMetadata().add("spatialreference",
+                    Utils::toString(getSpatialReference()));
+            }
+
             MetadataNode node = table.metadata();
+
             // serialize metadata
             std::string m = pdal::Utils::toJSON(node);
             m_array->put_metadata("_pdal", TILEDB_UINT8, m.length() + 1, m.c_str());
