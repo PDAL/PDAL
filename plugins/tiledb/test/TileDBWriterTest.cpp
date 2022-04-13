@@ -127,7 +127,7 @@ namespace pdal
         uint32_t v_num;
         array.get_metadata("_pdal", &v_type, &v_num, &v_r);
         NL::json meta = NL::json::parse(static_cast<const char*>(v_r));
-        EXPECT_TRUE(meta.count("writers.tiledb") > 0);
+        EXPECT_TRUE(meta["root"].count("writers.tiledb") > 0);
 
         auto domain = array.non_empty_domain<double>();
         std::vector<double> subarray;
@@ -204,7 +204,7 @@ namespace pdal
         uint32_t v_num;
         array.get_metadata("_pdal", &v_type, &v_num, &v_r);
         NL::json meta = NL::json::parse(static_cast<const char*>(v_r));
-        EXPECT_TRUE(meta.count("writers.tiledb") > 0);
+        EXPECT_TRUE(meta["root"].count("writers.tiledb") > 0);
 
         for (const auto& kv: domain)
         {
@@ -617,8 +617,8 @@ namespace pdal
         array.get_metadata("_pdal", &v_type, &v_num, &v_r);
         NL::json metaDoc = NL::json::parse(static_cast<const char*>(v_r));
 
-        EXPECT_TRUE(metaDoc.contains("filters.stats"));
-        EXPECT_TRUE(metaDoc.contains("writers.tiledb"));
+        EXPECT_TRUE(metaDoc["root"].contains("filters.stats"));
+        EXPECT_TRUE(metaDoc["root"].contains("writers.tiledb"));
 
         array.close();
     }
