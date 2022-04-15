@@ -101,7 +101,7 @@ public:
     void append(const PointView& buf)
     {
         // We use size() instead of the index end because temp points might have been
-        // placed at the end of the buffer. Those temp points on this view are discareded,
+        // placed at the end of the buffer. Those temp points on this view are discarded,
         // as are any on the temp list.
         auto thisEnd = m_index.begin() + size();
         auto bufEnd = buf.m_index.begin() + buf.size();

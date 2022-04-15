@@ -2,11 +2,9 @@
 // (c) 2022 SRI International
 //
 #include <cmath>
-#include <stdexcept>
-#include <iostream>
-#include <iomanip>
 #include <ceres/ceres.h>
-#include <glog/logging.h>
+
+#include <pdal/pdal_types.hpp>
 
 #include "PulseCollection.hpp"
 
@@ -40,7 +38,7 @@ void PulseCollection::Add(double time, const Eigen::Vector3d& r, int nr, int rn,
     }
     double adjTime = time - m_timeOrigin;
     if (adjTime < m_lastAdjTime)
-        throw std::runtime_error("PulseCollection: returns are not sorted in time");
+        throw pdal_error("PulseCollection: returns are not sorted in time");
 
     if (nr == 1)
     {
@@ -129,7 +127,7 @@ void PulseCollection::registerSingle(const std::vector<Pulse>& buf)
     // Look for midpoint of a run of pulses with the same angle (on the
     // theory that this will have the smallest quantization error).
     if (buf.size() > std::numeric_limits<int>::max())
-        throw std::runtime_error("Attempting to register an oversized vector.");
+        throw pdal_error("Attempting to register an oversized vector.");
 
     int mid = buf.size() / 2;
     int low = mid - 1;
@@ -264,12 +262,12 @@ PulseCollection::EstimatedPositionVelocity(double t, Eigen::Vector3d& r, Eigen::
 void PulseCollection::InitializeTrajectory()
 {
     if (pulses.empty())
-        throw std::runtime_error("PulseCollection: no pulses for Solve");
+        throw pdal_error("PulseCollection: no pulses for Solve");
 
     double tstart = std::floor((m_timeMin - m_timeOrigin) / m_args.tblock);
     int num = int(std::ceil((m_timeMax - m_timeOrigin) / m_args.tblock) - tstart) - 1;
     if (num < 1)
-      throw std::runtime_error("PulseCollection: no time interval for Solve");
+        throw pdal_error("PulseCollection: no time interval for Solve");
     tstart *= m_args.tblock;
 
     traj = SplineFit3(num, m_args.tblock, tstart);
@@ -283,8 +281,7 @@ void PulseCollection::InitializeTrajectory()
     }
 
     if (!traj.fillmissing(true))
-      throw std::runtime_error
-        ("PulseCollection: too few pulses for initial estimate of trajectory");
+        throw pdal_error("PulseCollection: too few pulses for initial estimate of trajectory");
 
     for (int i = 0; i <= num; ++i)
     {

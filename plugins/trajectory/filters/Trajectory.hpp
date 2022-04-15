@@ -29,6 +29,8 @@ private:
     virtual void addDimensions(PointLayoutPtr layout);
     virtual PointViewSet run(PointViewPtr view);
 
+    PointViewSet runAlgorithm(PointViewPtr view);
+
     std::unique_ptr<trajectory::Args> m_args;
 };
 

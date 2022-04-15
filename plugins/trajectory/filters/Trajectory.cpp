@@ -3,7 +3,6 @@
 //
 #include "Trajectory.hpp"
 
-#include <iostream>
 #include <limits>
 #include <cmath>
 #include <Eigen/Dense>
@@ -77,6 +76,20 @@ PointViewSet Trajectory::run(PointViewPtr inView)
     if (!inView->size())
         throwError("No returns to process.");
 
+    PointViewSet out;
+    try
+    {
+        out = runAlgorithm(inView);
+    }
+    catch (const std::exception& e)
+    {
+        throwError(e.what());
+    }
+    return out;
+}
+
+PointViewSet Trajectory::runAlgorithm(PointViewPtr inView)
+{
     PointViewPtr outView = inView->makeNew();
 
     trajectory::PulseCollection coll(*m_args);
@@ -129,6 +142,6 @@ PointViewSet Trajectory::run(PointViewPtr inView)
     }
 
     return PointViewSet { outView };
-  }
+}
 
 } // namespace pdal
