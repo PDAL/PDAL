@@ -223,6 +223,9 @@ void BpfReader::initialize()
     // Read thing after the standard header as metadata->
     readHeaderExtraData();
 
+    // Add the point count to metadata
+    m_metadata.add("count", m_header.m_numPts);
+
     // Fast forward file to end of header as reported by base header.
     std::streampos pos = m_stream.position();
     if (pos > m_header.m_len)
