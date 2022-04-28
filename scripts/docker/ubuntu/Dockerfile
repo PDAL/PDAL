@@ -1,8 +1,9 @@
 FROM pdal/ubuntubase:latest as build
-MAINTAINER Andrew Bell <andrew@hobu.co>
+MAINTAINER Howard Butler <howard@hobu.co>
 
 SHELL ["conda", "run", "-n", "pdal", "/bin/bash", "-c"]
 
+RUN  conda install -c conda-forge git compilers cmake make ninja sysroot_linux-64=2.17 libstdcxx-ng
 RUN git clone http://github.com/PDAL/PDAL.git pdal && \
     mkdir -p pdal/build && \
     cd pdal/build  && \
@@ -24,8 +25,8 @@ RUN git clone http://github.com/PDAL/PDAL.git pdal && \
 RUN cd pdal/build  && \
     ninja
 
-RUN cd pdal/build  && \
-    ctest -V
+#RUN cd pdal/build  && \
+#    ctest -V
 
 RUN cd pdal/build  && \
     ninja install
@@ -34,15 +35,13 @@ RUN conda-pack -n pdal --dest-prefix=/opt/conda/envs/pdal -o  /tmp/env.tar && \
      mkdir /venv && cd /venv && tar xf /tmp/env.tar  && \
      rm /tmp/env.tar
 
-FROM continuumio/miniconda3
+FROM condaforge/miniforge3
 
 ENV CONDAENV "/opt/conda/envs/pdal"
 COPY --from=build /venv "/opt/conda/envs/pdal"
 
 ENV PROJ_NETWORK=TRUE
 ENV PATH $PATH:${CONDAENV}/bin
-ENV DTED_APPLY_PIXEL_IS_POINT=TRUE
-ENV GTIFF_POINT_GEO_IGNORE=TRUE
 ENV GTIFF_REPORT_COMPD_CS=TRUE
 ENV REPORT_COMPD_CS=TRUE
 ENV OAMS_TRADITIONAL_GIS_ORDER=TRUE
