@@ -16,7 +16,8 @@ This exercise uses PDAL to apply to clip data with polygon geometries.
 Exercise
 --------------------------------------------------------------------------------
 
-The ``autzen.laz`` file is a staple in PDAL and libLAS examples. We will
+The ``autzen.laz`` file is a staple in PDAL and libLAS examples. You can [download this file here] 
+(https://github.com/PDAL/data/blob/master/autzen/autzen.laz) We will
 use this file to demonstrate clipping points with a geometry. We're going to
 clip out the stadium into a new LAS file.
 
