@@ -62,11 +62,10 @@ void PtsReader::initialize(PointTableRef table)
     std::getline(*m_istream, buf);
 
     // Very first line is point count
-    if(!Utils::fromString(buf, m_PointCount))
-    {
-        throwError("Unable to read expected point count at top of the file '" + m_filename + "'.");
-    }
-
+    auto res = Utils::fromString(buf, m_PointCount);
+    if (!res)
+        throwError("Unable to read expected point count at top of the file '" +
+            m_filename + "': " + res.what());
     // Peek second line to determine dimensions to add.
     // Expect points in the formats:
     //      X Y Z,

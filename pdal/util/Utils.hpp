@@ -951,6 +951,16 @@ namespace Utils
         return true;
     }
 
+    template<typename T, std::enable_if_t<!std::is_integral<T>::value>* = nullptr>
+    StatusWithReason fromString(const std::string& from, T& to)
+    {
+        std::istringstream iss(from);
+
+        iss >> to;
+        return !iss.fail();
+    }
+
+
     /**
       Convert a string to a value by reading from a string stream.
 
@@ -958,13 +968,18 @@ namespace Utils
       \param to  Converted value.
       \return  \c true if the conversion was successful, \c false otherwise.
     */
-    template<typename T>
+    template<typename T, std::enable_if_t<std::is_integral<T>::value>* = nullptr>
     StatusWithReason fromString(const std::string& from, T& to)
     {
         std::istringstream iss(from);
 
         iss >> to;
-        return !iss.fail();
+        bool failure = iss.fail();
+        auto pos = iss.tellg();
+        if (pos > 0)
+            return { -1, "Found '" + from.substr(pos) + "' after valid integral value of '" +
+                from.substr(0, pos) + "'." };
+        return !failure;
     }
 
     // Optimization of above.
