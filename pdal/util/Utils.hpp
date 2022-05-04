@@ -951,6 +951,14 @@ namespace Utils
         return true;
     }
 
+
+    /**
+      Convert a string to a non-integral value by reading from a string stream.
+
+      \param from  String to convert.
+      \param to  Converted value.
+      \return  \c true if the conversion was successful, \c false otherwise.
+    */
     template<typename T, std::enable_if_t<!std::is_integral<T>::value>* = nullptr>
     StatusWithReason fromString(const std::string& from, T& to)
     {
@@ -962,7 +970,7 @@ namespace Utils
 
 
     /**
-      Convert a string to a value by reading from a string stream.
+      Convert a string to an integral value by reading from a string stream.
 
       \param from  String to convert.
       \param to  Converted value.
