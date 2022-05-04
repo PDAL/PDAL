@@ -468,7 +468,8 @@ std::vector<std::string> glob(std::string path)
         if (found == std::wstring::npos)
             filenames.push_back(fromNative(ffd.cFileName));
         else
-            filenames.push_back(fromNative(wpath.substr(0, found)) + "\\" + fromNative(ffd.cFileName));
+            filenames.push_back(fromNative(wpath.substr(0, found + 1)) +
+                fromNative(ffd.cFileName));
 
     } while (FindNextFileW(handle, &ffd) != 0);
     FindClose(handle);
@@ -488,7 +489,7 @@ std::vector<std::string> glob(std::string path)
         if (found == std::wstring::npos)
             filenames.push_back(ffd.cFileName);
         else
-            filenames.push_back(path.substr(0, found) + "\\" + ffd.cFileName);
+            filenames.push_back(path.substr(0, found + 1) + ffd.cFileName);
 
     } while (FindNextFileA(handle, &ffd) != 0);
     FindClose(handle);
