@@ -62,6 +62,7 @@ void PtsReader::initialize(PointTableRef table)
     std::getline(*m_istream, buf);
 
     // Very first line is point count
+    Utils::trim(buf);
     auto res = Utils::fromString(buf, m_PointCount);
     if (!res)
         throwError("Unable to read expected point count at top of the file '" +
