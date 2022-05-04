@@ -34,6 +34,7 @@
 
 #include <pdal/pdal_test_main.hpp>
 
+#include <cmath>
 #include <sstream>
 #include <vector>
 
@@ -513,6 +514,36 @@ TEST(UtilsTest, extractor)
         EXPECT_EQ(s.size(), 0);
         EXPECT_TRUE(s.empty());
     }
+}
+
+TEST(UtilsTest, fromString)
+{
+    int i;
+    Utils::StatusWithReason ok;
+    ok = Utils::fromString("12345", i);
+    EXPECT_EQ(i, 12345);
+    EXPECT_EQ(ok.code(), 0);
+    ok = Utils::fromString("12345.123", i);
+    EXPECT_EQ(i, 12345);
+    EXPECT_NE(ok.code(), 0);
+
+    std::string s;
+    ok = Utils::fromString("12345", s);
+    EXPECT_EQ(s, "12345");
+    EXPECT_EQ(ok.code(), 0);
+
+    double d;
+    ok = Utils::fromString("12345.34", d);
+    EXPECT_EQ(d, 12345.34);
+    EXPECT_EQ(ok.code(), 0);
+    ok = Utils::fromString("12345", d);
+    EXPECT_EQ(d, 12345.0);
+    EXPECT_EQ(ok.code(), 0);
+    ok = Utils::fromString("foo", d);
+    EXPECT_NE(ok.code(), 0);
+    ok = Utils::fromString("NaN", d);
+    EXPECT_TRUE(std::isnan(d));
+    EXPECT_EQ(ok.code(), 0);
 }
 
 // Don't run if we are WIN32
