@@ -468,7 +468,7 @@ std::vector<std::string> glob(std::string path)
         if (found == std::wstring::npos)
             filenames.push_back(fromNative(ffd.cFileName));
         else
-            filenames.push_back(fromNative(wpath.substr(0, found)) + wapth[found] +
+            filenames.push_back(fromNative(wpath.substr(0, found)) + wpath[found] +
                 fromNative(ffd.cFileName));
 
     } while (FindNextFileW(handle, &ffd) != 0);
