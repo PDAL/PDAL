@@ -411,7 +411,7 @@ Tempfile::Tempfile(bool ascii)
         std::string s(1, (char)0xC3);
 
         // The second byte of UTF-8 latin in in the range 0x80 - 0xBF;
-        const int range = 0xBF - 0x80 + 1;
+        const int range = 0xBF - 0x80;
         uint8_t v = (uint8_t)std::uniform_int_distribution<>(0, range)(r.generator());
         s += (char)(0x80 + v);
         return s;
