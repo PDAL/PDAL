@@ -40,6 +40,10 @@
 #include "Support.hpp"
 
 #include <iostream>
+#ifdef _WIN32
+#include <codecvt>
+#include <winioctl.h>
+#endif
 
 using namespace pdal;
 
@@ -332,6 +336,15 @@ TEST(UtilsTest, map)
 #ifdef _WIN32
     Support::Tempfile temp(false);
     std::string filename = temp.filename();
+
+    auto toNative = [](const std::string& in) -> std::wstring
+    {
+        // TODO: C++11 define convert with static thread_local
+	std::wstring_convert<std::codecvt_utf8_utf16<uint16_t>, uint16_t> convert;
+	auto s = convert.from_bytes(in);
+	auto p = reinterpret_cast<wchar_t const*>(s.data());
+	return std::wstring(p, p + s.size());
+    };
 
     auto f = CreateFileW(toNative(filename).data(), GENERIC_READ | GENERIC_WRITE,
         0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
