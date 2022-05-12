@@ -282,6 +282,16 @@ void CopcWriter::write(const PointViewPtr v)
 {
     using namespace copcwriter;
 
+    if (v->empty())
+    {
+        log()->get(LogLevel::Warning) << "writers.copc skipping empty point view.\n";
+        return;
+    }
+
+    if (++b->viewCount > 1)
+        log()->get(LogLevel::Warning) << "writers.copc does not support multiple views "
+            "and will overwrite files for earlier views. Consider adding a merge filter.\n";
+
     BOX3D box;
     v->calculateBounds(box);
 
