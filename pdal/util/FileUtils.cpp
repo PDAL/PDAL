@@ -532,7 +532,7 @@ MapContext mapFile(const std::string& filename, bool readOnly, uintmax_t pos, ui
 #ifndef _WIN32
     ctx.m_fd = ::open(filename.c_str(), readOnly ? O_RDONLY : O_RDWR);
 #else
-    ctx.m_fd = ::_open(filename.c_str(), readOnly ? O_RDONLY : O_RDWR);
+    ctx.m_fd = ::_wopen(toNative(filename).data(), readOnly ? O_RDONLY : O_RDWR);
 #endif
 
     if (ctx.m_fd == -1)

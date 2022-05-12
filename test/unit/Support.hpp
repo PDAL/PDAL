@@ -127,7 +127,7 @@ void compareBounds(const pdal::BOX3D& p, const pdal::BOX3D& q);
 class Tempfile
 {
 public:
-    Tempfile();
+    Tempfile(bool ascii = true);
     ~Tempfile();
 
     std::string filename();
