@@ -90,8 +90,18 @@ std::wstring toNative(std::string const& in)
     auto p = reinterpret_cast<wchar_t const*>(s.data());
     return std::wstring(p, p + s.size());
 }
+std::string fromNative(const std::wstring& in)
+{
+    std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
+    auto p = reinterpret_cast<unsigned short const*>(in.data());
+    return convert.to_bytes(p, p + in.size());
+}
 #else // Unix, OSX, MinGW
-std::string const& toNative(std::string const& in)
+const std::string& toNative(const std::string& in)
+{
+    return in;
+}
+const std::string& fromNative(const std::string& in)
 {
     return in;
 }
@@ -196,11 +206,11 @@ std::vector<std::string> directoryList(const std::string& dir)
 
     try
     {
-        fs::directory_iterator it(dir);
+        fs::directory_iterator it(toNative(dir));
         fs::directory_iterator end;
         while (it != end)
         {
-            files.push_back(it->path().string());
+            files.push_back(fromNative(it->path()));
             it++;
         }
     }
@@ -445,13 +455,6 @@ std::vector<std::string> glob(std::string path)
 
 #ifdef _WIN32
 #ifdef PDAL_WIN32_STL
-    auto fromNative = [](std::wstring const& in) -> std::string
-    {
-        std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
-        auto p = reinterpret_cast<unsigned short const*>(in.data());
-        return convert.to_bytes(p, p + in.size());
-    };
-
     std::wstring wpath(toNative(path));
     WIN32_FIND_DATAW ffd;
     HANDLE handle = FindFirstFileW(wpath.c_str(), &ffd);
