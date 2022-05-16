@@ -4,7 +4,7 @@ echo "Configuring build type '$BUILD_TYPE'"
 mkdir build
 
 conda update -n base -c defaults conda
-conda install -c conda-forge pkg-config cmake ninja pkgconfig libgcc-ng -y
+conda install -c conda-forge pkg-config cmake ninja pkgconfig libgcc-ng glib -y
 
 if [ "$BUILD_TYPE" == "fixed" ]; then
 
