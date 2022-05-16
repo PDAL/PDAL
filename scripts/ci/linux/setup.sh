@@ -20,5 +20,7 @@ else
 
 fi
 
+# patch on libstdcxx
+conda install -c conda-forge "libstdcxx-ng>=12.1.0" -y
 gdal-config --version
 
