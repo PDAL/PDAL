@@ -4,7 +4,7 @@ echo "Configuring build type '$BUILD_TYPE'"
 mkdir build
 
 conda update -n base -c defaults conda
-conda install -c conda-forge pkg-config cmake ninja pkgconfig "libstdcxx-ng>=12.1.0" -y
+conda install -c conda-forge pkg-config cmake ninja -y
 
 if [ "$BUILD_TYPE" == "fixed" ]; then
 
@@ -16,11 +16,9 @@ if [ "$BUILD_TYPE" == "fixed" ]; then
 else
 
     conda install pdal --only-deps -y
-    conda install --yes --quiet gdal=3.4.2 -y
+    conda install --yes --quiet gdal=3.4.2=py310hce6f0df_7 -y
 
 fi
 
-# patch on libstdcxx
-conda install -c conda-forge "libstdcxx-ng>=12.1.0" -y
 gdal-config --version
 
