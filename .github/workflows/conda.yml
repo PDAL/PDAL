@@ -38,6 +38,12 @@ jobs:
           source ../scripts/ci/conda/compile.sh
       working-directory: ./pdal-feedstock
 
+    - name: Debug
+      shell: bash -l {0}
+      run: |
+          conda activate test
+          conda list
+
     - uses: ilammy/msvc-dev-cmd@v1
       if: matrix.platform == 'windows-latest'
     - name: Test
