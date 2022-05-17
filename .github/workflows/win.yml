@@ -11,6 +11,9 @@ jobs:
       fail-fast: true
       matrix:
         type: ['floating','fixed']
+    defaults:
+      run:
+        shell: bash -l {0}
     env:
       BUILD_TYPE: ${{ matrix.type }}
 
@@ -26,30 +29,25 @@ jobs:
         python-version: '3.8'
 
     - name: Setup
-      shell: bash -l {0}
       run: |
           source ./scripts/ci/win/setup.sh
 
     - name: CMake
-      shell: bash -l {0}
       working-directory: ./build
       run: |
           source ../scripts/ci/win/cmake.sh
 
     - name: Compile
-      shell: bash -l {0}
       working-directory: ./build
       run: |
           source ../scripts/ci/win/compile.sh
 
     - name: Test
-      shell: bash -l {0}
       working-directory: ./build
       run: |
           source ../scripts/ci/win/test.sh
 
     - name: Examples
-      shell: bash -l {0}
       run: |
           source ./scripts/ci/win/examples.sh
 

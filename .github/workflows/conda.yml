@@ -5,7 +5,9 @@ on: [push, pull_request]
 jobs:
   build:
     name: Conda ${{ matrix.platform }}
-
+    defaults:
+      run:
+        shell: bash -l {0}
     runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: true
@@ -30,12 +32,10 @@ jobs:
         auto-update-conda: true
 
     - name: Setup
-      shell: bash -l {0}
       run: |
           source ./scripts/ci/conda/setup.sh
 
     - name: Build
-      shell: bash -l {0}
       run: |
           source ../scripts/ci/conda/compile.sh
       working-directory: ./pdal-feedstock
@@ -43,7 +43,6 @@ jobs:
     - uses: ilammy/msvc-dev-cmd@v1
       if: matrix.platform == 'windows-latest'
     - name: Test
-      shell: bash -l {0}
       run: |
           source ./scripts/ci/conda/examples.sh
 
@@ -54,7 +53,6 @@ jobs:
 
     - name: Deploy to pdal-master Conda channel
       if: github.ref == 'refs/heads/master'
-      shell: bash -l {0}
       env:
         ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
       run: |

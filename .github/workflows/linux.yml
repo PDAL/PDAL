@@ -5,7 +5,9 @@ on: [push, pull_request]
 jobs:
   build:
     name: Linux ${{ matrix.type }}
-
+    defaults:
+      run:
+        shell: bash -l {0}
     runs-on: 'ubuntu-latest'
     strategy:
       fail-fast: false
@@ -24,30 +26,25 @@ jobs:
         auto-update-conda: true
 
     - name: Setup
-      shell: bash -l {0}
       run: |
           source ./scripts/ci/linux/setup.sh
 
     - name: CMake
-      shell: bash -l {0}
       run: |
           source ../scripts/ci/linux/cmake.sh
       working-directory: ./build
 
     - name: Compile
-      shell: bash -l {0}
       run: |
           source ../scripts/ci/linux/compile.sh
       working-directory: ./build
 
     - name: Test
-      shell: bash -l {0}
       run: |
           source ../scripts/ci/linux/test.sh
       working-directory: ./build
 
     - name: Examples
-      shell: bash -l {0}
       run: |
           source ./scripts/ci/linux/examples.sh
 
