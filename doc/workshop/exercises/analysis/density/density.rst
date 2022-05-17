@@ -24,15 +24,18 @@ Command
 
 Invoke the following command, substituting accordingly, in your ` Shell`:
 
-.. literalinclude:: ./density-command.txt
-    :linenos:
+.. code-block:: console
 
-.. literalinclude:: ./density-command-win.txt
-    :linenos:
+    $ pdal density ./exercises/analysis/density/uncompahgre.laz  \
+    -o ./exercises/analysis/density/density.sqlite \
+    -f SQLite
 
 
-.. image:: ../../../images/density-command-run.png
-    :target: ../../../../_images/density-command-run.png
+.. code-block:: doscon
+
+    > pdal density ./exercises/analysis/density/uncompahgre.laz  ^
+    -o ./exercises/analysis/density/density.sqlite ^
+    -f SQLite
 
 Visualization
 ................................................................................
