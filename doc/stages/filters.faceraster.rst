@@ -9,7 +9,7 @@ is given a value that is an interpolation of the known values of the containing
 triangle.  If the raster cell center is outside of the triangulation, it is
 assigned the nodata_ value.  Use `writers.raster` to write the output.
 
-The extent of the raster can be defined by using the origin_x_, origin_y, width_ and
+The extent of the raster can be defined by using the origin_x_, origin_y_, width_ and
 height_ options. If these options aren't provided the raster is sized to contain the
 input data.
 

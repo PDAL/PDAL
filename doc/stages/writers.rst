@@ -21,6 +21,7 @@ dimension type, while others only understand fixed dimension names.
    writers.draco
    writers.ept_addon
    writers.e57
+   writers.fbx
    writers.gdal
    writers.gltf
    writers.las
@@ -40,7 +41,8 @@ dimension type, while others only understand fixed dimension names.
     Write BPF version 3 files. BPF is an NGA specification for point cloud data.
 
 :ref:`writers.copc`
-    Write COPC (spatially arranged LAZ) files.
+    COPC, or Cloud Optimized Point Cloud, is an LAZ 1.4 file stored as a
+    clustered octree.
 
 :ref:`writers.draco`
     Write a buffer in Google Draco format
@@ -50,6 +52,9 @@ dimension type, while others only understand fixed dimension names.
 
 :ref:`writers.e57`
     Write data in the E57 format.
+
+:ref:`writers.fbx`
+    Write mesh output in the Adobe FBX format.
 
 :ref:`writers.gdal`
     Create a raster from a point cloud using an interpolation algorithm.

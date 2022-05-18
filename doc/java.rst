@@ -185,7 +185,9 @@ Development purposes (including binaries) compilation:
 Only Java development purposes compilation:
   1. Provide ``$LD_LIBRARY_PATH`` or ``$DYLD_LIBRARY_PATH``
   2. If you don't want to provide global variable you can pass ``-Djava.library.path=<path>`` into sbt:
+
     ``./sbt -Djava.library.path=<path>``
+
   3. Set ``PDAL_DEPEND_ON_NATIVE=false`` (to disable ``native`` project build)
   4. Run ``PDAL_DEPEND_ON_NATIVE=false ./sbt``
 

@@ -462,14 +462,16 @@ TEST(EptReaderTest, originRead)
     const auto set(reader.execute(table));
 
     uint64_t np(0);
-    uint64_t o;
+//    uint64_t o;
     for (const PointViewPtr& view : set)
     {
         np += view->size();
+        /**
         for (point_count_t i(0); i < view->size(); ++i)
         {
             o = view->getFieldAs<uint64_t>(Dimension::Id::OriginId, i);
         }
+        **/
     }
 
     EXPECT_EQ(np, ellipsoidNumPoints);

@@ -20,26 +20,26 @@ levels of some of the Draco attributes.
 
 .. code-block:: json
 
-[
-    {
-        "type": "readers.las",
-        "filename": "color.las"
-    },
-    {
-        "type": "writers.draco",
-        "filename": "draco.drc",
-        "dimensions": {
-            "X": "float",
-            "Y": "float",
-            "Z": "float"
+    [
+        {
+            "type": "readers.las",
+            "filename": "color.las"
         },
-        "quantization": {
-            "NORMAL": 8,
-            "TEX_COORD": 7,
-            "GENERIC": 6
+        {
+            "type": "writers.draco",
+            "filename": "draco.drc",
+            "dimensions": {
+                "X": "float",
+                "Y": "float",
+                "Z": "float"
+            },
+            "quantization": {
+                "NORMAL": 8,
+                "TEX_COORD": 7,
+                "GENERIC": 6
+            }
         }
-    }
-]
+    ]
 
 Options
 -------
@@ -63,14 +63,15 @@ quantization
     must be integers. Default quantization levels are below, and will be
     overridden by any values placed in the options.
 
-..code-block:: json
-{
-    "POSITION": 11,
-    "NORMAL": 7,
-    "TEX_COORD": 10,
-    "COLOR": 8,
-    "GENERIC": 8
-}
+.. code-block:: json
+
+    {
+        "POSITION": 11,
+        "NORMAL": 7,
+        "TEX_COORD": 10,
+        "COLOR": 8,
+        "GENERIC": 8
+    }
 
 .. include:: writer_opts.rst
 

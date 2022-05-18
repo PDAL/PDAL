@@ -65,7 +65,17 @@ void setSummary(las::Header& header, const Summary& summary)
     header.setPointCount(summary.getTotalNumPoints());
     for (int i = 0; i < Header::ReturnCount; ++i)
         header.setPointsByReturn(i, summary.getReturnCount(i));
-    header.bounds = summary.getBounds();
+    if (summary.getTotalNumPoints() == 0)
+    {
+        header.bounds.minx = 0;
+        header.bounds.maxx = 0;
+        header.bounds.miny = 0;
+        header.bounds.maxy = 0;
+        header.bounds.minz = 0;
+        header.bounds.maxz = 0;
+    }
+    else
+        header.bounds = summary.getBounds();
 }
 
 

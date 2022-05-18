@@ -3,7 +3,7 @@ project(FilterTutorial)
 
 find_package(PDAL 1.9.0 REQUIRED CONFIG)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_library(pdal_plugin_filter_myfilter SHARED MyFilter.cpp)
 target_link_libraries(pdal_plugin_filter_myfilter PRIVATE ${PDAL_LIBRARIES})

@@ -21,7 +21,7 @@ macro(PDAL_CREATE_PLUGIN)
     project(${PROJECT_NAME} VERSION ${VERSION} LANGUAGES CXX)
 
     add_library(${TARGET} SHARED ${SOURCES})
-    set_property(TARGET ${TARGET} PROPERTY CXX_STANDARD 11)
+    set_property(TARGET ${TARGET} PROPERTY CXX_STANDARD 17)
     set_property(TARGET ${TARGET} PROPERTY CXX_STANDARD_REQUIRED TRUE)
     target_include_directories(${TARGET} PRIVATE ${PDAL_INCLUDE_DIRS})
     target_link_libraries(${TARGET} PRIVATE ${PDAL_LIBRARIES})

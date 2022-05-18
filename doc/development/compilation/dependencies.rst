@@ -4,18 +4,17 @@
 Dependencies
 ==============================================================================
 
-
 .. note::
 
     The absolute best source of build and configuration examples is the
     PDAL GitHub repository. Specifically, the continuous integration
     scripts at https://github.com/PDAL/PDAL/tree/master/scripts/ci
 
-PDAL depends on a number of libraries to do its work.  You should make sure
+PDAL depends on a number of libraries to do its work.  Make sure
 those dependencies are installed on your system before installing PDAL
-or use a packaging system that will automatically ensure that prerequisites
-are satisified.  Packaging system such as `apt`_ or `Conda`_ can
-be used to install dependencies on your system.
+or use a packaging system that will automatically load prerequisites.
+Packaging system such as `apt`_ or `Conda`_ can be used to install dependencies
+on your system.
 
 .. _`apt`: https://help.ubuntu.com/lts/serverguide/apt.html
 .. _`Conda`: https://conda.io/en/latest/
@@ -23,7 +22,7 @@ be used to install dependencies on your system.
 Required Dependencies
 ------------------------------------------------------------------------------
 
-GDAL (2.2+)
+GDAL (3.0+)
 ..............................................................................
 
 PDAL uses GDAL for spatial reference system description manipulation, and image
@@ -54,39 +53,6 @@ from a package will generally install GeoTIFF as well. ::
     insanity that can ensue on some platforms.  `Conda Forge`_ users, including
     those using that platform to link and build PDAL themselves, do
     not need to worry about this issue.
-
-Optional Dependencies
-------------------------------------------------------------------------------
-
-LASzip (Latest package/source recommended)
-..............................................................................
-
-`LASzip`_ is a library with a `CMake`-based build system that
-provides periodic compression of `ASPRS LAS`_ data. It is used by the
-:ref:`writers.las` and :ref:`readers.las` to provide
-compressed LAS support.::
-
-    Source: https://github.com/LASzip/LASzip
-    Conda: https://anaconda.org/conda-forge/laszip
-
-laz-perf (Latest package/source recommended)
-..............................................................................
-
-laz-perf provides an alternative LAS compression/decompression engine that
-may be slightly faster in some circumstances.  laz-perf supports fewer LAS
-point types and versions than does LASzip.
-
-    Source: https://github.com/verma/laz-perf/
-    Conda: https://anaconda.org/conda-forge/laz-perf
-
-libxml2  (2.7+)
-..............................................................................
-
-libxml2_ is used to serialize PDAL dimension descriptions into XML for
-:ref:`readers.pgpointcloud`.::
-
-    Source: http://www.xmlsoft.org/
-    Conda: https://anaconda.org/conda-forge/libxml2
 
 Plugin Dependencies
 ------------------------------------------------------------------------------

@@ -31,11 +31,10 @@ Fortunately, Conda provides us a fully-featured known
 configuration to run our examples and exercises without having to suffer
 so much, and provides it for Windows, Linux, and macOS.
 
-
 .. note::
 
     Not everyone uses Conda. Another alternative to get a known configuration
-    is to go through the workshop using :ref:`docker` as your platform. A
+    is to go through the workshop using :ref:`docker <development_docker>` as your platform. A
     previous edition of the workshop was provided using Docker, but it was
     found to be a bit too difficult to follow.
 

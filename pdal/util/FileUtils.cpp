@@ -90,8 +90,18 @@ std::wstring toNative(std::string const& in)
     auto p = reinterpret_cast<wchar_t const*>(s.data());
     return std::wstring(p, p + s.size());
 }
+std::string fromNative(const std::wstring& in)
+{
+    std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
+    auto p = reinterpret_cast<unsigned short const*>(in.data());
+    return convert.to_bytes(p, p + in.size());
+}
 #else // Unix, OSX, MinGW
-std::string const& toNative(std::string const& in)
+const std::string& toNative(const std::string& in)
+{
+    return in;
+}
+const std::string& fromNative(const std::string& in)
 {
     return in;
 }
@@ -196,11 +206,11 @@ std::vector<std::string> directoryList(const std::string& dir)
 
     try
     {
-        fs::directory_iterator it(dir);
+        fs::directory_iterator it(toNative(dir));
         fs::directory_iterator end;
         while (it != end)
         {
-            files.push_back(it->path().string());
+            files.push_back(fromNative(it->path()));
             it++;
         }
     }
@@ -445,13 +455,6 @@ std::vector<std::string> glob(std::string path)
 
 #ifdef _WIN32
 #ifdef PDAL_WIN32_STL
-    auto fromNative = [](std::wstring const& in) -> std::string
-    {
-        std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
-        auto p = reinterpret_cast<unsigned short const*>(in.data());
-        return convert.to_bytes(p, p + in.size());
-    };
-
     std::wstring wpath(toNative(path));
     WIN32_FIND_DATAW ffd;
     HANDLE handle = FindFirstFileW(wpath.c_str(), &ffd);
@@ -468,7 +471,8 @@ std::vector<std::string> glob(std::string path)
         if (found == std::wstring::npos)
             filenames.push_back(fromNative(ffd.cFileName));
         else
-            filenames.push_back(fromNative(wpath.substr(0, found)) + "\\" + fromNative(ffd.cFileName));
+            filenames.push_back(fromNative(wpath.substr(0, found + 1)) +
+                fromNative(ffd.cFileName));
 
     } while (FindNextFileW(handle, &ffd) != 0);
     FindClose(handle);
@@ -488,7 +492,7 @@ std::vector<std::string> glob(std::string path)
         if (found == std::wstring::npos)
             filenames.push_back(ffd.cFileName);
         else
-            filenames.push_back(path.substr(0, found) + "\\" + ffd.cFileName);
+            filenames.push_back(path.substr(0, found + 1) + ffd.cFileName);
 
     } while (FindNextFileA(handle, &ffd) != 0);
     FindClose(handle);
@@ -531,7 +535,7 @@ MapContext mapFile(const std::string& filename, bool readOnly, uintmax_t pos, ui
 #ifndef _WIN32
     ctx.m_fd = ::open(filename.c_str(), readOnly ? O_RDONLY : O_RDWR);
 #else
-    ctx.m_fd = ::_open(filename.c_str(), readOnly ? O_RDONLY : O_RDWR);
+    ctx.m_fd = ::_wopen(toNative(filename).data(), readOnly ? O_RDONLY : O_RDWR);
 #endif
 
     if (ctx.m_fd == -1)

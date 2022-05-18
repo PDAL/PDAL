@@ -80,9 +80,12 @@ const int MinimumPoints = 100;
 const int MinimumTotalPoints = 1500;
 // Number of cells in each direction for a voxel, kinda.
 constexpr double Sqrt3 = 1.73205080757;
+
 // Number of cells in each direction when sampling points into pyramid layers
-constexpr int ChildCellCount = int(300 * Sqrt3);
-constexpr int RootCellCount = int(300 * Sqrt3 / 1.5);
+//NOTE: These values must be <= 256 or the GridKey structure needs to be changed.
+constexpr int ChildCellCount = int(128 * Sqrt3);
+//NOTE: These values must be <= 256 or the GridKey structure needs to be changed.
+constexpr int RootCellCount = int(128 * Sqrt3 / 1.5);
 
 struct Options
 {

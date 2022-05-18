@@ -10,7 +10,7 @@ EPT format, including spatially accelerated queries and file reconstruction
 queries.
 
 Sample EPT datasets of hundreds of billions of points in size may be viewed
-with `Potree`_ or `Plasio`_.
+with `Potree`_.
 
 .. embed::
 
