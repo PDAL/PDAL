@@ -68,12 +68,12 @@ dictionaries.
 Run ``pdal pipeline``
 ................................................................................
 
-.. literalinclude:: ./histogram-command.txt
-   :linenos:
+.. code-block:: console
 
-.. image:: ../../images/python-histogram-command.png
-    :target: ../../../_images/python-histogram-command.png
+    $ pdal pipeline ./exercises/python/histogram.json
+    anything:47: UserWarning: Attempting to set identical left == right == 0 results in singular transformations; automatically expanding.
 
+    $
 
 Output
 ................................................................................
