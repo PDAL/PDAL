@@ -36,6 +36,8 @@ Reference
 
 .. [Breunig2000] Breunig, M.M., Kriegel, H.-P., Ng, R.T., Sander, J., 2000. LOF: Identifying Density-Based Local Outliers. Proc. 2000 Acm Sigmod Int. Conf. Manag. Data 1–12.
 
+.. [Butler2021] Butler, H. Chambers, B. Hartzell, P. Glennie, C. PDAL: An open source library for the processing and analysis of point clouds. Computers & Geosciences, Volume 148, 2021, 104680, ISSN 0098-3004, https://doi.org/10.1016/j.cageo.2020.104680.
+
 .. [Chen2012] Chen, Ziyue et al. “Upward-Fusion Urban DTM Generating Method Using Airborne Lidar Data.” ISPRS Journal of Photogrammetry and Remote Sensing 72 (2012): 121–130.
 
 .. [Cook1986] Cook, Robert L. "Stochastic sampling in computer graphics." *ACM Transactions on Graphics (TOG)* 5.1 (1986): 51-72.
