@@ -11,17 +11,17 @@ Citation
 
 To cite PDAL in publications use:
 
-  PDAL Contributors, 2020. PDAL Point Data Abstraction Library. doi:10.5281/zenodo.2556737
+  PDAL Contributors, 2022. PDAL Point Data Abstraction Library.  https://doi.org/10.5281/zenodo.2616780
 
 A BibTeX entry for LaTeX users is
 
-  | @misc{pdal_contributors_2020_2556737,
+  | @misc{pdal_contributors_2022_2616780,
   |   author       = {PDAL Contributors},
   |   title        = {PDAL Point Data Abstraction Library},
   |   month        = aug,
-  |   year         = 2020,
-  |   doi          = {10.5281/zenodo.2556737},
-  |   url          = {https://doi.org/10.5281/zenodo.2556737}
+  |   year         = 2022,
+  |   doi          = {10.5281/zenodo.2616780},
+  |   url          = {https://doi.org/10.5281/zenodo.2616780}
   | }
 
 
