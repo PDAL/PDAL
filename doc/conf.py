@@ -244,6 +244,9 @@ html_show_sourcelink = False
 htmlhelp_basename = 'PDALdoc'
 
 
+# List of Sphinx warnings that will not be raised
+suppress_warnings = ['epub.unknown_project_files']
+
 # -- Options for LaTeX output --------------------------------------------------
 preamble = r'''
   \makeatother
