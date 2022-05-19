@@ -119,6 +119,12 @@ std::string fromNative(const std::wstring& in)
     }
     return out;
 }
+std::string fromNative(const std::wstring& in)
+{
+    std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
+    auto p = reinterpret_cast<unsigned short const*>(in.data());
+    return convert.to_bytes(p, p + in.size());
+}
 #else // Unix, OSX, MinGW
 std::string toNative(const std::string& in)
 {
