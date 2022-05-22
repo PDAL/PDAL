@@ -109,8 +109,12 @@ void Vlr::fillHeader(const char *buf)
 
     in >> recordSig;
     in.get(userId, 16);
+    // Trim all characters after a NULL
+    userId = userId.data();
     in >> recordId >> dataLen;
     in.get(description, 32);
+    // Trim all characters after a NULL
+    description = description.data();
     promisedDataSize = dataLen;
 }
 
@@ -134,8 +138,12 @@ void Evlr::fillHeader(const char *buf)
 
     in >> recordSig;
     in.get(userId, 16);
+    // Trim all characters after a NULL
+    userId = userId.data();
     in >> recordId >> promisedDataSize;
     in.get(description, 32);
+    // Trim all characters after a NULL
+    description = description.data();
 }
 
 std::vector<char> Evlr::headerData() const
