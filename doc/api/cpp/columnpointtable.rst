@@ -1,16 +1,9 @@
-.. _cpp-pdal-utils:
+.. _cpp-pdal-columnpointtable:
 
 ******************************************************************************
-``pdal::Utils``
+:cpp:class:`pdal::ColumnPointTable`
 ******************************************************************************
 
-.. index:: Utils
-
-.. cpp:namespace:: pdal::Utils
-
-`pdal::Utils` is a set of utility functions.
-
-.. doxygennamespace:: pdal::Utils
+.. doxygenclass:: pdal::ColumnPointTable
    :members:
    :undoc-members:
-
