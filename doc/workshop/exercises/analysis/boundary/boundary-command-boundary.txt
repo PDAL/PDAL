@@ -1,1 +1,0 @@
-pdal info ./exercises/analysis/density/uncompahgre.laz --boundary

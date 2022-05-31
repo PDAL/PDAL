@@ -1,1 +1,0 @@
-pdal pipeline ./exercises/analysis/dtm/gdal.json
