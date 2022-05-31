@@ -60,16 +60,12 @@ def make_plot(ins, outs):
     # to filters.programmable and filters.predicate modules that contains
     # a dictionary of arguments that can be explicitly passed into
     # the module by the user. We passed in a filename arg in our `pdal pipeline` call
-    if 'filename' in pdalargs:
-        filename = pdalargs['filename']
-    else:
-        filename = 'histogram.png'
-
+    filename = pdalargs['filename'] if 'filename' in pdalargs else 'histogram.png'
+    
     # open up the filename and write out the
     # bytes of the PNG stored in the BytesIO instance
-    o = open(filename, 'wb')
-    o.write(output.getvalue())
-    o.close()
+    with open(filename, 'wb') as o:
+        o.write(output.getvalue()) 
 
 
     # filters.programmable scripts need to
