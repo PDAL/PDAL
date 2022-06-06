@@ -196,10 +196,6 @@ TEST_F(TileDBReaderTest, read)
     tiledb::Query q(ctx, array, TILEDB_READ);
     q.set_subarray(subarray);
 
-#if TILEDB_VERSION_MAJOR == 1
-    std::vector<double> coords(count  * 3);
-    q.set_coordinates(coords);
-#else
     std::vector<double> xs(count);
     std::vector<double> ys(count);
     std::vector<double> zs(count);
@@ -207,7 +203,6 @@ TEST_F(TileDBReaderTest, read)
     q.set_buffer("X", xs)
         .set_buffer("Y", ys)
         .set_buffer("Z", zs);
-#endif
 
     q.submit();
     array.close();

@@ -1,5 +1,5 @@
 #
-# LZMA support
+# Zstd support
 #
 option(WITH_ZSTD
     "Build support for compression/decompression with Zstd." TRUE)

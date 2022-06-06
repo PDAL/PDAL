@@ -3,7 +3,7 @@
 writers.tiledb
 ==============
 
-Implements `TileDB`_ 1.4.1+ reads from an array.
+Implements `TileDB`_ 2.3.0+ reads from an array.
 
 .. plugin::
 
@@ -99,7 +99,7 @@ stats
   Dump query stats to stdout [Optional]
 
 filters
-  JSON array or object of compression filters for either `coords` or `attributes` of the form {coords/attributename : {"compression": name, compression_options: value, ...}} [Optional]
+  JSON array or object of compression filters for either `dims` or `attributes` of the form {dim/attributename : {"compression": name, compression_options: value, ...}} [Optional]
 
 timestamp
   Sets the TileDB timestamp for this write
@@ -111,9 +111,9 @@ By default TileDB will use the following set of compression filters for coordina
 .. code-block:: json
 
   {
-      "coords":[
-        {"compression": "zstd", "compression_level": 7}
-      ],
+      "X":{"compression": "zstd", "compression_level": 7},
+      "Y":{"compression": "zstd", "compression_level": 7},
+      "Z":{"compression": "zstd", "compression_level": 7},
       "Intensity":{"compression": "bzip2", "compression_level": 5},
       "ReturnNumber": {"compression": "zstd", "compression_level": 7},
       "NumberOfReturns": {"compression": "zstd", "compression_level": 7},
@@ -126,9 +126,7 @@ By default TileDB will use the following set of compression filters for coordina
       "Red": {"compression": "zstd", "compression_level": 7},
       "Green": {{"compression": "zstd", "compression_level": 7},
       "Blue": {{"compression": "zstd", "compression_level": 7},
-      "GpsTime": [  
-        {"compression": "zstd", "compression_level": 7}
-      ]
+      "GpsTime": {"compression": "zstd", "compression_level": 7}
   }
 
 .. _TileDB: https://tiledb.io
