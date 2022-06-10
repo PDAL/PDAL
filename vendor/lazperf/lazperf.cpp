@@ -641,6 +641,13 @@ void compress_chunk_table(OutputCb cb, const std::vector<chunk>& chunks, bool va
     encoder.done();
 }
 
+std::vector<chunk> decompress_chunk_table(std::istream& s, size_t numChunks, bool variable)
+{
+    lazperf::InFileStream stream(s);
+
+    return decompress_chunk_table(stream.cb(), numChunks, variable);
+}
+
 std::vector<chunk> decompress_chunk_table(InputCb cb, size_t numChunks, bool variable)
 {
     std::vector<chunk> chunks;
@@ -674,7 +681,7 @@ std::vector<chunk> decompress_chunk_table(InputCb cb, size_t numChunks, bool var
 // Deprecated
 std::vector<uint32_t> decompress_chunk_table(InputCb cb, size_t numChunks)
 {
-    std::vector<chunk> chunks = decompress_chunk_table(cb, numChunks, false);;
+    std::vector<chunk> chunks = decompress_chunk_table(cb, numChunks, false);
 
     std::vector<uint32_t> sizes;
     for (chunk& c : chunks)

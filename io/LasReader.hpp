@@ -76,9 +76,13 @@ protected:
             if (m_istream)
                 Utils::closeFile(m_istream);
         }
+        operator std::istream& ()
+        { return *m_istream; }
 
+    private:
         std::istream *m_istream;
     };
+    using LasStreamPtr = std::unique_ptr<LasStreamIf>;
 
     friend class NitfReader;
 public:
@@ -94,9 +98,7 @@ public:
     point_count_t getNumPoints() const;
 
 protected:
-    virtual void createStream();
-
-    std::unique_ptr<LasStreamIf> m_streamIf;
+    virtual LasStreamPtr createStream();
 
 private:
     virtual void addArgs(ProgramArgs& args);
@@ -110,16 +112,18 @@ private:
     virtual void done(PointTableRef table);
     virtual bool eof();
 
-    void handleCompressionOption();
     void setSrs(MetadataNode& m);
     void readExtraBytesVlr();
     void extractHeaderMetadata(MetadataNode& forward, MetadataNode& m);
     void extractVlrMetadata(MetadataNode& forward, MetadataNode& m);
-    void loadPoint(PointRef& point, char *buf, size_t bufsize);
-    void loadPointV10(PointRef& point, char *buf, size_t bufsize);
-    void loadPointV14(PointRef& point, char *buf, size_t bufsize);
+    void loadPoint(PointRef& point);
+    void loadPointV10(PointRef& point, const char *buf, size_t bufsize);
+    void loadPointV14(PointRef& point, const char *buf, size_t bufsize);
     void loadExtraDims(LeExtractor& istream, PointRef& data);
-    point_count_t readFileBlock(std::vector<char>& buf, point_count_t maxPoints);
+
+    void queueNext();
+    void queueNextCompressedChunk();
+    void queueNextStandardChunk();
 
     struct Options;
     struct Private;

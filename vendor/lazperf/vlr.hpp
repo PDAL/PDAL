@@ -108,8 +108,8 @@ public:
     uint16_t revision;
     uint32_t options;
     uint32_t chunk_size;
-    uint64_t num_points;
-    uint64_t num_bytes;
+    uint64_t num_points;  //ABELL - This is *not* the number of points. It's garbage.
+    uint64_t num_bytes;   //ABELL - This is *not* the number of bytes. It's garbage.
     std::vector<laz_item> items;
 
     laz_vlr();

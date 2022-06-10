@@ -266,6 +266,8 @@ LAZPERF_EXPORT las_decompressor::ptr build_las_decompressor(InputCb, int format,
 LAZPERF_EXPORT void compress_chunk_table(OutputCb cb, const std::vector<uint32_t>& chunks);
 LAZPERF_EXPORT void compress_chunk_table(OutputCb cb, const std::vector<chunk>& chunks,
     bool variableChunks);
+LAZPERF_EXPORT std::vector<chunk> decompress_chunk_table(std::istream& s, size_t numChunks,
+    bool variableChunks);
 LAZPERF_EXPORT std::vector<chunk> decompress_chunk_table(InputCb cb, size_t numChunks,
     bool variableChunks);
 

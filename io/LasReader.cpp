@@ -32,15 +32,17 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/compression/LazPerfVlrCompression.hpp>
-
 #include "LasHeader.hpp"
 #include "LasReader.hpp"
+#include "private/las/ChunkInfo.hpp"
 #include "private/las/Header.hpp"
 #include "private/las/Srs.hpp"
+#include "private/las/Tile.hpp"
 #include "private/las/Utils.hpp"
 #include "private/las/Vlr.hpp"
 
+#include <condition_variable>
+#include <mutex>
 #include <sstream>
 #include <string.h>
 
@@ -52,6 +54,7 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/IStream.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <lazperf/readers.hpp>
 
 namespace pdal
 {
@@ -84,15 +87,23 @@ struct LasReader::Private
     Options opts;
     las::Header header;
     LasHeader apiHeader;
-    LazPerfVlrDecompressor *decompressor;
-    std::vector<char> decompressorBuf;
     point_count_t index;
     las::VlrList ignoreVlrs;
     las::VlrList vlrs;
     las::Srs srs;
+    las::TilePtr currentTile;
+    las::ChunkInfo chunkInfo;
+    std::vector<las::TilePtr> tiles;
     std::vector<las::ExtraDim> extraDims;
+    ThreadPool pool;
+    uint32_t nextFetchChunk;
+    uint64_t nextFetchPoint;
+    uint32_t nextReadChunk;
+    std::mutex mutex;
+    std::condition_variable processedCv;
 
-    Private() : apiHeader(header, srs, vlrs), decompressor(nullptr), index(0)
+    //ABELL - Thread count here...
+    Private() : apiHeader(header, srs, vlrs), index(0), pool(7)
     {}
 };
 
@@ -183,18 +194,21 @@ QuickInfo LasReader::inspect()
 }
 
 
-void LasReader::createStream()
+// IMPORTANT NOTE: Unless you're going to totally overhaul things, you *must* use this
+//  virtual function to create a stream that you *must* use. NITF files contain embedded
+//  LAS files and this allows native and embedded files to be accessed identically. All
+//  the file positioning works assuming that the file is pure LAS/LAZ thanks to this.
+LasReader::LasStreamPtr LasReader::createStream()
 {
-    if (m_streamIf)
-        std::cerr << "Attempt to create stream twice!\n";
-    m_streamIf.reset(new LasStreamIf(m_filename));
-    if (!m_streamIf->m_istream)
+    LasStreamPtr s(new LasStreamIf(m_filename));
+    if (!s)
     {
         std::ostringstream oss;
         oss << "Unable to open stream for '"
-            << m_filename <<"' with error '" << strerror(errno) <<"'";
+            << m_filename <<"' with error '" << strerror(errno) << "'";
         throw pdal_error(oss.str());
     }
+    return s;
 }
 
 
@@ -214,14 +228,14 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     if (error.size())
         throwError(error);
 
-    createStream();
-    std::istream *stream(m_streamIf->m_istream);
+    auto lasStream = createStream();
+    std::istream& stream(*lasStream);
 
-    stream->seekg(0);
+    stream.seekg(0);
     // Always try to read as if we have 1.4 size.
     char headerBuf[las::Header::Size14];
-    stream->read(headerBuf, las::Header::Size14);
-    if (stream->gcount() < (std::streamsize)las::Header::Size12)
+    stream.read(headerBuf, las::Header::Size14);
+    if (stream.gcount() < (std::streamsize)las::Header::Size12)
         throwError("Couldn't read LAS header. File size insufficient.");
     d->header.fill(headerBuf, las::Header::Size14);
 
@@ -229,7 +243,6 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     StringList errors = d->header.validate(fileSize);
     if (errors.size())
         throwError(errors.front());
-
     // Verify
     if (!las::pointFormatSupported(d->header.pointFormat()))
         throwError("Unsupported LAS input point format: " +
@@ -237,18 +250,18 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 
     // Go peek into header and see if we are COPC
     // Clear the error state since we potentially over-read the header, leaving
-    // the stream in error, when things are really fine for zero-point file.
-    stream->clear();
-    stream->seekg(377);
+    // the stream in error when things are really fine for zero-point file.
+    stream.clear();
+    stream.seekg(377);
     char copcBuf[4] {};
-    stream->read(copcBuf, 4);
+    stream.read(copcBuf, 4);
     m.add("copc", ::memcmp(copcBuf, "copc", 4) == 0);
 
     // Read VLRs.
     // Clear the error state since the seek or read above may have failed but the file could
     // still be fine.
-    stream->clear();
-    stream->seekg(d->header.headerSize);
+    stream.clear();
+    stream.seekg(d->header.headerSize);
 
     char vlrHeaderBuf[las::Vlr::HeaderSize];
     std::vector<char> vlrBuf;
@@ -256,23 +269,23 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     {
         las::Vlr vlr;
 
-        stream->read((char *)vlrHeaderBuf, las::Vlr::HeaderSize);
-        if (stream->gcount() != las::Vlr::HeaderSize)
+        stream.read((char *)vlrHeaderBuf, las::Vlr::HeaderSize);
+        if (stream.gcount() != las::Vlr::HeaderSize)
             throwError("Couldn't read VLR " + std::to_string(i + 1) + ". End of file reached.");
         vlr.fillHeader(vlrHeaderBuf);
-        if ((uint64_t)stream->tellg() + vlr.promisedDataSize > d->header.pointOffset)
+        if ((uint64_t)stream.tellg() + vlr.promisedDataSize > d->header.pointOffset)
             throwError("VLR " + std::to_string(i + 1) +
                 "(" + vlr.userId + "/" + std::to_string(vlr.recordId) + ") "
                 "size too large -- flows into point data.");
         if (las::shouldIgnoreVlr(vlr, d->ignoreVlrs))
         {
-            stream->seekg(vlr.promisedDataSize, std::ios::cur);
+            stream.seekg(vlr.promisedDataSize, std::ios::cur);
             continue;
         }
         vlr.dataVec.resize(vlr.promisedDataSize);
-        stream->read(vlr.data(), vlr.promisedDataSize);
+        stream.read(vlr.data(), vlr.promisedDataSize);
 
-        if (stream->gcount() != (std::streamsize)vlr.promisedDataSize)
+        if (stream.gcount() != (std::streamsize)vlr.promisedDataSize)
             throwError("Couldn't read VLR " + std::to_string(i + 1) + ". End of file reached.");
         d->vlrs.push_back(std::move(vlr));
     }
@@ -281,31 +294,31 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     if (d->header.evlrOffset && d->header.evlrCount)
     {
         char evlrHeaderBuf[las::Evlr::HeaderSize];
-        stream->seekg(d->header.evlrOffset);
+        stream.seekg(d->header.evlrOffset);
         for (uint32_t i = 0; i < d->header.evlrCount; ++i)
         {
             las::Evlr evlr;
 
-            stream->read((char *)evlrHeaderBuf, las::Evlr::HeaderSize);
-            if (stream->gcount() != las::Evlr::HeaderSize)
+            stream.read((char *)evlrHeaderBuf, las::Evlr::HeaderSize);
+            if (stream.gcount() != las::Evlr::HeaderSize)
                 throwError("Couldn't read EVLR " + std::to_string(i + 1) +
                     ". End of file reached.");
             evlr.fillHeader(evlrHeaderBuf);
 
-            if ((uint64_t)stream->tellg() + evlr.promisedDataSize > fileSize)
+            if ((uint64_t)stream.tellg() + evlr.promisedDataSize > fileSize)
                 throwError("EVLR " + std::to_string(i + 1) +
                     "(" + evlr.userId + "/" + std::to_string(evlr.recordId) + ") "
                     "size too large -- exceeds file size.");
             if (las::shouldIgnoreVlr(evlr, d->ignoreVlrs))
             {
-                stream->seekg(evlr.promisedDataSize, std::ios::cur);
+                stream.seekg(evlr.promisedDataSize, std::ios::cur);
                 continue;
             }
             evlr.dataVec.resize(evlr.promisedDataSize);
-            stream->read(evlr.data(), evlr.promisedDataSize);
+            stream.read(evlr.data(), evlr.promisedDataSize);
 
             //ABELL - Better error message.
-            if (stream->gcount() != (std::streamsize)evlr.promisedDataSize)
+            if (stream.gcount() != (std::streamsize)evlr.promisedDataSize)
                 throwError("Couldn't read EVLR " + std::to_string(i + 1) +
                     ". End of file reached.");
             d->vlrs.push_back(std::move(evlr));
@@ -328,41 +341,159 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     las::extractSrsMetadata(d->srs, m);
     for (int i = 0; i < (int)d->vlrs.size(); ++i)
         las::addVlrMetadata(d->vlrs[i], "vlr_" + std::to_string(i), forward, m);
-
-    m_streamIf.reset();
 }
 
 
 void LasReader::ready(PointTableRef table)
 {
-    createStream();
-    std::istream *stream(m_streamIf->m_istream);
+    LasStreamPtr lasStream(createStream());
+    std::istream& stream(*lasStream);
+
+    d->currentTile.reset();
+    d->tiles.clear();
 
     d->index = 0;
     if (d->header.dataCompressed())
     {
-        delete d->decompressor;
-
         const las::Vlr *vlr = las::findVlr(las::LaszipUserId, las::LaszipRecordId, d->vlrs);
         if (!vlr)
             throwError("LAZ file missing required laszip VLR.");
-        d->decompressor = new LazPerfVlrDecompressor(*stream, d->header, vlr->data());
+        lazperf::laz_vlr laz_vlr;
+        laz_vlr.fill(vlr->data(), vlr->dataSize());
+        try
+        {
+            d->chunkInfo.load(stream, d->header.pointOffset, d->header.pointCount(),
+                laz_vlr.chunk_size);
+        }
+        catch (const pdal_error& e)
+        {
+            throwError(e.what());
+        }
+
+        d->nextFetchChunk = 0;
+        d->nextFetchPoint = 0;
         if (d->opts.start > 0)
         {
             if (d->opts.start > d->header.pointCount())
                 throwError("'start' option set past end of file.");
-            d->decompressor->seek(d->opts.start);
+            d->nextFetchChunk = d->chunkInfo.chunk(d->opts.start);
+            d->nextFetchPoint = d->chunkInfo.offset(d->opts.start, d->nextFetchChunk);
         }
-        d->decompressorBuf.resize(d->header.pointSize);
+        d->nextReadChunk = d->nextFetchChunk;
     }
     else
     {
-        std::istream::pos_type start = d->header.pointOffset +
-            (d->opts.start * d->header.pointSize);
-        stream->seekg(start);
+        d->nextFetchPoint = d->opts.start;
+        d->nextFetchChunk = 0;
+        d->nextReadChunk = 0;
     }
+
+//ABELL - Set numThreads.
+    const int numThreads = 1;
+    for (int i = 0; i < numThreads; ++i)
+        queueNext();
 }
 
+// Use a function instead of if statement.
+void LasReader::queueNext()
+{
+    if (d->header.dataCompressed())
+        queueNextCompressedChunk();
+    else
+        queueNextStandardChunk();
+}
+
+void LasReader::queueNextCompressedChunk()
+{
+    if (d->nextFetchChunk >= d->chunkInfo.numChunks())
+        return;
+    
+    uint32_t chunk = d->nextFetchChunk;
+    uint32_t start = d->nextFetchPoint;
+    
+    d->pool.add([this, chunk, start]()
+    {
+        uint32_t chunkpoints = d->chunkInfo.chunkpoints(chunk);
+        uint64_t chunkoffset = d->chunkInfo.chunkoffset(chunk);
+        uint32_t chunksize = d->chunkInfo.chunksize(chunk);
+
+        auto lasStream = createStream();
+        std::istream& in(*lasStream);
+
+        std::vector<char> buf(chunksize);
+        in.seekg(chunkoffset);
+        in.read(buf.data(), buf.size());
+
+        int32_t tilepoints = chunkpoints - start;
+        las::TilePtr tile = std::make_unique<las::Tile>(chunk, tilepoints * d->header.pointSize);
+
+        lazperf::reader::chunk_decompressor decomp(d->header.pointFormat(), d->header.ebCount(),
+            buf.data());
+
+        // We have to decompress all the points, even if we're discarding the points at
+        // the front because chunkpointstart isn't 0. Just reuse the front of the tile
+        // buffer for discarded points.
+        char *pos = tile->data();
+        for (uint32_t i = 0; i < chunkpoints; ++i)
+        {
+            decomp.decompress(pos);
+
+            // Advance the point location in the tile if we're keeping the point.
+            if (i >= start)
+                pos += d->header.pointSize;
+        }
+        {
+            std::unique_lock l(d->mutex);
+            for (las::TilePtr& t : d->tiles)
+                if (!t)
+                {
+                    t = std::move(tile);
+                    goto done;
+                }
+            d->tiles.push_back(std::move(tile));    
+        }
+        done:
+        d->processedCv.notify_one();
+    });
+    d->nextFetchChunk++;
+    d->nextFetchPoint = 0;
+}
+
+void LasReader::queueNextStandardChunk()
+{
+    const uint64_t chunkSize = 50'000;
+
+    if (d->nextFetchPoint >= d->header.pointCount())
+        return;
+
+    int chunk = d->nextFetchChunk;
+    uint64_t start = d->nextFetchPoint;
+    uint64_t count = (std::min)(chunkSize, d->header.pointCount() - start);
+    d->pool.add([this, chunk, count, start]()
+    {
+        auto lasStream = createStream();
+        std::istream& in(*lasStream);
+
+        las::TilePtr tile = std::make_unique<las::Tile>(chunk, count * d->header.pointSize);
+        in.seekg(d->header.pointOffset + start * d->header.pointSize);
+        in.read(tile->data(), tile->size());
+
+        {
+            std::unique_lock l(d->mutex);
+            for (las::TilePtr& t : d->tiles)
+                if (!t)
+                {
+                    t = std::move(tile);
+                    goto done;
+                }
+            d->tiles.push_back(std::move(tile));    
+        }
+        done:
+        d->processedCv.notify_one();
+    });
+    d->nextFetchPoint += (std::min)(chunkSize, d->header.pointCount() - d->nextFetchPoint);
+    d->nextFetchChunk++;
+}
 
 void LasReader::readExtraBytesVlr()
 {
@@ -420,112 +551,71 @@ void LasReader::addDimensions(PointLayoutPtr layout)
 
 bool LasReader::processOne(PointRef& point)
 {
-    if (d->index >= getNumPoints())
+    // This is called under lock.
+    auto getTile = [this](uint32_t chunk)
+    {
+        for (las::TilePtr& t : d->tiles)
+            if (t && t->chunk() == chunk)
+                return std::move(t);
+        return las::TilePtr();
+    };
+
+    if (eof())
         return false;
 
-    if (d->header.dataCompressed())
+    if (!d->currentTile)
     {
-        if (!d->decompressor->decompress(d->decompressorBuf.data()))
-            throwError("Error reading point " + std::to_string(d->index) +
-                " from " + m_filename + ". Invalid/corrupt file.");
-        loadPoint(point, d->decompressorBuf.data(), d->header.pointSize);
+        {
+            std::unique_lock<std::mutex> l(d->mutex);
+
+            while (true)
+            {
+                d->currentTile = getTile(d->nextReadChunk);
+                if (d->currentTile)
+                    break;
+                d->processedCv.wait(l);
+            }
+        }
+
+        // Found the tile we wanted.
+//        checkTile(d->currentTile);
+        d->nextReadChunk++;
+        queueNext();
     }
-    else
-    {
-        std::vector<char> buf(d->header.pointSize);
-        m_streamIf->m_istream->read(buf.data(), buf.size());
-        loadPoint(point, buf.data(), buf.size());
-    }
+    loadPoint(point);
     d->index++;
     return true;
 }
-
 
 point_count_t LasReader::read(PointViewPtr view, point_count_t count)
 {
     count = (std::min)(count, getNumPoints() - d->index);
 
     PointId i = 0;
-    if (d->header.dataCompressed())
+    for (i = 0; i < count; i++)
     {
-        for (i = 0; i < count; i++)
-        {
-            PointRef point = view->point(i);
-            PointId id = view->size();
-            processOne(point);
-            if (m_cb)
-                m_cb(*view, id);
-        }
+        PointRef point = view->point(i);
+        PointId id = view->size();
+        processOne(point);
+        if (m_cb)
+            m_cb(*view, id);
     }
-    else
-    {
-        point_count_t remaining = count;
-
-        // Make a buffer at most a meg.
-        size_t bufsize = (std::min)((point_count_t)1000000, count * d->header.pointSize);
-        std::vector<char> buf(bufsize);
-        try
-        {
-            do
-            {
-                point_count_t blockPoints = readFileBlock(buf, remaining);
-                remaining -= blockPoints;
-                char *pos = buf.data();
-                while (blockPoints--)
-                {
-                    PointId id = view->size();
-                    PointRef point = view->point(id);
-                    loadPoint(point, pos, d->header.pointSize);
-                    if (m_cb)
-                        m_cb(*view, id);
-                    pos += d->header.pointSize;
-                    i++;
-                }
-            } while (remaining);
-        }
-        catch (std::out_of_range&)
-        {}
-        catch (invalid_stream&)
-        {}
-    }
-    d->index += i;
     return (point_count_t)i;
 }
 
 
-point_count_t LasReader::readFileBlock(std::vector<char>& buf, point_count_t maxpoints)
-{
-    std::istream *stream(m_streamIf->m_istream);
-
-    size_t ptLen = d->header.pointSize;
-    point_count_t blockpoints = buf.size() / ptLen;
-
-    blockpoints = (std::min)(maxpoints, blockpoints);
-    if (stream->eof())
-        throw invalid_stream("stream is done");
-
-    stream->read(buf.data(), blockpoints * ptLen);
-    if (stream->gcount() != (std::streamsize)(blockpoints * ptLen))
-    {
-        // we read fewer bytes than we asked for
-        // because the file was either truncated
-        // or the header is bunk.
-        blockpoints = stream->gcount() / ptLen;
-    }
-    return blockpoints;
-}
-
-
-void LasReader::loadPoint(PointRef& point, char *buf, size_t bufsize)
+void LasReader::loadPoint(PointRef& point)
 {
     if (d->header.has14PointFormat())
-        loadPointV14(point, buf, bufsize);
+        loadPointV14(point, d->currentTile->pos(), d->header.pointSize);
     else
-        loadPointV10(point, buf, bufsize);
+        loadPointV10(point, d->currentTile->pos(), d->header.pointSize);
+    if (!d->currentTile->advance(d->header.pointSize))
+        d->currentTile.reset();
 }
 
 
-void LasReader::loadPointV10(PointRef& point, char *buf, size_t bufsize)
+void LasReader::loadPointV10(PointRef& point, const char *buf, size_t bufsize)
 {
     LeExtractor istream(buf, bufsize);
 
@@ -586,7 +676,7 @@ void LasReader::loadPointV10(PointRef& point, char *buf, size_t bufsize)
 }
 
 
-void LasReader::loadPointV14(PointRef& point, char *buf, size_t bufsize)
+void LasReader::loadPointV14(PointRef& point, const char *buf, size_t bufsize)
 {
     LeExtractor istream(buf, bufsize);
 
@@ -683,7 +773,7 @@ void LasReader::loadExtraDims(LeExtractor& istream, PointRef& point)
 
 void LasReader::done(PointTableRef)
 {
-    m_streamIf.reset();
+    //ABELL - Anything?
 }
 
 bool LasReader::eof()
