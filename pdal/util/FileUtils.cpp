@@ -234,7 +234,11 @@ std::vector<std::string> directoryList(const std::string& dir)
         fs::directory_iterator end;
         while (it != end)
         {
+#ifndef PDAL_WIN32_STL 
+            files.push_back(fromNative(it->path().string()));
+#else
             files.push_back(fromNative(it->path()));
+#endif
             it++;
         }
     }
@@ -556,7 +560,7 @@ MapContext mapFile(const std::string& filename, bool readOnly, uintmax_t pos, ui
         }
     }
 
-#ifndef _WIN32
+#ifndef PDAL_WIN32_STL
     ctx.m_fd = ::open(filename.c_str(), readOnly ? O_RDONLY : O_RDWR);
 #else
     ctx.m_fd = ::_wopen(toNative(filename).data(), readOnly ? O_RDONLY : O_RDWR);
