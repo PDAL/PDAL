@@ -141,12 +141,14 @@ std::string SpatialReference::getPROJJSON() const
 {
     OGRScopedSpatialReference poSRS = ogrCreateSrs(m_wkt);
 
-    char *poJSON = 0;
+    char *poJSON (nullptr);
     char **papszOptions = NULL;
     papszOptions = CSLSetNameValue( papszOptions, "INDENTATION_WIDTH", "2" );
     papszOptions = CSLSetNameValue( papszOptions, "SCHEMA", "" );
     poSRS->exportToPROJJSON(&poJSON, papszOptions);
-    std::string json (poJSON);
+    std::string json("");
+    if (poJSON)
+        json = std::string(poJSON);
     CPLFree(poJSON);
     CSLDestroy( papszOptions );
     return json;
