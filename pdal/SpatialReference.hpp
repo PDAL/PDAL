@@ -141,6 +141,9 @@ public:
     /// support more coordinate systems and descriptions.
     std::string getProj4() const;
 
+
+    /// Return PROJJSON
+    std::string getPROJJSON() const;
     std::string getHorizontal() const;
     std::string getHorizontalUnits() const;
     std::string getVertical() const;
