@@ -82,6 +82,7 @@ protected:
     private:
         std::istream *m_istream;
     };
+    bool eof();
     using LasStreamPtr = std::unique_ptr<LasStreamIf>;
 
     friend class NitfReader;
@@ -110,7 +111,6 @@ private:
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual bool processOne(PointRef& point);
     virtual void done(PointTableRef table);
-    virtual bool eof();
 
     void setSrs(MetadataNode& m);
     void readExtraBytesVlr();
@@ -121,6 +121,7 @@ private:
     void loadPointV14(PointRef& point, const char *buf, size_t bufsize);
     void loadExtraDims(LeExtractor& istream, PointRef& data);
 
+    bool eof();
     void queueNext();
     void queueNextCompressedChunk();
     void queueNextStandardChunk();

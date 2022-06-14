@@ -128,23 +128,26 @@ public:
     }
 
     // Find the offset of a point in a chunk. -1 if the offset isn't in the provided chunk.
-    int32_t offset(uint64_t point, int32_t chunk) const
+    int32_t index(uint64_t point, int32_t chunk) const
     {
         if (point > m_chunks[chunk + 1].count || point < m_chunks[chunk].count)
             return -1;
         return point - m_chunks[chunk].count;
     }
 
+    // Get the number of points in the chunk.
     uint32_t chunkpoints(int32_t chunk)
     {
         return m_chunks[chunk + 1].count - m_chunks[chunk].count;
     }
 
+    // Get the position of the chunk in the file.
     uint64_t chunkoffset(int32_t chunk)
     {
         return m_chunks[chunk].offset;
     }
 
+    // Get the size of the chunk.
     uint32_t chunksize(int32_t chunk)
     {
         return (uint32_t)(m_chunks[chunk + 1].offset - m_chunks[chunk].offset);

@@ -49,8 +49,11 @@ static int runTranslate(std::string const& cmdline, std::string& output)
 {
     const std::string cmd = Support::binpath(Support::exename("pdal")) +
         " translate";
-
-    return Utils::run_shell_command(cmd + " " + cmdline, output);
+std::cerr << "CMD = " << cmd << " " << cmdline << "!\n";
+//    return Utils::run_shell_command(cmd + " " + cmdline, output);
+int val = Utils::run_shell_command(cmd + " " + cmdline, output);
+std::cerr << "OUT =" << output << "!\n\n";
+    return val;
 }
 
 TEST(TranslateTest, t1)

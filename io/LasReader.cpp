@@ -99,6 +99,7 @@ struct LasReader::Private
     uint32_t nextFetchChunk;
     uint64_t nextFetchPoint;
     uint32_t nextReadChunk;
+    PointId end;
     std::mutex mutex;
     std::condition_variable processedCv;
 
@@ -162,7 +163,7 @@ uint64_t LasReader::vlrData(const std::string& userId, uint16_t recordId, char c
 
 point_count_t LasReader::getNumPoints() const
 {
-    return d->header.pointCount() - d->opts.start;
+    return header.pointCount() - d->opts.start;
 }
 
 void LasReader::initialize(PointTableRef table)
@@ -200,6 +201,7 @@ QuickInfo LasReader::inspect()
 //  the file positioning works assuming that the file is pure LAS/LAZ thanks to this.
 LasReader::LasStreamPtr LasReader::createStream()
 {
+    std::cerr << "Create string for " << m_filename << "!\n";
     LasStreamPtr s(new LasStreamIf(m_filename));
     if (!s)
     {
@@ -208,6 +210,7 @@ LasReader::LasStreamPtr LasReader::createStream()
             << m_filename <<"' with error '" << strerror(errno) << "'";
         throw pdal_error(oss.str());
     }
+    std::cerr << "Stream OK!\n";
     return s;
 }
 
@@ -238,6 +241,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     if (stream.gcount() < (std::streamsize)las::Header::Size12)
         throwError("Couldn't read LAS header. File size insufficient.");
     d->header.fill(headerBuf, las::Header::Size14);
+    d->end = std::min(d->opts.start + count(), d->header.pointCount());
 
     uint64_t fileSize = Utils::fileSize(m_filename);
     StringList errors = d->header.validate(fileSize);
@@ -463,6 +467,8 @@ void LasReader::queueNextStandardChunk()
 {
     const uint64_t chunkSize = 50'000;
 
+    std::cerr << "Queue next chunk with fetch/count = " << d->nextFetchPoint << "/" <<
+        d->header.pointCount() << "!\n";
     if (d->nextFetchPoint >= d->header.pointCount())
         return;
 
@@ -475,6 +481,7 @@ void LasReader::queueNextStandardChunk()
         std::istream& in(*lasStream);
 
         las::TilePtr tile = std::make_unique<las::Tile>(chunk, count * d->header.pointSize);
+std::cerr << "Start/count/offset = " << start << "/" << count << "/" << d->header.pointOffset << "!\n";
         in.seekg(d->header.pointOffset + start * d->header.pointSize);
         in.read(tile->data(), tile->size());
 
@@ -591,6 +598,7 @@ point_count_t LasReader::read(PointViewPtr view, point_count_t count)
 {
     count = (std::min)(count, getNumPoints() - d->index);
 
+std::cerr << "Read with count = " << count << "!\n";
     PointId i = 0;
     for (i = 0; i < count; i++)
     {
@@ -778,7 +786,7 @@ void LasReader::done(PointTableRef)
 
 bool LasReader::eof()
 {
-    return d->index >= getNumPoints();
+    return d->index >= d->end();
 }
 
 
