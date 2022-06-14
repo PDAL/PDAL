@@ -1,16 +1,9 @@
-.. _cpp-pdal-utils:
+.. _cpp-pdal-rowpointtable:
 
 ******************************************************************************
-``pdal::Utils``
+:cpp:class:`pdal::RowPointTable`
 ******************************************************************************
 
-.. index:: Utils
-
-.. cpp:namespace:: pdal::Utils
-
-`pdal::Utils` is a set of utility functions.
-
-.. doxygennamespace:: pdal::Utils
+.. doxygenclass:: pdal::RowPointTable
    :members:
    :undoc-members:
-

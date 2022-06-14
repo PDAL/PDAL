@@ -2,6 +2,7 @@
 
 REM Command file for Sphinx documentation
 
+set SPHINXOPTS=-E -W --keep-going
 if "%SPHINXBUILD%" == "" (
 	set SPHINXBUILD=sphinx-build
 )

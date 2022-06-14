@@ -14,7 +14,7 @@ GITSHA="$(git rev-parse HEAD)"
 echo "Cutting release for SHA $GITSHA"
 
 HERE=`pwd`
-CONTAINER="pdal/alpinebase"
+CONTAINER="condaforge/miniforge3"
 DOCKER="docker"
 
 CONTAINERRUN="$DOCKER run -it -d --entrypoint /bin/sh -v $HERE:/data $CONTAINER"
@@ -27,6 +27,11 @@ if [ $# -eq 1 ]
 then
     RELEASE_SUFFIX=$1
 fi
+
+
+conda update --all -y -n base
+DEBIAN_FRONTEND=noninteractive apt-get update -y && apt-get install gcc g++ -y
+conda install -c conda-forge -y -n base cmake make ninja gdal
 
 git clone https://github.com/PDAL/PDAL.git;
 cd /PDAL;

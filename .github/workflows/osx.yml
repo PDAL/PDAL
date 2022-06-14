@@ -13,39 +13,45 @@ jobs:
         type: ['floating','fixed']
     env:
       BUILD_TYPE: ${{ matrix.type }}
+    defaults:
+      run:
+        shell: bash -l {0}
 
     steps:
     - uses: actions/checkout@v2
+    - name: Cache Conda Environment
+      uses: actions/cache@v2
+      with:
+        path: ~/conda_pkgs_dir
+        key: ${{ runner.os }}-${{ steps.get-date.outputs.today }}-conda-${{ env.CACHE_NUMBER }}
     - uses: conda-incubator/setup-miniconda@v2
       with:
-        channels: conda-forge
+        miniforge-variant: Mambaforge
+        miniforge-version: latest
+        use-mamba: true
         auto-update-conda: true
+        use-only-tar-bz2: true
 
     - name: Setup
-      shell: bash -l {0}
       run: |
           source ./scripts/ci/osx/setup.sh
 
     - name: CMake
-      shell: bash -l {0}
       run: |
           source ../scripts/ci/osx/cmake.sh
       working-directory: ./build
 
     - name: Compile
-      shell: bash -l {0}
       run: |
           source ../scripts/ci/osx/compile.sh
       working-directory: ./build
 
     - name: Test
-      shell: bash -l {0}
       run: |
           source ../scripts/ci/osx/test.sh
       working-directory: ./build
 
     - name: Examples
-      shell: bash -l {0}
       run: |
           source ./scripts/ci/osx/examples.sh
 

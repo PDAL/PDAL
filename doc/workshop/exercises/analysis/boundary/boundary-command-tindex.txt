@@ -1,3 +1,0 @@
-pdal tindex create --tindex ./exercises/analysis/boundary/boundary.sqlite \
- --filespec ./exercises/analysis/density/uncompahgre.laz \
- -f SQLite
