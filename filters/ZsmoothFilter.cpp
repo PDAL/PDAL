@@ -50,7 +50,7 @@ struct ZsmoothFilter::Private
     Dimension::Id statDim;
 };
 
-CREATE_SHARED_STAGE(ZsmoothFilter, ptstatInfo)
+CREATE_STATIC_STAGE(ZsmoothFilter, ptstatInfo)
 
 std::string ZsmoothFilter::getName() const
 {
