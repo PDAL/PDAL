@@ -147,7 +147,7 @@ publish: clone
 	cd $(OUTPUTDIR) ; git checkout master; git add  "*" ; git commit -m "update for $(DATE)" . ; git push
 
 spell:
-	$(SPHINXBUILD) -b spelling $(ALLSPHINXOPTS) -d $(BUILDDIR)/doctrees build/spelling
+	$(SPHINXBUILD) -E -b spelling . -d $(BUILDDIR)/doctrees build/spelling 
 
 pdf:
 	$(SPHINXBUILD) -b pdf $(ALLSPHINXOPTS) $(BUILDDIR)/pdf
