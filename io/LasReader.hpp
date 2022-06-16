@@ -79,10 +79,14 @@ protected:
         operator std::istream& ()
         { return *m_istream; }
 
+        bool open() const
+        {
+            return m_istream && m_istream->good();
+        }
+
     private:
         std::istream *m_istream;
     };
-    bool eof();
     using LasStreamPtr = std::unique_ptr<LasStreamIf>;
 
     friend class NitfReader;

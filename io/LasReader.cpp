@@ -87,7 +87,7 @@ struct LasReader::Private
     Options opts;
     las::Header header;
     LasHeader apiHeader;
-    point_count_t index;
+    uint64_t index;
     las::VlrList ignoreVlrs;
     las::VlrList vlrs;
     las::Srs srs;
@@ -96,10 +96,14 @@ struct LasReader::Private
     std::vector<las::TilePtr> tiles;
     std::vector<las::ExtraDim> extraDims;
     ThreadPool pool;
-    uint32_t nextFetchChunk;
-    uint64_t nextFetchPoint;
-    uint32_t nextReadChunk;
+    // One past the Index of the last point we want to fetch.
     PointId end;
+    // The index of the chunk we want to fetch next.
+    uint32_t nextFetchChunk;
+    // The point ID of the point we want to fetch next.
+    uint64_t nextFetchPoint;
+    // The index of the chunk (tile) we want to read data from.
+    uint32_t nextReadChunk;
     std::mutex mutex;
     std::condition_variable processedCv;
 
@@ -161,9 +165,10 @@ uint64_t LasReader::vlrData(const std::string& userId, uint16_t recordId, char c
     return vlr->dataVec.size();
 }
 
+// Number of points we're wanting to fetch.
 point_count_t LasReader::getNumPoints() const
 {
-    return header.pointCount() - d->opts.start;
+    return d->end - d->opts.start;
 }
 
 void LasReader::initialize(PointTableRef table)
@@ -201,16 +206,14 @@ QuickInfo LasReader::inspect()
 //  the file positioning works assuming that the file is pure LAS/LAZ thanks to this.
 LasReader::LasStreamPtr LasReader::createStream()
 {
-    std::cerr << "Create string for " << m_filename << "!\n";
     LasStreamPtr s(new LasStreamIf(m_filename));
-    if (!s)
+    if (!s->open())
     {
         std::ostringstream oss;
         oss << "Unable to open stream for '"
             << m_filename <<"' with error '" << strerror(errno) << "'";
         throw pdal_error(oss.str());
     }
-    std::cerr << "Stream OK!\n";
     return s;
 }
 
@@ -241,7 +244,6 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     if (stream.gcount() < (std::streamsize)las::Header::Size12)
         throwError("Couldn't read LAS header. File size insufficient.");
     d->header.fill(headerBuf, las::Header::Size14);
-    d->end = std::min(d->opts.start + count(), d->header.pointCount());
 
     uint64_t fileSize = Utils::fileSize(m_filename);
     StringList errors = d->header.validate(fileSize);
@@ -332,9 +334,20 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     if (!d->opts.nosrs)
         d->srs.init(d->vlrs, d->header.mustUseWkt(), log());
 
-    if (d->opts.start > d->header.pointCount())
-        throwError("'start' value of " + std::to_string(d->opts.start) + " is too large. "
-            "File contains " + std::to_string(d->header.pointCount()) + " points.");
+    d->end = d->header.pointCount();
+    if (d->header.pointCount())
+    {
+        if (d->opts.start >= d->header.pointCount())
+            throwError("'start' value of " + std::to_string(d->opts.start) + " is too large. "
+                "File contains " + std::to_string(d->header.pointCount()) + " points.");
+
+        // maxPoints is positive because start is less than count from above.
+        uint64_t maxPoints = d->header.pointCount() - d->opts.start;
+
+        // count() can be a crazy-high value -- don't overflow with the addition.
+        if (count() < maxPoints)
+            d->end = d->opts.start + count();
+    }
 
     if (d->header.versionAtLeast(1, 4) || d->opts.useEbVlr)
         readExtraBytesVlr();
@@ -378,10 +391,10 @@ void LasReader::ready(PointTableRef table)
         d->nextFetchPoint = 0;
         if (d->opts.start > 0)
         {
-            if (d->opts.start > d->header.pointCount())
+            if (d->opts.start >= d->header.pointCount())
                 throwError("'start' option set past end of file.");
             d->nextFetchChunk = d->chunkInfo.chunk(d->opts.start);
-            d->nextFetchPoint = d->chunkInfo.offset(d->opts.start, d->nextFetchChunk);
+            d->nextFetchPoint = d->chunkInfo.index(d->opts.start, d->nextFetchChunk);
         }
         d->nextReadChunk = d->nextFetchChunk;
     }
@@ -393,7 +406,7 @@ void LasReader::ready(PointTableRef table)
     }
 
 //ABELL - Set numThreads.
-    const int numThreads = 1;
+    const int numThreads = 3;
     for (int i = 0; i < numThreads; ++i)
         queueNext();
 }
@@ -409,19 +422,20 @@ void LasReader::queueNext()
 
 void LasReader::queueNextCompressedChunk()
 {
-    if (d->nextFetchChunk >= d->chunkInfo.numChunks())
+    if ((d->nextFetchChunk >= d->chunkInfo.numChunks()) ||
+        (d->chunkInfo.firstPoint(d->nextFetchChunk) >= d->end))
         return;
-    
+
     uint32_t chunk = d->nextFetchChunk;
     uint32_t start = d->nextFetchPoint;
-    
+
     d->pool.add([this, chunk, start]()
     {
-        uint32_t chunkpoints = d->chunkInfo.chunkpoints(chunk);
-        uint64_t chunkoffset = d->chunkInfo.chunkoffset(chunk);
-        uint32_t chunksize = d->chunkInfo.chunksize(chunk);
+        uint32_t chunkpoints = d->chunkInfo.chunkPoints(chunk);
+        uint64_t chunkoffset = d->chunkInfo.chunkOffset(chunk);
+        uint32_t chunksize = d->chunkInfo.chunkSize(chunk);
 
-        auto lasStream = createStream();
+        LasStreamPtr lasStream = createStream();
         std::istream& in(*lasStream);
 
         std::vector<char> buf(chunksize);
@@ -435,7 +449,7 @@ void LasReader::queueNextCompressedChunk()
             buf.data());
 
         // We have to decompress all the points, even if we're discarding the points at
-        // the front because chunkpointstart isn't 0. Just reuse the front of the tile
+        // the front because nextFetchPoint isn't 0. Just reuse the front of the tile
         // buffer for discarded points.
         char *pos = tile->data();
         for (uint32_t i = 0; i < chunkpoints; ++i)
@@ -460,6 +474,7 @@ void LasReader::queueNextCompressedChunk()
         d->processedCv.notify_one();
     });
     d->nextFetchChunk++;
+    // After the first chunk, we always start at 0.
     d->nextFetchPoint = 0;
 }
 
@@ -467,21 +482,18 @@ void LasReader::queueNextStandardChunk()
 {
     const uint64_t chunkSize = 50'000;
 
-    std::cerr << "Queue next chunk with fetch/count = " << d->nextFetchPoint << "/" <<
-        d->header.pointCount() << "!\n";
-    if (d->nextFetchPoint >= d->header.pointCount())
+    if (d->nextFetchPoint >= d->end)
         return;
 
     int chunk = d->nextFetchChunk;
     uint64_t start = d->nextFetchPoint;
-    uint64_t count = (std::min)(chunkSize, d->header.pointCount() - start);
+    uint64_t count = (std::min)(chunkSize, d->end - start);
     d->pool.add([this, chunk, count, start]()
     {
         auto lasStream = createStream();
         std::istream& in(*lasStream);
 
         las::TilePtr tile = std::make_unique<las::Tile>(chunk, count * d->header.pointSize);
-std::cerr << "Start/count/offset = " << start << "/" << count << "/" << d->header.pointOffset << "!\n";
         in.seekg(d->header.pointOffset + start * d->header.pointSize);
         in.read(tile->data(), tile->size());
 
@@ -498,7 +510,12 @@ std::cerr << "Start/count/offset = " << start << "/" << count << "/" << d->heade
         done:
         d->processedCv.notify_one();
     });
-    d->nextFetchPoint += (std::min)(chunkSize, d->header.pointCount() - d->nextFetchPoint);
+
+    // This check is just to prevent overflow.
+    if (d->nextFetchPoint > (std::numeric_limits<uint64_t>::max)() - chunkSize)
+        d->nextFetchPoint = d->end;
+    else
+        d->nextFetchPoint += chunkSize;
     d->nextFetchChunk++;
 }
 
@@ -558,7 +575,9 @@ void LasReader::addDimensions(PointLayoutPtr layout)
 
 bool LasReader::processOne(PointRef& point)
 {
-    // This is called under lock.
+    // This is called under lock. Note that we don't remove the tile *pointer* from the
+    // vector, it just gets set to null. When we add a tile, we'll look for a null
+    // entry before we add to the vector.
     auto getTile = [this](uint32_t chunk)
     {
         for (las::TilePtr& t : d->tiles)
@@ -574,7 +593,6 @@ bool LasReader::processOne(PointRef& point)
     {
         {
             std::unique_lock<std::mutex> l(d->mutex);
-
             while (true)
             {
                 d->currentTile = getTile(d->nextReadChunk);
@@ -596,9 +614,8 @@ bool LasReader::processOne(PointRef& point)
 
 point_count_t LasReader::read(PointViewPtr view, point_count_t count)
 {
-    count = (std::min)(count, getNumPoints() - d->index);
+    count = (std::min)(count, getNumPoints() - (point_count_t)d->index);
 
-std::cerr << "Read with count = " << count << "!\n";
     PointId i = 0;
     for (i = 0; i < count; i++)
     {
@@ -786,7 +803,8 @@ void LasReader::done(PointTableRef)
 
 bool LasReader::eof()
 {
-    return d->index >= d->end();
+    // This breaks when the number of points is the maximum (2^64 - 1), but that's never happening.
+    return d->index >= d->end;
 }
 
 

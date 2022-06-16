@@ -136,19 +136,25 @@ public:
     }
 
     // Get the number of points in the chunk.
-    uint32_t chunkpoints(int32_t chunk)
+    uint32_t chunkPoints(int32_t chunk)
     {
         return m_chunks[chunk + 1].count - m_chunks[chunk].count;
     }
 
+    // Get the ID of the first point in the chunk.
+    uint32_t firstPoint(int32_t chunk)
+    {
+        return m_chunks[chunk].count;
+    }
+
     // Get the position of the chunk in the file.
-    uint64_t chunkoffset(int32_t chunk)
+    uint64_t chunkOffset(int32_t chunk)
     {
         return m_chunks[chunk].offset;
     }
 
     // Get the size of the chunk.
-    uint32_t chunksize(int32_t chunk)
+    uint32_t chunkSize(int32_t chunk)
     {
         return (uint32_t)(m_chunks[chunk + 1].offset - m_chunks[chunk].offset);
     }

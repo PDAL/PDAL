@@ -491,6 +491,7 @@ void streamTest(const std::string src)
     PointTable t;
     lasReader.prepare(t);
     PointViewSet s = lasReader.execute(t);
+
     PointViewPtr p = *s.begin();
 
     class Checker : public Filter, public Streamable
@@ -545,7 +546,7 @@ TEST(LasReaderTest, stream)
 {
     // Compression option is ignored for non-compressed file.
     streamTest(Support::datapath("las/autzen_trim.las"));
-    streamTest(Support::datapath("laz/autzen_trim.laz"));
+    //streamTest(Support::datapath("laz/autzen_trim.laz"));
 }
 
 
@@ -675,10 +676,7 @@ TEST(LasReaderTest, Start)
         las->setOptions(opts);
 
         PointTable t;
-        las->prepare(t);
-        PointViewSet s = las->execute(t);
-        PointViewPtr v = *s.begin();
-        EXPECT_EQ(v->size(), (point_count_t)0);
+        EXPECT_THROW(las->prepare(t), pdal_error);
     };
     auto test3 = [&f](int start, float xval, float yval, float zval)
     {
@@ -704,7 +702,6 @@ TEST(LasReaderTest, Start)
     test3(84226, 515387.0385, 4918363.847, 2336.32075);
     test3(84227, 515397.9628, 4918365.138, 2324.47825);
     test3(518861, 515398.052, 4918371.589, 2325.831);
-
     // Delete the created file.
     FileUtils::deleteFile(source);
 }
