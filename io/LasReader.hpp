@@ -84,7 +84,7 @@ protected:
             return m_istream && m_istream->good();
         }
 
-    private:
+    protected:
         std::istream *m_istream;
     };
     using LasStreamPtr = std::unique_ptr<LasStreamIf>;

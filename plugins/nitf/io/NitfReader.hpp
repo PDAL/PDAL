@@ -149,11 +149,9 @@ public:
     std::string getName() const;
 
 protected:
-    virtual void createStream()
+    virtual LasStreamPtr createStream()
     {
-        if (m_streamIf)
-            std::cerr << "Attempt to create stream twice!\n";
-        m_streamIf.reset(new NitfStreamIf(m_filename, m_offset));
+        return LasStreamPtr(new NitfStreamIf(m_filename, m_offset));
     }
 
 private:
