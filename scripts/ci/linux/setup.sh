@@ -15,8 +15,6 @@ if [ "$BUILD_TYPE" == "fixed" ]; then
 
 else
 
-    conda install --yes --quiet gdal=3.4.2=py310hce6f0df_7 -y
-    conda install --yes --quiet tiledb=2.8.2=h1e4a385_0
     conda install pdal --only-deps -y
 
 fi
