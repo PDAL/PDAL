@@ -33,6 +33,8 @@
 ****************************************************************************/
 #pragma once
 
+#include <cstring>
+
 #include "portable_endian.hpp"
 #include "pdal_util_export.hpp"
 

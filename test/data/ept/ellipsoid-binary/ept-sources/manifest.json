@@ -1,0 +1,16 @@
+[
+  {
+    "bounds": [
+      -8242746.0,
+      4966506.0,
+      -50.0,
+      -8242446.0,
+      4966706.0,
+      50.0
+    ],
+    "path": "/Users/connor/code/entwine/test/data/ellipsoid.laz",
+    "points": 100000,
+    "inserted": true,
+    "metadataPath": "ellipsoid.json"
+  }
+]

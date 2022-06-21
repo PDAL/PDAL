@@ -193,7 +193,7 @@ Below is a python script which executes multiple LAS files. Save to your compute
 .. note:: 
    The file is also available from  https://gist.github.com/rclarkelinz/d48de5c0432f5c00d02a452e6d1d3bc3
 
-.. literalinclude:: ./lvd_to_nzvd2016.json
+.. literalinclude:: ./lvd_to_nzvd2016.py
    :language: python
    
 To execute the script, open the Anaconda Prompt, activate the ``vd-reproject`` environment and then navigate to where you have saved the script and issue this command:

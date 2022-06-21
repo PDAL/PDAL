@@ -63,7 +63,7 @@ namespace
          "ScanAngleRank", "UserData", "PointSourceId", "GpsTime", "OriginId"
     };
 
-    // Most of our tests will exercise this laszip-based EPT dataset based on
+    // Most of our tests will exercise this laz-based EPT dataset based on
     // a 4-tile split of Lone Star Geyser.
     const std::string sourceFilePath(
             Support::datapath("ept/source/lone-star.laz"));
@@ -419,7 +419,7 @@ TEST(EptReaderTest, boundedRead3d)
     EXPECT_EQ(np, 45930u);
 }
 
-TEST(EptReaderTest, originRead)
+TEST(EptReaderTest, originReadVersion1_0_0)
 {
     uint64_t np(0);
     for (uint64_t origin(0); origin < 4; ++origin)
@@ -446,6 +446,35 @@ TEST(EptReaderTest, originRead)
     }
 
     EXPECT_EQ(np, expNumPoints);
+}
+
+TEST(EptReaderTest, originRead)
+{
+    // This dataset is version 1.1.0, so make sure we handle its origin query
+    // properly.
+    EptReader reader;
+    Options options;
+    options.add("filename", ellipsoidEptBinaryPath);
+    options.add("origin", "ellipsoid");
+    reader.setOptions(options);
+    PointTable table;
+    reader.prepare(table);
+    const auto set(reader.execute(table));
+
+    uint64_t np(0);
+//    uint64_t o;
+    for (const PointViewPtr& view : set)
+    {
+        np += view->size();
+        /**
+        for (point_count_t i(0); i < view->size(); ++i)
+        {
+            o = view->getFieldAs<uint64_t>(Dimension::Id::OriginId, i);
+        }
+        **/
+    }
+
+    EXPECT_EQ(np, ellipsoidNumPoints);
 }
 
 TEST(EptReaderTest, badOriginQuery)
@@ -564,9 +593,7 @@ TEST(EptReaderTest, binaryStream)
 
 TEST(EptReaderTest, laszipStream)
 {
-#ifdef PDAL_HAVE_LASZIP
     streamTest(eptLaszipPath);
-#endif
 }
 
 TEST(EptReaderTest, zstandardStream)

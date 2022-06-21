@@ -34,6 +34,7 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
    readers.mrsid
    readers.nitf
    readers.numpy
+   readers.obj
    readers.optech
    readers.pcd
    readers.pgpointcloud
@@ -43,7 +44,7 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
    readers.rdb
    readers.rxp
    readers.sbet
-   readers.sqlite
+   readers.smrmsg
    readers.slpk
    readers.terrasolid
    readers.text
@@ -53,6 +54,10 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
 :ref:`readers.bpf`
     Read BPF files encoded as version 1, 2, or 3. BPF is an NGA specification
     for point cloud data.
+
+:ref:`readers.copc`
+    COPC, or Cloud Optimized Point Cloud is an LAZ 1.4 file stored as a
+    clustered octree.
 
 :ref:`readers.buffer`
     Special stage that allows you to read data from your own PointView rather
@@ -110,6 +115,9 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
 :ref:`readers.numpy`
     Read point cloud data from Numpy ``.npy`` files.
 
+:ref:`readers.obj`
+    Read points and a mesh from Wavefront OBJ files.
+
 :ref:`readers.optech`
     Read Optech Corrected Sensor Data (.csd) files.
 
@@ -140,9 +148,6 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
 
 :ref:`readers.sbet`
     Read the SBET format.
-
-:ref:`readers.sqlite`
-    Read data stored in a SQLite database.
 
 :ref:`readers.slpk`
     Read data stored in an Esri SLPK file.

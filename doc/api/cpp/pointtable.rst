@@ -4,8 +4,4 @@
 :cpp:class:`pdal::PointTable`
 ******************************************************************************
 
-
-.. doxygenclass:: pdal::PointTable
-   :members:
-   :undoc-members:
-
+``pdal::PointTable`` is an alias for :cpp:class:`pdal::RowPointTable`

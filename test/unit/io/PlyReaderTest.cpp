@@ -199,4 +199,19 @@ TEST(PlyReader, NoVertex)
     EXPECT_THROW(reader.prepare(table), pdal_error);
 }
 
+TEST(PlyReader, inspect)
+{
+    PlyReader reader;
+    Options options;
+    options.add("filename", Support::datapath("ply/text_extradim.ply"));
+    reader.setOptions(options);
+
+    const QuickInfo qi = reader.preview();
+    EXPECT_TRUE(qi.m_valid);
+    EXPECT_EQ(qi.m_pointCount, 1u);
+    EXPECT_TRUE(std::find(qi.m_dimNames.begin(), qi.m_dimNames.end(), "x") != qi.m_dimNames.end());
+    EXPECT_TRUE(std::find(qi.m_dimNames.begin(), qi.m_dimNames.end(), "nx") != qi.m_dimNames.end());
+    EXPECT_TRUE(std::find(qi.m_dimNames.begin(), qi.m_dimNames.end(), "red") != qi.m_dimNames.end());
+}
+
 }

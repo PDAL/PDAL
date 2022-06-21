@@ -107,9 +107,6 @@ PDAL_ADD_TEST(pdal_streaming_test FILES StreamingTest.cpp)
 PDAL_ADD_TEST(pdal_support_test FILES SupportTest.cpp)
 PDAL_ADD_TEST(pdal_utils_test FILES UtilsTest.cpp)
 PDAL_ADD_TEST(pdal_uuid_test FILES UuidTest.cpp)
-if (PDAL_HAVE_LAZ_PERF)
-PDAL_ADD_TEST(pdal_lazperf_test FILES LazPerfTest.cpp)
-endif()
 if (PDAL_HAVE_ZLIB)
 PDAL_ADD_TEST(pdal_deflate_test FILES DeflateTest.cpp)
 endif()
@@ -129,31 +126,27 @@ if (PDAL_HAVE_ZLIB)
     PDAL_ADD_TEST(pdal_io_bpf_zlib_test FILES io/BpfTestZlib.cpp)
 endif()
 PDAL_ADD_TEST(pdal_io_buffer_test FILES io/BufferTest.cpp)
-if (PDAL_HAVE_LASZIP)
-    PDAL_ADD_TEST(pdal_io_ept_reader_test
-        FILES
-            io/EptReaderTest.cpp
-        LINK_WITH
-            ${GDAL_LIBRARY}
-        INCLUDES
-            ${GDAL_INCLUDE_DIR}
-            ${NLOHMANN_INCLUDE_DIR}
-    )
-    PDAL_ADD_TEST(pdal_io_ept_addon_writer_test
-        FILES
-            io/EptAddonWriterTest.cpp
-        INCLUDES
-            ${NLOHMANN_INCLUDE_DIR}
-    )
-endif(PDAL_HAVE_LASZIP)
-if (PDAL_HAVE_LAZPERF)
-    PDAL_ADD_TEST(pdal_io_copc_reader_test
-        FILES
-            io/CopcReaderTest.cpp
-        INCLUDES
-            ${NLOHMANN_INCLUDE_DIR}
-    )
-endif()
+PDAL_ADD_TEST(pdal_io_ept_reader_test
+    FILES
+        io/EptReaderTest.cpp
+    LINK_WITH
+        ${GDAL_LIBRARY}
+    INCLUDES
+        ${GDAL_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
+)
+PDAL_ADD_TEST(pdal_io_ept_addon_writer_test
+    FILES
+        io/EptAddonWriterTest.cpp
+    INCLUDES
+        ${NLOHMANN_INCLUDE_DIR}
+)
+PDAL_ADD_TEST(pdal_io_copc_reader_test
+    FILES
+        io/CopcReaderTest.cpp
+    INCLUDES
+        ${NLOHMANN_INCLUDE_DIR}
+)
 PDAL_ADD_TEST(pdal_io_faux_test FILES io/FauxReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_gdal_reader_test
     FILES
@@ -229,6 +222,7 @@ PDAL_ADD_TEST(pdal_io_text_reader_test
         ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_io_gltf_writer_test FILES io/GltfWriterTest.cpp)
+PDAL_ADD_TEST(pdal_io_smrmsg_reader_test FILES io/SmrmsgReaderTest.cpp)
 
 #
 # sources for the native filters
@@ -350,9 +344,7 @@ PDAL_ADD_TEST(pdal_info_test FILES apps/InfoTest.cpp)
 PDAL_ADD_TEST(pdal_tile_test FILES apps/TileTest.cpp)
 
 PDAL_ADD_TEST(pdal_tindex_test FILES apps/TIndexTest.cpp)
-if (LASZIP_FOUND)
-    PDAL_ADD_TEST(pdal_merge_test FILES apps/MergeTest.cpp)
-endif()
+PDAL_ADD_TEST(pdal_merge_test FILES apps/MergeTest.cpp)
 PDAL_ADD_TEST(pc2pc_test FILES apps/pc2pcTest.cpp)
 
 if (BUILD_PIPELINE_TESTS)

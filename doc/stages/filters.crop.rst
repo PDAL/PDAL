@@ -23,7 +23,7 @@ be logged.
 
 
 Example 1
--------
+----------
 This example crops an input point cloud using a square polygon.
 
 .. code-block:: json
@@ -41,7 +41,7 @@ This example crops an input point cloud using a square polygon.
   ]
 
 Example 2
--------
+----------
 This example crops all points more than 500 units in any direction from a point. 
 
 .. code-block:: json

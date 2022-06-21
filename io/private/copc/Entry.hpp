@@ -124,6 +124,7 @@ public:
         { return m_entries.end(); }
     size_t size() const
         { return m_entries.size(); }
+    point_count_t pointCount() const;
 
 private:
     std::unordered_set<Entry> m_entries;

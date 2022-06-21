@@ -49,12 +49,12 @@
 #include <pdal/util/ThreadPool.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/SrsTransform.hpp>
-#include <io/LasHeader.hpp>
 
 #include "private/copc/Connector.hpp"
 #include "private/copc/Entry.hpp"
 #include "private/copc/Info.hpp"
 #include "private/copc/Tile.hpp"
+#include "private/las/Header.hpp"
 #include "private/las/Utils.hpp"
 #include "private/las/Vlr.hpp"
 
@@ -201,6 +201,9 @@ void CopcReader::initialize(PointTableRef table)
     MetadataNode forward = table.privateMetadata("lasforward");
     MetadataNode m = getMetadata();
 
+    // alert consumers that we are a COPC file
+    m.add("copc", true);
+
     fetchHeader();
     las::extractHeaderMetadata(m_p->header, forward, m);
 
@@ -226,7 +229,7 @@ void CopcReader::initialize(PointTableRef table)
             if (las::shouldIgnoreVlr(vlr, ignored) || vlr == ebVlr || vlr == srsVlr)
                 continue;
             vlr.dataVec = catalog.fetchWithDescription(e.userId, e.recordId, vlr.description);
-            las::addVlrMetadata(vlr, "vlr_" + std::to_string(i++), forward, m); 
+            las::addVlrMetadata(vlr, "vlr_" + std::to_string(i++), forward, m);
         }
     }
 
@@ -265,7 +268,7 @@ void CopcReader::fetchHeader()
     // Read the header - ignore the data.
     las::Vlr vlr;
     vlr.fillHeader(d);
-    
+
     // Read VLR payload into COPC struct.
     d += las::Vlr::HeaderSize;
     size -= las::Vlr::HeaderSize;
@@ -309,7 +312,7 @@ las::Vlr CopcReader::fetchEbVlr(const las::VlrCatalog& catalog)
         return vlr;
     }
     m_p->extraDims = las::ExtraBytesIf::toExtraDims(vlr.data(), vlr.dataSize(),
-        lazperf::baseCount(m_p->header.pointFormat()));
+        las::baseCount(m_p->header.pointFormat()));
     return vlr;
 }
 
@@ -405,8 +408,7 @@ QuickInfo CopcReader::inspect()
     {
         loadHierarchy();
 
-        //ABELL - Fix.
-        //qi.m_pointCount = m_p->hierarchy->pointCount();
+        qi.m_pointCount = m_p->hierarchy.pointCount();
 
         //ABELL - This is wrong since we're not transforming the tile bounds to the
         //  SRS of each clip region, but that seems like a lot of mess for

@@ -43,10 +43,11 @@
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <io/BufferReader.hpp>
-#include <io/LasReader.hpp>
 #include <io/LasHeader.hpp>
+#include <io/LasReader.hpp>
 #include <io/LasWriter.hpp>
 #include <io/BpfReader.hpp>
+#include <io/private/las/Header.hpp>
 #include <io/private/las/Vlr.hpp>
 
 #include "Support.hpp"
@@ -184,9 +185,9 @@ TEST(LasWriterTest, auto_offset)
     reader.setOptions(readerOps);
 
     reader.prepare(readTable);
-    EXPECT_DOUBLE_EQ((1000000.02 + 25) * 0.5, reader.header().offset.x);
-    EXPECT_DOUBLE_EQ(0, reader.header().offset.y);
-    EXPECT_DOUBLE_EQ(-123 * 0.5 + 2147483524 * 0.5, reader.header().offset.z);
+    EXPECT_DOUBLE_EQ((1000000.02 + 25) * 0.5, reader.header().offsetX());
+    EXPECT_DOUBLE_EQ(0, reader.header().offsetY());
+    EXPECT_DOUBLE_EQ(-123 * 0.5 + 2147483524 * 0.5, reader.header().offsetZ());
 
     // (max - min) are chosen to yield std::numeric_limits<int>::max();
 
@@ -266,14 +267,14 @@ TEST(LasWriterTest, auto_offset2)
         reader.setOptions(readerOps);
 
         reader.prepare(readTable);
-        EXPECT_DOUBLE_EQ((74529.00 + 1000000.02) * 0.5, reader.header().offset.x);
-        EXPECT_DOUBLE_EQ(0, reader.header().offset.y);
-        EXPECT_DOUBLE_EQ((-123 + 945.23) * 0.5, reader.header().offset.z);
+        EXPECT_DOUBLE_EQ((74529.00 + 1000000.02) * 0.5, reader.header().offsetX());
+        EXPECT_DOUBLE_EQ(0, reader.header().offsetY());
+        EXPECT_DOUBLE_EQ((-123 + 945.23) * 0.5, reader.header().offsetZ());
 
-        EXPECT_NEAR(2.15478e-4, reader.header().scale.x, 1e-4);
-        EXPECT_DOUBLE_EQ(.01, reader.header().scale.y);
+        EXPECT_NEAR(2.15478e-4, reader.header().scaleX(), 1e-4);
+        EXPECT_DOUBLE_EQ(.01, reader.header().scaleY());
         // (max - min) are chosen to yield std::numeric_limits<int>::max();
-        EXPECT_NEAR(2.48716e-7, reader.header().scale.z, 1e-7);
+        EXPECT_NEAR(2.48716e-7, reader.header().scaleZ(), 1e-7);
 
         PointViewSet viewSet = reader.execute(readTable);
         EXPECT_EQ(viewSet.size(), 1u);
@@ -293,13 +294,13 @@ TEST(LasWriterTest, auto_offset2)
         reader.setOptions(readerOps);
 
         reader.prepare(readTable);
-        EXPECT_NEAR((534252.35 + 25.0) * 0.5, reader.header().offset.x, 0.01);
-        EXPECT_DOUBLE_EQ(0, reader.header().offset.y);
-        EXPECT_NEAR((2147483524 + 1.5) * 0.5, reader.header().offset.z, 0.01);
+        EXPECT_NEAR((534252.35 + 25.0) * 0.5, reader.header().offsetX(), 0.01);
+        EXPECT_DOUBLE_EQ(0, reader.header().offsetY());
+        EXPECT_NEAR((2147483524 + 1.5) * 0.5, reader.header().offsetZ(), 0.01);
 
-        EXPECT_NEAR(1.2438e-4, reader.header().scale.x, 1e-7);
-        EXPECT_DOUBLE_EQ(.01, reader.header().scale.y);
-        EXPECT_NEAR(.49999, reader.header().scale.z, 1e-5);
+        EXPECT_NEAR(1.2438e-4, reader.header().scaleX(), 1e-7);
+        EXPECT_DOUBLE_EQ(.01, reader.header().scaleY());
+        EXPECT_NEAR(.49999, reader.header().scaleZ(), 1e-5);
 
         PointViewSet viewSet = reader.execute(readTable);
         EXPECT_EQ(viewSet.size(), 1u);
@@ -372,7 +373,7 @@ TEST(LasWriterTest, auto_scale_with_auto_offset)
     reader.setOptions(readerOps);
 
     reader.prepare(readTable);
-    EXPECT_DOUBLE_EQ((-250.00 + 780.00) * 0.5, reader.header().offset.x);
+    EXPECT_DOUBLE_EQ((-250.00 + 780.00) * 0.5, reader.header().offsetX());
     PointViewSet viewSet = reader.execute(readTable);
     EXPECT_EQ(viewSet.size(), 1u);
     view = *viewSet.begin();
@@ -413,8 +414,6 @@ TEST(LasWriterTest, extra_dims)
     PointViewSet viewSet = writer.execute(table);
 
     LasTester tester;
-    const las::Header& header = tester.header(writer);
-    EXPECT_EQ(header.pointSize, header.baseCount() + 10);
     PointViewPtr pb = *viewSet.begin();
 
     uint16_t colors[][3] = {
@@ -742,7 +741,6 @@ TEST(LasWriterTest, flex2)
     EXPECT_EQ(r.preview().m_pointCount, 1065u);
 }
 
-#if defined(PDAL_HAVE_LAZPERF) && defined(PDAL_HAVE_LASZIP)
 // LAZ files are normally written in chunks of 50,000, so a file of size
 // 110,000 ensures we read some whole chunks and a partial.
 TEST(LasWriterTest, lazperf)
@@ -769,7 +767,7 @@ TEST(LasWriterTest, lazperf)
     lazWriter.prepare(t);
     lazWriter.execute(t);
 
-    // Now test the points were properly written.  Use laszip.
+    // Now test the points were properly written.
     Options ops1;
     ops1.add("filename", testfile);
 
@@ -809,79 +807,12 @@ TEST(LasWriterTest, lazperf)
        EXPECT_EQ(memcmp(buf1.data(), buf2.data(), pointSize), 0);
     }
 }
-#endif
 
-#if defined(PDAL_HAVE_LASZIP)
-// LAZ files are normally written in chunks of 50,000, so a file of size
-// 110,000 ensures we read some whole chunks and a partial.
-TEST(LasWriterTest, laszip)
-{
-    Options readerOps;
-    readerOps.add("filename", Support::datapath("las/autzen_trim.las"));
-
-    LasReader lazReader;
-    lazReader.setOptions(readerOps);
-
-    std::string testfile(Support::temppath("temp.laz"));
-
-    FileUtils::deleteFile(testfile);
-
-    Options writerOps;
-    writerOps.add("filename", testfile);
-
-    LasWriter lazWriter;
-    lazWriter.setOptions(writerOps);
-    lazWriter.setInput(lazReader);
-
-    PointTable t;
-    lazWriter.prepare(t);
-    lazWriter.execute(t);
-
-    // Now test the points were properly written.  Use laszip.
-    Options ops1;
-    ops1.add("filename", testfile);
-
-    LasReader r1;
-    r1.setOptions(ops1);
-
-    PointTable t1;
-    r1.prepare(t1);
-    PointViewSet set1 = r1.execute(t1);
-    PointViewPtr view1 = *set1.begin();
-
-    Options ops2;
-    ops2.add("filename", Support::datapath("las/autzen_trim.las"));
-
-    LasReader r2;
-    r2.setOptions(ops2);
-
-    PointTable t2;
-    r2.prepare(t2);
-    PointViewSet set2 = r2.execute(t2);
-    PointViewPtr view2 = *set2.begin();
-
-    EXPECT_EQ(view1->size(), view2->size());
-    EXPECT_EQ(view1->size(), (point_count_t)110000);
-
-    DimTypeList dims = view1->dimTypes();
-    size_t pointSize = view1->pointSize();
-    EXPECT_EQ(view1->pointSize(), view2->pointSize());
-
-   // Validate some point data.
-    std::vector<char> buf1(pointSize);
-    std::vector<char> buf2(pointSize);
-    for (PointId i = 0; i < view1->size(); i += 100)
-    {
-       view1->getPackedPoint(dims, i, buf1.data());
-       view2->getPackedPoint(dims, i, buf2.data());
-       EXPECT_EQ(memcmp(buf1.data(), buf2.data(), pointSize), 0);
-    }
-}
 
 // This is the same test as the above, but for a 1.4-specific point format.
 // LAZ files are normally written in chunks of 50,000, so a file of size
 // 110,000 ensures we read some whole chunks and a partial.
-TEST(LasWriterTest, laszip1_4)
+TEST(LasWriterTest, compressed1_4)
 {
     Options readerOps;
     std::string baseFilename = Support::datapath("las/autzen_trim_7.las");
@@ -907,7 +838,7 @@ TEST(LasWriterTest, laszip1_4)
     lazWriter.prepare(t);
     lazWriter.execute(t);
 
-    // Now test the points were properly written.  Use laszip.
+    // Now test the points were properly written.
     Options ops1;
     ops1.add("filename", testfile);
 
@@ -1040,7 +971,6 @@ TEST(LasWriterTest, flex_vlr)
 	EXPECT_TRUE(r.vlrData("PDAL", 13, data) > 0);
     }
 }
-#endif // PDAL_HAVE_LASZIP
 
 void compareFiles(const std::string& name1, const std::string& name2,
     size_t increment = 100)
@@ -1250,10 +1180,18 @@ TEST(LasWriterTest, pdal_add_vlr)
           "user_id": "hobu",
           "filename": ")" + Support::datapath("las/vlr-43.bin") + R"("})"
     );
-
+    std::string vlr3(
+      R"({
+          "description": "A description under 32 bytes",
+          "record_id": 44,
+          "user_id": "hobu",
+          "metadata": "software_id"
+          })"
+    );
     Options writerOpts;
     writerOpts.add("vlrs", vlr1);
     writerOpts.add("vlrs", vlr2);
+    writerOpts.add("vlrs", vlr3);
     writerOpts.add("filename", outfile);
 
     LasReader reader;
@@ -1274,22 +1212,20 @@ TEST(LasWriterTest, pdal_add_vlr)
     reader2.prepare(t2);
     reader2.execute(t2);
 
-    MetadataNode forward = reader2.getMetadata();
+    const VlrList& vlrs = reader2.header().vlrs();
+    EXPECT_EQ(vlrs.size(), 3u);
 
-    auto pred = [](MetadataNode temp)
-        { return Utils::startsWith(temp.name(), "vlr_"); };
+    const LasVLR& v0 = vlrs[0];
+    std::string s0(v0.data(), v0.data() + v0.dataLen());
+    EXPECT_EQ(s0, "this is some text");
 
-    MetadataNode root = reader2.getMetadata();
-    MetadataNodeList nodes = root.findChildren(pred);
-    EXPECT_EQ(nodes.size(), 2u);
+    const LasVLR& v1 = vlrs[1];
+    std::string s1(v1.data(), v1.data() + v1.dataLen());
+    EXPECT_EQ(s1, "this is some more text");
 
-    MetadataNode node = nodes[1].findChild("data");
-    std::vector<uint8_t> buf =
-        Utils::base64_decode(node.value());
-
-
-    EXPECT_EQ(memcmp(buf.data(), "this is some more text",
-        buf.size() - 1), 0);
+    const LasVLR& v2 = vlrs[2];
+    std::string s2(v2.data(), v2.data() + v2.dataLen());
+    EXPECT_EQ(s2, "TerraScan");
 }
 
 // Make sure we can read an array of VLRs in a pipeline.
@@ -1585,10 +1521,10 @@ TEST(LasWriterTest, issue2663)
     PointTable t;
     r.prepare(t);
 
-    const las::Header& h = r.header();
-    EXPECT_EQ(h.scale.x, .001);
-    EXPECT_EQ(h.scale.y, .001);
-    EXPECT_EQ(h.scale.z, .001);
+    const LasHeader& h = r.header();
+    EXPECT_EQ(h.scaleX(), .001);
+    EXPECT_EQ(h.scaleY(), .001);
+    EXPECT_EQ(h.scaleZ(), .001);
 }
 
 // Make sure that we don't crash when writing scan angle values >90 && <-90 in point
@@ -1619,7 +1555,6 @@ TEST(LasWriterTest, issue3288)
     }
 }
 
-#if defined(PDAL_HAVE_LASZIP)
 // Make sure that we can translate this special test data to 1.4, dataformat 6.
 TEST(LasWriterTest, issue2320)
 {
@@ -1660,7 +1595,6 @@ TEST(LasWriterTest, issue2320)
         EXPECT_EQ(v->size(), 1000U);
     }
 }
-#endif
 
 TEST(LasWriterTest, synthetic_points)
 {
@@ -1709,48 +1643,36 @@ TEST(LasWriterTest, synthetic_points)
     FileUtils::deleteFile(FILENAME);
 }
 
-#if defined(PDAL_HAVE_LASZIP) || defined(PDAL_HAVE_LAZPERF)
 // Make sure that we can read and write 0-point files.
 TEST(LasWriterTest, issue3652)
 {
     std::string outfile(Support::temppath("3652.laz"));
 
-    auto test = [&outfile](const std::string& compression)
+    FileUtils::deleteFile(outfile);
     {
-        FileUtils::deleteFile(outfile);
-        {
-            LasWriter w;
-            Options wo;
-            wo.add("filename", outfile);
-            wo.add("compression", compression);
-            w.setOptions(wo);
+        LasWriter w;
+        Options wo;
+        wo.add("filename", outfile);
+        w.setOptions(wo);
 
-            PointTable t;
-            w.prepare(t);
-            w.execute(t);
-        }
+        PointTable t;
+        w.prepare(t);
+        w.execute(t);
+    }
 
-        // Check that we can read.
-        {
-            LasReader r;
-            Options ro;
-            ro.add("filename", outfile);
-            r.setOptions(ro);
+    // Check that we can read.
+    {
+        LasReader r;
+        Options ro;
+        ro.add("filename", outfile);
+        r.setOptions(ro);
 
-            PointTable t;
-            r.prepare(t);
-            PointViewSet s = r.execute(t);
-            EXPECT_EQ(s.size(), 1U);
-            PointViewPtr v = *s.begin();
-            EXPECT_EQ(v->size(), 0U);
-        }
-    };
-#if defined(PDAL_HAVE_LAZPERF)
-    test("lazperf");
-#endif
-#if defined(PDAL_HAVE_LASZIP)
-    test("laszip");
-#endif
+        PointTable t;
+        r.prepare(t);
+        PointViewSet s = r.execute(t);
+        EXPECT_EQ(s.size(), 1U);
+        PointViewPtr v = *s.begin();
+        EXPECT_EQ(v->size(), 0U);
+    }
 }
-#endif
 

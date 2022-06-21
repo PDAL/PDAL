@@ -59,9 +59,8 @@ struct Vlr;
 
 enum class Compression
 {
-    LasZip,
-    LazPerf,
-    None
+    True,
+    False
 };
 
 inline std::istream& operator>>(std::istream& in, Compression& c)
@@ -70,12 +69,10 @@ inline std::istream& operator>>(std::istream& in, Compression& c)
 
     in >> s;
     s = Utils::toupper(s);
-    if (s == "LASZIP"  || s == "TRUE")
-        c = Compression::LasZip;
-    else if (s == "LAZPERF")
-        c = Compression::LazPerf;
+    if (s == "LASZIP"  || s == "TRUE" || s == "LAZPERF")
+        c = Compression::True;
     else
-        c = Compression::None;
+        c = Compression::False;
     return in;
 }
 
@@ -83,14 +80,11 @@ inline std::ostream& operator<<(std::ostream& out, const Compression& c)
 {
     switch (c)
     {
-    case Compression::LasZip:
-        out << "LasZip";
+    case Compression::True:
+        out << "true";
         break;
-    case Compression::LazPerf:
-        out << "LazPerf";
-        break;
-    case Compression::None:
-        out << "None";
+    case Compression::False:
+        out << "false";
         break;
     }
     return out;
@@ -239,7 +233,6 @@ public:
 
     void appendTo(std::vector<char>& ebBytes);
     void readFrom(const char *buf);
-    uint8_t lasType();
     void setType(uint8_t lastype);
     static std::vector<ExtraDim> toExtraDims(const char *buf, size_t bufsize, int byteOffset);
 
@@ -262,6 +255,7 @@ void setSummary(Header& header, const Summary& summary);
 std::string generateSoftwareId();
 std::vector<ExtraDim> parse(const StringList& dimString, bool allOk);
 const Dimension::IdList& pdrfDims(int pdrf);
+uint8_t lasType(Dimension::Type type, int fieldCnt);
 
 struct error : public std::runtime_error
 {

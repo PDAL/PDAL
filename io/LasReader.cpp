@@ -34,8 +34,9 @@
 
 #include <pdal/compression/LazPerfVlrCompression.hpp>
 
-#include "LasReader.hpp"
 #include "LasHeader.hpp"
+#include "LasReader.hpp"
+#include "private/las/Header.hpp"
 #include "private/las/Srs.hpp"
 #include "private/las/Utils.hpp"
 #include "private/las/Vlr.hpp"
@@ -51,14 +52,6 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/IStream.hpp>
 #include <pdal/util/ProgramArgs.hpp>
-
-#ifdef PDAL_HAVE_LASZIP
-#include <laszip/laszip_api.h>
-#else
-using laszip_POINTER = void *;
-using laszip_point_struct = void *;
-struct laszip_point;
-#endif
 
 namespace pdal
 {
@@ -77,6 +70,7 @@ struct invalid_stream : public std::runtime_error
 struct LasReader::Options
 {
     StringList extraDimSpec;
+    //ABELL
     std::string compression;
     bool useEbVlr;
     StringList ignoreVLROption;
@@ -89,8 +83,7 @@ struct LasReader::Private
 {
     Options opts;
     las::Header header;
-    laszip_POINTER laszip;
-    laszip_point_struct *laszipPoint;
+    LasHeader apiHeader;
     LazPerfVlrDecompressor *decompressor;
     std::vector<char> decompressorBuf;
     point_count_t index;
@@ -99,7 +92,7 @@ struct LasReader::Private
     las::Srs srs;
     std::vector<las::ExtraDim> extraDims;
 
-    Private() : decompressor(nullptr), index(0)
+    Private() : apiHeader(header, srs, vlrs), decompressor(nullptr), index(0)
     {}
 };
 
@@ -142,9 +135,9 @@ CREATE_STATIC_STAGE(LasReader, s_info)
 
 std::string LasReader::getName() const { return s_info.name; }
 
-const las::Header& LasReader::header() const
+const LasHeader& LasReader::header() const
 {
-    return d->header;
+    return d->apiHeader;
 }
 
 uint64_t LasReader::vlrData(const std::string& userId, uint16_t recordId, char const * & data)
@@ -189,38 +182,6 @@ QuickInfo LasReader::inspect()
     return qi;
 }
 
-
-void LasReader::handleCompressionOption()
-{
-    std::string compression = Utils::toupper(d->opts.compression);
-#if defined(PDAL_HAVE_LAZPERF) && defined(PDAL_HAVE_LASZIP)
-    if (compression == "EITHER")
-        compression = "LASZIP";
-#endif
-#if !defined(PDAL_HAVE_LAZPERF) && defined(PDAL_HAVE_LASZIP)
-    if (compression == "EITHER")
-        compression = "LASZIP";
-    if (compression == "LAZPERF")
-        throwError("Can't decompress with LAZperf.  PDAL not built "
-            "with LAZperf.");
-#endif
-#if defined(PDAL_HAVE_LAZPERF) && !defined(PDAL_HAVE_LASZIP)
-    if (compression == "EITHER")
-        compression = "LAZPERF";
-    if (compression == "LASZIP")
-        throwError("Can't decompress with LASzip.  PDAL not built "
-            "with LASzip.");
-#endif
-
-#if defined(PDAL_HAVE_LAZPERF) || defined(PDAL_HAVE_LASZIP)
-    if (compression != "LAZPERF" && compression != "LASZIP")
-        throwError("Invalid value for option for compression: '" +
-            d->opts.compression + "'.  Value values are 'lazperf' and 'laszip'.");
-#endif
-
-    // Set case-corrected value.
-    d->opts.compression = compression;
-}
 
 void LasReader::createStream()
 {
@@ -274,8 +235,18 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
         throwError("Unsupported LAS input point format: " +
             Utils::toString((int)d->header.pointFormat()) + ".");
 
-    // Read VLRs.  Clear the error state since we potentially over-read the header, leaving
-    // the stream in error, when things are really fine.
+    // Go peek into header and see if we are COPC
+    // Clear the error state since we potentially over-read the header, leaving
+    // the stream in error, when things are really fine for zero-point file.
+    stream->clear();
+    stream->seekg(377);
+    char copcBuf[4] {};
+    stream->read(copcBuf, 4);
+    m.add("copc", ::memcmp(copcBuf, "copc", 4) == 0);
+
+    // Read VLRs.
+    // Clear the error state since the seek or read above may have failed but the file could
+    // still be fine.
     stream->clear();
     stream->seekg(d->header.headerSize);
 
@@ -348,13 +319,6 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
         throwError("'start' value of " + std::to_string(d->opts.start) + " is too large. "
             "File contains " + std::to_string(d->header.pointCount()) + " points.");
 
-    if (d->header.dataCompressed())
-        handleCompressionOption();
-#ifdef PDAL_HAVE_LASZIP
-    d->laszip = nullptr;
-#endif
-
-
     if (d->header.versionAtLeast(1, 4) || d->opts.useEbVlr)
         readExtraBytesVlr();
 
@@ -369,19 +333,6 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 }
 
 
-void LasReader::handleLaszip(int result)
-{
-#ifdef PDAL_HAVE_LASZIP
-    if (result)
-    {
-        char *buf;
-        laszip_get_error(d->laszip, &buf);
-        throwError(buf);
-    }
-#endif
-}
-
-
 void LasReader::ready(PointTableRef table)
 {
     createStream();
@@ -390,42 +341,19 @@ void LasReader::ready(PointTableRef table)
     d->index = 0;
     if (d->header.dataCompressed())
     {
-#ifdef PDAL_HAVE_LASZIP
-        if (d->opts.compression == "LASZIP")
+        delete d->decompressor;
+
+        const las::Vlr *vlr = las::findVlr(las::LaszipUserId, las::LaszipRecordId, d->vlrs);
+        if (!vlr)
+            throwError("LAZ file missing required laszip VLR.");
+        d->decompressor = new LazPerfVlrDecompressor(*stream, d->header, vlr->data());
+        if (d->opts.start > 0)
         {
-            laszip_BOOL compressed;
-
-            handleLaszip(laszip_create(&d->laszip));
-            handleLaszip(laszip_open_reader_stream(d->laszip, *stream,
-                &compressed));
-            handleLaszip(laszip_get_point_pointer(d->laszip, &d->laszipPoint));
-            handleLaszip(laszip_seek_point(d->laszip, d->opts.start));
+            if (d->opts.start > d->header.pointCount())
+                throwError("'start' option set past end of file.");
+            d->decompressor->seek(d->opts.start);
         }
-#endif
-
-#ifdef PDAL_HAVE_LAZPERF
-        if (d->opts.compression == "LAZPERF")
-        {
-            delete d->decompressor;
-
-            const las::Vlr *vlr = las::findVlr(las::LaszipUserId, las::LaszipRecordId, d->vlrs);
-            if (!vlr)
-                throwError("LAZ file missing required laszip VLR.");
-            d->decompressor = new LazPerfVlrDecompressor(*stream, d->header, vlr->data());
-            if (d->opts.start > 0)
-            {
-                if (d->opts.start > d->header.pointCount())
-                    throwError("'start' option set past end of file.");
-                d->decompressor->seek(d->opts.start);
-            }
-            d->decompressorBuf.resize(d->header.pointSize);
-        }
-#endif
-
-#if !defined(PDAL_HAVE_LAZPERF) && !defined(PDAL_HAVE_LASZIP)
-        throwError("Can't read compressed file without LASzip or "
-            "LAZperf decompression library.");
-#endif
+        d->decompressorBuf.resize(d->header.pointSize);
     }
     else
     {
@@ -497,28 +425,11 @@ bool LasReader::processOne(PointRef& point)
 
     if (d->header.dataCompressed())
     {
-#ifdef PDAL_HAVE_LASZIP
-        if (d->opts.compression == "LASZIP")
-        {
-            handleLaszip(laszip_read_point(d->laszip));
-            loadPoint(point);
-        }
-#endif
-
-#ifdef PDAL_HAVE_LAZPERF
-        if (d->opts.compression == "LAZPERF")
-        {
-            if (!d->decompressor->decompress(d->decompressorBuf.data()))
-                throwError("Error reading point " + std::to_string(d->index) +
-                    " from " + m_filename + ". Invalid/corrupt file.");
-            loadPoint(point, d->decompressorBuf.data(), d->header.pointSize);
-        }
-#endif
-#if !defined(PDAL_HAVE_LAZPERF) && !defined(PDAL_HAVE_LASZIP)
-        throwError("Can't read compressed file without LASzip or "
-            "LAZperf decompression library.");
-#endif
-    } // compression
+        if (!d->decompressor->decompress(d->decompressorBuf.data()))
+            throwError("Error reading point " + std::to_string(d->index) +
+                " from " + m_filename + ". Invalid/corrupt file.");
+        loadPoint(point, d->decompressorBuf.data(), d->header.pointSize);
+    }
     else
     {
         std::vector<char> buf(d->header.pointSize);
@@ -537,22 +448,14 @@ point_count_t LasReader::read(PointViewPtr view, point_count_t count)
     PointId i = 0;
     if (d->header.dataCompressed())
     {
-#if defined(PDAL_HAVE_LAZPERF) || defined(PDAL_HAVE_LASZIP)
-        if (d->opts.compression == "LASZIP" || d->opts.compression == "LAZPERF")
+        for (i = 0; i < count; i++)
         {
-            for (i = 0; i < count; i++)
-            {
-                PointRef point = view->point(i);
-                PointId id = view->size();
-                processOne(point);
-                if (m_cb)
-                    m_cb(*view, id);
-            }
+            PointRef point = view->point(i);
+            PointId id = view->size();
+            processOne(point);
+            if (m_cb)
+                m_cb(*view, id);
         }
-#else
-        throwError("Can't read compressed file without LASzip or "
-            "LAZperf decompression library.");
-#endif
     }
     else
     {
@@ -590,8 +493,7 @@ point_count_t LasReader::read(PointViewPtr view, point_count_t count)
 }
 
 
-point_count_t LasReader::readFileBlock(std::vector<char>& buf,
-    point_count_t maxpoints)
+point_count_t LasReader::readFileBlock(std::vector<char>& buf, point_count_t maxpoints)
 {
     std::istream *stream(m_streamIf->m_istream);
 
@@ -614,17 +516,6 @@ point_count_t LasReader::readFileBlock(std::vector<char>& buf,
 }
 
 
-#ifdef PDAL_HAVE_LASZIP
-void LasReader::loadPoint(PointRef& point)
-{
-    if (d->header.has14PointFormat())
-        loadPointV14(point);
-    else
-        loadPointV10(point);
-}
-#endif // PDAL_HAVE_LASZIP
-
-
 void LasReader::loadPoint(PointRef& point, char *buf, size_t bufsize)
 {
     if (d->header.has14PointFormat())
@@ -633,51 +524,6 @@ void LasReader::loadPoint(PointRef& point, char *buf, size_t bufsize)
         loadPointV10(point, buf, bufsize);
 }
 
-
-#ifdef PDAL_HAVE_LASZIP
-void LasReader::loadPointV10(PointRef& point)
-{
-    // We used to pass the laszip point as an argument, but this allows us to keep
-    // any laszip information out of LasReader.hpp.
-    laszip_point& p = *d->laszipPoint;
-    const las::Header& h = d->header;
-
-    double x = p.X * h.scale.x + h.offset.x;
-    double y = p.Y * h.scale.y + h.offset.y;
-    double z = p.Z * h.scale.z + h.offset.z;
-
-    point.setField(Dimension::Id::X, x);
-    point.setField(Dimension::Id::Y, y);
-    point.setField(Dimension::Id::Z, z);
-    point.setField(Dimension::Id::Intensity, p.intensity);
-    point.setField(Dimension::Id::ReturnNumber, p.return_number);
-    point.setField(Dimension::Id::NumberOfReturns, p.number_of_returns);
-    point.setField(Dimension::Id::ScanDirectionFlag, p.scan_direction_flag);
-    point.setField(Dimension::Id::EdgeOfFlightLine, p.edge_of_flight_line);
-    uint8_t classification = p.classification | (p.synthetic_flag << 5) |
-        (p.keypoint_flag << 6) | (p.withheld_flag << 7);
-    point.setField(Dimension::Id::Classification, classification);
-    point.setField(Dimension::Id::ScanAngleRank, p.scan_angle_rank);
-    point.setField(Dimension::Id::UserData, p.user_data);
-    point.setField(Dimension::Id::PointSourceId, p.point_source_ID);
-
-    if (h.hasTime())
-        point.setField(Dimension::Id::GpsTime, p.gps_time);
-
-    if (h.hasColor())
-    {
-        point.setField(Dimension::Id::Red, p.rgb[0]);
-        point.setField(Dimension::Id::Green, p.rgb[1]);
-        point.setField(Dimension::Id::Blue, p.rgb[2]);
-    }
-
-    if (d->extraDims.size())
-    {
-        LeExtractor extractor((const char *)p.extra_bytes, p.num_extra_bytes);
-        loadExtraDims(extractor, point);
-    }
-}
-#endif // PDAL_HAVE_LASZIP
 
 void LasReader::loadPointV10(PointRef& point, char *buf, size_t bufsize)
 {
@@ -738,56 +584,6 @@ void LasReader::loadPointV10(PointRef& point, char *buf, size_t bufsize)
     if (d->extraDims.size())
         loadExtraDims(istream, point);
 }
-
-
-#ifdef PDAL_HAVE_LASZIP
-void LasReader::loadPointV14(PointRef& point)
-{
-    // We used to pass the laszip point as an argument, but this allows us to keep
-    // any laszip information out of LasReader.hpp.
-    laszip_point& p = *d->laszipPoint;
-    const las::Header& h = d->header;
-
-    double x = p.X * h.scale.x + h.offset.x;
-    double y = p.Y * h.scale.y + h.offset.y;
-    double z = p.Z * h.scale.z + h.offset.z;
-
-    point.setField(Dimension::Id::X, x);
-    point.setField(Dimension::Id::Y, y);
-    point.setField(Dimension::Id::Z, z);
-    point.setField(Dimension::Id::Intensity, p.intensity);
-    point.setField(Dimension::Id::ReturnNumber, p.extended_return_number);
-    point.setField(Dimension::Id::NumberOfReturns,
-        p.extended_number_of_returns);
-    point.setField(Dimension::Id::ClassFlags, p.extended_classification_flags);
-    point.setField(Dimension::Id::ScanChannel, p.extended_scanner_channel);
-    point.setField(Dimension::Id::ScanDirectionFlag, p.scan_direction_flag);
-    point.setField(Dimension::Id::EdgeOfFlightLine, p.edge_of_flight_line);
-    point.setField(Dimension::Id::Classification, p.extended_classification);
-    point.setField(Dimension::Id::ScanAngleRank, p.extended_scan_angle * .006);
-    point.setField(Dimension::Id::UserData, p.user_data);
-    point.setField(Dimension::Id::PointSourceId, p.point_source_ID);
-    point.setField(Dimension::Id::GpsTime, p.gps_time);
-
-    if (h.hasColor())
-    {
-        point.setField(Dimension::Id::Red, p.rgb[0]);
-        point.setField(Dimension::Id::Green, p.rgb[1]);
-        point.setField(Dimension::Id::Blue, p.rgb[2]);
-    }
-
-    if (h.hasInfrared())
-    {
-        point.setField(Dimension::Id::Infrared, p.rgb[3]);
-    }
-
-    if (d->extraDims.size())
-    {
-        LeExtractor extractor((const char *)p.extra_bytes, p.num_extra_bytes);
-        loadExtraDims(extractor, point);
-    }
-}
-#endif  // PDAL_HAVE_LASZIP
 
 
 void LasReader::loadPointV14(PointRef& point, char *buf, size_t bufsize)
@@ -887,13 +683,6 @@ void LasReader::loadExtraDims(LeExtractor& istream, PointRef& point)
 
 void LasReader::done(PointTableRef)
 {
-#ifdef PDAL_HAVE_LASZIP
-    if (d->laszip)
-    {
-        handleLaszip(laszip_close_reader(d->laszip));
-        handleLaszip(laszip_destroy(d->laszip));
-    }
-#endif
     m_streamIf.reset();
 }
 

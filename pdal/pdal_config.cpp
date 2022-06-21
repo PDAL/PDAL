@@ -61,15 +61,8 @@ bool hasFeature(Feature f)
     bool enabled = false;
     switch (f)
     {
-    case Feature::LASZIP:
-#ifdef PDAL_HAVE_LASZIP
-        enabled = true;
-#endif
-        break;
     case Feature::LAZPERF:
-#ifdef PDAL_HAVE_LAZPERF
         enabled = true;
-#endif
         break;
     case Feature::ZSTD:
 #ifdef PDAL_HAVE_ZSTD

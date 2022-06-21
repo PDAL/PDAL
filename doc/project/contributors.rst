@@ -42,8 +42,8 @@ primitive objects, and first stage implementations.
 
 `Bradley Chambers`_ from `Grover Consulting Services`_ has contributed numerous
 features and capabilities to the PDAL project, including :ref:`Poisson sampling
-<filters.sample>` and :ref:`Progressive Morphological Filters <pcl_ground>`.
-He is also a prolific :ref:`tutorial` writer.
+<filters.sample>` and classification filters such as
+:ref:`the SMRF filter<filters.smrf>`.  He is also a prolific :ref:`tutorial` writer.
 
 .. _`Bradley Chambers`: https://github.com/chambbj
 .. _`Grover Consulting Services`: https://grovercsllc.com/

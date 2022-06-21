@@ -9,3 +9,4 @@ Software Installation
    :maxdepth: 2
 
    conda
+   qgis

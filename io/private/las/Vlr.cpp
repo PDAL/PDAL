@@ -109,8 +109,12 @@ void Vlr::fillHeader(const char *buf)
 
     in >> recordSig;
     in.get(userId, 16);
+    // Trim all characters after a NULL
+    userId = userId.data();
     in >> recordId >> dataLen;
     in.get(description, 32);
+    // Trim all characters after a NULL
+    description = description.data();
     promisedDataSize = dataLen;
 }
 
@@ -134,8 +138,12 @@ void Evlr::fillHeader(const char *buf)
 
     in >> recordSig;
     in.get(userId, 16);
+    // Trim all characters after a NULL
+    userId = userId.data();
     in >> recordId >> promisedDataSize;
     in.get(description, 32);
+    // Trim all characters after a NULL
+    description = description.data();
 }
 
 std::vector<char> Evlr::headerData() const
@@ -150,6 +158,78 @@ std::vector<char> Evlr::headerData() const
 
     return buf;
 }
+
+// Fill VLR data from base-64 encoded data.
+struct DataFunc
+{
+    DataFunc(const std::string& data) : m_data(data)
+    {}
+
+    void operator()(las::Evlr& v, MetadataNode)
+    {
+        std::vector<uint8_t> b64buf = Utils::base64_decode(m_data);
+        v.dataVec.insert(v.dataVec.end(), b64buf.data(), (b64buf.data() + b64buf.size()));
+    }
+
+    std::string m_data;
+};
+
+// Fill VLR data from a file.
+struct FileFunc
+{
+    FileFunc(const std::string& filename) : m_filename(filename)
+    {}
+
+    void operator()(las::Evlr& v, MetadataNode)
+    {
+        size_t fileSize = FileUtils::fileSize(m_filename);
+        auto ctx = FileUtils::mapFile(m_filename, true, 0, fileSize);
+        if (ctx.addr())
+        {
+            uint8_t *addr = reinterpret_cast<uint8_t *>(ctx.addr());
+            v.dataVec.insert(v.dataVec.end(), addr, addr + fileSize);
+        }
+        FileUtils::unmapFile(ctx);
+        if (!ctx.addr())
+            throw pdal_error("Couldn't open file '" + m_filename +
+                "' from which to read VLR data: " + ctx.what());
+    }
+
+    std::string m_filename;
+};
+
+// Fill VLR data from metadata.
+struct MetadataFunc
+{
+    MetadataFunc(const std::string& key) : m_key(key)
+    {}
+
+    void operator()(las::Evlr& v, MetadataNode m)
+    {
+        auto pred = [key=m_key](MetadataNode m)
+            { return Utils::iequals(m.name(), key); };
+
+        MetadataNode node = m.find(pred);
+        if (!node.valid())
+            throw pdal_error("Unable to find metadata entry for key '" + m_key + "'.");
+
+        if (node.type() == "base64Binary")
+        {
+            std::vector<uint8_t> b64buf = Utils::base64_decode(node.value());
+            v.dataVec.insert(v.dataVec.end(), b64buf.data(), (b64buf.data() + b64buf.size()));
+        }
+        else if (node.type() == "string")
+        {
+            const std::string& s = node.value();
+            v.dataVec.insert(v.dataVec.end(), s.data(), s.data() + s.size());
+        }
+        else
+            throw pdal_error("Metadata for key '" + m_key + "' is not a string or base64 encoded.");
+    }
+
+    std::string m_key;
+};
+
 
 std::istream& operator>>(std::istream& in, las::Evlr& v)
 {
@@ -171,93 +251,83 @@ std::istream& operator>>(std::istream& in, las::Evlr& v)
     if (!j.is_object())
         throw pdal_error("LAS VLR must be specified as a JSON object.");
 
-    std::string description;
     std::string b64data;
-    std::string userId;
     std::vector<char> data;
-    double recordId(std::numeric_limits<double>::quiet_NaN());
+
+    v.description.clear();
+    v.userId.clear();
+    v.recordId = 1;
     for (auto& el : j.items())
     {
         if (el.key() == "description")
         {
-            if (!el.value().is_string()) 
-                throw pdal_error("LAS VLR description must be specified "
-                    "as a string.");
-            description = el.value().get<std::string>();
-            if (description.size() > 32)
-                throw pdal_error("LAS VLR description must be 32 characters "
-                    "or less.");
+            if (!el.value().is_string())
+                throw pdal_error("LAS VLR description must be specified as a string.");
+            v.description = el.value().get<std::string>();
+            if (v.description.size() > 32)
+                throw pdal_error("LAS VLR description must be 32 characters or less.");
         }
         else if (el.key() == "record_id")
         {
             if (!el.value().is_number())
-                throw pdal_error("LAS VLR record ID must be specified as "
-                    "a number.");
-            recordId = el.value().get<double>();
-            if (recordId < 0 ||
-                recordId > (std::numeric_limits<uint16_t>::max)() ||
-                recordId != (uint16_t)recordId)
+                throw pdal_error("LAS VLR record ID must be specified as a number.");
+            double d = el.value().get<double>();
+            if (d < 0 ||
+                d > (std::numeric_limits<uint16_t>::max)() ||
+                d != (uint16_t)d)
                 throw pdal_error("LAS VLR record ID must be an non-negative "
                     "integer less than 65536.");
+            v.recordId = (uint16_t)d;
         }
         else if (el.key() == "user_id")
         {
-            if (!el.value().is_string()) 
-                throw pdal_error("LAS VLR user ID must be specified "
-                    "as a string.");
-            userId = el.value().get<std::string>();
-            if (userId.size() > 16)
-                throw pdal_error("LAS VLR user ID must be 16 characters "
-                    "or less.");
+            if (!el.value().is_string())
+                throw pdal_error("LAS VLR user ID must be specified as a string.");
+            v.userId = el.value().get<std::string>();
+            if (v.userId.size() > 16)
+                throw pdal_error("LAS VLR user ID must be 16 characters or less.");
         }
         else if (el.key() == "data")
         {
-            if (data.size())
-                throw pdal_error("Can't specify both 'data' and 'filename' "
-                    "in VLR specification.");
+            if (v.dataFunc)
+                throw pdal_error("VLR can only be specified as one of "
+                    "'data', 'metadata' or 'filename'.");
             if (!el.value().is_string())
-                throw pdal_error("LAS VLR data must be specified as "
-                    "a base64-encoded string.");
-            //ABELL - Fix this.
-            std::vector<uint8_t> b64buf;
-            b64buf = Utils::base64_decode(el.value().get<std::string>());
-            data.insert(data.end(), (char *)b64buf.data(), (char *)(b64buf.data() + b64buf.size()));
+                throw pdal_error("LAS VLR data must be specified as a string.");
+            const std::string& data = el.value().get<std::string>();
+
+            v.dataFunc = DataFunc(data);
         }
         else if (el.key() == "filename")
         {
-            if (data.size())
-                throw pdal_error("Can't specify both 'data' and 'filename' "
-                    "in VLR specification.");
+            if (v.dataFunc)
+                throw pdal_error("VLR can only be specified as one of "
+                    "'data', 'metadata' or 'filename'.");
             if (!el.value().is_string())
                 throw pdal_error("LAS VLR filename must be a string.");
-            std::string filename = el.value().get<std::string>();
-            size_t fileSize = FileUtils::fileSize(filename);
-            auto ctx = FileUtils::mapFile(filename, true, 0, fileSize);
-            if (ctx.addr())
-            {
-                uint8_t *addr = reinterpret_cast<uint8_t *>(ctx.addr());
-                data.insert(data.begin(), addr, addr + fileSize);
-            }
-            FileUtils::unmapFile(ctx);
-            if (!ctx.addr())
-                throw pdal_error("Couldn't open file '" + filename + "' "
-                    "from which to read VLR data: " + ctx.what());
+            const std::string& filename = el.value().get<std::string>();
+
+            v.dataFunc = FileFunc(filename);
+        }
+        else if (el.key() == "metadata")
+        {
+            if (v.dataFunc)
+                throw pdal_error("VLR can only be specified as one of "
+                    "'data', 'metadata' or 'filename'.");
+            if (!el.value().is_string())
+                throw pdal_error("LAS VLR metadata key must be specified as a string.");
+            const std::string& metadataId = el.value().get<std::string>();
+
+            v.dataFunc = MetadataFunc(metadataId);
         }
         else
-            throw pdal_error("Invalid key '" + el.key() + "' in VLR "
-                "specification.");
+            throw pdal_error("Invalid key '" + el.key() + "' in VLR specification.");
     }
-    if (data.size() == 0)
-        throw pdal_error("LAS VLR must contain 'data' member.");
-    if (userId.empty())
-        throw pdal_error("LAS VLR must contain 'user_id' member.");
-    if (std::isnan(recordId))
-        recordId = 1;
 
-    v.userId = userId;
-    v.recordId = (uint16_t)recordId;
-    v.description = description;
-    v.dataVec = std::move(data);
+    if (v.userId.empty())
+        throw pdal_error("LAS VLR must contain 'user_id' member.");
+    if (!v.dataFunc)
+        throw pdal_error("LAS VLR must contain a 'data', 'metadata' or 'filename' member.");
     return in;
 }
 

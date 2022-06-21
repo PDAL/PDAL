@@ -50,5 +50,14 @@ Hierarchy::Hierarchy(const std::vector<char>& data)
     }
 }
 
+point_count_t Hierarchy::pointCount() const
+{
+    point_count_t pointCount = 0;
+
+    for (const Entry& e : m_entries)
+        pointCount += e.m_pointCount;
+    return pointCount;
+}
+
 } // namespace copc
 } // namespace pdal

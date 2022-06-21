@@ -220,10 +220,6 @@ TEST_F(TileDBWriterTimeDimTest, write_with_time)
     tiledb::Query q(ctx, array, TILEDB_READ);
     q.set_subarray(subarray);
 
-#if TILEDB_VERSION_MAJOR == 1
-    std::vector<double> coords(count  * 4);
-    q.set_coordinates(coords);
-#else
     std::vector<double> xs(count);
     std::vector<double> ys(count);
     std::vector<double> zs(count);
@@ -233,16 +229,11 @@ TEST_F(TileDBWriterTimeDimTest, write_with_time)
         .set_buffer("Y", ys)
         .set_buffer("Z", zs)
         .set_buffer("GpsTime", ts);
-#endif
 
     q.submit();
     array.close();
 
-#if TILEDB_VERSION_MAJOR == 1
-        result_num = ((int)q.result_buffer_elements()["__coords"].second / 4);
-#else
-        result_num = (int)q.result_buffer_elements()["X"].second;
-#endif
+    result_num = (int)q.result_buffer_elements()["X"].second;
 
     EXPECT_EQ(m_reader.count(), result_num);
 
@@ -301,10 +292,6 @@ TEST_F(TileDBWriterTimeDimTest, write_append_with_time)
     tiledb::Query q(ctx, array, TILEDB_READ);
     q.set_subarray(subarray);
 
-#if TILEDB_VERSION_MAJOR == 1
-    std::vector<double> coords(count  * 2 * 4);
-    q.set_coordinates(coords);
-#else
     std::vector<double> xs(count * 2);
     std::vector<double> ys(count * 2);
     std::vector<double> zs(count * 2);
@@ -314,16 +301,11 @@ TEST_F(TileDBWriterTimeDimTest, write_append_with_time)
         .set_buffer("Y", ys)
         .set_buffer("Z", zs)
         .set_buffer("GpsTime", ts);
-#endif
 
     q.submit();
     array.close();
 
-#if TILEDB_VERSION_MAJOR == 1
-    result_num = ((int)q.result_buffer_elements()["__coords"].second / 4) * 2;
-#else
     result_num = (int)q.result_buffer_elements()["X"].second;
-#endif
     EXPECT_EQ(m_reader.count() + m_reader2.count(), result_num);
 }
 
@@ -425,7 +407,6 @@ TEST_F(TileDBWriterTimeDimTest, time_first_or_last)
     EXPECT_EQ(last_dim_name, "GpsTime");
 }
 
-#if TILEDB_VERSION_MAJOR > 1
 TEST_F(TileDBWriterTimeDimTest, append_write_with_time)
 {
     tiledb::Context ctx;
@@ -500,6 +481,5 @@ TEST_F(TileDBWriterTimeDimTest, append_write_with_time)
 
     EXPECT_EQ(result_num, reader.count() + m_reader.count());
 }
-#endif
 
 }

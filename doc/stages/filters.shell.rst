@@ -1,3 +1,5 @@
+:orphan:
+
 .. _filters.shell:
 
 filters.shell

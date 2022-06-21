@@ -55,7 +55,15 @@ static inline Dimension::IdList fileDimensions()
     return { Id::GpsTime, Id::Y, Id::X, Id::Z, Id::XVelocity, Id::YVelocity,
         Id::ZVelocity, Id::Roll, Id::Pitch, Id::Azimuth, Id::WanderAngle,
         Id::XBodyAccel, Id::YBodyAccel, Id::ZBodyAccel, Id::XBodyAngRate,
-        Id::YBodyAngRate, Id::ZBodyAngRate };
+        Id::YBodyAngRate, Id::ZBodyAngRate};
+}
+
+static inline Dimension::IdList smrmsgFileDimensions()
+{
+    using namespace Dimension;
+    return {Id::GpsTime, Id::NorthPositionRMS, Id::EastPositionRMS,
+    Id::DownPositionRMS, Id::NorthVelocityRMS, Id::EastVelocityRMS,
+    Id::DownVelocityRMS, Id::RollRMS, Id::PitchRMS, Id::HeadingRMS};
 }
 
 static inline bool isAngularDimension(Dimension::Id dimension) {

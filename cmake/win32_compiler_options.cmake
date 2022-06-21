@@ -3,7 +3,7 @@
 #
 
 function(pdal_target_compile_settings target)
-    set_property(TARGET ${target} PROPERTY CXX_STANDARD 11)
+    set_property(TARGET ${target} PROPERTY CXX_STANDARD 17)
     set_property(TARGET ${target} PROPERTY CXX_STANDARD_REQUIRED TRUE)
     target_compile_definitions(${target} PRIVATE
         -DWIN32_LEAN_AND_MEAN

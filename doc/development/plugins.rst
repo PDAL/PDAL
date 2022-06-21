@@ -27,6 +27,7 @@ where ``plugin name`` is one of ``reader``, ``writer`` or ``filter``.
 PDAL kernel plugins must be named:
 
 ::
+
     libpdal_plugin_kernel_<plugin name>.<shared library extension>
 
 See the tutorials :ref:`writing-reader`, :ref:`writing-filter` or :ref:`writing-writer` for

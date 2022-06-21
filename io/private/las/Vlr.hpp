@@ -38,6 +38,7 @@
 #include <string>
 #include <vector>
 
+#include <pdal/Metadata.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/util/ThreadPool.hpp>
 
@@ -95,7 +96,7 @@ public:
         { return (const char *)(dataVec.data()); }
     size_t dataSize() const
         { return dataVec.size(); }
-    size_t empty() const
+    bool empty() const
         { return dataVec.size() == 0; }
 
     virtual void fillHeader(const char *buf);
@@ -107,6 +108,7 @@ public:
     uint64_t promisedDataSize;
     std::string description;
     std::vector<char> dataVec;
+    std::string metadataId;
 };
 
 inline bool operator==(const Vlr& v1, const Vlr& v2)
@@ -132,6 +134,17 @@ struct Evlr : public Vlr
     virtual void fillHeader(const char *buf) override;
     virtual std::vector<char> headerData() const override;
 
+    using DataCreationFunc = std::function<void(Evlr&, MetadataNode)>;
+    DataCreationFunc dataFunc;
+
+    // Fill the VLR data using the data fetch function.
+    void fillData(MetadataNode n)
+    {
+        if (dataFunc)
+            dataFunc(*this, n);
+    }
+
+    // These allow input and output of VLRs as JSON from streams.
     friend std::istream& operator>>(std::istream& in, Evlr& v);
     friend std::ostream& operator<<(std::ostream& out, const Evlr& v);
 };

@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 3.5)
 
-project(PDAL VERSION 2.3.0 LANGUAGES CXX C)
+project(PDAL VERSION 2.4.1 LANGUAGES CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
@@ -30,11 +30,11 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 # Must be changed if there is an ABI change.  This builds the SONAME
 # that's embedded in the library itself.
 #
-set(PDAL_SOLIB_MAJOR 13)
+set(PDAL_SOLIB_MAJOR 14)
 #
 # Change if there's a new release with no ABI change
 #
-set(PDAL_SOLIB_MINOR 0)
+set(PDAL_SOLIB_MINOR 1)
 #
 # Build number.  Increment for builds within minor versions.  Probably
 # always 0 for PDAL
@@ -125,8 +125,6 @@ set(PDAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 
 include(${PDAL_CMAKE_DIR}/gdal.cmake)
 include(${PDAL_CMAKE_DIR}/geotiff.cmake)  # Optional (not really)
-include(${PDAL_CMAKE_DIR}/lazperf.cmake)  # Optional
-include(${PDAL_CMAKE_DIR}/laszip.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/threads.cmake)
 include(${PDAL_CMAKE_DIR}/zlib.cmake)
 include(${PDAL_CMAKE_DIR}/lzma.cmake)
@@ -137,6 +135,7 @@ include(${PDAL_CMAKE_DIR}/libxml2.cmake)
 include(${PDAL_CMAKE_DIR}/dimension.cmake)
 include(${PDAL_CMAKE_DIR}/arbiter.cmake)
 include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
+include(${PDAL_CMAKE_DIR}/lazperf.cmake)
 include(${PDAL_CMAKE_DIR}/openssl.cmake) # Optional
 
 #------------------------------------------------------------------------------
@@ -180,6 +179,7 @@ endif()
 add_subdirectory(dimbuilder)
 add_subdirectory(vendor/arbiter)
 add_subdirectory(vendor/kazhdan)
+add_subdirectory(vendor/lazperf)
 add_subdirectory(pdal/util)
 add_subdirectory(tools)
 add_subdirectory(apps)
@@ -237,11 +237,6 @@ if (NOT PDAL_HAVE_LZMA)
         ${PDAL_SRC_DIR}/compression/LzmaCompression.cpp)
     list(REMOVE_ITEM SRCS ${LZMA_SRCS})
 endif()
-if (NOT PDAL_HAVE_LAZPERF)
-    file(GLOB LAZPERF_SRCS
-        ${PDAL_SRC_DIR}/compression/LazPerfVlrCompression.cpp)
-    list(REMOVE_ITEM SRCS ${LAZPERF_SRCS})
-endif()
 
 if (GDAL_VERSION VERSION_LESS 3.0.0)
     file(GLOB PROJPIPELINE_FILTER_SRCS
@@ -264,7 +259,6 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${ZSTD_INCLUDE_DIRS}
         ${NLOHMANN_INCLUDE_DIR}
         ${GDAL_INCLUDE_DIR}
-        ${LASZIP_INCLUDE_DIR}
 )
 target_link_libraries(${PDAL_BASE_LIB_NAME}
     PRIVATE
@@ -272,7 +266,6 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${CMAKE_DL_LIBS}
         ${GDAL_LIBRARY}
         ${GEOTIFF_LIBRARY}
-        ${LASZIP_LIBRARY}
         ${LIBXML2_LIBRARIES}
         ${ZLIB_LIBRARIES}
         ${LIBLZMA_LIBRARIES}
@@ -282,13 +275,9 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${PDAL_UTIL_LIB_NAME}
         ${PDAL_ARBITER_LIB_NAME}
         ${PDAL_KAZHDAN_LIB_NAME}
-        ${LAZPERF_LIBRARY}
+        ${PDAL_LAZPERF_LIB_NAME}
     INTERFACE
         ${PDAL_LIBDIR}
-)
-target_compile_definitions(${PDAL_BASE_LIB_NAME}
-    PRIVATE
-        ${LASZIP_DEFINES}
 )
 set_target_properties(${PDAL_BASE_LIB_NAME} PROPERTIES
     VERSION ${PDAL_BUILD_VERSION}

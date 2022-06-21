@@ -155,14 +155,17 @@ public:
     {}
 
     StringHeaderVal(const std::string& s) : BaseHeaderVal(s)
-    {}
+    {
+        if (LEN > 0)
+            m_defVal.resize(LEN);
+    }
 
     bool setVal(std::string val)
     {
         m_valSet = true;
         m_val = val;
         if (LEN > 0)
-            m_val.resize((std::min)(m_val.length(), LEN));
+            m_val.resize(LEN);
         return (LEN == 0 || val.length() <= LEN);
     }
 

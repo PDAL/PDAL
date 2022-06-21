@@ -104,17 +104,14 @@ void Dumper::dump()
         *m_out << "Data start signature: " << dataStartSig << "\n";
     }
 
-    // Seek to start of points and dump.
-    in.seek(m_header.pointOffset());
-    if (m_header.compressed())
-        readCompressedPoints(in);
-    else
-        readPoints(in);
+    in.close();
+    readPoints();
 
     // We're done if this is an extended VLR.
     if (!m_header.versionAtLeast(1, 4))
         return;
 
+    in.open(m_filename);
     // Seek to start of extended VLRs and dump.
     in.seek(m_header.eVlrOffset());
     for (uint32_t i = 0; i < m_header.eVlrCount(); ++i)
@@ -128,112 +125,17 @@ void Dumper::dump()
 }
 
 
-void Dumper::readPoints(ILeStream& in)
+void Dumper::readPoints()
 {
-    std::vector<char> buf(m_header.pointLen());
+    lazperf::reader::named_file f(m_filename);
 
+    std::vector<char> buf(m_header.pointLen());
     for (uint64_t i = 0; i < m_header.pointCount(); ++i)
     {
-        in.get(buf);
-        *m_out << cksum(buf) << "\n";
+        f.readPoint(buf.data());
+        *m_out << i << " " << cksum(buf) << "\n";
     }
 }
-
-
-void Dumper::handleLaszip(int result)
-{
-     if (result)
-     {
-         char *buf;
-         laszip_get_error(m_zip, &buf);
-         std::cerr << buf;
-         exit(-1);
-     }
-}
-
-
-void Dumper::readCompressedPoints(ILeStream& in)
-{
-    laszip_BOOL compressed;
-    laszip_point_struct *zipPoint;
-
-    handleLaszip(laszip_create(&m_zip));
-    handleLaszip(laszip_open_reader_stream(m_zip, *in.stream(), &compressed));
-    handleLaszip(laszip_get_point_pointer(m_zip, &zipPoint));
-
-    std::vector<char> buf(m_header.pointLen());
-    for (size_t i = 0; i < m_header.pointCount(); ++i)
-    {
-        handleLaszip(laszip_read_point(m_zip));
-        loadPoint(zipPoint, buf);
-        *m_out << cksum(buf) << "\n";
-    }
-}
-
-
-void Dumper::loadPoint(const laszip_point_struct *zipPoint, std::vector<char>& buf)
-{
-    const char *in = (const char *)zipPoint;
-    char *out = buf.data();
-    if (m_header.pointFormat() <= 5)
-    {
-        std::copy(in, in + 20, out);
-        out += 20;
-        in += 20;
-        if (m_header.pointFormat() == 1 || m_header.pointFormat() == 3)
-        {
-            in = reinterpret_cast<const char *>(&(zipPoint->gps_time));
-            std::copy(in, in + 8, out);
-            out += 8;
-        }
-        if (m_header.pointFormat() == 2 || m_header.pointFormat() == 3)
-        {
-            in = reinterpret_cast<const char *>(&(zipPoint->rgb));
-            std::copy(in, in + 6, out);
-            out += 6;
-        }
-    }
-    else if (m_header.pointFormat() >= 6 && m_header.pointFormat() <= 10)
-    {
-        std::copy(in, in + 14, out);
-        out += 14;
-        in += 14;
-        *out++ = zipPoint->extended_return_number |
-            (zipPoint->extended_number_of_returns << 4);
-        *out++ = zipPoint->extended_classification_flags |
-            (zipPoint->extended_scanner_channel << 4) |
-            (zipPoint->scan_direction_flag << 6) |
-            (zipPoint->edge_of_flight_line << 7);
-        *out++ = zipPoint->extended_classification;
-        *out++ = zipPoint->user_data;
-
-        in = reinterpret_cast<const char *>(&(zipPoint->extended_scan_angle));
-        std::copy(in, in + 2, out);
-        out += 2;
-
-        in = reinterpret_cast<const char *>(&(zipPoint->point_source_ID));
-        std::copy(in, in + 2, out);
-        out += 2;
-
-        in = reinterpret_cast<const char *>(&(zipPoint->gps_time));
-        std::copy(in, in + 8, out);
-        out += 8;
-
-        if (m_header.pointFormat() == 7)
-        {
-            in = reinterpret_cast<const char *>(&(zipPoint->rgb));
-            std::copy(in, in + 6, out); // RBG
-            out += 6;
-        }
-        if (m_header.pointFormat() == 8)
-        {
-            in = reinterpret_cast<const char *>(&(zipPoint->rgb));
-            std::copy(in, in + 8, out); // RBG, NIR
-            out += 8;
-        }
-    }
-}
-
 
 int Dumper::processArgs(std::deque<std::string> args)
 {

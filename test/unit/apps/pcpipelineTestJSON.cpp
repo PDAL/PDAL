@@ -231,7 +231,6 @@ TEST_P(jsonWithNITF, pipeline)
 }
 
 
-#if defined(PDAL_HAVE_LASZIP) || defined(PDAL_HAVE_LAZPERF)
 INSTANTIATE_TEST_CASE_P(plugins, jsonWithNITF,
                         testing::Values(
                             "pipeline/bpf2nitf.json",
@@ -240,15 +239,6 @@ INSTANTIATE_TEST_CASE_P(plugins, jsonWithNITF,
                             "pipeline/las2nitf-2.json",
                             "pipeline/nitf2las.json"
                         ));
-#else
-INSTANTIATE_TEST_CASE_P(plugins, jsonWithNITF,
-                        testing::Values(
-                            "pipeline/bpf2nitf.json",
-                            "pipeline/las2nitf.json",
-                            "pipeline/las2nitf-crop-with-options.json",
-                            "pipeline/nitf2las.json"
-                        ));
-#endif
 
 class jsonWithP2G : public testing::TestWithParam<const char*> {};
 
@@ -289,11 +279,7 @@ class jsonWithLAZ : public testing::TestWithParam<const char*> {};
 
 TEST_P(jsonWithLAZ, pipeline)
 {
-#if defined PDAL_HAVE_LASZIP || defined PDAL_HAVE_LAZPERF
     run_pipeline(GetParam());
-#else
-    std::cerr << "WARNING: no LAZ support, skipping test" << std::endl;
-#endif
 }
 
 INSTANTIATE_TEST_CASE_P(plugins, jsonWithLAZ,

@@ -1,11 +1,11 @@
 #
 # Draco plugin CMake configuration
 #
-include (${PDAL_CMAKE_DIR}/draco.cmake)
 
-if (NOT PDAL_HAVE_DRACO)
-    message(FATAL_ERROR "Can't find Draco support required.")
-endif()
+#
+# We use pkg_check_modules because the draco Cmake config is broken
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(DRACO REQUIRED draco>1.4.0)
 
 if (WIN32)
     add_definitions(-DNOMINMAX)
@@ -28,6 +28,11 @@ PDAL_ADD_PLUGIN(reader_libname reader draco
 target_link_libraries(${reader_libname}  PRIVATE ${DRACO_LIBRARY})
 target_link_directories(${reader_libname} PRIVATE ${DRACO_LIBRARY_DIRS})
 
+if (UNIX)
+    target_compile_options(${reader_libname} PRIVATE -Wno-deprecated-copy -Wno-sign-compare)
+endif()
+
+
 #
 # Draco Writer
 #
@@ -43,6 +48,9 @@ PDAL_ADD_PLUGIN(writer_libname writer draco
 )
 
 target_link_directories(${writer_libname} PRIVATE ${DRACO_LIBRARY_DIRS})
+if (UNIX)
+    target_compile_options(${writer_libname} PRIVATE -Wno-deprecated-copy -Wno-sign-compare)
+endif()
 
 
 if (WITH_TESTS)
@@ -59,6 +67,9 @@ if (WITH_TESTS)
     )
     target_link_directories(pdal_io_draco_writer_test PRIVATE ${DRACO_LIBRARY_DIRS})
     target_link_libraries(pdal_io_draco_writer_test  PRIVATE ${DRACO_LIBRARIES})
+    if (UNIX)
+        target_compile_options(pdal_io_draco_writer_test PRIVATE -Wno-deprecated-copy -Wno-sign-compare)
+    endif()
 
     PDAL_ADD_TEST(pdal_io_draco_reader_test
         FILES
@@ -72,6 +83,9 @@ if (WITH_TESTS)
     )
     target_link_directories(pdal_io_draco_reader_test PRIVATE ${DRACO_LIBRARY_DIRS})
     target_link_libraries(pdal_io_draco_reader_test  PRIVATE ${DRACO_LIBRARIES})
+    if (UNIX)
+        target_compile_options(pdal_io_draco_reader_test PRIVATE -Wno-deprecated-copy -Wno-sign-compare)
+    endif()
 
 
 endif()
