@@ -33,6 +33,8 @@
 ****************************************************************************/
 
 #include <pdal/util/Algorithm.hpp>
+#include <pdal/PDALUtils.hpp>
+#include <arbiter/arbiter.hpp>
 
 #include "CopcWriter.hpp"
 
@@ -42,6 +44,7 @@
 #include "private/copcwriter/CellManager.hpp"
 #include "private/copcwriter/Grid.hpp"
 #include "private/copcwriter/Reprocessor.hpp"
+
 
 namespace pdal
 {
@@ -73,6 +76,7 @@ void CopcWriter::initialize(PointTableRef table)
 {
     fillForwardList();
 }
+
 
 void CopcWriter::addArgs(ProgramArgs& args)
 {

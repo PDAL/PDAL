@@ -54,7 +54,7 @@ namespace copcwriter
 class BuPyramid
 {
 public:
-    BuPyramid(const BaseInfo& common);
+    BuPyramid(BaseInfo& common);
     void run(CellManager& cells);
 
 private:
