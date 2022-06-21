@@ -234,11 +234,7 @@ std::vector<std::string> directoryList(const std::string& dir)
         fs::directory_iterator end;
         while (it != end)
         {
-#ifndef PDAL_WIN32_STL 
-            files.push_back(fromNative(it->path().string()));
-#else
-            files.push_back(fromNative(it->path()));
-#endif
+            files.push_back(it->path().u8string());
             it++;
         }
     }
