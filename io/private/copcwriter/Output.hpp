@@ -42,6 +42,8 @@
 #include <lazperf/lazperf.hpp>
 #include <lazperf/vlr.hpp>
 
+#include <pdal/PDALUtils.hpp>
+
 namespace pdal
 {
 namespace copcwriter
@@ -62,13 +64,14 @@ public:
     using CountMap = std::unordered_map<VoxelKey, point_count_t>;
     using Entries = std::vector<std::pair<VoxelKey, Entry>>;
 
-    Output(const BaseInfo& b);
+    Output(BaseInfo& b);
     void finish(const CountMap& childCounts);
     uint64_t newChunk(const VoxelKey& key, int32_t size, int32_t count);
 
 private:
     const BaseInfo& b;
-    std::ofstream m_f;
+    Utils::ArbiterOutStream m_f;
+
     lazperf::header14 m_header;
     lazperf::copc_info_vlr m_copcVlr;
     std::vector<char> m_vlrBuf;
