@@ -50,7 +50,7 @@ namespace copcwriter
 
 /// BuPyramid
 
-BuPyramid::BuPyramid(const BaseInfo& common) : m_manager(common)
+BuPyramid::BuPyramid(BaseInfo& common) : m_manager(common)
 {}
 
 

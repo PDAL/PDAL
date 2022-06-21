@@ -7,7 +7,8 @@ Removing noise
 
 .. index:: Denoising, outliers
 
-This exercise uses PDAL to remove unwanted noise in an airborne LiDAR collection.
+This exercise uses PDAL to remove unwanted noise in an airborne LiDAR
+collection.
 
 
 Exercise
@@ -68,7 +69,7 @@ every point with a ``Classification`` value **not** equal to 7.
 
 Even with the :ref:`filters.outlier` operation, there is still a cluster of
 points with extremely negative ``Z`` values. These are some artifact or
-miscomputation of processing, and we don't want these points. We can construct
+mis-computation of processing, and we don't want these points. We can construct
 another :ref:`range <ranges>` to keep only points that are within the range
 :math:`-100 <= Z <= 3000`.
 
@@ -117,10 +118,9 @@ Execution
 
 Invoke the following command, substituting accordingly, in your ` Shell`:
 
-.. literalinclude:: ./denoising-run-command.txt
+.. code-block:: console
 
-.. image:: ../../../images/denoise-run-command.png
-    :target: ../../../../_images/denoise-run-command.png
+    $ pdal pipeline ./exercises/analysis/denoising/denoise.json
 
 Visualization
 ................................................................................

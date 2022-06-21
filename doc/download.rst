@@ -15,8 +15,10 @@ Current Release(s)
 
 * **2022-03-18** `PDAL-2.4.0-src.tar.gz`_ `Release Notes`_ (`md5`_)
 
-.. _`Release Notes`: https://github.com/PDAL/PDAL/releases/tag/2.4.0
-.. _`md5`: https://github.com/PDAL/PDAL/releases/download/2.4.0/PDAL-2.4.0-src.tar.gz.md5
+.. _`PDAL-2.4.2-src.tar.gz`: https://github.com/PDAL/PDAL/releases/download/2.4.2/PDAL-2.4.2-src.tar.gz
+.. _`Release Notes`: https://github.com/PDAL/PDAL/releases/tag/2.4.2
+.. _`md5`: https://github.com/PDAL/PDAL/releases/download/2.4.2/PDAL-2.4.2-src.tar.gz.md5
+
 
 
 Past Releases
@@ -65,20 +67,20 @@ and RiVLib. To enable any of these plugins, the reader will need to install any
 required dependencies and build PDAL from source.
 
 .. csv-table:: PDAL Distribution Feature Comparison
-   :header: "", "Docker", "RPMs", "Debian", "Alpine", ":ref:`Conda`"
+   :header: "", "Docker", "RPMs", "Alpine", ":ref:`Conda`"
    :widths: 20, 20, 20, 20, 20, 20
 
-   "Platform(s)", "linux", "linux", "linux", "linux", "win64, mac, linux"
-   "PDAL version", "2.3", "", "", "2.2", "2.3"
-   "CPD", "", "", "", "X", ""
-   "E57", "X", "", "", "", "X"
-   "HDF", "X", "", "", "", "X"
-   "I3S", "", "", "", "", "X"
-   "Icebridge", "X",  "", "", "X", "X"
-   "NITF", "X",  "", "", "", "X (except Windows)"
-   "pgpointcloud", "X",  "", "", "X", "X"
-   "SLPK", "", "", "", "", "X"
-   "TileDB", "X", "", "", "", "X (except Windows)"
+   "Platform(s)", "linux", "linux",  "linux", "win64, mac, linux"
+   "PDAL version", "2.4", "",  "2.4", "2.4"
+   "CPD", "", "",  "X", ""
+   "E57", "X", "",  "", "X"
+   "HDF", "X", "",  "", "X"
+   "I3S", "", "", "",  "X"
+   "Icebridge", "X",   "", "X", "X"
+   "NITF", "X",  "",  "", "X"
+   "pgpointcloud", "X",  "",  "X", "X"
+   "SLPK", "", "", "", "X"
+   "TileDB", "X", "", "", "", "X "
 
 
 Windows
@@ -94,14 +96,6 @@ RPMs
 
 RPMs for PDAL are available at
 https://copr.fedorainfracloud.org/coprs/neteler/pdal/.
-
-
-Debian
-................................................................................
-
-Debian packages are now available on `Debian Unstable`_.
-
-.. _`Debian Unstable`: https://tracker.debian.org/pkg/pdal
 
 
 Alpine

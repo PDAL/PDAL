@@ -33,6 +33,8 @@
 ****************************************************************************/
 
 #include <pdal/util/Algorithm.hpp>
+#include <pdal/PDALUtils.hpp>
+#include <arbiter/arbiter.hpp>
 
 #include "CopcWriter.hpp"
 
@@ -42,6 +44,7 @@
 #include "private/copcwriter/CellManager.hpp"
 #include "private/copcwriter/Grid.hpp"
 #include "private/copcwriter/Reprocessor.hpp"
+
 
 namespace pdal
 {
@@ -73,6 +76,7 @@ void CopcWriter::initialize(PointTableRef table)
 {
     fillForwardList();
 }
+
 
 void CopcWriter::addArgs(ProgramArgs& args)
 {
@@ -281,6 +285,16 @@ void CopcWriter::handleUserVlrs(MetadataNode m)
 void CopcWriter::write(const PointViewPtr v)
 {
     using namespace copcwriter;
+
+    if (v->empty())
+    {
+        log()->get(LogLevel::Warning) << "writers.copc skipping empty point view.\n";
+        return;
+    }
+
+    if (++b->viewCount > 1)
+        log()->get(LogLevel::Warning) << "writers.copc does not support multiple views "
+            "and will overwrite files for earlier views. Consider adding a merge filter.\n";
 
     BOX3D box;
     v->calculateBounds(box);

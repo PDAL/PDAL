@@ -57,7 +57,7 @@ class PyramidManager
 {
     using Entries = std::vector<std::pair<VoxelKey, int>>;
 public:
-    PyramidManager(const BaseInfo& b);
+    PyramidManager(BaseInfo& b);
     ~PyramidManager();
 
     void queue(const OctantInfo& o);

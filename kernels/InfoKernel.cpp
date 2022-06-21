@@ -252,11 +252,11 @@ MetadataNode InfoKernel::run(const std::string& filename)
     t << std::put_time( std::localtime( &now ), "%FT%T%z" );
     root.add("reader", m_reader->getName());
     root.add("now", t.str());
-    
+
     uintmax_t size = Utils::fileSize(filename);
     if (size)
         root.add("file_size", size);
-    
+
     return root;
 }
 
@@ -291,9 +291,11 @@ void InfoKernel::dump(MetadataNode& root)
         if (node.findChild("error"))
         {
             std::string poly = info->bounds().to2d().toWKT();
+            std::string poly_geojson = info->bounds().to2d().toGeoJSON();
 
             MetadataNode m("boundary");
             m.add("boundary", poly, "Simple boundary of polygon");
+            m.add("boundary_json", poly_geojson, "Simple boundary of polygon");
             root.add(m);
         }
         else

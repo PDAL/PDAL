@@ -110,8 +110,8 @@ philosophy in a number of important ways:
    `OSI`_-approved license.
 2. PDAL allows application developers to provide proprietary extensions that
    act as stages in processing pipelines. These might be things like custom
-   format
-   readers, specialized exploitation algorithms, or entire processing pipelines.
+   format readers, specialized exploitation algorithms, or entire processing
+   pipelines.
 3. PDAL can operate on point cloud data of any format
    -- not just `ASPRS LAS`_. `LAStools`_ can read and write formats other than
    LAS, but relates all data to its internal handling of LAS data, limiting
@@ -139,17 +139,14 @@ Entwine
 
 .. index:: Entwine
 
-
- `Entwine`_ is open source software from Hobu, Inc. that organizes massive
- point cloud collections into streamable data services. These two software
- projects allow province-scale LiDAR collections to be organized and served via
- HTTP clients over the internet. PDAL provides :ref:`readers.ept` to allow
- users to read data from those `Entwine Point Tile`_ collections that Entwine
- produces..
+`Entwine`_ is open source software from Hobu, Inc. that organizes massive point
+cloud collections into streamable data services. These two software projects
+allow province-scale LiDAR collections to be organized and served via HTTP
+clients over the internet. PDAL provides :ref:`readers.ept` to allow users to
+read data from those `Entwine Point Tile`_ collections that Entwine produces..
 
 .. _`Entwine Point Tile`: https://entwine.io/entwine-point-tile.html
 .. _`Hobu, Inc.`: https://hobu.co
-
 .. _`Entwine`: https://entwine.io
 .. _`Greyhound`: http://greyhound.io
 
@@ -201,7 +198,6 @@ might find useful bits of functionality in them. These other tools include:
 .. _`Python LAS`: https://pypi.python.org/pypi/laspy/1.4.1
 .. _`ASPRS LAS`: http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
 .. _`OSI`: https://opensource.org/licenses
-
 .. _`LAStools`: http://lastools.org
 .. _`Martin Isenburg`: https://www.cs.unc.edu/~isenburg/
 
@@ -209,39 +205,39 @@ Where did PDAL come from?
 --------------------------------------------------------------------------------
 
 PDAL takes its cue from another very popular open source project -- |GDAL|.
-GDAL is Geospatial Data Abstraction Library, and it is used throughout the geospatial
-software industry to provide translation and processing support for a variety
-of raster and vector formats. PDAL provides the same capability for point
-cloud data types.
+GDAL is Geospatial Data Abstraction Library, and it is used throughout the
+geospatial software industry to provide translation and processing support for
+a variety of raster and vector formats. PDAL provides the same capability for
+point cloud data types.
 
 PDAL evolved out of the development of database storage and access capabilities
 for the |USACE| `CRREL <http://www.erdc.usace.army.mil/Media/Fact-Sheets/Fact-Sheet-Article-View/Article/476649/remote-sensinggeographic-information-systems-center/>`__ |GRiD| project. Functionality that was creeping into |libLAS|
 was pulled into a new library, and it was designed from the ground up to mimic
 successful extract, transform, and load libraries in the geospatial software
-domain. PDAL has steadily attracted more contributors as other software developers
-use it to provide point cloud data translation and processing capability to
-their software.
+domain. PDAL has steadily attracted more contributors as other software
+developers use it to provide point cloud data translation and processing
+capability to their software.
 
 
 How is point cloud data different than raster or vector geo data?
 ................................................................................
 
 Point cloud data are indeed very much like the typical vector point data type
-of which many geospatial practitioners are familiar, but their volume causes some
-significant challenges. Besides their `X`, `Y`, and `Z` locations, each point
-often has full attribute information of other things like `Intensity`, `Time`,
-`Red`, `Green`, and `Blue`.
+of which many geospatial practitioners are familiar, but their volume causes
+some significant challenges. Besides their `X`, `Y`, and `Z` locations, each
+point often has full attribute information of other things like `Intensity`,
+`Time`, `Red`, `Green`, and `Blue`.
 
 Typical vector coverages of point data might max out at a million or so
 features. Point clouds quickly get into the billions and even trillions, and
 because of this specialized processing and management techniques must be used
 to handle so much data efficiently.
 
-The algorithms used to extract and exploit point cloud data are also significantly
-different than typical vector GIS work flows, and data organization is extremely
-important to be able to efficiently leverage the available computing. These
-characteristics demand a library oriented toward these approaches and PDAL
-achieves it.
+The algorithms used to extract and exploit point cloud data are also
+significantly different than typical vector GIS work flows, and data
+organization is extremely important to be able to efficiently leverage the
+available computing. These characteristics demand a library oriented toward
+these approaches and PDAL achieves it.
 
 .. note::
 
@@ -259,13 +255,13 @@ does come with a bit of overhead cost. In most cases this is not significant,
 but for specific processing work flows with specific data, specialized tools
 will certainly outperform it.
 
-In exchange for possible performance penalty or data model impedance, developers
-get the freedom to access data over an abstract API, a multitude of algorithms
-to apply to data within easy reach, and the most complete set of
-point cloud format drivers in the industry. PDAL also provides a straightforward
-command line, and it extends simple generic Python processing through Numpy. These
-features make it attractive to software developers, data managers, and
-scientists.
+In exchange for possible performance penalty or data model impedance,
+developers get the freedom to access data over an abstract API, a multitude of
+algorithms to apply to data within easy reach, and the most complete set of
+point cloud format drivers in the industry. PDAL also provides a
+straightforward command line, and it extends simple generic Python processing
+through Numpy. These features make it attractive to software developers, data
+managers, and scientists.
 
 What are PDAL's weak points?
 --------------------------------------------------------------------------------
@@ -356,12 +352,14 @@ Julia Plugin
 
 .. index:: Julia
 
-PDAL supports embedding |Julia| filters. These allow you to dynamically interact
-with point cloud data in a more comfortable and familiar language environment
-for geospatial practitioners, while still maintaining high performance.
+PDAL supports embedding |Julia| filters. These allow you to dynamically
+interact with point cloud data in a more comfortable and familiar language
+environment for geospatial practitioners, while still maintaining high
+performance.
 
-Additionally the TypedTables.jl, RoamesGeometry.jl and AcceleratedArrays.jl libraries
-provide some very high-level interfaces for writing efficient filters.
+Additionally the TypedTables.jl, RoamesGeometry.jl and AcceleratedArrays.jl
+libraries provide some very high-level interfaces for writing efficient
+filters.
 
 .. seealso::
 

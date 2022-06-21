@@ -192,10 +192,6 @@ TEST_F(TileDBReaderTimeDimTest, read_4d)
     tiledb::Query q(ctx, array, TILEDB_READ);
     q.set_subarray(subarray);
 
-#if TILEDB_VERSION_MAJOR == 1
-    std::vector<double> coords(count  * 4);
-    q.set_coordinates(coords);
-#else
     std::vector<double> xs(count);
     std::vector<double> ys(count);
     std::vector<double> zs(count);
@@ -205,7 +201,6 @@ TEST_F(TileDBReaderTimeDimTest, read_4d)
         .set_buffer("Y", ys)
         .set_buffer("Z", zs)
         .set_buffer("GpsTime", ts);
-#endif
 
     q.submit();
     array.close();

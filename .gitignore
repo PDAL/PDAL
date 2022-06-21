@@ -98,8 +98,6 @@ doc/build
 bin/
 lib/
 test/unit/CMakeScripts/
-pdal/gitsha.cpp
-.vagrant/
 test/unit/TestConfig.hpp
 *.pyc
 

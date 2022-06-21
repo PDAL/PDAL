@@ -82,16 +82,50 @@ std::string addTrailingSlash(std::string path)
 }
 
 #ifdef PDAL_WIN32_STL
-std::wstring toNative(std::string const& in)
+std::wstring toNative(const std::string& in)
 {
-    // TODO: C++11 define convert with static thread_local
-    std::wstring_convert<std::codecvt_utf8_utf16<uint16_t>, uint16_t> convert;
-    auto s = convert.from_bytes(in);
-    auto p = reinterpret_cast<wchar_t const*>(s.data());
-    return std::wstring(p, p + s.size());
+    if (in.empty())
+        return std::wstring();
+
+    // The first call determines the length of the conversion. The second does the
+    // actual conversion.
+    int len = MultiByteToWideChar(CP_UTF8, 0, in.data(), in.length(), nullptr, 0);
+    std::wstring out(len, 0);
+    if (MultiByteToWideChar(CP_UTF8, 0, in.data(), in.length(), out.data(), len) == 0)
+    {
+        char buf[200] {};
+        len = FormatMessageA(0, 0, GetLastError(), 0, buf, 199, 0);
+        throw pdal_error("Can't convert UTF8 to UTF16: " + std::string(buf, len));
+    }
+    return out;
+}
+
+std::string fromNative(const std::wstring& in)
+{
+    if (in.empty())
+        return std::string();
+
+    // The first call determines the length of the conversion. The second does the
+    // actual conversion.
+    int len = WideCharToMultiByte(CP_UTF8, 0, in.data(), in.length(), nullptr, 0, nullptr, nullptr);
+    std::string out(len, 0);
+    if (WideCharToMultiByte(CP_UTF8, 0, in.data(), in.length(), out.data(), len,
+        nullptr, nullptr) == 0)
+    {
+        int err = GetLastError();
+        char buf[200] {};
+        len = FormatMessageA(0, 0, GetLastError(), 0, buf, 199, 0);
+        throw pdal_error("Can't convert UTF16 to UTF8: " + std::string(buf, len));
+    }
+    return out;
 }
 #else // Unix, OSX, MinGW
-std::string const& toNative(std::string const& in)
+std::string toNative(const std::string& in)
+{
+    return in;
+}
+
+std::string fromNative(const std::string& in)
 {
     return in;
 }
@@ -196,11 +230,11 @@ std::vector<std::string> directoryList(const std::string& dir)
 
     try
     {
-        fs::directory_iterator it(dir);
+        fs::directory_iterator it(toNative(dir));
         fs::directory_iterator end;
         while (it != end)
         {
-            files.push_back(it->path().string());
+            files.push_back(fromNative(it->path()));
             it++;
         }
     }
@@ -445,13 +479,6 @@ std::vector<std::string> glob(std::string path)
 
 #ifdef _WIN32
 #ifdef PDAL_WIN32_STL
-    auto fromNative = [](std::wstring const& in) -> std::string
-    {
-        std::wstring_convert<std::codecvt_utf8_utf16<unsigned short>, unsigned short> convert;
-        auto p = reinterpret_cast<unsigned short const*>(in.data());
-        return convert.to_bytes(p, p + in.size());
-    };
-
     std::wstring wpath(toNative(path));
     WIN32_FIND_DATAW ffd;
     HANDLE handle = FindFirstFileW(wpath.c_str(), &ffd);
@@ -468,7 +495,8 @@ std::vector<std::string> glob(std::string path)
         if (found == std::wstring::npos)
             filenames.push_back(fromNative(ffd.cFileName));
         else
-            filenames.push_back(fromNative(wpath.substr(0, found)) + "\\" + fromNative(ffd.cFileName));
+            filenames.push_back(fromNative(wpath.substr(0, found + 1)) +
+                fromNative(ffd.cFileName));
 
     } while (FindNextFileW(handle, &ffd) != 0);
     FindClose(handle);
@@ -488,7 +516,7 @@ std::vector<std::string> glob(std::string path)
         if (found == std::wstring::npos)
             filenames.push_back(ffd.cFileName);
         else
-            filenames.push_back(path.substr(0, found) + "\\" + ffd.cFileName);
+            filenames.push_back(path.substr(0, found + 1) + ffd.cFileName);
 
     } while (FindNextFileA(handle, &ffd) != 0);
     FindClose(handle);
@@ -531,7 +559,7 @@ MapContext mapFile(const std::string& filename, bool readOnly, uintmax_t pos, ui
 #ifndef _WIN32
     ctx.m_fd = ::open(filename.c_str(), readOnly ? O_RDONLY : O_RDWR);
 #else
-    ctx.m_fd = ::_open(filename.c_str(), readOnly ? O_RDONLY : O_RDWR);
+    ctx.m_fd = ::_wopen(toNative(filename).data(), readOnly ? O_RDONLY : O_RDWR);
 #endif
 
     if (ctx.m_fd == -1)

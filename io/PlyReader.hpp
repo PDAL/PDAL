@@ -127,6 +127,7 @@ private:
     PointId m_index;
     Element *m_vertexElt;
 
+    virtual QuickInfo inspect();
     virtual void initialize();
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
