@@ -12,8 +12,8 @@ The method is described in detail `here`_. It extends the method of :cite:`Gatzi
 
 .. note::
 
-This filter creates a new dataset describing the trajectory of the sensor,
-replacing the input dataset.
+  This filter creates a new dataset describing the trajectory of the sensor,
+  replacing the input dataset.
 
 Examples
 --------
