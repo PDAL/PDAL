@@ -51,5 +51,6 @@ ENV GTIFF_REPORT_COMPD_CS=TRUE
 ENV REPORT_COMPD_CS=TRUE
 ENV OAMS_TRADITIONAL_GIS_ORDER=TRUE
 
+
 SHELL ["conda", "run", "--no-capture-output", "-n", "pdal", "/bin/sh", "-c"]
 
