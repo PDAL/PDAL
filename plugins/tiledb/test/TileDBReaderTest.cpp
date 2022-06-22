@@ -46,7 +46,11 @@
 #include "../io/TileDBReader.hpp"
 #include "../io/TileDBWriter.hpp"
 
+#if TILEDB_VERSION_MAJOR >= 2
+#if ((TILEDB_VERSION_MINOR > 7) || (TILEDB_VERSION_MAJOR > 2))
 #include <tiledb/array_schema_evolution.h>
+#endif
+#endif
 
 namespace pdal
 {
@@ -263,6 +267,8 @@ TEST_F(TileDBReaderTest, spatial_reference)
     EXPECT_TRUE(rdr.getSpatialReference().equals(utm16));
 };
 
+#if TILEDB_VERSION_MAJOR >= 2
+#if ((TILEDB_VERSION_MINOR > 7) || (TILEDB_VERSION_MAJOR > 2))
 TEST_F(TileDBReaderTest, unsupported_attribute)
 {
     std::string pth = Support::temppath("tiledb_test_unsupported");
@@ -327,5 +333,7 @@ TEST_F(TileDBReaderTest, unsupported_attribute)
 
     EXPECT_EQ(table.numPoints(), 50);
 }
+#endif
+#endif
 
 }; //pdal namespace
