@@ -1,9 +1,13 @@
-FROM pdal/ubuntubase:latest as build
+FROM condaforge/mambaforge:latest as build
 MAINTAINER Howard Butler <howard@hobu.co>
+
+ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
 SHELL ["conda", "run", "-n", "pdal", "/bin/bash", "-c"]
 
-RUN  conda install -c conda-forge git compilers cmake make ninja sysroot_linux-64=2.17 libstdcxx-ng
+RUN mamba install -c conda-forge git compilers conda-pack cmake make ninja &&
+    mamba install --yes -c conda-forge pdal --only-deps
+
 RUN git clone http://github.com/PDAL/PDAL.git pdal && \
     mkdir -p pdal/build && \
     cd pdal/build  && \
@@ -26,8 +30,8 @@ RUN git clone http://github.com/PDAL/PDAL.git pdal && \
 RUN cd pdal/build  && \
     ninja
 
-#RUN cd pdal/build  && \
-#    ctest -V
+RUN cd pdal/build  && \
+    ctest -V
 
 RUN cd pdal/build  && \
     ninja install
