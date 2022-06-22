@@ -3,6 +3,8 @@ MAINTAINER Howard Butler <howard@hobu.co>
 
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
+RUN conda create -n pdal -y
+
 SHELL ["conda", "run", "-n", "pdal", "/bin/bash", "-c"]
 
 RUN mamba install -c conda-forge git compilers conda-pack cmake make ninja && \
