@@ -53,6 +53,9 @@ end_timestamp
 start_timestamp
   Opens the array between a timestamp range of start_timestamp and end_timestamp [Optional]
 
+strict
+  Raise an error if the array contains a TileDB attribute not supported by PDAL, the default is set to true to raise an error for unsupported attribute types [Optional]
+
 .. include:: reader_opts.rst
 
 .. _TileDB: https://tiledb.io

@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        platform: ['windows-latest']
+        platform: ['windows-latest','macos-latest','ubuntu-latest']
 
     env:
       PDAL_PLATFORM: ${{ matrix.platform }}
