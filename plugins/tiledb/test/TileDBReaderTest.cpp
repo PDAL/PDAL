@@ -46,6 +46,8 @@
 #include "../io/TileDBReader.hpp"
 #include "../io/TileDBWriter.hpp"
 
+#include <tiledb/array_schema_evolution.h>
+
 namespace pdal
 {
 
@@ -260,5 +262,70 @@ TEST_F(TileDBReaderTest, spatial_reference)
     rdr.execute(table2);
     EXPECT_TRUE(rdr.getSpatialReference().equals(utm16));
 };
+
+TEST_F(TileDBReaderTest, unsupported_attribute)
+{
+    std::string pth = Support::temppath("tiledb_test_unsupported");
+
+    Options writer_options;
+    writer_options.add("array_name", pth);
+    writer_options.add("x_tile_size", 1);
+    writer_options.add("y_tile_size", 1);
+    writer_options.add("z_tile_size", 1);
+
+    if (FileUtils::directoryExists(pth))
+        FileUtils::deleteDirectory(pth);
+
+    FauxReader reader;
+    Options reader_options;
+    reader_options.add("mode", "ramp");
+    reader_options.add("count", 50);
+    reader.addOptions(reader_options);
+
+    TileDBWriter writer;
+    writer.setOptions(writer_options);
+    writer.setInput(reader);
+
+    FixedPointTable table(count);
+    writer.prepare(table);
+    writer.execute(table);
+
+    // now evolve the schema to add a string attribute
+    tiledb::Context ctx;
+    tiledb::ArraySchemaEvolution evolution(ctx);
+
+    // add a new attribute a1
+    auto a1 = tiledb::Attribute::create<std::string>(ctx, "a1");
+    evolution.add_attribute(a1);
+
+    uint64_t now = tiledb_timestamp_now_ms();
+    now = now + 1;
+    evolution.set_timestamp_range({now, now});
+
+    // evolve array
+    evolution.array_evolve(pth);
+
+    // read schema
+    auto read_schema = tiledb::Array::load_schema(ctx, pth);
+
+    auto attrs = read_schema.attributes();
+    EXPECT_TRUE(attrs.count("a1") == 1);
+
+    // read the points from the array, and check we skip over the unsupported attribute
+    TileDBReader rdr;
+    Options options;
+    options.add("array_name", pth);
+    rdr.setOptions(options);
+    FixedPointTable table2(count);
+    EXPECT_THROW(rdr.prepare(table2), pdal_error);
+
+    TileDBReader rdr2;
+    options.add("strict", false);
+    rdr2.setOptions(options);
+    rdr2.prepare(table2);
+    rdr2.execute(table2);  
+
+    EXPECT_EQ(table.numPoints(), 50);
+}
 
 }; //pdal namespace
