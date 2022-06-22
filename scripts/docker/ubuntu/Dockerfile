@@ -5,7 +5,7 @@ ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
 SHELL ["conda", "run", "-n", "pdal", "/bin/bash", "-c"]
 
-RUN mamba install -c conda-forge git compilers conda-pack cmake make ninja &&
+RUN mamba install -c conda-forge git compilers conda-pack cmake make ninja && \
     mamba install --yes -c conda-forge pdal --only-deps
 
 RUN git clone http://github.com/PDAL/PDAL.git pdal && \
