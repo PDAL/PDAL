@@ -326,7 +326,7 @@ TEST(FileUtilsTest, test_file_ops_with_unicode_paths)
 
 // Don't run if we are WIN32
 #if !defined(_WIN32) || defined(_WIN64)
-TEST(UtilsTest, map)
+TEST(FileUtilsTest, map)
 {
     std::ostream *out;
     // This turns on sparse file support. Otherwise, we're going to make a huge
