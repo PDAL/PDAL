@@ -44,6 +44,7 @@ Ground/Unclassified
    filters.pmf
    filters.skewnessbalancing
    filters.smrf
+   filters.trajectory
 
 :ref:`filters.csf`
     Label ground/non-ground returns using [Zhang2016]_.
@@ -56,6 +57,10 @@ Ground/Unclassified
 
 :ref:`filters.smrf`
     Label ground/non-ground returns using [Pingel2013]_.
+
+:ref:`filters.trajectory`
+    Label ground/non-ground returns using estimate flight trajectory given
+    multi-return point cloud data with timing information.
 
 
 Noise

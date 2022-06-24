@@ -100,9 +100,9 @@ public:
     inline void appendPoint(const PointView& buffer, PointId id);
     void append(const PointView& buf)
     {
-        // We use size() instead of the index end because temp points
-        // might have been placed at the end of the buffer.
-        // We're essentially ditching temp points.
+        // We use size() instead of the index end because temp points might have been
+        // placed at the end of the buffer. Those temp points on this view are discarded,
+        // as are any on the temp list.
         auto thisEnd = m_index.begin() + size();
         auto bufEnd = buf.m_index.begin() + buf.size();
         m_index.insert(thisEnd, buf.m_index.begin(), bufEnd);
@@ -117,6 +117,8 @@ public:
         return PointViewPtr(new PointView(m_pointTable, m_spatialReference));
     }
 
+    // This depends on RVO (copy elision) so as not to invoke the PointRef copy ctor,
+    // which creates temp points. This is guaranteed by C++17.
     PointRef point(PointId id)
         { return PointRef(*this, id); }
 
@@ -181,16 +183,6 @@ public:
         }
     }
 
-    /*! @return a cumulated bounds of all points in the PointView.
-        \verbatim embed:rst
-        .. note::
-
-            This method requires that an `X`, `Y`, and `Z` dimension be
-            available, and that it can be casted into a *double* data
-            type using the :cpp:func:`pdal::Dimension::applyScaling`
-            method. Otherwise, an exception will be thrown.
-        \endverbatim
-    */
     void calculateBounds(BOX2D& box) const;
     void calculateBounds(BOX3D& box) const;
 
@@ -263,7 +255,7 @@ public:
     }
 
     // The standard idiom is swapping with a stack-created empty queue, but
-    // that invokes the ctor and probably allocates.  We've probably only got
+    // that invokes the ctor and may allocate.  We've probably only got
     // one or two things in our queue, so just pop until we're empty.
     void clearTemps()
     {
