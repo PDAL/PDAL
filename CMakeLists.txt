@@ -355,7 +355,7 @@ install(FILES ${DIMENSION_OUTFILE} ${pdal_features_hpp}
   DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pdal"
 )
 install(FILES ${PDAL_CMAKE_DIR}/pluginmacros.cmake
-    DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/cmake/PDAL")
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/PDAL")
 
 #
 # CPACK
@@ -374,7 +374,7 @@ install(
     EXPORT
         PDALTargets
     DESTINATION
-        "${CMAKE_INSTALL_DATAROOTDIR}/cmake/PDAL")
+        "${CMAKE_INSTALL_LIBDIR}/cmake/PDAL")
 include(${PDAL_CMAKE_DIR}/config.cmake)
 
 #
