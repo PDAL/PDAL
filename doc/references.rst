@@ -25,6 +25,9 @@ A BibTeX entry for LaTeX users is
   | }
 
 
+A paper about PDAL by the team, "PDAL: An open source library for the
+processing and analysis of point clouds", is available at [Butler2021]_.
+
 
 Reference
 --------------------------------------------------------------------------------
