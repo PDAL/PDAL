@@ -3,6 +3,8 @@
 #
 set(CDIR "${CMAKE_CURRENT_LIST_DIR}")
 
+include(GNUInstallDirs)
+
 #
 # This must be first.
 #

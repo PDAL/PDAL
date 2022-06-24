@@ -322,7 +322,7 @@ if (NOT PDAL_HAVE_LAZPERF)
 endif()
 
 install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
-    DESTINATION include
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pdal"
     FILES_MATCHING PATTERN "*.hpp"
 #    PATTERN "pdal/private" EXCLUDE
 #    PATTERN "pdal/io/private" EXCLUDE
@@ -336,26 +336,26 @@ install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
 )
 
 install(DIRECTORY ${PDAL_KERNELS_DIR}
-    DESTINATION include/pdal
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pdal"
     FILES_MATCHING PATTERN "*.hpp"
 #    PATTERN "private" EXCLUDE
 )
 install(DIRECTORY ${PDAL_IO_DIR}
-    DESTINATION include/pdal
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pdal"
     FILES_MATCHING PATTERN "*.hpp"
 #    PATTERN "private" EXCLUDE
 )
 install(DIRECTORY ${PDAL_FILTERS_DIR}
-    DESTINATION include/pdal
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pdal"
     FILES_MATCHING PATTERN "*.hpp"
 #    PATTERN "private" EXCLUDE
 )
 
 install(FILES ${DIMENSION_OUTFILE} ${pdal_features_hpp}
-  DESTINATION include/pdal
+  DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pdal"
 )
 install(FILES ${PDAL_CMAKE_DIR}/pluginmacros.cmake
-    DESTINATION ${PDAL_LIB_INSTALL_DIR}/cmake/PDAL)
+    DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/cmake/PDAL")
 
 #
 # CPACK
@@ -374,7 +374,7 @@ install(
     EXPORT
         PDALTargets
     DESTINATION
-        "${PDAL_LIB_INSTALL_DIR}/cmake/PDAL")
+        "${CMAKE_INSTALL_DATAROOTDIR}/cmake/PDAL")
 include(${PDAL_CMAKE_DIR}/config.cmake)
 
 #
