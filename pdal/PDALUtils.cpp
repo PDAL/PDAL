@@ -176,6 +176,8 @@ void toJSON(const MetadataNode& m, std::ostream& o)
     o << std::endl;
 }
 
+namespace
+{
 
 std::string tempFilename(const std::string& path)
 {
@@ -185,38 +187,59 @@ std::string tempFilename(const std::string& path)
     return arbiter::join(tempdir, basename);
 }
 
-TempFile::TempFile(const std::string path) : m_filename(path) {}
-TempFile::~TempFile()
-    { FileUtils::deleteFile(m_filename); }
-
-const std::string& TempFile::filename()
-    { return m_filename; }
-
-
-ArbiterOutStream::ArbiterOutStream(const std::string& localPath,
-        const std::string& remotePath, std::ios::openmode mode) :
-    std::ofstream(localPath, mode), m_remotePath(remotePath),
-    m_localFile(localPath)
-{ }
-
-
-ArbiterOutStream::~ArbiterOutStream()
+// RAII handling of a temp file to make sure file gets deleted.
+class TempFile
 {
-    close();
-    arbiter::Arbiter a;
-    a.put(m_remotePath, a.getBinary(m_localFile.filename()));
-}
+public:
+    TempFile(const std::string path) : m_filename(path)
+    {}
 
+    virtual ~TempFile()
+        { FileUtils::deleteFile(m_filename); }
 
-ArbiterInStream::ArbiterInStream(const std::string& localPath, const std::string& remotePath,
-        std::ios::openmode mode) :
-    m_localFile(localPath)
+    const std::string& filename()
+        { return m_filename; }
+
+private:
+    std::string m_filename;
+};
+
+class ArbiterOutStream : public std::ofstream
 {
-    arbiter::Arbiter a;
-    a.put(localPath, a.getBinary(remotePath));
-    open(localPath, mode);
-}
+public:
+    ArbiterOutStream(const std::string& localPath,
+            const std::string& remotePath, std::ios::openmode mode) :
+        std::ofstream(localPath, mode), m_remotePath(remotePath),
+        m_localFile(localPath)
+    {}
 
+    virtual ~ArbiterOutStream()
+    {
+        close();
+        arbiter::Arbiter a;
+        a.put(m_remotePath, a.getBinary(m_localFile.filename()));
+    }
+
+    std::string m_remotePath;
+    TempFile m_localFile;
+};
+
+class ArbiterInStream : public std::ifstream
+{
+public:
+    ArbiterInStream(const std::string& localPath, const std::string& remotePath,
+            std::ios::openmode mode) :
+        m_localFile(localPath)
+    {
+        arbiter::Arbiter a;
+        a.put(localPath, a.getBinary(remotePath));
+        open(localPath, mode);
+    }
+
+    TempFile m_localFile;
+};
+
+}  // unnamed namespace
 
 uintmax_t fileSize(const std::string& path)
 {

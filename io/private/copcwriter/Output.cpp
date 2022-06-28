@@ -50,19 +50,8 @@ namespace pdal
 namespace copcwriter
 {
 
-Output::Output(BaseInfo& b)
-    : b(b),
-    m_f(Utils::tempFilename(b.opts.filename),
-            b.opts.filename,  std::ios::out | std::ios::binary)
+Output::Output(const BaseInfo& b) : b(b)
 {
-
-    // If we are a remote filename, swap out with our
-    // local temp filename for the COPC writer.
-    if (Utils::isRemote(b.opts.filename))
-    {
-        b.opts.filename = m_f.m_localFile.filename();
-    }
-    b.opts.filename = m_f.m_localFile.filename();
     m_header.file_source_id = b.opts.filesourceId.val();
     m_header.global_encoding = b.opts.globalEncoding.val() | (1 << 4); // Set for WKT
     b.opts.projectId.val().pack(m_header.guid);
