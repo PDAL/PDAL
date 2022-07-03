@@ -39,7 +39,7 @@
 namespace pdal
 {
 
-class PtxReader : public Reader
+class PDAL_DLL PtxReader : public Reader
 {
 public:
     PtxReader() = default;
