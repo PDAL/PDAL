@@ -316,11 +316,12 @@ point_count_t PtxReader::read(PointViewPtr view, point_count_t numPts)
 
         if (m_discardMissingPoints)
         {
-            // As per #3718, Ptx files contain "fully populated" point clouds. 
-            // This means they can (and likely will) contain missing points. A 
+            // Ptx files contain "fully populated" point clouds. This means they
+            // can (and likely will) contain missing points. If the discard 
+            // missing points argument was set we will skip over these. A 
             // missing point is defined as a point with XYZ values of "0 0 0". 
-            // We check the X, Y and Z values were exactly 0.0 to determine if 
-            // the point was a missing point. If so, we discard it.
+            // We check the XYZ values were exactly 0 to determine if the point 
+            // was a missing point.
 
             if (values[0] == 0.0 && values[1] == 0.0 && values[2] == 0.0)
             {
