@@ -201,6 +201,9 @@ void CopcReader::initialize(PointTableRef table)
     MetadataNode forward = table.privateMetadata("lasforward");
     MetadataNode m = getMetadata();
 
+    // alert consumers that we are a COPC file
+    m.add("copc", true);
+
     fetchHeader();
     las::extractHeaderMetadata(m_p->header, forward, m);
 
@@ -226,7 +229,7 @@ void CopcReader::initialize(PointTableRef table)
             if (las::shouldIgnoreVlr(vlr, ignored) || vlr == ebVlr || vlr == srsVlr)
                 continue;
             vlr.dataVec = catalog.fetchWithDescription(e.userId, e.recordId, vlr.description);
-            las::addVlrMetadata(vlr, "vlr_" + std::to_string(i++), forward, m); 
+            las::addVlrMetadata(vlr, "vlr_" + std::to_string(i++), forward, m);
         }
     }
 
@@ -265,7 +268,7 @@ void CopcReader::fetchHeader()
     // Read the header - ignore the data.
     las::Vlr vlr;
     vlr.fillHeader(d);
-    
+
     // Read VLR payload into COPC struct.
     d += las::Vlr::HeaderSize;
     size -= las::Vlr::HeaderSize;

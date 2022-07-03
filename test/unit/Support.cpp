@@ -390,20 +390,43 @@ void compareBounds(const BOX3D& p, const BOX3D& q)
 }
 
 // This provides no guarantees but is highly likely to work, and it's just for test purposes.
-Tempfile::Tempfile()
+Tempfile::Tempfile(bool ascii)
 {
     Utils::Random r;
-    m_name = temppath() + "tmp";
-    for (size_t i = 0; i < 20; ++i)
+
+    auto asciiChar = [&r]() -> std::string
     {
         // 10 numbers + 26 lowercase + 26 uppercase = 62 values.
         uint8_t v = (uint8_t)std::uniform_int_distribution<>(0, 61)(r.generator());
         if (v < 10)
-            m_name += ('0' + v);
+            return std::string(1, '0' + v);
         else if (v < 36)
-            m_name += ('a' + v - 10);
-        else
-            m_name += ('A' + v - 36);
+            return std::string(1, 'a' + v - 10);
+        return std::string(1, 'A' + v - 36);
+    };
+
+    auto latinChar = [&r]() -> std::string
+    {
+        // The first byte of UTF-8 latin is always C3.
+        std::string s(1, (char)0xC3);
+
+        // The second byte of UTF-8 latin in in the range 0x80 - 0xBF;
+        const int range = 0xBF - 0x80;
+        uint8_t v = (uint8_t)std::uniform_int_distribution<>(0, range)(r.generator());
+        s += (char)(0x80 + v);
+        return s;
+    };
+
+    m_name = temppath() + "tmp";
+    if (ascii)
+    {
+        for (size_t i = 0; i < 20; ++i)
+            m_name += asciiChar();
+    }
+    else // generate some latin and ascii chars
+    {
+        for (size_t i = 0; i < 20; ++i)
+            m_name += i % 2 ? asciiChar() : latinChar();
     }
 }
 

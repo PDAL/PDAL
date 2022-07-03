@@ -66,7 +66,6 @@ private:
     void handlePipelineVlr();
 
     std::unique_ptr<copcwriter::BaseInfo> b;
-
 };
 
 } // namespace pdal

@@ -90,6 +90,7 @@ void TranslateKernel::addSwitches(ProgramArgs& args)
     args.add("nostream", "Run in standard mode", m_noStream);
     args.add("stream", "Run in stream mode.  Error if not possible.", m_stream);
     args.add("dims", "Dimensions to store", m_dimNames);
+    args.add("overwrite", "Overwrite existing input", m_overwriteInput, false);
 }
 
 
@@ -104,6 +105,9 @@ void TranslateKernel::validateSwitches(ProgramArgs&)
         m_mode = ExecMode::Standard;
     else
         m_mode = ExecMode::PreferStream;
+
+    if (Utils::iequals(m_inputFile, m_outputFile) && !m_overwriteInput)
+        throw pdal_error("Input and output filenames are equal and no --overwrite option was provided!");
 }
 
 

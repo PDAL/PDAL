@@ -94,6 +94,12 @@ Dimension::Type toPdalType(GDALDataType t)
         return Dimension::Type::Float;
     case GDT_Float64:
         return Dimension::Type::Double;
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,5,0)
+    case GDT_UInt64:
+        return Dimension::Type::Unsigned64;
+    case GDT_Int64:
+        return Dimension::Type::Signed64;
+#endif
     case GDT_CInt16:
     case GDT_CInt32:
     case GDT_CFloat32:
@@ -103,6 +109,9 @@ Dimension::Type toPdalType(GDALDataType t)
         throw pdal_error("GDAL unknown type unsupported.");
     case GDT_TypeCount:
         throw pdal_error("Detected bad GDAL data type.");
+    default:
+        throw pdal_error("Detected bad GDAL data type.");
+
     }
     return Dimension::Type::None;
 }

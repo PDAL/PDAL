@@ -6,7 +6,9 @@
 
 .. index:: Utils
 
-:cpp:namespace:`pdal::Utils` is a set of utility functions.
+.. cpp:namespace:: pdal::Utils
+
+`pdal::Utils` is a set of utility functions.
 
 .. doxygennamespace:: pdal::Utils
    :members:

@@ -81,17 +81,32 @@ Dimension::Type getPdalType(tiledb_datatype_t t)
             return Dimension::Type::Float;
         case TILEDB_FLOAT64:
             return Dimension::Type::Double;
-        case TILEDB_CHAR:
-        case TILEDB_STRING_ASCII:
-        case TILEDB_STRING_UTF8:
-        case TILEDB_STRING_UTF16:
-        case TILEDB_STRING_UTF32:
-        case TILEDB_STRING_UCS2:
-        case TILEDB_STRING_UCS4:
-        case TILEDB_ANY:
+        case TILEDB_DATETIME_AS:
+        case TILEDB_DATETIME_DAY:
+        case TILEDB_DATETIME_FS:
+        case TILEDB_DATETIME_HR:
+        case TILEDB_DATETIME_MIN:
+        case TILEDB_DATETIME_MONTH:
+        case TILEDB_DATETIME_MS:
+        case TILEDB_DATETIME_NS:
+        case TILEDB_DATETIME_PS:
+        case TILEDB_DATETIME_SEC:
+        case TILEDB_DATETIME_US:
+        case TILEDB_DATETIME_WEEK:
+        case TILEDB_DATETIME_YEAR:
+        case TILEDB_TIME_HR:
+        case TILEDB_TIME_MIN:
+        case TILEDB_TIME_SEC:
+        case TILEDB_TIME_MS:
+        case TILEDB_TIME_US:
+        case TILEDB_TIME_NS:
+        case TILEDB_TIME_PS:
+        case TILEDB_TIME_FS:
+        case TILEDB_TIME_AS:
+            return Dimension::Type::Signed64;
         default:
-            // Not supported tiledb domain types
-            throw pdal_error("Invalid Dim type from TileDB");
+            // Not supported tiledb domain types, return as None
+            return Dimension::Type::None;
     }
 }
 
@@ -110,10 +125,9 @@ void TileDBReader::addArgs(ProgramArgs& args)
     args.add("end_timestamp", "TileDB array timestamp", m_endTimeStamp,
         point_count_t(0));
     args.addSynonym("end_timestamp", "timestamp");
-#if TILEDB_VERSION_MAJOR > 2 || (TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR >= 3)
     args.add("start_timestamp", "TileDB array timestamp", m_startTimeStamp,
         point_count_t(0));
-#endif
+    args.add("strict", "Raise an error for unsupported attributes", m_strict, true);
 }
 
 void TileDBReader::prepared(PointTableRef table)
@@ -141,7 +155,6 @@ void TileDBReader::initialize()
 
         if (m_endTimeStamp)
         {
-#if TILEDB_VERSION_MAJOR > 2 || (TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR >= 3)
             if (m_startTimeStamp)
             {
                 m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ));
@@ -150,8 +163,7 @@ void TileDBReader::initialize()
                 m_array->reopen();
             }
             else
-#endif
-            m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ, m_endTimeStamp));
+                m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ, m_endTimeStamp));
         }
         else
             m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ));
@@ -179,18 +191,17 @@ void TileDBReader::addDimensions(PointLayoutPtr layout)
         di.m_name = dim.name();
         if (di.m_name == "GpsTime")
             m_has_time = true;
-#if TILEDB_VERSION_MAJOR == 1
-        di.m_offset = i;
-        di.m_span = dims.size();
-#else
+
         di.m_offset = 0;
         di.m_span = 1;
-#endif
         di.m_dimCategory = DimCategory::Dimension;
         di.m_tileType = dim.type();
         di.m_type = getPdalType(di.m_tileType);
-        di.m_id = layout->registerOrAssignDim(dim.name(), di.m_type);
 
+        if (di.m_type == pdal::Dimension::Type::None)
+            throwError("Invalid Dim type from TileDB");
+
+        di.m_id = layout->registerOrAssignDim(dim.name(), di.m_type);
         m_dims.push_back(di);
     }
 
@@ -207,9 +218,19 @@ void TileDBReader::addDimensions(PointLayoutPtr layout)
         di.m_dimCategory = DimCategory::Attribute;
         di.m_tileType = a.second.type();
         di.m_type = getPdalType(di.m_tileType);
-        di.m_id = layout->registerOrAssignDim(a.first, di.m_type);
-
-        m_dims.push_back(di);
+        if (di.m_type != pdal::Dimension::Type::None)
+        {
+            di.m_id = layout->registerOrAssignDim(a.first, di.m_type);
+            m_dims.push_back(di);
+        }
+        else
+        {
+            if (!m_strict)
+                std::cerr << "Skipping over unsupported attribute type - " << di.m_name << "!\n";
+            else
+                throwError("TileDB dimension '" + di.m_name + "' can't be mapped "
+                    "to trivial type.");
+        }
     }
 
     //ABELL
@@ -245,9 +266,6 @@ void TileDBReader::setQueryBuffer(const DimInfo& di)
     case TILEDB_UINT32:
         setQueryBuffer<uint32_t>(di);
         break;
-    case TILEDB_INT64:
-        setQueryBuffer<int64_t>(di);
-        break;
     case TILEDB_UINT64:
         setQueryBuffer<uint64_t>(di);
         break;
@@ -256,6 +274,31 @@ void TileDBReader::setQueryBuffer(const DimInfo& di)
         break;
     case TILEDB_FLOAT64:
         setQueryBuffer<double>(di);
+        break;
+    case TILEDB_DATETIME_AS:
+    case TILEDB_DATETIME_DAY:
+    case TILEDB_DATETIME_FS:
+    case TILEDB_DATETIME_HR:
+    case TILEDB_DATETIME_MIN:
+    case TILEDB_DATETIME_MONTH:
+    case TILEDB_DATETIME_MS:
+    case TILEDB_DATETIME_NS:
+    case TILEDB_DATETIME_PS:
+    case TILEDB_DATETIME_SEC:
+    case TILEDB_DATETIME_US:
+    case TILEDB_DATETIME_WEEK:
+    case TILEDB_DATETIME_YEAR:
+    case TILEDB_TIME_HR:
+    case TILEDB_TIME_MIN:
+    case TILEDB_TIME_SEC:
+    case TILEDB_TIME_MS:
+    case TILEDB_TIME_US:
+    case TILEDB_TIME_NS:
+    case TILEDB_TIME_PS:
+    case TILEDB_TIME_FS:
+    case TILEDB_TIME_AS:
+    case TILEDB_INT64:
+        setQueryBuffer<int64_t>(di);
         break;
     default:
         throwError("TileDB dimension '" + di.m_name + "' can't be mapped "
@@ -289,22 +332,9 @@ void TileDBReader::localReady()
 
     DimInfo& di = *it;
 
-#if TILEDB_VERSION_MAJOR == 1
-    Buffer *dimBuf = new Buffer(di.m_tileType, m_chunkSize * numDims);
-    m_query->set_coordinates(dimBuf->get<double>(), dimBuf->count());
-    m_buffers.push_back(std::unique_ptr<Buffer>(dimBuf));
-#endif
-
     for (DimInfo& di : m_dims)
     {
         // All dimensions use the same buffer.
-#if TILEDB_VERSION_MAJOR == 1 
-        if (di.m_dimCategory == DimCategory::Dimension)
-        {
-            di.m_buffer = dimBuf;
-            continue;
-        }
-#endif
         std::unique_ptr<Buffer> dimBuf(
             new Buffer(di.m_tileType, m_chunkSize));
         di.m_buffer = dimBuf.get();
@@ -342,38 +372,19 @@ void TileDBReader::localReady()
     // read spatial reference
     NL::json meta = nullptr;
 
-#if TILEDB_VERSION_MAJOR > 1 || TILEDB_VERSION_MINOR >= 7
     tiledb_datatype_t v_type = TILEDB_UINT8;
     const void* v_r;
     uint32_t v_num;
     m_array->get_metadata("_pdal", &v_type, &v_num, &v_r);
+
     if (v_r != NULL)
         meta = NL::json::parse(static_cast<const char*>(v_r));
-#endif
 
-    if (meta == nullptr)
+    if ((meta != nullptr) && (meta.count("root") > 0) &&
+        (meta["root"].count("writers.tiledb") > 0) &&
+        (meta["root"]["writers.tiledb"].count("spatialreference") > 0))
     {
-        tiledb::VFS vfs(*m_ctx, m_ctx->config());
-        tiledb::VFS::filebuf fbuf(vfs);
-        std::string metaFName = m_filename + pathSeparator + "pdal.json";
-
-        if (vfs.is_file(metaFName))
-        {
-            auto nBytes = vfs.file_size(metaFName);
-            tiledb::VFS::filebuf fbuf(vfs);
-            fbuf.open(metaFName, std::ios::in);
-            std::istream is(&fbuf);
-            std::string s { std::istreambuf_iterator<char>(is), std::istreambuf_iterator<char>() };
-            fbuf.close();
-            meta = NL::json::parse(s);
-        }
-    }
-
-    if ((meta != nullptr) &&
-        (meta.count("writers.tiledb") > 0) &&
-        (meta["writers.tiledb"].count("spatialreference") > 0))
-    {
-        SpatialReference ref(meta["writers.tiledb"]["spatialreference"]);
+        SpatialReference ref(meta["root"]["writers.tiledb"]["spatialreference"]);
         setSpatialReference(ref);
     }
 
@@ -474,13 +485,8 @@ bool TileDBReader::processPoint(PointRef& point)
             // returned by the query for dimensions.  So if there are three
             // dimensions, the number of points returned is the buffer count
             // divided by the number of dimensions.
-#if TILEDB_VERSION_MAJOR == 1
-            m_resultSize =
-                (int)m_query->result_buffer_elements()[TILEDB_COORDS].second /
-                m_array->schema().domain().dimensions().size();
-#else
             m_resultSize = (int)m_query->result_buffer_elements()["X"].second;
-#endif
+
             if (status == tiledb::Query::Status::INCOMPLETE &&
                     m_resultSize == 0)
                 throwError("Need to increase chunk_size for reader.");

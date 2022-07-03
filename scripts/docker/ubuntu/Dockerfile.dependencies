@@ -1,41 +1,13 @@
-FROM ubuntu:focal
-MAINTAINER Andrew Bell<andrew@hobu.co>
+FROM condaforge/miniforge3
+MAINTAINER Howard Butler <howard@hobu.co>
 
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
-RUN apt-get update -q && \
-    apt-get install -q -y \
-        bzip2 \
-        ca-certificates \
-        git \
-        wget \
-        g++ \
-    && apt-get clean
-
-ENV PATH /opt/conda/bin:$PATH
-
-CMD [ "/bin/bash" ]
-
-# Leave these args here to better use the Docker build cache
-ARG CONDA_VERSION=py38_4.9.2
-ARG CONDA_MD5=122c8c9beb51e124ab32a0fa6426c656
-
-RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh -O miniconda.sh && \
-    echo "${CONDA_MD5}  miniconda.sh" > miniconda.md5 && \
-    if ! md5sum --status -c miniconda.md5; then exit 1; fi && \
-    mkdir -p /opt && \
-    sh miniconda.sh -b -p /opt/conda && \
-    rm miniconda.sh miniconda.md5 && \
-    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
-    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
-    echo "conda activate base" >> ~/.bashrc && \
-    find /opt/conda/ -follow -type f -name '*.a' -delete && \
-    find /opt/conda/ -follow -type f -name '*.js.map' -delete && \
-    /opt/conda/bin/conda clean -afy
+SHELL ["conda", "run", "-n", "base", "/bin/bash", "-c"]
 
 RUN \
     conda update -n base -c defaults conda && \
+    conda install -c conda-forge -n base conda-pack git compilers cmake make ninja && \
     conda create -n pdal -y && \
-    conda install -c conda-forge git conda-pack cmake ninja && \
     conda install --yes --name pdal -c conda-forge pdal --only-deps
 

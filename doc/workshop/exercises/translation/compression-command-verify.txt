@@ -1,3 +1,0 @@
-ls -alh ./exercises/translation/interesting.laz
-
-ls -alh  ./exercises/translation/interesting.las

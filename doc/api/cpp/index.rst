@@ -9,6 +9,7 @@ C++ API
 
    bounds
    charbuf
+   columnpointtable
    dimension
    extractor
    fileutils
@@ -21,6 +22,7 @@ C++ API
    pointview
    programargs
    reader
+   rowpointtable
    stage
    stagefactory
    utils

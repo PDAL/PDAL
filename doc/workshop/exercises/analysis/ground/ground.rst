@@ -26,7 +26,8 @@ generate a ground surface.
 
 .. seealso::
 
-    You can read more about the specifics of the SMRF algorithm from `[Pingle2013]_`
+    You can read more about the specifics of the :ref:`Simple Morphological
+    Filter (SMRF) <filters.smrf>`
 
 .. _`Digital Terrain Model`: https://en.wikipedia.org/wiki/Digital_elevation_model
 
@@ -35,15 +36,19 @@ Command
 
 Invoke the following command, substituting accordingly, in your `Conda Shell`:
 
-.. literalinclude:: ./ground-run-no-filter.txt
-    :linenos:
+.. code-block:: console
 
-.. literalinclude:: ./ground-run-no-filter-win.txt
-    :linenos:
+    $ pdal translate ./exercises/analysis/ground/CSite1_orig-utm.laz \
+    -o ./exercises/analysis/ground/ground.laz \
+    smrf \
+    -v 4
 
-.. image:: ../../../images/ground-run-command.png
-    :target: ../../../../_images/ground-run-command.png
+.. code-block:: doscon
 
+    > pdal translate ./exercises/analysis/ground/CSite1_orig-utm.laz ^
+    -o ./exercises/analysis/ground/ground.laz ^
+    smrf ^
+    -v 4
 
 As we can see, the algorithm does a great job of discriminating the points, but
 there's a few issues.
@@ -68,28 +73,57 @@ technique we learned about in :ref:`workshop-denoising`.
 
 1. Let us start by removing the non-ground data to just view the ground data:
 
-.. literalinclude:: ./ground-run-ground-only.txt
-    :linenos:
-    :emphasize-lines: 5
-    :language: console
+    .. code-block:: console
+        :emphasize-lines: 5
 
-.. literalinclude:: ./ground-run-ground-only-win.txt
-    :linenos:
-    :emphasize-lines: 5
-    :language: bat
+        $ pdal translate \
+        ./exercises/analysis/ground/CSite1_orig-utm.laz \
+        -o ./exercises/analysis/ground/ground.laz \
+        smrf range \
+        --filters.range.limits="Classification[2:2]" \
+        -v 4
 
-.. image:: ../../../images/ground-ground-only-view.png
-    :target: ../../../../_images/ground-ground-only-view.png
+    .. code-block:: doscon
+        :emphasize-lines: 5
+
+        > pdal translate ^
+        ./exercises/analysis/ground/CSite1_orig-utm.laz ^
+        -o ./exercises/analysis/ground/ground.laz ^
+        smrf range ^
+        --filters.range.limits="Classification[2:2]" ^
+        -v 4
+
+
+    .. image:: ../../../images/ground-ground-only-view.png
+        :target: ../../../../_images/ground-ground-only-view.png
 
 
 2. Now we will instead use the :ref:`translate_command` command to stack the
 :ref:`filters.outlier` and :ref:`filters.smrf` stages:
 
-.. literalinclude:: ./translate-run-ground-only.txt
-   :linenos:
+    .. code-block:: console
 
-.. literalinclude:: ./translate-run-ground-only-win.txt
-   :linenos:
+        $ pdal translate ./exercises/analysis/ground/CSite1_orig-utm.laz \
+        -o ./exercises/analysis/ground/denoised-ground-only.laz \
+        outlier smrf range  \
+        --filters.outlier.method="statistical" \
+        --filters.outlier.mean_k=8 --filters.outlier.multiplier=3.0 \
+        --filters.smrf.ignore="Classification[7:7]"  \
+        --filters.range.limits="Classification[2:2]" \
+        --writers.las.compression=true \
+        --verbose 4
+
+    .. code-block:: doscon
+
+        > pdal translate ./exercises/analysis/ground/CSite1_orig-utm.laz ^
+        -o ./exercises/analysis/ground/denoised-ground-only.laz ^
+        outlier smrf range  ^
+        --filters.outlier.method="statistical" ^
+        --filters.outlier.mean_k=8 --filters.outlier.multiplier=3.0 ^
+        --filters.smrf.ignore="Classification[7:7]"  ^
+        --filters.range.limits="Classification[2:2]" ^
+        --writers.las.compression=true ^
+        --verbose 4
 
 In this invocation, we have more control over the process. First the outlier
 filter merely classifies outliers with a ``Classification`` value of 7. These

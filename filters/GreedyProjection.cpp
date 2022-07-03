@@ -126,7 +126,9 @@ void GreedyProjection::addTriangle(PointId a, PointId b, PointId c)
 
 void GreedyProjection::filter(PointView& view)
 {
-    NormalFilter().doFilter(view);
+    NormalFilter nf;
+    nf.setLog(log());
+    nf.doFilter(view);
 
     KD3Index& tree = view.build3dIndex();
 
