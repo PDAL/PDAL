@@ -68,7 +68,7 @@ private:
     virtual void done(PointTableRef table) override;
 
 private:
-    bool m_discardEmpty{ true };
+    bool m_discardMissingPoints{ true };
     std::istream* m_istream{ nullptr };
     Dimension::IdList m_dimensions;
 };

@@ -80,18 +80,18 @@ TEST(PtxReader, Basic)
     EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::Blue, 489), 114);
 }
 
-TEST(PtxReader, DisardEmptyWithComplexTransform)
+TEST(PtxReader, DiscardMissingPointsWithComplexTransform)
 {
     PtxReader reader;
 
     Options options;
     options.add("filename", Support::datapath("ptx/complex-transform.ptx"));
-    options.add("discard_empty", true);
+    options.add("discard_missing_points", true);
     reader.setOptions(options);
 
-    // Since we are discarding empty points, the first point will be the fifth
-    // point, the first non-empty point in the input file. There are only four
-    // non-empty points in the input file so thats how many we expect to read.
+    // Since we are discarding missing points, the first point will be the fifth
+    // point, the first not missing point in the input file. There are only four
+    // not missing points in the input file so thats how many we expect to read.
 
     PointTable table;
     reader.prepare(table);

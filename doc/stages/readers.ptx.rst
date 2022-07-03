@@ -39,7 +39,10 @@ filename
 
 .. include:: reader_opts.rst
 
-_`discard_empty`
-  Discard empty input points. [Default: true]
+_`discard_missing_points`
+  Each point cloud in a PTX file is "fully populated", in that the point cloud 
+  will contain missing points with XYZ values of "0 0 0". When this option is 
+  enabled, we will skip over any missing input points. 
+  [Default: true]
 
 .. _Leica Cyclone PTX: http://paulbourke.net/dataformats/ptx/

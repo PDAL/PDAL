@@ -206,8 +206,9 @@ void PtxReader::initialize(PointTableRef table)
 
 void PtxReader::addArgs(ProgramArgs& args)
 {
-    args.add("discard_empty", "Discard empty input points!", m_discardEmpty,
-             true);
+    args.add("discard_missing_points", 
+             "Skip over missing input points with XYZ values of \"0 0 0\".", 
+             m_discardMissingPoints, true);
 }
 
 void PtxReader::addDimensions(PointLayoutPtr layout)
@@ -313,17 +314,18 @@ point_count_t PtxReader::read(PointViewPtr view, point_count_t numPts)
             values[i] = value;
         }
 
-        if (m_discardEmpty)
+        if (m_discardMissingPoints)
         {
-            // Ptx files may contain these "empty" or "null" values. If the
-            // discard empty argument was set we will skip over these. We do
-            // exact double comparisons here on purpose to ensure empty is
-            // exactly empty!
+            // As per #3718, Ptx files contain "fully populated" point clouds. 
+            // This means they can (and likely will) contain missing points. A 
+            // missing point is defined as a point with XYZ values of "0 0 0". 
+            // We check the X, Y and Z values were exactly 0.0 to determine if 
+            // the point was a missing point. If so, we discard it.
 
-            if (values == std::array<double, 7>{ 0.0, 0.0, 0.0, 2048, 0, 0, 0 })
+            if (values[0] == 0.0 && values[1] == 0.0 && values[2] == 0.0)
             {
                 log()->get(LogLevel::Debug) << "Line " << line << " in '" <<
-                    m_filename << "' contains an empty point. Ignoring." << 
+                    m_filename << "' is a missing point. Ignoring." << 
                     std::endl;
                 continue;
             }
