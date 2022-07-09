@@ -92,6 +92,7 @@ PtxReader::PtxHeader PtxReader::readHeader()
     std::getline(*m_istream, buf);
     if (!m_istream->good())
         throwError("Unable to read column size for file '" + m_filename + "'.");
+    Utils::trim(buf);
     if (auto status = Utils::fromString(buf, header.m_columns); !status)
     {
         throwError("Invalid column size '" + buf + "' in header for file '" + 
@@ -101,6 +102,7 @@ PtxReader::PtxHeader PtxReader::readHeader()
     std::getline(*m_istream, buf);
     if (!m_istream->good())
         throwError("Unable to read row size for file '" + m_filename + "'.");
+    Utils::trim(buf);
     if (auto status = Utils::fromString(buf, header.m_rows); !status)
     {
         throwError("Invalid row size '" + buf + "' in header for file '" +  
