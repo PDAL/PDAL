@@ -85,21 +85,26 @@ PtxReader::PtxHeader PtxReader::readHeader()
     std::string buf;
 
     if (!m_istream || !m_istream->good())
-        throwError("Unable to read header in '" + m_filename + "'.");
+        throwError("Unable to read header for file '" + m_filename + "'.");
     
     // Read column count and row count.
 
     std::getline(*m_istream, buf);
-    if (!m_istream->good() || !Utils::fromString(buf, header.m_columns))
+    if (!m_istream->good())
+        throwError("Unable to read column size for file '" + m_filename + "'.");
+    if (auto status = Utils::fromString(buf, header.m_columns); !status)
     {
         throwError("Invalid column size '" + buf + "' in header for file '" + 
-                   m_filename + "'.");
+                   m_filename + "'. " + status.what());
     }
+
     std::getline(*m_istream, buf);
-    if (!m_istream->good() || !Utils::fromString(buf, header.m_rows))
+    if (!m_istream->good())
+        throwError("Unable to read row size for file '" + m_filename + "'.");
+    if (auto status = Utils::fromString(buf, header.m_rows); !status)
     {
         throwError("Invalid row size '" + buf + "' in header for file '" +  
-                   m_filename + "'.");
+                   m_filename + "'. " + status.what());
     }
 
     // Skip scanner position and scanner 3x3 transformation matrix.
@@ -119,9 +124,14 @@ PtxReader::PtxHeader PtxReader::readHeader()
     for (size_t ty = 0; ty < 4; ++ty)
     {
         std::getline(*m_istream, buf);
+        if (!m_istream->good())
+        {
+            throwError("Unable to read transform row for file '" + m_filename + 
+                       "'.");
+        }
 
         const StringList fields = Utils::split2(buf, ' ');
-        if (!m_istream->good() || fields.size() != 4)
+        if (fields.size() != 4)
         {
             throwError("Invalid transform row '" + buf + "' in header for file'"
                        + m_filename + "'.");
@@ -129,10 +139,13 @@ PtxReader::PtxHeader PtxReader::readHeader()
         
         for (size_t tx = 0; tx < 4; ++tx)
         {
-            if (!Utils::fromString(fields[tx], header.m_transform[tx + ty * 4]))
+            double &value = header.m_transform[tx + ty * 4];
+            auto status = Utils::fromString(fields[tx], value);
+            if (!status)
             {
                 throwError("Invalid transform value '" + fields[tx] + "' in "
-                           "header for file '" + m_filename + "'.");
+                           "header for file '" + m_filename + "'. " + 
+                           status.what());
             }
         }
     }
@@ -175,9 +188,16 @@ void PtxReader::initialize(PointTableRef table)
     //
     //      X Y Z Intensity R G B
     //
+    // NOTE: A 10 column Ptx file format which contains normal X Y and Z fields
+    //       after the R G B fields may exist. But I have not been able to find
+    //       an example of one.
+    //
 
     std::string buf;
     std::getline(*m_istream, buf);
+    if (!m_istream->good())
+        throwError("Unable to peek first point for file '" + m_filename + "'.");
+
     const StringList fields = Utils::split2(buf, ' ');
 
     m_dimensions = {};
@@ -240,8 +260,7 @@ point_count_t PtxReader::read(PointViewPtr view, point_count_t numPts)
         {
             // Either we are at the start of the file OR we have finished
             // reading the expected number of points for our previous header.
-            // In either case we expect now to read the next header. I wonder
-            // if it makes sense to write a cloud index, or similar dimension?
+            // In either case we expect now to read the next header.
 
             if (m_istream->peek() == EOF)
                 break; // We have reached the end of the file, so we break out!
@@ -276,7 +295,7 @@ point_count_t PtxReader::read(PointViewPtr view, point_count_t numPts)
         if (fields.size() != m_dimensions.size())
         {
             // As mentioned above. We assume each cloud in the Ptx file has
-            // the same number of fields. As far as I know that's okay!
+            // the same number of fields.
 
             log()->get(LogLevel::Error) << "Line " << line <<
                " in '" << m_filename << "' contains " << fields.size() <<
@@ -285,28 +304,29 @@ point_count_t PtxReader::read(PointViewPtr view, point_count_t numPts)
             continue;
         }
 
-        // Note that similar to the Ptx reader we lazily treat RGB as doubles,
-        // for simplicity. It of course gets casted when we set the dimension
-        // field to the dimension's type.
+        // NOTE: Similar to the Ptx reader we lazily treat RGB as doubles, for 
+        //       simplicity. It gets casted to the appropriate type when we set 
+        //       the RGB dimension value.
 
         std::array<double, 7> values{ 0.0 };
         for (size_t i = 0; i < fields.size(); ++i)
         {
             double value;
-            if (!Utils::fromString(fields[i], value))
+            auto status = Utils::fromString(fields[i], value);
+            if (!status)
             {
                 log()->get(LogLevel::Error) << "Can't convert "
                     "field '" << fields[i] << "' to numeric value on line " <<
-                    line << " in '" << m_filename << "'.  Setting to 0." <<
-                    std::endl;
+                    line << " in '" << m_filename << "'. " << status.what() << 
+                    " Setting to 0." << std::endl;
                 value = 0.0;
             }
 
             if (m_dimensions[i] == Dimension::Id::Intensity) 
             {
                 // Intensity field in Ptx is 0.0 to 1.0, we map to PDAL 0 to 
-                // 4096. We don't actually check the intensity is between 0.0 
-                // and 1.0?
+                // 4096. We don't (but possible should) check the intensity is 
+                // between 0.0 and 1.0.
 
                 value *= 4096;
             }
