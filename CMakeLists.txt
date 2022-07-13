@@ -317,9 +317,8 @@ endif()
 if (NOT PDAL_HAVE_LZMA)
     set(LZMA_EXCLUDES PATTERN pdal/compression/Lzma* EXCLUDE)
 endif()
-if (NOT PDAL_HAVE_LAZPERF)
-    set(LAZPERF_EXCLUDES PATTERN pdal/compression/LazPerf* EXCLUDE)
-endif()
+
+set(LAZPERF_EXCLUDES PATTERN pdal/compression/LazPerf* EXCLUDE)
 
 install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
     DESTINATION include
