@@ -318,8 +318,6 @@ if (NOT PDAL_HAVE_LZMA)
     set(LZMA_EXCLUDES PATTERN pdal/compression/Lzma* EXCLUDE)
 endif()
 
-set(LAZPERF_EXCLUDES PATTERN pdal/compression/LazPerf* EXCLUDE)
-
 install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
     DESTINATION include
     FILES_MATCHING PATTERN "*.hpp"
@@ -331,7 +329,6 @@ install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
 #    ${ZSTD_EXCLUDES}
 #    ${ZLIB_EXCLUDES}
 #    ${LZMA_EXCLUDES}
-#    ${LAZPERF_EXCLUDES}
 )
 
 install(DIRECTORY ${PDAL_KERNELS_DIR}
