@@ -7,8 +7,6 @@ The **SBET writer** writes files in the SBET format, used for exchange data from
 
 .. embed::
 
-.. streamable::
-
 Example
 -------
 

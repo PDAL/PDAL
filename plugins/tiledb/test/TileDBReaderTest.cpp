@@ -261,4 +261,32 @@ TEST_F(TileDBReaderTest, spatial_reference)
     EXPECT_TRUE(rdr.getSpatialReference().equals(utm16));
 };
 
+TEST_F(TileDBReaderTest, unsupported_attribute)
+{
+    tiledb::Context ctx;
+    std::string pth = Support::temppath("tiledb_test_unsupported");
+    auto read_schema = tiledb::Array::load_schema(ctx, data_path);
+
+    if (FileUtils::directoryExists(pth))
+        FileUtils::deleteDirectory(pth);
+
+    // add a new attribute a1
+    auto a1 = tiledb::Attribute::create<std::string>(ctx, "a1");
+    read_schema.add_attribute(a1);
+    tiledb::Array::create(pth, read_schema);
+
+    // read the schema from the array, and check we skip over the unsupported attributes when strict is false
+    TileDBReader rdr;
+    Options options;
+    options.add("array_name", pth);
+    rdr.setOptions(options);
+    FixedPointTable table(count);
+    EXPECT_THROW(rdr.prepare(table), pdal_error);
+
+    TileDBReader rdr2;
+    options.add("strict", false);
+    rdr2.setOptions(options);
+    EXPECT_NO_THROW(rdr2.prepare(table));
+}
+
 }; //pdal namespace

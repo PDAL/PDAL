@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 3.5)
 
-project(PDAL VERSION 2.4.0 LANGUAGES CXX C)
+project(PDAL VERSION 2.4.1 LANGUAGES CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
@@ -34,7 +34,7 @@ set(PDAL_SOLIB_MAJOR 14)
 #
 # Change if there's a new release with no ABI change
 #
-set(PDAL_SOLIB_MINOR 0)
+set(PDAL_SOLIB_MINOR 1)
 #
 # Build number.  Increment for builds within minor versions.  Probably
 # always 0 for PDAL
@@ -317,9 +317,6 @@ endif()
 if (NOT PDAL_HAVE_LZMA)
     set(LZMA_EXCLUDES PATTERN pdal/compression/Lzma* EXCLUDE)
 endif()
-if (NOT PDAL_HAVE_LAZPERF)
-    set(LAZPERF_EXCLUDES PATTERN pdal/compression/LazPerf* EXCLUDE)
-endif()
 
 install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
     DESTINATION include
@@ -332,7 +329,6 @@ install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
 #    ${ZSTD_EXCLUDES}
 #    ${ZLIB_EXCLUDES}
 #    ${LZMA_EXCLUDES}
-#    ${LAZPERF_EXCLUDES}
 )
 
 install(DIRECTORY ${PDAL_KERNELS_DIR}

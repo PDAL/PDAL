@@ -15,8 +15,10 @@ Current Release(s)
 
 * **2022-03-18** `PDAL-2.4.0-src.tar.gz`_ `Release Notes`_ (`md5`_)
 
-.. _`Release Notes`: https://github.com/PDAL/PDAL/releases/tag/2.4.0
-.. _`md5`: https://github.com/PDAL/PDAL/releases/download/2.4.0/PDAL-2.4.0-src.tar.gz.md5
+.. _`PDAL-2.4.2-src.tar.gz`: https://github.com/PDAL/PDAL/releases/download/2.4.2/PDAL-2.4.2-src.tar.gz
+.. _`Release Notes`: https://github.com/PDAL/PDAL/releases/tag/2.4.2
+.. _`md5`: https://github.com/PDAL/PDAL/releases/download/2.4.2/PDAL-2.4.2-src.tar.gz.md5
+
 
 
 Past Releases

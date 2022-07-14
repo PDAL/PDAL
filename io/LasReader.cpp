@@ -118,9 +118,7 @@ LasReader::LasReader() : d(new Private)
 
 LasReader::~LasReader()
 {
-#ifdef PDAL_HAVE_LAZPERF
     delete d->decompressor;
-#endif
 }
 
 

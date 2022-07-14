@@ -81,17 +81,32 @@ Dimension::Type getPdalType(tiledb_datatype_t t)
             return Dimension::Type::Float;
         case TILEDB_FLOAT64:
             return Dimension::Type::Double;
-        case TILEDB_CHAR:
-        case TILEDB_STRING_ASCII:
-        case TILEDB_STRING_UTF8:
-        case TILEDB_STRING_UTF16:
-        case TILEDB_STRING_UTF32:
-        case TILEDB_STRING_UCS2:
-        case TILEDB_STRING_UCS4:
-        case TILEDB_ANY:
+        case TILEDB_DATETIME_AS:
+        case TILEDB_DATETIME_DAY:
+        case TILEDB_DATETIME_FS:
+        case TILEDB_DATETIME_HR:
+        case TILEDB_DATETIME_MIN:
+        case TILEDB_DATETIME_MONTH:
+        case TILEDB_DATETIME_MS:
+        case TILEDB_DATETIME_NS:
+        case TILEDB_DATETIME_PS:
+        case TILEDB_DATETIME_SEC:
+        case TILEDB_DATETIME_US:
+        case TILEDB_DATETIME_WEEK:
+        case TILEDB_DATETIME_YEAR:
+        case TILEDB_TIME_HR:
+        case TILEDB_TIME_MIN:
+        case TILEDB_TIME_SEC:
+        case TILEDB_TIME_MS:
+        case TILEDB_TIME_US:
+        case TILEDB_TIME_NS:
+        case TILEDB_TIME_PS:
+        case TILEDB_TIME_FS:
+        case TILEDB_TIME_AS:
+            return Dimension::Type::Signed64;
         default:
-            // Not supported tiledb domain types
-            throw pdal_error("Invalid Dim type from TileDB");
+            // Not supported tiledb domain types, return as None
+            return Dimension::Type::None;
     }
 }
 
@@ -112,6 +127,7 @@ void TileDBReader::addArgs(ProgramArgs& args)
     args.addSynonym("end_timestamp", "timestamp");
     args.add("start_timestamp", "TileDB array timestamp", m_startTimeStamp,
         point_count_t(0));
+    args.add("strict", "Raise an error for unsupported attributes", m_strict, true);
 }
 
 void TileDBReader::prepared(PointTableRef table)
@@ -181,8 +197,11 @@ void TileDBReader::addDimensions(PointLayoutPtr layout)
         di.m_dimCategory = DimCategory::Dimension;
         di.m_tileType = dim.type();
         di.m_type = getPdalType(di.m_tileType);
-        di.m_id = layout->registerOrAssignDim(dim.name(), di.m_type);
 
+        if (di.m_type == pdal::Dimension::Type::None)
+            throwError("Invalid Dim type from TileDB");
+
+        di.m_id = layout->registerOrAssignDim(dim.name(), di.m_type);
         m_dims.push_back(di);
     }
 
@@ -199,9 +218,19 @@ void TileDBReader::addDimensions(PointLayoutPtr layout)
         di.m_dimCategory = DimCategory::Attribute;
         di.m_tileType = a.second.type();
         di.m_type = getPdalType(di.m_tileType);
-        di.m_id = layout->registerOrAssignDim(a.first, di.m_type);
-
-        m_dims.push_back(di);
+        if (di.m_type != pdal::Dimension::Type::None)
+        {
+            di.m_id = layout->registerOrAssignDim(a.first, di.m_type);
+            m_dims.push_back(di);
+        }
+        else
+        {
+            if (!m_strict)
+                std::cerr << "Skipping over unsupported attribute type - " << di.m_name << "!\n";
+            else
+                throwError("TileDB dimension '" + di.m_name + "' can't be mapped "
+                    "to trivial type.");
+        }
     }
 
     //ABELL
@@ -237,9 +266,6 @@ void TileDBReader::setQueryBuffer(const DimInfo& di)
     case TILEDB_UINT32:
         setQueryBuffer<uint32_t>(di);
         break;
-    case TILEDB_INT64:
-        setQueryBuffer<int64_t>(di);
-        break;
     case TILEDB_UINT64:
         setQueryBuffer<uint64_t>(di);
         break;
@@ -248,6 +274,31 @@ void TileDBReader::setQueryBuffer(const DimInfo& di)
         break;
     case TILEDB_FLOAT64:
         setQueryBuffer<double>(di);
+        break;
+    case TILEDB_DATETIME_AS:
+    case TILEDB_DATETIME_DAY:
+    case TILEDB_DATETIME_FS:
+    case TILEDB_DATETIME_HR:
+    case TILEDB_DATETIME_MIN:
+    case TILEDB_DATETIME_MONTH:
+    case TILEDB_DATETIME_MS:
+    case TILEDB_DATETIME_NS:
+    case TILEDB_DATETIME_PS:
+    case TILEDB_DATETIME_SEC:
+    case TILEDB_DATETIME_US:
+    case TILEDB_DATETIME_WEEK:
+    case TILEDB_DATETIME_YEAR:
+    case TILEDB_TIME_HR:
+    case TILEDB_TIME_MIN:
+    case TILEDB_TIME_SEC:
+    case TILEDB_TIME_MS:
+    case TILEDB_TIME_US:
+    case TILEDB_TIME_NS:
+    case TILEDB_TIME_PS:
+    case TILEDB_TIME_FS:
+    case TILEDB_TIME_AS:
+    case TILEDB_INT64:
+        setQueryBuffer<int64_t>(di);
         break;
     default:
         throwError("TileDB dimension '" + di.m_name + "' can't be mapped "

@@ -16,10 +16,11 @@ This exercise uses PDAL to apply to clip data with polygon geometries.
 Exercise
 --------------------------------------------------------------------------------
 
-The ``autzen.laz`` file is a staple in PDAL and libLAS examples. You can [download this file here] 
-(https://github.com/PDAL/data/blob/master/autzen/autzen.laz) We will
-use this file to demonstrate clipping points with a geometry. We're going to
-clip out the stadium into a new LAS file.
+The ``autzen.laz`` file is a staple in PDAL and libLAS examples. You can
+`download this file here
+<https://github.com/PDAL/data/blob/master/autzen/autzen.laz>`_. We will use
+this file to demonstrate clipping points with a geometry. We're going to clip
+out the stadium into a new LAS file.
 
 .. image:: ../../../images/clipping-autzen-view.png
     :target: ../../../../_images/clipping-autzen-view.png
@@ -67,7 +68,7 @@ capability to reproject the data for us on-the-fly:
 .. note::
 
     The GeoJSON file does not have an externally-defined coordinate system,
-    so we are explictly setting one with the LayerSRS parameter. If your
+    so we are explicitly setting one with the LayerSRS parameter. If your
     data does have coordinate system information, you don't need to do that.
     See the `OGR VRT documentation`_ for more details.
 
@@ -117,14 +118,13 @@ Execution
 
 Invoke the following command, substituting accordingly, in your `Conda Shell`:
 
-The `--nostream` option disables stream mode. The point-in-polygon check (see notes)
-performs poorly in stream mode currently.
+The `--nostream` option disables stream mode. The point-in-polygon check (see
+notes) performs poorly in stream mode currently.
 
-.. literalinclude:: ./clipping-run-command.txt
-    :linenos:
+.. code-block:: console
 
-.. image:: ../../../images/clipping-run-command.png
-    :target: ../../../../_images/clipping-run-command.png
+    $ pdal pipeline ./exercises/analysis/clipping/clipping.json --nostream
+
 
 Visualization
 ................................................................................

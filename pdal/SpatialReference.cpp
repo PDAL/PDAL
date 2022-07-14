@@ -137,6 +137,25 @@ std::string SpatialReference::getWKT() const
     return m_wkt;
 }
 
+std::string SpatialReference::getPROJJSON() const
+{
+    OGRScopedSpatialReference poSRS = ogrCreateSrs(m_wkt);
+    std::string json("");
+
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,1,0)
+    char *poJSON (nullptr);
+    char **papszOptions = NULL;
+    papszOptions = CSLSetNameValue( papszOptions, "INDENTATION_WIDTH", "2" );
+    papszOptions = CSLSetNameValue( papszOptions, "SCHEMA", "" );
+    poSRS->exportToPROJJSON(&poJSON, papszOptions);
+    if (poJSON)
+        json = std::string(poJSON);
+    CPLFree(poJSON);
+    CSLDestroy( papszOptions );
+    return json;
+#endif
+}
+
 
 void SpatialReference::parse(const std::string& s, std::string::size_type& pos)
 {
@@ -537,6 +556,7 @@ MetadataNode SpatialReference::toMetadata() const
     root.add("proj4", getProj4());
     root.add("prettywkt", prettyWkt(getHorizontal()));
     root.add("wkt", getHorizontal());
+    root.add("json", getPROJJSON());
     root.add("compoundwkt", getWKT());
     root.add("prettycompoundwkt", prettyWkt(m_wkt));
 

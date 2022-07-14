@@ -70,6 +70,7 @@ private:
     bool m_stream;
     ExecMode m_mode;
     StringList m_dimNames;
+    bool m_overwriteInput;
 };
 
 } // namespace pdal

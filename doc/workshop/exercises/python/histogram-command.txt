@@ -1,1 +1,0 @@
-pdal pipeline ./exercises/python/histogram.json

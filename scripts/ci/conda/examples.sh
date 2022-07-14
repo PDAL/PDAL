@@ -3,7 +3,7 @@
 export BASE=`pwd`
 
 conda activate test
-conda install cmake ninja -y
+conda install cmake ninja compilers -y
 
 if [ "$PDAL_PLATFORM" == "windows-latest" ]; then
 

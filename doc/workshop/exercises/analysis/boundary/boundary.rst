@@ -1,5 +1,3 @@
-.. _boundary:
-
 Finding the boundary
 ================================================================================
 
@@ -17,19 +15,22 @@ boundary, which means we must first install it on our system.
 Exercise
 --------------------------------------------------------------------------------
 
-
-
 .. note::
 
     We are going to run using the Uncompahgre data in the ``./density``
     directory.
 
+.. code-block:: console
 
-.. literalinclude:: ./boundary-command-boundary.txt
-    :linenos:
-
-.. image:: ../../../images/boundary-text-output.png
-    :target: ../../../../_images/boundary-text-output.png
+    $ pdal info ./exercises/analysis/density/uncompahgre.laz --boundary
+    {
+        "boundary":
+        {
+            "area": 90431700.63,
+            "avg_pt_per_sq_unit": 20.23338738,
+            "avg_pt_spacing": 2.580181288,
+            "boundary": "MULTIPOLYGON (((245561.32 4208409.0,245731.84 4208556.7,246072.88 4208409.0,246371.29 4208630.5,246584.44 4208556.7,246882.84 4208778.2,247095.99 4208704.4,247394.4
+            ...
 
 ... a giant blizzard of coordinate output scrolls across our terminal. Not very
 useful.
@@ -38,21 +39,23 @@ Instead, let's generate some kind of vector output we can visualize with
 :ref:`qgis`.  The ``pdal tindex`` is the "tile index" command, and it outputs a
 vector geometry file for each point cloud file it reads. It generates this
 boundary using the same mechanism we invoked above -- :ref:`filters.hexbin`.
-We can leverage this capability to output a contiguous boundary of the ``uncompahgre.laz``
-file.
+We can leverage this capability to output a contiguous boundary of the
+``uncompahgre.laz`` file.
 
 
-.. literalinclude:: ./boundary-command-tindex.txt
-    :linenos:
+.. code-block:: console
 
-.. literalinclude:: ./boundary-command-tindex-win.txt
-    :linenos:
+    $ pdal tindex create --tindex ./exercises/analysis/boundary/boundary.sqlite \
+    --filespec ./exercises/analysis/density/uncompahgre.laz \
+    -f SQLite
 
-.. image:: ../../../images/boundary-tindex-run.png
-    :target: ../../../../_images/boundary-tindex-run.png
+.. code-block:: doscon
+
+    > pdal tindex create --tindex ./exercises/analysis/boundary/boundary.sqlite ^
+    --filespec ./exercises/analysis/density/uncompahgre.laz ^
+    -f SQLite
 
 Once we've run the :ref:`tindex_command`, we can now visualize our output:
-
 
 Open :ref:`qgis` and select `Add Vector Layer`:
 
@@ -82,5 +85,5 @@ Notes
    application. You can also use this command to merge data together
    (query across boundaries, for example).
 
-.. _qgis: https://qgis.org
+.. qgis: https://qgis.org
 
