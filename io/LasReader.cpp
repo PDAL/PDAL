@@ -80,6 +80,7 @@ struct LasReader::Options
     bool fixNames;
     PointId start;
     bool nosrs;
+    int numThreads;
 };
 
 struct LasReader::Private
@@ -132,6 +133,7 @@ void LasReader::addArgs(ProgramArgs& args)
     args.add("fix_dims", "Make invalid dimension names valid by changing "
         "invalid characters to '_'", d->opts.fixNames, true);
     args.add("nosrs", "Skip reading/processing file SRS", d->opts.nosrs);
+    args.add("threads", "Thread pool size", d->opts.numThreads, 7);
 }
 
 
@@ -360,6 +362,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 
 void LasReader::ready(PointTableRef table)
 {
+    d->pool.resize(d->opts.numThreads);
     LasStreamPtr lasStream(createStream());
     std::istream& stream(*lasStream);
 
