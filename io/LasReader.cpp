@@ -118,7 +118,6 @@ LasReader::LasReader() : d(new Private)
 
 LasReader::~LasReader()
 {
-    delete d->decompressor;
 }
 
 
@@ -466,7 +465,7 @@ void LasReader::queueNextCompressedChunk()
                     t = std::move(tile);
                     goto done;
                 }
-            d->tiles.push_back(std::move(tile));    
+            d->tiles.push_back(std::move(tile));
         }
         done:
         d->processedCv.notify_one();
@@ -503,7 +502,7 @@ void LasReader::queueNextStandardChunk()
                     t = std::move(tile);
                     goto done;
                 }
-            d->tiles.push_back(std::move(tile));    
+            d->tiles.push_back(std::move(tile));
         }
         done:
         d->processedCv.notify_one();
