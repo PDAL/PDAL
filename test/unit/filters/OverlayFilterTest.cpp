@@ -51,6 +51,7 @@ void testOverlay(int numReaders, bool stream)
     Options fo;
     fo.add("dimension", "Classification");
     fo.add("column", "cls");
+    fo.add("bounds", "([-123.072145, -123.062904],[44.054331, 44.062296])");
     fo.add("datasource", Support::datapath("autzen/attributes.shp"));
 
     LogPtr l(Log::makeLog("readers.las", "stderr"));
