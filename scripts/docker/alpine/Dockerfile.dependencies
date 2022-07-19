@@ -1,4 +1,4 @@
-FROM alpine:3.11
+FROM alpine:3.16
 
 #
 # Nitro looks for unistd.h in the wrong place.
@@ -11,8 +11,8 @@ RUN \
 # gdal-tools is for gdalinfo, which gets used in a test
 #
 RUN \
-    echo "http://mirror.math.princeton.edu/pub/alpinelinux/v3.11/main" >> /etc/apk/repositories; \
-    echo "http://mirror.math.princeton.edu/pub/alpinelinux/v3.11/community" >> /etc/apk/repositories; \
+    echo "http://mirror.math.princeton.edu/pub/alpinelinux/v3.16/main" >> /etc/apk/repositories; \
+    echo "http://mirror.math.princeton.edu/pub/alpinelinux/v3.16/community" >> /etc/apk/repositories; \
     echo "http://mirror.math.princeton.edu/pub/alpinelinux/edge/main" >> /etc/apk/repositories; \
     echo "@edgetesting http://mirror.math.princeton.edu/pub/alpinelinux/edge/testing" >> /etc/apk/repositories; \
     echo "@edgecomm http://mirror.math.princeton.edu/pub/alpinelinux/edge/community" >> /etc/apk/repositories; \
@@ -46,7 +46,6 @@ RUN \
         libgeotiff-dev@edgecomm \
         nitro@edgetesting \
         nitro-dev@edgetesting \
-        laszip-dev@edgecomm \
         hdf5-dev@edgecomm \
     ; \
 #
@@ -76,14 +75,5 @@ RUN \
     ; \
     ninja install; \
     cd /; \
-    rm -rf cpd; \
-    \
-    git clone https://github.com/hobu/laz-perf.git lazperf; \
-    cd lazperf; \
-    mkdir build; \
-    cd build; \
-    cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release; \
-    ninja install; \
-    cd /; \
-    rm -rf lazperf;
+    rm -rf cpd;
 
