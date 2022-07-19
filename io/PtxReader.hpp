@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2018, Hobu Inc. (info@hobu.co)
+* Copyright (c) 2022, Daniel Brookes (dbrookes@micromine.com)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -32,31 +32,45 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <map>
-#include <mutex>
+#pragma once
 
-#include <pdal/Log.hpp>
-#include <pdal/pdal_types.hpp>
+#include "pdal/Reader.hpp"
 
 namespace pdal
 {
 
-class StageExtensions
+class PDAL_DLL PtxReader : public Reader
 {
 public:
-    StageExtensions(LogPtr log);
+    PtxReader() = default;
+    ~PtxReader();
+    virtual std::string getName() const override;
 
-    PDAL_DLL void set(const std::string& stage, const StringList& exts);
-    PDAL_DLL std::string defaultReader(const std::string& filename);
-    std::string defaultWriter(const std::string& filename);
-    PDAL_DLL StringList extensions(const std::string& stage);
+protected:
+    struct PtxHeader
+    {
+        size_t m_columns;
+        size_t m_rows;
+        std::array<double, 16> m_transform;
+
+        void applyTransform(double &x, double &y, double &z) const;
+    };
+
+    PtxHeader readHeader();
+
 private:
-    void load();
+    virtual void initialize(PointTableRef table) override;
+    virtual void addArgs(ProgramArgs& args) override;
+    virtual void addDimensions(PointLayoutPtr layout) override;
+    virtual void ready(PointTableRef table) override;
+    virtual point_count_t read(PointViewPtr view, 
+                               point_count_t numPts) override;
+    virtual void done(PointTableRef table) override;
 
-    LogPtr m_log;
-    std::mutex m_mutex;
-    std::map<std::string, std::string> m_readers;
-    std::map<std::string, std::string> m_writers;
+private:
+    bool m_discardMissingPoints{ true };
+    std::istream* m_istream{ nullptr };
+    Dimension::IdList m_dimensions;
 };
 
-}
+} // namespace pdal

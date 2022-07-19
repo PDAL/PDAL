@@ -40,6 +40,7 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
    readers.pgpointcloud
    readers.ply
    readers.pts
+   readers.ptx
    readers.qfit
    readers.rdb
    readers.rxp
@@ -133,6 +134,9 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
 
 :ref:`readers.pts`
     Read data from Leica Cyclone PTS files.
+
+:ref:`readers.ptx`
+    Read data from Leica Cyclone PTX files.
 
 :ref:`readers.qfit`
     Read data in the QFIT format originated for NASA's Airborne Topographic
