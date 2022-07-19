@@ -115,15 +115,16 @@ std::vector<char> Header::data() const
     return buf;
 }
 
-StringList Header::validate(uint64_t fileSize) const
+StringList Header::validate(uint64_t fileSize, bool nosrs) const
 {
     StringList errors;
 
     if (magic != "LASF")
         errors.push_back("Invalid file signature. Was expecting 'LASF', Check the first four "
             " bytes of the file.");
-    if (has14PointFormat() && !useWkt())
-        errors.push_back("Global encoding WKT flag not set for point format 6 - 10.");
+    if (!nosrs)
+        if (has14PointFormat() && !useWkt())
+            errors.push_back("Global encoding WKT flag not set for point format 6 - 10.");
     if (!dataCompressed() && (pointOffset > fileSize))
         errors.push_back("Invalid point offset - exceeds file size.");
     if (!dataCompressed() && (pointOffset + pointCount() * pointSize > fileSize))
