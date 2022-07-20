@@ -12,7 +12,7 @@
     (c) 2014, Uday Verma, Hobu, Inc.
 
     This is free software; you can redistribute and/or modify it under the
-    terms of the GNU Lesser General Licence as published by the Free Software
+    terms of the Apache Public License 2.0 published by the Apache Software
     Foundation. See the COPYING file for more information.
 
     This software is distributed WITHOUT ANY WARRANTY and without even the
@@ -47,9 +47,9 @@ unsigned int color_diff_bits(const las::rgb& this_val, const las::rgb& last)
                     (__flag_diff(a.g, b.g, 0xFF00) << 3) |
                     (__flag_diff(a.b, b.b, 0x00FF) << 4) |
                     (__flag_diff(a.b, b.b, 0xFF00) << 5) |
-                    (__flag_diff(b.r, b.g, 0x00FF) |
-                     __flag_diff(b.r, b.b, 0x00FF) |
-                     __flag_diff(b.r, b.g, 0xFF00) |
+                    (__flag_diff(b.r, b.g, 0x00FF) ||
+                     __flag_diff(b.r, b.b, 0x00FF) ||
+                     __flag_diff(b.r, b.g, 0xFF00) ||
                      __flag_diff(b.r, b.b, 0xFF00)) << 6;
 #undef __flag_diff
 
