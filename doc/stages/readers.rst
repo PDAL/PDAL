@@ -23,6 +23,7 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
    readers.ept
    readers.e57
    readers.faux
+   readers.fbi
    readers.gdal
    readers.hdf
    readers.i3s
@@ -76,6 +77,9 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
 :ref:`readers.faux`
     Used for testing pipelines. It does not read from a file or database, but
     generates synthetic data to feed into the pipeline.
+
+:ref:`readers.fbi`
+    Read TerraSolid FBI format
 
 :ref:`readers.gdal`
     Read GDAL readable raster data sources as point clouds.

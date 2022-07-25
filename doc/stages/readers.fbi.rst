@@ -9,8 +9,8 @@ version 1 of the FBI specification.
 
 .. note::
 
-Support for all point attributes in LAS 1.2 format so data can be converted between LAS 1.2
-and Fast Binary formats without any loss of point attribute information.
+    Support for all point attributes in LAS 1.2 format so data can be converted between LAS 1.2
+    and Fast Binary formats without any loss of point attribute information.
 
 .. warning::
 
