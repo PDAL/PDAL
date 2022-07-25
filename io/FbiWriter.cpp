@@ -67,18 +67,18 @@ void buildHdrFromPoints(fbi::FbiHdr& hdr, const PointViewPtr view)
     hdr.TimeType = 1; // standard time by default
     hdr.Order = 0; // order is not know
     hdr.Reserved1 = 0; // Not use for now
-    
+
     // no additional values in this fbi export (for manage by terrascan for now)
     hdr.VlrCnt = 0;
     hdr.VlrSize = 0;
     hdr.RecSize = 0;
-     
+
     hdr.FastCnt = view->size();
     hdr.RecCnt = 0; // no additional points in this fbi export
-    
+
     BOX3D box;
     view->calculateBounds(box);
-    
+
     hdr.MinX = box.minx;
     hdr.MaxX = box.maxx;
     hdr.MinY = box.miny;
@@ -89,29 +89,29 @@ void buildHdrFromPoints(fbi::FbiHdr& hdr, const PointViewPtr view)
     // By default for now
     hdr.UnitsXyz = 100;
     hdr.UnitsDistance = 0;
-    
+
     hdr.OrgX = std::abs(hdr.MinX)-1;
     hdr.OrgY = std::abs(hdr.MinY)-1;
     hdr.OrgZ = std::abs(hdr.MinZ)-1;
-     
+
     hdr.BitsX = 32;
     hdr.BitsY = 32;
     hdr.BitsZ = 32;
-    
+
     hdr.BitsTime = ( view->hasDim(Dimension::Id::OffsetTime) ? 64 : 0 );
     hdr.BitsGroup = ( view->hasDim(Dimension::Id::ClusterID) ? 32 : 0 );
     hdr.BitsIntensity = ( view->hasDim(Dimension::Id::Intensity) ? 16 : 0 );
     hdr.BitsScanner = ( view->hasDim(Dimension::Id::UserData) ? 8 : 0 );
     hdr.BitsEcho = ( view->hasDim(Dimension::Id::ReturnNumber) ? 8 : 0 );
-    
+
     // Fbi only accept 8 bits ScanAngleRank
     hdr.BitsAngle = ( view->hasDim(Dimension::Id::ScanAngleRank)
                      && view->dimType(Dimension::Id::ScanAngleRank)== Dimension::Type::Signed8 ? 8 : 0 );
-    
+
     hdr.BitsClass = ( view->hasDim(Dimension::Id::Classification) ? 8 : 0 );
     hdr.BitsLine = ( view->hasDim(Dimension::Id::PointSourceId) ? 16 : 0 );
     hdr.BitsEchoLen = ( view->hasDim(Dimension::Id::ReturnNumber) ? 16 : 0 );
-    
+
     hdr.BitsColor = 0; int NbCanal (0);
     if ( view->hasDim(Dimension::Id::Red) && view->hasDim(Dimension::Id::Blue) && view->hasDim(Dimension::Id::Green) )
     {
@@ -140,9 +140,9 @@ void buildHdrFromPoints(fbi::FbiHdr& hdr, const PointViewPtr view)
 
     // why not 32 ?
     hdr.BitsImage = ( view->hasDim(Dimension::Id::Image) ? 16 : 0 );
-    
+
     hdr.Reserved5 = 0;
-    
+
     hdr.PosVlr = 0 ; // not use in fbi files for now
     hdr.PosXyz = hdr.HdrSize;
     hdr.PosTime = hdr.PosXyz + 3*view->size()*sizeof(fbi::UINT);
@@ -182,7 +182,7 @@ void writeFbiHeader(const fbi::FbiHdr& hdr, std::ostream* ofFBI)
     ofFBI->write(reinterpret_cast<const char *>(&hdr.VlrCnt), sizeof(hdr.VlrCnt));
     ofFBI->write(reinterpret_cast<const char *>(&hdr.VlrSize), sizeof(hdr.VlrSize));
     ofFBI->write(reinterpret_cast<const char *>(&hdr.RecSize), sizeof(hdr.RecSize));
-    
+
     ofFBI->write(reinterpret_cast<const char *>(&hdr.FastCnt), sizeof(hdr.FastCnt));
     ofFBI->write(reinterpret_cast<const char *>(&hdr.RecCnt), sizeof(hdr.RecCnt));
     ofFBI->write(reinterpret_cast<const char *>(&hdr.UnitsXyz), sizeof(hdr.UnitsXyz));
@@ -199,7 +199,7 @@ void writeFbiHeader(const fbi::FbiHdr& hdr, std::ostream* ofFBI)
     ofFBI->write(reinterpret_cast<const char *>(&hdr.System), sizeof(hdr.System));
     ofFBI->write(reinterpret_cast<const char *>(&hdr.Software), sizeof(hdr.Software));
     ofFBI->write(reinterpret_cast<const char *>(&hdr.Reserved2), sizeof(hdr.Reserved2));
-    
+
     ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsX), sizeof(hdr.BitsX));
     ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsY), sizeof(hdr.BitsY));
     ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsZ), sizeof(hdr.BitsZ));
@@ -223,7 +223,7 @@ void writeFbiHeader(const fbi::FbiHdr& hdr, std::ostream* ofFBI)
     ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsDeviation), sizeof(hdr.BitsDeviation));
     ofFBI->write(reinterpret_cast<const char *>(&hdr.BitsReliab), sizeof(hdr.BitsReliab));
     ofFBI->write(reinterpret_cast<const char *>(&hdr.Reserved5), sizeof(hdr.Reserved5));
-    
+
     ofFBI->write(reinterpret_cast<const char *>(&hdr.PosVlr), sizeof(hdr.PosVlr));
     ofFBI->write(reinterpret_cast<const char *>(&hdr.PosXyz), sizeof(hdr.PosXyz));
     ofFBI->write(reinterpret_cast<const char *>(&hdr.PosTime), sizeof(hdr.PosTime));
@@ -262,8 +262,8 @@ void NrmVecSet(fbi::NrmVec *Vp, int Dim, double X, double Y, double Z)
     double Vml = 32767.0 / fbi::hc_pi ;
     double Van = asin(Z);
     int Vvl = std::floor( Vml * (Van + fbi::hc_piover2)) ;
-    Vvl = std::max( Vvl, 0) ;
-    Vvl = std::min( Vvl, 32767) ;
+    Vvl = (std::max)( Vvl, 0) ;
+    Vvl = (std::min)( Vvl, 32767) ;
     Vp->Dim     = Dim ;
     Vp->VertAng = Vvl ;
     Vp->HorzAng = 0;
@@ -272,8 +272,8 @@ void NrmVecSet(fbi::NrmVec *Vp, int Dim, double X, double Y, double Z)
         if (Han < 0.0)
             Han += fbi::hc_2pi ;
         int Hvl = std::floor( Hml * Han) ;
-        Hvl = std::max( Hvl, 0) ;
-        Hvl = std::min( Hvl, 32767) ;
+        Hvl = (std::max)( Hvl, 0) ;
+        Hvl = (std::min)( Hvl, 32767) ;
         Vp->HorzAng = Hvl ;
     }
 }
@@ -281,16 +281,16 @@ void NrmVecSet(fbi::NrmVec *Vp, int Dim, double X, double Y, double Z)
 void FbiWriter::write(const PointViewPtr view)
 {
     buildHdrFromPoints(*hdr, view);
-    
+
     PointRef point(*view, 0);
-    
+
     std::ostream* ofFBI = Utils::createFile(m_filename, true);
-        
+
     writeFbiHeader(*hdr.get(), ofFBI);
-    
+
     assert(hdr->UnitsXyz > 0);
     double Mul = 1.0 / hdr->UnitsXyz;
-    
+
     for (PointId i = 0; i < view->size(); ++i)
     {
         point.setPointId(i);
@@ -306,7 +306,7 @@ void FbiWriter::write(const PointViewPtr view)
         ofFBI->write(reinterpret_cast<const char *>(&yr), hdr->BitsY/8);
         ofFBI->write(reinterpret_cast<const char *>(&zr), hdr->BitsZ/8);
     }
-    
+
     if (hdr->BitsTime > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
@@ -316,7 +316,7 @@ void FbiWriter::write(const PointViewPtr view)
             ofFBI->write(reinterpret_cast<const char *>(&time), hdr->BitsTime/8);
         }
     }
-    
+
     if (hdr->BitsDistance > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
@@ -336,7 +336,7 @@ void FbiWriter::write(const PointViewPtr view)
             ofFBI->write(reinterpret_cast<const char *>(&cluster), hdr->BitsGroup/8);
         }
     }
-    
+
     if (hdr->BitsNormal > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
@@ -352,21 +352,21 @@ void FbiWriter::write(const PointViewPtr view)
         }
 
     }
-        
+
     if (hdr->BitsColor > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
         {
             point.setPointId(i);
-            
+
             uint16_t blue = point.getFieldAs<uint16_t>(Dimension::Id::Blue);
             uint16_t green = point.getFieldAs<uint16_t>(Dimension::Id::Green);
             uint16_t red = point.getFieldAs<uint16_t>(Dimension::Id::Red);
-            
+
             ofFBI->write(reinterpret_cast<const char *>(&blue), hdr->BitsColor/8);
             ofFBI->write(reinterpret_cast<const char *>(&green), hdr->BitsColor/8);
             ofFBI->write(reinterpret_cast<const char *>(&red), hdr->BitsColor/8);
-            
+
             if (view->hasDim(Dimension::Id::Infrared))
             {
                 uint16_t infra = point.getFieldAs<uint16_t>(Dimension::Id::Infrared);
@@ -374,7 +374,7 @@ void FbiWriter::write(const PointViewPtr view)
             }
         }
     }
-    
+
     if (hdr->BitsIntensity > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
@@ -384,7 +384,7 @@ void FbiWriter::write(const PointViewPtr view)
             ofFBI->write(reinterpret_cast<const char *>(&intensity), hdr->BitsIntensity/8);
         }
     }
-    
+
     if (hdr->BitsLine > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
@@ -394,7 +394,7 @@ void FbiWriter::write(const PointViewPtr view)
             ofFBI->write(reinterpret_cast<const char *>(&line), hdr->BitsLine/8);
         }
     }
-    
+
     if (hdr->BitsEchoLen > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
@@ -414,7 +414,7 @@ void FbiWriter::write(const PointViewPtr view)
             ofFBI->write(reinterpret_cast<const char *>(&amplitude), hdr->BitsAmplitude/8);
         }
     }
-        
+
     if (hdr->BitsScanner > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
@@ -424,7 +424,7 @@ void FbiWriter::write(const PointViewPtr view)
             ofFBI->write(reinterpret_cast<const char *>(&scanNbr), hdr->BitsScanner/8);
         }
     }
-    
+
     if (hdr->BitsEcho > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
@@ -434,7 +434,7 @@ void FbiWriter::write(const PointViewPtr view)
             ofFBI->write(reinterpret_cast<const char *>(&echo), hdr->BitsEcho/8);
         }
     }
-    
+
     if (hdr->BitsAngle > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
@@ -444,7 +444,7 @@ void FbiWriter::write(const PointViewPtr view)
             ofFBI->write(reinterpret_cast<const char *>(&angle), hdr->BitsAngle/8);
         }
     }
-    
+
     if (hdr->BitsEchoNorm > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
@@ -464,7 +464,7 @@ void FbiWriter::write(const PointViewPtr view)
             ofFBI->write(reinterpret_cast<const char *>(&classif), hdr->BitsClass/8);
         }
     }
-    
+
     if (hdr->BitsEchoPos > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
@@ -474,7 +474,7 @@ void FbiWriter::write(const PointViewPtr view)
             ofFBI->write(reinterpret_cast<const char *>(&echoPos), hdr->BitsEchoPos/8);
         }
     }
-    
+
     if (hdr->BitsImage > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
@@ -484,7 +484,7 @@ void FbiWriter::write(const PointViewPtr view)
             ofFBI->write(reinterpret_cast<const char *>(&image), hdr->BitsImage/8);
         }
     }
-    
+
     if (hdr->BitsReflect > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
@@ -494,7 +494,7 @@ void FbiWriter::write(const PointViewPtr view)
             ofFBI->write(reinterpret_cast<const char *>(&reflectance), hdr->BitsReflect/8);
         }
     }
-    
+
     if (hdr->BitsDeviation > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
@@ -504,7 +504,7 @@ void FbiWriter::write(const PointViewPtr view)
             ofFBI->write(reinterpret_cast<const char *>(&deviation), hdr->BitsDeviation/8);
         }
     }
-    
+
     if (hdr->BitsReliab > 0)
     {
         for (PointId i = 0; i < view->size(); ++i)
@@ -514,12 +514,12 @@ void FbiWriter::write(const PointViewPtr view)
             ofFBI->write(reinterpret_cast<const char *>(&reliability), hdr->BitsReliab/8);
         }
     }
-    
+
     if (hdr->ImgNbrCnt > 0)
     {
-        
+
     }
-    
+
     Utils::closeFile(ofFBI);
 }
 
