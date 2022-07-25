@@ -2,7 +2,7 @@
     "pipeline": [
         {
             "type": "readers.ept",
-            "filename":"ept://https://na-c.entwine.io/dublin/ept.json",
+            "filename":"https://na-c.entwine.io/dublin/ept.json",
             "resolution": 5
         },
         {

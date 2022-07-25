@@ -38,6 +38,7 @@
 
 #include <ogr_api.h>
 
+#include <pdal/Polygon.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
 
@@ -49,7 +50,7 @@ static StaticPluginInfo const s_info
     "filters.overlay",
     "Assign values to a dimension based on the extent of an OGR-readable data "
         " source or an OGR SQL query.",
-    "http://pdal.io/stages/filters.overlay.html"
+    "https://pdal.io/stages/filters.overlay.html"
 };
 
 CREATE_STATIC_STAGE(OverlayFilter, s_info)
@@ -66,6 +67,7 @@ void OverlayFilter::addArgs(ProgramArgs& args)
     args.add("query", "OGR SQL query to execute on the "
         "datasource to fetch geometry and attributes", m_query);
     args.add("layer", "Datasource layer to use", m_layer);
+    args.add("bounds", "Bounds to limit query using with OGR_L_SetSpatialFilter", m_bounds);
 }
 
 
@@ -99,6 +101,13 @@ void OverlayFilter::ready(PointTableRef table)
 
     if (!m_lyr)
         throwError("Unable to select layer '" + m_layer + "'");
+
+
+    if (!m_bounds.empty())
+    {
+        pdal::Polygon g(m_bounds.toWKT());
+        OGR_L_SetSpatialFilter(m_lyr, g.getOGRHandle());
+    }
 
     auto featureDeleter = [](void *p)
     {

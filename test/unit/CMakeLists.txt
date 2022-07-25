@@ -210,6 +210,7 @@ PDAL_ADD_TEST(pdal_io_ply_writer_test
     INCLUDES ${PDAL_VENDOR_DIR}
 )
 PDAL_ADD_TEST(pdal_io_pts_reader_test FILES io/PtsReaderTest.cpp)
+PDAL_ADD_TEST(pdal_io_ptx_reader_test FILES io/PtxReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_qfit_test FILES io/QFITReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_sbet_reader_test FILES io/SbetReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_sbet_writer_test FILES io/SbetWriterTest.cpp)

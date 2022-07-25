@@ -176,9 +176,6 @@ void toJSON(const MetadataNode& m, std::ostream& o)
     o << std::endl;
 }
 
-namespace
-{
-
 std::string tempFilename(const std::string& path)
 {
     const std::string tempdir(arbiter::getTempPath());
@@ -239,7 +236,6 @@ public:
     TempFile m_localFile;
 };
 
-}  // unnamed namespace
 
 uintmax_t fileSize(const std::string& path)
 {

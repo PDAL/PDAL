@@ -472,7 +472,6 @@ TEST(SpatialReferenceTest, issue_1989)
     EXPECT_EQ(-32, south.getUTMZone());
 }
 
-#if GDAL_VERSION_MAJOR >= 3
 // Test setting EPSG:4326 from User string
 TEST(SpatialReferenceTest, axis_ordering)
 {
@@ -508,8 +507,32 @@ TEST(SpatialReferenceTest, axis_ordering)
         Support::datapath("las/test_epsg_4326_axis.las"));
 
 }
+
+
+TEST(SpatialReferenceTest, badGeoTIFFkeys)
+{
+    Options ops1;
+    ops1.add("filename", Support::datapath("las/bad-geotiff-keys.las"));
+    LasReader reader1;
+    reader1.setOptions(ops1);
+
+    Options ops1a;
+    ReprojectionFilter repro1;
+    ops1a.add("out_srs", "EPSG:4326");
+    repro1.setInput(reader1);
+    repro1.setOptions(ops1a);
+
+    PointTable table1;
+    repro1.prepare(table1);
+
+    // The bad data file isn't bad until libgeotiff 1.7.1
+    // when it got more strict about keys with 0s.
+#if LIBGEOTIFF_VERSION >= 1710
+    EXPECT_THROW(repro1.execute(table1), pdal_error);
 #endif
 
+
+}
 
 
 } // namespace pdal

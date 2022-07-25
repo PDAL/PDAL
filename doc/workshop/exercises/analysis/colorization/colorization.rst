@@ -109,10 +109,10 @@ Execution
 Invoke the following command, substituting accordingly, in your |Terminal|:
 
 
-.. literalinclude:: ./colorization-run-command.txt
-    :linenos:
+.. code-block:: console
 
-.. image:: ../../../images/colorize-run-command.png
+    $ pdal pipeline ./exercises/analysis/colorization/colorize.json
+
 
 Visualization
 ................................................................................
@@ -138,7 +138,8 @@ Notes
    raster format and type being used. See :ref:`filters.colorization`
    for more information.
 
-4. These data are of `Uncompahgre Basin`_ courtesy of the `NASA Airborne Snow Observatory`_.
+4. These data are of `Uncompahgre Basin`_ courtesy of the
+   `NASA Airborne Snow Observatory`_.
 
 .. _`NASA Airborne Snow Observatory`: http://aso.jpl.nasa.gov/
 .. _`Uncompahgre Basin`: https://en.wikipedia.org/wiki/Uncompahgre_River

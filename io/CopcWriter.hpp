@@ -56,6 +56,7 @@ private:
     virtual void prepared(PointTableRef table) override;
     virtual void ready(PointTableRef table) override;
     virtual void write(const PointViewPtr view) override;
+    virtual void done(PointTableRef table) override;
 
     void fillForwardList();
     template <typename T>
@@ -66,7 +67,8 @@ private:
     void handlePipelineVlr();
 
     std::unique_ptr<copcwriter::BaseInfo> b;
-
+    bool isRemote;
+    std::string remoteFilename;
 };
 
 } // namespace pdal

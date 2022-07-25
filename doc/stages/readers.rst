@@ -40,6 +40,7 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
    readers.pgpointcloud
    readers.ply
    readers.pts
+   readers.ptx
    readers.qfit
    readers.rdb
    readers.rxp
@@ -54,6 +55,10 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
 :ref:`readers.bpf`
     Read BPF files encoded as version 1, 2, or 3. BPF is an NGA specification
     for point cloud data.
+
+:ref:`readers.copc`
+    COPC, or Cloud Optimized Point Cloud is an LAZ 1.4 file stored as a
+    clustered octree.
 
 :ref:`readers.buffer`
     Special stage that allows you to read data from your own PointView rather
@@ -129,6 +134,9 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
 
 :ref:`readers.pts`
     Read data from Leica Cyclone PTS files.
+
+:ref:`readers.ptx`
+    Read data from Leica Cyclone PTX files.
 
 :ref:`readers.qfit`
     Read data in the QFIT format originated for NASA's Airborne Topographic

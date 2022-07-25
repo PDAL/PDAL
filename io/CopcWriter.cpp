@@ -33,8 +33,10 @@
 ****************************************************************************/
 
 #include <pdal/util/Algorithm.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 #include "CopcWriter.hpp"
+#include <arbiter/arbiter.hpp>
 
 #include "private/las/Header.hpp"
 #include "private/las/Utils.hpp"
@@ -61,7 +63,7 @@ const StaticPluginInfo s_info
 
 CREATE_STATIC_STAGE(CopcWriter, s_info);
 
-CopcWriter::CopcWriter() : b(new copcwriter::BaseInfo)
+CopcWriter::CopcWriter() : b(new copcwriter::BaseInfo), isRemote(false)
 {}
 
 CopcWriter::~CopcWriter()
@@ -247,6 +249,17 @@ void CopcWriter::prepared(PointTableRef table)
 
 void CopcWriter::ready(PointTableRef table)
 {
+    // Deal with remote files
+    if (Utils::isRemote(b->opts.filename))
+    {
+
+        // swap our filename for a tmp file
+        std::string tmpname = Utils::tempFilename(b->opts.filename);
+        remoteFilename = b->opts.filename;
+        b->opts.filename = tmpname;
+        isRemote = true;
+    }
+
     MetadataNode forwardMetadata = table.privateMetadata("lasforward");
     handleHeaderForwards(forwardMetadata);
     handleForwardVlrs(forwardMetadata);
@@ -281,6 +294,16 @@ void CopcWriter::handleUserVlrs(MetadataNode m)
 void CopcWriter::write(const PointViewPtr v)
 {
     using namespace copcwriter;
+
+    if (v->empty())
+    {
+        log()->get(LogLevel::Warning) << "writers.copc skipping empty point view.\n";
+        return;
+    }
+
+    if (++b->viewCount > 1)
+        log()->get(LogLevel::Warning) << "writers.copc does not support multiple views "
+            "and will overwrite files for earlier views. Consider adding a merge filter.\n";
 
     BOX3D box;
     v->calculateBounds(box);
@@ -361,6 +384,21 @@ void CopcWriter::write(const PointViewPtr v)
 
     BuPyramid bu(*b);
     bu.run(mgr);
+}
+
+void CopcWriter::done(PointTableRef table)
+{
+
+
+    if (isRemote)
+    {
+        arbiter::Arbiter a;
+        a.put(remoteFilename, a.getBinary(b->opts.filename));
+
+        // Clean up temporary
+        FileUtils::deleteFile(b->opts.filename);
+    }
+
 }
 
 } // namespace pdal

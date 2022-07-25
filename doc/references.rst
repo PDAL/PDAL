@@ -11,19 +11,22 @@ Citation
 
 To cite PDAL in publications use:
 
-  PDAL Contributors, 2020. PDAL Point Data Abstraction Library. doi:10.5281/zenodo.2556737
+  PDAL Contributors, 2022. PDAL Point Data Abstraction Library.  https://doi.org/10.5281/zenodo.2616780
 
 A BibTeX entry for LaTeX users is
 
-  | @misc{pdal_contributors_2020_2556737,
+  | @misc{pdal_contributors_2022_2616780,
   |   author       = {PDAL Contributors},
   |   title        = {PDAL Point Data Abstraction Library},
   |   month        = aug,
-  |   year         = 2020,
-  |   doi          = {10.5281/zenodo.2556737},
-  |   url          = {https://doi.org/10.5281/zenodo.2556737}
+  |   year         = 2022,
+  |   doi          = {10.5281/zenodo.2616780},
+  |   url          = {https://doi.org/10.5281/zenodo.2616780}
   | }
 
+
+A paper about PDAL by the team, "PDAL: An open source library for the
+processing and analysis of point clouds", is available at [Butler2021]_.
 
 
 Reference
@@ -35,6 +38,8 @@ Reference
 .. [Bartels2010] Bartels, Marc, and Hong Wei. "Threshold-free object and ground point separation in LIDAR data." Pattern recognition letters 31.10 (2010): 1089-1099.
 
 .. [Breunig2000] Breunig, M.M., Kriegel, H.-P., Ng, R.T., Sander, J., 2000. LOF: Identifying Density-Based Local Outliers. Proc. 2000 Acm Sigmod Int. Conf. Manag. Data 1–12.
+
+.. [Butler2021] Butler, H. Chambers, B. Hartzell, P. Glennie, C. PDAL: An open source library for the processing and analysis of point clouds. Computers & Geosciences, Volume 148, 2021, 104680, ISSN 0098-3004, https://doi.org/10.1016/j.cageo.2020.104680.
 
 .. [Chen2012] Chen, Ziyue et al. “Upward-Fusion Urban DTM Generating Method Using Airborne Lidar Data.” ISPRS Journal of Photogrammetry and Remote Sensing 72 (2012): 121–130.
 

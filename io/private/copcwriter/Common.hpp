@@ -123,6 +123,7 @@ struct BaseInfo
     Scaling scaling;
     std::set<std::string> forwards;
     bool forwardVlrs = false;
+    int viewCount = 0;
     std::vector<las::Evlr> vlrs;
 
     std::array<stats::Summary, 5> stats

@@ -17,7 +17,7 @@
     (c) 2014, Uday Verma, Hobu, Inc.
 
     This is free software; you can redistribute and/or modify it under the
-    terms of the GNU Lesser General Licence as published by the Free Software
+    terms of the Apache Public License 2.0 published by the Apache Software
     Foundation. See the COPYING file for more information.
 
     This software is distributed WITHOUT ANY WARRANTY and without even the
@@ -81,11 +81,11 @@ protected:
         std::array<int32_t, 4> last_gpstime_diff_;
         std::array<int32_t, 4> multi_extreme_counter_;
         bool gps_time_change_;
-         
+
         ChannelCtx() : changed_values_model_(8, models::arithmetic(128)),
             scanner_channel_model_(3), rn_gps_same_model_(13),
             nr_model_(16, models::arithmetic(16)), rn_model_(16, models::arithmetic(16)),
-            class_model_(64, models::arithmetic(256)), flag_model_(64, models::arithmetic(64)), 
+            class_model_(64, models::arithmetic(256)), flag_model_(64, models::arithmetic(64)),
             user_data_model_(64, models::arithmetic(256)), gpstime_multi_model_(515),
             gpstime_0diff_model_(5),
             dx_compr_(32, 2), dy_compr_(32, 22), z_compr_(32, 20), intensity_compr_(16, 4),
@@ -104,7 +104,7 @@ protected:
             intensity_compr_.init();
             scan_angle_compr_.init();
             point_source_id_compr_.init();
-            gpstime_compr_.init(); 
+            gpstime_compr_.init();
 
             dx_decomp_.init();
             dy_decomp_.init();
@@ -112,7 +112,7 @@ protected:
             intensity_decomp_.init();
             scan_angle_decomp_.init();
             point_source_id_decomp_.init();
-            gpstime_decomp_.init(); 
+            gpstime_decomp_.init();
 
             for (auto& xd : last_x_diff_median5_)
                 xd.init();
@@ -155,7 +155,7 @@ class Point14Decompressor : public Point14Base
 public:
     Point14Decompressor(InCbStream& stream) : stream_(stream)
     {}
-   
+
     void dumpSums();
     void readSizes();
     void readData();

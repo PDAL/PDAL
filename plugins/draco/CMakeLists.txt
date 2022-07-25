@@ -1,11 +1,11 @@
 #
 # Draco plugin CMake configuration
 #
-include (${PDAL_CMAKE_DIR}/draco.cmake)
 
-if (NOT PDAL_HAVE_DRACO)
-    message(FATAL_ERROR "Can't find Draco support required.")
-endif()
+#
+# We use pkg_check_modules because the draco Cmake config is broken
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(DRACO REQUIRED draco>1.4.0)
 
 if (WIN32)
     add_definitions(-DNOMINMAX)

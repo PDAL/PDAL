@@ -17,6 +17,7 @@
 .. |GEOS| replace:: `GEOS <https://trac.osgeo.org/geos/>`__
 .. |LASzip| replace:: `LASzip <http://laszip.org>`__
 .. |Python| replace:: `Python <http://python.org/>`__
+.. |Julia| replace:: `Julia <https://julialand.org>`__
 .. |Docker| replace:: `Docker <https://www.docker.com/>`__
 .. |LiDAR| replace:: `LiDAR <https://en.wikipedia.org/wiki/Lidar>`__
 .. |CRREL| replace:: `CRREL <http://www.erdc.usace.army.mil/Locations/ColdRegionsResearchandEngineeringLaboratory.aspx>`__

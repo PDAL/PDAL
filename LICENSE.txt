@@ -1,6 +1,6 @@
 Unless otherwise indicated, all files in the PDAL distribution are
 
-  Copyright (c) 2019, Hobu, Inc. (howard@hobu.co)
+  Copyright (c) 2022, Hobu, Inc. (howard@hobu.co)
 
 and are released under the terms of the BSD open source license.
 
@@ -10,7 +10,7 @@ This file contains the license terms of all files within PDAL.
 Overall PDAL license (BSD)
 ===========================
 
- Copyright (c) 2019, Hobu, Inc. (howard@hobu.co)
+ Copyright (c) 2022, Hobu, Inc. (howard@hobu.co)
 
  All rights reserved.
 

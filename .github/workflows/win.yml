@@ -2,6 +2,11 @@ name: Windows
 
 on: [push, pull_request]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+
 jobs:
   build:
     name: MSVC
@@ -11,43 +16,49 @@ jobs:
       fail-fast: true
       matrix:
         type: ['floating','fixed']
+    defaults:
+      run:
+        shell: bash -l {0}
     env:
       BUILD_TYPE: ${{ matrix.type }}
 
     steps:
     - uses: actions/checkout@v2
     - uses: ilammy/msvc-dev-cmd@v1
+    - name: Cache Conda Environment
+      uses: actions/cache@v2
+      with:
+        path: ~/conda_pkgs_dir
+        key: ${{ runner.os }}-${{ steps.get-date.outputs.today }}-conda-${{ env.CACHE_NUMBER }}
     - uses: conda-incubator/setup-miniconda@v2
       with:
-        channels: conda-forge
+        miniforge-variant: Mambaforge
+        miniforge-version: latest
+        use-mamba: true
         auto-update-conda: true
         python-version: '3.8'
+        use-only-tar-bz2: true
 
     - name: Setup
-      shell: bash -l {0}
       run: |
           source ./scripts/ci/win/setup.sh
 
     - name: CMake
-      shell: bash -l {0}
       working-directory: ./build
       run: |
           source ../scripts/ci/win/cmake.sh
 
     - name: Compile
-      shell: bash -l {0}
       working-directory: ./build
       run: |
           source ../scripts/ci/win/compile.sh
 
     - name: Test
-      shell: bash -l {0}
       working-directory: ./build
       run: |
           source ../scripts/ci/win/test.sh
 
     - name: Examples
-      shell: bash -l {0}
       run: |
           source ./scripts/ci/win/examples.sh
 

@@ -106,7 +106,7 @@ struct Header
 
     void fill(const char *buf, size_t bufsize);
     std::vector<char> data() const;
-    StringList validate(uint64_t fileSize) const;
+    StringList validate(uint64_t fileSize, bool nosrs) const;
 
     int size() const
         { return versionMinor >= 4 ? Size14 : versionMinor == 3 ? Size13 : Size12; }
