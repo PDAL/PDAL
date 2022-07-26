@@ -35,4 +35,6 @@ target_link_libraries(dimbuilder
 )
 
 
-target_link_options(${target} PRIVATE /SUBSYSTEM:CONSOLE /ENTRY:mainCRTStartup)
+if (MSVC)
+    target_link_options(dimbuilder PRIVATE /SUBSYSTEM:CONSOLE /ENTRY:mainCRTStartup)
+endif(MSVC)
