@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2017, Hobu Inc. <hobu.inc@gmail.com>
+* Copyright (c) 2021, Antoine Lavenant, antoine.lavenant@ign.fr
 *
 * All rights reserved.
 *
@@ -34,69 +34,49 @@
 
 #pragma once
 
-#include <pdal/Filter.hpp>
-#include <pdal/Polygon.hpp>
-#include <pdal/Streamable.hpp>
+#include <pdal/Options.hpp>
+#include <pdal/Reader.hpp>
 
-#include <map>
 #include <memory>
-#include <string>
+#include <vector>
 
-typedef void *OGRLayerH;
+#include "FbiHeader.hpp"
 
 namespace pdal
 {
 
-namespace gdal
+class PDAL_DLL FbiReader : public pdal::Reader
 {
-    class ErrorHandler;
-}
-
-typedef std::shared_ptr<void> OGRDSPtr;
-typedef std::shared_ptr<void> OGRFeaturePtr;
-typedef std::shared_ptr<void> OGRGeometryPtr;
-
-class Arg;
-
-class PDAL_DLL OverlayFilter : public Filter, public Streamable
-{
-    struct PolyVal
-    {
-        Polygon geom;
-        int32_t val;
-    };
-
 public:
-    OverlayFilter() : m_ds(0), m_lyr(0)
-    {}
+    FbiReader();
+    std::string getName() const;
 
-    std::string getName() const { return "filters.overlay"; }
+    point_count_t getNumPoints() const { return hdr->FastCnt; }
+
+    const fbi::FbiHdr& getHeader() const { return *hdr; }
+
+    // this is called by the stage's iterator
+    uint32_t processBuffer(PointViewPtr view, std::istream& stream,
+                           uint64_t numPointsLeft) const;
 
 private:
-    virtual void addArgs(ProgramArgs& args);
-    virtual void spatialReferenceChanged(const SpatialReference& srs);
-    virtual bool processOne(PointRef& point);
+    std::unique_ptr<fbi::FbiHdr> hdr;
+    std::istream *m_istreamPtr;
+    
     virtual void initialize();
-    virtual void prepared(PointTableRef table);
+    virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
-    virtual void filter(PointView& view);
+    virtual point_count_t read(PointViewPtr view, point_count_t count);
+    virtual void done(PointTableRef table);
+    virtual void addArgs(ProgramArgs& args);
+    
+    FbiReader& operator=(const FbiReader&); // not implemented
+    FbiReader(const FbiReader&); // not implemented
 
-    OverlayFilter& operator=(const OverlayFilter&) = delete;
-    OverlayFilter(const OverlayFilter&) = delete;
-
-    typedef std::shared_ptr<void> OGRDSPtr;
-
-    OGRDSPtr m_ds;
-    OGRLayerH m_lyr;
-    std::string m_dimName;
-    std::string m_datasource;
-    std::string m_column;
-    std::string m_query;
-    std::string m_layer;
-    Dimension::Id m_dim;
-    std::vector<PolyVal> m_polygons;
-    BOX2D m_bounds;
-
+private:
+    int NbBytesColor; // deduce from BitsColor
+    std::vector<fbi::UINT64> indexNameImages;
+    
 };
 
 } // namespace pdal

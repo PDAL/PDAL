@@ -245,7 +245,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     d->header.fill(headerBuf, las::Header::Size14);
 
     uint64_t fileSize = Utils::fileSize(m_filename);
-    StringList errors = d->header.validate(fileSize);
+    StringList errors = d->header.validate(fileSize, d->opts.nosrs);
     if (errors.size())
         throwError(errors.front());
     // Verify

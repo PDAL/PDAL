@@ -58,6 +58,7 @@ static const Extensions readerExtensions =
   { "readers.rdb", { "rdbx" } },
   { "readers.mrsid", { "sid" } },
   { "readers.rxp", { "rxp" } },
+  { "readers.fbi", { "fbi" } },
   { "readers.fbx", { "fbx" } },
   { "readers.slpk", { "slpk" } },
   { "readers.i3s", { "i3s" } },
@@ -68,6 +69,7 @@ static const Extensions readerExtensions =
 static const Extensions writerExtensions =
 {
   { "writers.draco", { "drc" } },
+  { "writers.fbi", { "fbi" } },
   { "writers.matlab", { "mat" } },
   { "writers.nitf", { "nitf", "nsf", "ntf" } },
   { "writers.pcd", { "pcd" } },

@@ -77,6 +77,11 @@ This example sets the Intensity attribute to ``CLS`` values read from the
 Options
 -------
 
+bounds
+  A bounds to pre-filter the OGR datasource that is passed to
+  `OGR_L_SetSpatialFilter <https://gdal.org/doxygen/ogr__api_8h.html#a678d1735bc82533614ac005691d1138c>`__
+  in the form `([xmin, xmax], [ymin, ymax])`.
+
 dimension
   Name of the dimension whose value should be altered.  [Required]
 

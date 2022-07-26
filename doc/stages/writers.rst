@@ -21,6 +21,7 @@ dimension type, while others only understand fixed dimension names.
    writers.draco
    writers.ept_addon
    writers.e57
+   writers.fbi
    writers.fbx
    writers.gdal
    writers.gltf
@@ -52,6 +53,9 @@ dimension type, while others only understand fixed dimension names.
 
 :ref:`writers.e57`
     Write data in the E57 format.
+
+:ref:`writers.fbi`
+    Write TerraSolid FBI format
 
 :ref:`writers.fbx`
     Write mesh output in the Adobe FBX format.

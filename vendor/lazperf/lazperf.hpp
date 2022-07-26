@@ -77,7 +77,7 @@ protected:
     std::unique_ptr<Private> p_;
 };
 
-class point_compressor_0 : public point_compressor_base_1_2
+class point_compressor_0 final : public point_compressor_base_1_2
 {
 public:
     LAZPERF_EXPORT point_compressor_0(OutputCb cb, size_t ebCount = 0);
@@ -86,7 +86,7 @@ public:
     LAZPERF_EXPORT virtual const char *compress(const char *in);
 };
 
-class point_compressor_1 : public point_compressor_base_1_2
+class point_compressor_1 final : public point_compressor_base_1_2
 {
 public:
     LAZPERF_EXPORT point_compressor_1(OutputCb cb, size_t ebCount = 0);
@@ -95,7 +95,7 @@ public:
     LAZPERF_EXPORT virtual const char *compress(const char *in);
 };
 
-class point_compressor_2 : public point_compressor_base_1_2
+class point_compressor_2 final : public point_compressor_base_1_2
 {
 public:
     LAZPERF_EXPORT point_compressor_2(OutputCb cb, size_t ebCount = 0);
@@ -104,7 +104,7 @@ public:
     LAZPERF_EXPORT virtual const char *compress(const char *in);
 };
 
-class point_compressor_3 : public point_compressor_base_1_2
+class point_compressor_3 final : public point_compressor_base_1_2
 {
 public:
     LAZPERF_EXPORT point_compressor_3(OutputCb cb, size_t ebCount = 0);
@@ -127,7 +127,7 @@ protected:
 };
 
 
-class point_compressor_6 : public point_compressor_base_1_4
+class point_compressor_6 final : public point_compressor_base_1_4
 {
 public:
     LAZPERF_EXPORT point_compressor_6(OutputCb cb, size_t ebCount = 0);
@@ -137,7 +137,7 @@ public:
     LAZPERF_EXPORT virtual void done();
 };
 
-class point_compressor_7 : public point_compressor_base_1_4
+class point_compressor_7 final : public point_compressor_base_1_4
 {
 public:
     LAZPERF_EXPORT point_compressor_7(OutputCb cb, size_t ebCount = 0);
@@ -147,7 +147,7 @@ public:
     LAZPERF_EXPORT virtual void done();
 };
 
-class point_compressor_8 : public point_compressor_base_1_4
+class point_compressor_8 final : public point_compressor_base_1_4
 {
 public:
     LAZPERF_EXPORT point_compressor_8(OutputCb cb, size_t ebCount = 0);
@@ -175,7 +175,7 @@ protected:
     std::unique_ptr<Private> p_;
 };
 
-class point_decompressor_0 : public point_decompressor_base_1_2
+class point_decompressor_0 final : public point_decompressor_base_1_2
 {
 public:
     LAZPERF_EXPORT point_decompressor_0(InputCb cb, size_t ebCount = 0);
@@ -184,7 +184,7 @@ public:
     LAZPERF_EXPORT virtual char *decompress(char *in);
 };
 
-class point_decompressor_1 : public point_decompressor_base_1_2
+class point_decompressor_1 final : public point_decompressor_base_1_2
 {
 public:
     LAZPERF_EXPORT point_decompressor_1(InputCb cb, size_t ebCount = 0);
@@ -193,7 +193,7 @@ public:
     LAZPERF_EXPORT virtual char *decompress(char *out);
 };
 
-class point_decompressor_2 : public point_decompressor_base_1_2
+class point_decompressor_2 final : public point_decompressor_base_1_2
 {
 public:
     LAZPERF_EXPORT point_decompressor_2(InputCb cb, size_t ebCount = 0);
@@ -202,7 +202,7 @@ public:
     LAZPERF_EXPORT virtual char *decompress(char *out);
 };
 
-class point_decompressor_3 : public point_decompressor_base_1_2
+class point_decompressor_3 final : public point_decompressor_base_1_2
 {
 public:
     LAZPERF_EXPORT point_decompressor_3(InputCb cb, size_t ebCount = 0);
@@ -224,7 +224,7 @@ protected:
     std::unique_ptr<Private> p_;
 };
 
-class point_decompressor_6 : public point_decompressor_base_1_4
+class point_decompressor_6 final : public point_decompressor_base_1_4
 {
 public:
     LAZPERF_EXPORT point_decompressor_6(InputCb cb, size_t ebCount = 0);
@@ -233,7 +233,7 @@ public:
     LAZPERF_EXPORT virtual char *decompress(char *out);
 };
 
-class point_decompressor_7 : public point_decompressor_base_1_4
+class point_decompressor_7 final : public point_decompressor_base_1_4
 {
 public:
     LAZPERF_EXPORT point_decompressor_7(InputCb cb, size_t ebCount = 0);
@@ -242,7 +242,7 @@ public:
     LAZPERF_EXPORT virtual char *decompress(char *out);
 };
 
-struct point_decompressor_8 : public point_decompressor_base_1_4
+struct point_decompressor_8 final : public point_decompressor_base_1_4
 {
 public:
     LAZPERF_EXPORT ~point_decompressor_8();
