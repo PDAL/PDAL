@@ -215,6 +215,7 @@ PDAL_ADD_TEST(pdal_io_qfit_test FILES io/QFITReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_sbet_reader_test FILES io/SbetReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_sbet_writer_test FILES io/SbetWriterTest.cpp)
 PDAL_ADD_TEST(pdal_io_terrasolid_test FILES io/TerrasolidReaderTest.cpp)
+PDAL_ADD_TEST(pdal_io_fbi_test FILES io/FbiReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_text_writer_test FILES io/TextWriterTest.cpp)
 PDAL_ADD_TEST(pdal_io_text_reader_test
     FILES
