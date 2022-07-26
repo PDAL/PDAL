@@ -39,6 +39,9 @@ function(pdal_target_compile_settings target)
 #                /wd4530
                 # Standard C++-type exception handling.
                 /EHsc
+
+                # _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
+                /wd4996
                 )
             target_link_options(${target} PRIVATE /SUBSYSTEM:CONSOLE /ENTRY:wmainCRTStartup)
         endif()
