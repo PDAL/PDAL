@@ -73,5 +73,5 @@ ENDIF()
 
 if(MSVC)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
-        /SUBSYSTEM:WINDOWS /ENTRY:wmainCRTStartup")
+        /SUBSYSTEM:CONSOLE /ENTRY:wmainCRTStartup")
 endif()

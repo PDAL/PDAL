@@ -37,7 +37,11 @@
 
 #include <pdal/util/ProgramArgs.hpp>
 
+#ifdef _WIN32
+int wmain( int argc, wchar_t *argv[ ], wchar_t *envp[ ] )
+#else
 int main(int argc, char *argv[])
+#endif
 {
     pdal::DimBuilder d;
 
@@ -272,7 +276,7 @@ void DimBuilder::extractDim(NL::json& dim)
         else
             typeError = true;
 
-        
+
         if (typeError)
         {
             std::ostringstream oss;
