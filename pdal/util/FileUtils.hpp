@@ -248,7 +248,7 @@ namespace FileUtils
     */
     PDAL_DLL std::string toAbsolutePath(const std::string& filename,
         const std::string base);
-    
+
     /**
       Get the file creation and modification times.
 
@@ -284,6 +284,10 @@ namespace FileUtils
     */
     PDAL_DLL std::vector<std::string> glob(std::string filespec);
 
+
+    PDAL_DLL std::string toNative(const std::string& in);
+    PDAL_DLL std::string fromNative(const std::wstring& in);
+    PDAL_DLL std::string fromNative(const std::string& in);
 
     struct MapContext
     {
