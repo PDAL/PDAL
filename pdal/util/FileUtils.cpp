@@ -319,7 +319,7 @@ std::string readFileIntoString(const std::string& filename)
 {
     std::string str;
 
-    std::istream* stream = openFile(toNative(filename), false);
+    std::istream* stream = openFile(filename, false);
     if (stream)
     {
         str.assign((std::istreambuf_iterator<char>(*stream)),
@@ -339,22 +339,7 @@ std::string getcwd()
 
 std::string toCanonicalPath(std::string filename)
 {
-    std::string result;
-
-#ifdef _WIN32
-    filename = addTrailingSlash(filename);
-    char buf[MAX_PATH];
-    if (GetFullPathName(filename.c_str(), MAX_PATH, buf, NULL))
-        result = buf;
-#else
-    char *buf = realpath(toNative(filename).c_str(), NULL);
-    if (buf)
-    {
-        result = buf;
-        free(buf);
-    }
-#endif
-    return result;
+    return fs::canonical(toNative(filename)).string();
 }
 
 
