@@ -40,7 +40,7 @@ function(pdal_target_compile_settings target)
                 # Standard C++-type exception handling.
                 /EHsc
                 )
-            target_link_options(${target} PRIVATE "/SUBSYSTEM:CONSOLE /ENTRY:wmainCRTStartup"
+            target_link_options(${target} PRIVATE "/SUBSYSTEM:CONSOLE /ENTRY:wmainCRTStartup")
         endif()
 
         # check for MSVC 9+
