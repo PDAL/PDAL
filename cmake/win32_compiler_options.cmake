@@ -43,7 +43,7 @@ function(pdal_target_compile_settings target)
                 # _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
                 /wd4996
                 )
-            target_link_options(${target} PRIVATE /SUBSYSTEM:CONSOLE /ENTRY:wmainCRTStartup)
+
         endif()
 
         # check for MSVC 9+
