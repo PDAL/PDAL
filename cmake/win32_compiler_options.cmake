@@ -40,6 +40,7 @@ function(pdal_target_compile_settings target)
                 # Standard C++-type exception handling.
                 /EHsc
                 )
+            target_link_options(${target} PRIVATE "/SUBSYSTEM:CONSOLE /ENTRY:wmainCRTStartup"
         endif()
 
         # check for MSVC 9+
@@ -64,14 +65,3 @@ endfunction()
 #
 set(WINSOCK_LIBRARY ws2_32)
 
-IF(DEFINED ENV{OSGEO4W_HOME})
-	set(CMAKE_INCLUDE_PATH "c:/OSGeo4W64/include;$ENV{CMAKE_INCLUDE_PATH}")
-	set(CMAKE_LIBRARY_PATH "c:/OSGeo4W64/lib;$ENV{CMAKE_LIBRARY_PATH}")
-    set(CMAKE_PREFIX_PATH "c:/OSGeo4W64/cmake;$ENV{CMAKE_LIBRARY_PATH}")
-ENDIF()
-
-
-if(MSVC)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
-        /SUBSYSTEM:CONSOLE /ENTRY:wmainCRTStartup")
-endif()
