@@ -74,6 +74,13 @@ bool isStdout(std::string filename)
         Utils::toupper(filename) == "STDOUT";
 }
 
+std::string addTrailingSlash(std::string path)
+{
+    if (path[path.size() - 1] != '/' && path[path.size() - 1] != '\\')
+        path += "/";
+    return path;
+}
+
 } // unnamed namespace
 
 namespace FileUtils
@@ -207,7 +214,13 @@ bool createDirectory(const std::string& dirname)
 
 bool createDirectories(const std::string& dirname)
 {
-    return fs::create_directories(toNative(dirname));
+    // Need to strip any /'s off the end because windows and unix 
+    // create_directories seem to behave differently    
+    std::string s(dirname);
+    if('/' == s.back())
+        s.pop_back();
+
+    return fs::create_directories(toNative(s));
 }
 
 
@@ -326,7 +339,7 @@ std::string readFileIntoString(const std::string& filename)
 std::string getcwd()
 {
     const fs::path p = fs::current_path();
-    return p.u8string();
+    return addTrailingSlash(p.u8string());
 }
 
 
@@ -380,7 +393,7 @@ std::string getDirectory(const std::string& path)
 {
     const fs::path dir =
          fs::path(toNative(path)).parent_path();
-    return dir.u8string();
+    return addTrailingSlash(dir.u8string());
 }
 
 

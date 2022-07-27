@@ -289,7 +289,7 @@ TEST(FileUtilsTest, test_file_ops_with_unicode_paths)
         EXPECT_GE(dirs.size(), 1U);
         auto const dircount = std::count_if(dirs.cbegin(), dirs.cend(),
             [&japanese_dir](std::string const& d) {
-                 return normalize(d ) == normalize(japanese_dir); });
+                 return normalize(d + "/" ) == normalize(japanese_dir); });
         EXPECT_EQ(dircount, 1);
 
         std::string tmp2(Support::temppath("nonunicode.tmp"));
@@ -311,7 +311,7 @@ TEST(FileUtilsTest, test_file_ops_with_unicode_paths)
         EXPECT_EQ(FileUtils::fileSize(tmp1), 3U);
 
         // glob for files with Unicode path
-        auto const filenames = FileUtils::glob(japanese_dir + "/\*");
+        auto const filenames = FileUtils::glob(japanese_dir + "*");
         EXPECT_GE(filenames.size(), 1U);
         auto const tmp1count = std::count_if(filenames.cbegin(), filenames.cend(),
             [&tmp1](std::string const& f) { return normalize(f) == normalize(tmp1); });
