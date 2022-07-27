@@ -74,13 +74,6 @@ bool isStdout(std::string filename)
         Utils::toupper(filename) == "STDOUT";
 }
 
-std::string addTrailingSlash(std::string path)
-{
-    if (path[path.size() - 1] != '/' && path[path.size() - 1] != '\\')
-        path += "/";
-    return path;
-}
-
 } // unnamed namespace
 
 namespace FileUtils
@@ -238,7 +231,7 @@ std::vector<std::string> directoryList(const std::string& dir)
             it++;
         }
     }
-    catch (fs::filesystem_error&)
+    catch (fs::filesystem_error& )
     {
         files.clear();
     }
@@ -333,13 +326,13 @@ std::string readFileIntoString(const std::string& filename)
 std::string getcwd()
 {
     const fs::path p = fs::current_path();
-    return addTrailingSlash(p.string());
+    return p.u8string();
 }
 
 
 std::string toCanonicalPath(std::string filename)
 {
-    return fs::canonical(toNative(filename)).string();
+    return fs::canonical(toNative(filename)).u8string();
 }
 
 
@@ -347,7 +340,7 @@ std::string toCanonicalPath(std::string filename)
 // otherwise, make it absolute (relative to current working dir) and return that
 std::string toAbsolutePath(const std::string& filename)
 {
-    return fs::absolute(toNative(filename)).string();
+    return fs::absolute(toNative(filename)).u8string();
 }
 
 
@@ -387,7 +380,7 @@ std::string getDirectory(const std::string& path)
 {
     const fs::path dir =
          fs::path(toNative(path)).parent_path();
-    return addTrailingSlash(dir.string());
+    return dir.u8string();
 }
 
 
