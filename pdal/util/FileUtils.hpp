@@ -48,6 +48,7 @@
 #endif
 
 #include "pdal_util_export.hpp"
+#include "pdal_util_internal.hpp"
 
 namespace pdal
 {
@@ -248,7 +249,7 @@ namespace FileUtils
     */
     PDAL_DLL std::string toAbsolutePath(const std::string& filename,
         const std::string base);
-    
+
     /**
       Get the file creation and modification times.
 
@@ -284,6 +285,13 @@ namespace FileUtils
     */
     PDAL_DLL std::vector<std::string> glob(std::string filespec);
 
+#ifdef PDAL_WIN32_STL
+    PDAL_DLL std::wstring toNative(const std::string& in);
+    PDAL_DLL std::string fromNative(const std::wstring& in);
+#else
+    PDAL_DLL std::string toNative(const std::string& in);
+    PDAL_DLL std::string fromNative(const std::string& in);
+#endif
 
     struct MapContext
     {

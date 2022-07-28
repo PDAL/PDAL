@@ -33,3 +33,6 @@ target_link_libraries(dimbuilder
         ${EXECINFO_LIBRARY}
         ${CMAKE_DL_LIBS}
 )
+
+
+target_link_options(${target} PRIVATE /SUBSYSTEM:CONSOLE /ENTRY:mainCRTStartup)

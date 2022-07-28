@@ -30,6 +30,10 @@ target_include_directories(${PDAL_APP} PRIVATE
     ${GDAL_INCLUDE_DIR}
     ${PROJECT_BINARY_DIR}/include)
 
+IF(WIN32)
+    target_link_options(${PDAL_APP} PRIVATE /SUBSYSTEM:CONSOLE /ENTRY:wmainCRTStartup)
+endif(WIN32)
+
 #------------------------------------------------------------------------------
 # Targets installation
 #------------------------------------------------------------------------------

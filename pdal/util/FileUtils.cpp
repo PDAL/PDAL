@@ -81,6 +81,10 @@ std::string addTrailingSlash(std::string path)
     return path;
 }
 
+} // unnamed namespace
+
+namespace FileUtils
+{
 #ifdef PDAL_WIN32_STL
 std::wstring toNative(const std::string& in)
 {
@@ -131,10 +135,6 @@ std::string fromNative(const std::string& in)
 }
 #endif
 
-} // unnamed namespace
-
-namespace FileUtils
-{
 
 std::istream *openFile(std::string const& filename, bool asBinary)
 {
@@ -339,22 +339,7 @@ std::string getcwd()
 
 std::string toCanonicalPath(std::string filename)
 {
-    std::string result;
-
-#ifdef _WIN32
-    filename = addTrailingSlash(filename);
-    char buf[MAX_PATH];
-    if (GetFullPathName(filename.c_str(), MAX_PATH, buf, NULL))
-        result = buf;
-#else
-    char *buf = realpath(filename.c_str(), NULL);
-    if (buf)
-    {
-        result = buf;
-        free(buf);
-    }
-#endif
-    return result;
+    return fs::canonical(toNative(filename)).string();
 }
 
 

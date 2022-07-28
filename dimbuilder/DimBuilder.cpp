@@ -272,7 +272,7 @@ void DimBuilder::extractDim(NL::json& dim)
         else
             typeError = true;
 
-        
+
         if (typeError)
         {
             std::ostringstream oss;
