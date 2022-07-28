@@ -33,3 +33,8 @@ target_link_libraries(dimbuilder
         ${EXECINFO_LIBRARY}
         ${CMAKE_DL_LIBS}
 )
+
+
+if (MSVC)
+    target_link_options(dimbuilder PRIVATE /SUBSYSTEM:CONSOLE /ENTRY:mainCRTStartup)
+endif(MSVC)

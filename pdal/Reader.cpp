@@ -84,7 +84,8 @@ void Reader::setSpatialReference(MetadataNode& m, const SpatialReference& srs)
     else
     {
         log()->get(LogLevel::Debug) <<
-            "Ignoring setSpatialReference attempt: an override was set";
+            "Ignoring setSpatialReference attempt: an override was set"
+            << std::endl;
     }
 }
 
