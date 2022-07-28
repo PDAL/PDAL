@@ -34,5 +34,6 @@ target_link_libraries(dimbuilder
         ${CMAKE_DL_LIBS}
 )
 
-
-target_link_options(${target} PRIVATE /SUBSYSTEM:CONSOLE /ENTRY:mainCRTStartup)
+if (WIN32)
+    target_link_options(dimbuilder PRIVATE /SUBSYSTEM:CONSOLE /ENTRY:mainCRTStartup)
+endif(WIN32)
