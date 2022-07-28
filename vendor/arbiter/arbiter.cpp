@@ -120,6 +120,17 @@ void Arbiter::addDriver(const std::string type, std::shared_ptr<Driver> driver)
     m_drivers[type] = driver;
 }
 
+bool Arbiter::hasDriver(const std::string path) const
+{
+    try
+    {
+        getDriver(path);
+        return true;
+    }
+    catch (...) { }
+    return false;
+}
+
 std::string Arbiter::get(const std::string path) const
 {
     return getDriver(path)->get(stripProtocol(path));

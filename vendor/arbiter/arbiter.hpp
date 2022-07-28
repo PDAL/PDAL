@@ -5258,6 +5258,9 @@ public:
      */
     void addDriver(std::string type, std::shared_ptr<Driver> driver);
 
+    /** Returns true if a driver from this path is available. */
+    bool hasDriver(std::string path) const;
+
     /** Get data or throw if inaccessible. */
     std::string get(std::string path) const;
 
