@@ -214,7 +214,17 @@ bool createDirectory(const std::string& dirname)
 
 bool createDirectories(const std::string& dirname)
 {
+<<<<<<< HEAD
     return fs::create_directories(toNative(dirname));
+=======
+    // Need to strip any /'s off the end because windows and unix
+    // create_directories seem to behave differently
+    std::string s(dirname);
+    if('/' == s.back())
+        s.pop_back();
+
+    return fs::create_directories(toNative(s));
+>>>>>>> ee902594b (we need weakly_canonical instead of canonical because given paths might not exist)
 }
 
 
@@ -339,9 +349,8 @@ std::string getcwd()
 
 std::string toCanonicalPath(std::string filename)
 {
-    return fs::canonical(toNative(filename)).string();
+    return fs::weakly_canonical(toNative(filename)).u8string();
 }
-
 
 // if the filename is an absolute path, just return it
 // otherwise, make it absolute (relative to current working dir) and return that
