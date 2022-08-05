@@ -214,17 +214,7 @@ bool createDirectory(const std::string& dirname)
 
 bool createDirectories(const std::string& dirname)
 {
-<<<<<<< HEAD
     return fs::create_directories(toNative(dirname));
-=======
-    // Need to strip any /'s off the end because windows and unix
-    // create_directories seem to behave differently
-    std::string s(dirname);
-    if('/' == s.back())
-        s.pop_back();
-
-    return fs::create_directories(toNative(s));
->>>>>>> ee902594b (we need weakly_canonical instead of canonical because given paths might not exist)
 }
 
 
