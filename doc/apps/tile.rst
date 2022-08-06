@@ -73,6 +73,7 @@ a set of text files in the current directory.
 
 --------------------------------------------------------------------------------
 
-.. note:: 
+.. note::
+
 Tile does not wotk with nor-streamable formats, for example, copc. 
 
