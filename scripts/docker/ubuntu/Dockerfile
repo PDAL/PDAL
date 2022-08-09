@@ -13,7 +13,7 @@ RUN mamba install -c conda-forge git compilers conda-pack cmake make ninja sysro
 RUN git clone http://github.com/PDAL/PDAL.git pdal && \
     mkdir -p pdal/build && \
     cd pdal/build  && \
-    LDFLAGS="-Wl,-rpath-link,$CONDA_PREFIX/lib" cmake -G Ninja  \
+    CXXFLAGS="-Werror=strict-aliasing" LDFLAGS="-Wl,-rpath-link,$CONDA_PREFIX/lib" cmake -G Ninja  \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_LIBRARY_PATH:FILEPATH="$CONDA_PREFIX/lib" \
         -DCMAKE_INCLUDE_PATH:FILEPATH="$CONDA_PREFIX/include" \

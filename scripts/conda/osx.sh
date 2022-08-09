@@ -11,7 +11,7 @@ fi
 rm -rf $BUILDDIR
 mkdir -p $BUILDDIR
 cd $BUILDDIR
-CFLAGS= CXXFLAGS= CC=/usr/bin/cc CXX=/usr/bin/c++ cmake   -G "Ninja"  \
+CFLAGS= CXXFLAGS="-Werror=strict-aliasing" CC=/usr/bin/cc CXX=/usr/bin/c++ cmake   -G "Ninja"  \
         -DCMAKE_LIBRARY_PATH:FILEPATH="$CONDA_PREFIX/lib" \
         -DCMAKE_INCLUDE_PATH:FILEPATH="$CONDA_PREFIX/include" \
         -DCMAKE_FIND_FRAMEWORK="NEVER" \

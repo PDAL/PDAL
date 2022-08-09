@@ -1,6 +1,12 @@
 name: Alpine
 
-on: [push, pull_request]
+on:
+    push:
+        paths-ignore:
+            - 'doc/**'
+    pull_request:
+        paths-ignore:
+            - 'doc/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
@@ -9,6 +15,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
     defaults:
       run:
         shell: bash -l {0}
