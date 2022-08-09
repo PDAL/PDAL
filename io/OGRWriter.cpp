@@ -112,10 +112,7 @@ void OGRWriter::prepared(PointTableRef table)
 void OGRWriter::readyTable(PointTableRef table)
 {
     m_driver = GetGDALDriverManager()->GetDriverByName(m_driverName.data());
-    if (m_measureDim == Dimension::Id::Unknown)
-        m_geomType = (m_multiCount == 1) ? wkbPoint : wkbMultiPoint;
-    else
-        m_geomType = (m_multiCount == 1) ? wkbPointZM : wkbMultiPointZM;
+    m_geomType = (m_multiCount == 1) ? wkbPointZM : wkbMultiPointZM;
 }
 
 
