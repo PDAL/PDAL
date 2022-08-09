@@ -181,9 +181,12 @@ bool OGRWriter::processOne(PointRef& point)
 
 void OGRWriter::doneFile()
 {
-    if (m_curCount)
+    if (m_curCount % m_multiCount > 0) {
+        m_feature->SetGeometry(&m_multiPoint);
+
         if (m_layer->CreateFeature(m_feature))
             throwError("Couldn't create feature.");
+    }
     OGRFeature::DestroyFeature(m_feature);
     GDALClose(m_ds);
     m_layer = nullptr;
