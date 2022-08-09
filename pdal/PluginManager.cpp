@@ -140,7 +140,24 @@ void PluginManager<Kernel>::l_loadAll()
 template <typename T>
 std::string PluginManager<T>::link(const std::string& name)
 {
-    return get().l_link(name);
+    // Compute URLs for stage documents from the name instead
+    // of using the URLs that are in the PluginInfo struct
+    //
+    // For development builds, we always point to master
+    // https://pdal.dev/en/master/stages/filters.reprojection.html
+    //
+    // For versioned (Release) builds, we point to the version number
+    // https://pdal.dev/en/2.4.3/stages/filters.reprojection.html
+    //
+    std::string root("https://pdal.io/en/");
+
+    std::string version("master");
+    std::string sha = Config::sha1();
+    if (Utils::iequals(sha, "Release"))
+        version = Config::versionString();
+
+    std::string base = root + version +"/stages/";
+    return base + name + ".html";
 }
 
 
@@ -151,9 +168,12 @@ std::string PluginManager<T>::l_link(const std::string& name)
 
     std::lock_guard<std::mutex> lock(m_pluginMutex);
     auto ei = m_plugins.find(name);
+
+    // Try to find the plugin given the name and use
+    // the computed link name when we do
     if (ei != m_plugins.end())
-        link = ei->second.link;
-    return link;
+        return get().link(name);
+    return std::string("");
 }
 
 
