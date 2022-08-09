@@ -157,23 +157,28 @@ bool OGRWriter::processOne(PointRef& point)
     OGRPoint pt(x, y, z);
     if (m_measureDim != Dimension::Id::Unknown)
         pt.setM(m);
-    
+
     m_curCount++;
 
     if (m_multiCount > 1)
         m_multiPoint.addGeometry(&pt);
-    if (m_curCount == m_multiCount)
+
+    if (m_curCount % m_multiCount == 0)
     {
         if (m_multiCount > 1)
         {
             m_feature->SetGeometry(&m_multiPoint);
+            m_feature->SetFID(m_curCount / m_multiCount);
             m_multiPoint.empty();
         }
         else
+        {
             m_feature->SetGeometry(&pt);
+            m_feature->SetFID(point.pointId());
+        }
+
         if (m_layer->CreateFeature(m_feature))
             throwError("Couldn't create feature.");
-        m_curCount = 0;
     }
     return true;
 }
@@ -183,6 +188,7 @@ void OGRWriter::doneFile()
 {
     if (m_curCount % m_multiCount > 0) {
         m_feature->SetGeometry(&m_multiPoint);
+        m_feature->SetFID(m_curCount / m_multiCount + 1);
 
         if (m_layer->CreateFeature(m_feature))
             throwError("Couldn't create feature.");
