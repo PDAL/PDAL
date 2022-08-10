@@ -52,9 +52,9 @@ namespace pdal
 //  moving data around every time the grid is resized.
 
 GDALGrid::GDALGrid(double xOrigin, double yOrigin, size_t width, size_t height, double edgeLength,
-        double radius, int outputTypes, size_t windowSize, double power) :
+        double radius, int outputTypes, size_t windowSize, double power, bool binMode) :
     m_windowSize(windowSize), m_edgeLength(edgeLength), m_radius(radius), m_power(power),
-    m_outputTypes(outputTypes)
+    m_outputTypes(outputTypes), m_binMode(binMode)
 {
     if (width > (size_t)(std::numeric_limits<int>::max)() ||
         height > (size_t)(std::numeric_limits<int>::max)())
@@ -210,21 +210,38 @@ void GDALGrid::addPoint(double x, double y, double z)
     //       <--- | v
     //         <- v
 
-    updateFirstQuadrant(x, y, z);
-    updateSecondQuadrant(x, y, z);
-    updateThirdQuadrant(x, y, z);
-    updateFourthQuadrant(x, y, z);
+    if (!m_binMode)
+    {
+        updateFirstQuadrant(x, y, z);
+        updateSecondQuadrant(x, y, z);
+        updateThirdQuadrant(x, y, z);
+        updateFourthQuadrant(x, y, z);
 
-    int iOrigin = m_count->xCell(x);
-    int jOrigin = m_count->yCell(y);
+        int iOrigin = m_count->xCell(x);
+        int jOrigin = m_count->yCell(y);
 
-    // This is a questionable case.  If a point is in a cell, shouldn't
-    // it just be counted?
-    double d = distance(iOrigin, jOrigin, x, y);
-    if (d < m_radius &&
-        iOrigin >= 0 && jOrigin >= 0 &&
-        iOrigin < width() && jOrigin < height())
-        update(iOrigin, jOrigin, z, d);
+        // This is a questionable case.  If a point is in a cell, shouldn't
+        // it just be counted?
+        double d = distance(iOrigin, jOrigin, x, y);
+        if (d < m_radius &&
+            iOrigin >= 0 && jOrigin >= 0 &&
+            iOrigin < width() && jOrigin < height())
+            update(iOrigin, jOrigin, z, d);
+    } else
+    {
+
+        // If we are in bin mode we only care about points
+        // that are inside the cell. We don't care about distance, and
+        // we are not interpolating anything.
+        int iOrigin = m_count->xCell(x);
+        int jOrigin = m_count->yCell(y);
+
+        if (
+            iOrigin >= 0 && jOrigin >= 0 &&
+            iOrigin < width() && jOrigin < height())
+            update(iOrigin, jOrigin, z, 0.0f);
+
+    }
 }
 
 
