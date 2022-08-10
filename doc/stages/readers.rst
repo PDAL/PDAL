@@ -32,7 +32,6 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
    readers.matlab
    readers.memoryview
    readers.mbio
-   readers.mrsid
    readers.nitf
    readers.numpy
    readers.obj
