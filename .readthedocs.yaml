@@ -12,6 +12,8 @@ build:
   jobs:
     pre_build:
       - doxygen ./doc/doxygen/doxygen.conf 1> /dev/null
+  apt_packages:
+    - graphviz
 
 sphinx:
   builder: html
