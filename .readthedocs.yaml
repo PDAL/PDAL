@@ -11,7 +11,7 @@ build:
     python: "3.10"
   jobs:
     pre_build:
-      - doxygen ./doc/doxygen/doxygen.conf
+      - doxygen ./doc/doxygen/doxygen.conf 1> /dev/null
 
 sphinx:
   builder: html
