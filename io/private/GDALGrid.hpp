@@ -64,7 +64,7 @@ public:
     // Exported for testing.
     PDAL_DLL GDALGrid(double xOrigin, double yOrigin, size_t width, size_t height,
         double edgeLength, double radius, int outputTypes, size_t windowSize,
-        double power);
+        double power, bool binMode=false);
 
     void expandToInclude(double x, double y);
 
@@ -85,6 +85,7 @@ public:
     double xOrigin() const;
     double yOrigin() const;
 
+
 private:
     int m_windowSize;
     double m_edgeLength;
@@ -101,6 +102,8 @@ private:
     DataPtr m_idwDist;
 
     int m_outputTypes;
+
+    bool m_binMode;
 
     // Determine if a cell i, j has no associated points.
     bool empty(size_t i, size_t j) const
