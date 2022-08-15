@@ -198,16 +198,17 @@ void OGRWriter::readyFile(const std::string& filename,
     if (!m_ds)
         throwError("Unable to open OGR datasource '" + filename + "': " + CPLGetLastErrorMsg());
 
-    m_layer = m_ds->CreateLayer("points", nullptr, m_geomType, nullptr);
+    // CRS
+    if (!srs.empty())
+    {
+        if (!m_srs.importFromWkt(srs.getWKT().data()))
+            throwError(std::string("Can't initialise OGR SRS: ") + CPLGetLastErrorMsg());
+    }
+
+    // Layer
+    m_layer = m_ds->CreateLayer("points", &m_srs, m_geomType, nullptr);
     if (!m_layer)
         throwError(std::string("Can't create OGR layer: ") + CPLGetLastErrorMsg());
-
-    // CRS
-    {
-        gdal::ErrorHandlerSuspender devnull;
-
-        m_ds->SetProjection(srs.getWKT().data());
-    }
 
     // Fields
     for(auto& attr : m_attrs)
