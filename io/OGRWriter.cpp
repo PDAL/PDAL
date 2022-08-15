@@ -193,20 +193,23 @@ void OGRWriter::readyFile(const std::string& filename,
     m_curCount = 0;
     m_outputFilename = filename;
 
+    // Dataset
     m_ds = m_driver->Create(filename.data(), 0, 0, 0, GDT_Unknown, nullptr);
     if (!m_ds)
-        throwError("Unable to open OGR datasource '" + filename + "'.\n");
+        throwError("Unable to open OGR datasource '" + filename + "': " + CPLGetLastErrorMsg());
 
     m_layer = m_ds->CreateLayer("points", nullptr, m_geomType, nullptr);
     if (!m_layer)
-        throwError("Can't create OGR layer for points.\n");
+        throwError(std::string("Can't create OGR layer: ") + CPLGetLastErrorMsg());
 
+    // CRS
     {
         gdal::ErrorHandlerSuspender devnull;
 
         m_ds->SetProjection(srs.getWKT().data());
     }
 
+    // Fields
     for(auto& attr : m_attrs)
     {
         auto& ogrField = std::get<2>(attr);
@@ -214,7 +217,10 @@ void OGRWriter::readyFile(const std::string& filename,
             throwError(std::string("Can't create OGR field: ") + ogrField.GetNameRef());
     }
 
+    // Reusable template feature
     m_feature = OGRFeature::CreateFeature(m_layer->GetLayerDefn());
+    if (!m_feature)
+        throwError(std::string("Can't create template OGR feature: ") + CPLGetLastErrorMsg());
 }
 
 void OGRWriter::writeView(const PointViewPtr view)
@@ -293,7 +299,7 @@ bool OGRWriter::processOne(PointRef& point)
         }
 
         if (m_layer->CreateFeature(m_feature))
-            throwError("Couldn't create feature.");
+            throwError(std::string("Can't create OGR feature: ") + CPLGetLastErrorMsg());
     }
     return true;
 }
@@ -306,7 +312,7 @@ void OGRWriter::doneFile()
         m_feature->SetFID(m_curCount / m_multiCount + 1);
 
         if (m_layer->CreateFeature(m_feature))
-            throwError("Couldn't create feature.");
+            throwError(std::string("Can't create OGR feature: ") + CPLGetLastErrorMsg());
     }
     OGRFeature::DestroyFeature(m_feature);
     GDALClose(m_ds);
