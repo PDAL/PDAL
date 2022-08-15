@@ -301,6 +301,10 @@ bool OGRWriter::processOne(PointRef& point)
 
         if (m_layer->CreateFeature(m_feature))
             throwError(std::string("Can't create OGR feature: ") + CPLGetLastErrorMsg());
+
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,5,0)
+        m_feature->Reset();
+#endif
     }
     return true;
 }
@@ -309,6 +313,10 @@ bool OGRWriter::processOne(PointRef& point)
 void OGRWriter::doneFile()
 {
     if (m_curCount % m_multiCount > 0) {
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,5,0)
+        m_feature->Reset();
+#endif
+
         m_feature->SetGeometry(&m_multiPoint);
         m_feature->SetFID(m_curCount / m_multiCount + 1);
 
