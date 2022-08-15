@@ -78,7 +78,8 @@ void OGRWriter::addArgs(ProgramArgs& args)
     args.add("measure_dim", "Use dimensions as a measure value",
         m_measureDimName);
     args.add("ogrdriver", "OGR writer driver name", m_driverName, m_driverName);
-    args.add("attr_dims", "Dimensions to use as attributes, 'all' for all. Incompatible with multicount>1", m_attrDimNames);
+    args.add("ogr_options", "OGR layer creation options", m_ogrOptions);
+    args.add("attr_dims", "Dimension to use as attributes, 'all' for all. Incompatible with multicount>1", m_attrDimNames);
 }
 
 
@@ -205,8 +206,14 @@ void OGRWriter::readyFile(const std::string& filename,
             throwError(std::string("Can't initialise OGR SRS: ") + CPLGetLastErrorMsg());
     }
 
+    // Creation options
+    std::vector<const char*> ogr_create_options;
+    for(auto&& o:m_ogrOptions)
+        ogr_create_options.push_back(o.c_str());
+    ogr_create_options.push_back(nullptr);
+
     // Layer
-    m_layer = m_ds->CreateLayer("points", &m_srs, m_geomType, nullptr);
+    m_layer = m_ds->CreateLayer("points", &m_srs, m_geomType, const_cast<char**>(ogr_create_options.data()));
     if (!m_layer)
         throwError(std::string("Can't create OGR layer: ") + CPLGetLastErrorMsg());
 
