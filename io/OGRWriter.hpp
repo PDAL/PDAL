@@ -66,6 +66,7 @@ private:
     GDALDataset *m_ds;
     OGRLayer *m_layer;
     OGRFeature *m_feature;
+    OGRSpatialReference m_srs;
     OGRwkbGeometryType m_geomType;
     OGRMultiPoint m_multiPoint;
     std::string m_outputFilename;
@@ -74,6 +75,9 @@ private:
     size_t m_curCount;
     std::string m_measureDimName;
     Dimension::Id m_measureDim;
+    std::vector<std::string> m_attrDimNames;
+    std::vector<std::string> m_ogrOptions;
+    std::deque<std::tuple<Dimension::Id, Dimension::Type, OGRFieldDefn> > m_attrs;
 };
 
 }

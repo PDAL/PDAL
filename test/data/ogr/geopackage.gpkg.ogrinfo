@@ -1,0 +1,58 @@
+INFO: Open of `/Users/rcoup/code/point-clouds/pdal/test/data/../temp/ogr/geopackage.gpkg'
+      using driver `GPKG' successful.
+
+Layer name: points
+Geometry: 3D Measured Point
+Feature Count: 10
+Extent: (635619.850000, 849017.320000) - (635685.330000, 852165.120000)
+Layer SRS WKT:
+GEOGCRS["Undefined geographic SRS",
+    DATUM["unknown",
+        ELLIPSOID["unknown",6378137,298.257223563,
+            LENGTHUNIT["metre",1,
+                ID["EPSG",9001]]]],
+    PRIMEM["Greenwich",0,
+        ANGLEUNIT["degree",0.0174532925199433,
+            ID["EPSG",9122]]],
+    CS[ellipsoidal,2],
+        AXIS["latitude",north,
+            ORDER[1],
+            ANGLEUNIT["degree",0.0174532925199433,
+                ID["EPSG",9122]]],
+        AXIS["longitude",east,
+            ORDER[2],
+            ANGLEUNIT["degree",0.0174532925199433,
+                ID["EPSG",9122]]]]
+Data axis to CRS axis mapping: 2,1
+FID Column = fid
+Geometry Column = geom
+OGRFeature(points):0
+  POINT Z (635619.85 850064.04 447.01)
+
+OGRFeature(points):1
+  POINT Z (635640.42 849758.79 422.74)
+
+OGRFeature(points):2
+  POINT Z (635650.95 850244.03 424.93)
+
+OGRFeature(points):3
+  POINT Z (635673.46 850157.55 435.73)
+
+OGRFeature(points):4
+  POINT Z (635674.05 849017.32 428.02)
+
+OGRFeature(points):5
+  POINT Z (635678.9 851351.44 436.45)
+
+OGRFeature(points):6
+  POINT Z (635680.54 849362.66 421.56)
+
+OGRFeature(points):7
+  POINT Z (635681.07 851383.76 419)
+
+OGRFeature(points):8
+  POINT Z (635684.02 849494.39 407.12)
+
+OGRFeature(points):9
+  POINT Z (635685.33 852165.12 421.75)
+

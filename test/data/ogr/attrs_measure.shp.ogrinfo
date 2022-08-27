@@ -1,0 +1,171 @@
+INFO: Open of `/Users/rcoup/code/point-clouds/pdal/test/data/../temp/ogr/attrs_measure.shp'
+      using driver `ESRI Shapefile' successful.
+
+Layer name: attrs_measure
+Geometry: 3D Measured Point
+Feature Count: 10
+Extent: (635619.850000, 849017.320000) - (635685.330000, 852165.120000)
+Layer SRS WKT:
+(unknown)
+Intensity: Integer (9.0)
+ReturnNumb: Integer (9.0)
+NumberOfRe: Integer (9.0)
+ScanDirect: Integer (9.0)
+EdgeOfFlig: Integer (9.0)
+ScanAngleR: Real (24.15)
+UserData: Integer (9.0)
+PointSourc: Integer (9.0)
+GpsTime: Real (24.15)
+Red: Integer (9.0)
+Green: Integer (9.0)
+Blue: Integer (9.0)
+OGRFeature(attrs_measure):0
+  Intensity (Integer) = 1
+  ReturnNumb (Integer) = 1
+  NumberOfRe (Integer) = 2
+  ScanDirect (Integer) = 0
+  EdgeOfFlig (Integer) = 0
+  ScanAngleR (Real) = 15.000000000000000
+  UserData (Integer) = 125
+  PointSourc (Integer) = 7327
+  GpsTime (Real) = 246092.207880993664730
+  Red (Integer) = 52
+  Green (Integer) = 65
+  Blue (Integer) = 68
+  POINT ZM (635619.85 850064.04 447.01 1)
+
+OGRFeature(attrs_measure):1
+  Intensity (Integer) = 25
+  ReturnNumb (Integer) = 1
+  NumberOfRe (Integer) = 1
+  ScanDirect (Integer) = 1
+  EdgeOfFlig (Integer) = 0
+  ScanAngleR (Real) = 6.000000000000000
+  UserData (Integer) = 124
+  PointSourc (Integer) = 7327
+  GpsTime (Real) = 246092.682015085854800
+  Red (Integer) = 39
+  Green (Integer) = 57
+  Blue (Integer) = 56
+  POINT ZM (635640.42 849758.79 422.74 1)
+
+OGRFeature(attrs_measure):2
+  Intensity (Integer) = 33
+  ReturnNumb (Integer) = 1
+  NumberOfRe (Integer) = 1
+  ScanDirect (Integer) = 1
+  EdgeOfFlig (Integer) = 0
+  ScanAngleR (Real) = -11.000000000000000
+  UserData (Integer) = 126
+  PointSourc (Integer) = 7329
+  GpsTime (Real) = 247175.609838934644358
+  Red (Integer) = 109
+  Green (Integer) = 104
+  Blue (Integer) = 122
+  POINT ZM (635650.95 850244.03 424.93 2)
+
+OGRFeature(attrs_measure):3
+  Intensity (Integer) = 70
+  ReturnNumb (Integer) = 1
+  NumberOfRe (Integer) = 1
+  ScanDirect (Integer) = 1
+  EdgeOfFlig (Integer) = 0
+  ScanAngleR (Real) = 0.000000000000000
+  UserData (Integer) = 124
+  PointSourc (Integer) = 7328
+  GpsTime (Real) = 246509.078758077346720
+  Red (Integer) = 228
+  Green (Integer) = 220
+  Blue (Integer) = 231
+  POINT ZM (635673.46 850157.55 435.73 1)
+
+OGRFeature(attrs_measure):4
+  Intensity (Integer) = 153
+  ReturnNumb (Integer) = 1
+  NumberOfRe (Integer) = 1
+  ScanDirect (Integer) = 0
+  EdgeOfFlig (Integer) = 0
+  ScanAngleR (Real) = -7.000000000000000
+  UserData (Integer) = 126
+  PointSourc (Integer) = 7326
+  GpsTime (Real) = 245388.610486141726142
+  Red (Integer) = 146
+  Green (Integer) = 104
+  Blue (Integer) = 140
+  POINT ZM (635674.05 849017.32 428.02 1)
+
+OGRFeature(attrs_measure):5
+  Intensity (Integer) = 6
+  ReturnNumb (Integer) = 2
+  NumberOfRe (Integer) = 2
+  ScanDirect (Integer) = 0
+  EdgeOfFlig (Integer) = 0
+  ScanAngleR (Real) = 10.000000000000000
+  UserData (Integer) = 126
+  PointSourc (Integer) = 7329
+  GpsTime (Real) = 247174.372762127750320
+  Red (Integer) = 76
+  Green (Integer) = 87
+  Blue (Integer) = 92
+  POINT ZM (635678.9 851351.44 436.45 1)
+
+OGRFeature(attrs_measure):6
+  Intensity (Integer) = 58
+  ReturnNumb (Integer) = 2
+  NumberOfRe (Integer) = 2
+  ScanDirect (Integer) = 0
+  EdgeOfFlig (Integer) = 0
+  ScanAngleR (Real) = -1.000000000000000
+  UserData (Integer) = 126
+  PointSourc (Integer) = 7327
+  GpsTime (Real) = 246093.418377374502597
+  Red (Integer) = 64
+  Green (Integer) = 73
+  Blue (Integer) = 78
+  POINT ZM (635680.54 849362.66 421.56 2)
+
+OGRFeature(attrs_measure):7
+  Intensity (Integer) = 99
+  ReturnNumb (Integer) = 2
+  NumberOfRe (Integer) = 2
+  ScanDirect (Integer) = 1
+  EdgeOfFlig (Integer) = 0
+  ScanAngleR (Real) = -3.000000000000000
+  UserData (Integer) = 130
+  PointSourc (Integer) = 7330
+  GpsTime (Real) = 247574.175078637053957
+  Red (Integer) = 81
+  Green (Integer) = 84
+  Blue (Integer) = 95
+  POINT ZM (635681.07 851383.76 419 2)
+
+OGRFeature(attrs_measure):8
+  Intensity (Integer) = 48
+  ReturnNumb (Integer) = 1
+  NumberOfRe (Integer) = 1
+  ScanDirect (Integer) = 0
+  EdgeOfFlig (Integer) = 0
+  ScanAngleR (Real) = 1.000000000000000
+  UserData (Integer) = 126
+  PointSourc (Integer) = 7327
+  GpsTime (Real) = 246093.264552279375494
+  Red (Integer) = 78
+  Green (Integer) = 88
+  Blue (Integer) = 94
+  POINT ZM (635684.02 849494.39 407.12 1)
+
+OGRFeature(attrs_measure):9
+  Intensity (Integer) = 109
+  ReturnNumb (Integer) = 1
+  NumberOfRe (Integer) = 1
+  ScanDirect (Integer) = 1
+  EdgeOfFlig (Integer) = 0
+  ScanAngleR (Real) = 7.000000000000000
+  UserData (Integer) = 126
+  PointSourc (Integer) = 7332
+  GpsTime (Real) = 248689.024384217045736
+  Red (Integer) = 64
+  Green (Integer) = 73
+  Blue (Integer) = 78
+  POINT ZM (635685.33 852165.12 421.75 1)
+
