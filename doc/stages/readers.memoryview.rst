@@ -15,7 +15,7 @@ Note that the memoryview reader does not currently work with columnar
 data (data where individual dimensions are packed into arrays).
 
 Usage
-=====
+-----
 
 The memoryview reader cannot be used from the command-line.  It is for use
 by software using the PDAL API.
