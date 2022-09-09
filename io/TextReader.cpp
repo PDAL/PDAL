@@ -103,6 +103,7 @@ void TextReader::checkHeader(const std::string& header)
 
 void TextReader::parseHeader(const std::string& header)
 {
+    m_dimNames.clear();
     // If the first character is a double quote, assume that we have quoted
     // field names.
     if (header[0] == '"')
