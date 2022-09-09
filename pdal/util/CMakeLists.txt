@@ -46,3 +46,10 @@ set_target_properties(${PDAL_UTIL_LIB_NAME} PROPERTIES
     CLEAN_DIRECT_OUTPUT 1)
 
 set_property(GLOBAL PROPERTY _UTIL_INCLUDED TRUE)
+
+# Compatibility for GCC8: std::filesystem requires linking with libstdc++fs
+target_link_libraries(
+  ${PDAL_UTIL_LIB_NAME}
+  PRIVATE
+  "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:-lstdc++fs>"
+)
