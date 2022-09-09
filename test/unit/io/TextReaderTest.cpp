@@ -212,6 +212,7 @@ TEST(TextReaderTest, strip_whitespace_from_dimension_names)
     }
 }
 
+// Make sure that we can prepare twice with a quoted header.
 TEST(TextReaderTest, issue3859)
 {
     TextReader reader;
