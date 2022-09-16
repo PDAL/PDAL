@@ -4,13 +4,14 @@ MAINTAINER Howard Butler <howard@hobu.co>
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
 RUN conda create -n pdal -y
+ARG GITHUB_SHA
 
 SHELL ["conda", "run", "-n", "pdal", "/bin/bash", "-c"]
 
 RUN mamba install -c conda-forge git compilers conda-pack cmake make ninja sysroot_linux-64=2.17 && \
     mamba install --yes -c conda-forge pdal --only-deps
 
-RUN git clone http://github.com/PDAL/PDAL.git pdal && git checkout $GITHUB_SHA || true && \
+RUN git clone http://github.com/PDAL/PDAL.git pdal && git checkout ${GITHUB_SHA} || true && \
     mkdir -p pdal/build && \
     cd pdal/build  && \
     CXXFLAGS="-Werror=strict-aliasing" LDFLAGS="-Wl,-rpath-link,$CONDA_PREFIX/lib" cmake -G Ninja  \
