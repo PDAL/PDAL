@@ -11,9 +11,11 @@ SHELL ["conda", "run", "-n", "pdal", "/bin/bash", "-c"]
 RUN mamba install -c conda-forge git compilers conda-pack cmake make ninja sysroot_linux-64=2.17 && \
     mamba install --yes -c conda-forge pdal --only-deps
 
-RUN git clone http://github.com/PDAL/PDAL.git pdal && git checkout ${GITHUB_SHA} || true && \
+RUN git clone http://github.com/PDAL/PDAL.git pdal &&  \
     mkdir -p pdal/build && \
-    cd pdal/build  && \
+    cd pdal && \
+    git checkout ${GITHUB_SHA} || true ; \
+    cd build  && \
     CXXFLAGS="-Werror=strict-aliasing" LDFLAGS="-Wl,-rpath-link,$CONDA_PREFIX/lib" cmake -G Ninja  \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_LIBRARY_PATH:FILEPATH="$CONDA_PREFIX/lib" \
