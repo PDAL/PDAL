@@ -63,6 +63,7 @@ jobs:
           context: .
           file: ./scripts/docker/ubuntu/Dockerfile
           platforms: linux/amd64
+          build-args: GITHUB_SHA=${{ github.sha }}
           tags: |
             docker.io/pdal/pdal:${{ steps.prep.outputs.VERSION }}
             docker.io/pdal/pdal:latest
