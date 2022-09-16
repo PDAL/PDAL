@@ -11,6 +11,7 @@ RUN mamba install -c conda-forge git compilers conda-pack cmake make ninja sysro
     mamba install --yes -c conda-forge pdal --only-deps
 
 RUN git clone http://github.com/PDAL/PDAL.git pdal && \
+    git checkout $GITHUB_SHA && \
     mkdir -p pdal/build && \
     cd pdal/build  && \
     CXXFLAGS="-Werror=strict-aliasing" LDFLAGS="-Wl,-rpath-link,$CONDA_PREFIX/lib" cmake -G Ninja  \
