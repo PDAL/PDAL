@@ -273,6 +273,8 @@ TEST(LasReaderTest, inspect)
          R"(GEOGCS)"
     };
 
+    std::cout << "qi.m_srs.getWKT(): " << qi.m_srs.getWKT() << std::endl;
+    std::cout << "testWkt: " << testWkt << std::endl;
     EXPECT_TRUE(Utils::startsWith(qi.m_srs.getWKT(), testWkt));
     EXPECT_EQ(qi.m_pointCount, 5380u);
 
