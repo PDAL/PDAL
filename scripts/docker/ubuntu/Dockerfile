@@ -4,7 +4,7 @@ MAINTAINER Howard Butler <howard@hobu.co>
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
 RUN conda create -n pdal -y
-ARG GITHUB_SHA
+ARG CI
 ARG GITHUB_REPOSITORY="PDAL/PDAL"
 ARG GITHUB_SERVER_URL="https://github.com"
 
@@ -13,29 +13,10 @@ SHELL ["conda", "run", "-n", "pdal", "/bin/bash", "-c"]
 RUN mamba install -c conda-forge git compilers conda-pack cmake make ninja sysroot_linux-64=2.17 && \
     mamba install --yes -c conda-forge pdal --only-deps
 
-#RUN git clone "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" pdal &&  \
-#    mkdir -p pdal/build && \
-#    cd pdal && \
-#    git checkout ${GITHUB_SHA} || true ; \
-#    cd build  && \
-#    CXXFLAGS="-Werror=strict-aliasing" LDFLAGS="-Wl,-rpath-link,$CONDA_PREFIX/lib" cmake -G Ninja  \
-#        -DCMAKE_BUILD_TYPE=Release \
-#        -DCMAKE_LIBRARY_PATH:FILEPATH="$CONDA_PREFIX/lib" \
-#        -DCMAKE_INCLUDE_PATH:FILEPATH="$CONDA_PREFIX/include" \
-#        -DCMAKE_INSTALL_PREFIX="$CONDA_PREFIX" \
-#        -DBUILD_PLUGIN_CPD=OFF \
-#        -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
-#        -DBUILD_PLUGIN_NITF=ON \
-#        -DBUILD_PLUGIN_ICEBRIDGE=ON \
-#        -DBUILD_PLUGIN_HDF=ON \
-#        -DBUILD_PLUGIN_TILEDB=ON \
-#        -DBUILD_PLUGIN_E57=ON \
-#        -DBUILD_PGPOINTCLOUD_TESTS=OFF \
-#        -DWITH_ZSTD=ON \
-#        ..
+RUN if [ -z "${CI+x}" ]; then git clone "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" pdal; else echo "CI is set, we are not going to check it out '$CI'"; fi
 
-RUN cd /home/runner/work/PDAL/PDAL && mkdir build && \
-    cd build  && \
+RUN mkdir -p pdal/build && \
+    cd pdal/build  && \
     CXXFLAGS="-Werror=strict-aliasing" LDFLAGS="-Wl,-rpath-link,$CONDA_PREFIX/lib" cmake -G Ninja  \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_LIBRARY_PATH:FILEPATH="$CONDA_PREFIX/lib" \
