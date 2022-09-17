@@ -47,6 +47,6 @@ PROJCRS["NAD83 / UTM zone 15N",
 Data axis to CRS axis mapping: 1,2
 FID Column = fid
 Geometry Column = geom
-OGRFeature(points):0
+OGRFeature(points):1
   POINT Z (470692.44 4602888.9 16)
 

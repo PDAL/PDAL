@@ -270,7 +270,6 @@ bool OGRWriter::processOne(PointRef& point)
         else
         {
             m_feature->SetGeometry(&pt);
-            m_feature->SetFID(point.pointId());
 
             for (auto it = std::begin(m_attrs); it != std::end(m_attrs); ++it)
             {
@@ -325,7 +324,6 @@ void OGRWriter::doneFile()
 #endif
 
         m_feature->SetGeometry(&m_multiPoint);
-        m_feature->SetFID(m_curCount / m_multiCount + 1);
 
         if (m_layer->CreateFeature(m_feature))
             throwError(std::string("Can't create OGR feature: ") + CPLGetLastErrorMsg());
