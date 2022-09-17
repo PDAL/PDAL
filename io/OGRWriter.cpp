@@ -264,7 +264,6 @@ bool OGRWriter::processOne(PointRef& point)
         if (m_multiCount > 1)
         {
             m_feature->SetGeometry(&m_multiPoint);
-            m_feature->SetFID(m_curCount / m_multiCount);
             m_multiPoint.empty();
         }
         else
@@ -310,6 +309,8 @@ bool OGRWriter::processOne(PointRef& point)
 
 #if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,5,0)
         m_feature->Reset();
+#else
+        m_feature->SetFID(OGRNullFID);
 #endif
     }
     return true;
@@ -321,6 +322,8 @@ void OGRWriter::doneFile()
     if (m_curCount % m_multiCount > 0) {
 #if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,5,0)
         m_feature->Reset();
+#else
+        m_feature->SetFID(OGRNullFID);
 #endif
 
         m_feature->SetGeometry(&m_multiPoint);
