@@ -60,7 +60,7 @@ jobs:
           push: ${{ env.PUSH_PACKAGES == 'true' }}
           builder: ${{ steps.buildx.outputs.name }}
           context: .
-          file: ./scripts/docker/ubuntu/Dockerfile
+          file: /scripts/docker/ubuntu/Dockerfile
           platforms: linux/amd64
           build-args: |
             CI=${{ env.CI }}
