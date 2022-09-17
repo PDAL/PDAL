@@ -34,7 +34,7 @@ RUN mamba install -c conda-forge git compilers conda-pack cmake make ninja sysro
 #        -DWITH_ZSTD=ON \
 #        ..
 
-RUN mkdir build && \
+RUN cd /home/runner/work/PDAL/PDAL && mkdir build && \
     cd build  && \
     CXXFLAGS="-Werror=strict-aliasing" LDFLAGS="-Wl,-rpath-link,$CONDA_PREFIX/lib" cmake -G Ninja  \
         -DCMAKE_BUILD_TYPE=Release \
