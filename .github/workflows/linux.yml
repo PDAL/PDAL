@@ -65,3 +65,16 @@ jobs:
       run: |
           source ./scripts/ci/linux/examples.sh
 
+    - name: Install German locale
+      env:
+        DEBIAN_FRONTEND: noninteractive
+        TZ: Etc/UTC
+      run: sudo apt-get install -y tzdata locales && sudo locale-gen de_DE.UTF-8
+
+    - name: Test with German locale
+      env:
+        TEST_SET_LOCALE: de_DE.UTF-8
+      run: |
+          source ../scripts/ci/linux/test.sh
+      working-directory: ./build
+
