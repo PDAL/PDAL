@@ -3,56 +3,50 @@ INFO: Open of `/Users/rcoup/code/point-clouds/pdal/test/data/../temp/ogr/geopack
 
 Layer name: points
 Geometry: 3D Measured Point
-Feature Count: 10
-Extent: (635619.850000, 849017.320000) - (635685.330000, 852165.120000)
+Feature Count: 1
+Extent: (470692.440000, 4602888.900000) - (470692.440000, 4602888.900000)
 Layer SRS WKT:
-GEOGCRS["Undefined geographic SRS",
-    DATUM["unknown",
-        ELLIPSOID["unknown",6378137,298.257223563,
-            LENGTHUNIT["metre",1,
-                ID["EPSG",9001]]]],
-    PRIMEM["Greenwich",0,
-        ANGLEUNIT["degree",0.0174532925199433,
-            ID["EPSG",9122]]],
-    CS[ellipsoidal,2],
-        AXIS["latitude",north,
+PROJCRS["NAD83 / UTM zone 15N",
+    BASEGEOGCRS["NAD83",
+        DATUM["North American Datum 1983",
+            ELLIPSOID["GRS 1980",6378137,298.257222101,
+                LENGTHUNIT["metre",1]]],
+        PRIMEM["Greenwich",0,
+            ANGLEUNIT["degree",0.0174532925199433]],
+        ID["EPSG",4269]],
+    CONVERSION["UTM zone 15N",
+        METHOD["Transverse Mercator",
+            ID["EPSG",9807]],
+        PARAMETER["Latitude of natural origin",0,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8801]],
+        PARAMETER["Longitude of natural origin",-93,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8802]],
+        PARAMETER["Scale factor at natural origin",0.9996,
+            SCALEUNIT["unity",1],
+            ID["EPSG",8805]],
+        PARAMETER["False easting",500000,
+            LENGTHUNIT["metre",1],
+            ID["EPSG",8806]],
+        PARAMETER["False northing",0,
+            LENGTHUNIT["metre",1],
+            ID["EPSG",8807]]],
+    CS[Cartesian,2],
+        AXIS["(E)",east,
             ORDER[1],
-            ANGLEUNIT["degree",0.0174532925199433,
-                ID["EPSG",9122]]],
-        AXIS["longitude",east,
+            LENGTHUNIT["metre",1]],
+        AXIS["(N)",north,
             ORDER[2],
-            ANGLEUNIT["degree",0.0174532925199433,
-                ID["EPSG",9122]]]]
-Data axis to CRS axis mapping: 2,1
+            LENGTHUNIT["metre",1]],
+    USAGE[
+        SCOPE["Engineering survey, topographic mapping."],
+        AREA["North America - between 96°W and 90°W - onshore and offshore. Canada - Manitoba; Nunavut; Ontario. United States (USA) - Arkansas; Illinois; Iowa; Kansas; Louisiana; Michigan; Minnesota; Mississippi; Missouri; Nebraska; Oklahoma; Tennessee; Texas; Wisconsin."],
+        BBOX[25.61,-96,84,-90]],
+    ID["EPSG",26915]]
+Data axis to CRS axis mapping: 1,2
 FID Column = fid
 Geometry Column = geom
 OGRFeature(points):0
-  POINT Z (635619.85 850064.04 447.01)
-
-OGRFeature(points):1
-  POINT Z (635640.42 849758.79 422.74)
-
-OGRFeature(points):2
-  POINT Z (635650.95 850244.03 424.93)
-
-OGRFeature(points):3
-  POINT Z (635673.46 850157.55 435.73)
-
-OGRFeature(points):4
-  POINT Z (635674.05 849017.32 428.02)
-
-OGRFeature(points):5
-  POINT Z (635678.9 851351.44 436.45)
-
-OGRFeature(points):6
-  POINT Z (635680.54 849362.66 421.56)
-
-OGRFeature(points):7
-  POINT Z (635681.07 851383.76 419)
-
-OGRFeature(points):8
-  POINT Z (635684.02 849494.39 407.12)
-
-OGRFeature(points):9
-  POINT Z (635685.33 852165.12 421.75)
+  POINT Z (470692.44 4602888.9 16)
 

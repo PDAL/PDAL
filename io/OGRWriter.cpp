@@ -202,7 +202,7 @@ void OGRWriter::readyFile(const std::string& filename,
     // CRS
     if (!srs.empty())
     {
-        if (!m_srs.importFromWkt(srs.getWKT().data()))
+        if (m_srs.importFromWkt(srs.getWKT().data()) != OGRERR_NONE)
             throwError(std::string("Can't initialise OGR SRS: ") + CPLGetLastErrorMsg());
     }
 
