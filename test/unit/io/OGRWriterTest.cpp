@@ -242,7 +242,7 @@ TEST(OGRWriterTest, json)
 
 TEST(OGRWriterTest, geopackage)
 {
-    std::string infile = Support::datapath("las/simple.las");
+    std::string infile = Support::datapath("las/utm15.las");
     std::string infofile = Support::datapath("ogr/geopackage.gpkg.ogrinfo");
 
     Options wo;
