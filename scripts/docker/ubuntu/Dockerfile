@@ -5,6 +5,7 @@ ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
 RUN conda create -n pdal -y
 ARG CI
+ARG GITHUB_SHA
 ARG GITHUB_REPOSITORY="PDAL/PDAL"
 ARG GITHUB_SERVER_URL="https://github.com"
 
