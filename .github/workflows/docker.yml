@@ -61,9 +61,8 @@ jobs:
           push: ${{ env.PUSH_PACKAGES == 'true' }}
           builder: ${{ steps.buildx.outputs.name }}
           file: "./scripts/docker/ubuntu/Dockerfile"
+          context: .
           platforms: linux/amd64
-          volumes:
-            - ${{github.workspace}}/:/pdal
           build-args: |
             CI=${{ env.CI }}
           tags: |
