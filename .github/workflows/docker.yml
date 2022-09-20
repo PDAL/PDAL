@@ -59,7 +59,7 @@ jobs:
         with:
           push: ${{ env.PUSH_PACKAGES == 'true' }}
           builder: ${{ steps.buildx.outputs.name }}
-          context: "{{defaultContext}}"
+          context: "{{defaultContext}}:hobusubdir"
           file: "./scripts/docker/ubuntu/Dockerfile"
           platforms: linux/amd64
           build-args: |
