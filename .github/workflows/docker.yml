@@ -21,6 +21,7 @@ jobs:
     env:
       PUSH_PACKAGES: ${{ github.repository_owner == 'PDAL' && github.event_name != 'pull_request'  }}
     steps:
+      - uses: actions/checkout@v2
       - name: Lint
         id: lint
         run: |
@@ -59,7 +60,6 @@ jobs:
         with:
           push: ${{ env.PUSH_PACKAGES == 'true' }}
           builder: ${{ steps.buildx.outputs.name }}
-          context: "{{defaultContext}}:pdalsubdir"
           file: "./scripts/docker/ubuntu/Dockerfile"
           platforms: linux/amd64
           build-args: |
