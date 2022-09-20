@@ -62,6 +62,8 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           file: "./scripts/docker/ubuntu/Dockerfile"
           platforms: linux/amd64
+          volumes:
+            - ${{github.workspace}}/:/pdal
           build-args: |
             CI=${{ env.CI }}
           tags: |
