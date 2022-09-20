@@ -13,7 +13,7 @@ SHELL ["conda", "run", "-n", "pdal", "/bin/bash", "-c"]
 RUN mamba install -c conda-forge git compilers conda-pack cmake make ninja sysroot_linux-64=2.17 && \
     mamba install --yes -c conda-forge pdal --only-deps
 
-RUN if [ -z "${CI+x}" ]; then git clone "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" pdal; else echo "CI is set, we are not going to check it out '$CI'" && ls / && ls /data; fi
+RUN if [ -z "${CI+x}" ]; then git clone "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" pdal; else echo "CI is set, we are not going to check it out '$CI'" && ls / ; ls /data; ls "${GITHUB_WORKSPACE}"; ls /home/runner/work/PDAL/PDAL; fi
 
 
 RUN ls && pwd && mkdir -p pdal/build && \
