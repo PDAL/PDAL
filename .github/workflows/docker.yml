@@ -65,7 +65,7 @@ jobs:
           platforms: linux/amd64
           build-args: |
             CI=1
-            GITHUB_SHA=${{ github.event.pull_request.head.sha }}
+            GITHUB_SHA=${{ github.sha }}
           tags: |
             docker.io/pdal/pdal:${{ steps.prep.outputs.VERSION }}
             docker.io/pdal/pdal:latest
