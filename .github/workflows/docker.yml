@@ -65,6 +65,7 @@ jobs:
           platforms: linux/amd64
           build-args: |
             CI=${{ env.CI }}
+            GITHUB_SHA=${{ env.GITHUB_SHA }}
           tags: |
             docker.io/pdal/pdal:${{ steps.prep.outputs.VERSION }}
             docker.io/pdal/pdal:latest
