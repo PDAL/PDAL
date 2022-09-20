@@ -15,6 +15,8 @@ RUN mamba install -c conda-forge git compilers conda-pack cmake make ninja sysro
 
 RUN if [ -z "${CI+x}" ]; then git clone "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" pdal; else echo "CI is set, we are not going to check it out '$CI'" && cd ${GITHUB_WORKSPACE}; fi
 
+RUN echo "workspace location: ${GITHUB_WORKSPACE}"
+
 RUN ls && pwd && mkdir -p pdal/build && \
     cd pdal/build  && \
     CXXFLAGS="-Werror=strict-aliasing" LDFLAGS="-Wl,-rpath-link,$CONDA_PREFIX/lib" cmake -G Ninja  \
