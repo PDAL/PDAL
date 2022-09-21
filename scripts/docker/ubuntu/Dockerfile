@@ -4,7 +4,6 @@ MAINTAINER Howard Butler <howard@hobu.co>
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
 RUN conda create -n pdal -y
-ARG CI
 ARG GITHUB_SHA
 ARG GITHUB_REPOSITORY="PDAL/PDAL"
 ARG GITHUB_SERVER_URL="https://github.com"
@@ -14,14 +13,9 @@ SHELL ["conda", "run", "-n", "pdal", "/bin/bash", "-c"]
 RUN mamba install -c conda-forge git compilers conda-pack cmake make ninja sysroot_linux-64=2.17 && \
     mamba install --yes -c conda-forge pdal --only-deps
 
-#RUN if [ -z "${CI+x}" ]; then git clone "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" pdal; else echo "CI is set, we are not going to check it out '$CI'" && env; ls $HOME; find /; fi
-
-RUN env
-
 RUN git clone "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" pdal && \
-    cd pdal && \
+    cd pdal ; \
     git checkout ${GITHUB_SHA}
-
 
 RUN mkdir -p pdal/build && \
     cd pdal/build  && \

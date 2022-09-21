@@ -63,8 +63,11 @@ jobs:
           file: "./scripts/docker/ubuntu/Dockerfile"
           context: .
           platforms: linux/amd64
+
+          # We need to pass in the SHA to the Dockerfile so it can checkout
+          # our code. It is a different active SHA depending on whether it is a
+          # PR or a simple push
           build-args: |
-            CI=1
             GITHUB_SHA=${{ github.event.pull_request.head.sha != '' && github.event.pull_request.head.sha || github.sha }}
           tags: |
             docker.io/pdal/pdal:${{ steps.prep.outputs.VERSION }}
