@@ -539,7 +539,7 @@ int Utils::screenWidth()
         return 80;
 
     if (!ws.ws_col)
-      return 80;
+        return 80;
 
     return ws.ws_col;
 #endif
