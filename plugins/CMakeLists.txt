@@ -5,6 +5,11 @@ if (BUILD_PLUGIN_TRAJECTORY)
     add_subdirectory(trajectory)
 endif()
 
+add_subdirectory(stac)
+if (BUILD_PLUGIN_STAC)
+    add_subdirectory(stac)
+endif()
+
 if(BUILD_PLUGIN_I3S)
     if(NOT ZLIB_FOUND)
         message(FATAL_ERROR "Can't build i3s and slpk plugins without zlib")
