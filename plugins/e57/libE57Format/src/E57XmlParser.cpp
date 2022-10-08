@@ -354,7 +354,7 @@ void E57XmlParser::startElement(const   XMLCh* const    uri,
 
         if (isAttributeDefined(attributes, att_scale)) {
             ustring scale_str = lookupAttribute(attributes, att_scale);
-            pi.scale = atof(scale_str.c_str());  //??? use exact rounding library
+            fromString(scale_str, pi.scale);  //??? use exact rounding library
         } else {
             /// Not defined defined in XML, so defaults to 1.0
             pi.scale = 1.0;
@@ -362,7 +362,7 @@ void E57XmlParser::startElement(const   XMLCh* const    uri,
 
         if (isAttributeDefined(attributes, att_offset)) {
             ustring offset_str = lookupAttribute(attributes, att_offset);
-            pi.offset = atof(offset_str.c_str());  //??? use exact rounding library
+            fromString(offset_str, pi.offset);  //??? use exact rounding library
         } else {
             /// Not defined defined in XML, so defaults to 0.0
             pi.offset = 0.0;
@@ -397,7 +397,7 @@ void E57XmlParser::startElement(const   XMLCh* const    uri,
 
         if (isAttributeDefined(attributes, att_minimum)) {
             ustring minimum_str = lookupAttribute(attributes, att_minimum);
-            pi.floatMinimum = atof(minimum_str.c_str());  //??? use exact rounding library
+            fromString(minimum_str, pi.floatMinimum);  //??? use exact rounding library
         } else {
             /// Not defined defined in XML, so defaults to E57_FLOAT_MIN or E57_DOUBLE_MIN
             if (pi.precision == E57_SINGLE)
@@ -408,7 +408,7 @@ void E57XmlParser::startElement(const   XMLCh* const    uri,
 
         if (isAttributeDefined(attributes, att_maximum)) {
             ustring maximum_str = lookupAttribute(attributes, att_maximum);
-            pi.floatMaximum = atof(maximum_str.c_str());  //??? use exact rounding library
+            fromString(maximum_str, pi.floatMaximum);  //??? use exact rounding library
         } else {
             /// Not defined defined in XML, so defaults to FLOAT_MAX or DOUBLE_MAX
             if (pi.precision == E57_SINGLE)
@@ -620,7 +620,7 @@ void E57XmlParser::endElement(const XMLCh* const uri,
             /// Convert child text (if any) to value, else default to 0.0
             double floatValue;
             if (pi.childText.length() > 0)
-                floatValue = atof(pi.childText.c_str());
+                fromString(pi.childText, floatValue);
             else
                 floatValue = 0.0;
             shared_ptr<FloatNodeImpl> f_ni(new FloatNodeImpl(imf_, floatValue, pi.precision, pi.floatMinimum, pi.floatMaximum));

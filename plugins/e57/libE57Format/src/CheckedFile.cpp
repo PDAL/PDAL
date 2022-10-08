@@ -276,14 +276,14 @@ CheckedFile& CheckedFile::operator<<(const ustring& s)
 
 CheckedFile& CheckedFile::operator<<(int64_t i)
 {
-   stringstream ss;
+   ClassicLocaleStream<stringstream> ss;
    ss << i;
    return(*this << ss.str());
 }
 
 CheckedFile& CheckedFile::operator<<(uint64_t i)
 {
-   stringstream ss;
+   ClassicLocaleStream<stringstream> ss;
    ss << i;
    return(*this << ss.str());
 }
@@ -306,7 +306,7 @@ template<class FTYPE> CheckedFile& CheckedFile::writeFloatingPoint(FTYPE value, 
    cout << "CheckedFile::writeFloatingPoint, value=" << value << " precision=" << precision << endl;
 #endif
 
-   stringstream ss;
+   ClassicLocaleStream<stringstream> ss;
    ss << scientific << setprecision(precision) << value;
 
    /// Try to remove trailing zeroes and decimal point
