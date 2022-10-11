@@ -70,7 +70,6 @@ jobs:
           build-args: |
             GITHUB_SHA=${{ github.event.pull_request.head.sha != '' && github.event.pull_request.head.sha || github.sha }}
             GITHUB_REPOSITORY=${{ github.event.pull_request.head.repo.full_name }}}
-
           tags: |
             docker.io/pdal/pdal:${{ steps.prep.outputs.VERSION }}
             docker.io/pdal/pdal:latest
