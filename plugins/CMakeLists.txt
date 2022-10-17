@@ -5,7 +5,6 @@ if (BUILD_PLUGIN_TRAJECTORY)
     add_subdirectory(trajectory)
 endif()
 
-add_subdirectory(stac)
 if (BUILD_PLUGIN_STAC)
     add_subdirectory(stac)
 endif()

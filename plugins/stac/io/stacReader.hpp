@@ -34,46 +34,50 @@
 #pragma once
 
 #include <pdal/PointView.hpp>
-
 #include <pdal/Reader.hpp>
-
 #include <pdal/util/IStream.hpp>
+#include <pdal/util/Bounds.hpp>
+#include <pdal/JsonFwd.hpp>
+#include <pdal/StageFactory.hpp>
+#include <pdal/PipelineManager.hpp>
+#include <filters/MergeFilter.hpp>
+#include <arbiter/arbiter.hpp>
 
 
 namespace pdal
-
 {
+    class StacReader : public Reader
+    {
+        public:
 
-  class StacReader : public Reader
+            StacReader() : Reader() {};
 
-  {
-
-  public:
-
-    StacReader() : Reader() {};
-
-    std::string getName() const;
+            std::string getName() const;
 
 
-  private:
+        private:
+            struct Args
+            {
+                std::string id;
+                std::string itemPath;
+                std::string assetName;
+            };
 
-    std::unique_ptr<ILeStream> m_stream;
+            std::unique_ptr<ILeStream> m_stream;
+            std::unique_ptr<Args> m_args;
+            std::unique_ptr<arbiter::Arbiter> m_arbiter;
 
-    point_count_t m_index;
+            StageFactory m_factory;
+            MergeFilter m_merge;
+            PointViewSet m_pvSet;
 
-    double m_scale_z;
-
-
-    virtual void addDimensions(PointLayoutPtr layout);
-
-    virtual void addArgs(ProgramArgs& args);
-
-    virtual void ready(PointTableRef table);
-
-    virtual point_count_t read(PointViewPtr view, point_count_t count);
-
-    virtual void done(PointTableRef table);
-
-  };
-
+            virtual void initialize(PointTableRef table);
+            virtual void initializeItem(NL::json stacJson);
+            virtual void initializeCatalog(NL::json stacJson);
+            virtual void addArgs(ProgramArgs& args);
+            virtual void prepared(PointTableRef table);
+            virtual void ready(PointTableRef table);
+            virtual void done(PointTableRef table);
+            virtual PointViewSet run(PointViewPtr view);
+    };
 }

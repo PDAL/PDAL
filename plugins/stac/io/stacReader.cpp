@@ -35,175 +35,101 @@
 #include "stacReader.hpp"
 
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/Kernel.hpp>
 
 
 namespace pdal
 {
 
-  static PluginInfo const stacinfo
-  {
+static PluginInfo const stacinfo
+{
     "readers.stac",
     "STAC Reader",
     "http://pdal.io/stages/readers.stac.html"
-  };
+};
+
+CREATE_SHARED_STAGE(StacReader, stacinfo)
+
+std::string StacReader::getName() const { return stacinfo.name; }
+
+void StacReader::addArgs(ProgramArgs& args)
+{
+    args.add("asset_name", "Asset to use for data consumption", m_args->assetName, "data");
+}
 
 
-  CREATE_SHARED_STAGE(StacReader, stacinfo)
+void StacReader::initialize(PointTableRef table)
+{
+    m_arbiter.reset(new arbiter::Arbiter());
+    std::string stacStr = m_arbiter->get(m_filename);
+    NL::json stacJson = NL::json::parse(stacStr);
 
-  std::string StacReader::getName() const { return stacinfo.name; }
+    if (!stacJson.contains("type"))
+        throw pdal_error("Invalid STAC object provided.");
 
-  void StacReader::addArgs(ProgramArgs& args)
-  {
+    std::string stacType = stacJson["type"];
+    if (stacType == "Feature")
+        initializeItem(stacJson);
+    else if (stacType == "Catalog")
+        initializeCatalog(stacJson);
+    else
+        throw pdal_error("Could not initialize STAC object of type " + stacType);
+}
 
-    args.add("z_scale", "Z Scaling", m_scale_z, 1.0);
-    args.add("z_scale", "Z Scaling", m_scale_z, 1.0);
+void StacReader::initializeItem(NL::json stacJson)
+{
+    std::string dataUrl = stacJson["assets"]["ept.json"]["href"];
+    std::string driver = m_factory.inferReaderDriver(dataUrl);
+    log()->get(LogLevel::Debug) << "Using driver " << driver <<
+        " for file " << dataUrl << std::endl;
 
-  }
+    Stage *reader = m_factory.createStage(driver);
+    Stage *merge = m_factory.createStage("filters.merge");
 
-  void StacReader::addDimensions(PointLayoutPtr layout)
-  {
+    if (!reader)
+        throwError("Unable to create reader for file '" + dataUrl + "'.");
 
-    layout->registerDim(Dimension::Id::X);
+    Options readerOptions;
+    readerOptions.add("filename", dataUrl);
+    reader->setOptions(readerOptions);
 
-    layout->registerDim(Dimension::Id::Y);
+    m_merge.setInput(*reader);
+}
 
-    layout->registerDim(Dimension::Id::Z);
-
-    layout->registerOrAssignDim("MyData", Dimension::Type::Unsigned64);
-
-  }
-
-  void StacReader::ready(PointTableRef)
-
-  {
-
-    m_index = 0;
-
-    SpatialReference ref("EPSG:4385");
-
-    setSpatialReference(ref);
-
-  }
-
-  template <typename T>
-
-  T convert(const StringList& s, const std::string& name, size_t fieldno)
-  {
-
-      T output;
-
-      bool bConverted = Utils::fromString(s[fieldno], output);
-
-      if (!bConverted)
-
-      {
-
-          std::stringstream oss;
-
-          oss << "Unable to convert " << name << ", " << s[fieldno] <<
-
-              ", to double";
-
-          throw pdal_error(oss.str());
-
-      }
-      return output;
-  }
-
-  point_count_t StacReader::read(PointViewPtr view, point_count_t count)
-  {
-
-    PointLayoutPtr layout = view->layout();
-    PointId nextId = view->size();
-    PointId idx = m_index;
-    point_count_t numRead = 0;
-
-    m_stream.reset(new ILeStream(m_filename));
-
-    size_t HEADERSIZE(1);
-    size_t skip_lines((std::max)(HEADERSIZE, (size_t)m_index));
-    size_t line_no(1);
-
-    for (std::string line; std::getline(*m_stream->stream(), line); line_no++)
+void StacReader::initializeCatalog(NL::json stacJson)
+{
+    auto itemLinks = stacJson["links"];
+    for (auto link: itemLinks)
     {
-      if (line_no <= skip_lines)
-      {
-
-        continue;
-
-      }
-      // StacReader format:  X::Y::Z::Data
-      StringList s = Utils::split2(line, ':');
-
-
-      unsigned long u64(0);
-
-      if (s.size() != 4)
-
-      {
-
-        std::stringstream oss;
-
-        oss << "Unable to split proper number of fields.  Expected 4, got "
-
-            << s.size();
-
-        throw pdal_error(oss.str());
-
-      }
-
-
-      std::string name("X");
-
-      view->setField(Dimension::Id::X, nextId, convert<double>(s, name, 0));
-
-
-      name = "Y";
-
-      view->setField(Dimension::Id::Y, nextId, convert<double>(s, name, 1));
-
-
-      name = "Z";
-
-      double z = convert<double>(s, name, 2) * m_scale_z;
-
-      view->setField(Dimension::Id::Z, nextId, z);
-
-
-      name = "MyData";
-
-      view->setField(layout->findProprietaryDim(name),
-
-                     nextId,
-
-                     convert<unsigned int>(s, name, 3));
-
-
-      nextId++;
-
-      if (m_cb)
-
-        m_cb(*view, nextId);
-
+        std::cout << link << std::endl;
+        std::string linkType = link["rel"];
+        if (linkType != "item")
+            continue;
+        std::string itemUrl = link["href"];
+        //Create json from itemUrl
+        NL::json itemJson = NL::json::parse(m_arbiter->get(itemUrl));
+        initializeItem(itemJson);
     }
+}
 
-    m_index = nextId;
+void StacReader::prepared(PointTableRef table)
+{
+    m_merge.prepare(table);
+}
 
-    numRead = nextId;
+void StacReader::ready(PointTableRef table)
+{
+    m_pvSet = m_merge.execute(table);
+}
 
-
-    return numRead;
-
-  }
-
-
-  void StacReader::done(PointTableRef)
-
-  {
-
+void StacReader::done(PointTableRef)
+{
     m_stream.reset();
+}
 
-  }
-
+PointViewSet StacReader::run(PointViewPtr view)
+{
+    return m_pvSet;
+}
 
 } //namespace pdal
