@@ -31,6 +31,8 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+#include <ctime>
+#include <time.h>
 
 #include "stacReader.hpp"
 
@@ -54,12 +56,25 @@ std::string StacReader::getName() const { return stacinfo.name; }
 
 void StacReader::addArgs(ProgramArgs& args)
 {
-    args.add("asset_name", "Asset to use for data consumption", m_args->assetName, "data");
-}
+    m_args.reset(new StacReader::Args());
 
+
+    args.add("asset_name", "Asset to use for data consumption", m_args->assetName, "data");
+    args.add("min_date", "Minimum date to accept STAC items. Inclusive.", m_args->minDate);
+    args.add("max_date", "Maximum date to accept STAC items. Inclusive.", m_args->maxDate);
+    args.add("id", "Regular expression of IDs to select", m_args->id);
+
+}
 
 void StacReader::initialize(PointTableRef table)
 {
+
+    if (!m_args->minDate.empty())
+        log()->get(LogLevel::Debug) << "Minimum Date: " << m_args->minDate << std::endl;
+
+    if (!m_args->maxDate.empty())
+        log()->get(LogLevel::Debug) << "Maximum Date: " << m_args->maxDate << std::endl;
+
     m_arbiter.reset(new arbiter::Arbiter());
     std::string stacStr = m_arbiter->get(m_filename);
     NL::json stacJson = NL::json::parse(stacStr);
@@ -78,7 +93,26 @@ void StacReader::initialize(PointTableRef table)
 
 void StacReader::initializeItem(NL::json stacJson)
 {
-    std::string dataUrl = stacJson["assets"]["ept.json"]["href"];
+    std::string stacDate = stacJson["properties"]["datetime"];
+    std::string itemId = stacJson["id"];
+
+    if (stacDate <= m_args->minDate && !m_args->minDate.empty())
+    {
+        log()->get(LogLevel::Debug) << "Id " << itemId <<
+            " has date (" << stacDate <<
+            ") less than the minimum date. Excluding." << std::endl;
+        return;
+    }
+
+    if (stacDate >= m_args->maxDate && !m_args->maxDate.empty())
+    {
+        log()->get(LogLevel::Debug) << "Id " << itemId <<
+            " has date (" << stacDate <<
+            ") greater than the maximum date. Excluding." << std::endl;
+        return;
+    }
+
+    std::string dataUrl = stacJson["assets"][m_args->assetName]["href"];
     std::string driver = m_factory.inferReaderDriver(dataUrl);
     log()->get(LogLevel::Debug) << "Using driver " << driver <<
         " for file " << dataUrl << std::endl;
@@ -101,7 +135,6 @@ void StacReader::initializeCatalog(NL::json stacJson)
     auto itemLinks = stacJson["links"];
     for (auto link: itemLinks)
     {
-        std::cout << link << std::endl;
         std::string linkType = link["rel"];
         if (linkType != "item")
             continue;

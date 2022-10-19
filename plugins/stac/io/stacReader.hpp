@@ -33,6 +33,9 @@
 ****************************************************************************/
 #pragma once
 
+#include <time.h>
+#include <ctime>
+
 #include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/util/IStream.hpp>
@@ -61,11 +64,15 @@ namespace pdal
                 std::string id;
                 std::string itemPath;
                 std::string assetName;
+                std::string minDate;
+                std::string maxDate;
             };
 
             std::unique_ptr<ILeStream> m_stream;
             std::unique_ptr<Args> m_args;
             std::unique_ptr<arbiter::Arbiter> m_arbiter;
+            // char m_minDate[32];
+            // char m_maxDate[32];
 
             StageFactory m_factory;
             MergeFilter m_merge;
