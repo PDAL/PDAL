@@ -35,6 +35,7 @@
 
 #include <time.h>
 #include <ctime>
+#include <regex>
 
 #include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
@@ -77,10 +78,10 @@ namespace pdal
             StageFactory m_factory;
             MergeFilter m_merge;
             PointViewSet m_pvSet;
-
             virtual void initialize(PointTableRef table);
             virtual void initializeItem(NL::json stacJson);
             virtual void initializeCatalog(NL::json stacJson);
+            virtual bool prune(NL::json stacJson);
             virtual void addArgs(ProgramArgs& args);
             virtual void prepared(PointTableRef table);
             virtual void ready(PointTableRef table);

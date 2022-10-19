@@ -31,9 +31,6 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
-#include <ctime>
-#include <time.h>
-
 #include "stacReader.hpp"
 
 #include <pdal/util/ProgramArgs.hpp>
@@ -93,24 +90,8 @@ void StacReader::initialize(PointTableRef table)
 
 void StacReader::initializeItem(NL::json stacJson)
 {
-    std::string stacDate = stacJson["properties"]["datetime"];
-    std::string itemId = stacJson["id"];
-
-    if (stacDate <= m_args->minDate && !m_args->minDate.empty())
-    {
-        log()->get(LogLevel::Debug) << "Id " << itemId <<
-            " has date (" << stacDate <<
-            ") less than the minimum date. Excluding." << std::endl;
+    if (prune(stacJson))
         return;
-    }
-
-    if (stacDate >= m_args->maxDate && !m_args->maxDate.empty())
-    {
-        log()->get(LogLevel::Debug) << "Id " << itemId <<
-            " has date (" << stacDate <<
-            ") greater than the maximum date. Excluding." << std::endl;
-        return;
-    }
 
     std::string dataUrl = stacJson["assets"][m_args->assetName]["href"];
     std::string driver = m_factory.inferReaderDriver(dataUrl);
@@ -143,6 +124,44 @@ void StacReader::initializeCatalog(NL::json stacJson)
         NL::json itemJson = NL::json::parse(m_arbiter->get(itemUrl));
         initializeItem(itemJson);
     }
+}
+
+bool StacReader::prune(NL::json stacJson)
+{
+    // Returns true if item should be removed, false if it should stay
+    std::string itemId = stacJson["id"];
+    if (!m_args->id.empty())
+    {
+        std::regex id_regex(m_args->id);
+        if (!std::regex_match(itemId, id_regex))
+        {
+            log()->get(LogLevel::Debug) << "Id " << itemId <<
+                " does not match " << m_args->id << std::endl;
+            return true;
+        }
+    }
+
+    std::string stacDate = stacJson["properties"]["datetime"];
+    if (stacDate <= m_args->minDate && !m_args->minDate.empty())
+    {
+        log()->get(LogLevel::Debug) << "Id " << itemId <<
+            " has date (" << stacDate <<
+            ") less than the minimum date. Excluding." << std::endl;
+        return true;
+    }
+
+    if (stacDate >= m_args->maxDate && !m_args->maxDate.empty())
+    {
+        log()->get(LogLevel::Debug) << "Id " << itemId <<
+            " has date (" << stacDate <<
+            ") greater than the maximum date. Excluding." << std::endl;
+        return true;
+    }
+
+    log()->get(LogLevel::Debug) << "Id " << itemId <<
+        " will be included." << std::endl;
+    return false;
+
 }
 
 void StacReader::prepared(PointTableRef table)
