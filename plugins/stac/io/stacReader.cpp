@@ -73,11 +73,18 @@ void StacReader::initialize(PointTableRef table)
         std::cout << it.key() << ": " << it.value() << std::endl;
     }
 
+    if (!m_args->id.empty())
+        log()->get(LogLevel::Debug) << "STAC Id regex: " << m_args->id << std::endl;
+
     if (!m_args->minDate.empty())
         log()->get(LogLevel::Debug) << "Minimum Date: " << m_args->minDate << std::endl;
 
     if (!m_args->maxDate.empty())
         log()->get(LogLevel::Debug) << "Maximum Date: " << m_args->maxDate << std::endl;
+
+    if (!m_args->properties.empty())
+        log()->get(LogLevel::Debug) << "Property Pruning: " <<
+            m_args->properties.dump() << std::endl;
 
     m_arbiter.reset(new arbiter::Arbiter());
     std::string stacStr = m_arbiter->get(m_filename);
