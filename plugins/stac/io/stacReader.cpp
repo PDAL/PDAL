@@ -55,16 +55,23 @@ void StacReader::addArgs(ProgramArgs& args)
 {
     m_args.reset(new StacReader::Args());
 
-
     args.add("asset_name", "Asset to use for data consumption", m_args->assetName, "data");
     args.add("min_date", "Minimum date to accept STAC items. Inclusive.", m_args->minDate);
     args.add("max_date", "Maximum date to accept STAC items. Inclusive.", m_args->maxDate);
     args.add("id", "Regular expression of IDs to select", m_args->id);
+    args.add("properties", "Map of STAC property names to regular expression "
+        "values. ie. {\"pc:type\": \"(lidar|sonar)\"}. Selected items will match all properties."
+        , m_args->properties);
 
 }
 
 void StacReader::initialize(PointTableRef table)
 {
+
+    for (auto& it: m_args->properties.items())
+    {
+        std::cout << it.key() << ": " << it.value() << std::endl;
+    }
 
     if (!m_args->minDate.empty())
         log()->get(LogLevel::Debug) << "Minimum Date: " << m_args->minDate << std::endl;
@@ -156,6 +163,70 @@ bool StacReader::prune(NL::json stacJson)
             " has date (" << stacDate <<
             ") greater than the maximum date. Excluding." << std::endl;
         return true;
+    }
+
+    NL::json properties = stacJson["properties"];
+    if (!m_args->properties.empty())
+    {
+        for (auto &it: m_args->properties.items())
+        {
+            if (!properties.contains(it.key()))
+            {
+                log()->get(LogLevel::Debug) << "STAC Item does not contain "
+                    "property " << it.key() << ". Continuing." << std::endl;
+                continue;
+            }
+            NL::detail::value_t type = properties[it.key()].type();
+            // handle json types of number and string, all others are an exception
+            switch (type)
+            {
+                case NL::detail::value_t::string:
+                {
+                    std::regex desired(it.value());
+                    std::string value = properties[it.key()].get<std::string>();
+                    if (!std::regex_match(value, desired))
+                        return false;
+                    break;
+                }
+                case NL::detail::value_t::number_unsigned:
+                {
+                    uint value = properties[it.key()].get<uint>();
+                    uint desired = it.value().get<uint>();
+                    if (value != desired)
+                        return false;
+                    break;
+                }
+                case NL::detail::value_t::number_integer:
+                {
+                    int value = properties[it.key()].get<int>();
+                    int desired = it.value().get<int>();
+                    if (value != desired)
+                        return false;
+                    break;
+                }
+                case NL::detail::value_t::number_float:
+                {
+                    int value = properties[it.key()].get<int>();
+                    int desired = it.value().get<int>();
+                    if (value != desired)
+                        return false;
+                    break;
+                }
+                case NL::detail::value_t::boolean:
+                {
+                    bool value = properties[it.key()].get<bool>();
+                    bool desired = it.value().get<bool>();
+                    if (value != desired)
+                        return false;
+                    break;
+                }
+                default:
+                {
+                    throw pdal_error("Data type of " + it.key() + " is not supported for pruning.");
+                }
+            }
+
+        }
     }
 
     log()->get(LogLevel::Debug) << "Id " << itemId <<

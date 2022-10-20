@@ -63,6 +63,7 @@ namespace pdal
             struct Args
             {
                 std::string id;
+                NL::json properties;
                 std::string itemPath;
                 std::string assetName;
                 std::string minDate;
