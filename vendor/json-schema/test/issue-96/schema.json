@@ -1,0 +1,23 @@
+{
+    "$id": "http://xxx.local/schemas/mySchema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "topDef": {
+            "$id": "#topDef_ref",
+            "type": "object",
+            "properties": {
+                "value": {
+                    "type": "integer",
+                    "maximum": 100
+                }
+            }
+        }
+    },
+
+    "type": "object",
+    "properties": {
+        "top": {
+            "$ref": "#/definitions/topDef"
+        }
+    }
+}

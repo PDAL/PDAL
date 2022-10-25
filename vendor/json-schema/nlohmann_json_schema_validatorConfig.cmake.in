@@ -1,0 +1,9 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(nlohmann_json)
+
+include("${CMAKE_CURRENT_LIST_DIR}/nlohmann_json_schema_validatorTargets.cmake")
+check_required_components(
+  "nlohmann_json_schema_validator"
+  )

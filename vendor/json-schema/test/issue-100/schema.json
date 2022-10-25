@@ -1,0 +1,15 @@
+{
+    "$id": "http://xxx.local/schemas/mySchema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+
+    "type": "object",
+    "properties": {
+        "Prop1": {
+            "type": "integer",
+            "$comment": "Just a comment"
+        },
+        "Prop2": {
+            "$ref": "#random_ref"
+        }
+    }
+}

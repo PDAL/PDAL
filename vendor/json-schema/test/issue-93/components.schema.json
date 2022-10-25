@@ -1,0 +1,13 @@
+{
+    "Renderable": {
+        "type":"object",
+        "properties": {
+            "fg":{
+                "$ref":"/types/color.schema.json"
+            },
+            "bg":{
+                "$ref":"/types/color.schema.json"
+            }
+        }
+    }
+}

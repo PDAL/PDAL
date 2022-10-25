@@ -135,6 +135,7 @@ include(${PDAL_CMAKE_DIR}/libxml2.cmake)
 include(${PDAL_CMAKE_DIR}/dimension.cmake)
 include(${PDAL_CMAKE_DIR}/arbiter.cmake)
 include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
+include(${PDAL_CMAKE_DIR}/schema-validator.cmake)
 include(${PDAL_CMAKE_DIR}/lazperf.cmake)
 include(${PDAL_CMAKE_DIR}/openssl.cmake) # Optional
 
@@ -259,6 +260,7 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${ZSTD_INCLUDE_DIRS}
         ${NLOHMANN_INCLUDE_DIR}
         ${GDAL_INCLUDE_DIR}
+        ${SCHEMA_VALIDATOR_INCLUDE_DIR}
 )
 target_link_libraries(${PDAL_BASE_LIB_NAME}
     PRIVATE
@@ -276,7 +278,6 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${PDAL_ARBITER_LIB_NAME}
         ${PDAL_KAZHDAN_LIB_NAME}
         ${PDAL_LAZPERF_LIB_NAME}
-        ${NLOHMANN_JSON_SCHEMA_VALIDATOR}
     INTERFACE
         ${PDAL_LIBDIR}
 )

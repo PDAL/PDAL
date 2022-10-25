@@ -1,0 +1,11 @@
+{
+    "type":"array",
+    "items": {
+        "type":"object",
+        "properties": {
+            "renderable": {
+                "$ref":"/components.schema.json#/Renderable"
+            }
+        }
+    }
+}

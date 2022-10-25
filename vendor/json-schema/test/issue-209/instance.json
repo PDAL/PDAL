@@ -1,0 +1,10 @@
+[
+        {
+                "name": "player",
+                "fg": "White"
+        },
+        {
+                "name": "enemy",
+                "fg": "Red"
+        }
+]
