@@ -276,6 +276,7 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${PDAL_ARBITER_LIB_NAME}
         ${PDAL_KAZHDAN_LIB_NAME}
         ${PDAL_LAZPERF_LIB_NAME}
+        ${NLOHMANN_JSON_SCHEMA_VALIDATOR}
     INTERFACE
         ${PDAL_LIBDIR}
 )

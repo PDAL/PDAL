@@ -35,7 +35,7 @@
 
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/Kernel.hpp>
-
+// #include <nlohmann/json-schema.hpp>
 
 namespace pdal
 {
@@ -67,6 +67,7 @@ void StacReader::addArgs(ProgramArgs& args)
 
 void StacReader::initialize(PointTableRef table)
 {
+    // nlohmann::json_schema::json_validator val;
 
     for (auto& it: m_args->properties.items())
     {

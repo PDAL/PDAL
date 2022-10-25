@@ -1,9 +1,10 @@
-
+# find_package(nlohmann_json_schema_validator REQUIRED)
 PDAL_ADD_PLUGIN(stac_reader_libname reader stac
     FILES
         io/stacReader.cpp
     LINK_WITH
         ${STAC_LIBRARIES}
+        # ${nlohmann_json_schema_validator}
     INCLUDES
         ${ROOT_DIR}
         ${PDAL_VENDOR_DIR}
