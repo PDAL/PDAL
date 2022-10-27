@@ -68,6 +68,7 @@ namespace pdal
                 std::string assetName;
                 std::string minDate;
                 std::string maxDate;
+                bool validateJson;
             };
 
             std::unique_ptr<ILeStream> m_stream;
@@ -79,9 +80,11 @@ namespace pdal
             StageFactory m_factory;
             MergeFilter m_merge;
             PointViewSet m_pvSet;
+
             virtual void initialize(PointTableRef table);
             virtual void initializeItem(NL::json stacJson);
             virtual void initializeCatalog(NL::json stacJson);
+            virtual void validateJson(NL::json stacJson);
             virtual bool prune(NL::json stacJson);
             virtual void addArgs(ProgramArgs& args);
             virtual void prepared(PointTableRef table);

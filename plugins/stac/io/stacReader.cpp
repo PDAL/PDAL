@@ -60,6 +60,7 @@ void StacReader::addArgs(ProgramArgs& args)
     args.add("min_date", "Minimum date to accept STAC items. Inclusive.", m_args->minDate);
     args.add("max_date", "Maximum date to accept STAC items. Inclusive.", m_args->maxDate);
     args.add("id", "Regular expression of IDs to select", m_args->id);
+    args.add("validate_json", "Use JSON schema to validate your STAC objects.", m_args->validateJson, false);
     args.add("properties", "Map of STAC property names to regular expression "
         "values. ie. {\"pc:type\": \"(lidar|sonar)\"}. Selected items will match all properties."
         , m_args->properties);
@@ -68,12 +69,6 @@ void StacReader::addArgs(ProgramArgs& args)
 
 void StacReader::initialize(PointTableRef table)
 {
-
-    for (auto& it: m_args->properties.items())
-    {
-        std::cout << it.key() << ": " << it.value() << std::endl;
-    }
-
     if (!m_args->id.empty())
         log()->get(LogLevel::Debug) << "STAC Id regex: " << m_args->id << std::endl;
 
@@ -103,10 +98,33 @@ void StacReader::initialize(PointTableRef table)
         throw pdal_error("Could not initialize STAC object of type " + stacType);
 }
 
-void validateJson(NL::json stacJson)
+void StacReader::validateJson(NL::json stacJson)
 {
     nlohmann::json_schema::json_validator val;
 
+    if (!stacJson.contains("type"))
+        throw pdal_error("Invalid STAC json");
+    std::string type = stacJson["type"].get<std::string>();
+    std::string schemaUrl;
+
+    if (type == "Feature")
+    {
+        schemaUrl = "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/item.json";
+        for (auto& extSchemaUrl: stacJson["stac_extensions"])
+        {
+            val.set_root_schema(extSchemaUrl);
+            val.validate(stacJson);
+        }
+    }
+    else if (type == "Catalog")
+        schemaUrl = "https://schemas.stacspec.org/v1.0.0/catalog-spec/json-schema/catalog.json";
+    else
+        throw pdal_error("Invalid STAC type for PDAL consumption");
+
+    std::string schemaStr = m_arbiter->get(schemaUrl);
+    NL::json schemaJson = NL::json::parse(schemaStr);
+    val.set_root_schema(schemaJson);
+    val.validate(stacJson);
 }
 
 void StacReader::initializeItem(NL::json stacJson)
@@ -134,6 +152,8 @@ void StacReader::initializeItem(NL::json stacJson)
 
 void StacReader::initializeCatalog(NL::json stacJson)
 {
+    if (m_args->validateJson)
+        validateJson(stacJson);
     auto itemLinks = stacJson["links"];
     for (auto link: itemLinks)
     {
@@ -143,6 +163,8 @@ void StacReader::initializeCatalog(NL::json stacJson)
         std::string itemUrl = link["href"];
         //Create json from itemUrl
         NL::json itemJson = NL::json::parse(m_arbiter->get(itemUrl));
+        if (m_args->validateJson)
+            validateJson(itemJson);
         initializeItem(itemJson);
     }
 }
