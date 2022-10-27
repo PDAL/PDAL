@@ -179,6 +179,7 @@ if (WITH_TESTS)
 endif()
 add_subdirectory(dimbuilder)
 add_subdirectory(vendor/arbiter)
+add_subdirectory(vendor/schema-validator)
 add_subdirectory(vendor/kazhdan)
 add_subdirectory(vendor/lazperf)
 add_subdirectory(pdal/util)
@@ -260,7 +261,6 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${ZSTD_INCLUDE_DIRS}
         ${NLOHMANN_INCLUDE_DIR}
         ${GDAL_INCLUDE_DIR}
-        ${SCHEMA_VALIDATOR_INCLUDE_DIR}
 )
 target_link_libraries(${PDAL_BASE_LIB_NAME}
     PRIVATE
@@ -276,6 +276,7 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${PDAL_REEXPORT}
         ${PDAL_UTIL_LIB_NAME}
         ${PDAL_ARBITER_LIB_NAME}
+        ${JSON_SCHEMA_LIB_NAME}
         ${PDAL_KAZHDAN_LIB_NAME}
         ${PDAL_LAZPERF_LIB_NAME}
     INTERFACE

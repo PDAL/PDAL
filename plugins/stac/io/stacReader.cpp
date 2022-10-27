@@ -35,7 +35,8 @@
 
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/Kernel.hpp>
-// #include <nlohmann/json-schema.hpp>
+#include <nlohmann/json.hpp>
+#include <schema-validator/json-schema.hpp>
 
 namespace pdal
 {
@@ -67,7 +68,6 @@ void StacReader::addArgs(ProgramArgs& args)
 
 void StacReader::initialize(PointTableRef table)
 {
-    // nlohmann::json_schema::json_validator val;
 
     for (auto& it: m_args->properties.items())
     {
@@ -101,6 +101,12 @@ void StacReader::initialize(PointTableRef table)
         initializeCatalog(stacJson);
     else
         throw pdal_error("Could not initialize STAC object of type " + stacType);
+}
+
+void validateJson(NL::json stacJson)
+{
+    nlohmann::json_schema::json_validator val;
+
 }
 
 void StacReader::initializeItem(NL::json stacJson)

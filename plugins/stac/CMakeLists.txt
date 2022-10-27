@@ -4,6 +4,7 @@ PDAL_ADD_PLUGIN(stac_reader_libname reader stac
         io/stacReader.cpp
     LINK_WITH
         ${STAC_LIBRARIES}
+        ${JSON_SCHEMA_LIB_NAME}
     INCLUDES
         ${ROOT_DIR}
         ${PDAL_VENDOR_DIR}

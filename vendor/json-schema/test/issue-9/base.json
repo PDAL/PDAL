@@ -1,9 +1,0 @@
-{
-  "$schema": "http://json-schema.org/draft-04/schema#",
-  "description": "Describes foo",
-  "type": "object",
-  "allOf": [
-    { "$ref": "bar.json" },
-    { "$ref": "foo/foo.json" }
-  ]
-}
