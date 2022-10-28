@@ -74,8 +74,6 @@ namespace pdal
             std::unique_ptr<ILeStream> m_stream;
             std::unique_ptr<Args> m_args;
             std::unique_ptr<arbiter::Arbiter> m_arbiter;
-            // char m_minDate[32];
-            // char m_maxDate[32];
 
             StageFactory m_factory;
             MergeFilter m_merge;

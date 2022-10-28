@@ -98,10 +98,21 @@ void StacReader::initialize(PointTableRef table)
         throw pdal_error("Could not initialize STAC object of type " + stacType);
 }
 
+void schema_fetch(const nlohmann::json_uri &json_uri, nlohmann::json &json)
+{
+    std::unique_ptr<arbiter::Arbiter> fetcher;
+    fetcher.reset(new arbiter::Arbiter());
+    std::string jsonStr = fetcher->get(json_uri.url());
+    json = nlohmann::json::parse(jsonStr);
+}
+
 void StacReader::validateJson(NL::json stacJson)
 {
-    nlohmann::json_schema::json_validator val;
-
+    std::function<void(const nlohmann::json_uri &, nlohmann::json &)> fetch = schema_fetch;
+    nlohmann::json_schema::json_validator val(
+        fetch,
+        [](const std::string &, const std::string &) {}
+    );
     if (!stacJson.contains("type"))
         throw pdal_error("Invalid STAC json");
     std::string type = stacJson["type"].get<std::string>();
@@ -112,8 +123,18 @@ void StacReader::validateJson(NL::json stacJson)
         schemaUrl = "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/item.json";
         for (auto& extSchemaUrl: stacJson["stac_extensions"])
         {
-            val.set_root_schema(extSchemaUrl);
-            val.validate(stacJson);
+            // if (extSchemaUrl == "https://stac-extensions.github.io/pointcloud/v1.0.0/schema.json")
+            //     continue;
+            std::cout << "Processing extension " << extSchemaUrl << std::endl;
+            std::string schemaStr = m_arbiter->get(extSchemaUrl);
+            NL::json schemaJson = NL::json::parse(schemaStr);
+            val.set_root_schema(schemaJson);
+            // try {
+                val.validate(stacJson);
+            // } catch(const nlohmann::json_schema::error_handler& e) {
+            //     throw pdal_error("Failed to validate STAC JSON against extension " +
+            //         extSchemaUrl.dump() + " with error " + e.message);
+            // }
         }
     }
     else if (type == "Catalog")
@@ -131,8 +152,13 @@ void StacReader::initializeItem(NL::json stacJson)
 {
     if (prune(stacJson))
         return;
+    if (m_args->validateJson)
+        validateJson(stacJson);
 
-    std::string dataUrl = stacJson["assets"][m_args->assetName]["href"];
+    if (!stacJson["assets"].contains(m_args->assetName))
+        throw pdal_error("asset_name("+m_args->assetName+") doesn't match STAC object.");
+
+    std::string dataUrl = stacJson["assets"][m_args->assetName]["href"].get<std::string>();
     std::string driver = m_factory.inferReaderDriver(dataUrl);
     log()->get(LogLevel::Debug) << "Using driver " << driver <<
         " for file " << dataUrl << std::endl;
