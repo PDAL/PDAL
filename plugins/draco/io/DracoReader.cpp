@@ -145,8 +145,6 @@ void DracoReader::addDimensions(PointLayoutPtr layout)
 {
     using namespace draco;
 
-    log()->get(LogLevel::Debug) << "Number of attributes in point cloud: "
-                                << m_pc->num_attributes() << std::endl;;
 
     //iterate and collect information on draco attributes
     for (int i=0; i < m_pc->num_attributes(); ++i)
