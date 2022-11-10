@@ -12,9 +12,7 @@ if [ "$BUILD_TYPE" == "fixed" ]; then
     mamba install --yes --quiet pdal  --only-deps -y
 
 else
-    mamba install --yes --quiet
     mamba install pdal  --only-deps -y
-
 fi
 
 gdal-config --version
