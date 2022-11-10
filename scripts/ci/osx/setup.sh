@@ -7,7 +7,6 @@ mamba install -c conda-forge pkg-config cmake ninja pkgconfig -y
 
 if [ "$BUILD_TYPE" == "fixed" ]; then
 
-    mamba config --set channel_priority strict
     mamba install --yes draco -y
     mamba install --yes --quiet gdal=3.4.1=py310h2eb646b_6 python=3.10
     mamba install --yes --quiet pdal  --only-deps -y
