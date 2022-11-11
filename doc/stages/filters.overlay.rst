@@ -8,6 +8,8 @@ based on an OGR-readable polygon or multi-polygon.
 
 .. embed::
 
+.. streamable::
+
 OGR SQL support
 ----------------
 
