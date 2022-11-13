@@ -269,6 +269,14 @@ PDAL_ADD_TEST(pdal_filters_crop_test
     LINK_WITH
         ${GDAL_LIBRARY}
 )
+PDAL_ADD_TEST(pdal_filters_geomdistance_test
+    FILES
+        filters/GeomDistanceFilterTest.cpp
+    INCLUDES
+        ${GDAL_INCLUDE_DIR}
+    LINK_WITH
+        ${GDAL_LIBRARY}
+)
 PDAL_ADD_TEST(pdal_filters_csf_test FILES filters/CSFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_decimation_test FILES
     filters/DecimationFilterTest.cpp)

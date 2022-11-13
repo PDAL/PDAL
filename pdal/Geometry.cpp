@@ -206,6 +206,13 @@ BOX3D Geometry::bounds() const
 }
 
 
+double Geometry::distance(double x, double y, double z) const
+{
+    OGRPoint p(x, y, z);
+    return m_geom->Distance((OGRGeometry*)&p);
+}
+
+
 bool Geometry::valid() const
 {
     throwNoGeos();
@@ -251,6 +258,12 @@ std::string Geometry::json(double precision) const
     std::string output(json);
     OGRFree(json);
     return output;
+}
+
+
+void Geometry::clear()
+{
+    m_geom.reset();
 }
 
 
