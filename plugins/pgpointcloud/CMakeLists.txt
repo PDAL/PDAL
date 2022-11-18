@@ -14,6 +14,7 @@ PDAL_ADD_PLUGIN(reader_libname reader pgpointcloud
         ${LIBXML2_LIBRARIES}
     INCLUDES
         ${LIBXML2_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
 )
 
 #
@@ -27,6 +28,7 @@ PDAL_ADD_PLUGIN(writer_libname writer pgpointcloud
         ${LIBXML2_LIBRARIES}
     INCLUDES
         ${LIBXML2_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
 )
 #
 # PgPointCloud tests

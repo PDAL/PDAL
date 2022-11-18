@@ -23,6 +23,7 @@ target_include_directories(${PDAL_TEST_SUPPORT_OBJS}
         ${PROJECT_BINARY_DIR}/include
         ${PROJECT_BINARY_DIR}/test/unit
         ${PDAL_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_TARGET_COMPILE_SETTINGS(${PDAL_TEST_SUPPORT_OBJS})
 
