@@ -338,6 +338,8 @@ bool extractOption(Options& options, const std::string& name,
         options.add(name, node.get<double>());
     else if (node.is_boolean())
         options.add(name, node.get<bool>());
+    else if (node.is_array())
+        options.add(name, node.get<NL::json::array_t>());
     else if (node.is_null())
         options.add(name, "");
     else
