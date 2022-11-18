@@ -93,7 +93,7 @@ TEST(GeomDistanceFilterTest, test_polygon)
 
     double d = v->getFieldAs<double>(dim, 0);
 
-    EXPECT_EQ(d, 432.0f);
+    EXPECT_NEAR(d, 1501.558966f, 0.001);
 
 
     FileUtils::closeFile(wkt_stream);
