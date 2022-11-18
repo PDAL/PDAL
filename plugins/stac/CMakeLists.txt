@@ -15,4 +15,13 @@ target_compile_definitions(${stac_reader_libname}
         ARBITER_DLL_IMPORT
 )
 
-# if (WITH_TESTS)
+
+if (WITH_TESTS)
+    PDAL_ADD_TEST(pdal_io_stac_reader_test
+        FILES
+            test/StacReaderTest.cpp
+        INCLUDES
+            ${PDAL_VENDOR_DIR}
+            ${NLOHMANN_INCLUDE_DIR}
+    )
+endif()

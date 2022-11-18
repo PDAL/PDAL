@@ -40,7 +40,7 @@
 #include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/util/IStream.hpp>
-#include <pdal/util/Bounds.hpp>
+#include <pdal/SrsBounds.hpp>
 #include <pdal/JsonFwd.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/PipelineManager.hpp>
@@ -62,29 +62,38 @@ namespace pdal
         private:
             struct Args
             {
-                std::string id;
+                std::vector<std::string> ids;
                 NL::json properties;
-                std::string itemPath;
+                NL::json::array_t readerArgs;
+                NL::json::array_t dates;
+                SrsBounds bounds;
                 std::string assetName;
-                std::string minDate;
-                std::string maxDate;
-                bool validateJson;
+                bool schemaValidate;
+                bool dryRun;
             };
+
 
             std::unique_ptr<ILeStream> m_stream;
             std::unique_ptr<Args> m_args;
             std::unique_ptr<arbiter::Arbiter> m_arbiter;
+            NL::json m_readerArgs;
+            std::vector<std::string> m_idList;
+            std::vector<std::unique_ptr<Stage>> m_readerList;
+            std::mutex m_mutex;
 
             StageFactory m_factory;
             MergeFilter m_merge;
             PointViewSet m_pvSet;
 
+            virtual void handleReaderArgs();
             virtual void initialize(PointTableRef table);
             virtual void initializeItem(NL::json stacJson);
             virtual void initializeCatalog(NL::json stacJson);
-            virtual void validateJson(NL::json stacJson);
+            virtual void initializeArgs();
+            virtual void schemaValidate(NL::json stacJson);
             virtual bool prune(NL::json stacJson);
             virtual void addArgs(ProgramArgs& args);
+            virtual QuickInfo inspect();
             virtual void prepared(PointTableRef table);
             virtual void ready(PointTableRef table);
             virtual void done(PointTableRef table);
