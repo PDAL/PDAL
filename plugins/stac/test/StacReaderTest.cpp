@@ -50,50 +50,11 @@
 using namespace pdal;
 
 
-// TEST(StacReaderTest, remote_item_test)
-// {
-//     Options options;
-
-//     options.add("filename", "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/MD_GoldenBeach_2012.json");
-//     options.add("asset_name", "ept.json");
-
-//     StageFactory f;
-//     Stage& reader = *f.createStage("readers.stac");
-//     reader.setOptions(options);
-
-//     PointTable table;
-//     reader.prepare(table);
-//     QuickInfo qi = reader.preview();
-
-//     EXPECT_EQ(qi.m_pointCount, 4860658);
-// }
-
-
-// TEST(StacReaderTest, catalog_test)
-// {
-//     Options options;
-
-//     options.add("filename", Support::datapath("stac/catalog.json"));
-//     options.add("asset_name", "ept.json");
-
-//     StageFactory f;
-//     Stage& reader = *f.createStage("readers.stac");
-//     reader.setOptions(options);
-
-//     PointTable table;
-//     reader.prepare(table);
-//     QuickInfo qi = reader.preview();
-
-//     EXPECT_EQ(qi.m_pointCount, 36174643520);
-// }
-
-TEST(StacReaderTest, id_prune_test)
+TEST(StacReaderTest, remote_item_test)
 {
     Options options;
 
-    options.add("filename", Support::datapath("stac/catalog.json"));
-    options.add("ids", "MD_GoldenBeach_2012");
-    options.add("ids", "USGS_LPC_AK_Anchorage_2015_LAS_2017");
+    options.add("filename", "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/MD_GoldenBeach_2012.json");
     options.add("asset_name", "ept.json");
 
     StageFactory f;
@@ -103,11 +64,52 @@ TEST(StacReaderTest, id_prune_test)
     PointTable table;
     reader.prepare(table);
     QuickInfo qi = reader.preview();
+
+    EXPECT_EQ(qi.m_pointCount, 4860658);
+}
+
+
+TEST(StacReaderTest, catalog_test)
+{
+    Options options;
+
+    options.add("filename", Support::datapath("stac/catalog.json"));
+    options.add("asset_name", "ept.json");
+
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
+
+    PointTable table;
+    reader.prepare(table);
+    QuickInfo qi = reader.preview();
+
+    EXPECT_EQ(qi.m_pointCount, 72349287040);
+}
+
+TEST(StacReaderTest, id_prune_test)
+{
+    Options options;
+
+    options.add("filename", Support::datapath("stac/catalog.json"));
+    options.add("ids", "MD_GoldenBeach_2012");
+    //TODO find way to ignore regex commas?
+    options.add("ids", "USGS_LPC\\w*");
+    options.add("asset_name", "ept.json");
+
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
+
+    QuickInfo qi = reader.preview();
+
+    EXPECT_TRUE(qi.m_metadata.contains("id"));
     std::vector<std::string> idList = qi.m_metadata["id"].get<std::vector<std::string>>();
 
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "USGS_LPC_AK_Anchorage_2015_LAS_2017") != idList.end());
-    EXPECT_EQ(qi.m_pointCount, 12332042294);
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "USGS_LPC_AK_FairbanksNSB_QL1_2017_LAS_2018") != idList.end());
+    EXPECT_EQ(qi.m_pointCount, 36134211758);
 }
 
 

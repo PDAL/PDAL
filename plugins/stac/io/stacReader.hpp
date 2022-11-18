@@ -86,7 +86,7 @@ namespace pdal
             PointViewSet m_pvSet;
 
             virtual void handleReaderArgs();
-            virtual void initialize(PointTableRef table);
+            virtual void initialize();
             virtual void initializeItem(NL::json stacJson);
             virtual void initializeCatalog(NL::json stacJson);
             virtual void initializeArgs();

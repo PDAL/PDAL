@@ -158,9 +158,8 @@ void StacReader::initializeArgs()
 
 }
 
-void StacReader::initialize(PointTableRef table)
+void StacReader::initialize()
 {
-
     initializeArgs();
 
     m_arbiter.reset(new arbiter::Arbiter());
@@ -244,11 +243,7 @@ void StacReader::initializeItem(NL::json stacJson)
     log()->get(LogLevel::Debug) << "Using driver " << driver <<
         " for file " << dataUrl << std::endl;
 
-    // Stage *reader = m_factory.createStage(driver);
     Stage *reader = PluginManager<Stage>::createObject(driver);
-
-    //TODO remove merge filter?
-    // Stage *merge = m_factory.createStage("filters.merge");
 
     if (!reader)
         throwError("Unable to create reader for file '" + dataUrl + "'.");
@@ -265,7 +260,11 @@ void StacReader::initializeItem(NL::json stacJson)
     readerOptions.add("filename", dataUrl);
     reader->setOptions(readerOptions);
 
-    m_merge.setInput(*reader);
+    // m_merge.setInput(*reader);
+
+    if (m_readerList.size() > 0)
+        reader->setInput(*m_readerList.back());
+
     if (reader)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
@@ -455,7 +454,9 @@ bool StacReader::prune(NL::json stacJson)
 
 QuickInfo StacReader::inspect()
 {
+    initialize();
     QuickInfo qi;
+    // QuickInfo qi = m_readerList.back()->preview();
 
     for (auto& reader: m_readerList)
     {
@@ -464,7 +465,7 @@ QuickInfo StacReader::inspect()
         qi.m_pointCount += readerQi.m_pointCount;
         qi.m_metadata["id"] = NL::json::array();
         for (auto& id: m_idList)
-            qi.m_metadata.push_back(id);
+            qi.m_metadata["id"].push_back(id);
 
         for (auto& readerDim: readerQi.m_dimNames)
         {
@@ -477,36 +478,33 @@ QuickInfo StacReader::inspect()
         }
     }
 
-    log()->get(LogLevel::Debug) << "Id include list:" << std::endl;
-    for (auto& id: m_idList)
-        log()->get(LogLevel::Debug) << "  " << id << std::endl;
-
     qi.m_valid = true;
     return qi;
 }
 
 void StacReader::prepared(PointTableRef table)
 {
-    // for (auto it = m_readerList.begin(); it != m_readerList.end(); ++it)
+    m_readerList.back()->prepare(table);
+    // for (auto& reader: m_readerList)
+    //     reader->prepare(table);
+    // if (!m_args->dryRun)
+    //     m_merge.prepare(table);
+    // else
     // {
-
+    //     for (std::string& id : m_idList)
+    //     {
+    //         log()->get(LogLevel::Info) << id << std::endl;
+    //     }
     // }
-
-    if (!m_args->dryRun)
-        m_merge.prepare(table);
-    else
-    {
-        for (std::string& id : m_idList)
-        {
-            log()->get(LogLevel::Info) << id << std::endl;
-        }
-    }
 }
 
 void StacReader::ready(PointTableRef table)
 {
-    if (!m_args->dryRun)
-        m_pvSet = m_merge.execute(table);
+    m_pvSet = m_readerList.back()->execute(table);
+
+    // for (auto& reader: m_readerList)
+    // if (!m_args->dryRun)
+    //     m_pvSet = m_merge.execute(table);
 }
 
 void StacReader::done(PointTableRef)
