@@ -542,6 +542,7 @@ int Utils::screenWidth()
     err = GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbiInfo);
     if (!err)
     {
+        int len;
         char buf[200] {};
         len = FormatMessageA(0, 0, GetLastError(), 0, buf, 199, 0);
         throw std::runtime_error("Cant get console width " + std::string(buf, len));
