@@ -71,10 +71,12 @@ jobs:
         TZ: Etc/UTC
       run: sudo apt-get install -y tzdata locales && sudo locale-gen de_DE.UTF-8
 
-    - name: Test with German locale
+    - name: Test with German locale (except io_tiledb)
       env:
         TEST_SET_LOCALE: de_DE.UTF-8
       run: |
-          source ../scripts/ci/linux/test.sh
+          # Exclude 4 tiledb io tests that fail due to TileDB library implementation
+          # please, remove the exception rule here when fixed
+          source ../scripts/ci/linux/test.sh -E 'pdal_io_tiledb_(time_writer|time_reader|writer|reader)_test'
       working-directory: ./build
 
