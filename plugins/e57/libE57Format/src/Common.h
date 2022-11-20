@@ -29,7 +29,6 @@
 
 #include <iomanip>
 #include <iostream>
-#include <locale>
 #include <set>
 #include <sstream>
 #include <string>
@@ -72,15 +71,9 @@ namespace e57 {
 /// Create whitespace of given length, for indenting printouts in dump() functions
 inline std::string space(int n) {return(std::string(static_cast<size_t>(n),' '));}
 
-template<class T>
-struct ClassicLocaleStream : public T {ClassicLocaleStream() {this->imbue(std::locale::classic());}};
-
 /// Convert number to decimal, hexadecimal, and binary strings  (Note hex strings don't have leading zeros).
 template <class T>
-std::string toString(T x) {ClassicLocaleStream<std::ostringstream> ss; ss << x; return(ss.str());}
-
-template<class T>
-bool fromString(const std::string& from, T& to) {ClassicLocaleStream<std::istringstream> iss; iss.str(from); iss >> to; return !iss.fail();}
+std::string toString(T x) {std::ostringstream ss; ss << x; return(ss.str());}
 
 inline std::string hexString(uint64_t x) {std::ostringstream ss; ss << "0x" << std::hex << std::setw(16)<< std::setfill('0') << x; return(ss.str());}
 inline std::string hexString(uint32_t x) {std::ostringstream ss; ss << "0x" << std::hex << std::setw(8) << std::setfill('0') << x; return(ss.str());}
