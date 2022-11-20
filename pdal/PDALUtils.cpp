@@ -203,12 +203,12 @@ private:
     std::string m_filename;
 };
 
-class ArbiterOutStream : public ClassicLocaleStream<std::ofstream>
+class ArbiterOutStream : public std::ofstream
 {
 public:
     ArbiterOutStream(const std::string& localPath,
             const std::string& remotePath, std::ios::openmode mode) :
-        ClassicLocaleStream<std::ofstream>(localPath, mode),
+        std::ofstream(localPath, mode),
         m_remotePath(remotePath),
         m_localFile(localPath)
     {}
@@ -224,7 +224,7 @@ public:
     TempFile m_localFile;
 };
 
-class ArbiterInStream : public ClassicLocaleStream<std::ifstream>
+class ArbiterInStream : public std::ifstream
 {
 public:
     ArbiterInStream(const std::string& localPath, const std::string& remotePath,
