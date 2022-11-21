@@ -85,13 +85,14 @@ namespace pdal
             MergeFilter m_merge;
             PointViewSet m_pvSet;
 
-            virtual void handleReaderArgs();
+            void handleReaderArgs();
+            void initializeItem(NL::json stacJson);
+            void initializeCatalog(NL::json stacJson);
+            void initializeArgs();
+            void schemaValidate(NL::json stacJson);
+            bool prune(NL::json stacJson);
+
             virtual void initialize();
-            virtual void initializeItem(NL::json stacJson);
-            virtual void initializeCatalog(NL::json stacJson);
-            virtual void initializeArgs();
-            virtual void schemaValidate(NL::json stacJson);
-            virtual bool prune(NL::json stacJson);
             virtual void addArgs(ProgramArgs& args);
             virtual QuickInfo inspect();
             virtual void prepared(PointTableRef table);
