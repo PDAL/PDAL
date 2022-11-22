@@ -883,17 +883,24 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
     uint8_t scanDirectionFlag = point.getFieldAs<uint8_t>(Id::ScanDirectionFlag);
     uint8_t edgeOfFlightLine = point.getFieldAs<uint8_t>(Id::EdgeOfFlightLine);
     uint8_t classification = point.getFieldAs<uint8_t>(Id::Classification);
+    uint8_t classFlags;
+    if (point.hasDim(Id::ClassFlags))
+    {
+        // source file is PDRF >= 6
+        classFlags = point.getFieldAs<uint8_t>(Id::ClassFlags);
+    }
+    else
+    {
+        // source file is PDRF < 6
+        classFlags = classification >> 5;
+        classification &= 0x1F;
+    }
 
     if (has14PointFormat)
     {
         uint8_t bits = returnNumber | (numberOfReturns << 4);
         ostream << bits;
 
-        uint8_t classFlags;
-        if (point.hasDim(Id::ClassFlags))
-            classFlags = point.getFieldAs<uint8_t>(Id::ClassFlags);
-        else
-            classFlags = classification >> 5;
         bits = (classFlags & 0x0F) |
             ((scanChannel & 0x03) << 4) |
             ((scanDirectionFlag & 0x01) << 6) |
@@ -905,6 +912,20 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
         uint8_t bits = returnNumber | (numberOfReturns << 3) |
             (scanDirectionFlag << 6) | (edgeOfFlightLine << 7);
         ostream << bits;
+
+        if (classification > 31)
+        {
+            // Source file is PDRF 6+, which supports classification values up
+            // to 255, but we're writing to PDRF < 6 and can't write values
+            // over 31.
+            log()->get(LogLevel::Warning)
+                << "Classification " << classification
+                << " can't be written to LAS "
+                << std::to_string(d->header.versionMinor)
+                << ". Replaced with value 1." << std::endl;
+            classification = 1; // Unclassified
+        }
+        classification = (classFlags << 5) | classification;
     }
 
     ostream << classification;

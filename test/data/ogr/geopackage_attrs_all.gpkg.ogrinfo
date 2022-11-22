@@ -39,7 +39,7 @@ GpsTime: Real (0.0)
 Red: Integer (0.0)
 Green: Integer (0.0)
 Blue: Integer (0.0)
-OGRFeature(points):0
+OGRFeature(points):1
   Intensity (Integer) = 1
   ReturnNumber (Integer) = 1
   NumberOfReturns (Integer) = 2
@@ -55,7 +55,7 @@ OGRFeature(points):0
   Blue (Integer) = 68
   POINT Z (635619.85 850064.04 447.01)
 
-OGRFeature(points):1
+OGRFeature(points):2
   Intensity (Integer) = 25
   ReturnNumber (Integer) = 1
   NumberOfReturns (Integer) = 1
@@ -71,7 +71,7 @@ OGRFeature(points):1
   Blue (Integer) = 56
   POINT Z (635640.42 849758.79 422.74)
 
-OGRFeature(points):2
+OGRFeature(points):3
   Intensity (Integer) = 33
   ReturnNumber (Integer) = 1
   NumberOfReturns (Integer) = 1
@@ -87,7 +87,7 @@ OGRFeature(points):2
   Blue (Integer) = 122
   POINT Z (635650.95 850244.03 424.93)
 
-OGRFeature(points):3
+OGRFeature(points):4
   Intensity (Integer) = 70
   ReturnNumber (Integer) = 1
   NumberOfReturns (Integer) = 1
@@ -103,7 +103,7 @@ OGRFeature(points):3
   Blue (Integer) = 231
   POINT Z (635673.46 850157.55 435.73)
 
-OGRFeature(points):4
+OGRFeature(points):5
   Intensity (Integer) = 153
   ReturnNumber (Integer) = 1
   NumberOfReturns (Integer) = 1
@@ -119,7 +119,7 @@ OGRFeature(points):4
   Blue (Integer) = 140
   POINT Z (635674.05 849017.32 428.02)
 
-OGRFeature(points):5
+OGRFeature(points):6
   Intensity (Integer) = 6
   ReturnNumber (Integer) = 2
   NumberOfReturns (Integer) = 2
@@ -135,7 +135,7 @@ OGRFeature(points):5
   Blue (Integer) = 92
   POINT Z (635678.9 851351.44 436.45)
 
-OGRFeature(points):6
+OGRFeature(points):7
   Intensity (Integer) = 58
   ReturnNumber (Integer) = 2
   NumberOfReturns (Integer) = 2
@@ -151,7 +151,7 @@ OGRFeature(points):6
   Blue (Integer) = 78
   POINT Z (635680.54 849362.66 421.56)
 
-OGRFeature(points):7
+OGRFeature(points):8
   Intensity (Integer) = 99
   ReturnNumber (Integer) = 2
   NumberOfReturns (Integer) = 2
@@ -167,7 +167,7 @@ OGRFeature(points):7
   Blue (Integer) = 95
   POINT Z (635681.07 851383.76 419)
 
-OGRFeature(points):8
+OGRFeature(points):9
   Intensity (Integer) = 48
   ReturnNumber (Integer) = 1
   NumberOfReturns (Integer) = 1
@@ -183,7 +183,7 @@ OGRFeature(points):8
   Blue (Integer) = 94
   POINT Z (635684.02 849494.39 407.12)
 
-OGRFeature(points):9
+OGRFeature(points):10
   Intensity (Integer) = 109
   ReturnNumber (Integer) = 1
   NumberOfReturns (Integer) = 1
