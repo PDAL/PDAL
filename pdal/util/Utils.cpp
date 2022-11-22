@@ -538,9 +538,6 @@ int Utils::screenWidth()
     if (ioctl(0, TIOCGWINSZ, &ws))
         return 80;
 
-    if (!ws.ws_col)
-        return 80;
-
     return ws.ws_col;
 #endif
 }
