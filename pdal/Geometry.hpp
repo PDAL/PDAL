@@ -86,6 +86,8 @@ public:
     static void throwNoGeos();
 
     double distance(double x, double y, double z) const;
+    Geometry getRing() const;
+
 
 protected:
     std::unique_ptr<OGRGeometry> m_geom;

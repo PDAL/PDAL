@@ -29,6 +29,22 @@ This example crops an input point cloud using a square polygon.
           "filename":"with-distance.las"
       }
   ]
+
+
+.. figure:: ../images/filters.geomdistance-normal-mode.png
+   :scale: 75%
+
+    Normal distance mode causes any points *within* the given polygon to have a
+    distance of 0.
+
+.. figure:: ../images/filters.geomdistance-ring-mode.png
+   :scale: 75%
+
+    ``ring`` of ``True`` causes the polygon external ring to be used
+    for distance computation, resulting in distances **inside** the
+    polygon to be computed.
+
+
 Options
 -------
 
@@ -40,6 +56,10 @@ dimension
   The dimension to write the distance into
   bounds or polygon. [Default: distance]
 
+ring
+  Use the outer ring of the polygon (so as to get distances to the exterior
+  ring instead of all points inside the polygon having distance ``0``).
+  [Default: false]
 
 .. include:: filter_opts.rst
 

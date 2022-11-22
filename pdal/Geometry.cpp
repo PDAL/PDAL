@@ -212,6 +212,23 @@ double Geometry::distance(double x, double y, double z) const
     return m_geom->Distance((OGRGeometry*)&p);
 }
 
+Geometry Geometry::getRing() const
+{
+    throwNoGeos();
+
+    int count = OGR_G_GetGeometryCount(m_geom.get());
+    if (count)
+    {
+
+        OGRGeometryH ring = OGR_G_Clone(OGR_G_GetGeometryRef(m_geom.get(), 0));
+        OGRGeometryH linestring = OGR_G_ForceToLineString(ring);
+
+        return Geometry(linestring, getSpatialReference());
+    }
+    else
+        throwNoGeos();
+
+}
 
 bool Geometry::valid() const
 {

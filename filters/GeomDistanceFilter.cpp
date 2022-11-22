@@ -94,6 +94,8 @@ void GeomDistanceFilter::addArgs(ProgramArgs& args)
 
 void GeomDistanceFilter::ready(PointTableRef table)
 {
+    if (m_args->m_doRingMode)
+        m_args->m_geometry = m_args->m_geometry.getRing();
 }
 
 
