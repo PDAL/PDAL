@@ -202,8 +202,7 @@ macro(PDAL_ADD_TEST _name)
         ${PDAL_ADD_TEST_INCLUDES}
         ${PROJECT_SOURCE_DIR}/test/unit
         ${PROJECT_BINARY_DIR}/test/unit
-        ${PROJECT_BINARY_DIR}/include
-        ${NLOHMANN_INCLUDE_DIR})
+        ${PROJECT_BINARY_DIR}/include)
     if (PDAL_ADD_TEST_SYSTEM_INCLUDES)
         target_include_directories(${_name} SYSTEM PRIVATE
             ${PDAL_ADD_TEST_SYSTEM_INCLUDES})

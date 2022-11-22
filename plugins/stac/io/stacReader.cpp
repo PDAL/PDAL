@@ -463,9 +463,6 @@ QuickInfo StacReader::inspect()
         QuickInfo readerQi = reader->preview();
         qi.m_bounds.grow(readerQi.m_bounds);
         qi.m_pointCount += readerQi.m_pointCount;
-        qi.m_metadata["id"] = NL::json::array();
-        for (auto& id: m_idList)
-            qi.m_metadata["id"].push_back(id);
 
         for (auto& readerDim: readerQi.m_dimNames)
         {
@@ -476,6 +473,18 @@ QuickInfo StacReader::inspect()
             if (!exists)
                 qi.m_dimNames.push_back(readerDim);
         }
+    }
+
+    NL::json metadata;
+    metadata["ids"] = NL::json::array();
+    for (auto& id: m_idList)
+        metadata["ids"].push_back(id);
+
+
+    if (metadata.contains("ids"))
+    {
+        std::string metadataStr = metadata["ids"].dump();
+        qi.m_metadata.addWithType("stac_ids", metadataStr, "json", "STAC Reader ID List");
     }
 
     qi.m_valid = true;

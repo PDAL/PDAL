@@ -34,9 +34,6 @@
 
 #pragma once
 
-#include <pdal/JsonFwd.hpp>
-#include <nlohmann/json.hpp>
-
 #include <vector>
 
 #include <pdal/util/Bounds.hpp>
@@ -52,7 +49,7 @@ public:
     SpatialReference m_srs;
     point_count_t m_pointCount;
     StringList m_dimNames;
-    NL::json m_metadata;
+    MetadataNode m_metadata;
 
     bool m_valid;
 

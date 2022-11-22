@@ -185,7 +185,7 @@ MetadataNode InfoKernel::dumpSummary(const QuickInfo& qi)
 
     if (!qi.m_metadata.empty())
     {
-        summary.addWithType("metadata", qi.m_metadata.dump(), "json", "Preview JSON Metadata");
+        summary.add(qi.m_metadata.clone("metadata"));
     }
 
     return summary;

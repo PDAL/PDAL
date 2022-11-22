@@ -61,8 +61,6 @@ TEST(StacReaderTest, remote_item_test)
     Stage& reader = *f.createStage("readers.stac");
     reader.setOptions(options);
 
-    PointTable table;
-    reader.prepare(table);
     QuickInfo qi = reader.preview();
 
     EXPECT_EQ(qi.m_pointCount, 4860658);
@@ -80,11 +78,9 @@ TEST(StacReaderTest, catalog_test)
     Stage& reader = *f.createStage("readers.stac");
     reader.setOptions(options);
 
-    PointTable table;
-    reader.prepare(table);
     QuickInfo qi = reader.preview();
 
-    EXPECT_EQ(qi.m_pointCount, 72349287040);
+    EXPECT_EQ(qi.m_pointCount, 36174643520);
 }
 
 TEST(StacReaderTest, id_prune_test)
@@ -103,8 +99,10 @@ TEST(StacReaderTest, id_prune_test)
 
     QuickInfo qi = reader.preview();
 
-    EXPECT_TRUE(qi.m_metadata.contains("id"));
-    std::vector<std::string> idList = qi.m_metadata["id"].get<std::vector<std::string>>();
+
+    NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
+    EXPECT_TRUE(jsonMetadata.contains("stac_ids"));
+    std::vector<std::string> idList = jsonMetadata["stac_ids"].get<std::vector<std::string>>();
 
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "USGS_LPC_AK_Anchorage_2015_LAS_2017") != idList.end());
@@ -112,16 +110,18 @@ TEST(StacReaderTest, id_prune_test)
     EXPECT_EQ(qi.m_pointCount, 36134211758);
 }
 
-
-
-// TEST(StacReaderTest, dry_run)
+// TEST(StacReaderTest, date_prune_test)
 // {
 //     Options options;
-//     options.add("filename", "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/catalog.json");
+
+//     options.add("filename", Support::datapath("stac/MD_GoldenBeach_2012.json"));
 //     options.add("asset_name", "ept.json");
-//     options.add("dry_run", true);
+//     options.add("date_ranges", "[\"\",\"\"]")
 
 //     StageFactory f;
 //     Stage& reader = *f.createStage("readers.stac");
 //     reader.setOptions(options);
+
+//     QuickInfo qi = reader.preview();
+
 // }
