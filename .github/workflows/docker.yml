@@ -69,6 +69,7 @@ jobs:
           # PR or a simple push
           build-args: |
             GITHUB_SHA=${{ github.event.pull_request.head.sha != '' && github.event.pull_request.head.sha || github.sha }}
+            GITHUB_REPOSITORY=${{ github.event.pull_request.head.repo.full_name != '' && github.event.pull_request.head.repo.full_name || github.repository }}
           tags: |
             docker.io/pdal/pdal:${{ steps.prep.outputs.VERSION }}
             docker.io/pdal/pdal:latest

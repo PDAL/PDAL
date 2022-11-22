@@ -46,6 +46,8 @@
 #include <cxxabi.h>
 #include <sys/ioctl.h>
 #include <sys/wait.h>  // WIFEXITED, WEXITSTATUS
+#else
+#include <windows.h>  // GetConsoleScreenBufferInfo
 #endif
 
 #pragma warning(disable: 4127)  // conditional expression is constant
@@ -535,13 +537,27 @@ int Utils::screenWidth()
     return 80;
 #else
     struct winsize ws;
-    if (ioctl(0, TIOCGWINSZ, &ws))
-        return 80;
+    int err(0);
+    err = ioctl(0, TIOCGWINSZ, &ws);
+    if (err == 0)
+        return ws.ws_col;
+    else
+    {
+       if (errno  == EBADF)
+           throw std::runtime_error("screen width not a valid file descriptor");
+       else if (errno  == EFAULT)
+           throw std::runtime_error("Inaccessible memory access in ioctl");
+       else if (errno  == EINVAL)
+           throw std::runtime_error("Request invalid in gathering screenWidth");
+       else if (errno == ENOTTY)
+       {
+           // we are not a tty, so just return 80 *shrug*
+           return 80;
+       }
+       else
+           throw std::runtime_error("Unknown error code from ioctl!");
+   }
 
-    if (!ws.ws_col)
-      return 80;
-
-    return ws.ws_col;
 #endif
 }
 
@@ -674,3 +690,4 @@ std::vector<std::string> Utils::simpleWordexp(const std::string& cmdline)
 }
 
 } // namespace pdal
+

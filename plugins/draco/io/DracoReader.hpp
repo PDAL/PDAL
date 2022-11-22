@@ -50,14 +50,14 @@ public:
     DracoReader() = default;
     std::string getName() const;
 private:
-    virtual void addArgs(ProgramArgs& args);
-    virtual void initialize();
+    virtual void addArgs(ProgramArgs& args) override;
+    virtual void initialize() override;
     void addOneDimension(Dimension::Id id, const draco::PointAttribute* attr, PointLayoutPtr layout, int index, int attNum);
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void prepared(PointTableRef);
-    virtual void ready(PointTableRef);
-    virtual point_count_t read(PointViewPtr view, point_count_t count);
-    virtual void done(PointTableRef table);
+    virtual void addDimensions(PointLayoutPtr layout) override;
+    virtual void prepared(PointTableRef) override;
+    virtual void ready(PointTableRef) override;
+    virtual point_count_t read(PointViewPtr view, point_count_t count) override;
+    virtual void done(PointTableRef table) override;
 
     struct DimensionInfo {
         Dimension::Id pdalId;

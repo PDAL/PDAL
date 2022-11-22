@@ -39,10 +39,6 @@ if(BUILD_PLUGIN_MBIO)
     add_subdirectory(mbio)
 endif()
 
-if(BUILD_PLUGIN_MRSID)
-    add_subdirectory(mrsid)
-endif()
-
 if(BUILD_PLUGIN_NITF)
     add_subdirectory(nitf)
 endif()
@@ -65,10 +61,6 @@ endif(BUILD_PLUGIN_RDBLIB)
 if(BUILD_PLUGIN_RIVLIB)
     add_subdirectory(rxp)
 endif(BUILD_PLUGIN_RIVLIB)
-
-if (BUILD_PLUGIN_FBX)
-    add_subdirectory(fbx)
-endif()
 
 if(BUILD_PLUGIN_TEASER)
     add_subdirectory(teaser)

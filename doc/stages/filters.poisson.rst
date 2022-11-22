@@ -39,6 +39,7 @@ Example
       },
       {
           "type":"writers.ply",
+          "faces":true,
           "filename":"isosurface.ply"
       }
   ]
