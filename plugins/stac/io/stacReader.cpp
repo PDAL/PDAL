@@ -456,7 +456,6 @@ QuickInfo StacReader::inspect()
 {
     initialize();
     QuickInfo qi;
-    // QuickInfo qi = m_readerList.back()->preview();
 
     for (auto& reader: m_readerList)
     {
@@ -494,26 +493,11 @@ QuickInfo StacReader::inspect()
 void StacReader::prepared(PointTableRef table)
 {
     m_readerList.back()->prepare(table);
-    // for (auto& reader: m_readerList)
-    //     reader->prepare(table);
-    // if (!m_args->dryRun)
-    //     m_merge.prepare(table);
-    // else
-    // {
-    //     for (std::string& id : m_idList)
-    //     {
-    //         log()->get(LogLevel::Info) << id << std::endl;
-    //     }
-    // }
 }
 
 void StacReader::ready(PointTableRef table)
 {
     m_pvSet = m_readerList.back()->execute(table);
-
-    // for (auto& reader: m_readerList)
-    // if (!m_args->dryRun)
-    //     m_pvSet = m_merge.execute(table);
 }
 
 void StacReader::done(PointTableRef)

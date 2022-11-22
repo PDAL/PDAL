@@ -110,18 +110,90 @@ TEST(StacReaderTest, id_prune_test)
     EXPECT_EQ(qi.m_pointCount, 36134211758);
 }
 
-// TEST(StacReaderTest, date_prune_test)
-// {
-//     Options options;
+TEST(StacReaderTest, date_prune_accept_test)
+{
+    Options options;
 
-//     options.add("filename", Support::datapath("stac/MD_GoldenBeach_2012.json"));
-//     options.add("asset_name", "ept.json");
-//     options.add("date_ranges", "[\"\",\"\"]")
+    options.add("filename", Support::datapath("stac/MD_GoldenBeach_2012.json"));
+    options.add("asset_name", "ept.json");
+    options.add("date_ranges", "[\"2022-11-11T0:00:0Z\",\"2022-11-20T0:00:0Z\"]");
+    options.add("date_ranges", "[\"2022-05-21T0:00:0Z\",\"2022-05-20T0:00:0Z\"]");
 
-//     StageFactory f;
-//     Stage& reader = *f.createStage("readers.stac");
-//     reader.setOptions(options);
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
 
-//     QuickInfo qi = reader.preview();
+    QuickInfo qi = reader.preview();
 
-// }
+    NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
+    EXPECT_TRUE(jsonMetadata.contains("stac_ids"));
+    std::vector<std::string> idList = jsonMetadata["stac_ids"].get<std::vector<std::string>>();
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
+    EXPECT_EQ(qi.m_pointCount, 4860658);
+
+}
+
+TEST(StacReaderTest, date_prune_reject_test)
+{
+    Options options;
+
+    options.add("filename", Support::datapath("stac/MD_GoldenBeach_2012.json"));
+    options.add("asset_name", "ept.json");
+    options.add("date_ranges", "[\"2022-10-01T0:00:0Z\",\"2022-10-20T0:00:0Z\"]");
+    options.add("date_ranges", "[\"2022-05-21T0:00:0Z\",\"2022-05-20T0:00:0Z\"]");
+
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
+
+    QuickInfo qi = reader.preview();
+
+    NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
+    EXPECT_EQ(qi.m_pointCount, 0);
+}
+
+TEST(StacReaderTest, bounds_prune_accept_test)
+{
+    Options options;
+    std::string bounds = "([-76.69732810630839,-76.64792076569412],[38.473028642672034,38.5095635066537])";
+
+    options.add("filename", Support::datapath("stac/MD_GoldenBeach_2012.json"));
+    options.add("asset_name", "ept.json");
+    options.add("bounds", bounds);
+
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
+
+    QuickInfo qi = reader.preview();
+
+    NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
+    EXPECT_TRUE(jsonMetadata.contains("stac_ids"));
+    std::vector<std::string> idList = jsonMetadata["stac_ids"].get<std::vector<std::string>>();
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
+    EXPECT_EQ(qi.m_pointCount, 4860658);
+
+}
+
+TEST(StacReaderTest, bounds_prune_reject_test)
+{
+    Options options;
+    std::string bounds = "([50,51],[-10,0])";
+
+    options.add("filename", Support::datapath("stac/MD_GoldenBeach_2012.json"));
+    options.add("asset_name", "ept.json");
+    options.add("bounds", bounds);
+
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
+
+    QuickInfo qi = reader.preview();
+
+    NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
+    EXPECT_TRUE(jsonMetadata.contains("stac_ids"));
+    std::vector<std::string> idList = jsonMetadata["stac_ids"].get<std::vector<std::string>>();
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") == idList.end());
+    EXPECT_EQ(qi.m_pointCount, 0);
+
+}
