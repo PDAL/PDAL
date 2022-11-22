@@ -36,7 +36,6 @@ This example crops an input point cloud using a square polygon.
 
    Normal distance mode causes any points *within* the given polygon to have a distance of 0.
 
-    some other text
 
 .. figure:: ../images/filters.geomdistance-ring-mode.png
    :scale: 75%
