@@ -1,7 +1,7 @@
 .. _filters.geomdistance:
 
 filters.geomdistance
-============
+======================
 
 The geomdistance filter computes the distance between a given polygon
 and points.
@@ -30,19 +30,21 @@ This example crops an input point cloud using a square polygon.
       }
   ]
 
-
 .. figure:: ../images/filters.geomdistance-normal-mode.png
    :scale: 75%
+   :alt: Normal mode distance of Autzen to selection
 
-    Normal distance mode causes any points *within* the given polygon to have a
-    distance of 0.
+   Normal distance mode causes any points *within* the given polygon to have a distance of 0.
+
+    some other text
 
 .. figure:: ../images/filters.geomdistance-ring-mode.png
    :scale: 75%
+   :alt: Ring mode distance of Autzen to selection
 
-    ``ring`` of ``True`` causes the polygon external ring to be used
-    for distance computation, resulting in distances **inside** the
-    polygon to be computed.
+   ``ring`` of ``True`` causes the polygon external ring to be used
+   for distance computation, resulting in distances **inside** the
+   polygon to be computed.
 
 
 Options
