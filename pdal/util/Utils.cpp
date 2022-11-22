@@ -534,22 +534,7 @@ std::string Utils::demangle(const std::string& s)
 int Utils::screenWidth()
 {
 #ifdef _WIN32
-    CONSOLE_SCREEN_BUFFER_INFO csbiInfo;
-    BOOL err;
-
-    // If the function succeeds, the return value is nonzero.
-    // If the function fails, the return value is zero.
-    err = GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbiInfo);
-    if (!err)
-    {
-        int len;
-        char buf[200] {};
-        len = FormatMessageA(0, 0, GetLastError(), 0, buf, 199, 0);
-        throw std::runtime_error("Cant get console width " + std::string(buf, len));
-    }
-
-    return csbiInfo.dwSize.X;
-
+    return 80;
 #else
     struct winsize ws;
     int err(0);
