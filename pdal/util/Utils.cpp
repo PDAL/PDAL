@@ -558,10 +558,6 @@ int Utils::screenWidth()
            throw std::runtime_error("Unknown error code from ioctl!");
    }
 
-<<<<<<< HEAD
-    return ws.ws_col;
-=======
->>>>>>> master
 #endif
 }
 
