@@ -13,7 +13,8 @@ and points.
 
 Example 1
 ----------
-This example crops an input point cloud using a square polygon.
+
+This example computes the 2D distance of points to the given geometry.
 
 .. code-block:: json
 
