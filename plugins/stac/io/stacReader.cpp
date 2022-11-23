@@ -38,6 +38,7 @@
 #include <nlohmann/json.hpp>
 #include <schema-validator/json-schema.hpp>
 #include <pdal/util/Bounds.hpp>
+#include <pdal/Polygon.hpp>
 
 namespace pdal
 {
@@ -413,35 +414,47 @@ bool StacReader::prune(NL::json stacJson)
     // If STAC bbox matches *any* of the supplied bounds, it will not be pruned
     if (!m_args->bounds.empty())
     {
-        NL::json bboxJson;
-        if (stacJson.contains("bbox"))
-            bboxJson = stacJson["bbox"].get<NL::json>();
-        else if (stacJson.contains("geometry"))
+        if (stacJson.contains("geometry"))
         {
-
+            NL::json geometry = stacJson["geometry"].get<NL::json>();
+            Polygon f(geometry.dump());
+            if (m_args->bounds.is3d())
+            {
+                if (!m_args->bounds.to3d().overlaps(f.bounds()))
+                    return true;
+            }
+            else
+            {
+                BOX2D bbox = m_args->bounds.to2d();
+                if (!BOX3D(bbox).overlaps(f.bounds()))
+                    return true;
+            }
         }
-
-        if (bboxJson.size() == 4)
+        else if (stacJson.contains("bbox"))
         {
-            double minx = bboxJson[0];
-            double miny = bboxJson[1];
-            double maxx = bboxJson[2];
-            double maxy = bboxJson[3];
-            BOX2D bbox = BOX2D(minx, miny, maxx, maxy);
-            if (!m_args->bounds.to2d().overlaps(bbox))
-                return true;
-        }
-        else if (bboxJson.size() == 6)
-        {
-            double minx = bboxJson[0];
-            double miny = bboxJson[1];
-            double minz = bboxJson[2];
-            double maxx = bboxJson[3];
-            double maxy = bboxJson[4];
-            double maxz = bboxJson[5];
-            BOX3D bbox = BOX3D(minx, miny, minz, maxx, maxy, maxz);
-            if (!m_args->bounds.to3d().overlaps(bbox))
-                return true;
+            NL::json bboxJson = stacJson["bbox"].get<NL::json>();
+            if (bboxJson.size() == 4)
+            {
+                double minx = bboxJson[0];
+                double miny = bboxJson[1];
+                double maxx = bboxJson[2];
+                double maxy = bboxJson[3];
+                BOX2D bbox = BOX2D(minx, miny, maxx, maxy);
+                if (!m_args->bounds.to2d().overlaps(bbox))
+                    return true;
+            }
+            else if (bboxJson.size() == 6)
+            {
+                double minx = bboxJson[0];
+                double miny = bboxJson[1];
+                double minz = bboxJson[2];
+                double maxx = bboxJson[3];
+                double maxy = bboxJson[4];
+                double maxz = bboxJson[5];
+                BOX3D bbox = BOX3D(minx, miny, minz, maxx, maxy, maxz);
+                if (!m_args->bounds.to3d().overlaps(bbox))
+                    return true;
+            }
         }
     }
 

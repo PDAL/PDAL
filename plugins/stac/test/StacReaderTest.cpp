@@ -155,7 +155,7 @@ TEST(StacReaderTest, date_prune_reject_test)
 TEST(StacReaderTest, bounds_prune_accept_test)
 {
     Options options;
-    std::string bounds = "([-76.69732810630839,-76.64792076569412],[38.473028642672034,38.5095635066537])";
+    std::string bounds = "([-78.69732810630839,-74.64792076569412],[38.0,39.0])";
 
     options.add("filename", Support::datapath("stac/MD_GoldenBeach_2012.json"));
     options.add("asset_name", "ept.json");
@@ -196,4 +196,19 @@ TEST(StacReaderTest, bounds_prune_reject_test)
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") == idList.end());
     EXPECT_EQ(qi.m_pointCount, 0);
 
+}
+
+TEST(StacReaderTest, schema_validate_test)
+{
+    Options options;
+
+    options.add("filename", Support::datapath("stac/MD_GoldenBeach_2012.json"));
+    options.add("asset_name", "ept.json");
+    options.add("schema_validate", "true");
+
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
+
+    EXPECT_NO_THROW(reader.preview());
 }
