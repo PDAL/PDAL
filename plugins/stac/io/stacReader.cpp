@@ -140,8 +140,6 @@ void StacReader::initializeArgs()
             if (!opts.is_object())
                 throw pdal_error("Reader Args must be a valid JSON object");
 
-        // if (!m_args->readerArgs.is_object())
-        //     throw pdal_error("Reader Args must be a valid JSON object");
         handleReaderArgs();
     }
 
@@ -207,12 +205,7 @@ void StacReader::schemaValidate(NL::json stacJson)
             std::string schemaStr = m_arbiter->get(extSchemaUrl);
             NL::json schemaJson = NL::json::parse(schemaStr);
             val.set_root_schema(schemaJson);
-            // try {
-                val.validate(stacJson);
-            // } catch(const nlohmann::json_schema::error_handler& e) {
-            //     throw pdal_error("Failed to validate STAC JSON against extension " +
-            //         extSchemaUrl.dump() + " with error " + e.message);
-            // }
+            val.validate(stacJson);
         }
     }
     else if (type == "Catalog")
@@ -259,8 +252,6 @@ void StacReader::initializeItem(NL::json stacJson)
 
     readerOptions.add("filename", dataUrl);
     reader->setOptions(readerOptions);
-
-    // m_merge.setInput(*reader);
 
     if (m_readerList.size() > 0)
         reader->setInput(*m_readerList.back());
@@ -422,7 +413,14 @@ bool StacReader::prune(NL::json stacJson)
     // If STAC bbox matches *any* of the supplied bounds, it will not be pruned
     if (!m_args->bounds.empty())
     {
-        NL::json bboxJson = stacJson["bbox"].get<NL::json>();
+        NL::json bboxJson;
+        if (stacJson.contains("bbox"))
+            bboxJson = stacJson["bbox"].get<NL::json>();
+        else if (stacJson.contains("geometry"))
+        {
+
+        }
+
         if (bboxJson.size() == 4)
         {
             double minx = bboxJson[0];

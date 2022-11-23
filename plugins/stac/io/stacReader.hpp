@@ -56,7 +56,7 @@ namespace pdal
 
             StacReader() : Reader() {};
 
-            std::string getName() const;
+            std::string getName() const override;
 
 
         private:
@@ -92,12 +92,12 @@ namespace pdal
             void schemaValidate(NL::json stacJson);
             bool prune(NL::json stacJson);
 
-            virtual void initialize();
-            virtual void addArgs(ProgramArgs& args);
-            virtual QuickInfo inspect();
-            virtual void prepared(PointTableRef table);
-            virtual void ready(PointTableRef table);
-            virtual void done(PointTableRef table);
-            virtual PointViewSet run(PointViewPtr view);
+            virtual void initialize() override;
+            virtual void addArgs(ProgramArgs& args) override;
+            virtual QuickInfo inspect() override;
+            virtual void prepared(PointTableRef table) override;
+            virtual void ready(PointTableRef table) override;
+            virtual void done(PointTableRef table) override;
+            virtual PointViewSet run(PointViewPtr view) override;
     };
 }
