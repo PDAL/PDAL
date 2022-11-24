@@ -293,7 +293,7 @@ bool matchProperty(std::string key, NL::json val, NL::json properties, NL::detai
         }
         case NL::detail::value_t::number_unsigned:
         {
-            uint64_t value = properties[key].get<uint>();
+            uint64_t value = properties[key].get<uint64_t>();
             uint64_t desired = val.get<uint64_t>();
             if (value != desired)
                 return false;
