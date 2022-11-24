@@ -60,7 +60,8 @@ static StaticPluginInfo const s_info
 CREATE_STATIC_STAGE(OGRWriter, s_info)
 
 OGRWriter::OGRWriter() : m_driver(nullptr), m_ds(nullptr), m_layer(nullptr),
-    m_feature(nullptr), m_curCount(0), m_measureDim(Dimension::Id::Unknown)
+    m_feature(nullptr), m_curCount(0), m_measureDim(Dimension::Id::Unknown),
+    m_inTransaction(false)
 {}
 
 
@@ -178,6 +179,7 @@ void OGRWriter::readyTable(PointTableRef table)
                 ogrType = OFTReal;
                 break;
             case Dimension::Type::None:
+            default:
                 throwError("Unknown type for dimension '" + name + "' (attr_dims).");
                 continue;
         }
@@ -229,6 +231,11 @@ void OGRWriter::readyFile(const std::string& filename,
     m_feature = OGRFeature::CreateFeature(m_layer->GetLayerDefn());
     if (!m_feature)
         throwError(std::string("Can't create template OGR feature: ") + CPLGetLastErrorMsg());
+
+    // Try to use a transaction for data sources that support it (e.g. GPKG),
+    // otherwise new points may get auto-committed after each insert (very slow)
+    if (m_ds->TestCapability( ODsCTransactions ) && m_ds->StartTransaction() == OGRERR_NONE)
+        m_inTransaction = true;
 }
 
 void OGRWriter::writeView(const PointViewPtr view)
@@ -332,6 +339,11 @@ void OGRWriter::doneFile()
             throwError(std::string("Can't create OGR feature: ") + CPLGetLastErrorMsg());
     }
     OGRFeature::DestroyFeature(m_feature);
+
+    if (m_inTransaction && m_ds->CommitTransaction() != OGRERR_NONE)
+        throwError(std::string("Failed to commit transaction in OGR: ") + CPLGetLastErrorMsg());
+    m_inTransaction = false;
+
     GDALClose(m_ds);
     m_layer = nullptr;
     m_ds = nullptr;
