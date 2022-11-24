@@ -54,15 +54,13 @@ CREATE_SHARED_STAGE(StacReader, stacinfo)
 
 std::string StacReader::getName() const { return stacinfo.name; }
 
-//TODO make local stac catalog, with different reader types
-
 void StacReader::addArgs(ProgramArgs& args)
 {
     m_args.reset(new StacReader::Args());
 
     args.add("asset_name", "Asset to use for data consumption", m_args->assetName, "data");
     args.add("date_ranges", "Date ranges to include in your search. "
-        "Eg. dates'[{\"min\":\"min1\",\"max\":\"max1\"},...]'", m_args->dates);
+        "Eg. dates'[[\"min1\",\"max1\"],...]'", m_args->dates);
     args.add("bounds", "Bounding box to select stac items by. This will "
         "propogate down through all readers being used.", m_args->bounds);
     args.add("ids", "List of ID regexes to select STAC items based on.", m_args->ids);
@@ -72,7 +70,6 @@ void StacReader::addArgs(ProgramArgs& args)
         "match all properties.", m_args->properties);
     args.add("reader_args", "Map of reader arguments to their values to pass through.",
         m_args->readerArgs);
-    args.add("dry_run", "Dry run, will log ids to be run", m_args->dryRun);
 }
 
 void StacReader::handleReaderArgs()

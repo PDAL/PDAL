@@ -155,7 +155,7 @@ TEST(StacReaderTest, date_prune_reject_test)
 TEST(StacReaderTest, bounds_prune_accept_test)
 {
     Options options;
-    std::string bounds = "([-78.69732810630839,-74.64792076569412],[38.0,39.0])";
+    std::string bounds = "([-79.0,-74.0],[38.0,39.0])";
 
     options.add("filename", Support::datapath("stac/MD_GoldenBeach_2012.json"));
     options.add("asset_name", "ept.json");
