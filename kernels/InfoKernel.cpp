@@ -171,6 +171,11 @@ MetadataNode InfoKernel::dumpSummary(const QuickInfo& qi)
         summary.add(bounds.clone("bounds"));
     }
 
+    if (qi.m_metadata.valid())
+    {
+        summary.add("metadata", qi.m_metadata);
+    }
+
     std::string dims;
     auto di = qi.m_dimNames.begin();
     while (di != qi.m_dimNames.end())
