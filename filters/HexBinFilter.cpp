@@ -258,8 +258,8 @@ void HexBin::done(PointTableRef table)
 
     double hexArea(((3 * SQRT_3)/2.0) * (m_grid->height() * m_grid->height()));
     double avg_density = (n * hexArea) / totalCount;
-    m_metadata.add("avg_pt_per_sq_unit", avg_density, "Number of points "
-        "per square unit (tessellated area within inclusions)");
+    m_metadata.add("avg_pt_per_sq_unit", avg_density, "Area / point count "
+        "(ignore contrary metadata item name. This is '(n * hexArea) / totalCount')");
 }
 
 } // namespace pdal
