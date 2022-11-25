@@ -75,6 +75,10 @@ _`filename`
 
 .. include:: reader_opts.rst
 
+_`start`
+  Point at which reading should start (0-indexed). Useful in combination
+  with 'count' option to read a subset of points. [Default: 0]
+
 _`extra_dims`
   Extra dimensions to be read as part of each point beyond those specified by
   the LAS point format.  The format of the option is
