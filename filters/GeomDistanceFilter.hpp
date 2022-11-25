@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2020 Hobu, Inc. (info@hobu.co)
+* Copyright (c) 2022, Howard Butler (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -34,46 +34,43 @@
 
 #pragma once
 
-#include <iostream>
+#include <pdal/Filter.hpp>
+#include <pdal/Streamable.hpp>
 
-#include <pdal/Reader.hpp>
-#include <draco/point_cloud/point_cloud.h>
-#include <draco/compression/decode.h>
+#include <cstdint>
+#include <memory>
+#include <string>
 
 namespace pdal
 {
 
-class PDAL_DLL DracoReader : public Reader
+struct GeomDistanceArgs;
+
+class Options;
+class PointLayout;
+class PointView;
+
+class PDAL_DLL GeomDistanceFilter : public Filter, public Streamable
 {
 public:
+    GeomDistanceFilter();
+    ~GeomDistanceFilter();
 
-    DracoReader() = default;
     std::string getName() const override;
+
 private:
+
+    std::unique_ptr<GeomDistanceArgs> m_args;
+
+    virtual void ready(PointTableRef table) override;
     virtual void addArgs(ProgramArgs& args) override;
-    virtual void initialize() override;
-    void addOneDimension(Dimension::Id id, const draco::PointAttribute* attr, PointLayoutPtr layout, int index, int attNum);
     virtual void addDimensions(PointLayoutPtr layout) override;
-    virtual void prepared(PointTableRef) override;
-    virtual void ready(PointTableRef) override;
-    virtual point_count_t read(PointViewPtr view, point_count_t count) override;
-    virtual void done(PointTableRef table) override;
+    virtual void prepared(PointTableRef table) override;
+    virtual PointViewSet run(PointViewPtr view) override;
+    virtual bool processOne(PointRef& point) override;
 
-    struct DimensionInfo {
-        Dimension::Id pdalId;
-        const draco::PointAttribute *attr;
-        Dimension::Type pdalType;
-        int attNum;//eg POSITION = [ X, Y, Z ], Y's attNum would be 1
-    };
-    std::vector<DimensionInfo> m_dimensions;
-    DracoReader(const DracoReader&) = delete;
-    DracoReader& operator=(const DracoReader&) = delete;
-
-    std::istream* m_istreamPtr;
-    std::vector<char> m_data;
-    draco::DecoderBuffer m_draco_buffer;
-    std::unique_ptr<draco::PointCloud> m_pc;
-
+    GeomDistanceFilter& operator=(const GeomDistanceFilter&); // not implemented
+    GeomDistanceFilter(const GeomDistanceFilter&); // not implemented
 };
 
 } // namespace pdal

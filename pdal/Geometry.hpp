@@ -50,12 +50,13 @@ class BOX3D;
 
 class PDAL_DLL Geometry
 {
-protected:
+
+public:
+    Geometry(const std::string& wkt_or_json,
+           SpatialReference ref = SpatialReference());
     Geometry();
     Geometry(const Geometry&);
     Geometry(Geometry&&);
-    Geometry(const std::string& wkt_or_json,
-           SpatialReference ref = SpatialReference());
     Geometry(OGRGeometryH g);
     Geometry(OGRGeometryH g, const SpatialReference& srs);
 
@@ -68,7 +69,7 @@ public:
 
     virtual void update(const std::string& wkt_or_json);
     virtual bool valid() const;
-    virtual void clear() = 0;
+    virtual void clear();
     virtual void modified();
     bool srsValid() const;
     void setSpatialReference(const SpatialReference& ref);
@@ -83,6 +84,10 @@ public:
     operator bool () const
         { return m_geom != NULL; }
     static void throwNoGeos();
+
+    double distance(double x, double y, double z) const;
+    Geometry getRing() const;
+
 
 protected:
     std::unique_ptr<OGRGeometry> m_geom;

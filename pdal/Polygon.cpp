@@ -153,6 +153,7 @@ void Polygon::modified()
 
 void Polygon::clear()
 {
+    Geometry::clear();
     m_geom.reset(new OGRPolygon());
     modified();
 }
