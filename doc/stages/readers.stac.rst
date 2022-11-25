@@ -12,27 +12,29 @@ Example
 --------------------------------------------------------------------------------
 
 .. code-block:: json
-[
-    {
-        "type": "readers.stac",
-        "filename": "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/catalog.json",
-        "reader_args": [{"type": "readers.ept", "resolution": 100}],
-        "ids": ["MD_GoldenBeach_2012"],
-        "properties": { "pc:type": ["lidar", "sonar"], "pc:encoding": "ept" },
-        "asset_name": "ept.json",
-        "date_ranges": [
-            [
-                "2022-11-11T0:00:0Z",
-                "2022-11-30T0:00:0Z"
-            ]
-        ],
-        "schema_validate": true
-    }
-]
+
+    [
+        {
+            "type": "readers.stac",
+            "filename": "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/catalog.json",
+            "reader_args": [{"type": "readers.ept", "resolution": 100}],
+            "ids": ["MD_GoldenBeach_2012"],
+            "properties": { "pc:type": ["lidar", "sonar"], "pc:encoding": "ept" },
+            "asset_name": "ept.json",
+            "date_ranges": [
+                [
+                    "2022-11-11T0:00:0Z",
+                    "2022-11-30T0:00:0Z"
+                ]
+            ],
+            "schema_validate": true
+        }
+    ]
 
 .. code-block:: bash
-pdal info --input https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/MD_GoldenBeach_2012.json \
---driver readers.stac --asset_name ept.json --summary
+
+    pdal info --input https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/MD_GoldenBeach_2012.json \
+        --driver readers.stac --asset_name ept.json --summary
 
 Options
 --------------------------------------------------------------------------------
@@ -45,7 +47,7 @@ asset_name
 
 date_ranges
     A list of date ranges to prune Features by.
-    Example: ``--readers.stac.date_ranges '[["2022-11-11T0:00:0Z","2022-11-30T0:00:0Z"],...]'
+    Example: ``--readers.stac.date_ranges '[["2022-11-11T0:00:0Z","2022-11-30T0:00:0Z"],...]'``
 
 bounds
     Bounds to prune Features by.
