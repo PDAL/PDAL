@@ -35,6 +35,8 @@
 #include <assert.h>
 #include <iostream>
 #include <limits>
+#include <locale>
+#include <sstream>
 #include <vector>
 
 #include <pdal/util/Bounds.hpp>
@@ -231,38 +233,51 @@ void Bounds::set(const BOX2D& box)
 namespace
 {
 
+void moveForward(std::istringstream& ss, std::string::size_type count)
+{
+    for (std::string::size_type i = 0; i < count; i++)
+    {
+        ss.get();
+    }
+}
+
+bool discardSpacesBefore(std::istringstream& ss, char nextChar)
+{
+    Utils::eatwhitespace(ss);
+    return Utils::eatcharacter(ss, nextChar);
+}
+
+std::string::size_type countRemaining(std::istringstream& ss)
+{
+    std::string::size_type count = 0;
+    while (!ss.eof())
+    {
+        ss.get();
+        count++;
+    }
+    return count;
+}
+
 template <typename T>
-void parsePair(const std::string& s, std::string::size_type& pos,
-    double& low, double& high)
+void parsePair(std::istringstream& ss, double& low, double& high)
 {
     low = high = 0;
-    const char *start;
-    char *end;
 
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != '[')
+    if (!discardSpacesBefore(ss, '['))
         throw typename T::error("No opening '[' in range.");
 
-    pos += Utils::extractSpaces(s, pos);
-    start = s.data() + pos;
-    low = std::strtod(start, &end);
-    if (start == end)
+    ss >> low;
+    if (!ss.good())
         throw typename T::error("No valid minimum value for range.");
-    pos += (end - start);
 
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != ',')
+    if (!discardSpacesBefore(ss, ','))
         throw typename T::error("No ',' separating minimum/maximum values.");
 
-    pos += Utils::extractSpaces(s, pos);
-    start = s.data() + pos;
-    high = std::strtod(start, &end);
-    if (start == end)
+    ss >> high;
+    if (!ss.good())
         throw typename T::error("No valid maximum value for range.");
-    pos += (end - start);
 
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != ']')
+    if (!discardSpacesBefore(ss, ']'))
         throw typename T::error("No closing ']' in range.");
 }
 
@@ -272,46 +287,58 @@ void parsePair(const std::string& s, std::string::size_type& pos,
 // This parses the guts of a 2D range.
 void BOX2D::parse(const std::string& s, std::string::size_type& pos)
 {
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != '(')
+    static thread_local Utils::IStringStreamClassicLocale ss;
+    ss.clear();
+    ss.str(s);
+
+    moveForward(ss, pos);
+
+    if (!discardSpacesBefore(ss, '('))
         throw error("No opening '('.");
-    parsePair<BOX2D>(s, pos, minx, maxx);
 
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != ',')
+    parsePair<BOX2D>(ss, minx, maxx);
+
+    if (!discardSpacesBefore(ss, ','))
         throw error("No comma separating 'X' and 'Y' dimensions.");
-    parsePair<BOX2D>(s, pos, miny, maxy);
 
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != ')')
+    parsePair<BOX2D>(ss, miny, maxy);
+
+    if (!discardSpacesBefore(ss, ')'))
         throw error("No closing ')'.");
 
-    pos += Utils::extractSpaces(s, pos);
+    Utils::eatwhitespace(ss);
+    pos = s.size() - countRemaining(ss);
 }
 
 
 void BOX3D::parse(const std::string& s, std::string::size_type& pos)
 {
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != '(')
+    static thread_local Utils::IStringStreamClassicLocale ss;
+    ss.clear();
+    ss.str(s);
+
+    moveForward(ss, pos);
+
+    if (!discardSpacesBefore(ss, '('))
         throw error("No opening '('.");
-    parsePair<BOX3D>(s, pos, minx, maxx);
 
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != ',')
+    parsePair<BOX3D>(ss, minx, maxx);
+
+    if (!discardSpacesBefore(ss, ','))
         throw error("No comma separating 'X' and 'Y' dimensions.");
-    parsePair<BOX3D>(s, pos, miny, maxy);
 
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != ',')
+    parsePair<BOX3D>(ss, miny, maxy);
+
+    if (!discardSpacesBefore(ss, ','))
         throw error("No comma separating 'Y' and 'Z' dimensions.");
-    parsePair<BOX3D>(s, pos, minz, maxz);
 
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != ')')
+    parsePair<BOX3D>(ss, minz, maxz);
+
+    if (!discardSpacesBefore(ss, ')'))
         throw error("No closing ')'.");
 
-    pos += Utils::extractSpaces(s, pos);
+    Utils::eatwhitespace(ss);
+    pos = s.size() - countRemaining(ss);
 }
 
 

@@ -64,7 +64,7 @@ std::istream& operator>>(std::istream& in,
     pdal::TransformationFilter::Transform& xform)
 {
     std::string arg(std::istreambuf_iterator<char>(in), {});
-    std::stringstream matrix;
+    Utils::StringStreamClassicLocale matrix;
     matrix.str(arg);
 
     std::string matrix_str;

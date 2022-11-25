@@ -63,6 +63,7 @@
 
 #include "Inserter.hpp"
 #include "Extractor.hpp"
+#include "Utils.hpp"
 
 namespace pdal
 {
@@ -170,7 +171,7 @@ public:
 
     std::string unparse() const
     {
-        std::stringstream out;
+        Utils::StringStreamClassicLocale out;
 
         out << std::hex << std::uppercase << std::setfill('0');
         out << std::setw(8) << m_data.time_low << '-';

@@ -154,7 +154,7 @@ std::istream *openFile(std::string const& filename, bool asBinary)
     if (asBinary)
         mode |= std::ios::binary;
 
-    ifs = new std::ifstream(toNative(name), mode);
+    ifs = new Utils::ClassicLocaleStream<std::ifstream>(toNative(name), mode);
     if (!ifs->good())
     {
         delete ifs;
@@ -173,7 +173,7 @@ std::ostream *createFile(std::string const& name, bool asBinary)
     if (asBinary)
         mode |= std::ios::binary;
 
-    std::ostream *ofs = new std::ofstream(toNative(name), mode);
+    std::ostream *ofs = new Utils::ClassicLocaleStream<std::ofstream>(toNative(name), mode);
     if (!ofs->good())
     {
         delete ofs;
@@ -189,7 +189,7 @@ std::ostream *openExisting(const std::string& name, bool asBinary)
     if (asBinary)
         mode |= std::ios::binary;
 
-    std::ostream *ofs = new std::ofstream(toNative(name), mode);
+    std::ostream *ofs = new Utils::ClassicLocaleStream<std::ofstream>(toNative(name), mode);
     if (!ofs->good())
     {
         delete ofs;

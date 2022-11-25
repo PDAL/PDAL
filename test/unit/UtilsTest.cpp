@@ -449,6 +449,60 @@ TEST(UtilsTest, naninf)
     EXPECT_EQ(Utils::toString(d), "-Infinity");
 }
 
+TEST(UtilsTest, toString)
+{
+    int i = 12365565;
+    EXPECT_EQ(Utils::toString(i), "12365565");
+
+    double d = 1.2365;
+    EXPECT_EQ(Utils::toString(d), "1.2365");
+}
+
+TEST(UtilsTest, StringStreamClassicLocale)
+{
+    Utils::StringStreamClassicLocale ss;
+    double d = 456.34;
+    ss << d;
+    EXPECT_EQ(ss.str(), "456.34");
+
+    ss.clear();
+    ss.str("");
+
+    ss << "123456789";
+    int i = 0;
+    ss >> i;
+    EXPECT_EQ(i, 123456789);
+}
+
+TEST(UtilsTest, OStringStreamClassicLocale)
+{
+    Utils::OStringStreamClassicLocale ss;
+    double d = 456.34;
+    ss << d;
+    EXPECT_EQ(ss.str(), "456.34");
+
+    ss.clear();
+    ss.str("");
+
+    int i = 123456789;
+    ss << i;
+    EXPECT_EQ(ss.str(), "123456789");
+}
+
+TEST(UtilsTest, IStringStreamClassicLocale)
+{
+    Utils::IStringStreamClassicLocale ss("123456789");
+    int i = 0;
+    ss >> i;
+    EXPECT_EQ(i, 123456789);
+
+    ss.clear();
+    ss.str("80123.45 987654");
+    double d = 0;
+    ss >> d >> i;
+    EXPECT_EQ(d, 80123.45);
+    EXPECT_EQ(i, 987654);
+}
 
 TEST(UtilsTest, numeric_cast)
 {
