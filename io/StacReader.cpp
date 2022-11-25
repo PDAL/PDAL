@@ -31,7 +31,7 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
-#include "stacReader.hpp"
+#include "StacReader.hpp"
 
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/Kernel.hpp>
@@ -50,7 +50,7 @@ static PluginInfo const stacinfo
     "http://pdal.io/stages/readers.stac.html"
 };
 
-CREATE_SHARED_STAGE(StacReader, stacinfo)
+CREATE_STATIC_STAGE(StacReader, stacinfo)
 
 std::string StacReader::getName() const { return stacinfo.name; }
 

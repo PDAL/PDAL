@@ -1,6 +1,5 @@
 include(${PDAL_CMAKE_DIR}/test.cmake)
 
-add_subdirectory(stac)
 add_subdirectory(faux)
 if (BUILD_PLUGIN_TRAJECTORY)
     add_subdirectory(trajectory)
