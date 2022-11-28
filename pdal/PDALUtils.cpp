@@ -162,7 +162,7 @@ std::string toJSON(const MetadataNode& m)
 
     toJSON(m, o);
     std::string output(o.str());
-    output = utf8::replace_invalid(output);
+    output = utf8::replace_invalid(output, U' ');
     return output;
 }
 
