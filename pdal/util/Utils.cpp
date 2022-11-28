@@ -549,13 +549,9 @@ int Utils::screenWidth()
            throw std::runtime_error("Inaccessible memory access in ioctl");
        else if (errno  == EINVAL)
            throw std::runtime_error("Request invalid in gathering screenWidth");
-       else if (errno == ENOTTY)
-       {
+       else
            // we are not a tty, so just return 80 *shrug*
            return 80;
-       }
-       else
-           throw std::runtime_error("Unknown error code from ioctl!");
    }
 
 #endif
