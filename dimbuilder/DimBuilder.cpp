@@ -272,7 +272,7 @@ void DimBuilder::extractDim(NL::json& dim)
         else
             typeError = true;
 
-        
+
         if (typeError)
         {
             std::ostringstream oss;
@@ -379,9 +379,14 @@ void DimBuilder::writeIds(std::ostream& out)
     {
         DimSpec& d = *di;
         out << "    " << d.m_name;
+        size_t line_size = 4 + d.m_name.size();
         if (di + 1 != m_dims.end())
+        {
             out << ",";
-        out << "\n";
+            line_size += 1;
+        }
+        out << " ///< \\brief " << d.m_description << "\n"
+            << std::string(line_size, ' ') << " ///< \\default " << getTypename(d.m_type) << "\n";
     }
     out << "};\n";
     out << "typedef std::vector<Id> IdList;\n";

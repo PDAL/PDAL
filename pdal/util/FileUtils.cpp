@@ -81,6 +81,10 @@ std::string addTrailingSlash(std::string path)
     return path;
 }
 
+} // unnamed namespace
+
+namespace FileUtils
+{
 #ifdef PDAL_WIN32_STL
 std::wstring toNative(const std::string& in)
 {
@@ -131,10 +135,6 @@ std::string fromNative(const std::string& in)
 }
 #endif
 
-} // unnamed namespace
-
-namespace FileUtils
-{
 
 std::istream *openFile(std::string const& filename, bool asBinary)
 {
@@ -154,7 +154,7 @@ std::istream *openFile(std::string const& filename, bool asBinary)
     if (asBinary)
         mode |= std::ios::binary;
 
-    ifs = new std::ifstream(toNative(name), mode);
+    ifs = new Utils::ClassicLocaleStream<std::ifstream>(toNative(name), mode);
     if (!ifs->good())
     {
         delete ifs;
@@ -173,7 +173,7 @@ std::ostream *createFile(std::string const& name, bool asBinary)
     if (asBinary)
         mode |= std::ios::binary;
 
-    std::ostream *ofs = new std::ofstream(toNative(name), mode);
+    std::ostream *ofs = new Utils::ClassicLocaleStream<std::ofstream>(toNative(name), mode);
     if (!ofs->good())
     {
         delete ofs;
@@ -189,7 +189,7 @@ std::ostream *openExisting(const std::string& name, bool asBinary)
     if (asBinary)
         mode |= std::ios::binary;
 
-    std::ostream *ofs = new std::ofstream(toNative(name), mode);
+    std::ostream *ofs = new Utils::ClassicLocaleStream<std::ofstream>(toNative(name), mode);
     if (!ofs->good())
     {
         delete ofs;
@@ -214,7 +214,13 @@ bool createDirectory(const std::string& dirname)
 
 bool createDirectories(const std::string& dirname)
 {
-    return fs::create_directories(toNative(dirname));
+    // Need to strip any /'s off the end because windows and unix
+    // create_directories seem to behave differently
+    std::string s(dirname);
+    if('/' == s.back())
+        s.pop_back();
+
+    return fs::create_directories(toNative(s));
 }
 
 
@@ -238,7 +244,7 @@ std::vector<std::string> directoryList(const std::string& dir)
             it++;
         }
     }
-    catch (fs::filesystem_error&)
+    catch (fs::filesystem_error& )
     {
         files.clear();
     }
@@ -333,36 +339,20 @@ std::string readFileIntoString(const std::string& filename)
 std::string getcwd()
 {
     const fs::path p = fs::current_path();
-    return addTrailingSlash(p.string());
+    return addTrailingSlash(p.u8string());
 }
 
 
 std::string toCanonicalPath(std::string filename)
 {
-    std::string result;
-
-#ifdef _WIN32
-    filename = addTrailingSlash(filename);
-    char buf[MAX_PATH];
-    if (GetFullPathName(filename.c_str(), MAX_PATH, buf, NULL))
-        result = buf;
-#else
-    char *buf = realpath(filename.c_str(), NULL);
-    if (buf)
-    {
-        result = buf;
-        free(buf);
-    }
-#endif
-    return result;
+    return fs::weakly_canonical(toNative(filename)).u8string();
 }
-
 
 // if the filename is an absolute path, just return it
 // otherwise, make it absolute (relative to current working dir) and return that
 std::string toAbsolutePath(const std::string& filename)
 {
-    return fs::absolute(toNative(filename)).string();
+    return fs::absolute(toNative(filename)).u8string();
 }
 
 
@@ -402,7 +392,7 @@ std::string getDirectory(const std::string& path)
 {
     const fs::path dir =
          fs::path(toNative(path)).parent_path();
-    return addTrailingSlash(dir.string());
+    return addTrailingSlash(dir.u8string());
 }
 
 

@@ -1,0 +1,83 @@
+INFO: Open of `/Users/rcoup/code/point-clouds/pdal/test/data/../temp/ogr/attrs.shp'
+      using driver `ESRI Shapefile' successful.
+
+Layer name: attrs
+Geometry: 3D Point
+Feature Count: 10
+Extent: (635619.850000, 849017.320000) - (635685.330000, 852165.120000)
+Layer SRS WKT:
+(unknown)
+Classifica: Integer (9.0)
+Red: Integer (9.0)
+Green: Integer (9.0)
+Blue: Integer (9.0)
+OGRFeature(attrs):0
+  Classifica (Integer) = 1
+  Red (Integer) = 52
+  Green (Integer) = 65
+  Blue (Integer) = 68
+  POINT Z (635619.85 850064.04 447.01)
+
+OGRFeature(attrs):1
+  Classifica (Integer) = 1
+  Red (Integer) = 39
+  Green (Integer) = 57
+  Blue (Integer) = 56
+  POINT Z (635640.42 849758.79 422.74)
+
+OGRFeature(attrs):2
+  Classifica (Integer) = 2
+  Red (Integer) = 109
+  Green (Integer) = 104
+  Blue (Integer) = 122
+  POINT Z (635650.95 850244.03 424.93)
+
+OGRFeature(attrs):3
+  Classifica (Integer) = 1
+  Red (Integer) = 228
+  Green (Integer) = 220
+  Blue (Integer) = 231
+  POINT Z (635673.46 850157.55 435.73)
+
+OGRFeature(attrs):4
+  Classifica (Integer) = 1
+  Red (Integer) = 146
+  Green (Integer) = 104
+  Blue (Integer) = 140
+  POINT Z (635674.05 849017.32 428.02)
+
+OGRFeature(attrs):5
+  Classifica (Integer) = 1
+  Red (Integer) = 76
+  Green (Integer) = 87
+  Blue (Integer) = 92
+  POINT Z (635678.9 851351.44 436.45)
+
+OGRFeature(attrs):6
+  Classifica (Integer) = 2
+  Red (Integer) = 64
+  Green (Integer) = 73
+  Blue (Integer) = 78
+  POINT Z (635680.54 849362.66 421.56)
+
+OGRFeature(attrs):7
+  Classifica (Integer) = 2
+  Red (Integer) = 81
+  Green (Integer) = 84
+  Blue (Integer) = 95
+  POINT Z (635681.07 851383.76 419)
+
+OGRFeature(attrs):8
+  Classifica (Integer) = 1
+  Red (Integer) = 78
+  Green (Integer) = 88
+  Blue (Integer) = 94
+  POINT Z (635684.02 849494.39 407.12)
+
+OGRFeature(attrs):9
+  Classifica (Integer) = 1
+  Red (Integer) = 64
+  Green (Integer) = 73
+  Blue (Integer) = 78
+  POINT Z (635685.33 852165.12 421.75)
+

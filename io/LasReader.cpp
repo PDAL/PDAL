@@ -192,6 +192,7 @@ QuickInfo LasReader::inspect()
     qi.m_bounds = d->header.bounds;
     qi.m_srs = getSpatialReference();
     qi.m_valid = true;
+    qi.m_metadata = m_metadata;
 
     done(table);
 

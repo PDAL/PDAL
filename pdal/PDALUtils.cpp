@@ -46,6 +46,8 @@
 #include <dlfcn.h>
 #endif
 
+#include <locale>
+
 using namespace std;
 
 namespace pdal
@@ -154,7 +156,7 @@ namespace Utils
 
 std::string toJSON(const MetadataNode& m)
 {
-    std::ostringstream o;
+    Utils::OStringStreamClassicLocale o;
 
     toJSON(m, o);
     return o.str();
@@ -206,7 +208,8 @@ class ArbiterOutStream : public std::ofstream
 public:
     ArbiterOutStream(const std::string& localPath,
             const std::string& remotePath, std::ios::openmode mode) :
-        std::ofstream(localPath, mode), m_remotePath(remotePath),
+        std::ofstream(localPath, mode),
+        m_remotePath(remotePath),
         m_localFile(localPath)
     {}
 
@@ -296,13 +299,7 @@ std::ostream *createFile(const std::string& path, bool asBinary)
 
 bool isRemote(const std::string& path)
 {
-    const StringList prefixes
-        { "s3://", "gs://", "dropbox://", "http://", "https://", "az://" };
-
-    for (const string& prefix : prefixes)
-        if (Utils::startsWith(path, prefix))
-            return true;
-    return false;
+    return path.find("://") != std::string::npos;
 }
 
 
@@ -467,10 +464,10 @@ std::string dllDir()
         GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
         (LPCSTR)&dllDir, &hm))
     {
-        char path[MAX_PATH];
-        DWORD cnt = GetModuleFileNameA(hm, path, sizeof(path));
+        wchar_t path[MAX_PATH];
+        DWORD cnt = GetModuleFileNameW(hm, path, sizeof(path));
         if (cnt > 0 && cnt < MAX_PATH)
-            s = path;
+            s = FileUtils::fromNative(path);
     }
 #else
     Dl_info info;

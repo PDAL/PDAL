@@ -166,6 +166,14 @@ PDAL_ADD_TEST(pdal_io_gdal_writer_test
     INCLUDES
         ${GDAL_INCLUDE_DIR}
 )
+PDAL_ADD_TEST(pdal_io_ogr_writer_test
+    FILES
+        io/OGRWriterTest.cpp
+    LINK_WITH
+        ${GDAL_LIBRARY}
+    INCLUDES
+        ${GDAL_INCLUDE_DIR}
+)
 PDAL_ADD_TEST(pdal_io_las_reader_test
     FILES
         io/LasReaderTest.cpp
@@ -256,6 +264,14 @@ PDAL_ADD_TEST(pdal_filters_colorization_test
 PDAL_ADD_TEST(pdal_filters_crop_test
     FILES
         filters/CropFilterTest.cpp
+    INCLUDES
+        ${GDAL_INCLUDE_DIR}
+    LINK_WITH
+        ${GDAL_LIBRARY}
+)
+PDAL_ADD_TEST(pdal_filters_geomdistance_test
+    FILES
+        filters/GeomDistanceFilterTest.cpp
     INCLUDES
         ${GDAL_INCLUDE_DIR}
     LINK_WITH

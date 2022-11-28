@@ -140,7 +140,7 @@ void HexBin::done(PointTableRef table)
         return;
     }
 
-    std::ostringstream offsets;
+    Utils::OStringStreamClassicLocale offsets;
     offsets << "MULTIPOINT (";
     for (int i = 0; i < 6; ++i)
     {
@@ -164,7 +164,7 @@ void HexBin::done(PointTableRef table)
     m_metadata.add("hex_offsets", offsets.str(), "Offset of hex corners from "
         "hex centers.");
 
-    std::ostringstream polygon;
+    Utils::OStringStreamClassicLocale polygon;
     polygon.setf(std::ios_base::fixed, std::ios_base::floatfield);
     polygon.precision(m_precision);
     m_grid->toWKT(polygon);
@@ -181,7 +181,7 @@ void HexBin::done(PointTableRef table)
 
             hex.add("gridpos", Utils::toString(h.xgrid()) + " " +
                 Utils::toString((h.ygrid())));
-            std::ostringstream oss;
+            Utils::OStringStreamClassicLocale oss;
             // Using stream limits precision (default 6)
             oss << "POINT (" << h.x() << " " << h.y() << ")";
             hex.add("center", oss.str());
@@ -258,8 +258,8 @@ void HexBin::done(PointTableRef table)
 
     double hexArea(((3 * SQRT_3)/2.0) * (m_grid->height() * m_grid->height()));
     double avg_density = (n * hexArea) / totalCount;
-    m_metadata.add("avg_pt_per_sq_unit", avg_density, "Number of points "
-        "per square unit (tessellated area within inclusions)");
+    m_metadata.add("avg_pt_per_sq_unit", avg_density, "Area / point count "
+        "(ignore contrary metadata item name. This is '(n * hexArea) / totalCount')");
 }
 
 } // namespace pdal

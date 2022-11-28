@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael S. Rosen (michael.rosen@gmail.com)
+* Copyright (c) 2022, Howard Butler (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -34,61 +34,43 @@
 
 #pragma once
 
-#include <pdal/Reader.hpp>
-#include <pdal/util/Bounds.hpp>
+#include <pdal/Filter.hpp>
+#include <pdal/Streamable.hpp>
 
-#include <lidar/PointSource.h>
-#include <lidar/PointData.h>
-#include <lidar/MG4PointReader.h>
+#include <cstdint>
+#include <memory>
+#include <string>
 
 namespace pdal
 {
 
+struct GeomDistanceArgs;
 
-// The MrSIDReader wraps LT's PointSource abstraction
-//
-class PDAL_DLL MrsidReader : public pdal::Reader
+class Options;
+class PointLayout;
+class PointView;
+
+class PDAL_DLL GeomDistanceFilter : public Filter, public Streamable
 {
-
 public:
-    virtual ~MrsidReader(){};
-    MrsidReader();
-    MrsidReader& operator=(const MrsidReader&) = delete;
-    MrsidReader(const MrsidReader&) = delete;
-    std::string getName() const;
+    GeomDistanceFilter();
+    ~GeomDistanceFilter();
 
-    point_count_t getNumPoints() const
-        { if (m_PS)
-            return m_PS->getNumPoints();
-          else
-            return 0;
-        }
-
-protected:
-    virtual void addDimensions(PointLayoutPtr layout);
+    std::string getName() const override;
 
 private:
-    LizardTech::MG4PointReader *m_PS;
-    LizardTech::PointIterator *m_iter;
-    LizardTech::PointInfo m_pointInfo;
-    PointLayoutPtr m_layout;
 
-    point_count_t m_index;
+    std::unique_ptr<GeomDistanceArgs> m_args;
 
-    virtual void initialize();
-    void LayoutToPointInfo(const PointLayout &layout,
-        LizardTech::PointInfo &pointInfo) const;
-    virtual QuickInfo inspect();
-    virtual void addArgs(ProgramArgs& args);
-    virtual void ready(PointTableRef table)
-        { ready(table, m_metadata); }
-    virtual void ready(PointTableRef table, MetadataNode& m);
-    virtual point_count_t read(PointViewPtr view, point_count_t count);
-    virtual void done(PointTableRef table);
-    virtual bool eof()
-        { return m_index >= getNumPoints(); }
-    bool m_initialized;
+    virtual void ready(PointTableRef table) override;
+    virtual void addArgs(ProgramArgs& args) override;
+    virtual void addDimensions(PointLayoutPtr layout) override;
+    virtual void prepared(PointTableRef table) override;
+    virtual PointViewSet run(PointViewPtr view) override;
+    virtual bool processOne(PointRef& point) override;
+
+    GeomDistanceFilter& operator=(const GeomDistanceFilter&); // not implemented
+    GeomDistanceFilter(const GeomDistanceFilter&); // not implemented
 };
 
-
-} // namespaces
+} // namespace pdal

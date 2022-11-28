@@ -32,7 +32,6 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
    readers.matlab
    readers.memoryview
    readers.mbio
-   readers.mrsid
    readers.nitf
    readers.numpy
    readers.obj
@@ -109,10 +108,6 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
 :ref:`readers.memoryview`
     Read data from memory where dimension data is arranged in rows.  For
     use only with the PDAL API.
-
-:ref:`readers.mrsid`
-    Read data compressed by the MrSID 4.0 LiDAR Compressor. Requires the
-    LizardTech Lidar_DSDK.
 
 :ref:`readers.nitf`
     Read point cloud data (LAS or LAZ) wrapped in NITF 2.1 files.

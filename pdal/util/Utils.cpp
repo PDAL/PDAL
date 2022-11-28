@@ -46,6 +46,8 @@
 #include <cxxabi.h>
 #include <sys/ioctl.h>
 #include <sys/wait.h>  // WIFEXITED, WEXITSTATUS
+#else
+#include <windows.h>  // GetConsoleScreenBufferInfo
 #endif
 
 #pragma warning(disable: 4127)  // conditional expression is constant
@@ -401,7 +403,7 @@ std::string Utils::escapeJSON(const std::string &str)
       { "\\u0000", "\\u0001", "\\u0002", "\\u0003", "\\u0004",
         "\\u0005", "\\u0006", "\\u0007", "\\u0008", "\\t",
         "\\n", "\\b", "\\f", "\\r", "\\u000E",
-        "\\u000F", "\\u0010", "\\u0011", "\\0012", "\\u0013",
+        "\\u000F", "\\u0010", "\\u0011", "\\u0012", "\\u0013",
         "\\u0014", "\\u0015", "\\u0016", "\\u0017", "\\u0018",
         "\\u0019", "\\u001A", "\\u001B", "\\u001C", "\\u001D",
         "\\u001E", "\\u001F", " ", "!", "\\\"" }
@@ -439,7 +441,7 @@ StringList Utils::wordWrap(std::string const& s, size_t lineLength,
 
     size_t len = firstLength;
 
-    std::istringstream iss(s);
+    StringStreamClassicLocale iss(s);
     std::string line;
     do
     {
@@ -535,10 +537,27 @@ int Utils::screenWidth()
     return 80;
 #else
     struct winsize ws;
-    if (ioctl(0, TIOCGWINSZ, &ws))
-        return 80;
+    int err(0);
+    err = ioctl(0, TIOCGWINSZ, &ws);
+    if (err == 0)
+        return ws.ws_col;
+    else
+    {
+       if (errno  == EBADF)
+           throw std::runtime_error("screen width not a valid file descriptor");
+       else if (errno  == EFAULT)
+           throw std::runtime_error("Inaccessible memory access in ioctl");
+       else if (errno  == EINVAL)
+           throw std::runtime_error("Request invalid in gathering screenWidth");
+       else if (errno == ENOTTY)
+       {
+           // we are not a tty, so just return 80 *shrug*
+           return 80;
+       }
+       else
+           throw std::runtime_error("Unknown error code from ioctl!");
+   }
 
-    return ws.ws_col;
 #endif
 }
 
@@ -671,3 +690,4 @@ std::vector<std::string> Utils::simpleWordexp(const std::string& cmdline)
 }
 
 } // namespace pdal
+

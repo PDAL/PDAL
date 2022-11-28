@@ -364,10 +364,13 @@ Spatial
    :hidden:
 
    filters.crop
+   filters.geomdistance
 
 :ref:`filters.crop`
     Filter points inside or outside a bounding box or a polygon
 
+:ref:`filters.geomdistance`
+    Compute 2D distance from a polygon to points
 
 Resampling
 ..........

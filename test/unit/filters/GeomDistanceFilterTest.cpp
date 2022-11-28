@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Howard Butler (howard@hobu.co)
+* Copyright (c) 2022, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -34,45 +34,70 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/PipelineManager.hpp>
 #include <pdal/StageFactory.hpp>
-#include <io/LasWriter.hpp>
-
+#include <io/BufferReader.hpp>
+#include <io/FauxReader.hpp>
+#include <io/LasReader.hpp>
+#include <filters/ReprojectionFilter.hpp>
+#include <filters/GeomDistanceFilter.hpp>
+#include <filters/StatsFilter.hpp>
+#include <filters/StreamCallbackFilter.hpp>
 #include "Support.hpp"
-
-#include <iostream>
-
-#pragma GCC diagnostic ignored "-Wsign-compare"
 
 using namespace pdal;
 
-TEST(MrsidReaderTest, test_one)
+TEST(GeomDistanceFilterTest, create)
 {
     StageFactory f;
+    Stage* filter(f.createStage("filters.geomdistance"));
+    EXPECT_TRUE(filter);
+}
 
-    Options sid_opts;
-    sid_opts.add("filename", Support::datapath("mrsid/Tetons_200k.las.sid"));
-    sid_opts.add("count", 750);
+TEST(GeomDistanceFilterTest, test_polygon)
+{
+    Options ops1;
+    ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
+    LasReader reader;
+    reader.setOptions(ops1);
+
+    Options options;
+    Option debug("debug", true);
+    Option verbose("verbose", 9);
+
+    std::istream* wkt_stream =
+        FileUtils::openFile(Support::datapath("autzen/autzen-selection.wkt"));
+
+    std::stringstream strbuf;
+    strbuf << wkt_stream->rdbuf();
+
+    std::string wkt(strbuf.str());
+
+    Option polygon("geometry", wkt);
+    options.add(polygon);
+
+    Option ring("ring", true);
+    options.add(ring);
+
+    GeomDistanceFilter geomdist;
+    geomdist.setInput(reader);
+    geomdist.setOptions(options);
 
     PointTable table;
 
-    Stage* sid_reader(f.createStage("readers.mrsid"));
-    EXPECT_TRUE(sid_reader);
-    sid_reader->setOptions(sid_opts);
-    sid_reader->prepare(table);
-    PointViewSet pbSet = sid_reader->execute(table);
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointViewPtr view = *pbSet.begin();
-    EXPECT_EQ(view->size(), 750u);
-    int32_t sid_x = view->getFieldAs<int32_t>(Dimension::Id::X, 10);
-    int32_t sid_y = view->getFieldAs<int32_t>(Dimension::Id::Y, 10);
-    int32_t sid_z = view->getFieldAs<int32_t>(Dimension::Id::Z, 10);
-    EXPECT_EQ(sid_x, 504577);
-    EXPECT_EQ(sid_y, 4795801);
-    EXPECT_EQ(sid_z, 2505);
+    geomdist.prepare(table);
+    PointViewSet s = geomdist.execute(table);
+    EXPECT_EQ(s.size(), 1u);
+    PointViewPtr v = *s.begin();
+    EXPECT_EQ(v->size(), 1065u);
 
+    pdal::Dimension::Id dim = v->layout()->findDim("distance");
+
+    double d = v->getFieldAs<double>(dim, 0);
+
+    EXPECT_NEAR(d, 1501.55896f, 0.0001);
+
+
+    FileUtils::closeFile(wkt_stream);
 }
-
-
