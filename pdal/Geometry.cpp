@@ -228,6 +228,8 @@ Geometry Geometry::getRing() const
     else
         throwNoGeos();
 
+    return Geometry();
+
 }
 
 bool Geometry::valid() const
