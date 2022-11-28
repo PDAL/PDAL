@@ -1004,7 +1004,7 @@ void LasWriter::finishOutput()
 {
     if (d->opts.compression == las::Compression::True)
         finishLazPerfOutput();
-    log()->get(LogLevel::Debug) << "Wrote " << d->summary.getTotalNumPoints() <<
+    log()->get(LogLevel::Debug) << "Wrote " << (int)d->summary.getTotalNumPoints() <<
         " points to the LAS file" << std::endl;
 
     // addVlr prevents any evlrs from being added before version 1.4.
