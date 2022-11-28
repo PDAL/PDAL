@@ -161,8 +161,8 @@ std::string toJSON(const MetadataNode& m)
     Utils::OStringStreamClassicLocale o;
 
     toJSON(m, o);
-    std::string output(o.str());
-    output = utf8::replace_invalid(output, U' ');
+    std::string output;
+    utf8::replace_invalid(o.str().begin(), o.str().end(), std::back_inserter(output));
     return output;
 }
 
