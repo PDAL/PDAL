@@ -265,7 +265,6 @@ void StacReader::initializeItem(NL::json stacJson)
 
     if (reader)
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
         m_readerList.push_back(std::unique_ptr<Stage>(reader));
     }
 }
@@ -351,7 +350,6 @@ void validateForPrune(NL::json stacJson)
     if (!stacJson.contains("geometry") || !stacJson.contains("bbox"))
         throw pdal_error("JSON object does not contain one of 'geometry' or 'bbox'");
 
-
     NL::json prop = stacJson["properties"];
     if (
         !prop.contains("datetime") &&
@@ -362,10 +360,10 @@ void validateForPrune(NL::json stacJson)
 
 }
 
+// Returns true if item should be removed, false if it should stay
 bool StacReader::prune(NL::json stacJson)
 {
     validateForPrune(stacJson);
-    // Returns true if item should be removed, false if it should stay
 
     // ID
     // If STAC ID matches *any* ID in supplied list, it will not be pruned.
@@ -413,22 +411,25 @@ bool StacReader::prune(NL::json stacJson)
     } else if (properties.contains("start_datetime") && properties.contains("end_datetime"))
     {
         // Handle if STAC object has start and end datetimes instead of one
-        std::string start_date = properties["start_datetime"].get<std::string>();
-        std::string end_date = properties["end_datetime"].get<std::string>();
+        std::string stacStartDate = properties["start_datetime"].get<std::string>();
+        std::string stacEndDate = properties["end_datetime"].get<std::string>();
 
         bool dateFlag = true;
         for (auto& range: m_args->dates)
         {
             // If any of the date ranges overlap with the date range of the STAC
             // object, do not prune.
-            if (range[0].get<std::string>() <= end_date && range[0].get<std::string>() >= start_date)
+            std::string userMinDate = range[0].get<std::string>();
+            std::string userMaxDate = range[1].get<std::string>();
+            if (userMinDate >= stacStartDate && userMinDate <= stacEndDate)
             {
                 dateFlag = false;
             }
-            else if (
-                range[1].get<std::string>() <= end_date &&
-                range[1].get<std::string>() >= start_date
-            )
+            else if (userMaxDate >= stacStartDate && userMaxDate <= stacEndDate)
+            {
+                dateFlag = false;
+            }
+            else if (userMinDate <= stacStartDate && userMaxDate >= stacEndDate)
             {
                 dateFlag = false;
             }

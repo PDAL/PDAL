@@ -126,6 +126,13 @@ if (PDAL_HAVE_ZLIB)
     PDAL_ADD_TEST(pdal_io_bpf_zlib_test FILES io/BpfTestZlib.cpp)
 endif()
 PDAL_ADD_TEST(pdal_io_buffer_test FILES io/BufferTest.cpp)
+PDAL_ADD_TEST(pdal_io_stac_reader_test
+    FILES
+        io/StacReaderTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
+)
 PDAL_ADD_TEST(pdal_io_ept_reader_test
     FILES
         io/EptReaderTest.cpp

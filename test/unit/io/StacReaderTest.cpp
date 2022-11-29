@@ -36,7 +36,7 @@
 #include <nlohmann/json.hpp>
 #include <pdal/pdal_test_main.hpp>
 
-#include "../io/stacReader.hpp"
+#include <io/StacReader.hpp>
 #include <io/EptReader.hpp>
 
 #include <pdal/PipelineManager.hpp>
@@ -112,6 +112,8 @@ TEST(StacReaderTest, id_prune_test)
 
 TEST(StacReaderTest, date_prune_accept_test)
 {
+    //Test using standard datetime measures
+    {
     Options options;
 
     options.add("filename", Support::datapath("stac/MD_GoldenBeach_2012.json"));
@@ -130,7 +132,28 @@ TEST(StacReaderTest, date_prune_accept_test)
     std::vector<std::string> idList = jsonMetadata["stac_ids"].get<std::vector<std::string>>();
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
     EXPECT_EQ(qi.m_pointCount, 4860658);
+    }
 
+    {
+    //Test usage of start_datetime and end_datetime
+    Options options;
+
+    options.add("filename", Support::datapath("stac/GoldenBeach_datetime_test.json"));
+    options.add("asset_name", "ept.json");
+    options.add("date_ranges", "[\"2022-11-07T0:00:0Z\",\"2022-11-20T0:00:0Z\"]");
+
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
+
+    QuickInfo qi = reader.preview();
+
+    NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
+    EXPECT_TRUE(jsonMetadata.contains("stac_ids"));
+    std::vector<std::string> idList = jsonMetadata["stac_ids"].get<std::vector<std::string>>();
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
+    EXPECT_EQ(qi.m_pointCount, 4860658);
+    }
 }
 
 TEST(StacReaderTest, date_prune_reject_test)
@@ -146,10 +169,7 @@ TEST(StacReaderTest, date_prune_reject_test)
     Stage& reader = *f.createStage("readers.stac");
     reader.setOptions(options);
 
-    QuickInfo qi = reader.preview();
-
-    NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
-    EXPECT_EQ(qi.m_pointCount, 0);
+    EXPECT_THROW(QuickInfo qi = reader.preview(), pdal_error);
 }
 
 TEST(StacReaderTest, bounds_prune_accept_test)
@@ -188,14 +208,7 @@ TEST(StacReaderTest, bounds_prune_reject_test)
     Stage& reader = *f.createStage("readers.stac");
     reader.setOptions(options);
 
-    QuickInfo qi = reader.preview();
-
-    NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
-    EXPECT_TRUE(jsonMetadata.contains("stac_ids"));
-    std::vector<std::string> idList = jsonMetadata["stac_ids"].get<std::vector<std::string>>();
-    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") == idList.end());
-    EXPECT_EQ(qi.m_pointCount, 0);
-
+    EXPECT_THROW(QuickInfo qi = reader.preview(), pdal_error);
 }
 
 TEST(StacReaderTest, schema_validate_test)
