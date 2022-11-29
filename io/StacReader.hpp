@@ -68,6 +68,8 @@ namespace pdal
                 NL::json::array_t dates;
                 SrsBounds bounds;
                 std::string assetName;
+                std::string catalogSchemaUrl;
+                std::string featureSchemaUrl;
                 bool schemaValidate;
                 bool dryRun;
             };

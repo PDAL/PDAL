@@ -70,6 +70,12 @@ void StacReader::addArgs(ProgramArgs& args)
         "match all properties.", m_args->properties);
     args.add("reader_args", "Map of reader arguments to their values to pass through.",
         m_args->readerArgs);
+    args.add("catalog_schema_url", "URL of catalog schema you'd like to use for"
+        " JSON schema validation", m_args->catalogSchemaUrl,
+        "https://schemas.stacspec.org/v1.0.0/catalog-spec/json-schema/catalog.json");
+    args.add("feature_schema_url", "URL of feature schema you'd like to use for"
+        " JSON schema validation", m_args->featureSchemaUrl,
+        "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/item.json");
 }
 
 void StacReader::handleReaderArgs()
@@ -172,6 +178,9 @@ void StacReader::initialize()
         initializeCatalog(stacJson);
     else
         throw pdal_error("Could not initialize STAC object of type " + stacType);
+
+    if (m_readerList.empty())
+        throw pdal_error("No readers have been created for STAC reader.");
 }
 
 void schemaFetch(const nlohmann::json_uri &json_uri, nlohmann::json &json)
@@ -196,7 +205,7 @@ void StacReader::schemaValidate(NL::json stacJson)
 
     if (type == "Feature")
     {
-        schemaUrl = "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/item.json";
+        schemaUrl = m_args->featureSchemaUrl;
         for (auto& extSchemaUrl: stacJson["stac_extensions"])
         {
             log()->get(LogLevel::Debug) << "Processing extension " << extSchemaUrl << std::endl;
@@ -207,7 +216,7 @@ void StacReader::schemaValidate(NL::json stacJson)
         }
     }
     else if (type == "Catalog")
-        schemaUrl = "https://schemas.stacspec.org/v1.0.0/catalog-spec/json-schema/catalog.json";
+        schemaUrl = m_args->catalogSchemaUrl;
     else
         throw pdal_error("Invalid STAC type for PDAL consumption");
 
@@ -309,8 +318,8 @@ bool matchProperty(std::string key, NL::json val, NL::json properties, NL::detai
         }
         case NL::detail::value_t::number_float:
         {
-            int value = properties[key].get<int>();
-            int desired = val.get<int>();
+            int value = properties[key].get<double>();
+            int desired = val.get<double>();
             if (value != desired)
                 return false;
             break;
@@ -331,8 +340,31 @@ bool matchProperty(std::string key, NL::json val, NL::json properties, NL::detai
     return true;
 }
 
+void validateForPrune(NL::json stacJson)
+{
+    if (!stacJson.contains("id"))
+        throw pdal_error("JSON object does not contain required key 'id'");
+
+    if (!stacJson.contains("properties"))
+        throw pdal_error("JSON object does not contain required key 'properties'");
+
+    if (!stacJson.contains("geometry") || !stacJson.contains("bbox"))
+        throw pdal_error("JSON object does not contain one of 'geometry' or 'bbox'");
+
+
+    NL::json prop = stacJson["properties"];
+    if (
+        !prop.contains("datetime") &&
+        (!prop.contains("start_datetime") && !prop.contains("end_datetime"))
+    )
+        throw pdal_error("JSON object properties value not contain required key"
+            "'datetime' or 'start_datetime' and 'end_datetime'");
+
+}
+
 bool StacReader::prune(NL::json stacJson)
 {
+    validateForPrune(stacJson);
     // Returns true if item should be removed, false if it should stay
 
     // ID
@@ -356,28 +388,59 @@ bool StacReader::prune(NL::json stacJson)
     if (idFlag)
         return true;
 
+    NL::json properties = stacJson["properties"];
+
     // DateTime
     // If STAC datetime fits in *any* of the supplied ranges, it will not be pruned
-    std::string stacDate = stacJson["properties"]["datetime"];
-    bool dateFlag = true;
-    if (m_args->dates.empty())
-        dateFlag = false;
-    for (auto& range: m_args->dates)
+    if (properties.contains("datetime"))
     {
-        //If the extracted item date fits into any of the dates provided by
-        //the user, then do not prune this item based on dates.
-        if (
-            stacDate >= range[0].get<std::string>() &&
-            stacDate <= range[1].get<std::string>()
-        )
+        std::string stacDate = properties["datetime"];
+        bool dateFlag = true;
+        if (m_args->dates.empty())
             dateFlag = false;
+        for (auto& range: m_args->dates)
+        {
+            //If the extracted item date fits into any of the dates provided by
+            //the user, then do not prune this item based on dates.
+            if (
+                stacDate >= range[0].get<std::string>() &&
+                stacDate <= range[1].get<std::string>()
+            )
+                dateFlag = false;
+        }
+        if (dateFlag)
+            return true;
+    } else if (properties.contains("start_datetime") && properties.contains("end_datetime"))
+    {
+        // Handle if STAC object has start and end datetimes instead of one
+        std::string start_date = properties["start_datetime"].get<std::string>();
+        std::string end_date = properties["end_datetime"].get<std::string>();
+
+        bool dateFlag = true;
+        for (auto& range: m_args->dates)
+        {
+            // If any of the date ranges overlap with the date range of the STAC
+            // object, do not prune.
+            if (range[0].get<std::string>() <= end_date && range[0].get<std::string>() >= start_date)
+            {
+                dateFlag = false;
+            }
+            else if (
+                range[1].get<std::string>() <= end_date &&
+                range[1].get<std::string>() >= start_date
+            )
+            {
+                dateFlag = false;
+            }
+        }
+        if (dateFlag)
+            return true;
+
     }
-    if (dateFlag)
-        return true;
+
 
     // Properties
     // If STAC properties match *all* the supplied properties, it will not be pruned
-    NL::json properties = stacJson["properties"];
     if (!m_args->properties.empty())
     {
         for (auto &it: m_args->properties.items())
@@ -415,6 +478,9 @@ bool StacReader::prune(NL::json stacJson)
         {
             NL::json geometry = stacJson["geometry"].get<NL::json>();
             Polygon f(geometry.dump());
+            if (!f.valid())
+                throw pdal_error("Polygon created from STAC 'geometry' key is invalid");
+
             if (m_args->bounds.is3d())
             {
                 if (!m_args->bounds.to3d().overlaps(f.bounds()))
