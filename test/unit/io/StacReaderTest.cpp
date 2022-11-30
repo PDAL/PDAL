@@ -89,8 +89,7 @@ TEST(StacReaderTest, id_prune_test)
 
     options.add("filename", Support::datapath("stac/catalog.json"));
     options.add("ids", "MD_GoldenBeach_2012");
-    //TODO find way to ignore regex commas?
-    options.add("ids", "USGS_LPC\\w*");
+    options.add("ids", "USGS_LPC\\w{0,}");
     options.add("asset_name", "ept.json");
 
     StageFactory f;

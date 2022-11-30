@@ -40,6 +40,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <regex>
 
 #include <iostream>
 
@@ -66,6 +67,40 @@ typedef union
     uint32_t u32;
     uint64_t u64;
 } Everything;
+
+struct RegEx{
+    RegEx(): m_expression(), m_str()
+    {}
+
+    RegEx(std::string expr): m_expression(expr), m_str(expr)
+    {}
+
+    std::regex m_expression;
+    std::string m_str;
+
+    friend std::ostream& operator<<(std::ostream& out, const RegEx& regex);
+
+    friend std::istream& operator>>(std::istream& in, RegEx& regex);
+};
+
+inline std::ostream& operator<<(std::ostream& out, const RegEx& regex)
+{
+    std::string expr = regex.m_str;
+    if (!expr.empty())
+        out << expr;
+    return out;
+}
+
+inline std::istream& operator>>(std::istream& in, RegEx& regex)
+{
+    std::string expr;
+
+    in >> expr;
+    regex.m_str = expr;
+    regex.m_expression = std::regex(expr);
+
+    return in;
+}
 
 struct XForm
 {

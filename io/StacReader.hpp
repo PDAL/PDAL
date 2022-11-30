@@ -62,7 +62,7 @@ namespace pdal
         private:
             struct Args
             {
-                std::vector<std::string> ids;
+                std::vector<RegEx> ids;
                 NL::json properties;
                 NL::json::array_t readerArgs;
                 NL::json::array_t dates;

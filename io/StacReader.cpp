@@ -108,7 +108,7 @@ void StacReader::initializeArgs()
 
         log()->get(LogLevel::Debug) << "Selecting Ids: " << std::endl;
         for (auto& id: m_args->ids)
-            log()->get(LogLevel::Debug) << "    " << id << std::endl;
+            log()->get(LogLevel::Debug) << "    " << id.m_str << std::endl;
     }
 
     // A 2D array of dates, [[minDate1, maxDate1], [minDate2, maxDate2], ...]
@@ -373,8 +373,7 @@ bool StacReader::prune(NL::json stacJson)
     {
         for (auto& id: m_args->ids)
         {
-            std::regex id_regex(id);
-            if (std::regex_match(itemId, id_regex))
+            if (std::regex_match(itemId, id.m_expression))
             {
                 idFlag = false;
             }
