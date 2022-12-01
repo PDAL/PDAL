@@ -69,18 +69,32 @@ typedef union
 } Everything;
 
 struct RegEx{
-    RegEx(): m_expression(), m_str()
+    RegEx(): m_str()
     {}
 
-    RegEx(std::string expr): m_expression(expr), m_str(expr)
+    RegEx(std::string expr): m_str(expr)
     {}
 
-    std::regex m_expression;
     std::string m_str;
+    bool valid() {
+        if (!m_str.empty())
+        {
+            return true;
+        }
+        return false;
+    }
+
+    std::regex regex() { return std::regex(m_str); }
+
+    std::string str() { return m_str; }
 
     friend std::ostream& operator<<(std::ostream& out, const RegEx& regex);
 
     friend std::istream& operator>>(std::istream& in, RegEx& regex);
+
+    friend bool operator==(const RegEx& lhs, const RegEx& rhs);
+    friend bool operator==(const RegEx& lhs, const std::string& rhs);
+    friend bool operator==(const std::string& lhs, const RegEx& rhs);
 };
 
 inline std::ostream& operator<<(std::ostream& out, const RegEx& regex)
@@ -97,9 +111,23 @@ inline std::istream& operator>>(std::istream& in, RegEx& regex)
 
     in >> expr;
     regex.m_str = expr;
-    regex.m_expression = std::regex(expr);
 
     return in;
+}
+
+inline bool operator==(const RegEx& lhs, const RegEx& rhs)
+{
+    return lhs.m_str == rhs.m_str;
+}
+
+inline bool operator==(const RegEx& lhs, const std::string& rhs)
+{
+    return lhs.m_str == rhs;
+}
+
+inline bool operator==(const std::string& lhs, const RegEx& rhs)
+{
+    return lhs == rhs.m_str;
 }
 
 struct XForm

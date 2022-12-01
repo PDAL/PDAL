@@ -373,7 +373,7 @@ bool StacReader::prune(NL::json stacJson)
     {
         for (auto& id: m_args->ids)
         {
-            if (std::regex_match(itemId, id.m_expression))
+            if (std::regex_match(itemId, id.regex()))
             {
                 idFlag = false;
             }
