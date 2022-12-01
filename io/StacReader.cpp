@@ -231,8 +231,14 @@ void StacReader::initializeItem(NL::json stacJson)
     if (prune(stacJson))
         return;
 
-    if (m_args->schemaValidate)
-        schemaValidate(stacJson);
+    try {
+        if (m_args->schemaValidate)
+            schemaValidate(stacJson);
+    } catch(const std::exception& e)
+    {
+        std::cout << e.what() << std::endl;
+        throw e;
+    }
 
     if (!stacJson["assets"].contains(m_args->assetName))
         throw pdal_error("asset_name("+m_args->assetName+") doesn't match STAC object.");

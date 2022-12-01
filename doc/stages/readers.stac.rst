@@ -55,8 +55,8 @@ bounds
     Example: ``--readers.stac.bounds '([-79.0,-74.0],[38.0,39.0])'``
 
 ids
-    List of STAC Ids to prune by.
-    Example: ``--readers.stac.ids '["MD_GoldenBeach_2012", "MI_Charlevoix_Islands_TL_2018"]'``
+    List of `Regular Expression`_ strings to prune STAC Ids by.
+    Example: ``--readers.stac.ids '["MD_GoldenBeach_2012", "USGS_LPC\\w{0,}"]'``
 
 schema_validate
     Boolean value determining if the reader should validate the supplied STAC as
@@ -78,3 +78,4 @@ reader_args
 
 
 .. _Spatio Temporal Access Catalog (STAC): https://stacspec.org/en
+.. _Regular Expression: https://en.cppreference.com/w/cpp/regex
