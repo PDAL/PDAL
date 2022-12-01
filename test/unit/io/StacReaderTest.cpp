@@ -222,5 +222,7 @@ TEST(StacReaderTest, schema_validate_test)
     Stage& reader = *f.createStage("readers.stac");
     reader.setOptions(options);
 
-    EXPECT_NO_THROW(reader.preview());
+    QuickInfo qi = reader.preview();
+    EXPECT_TRUE(qi.valid());
+    EXPECT_EQ(qi.m_pointCount, 4860658);
 }
