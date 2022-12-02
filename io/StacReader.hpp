@@ -81,7 +81,6 @@ namespace pdal
             NL::json m_readerArgs;
             std::vector<std::string> m_idList;
             std::vector<std::unique_ptr<Stage>> m_readerList;
-            std::mutex m_mutex;
 
             StageFactory m_factory;
             MergeFilter m_merge;

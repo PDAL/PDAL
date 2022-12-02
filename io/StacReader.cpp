@@ -183,7 +183,7 @@ void StacReader::initialize()
         throw pdal_error("No readers have been created for STAC reader.");
 }
 
-void schemaFetch(const nlohmann::json_uri &json_uri, nlohmann::json &json)
+void schemaFetch(const nlohmann::json_uri& json_uri, nlohmann::json& json)
 {
     std::unique_ptr<arbiter::Arbiter> fetcher;
     fetcher.reset(new arbiter::Arbiter());
@@ -193,7 +193,7 @@ void schemaFetch(const nlohmann::json_uri &json_uri, nlohmann::json &json)
 
 void StacReader::schemaValidate(NL::json stacJson)
 {
-    std::function<void(const nlohmann::json_uri &, nlohmann::json &)> fetch = schemaFetch;
+    std::function<void(const nlohmann::json_uri&, nlohmann::json&)> fetch = schemaFetch;
     nlohmann::json_schema::json_validator val(
         fetch,
         [](const std::string &, const std::string &) {}

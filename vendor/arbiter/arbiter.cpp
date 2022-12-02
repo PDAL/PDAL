@@ -485,7 +485,7 @@ std::unique_ptr<std::string> Driver::tryGet(const std::string path) const
 std::vector<char> Driver::getBinary(std::string path) const
 {
     std::vector<char> data;
-    if (!get(path, data)) throw ArbiterError("Could not read file " + path);
+    if (!get(path, data)) throw ArbiterError("Could not read file " + m_protocol + "://" + path);
     return data;
 }
 
@@ -5274,7 +5274,7 @@ namespace
      //
      // Return the position of chr within base64_encode()
      //
-    
+
         if      (chr >= 'A' && chr <= 'Z') return chr - 'A';
         else if (chr >= 'a' && chr <= 'z') return chr - 'a' + ('Z' - 'A')               + 1;
         else if (chr >= '0' && chr <= '9') return chr - '0' + ('Z' - 'A') + ('z' - 'a') + 2;
