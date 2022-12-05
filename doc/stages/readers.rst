@@ -156,6 +156,9 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
 :ref:`readers.slpk`
     Read data stored in an Esri SLPK file.
 
+:ref:`readers.stac`
+    Read STAC JSON Catalogs and Items with the Pointcloud extension.
+
 :ref:`readers.terrasolid`
     TerraSolid Reader
 
