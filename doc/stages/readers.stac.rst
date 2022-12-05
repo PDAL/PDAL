@@ -79,7 +79,7 @@ reader_args
 
     Exmaple:
 
-.. code-block:: json
+.. code-block:: bash
 
     -readers.stac.reader_args \
     '[{"type": "readers.ept", "resolution": 100}, {"type": "readers.las", "nosrs": true}]'
