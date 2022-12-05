@@ -70,7 +70,7 @@ namespace pdal
                 std::string assetName;
                 std::string catalogSchemaUrl;
                 std::string featureSchemaUrl;
-                bool schemaValidate;
+                bool validateSchema;
                 bool dryRun;
             };
 
@@ -90,7 +90,7 @@ namespace pdal
             void initializeItem(NL::json stacJson);
             void initializeCatalog(NL::json stacJson);
             void initializeArgs();
-            void schemaValidate(NL::json stacJson);
+            void validateSchema(NL::json stacJson);
             bool prune(NL::json stacJson);
 
             virtual void initialize() override;

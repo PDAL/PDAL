@@ -8,6 +8,8 @@ information, so it can more easily be worked with, indexed, and discovered. The 
 reader will read Catalogs and Features. For Catalogs, the reader will iterate through
 items available in the Links key, creating a list of reads to accomplish.
 
+.. embed::
+
 Example
 --------------------------------------------------------------------------------
 
@@ -58,7 +60,7 @@ ids
     List of `Regular Expression`_ strings to prune STAC Ids by.
     Example: ``--readers.stac.ids '["MD_GoldenBeach_2012", "USGS_LPC\\w{0,}"]'``
 
-schema_validate
+validate_schema
     Boolean value determining if the reader should validate the supplied STAC as
     it's being read using JSON schema and the publicly available STAC schemas and
     list of STAC extension schemas.
@@ -74,7 +76,20 @@ properties
 reader_args
     A list of JSON objects with keys of reader options and the values to pass through.
     These will be in the exact same form as a Pipeline Stage object minus the filename.
-    Exmaple: ``-readers.stac.reader_args '[{"type": "readers.ept", "resolution": 100}]'``
+
+    Exmaple:
+
+.. code-block:: bash
+
+    -readers.stac.reader_args \
+    '[{"type": "readers.ept", "resolution": 100}, {"type": "readers.las", "nosrs": true}]'
+
+
+catalog_schema_url
+    URL of JSON schema you'd like to use for JSON schema validation of STAC Catalogs.
+
+feature_schema_url
+    URL of JSON schema you'd like to use for JSON schema validation of STAC Items/Features.
 
 
 .. _Spatio Temporal Access Catalog (STAC): https://stacspec.org/en

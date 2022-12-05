@@ -210,13 +210,14 @@ TEST(StacReaderTest, bounds_prune_reject_test)
     EXPECT_THROW(QuickInfo qi = reader.preview(), pdal_error);
 }
 
+#ifndef _WIN32
 TEST(StacReaderTest, schema_validate_test)
 {
     Options options;
 
     options.add("filename", Support::datapath("stac/MD_GoldenBeach_2012.json"));
     options.add("asset_name", "ept.json");
-    options.add("schema_validate", "true");
+    options.add("validate_schema", "true");
 
     StageFactory f;
     Stage& reader = *f.createStage("readers.stac");
@@ -226,3 +227,4 @@ TEST(StacReaderTest, schema_validate_test)
     EXPECT_TRUE(qi.valid());
     EXPECT_EQ(qi.m_pointCount, 4860658);
 }
+#endif
