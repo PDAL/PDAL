@@ -64,7 +64,7 @@ void StacReader::addArgs(ProgramArgs& args)
     args.add("bounds", "Bounding box to select stac items by. This will "
         "propogate down through all readers being used.", m_args->bounds);
     args.add("ids", "List of ID regexes to select STAC items based on.", m_args->ids);
-    args.add("schema_validate", "Use JSON schema to validate your STAC objects.", m_args->schemaValidate, false);
+    args.add("validate_schema", "Use JSON schema to validate your STAC objects.", m_args->validateSchema, false);
     args.add("properties", "Map of STAC property names to regular expression "
         "values. ie. {\"pc:type\": \"(lidar|sonar)\"}. Selected items will "
         "match all properties.", m_args->properties);
@@ -154,7 +154,7 @@ void StacReader::initializeArgs()
     if (m_args->dryRun)
         log()->get(LogLevel::Debug) << "Dry Run flag is set." << std::endl;
 
-    if (m_args->schemaValidate)
+    if (m_args->validateSchema)
         log()->get(LogLevel::Debug) <<
             "JSON Schema validation flag is set." << std::endl;
 
@@ -191,7 +191,7 @@ void schemaFetch(const nlohmann::json_uri& json_uri, nlohmann::json& json)
     json = nlohmann::json::parse(jsonStr);
 }
 
-void StacReader::schemaValidate(NL::json stacJson)
+void StacReader::validateSchema(NL::json stacJson)
 {
     std::function<void(const nlohmann::json_uri&, nlohmann::json&)> fetch = schemaFetch;
     nlohmann::json_schema::json_validator val(
@@ -231,8 +231,8 @@ void StacReader::initializeItem(NL::json stacJson)
     if (prune(stacJson))
         return;
 
-    if (m_args->schemaValidate)
-        schemaValidate(stacJson);
+    if (m_args->validateSchema)
+        validateSchema(stacJson);
 
     if (!stacJson["assets"].contains(m_args->assetName))
         throw pdal_error("asset_name("+m_args->assetName+") doesn't match STAC object.");
@@ -271,8 +271,8 @@ void StacReader::initializeItem(NL::json stacJson)
 
 void StacReader::initializeCatalog(NL::json stacJson)
 {
-    if (m_args->schemaValidate)
-        schemaValidate(stacJson);
+    if (m_args->validateSchema)
+        validateSchema(stacJson);
     auto itemLinks = stacJson["links"];
     for (auto link: itemLinks)
     {
