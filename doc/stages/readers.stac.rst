@@ -78,7 +78,8 @@ reader_args
     These will be in the exact same form as a Pipeline Stage object minus the filename.
 
     Exmaple:
-.. code-block: json
+
+.. code-block:: json
 
     -readers.stac.reader_args \
     '[{"type": "readers.ept", "resolution": 100}, {"type": "readers.las", "nosrs": true}]'
