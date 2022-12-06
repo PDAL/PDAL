@@ -58,6 +58,13 @@ PDAL_ADD_TEST(pdal_options_test
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
+
+PDAL_ADD_TEST(pdal_dimension_test
+    FILES
+        DimensionTest.cpp
+    INCLUDES
+        ${NLOHMANN_INCLUDE_DIR}
+)
 PDAL_ADD_TEST(pdal_pipeline_manager_test FILES PipelineManagerTest.cpp)
 PDAL_ADD_TEST(pdal_pipeline_writer_test
     FILES

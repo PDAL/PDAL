@@ -194,20 +194,29 @@ inline std::size_t extractName(const std::string& s, std::string::size_type p)
         return 0;
     auto isvalid = [](int c)
     {
-        return std::isalpha(c) || std::isdigit(c) || c == '_';
+        return std::isalpha(c) || std::isdigit(c) || c == '_' || c == ' ';
     };
     return Utils::extract(s, p, isvalid) + 1;
 }
 
 inline std::string fixName(std::string name)
 {
-    size_t pos = 0;
-    while (true)
+
+    char replaceChar = '_';
+
+    auto isvalid = [replaceChar](int c)
     {
-        pos = extractName(name, 0);
-        if (pos == name.size())
-            break;
-        name[pos] = '_';
+        return std::isalpha(c) || std::isdigit(c) || c == replaceChar || c == ' ';
+    };
+
+    // if first character isn't an alpha, we
+    // are going to replace it with _
+    if (!std::isalpha(name[0]))
+        name[0] = replaceChar;
+
+    for (std::size_t i = 0; i < name.size(); ++i)
+    {
+        if (!isvalid(name[i])) name[i] = replaceChar;
     }
     return name;
 }
