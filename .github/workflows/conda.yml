@@ -27,7 +27,7 @@ jobs:
 
     env:
       PDAL_PLATFORM: ${{ matrix.platform }}
-      CACHE_NUMBER: 0
+      CACHE_NUMBER: 1
     steps:
     - uses: actions/checkout@v2
 
