@@ -356,8 +356,8 @@ void CopcWriter::write(const PointViewPtr v)
 
     b->bounds = grid.processingBounds();
     b->trueBounds = grid.conformingBounds();
-    if (!b->aSrs.empty())
-       b->srs = baSrs;
+    if (!b->opts.aSrs.empty())
+       b->srs = b->opts.aSrs;
     else
        b->srs = v->spatialReference();
 
