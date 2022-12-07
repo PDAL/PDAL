@@ -107,6 +107,7 @@ struct Options
     std::vector<las::Evlr> userVlrs;
     bool emitPipeline;
     bool fixedSeed;
+    pdal::SpatialReference aSrs;
 };
 
 struct BaseInfo
