@@ -71,7 +71,7 @@ TEST(StacReaderTest, catalog_test)
 {
     Options options;
 
-    options.add("filename", Support::datapath("stac/catalog.json"));
+    options.add("filename", Support::datapath("stac/remote_catalog.json"));
     options.add("asset_name", "ept.json");
 
     StageFactory f;
@@ -83,11 +83,29 @@ TEST(StacReaderTest, catalog_test)
     EXPECT_EQ(qi.m_pointCount, 36174643520);
 }
 
+TEST(StacReaderTest, multiple_readers_test)
+{
+    Options options;
+
+    options.add("filename", Support::datapath("stac/multi_type_catalog.json"));
+    options.add("reader_args", "[{\"type\": \"readers.copc\", \"resolution\": 1},"
+        "{\"type\":\"readers.las\", \"nosrs\": true}]");
+
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
+
+    QuickInfo qi = reader.preview();
+
+    EXPECT_EQ(qi.m_pointCount, 10653336);
+
+}
+
 TEST(StacReaderTest, id_prune_test)
 {
     Options options;
 
-    options.add("filename", Support::datapath("stac/catalog.json"));
+    options.add("filename", Support::datapath("stac/remote_catalog.json"));
     options.add("ids", "MD_GoldenBeach_2012");
     options.add("ids", "USGS_LPC\\w{0,}");
     options.add("asset_name", "ept.json");

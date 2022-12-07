@@ -33,6 +33,7 @@
 ****************************************************************************/
 #include "StacReader.hpp"
 
+#include <pdal/util/ThreadPool.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/Kernel.hpp>
 #include <nlohmann/json.hpp>
@@ -76,6 +77,8 @@ void StacReader::addArgs(ProgramArgs& args)
     args.add("feature_schema_url", "URL of feature schema you'd like to use for"
         " JSON schema validation", m_args->featureSchemaUrl,
         "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/item.json");
+    args.add("threads", "Number of threads for fetching JSON files, Default: 8",
+        m_args->threads, 8);
 }
 
 void StacReader::handleReaderArgs()
@@ -97,7 +100,6 @@ void StacReader::handleReaderArgs()
             m_readerArgs[driver][arg.key()] = arg.value();
         }
     }
-    std::cout << m_readerArgs.dump() << std::endl;
 }
 
 void StacReader::initializeArgs()
@@ -162,9 +164,11 @@ void StacReader::initializeArgs()
 
 void StacReader::initialize()
 {
+    m_pool.reset(new ThreadPool(8));
+    m_arbiter.reset(new arbiter::Arbiter());
+
     initializeArgs();
 
-    m_arbiter.reset(new arbiter::Arbiter());
     std::string stacStr = m_arbiter->get(m_filename);
     NL::json stacJson = NL::json::parse(stacStr);
 
@@ -247,24 +251,24 @@ void StacReader::initializeItem(NL::json stacJson)
 
     if (!reader)
         throwError("Unable to create reader for file '" + dataUrl + "'.");
-
-    Options readerOptions;
-    // add reader options defined in reader args to their respective readers
-    if (m_readerArgs.contains(driver)) {
-        NL::json args = m_readerArgs[driver].get<NL::json>();
-        for (auto& arg : args.items()) {
-            readerOptions.add(arg.key(), arg.value());
-        }
-    }
-
-    readerOptions.add("filename", dataUrl);
-    reader->setOptions(readerOptions);
-
-    if (m_readerList.size() > 0)
-        reader->setInput(*m_readerList.back());
-
-    if (reader)
+    else
     {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        Options readerOptions;
+        // add reader options defined in reader args to their respective readers
+        if (m_readerArgs.contains(driver)) {
+            NL::json args = m_readerArgs[driver].get<NL::json>();
+            for (auto& arg : args.items()) {
+                readerOptions.add(arg.key(), arg.value());
+            }
+        }
+
+        readerOptions.add("filename", dataUrl);
+        reader->setOptions(readerOptions);
+
+        if (m_readerList.size() > 0)
+            reader->setInput(*m_readerList.back());
+
         m_readerList.push_back(std::unique_ptr<Stage>(reader));
     }
 }
@@ -276,14 +280,19 @@ void StacReader::initializeCatalog(NL::json stacJson)
     auto itemLinks = stacJson["links"];
     for (auto link: itemLinks)
     {
-        std::string linkType = link["rel"];
-        if (linkType != "item")
-            continue;
-        std::string itemUrl = link["href"];
-        //Create json from itemUrl
-        NL::json itemJson = NL::json::parse(m_arbiter->get(itemUrl));
-        initializeItem(itemJson);
+        m_pool->add([this, link]()
+        {
+            std::string linkType = link["rel"];
+            if (linkType != "item")
+                return;
+            std::string itemUrl = link["href"];
+            //Create json from itemUrl
+            NL::json itemJson = NL::json::parse(m_arbiter->get(itemUrl));
+            initializeItem(itemJson);
+        });
     }
+    m_pool->await();
+    m_pool->stop();
 }
 
 // returns true if property matches
@@ -522,6 +531,7 @@ bool StacReader::prune(NL::json stacJson)
     }
 
     log()->get(LogLevel::Debug) << "Including: " << itemId << std::endl;
+
     m_idList.push_back(itemId);
     return false;
 }
@@ -583,5 +593,7 @@ PointViewSet StacReader::run(PointViewPtr view)
 {
     return m_pvSet;
 }
+
+StacReader::~StacReader(){};
 
 } //namespace pdal

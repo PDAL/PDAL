@@ -50,11 +50,15 @@
 
 namespace pdal
 {
-    class StacReader : public Reader
+
+    class ThreadPool;
+
+    class PDAL_DLL StacReader : public Reader
     {
         public:
 
             StacReader() : Reader() {};
+            ~StacReader();
 
             std::string getName() const override;
 
@@ -72,15 +76,18 @@ namespace pdal
                 std::string featureSchemaUrl;
                 bool validateSchema;
                 bool dryRun;
+                int threads;
             };
-
 
             std::unique_ptr<ILeStream> m_stream;
             std::unique_ptr<Args> m_args;
+            std::unique_ptr<ThreadPool> m_pool;
             std::unique_ptr<arbiter::Arbiter> m_arbiter;
+            std::vector<std::unique_ptr<Stage>> m_readerList;
+
             NL::json m_readerArgs;
             std::vector<std::string> m_idList;
-            std::vector<std::unique_ptr<Stage>> m_readerList;
+            mutable std::mutex m_mutex;
 
             StageFactory m_factory;
             MergeFilter m_merge;

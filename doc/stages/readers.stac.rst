@@ -29,7 +29,7 @@ Example
                     "2022-11-30T0:00:0Z"
                 ]
             ],
-            "schema_validate": true
+            "validate_schema": true
         }
     ]
 

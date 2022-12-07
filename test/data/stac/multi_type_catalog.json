@@ -1,0 +1,49 @@
+{
+    "type": "Catalog",
+    "id": "3dep",
+    "stac_version": "1.0.0",
+    "description": "A catalog of USGS 3DEP Lidar hosted on AWS s3.",
+    "queryables": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$id": "https://example.org/queryables",
+        "type": "object",
+        "title": "Queryables",
+        "properties": {
+            "datetime": {
+                "description": "Datetime",
+                "type": "string",
+                "title": "Acquired",
+                "format": "date-time",
+                "pattern": "(\\+00:00|Z)$"
+            },
+            "id": {
+                "title": "Item ID",
+                "description": "Item identifier",
+                "$ref": "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/item.json#/definitions/core/allOf/2/properties/id"
+            }
+        }
+    },
+    "links": [
+        {
+            "rel": "root",
+            "href": "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/catalog.json",
+            "type": "application/json"
+        },
+        {
+            "rel": "self",
+            "href": "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/catalog.json",
+            "type": "application/json"
+        },
+        {
+            "rel": "item",
+            "href": "https://raw.githubusercontent.com/PDAL/data/stacdata/stac/autzen_copc.json"
+        },
+        {
+            "rel": "item",
+            "href": "https://raw.githubusercontent.com/PDAL/data/stacdata/stac/autzen_laz.json"
+        }
+    ],
+    "stac_extensions": [
+        "POINTCLOUD"
+    ]
+}
