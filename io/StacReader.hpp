@@ -57,7 +57,7 @@ namespace pdal
     {
         public:
 
-            StacReader() : Reader() {};
+            StacReader();
             ~StacReader();
 
             std::string getName() const override;

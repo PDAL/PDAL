@@ -55,6 +55,9 @@ CREATE_STATIC_STAGE(StacReader, stacinfo)
 
 std::string StacReader::getName() const { return stacinfo.name; }
 
+StacReader::StacReader(){};
+StacReader::~StacReader(){};
+
 void StacReader::addArgs(ProgramArgs& args)
 {
     m_args.reset(new StacReader::Args());
@@ -594,6 +597,5 @@ PointViewSet StacReader::run(PointViewPtr view)
     return m_pvSet;
 }
 
-StacReader::~StacReader(){};
 
 } //namespace pdal
