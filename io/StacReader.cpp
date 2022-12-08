@@ -147,10 +147,19 @@ void StacReader::initializeArgs()
     // { "type": "readers.ept" , "resolution": 100, "bounds": "([x,x],[y,y])"}
     if (!m_args->readerArgs.empty())
     {
+        if (m_args->readerArgs.is_object())
+        {
+            NL::json array_args = NL::json::array();
+            array_args.push_back(m_args->readerArgs);
+            m_args->readerArgs = array_args;
+            // std::cout <<"[" + m_args->readerArgs.dump() + "]"  <<std::endl;
+            // m_args->readerArgs = NL::json::parse("[" + m_args->readerArgs.dump() + "]");
+        }
         for (auto& opts: m_args->readerArgs)
             if (!opts.is_object())
                 throw pdal_error("Reader Args must be a valid JSON object");
 
+        log()->get(LogLevel::Debug) << "Reader Args: " << m_args->readerArgs.dump() << std::endl;
         handleReaderArgs();
     }
 
@@ -264,7 +273,36 @@ void StacReader::initializeItem(NL::json stacJson)
         if (m_readerArgs.contains(driver)) {
             NL::json args = m_readerArgs[driver].get<NL::json>();
             for (auto& arg : args.items()) {
-                readerOptions.add(arg.key(), arg.value());
+                NL::detail::value_t type = m_readerArgs[driver][arg.key()].type();
+                switch(type)
+                {
+                    case NL::detail::value_t::string:
+                    {
+                        std::string val = arg.value().get<std::string>();
+                        readerOptions.add(arg.key(), arg.value().get<std::string>());
+                        break;
+                    }
+                    case NL::detail::value_t::number_float:
+                    {
+                        readerOptions.add(arg.key(), arg.value().get<float>());
+                        break;
+                    }
+                    case NL::detail::value_t::number_integer:
+                    {
+                        readerOptions.add(arg.key(), arg.value().get<int>());
+                        break;
+                    }
+                    case NL::detail::value_t::boolean:
+                    {
+                        readerOptions.add(arg.key(), arg.value().get<bool>());
+                        break;
+                    }
+                    default:
+                    {
+                        readerOptions.add(arg.key(), arg.value());
+                        break;
+                    }
+                }
             }
         }
 
@@ -283,6 +321,8 @@ void StacReader::initializeCatalog(NL::json stacJson)
     if (m_args->validateSchema)
         validateSchema(stacJson);
     auto itemLinks = stacJson["links"];
+    log()->get(LogLevel::Debug) << "Filtering..." << std::endl;
+
     for (auto link: itemLinks)
     {
         m_pool->add([this, link]()
@@ -298,6 +338,8 @@ void StacReader::initializeCatalog(NL::json stacJson)
     }
     m_pool->await();
     m_pool->stop();
+    if (m_readerList.empty())
+        log()->get(LogLevel::Debug) << "Reader list is empty after filtering." << std::endl;
 }
 
 // returns true if property matches
