@@ -86,10 +86,9 @@ TEST(StacReaderTest, catalog_test)
 TEST(StacReaderTest, multiple_readers_test)
 {
     Options options;
-
+    std::string reader_args = "[{\"type\": \"readers.copc\", \"resolution\": 100},{\"type\":\"readers.las\", \"nosrs\": true}]";
     options.add("filename", Support::datapath("stac/multi_type_catalog.json"));
-    options.add("reader_args", "[{\"type\": \"readers.copc\", \"resolution\": 1},"
-        "{\"type\":\"readers.las\", \"nosrs\": true}]");
+    options.add("reader_args", reader_args);
 
     StageFactory f;
     Stage& reader = *f.createStage("readers.stac");

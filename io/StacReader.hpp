@@ -68,7 +68,7 @@ namespace pdal
             {
                 std::vector<RegEx> ids;
                 NL::json properties;
-                NL::json::array_t readerArgs;
+                NL::json readerArgs;
                 NL::json::array_t dates;
                 SrsBounds bounds;
                 std::string assetName;

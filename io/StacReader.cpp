@@ -72,6 +72,8 @@ void StacReader::addArgs(ProgramArgs& args)
     args.add("properties", "Map of STAC property names to regular expression "
         "values. ie. {\"pc:type\": \"(lidar|sonar)\"}. Selected items will "
         "match all properties.", m_args->properties);
+    // args.add("reader_args", "Map of reader arguments to their values to pass through.",
+    //     m_args->readerArgs);
     args.add("reader_args", "Map of reader arguments to their values to pass through.",
         m_args->readerArgs);
     args.add("catalog_schema_url", "URL of catalog schema you'd like to use for"
@@ -142,7 +144,7 @@ void StacReader::initializeArgs()
     }
 
     // array of pipeline-like reader definitions
-    //{ "type": "readers.ept" , "resolution": 100, "bounds": "([x,x],[y,y])"}
+    // { "type": "readers.ept" , "resolution": 100, "bounds": "([x,x],[y,y])"}
     if (!m_args->readerArgs.empty())
     {
         for (auto& opts: m_args->readerArgs)
