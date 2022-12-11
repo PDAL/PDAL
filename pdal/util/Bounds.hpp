@@ -228,7 +228,7 @@ public:
     */
     std::string toBox(uint32_t precision = 8) const
     {
-        std::stringstream oss;
+        Utils::StringStreamClassicLocale oss;
 
         oss.precision(precision);
         oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
@@ -250,7 +250,7 @@ public:
         if (empty())
             return std::string();
 
-        std::stringstream oss;
+        Utils::StringStreamClassicLocale oss;
 
         oss.precision(precision);
         oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
@@ -277,7 +277,7 @@ public:
         if (empty())
             return std::string();
 
-        std::stringstream oss;
+        Utils::StringStreamClassicLocale oss;
 
         oss.precision(precision);
         oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
@@ -523,7 +523,7 @@ public:
     */
     std::string toBox(uint32_t precision = 8) const
     {
-        std::stringstream oss;
+        Utils::StringStreamClassicLocale oss;
 
         oss.precision(precision);
         oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
@@ -544,7 +544,7 @@ public:
         if (empty())
             return std::string();
 
-        std::stringstream oss;
+        Utils::StringStreamClassicLocale oss;
 
         oss.precision(precision);
         oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
@@ -666,14 +666,13 @@ inline std::ostream& operator << (std::ostream& ostr, const BOX2D& bounds)
         ostr << "()";
         return ostr;
     }
-
-    auto savedPrec = ostr.precision();
-    ostr.precision(16); // or..?
-    ostr << "(";
-    ostr << "[" << bounds.minx << ", " << bounds.maxx << "], " <<
-            "[" << bounds.miny << ", " << bounds.maxy << "]";
-    ostr << ")";
-    ostr.precision(savedPrec);
+    Utils::StringStreamClassicLocale ss;
+    ss.precision(16); // or..?
+    ss << "(";
+    ss << "[" << bounds.minx << ", " << bounds.maxx << "], " <<
+          "[" << bounds.miny << ", " << bounds.maxy << "]";
+    ss << ")";
+    ostr << ss.str();
     return ostr;
 }
 
@@ -690,15 +689,14 @@ inline std::ostream& operator << (std::ostream& ostr, const BOX3D& bounds)
         ostr << "()";
         return ostr;
     }
-
-    auto savedPrec = ostr.precision();
-    ostr.precision(16); // or..?
-    ostr << "(";
-    ostr << "[" << bounds.minx << ", " << bounds.maxx << "], " <<
-            "[" << bounds.miny << ", " << bounds.maxy << "], " <<
-            "[" << bounds.minz << ", " << bounds.maxz << "]";
-    ostr << ")";
-    ostr.precision(savedPrec);
+    Utils::StringStreamClassicLocale ss;
+    ss.precision(16); // or..?
+    ss << "(";
+    ss << "[" << bounds.minx << ", " << bounds.maxx << "], " <<
+          "[" << bounds.miny << ", " << bounds.maxy << "], " <<
+          "[" << bounds.minz << ", " << bounds.maxz << "]";
+    ss << ")";
+    ostr << ss.str();
     return ostr;
 }
 
@@ -739,7 +737,7 @@ namespace Utils
     {
         try
         {
-            std::istringstream iss(s);
+            Utils::IStringStreamClassicLocale iss(s);
             iss >> bounds;
         }
         catch (BOX2D::error& error)
@@ -756,7 +754,7 @@ namespace Utils
     {
         try
         {
-            std::istringstream iss(s);
+            Utils::IStringStreamClassicLocale iss(s);
             iss >> bounds;
         }
         catch (BOX3D::error& error)
@@ -773,7 +771,7 @@ namespace Utils
     {
         try
         {
-            std::istringstream iss(s);
+            Utils::IStringStreamClassicLocale iss(s);
             iss >> bounds;
         }
         catch (Bounds::error& error)

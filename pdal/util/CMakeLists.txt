@@ -9,6 +9,7 @@ endif()
 include(${PDAL_CMAKE_DIR}/execinfo.cmake)
 include(${PDAL_CMAKE_DIR}/threads.cmake)
 include(${PDAL_CMAKE_DIR}/unwind.cmake)
+include(${PDAL_CMAKE_DIR}/utfcpp.cmake)
 
 if(LIBUNWIND_FOUND)
     set(BACKTRACE_SOURCE BacktraceUnwind.cpp)
@@ -36,8 +37,13 @@ PDAL_ADD_FREE_LIBRARY(${PDAL_UTIL_LIB_NAME} SHARED ${PDAL_UTIL_SOURCES})
 target_link_libraries(${PDAL_UTIL_LIB_NAME}
     PRIVATE
         ${BACKTRACE_LIBRARIES}
-        ${PDAL_BOOST_LIB_NAME}
         ${CMAKE_THREAD_LIBS_INIT}
+        ${UTFCPP_LIB_NAME}
+)
+
+target_include_directories(${PDAL_UTIL_LIB_NAME}
+    PRIVATE
+        ${UTFCPP_INCLUDE_DIR}
 )
 
 set_target_properties(${PDAL_UTIL_LIB_NAME} PROPERTIES
