@@ -42,6 +42,8 @@
 #include <pdal/Options.hpp>
 #include <pdal/util/FileUtils.hpp>
 
+#include <utf8.h>
+
 #ifndef _WIN32
 #include <dlfcn.h>
 #endif
@@ -159,7 +161,10 @@ std::string toJSON(const MetadataNode& m)
     Utils::OStringStreamClassicLocale o;
 
     toJSON(m, o);
-    return o.str();
+    std::string input(o.str());
+    std::string output;
+    utf8::replace_invalid(input.begin(), input.end(), std::back_inserter(output));
+    return output;
 }
 
 void toJSON(const MetadataNode& m, std::ostream& o)
