@@ -114,6 +114,7 @@ void CopcWriter::addArgs(ProgramArgs& args)
     args.add("pipeline", "Emit a JSON-represetation of the pipeline as a VLR",
         b->opts.emitPipeline);
     args.add("fixed_seed", "Fix the random seed", b->opts.fixedSeed).setHidden();
+    args.add("a_srs", "Spatial reference to use to write output", b->opts.aSrs);
     args.add("threads", "", b->opts.threadCount).setHidden();
 }
 
@@ -355,7 +356,10 @@ void CopcWriter::write(const PointViewPtr v)
 
     b->bounds = grid.processingBounds();
     b->trueBounds = grid.conformingBounds();
-    b->srs = v->spatialReference();
+    if (!b->opts.aSrs.empty())
+       b->srs = b->opts.aSrs;
+    else
+       b->srs = v->spatialReference();
 
     // Set the input string into scaling.
     b->scaling.m_xXform.m_scale.set(b->opts.scaleX.val());
