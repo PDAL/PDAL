@@ -144,6 +144,9 @@ pipeline
 vlrs
     Add VLRS specified as json. See `VLRs`_ above for details.
 
+threads
+    Number of threads to use when writing [Default: 10]
+
 .. include:: writer_opts.rst
 
 .. _COPC format: https://copc.io/

@@ -114,6 +114,7 @@ void CopcWriter::addArgs(ProgramArgs& args)
     args.add("pipeline", "Emit a JSON-represetation of the pipeline as a VLR",
         b->opts.emitPipeline);
     args.add("fixed_seed", "Fix the random seed", b->opts.fixedSeed).setHidden();
+    args.add("threads", "", b->opts.threadCount).setHidden();
 }
 
 void CopcWriter::fillForwardList()
