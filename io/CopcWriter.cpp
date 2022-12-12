@@ -251,6 +251,7 @@ void CopcWriter::prepared(PointTableRef table)
         b->extraDims.emplace_back(name, 
                                   type, 
                                   id,
+                                  size,
                                   las::baseCount(b->pointFormatId) + b->numExtraBytes, 
                                   dimType.m_xform.m_scale.m_val, 
                                   dimType.m_xform.m_offset.m_val);
