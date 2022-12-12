@@ -62,144 +62,29 @@ void StacReader::addArgs(ProgramArgs& args)
 {
     m_args.reset(new StacReader::Args());
 
-    args.add("asset_name", "Asset to use for data consumption", m_args->assetName, "data");
+    args.add("asset_names", "List of asset names to look for in data consumption. Default: 'data'", m_args->assetNames, {"data"});
     args.add("date_ranges", "Date ranges to include in your search. "
         "Eg. dates'[[\"min1\",\"max1\"],...]'", m_args->dates);
     args.add("bounds", "Bounding box to select stac items by. This will "
         "propogate down through all readers being used.", m_args->bounds);
-    args.add("ids", "List of ID regexes to select STAC items based on.", m_args->ids);
-    args.add("validate_schema", "Use JSON schema to validate your STAC objects.", m_args->validateSchema, false);
+    args.add("item_ids", "List of ID regexes to select STAC items based on.", m_args->item_ids);
+    args.add("catalog_ids", "List of ID regexes to select STAC items based on.", m_args->catalog_ids);
+    args.add("validate_schema", "Use JSON schema to validate your STAC objects. Default: false", m_args->validateSchema, false);
     args.add("properties", "Map of STAC property names to regular expression "
         "values. ie. {\"pc:type\": \"(lidar|sonar)\"}. Selected items will "
         "match all properties.", m_args->properties);
-    // args.add("reader_args", "Map of reader arguments to their values to pass through.",
-    //     m_args->readerArgs);
     args.add("reader_args", "Map of reader arguments to their values to pass through.",
         m_args->readerArgs);
     args.add("catalog_schema_url", "URL of catalog schema you'd like to use for"
-        " JSON schema validation", m_args->catalogSchemaUrl,
+        " JSON schema validation.", m_args->catalogSchemaUrl,
         "https://schemas.stacspec.org/v1.0.0/catalog-spec/json-schema/catalog.json");
     args.add("feature_schema_url", "URL of feature schema you'd like to use for"
-        " JSON schema validation", m_args->featureSchemaUrl,
+        " JSON schema validation.", m_args->featureSchemaUrl,
         "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/item.json");
     args.add("threads", "Number of threads for fetching JSON files, Default: 8",
         m_args->threads, 8);
 }
 
-void StacReader::handleReaderArgs()
-{
-    for (NL::json& readerPipeline: m_args->readerArgs)
-    {
-        if (!readerPipeline.contains("type"))
-            throw pdal_error("No \"type\" key found in supplied reader arguments.");
-
-        std::string driver = readerPipeline["type"].get<std::string>();
-        if (m_readerArgs.contains(driver))
-            throw pdal_error("Multiple instances of the same driver in supplie reader arguments.");
-        m_readerArgs[driver] = { };
-
-        for (auto& arg: readerPipeline.items())
-        {
-            if (arg.key() == "type")
-                continue;
-            m_readerArgs[driver][arg.key()] = arg.value();
-        }
-    }
-}
-
-void StacReader::initializeArgs()
-{
-    // should be a string vector, ["foo", "bar", "USGS_LPC_AK_Fairbanks_2009"]
-    if (!m_args->ids.empty())
-    {
-
-        log()->get(LogLevel::Debug) << "Selecting Ids: " << std::endl;
-        for (auto& id: m_args->ids)
-            log()->get(LogLevel::Debug) << "    " << id.m_str << std::endl;
-    }
-
-    // A 2D array of dates, [[minDate1, maxDate1], [minDate2, maxDate2], ...]
-    if (!m_args->dates.empty())
-    {
-        //TODO validate supplied dates?
-        log()->get(LogLevel::Debug) << "Dates selected: " << m_args->dates  << std::endl;
-    }
-
-    // A nlohmann JSON object with a key value pair that maps to properties in
-    // a STAC item. { "pc:encoding": "ept" }
-    if (!m_args->properties.empty())
-    {
-        if (!m_args->properties.is_object())
-            throw pdal_error("Properties argument must be a valid JSON object.");
-        log()->get(LogLevel::Debug) << "Property Pruning: " <<
-            m_args->properties.dump() << std::endl;
-    }
-
-    // An array of SrsBounds objects, [([xmin, xmax], [ymin, ymax], [zmin, zmax]), ...]
-    if (!m_args->bounds.empty())
-    {
-        if (!m_args->bounds.valid())
-            throw pdal_error("Supplied bounds are not valid.");
-        log()->get(LogLevel::Debug) << "Bounds: " << m_args->bounds << std::endl;
-    }
-
-    // array of pipeline-like reader definitions
-    // { "type": "readers.ept" , "resolution": 100, "bounds": "([x,x],[y,y])"}
-    if (!m_args->readerArgs.empty())
-    {
-        if (m_args->readerArgs.is_object())
-        {
-            NL::json array_args = NL::json::array();
-            array_args.push_back(m_args->readerArgs);
-            m_args->readerArgs = array_args;
-            // std::cout <<"[" + m_args->readerArgs.dump() + "]"  <<std::endl;
-            // m_args->readerArgs = NL::json::parse("[" + m_args->readerArgs.dump() + "]");
-        }
-        for (auto& opts: m_args->readerArgs)
-            if (!opts.is_object())
-                throw pdal_error("Reader Args must be a valid JSON object");
-
-        log()->get(LogLevel::Debug) << "Reader Args: " << m_args->readerArgs.dump() << std::endl;
-        handleReaderArgs();
-    }
-
-    if (!m_args->assetName.empty())
-        log()->get(LogLevel::Debug) << "STAC Reader will look for assets in "
-            "asset name '" << m_args->assetName << "'." << std::endl;
-
-    if (m_args->dryRun)
-        log()->get(LogLevel::Debug) << "Dry Run flag is set." << std::endl;
-
-    if (m_args->validateSchema)
-        log()->get(LogLevel::Debug) <<
-            "JSON Schema validation flag is set." << std::endl;
-
-}
-
-void StacReader::initialize()
-{
-    m_pool.reset(new ThreadPool(8));
-    m_arbiter.reset(new arbiter::Arbiter());
-
-    initializeArgs();
-
-    std::string stacStr = m_arbiter->get(m_filename);
-    NL::json stacJson = NL::json::parse(stacStr);
-
-    if (!stacJson.contains("type"))
-        throw pdal_error("Invalid STAC object provided.");
-
-    std::string stacType = stacJson["type"];
-    if (stacType == "Feature")
-        initializeItem(stacJson);
-    else if (stacType == "Catalog")
-        initializeCatalog(stacJson);
-    else
-        throw pdal_error("Could not initialize STAC object of type " + stacType);
-
-    if (m_readerList.empty())
-        throw pdal_error("No readers have been created for STAC reader.");
-}
 
 void schemaFetch(const nlohmann::json_uri& json_uri, nlohmann::json& json)
 {
@@ -244,6 +129,93 @@ void StacReader::validateSchema(NL::json stacJson)
     val.validate(stacJson);
 }
 
+void StacReader::handleReaderArgs()
+{
+    for (NL::json& readerPipeline: m_args->readerArgs)
+    {
+        if (!readerPipeline.contains("type"))
+            throw pdal_error("No \"type\" key found in supplied reader arguments.");
+
+        std::string driver = readerPipeline["type"].get<std::string>();
+        if (m_readerArgs.contains(driver))
+            throw pdal_error("Multiple instances of the same driver in supplie reader arguments.");
+        m_readerArgs[driver] = { };
+
+        for (auto& arg: readerPipeline.items())
+        {
+            if (arg.key() == "type")
+                continue;
+            m_readerArgs[driver][arg.key()] = arg.value();
+        }
+    }
+}
+
+void StacReader::initializeArgs()
+{
+    if (!m_args->item_ids.empty())
+    {
+        log()->get(LogLevel::Debug) << "Selecting Items with ids: " << std::endl;
+        for (auto& id: m_args->item_ids)
+            log()->get(LogLevel::Debug) << "    " << id.m_str << std::endl;
+    }
+
+    if (!m_args->catalog_ids.empty())
+    {
+        log()->get(LogLevel::Debug) << "Selecting Catalogs with ids: " << std::endl;
+        for (auto& id: m_args->catalog_ids)
+            log()->get(LogLevel::Debug) << "    " << id.m_str << std::endl;
+    }
+
+    if (!m_args->dates.empty())
+    {
+        //TODO validate supplied dates?
+        log()->get(LogLevel::Debug) << "Dates selected: " << m_args->dates  << std::endl;
+    }
+
+    if (!m_args->properties.empty())
+    {
+        if (!m_args->properties.is_object())
+            throw pdal_error("Properties argument must be a valid JSON object.");
+        log()->get(LogLevel::Debug) << "Property Pruning: " <<
+            m_args->properties.dump() << std::endl;
+    }
+
+    if (!m_args->bounds.empty())
+    {
+        if (!m_args->bounds.valid())
+            throw pdal_error("Supplied bounds are not valid.");
+        log()->get(LogLevel::Debug) << "Bounds: " << m_args->bounds << std::endl;
+    }
+
+    if (!m_args->readerArgs.empty())
+    {
+        if (m_args->readerArgs.is_object())
+        {
+            NL::json array_args = NL::json::array();
+            array_args.push_back(m_args->readerArgs);
+            m_args->readerArgs = array_args;
+        }
+        for (auto& opts: m_args->readerArgs)
+            if (!opts.is_object())
+                throw pdal_error("Reader Args must be a valid JSON object");
+
+        log()->get(LogLevel::Debug) << "Reader Args: " << m_args->readerArgs.dump() << std::endl;
+        handleReaderArgs();
+    }
+
+    if (!m_args->assetNames.empty())
+    {
+        log()->get(LogLevel::Debug) << "STAC Reader will look in these asset keys: ";
+        for (auto& name: m_args->assetNames)
+            log()->get(LogLevel::Debug) << name << std::endl;
+    }
+
+    if (m_args->validateSchema)
+        log()->get(LogLevel::Debug) <<
+            "JSON Schema validation flag is set." << std::endl;
+
+}
+
 void StacReader::initializeItem(NL::json stacJson)
 {
     if (prune(stacJson))
@@ -252,10 +224,20 @@ void StacReader::initializeItem(NL::json stacJson)
     if (m_args->validateSchema)
         validateSchema(stacJson);
 
-    if (!stacJson["assets"].contains(m_args->assetName))
-        throw pdal_error("asset_name("+m_args->assetName+") doesn't match STAC object.");
+    bool assetExists = false;
+    std::string assetName;
+    for (auto& name: m_args->assetNames)
+    {
+        if (stacJson["assets"].contains(name))
+        {
+            assetName = name;
+            assetExists = true;
+        }
+    }
+    if (!assetExists)
+        throw pdal_error("None of the asset names supplied exist in the STAC object.");
 
-    std::string dataUrl = stacJson["assets"][m_args->assetName]["href"].get<std::string>();
+    std::string dataUrl = stacJson["assets"][assetName]["href"].get<std::string>();
     std::string driver = m_factory.inferReaderDriver(dataUrl);
 
     log()->get(LogLevel::Debug) << "Using driver " << driver <<
@@ -316,8 +298,29 @@ void StacReader::initializeItem(NL::json stacJson)
     }
 }
 
-void StacReader::initializeCatalog(NL::json stacJson)
+void StacReader::initializeCatalog(NL::json stacJson, bool root = false)
 {
+    if (!stacJson.contains("id"))
+        throw pdal_error("Invalid catalog. Missing key 'id'");
+    std::string catalogId = stacJson["id"].get<std::string>();
+
+    if (root) {}
+    else if (!m_args->catalog_ids.empty())
+    {
+        bool pruneFlag = true;
+        for (auto& id: m_args->catalog_ids)
+        {
+            if (catalogId == id)
+            {
+                pruneFlag = false;
+                break;
+            }
+        }
+        if (pruneFlag)
+            return;
+    }
+
+
     if (m_args->validateSchema)
         validateSchema(stacJson);
     auto itemLinks = stacJson["links"];
@@ -328,18 +331,47 @@ void StacReader::initializeCatalog(NL::json stacJson)
         m_pool->add([this, link]()
         {
             std::string linkType = link["rel"];
-            if (linkType != "item")
-                return;
-            std::string itemUrl = link["href"];
-            //Create json from itemUrl
-            NL::json itemJson = NL::json::parse(m_arbiter->get(itemUrl));
-            initializeItem(itemJson);
+            std::string linkPath = link["href"];
+            if (linkType == "item")
+            {
+                NL::json itemJson = NL::json::parse(m_arbiter->get(linkPath));
+                initializeItem(itemJson);
+            }
+            else if (linkType == "catalog")
+            {
+                NL::json catalogJson = NL::json::parse(m_arbiter->get(linkPath));
+                initializeCatalog(catalogJson);
+            }
         });
     }
+}
+
+void StacReader::initialize()
+{
+    m_pool.reset(new ThreadPool(8));
+    m_arbiter.reset(new arbiter::Arbiter());
+
+    initializeArgs();
+
+    std::string stacStr = m_arbiter->get(m_filename);
+    NL::json stacJson = NL::json::parse(stacStr);
+
+    if (!stacJson.contains("type"))
+        throw pdal_error("Invalid STAC object provided.");
+
+    std::string stacType = stacJson["type"];
+    if (stacType == "Feature")
+        initializeItem(stacJson);
+    else if (stacType == "Catalog")
+        initializeCatalog(stacJson, true);
+    else
+        throw pdal_error("Could not initialize STAC object of type " + stacType);
+
     m_pool->await();
     m_pool->stop();
+
     if (m_readerList.empty())
-        log()->get(LogLevel::Debug) << "Reader list is empty after filtering." << std::endl;
+        throw pdal_error("Reader list is empty after filtering.");
 }
 
 // returns true if property matches
@@ -349,10 +381,13 @@ bool matchProperty(std::string key, NL::json val, NL::json properties, NL::detai
     {
         case NL::detail::value_t::string:
         {
-            std::regex desired(val);
+            std::string desired = val.get<std::string>();
+            // std::regex desired(d);
             std::string value = properties[key].get<std::string>();
-            if (!std::regex_match(value, desired))
+            if (value != desired)
                 return false;
+            // if (!std::regex_match(value, desired))
+            //     return false;
             break;
         }
         case NL::detail::value_t::number_unsigned:
@@ -425,9 +460,9 @@ bool StacReader::prune(NL::json stacJson)
     // If STAC ID matches *any* ID in supplied list, it will not be pruned.
     std::string itemId = stacJson["id"];
     bool idFlag = true;
-    if (!m_args->ids.empty())
+    if (!m_args->item_ids.empty())
     {
-        for (auto& id: m_args->ids)
+        for (auto& id: m_args->item_ids)
         {
             if (std::regex_match(itemId, id.regex()))
             {
@@ -493,7 +528,6 @@ bool StacReader::prune(NL::json stacJson)
             return true;
 
     }
-
 
     // Properties
     // If STAC properties match *all* the supplied properties, it will not be pruned
@@ -605,6 +639,7 @@ QuickInfo StacReader::inspect()
         }
     }
 
+    //TODO Make list of catalog ids and item ids to pass to metadata
     NL::json metadata;
     metadata["ids"] = NL::json::array();
     for (auto& id: m_idList)

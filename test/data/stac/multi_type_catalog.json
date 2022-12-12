@@ -1,6 +1,6 @@
 {
     "type": "Catalog",
-    "id": "3dep",
+    "id": "Test_Catalog",
     "stac_version": "1.0.0",
     "description": "A catalog of USGS 3DEP Lidar hosted on AWS s3.",
     "queryables": {
@@ -33,6 +33,10 @@
             "rel": "self",
             "href": "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/catalog.json",
             "type": "application/json"
+        },
+        {
+            "rel": "catalog",
+            "href": "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/catalog.json"
         },
         {
             "rel": "item",

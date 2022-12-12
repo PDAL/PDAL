@@ -64,14 +64,16 @@ namespace pdal
 
 
         private:
+            //TODO make assetName be a list
             struct Args
             {
-                std::vector<RegEx> ids;
+                std::vector<RegEx> item_ids;
+                std::vector<RegEx> catalog_ids;
                 NL::json properties;
                 NL::json readerArgs;
                 NL::json::array_t dates;
                 SrsBounds bounds;
-                std::string assetName;
+                std::vector<std::string> assetNames;
                 std::string catalogSchemaUrl;
                 std::string featureSchemaUrl;
                 bool validateSchema;
@@ -95,7 +97,7 @@ namespace pdal
 
             void handleReaderArgs();
             void initializeItem(NL::json stacJson);
-            void initializeCatalog(NL::json stacJson);
+            void initializeCatalog(NL::json stacJson, bool root);
             void initializeArgs();
             void validateSchema(NL::json stacJson);
             bool prune(NL::json stacJson);

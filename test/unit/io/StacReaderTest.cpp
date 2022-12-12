@@ -55,7 +55,7 @@ TEST(StacReaderTest, remote_item_test)
     Options options;
 
     options.add("filename", "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/MD_GoldenBeach_2012.json");
-    options.add("asset_name", "ept.json");
+    options.add("asset_names", "ept.json");
 
     StageFactory f;
     Stage& reader = *f.createStage("readers.stac");
@@ -72,7 +72,7 @@ TEST(StacReaderTest, catalog_test)
     Options options;
 
     options.add("filename", Support::datapath("stac/remote_catalog.json"));
-    options.add("asset_name", "ept.json");
+    options.add("asset_names", "ept.json");
 
     StageFactory f;
     Stage& reader = *f.createStage("readers.stac");
@@ -83,12 +83,13 @@ TEST(StacReaderTest, catalog_test)
     EXPECT_EQ(qi.m_pointCount, 36174643520);
 }
 
-TEST(StacReaderTest, multiple_readers_test)
+TEST(StacReaderTest, nested_catalog_test)
 {
     Options options;
-    std::string reader_args = "[{\"type\": \"readers.copc\", \"resolution\": 100},{\"type\":\"readers.las\", \"nosrs\": true}]";
     options.add("filename", Support::datapath("stac/multi_type_catalog.json"));
-    options.add("reader_args", reader_args);
+    options.add("catalog_ids", "3dep");
+    options.add("item_ids", "MD_GoldenBeach_2012");
+    options.add("asset_names", "ept.json");
 
     StageFactory f;
     Stage& reader = *f.createStage("readers.stac");
@@ -96,8 +97,41 @@ TEST(StacReaderTest, multiple_readers_test)
 
     QuickInfo qi = reader.preview();
 
-    EXPECT_EQ(qi.m_pointCount, 10653336);
+    EXPECT_EQ(qi.m_pointCount, 4860658);
+}
 
+TEST(StacReaderTest, multiple_readers_test)
+{
+    Options options;
+    std::string reader_args = "["
+        "{"
+            "\"type\": \"readers.ept\", "
+            "\"resolution\": 100,"
+            "\"bounds\":\"([-10429500, -10429000], [5081800, 5082300])\""
+        "},"
+        "{"
+            "\"type\": \"readers.copc\","
+            "\"resolution\": 80"
+        "}"
+    "]";
+    options.add("filename", Support::datapath("stac/multi_type_catalog.json"));
+    options.add("reader_args", reader_args);
+    options.add("asset_names", "data");
+    options.add("asset_names", "ept.json");
+    options.add("item_ids", "IA_SouthCentral_1_2020");
+    options.add("item_ids", "Autzen Classified");
+    options.add("properties", "{\"pc:encoding\": [\"ept\",\"application/vnd.laszip+copc\"]}");
+
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
+
+    PointTable table;
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    PointViewPtr view = *viewSet.begin();
+
+    EXPECT_EQ(view->size(), 61307);
 }
 
 TEST(StacReaderTest, id_prune_test)
@@ -105,9 +139,9 @@ TEST(StacReaderTest, id_prune_test)
     Options options;
 
     options.add("filename", Support::datapath("stac/remote_catalog.json"));
-    options.add("ids", "MD_GoldenBeach_2012");
-    options.add("ids", "USGS_LPC\\w{0,}");
-    options.add("asset_name", "ept.json");
+    options.add("item_ids", "MD_GoldenBeach_2012");
+    options.add("item_ids", "USGS_LPC\\w{0,}");
+    options.add("asset_names", "ept.json");
 
     StageFactory f;
     Stage& reader = *f.createStage("readers.stac");
@@ -133,7 +167,7 @@ TEST(StacReaderTest, date_prune_accept_test)
     Options options;
 
     options.add("filename", Support::datapath("stac/MD_GoldenBeach_2012.json"));
-    options.add("asset_name", "ept.json");
+    options.add("asset_names", "ept.json");
     options.add("date_ranges", "[\"2022-11-11T0:00:0Z\",\"2022-11-20T0:00:0Z\"]");
     options.add("date_ranges", "[\"2022-05-21T0:00:0Z\",\"2022-05-20T0:00:0Z\"]");
 
@@ -155,7 +189,7 @@ TEST(StacReaderTest, date_prune_accept_test)
     Options options;
 
     options.add("filename", Support::datapath("stac/GoldenBeach_datetime_test.json"));
-    options.add("asset_name", "ept.json");
+    options.add("asset_names", "ept.json");
     options.add("date_ranges", "[\"2022-11-07T0:00:0Z\",\"2022-11-20T0:00:0Z\"]");
 
     StageFactory f;
@@ -177,7 +211,7 @@ TEST(StacReaderTest, date_prune_reject_test)
     Options options;
 
     options.add("filename", Support::datapath("stac/MD_GoldenBeach_2012.json"));
-    options.add("asset_name", "ept.json");
+    options.add("asset_names", "ept.json");
     options.add("date_ranges", "[\"2022-10-01T0:00:0Z\",\"2022-10-20T0:00:0Z\"]");
     options.add("date_ranges", "[\"2022-05-21T0:00:0Z\",\"2022-05-20T0:00:0Z\"]");
 
@@ -194,7 +228,7 @@ TEST(StacReaderTest, bounds_prune_accept_test)
     std::string bounds = "([-79.0,-74.0],[38.0,39.0])";
 
     options.add("filename", Support::datapath("stac/MD_GoldenBeach_2012.json"));
-    options.add("asset_name", "ept.json");
+    options.add("asset_names", "ept.json");
     options.add("bounds", bounds);
 
     StageFactory f;
@@ -217,7 +251,7 @@ TEST(StacReaderTest, bounds_prune_reject_test)
     std::string bounds = "([50,51],[-10,0])";
 
     options.add("filename", Support::datapath("stac/MD_GoldenBeach_2012.json"));
-    options.add("asset_name", "ept.json");
+    options.add("asset_names", "ept.json");
     options.add("bounds", bounds);
 
     StageFactory f;
@@ -233,7 +267,7 @@ TEST(StacReaderTest, schema_validate_test)
     Options options;
 
     options.add("filename", Support::datapath("stac/MD_GoldenBeach_2012.json"));
-    options.add("asset_name", "ept.json");
+    options.add("asset_names", "ept.json");
     options.add("validate_schema", "true");
 
     StageFactory f;

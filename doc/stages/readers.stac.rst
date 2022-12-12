@@ -20,7 +20,8 @@ Example
             "type": "readers.stac",
             "filename": "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/catalog.json",
             "reader_args": [{"type": "readers.ept", "resolution": 100}],
-            "ids": ["MD_GoldenBeach_2012"],
+            "item_ids": ["MD_GoldenBeach_2012"],
+            "catalog_ids": ["3dep"],
             "properties": { "pc:type": ["lidar", "sonar"], "pc:encoding": "ept" },
             "asset_name": "ept.json",
             "date_ranges": [
@@ -43,8 +44,8 @@ Options
 filename
     STAC endpoint, local or remote, that corresponds to a Catalog or Feature.
 
-asset_name
-    The name of the asset that should be looked at to find the source data.
+asset_names
+    The list of asset names that should be looked at to find the source data.
     The default is 'data'.
 
 date_ranges
@@ -56,9 +57,14 @@ bounds
     Form: ``([minx,maxx],[miny,maxy],[minz,maxz])``
     Example: ``--readers.stac.bounds '([-79.0,-74.0],[38.0,39.0])'``
 
-ids
-    List of `Regular Expression`_ strings to prune STAC Ids by.
-    Example: ``--readers.stac.ids '["MD_GoldenBeach_2012", "USGS_LPC\\w{0,}"]'``
+item_ids
+    List of `Regular Expression`_ strings to prune STAC Item IDs by.
+    Example: ``--readers.stac.item_ids '["MD_GoldenBeach_2012", "USGS_LPC\\w{0,}"]'``
+
+catalog_ids
+    List of `Regular Expression`_ strings to prune STAC Catalog IDs by.
+    Root catalog IDs are always included in the list.
+    Example: ``--readers.stac.catalog_ids '["3dep-\*", "USGS"]'``
 
 validate_schema
     Boolean value determining if the reader should validate the supplied STAC as
