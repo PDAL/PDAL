@@ -165,6 +165,11 @@ struct ExtraDim
         m_byteOffset(byteOffset)
     {}
 
+    ExtraDim(const std::string name,  Dimension::Type type, Dimension::Id id, int byteOffset,
+             double scale = 1.0, double offset = 0.0) :
+        m_name(name), m_dimType(id, type, scale, offset),
+        m_size((uint8_t)Dimension::size(type)), m_byteOffset(byteOffset)
+    {}
     friend bool operator == (const ExtraDim& ed1, const ExtraDim& ed2);
 
     std::string m_name;

@@ -243,9 +243,18 @@ void CopcWriter::prepared(PointTableRef table)
     b->numExtraBytes = 0;
     for (Dimension::Id id : edIds)
     {
-        b->extraDims.emplace_back(layout->dimName(id), layout->dimType(id),
-            las::baseCount(b->pointFormatId) + b->numExtraBytes);
-        b->numExtraBytes += Dimension::size(layout->dimType(id));
+        std::string name (layout->dimName(id));
+        Dimension::Type type (layout->dimType(id));
+        DimType dimType = layout->findDimType(name);
+        Dimension::Detail const* detail = layout->dimDetail(id);
+        size_t size = detail->size();
+        b->extraDims.emplace_back(name, 
+                                  type, 
+                                  id,
+                                  las::baseCount(b->pointFormatId) + b->numExtraBytes, 
+                                  dimType.m_xform.m_scale.m_val, 
+                                  dimType.m_xform.m_offset.m_val);
+        b->numExtraBytes += size;
     }
 }
 
