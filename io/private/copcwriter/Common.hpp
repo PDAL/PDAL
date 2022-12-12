@@ -108,6 +108,7 @@ struct Options
     bool emitPipeline;
     bool fixedSeed;
     pdal::SpatialReference aSrs;
+    int threadCount = 10;
 };
 
 struct BaseInfo
