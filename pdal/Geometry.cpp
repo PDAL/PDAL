@@ -206,6 +206,32 @@ BOX3D Geometry::bounds() const
 }
 
 
+double Geometry::distance(double x, double y, double z) const
+{
+    OGRPoint p(x, y, z);
+    return m_geom->Distance((OGRGeometry*)&p);
+}
+
+Geometry Geometry::getRing() const
+{
+    throwNoGeos();
+
+    int count = OGR_G_GetGeometryCount(m_geom.get());
+    if (count)
+    {
+
+        OGRGeometryH ring = OGR_G_Clone(OGR_G_GetGeometryRef(m_geom.get(), 0));
+        OGRGeometryH linestring = OGR_G_ForceToLineString(ring);
+
+        return Geometry(linestring, getSpatialReference());
+    }
+    else
+        throwNoGeos();
+
+    return Geometry();
+
+}
+
 bool Geometry::valid() const
 {
     throwNoGeos();
@@ -251,6 +277,12 @@ std::string Geometry::json(double precision) const
     std::string output(json);
     OGRFree(json);
     return output;
+}
+
+
+void Geometry::clear()
+{
+    m_geom.reset();
 }
 
 

@@ -37,6 +37,7 @@
 #include <stdint.h>
 #include <cstdlib>
 #include <istream>
+#include <locale>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -149,17 +150,16 @@ struct XForm
                 m_auto = true;
             else
             {
-                size_t pos;
+                bool failed = false;
                 try
                 {
-                    m_val = std::stod(sval, &pos);
+                    failed = !Utils::fromString(sval, m_val);
                 }
                 catch (...)
                 {
-                    // Set error condition.
-                    pos = sval.size() + 1;
+                    failed = true;
                 }
-                if (pos != sval.size())
+                if (failed)
                 {
                     m_val = 0;
                     return false;

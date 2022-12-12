@@ -81,70 +81,100 @@ const BOX4D& BOX4D::getDefaultSpatialExtent()
 namespace
 {
 
-template <typename T>
-void parsePair(const std::string& s, std::string::size_type& pos,
-               double& low, double& high)
-   {
-    low = high = 0;
-    const char *start;
-    char *end;
+void moveForward(std::istringstream& ss, std::string::size_type count)
+{
+    for (std::string::size_type i = 0; i < count; i++)
+    {
+        ss.get();
+    }
+}
 
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != '[')
+bool discardSpacesBefore(std::istringstream& ss, char nextChar)
+{
+    Utils::eatwhitespace(ss);
+    return Utils::eatcharacter(ss, nextChar);
+}
+
+char discardSpacesBefore(std::istringstream& ss, const std::string& nextChars)
+{
+    Utils::eatwhitespace(ss);
+    for (const auto nextChar : nextChars) {
+        if (ss.peek() == nextChar)
+            return ss.get();
+    }
+    return 0;
+}
+
+std::string::size_type countRemaining(std::istringstream& ss)
+{
+    std::string::size_type count = 0;
+    while (!ss.eof())
+    {
+        ss.get();
+        count++;
+    }
+    return count;
+}
+
+template <typename T>
+void parsePair(std::istringstream& ss, double& low, double& high)
+{
+    low = high = 0;
+
+    if (!discardSpacesBefore(ss, '['))
         throw typename T::error("No opening '[' in range.");
 
-    pos += Utils::extractSpaces(s, pos);
-    start = s.data() + pos;
-    low = std::strtod(start, &end);
-    if (start == end)
+    ss >> low;
+    if (!ss.good())
         throw typename T::error("No valid minimum value for range.");
-    pos += (end - start);
 
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != ',')
+    if (!discardSpacesBefore(ss, ','))
         throw typename T::error("No ',' separating minimum/maximum values.");
 
-    pos += Utils::extractSpaces(s, pos);
-    start = s.data() + pos;
-    high = std::strtod(start, &end);
-    if (start == end)
+    ss >> high;
+    if (!ss.good())
         throw typename T::error("No valid maximum value for range.");
-    pos += (end - start);
 
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != ']')
+    if (!discardSpacesBefore(ss, ']'))
         throw typename T::error("No closing ']' in range.");
-   }
-
 }
+
+} // unnamed namespace
 
 void BOX4D::parse(const std::string& s, std::string::size_type& pos)
 {
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != '(')
+    static thread_local Utils::IStringStreamClassicLocale ss;
+    ss.clear();
+    ss.str(s);
+
+    moveForward(ss, pos);
+
+    if (!discardSpacesBefore(ss, '('))
         throw error("No opening '('.");
-    parsePair<BOX4D>(s, pos, minx, maxx);
 
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != ',')
+    parsePair<BOX4D>(ss, minx, maxx);
+
+    if (!discardSpacesBefore(ss, ','))
         throw error("No comma separating 'X' and 'Y' dimensions.");
-    parsePair<BOX4D>(s, pos, miny, maxy);
 
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != ',')
+    parsePair<BOX4D>(ss, miny, maxy);
+
+    if (!discardSpacesBefore(ss, ','))
         throw error("No comma separating 'Y' and 'Z' dimensions.");
-    parsePair<BOX4D>(s, pos, minz, maxz);
 
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos] != ',' && s[pos] != ')')
+    parsePair<BOX4D>(ss, minz, maxz);
+
+    char nextChar = discardSpacesBefore(ss, ",)");
+    if (nextChar == 0)
         throw error("No comma separating 'Z' and 'time' dimensions.");
-    else if (s[pos++] != ')')
-    {
-        parsePair<BOX4D>(s, pos, mintm, maxtm);
-        pos++;
+    else if (nextChar == ',') {
+        parsePair<BOX4D>(ss, mintm, maxtm);
+        if (!discardSpacesBefore(ss, ')'))
+            throw error("No closing ')'.");
     }
 
-    pos += Utils::extractSpaces(s, pos);
+    Utils::eatwhitespace(ss);
+    pos = s.size() - countRemaining(ss);
 }
 
 std::istream& operator>>(std::istream& in, BOX4D& box)

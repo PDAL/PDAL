@@ -49,8 +49,7 @@ std::string::size_type DimRange::subParse(const std::string& r)
     std::string& name(m_name);
 
     std::string::size_type pos, count;
-    const char *start;
-    char *end;
+    std::streampos start;
 
     ilb = true;
     iub = true;
@@ -79,11 +78,15 @@ std::string::size_type DimRange::subParse(const std::string& r)
     pos++;
 
     // Extract lower bound.
-    start = r.data() + pos;
-    lb = std::strtod(start, &end);
-    if (start == end)
+    Utils::StringStreamClassicLocale ss(r.data() + pos);
+    start = ss.tellg();
+    ss >> lb;
+    if (ss.fail())
         lb = std::numeric_limits<double>::lowest();
-    pos += (end - start);
+    else if (ss.eof())
+        throw error("Missing ':' limit separator.");
+    else
+        pos += (ss.tellg() - start);
 
     count = Utils::extractSpaces(r, pos);
     pos += count;
@@ -92,11 +95,17 @@ std::string::size_type DimRange::subParse(const std::string& r)
         throw error("Missing ':' limit separator.");
     pos++;
 
-    start = r.data() + pos;
-    ub = std::strtod(start, &end);
-    if (start == end)
+    // Extract upper bound.
+    ss.str(r.data() + pos);
+    ss.clear();
+    start = ss.tellg();
+    ss >> ub;
+    if (ss.fail())
         ub = (std::numeric_limits<double>::max)();
-    pos += (end - start);
+    else if (ss.eof())
+        throw error("Missing ')' or ']'.");
+    else
+        pos += (ss.tellg() - start);
 
     count = Utils::extractSpaces(r, pos);
     pos += count;

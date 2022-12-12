@@ -454,3 +454,26 @@ TEST(RangeFilterTest, nan)
     EXPECT_EQ(0u, view->size());
 }
 
+TEST(RangeFilterTest, wrongStringFormat)
+{
+    BOX3D srcBounds(0.0, 1.0, 1.0, 0.0, 10.0, 10.0);
+
+    Options ops;
+    ops.add("bounds", srcBounds);
+    ops.add("mode", "ramp");
+    ops.add("count", 10);
+
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    Options rangeOps;
+    rangeOps.add("limits", "Y[4.00e0");
+    rangeOps.add("limits", "Z[4:6]");
+
+    RangeFilter filter;
+    filter.setOptions(rangeOps);
+    filter.setInput(reader);
+
+    PointTable table;
+    EXPECT_ANY_THROW(filter.prepare(table));
+}

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2020 Hobu, Inc. (info@hobu.co)
+* Copyright (c) 2022, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -32,48 +32,72 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/pdal_test_main.hpp>
 
-#include <iostream>
+#include <pdal/util/FileUtils.hpp>
+#include <pdal/PointView.hpp>
+#include <pdal/StageFactory.hpp>
+#include <io/BufferReader.hpp>
+#include <io/FauxReader.hpp>
+#include <io/LasReader.hpp>
+#include <filters/ReprojectionFilter.hpp>
+#include <filters/GeomDistanceFilter.hpp>
+#include <filters/StatsFilter.hpp>
+#include <filters/StreamCallbackFilter.hpp>
+#include "Support.hpp"
 
-#include <pdal/Reader.hpp>
-#include <draco/point_cloud/point_cloud.h>
-#include <draco/compression/decode.h>
+using namespace pdal;
 
-namespace pdal
+TEST(GeomDistanceFilterTest, create)
 {
+    StageFactory f;
+    Stage* filter(f.createStage("filters.geomdistance"));
+    EXPECT_TRUE(filter);
+}
 
-class PDAL_DLL DracoReader : public Reader
+TEST(GeomDistanceFilterTest, test_polygon)
 {
-public:
+    Options ops1;
+    ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
+    LasReader reader;
+    reader.setOptions(ops1);
 
-    DracoReader() = default;
-    std::string getName() const override;
-private:
-    virtual void addArgs(ProgramArgs& args) override;
-    virtual void initialize() override;
-    void addOneDimension(Dimension::Id id, const draco::PointAttribute* attr, PointLayoutPtr layout, int index, int attNum);
-    virtual void addDimensions(PointLayoutPtr layout) override;
-    virtual void prepared(PointTableRef) override;
-    virtual void ready(PointTableRef) override;
-    virtual point_count_t read(PointViewPtr view, point_count_t count) override;
-    virtual void done(PointTableRef table) override;
+    Options options;
+    Option debug("debug", true);
+    Option verbose("verbose", 9);
 
-    struct DimensionInfo {
-        Dimension::Id pdalId;
-        const draco::PointAttribute *attr;
-        Dimension::Type pdalType;
-        int attNum;//eg POSITION = [ X, Y, Z ], Y's attNum would be 1
-    };
-    std::vector<DimensionInfo> m_dimensions;
-    DracoReader(const DracoReader&) = delete;
-    DracoReader& operator=(const DracoReader&) = delete;
+    std::istream* wkt_stream =
+        FileUtils::openFile(Support::datapath("autzen/autzen-selection.wkt"));
 
-    std::istream* m_istreamPtr;
-    std::vector<char> m_data;
-    draco::DecoderBuffer m_draco_buffer;
-    std::unique_ptr<draco::PointCloud> m_pc;
+    std::stringstream strbuf;
+    strbuf << wkt_stream->rdbuf();
 
-};
+    std::string wkt(strbuf.str());
 
-} // namespace pdal
+    Option polygon("geometry", wkt);
+    options.add(polygon);
+
+    Option ring("ring", true);
+    options.add(ring);
+
+    GeomDistanceFilter geomdist;
+    geomdist.setInput(reader);
+    geomdist.setOptions(options);
+
+    PointTable table;
+
+    geomdist.prepare(table);
+    PointViewSet s = geomdist.execute(table);
+    EXPECT_EQ(s.size(), 1u);
+    PointViewPtr v = *s.begin();
+    EXPECT_EQ(v->size(), 1065u);
+
+    pdal::Dimension::Id dim = v->layout()->findDim("distance");
+
+    double d = v->getFieldAs<double>(dim, 0);
+
+    EXPECT_NEAR(d, 1501.55896f, 0.0001);
+
+
+    FileUtils::closeFile(wkt_stream);
+}

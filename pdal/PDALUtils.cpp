@@ -42,9 +42,13 @@
 #include <pdal/Options.hpp>
 #include <pdal/util/FileUtils.hpp>
 
+#include <utf8.h>
+
 #ifndef _WIN32
 #include <dlfcn.h>
 #endif
+
+#include <locale>
 
 using namespace std;
 
@@ -154,10 +158,13 @@ namespace Utils
 
 std::string toJSON(const MetadataNode& m)
 {
-    std::ostringstream o;
+    Utils::OStringStreamClassicLocale o;
 
     toJSON(m, o);
-    return o.str();
+    std::string input(o.str());
+    std::string output;
+    utf8::replace_invalid(input.begin(), input.end(), std::back_inserter(output));
+    return output;
 }
 
 void toJSON(const MetadataNode& m, std::ostream& o)
@@ -206,7 +213,8 @@ class ArbiterOutStream : public std::ofstream
 public:
     ArbiterOutStream(const std::string& localPath,
             const std::string& remotePath, std::ios::openmode mode) :
-        std::ofstream(localPath, mode), m_remotePath(remotePath),
+        std::ofstream(localPath, mode),
+        m_remotePath(remotePath),
         m_localFile(localPath)
     {}
 

@@ -85,7 +85,7 @@ void runGdalWriter(const Options& wo, const std::string& infile,
             w.execute(t);
         }
 
-        std::istringstream iss(values);
+        Utils::IStringStreamClassicLocale iss(values);
 
         std::vector<double> arr;
         while (true)
@@ -162,7 +162,7 @@ void runGdalWriter2(const Options& wo, const std::string& outfile,
 
     using namespace gdal;
 
-    std::istringstream iss(values);
+    Utils::IStringStreamClassicLocale iss(values);
 
     std::vector<double> arr;
     while (true)
@@ -566,7 +566,7 @@ TEST(GDALWriterTest, btint)
         "3.000     4.000     5.000     5.000     6.000 "
         "2.000     3.000     4.000     4.000     5.000 "
         "1.000     2.000     3.000     4.000     5.000 ";
-    std::istringstream iss(values);
+    Utils::IStringStreamClassicLocale iss(values);
 
     std::vector<double> arr;
     while (true)

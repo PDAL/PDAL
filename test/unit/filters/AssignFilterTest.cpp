@@ -150,6 +150,49 @@ TEST(AssignFilterTest, t2)
     EXPECT_EQ(i8, 5);
 }
 
+TEST(AssignFilterTest, assignment_parse)
+{
+    StageFactory factory;
+
+    Stage& r = *factory.createStage("readers.las");
+    Stage& f = *factory.createStage("filters.assign");
+
+    // utm17.las contains 5 points with intensity of 280, 3 of 260 and 2 of 240
+    Options ro;
+    ro.add("filename", Support::datapath("las/utm17.las"));
+    r.setOptions(ro);
+
+    Options fo;
+    fo.add("assignment", "Intensity[:250.0]=4.0 ");
+    fo.add("assignment", "Intensity[245.0:270 ]=6");
+    fo.add("assignment", "Intensity[272.0:] = 8");
+
+    f.setInput(r);
+    f.setOptions(fo);
+
+    PointTable t;
+    f.prepare(t);
+    PointViewSet s = f.execute(t);
+    PointViewPtr v = *s.begin();
+
+    int i4 = 0;
+    int i6 = 0;
+    int i8 = 0;
+    for (PointId i = 0; i < v->size(); ++i)
+    {
+        int ii = v->getFieldAs<int>(Dimension::Id::Intensity, i);
+        if (ii == 4)
+            i4++;
+        else if (ii == 6)
+            i6++;
+        else if (ii == 8)
+            i8++;
+    }
+    EXPECT_EQ(i4, 2);
+    EXPECT_EQ(i6, 3);
+    EXPECT_EQ(i8, 5);
+}
+
 TEST(AssignFilterTest, test_condition)
 {
     StageFactory factory;

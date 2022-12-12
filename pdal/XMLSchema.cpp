@@ -431,7 +431,7 @@ bool XMLSchema::load(xmlDocPtr doc)
                     std::cerr << "Unable to fetch minimum value.\n";
                     return false;
                 }
-                dim.m_min = std::atof((const char*)n);
+                Utils::fromString((const char*)n, dim.m_min);
                 xmlFree(n);
             }
             if (propName == "maximum")
@@ -442,7 +442,7 @@ bool XMLSchema::load(xmlDocPtr doc)
                     std::cerr << "Unable to fetch maximum value.\n";
                     return false;
                 }
-                dim.m_max = std::atof((const char*)n);
+                Utils::fromString((const char*)n, dim.m_max);
                 xmlFree(n);
             }
             if (propName == "position")
@@ -570,13 +570,13 @@ void XMLSchema::writeXml(xmlTextWriterPtr w) const
         xmlTextWriterStartElementNS(w, (const xmlChar*)"pc",
             (const xmlChar*)"dimension", NULL);
 
-        std::ostringstream position;
+        Utils::OStringStreamClassicLocale position;
         position << (pos + 1);
         xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
             (const xmlChar*)"position", NULL,
             (const xmlChar*)position.str().c_str());
 
-        std::ostringstream size;
+        Utils::OStringStreamClassicLocale size;
         size << Dimension::size(di->m_dimType.m_type);
         xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
             (const xmlChar*)"size", NULL, (const xmlChar*)size.str().c_str());
@@ -590,7 +590,7 @@ void XMLSchema::writeXml(xmlTextWriterPtr w) const
         XForm xform = di->m_dimType.m_xform;
         if (xform.nonstandard())
         {
-            std::ostringstream out;
+            Utils::OStringStreamClassicLocale out;
             out.precision(15);
 
             out << xform.m_scale.m_val;

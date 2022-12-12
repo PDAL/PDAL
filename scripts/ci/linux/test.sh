@@ -1,3 +1,3 @@
 #!/bin/bash
 
-ctest -V
+ctest -V $@

@@ -31,6 +31,7 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+#include <locale>
 
 #include "gtest/gtest.h"
 
@@ -41,6 +42,30 @@
 
 GTEST_API_ int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
+
+    // Set the locale if requested for the tests,
+    //  from an envirtonment variable, or test argument
+    const char* envLocale = std::getenv("TEST_SET_LOCALE"); // for instance "de_DE.utf8"
+    std::string localeStr = envLocale ? envLocale : "";
+    const std::string prefix{"--set-locale="};
+    for (int i = 0; i < argc; i++)
+    {
+        if (std::string(argv[i]).rfind(prefix) == 0)
+            localeStr = std::string(argv[i]).substr(prefix.size());
+    }
+    if (!localeStr.empty())
+    {
+        try
+        {
+            std::locale::global(std::locale(localeStr));
+        }
+        catch(const std::runtime_error& e)
+        {
+            std::cerr << "Cannot set locale " << localeStr
+                      << " . Probably not installed \n" << e.what() << '\n';
+            return 1;
+        }
+    }
     return RUN_ALL_TESTS();
 }
 
