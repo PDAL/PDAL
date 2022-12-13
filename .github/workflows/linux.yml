@@ -58,7 +58,7 @@ jobs:
 
     - name: Test
       run: |
-          source ../scripts/ci/linux/test.sh
+          source ../scripts/ci/linux/test.sh --rerun-failed --output-on-failure
       working-directory: ./build
 
     - name: Examples
