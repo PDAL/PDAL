@@ -685,6 +685,8 @@ QuickInfo StacReader::inspect()
 {
     QuickInfo qi;
 
+    initialize();
+
     for (auto& reader: m_readerList)
     {
         QuickInfo readerQi = reader->preview();
