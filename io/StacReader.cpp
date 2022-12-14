@@ -81,8 +81,9 @@ void StacReader::addArgs(ProgramArgs& args)
     args.add("feature_schema_url", "URL of feature schema you'd like to use for"
         " JSON schema validation.", m_args->featureSchemaUrl,
         "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/item.json");
-    args.add("threads", "Number of threads for fetching JSON files, Default: 8",
+    args.add("requests", "Number of threads for fetching JSON files, Default: 8",
         m_args->threads, 8);
+    args.addSynonym("requests", "threads");
 }
 
 
@@ -348,7 +349,7 @@ void StacReader::initializeCatalog(NL::json stacJson, bool root = false)
 
 void StacReader::initialize()
 {
-    m_pool.reset(new ThreadPool(8));
+    m_pool.reset(new ThreadPool(m_args->threads));
     m_arbiter.reset(new arbiter::Arbiter());
 
     initializeArgs();
@@ -432,6 +433,11 @@ bool matchProperty(std::string key, NL::json val, NL::json properties, NL::detai
 
 void validateForPrune(NL::json stacJson)
 {
+
+    // TODO none of these error messages tell us
+    // *which* itemId is invalid. Someone who is given
+    // any of these errors is being told they're f'd right off and
+    // given no information to do anything about it
     if (!stacJson.contains("id"))
         throw pdal_error("JSON object does not contain required key 'id'");
 
@@ -449,12 +455,32 @@ void validateForPrune(NL::json stacJson)
         throw pdal_error("JSON object properties value not contain required key"
             "'datetime' or 'start_datetime' and 'end_datetime'");
 
+    // TODO validate the date ranges and other validation-type stuff
+    // that's going on in `prune`
+    //
+
+
+
+
+
 }
 
 // Returns true if item should be removed, false if it should stay
 bool StacReader::prune(NL::json stacJson)
 {
     validateForPrune(stacJson);
+
+    // TODO compute a struct that tells you what kind of filtering
+    // we're going to be doing. Do not make this part of any public StacReader API
+    //
+    // filters = whichFilters
+    // filters.date, filters.bbox, filters.polygon, filters.date
+    //
+    // - write a filter function for each filter type that takes in a stacItem
+    // - have this prune method switch on the filters and those methods, then
+    //   there will only be one place to go to update or enhance this stuff
+    //   and it will be easier to read in pieces
+
 
     // ID
     // If STAC ID matches *any* ID in supplied list, it will not be pruned.
@@ -483,6 +509,11 @@ bool StacReader::prune(NL::json stacJson)
     if (properties.contains("datetime"))
     {
         std::string stacDate = properties["datetime"];
+
+        // TODO This would remove three lines of stuff and
+        // be much clearer
+        //
+        // bool haveDateFlag = !m_args->dates.empty()
         bool dateFlag = true;
         if (m_args->dates.empty())
             dateFlag = false;
@@ -490,6 +521,8 @@ bool StacReader::prune(NL::json stacJson)
         {
             //If the extracted item date fits into any of the dates provided by
             //the user, then do not prune this item based on dates.
+            //
+            // TODO check that range.size() >= 2
             if (
                 stacDate >= range[0].get<std::string>() &&
                 stacDate <= range[1].get<std::string>()
@@ -509,8 +542,12 @@ bool StacReader::prune(NL::json stacJson)
         {
             // If any of the date ranges overlap with the date range of the STAC
             // object, do not prune.
+            //
+            // TODO check if range.size() == 2 before accessing this array
             std::string userMinDate = range[0].get<std::string>();
             std::string userMaxDate = range[1].get<std::string>();
+            //
+            // TODO should we really be comparing dates as strings?
             if (userMinDate >= stacStartDate && userMinDate <= stacEndDate)
             {
                 dateFlag = false;
@@ -531,6 +568,10 @@ bool StacReader::prune(NL::json stacJson)
 
     // Properties
     // If STAC properties match *all* the supplied properties, it will not be pruned
+    //
+    // TODO this reads backwards
+    // if match:
+    //     doPrune = true
     if (!m_args->properties.empty())
     {
         for (auto &it: m_args->properties.items())
@@ -547,7 +588,7 @@ bool StacReader::prune(NL::json stacJson)
             //Array of possibilities are Or'd together
             if (argType == NL::detail::value_t::array)
             {
-                bool arrFlag = true;
+                bool arrFlag (true);
                 for (auto& val: it.value())
                     if (matchProperty(it.key(), val, properties, type))
                         arrFlag = false;
@@ -562,6 +603,9 @@ bool StacReader::prune(NL::json stacJson)
 
     // bbox
     // If STAC bbox matches *any* of the supplied bounds, it will not be pruned
+
+    // TODO do we allow passing in of `polygon` options like readers.copc and
+    // readers.ept as well?
     if (!m_args->bounds.empty())
     {
         if (stacJson.contains("geometry"))
@@ -569,8 +613,15 @@ bool StacReader::prune(NL::json stacJson)
             NL::json geometry = stacJson["geometry"].get<NL::json>();
             Polygon f(geometry.dump());
             if (!f.valid())
-                throw pdal_error("Polygon created from STAC 'geometry' key is invalid");
+            {
+                std::stringstream msg;
+                msg << "Polygon created from STAC 'geometry' key for '"
+                    << itemId << "' is invalid";
+                throw pdal_error(msg.str());
+            }
 
+            // TODO if the bounds is 3d already, why
+            // do we convert it to 3d on the next line?
             if (m_args->bounds.is3d())
             {
                 if (!m_args->bounds.to3d().overlaps(f.bounds()))
@@ -578,14 +629,27 @@ bool StacReader::prune(NL::json stacJson)
             }
             else
             {
+                // TODO this is confusing, but I guess that
+                // is a result of PDAL's bounds interface.
+                // ie, we downcast the bounds to2d, then make
+                // a BOX3D from that and compare it to f.bounds()
+                // which is 2d or 3d?
                 BOX2D bbox = m_args->bounds.to2d();
                 if (!BOX3D(bbox).overlaps(f.bounds()))
                     return true;
             }
         }
+
+        // TODO make a function that does bbox filtering or find one
+        // or make one in PDALUtils
         else if (stacJson.contains("bbox"))
         {
             NL::json bboxJson = stacJson["bbox"].get<NL::json>();
+
+            // TODO if we have a bad bbox?
+            if (bboxJson.size() != 4 || bboxJson.size() != 6)
+                log()->get(LogLevel::Error) << "bbox for '" << itemId << "' is not valid";
+
             if (bboxJson.size() == 4)
             {
                 double minx = bboxJson[0];
@@ -619,7 +683,6 @@ bool StacReader::prune(NL::json stacJson)
 
 QuickInfo StacReader::inspect()
 {
-    initialize();
     QuickInfo qi;
 
     for (auto& reader: m_readerList)
