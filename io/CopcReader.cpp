@@ -187,7 +187,7 @@ void CopcReader::setForwards(StringMap& headers, StringMap& query)
 
 void CopcReader::initialize(PointTableRef table)
 {
-    const std::size_t threads((std::max)(m_args->threads, size_t(4)));
+    const std::size_t threads(m_args->threads);
     if (threads > 100)
         log()->get(LogLevel::Warning) << "Using a large thread count: " <<
             threads << " threads" << std::endl;
