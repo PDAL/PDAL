@@ -101,6 +101,8 @@ public:
     NL::json query;
     NL::json headers;
     NL::json ogr;
+
+    int keepAliveChunkCount = 10;
 };
 
 struct CopcReader::Private
@@ -146,8 +148,20 @@ std::string CopcReader::getName() const
 
 void CopcReader::addArgs(ProgramArgs& args)
 {
+    // These numbers are based on some timings of
+    // local vs remote files. You can get a little bit
+    // more performance on the local file scenario by bumping
+    // up the thread count, but processing is going to be
+    // dominated by whatever is happening to the data afterward
+    // in most cases
+    int defaultThreads(2); // local
+    if (Utils::isRemote(m_filename))
+    {
+        defaultThreads = 10;
+    }
+
     args.add("bounds", "Retangular clip region", m_args->clip);
-    args.add("requests", "Number of worker threads", m_args->threads, (size_t)15);
+    args.add("requests", "Number of worker threads", m_args->threads, (size_t)defaultThreads);
     args.addSynonym("requests", "threads");
     args.add("resolution", "Resolution limit", m_args->resolution);
     args.add("polygon", "Bounding polygon(s) to crop requests",
@@ -158,6 +172,9 @@ void CopcReader::addArgs(ProgramArgs& args)
     args.add("fix_dims", "Make invalid dimension names valid by changing invalid "
         "characters to '_'", m_args->fixNames, true);
     args.add("vlr", "Read LAS VLRs and add to metadata.", m_args->doVlrs);
+    args.add("keep_alive", "Number of chunks to keep alive in memory when working",
+            m_args->keepAliveChunkCount, 10);
+
 }
 
 
@@ -639,7 +656,7 @@ void CopcReader::load(const copc::Entry& entry)
             std::unique_lock<std::mutex> l(m_p->mutex);
             if (m_p->done)
                 return;
-            while (m_p->contents.size() >= (std::max)((size_t)10, m_p->pool->numThreads()))
+            while (m_p->contents.size() >= (std::max)((size_t)m_args->keepAliveChunkCount, m_p->pool->numThreads()))
                 m_p->consumedCv.wait(l);
             m_p->contents.push(std::move(tile));
             l.unlock();
