@@ -327,23 +327,50 @@ void StacReader::initializeCatalog(NL::json stacJson, bool root = false)
     auto itemLinks = stacJson["links"];
     log()->get(LogLevel::Debug) << "Filtering..." << std::endl;
 
+    std::deque <std::pair<std::string, std::string> > errors;
     for (auto link: itemLinks)
     {
-        m_pool->add([this, link]()
+
+        m_pool->add([&]()
         {
-            std::string linkType = link["rel"];
-            std::string linkPath = link["href"];
-            if (linkType == "item")
+
+            std::string linkType = link.at("rel");
+            std::string linkPath = link.at("href");
+            try
             {
-                NL::json itemJson = NL::json::parse(m_arbiter->get(linkPath));
-                initializeItem(itemJson);
+                if (linkType == "item")
+                {
+                    NL::json itemJson = NL::json::parse(m_arbiter->get(linkPath));
+                    initializeItem(itemJson);
+                }
+                else if (linkType == "catalog")
+                {
+                    NL::json catalogJson = NL::json::parse(m_arbiter->get(linkPath));
+                    initializeCatalog(catalogJson);
+                }
             }
-            else if (linkType == "catalog")
+            catch (std::exception& e)
             {
-                NL::json catalogJson = NL::json::parse(m_arbiter->get(linkPath));
-                initializeCatalog(catalogJson);
+                std::lock_guard<std::mutex> lock(m_mutex);
+                std::pair<std::string, std::string> p {linkPath, e.what()};
+                errors.push_back(p);
             }
+            catch (...)
+            {
+                std::lock_guard<std::mutex> lock(m_mutex);
+                errors.push_back({linkPath, "Unknown error"});
+            }
+
         });
+    }
+
+    if (errors.size())
+    {
+        for (auto& p: errors)
+        {
+            log()->get(LogLevel::Error) << "Failure fetching '" << p.first << "' with error '"
+                << p.second << "'";
+        }
     }
 }
 
