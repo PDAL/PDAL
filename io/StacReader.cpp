@@ -229,7 +229,7 @@ void StacReader::initializeItem(NL::json stacJson)
     std::string assetName;
     for (auto& name: m_args->assetNames)
     {
-        if (stacJson["assets"].contains(name))
+        if (stacJson.at("assets").contains(name))
         {
             assetName = name;
             assetExists = true;
@@ -238,7 +238,7 @@ void StacReader::initializeItem(NL::json stacJson)
     if (!assetExists)
         throw pdal_error("None of the asset names supplied exist in the STAC object.");
 
-    std::string dataUrl = stacJson["assets"][assetName]["href"].get<std::string>();
+    std::string dataUrl = stacJson.at("assets").at(assetName).at("href").get<std::string>();
     std::string driver = m_factory.inferReaderDriver(dataUrl);
 
     log()->get(LogLevel::Debug) << "Using driver " << driver <<
@@ -254,9 +254,9 @@ void StacReader::initializeItem(NL::json stacJson)
         Options readerOptions;
         // add reader options defined in reader args to their respective readers
         if (m_readerArgs.contains(driver)) {
-            NL::json args = m_readerArgs[driver].get<NL::json>();
+            NL::json args = m_readerArgs.at(driver).get<NL::json>();
             for (auto& arg : args.items()) {
-                NL::detail::value_t type = m_readerArgs[driver][arg.key()].type();
+                NL::detail::value_t type = m_readerArgs.at(driver).at(arg.key()).type();
                 switch(type)
                 {
                     case NL::detail::value_t::string:
@@ -303,7 +303,7 @@ void StacReader::initializeCatalog(NL::json stacJson, bool root = false)
 {
     if (!stacJson.contains("id"))
         throw pdal_error("Invalid catalog. Missing key 'id'");
-    std::string catalogId = stacJson["id"].get<std::string>();
+    std::string catalogId = stacJson.at("id").get<std::string>();
 
     if (root) {}
     else if (!m_args->catalog_ids.empty())
@@ -324,18 +324,24 @@ void StacReader::initializeCatalog(NL::json stacJson, bool root = false)
 
     if (m_args->validateSchema)
         validateSchema(stacJson);
-    auto itemLinks = stacJson["links"];
+    auto itemLinks = stacJson.at("links");
     log()->get(LogLevel::Debug) << "Filtering..." << std::endl;
 
     std::deque <std::pair<std::string, std::string> > errors;
     for (auto link: itemLinks)
     {
 
+        std::string dump = link.dump();
+        if (!link.contains("href"))
+            throw pdal::pdal_error("item does not contain 'href'" + itemLinks.dump() );
+        std::string linkPath = link.at("href");
+
+        if (!link.contains("rel"))
+            throw pdal::pdal_error("item does not contain 'rel' for href '" + linkPath + "'");
+        std::string linkType = link.at("rel");
         m_pool->add([&]()
         {
 
-            std::string linkType = link.at("rel");
-            std::string linkPath = link.at("href");
             try
             {
                 if (linkType == "item")
@@ -346,7 +352,11 @@ void StacReader::initializeCatalog(NL::json stacJson, bool root = false)
                 else if (linkType == "catalog")
                 {
                     NL::json catalogJson = NL::json::parse(m_arbiter->get(linkPath));
+
+                    std::lock_guard<std::mutex> lock(m_mutex);
                     initializeCatalog(catalogJson);
+                    m_pool->await();
+
                 }
             }
             catch (std::exception& e)
@@ -372,6 +382,8 @@ void StacReader::initializeCatalog(NL::json stacJson, bool root = false)
                 << p.second << "'";
         }
     }
+
+
 }
 
 void StacReader::initialize()
@@ -384,12 +396,11 @@ void StacReader::initialize()
     std::string stacStr = m_arbiter->get(m_filename);
     NL::json stacJson = NL::json::parse(stacStr);
 
-    if (!stacJson.contains("type"))
-        throw pdal_error("Invalid STAC object provided.");
-
-    std::string stacType = stacJson["type"];
+    std::string stacType = stacJson.at("type");
     if (stacType == "Feature")
+    {
         initializeItem(stacJson);
+    }
     else if (stacType == "Catalog")
         initializeCatalog(stacJson, true);
     else
@@ -411,7 +422,7 @@ bool matchProperty(std::string key, NL::json val, NL::json properties, NL::detai
         {
             std::string desired = val.get<std::string>();
             // std::regex desired(d);
-            std::string value = properties[key].get<std::string>();
+            std::string value = properties.at(key).get<std::string>();
             if (value != desired)
                 return false;
             // if (!std::regex_match(value, desired))
@@ -420,7 +431,7 @@ bool matchProperty(std::string key, NL::json val, NL::json properties, NL::detai
         }
         case NL::detail::value_t::number_unsigned:
         {
-            uint64_t value = properties[key].get<uint64_t>();
+            uint64_t value = properties.at(key).get<uint64_t>();
             uint64_t desired = val.get<uint64_t>();
             if (value != desired)
                 return false;
@@ -428,7 +439,7 @@ bool matchProperty(std::string key, NL::json val, NL::json properties, NL::detai
         }
         case NL::detail::value_t::number_integer:
         {
-            int value = properties[key].get<int>();
+            int value = properties.at(key).get<int>();
             int desired = val.get<int>();
             if (value != desired)
                 return false;
@@ -436,7 +447,7 @@ bool matchProperty(std::string key, NL::json val, NL::json properties, NL::detai
         }
         case NL::detail::value_t::number_float:
         {
-            int value = properties[key].get<double>();
+            int value = properties.at(key).get<double>();
             int desired = val.get<double>();
             if (value != desired)
                 return false;
@@ -444,7 +455,7 @@ bool matchProperty(std::string key, NL::json val, NL::json properties, NL::detai
         }
         case NL::detail::value_t::boolean:
         {
-            bool value = properties[key].get<bool>();
+            bool value = properties.at(key).get<bool>();
             bool desired = val.get<bool>();
             if (value != desired)
                 return false;
@@ -474,7 +485,7 @@ void validateForPrune(NL::json stacJson)
     if (!stacJson.contains("geometry") || !stacJson.contains("bbox"))
         throw pdal_error("JSON object does not contain one of 'geometry' or 'bbox'");
 
-    NL::json prop = stacJson["properties"];
+    NL::json prop = stacJson.at("properties");
     if (
         !prop.contains("datetime") &&
         (!prop.contains("start_datetime") && !prop.contains("end_datetime"))
@@ -511,7 +522,7 @@ bool StacReader::prune(NL::json stacJson)
 
     // ID
     // If STAC ID matches *any* ID in supplied list, it will not be pruned.
-    std::string itemId = stacJson["id"];
+    std::string itemId = stacJson.at("id");
     bool idFlag = true;
     if (!m_args->item_ids.empty())
     {
@@ -529,13 +540,13 @@ bool StacReader::prune(NL::json stacJson)
     if (idFlag)
         return true;
 
-    NL::json properties = stacJson["properties"];
+    NL::json properties = stacJson.at("properties");
 
     // DateTime
     // If STAC datetime fits in *any* of the supplied ranges, it will not be pruned
     if (properties.contains("datetime"))
     {
-        std::string stacDate = properties["datetime"];
+        std::string stacDate = properties.at("datetime");
 
         // TODO This would remove three lines of stuff and
         // be much clearer
@@ -550,6 +561,9 @@ bool StacReader::prune(NL::json stacJson)
             //the user, then do not prune this item based on dates.
             //
             // TODO check that range.size() >= 2
+            if (range.size() <2)
+                throw pdal_error("Invalid date range size!");
+
             if (
                 stacDate >= range[0].get<std::string>() &&
                 stacDate <= range[1].get<std::string>()
@@ -561,8 +575,8 @@ bool StacReader::prune(NL::json stacJson)
     } else if (properties.contains("start_datetime") && properties.contains("end_datetime"))
     {
         // Handle if STAC object has start and end datetimes instead of one
-        std::string stacStartDate = properties["start_datetime"].get<std::string>();
-        std::string stacEndDate = properties["end_datetime"].get<std::string>();
+        std::string stacStartDate = properties.at("start_datetime").get<std::string>();
+        std::string stacEndDate = properties.at("end_datetime").get<std::string>();
 
         bool dateFlag = true;
         for (auto& range: m_args->dates)
@@ -571,6 +585,8 @@ bool StacReader::prune(NL::json stacJson)
             // object, do not prune.
             //
             // TODO check if range.size() == 2 before accessing this array
+            if (range.size() <2)
+                throw pdal_error("Invalid date range size!");
             std::string userMinDate = range[0].get<std::string>();
             std::string userMaxDate = range[1].get<std::string>();
             //
@@ -610,7 +626,7 @@ bool StacReader::prune(NL::json stacJson)
                 continue;
             }
 
-            NL::detail::value_t type = properties[it.key()].type();
+            NL::detail::value_t type = properties.at(it.key()).type();
             NL::detail::value_t argType = it.value().type();
             //Array of possibilities are Or'd together
             if (argType == NL::detail::value_t::array)
@@ -637,7 +653,7 @@ bool StacReader::prune(NL::json stacJson)
     {
         if (stacJson.contains("geometry"))
         {
-            NL::json geometry = stacJson["geometry"].get<NL::json>();
+            NL::json geometry = stacJson.at("geometry").get<NL::json>();
             Polygon f(geometry.dump());
             if (!f.valid())
             {
@@ -671,7 +687,7 @@ bool StacReader::prune(NL::json stacJson)
         // or make one in PDALUtils
         else if (stacJson.contains("bbox"))
         {
-            NL::json bboxJson = stacJson["bbox"].get<NL::json>();
+            NL::json bboxJson = stacJson.at("bbox").get<NL::json>();
 
             // TODO if we have a bad bbox?
             if (bboxJson.size() != 4 || bboxJson.size() != 6)
