@@ -303,7 +303,7 @@ void StacReader::initializeCatalog(NL::json stacJson, bool root = false)
 {
     if (!stacJson.contains("id"))
         throw pdal_error("Invalid catalog. Missing key 'id'");
-    std::string catalogId = stacJson["id"].get<std::string>();
+    std::string catalogId = stacJson.at("id").get<std::string>();
 
     if (root) {}
     else if (!m_args->catalog_ids.empty())
@@ -324,18 +324,24 @@ void StacReader::initializeCatalog(NL::json stacJson, bool root = false)
 
     if (m_args->validateSchema)
         validateSchema(stacJson);
-    auto itemLinks = stacJson["links"];
+    auto itemLinks = stacJson.at("links");
     log()->get(LogLevel::Debug) << "Filtering..." << std::endl;
 
-    std::deque <std::pair<std::string, std::string> > errors;
-    for (auto link: itemLinks)
+    std::deque <std::pair<std::string, std::string>> errors;
+    for (const auto& link: itemLinks)
     {
-
-        m_pool->add([&]()
+        if (!link.count("href") || !link.count("rel"))
         {
+            // TODO: Remove debug.
+            std::cout << "Failing " << link.dump() << std::endl;
+            continue;
+        }
 
-            std::string linkType = link.at("rel");
-            std::string linkPath = link.at("href");
+        std::string linkType = link.at("rel").get<std::string>();
+        std::string linkPath = link.at("href").get<std::string>();
+
+        m_pool->add([this, link]()
+        {
             try
             {
                 if (linkType == "item")
@@ -360,7 +366,6 @@ void StacReader::initializeCatalog(NL::json stacJson, bool root = false)
                 std::lock_guard<std::mutex> lock(m_mutex);
                 errors.push_back({linkPath, "Unknown error"});
             }
-
         });
     }
 
@@ -565,12 +570,16 @@ bool StacReader::prune(NL::json stacJson)
         std::string stacEndDate = properties["end_datetime"].get<std::string>();
 
         bool dateFlag = true;
-        for (auto& range: m_args->dates)
+        for (const auto& range: m_args->dates)
         {
             // If any of the date ranges overlap with the date range of the STAC
             // object, do not prune.
             //
             // TODO check if range.size() == 2 before accessing this array
+            if (range.size() != 2)
+            {
+                throwError("Invalid range")
+            }
             std::string userMinDate = range[0].get<std::string>();
             std::string userMaxDate = range[1].get<std::string>();
             //
@@ -704,6 +713,7 @@ bool StacReader::prune(NL::json stacJson)
 
     log()->get(LogLevel::Debug) << "Including: " << itemId << std::endl;
 
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_idList.push_back(itemId);
     return false;
 }
