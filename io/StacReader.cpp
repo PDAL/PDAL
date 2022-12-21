@@ -62,6 +62,7 @@ public:
     std::condition_variable m_contentsCv;
     std::mutex m_mutex;
     std::vector<std::string> m_idList;
+    std::unique_ptr<arbiter::drivers::Http> m_httpDriver;
 };
 
 struct StacReader::Args
@@ -254,6 +255,48 @@ void StacReader::initializeArgs()
 
 }
 
+Options StacReader::setReaderOptions(const NL::json& readerArgs, const std::string& driver) const
+{
+    Options readerOptions;
+    if (readerArgs.contains(driver)) {
+        NL::json args = readerArgs.at(driver).get<NL::json>();
+        for (auto& arg : args.items()) {
+            NL::detail::value_t type = readerArgs.at(driver).at(arg.key()).type();
+            switch(type)
+            {
+                case NL::detail::value_t::string:
+                {
+                    std::string val = arg.value().get<std::string>();
+                    readerOptions.add(arg.key(), arg.value().get<std::string>());
+                    break;
+                }
+                case NL::detail::value_t::number_float:
+                {
+                    readerOptions.add(arg.key(), arg.value().get<float>());
+                    break;
+                }
+                case NL::detail::value_t::number_integer:
+                {
+                    readerOptions.add(arg.key(), arg.value().get<int>());
+                    break;
+                }
+                case NL::detail::value_t::boolean:
+                {
+                    readerOptions.add(arg.key(), arg.value().get<bool>());
+                    break;
+                }
+                default:
+                {
+                    readerOptions.add(arg.key(), arg.value());
+                    break;
+                }
+            }
+        }
+    }
+
+    return readerOptions;
+}
+
 void StacReader::initializeItem(NL::json stacJson)
 {
     if (prune(stacJson))
@@ -284,72 +327,41 @@ void StacReader::initializeItem(NL::json stacJson)
     Stage *reader = PluginManager<Stage>::createObject(driver);
 
     if (!reader)
-        throwError("Unable to create reader for file '" + dataUrl + "'.");
-    else
     {
-//         std::lock_guard<std::mutex> lock(m_p->m_mutex);
-        Options readerOptions;
-        // add reader options defined in reader args to their respective readers
-        if (m_args->readerArgs.contains(driver)) {
-            NL::json args = m_args->readerArgs.at(driver).get<NL::json>();
-            for (auto& arg : args.items()) {
-                NL::detail::value_t type = m_args->readerArgs.at(driver).at(arg.key()).type();
-                switch(type)
-                {
-                    case NL::detail::value_t::string:
-                    {
-                        std::string val = arg.value().get<std::string>();
-                        readerOptions.add(arg.key(), arg.value().get<std::string>());
-                        break;
-                    }
-                    case NL::detail::value_t::number_float:
-                    {
-                        readerOptions.add(arg.key(), arg.value().get<float>());
-                        break;
-                    }
-                    case NL::detail::value_t::number_integer:
-                    {
-                        readerOptions.add(arg.key(), arg.value().get<int>());
-                        break;
-                    }
-                    case NL::detail::value_t::boolean:
-                    {
-                        readerOptions.add(arg.key(), arg.value().get<bool>());
-                        break;
-                    }
-                    default:
-                    {
-                        readerOptions.add(arg.key(), arg.value());
-                        break;
-                    }
-                }
-            }
-        }
-
-        readerOptions.add("filename", dataUrl);
-        reader->setOptions(readerOptions);
-
-        std::unique_lock<std::mutex> l(m_p->m_mutex);
-        if (m_p->m_readerList.size() > 0)
-            reader->setInput(*m_p->m_readerList.back());
-
-        m_p->m_readerList.push_back(std::unique_ptr<Stage>(reader));
-
-//         l.unlock();
-        m_p->m_contentsCv.notify_one();
-
-
+        std::stringstream msg;
+        msg << "Unable to create driver '" << driver << "' for "
+            << "for asset located at '" << dataUrl <<"'";
+        throw pdal_error(msg.str());
     }
+
+    Options readerOptions = setReaderOptions(m_args->readerArgs, driver);
+
+    readerOptions.add("filename", dataUrl);
+    reader->setOptions(readerOptions);
+
+    std::unique_lock<std::mutex> l(m_p->m_mutex);
+    if (m_p->m_readerList.size() > 0)
+        reader->setInput(*m_p->m_readerList.back());
+
+    m_p->m_readerList.push_back(std::unique_ptr<Stage>(reader));
+
 }
 
-void StacReader::initializeCatalog(NL::json stacJson, bool root = false)
+
+
+
+void StacReader::initializeCatalog(NL::json stacJson, bool isRoot)
 {
     if (!stacJson.contains("id"))
-        throw pdal_error("Invalid catalog. Missing key 'id'");
+    {
+        std::stringstream msg;
+        msg << "Invalid catalog. It is missing key 'id'.";
+        throw pdal_error(msg.str());
+    }
+
     std::string catalogId = stacJson.at("id").get<std::string>();
 
-    if (root) {}
-    else if (!m_args->catalog_ids.empty())
+    if (!m_args->catalog_ids.empty() && !isRoot)
     {
         bool pruneFlag = true;
         for (auto& id: m_args->catalog_ids)
@@ -368,6 +380,7 @@ void StacReader::initializeCatalog(NL::json stacJson, bool root = false)
     if (m_args->validateSchema)
         validateSchema(stacJson);
     auto itemLinks = stacJson.at("links");
+
     log()->get(LogLevel::Debug) << "Filtering..." << std::endl;
 
     std::deque <std::pair<std::string, std::string>> errors;
@@ -386,6 +399,15 @@ void StacReader::initializeCatalog(NL::json stacJson, bool root = false)
             {
                 if (linkType == "item")
                 {
+
+                    arbiter::http::Response r = m_p->m_httpDriver->internalHead(linkPath);
+                    arbiter::http::Headers const& h = r.headers();
+
+                    if (h.find("Content-Type") != h.end())
+                    {
+                        // we know our type
+                    }
+
                     NL::json itemJson = NL::json::parse(m_p->m_arbiter->get(linkPath));
                     initializeItem(itemJson);
                 }
@@ -427,6 +449,8 @@ void StacReader::initialize()
 {
     m_p->m_pool.reset(new ThreadPool(m_args->threads));
     m_p->m_arbiter.reset(new arbiter::Arbiter());
+
+    m_p->m_httpDriver.reset(new arbiter::drivers::Http( m_p->m_arbiter->httpPool()));
 
     initializeArgs();
 

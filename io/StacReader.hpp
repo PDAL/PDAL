@@ -73,9 +73,12 @@ namespace pdal
 
             void handleReaderArgs();
             void initializeItem(NL::json stacJson);
-            void initializeCatalog(NL::json stacJson, bool root);
+            void initializeCatalog(NL::json stacJson, bool isRoot = false);
             void initializeArgs();
             void validateSchema(NL::json stacJson);
+            Options setReaderOptions(const NL::json& readerArgs,
+                                     const std::string& driver) const;
+
             bool prune(NL::json stacJson);
 
             virtual void initialize() override;
