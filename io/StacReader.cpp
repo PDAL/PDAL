@@ -40,9 +40,46 @@
 #include <schema-validator/json-schema.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/Polygon.hpp>
+#include <pdal/util/IStream.hpp>
+#include <pdal/SrsBounds.hpp>
+#include <arbiter/arbiter.hpp>
+#include <pdal/PipelineManager.hpp>
+
 
 namespace pdal
 {
+
+
+
+struct StacReader::Private
+{
+public:
+    std::unique_ptr<ILeStream> m_stream;
+    std::unique_ptr<Args> m_args;
+    std::unique_ptr<ThreadPool> m_pool;
+    std::unique_ptr<arbiter::Arbiter> m_arbiter;
+    std::vector<std::unique_ptr<Stage>> m_readerList;
+    std::condition_variable m_contentsCv;
+    std::mutex m_mutex;
+    std::vector<std::string> m_idList;
+};
+
+struct StacReader::Args
+{
+    std::vector<RegEx> item_ids;
+    std::vector<RegEx> catalog_ids;
+    NL::json properties;
+    NL::json readerArgs;
+    NL::json rawReaderArgs;
+    NL::json::array_t dates;
+    SrsBounds bounds;
+    std::vector<std::string> assetNames;
+    std::string catalogSchemaUrl;
+    std::string featureSchemaUrl;
+    bool validateSchema;
+    bool dryRun;
+    int threads;
+};
 
 static PluginInfo const stacinfo
 {
@@ -55,7 +92,7 @@ CREATE_STATIC_STAGE(StacReader, stacinfo)
 
 std::string StacReader::getName() const { return stacinfo.name; }
 
-StacReader::StacReader(){};
+StacReader::StacReader(): m_args(new StacReader::Args), m_p(new StacReader::Private){};
 StacReader::~StacReader(){};
 
 void StacReader::addArgs(ProgramArgs& args)
@@ -74,7 +111,7 @@ void StacReader::addArgs(ProgramArgs& args)
         "values. ie. {\"pc:type\": \"(lidar|sonar)\"}. Selected items will "
         "match all properties.", m_args->properties);
     args.add("reader_args", "Map of reader arguments to their values to pass through.",
-        m_args->readerArgs);
+        m_args->rawReaderArgs);
     args.add("catalog_schema_url", "URL of catalog schema you'd like to use for"
         " JSON schema validation.", m_args->catalogSchemaUrl,
         "https://schemas.stacspec.org/v1.0.0/catalog-spec/json-schema/catalog.json");
@@ -82,7 +119,7 @@ void StacReader::addArgs(ProgramArgs& args)
         " JSON schema validation.", m_args->featureSchemaUrl,
         "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/item.json");
     args.add("requests", "Number of threads for fetching JSON files, Default: 8",
-        m_args->threads, 8);
+        m_args->threads, 1);
     args.addSynonym("requests", "threads");
 }
 
@@ -113,7 +150,7 @@ void StacReader::validateSchema(NL::json stacJson)
         for (auto& extSchemaUrl: stacJson["stac_extensions"])
         {
             log()->get(LogLevel::Debug) << "Processing extension " << extSchemaUrl << std::endl;
-            std::string schemaStr = m_arbiter->get(extSchemaUrl);
+            std::string schemaStr = m_p->m_arbiter->get(extSchemaUrl);
             NL::json schemaJson = NL::json::parse(schemaStr);
             val.set_root_schema(schemaJson);
             val.validate(stacJson);
@@ -124,7 +161,7 @@ void StacReader::validateSchema(NL::json stacJson)
     else
         throw pdal_error("Invalid STAC type for PDAL consumption");
 
-    std::string schemaStr = m_arbiter->get(schemaUrl);
+    std::string schemaStr = m_p->m_arbiter->get(schemaUrl);
     NL::json schemaJson = NL::json::parse(schemaStr);
     val.set_root_schema(schemaJson);
     val.validate(stacJson);
@@ -132,21 +169,21 @@ void StacReader::validateSchema(NL::json stacJson)
 
 void StacReader::handleReaderArgs()
 {
-    for (NL::json& readerPipeline: m_args->readerArgs)
+    for (NL::json& readerPipeline: m_args->rawReaderArgs)
     {
         if (!readerPipeline.contains("type"))
             throw pdal_error("No \"type\" key found in supplied reader arguments.");
 
         std::string driver = readerPipeline["type"].get<std::string>();
-        if (m_readerArgs.contains(driver))
+        if (m_args->readerArgs.contains(driver))
             throw pdal_error("Multiple instances of the same driver in supplie reader arguments.");
-        m_readerArgs[driver] = { };
+        m_args->readerArgs[driver] = { };
 
         for (auto& arg: readerPipeline.items())
         {
             if (arg.key() == "type")
                 continue;
-            m_readerArgs[driver][arg.key()] = arg.value();
+            m_args->readerArgs[driver][arg.key()] = arg.value();
         }
     }
 }
@@ -188,19 +225,19 @@ void StacReader::initializeArgs()
         log()->get(LogLevel::Debug) << "Bounds: " << m_args->bounds << std::endl;
     }
 
-    if (!m_args->readerArgs.empty())
+    if (!m_args->rawReaderArgs.empty())
     {
-        if (m_args->readerArgs.is_object())
+        if (m_args->rawReaderArgs.is_object())
         {
             NL::json array_args = NL::json::array();
             array_args.push_back(m_args->readerArgs);
-            m_args->readerArgs = array_args;
+            m_args->rawReaderArgs = array_args;
         }
-        for (auto& opts: m_args->readerArgs)
+        for (auto& opts: m_args->rawReaderArgs)
             if (!opts.is_object())
                 throw pdal_error("Reader Args must be a valid JSON object");
 
-        log()->get(LogLevel::Debug) << "Reader Args: " << m_args->readerArgs.dump() << std::endl;
+        log()->get(LogLevel::Debug) << "Reader Args: " << m_args->rawReaderArgs.dump() << std::endl;
         handleReaderArgs();
     }
 
@@ -229,7 +266,7 @@ void StacReader::initializeItem(NL::json stacJson)
     std::string assetName;
     for (auto& name: m_args->assetNames)
     {
-        if (stacJson["assets"].contains(name))
+        if (stacJson.at("assets").contains(name))
         {
             assetName = name;
             assetExists = true;
@@ -238,7 +275,7 @@ void StacReader::initializeItem(NL::json stacJson)
     if (!assetExists)
         throw pdal_error("None of the asset names supplied exist in the STAC object.");
 
-    std::string dataUrl = stacJson["assets"][assetName]["href"].get<std::string>();
+    std::string dataUrl = stacJson.at("assets").at(assetName).at("href").get<std::string>();
     std::string driver = m_factory.inferReaderDriver(dataUrl);
 
     log()->get(LogLevel::Debug) << "Using driver " << driver <<
@@ -250,13 +287,13 @@ void StacReader::initializeItem(NL::json stacJson)
         throwError("Unable to create reader for file '" + dataUrl + "'.");
     else
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
+//         std::lock_guard<std::mutex> lock(m_p->m_mutex);
         Options readerOptions;
         // add reader options defined in reader args to their respective readers
-        if (m_readerArgs.contains(driver)) {
-            NL::json args = m_readerArgs[driver].get<NL::json>();
+        if (m_args->readerArgs.contains(driver)) {
+            NL::json args = m_args->readerArgs.at(driver).get<NL::json>();
             for (auto& arg : args.items()) {
-                NL::detail::value_t type = m_readerArgs[driver][arg.key()].type();
+                NL::detail::value_t type = m_args->readerArgs.at(driver).at(arg.key()).type();
                 switch(type)
                 {
                     case NL::detail::value_t::string:
@@ -292,10 +329,16 @@ void StacReader::initializeItem(NL::json stacJson)
         readerOptions.add("filename", dataUrl);
         reader->setOptions(readerOptions);
 
-        if (m_readerList.size() > 0)
-            reader->setInput(*m_readerList.back());
+        std::unique_lock<std::mutex> l(m_p->m_mutex);
+        if (m_p->m_readerList.size() > 0)
+            reader->setInput(*m_p->m_readerList.back());
 
-        m_readerList.push_back(std::unique_ptr<Stage>(reader));
+        m_p->m_readerList.push_back(std::unique_ptr<Stage>(reader));
+
+//         l.unlock();
+        m_p->m_contentsCv.notify_one();
+
+
     }
 }
 
@@ -330,40 +373,39 @@ void StacReader::initializeCatalog(NL::json stacJson, bool root = false)
     std::deque <std::pair<std::string, std::string>> errors;
     for (const auto& link: itemLinks)
     {
+
         if (!link.count("href") || !link.count("rel"))
-        {
-            // TODO: Remove debug.
-            std::cout << "Failing " << link.dump() << std::endl;
-            continue;
-        }
+            throw pdal::pdal_error("item does not contain 'href' or 'rel'");
 
         std::string linkType = link.at("rel").get<std::string>();
         std::string linkPath = link.at("href").get<std::string>();
 
-        m_pool->add([this, linkType, linkPath, link, &errors]()
+        m_p->m_pool->add([this, linkType, linkPath, link, &errors]()
         {
             try
             {
                 if (linkType == "item")
                 {
-                    NL::json itemJson = NL::json::parse(m_arbiter->get(linkPath));
+                    NL::json itemJson = NL::json::parse(m_p->m_arbiter->get(linkPath));
                     initializeItem(itemJson);
                 }
                 else if (linkType == "catalog")
                 {
-                    NL::json catalogJson = NL::json::parse(m_arbiter->get(linkPath));
+                    NL::json catalogJson = NL::json::parse(m_p->m_arbiter->get(linkPath));
+
                     initializeCatalog(catalogJson);
+
                 }
             }
             catch (std::exception& e)
             {
-                std::lock_guard<std::mutex> lock(m_mutex);
+                std::lock_guard<std::mutex> lock(m_p->m_mutex);
                 std::pair<std::string, std::string> p {linkPath, e.what()};
                 errors.push_back(p);
             }
             catch (...)
             {
-                std::lock_guard<std::mutex> lock(m_mutex);
+                std::lock_guard<std::mutex> lock(m_p->m_mutex);
                 errors.push_back({linkPath, "Unknown error"});
             }
         });
@@ -377,33 +419,34 @@ void StacReader::initializeCatalog(NL::json stacJson, bool root = false)
                 << p.second << "'";
         }
     }
+
+
 }
 
 void StacReader::initialize()
 {
-    m_pool.reset(new ThreadPool(m_args->threads));
-    m_arbiter.reset(new arbiter::Arbiter());
+    m_p->m_pool.reset(new ThreadPool(m_args->threads));
+    m_p->m_arbiter.reset(new arbiter::Arbiter());
 
     initializeArgs();
 
-    std::string stacStr = m_arbiter->get(m_filename);
+    std::string stacStr = m_p->m_arbiter->get(m_filename);
     NL::json stacJson = NL::json::parse(stacStr);
 
-    if (!stacJson.contains("type"))
-        throw pdal_error("Invalid STAC object provided.");
-
-    std::string stacType = stacJson["type"];
+    std::string stacType = stacJson.at("type");
     if (stacType == "Feature")
+    {
         initializeItem(stacJson);
+    }
     else if (stacType == "Catalog")
         initializeCatalog(stacJson, true);
     else
         throw pdal_error("Could not initialize STAC object of type " + stacType);
 
-    m_pool->await();
-    m_pool->stop();
+    m_p->m_pool->await();
+    m_p->m_pool->stop();
 
-    if (m_readerList.empty())
+    if (m_p->m_readerList.empty())
         throw pdal_error("Reader list is empty after filtering.");
 }
 
@@ -416,7 +459,7 @@ bool matchProperty(std::string key, NL::json val, NL::json properties, NL::detai
         {
             std::string desired = val.get<std::string>();
             // std::regex desired(d);
-            std::string value = properties[key].get<std::string>();
+            std::string value = properties.at(key).get<std::string>();
             if (value != desired)
                 return false;
             // if (!std::regex_match(value, desired))
@@ -425,7 +468,7 @@ bool matchProperty(std::string key, NL::json val, NL::json properties, NL::detai
         }
         case NL::detail::value_t::number_unsigned:
         {
-            uint64_t value = properties[key].get<uint64_t>();
+            uint64_t value = properties.at(key).get<uint64_t>();
             uint64_t desired = val.get<uint64_t>();
             if (value != desired)
                 return false;
@@ -433,7 +476,7 @@ bool matchProperty(std::string key, NL::json val, NL::json properties, NL::detai
         }
         case NL::detail::value_t::number_integer:
         {
-            int value = properties[key].get<int>();
+            int value = properties.at(key).get<int>();
             int desired = val.get<int>();
             if (value != desired)
                 return false;
@@ -441,7 +484,7 @@ bool matchProperty(std::string key, NL::json val, NL::json properties, NL::detai
         }
         case NL::detail::value_t::number_float:
         {
-            int value = properties[key].get<double>();
+            int value = properties.at(key).get<double>();
             int desired = val.get<double>();
             if (value != desired)
                 return false;
@@ -449,7 +492,7 @@ bool matchProperty(std::string key, NL::json val, NL::json properties, NL::detai
         }
         case NL::detail::value_t::boolean:
         {
-            bool value = properties[key].get<bool>();
+            bool value = properties.at(key).get<bool>();
             bool desired = val.get<bool>();
             if (value != desired)
                 return false;
@@ -479,7 +522,7 @@ void validateForPrune(NL::json stacJson)
     if (!stacJson.contains("geometry") || !stacJson.contains("bbox"))
         throw pdal_error("JSON object does not contain one of 'geometry' or 'bbox'");
 
-    NL::json prop = stacJson["properties"];
+    NL::json prop = stacJson.at("properties");
     if (
         !prop.contains("datetime") &&
         (!prop.contains("start_datetime") && !prop.contains("end_datetime"))
@@ -516,7 +559,7 @@ bool StacReader::prune(NL::json stacJson)
 
     // ID
     // If STAC ID matches *any* ID in supplied list, it will not be pruned.
-    std::string itemId = stacJson["id"];
+    std::string itemId = stacJson.at("id");
     bool idFlag = true;
     if (!m_args->item_ids.empty())
     {
@@ -534,13 +577,13 @@ bool StacReader::prune(NL::json stacJson)
     if (idFlag)
         return true;
 
-    NL::json properties = stacJson["properties"];
+    NL::json properties = stacJson.at("properties");
 
     // DateTime
     // If STAC datetime fits in *any* of the supplied ranges, it will not be pruned
     if (properties.contains("datetime"))
     {
-        std::string stacDate = properties["datetime"];
+        std::string stacDate = properties.at("datetime");
 
         // TODO This would remove three lines of stuff and
         // be much clearer
@@ -555,6 +598,9 @@ bool StacReader::prune(NL::json stacJson)
             //the user, then do not prune this item based on dates.
             //
             // TODO check that range.size() >= 2
+            if (range.size() <2)
+                throw pdal_error("Invalid date range size!");
+
             if (
                 stacDate >= range[0].get<std::string>() &&
                 stacDate <= range[1].get<std::string>()
@@ -566,20 +612,16 @@ bool StacReader::prune(NL::json stacJson)
     } else if (properties.contains("start_datetime") && properties.contains("end_datetime"))
     {
         // Handle if STAC object has start and end datetimes instead of one
-        std::string stacStartDate = properties["start_datetime"].get<std::string>();
-        std::string stacEndDate = properties["end_datetime"].get<std::string>();
+        std::string stacStartDate = properties.at("start_datetime").get<std::string>();
+        std::string stacEndDate = properties.at("end_datetime").get<std::string>();
 
         bool dateFlag = true;
         for (const auto& range: m_args->dates)
         {
             // If any of the date ranges overlap with the date range of the STAC
             // object, do not prune.
-            //
-            // TODO check if range.size() == 2 before accessing this array
             if (range.size() != 2)
-            {
-                throwError("Invalid range");
-            }
+                throw pdal_error("Invalid date range size!");
             std::string userMinDate = range[0].get<std::string>();
             std::string userMaxDate = range[1].get<std::string>();
             //
@@ -619,7 +661,7 @@ bool StacReader::prune(NL::json stacJson)
                 continue;
             }
 
-            NL::detail::value_t type = properties[it.key()].type();
+            NL::detail::value_t type = properties.at(it.key()).type();
             NL::detail::value_t argType = it.value().type();
             //Array of possibilities are Or'd together
             if (argType == NL::detail::value_t::array)
@@ -646,7 +688,7 @@ bool StacReader::prune(NL::json stacJson)
     {
         if (stacJson.contains("geometry"))
         {
-            NL::json geometry = stacJson["geometry"].get<NL::json>();
+            NL::json geometry = stacJson.at("geometry").get<NL::json>();
             Polygon f(geometry.dump());
             if (!f.valid())
             {
@@ -680,7 +722,7 @@ bool StacReader::prune(NL::json stacJson)
         // or make one in PDALUtils
         else if (stacJson.contains("bbox"))
         {
-            NL::json bboxJson = stacJson["bbox"].get<NL::json>();
+            NL::json bboxJson = stacJson.at("bbox").get<NL::json>();
 
             // TODO if we have a bad bbox?
             if (bboxJson.size() != 4 || bboxJson.size() != 6)
@@ -713,8 +755,8 @@ bool StacReader::prune(NL::json stacJson)
 
     log()->get(LogLevel::Debug) << "Including: " << itemId << std::endl;
 
-    std::lock_guard<std::mutex> lock(m_mutex);
-    m_idList.push_back(itemId);
+    std::lock_guard<std::mutex> lock(m_p->m_mutex);
+    m_p->m_idList.push_back(itemId);
     return false;
 }
 
@@ -724,7 +766,7 @@ QuickInfo StacReader::inspect()
 
     initialize();
 
-    for (auto& reader: m_readerList)
+    for (auto& reader: m_p->m_readerList)
     {
         QuickInfo readerQi = reader->preview();
         qi.m_bounds.grow(readerQi.m_bounds);
@@ -744,7 +786,7 @@ QuickInfo StacReader::inspect()
     //TODO Make list of catalog ids and item ids to pass to metadata
     NL::json metadata;
     metadata["ids"] = NL::json::array();
-    for (auto& id: m_idList)
+    for (auto& id: m_p->m_idList)
         metadata["ids"].push_back(id);
 
 
@@ -760,17 +802,17 @@ QuickInfo StacReader::inspect()
 
 void StacReader::prepared(PointTableRef table)
 {
-    m_readerList.back()->prepare(table);
+    m_p->m_readerList.back()->prepare(table);
 }
 
 void StacReader::ready(PointTableRef table)
 {
-    m_pvSet = m_readerList.back()->execute(table);
+    m_pvSet = m_p->m_readerList.back()->execute(table);
 }
 
 void StacReader::done(PointTableRef)
 {
-    m_stream.reset();
+    m_p->m_stream.reset();
 }
 
 PointViewSet StacReader::run(PointViewPtr view)

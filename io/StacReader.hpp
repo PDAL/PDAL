@@ -35,23 +35,19 @@
 
 #include <time.h>
 #include <ctime>
-#include <regex>
 
 #include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
-#include <pdal/util/IStream.hpp>
-#include <pdal/SrsBounds.hpp>
+
+
 #include <pdal/JsonFwd.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/PipelineManager.hpp>
 #include <filters/MergeFilter.hpp>
-#include <arbiter/arbiter.hpp>
+
 
 
 namespace pdal
 {
-
-    class ThreadPool;
 
     class PDAL_DLL StacReader : public Reader
     {
@@ -64,32 +60,12 @@ namespace pdal
 
 
         private:
-            //TODO make assetName be a list
-            struct Args
-            {
-                std::vector<RegEx> item_ids;
-                std::vector<RegEx> catalog_ids;
-                NL::json properties;
-                NL::json readerArgs;
-                NL::json::array_t dates;
-                SrsBounds bounds;
-                std::vector<std::string> assetNames;
-                std::string catalogSchemaUrl;
-                std::string featureSchemaUrl;
-                bool validateSchema;
-                bool dryRun;
-                int threads;
-            };
 
-            std::unique_ptr<ILeStream> m_stream;
+            struct Private;
+            struct Args;
+
             std::unique_ptr<Args> m_args;
-            std::unique_ptr<ThreadPool> m_pool;
-            std::unique_ptr<arbiter::Arbiter> m_arbiter;
-            std::vector<std::unique_ptr<Stage>> m_readerList;
-
-            NL::json m_readerArgs;
-            std::vector<std::string> m_idList;
-            mutable std::mutex m_mutex;
+            std::unique_ptr<Private> m_p;
 
             StageFactory m_factory;
             MergeFilter m_merge;
