@@ -117,7 +117,6 @@ TEST(StacReaderTest, multiple_readers_test)
     options.add("filename", Support::datapath("stac/multi_type_catalog.json"));
     options.add("reader_args", reader_args);
     options.add("asset_names", "data");
-    options.add("debug", true);
     options.add("asset_names", "ept.json");
     options.add("item_ids", "IA_SouthCentral_1_2020");
     options.add("item_ids", "Autzen Classified");

@@ -340,7 +340,7 @@ void StacReader::initializeCatalog(NL::json stacJson, bool root = false)
         std::string linkType = link.at("rel").get<std::string>();
         std::string linkPath = link.at("href").get<std::string>();
 
-        m_pool->add([this, link]()
+        m_pool->add([this, linkType, linkPath, link, &errors]()
         {
             try
             {
@@ -578,7 +578,7 @@ bool StacReader::prune(NL::json stacJson)
             // TODO check if range.size() == 2 before accessing this array
             if (range.size() != 2)
             {
-                throwError("Invalid range")
+                throwError("Invalid range");
             }
             std::string userMinDate = range[0].get<std::string>();
             std::string userMaxDate = range[1].get<std::string>();
