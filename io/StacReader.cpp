@@ -149,13 +149,13 @@ void StacReader::validateSchema(NL::json stacJson)
     );
     if (!stacJson.contains("type"))
         throw pdal_error("Invalid STAC json");
-    std::string type = stacJson["type"].get<std::string>();
+    std::string type = stacJson.at("type").get<std::string>();
     std::string schemaUrl;
 
     if (type == "Feature")
     {
         schemaUrl = m_args->featureSchemaUrl;
-        for (auto& extSchemaUrl: stacJson["stac_extensions"])
+        for (auto& extSchemaUrl: stacJson.at("stac_extensions"))
         {
             log()->get(LogLevel::Debug) << "Processing extension " << extSchemaUrl << std::endl;
             NL::json schemaJson = m_p->m_connector->getJson(extSchemaUrl);
@@ -180,16 +180,20 @@ void StacReader::handleReaderArgs()
         if (!readerPipeline.contains("type"))
             throw pdal_error("No \"type\" key found in supplied reader arguments.");
 
-        std::string driver = readerPipeline["type"].get<std::string>();
-        if (m_args->readerArgs.contains(driver))
-            throw pdal_error("Multiple instances of the same driver in supplie reader arguments.");
+        std::string driver = readerPipeline.at("type").get<std::string>();
+        if (m_args->rawReaderArgs.contains(driver))
+            throw pdal_error("Multiple instances of the same driver in supplied reader arguments.");
         m_args->readerArgs[driver] = { };
 
         for (auto& arg: readerPipeline.items())
         {
             if (arg.key() == "type")
                 continue;
-            m_args->readerArgs[driver][arg.key()] = arg.value();
+
+            key = arg.key();
+            value = arg.value();
+            m_args->readerArgs[driver][key] = { };
+            m_args->readerArgs[driver][key] = value;
         }
     }
 }
@@ -652,9 +656,7 @@ bool StacReader::prune(NL::json stacJson)
         {
             //If the extracted item date fits into any of the dates provided by
             //the user, then do not prune this item based on dates.
-            //
-            // TODO check that range.size() >= 2
-            if (range.size() <2)
+            if (range.size() != 2)
                 throw pdal_error("Invalid date range size!");
 
             if (
