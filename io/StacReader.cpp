@@ -45,6 +45,8 @@
 #include <arbiter/arbiter.hpp>
 #include <pdal/PipelineManager.hpp>
 
+#include "private/ept/Connector.hpp"
+
 
 namespace pdal
 {
@@ -57,12 +59,10 @@ public:
     std::unique_ptr<ILeStream> m_stream;
     std::unique_ptr<Args> m_args;
     std::unique_ptr<ThreadPool> m_pool;
-    std::unique_ptr<arbiter::Arbiter> m_arbiter;
     std::vector<std::unique_ptr<Stage>> m_readerList;
-    std::condition_variable m_contentsCv;
     std::mutex m_mutex;
     std::vector<std::string> m_idList;
-    std::unique_ptr<arbiter::drivers::Http> m_httpDriver;
+    std::unique_ptr<ept::Connector> m_connector;
 };
 
 struct StacReader::Args
@@ -80,6 +80,9 @@ struct StacReader::Args
     bool validateSchema;
     bool dryRun;
     int threads;
+
+    NL::json m_query;
+    NL::json m_headers;
 };
 
 static PluginInfo const stacinfo
@@ -108,6 +111,8 @@ void StacReader::addArgs(ProgramArgs& args)
     args.add("item_ids", "List of ID regexes to select STAC items based on.", m_args->item_ids);
     args.add("catalog_ids", "List of ID regexes to select STAC items based on.", m_args->catalog_ids);
     args.add("validate_schema", "Use JSON schema to validate your STAC objects. Default: false", m_args->validateSchema, false);
+    args.add("header", "Header fields to forward with HTTP requests", m_args->m_headers);
+    args.add("query", "Query parameters to forward with HTTP requests", m_args->m_query);
     args.add("properties", "Map of STAC property names to regular expression "
         "values. ie. {\"pc:type\": \"(lidar|sonar)\"}. Selected items will "
         "match all properties.", m_args->properties);
@@ -120,8 +125,10 @@ void StacReader::addArgs(ProgramArgs& args)
         " JSON schema validation.", m_args->featureSchemaUrl,
         "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/item.json");
     args.add("requests", "Number of threads for fetching JSON files, Default: 8",
-        m_args->threads, 1);
+        m_args->threads, 8);
     args.addSynonym("requests", "threads");
+
+
 }
 
 
@@ -151,8 +158,7 @@ void StacReader::validateSchema(NL::json stacJson)
         for (auto& extSchemaUrl: stacJson["stac_extensions"])
         {
             log()->get(LogLevel::Debug) << "Processing extension " << extSchemaUrl << std::endl;
-            std::string schemaStr = m_p->m_arbiter->get(extSchemaUrl);
-            NL::json schemaJson = NL::json::parse(schemaStr);
+            NL::json schemaJson = m_p->m_connector->getJson(extSchemaUrl);
             val.set_root_schema(schemaJson);
             val.validate(stacJson);
         }
@@ -162,8 +168,7 @@ void StacReader::validateSchema(NL::json stacJson)
     else
         throw pdal_error("Invalid STAC type for PDAL consumption");
 
-    std::string schemaStr = m_p->m_arbiter->get(schemaUrl);
-    NL::json schemaJson = NL::json::parse(schemaStr);
+    NL::json schemaJson = m_p->m_connector->getJson(schemaUrl);
     val.set_root_schema(schemaJson);
     val.validate(stacJson);
 }
@@ -297,6 +302,29 @@ Options StacReader::setReaderOptions(const NL::json& readerArgs, const std::stri
     return readerOptions;
 }
 
+void StacReader::setForwards(StringMap& headers, StringMap& query)
+{
+    try
+    {
+        if (!m_args->m_headers.is_null())
+            headers = m_args->m_headers.get<StringMap>();
+    }
+    catch (const std::exception& err)
+    {
+        throwError(std::string("Error parsing 'headers': ") + err.what());
+    }
+
+    try
+    {
+        if (!m_args->m_query.is_null())
+            query = m_args->m_query.get<StringMap>();
+    }
+    catch (const std::exception& err)
+    {
+        throwError(std::string("Error parsing 'query': ") + err.what());
+    }
+}
+
 void StacReader::initializeItem(NL::json stacJson)
 {
     if (prune(stacJson))
@@ -339,11 +367,13 @@ void StacReader::initializeItem(NL::json stacJson)
     readerOptions.add("filename", dataUrl);
     reader->setOptions(readerOptions);
 
-    std::unique_lock<std::mutex> l(m_p->m_mutex);
-    if (m_p->m_readerList.size() > 0)
-        reader->setInput(*m_p->m_readerList.back());
+    {
+        std::unique_lock<std::mutex> l(m_p->m_mutex);
+        if (m_p->m_readerList.size() > 0)
+            reader->setInput(*m_p->m_readerList.back());
 
-    m_p->m_readerList.push_back(std::unique_ptr<Stage>(reader));
+        m_p->m_readerList.push_back(std::unique_ptr<Stage>(reader));
+    }
 
 }
 
@@ -400,21 +430,21 @@ void StacReader::initializeCatalog(NL::json stacJson, bool isRoot)
                 if (linkType == "item")
                 {
 
-                    arbiter::http::Response r = m_p->m_httpDriver->internalHead(linkPath);
-                    arbiter::http::Headers const& h = r.headers();
+                    // If we don't have `media_type` in our item, go make a HEAD
+                    // request and try to find the `Content-Type` there
+                    StringMap headers = m_p->m_connector->headRequest(linkPath);
 
-                    if (h.find("Content-Type") != h.end())
+                    if (headers.find("Content-Type") != headers.end())
                     {
                         // we know our type
                     }
 
-                    NL::json itemJson = NL::json::parse(m_p->m_arbiter->get(linkPath));
+                    NL::json itemJson = m_p->m_connector->getJson(linkPath);
                     initializeItem(itemJson);
                 }
                 else if (linkType == "catalog")
                 {
-                    NL::json catalogJson = NL::json::parse(m_p->m_arbiter->get(linkPath));
-
+                    NL::json catalogJson = m_p->m_connector->getJson(linkPath);
                     initializeCatalog(catalogJson);
 
                 }
@@ -447,15 +477,17 @@ void StacReader::initializeCatalog(NL::json stacJson, bool isRoot)
 
 void StacReader::initialize()
 {
-    m_p->m_pool.reset(new ThreadPool(m_args->threads));
-    m_p->m_arbiter.reset(new arbiter::Arbiter());
 
-    m_p->m_httpDriver.reset(new arbiter::drivers::Http( m_p->m_arbiter->httpPool()));
+    StringMap headers;
+    StringMap query;
+    setForwards(headers, query);
+    m_p->m_connector.reset(new ept::Connector(headers, query));
+
+    m_p->m_pool.reset(new ThreadPool(m_args->threads));
 
     initializeArgs();
 
-    std::string stacStr = m_p->m_arbiter->get(m_filename);
-    NL::json stacJson = NL::json::parse(stacStr);
+    NL::json stacJson = m_p->m_connector->getJson(m_filename);
 
     std::string stacType = stacJson.at("type");
     if (stacType == "Feature")
@@ -779,8 +811,10 @@ bool StacReader::prune(NL::json stacJson)
 
     log()->get(LogLevel::Debug) << "Including: " << itemId << std::endl;
 
-    std::lock_guard<std::mutex> lock(m_p->m_mutex);
-    m_p->m_idList.push_back(itemId);
+    {
+        std::lock_guard<std::mutex> lock(m_p->m_mutex);
+        m_p->m_idList.push_back(itemId);
+    }
     return false;
 }
 

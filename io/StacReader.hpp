@@ -58,7 +58,7 @@ namespace pdal
 
             std::string getName() const override;
 
-
+            using StringMap = std::map<std::string, std::string>;
         private:
 
             struct Private;
@@ -78,6 +78,7 @@ namespace pdal
             void validateSchema(NL::json stacJson);
             Options setReaderOptions(const NL::json& readerArgs,
                                      const std::string& driver) const;
+            void setForwards(StringMap& headers, StringMap& query);
 
             bool prune(NL::json stacJson);
 
