@@ -190,8 +190,8 @@ void StacReader::handleReaderArgs()
             if (arg.key() == "type")
                 continue;
 
-            key = arg.key();
-            value = arg.value();
+            std::string key = arg.key();
+            std::string value = arg.value();
             m_args->readerArgs[driver][key] = { };
             m_args->readerArgs[driver][key] = value;
         }
