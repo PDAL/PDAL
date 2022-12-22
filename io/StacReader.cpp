@@ -63,6 +63,7 @@ public:
     std::mutex m_mutex;
     std::vector<std::string> m_idList;
     std::unique_ptr<ept::Connector> m_connector;
+    std::deque <std::pair<std::string, std::string>> m_errors;
 };
 
 struct StacReader::Args
@@ -328,6 +329,50 @@ void StacReader::setForwards(StringMap& headers, StringMap& query)
     }
 }
 
+
+std::string StacReader::extractDriverFromItem(const NL::json& asset) const
+{
+    std::string output;
+
+    std::map<std::string, std::string> contentTypes =
+    {
+        { "application/vnd.laszip+copc", "readers.copc"}
+    };
+
+    if (!asset.contains("href"))
+        throw pdal_error("asset does not contain an href!");
+    std::string dataUrl = asset.at("href").get<std::string>();
+
+    std::string contentType;
+
+    if (asset.contains("media_type"))
+    {
+        contentType = asset.at("media_type").get<std::string>();
+        for(const auto& ct: contentTypes)
+            if (Utils::iequals(ct.first, contentType))
+                return ct.second;
+    }
+
+    // Try to guess from the URL
+    std::string driver = m_factory.inferReaderDriver(dataUrl);
+    if (driver.size())
+        return driver;
+
+
+    // Try to make a HEAD request and get it from Content-Type
+    StringMap headers = m_p->m_connector->headRequest(dataUrl);
+    if (headers.find("Content-Type") != headers.end())
+    {
+        contentType = headers["Content-Type"];
+        for(const auto& ct: contentTypes)
+            if (Utils::iequals(ct.first, contentType))
+                return ct.second;
+    }
+
+    return output;
+}
+
+
 void StacReader::initializeItem(NL::json stacJson)
 {
     if (prune(stacJson))
@@ -349,7 +394,11 @@ void StacReader::initializeItem(NL::json stacJson)
     if (!assetExists)
         throw pdal_error("None of the asset names supplied exist in the STAC object.");
 
-    std::string dataUrl = stacJson.at("assets").at(assetName).at("href").get<std::string>();
+    NL::json asset = stacJson.at("assets").at(assetName);
+
+    std::string dataUrl = asset.at("href").get<std::string>();
+
+
     std::string driver = m_factory.inferReaderDriver(dataUrl);
 
     log()->get(LogLevel::Debug) << "Using driver " << driver <<
@@ -416,7 +465,7 @@ void StacReader::initializeCatalog(NL::json stacJson, bool isRoot)
 
     log()->get(LogLevel::Debug) << "Filtering..." << std::endl;
 
-    std::deque <std::pair<std::string, std::string>> errors;
+
     for (const auto& link: itemLinks)
     {
 
@@ -426,22 +475,12 @@ void StacReader::initializeCatalog(NL::json stacJson, bool isRoot)
         std::string linkType = link.at("rel").get<std::string>();
         std::string linkPath = link.at("href").get<std::string>();
 
-        m_p->m_pool->add([this, linkType, linkPath, link, &errors]()
+        m_p->m_pool->add([this, linkType, linkPath, link ]()
         {
             try
             {
                 if (linkType == "item")
                 {
-
-                    // If we don't have `media_type` in our item, go make a HEAD
-                    // request and try to find the `Content-Type` there
-                    StringMap headers = m_p->m_connector->headRequest(linkPath);
-
-                    if (headers.find("Content-Type") != headers.end())
-                    {
-                        // we know our type
-                    }
-
                     NL::json itemJson = m_p->m_connector->getJson(linkPath);
                     initializeItem(itemJson);
                 }
@@ -449,26 +488,25 @@ void StacReader::initializeCatalog(NL::json stacJson, bool isRoot)
                 {
                     NL::json catalogJson = m_p->m_connector->getJson(linkPath);
                     initializeCatalog(catalogJson);
-
                 }
             }
             catch (std::exception& e)
             {
                 std::lock_guard<std::mutex> lock(m_p->m_mutex);
                 std::pair<std::string, std::string> p {linkPath, e.what()};
-                errors.push_back(p);
+                m_p->m_errors.push_back(p);
             }
             catch (...)
             {
                 std::lock_guard<std::mutex> lock(m_p->m_mutex);
-                errors.push_back({linkPath, "Unknown error"});
+                m_p->m_errors.push_back({linkPath, "Unknown error"});
             }
         });
     }
 
-    if (errors.size())
+    if (m_p->m_errors.size())
     {
-        for (auto& p: errors)
+        for (auto& p: m_p->m_errors)
         {
             log()->get(LogLevel::Error) << "Failure fetching '" << p.first << "' with error '"
                 << p.second << "'";
@@ -861,6 +899,8 @@ QuickInfo StacReader::inspect()
 
 void StacReader::prepared(PointTableRef table)
 {
+    std::unique_lock<std::mutex> l(m_p->m_mutex);
+
     m_p->m_readerList.back()->prepare(table);
 }
 

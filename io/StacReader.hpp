@@ -79,6 +79,7 @@ namespace pdal
             Options setReaderOptions(const NL::json& readerArgs,
                                      const std::string& driver) const;
             void setForwards(StringMap& headers, StringMap& query);
+            std::string extractDriverFromItem(const NL::json& asset) const;
 
             bool prune(NL::json stacJson);
 

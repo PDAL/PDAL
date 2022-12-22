@@ -70,6 +70,7 @@ TEST(StageFactoryTest, extensionTest)
 
     EXPECT_EQ(StageFactory::inferReaderDriver("foo.ntf"), "readers.nitf");
     EXPECT_EQ(StageFactory::inferWriterDriver("foo.ntf"), "writers.nitf");
+    EXPECT_EQ(StageFactory::inferWriterDriver("junk.junk"), "");
 }
 
 } // namespace pdal
