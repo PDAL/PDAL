@@ -398,8 +398,7 @@ void StacReader::initializeItem(NL::json stacJson)
 
     std::string dataUrl = asset.at("href").get<std::string>();
 
-
-    std::string driver = m_factory.inferReaderDriver(dataUrl);
+    std::string driver = extractDriverFromItem(asset);
 
     log()->get(LogLevel::Debug) << "Using driver " << driver <<
         " for file " << dataUrl << std::endl;
@@ -419,17 +418,14 @@ void StacReader::initializeItem(NL::json stacJson)
     readerOptions.add("filename", dataUrl);
     reader->setOptions(readerOptions);
 
-    {
-        std::unique_lock<std::mutex> l(m_p->m_mutex);
-        if (m_p->m_readerList.size() > 0)
-            reader->setInput(*m_p->m_readerList.back());
 
-        m_p->m_readerList.push_back(std::unique_ptr<Stage>(reader));
-    }
+    std::unique_lock<std::mutex> l(m_p->m_mutex);
+    if (m_p->m_readerList.size() > 0)
+        reader->setInput(*m_p->m_readerList.back());
+
+    m_p->m_readerList.push_back(std::unique_ptr<Stage>(reader));
 
 }
-
-
 
 
 void StacReader::initializeCatalog(NL::json stacJson, bool isRoot)
@@ -899,14 +895,18 @@ QuickInfo StacReader::inspect()
 
 void StacReader::prepared(PointTableRef table)
 {
-    std::unique_lock<std::mutex> l(m_p->m_mutex);
-
-    m_p->m_readerList.back()->prepare(table);
+    if (m_p->m_readerList.size())
+        m_p->m_readerList.back()->prepare(table);
+    else
+        throw pdal_error("Reader list is empty in StacReader:prepared!");
 }
 
 void StacReader::ready(PointTableRef table)
 {
-    m_pvSet = m_p->m_readerList.back()->execute(table);
+    if (m_p->m_readerList.size())
+        m_pvSet = m_p->m_readerList.back()->execute(table);
+    else
+        throw pdal_error("Reader list is empty in StacReader:empty!");
 }
 
 void StacReader::done(PointTableRef)
