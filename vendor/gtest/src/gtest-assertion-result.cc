@@ -1,4 +1,4 @@
-// Copyright 2008, Google Inc.
+// Copyright 2005, Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -26,34 +26,52 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+// The Google C++ Testing and Mocking Framework (Google Test)
 //
-// Author: preston.a.jackson@gmail.com (Preston Jackson)
-//
-// Google Test - FrameworkSample
-// widget.h
-//
+// This file defines the AssertionResult type.
 
-// Widget is a very simple class used for demonstrating the use of gtest. It
-// simply stores two values a string and an integer, which are returned via
-// public accessors in multiple forms.
+#include "gtest/gtest-assertion-result.h"
 
-#import <string>
+#include <string>
+#include <utility>
 
-class Widget {
- public:
-  Widget(int number, const std::string& name);
-  ~Widget();
+#include "gtest/gtest-message.h"
 
-  // Public accessors to number data
-  float GetFloatValue() const;
-  int GetIntValue() const;
+namespace testing {
 
-  // Public accessors to the string data
-  std::string GetStringValue() const;
-  void GetCharPtrValue(char* buffer, size_t max_size) const;
+// AssertionResult constructors.
+// Used in EXPECT_TRUE/FALSE(assertion_result).
+AssertionResult::AssertionResult(const AssertionResult& other)
+    : success_(other.success_),
+      message_(other.message_.get() != nullptr
+                   ? new ::std::string(*other.message_)
+                   : static_cast< ::std::string*>(nullptr)) {}
 
- private:
-  // Data members
-  float number_;
-  std::string name_;
-};
+// Swaps two AssertionResults.
+void AssertionResult::swap(AssertionResult& other) {
+  using std::swap;
+  swap(success_, other.success_);
+  swap(message_, other.message_);
+}
+
+// Returns the assertion's negation. Used with EXPECT/ASSERT_FALSE.
+AssertionResult AssertionResult::operator!() const {
+  AssertionResult negation(!success_);
+  if (message_.get() != nullptr) negation << *message_;
+  return negation;
+}
+
+// Makes a successful assertion result.
+AssertionResult AssertionSuccess() { return AssertionResult(true); }
+
+// Makes a failed assertion result.
+AssertionResult AssertionFailure() { return AssertionResult(false); }
+
+// Makes a failed assertion result with the given failure message.
+// Deprecated; use AssertionFailure() << message.
+AssertionResult AssertionFailure(const Message& message) {
+  return AssertionFailure() << message;
+}
+
+}  // namespace testing

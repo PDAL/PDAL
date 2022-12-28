@@ -12,6 +12,8 @@ find_package(absl QUIET)
 set(FPHSA_NAME_MISMATCHED 0)
 
 if (absl_FOUND)
+    find_package(re2 REQUIRED)
+
     if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13.0")
         cmake_policy(SET CMP0079 NEW)
     endif()
@@ -19,9 +21,15 @@ if (absl_FOUND)
     target_compile_definitions(gtest_main PUBLIC GTEST_HAS_ABSL=1)
     target_link_libraries(gtest PRIVATE absl::algorithm
                                         absl::base
+                                        absl::flags
+                                        absl::flags_internal
+                                        absl::flags_usage
+                                        absl::flags_commandlineflag
+                                        absl::flags_parse
                                         absl::debugging
                                         absl::numeric
                                         absl::strings
                                         absl::utility
                                         absl::failure_signal_handler)
+    target_link_libraries(gtest PRIVATE re2::re2)
 endif()
