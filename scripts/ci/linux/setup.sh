@@ -4,7 +4,7 @@ echo "Configuring build type '$BUILD_TYPE'"
 mkdir build
 
 conda update -n base -c defaults conda
-mamba install -c conda-forge pkg-config cmake ninja compilers -y
+mamba install -c conda-forge abseil-cpp re2 pkg-config cmake ninja compilers -y
 
 if [ "$BUILD_TYPE" == "fixed" ]; then
 
