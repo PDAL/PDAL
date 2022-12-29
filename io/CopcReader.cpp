@@ -270,7 +270,7 @@ std::vector<char> CopcReader::fetch(uint64_t offset, int32_t size)
 void CopcReader::fetchHeader()
 {
     // Read the LAS header, COPC info VLR header and COPC VLR
-    int size = 549;
+    int size = 589;
     std::vector<char> data = fetch(0, size);
 
     const char *d = data.data();
@@ -289,6 +289,14 @@ void CopcReader::fetchHeader()
     // Read VLR payload into COPC struct.
     d += las::Vlr::HeaderSize;
     size -= las::Vlr::HeaderSize;
+
+    if (size != 160)
+    {
+        std::stringstream msg;
+        msg << "Fetched COPC VLR size is in correct. It should "
+            << "be 160 and it is " << size;
+        throwError(msg.str());
+    }
     m_p->copc_info.fill(d, size);
 
     m_p->rootNodeExtent = BOX3D(
