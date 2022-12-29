@@ -48,7 +48,7 @@ namespace pdal
 namespace copcwriter
 {
 
-PyramidManager::PyramidManager(const BaseInfo& b) : m_b(b), m_pool(10), m_totalPoints(0),
+PyramidManager::PyramidManager(const BaseInfo& b) : m_b(b), m_pool(b.opts.threadCount), m_totalPoints(0),
     m_output(b)
 {}
 

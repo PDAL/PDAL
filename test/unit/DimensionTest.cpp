@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2018, Hobu Inc. (info@hobu.co)
+* Copyright (c) 2022, Howard Butler (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -32,39 +32,32 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "BacktraceImpl.hpp"
+#include <pdal/pdal_test_main.hpp>
 
-#include <execinfo.h> // backtrace
-#include <dlfcn.h> // dladdr
+#include <nlohmann/json.hpp>
+
+#include <pdal/DimUtil.hpp>
+
+#include "Support.hpp"
 
 namespace pdal
 {
 
-Utils::BacktraceEntries Utils::backtraceImpl()
+TEST(DimensionTest, test_sanitization)
 {
-    Utils::BacktraceEntries entries;
-    const int MAX_STACK_SIZE(100);
-    void* buffer[MAX_STACK_SIZE];
+    std::string with_space("Pulse width");
+    EXPECT_EQ(Dimension::fixName(with_space), with_space);
 
-    std::size_t size(::backtrace(buffer, MAX_STACK_SIZE));
+    std::string with_a_number("DimensionName42");
+    EXPECT_EQ(Dimension::fixName(with_a_number), with_a_number);
 
-    for (size_t i = 0; i < size && i < MAX_STACK_SIZE; ++i)
-    {
-        BacktraceEntry entry;
+    std::string with_punctuation("with#punctuation.");
+    EXPECT_EQ(Dimension::fixName(with_punctuation), "with_punctuation_");
 
-        entry.addr = buffer[i];
+    std::string begin_with_a_number("42DimensionName42");
+    EXPECT_EQ(Dimension::fixName(begin_with_a_number), "_2DimensionName42");
 
-        Dl_info info;
-        if (dladdr(entry.addr, &info))
-        {
-            entry.symname = info.dli_sname;
-            entry.libname = info.dli_fname;
-            entry.offset = reinterpret_cast<char *>(entry.addr) -
-                reinterpret_cast<const char *>(info.dli_saddr);
-        }
-        entries.push_back(entry);
-    }
-    return entries;
 }
+
 
 } // namespace pdal
