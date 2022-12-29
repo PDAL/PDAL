@@ -212,8 +212,7 @@ namespace pdal
         PointTable table;
         writer.prepare(table);
 
-        if (pass) writer.execute(table);
-        else EXPECT_THROW(writer.execute(table), pdal_error);
+        writer.execute(table);
     }
 
     void testZeroFill() {
