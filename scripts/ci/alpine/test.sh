@@ -1,3 +1,4 @@
 #!/bin/bash
 
-ctest -V
+ctest -V --rerun-failed --output-on-failure
+

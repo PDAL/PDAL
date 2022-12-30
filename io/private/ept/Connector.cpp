@@ -41,12 +41,17 @@ namespace pdal
 namespace ept
 {
 
-Connector::Connector() : m_arbiter(new arbiter::Arbiter())
+Connector::Connector()
+    : m_arbiter(new arbiter::Arbiter()),
+      m_httpDriver(new arbiter::drivers::Http( m_arbiter->httpPool()))
 {}
 
 Connector::Connector(const StringMap& headers, const StringMap& query) :
-    m_arbiter(new arbiter::Arbiter), m_headers(headers), m_query(query)
-{}    
+    m_arbiter(new arbiter::Arbiter),
+    m_headers(headers),
+    m_query(query),
+    m_httpDriver(new arbiter::drivers::Http( m_arbiter->httpPool()))
+{}
 
 std::string Connector::get(const std::string& path) const
 {
@@ -107,6 +112,14 @@ void Connector::makeDir(const std::string& path) const
     if (m_arbiter->isLocal(path))
         arbiter::mkdirp(path);
 }
+
+
+StringMap Connector::headRequest(const std::string& path) const
+{
+    arbiter::http::Response r = m_httpDriver->internalHead(path);
+    return r.headers();
+}
+
 
 } // namespace ept
 } // namespace pdal

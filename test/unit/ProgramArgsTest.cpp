@@ -380,6 +380,18 @@ TEST(ProgramArgsTest, stringvector)
     EXPECT_EQ(m_baz, false);
 }
 
+TEST(ProgramArgsTest, regexvector)
+{
+    ProgramArgs args;
+    std::vector<RegEx> m_foo;
+    StringList s = { "--foo", "Yoyoyo\\w{0,10}", "--foo", "Bar|Baz"};
+    args.add("foo", "Regex Description", m_foo);
+    args.parse(s);
+    EXPECT_EQ(m_foo.size(), 2u);
+    EXPECT_EQ(m_foo[0], "Yoyoyo\\w{0,10}");
+    EXPECT_EQ(m_foo[1], "Bar|Baz");
+}
+
 TEST(ProgramArgsTest, vectorfail)
 {
     ProgramArgs args;

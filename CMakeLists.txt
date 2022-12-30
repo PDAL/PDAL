@@ -135,6 +135,7 @@ include(${PDAL_CMAKE_DIR}/libxml2.cmake)
 include(${PDAL_CMAKE_DIR}/dimension.cmake)
 include(${PDAL_CMAKE_DIR}/arbiter.cmake)
 include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
+include(${PDAL_CMAKE_DIR}/schema-validator.cmake)
 include(${PDAL_CMAKE_DIR}/lazperf.cmake)
 include(${PDAL_CMAKE_DIR}/openssl.cmake) # Optional
 include(${PDAL_CMAKE_DIR}/utfcpp.cmake)
@@ -179,6 +180,7 @@ if (WITH_TESTS)
 endif()
 add_subdirectory(dimbuilder)
 add_subdirectory(vendor/arbiter)
+add_subdirectory(vendor/schema-validator)
 add_subdirectory(vendor/kazhdan)
 add_subdirectory(vendor/lazperf)
 add_subdirectory(vendor/utfcpp)
@@ -277,6 +279,7 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${PDAL_REEXPORT}
         ${PDAL_UTIL_LIB_NAME}
         ${PDAL_ARBITER_LIB_NAME}
+        ${JSON_SCHEMA_LIB_NAME}
         ${PDAL_KAZHDAN_LIB_NAME}
         ${PDAL_LAZPERF_LIB_NAME}
         ${UTFCPP_LIB_NAME}

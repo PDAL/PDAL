@@ -48,6 +48,7 @@ class Connector
     std::unique_ptr<arbiter::Arbiter> m_arbiter;
     StringMap m_headers;
     StringMap m_query;
+    std::unique_ptr<arbiter::drivers::Http> m_httpDriver;
 
 public:
     Connector();
@@ -60,6 +61,7 @@ public:
     void put(const std::string& path, const std::vector<char>& data) const;
     void put(const std::string& path, const std::string& data) const;
     void makeDir(const std::string& path) const;
+    StringMap headRequest(const std::string& path) const;
 };
 
 } // namespace ept
