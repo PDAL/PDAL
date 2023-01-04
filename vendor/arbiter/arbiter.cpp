@@ -4297,7 +4297,11 @@ int Curl::perform()
     curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &httpCode);
     curl_easy_reset(m_curl);
 
-    if (code != CURLE_OK) httpCode = 500;
+    if (code != CURLE_OK)
+    {
+        std::cerr << "Curl failure: " << curl_easy_strerror(code) << std::endl;
+        httpCode = 450;
+    }
 
     return httpCode;
 #else
@@ -4622,7 +4626,8 @@ Response Resource::exec(std::function<Response()> f)
     {
         if (tries)
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(tries * 500));
+            std::this_thread::sleep_for(
+                std::chrono::milliseconds((int)std::pow(2, tries) * 500));
         }
 
         res = f();

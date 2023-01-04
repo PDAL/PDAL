@@ -160,9 +160,6 @@ private:
     std::vector<std::thread> m_threads;
     std::queue<std::function<void()>> m_tasks;
 
-    std::vector<std::string> m_errors;
-    std::mutex m_errorMutex;
-
     std::size_t m_outstanding = 0;
     bool m_running = false;
 
