@@ -4300,7 +4300,7 @@ int Curl::perform()
     if (code != CURLE_OK)
     {
         std::cerr << "Curl failure: " << curl_easy_strerror(code) << std::endl;
-        httpCode = 450;
+        httpCode = 550;
     }
 
     return httpCode;
