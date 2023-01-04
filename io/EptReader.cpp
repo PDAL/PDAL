@@ -829,6 +829,11 @@ void EptReader::process(PointViewPtr dstView, const ept::TileContents& tile,
     }
 }
 
+void EptReader::done(PointTableRef)
+{
+    m_p->connector.reset();
+}
+
 
 bool EptReader::processOne(PointRef& point)
 {
