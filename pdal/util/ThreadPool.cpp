@@ -74,33 +74,14 @@ void ThreadPool::work()
 
             std::string err;
 
-            // task();
+            task();
 
-            auto release = [this, &lock]()
-            {
-                lock.lock();
-                --m_outstanding;
-                lock.unlock();
+            lock.lock();
+            --m_outstanding;
+            lock.unlock();
 
-                // Notify await(), which may be waiting for a running task.
-                m_produceCv.notify_all();
-            };
-
-            try
-            {
-                task();
-                release();
-            }
-            catch (std::exception& e)
-            {
-                release();
-                throw e;
-            }
-            catch (...)
-            {
-                release();
-                throw std::runtime_error("Unknown error");
-            }
+            // Notify await(), which may be waiting for a running task.
+            m_produceCv.notify_all();
         }
         else if (!m_running)
         {
