@@ -4296,7 +4296,7 @@ int Curl::perform()
 
     // https://curl.se/libcurl/c/CURLOPT_ERRORBUFFER.html
     char errbuf[CURL_ERROR_SIZE];
-    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
+    curl_easy_setopt(m_curl, CURLOPT_ERRORBUFFER, errbuf);
     errbuf[0] = 0;
 
     const auto code(curl_easy_perform(m_curl));
