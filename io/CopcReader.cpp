@@ -111,7 +111,7 @@ public:
     std::unique_ptr<ThreadPool> pool;
     std::unique_ptr<copc::Tile> currentTile;
 
-    copc::Connector connector;
+    std::unique_ptr<copc::Connector> connector;
     std::queue<copc::Tile> contents;
     copc::Hierarchy hierarchy;
     las::LoaderDriver loader;
@@ -213,7 +213,7 @@ void CopcReader::initialize(PointTableRef table)
     StringMap headers;
     StringMap query;
     setForwards(headers, query);
-    m_p->connector =  copc::Connector(m_filename, headers, query);
+    m_p->connector.reset(new copc::Connector(m_filename, headers, query));
 
     MetadataNode forward = table.privateMetadata("lasforward");
     MetadataNode m = getMetadata();
@@ -263,7 +263,7 @@ void CopcReader::initialize(PointTableRef table)
 
 std::vector<char> CopcReader::fetch(uint64_t offset, int32_t size)
 {
-    return m_p->connector.getBinary(offset, size);
+    return m_p->connector->getBinary(offset, size);
 }
 
 
@@ -657,7 +657,7 @@ void CopcReader::load(const copc::Entry& entry)
     m_p->pool->add([this, entry]()
         {
             // Read the tile.
-            copc::Tile tile(entry, m_p->connector, m_p->header);
+            copc::Tile tile(entry, *m_p->connector, m_p->header);
             tile.read();
 
             // Put the tile on the output queue.
@@ -840,6 +840,7 @@ void CopcReader::done(PointTableRef)
     }
     m_p->consumedCv.notify_all();
     m_p->pool->stop();
+    m_p->connector.reset();
 }
 
 } // namespace pdal
