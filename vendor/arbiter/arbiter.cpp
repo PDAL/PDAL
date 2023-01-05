@@ -4005,7 +4005,7 @@ std::vector<std::string> Dropbox::glob(std::string path, bool verbose) const
 #include <cstring>
 #include <ios>
 #include <iostream>
-#include <stdio>
+#include <cstdio>
 
 #ifndef ARBITER_IS_AMALGAMATION
 #include <arbiter/util/curl.hpp>
