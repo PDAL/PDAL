@@ -4005,6 +4005,7 @@ std::vector<std::string> Dropbox::glob(std::string path, bool verbose) const
 #include <cstring>
 #include <ios>
 #include <iostream>
+#include <stdio>
 
 #ifndef ARBITER_IS_AMALGAMATION
 #include <arbiter/util/curl.hpp>
@@ -4293,12 +4294,22 @@ int Curl::perform()
 #ifdef ARBITER_CURL
     long httpCode(0);
 
+    // https://curl.se/libcurl/c/CURLOPT_ERRORBUFFER.html
+    char errbuf[CURL_ERROR_SIZE];
+    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
+    errbuf[0] = 0;
+
     const auto code(curl_easy_perform(m_curl));
     curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &httpCode);
     curl_easy_reset(m_curl);
 
     if (code != CURLE_OK)
     {
+        if (strlen(errbuf))
+        {
+            fprintf(stderr, "Curl details: %s%s", errbuf,
+                ((errbuf[len - 1] != '\n') ? "\n" : ""));
+        }
         std::cerr << "Curl failure: " << curl_easy_strerror(code) << std::endl;
         httpCode = 550;
     }
