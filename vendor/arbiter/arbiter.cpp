@@ -4305,7 +4305,8 @@ int Curl::perform()
 
     if (code != CURLE_OK)
     {
-        if (strlen(errbuf))
+        std::size_t len = strlen(errbuf);
+        if (len)
         {
             fprintf(stderr, "Curl details: %s%s", errbuf,
                 ((errbuf[len - 1] != '\n') ? "\n" : ""));
