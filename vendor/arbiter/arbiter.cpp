@@ -4246,10 +4246,8 @@ void Curl::init(
     curl_easy_setopt(m_curl, CURLOPT_URL, path.c_str());
 
     curl_version_info_data* versioninfo = curl_version_info(CURLVERSION_NOW);
-    std::cout << "ASYNCHDNS? " << (!(versioninfo->features & CURL_VERSION_ASYNCHDNS)) << std::endl;
     if (!(versioninfo->features & CURL_VERSION_ASYNCHDNS))
     {
-        std::cout << "Setting NOSIGNAL option" << std::endl;
         curl_easy_setopt(m_curl, CURLOPT_NOSIGNAL, 1L);
     }
 
