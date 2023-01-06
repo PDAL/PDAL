@@ -57,8 +57,6 @@ jobs:
       working-directory: ./build
 
     - name: Test
-      env:
-        VERBOSE: 1
       run: |
           source ../scripts/ci/linux/test.sh --rerun-failed --output-on-failure
       working-directory: ./build

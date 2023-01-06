@@ -4245,8 +4245,13 @@ void Curl::init(
     const std::string path(rawPath + buildQueryString(query));
     curl_easy_setopt(m_curl, CURLOPT_URL, path.c_str());
 
-    // Needed for multithreaded Curl usage.
-    // curl_easy_setopt(m_curl, CURLOPT_NOSIGNAL, 1L);
+    curl_version_info_data* versioninfo = curl_version_info(CURLVERSION_NOW);
+    std::cout << "ASYNCHDNS? " << (!(versioninfo->features & CURL_VERSION_ASYNCHDNS)) << std::endl;
+    if (!(versioninfo->features & CURL_VERSION_ASYNCHDNS))
+    {
+        std::cout << "Setting NOSIGNAL option" << std::endl;
+        curl_easy_setopt(m_curl, CURLOPT_NOSIGNAL, 1L);
+    }
 
     // Substantially faster DNS lookups without IPv6.
     curl_easy_setopt(m_curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
