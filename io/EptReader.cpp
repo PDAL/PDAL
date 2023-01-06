@@ -94,6 +94,7 @@ public:
     NL::json m_query;
     NL::json m_headers;
     NL::json m_ogr;
+    bool m_ignoreUnreadable = false;
 };
 
 struct EptReader::Private
@@ -135,6 +136,8 @@ void EptReader::addArgs(ProgramArgs& args)
     args.add("header", "Header fields to forward with HTTP requests", m_args->m_headers);
     args.add("query", "Query parameters to forward with HTTP requests", m_args->m_query);
     args.add("ogr", "OGR filter geometries", m_args->m_ogr);
+    args.add("ignore_unreadable", "Ignore errors for missing point data nodes",
+        m_args->m_ignoreUnreadable, false);
 }
 
 
@@ -454,13 +457,35 @@ void EptReader::load(const ept::Overlap& overlap)
         {
             // Read the tile.
             ept::TileContents tile(overlap, *m_p->info, *m_p->connector, m_p->addons);
-            tile.read();
 
-            // Put the tile on the output queue.
-            std::unique_lock<std::mutex> l(m_p->mutex);
-            m_p->contents.push(std::move(tile));
-            l.unlock();
-            m_p->contentsCv.notify_one();
+            try
+            {
+                tile.read();
+
+                // Put the tile on the output queue.
+                std::unique_lock<std::mutex> l(m_p->mutex);
+                m_p->contents.push(std::move(tile));
+                l.unlock();
+                m_p->contentsCv.notify_one();
+            }
+            catch (std::exception& e)
+            {
+                if (m_args->m_ignoreUnreadable)
+                {
+                    log()->get(LogLevel::Warning) << "Failed to read " <<
+                        tile.key().toString() << ": " << e.what() << std::endl;
+                }
+                else
+                {
+                    log()->get(LogLevel::Error) << "Failed to read " <<
+                        tile.key().toString() << ": " << e.what() << std::endl;
+                    log()->get(LogLevel::Error) <<
+                        "Use readers.ept.ignore_unreadable to ignore this error" <<
+                        std::endl;
+                    throw e;
+                }
+
+            }
         }
     );
 }

@@ -79,6 +79,8 @@ namespace
             Support::datapath("ept/ellipsoid-binary/ept.json"));
     const std::string ellipsoidEptZstandardPath(
             Support::datapath("ept/ellipsoid-zstandard/ept.json"));
+    const std::string ellipsoidEptNoPointsPath(
+            Support::datapath("ept/ellipsoid-nopoints/ept.json"));
 
     const point_count_t ellipsoidNumPoints(100000);
     const BOX3D ellipsoidBoundsConforming(-8242746, 4966506, -50,
@@ -203,6 +205,48 @@ TEST(EptReaderTest, fullReadBinary)
 
     EXPECT_EQ(np, ellipsoidNumPoints);
 }
+
+TEST(EptReaderTest, unreadableDataFailure)
+{
+    Options options;
+    options.add("filename", ellipsoidEptNoPointsPath);
+
+    PointTable table;
+
+    EptReader reader;
+    reader.setOptions(options);
+    reader.prepare(table);
+
+    // This dataset is missing its root point data node, so we should fail here.
+    EXPECT_THROW(reader.execute(table), pdal_error);
+}
+
+
+TEST(EptReaderTest, unreadableDataIgnored)
+{
+    Options options;
+    options.add("filename", ellipsoidEptNoPointsPath);
+    options.add("ignore_unreadable", true);
+
+    PointTable table;
+
+    EptReader reader;
+    reader.setOptions(options);
+    reader.prepare(table);
+    reader.execute(table);
+
+    const auto set(reader.execute(table));
+    std::size_t np = 0;
+    for (const auto& view : set)
+    {
+        np += view->size();
+    }
+
+    // This is missing its root point data node (which is its only node), so we
+    // should simply get no points here.
+    EXPECT_EQ(np, 0);
+}
+
 
 TEST(EptReaderTest, fullReadZstandard)
 {

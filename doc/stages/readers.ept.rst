@@ -167,3 +167,6 @@ header
 query
     HTTP query parameters to forward for remote EPT endpoints, specified as a
     JSON object of key/value string pairs.
+
+ignore_unreadable
+    If set to true, ignore errors for missing or unreadable point data nodes.
