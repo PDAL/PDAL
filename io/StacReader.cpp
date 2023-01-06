@@ -345,9 +345,9 @@ std::string StacReader::extractDriverFromItem(const NL::json& asset) const
 
     std::string contentType;
 
-    if (asset.contains("media_type"))
+    if (asset.contains("type"))
     {
-        contentType = asset.at("media_type").get<std::string>();
+        contentType = asset.at("type").get<std::string>();
         for(const auto& ct: contentTypes)
             if (Utils::iequals(ct.first, contentType))
                 return ct.second;
