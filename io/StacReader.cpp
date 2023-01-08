@@ -52,6 +52,25 @@ namespace pdal
 {
 
 
+namespace
+{
+
+std::mutex mutex;
+std::unique_ptr<arbiter::Arbiter> arbiter;
+
+void schemaFetch(const nlohmann::json_uri& json_uri, nlohmann::json& json)
+{
+    {
+        std::lock_guard<std::mutex> lock(mutex);
+        if (!arbiter) arbiter.reset(new arbiter::Arbiter());
+    }
+
+    std::string jsonStr = arbiter->get(json_uri.url());
+    json = nlohmann::json::parse(jsonStr);
+}
+
+}
+
 
 struct StacReader::Private
 {
@@ -132,14 +151,6 @@ void StacReader::addArgs(ProgramArgs& args)
 
 }
 
-
-void schemaFetch(const nlohmann::json_uri& json_uri, nlohmann::json& json)
-{
-    std::unique_ptr<arbiter::Arbiter> fetcher;
-    fetcher.reset(new arbiter::Arbiter());
-    std::string jsonStr = fetcher->get(json_uri.url());
-    json = nlohmann::json::parse(jsonStr);
-}
 
 void StacReader::validateSchema(NL::json stacJson)
 {

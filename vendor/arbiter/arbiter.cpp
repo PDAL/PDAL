@@ -4005,6 +4005,7 @@ std::vector<std::string> Dropbox::glob(std::string path, bool verbose) const
 #include <cstring>
 #include <ios>
 #include <iostream>
+#include <cstdio>
 
 #ifndef ARBITER_IS_AMALGAMATION
 #include <arbiter/util/curl.hpp>
@@ -4244,8 +4245,11 @@ void Curl::init(
     const std::string path(rawPath + buildQueryString(query));
     curl_easy_setopt(m_curl, CURLOPT_URL, path.c_str());
 
-    // Needed for multithreaded Curl usage.
-    curl_easy_setopt(m_curl, CURLOPT_NOSIGNAL, 1L);
+    curl_version_info_data* versioninfo = curl_version_info(CURLVERSION_NOW);
+    if (!(versioninfo->features & CURL_VERSION_ASYNCHDNS))
+    {
+        curl_easy_setopt(m_curl, CURLOPT_NOSIGNAL, 1L);
+    }
 
     // Substantially faster DNS lookups without IPv6.
     curl_easy_setopt(m_curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
@@ -4293,12 +4297,23 @@ int Curl::perform()
 #ifdef ARBITER_CURL
     long httpCode(0);
 
+    // https://curl.se/libcurl/c/CURLOPT_ERRORBUFFER.html
+    char errbuf[CURL_ERROR_SIZE];
+    curl_easy_setopt(m_curl, CURLOPT_ERRORBUFFER, errbuf);
+    errbuf[0] = 0;
+
     const auto code(curl_easy_perform(m_curl));
     curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &httpCode);
     curl_easy_reset(m_curl);
 
     if (code != CURLE_OK)
     {
+        std::size_t len = strlen(errbuf);
+        if (len)
+        {
+            fprintf(stderr, "Curl details: %s%s", errbuf,
+                ((errbuf[len - 1] != '\n') ? "\n" : ""));
+        }
         std::cerr << "Curl failure: " << curl_easy_strerror(code) << std::endl;
         httpCode = 550;
     }
