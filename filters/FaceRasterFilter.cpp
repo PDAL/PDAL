@@ -65,6 +65,7 @@ void FaceRasterFilter::addArgs(ProgramArgs& args)
     m_limits->addArgs(args);
     args.add("mesh", "Mesh name", m_meshName);
     args.add("nodata", "No data value", m_noData, std::numeric_limits<double>::quiet_NaN());
+    args.add("edge_length", "Triangle edge length", m_limits->edgeLength);
 }
 
 void FaceRasterFilter::prepared(PointTableRef)
