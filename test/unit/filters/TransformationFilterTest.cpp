@@ -257,6 +257,25 @@ TEST_F(TransformationFilterTest, SrsReset)
     EXPECT_EQ(view->spatialReference(), "EPSG:3857");
 }
 
+TEST_F(TransformationFilterTest, StreamsTest)
+{
+    TransformationFilter::Transform n { { 1, 0, 0, 0,
+                                          0, 1, 0, 0,
+                                          0, 0, 1, 0,
+                                          0, 0, 0, 1 } };
+
+    Utils::StringStreamClassicLocale oss;
+    oss << n;
+
+    Utils::StringStreamClassicLocale iss(oss.str());
+    TransformationFilter::Transform m;
+    iss >> m;
+
+    check(m);
+
+}
+
+
 TEST(TransformationMatrix, init_file_oneline)
 {
 
