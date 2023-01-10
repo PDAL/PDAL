@@ -818,7 +818,7 @@ point_count_t EptReader::read(PointViewPtr view, point_count_t count)
                 numRead += tile.size();
                 m_tileCount--;
             }
-            else
+            else if (m_tileCount)
                 m_p->contentsCv.wait(l);
         } while (m_tileCount && numRead <= count);
     }
