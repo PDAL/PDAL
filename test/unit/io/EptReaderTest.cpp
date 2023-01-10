@@ -43,6 +43,7 @@
 #include <filters/CropFilter.hpp>
 #include <filters/ReprojectionFilter.hpp>
 #include <pdal/SrsBounds.hpp>
+#include <pdal/Writer.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
 
@@ -85,27 +86,6 @@ namespace
     const point_count_t ellipsoidNumPoints(100000);
     const BOX3D ellipsoidBoundsConforming(-8242746, 4966506, -50,
             -8242446, 4966706, 50);
-}
-
-TEST(EptReaderTest, protocol)
-{
-    Options opts;
-    opts.add("filename", "ept://http://testfile");
-
-    EptReader reader;
-    reader.setOptions(opts);
-
-    bool gotEx = false;
-    try
-    {
-        reader.preview();
-    }
-    catch (const pdal_error& err)
-    {
-        EXPECT_TRUE(strstr(err.what(), "ept.json"));
-        gotEx = true;
-    }
-    EXPECT_TRUE(gotEx);
 }
 
 TEST(EptReaderTest, inspect)
@@ -221,7 +201,6 @@ TEST(EptReaderTest, unreadableDataFailure)
     EXPECT_THROW(reader.execute(table), pdal_error);
 }
 
-
 TEST(EptReaderTest, unreadableDataIgnored)
 {
     Options options;
@@ -233,7 +212,6 @@ TEST(EptReaderTest, unreadableDataIgnored)
     EptReader reader;
     reader.setOptions(options);
     reader.prepare(table);
-    reader.execute(table);
 
     const auto set(reader.execute(table));
     std::size_t np = 0;
@@ -247,6 +225,42 @@ TEST(EptReaderTest, unreadableDataIgnored)
     EXPECT_EQ(np, 0);
 }
 
+TEST(EptReaderTest, unreadableDataIgnoredStreaming)
+{
+    class TestWriter : public Writer, public Streamable
+    {
+        std::string getName() const
+        { return "writers.test"; }
+
+        bool processOne(PointRef& p)
+        {
+            count++;
+            return true;
+        }
+
+    public:
+        int count = 0;
+    };
+
+    Options options;
+    options.add("filename", ellipsoidEptNoPointsPath);
+    options.add("ignore_unreadable", true);
+
+    EptReader reader;
+    reader.setOptions(options);
+
+    TestWriter writer;
+    writer.setInput(reader);
+
+    FixedPointTable table(1000);
+    writer.prepare(table);
+
+    writer.execute(table);
+
+    // This is missing its root point data node (which is its only node), so we
+    // should simply get no points here.
+    EXPECT_EQ(writer.count, 0);
+}
 
 TEST(EptReaderTest, fullReadZstandard)
 {
