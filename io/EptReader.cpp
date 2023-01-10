@@ -94,6 +94,7 @@ public:
     NL::json m_query;
     NL::json m_headers;
     NL::json m_ogr;
+    bool m_ignoreUnreadable = false;
 };
 
 struct EptReader::Private
@@ -135,6 +136,8 @@ void EptReader::addArgs(ProgramArgs& args)
     args.add("header", "Header fields to forward with HTTP requests", m_args->m_headers);
     args.add("query", "Query parameters to forward with HTTP requests", m_args->m_query);
     args.add("ogr", "OGR filter geometries", m_args->m_ogr);
+    args.add("ignore_unreadable", "Ignore errors for missing point data nodes",
+        m_args->m_ignoreUnreadable);
 }
 
 
@@ -454,12 +457,32 @@ void EptReader::load(const ept::Overlap& overlap)
         {
             // Read the tile.
             ept::TileContents tile(overlap, *m_p->info, *m_p->connector, m_p->addons);
+
             tile.read();
 
-            // Put the tile on the output queue.
-            std::unique_lock<std::mutex> l(m_p->mutex);
-            m_p->contents.push(std::move(tile));
-            l.unlock();
+            if (tile.error().size())
+            {
+                log()->get(LogLevel::Warning) << "Failed to read " <<
+                    tile.key().toString() << ": " << tile.error() << std::endl;
+            }
+
+            if (tile.error().empty() || !m_args->m_ignoreUnreadable)
+            {
+                // Put the tile on the output queue.  Note that if the tile has
+                // an error and ignoreUnreadable isn't set, this will be fatal
+                // but that will occur downstream outside of this pool thread.
+                std::unique_lock<std::mutex> l(m_p->mutex);
+                m_p->contents.push(std::move(tile));
+                l.unlock();
+            }
+            else
+            {
+                // If the tile has an error, and the ignoreUnreadable option is
+                // set, then we just skip this tile.
+                std::lock_guard<std::mutex> l(m_p->mutex);
+                --m_tileCount;
+            }
+
             m_p->contentsCv.notify_one();
         }
     );
@@ -675,7 +698,11 @@ void EptReader::checkTile(const ept::TileContents& tile)
     if (tile.error().size())
     {
         m_p->pool->stop();
-        throwError("Error reading tile: " + tile.error());
+        log()->get(LogLevel::Warning) <<
+            "Use readers.ept.ignore_unreadable to ignore this error" <<
+            std::endl;
+        throwError("Error reading tile " + tile.key().toString() + ": " +
+            tile.error());
     }
 }
 
@@ -791,7 +818,7 @@ point_count_t EptReader::read(PointViewPtr view, point_count_t count)
                 numRead += tile.size();
                 m_tileCount--;
             }
-            else
+            else if (m_tileCount)
                 m_p->contentsCv.wait(l);
         } while (m_tileCount && numRead <= count);
     }
@@ -829,6 +856,11 @@ void EptReader::process(PointViewPtr dstView, const ept::TileContents& tile,
     }
 }
 
+void EptReader::done(PointTableRef)
+{
+    m_p->connector.reset();
+}
+
 
 bool EptReader::processOne(PointRef& point)
 {
@@ -849,6 +881,8 @@ top:
                 m_p->contents.pop();
                 break;
             }
+            else if (!m_tileCount)
+                return false;
             else
                 m_p->contentsCv.wait(l);
         } while (true);

@@ -123,7 +123,7 @@ TEST(HexbinFilterTest, issue_2507)
     grid.findShapes();
     grid.findParentPaths();
 
-    std::ostringstream oss;
+    pdal::Utils::OStringStreamClassicLocale oss;
     grid.toWKT(oss);
     std::string s(oss.str());
 

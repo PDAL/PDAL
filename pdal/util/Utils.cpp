@@ -55,6 +55,8 @@
 #include <stdio.h>
 #include <iomanip>
 
+#include <utf8.h>
+
 #include "private/BacktraceImpl.hpp"
 
 typedef std::vector<std::string> StringList;
@@ -397,7 +399,11 @@ std::string Utils::replaceAll(std::string result,
 
 std::string Utils::escapeJSON(const std::string &str)
 {
-    std::string s(str);
+
+    // All JSON is UTF-8. This will wipe off any non-utf-8
+    // characters
+    std::string s;
+    utf8::replace_invalid(str.begin(), str.end(), std::back_inserter(s));
 
     std::array<std::string, 35> replacements {
       { "\\u0000", "\\u0001", "\\u0002", "\\u0003", "\\u0004",
@@ -549,13 +555,9 @@ int Utils::screenWidth()
            throw std::runtime_error("Inaccessible memory access in ioctl");
        else if (errno  == EINVAL)
            throw std::runtime_error("Request invalid in gathering screenWidth");
-       else if (errno == ENOTTY)
-       {
+       else
            // we are not a tty, so just return 80 *shrug*
            return 80;
-       }
-       else
-           throw std::runtime_error("Unknown error code from ioctl!");
    }
 
 #endif

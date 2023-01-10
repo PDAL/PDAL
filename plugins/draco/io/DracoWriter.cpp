@@ -183,7 +183,7 @@ void DracoWriter::parseDimensions(BasePointTable &table)
         log()->get(LogLevel::Info) << "Key: " << dimString << ", Value: "
             << dataType << std::endl;
         const auto it = dimMap.find(dim);
-        Dimension::Type pdalType = Dimension::type(dataType);
+        Dimension::Type pdalType = layout->dimType(dim);
         if (it != dimMap.end())
         {
             //get draco type associated with the current dimension in loop

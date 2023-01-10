@@ -114,6 +114,8 @@ void CopcWriter::addArgs(ProgramArgs& args)
     args.add("pipeline", "Emit a JSON-represetation of the pipeline as a VLR",
         b->opts.emitPipeline);
     args.add("fixed_seed", "Fix the random seed", b->opts.fixedSeed).setHidden();
+    args.add("a_srs", "Spatial reference to use to write output", b->opts.aSrs);
+    args.add("threads", "", b->opts.threadCount).setHidden();
 }
 
 void CopcWriter::fillForwardList()
@@ -241,9 +243,19 @@ void CopcWriter::prepared(PointTableRef table)
     b->numExtraBytes = 0;
     for (Dimension::Id id : edIds)
     {
-        b->extraDims.emplace_back(layout->dimName(id), layout->dimType(id),
-            las::baseCount(b->pointFormatId) + b->numExtraBytes);
-        b->numExtraBytes += Dimension::size(layout->dimType(id));
+        std::string name (layout->dimName(id));
+        Dimension::Type type (layout->dimType(id));
+        DimType dimType = layout->findDimType(name);
+        Dimension::Detail const* detail = layout->dimDetail(id);
+        size_t size = detail->size();
+        b->extraDims.emplace_back(name, 
+                                  type, 
+                                  id,
+                                  size,
+                                  las::baseCount(b->pointFormatId) + b->numExtraBytes, 
+                                  dimType.m_xform.m_scale.m_val, 
+                                  dimType.m_xform.m_offset.m_val);
+        b->numExtraBytes += size;
     }
 }
 
@@ -354,7 +366,10 @@ void CopcWriter::write(const PointViewPtr v)
 
     b->bounds = grid.processingBounds();
     b->trueBounds = grid.conformingBounds();
-    b->srs = v->spatialReference();
+    if (!b->opts.aSrs.empty())
+       b->srs = b->opts.aSrs;
+    else
+       b->srs = v->spatialReference();
 
     // Set the input string into scaling.
     b->scaling.m_xXform.m_scale.set(b->opts.scaleX.val());

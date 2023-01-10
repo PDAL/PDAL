@@ -485,7 +485,7 @@ std::unique_ptr<std::string> Driver::tryGet(const std::string path) const
 std::vector<char> Driver::getBinary(std::string path) const
 {
     std::vector<char> data;
-    if (!get(path, data)) throw ArbiterError("Could not read file " + path);
+    if (!get(path, data)) throw ArbiterError("Could not read file " + m_protocol + "://" + path);
     return data;
 }
 
@@ -4005,6 +4005,7 @@ std::vector<std::string> Dropbox::glob(std::string path, bool verbose) const
 #include <cstring>
 #include <ios>
 #include <iostream>
+#include <cstdio>
 
 #ifndef ARBITER_IS_AMALGAMATION
 #include <arbiter/util/curl.hpp>
@@ -4244,8 +4245,11 @@ void Curl::init(
     const std::string path(rawPath + buildQueryString(query));
     curl_easy_setopt(m_curl, CURLOPT_URL, path.c_str());
 
-    // Needed for multithreaded Curl usage.
-    curl_easy_setopt(m_curl, CURLOPT_NOSIGNAL, 1L);
+    curl_version_info_data* versioninfo = curl_version_info(CURLVERSION_NOW);
+    if (!(versioninfo->features & CURL_VERSION_ASYNCHDNS))
+    {
+        curl_easy_setopt(m_curl, CURLOPT_NOSIGNAL, 1L);
+    }
 
     // Substantially faster DNS lookups without IPv6.
     curl_easy_setopt(m_curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
@@ -4293,11 +4297,26 @@ int Curl::perform()
 #ifdef ARBITER_CURL
     long httpCode(0);
 
+    // https://curl.se/libcurl/c/CURLOPT_ERRORBUFFER.html
+    char errbuf[CURL_ERROR_SIZE];
+    curl_easy_setopt(m_curl, CURLOPT_ERRORBUFFER, errbuf);
+    errbuf[0] = 0;
+
     const auto code(curl_easy_perform(m_curl));
     curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &httpCode);
     curl_easy_reset(m_curl);
 
-    if (code != CURLE_OK) httpCode = 500;
+    if (code != CURLE_OK)
+    {
+        std::size_t len = strlen(errbuf);
+        if (len)
+        {
+            fprintf(stderr, "Curl details: %s%s", errbuf,
+                ((errbuf[len - 1] != '\n') ? "\n" : ""));
+        }
+        std::cerr << "Curl failure: " << curl_easy_strerror(code) << std::endl;
+        httpCode = 550;
+    }
 
     return httpCode;
 #else
@@ -4492,12 +4511,14 @@ Response Curl::post(
 #include <curl/curl.h>
 #endif
 
+#include <chrono>
 #include <cctype>
 #include <iomanip>
 #include <iostream>
 #include <numeric>
 #include <set>
 #include <sstream>
+#include <thread>
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
@@ -4618,6 +4639,12 @@ Response Resource::exec(std::function<Response()> f)
 
     do
     {
+        if (tries)
+        {
+            std::this_thread::sleep_for(
+                std::chrono::milliseconds((int)std::pow(2, tries) * 500));
+        }
+
         res = f();
     }
     while (res.serverError() && tries++ < m_retry);
@@ -5274,7 +5301,7 @@ namespace
      //
      // Return the position of chr within base64_encode()
      //
-    
+
         if      (chr >= 'A' && chr <= 'Z') return chr - 'A';
         else if (chr >= 'a' && chr <= 'z') return chr - 'a' + ('Z' - 'A')               + 1;
         else if (chr >= '0' && chr <= '9') return chr - '0' + ('Z' - 'A') + ('z' - 'a') + 2;

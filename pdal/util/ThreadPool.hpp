@@ -55,7 +55,7 @@ public:
     PDAL_DLL ThreadPool(std::size_t numThreads, int64_t queueSize = -1,
             bool verbose = true) :
         m_queueSize(queueSize),
-        m_numThreads(std::max<std::size_t>(numThreads, 1)), m_verbose(verbose)
+        m_numThreads(std::max<std::size_t>(numThreads, 1))
     {
         assert(m_queueSize != 0);
         go();
@@ -118,10 +118,6 @@ public:
         go();
     }
 
-    // Not thread-safe, pool should be joined before calling.
-    const std::vector<std::string>& errors() const
-    { return m_errors; }
-
     // Add a threaded task, blocking until a thread is available.  If join() is
     // called, add() may not be called again until go() is called and completes.
     PDAL_DLL void add(std::function<void()> task)
@@ -156,12 +152,8 @@ private:
 
     int64_t m_queueSize;
     std::size_t m_numThreads;
-    bool m_verbose;
     std::vector<std::thread> m_threads;
     std::queue<std::function<void()>> m_tasks;
-
-    std::vector<std::string> m_errors;
-    std::mutex m_errorMutex;
 
     std::size_t m_outstanding = 0;
     bool m_running = false;

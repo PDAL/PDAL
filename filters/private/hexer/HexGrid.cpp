@@ -372,24 +372,21 @@ void HexGrid::cleanPossibleRoot(Segment s, Path *p)
 
 void HexGrid::toWKT(std::ostream& out) const
 {
-    pdal::Utils::StringStreamClassicLocale ss;
-
-    auto writePath = [this, &ss](size_t pathNum)
+    auto writePath = [this, &out](size_t pathNum)
     {
-       rootPaths()[pathNum]->toWKT(ss);
+       rootPaths()[pathNum]->toWKT(out);
     };
 
-    ss << "MULTIPOLYGON (";
+    out << "MULTIPOLYGON (";
 
     if (rootPaths().size())
         writePath(0);
     for (size_t pi = 1; pi < rootPaths().size(); ++pi)
     {
-        ss << ",";
+        out << ",";
         writePath(pi);
     }
-    ss << ")";
-    out << ss.str();
+    out << ")";
 }
 
 size_t HexGrid::densePointCount() const

@@ -16,7 +16,7 @@ incremental loading and spatial filtering.
   input LAS file to an output LAS file will frequently want to use the same
   scale factors and offsets in the output file as existed in the input
   file in order to
-  maintain the precision of the data.  Use the `forward` option of 
+  maintain the precision of the data.  Use the `forward` option of
   :ref:`writers.las` to facilitate transfer of header information from
   source COPC files to destination LAS/LAZ files.
 
@@ -123,7 +123,10 @@ query
 
 las
   Read LAS VLRs and import as metadata. [Default: false]
-   
+
+keep_alive
+  The number of chunks to keep active in memory while reading [Default: 10]
+
 fix_dims
   Make invalid dimension names valid by converting disallowed characters to '_'. Only
   applies to names specified in an extra-bytes VLR. [Default: true]

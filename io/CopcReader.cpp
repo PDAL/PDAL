@@ -101,6 +101,8 @@ public:
     NL::json query;
     NL::json headers;
     NL::json ogr;
+
+    int keepAliveChunkCount = 10;
 };
 
 struct CopcReader::Private
@@ -109,7 +111,7 @@ public:
     std::unique_ptr<ThreadPool> pool;
     std::unique_ptr<copc::Tile> currentTile;
 
-    copc::Connector connector;
+    std::unique_ptr<copc::Connector> connector;
     std::queue<copc::Tile> contents;
     copc::Hierarchy hierarchy;
     las::LoaderDriver loader;
@@ -146,8 +148,20 @@ std::string CopcReader::getName() const
 
 void CopcReader::addArgs(ProgramArgs& args)
 {
+    // These numbers are based on some timings of
+    // local vs remote files. You can get a little bit
+    // more performance on the local file scenario by bumping
+    // up the thread count, but processing is going to be
+    // dominated by whatever is happening to the data afterward
+    // in most cases
+    int defaultThreads(2); // local
+    if (Utils::isRemote(m_filename))
+    {
+        defaultThreads = 10;
+    }
+
     args.add("bounds", "Retangular clip region", m_args->clip);
-    args.add("requests", "Number of worker threads", m_args->threads, (size_t)15);
+    args.add("requests", "Number of worker threads", m_args->threads, (size_t)defaultThreads);
     args.addSynonym("requests", "threads");
     args.add("resolution", "Resolution limit", m_args->resolution);
     args.add("polygon", "Bounding polygon(s) to crop requests",
@@ -158,6 +172,9 @@ void CopcReader::addArgs(ProgramArgs& args)
     args.add("fix_dims", "Make invalid dimension names valid by changing invalid "
         "characters to '_'", m_args->fixNames, true);
     args.add("vlr", "Read LAS VLRs and add to metadata.", m_args->doVlrs);
+    args.add("keep_alive", "Number of chunks to keep alive in memory when working",
+            m_args->keepAliveChunkCount, 10);
+
 }
 
 
@@ -187,7 +204,7 @@ void CopcReader::setForwards(StringMap& headers, StringMap& query)
 
 void CopcReader::initialize(PointTableRef table)
 {
-    const std::size_t threads((std::max)(m_args->threads, size_t(4)));
+    const std::size_t threads(m_args->threads);
     if (threads > 100)
         log()->get(LogLevel::Warning) << "Using a large thread count: " <<
             threads << " threads" << std::endl;
@@ -196,7 +213,7 @@ void CopcReader::initialize(PointTableRef table)
     StringMap headers;
     StringMap query;
     setForwards(headers, query);
-    m_p->connector =  copc::Connector(m_filename, headers, query);
+    m_p->connector.reset(new copc::Connector(m_filename, headers, query));
 
     MetadataNode forward = table.privateMetadata("lasforward");
     MetadataNode m = getMetadata();
@@ -246,14 +263,14 @@ void CopcReader::initialize(PointTableRef table)
 
 std::vector<char> CopcReader::fetch(uint64_t offset, int32_t size)
 {
-    return m_p->connector.getBinary(offset, size);
+    return m_p->connector->getBinary(offset, size);
 }
 
 
 void CopcReader::fetchHeader()
 {
     // Read the LAS header, COPC info VLR header and COPC VLR
-    int size = 549;
+    int size = 589;
     std::vector<char> data = fetch(0, size);
 
     const char *d = data.data();
@@ -272,6 +289,14 @@ void CopcReader::fetchHeader()
     // Read VLR payload into COPC struct.
     d += las::Vlr::HeaderSize;
     size -= las::Vlr::HeaderSize;
+
+    if (size != 160)
+    {
+        std::stringstream msg;
+        msg << "Fetched COPC VLR size is in correct. It should "
+            << "be 160 and it is " << size;
+        throwError(msg.str());
+    }
     m_p->copc_info.fill(d, size);
 
     m_p->rootNodeExtent = BOX3D(
@@ -632,14 +657,14 @@ void CopcReader::load(const copc::Entry& entry)
     m_p->pool->add([this, entry]()
         {
             // Read the tile.
-            copc::Tile tile(entry, m_p->connector, m_p->header);
+            copc::Tile tile(entry, *m_p->connector, m_p->header);
             tile.read();
 
             // Put the tile on the output queue.
             std::unique_lock<std::mutex> l(m_p->mutex);
             if (m_p->done)
                 return;
-            while (m_p->contents.size() >= (std::max)((size_t)10, m_p->pool->numThreads()))
+            while (m_p->contents.size() >= (std::max)((size_t)m_args->keepAliveChunkCount, m_p->pool->numThreads()))
                 m_p->consumedCv.wait(l);
             m_p->contents.push(std::move(tile));
             l.unlock();
@@ -815,6 +840,7 @@ void CopcReader::done(PointTableRef)
     }
     m_p->consumedCv.notify_all();
     m_p->pool->stop();
+    m_p->connector.reset();
 }
 
 } // namespace pdal

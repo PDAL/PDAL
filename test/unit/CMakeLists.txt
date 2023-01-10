@@ -58,6 +58,13 @@ PDAL_ADD_TEST(pdal_options_test
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
+
+PDAL_ADD_TEST(pdal_dimension_test
+    FILES
+        DimensionTest.cpp
+    INCLUDES
+        ${NLOHMANN_INCLUDE_DIR}
+)
 PDAL_ADD_TEST(pdal_pipeline_manager_test FILES PipelineManagerTest.cpp)
 PDAL_ADD_TEST(pdal_pipeline_writer_test
     FILES
@@ -126,6 +133,13 @@ if (PDAL_HAVE_ZLIB)
     PDAL_ADD_TEST(pdal_io_bpf_zlib_test FILES io/BpfTestZlib.cpp)
 endif()
 PDAL_ADD_TEST(pdal_io_buffer_test FILES io/BufferTest.cpp)
+PDAL_ADD_TEST(pdal_io_stac_reader_test
+    FILES
+        io/StacReaderTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
+)
 PDAL_ADD_TEST(pdal_io_ept_reader_test
     FILES
         io/EptReaderTest.cpp
@@ -331,6 +345,7 @@ if (GDAL_3)
     PDAL_ADD_TEST(pdal_filters_projpipeline_test FILES filters/ProjPipelineFilterTest.cpp)
 endif()
 PDAL_ADD_TEST(pdal_filters_range_test FILES filters/RangeFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_expression_test FILES filters/ExpressionFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_randomize_test FILES filters/RandomizeFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_reciprocity_test FILES filters/ReciprocityFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_returns_test FILES filters/ReturnsFilterTest.cpp)
