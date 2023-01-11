@@ -20,7 +20,6 @@ CFLAGS= CXXFLAGS="-Werror=strict-aliasing" CC=/usr/bin/cc CXX=/usr/bin/c++ cmake
         -DCMAKE_INSTALL_PREFIX=${CONDA_PREFIX} \
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
         -DBUILD_PLUGIN_NITF=ON \
-        -DBUILD_PLUGIN_CPD=ON \
         -DBUILD_PLUGIN_HDF=ON \
         -DBUILD_PLUGIN_DRACO=ON \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
