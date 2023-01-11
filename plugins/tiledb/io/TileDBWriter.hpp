@@ -34,8 +34,9 @@
 
 #pragma once
 
+#ifndef NOMINMAX
 #define NOMINMAX
-
+#endif
 #include <pdal/Streamable.hpp>
 #include <pdal/Writer.hpp>
 

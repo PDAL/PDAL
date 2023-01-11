@@ -42,10 +42,10 @@ target_link_libraries(${PDAL_UTIL_LIB_NAME}
         ${UTFCPP_LIB_NAME}
 )
 
-target_link_options(${PDAL_UTIL_LIB_NAME}
-    PRIVATE
-    	${WINSOCK_EXPORTS}
-)
+#target_link_options(${PDAL_UTIL_LIB_NAME}
+#    PRIVATE
+#    	${WINSOCK_EXPORTS}
+#)
 
 target_include_directories(${PDAL_UTIL_LIB_NAME}
     PRIVATE

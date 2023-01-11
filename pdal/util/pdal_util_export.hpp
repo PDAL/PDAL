@@ -41,9 +41,11 @@
 #ifdef _WIN32
 #   define PDAL_DLL   __declspec(dllexport)
 #   define PDAL_LOCAL
+#   define PDAL_DLL_UNIX
 #else
 #   define PDAL_DLL     __attribute__ ((visibility("default")))
 #   define PDAL_LOCAL   __attribute__((visibility("hidden")))
+#   define PDAL_DLL_UNIX   __attribute__ ((visibility("default")))
 #endif // _WIN32
 
 

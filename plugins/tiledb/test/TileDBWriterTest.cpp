@@ -32,7 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 
 #include <stdio.h>
 #include <sys/types.h>
