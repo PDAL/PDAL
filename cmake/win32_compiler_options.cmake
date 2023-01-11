@@ -66,11 +66,12 @@ endfunction()
 #
 # Windows htonl and similar are in winsock :(
 #
-set(WINSOCK_LIBRARY ws2_32
-    \EXPORT:__imp_htonl
-    \EXPORT:__imp_ntohl
-    \EXPORT:__imp_htons
-    \EXPORT:__imp_ntohs
+set(WINSOCK_LIBRARY ws2_32)
+set(WINSOCK_EXPORTS
+    /EXPORT:__imp_htonl
+    /EXPORT:__imp_ntohl
+    /EXPORT:__imp_htons
+    /EXPORT:__imp_ntohs
 )
 
 function(pdal_lib_compile_settings target)

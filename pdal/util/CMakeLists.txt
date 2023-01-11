@@ -36,10 +36,15 @@ set(PDAL_UTIL_SOURCES
 PDAL_ADD_FREE_LIBRARY(${PDAL_UTIL_LIB_NAME} SHARED ${PDAL_UTIL_SOURCES})
 target_link_libraries(${PDAL_UTIL_LIB_NAME}
     PRIVATE
-        ${WINSOCK_LIBRARIES}
+        ${WINSOCK_LIBRARY}
         ${BACKTRACE_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
         ${UTFCPP_LIB_NAME}
+)
+
+target_link_options(${PDAL_UTIL_LIB_NAME}
+    PRIVATE
+    	${WINSOCK_EXPORTS}
 )
 
 target_include_directories(${PDAL_UTIL_LIB_NAME}
