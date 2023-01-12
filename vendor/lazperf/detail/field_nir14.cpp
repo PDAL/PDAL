@@ -82,7 +82,7 @@ const char *Nir14Compressor::compress(const char *buf, int& sc)
 
     bool lowChange = (lastNir.val & 0xFF) != (nir.val & 0xFF);
     bool highChange = (lastNir.val & 0xFF00) != (nir.val & 0xFF00);
-    int32_t sym = lowChange | (highChange << 1);
+    int32_t sym = (int32_t)lowChange | (highChange << 1);
     if (sym)
         nir_enc_.makeValid();
     nir_enc_.encodeSymbol(c.used_model_, sym);
