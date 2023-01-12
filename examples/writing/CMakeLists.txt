@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(tutorial tutorial.cpp)
 
-target_link_libraries(tutorial PRIVATE ${PDAL_LIBRARIES} ${WINSOCK_LIBRARY})
+target_link_libraries(tutorial PRIVATE ${PDAL_LIBRARIES})
 target_include_directories(tutorial PRIVATE
     ${PDAL_INCLUDE_DIRS}
     ${PDAL_INCLUDE_DIRS}/pdal)
