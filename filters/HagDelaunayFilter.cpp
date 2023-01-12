@@ -66,7 +66,7 @@ double delaunay_interp_ground(double x0, double y0, PointViewPtr gView,
     }
 
     delaunator::Delaunator triangulation(neighbors);
-    const std::vector<size_t>& triangles(triangulation.triangles);
+    const std::vector<delaunator::index_t>& triangles(triangulation.triangles);
 
     for (size_t j = 0; j < triangles.size(); j += 3)
     {
