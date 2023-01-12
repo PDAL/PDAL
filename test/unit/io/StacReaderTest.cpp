@@ -50,6 +50,42 @@
 using namespace pdal;
 
 
+TEST(StacReaderTest, item_collection_test)
+{
+    Options options;
+
+    options.add("filename", Support::datapath("stac/test_item_collection.json"));
+    options.add("asset_names", "ept.json");
+    options.add("item_ids", "AK_NorthSlope_\\w{0,}");
+
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
+
+    QuickInfo qi = reader.preview();
+
+    NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
+    EXPECT_TRUE(jsonMetadata.contains("stac_ids"));
+    std::vector<std::string> idList = jsonMetadata["stac_ids"].get<std::vector<std::string>>();
+
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "AK_NorthSlope_B1_2018") != idList.end());
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "AK_NorthSlope_B2_2018") != idList.end());
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "AK_NorthSlope_B3_2018") != idList.end());
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "AK_NorthSlope_B4_2018") != idList.end());
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "AK_NorthSlope_B5_2018") != idList.end());
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "AK_NorthSlope_B6_2018") != idList.end());
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "AK_NorthSlope_B7_2018") != idList.end());
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "AK_NorthSlope_B8_2018") != idList.end());
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "AK_NorthSlope_B9_2018") != idList.end());
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "AK_NorthSlope_B10_2018") != idList.end());
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "AK_NorthSlope_B11_2018") != idList.end());
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "AK_NorthSlope_B12_2018") != idList.end());
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "AK_NorthSlope_B13_2018") != idList.end());
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "AK_NorthSlope_B14_2018") != idList.end());
+
+    EXPECT_EQ(qi.m_pointCount, 9050847242);
+}
+
 TEST(StacReaderTest, remote_item_test)
 {
     Options options;
