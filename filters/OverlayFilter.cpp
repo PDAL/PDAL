@@ -41,6 +41,7 @@
 #include <pdal/Polygon.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
+#include <pdal/private/gdal/SpatialRef.hpp>
 
 namespace pdal
 {
@@ -125,13 +126,17 @@ void OverlayFilter::ready(PointTableRef table)
             throwError("No column name '" + m_column + "' was found.");
     }
 
+    gdal::SpatialRef sref;
+    sref.setFromLayer(m_lyr);
+    SpatialReference layerSrs(sref.wkt());
+
     do
     {
         OGRGeometryH geom = OGR_F_GetGeometryRef(feature.get());
         int32_t fieldVal = OGR_F_GetFieldAsInteger(feature.get(), field_index);
 
         m_polygons.push_back(
-            { Polygon(geom, table.anySpatialReference()), fieldVal} );
+            { Polygon(geom, layerSrs), fieldVal} );
 
         feature = OGRFeaturePtr(OGR_L_GetNextFeature(m_lyr), featureDeleter);
     }
