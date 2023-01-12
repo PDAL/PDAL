@@ -221,7 +221,20 @@ void CopcReader::initialize(PointTableRef table)
     // alert consumers that we are a COPC file
     m.add("copc", true);
 
+
     fetchHeader();
+
+    MetadataNode copc_metadata = m.add("copc_info");
+
+    copc_metadata.add("center_x", m_p->copc_info.center_x);
+    copc_metadata.add("center_y", m_p->copc_info.center_y);
+    copc_metadata.add("center_z", m_p->copc_info.center_z);
+    copc_metadata.add("halfsize", m_p->copc_info.halfsize);
+    copc_metadata.add("spacing", m_p->copc_info.spacing);
+    copc_metadata.add("root_hier_offset", m_p->copc_info.root_hier_offset);
+    copc_metadata.add("root_hier_size", m_p->copc_info.root_hier_size);
+    copc_metadata.add("gpstime_minimum", m_p->copc_info.gpstime_minimum);
+    copc_metadata.add("gpstime_maximum", m_p->copc_info.gpstime_maximum);
     las::extractHeaderMetadata(m_p->header, forward, m);
 
     using namespace std::placeholders;

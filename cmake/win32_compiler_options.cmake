@@ -68,3 +68,7 @@ endfunction()
 #
 set(WINSOCK_LIBRARY ws2_32)
 
+function(pdal_lib_compile_settings target)
+    pdal_target_compile_settings(${target})
+endfunction()
+

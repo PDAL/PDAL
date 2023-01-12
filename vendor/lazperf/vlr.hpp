@@ -38,6 +38,8 @@
 namespace lazperf
 {
 
+#pragma warning (push)
+#pragma warning (disable: 4251)
 struct LAZPERF_EXPORT vlr_header
 {
     uint16_t reserved;
@@ -212,6 +214,7 @@ public:
     virtual vlr_header header() const;
     virtual evlr_header eheader() const;
 };
+#pragma warning (pop)
 
 } // namesapce lazperf
 

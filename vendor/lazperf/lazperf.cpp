@@ -674,11 +674,11 @@ std::vector<chunk> decompress_chunk_table(InputCb cb, size_t numChunks, bool var
 // Deprecated
 std::vector<uint32_t> decompress_chunk_table(InputCb cb, size_t numChunks)
 {
-    std::vector<chunk> chunks = decompress_chunk_table(cb, numChunks, false);;
+    std::vector<chunk> chunks = decompress_chunk_table(cb, numChunks, false);
 
     std::vector<uint32_t> sizes;
     for (chunk& c : chunks)
-        sizes.push_back(c.offset);
+        sizes.push_back((uint32_t)c.offset);
     return sizes;
 }
 
