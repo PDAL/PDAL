@@ -251,7 +251,7 @@ void StacReader::initializeArgs()
         if (m_args->rawReaderArgs.is_object())
         {
             NL::json array_args = NL::json::array();
-            array_args.push_back(m_args->readerArgs);
+            array_args.push_back(m_args->rawReaderArgs);
             m_args->rawReaderArgs = array_args;
         }
         for (auto& opts: m_args->rawReaderArgs)
@@ -712,65 +712,68 @@ bool StacReader::prune(NL::json stacJson)
 
     // DateTime
     // If STAC datetime fits in *any* of the supplied ranges, it will not be pruned
-    if (properties.contains("datetime"))
+    if (!m_args->dates.empty())
     {
-        std::string stacDate = properties.at("datetime");
-
-        // TODO This would remove three lines of stuff and
-        // be much clearer
-        //
-        // bool haveDateFlag = !m_args->dates.empty()
-        bool dateFlag = true;
-        if (m_args->dates.empty())
-            dateFlag = false;
-        for (auto& range: m_args->dates)
+        if (properties.contains("datetime") && properties.at("datetime").type() != NL::detail::value_t::null)
         {
-            //If the extracted item date fits into any of the dates provided by
-            //the user, then do not prune this item based on dates.
-            if (range.size() != 2)
-                throw pdal_error("Invalid date range size!");
+            std::string stacDate = properties.at("datetime");
 
-            if (
-                stacDate >= range[0].get<std::string>() &&
-                stacDate <= range[1].get<std::string>()
-            )
-                dateFlag = false;
-        }
-        if (dateFlag)
-            return true;
-    } else if (properties.contains("start_datetime") && properties.contains("end_datetime"))
-    {
-        // Handle if STAC object has start and end datetimes instead of one
-        std::string stacStartDate = properties.at("start_datetime").get<std::string>();
-        std::string stacEndDate = properties.at("end_datetime").get<std::string>();
-
-        bool dateFlag = true;
-        for (const auto& range: m_args->dates)
-        {
-            // If any of the date ranges overlap with the date range of the STAC
-            // object, do not prune.
-            if (range.size() != 2)
-                throw pdal_error("Invalid date range size!");
-            std::string userMinDate = range[0].get<std::string>();
-            std::string userMaxDate = range[1].get<std::string>();
+            // TODO This would remove three lines of stuff and
+            // be much clearer
             //
-            // TODO should we really be comparing dates as strings?
-            if (userMinDate >= stacStartDate && userMinDate <= stacEndDate)
-            {
+            // bool haveDateFlag = !m_args->dates.empty()
+            bool dateFlag = true;
+            if (m_args->dates.empty())
                 dateFlag = false;
-            }
-            else if (userMaxDate >= stacStartDate && userMaxDate <= stacEndDate)
+            for (auto& range: m_args->dates)
             {
-                dateFlag = false;
-            }
-            else if (userMinDate <= stacStartDate && userMaxDate >= stacEndDate)
-            {
-                dateFlag = false;
-            }
-        }
-        if (dateFlag)
-            return true;
+                //If the extracted item date fits into any of the dates provided by
+                //the user, then do not prune this item based on dates.
+                if (range.size() != 2)
+                    throw pdal_error("Invalid date range size!");
 
+                if (
+                    stacDate >= range[0].get<std::string>() &&
+                    stacDate <= range[1].get<std::string>()
+                )
+                    dateFlag = false;
+            }
+            if (dateFlag)
+                return true;
+        } else if (properties.contains("start_datetime") && properties.contains("end_datetime"))
+        {
+            // Handle if STAC object has start and end datetimes instead of one
+            std::string stacStartDate = properties.at("start_datetime").get<std::string>();
+            std::string stacEndDate = properties.at("end_datetime").get<std::string>();
+
+            bool dateFlag = true;
+            for (const auto& range: m_args->dates)
+            {
+                // If any of the date ranges overlap with the date range of the STAC
+                // object, do not prune.
+                if (range.size() != 2)
+                    throw pdal_error("Invalid date range size!");
+                std::string userMinDate = range[0].get<std::string>();
+                std::string userMaxDate = range[1].get<std::string>();
+                //
+                // TODO should we really be comparing dates as strings?
+                if (userMinDate >= stacStartDate && userMinDate <= stacEndDate)
+                {
+                    dateFlag = false;
+                }
+                else if (userMaxDate >= stacStartDate && userMaxDate <= stacEndDate)
+                {
+                    dateFlag = false;
+                }
+                else if (userMinDate <= stacStartDate && userMaxDate >= stacEndDate)
+                {
+                    dateFlag = false;
+                }
+            }
+            if (dateFlag)
+                return true;
+
+        }
     }
 
     // Properties
