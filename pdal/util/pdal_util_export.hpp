@@ -42,10 +42,12 @@
 #   define PDAL_DLL   __declspec(dllexport)
 #   define PDAL_LOCAL
 #   define PDAL_DLL_UNIX
+#   define PDAL_DLL_DEPRECATED   __declspec(deprecated, dllexport)
 #else
 #   define PDAL_DLL     __attribute__ ((visibility("default")))
 #   define PDAL_LOCAL   __attribute__((visibility("hidden")))
 #   define PDAL_DLL_UNIX   __attribute__ ((visibility("default")))
+#   define PDAL_DLL_DEPRECATED   __attribute__((deprecated))
 #endif // _WIN32
 
 

@@ -51,7 +51,9 @@ namespace pdal
   It is constructed with JSON defining a pipeline.
 */
 
-class PDAL_DLL PipelineExecutor {
+
+/* Don't use this anymore. Use PipelineManager directly yourself */
+class PDAL_DLL_DEPRECATED PipelineExecutor {
 public:
 
     /**
