@@ -520,7 +520,34 @@ void StacReader::initializeCatalog(NL::json stacJson, bool isRoot)
         }
     }
 
+}
 
+void StacReader::initializeItemCollection(NL::json stacJson)
+{
+    if (!stacJson.contains("features"))
+        throw pdal_error("Missing required key 'features' in FeatureCollection.");
+
+    NL::json itemList = stacJson.at("features");
+    for (NL::json& item: itemList)
+    {
+        initializeItem(item);
+    }
+    if (stacJson.contains("links"))
+    {
+        NL::json links = stacJson.at("links");
+        for (NL::json& link: links)
+        {
+            if (!link.contains("rel"))
+                throw pdal_error("Missing required key 'rel' in STAC Link object.");
+            std::string target = link.at("rel").get<std::string>();
+            if (target == "next")
+            {
+                std::string next = link.at("href").get<std::string>();
+                NL::json nextJson = m_p->m_connector->getJson(next);
+                initializeItemCollection(nextJson);
+            }
+        }
+    }
 }
 
 void StacReader::initialize()
@@ -539,11 +566,11 @@ void StacReader::initialize()
 
     std::string stacType = stacJson.at("type");
     if (stacType == "Feature")
-    {
         initializeItem(stacJson);
-    }
     else if (stacType == "Catalog")
         initializeCatalog(stacJson, true);
+    else if (stacType == "FeatureCollection")
+        initializeItemCollection(stacJson);
     else
         throw pdal_error("Could not initialize STAC object of type " + stacType);
 
