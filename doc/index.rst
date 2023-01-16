@@ -28,6 +28,12 @@ The entire website is available as a single PDF at http://pdal.io/PDAL.pdf
 News
 --------------------------------------------------------------------------------
 
+**01-13-2023**
+................................................................................
+
+PDAL 2.5.0 was released. Visit :ref:`download` to grab a copy. See it in
+action in Jupyter by visiting Google Colab at https://colab.research.google.com/drive/1JQpcVFFJYMrJCfodqP4Nc_B0_w6p5WOV?usp=sharing
+
 **06-28-2021**
 ................................................................................
 
