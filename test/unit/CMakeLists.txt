@@ -79,6 +79,7 @@ PDAL_ADD_TEST(pdal_point_view_test
     INCLUDES
         ${PDAL_VENDOR_DIR}/eigen
 )
+target_link_libraries(pdal_point_view_test PRIVATE re2::re2)
 PDAL_ADD_TEST(pdal_point_table_test FILES PointTableTest.cpp)
 
 PDAL_ADD_TEST(pdal_program_arg_test
