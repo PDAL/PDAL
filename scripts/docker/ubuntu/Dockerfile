@@ -54,10 +54,10 @@ ENV CONDAENV "/opt/conda/envs/pdal"
 COPY --from=build /venv "/opt/conda/envs/pdal"
 
 ENV PROJ_NETWORK=TRUE
-ENV PROJ_DATA="/venv/share/proj"
-ENV GDAL_DATA="/venv/share/gdal"
-ENV GEOTIFF_CSV="/venv/share/epsg_csv"
-ENV GDAL_DRIVER_PATH="/venv/lib/gdalplugins"
+ENV PROJ_DATA="${CONDAENV}/share/proj"
+ENV GDAL_DATA="${CONDAENV}/share/gdal"
+ENV GEOTIFF_CSV="${CONDAENV}/share/epsg_csv"
+ENV GDAL_DRIVER_PATH="${CONDAENV}/lib/gdalplugins"
 ENV PATH $PATH:${CONDAENV}/bin
 ENV GTIFF_REPORT_COMPD_CS=TRUE
 ENV REPORT_COMPD_CS=TRUE
