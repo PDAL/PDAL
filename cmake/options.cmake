@@ -105,6 +105,10 @@ add_feature_info("Unit tests" WITH_TESTS "PDAL unit tests")
 option(ENABLE_CTEST
     "Enable CTest to support submissions of results to CDash at http://cdash.org" FALSE)
 
+option(WITH_ABSEIL
+    "Choose if PDAL should be built with Abseil support for testing" FALSE)
+add_feature_info("Abseil debugging support " WITH_ABSEIL "unit tests")
+
 #
 # Choose dependent options
 #
