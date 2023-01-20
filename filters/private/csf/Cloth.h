@@ -86,6 +86,7 @@ private:
     double smoothThreshold;
     double heightThreshold;
     string m_outputDir;
+    bool debug;
 
 public:
 
@@ -135,6 +136,7 @@ public:
           double      heightThreshold,
           int         rigidness,
           double      time_step,
+          bool        debug,
           string      output_dir);
 
     /* this is an important methods where the time is progressed one

@@ -29,10 +29,12 @@ Cloth::Cloth(const Vec3& _origin_pos,
              double      _heightThreshold,
              int         rigidness,
              double      time_step,
+             bool        debug,
              string      output_dir)
     : constraint_iterations(rigidness),
     smoothThreshold(_smoothThreshold),
     heightThreshold(_heightThreshold),
+    debug(debug),
     m_outputDir(output_dir),
     origin_pos(_origin_pos),
     step_x(_step_x),
@@ -367,7 +369,7 @@ void Cloth::handle_slop_connected(vector<int> edgePoints, vector<XY> connected, 
 }
 
 void Cloth::saveToFile(string path) {
-    if (m_outputDir.empty())
+    if (m_outputDir.empty() || debug == false)
         return;
 
     string filepath = "cloth_nodes.txt";
