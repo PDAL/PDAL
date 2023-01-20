@@ -44,6 +44,7 @@
 #include <pdal/SrsBounds.hpp>
 #include <arbiter/arbiter.hpp>
 #include <pdal/PipelineManager.hpp>
+#include <pdal/private/SrsTransform.hpp>
 
 #include "private/ept/Connector.hpp"
 
@@ -241,8 +242,30 @@ void StacReader::initializeArgs()
 
     if (!m_args->bounds.empty())
     {
+        SrsBounds bounds = m_args->bounds;
         if (!m_args->bounds.valid())
             throw pdal_error("Supplied bounds are not valid.");
+
+        SpatialReference baseSrs("EPSG:4326");
+
+        BOX3D bbox;
+        if (bounds.is2d())
+        {
+            bbox = BOX3D(bounds.to2d());
+            bbox.minz = (std::numeric_limits<double>::lowest)();
+            bbox.maxz = (std::numeric_limits<double>::max)();
+        }
+        else
+            bbox = bounds.to3d();
+
+        if (!m_args->bounds.spatialReference().empty())
+        {
+            SrsTransform transform(m_args->bounds.spatialReference(), baseSrs);
+            transform.transform(bbox.minx, bbox.miny, bbox.minz);
+            transform.transform(bbox.maxx, bbox.maxy, bbox.maxz);
+        }
+        m_args->bounds = SrsBounds(bbox, baseSrs);
+
         log()->get(LogLevel::Debug) << "Bounds: " << m_args->bounds << std::endl;
     }
 
@@ -552,7 +575,6 @@ void StacReader::initializeItemCollection(NL::json stacJson)
 
 void StacReader::initialize()
 {
-
     StringMap headers;
     StringMap query;
     setForwards(headers, query);
@@ -818,7 +840,9 @@ bool StacReader::prune(NL::json stacJson)
     // readers.ept as well?
     if (!m_args->bounds.empty())
     {
-        if (stacJson.contains("geometry"))
+        if (!stacJson.contains("geometry"))
+            throw pdal_error("Missing required key 'geometry'.");
+        if (stacJson.at("geometry") != NL::detail::value_t::null)
         {
             NL::json geometry = stacJson.at("geometry").get<NL::json>();
             Polygon f(geometry.dump());
@@ -826,28 +850,11 @@ bool StacReader::prune(NL::json stacJson)
             {
                 std::stringstream msg;
                 msg << "Polygon created from STAC 'geometry' key for '"
-                    << itemId << "' is invalid";
+                    << itemId << "' is invalid.";
                 throw pdal_error(msg.str());
             }
-
-            // TODO if the bounds is 3d already, why
-            // do we convert it to 3d on the next line?
-            if (m_args->bounds.is3d())
-            {
-                if (!m_args->bounds.to3d().overlaps(f.bounds()))
-                    return true;
-            }
-            else
-            {
-                // TODO this is confusing, but I guess that
-                // is a result of PDAL's bounds interface.
-                // ie, we downcast the bounds to2d, then make
-                // a BOX3D from that and compare it to f.bounds()
-                // which is 2d or 3d?
-                BOX2D bbox = m_args->bounds.to2d();
-                if (!BOX3D(bbox).overlaps(f.bounds()))
-                    return true;
-            }
+            if (!f.intersects(m_args->bounds.to3d()))
+                return true;
         }
 
         // TODO make a function that does bbox filtering or find one
@@ -926,7 +933,7 @@ QuickInfo StacReader::inspect()
 
     if (metadata.contains("ids"))
     {
-        std::string metadataStr = metadata["ids"].dump();
+        std::string metadataStr = metadata.at("ids").dump();
         qi.m_metadata.addWithType("stac_ids", metadataStr, "json", "STAC Reader ID List");
     }
 
