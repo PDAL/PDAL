@@ -301,7 +301,7 @@ namespace
     LogPtr logPtr(Log::makeLog("PDAL", "stderr"));
 }
 
-#ifdef _WIN32
+#ifdef PDAL_WIN32_STL
 int wmain( int argc, wchar_t *argv[ ], wchar_t *envp[ ] )
 #else
 int main(int argc, char *argv[])
