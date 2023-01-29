@@ -640,7 +640,7 @@ TEST(CropFilterTest, issue_3114)
         table.finalize();
 
         PointViewPtr view(new PointView(table));
-        
+
         view->setField(Id::X, 0, 555000);
         view->setField(Id::Y, 0, 4180000);
         view->setField(Id::Z, 0, 100);
@@ -677,3 +677,43 @@ TEST(CropFilterTest, issue_3114)
     tst("([-122.530, -122.347], [37.695, 37.816])", 2);
     tst("([-122.530, -122.347], [37.695, 37.816], [0,500])", 1);
 }
+
+
+TEST(CropFilterTest, test_crop_on_edge)
+{
+    Options readOptions;
+
+    readOptions.add("filename", Support::datapath("filters/crop-on-edge/crop.las"));
+
+    LasReader reader;
+    reader.setOptions(readOptions);
+
+    std::istream* wkt_stream =
+        FileUtils::openFile(Support::datapath("filters/crop-on-edge/poly.wkt"));
+
+    std::stringstream strbuf;
+    strbuf << wkt_stream->rdbuf();
+
+    std::string wkt(strbuf.str());
+    FileUtils::closeFile(wkt_stream);
+
+    Option polygon("polygon", wkt);
+
+    Options cropOptions;
+    cropOptions.add(polygon);
+
+    CropFilter crop;
+    crop.setOptions(cropOptions);
+    crop.setInput(reader);
+
+    PointTable table;
+    PointViewPtr view(new PointView(table));
+    crop.prepare(table);
+    PointViewSet viewSet = crop.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 132u);
+
+}
+
+
