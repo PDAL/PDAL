@@ -46,15 +46,19 @@ namespace lazperf
 
 namespace pdal
 {
+
+namespace connector
+{
+    class Connector;
+}
+
 namespace copc
 {
-
-class Connector;
 
 class Tile
 {
 public:
-    Tile(const Entry& entry, const Connector& connector, const las::Header& header) :
+    Tile(const Entry& entry, const connector::Connector& connector, const las::Header& header) :
         m_entry(entry), m_connector(connector), m_header(header)
     {}
 
@@ -70,8 +74,8 @@ public:
 
 private:
     Entry m_entry;
-    const Connector& m_connector;
-    const las::Header& m_header; 
+    const connector::Connector& m_connector;
+    const las::Header& m_header;
     std::string m_error;
     std::vector<char> m_data;
 };

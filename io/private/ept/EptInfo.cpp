@@ -32,7 +32,7 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "Connector.hpp"
+#include "../connector/Connector.hpp"
 #include "EptInfo.hpp"
 #include "EptSupport.hpp"
 
@@ -57,7 +57,7 @@ EptInfo::EptInfo(const std::string& info)
     initialize();
 }
 
-EptInfo::EptInfo(const std::string& filename, const Connector& connector) :
+EptInfo::EptInfo(const std::string& filename, const connector::Connector& connector) :
     m_filename(filename)
 {
     if (Utils::startsWith(m_filename, "ept://"))

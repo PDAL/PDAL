@@ -35,23 +35,66 @@
 #include "Connector.hpp"
 
 #include <pdal/pdal_types.hpp>
+#include <pdal/pdal_config.hpp>
+#include <curl/curl.h>
+#include <pdal/util/FileUtils.hpp>
+
+
+
+
 
 namespace pdal
 {
-namespace ept
+namespace connector
 {
+
+std::string getUserAgent()
+{
+    std::stringstream output;
+
+    output  << "pdal ("
+            << pdal::Config::versionMajor() << "."
+            << pdal::Config::versionMinor() << "."
+            << pdal::Config::versionPatch() << ") "
+            << " / curl (" << std::string (curl_version()) << ")";
+    return output.str();
+}
 
 Connector::Connector()
     : m_arbiter(new arbiter::Arbiter()),
       m_httpDriver(new arbiter::drivers::Http( m_arbiter->httpPool()))
-{}
+{
+    if (m_headers.find("User-Agent") == m_headers.end())
+    {
+        m_headers.insert( std::make_pair("User-Agent", getUserAgent()));
+    }
+}
 
 Connector::Connector(const StringMap& headers, const StringMap& query) :
     m_arbiter(new arbiter::Arbiter),
     m_headers(headers),
     m_query(query),
     m_httpDriver(new arbiter::drivers::Http( m_arbiter->httpPool()))
-{}
+{
+    if (m_headers.find("User-Agent") == m_headers.end())
+    {
+        m_headers.insert( std::make_pair("User-Agent", getUserAgent()));
+    }
+}
+
+Connector::Connector(const std::string& filename, const StringMap& headers,
+        const StringMap& query) :
+    m_arbiter(new arbiter::Arbiter),
+    m_headers(headers),
+    m_query(query),
+    m_filename(filename)
+{
+    if (m_headers.find("User-Agent") == m_headers.end())
+    {
+        m_headers.insert( std::make_pair("User-Agent", getUserAgent()));
+    }
+}
+
 
 std::string Connector::get(const std::string& path) const
 {
@@ -120,6 +163,34 @@ StringMap Connector::headRequest(const std::string& path) const
     return r.headers();
 }
 
+std::vector<char> Connector::getBinary(uint64_t offset, int32_t size) const
+{
+    if (size <= 0)
+        return std::vector<char>();
 
-} // namespace ept
+    if (m_arbiter->isLocal(m_filename))
+    {
+        std::vector<char> buf(size);
+        std::ifstream in(m_filename, std::ios::binary);
+        if (in.fail() )
+        {
+            std::string message = "Unable to open '" + m_filename + "'.";
+            if (!pdal::FileUtils::fileExists(m_filename))
+                message += " File does not exist.";
+            throw pdal_error(message);
+        }
+        in.seekg(offset);
+        in.read(buf.data(), size);
+        return buf;
+    }
+    else
+    {
+        StringMap headers(m_headers);
+        headers["Range"] = "bytes=" + std::to_string(offset) + "-" +
+            std::to_string(offset + size - 1);
+        return m_arbiter->getBinary(m_filename, headers, m_query);
+    }
+}
+
+} // namespace connector
 } // namespace pdal

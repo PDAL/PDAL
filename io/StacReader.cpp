@@ -46,7 +46,7 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/private/SrsTransform.hpp>
 
-#include "private/ept/Connector.hpp"
+#include "private/connector/Connector.hpp"
 
 
 namespace pdal
@@ -82,7 +82,7 @@ public:
     std::vector<std::unique_ptr<Stage>> m_readerList;
     std::mutex m_mutex;
     std::vector<std::string> m_idList;
-    std::unique_ptr<ept::Connector> m_connector;
+    std::unique_ptr<connector::Connector> m_connector;
     std::deque <std::pair<std::string, std::string>> m_errors;
 };
 
@@ -578,7 +578,7 @@ void StacReader::initialize()
     StringMap headers;
     StringMap query;
     setForwards(headers, query);
-    m_p->m_connector.reset(new ept::Connector(headers, query));
+    m_p->m_connector.reset(new connector::Connector(headers, query));
 
     m_p->m_pool.reset(new ThreadPool(m_args->threads));
 

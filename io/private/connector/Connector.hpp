@@ -32,49 +32,42 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "Connector.hpp"
+#pragma once
 
-#include <pdal/pdal_types.hpp>
-#include <pdal/util/FileUtils.hpp>
+#include <arbiter/arbiter.hpp>
+
+using StringMap = std::map<std::string, std::string>;
 
 namespace pdal
 {
-namespace copc
+namespace connector
 {
 
-Connector::Connector(const std::string& filename, const StringMap& headers,
-        const StringMap& query) :
-    m_filename(filename), m_headers(headers), m_query(query), m_arbiter(new arbiter::Arbiter)
-{}
-
-std::vector<char> Connector::getBinary(uint64_t offset, int32_t size) const
+class Connector
 {
-    if (size <= 0)
-        return std::vector<char>();
+    std::unique_ptr<arbiter::Arbiter> m_arbiter;
+    StringMap m_headers;
+    StringMap m_query;
+    std::unique_ptr<arbiter::drivers::Http> m_httpDriver;
+    std::string m_filename;
 
-    if (m_arbiter->isLocal(m_filename))
-    {
-        std::vector<char> buf(size);
-        std::ifstream in(m_filename, std::ios::binary);
-        if (in.fail() )
-        {
-            std::string message = "Unable to open '" + m_filename + "'.";
-            if (!pdal::FileUtils::fileExists(m_filename))
-                message += " File does not exist.";
-            throw pdal_error(message);
-        }
-        in.seekg(offset);
-        in.read(buf.data(), size);
-        return buf;
-    }
-    else
-    {
-        StringMap headers(m_headers);
-        headers["Range"] = "bytes=" + std::to_string(offset) + "-" +
-            std::to_string(offset + size - 1);
-        return m_arbiter->getBinary(m_filename, headers, m_query);
-    }
-}
+public:
+    Connector();
+    Connector(const std::string& filename, const StringMap& headers, const StringMap& query);
+    Connector(const StringMap& headers, const StringMap& query);
 
-} // namespace copc
+    std::string get(const std::string& path) const;
+    NL::json getJson(const std::string& path) const;
+    std::vector<char> getBinary(const std::string& path) const;
+    arbiter::LocalHandle getLocalHandle(const std::string& path) const;
+    void put(const std::string& path, const std::vector<char>& data) const;
+    void put(const std::string& path, const std::string& data) const;
+    void makeDir(const std::string& path) const;
+    StringMap headRequest(const std::string& path) const;
+
+    std::vector<char> getBinary(uint64_t offset, int32_t size) const;
+};
+
+} // namespace ept
 } // namespace pdal
+
