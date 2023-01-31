@@ -37,7 +37,7 @@
 #include <pdal/util/FileUtils.hpp>
 
 #include "Addon.hpp"
-#include "Connector.hpp"
+#include "../connector/Connector.hpp"
 
 namespace pdal
 {
@@ -60,7 +60,7 @@ std::string Addon::hierarchyDir() const
     return FileUtils::getDirectory(m_filename) + "ept-hierarchy/";
 }
 
-AddonList Addon::store(const Connector& connector, const NL::json& spec,
+AddonList Addon::store(const connector::Connector& connector, const NL::json& spec,
     const PointLayout& layout)
 {
     AddonList addons;
@@ -104,7 +104,7 @@ AddonList Addon::store(const Connector& connector, const NL::json& spec,
     return addons;
 }
 
-AddonList Addon::load(const Connector& connector, const NL::json& spec)
+AddonList Addon::load(const connector::Connector& connector, const NL::json& spec)
 {
     AddonList addons;
     std::string filename;
@@ -128,7 +128,7 @@ AddonList Addon::load(const Connector& connector, const NL::json& spec)
 }
 
 
-Addon Addon::loadAddon(const Connector& connector,
+Addon Addon::loadAddon(const connector::Connector& connector,
     const std::string& dimName, const std::string& filename)
 {
     NL::json info = connector.getJson(filename);

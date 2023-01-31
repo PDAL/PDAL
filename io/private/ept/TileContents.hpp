@@ -46,17 +46,21 @@ namespace pdal
 class BasePointTable;
 using BasePointTablePtr = std::unique_ptr<BasePointTable>;
 
+namespace connector
+{
+    class Connector;
+}
+
 namespace ept
 {
 
 class EptInfo;
-class Connector;
 
 class TileContents
 {
 public:
     TileContents(const Overlap& overlap, const EptInfo& info,
-            const Connector& connector, const AddonList& addons) :
+            const connector::Connector& connector, const AddonList& addons) :
         m_overlap(overlap), m_info(info), m_connector(connector),
         m_addons(addons)
     {}
@@ -82,7 +86,7 @@ public:
 private:
     Overlap m_overlap;
     const EptInfo& m_info;
-    const Connector& m_connector;
+    const connector::Connector& m_connector;
     const AddonList& m_addons;
     std::string m_error;
     // Table for the base point data.

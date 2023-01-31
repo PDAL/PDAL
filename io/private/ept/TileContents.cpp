@@ -35,7 +35,7 @@
 #include <io/LasReader.hpp>
 #include <pdal/compression/ZstdCompression.hpp>
 
-#include "Connector.hpp"
+#include "../connector/Connector.hpp"
 #include "EptInfo.hpp"
 #include "TileContents.hpp"
 #include "VectorPointTable.hpp"

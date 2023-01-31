@@ -46,7 +46,7 @@
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/SrsTransform.hpp>
 
-#include "private/ept/Connector.hpp"
+#include "private/connector/Connector.hpp"
 #include "private/ept/Artifact.hpp"
 #include "private/ept/EptSupport.hpp"
 #include "private/ept/TileContents.hpp"
@@ -100,7 +100,7 @@ public:
 struct EptReader::Private
 {
 public:
-    std::unique_ptr<ept::Connector> connector;
+    std::unique_ptr<connector::Connector> connector;
     std::unique_ptr<ept::EptInfo> info;
     std::unique_ptr<ThreadPool> pool;
     std::unique_ptr<ept::TileContents> currentTile;
@@ -177,7 +177,7 @@ void EptReader::initialize()
     StringMap headers;
     StringMap query;
     setForwards(headers, query);
-    m_p->connector.reset(new ept::Connector(headers, query));
+    m_p->connector.reset(new connector::Connector(headers, query));
 
     try
     {
