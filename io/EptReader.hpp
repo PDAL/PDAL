@@ -49,9 +49,13 @@ using StringMap = std::map<std::string, std::string>;
 namespace pdal
 {
 
-namespace ept
+namespace connector
 {
     class Connector;
+}
+
+namespace ept
+{
     class EptInfo;
     class Key;
     class TileContents;

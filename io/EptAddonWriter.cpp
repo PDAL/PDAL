@@ -43,7 +43,7 @@
 
 #include "private/ept/Addon.hpp"
 #include "private/ept/Artifact.hpp"
-#include "private/ept/Connector.hpp"
+#include "private/connector/Connector.hpp"
 
 namespace pdal
 {
@@ -103,7 +103,7 @@ void EptAddonWriter::prepared(PointTableRef table)
     // Note that we use a generic connector here.  In ready() we steal
     // the connector that was used in the EptReader that uses any
     // headers/query that was set.
-    m_connector.reset(new ept::Connector());
+    m_connector.reset(new connector::Connector());
     m_addons = ept::Addon::store(*m_connector, m_args->m_addons, *(table.layout()));
 }
 

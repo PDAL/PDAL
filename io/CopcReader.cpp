@@ -50,7 +50,7 @@
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/SrsTransform.hpp>
 
-#include "private/copc/Connector.hpp"
+#include "private/connector/Connector.hpp"
 #include "private/copc/Entry.hpp"
 #include "private/copc/Info.hpp"
 #include "private/copc/Tile.hpp"
@@ -111,7 +111,7 @@ public:
     std::unique_ptr<ThreadPool> pool;
     std::unique_ptr<copc::Tile> currentTile;
 
-    std::unique_ptr<copc::Connector> connector;
+    std::unique_ptr<connector::Connector> connector;
     std::queue<copc::Tile> contents;
     copc::Hierarchy hierarchy;
     las::LoaderDriver loader;
@@ -213,7 +213,7 @@ void CopcReader::initialize(PointTableRef table)
     StringMap headers;
     StringMap query;
     setForwards(headers, query);
-    m_p->connector.reset(new copc::Connector(m_filename, headers, query));
+    m_p->connector.reset(new connector::Connector(m_filename, headers, query));
 
     MetadataNode forward = table.privateMetadata("lasforward");
     MetadataNode m = getMetadata();

@@ -40,7 +40,7 @@
 #include <io/LasReader.hpp>
 #include <io/private/las/Header.hpp>
 
-#include "Connector.hpp"
+#include "../connector/Connector.hpp"
 #include "Tile.hpp"
 
 namespace pdal
