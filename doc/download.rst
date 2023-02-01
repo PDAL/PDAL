@@ -70,10 +70,10 @@ required dependencies and build PDAL from source.
 
 .. csv-table:: PDAL Distribution Feature Comparison
    :header: "", "Docker", "RPMs", "Alpine", ":ref:`Conda`"
-   :widths: 20, 20, 20, 20, 20, 20
+   :widths: 20, 20, 20, 20, 20
 
    "Platform(s)", "linux", "linux",  "linux", "win64, mac, linux"
-   "PDAL version", "2.4", "",  "2.4", "2.4"
+   "PDAL version", "2.5", "",  "2.4", "2.5"
    "CPD", "", "",  "X", ""
    "E57", "X", "",  "", "X"
    "HDF", "X", "",  "", "X"
@@ -82,7 +82,7 @@ required dependencies and build PDAL from source.
    "NITF", "X",  "",  "", "X"
    "pgpointcloud", "X",  "",  "X", "X"
    "SLPK", "", "", "", "X"
-   "TileDB", "X", "", "", "", "X "
+   "TileDB", "X", "", "", "X"
 
 
 Windows
