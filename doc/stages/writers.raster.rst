@@ -51,8 +51,6 @@ Options
 filename
     Name of output file. [Required]
 
-.. _resolution:
-
 gdaldriver
     GDAL code of the `GDAL driver`_ to use to write the output.
     [Default: "GTiff"]
@@ -74,13 +72,9 @@ rasters
     that don't have the same limits will be dropped. If no raster names are provided,
     only the first raster found will be placed into a single band for output.
 
-.. _data_type:
-
 data_type
     The :ref:`data type <types>` to use for the output raster.  Many GDAL drivers only
     support a limited set of output data types.  [Default: depends on the driver]
-
-.. _nodata:
 
 nodata
     The value to use for a raster cell if the raster contains no data in a cell.
