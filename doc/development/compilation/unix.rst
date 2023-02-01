@@ -19,6 +19,12 @@ running the build tool).
 .. _`Ninja`: https://ninja-build.org/
 .. _`GNU Makefiles`: https://www.gnu.org/software/make/manual/make.html
 
+
+.. note::
+
+    The `PDAL continuous integration <https://github.com/PDAL/PDAL/tree/master/scripts/ci>`__
+    provides example configuration and build recipes for Linux, Windows, and OSX.
+
 Dependencies
 ------------------------------------------------------------------------------
 

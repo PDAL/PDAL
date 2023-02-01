@@ -5,14 +5,14 @@ writers.raster
 
 The **Raster Writer** writes an existing raster to a file.
 Output is produced using `GDAL`_ and can use any `driver
-that supports creation of rasters`_.  A data_type_ can be specified for the
+that supports creation of rasters`_.  A ``data_type`` can be specified for the
 raster (double, float, int32, etc.).  If no data type is specified, the
 data type with the largest range supported by the driver is used.
 
 .. _`GDAL`: http://gdal.org
 .. _`driver that supports creation of rasters`: http://www.gdal.org/formats_list.html
 
-Cells that have no value are given a value specified by the nodata_ option.
+Cells that have no value are given a value specified by the ``nodata`` option.
 
 .. embed::
 
@@ -80,7 +80,7 @@ nodata
     The value to use for a raster cell if the raster contains no data in a cell.
     Note that the nodata written to the output may be different from that of the
     raster being written.
-    [Default: depends on the data_type_.  -9999 for double, float, int and short, 9999 for
+    [Default: depends on the ``data_type``.  -9999 for double, float, int and short, 9999 for
     unsigned int and unsigned short, 255 for unsigned char and -128 for char]
 
 .. include:: writer_opts.rst
