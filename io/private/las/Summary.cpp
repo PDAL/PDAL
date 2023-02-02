@@ -57,7 +57,8 @@ void Summary::addPoint(double x, double y, double z, int returnNumber)
     m_bounds.grow(x, y, z);
 
     // Returns numbers are indexed from one, but the array indexes from 0.
-    m_returnCounts[returnNumber - 1]++;
+    if (returnNumber >= 1 && returnNumber <= m_returnCounts.size())
+        m_returnCounts[returnNumber - 1]++;
 }
 
 
