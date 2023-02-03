@@ -35,6 +35,11 @@
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/FileUtils.hpp>
 
+// This must come before CopcWriter.hpp as it contains a specialization for
+// fromString() that must come be available before the Util template when
+// ProgramArgs is seen.
+#include "HeaderVal.hpp"
+
 #include "CopcWriter.hpp"
 #include <arbiter/arbiter.hpp>
 
