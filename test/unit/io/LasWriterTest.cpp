@@ -1835,3 +1835,36 @@ TEST(LasWriterTest, issue3652)
     }
 }
 
+// Make sure that we can write software ID with spaces
+TEST(LasWriterTest, issue3964)
+{
+    std::string outfile(Support::temppath("3964.las"));
+
+    FileUtils::deleteFile(outfile);
+
+    {
+        LasWriter w;
+        Options wo;
+        wo.add("filename", outfile);
+        wo.add("software_id", "This is a test");
+        w.setOptions(wo);
+
+        PointTable t;
+        w.prepare(t);
+        w.execute(t);
+    }
+
+    // Check that we can read.
+    {
+        LasReader r;
+        Options ro;
+        ro.add("filename", outfile);
+        r.setOptions(ro);
+
+        PointTable t;
+        r.prepare(t);
+        MetadataNode m = r.getMetadata();
+        MetadataNode n = m.findChild("software_id");
+        EXPECT_EQ(n.value(), "This is a test");
+    }
+}

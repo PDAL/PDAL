@@ -145,6 +145,7 @@ inline std::istream& operator>>(std::istream& in, DoubleHeaderVal& h)
     return in;
 }
 
+// LEN of 0 is any length.
 template <size_t LEN>
 class StringHeaderVal : public BaseHeaderVal<std::string>
 {
@@ -173,15 +174,20 @@ public:
         { return m_valSet ? m_val : m_defVal; }
 };
 
-template <size_t LEN>
-inline std::istream& operator>>(std::istream& in, StringHeaderVal<LEN>& h)
+namespace Utils
 {
-    std::string s;
-    in >> s;
-    if (!h.setVal(s))
-        in.setstate(std::ios::failbit);
-    return in;
+
+template<size_t LEN>
+inline StatusWithReason fromString(const std::string& from, StringHeaderVal<LEN>& h)
+{
+    std::string src(from);
+    src.resize(LEN, ' ');
+    h.setVal(from);
+    return true;
 }
+
+} // namespace Utils
+
 
 template <size_t LEN>
 inline std::ostream& operator<<(std::ostream& out,
