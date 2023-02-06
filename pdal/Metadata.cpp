@@ -51,7 +51,7 @@ std::string Metadata::inferType(const std::string& val)
 {
     size_t pos;
 
-    long l(0);
+    long l = 0;
     try
     {
         pos = 0;
@@ -65,7 +65,10 @@ std::string Metadata::inferType(const std::string& val)
     try
     {
         pos = 0;
-        auto l = std::stod(val, &pos);
+
+        // silence discarding return value of function with 'nodiscard' attribute
+        // with the (void) cast
+        (void)std::stod(val, &pos);
     }
     catch(std::invalid_argument&)
     {}
