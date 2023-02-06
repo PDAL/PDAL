@@ -152,8 +152,8 @@ std::string SpatialReference::getPROJJSON() const
         json = std::string(poJSON);
     CPLFree(poJSON);
     CSLDestroy( papszOptions );
-    return json;
 #endif
+    return json;
 }
 
 

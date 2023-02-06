@@ -180,8 +180,6 @@ namespace Utils
 template<size_t LEN>
 inline StatusWithReason fromString(const std::string& from, StringHeaderVal<LEN>& h)
 {
-    std::string src(from);
-    src.resize(LEN, ' ');
     h.setVal(from);
     return true;
 }
