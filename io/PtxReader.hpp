@@ -54,6 +54,7 @@ protected:
         std::array<double, 16> m_transform;
 
         void applyTransform(double &x, double &y, double &z) const;
+        PtxHeader() : m_columns(0), m_rows(0) {};
     };
 
     PtxHeader readHeader();
@@ -63,7 +64,7 @@ private:
     virtual void addArgs(ProgramArgs& args) override;
     virtual void addDimensions(PointLayoutPtr layout) override;
     virtual void ready(PointTableRef table) override;
-    virtual point_count_t read(PointViewPtr view, 
+    virtual point_count_t read(PointViewPtr view,
                                point_count_t numPts) override;
     virtual void done(PointTableRef table) override;
 

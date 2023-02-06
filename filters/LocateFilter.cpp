@@ -75,7 +75,8 @@ PointViewSet LocateFilter::run(PointViewPtr inView)
     if (!inView->size())
         return viewSet;
 
-    PointId minidx, maxidx;
+    PointId minidx(0);
+    PointId maxidx(0);
     double minval = (std::numeric_limits<double>::max)();
     double maxval = std::numeric_limits<double>::lowest();
 
