@@ -65,7 +65,10 @@ std::string Metadata::inferType(const std::string& val)
     try
     {
         pos = 0;
-        std::stod(val, &pos);
+
+        // silence discarding return value of function with 'nodiscard' attribute
+        // with the (void) cast
+        (void)std::stod(val, &pos);
     }
     catch(std::invalid_argument&)
     {}
