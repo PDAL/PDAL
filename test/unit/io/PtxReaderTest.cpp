@@ -105,9 +105,9 @@ TEST(PtxReader, DiscardMissingPointsWithComplexTransform)
     EXPECT_TRUE(layout->hasDim(Dimension::Id::Green));
     EXPECT_TRUE(layout->hasDim(Dimension::Id::Blue));
 
-    EXPECT_FLOAT_EQ(view->getFieldAs<float>(Dimension::Id::X, 0), -3.034408);
-    EXPECT_FLOAT_EQ(view->getFieldAs<float>(Dimension::Id::Y, 0), -3.173781);
-    EXPECT_FLOAT_EQ(view->getFieldAs<float>(Dimension::Id::Z, 0), -1.823750);
+    EXPECT_FLOAT_EQ(view->getFieldAs<float>(Dimension::Id::X, 0), -3.034408f);
+    EXPECT_FLOAT_EQ(view->getFieldAs<float>(Dimension::Id::Y, 0), -3.173781f);
+    EXPECT_FLOAT_EQ(view->getFieldAs<float>(Dimension::Id::Z, 0), -1.823750f);
     // Intensity = 0.494911 * 4096 ~= 2027.155456
     EXPECT_DOUBLE_EQ(view->getFieldAs<double>(Dimension::Id::Intensity, 0), 2027);
     EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::Red, 0), 33);
@@ -137,18 +137,18 @@ TEST(PtxReader, MultipleClouds)
     EXPECT_FALSE(layout->hasDim(Dimension::Id::Green));
     EXPECT_FALSE(layout->hasDim(Dimension::Id::Blue));
 
-    // The input file has two clouds with the same four points, but the first 
+    // The input file has two clouds with the same four points, but the first
     // clout has a transform. We compare them to ensure they're equal.
 
     for (point_count_t i = 0; i < static_cast<point_count_t>(4); ++i)
     {
         const point_count_t i2 = i + static_cast<point_count_t>(4);
 
-        EXPECT_DOUBLE_EQ(view->getFieldAs<double>(Dimension::Id::X, i), 
+        EXPECT_DOUBLE_EQ(view->getFieldAs<double>(Dimension::Id::X, i),
             view->getFieldAs<double>(Dimension::Id::X, i2));
-        EXPECT_DOUBLE_EQ(view->getFieldAs<double>(Dimension::Id::Y, i), 
+        EXPECT_DOUBLE_EQ(view->getFieldAs<double>(Dimension::Id::Y, i),
             view->getFieldAs<double>(Dimension::Id::Y, i2));
-        EXPECT_DOUBLE_EQ(view->getFieldAs<double>(Dimension::Id::Z, i), 
+        EXPECT_DOUBLE_EQ(view->getFieldAs<double>(Dimension::Id::Z, i),
             view->getFieldAs<double>(Dimension::Id::Z, i2));
     }
 }

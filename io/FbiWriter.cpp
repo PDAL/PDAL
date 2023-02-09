@@ -261,7 +261,7 @@ void NrmVecSet(fbi::NrmVec *Vp, int Dim, double X, double Y, double Z)
     double Hml = 32767.0 / fbi::hc_2pi ;
     double Vml = 32767.0 / fbi::hc_pi ;
     double Van = asin(Z);
-    int Vvl = std::floor( Vml * (Van + fbi::hc_piover2)) ;
+    int Vvl = (int) std::floor( Vml * (Van + fbi::hc_piover2)) ;
     Vvl = (std::max)( Vvl, 0) ;
     Vvl = (std::min)( Vvl, 32767) ;
     Vp->Dim     = Dim ;
@@ -271,7 +271,7 @@ void NrmVecSet(fbi::NrmVec *Vp, int Dim, double X, double Y, double Z)
         double Han = atan2( Y, X) ;
         if (Han < 0.0)
             Han += fbi::hc_2pi ;
-        int Hvl = std::floor( Hml * Han) ;
+        int Hvl = (int)std::floor( Hml * Han) ;
         Hvl = (std::max)( Hvl, 0) ;
         Hvl = (std::min)( Hvl, 32767) ;
         Vp->HorzAng = Hvl ;
@@ -298,9 +298,9 @@ void FbiWriter::write(const PointViewPtr view)
         double Y = point.getFieldAs<double>(Dimension::Id::Y);
         double Z = point.getFieldAs<double>(Dimension::Id::Z);
 
-        fbi::UINT xr = (X - hdr->OrgX)*Mul;
-        fbi::UINT yr = (Y - hdr->OrgY)*Mul;
-        fbi::UINT zr = (Z - hdr->OrgZ)*Mul;
+        fbi::UINT xr = (fbi::UINT) (X - hdr->OrgX)*Mul;
+        fbi::UINT yr = (fbi::UINT) (Y - hdr->OrgY)*Mul;
+        fbi::UINT zr = (fbi::UINT) (Z - hdr->OrgZ)*Mul;
 
         ofFBI->write(reinterpret_cast<const char *>(&xr), hdr->BitsX/8);
         ofFBI->write(reinterpret_cast<const char *>(&yr), hdr->BitsY/8);
@@ -342,7 +342,7 @@ void FbiWriter::write(const PointViewPtr view)
         for (PointId i = 0; i < view->size(); ++i)
         {
             point.setPointId(i);
-            uint8_t dim = point.getFieldAs<double>(Dimension::Id::Dimension);
+            uint8_t dim = (uint8_t) point.getFieldAs<double>(Dimension::Id::Dimension);
             double norm_x = point.getFieldAs<double>(Dimension::Id::NormalX);
             double norm_y = point.getFieldAs<double>(Dimension::Id::NormalY);
             double norm_z = point.getFieldAs<double>(Dimension::Id::NormalZ);
