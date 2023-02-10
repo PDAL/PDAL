@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 3.5)
 
-project(PDAL VERSION 2.5.0 LANGUAGES CXX C)
+project(PDAL VERSION 2.5.1 LANGUAGES CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
@@ -34,7 +34,7 @@ set(PDAL_SOLIB_MAJOR 15)
 #
 # Change if there's a new release with no ABI change
 #
-set(PDAL_SOLIB_MINOR 0)
+set(PDAL_SOLIB_MINOR 1)
 #
 # Build number.  Increment for builds within minor versions.  Probably
 # always 0 for PDAL
@@ -290,7 +290,7 @@ set_target_properties(${PDAL_BASE_LIB_NAME} PROPERTIES
     VERSION ${PDAL_BUILD_VERSION}
     SOVERSION ${PDAL_API_VERSION}
     CLEAN_DIRECT_OUTPUT 1)
-    
+
 
 
 # shut off -Wpedantic selectively
