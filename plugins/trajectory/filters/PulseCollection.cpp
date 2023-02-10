@@ -43,7 +43,7 @@ void PulseCollection::Add(double time, const Eigen::Vector3d& r, int nr, int rn,
     if (nr == 1)
     {
         addPoint(adjTime, r - m_rOrigin, r - m_rOrigin, angle);
-        m_lowhigh = 0;     // In case we didn't get a good multi-return pulse. 
+        m_lowhigh = 0;     // In case we didn't get a good multi-return pulse.
     }
     else
     {
@@ -126,7 +126,7 @@ void PulseCollection::registerSingle(const std::vector<Pulse>& buf)
 
     // Look for midpoint of a run of pulses with the same angle (on the
     // theory that this will have the smallest quantization error).
-    if (buf.size() > std::numeric_limits<int>::max())
+    if (buf.size() > (std::numeric_limits<int>::max)())
         throw pdal_error("Attempting to register an oversized vector.");
 
     int mid = buf.size() / 2;
