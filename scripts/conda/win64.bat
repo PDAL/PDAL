@@ -14,7 +14,11 @@ cmake -G %GENERATOR% ^
       -DBUILD_PLUGIN_E57=ON ^
 	-DBUILD_PLUGIN_TILEDB=ON ^
       -DBUILD_PLUGIN_ICEBRIDGE=ON ^
+      -Dgtest_force_shared_crt=ON ^
+      -DBUILD_PLUGIN_HDF=ON ^
       -DBUILD_PLUGIN_NITF=ON ^
+      -DBUILD_PLUGIN_TRAJECTORY=ON ^
+      -DBUILD_PLUGIN_DRACO=ON ^
       -DBUILD_PLUGIN_TILEDB=OFF ^
       -DWITH_TESTS=ON ^
       -DWITH_ZLIB=ON ^
@@ -23,7 +27,7 @@ cmake -G %GENERATOR% ^
       -DWITH_LZMA=ON ^
       -DLIBLZMA_LIBRARY:FILEPATH=%CONDA_PREFIX%\Library\lib\liblzma.lib ^
       -DZSTD_LIBRARY:FILEPATH=%CONDA_PREFIX%\Library\lib\libzstd.lib ^
-      .. --debug-trycompile
+      .. 
 
-call ninja
+REM call ninja
 REM nmake /f Makefile
