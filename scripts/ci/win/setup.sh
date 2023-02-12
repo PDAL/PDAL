@@ -19,7 +19,7 @@ else
 
 fi
 
-mamba install --yes ceres-solver mkl libblas
+mamba install --yes ceres-solver mkl blas
 
 gdalinfo --version
 
