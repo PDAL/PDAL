@@ -2012,10 +2012,14 @@ S3::AuthFields S3::Auth::fields() const
     return S3::AuthFields(m_access, m_hidden, m_token);
 }
 
-std::unique_ptr<std::size_t> S3::tryGetSize(std::string rawPath) const
+std::unique_ptr<std::size_t> S3::tryGetSize(
+    const std::string rawPath,
+    const http::Headers userHeaders,
+    const http::Query query) const
 {
     Headers headers(m_config->baseHeaders());
     headers.erase("x-amz-server-side-encryption");
+    headers.insert(userHeaders.begin(), userHeaders.end());
 
     const Resource resource(m_config->baseUrl(), rawPath);
     const ApiV4 apiV4(
@@ -2023,7 +2027,7 @@ std::unique_ptr<std::size_t> S3::tryGetSize(std::string rawPath) const
             m_config->region(),
             resource,
             m_auth->fields(),
-            Query(),
+            query,
             headers,
             empty);
 
@@ -2051,7 +2055,7 @@ bool S3::get(
 
     std::unique_ptr<std::size_t> size(
             m_config->precheck() && !headers.count("Range") ?
-                tryGetSize(rawPath) : nullptr);
+                tryGetSize(rawPath, userHeaders, query) : nullptr);
 
     const Resource resource(m_config->baseUrl(), rawPath);
     const ApiV4 apiV4(
@@ -4297,23 +4301,12 @@ int Curl::perform()
 #ifdef ARBITER_CURL
     long httpCode(0);
 
-    // https://curl.se/libcurl/c/CURLOPT_ERRORBUFFER.html
-    char errbuf[CURL_ERROR_SIZE];
-    curl_easy_setopt(m_curl, CURLOPT_ERRORBUFFER, errbuf);
-    errbuf[0] = 0;
-
     const auto code(curl_easy_perform(m_curl));
     curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &httpCode);
     curl_easy_reset(m_curl);
 
     if (code != CURLE_OK)
     {
-        std::size_t len = strlen(errbuf);
-        if (len)
-        {
-            fprintf(stderr, "Curl details: %s%s", errbuf,
-                ((errbuf[len - 1] != '\n') ? "\n" : ""));
-        }
         std::cerr << "Curl failure: " << curl_easy_strerror(code) << std::endl;
         httpCode = 550;
     }

@@ -35,10 +35,12 @@
 #pragma once
 
 #include <pdal/pdal_features.hpp>
+
+#include "HeaderVal.hpp"
+
 #include <pdal/FlexWriter.hpp>
 #include <pdal/Streamable.hpp>
 
-#include "HeaderVal.hpp"
 #include "private/las/Vlr.hpp"
 
 namespace pdal

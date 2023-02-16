@@ -469,8 +469,13 @@ std::string dllDir()
         GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
         (LPCSTR)&dllDir, &hm))
     {
+#ifdef PDAL_WIN32_STL
         wchar_t path[MAX_PATH];
         DWORD cnt = GetModuleFileNameW(hm, path, sizeof(path));
+#else
+        char path[MAX_PATH];
+        DWORD cnt = GetModuleFileNameA(hm, path, sizeof(path));
+#endif
         if (cnt > 0 && cnt < MAX_PATH)
             s = FileUtils::fromNative(path);
     }

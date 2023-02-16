@@ -685,7 +685,7 @@ std::vector<uint32_t> decompress_chunk_table(InputCb cb, size_t numChunks)
 
     std::vector<uint32_t> sizes;
     for (chunk& c : chunks)
-        sizes.push_back(c.offset);
+        sizes.push_back((uint32_t)c.offset);
     return sizes;
 }
 

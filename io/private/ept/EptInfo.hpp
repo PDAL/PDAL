@@ -42,10 +42,14 @@
 
 namespace pdal
 {
+
+namespace connector
+{
+    class Connector;
+}
+
 namespace ept
 {
-
-class Connector;
 
 class EptInfo
 {
@@ -58,7 +62,7 @@ public:
     };
 
     EptInfo(const std::string& info);
-    EptInfo(const std::string& filename, const Connector& connector);
+    EptInfo(const std::string& filename, const connector::Connector& connector);
 
     const BOX3D& bounds() const { return m_bounds; }
     const BOX3D& boundsConforming() const { return m_boundsConforming; }

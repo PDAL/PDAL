@@ -155,6 +155,7 @@ void CSF::do_filtering(std::vector<int>& groundIndexes,
         9999,
         params.rigidness,
         params.time_step,
+        params.debug,
         params.m_dir
     );
 

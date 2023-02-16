@@ -50,7 +50,7 @@
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/SrsTransform.hpp>
 
-#include "private/copc/Connector.hpp"
+#include "private/connector/Connector.hpp"
 #include "private/copc/Entry.hpp"
 #include "private/copc/Info.hpp"
 #include "private/copc/Tile.hpp"
@@ -111,7 +111,7 @@ public:
     std::unique_ptr<ThreadPool> pool;
     std::unique_ptr<copc::Tile> currentTile;
 
-    std::unique_ptr<copc::Connector> connector;
+    std::unique_ptr<connector::Connector> connector;
     std::queue<copc::Tile> contents;
     copc::Hierarchy hierarchy;
     las::LoaderDriver loader;
@@ -213,7 +213,7 @@ void CopcReader::initialize(PointTableRef table)
     StringMap headers;
     StringMap query;
     setForwards(headers, query);
-    m_p->connector.reset(new copc::Connector(m_filename, headers, query));
+    m_p->connector.reset(new connector::Connector(m_filename, headers, query));
 
     MetadataNode forward = table.privateMetadata("lasforward");
     MetadataNode m = getMetadata();
@@ -221,7 +221,20 @@ void CopcReader::initialize(PointTableRef table)
     // alert consumers that we are a COPC file
     m.add("copc", true);
 
+
     fetchHeader();
+
+    MetadataNode copc_metadata = m.add("copc_info");
+
+    copc_metadata.add("center_x", m_p->copc_info.center_x);
+    copc_metadata.add("center_y", m_p->copc_info.center_y);
+    copc_metadata.add("center_z", m_p->copc_info.center_z);
+    copc_metadata.add("halfsize", m_p->copc_info.halfsize);
+    copc_metadata.add("spacing", m_p->copc_info.spacing);
+    copc_metadata.add("root_hier_offset", m_p->copc_info.root_hier_offset);
+    copc_metadata.add("root_hier_size", m_p->copc_info.root_hier_size);
+    copc_metadata.add("gpstime_minimum", m_p->copc_info.gpstime_minimum);
+    copc_metadata.add("gpstime_maximum", m_p->copc_info.gpstime_maximum);
     las::extractHeaderMetadata(m_p->header, forward, m);
 
     using namespace std::placeholders;

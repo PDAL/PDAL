@@ -106,7 +106,7 @@ pdal_error stageError(const std::string& cls, const std::string& type)
     std::ostringstream ss;
     ss << "Couldn't create " << cls << " stage of type '" << type << "'.\n";
     ss << "You probably have a version of PDAL that didn't come with a plugin\n"
-        "you're trying to load.  Please see the FAQ at https://pdal.io/faq";
+        "you're trying to load.  Please see the FAQ at https://pdal.io/faq.html";
     return pdal_error(ss.str());
 }
 

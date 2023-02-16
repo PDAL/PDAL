@@ -919,8 +919,9 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
             // to 255, but we're writing to PDRF < 6 and can't write values
             // over 31.
             log()->get(LogLevel::Warning)
-                << "Classification " << classification
+                << "Classification " << (int)classification
                 << " can't be written to LAS "
+                << std::to_string(d->header.versionMajor) << "."
                 << std::to_string(d->header.versionMinor)
                 << ". Replaced with value 1." << std::endl;
             classification = 1; // Unclassified

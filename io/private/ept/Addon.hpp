@@ -44,11 +44,16 @@
 
 namespace pdal
 {
+
+namespace connector
+{
+    class Connector;
+}
+
 namespace ept
 {
 
 class Addon;
-class Connector;
 using AddonList = std::vector<Addon>;
 
 class Addon
@@ -80,9 +85,9 @@ public:
     point_count_t points(const Key& key) const;
     std::string dataDir() const;
     std::string hierarchyDir() const;
-    static AddonList store(const Connector& connector, const NL::json& spec,
-        const PointLayout& layout);        
-    static AddonList load(const Connector& connector, const NL::json& spec);
+    static AddonList store(const connector::Connector& connector, const NL::json& spec,
+        const PointLayout& layout);
+    static AddonList load(const connector::Connector& connector, const NL::json& spec);
 
 private:
     std::string m_name;
@@ -94,7 +99,7 @@ private:
     Hierarchy m_hierarchy;
     PointLayout m_layout;
 
-    static Addon loadAddon(const Connector& connector,
+    static Addon loadAddon(const connector::Connector& connector,
         const std::string& dimName, const std::string& filename);
 };
 

@@ -1,0 +1,9 @@
+name: pdal-build
+channels:
+  - conda-forge
+dependencies:
+  - compilers
+  - ninja
+  - cmake
+  - pkg-config
+  - make  # [not win]

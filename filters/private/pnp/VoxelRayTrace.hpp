@@ -98,7 +98,11 @@ public:
         int ylast = ycell(m_yend);
 
         cells.push_back( {gridX, gridY} );
-        while (gridX != xlast || gridY != ylast)
+
+        // Stop when we hit either the X or Y end position. This allows us to properly
+        // exit the loop when m_tMaxX == t_MaxY at the end, which can happen if an
+        // endpoint is exactly on a grid vertex.
+        while (gridX != xlast && gridY != ylast)
         {
             if (m_tMaxX < m_tMaxY)
             {
@@ -110,6 +114,19 @@ public:
                 m_tMaxY += m_tDeltaY;
                 gridY += m_stepY;
             }
+            cells.push_back( { gridX, gridY } );
+        }
+
+        // Once we have hit the endpoint in one direction, add cells in the other
+        // direction until we're done.
+        while (gridX != xlast)
+        {
+            gridX += m_stepX;
+            cells.push_back( { gridX, gridY } );
+        }
+        while (gridY != ylast)
+        {
+            gridY += m_stepY;
             cells.push_back( { gridX, gridY } );
         }
         return cells;

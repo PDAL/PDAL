@@ -3,9 +3,18 @@
 writers.copc
 ============
 
-The **COPC Writer** supports writing to `COPC format`_ files.
+The **COPC Writer** supports writing to `COPC format`_ files. COPC
+is *Cloud Optimized Point Clouds*, and it is a LAZ 1.4 file that is
+organized stored as a clustered octree.
 
 .. embed::
+
+
+.. note::
+
+    Visit https://viewer.copc.io to view COPC files in your browser.
+    Simply drag-n-drop the file from your desktop onto the page,
+    or use
 
 VLRs
 ----

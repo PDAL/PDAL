@@ -47,9 +47,13 @@ namespace pdal
 
 class ThreadPool;
 
-namespace ept
+namespace connector
 {
     class Connector;
+}
+
+namespace ept
+{
     class EptInfo;
     class Key;
     class Addon;
@@ -84,7 +88,7 @@ private:
     Dimension::Id m_nodeIdDim = Dimension::Id::Unknown;
     Dimension::Id m_pointIdDim = Dimension::Id::Unknown;
 
-    std::unique_ptr<ept::Connector> m_connector;
+    std::unique_ptr<connector::Connector> m_connector;
     std::unique_ptr<ThreadPool> m_pool;
     std::unique_ptr<ept::EptInfo> m_info;
     std::unique_ptr<ept::Hierarchy> m_hierarchy;

@@ -87,7 +87,11 @@ DynamicLibrary *DynamicLibrary::load(const std::string &name,
     void *handle = NULL;
 
 #ifdef _WIN32
+#ifdef PDAL_WIN32_STL
     handle = ::LoadLibraryW(FileUtils::toNative(name).c_str());
+#else
+    handle = ::LoadLibraryA(FileUtils::toNative(name).c_str());
+#endif
     if (handle == NULL)
     {
         DWORD errorCode = ::GetLastError();

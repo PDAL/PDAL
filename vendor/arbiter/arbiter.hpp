@@ -2733,11 +2733,7 @@ namespace Xml = rapidxml;
 #   define ARBITER_DLL
 #endif
 #else
-#  if defined(USE_GCC_VISIBILITY_FLAG)
 #    define ARBITER_DLL     __attribute__ ((visibility("default")))
-#  else
-#    define ARBITER_DLL
-#  endif
 #endif
 #endif
 
@@ -4093,7 +4089,7 @@ public:
             http::Query query = http::Query()) const;
 
     /* Perform an HTTP HEAD request. */
-    std::unique_ptr<std::size_t> tryGetSize(
+    virtual std::unique_ptr<std::size_t> tryGetSize(
             std::string path,
             http::Headers headers,
             http::Query query = http::Query()) const;
@@ -4283,7 +4279,9 @@ public:
 
     // Overrides.
     virtual std::unique_ptr<std::size_t> tryGetSize(
-            std::string path) const override;
+            std::string path,
+            http::Headers headers,
+            http::Query query = http::Query()) const override;
 
     /** Inherited from Drivers::Http. */
     virtual void put(

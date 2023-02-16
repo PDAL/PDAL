@@ -62,7 +62,7 @@ public:
     // convert time to index + fractional time
     std::pair<int, double> tconvert(double t) const
     {
-        int i = (std::min)(num-1, std::max(0, int(std::floor((t - tstart) / tblock))));
+        int i = (std::min)(num-1, (std::max)(0, int(std::floor((t - tstart) / tblock))));
         double tf = (t - tstart) / tblock - (i + 0.5);
         return std::make_pair(i, tf);
     }

@@ -1,0 +1,16 @@
+name: pdal-build
+channels:
+  - conda-forge
+dependencies:
+  - libgdal
+  - libpq
+  - curl
+  - hdf5
+  - tiledb
+  - draco
+  - libxml2
+  - openssl
+  - nitro
+  - ceres-solver
+  - mkl  # [win]
+  - blas  # [win]

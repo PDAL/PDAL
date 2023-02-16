@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 3.5)
 
-project(PDAL VERSION 2.5.0 LANGUAGES CXX C)
+project(PDAL VERSION 2.6.0 LANGUAGES CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
@@ -30,7 +30,7 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 # Must be changed if there is an ABI change.  This builds the SONAME
 # that's embedded in the library itself.
 #
-set(PDAL_SOLIB_MAJOR 15)
+set(PDAL_SOLIB_MAJOR 16)
 #
 # Change if there's a new release with no ABI change
 #
@@ -290,6 +290,8 @@ set_target_properties(${PDAL_BASE_LIB_NAME} PROPERTIES
     VERSION ${PDAL_BUILD_VERSION}
     SOVERSION ${PDAL_API_VERSION}
     CLEAN_DIRECT_OUTPUT 1)
+
+
 
 # shut off -Wpedantic selectively
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" )

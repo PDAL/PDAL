@@ -1,0 +1,19 @@
+
+[
+   {
+        "type":"readers.las",
+        "filename":"./bug/crop.las",
+	"nosrs":true,
+	"override_srs":"EPSG:2154"
+    },
+    {
+        "type":"filters.overlay",
+	"dimension":"Intensity",
+	"datasource":"./bug/poly_pb.geojson",
+        "column":"PRESENCE"
+    },
+    {
+        "type":"writers.las",
+        "filename":"./bug/crop_2.las"
+    }
+]

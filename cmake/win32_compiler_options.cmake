@@ -33,6 +33,7 @@ function(pdal_target_compile_settings target)
                 # Annoying warning about function hiding with virtual
                 # inheritance.
                 /wd4250
+                /wd4251
                 # some templates don't return
 #                /wd4716
                 # unwind semantics
@@ -67,4 +68,8 @@ endfunction()
 # Windows htonl and similar are in winsock :(
 #
 set(WINSOCK_LIBRARY ws2_32)
+
+function(pdal_lib_compile_settings target)
+    pdal_target_compile_settings(${target})
+endfunction()
 
