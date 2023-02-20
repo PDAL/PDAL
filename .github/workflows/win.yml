@@ -45,8 +45,8 @@ jobs:
         miniforge-version: latest
         use-mamba: true
         auto-update-conda: true
-        python-version: '3.8'
-        use-only-tar-bz2: true
+        python-version: '3.9'
+        use-only-tar-bz2: false
 
     - name: Setup
       run: |
