@@ -40,7 +40,7 @@ jobs:
         miniforge-version: latest
         use-mamba: true
         auto-update-conda: true
-        use-only-tar-bz2: true
+        use-only-tar-bz2: false
 
     - name: Setup
       run: |
