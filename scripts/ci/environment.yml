@@ -14,3 +14,11 @@ dependencies:
   - ceres-solver
   - mkl  # [win]
   - blas  # [win]
+  - compilers
+  - ninja
+  - cmake
+  - pkg-config
+  - make  # [not win]
+  - re2  # [linux]
+  - abseil-cpp  # [linux]
+  -
