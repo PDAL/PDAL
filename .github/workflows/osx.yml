@@ -43,7 +43,8 @@ jobs:
         miniforge-version: latest
         use-mamba: true
         auto-update-conda: true
-        use-only-tar-bz2: false
+        environment-file: scripts/ci/environment.yml
+        python-version: "3.10"
 
     - name: Setup
       run: |
