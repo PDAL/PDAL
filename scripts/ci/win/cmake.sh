@@ -30,4 +30,4 @@ cmake .. -G "Ninja" \
     -DWITH_ZLIB=ON \
     -Dgtest_force_shared_crt=ON \
     -DBUILD_PGPOINTCLOUD_TESTS=OFF \
-    -DBUILD_I3S_TESTS=ON \
+    -DBUILD_I3S_TESTS=ON
