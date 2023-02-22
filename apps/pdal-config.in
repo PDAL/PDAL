@@ -53,7 +53,7 @@ case $1 in
     ;;
 
   --cxxflags)
-    echo @CMAKE_CXX_FLAGS@ -std=c++11
+    echo @CMAKE_CXX_FLAGS@
     ;;
 
   --version)
