@@ -102,6 +102,8 @@ void GDALWriter::addArgs(ProgramArgs& args)
         m_writePDALMetadata, decltype(m_writePDALMetadata)(false));
     args.add("binmode", "Use binning mode for computing statistics and ignore distance and neighborhood",
         m_binMode, false);
+    args.add("allow_empty", "Allow writing GDAL output that do not have any pixel values (no points)",
+        m_allowEmpty, false);
 }
 
 
@@ -282,7 +284,7 @@ bool GDALWriter::processOne(PointRef& point)
 
 void GDALWriter::doneFile()
 {
-    if (!m_grid)
+    if (!m_grid && !m_allowEmpty)
         throw pdal_error("Unable to write GDAL data with no points "
             "for output.");
 
