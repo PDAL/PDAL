@@ -934,6 +934,26 @@ QuickInfo StacReader::inspect()
     return qi;
 }
 
+point_count_t StacReader::read(PointViewPtr view, point_count_t num)
+{
+    point_count_t cnt(0);
+
+//     PointRef point(view->point(0));
+//     for (PointId idx = 0; idx < m_vertexElt->m_count && idx < num; ++idx)
+//     {
+//         point.setPointId(idx);
+//         processOne(point);
+//         cnt++;
+//     }
+    return cnt;
+}
+
+bool StacReader::processOne(PointRef& point)
+{
+    return false;
+}
+
+
 void StacReader::prepared(PointTableRef table)
 {
     if (m_p->m_readerList.size())

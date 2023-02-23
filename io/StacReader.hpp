@@ -49,7 +49,7 @@
 namespace pdal
 {
 
-    class PDAL_DLL StacReader : public Reader
+    class PDAL_DLL StacReader : public Reader, public Streamable
     {
         public:
 
@@ -90,6 +90,8 @@ namespace pdal
             virtual void prepared(PointTableRef table) override;
             virtual void ready(PointTableRef table) override;
             virtual void done(PointTableRef table) override;
+            virtual point_count_t read(PointViewPtr view, point_count_t num) override;
+            virtual bool processOne(PointRef& point) override;
             virtual PointViewSet run(PointViewPtr view) override;
     };
 }
