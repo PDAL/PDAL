@@ -59,6 +59,8 @@ namespace pdal
             std::string getName() const override;
 
             using StringMap = std::map<std::string, std::string>;
+            virtual bool pipelineStreamable() const override;
+
         private:
 
             struct Private;
@@ -93,5 +95,9 @@ namespace pdal
             virtual point_count_t read(PointViewPtr view, point_count_t num) override;
             virtual bool processOne(PointRef& point) override;
             virtual PointViewSet run(PointViewPtr view) override;
+            Reader * m_currentReader;
+            size_t m_currentReaderIndex;
+            point_count_t m_currentPoint;
+            point_count_t m_totalNumPoints;
     };
 }
