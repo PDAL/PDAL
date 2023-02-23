@@ -592,8 +592,6 @@ void StacReader::initialize()
     m_p->m_pool->await();
     m_p->m_pool->stop();
 
-    if (m_p->m_readerList.empty())
-        throw pdal_error("Reader list is empty after filtering.");
 }
 
 // returns true if property matches
@@ -1017,6 +1015,9 @@ void StacReader::ready(PointTableRef table)
 //         m_pvSet = m_p->m_readerList.back()->execute(table);
     else
         throw pdal_error("Reader list is empty in StacReader:empty!");
+
+    setInput(*m_p->m_readerList.back());
+
 }
 
 void StacReader::done(PointTableRef)
