@@ -120,7 +120,9 @@ std::string StacReader::getName() const { return stacinfo.name; }
 StacReader::StacReader():
     m_args(new StacReader::Args),
     m_p(new StacReader::Private),
-    m_currentReader(nullptr), m_currentPoint(0)
+    m_currentReader(nullptr),
+    m_streamable(nullptr),
+    m_currentReaderIndex(0)
 {};
 
 StacReader::~StacReader(){};
@@ -962,36 +964,49 @@ point_count_t StacReader::read(PointViewPtr view, point_count_t num)
 {
     point_count_t cnt(0);
 
-    PointRef point(view->point(0));
-    for (PointId idx = 0; idx < m_totalNumPoints && idx < num; ++idx)
-    {
-        point.setPointId(idx);
-        processOne(point);
-        cnt++;
-    }
+//     PointRef point(view->point(0));
+//     for (PointId idx = 0; idx < m_totalNumPoints && idx < num; ++idx)
+//     {
+//         point.setPointId(idx);
+//         processOne(point);
+//         cnt++;
+//     }
     return cnt;
 }
 
 bool StacReader::processOne(PointRef& point)
 {
+//     return true;
     bool didRead(false);
-
-    Reader* reader = dynamic_cast<Reader*>(m_currentReader);
-    if (!reader)
-        throwError("Unable to cast stage to type Reader in readers.stac processOne!");
-
-    Streamable* streamable = dynamic_cast<Streamable*>(reader);
-
-    point_count_t stageCount = reader->count();
-    if (m_currentPoint < stageCount)
+    didRead = StreamableWrapper::processOne(*m_streamable, point);
+    if (!didRead)
     {
-        didRead = StreamableWrapper::processOne(*streamable, point);
-        m_currentPoint++;
-        return true;
-    } else if (m_currentPoint == stageCount)
-    {
-        if (m_currentReaderIndex <= m_p->m_readerList.size())
-            m_currentReader = m_p->m_readerList[m_currentReaderIndex++].get();
+        if (m_currentReaderIndex >= m_p->m_readerList.size())
+        {
+            log()->get(LogLevel::Debug) << "oh no we are done" << m_currentReaderIndex << std::endl;
+            return false;
+        }
+        else
+        {
+            std::lock_guard<std::mutex> lock(mutex);
+            m_currentReaderIndex++;
+            m_currentReader = m_p->m_readerList[m_currentReaderIndex].get();
+            Reader* reader = dynamic_cast<Reader*>(m_currentReader);
+            if (!reader)
+                throwError("Unable to cast stage to type Reader in readers.stac processOne!");
+
+            m_streamable = dynamic_cast<Streamable*>(reader);
+            if (!m_streamable)
+                throwError("Unable to cast stage to type Streamable in readers.stac processOne!");
+
+            log()->get(LogLevel::Debug) << "Switching reader to '" << m_currentReaderIndex <<"'" << std::endl;
+            didRead = StreamableWrapper::processOne(*m_streamable, point);
+            log()->get(LogLevel::Debug) << "successfully read from new reader didRead: " << didRead << std::endl;
+            return didRead;
+
+        }
+
+
     }
     return didRead;
 }
@@ -1000,23 +1015,36 @@ bool StacReader::processOne(PointRef& point)
 void StacReader::prepared(PointTableRef table)
 {
     log()->get(LogLevel::Debug) << "Executing StacReader::prepared" << std::endl;
-    for (auto& r: m_p->m_readerList)
+
+    if (m_p->m_readerList.size())
     {
-        r->prepare(table);
-        r->setLog(log());
+        m_currentReader = m_p->m_readerList[m_currentReaderIndex].get();
+        setInput(*m_currentReader);
+        for (auto& r: m_p->m_readerList)
+        {
+            r->prepare(table);
+            r->setLog(log());
+        }
     }
+    else
+        throw pdal_error("Reader list is empty in StacReader:prepared!");
+
+    Reader* reader = dynamic_cast<Reader*>(m_currentReader);
+    if (!reader)
+        throwError("Unable to cast stage to type Reader in readers.stac prepared!");
+
+    m_streamable = dynamic_cast<Streamable*>(reader);
+    if (!m_streamable)
+        throwError("Unable to cast stage to type Streamable in readers.stac prepared!");
 }
 
 void StacReader::ready(PointTableRef table)
 {
-    log()->get(LogLevel::Debug) << "Executing StacReader::ready" << std::endl;
-    if (m_p->m_readerList.size())
-        m_currentReader = m_p->m_readerList[0].get();
-//         m_pvSet = m_p->m_readerList.back()->execute(table);
-    else
-        throw pdal_error("Reader list is empty in StacReader:empty!");
 
-    setInput(*m_p->m_readerList.back());
+    for (auto& r: m_p->m_readerList)
+    {
+        StageWrapper::ready(*r, table);
+    }
 
 }
 

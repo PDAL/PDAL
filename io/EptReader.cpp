@@ -168,7 +168,7 @@ void EptReader::initialize()
 {
     auto& debug(log()->get(LogLevel::Debug));
 
-    const std::size_t threads(m_args->m_threads);
+    const std::size_t threads((std::max)(m_args->m_threads, size_t(4)));
     if (threads > 100)
         log()->get(LogLevel::Warning) << "Using a large thread count: " <<
             threads << " threads" << std::endl;

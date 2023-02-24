@@ -70,8 +70,6 @@ namespace pdal
             std::unique_ptr<Private> m_p;
 
             StageFactory m_factory;
-            MergeFilter m_merge;
-            PointViewSet m_pvSet;
 
             void handleReaderArgs();
             void initializeItem(NL::json stacJson);
@@ -95,9 +93,12 @@ namespace pdal
             virtual point_count_t read(PointViewPtr view, point_count_t num) override;
             virtual bool processOne(PointRef& point) override;
             virtual PointViewSet run(PointViewPtr view) override;
+
+            PointViewSet m_pvSet;
             Reader * m_currentReader;
-            size_t m_currentReaderIndex;
-            point_count_t m_currentPoint;
-            point_count_t m_totalNumPoints;
+            Streamable* m_streamable;
+            MergeFilter m_merge;
+            std::size_t m_currentReaderIndex;
+
     };
 }
