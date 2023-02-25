@@ -59,7 +59,6 @@ namespace pdal
             std::string getName() const override;
 
             using StringMap = std::map<std::string, std::string>;
-            virtual bool pipelineStreamable() const override;
 
         private:
 
@@ -79,7 +78,7 @@ namespace pdal
             void validateSchema(NL::json stacJson);
             Options setReaderOptions(const NL::json& readerArgs,
                                      const std::string& driver) const;
-            void setForwards(StringMap& headers, StringMap& query);
+            void setConnectionForwards(StringMap& headers, StringMap& query);
             std::string extractDriverFromItem(const NL::json& asset) const;
 
             bool prune(NL::json stacJson);
@@ -89,16 +88,11 @@ namespace pdal
             virtual QuickInfo inspect() override;
             virtual void prepared(PointTableRef table) override;
             virtual void ready(PointTableRef table) override;
-            virtual void done(PointTableRef table) override;
             virtual point_count_t read(PointViewPtr view, point_count_t num) override;
             virtual bool processOne(PointRef& point) override;
             virtual PointViewSet run(PointViewPtr view) override;
 
-            PointViewSet m_pvSet;
-            Reader * m_currentReader;
-            Streamable* m_streamable;
             MergeFilter m_merge;
-            std::size_t m_currentReaderIndex;
 
     };
 }

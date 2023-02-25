@@ -76,10 +76,9 @@ void schemaFetch(const nlohmann::json_uri& json_uri, nlohmann::json& json)
 struct StacReader::Private
 {
 public:
-    std::unique_ptr<ILeStream> m_stream;
     std::unique_ptr<Args> m_args;
     std::unique_ptr<ThreadPool> m_pool;
-    std::vector<std::unique_ptr<Reader>> m_readerList;
+    std::vector<Reader*> m_readerList;
     std::mutex m_mutex;
     std::vector<std::string> m_idList;
     std::unique_ptr<connector::Connector> m_connector;
@@ -119,10 +118,7 @@ std::string StacReader::getName() const { return stacinfo.name; }
 
 StacReader::StacReader():
     m_args(new StacReader::Args),
-    m_p(new StacReader::Private),
-    m_currentReader(nullptr),
-    m_streamable(nullptr),
-    m_currentReaderIndex(0)
+    m_p(new StacReader::Private)
 {};
 
 StacReader::~StacReader(){};
@@ -325,7 +321,7 @@ Options StacReader::setReaderOptions(const NL::json& readerArgs, const std::stri
     return readerOptions;
 }
 
-void StacReader::setForwards(StringMap& headers, StringMap& query)
+void StacReader::setConnectionForwards(StringMap& headers, StringMap& query)
 {
     try
     {
@@ -422,7 +418,7 @@ void StacReader::initializeItem(NL::json stacJson)
     log()->get(LogLevel::Debug) << "Using driver " << driver <<
         " for file " << dataUrl << std::endl;
 
-    Stage *stage = PluginManager<Stage>::createObject(driver);
+    Stage *stage = m_factory.createStage(driver);
 
     if (!stage)
     {
@@ -446,12 +442,11 @@ void StacReader::initializeItem(NL::json stacJson)
     readerOptions.add("filename", dataUrl);
     reader->setOptions(readerOptions);
 
+    std::lock_guard<std::mutex> lock(m_p->m_mutex);
+    m_merge.setInput(*reader);
+    reader->setLog(log());
 
-    std::unique_lock<std::mutex> l(m_p->m_mutex);
-    if (m_p->m_readerList.size() > 0)
-        reader->setInput(*m_p->m_readerList.back());
-
-    m_p->m_readerList.push_back(std::unique_ptr<Reader>(reader));
+    m_p->m_readerList.push_back(reader);
 
 }
 
@@ -572,7 +567,7 @@ void StacReader::initialize()
 
     StringMap headers;
     StringMap query;
-    setForwards(headers, query);
+    setConnectionForwards(headers, query);
     m_p->m_connector.reset(new connector::Connector(headers, query));
 
     m_p->m_pool.reset(new ThreadPool(m_args->threads));
@@ -594,6 +589,10 @@ void StacReader::initialize()
     m_p->m_pool->await();
     m_p->m_pool->stop();
 
+    if (m_p->m_readerList.empty())
+        throw pdal_error("Reader list is empty after filtering.");
+
+    setInput(m_merge);
 }
 
 // returns true if property matches
@@ -909,6 +908,7 @@ bool StacReader::prune(NL::json stacJson)
     return false;
 }
 
+
 QuickInfo StacReader::inspect()
 {
     QuickInfo qi;
@@ -950,113 +950,43 @@ QuickInfo StacReader::inspect()
 }
 
 
-bool StacReader::pipelineStreamable() const
-{
-    for (auto& s: m_p->m_readerList)
-    {
-        if (!s->pipelineStreamable())
-            return false;
-    }
-    return Streamable::pipelineStreamable();
-}
-
 point_count_t StacReader::read(PointViewPtr view, point_count_t num)
 {
     point_count_t cnt(0);
 
-//     PointRef point(view->point(0));
-//     for (PointId idx = 0; idx < m_totalNumPoints && idx < num; ++idx)
-//     {
-//         point.setPointId(idx);
-//         processOne(point);
-//         cnt++;
-//     }
+    PointRef point(view->point(0));
+    for (PointId idx = 0; idx < num; ++idx)
+    {
+        point.setPointId(idx);
+        processOne(point);
+        cnt++;
+    }
     return cnt;
 }
 
+
 bool StacReader::processOne(PointRef& point)
 {
-//     return true;
-    bool didRead(false);
-    didRead = StreamableWrapper::processOne(*m_streamable, point);
-    if (!didRead)
-    {
-        if (m_currentReaderIndex >= m_p->m_readerList.size())
-        {
-            log()->get(LogLevel::Debug) << "oh no we are done" << m_currentReaderIndex << std::endl;
-            return false;
-        }
-        else
-        {
-            std::lock_guard<std::mutex> lock(mutex);
-            m_currentReaderIndex++;
-            m_currentReader = m_p->m_readerList[m_currentReaderIndex].get();
-            Reader* reader = dynamic_cast<Reader*>(m_currentReader);
-            if (!reader)
-                throwError("Unable to cast stage to type Reader in readers.stac processOne!");
-
-            m_streamable = dynamic_cast<Streamable*>(reader);
-            if (!m_streamable)
-                throwError("Unable to cast stage to type Streamable in readers.stac processOne!");
-
-            log()->get(LogLevel::Debug) << "Switching reader to '" << m_currentReaderIndex <<"'" << std::endl;
-            didRead = StreamableWrapper::processOne(*m_streamable, point);
-            log()->get(LogLevel::Debug) << "successfully read from new reader didRead: " << didRead << std::endl;
-            return didRead;
-
-        }
-
-
-    }
-    return didRead;
+    return true;
 }
 
 
 void StacReader::prepared(PointTableRef table)
 {
-    log()->get(LogLevel::Debug) << "Executing StacReader::prepared" << std::endl;
-
-    if (m_p->m_readerList.size())
-    {
-        m_currentReader = m_p->m_readerList[m_currentReaderIndex].get();
-        setInput(*m_currentReader);
-        for (auto& r: m_p->m_readerList)
-        {
-            r->prepare(table);
-            r->setLog(log());
-        }
-    }
-    else
-        throw pdal_error("Reader list is empty in StacReader:prepared!");
-
-    Reader* reader = dynamic_cast<Reader*>(m_currentReader);
-    if (!reader)
-        throwError("Unable to cast stage to type Reader in readers.stac prepared!");
-
-    m_streamable = dynamic_cast<Streamable*>(reader);
-    if (!m_streamable)
-        throwError("Unable to cast stage to type Streamable in readers.stac prepared!");
+    m_merge.prepare(table);
+    m_merge.setLog(log());
 }
+
 
 void StacReader::ready(PointTableRef table)
 {
-
-    for (auto& r: m_p->m_readerList)
-    {
-        StageWrapper::ready(*r, table);
-    }
-
+    StageWrapper::ready(m_merge, table);
 }
 
-void StacReader::done(PointTableRef)
-{
-    m_p->m_stream.reset();
-}
 
 PointViewSet StacReader::run(PointViewPtr view)
 {
-    log()->get(LogLevel::Debug) << "Executing StacReader::run" << std::endl;
-    return m_pvSet;
+    return StageWrapper::run(m_merge, view);
 }
 
 
