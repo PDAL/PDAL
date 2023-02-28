@@ -22,5 +22,4 @@ dependencies:
   - re2  # [linux]
   - abseil-cpp  # [linux]
   - ccache
-  - libcxx=14  # [osx]
 
