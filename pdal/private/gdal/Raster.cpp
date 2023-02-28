@@ -327,7 +327,7 @@ GDALError Raster::open(int width, int height, int numBands,
   Open a raster for output.
   \return  Error code, or GDALError::None.
 */
-GDALError Raster::open()
+GDALError Raster::open(StringList options)
 {
     if (m_ds)
         return GDALError::None;
@@ -341,8 +341,16 @@ GDALError Raster::open()
     }
 
     registerDrivers();
+
+    std::vector<const char *> opts;
+    for (size_t i = 0; i < options.size(); ++i)
+    {
+        opts.push_back(options[i].data());
+    }
+    opts.push_back(NULL);
+
     m_ds = (GDALDataset *)GDALOpenEx(m_filename.c_str(),
-        GDAL_OF_READONLY | GDAL_OF_RASTER, driverP, nullptr, nullptr);
+        GDAL_OF_READONLY | GDAL_OF_RASTER, driverP, nullptr, const_cast<char **>(opts.data()));
     return wake();
 }
 

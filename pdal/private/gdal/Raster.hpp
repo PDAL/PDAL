@@ -321,7 +321,7 @@ public:
     /**
       Open raster file for reading.
     */
-    GDALError open();
+    GDALError open(StringList options = StringList());
 
     /**
       Open a raster for writing.
