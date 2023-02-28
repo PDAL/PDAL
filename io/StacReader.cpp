@@ -47,6 +47,7 @@
 #include <pdal/private/SrsTransform.hpp>
 
 #include "private/connector/Connector.hpp"
+#include <pdal/StageWrapper.hpp>
 
 
 namespace pdal
@@ -76,10 +77,9 @@ void schemaFetch(const nlohmann::json_uri& json_uri, nlohmann::json& json)
 struct StacReader::Private
 {
 public:
-    std::unique_ptr<ILeStream> m_stream;
     std::unique_ptr<Args> m_args;
     std::unique_ptr<ThreadPool> m_pool;
-    std::vector<std::unique_ptr<Stage>> m_readerList;
+    std::vector<Reader*> m_readerList;
     std::mutex m_mutex;
     std::vector<std::string> m_idList;
     std::unique_ptr<connector::Connector> m_connector;
@@ -117,7 +117,11 @@ CREATE_STATIC_STAGE(StacReader, stacinfo)
 
 std::string StacReader::getName() const { return stacinfo.name; }
 
-StacReader::StacReader(): m_args(new StacReader::Args), m_p(new StacReader::Private){};
+StacReader::StacReader():
+    m_args(new StacReader::Args),
+    m_p(new StacReader::Private)
+{};
+
 StacReader::~StacReader(){};
 
 void StacReader::addArgs(ProgramArgs& args)
@@ -340,7 +344,7 @@ Options StacReader::setReaderOptions(const NL::json& readerArgs, const std::stri
     return readerOptions;
 }
 
-void StacReader::setForwards(StringMap& headers, StringMap& query)
+void StacReader::setConnectionForwards(StringMap& headers, StringMap& query)
 {
     try
     {
@@ -437,12 +441,21 @@ void StacReader::initializeItem(NL::json stacJson)
     log()->get(LogLevel::Debug) << "Using driver " << driver <<
         " for file " << dataUrl << std::endl;
 
-    Stage *reader = PluginManager<Stage>::createObject(driver);
+    Stage *stage = m_factory.createStage(driver);
 
-    if (!reader)
+    if (!stage)
     {
         std::stringstream msg;
         msg << "Unable to create driver '" << driver << "' for "
+            << "for asset located at '" << dataUrl <<"'";
+        throw pdal_error(msg.str());
+    }
+
+    Reader* reader = dynamic_cast<Reader*>(stage);
+    if (!reader)
+    {
+        std::stringstream msg;
+        msg << "Unable to cast stage to reader for '" << driver << "' for "
             << "for asset located at '" << dataUrl <<"'";
         throw pdal_error(msg.str());
     }
@@ -452,12 +465,11 @@ void StacReader::initializeItem(NL::json stacJson)
     readerOptions.add("filename", dataUrl);
     reader->setOptions(readerOptions);
 
+    std::lock_guard<std::mutex> lock(m_p->m_mutex);
+    m_merge.setInput(*reader);
+    reader->setLog(log());
 
-    std::unique_lock<std::mutex> l(m_p->m_mutex);
-    if (m_p->m_readerList.size() > 0)
-        reader->setInput(*m_p->m_readerList.back());
-
-    m_p->m_readerList.push_back(std::unique_ptr<Stage>(reader));
+    m_p->m_readerList.push_back(reader);
 
 }
 
@@ -577,7 +589,7 @@ void StacReader::initialize()
 {
     StringMap headers;
     StringMap query;
-    setForwards(headers, query);
+    setConnectionForwards(headers, query);
     m_p->m_connector.reset(new connector::Connector(headers, query));
 
     m_p->m_pool.reset(new ThreadPool(m_args->threads));
@@ -601,6 +613,8 @@ void StacReader::initialize()
 
     if (m_p->m_readerList.empty())
         throw pdal_error("Reader list is empty after filtering.");
+
+    setInput(m_merge);
 }
 
 // returns true if property matches
@@ -901,6 +915,7 @@ bool StacReader::prune(NL::json stacJson)
     return false;
 }
 
+
 QuickInfo StacReader::inspect()
 {
     QuickInfo qi;
@@ -941,30 +956,44 @@ QuickInfo StacReader::inspect()
     return qi;
 }
 
+
+point_count_t StacReader::read(PointViewPtr view, point_count_t num)
+{
+    point_count_t cnt(0);
+
+    PointRef point(view->point(0));
+    for (PointId idx = 0; idx < num; ++idx)
+    {
+        point.setPointId(idx);
+        processOne(point);
+        cnt++;
+    }
+    return cnt;
+}
+
+
+bool StacReader::processOne(PointRef& point)
+{
+    return true;
+}
+
+
 void StacReader::prepared(PointTableRef table)
 {
-    if (m_p->m_readerList.size())
-        m_p->m_readerList.back()->prepare(table);
-    else
-        throw pdal_error("Reader list is empty in StacReader:prepared!");
+    m_merge.prepare(table);
+    m_merge.setLog(log());
 }
+
 
 void StacReader::ready(PointTableRef table)
 {
-    if (m_p->m_readerList.size())
-        m_pvSet = m_p->m_readerList.back()->execute(table);
-    else
-        throw pdal_error("Reader list is empty in StacReader:empty!");
+    StageWrapper::ready(m_merge, table);
 }
 
-void StacReader::done(PointTableRef)
-{
-    m_p->m_stream.reset();
-}
 
 PointViewSet StacReader::run(PointViewPtr view)
 {
-    return m_pvSet;
+    return StageWrapper::run(m_merge, view);
 }
 
 

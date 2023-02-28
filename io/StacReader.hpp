@@ -49,7 +49,7 @@
 namespace pdal
 {
 
-    class PDAL_DLL StacReader : public Reader
+    class PDAL_DLL StacReader : public Reader, public Streamable
     {
         public:
 
@@ -59,6 +59,7 @@ namespace pdal
             std::string getName() const override;
 
             using StringMap = std::map<std::string, std::string>;
+
         private:
 
             struct Private;
@@ -68,8 +69,6 @@ namespace pdal
             std::unique_ptr<Private> m_p;
 
             StageFactory m_factory;
-            MergeFilter m_merge;
-            PointViewSet m_pvSet;
 
             void handleReaderArgs();
             void initializeItem(NL::json stacJson);
@@ -79,7 +78,7 @@ namespace pdal
             void validateSchema(NL::json stacJson);
             Options setReaderOptions(const NL::json& readerArgs,
                                      const std::string& driver) const;
-            void setForwards(StringMap& headers, StringMap& query);
+            void setConnectionForwards(StringMap& headers, StringMap& query);
             std::string extractDriverFromItem(const NL::json& asset) const;
 
             bool prune(NL::json stacJson);
@@ -89,7 +88,11 @@ namespace pdal
             virtual QuickInfo inspect() override;
             virtual void prepared(PointTableRef table) override;
             virtual void ready(PointTableRef table) override;
-            virtual void done(PointTableRef table) override;
+            virtual point_count_t read(PointViewPtr view, point_count_t num) override;
+            virtual bool processOne(PointRef& point) override;
             virtual PointViewSet run(PointViewPtr view) override;
+
+            MergeFilter m_merge;
+
     };
 }
