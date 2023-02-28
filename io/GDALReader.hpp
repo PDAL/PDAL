@@ -81,6 +81,7 @@ private:
 
     BOX3D m_bounds;
     StringList m_dimNames;
+    StringList m_options;
 };
 
 } // namespace pdal

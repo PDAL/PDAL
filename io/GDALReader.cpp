@@ -151,13 +151,15 @@ void GDALReader::addArgs(ProgramArgs& args)
         "raster bands to dimension id", m_header);
     args.add("memorycopy", "Load the given raster file "
         "entirely to memory", m_useMemoryCopy, false).setHidden();
+    args.add("gdalopts", "GDAL driver options (name=value,name=value...)",
+        m_options);
 }
 
 
 void GDALReader::ready(PointTableRef table)
 {
     m_raster.reset(new gdal::Raster(m_filename));
-    if (m_raster->open() == gdal::GDALError::CantOpen)
+    if (m_raster->open(m_options) == gdal::GDALError::CantOpen)
         throwError("Couldn't open raster file '" + m_filename + "'.");
 
     if (m_useMemoryCopy)
