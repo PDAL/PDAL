@@ -10,10 +10,6 @@ find_package(PDAL COMPONENTS REQUIRED)
 endif(STANDALONE)
 
 find_package(rdb COMPONENTS REQUIRED)
-set_package_properties(rdb PROPERTIES
-    TYPE REQUIRED
-    PURPOSE "Read data from RIEGL databases"
-    )
 
 PDAL_ADD_PLUGIN(libname reader rdb
     FILES
