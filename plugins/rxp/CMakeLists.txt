@@ -1,10 +1,7 @@
 set(RXP_TEST_NAME rxptest)
 
 find_package(RiVLib COMPONENTS scanlib REQUIRED)
-set_package_properties(RiVLib PROPERTIES
-    TYPE REQUIRED
-    PURPOSE "Read data from RIEGL sensors"
-    )
+include(FeatureSummary)
 
 PDAL_ADD_PLUGIN(libname reader rxp
     FILES
