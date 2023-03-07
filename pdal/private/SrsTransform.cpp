@@ -43,7 +43,7 @@ SrsTransform::SrsTransform(const SrsTransform& src)
 {
     if (src.valid())
         set(*(src.m_transform->GetSourceCS()), *(src.m_transform->GetTargetCS()));
-}    
+}
 
 
 SrsTransform::SrsTransform(SrsTransform&& src) : m_transform(std::move(src.m_transform))
@@ -53,6 +53,20 @@ SrsTransform::SrsTransform(SrsTransform&& src) : m_transform(std::move(src.m_tra
 SrsTransform::~SrsTransform()
 {}
 
+
+void SrsTransform::setSrcEpoch(double epoch)
+{
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,4,0)
+    m_transform->GetSourceCS()->SetCoordinateEpoch(epoch);
+#endif
+}
+
+void SrsTransform::setDstEpoch(double epoch)
+{
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,4,0)
+    m_transform->GetTargetCS()->SetCoordinateEpoch(epoch);
+#endif
+}
 
 SrsTransform& SrsTransform::operator=(SrsTransform&& src)
 {

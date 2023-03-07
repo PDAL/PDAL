@@ -68,6 +68,8 @@ void ReprojectionFilter::addArgs(ProgramArgs& args)
     args.add("in_srs", "Input spatial reference", m_inSRS);
     args.add("in_axis_ordering", "Axis ordering override for in_srs", m_inAxisOrderingArg, {} );
     args.add("out_axis_ordering", "Axis ordering override for out_srs", m_outAxisOrderingArg, {} );
+    args.add("in_coord_epoch", "Input coordinate epoch for transformation", m_inCoordEpochArg);
+    args.add("out_coord_epoch", "Output coordinate epoch for transformation", m_outCoordEpochArg);
     args.add("error_on_failure", "Throw an exception if we can't reproject any point",
         m_errorOnFailure);
 }
@@ -159,6 +161,18 @@ void ReprojectionFilter::createTransform(const SpatialReference& srsSRS)
     } else {
         m_transform.reset(new SrsTransform(m_inSRS, m_outSRS));
     }
+
+
+    if (!pdal::Utils::compare_approx(m_inCoordEpochArg, 0.0f, 0.00f))
+    {
+        m_transform->setSrcEpoch(m_inCoordEpochArg);
+    }
+
+    if (!pdal::Utils::compare_approx(m_outCoordEpochArg, 0.0f, 0.00f))
+    {
+        m_transform->setDstEpoch(m_outCoordEpochArg);
+    }
+
 }
 
 
