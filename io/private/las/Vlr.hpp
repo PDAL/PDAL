@@ -57,6 +57,7 @@ static const uint16_t TextDescriptionRecordId = 3;
 static const uint16_t ExtraBytesRecordId = 4;
 static const uint16_t PdalMetadataRecordId = 12;
 static const uint16_t PdalPipelineRecordId = 13;
+static const uint16_t PdalWkt2RecordId = 4224;
 static const uint16_t CopcInfoRecordId = 1;
 static const uint16_t CopcHierarchyRecordId = 1000;
 

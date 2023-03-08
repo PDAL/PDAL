@@ -79,6 +79,22 @@ OGRScopedSpatialReference ogrCreateSrs(std::string s = "", double epoch=0.0)
     return r;
 }
 
+std::string exportToWkt(OGRSpatialReference* srs, const char** apszOptions)
+{
+    std::string wkt;
+    if (!srs)
+        return wkt;
+
+    char *buf = nullptr;
+    srs->exportToWkt(&buf, apszOptions);
+    if (buf)
+    {
+        wkt = buf;
+        CPLFree(buf);
+    }
+    return wkt;
+}
+
 }
 
 namespace pdal
@@ -214,10 +230,7 @@ void SpatialReference::set(std::string v)
         throw pdal_error(oss.str());
     }
 
-    char *poWKT = 0;
-    srs.exportToWkt(&poWKT);
-    m_wkt = poWKT;
-    CPLFree(poWKT);
+    m_wkt = exportToWkt(&srs, nullptr);
 }
 
 
@@ -298,11 +311,8 @@ std::string SpatialReference::getHorizontal() const
 
         if (poSRS)
         {
-            char *pszWKT(nullptr);
             poSRS->StripVertical();
-            poSRS->exportToWkt(&pszWKT);
-            m_horizontalWkt = pszWKT;
-            CPLFree(pszWKT);
+            m_horizontalWkt = exportToWkt(poSRS.get(), nullptr);
         }
     }
     return m_horizontalWkt;
@@ -477,7 +487,8 @@ bool SpatialReference::isWKT(const std::string& wkt)
         "IMAGECRS",
         "PARAMETRICCRS",
         "TIMECRS",
-        "COMPOUNDCRS"
+        "COMPOUNDCRS",
+        "DERIVEDPROJCRS"
     };
 
     for (const std::string& s : leaders)
@@ -495,40 +506,32 @@ std::string SpatialReference::prettyWkt(const std::string& wkt)
     if (!srs)
         return outWkt;
 
-    char *buf = nullptr;
-    srs->exportToPrettyWkt(&buf, FALSE);
-
-    outWkt = buf;
-    CPLFree(buf);
+    const char* apszOptions[] = { "MULTILINE=YES", nullptr }; // equivalent to exportToPrettyWkt
+    outWkt = exportToWkt(srs.get(), apszOptions);
     return outWkt;
 }
 
-std::string SpatialReference::getWKT1() const
+std::string SpatialReference::getWKT1(bool throwIfEmpty) const
 {
     std::string wkt = getWKT();
     if (wkt.empty())
         return wkt;
 
     OGRScopedSpatialReference srs = ogrCreateSrs(wkt, m_epoch);
-    std::string wkt1;
-    if (srs)
-    {
-        char *buf = nullptr;
-        const char* apszOptions[] =
-            { "FORMAT=WKT1_GDAL", "ALLOW_ELLIPSOIDAL_HEIGHT_AS_VERTICAL_CRS=YES", nullptr };
-
-        srs->exportToWkt(&buf, apszOptions);
-        if (buf)
-        {
-            wkt1 = buf;
-            CPLFree(buf);
-        }
-    }
-    if (wkt1.empty())
-        throw pdal_error("Couldn't convert spatial reference to WKT version 1.");
+    const char* apszOptions[] = { "FORMAT=WKT1_GDAL", "ALLOW_ELLIPSOIDAL_HEIGHT_AS_VERTICAL_CRS=YES", nullptr };
+    std::string wkt1 = exportToWkt(srs.get(), apszOptions);
+    if (wkt1.empty() && throwIfEmpty)
+       throw pdal_error("Couldn't convert spatial reference to WKT version 1.");
     return wkt1;
 }
 
+std::string SpatialReference::getWKT2() const
+{
+    std::string wkt = getWKT();
+    OGRScopedSpatialReference srs = ogrCreateSrs(wkt);
+    const char* wktOptions[] = { "FORMAT=WKT2", nullptr };
+    return exportToWkt(srs.get(), wktOptions);
+}
 
 int SpatialReference::getUTMZone() const
 {

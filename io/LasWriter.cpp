@@ -99,6 +99,7 @@ struct LasWriter::Options
     StringHeaderVal<0> offsetY;
     StringHeaderVal<0> offsetZ;
     std::vector<las::Evlr> userVlrs;
+    bool writeWKT2;
 };
 
 struct LasWriter::Private
@@ -173,6 +174,7 @@ void LasWriter::addArgs(ProgramArgs& args)
     args.add("offset_y", "Y offset", d->opts.offsetY);
     args.add("offset_z", "Z offset", d->opts.offsetZ);
     args.add("vlrs", "List of VLRs to set", d->opts.userVlrs);
+    args.add("write_wkt2", "Write WKT2 as VLR?", d->opts.writeWKT2, decltype(d->opts.writeWKT2)(false));
 }
 
 void LasWriter::initialize()
@@ -485,11 +487,17 @@ void LasWriter::addSpatialRefVlrs()
     deleteVlr(las::TransformUserId, las::GeotiffAsciiRecordId);
     deleteVlr(las::TransformUserId, las::WktRecordId);
     deleteVlr(las::LiblasUserId, las::WktRecordId);
+    deleteVlr(las::PdalUserId, las::PdalWkt2RecordId);
 
     if (d->header.versionAtLeast(1, 4))
         addWktVlr();
     else
+    {
         addGeotiffVlrs();
+        if (d->opts.writeWKT2)
+            log()->get(LogLevel::Error) << "pdal wkt2 VLR needs at least LAS 1.4. "
+                "wkt2 option will be ignored.";
+    }
 }
 
 void LasWriter::addGeotiffVlrs()
@@ -524,8 +532,18 @@ void LasWriter::addGeotiffVlrs()
 /// \return  Whether the VLR was added.
 bool LasWriter::addWktVlr()
 {
+    // WKT2 can be writen in PDAL VLRs
+    std::string wkt2;
+    if (d->opts.writeWKT2) {
+        wkt2 = m_srs.getWKT2();
+        if (!wkt2.empty()) {
+            std::vector<char> wktBytes(wkt2.begin(), wkt2.end());
+            wktBytes.resize(wktBytes.size() + 1, 0);
+            addVlr(las::PdalUserId, las::PdalWkt2RecordId, "PDAL WKT2 Record", wktBytes);
+        }
+    }
     // LAS 1.4 requires WKTv1
-    std::string wkt = m_srs.getWKT1();
+    std::string wkt = m_srs.getWKT1(wkt2.empty());
     if (wkt.empty())
         return false;
 

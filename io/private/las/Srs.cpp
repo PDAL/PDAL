@@ -120,7 +120,13 @@ void Srs::init(const VlrList& vlrs, bool useWkt, LogPtr log)
     m_srs = SpatialReference();
     m_geotiffString.clear();
 
-    const Vlr *wktVlr = findVlr(TransformUserId, WktRecordId, vlrs);
+    const Vlr *wktVlr = findVlr(PdalUserId, PdalWkt2RecordId, vlrs);
+    if (!wktVlr)
+        wktVlr = findVlr(TransformUserId, WktRecordId, vlrs);
+    else // TODO remove
+        log->get(LogLevel::Debug) << "File contains "
+            "WKT2 VLR.\n" << wktVlr->data() << std::endl;
+
     const Vlr *gtiffVlr = findVlr(TransformUserId, GeotiffDirectoryRecordId, vlrs);
 
     if (wktVlr && gtiffVlr && log)
