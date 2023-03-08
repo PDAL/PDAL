@@ -77,6 +77,50 @@ public:
 
 using namespace pdal;
 
+namespace
+{
+    std::string wkt2DerivedProjected =
+        "DERIVEDPROJCRS[\"Custom Site Calibrated CRS\",\n"
+        "    BASEPROJCRS[\"NAD83(2011) / Mississippi East (ftUS)\",\n"
+        "        BASEGEOGCRS[\"NAD83(2011)\",\n"
+        "            DATUM[\"NAD83 (National Spatial Reference System "
+        "2011)\",\n"
+        "                ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+        "        CONVERSION[\"SPCS83 Mississippi East zone (US Survey "
+        "feet)\",\n"
+        "            METHOD[\"Transverse Mercator\",\n"
+        "                ID[\"EPSG\",9807]],\n"
+        "            PARAMETER[\"Latitude of natural origin\",29.5,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8801]],\n"
+        "            PARAMETER[\"Longitude of natural "
+        "origin\",-88.8333333333333,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8802]],\n"
+        "            PARAMETER[\"Scale factor at natural origin\",0.99995,\n"
+        "                SCALEUNIT[\"unity\",1],\n"
+        "                ID[\"EPSG\",8805]],\n"
+        "            PARAMETER[\"False easting\",984250,\n"
+        "                LENGTHUNIT[\"US survey foot\",0.304800609601219],\n"
+        "                ID[\"EPSG\",8806]],\n"
+        "            PARAMETER[\"False northing\",0,\n"
+        "                LENGTHUNIT[\"US survey foot\",0.304800609601219],\n"
+        "                ID[\"EPSG\",8807]]]],\n"
+        "    DERIVINGCONVERSION[\"Affine transformation as PROJ-based\",\n"
+        "        METHOD[\"PROJ-based operation method: "
+        "+proj=pipeline +step +proj=unitconvert +xy_in=m +xy_out=us-ft "
+        "+step +proj=affine +xoff=20 "
+        "+step +proj=unitconvert +xy_in=us-ft +xy_out=m\"]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"northing (Y)\",north,\n"
+        "            LENGTHUNIT[\"US survey foot\",0.304800609601219]],\n"
+        "        AXIS[\"easting (X)\",east,\n"
+        "            LENGTHUNIT[\"US survey foot\",0.304800609601219]],\n"
+        "    REMARK[\"EPSG:6507 with 20 feet offset and axis inversion\"]]";
+}
 
 TEST(LasWriterTest, srs)
 {
@@ -128,47 +172,6 @@ TEST(LasWriterTest, srs2)
 
 TEST(LasWriterTest, srsWkt2)
 {
-    std::string wkt2 =
-        "DERIVEDPROJCRS[\"Custom Site Calibrated CRS\",\n"
-        "    BASEPROJCRS[\"NAD83(2011) / Mississippi East (ftUS)\",\n"
-        "        BASEGEOGCRS[\"NAD83(2011)\",\n"
-        "            DATUM[\"NAD83 (National Spatial Reference System "
-        "2011)\",\n"
-        "                ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
-        "                    LENGTHUNIT[\"metre\",1]]],\n"
-        "            PRIMEM[\"Greenwich\",0,\n"
-        "                ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
-        "        CONVERSION[\"SPCS83 Mississippi East zone (US Survey "
-        "feet)\",\n"
-        "            METHOD[\"Transverse Mercator\",\n"
-        "                ID[\"EPSG\",9807]],\n"
-        "            PARAMETER[\"Latitude of natural origin\",29.5,\n"
-        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
-        "                ID[\"EPSG\",8801]],\n"
-        "            PARAMETER[\"Longitude of natural "
-        "origin\",-88.8333333333333,\n"
-        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
-        "                ID[\"EPSG\",8802]],\n"
-        "            PARAMETER[\"Scale factor at natural origin\",0.99995,\n"
-        "                SCALEUNIT[\"unity\",1],\n"
-        "                ID[\"EPSG\",8805]],\n"
-        "            PARAMETER[\"False easting\",984250,\n"
-        "                LENGTHUNIT[\"US survey foot\",0.304800609601219],\n"
-        "                ID[\"EPSG\",8806]],\n"
-        "            PARAMETER[\"False northing\",0,\n"
-        "                LENGTHUNIT[\"US survey foot\",0.304800609601219],\n"
-        "                ID[\"EPSG\",8807]]]],\n"
-        "    DERIVINGCONVERSION[\"Affine transformation as PROJ-based\",\n"
-        "        METHOD[\"PROJ-based operation method: "
-        "+proj=pipeline +step +proj=unitconvert +xy_in=m +xy_out=us-ft "
-        "+step +proj=affine +xoff=20 "
-        "+step +proj=unitconvert +xy_in=us-ft +xy_out=m\"]],\n"
-        "    CS[Cartesian,2],\n"
-        "        AXIS[\"northing (Y)\",north,\n"
-        "            LENGTHUNIT[\"US survey foot\",0.304800609601219]],\n"
-        "        AXIS[\"easting (X)\",east,\n"
-        "            LENGTHUNIT[\"US survey foot\",0.304800609601219]],\n"
-        "    REMARK[\"EPSG:6507 with 20 feet offset and axis inversion\"]]";
     Options readerOps;
     readerOps.add("filename", Support::datapath("las/utm15.las"));
 
@@ -177,7 +180,7 @@ TEST(LasWriterTest, srsWkt2)
 
     Options writerOps;
     writerOps.add("filename", Support::temppath("out.las"));
-    writerOps.add("a_srs", wkt2);
+    writerOps.add("a_srs", wkt2DerivedProjected);
     writerOps.add("minor_version", 4);
     writerOps.add("write_wkt2", true);
     LasWriter writer;
@@ -190,7 +193,7 @@ TEST(LasWriterTest, srsWkt2)
 
     LasTester tester;
     SpatialReference srs = tester.srs(writer);
-    EXPECT_EQ(srs, wkt2);
+    EXPECT_EQ(srs, wkt2DerivedProjected);
 }
 
 TEST(LasWriterTest, auto_offset)
@@ -1292,6 +1295,113 @@ TEST(LasWriterTest, pdal_add_vlr)
     const LasVLR& v2 = vlrs[2];
     std::string s2(v2.data(), v2.data() + v2.dataLen());
     EXPECT_EQ(s2, "TerraScan");
+}
+
+TEST(LasWriterTest, pdal_wkt2_vlr)
+{
+    PointTable table;
+
+    std::string infile(Support::datapath("las/1.2-with-color.las"));
+    std::string outfile(Support::temppath("simple.las"));
+
+    // remove file from earlier run, if needed
+    FileUtils::deleteFile(outfile);
+
+    Options readerOpts;
+    readerOpts.add("filename", infile);
+
+    Options writerOpts;
+    writerOpts.add("a_srs", "EPSG:32632");
+    writerOpts.add("write_wkt2", true);
+    writerOpts.add("major_version", 1);
+    writerOpts.add("minor_version", 4);
+    writerOpts.add("filename", outfile);
+
+    LasReader reader;
+    reader.setOptions(readerOpts);
+
+    LasWriter writer;
+    writer.setOptions(writerOpts);
+    writer.setInput(reader);
+    writer.prepare(table);
+    writer.execute(table);
+
+    PointTable t2;
+    Options readerOpts2;
+    readerOpts2.add("filename", outfile);
+    LasReader reader2;
+    reader2.setOptions(readerOpts2);
+
+    reader2.prepare(t2);
+    reader2.execute(t2);
+
+    const VlrList& vlrs = reader2.header().vlrs();
+    EXPECT_GT(vlrs.size(), 1u);
+
+    bool vlrFound = false;
+    for (const LasVLR& v : vlrs)
+    {
+        if (v.userId() == "PDAL" && v.recordId() == 4224)
+        {
+            std::string s1(v.data(), v.data() + v.dataLen());
+            std::string s1Check = "PROJCRS[\"WGS 84 / UTM zone 32N\"";
+            EXPECT_EQ(s1.substr(0, s1Check.size()), s1Check);
+            vlrFound = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(vlrFound);
+}
+
+TEST(LasWriterTest, pdal_wkt2_with_derivedprojcrs_vlr)
+{
+    PointTable table;
+
+    std::string infile(Support::datapath("las/1.2-with-color.las"));
+    std::string outfile(Support::temppath("simple.las"));
+
+    // remove file from earlier run, if needed
+    FileUtils::deleteFile(outfile);
+
+    Options readerOpts;
+    readerOpts.add("filename", infile);
+
+    Options writerOpts;
+    writerOpts.add("a_srs", wkt2DerivedProjected);
+    writerOpts.add("write_wkt2", true);
+    writerOpts.add("major_version", 1);
+    writerOpts.add("minor_version", 4);
+    writerOpts.add("filename", outfile);
+
+    LasReader reader;
+    reader.setOptions(readerOpts);
+
+    LasWriter writer;
+    writer.setOptions(writerOpts);
+    writer.setInput(reader);
+    writer.prepare(table);
+    writer.execute(table);
+
+    PointTable t2;
+    Options readerOpts2;
+    readerOpts2.add("filename", outfile);
+    LasReader reader2;
+    reader2.setOptions(readerOpts2);
+
+    reader2.prepare(t2);
+    reader2.execute(t2);
+
+    const VlrList& vlrs = reader2.header().vlrs();
+    EXPECT_EQ(vlrs.size(), 1u);
+
+    const LasVLR& v1 = vlrs[0];
+    EXPECT_EQ(v1.recordId(), 4224);
+    EXPECT_EQ(v1.userId(), "PDAL");
+    std::string s1(v1.data(), v1.data() + v1.dataLen());
+    std::string s1Check = "DERIVEDPROJCRS[\"Custom Site Calibrated CRS\"";
+    EXPECT_EQ(s1.substr(0, s1Check.size()), s1Check);
+
+    EXPECT_EQ(reader2.header().srs(), SpatialReference(wkt2DerivedProjected));
 }
 
 // Make sure we can read an array of VLRs in a pipeline.
