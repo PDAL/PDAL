@@ -531,7 +531,7 @@ GDALError Raster::computePDALDimensionTypes()
   \param[out] data  Vector of raster data associated with the provided point.
   \return  Error code or GDALError::None.
 */
-GDALError Raster::read(double x, double y, std::vector<double>& data)
+GDALError Raster::read(double x, double y, std::vector<double>& data, std::array<double, 2>& pix)
 {
     if (!m_ds)
     {
@@ -557,10 +557,10 @@ GDALError Raster::read(double x, double y, std::vector<double>& data)
     {
         GDALRasterBandH b = GDALGetRasterBand(m_ds, i + 1);
         if (GDALRasterIO(b, GF_Read, pixel, line, 1, 1,
-            &data[0], 1, 1, GDT_Float64, 0, 0) == CE_None)
+            &pix[0], 1, 1, GDT_Float64, 0, 0) == CE_None)
         {
             // we read a pixel put its values in our vector
-//             data[i] = pix[0];
+            data[i] = pix[0];
         }
     }
 

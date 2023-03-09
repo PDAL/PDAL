@@ -82,8 +82,6 @@ private:
     BOX3D m_bounds;
     StringList m_dimNames;
     StringList m_options;
-    std::array<double, 2> m_coords;
-    std::vector<double> m_data;
 };
 
 } // namespace pdal

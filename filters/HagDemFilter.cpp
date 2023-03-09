@@ -100,7 +100,8 @@ void HagDemFilter::filter(PointView& view)
 bool HagDemFilter::processOne(PointRef& point)
 {
     using namespace pdal::Dimension;
-    std::vector<double> data;
+    static std::vector<double> data;
+    static std::array<double, 2> pix;
 
     // If "zero_ground" option is set, all ground points get HAG of 0
     if (m_zeroGround &&
@@ -115,7 +116,7 @@ bool HagDemFilter::processOne(PointRef& point)
 
         // If raster has a point at X, Y of pointcloud point, use it.
         // Otherwise the HAG value is not set.
-        if (m_raster->read(x, y, data) == gdal::GDALError::None)
+        if (m_raster->read(x, y, data, pix) == gdal::GDALError::None)
         {
             double z = point.getFieldAs<double>(Id::Z);
             double hag = z - data[m_band - 1];

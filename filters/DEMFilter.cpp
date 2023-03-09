@@ -109,14 +109,14 @@ void DEMFilter::prepared(PointTableRef table)
 bool DEMFilter::processOne(PointRef& point)
 {
     static std::vector<double> data;
+    static std::array<double, 2> pix;
 
     double x = point.getFieldAs<double>(Dimension::Id::X);
     double y = point.getFieldAs<double>(Dimension::Id::Y);
     double z = point.getFieldAs<double>(m_args->m_dim);
 
     bool passes(false);
-
-    if (m_raster->read(x, y, data) == gdal::GDALError::None)
+    if (m_raster->read(x, y, data, pix) == gdal::GDALError::None)
     {
         double v = data[m_args->m_band-1];
         double lb = v - m_args->m_range.m_lower_bound;

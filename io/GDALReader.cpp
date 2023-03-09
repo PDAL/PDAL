@@ -197,22 +197,25 @@ point_count_t GDALReader::read(PointViewPtr view, point_count_t numPts)
 
 bool GDALReader::processOne(PointRef& point)
 {
+    std::array<double, 2> coords;
     if (m_row == m_height)
         return false; // done
 
-    m_raster->pixelToCoord(m_col, m_row, m_coords);
-    double x = m_coords[0];
-    double y = m_coords[1];
+    m_raster->pixelToCoord(m_col, m_row, coords);
+    double x = coords[0];
+    double y = coords[1];
     point.setField(Dimension::Id::X, x);
     point.setField(Dimension::Id::Y, y);
 
-    if (m_raster->read(x, y, m_data) != gdal::GDALError::None)
+    static std::vector<double> data;
+    static std::array<double, 2> pix;
+    if (m_raster->read(x, y, data, pix) != gdal::GDALError::None)
         return false;
 
     for (int b = 0; b < m_raster->bandCount(); ++b)
     {
         Dimension::Id id = m_bandIds[b];
-        double v = m_data[b];
+        double v = data[b];
         point.setField(id, v);
     }
     m_col++;

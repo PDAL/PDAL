@@ -467,8 +467,9 @@ public:
       \param x  X position to read
       \param y  Y position to read
       \param data  Vector in which to store data.
+      \param pix pixel to fill
     */
-    GDALError read(double x, double y, std::vector<double>& data);
+    GDALError read(double x, double y, std::vector<double>& data, std::array<double, 2>& pix);
 
     /**
       Get a vector of dimensions that map to the bands of a raster.
