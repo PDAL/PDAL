@@ -543,7 +543,7 @@ GDALError Raster::read(double x, double y, std::vector<double>& data)
     int32_t line(0);
     data.resize(m_numBands);
 
-    std::array<double, 2> pix = { {0.0, 0.0} };
+//     std::array<double, 2> pix = { {0.0, 0.0} };
 
     // No data at this x,y if we can't compute a pixel/line location
     // for it.
@@ -557,10 +557,10 @@ GDALError Raster::read(double x, double y, std::vector<double>& data)
     {
         GDALRasterBandH b = GDALGetRasterBand(m_ds, i + 1);
         if (GDALRasterIO(b, GF_Read, pixel, line, 1, 1,
-            &pix[0], 1, 1, GDT_Float64, 0, 0) == CE_None)
+            &data[0], 1, 1, GDT_Float64, 0, 0) == CE_None)
         {
             // we read a pixel put its values in our vector
-            data[i] = pix[0];
+//             data[i] = pix[0];
         }
     }
 
