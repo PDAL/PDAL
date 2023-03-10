@@ -183,7 +183,7 @@ private:
     point_count_t m_numPts;
 
     // Make sure this is power-of-2 to facilitate fast div and mod ops.
-    static const point_count_t m_blockPtCnt = 65536;
+    static const point_count_t m_blockPtCnt = 16384;
 
 public:
     ColumnPointTable() : SimplePointTable(m_layout), m_numPts(0)
