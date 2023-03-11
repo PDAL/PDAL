@@ -182,7 +182,7 @@ TEST(LasWriterTest, srsWkt2)
     writerOps.add("filename", Support::temppath("out.las"));
     writerOps.add("a_srs", wkt2DerivedProjected);
     writerOps.add("minor_version", 4);
-    writerOps.add("write_wkt2", true);
+    writerOps.add("enhanced_srs_vlrs", true);
     LasWriter writer;
     writer.setInput(reader);
     writer.setOptions(writerOps);
@@ -1312,7 +1312,7 @@ TEST(LasWriterTest, pdal_wkt2_vlr)
 
     Options writerOpts;
     writerOpts.add("a_srs", "EPSG:32632");
-    writerOpts.add("write_wkt2", true);
+    writerOpts.add("enhanced_srs_vlrs", true);
     writerOpts.add("major_version", 1);
     writerOpts.add("minor_version", 4);
     writerOpts.add("filename", outfile);
@@ -1368,7 +1368,7 @@ TEST(LasWriterTest, pdal_wkt2_with_derivedprojcrs_vlr)
 
     Options writerOpts;
     writerOpts.add("a_srs", wkt2DerivedProjected);
-    writerOpts.add("write_wkt2", true);
+    writerOpts.add("enhanced_srs_vlrs", true);
     writerOpts.add("major_version", 1);
     writerOpts.add("minor_version", 4);
     writerOpts.add("filename", outfile);
@@ -1392,7 +1392,7 @@ TEST(LasWriterTest, pdal_wkt2_with_derivedprojcrs_vlr)
     reader2.execute(t2);
 
     const VlrList& vlrs = reader2.header().vlrs();
-    EXPECT_EQ(vlrs.size(), 1u);
+    EXPECT_EQ(vlrs.size(), 2u);
 
     const LasVLR& v1 = vlrs[0];
     EXPECT_EQ(v1.recordId(), 4224);
@@ -1400,6 +1400,13 @@ TEST(LasWriterTest, pdal_wkt2_with_derivedprojcrs_vlr)
     std::string s1(v1.data(), v1.data() + v1.dataLen());
     std::string s1Check = "DERIVEDPROJCRS[\"Custom Site Calibrated CRS\"";
     EXPECT_EQ(s1.substr(0, s1Check.size()), s1Check);
+
+    const LasVLR& v2 = vlrs[1];
+    EXPECT_EQ(v2.recordId(), 4225);
+    EXPECT_EQ(v2.userId(), "PDAL");
+    std::string s2(v2.data(), v2.data() + v2.dataLen());
+    std::string s2Check = "{\n  \"type\": \"DerivedProjectedCRS\",\n  \"name\"";
+    EXPECT_EQ(s2.substr(0, s2Check.size()), s2Check);
 
     EXPECT_EQ(reader2.header().srs(), SpatialReference(wkt2DerivedProjected));
 }

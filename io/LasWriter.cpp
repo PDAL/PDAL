@@ -99,7 +99,7 @@ struct LasWriter::Options
     StringHeaderVal<0> offsetY;
     StringHeaderVal<0> offsetZ;
     std::vector<las::Evlr> userVlrs;
-    bool writeWKT2;
+    bool enhancedSrsVlrs;
 };
 
 struct LasWriter::Private
@@ -174,7 +174,8 @@ void LasWriter::addArgs(ProgramArgs& args)
     args.add("offset_y", "Y offset", d->opts.offsetY);
     args.add("offset_z", "Z offset", d->opts.offsetZ);
     args.add("vlrs", "List of VLRs to set", d->opts.userVlrs);
-    args.add("write_wkt2", "Write WKT2 as VLR?", d->opts.writeWKT2, decltype(d->opts.writeWKT2)(false));
+    args.add("enhanced_srs_vlrs", "Write WKT2 and PROJJSON as VLR?", d->opts.enhancedSrsVlrs,
+        decltype(d->opts.enhancedSrsVlrs)(false));
 }
 
 void LasWriter::initialize()
@@ -488,16 +489,12 @@ void LasWriter::addSpatialRefVlrs()
     deleteVlr(las::TransformUserId, las::WktRecordId);
     deleteVlr(las::LiblasUserId, las::WktRecordId);
     deleteVlr(las::PdalUserId, las::PdalWkt2RecordId);
+    deleteVlr(las::PdalUserId, las::PdalProjJsonRecordId);
 
     if (d->header.versionAtLeast(1, 4))
         addWktVlr();
     else
-    {
         addGeotiffVlrs();
-        if (d->opts.writeWKT2)
-            log()->get(LogLevel::Error) << "pdal wkt2 VLR needs at least LAS 1.4. "
-                "wkt2 option will be ignored.";
-    }
 }
 
 void LasWriter::addGeotiffVlrs()
@@ -532,18 +529,35 @@ void LasWriter::addGeotiffVlrs()
 /// \return  Whether the VLR was added.
 bool LasWriter::addWktVlr()
 {
-    // WKT2 can be writen in PDAL VLRs
-    std::string wkt2;
-    if (d->opts.writeWKT2) {
-        wkt2 = m_srs.getWKT2();
+    // WKT2 and PROJJSON can be writen in PDAL VLRs
+    if (d->opts.enhancedSrsVlrs) {
+        const std::string wkt2 = m_srs.getWKT2();
         if (!wkt2.empty()) {
             std::vector<char> wktBytes(wkt2.begin(), wkt2.end());
             wktBytes.resize(wktBytes.size() + 1, 0);
             addVlr(las::PdalUserId, las::PdalWkt2RecordId, "PDAL WKT2 Record", wktBytes);
         }
+
+        const std::string projjson = m_srs.getPROJJSON();
+        if (!projjson.empty()) {
+            std::vector<char> wktBytes(projjson.begin(), projjson.end());
+            wktBytes.resize(wktBytes.size() + 1, 0);
+            addVlr(las::PdalUserId, las::PdalProjJsonRecordId, "PDAL PROJJSON Record", wktBytes);
+        }
     }
+
     // LAS 1.4 requires WKTv1
-    std::string wkt = m_srs.getWKT1(wkt2.empty());
+    std::string wkt;
+    try
+    {
+        wkt = m_srs.getWKT1();
+    }
+    catch(const std::exception&)
+    {
+        if (!d->opts.enhancedSrsVlrs)
+            throw;
+    }
+
     if (wkt.empty())
         return false;
 
