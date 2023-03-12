@@ -58,6 +58,38 @@ public:
     ~GDALReader();
 
 private:
+    class BlockReader
+    {
+    public:
+        BlockReader(GDALReader& reader);
+        void initialize();
+        point_count_t processBlock(PointViewPtr view);
+        bool processOne(PointRef& point);
+
+    private:
+        struct Block
+        {
+            std::vector<std::vector<double>> m_data;
+            int m_blockCol;
+            int m_blockRow;
+        };
+
+        bool readBlock();
+
+        GDALReader& m_reader;
+        int m_blockRow;
+        int m_blockCol;
+        int m_blockWidth;
+        int m_blockHeight;
+        int m_numBlocksX;
+        int m_numBlocksY;
+        
+        Block m_currentBlock;
+        bool m_needsRead;
+        int m_colInBlock;
+        int m_rowInBlock;
+    };
+
     virtual void initialize();
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
@@ -75,9 +107,8 @@ private:
     int m_width;
     int m_height;
     bool m_useMemoryCopy;
-    point_count_t m_index;
-    int m_row;
-    int m_col;
+
+    BlockReader m_blockReader;
 
     BOX3D m_bounds;
     StringList m_dimNames;
