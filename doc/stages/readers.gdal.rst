@@ -57,6 +57,11 @@ RGB values of an `ASPRS LAS`_ file using :ref:`writers.las`.
   ]
 
 
+.. note::
+   :ref:`readers.gdal` is quite sensitive to GDAL's cache settings. See the
+   ``GDAL_CACHEMAX`` value at https://gdal.org/user/configoptions.html for
+   more information.
+
 Options
 --------------------------------------------------------------------------------
 
@@ -71,3 +76,14 @@ header
     A comma-separated list of :ref:`dimension <dimensions>` IDs to map
     bands to. The length of the list must match the number
     of bands in the raster.
+
+memorycopy
+    Use the `GDAL MEM driver <https://gdal.org/drivers/raster/mem.html>`__
+    to copy the entire raster into memory before converting to points. This
+    is useful if the raster driver has a lot of per-block overhead or you
+    are willing to trade memory for performance.
+
+gdalopts
+    A list of key/value options to pass directly to the GDAL driver.  The
+    format is name=value,name=value,...  The option may be specified
+    any number of times.

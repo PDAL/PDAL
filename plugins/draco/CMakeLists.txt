@@ -2,10 +2,10 @@
 # Draco plugin CMake configuration
 #
 
-#
-# We use pkg_check_modules because the draco Cmake config is broken
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(DRACO REQUIRED draco>1.4.0)
+
+find_package(Draco 1.5.6 REQUIRED CONFIG)
+
+set (DRACO_LIBRARIES "draco::draco")
 
 if (WIN32)
     add_definitions(-DNOMINMAX)
