@@ -276,11 +276,10 @@ point_count_t GDALReader::BlockReader::processBlock(PointViewPtr view)
                 break;
 
             PointRef point = view->point(view->size());
-            std::array<double, 2> coords;
-            m_reader.m_raster->pixelToCoord(col, row, coords);
-            point.setField(Dimension::Id::X, coords[0]);
-            point.setField(Dimension::Id::Y, coords[1]);
-            for (int band = 0; band < m_currentBlock.m_data.size(); ++band)
+            m_reader.m_raster->pixelToCoord(col, row, m_coords);
+            point.setField(Dimension::Id::X, m_coords[0]);
+            point.setField(Dimension::Id::Y, m_coords[1]);
+            for (size_t band = 0; band < m_currentBlock.m_data.size(); ++band)
             {
                 Dimension::Id id = m_reader.m_bandIds[band];
                 point.setField(id, m_currentBlock.m_data.at(band).at(
@@ -306,11 +305,10 @@ bool GDALReader::BlockReader::processOne(PointRef& point)
     int sample = m_currentBlock.m_blockCol * m_blockWidth + m_colInBlock;
     int line = m_currentBlock.m_blockRow * m_blockHeight + m_rowInBlock;
 
-    std::array<double, 2> coords;
-    m_reader.m_raster->pixelToCoord(sample, line, coords);
-    point.setField(Dimension::Id::X, coords[0]);
-    point.setField(Dimension::Id::Y, coords[1]);
-    for (int band = 0; band < m_currentBlock.m_data.size(); ++band)
+    m_reader.m_raster->pixelToCoord(sample, line, m_coords);
+    point.setField(Dimension::Id::X, m_coords[0]);
+    point.setField(Dimension::Id::Y, m_coords[1]);
+    for (size_t band = 0; band < m_currentBlock.m_data.size(); ++band)
     {
         Dimension::Id id = m_reader.m_bandIds[band];
         point.setField(id, m_currentBlock.m_data.at(band).at(

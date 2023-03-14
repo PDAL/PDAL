@@ -83,11 +83,12 @@ private:
         int m_blockHeight;
         int m_numBlocksX;
         int m_numBlocksY;
-        
+
         Block m_currentBlock;
         bool m_needsRead;
         int m_colInBlock;
         int m_rowInBlock;
+        std::array<double, 2> m_coords;
     };
 
     virtual void initialize();

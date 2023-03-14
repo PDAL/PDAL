@@ -468,7 +468,7 @@ public:
       \param y  Y position to read
       \param data  Vector in which to store data.
     */
-    GDALError read(double x, double y, std::vector<double>& data);
+    GDALError read(double x, double y, std::vector<double>& data, std::array<double, 2>& pix);
 
     /**
      Read a block of data for a band into a vector of bytes.

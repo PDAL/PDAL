@@ -523,7 +523,10 @@ GDALError Raster::computePDALDimensionTypes()
   \param[out] data  Vector of raster data associated with the provided point.
   \return  Error code or GDALError::None.
 */
-GDALError Raster::read(double x, double y, std::vector<double>& data)
+GDALError Raster::read(double x,
+        double y,
+        std::vector<double>& data,
+        std::array<double, 2>& pix)
 {
     if (!m_ds)
     {
@@ -535,7 +538,7 @@ GDALError Raster::read(double x, double y, std::vector<double>& data)
     int32_t line(0);
     data.resize(m_numBands);
 
-    std::array<double, 2> pix = { {0.0, 0.0} };
+//     std::array<double, 2> pix = { {0.0, 0.0} };
 
     // No data at this x,y if we can't compute a pixel/line location
     // for it.
@@ -572,7 +575,7 @@ GDALError Raster::read(int band, int x, int y, int width, int height, std::vecto
     if (y + height > this->height()) {
         validHeight = this->height() - y;
     }
-    
+
     int validWidth = width;
     if (x + width > this->width()) {
         validWidth = this->width() - x;
