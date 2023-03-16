@@ -556,7 +556,7 @@ MetadataNode SpatialReference::toMetadata() const
     root.add("proj4", getProj4());
     root.add("prettywkt", prettyWkt(getHorizontal()));
     root.add("wkt", getHorizontal());
-    root.add("json", getPROJJSON());
+    root.addWithType("json", getPROJJSON(), "json", "PROJJSON");
     root.add("compoundwkt", getWKT());
     root.add("prettycompoundwkt", prettyWkt(m_wkt));
 
