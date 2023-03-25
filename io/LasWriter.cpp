@@ -488,8 +488,8 @@ void LasWriter::addSpatialRefVlrs()
     deleteVlr(las::TransformUserId, las::GeotiffAsciiRecordId);
     deleteVlr(las::TransformUserId, las::WktRecordId);
     deleteVlr(las::LiblasUserId, las::WktRecordId);
-    deleteVlr(las::PdalUserId, las::PdalWkt2RecordId);
-    deleteVlr(las::PdalUserId, las::PdalProjJsonRecordId);
+    // deleteVlr(las::PdalUserId, las::PdalWkt2RecordId);
+    // deleteVlr(las::PdalUserId, las::PdalProjJsonRecordId);
 
     if (d->header.versionAtLeast(1, 4))
         addWktVlr();

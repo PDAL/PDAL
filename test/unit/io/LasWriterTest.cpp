@@ -1411,6 +1411,121 @@ TEST(LasWriterTest, pdal_wkt2_with_derivedprojcrs_vlr)
     EXPECT_EQ(reader2.header().srs(), SpatialReference(wkt2DerivedProjected));
 }
 
+TEST(LasWriterTest, pdal_wkt2_read_as_projjson)
+{
+    PointTable table;
+
+    std::string infile(Support::datapath("las/1.2-with-color.las"));
+    std::string outfile(Support::temppath("simple.las"));
+
+    // remove file from earlier run, if needed
+    FileUtils::deleteFile(outfile);
+
+    Options readerOpts;
+    readerOpts.add("filename", infile);
+
+    Options writerOpts;
+    writerOpts.add("a_srs", wkt2DerivedProjected);
+    writerOpts.add("enhanced_srs_vlrs", true);
+    writerOpts.add("major_version", 1);
+    writerOpts.add("minor_version", 4);
+    writerOpts.add("filename", outfile);
+
+    LasReader reader;
+    reader.setOptions(readerOpts);
+
+    LasWriter writer;
+    writer.setOptions(writerOpts);
+    writer.setInput(reader);
+    writer.prepare(table);
+    writer.execute(table);
+
+    PointTable t2;
+    Options readerOpts2;
+    readerOpts2.add("filename", outfile);
+    readerOpts2.add("srs_consume_preference", "projjson, wkt2, wkt1, geotiff");
+    LasReader reader2;
+    reader2.setOptions(readerOpts2);
+
+    reader2.prepare(t2);
+    reader2.execute(t2);
+
+    EXPECT_EQ(reader2.header().srs(), SpatialReference(wkt2DerivedProjected));
+}
+
+TEST(LasWriterTest, read_consume_order)
+{
+    PointTable table;
+
+    std::string infile(Support::datapath("las/1.2-with-color.las"));
+    std::string outfile(Support::temppath("simple.las"));
+
+    // remove file from earlier run, if needed
+    FileUtils::deleteFile(outfile);
+
+    Options readerOpts;
+    readerOpts.add("filename", infile);
+
+    auto encodeToBase64 = [] (std::string input) {
+        std::vector<uint8_t> bytes(input.begin(), input.end());
+        bytes.resize(bytes.size() + 1, 0);
+        return Utils::base64_encode(bytes);
+    };
+
+    std::string utm32("EPSG:32632");
+    std::string vlrWkt2 =
+        " { \"description\": \"created wkt2 vlr\", "
+        "\"record_id\": 4224, \"user_id\": \"PDAL\", \"data\": \"" +
+        encodeToBase64(pdal::SpatialReference(utm32).getWKT2()) + "\" }";
+
+    std::string utm33("EPSG:32633");
+    std::string vlrProjJson =
+        " { \"description\": \"created projjson vlr\", "
+        "\"record_id\": 4225, \"user_id\": \"PDAL\", \"data\": \"" +
+        encodeToBase64(pdal::SpatialReference(utm33).getPROJJSON())  + "\" }";
+
+    std::string utm34("EPSG:32634");
+
+    // To check that reader is reading the srs precedence correctly
+    // we create different CRSs on each vlr
+    // to be able to compare different values.
+    Options writerOpts;
+    writerOpts.add("a_srs", utm34);
+    writerOpts.add("major_version", 1);
+    writerOpts.add("minor_version", 4);
+    writerOpts.add("filename", outfile);
+    writerOpts.add("vlrs", vlrWkt2);
+    writerOpts.add("vlrs", vlrProjJson);
+
+    LasReader reader;
+    reader.setOptions(readerOpts);
+
+    LasWriter writer;
+    writer.setOptions(writerOpts);
+    writer.setInput(reader);
+    writer.prepare(table);
+    writer.execute(table);
+
+    auto doTest = [outfile] (const std::string& preference, const std::string& srs_id) {
+        PointTable t2;
+        Options readerOpts2;
+        readerOpts2.add("filename", outfile);
+        if (!preference.empty())
+            readerOpts2.add("srs_consume_preference", preference);
+        LasReader reader2;
+        reader2.setOptions(readerOpts2);
+
+        reader2.prepare(t2);
+        reader2.execute(t2);
+        pdal::SpatialReference srs(srs_id);
+        EXPECT_EQ(reader2.header().srs(), srs) << " using srs_consume_preference " << preference;
+    };
+    doTest ("projjson, wkt2, wkt1, geotiff", utm33);
+    doTest ("wkt2, projjson, wkt1, geotiff", utm32);
+    doTest ("", utm32);
+    doTest ("wkt1, geotiff", utm34);
+}
+
 // Make sure we can read an array of VLRs in a pipeline.
 TEST(LasWriterTest, issue2937)
 {
