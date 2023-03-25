@@ -300,6 +300,13 @@ private:
 
     static void get(ILeStream& in, Uuid& uuid);
     static void put(OLeStream& in, Uuid uuid);
+
+    friend LasReader;
+
+    LasHeader();
+    las::Header& getHeader();
+    las::Srs& getSrs();
+    las::VlrList& getVlrs();
 };
 
 } // namespace pdal

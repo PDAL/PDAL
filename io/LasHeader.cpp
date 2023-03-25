@@ -55,6 +55,9 @@ std::string GetDefaultSoftwareId()
 
 struct LasHeader::Private
 {
+    Private()
+    {}
+
     Private(las::Header& h, las::Srs& srs, las::VlrList& vlrs) : h(h), srs(srs), vlrs(vlrs)
     {}
 
@@ -62,15 +65,18 @@ struct LasHeader::Private
         interfaceVlrs(src.interfaceVlrs)
     {}
 
-    las::Header& h;
-    las::Srs& srs;
-    las::VlrList& vlrs;
+    las::Header h;
+    las::Srs srs;
+    las::VlrList vlrs;
 
     VlrList interfaceVlrs;
 };
 
 LasHeader::LasHeader(las::Header& h, las::Srs& srs, las::VlrList& vlrs) :
     d(std::make_unique<Private>(h, srs, vlrs))
+{}
+
+LasHeader::LasHeader() : d(std::make_unique<Private>())
 {}
 
 LasHeader::LasHeader(const LasHeader& src) : d(std::make_unique<Private>(*(src.d)))
@@ -93,6 +99,21 @@ LasHeader& LasHeader::operator=(LasHeader&& src)
 
 LasHeader::~LasHeader()
 {}
+
+las::Header& LasHeader::getHeader()
+{
+    return d->h;
+}
+
+las::Srs& LasHeader::getSrs()
+{
+    return d->srs;
+}
+
+las::VlrList& LasHeader::getVlrs()
+{
+    return d->vlrs;
+}
 
 std::string LasHeader::getSystemIdentifier() const
 {

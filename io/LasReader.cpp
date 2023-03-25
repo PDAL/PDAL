@@ -82,17 +82,20 @@ struct LasReader::Options
 struct LasReader::Private
 {
     Options opts;
-    las::Header header;
     LasHeader apiHeader;
     LazPerfVlrDecompressor *decompressor;
     std::vector<char> decompressorBuf;
     point_count_t index;
     las::VlrList ignoreVlrs;
-    las::VlrList vlrs;
-    las::Srs srs;
+    las::Header& header;
+    las::VlrList& vlrs;
+    las::Srs& srs;
     std::vector<las::ExtraDim> extraDims;
 
-    Private() : apiHeader(header, srs, vlrs), decompressor(nullptr), index(0)
+    Private() : apiHeader(), decompressor(nullptr), index(0)
+    , header(apiHeader.getHeader())
+    , vlrs(apiHeader.getVlrs())
+    , srs(apiHeader.getSrs())
     {}
 };
 
