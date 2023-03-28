@@ -120,6 +120,11 @@ PluginDirectory::PluginDirectory()
 {
     for (const auto& dir : pluginSearchPaths())
     {
+        // Don't try to list the directory if it
+        // doesn't exist
+        if (!FileUtils::directoryExists(dir))
+            continue;
+
         StringList files = FileUtils::directoryList(dir);
         for (auto& file : files)
         {
