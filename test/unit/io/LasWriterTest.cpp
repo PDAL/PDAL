@@ -1341,7 +1341,7 @@ TEST(LasWriterTest, pdal_wkt2_vlr)
     bool vlrFound = false;
     for (const LasVLR& v : vlrs)
     {
-        if (v.userId() == "PDAL" && v.recordId() == 4224)
+        if (v.userId() == "LASF_Projection" && v.recordId() == 4224)
         {
             std::string s1(v.data(), v.data() + v.dataLen());
             std::string s1Check = "PROJCRS[\"WGS 84 / UTM zone 32N\"";
@@ -1396,7 +1396,7 @@ TEST(LasWriterTest, pdal_wkt2_with_derivedprojcrs_vlr)
 
     const LasVLR& v1 = vlrs[0];
     EXPECT_EQ(v1.recordId(), 4224);
-    EXPECT_EQ(v1.userId(), "PDAL");
+    EXPECT_EQ(v1.userId(), "LASF_Projection");
     std::string s1(v1.data(), v1.data() + v1.dataLen());
     std::string s1Check = "DERIVEDPROJCRS[\"Custom Site Calibrated CRS\"";
     EXPECT_EQ(s1.substr(0, s1Check.size()), s1Check);
@@ -1475,7 +1475,7 @@ TEST(LasWriterTest, read_consume_order)
     std::string utm32("EPSG:32632");
     std::string vlrWkt2 =
         " { \"description\": \"created wkt2 vlr\", "
-        "\"record_id\": 4224, \"user_id\": \"PDAL\", \"data\": \"" +
+        "\"record_id\": 4224, \"user_id\": \"LASF_Projection\", \"data\": \"" +
         encodeToBase64(pdal::SpatialReference(utm32).getWKT2()) + "\" }";
 
     std::string utm33("EPSG:32633");

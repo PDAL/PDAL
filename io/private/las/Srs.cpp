@@ -135,7 +135,7 @@ void Srs::init(const VlrList& vlrs, std::string srsConsumePreference, LogPtr log
     {
         if (pref == "wkt2")
         {
-            if ((vlr = findVlr(PdalUserId, PdalWkt2RecordId, vlrs)))
+            if ((vlr = findVlr(TransformUserId, PdalWkt2RecordId, vlrs)))
             {
                 log->get(LogLevel::Debug) << "Using WKT2 VLR" << std::endl;
                 break;
