@@ -1,36 +1,36 @@
 /******************************************************************************
-* Copyright (c) 2021 TileDB, Inc
-*
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following
-* conditions are met:
-*
-*     * Redistributions of source code must retain the above copyright
-*       notice, this list of conditions and the following disclaimer.
-*     * Redistributions in binary form must reproduce the above copyright
-*       notice, this list of conditions and the following disclaimer in
-*       the documentation and/or other materials provided
-*       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
-*       names of its contributors may be used to endorse or promote
-*       products derived from this software without specific prior
-*       written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-* "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-* LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-* FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-* COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-* BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
-* OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
-* AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
-* OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
-* OF SUCH DAMAGE.
-****************************************************************************/
+ * Copyright (c) 2021 TileDB, Inc
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following
+ * conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in
+ *       the documentation and/or other materials provided
+ *       with the distribution.
+ *     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
+ *       names of its contributors may be used to endorse or promote
+ *       products derived from this software without specific prior
+ *       written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+ * OF SUCH DAMAGE.
+ ****************************************************************************/
 
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -39,12 +39,11 @@
 #include <stdio.h>
 #include <sys/types.h>
 
-
 #include <filters/StatsFilter.hpp>
-#include <pdal/pdal_test_main.hpp>
 #include <io/FauxReader.hpp>
-#include <pdal/util/FileUtils.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/pdal_test_main.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 #include "Support.hpp"
 
@@ -79,7 +78,10 @@ protected:
         writer_options.add("z_tile_size", 10.f);
         writer_options.add("time_tile_size", 777600.f);
 
-        reader_options.add("bounds", BOX4D(0., 0., 0., 1314489618., 10., 10., 10., 1315353618.)); //sep 1 - sep 11 00:00:00 UTC 2021 -> gpstime
+        reader_options.add(
+            "bounds",
+            BOX4D(0., 0., 0., 1314489618., 10., 10., 10.,
+                  1315353618.)); // sep 1 - sep 11 00:00:00 UTC 2021 -> gpstime
         reader_options.add("count", count);
         reader_options.add("xyz_mode", "ramp");
         reader_options.add("time_mode", "ramp");
@@ -93,7 +95,6 @@ protected:
         writer.execute(table);
     }
     std::string data_path;
-
 };
 
 TEST_F(TileDBReaderTimeDimTest, set_dims)
@@ -111,7 +112,11 @@ TEST_F(TileDBReaderTimeDimTest, read_bbox4d)
 {
     Options options;
     options.add("array_name", data_path);
-    options.add("bbox4d", "([2., 7.], [2., 7.], [2., 7.], [1314662418., 1315094418.])"); // sep 3 - sep 8
+    options.add(
+        "bbox4d",
+        "([2., 7.], [2., 7.], [2., 7.], [1314662418., 1315094418.])"); // sep 3
+                                                                       // - sep
+                                                                       // 8
 
     TileDBReader reader;
     reader.setOptions(options);
@@ -145,9 +150,11 @@ TEST_F(TileDBReaderTimeDimTest, read_4d)
                             1e-1);
                 EXPECT_NEAR(0.f, point.getFieldAs<double>(Dimension::Id::Z),
                             1e-1);
-                EXPECT_NEAR(1314489618, point.getFieldAs<double>(Dimension::Id::GpsTime),
+                EXPECT_NEAR(1314489618,
+                            point.getFieldAs<double>(Dimension::Id::GpsTime),
                             10);
-                EXPECT_DOUBLE_EQ(1.0f, point.getFieldAs<double>(Dimension::Id::Density));
+                EXPECT_DOUBLE_EQ(
+                    1.0f, point.getFieldAs<double>(Dimension::Id::Density));
             }
             if (cnt == 1)
             {
@@ -157,9 +164,11 @@ TEST_F(TileDBReaderTimeDimTest, read_4d)
                             1e-1);
                 EXPECT_NEAR(0.101f, point.getFieldAs<double>(Dimension::Id::Z),
                             1e-1);
-                EXPECT_NEAR(1314498345, point.getFieldAs<double>(Dimension::Id::GpsTime),
+                EXPECT_NEAR(1314498345,
+                            point.getFieldAs<double>(Dimension::Id::GpsTime),
                             10);
-                EXPECT_DOUBLE_EQ(1.0, point.getFieldAs<double>(Dimension::Id::Density));
+                EXPECT_DOUBLE_EQ(
+                    1.0, point.getFieldAs<double>(Dimension::Id::Density));
             }
             if (cnt == 2)
             {
@@ -169,9 +178,11 @@ TEST_F(TileDBReaderTimeDimTest, read_4d)
                             1e-1);
                 EXPECT_NEAR(0.202f, point.getFieldAs<double>(Dimension::Id::Z),
                             1e-1);
-                EXPECT_NEAR(1314507072, point.getFieldAs<double>(Dimension::Id::GpsTime),
+                EXPECT_NEAR(1314507072,
+                            point.getFieldAs<double>(Dimension::Id::GpsTime),
                             10);
-                EXPECT_DOUBLE_EQ(1.0, point.getFieldAs<double>(Dimension::Id::Density));
+                EXPECT_DOUBLE_EQ(
+                    1.0, point.getFieldAs<double>(Dimension::Id::Density));
             }
             cnt++;
             return true;
@@ -198,11 +209,9 @@ TEST_F(TileDBReaderTimeDimTest, read_4d)
     std::vector<double> ys(count);
     std::vector<double> zs(count);
     std::vector<double> ts(count);
-    
-    q.set_buffer("X", xs)
-        .set_buffer("Y", ys)
-        .set_buffer("Z", zs)
-        .set_buffer("GpsTime", ts);
+
+    q.set_buffer("X", xs).set_buffer("Y", ys).set_buffer("Z", zs).set_buffer(
+        "GpsTime", ts);
 
     q.submit();
     array.close();
@@ -234,8 +243,8 @@ TEST_F(TileDBReaderTimeDimTest, test_dim4_change_name)
     faux_reader.prepare(table);
     faux_reader.execute(table);
 
-    EXPECT_TRUE(table.layout()->dimName(table.layout()->findDim("something")) == "something");
+    EXPECT_TRUE(table.layout()->dimName(table.layout()->findDim("something")) ==
+                "something");
 }
 
-} // pdal namespace
-
+} // namespace pdal

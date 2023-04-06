@@ -1,36 +1,36 @@
 /******************************************************************************
-* Copyright (c) 2021 TileDB, Inc.
-*
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following
-* conditions are met:
-*
-*     * Redistributions of source code must retain the above copyright
-*       notice, this list of conditions and the following disclaimer.
-*     * Redistributions in binary form must reproduce the above copyright
-*       notice, this list of conditions and the following disclaimer in
-*       the documentation and/or other materials provided
-*       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
-*       names of its contributors may be used to endorse or promote
-*       products derived from this software without specific prior
-*       written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-* "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-* LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-* FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-* COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-* BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
-* OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
-* AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
-* OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
-* OF SUCH DAMAGE.
-****************************************************************************/
+ * Copyright (c) 2021 TileDB, Inc.
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following
+ * conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in
+ *       the documentation and/or other materials provided
+ *       with the distribution.
+ *     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+ *       names of its contributors may be used to endorse or promote
+ *       products derived from this software without specific prior
+ *       written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+ * OF SUCH DAMAGE.
+ ****************************************************************************/
 
 #include "Bounds4D.hpp"
 #include <pdal/PluginHelper.hpp>
@@ -44,11 +44,11 @@ namespace
 const double LOWEST = (std::numeric_limits<double>::lowest)();
 const double HIGHEST = (std::numeric_limits<double>::max)();
 
-}
+} // namespace
 
 bool BOX4D::empty() const
 {
-    return  BOX3D::empty() && mintm == HIGHEST && maxtm == LOWEST;
+    return BOX3D::empty() && mintm == HIGHEST && maxtm == LOWEST;
 }
 
 bool BOX4D::valid() const
@@ -59,8 +59,10 @@ bool BOX4D::valid() const
 BOX4D& BOX4D::grow(double x, double y, double z, double tm)
 {
     BOX3D::grow(x, y, z);
-    if (tm < mintm) mintm = tm;
-    if (tm > maxtm) maxtm = tm;
+    if (tm < mintm)
+        mintm = tm;
+    if (tm > maxtm)
+        maxtm = tm;
     return *this;
 }
 
@@ -73,8 +75,8 @@ void BOX4D::clear()
 
 const BOX4D& BOX4D::getDefaultSpatialExtent()
 {
-    static BOX4D v(LOWEST, LOWEST, LOWEST, LOWEST,
-                   HIGHEST, HIGHEST, HIGHEST, HIGHEST);
+    static BOX4D v(LOWEST, LOWEST, LOWEST, LOWEST, HIGHEST, HIGHEST, HIGHEST,
+                   HIGHEST);
     return v;
 }
 
@@ -98,7 +100,8 @@ bool discardSpacesBefore(std::istringstream& ss, char nextChar)
 char discardSpacesBefore(std::istringstream& ss, const std::string& nextChars)
 {
     Utils::eatwhitespace(ss);
-    for (const auto nextChar : nextChars) {
+    for (const auto nextChar : nextChars)
+    {
         if (ss.peek() == nextChar)
             return ss.get();
     }
@@ -167,7 +170,8 @@ void BOX4D::parse(const std::string& s, std::string::size_type& pos)
     char nextChar = discardSpacesBefore(ss, ",)");
     if (nextChar == 0)
         throw error("No comma separating 'Z' and 'time' dimensions.");
-    else if (nextChar == ',') {
+    else if (nextChar == ',')
+    {
         parsePair<BOX4D>(ss, mintm, maxtm);
         if (!discardSpacesBefore(ss, ')'))
             throw error("No closing ')'.");
@@ -190,8 +194,7 @@ std::istream& operator>>(std::istream& in, BOX4D& box)
     return in;
 }
 
-Bounds4D::Bounds4D(const BOX4D& box) : m_box(box)
-{}
+Bounds4D::Bounds4D(const BOX4D& box) : m_box(box) {}
 
 Bounds4D::Bounds4D(const BOX3D& box)
 {
@@ -400,7 +403,7 @@ std::ostream& operator<<(std::ostream& out, const Bounds4D& bounds)
 
 class Metadata4D : public Metadata
 {
-std::string inferType(const std::string& val);
+    std::string inferType(const std::string& val);
 };
 
 std::string Metadata4D::inferType(const std::string& val)
@@ -414,7 +417,8 @@ std::string Metadata4D::inferType(const std::string& val)
         l = std::stol(val, &pos);
     }
     catch (std::invalid_argument&)
-    {}
+    {
+    }
     if (pos == val.length())
         return (l < 0 ? "nonNegativeInteger" : "integer");
 
@@ -423,8 +427,9 @@ std::string Metadata4D::inferType(const std::string& val)
         pos = 0;
         std::stod(val, &pos);
     }
-    catch(std::invalid_argument&)
-    {}
+    catch (std::invalid_argument&)
+    {
+    }
 
     if (pos == val.length())
         return "double";
@@ -438,7 +443,8 @@ std::string Metadata4D::inferType(const std::string& val)
             return "bounds";
     }
     catch (const BOX2D::error&)
-    {}
+    {
+    }
 
     BOX3D b3d;
     std::istringstream iss2(val);
@@ -449,7 +455,8 @@ std::string Metadata4D::inferType(const std::string& val)
             return "bounds";
     }
     catch (const BOX3D::error&)
-    {}
+    {
+    }
 
     BOX4D b4d;
     std::istringstream iss3(val);
@@ -460,7 +467,8 @@ std::string Metadata4D::inferType(const std::string& val)
             return "bounds";
     }
     catch (const BOX4D::error&)
-    {}
+    {
+    }
 
     if (val == "true" || val == "false")
         return "boolean";
@@ -481,4 +489,4 @@ std::string Metadata4D::inferType(const std::string& val)
     return "string";
 }
 
-}
+} // namespace pdal

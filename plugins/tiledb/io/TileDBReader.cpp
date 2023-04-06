@@ -1,36 +1,36 @@
 /******************************************************************************
-* Copyright (c) 2019 TileDB, Inc
-*
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following
-* conditions are met:
-*
-*     * Redistributions of source code must retain the above copyright
-*       notice, this list of conditions and the following disclaimer.
-*     * Redistributions in binary form must reproduce the above copyright
-*       notice, this list of conditions and the following disclaimer in
-*       the documentation and/or other materials provided
-*       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
-*       names of its contributors may be used to endorse or promote
-*       products derived from this software without specific prior
-*       written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-* "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-* LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-* FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-* COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-* BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
-* OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
-* AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
-* OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
-* OF SUCH DAMAGE.
-****************************************************************************/
+ * Copyright (c) 2019 TileDB, Inc
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following
+ * conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in
+ *       the documentation and/or other materials provided
+ *       with the distribution.
+ *     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+ *       names of its contributors may be used to endorse or promote
+ *       products derived from this software without specific prior
+ *       written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+ * OF SUCH DAMAGE.
+ ****************************************************************************/
 
 #include <algorithm>
 
@@ -38,75 +38,75 @@
 
 #include "TileDBReader.hpp"
 
-
 const char pathSeparator =
 #ifdef _WIN32
-        '\\';
+    '\\';
 #else
-        '/';
+    '/';
 #endif
-namespace pdal {
-
-static PluginInfo const s_info
+namespace pdal
 {
-        "readers.tiledb",
-        "Read data from a TileDB array.",
-        "http://pdal.io/stages/readers.tiledb.html"
-};
+
+static PluginInfo const s_info{"readers.tiledb",
+                               "Read data from a TileDB array.",
+                               "http://pdal.io/stages/readers.tiledb.html"};
 
 CREATE_SHARED_STAGE(TileDBReader, s_info)
-std::string TileDBReader::getName() const { return s_info.name; }
+std::string TileDBReader::getName() const
+{
+    return s_info.name;
+}
 
 Dimension::Type getPdalType(tiledb_datatype_t t)
 {
     switch (t)
     {
-        case TILEDB_INT8:
-            return Dimension::Type::Signed8;
-        case TILEDB_UINT8:
-            return Dimension::Type::Unsigned8;
-        case TILEDB_INT16:
-            return Dimension::Type::Signed16;
-        case TILEDB_UINT16:
-            return Dimension::Type::Unsigned16;
-        case TILEDB_INT32:
-            return Dimension::Type::Signed32;
-        case TILEDB_UINT32:
-            return Dimension::Type::Unsigned32;
-        case TILEDB_INT64:
-            return Dimension::Type::Signed64;
-        case TILEDB_UINT64:
-            return Dimension::Type::Unsigned64;
-        case TILEDB_FLOAT32:
-            return Dimension::Type::Float;
-        case TILEDB_FLOAT64:
-            return Dimension::Type::Double;
-        case TILEDB_DATETIME_AS:
-        case TILEDB_DATETIME_DAY:
-        case TILEDB_DATETIME_FS:
-        case TILEDB_DATETIME_HR:
-        case TILEDB_DATETIME_MIN:
-        case TILEDB_DATETIME_MONTH:
-        case TILEDB_DATETIME_MS:
-        case TILEDB_DATETIME_NS:
-        case TILEDB_DATETIME_PS:
-        case TILEDB_DATETIME_SEC:
-        case TILEDB_DATETIME_US:
-        case TILEDB_DATETIME_WEEK:
-        case TILEDB_DATETIME_YEAR:
-        case TILEDB_TIME_HR:
-        case TILEDB_TIME_MIN:
-        case TILEDB_TIME_SEC:
-        case TILEDB_TIME_MS:
-        case TILEDB_TIME_US:
-        case TILEDB_TIME_NS:
-        case TILEDB_TIME_PS:
-        case TILEDB_TIME_FS:
-        case TILEDB_TIME_AS:
-            return Dimension::Type::Signed64;
-        default:
-            // Not supported tiledb domain types, return as None
-            return Dimension::Type::None;
+    case TILEDB_INT8:
+        return Dimension::Type::Signed8;
+    case TILEDB_UINT8:
+        return Dimension::Type::Unsigned8;
+    case TILEDB_INT16:
+        return Dimension::Type::Signed16;
+    case TILEDB_UINT16:
+        return Dimension::Type::Unsigned16;
+    case TILEDB_INT32:
+        return Dimension::Type::Signed32;
+    case TILEDB_UINT32:
+        return Dimension::Type::Unsigned32;
+    case TILEDB_INT64:
+        return Dimension::Type::Signed64;
+    case TILEDB_UINT64:
+        return Dimension::Type::Unsigned64;
+    case TILEDB_FLOAT32:
+        return Dimension::Type::Float;
+    case TILEDB_FLOAT64:
+        return Dimension::Type::Double;
+    case TILEDB_DATETIME_AS:
+    case TILEDB_DATETIME_DAY:
+    case TILEDB_DATETIME_FS:
+    case TILEDB_DATETIME_HR:
+    case TILEDB_DATETIME_MIN:
+    case TILEDB_DATETIME_MONTH:
+    case TILEDB_DATETIME_MS:
+    case TILEDB_DATETIME_NS:
+    case TILEDB_DATETIME_PS:
+    case TILEDB_DATETIME_SEC:
+    case TILEDB_DATETIME_US:
+    case TILEDB_DATETIME_WEEK:
+    case TILEDB_DATETIME_YEAR:
+    case TILEDB_TIME_HR:
+    case TILEDB_TIME_MIN:
+    case TILEDB_TIME_SEC:
+    case TILEDB_TIME_MS:
+    case TILEDB_TIME_US:
+    case TILEDB_TIME_NS:
+    case TILEDB_TIME_PS:
+    case TILEDB_TIME_FS:
+    case TILEDB_TIME_AS:
+        return Dimension::Type::Signed64;
+    default:
+        // Not supported tiledb domain types, return as None
+        return Dimension::Type::None;
     }
 }
 
@@ -114,29 +114,34 @@ void TileDBReader::addArgs(ProgramArgs& args)
 {
     args.addSynonym("filename", "array_name");
     args.add("config_file", "TileDB configuration file location",
-        m_cfgFileName);
+             m_cfgFileName);
     args.add("chunk_size", "TileDB read chunk size", m_chunkSize,
-        point_count_t(1000000));
+             point_count_t(1000000));
     args.add("stats", "Dump TileDB query stats to stdout", m_stats, false);
-    args.add("bbox3d", "Bounding box subarray to read from TileDB in format"
-                       "([minx, maxx], [miny, maxy], [minz, maxz])", m_bbox);
-    args.add("bbox4d", "Bounding box subarray to read from TileDB in format"
-                       "([minx, maxx], [miny, maxy], [minz, maxz], [min_gpstime, max_gpstime] )", m_bbox);
+    args.add("bbox3d",
+             "Bounding box subarray to read from TileDB in format"
+             "([minx, maxx], [miny, maxy], [minz, maxz])",
+             m_bbox);
+    args.add("bbox4d",
+             "Bounding box subarray to read from TileDB in format"
+             "([minx, maxx], [miny, maxy], [minz, maxz], [min_gpstime, "
+             "max_gpstime] )",
+             m_bbox);
     args.add("end_timestamp", "TileDB array timestamp", m_endTimeStamp,
-        point_count_t(0));
+             point_count_t(0));
     args.addSynonym("end_timestamp", "timestamp");
     args.add("start_timestamp", "TileDB array timestamp", m_startTimeStamp,
-        point_count_t(0));
-    args.add("strict", "Raise an error for unsupported attributes", m_strict, true);
+             point_count_t(0));
+    args.add("strict", "Raise an error for unsupported attributes", m_strict,
+             true);
 }
 
 void TileDBReader::prepared(PointTableRef table)
 {
     if (m_filename.empty())
         throwError("Required argument 'filename' (TileDB array name) "
-            "not provided.");
+                   "not provided.");
 }
-
 
 void TileDBReader::initialize()
 {
@@ -157,17 +162,18 @@ void TileDBReader::initialize()
         {
             if (m_startTimeStamp)
             {
-                m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ));
+                m_array.reset(
+                    new tiledb::Array(*m_ctx, m_filename, TILEDB_READ));
                 m_array->set_open_timestamp_start(m_startTimeStamp);
                 m_array->set_open_timestamp_end(m_endTimeStamp);
                 m_array->reopen();
             }
             else
-                m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ, m_endTimeStamp));
+                m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ,
+                                                m_endTimeStamp));
         }
         else
             m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ));
-
     }
     catch (const tiledb::TileDBError& err)
     {
@@ -226,27 +232,28 @@ void TileDBReader::addDimensions(PointLayoutPtr layout)
         else
         {
             if (!m_strict)
-                std::cerr << "Skipping over unsupported attribute type - " << di.m_name << "!\n";
+                std::cerr << "Skipping over unsupported attribute type - "
+                          << di.m_name << "!\n";
             else
-                throwError("TileDB dimension '" + di.m_name + "' can't be mapped "
-                    "to trivial type.");
+                throwError("TileDB dimension '" + di.m_name +
+                           "' can't be mapped "
+                           "to trivial type.");
         }
     }
 
-    //ABELL
-    // Should we check that X Y and Z exist and remap the primary/secondary
-    // dimensions to X Y and Z if necessary?
+    // ABELL
+    //  Should we check that X Y and Z exist and remap the primary/secondary
+    //  dimensions to X Y and Z if necessary?
 }
 
-template <typename T>
-void TileDBReader::setQueryBuffer(const DimInfo& di)
+template <typename T> void TileDBReader::setQueryBuffer(const DimInfo& di)
 {
     m_query->set_buffer(di.m_name, di.m_buffer->get<T>(), di.m_buffer->count());
 }
 
 void TileDBReader::setQueryBuffer(const DimInfo& di)
 {
-    switch(di.m_tileType)
+    switch (di.m_tileType)
     {
     case TILEDB_INT8:
         setQueryBuffer<int8_t>(di);
@@ -301,8 +308,9 @@ void TileDBReader::setQueryBuffer(const DimInfo& di)
         setQueryBuffer<int64_t>(di);
         break;
     default:
-        throwError("TileDB dimension '" + di.m_name + "' can't be mapped "
-            "to trivial type.");
+        throwError("TileDB dimension '" + di.m_name +
+                   "' can't be mapped "
+                   "to trivial type.");
     }
 }
 
@@ -318,25 +326,24 @@ void TileDBReader::ready(PointTableRef)
     }
 }
 
-
 void TileDBReader::localReady()
 {
     int numDims = m_array->schema().domain().dimensions().size();
 
     m_query.reset(new tiledb::Query(*m_ctx, *m_array));
-    m_query->set_layout( TILEDB_UNORDERED );
+    m_query->set_layout(TILEDB_UNORDERED);
 
     // Build the buffer for the dimensions.
-    auto it = std::find_if(m_dims.begin(), m_dims.end(),
-        [](DimInfo& di){ return di.m_dimCategory == DimCategory::Dimension; });
+    auto it = std::find_if(
+        m_dims.begin(), m_dims.end(),
+        [](DimInfo& di) { return di.m_dimCategory == DimCategory::Dimension; });
 
     DimInfo& di = *it;
 
     for (DimInfo& di : m_dims)
     {
         // All dimensions use the same buffer.
-        std::unique_ptr<Buffer> dimBuf(
-            new Buffer(di.m_tileType, m_chunkSize));
+        std::unique_ptr<Buffer> dimBuf(new Buffer(di.m_tileType, m_chunkSize));
         di.m_buffer = dimBuf.get();
         m_buffers.push_back(std::move(dimBuf));
         setQueryBuffer(di);
@@ -346,15 +353,15 @@ void TileDBReader::localReady()
     if (!m_bbox.empty())
     {
         if (numDims == 2)
-            m_query->set_subarray({m_bbox.minx, m_bbox.maxx,
-                m_bbox.miny, m_bbox.maxy});
+            m_query->set_subarray(
+                {m_bbox.minx, m_bbox.maxx, m_bbox.miny, m_bbox.maxy});
         else if (numDims == 4)
-            m_query->set_subarray({m_bbox.minx, m_bbox.maxx,
-               m_bbox.miny, m_bbox.maxy, m_bbox.minz, m_bbox.maxz,
-               m_bbox.mintm, m_bbox.maxtm});
+            m_query->set_subarray({m_bbox.minx, m_bbox.maxx, m_bbox.miny,
+                                   m_bbox.maxy, m_bbox.minz, m_bbox.maxz,
+                                   m_bbox.mintm, m_bbox.maxtm});
         else
-            m_query->set_subarray({m_bbox.minx, m_bbox.maxx,
-                m_bbox.miny, m_bbox.maxy, m_bbox.minz, m_bbox.maxz});
+            m_query->set_subarray({m_bbox.minx, m_bbox.maxx, m_bbox.miny,
+                                   m_bbox.maxy, m_bbox.minz, m_bbox.maxz});
     }
     else
     {
@@ -384,7 +391,8 @@ void TileDBReader::localReady()
         (meta["root"].count("writers.tiledb") > 0) &&
         (meta["root"]["writers.tiledb"].count("spatialreference") > 0))
     {
-        SpatialReference ref(meta["root"]["writers.tiledb"]["spatialreference"]);
+        SpatialReference ref(
+            meta["root"]["writers.tiledb"]["spatialreference"]);
         setSpatialReference(ref);
     }
 
@@ -444,7 +452,6 @@ bool setField(PointRef& point, TileDBReader::DimInfo di, size_t bufOffset)
 
 } // unnamed namespace
 
-
 bool TileDBReader::processOne(PointRef& point)
 {
     try
@@ -457,7 +464,6 @@ bool TileDBReader::processOne(PointRef& point)
     }
     return false;
 }
-
 
 bool TileDBReader::processPoint(PointRef& point)
 {
@@ -488,14 +494,14 @@ bool TileDBReader::processPoint(PointRef& point)
             m_resultSize = (int)m_query->result_buffer_elements()["X"].second;
 
             if (status == tiledb::Query::Status::INCOMPLETE &&
-                    m_resultSize == 0)
+                m_resultSize == 0)
                 throwError("Need to increase chunk_size for reader.");
 
             if (status == tiledb::Query::Status::COMPLETE)
                 m_complete = true;
 
             m_offset = 0;
-        }     
+        }
     }
 
     if (m_resultSize > 0)
@@ -523,10 +529,10 @@ point_count_t TileDBReader::read(PointViewPtr view, point_count_t count)
         if (!processOne(point))
             break;
     }
-    return id;   
+    return id;
 }
 
-void TileDBReader::done(pdal::BasePointTable &table)
+void TileDBReader::done(pdal::BasePointTable& table)
 {
     m_array->close();
 }

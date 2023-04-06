@@ -1,44 +1,44 @@
 /******************************************************************************
-* Copyright (c) 2021 TileDB, Inc.
-*
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following
-* conditions are met:
-*
-*     * Redistributions of source code must retain the above copyright
-*       notice, this list of conditions and the following disclaimer.
-*     * Redistributions in binary form must reproduce the above copyright
-*       notice, this list of conditions and the following disclaimer in
-*       the documentation and/or other materials provided
-*       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
-*       names of its contributors may be used to endorse or promote
-*       products derived from this software without specific prior
-*       written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-* "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-* LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-* FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-* COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-* BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
-* OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
-* AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
-* OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
-* OF SUCH DAMAGE.
-****************************************************************************/
+ * Copyright (c) 2021 TileDB, Inc.
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following
+ * conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in
+ *       the documentation and/or other materials provided
+ *       with the distribution.
+ *     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+ *       names of its contributors may be used to endorse or promote
+ *       products derived from this software without specific prior
+ *       written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+ * OF SUCH DAMAGE.
+ ****************************************************************************/
 
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
 
-#include <stdio.h>
 #include <pdal/pdal_test_main.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <stdio.h>
 
 #include "Support.hpp"
 
@@ -155,7 +155,7 @@ TEST_F(TileDBWriterTimeDimTest, test_dims_no_tm_and_use_tm)
     }
 
     idx = 0;
-    for (const auto& name: dim_names)
+    for (const auto& name : dim_names)
     {
         EXPECT_EQ(name, domain_with_time.at(idx++).first);
     }
@@ -213,7 +213,7 @@ TEST_F(TileDBWriterTimeDimTest, write_with_time)
     auto domain = array.non_empty_domain<double>();
     std::vector<double> subarray;
 
-    for (const auto& kv: domain)
+    for (const auto& kv : domain)
     {
         subarray.push_back(kv.second.first);
         subarray.push_back(kv.second.second);
@@ -226,11 +226,9 @@ TEST_F(TileDBWriterTimeDimTest, write_with_time)
     std::vector<double> ys(count);
     std::vector<double> zs(count);
     std::vector<double> ts(count);
-    
-    q.set_buffer("X", xs)
-        .set_buffer("Y", ys)
-        .set_buffer("Z", zs)
-        .set_buffer("GpsTime", ts);
+
+    q.set_buffer("X", xs).set_buffer("Y", ys).set_buffer("Z", zs).set_buffer(
+        "GpsTime", ts);
 
     q.submit();
     array.close();
@@ -260,7 +258,6 @@ TEST_F(TileDBWriterTimeDimTest, write_append_with_time)
     options.add("chunk_size", 80);
     options.add("use_time_dim", true);
 
-
     if (FileUtils::directoryExists(out_path))
         FileUtils::deleteDirectory(out_path);
 
@@ -285,7 +282,7 @@ TEST_F(TileDBWriterTimeDimTest, write_append_with_time)
     auto domain = array.non_empty_domain<double>();
     std::vector<double> subarray;
 
-    for (const auto& kv: domain)
+    for (const auto& kv : domain)
     {
         subarray.push_back(kv.second.first);
         subarray.push_back(kv.second.second);
@@ -298,11 +295,9 @@ TEST_F(TileDBWriterTimeDimTest, write_append_with_time)
     std::vector<double> ys(count * 2);
     std::vector<double> zs(count * 2);
     std::vector<double> ts(count * 2);
-    
-    q.set_buffer("X", xs)
-        .set_buffer("Y", ys)
-        .set_buffer("Z", zs)
-        .set_buffer("GpsTime", ts);
+
+    q.set_buffer("X", xs).set_buffer("Y", ys).set_buffer("Z", zs).set_buffer(
+        "GpsTime", ts);
 
     q.submit();
     array.close();
@@ -316,7 +311,6 @@ TEST_F(TileDBWriterTimeDimTest, write_options_with_time_dim)
     tiledb::Context ctx;
 
     std::string out_path = Support::temppath("xyztm_tdb_writer_options");
-
 
     if (FileUtils::directoryExists(out_path))
         FileUtils::deleteDirectory(out_path);
@@ -385,7 +379,6 @@ TEST_F(TileDBWriterTimeDimTest, time_first_or_last)
     EXPECT_EQ(first_dim_name, "GpsTime");
 
     std::string out_path2 = Support::temppath("xyztm_tm_last");
-
 
     if (FileUtils::directoryExists(out_path2))
         FileUtils::deleteDirectory(out_path2);
@@ -457,7 +450,7 @@ TEST_F(TileDBWriterTimeDimTest, append_write_with_time)
     auto domain = array.non_empty_domain<double>();
 
     std::vector<double> subarray;
-    for (const auto& kv: domain)
+    for (const auto& kv : domain)
     {
         subarray.push_back(kv.second.first);
         subarray.push_back(kv.second.second);
@@ -470,11 +463,9 @@ TEST_F(TileDBWriterTimeDimTest, append_write_with_time)
     std::vector<double> ys(count * 2);
     std::vector<double> zs(count * 2);
     std::vector<double> ts(count * 2);
-    
-    q.set_buffer("X", xs)
-        .set_buffer("Y", ys)
-        .set_buffer("Z", zs)
-        .set_buffer("GpsTime", ts);
+
+    q.set_buffer("X", xs).set_buffer("Y", ys).set_buffer("Z", zs).set_buffer(
+        "GpsTime", ts);
 
     q.submit();
     array.close();
@@ -484,4 +475,4 @@ TEST_F(TileDBWriterTimeDimTest, append_write_with_time)
     EXPECT_EQ(result_num, reader.count() + m_reader.count());
 }
 
-}
+} // namespace pdal
