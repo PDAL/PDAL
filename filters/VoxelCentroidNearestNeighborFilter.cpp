@@ -67,22 +67,23 @@ void VoxelCentroidNearestNeighborFilter::addArgs(ProgramArgs& args)
 
 PointViewSet VoxelCentroidNearestNeighborFilter::run(PointViewPtr view)
 {
+    typedef std::make_signed<std::size_t>::type ssize_t;
     double x0 = view->getFieldAs<double>(Dimension::Id::X, 0);
     double y0 = view->getFieldAs<double>(Dimension::Id::Y, 0);
     double z0 = view->getFieldAs<double>(Dimension::Id::Z, 0);
 
     // Make an initial pass through the input PointView to index PointIds by
     // row, column, and depth.
-    std::map<std::tuple<size_t, size_t, size_t>, PointIdList>
+    std::map<std::tuple<ssize_t, ssize_t, ssize_t>, PointIdList>
         populated_voxel_ids;
     for (PointId id = 0; id < view->size(); ++id)
     {
         double y = view->getFieldAs<double>(Dimension::Id::Y, id);
         double x = view->getFieldAs<double>(Dimension::Id::X, id);
         double z = view->getFieldAs<double>(Dimension::Id::Z, id);
-        size_t r = static_cast<size_t>((y - y0) / m_cell);
-        size_t c = static_cast<size_t>((x - x0) / m_cell);
-        size_t d = static_cast<size_t>((z - z0) / m_cell);
+        ssize_t r = static_cast<ssize_t>((y - y0) / m_cell);
+        ssize_t c = static_cast<ssize_t>((x - x0) / m_cell);
+        ssize_t d = static_cast<ssize_t>((z - z0) / m_cell);
         populated_voxel_ids[std::make_tuple(r, c, d)].push_back(id);
     }
 
