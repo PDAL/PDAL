@@ -86,6 +86,13 @@ Geometry::Geometry(OGRGeometryH g)
         m_geom.reset(geom->clone());
 }
 
+    OGRGeometry* geom(nullptr);
+    geom = reinterpret_cast<OGRGeometry *>(g);
+
+    if (geom)
+        m_geom.reset(geom->clone());
+}
+
 
 Geometry::Geometry(OGRGeometryH g, const SpatialReference& srs)
 {
