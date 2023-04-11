@@ -66,7 +66,7 @@ Geometry::Geometry(const std::string& wkt_or_json, SpatialReference ref)
 }
 
 
-Geometry::Geometry(const Geometry& input) : m_geom(input.m_geom->clone())
+Geometry::Geometry(const Geometry& input)
 {
     if (input.m_geom)
         m_geom.reset(input.m_geom->clone());
@@ -79,7 +79,6 @@ Geometry::Geometry(Geometry&& input) : m_geom(std::move(input.m_geom))
 
 Geometry::Geometry(OGRGeometryH g)
 {
-
     OGRGeometry* geom(nullptr);
     geom = reinterpret_cast<OGRGeometry *>(g);
 
