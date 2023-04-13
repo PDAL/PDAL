@@ -80,7 +80,7 @@ struct TileDBWriter::Args
     NL::json m_filters;
     NL::json m_defaults;
     bool m_append;
-    point_count_t m_timeStamp = 0;
+    uint64_t m_timeStamp = UINT64_MAX;
 };
 
 CREATE_SHARED_STAGE(TileDBWriter, s_info)
@@ -341,8 +341,8 @@ void TileDBWriter::addArgs(ProgramArgs& args)
              "If writing 4D array with XYZ and Time, choose to put time dim "
              "first or last (default)",
              m_time_first, false);
-    args.add("timestamp", "TileDB array timestamp", m_args->m_timeStamp,
-             point_count_t(0));
+    args.add<uint64_t>("timestamp", "TileDB array timestamp",
+                       m_args->m_timeStamp, UINT64_MAX);
 }
 
 void TileDBWriter::initialize()
@@ -621,12 +621,18 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
     }
     else
     {
-        if (m_args->m_timeStamp)
+#if TILEDB_VERSION_MINOR < 15
+        if (m_args->m_timeStamp != UINT64_MAX)
             m_array.reset(new tiledb::Array(*m_ctx, m_args->m_arrayName,
                                             TILEDB_WRITE, m_args->m_timeStamp));
         else
             m_array.reset(
                 new tiledb::Array(*m_ctx, m_args->m_arrayName, TILEDB_WRITE));
+#else
+        m_array.reset(new tiledb::Array(
+            *m_ctx, m_args->m_arrayName, TILEDB_WRITE,
+            {tiledb::TimeTravelMarker(), m_args->m_timeStamp}));
+#endif
         if (m_array->schema().domain().has_dimension("GpsTime"))
             m_use_time = true;
     }
@@ -668,13 +674,18 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
     if (!m_args->m_append)
     {
         tiledb::Array::create(m_args->m_arrayName, *m_schema);
-
-        if (m_args->m_timeStamp)
+#if TILEDB_VERSION_MINOR < 15
+        if (m_args->m_timeStamp != UINT64_MAX)
             m_array.reset(new tiledb::Array(*m_ctx, m_args->m_arrayName,
                                             TILEDB_WRITE, m_args->m_timeStamp));
         else
             m_array.reset(
                 new tiledb::Array(*m_ctx, m_args->m_arrayName, TILEDB_WRITE));
+#else
+        m_array.reset(new tiledb::Array(
+            *m_ctx, m_args->m_arrayName, TILEDB_WRITE,
+            {tiledb::TimeTravelMarker(), m_args->m_timeStamp}));
+#endif
     }
 
     m_current_idx = 0;

@@ -128,10 +128,10 @@ void TileDBReader::addArgs(ProgramArgs& args)
              "max_gpstime] )",
              m_bbox);
     args.add("end_timestamp", "TileDB array timestamp", m_endTimeStamp,
-             point_count_t(0));
+             UINT64_MAX);
     args.addSynonym("end_timestamp", "timestamp");
-    args.add("start_timestamp", "TileDB array timestamp", m_startTimeStamp,
-             point_count_t(0));
+    args.add<uint64_t>("start_timestamp", "TileDB array timestamp",
+                       m_startTimeStamp, 0);
     args.add("strict", "Raise an error for unsupported attributes", m_strict,
              true);
 }
@@ -158,22 +158,18 @@ void TileDBReader::initialize()
         if (m_stats)
             tiledb::Stats::enable();
 
-        if (m_endTimeStamp)
-        {
-            if (m_startTimeStamp)
-            {
-                m_array.reset(
-                    new tiledb::Array(*m_ctx, m_filename, TILEDB_READ));
-                m_array->set_open_timestamp_start(m_startTimeStamp);
-                m_array->set_open_timestamp_end(m_endTimeStamp);
-                m_array->reopen();
-            }
-            else
-                m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ,
-                                                m_endTimeStamp));
-        }
-        else
-            m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ));
+#if TILEDB_VERSION_MINOR < 15
+        m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ));
+        if (m_startTimeStamp != 0)
+            m_array->set_open_timestamp_start(m_startTimeStamp);
+        if (m_endTimeStamp != UINT64_MAX)
+            m_array->set_open_timestamp_end(m_endTimeStamp);
+        m_array->reopen();
+#else
+        m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ,
+                                        {tiledb::TimestampStartEndMarker(),
+                                         m_startTimeStamp, m_endTimeStamp}));
+#endif
     }
     catch (const tiledb::TileDBError& err)
     {
