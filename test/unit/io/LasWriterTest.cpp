@@ -50,6 +50,8 @@
 #include <io/private/las/Header.hpp>
 #include <io/private/las/Vlr.hpp>
 
+#include <gdal/gdal_version.h>
+
 #include "Support.hpp"
 
 namespace pdal
@@ -1355,6 +1357,12 @@ TEST(LasWriterTest, pdal_wkt2_vlr)
 
 TEST(LasWriterTest, pdal_wkt2_with_derivedprojcrs_vlr)
 {
+#if GDAL_VERSION_NUM <= GDAL_COMPUTE_VERSION(3,6,0)
+    // not working with PROJ >= 9.2.0 https://github.com/OSGeo/gdal/pull/6800
+    std::cerr << "Test disabled with GDAL <= 3.6.0" << std::endl;
+    return;
+#endif
+
     PointTable table;
 
     std::string infile(Support::datapath("las/1.2-with-color.las"));
@@ -1392,7 +1400,7 @@ TEST(LasWriterTest, pdal_wkt2_with_derivedprojcrs_vlr)
     reader2.execute(t2);
 
     const VlrList& vlrs = reader2.header().vlrs();
-    EXPECT_EQ(vlrs.size(), 2u);
+    ASSERT_EQ(vlrs.size(), 2u);
 
     const LasVLR& v1 = vlrs[0];
     EXPECT_EQ(v1.recordId(), 4224);
@@ -1413,6 +1421,12 @@ TEST(LasWriterTest, pdal_wkt2_with_derivedprojcrs_vlr)
 
 TEST(LasWriterTest, pdal_wkt2_read_as_projjson)
 {
+#if GDAL_VERSION_NUM <= GDAL_COMPUTE_VERSION(3,6,0)
+    // not working with PROJ >= 9.2.0 https://github.com/OSGeo/gdal/pull/6800
+    std::cerr << "Test disabled with GDAL <= 3.6.0" << std::endl;
+    return;
+#endif
+
     PointTable table;
 
     std::string infile(Support::datapath("las/1.2-with-color.las"));

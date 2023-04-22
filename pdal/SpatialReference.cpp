@@ -182,6 +182,8 @@ std::string SpatialReference::getPROJJSON() const
 {
     OGRScopedSpatialReference poSRS = ogrCreateSrs(m_wkt, m_epoch);
     std::string json("");
+    if (!poSRS)
+        return json;
 
 #if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,1,0)
     char *poJSON (nullptr);
@@ -415,7 +417,8 @@ std::vector<int> SpatialReference::getAxisOrdering() const
 {
     std::vector<int> output;
     OGRScopedSpatialReference current = ogrCreateSrs(m_wkt, m_epoch);
-    output = current.get()->GetDataAxisToSRSAxisMapping();
+    if (current)
+        output = current.get()->GetDataAxisToSRSAxisMapping();
     return output;
 }
 
