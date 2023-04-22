@@ -50,7 +50,7 @@
 #include <io/private/las/Header.hpp>
 #include <io/private/las/Vlr.hpp>
 
-#include <gdal/gdal_version.h>
+#include <gdal_version.h>
 
 #include "Support.hpp"
 
