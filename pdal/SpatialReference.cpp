@@ -535,7 +535,7 @@ std::string SpatialReference::getWKT2() const
 {
     std::string wkt = getWKT();
     OGRScopedSpatialReference srs = ogrCreateSrs(wkt);
-    return exportToWkt(srs.get(), {"FORMAT=WKT2"});
+    return exportToWkt(srs.get(), {"FORMAT=WKT2_2018"});
 }
 
 int SpatialReference::getUTMZone() const

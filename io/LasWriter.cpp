@@ -488,8 +488,6 @@ void LasWriter::addSpatialRefVlrs()
     deleteVlr(las::TransformUserId, las::GeotiffAsciiRecordId);
     deleteVlr(las::TransformUserId, las::WktRecordId);
     deleteVlr(las::LiblasUserId, las::WktRecordId);
-    // deleteVlr(las::TransformUserId, las::PdalWkt2RecordId);
-    // deleteVlr(las::PdalUserId, las::PdalProjJsonRecordId);
 
     if (d->header.versionAtLeast(1, 4))
         addWktVlr();
@@ -535,7 +533,7 @@ bool LasWriter::addWktVlr()
         if (!wkt2.empty()) {
             std::vector<char> wktBytes(wkt2.begin(), wkt2.end());
             wktBytes.resize(wktBytes.size() + 1, 0);
-            addVlr(las::TransformUserId, las::PdalWkt2RecordId, "PDAL WKT2 Record", wktBytes);
+            addVlr(las::TransformUserId, las::LASFWkt2recordId, "PDAL WKT2 Record", wktBytes);
         }
 
         const std::string projjson = m_srs.getPROJJSON();
