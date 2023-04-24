@@ -328,9 +328,9 @@ std::istream *openFile(const std::string& path, bool asBinary)
             return new ArbiterInStream(tempFilename(path), path,
                 asBinary ? ios::in | ios::binary : ios::in);
         }
-        catch (arbiter::ArbiterError&)
+        catch (arbiter::ArbiterError& e)
         {
-            return nullptr;
+            throw e;
         }
     }
     return FileUtils::openFile(path, asBinary);
