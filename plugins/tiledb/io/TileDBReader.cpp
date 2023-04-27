@@ -328,7 +328,6 @@ void TileDBReader::ready(PointTableRef)
 
 void TileDBReader::localReady()
 {
-    int numDims = m_array->schema().domain().dimensions().size();
 
     m_query.reset(new tiledb::Query(*m_ctx, *m_array));
     m_query->set_layout(TILEDB_UNORDERED);
@@ -350,31 +349,21 @@ void TileDBReader::localReady()
     }
 
     // Set the extent of the query.
+    tiledb::Subarray subarray(*m_ctx, *m_array);
     if (!m_bbox.empty())
     {
-        if (numDims == 2)
-            m_query->set_subarray(
-                {m_bbox.minx, m_bbox.maxx, m_bbox.miny, m_bbox.maxy});
-        else if (numDims == 4)
-            m_query->set_subarray({m_bbox.minx, m_bbox.maxx, m_bbox.miny,
-                                   m_bbox.maxy, m_bbox.minz, m_bbox.maxz,
-                                   m_bbox.mintm, m_bbox.maxtm});
-        else
-            m_query->set_subarray({m_bbox.minx, m_bbox.maxx, m_bbox.miny,
-                                   m_bbox.maxy, m_bbox.minz, m_bbox.maxz});
+        const auto domain = m_array->schema().domain();
+
+        if (domain.has_dimension("X"))
+            subarray.add_range(0, m_bbox.minx, m_bbox.maxx);
+        if (domain.has_dimension("Y"))
+            subarray.add_range(1, m_bbox.miny, m_bbox.maxy);
+        if (domain.has_dimension("Z"))
+            subarray.add_range(2, m_bbox.minz, m_bbox.maxz);
+        if (domain.has_dimension("GpsTime"))
+            subarray.add_range("GpsTime", m_bbox.mintm, m_bbox.maxtm);
     }
-    else
-    {
-        // get extents
-        std::vector<double> subarray;
-        auto domain = m_array->non_empty_domain<double>();
-        for (const auto& kv : domain)
-        {
-            subarray.push_back(kv.second.first);
-            subarray.push_back(kv.second.second);
-        }
-        m_query->set_subarray(subarray);
-    }
+    m_query->set_subarray(subarray);
 
     // read spatial reference
     NL::json meta = nullptr;
