@@ -348,20 +348,29 @@ void TileDBReader::localReady()
         setQueryBuffer(di);
     }
 
-    // Set the extent of the query.
+    // Set the subarray to query. The default for each dimension is to query
+    // the entire dimension domain unless a range is explicitly set on it.
     tiledb::Subarray subarray(*m_ctx, *m_array);
-    if (!m_bbox.empty())
+    const auto ndim_bbox = m_bbox.ndim();
+    const auto domain = m_array->schema().domain();
+    switch (m_bbox.ndim())
     {
-        const auto domain = m_array->schema().domain();
-
-        if (domain.has_dimension("X"))
-            subarray.add_range(0, m_bbox.minx, m_bbox.maxx);
-        if (domain.has_dimension("Y"))
-            subarray.add_range(1, m_bbox.miny, m_bbox.maxy);
-        if (domain.has_dimension("Z"))
-            subarray.add_range(2, m_bbox.minz, m_bbox.maxz);
+    case 4:
         if (domain.has_dimension("GpsTime"))
-            subarray.add_range("GpsTime", m_bbox.mintm, m_bbox.maxtm);
+            subarray.add_range("GpsTime", m_bbox.minGpsTime(),
+                               m_bbox.maxGpsTime());
+        [[fallthrough]];
+    case 3:
+        if (domain.has_dimension("Z"))
+            subarray.add_range("Z", m_bbox.minZ(), m_bbox.maxZ());
+        [[fallthrough]];
+    case 2:
+        if (domain.has_dimension("Y"))
+            subarray.add_range("Y", m_bbox.minY(), m_bbox.maxY());
+        [[fallthrough]];
+    case 1:
+        if (domain.has_dimension("X"))
+            subarray.add_range("X", m_bbox.minX(), m_bbox.maxX());
     }
     m_query->set_subarray(subarray);
 

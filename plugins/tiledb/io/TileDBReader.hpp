@@ -40,7 +40,7 @@
 
 #include <iostream>
 
-#include "Bounds4D.hpp"
+#include "TileDBUtils.hpp"
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
 #include <tiledb/tiledb>
@@ -113,7 +113,7 @@ private:
     bool m_strict;
     bool m_complete;
     bool m_stats;
-    BOX4D m_bbox;
+    DomainBounds m_bbox;
     std::vector<std::unique_ptr<Buffer>> m_buffers;
     std::vector<DimInfo> m_dims;
     bool m_has_time = false;

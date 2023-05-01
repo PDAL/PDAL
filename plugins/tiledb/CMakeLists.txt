@@ -16,7 +16,7 @@ endif()
 PDAL_ADD_PLUGIN(reader_libname reader tiledb
     FILES
         io/TileDBReader.cpp
-        io/Bounds4D.cpp
+        io/TileDBUtils.cpp
     LINK_WITH
         ${TILEDB_LIBRARIES}
     INCLUDES
@@ -31,7 +31,6 @@ PDAL_ADD_PLUGIN(reader_libname reader tiledb
 PDAL_ADD_PLUGIN(writer_libname writer tiledb
     FILES
         io/TileDBWriter.cpp
-        io/Bounds4D.cpp
     LINK_WITH
         ${TILEDB_LIBRARIES}
     INCLUDES
