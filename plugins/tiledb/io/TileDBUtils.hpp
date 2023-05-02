@@ -119,6 +119,14 @@ public:
     /**
       Parse a range from an input string and add it to the end of the bounds.
 
+      The expected input is in one of the following forms:
+
+      * `()`
+      * `([minX, maxX])`
+      * `([minX, maxX], [minY, maxY])`
+      * `([minX, maxX], [minY, maxY], [minZ, maxZ])`
+      * `([minX, maxX], [minY, maxY], [minZ, maxZ], [minGpsTime, maxGpsTime])`
+
       \param ss Input stream to parse data from
       \param dimName Dimension name to use for error messages
 

@@ -40,6 +40,16 @@ PDAL_ADD_PLUGIN(writer_libname writer tiledb
 
 if (WITH_TESTS)
 
+    PDAL_ADD_TEST(pdal_io_tiledb_utils_test
+        FILES
+            test/TileDBUtilsTest.cpp
+            io/TileDBUtils.cpp
+        LINK_WITH
+            ${TILEDB_LIBRARIES}
+        INCLUDES
+            ${TILEDB_INCLUDE_DIR}
+    )
+
     PDAL_ADD_TEST(pdal_io_tiledb_bounds4d_test
         FILES
             test/Bounds4DTest.cpp

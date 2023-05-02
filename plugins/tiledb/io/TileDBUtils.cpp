@@ -75,6 +75,9 @@ void DomainBounds::parse(std::string input)
     Utils::eatwhitespace(ss);
     if (!Utils::eatcharacter(ss, '('))
         throw error("No opening '('.");
+    Utils::eatwhitespace(ss);
+    if (ss.peek() == ')')
+        return;
     std::vector<std::string> names{"X", "Y", "Z", "GpsTime"};
     for (uint32_t index{0}; index < 4; ++index)
     {
@@ -83,7 +86,7 @@ void DomainBounds::parse(std::string input)
         auto nextChar = ss.get();
         if (nextChar == ')')
             return;
-        if (index == 4)
+        if (index == 3)
             throw error("Can only add 4 ranges to the bounding box.");
         if (nextChar != ',')
             throw error("No comma separating '" + names[index] + "' and '" +
