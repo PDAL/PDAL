@@ -124,6 +124,14 @@ TEST_F(TileDBWriterTest, write)
 
     tiledb::Array array(ctx, pth, TILEDB_READ);
 
+    // Check the non-empty domain is the cube ([0, 1], [0, 1], [0, 1]).
+    auto nonempty_domain = array.non_empty_domain<double>();
+    for (const auto& kv : nonempty_domain)
+    {
+        ASSERT_DOUBLE_EQ(kv.second.first, 0.0);
+        ASSERT_DOUBLE_EQ(kv.second.second, 1.0);
+    }
+
     tiledb_datatype_t v_type = TILEDB_UINT8;
     const void* v_r;
     uint32_t v_num;
@@ -131,37 +139,20 @@ TEST_F(TileDBWriterTest, write)
     NL::json meta = NL::json::parse(static_cast<const char*>(v_r));
     EXPECT_TRUE(meta["root"].count("writers.tiledb") > 0);
 
-    auto domain = array.non_empty_domain<double>();
-    std::vector<double> subarray;
-
-    for (const auto& kv : domain)
-    {
-        subarray.push_back(kv.second.first);
-        subarray.push_back(kv.second.second);
-    }
-
     tiledb::Query q(ctx, array, TILEDB_READ);
-    q.set_subarray(subarray);
 
     std::vector<double> xs(count);
     std::vector<double> ys(count);
     std::vector<double> zs(count);
 
-    q.set_buffer("X", xs).set_buffer("Y", ys).set_buffer("Z", zs);
-
+    q.set_data_buffer("X", xs).set_data_buffer("Y", ys).set_data_buffer("Z",
+                                                                        zs);
     q.submit();
     array.close();
 
     result_num = (int)q.result_buffer_elements()["X"].second;
 
     EXPECT_EQ(m_reader.count(), result_num);
-
-    ASSERT_DOUBLE_EQ(subarray[0], 0.0);
-    ASSERT_DOUBLE_EQ(subarray[2], 0.0);
-    ASSERT_DOUBLE_EQ(subarray[4], 0.0);
-    ASSERT_DOUBLE_EQ(subarray[1], 1.0);
-    ASSERT_DOUBLE_EQ(subarray[3], 1.0);
-    ASSERT_DOUBLE_EQ(subarray[5], 1.0);
 }
 
 TEST_F(TileDBWriterTest, write_append)
@@ -196,8 +187,6 @@ TEST_F(TileDBWriterTest, write_append)
     append_writer.execute(table2);
 
     tiledb::Array array(ctx, pth, TILEDB_READ);
-    auto domain = array.non_empty_domain<double>();
-    std::vector<double> subarray;
 
     tiledb_datatype_t v_type = TILEDB_UINT8;
     const void* v_r;
@@ -206,20 +195,14 @@ TEST_F(TileDBWriterTest, write_append)
     NL::json meta = NL::json::parse(static_cast<const char*>(v_r));
     EXPECT_TRUE(meta["root"].count("writers.tiledb") > 0);
 
-    for (const auto& kv : domain)
-    {
-        subarray.push_back(kv.second.first);
-        subarray.push_back(kv.second.second);
-    }
-
     tiledb::Query q(ctx, array, TILEDB_READ);
-    q.set_subarray(subarray);
 
     std::vector<double> xs(count * 2);
     std::vector<double> ys(count * 2);
     std::vector<double> zs(count * 2);
 
-    q.set_buffer("X", xs).set_buffer("Y", ys).set_buffer("Z", zs);
+    q.set_data_buffer("X", xs).set_data_buffer("Y", ys).set_data_buffer("Z",
+                                                                        zs);
 
     q.submit();
     array.close();
@@ -479,15 +462,6 @@ TEST_F(TileDBWriterTest, dup_points)
     writer.execute(table);
 
     tiledb::Array array(ctx, pth, TILEDB_READ);
-    auto domain = array.non_empty_domain<double>();
-    std::vector<double> subarray;
-
-    for (const auto& kv : domain)
-    {
-        subarray.push_back(kv.second.first);
-        subarray.push_back(kv.second.second);
-    }
-
     tiledb::Query q(ctx, array, TILEDB_READ);
 
     // intentionally oversize buffers and check the result count
@@ -495,8 +469,8 @@ TEST_F(TileDBWriterTest, dup_points)
     std::vector<double> ys(count * 2);
     std::vector<double> zs(count * 2);
 
-    q.set_subarray(subarray).set_buffer("X", xs).set_buffer("Y", ys).set_buffer(
-        "Z", zs);
+    q.set_data_buffer("X", xs).set_data_buffer("Y", ys).set_data_buffer("Z",
+                                                                        zs);
 
     q.submit();
     array.close();

@@ -186,23 +186,14 @@ TEST_F(TileDBReaderTest, read)
     options.add("array_name", data_path);
 
     tiledb::Array array(ctx, data_path, TILEDB_READ);
-    auto domain = array.non_empty_domain<double>();
-    std::vector<double> subarray;
-
-    for (const auto& kv : domain)
-    {
-        subarray.push_back(kv.second.first);
-        subarray.push_back(kv.second.second);
-    }
-
     tiledb::Query q(ctx, array, TILEDB_READ);
-    q.set_subarray(subarray);
 
     std::vector<double> xs(count);
     std::vector<double> ys(count);
     std::vector<double> zs(count);
 
-    q.set_buffer("X", xs).set_buffer("Y", ys).set_buffer("Z", zs);
+    q.set_data_buffer("X", xs).set_data_buffer("Y", ys).set_data_buffer("Z",
+                                                                        zs);
 
     q.submit();
     array.close();
