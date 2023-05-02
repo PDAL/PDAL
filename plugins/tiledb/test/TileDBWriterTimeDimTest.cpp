@@ -43,6 +43,7 @@
 #include "Support.hpp"
 
 #include "../io/TileDBReader.hpp"
+#include "../io/TileDBUtils.hpp"
 #include "../io/TileDBWriter.hpp"
 #include "XYZTmUtils.hpp"
 
@@ -70,7 +71,7 @@ Options getTileDBOptions()
 }
 
 const size_t count = 100;
-BOX4D rdr_bounds(0, 0, 0, 0, 10, 10, 10, 10);
+DomainBounds rdr_bounds(0, 0, 0, 0, 10, 10, 10, 10);
 
 class TileDBWriterTimeDimTest : public ::testing::Test
 {

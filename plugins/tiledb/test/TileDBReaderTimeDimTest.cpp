@@ -81,8 +81,9 @@ public:
         Options reader_options;
         reader_options.add(
             "bounds",
-            BOX4D(0., 0., 0., 1314489618., 10., 10., 10.,
-                  1315353618.)); // sep 1 - sep 11 00:00:00 UTC 2021 -> gpstime
+            DomainBounds(
+                0., 0., 0., 1314489618., 10., 10., 10.,
+                1315353618.)); // sep 1 - sep 11 00:00:00 UTC 2021 -> gpstime
         reader_options.add("count", count);
         reader_options.add("xyz_mode", "ramp");
         reader_options.add("time_mode", "ramp");
@@ -252,7 +253,8 @@ TEST_P(TileDBReaderTimeDimTest, read_4d)
 TEST_P(TileDBReaderTimeDimTest, test_dim4_change_name)
 {
     Options input_options;
-    input_options.add("bounds", BOX4D(0., 0., 0., 0., 10., 10., 10., 10.));
+    input_options.add("bounds",
+                      DomainBounds(0., 0., 0., 0., 10., 10., 10., 10.));
     input_options.add("count", count);
     input_options.add("xyz_mode", "ramp");
     input_options.add("time_mode", "ramp");
