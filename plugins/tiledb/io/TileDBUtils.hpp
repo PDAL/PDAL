@@ -37,8 +37,12 @@
 #include <array>
 #include <iostream>
 #include <istream>
+#include <optional>
 #include <stdexcept>
 #include <vector>
+
+#include <nlohmann/json.hpp>
+#include <tiledb/tiledb>
 
 #include <pdal/util/Utils.hpp>
 
@@ -194,5 +198,99 @@ private:
 std::istream& operator>>(std::istream& in, DomainBounds& bounds);
 
 std::ostream& operator<<(std::ostream& out, const DomainBounds& bounds);
+
+class FilterFactory
+{
+public:
+    /** No default constructor. */
+    FilterFactory() = delete;
+
+    /**
+     Constructor.
+
+     \param userProvidedFilters JSON containing the user defined filters.
+     \param defaultCompressor Filter to use for the default filter.
+     \param defaultCompressionLevel Compression level to use for the default
+            filter.
+
+     */
+    FilterFactory(const NL::json& userProvidedFilters,
+                  const std::string& defaultCompressor,
+                  int32_t defaultCompressionLevel);
+
+    /**
+      Returns a TileDB filter defined by the input JSON options
+
+      \param ctx TileDB Context object.
+      \param options JSON options to get the Filter definition from.
+    */
+    static tiledb::Filter filter(const tiledb::Context& ctx,
+                                 const NL::json& options);
+
+    /**
+     Returns a TileDB filter type from an input string.
+
+      \param filter_str String of the desired filter type.
+     */
+    static tiledb_filter_type_t
+    filterTypeFromString(const std::string& filter_str);
+
+    /**
+     Returns a filter list for the requested dimension.
+
+     If the user provided compression filter(s) for this dimension, create a
+     filter list from the JSON. Otherwise, return the default compression
+     filters for this dimension.
+
+     \param ctx TileDB Context object.
+     \param dimName Name of the dimension to get the filter list for.
+     */
+    tiledb::FilterList filterList(const tiledb::Context& ctx,
+                                  const std::string& dimName) const;
+    /**
+     Returns a filter list using the default filter type and compression level.
+
+     If no default filter was set, this will return an empty fitler list.
+
+     \param ctx TileDB Context object.
+     */
+    tiledb::FilterList defaultFilterList(const tiledb::Context& ctx) const;
+
+    /**
+      Returns a TileDB filter list for the dimension as defined by the default
+      profile.
+
+      Default profile:
+      {
+          "X":{"compression": "zstd", "compression_level": 7},
+          "Y":{"compression": "zstd", "compression_level": 7},
+          "Z":{"compression": "zstd", "compression_level": 7},
+          "Intensity":{"compression": "bzip2", "compression_level": 5},
+          "ReturnNumber": {"compression": "zstd", "compression_level": 7},
+          "NumberOfReturns": {"compression": "zstd", "compression_level": 7},
+          "ScanDirectionFlag": {"compression": "bzip2", "compression_level": 5},
+          "EdgeOfFlightLine": {"compression": "bzip2", "compression_level": 5},
+          "Classification": {"compression": "gzip", "compression_level": 9},
+          "ScanAngleRank": {"compression": "bzip2", "compression_level": 5},
+          "UserData": {"compression": "gzip", "compression_level": 9},
+          "PointSourceId": {"compression": "bzip2"},
+          "Red": {"compression": "zstd", "compression_level": 7},
+          "Green": {"compression": "zstd", "compression_level": 7},
+          "Blue": {"compression": "zstd", "compression_level": 7},
+          "GpsTime": {"compression": "zstd", "compression_level": 7}
+      }
+
+      \param ctx TileDB context object.
+      \param dimName name of the dimension to get the default filter list for.
+     */
+    tiledb::FilterList
+    defaultProfileFilterList(const tiledb::Context& ctx,
+                             const std::string& dimName) const;
+
+private:
+    NL::json m_user_filters{};
+    std::optional<tiledb_filter_type_t> m_default_filter_type{std::nullopt};
+    std::optional<int32_t> m_default_compression_level{std::nullopt};
+};
 
 } // namespace pdal

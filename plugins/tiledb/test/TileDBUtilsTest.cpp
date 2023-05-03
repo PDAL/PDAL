@@ -34,6 +34,7 @@
 
 #include "../io/TileDBUtils.hpp"
 #include <pdal/pdal_test_main.hpp>
+#include <tiledb/tiledb>
 
 namespace pdal
 {
@@ -163,6 +164,32 @@ TEST(DomainBounds, parse_pair_missing_back_bracket_with_error)
     std::istringstream ss("[-1.0, 1.0)");
     DomainBounds bounds;
     EXPECT_THROW(bounds.parsePair(ss, "Dim"), std::runtime_error);
+}
+
+TEST(FilterFactor, user_set_two_filter_list)
+{
+    NL::json jsonOptions;
+    jsonOptions["X"] = {{{"compression", "bit-shuffle"}},
+                        {{"compression", "gzip"}, {"compression_level", 9}}};
+    FilterFactory factory{jsonOptions, "zstd", 7};
+
+    tiledb::Context ctx{};
+    auto filterList = factory.filterList(ctx, "X");
+    auto nfilters = filterList.nfilters();
+    EXPECT_EQ(nfilters, 2);
+    if (nfilters >= 1)
+    {
+        auto filter = filterList.filter(0);
+        EXPECT_EQ(filter.filter_type(), TILEDB_FILTER_BITSHUFFLE);
+    }
+    if (nfilters >= 2)
+    {
+        auto filter = filterList.filter(1);
+        EXPECT_EQ(filter.filter_type(), TILEDB_FILTER_GZIP);
+        int32_t compressionLevel;
+        filter.get_option<int32_t>(TILEDB_COMPRESSION_LEVEL, &compressionLevel);
+        EXPECT_EQ(compressionLevel, 9);
+    }
 }
 
 } // namespace pdal

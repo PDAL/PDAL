@@ -129,4 +129,146 @@ std::ostream& operator<<(std::ostream& out, const DomainBounds& bounds)
     return out;
 }
 
+FilterFactory::FilterFactory(const NL::json& userProvidedFilters,
+                             const std::string& defaultCompressor,
+                             int32_t defaultCompressionLevel)
+{
+    m_user_filters.update(userProvidedFilters);
+    if (!defaultCompressor.empty())
+    {
+        m_default_filter_type =
+            FilterFactory::filterTypeFromString(defaultCompressor);
+        m_default_compression_level = defaultCompressionLevel;
+    }
+}
+
+tiledb::Filter FilterFactory::filter(const tiledb::Context& ctx,
+                                     const NL::json& options)
+{
+    if (options.empty())
+        return tiledb::Filter(ctx, TILEDB_FILTER_NONE);
+    std::string compression = options["compression"];
+    auto filter_type = FilterFactory::filterTypeFromString(compression);
+
+    tiledb::Filter filter{ctx, filter_type};
+
+    if (options.count("compression_level") > 0)
+        filter.set_option(TILEDB_COMPRESSION_LEVEL,
+                          options["compression_level"].get<int32_t>());
+
+    if (options.count("bit_width_max_window") > 0)
+        filter.set_option(TILEDB_BIT_WIDTH_MAX_WINDOW,
+                          options["bit_width_max_window"].get<int32_t>());
+
+    if (options.count("positive_delta_max_window") > 0)
+        filter.set_option(TILEDB_POSITIVE_DELTA_MAX_WINDOW,
+                          options["positive_delta_max_window"].get<int32_t>());
+    return filter;
+}
+
+tiledb_filter_type_t
+FilterFactory::filterTypeFromString(const std::string& filter_str)
+{
+    if (filter_str.empty())
+        return TILEDB_FILTER_NONE;
+    else if (filter_str == "gzip")
+        return TILEDB_FILTER_GZIP;
+    else if (filter_str == "zstd")
+        return TILEDB_FILTER_ZSTD;
+    else if (filter_str == "lz4")
+        return TILEDB_FILTER_LZ4;
+    else if (filter_str == "rle")
+        return TILEDB_FILTER_RLE;
+    else if (filter_str == "bzip2")
+        return TILEDB_FILTER_BZIP2;
+    else if (filter_str == "double-delta")
+        return TILEDB_FILTER_DOUBLE_DELTA;
+    else if (filter_str == "bit-width-reduction")
+        return TILEDB_FILTER_BIT_WIDTH_REDUCTION;
+    else if (filter_str == "bit-shuffle")
+        return TILEDB_FILTER_BITSHUFFLE;
+    else if (filter_str == "byte-shuffle")
+        return TILEDB_FILTER_BYTESHUFFLE;
+    else if (filter_str == "positive-delta")
+        return TILEDB_FILTER_POSITIVE_DELTA;
+    else
+        throw tiledb::TileDBError("Unable to parse compression type: " +
+                                  filter_str);
+}
+
+tiledb::FilterList FilterFactory::filterList(const tiledb::Context& ctx,
+                                             const std::string& dimName) const
+{
+    if (m_user_filters.count(dimName) > 0)
+    {
+        NL::json options = m_user_filters[dimName];
+        tiledb::FilterList filterList{ctx};
+        if (options.is_array())
+        {
+            for (auto& element : options.items())
+            {
+                auto value = element.value();
+                filterList.add_filter(FilterFactory::filter(ctx, value));
+            }
+        }
+        else
+            filterList.add_filter(FilterFactory::filter(ctx, options));
+        return filterList;
+    }
+    return defaultProfileFilterList(ctx, dimName);
+}
+
+tiledb::FilterList
+FilterFactory::defaultFilterList(const tiledb::Context& ctx) const
+{
+    tiledb::FilterList filterList{ctx};
+    if (!m_default_filter_type.has_value())
+        return filterList;
+    tiledb::Filter filter(ctx, m_default_filter_type.value());
+    if (m_default_compression_level.has_value())
+        filter.set_option(TILEDB_COMPRESSION_LEVEL,
+                          m_default_compression_level.value());
+
+    filterList.add_filter(filter);
+    return filterList;
+}
+
+tiledb::FilterList
+FilterFactory::defaultProfileFilterList(const tiledb::Context& ctx,
+                                        const std::string& dimName) const
+{
+    tiledb::FilterList filterList{ctx};
+    if (dimName == "X" || dimName == "Y" || dimName == "Z" ||
+        dimName == "Red" || dimName == "Green" || dimName == "Blue" ||
+        dimName == "GpsTime" || dimName == "ReturnNumber" ||
+        dimName == "NumberOfReturns")
+    {
+        tiledb::Filter filter{ctx, TILEDB_FILTER_ZSTD};
+        filter.set_option(TILEDB_COMPRESSION_LEVEL, 7);
+        filterList.add_filter(filter);
+        return filterList;
+    }
+    if (dimName == "Intensity" || dimName == "ScanDirectionFlag" ||
+        dimName == "ScanAngleRank" || dimName == "EdgeOfFlightLine")
+    {
+        tiledb::Filter filter{ctx, TILEDB_FILTER_BZIP2};
+        filter.set_option(TILEDB_COMPRESSION_LEVEL, 5);
+        filterList.add_filter(filter);
+        return filterList;
+    }
+    if (dimName == "UserData" || dimName == "Classification")
+    {
+        tiledb::Filter filter{ctx, TILEDB_FILTER_GZIP};
+        filter.set_option(TILEDB_COMPRESSION_LEVEL, 9);
+        filterList.add_filter(filter);
+        return filterList;
+    }
+    if (dimName == "PointSourceId")
+    {
+        filterList.add_filter(tiledb::Filter(ctx, TILEDB_FILTER_BZIP2));
+        return filterList;
+    }
+    return defaultFilterList(ctx);
+}
+
 } // namespace pdal
