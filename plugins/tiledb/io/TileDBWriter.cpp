@@ -392,6 +392,13 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
              (m_args->m_z_tile_size > 0) &&
              (!m_use_time || m_args->m_time_tile_size > 0));
 
+        // Check if the domain is set for all dimensions.
+        bool hasValidDomain = (m_args->m_x_domain_end > m_args->m_x_domain_st &&
+                               m_args->m_y_domain_end > m_args->m_y_domain_st &&
+                               m_args->m_z_domain_end > m_args->m_z_domain_st &&
+                               (!m_use_time || m_args->m_time_domain_end >
+                                                   m_args->m_time_domain_st));
+
         // Get table metadata and check if it is valid.
         MetadataNode meta =
             table.metadata().findChild("filters.stats:bbox:native:bbox");
@@ -399,13 +406,14 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
 
         // Check the user set valid tile extents, valid domains, or ran stats on
         // the point table.
-        if (!hasValidTiles && !hasMetadataStats && !isValidDomain(*m_args))
-            throwError("Must specify tile extent for all dimensions, specify "
-                       "valid domain for all dimensions, or execute a prior "
+        if (!hasValidTiles && !hasMetadataStats && !hasValidDomain)
+            throwError("Must specify a tile extent for all dimensions, specify "
+                       "a valid domain for all dimensions, or execute a prior "
                        "stats filter stage.");
 
         tiledb::Domain domain(*m_ctx);
 
+        // Get filters for the dimensions.
         tiledb::FilterList xFltrs =
             *getDimFilter(*m_ctx, "X", m_args->m_defaults, m_args->m_compressor,
                           m_args->m_compressionLevel);
@@ -419,43 +427,71 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
             *getDimFilter(*m_ctx, "GpsTime", m_args->m_defaults,
                           m_args->m_compressor, m_args->m_compressionLevel);
 
-        // Set the domain for each dimension.
-        double dimMin = std::numeric_limits<double>::lowest();
-        double dimMax = std::numeric_limits<double>::max();
-        std::array<double, 2> xDomain{dimMin, dimMax};
-        std::array<double, 2> yDomain{dimMin, dimMax};
-        std::array<double, 2> zDomain{dimMin, dimMax};
-        std::array<double, 2> gpsTimeDomain{dimMin, dimMax};
-        if (isValidDomain(*m_args))
+        // Set the domain values for the dimensions. Use the user provided
+        // domain values, and update if they are the default domain or otherwise
+        // not valid.
+        std::array<double, 2> xDomain{m_args->m_x_domain_st,
+                                      m_args->m_x_domain_end};
+        std::array<double, 2> yDomain{m_args->m_y_domain_st,
+                                      m_args->m_y_domain_end};
+        std::array<double, 2> zDomain{m_args->m_z_domain_st,
+                                      m_args->m_z_domain_end};
+        std::array<double, 2> gpsTimeDomain{m_args->m_time_domain_st,
+                                            m_args->m_time_domain_end};
+        if (!hasValidDomain)
         {
-            // Set domain from user arguments.
-            xDomain[0] = m_args->m_x_domain_st;
-            xDomain[1] = m_args->m_x_domain_end;
-            yDomain[0] = m_args->m_y_domain_st;
-            yDomain[1] = m_args->m_y_domain_end;
-            zDomain[0] = m_args->m_z_domain_st;
-            zDomain[1] = m_args->m_z_domain_end;
-            if (m_use_time)
+            if (hasMetadataStats)
             {
-                gpsTimeDomain[0] = m_args->m_time_domain_st;
-                gpsTimeDomain[1] = m_args->m_time_domain_end;
+                // Use statistics from the point table to set the invalid
+                // domains.
+                if (xDomain[1] <= xDomain[0])
+                {
+                    xDomain[0] = meta.findChild("minx").value<double>() - 1.0;
+                    xDomain[1] = meta.findChild("maxx").value<double>() + 1.0;
+                }
+                if (yDomain[1] <= yDomain[0])
+                {
+                    yDomain[0] = meta.findChild("miny").value<double>() - 1.0;
+                    yDomain[1] = meta.findChild("maxy").value<double>() + 1.0;
+                }
+                if (zDomain[1] <= zDomain[0])
+                {
+                    zDomain[0] = meta.findChild("minz").value<double>() - 1.0;
+                    zDomain[1] = meta.findChild("maxz").value<double>() + 1.0;
+                }
+                if (m_use_time && gpsTimeDomain[1] <= gpsTimeDomain[0])
+                {
+                    gpsTimeDomain[0] =
+                        meta.findChild("mintm").value<double>() - 1.0;
+                    gpsTimeDomain[1] =
+                        meta.findChild("maxtm").value<double>() + 1.0;
+                }
             }
-        }
-        else if (hasMetadataStats)
-        {
-            // Read from table.metadata if it is available
-            xDomain[0] = meta.findChild("minx").value<double>() - 1.0;
-            xDomain[1] = meta.findChild("maxx").value<double>() + 1.0;
-            yDomain[0] = meta.findChild("miny").value<double>() - 1.0;
-            yDomain[1] = meta.findChild("maxy").value<double>() + 1.0;
-            zDomain[0] = meta.findChild("minz").value<double>() - 1.0;
-            zDomain[1] = meta.findChild("maxz").value<double>() + 1.0;
-            if (m_use_time)
+            else
             {
-                gpsTimeDomain[0] =
-                    meta.findChild("mintm").value<double>() - 1.0;
-                gpsTimeDomain[1] =
-                    meta.findChild("maxtm").value<double>() + 1.0;
+                // Use the maximum possible domain to set the invalid domains.
+                double dimMin = std::numeric_limits<double>::lowest();
+                double dimMax = std::numeric_limits<double>::max();
+                if (xDomain[1] <= xDomain[0])
+                {
+                    xDomain[0] = dimMin;
+                    xDomain[1] = dimMax;
+                }
+                if (yDomain[1] <= yDomain[0])
+                {
+                    yDomain[0] = dimMin;
+                    yDomain[1] = dimMax;
+                }
+                if (zDomain[1] <= zDomain[0])
+                {
+                    zDomain[0] = dimMin;
+                    zDomain[1] = dimMax;
+                }
+                if (gpsTimeDomain[1] <= gpsTimeDomain[0])
+                {
+                    gpsTimeDomain[0] = dimMin;
+                    gpsTimeDomain[1] = dimMax;
+                }
             }
         }
 
@@ -651,13 +687,6 @@ void TileDBWriter::done(PointTableRef table)
     {
         throwError("Unable to flush points to TileDB array");
     }
-}
-
-bool TileDBWriter::isValidDomain(TileDBWriter::Args& args)
-{
-    return (((args.m_x_domain_end - args.m_x_domain_st) > 0) &&
-            ((args.m_y_domain_end - args.m_y_domain_st) > 0) &&
-            ((args.m_z_domain_end - args.m_z_domain_st) > 0));
 }
 
 bool TileDBWriter::flushCache(size_t size)
