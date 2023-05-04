@@ -108,8 +108,8 @@ private:
     point_count_t m_chunkSize;
     point_count_t m_offset;
     point_count_t m_resultSize;
-    point_count_t m_startTimeStamp;
-    point_count_t m_endTimeStamp;
+    uint64_t m_startTimeStamp;
+    uint64_t m_endTimeStamp;
     bool m_strict;
     bool m_complete;
     bool m_stats;
