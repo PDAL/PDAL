@@ -244,7 +244,8 @@ void TileDBReader::addDimensions(PointLayoutPtr layout)
 
 template <typename T> void TileDBReader::setQueryBuffer(const DimInfo& di)
 {
-    m_query->set_buffer(di.m_name, di.m_buffer->get<T>(), di.m_buffer->count());
+    m_query->set_data_buffer(di.m_name, di.m_buffer->get<T>(),
+                             di.m_buffer->count());
 }
 
 void TileDBReader::setQueryBuffer(const DimInfo& di)
@@ -324,7 +325,6 @@ void TileDBReader::ready(PointTableRef)
 
 void TileDBReader::localReady()
 {
-    int numDims = m_array->schema().domain().dimensions().size();
 
     m_query.reset(new tiledb::Query(*m_ctx, *m_array));
     m_query->set_layout(TILEDB_UNORDERED);
@@ -345,32 +345,31 @@ void TileDBReader::localReady()
         setQueryBuffer(di);
     }
 
-    // Set the extent of the query.
-    if (!m_bbox.empty())
+    // Set the subarray to query. The default for each dimension is to query
+    // the entire dimension domain unless a range is explicitly set on it.
+    tiledb::Subarray subarray(*m_ctx, *m_array);
+    const auto ndim_bbox = m_bbox.ndim();
+    const auto domain = m_array->schema().domain();
+    switch (m_bbox.ndim())
     {
-        if (numDims == 2)
-            m_query->set_subarray(
-                {m_bbox.minx, m_bbox.maxx, m_bbox.miny, m_bbox.maxy});
-        else if (numDims == 4)
-            m_query->set_subarray({m_bbox.minx, m_bbox.maxx, m_bbox.miny,
-                                   m_bbox.maxy, m_bbox.minz, m_bbox.maxz,
-                                   m_bbox.mintm, m_bbox.maxtm});
-        else
-            m_query->set_subarray({m_bbox.minx, m_bbox.maxx, m_bbox.miny,
-                                   m_bbox.maxy, m_bbox.minz, m_bbox.maxz});
+    case 4:
+        if (domain.has_dimension("GpsTime"))
+            subarray.add_range("GpsTime", m_bbox.minGpsTime(),
+                               m_bbox.maxGpsTime());
+        [[fallthrough]];
+    case 3:
+        if (domain.has_dimension("Z"))
+            subarray.add_range("Z", m_bbox.minZ(), m_bbox.maxZ());
+        [[fallthrough]];
+    case 2:
+        if (domain.has_dimension("Y"))
+            subarray.add_range("Y", m_bbox.minY(), m_bbox.maxY());
+        [[fallthrough]];
+    case 1:
+        if (domain.has_dimension("X"))
+            subarray.add_range("X", m_bbox.minX(), m_bbox.maxX());
     }
-    else
-    {
-        // get extents
-        std::vector<double> subarray;
-        auto domain = m_array->non_empty_domain<double>();
-        for (const auto& kv : domain)
-        {
-            subarray.push_back(kv.second.first);
-            subarray.push_back(kv.second.second);
-        }
-        m_query->set_subarray(subarray);
-    }
+    m_query->set_subarray(subarray);
 
     // read spatial reference
     NL::json meta = nullptr;

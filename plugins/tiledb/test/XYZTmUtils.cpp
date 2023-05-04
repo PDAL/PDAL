@@ -51,7 +51,7 @@ std::string XYZTimeFauxReader::getName() const
 void XYZTimeFauxReader::addArgs(ProgramArgs& args)
 {
     args.add("bounds", "X/Y/Z/time limits", m_bounds,
-             BOX4D(0., 0., 0., 0., 1., 1., 1., 1));
+             DomainBounds(0., 0., 0., 0., 1., 1., 1., 1));
     args.add("xyz_mode", "mode for distribution of xyz dimension values",
              m_xyz_mode, Mode::Uniform);
     args.add("time_mode", "mode for distribution of time dimension values",
@@ -79,17 +79,17 @@ void XYZTimeFauxReader::initialize()
 
     if (m_xyz_mode == Mode::Uniform)
     {
-        m_uniformX.reset(new urd(m_bounds.minx, m_bounds.maxx));
-        m_uniformY.reset(new urd(m_bounds.miny, m_bounds.maxy));
-        m_uniformZ.reset(new urd(m_bounds.minz, m_bounds.maxz));
+        m_uniformX.reset(new urd(m_bounds.minX(), m_bounds.maxX()));
+        m_uniformY.reset(new urd(m_bounds.minY(), m_bounds.maxY()));
+        m_uniformZ.reset(new urd(m_bounds.minZ(), m_bounds.maxZ()));
     }
     else if (m_xyz_mode == Mode::Ramp)
     {
         if (m_count > 1)
         {
-            m_delX = (m_bounds.maxx - m_bounds.minx) / (m_count - 1);
-            m_delY = (m_bounds.maxy - m_bounds.miny) / (m_count - 1);
-            m_delZ = (m_bounds.maxz - m_bounds.minz) / (m_count - 1);
+            m_delX = (m_bounds.maxX() - m_bounds.minX()) / (m_count - 1);
+            m_delY = (m_bounds.maxY() - m_bounds.minY()) / (m_count - 1);
+            m_delZ = (m_bounds.maxZ() - m_bounds.minZ()) / (m_count - 1);
         }
         else
         {
@@ -103,13 +103,15 @@ void XYZTimeFauxReader::initialize()
     {
         if (m_tm_mode == Mode::Uniform)
         {
-            m_uniformTm.reset(new urd(m_bounds.mintm, m_bounds.maxtm));
+            m_uniformTm.reset(
+                new urd(m_bounds.minGpsTime(), m_bounds.maxGpsTime()));
         }
         else if (m_tm_mode == Mode::Ramp)
         {
             if (m_count > 1)
             {
-                m_delTm = (m_bounds.maxtm - m_bounds.mintm) / (m_count - 1);
+                m_delTm = (m_bounds.maxGpsTime() - m_bounds.minGpsTime()) /
+                          (m_count - 1);
             }
             else
             {
@@ -163,9 +165,9 @@ bool XYZTimeFauxReader::processOne(PointRef& point)
         z = (*m_uniformZ)(m_generator);
         break;
     case Mode::Ramp:
-        x = m_bounds.minx + m_delX * m_index;
-        y = m_bounds.miny + m_delY * m_index;
-        z = m_bounds.minz + m_delZ * m_index;
+        x = m_bounds.minX() + m_delX * m_index;
+        y = m_bounds.minY() + m_delY * m_index;
+        z = m_bounds.minZ() + m_delZ * m_index;
         break;
     default:
         throwError("Invalid mode: only 'uniform' and 'ramp' implemented");
@@ -179,7 +181,7 @@ bool XYZTimeFauxReader::processOne(PointRef& point)
             tm = (*m_uniformTm)(m_generator);
             break;
         case Mode::Ramp:
-            tm = m_bounds.mintm + m_delTm * m_index;
+            tm = m_bounds.minGpsTime() + m_delTm * m_index;
             break;
         default:
             throwError("Invalid mode: only 'uniform' and 'ramp' implemented");

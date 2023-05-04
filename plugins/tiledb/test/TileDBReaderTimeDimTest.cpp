@@ -56,17 +56,16 @@ namespace pdal
 
 const size_t count = 100;
 
-class TileDBReaderTimeDimTest : public ::testing::Test
+class TileDBReaderTimeDimTest : public ::testing::TestWithParam<bool>
 {
-protected:
-    virtual void SetUp()
+public:
+    void SetUp() override
     {
-        XYZTimeFauxReader rdr;
         TileDBWriter writer;
-        Options reader_options;
         Options writer_options;
 
         data_path = Support::temppath("xyztm_tdb_array");
+        m_time_first = GetParam();
 
         if (FileUtils::directoryExists(data_path))
             FileUtils::deleteDirectory(data_path);
@@ -77,14 +76,19 @@ protected:
         writer_options.add("y_tile_size", 10.f);
         writer_options.add("z_tile_size", 10.f);
         writer_options.add("time_tile_size", 777600.f);
+        writer_options.add("time_first", m_time_first);
 
+        Options reader_options;
         reader_options.add(
             "bounds",
-            BOX4D(0., 0., 0., 1314489618., 10., 10., 10.,
-                  1315353618.)); // sep 1 - sep 11 00:00:00 UTC 2021 -> gpstime
+            DomainBounds(
+                0., 0., 0., 1314489618., 10., 10., 10.,
+                1315353618.)); // sep 1 - sep 11 00:00:00 UTC 2021 -> gpstime
         reader_options.add("count", count);
         reader_options.add("xyz_mode", "ramp");
         reader_options.add("time_mode", "ramp");
+
+        XYZTimeFauxReader rdr;
         rdr.setOptions(reader_options);
 
         writer.setOptions(writer_options);
@@ -95,20 +99,39 @@ protected:
         writer.execute(table);
     }
     std::string data_path;
+
+    bool time_is_first() const
+    {
+        return m_time_first;
+    }
+
+private:
+    bool m_time_first;
 };
 
-TEST_F(TileDBReaderTimeDimTest, set_dims)
+TEST_P(TileDBReaderTimeDimTest, set_dims)
 {
     tiledb::Context ctx;
 
     tiledb::Array array(ctx, data_path, TILEDB_READ);
     tiledb::Domain domain(array.schema().domain());
-    std::vector<std::string> dim_names{"X", "Y", "Z", "GpsTime"};
-    for (size_t i(0); i != 3; ++i)
-        EXPECT_EQ(domain.dimensions().at(i).name(), dim_names[i]);
+    if (time_is_first())
+    {
+        EXPECT_EQ(domain.dimension(0).name(), "GpsTime");
+        EXPECT_EQ(domain.dimension(1).name(), "X");
+        EXPECT_EQ(domain.dimension(2).name(), "Y");
+        EXPECT_EQ(domain.dimension(3).name(), "Z");
+    }
+    else
+    {
+        EXPECT_EQ(domain.dimension(0).name(), "X");
+        EXPECT_EQ(domain.dimension(1).name(), "Y");
+        EXPECT_EQ(domain.dimension(2).name(), "Z");
+        EXPECT_EQ(domain.dimension(3).name(), "GpsTime");
+    }
 }
 
-TEST_F(TileDBReaderTimeDimTest, read_bbox4d)
+TEST_P(TileDBReaderTimeDimTest, read_bbox4d)
 {
     Options options;
     options.add("array_name", data_path);
@@ -128,7 +151,7 @@ TEST_F(TileDBReaderTimeDimTest, read_bbox4d)
     EXPECT_EQ(table.numPoints(), 50);
 }
 
-TEST_F(TileDBReaderTimeDimTest, read_4d)
+TEST_P(TileDBReaderTimeDimTest, read_4d)
 {
     class Checker4D : public Filter, public Streamable
     {
@@ -193,25 +216,17 @@ TEST_F(TileDBReaderTimeDimTest, read_4d)
     options.add("array_name", data_path);
 
     tiledb::Array array(ctx, data_path, TILEDB_READ);
-    auto domain = array.non_empty_domain<double>();
-    std::vector<double> subarray;
-
-    for (const auto& kv : domain)
-    {
-        subarray.push_back(kv.second.first);
-        subarray.push_back(kv.second.second);
-    }
-
     tiledb::Query q(ctx, array, TILEDB_READ);
-    q.set_subarray(subarray);
 
     std::vector<double> xs(count);
     std::vector<double> ys(count);
     std::vector<double> zs(count);
     std::vector<double> ts(count);
 
-    q.set_buffer("X", xs).set_buffer("Y", ys).set_buffer("Z", zs).set_buffer(
-        "GpsTime", ts);
+    q.set_data_buffer("X", xs)
+        .set_data_buffer("Y", ys)
+        .set_data_buffer("Z", zs)
+        .set_data_buffer("GpsTime", ts);
 
     q.submit();
     array.close();
@@ -227,10 +242,11 @@ TEST_F(TileDBReaderTimeDimTest, read_4d)
     c4d.execute(table);
 }
 
-TEST_F(TileDBReaderTimeDimTest, test_dim4_change_name)
+TEST_P(TileDBReaderTimeDimTest, test_dim4_change_name)
 {
     Options input_options;
-    input_options.add("bounds", BOX4D(0., 0., 0., 0., 10., 10., 10., 10.));
+    input_options.add("bounds",
+                      DomainBounds(0., 0., 0., 0., 10., 10., 10., 10.));
     input_options.add("count", count);
     input_options.add("xyz_mode", "ramp");
     input_options.add("time_mode", "ramp");
@@ -246,5 +262,8 @@ TEST_F(TileDBReaderTimeDimTest, test_dim4_change_name)
     EXPECT_TRUE(table.layout()->dimName(table.layout()->findDim("something")) ==
                 "something");
 }
+
+INSTANTIATE_TEST_SUITE_P(TileDBTimeDimTest, TileDBReaderTimeDimTest,
+                         testing::Values(true, false));
 
 } // namespace pdal

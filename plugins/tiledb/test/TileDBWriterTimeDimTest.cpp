@@ -43,6 +43,7 @@
 #include "Support.hpp"
 
 #include "../io/TileDBReader.hpp"
+#include "../io/TileDBUtils.hpp"
 #include "../io/TileDBWriter.hpp"
 #include "XYZTmUtils.hpp"
 
@@ -70,7 +71,7 @@ Options getTileDBOptions()
 }
 
 const size_t count = 100;
-BOX4D rdr_bounds(0, 0, 0, 0, 10, 10, 10, 10);
+DomainBounds rdr_bounds(0, 0, 0, 0, 10, 10, 10, 10);
 
 class TileDBWriterTimeDimTest : public ::testing::Test
 {
@@ -210,25 +211,27 @@ TEST_F(TileDBWriterTimeDimTest, write_with_time)
     writer.execute(table);
 
     tiledb::Array array(ctx, out_path, TILEDB_READ);
-    auto domain = array.non_empty_domain<double>();
-    std::vector<double> subarray;
 
-    for (const auto& kv : domain)
+    // Check the non-empty domain is the hypercube
+    // ([0, 10], [0, 10], [0, 10], [0, 10]).
+    auto nonempty_domain = array.non_empty_domain<double>();
+    for (const auto& kv : nonempty_domain)
     {
-        subarray.push_back(kv.second.first);
-        subarray.push_back(kv.second.second);
+        ASSERT_DOUBLE_EQ(kv.second.first, 0.0);
+        ASSERT_DOUBLE_EQ(kv.second.second, 10.0);
     }
 
     tiledb::Query q(ctx, array, TILEDB_READ);
-    q.set_subarray(subarray);
 
     std::vector<double> xs(count);
     std::vector<double> ys(count);
     std::vector<double> zs(count);
     std::vector<double> ts(count);
 
-    q.set_buffer("X", xs).set_buffer("Y", ys).set_buffer("Z", zs).set_buffer(
-        "GpsTime", ts);
+    q.set_data_buffer("X", xs)
+        .set_data_buffer("Y", ys)
+        .set_data_buffer("Z", zs)
+        .set_data_buffer("GpsTime", ts);
 
     q.submit();
     array.close();
@@ -236,15 +239,6 @@ TEST_F(TileDBWriterTimeDimTest, write_with_time)
     result_num = (int)q.result_buffer_elements()["X"].second;
 
     EXPECT_EQ(m_reader.count(), result_num);
-
-    ASSERT_DOUBLE_EQ(subarray[0], 0.0);
-    ASSERT_DOUBLE_EQ(subarray[2], 0.0);
-    ASSERT_DOUBLE_EQ(subarray[4], 0.0);
-    ASSERT_DOUBLE_EQ(subarray[6], 0.0);
-    ASSERT_DOUBLE_EQ(subarray[1], 10.0);
-    ASSERT_DOUBLE_EQ(subarray[3], 10.0);
-    ASSERT_DOUBLE_EQ(subarray[5], 10.0);
-    ASSERT_DOUBLE_EQ(subarray[7], 10.0);
 }
 
 TEST_F(TileDBWriterTimeDimTest, write_append_with_time)
@@ -279,25 +273,17 @@ TEST_F(TileDBWriterTimeDimTest, write_append_with_time)
     append_writer.execute(table2);
 
     tiledb::Array array(ctx, out_path, TILEDB_READ);
-    auto domain = array.non_empty_domain<double>();
-    std::vector<double> subarray;
-
-    for (const auto& kv : domain)
-    {
-        subarray.push_back(kv.second.first);
-        subarray.push_back(kv.second.second);
-    }
-
     tiledb::Query q(ctx, array, TILEDB_READ);
-    q.set_subarray(subarray);
 
     std::vector<double> xs(count * 2);
     std::vector<double> ys(count * 2);
     std::vector<double> zs(count * 2);
     std::vector<double> ts(count * 2);
 
-    q.set_buffer("X", xs).set_buffer("Y", ys).set_buffer("Z", zs).set_buffer(
-        "GpsTime", ts);
+    q.set_data_buffer("X", xs)
+        .set_data_buffer("Y", ys)
+        .set_data_buffer("Z", zs)
+        .set_data_buffer("GpsTime", ts);
 
     q.submit();
     array.close();
@@ -447,25 +433,17 @@ TEST_F(TileDBWriterTimeDimTest, append_write_with_time)
     writer2.execute(table2);
 
     tiledb::Array array(ctx, out_path, TILEDB_READ);
-    auto domain = array.non_empty_domain<double>();
-
-    std::vector<double> subarray;
-    for (const auto& kv : domain)
-    {
-        subarray.push_back(kv.second.first);
-        subarray.push_back(kv.second.second);
-    }
-
     tiledb::Query q(ctx, array, TILEDB_READ);
-    q.set_subarray(subarray);
 
     std::vector<double> xs(count * 2);
     std::vector<double> ys(count * 2);
     std::vector<double> zs(count * 2);
     std::vector<double> ts(count * 2);
 
-    q.set_buffer("X", xs).set_buffer("Y", ys).set_buffer("Z", zs).set_buffer(
-        "GpsTime", ts);
+    q.set_data_buffer("X", xs)
+        .set_data_buffer("Y", ys)
+        .set_data_buffer("Z", zs)
+        .set_data_buffer("GpsTime", ts);
 
     q.submit();
     array.close();

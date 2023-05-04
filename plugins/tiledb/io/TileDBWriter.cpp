@@ -773,12 +773,12 @@ bool TileDBWriter::flushCache(size_t size)
     tiledb::Query query(*m_ctx, *m_array);
     query.set_layout(TILEDB_UNORDERED);
 
-    query.set_buffer("X", m_xs);
-    query.set_buffer("Y", m_ys);
-    query.set_buffer("Z", m_zs);
+    query.set_data_buffer("X", m_xs);
+    query.set_data_buffer("Y", m_ys);
+    query.set_data_buffer("Z", m_zs);
 
     if (m_use_time)
-        query.set_buffer("GpsTime", m_tms);
+        query.set_data_buffer("GpsTime", m_tms);
 
     // set tiledb buffers
     for (const auto& a : m_attrs)
@@ -787,34 +787,44 @@ bool TileDBWriter::flushCache(size_t size)
         switch (a.m_type)
         {
         case Dimension::Type::Double:
-            query.set_buffer(a.m_name, reinterpret_cast<double*>(buf), size);
+            query.set_data_buffer(a.m_name, reinterpret_cast<double*>(buf),
+                                  size);
             break;
         case Dimension::Type::Float:
-            query.set_buffer(a.m_name, reinterpret_cast<float*>(buf), size);
+            query.set_data_buffer(a.m_name, reinterpret_cast<float*>(buf),
+                                  size);
             break;
         case Dimension::Type::Signed8:
-            query.set_buffer(a.m_name, reinterpret_cast<int8_t*>(buf), size);
+            query.set_data_buffer(a.m_name, reinterpret_cast<int8_t*>(buf),
+                                  size);
             break;
         case Dimension::Type::Signed16:
-            query.set_buffer(a.m_name, reinterpret_cast<int16_t*>(buf), size);
+            query.set_data_buffer(a.m_name, reinterpret_cast<int16_t*>(buf),
+                                  size);
             break;
         case Dimension::Type::Signed32:
-            query.set_buffer(a.m_name, reinterpret_cast<int32_t*>(buf), size);
+            query.set_data_buffer(a.m_name, reinterpret_cast<int32_t*>(buf),
+                                  size);
             break;
         case Dimension::Type::Signed64:
-            query.set_buffer(a.m_name, reinterpret_cast<int64_t*>(buf), size);
+            query.set_data_buffer(a.m_name, reinterpret_cast<int64_t*>(buf),
+                                  size);
             break;
         case Dimension::Type::Unsigned8:
-            query.set_buffer(a.m_name, reinterpret_cast<uint8_t*>(buf), size);
+            query.set_data_buffer(a.m_name, reinterpret_cast<uint8_t*>(buf),
+                                  size);
             break;
         case Dimension::Type::Unsigned16:
-            query.set_buffer(a.m_name, reinterpret_cast<uint16_t*>(buf), size);
+            query.set_data_buffer(a.m_name, reinterpret_cast<uint16_t*>(buf),
+                                  size);
             break;
         case Dimension::Type::Unsigned32:
-            query.set_buffer(a.m_name, reinterpret_cast<uint32_t*>(buf), size);
+            query.set_data_buffer(a.m_name, reinterpret_cast<uint32_t*>(buf),
+                                  size);
             break;
         case Dimension::Type::Unsigned64:
-            query.set_buffer(a.m_name, reinterpret_cast<uint64_t*>(buf), size);
+            query.set_data_buffer(a.m_name, reinterpret_cast<uint64_t*>(buf),
+                                  size);
             break;
         case Dimension::Type::None:
         default:

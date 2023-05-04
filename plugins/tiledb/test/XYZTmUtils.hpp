@@ -40,7 +40,7 @@
 
 #include <pdal/PluginHelper.hpp>
 
-#include "../io/Bounds4D.hpp"
+#include "../io/TileDBUtils.hpp"
 
 namespace pdal
 {
@@ -66,7 +66,7 @@ private:
     double m_delZ;
     double m_delTm;
     double m_density;
-    BOX4D m_bounds;
+    DomainBounds m_bounds;
     Mode m_xyz_mode;
     Mode m_tm_mode;
     bool m_use_time;
