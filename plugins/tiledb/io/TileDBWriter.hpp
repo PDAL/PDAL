@@ -77,7 +77,6 @@ private:
     bool flushCache(size_t size);
 
     struct Args;
-    bool isValidDomain(TileDBWriter::Args& args);
     std::unique_ptr<TileDBWriter::Args> m_args;
 
     size_t m_current_idx;
