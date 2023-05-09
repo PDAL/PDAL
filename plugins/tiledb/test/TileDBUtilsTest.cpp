@@ -166,9 +166,37 @@ TEST(DomainBounds, parse_pair_missing_back_bracket_with_error)
     EXPECT_THROW(bounds.parsePair(ss, "Dim"), std::runtime_error);
 }
 
-TEST(FilterFactor, user_set_two_filter_list)
+TEST(FilterFactory, dim_with_unset_default_filter)
 {
-    NL::json jsonOptions;
+    NL::json jsonOptions({});
+    tiledb::Context ctx{};
+    FilterFactory factory{jsonOptions, "", 0};
+    auto filterList = factory.filterList(ctx, "Curvature");
+    auto nfilters = filterList.nfilters();
+    EXPECT_EQ(nfilters, 0);
+}
+
+TEST(FilterFactory, dim_with_set_default_filter)
+{
+    NL::json jsonOptions({});
+    tiledb::Context ctx{};
+    FilterFactory factory{jsonOptions, "zstd", 9};
+    auto filterList = factory.filterList(ctx, "Curvature");
+    auto nfilters = filterList.nfilters();
+    EXPECT_EQ(nfilters, 1);
+    if (nfilters >= 1)
+    {
+        auto filter = filterList.filter(0);
+        EXPECT_EQ(filter.filter_type(), TILEDB_FILTER_ZSTD);
+        int32_t compressionLevel;
+        filter.get_option<int32_t>(TILEDB_COMPRESSION_LEVEL, &compressionLevel);
+        EXPECT_EQ(compressionLevel, 9);
+    }
+}
+
+TEST(FilterFactory, user_set_two_filter_list)
+{
+    NL::json jsonOptions({});
     jsonOptions["X"] = {{{"compression", "bit-shuffle"}},
                         {{"compression", "gzip"}, {"compression_level", 9}}};
     FilterFactory factory{jsonOptions, "zstd", 7};
@@ -179,15 +207,16 @@ TEST(FilterFactor, user_set_two_filter_list)
     EXPECT_EQ(nfilters, 2);
     if (nfilters >= 1)
     {
-        auto filter = filterList.filter(0);
-        EXPECT_EQ(filter.filter_type(), TILEDB_FILTER_BITSHUFFLE);
+        auto filter0 = filterList.filter(0);
+        EXPECT_EQ(filter0.filter_type(), TILEDB_FILTER_BITSHUFFLE);
     }
     if (nfilters >= 2)
     {
-        auto filter = filterList.filter(1);
-        EXPECT_EQ(filter.filter_type(), TILEDB_FILTER_GZIP);
+        auto filter1 = filterList.filter(1);
+        EXPECT_EQ(filter1.filter_type(), TILEDB_FILTER_GZIP);
         int32_t compressionLevel;
-        filter.get_option<int32_t>(TILEDB_COMPRESSION_LEVEL, &compressionLevel);
+        filter1.get_option<int32_t>(TILEDB_COMPRESSION_LEVEL,
+                                    &compressionLevel);
         EXPECT_EQ(compressionLevel, 9);
     }
 }
