@@ -292,6 +292,58 @@ TEST(BoundsTest, test_parse)
     EXPECT_EQ(b1, b2);
 }
 
+TEST(BoundsTest, test_parse_geojson)
+{
+    std::istringstream iss1("([1,101],[2,102],[3,103])");
+    std::istringstream iss2("[1, 2, 3, 101, 102, 103]");
+
+    BOX3D b1;
+    BOX3D b2;
+
+    iss1 >> b1;
+    iss2 >> b2;
+
+    EXPECT_EQ(b1, b2);
+
+    std::istringstream iss3("([1,101],[2,102])");
+    std::istringstream iss4("[1, 2, 101, 102]");
+
+    BOX2D b3;
+    BOX2D b4;
+
+    iss3 >> b3;
+    iss4 >> b4;
+
+    EXPECT_EQ(b3, b4);
+}
+
+TEST(BoundsTest, test_parse_object)
+{
+    std::istringstream iss1("([1,101],[2,102],[3,103])");
+    std::istringstream iss2("{\"minx\": 1,\"miny\": 2,\"minz\": 3,\"maxx\": 101,\"maxy\": 102,\"maxz\": 103}");
+
+    BOX3D b1;
+    BOX3D b2;
+
+    iss1 >> b1;
+    iss2 >> b2;
+
+    EXPECT_EQ(b1, b2);
+
+    std::istringstream iss3("([1,101],[2,102])");
+    std::istringstream iss4("{\"minx\": 1,\"miny\": 2,\"maxx\": 101,\"maxy\": 102}");
+
+    BOX2D b3;
+    BOX2D b4;
+
+    iss3 >> b3;
+    iss4 >> b4;
+
+    EXPECT_EQ(b3, b4);
+}
+
+
+
 TEST(BoundsTest, test_wkt)
 {
     BOX2D b(1.1,2.2,101.1,102.2);
