@@ -39,12 +39,13 @@
 #include <pdal/StageFactory.hpp>
 #include <filters/MergeFilter.hpp>
 
+
 namespace pdal
 {
 
 namespace gdal { class SpatialRef; }
 
-class PDAL_DLL TIndexReader : public Reader
+class PDAL_DLL TIndexReader : public Reader, public Streamable
 {
     struct FileInfo
     {
@@ -67,15 +68,17 @@ public:
     TIndexReader() : m_dataset(NULL) , m_layer(NULL)
         {}
 
-    std::string getName() const;
+    std::string getName() const override;
 
 private:
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void addArgs(ProgramArgs& args);
-    virtual void initialize();
-    virtual void prepared(PointTableRef table);
-    virtual void ready(PointTableRef table);
-    virtual PointViewSet run(PointViewPtr view);
+    virtual void addDimensions(PointLayoutPtr layout) override;
+    virtual void addArgs(ProgramArgs& args) override;
+    virtual void initialize() override;
+    virtual void prepared(PointTableRef table) override;
+    virtual void ready(PointTableRef table) override;
+    virtual PointViewSet run(PointViewPtr view) override;
+    virtual point_count_t read(PointViewPtr view, point_count_t num) override;
+    virtual bool processOne(PointRef& point) override;
 
     std::string m_layerName;
     std::string m_driverName;
@@ -95,7 +98,6 @@ private:
 
     StageFactory m_factory;
     MergeFilter m_merge;
-    PointViewSet m_pvSet;
 
     std::vector<FileInfo> getFiles();
     FieldIndexes getFields();

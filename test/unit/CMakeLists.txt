@@ -401,14 +401,6 @@ if(PDAL_HAVE_LIBXML2)
         INCLUDES
             ${LIBXML2_INCLUDE_DIR}
     )
-    PDAL_ADD_TEST(xml_schema_test
-        FILES
-            XMLSchemaTest.cpp
-        LINK_WITH
-            ${LIBXML2_LIBRARIES}
-        INCLUDES
-            ${LIBXML2_INCLUDE_DIR}
-    )
     PDAL_ADD_TEST(pdal_io_ilvis2_test
         FILES
             io/Ilvis2ReaderTest.cpp

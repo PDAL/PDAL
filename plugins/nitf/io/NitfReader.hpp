@@ -151,7 +151,8 @@ public:
 protected:
     virtual LasStreamPtr createStream()
     {
-        return LasStreamPtr(new NitfStreamIf(m_filename, m_offset));
+        if (!m_streamIf)
+            m_streamIf.reset(new NitfStreamIf(m_filename, m_offset));
     }
 
 private:

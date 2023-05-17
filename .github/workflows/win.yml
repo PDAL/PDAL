@@ -45,8 +45,9 @@ jobs:
         miniforge-version: latest
         use-mamba: true
         auto-update-conda: true
-        python-version: '3.8'
-        use-only-tar-bz2: true
+        environment-file: scripts/ci/environment.yml
+        python-version: "3.10"
+        activate-environment: "pdal-build"
 
     - name: Setup
       run: |

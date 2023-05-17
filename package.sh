@@ -14,7 +14,7 @@ GITSHA="$(git rev-parse HEAD)"
 echo "Cutting release for SHA $GITSHA"
 
 HERE=`pwd`
-CONTAINER="condaforge/miniforge3"
+CONTAINER="condaforge/mambaforge"
 DOCKER="docker"
 
 CONTAINERRUN="$DOCKER run -it -d --entrypoint /bin/sh -v $HERE:/data $CONTAINER"
@@ -29,9 +29,9 @@ then
 fi
 
 
-conda update --all -y -n base
+mamba update --all -y -n base
 DEBIAN_FRONTEND=noninteractive apt-get update -y && apt-get install gcc g++ -y
-conda install -c conda-forge -y -n base cmake make ninja gdal
+mamba install -c conda-forge -y -n base cmake make ninja gdal
 
 git clone https://github.com/PDAL/PDAL.git;
 cd /PDAL;

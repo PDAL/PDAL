@@ -51,11 +51,11 @@ Dimension::Id e57ToPdal(const std::string &e57Dimension)
     else if (e57Dimension == "cartesianZ")
         return Dimension::Id::Z;
     else if (e57Dimension == "sphericalRange")
-        return Dimension::Id::X;
+        return Dimension::Id::SphericalRange;
     else if (e57Dimension == "sphericalAzimuth")
-        return Dimension::Id::Y;
+        return Dimension::Id::SphericalAzimuth;
     else if (e57Dimension == "sphericalElevation")
-        return Dimension::Id::Z;
+        return Dimension::Id::SphericalElevation;
     else if (e57Dimension == "nor:normalX")
         return Dimension::Id::NormalX;
     else if (e57Dimension == "nor:normalY")
@@ -115,6 +115,7 @@ std::string pdalToE57(Dimension::Id pdalDimension)
 std::vector<Dimension::Id> supportedPdalTypes()
 {
     return {Dimension::Id::X, Dimension::Id::Y, Dimension::Id::Z,
+            Dimension::Id::SphericalRange, Dimension::Id::SphericalAzimuth, Dimension::Id::SphericalElevation,
             Dimension::Id::NormalX, Dimension::Id::NormalY, Dimension::Id::NormalZ,
             Dimension::Id::Red, Dimension::Id::Green, Dimension::Id::Blue,
             Dimension::Id::Intensity, Dimension::Id::Omit, Dimension::Id::Classification
@@ -124,9 +125,10 @@ std::vector<Dimension::Id> supportedPdalTypes()
 std::vector<std::string> supportedE57Types()
 {
     return {"cartesianX",  "cartesianY", "cartesianZ",
+            "sphericalRange", "sphericalAzimuth", "sphericalElevation",
             "nor:normalX", "nor:normalY", "nor:normalZ",
             "colorRed", "colorGreen", "colorBlue", "intensity",
-            "cartesianInvalidState", "classification"};
+            "cartesianInvalidState", "sphericalInvalidState", "classification"};
 }
 
 std::vector<std::string> scalableE57Types()

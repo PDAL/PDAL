@@ -119,22 +119,22 @@ TEST(StacReaderTest, catalog_test)
     EXPECT_EQ(qi.m_pointCount, 36174643520);
 }
 
-// TEST(StacReaderTest, nested_catalog_test)
-// {
-//     Options options;
-//     options.add("filename", Support::datapath("stac/multi_type_catalog.json"));
-//     options.add("catalog_ids", "3dep");
-//     options.add("item_ids", "MD_GoldenBeach_2012");
-//     options.add("asset_names", "ept.json");
-//
-//     StageFactory f;
-//     Stage& reader = *f.createStage("readers.stac");
-//     reader.setOptions(options);
-//
-//     QuickInfo qi = reader.preview();
-//
-//     EXPECT_EQ(qi.m_pointCount, 4860658);
-// }
+TEST(StacReaderTest, nested_catalog_test)
+{
+    Options options;
+    options.add("filename", Support::datapath("stac/multi_type_catalog.json"));
+    options.add("catalog_ids", "3dep");
+    options.add("item_ids", "MD_GoldenBeach_2012");
+    options.add("asset_names", "ept.json");
+
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
+
+    QuickInfo qi = reader.preview();
+
+    EXPECT_EQ(qi.m_pointCount, 4860658);
+}
 
 TEST(StacReaderTest, multiple_readers_test)
 {
