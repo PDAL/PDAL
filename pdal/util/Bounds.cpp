@@ -59,6 +59,7 @@ void BOX2D::clear()
 {
     minx = HIGHEST; miny = HIGHEST;
     maxx = LOWEST; maxy = LOWEST;
+    wkt = "";
 }
 
 void BOX3D::clear()
@@ -66,6 +67,7 @@ void BOX3D::clear()
     BOX2D::clear();
     minz = HIGHEST;
     maxz = LOWEST;
+    wkt = "";
 }
 
 bool BOX2D::empty() const
@@ -156,6 +158,7 @@ void Bounds::reset(const BOX2D& box)
     m_box.maxy = box.maxy;
     m_box.minz = HIGHEST;
     m_box.maxz = LOWEST;
+    m_box.wkt = box.wkt;
 }
 
 
@@ -343,6 +346,12 @@ void BOX2D::parse(const std::string& s, std::string::size_type& pos)
             throw error("Object must contain 'maxy'");
         maxy = b["maxy"].get<double>();
 
+        if (b.contains("crs"))
+            wkt = b["crs"].get<std::string>();
+
+        if (b.contains("srs"))
+            wkt = b["srs"].get<std::string>();
+
         // parsed. we are done
         pos = s.size();
         return;
@@ -439,6 +448,12 @@ void BOX3D::parse(const std::string& s, std::string::size_type& pos)
             minz = b["minz"].get<double>();
             maxz = b["maxz"].get<double>();
         }
+
+        if (b.contains("crs"))
+            wkt = b["crs"].get<std::string>();
+
+        if (b.contains("srs"))
+            wkt = b["srs"].get<std::string>();
 
         // Parsed. We are done.
         pos = s.size();

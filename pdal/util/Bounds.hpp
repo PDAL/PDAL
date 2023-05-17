@@ -60,6 +60,7 @@ public:
     double maxx;  ///< Maximum X value.
     double miny;  ///< Minimum Y value.
     double maxy;  ///< Maximum Y value.
+    std::string wkt; ///< WKT/PROJJSON/EPSG:code/etc GDAL-readable SRS format
 
     /**
       Construct an "empty" bounds box.
@@ -322,6 +323,7 @@ public:
     using BOX2D::maxy;
     double minz;   ///< Minimum Z value.
     double maxz;   ///< Maximum Z value.
+    using BOX2D::wkt;
 
     /**
       Clear the bounds box to an empty state.

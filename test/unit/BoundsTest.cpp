@@ -340,6 +340,27 @@ TEST(BoundsTest, test_parse_object)
     iss4 >> b4;
 
     EXPECT_EQ(b3, b4);
+
+
+
+
+    SrsBounds sb;
+    std::string t("{\"minx\": 1,\"miny\": 2,\"maxx\": 101,\"maxy\": 102, \"crs\":\"EPSG:2596\"}");
+    Utils::fromString(t, sb);
+
+    EXPECT_FALSE(sb.is3d());
+    EXPECT_TRUE(sb.to3d().empty());
+
+    BOX2D box = sb.to2d();
+    EXPECT_EQ(box.minx, 1.0);
+    EXPECT_EQ(box.miny, 2.0);
+    EXPECT_EQ(box.maxx, 101.0);
+    EXPECT_EQ(box.maxy, 102.0);
+
+    EXPECT_NE(std::string::npos,
+        sb.spatialReference().getWKT().find("Krassowsky 1940"));
+
+
 }
 
 
