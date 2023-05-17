@@ -48,23 +48,26 @@ namespace pdal
 
 SrsBounds::SrsBounds(const BOX3D& box) : Bounds(box)
 {
-    if (box.wkt.size())
-       m_srs.set(box.wkt);
+    const std::string& wkt = box.to2d().wkt;
+    if (wkt.size())
+       m_srs.set(wkt);
 }
 
 
 SrsBounds::SrsBounds(const BOX3D& box, const SpatialReference& srs) :
     Bounds(box), m_srs(srs)
 {
-    if (box.wkt.size())
-       m_srs.set(box.wkt);
+    const std::string& wkt = box.to2d().wkt;
+    if (wkt.size())
+       m_srs.set(wkt);
 }
 
 
 SrsBounds::SrsBounds(const BOX2D& box) : Bounds(box)
 {
-    if (box.wkt.size())
-       m_srs.set(box.wkt);
+    const std::string& wkt = box.wkt;
+    if (wkt.size())
+       m_srs.set(wkt);
 }
 
 
