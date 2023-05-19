@@ -40,7 +40,6 @@
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/Extractor.hpp>
-#include <pdal/util/FileUtils.hpp>
 
 #ifndef _WIN32
 #include <fcntl.h>
@@ -264,41 +263,6 @@ inline void writeProgress(int fd, const std::string& type,
 #endif
 }
 
-// RAII handling of a temp file to make sure file gets deleted.
-class TempFile
-{
-public:
-    TempFile(const std::string path);
-
-    virtual ~TempFile();
-
-    const std::string& filename();
-
-private:
-    std::string m_filename;
-};
-
-class ArbiterOutStream : public std::ofstream
-{
-public:
-    ArbiterOutStream(const std::string& localPath,
-            const std::string& remotePath, std::ios::openmode mode);
-
-    virtual ~ArbiterOutStream();
-
-    std::string m_remotePath;
-    TempFile m_localFile;
-};
-
-class ArbiterInStream : public std::ifstream
-{
-public:
-    ArbiterInStream(const std::string& localPath, const std::string& remotePath,
-            std::ios::openmode mode);
-
-    TempFile m_localFile;
-};
-
 std::string dllDir();
 std::string PDAL_DLL toJSON(const MetadataNode& m);
 void PDAL_DLL toJSON(const MetadataNode& m, std::ostream& o);
@@ -315,8 +279,8 @@ std::vector<std::string> PDAL_DLL maybeGlob(const std::string& path);
 double PDAL_DLL computeHausdorff(PointViewPtr srcView, PointViewPtr candView);
 std::pair<double, double> PDAL_DLL computeHausdorffPair(PointViewPtr srcView, PointViewPtr candView);
 double PDAL_DLL computeChamfer(PointViewPtr srcView, PointViewPtr candView);
+std::string PDAL_DLL tempFilename(const std::string& path);
 
-std::string tempFilename(const std::string& path);
 
 } // namespace Utils
 } // namespace pdal

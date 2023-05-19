@@ -150,6 +150,24 @@ read data from those `Entwine Point Tile`_ collections that Entwine produces..
 .. _`Entwine`: https://entwine.io
 .. _`Greyhound`: http://greyhound.io
 
+Untwine
+................................................................................
+`Untwine`_ is open source software from Hobu, Inc. that organizes massive point
+just like Entwine, but it does so in a bottom-up rather than top-down way.
+
+.. _`Untwine`: https://github.com/hobuinc/untwine
+
+
+.. index:: Untwine
+
+viewer.copc.io
+................................................................................
+
+The Eptium viewer from Hobu, Inc. is a commercial lidar exploitation and
+visualization platform based on Cesium that can be used to visualize `COPC <https://copc.io>`__
+and `Entwine Point Tile`_ content.
+
+
 Potree
 ................................................................................
 

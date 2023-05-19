@@ -90,7 +90,7 @@ struct named_file::Private
 // The chunk table itself is at the end of the point chunks. It has its own
 // header that consists of a version number and a chunk count. The chunk table entries
 // are compressed with an integer compressor.
-// 
+//
 // A chunk table entry is created after each chunk of points has been created and written.
 // If the chunks are variable size, the chunk table entries consist of a count followed by
 // an "offset".  The count is the number of points in the chunk. The offset is the the number
@@ -184,7 +184,8 @@ void basic_file::Private::close()
 {
     if (compressed())
     {
-        pcompressor->done();
+        if (pcompressor)
+            pcompressor->done();
         chunks.push_back({ chunk_point_num, (uint64_t)f->tellp() });
     }
 
@@ -196,7 +197,15 @@ void basic_file::Private::close()
 void basic_file::Private::writeHeader()
 {
     laz_vlr lazVlr(head14.pointFormat(), head14.ebCount(), chunk_size);
-    eb_vlr ebVlr(head14.ebCount());
+    eb_vlr ebVlr;
+
+    for (int i = 0; i < head14.ebCount(); ++i)
+    {
+        eb_vlr::ebfield field;
+
+        field.name = "FIELD_" + std::to_string(i);
+        ebVlr.addField(field);
+    }
 
     // Set the version number to 2 in order to write something reasonable.
     if (head14.version.minor < 2 || head14.version.minor > 4)
@@ -210,11 +219,11 @@ void basic_file::Private::writeHeader()
     {
         head14.vlr_count++;
         head14.point_format_id |= (1 << 7);
-        head14.point_offset += lazVlr.size() + lazVlr.header().Size;
+        head14.point_offset += (uint32_t)(lazVlr.size() + lazVlr.header().Size);
     }
     if (head14.ebCount())
     {
-        head14.point_offset += ebVlr.size() + ebVlr.header().Size;
+        head14.point_offset += (uint32_t)(ebVlr.size() + ebVlr.header().Size);
         head14.vlr_count++;
     }
 
@@ -379,7 +388,7 @@ named_file::named_file(const std::string& filename, const named_file::config& c)
     p_(new Private(basic_file::p_.get()))
 {
     p_->open(filename, c);
-}    
+}
 
 named_file::~named_file()
 {}

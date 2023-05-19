@@ -247,7 +247,7 @@ bool basic_file::Private::extractVlr(const std::string& user_id, uint16_t record
     // Extract EB VLR
     else if (user_id == "LASF_Spec" && record_id == 4)
     {
-        eb.read(*f, data_length);
+        eb.read(*f, (uint32_t) data_length);
         return true;
     }
     return false;
@@ -338,7 +338,7 @@ void basic_file::Private::parseChunkTable()
         {
             if (total_points < laz.chunk_size)
             {
-                count = total_points;
+                count = (uint32_t) total_points;
                 assert(i == chunk_table_header.chunk_count - 1);
             }
             else

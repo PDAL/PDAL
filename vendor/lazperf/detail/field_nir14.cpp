@@ -2,29 +2,29 @@
 ===============================================================================
 
   FILE:  field_nir14.hpp
-  
+
   CONTENTS:
-    
+
 
   PROGRAMMERS:
 
     martin.isenburg@rapidlasso.com  -  http://rapidlasso.com
     uday.karan@gmail.com - Hobu, Inc.
-  
+
   COPYRIGHT:
-  
+
     (c) 2007-2014, martin isenburg, rapidlasso - tools to catch reality
     (c) 2014, Uday Verma, Hobu, Inc.
 
     This is free software; you can redistribute and/or modify it under the
-    terms of the GNU Lesser General Licence as published by the Free Software
+    terms of the Apache Public License 2.0 published by the Apache Software
     Foundation. See the COPYING file for more information.
 
     This software is distributed WITHOUT ANY WARRANTY and without even the
     implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  
+
   CHANGE HISTORY:
-  
+
 ===============================================================================
 */
 
@@ -82,7 +82,7 @@ const char *Nir14Compressor::compress(const char *buf, int& sc)
 
     bool lowChange = (lastNir.val & 0xFF) != (nir.val & 0xFF);
     bool highChange = (lastNir.val & 0xFF00) != (nir.val & 0xFF00);
-    int32_t sym = lowChange | (highChange << 1);
+    int32_t sym = (int32_t)lowChange | (highChange << 1);
     if (sym)
         nir_enc_.makeValid();
     nir_enc_.encodeSymbol(c.used_model_, sym);

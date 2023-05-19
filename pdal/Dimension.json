@@ -596,5 +596,50 @@
     "name": "HeadingRMS",
     "type": "double",
     "description": "Heading RMS error"
+    },
+    {
+    "name": "Reliability",
+    "type": "double",
+    "description": "Reliability (or confidence) of points"
+    },
+    {
+    "name": "EchoPos",
+    "type": "double",
+    "description": "Difference in position of a peak of a return signal compared to a typical return from a hard surface"
+    },
+    {
+    "name": "EchoNorm",
+    "type": "double",
+    "description": "Difference in shape of a return signal compared to a typical return from a hard surface."
+    },
+    {
+    "name": "ImgNbr",
+    "type": "uint8",
+    "description": "Stores the number of the image from which it gets the color."
+    },
+    {
+    "name": "Image",
+    "type": "uint16",
+    "description": "Index of the image use for texturation."
+    },
+    {
+    "name": "Dimension",
+    "type": "uint8",
+    "description": "Dimension of the points. three types of dimensions are available (Linear : points form a linear feature. Planar : points form a planar surface. Complex : random group of points)."
+    },
+    {
+    "name": "SphericalRange",
+    "type": "double",
+    "description": "Range in context of spherical coordinates."
+    },
+    {
+    "name": "SphericalAzimuth",
+    "type": "double",
+    "description": "Azimuth in context of spherical coordinates."
+    },
+    {
+    "name": "SphericalElevation",
+    "type": "double",
+    "description": "Elevation in context of spherical coordinates."
     }
 ] }

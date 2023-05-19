@@ -25,6 +25,7 @@ PDAL_ADD_PLUGIN(libname reader rdb
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
         ${RDB_INCLUDE_CPP_DIR}
+        ${RDB_INCLUDE_C_DIR}
         ${PDAL_INCLUDE_DIRS}
 )
 target_include_directories(${libname} PRIVATE "${PDAL_VENDOR_DIR}/eigen")
@@ -55,6 +56,7 @@ if (BUILD_RDBLIB_TESTS)
             ${PROJECT_BINARY_DIR}/plugins/rdb/test
             ${PROJECT_SOURCE_DIR}/plugins/rdb/io
             ${RDB_INCLUDE_CPP_DIR}
+            ${RDB_INCLUDE_C_DIR}
             ${PDAL_VENDOR_DIR}/eigen
 
     )

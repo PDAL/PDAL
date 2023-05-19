@@ -60,7 +60,7 @@ Utils::BacktraceEntries Utils::backtraceImpl()
             entry.symname = info.dli_sname;
             entry.libname = info.dli_fname;
             entry.offset = reinterpret_cast<char *>(entry.addr) -
-                reinterpret_cast<char *>(info.dli_saddr);
+                reinterpret_cast<const char *>(info.dli_saddr);
         }
         entries.push_back(entry);
     }

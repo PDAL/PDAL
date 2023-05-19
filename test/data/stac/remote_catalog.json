@@ -1,0 +1,62 @@
+{
+    "type": "Catalog",
+    "id": "3dep",
+    "stac_version": "1.0.0",
+    "description": "A catalog of USGS 3DEP Lidar hosted on AWS s3.",
+    "queryables": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$id": "https://example.org/queryables",
+        "type": "object",
+        "title": "Queryables",
+        "properties": {
+            "datetime": {
+                "description": "Datetime",
+                "type": "string",
+                "title": "Acquired",
+                "format": "date-time",
+                "pattern": "(\\+00:00|Z)$"
+            },
+            "id": {
+                "title": "Item ID",
+                "description": "Item identifier",
+                "$ref": "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/item.json#/definitions/core/allOf/2/properties/id"
+            }
+        }
+    },
+    "links": [
+        {
+            "rel": "root",
+            "href": "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/catalog.json",
+            "type": "application/json"
+        },
+        {
+            "rel": "self",
+            "href": "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/catalog.json",
+            "type": "application/json"
+        },
+        {
+            "rel": "item",
+            "href": "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/MD_GoldenBeach_2012.json"
+        },
+        {
+            "rel": "item",
+            "href": "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/MI_Charlevoix_Islands_TL_2018.json"
+        },
+        {
+            "rel": "item",
+            "href": "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/TX_WestTexas_TL_2018.json"
+        },
+        {
+            "rel": "item",
+            "href": "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/USGS_LPC_AK_Anchorage_2015_LAS_2017.json"
+        },
+        {
+            "rel": "item",
+            "href": "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/USGS_LPC_AK_FairbanksNSB_QL1_2017_LAS_2018.json"
+        }
+
+    ],
+    "stac_extensions": [
+        "POINTCLOUD"
+    ]
+}

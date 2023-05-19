@@ -42,9 +42,13 @@
 #include <pdal/Options.hpp>
 #include <pdal/util/FileUtils.hpp>
 
+#include <utf8.h>
+
 #ifndef _WIN32
 #include <dlfcn.h>
 #endif
+
+#include <locale>
 
 using namespace std;
 
@@ -154,10 +158,13 @@ namespace Utils
 
 std::string toJSON(const MetadataNode& m)
 {
-    std::ostringstream o;
+    Utils::OStringStreamClassicLocale o;
 
     toJSON(m, o);
-    return o.str();
+    std::string input(o.str());
+    std::string output;
+    utf8::replace_invalid(input.begin(), input.end(), std::back_inserter(output));
+    return output;
 }
 
 void toJSON(const MetadataNode& m, std::ostream& o)
@@ -176,7 +183,6 @@ void toJSON(const MetadataNode& m, std::ostream& o)
     o << std::endl;
 }
 
-
 std::string tempFilename(const std::string& path)
 {
     const std::string tempdir(arbiter::getTempPath());
@@ -185,37 +191,58 @@ std::string tempFilename(const std::string& path)
     return arbiter::join(tempdir, basename);
 }
 
-TempFile::TempFile(const std::string path) : m_filename(path) {}
-TempFile::~TempFile()
-    { FileUtils::deleteFile(m_filename); }
-
-const std::string& TempFile::filename()
-    { return m_filename; }
-
-
-ArbiterOutStream::ArbiterOutStream(const std::string& localPath,
-        const std::string& remotePath, std::ios::openmode mode) :
-    std::ofstream(localPath, mode), m_remotePath(remotePath),
-    m_localFile(localPath)
-{ }
-
-
-ArbiterOutStream::~ArbiterOutStream()
+// RAII handling of a temp file to make sure file gets deleted.
+class TempFile
 {
-    close();
-    arbiter::Arbiter a;
-    a.put(m_remotePath, a.getBinary(m_localFile.filename()));
-}
+public:
+    TempFile(const std::string path) : m_filename(path)
+    {}
 
+    virtual ~TempFile()
+        { FileUtils::deleteFile(m_filename); }
 
-ArbiterInStream::ArbiterInStream(const std::string& localPath, const std::string& remotePath,
-        std::ios::openmode mode) :
-    m_localFile(localPath)
+    const std::string& filename()
+        { return m_filename; }
+
+private:
+    std::string m_filename;
+};
+
+class ArbiterOutStream : public std::ofstream
 {
-    arbiter::Arbiter a;
-    a.put(localPath, a.getBinary(remotePath));
-    open(localPath, mode);
-}
+public:
+    ArbiterOutStream(const std::string& localPath,
+            const std::string& remotePath, std::ios::openmode mode) :
+        std::ofstream(localPath, mode),
+        m_remotePath(remotePath),
+        m_localFile(localPath)
+    {}
+
+    virtual ~ArbiterOutStream()
+    {
+        close();
+        arbiter::Arbiter a;
+        a.put(m_remotePath, a.getBinary(m_localFile.filename()));
+    }
+
+    std::string m_remotePath;
+    TempFile m_localFile;
+};
+
+class ArbiterInStream : public std::ifstream
+{
+public:
+    ArbiterInStream(const std::string& localPath, const std::string& remotePath,
+            std::ios::openmode mode) :
+        m_localFile(localPath)
+    {
+        arbiter::Arbiter a;
+        a.put(localPath, a.getBinary(remotePath));
+        open(localPath, mode);
+    }
+
+    TempFile m_localFile;
+};
 
 
 uintmax_t fileSize(const std::string& path)
@@ -277,13 +304,7 @@ std::ostream *createFile(const std::string& path, bool asBinary)
 
 bool isRemote(const std::string& path)
 {
-    const StringList prefixes
-        { "s3://", "gs://", "dropbox://", "http://", "https://", "az://" };
-
-    for (const string& prefix : prefixes)
-        if (Utils::startsWith(path, prefix))
-            return true;
-    return false;
+    return path.find("://") != std::string::npos;
 }
 
 
@@ -307,9 +328,9 @@ std::istream *openFile(const std::string& path, bool asBinary)
             return new ArbiterInStream(tempFilename(path), path,
                 asBinary ? ios::in | ios::binary : ios::in);
         }
-        catch (arbiter::ArbiterError&)
+        catch (arbiter::ArbiterError& e)
         {
-            return nullptr;
+            throw e;
         }
     }
     return FileUtils::openFile(path, asBinary);
@@ -448,10 +469,15 @@ std::string dllDir()
         GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
         (LPCSTR)&dllDir, &hm))
     {
+#ifdef PDAL_WIN32_STL
+        wchar_t path[MAX_PATH];
+        DWORD cnt = GetModuleFileNameW(hm, path, sizeof(path));
+#else
         char path[MAX_PATH];
         DWORD cnt = GetModuleFileNameA(hm, path, sizeof(path));
+#endif
         if (cnt > 0 && cnt < MAX_PATH)
-            s = path;
+            s = FileUtils::fromNative(path);
     }
 #else
     Dl_info info;

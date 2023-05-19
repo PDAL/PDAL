@@ -44,8 +44,6 @@ based on the vertices of the triangle that contains each raster cell center.
 Options
 --------------------------------------------------------------------------------
 
-.. _resolution:
-
 resolution
     Length of raster cell edges in X/Y units.  [Required]
 
@@ -58,7 +56,7 @@ _`nodata`
 mesh
   Name of the triangulation to use for interpolation.  If not provided, the first
   triangulation associated with the input points will be used. [Default: None]
- 
+
 _`origin_x`
   X origin (lower left corner) of the grid. [Default: None]
 

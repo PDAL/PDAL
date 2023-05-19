@@ -1,6 +1,13 @@
 name: OSX
 
-on: [push, pull_request]
+on:
+    push:
+        paths-ignore:
+            - 'doc/**'
+    pull_request:
+        paths-ignore:
+            - 'doc/**'
+
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
@@ -12,6 +19,7 @@ jobs:
     name: OSX
 
     runs-on: 'macos-latest'
+    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
     strategy:
       fail-fast: true
       matrix:
@@ -35,7 +43,9 @@ jobs:
         miniforge-version: latest
         use-mamba: true
         auto-update-conda: true
-        use-only-tar-bz2: true
+        activate-environment: "pdal-build"
+        environment-file: scripts/ci/environment.yml
+        python-version: "3.10"
 
     - name: Setup
       run: |

@@ -5,6 +5,7 @@ if (BUILD_PLUGIN_TRAJECTORY)
     add_subdirectory(trajectory)
 endif()
 
+
 if(BUILD_PLUGIN_I3S)
     if(NOT ZLIB_FOUND)
         message(FATAL_ERROR "Can't build i3s and slpk plugins without zlib")
@@ -39,10 +40,6 @@ if(BUILD_PLUGIN_MBIO)
     add_subdirectory(mbio)
 endif()
 
-if(BUILD_PLUGIN_MRSID)
-    add_subdirectory(mrsid)
-endif()
-
 if(BUILD_PLUGIN_NITF)
     add_subdirectory(nitf)
 endif()
@@ -65,10 +62,6 @@ endif(BUILD_PLUGIN_RDBLIB)
 if(BUILD_PLUGIN_RIVLIB)
     add_subdirectory(rxp)
 endif(BUILD_PLUGIN_RIVLIB)
-
-if (BUILD_PLUGIN_FBX)
-    add_subdirectory(fbx)
-endif()
 
 if(BUILD_PLUGIN_TEASER)
     add_subdirectory(teaser)

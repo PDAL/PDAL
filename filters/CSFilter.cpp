@@ -79,6 +79,7 @@ struct CSArgs
     int m_iterations;
     std::vector<DimRange> m_ignored;
     StringList m_returns;
+    bool m_debug;
     std::string m_dir;
 };
 
@@ -102,6 +103,7 @@ void CSFilter::addArgs(ProgramArgs& args)
     args.add("ignore", "Ignore values", m_args->m_ignored);
     args.add("returns", "Include last returns?", m_args->m_returns,
              {"last", "only"});
+    args.add("debug", "Enable debugging output and use the dir argument", m_args->m_debug, false);
     args.add("dir", "Optional output directory for debugging", m_args->m_dir);
 }
 
@@ -230,6 +232,7 @@ PointViewSet CSFilter::run(PointViewPtr view)
     c.params.cloth_resolution = m_args->m_resolution;
     c.params.rigidness = m_args->m_rigid;
     c.params.interations = m_args->m_iterations;
+    c.params.debug = m_args->m_debug;
     c.params.m_dir = m_args->m_dir;
     std::vector<int> groundIdx, offGroundIdx;
     c.setLog(log());

@@ -54,7 +54,7 @@ macro(PDAL_ADD_LIBRARY _name)
     set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
     target_include_directories(${_name} PRIVATE
         ${PDAL_INCLUDE_DIR})
-    pdal_target_compile_settings(${_name})
+    pdal_lib_compile_settings(${_name})
     if (NOT ${_library_type} STREQUAL "STATIC")
         target_compile_definitions(${_name} PRIVATE PDAL_DLL_EXPORT)
     endif()
@@ -89,7 +89,7 @@ macro(PDAL_ADD_FREE_LIBRARY _name _library_type)
     set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
     target_include_directories(${_name} PRIVATE
         ${PDAL_INCLUDE_DIR})
-    pdal_target_compile_settings(${_name})
+    pdal_lib_compile_settings(${_name})
     set_property (TARGET ${_name}
       PROPERTY
         # Enable C++17 standard compliance

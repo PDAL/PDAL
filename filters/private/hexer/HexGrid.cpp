@@ -42,6 +42,8 @@
 #include "Processor.hpp"
 #include "Segment.hpp"
 
+#include "pdal/util/Utils.hpp"
+
 using namespace std;
 
 namespace hexer

@@ -39,8 +39,11 @@
 
 #include "pdal_internal.hpp"
 
+#include <pdal/util/FileUtils.hpp>
+
 #ifdef _WIN32
-  #include <windows.h>
+
+  #include <codecvt>
 #else // Unix
   #include <dlfcn.h>
 #endif
@@ -84,7 +87,11 @@ DynamicLibrary *DynamicLibrary::load(const std::string &name,
     void *handle = NULL;
 
 #ifdef _WIN32
-    handle = ::LoadLibraryA(name.c_str());
+#ifdef PDAL_WIN32_STL
+    handle = ::LoadLibraryW(FileUtils::toNative(name).c_str());
+#else
+    handle = ::LoadLibraryA(FileUtils::toNative(name).c_str());
+#endif
     if (handle == NULL)
     {
         DWORD errorCode = ::GetLastError();

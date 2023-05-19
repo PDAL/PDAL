@@ -60,7 +60,8 @@ static StaticPluginInfo const s_info
 CREATE_STATIC_STAGE(OGRWriter, s_info)
 
 OGRWriter::OGRWriter() : m_driver(nullptr), m_ds(nullptr), m_layer(nullptr),
-    m_feature(nullptr), m_curCount(0), m_measureDim(Dimension::Id::Unknown)
+    m_feature(nullptr), m_curCount(0), m_measureDim(Dimension::Id::Unknown),
+    m_inTransaction(false)
 {}
 
 
@@ -78,6 +79,8 @@ void OGRWriter::addArgs(ProgramArgs& args)
     args.add("measure_dim", "Use dimensions as a measure value",
         m_measureDimName);
     args.add("ogrdriver", "OGR writer driver name", m_driverName, m_driverName);
+    args.add("ogr_options", "OGR layer creation options", m_ogrOptions);
+    args.add("attr_dims", "Dimension to use as attributes, 'all' for all. Incompatible with multicount>1", m_attrDimNames);
 }
 
 
@@ -85,7 +88,10 @@ void OGRWriter::initialize()
 {
     gdal::registerDrivers();
     if (m_multiCount < 1)
-        throwError("'m_multicount' must be greater than 0.");
+        throwError("multicount must be greater than 0.");
+    else if (m_multiCount > 1 && m_attrDimNames.size() > 0) {
+        throwError("multicount > 1 incompatible with attr_dims");
+    }
 }
 
 
@@ -106,16 +112,81 @@ void OGRWriter::prepared(PointTableRef table)
         else
             m_driverName = "ESRI Shapefile";
     }
+
+    // Build the attr dims list, replacing special keywords with the proper
+    // field names.
+    for (auto& name : m_attrDimNames)
+    {
+        if (name == "all")
+        {
+            m_attrDimNames.clear();
+            for (auto& dim : table.layout()->dims())
+            {
+                switch(dim)
+                {
+                    // we don't need geometry attributes repeated as fields
+                    case Dimension::Id::X:
+                    case Dimension::Id::Y:
+                    case Dimension::Id::Z:
+                        break;
+
+                    default:
+                        if (dim != m_measureDim) {
+                            m_attrDimNames.push_back(table.layout()->dimName(dim));
+                        }
+                }
+            }
+            break;
+        }
+        else
+        {
+            auto dim = table.layout()->findDim(name);
+            if (dim == Dimension::Id::Unknown)
+                throwError("Dimension '" + name + "' (attr_dims) not found.");
+        }
+    }
 }
 
 
 void OGRWriter::readyTable(PointTableRef table)
 {
     m_driver = GetGDALDriverManager()->GetDriverByName(m_driverName.data());
-    if (m_measureDim == Dimension::Id::Unknown)
-        m_geomType = (m_multiCount == 1) ? wkbPoint : wkbMultiPoint;
-    else
-        m_geomType = (m_multiCount == 1) ? wkbPointZM : wkbMultiPointZM;
+    m_geomType = (m_multiCount == 1) ? wkbPointZM : wkbMultiPointZM;
+
+    const auto& layout = table.layout();
+    for(auto& name : m_attrDimNames)
+    {
+        auto dim = layout->findDim(name);
+        auto dimType = layout->dimType(dim);
+        OGRFieldType ogrType;
+
+        switch(dimType)
+        {
+            case Dimension::Type::Signed8:
+            case Dimension::Type::Unsigned8:
+            case Dimension::Type::Signed16:
+            case Dimension::Type::Unsigned16:
+            case Dimension::Type::Signed32:
+                ogrType = OFTInteger;
+                break;
+            case Dimension::Type::Unsigned32:
+            case Dimension::Type::Signed64:
+            case Dimension::Type::Unsigned64:  // error here?
+                ogrType = OFTInteger64;
+                break;
+            case Dimension::Type::Float:
+            case Dimension::Type::Double:
+                ogrType = OFTReal;
+                break;
+            case Dimension::Type::None:
+            default:
+                throwError("Unknown type for dimension '" + name + "' (attr_dims).");
+                continue;
+        }
+        auto ogrField = new OGRFieldDefn(name.c_str(), ogrType);
+        m_attrs.emplace_back(dim, dimType, ogrField);
+    }
+
 }
 
 
@@ -124,18 +195,47 @@ void OGRWriter::readyFile(const std::string& filename,
 {
     m_curCount = 0;
     m_outputFilename = filename;
+
+    // Dataset
     m_ds = m_driver->Create(filename.data(), 0, 0, 0, GDT_Unknown, nullptr);
     if (!m_ds)
-        throwError("Unable to open OGR datasource '" + filename + "'.\n");
-    m_layer = m_ds->CreateLayer("points", nullptr, m_geomType, nullptr);
-    if (!m_layer)
-        throwError("Can't create OGR layer for points.\n");
-    {
-        gdal::ErrorHandlerSuspender devnull;
+        throwError("Unable to open OGR datasource '" + filename + "': " + CPLGetLastErrorMsg());
 
-        m_ds->SetProjection(srs.getWKT().data());
+    // CRS
+    if (!srs.empty())
+    {
+        if (m_srs.importFromWkt(srs.getWKT().data()) != OGRERR_NONE)
+            throwError(std::string("Can't initialise OGR SRS: ") + CPLGetLastErrorMsg());
     }
+
+    // Creation options
+    std::vector<const char*> ogr_create_options;
+    for(auto&& o:m_ogrOptions)
+        ogr_create_options.push_back(o.c_str());
+    ogr_create_options.push_back(nullptr);
+
+    // Layer
+    m_layer = m_ds->CreateLayer("points", &m_srs, m_geomType, const_cast<char**>(ogr_create_options.data()));
+    if (!m_layer)
+        throwError(std::string("Can't create OGR layer: ") + CPLGetLastErrorMsg());
+
+    // Fields
+    for(auto& attr : m_attrs)
+    {
+        auto& ogrField = std::get<2>(attr);
+        if (m_layer->CreateField(&ogrField) != OGRERR_NONE)
+            throwError(std::string("Can't create OGR field: ") + ogrField.GetNameRef());
+    }
+
+    // Reusable template feature
     m_feature = OGRFeature::CreateFeature(m_layer->GetLayerDefn());
+    if (!m_feature)
+        throwError(std::string("Can't create template OGR feature: ") + CPLGetLastErrorMsg());
+
+    // Try to use a transaction for data sources that support it (e.g. GPKG),
+    // otherwise new points may get auto-committed after each insert (very slow)
+    if (m_ds->TestCapability( ODsCTransactions ) && m_ds->StartTransaction() == OGRERR_NONE)
+        m_inTransaction = true;
 }
 
 void OGRWriter::writeView(const PointViewPtr view)
@@ -160,12 +260,13 @@ bool OGRWriter::processOne(PointRef& point)
     OGRPoint pt(x, y, z);
     if (m_measureDim != Dimension::Id::Unknown)
         pt.setM(m);
-    
+
     m_curCount++;
 
     if (m_multiCount > 1)
         m_multiPoint.addGeometry(&pt);
-    if (m_curCount == m_multiCount)
+
+    if (m_curCount % m_multiCount == 0)
     {
         if (m_multiCount > 1)
         {
@@ -173,10 +274,51 @@ bool OGRWriter::processOne(PointRef& point)
             m_multiPoint.empty();
         }
         else
+        {
             m_feature->SetGeometry(&pt);
+
+            for (auto it = std::begin(m_attrs); it != std::end(m_attrs); ++it)
+            {
+                const auto &dim = std::get<0>(*it);
+                const auto &dimType = std::get<1>(*it);
+                const auto &ogrField = std::get<2>(*it);
+                size_t ogr_field_idx = std::distance(std::begin(m_attrs), it);
+
+                switch(dimType)
+                {
+                    case Dimension::Type::Signed8:
+                    case Dimension::Type::Unsigned8:
+                    case Dimension::Type::Signed16:
+                    case Dimension::Type::Unsigned16:
+                    case Dimension::Type::Signed32:
+                        m_feature->SetField(ogr_field_idx, point.getFieldAs<int>(dim));
+                        break;
+
+                    case Dimension::Type::Unsigned32:
+                    case Dimension::Type::Unsigned64:
+                    case Dimension::Type::Signed64:
+                        m_feature->SetField(ogr_field_idx, point.getFieldAs<GIntBig>(dim));
+                        break;
+
+                    case Dimension::Type::Float:
+                    case Dimension::Type::Double:
+                        m_feature->SetField(ogr_field_idx, point.getFieldAs<double>(dim));
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        }
+
         if (m_layer->CreateFeature(m_feature))
-            throwError("Couldn't create feature.");
-        m_curCount = 0;
+            throwError(std::string("Can't create OGR feature: ") + CPLGetLastErrorMsg());
+
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,5,0)
+        m_feature->Reset();
+#else
+        m_feature->SetFID(OGRNullFID);
+#endif
     }
     return true;
 }
@@ -184,10 +326,24 @@ bool OGRWriter::processOne(PointRef& point)
 
 void OGRWriter::doneFile()
 {
-    if (m_curCount)
+    if (m_curCount % m_multiCount > 0) {
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,5,0)
+        m_feature->Reset();
+#else
+        m_feature->SetFID(OGRNullFID);
+#endif
+
+        m_feature->SetGeometry(&m_multiPoint);
+
         if (m_layer->CreateFeature(m_feature))
-            throwError("Couldn't create feature.");
+            throwError(std::string("Can't create OGR feature: ") + CPLGetLastErrorMsg());
+    }
     OGRFeature::DestroyFeature(m_feature);
+
+    if (m_inTransaction && m_ds->CommitTransaction() != OGRERR_NONE)
+        throwError(std::string("Failed to commit transaction in OGR: ") + CPLGetLastErrorMsg());
+    m_inTransaction = false;
+
     GDALClose(m_ds);
     m_layer = nullptr;
     m_ds = nullptr;

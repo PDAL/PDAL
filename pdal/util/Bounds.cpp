@@ -35,10 +35,14 @@
 #include <assert.h>
 #include <iostream>
 #include <limits>
+#include <locale>
+#include <sstream>
 #include <vector>
 
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/Utils.hpp>
+
+#include <nlohmann/json.hpp>
 
 namespace pdal
 {
@@ -55,6 +59,7 @@ void BOX2D::clear()
 {
     minx = HIGHEST; miny = HIGHEST;
     maxx = LOWEST; maxy = LOWEST;
+    wkt = "";
 }
 
 void BOX3D::clear()
@@ -62,6 +67,7 @@ void BOX3D::clear()
     BOX2D::clear();
     minz = HIGHEST;
     maxz = LOWEST;
+    wkt = "";
 }
 
 bool BOX2D::empty() const
@@ -152,6 +158,7 @@ void Bounds::reset(const BOX2D& box)
     m_box.maxy = box.maxy;
     m_box.minz = HIGHEST;
     m_box.maxz = LOWEST;
+    m_box.wkt = box.wkt;
 }
 
 
@@ -231,38 +238,51 @@ void Bounds::set(const BOX2D& box)
 namespace
 {
 
+void moveForward(std::istringstream& ss, std::string::size_type count)
+{
+    for (std::string::size_type i = 0; i < count; i++)
+    {
+        ss.get();
+    }
+}
+
+bool discardSpacesBefore(std::istringstream& ss, char nextChar)
+{
+    Utils::eatwhitespace(ss);
+    return Utils::eatcharacter(ss, nextChar);
+}
+
+std::string::size_type countRemaining(std::istringstream& ss)
+{
+    std::string::size_type count = 0;
+    while (!ss.eof())
+    {
+        ss.get();
+        count++;
+    }
+    return count;
+}
+
 template <typename T>
-void parsePair(const std::string& s, std::string::size_type& pos,
-    double& low, double& high)
+void parsePair(std::istringstream& ss, double& low, double& high)
 {
     low = high = 0;
-    const char *start;
-    char *end;
 
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != '[')
+    if (!discardSpacesBefore(ss, '['))
         throw typename T::error("No opening '[' in range.");
 
-    pos += Utils::extractSpaces(s, pos);
-    start = s.data() + pos;
-    low = std::strtod(start, &end);
-    if (start == end)
+    ss >> low;
+    if (!ss.good())
         throw typename T::error("No valid minimum value for range.");
-    pos += (end - start);
 
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != ',')
+    if (!discardSpacesBefore(ss, ','))
         throw typename T::error("No ',' separating minimum/maximum values.");
 
-    pos += Utils::extractSpaces(s, pos);
-    start = s.data() + pos;
-    high = std::strtod(start, &end);
-    if (start == end)
+    ss >> high;
+    if (!ss.good())
         throw typename T::error("No valid maximum value for range.");
-    pos += (end - start);
 
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != ']')
+    if (!discardSpacesBefore(ss, ']'))
         throw typename T::error("No closing ']' in range.");
 }
 
@@ -272,46 +292,201 @@ void parsePair(const std::string& s, std::string::size_type& pos,
 // This parses the guts of a 2D range.
 void BOX2D::parse(const std::string& s, std::string::size_type& pos)
 {
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != '(')
+
+    bool isJson(false);
+    bool isArray(false);
+    bool isObject(false);
+    std::string jsonParseMessage("");
+    NL::json b;
+    try
+    {
+        b = NL::json::parse(s);
+        isJson = true;
+        isArray = b.is_array();
+        isObject = b.is_object();
+    } catch (NL::json::parse_error& e)
+    {
+        jsonParseMessage = e.what();
+        isJson = false;
+    }
+
+    if (isArray && isJson)
+    {
+        if (b.size() != 4)
+        {
+            std::stringstream msg;
+            msg << "GeoJSON array size must be 4 for BOX2d. It was " << b.size();
+            throw error(msg.str());
+        }
+        minx = b[0].get<double>();
+        miny = b[1].get<double>();
+        maxx = b[2].get<double>();
+        maxy = b[3].get<double>();
+
+        // parsed. we are done
+        pos = s.size();
+        return;
+    }
+
+    if (isObject && isJson)
+    {
+        if (!b.contains("minx"))
+            throw error("Object must contain 'minx'");
+        minx = b["minx"].get<double>();
+
+        if (!b.contains("miny"))
+            throw error("Object must contain 'miny'");
+        miny = b["miny"].get<double>();
+
+        if (!b.contains("maxx"))
+            throw error("Object must contain 'maxx'");
+        maxx = b["maxx"].get<double>();
+
+        if (!b.contains("maxy"))
+            throw error("Object must contain 'maxy'");
+        maxy = b["maxy"].get<double>();
+
+        if (b.contains("crs"))
+            wkt = b["crs"].get<std::string>();
+
+        if (b.contains("srs"))
+            wkt = b["srs"].get<std::string>();
+
+        // parsed. we are done
+        pos = s.size();
+        return;
+
+    }
+
+    static thread_local Utils::IStringStreamClassicLocale ss;
+    ss.clear();
+    ss.str(s);
+
+    moveForward(ss, pos);
+
+    if (!discardSpacesBefore(ss, '('))
         throw error("No opening '('.");
-    parsePair<BOX2D>(s, pos, minx, maxx);
 
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != ',')
+    parsePair<BOX2D>(ss, minx, maxx);
+
+    if (!discardSpacesBefore(ss, ','))
         throw error("No comma separating 'X' and 'Y' dimensions.");
-    parsePair<BOX2D>(s, pos, miny, maxy);
 
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != ')')
+    parsePair<BOX2D>(ss, miny, maxy);
+
+    if (!discardSpacesBefore(ss, ')'))
         throw error("No closing ')'.");
 
-    pos += Utils::extractSpaces(s, pos);
+    Utils::eatwhitespace(ss);
+    pos = s.size() - countRemaining(ss);
 }
 
 
 void BOX3D::parse(const std::string& s, std::string::size_type& pos)
 {
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != '(')
+
+    bool isJson(false);
+    bool isArray(false);
+    bool isObject(false);
+    std::string jsonParseMessage("");
+    NL::json b;
+    try
+    {
+        b = NL::json::parse(s);
+        isJson = true;
+        isArray = b.is_array();
+        isObject = b.is_object();
+    } catch (NL::json::parse_error& e)
+    {
+        jsonParseMessage = e.what();
+        isJson = false;
+    }
+
+    if (isArray && isJson)
+    {
+        if (b.size() != 6)
+        {
+            std::stringstream msg;
+            msg << "GeoJSON array must be 6. It was " << b.size();
+            throw error(msg.str());
+        }
+        // Unpack GeoJSON array
+        minx = b[0].get<double>();
+        miny = b[1].get<double>();
+        minz = b[2].get<double>();
+        maxx = b[3].get<double>();
+        maxy = b[4].get<double>();
+        maxz = b[5].get<double>();
+
+        // Parsed. We are done.
+        pos = s.size();
+        return;
+    }
+
+    if (isObject && isJson)
+    {
+        if (!b.contains("minx"))
+            throw error("Object must contain 'minx'");
+        minx = b["minx"].get<double>();
+
+        if (!b.contains("miny"))
+            throw error("Object must contain 'miny'");
+        miny = b["miny"].get<double>();
+
+        if (!b.contains("maxx"))
+            throw error("Object must contain 'maxx'");
+        maxx = b["maxx"].get<double>();
+
+        if (!b.contains("maxy"))
+            throw error("Object must contain 'maxy'");
+        maxy = b["maxy"].get<double>();
+
+        if (b.contains("minz"))
+        {
+            if (!b.contains("maxx"))
+                throw error("Object must contain 'maxz' if 'minz' is provided");
+            minz = b["minz"].get<double>();
+            maxz = b["maxz"].get<double>();
+        }
+
+        if (b.contains("crs"))
+            wkt = b["crs"].get<std::string>();
+
+        if (b.contains("srs"))
+            wkt = b["srs"].get<std::string>();
+
+        // Parsed. We are done.
+        pos = s.size();
+        return;
+    }
+
+    static thread_local Utils::IStringStreamClassicLocale ss;
+    ss.clear();
+    ss.str(s);
+
+
+    moveForward(ss, pos);
+
+    if (!discardSpacesBefore(ss, '('))
         throw error("No opening '('.");
-    parsePair<BOX3D>(s, pos, minx, maxx);
 
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != ',')
+    parsePair<BOX3D>(ss, minx, maxx);
+
+    if (!discardSpacesBefore(ss, ','))
         throw error("No comma separating 'X' and 'Y' dimensions.");
-    parsePair<BOX3D>(s, pos, miny, maxy);
 
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != ',')
+    parsePair<BOX3D>(ss, miny, maxy);
+
+    if (!discardSpacesBefore(ss, ','))
         throw error("No comma separating 'Y' and 'Z' dimensions.");
-    parsePair<BOX3D>(s, pos, minz, maxz);
 
-    pos += Utils::extractSpaces(s, pos);
-    if (s[pos++] != ')')
+    parsePair<BOX3D>(ss, minz, maxz);
+
+    if (!discardSpacesBefore(ss, ')'))
         throw error("No closing ')'.");
 
-    pos += Utils::extractSpaces(s, pos);
+    Utils::eatwhitespace(ss);
+    pos = s.size() - countRemaining(ss);
 }
 
 

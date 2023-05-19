@@ -49,9 +49,13 @@ using StringMap = std::map<std::string, std::string>;
 namespace pdal
 {
 
-namespace ept
+namespace connector
 {
     class Connector;
+}
+
+namespace ept
+{
     class EptInfo;
     class Key;
     class TileContents;
@@ -77,6 +81,8 @@ private:
     virtual void ready(PointTableRef table) override;
     virtual point_count_t read(PointViewPtr view, point_count_t count) override;
     virtual bool processOne(PointRef& point) override;
+    virtual void done(PointTableRef) override;
+
 
     // If argument "origin" is specified, this function will clip the query
     // bounds to the bounds of the specified origin and set m_queryOriginId to

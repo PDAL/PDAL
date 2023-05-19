@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 3.5)
 
-project(PDAL VERSION 2.4.1 LANGUAGES CXX C)
+project(PDAL VERSION 2.6.0 LANGUAGES CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
@@ -30,11 +30,11 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 # Must be changed if there is an ABI change.  This builds the SONAME
 # that's embedded in the library itself.
 #
-set(PDAL_SOLIB_MAJOR 14)
+set(PDAL_SOLIB_MAJOR 16)
 #
 # Change if there's a new release with no ABI change
 #
-set(PDAL_SOLIB_MINOR 1)
+set(PDAL_SOLIB_MINOR 0)
 #
 # Build number.  Increment for builds within minor versions.  Probably
 # always 0 for PDAL
@@ -135,8 +135,10 @@ include(${PDAL_CMAKE_DIR}/libxml2.cmake)
 include(${PDAL_CMAKE_DIR}/dimension.cmake)
 include(${PDAL_CMAKE_DIR}/arbiter.cmake)
 include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
+include(${PDAL_CMAKE_DIR}/schema-validator.cmake)
 include(${PDAL_CMAKE_DIR}/lazperf.cmake)
 include(${PDAL_CMAKE_DIR}/openssl.cmake) # Optional
+include(${PDAL_CMAKE_DIR}/utfcpp.cmake)
 
 #------------------------------------------------------------------------------
 # generate the pdal_features.hpp header
@@ -178,8 +180,10 @@ if (WITH_TESTS)
 endif()
 add_subdirectory(dimbuilder)
 add_subdirectory(vendor/arbiter)
+add_subdirectory(vendor/schema-validator)
 add_subdirectory(vendor/kazhdan)
 add_subdirectory(vendor/lazperf)
+add_subdirectory(vendor/utfcpp)
 add_subdirectory(pdal/util)
 add_subdirectory(tools)
 add_subdirectory(apps)
@@ -258,6 +262,7 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${LIBXML2_INCLUDE_DIR}
         ${ZSTD_INCLUDE_DIRS}
         ${NLOHMANN_INCLUDE_DIR}
+        ${UTFCPP_INCLUDE_DIR}
         ${GDAL_INCLUDE_DIR}
 )
 target_link_libraries(${PDAL_BASE_LIB_NAME}
@@ -274,8 +279,10 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${PDAL_REEXPORT}
         ${PDAL_UTIL_LIB_NAME}
         ${PDAL_ARBITER_LIB_NAME}
+        ${JSON_SCHEMA_LIB_NAME}
         ${PDAL_KAZHDAN_LIB_NAME}
         ${PDAL_LAZPERF_LIB_NAME}
+        ${UTFCPP_LIB_NAME}
     INTERFACE
         ${PDAL_LIBDIR}
 )
@@ -283,6 +290,8 @@ set_target_properties(${PDAL_BASE_LIB_NAME} PROPERTIES
     VERSION ${PDAL_BUILD_VERSION}
     SOVERSION ${PDAL_API_VERSION}
     CLEAN_DIRECT_OUTPUT 1)
+
+
 
 # shut off -Wpedantic selectively
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" )
@@ -317,9 +326,6 @@ endif()
 if (NOT PDAL_HAVE_LZMA)
     set(LZMA_EXCLUDES PATTERN pdal/compression/Lzma* EXCLUDE)
 endif()
-if (NOT PDAL_HAVE_LAZPERF)
-    set(LAZPERF_EXCLUDES PATTERN pdal/compression/LazPerf* EXCLUDE)
-endif()
 
 install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pdal"
@@ -332,7 +338,6 @@ install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
 #    ${ZSTD_EXCLUDES}
 #    ${ZLIB_EXCLUDES}
 #    ${LZMA_EXCLUDES}
-#    ${LAZPERF_EXCLUDES}
 )
 
 install(DIRECTORY ${PDAL_KERNELS_DIR}

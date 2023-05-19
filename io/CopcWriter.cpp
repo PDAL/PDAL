@@ -33,10 +33,15 @@
 ****************************************************************************/
 
 #include <pdal/util/Algorithm.hpp>
-#include <pdal/PDALUtils.hpp>
-#include <arbiter/arbiter.hpp>
+#include <pdal/util/FileUtils.hpp>
+
+// This must come before CopcWriter.hpp as it contains a specialization for
+// fromString() that must come be available before the Util template when
+// ProgramArgs is seen.
+#include "HeaderVal.hpp"
 
 #include "CopcWriter.hpp"
+#include <arbiter/arbiter.hpp>
 
 #include "private/las/Header.hpp"
 #include "private/las/Utils.hpp"
@@ -44,7 +49,6 @@
 #include "private/copcwriter/CellManager.hpp"
 #include "private/copcwriter/Grid.hpp"
 #include "private/copcwriter/Reprocessor.hpp"
-
 
 namespace pdal
 {
@@ -64,7 +68,7 @@ const StaticPluginInfo s_info
 
 CREATE_STATIC_STAGE(CopcWriter, s_info);
 
-CopcWriter::CopcWriter() : b(new copcwriter::BaseInfo)
+CopcWriter::CopcWriter() : b(new copcwriter::BaseInfo), isRemote(false)
 {}
 
 CopcWriter::~CopcWriter()
@@ -76,7 +80,6 @@ void CopcWriter::initialize(PointTableRef table)
 {
     fillForwardList();
 }
-
 
 void CopcWriter::addArgs(ProgramArgs& args)
 {
@@ -116,6 +119,8 @@ void CopcWriter::addArgs(ProgramArgs& args)
     args.add("pipeline", "Emit a JSON-represetation of the pipeline as a VLR",
         b->opts.emitPipeline);
     args.add("fixed_seed", "Fix the random seed", b->opts.fixedSeed).setHidden();
+    args.add("a_srs", "Spatial reference to use to write output", b->opts.aSrs);
+    args.add("threads", "", b->opts.threadCount).setHidden();
 }
 
 void CopcWriter::fillForwardList()
@@ -243,14 +248,35 @@ void CopcWriter::prepared(PointTableRef table)
     b->numExtraBytes = 0;
     for (Dimension::Id id : edIds)
     {
-        b->extraDims.emplace_back(layout->dimName(id), layout->dimType(id),
-            las::baseCount(b->pointFormatId) + b->numExtraBytes);
-        b->numExtraBytes += Dimension::size(layout->dimType(id));
+        std::string name (layout->dimName(id));
+        Dimension::Type type (layout->dimType(id));
+        DimType dimType = layout->findDimType(name);
+        Dimension::Detail const* detail = layout->dimDetail(id);
+        size_t size = detail->size();
+        b->extraDims.emplace_back(name, 
+                                  type, 
+                                  id,
+                                  size,
+                                  las::baseCount(b->pointFormatId) + b->numExtraBytes, 
+                                  dimType.m_xform.m_scale.m_val, 
+                                  dimType.m_xform.m_offset.m_val);
+        b->numExtraBytes += size;
     }
 }
 
 void CopcWriter::ready(PointTableRef table)
 {
+    // Deal with remote files
+    if (Utils::isRemote(b->opts.filename))
+    {
+
+        // swap our filename for a tmp file
+        std::string tmpname = Utils::tempFilename(b->opts.filename);
+        remoteFilename = b->opts.filename;
+        b->opts.filename = tmpname;
+        isRemote = true;
+    }
+
     MetadataNode forwardMetadata = table.privateMetadata("lasforward");
     handleHeaderForwards(forwardMetadata);
     handleForwardVlrs(forwardMetadata);
@@ -345,7 +371,10 @@ void CopcWriter::write(const PointViewPtr v)
 
     b->bounds = grid.processingBounds();
     b->trueBounds = grid.conformingBounds();
-    b->srs = v->spatialReference();
+    if (!b->opts.aSrs.empty())
+       b->srs = b->opts.aSrs;
+    else
+       b->srs = v->spatialReference();
 
     // Set the input string into scaling.
     b->scaling.m_xXform.m_scale.set(b->opts.scaleX.val());
@@ -375,6 +404,21 @@ void CopcWriter::write(const PointViewPtr v)
 
     BuPyramid bu(*b);
     bu.run(mgr);
+}
+
+void CopcWriter::done(PointTableRef table)
+{
+
+
+    if (isRemote)
+    {
+        arbiter::Arbiter a;
+        a.put(remoteFilename, a.getBinary(b->opts.filename));
+
+        // Clean up temporary
+        FileUtils::deleteFile(b->opts.filename);
+    }
+
 }
 
 } // namespace pdal

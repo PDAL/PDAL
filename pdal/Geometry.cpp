@@ -66,22 +66,35 @@ Geometry::Geometry(const std::string& wkt_or_json, SpatialReference ref)
 }
 
 
-Geometry::Geometry(const Geometry& input) : m_geom(input.m_geom->clone())
-{}
+Geometry::Geometry(const Geometry& input)
+{
+    if (input.m_geom)
+        m_geom.reset(input.m_geom->clone());
+}
 
 
 Geometry::Geometry(Geometry&& input) : m_geom(std::move(input.m_geom))
 {}
 
 
-Geometry::Geometry(OGRGeometryH g) :
-    m_geom((reinterpret_cast<OGRGeometry *>(g))->clone())
-{}
-
-
-Geometry::Geometry(OGRGeometryH g, const SpatialReference& srs) :
-    m_geom((reinterpret_cast<OGRGeometry *>(g))->clone())
+Geometry::Geometry(OGRGeometryH g)
 {
+    OGRGeometry* geom(nullptr);
+    geom = reinterpret_cast<OGRGeometry *>(g);
+
+    if (geom)
+        m_geom.reset(geom->clone());
+}
+
+
+Geometry::Geometry(OGRGeometryH g, const SpatialReference& srs)
+{
+    OGRGeometry* geom(nullptr);
+    geom = reinterpret_cast<OGRGeometry *>(g);
+
+    if (geom)
+        m_geom.reset(geom->clone());
+
     setSpatialReference(srs);
 }
 
@@ -140,7 +153,7 @@ Geometry& Geometry::operator=(const Geometry& input)
 
 bool Geometry::srsValid() const
 {
-    OGRSpatialReference *srs = m_geom->getSpatialReference();
+    const OGRSpatialReference *srs = m_geom->getSpatialReference();
     return srs && srs->GetRoot();
 }
 
@@ -159,7 +172,7 @@ Utils::StatusWithReason Geometry::transform(SpatialReference out)
         return StatusWithReason(-2,
             "Geometry::transform() failed.  NULL target SRS.");
 
-    OGRSpatialReference *inSrs = m_geom->getSpatialReference();
+    const OGRSpatialReference *inSrs = m_geom->getSpatialReference();
     SrsTransform transform(*inSrs, OGRSpatialReference(out.getWKT().data()));
     if (m_geom->transform(transform.get()) != OGRERR_NONE)
         return StatusWithReason(-1, "Geometry::transform() failed.");
@@ -206,6 +219,32 @@ BOX3D Geometry::bounds() const
 }
 
 
+double Geometry::distance(double x, double y, double z) const
+{
+    OGRPoint p(x, y, z);
+    return m_geom->Distance((OGRGeometry*)&p);
+}
+
+Geometry Geometry::getRing() const
+{
+    throwNoGeos();
+
+    int count = OGR_G_GetGeometryCount(m_geom.get());
+    if (count)
+    {
+
+        OGRGeometryH ring = OGR_G_Clone(OGR_G_GetGeometryRef(m_geom.get(), 0));
+        OGRGeometryH linestring = OGR_G_ForceToLineString(ring);
+
+        return Geometry(linestring, getSpatialReference());
+    }
+    else
+        throwNoGeos();
+
+    return Geometry();
+
+}
+
 bool Geometry::valid() const
 {
     throwNoGeos();
@@ -251,6 +290,12 @@ std::string Geometry::json(double precision) const
     std::string output(json);
     OGRFree(json);
     return output;
+}
+
+
+void Geometry::clear()
+{
+    m_geom.reset();
 }
 
 

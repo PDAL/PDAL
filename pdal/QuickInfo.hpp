@@ -49,6 +49,8 @@ public:
     SpatialReference m_srs;
     point_count_t m_pointCount;
     StringList m_dimNames;
+    MetadataNode m_metadata;
+
     bool m_valid;
 
     QuickInfo() : m_pointCount(0), m_valid(false)

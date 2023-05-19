@@ -27,11 +27,13 @@
 #include <vector>
 
 #include <pdal/util/Utils.hpp>
+#include <pdal/pdal_types.hpp>
 
 namespace pdal
 {
-
-class arg_error
+#pragma warning (push)
+#pragma warning (disable: 4251)
+class PDAL_DLL arg_error
 {
 public:
     arg_error(const std::string& error) : m_error(error)
@@ -39,17 +41,19 @@ public:
 
     std::string what() const
         { return m_error; }
-
+private:
     std::string m_error;
 };
 
 // Specifically, an error in the argument's value.
-class arg_val_error : public arg_error
+class PDAL_DLL arg_val_error : public arg_error
 {
 public:
     arg_val_error(const std::string& error) : arg_error(error)
     {}
 };
+
+#pragma warning (pop)
 
 namespace
 {
@@ -820,6 +824,104 @@ public:
 private:
     std::vector<T>& m_var;
     std::vector<T> m_defaultVal;
+};
+
+template<>
+class VArg<RegEx>: public BaseVArg
+{
+public:
+    /**
+      Constructor for arguments wit default value.
+
+      \param longname  Name of argument specified on command line with "--"
+        prefix.
+      \param shortname  Optional name of argument specified on command
+        line with "-" prefix.
+      \param description  Argument description.
+      \param variable  Variable to which the argument value(s) should be bound.
+      \param def  Default value.
+    */
+    VArg(const std::string& longname, const std::string& shortname,
+        const std::string& description, std::vector<RegEx>& variable,
+        std::vector<RegEx> def) :
+        BaseVArg(longname, shortname, description), m_var(variable),
+        m_defaultVal(def)
+    {
+        m_var = def;
+        m_defaultProvided = true;
+    }
+
+    /**
+      Constructor for arguments without default value.
+
+      \param longname  Name of argument specified on command line with "--"
+        prefix.
+      \param shortname  Optional name of argument specified on command
+        line with "-" prefix.
+      \param description  Argument description.
+      \param variable  Variable to which the argument value(s) should be bound.
+    */
+    VArg(const std::string& longname, const std::string& shortname,
+        const std::string& description, std::vector<RegEx>& variable) :
+        BaseVArg(longname, shortname, description), m_var(variable)
+    {}
+
+    /**
+      Set a an argument's value from a string.
+
+      Throws an arg_error exception if \a s can't be converted to
+      the argument's type.
+      \note  Not intended to be called from user code.
+
+      \param s  Value to set.
+    */
+    virtual void setValue(const std::string& s)
+    {
+        RegEx val(s);
+        m_rawVal = s;
+        if (!m_set)
+            m_var.clear();
+        m_var.reserve(m_var.size() + sizeof(val));
+        m_var.push_back(val);
+        m_set = true;
+    }
+
+    /**
+      Reset the argument's state.
+
+      Set the internal state of the argument and it's referenced variable
+      as if no command-line parsing had occurred.
+      \note  For testing.  Not intended to be called from user code.
+    */
+    virtual void reset()
+    {
+        m_var = m_defaultVal;
+        m_set = false;
+        m_hidden = false;
+    }
+
+    /**
+      Return a string representation of an Arg's default value, or an
+      empty string if none exists.
+
+      \return  Default value as a string.
+    */
+    virtual std::string defaultVal() const
+    {
+        std::string s;
+
+        for (size_t i = 0; i < m_defaultVal.size(); ++i)
+        {
+            if (i > 0)
+                s += ", ";
+            s += m_defaultVal[i].m_str;
+        }
+        return s;
+    }
+
+private:
+    std::vector<RegEx>& m_var;
+    std::vector<RegEx> m_defaultVal;
 };
 
 /**

@@ -70,3 +70,8 @@ points to geographic coordinates if necessary.  The output is written to
 a set of text files in the current directory.
 
 .. _glob pattern: https://en.wikipedia.org/wiki/Glob_%28programming%29
+
+--------------------------------------------------------------------------------
+
+.. note:: Tile does not wotk with nor-streamable formats, for example, copc. 
+

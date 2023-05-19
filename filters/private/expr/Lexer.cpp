@@ -2,8 +2,11 @@
 #include <cassert>
 #include <cctype>
 #include <cstdlib>
+#include <sstream>
 
 #include "Lexer.hpp"
+
+#include "pdal/util/Utils.hpp"
 
 namespace pdal
 {
@@ -199,11 +202,15 @@ Token Lexer::greater()
 
 Token Lexer::number()
 {
-    const char *start = m_buf.data() + m_tokPos;
-    char *end;
-    double v = strtod(start, &end);
-    m_pos = end - m_buf.data();
-    int len = (int)(end - start);
+    Utils::IStringStreamClassicLocale iss;
+    iss.str(m_buf.data() + m_tokPos);
+    double v = 0;
+    const auto start = iss.tellg();
+    iss >> v;
+    int len = (int)(m_buf.size() - m_tokPos);
+    if (!iss.eof())
+        len = (int)(iss.tellg() - start);
+    m_pos = m_tokPos + len;
     return Token(TokenType::Number, m_tokPos, m_pos, m_buf.substr(m_tokPos, len), v);
 }
 

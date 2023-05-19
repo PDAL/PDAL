@@ -1,0 +1,18 @@
+INFO: Open of `/Users/rcoup/code/point-clouds/pdal/test/data/../temp/ogr/multicount_3.shp'
+      using driver `ESRI Shapefile' successful.
+
+Layer name: multicount_3
+Geometry: 3D Multi Point
+Feature Count: 2
+Extent: (635619.850000, 849017.320000) - (635685.330000, 852165.120000)
+Layer SRS WKT:
+(unknown)
+FID: Integer64 (11.0)
+OGRFeature(multicount_3):0
+  FID (Integer64) = 0
+  MULTIPOINT Z ((635619.85 850064.04 447.01),(635640.42 849758.79 422.74),(635650.95 850244.03 424.93),(635673.46 850157.55 435.73),(635674.05 849017.32 428.02))
+
+OGRFeature(multicount_3):1
+  FID (Integer64) = 1
+  MULTIPOINT Z ((635678.9 851351.44 436.45),(635680.54 849362.66 421.56),(635681.07 851383.76 419),(635684.02 849494.39 407.12),(635685.33 852165.12 421.75))
+

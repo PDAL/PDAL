@@ -110,6 +110,8 @@ private:
     SpatialReference m_overrideSrs;
     std::string m_GDAL_metadata;
     bool m_writePDALMetadata;
+    bool m_binMode;
+    bool m_allowEmpty;
 };
 
 }

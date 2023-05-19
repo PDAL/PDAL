@@ -151,9 +151,8 @@ public:
 protected:
     virtual void createStream()
     {
-        if (m_streamIf)
-            std::cerr << "Attempt to create stream twice!\n";
-        m_streamIf.reset(new NitfStreamIf(m_filename, m_offset));
+        if (!m_streamIf)
+            m_streamIf.reset(new NitfStreamIf(m_filename, m_offset));
     }
 
 private:

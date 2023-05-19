@@ -101,6 +101,12 @@ filename
     the result of using :ref:`filters.splitter`, :ref:`filters.chipper` or
     :ref:`filters.divider`.[Required]
 
+
+binmode:
+    If 'true', only points **inside** the raster pixel will be considered
+    for statistics, and no distance-based summary or interpolation will
+    be applied [Default: false]
+
 .. _resolution:
 
 resolution

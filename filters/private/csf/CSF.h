@@ -50,6 +50,7 @@ struct Params {
     double cloth_resolution;
     int rigidness;
     int interations;
+    bool debug;
     std::string m_dir;
 };
 

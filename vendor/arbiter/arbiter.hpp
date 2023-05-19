@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: 67761eb4ddfeac89e1a0d73aab21f2f081e1f484
+// Git SHA: f17a62f31d4df0ec23636971f56f152a8c52b72c
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -2733,11 +2733,7 @@ namespace Xml = rapidxml;
 #   define ARBITER_DLL
 #endif
 #else
-#  if defined(USE_GCC_VISIBILITY_FLAG)
 #    define ARBITER_DLL     __attribute__ ((visibility("default")))
-#  else
-#    define ARBITER_DLL
-#  endif
 #endif
 #endif
 
@@ -3684,6 +3680,15 @@ ARBITER_DLL std::string getExtension(std::string path);
  * '.' if one exists, otherwise return the full path. */
 ARBITER_DLL std::string stripExtension(std::string path);
 
+/** Get the characters up to the last instance of "@" in the protocol, or an
+ * empty string if no "@" character exists. */
+ARBITER_DLL std::string getProfile(std::string protocol);
+
+/** Get the characters following the last instance of "@" in the protocol, or
+ * the original @p protocol if no profile exists.
+*/
+ARBITER_DLL std::string stripProfile(std::string protocol);
+
 } // namespace arbiter
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
@@ -3709,6 +3714,7 @@ ARBITER_DLL std::string stripExtension(std::string path);
 #include <iostream>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -3723,8 +3729,8 @@ namespace ARBITER_CUSTOM_NAMESPACE
 
 namespace arbiter
 {
+namespace http { class Pool; }
 
-class HttpPool;
 
 /** @brief Base class for interacting with a storage type.
  *
@@ -3744,17 +3750,24 @@ class HttpPool;
 class ARBITER_DLL Driver
 {
 public:
+    Driver(std::string protocol, std::string profile = "")
+        : m_profile(profile)
+        , m_protocol(protocol)
+    { }
+
     virtual ~Driver() { }
 
-    /**
-     * Returns a string identifying this driver type, which should be unique
-     * among all other drivers.  Paths that begin with the substring
-     * `<type>://` will be routed to this driver.  For example, `fs`, `s3`, or
-     * `http`.
-     *
-     * @note Derived classes must override.
-     */
-    virtual std::string type() const = 0;
+    static std::shared_ptr<Driver> create(
+        http::Pool& pool,
+        std::string protocol,
+        std::string config);
+
+    std::string profile() const { return m_profile; }
+    std::string protocol() const { return m_protocol; }
+    std::string profiledProtocol() const
+    {
+        return m_profile.size() ? m_profile + "@" + m_protocol : m_protocol;
+    }
 
     /** Get string data. */
     std::string get(std::string path) const;
@@ -3828,9 +3841,12 @@ protected:
      * @param[out] data Empty vector in which to write resulting data.
      */
     virtual bool get(std::string path, std::vector<char>& data) const = 0;
+
+    const std::string m_profile;
+    const std::string m_protocol;
 };
 
-typedef std::map<std::string, std::unique_ptr<Driver>> DriverMap;
+typedef std::map<std::string, std::shared_ptr<Driver>> DriverMap;
 
 } // namespace arbiter
 
@@ -3948,13 +3964,11 @@ namespace drivers
 class ARBITER_DLL Fs : public Driver
 {
 public:
-    Fs() { }
+    Fs(std::string protocol = "file"): Driver(protocol) { }
 
     using Driver::get;
 
     static std::unique_ptr<Fs> create();
-
-    virtual std::string type() const override { return "file"; }
 
     virtual std::unique_ptr<std::size_t> tryGetSize(
             std::string path) const override;
@@ -4028,11 +4042,12 @@ namespace drivers
 class ARBITER_DLL Http : public Driver
 {
 public:
-    Http(http::Pool& pool);
+    Http(
+            http::Pool& pool,
+            std::string protocol = "http",
+            std::string httpProtocol = "http",
+            std::string profile = "");
     static std::unique_ptr<Http> create(http::Pool& pool);
-
-    // Inherited from Driver.
-    virtual std::string type() const override { return "http"; }
 
     /** By default, performs a HEAD request and returns the contents of the
      * Content-Length header.
@@ -4074,7 +4089,7 @@ public:
             http::Query query = http::Query()) const;
 
     /* Perform an HTTP HEAD request. */
-    std::unique_ptr<std::size_t> tryGetSize(
+    virtual std::unique_ptr<std::size_t> tryGetSize(
             std::string path,
             http::Headers headers,
             http::Query query = http::Query()) const;
@@ -4157,6 +4172,7 @@ protected:
             http::Query query) const;
 
     http::Pool& m_pool;
+    std::string m_httpProtocol;
 
 private:
     virtual bool get(
@@ -4175,14 +4191,18 @@ private:
 class Https : public Http
 {
 public:
-    Https(http::Pool& pool) : Http(pool) { }
+    Https(
+            http::Pool& pool,
+            std::string driverProtocol = "https",
+            std::string httpProtocol = "https",
+            std::string profile = "")
+        : Http(pool, driverProtocol, httpProtocol, profile)
+    { }
 
     static std::unique_ptr<Https> create(http::Pool& pool)
     {
         return std::unique_ptr<Https>(new Https(pool));
     }
-
-    virtual std::string type() const override { return "https"; }
 };
 
 } // namespace drivers
@@ -4247,22 +4267,21 @@ public:
     /** Try to construct an S3 driver.  The configuration/credential discovery
      * follows, in order:
      *      - Environment settings.
-     *      - Arbiter JSON configuration.
+     *      - JSON configuration
      *      - Well-known files or their environment overrides, like
      *          `~/.aws/credentials` or the file at AWS_CREDENTIAL_FILE.
      *      - EC2 instance profile.
      */
-    static std::vector<std::unique_ptr<S3>> create(
-            http::Pool& pool,
-            std::string j);
-
-    static std::unique_ptr<S3> createOne(http::Pool& pool, std::string j);
+    static std::unique_ptr<S3> create(
+        http::Pool& pool,
+        std::string json,
+        std::string profile = "default");
 
     // Overrides.
-    virtual std::string type() const override;
-
     virtual std::unique_ptr<std::size_t> tryGetSize(
-            std::string path) const override;
+            std::string path,
+            http::Headers headers,
+            http::Query query = http::Query()) const override;
 
     /** Inherited from Drivers::Http. */
     virtual void put(
@@ -4274,14 +4293,6 @@ public:
     virtual void copy(std::string src, std::string dst) const override;
 
 private:
-    static std::string extractProfile(std::string j);
-
-    /*
-    static std::unique_ptr<Config> extractConfig(
-            std::string j,
-            std::string profile);
-
-            */
     /** Inherited from Drivers::Http. */
     virtual bool get(
             std::string path,
@@ -4296,7 +4307,6 @@ private:
     class ApiV4;
     class Resource;
 
-    std::string m_profile;
     std::unique_ptr<Auth> m_auth;
     std::unique_ptr<Config> m_config;
 };
@@ -4331,7 +4341,7 @@ public:
         : m_credUrl(internal::makeUnique<std::string>(credUrl))
     { }
 
-    static std::unique_ptr<Auth> create(std::string j, std::string profile);
+    static std::unique_ptr<Auth> create(std::string profile, std::string s);
 
     AuthFields fields() const;
 
@@ -4348,7 +4358,7 @@ private:
 class S3::Config
 {
 public:
-    Config(std::string j, std::string profile);
+    Config(std::string json, std::string profile);
 
     const std::string& region() const { return m_region; }
     const std::string& baseUrl() const { return m_baseUrl; }
@@ -4356,8 +4366,8 @@ public:
     bool precheck() const { return m_precheck; }
 
 private:
-    static std::string extractRegion(std::string j, std::string profile);
-    static std::string extractBaseUrl(std::string j, std::string region);
+    static std::string extractRegion(std::string json, std::string profile);
+    static std::string extractBaseUrl(std::string json, std::string region);
 
     const std::string m_region;
     const std::string m_baseUrl;
@@ -4489,20 +4499,17 @@ public:
             std::string profile,
             std::unique_ptr<Config> config);
 
-    /** Try to construct an Azure blob driver.  The configuration/credential discovery
-     * follows, in order:
+    /** Try to construct an Azure blob driver.  The configuration/credential
+     * discovery follows, in order:
      *      - Environment settings.
-     *      - Arbiter JSON configuration.
+     *      - JSON configuration.
      */
-    static std::vector<std::unique_ptr<AZ>> create(
+    static std::unique_ptr<AZ> create(
             http::Pool& pool,
-            std::string j);
-
-    static std::unique_ptr<AZ> createOne(http::Pool& pool, std::string j);
+            std::string j,
+            std::string profile);
 
     // Overrides.
-    virtual std::string type() const override;
-
     virtual std::unique_ptr<std::size_t> tryGetSize(
             std::string path) const override;
 
@@ -4516,14 +4523,6 @@ public:
     virtual void copy(std::string src, std::string dst) const override;
 
 private:
-    static std::string extractProfile(std::string j);
-
-    /*
-    static std::unique_ptr<Config> extractConfig(
-            std::string j,
-            std::string profile);
-
-            */
     /** Inherited from Drivers::Http. */
     virtual bool get(
             std::string path,
@@ -4538,7 +4537,6 @@ private:
     class ApiV1;
     class Resource;
 
-    std::string m_profile;
     std::unique_ptr<Config> m_config;
 };
 
@@ -4561,7 +4559,7 @@ class AZ::Config
 {
 
 public:
-    Config(std::string j, std::string profile);
+    Config(std::string j);
 
     const http::Query& sasToken() const { return m_sasToken; }
     bool hasSasToken() const { return m_sasToken.size() > 0; }
@@ -4575,11 +4573,11 @@ public:
     AuthFields authFields() const { return AuthFields(m_storageAccount, m_storageAccessKey); }
 
 private:
-    static std::string extractService(std::string j, std::string profile);
-    static std::string extractEndpoint(std::string j, std::string profile);
+    static std::string extractService(std::string j);
+    static std::string extractEndpoint(std::string j);
     static std::string extractBaseUrl(std::string j, std::string endpoint, std::string service, std::string account);
-    static std::string extractStorageAccount(std::string j, std::string profile);
-    static std::string extractStorageAccessKey(std::string j, std::string profile);
+    static std::string extractStorageAccount(std::string j);
+    static std::string extractStorageAccessKey(std::string j);
     static std::string extractSasToken(std::string j);
 
     http::Query m_sasToken;
@@ -4700,13 +4698,17 @@ class Google : public Https
 {
     class Auth;
 public:
-    Google(http::Pool& pool, std::unique_ptr<Auth> auth);
+    Google(
+            http::Pool& pool,
+            std::unique_ptr<Auth> auth,
+            std::string profile = "");
 
-    static std::unique_ptr<Google> create(http::Pool& pool, std::string j);
+    static std::unique_ptr<Google> create(
+            http::Pool& pool,
+            std::string j,
+            std::string profile);
 
     // Overrides.
-    virtual std::string type() const override { return "gs"; }  // Match gsutil.
-
     virtual std::unique_ptr<std::size_t> tryGetSize(
             std::string path) const override;
 
@@ -4799,15 +4801,17 @@ class Dropbox : public Http
 {
 public:
     class Auth;
-    Dropbox(http::Pool& pool, const Auth& auth);
+    Dropbox(http::Pool& pool, const Auth& auth, std::string profile);
 
     /** Try to construct a %Dropbox Driver.  @p j may be stringified JSON, in
      * which the key `token` will be used to construct the Dropbox auth, or
      * may simply be the token string itself.
      */
-    static std::unique_ptr<Dropbox> create(http::Pool& pool, std::string j);
+    static std::unique_ptr<Dropbox> create(
+        http::Pool& pool,
+        std::string j,
+        std::string profile);
 
-    virtual std::string type() const override { return "dropbox"; }
     virtual void put(
             std::string path,
             const std::vector<char>& data,
@@ -4895,12 +4899,13 @@ namespace drivers
 class Test : public Fs
 {
 public:
+    Test(): Fs("test") { }
+
     static std::unique_ptr<Test> create()
     {
         return std::unique_ptr<Test>(new Test());
     }
 
-    virtual std::string type() const override { return "test"; }
     virtual bool isRemote() const override { return true; }
 
 private:
@@ -4909,7 +4914,7 @@ private:
             bool verbose) const override
     {
         auto results(Fs::glob(path, verbose));
-        for (auto& p : results) p = type() + "://" + p;
+        for (auto& p : results) p = profiledProtocol() + "://" + p;
         return results;
     }
 };
@@ -4995,8 +5000,12 @@ public:
 
     // Driver passthroughs.
 
-    /** Passthrough to Driver::type. */
-    std::string type() const;
+    /** Passthrough to Driver::protocol. */
+    std::string protocol() const;
+    /** Passthrough to Driver::profile. */
+    std::string profile() const;
+    /** Passthrough to Driver::profiledProtocol. */
+    std::string profiledProtocol() const;
 
     /** Passthrough to Driver::isRemote. */
     bool isRemote() const;
@@ -5234,9 +5243,6 @@ public:
     /** @brief Construct an Arbiter with driver configurations. */
     Arbiter(std::string stringifiedJson);
 
-    /** True if a Driver has been registered for this file type. */
-    bool hasDriver(std::string path) const;
-
     /** @brief Add a custom driver for the supplied type.
      *
      * After this operation completes, future requests into arbiter beginning
@@ -5248,7 +5254,10 @@ public:
      *
      * @note This operation is not thread-safe.
      */
-    void addDriver(std::string type, std::unique_ptr<Driver> driver);
+    void addDriver(std::string type, std::shared_ptr<Driver> driver);
+
+    /** Returns true if a driver from this path is available. */
+    bool hasDriver(std::string path) const;
 
     /** Get data or throw if inaccessible. */
     std::string get(std::string path) const;
@@ -5411,7 +5420,7 @@ public:
      *
      * Optionally, filesystem paths may be explicitly prefixed with `file://`.
      */
-    const Driver& getDriver(std::string path) const;
+    std::shared_ptr<Driver> getDriver(std::string path) const;
 
     /** @brief Get a LocalHandle to a possibly remote file.
      *
@@ -5462,10 +5471,12 @@ public:
     http::Pool& httpPool() { return *m_pool; }
 
 private:
-    const drivers::Http* tryGetHttpDriver(std::string path) const;
-    const drivers::Http& getHttpDriver(std::string path) const;
+    std::shared_ptr<drivers::Http> tryGetHttpDriver(std::string path) const;
+    std::shared_ptr<drivers::Http> getHttpDriver(std::string path) const;
 
-    DriverMap m_drivers;
+    std::string m_config;
+    mutable std::mutex m_mutex;
+    mutable DriverMap m_drivers;
     std::unique_ptr<http::Pool> m_pool;
 };
 

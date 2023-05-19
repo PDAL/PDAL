@@ -107,6 +107,8 @@ struct Options
     std::vector<las::Evlr> userVlrs;
     bool emitPipeline;
     bool fixedSeed;
+    pdal::SpatialReference aSrs;
+    int threadCount = 10;
 };
 
 struct BaseInfo

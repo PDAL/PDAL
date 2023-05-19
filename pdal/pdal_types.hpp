@@ -37,9 +37,11 @@
 #include <stdint.h>
 #include <cstdlib>
 #include <istream>
+#include <locale>
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <regex>
 
 #include <iostream>
 
@@ -67,6 +69,68 @@ typedef union
     uint64_t u64;
 } Everything;
 
+struct RegEx{
+    RegEx(): m_str()
+    {}
+
+    RegEx(std::string expr): m_str(expr)
+    {}
+
+    std::string m_str;
+    bool valid() {
+        if (!m_str.empty())
+        {
+            return true;
+        }
+        return false;
+    }
+
+    std::regex regex() { return std::regex(m_str); }
+
+    std::string str() { return m_str; }
+
+    friend std::ostream& operator<<(std::ostream& out, const RegEx& regex);
+
+    friend std::istream& operator>>(std::istream& in, RegEx& regex);
+
+    friend bool operator==(const RegEx& lhs, const RegEx& rhs);
+    friend bool operator==(const RegEx& lhs, const std::string& rhs);
+    friend bool operator==(const std::string& lhs, const RegEx& rhs);
+};
+
+inline std::ostream& operator<<(std::ostream& out, const RegEx& regex)
+{
+    std::string expr = regex.m_str;
+    if (!expr.empty())
+        out << expr;
+    return out;
+}
+
+inline std::istream& operator>>(std::istream& in, RegEx& regex)
+{
+    std::string expr;
+
+    in >> expr;
+    regex.m_str = expr;
+
+    return in;
+}
+
+inline bool operator==(const RegEx& lhs, const RegEx& rhs)
+{
+    return lhs.m_str == rhs.m_str;
+}
+
+inline bool operator==(const RegEx& lhs, const std::string& rhs)
+{
+    return lhs.m_str == rhs;
+}
+
+inline bool operator==(const std::string& lhs, const RegEx& rhs)
+{
+    return lhs == rhs.m_str;
+}
+
 struct XForm
 {
     struct XFormComponent
@@ -86,17 +150,16 @@ struct XForm
                 m_auto = true;
             else
             {
-                size_t pos;
+                bool failed = false;
                 try
                 {
-                    m_val = std::stod(sval, &pos);
+                    failed = !Utils::fromString(sval, m_val);
                 }
                 catch (...)
                 {
-                    // Set error condition.
-                    pos = sval.size() + 1;
+                    failed = true;
                 }
-                if (pos != sval.size())
+                if (failed)
                 {
                     m_val = 0;
                     return false;
@@ -251,7 +314,7 @@ enum class Orientation
     DimensionMajor
 };
 
-class pdal_error : public std::runtime_error
+class PDAL_DLL_UNIX pdal_error : public std::runtime_error
 {
 public:
     inline pdal_error(std::string const& msg) : std::runtime_error(msg)

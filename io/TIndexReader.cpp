@@ -40,6 +40,7 @@
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/gdal/SpatialRef.hpp>
+#include <pdal/StageWrapper.hpp>
 
 namespace pdal
 {
@@ -272,22 +273,46 @@ void TIndexReader::initialize()
     }
     m_layer = 0;
     m_dataset = 0;
+
+    setInput(m_merge);
+}
+
+
+point_count_t TIndexReader::read(PointViewPtr view, point_count_t num)
+{
+    point_count_t cnt(0);
+
+    PointRef point(view->point(0));
+    for (PointId idx = 0; idx < num; ++idx)
+    {
+        point.setPointId(idx);
+        processOne(point);
+        cnt++;
+    }
+    return cnt;
+}
+
+
+bool TIndexReader::processOne(PointRef& point)
+{
+    return true;
 }
 
 void TIndexReader::prepared(PointTableRef table)
 {
     m_merge.prepare(table);
+    m_merge.setLog(log());
 }
 
 void TIndexReader::ready(PointTableRef table)
 {
-    m_pvSet = m_merge.execute(table);
+    StageWrapper::ready(m_merge, table);
 }
 
 
-PointViewSet TIndexReader::run(PointViewPtr)
+PointViewSet TIndexReader::run(PointViewPtr view)
 {
-    return m_pvSet;
+    return StageWrapper::run(m_merge, view);
 }
 
 } // namespace pdal

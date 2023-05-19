@@ -13,10 +13,18 @@
 #include <limits>
 #include <vector>
 
+#include <stdint.h>
+
+
 namespace delaunator {
 
-constexpr std::size_t INVALID_INDEX =
-    (std::numeric_limits<std::size_t>::max)();
+// using shorter value type for indices rather than size_t
+// to consume less memory (it is unlikely that the triangulation
+// would be done on more than 4 billion points)
+typedef uint32_t index_t;
+
+constexpr index_t INVALID_INDEX =
+    (std::numeric_limits<index_t>::max)();
 
 class Point
 {
@@ -42,32 +50,32 @@ class Delaunator {
 
 public:
     std::vector<double> const& coords;
-    std::vector<std::size_t> triangles;
-    std::vector<std::size_t> halfedges;
-    std::vector<std::size_t> hull_prev;
-    std::vector<std::size_t> hull_next;
-    std::vector<std::size_t> hull_tri;
-    std::size_t hull_start;
+    std::vector<index_t> triangles;
+    std::vector<index_t> halfedges;
+    std::vector<index_t> hull_prev;
+    std::vector<index_t> hull_next;
+    std::vector<index_t> hull_tri;
+    index_t hull_start;
 
     INLINE Delaunator(std::vector<double> const& in_coords);
     INLINE double get_hull_area();
 
 private:
-    std::vector<std::size_t> m_hash;
+    std::vector<index_t> m_hash;
     Point m_center;
-    std::size_t m_hash_size;
-    std::vector<std::size_t> m_edge_stack;
+    index_t m_hash_size;
+    std::vector<index_t> m_edge_stack;
 
-    INLINE std::size_t legalize(std::size_t a);
-    INLINE std::size_t hash_key(double x, double y) const;
-    INLINE std::size_t add_triangle(
-        std::size_t i0,
-        std::size_t i1,
-        std::size_t i2,
-        std::size_t a,
-        std::size_t b,
-        std::size_t c);
-    INLINE void link(std::size_t a, std::size_t b);
+    INLINE index_t legalize(index_t a);
+    INLINE index_t hash_key(double x, double y) const;
+    INLINE index_t add_triangle(
+        index_t i0,
+        index_t i1,
+        index_t i2,
+        index_t a,
+        index_t b,
+        index_t c);
+    INLINE void link(index_t a, index_t b);
 };
 
 } //namespace delaunator

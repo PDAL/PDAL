@@ -364,10 +364,13 @@ Spatial
    :hidden:
 
    filters.crop
+   filters.geomdistance
 
 :ref:`filters.crop`
     Filter points inside or outside a bounding box or a polygon
 
+:ref:`filters.geomdistance`
+    Compute 2D distance from a polygon to points
 
 Resampling
 ..........
@@ -455,11 +458,15 @@ Position
    :glob:
    :hidden:
 
+   filters.expression
    filters.head
    filters.locate
    filters.mongo
    filters.range
    filters.tail
+
+:ref:`filters.expression`
+    Pass only points given an :ref:`expression <PDAL expression>`
 
 :ref:`filters.head`
     Return N points from beginning of the point cloud.

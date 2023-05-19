@@ -23,6 +23,7 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
    readers.ept
    readers.e57
    readers.faux
+   readers.fbi
    readers.gdal
    readers.hdf
    readers.i3s
@@ -31,7 +32,6 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
    readers.matlab
    readers.memoryview
    readers.mbio
-   readers.mrsid
    readers.nitf
    readers.numpy
    readers.obj
@@ -40,12 +40,14 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
    readers.pgpointcloud
    readers.ply
    readers.pts
+   readers.ptx
    readers.qfit
    readers.rdb
    readers.rxp
    readers.sbet
    readers.smrmsg
    readers.slpk
+   readers.stac
    readers.terrasolid
    readers.text
    readers.tiledb
@@ -76,6 +78,9 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
     Used for testing pipelines. It does not read from a file or database, but
     generates synthetic data to feed into the pipeline.
 
+:ref:`readers.fbi`
+    Read TerraSolid FBI format
+
 :ref:`readers.gdal`
     Read GDAL readable raster data sources as point clouds.
 
@@ -105,10 +110,6 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
     Read data from memory where dimension data is arranged in rows.  For
     use only with the PDAL API.
 
-:ref:`readers.mrsid`
-    Read data compressed by the MrSID 4.0 LiDAR Compressor. Requires the
-    LizardTech Lidar_DSDK.
-
 :ref:`readers.nitf`
     Read point cloud data (LAS or LAZ) wrapped in NITF 2.1 files.
 
@@ -134,6 +135,9 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
 :ref:`readers.pts`
     Read data from Leica Cyclone PTS files.
 
+:ref:`readers.ptx`
+    Read data from Leica Cyclone PTX files.
+
 :ref:`readers.qfit`
     Read data in the QFIT format originated for NASA's Airborne Topographic
     Mapper project.
@@ -151,6 +155,9 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
 
 :ref:`readers.slpk`
     Read data stored in an Esri SLPK file.
+
+:ref:`readers.stac`
+    Read STAC JSON Catalogs and Items with the Pointcloud extension.
 
 :ref:`readers.terrasolid`
     TerraSolid Reader

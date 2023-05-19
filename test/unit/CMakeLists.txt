@@ -58,6 +58,13 @@ PDAL_ADD_TEST(pdal_options_test
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
+
+PDAL_ADD_TEST(pdal_dimension_test
+    FILES
+        DimensionTest.cpp
+    INCLUDES
+        ${NLOHMANN_INCLUDE_DIR}
+)
 PDAL_ADD_TEST(pdal_pipeline_manager_test FILES PipelineManagerTest.cpp)
 PDAL_ADD_TEST(pdal_pipeline_writer_test
     FILES
@@ -126,6 +133,13 @@ if (PDAL_HAVE_ZLIB)
     PDAL_ADD_TEST(pdal_io_bpf_zlib_test FILES io/BpfTestZlib.cpp)
 endif()
 PDAL_ADD_TEST(pdal_io_buffer_test FILES io/BufferTest.cpp)
+PDAL_ADD_TEST(pdal_io_stac_reader_test
+    FILES
+        io/StacReaderTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
+)
 PDAL_ADD_TEST(pdal_io_ept_reader_test
     FILES
         io/EptReaderTest.cpp
@@ -161,6 +175,14 @@ PDAL_ADD_TEST(pdal_io_gdal_reader_test
 PDAL_ADD_TEST(pdal_io_gdal_writer_test
     FILES
         io/GDALWriterTest.cpp
+    LINK_WITH
+        ${GDAL_LIBRARY}
+    INCLUDES
+        ${GDAL_INCLUDE_DIR}
+)
+PDAL_ADD_TEST(pdal_io_ogr_writer_test
+    FILES
+        io/OGRWriterTest.cpp
     LINK_WITH
         ${GDAL_LIBRARY}
     INCLUDES
@@ -210,10 +232,12 @@ PDAL_ADD_TEST(pdal_io_ply_writer_test
     INCLUDES ${PDAL_VENDOR_DIR}
 )
 PDAL_ADD_TEST(pdal_io_pts_reader_test FILES io/PtsReaderTest.cpp)
+PDAL_ADD_TEST(pdal_io_ptx_reader_test FILES io/PtxReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_qfit_test FILES io/QFITReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_sbet_reader_test FILES io/SbetReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_sbet_writer_test FILES io/SbetWriterTest.cpp)
 PDAL_ADD_TEST(pdal_io_terrasolid_test FILES io/TerrasolidReaderTest.cpp)
+PDAL_ADD_TEST(pdal_io_fbi_test FILES io/FbiReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_text_writer_test FILES io/TextWriterTest.cpp)
 PDAL_ADD_TEST(pdal_io_text_reader_test
     FILES
@@ -254,6 +278,14 @@ PDAL_ADD_TEST(pdal_filters_colorization_test
 PDAL_ADD_TEST(pdal_filters_crop_test
     FILES
         filters/CropFilterTest.cpp
+    INCLUDES
+        ${GDAL_INCLUDE_DIR}
+    LINK_WITH
+        ${GDAL_LIBRARY}
+)
+PDAL_ADD_TEST(pdal_filters_geomdistance_test
+    FILES
+        filters/GeomDistanceFilterTest.cpp
     INCLUDES
         ${GDAL_INCLUDE_DIR}
     LINK_WITH
@@ -313,6 +345,7 @@ if (GDAL_3)
     PDAL_ADD_TEST(pdal_filters_projpipeline_test FILES filters/ProjPipelineFilterTest.cpp)
 endif()
 PDAL_ADD_TEST(pdal_filters_range_test FILES filters/RangeFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_expression_test FILES filters/ExpressionFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_randomize_test FILES filters/RandomizeFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_reciprocity_test FILES filters/ReciprocityFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_returns_test FILES filters/ReturnsFilterTest.cpp)
@@ -365,14 +398,6 @@ if(PDAL_HAVE_LIBXML2)
     PDAL_ADD_TEST(pdal_io_ilvis2_reader_metadata_test
         FILES
             io/Ilvis2ReaderWithMDReaderTest.cpp
-        INCLUDES
-            ${LIBXML2_INCLUDE_DIR}
-    )
-    PDAL_ADD_TEST(xml_schema_test
-        FILES
-            XMLSchemaTest.cpp
-        LINK_WITH
-            ${LIBXML2_LIBRARIES}
         INCLUDES
             ${LIBXML2_INCLUDE_DIR}
     )

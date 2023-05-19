@@ -1,0 +1,318 @@
+{
+    "type": "Feature",
+    "stac_version": "1.0.0",
+    "id": "MD_GoldenBeach_2012",
+    "properties": {
+        "description": "A USGS Lidar pointcloud in Entwine/EPT format",
+        "pc:count": 4860658,
+        "pc:type": "lidar",
+        "pc:encoding": "ept",
+        "pc:schemas": [
+            {
+                "name": "X",
+                "offset": -8535335,
+                "scale": 0.01,
+                "size": 4,
+                "type": "signed"
+            },
+            {
+                "name": "Y",
+                "offset": 4649791,
+                "scale": 0.01,
+                "size": 4,
+                "type": "signed"
+            },
+            {
+                "name": "Z",
+                "offset": 523,
+                "scale": 0.01,
+                "size": 4,
+                "type": "signed"
+            },
+            {
+                "name": "Intensity",
+                "size": 2,
+                "type": "unsigned"
+            },
+            {
+                "name": "ReturnNumber",
+                "size": 1,
+                "type": "unsigned"
+            },
+            {
+                "name": "NumberOfReturns",
+                "size": 1,
+                "type": "unsigned"
+            },
+            {
+                "name": "ScanDirectionFlag",
+                "size": 1,
+                "type": "unsigned"
+            },
+            {
+                "name": "EdgeOfFlightLine",
+                "size": 1,
+                "type": "unsigned"
+            },
+            {
+                "name": "Classification",
+                "size": 1,
+                "type": "unsigned"
+            },
+            {
+                "name": "ScanAngleRank",
+                "size": 4,
+                "type": "floating"
+            },
+            {
+                "name": "UserData",
+                "size": 1,
+                "type": "unsigned"
+            },
+            {
+                "name": "PointSourceId",
+                "size": 2,
+                "type": "unsigned"
+            },
+            {
+                "name": "GpsTime",
+                "size": 8,
+                "type": "floating"
+            },
+            {
+                "name": "OriginId",
+                "size": 4,
+                "type": "unsigned"
+            }
+        ],
+        "proj:epsg": 3857,
+        "proj:projjson": {
+            "$schema": "https://proj.org/schemas/v0.5/projjson.schema.json",
+            "type": "ProjectedCRS",
+            "name": "WGS 84 / Pseudo-Mercator",
+            "base_crs": {
+                "name": "WGS 84",
+                "datum_ensemble": {
+                    "name": "World Geodetic System 1984 ensemble",
+                    "members": [
+                        {
+                            "name": "World Geodetic System 1984 (Transit)",
+                            "id": {
+                                "authority": "EPSG",
+                                "code": 1166
+                            }
+                        },
+                        {
+                            "name": "World Geodetic System 1984 (G730)",
+                            "id": {
+                                "authority": "EPSG",
+                                "code": 1152
+                            }
+                        },
+                        {
+                            "name": "World Geodetic System 1984 (G873)",
+                            "id": {
+                                "authority": "EPSG",
+                                "code": 1153
+                            }
+                        },
+                        {
+                            "name": "World Geodetic System 1984 (G1150)",
+                            "id": {
+                                "authority": "EPSG",
+                                "code": 1154
+                            }
+                        },
+                        {
+                            "name": "World Geodetic System 1984 (G1674)",
+                            "id": {
+                                "authority": "EPSG",
+                                "code": 1155
+                            }
+                        },
+                        {
+                            "name": "World Geodetic System 1984 (G1762)",
+                            "id": {
+                                "authority": "EPSG",
+                                "code": 1156
+                            }
+                        },
+                        {
+                            "name": "World Geodetic System 1984 (G2139)",
+                            "id": {
+                                "authority": "EPSG",
+                                "code": 1309
+                            }
+                        }
+                    ],
+                    "ellipsoid": {
+                        "name": "WGS 84",
+                        "semi_major_axis": 6378137,
+                        "inverse_flattening": 298.257223563
+                    },
+                    "accuracy": "2.0",
+                    "id": {
+                        "authority": "EPSG",
+                        "code": 6326
+                    }
+                },
+                "coordinate_system": {
+                    "subtype": "ellipsoidal",
+                    "axis": [
+                        {
+                            "name": "Geodetic latitude",
+                            "abbreviation": "Lat",
+                            "direction": "north",
+                            "unit": "degree"
+                        },
+                        {
+                            "name": "Geodetic longitude",
+                            "abbreviation": "Lon",
+                            "direction": "east",
+                            "unit": "degree"
+                        }
+                    ]
+                },
+                "id": {
+                    "authority": "EPSG",
+                    "code": 4326
+                }
+            },
+            "conversion": {
+                "name": "Popular Visualisation Pseudo-Mercator",
+                "method": {
+                    "name": "Popular Visualisation Pseudo Mercator",
+                    "id": {
+                        "authority": "EPSG",
+                        "code": 1024
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "Latitude of natural origin",
+                        "value": 0,
+                        "unit": "degree",
+                        "id": {
+                            "authority": "EPSG",
+                            "code": 8801
+                        }
+                    },
+                    {
+                        "name": "Longitude of natural origin",
+                        "value": 0,
+                        "unit": "degree",
+                        "id": {
+                            "authority": "EPSG",
+                            "code": 8802
+                        }
+                    },
+                    {
+                        "name": "False easting",
+                        "value": 0,
+                        "unit": "metre",
+                        "id": {
+                            "authority": "EPSG",
+                            "code": 8806
+                        }
+                    },
+                    {
+                        "name": "False northing",
+                        "value": 0,
+                        "unit": "metre",
+                        "id": {
+                            "authority": "EPSG",
+                            "code": 8807
+                        }
+                    }
+                ]
+            },
+            "coordinate_system": {
+                "subtype": "Cartesian",
+                "axis": [
+                    {
+                        "name": "Easting",
+                        "abbreviation": "X",
+                        "direction": "east",
+                        "unit": "metre"
+                    },
+                    {
+                        "name": "Northing",
+                        "abbreviation": "Y",
+                        "direction": "north",
+                        "unit": "metre"
+                    }
+                ]
+            },
+            "scope": "Web mapping and visualisation.",
+            "area": "World between 85.06°S and 85.06°N.",
+            "bbox": {
+                "south_latitude": -85.06,
+                "west_longitude": -180,
+                "north_latitude": 85.06,
+                "east_longitude": 180
+            },
+            "id": {
+                "authority": "EPSG",
+                "code": 3857
+            }
+        },
+        "start_datetime": "2022-11-10T16:06:02.616469Z",
+        "end_datetime": "2022-11-15T16:06:02.616469Z"
+    },
+    "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+            [
+                [
+                    [
+                        -76.6613954949525,
+                        38.473028642672034
+                    ],
+                    [
+                        -76.64792076569412,
+                        38.5034756491689
+                    ],
+                    [
+                        -76.69732810630839,
+                        38.5095635066537
+                    ],
+                    [
+                        -76.69732810630839,
+                        38.48520898898422
+                    ],
+                    [
+                        -76.6613954949525,
+                        38.473028642672034
+                    ]
+                ]
+            ]
+        ]
+    },
+    "links": [
+        {
+            "rel": "self",
+            "href": "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/MD_GoldenBeach_2012.json"
+        },
+        {
+            "rel": "parent",
+            "href": "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/catalog.json"
+        }
+    ],
+    "assets": {
+        "ept.json": {
+            "href": "https://s3-us-west-2.amazonaws.com/usgs-lidar-public/MD_GoldenBeach_2012/ept.json",
+            "title": "entwine",
+            "description": "The ept.json for accessing data"
+        }
+    },
+    "bbox": [
+        -76.69732810630839,
+        38.473028642672034,
+        -76.64792076569412,
+        38.5095635066537
+    ],
+    "stac_extensions": [
+        "https://stac-extensions.github.io/pointcloud/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/projection/v1.0.0/schema.json"
+    ]
+}

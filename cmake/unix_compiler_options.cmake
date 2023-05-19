@@ -43,3 +43,13 @@ function(pdal_target_compile_settings target)
         )
     endif()
 endfunction()
+
+
+
+function(pdal_lib_compile_settings target)
+    pdal_target_compile_settings(${target})
+
+    target_compile_options(${target} PRIVATE
+        -fvisibility=hidden
+        -fvisibility-inlines-hidden)
+endfunction()

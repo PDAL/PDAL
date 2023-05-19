@@ -87,8 +87,7 @@ namespace
         json in(s.size() ? json::parse(s) : json::object());
 
         json config;
-        std::string path("~/.arbiter/config.json");
-
+        std::string path = in.value("configFile", "~/.arbiter/config.json");
         if      (auto p = env("ARBITER_CONFIG_FILE")) path = *p;
         else if (auto p = env("ARBITER_CONFIG_PATH")) path = *p;
 
@@ -101,10 +100,10 @@ namespace
     }
 }
 
-Arbiter::Arbiter() : Arbiter(json().dump()) { }
+Arbiter::Arbiter() : Arbiter("") { }
 
 Arbiter::Arbiter(const std::string s)
-    : m_drivers()
+    : m_config(s)
 #ifdef ARBITER_CURL
     , m_pool(
             new http::Pool(
@@ -112,108 +111,64 @@ Arbiter::Arbiter(const std::string s)
                 httpRetryCount,
                 getConfig(s).dump()))
 #endif
+{ }
+
+void Arbiter::addDriver(const std::string type, std::shared_ptr<Driver> driver)
 {
-    using namespace drivers;
-
-    const json c(getConfig(s));
-
-    if (auto d = Fs::create())
-    {
-        m_drivers[d->type()] = std::move(d);
-    }
-
-    if (auto d = Test::create())
-    {
-        m_drivers[d->type()] = std::move(d);
-    }
-
-#ifdef ARBITER_CURL
-    if (auto d = Http::create(*m_pool))
-    {
-        m_drivers[d->type()] = std::move(d);
-    }
-
-    if (auto d = Https::create(*m_pool))
-    {
-        m_drivers[d->type()] = std::move(d);
-    }
-
-    {
-        auto dlist(S3::create(*m_pool, c.value("s3", json()).dump()));
-        for (auto& d : dlist) m_drivers[d->type()] = std::move(d);
-    }
-
-    {
-        auto dlist(AZ::create(*m_pool, c.value("az", json()).dump()));
-        for (auto& d : dlist) m_drivers[d->type()] = std::move(d);
-    }
-
-    // Credential-based drivers should probably all do something similar to the
-    // S3 driver to support multiple profiles.
-    if (auto d = Dropbox::create(*m_pool, c.value("dropbox", json()).dump()))
-    {
-        m_drivers[d->type()] = std::move(d);
-    }
-
-#ifdef ARBITER_OPENSSL
-    if (auto d = Google::create(*m_pool, c.value("gs", json()).dump()))
-    {
-        m_drivers[d->type()] = std::move(d);
-    }
-#endif
-
-#endif
+    if (!driver) throw ArbiterError("Cannot add empty driver for " + type);
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_drivers[type] = driver;
 }
 
 bool Arbiter::hasDriver(const std::string path) const
 {
-    return m_drivers.count(getProtocol(path));
-}
-
-void Arbiter::addDriver(const std::string type, std::unique_ptr<Driver> driver)
-{
-    if (!driver) throw ArbiterError("Cannot add empty driver for " + type);
-    m_drivers[type] = std::move(driver);
+    try
+    {
+        getDriver(path);
+        return true;
+    }
+    catch (...) { }
+    return false;
 }
 
 std::string Arbiter::get(const std::string path) const
 {
-    return getDriver(path).get(stripProtocol(path));
+    return getDriver(path)->get(stripProtocol(path));
 }
 
 std::vector<char> Arbiter::getBinary(const std::string path) const
 {
-    return getDriver(path).getBinary(stripProtocol(path));
+    return getDriver(path)->getBinary(stripProtocol(path));
 }
 
 std::unique_ptr<std::string> Arbiter::tryGet(std::string path) const
 {
-    return getDriver(path).tryGet(stripProtocol(path));
+    return getDriver(path)->tryGet(stripProtocol(path));
 }
 
 std::unique_ptr<std::vector<char>> Arbiter::tryGetBinary(std::string path) const
 {
-    return getDriver(path).tryGetBinary(stripProtocol(path));
+    return getDriver(path)->tryGetBinary(stripProtocol(path));
 }
 
 std::size_t Arbiter::getSize(const std::string path) const
 {
-    return getDriver(path).getSize(stripProtocol(path));
+    return getDriver(path)->getSize(stripProtocol(path));
 }
 
 std::unique_ptr<std::size_t> Arbiter::tryGetSize(const std::string path) const
 {
-    return getDriver(path).tryGetSize(stripProtocol(path));
+    return getDriver(path)->tryGetSize(stripProtocol(path));
 }
 
 void Arbiter::put(const std::string path, const std::string& data) const
 {
-    return getDriver(path).put(stripProtocol(path), data);
+    return getDriver(path)->put(stripProtocol(path), data);
 }
 
 void Arbiter::put(const std::string path, const std::vector<char>& data) const
 {
-    return getDriver(path).put(stripProtocol(path), data);
+    return getDriver(path)->put(stripProtocol(path), data);
 }
 
 std::string Arbiter::get(
@@ -221,7 +176,7 @@ std::string Arbiter::get(
         const http::Headers headers,
         const http::Query query) const
 {
-    return getHttpDriver(path).get(stripProtocol(path), headers, query);
+    return getHttpDriver(path)->get(stripProtocol(path), headers, query);
 }
 
 std::unique_ptr<std::string> Arbiter::tryGet(
@@ -229,7 +184,7 @@ std::unique_ptr<std::string> Arbiter::tryGet(
         const http::Headers headers,
         const http::Query query) const
 {
-    return getHttpDriver(path).tryGet(stripProtocol(path), headers, query);
+    return getHttpDriver(path)->tryGet(stripProtocol(path), headers, query);
 }
 
 std::vector<char> Arbiter::getBinary(
@@ -237,7 +192,7 @@ std::vector<char> Arbiter::getBinary(
         const http::Headers headers,
         const http::Query query) const
 {
-    return getHttpDriver(path).getBinary(stripProtocol(path), headers, query);
+    return getHttpDriver(path)->getBinary(stripProtocol(path), headers, query);
 }
 
 std::unique_ptr<std::vector<char>> Arbiter::tryGetBinary(
@@ -245,7 +200,7 @@ std::unique_ptr<std::vector<char>> Arbiter::tryGetBinary(
         const http::Headers headers,
         const http::Query query) const
 {
-    return getHttpDriver(path).tryGetBinary(stripProtocol(path), headers, query);
+    return getHttpDriver(path)->tryGetBinary(stripProtocol(path), headers, query);
 }
 
 void Arbiter::put(
@@ -254,7 +209,7 @@ void Arbiter::put(
         const http::Headers headers,
         const http::Query query) const
 {
-    return getHttpDriver(path).put(stripProtocol(path), data, headers, query);
+    return getHttpDriver(path)->put(stripProtocol(path), data, headers, query);
 }
 
 void Arbiter::put(
@@ -263,7 +218,7 @@ void Arbiter::put(
         const http::Headers headers,
         const http::Query query) const
 {
-    return getHttpDriver(path).put(stripProtocol(path), data, headers, query);
+    return getHttpDriver(path)->put(stripProtocol(path), data, headers, query);
 }
 
 void Arbiter::copy(
@@ -344,11 +299,11 @@ void Arbiter::copyFile(
 
     if (dstEndpoint.isLocal()) mkdirp(getDirname(dst));
 
-    if (getEndpoint(file).type() == dstEndpoint.type())
+    if (getEndpoint(file).profiledProtocol() == dstEndpoint.profiledProtocol())
     {
         // If this copy is within the same driver domain, defer to the
         // hopefully specialized copy method.
-        getDriver(file).copy(stripProtocol(file), stripProtocol(dst));
+        getDriver(file)->copy(stripProtocol(file), stripProtocol(dst));
     }
     else
     {
@@ -359,7 +314,7 @@ void Arbiter::copyFile(
 
 bool Arbiter::isRemote(const std::string path) const
 {
-    return getDriver(path).isRemote();
+    return getDriver(path)->isRemote();
 }
 
 bool Arbiter::isLocal(const std::string path) const
@@ -381,34 +336,46 @@ std::vector<std::string> Arbiter::resolve(
         const std::string path,
         const bool verbose) const
 {
-    return getDriver(path).resolve(stripProtocol(path), verbose);
+    return getDriver(path)->resolve(stripProtocol(path), verbose);
 }
 
 Endpoint Arbiter::getEndpoint(const std::string root) const
 {
-    return Endpoint(getDriver(root), stripProtocol(root));
+    return Endpoint(*getDriver(root), stripProtocol(root));
 }
 
-const Driver& Arbiter::getDriver(const std::string path) const
+std::shared_ptr<Driver> Arbiter::getDriver(const std::string path) const
 {
     const auto type(getProtocol(path));
 
-    if (!m_drivers.count(type))
     {
-        throw ArbiterError("No driver for " + path);
+        std::lock_guard<std::mutex> lock(m_mutex);
+        auto it = m_drivers.find(type);
+        if (it != m_drivers.end()) return it->second;
     }
 
-    return *m_drivers.at(type);
+    const json config = getConfig(m_config);
+    if (auto driver = Driver::create(*m_pool, type, config.dump()))
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_drivers[type] = driver;
+        return driver;
+    }
+
+    throw ArbiterError("No driver for " + path);
 }
 
-const drivers::Http* Arbiter::tryGetHttpDriver(const std::string path) const
+std::shared_ptr<drivers::Http> Arbiter::tryGetHttpDriver(
+    const std::string path) const
 {
-    return dynamic_cast<const drivers::Http*>(&getDriver(path));
+    std::shared_ptr<Driver> driver = getDriver(path);
+    if (!driver) return std::shared_ptr<drivers::Http>();
+    return std::dynamic_pointer_cast<drivers::Http>(driver);
 }
 
-const drivers::Http& Arbiter::getHttpDriver(const std::string path) const
+std::shared_ptr<drivers::Http> Arbiter::getHttpDriver(const std::string path) const
 {
-    if (auto d = tryGetHttpDriver(path)) return *d;
+    if (auto d = tryGetHttpDriver(path)) return d;
     else throw ArbiterError("Cannot get driver for " + path + " as HTTP");
 }
 
@@ -461,6 +428,8 @@ LocalHandle Arbiter::getLocalHandle(
 #include <arbiter/driver.hpp>
 
 #include <arbiter/arbiter.hpp>
+#include <arbiter/util/json.hpp>
+#include <arbiter/util/util.hpp>
 #endif
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
@@ -470,6 +439,34 @@ namespace ARBITER_CUSTOM_NAMESPACE
 
 namespace arbiter
 {
+
+std::shared_ptr<Driver> Driver::create(
+    http::Pool& pool,
+    const std::string protocol,
+    const std::string s)
+{
+    using namespace drivers;
+
+    const json config = json::parse(s);
+    const json entry = config.value(protocol, json());
+
+    const std::string profile = getProfile(protocol);
+    const std::string type = stripProfile(protocol);
+
+    if (type == "file") return Fs::create();
+    if (type == "test") return Test::create();
+#ifdef ARBITER_CURL
+    if (type == "http") return Http::create(pool);
+    if (type == "https") return Https::create(pool);
+    if (type == "s3") return S3::create(pool, entry.dump(), profile);
+    if (type == "az") return AZ::create(pool, entry.dump(), profile);
+    if (type == "dbx") return Dropbox::create(pool, entry.dump(), profile);
+#ifdef ARBITER_OPENSSL
+    if (type == "gs") return Google::create(pool, entry.dump(), profile);
+#endif
+#endif
+    return std::shared_ptr<Driver>();
+}
 
 std::string Driver::get(const std::string path) const
 {
@@ -488,7 +485,7 @@ std::unique_ptr<std::string> Driver::tryGet(const std::string path) const
 std::vector<char> Driver::getBinary(std::string path) const
 {
     std::vector<char> data;
-    if (!get(path, data)) throw ArbiterError("Could not read file " + path);
+    if (!get(path, data)) throw ArbiterError("Could not read file " + m_protocol + "://" + path);
     return data;
 }
 
@@ -525,8 +522,8 @@ std::vector<std::string> Driver::resolve(
     {
         if (verbose)
         {
-            std::cout << "Resolving [" << type() << "]: " << path << " ..." <<
-                std::flush;
+            std::cout << "Resolving [" << profiledProtocol() << "]: "
+                << path << " ..." << std::flush;
         }
 
         results = glob(path, verbose);
@@ -539,7 +536,7 @@ std::vector<std::string> Driver::resolve(
     }
     else
     {
-        if (isRemote()) path = type() + "://" + path;
+        if (isRemote()) path = profiledProtocol() + "://" + path;
         else path = expandTilde(path);
 
         results.push_back(path);
@@ -625,9 +622,19 @@ std::string Endpoint::prefixedRoot() const
     return softPrefix() + root();
 }
 
-std::string Endpoint::type() const
+std::string Endpoint::protocol() const
 {
-    return m_driver->type();
+    return m_driver->protocol();
+}
+
+std::string Endpoint::profile() const
+{
+    return m_driver->profile();
+}
+
+std::string Endpoint::profiledProtocol() const
+{
+    return m_driver->profiledProtocol();
 }
 
 bool Endpoint::isRemote() const
@@ -869,7 +876,7 @@ Endpoint Endpoint::getSubEndpoint(std::string subpath) const
 
 std::string Endpoint::softPrefix() const
 {
-    return isRemote() ? type() + "://" : "";
+    return isRemote() ? profiledProtocol() + "://" : "";
 }
 
 const drivers::Http* Endpoint::tryGetHttpDriver() const
@@ -880,7 +887,8 @@ const drivers::Http* Endpoint::tryGetHttpDriver() const
 const drivers::Http& Endpoint::getHttpDriver() const
 {
     if (auto d = tryGetHttpDriver()) return *d;
-    else throw ArbiterError("Cannot get driver of type " + type() + " as HTTP");
+    else throw ArbiterError(
+        "Cannot get driver of type " + profiledProtocol() + " as HTTP");
 }
 
 } // namespace arbiter
@@ -1370,8 +1378,14 @@ namespace drivers
 
 using namespace http;
 
-Http::Http(Pool& pool)
-    : m_pool(pool)
+Http::Http(
+        Pool& pool,
+        const std::string driverProtocol,
+        const std::string httpProtocol,
+        const std::string profile)
+    : Driver(driverProtocol, profile)
+    , m_pool(pool)
+    , m_httpProtocol(httpProtocol)
 {
 #ifndef ARBITER_CURL
     throw ArbiterError("Cannot create HTTP driver - no curl support was built");
@@ -1571,7 +1585,7 @@ Response Http::internalPost(
 std::string Http::typedPath(const std::string& p) const
 {
     if (getProtocol(p) != "file") return p;
-    else return type() + "://" + p;
+    else return m_httpProtocol + "://" + p;
 }
 
 } // namespace drivers
@@ -1707,73 +1721,36 @@ S3::S3(
         std::string profile,
         std::unique_ptr<Auth> auth,
         std::unique_ptr<Config> config)
-    : Http(pool)
-    , m_profile(profile)
+    : Http(pool, "s3", "http", profile == "default" ? "" : profile)
     , m_auth(std::move(auth))
     , m_config(std::move(config))
 { }
 
-std::vector<std::unique_ptr<S3>> S3::create(Pool& pool, const std::string s)
+std::unique_ptr<S3> S3::create(
+    Pool& pool,
+    const std::string s,
+    std::string profile)
 {
-    std::vector<std::unique_ptr<S3>> result;
-
-    const json config(s.size() ? json::parse(s) : json());
-
-    if (config.is_array())
+    if (profile.empty())
     {
-        for (const json& curr : config)
-        {
-            if (auto s = createOne(pool, curr.dump()))
-            {
-                result.push_back(std::move(s));
-            }
-        }
-    }
-    else if (auto s = createOne(pool, config.dump()))
-    {
-        result.push_back(std::move(s));
+        profile = "default";
+        if (auto p = env("AWS_DEFAULT_PROFILE")) profile = *p;
+        if (auto p = env("AWS_PROFILE")) profile = *p;
     }
 
-    return result;
-}
-
-std::unique_ptr<S3> S3::createOne(Pool& pool, const std::string s)
-{
-    const json j(s.size() ? json::parse(s) : json());
-    const std::string profile(extractProfile(j.dump()));
-
-    auto auth(Auth::create(j.dump(), profile));
+    auto auth(Auth::create(s, profile));
     if (!auth) return std::unique_ptr<S3>();
 
-    std::unique_ptr<Config> config(new Config(j.dump(), profile));
-    auto s3 = makeUnique<S3>(pool, profile, std::move(auth), std::move(config));
-    return s3;
-}
-
-std::string S3::extractProfile(const std::string s)
-{
-    const json config(s.size() ? json::parse(s) : json());
-
-    if (
-            !config.is_null() &&
-            config.count("profile") &&
-            config["profile"].get<std::string>().size())
-    {
-        return config["profile"].get<std::string>();
-    }
-
-    if (auto p = env("AWS_PROFILE")) return *p;
-    if (auto p = env("AWS_DEFAULT_PROFILE")) return *p;
-    else return "default";
+    auto config = makeUnique<Config>(s, profile);
+    return makeUnique<S3>(pool, profile, std::move(auth), std::move(config));
 }
 
 std::unique_ptr<S3::Auth> S3::Auth::create(
-        const std::string s,
-        const std::string profile)
+    const std::string s,
+    const std::string profile)
 {
-    const json config(s.size() ? json::parse(s) : json());
+    const json config = s.size() ? json::parse(s) : json();
 
-    // Try explicit JSON configuration first.
     if (
             !config.is_null() &&
             config.count("access") &&
@@ -1787,7 +1764,8 @@ std::unique_ptr<S3::Auth> S3::Auth::create(
                 config.value("token", ""));
     }
 
-    // Try environment settings next.
+    // Try environment settings next - this only works for the default profile.
+    if (profile == "default")
     {
         auto access(env("AWS_ACCESS_KEY_ID"));
         auto hidden(env("AWS_SECRET_ACCESS_KEY"));
@@ -1812,7 +1790,7 @@ std::unique_ptr<S3::Auth> S3::Auth::create(
             env("AWS_CREDENTIAL_FILE") ?
                 *env("AWS_CREDENTIAL_FILE") : "~/.aws/credentials");
 
-    // Finally, try reading credentials file.
+    // Try reading credentials file.
     drivers::Fs fsDriver;
     if (std::unique_ptr<std::string> c = fsDriver.tryGet(credPath))
     {
@@ -1843,18 +1821,9 @@ std::unique_ptr<S3::Auth> S3::Auth::create(
 
     // Nothing found in the environment or on the filesystem.  However we may
     // be running in an EC2 instance with an instance profile set up.
-    //
-    // By default we won't search for this since we don't really want to make
-    // an HTTP request on every Arbiter construction - but if we're allowed,
-    // see if we can request an instance profile configuration.
-    if (
-        (!config.is_null() && config.value("allowInstanceProfile", false)) ||
-        env("AWS_ALLOW_INSTANCE_PROFILE"))
+    if (const auto iamRole = httpDriver.tryGet(ec2CredBase))
     {
-        if (const auto iamRole = httpDriver.tryGet(ec2CredBase))
-        {
-            return makeUnique<Auth>(ec2CredBase + "/" + *iamRole);
-        }
+        return makeUnique<Auth>(ec2CredBase + "/" + *iamRole);
     }
 
     // We also may be running in Fargate, which looks very similar but with a
@@ -1907,8 +1876,8 @@ S3::Config::Config(const std::string s, const std::string profile)
 }
 
 std::string S3::Config::extractRegion(
-        const std::string s,
-        const std::string profile)
+    const std::string s,
+    const std::string profile)
 {
     const std::string configPath(
             env("AWS_CONFIG_FILE") ?
@@ -1949,8 +1918,8 @@ std::string S3::Config::extractRegion(
 }
 
 std::string S3::Config::extractBaseUrl(
-        const std::string s,
-        const std::string region)
+    const std::string s,
+    const std::string region)
 {
     const json c(s.size() ? json::parse(s) : json());
 
@@ -1967,10 +1936,6 @@ std::string S3::Config::extractBaseUrl(
     if (const auto e = env("AWS_ENDPOINTS_FILE"))
     {
         endpointsPath = *e;
-    }
-    else if (c.count("endpointsFile"))
-    {
-        endpointsPath = c["endpointsFile"].get<std::string>();
     }
 
     std::string dnsSuffix("amazonaws.com");
@@ -2047,16 +2012,14 @@ S3::AuthFields S3::Auth::fields() const
     return S3::AuthFields(m_access, m_hidden, m_token);
 }
 
-std::string S3::type() const
-{
-    if (m_profile == "default") return "s3";
-    else return m_profile + "@s3";
-}
-
-std::unique_ptr<std::size_t> S3::tryGetSize(std::string rawPath) const
+std::unique_ptr<std::size_t> S3::tryGetSize(
+    const std::string rawPath,
+    const http::Headers userHeaders,
+    const http::Query query) const
 {
     Headers headers(m_config->baseHeaders());
     headers.erase("x-amz-server-side-encryption");
+    headers.insert(userHeaders.begin(), userHeaders.end());
 
     const Resource resource(m_config->baseUrl(), rawPath);
     const ApiV4 apiV4(
@@ -2064,7 +2027,7 @@ std::unique_ptr<std::size_t> S3::tryGetSize(std::string rawPath) const
             m_config->region(),
             resource,
             m_auth->fields(),
-            Query(),
+            query,
             headers,
             empty);
 
@@ -2092,7 +2055,7 @@ bool S3::get(
 
     std::unique_ptr<std::size_t> size(
             m_config->precheck() && !headers.count("Range") ?
-                tryGetSize(rawPath) : nullptr);
+                tryGetSize(rawPath, userHeaders, query) : nullptr);
 
     const Resource resource(m_config->baseUrl(), rawPath);
     const ApiV4 apiV4(
@@ -2242,7 +2205,8 @@ std::vector<std::string> S3::glob(std::string path, bool verbose) const
                         if (recursive || !isSubdir)
                         {
                             results.push_back(
-                                    type() + "://" + bucket + "/" + key);
+                                    profiledProtocol() + "://" +
+                                    bucket + "/" + key);
                         }
 
                         if (more)
@@ -2597,72 +2561,28 @@ AZ::AZ(
         Pool& pool,
         std::string profile,
         std::unique_ptr<Config> config)
-    : Http(pool)
-    , m_profile(profile)
+    : Http(pool, "az", profile == "default" ? "" : profile)
     , m_config(std::move(config))
 { }
 
-std::vector<std::unique_ptr<AZ>> AZ::create(Pool& pool, const std::string s)
+std::unique_ptr<AZ> AZ::create(
+    Pool& pool,
+    const std::string s,
+    std::string profile)
 {
-    std::vector<std::unique_ptr<AZ>> result;
+    if (profile.empty()) profile = "default";
+    if (auto p = env("AZ_DEFAULT_PROFILE")) profile = *p;
+    if (auto p = env("AZ_PROFILE")) profile = *p;
 
-    const json config(s.size() ? json::parse(s) : json());
-
-    if (config.is_array())
-    {
-        for (const json& curr : config)
-        {
-            if (auto s = createOne(pool, curr.dump()))
-            {
-                result.push_back(std::move(s));
-            }
-        }
-    }
-    else if (auto s = createOne(pool, config.dump()))
-    {
-        result.push_back(std::move(s));
-    }
-
-    return result;
+    std::unique_ptr<Config> config(new Config(s));
+    return makeUnique<AZ>(pool, profile, std::move(config));
 }
 
-std::unique_ptr<AZ> AZ::createOne(Pool& pool, const std::string s)
-{
-    try
-    {
-        const json j(s.size() ? json::parse(s) : json());
-        const std::string profile(extractProfile(j.dump()));
-
-        std::unique_ptr<Config> config(new Config(j.dump(), profile));
-        return makeUnique<AZ>(pool, profile, std::move(config));
-    }
-    catch (...) { }
-
-    return std::unique_ptr<AZ>();
-}
-
-std::string AZ::extractProfile(const std::string s)
-{
-    const json config(s.size() ? json::parse(s) : json());
-
-    if (
-            !config.is_null() &&
-            config.count("profile") &&
-            config["profile"].get<std::string>().size())
-    {
-        return config["profile"].get<std::string>();
-    }
-
-    if (auto p = env("AZ_PROFILE")) return *p;
-    if (auto p = env("AZ_DEFAULT_PROFILE")) return *p;
-    else return "default";
-}
-
-AZ::Config::Config(const std::string s, const std::string profile)
-    : m_service(extractService(s, profile))
-    , m_storageAccount(extractStorageAccount(s,profile))
-    , m_storageAccessKey(extractStorageAccessKey(s,profile))
-    , m_endpoint(extractEndpoint(s, profile))
+AZ::Config::Config(const std::string s)
+    : m_service(extractService(s))
+    , m_storageAccount(extractStorageAccount(s))
+    , m_storageAccessKey(extractStorageAccessKey(s))
+    , m_endpoint(extractEndpoint(s))
     , m_baseUrl(extractBaseUrl(s, m_service, m_endpoint, m_storageAccount))
 {
     const std::string sasString = extractSasToken(s);
@@ -2700,9 +2620,7 @@ AZ::Config::Config(const std::string s, const std::string profile)
     }
 }
 
-std::string AZ::Config::extractStorageAccount(
-    const std::string s,
-    const std::string profile)
+std::string AZ::Config::extractStorageAccount(const std::string s)
 {
     const json c(s.size() ? json::parse(s) : json());
 
@@ -2722,9 +2640,7 @@ std::string AZ::Config::extractStorageAccount(
    throw ArbiterError("Couldn't find Azure Storage account value - this is mandatory");
 }
 
-std::string AZ::Config::extractStorageAccessKey(
-    const std::string s,
-    const std::string profile)
+std::string AZ::Config::extractStorageAccessKey(const std::string s)
 {
     const json c(s.size() ? json::parse(s) : json());
 
@@ -2768,9 +2684,7 @@ std::string AZ::Config::extractSasToken(const std::string s)
     return "";
 }
 
-std::string AZ::Config::extractService(
-        const std::string s,
-        const std::string profile)
+std::string AZ::Config::extractService(const std::string s)
 {
     const json c(s.size() ? json::parse(s) : json());
 
@@ -2803,9 +2717,7 @@ std::string AZ::Config::extractService(
     return "blob";
 }
 
-std::string AZ::Config::extractEndpoint(
-    const std::string s,
-    const std::string profile)
+std::string AZ::Config::extractEndpoint(const std::string s)
 {
     const json c(s.size() ? json::parse(s) : json());
 
@@ -2837,12 +2749,6 @@ std::string AZ::Config::extractBaseUrl(
      const std::string account)
 {
     return account + "." + service + "." + endpoint + "/";
-}
-
-std::string AZ::type() const
-{
-    if (m_profile == "default") return "az";
-    else return m_profile + "@az";
 }
 
 std::unique_ptr<std::size_t> AZ::tryGetSize(std::string rawPath) const
@@ -3066,14 +2972,11 @@ std::vector<std::string> AZ::glob(std::string path, bool verbose) const
                         if (recursive || !isSubdir)
                         {
                             results.push_back(
-                                    type() + "://" + bucket + "/" + key);
+                                    profiledProtocol() + "://" +
+                                    bucket + "/" + key);
                         }
                     }
                 }
-            }
-            else
-            {
-                throw ArbiterError("No blob node");
             }
         }
         else
@@ -3408,16 +3311,22 @@ namespace
 namespace drivers
 {
 
-Google::Google(http::Pool& pool, std::unique_ptr<Auth> auth)
-    : Https(pool)
+Google::Google(
+        http::Pool& pool,
+        std::unique_ptr<Auth> auth,
+        const std::string profile)
+    : Https(pool, "gs", profile == "default" ? "" : profile)
     , m_auth(std::move(auth))
 { }
 
-std::unique_ptr<Google> Google::create(http::Pool& pool, const std::string s)
+std::unique_ptr<Google> Google::create(
+    http::Pool& pool,
+    const std::string s,
+    const std::string profile)
 {
     if (auto auth = Auth::create(s))
     {
-        return makeUnique<Google>(pool, std::move(auth));
+        return makeUnique<Google>(pool, std::move(auth), profile);
     }
 
     return std::unique_ptr<Google>();
@@ -3525,7 +3434,7 @@ std::vector<std::string> Google::glob(std::string path, bool verbose) const
         for (const json& item : j.at("items"))
         {
             results.push_back(
-                    type() + "://" +
+                    profiledProtocol() + "://" +
                     resource.bucket() + item.at("name").get<std::string>());
         }
 
@@ -3787,12 +3696,18 @@ namespace drivers
 
 using namespace http;
 
-Dropbox::Dropbox(Pool& pool, const Dropbox::Auth& auth)
-    : Http(pool)
+Dropbox::Dropbox(
+        Pool& pool,
+        const Dropbox::Auth& auth,
+        const std::string profile)
+    : Http(pool, "dbx", profile)
     , m_auth(auth)
 { }
 
-std::unique_ptr<Dropbox> Dropbox::create(Pool& pool, const std::string s)
+std::unique_ptr<Dropbox> Dropbox::create(
+    Pool& pool,
+    const std::string s,
+    const std::string profile)
 {
     const json j(json::parse(s));
     if (!j.is_null())
@@ -3801,11 +3716,15 @@ std::unique_ptr<Dropbox> Dropbox::create(Pool& pool, const std::string s)
         {
             return makeUnique<Dropbox>(
                     pool,
-                    Auth(j.at("token").get<std::string>()));
+                    Auth(j.at("token").get<std::string>()),
+                    profile);
         }
         else if (j.is_string())
         {
-            return makeUnique<Dropbox>(pool, Auth(j.get<std::string>()));
+            return makeUnique<Dropbox>(
+                    pool,
+                    Auth(j.get<std::string>()),
+                    profile);
         }
     }
 
@@ -4044,7 +3963,9 @@ std::vector<std::string> Dropbox::glob(std::string path, bool verbose) const
             {
                 // Results already begin with a slash.
                 results.push_back(
-                        type() + ":/" + v.at("path_lower").get<std::string>());
+                        profiledProtocol() +
+                        ":/" +
+                        v.at("path_lower").get<std::string>());
             }
         }
     };
@@ -4088,6 +4009,7 @@ std::vector<std::string> Dropbox::glob(std::string path, bool verbose) const
 #include <cstring>
 #include <ios>
 #include <iostream>
+#include <cstdio>
 
 #ifndef ARBITER_IS_AMALGAMATION
 #include <arbiter/util/curl.hpp>
@@ -4327,8 +4249,11 @@ void Curl::init(
     const std::string path(rawPath + buildQueryString(query));
     curl_easy_setopt(m_curl, CURLOPT_URL, path.c_str());
 
-    // Needed for multithreaded Curl usage.
-    curl_easy_setopt(m_curl, CURLOPT_NOSIGNAL, 1L);
+    curl_version_info_data* versioninfo = curl_version_info(CURLVERSION_NOW);
+    if (!(versioninfo->features & CURL_VERSION_ASYNCHDNS))
+    {
+        curl_easy_setopt(m_curl, CURLOPT_NOSIGNAL, 1L);
+    }
 
     // Substantially faster DNS lookups without IPv6.
     curl_easy_setopt(m_curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
@@ -4380,7 +4305,11 @@ int Curl::perform()
     curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &httpCode);
     curl_easy_reset(m_curl);
 
-    if (code != CURLE_OK) httpCode = 500;
+    if (code != CURLE_OK)
+    {
+        std::cerr << "Curl failure: " << curl_easy_strerror(code) << std::endl;
+        httpCode = 550;
+    }
 
     return httpCode;
 #else
@@ -4575,12 +4504,14 @@ Response Curl::post(
 #include <curl/curl.h>
 #endif
 
+#include <chrono>
 #include <cctype>
 #include <iomanip>
 #include <iostream>
 #include <numeric>
 #include <set>
 #include <sstream>
+#include <thread>
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
@@ -4701,6 +4632,12 @@ Response Resource::exec(std::function<Response()> f)
 
     do
     {
+        if (tries)
+        {
+            std::this_thread::sleep_for(
+                std::chrono::milliseconds((int)std::pow(2, tries) * 500));
+        }
+
         res = f();
     }
     while (res.serverError() && tries++ < m_retry);
@@ -5357,7 +5294,7 @@ namespace
      //
      // Return the position of chr within base64_encode()
      //
-    
+
         if      (chr >= 'A' && chr <= 'Z') return chr - 'A';
         else if (chr >= 'a' && chr <= 'z') return chr - 'a' + ('Z' - 'A')               + 1;
         else if (chr >= '0' && chr <= '9') return chr - '0' + ('Z' - 'A') + ('z' - 'a') + 2;
@@ -5846,6 +5783,24 @@ std::string stripExtension(const std::string path)
 {
     const std::size_t pos(path.find_last_of('.'));
     return path.substr(0, pos);
+}
+
+std::string getProfile(std::string protocol)
+{
+    const std::size_t pos(protocol.find_last_of('@'));
+
+    if (pos != std::string::npos) return protocol.substr(0, pos);
+    return "";
+}
+
+std::string stripProfile(std::string protocol)
+{
+    const std::string profile = getProfile(protocol);
+    if (profile.size() && protocol.size() >= profile.size() + 1)
+    {
+        return protocol.substr(profile.size() + 1);
+    }
+    return protocol;
 }
 
 } // namespace arbiter

@@ -68,8 +68,6 @@ struct AssignArgs
 void AssignRange::parse(const std::string& r)
 {
     std::string::size_type pos, count;
-    const char *start;
-    char *end;
 
     pos = subParse(r);
     count = Utils::extractSpaces(r, pos);
@@ -82,12 +80,19 @@ void AssignRange::parse(const std::string& r)
     count = Utils::extractSpaces(r, pos);
     pos += count;
 
-    // Extract value
-    start = r.data() + pos;
-    m_value = std::strtod(start, &end);
-    if (start == end)
+    // Extract value.
+    Utils::StringStreamClassicLocale ss(r.data() + pos);
+    auto start = ss.tellg();
+    ss >> m_value;
+    if (ss.fail())
         throw error("Missing value to assign following '='.");
-    pos += (end - start);
+    else if (ss.eof())
+        pos = r.size();
+    else {
+        pos += (ss.tellg() - start);
+        count = Utils::extractSpaces(r, pos);
+        pos += count;
+    }
 
     if (pos != r.size())
         throw error("Invalid characters following valid range.");

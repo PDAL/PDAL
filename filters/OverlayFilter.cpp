@@ -38,8 +38,10 @@
 
 #include <ogr_api.h>
 
+#include <pdal/Polygon.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
+#include <pdal/private/gdal/SpatialRef.hpp>
 
 namespace pdal
 {
@@ -49,7 +51,7 @@ static StaticPluginInfo const s_info
     "filters.overlay",
     "Assign values to a dimension based on the extent of an OGR-readable data "
         " source or an OGR SQL query.",
-    "http://pdal.io/stages/filters.overlay.html"
+    "https://pdal.io/stages/filters.overlay.html"
 };
 
 CREATE_STATIC_STAGE(OverlayFilter, s_info)
@@ -66,6 +68,7 @@ void OverlayFilter::addArgs(ProgramArgs& args)
     args.add("query", "OGR SQL query to execute on the "
         "datasource to fetch geometry and attributes", m_query);
     args.add("layer", "Datasource layer to use", m_layer);
+    args.add("bounds", "Bounds to limit query using with OGR_L_SetSpatialFilter", m_bounds);
 }
 
 
@@ -100,6 +103,13 @@ void OverlayFilter::ready(PointTableRef table)
     if (!m_lyr)
         throwError("Unable to select layer '" + m_layer + "'");
 
+
+    if (!m_bounds.empty())
+    {
+        pdal::Polygon g(m_bounds.toWKT());
+        OGR_L_SetSpatialFilter(m_lyr, g.getOGRHandle());
+    }
+
     auto featureDeleter = [](void *p)
     {
         if (p)
@@ -116,13 +126,17 @@ void OverlayFilter::ready(PointTableRef table)
             throwError("No column name '" + m_column + "' was found.");
     }
 
+    gdal::SpatialRef sref;
+    sref.setFromLayer(m_lyr);
+    SpatialReference layerSrs(sref.wkt());
+
     do
     {
         OGRGeometryH geom = OGR_F_GetGeometryRef(feature.get());
         int32_t fieldVal = OGR_F_GetFieldAsInteger(feature.get(), field_index);
 
         m_polygons.push_back(
-            { Polygon(geom, table.anySpatialReference()), fieldVal} );
+            { Polygon(geom, layerSrs), fieldVal} );
 
         feature = OGRFeaturePtr(OGR_L_GetNextFeature(m_lyr), featureDeleter);
     }

@@ -5,19 +5,16 @@
 
   CONTENTS:
 
-
   PROGRAMMERS:
 
     martin.isenburg@rapidlasso.com  -  http://rapidlasso.com
-    uday.karan@gmail.com - Hobu, Inc.
 
   COPYRIGHT:
 
     (c) 2007-2014, martin isenburg, rapidlasso - tools to catch reality
-    (c) 2014, Uday Verma, Hobu, Inc.
 
     This is free software; you can redistribute and/or modify it under the
-    terms of the GNU Lesser General Licence as published by the Free Software
+    terms of the Apache Public License 2.0 published by the Apache Software
     Foundation. See the COPYING file for more information.
 
     This software is distributed WITHOUT ANY WARRANTY and without even the
@@ -276,7 +273,7 @@ const char *Point14Compressor::compress(const char *buf, int& scArg)
 
     // X and Y
     {
-        uint32_t ctx = (number_return_map_6ctx[n][r] << 1) | gps_time_change;
+        uint32_t ctx = (number_return_map_6ctx[n][r] << 1) | (uint32_t) gps_time_change;
         int32_t median = c.last_x_diff_median5_[ctx].get();
         int32_t diff = point.x() - c.last_.x();
         c.dx_compr_.compress(xy_enc_, median, diff, point.numReturns() == 1);
@@ -333,7 +330,7 @@ const char *Point14Compressor::compress(const char *buf, int& scArg)
     // Intensity
     {
         int32_t ctx =
-            gps_time_change |
+            (int32_t)gps_time_change |
             ((r >= n) << 1) |
             ((r == 1) << 2);
 
@@ -404,7 +401,7 @@ void Point14Compressor::encodeGpsTime(const las::point14& point, ChannelCtx& c)
 
     gpstime_enc_.makeValid();
 
-    loop: 
+    loop:
     if (c.last_gpstime_diff_[c.last_gps_seq_] == 0)
     {
         int32_t diff;  // Difference between current time and last time in the sequence,
@@ -693,7 +690,7 @@ char *Point14Decompressor::decompress(char *buf, int& scArg)
     LAZDEBUG(sumReturn.add(n));
     LAZDEBUG(sumReturn.add(r));
 
-    uint32_t ctx = (number_return_map_6ctx[n][r] << 1) | gps_time_changed;
+    uint32_t ctx = (number_return_map_6ctx[n][r] << 1) | (uint32_t) gps_time_changed;
     // X
     {
         int32_t median = c.last_x_diff_median5_[ctx].get();
@@ -754,7 +751,7 @@ char *Point14Decompressor::decompress(char *buf, int& scArg)
     // Intensity
     if (intensity_dec_.valid())
     {
-        int32_t ctx = gps_time_changed | ((r >= n) << 1) | ((r == 1) << 2);
+        int32_t ctx = (int32_t) gps_time_changed | ((r >= n) << 1) | ((r == 1) << 2);
 
         uint16_t intensity = c.intensity_decomp_.decompress(intensity_dec_,
                 c.last_intensity_[ctx], ctx >> 1);

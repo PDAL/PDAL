@@ -182,6 +182,12 @@ MetadataNode InfoKernel::dumpSummary(const QuickInfo& qi)
     }
     if (dims.size())
         summary.add("dimensions", dims);
+
+    if (!qi.m_metadata.empty() && qi.m_metadata.valid())
+    {
+        summary.add(qi.m_metadata.clone("metadata"));
+    }
+
     return summary;
 }
 

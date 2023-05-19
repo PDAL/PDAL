@@ -45,7 +45,6 @@
 
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
-#include <pdal/Streamable.hpp>
 #include <pdal/util/Bounds.hpp>
 
 #include "EsriUtil.hpp"

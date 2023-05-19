@@ -194,7 +194,7 @@ bool Kernel::doSwitches(const StringList& cmdArgs, ProgramArgs& args)
     }
     catch (arg_error& e)
     {
-        throw pdal_error(getName() + ": " + e.m_error);
+        throw pdal_error(getName() + ": " + e.what());
     }
     return true;
 }

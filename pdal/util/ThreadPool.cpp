@@ -76,29 +76,8 @@ void ThreadPool::work()
 
             task();
 
-            /**
-            try
-            {
-                task();
-            }
-            catch (std::exception& e)
-            {
-                err = e.what();
-            }
-            catch (...)
-            {
-                err = "Unknown error";
-            }
-            **/
-
             lock.lock();
             --m_outstanding;
-            if (err.size())
-            {
-                if (m_verbose)
-                    std::cout << "Exception in pool task: " << err << std::endl;
-                m_errors.push_back(err);
-            }
             lock.unlock();
 
             // Notify await(), which may be waiting for a running task.

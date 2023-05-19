@@ -37,6 +37,8 @@
 #include <cpl_conv.h>
 #include <cpl_error.h>
 
+#include <mutex>
+
 namespace pdal
 {
 namespace gdal
@@ -113,7 +115,8 @@ private:
     CPLErrorHandler m_prevHandler;
 };
 
-class ErrorHandlerSuspender
+// Exported for test support
+class PDAL_DLL ErrorHandlerSuspender
 {
 public:
     ErrorHandlerSuspender();

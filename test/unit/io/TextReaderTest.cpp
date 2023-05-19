@@ -212,6 +212,19 @@ TEST(TextReaderTest, strip_whitespace_from_dimension_names)
     }
 }
 
+// Make sure that we can prepare twice with a quoted header.
+TEST(TextReaderTest, issue3859)
+{
+    TextReader reader;
+    Options options;
+    options.add("filename", Support::datapath("text/quoted.txt"));
+    reader.setOptions(options);
+
+    PointTable table;
+    reader.prepare(table);
+    EXPECT_NO_THROW(reader.prepare(table));
+}
+
 // Check that space-delimited files work with a CR/LF terminated file.
 TEST(TextReaderTest, issue1939)
 {

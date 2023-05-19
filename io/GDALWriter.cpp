@@ -100,7 +100,12 @@ void GDALWriter::addArgs(ProgramArgs& args)
         m_GDAL_metadata);
     args.add("pdal_metadata", "Write PDAL metadata as to GDAL PAM XML Metadata?",
         m_writePDALMetadata, decltype(m_writePDALMetadata)(false));
+    args.add("binmode", "Use binning mode for computing statistics and ignore distance and neighborhood",
+        m_binMode, false);
+    args.add("allow_empty", "Allow writing GDAL output that do not have any pixel values (no points)",
+        m_allowEmpty, false);
 }
+
 
 
 void GDALWriter::initialize()
@@ -220,7 +225,7 @@ void GDALWriter::createGrid(BOX2D bounds)
     try
     {
         m_grid.reset(new GDALGrid(bounds.minx, bounds.miny, width, height, m_edgeLength,
-            m_radius, m_outputTypes, m_windowSize, m_power));
+            m_radius, m_outputTypes, m_windowSize, m_power, m_binMode));
     }
     catch (GDALGrid::error& err)
     {
@@ -279,7 +284,7 @@ bool GDALWriter::processOne(PointRef& point)
 
 void GDALWriter::doneFile()
 {
-    if (!m_grid)
+    if (!m_grid && !m_allowEmpty)
         throw pdal_error("Unable to write GDAL data with no points "
             "for output.");
 

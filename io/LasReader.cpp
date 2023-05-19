@@ -102,9 +102,7 @@ LasReader::LasReader() : d(new Private)
 
 LasReader::~LasReader()
 {
-#ifdef PDAL_HAVE_LAZPERF
     delete d->decompressor;
-#endif
 }
 
 
@@ -176,6 +174,7 @@ QuickInfo LasReader::inspect()
     qi.m_bounds = d->header.bounds;
     qi.m_srs = getSpatialReference();
     qi.m_valid = true;
+    qi.m_metadata = m_metadata;
 
     done(table);
 
@@ -185,9 +184,9 @@ QuickInfo LasReader::inspect()
 
 void LasReader::createStream()
 {
-    if (m_streamIf)
-        std::cerr << "Attempt to create stream twice!\n";
-    m_streamIf.reset(new LasStreamIf(m_filename));
+    if (!m_streamIf)
+        m_streamIf.reset(new LasStreamIf(m_filename));
+
     if (!m_streamIf->m_istream)
     {
         std::ostringstream oss;
@@ -226,7 +225,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     d->header.fill(headerBuf, las::Header::Size14);
 
     uint64_t fileSize = Utils::fileSize(m_filename);
-    StringList errors = d->header.validate(fileSize);
+    StringList errors = d->header.validate(fileSize, d->opts.nosrs);
     if (errors.size())
         throwError(errors.front());
 
@@ -329,7 +328,6 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     for (int i = 0; i < (int)d->vlrs.size(); ++i)
         las::addVlrMetadata(d->vlrs[i], "vlr_" + std::to_string(i), forward, m);
 
-    m_streamIf.reset();
 }
 
 

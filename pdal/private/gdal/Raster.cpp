@@ -94,11 +94,9 @@ Dimension::Type toPdalType(GDALDataType t)
         return Dimension::Type::Float;
     case GDT_Float64:
         return Dimension::Type::Double;
-#ifdef GDT_UInt64
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,5,0)
     case GDT_UInt64:
         return Dimension::Type::Unsigned64;
-#endif
-#ifdef GDT_Int64
     case GDT_Int64:
         return Dimension::Type::Signed64;
 #endif
@@ -111,6 +109,9 @@ Dimension::Type toPdalType(GDALDataType t)
         throw pdal_error("GDAL unknown type unsupported.");
     case GDT_TypeCount:
         throw pdal_error("Detected bad GDAL data type.");
+    default:
+        throw pdal_error("Detected bad GDAL data type.");
+
     }
     return Dimension::Type::None;
 }
@@ -326,7 +327,7 @@ GDALError Raster::open(int width, int height, int numBands,
   Open a raster for output.
   \return  Error code, or GDALError::None.
 */
-GDALError Raster::open()
+GDALError Raster::open(StringList options)
 {
     if (m_ds)
         return GDALError::None;
@@ -340,8 +341,16 @@ GDALError Raster::open()
     }
 
     registerDrivers();
+
+    std::vector<const char *> opts;
+    for (size_t i = 0; i < options.size(); ++i)
+    {
+        opts.push_back(options[i].data());
+    }
+    opts.push_back(NULL);
+
     m_ds = (GDALDataset *)GDALOpenEx(m_filename.c_str(),
-        GDAL_OF_READONLY | GDAL_OF_RASTER, driverP, nullptr, nullptr);
+        GDAL_OF_READONLY | GDAL_OF_RASTER, driverP, nullptr, const_cast<char **>(opts.data()));
     return wake();
 }
 

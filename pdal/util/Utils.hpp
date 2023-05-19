@@ -44,6 +44,7 @@
 #include <iomanip>
 #include <istream>
 #include <limits>
+#include <locale>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
@@ -792,6 +793,29 @@ namespace Utils
     }
 
     /**
+      Wrapper around a stream to be sure that uses classic locale.
+      Use it instead of a std::*stream on any stream that reads or writes numbers.
+      It prevents problems due to locale global changes done in the application that uses PDAL.
+     */
+    template<typename T>
+    struct ClassicLocaleStream : public T
+    {
+        template<typename... Args>
+        ClassicLocaleStream(Args&&... args) : T(std::forward<Args>(args)...)
+        {
+            this->imbue(std::locale::classic());
+        }
+    };
+
+    /**
+      Common used streams with classic locale
+     */
+    using StringStreamClassicLocale = ClassicLocaleStream<std::stringstream>;
+    using IStringStreamClassicLocale = ClassicLocaleStream<std::istringstream>;
+    using OStringStreamClassicLocale = ClassicLocaleStream<std::ostringstream>;
+
+
+    /**
       Convert a value to its string representation by writing to a stringstream.
 
       \param from  Value to convert.
@@ -800,7 +824,7 @@ namespace Utils
     template<typename T>
     std::string toString(const T& from)
     {
-        std::ostringstream oss;
+        OStringStreamClassicLocale oss;
         oss << from;
         return oss.str();
     }
@@ -821,7 +845,7 @@ namespace Utils
     */
     inline std::string toString(double from, size_t precision = 10)
     {
-        std::ostringstream oss;
+        OStringStreamClassicLocale oss;
         // Standardize nan/inf output to the JAVA property names because
         // when we convert to a string, we usually convert to JSON.
         if (std::isnan(from))
@@ -840,7 +864,7 @@ namespace Utils
     */
     inline std::string toString(float from)
     {
-        std::ostringstream oss;
+        OStringStreamClassicLocale oss;
         oss << std::setprecision(8) << from;
         return oss.str();
     }
@@ -962,7 +986,9 @@ namespace Utils
     template<typename T, std::enable_if_t<!std::is_integral<T>::value>* = nullptr>
     StatusWithReason fromString(const std::string& from, T& to)
     {
-        std::istringstream iss(from);
+        static thread_local Utils::IStringStreamClassicLocale iss;
+        iss.clear();
+        iss.str(from);
 
         iss >> to;
         return !iss.fail();
@@ -979,7 +1005,9 @@ namespace Utils
     template<typename T, std::enable_if_t<std::is_integral<T>::value>* = nullptr>
     StatusWithReason fromString(const std::string& from, T& to)
     {
-        std::istringstream iss(from);
+        static thread_local Utils::IStringStreamClassicLocale iss;
+        iss.clear();
+        iss.str(from);
 
         iss >> to;
         bool failure = iss.fail();
@@ -1108,10 +1136,12 @@ namespace Utils
             return true;
         }
 
-        std::istringstream iss(s);
+        static thread_local Utils::IStringStreamClassicLocale iss;
+        iss.clear();
+        iss.str(s);
 
         iss >> d;
-        return !iss.fail();
+        return !iss.fail(); // should it be  iss.eof() && !iss.fail() ?
     }
 
     /**

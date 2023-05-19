@@ -26,6 +26,7 @@ add_executable(dimbuilder
 target_include_directories(dimbuilder PRIVATE
     ${PDAL_INCLUDE_DIR}
     ${NLOHMANN_INCLUDE_DIR}
+    ${UTFCPP_INCLUDE_DIR}
 )
 PDAL_TARGET_COMPILE_SETTINGS(dimbuilder)
 target_link_libraries(dimbuilder
@@ -33,3 +34,8 @@ target_link_libraries(dimbuilder
         ${EXECINFO_LIBRARY}
         ${CMAKE_DL_LIBS}
 )
+
+
+if (MSVC)
+    target_link_options(dimbuilder PRIVATE /SUBSYSTEM:CONSOLE /ENTRY:mainCRTStartup)
+endif(MSVC)

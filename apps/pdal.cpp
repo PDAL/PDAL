@@ -38,6 +38,7 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_config.hpp>
 #include <pdal/util/Backtrace.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
 
 #include <iomanip>
@@ -300,13 +301,17 @@ namespace
     LogPtr logPtr(Log::makeLog("PDAL", "stderr"));
 }
 
-int main(int argc, char* argv[])
+#ifdef PDAL_WIN32_STL
+int wmain( int argc, wchar_t *argv[ ], wchar_t *envp[ ] )
+#else
+int main(int argc, char *argv[])
+#endif
 {
     App pdal;
 
     StringList cmdArgs;
     for (int i = 1; i < argc; ++i)
-        cmdArgs.push_back(argv[i]);
+        cmdArgs.push_back(pdal::FileUtils::fromNative(argv[i]));
     return pdal.execute(cmdArgs, logPtr);
 }
 
