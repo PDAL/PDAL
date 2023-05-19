@@ -134,6 +134,10 @@ public:
     ///    wkt, etc).
     void set(std::string v);
 
+    void setEpoch(const double& epoch);
+
+    double getEpoch() const;
+
     /// Returns the Proj.4 string describing the Spatial Reference System.
     /// If GDAL is linked, it uses GDAL's operations and methods to determine
     /// the Proj.4 string -- otherwise, if libgeotiff is linked, it uses
@@ -177,6 +181,7 @@ public:
 
 private:
     std::string m_wkt;
+    double m_epoch = 0.0f;
     mutable std::string m_horizontalWkt;
     friend PDAL_DLL std::ostream& operator<<(std::ostream& ostr,
         const SpatialReference& srs);

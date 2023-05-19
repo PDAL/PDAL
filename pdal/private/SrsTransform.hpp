@@ -54,6 +54,10 @@ public:
                  const SpatialReference& dst, std::vector<int> dstOrder);
     ~SrsTransform();
 
+
+    void setSrcEpoch(double epoch);
+    void setDstEpoch(double epoch);
+
     void set(OGRSpatialReference src, OGRSpatialReference dst);
     void set(const SpatialReference& src, const SpatialReference& dst);
 
