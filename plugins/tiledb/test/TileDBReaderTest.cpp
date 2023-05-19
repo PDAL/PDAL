@@ -1,36 +1,36 @@
 /******************************************************************************
-* Copyright (c) 2019 TileDB, Inc
-*
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following
-* conditions are met:
-*
-*     * Redistributions of source code must retain the above copyright
-*       notice, this list of conditions and the following disclaimer.
-*     * Redistributions in binary form must reproduce the above copyright
-*       notice, this list of conditions and the following disclaimer in
-*       the documentation and/or other materials provided
-*       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
-*       names of its contributors may be used to endorse or promote
-*       products derived from this software without specific prior
-*       written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-* "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-* LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-* FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-* COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-* BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
-* OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
-* AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
-* OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
-* OF SUCH DAMAGE.
-****************************************************************************/
+ * Copyright (c) 2019 TileDB, Inc
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following
+ * conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in
+ *       the documentation and/or other materials provided
+ *       with the distribution.
+ *     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
+ *       names of its contributors may be used to endorse or promote
+ *       products derived from this software without specific prior
+ *       written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+ * OF SUCH DAMAGE.
+ ****************************************************************************/
 
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -40,8 +40,8 @@
 #include <pdal/pdal_test_main.hpp>
 #include <pdal/util/FileUtils.hpp>
 
-#include <pdal/StageFactory.hpp>
 #include <io/FauxReader.hpp>
+#include <pdal/StageFactory.hpp>
 
 #include "Support.hpp"
 
@@ -103,7 +103,7 @@ TEST_F(TileDBReaderTest, findStage)
 }
 
 TEST_F(TileDBReaderTest, read_bbox)
-{ 
+{
     Options options;
     options.add("array_name", data_path);
     options.add("bbox3d", "([0, 0.5], [0, 0.5], [0, 0.5])");
@@ -186,25 +186,14 @@ TEST_F(TileDBReaderTest, read)
     options.add("array_name", data_path);
 
     tiledb::Array array(ctx, data_path, TILEDB_READ);
-    auto domain = array.non_empty_domain<double>();
-    std::vector<double> subarray;
-
-    for (const auto& kv : domain)
-    {
-        subarray.push_back(kv.second.first);
-        subarray.push_back(kv.second.second);
-    }
-
     tiledb::Query q(ctx, array, TILEDB_READ);
-    q.set_subarray(subarray);
 
     std::vector<double> xs(count);
     std::vector<double> ys(count);
     std::vector<double> zs(count);
-    
-    q.set_buffer("X", xs)
-        .set_buffer("Y", ys)
-        .set_buffer("Z", zs);
+
+    q.set_data_buffer("X", xs).set_data_buffer("Y", ys).set_data_buffer("Z",
+                                                                        zs);
 
     q.submit();
     array.close();
@@ -277,7 +266,8 @@ TEST_F(TileDBReaderTest, unsupported_attribute)
     read_schema.add_attribute(a1);
     tiledb::Array::create(pth, read_schema);
 
-    // read the schema from the array, and check we skip over the unsupported attributes when strict is false
+    // read the schema from the array, and check we skip over the unsupported
+    // attributes when strict is false
     TileDBReader rdr;
     Options options;
     options.add("array_name", pth);
@@ -291,4 +281,4 @@ TEST_F(TileDBReaderTest, unsupported_attribute)
     EXPECT_NO_THROW(rdr2.prepare(table));
 }
 
-}; //pdal namespace
+}; // namespace pdal

@@ -125,6 +125,15 @@ void E57Reader::addDimensions(PointLayoutPtr layout)
         }
     }
 
+    if (layout->hasDim(Dimension::Id::SphericalRange) &&
+        layout->hasDim(Dimension::Id::SphericalAzimuth) &&
+        layout->hasDim(Dimension::Id::SphericalElevation))
+    {
+        layout->registerDim(Dimension::Id::X);
+        layout->registerDim(Dimension::Id::Y);
+        layout->registerDim(Dimension::Id::Z);
+    }
+
     m_extraDims.reset(new e57plugin::ExtraDims());
     m_extraDims->parse(m_extraDimsSpec);
     auto i = m_extraDims->begin();
@@ -315,6 +324,18 @@ bool E57Reader::fillPoint(PointRef& point)
                 point.setField(dim->m_id, keyValue.second[m_currentIndex]);
             }
         }
+    }
+
+    if (point.hasDim(Dimension::Id::SphericalRange) &&
+        point.hasDim(Dimension::Id::SphericalAzimuth) &&
+        point.hasDim(Dimension::Id::SphericalElevation))
+    {
+        const double range = point.getFieldAs<double>(Dimension::Id::SphericalRange);
+        const double azimuth = point.getFieldAs<double>(Dimension::Id::SphericalAzimuth);
+        const double elevation = point.getFieldAs<double>(Dimension::Id::SphericalElevation);
+        point.setField(Dimension::Id::X, range * std::cos(elevation) * std::cos(azimuth));
+        point.setField(Dimension::Id::Y, range * std::cos(elevation) * std::sin(azimuth));
+        point.setField(Dimension::Id::Z, range * std::sin(elevation));
     }
 
     if (m_scan->hasPose())

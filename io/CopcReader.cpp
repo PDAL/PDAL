@@ -303,6 +303,16 @@ void CopcReader::fetchHeader()
     d += las::Vlr::HeaderSize;
     size -= las::Vlr::HeaderSize;
 
+    if (!Utils::iequals(vlr.userId, "copc"))
+    {
+        std::stringstream msg;
+        msg << "The first VLR in a COPC file is required to have "
+            << "user_id of 'copc' and this file has '" << vlr.userId
+            << "'";
+        throwError(msg.str());
+
+    }
+
     if (size != 160)
     {
         std::stringstream msg;

@@ -42,7 +42,7 @@ Example
 Options
 --------------------------------------------------------------------------------
 filename
-    STAC endpoint, local or remote, that corresponds to a Catalog or Feature.
+    STAC endpoint, local or remote, that corresponds to a Catalog, Feature or ItemCollection.
 
 asset_names
     The list of asset names that should be looked at to find the source data.
@@ -75,7 +75,7 @@ properties
     A key value mapping (JSON) of properties and the desired values to prune
     Features by. Different keys will be AND'd together, and list of values will
     OR'd together.
-    Example: ``--readers.stac.properties'{"pc:type":["lidar","sonar"],"pc:encoding":"ept"}'``
+    Example: ``--readers.stac.properties '{"pc:type":["lidar","sonar"],"pc:encoding":"ept"}'``
     In this example, a Feature must have a `pc:type` key with values of either
     `lidar` or `sonar`, and a `pc:encoding` key with a value of `ept`.
 
@@ -87,7 +87,7 @@ reader_args
 
 .. code-block:: bash
 
-    -readers.stac.reader_args \
+    --readers.stac.reader_args \
     '[{"type": "readers.ept", "resolution": 100}, {"type": "readers.las", "nosrs": true}]'
 
 
