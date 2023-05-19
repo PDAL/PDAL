@@ -57,14 +57,20 @@ SrsTransform::~SrsTransform()
 void SrsTransform::setSrcEpoch(double epoch)
 {
 #if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,4,0)
-    m_transform->GetSourceCS()->SetCoordinateEpoch(epoch);
+    OGRSpatialReference target(*m_transform->GetTargetCS());
+    OGRSpatialReference source(*m_transform->GetSourceCS());
+    source.SetCoordinateEpoch(epoch);
+    set(target, source);
 #endif
 }
 
 void SrsTransform::setDstEpoch(double epoch)
 {
 #if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,4,0)
-    m_transform->GetTargetCS()->SetCoordinateEpoch(epoch);
+    OGRSpatialReference target(*m_transform->GetTargetCS());
+    OGRSpatialReference source(*m_transform->GetSourceCS());
+    target.SetCoordinateEpoch(epoch);
+    set(target, source);
 #endif
 }
 
