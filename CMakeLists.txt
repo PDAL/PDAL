@@ -305,7 +305,7 @@ endif()
 #
 if (UNIX AND NOT APPLE)
     set(LIBNAME ${CMAKE_SHARED_LIBRARY_PREFIX}${PDAL_LIB_NAME})
-    install(FILES ${LIBNAME} DESTINATION ${PDAL_LIB_INSTALL_DIR}
+    install(FILES ${LIBNAME} DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RENAME ${LIBNAME}${CMAKE_SHARED_LIBRARY_SUFFIX})
 endif()
 
@@ -327,8 +327,8 @@ if (NOT PDAL_HAVE_LZMA)
     set(LZMA_EXCLUDES PATTERN pdal/compression/Lzma* EXCLUDE)
 endif()
 
-install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
-    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal/
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pdal"
     FILES_MATCHING PATTERN "*.hpp"
 #    PATTERN "pdal/private" EXCLUDE
 #    PATTERN "pdal/io/private" EXCLUDE
@@ -340,27 +340,27 @@ install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
 #    ${LZMA_EXCLUDES}
 )
 
-install(DIRECTORY ${PDAL_KERNELS_DIR}
-    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+install(DIRECTORY ${PDAL_KERNELS_DIR}/
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pdal"
     FILES_MATCHING PATTERN "*.hpp"
 #    PATTERN "private" EXCLUDE
 )
-install(DIRECTORY ${PDAL_IO_DIR}
-    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+install(DIRECTORY ${PDAL_IO_DIR}/
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pdal"
     FILES_MATCHING PATTERN "*.hpp"
 #    PATTERN "private" EXCLUDE
 )
-install(DIRECTORY ${PDAL_FILTERS_DIR}
-    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+install(DIRECTORY ${PDAL_FILTERS_DIR}/
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pdal"
     FILES_MATCHING PATTERN "*.hpp"
 #    PATTERN "private" EXCLUDE
 )
 
-install(FILES ${DIMENSION_OUTFILE} ${pdal_features_hpp}
-  DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+install(FILES ${DIMENSION_OUTFILE} ${pdal_features_hpp}/
+  DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pdal"
 )
 install(FILES ${PDAL_CMAKE_DIR}/pluginmacros.cmake
-    DESTINATION ${PDAL_LIB_INSTALL_DIR}/cmake/PDAL)
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/cmake/PDAL)
 
 #
 # CPACK
@@ -379,7 +379,7 @@ install(
     EXPORT
         PDALTargets
     DESTINATION
-        "${PDAL_LIB_INSTALL_DIR}/cmake/PDAL")
+        "${CMAKE_INSTALL_LIBDIR}/cmake/PDAL")
 include(${PDAL_CMAKE_DIR}/config.cmake)
 
 #
@@ -402,12 +402,12 @@ if (WITH_COMPLETION)
             FILES
                 "${PROJECT_SOURCE_DIR}/scripts/bash-completion/pdal"
             DESTINATION
-                "${CMAKE_INSTALL_PREFIX}/share/bash-completion/completions")
+                "${CMAKE_INSTALL_DATAROOTDIR}/share/bash-completion/completions")
     elseif (IS_DIRECTORY /etc/bash_completion.d)
         install(
             FILES
                 "${PROJECT_SOURCE_DIR}/scripts/bash-completion/pdal"
             DESTINATION
-                "${CMAKE_INSTALL_PREFIX}/etc/bash_completion.d")
+                "${CMAKE_INSTALL_DATAROOTDIR}/etc/bash_completion.d")
     endif()
 endif()
