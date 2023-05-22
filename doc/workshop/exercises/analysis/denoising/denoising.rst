@@ -106,7 +106,7 @@ add a few options to have finer control over what is written. These include:
 2. ``minor_version``: We want to make sure to output LAS 1.2, which will
    provide the widest compatibility with other softwares that can
    consume LAS.
-3. ``dataformat_id``: Format 3 supports both time and color information
+3. ``dataformat_id``: Format 0 supports both time and color information
 
 .. note::
 
@@ -132,7 +132,7 @@ opened the file using the `Fugro Viewer`_
 .. image:: ../../../images/denoise-fugro.png
     :target: ../../../../_images/denoise-fugro.png
 
-.. _`Fugro Viewer`: http://www.fugroviewer.com/
+.. _`Fugro Viewer`: https://hub.fugro.com/fugroviewer_socialpg/?utm_source=DSMN8&utm_medium=LinkedIn/
 
 
 Notes
