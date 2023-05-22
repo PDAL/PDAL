@@ -74,6 +74,11 @@ following command in your `Conda Shell`.
 .. _`jq`: https://stedolan.github.io/jq/
 .. _`Ruby JSON library`: https://ruby-doc.org/stdlib-3.0.2/libdoc/json/rdoc/JSON.html
 
+.. note::
+    We will be utilizing `jq`_ for the following steps. To add jq to your
+    conda environment, run the following command in your `Conda Shell`:
+
+    ``$ conda install -c conda-forge jq``
 
 Structured Metadata Output
 ................................................................................
