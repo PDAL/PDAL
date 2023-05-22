@@ -28,8 +28,6 @@ Exercise
 Command
 ................................................................................
 
-Invoke the following command, substituting accordingly, in your |Terminal|:
-
 PDAL capability to generate rasterized output is provided by the
 :ref:`writers.gdal` stage. There is no :ref:`application <apps>` to drive this
 stage, and we must use a pipeline.
@@ -102,9 +100,6 @@ see what was produced. Let us use :ref:`qgis` to visualize the output.
 
     .. image:: ../../../images/dtm-qgis-classify.png
         :target: ../../../../_images/dtm-qgis-classify.png
-
-    .. image:: ../../../images/dtm-qgis-colorize-dtm.png
-        :target: ../../../../_images/dtm-qgis-colorize-dtm.png
 
 
 5. :ref:`qgis` provides access to |GDAL| processing tools, and we
