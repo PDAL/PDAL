@@ -22,7 +22,7 @@ Given the following pipeline for fetching the data, complete the rest of the tas
         "pipeline": [
             {
                 "type": "readers.ept",
-                "filename":"http://na-c.entwine.io/dublin/",
+                "filename":"http://na-c.entwine.io/dublin/ept.json",
                 "bounds":"([-697041.0, -696241.0], [7045398.0, 7046086.0],[-40, 400])"
 
             },
