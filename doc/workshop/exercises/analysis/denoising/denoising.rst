@@ -132,7 +132,7 @@ opened the file using the `Fugro Viewer`_
 .. image:: ../../../images/denoise-fugro.png
     :target: ../../../../_images/denoise-fugro.png
 
-.. _`Fugro Viewer`: https://hub.fugro.com/fugroviewer_socialpg/?utm_source=DSMN8&utm_medium=LinkedIn/
+.. _`Fugro Viewer`: https://hub.fugro.com/fugroviewer_socialpg/
 
 
 Notes
