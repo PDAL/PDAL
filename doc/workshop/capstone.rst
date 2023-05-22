@@ -43,7 +43,7 @@ Given the following pipeline for fetching the data, complete the rest of the tas
 * Classify ground points using :ref:`filters.smrf` (See :ref:`workshop-ground`)
 * Compute height above ground using :ref:`filters.hag_nn`
 * Generate a digital terrain model (DTM) using :ref:`writers.gdal` (See :ref:`workshop-dtm`)
-* Generate a average vegetative height model using :ref:`writers.gdal`
+* Generate the average vegetative height using ASPRS Classifations (Hint: 3-5) and :ref:`writers.gdal`
 
 .. note::
 
