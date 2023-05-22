@@ -119,7 +119,7 @@ Visualization
 
 Use one of the point cloud visualization tools you installed to take a look at
 your ``uncompahgre-colored.laz`` output. In the example below, we simply
-opened the file using the http://plas.io website (You will need to change the color of the image to RGB in softeware).
+opened the file using the http://plas.io website (You will need to change the color of the image to RGB in the software).
 
 .. image:: ../../../images/colorize-umpaghre-colored.png
 
