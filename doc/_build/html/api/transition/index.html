@@ -1,0 +1,529 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>libLAS C API to PDAL transition guide &mdash; pdal.io</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/pdal.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/breathe.css" type="text/css" />
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://pdal.io/api/transition/index.html"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="copyright" title="Copyright" href="../../copyright.html" />
+    <link rel="next" title="FAQ" href="../../faq.html" />
+    <link rel="prev" title="pdal::Writer" href="../cpp/writer.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+          </a>
+              <div class="version">
+                2.6.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../about.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../download.html">Download</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../apps/index.html">Applications</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../community.html">Community</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../pipeline.html">Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stages/stages.html">Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stages/readers.html">Readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stages/writers.html">Writers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stages/filters.html">Filters</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../dimensions.html">Dimensions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../types.html">Types</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../python.html">Python</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../java.html">Java</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../workshop/index.html">Workshop</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../project/index.html">Project</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../cpp/index.html">C++ API</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">libLAS C API to PDAL transition guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#includes">Includes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#initial-steps">Initial steps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dataset-properties">Dataset properties</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#iterating-over-points">Iterating over points</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#point-validity">Point validity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#coordinates">Coordinates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#returns">Returns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#classes">Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#color">Color</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#time">Time</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#other-point-attributes">Other point attributes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#memory-management">Memory management</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../copyright.html">License</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PDAL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html"> Documentation </a> &raquo;</li>
+      
+          <li><a href="../index.html">API</a> &raquo;</li>
+      
+      <li>libLAS C API to PDAL transition guide</li>
+    
+
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/PDAL/PDAL/edit//master/doc/api/transition/index.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="../../faq.html" class="btn btn-neutral float-right" title="FAQ" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../cpp/writer.html" class="btn btn-neutral float-left" title="pdal::Writer" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="liblas-c-api-to-pdal-transition-guide">
+<span id="liblas-to-pdal"></span><h1>libLAS C API to PDAL transition guide<a class="headerlink" href="#liblas-c-api-to-pdal-transition-guide" title="Permalink to this heading"></a></h1>
+<dl class="field-list simple">
+<dt class="field-odd">Author<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Vaclav Petras</p>
+</dd>
+<dt class="field-even">Contact<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="mailto:wenzeslaus&#37;&#52;&#48;gmail&#46;com">wenzeslaus<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+</dd>
+<dt class="field-odd">Date<span class="colon">:</span></dt>
+<dd class="field-odd"><p>09/04/2015</p>
+</dd>
+</dl>
+<p>This page shows how to port code using libLAS C API to PDAL API
+(which is C++). The new code is not using full power of PDAL but
+it uses just what is necessary to read content of a LAS file.</p>
+<section id="includes">
+<h2>Includes<a class="headerlink" href="#includes" title="Permalink to this heading"></a></h2>
+<p>libLAS include:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;liblas/capi/liblas.h&gt;</span>
+</pre></div>
+</div>
+<p>For PDAL, in addition to PDAL headers, we also include standard headers
+which will be useful later:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;memory&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;pdal/PointTable.hpp&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;pdal/PointView.hpp&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;pdal/LasReader.hpp&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;pdal/LasHeader.hpp&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;pdal/Options.hpp&gt;</span>
+</pre></div>
+</div>
+</section>
+<section id="initial-steps">
+<h2>Initial steps<a class="headerlink" href="#initial-steps" title="Permalink to this heading"></a></h2>
+<p>Opening the dataset in libLAS:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">LASReaderH</span><span class="w"> </span><span class="n">LAS_reader</span><span class="p">;</span>
+<span class="n">LASHeaderH</span><span class="w"> </span><span class="n">LAS_header</span><span class="p">;</span>
+<span class="n">LASSRSH</span><span class="w"> </span><span class="n">LAS_srs</span><span class="p">;</span>
+<span class="n">LAS_reader</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASReader_Create</span><span class="p">(</span><span class="n">in_opt</span><span class="o">-&gt;</span><span class="n">answer</span><span class="p">);</span>
+<span class="n">LAS_header</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASReader_GetHeader</span><span class="p">(</span><span class="n">LAS_reader</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The higher level of abstraction in PDAL requires a little bit more code
+for the initial steps:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">pdal</span><span class="o">::</span><span class="n">Option</span><span class="w"> </span><span class="n">las_opt</span><span class="p">(</span><span class="s">&quot;filename&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">in_opt</span><span class="o">-&gt;</span><span class="n">answer</span><span class="p">);</span>
+<span class="n">pdal</span><span class="o">::</span><span class="n">Options</span><span class="w"> </span><span class="n">las_opts</span><span class="p">;</span>
+<span class="n">las_opts</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">las_opt</span><span class="p">);</span>
+<span class="n">pdal</span><span class="o">::</span><span class="n">PointTable</span><span class="w"> </span><span class="n">table</span><span class="p">;</span>
+<span class="n">pdal</span><span class="o">::</span><span class="n">LasReader</span><span class="w"> </span><span class="n">las_reader</span><span class="p">;</span>
+<span class="n">las_reader</span><span class="p">.</span><span class="n">setOptions</span><span class="p">(</span><span class="n">las_opts</span><span class="p">);</span>
+<span class="n">las_reader</span><span class="p">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">table</span><span class="p">);</span>
+<span class="n">pdal</span><span class="o">::</span><span class="n">PointViewSet</span><span class="w"> </span><span class="n">point_view_set</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">las_reader</span><span class="p">.</span><span class="n">execute</span><span class="p">(</span><span class="n">table</span><span class="p">);</span>
+<span class="n">pdal</span><span class="o">::</span><span class="n">PointViewPtr</span><span class="w"> </span><span class="n">point_view</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">point_view_set</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+<span class="n">pdal</span><span class="o">::</span><span class="n">Dimension</span><span class="o">::</span><span class="n">IdList</span><span class="w"> </span><span class="n">dims</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">point_view</span><span class="o">-&gt;</span><span class="n">dims</span><span class="p">();</span>
+<span class="n">pdal</span><span class="o">::</span><span class="n">LasHeader</span><span class="w"> </span><span class="n">las_header</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">las_reader</span><span class="p">.</span><span class="n">header</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>The PDAL code is also different in the way that we read all the data
+right away while in libLAS we just open the file.
+To make use of other readers supported by PDAL, see <code class="docutils literal notranslate"><span class="pre">StageFactory</span></code> class.</p>
+<p>The test if the file was loaded successfully, the test of the header
+pointer was used with libLAS:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">LAS_header</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* fail */</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>In general, PDAL will throw a <code class="docutils literal notranslate"><span class="pre">pdal_error</span></code> exception in case something
+is wrong and it can’t recover such in the case when the file can’t be opened.
+To handle the exceptional state by yourself, you can wrap the code
+in <code class="docutils literal notranslate"><span class="pre">try-catch</span></code> block:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* actual code */</span>
+<span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* fail in your own way */</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="dataset-properties">
+<h2>Dataset properties<a class="headerlink" href="#dataset-properties" title="Permalink to this heading"></a></h2>
+<p>We assume we defined all the following variables as <code class="docutils literal notranslate"><span class="pre">double</span></code>.</p>
+<p>The general properties from the LAS file are retrieved from the
+header in libLAS:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">scale_x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASHeader_GetScaleX</span><span class="p">(</span><span class="n">LAS_header</span><span class="p">);</span>
+<span class="n">scale_y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASHeader_GetScaleY</span><span class="p">(</span><span class="n">LAS_header</span><span class="p">);</span>
+<span class="n">scale_z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASHeader_GetScaleZ</span><span class="p">(</span><span class="n">LAS_header</span><span class="p">);</span>
+
+<span class="n">offset_x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASHeader_GetOffsetX</span><span class="p">(</span><span class="n">LAS_header</span><span class="p">);</span>
+<span class="n">offset_y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASHeader_GetOffsetY</span><span class="p">(</span><span class="n">LAS_header</span><span class="p">);</span>
+<span class="n">offset_z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASHeader_GetOffsetZ</span><span class="p">(</span><span class="n">LAS_header</span><span class="p">);</span>
+
+<span class="n">xmin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASHeader_GetMinX</span><span class="p">(</span><span class="n">LAS_header</span><span class="p">);</span>
+<span class="n">xmax</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASHeader_GetMaxX</span><span class="p">(</span><span class="n">LAS_header</span><span class="p">);</span>
+<span class="n">ymin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASHeader_GetMinY</span><span class="p">(</span><span class="n">LAS_header</span><span class="p">);</span>
+<span class="n">ymax</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASHeader_GetMaxY</span><span class="p">(</span><span class="n">LAS_header</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>And the same applies PDAL:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">scale_x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">las_header</span><span class="p">.</span><span class="n">scaleX</span><span class="p">();</span>
+<span class="n">scale_y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">las_header</span><span class="p">.</span><span class="n">scaleY</span><span class="p">();</span>
+<span class="n">scale_z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">las_header</span><span class="p">.</span><span class="n">scaleZ</span><span class="p">();</span>
+
+<span class="n">offset_x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">las_header</span><span class="p">.</span><span class="n">offsetX</span><span class="p">();</span>
+<span class="n">offset_y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">las_header</span><span class="p">.</span><span class="n">offsetY</span><span class="p">();</span>
+<span class="n">offset_z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">las_header</span><span class="p">.</span><span class="n">offsetZ</span><span class="p">();</span>
+
+<span class="n">xmin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">las_header</span><span class="p">.</span><span class="n">minX</span><span class="p">();</span>
+<span class="n">xmax</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">las_header</span><span class="p">.</span><span class="n">maxX</span><span class="p">();</span>
+<span class="n">ymin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">las_header</span><span class="p">.</span><span class="n">minY</span><span class="p">();</span>
+<span class="n">ymax</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">las_header</span><span class="p">.</span><span class="n">maxY</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>The point record count in libLAS:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">n_features</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASHeader_GetPointRecordsCount</span><span class="p">(</span><span class="n">LAS_header</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>is just point count in PDAL:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">n_features</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">las_header</span><span class="p">.</span><span class="n">pointCount</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>WKT of a spatial reference system is obtained from the header in libLAS:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">LAS_srs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASHeader_GetSRS</span><span class="p">(</span><span class="n">LAS_header</span><span class="p">);</span>
+<span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">projstr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASSRS_GetWKT_CompoundOK</span><span class="p">(</span><span class="n">LAS_srs</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>In PDAL, spatial reference is part of the <code class="docutils literal notranslate"><span class="pre">PointTable</span></code>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">projstr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">table</span><span class="p">.</span><span class="n">spatialRef</span><span class="p">().</span><span class="n">getWKT</span><span class="p">(</span><span class="n">pdal</span><span class="o">::</span><span class="n">SpatialReference</span><span class="o">::</span><span class="n">eCompoundOK</span><span class="p">).</span><span class="n">c_str</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>Whether the time or color is supported by the LAS format, one would
+have to determine from the format ID in libLAS:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">las_point_format</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASHeader_GetDataFormatId</span><span class="p">(</span><span class="n">LAS_header</span><span class="p">);</span>
+<span class="n">have_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">las_point_format</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">...</span>
+</pre></div>
+</div>
+<p>In PDAL, there is a convenient function for it in the header:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">have_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">las_header</span><span class="p">.</span><span class="n">hasTime</span><span class="p">();</span>
+<span class="n">have_color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">las_header</span><span class="p">.</span><span class="n">hasColor</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>The presence of color, time and other dimensions can be also determined
+with:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">pdal</span><span class="o">::</span><span class="n">Dimension</span><span class="o">::</span><span class="n">IdList</span><span class="w"> </span><span class="n">dims</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">point_view</span><span class="o">-&gt;</span><span class="n">dims</span><span class="p">();</span>
+</pre></div>
+</div>
+</section>
+<section id="iterating-over-points">
+<h2>Iterating over points<a class="headerlink" href="#iterating-over-points" title="Permalink to this heading"></a></h2>
+<p>libLAS:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">while</span><span class="w"> </span><span class="p">((</span><span class="n">LAS_point</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASReader_GetNextPoint</span><span class="p">(</span><span class="n">LAS_reader</span><span class="p">))</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>PDAL:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">pdal</span><span class="o">::</span><span class="n">PointId</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">point_view</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">idx</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="point-validity">
+<h2>Point validity<a class="headerlink" href="#point-validity" title="Permalink to this heading"></a></h2>
+<p>The correct usage of libLAS required to test point validity:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">LASPoint_IsValid</span><span class="p">(</span><span class="n">LAS_point</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In PDAL, there is no need to do that and the caller can assume that
+all the points provided by PDAL are valid.</p>
+</section>
+<section id="coordinates">
+<h2>Coordinates<a class="headerlink" href="#coordinates" title="Permalink to this heading"></a></h2>
+<p>libLAS:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASPoint_GetX</span><span class="p">(</span><span class="n">LAS_point</span><span class="p">);</span>
+<span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASPoint_GetY</span><span class="p">(</span><span class="n">LAS_point</span><span class="p">);</span>
+<span class="n">z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASPoint_GetZ</span><span class="p">(</span><span class="n">LAS_point</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>In PDAL, point coordinates are one of the dimensions:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">pdal</span><span class="o">::</span><span class="nn">Dimension</span><span class="p">;</span>
+<span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">point_view</span><span class="o">-&gt;</span><span class="n">getFieldAs</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Id</span><span class="o">::</span><span class="n">X</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">);</span>
+<span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">point_view</span><span class="o">-&gt;</span><span class="n">getFieldAs</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Id</span><span class="o">::</span><span class="n">Y</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">);</span>
+<span class="n">z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">point_view</span><span class="o">-&gt;</span><span class="n">getFieldAs</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Id</span><span class="o">::</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Thanks to <code class="docutils literal notranslate"><span class="pre">using</span> <span class="pre">namespace</span> <span class="pre">pdal::Dimension</span></code> we can just write <code class="docutils literal notranslate"><span class="pre">Id::X</span></code> etc.</p>
+</section>
+<section id="returns">
+<h2>Returns<a class="headerlink" href="#returns" title="Permalink to this heading"></a></h2>
+<p>libLAS:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">return_no</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASPoint_GetReturnNumber</span><span class="p">(</span><span class="n">LAS_point</span><span class="p">);</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">n_returns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASPoint_GetNumberOfReturns</span><span class="p">(</span><span class="n">LAS_point</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>PDAL:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">return_no</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">point_view</span><span class="o">-&gt;</span><span class="n">getFieldAs</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Id</span><span class="o">::</span><span class="n">ReturnNumber</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">);</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">n_returns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">point_view</span><span class="o">-&gt;</span><span class="n">getFieldAs</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Id</span><span class="o">::</span><span class="n">NumberOfReturns</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Permalink to this heading"></a></h2>
+<p>libLAS:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">point_class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="n">LASPoint_GetClassification</span><span class="p">(</span><span class="n">LAS_point</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>PDAL:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">point_class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">point_view</span><span class="o">-&gt;</span><span class="n">getFieldAs</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Id</span><span class="o">::</span><span class="n">Classification</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="color">
+<h2>Color<a class="headerlink" href="#color" title="Permalink to this heading"></a></h2>
+<p>libLAS:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">LASColorH</span><span class="w"> </span><span class="n">LAS_color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASPoint_GetColor</span><span class="p">(</span><span class="n">LAS_point</span><span class="p">);</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">red</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASColor_GetRed</span><span class="p">(</span><span class="n">LAS_color</span><span class="p">);</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">green</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASColor_GetGreen</span><span class="p">(</span><span class="n">LAS_color</span><span class="p">);</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">blue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASColor_GetBlue</span><span class="p">(</span><span class="n">LAS_color</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>PDAL:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="n">red</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">point_view</span><span class="o">-&gt;</span><span class="n">getFieldAs</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Id</span><span class="o">::</span><span class="n">Red</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">);</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">green</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">point_view</span><span class="o">-&gt;</span><span class="n">getFieldAs</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Id</span><span class="o">::</span><span class="n">Green</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">);</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">blue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">point_view</span><span class="o">-&gt;</span><span class="n">getFieldAs</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Id</span><span class="o">::</span><span class="n">Blue</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>For LAS format, <code class="docutils literal notranslate"><span class="pre">hasColor()</span></code> method of <code class="docutils literal notranslate"><span class="pre">LasHeader</span></code> to see if the
+format supports RGB. However, in general, you can test use
+<code class="docutils literal notranslate"><span class="pre">hasDim(Id::Red)</span></code>, <code class="docutils literal notranslate"><span class="pre">hasDim(Id::Green)</span></code> and <code class="docutils literal notranslate"><span class="pre">hasDim(Id::Blue)</span></code>
+method calls on the point, to see if the color was defined.</p>
+</section>
+<section id="time">
+<h2>Time<a class="headerlink" href="#time" title="Permalink to this heading"></a></h2>
+<p>libLAS:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">double</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LASPoint_GetTime</span><span class="p">(</span><span class="n">LAS_point</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>PDAL:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="kt">double</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">point_view</span><span class="o">-&gt;</span><span class="n">getFieldAs</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Id</span><span class="o">::</span><span class="n">GpsTime</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="other-point-attributes">
+<h2>Other point attributes<a class="headerlink" href="#other-point-attributes" title="Permalink to this heading"></a></h2>
+<p>libLAS:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">LASPoint_GetIntensity</span><span class="p">(</span><span class="n">LAS_point</span><span class="p">)</span>
+<span class="n">LASPoint_GetScanDirection</span><span class="p">(</span><span class="n">LAS_point</span><span class="p">)</span>
+<span class="n">LASPoint_GetFlightLineEdge</span><span class="p">(</span><span class="n">LAS_point</span><span class="p">)</span>
+<span class="n">LASPoint_GetScanAngleRank</span><span class="p">(</span><span class="n">LAS_point</span><span class="p">)</span>
+<span class="n">LASPoint_GetPointSourceId</span><span class="p">(</span><span class="n">LAS_point</span><span class="p">)</span>
+<span class="n">LASPoint_GetUserData</span><span class="p">(</span><span class="n">LAS_point</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>PDAL:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">point_view</span><span class="o">-&gt;</span><span class="n">getFieldAs</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Id</span><span class="o">::</span><span class="n">Intensity</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">)</span>
+<span class="n">point_view</span><span class="o">-&gt;</span><span class="n">getFieldAs</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Id</span><span class="o">::</span><span class="n">ScanDirectionFlag</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">)</span>
+<span class="n">point_view</span><span class="o">-&gt;</span><span class="n">getFieldAs</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Id</span><span class="o">::</span><span class="n">EdgeOfFlightLine</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">)</span>
+<span class="n">point_view</span><span class="o">-&gt;</span><span class="n">getFieldAs</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Id</span><span class="o">::</span><span class="n">ScanAngleRank</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">)</span>
+<span class="n">point_view</span><span class="o">-&gt;</span><span class="n">getFieldAs</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Id</span><span class="o">::</span><span class="n">PointSourceId</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">)</span>
+<span class="n">point_view</span><span class="o">-&gt;</span><span class="n">getFieldAs</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Id</span><span class="o">::</span><span class="n">UserData</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="memory-management">
+<h2>Memory management<a class="headerlink" href="#memory-management" title="Permalink to this heading"></a></h2>
+<p>In libLAS C API, we need to explicitly take care of freeing the memory:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">LASSRS_Destroy</span><span class="p">(</span><span class="n">LAS_srs</span><span class="p">);</span>
+<span class="n">LASHeader_Destroy</span><span class="p">(</span><span class="n">LAS_header</span><span class="p">);</span>
+<span class="n">LASReader_Destroy</span><span class="p">(</span><span class="n">LAS_reader</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>When using C++ and PDAL, the objects created on stack free the memory
+when they go out of scope. When using smart pointers, they will take
+care of the memory they manage. This does not apply to special cases
+such as <code class="docutils literal notranslate"><span class="pre">exit()</span></code> function calls.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../../faq.html" class="btn btn-neutral float-right" title="FAQ" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../cpp/writer.html" class="btn btn-neutral float-left" title="pdal::Writer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <div class="info">
+      <a class="logo-link" href="https://hobu.co">
+        <div class="hobu-logo"></div>
+      </a>
+      <div class="copyright">
+      
+
+                    &copy;  2023
+                        <a href="https://github.com/abellgithub">Andrew Bell</a>,
+                        <a href="https://github.com/chambbj">Brad Chambers</a>,
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>.
+
+      
+      Last updated on May 22, 2023.
+      </div>
+    </div>
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="footer">
+        <div class="container">
+                    &copy;  2023
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        <a href="http://github.com/mpgerlek">Michael Gerlek</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>,
+                Last updated
+                    on May 22, 2023.
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,411 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>writers.copc &mdash; pdal.io</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/pdal.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/breathe.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="canonical" href="https://pdal.io/stages/writers.copc.html"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="copyright" title="Copyright" href="../copyright.html" />
+    <link rel="next" title="writers.draco" href="writers.draco.html" />
+    <link rel="prev" title="writers.bpf" href="writers.bpf.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+          </a>
+              <div class="version">
+                2.6.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../apps/index.html">Applications</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../community.html">Community</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stages.html">Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readers.html">Readers</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="writers.html">Writers</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="writers.bpf.html">writers.bpf</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">writers.copc</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#vlrs">VLRs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#options">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="writers.draco.html">writers.draco</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.ept_addon.html">writers.ept_addon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.e57.html">writers.e57</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.fbi.html">writers.fbi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.fbx.html">writers.fbx</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.gdal.html">writers.gdal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.gltf.html">writers.gltf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.las.html">writers.las</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.matlab.html">writers.matlab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.nitf.html">writers.nitf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.null.html">writers.null</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.ogr.html">writers.ogr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.pcd.html">writers.pcd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.pgpointcloud.html">writers.pgpointcloud</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.ply.html">writers.ply</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.raster.html">writers.raster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.sbet.html">writers.sbet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.text.html">writers.text</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.tiledb.html">writers.tiledb</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="filters.html">Filters</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../dimensions.html">Dimensions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../types.html">Types</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../python.html">Python</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../java.html">Java</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../workshop/index.html">Workshop</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project/index.html">Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../copyright.html">License</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PDAL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html"> Documentation </a> &raquo;</li>
+      
+          <li><a href="writers.html">Writers</a> &raquo;</li>
+      
+      <li>writers.copc</li>
+    
+
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/PDAL/PDAL/edit//master/doc/stages/writers.copc.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="writers.draco.html" class="btn btn-neutral float-right" title="writers.draco" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="writers.bpf.html" class="btn btn-neutral float-left" title="writers.bpf" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="writers-copc">
+<span id="id1"></span><h1>writers.copc<a class="headerlink" href="#writers-copc" title="Permalink to this heading"></a></h1>
+<p>The <strong>COPC Writer</strong> supports writing to <a class="reference external" href="https://copc.io/">COPC format</a> files. COPC
+is <em>Cloud Optimized Point Clouds</em>, and it is a LAZ 1.4 file that is
+organized stored as a clustered octree.</p>
+<div class="admonition embed" id="embed-0">
+<p class="admonition-title">Default Embedded Stage </p>
+<p>This stage is enabled by default</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Visit <a class="reference external" href="https://viewer.copc.io">https://viewer.copc.io</a> to view COPC files in your browser.
+Simply drag-n-drop the file from your desktop onto the page,
+or use</p>
+</div>
+<section id="vlrs">
+<h2>VLRs<a class="headerlink" href="#vlrs" title="Permalink to this heading"></a></h2>
+<p>VLRs can be created by providing a JSON node called <cite>vlrs</cite> with objects
+as shown:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;readers.las&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="p">:</span><span class="s2">&quot;inputfile.las&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;writers.las&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;vlrs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span>
+<span class="w">            </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A description under 32 bytes&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;record_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hobu&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dGhpcyBpcyBzb21lIHRleHQ=&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A description under 32 bytes&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;record_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">43</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hobu&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;filename&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;path-to-my-file.input&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A description under 32 bytes&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;record_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">44</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hobu&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;metadata_keyname&quot;</span>
+<span class="w">            </span><span class="p">}],</span>
+<span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="p">:</span><span class="s2">&quot;outputfile.las&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>One of <cite>data</cite>, <cite>filename</cite> or <cite>metadata</cite> must be specified. Data must be
+specified as base64 encoded strings. The content of a file is inserted as
+binary. The metadata key specified must refer to a string or base64 encoded data.</p>
+</div>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this heading"></a></h2>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;inputfile1.las&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;inputfile2.laz&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;writers.copc&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="p">:</span><span class="s2">&quot;outputfile.copc.laz&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="options">
+<h2>Options<a class="headerlink" href="#options" title="Permalink to this heading"></a></h2>
+<dl>
+<dt>filename</dt><dd><p>Output filename.  [Required]</p>
+</dd>
+<dt><span class="target" id="forward">forward</span></dt><dd><p>List of header fields whose values should be preserved from a source
+LAS file.  The option can be specified multiple times, which has the same effect as
+listing values separated by a comma.  The following values are valid:
+<code class="docutils literal notranslate"><span class="pre">filesource_id</span></code>, <code class="docutils literal notranslate"><span class="pre">global_encoding</span></code>, <code class="docutils literal notranslate"><span class="pre">project_id</span></code>, <code class="docutils literal notranslate"><span class="pre">system_id</span></code>, <code class="docutils literal notranslate"><span class="pre">software_id</span></code>,
+<code class="docutils literal notranslate"><span class="pre">creation_doy</span></code>, <code class="docutils literal notranslate"><span class="pre">creation_year</span></code>, <code class="docutils literal notranslate"><span class="pre">scale_x</span></code>, <code class="docutils literal notranslate"><span class="pre">scale_y</span></code>, <code class="docutils literal notranslate"><span class="pre">scale_z</span></code>,
+<code class="docutils literal notranslate"><span class="pre">offset_x</span></code>, <code class="docutils literal notranslate"><span class="pre">offset_y</span></code>, <code class="docutils literal notranslate"><span class="pre">offset_z</span></code>.  In addition, the special value <code class="docutils literal notranslate"><span class="pre">header</span></code>
+can be specified, which is equivalent to specifying all the values EXCEPT the scale and
+offset values.  Scale and offset values can be forwarded as a group by
+using the special values <code class="docutils literal notranslate"><span class="pre">scale</span></code> and <code class="docutils literal notranslate"><span class="pre">offset</span></code> respectively.  The special
+value <code class="docutils literal notranslate"><span class="pre">all</span></code> is equivalent to specifying <code class="docutils literal notranslate"><span class="pre">header</span></code>, <code class="docutils literal notranslate"><span class="pre">scale</span></code>, <code class="docutils literal notranslate"><span class="pre">offset</span></code> and
+<code class="docutils literal notranslate"><span class="pre">vlr</span></code> (see below).  If a header option is specified explicitly, it will override
+any forwarded header value.
+If a LAS file is the result of multiple LAS input files, the header values
+to be forwarded must match or they will be ignored and a default will
+be used instead.</p>
+<p>VLRs can be forwarded by using the special value <code class="docutils literal notranslate"><span class="pre">vlr</span></code>.  VLRs containing
+the following User IDs are NOT forwarded: <code class="docutils literal notranslate"><span class="pre">LASF_Projection</span></code>,
+<code class="docutils literal notranslate"><span class="pre">liblas</span></code>, <code class="docutils literal notranslate"><span class="pre">laszip</span> <span class="pre">encoded</span></code>.  VLRs with the User ID <code class="docutils literal notranslate"><span class="pre">LASF_Spec</span></code> and
+a record ID other than 0 or 3 are also not forwarded.  These VLRs are known
+to contain information regarding the formatting of the data and will be rebuilt
+properly in the output file as necessary.  Unlike header values, VLRs from multiple
+input files are accumulated and each is written to the output file.  Forwarded
+VLRs may contain duplicate User ID/Record ID pairs.</p>
+</dd>
+<dt>software_id</dt><dd><p>String identifying the software that created this LAS file.
+[Default: PDAL version num (build num)]”</p>
+</dd>
+<dt>creation_doy</dt><dd><p>Number of the day of the year (January 1 == 1) this file is being created.</p>
+</dd>
+<dt>creation_year</dt><dd><p>Year (Gregorian) this file is being created.</p>
+</dd>
+<dt>system_id</dt><dd><p>String identifying the system that created this LAS file. [Default: “PDAL”]</p>
+</dd>
+<dt>global_encoding</dt><dd><p>Various indicators to describe the data.  See the LAS documentation.  Note
+that PDAL will always set bit four when creating LAS version 1.4 output.
+[Default: 0]</p>
+</dd>
+<dt>project_id</dt><dd><p>UID reserved for the user [Default: Nil UID]</p>
+</dd>
+<dt>scale_x, scale_y, scale_z</dt><dd><p>Scale to be divided from the X, Y and Z nominal values, respectively, after
+the offset has been applied.  The special value <code class="docutils literal notranslate"><span class="pre">auto</span></code> can be specified,
+which causes the writer to select a scale to set the stored values of the
+dimensions to range from [0, 2147483647].  [Default: .01]</p>
+<p>Note: written value = (nominal value - offset) / scale.</p>
+</dd>
+<dt>offset_x, offset_y, offset_z</dt><dd><p>Offset to be subtracted from the X, Y and Z nominal values, respectively,
+before the value is scaled.  The special value <code class="docutils literal notranslate"><span class="pre">auto</span></code> can be specified,
+which causes the writer to set the offset to the minimum value of the
+dimension.  [Default: 0]</p>
+<p>Note: written value = (nominal value - offset) / scale.</p>
+</dd>
+<dt>filesource_id</dt><dd><p>The file source id number to use for this file (a value between
+0 and 65535 - 0 implies “unassigned”) [Default: 0]</p>
+</dd>
+<dt>pipeline</dt><dd><p>Write a JSON representation of the running pipeline as a VLR.</p>
+</dd>
+<dt>vlrs</dt><dd><p>Add VLRS specified as json. See <a class="reference internal" href="#vlrs">VLRs</a> above for details.</p>
+</dd>
+<dt>threads</dt><dd><p>Number of threads to use when writing [Default: 10]</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>where</dt><dd><p>An <a class="reference internal" href="expression.html#pdal-expression"><span class="std std-ref">expression</span></a> that limits points passed to a writer.
+Points that don’t pass the
+expression skip the stage but are available to subsequent stages in a pipeline.
+[Default: no filtering]</p>
+</dd>
+<dt>where_merge</dt><dd><p>A strategy for merging points skipped by a ‘<cite>where’</cite> option when running in standard mode.
+If <code class="docutils literal notranslate"><span class="pre">true</span></code>, the skipped points are added to the first point view returned by the skipped
+filter. If <code class="docutils literal notranslate"><span class="pre">false</span></code>, skipped points are placed in their own point view. If <code class="docutils literal notranslate"><span class="pre">auto</span></code>,
+skipped points are merged into the returned point view provided that only one point view
+is returned and it has the same point count as it did when the writer was run.
+[Default: <code class="docutils literal notranslate"><span class="pre">auto</span></code>]</p>
+</dd>
+</dl>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="writers.draco.html" class="btn btn-neutral float-right" title="writers.draco" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="writers.bpf.html" class="btn btn-neutral float-left" title="writers.bpf" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <div class="info">
+      <a class="logo-link" href="https://hobu.co">
+        <div class="hobu-logo"></div>
+      </a>
+      <div class="copyright">
+      
+
+                    &copy;  2023
+                        <a href="https://github.com/abellgithub">Andrew Bell</a>,
+                        <a href="https://github.com/chambbj">Brad Chambers</a>,
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>.
+
+      
+      Last updated on May 22, 2023.
+      </div>
+    </div>
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="footer">
+        <div class="container">
+                    &copy;  2023
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        <a href="http://github.com/mpgerlek">Michael Gerlek</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>,
+                Last updated
+                    on May 22, 2023.
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,425 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reading with PDAL &mdash; pdal.io</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/pdal.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/breathe.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="canonical" href="https://pdal.io/tutorial/reading.html"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="copyright" title="Copyright" href="../copyright.html" />
+    <link rel="next" title="Reading data from EPT" href="iowa-entwine.html" />
+    <link rel="prev" title="Tutorials" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+          </a>
+              <div class="version">
+                2.6.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../apps/index.html">Applications</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../community.html">Community</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stages/stages.html">Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stages/readers.html">Readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stages/writers.html">Writers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stages/filters.html">Filters</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../dimensions.html">Dimensions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../types.html">Types</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../python.html">Python</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../java.html">Java</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Reading with PDAL</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#a-basic-inquiry-example">A basic inquiry example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#a-conversion-example">A conversion example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#metadata">Metadata</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#a-pipeline-example">A Pipeline Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#simple-conversion">Simple conversion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#loop-a-directory-and-filter-it-through-a-pipeline">Loop a directory and filter it through a pipeline</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="iowa-entwine.html">Reading data from EPT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="las.html">LAS Reading and Writing with PDAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="clipping/index.html">Clipping with Geometries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ground-filters.html">Ground Filter Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid-shift.html">Applying a grid shift to point clouds</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../workshop/index.html">Workshop</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project/index.html">Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../copyright.html">License</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PDAL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html"> Documentation </a> &raquo;</li>
+      
+          <li><a href="index.html">Tutorials</a> &raquo;</li>
+      
+      <li>Reading with PDAL</li>
+    
+
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/PDAL/PDAL/edit//master/doc/tutorial/reading.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="iowa-entwine.html" class="btn btn-neutral float-right" title="Reading data from EPT" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Tutorials" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="reading-with-pdal">
+<span id="reading"></span><h1>Reading with PDAL<a class="headerlink" href="#reading-with-pdal" title="Permalink to this heading"></a></h1>
+<dl class="field-list simple">
+<dt class="field-odd">Author<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Bradley Chambers</p>
+</dd>
+<dt class="field-even">Contact<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="mailto:brad&#46;chambers&#37;&#52;&#48;gmail&#46;com">brad<span>&#46;</span>chambers<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+</dd>
+<dt class="field-odd">Date<span class="colon">:</span></dt>
+<dd class="field-odd"><p>01/21/2015</p>
+</dd>
+</dl>
+<nav class="contents" id="contents">
+<p class="topic-title">Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#reading-with-pdal" id="id2">Reading with PDAL</a></p>
+<ul>
+<li><p><a class="reference internal" href="#a-basic-inquiry-example" id="id3">A basic inquiry example</a></p></li>
+<li><p><a class="reference internal" href="#a-conversion-example" id="id4">A conversion example</a></p>
+<ul>
+<li><p><a class="reference internal" href="#metadata" id="id5">Metadata</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#a-pipeline-example" id="id6">A Pipeline Example</a></p>
+<ul>
+<li><p><a class="reference internal" href="#simple-conversion" id="id7">Simple conversion</a></p></li>
+<li><p><a class="reference internal" href="#loop-a-directory-and-filter-it-through-a-pipeline" id="id8">Loop a directory and filter it through a pipeline</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+<p>This tutorial is an introduction to using PDAL to read data using pdal
+from the command line.</p>
+<section id="a-basic-inquiry-example">
+<h2>A basic inquiry example<a class="headerlink" href="#a-basic-inquiry-example" title="Permalink to this heading"></a></h2>
+<p>Our first example to demonstrate PDAL’s utility will be to simply query an
+<a class="reference external" href="http://www.asprs.org/a/society/committees/standards/lidar_exchange_format.html">LAS</a> file to determine the data that are in it in the very first point.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <a class="reference external" href="https://github.com/PDAL/PDAL/blob/master/test/data/las/interesting.las?raw=true">interesting.las</a> file in these examples can be found on github.</p>
+</div>
+<p><cite>pdal info</cite> outputs JavaScript <a class="reference external" href="http://www.json.org/">JSON</a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pdal info interesting.las -p 0
+</pre></div>
+</div>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="s2">&quot;filename&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;interesting.las&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;pdal_version&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;1.0.1 (git-version: 80644d)&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;points&quot;</span><span class="o">:</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="s2">&quot;point&quot;</span><span class="o">:</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="s2">&quot;Blue&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">88</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;Classification&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">1</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;EdgeOfFlightLine&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">0</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;GpsTime&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">245381</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;Green&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">77</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;Intensity&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">143</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;NumberOfReturns&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">1</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;PointId&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">0</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;PointSourceId&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">7326</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;Red&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">68</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;ReturnNumber&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">1</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;ScanAngleRank&quot;</span><span class="o">:</span><span class="w"> </span><span class="o">-</span><span class="mf">9</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;ScanDirectionFlag&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">1</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;UserData&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">132</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;X&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">637012</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;Y&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">849028</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;Z&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">431.66</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="a-conversion-example">
+<h2>A conversion example<a class="headerlink" href="#a-conversion-example" title="Permalink to this heading"></a></h2>
+<p>Conversion of data from one format to another may be lossy, in that some
+data in the source format may not be representable in the same format or
+at all in the destination format.  For example, some formats don’t support
+spatial references for point data, some have no metadata support and others
+have limited <a class="reference internal" href="../dimensions.html#dimensions"><span class="std std-ref">dimension</span></a> support.  Even when data types are
+supported in both source and destination formats, there may be limitations
+with regard to data type, precision or, scaling.  PDAL attempts to convert
+data as accurately as possible, but you should make sure that you’re
+aware of the capabilities of the data formats you’re using.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pdal translate interesting.las output.txt
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;X&quot;</span><span class="p">,</span><span class="s2">&quot;Y&quot;</span><span class="p">,</span><span class="s2">&quot;Z&quot;</span><span class="p">,</span><span class="s2">&quot;Intensity&quot;</span><span class="p">,</span><span class="s2">&quot;ReturnNumber&quot;</span><span class="p">,</span><span class="s2">&quot;NumberOfReturns&quot;</span><span class="p">,</span><span class="s2">&quot;ScanDirectionFlag&quot;</span><span class="p">,</span><span class="s2">&quot;EdgeOfFlightLine&quot;</span><span class="p">,</span><span class="s2">&quot;Classification&quot;</span><span class="p">,</span><span class="s2">&quot;ScanAngleRank&quot;</span><span class="p">,</span><span class="s2">&quot;UserData&quot;</span><span class="p">,</span><span class="s2">&quot;PointSourceId&quot;</span><span class="p">,</span><span class="s2">&quot;Time&quot;</span><span class="p">,</span><span class="s2">&quot;Red&quot;</span><span class="p">,</span><span class="s2">&quot;Green&quot;</span><span class="p">,</span><span class="s2">&quot;Blue&quot;</span>
+<span class="mf">637012.24</span><span class="p">,</span><span class="mf">849028.31</span><span class="p">,</span><span class="mf">431.66</span><span class="p">,</span><span class="mi">143</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">9</span><span class="p">,</span><span class="mi">132</span><span class="p">,</span><span class="mi">7326</span><span class="p">,</span><span class="mi">245381</span><span class="p">,</span><span class="mi">68</span><span class="p">,</span><span class="mi">77</span><span class="p">,</span><span class="mi">88</span>
+<span class="mf">636896.33</span><span class="p">,</span><span class="mf">849087.70</span><span class="p">,</span><span class="mf">446.39</span><span class="p">,</span><span class="mi">18</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">11</span><span class="p">,</span><span class="mi">128</span><span class="p">,</span><span class="mi">7326</span><span class="p">,</span><span class="mi">245381</span><span class="p">,</span><span class="mi">54</span><span class="p">,</span><span class="mi">66</span><span class="p">,</span><span class="mi">68</span>
+<span class="mf">636784.74</span><span class="p">,</span><span class="mf">849106.66</span><span class="p">,</span><span class="mf">426.71</span><span class="p">,</span><span class="mi">118</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">122</span><span class="p">,</span><span class="mi">7326</span><span class="p">,</span><span class="mi">245382</span><span class="p">,</span><span class="mi">112</span><span class="p">,</span><span class="mi">97</span><span class="p">,</span><span class="mi">114</span>
+<span class="mf">636699.38</span><span class="p">,</span><span class="mf">848991.01</span><span class="p">,</span><span class="mf">425.39</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span><span class="mi">124</span><span class="p">,</span><span class="mi">7326</span><span class="p">,</span><span class="mi">245383</span><span class="p">,</span><span class="mi">178</span><span class="p">,</span><span class="mi">138</span><span class="p">,</span><span class="mi">162</span>
+<span class="mf">636601.87</span><span class="p">,</span><span class="mf">849018.60</span><span class="p">,</span><span class="mf">425.10</span><span class="p">,</span><span class="mi">124</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span><span class="mi">126</span><span class="p">,</span><span class="mi">7326</span><span class="p">,</span><span class="mi">245383</span><span class="p">,</span><span class="mi">134</span><span class="p">,</span><span class="mi">104</span><span class="p">,</span><span class="mi">134</span>
+<span class="mf">636451.97</span><span class="p">,</span><span class="mf">849250.59</span><span class="p">,</span><span class="mf">435.17</span><span class="p">,</span><span class="mi">48</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">9</span><span class="p">,</span><span class="mi">122</span><span class="p">,</span><span class="mi">7326</span><span class="p">,</span><span class="mi">245384</span><span class="p">,</span><span class="mi">99</span><span class="p">,</span><span class="mi">85</span><span class="p">,</span><span class="mi">95</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>The text format supports all point attributes, but provides no support for
+metadata such as the input spatial reference system or the <a class="reference external" href="http://www.asprs.org/a/society/committees/standards/lidar_exchange_format.html">LAS</a> header
+fields, such as <a class="reference external" href="http://en.wikipedia.org/wiki/Universally_unique_identifier">UUID</a>.
+You may need to preserve some more information as part of
+your conversion to make it useful down the road.</p>
+<section id="metadata">
+<h3>Metadata<a class="headerlink" href="#metadata" title="Permalink to this heading"></a></h3>
+<p>PDAL carries <a class="reference internal" href="../development/metadata.html#metadata"><span class="std std-ref">metadata</span></a> for each stage through the PDAL
+<a class="reference internal" href="../pipeline.html#pipeline"><span class="std std-ref">processing pipeline</span></a>.  The metadata can be written in
+JSON form using the pdal <a class="reference internal" href="../apps/info.html#info-command"><span class="std std-ref">info</span></a> command</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pdal info --metadata interesting.las
+</pre></div>
+</div>
+<p>This produces metadata that looks like
+<a class="reference external" href="../_images/info-interesting-metadata.png">this</a>. You can use
+your <a class="reference external" href="http://www.json.org/">JSON</a> manipulation tools to extract this information.
+For formats that do not have the ability to
+preserve this metadata internally, you can keep a <code class="docutils literal notranslate"><span class="pre">.json</span></code> file
+alongside the <code class="docutils literal notranslate"><span class="pre">.txt</span></code> file as auxiliary information.</p>
+</section>
+</section>
+<section id="a-pipeline-example">
+<h2>A Pipeline Example<a class="headerlink" href="#a-pipeline-example" title="Permalink to this heading"></a></h2>
+<p>The full power of PDAL comes in the form of <a class="reference internal" href="../apps/pipeline.html#pipeline-command"><span class="std std-ref">pipeline</span></a> invocations.
+Pipelines allow you to take advantage of PDAL’s ability to manipulate data
+as they are converted. This section will provide a basic example and
+demonstration of pipeline usage.  See the
+<a class="reference internal" href="../pipeline.html#pipeline"><span class="std std-ref">pipeline specification</span></a>, for more detailed exposition of the
+topic.</p>
+<p>The <a class="reference internal" href="../apps/pipeline.html#pipeline-command"><span class="std std-ref">pipeline</span></a> describes a series of processing stages to
+be performed in JSON format.  Each stage can be provided a set of options
+that control the details of processing. PDAL is single-threaded and stages
+are executed in a linear order.  Some stages support what is known as
+“stream mode”.  If all stages in a pipeline support stream mode the command
+is run using using stream mode to reduce the memory processing footprint.
+Even when run in stream mode, execution is single-threaded and can be
+thought of as linear.</p>
+<section id="simple-conversion">
+<h3>Simple conversion<a class="headerlink" href="#simple-conversion" title="Permalink to this heading"></a></h3>
+<p>The following <a class="reference external" href="http://www.json.org/">JSON</a> document defines a pipeline that takes the <code class="docutils literal notranslate"><span class="pre">file.las</span></code>
+<a class="reference external" href="http://www.asprs.org/a/society/committees/standards/lidar_exchange_format.html">LAS</a> file and converts it to a new file called <code class="docutils literal notranslate"><span class="pre">output.las</span></code>.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;file.las&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;output.las&quot;</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="loop-a-directory-and-filter-it-through-a-pipeline">
+<h3>Loop a directory and filter it through a pipeline<a class="headerlink" href="#loop-a-directory-and-filter-it-through-a-pipeline" title="Permalink to this heading"></a></h3>
+<p>This bash script loops through a directory and pushes the las files through
+a pipeline, substituting the input and output as it goes.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ls</span> <span class="o">*.</span><span class="n">las</span> <span class="o">|</span> <span class="n">cut</span> <span class="o">-</span><span class="n">d</span><span class="o">.</span> <span class="o">-</span><span class="n">f1</span> <span class="o">|</span> <span class="n">xargs</span> <span class="o">-</span><span class="n">P20</span> <span class="o">-</span><span class="n">I</span><span class="p">{}</span> <span class="n">pdal</span> <span class="n">pipeline</span> <span class="o">-</span><span class="n">i</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">proj</span><span class="o">.</span><span class="n">json</span> <span class="o">--</span><span class="n">readers</span><span class="o">.</span><span class="n">las</span><span class="o">.</span><span class="n">filename</span><span class="o">=</span><span class="p">{}</span><span class="o">.</span><span class="n">las</span> <span class="o">--</span><span class="n">writers</span><span class="o">.</span><span class="n">las</span><span class="o">.</span><span class="n">filename</span><span class="o">=</span><span class="n">output</span><span class="o">/</span><span class="p">{}</span><span class="o">.</span><span class="n">laz</span>
+</pre></div>
+</div>
+<p>Here is an example doing something similar with Windows PowerShell</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$indir=&quot;Documents\inlas&quot;
+$outdir=&quot;Documents\outlas&quot;
+get-childitem $indir |
+foreach-object {
+    if ($_.extension -ne &quot;.las&quot;) {
+        continue
+    }
+    $outname = $outdir + &quot;\&quot; + $_.name
+    pdal pipeline -i \path\to\proj.json $_.fullname $outname
+}
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="iowa-entwine.html" class="btn btn-neutral float-right" title="Reading data from EPT" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <div class="info">
+      <a class="logo-link" href="https://hobu.co">
+        <div class="hobu-logo"></div>
+      </a>
+      <div class="copyright">
+      
+
+                    &copy;  2023
+                        <a href="https://github.com/abellgithub">Andrew Bell</a>,
+                        <a href="https://github.com/chambbj">Brad Chambers</a>,
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>.
+
+      
+      Last updated on May 22, 2023.
+      </div>
+    </div>
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="footer">
+        <div class="container">
+                    &copy;  2023
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        <a href="http://github.com/mpgerlek">Michael Gerlek</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>,
+                Last updated
+                    on May 22, 2023.
+        </div>
+    </div>
+
+</body>
+</html>

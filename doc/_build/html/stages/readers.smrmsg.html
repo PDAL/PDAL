@@ -1,0 +1,315 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>readers.smrmsg &mdash; pdal.io</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/pdal.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/breathe.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="canonical" href="https://pdal.io/stages/readers.smrmsg.html"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="copyright" title="Copyright" href="../copyright.html" />
+    <link rel="next" title="readers.slpk" href="readers.slpk.html" />
+    <link rel="prev" title="readers.sbet" href="readers.sbet.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+          </a>
+              <div class="version">
+                2.6.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../apps/index.html">Applications</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../community.html">Community</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stages.html">Stages</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="readers.html">Readers</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="readers.bpf.html">readers.bpf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.buffer.html">readers.buffer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.copc.html">readers.copc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.draco.html">readers.draco</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.ept.html">readers.ept</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.e57.html">readers.e57</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.faux.html">readers.faux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.fbi.html">readers.fbi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.gdal.html">readers.gdal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.hdf.html">readers.hdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.i3s.html">readers.i3s</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.ilvis2.html">readers.ilvis2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.las.html">readers.las</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.matlab.html">readers.matlab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.memoryview.html">readers.memoryview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.mbio.html">readers.mbio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.nitf.html">readers.nitf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.numpy.html">readers.numpy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.obj.html">readers.obj</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.optech.html">readers.optech</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.pcd.html">readers.pcd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.pgpointcloud.html">readers.pgpointcloud</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.ply.html">readers.ply</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.pts.html">readers.pts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.ptx.html">readers.ptx</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.qfit.html">readers.qfit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.rdb.html">readers.rdb</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.rxp.html">readers.rxp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.sbet.html">readers.sbet</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">readers.smrmsg</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#example">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#options">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="readers.slpk.html">readers.slpk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.stac.html">readers.stac</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.terrasolid.html">readers.terrasolid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.text.html">readers.text</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.tiledb.html">readers.tiledb</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.tindex.html">readers.tindex</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="writers.html">Writers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filters.html">Filters</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../dimensions.html">Dimensions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../types.html">Types</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../python.html">Python</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../java.html">Java</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../workshop/index.html">Workshop</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project/index.html">Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../copyright.html">License</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PDAL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html"> Documentation </a> &raquo;</li>
+      
+          <li><a href="readers.html">Readers</a> &raquo;</li>
+      
+      <li>readers.smrmsg</li>
+    
+
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/PDAL/PDAL/edit//master/doc/stages/readers.smrmsg.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="readers.slpk.html" class="btn btn-neutral float-right" title="readers.slpk" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="readers.sbet.html" class="btn btn-neutral float-left" title="readers.sbet" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="readers-smrmsg">
+<span id="id1"></span><h1>readers.smrmsg<a class="headerlink" href="#readers-smrmsg" title="Permalink to this heading"></a></h1>
+<p>The <strong>SMRMSG reader</strong> read from POSPac MMS post-processed accuracy files, used to describes the accuracy of the post-processed solution (SBET file) and
+contains the position, orientation and velocity RMS after smoothing. See <a class="reference internal" href="writers.sbet.html#writers-sbet"><span class="std std-ref">writers.sbet</span></a>.</p>
+<div class="admonition embed" id="embed-0">
+<p class="admonition-title">Default Embedded Stage </p>
+<p>This stage is enabled by default</p>
+</div>
+<div class="admonition streamable" id="streamable-0">
+<p class="admonition-title">Streamable Stage</p>
+<p>This stage supports streaming operations</p>
+</div>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this heading"></a></h2>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;smrmsg_xxx.out&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;output.txt&quot;</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="options">
+<h2>Options<a class="headerlink" href="#options" title="Permalink to this heading"></a></h2>
+<dl class="simple">
+<dt>filename</dt><dd><p>File to read from [Required]</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>count</dt><dd><p>Maximum number of points to read. [Default: unlimited]</p>
+</dd>
+<dt>override_srs</dt><dd><p>Spatial reference to apply to the data.  Overrides any SRS in the input
+itself.  Can be specified as a WKT, proj.4 or EPSG string. Can’t use
+with ‘default_srs’. [Default: none]</p>
+</dd>
+<dt>default_srs</dt><dd><p>Spatial reference to apply to the data if the input does not specify
+one.  Can be specified as a WKT, proj.4 or EPSG string. Can’t use
+with ‘override_srs’. [Default: none]</p>
+</dd>
+</dl>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="readers.slpk.html" class="btn btn-neutral float-right" title="readers.slpk" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="readers.sbet.html" class="btn btn-neutral float-left" title="readers.sbet" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <div class="info">
+      <a class="logo-link" href="https://hobu.co">
+        <div class="hobu-logo"></div>
+      </a>
+      <div class="copyright">
+      
+
+                    &copy;  2023
+                        <a href="https://github.com/abellgithub">Andrew Bell</a>,
+                        <a href="https://github.com/chambbj">Brad Chambers</a>,
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>.
+
+      
+      Last updated on May 22, 2023.
+      </div>
+    </div>
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="footer">
+        <div class="container">
+                    &copy;  2023
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        <a href="http://github.com/mpgerlek">Michael Gerlek</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>,
+                Last updated
+                    on May 22, 2023.
+        </div>
+    </div>
+
+</body>
+</html>

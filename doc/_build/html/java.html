@@ -1,0 +1,422 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Java &mdash; pdal.io</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/pdal.css" type="text/css" />
+      <link rel="stylesheet" href="_static/breathe.css" type="text/css" />
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="canonical" href="https://pdal.io/java.html"/>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="copyright" title="Copyright" href="copyright.html" />
+    <link rel="next" title="Tutorials" href="tutorial/index.html" />
+    <link rel="prev" title="Python" href="python.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html">
+            
+          </a>
+              <div class="version">
+                2.6.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="apps/index.html">Applications</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="community.html">Community</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stages/stages.html">Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stages/readers.html">Readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stages/writers.html">Writers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stages/filters.html">Filters</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dimensions.html">Dimensions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Types</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="python.html">Python</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Java</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#versions">Versions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-pdal-java-bindings">Using PDAL Java bindings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-pdal-scala">Using PDAL Scala</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compilation">Compilation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="workshop/index.html">Workshop</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="project/index.html">Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copyright.html">License</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PDAL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html"> Documentation </a> &raquo;</li>
+      
+      <li>Java</li>
+    
+
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/PDAL/PDAL/edit//master/doc/java.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="tutorial/index.html" class="btn btn-neutral float-right" title="Tutorials" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="python.html" class="btn btn-neutral float-left" title="Python" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="java">
+<span id="id1"></span><h1>Java<a class="headerlink" href="#java" title="Permalink to this heading"></a></h1>
+<p id="index-0">PDAL provides <a class="reference external" href="https://github.com/PDAL/java">Java bindings to use PDAL on JVM</a>. It is released independently from PDAL itself as of PDAL 1.7.
+Native binaries are prebuilt for Linux and MacOS and delivered in a jar, so there is no need
+in building PDAL with a special flag or building JNI binaries manually.</p>
+<p>The project consists of the following modules:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pdal-native</span></code> - with packed OS specific libraries to link PDAL to JNI proxy classes. Dependency contains bindings for <code class="docutils literal notranslate"><span class="pre">x86_64-darwin</span></code> and <code class="docutils literal notranslate"><span class="pre">x86_64-linux</span></code>, other versions are not supported yet.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pdal</span></code> - with the core bindings functionality.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pdal-scala</span></code> - a Scala API package that simplifies PDAL Pipeline construction.</p></li>
+</ul>
+<section id="versions">
+<h2>Versions<a class="headerlink" href="#versions" title="Permalink to this heading"></a></h2>
+<p>PDAL JNI major version usually follows PDAL versioning i.e. <code class="docutils literal notranslate"><span class="pre">pdal-java</span> <span class="pre">1.8.x</span></code> was
+built and tested against <code class="docutils literal notranslate"><span class="pre">PDAL</span> <span class="pre">1.8.x</span></code> and <code class="docutils literal notranslate"><span class="pre">pdal-java</span> <span class="pre">2.1.x</span></code> against <code class="docutils literal notranslate"><span class="pre">PDAL</span> <span class="pre">2.x.x</span></code>.</p>
+</section>
+<section id="using-pdal-java-bindings">
+<h2>Using PDAL Java bindings<a class="headerlink" href="#using-pdal-java-bindings" title="Permalink to this heading"></a></h2>
+<p id="index-1">PDAL provides <a class="reference external" href="https://docs.oracle.com/javase/8/docs/technotes/guides/jni/index.html">JNI bindings</a>
+that gives users access to executing
+<a class="reference internal" href="pipeline.html#pipeline"><span class="std std-ref">pipeline</span></a> instantiations and capturing the results
+in <code class="docutils literal notranslate"><span class="pre">Java</span></code> interfaces.
+This mode of operation is useful if you are looking to have PDAL simply act as
+your data format and processing handler.</p>
+<p>Users are expected to construct their own PDAL <a class="reference internal" href="pipeline.html#pipeline"><span class="std std-ref">pipeline</span></a>,
+execute it, and retrieve points into Java memory:</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="nn">io</span><span class="p">.</span><span class="nn">pdal</span><span class="p">.</span><span class="n">_</span>
+
+<span class="kd">val</span><span class="w"> </span><span class="n">json</span><span class="w"> </span><span class="o">=</span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="s">  |{</span>
+<span class="s">  |  &quot;pipeline&quot;:[</span>
+<span class="s">  |    {</span>
+<span class="s">  |      &quot;filename&quot;:&quot;1.2-with-color.las&quot;,</span>
+<span class="s">  |      &quot;spatialreference&quot;:&quot;EPSG:2993&quot;</span>
+<span class="s">  |    },</span>
+<span class="s">  |    {</span>
+<span class="s">  |      &quot;type&quot;: &quot;filters.reprojection&quot;,</span>
+<span class="s">  |      &quot;out_srs&quot;: &quot;EPSG:3857&quot;</span>
+<span class="s">  |    },</span>
+<span class="s">  |    {</span>
+<span class="s">  |       &quot;type&quot;: &quot;filters.delaunay&quot;</span>
+<span class="s">  |    }</span>
+<span class="s">  |  ]</span>
+<span class="s">  |}</span>
+<span class="s">&quot;&quot;&quot;</span><span class="p">.</span><span class="n">stripMargin</span>
+
+<span class="kd">val</span><span class="w"> </span><span class="n">pipeline</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Pipeline</span><span class="p">(</span><span class="n">json</span><span class="p">)</span>
+<span class="n">pipeline</span><span class="p">.</span><span class="n">validate</span><span class="p">()</span><span class="w"> </span><span class="c1">// check if our JSON and options were good</span>
+<span class="n">pipeline</span><span class="p">.</span><span class="n">setLogLevel</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="w"> </span><span class="c1">// make it really noisy</span>
+<span class="n">pipeline</span><span class="p">.</span><span class="n">execute</span><span class="p">()</span><span class="w"> </span><span class="c1">// execute the pipeline</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">metadata</span><span class="p">:</span><span class="w"> </span><span class="nc">String</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="n">pipeline</span><span class="p">.</span><span class="n">getMetadata</span><span class="p">()</span><span class="w"> </span><span class="c1">// retrieve metadata</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">pvs</span><span class="p">:</span><span class="w"> </span><span class="nc">PointViewIterator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pipeline</span><span class="p">.</span><span class="n">getPointViews</span><span class="p">()</span><span class="w"> </span><span class="c1">// iterator over PointViews</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">pv</span><span class="p">:</span><span class="w"> </span><span class="nc">PointView</span><span class="w">          </span><span class="o">=</span><span class="w"> </span><span class="n">pvs</span><span class="p">.</span><span class="n">next</span><span class="p">()</span><span class="w"> </span><span class="c1">// let&#39;s take the first PointView</span>
+
+<span class="c1">// load all points into JVM memory</span>
+<span class="c1">// PointCloud provides operations on PDAL points that</span>
+<span class="c1">// are loaded in this case into JVM memory as a single Array[Byte]</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">pointCloud</span><span class="p">:</span><span class="w"> </span><span class="nc">PointCloud</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pv</span><span class="p">.</span><span class="n">getPointCloud</span><span class="p">()</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">x</span><span class="p">:</span><span class="w"> </span><span class="nc">Double</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pointCloud</span><span class="p">.</span><span class="n">getDouble</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nc">DimType</span><span class="p">.</span><span class="nc">X</span><span class="p">)</span><span class="w"> </span><span class="c1">// get a point with PointId = 0 and only a single dimensions</span>
+
+<span class="c1">// in some cases it is not neccesary to load everything into JVM memory</span>
+<span class="c1">// so it is possible to get only required points directly from the PointView</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">y</span><span class="p">:</span><span class="w"> </span><span class="nc">Double</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pv</span><span class="p">.</span><span class="n">getDouble</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nc">DimType</span><span class="p">.</span><span class="nc">Y</span><span class="p">)</span>
+
+<span class="c1">// it is also possible to get access to the triangular mesh generated via PDAL</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">mesh</span><span class="p">:</span><span class="w"> </span><span class="nc">TriangularMesh</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="n">pv</span><span class="p">.</span><span class="n">getTriangularMesh</span><span class="p">()</span>
+<span class="c1">// the output is an Array of Triangles</span>
+<span class="c1">// Each Triangle contains PointIds from the PDAL point table</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">triangles</span><span class="p">:</span><span class="w"> </span><span class="nc">Array</span><span class="p">[</span><span class="nc">Triangle</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">asArray</span>
+
+<span class="n">pv</span><span class="p">.</span><span class="n">close</span><span class="p">()</span>
+<span class="n">pipeline</span><span class="p">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="using-pdal-scala">
+<h2>Using PDAL Scala<a class="headerlink" href="#using-pdal-scala" title="Permalink to this heading"></a></h2>
+<p>PDAL Scala project introduces a DSL to simplify PDAL Pipeline construction (this is the same pipeline from the section above):</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="nn">io</span><span class="p">.</span><span class="nn">pdal</span><span class="p">.</span><span class="n">_</span>
+<span class="k">import</span><span class="w"> </span><span class="nn">io</span><span class="p">.</span><span class="nn">pdal</span><span class="p">.</span><span class="nn">pipeline</span><span class="p">.</span><span class="n">_</span>
+
+<span class="kd">val</span><span class="w"> </span><span class="n">expression</span><span class="w"> </span><span class="o">=</span>
+<span class="w">  </span><span class="nc">ReadLas</span><span class="p">(</span><span class="s">&quot;1.2-with-color.las&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">spatialreference</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Some</span><span class="p">(</span><span class="s">&quot;EPSG:2993&quot;</span><span class="p">))</span><span class="w"> </span><span class="o">~</span>
+<span class="w">  </span><span class="nc">FilterReprojection</span><span class="p">(</span><span class="s">&quot;EPSG:3857&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">~</span>
+<span class="w">  </span><span class="nc">FilterDelaunay</span><span class="p">()</span>
+
+<span class="kd">val</span><span class="w"> </span><span class="n">pipeline</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">expression</span><span class="p">.</span><span class="n">toPipeline</span>
+<span class="n">pipeline</span><span class="p">.</span><span class="n">validate</span><span class="p">()</span><span class="w"> </span><span class="c1">// check if our JSON and options were good</span>
+<span class="n">pipeline</span><span class="p">.</span><span class="n">setLogLevel</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="w"> </span><span class="c1">// make it really noisy</span>
+<span class="n">pipeline</span><span class="p">.</span><span class="n">execute</span><span class="p">()</span><span class="w"> </span><span class="c1">// execute the pipeline</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">metadata</span><span class="p">:</span><span class="w"> </span><span class="nc">String</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="n">pipeline</span><span class="p">.</span><span class="n">getMetadata</span><span class="p">()</span><span class="w"> </span><span class="c1">// retrieve metadata</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">pvs</span><span class="p">:</span><span class="w"> </span><span class="nc">PointViewIterator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pipeline</span><span class="p">.</span><span class="n">getPointViews</span><span class="p">()</span><span class="w"> </span><span class="c1">// iterator over PointViews</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">pv</span><span class="p">:</span><span class="w"> </span><span class="nc">PointView</span><span class="w">          </span><span class="o">=</span><span class="w"> </span><span class="n">pvs</span><span class="p">.</span><span class="n">next</span><span class="p">()</span><span class="w"> </span><span class="c1">// let&#39;s take the first PointView</span>
+
+<span class="c1">// load all points into JVM memory</span>
+<span class="c1">// PointCloud provides operations on PDAL points that</span>
+<span class="c1">// are loaded in this case into JVM memory as a single Array[Byte]</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">pointCloud</span><span class="p">:</span><span class="w"> </span><span class="nc">PointCloud</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pv</span><span class="p">.</span><span class="n">getPointCloud</span><span class="p">()</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">x</span><span class="p">:</span><span class="w"> </span><span class="nc">Double</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pointCloud</span><span class="p">.</span><span class="n">getDouble</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nc">DimType</span><span class="p">.</span><span class="nc">X</span><span class="p">)</span><span class="w"> </span><span class="c1">// get a point with PointId = 0 and only a single dimensions</span>
+
+<span class="c1">// in some cases it is not neccesary to load everything into JVM memory</span>
+<span class="c1">// so it is possible to get only required points directly from the PointView</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">y</span><span class="p">:</span><span class="w"> </span><span class="nc">Double</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pv</span><span class="p">.</span><span class="n">getDouble</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nc">DimType</span><span class="p">.</span><span class="nc">Y</span><span class="p">)</span>
+
+<span class="c1">// it is also possible to get access to the triangular mesh generated via PDAL</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">mesh</span><span class="p">:</span><span class="w"> </span><span class="nc">TriangularMesh</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="n">pv</span><span class="p">.</span><span class="n">getTriangularMesh</span><span class="p">()</span>
+<span class="c1">// the output is an Array of Triangles</span>
+<span class="c1">// Each Triangle contains PointIds from the PDAL point table</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">triangles</span><span class="p">:</span><span class="w"> </span><span class="nc">Array</span><span class="p">[</span><span class="nc">Triangle</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">asArray</span>
+
+<span class="n">pv</span><span class="p">.</span><span class="n">close</span><span class="p">()</span>
+<span class="n">pipeline</span><span class="p">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>It covers PDAL 2.0.x, but to use any custom DSL that is not covered by the
+current Scala API you can use <code class="docutils literal notranslate"><span class="pre">RawExpr</span></code> type to build a <code class="docutils literal notranslate"><span class="pre">Pipeline</span> <span class="pre">Expression</span></code>:</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="nn">io</span><span class="p">.</span><span class="nn">pdal</span><span class="p">.</span><span class="n">_</span>
+<span class="k">import</span><span class="w"> </span><span class="nn">io</span><span class="p">.</span><span class="nn">pdal</span><span class="p">.</span><span class="nn">pipeline</span><span class="p">.</span><span class="n">_</span>
+<span class="k">import</span><span class="w"> </span><span class="nn">io</span><span class="p">.</span><span class="nn">circe</span><span class="p">.</span><span class="nn">syntax</span><span class="p">.</span><span class="n">_</span>
+
+<span class="kd">val</span><span class="w"> </span><span class="n">pipelineWithRawExpr</span><span class="w"> </span><span class="o">=</span>
+<span class="w">  </span><span class="nc">ReadLas</span><span class="p">(</span><span class="s">&quot;1.2-with-color.las&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">~</span>
+<span class="w">  </span><span class="nc">RawExpr</span><span class="p">(</span><span class="nc">Map</span><span class="p">(</span><span class="s">&quot;type&quot;</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="s">&quot;filters.crop&quot;</span><span class="p">).</span><span class="n">asJson</span><span class="p">)</span><span class="w"> </span><span class="o">~</span>
+<span class="w">  </span><span class="nc">WriteLas</span><span class="p">(</span><span class="s">&quot;1.2-with-color-out.las&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<section id="installation">
+<h3>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h3>
+<p id="index-2">PDAL Java artifacts are cross published for <code class="docutils literal notranslate"><span class="pre">Scala</span> <span class="pre">2.13</span></code>, <code class="docutils literal notranslate"><span class="pre">2.12</span></code> and <code class="docutils literal notranslate"><span class="pre">2.11</span></code>.
+However, if it is not required, a separate artifact that has no Scala specific
+artifact postfix is published as well.</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="c1">// pdal is published to maven central, but you can use following repos in addition</span>
+<span class="n">resolvers</span><span class="w"> </span><span class="o">++=</span><span class="w"> </span><span class="nc">Seq</span><span class="p">(</span>
+<span class="w">  </span><span class="nc">Resolver</span><span class="p">.</span><span class="n">sonatypeRepo</span><span class="p">(</span><span class="s">&quot;releases&quot;</span><span class="p">),</span>
+<span class="w">  </span><span class="nc">Resolver</span><span class="p">.</span><span class="n">sonatypeRepo</span><span class="p">(</span><span class="s">&quot;snapshots&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// for snaphots</span>
+<span class="p">)</span>
+
+<span class="n">libraryDependencies</span><span class="w"> </span><span class="o">++=</span><span class="w"> </span><span class="nc">Seq</span><span class="p">(</span>
+<span class="w">  </span><span class="s">&quot;io.pdal&quot;</span><span class="w"> </span><span class="o">%%</span><span class="w"> </span><span class="s">&quot;pdal&quot;</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="s">&quot;x.x.x&quot;</span><span class="p">,</span><span class="w">        </span><span class="c1">// core library</span>
+<span class="w">  </span><span class="s">&quot;io.pdal&quot;</span><span class="w"> </span><span class="o">%</span><span class="w">  </span><span class="s">&quot;pdal-native&quot;</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="s">&quot;x.x.x&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// jni binaries</span>
+<span class="w">  </span><span class="s">&quot;io.pdal&quot;</span><span class="w"> </span><span class="o">%%</span><span class="w"> </span><span class="s">&quot;pdal-scala&quot;</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="s">&quot;x.x.x&quot;</span><span class="w">   </span><span class="c1">// if scala core library (if required)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>The latest version is: <a class="reference external" href="https://search.maven.org/search?q=g:io.pdal">https://search.maven.org/search?q=g:io.pdal</a></p>
+<p>There is also an <a class="reference external" href="https://github.com/PDAL/java/tree/master/examples/pdal-jni">example SBT PDAL Demo project</a> in the
+bindings repository, that can be used for a quick start.</p>
+</section>
+<section id="compilation">
+<h3>Compilation<a class="headerlink" href="#compilation" title="Permalink to this heading"></a></h3>
+<dl id="index-3">
+<dt>Development purposes (including binaries) compilation:</dt><dd><ol class="arabic simple">
+<li><p>Install PDAL (using brew / package managers (unix) / build from sources / etc)</p></li>
+<li><p>Build native libs <code class="docutils literal notranslate"><span class="pre">./sbt</span> <span class="pre">native/nativeCompile</span></code> (optionally, binaries would be built during tests run)</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">./sbt</span> <span class="pre">core/test</span></code> to run PDAL tests</p></li>
+</ol>
+</dd>
+<dt>Only Java development purposes compilation:</dt><dd><ol class="arabic simple">
+<li><p>Provide <code class="docutils literal notranslate"><span class="pre">$LD_LIBRARY_PATH</span></code> or <code class="docutils literal notranslate"><span class="pre">$DYLD_LIBRARY_PATH</span></code></p></li>
+<li><p>If you don’t want to provide global variable you can pass <code class="docutils literal notranslate"><span class="pre">-Djava.library.path=&lt;path&gt;</span></code> into sbt:</p></li>
+</ol>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">./sbt</span> <span class="pre">-Djava.library.path=&lt;path&gt;</span></code></p>
+</div></blockquote>
+<ol class="arabic simple" start="3">
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">PDAL_DEPEND_ON_NATIVE=false</span></code> (to disable <code class="docutils literal notranslate"><span class="pre">native</span></code> project build)</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">PDAL_DEPEND_ON_NATIVE=false</span> <span class="pre">./sbt</span></code></p></li>
+</ol>
+</dd>
+</dl>
+<p>If you would like to use your own bindings binary, it is necessary to set <code class="docutils literal notranslate"><span class="pre">java.library.path</span></code>:</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="c1">// Mac OS X example with manual JNI installation</span>
+<span class="c1">// cp -f native/target/resource_managed/main/native/x86_64-darwin/libpdaljni.2.1.dylib /usr/local/lib/libpdaljni.2.1.dylib</span>
+<span class="c1">// place built binary into /usr/local/lib, and pass java.library.path to your JVM</span>
+<span class="n">javaOptions</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="s">&quot;-Djava.library.path=/usr/local/lib&quot;</span>
+</pre></div>
+</div>
+<p>You can use <code class="docutils literal notranslate"><span class="pre">pdal-native</span></code> dep in case you don’t have installed JNI bindings and to avoid steps described above.
+Dependency contains bindings for <code class="docutils literal notranslate"><span class="pre">x86_64-darwin</span></code> and <code class="docutils literal notranslate"><span class="pre">x86_64-linux</span></code>, other versions are not supported yet.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tutorial/index.html" class="btn btn-neutral float-right" title="Tutorials" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="python.html" class="btn btn-neutral float-left" title="Python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <div class="info">
+      <a class="logo-link" href="https://hobu.co">
+        <div class="hobu-logo"></div>
+      </a>
+      <div class="copyright">
+      
+
+                    &copy;  2023
+                        <a href="https://github.com/abellgithub">Andrew Bell</a>,
+                        <a href="https://github.com/chambbj">Brad Chambers</a>,
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>.
+
+      
+      Last updated on May 22, 2023.
+      </div>
+    </div>
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="footer">
+        <div class="container">
+                    &copy;  2023
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        <a href="http://github.com/mpgerlek">Michael Gerlek</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>,
+                Last updated
+                    on May 22, 2023.
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,361 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>filters.pmf &mdash; pdal.io</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/pdal.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/breathe.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="canonical" href="https://pdal.io/stages/filters.pmf.html"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="copyright" title="Copyright" href="../copyright.html" />
+    <link rel="next" title="filters.skewnessbalancing" href="filters.skewnessbalancing.html" />
+    <link rel="prev" title="filters.csf" href="filters.csf.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+          </a>
+              <div class="version">
+                2.6.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../apps/index.html">Applications</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../community.html">Community</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stages.html">Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readers.html">Readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writers.html">Writers</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="filters.html">Filters</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="filters.html#create">Create</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="filters.html#classification">Classification</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="filters.html#ground-unclassified">Ground/Unclassified</a></li>
+<li class="toctree-l4"><a class="reference internal" href="filters.html#noise">Noise</a></li>
+<li class="toctree-l4"><a class="reference internal" href="filters.html#consensus">Consensus</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="filters.html#height-above-ground">Height Above Ground</a></li>
+<li class="toctree-l3"><a class="reference internal" href="filters.html#colorization">Colorization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="filters.html#clustering">Clustering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="filters.html#pointwise-features">Pointwise Features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="filters.html#assignment">Assignment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="filters.html#dimension-create-copy">Dimension Create/Copy</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#order">Order</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#move">Move</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#cull">Cull</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#new">New</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#join">Join</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#metadata">Metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#mesh">Mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#languages">Languages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#other">Other</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../dimensions.html">Dimensions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../types.html">Types</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../python.html">Python</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../java.html">Java</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../workshop/index.html">Workshop</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project/index.html">Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../copyright.html">License</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PDAL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html"> Documentation </a> &raquo;</li>
+      
+          <li><a href="filters.html">Filters</a> &raquo;</li>
+      
+      <li>filters.pmf</li>
+    
+
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/PDAL/PDAL/edit//master/doc/stages/filters.pmf.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="filters.skewnessbalancing.html" class="btn btn-neutral float-right" title="filters.skewnessbalancing" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="filters.csf.html" class="btn btn-neutral float-left" title="filters.csf" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="filters-pmf">
+<span id="id1"></span><h1>filters.pmf<a class="headerlink" href="#filters-pmf" title="Permalink to this heading"></a></h1>
+<p>The <strong>Progressive Morphological Filter (PMF)</strong> is a method of
+segmenting ground and non-ground returns. This filter is an implementation
+of the method described in
+<a class="reference internal" href="../references.html#zhang2003" id="id2"><span>[Zhang2003]</span></a>.</p>
+<div class="admonition embed" id="embed-0">
+<p class="admonition-title">Default Embedded Stage </p>
+<p>This stage is enabled by default</p>
+</div>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this heading"></a></h2>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;input.las&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;filters.pmf&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="s2">&quot;output.las&quot;</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="#slope">slope</a> controls the height threshold at each iteration. A slope of 1.0
+represents a 1:1 or 45º.</p></li>
+<li><p><a class="reference internal" href="#initial-distance">initial_distance</a> is _intended_ to be set to account for z noise, so for a
+flat surface if you have an uncertainty of around 15 cm, you set
+<a class="reference internal" href="#initial-distance">initial_distance</a> large enough to not exclude these points from the ground.</p></li>
+<li><p>For a given iteration, the height threshold is determined by multiplying
+slope by <a class="reference internal" href="#cell-size">cell_size</a> by the difference in window size between the
+current and last iteration, plus the <a class="reference internal" href="#initial-distance">initial_distance</a>. This height
+threshold is constant across all cells and is maxed out at the
+<a class="reference internal" href="#max-distance">max_distance</a> value. If the difference in elevation between a point and its
+“opened” value (from the morphological operator) exceeds the height threshold,
+it is treated as non-ground.  So, bigger slope leads to bigger height
+thresholds, and these grow with each iteration (not to exceed the max).  With
+flat terrain, keep this low, the thresholds are small, and stuff is more
+aggressively dumped into non-ground class.  In rugged terrain, open things up
+a little, but then you can start missing buildings, veg, etc.</p></li>
+<li><p>Very large <a class="reference internal" href="#max-window-size">max_window_size</a> values will result in a lot of potentially
+extra iteration. This parameter can have a strongly negative impact on
+computation performance.</p></li>
+<li><p><a class="reference internal" href="#exponential">exponential</a> is used to control the rate of growth of morphological window
+sizes toward <a class="reference internal" href="#max-window-size">max_window_size</a>. Linear growth preserves gradually changing
+topographic features well, but demands considerable compute time. The default
+behavior is to grow the window sizes exponentially, thus reducing the number
+of iterations.</p></li>
+<li><p>This filter will mark all returns deemed to be ground returns with a
+classification value of 2 (per the LAS specification). To extract only these
+returns, users can add a <a class="reference internal" href="filters.range.html#filters-range"><span class="std std-ref">range filter</span></a> to the pipeline.</p></li>
+</ul>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;filters.range&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;limits&quot;</span><span class="p">:</span><span class="s2">&quot;Classification[2:2]&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="../references.html#zhang2003" id="id3"><span>[Zhang2003]</span></a> describes the consequences and relationships of the parameters
+in more detail and is the canonical resource on the topic.</p>
+</div>
+</section>
+<section id="options">
+<h2>Options<a class="headerlink" href="#options" title="Permalink to this heading"></a></h2>
+<dl class="simple">
+<dt><span class="target" id="cell-size">cell_size</span></dt><dd><p>Cell Size. [Default: 1]</p>
+</dd>
+<dt><span class="target" id="exponential">exponential</span></dt><dd><p>Use exponential growth for window sizes? [Default: true]</p>
+</dd>
+<dt><span class="target" id="ignore">ignore</span></dt><dd><p>Range of values to ignore. [Optional]</p>
+</dd>
+<dt><span class="target" id="initial-distance">initial_distance</span></dt><dd><p>Initial distance. [Default: 0.15]</p>
+</dd>
+<dt>returns</dt><dd><p>Comma-separated list of return types into which data should be segmented.
+Valid groups are “last”, “first”, “intermediate” and “only”. [Default:
+“last, only”]</p>
+</dd>
+<dt><span class="target" id="max-distance">max_distance</span></dt><dd><p>Maximum distance. [Default: 2.5]</p>
+</dd>
+<dt><span class="target" id="max-window-size">max_window_size</span></dt><dd><p>Maximum window size. [Default: 33]</p>
+</dd>
+<dt><span class="target" id="slope">slope</span></dt><dd><p>Slope. [Default: 1.0]</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>where</dt><dd><p>An <a class="reference internal" href="expression.html#pdal-expression"><span class="std std-ref">expression</span></a> that limits points passed to a filter.
+Points that don’t pass the
+expression skip the stage but are available to subsequent stages in a pipeline.
+[Default: no filtering]</p>
+</dd>
+<dt>where_merge</dt><dd><p>A strategy for merging points skipped by a ‘<cite>where’</cite> option when running in standard mode.
+If <code class="docutils literal notranslate"><span class="pre">true</span></code>, the skipped points are added to the first point view returned by the skipped
+filter. If <code class="docutils literal notranslate"><span class="pre">false</span></code>, skipped points are placed in their own point view. If <code class="docutils literal notranslate"><span class="pre">auto</span></code>,
+skipped points are merged into the returned point view provided that only one point view
+is returned and it has the same point count as it did when the filter was run.
+[Default: <code class="docutils literal notranslate"><span class="pre">auto</span></code>]</p>
+</dd>
+</dl>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="filters.skewnessbalancing.html" class="btn btn-neutral float-right" title="filters.skewnessbalancing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="filters.csf.html" class="btn btn-neutral float-left" title="filters.csf" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <div class="info">
+      <a class="logo-link" href="https://hobu.co">
+        <div class="hobu-logo"></div>
+      </a>
+      <div class="copyright">
+      
+
+                    &copy;  2023
+                        <a href="https://github.com/abellgithub">Andrew Bell</a>,
+                        <a href="https://github.com/chambbj">Brad Chambers</a>,
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>.
+
+      
+      Last updated on May 22, 2023.
+      </div>
+    </div>
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="footer">
+        <div class="container">
+                    &copy;  2023
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        <a href="http://github.com/mpgerlek">Michael Gerlek</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>,
+                Last updated
+                    on May 22, 2023.
+        </div>
+    </div>
+
+</body>
+</html>

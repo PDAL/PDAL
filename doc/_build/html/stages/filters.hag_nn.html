@@ -1,0 +1,383 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>filters.hag_nn &mdash; pdal.io</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/pdal.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/breathe.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="canonical" href="https://pdal.io/stages/filters.hag_nn.html"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="copyright" title="Copyright" href="../copyright.html" />
+    <link rel="next" title="filters.colorinterp" href="filters.colorinterp.html" />
+    <link rel="prev" title="filters.hag_dem" href="filters.hag_dem.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+          </a>
+              <div class="version">
+                2.6.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../apps/index.html">Applications</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../community.html">Community</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stages.html">Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readers.html">Readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writers.html">Writers</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="filters.html">Filters</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="filters.html#create">Create</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="filters.html#classification">Classification</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="filters.html#height-above-ground">Height Above Ground</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="filters.hag_delaunay.html">filters.hag_delaunay</a></li>
+<li class="toctree-l4"><a class="reference internal" href="filters.hag_dem.html">filters.hag_dem</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">filters.hag_nn</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="filters.html#colorization">Colorization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="filters.html#clustering">Clustering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="filters.html#pointwise-features">Pointwise Features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="filters.html#assignment">Assignment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="filters.html#dimension-create-copy">Dimension Create/Copy</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#order">Order</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#move">Move</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#cull">Cull</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#new">New</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#join">Join</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#metadata">Metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#mesh">Mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#languages">Languages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#other">Other</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../dimensions.html">Dimensions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../types.html">Types</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../python.html">Python</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../java.html">Java</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../workshop/index.html">Workshop</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project/index.html">Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../copyright.html">License</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PDAL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html"> Documentation </a> &raquo;</li>
+      
+          <li><a href="filters.html">Filters</a> &raquo;</li>
+      
+      <li>filters.hag_nn</li>
+    
+
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/PDAL/PDAL/edit//master/doc/stages/filters.hag_nn.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="filters.colorinterp.html" class="btn btn-neutral float-right" title="filters.colorinterp" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="filters.hag_dem.html" class="btn btn-neutral float-left" title="filters.hag_dem" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="filters-hag-nn">
+<span id="id1"></span><h1>filters.hag_nn<a class="headerlink" href="#filters-hag-nn" title="Permalink to this heading"></a></h1>
+<p>The <strong>Height Above Ground Nearest Neighbor filter</strong> takes as input a point
+cloud with <code class="docutils literal notranslate"><span class="pre">Classification</span></code> set to 2 for ground points.  It creates a new
+dimension, <code class="docutils literal notranslate"><span class="pre">HeightAboveGround</span></code>, that contains the normalized height values.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We expect ground returns to have the classification value of 2 in keeping
+with the <a class="reference external" href="http://www.asprs.org/a/society/committees/standards/LAS_1_4_r13.pdf">ASPRS Standard LIDAR Point Classes</a>.</p>
+</div>
+<p>Ground points may be generated by <a class="reference internal" href="filters.pmf.html#filters-pmf"><span class="std std-ref">filters.pmf</span></a> or <a class="reference internal" href="filters.smrf.html#filters-smrf"><span class="std std-ref">filters.smrf</span></a>,
+but you can use any method you choose, as long as the ground returns are
+marked.</p>
+<p>Normalized heights are a commonly used attribute of point cloud data. This can
+also be referred to as <em>height above ground</em> (HAG) or <em>above ground level</em>
+(AGL) heights. In the end, it is simply a measure of a point’s relative height
+as opposed to its raw elevation value.</p>
+<p>The filter finds the <a class="reference internal" href="#count">count</a> ground points nearest the non-ground point under
+consideration.  It calculates an average ground height weighted by the distance
+of each ground point from the non-ground point.  The <code class="docutils literal notranslate"><span class="pre">HeightAboveGround</span></code> is
+the difference between the <code class="docutils literal notranslate"><span class="pre">Z</span></code> value of the non-ground point and the
+interpolated ground height.</p>
+<div class="admonition embed" id="embed-0">
+<p class="admonition-title">Default Embedded Stage </p>
+<p>This stage is enabled by default</p>
+</div>
+<section id="example-1">
+<h2>Example #1<a class="headerlink" href="#example-1" title="Permalink to this heading"></a></h2>
+<p>Using the autzen dataset (here shown colored by elevation), which already has
+points classified as ground</p>
+<a class="reference internal image-reference" href="../_images/autzen-elevation.png"><img alt="../_images/autzen-elevation.png" src="../_images/autzen-elevation.png" style="height: 400px;" /></a>
+<p>we execute the following pipeline</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;autzen.laz&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;filters.hag_nn&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;writers.laz&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="p">:</span><span class="s2">&quot;autzen_hag_nn.laz&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;extra_dims&quot;</span><span class="p">:</span><span class="s2">&quot;HeightAboveGround=float32&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>which is equivalent to the <code class="docutils literal notranslate"><span class="pre">pdal</span> <span class="pre">translate</span></code> command</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pdal translate autzen.laz autzen_hag_nn.laz hag_nn \
+    --writers.las.extra_dims=&quot;HeightAboveGround=float32&quot;
+</pre></div>
+</div>
+<p>In either case, the result, when colored by the normalized height instead of
+elevation is</p>
+<a class="reference internal image-reference" href="../_images/autzen-hag-nn.png"><img alt="../_images/autzen-hag-nn.png" src="../_images/autzen-hag-nn.png" style="height: 400px;" /></a>
+</section>
+<section id="example-2">
+<h2>Example #2<a class="headerlink" href="#example-2" title="Permalink to this heading"></a></h2>
+<p>In the previous example, we chose to write <code class="docutils literal notranslate"><span class="pre">HeightAboveGround</span></code> using the
+<code class="docutils literal notranslate"><span class="pre">extra_dims</span></code> option of <a class="reference internal" href="writers.las.html#writers-las"><span class="std std-ref">writers.las</span></a>. If you’d instead like to overwrite
+your Z values, then follow the height filter with <a class="reference internal" href="filters.ferry.html#filters-ferry"><span class="std std-ref">filters.ferry</span></a> as shown</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;autzen.laz&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;filters.hag_nn&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;filters.ferry&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;dimensions&quot;</span><span class="p">:</span><span class="s2">&quot;HeightAboveGround=&gt;Z&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="s2">&quot;autzen-height-as-Z.laz&quot;</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="example-3">
+<h2>Example #3<a class="headerlink" href="#example-3" title="Permalink to this heading"></a></h2>
+<p>If you don’t yet have points classified as ground, start with <a class="reference internal" href="filters.pmf.html#filters-pmf"><span class="std std-ref">filters.pmf</span></a>
+or <a class="reference internal" href="filters.smrf.html#filters-smrf"><span class="std std-ref">filters.smrf</span></a> to label ground returns, as shown</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;autzen.laz&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;filters.smrf&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;filters.hag_nn&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;filters.ferry&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;dimensions&quot;</span><span class="p">:</span><span class="s2">&quot;HeightAboveGround=&gt;Z&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="s2">&quot;autzen-height-as-Z-smrf.laz&quot;</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="options">
+<h2>Options<a class="headerlink" href="#options" title="Permalink to this heading"></a></h2>
+<dl class="simple">
+<dt><span class="target" id="count">count</span></dt><dd><p>The number of ground neighbors to consider when determining the height
+above ground for a non-ground point.  [Default: 1]</p>
+</dd>
+<dt>max_distance</dt><dd><p>Use only ground points within <cite>max_distance</cite> of non-ground point when
+performing neighbor interpolation.  [Default: None]</p>
+</dd>
+<dt>allow_extrapolation</dt><dd><p>If false and a non-ground point lies outside of the bounding box of all
+ground points, its <code class="docutils literal notranslate"><span class="pre">HeightAboveGround</span></code> is set to 0.  If true,
+extrapolation is used to assign the <code class="docutils literal notranslate"><span class="pre">HeightAboveGround</span></code> value.  [Default:
+false]</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>where</dt><dd><p>An <a class="reference internal" href="expression.html#pdal-expression"><span class="std std-ref">expression</span></a> that limits points passed to a filter.
+Points that don’t pass the
+expression skip the stage but are available to subsequent stages in a pipeline.
+[Default: no filtering]</p>
+</dd>
+<dt>where_merge</dt><dd><p>A strategy for merging points skipped by a ‘<cite>where’</cite> option when running in standard mode.
+If <code class="docutils literal notranslate"><span class="pre">true</span></code>, the skipped points are added to the first point view returned by the skipped
+filter. If <code class="docutils literal notranslate"><span class="pre">false</span></code>, skipped points are placed in their own point view. If <code class="docutils literal notranslate"><span class="pre">auto</span></code>,
+skipped points are merged into the returned point view provided that only one point view
+is returned and it has the same point count as it did when the filter was run.
+[Default: <code class="docutils literal notranslate"><span class="pre">auto</span></code>]</p>
+</dd>
+</dl>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="filters.colorinterp.html" class="btn btn-neutral float-right" title="filters.colorinterp" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="filters.hag_dem.html" class="btn btn-neutral float-left" title="filters.hag_dem" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <div class="info">
+      <a class="logo-link" href="https://hobu.co">
+        <div class="hobu-logo"></div>
+      </a>
+      <div class="copyright">
+      
+
+                    &copy;  2023
+                        <a href="https://github.com/abellgithub">Andrew Bell</a>,
+                        <a href="https://github.com/chambbj">Brad Chambers</a>,
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>.
+
+      
+      Last updated on May 22, 2023.
+      </div>
+    </div>
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="footer">
+        <div class="container">
+                    &copy;  2023
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        <a href="http://github.com/mpgerlek">Michael Gerlek</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>,
+                Last updated
+                    on May 22, 2023.
+        </div>
+    </div>
+
+</body>
+</html>

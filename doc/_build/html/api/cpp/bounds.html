@@ -1,0 +1,907 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pdal::BOX2D &mdash; pdal.io</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/pdal.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/breathe.css" type="text/css" />
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://pdal.io/api/cpp/bounds.html"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="copyright" title="Copyright" href="../../copyright.html" />
+    <link rel="next" title="pdal::Charbuf" href="charbuf.html" />
+    <link rel="prev" title="C++ API" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+          </a>
+              <div class="version">
+                2.6.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../about.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../download.html">Download</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../apps/index.html">Applications</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../community.html">Community</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../pipeline.html">Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stages/stages.html">Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stages/readers.html">Readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stages/writers.html">Writers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stages/filters.html">Filters</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../dimensions.html">Dimensions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../types.html">Types</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../python.html">Python</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../java.html">Java</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../workshop/index.html">Workshop</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../project/index.html">Project</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">C++ API</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::BOX2D</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="charbuf.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Charbuf</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="columnpointtable.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::ColumnPointTable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dimension.html"><code class="docutils literal notranslate"><span class="pre">pdal::Dimension</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="extractor.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Extractor</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileutils.html"><code class="docutils literal notranslate"><span class="pre">pdal::FileUtils</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="filter.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Filter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="istream.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::IStream</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="log.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Log</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="metadata.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Metadata</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="options.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Options</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pointtable.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::PointTable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pointview.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::PointView</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="programargs.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::ProgramArgs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="reader.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Reader</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="rowpointtable.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::RowPointTable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="stage.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Stage</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="stagefactory.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::StageFactory</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html"><code class="docutils literal notranslate"><span class="pre">pdal::Utils</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="writer.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Writer</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../transition/index.html">libLAS C API to PDAL transition guide</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../copyright.html">License</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PDAL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html"> Documentation </a> &raquo;</li>
+      
+          <li><a href="../index.html">API</a> &raquo;</li>
+      
+          <li><a href="index.html">C++ API</a> &raquo;</li>
+      
+      <li><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::BOX2D</span></code></li>
+    
+
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/PDAL/PDAL/edit//master/doc/api/cpp/bounds.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="charbuf.html" class="btn btn-neutral float-right" title="pdal::Charbuf" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="C++ API" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pdal-box2d">
+<span id="cpp-pdal-bounds"></span><h1><a class="reference internal" href="#_CPPv4N4pdal5BOX2DE" title="pdal::BOX2D"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::BOX2D</span></code></a><a class="headerlink" href="#pdal-box2d" title="Permalink to this heading"></a></h1>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX2DE">
+<span id="_CPPv3N4pdal5BOX2DE"></span><span id="_CPPv2N4pdal5BOX2DE"></span><span id="pdal::BOX2D"></span><span class="target" id="classpdal_1_1BOX2D"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">BOX2D</span></span></span><a class="headerlink" href="#_CPPv4N4pdal5BOX2DE" title="Permalink to this definition"></a><br /></dt>
+<dd><p><a class="reference internal" href="#classpdal_1_1BOX2D"><span class="std std-ref">BOX2D</span></a> represents a two-dimensional box with double-precision bounds. </p>
+<p>Subclassed by <a class="reference internal" href="#classpdal_1_1BOX3D"><span class="std std-ref">pdal::BOX3D</span></a></p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX2D5BOX2DEv">
+<span id="_CPPv3N4pdal5BOX2D5BOX2DEv"></span><span id="_CPPv2N4pdal5BOX2D5BOX2DEv"></span><span id="pdal::BOX2D::BOX2D"></span><span class="target" id="classpdal_1_1BOX2D_1a375c7291fb08957fb5681da9b9fa4937"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">BOX2D</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5BOX2D5BOX2DEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Construct an “empty” bounds box. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX2D5BOX2DEdddd">
+<span id="_CPPv3N4pdal5BOX2D5BOX2DEdddd"></span><span id="_CPPv2N4pdal5BOX2D5BOX2DEdddd"></span><span id="pdal::BOX2D::BOX2D__double.double.double.double"></span><span class="target" id="classpdal_1_1BOX2D_1a9f8c396394e2954259768927318aac28"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">BOX2D</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">minx</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">miny</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">maxx</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">maxy</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5BOX2D5BOX2DEdddd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Construct and initialize a bounds box. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>minx</strong> – Minimum X value. </p></li>
+<li><p><strong>miny</strong> – Minimum Y value. </p></li>
+<li><p><strong>maxx</strong> – Maximum X value. </p></li>
+<li><p><strong>maxy</strong> – Maximum Y value. </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5BOX2D5emptyEv">
+<span id="_CPPv3NK4pdal5BOX2D5emptyEv"></span><span id="_CPPv2NK4pdal5BOX2D5emptyEv"></span><span id="pdal::BOX2D::emptyC"></span><span class="target" id="classpdal_1_1BOX2D_1a7fb107a88f68d497a98d87ea0e89e9e9"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">empty</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5BOX2D5emptyEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Determine whether a bounds box has not had any bounds set. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Whether the bounds box is empty. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5BOX2D5validEv">
+<span id="_CPPv3NK4pdal5BOX2D5validEv"></span><span id="_CPPv2NK4pdal5BOX2D5validEv"></span><span id="pdal::BOX2D::validC"></span><span class="target" id="classpdal_1_1BOX2D_1ab7f2713cbf75f2b820fcd8ddba92a6a7"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">valid</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5BOX2D5validEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Determine whether a bounds box has had any bounds set. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Whether the bounds box is valid. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX2D5clearEv">
+<span id="_CPPv3N4pdal5BOX2D5clearEv"></span><span id="_CPPv2N4pdal5BOX2D5clearEv"></span><span id="pdal::BOX2D::clear"></span><span class="target" id="classpdal_1_1BOX2D_1a299dd7a0eb6878ba584f6ae3608c22f1"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">clear</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5BOX2D5clearEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Clear the bounds box to an empty state. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX2D4growEdd">
+<span id="_CPPv3N4pdal5BOX2D4growEdd"></span><span id="_CPPv2N4pdal5BOX2D4growEdd"></span><span id="pdal::BOX2D::grow__double.double"></span><span class="target" id="classpdal_1_1BOX2D_1a373331c3cdf146fb7ac6e8dfea5b5aef"></span><a class="reference internal" href="#_CPPv4N4pdal5BOX2DE" title="pdal::BOX2D"><span class="n"><span class="pre">BOX2D</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">grow</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">x</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">y</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5BOX2D4growEdd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Expand the bounds of the box to include the specified point. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – X point location. </p></li>
+<li><p><strong>y</strong> – Y point location. </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX2D4growEd">
+<span id="_CPPv3N4pdal5BOX2D4growEd"></span><span id="_CPPv2N4pdal5BOX2D4growEd"></span><span id="pdal::BOX2D::grow__double"></span><span class="target" id="classpdal_1_1BOX2D_1af46365212b4e48a0f876021352ad8d8e"></span><a class="reference internal" href="#_CPPv4N4pdal5BOX2DE" title="pdal::BOX2D"><span class="n"><span class="pre">BOX2D</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">grow</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">dist</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5BOX2D4growEd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Expand the bounds of the box in all directions by a specified amount. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dist</strong> – Distance by which to expand the box. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5BOX2D8containsEdd">
+<span id="_CPPv3NK4pdal5BOX2D8containsEdd"></span><span id="_CPPv2NK4pdal5BOX2D8containsEdd"></span><span id="pdal::BOX2D::contains__double.doubleC"></span><span class="target" id="classpdal_1_1BOX2D_1a218d3130191186989fdf786c54909e9e"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">contains</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">x</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">y</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5BOX2D8containsEdd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Determine if a bounds box contains a point. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – X dimension value. </p></li>
+<li><p><strong>y</strong> – Y dimension value. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether both dimensions are equal to or less than the maximum box values and equal to or more than the minimum box values. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5BOX2D5equalERK5BOX2D">
+<span id="_CPPv3NK4pdal5BOX2D5equalERK5BOX2D"></span><span id="_CPPv2NK4pdal5BOX2D5equalERK5BOX2D"></span><span id="pdal::BOX2D::equal__BOX2DCRC"></span><span class="target" id="classpdal_1_1BOX2D_1a4b6fcabd9b310985587d5148451a5b1e"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">equal</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal5BOX2DE" title="pdal::BOX2D"><span class="n"><span class="pre">BOX2D</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">other</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5BOX2D5equalERK5BOX2D" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Determine if the bounds of this box are the same as that of another box. </p>
+<p>Empty bounds boxes are always equal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> – Bounds box to check for equality. </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">true</span></code> if the provided box has equal limits to this box, <code class="docutils literal notranslate"><span class="pre">false</span></code> otherwise. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5BOX2DeqERK5BOX2D">
+<span id="_CPPv3NK4pdal5BOX2DeqERK5BOX2D"></span><span id="_CPPv2NK4pdal5BOX2DeqERK5BOX2D"></span><span id="pdal::BOX2D::eq-operator__BOX2DCRC"></span><span class="target" id="classpdal_1_1BOX2D_1a74f0d7342f1153e913fb8f05a47546e0"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">==</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4N4pdal5BOX2DE" title="pdal::BOX2D"><span class="n"><span class="pre">BOX2D</span></span></a><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">other</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5BOX2DeqERK5BOX2D" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Determine if the bounds of this box are the same as that of another box. </p>
+<p>Empty bounds boxes are always equal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> – Bounds box to check for equality. </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">true</span></code> if the provided box has equal limits to this box, <code class="docutils literal notranslate"><span class="pre">false</span></code> otherwise. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5BOX2DneERK5BOX2D">
+<span id="_CPPv3NK4pdal5BOX2DneERK5BOX2D"></span><span id="_CPPv2NK4pdal5BOX2DneERK5BOX2D"></span><span id="pdal::BOX2D::neq-operator__BOX2DCRC"></span><span class="target" id="classpdal_1_1BOX2D_1a2aae0bad7367e745b37e0e331507c2d0"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">!=</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4N4pdal5BOX2DE" title="pdal::BOX2D"><span class="n"><span class="pre">BOX2D</span></span></a><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">other</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5BOX2DneERK5BOX2D" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Determine if the bounds of this box are different from that of another box. </p>
+<p>Empty bounds boxes are never unequal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> – Bounds box to check for inequality. </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">true</span></code> if the provided box has limits different from this box, <code class="docutils literal notranslate"><span class="pre">false</span></code> otherwise. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX2D4growERK5BOX2D">
+<span id="_CPPv3N4pdal5BOX2D4growERK5BOX2D"></span><span id="_CPPv2N4pdal5BOX2D4growERK5BOX2D"></span><span id="pdal::BOX2D::grow__BOX2DCR"></span><span class="target" id="classpdal_1_1BOX2D_1af9c158cc501b2e783f5e32d837baa1f8"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal5BOX2DE" title="pdal::BOX2D"><span class="n"><span class="pre">BOX2D</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">grow</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal5BOX2DE" title="pdal::BOX2D"><span class="n"><span class="pre">BOX2D</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">other</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5BOX2D4growERK5BOX2D" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Expand this box to contain another box. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> – Box that this box should contain. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX2D4clipERK5BOX2D">
+<span id="_CPPv3N4pdal5BOX2D4clipERK5BOX2D"></span><span id="_CPPv2N4pdal5BOX2D4clipERK5BOX2D"></span><span id="pdal::BOX2D::clip__BOX2DCR"></span><span class="target" id="classpdal_1_1BOX2D_1a3aef8b868845f667fda96fd3556a6e7c"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">clip</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal5BOX2DE" title="pdal::BOX2D"><span class="n"><span class="pre">BOX2D</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">other</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5BOX2D4clipERK5BOX2D" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Clip this bounds box by another so it will be contained by the other box. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> – Clipping box for this box. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5BOX2D8containsERK5BOX2D">
+<span id="_CPPv3NK4pdal5BOX2D8containsERK5BOX2D"></span><span id="_CPPv2NK4pdal5BOX2D8containsERK5BOX2D"></span><span id="pdal::BOX2D::contains__BOX2DCRC"></span><span class="target" id="classpdal_1_1BOX2D_1a5091643413926baeccfcdca6bacb0643"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">contains</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal5BOX2DE" title="pdal::BOX2D"><span class="n"><span class="pre">BOX2D</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">other</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5BOX2D8containsERK5BOX2D" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Determine if another bounds box is contained in this bounds box. </p>
+<p>Equal limits are considered to be contained.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> – Bounds box to check for containment. </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">true</span></code> if the provided box is contained in this box, <code class="docutils literal notranslate"><span class="pre">false</span></code> otherwise. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5BOX2D8overlapsERK5BOX2D">
+<span id="_CPPv3NK4pdal5BOX2D8overlapsERK5BOX2D"></span><span id="_CPPv2NK4pdal5BOX2D8overlapsERK5BOX2D"></span><span id="pdal::BOX2D::overlaps__BOX2DCRC"></span><span class="target" id="classpdal_1_1BOX2D_1a270703a22359091aff0beae67e866625"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">overlaps</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal5BOX2DE" title="pdal::BOX2D"><span class="n"><span class="pre">BOX2D</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">other</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5BOX2D8overlapsERK5BOX2D" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Determine if another box overlaps this box. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> – Box to test for overlap. </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether the provided box overlaps this box. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5BOX2D5toBoxE8uint32_t">
+<span id="_CPPv3NK4pdal5BOX2D5toBoxE8uint32_t"></span><span id="_CPPv2NK4pdal5BOX2D5toBoxE8uint32_t"></span><span id="pdal::BOX2D::toBox__uint32_tC"></span><span class="target" id="classpdal_1_1BOX2D_1ac72db07c52376184e73017543223b40b"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">toBox</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">precision</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">8</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5BOX2D5toBoxE8uint32_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Convert this box to a string suitable for use in SQLite. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>precision</strong> – Precision for output [default: 8] </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>String format of this box. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5BOX2D5toWKTE8uint32_t">
+<span id="_CPPv3NK4pdal5BOX2D5toWKTE8uint32_t"></span><span id="_CPPv2NK4pdal5BOX2D5toWKTE8uint32_t"></span><span id="pdal::BOX2D::toWKT__uint32_tC"></span><span class="target" id="classpdal_1_1BOX2D_1a89f011a065f162f8d17d2a4ce4b532b2"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">toWKT</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">precision</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">8</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5BOX2D5toWKTE8uint32_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Convert this box to a well-known text string. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>precision</strong> – Precision for output [default: 8] </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>String format of this box. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5BOX2D9toGeoJSONE8uint32_t">
+<span id="_CPPv3NK4pdal5BOX2D9toGeoJSONE8uint32_t"></span><span id="_CPPv2NK4pdal5BOX2D9toGeoJSONE8uint32_t"></span><span id="pdal::BOX2D::toGeoJSON__uint32_tC"></span><span class="target" id="classpdal_1_1BOX2D_1a6fdde5b566f3e358fcf1fedcc0b237bc"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">toGeoJSON</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">precision</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">8</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5BOX2D9toGeoJSONE8uint32_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Convert this box to a GeoJSON text string. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>precision</strong> – Precision for output [default: 8] </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>String format of this box. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX2D5parseERKNSt6stringERNSt6string9size_typeE">
+<span id="_CPPv3N4pdal5BOX2D5parseERKNSt6stringERNSt6string9size_typeE"></span><span id="_CPPv2N4pdal5BOX2D5parseERKNSt6stringERNSt6string9size_typeE"></span><span id="pdal::BOX2D::parse__ssCR.std::string::size_typeR"></span><span class="target" id="classpdal_1_1BOX2D_1a5ddf7c378bfe1497e489b1c58fad70e9"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">parse</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">s</span></span>, <span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">size_type</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">pos</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5BOX2D5parseERKNSt6stringERNSt6string9size_typeE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Parse a string as a <a class="reference internal" href="#classpdal_1_1BOX2D"><span class="std std-ref">BOX2D</span></a>. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s</strong> – String representation of the box. </p></li>
+<li><p><strong>pos</strong> – Position in the string at which to start parsing. On return set to parsing end position. </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX2D4minxE">
+<span id="_CPPv3N4pdal5BOX2D4minxE"></span><span id="_CPPv2N4pdal5BOX2D4minxE"></span><span id="pdal::BOX2D::minx__double"></span><span class="target" id="classpdal_1_1BOX2D_1ae47a946028d6d48b96477a17596c449f"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">minx</span></span></span><a class="headerlink" href="#_CPPv4N4pdal5BOX2D4minxE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Minimum X value. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX2D4maxxE">
+<span id="_CPPv3N4pdal5BOX2D4maxxE"></span><span id="_CPPv2N4pdal5BOX2D4maxxE"></span><span id="pdal::BOX2D::maxx__double"></span><span class="target" id="classpdal_1_1BOX2D_1ab2b3bbff63b654340c501a71524ba333"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">maxx</span></span></span><a class="headerlink" href="#_CPPv4N4pdal5BOX2D4maxxE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Maximum X value. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX2D4minyE">
+<span id="_CPPv3N4pdal5BOX2D4minyE"></span><span id="_CPPv2N4pdal5BOX2D4minyE"></span><span id="pdal::BOX2D::miny__double"></span><span class="target" id="classpdal_1_1BOX2D_1a7811c55c05b344a64c9bbc830112c8d7"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">miny</span></span></span><a class="headerlink" href="#_CPPv4N4pdal5BOX2D4minyE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Minimum Y value. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX2D4maxyE">
+<span id="_CPPv3N4pdal5BOX2D4maxyE"></span><span id="_CPPv2N4pdal5BOX2D4maxyE"></span><span id="pdal::BOX2D::maxy__double"></span><span class="target" id="classpdal_1_1BOX2D_1a772f64b028f339247a06f62d538c871c"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">maxy</span></span></span><a class="headerlink" href="#_CPPv4N4pdal5BOX2D4maxyE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Maximum Y value. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-static-functions">Public Static Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX2D23getDefaultSpatialExtentEv">
+<span id="_CPPv3N4pdal5BOX2D23getDefaultSpatialExtentEv"></span><span id="_CPPv2N4pdal5BOX2D23getDefaultSpatialExtentEv"></span><span id="pdal::BOX2D::getDefaultSpatialExtent"></span><span class="target" id="classpdal_1_1BOX2D_1a807d5af227db2720beec42a1a128b60d"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal5BOX2DE" title="pdal::BOX2D"><span class="n"><span class="pre">BOX2D</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getDefaultSpatialExtent</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5BOX2D23getDefaultSpatialExtentEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Return a statically-allocated Bounds extent that represents infinity. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A bounds box with infinite bounds, </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX2D5errorE">
+<span id="_CPPv3N4pdal5BOX2D5errorE"></span><span id="_CPPv2N4pdal5BOX2D5errorE"></span><span id="pdal::BOX2D::error"></span><span class="target" id="structpdal_1_1BOX2D_1_1error"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">error</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">runtime_error</span></span><a class="headerlink" href="#_CPPv4N4pdal5BOX2D5errorE" title="Permalink to this definition"></a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX2D5error5errorERKNSt6stringE">
+<span id="_CPPv3N4pdal5BOX2D5error5errorERKNSt6stringE"></span><span id="_CPPv2N4pdal5BOX2D5error5errorERKNSt6stringE"></span><span id="pdal::BOX2D::error::error__ssCR"></span><span class="target" id="structpdal_1_1BOX2D_1_1error_1a2203bc81dd9d4f07fd0942748abd4d6c"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">error</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">err</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5BOX2D5error5errorERKNSt6stringE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX3DE">
+<span id="_CPPv3N4pdal5BOX3DE"></span><span id="_CPPv2N4pdal5BOX3DE"></span><span id="pdal::BOX3D"></span><span class="target" id="classpdal_1_1BOX3D"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">BOX3D</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">private</span></span><span class="w"> </span><span class="n"><span class="pre">pdal</span></span><span class="p"><span class="pre">::</span></span><a class="reference internal" href="#_CPPv4N4pdal5BOX2DE" title="pdal::BOX2D"><span class="n"><span class="pre">BOX2D</span></span></a><a class="headerlink" href="#_CPPv4N4pdal5BOX3DE" title="Permalink to this definition"></a><br /></dt>
+<dd><p><a class="reference internal" href="#classpdal_1_1BOX3D"><span class="std std-ref">BOX3D</span></a> represents a three-dimensional box with double-precision bounds. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX3D5BOX3DEv">
+<span id="_CPPv3N4pdal5BOX3D5BOX3DEv"></span><span id="_CPPv2N4pdal5BOX3D5BOX3DEv"></span><span id="pdal::BOX3D::BOX3D"></span><span class="target" id="classpdal_1_1BOX3D_1adf44e4d7f449ea21c665ee2511f20ed4"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">BOX3D</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5BOX3D5BOX3DEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Clear the bounds box to an empty state. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX3D5BOX3DERK5BOX3D">
+<span id="_CPPv3N4pdal5BOX3D5BOX3DERK5BOX3D"></span><span id="_CPPv2N4pdal5BOX3D5BOX3DERK5BOX3D"></span><span id="pdal::BOX3D::BOX3D__BOX3DCR"></span><span class="target" id="classpdal_1_1BOX3D_1afb0f95a0fb317d7c423f72355255d5b6"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">BOX3D</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal5BOX3D5BOX3DERK5BOX3D" title="pdal::BOX3D::BOX3D"><span class="n"><span class="pre">BOX3D</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">box</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5BOX3D5BOX3DERK5BOX3D" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX3DaSERK5BOX3D">
+<span id="_CPPv3N4pdal5BOX3DaSERK5BOX3D"></span><span id="_CPPv2N4pdal5BOX3DaSERK5BOX3D"></span><span id="pdal::BOX3D::assign-operator__BOX3DCR"></span><span class="target" id="classpdal_1_1BOX3D_1a9d0cffef6913413506c9969cfd815b7e"></span><a class="reference internal" href="#_CPPv4N4pdal5BOX3DE" title="pdal::BOX3D"><span class="n"><span class="pre">BOX3D</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">=</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal5BOX3DE" title="pdal::BOX3D"><span class="n"><span class="pre">BOX3D</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">box</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">default</span></span><a class="headerlink" href="#_CPPv4N4pdal5BOX3DaSERK5BOX3D" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX3D5BOX3DERK5BOX2D">
+<span id="_CPPv3N4pdal5BOX3D5BOX3DERK5BOX2D"></span><span id="_CPPv2N4pdal5BOX3D5BOX3DERK5BOX2D"></span><span id="pdal::BOX3D::BOX3D__BOX2DCR"></span><span class="target" id="classpdal_1_1BOX3D_1af13d942174620789a105ee989f1918ee"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">explicit</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">BOX3D</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal5BOX2DE" title="pdal::BOX2D"><span class="n"><span class="pre">BOX2D</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">box</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5BOX3D5BOX3DERK5BOX2D" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX3D5BOX3DEdddddd">
+<span id="_CPPv3N4pdal5BOX3D5BOX3DEdddddd"></span><span id="_CPPv2N4pdal5BOX3D5BOX3DEdddddd"></span><span id="pdal::BOX3D::BOX3D__double.double.double.double.double.double"></span><span class="target" id="classpdal_1_1BOX3D_1a387cf669058755e95597da658e693c48"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">BOX3D</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">minx</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">miny</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">minz</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">maxx</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">maxy</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">maxz</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5BOX3D5BOX3DEdddddd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Construct and initialize a bounds box. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>minx</strong> – Minimum X value. </p></li>
+<li><p><strong>miny</strong> – Minimum Y value. </p></li>
+<li><p><strong>minx</strong> – Minimum Z value. </p></li>
+<li><p><strong>maxx</strong> – Maximum X value. </p></li>
+<li><p><strong>maxy</strong> – Maximum Y value. </p></li>
+<li><p><strong>maxz</strong> – Maximum Z value. </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5BOX3D5emptyEv">
+<span id="_CPPv3NK4pdal5BOX3D5emptyEv"></span><span id="_CPPv2NK4pdal5BOX3D5emptyEv"></span><span id="pdal::BOX3D::emptyC"></span><span class="target" id="classpdal_1_1BOX3D_1ac244977b6360f84a4ebdedd0b4421758"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">empty</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5BOX3D5emptyEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Determine whether a bounds box has not had any bounds set (is in a state as if default-constructed). </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Whether the bounds box is empty. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5BOX3D5validEv">
+<span id="_CPPv3NK4pdal5BOX3D5validEv"></span><span id="_CPPv2NK4pdal5BOX3D5validEv"></span><span id="pdal::BOX3D::validC"></span><span class="target" id="classpdal_1_1BOX3D_1a62dde3a8547bb17f9e7681d454344978"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">valid</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5BOX3D5validEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Determine whether a bounds box has had any bounds set. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>\true if the bounds box is not empty </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX3D4growEddd">
+<span id="_CPPv3N4pdal5BOX3D4growEddd"></span><span id="_CPPv2N4pdal5BOX3D4growEddd"></span><span id="pdal::BOX3D::grow__double.double.double"></span><span class="target" id="classpdal_1_1BOX3D_1a12b1d7ce0d48e3c592f0f4416e74aac0"></span><a class="reference internal" href="#_CPPv4N4pdal5BOX3DE" title="pdal::BOX3D"><span class="n"><span class="pre">BOX3D</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">grow</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">x</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">y</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">z</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5BOX3D4growEddd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Expand the bounds of the box if a value is less than the current minimum or greater than the current maximum. </p>
+<p>If the bounds box is currently empty, both minimum and maximum box bounds will be set to the provided value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – X dimension value. </p></li>
+<li><p><strong>y</strong> – Y dimension value. </p></li>
+<li><p><strong>z</strong> – Z dimension value. </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX3D5clearEv">
+<span id="_CPPv3N4pdal5BOX3D5clearEv"></span><span id="_CPPv2N4pdal5BOX3D5clearEv"></span><span id="pdal::BOX3D::clear"></span><span class="target" id="classpdal_1_1BOX3D_1a2bc36ba06f8eb54acd95cf58fb968317"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">clear</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5BOX3D5clearEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Clear the bounds box to an empty state. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5BOX3D8containsEddd">
+<span id="_CPPv3NK4pdal5BOX3D8containsEddd"></span><span id="_CPPv2NK4pdal5BOX3D8containsEddd"></span><span id="pdal::BOX3D::contains__double.double.doubleC"></span><span class="target" id="classpdal_1_1BOX3D_1a0c74088d2dbded79c47a83b54faf60e4"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">contains</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">x</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">y</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">z</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5BOX3D8containsEddd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Determine if a bounds box contains a point. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – X dimension value. </p></li>
+<li><p><strong>y</strong> – Y dimension value. </p></li>
+<li><p><strong>z</strong> – Z dimension value. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether both dimensions are equal to or less than the maximum box values and equal to or more than the minimum box values. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5BOX3D8containsERK5BOX3D">
+<span id="_CPPv3NK4pdal5BOX3D8containsERK5BOX3D"></span><span id="_CPPv2NK4pdal5BOX3D8containsERK5BOX3D"></span><span id="pdal::BOX3D::contains__BOX3DCRC"></span><span class="target" id="classpdal_1_1BOX3D_1ae5a09c589c4c5f9da21ae5cd9147bc90"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">contains</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal5BOX3DE" title="pdal::BOX3D"><span class="n"><span class="pre">BOX3D</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">other</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5BOX3D8containsERK5BOX3D" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Determine if another bounds box is contained in this bounds box. </p>
+<p>Equal limits are considered to be contained.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> – Bounds box to check for containment. </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">true</span></code> if the provided box is contained in this box, <code class="docutils literal notranslate"><span class="pre">false</span></code> otherwise. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5BOX3D5equalERK5BOX3D">
+<span id="_CPPv3NK4pdal5BOX3D5equalERK5BOX3D"></span><span id="_CPPv2NK4pdal5BOX3D5equalERK5BOX3D"></span><span id="pdal::BOX3D::equal__BOX3DCRC"></span><span class="target" id="classpdal_1_1BOX3D_1aaaddeb6aa36c2d3a68edfee6ce517ca3"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">equal</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal5BOX3DE" title="pdal::BOX3D"><span class="n"><span class="pre">BOX3D</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">other</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5BOX3D5equalERK5BOX3D" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Determine if the bounds of this box are the same as that of another box. </p>
+<p>Empty bounds boxes are always equal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> – Bounds box to check for equality. </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">true</span></code> if the provided box has equal limits to this box, <code class="docutils literal notranslate"><span class="pre">false</span></code> otherwise. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5BOX3DeqERK5BOX3D">
+<span id="_CPPv3NK4pdal5BOX3DeqERK5BOX3D"></span><span id="_CPPv2NK4pdal5BOX3DeqERK5BOX3D"></span><span id="pdal::BOX3D::eq-operator__BOX3DCRC"></span><span class="target" id="classpdal_1_1BOX3D_1a41cd43b6b266789528855290eaf507c8"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">==</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4N4pdal5BOX3DE" title="pdal::BOX3D"><span class="n"><span class="pre">BOX3D</span></span></a><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">rhs</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5BOX3DeqERK5BOX3D" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Determine if the bounds of this box are the same as that of another box. </p>
+<p>Empty bounds boxes are always equal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> – Bounds box to check for equality. </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">true</span></code> if the provided box has equal limits to this box, <code class="docutils literal notranslate"><span class="pre">false</span></code> otherwise. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5BOX3DneERK5BOX3D">
+<span id="_CPPv3NK4pdal5BOX3DneERK5BOX3D"></span><span id="_CPPv2NK4pdal5BOX3DneERK5BOX3D"></span><span id="pdal::BOX3D::neq-operator__BOX3DCRC"></span><span class="target" id="classpdal_1_1BOX3D_1ac9ca14442862b980a447875fc8ea4df9"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">!=</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4N4pdal5BOX3DE" title="pdal::BOX3D"><span class="n"><span class="pre">BOX3D</span></span></a><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">rhs</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5BOX3DneERK5BOX3D" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Determine if the bounds of this box are different from that of another box. </p>
+<p>Empty bounds boxes are never unequal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> – Bounds box to check for inequality. </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">true</span></code> if the provided box has limits different from this box, <code class="docutils literal notranslate"><span class="pre">false</span></code> otherwise. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX3D4growERK5BOX3D">
+<span id="_CPPv3N4pdal5BOX3D4growERK5BOX3D"></span><span id="_CPPv2N4pdal5BOX3D4growERK5BOX3D"></span><span id="pdal::BOX3D::grow__BOX3DCR"></span><span class="target" id="classpdal_1_1BOX3D_1aab2661cbabc1b3d3c9cb4aba6c367586"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal5BOX3DE" title="pdal::BOX3D"><span class="n"><span class="pre">BOX3D</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">grow</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal5BOX3DE" title="pdal::BOX3D"><span class="n"><span class="pre">BOX3D</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">other</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5BOX3D4growERK5BOX3D" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Expand this box to contain another box. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> – Box that this box should contain. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX3D4growEd">
+<span id="_CPPv3N4pdal5BOX3D4growEd"></span><span id="_CPPv2N4pdal5BOX3D4growEd"></span><span id="pdal::BOX3D::grow__double"></span><span class="target" id="classpdal_1_1BOX3D_1a820dfb7758f9d225e43e03b7c8d7fc84"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal5BOX3DE" title="pdal::BOX3D"><span class="n"><span class="pre">BOX3D</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">grow</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">dist</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5BOX3D4growEd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Expand this box by a specified amount. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dist</strong> – Distance by which box should be expanded. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX3D4clipERK5BOX3D">
+<span id="_CPPv3N4pdal5BOX3D4clipERK5BOX3D"></span><span id="_CPPv2N4pdal5BOX3D4clipERK5BOX3D"></span><span id="pdal::BOX3D::clip__BOX3DCR"></span><span class="target" id="classpdal_1_1BOX3D_1a0d928cc17ca6e4e6c9c95059bbc8ea7a"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">clip</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal5BOX3DE" title="pdal::BOX3D"><span class="n"><span class="pre">BOX3D</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">other</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5BOX3D4clipERK5BOX3D" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Clip this bounds box by another so it will be contained by the other box. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> – Clipping box for this box. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5BOX3D8overlapsERK5BOX3D">
+<span id="_CPPv3NK4pdal5BOX3D8overlapsERK5BOX3D"></span><span id="_CPPv2NK4pdal5BOX3D8overlapsERK5BOX3D"></span><span id="pdal::BOX3D::overlaps__BOX3DCRC"></span><span class="target" id="classpdal_1_1BOX3D_1a87d79e4556cb5660b072642ccd3565f8"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">overlaps</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal5BOX3DE" title="pdal::BOX3D"><span class="n"><span class="pre">BOX3D</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">other</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5BOX3D8overlapsERK5BOX3D" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Determine if another box overlaps this box. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> – Box to test for overlap. </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether the provided box overlaps this box. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5BOX3D4to2dEv">
+<span id="_CPPv3NK4pdal5BOX3D4to2dEv"></span><span id="_CPPv2NK4pdal5BOX3D4to2dEv"></span><span id="pdal::BOX3D::to2dC"></span><span class="target" id="classpdal_1_1BOX3D_1aae251318fffafce3dddc01984f5a03ea"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal5BOX2DE" title="pdal::BOX2D"><span class="n"><span class="pre">BOX2D</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">to2d</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5BOX3D4to2dEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Convert this box to 2-dimensional bounding box. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Bounding box with Z dimension stripped. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5BOX3D5toBoxE8uint32_t">
+<span id="_CPPv3NK4pdal5BOX3D5toBoxE8uint32_t"></span><span id="_CPPv2NK4pdal5BOX3D5toBoxE8uint32_t"></span><span id="pdal::BOX3D::toBox__uint32_tC"></span><span class="target" id="classpdal_1_1BOX3D_1adc0c9dd755f102bb9b7d4e0c3ae7dea5"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">toBox</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">precision</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">8</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5BOX3D5toBoxE8uint32_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Convert this box to a string suitable for use in SQLite. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>precision</strong> – Precision for output [default: 8] </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>String format of this box. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5BOX3D5toWKTE8uint32_t">
+<span id="_CPPv3NK4pdal5BOX3D5toWKTE8uint32_t"></span><span id="_CPPv2NK4pdal5BOX3D5toWKTE8uint32_t"></span><span id="pdal::BOX3D::toWKT__uint32_tC"></span><span class="target" id="classpdal_1_1BOX3D_1a8a1a2e0a438669c3dbcf1cfe289e429a"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">toWKT</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">precision</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">8</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5BOX3D5toWKTE8uint32_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Convert this box to a well-known text string. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>precision</strong> – Precision for output [default: 8] </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>String format of this box. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX3D5parseERKNSt6stringERNSt6string9size_typeE">
+<span id="_CPPv3N4pdal5BOX3D5parseERKNSt6stringERNSt6string9size_typeE"></span><span id="_CPPv2N4pdal5BOX3D5parseERKNSt6stringERNSt6string9size_typeE"></span><span id="pdal::BOX3D::parse__ssCR.std::string::size_typeR"></span><span class="target" id="classpdal_1_1BOX3D_1a7a4a64e92a94c7d1b54b1f730bfb5ca4"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">parse</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">s</span></span>, <span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">size_type</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">pos</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5BOX3D5parseERKNSt6stringERNSt6string9size_typeE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Parse a string as a <a class="reference internal" href="#classpdal_1_1BOX3D"><span class="std std-ref">BOX3D</span></a>. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s</strong> – String representation of the box. </p></li>
+<li><p><strong>pos</strong> – Position in the string at which to start parsing. On return set to parsing end position. </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX3D4minzE">
+<span id="_CPPv3N4pdal5BOX3D4minzE"></span><span id="_CPPv2N4pdal5BOX3D4minzE"></span><span id="pdal::BOX3D::minz__double"></span><span class="target" id="classpdal_1_1BOX3D_1a910963ee88ce253b63dd660fd56572e0"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">minz</span></span></span><a class="headerlink" href="#_CPPv4N4pdal5BOX3D4minzE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Minimum Z value. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX3D4maxzE">
+<span id="_CPPv3N4pdal5BOX3D4maxzE"></span><span id="_CPPv2N4pdal5BOX3D4maxzE"></span><span id="pdal::BOX3D::maxz__double"></span><span class="target" id="classpdal_1_1BOX3D_1aae93b6f00bb7d668447a4d7b368f61c5"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">maxz</span></span></span><a class="headerlink" href="#_CPPv4N4pdal5BOX3D4maxzE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Maximum Z value. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX3D4minxE">
+<span id="_CPPv3N4pdal5BOX3D4minxE"></span><span id="_CPPv2N4pdal5BOX3D4minxE"></span><span id="pdal::BOX3D::minx__double"></span><span class="target" id="classpdal_1_1BOX3D_1ae47a946028d6d48b96477a17596c449f"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">minx</span></span></span><a class="headerlink" href="#_CPPv4N4pdal5BOX3D4minxE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Minimum X value. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX3D4maxxE">
+<span id="_CPPv3N4pdal5BOX3D4maxxE"></span><span id="_CPPv2N4pdal5BOX3D4maxxE"></span><span id="pdal::BOX3D::maxx__double"></span><span class="target" id="classpdal_1_1BOX3D_1ab2b3bbff63b654340c501a71524ba333"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">maxx</span></span></span><a class="headerlink" href="#_CPPv4N4pdal5BOX3D4maxxE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Maximum X value. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX3D4minyE">
+<span id="_CPPv3N4pdal5BOX3D4minyE"></span><span id="_CPPv2N4pdal5BOX3D4minyE"></span><span id="pdal::BOX3D::miny__double"></span><span class="target" id="classpdal_1_1BOX3D_1a7811c55c05b344a64c9bbc830112c8d7"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">miny</span></span></span><a class="headerlink" href="#_CPPv4N4pdal5BOX3D4minyE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Minimum Y value. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX3D4maxyE">
+<span id="_CPPv3N4pdal5BOX3D4maxyE"></span><span id="_CPPv2N4pdal5BOX3D4maxyE"></span><span id="pdal::BOX3D::maxy__double"></span><span class="target" id="classpdal_1_1BOX3D_1a772f64b028f339247a06f62d538c871c"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">maxy</span></span></span><a class="headerlink" href="#_CPPv4N4pdal5BOX3D4maxyE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Maximum Y value. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-static-functions">Public Static Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX3D23getDefaultSpatialExtentEv">
+<span id="_CPPv3N4pdal5BOX3D23getDefaultSpatialExtentEv"></span><span id="_CPPv2N4pdal5BOX3D23getDefaultSpatialExtentEv"></span><span id="pdal::BOX3D::getDefaultSpatialExtent"></span><span class="target" id="classpdal_1_1BOX3D_1a080d3d38dbbf973d05744aa2fe5d7e5c"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal5BOX3DE" title="pdal::BOX3D"><span class="n"><span class="pre">BOX3D</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getDefaultSpatialExtent</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5BOX3D23getDefaultSpatialExtentEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Return a statically-allocated Bounds extent that represents infinity. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A bounds box with infinite bounds, </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX3D5errorE">
+<span id="_CPPv3N4pdal5BOX3D5errorE"></span><span id="_CPPv2N4pdal5BOX3D5errorE"></span><span id="pdal::BOX3D::error"></span><span class="target" id="structpdal_1_1BOX3D_1_1error"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">error</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">runtime_error</span></span><a class="headerlink" href="#_CPPv4N4pdal5BOX3D5errorE" title="Permalink to this definition"></a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5BOX3D5error5errorERKNSt6stringE">
+<span id="_CPPv3N4pdal5BOX3D5error5errorERKNSt6stringE"></span><span id="_CPPv2N4pdal5BOX3D5error5errorERKNSt6stringE"></span><span id="pdal::BOX3D::error::error__ssCR"></span><span class="target" id="structpdal_1_1BOX3D_1_1error_1a5f80ce27423b32ba39db3d7ceb06282a"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">error</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">err</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5BOX3D5error5errorERKNSt6stringE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="charbuf.html" class="btn btn-neutral float-right" title="pdal::Charbuf" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="C++ API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <div class="info">
+      <a class="logo-link" href="https://hobu.co">
+        <div class="hobu-logo"></div>
+      </a>
+      <div class="copyright">
+      
+
+                    &copy;  2023
+                        <a href="https://github.com/abellgithub">Andrew Bell</a>,
+                        <a href="https://github.com/chambbj">Brad Chambers</a>,
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>.
+
+      
+      Last updated on May 22, 2023.
+      </div>
+    </div>
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="footer">
+        <div class="container">
+                    &copy;  2023
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        <a href="http://github.com/mpgerlek">Michael Gerlek</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>,
+                Last updated
+                    on May 22, 2023.
+        </div>
+    </div>
+
+</body>
+</html>

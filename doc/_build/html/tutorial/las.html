@@ -1,0 +1,812 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LAS Reading and Writing with PDAL &mdash; pdal.io</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/pdal.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/breathe.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="canonical" href="https://pdal.io/tutorial/las.html"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="copyright" title="Copyright" href="../copyright.html" />
+    <link rel="next" title="Clipping with Geometries" href="clipping/index.html" />
+    <link rel="prev" title="Reading data from EPT" href="iowa-entwine.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+          </a>
+              <div class="version">
+                2.6.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../apps/index.html">Applications</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../community.html">Community</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stages/stages.html">Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stages/readers.html">Readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stages/writers.html">Writers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stages/filters.html">Filters</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../dimensions.html">Dimensions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../types.html">Types</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../python.html">Python</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../java.html">Java</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="reading.html">Reading with PDAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iowa-entwine.html">Reading data from EPT</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">LAS Reading and Writing with PDAL</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#las-versions">LAS Versions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#version-example">Version Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#spatial-reference-system">Spatial Reference System</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#assignment-example">Assignment Example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#vertical-datum-example">Vertical Datum Example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reprojection-example">Reprojection Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#point-formats">Point Formats</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#point-format-example">Point Format Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#extra-dimensions">Extra Dimensions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#extra-dimension-example">Extra Dimension Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#required-header-fields">Required Header Fields</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#header-fields-example">Header Fields Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#coordinate-scaling">Coordinate Scaling</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#auto-offset-example">Auto Offset Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#compression">Compression</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#compression-example">Compression Example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#variable-length-records">Variable Length Records</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#vlr-example">VLR Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pdal-metadata">PDAL Metadata</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#metadata-example">Metadata Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="clipping/index.html">Clipping with Geometries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ground-filters.html">Ground Filter Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid-shift.html">Applying a grid shift to point clouds</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../workshop/index.html">Workshop</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project/index.html">Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../copyright.html">License</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PDAL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html"> Documentation </a> &raquo;</li>
+      
+          <li><a href="index.html">Tutorials</a> &raquo;</li>
+      
+      <li>LAS Reading and Writing with PDAL</li>
+    
+
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/PDAL/PDAL/edit//master/doc/tutorial/las.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="clipping/index.html" class="btn btn-neutral float-right" title="Clipping with Geometries" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="iowa-entwine.html" class="btn btn-neutral float-left" title="Reading data from EPT" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="las-reading-and-writing-with-pdal">
+<span id="las-tutorial"></span><h1><a class="toc-backref" href="#id2" role="doc-backlink">LAS Reading and Writing with PDAL</a><a class="headerlink" href="#las-reading-and-writing-with-pdal" title="Permalink to this heading"></a></h1>
+<dl class="field-list simple">
+<dt class="field-odd">Author<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Howard Butler</p>
+</dd>
+<dt class="field-even">Contact<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="mailto:howard&#37;&#52;&#48;hobu&#46;co">howard<span>&#64;</span>hobu<span>&#46;</span>co</a></p>
+</dd>
+<dt class="field-odd">Date<span class="colon">:</span></dt>
+<dd class="field-odd"><p>3/27/2017</p>
+</dd>
+</dl>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#las-reading-and-writing-with-pdal" id="id2">LAS Reading and Writing with PDAL</a></p>
+<ul>
+<li><p><a class="reference internal" href="#introduction" id="id3">Introduction</a></p></li>
+<li><p><a class="reference internal" href="#las-versions" id="id4">LAS Versions</a></p></li>
+<li><p><a class="reference internal" href="#spatial-reference-system" id="id5">Spatial Reference System</a></p></li>
+<li><p><a class="reference internal" href="#point-formats" id="id6">Point Formats</a></p></li>
+<li><p><a class="reference internal" href="#extra-dimensions" id="id7">Extra Dimensions</a></p></li>
+<li><p><a class="reference internal" href="#required-header-fields" id="id8">Required Header Fields</a></p></li>
+<li><p><a class="reference internal" href="#coordinate-scaling" id="id9">Coordinate Scaling</a></p></li>
+<li><p><a class="reference internal" href="#compression" id="id10">Compression</a></p></li>
+<li><p><a class="reference internal" href="#pdal-metadata" id="id11">PDAL Metadata</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<p>This tutorial will describe reading and writing <a class="reference external" href="http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html">ASPRS LAS</a> data with PDAL,
+discuss the capabilities that PDAL <a class="reference internal" href="../stages/readers.las.html#readers-las"><span class="std std-ref">readers.las</span></a> and <a class="reference internal" href="../stages/writers.las.html#writers-las"><span class="std std-ref">writers.las</span></a>
+can provide for this format.</p>
+<section id="introduction">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Introduction</a><a class="headerlink" href="#introduction" title="Permalink to this heading"></a></h2>
+<p><a class="reference external" href="http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html">ASPRS LAS</a> is probably the most commonly used <a class="reference external" href="https://en.wikipedia.org/wiki/Lidar">LiDAR</a> format, and PDAL’s support
+of LAS is important for many users of the library. This tutorial describes and
+demonstrates some of the capabilities the drivers provide, points out items to
+be aware of when using the drivers, and hopefully provides some examples you
+can use to get what you need out of the LAS drivers.</p>
+</section>
+<section id="las-versions">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">LAS Versions</a><a class="headerlink" href="#las-versions" title="Permalink to this heading"></a></h2>
+<p>There are five LAS versions – 1.0 to 1.4. Each iteration added some
+complexity to the format in terms of capabilities it supports, possible data
+types it stores, and metadata. Users of LAS must balance the features they need
+with the use of the data by downstream applications. While LAS support in some
+form is quite widespread throughout the industry, most applications do not
+support every feature of each version.  PDAL works to provide many of
+these features, but it is also incomplete.  Specifically, PDAL doesn’t support
+point formats that store waveform data.</p>
+<section id="version-example">
+<h3>Version Example<a class="headerlink" href="#version-example" title="Permalink to this heading"></a></h3>
+<p>We can use the <code class="docutils literal notranslate"><span class="pre">minor_version</span></code> option of <a class="reference internal" href="../stages/writers.las.html#writers-las"><span class="std std-ref">writers.las</span></a> to set the
+version PDAL should output. The following example will write a 1.1 version LAS
+file. Depending on the features you need, this may or may not be what you want.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="p">[</span>
+<span class="linenos"> 2</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos"> 3</span><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;readers.las&quot;</span><span class="p">,</span>
+<span class="linenos"> 4</span><span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input.las&quot;</span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="p">},</span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos"> 7</span><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;writers.las&quot;</span><span class="p">,</span>
+<span class="hll"><span class="linenos"> 8</span><span class="w">        </span><span class="nt">&quot;minor_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+</span><span class="linenos"> 9</span><span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output.las&quot;</span>
+<span class="linenos">10</span><span class="w">    </span><span class="p">}</span>
+<span class="linenos">11</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>PDAL defaults to writing a LAS 1.2 version if no <code class="docutils literal notranslate"><span class="pre">minor_version</span></code> is
+specified
+or the <code class="docutils literal notranslate"><span class="pre">forward</span></code> option of <a class="reference internal" href="../stages/writers.las.html#writers-las"><span class="std std-ref">writers.las</span></a> is not used to carry along
+a version from a previously read file.</p>
+</div>
+</section>
+</section>
+<section id="spatial-reference-system">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Spatial Reference System</a><a class="headerlink" href="#spatial-reference-system" title="Permalink to this heading"></a></h2>
+<p>LAS 1.0 to 1.3 use <a class="reference external" href="https://trac.osgeo.org/geotiff/">GeoTIFF</a> keys for storing coordinate system information,
+while LAS 1.4 uses <a class="reference external" href="https://en.wikipedia.org/wiki/Well-known_text#Coordinate_reference_systems">Well Known Text</a>. GeoTIFF is well-supported by most software
+that read LAS, but it is not possible to express some coordinate system
+specifics with GeoTIFF. WKT is supports
+more coordinate systems than GeoTIFF, but vendor-specific and later versions
+(WKT 2) may not be handled well.</p>
+<section id="assignment-example">
+<h3>Assignment Example<a class="headerlink" href="#assignment-example" title="Permalink to this heading"></a></h3>
+<p>The PDAL <a class="reference internal" href="../stages/writers.las.html#writers-las"><span class="std std-ref">writers.las</span></a> allows you to override or assign the coordinate
+system to an explicit value if you need. Often the coordinate system defined by
+a file might be incorrect or non-existent, and you can set this with PDAL.</p>
+<p>The following example sets the <code class="docutils literal notranslate"><span class="pre">a_srs</span></code> option of the <a class="reference internal" href="../stages/writers.las.html#writers-las"><span class="std std-ref">writers.las</span></a> to
+<code class="docutils literal notranslate"><span class="pre">EPSG:4326</span></code>.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="p">[</span>
+<span class="linenos"> 2</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos"> 3</span><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;readers.las&quot;</span><span class="p">,</span>
+<span class="linenos"> 4</span><span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input.las&quot;</span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="p">},</span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos"> 7</span><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;writers.las&quot;</span><span class="p">,</span>
+<span class="hll"><span class="linenos"> 8</span><span class="w">        </span><span class="nt">&quot;a_srs&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">,</span>
+</span><span class="linenos"> 9</span><span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output.las&quot;</span>
+<span class="linenos">10</span><span class="w">    </span><span class="p">}</span>
+<span class="linenos">11</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Remember to set <code class="docutils literal notranslate"><span class="pre">offset_x</span></code>, <code class="docutils literal notranslate"><span class="pre">offset_y</span></code>, <code class="docutils literal notranslate"><span class="pre">scale_x</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">scale_y</span></code> values to something appropriate if your are storing decimal
+degree data in LAS files. The special value <code class="docutils literal notranslate"><span class="pre">auto</span></code> can be used for the
+offset values, but you should set an explicit value for the scale values
+to prevent overdriving the precision of the data and disrupting
+<a class="reference internal" href="#compression">Compression</a> with <a class="reference external" href="http://laszip.org">LASzip</a>.</p>
+</div>
+</section>
+<section id="vertical-datum-example">
+<h3>Vertical Datum Example<a class="headerlink" href="#vertical-datum-example" title="Permalink to this heading"></a></h3>
+<p>Vertical coordinate control is important in <a class="reference external" href="https://en.wikipedia.org/wiki/Lidar">LiDAR</a> and PDAL supports
+assignment
+and reprojection/transform of vertical coordinates using <a class="reference external" href="http://proj4.org">Proj.4</a> and <a class="reference external" href="http://gdal.org/">GDAL</a>.
+The coordinate system description magic happens in GDAL, and you assign a
+compound coordinate system (both vertical and horizontal definitions) using
+the following syntax:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EPSG</span><span class="p">:</span><span class="mi">4326</span><span class="o">+</span><span class="mi">3855</span>
+</pre></div>
+</div>
+<p>This assignment states typical 4326 horizontal coordinate system plus a vertical one that
+represents <a class="reference external" href="http://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/egm08_wgs84.html">EGM08</a>. In <a class="reference external" href="https://en.wikipedia.org/wiki/Well-known_text#Coordinate_reference_systems">Well Known Text</a>, this coordinate system is described by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ gdalsrsinfo &quot;EPSG:4326+3855&quot;
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">COMPD_CS</span><span class="p">[</span><span class="s2">&quot;WGS 84 + EGM2008 geoid height&quot;</span><span class="p">,</span>
+    <span class="n">GEOGCS</span><span class="p">[</span><span class="s2">&quot;WGS 84&quot;</span><span class="p">,</span>
+        <span class="n">DATUM</span><span class="p">[</span><span class="s2">&quot;WGS_1984&quot;</span><span class="p">,</span>
+            <span class="n">SPHEROID</span><span class="p">[</span><span class="s2">&quot;WGS 84&quot;</span><span class="p">,</span><span class="mi">6378137</span><span class="p">,</span><span class="mf">298.257223563</span><span class="p">,</span>
+                <span class="n">AUTHORITY</span><span class="p">[</span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span><span class="s2">&quot;7030&quot;</span><span class="p">]],</span>
+            <span class="n">AUTHORITY</span><span class="p">[</span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span><span class="s2">&quot;6326&quot;</span><span class="p">]],</span>
+        <span class="n">PRIMEM</span><span class="p">[</span><span class="s2">&quot;Greenwich&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">AUTHORITY</span><span class="p">[</span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span><span class="s2">&quot;8901&quot;</span><span class="p">]],</span>
+        <span class="n">UNIT</span><span class="p">[</span><span class="s2">&quot;degree&quot;</span><span class="p">,</span><span class="mf">0.0174532925199433</span><span class="p">,</span>
+            <span class="n">AUTHORITY</span><span class="p">[</span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span><span class="s2">&quot;9122&quot;</span><span class="p">]],</span>
+        <span class="n">AUTHORITY</span><span class="p">[</span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span><span class="s2">&quot;4326&quot;</span><span class="p">]],</span>
+    <span class="n">VERT_CS</span><span class="p">[</span><span class="s2">&quot;EGM2008 geoid height&quot;</span><span class="p">,</span>
+        <span class="n">VERT_DATUM</span><span class="p">[</span><span class="s2">&quot;EGM2008 geoid&quot;</span><span class="p">,</span><span class="mi">2005</span><span class="p">,</span>
+            <span class="n">AUTHORITY</span><span class="p">[</span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span><span class="s2">&quot;1027&quot;</span><span class="p">],</span>
+            <span class="n">EXTENSION</span><span class="p">[</span><span class="s2">&quot;PROJ4_GRIDS&quot;</span><span class="p">,</span><span class="s2">&quot;egm08_25.gtx&quot;</span><span class="p">]],</span>
+        <span class="n">UNIT</span><span class="p">[</span><span class="s2">&quot;metre&quot;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">AUTHORITY</span><span class="p">[</span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span><span class="s2">&quot;9001&quot;</span><span class="p">]],</span>
+        <span class="n">AXIS</span><span class="p">[</span><span class="s2">&quot;Up&quot;</span><span class="p">,</span><span class="n">UP</span><span class="p">],</span>
+        <span class="n">AUTHORITY</span><span class="p">[</span><span class="s2">&quot;EPSG&quot;</span><span class="p">,</span><span class="s2">&quot;3855&quot;</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>As in <a class="reference internal" href="#assignment-example">Assignment Example</a>, it is common to need to reassign the coordinate
+system. The following example defines both the horizontal and vertical
+coordinate system for a file to <a class="reference external" href="http://epsg.io/26915">UTM Zone 15N NAD83</a> for horizontal and
+<a class="reference external" href="http://epsg.io/5703">NAVD88</a> for the vertical.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="p">[</span>
+<span class="linenos"> 2</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos"> 3</span><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;readers.las&quot;</span><span class="p">,</span>
+<span class="linenos"> 4</span><span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input.las&quot;</span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="p">},</span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos"> 7</span><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;writers.las&quot;</span><span class="p">,</span>
+<span class="hll"><span class="linenos"> 8</span><span class="w">        </span><span class="nt">&quot;a_srs&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EPSG:26915+5703&quot;</span><span class="p">,</span>
+</span><span class="linenos"> 9</span><span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output.las&quot;</span>
+<span class="linenos">10</span><span class="w">    </span><span class="p">}</span>
+<span class="linenos">11</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Any coordinate system description format supported by GDAL’s
+<a class="reference external" href="http://www.gdal.org/ogr__srs__api_8h.html#a927749db01cec3af8aa5e577d032956bk">SetFromUserInput</a>
+method can be used to assign or set the coordinate system in PDAL.
+This includes WKT, <a class="reference external" href="http://proj4.org">Proj.4</a> definitions, or OGC URNs. It is your
+responsibility, however, to escape or massage any input data to
+make it be valid JSON.</p>
+</div>
+</section>
+<section id="reprojection-example">
+<h3>Reprojection Example<a class="headerlink" href="#reprojection-example" title="Permalink to this heading"></a></h3>
+<p>A common desire is to transform the coordinates of an <a class="reference external" href="http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html">ASPRS LAS</a> file
+from one coordinate system to another. The mechanism to do that with
+PDAL is <a class="reference internal" href="../stages/filters.reprojection.html#filters-reprojection"><span class="std std-ref">filters.reprojection</span></a>.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="p">[</span>
+<span class="linenos"> 2</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos"> 3</span><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;readers.las&quot;</span><span class="p">,</span>
+<span class="linenos"> 4</span><span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input.las&quot;</span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="p">},</span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos"> 7</span><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;filters.reprojection&quot;</span><span class="p">,</span>
+<span class="hll"><span class="linenos"> 8</span><span class="w">        </span><span class="nt">&quot;out_srs&quot;</span><span class="p">:</span><span class="s2">&quot;EPSG:26915&quot;</span>
+</span><span class="linenos"> 9</span><span class="w">    </span><span class="p">},</span>
+<span class="linenos">10</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos">11</span><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;writers.las&quot;</span><span class="p">,</span>
+<span class="linenos">12</span><span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output.las&quot;</span>
+<span class="linenos">13</span><span class="w">    </span><span class="p">}</span>
+<span class="linenos">14</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the input data doesn’t specify a projection, you must specify the
+<code class="docutils literal notranslate"><span class="pre">in_srs</span></code> option of <a class="reference internal" href="../stages/filters.reprojection.html#filters-reprojection"><span class="std std-ref">filters.reprojection</span></a>.  <code class="docutils literal notranslate"><span class="pre">in_srs</span></code> can also
+be used to override an existing spatial reference attached to the input
+point set.</p>
+</div>
+</section>
+</section>
+<section id="point-formats">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Point Formats</a><a class="headerlink" href="#point-formats" title="Permalink to this heading"></a></h2>
+<p>As each revision of LAS was released, more point formats were added. A point
+format is
+the fixed set of <a class="reference internal" href="../dimensions.html#dimensions"><span class="std std-ref">dimensions</span></a> that a LAS file stores
+for each point in
+the file.  For any point format, the size and composition of dimensions is
+consistent across versions, but users should be aware of some minor
+interpretation changes based on LAS file version.  For example, a classification
+value of 11 in version 1.4 indicates “Road Surface”, while that value is
+reserved in version 1.1.</p>
+<section id="point-format-example">
+<h3>Point Format Example<a class="headerlink" href="#point-format-example" title="Permalink to this heading"></a></h3>
+<p>Point format or <cite>dataformat_id</cite> is an integer that defines the set of fixed
+<a class="reference internal" href="../dimensions.html#dimensions"><span class="std std-ref">dimensions</span></a> stored for each point in a LAS file.
+All point formats
+specify the following dimensions as part of a point record:</p>
+<table class="docutils align-default" id="id1">
+<caption><span class="caption-text">Base LAS <a class="reference internal" href="../dimensions.html#dimensions"><span class="std std-ref">Dimensions</span></a></span><a class="headerlink" href="#id1" title="Permalink to this table"></a></caption>
+<tbody>
+<tr class="row-odd"><td><p>X</p></td>
+<td><p>Y</p></td>
+<td><p>Z</p></td>
+</tr>
+<tr class="row-even"><td><p>Intensity</p></td>
+<td><p>ReturnNumber</p></td>
+<td><p>NumberOfReturns</p></td>
+</tr>
+<tr class="row-odd"><td><p>ScanDirectionFlag</p></td>
+<td><p>EdgeOfFlightLine</p></td>
+<td><p>Classification</p></td>
+</tr>
+<tr class="row-even"><td><p>ScanAngleRank</p></td>
+<td><p>UserData</p></td>
+<td><p>PointSourceId</p></td>
+</tr>
+</tbody>
+</table>
+<p>Because LAS files have no built-in compression, it’s important to use a
+point format that stores the fewest fields possible that store the desired
+data.  For example, point format 10 uses 45 more bytes per point than point
+format zero.</p>
+<p>If one wanted remove the Red/Green/Blue fields from a LAS file
+(one using point format 2), one could simply set the <code class="docutils literal notranslate"><span class="pre">dataformat_id</span></code>
+option to 0.  The <code class="docutils literal notranslate"><span class="pre">forward</span></code> option can also be set to carry forward
+all possible header values from the source file to the new, smaller file.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="p">[</span>
+<span class="linenos"> 2</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos"> 3</span><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;readers.las&quot;</span><span class="p">,</span>
+<span class="linenos"> 4</span><span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input.las&quot;</span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="p">},</span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos"> 7</span><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;writers.las&quot;</span><span class="p">,</span>
+<span class="linenos"> 8</span><span class="w">        </span><span class="nt">&quot;forward&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+<span class="hll"><span class="linenos"> 9</span><span class="w">        </span><span class="nt">&quot;dataformat_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+</span><span class="linenos">10</span><span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output.las&quot;</span>
+<span class="linenos">11</span><span class="w">    </span><span class="p">}</span>
+<span class="linenos">12</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <a class="reference external" href="http://laszip.org">LASzip</a> storage of GPSTime and Red/Green/Blue fields with no
+data is perfectly efficient.</p>
+</div>
+</section>
+</section>
+<section id="extra-dimensions">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">Extra Dimensions</a><a class="headerlink" href="#extra-dimensions" title="Permalink to this heading"></a></h2>
+<p>A LAS Point Format ID defines the fixed set of
+<a class="reference internal" href="../dimensions.html#dimensions"><span class="std std-ref">dimensions</span></a> a file must
+store, but programs are allowed to store extra data beyond that fixed set.
+This feature of the format was regularized in LAS 1.4 as something called
+“extra bytes” or “extra dims”, but previous versions can
+also store these extra per-point attributes.</p>
+<section id="extra-dimension-example">
+<h3>Extra Dimension Example<a class="headerlink" href="#extra-dimension-example" title="Permalink to this heading"></a></h3>
+<p>LAS 1.4 provides for the storage of dimensions not part of the chosen
+point format by appending them to each point record.  PDAL supports this
+feature when writing files with the “extra_dims” option.  The following
+example will store all source dimensions in the output file and place
+a description of the dimensions that aren’t part of the point format in
+an “extra bytes” VLR:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="p">[</span>
+<span class="linenos">2</span><span class="w">    </span><span class="s2">&quot;some_non_las_file&quot;</span><span class="p">,</span>
+<span class="linenos">3</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos">4</span><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;writers.las&quot;</span><span class="p">,</span>
+<span class="hll"><span class="linenos">5</span><span class="w">        </span><span class="nt">&quot;extra_dims&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+</span><span class="linenos">6</span><span class="w">        </span><span class="nt">&quot;minor_version&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4&quot;</span><span class="p">,</span>
+<span class="linenos">7</span><span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output.las&quot;</span>
+<span class="linenos">8</span><span class="w">    </span><span class="p">}</span>
+<span class="linenos">9</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="required-header-fields">
+<h2><a class="toc-backref" href="#id8" role="doc-backlink">Required Header Fields</a><a class="headerlink" href="#required-header-fields" title="Permalink to this heading"></a></h2>
+<p>Readers of the ASPRS LAS Specification will see there are many fields that
+softwares are required to write, with their content mandated by various options
+and configurations in the format. PDAL does not assume responsibility for
+writing these fields and coercing meaning from the content to fit the
+specification.  It is the PDAL users’ responsibility to do so. Fields where
+this might matter include:</p>
+<ul class="simple">
+<li><p><cite>project_id</cite></p></li>
+<li><p><cite>global_encoding</cite></p></li>
+<li><p><cite>system_id</cite></p></li>
+<li><p><cite>software_id</cite></p></li>
+<li><p><cite>filesource_id</cite></p></li>
+</ul>
+<section id="header-fields-example">
+<h3>Header Fields Example<a class="headerlink" href="#header-fields-example" title="Permalink to this heading"></a></h3>
+<p>The “forward” option of <a class="reference internal" href="../stages/writers.las.html#writers-las"><span class="std std-ref">writers.las</span></a> is the easiest way to get most of
+what you might want in terms of header settings copied from an input to an
+output file upon processing. Imagine the scenario of zero’ing out the
+classification values for an LAS file in preparation for using
+<a class="reference internal" href="../stages/filters.pmf.html#filters-pmf"><span class="std std-ref">filters.pmf</span></a> to reassign them. During this scenario, we’d like to keep
+all of the other LAS header information, such as <a class="reference internal" href="#variable-length-records">Variable Length Records</a>,
+extent information, and format settings.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="p">[</span>
+<span class="linenos"> 2</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos"> 3</span><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;readers.las&quot;</span><span class="p">,</span>
+<span class="linenos"> 4</span><span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input.las&quot;</span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="p">},</span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos"> 7</span><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;filters.assign&quot;</span><span class="p">,</span>
+<span class="linenos"> 8</span><span class="w">        </span><span class="nt">&quot;assignment&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Classification[0:32]=0&quot;</span>
+<span class="linenos"> 9</span><span class="w">    </span><span class="p">},</span>
+<span class="linenos">10</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos">11</span><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;filters.pmf&quot;</span><span class="p">,</span>
+<span class="linenos">12</span><span class="w">        </span><span class="nt">&quot;cell_size&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">2.5</span><span class="p">,</span>
+<span class="linenos">13</span><span class="w">        </span><span class="nt">&quot;approximate&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="linenos">14</span><span class="w">        </span><span class="nt">&quot;max_distance&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">25</span>
+<span class="linenos">15</span><span class="w">    </span><span class="p">},</span>
+<span class="linenos">16</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos">17</span><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;writers.las&quot;</span><span class="p">,</span>
+<span class="hll"><span class="linenos">18</span><span class="w">        </span><span class="nt">&quot;forward&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+</span><span class="linenos">19</span><span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output.las&quot;</span>
+<span class="linenos">20</span><span class="w">    </span><span class="p">}</span>
+<span class="linenos">21</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If multiple input LAS files are being written to an output file, the
+<code class="docutils literal notranslate"><span class="pre">forward</span></code> option can only preserve values when they are the same in
+all input files.  If the values differ, a default will be used (as it
+would if the <code class="docutils literal notranslate"><span class="pre">forward</span></code> option weren’t supplied).  You can specify
+specific option values for output that will also override any forwarded
+data.</p>
+</div>
+</section>
+</section>
+<section id="coordinate-scaling">
+<h2><a class="toc-backref" href="#id9" role="doc-backlink">Coordinate Scaling</a><a class="headerlink" href="#coordinate-scaling" title="Permalink to this heading"></a></h2>
+<p>LAS stores coordinates as 32 bit integers. It is the user’s responsibility to
+ensure that the coordinate domain required by the data in the file fits within
+the 32 bit integer domain.  Most coordinate values have digits to the right
+of the decimal point that must be preserved for sufficient accuracy.
+Using the scale factor allows for integers to be interpreted as floating
+point values when read by software.</p>
+<p>When writing data to LAS, choosing an appropriate scale factor should take
+into account not just the maximum precision that can be accommodated by the
+format, but the actual precision of the data.  Using a precision greater than
+the resolution of the data collection can mislead users as to the actual
+measurement precision of the data.  In addition, it can lead to larger files
+when writing <a class="reference external" href="Compression">compressed</a> data with <a class="reference external" href="http://laszip.org">LASzip</a>.</p>
+<section id="auto-offset-example">
+<h3>Auto Offset Example<a class="headerlink" href="#auto-offset-example" title="Permalink to this heading"></a></h3>
+<p>Users can allow PDAL select scale and offset values for data with the <code class="docutils literal notranslate"><span class="pre">auto</span></code>
+option.  This can have some detrimental effects on downstream processing.
+<code class="docutils literal notranslate"><span class="pre">auto</span></code> for scale values will use the entire 32-bit integer domain.
+This maximizes the precision available to
+store the data, but this will have a detrimental effect on <a class="reference external" href="http://laszip.org">LASzip</a> storage
+efficiency.  <code class="docutils literal notranslate"><span class="pre">auto</span></code> for offset calculation is just fine, however. When given
+the option, choose to store <a class="reference external" href="http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html">ASPRS LAS</a> data with an explicit scale for the X,
+Y, and Z dimensions that represents actual expected data precision, not
+artificial storage precision or maximal storage precision.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="p">[</span>
+<span class="linenos"> 2</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos"> 3</span><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;readers.las&quot;</span><span class="p">,</span>
+<span class="linenos"> 4</span><span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input.las&quot;</span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="p">},</span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos"> 7</span><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;writers.las&quot;</span><span class="p">,</span>
+<span class="hll"><span class="linenos"> 8</span><span class="w">        </span><span class="nt">&quot;scale_x&quot;</span><span class="p">:</span><span class="s2">&quot;0.0000001&quot;</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos"> 9</span><span class="w">        </span><span class="nt">&quot;scale_y&quot;</span><span class="p">:</span><span class="s2">&quot;0.0000001&quot;</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos">10</span><span class="w">        </span><span class="nt">&quot;scale_z&quot;</span><span class="p">:</span><span class="s2">&quot;0.01&quot;</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos">11</span><span class="w">        </span><span class="nt">&quot;offset_x&quot;</span><span class="p">:</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos">12</span><span class="w">        </span><span class="nt">&quot;offset_y&quot;</span><span class="p">:</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos">13</span><span class="w">        </span><span class="nt">&quot;offset_z&quot;</span><span class="p">:</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+</span><span class="linenos">14</span><span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output.las&quot;</span>
+<span class="linenos">15</span><span class="w">    </span><span class="p">}</span>
+<span class="linenos">16</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="compression">
+<h2><a class="toc-backref" href="#id10" role="doc-backlink">Compression</a><a class="headerlink" href="#compression" title="Permalink to this heading"></a></h2>
+<p><a class="reference external" href="http://laszip.org">LASzip</a> is an open source, lossless compression technique for <a class="reference external" href="http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html">ASPRS LAS</a> data.
+It is supported by two different software libraries, and it can be used in both
+the C/C++ and the JavaScript execution environments.  LAZ support is provided
+by both <a class="reference internal" href="../stages/readers.las.html#readers-las"><span class="std std-ref">readers.las</span></a> and <a class="reference internal" href="../stages/writers.las.html#writers-las"><span class="std std-ref">writers.las</span></a>.  It can be enabled by
+setting the <code class="docutils literal notranslate"><span class="pre">compression</span></code> option to <code class="docutils literal notranslate"><span class="pre">laszip</span></code>.</p>
+<section id="compression-example">
+<h3>Compression Example<a class="headerlink" href="#compression-example" title="Permalink to this heading"></a></h3>
+<p>Providing a filename with a <code class="docutils literal notranslate"><span class="pre">.laz</span></code> extension will write compressed data.
+Compression can be turned on explicitly as well:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="p">[</span>
+<span class="linenos"> 2</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos"> 3</span><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;readers.las&quot;</span><span class="p">,</span>
+<span class="linenos"> 4</span><span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input.las&quot;</span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="p">},</span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos"> 7</span><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;writers.las&quot;</span><span class="p">,</span>
+<span class="hll"><span class="linenos"> 8</span><span class="w">        </span><span class="nt">&quot;compression&quot;</span><span class="p">:</span><span class="s2">&quot;laszip&quot;</span><span class="p">,</span>
+</span><span class="linenos"> 9</span><span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output.laz&quot;</span>
+<span class="linenos">10</span><span class="w">    </span><span class="p">}</span>
+<span class="linenos">11</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="variable-length-records">
+<h3>Variable Length Records<a class="headerlink" href="#variable-length-records" title="Permalink to this heading"></a></h3>
+<p>Variable Length Records, or VLRs, are binary data that the LAS format
+supports to allow applications to store their own data. Coordinate system
+information is one type of data stored in VLRs, and many different LAS-using
+applications store data and metadata with this format capability. PDAL allows
+users to access VLR information, forward it along to newly written files, and
+create VLRs that store processing history information.</p>
+<p>Common VLR data include:</p>
+<ul class="simple">
+<li><p>Coordinate system</p></li>
+<li><p>Metadata</p></li>
+<li><p>Processing history</p></li>
+<li><p>Indexing</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>There are VLRs that are defined by the specification, and they
+have the VLR <code class="docutils literal notranslate"><span class="pre">user_id</span></code> of <cite>LASF_Spec</cite> or <cite>LASF_Projection</cite>.
+<cite>LASF_Spec</cite> VLRs provide a description of the data beyond that
+available in the header.  <cite>LASF_Projection</cite> VLRs store the spatial
+coordinate system of the data.</p>
+</div>
+<p>For LAS 1.0-1.3, the VLR length could be no larger than
+65535 bytes. Version 1.4 introduced extended VLRs, stored at the end of the
+file, which could be up to 4gb in size.</p>
+</section>
+<section id="vlr-example">
+<h3>VLR Example<a class="headerlink" href="#vlr-example" title="Permalink to this heading"></a></h3>
+<p>You can add your own VLRs to files to store processing information or
+whatever you
+want by providing a JSON block via <a class="reference internal" href="../stages/writers.las.html#writers-las"><span class="std std-ref">writers.las</span></a> <code class="docutils literal notranslate"><span class="pre">vlrs</span></code> option that
+defines the <code class="docutils literal notranslate"><span class="pre">user_id</span></code> and <code class="docutils literal notranslate"><span class="pre">data</span></code> items for the VLR. The <code class="docutils literal notranslate"><span class="pre">data</span></code> option
+must be <a class="reference external" href="https://en.wikipedia.org/wiki/Base64">base64</a>-encoded string output. The data will be converted to binary
+information and stored in the VLR when the file is written.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;input.las&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;writers.las&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="p">:</span><span class="s2">&quot;output.las&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;vlrs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">   </span><span class="p">{</span>
+<span class="w">                      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A description under 32 bytes&quot;</span><span class="p">,</span>
+<span class="w">                      </span><span class="nt">&quot;record_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span>
+<span class="w">                      </span><span class="nt">&quot;user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hobu&quot;</span><span class="p">,</span>
+<span class="w">                      </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dGhpcyBpcyBzb21lIHRleHQ=&quot;</span>
+<span class="w">                     </span><span class="p">},</span>
+<span class="w">                     </span><span class="p">{</span>
+<span class="w">                      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A description under 32 bytes&quot;</span><span class="p">,</span>
+<span class="w">                      </span><span class="nt">&quot;record_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">43</span><span class="p">,</span>
+<span class="w">                      </span><span class="nt">&quot;user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hobu&quot;</span><span class="p">,</span>
+<span class="w">                      </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dGhpcyBpcyBzb21lIG1vcmUgdGV4dA==&quot;</span>
+<span class="w">                      </span><span class="p">}</span>
+<span class="w">                    </span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="pdal-metadata">
+<h2><a class="toc-backref" href="#id11" role="doc-backlink">PDAL Metadata</a><a class="headerlink" href="#pdal-metadata" title="Permalink to this heading"></a></h2>
+<p>The <a class="reference internal" href="../stages/writers.las.html#writers-las"><span class="std std-ref">writers.las</span></a> driver supports an option, <code class="docutils literal notranslate"><span class="pre">pdal_metadata</span></code>, that writes
+two <cite>PDAL</cite> VLRs to LAS files. The first is the equivalent of
+<a class="reference internal" href="../apps/info.html#info-command"><span class="std std-ref">info</span></a>’s
+<code class="docutils literal notranslate"><span class="pre">--metadata</span></code> output. The second is a copy of the output of the
+<code class="docutils literal notranslate"><span class="pre">--pipeline</span></code> serialization
+option that describes all stages and options of the pipeline that created
+the file.  These two VLRs may
+be useful in tracking down processing history of data, allow you to determine
+which versions of PDAL may have written a file and what filter options were set
+when it was written, and give you the ability to store metadata and other
+information via pipeline <code class="docutils literal notranslate"><span class="pre">user_data</span></code> from your own applications.</p>
+<section id="metadata-example">
+<h3>Metadata Example<a class="headerlink" href="#metadata-example" title="Permalink to this heading"></a></h3>
+<p>The pipeline used to construct the file and all of its <a class="reference internal" href="../development/metadata.html#metadata"><span class="std std-ref">Metadata</span></a>
+can be written into VLRs in <a class="reference external" href="http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html">ASPRS LAS</a> files under the <cite>PDAL</cite> <a class="reference external" href="http://www.asprs.org/misc/las-key-list.html">VLR key</a>.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="p">[</span>
+<span class="linenos"> 2</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos"> 3</span><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;readers.las&quot;</span><span class="p">,</span>
+<span class="linenos"> 4</span><span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;input.las&quot;</span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="p">},</span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos"> 7</span><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;writers.las&quot;</span><span class="p">,</span>
+<span class="hll"><span class="linenos"> 8</span><span class="w">        </span><span class="nt">&quot;pdal_metadata&quot;</span><span class="p">:</span><span class="s2">&quot;true&quot;</span><span class="p">,</span>
+</span><span class="linenos"> 9</span><span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output.laz&quot;</span>
+<span class="linenos">10</span><span class="w">    </span><span class="p">}</span>
+<span class="linenos">11</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>LAS versions prior to 1.4 only support VLRs of at most 64K of information.
+It is possible, though improbable, that the metadata or pipeline stored
+in the VLRs will not fit in that space.</p>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="clipping/index.html" class="btn btn-neutral float-right" title="Clipping with Geometries" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="iowa-entwine.html" class="btn btn-neutral float-left" title="Reading data from EPT" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <div class="info">
+      <a class="logo-link" href="https://hobu.co">
+        <div class="hobu-logo"></div>
+      </a>
+      <div class="copyright">
+      
+
+                    &copy;  2023
+                        <a href="https://github.com/abellgithub">Andrew Bell</a>,
+                        <a href="https://github.com/chambbj">Brad Chambers</a>,
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>.
+
+      
+      Last updated on May 22, 2023.
+      </div>
+    </div>
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="footer">
+        <div class="container">
+                    &copy;  2023
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        <a href="http://github.com/mpgerlek">Michael Gerlek</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>,
+                Last updated
+                    on May 22, 2023.
+        </div>
+    </div>
+
+</body>
+</html>

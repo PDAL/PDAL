@@ -1,0 +1,451 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>writers.gdal &mdash; pdal.io</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/pdal.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/breathe.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="canonical" href="https://pdal.io/stages/writers.gdal.html"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="copyright" title="Copyright" href="../copyright.html" />
+    <link rel="next" title="writers.gltf" href="writers.gltf.html" />
+    <link rel="prev" title="writers.fbx" href="writers.fbx.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+          </a>
+              <div class="version">
+                2.6.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../apps/index.html">Applications</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../community.html">Community</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stages.html">Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readers.html">Readers</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="writers.html">Writers</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="writers.bpf.html">writers.bpf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.copc.html">writers.copc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.draco.html">writers.draco</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.ept_addon.html">writers.ept_addon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.e57.html">writers.e57</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.fbi.html">writers.fbi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.fbx.html">writers.fbx</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">writers.gdal</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-example">Basic Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#options">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="writers.gltf.html">writers.gltf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.las.html">writers.las</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.matlab.html">writers.matlab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.nitf.html">writers.nitf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.null.html">writers.null</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.ogr.html">writers.ogr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.pcd.html">writers.pcd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.pgpointcloud.html">writers.pgpointcloud</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.ply.html">writers.ply</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.raster.html">writers.raster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.sbet.html">writers.sbet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.text.html">writers.text</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.tiledb.html">writers.tiledb</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="filters.html">Filters</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../dimensions.html">Dimensions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../types.html">Types</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../python.html">Python</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../java.html">Java</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../workshop/index.html">Workshop</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project/index.html">Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../copyright.html">License</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PDAL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html"> Documentation </a> &raquo;</li>
+      
+          <li><a href="writers.html">Writers</a> &raquo;</li>
+      
+      <li>writers.gdal</li>
+    
+
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/PDAL/PDAL/edit//master/doc/stages/writers.gdal.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="writers.gltf.html" class="btn btn-neutral float-right" title="writers.gltf" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="writers.fbx.html" class="btn btn-neutral float-left" title="writers.fbx" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="writers-gdal">
+<span id="id1"></span><h1>writers.gdal<a class="headerlink" href="#writers-gdal" title="Permalink to this heading"></a></h1>
+<p>The <strong>GDAL writer</strong> creates a raster from a point cloud using an interpolation
+algorithm.  Output is produced using <a class="reference external" href="http://gdal.org">GDAL</a> and can use any <a class="reference external" href="http://www.gdal.org/formats_list.html">driver
+that supports creation of rasters</a>.  A <a class="reference internal" href="#data-type">data_type</a> can be specified for the
+raster (double, float, int32, etc.).  If no data type is specified, the
+data type with the largest range supported by the driver is used.</p>
+<p>The technique used to create the raster is a simple interpolation where
+each point that falls within a given <a class="reference internal" href="#radius">radius</a> of a raster cell center
+potentially contributes to the raster’s value.  If no radius is provided,
+it is set to the product of the <a class="reference internal" href="#resolution">resolution</a> and the square root of two.
+If a circle with the provided radius
+doesn’t encompass the entire cell, it is possible that some points will
+not be considered at all, including those that may be within the bounds
+of the raster cell.</p>
+<p>The GDAL writer creates rasters using the data specified in the <a class="reference internal" href="#dimension">dimension</a>
+option (defaults to <cite>Z</cite>). The writer creates up to six rasters based on
+different statistics in the output dataset.  The order of the layers in the
+dataset is as follows:</p>
+<dl class="simple">
+<dt>min</dt><dd><p>Give the cell the minimum value of all points within the given radius.</p>
+</dd>
+<dt>max</dt><dd><p>Give the cell the maximum value of all points within the given radius.</p>
+</dd>
+<dt>mean</dt><dd><p>Give the cell the mean value of all points within the given radius.</p>
+</dd>
+<dt>idw</dt><dd><p>Cells are assigned a value based on <a class="reference external" href="https://en.wikipedia.org/wiki/Inverse_distance_weighting">Shepard’s inverse distance weighting</a>
+algorithm, considering all points within the given radius.</p>
+</dd>
+<dt>count</dt><dd><p>Give the cell the number of points that lie within the given radius.</p>
+</dd>
+<dt>stdev</dt><dd><p>Give the cell the population standard deviation of the points that lie
+within the given radius.</p>
+</dd>
+</dl>
+<p>If no points fall within the circle about a raster cell, a secondary
+algorithm can be used to attempt to provide a value after the standard
+interpolation is complete.  If the <a class="reference internal" href="#window-size">window_size</a> option is non-zero, the
+values of a square of rasters surrounding an empty cell is applied
+using inverse distance weighting of any non-empty cells.
+The value provided for window_size is the
+maximum horizontal or vertical distance that a donor cell may be in order to
+contribute to the subject cell (A window_size of 1 essentially creates a 3x3
+array around the subject cell.  A window_size of 2 creates a 5x5 array, and
+so on.)</p>
+<p>Cells that have no value after interpolation are given a value specified by
+the <a class="reference internal" href="#nodata">nodata</a> option.</p>
+<div class="admonition embed" id="embed-0">
+<p class="admonition-title">Default Embedded Stage </p>
+<p>This stage is enabled by default</p>
+</div>
+<div class="admonition streamable" id="streamable-0">
+<p class="admonition-title">Streamable Stage</p>
+<p>This stage supports streaming operations</p>
+</div>
+<section id="basic-example">
+<h2>Basic Example<a class="headerlink" href="#basic-example" title="Permalink to this heading"></a></h2>
+<p>This  pipeline reads the file autzen_trim.las and creates a Geotiff dataset
+called outputfile.tif.  Since output_type isn’t specified, it creates six
+raster bands (“min”, “max”, “mean”, “idx”, “count” and “stdev”) in the output
+dataset.  The raster cells are 10x10 and the radius used to locate points
+whose values contribute to the cell value is 14.14.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;pdal/test/data/las/autzen_trim.las&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;resolution&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;radius&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">14.14</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="p">:</span><span class="s2">&quot;outputfile.tif&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="options">
+<h2>Options<a class="headerlink" href="#options" title="Permalink to this heading"></a></h2>
+<dl class="simple">
+<dt>filename</dt><dd><p>Name of output file. The writer will accept a filename containing
+a single placeholder character (<cite>#</cite>).  If input to the writer consists
+of multiple PointViews, each will be written to a separate file, where
+the placeholder will be replaced with an incrementing integer.  If no
+placeholder is found, all PointViews provided to the writer are
+aggregated into a single file for output.  Multiple PointViews are usually
+the result of using <a class="reference internal" href="filters.splitter.html#filters-splitter"><span class="std std-ref">filters.splitter</span></a>, <a class="reference internal" href="filters.chipper.html#filters-chipper"><span class="std std-ref">filters.chipper</span></a> or
+<a class="reference internal" href="filters.divider.html#filters-divider"><span class="std std-ref">filters.divider</span></a>.[Required]</p>
+</dd>
+<dt>binmode:</dt><dd><p>If ‘true’, only points <strong>inside</strong> the raster pixel will be considered
+for statistics, and no distance-based summary or interpolation will
+be applied [Default: false]</p>
+</dd>
+</dl>
+<dl class="simple" id="resolution">
+<dt>resolution</dt><dd><p>Length of raster cell edges in X/Y units.  [Required]</p>
+</dd>
+</dl>
+<dl class="simple" id="radius">
+<dt>radius</dt><dd><p>Radius about cell center bounding points to use to calculate a cell value.
+[Default: <a class="reference internal" href="#resolution">resolution</a> * sqrt(2)]</p>
+</dd>
+<dt>power</dt><dd><p>Exponent of the distance when computing IDW. Close points have higher
+significance than far points. [Default: 1.0]</p>
+</dd>
+<dt>gdaldriver</dt><dd><p>GDAL code of the <a class="reference external" href="http://www.gdal.org/formats_list.html">GDAL driver</a> to use to write the output.
+[Default: “GTiff”]</p>
+</dd>
+</dl>
+<dl>
+<dt>gdalopts</dt><dd><p>A list of key/value options to pass directly to the GDAL driver.  The
+format is name=value,name=value,…  The option may be specified
+any number of times.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The INTERLEAVE GDAL driver option is not supported.  writers.gdal
+always uses BAND interleaving.</p>
+</div>
+</dd>
+</dl>
+<dl class="simple" id="data-type">
+<dt>data_type</dt><dd><p>The <a class="reference internal" href="../types.html#types"><span class="std std-ref">data type</span></a> to use for the output raster.
+Many GDAL drivers only
+support a limited set of output data types.
+[Default: depends on the driver]</p>
+</dd>
+</dl>
+<dl class="simple" id="nodata">
+<dt>nodata</dt><dd><p>The value to use for a raster cell if no data exists in the input data
+with which to compute an output cell value. [Default: depends on the
+<a class="reference internal" href="#data-type">data_type</a>.  -9999 for double, float, int and short, 9999 for
+unsigned int and unsigned short, 255 for unsigned char and -128 for char]</p>
+</dd>
+</dl>
+<dl class="simple" id="output-type">
+<dt>output_type</dt><dd><p>A comma separated list of statistics for which to produce raster layers.
+The supported values are “min”, “max”, “mean”, “idw”, “count”, “stdev”
+and “all”.  The option may be specified more than once. [Default: “all”]</p>
+</dd>
+</dl>
+<dl class="simple" id="window-size">
+<dt>window_size</dt><dd><p>The maximum distance from a donor cell to a target cell when applying
+the fallback interpolation method.  See the stage description for more
+information. [Default: 0]</p>
+</dd>
+</dl>
+<dl class="simple" id="dimension">
+<dt>dimension</dt><dd><p>A dimension name to use for the interpolation. [Default: “Z”]</p>
+</dd>
+<dt>bounds</dt><dd><p>The bounds of the data to be written.  Points not in bounds are discarded.
+The format is ([minx, maxx],[miny,maxy]). [Optional]</p>
+</dd>
+<dt>origin_x</dt><dd><p>X origin (lower left corner) of the grid. [Default: None]</p>
+</dd>
+<dt>origin_y</dt><dd><p>Y origin (lower left corner) of the grid. [Default: None]</p>
+</dd>
+<dt>width</dt><dd><p>Number of cells in the X direction. [Default: None]</p>
+</dd>
+<dt>height</dt><dd><p>Number of cells in the Y direction. [Default: None]</p>
+</dd>
+<dt>override_srs</dt><dd><p>Write the raster with the provided SRS. [Default: None]</p>
+</dd>
+<dt>default_srs</dt><dd><p>Write the raster with the provided SRS if none exists. [Default: None]</p>
+</dd>
+<dt>metadata:</dt><dd><p>Add or set GDAL metadata to set on the raster, in the form
+<code class="docutils literal notranslate"><span class="pre">NAME=VALUE,NAME2=VALUE2,NAME3=VALUE3</span></code> [Default: None]</p>
+</dd>
+<dt>pdal_metadata:</dt><dd><p>Write PDAL’s pipeline and metadata as base64 to the GDAL PAM metadata [Default: False]</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>where</dt><dd><p>An <a class="reference internal" href="expression.html#pdal-expression"><span class="std std-ref">expression</span></a> that limits points passed to a writer.
+Points that don’t pass the
+expression skip the stage but are available to subsequent stages in a pipeline.
+[Default: no filtering]</p>
+</dd>
+<dt>where_merge</dt><dd><p>A strategy for merging points skipped by a ‘<cite>where’</cite> option when running in standard mode.
+If <code class="docutils literal notranslate"><span class="pre">true</span></code>, the skipped points are added to the first point view returned by the skipped
+filter. If <code class="docutils literal notranslate"><span class="pre">false</span></code>, skipped points are placed in their own point view. If <code class="docutils literal notranslate"><span class="pre">auto</span></code>,
+skipped points are merged into the returned point view provided that only one point view
+is returned and it has the same point count as it did when the writer was run.
+[Default: <code class="docutils literal notranslate"><span class="pre">auto</span></code>]</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You may use the ‘bounds’ option, or ‘origin_x’, ‘origin_y’, ‘width’
+and ‘height’, but not both.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Unless the raster being written is empty, the spatial reference will automatically
+come from the data and does not need to be set with ‘override_srs’ or ‘default_srs’.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="writers.gltf.html" class="btn btn-neutral float-right" title="writers.gltf" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="writers.fbx.html" class="btn btn-neutral float-left" title="writers.fbx" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <div class="info">
+      <a class="logo-link" href="https://hobu.co">
+        <div class="hobu-logo"></div>
+      </a>
+      <div class="copyright">
+      
+
+                    &copy;  2023
+                        <a href="https://github.com/abellgithub">Andrew Bell</a>,
+                        <a href="https://github.com/chambbj">Brad Chambers</a>,
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>.
+
+      
+      Last updated on May 22, 2023.
+      </div>
+    </div>
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="footer">
+        <div class="container">
+                    &copy;  2023
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        <a href="http://github.com/mpgerlek">Michael Gerlek</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>,
+                Last updated
+                    on May 22, 2023.
+        </div>
+    </div>
+
+</body>
+</html>

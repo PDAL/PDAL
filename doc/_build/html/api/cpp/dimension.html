@@ -1,0 +1,480 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pdal::Dimension &mdash; pdal.io</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/pdal.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/breathe.css" type="text/css" />
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://pdal.io/api/cpp/dimension.html"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="copyright" title="Copyright" href="../../copyright.html" />
+    <link rel="next" title="pdal::Extractor" href="extractor.html" />
+    <link rel="prev" title="pdal::ColumnPointTable" href="columnpointtable.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+          </a>
+              <div class="version">
+                2.6.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../about.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../download.html">Download</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../apps/index.html">Applications</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../community.html">Community</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../pipeline.html">Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stages/stages.html">Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stages/readers.html">Readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stages/writers.html">Writers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stages/filters.html">Filters</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../dimensions.html">Dimensions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../types.html">Types</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../python.html">Python</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../java.html">Java</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../workshop/index.html">Workshop</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../project/index.html">Project</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">C++ API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="bounds.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::BOX2D</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="charbuf.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Charbuf</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="columnpointtable.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::ColumnPointTable</span></code></a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">pdal::Dimension</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="extractor.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Extractor</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileutils.html"><code class="docutils literal notranslate"><span class="pre">pdal::FileUtils</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="filter.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Filter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="istream.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::IStream</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="log.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Log</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="metadata.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Metadata</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="options.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Options</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pointtable.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::PointTable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pointview.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::PointView</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="programargs.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::ProgramArgs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="reader.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Reader</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="rowpointtable.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::RowPointTable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="stage.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Stage</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="stagefactory.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::StageFactory</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html"><code class="docutils literal notranslate"><span class="pre">pdal::Utils</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="writer.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Writer</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../transition/index.html">libLAS C API to PDAL transition guide</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../copyright.html">License</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PDAL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html"> Documentation </a> &raquo;</li>
+      
+          <li><a href="../index.html">API</a> &raquo;</li>
+      
+          <li><a href="index.html">C++ API</a> &raquo;</li>
+      
+      <li><code class="docutils literal notranslate"><span class="pre">pdal::Dimension</span></code></li>
+    
+
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/PDAL/PDAL/edit//master/doc/api/cpp/dimension.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="extractor.html" class="btn btn-neutral float-right" title="pdal::Extractor" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="columnpointtable.html" class="btn btn-neutral float-left" title="pdal::ColumnPointTable" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pdal-dimension">
+<span id="cpp-pdal-dimension"></span><h1><code class="docutils literal notranslate"><span class="pre">pdal::Dimension</span></code><a class="headerlink" href="#pdal-dimension" title="Permalink to this heading"></a></h1>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9DimensionE">
+<span id="_CPPv3N4pdal9DimensionE"></span><span id="_CPPv2N4pdal9DimensionE"></span><span id="pdal::Dimension"></span><span class="target" id="namespacepdal_1_1Dimension"></span><span class="k"><span class="pre">namespace</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Dimension</span></span></span><a class="headerlink" href="#_CPPv4N4pdal9DimensionE" title="Permalink to this definition"></a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-typedefs">Typedefs</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension10DetailListE">
+<span id="_CPPv3N4pdal9Dimension10DetailListE"></span><span id="_CPPv2N4pdal9Dimension10DetailListE"></span><span id="pdal::Dimension::DetailList"></span><span class="target" id="namespacepdal_1_1Dimension_1afd79505fa191433a2436a9feb8d5b664"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N4pdal9Dimension6DetailE" title="pdal::Dimension::Detail"><span class="n"><span class="pre">Detail</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">DetailList</span></span></span><a class="headerlink" href="#_CPPv4N4pdal9Dimension10DetailListE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-enums">Enums</p>
+<dl class="cpp enum-class">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension8BaseTypeE">
+<span id="_CPPv3N4pdal9Dimension8BaseTypeE"></span><span id="_CPPv2N4pdal9Dimension8BaseTypeE"></span><span class="target" id="namespacepdal_1_1Dimension_1a285f79a35d01de5eaa7ccb49acd91a14"></span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">BaseType</span></span></span><a class="headerlink" href="#_CPPv4N4pdal9Dimension8BaseTypeE" title="Permalink to this definition"></a><br /></dt>
+<dd><p><em>Values:</em></p>
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension8BaseType4NoneE">
+<span id="_CPPv3N4pdal9Dimension8BaseType4NoneE"></span><span id="_CPPv2N4pdal9Dimension8BaseType4NoneE"></span><span class="target" id="namespacepdal_1_1Dimension_1a285f79a35d01de5eaa7ccb49acd91a14a6adf97f83acf6453d4a6a4b1070f3754"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">None</span></span></span><a class="headerlink" href="#_CPPv4N4pdal9Dimension8BaseType4NoneE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension8BaseType6SignedE">
+<span id="_CPPv3N4pdal9Dimension8BaseType6SignedE"></span><span id="_CPPv2N4pdal9Dimension8BaseType6SignedE"></span><span class="target" id="namespacepdal_1_1Dimension_1a285f79a35d01de5eaa7ccb49acd91a14a71fed0c3428bf1a2e19af257c4bac379"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Signed</span></span></span><a class="headerlink" href="#_CPPv4N4pdal9Dimension8BaseType6SignedE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension8BaseType8UnsignedE">
+<span id="_CPPv3N4pdal9Dimension8BaseType8UnsignedE"></span><span id="_CPPv2N4pdal9Dimension8BaseType8UnsignedE"></span><span class="target" id="namespacepdal_1_1Dimension_1a285f79a35d01de5eaa7ccb49acd91a14aa1a914735b205424ba6c40b85528d78a"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Unsigned</span></span></span><a class="headerlink" href="#_CPPv4N4pdal9Dimension8BaseType8UnsignedE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension8BaseType8FloatingE">
+<span id="_CPPv3N4pdal9Dimension8BaseType8FloatingE"></span><span id="_CPPv2N4pdal9Dimension8BaseType8FloatingE"></span><span class="target" id="namespacepdal_1_1Dimension_1a285f79a35d01de5eaa7ccb49acd91a14ac8df43648942ec3a9aec140f07f47b7c"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Floating</span></span></span><a class="headerlink" href="#_CPPv4N4pdal9Dimension8BaseType8FloatingE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="cpp enum-class">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension4TypeE">
+<span id="_CPPv3N4pdal9Dimension4TypeE"></span><span id="_CPPv2N4pdal9Dimension4TypeE"></span><span class="target" id="namespacepdal_1_1Dimension_1a1cd74811ea9d738f0e8414a9712b7274"></span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Type</span></span></span><a class="headerlink" href="#_CPPv4N4pdal9Dimension4TypeE" title="Permalink to this definition"></a><br /></dt>
+<dd><p><em>Values:</em></p>
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension4Type4NoneE">
+<span id="_CPPv3N4pdal9Dimension4Type4NoneE"></span><span id="_CPPv2N4pdal9Dimension4Type4NoneE"></span><span class="target" id="namespacepdal_1_1Dimension_1a1cd74811ea9d738f0e8414a9712b7274a6adf97f83acf6453d4a6a4b1070f3754"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">None</span></span></span><a class="headerlink" href="#_CPPv4N4pdal9Dimension4Type4NoneE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension4Type9Unsigned8E">
+<span id="_CPPv3N4pdal9Dimension4Type9Unsigned8E"></span><span id="_CPPv2N4pdal9Dimension4Type9Unsigned8E"></span><span class="target" id="namespacepdal_1_1Dimension_1a1cd74811ea9d738f0e8414a9712b7274aedf6d540edaa0ca6d4765967e862540e"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Unsigned8</span></span></span><a class="headerlink" href="#_CPPv4N4pdal9Dimension4Type9Unsigned8E" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension4Type7Signed8E">
+<span id="_CPPv3N4pdal9Dimension4Type7Signed8E"></span><span id="_CPPv2N4pdal9Dimension4Type7Signed8E"></span><span class="target" id="namespacepdal_1_1Dimension_1a1cd74811ea9d738f0e8414a9712b7274a8c04e5bc88a7f787b717c4c1916a152e"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Signed8</span></span></span><a class="headerlink" href="#_CPPv4N4pdal9Dimension4Type7Signed8E" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension4Type10Unsigned16E">
+<span id="_CPPv3N4pdal9Dimension4Type10Unsigned16E"></span><span id="_CPPv2N4pdal9Dimension4Type10Unsigned16E"></span><span class="target" id="namespacepdal_1_1Dimension_1a1cd74811ea9d738f0e8414a9712b7274a3bb2c43c9226462544bef717159a6ab7"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Unsigned16</span></span></span><a class="headerlink" href="#_CPPv4N4pdal9Dimension4Type10Unsigned16E" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension4Type8Signed16E">
+<span id="_CPPv3N4pdal9Dimension4Type8Signed16E"></span><span id="_CPPv2N4pdal9Dimension4Type8Signed16E"></span><span class="target" id="namespacepdal_1_1Dimension_1a1cd74811ea9d738f0e8414a9712b7274a55e220348f0544985a7f511f06cbea22"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Signed16</span></span></span><a class="headerlink" href="#_CPPv4N4pdal9Dimension4Type8Signed16E" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension4Type10Unsigned32E">
+<span id="_CPPv3N4pdal9Dimension4Type10Unsigned32E"></span><span id="_CPPv2N4pdal9Dimension4Type10Unsigned32E"></span><span class="target" id="namespacepdal_1_1Dimension_1a1cd74811ea9d738f0e8414a9712b7274abc32f95ce2269d1ac06175867e8c43e0"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Unsigned32</span></span></span><a class="headerlink" href="#_CPPv4N4pdal9Dimension4Type10Unsigned32E" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension4Type8Signed32E">
+<span id="_CPPv3N4pdal9Dimension4Type8Signed32E"></span><span id="_CPPv2N4pdal9Dimension4Type8Signed32E"></span><span class="target" id="namespacepdal_1_1Dimension_1a1cd74811ea9d738f0e8414a9712b7274accedffbc6e5308e33d3843e8bdc0dad7"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Signed32</span></span></span><a class="headerlink" href="#_CPPv4N4pdal9Dimension4Type8Signed32E" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension4Type10Unsigned64E">
+<span id="_CPPv3N4pdal9Dimension4Type10Unsigned64E"></span><span id="_CPPv2N4pdal9Dimension4Type10Unsigned64E"></span><span class="target" id="namespacepdal_1_1Dimension_1a1cd74811ea9d738f0e8414a9712b7274a4b86d461c3e18e6882a6d0656bae932b"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Unsigned64</span></span></span><a class="headerlink" href="#_CPPv4N4pdal9Dimension4Type10Unsigned64E" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension4Type8Signed64E">
+<span id="_CPPv3N4pdal9Dimension4Type8Signed64E"></span><span id="_CPPv2N4pdal9Dimension4Type8Signed64E"></span><span class="target" id="namespacepdal_1_1Dimension_1a1cd74811ea9d738f0e8414a9712b7274ae1b3c9c6087a93b07c83e0b04f377a8d"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Signed64</span></span></span><a class="headerlink" href="#_CPPv4N4pdal9Dimension4Type8Signed64E" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension4Type5FloatE">
+<span id="_CPPv3N4pdal9Dimension4Type5FloatE"></span><span id="_CPPv2N4pdal9Dimension4Type5FloatE"></span><span class="target" id="namespacepdal_1_1Dimension_1a1cd74811ea9d738f0e8414a9712b7274a22ae0e2b89e5e3d477f988cc36d3272b"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Float</span></span></span><a class="headerlink" href="#_CPPv4N4pdal9Dimension4Type5FloatE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension4Type6DoubleE">
+<span id="_CPPv3N4pdal9Dimension4Type6DoubleE"></span><span id="_CPPv2N4pdal9Dimension4Type6DoubleE"></span><span class="target" id="namespacepdal_1_1Dimension_1a1cd74811ea9d738f0e8414a9712b7274ad909d38d705ce75386dd86e611a82f5b"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Double</span></span></span><a class="headerlink" href="#_CPPv4N4pdal9Dimension4Type6DoubleE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension8fromNameENSt6stringE">
+<span id="_CPPv3N4pdal9Dimension8fromNameENSt6stringE"></span><span id="_CPPv2N4pdal9Dimension8fromNameENSt6stringE"></span><span id="pdal::Dimension::fromName__ss"></span><span class="target" id="namespacepdal_1_1Dimension_1aa5181b363a211f400c859f66f2c9183a"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal9Dimension8BaseTypeE" title="pdal::Dimension::BaseType"><span class="n"><span class="pre">BaseType</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">fromName</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal9Dimension8fromNameENSt6stringE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension6toNameE8BaseType">
+<span id="_CPPv3N4pdal9Dimension6toNameE8BaseType"></span><span id="_CPPv2N4pdal9Dimension6toNameE8BaseType"></span><span id="pdal::Dimension::toName__BaseType"></span><span class="target" id="namespacepdal_1_1Dimension_1ab617d7d6d8a56b6711d9e8aa645ba161"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">toName</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4N4pdal9Dimension8BaseTypeE" title="pdal::Dimension::BaseType"><span class="n"><span class="pre">BaseType</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">b</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal9Dimension6toNameE8BaseType" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension4sizeE4Type">
+<span id="_CPPv3N4pdal9Dimension4sizeE4Type"></span><span id="_CPPv2N4pdal9Dimension4sizeE4Type"></span><span id="pdal::Dimension::size__Type"></span><span class="target" id="namespacepdal_1_1Dimension_1acf81dae9d5946f3a941f9df154b2329b"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">size</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4N4pdal9Dimension4TypeE" title="pdal::Dimension::Type"><span class="n"><span class="pre">Type</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">t</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal9Dimension4sizeE4Type" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension4baseE4Type">
+<span id="_CPPv3N4pdal9Dimension4baseE4Type"></span><span id="_CPPv2N4pdal9Dimension4baseE4Type"></span><span id="pdal::Dimension::base__Type"></span><span class="target" id="namespacepdal_1_1Dimension_1ab9491687b8700d1db27e0aba1fcd7143"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal9Dimension8BaseTypeE" title="pdal::Dimension::BaseType"><span class="n"><span class="pre">BaseType</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">base</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4N4pdal9Dimension4TypeE" title="pdal::Dimension::Type"><span class="n"><span class="pre">Type</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">t</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal9Dimension4baseE4Type" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension18interpretationNameE4Type">
+<span id="_CPPv3N4pdal9Dimension18interpretationNameE4Type"></span><span id="_CPPv2N4pdal9Dimension18interpretationNameE4Type"></span><span id="pdal::Dimension::interpretationName__Type"></span><span class="target" id="namespacepdal_1_1Dimension_1acc41232ae1e707d6c928ffb9a56592d3"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">interpretationName</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4N4pdal9Dimension4TypeE" title="pdal::Dimension::Type"><span class="n"><span class="pre">Type</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">dimtype</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal9Dimension18interpretationNameE4Type" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Get a string reresentation of a datatype. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dimtype</strong> – <strong>[in]</strong> <a class="reference internal" href="#namespacepdal_1_1Dimension"><span class="std std-ref">Dimension</span></a> type. </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>String representation of dimension type. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension4typeENSt6stringE">
+<span id="_CPPv3N4pdal9Dimension4typeENSt6stringE"></span><span id="_CPPv2N4pdal9Dimension4typeENSt6stringE"></span><span id="pdal::Dimension::type__ss"></span><span class="target" id="namespacepdal_1_1Dimension_1a880d689fed54aa3ded6f88c9e058c5d2"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal9Dimension4TypeE" title="pdal::Dimension::Type"><span class="n"><span class="pre">Type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">type</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">s</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal9Dimension4typeENSt6stringE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Get the type corresponding to a type name. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>s</strong> – Name of type. </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Corresponding type enumeration value. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension4typeERKNSt6stringE6size_t">
+<span id="_CPPv3N4pdal9Dimension4typeERKNSt6stringE6size_t"></span><span id="_CPPv2N4pdal9Dimension4typeERKNSt6stringE6size_t"></span><span id="pdal::Dimension::type__ssCR.s"></span><span class="target" id="namespacepdal_1_1Dimension_1afc1fd5ca4f5038f935f53ca88d1faa43"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal9Dimension4TypeE" title="pdal::Dimension::Type"><span class="n"><span class="pre">Type</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">type</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">baseType</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal9Dimension4typeERKNSt6stringE6size_t" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension11extractNameERKNSt6stringENSt6string9size_typeE">
+<span id="_CPPv3N4pdal9Dimension11extractNameERKNSt6stringENSt6string9size_typeE"></span><span id="_CPPv2N4pdal9Dimension11extractNameERKNSt6stringENSt6string9size_typeE"></span><span id="pdal::Dimension::extractName__ssCR.std::string::size_type"></span><span class="target" id="namespacepdal_1_1Dimension_1ad7dd00ca79ce099313f3fe405f40cd93"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">extractName</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">s</span></span>, <span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">size_type</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal9Dimension11extractNameERKNSt6stringENSt6string9size_typeE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Extract a dimension name of a string. </p>
+<p><a class="reference internal" href="#namespacepdal_1_1Dimension"><span class="std std-ref">Dimension</span></a> names start with an alpha and continue with numbers or underscores. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s</strong> – String from which to extract dimension name. </p></li>
+<li><p><strong>p</strong> – Position at which to start extracting. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Number of characters in the extracted name. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension7fixNameENSt6stringE">
+<span id="_CPPv3N4pdal9Dimension7fixNameENSt6stringE"></span><span id="_CPPv2N4pdal9Dimension7fixNameENSt6stringE"></span><span id="pdal::Dimension::fixName__ss"></span><span class="target" id="namespacepdal_1_1Dimension_1afa31085f618e7b792c65cc3989ff677f"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">fixName</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal9Dimension7fixNameENSt6stringE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension9nameValidENSt6stringE">
+<span id="_CPPv3N4pdal9Dimension9nameValidENSt6stringE"></span><span id="_CPPv2N4pdal9Dimension9nameValidENSt6stringE"></span><span id="pdal::Dimension::nameValid__ss"></span><span class="target" id="namespacepdal_1_1Dimension_1ac93375a515137eeed62bcfd4b1f25d1f"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">nameValid</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">name</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal9Dimension9nameValidENSt6stringE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9DimensionrsERNSt7istreamERN9Dimension4TypeE">
+<span id="_CPPv3N4pdal9DimensionrsERNSt7istreamERN9Dimension4TypeE"></span><span id="_CPPv2N4pdal9DimensionrsERNSt7istreamERN9Dimension4TypeE"></span><span id="pdal::Dimension::rshift-operator__isR.Dimension::TypeR"></span><span class="target" id="namespacepdal_1_1Dimension_1ae66ffa013fbec30840709c38cb09d990"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">istream</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">&gt;&gt;</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">istream</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">in</span></span>, <a class="reference internal" href="#_CPPv4N4pdal9DimensionE" title="pdal::Dimension"><span class="n"><span class="pre">Dimension</span></span></a><span class="p"><span class="pre">::</span></span><a class="reference internal" href="#_CPPv4N4pdal9Dimension4TypeE" title="pdal::Dimension::Type"><span class="n"><span class="pre">Type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">type</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal9DimensionrsERNSt7istreamERN9Dimension4TypeE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9DimensionlsERNSt7ostreamERKN9Dimension4TypeE">
+<span id="_CPPv3N4pdal9DimensionlsERNSt7ostreamERKN9Dimension4TypeE"></span><span id="_CPPv2N4pdal9DimensionlsERNSt7ostreamERKN9Dimension4TypeE"></span><span id="pdal::Dimension::lshift-operator__osR.Dimension::TypeCR"></span><span class="target" id="namespacepdal_1_1Dimension_1a7ba79c7ce8deb63413a22e7233a0b251"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ostream</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">&lt;&lt;</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ostream</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">out</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal9DimensionE" title="pdal::Dimension"><span class="n"><span class="pre">Dimension</span></span></a><span class="p"><span class="pre">::</span></span><a class="reference internal" href="#_CPPv4N4pdal9Dimension4TypeE" title="pdal::Dimension::Type"><span class="n"><span class="pre">Type</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">type</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal9DimensionlsERNSt7ostreamERKN9Dimension4TypeE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-variables">Variables</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension5COUNTE">
+<span id="_CPPv3N4pdal9Dimension5COUNTE"></span><span id="_CPPv2N4pdal9Dimension5COUNTE"></span><span id="pdal::Dimension::COUNT__iC"></span><span class="target" id="namespacepdal_1_1Dimension_1a632190704690e9d391cc008f907f77ae"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">COUNT</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">1024</span></span><a class="headerlink" href="#_CPPv4N4pdal9Dimension5COUNTE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension11PROPRIETARYE">
+<span id="_CPPv3N4pdal9Dimension11PROPRIETARYE"></span><span id="_CPPv2N4pdal9Dimension11PROPRIETARYE"></span><span id="pdal::Dimension::PROPRIETARY__iC"></span><span class="target" id="namespacepdal_1_1Dimension_1a98f90cefeda0cc3c30717ea05f143411"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PROPRIETARY</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">512</span></span><a class="headerlink" href="#_CPPv4N4pdal9Dimension11PROPRIETARYE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal9Dimension6DetailE">
+<span id="_CPPv3N4pdal9Dimension6DetailE"></span><span id="_CPPv2N4pdal9Dimension6DetailE"></span><span id="pdal::Dimension::Detail"></span><span class="target" id="classpdal_1_1Dimension_1_1Detail"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Detail</span></span></span><a class="headerlink" href="#_CPPv4N4pdal9Dimension6DetailE" title="Permalink to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;DimDetail.hpp&gt;</em></div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="extractor.html" class="btn btn-neutral float-right" title="pdal::Extractor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="columnpointtable.html" class="btn btn-neutral float-left" title="pdal::ColumnPointTable" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <div class="info">
+      <a class="logo-link" href="https://hobu.co">
+        <div class="hobu-logo"></div>
+      </a>
+      <div class="copyright">
+      
+
+                    &copy;  2023
+                        <a href="https://github.com/abellgithub">Andrew Bell</a>,
+                        <a href="https://github.com/chambbj">Brad Chambers</a>,
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>.
+
+      
+      Last updated on May 22, 2023.
+      </div>
+    </div>
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="footer">
+        <div class="container">
+                    &copy;  2023
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        <a href="http://github.com/mpgerlek">Michael Gerlek</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>,
+                Last updated
+                    on May 22, 2023.
+        </div>
+    </div>
+
+</body>
+</html>

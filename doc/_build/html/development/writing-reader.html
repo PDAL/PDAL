@@ -1,0 +1,642 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Writing a reader &mdash; pdal.io</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/pdal.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/breathe.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="canonical" href="https://pdal.io/development/writing-reader.html"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="copyright" title="Copyright" href="../copyright.html" />
+    <link rel="next" title="Writing a writer" href="writing-writer.html" />
+    <link rel="prev" title="Writing a kernel" href="writing-kernel.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+          </a>
+              <div class="version">
+                2.6.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../apps/index.html">Applications</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../community.html">Community</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stages/stages.html">Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stages/readers.html">Readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stages/writers.html">Writers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stages/filters.html">Filters</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../dimensions.html">Dimensions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../types.html">Types</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../python.html">Python</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../java.html">Java</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../workshop/index.html">Workshop</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Development</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="overview.html">PDAL Architecture Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compilation/index.html">Compilation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="errorhandling.html">Errors and Error Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="metadata.html">Metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writing.html">Writing with PDAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugins.html">Writing and building a PDAL Plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writing-filter.html">Writing a filter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writing-kernel.html">Writing a kernel</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Writing a reader</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-header">The header</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-source">The source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compiling-and-usage">Compiling and Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="writing-writer.html">Writing a writer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cmake.html">CMake</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../project/index.html">Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../copyright.html">License</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PDAL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html"> Documentation </a> &raquo;</li>
+      
+          <li><a href="index.html">Development</a> &raquo;</li>
+      
+      <li>Writing a reader</li>
+    
+
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/PDAL/PDAL/edit//master/doc/development/writing-reader.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="writing-writer.html" class="btn btn-neutral float-right" title="Writing a writer" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="writing-kernel.html" class="btn btn-neutral float-left" title="Writing a kernel" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="writing-a-reader">
+<span id="writing-reader"></span><h1>Writing a reader<a class="headerlink" href="#writing-a-reader" title="Permalink to this heading"></a></h1>
+<dl class="field-list simple">
+<dt class="field-odd">Authors<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Bradley Chambers, Scott Lewis</p>
+</dd>
+<dt class="field-even">Contact<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="mailto:brad&#46;chambers&#37;&#52;&#48;gmail&#46;com">brad<span>&#46;</span>chambers<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+</dd>
+<dt class="field-odd">Date<span class="colon">:</span></dt>
+<dd class="field-odd"><p>11/02/2017</p>
+</dd>
+</dl>
+<p>PDAL’s command-line application can be extended through the development of
+reader functions. In this tutorial, we will give a brief example.</p>
+<section id="the-header">
+<h2>The header<a class="headerlink" href="#the-header" title="Permalink to this heading"></a></h2>
+<p>First, we provide a full listing of the reader header.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1">// MyReader.hpp</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="cp">#pragma once</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;pdal/PointView.hpp&gt;</span>
+<span class="linenos"> 6</span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;pdal/Reader.hpp&gt;</span>
+<span class="linenos"> 7</span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;pdal/util/IStream.hpp&gt;</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="k">namespace</span><span class="w"> </span><span class="nn">pdal</span>
+<span class="linenos">10</span><span class="p">{</span>
+<span class="linenos">11</span><span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">MyReader</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Reader</span>
+<span class="linenos">12</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos">13</span><span class="w">  </span><span class="k">public</span><span class="o">:</span>
+<span class="linenos">14</span><span class="w">    </span><span class="n">MyReader</span><span class="p">()</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Reader</span><span class="p">()</span><span class="w"> </span><span class="p">{};</span>
+<span class="linenos">15</span><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="nf">getName</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="linenos">16</span>
+<span class="linenos">17</span><span class="w">  </span><span class="k">private</span><span class="o">:</span>
+<span class="linenos">18</span><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">ILeStream</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_stream</span><span class="p">;</span>
+<span class="linenos">19</span><span class="w">    </span><span class="n">point_count_t</span><span class="w"> </span><span class="n">m_index</span><span class="p">;</span>
+<span class="linenos">20</span><span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">m_scale_z</span><span class="p">;</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span><span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">addDimensions</span><span class="p">(</span><span class="n">PointLayoutPtr</span><span class="w"> </span><span class="n">layout</span><span class="p">);</span>
+<span class="linenos">23</span><span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">addArgs</span><span class="p">(</span><span class="n">ProgramArgs</span><span class="o">&amp;</span><span class="w"> </span><span class="n">args</span><span class="p">);</span>
+<span class="linenos">24</span><span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">ready</span><span class="p">(</span><span class="n">PointTableRef</span><span class="w"> </span><span class="n">table</span><span class="p">);</span>
+<span class="linenos">25</span><span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="n">point_count_t</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="n">PointViewPtr</span><span class="w"> </span><span class="n">view</span><span class="p">,</span><span class="w"> </span><span class="n">point_count_t</span><span class="w"> </span><span class="n">count</span><span class="p">);</span>
+<span class="linenos">26</span><span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">done</span><span class="p">(</span><span class="n">PointTableRef</span><span class="w"> </span><span class="n">table</span><span class="p">);</span>
+<span class="linenos">27</span><span class="w">  </span><span class="p">};</span>
+<span class="linenos">28</span><span class="p">}</span>
+</pre></div>
+</div>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">ILeStream</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_stream</span><span class="p">;</span>
+<span class="linenos">2</span><span class="w">    </span><span class="n">point_count_t</span><span class="w"> </span><span class="n">m_index</span><span class="p">;</span>
+<span class="linenos">3</span><span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">m_scale_z</span><span class="p">;</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">m_stream</span></code> is used to process the input, while <code class="docutils literal notranslate"><span class="pre">m_index</span></code> is used to track
+the index of the records.  <code class="docutils literal notranslate"><span class="pre">m_scale_z</span></code> is specific to MyReader, and will
+be described later.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">addDimensions</span><span class="p">(</span><span class="n">PointLayoutPtr</span><span class="w"> </span><span class="n">layout</span><span class="p">);</span>
+<span class="linenos">2</span><span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">addArgs</span><span class="p">(</span><span class="n">ProgramArgs</span><span class="o">&amp;</span><span class="w"> </span><span class="n">args</span><span class="p">);</span>
+<span class="linenos">3</span><span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">ready</span><span class="p">(</span><span class="n">PointTableRef</span><span class="w"> </span><span class="n">table</span><span class="p">);</span>
+<span class="linenos">4</span><span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="n">point_count_t</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="n">PointViewPtr</span><span class="w"> </span><span class="n">view</span><span class="p">,</span><span class="w"> </span><span class="n">point_count_t</span><span class="w"> </span><span class="n">count</span><span class="p">);</span>
+<span class="linenos">5</span><span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">done</span><span class="p">(</span><span class="n">PointTableRef</span><span class="w"> </span><span class="n">table</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Various other override methods for the stage.  There are a few others that
+could be overridden, which will not be discussed in this tutorial.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>See <code class="docutils literal notranslate"><span class="pre">./include/pdal/Reader.hpp</span></code> of the source tree for more methods
+that a reader can override or implement.</p>
+</div>
+</section>
+<section id="the-source">
+<h2>The source<a class="headerlink" href="#the-source" title="Permalink to this heading"></a></h2>
+<p>Again, we start with a full listing of the reader source.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="c1">// MyReader.cpp</span>
+<span class="linenos">  2</span>
+<span class="linenos">  3</span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;MyReader.hpp&quot;</span>
+<span class="linenos">  4</span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;pdal/util/ProgramArgs.hpp&gt;</span>
+<span class="linenos">  5</span>
+<span class="linenos">  6</span><span class="k">namespace</span><span class="w"> </span><span class="nn">pdal</span>
+<span class="linenos">  7</span><span class="p">{</span>
+<span class="linenos">  8</span><span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">PluginInfo</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">s_info</span>
+<span class="linenos">  9</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos"> 10</span><span class="w">    </span><span class="s">&quot;readers.myreader&quot;</span><span class="p">,</span>
+<span class="linenos"> 11</span><span class="w">    </span><span class="s">&quot;My Awesome Reader&quot;</span><span class="p">,</span>
+<span class="linenos"> 12</span><span class="w">    </span><span class="s">&quot;http://link/to/documentation&quot;</span>
+<span class="linenos"> 13</span><span class="w">  </span><span class="p">};</span>
+<span class="linenos"> 14</span>
+<span class="linenos"> 15</span><span class="w">  </span><span class="n">CREATE_SHARED_STAGE</span><span class="p">(</span><span class="n">MyReader</span><span class="p">,</span><span class="w"> </span><span class="n">s_info</span><span class="p">)</span>
+<span class="linenos"> 16</span>
+<span class="linenos"> 17</span><span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">MyReader</span><span class="o">::</span><span class="n">getName</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">s_info</span><span class="p">.</span><span class="n">name</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="linenos"> 18</span>
+<span class="linenos"> 19</span><span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">MyReader</span><span class="o">::</span><span class="n">addArgs</span><span class="p">(</span><span class="n">ProgramArgs</span><span class="o">&amp;</span><span class="w"> </span><span class="n">args</span><span class="p">)</span>
+<span class="linenos"> 20</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos"> 21</span><span class="w">    </span><span class="n">args</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;z_scale&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Z Scaling&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">m_scale_z</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="linenos"> 22</span><span class="w">  </span><span class="p">}</span>
+<span class="linenos"> 23</span>
+<span class="linenos"> 24</span><span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">MyReader</span><span class="o">::</span><span class="n">addDimensions</span><span class="p">(</span><span class="n">PointLayoutPtr</span><span class="w"> </span><span class="n">layout</span><span class="p">)</span>
+<span class="linenos"> 25</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos"> 26</span><span class="w">    </span><span class="n">layout</span><span class="o">-&gt;</span><span class="n">registerDim</span><span class="p">(</span><span class="n">Dimension</span><span class="o">::</span><span class="n">Id</span><span class="o">::</span><span class="n">X</span><span class="p">);</span>
+<span class="linenos"> 27</span><span class="w">    </span><span class="n">layout</span><span class="o">-&gt;</span><span class="n">registerDim</span><span class="p">(</span><span class="n">Dimension</span><span class="o">::</span><span class="n">Id</span><span class="o">::</span><span class="n">Y</span><span class="p">);</span>
+<span class="linenos"> 28</span><span class="w">    </span><span class="n">layout</span><span class="o">-&gt;</span><span class="n">registerDim</span><span class="p">(</span><span class="n">Dimension</span><span class="o">::</span><span class="n">Id</span><span class="o">::</span><span class="n">Z</span><span class="p">);</span>
+<span class="linenos"> 29</span><span class="w">    </span><span class="n">layout</span><span class="o">-&gt;</span><span class="n">registerOrAssignDim</span><span class="p">(</span><span class="s">&quot;MyData&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">Dimension</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Unsigned64</span><span class="p">);</span>
+<span class="linenos"> 30</span><span class="w">  </span><span class="p">}</span>
+<span class="linenos"> 31</span>
+<span class="linenos"> 32</span><span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">MyReader</span><span class="o">::</span><span class="n">ready</span><span class="p">(</span><span class="n">PointTableRef</span><span class="p">)</span>
+<span class="linenos"> 33</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos"> 34</span><span class="w">    </span><span class="n">m_index</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="linenos"> 35</span><span class="w">    </span><span class="n">SpatialReference</span><span class="w"> </span><span class="n">ref</span><span class="p">(</span><span class="s">&quot;EPSG:4385&quot;</span><span class="p">);</span>
+<span class="linenos"> 36</span><span class="w">    </span><span class="n">setSpatialReference</span><span class="p">(</span><span class="n">ref</span><span class="p">);</span>
+<span class="linenos"> 37</span><span class="w">  </span><span class="p">}</span>
+<span class="linenos"> 38</span>
+<span class="linenos"> 39</span><span class="w">  </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<span class="linenos"> 40</span><span class="w">  </span><span class="n">T</span><span class="w"> </span><span class="n">convert</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">StringList</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">fieldno</span><span class="p">)</span>
+<span class="linenos"> 41</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos"> 42</span><span class="w">      </span><span class="n">T</span><span class="w"> </span><span class="n">output</span><span class="p">;</span>
+<span class="linenos"> 43</span><span class="w">      </span><span class="kt">bool</span><span class="w"> </span><span class="n">bConverted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Utils</span><span class="o">::</span><span class="n">fromString</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">fieldno</span><span class="p">],</span><span class="w"> </span><span class="n">output</span><span class="p">);</span>
+<span class="linenos"> 44</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">bConverted</span><span class="p">)</span>
+<span class="linenos"> 45</span><span class="w">      </span><span class="p">{</span>
+<span class="linenos"> 46</span><span class="w">          </span><span class="n">std</span><span class="o">::</span><span class="n">stringstream</span><span class="w"> </span><span class="n">oss</span><span class="p">;</span>
+<span class="linenos"> 47</span><span class="w">          </span><span class="n">oss</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Unable to convert &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;, &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">s</span><span class="p">[</span><span class="n">fieldno</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span>
+<span class="linenos"> 48</span><span class="w">              </span><span class="s">&quot;, to double&quot;</span><span class="p">;</span>
+<span class="linenos"> 49</span><span class="w">          </span><span class="k">throw</span><span class="w"> </span><span class="n">pdal_error</span><span class="p">(</span><span class="n">oss</span><span class="p">.</span><span class="n">str</span><span class="p">());</span>
+<span class="linenos"> 50</span><span class="w">      </span><span class="p">}</span>
+<span class="linenos"> 51</span>
+<span class="linenos"> 52</span><span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">output</span><span class="p">;</span>
+<span class="linenos"> 53</span><span class="w">  </span><span class="p">}</span>
+<span class="linenos"> 54</span>
+<span class="linenos"> 55</span>
+<span class="linenos"> 56</span><span class="w">  </span><span class="n">point_count_t</span><span class="w"> </span><span class="n">MyReader</span><span class="o">::</span><span class="n">read</span><span class="p">(</span><span class="n">PointViewPtr</span><span class="w"> </span><span class="n">view</span><span class="p">,</span><span class="w"> </span><span class="n">point_count_t</span><span class="w"> </span><span class="n">count</span><span class="p">)</span>
+<span class="linenos"> 57</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos"> 58</span><span class="w">    </span><span class="n">PointLayoutPtr</span><span class="w"> </span><span class="n">layout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">view</span><span class="o">-&gt;</span><span class="n">layout</span><span class="p">();</span>
+<span class="linenos"> 59</span><span class="w">    </span><span class="n">PointId</span><span class="w"> </span><span class="n">nextId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">view</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">();</span>
+<span class="linenos"> 60</span><span class="w">    </span><span class="n">PointId</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_index</span><span class="p">;</span>
+<span class="linenos"> 61</span><span class="w">    </span><span class="n">point_count_t</span><span class="w"> </span><span class="n">numRead</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="linenos"> 62</span>
+<span class="linenos"> 63</span><span class="w">    </span><span class="n">m_stream</span><span class="p">.</span><span class="n">reset</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">ILeStream</span><span class="p">(</span><span class="n">m_filename</span><span class="p">));</span>
+<span class="linenos"> 64</span>
+<span class="linenos"> 65</span><span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="nf">HEADERSIZE</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="linenos"> 66</span><span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="nf">skip_lines</span><span class="p">((</span><span class="n">std</span><span class="o">::</span><span class="n">max</span><span class="p">)(</span><span class="n">HEADERSIZE</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="p">)</span><span class="n">m_index</span><span class="p">));</span>
+<span class="linenos"> 67</span><span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="nf">line_no</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="linenos"> 68</span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">line</span><span class="p">;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">getline</span><span class="p">(</span><span class="o">*</span><span class="n">m_stream</span><span class="o">-&gt;</span><span class="n">stream</span><span class="p">(),</span><span class="w"> </span><span class="n">line</span><span class="p">);</span><span class="w"> </span><span class="n">line_no</span><span class="o">++</span><span class="p">)</span>
+<span class="linenos"> 69</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos"> 70</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">line_no</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">skip_lines</span><span class="p">)</span>
+<span class="linenos"> 71</span><span class="w">      </span><span class="p">{</span>
+<span class="linenos"> 72</span><span class="w">        </span><span class="k">continue</span><span class="p">;</span>
+<span class="linenos"> 73</span><span class="w">      </span><span class="p">}</span>
+<span class="linenos"> 74</span>
+<span class="linenos"> 75</span><span class="w">      </span><span class="c1">// MyReader format:  X::Y::Z::Data</span>
+<span class="linenos"> 76</span><span class="w">      </span><span class="n">StringList</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Utils</span><span class="o">::</span><span class="n">split2</span><span class="p">(</span><span class="n">line</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;:&#39;</span><span class="p">);</span>
+<span class="linenos"> 77</span>
+<span class="linenos"> 78</span><span class="w">      </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="nf">u64</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="linenos"> 79</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span>
+<span class="linenos"> 80</span><span class="w">      </span><span class="p">{</span>
+<span class="linenos"> 81</span><span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">stringstream</span><span class="w"> </span><span class="n">oss</span><span class="p">;</span>
+<span class="linenos"> 82</span><span class="w">        </span><span class="n">oss</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Unable to split proper number of fields.  Expected 4, got &quot;</span>
+<span class="linenos"> 83</span><span class="w">            </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+<span class="linenos"> 84</span><span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="n">pdal_error</span><span class="p">(</span><span class="n">oss</span><span class="p">.</span><span class="n">str</span><span class="p">());</span>
+<span class="linenos"> 85</span><span class="w">      </span><span class="p">}</span>
+<span class="linenos"> 86</span>
+<span class="linenos"> 87</span><span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">name</span><span class="p">(</span><span class="s">&quot;X&quot;</span><span class="p">);</span>
+<span class="linenos"> 88</span><span class="w">      </span><span class="n">view</span><span class="o">-&gt;</span><span class="n">setField</span><span class="p">(</span><span class="n">Dimension</span><span class="o">::</span><span class="n">Id</span><span class="o">::</span><span class="n">X</span><span class="p">,</span><span class="w"> </span><span class="n">nextId</span><span class="p">,</span><span class="w"> </span><span class="n">convert</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">));</span>
+<span class="linenos"> 89</span>
+<span class="linenos"> 90</span><span class="w">      </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Y&quot;</span><span class="p">;</span>
+<span class="linenos"> 91</span><span class="w">      </span><span class="n">view</span><span class="o">-&gt;</span><span class="n">setField</span><span class="p">(</span><span class="n">Dimension</span><span class="o">::</span><span class="n">Id</span><span class="o">::</span><span class="n">Y</span><span class="p">,</span><span class="w"> </span><span class="n">nextId</span><span class="p">,</span><span class="w"> </span><span class="n">convert</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">));</span>
+<span class="linenos"> 92</span>
+<span class="linenos"> 93</span><span class="w">      </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Z&quot;</span><span class="p">;</span>
+<span class="linenos"> 94</span><span class="w">      </span><span class="kt">double</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">convert</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">m_scale_z</span><span class="p">;</span>
+<span class="linenos"> 95</span><span class="w">      </span><span class="n">view</span><span class="o">-&gt;</span><span class="n">setField</span><span class="p">(</span><span class="n">Dimension</span><span class="o">::</span><span class="n">Id</span><span class="o">::</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="n">nextId</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">);</span>
+<span class="linenos"> 96</span>
+<span class="linenos"> 97</span><span class="w">      </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;MyData&quot;</span><span class="p">;</span>
+<span class="linenos"> 98</span><span class="w">      </span><span class="n">view</span><span class="o">-&gt;</span><span class="n">setField</span><span class="p">(</span><span class="n">layout</span><span class="o">-&gt;</span><span class="n">findProprietaryDim</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
+<span class="linenos"> 99</span><span class="w">                     </span><span class="n">nextId</span><span class="p">,</span>
+<span class="linenos">100</span><span class="w">                     </span><span class="n">convert</span><span class="o">&lt;</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">));</span>
+<span class="linenos">101</span>
+<span class="linenos">102</span><span class="w">      </span><span class="n">nextId</span><span class="o">++</span><span class="p">;</span>
+<span class="linenos">103</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_cb</span><span class="p">)</span>
+<span class="linenos">104</span><span class="w">        </span><span class="n">m_cb</span><span class="p">(</span><span class="o">*</span><span class="n">view</span><span class="p">,</span><span class="w"> </span><span class="n">nextId</span><span class="p">);</span>
+<span class="linenos">105</span><span class="w">    </span><span class="p">}</span>
+<span class="linenos">106</span><span class="w">    </span><span class="n">m_index</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nextId</span><span class="p">;</span>
+<span class="linenos">107</span><span class="w">    </span><span class="n">numRead</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nextId</span><span class="p">;</span>
+<span class="linenos">108</span>
+<span class="linenos">109</span><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">numRead</span><span class="p">;</span>
+<span class="linenos">110</span><span class="w">  </span><span class="p">}</span>
+<span class="linenos">111</span>
+<span class="linenos">112</span><span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">MyReader</span><span class="o">::</span><span class="n">done</span><span class="p">(</span><span class="n">PointTableRef</span><span class="p">)</span>
+<span class="linenos">113</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos">114</span><span class="w">    </span><span class="n">m_stream</span><span class="p">.</span><span class="n">reset</span><span class="p">();</span>
+<span class="linenos">115</span><span class="w">  </span><span class="p">}</span>
+<span class="linenos">116</span>
+<span class="linenos">117</span><span class="p">}</span><span class="w"> </span><span class="c1">//namespace pdal</span>
+</pre></div>
+</div>
+<p>In your reader implementation, you will use a macro to create the plugin.
+This macro registers the plugin with the PDAL PluginManager.  In this case,
+we are declaring this as a SHARED stage, meaning that it will be loaded at
+runtime instead of being linked
+to the main PDAL installation.  The macro is supplied with the class name
+of the plugin and a PluginInfo object.  The PluginInfo objection includes
+the name of the plugin, a description, and a link to documentation.</p>
+<p>When making a shared plugin,
+the name of the shared library must correspond with the name of the reader
+provided here.  The name of the generated shared object must be</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">libpdal_plugin_reader_</span><span class="o">&lt;</span><span class="n">reader</span> <span class="n">name</span><span class="o">&gt;.&lt;</span><span class="n">shared</span> <span class="n">library</span> <span class="n">extension</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">PluginInfo</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">s_info</span>
+<span class="linenos">2</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos">3</span><span class="w">    </span><span class="s">&quot;readers.myreader&quot;</span><span class="p">,</span>
+<span class="linenos">4</span><span class="w">    </span><span class="s">&quot;My Awesome Reader&quot;</span><span class="p">,</span>
+<span class="linenos">5</span><span class="w">    </span><span class="s">&quot;http://link/to/documentation&quot;</span>
+<span class="linenos">6</span><span class="w">  </span><span class="p">};</span>
+<span class="linenos">7</span>
+<span class="linenos">8</span><span class="w">  </span><span class="n">CREATE_SHARED_STAGE</span><span class="p">(</span><span class="n">MyReader</span><span class="p">,</span><span class="w"> </span><span class="n">s_info</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This method will process a options for the reader.  In this
+example, we are setting the z_scale value to a default of 1.0, indicating
+that the Z values we read should remain as-is.  (In our reader, this could
+be changed if, for example, the Z values in the file represented mm values,
+and we want to represent them as m in the storage model). <code class="docutils literal notranslate"><span class="pre">addArgs</span></code> will
+bind values given for the argument to the <code class="docutils literal notranslate"><span class="pre">m_scale_z</span></code> variable of the
+stage.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">MyReader::addArgs</span><span class="p">(</span><span class="n">ProgramArgs</span><span class="o">&amp;</span><span class="w"> </span><span class="n">args</span><span class="p">)</span>
+<span class="linenos">2</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos">3</span><span class="w">    </span><span class="n">args</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;z_scale&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Z Scaling&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">m_scale_z</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="linenos">4</span><span class="w">  </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>This method registers the various dimensions the reader will use.  In our case,
+we are using the X, Y, and Z built-in dimensions, as well as a custom
+dimension MyData.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">MyReader::addDimensions</span><span class="p">(</span><span class="n">PointLayoutPtr</span><span class="w"> </span><span class="n">layout</span><span class="p">)</span>
+<span class="linenos">2</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos">3</span><span class="w">    </span><span class="n">layout</span><span class="o">-&gt;</span><span class="n">registerDim</span><span class="p">(</span><span class="n">Dimension</span><span class="o">::</span><span class="n">Id</span><span class="o">::</span><span class="n">X</span><span class="p">);</span>
+<span class="linenos">4</span><span class="w">    </span><span class="n">layout</span><span class="o">-&gt;</span><span class="n">registerDim</span><span class="p">(</span><span class="n">Dimension</span><span class="o">::</span><span class="n">Id</span><span class="o">::</span><span class="n">Y</span><span class="p">);</span>
+<span class="linenos">5</span><span class="w">    </span><span class="n">layout</span><span class="o">-&gt;</span><span class="n">registerDim</span><span class="p">(</span><span class="n">Dimension</span><span class="o">::</span><span class="n">Id</span><span class="o">::</span><span class="n">Z</span><span class="p">);</span>
+<span class="linenos">6</span><span class="w">    </span><span class="n">layout</span><span class="o">-&gt;</span><span class="n">registerOrAssignDim</span><span class="p">(</span><span class="s">&quot;MyData&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">Dimension</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Unsigned64</span><span class="p">);</span>
+<span class="linenos">7</span><span class="w">  </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>This method is called when the Reader is ready for use.  It will only be
+called once, regardless of the number of PointViews that are to be
+processed.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">MyReader::ready</span><span class="p">(</span><span class="n">PointTableRef</span><span class="p">)</span>
+<span class="linenos">2</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos">3</span><span class="w">    </span><span class="n">m_index</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="linenos">4</span><span class="w">    </span><span class="n">SpatialReference</span><span class="w"> </span><span class="n">ref</span><span class="p">(</span><span class="s">&quot;EPSG:4385&quot;</span><span class="p">);</span>
+<span class="linenos">5</span><span class="w">    </span><span class="n">setSpatialReference</span><span class="p">(</span><span class="n">ref</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>This is a helper function, which will convert a string value into the type
+specified when it’s called.  In our example, it will be used to convert
+strings to doubles when reading from the input stream.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w">  </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<span class="linenos"> 2</span><span class="w">  </span><span class="n">T</span><span class="w"> </span><span class="n">convert</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">StringList</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">fieldno</span><span class="p">)</span>
+<span class="linenos"> 3</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos"> 4</span><span class="w">      </span><span class="n">T</span><span class="w"> </span><span class="n">output</span><span class="p">;</span>
+<span class="linenos"> 5</span><span class="w">      </span><span class="kt">bool</span><span class="w"> </span><span class="n">bConverted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Utils</span><span class="o">::</span><span class="n">fromString</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">fieldno</span><span class="p">],</span><span class="w"> </span><span class="n">output</span><span class="p">);</span>
+<span class="linenos"> 6</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">bConverted</span><span class="p">)</span>
+<span class="linenos"> 7</span><span class="w">      </span><span class="p">{</span>
+<span class="linenos"> 8</span><span class="w">          </span><span class="n">std</span><span class="o">::</span><span class="n">stringstream</span><span class="w"> </span><span class="n">oss</span><span class="p">;</span>
+<span class="linenos"> 9</span><span class="w">          </span><span class="n">oss</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Unable to convert &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;, &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">s</span><span class="p">[</span><span class="n">fieldno</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span>
+<span class="linenos">10</span><span class="w">              </span><span class="s">&quot;, to double&quot;</span><span class="p">;</span>
+<span class="linenos">11</span><span class="w">          </span><span class="k">throw</span><span class="w"> </span><span class="n">pdal_error</span><span class="p">(</span><span class="n">oss</span><span class="p">.</span><span class="n">str</span><span class="p">());</span>
+<span class="linenos">12</span><span class="w">      </span><span class="p">}</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span><span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">output</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>This method is the main processing method for the reader.  It takes a
+pointer to a PointView which we will build as we read from the file.  We
+initialize some variables as well, and then reset the input stream with
+the filename used for the reader.  Note that in other readers, the contents
+of this method could be very different depending on the format of the file
+being read, but this should serve as a good start for how to build the
+PointView object.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos">2</span><span class="w">    </span><span class="n">PointLayoutPtr</span><span class="w"> </span><span class="n">layout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">view</span><span class="o">-&gt;</span><span class="n">layout</span><span class="p">();</span>
+<span class="linenos">3</span><span class="w">    </span><span class="n">PointId</span><span class="w"> </span><span class="n">nextId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">view</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">();</span>
+<span class="linenos">4</span><span class="w">    </span><span class="n">PointId</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_index</span><span class="p">;</span>
+<span class="linenos">5</span><span class="w">    </span><span class="n">point_count_t</span><span class="w"> </span><span class="n">numRead</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>In preparation for reading the file, we prepare to skip some header lines.  In
+our case, the header is only a single line.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="nf">HEADERSIZE</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="linenos">2</span><span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="nf">skip_lines</span><span class="p">((</span><span class="n">std</span><span class="o">::</span><span class="n">max</span><span class="p">)(</span><span class="n">HEADERSIZE</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="p">)</span><span class="n">m_index</span><span class="p">));</span>
+</pre></div>
+</div>
+<p>Here we begin our main loop.  In our example file, the first line is a header,
+and each line thereafter is a single point.  If the file had a different format
+the method of looping and reading would have to change as appropriate.  We make
+sure we are skipping the header lines here before moving on.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="nf">line_no</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="linenos">2</span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">line</span><span class="p">;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">getline</span><span class="p">(</span><span class="o">*</span><span class="n">m_stream</span><span class="o">-&gt;</span><span class="n">stream</span><span class="p">(),</span><span class="w"> </span><span class="n">line</span><span class="p">);</span><span class="w"> </span><span class="n">line_no</span><span class="o">++</span><span class="p">)</span>
+<span class="linenos">3</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos">4</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">line_no</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">skip_lines</span><span class="p">)</span>
+<span class="linenos">5</span><span class="w">      </span><span class="p">{</span>
+<span class="linenos">6</span><span class="w">        </span><span class="k">continue</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Here we take the line we read in the for block header, split it, and make sure
+that we have the proper number of fields.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w">      </span><span class="c1">// MyReader format:  X::Y::Z::Data</span>
+<span class="linenos"> 2</span><span class="w">      </span><span class="n">StringList</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Utils</span><span class="o">::</span><span class="n">split2</span><span class="p">(</span><span class="n">line</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;:&#39;</span><span class="p">);</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="w">      </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="nf">u64</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="linenos"> 5</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span>
+<span class="linenos"> 6</span><span class="w">      </span><span class="p">{</span>
+<span class="linenos"> 7</span><span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">stringstream</span><span class="w"> </span><span class="n">oss</span><span class="p">;</span>
+<span class="linenos"> 8</span><span class="w">        </span><span class="n">oss</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Unable to split proper number of fields.  Expected 4, got &quot;</span>
+<span class="linenos"> 9</span><span class="w">            </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+<span class="linenos">10</span><span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="n">pdal_error</span><span class="p">(</span><span class="n">oss</span><span class="p">.</span><span class="n">str</span><span class="p">());</span>
+</pre></div>
+</div>
+<p>Here we take the values we read and put them into the PointView object.  The
+X and Y fields are simply converted from the file and put into the respective
+fields.  MyData is done likewise with the custom dimension we defined.  The Z
+value is read, and multiplied by the scale_z option (defaulted to 1.0), before
+the converted value is put into the field.</p>
+<p>When putting the value into the PointView object, we pass in the Dimension
+that we are assigning it to, the ID of the point (which is incremented in
+each iteration of the loop), and the dimension value.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">name</span><span class="p">(</span><span class="s">&quot;X&quot;</span><span class="p">);</span>
+<span class="linenos"> 2</span><span class="w">      </span><span class="n">view</span><span class="o">-&gt;</span><span class="n">setField</span><span class="p">(</span><span class="n">Dimension</span><span class="o">::</span><span class="n">Id</span><span class="o">::</span><span class="n">X</span><span class="p">,</span><span class="w"> </span><span class="n">nextId</span><span class="p">,</span><span class="w"> </span><span class="n">convert</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">));</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="w">      </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Y&quot;</span><span class="p">;</span>
+<span class="linenos"> 5</span><span class="w">      </span><span class="n">view</span><span class="o">-&gt;</span><span class="n">setField</span><span class="p">(</span><span class="n">Dimension</span><span class="o">::</span><span class="n">Id</span><span class="o">::</span><span class="n">Y</span><span class="p">,</span><span class="w"> </span><span class="n">nextId</span><span class="p">,</span><span class="w"> </span><span class="n">convert</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">));</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="w">      </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Z&quot;</span><span class="p">;</span>
+<span class="linenos"> 8</span><span class="w">      </span><span class="kt">double</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">convert</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">m_scale_z</span><span class="p">;</span>
+<span class="linenos"> 9</span><span class="w">      </span><span class="n">view</span><span class="o">-&gt;</span><span class="n">setField</span><span class="p">(</span><span class="n">Dimension</span><span class="o">::</span><span class="n">Id</span><span class="o">::</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="n">nextId</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">);</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="w">      </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;MyData&quot;</span><span class="p">;</span>
+<span class="linenos">12</span><span class="w">      </span><span class="n">view</span><span class="o">-&gt;</span><span class="n">setField</span><span class="p">(</span><span class="n">layout</span><span class="o">-&gt;</span><span class="n">findProprietaryDim</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
+<span class="linenos">13</span><span class="w">                     </span><span class="n">nextId</span><span class="p">,</span>
+</pre></div>
+</div>
+<p>Finally, we increment the nextId and make a call into the progress callback
+if we have one with our nextId.  After the loop is done, we set the index
+and number read, and return that value as the number of points read.
+This could differ in cases where we read multiple streams, but that won’t
+be covered here.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w">      </span><span class="n">nextId</span><span class="o">++</span><span class="p">;</span>
+<span class="linenos">2</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_cb</span><span class="p">)</span>
+<span class="linenos">3</span><span class="w">        </span><span class="n">m_cb</span><span class="p">(</span><span class="o">*</span><span class="n">view</span><span class="p">,</span><span class="w"> </span><span class="n">nextId</span><span class="p">);</span>
+<span class="linenos">4</span><span class="w">    </span><span class="p">}</span>
+<span class="linenos">5</span><span class="w">    </span><span class="n">m_index</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nextId</span><span class="p">;</span>
+<span class="linenos">6</span><span class="w">    </span><span class="n">numRead</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nextId</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>When the read method is finished, the done method is called for any cleanup.
+In this case, we simply make sure the stream is reset.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">MyReader::done</span><span class="p">(</span><span class="n">PointTableRef</span><span class="p">)</span>
+<span class="linenos">2</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos">3</span><span class="w">    </span><span class="n">m_stream</span><span class="p">.</span><span class="n">reset</span><span class="p">();</span>
+</pre></div>
+</div>
+</section>
+<section id="compiling-and-usage">
+<h2>Compiling and Usage<a class="headerlink" href="#compiling-and-usage" title="Permalink to this heading"></a></h2>
+<p>The MyReader.cpp code can be compiled.  For this example, we’ll use cmake.
+Here is the CMakeLists.txt file we will use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>cmake_minimum_required(VERSION 2.8.12)
+<span class="linenos"> 2</span>project(ReaderTutorial)
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span>find_package(PDAL 2.0 REQUIRED CONFIG)
+<span class="linenos"> 5</span>set(CMAKE_CXX_STANDARD 17)
+<span class="linenos"> 6</span>set(CMAKE_CXX_STANDARD_REQUIRED ON)
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span>add_library(pdal_plugin_reader_myreader SHARED MyReader.cpp)
+<span class="linenos"> 9</span>target_link_libraries(pdal_plugin_reader_myreader PRIVATE ${PDAL_LIBRARIES})
+<span class="linenos">10</span>target_include_directories(pdal_plugin_reader_myreader PRIVATE
+<span class="linenos">11</span>                            ${PDAL_INCLUDE_DIRS})
+<span class="linenos">12</span>target_link_directories(pdal_plugin_reader_myreader PRIVATE ${PDAL_LIBRARY_DIRS})
+</pre></div>
+</div>
+<p>If this file is in the directory containing MyReader.hpp and MyReader.cpp,
+simply run <code class="docutils literal notranslate"><span class="pre">cmake</span> <span class="pre">.</span></code>, followed by <code class="docutils literal notranslate"><span class="pre">make</span></code>.  This will generate a file called
+<code class="docutils literal notranslate"><span class="pre">libpdal_plugin_reader_myreader.dylib</span></code>.</p>
+<p>Put this dylib file into the directory pointed to by <code class="docutils literal notranslate"><span class="pre">PDAL_DRIVER_PATH</span></code>, and
+then when you run <code class="docutils literal notranslate"><span class="pre">pdal</span> <span class="pre">--drivers</span></code>, you should see an entry for
+readers.myreader.</p>
+<p>To test the reader, we will put it into a pipeline and output a text file.</p>
+<p>Please download the <a class="reference external" href="https://github.com/PDAL/PDAL/blob/master/examples/writing-reader/pipeline-myreader.json?raw=true">pipeline-myreader.json</a> and <a class="reference external" href="https://github.com/PDAL/PDAL/blob/master/examples/writing-reader/test-reader-input.txt?raw=true">test-reader-input.txt</a> files.</p>
+<p>In the directory with those two files, run
+<code class="docutils literal notranslate"><span class="pre">pdal</span> <span class="pre">pipeline</span> <span class="pre">pipeline-myreader.json</span></code>.  You should have an output file
+called <code class="docutils literal notranslate"><span class="pre">output.txt</span></code>, which will have the same data as in the input file,
+except in a CSV style format, and with the Z values scaled by .001.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="writing-writer.html" class="btn btn-neutral float-right" title="Writing a writer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="writing-kernel.html" class="btn btn-neutral float-left" title="Writing a kernel" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <div class="info">
+      <a class="logo-link" href="https://hobu.co">
+        <div class="hobu-logo"></div>
+      </a>
+      <div class="copyright">
+      
+
+                    &copy;  2023
+                        <a href="https://github.com/abellgithub">Andrew Bell</a>,
+                        <a href="https://github.com/chambbj">Brad Chambers</a>,
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>.
+
+      
+      Last updated on May 22, 2023.
+      </div>
+    </div>
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="footer">
+        <div class="container">
+                    &copy;  2023
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        <a href="http://github.com/mpgerlek">Michael Gerlek</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>,
+                Last updated
+                    on May 22, 2023.
+        </div>
+    </div>
+
+</body>
+</html>

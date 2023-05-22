@@ -1,0 +1,314 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Writers &mdash; pdal.io</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/pdal.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/breathe.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="canonical" href="https://pdal.io/stages/writers.html"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="copyright" title="Copyright" href="../copyright.html" />
+    <link rel="next" title="writers.bpf" href="writers.bpf.html" />
+    <link rel="prev" title="readers.tindex" href="readers.tindex.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+          </a>
+              <div class="version">
+                2.6.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../apps/index.html">Applications</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../community.html">Community</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stages.html">Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readers.html">Readers</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Writers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="writers.bpf.html">writers.bpf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.copc.html">writers.copc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.draco.html">writers.draco</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.ept_addon.html">writers.ept_addon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.e57.html">writers.e57</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.fbi.html">writers.fbi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.fbx.html">writers.fbx</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.gdal.html">writers.gdal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.gltf.html">writers.gltf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.las.html">writers.las</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.matlab.html">writers.matlab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.nitf.html">writers.nitf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.null.html">writers.null</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.ogr.html">writers.ogr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.pcd.html">writers.pcd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.pgpointcloud.html">writers.pgpointcloud</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.ply.html">writers.ply</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.raster.html">writers.raster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.sbet.html">writers.sbet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.text.html">writers.text</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writers.tiledb.html">writers.tiledb</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="filters.html">Filters</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../dimensions.html">Dimensions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../types.html">Types</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../python.html">Python</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../java.html">Java</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../workshop/index.html">Workshop</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project/index.html">Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../copyright.html">License</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PDAL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html"> Documentation </a> &raquo;</li>
+      
+      <li>Writers</li>
+    
+
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/PDAL/PDAL/edit//master/doc/stages/writers.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="writers.bpf.html" class="btn btn-neutral float-right" title="writers.bpf" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="readers.tindex.html" class="btn btn-neutral float-left" title="readers.tindex" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="writers">
+<span id="id1"></span><h1>Writers<a class="headerlink" href="#writers" title="Permalink to this heading"></a></h1>
+<p>Writers consume data provided by <a class="reference internal" href="readers.html#readers"><span class="std std-ref">Readers</span></a>. Some writers can consume any
+dimension type, while others only understand fixed dimension names.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>PDAL predefined dimension names can be found in the dimension registry:
+<a class="reference internal" href="../dimensions.html#dimensions"><span class="std std-ref">Dimensions</span></a></p>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<dl class="simple">
+<dt><a class="reference internal" href="writers.bpf.html#writers-bpf"><span class="std std-ref">writers.bpf</span></a></dt><dd><p>Write BPF version 3 files. BPF is an NGA specification for point cloud data.</p>
+</dd>
+<dt><a class="reference internal" href="writers.copc.html#writers-copc"><span class="std std-ref">writers.copc</span></a></dt><dd><p>COPC, or Cloud Optimized Point Cloud, is an LAZ 1.4 file stored as a
+clustered octree.</p>
+</dd>
+<dt><a class="reference internal" href="writers.draco.html#writers-draco"><span class="std std-ref">writers.draco</span></a></dt><dd><p>Write a buffer in Google Draco format</p>
+</dd>
+<dt><a class="reference internal" href="writers.ept_addon.html#writers-ept-addon"><span class="std std-ref">writers.ept_addon</span></a></dt><dd><p>Append additional dimensions to Entwine resources.</p>
+</dd>
+<dt><a class="reference internal" href="writers.e57.html#writers-e57"><span class="std std-ref">writers.e57</span></a></dt><dd><p>Write data in the E57 format.</p>
+</dd>
+<dt><a class="reference internal" href="writers.fbi.html#writers-fbi"><span class="std std-ref">writers.fbi</span></a></dt><dd><p>Write TerraSolid FBI format</p>
+</dd>
+<dt><a class="reference internal" href="writers.fbx.html#writers-fbx"><span class="std std-ref">writers.fbx</span></a></dt><dd><p>Write mesh output in the Adobe FBX format.</p>
+</dd>
+<dt><a class="reference internal" href="writers.gdal.html#writers-gdal"><span class="std std-ref">writers.gdal</span></a></dt><dd><p>Create a raster from a point cloud using an interpolation algorithm.</p>
+</dd>
+<dt><a class="reference internal" href="writers.gltf.html#writers-gltf"><span class="std std-ref">writers.gltf</span></a></dt><dd><p>Write mesh data in GLTF format.  Point clouds without meshes cannot be
+written.</p>
+</dd>
+<dt><a class="reference internal" href="writers.las.html#writers-las"><span class="std std-ref">writers.las</span></a></dt><dd><p>Write ASPRS LAS versions 1.0 - 1.4 formatted data. LAZ support is also
+available if enabled at compile-time.</p>
+</dd>
+<dt><a class="reference internal" href="writers.matlab.html#writers-matlab"><span class="std std-ref">writers.matlab</span></a></dt><dd><p>Write MATLAB .mat files. The output has a single array struct.</p>
+</dd>
+<dt><a class="reference internal" href="writers.nitf.html#writers-nitf"><span class="std std-ref">writers.nitf</span></a></dt><dd><p>Write LAS and LAZ point cloud data, wrapped in a NITF 2.1 file.</p>
+</dd>
+<dt><a class="reference internal" href="writers.null.html#writers-null"><span class="std std-ref">writers.null</span></a></dt><dd><p>Provides a sink for points in a pipeline. It’s the same as sending pipeline
+output to /dev/null.</p>
+</dd>
+<dt><a class="reference internal" href="writers.ogr.html#writers-ogr"><span class="std std-ref">writers.ogr</span></a></dt><dd><p>Write a point cloud as a set of OGR points/multipoints</p>
+</dd>
+<dt><a class="reference internal" href="writers.pcd.html#writers-pcd"><span class="std std-ref">writers.pcd</span></a></dt><dd><p>Write PCD-formatted files in the ASCII, binary, or compressed format.</p>
+</dd>
+<dt><a class="reference internal" href="writers.pgpointcloud.html#writers-pgpointcloud"><span class="std std-ref">writers.pgpointcloud</span></a></dt><dd><p>Write to a PostgreSQL database that has the PostgreSQL Pointcloud extension
+enabled.</p>
+</dd>
+<dt><a class="reference internal" href="writers.ply.html#writers-ply"><span class="std std-ref">writers.ply</span></a></dt><dd><p>Write points as PLY vertices. Can also emit a mesh as a set of faces.</p>
+</dd>
+<dt><a class="reference internal" href="writers.raster.html#writers-raster"><span class="std std-ref">writers.raster</span></a></dt><dd><p>Writes rasters using GDAL. Rasters must be created using a PDAL filter.</p>
+</dd>
+<dt><a class="reference internal" href="writers.sbet.html#writers-sbet"><span class="std std-ref">writers.sbet</span></a></dt><dd><p>Write data in the SBET format.</p>
+</dd>
+<dt><a class="reference internal" href="writers.text.html#writers-text"><span class="std std-ref">writers.text</span></a></dt><dd><p>Write points in a text file. GeoJSON and CSV formats are supported.</p>
+</dd>
+<dt><a class="reference internal" href="writers.tiledb.html#writers-tiledb"><span class="std std-ref">writers.tiledb</span></a></dt><dd><p>Write points into a TileDB database.</p>
+</dd>
+</dl>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="writers.bpf.html" class="btn btn-neutral float-right" title="writers.bpf" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="readers.tindex.html" class="btn btn-neutral float-left" title="readers.tindex" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <div class="info">
+      <a class="logo-link" href="https://hobu.co">
+        <div class="hobu-logo"></div>
+      </a>
+      <div class="copyright">
+      
+
+                    &copy;  2023
+                        <a href="https://github.com/abellgithub">Andrew Bell</a>,
+                        <a href="https://github.com/chambbj">Brad Chambers</a>,
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>.
+
+      
+      Last updated on May 22, 2023.
+      </div>
+    </div>
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="footer">
+        <div class="container">
+                    &copy;  2023
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        <a href="http://github.com/mpgerlek">Michael Gerlek</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>,
+                Last updated
+                    on May 22, 2023.
+        </div>
+    </div>
+
+</body>
+</html>

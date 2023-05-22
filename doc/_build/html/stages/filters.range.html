@@ -1,0 +1,378 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>filters.range &mdash; pdal.io</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/pdal.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/breathe.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="canonical" href="https://pdal.io/stages/filters.range.html"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="copyright" title="Copyright" href="../copyright.html" />
+    <link rel="next" title="filters.tail" href="filters.tail.html" />
+    <link rel="prev" title="filters.mongo" href="filters.mongo.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+          </a>
+              <div class="version">
+                2.6.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../apps/index.html">Applications</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../community.html">Community</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stages.html">Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readers.html">Readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writers.html">Writers</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="filters.html">Filters</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="filters.html#create">Create</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#order">Order</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#move">Move</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="filters.html#cull">Cull</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="filters.html#spatial">Spatial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="filters.html#resampling">Resampling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="filters.html#conditional">Conditional</a></li>
+<li class="toctree-l3"><a class="reference internal" href="filters.html#voxel">Voxel</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="filters.html#position">Position</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="filters.expression.html">filters.expression</a></li>
+<li class="toctree-l4"><a class="reference internal" href="filters.head.html">filters.head</a></li>
+<li class="toctree-l4"><a class="reference internal" href="filters.locate.html">filters.locate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="filters.mongo.html">filters.mongo</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">filters.range</a></li>
+<li class="toctree-l4"><a class="reference internal" href="filters.tail.html">filters.tail</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#new">New</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#join">Join</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#metadata">Metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#mesh">Mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#languages">Languages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filters.html#other">Other</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../dimensions.html">Dimensions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../types.html">Types</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../python.html">Python</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../java.html">Java</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../workshop/index.html">Workshop</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project/index.html">Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../copyright.html">License</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PDAL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html"> Documentation </a> &raquo;</li>
+      
+          <li><a href="filters.html">Filters</a> &raquo;</li>
+      
+      <li>filters.range</li>
+    
+
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/PDAL/PDAL/edit//master/doc/stages/filters.range.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="filters.tail.html" class="btn btn-neutral float-right" title="filters.tail" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="filters.mongo.html" class="btn btn-neutral float-left" title="filters.mongo" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="filters-range">
+<span id="id1"></span><h1>filters.range<a class="headerlink" href="#filters-range" title="Permalink to this heading"></a></h1>
+<p>The <strong>Range Filter</strong> applies rudimentary filtering to the input point cloud
+based on a set of criteria on the given dimensions.</p>
+<div class="admonition embed" id="embed-0">
+<p class="admonition-title">Default Embedded Stage </p>
+<p>This stage is enabled by default</p>
+</div>
+<div class="admonition streamable" id="streamable-0">
+<p class="admonition-title">Streamable Stage</p>
+<p>This stage supports streaming operations</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We suggest you start using <a class="reference internal" href="filters.expression.html#filters-expression"><span class="std std-ref">filters.expression</span></a> for PDAL 2.5.x+.
+The syntax is simpler, and it is the same syntax that is used by
+the <code class="docutils literal notranslate"><span class="pre">where</span></code> option of many stages. <code class="docutils literal notranslate"><span class="pre">filters.range</span></code> will
+be deprecated starting PDAL 3.0.</p>
+</div>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this heading"></a></h2>
+<p>This example passes through all points whose <code class="docutils literal notranslate"><span class="pre">Z</span></code> value is in the
+range [0,100]
+and whose <code class="docutils literal notranslate"><span class="pre">Classification</span></code> equals 2 (corresponding to ground in LAS).</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;input.las&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;filters.range&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;limits&quot;</span><span class="p">:</span><span class="s2">&quot;Z[0:100],Classification[2:2]&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;writers.las&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="p">:</span><span class="s2">&quot;filtered.las&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>The equivalent pipeline invoked via the PDAL <code class="docutils literal notranslate"><span class="pre">translate</span></code> command would be</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pdal<span class="w"> </span>translate<span class="w"> </span>-i<span class="w"> </span>input.las<span class="w"> </span>-o<span class="w"> </span>filtered.las<span class="w"> </span>-f<span class="w"> </span>range<span class="w"> </span>--filters.range.limits<span class="o">=</span><span class="s2">&quot;Z[0:100],Classification[2:2]&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="options">
+<h2>Options<a class="headerlink" href="#options" title="Permalink to this heading"></a></h2>
+<dl>
+<dt>limits</dt><dd><p>A comma-separated list of <a class="reference internal" href="#ranges"><span class="std std-ref">Ranges</span></a>.  If more than one range is
+specified for a dimension, the criteria are treated as being logically
+ORed together.  Ranges for different dimensions are treated as being
+logically ANDed.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Classification</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="n">Red</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">50</span><span class="p">],</span> <span class="n">Blue</span><span class="p">[</span><span class="mi">25</span><span class="p">:</span><span class="mi">75</span><span class="p">],</span> <span class="n">Red</span><span class="p">[</span><span class="mi">75</span><span class="p">:</span><span class="mi">255</span><span class="p">],</span> <span class="n">Classification</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">7</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>This specification will select points that have the classification of
+1, 2, 6 or 7 and have a blue value or 25-75 and have a red value of
+1-50 or 75-255.  In this case, all values are inclusive.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>where</dt><dd><p>An <a class="reference internal" href="expression.html#pdal-expression"><span class="std std-ref">expression</span></a> that limits points passed to a filter.
+Points that don’t pass the
+expression skip the stage but are available to subsequent stages in a pipeline.
+[Default: no filtering]</p>
+</dd>
+<dt>where_merge</dt><dd><p>A strategy for merging points skipped by a ‘<cite>where’</cite> option when running in standard mode.
+If <code class="docutils literal notranslate"><span class="pre">true</span></code>, the skipped points are added to the first point view returned by the skipped
+filter. If <code class="docutils literal notranslate"><span class="pre">false</span></code>, skipped points are placed in their own point view. If <code class="docutils literal notranslate"><span class="pre">auto</span></code>,
+skipped points are merged into the returned point view provided that only one point view
+is returned and it has the same point count as it did when the filter was run.
+[Default: <code class="docutils literal notranslate"><span class="pre">auto</span></code>]</p>
+</dd>
+</dl>
+</section>
+<section id="ranges">
+<span id="id2"></span><h2>Ranges<a class="headerlink" href="#ranges" title="Permalink to this heading"></a></h2>
+<p>A range specification is a dimension name, followed by an optional negation
+character (‘!’), and a starting and ending value separated by a colon,
+surrounded by parentheses or square brackets.  Either the starting or ending
+values can be omitted.  Parentheses indicate an open endpoint that doesn’t
+include the adjacent value.  Square brackets indicate a closed endpoint
+that includes the adjacent value.</p>
+<section id="example-1">
+<h3>Example 1:<a class="headerlink" href="#example-1" title="Permalink to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Z</span><span class="p">[</span><span class="mi">10</span><span class="p">:]</span>
+</pre></div>
+</div>
+<p>Selects all points with a Z value greater than or equal to 10.</p>
+</section>
+<section id="example-2">
+<h3>Example 2:<a class="headerlink" href="#example-2" title="Permalink to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Classification</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Selects all points with a classification of 2.</p>
+</section>
+<section id="example-3">
+<h3>Example 3:<a class="headerlink" href="#example-3" title="Permalink to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Red!(20:40]
+</pre></div>
+</div>
+<p>Selects all points with red values less than or equal to 20 and those with
+values greater than 40</p>
+</section>
+<section id="example-4">
+<h3>Example 4:<a class="headerlink" href="#example-4" title="Permalink to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Blue</span><span class="p">[:</span><span class="mi">255</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Selects all points with a blue value less than 255.</p>
+</section>
+<section id="example-5">
+<h3>Example 5:<a class="headerlink" href="#example-5" title="Permalink to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Intensity![25:25]
+</pre></div>
+</div>
+<p>Selects all points with an intensity not equal to 25.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="filters.tail.html" class="btn btn-neutral float-right" title="filters.tail" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="filters.mongo.html" class="btn btn-neutral float-left" title="filters.mongo" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <div class="info">
+      <a class="logo-link" href="https://hobu.co">
+        <div class="hobu-logo"></div>
+      </a>
+      <div class="copyright">
+      
+
+                    &copy;  2023
+                        <a href="https://github.com/abellgithub">Andrew Bell</a>,
+                        <a href="https://github.com/chambbj">Brad Chambers</a>,
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>.
+
+      
+      Last updated on May 22, 2023.
+      </div>
+    </div>
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="footer">
+        <div class="container">
+                    &copy;  2023
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        <a href="http://github.com/mpgerlek">Michael Gerlek</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>,
+                Last updated
+                    on May 22, 2023.
+        </div>
+    </div>
+
+</body>
+</html>

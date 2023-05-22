@@ -1,0 +1,388 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Building Under Windows &mdash; pdal.io</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/pdal.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/breathe.css" type="text/css" />
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://pdal.io/development/compilation/windows.html"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="copyright" title="Copyright" href="../../copyright.html" />
+    <link rel="next" title="Dependencies" href="dependencies.html" />
+    <link rel="prev" title="Unix Compilation" href="unix.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+          </a>
+              <div class="version">
+                2.6.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../about.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../download.html">Download</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../apps/index.html">Applications</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../community.html">Community</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../pipeline.html">Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stages/stages.html">Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stages/readers.html">Readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stages/writers.html">Writers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stages/filters.html">Filters</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../dimensions.html">Dimensions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../types.html">Types</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../python.html">Python</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../java.html">Java</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../workshop/index.html">Workshop</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Development</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../overview.html">PDAL Architecture Overview</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Compilation</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="unix.html">Unix Compilation</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Building Under Windows</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#required-compiler">Required Compiler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#prerequisite-libraries">Prerequisite Libraries</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fetching-the-source">Fetching the Source</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#configuration">Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#building">Building</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#running">Running</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="dependencies.html">Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../errorhandling.html">Errors and Error Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../metadata.html">Metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../writing.html">Writing with PDAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugins.html">Writing and building a PDAL Plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../writing-filter.html">Writing a filter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../writing-kernel.html">Writing a kernel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../writing-reader.html">Writing a reader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../writing-writer.html">Writing a writer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cmake.html">CMake</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../project/index.html">Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../copyright.html">License</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PDAL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html"> Documentation </a> &raquo;</li>
+      
+          <li><a href="../index.html">Development</a> &raquo;</li>
+      
+          <li><a href="index.html">Compilation</a> &raquo;</li>
+      
+      <li>Building Under Windows</li>
+    
+
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/PDAL/PDAL/edit//master/doc/development/compilation/windows.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="dependencies.html" class="btn btn-neutral float-right" title="Dependencies" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="unix.html" class="btn btn-neutral float-left" title="Unix Compilation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="building-under-windows">
+<span id="building-windows"></span><h1>Building Under Windows<a class="headerlink" href="#building-under-windows" title="Permalink to this heading"></a></h1>
+<dl class="field-list simple">
+<dt class="field-odd">Author<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Howard Butler</p>
+</dd>
+<dt class="field-even">Contact<span class="colon">:</span></dt>
+<dd class="field-even"><p>howard at hobu.co</p>
+</dd>
+<dt class="field-odd">Date<span class="colon">:</span></dt>
+<dd class="field-odd"><p>11/20/2020</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="../../download.html#conda"><span class="std std-ref">Conda</span></a> contains a pre-built up-to-date 64 bit Windows binary. It
+is fully-featured, and if you do not need anything custom, it is likely
+the fastest way to get going.</p>
+</div>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading"></a></h2>
+<p>Pre-built binary packages for Windows are available via <a class="reference internal" href="../../download.html#conda"><span class="std std-ref">Conda</span></a> (64-bit version),
+and all of the prerequisites required for compilation of a fully featured build
+are also available via that packaging system. This document assumes you
+will be using Conda Forge as your base, and anything more advanced is beyond
+the scope of the document.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The GitHub Action build system uses the PDAL project’s configuration on the Conda Forge
+system. It contains a rich resource of known working examples. See
+<a class="reference external" href="https://github.com/PDAL/PDAL/blob/master/.github/workflows/win.yml">https://github.com/PDAL/PDAL/blob/master/.github/workflows/win.yml</a> and
+<a class="reference external" href="https://github.com/PDAL/PDAL/tree/master/scripts/ci/win">https://github.com/PDAL/PDAL/tree/master/scripts/ci/win</a> for inspiration.</p>
+</div>
+</section>
+<section id="required-compiler">
+<h2>Required Compiler<a class="headerlink" href="#required-compiler" title="Permalink to this heading"></a></h2>
+<p>PDAL is known to compile on <a class="reference external" href="https://www.visualstudio.com/vs/older-downloads/">Visual Studio 2015</a>, and 2013 <em>might</em> work with
+some source tree adjustments. PDAL makes heavy use of C++11, and a compiler
+with good support for those features is required.</p>
+</section>
+<section id="prerequisite-libraries">
+<h2>Prerequisite Libraries<a class="headerlink" href="#prerequisite-libraries" title="Permalink to this heading"></a></h2>
+<p>PDAL uses the <a class="reference external" href="https://github.com/PDAL/PDAL/actions">GitHub Actions</a> continuous integration platform for building and
+testing itself on Windows. The configuration that PDAL uses is valuable
+raw materials for configuring your own environment because the PDAL
+team must keep it up to date with both the <a class="reference internal" href="../../download.html#conda"><span class="std std-ref">Conda</span></a> environment and
+the Microsoft compiler situation.</p>
+<p>You can see the current configuration at
+<a class="reference external" href="https://github.com/PDAL/PDAL/blob/master/.github/workflows/win.yml">https://github.com/PDAL/PDAL/blob/master/.github/workflows/win.yml</a> The most interesting bits
+are the <code class="docutils literal notranslate"><span class="pre">Setup</span></code> step, the <code class="docutils literal notranslate"><span class="pre">CMake</span></code> step, and the <code class="docutils literal notranslate"><span class="pre">Compile</span></code> scripts.
+The configuration already has Miniconda installed, and the
+<code class="docutils literal notranslate"><span class="pre">setup.sh</span></code> script installs all of PDAL’s prerequisites via the command
+line.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="n">geotiff</span> <span class="n">laszip</span> <span class="n">nitro</span> <span class="n">curl</span> <span class="o">^</span>
+   <span class="n">gdal</span> <span class="n">pcl</span> <span class="n">cmake</span> <span class="n">eigen</span> <span class="n">ninja</span> <span class="n">libgdal</span> <span class="o">^</span>
+   <span class="n">zstd</span> <span class="n">numpy</span> <span class="n">xz</span> <span class="n">libxml2</span> <span class="n">laz</span><span class="o">-</span><span class="n">perf</span> <span class="n">qhull</span> <span class="o">^</span>
+   <span class="n">sqlite</span> <span class="n">hdf5</span> <span class="n">tiledb</span> <span class="n">conda</span><span class="o">-</span><span class="n">build</span> <span class="n">ninja</span> <span class="o">-</span><span class="n">y</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The package list here might change over time. The canonnical location
+to learn the  prerequisite list for PDAL is the <code class="docutils literal notranslate"><span class="pre">scripts/ci/win</span></code>
+directory in PDAL’s source tree.</p>
+</div>
+</section>
+<section id="fetching-the-source">
+<h2>Fetching the Source<a class="headerlink" href="#fetching-the-source" title="Permalink to this heading"></a></h2>
+<p>Get the source code for PDAL. Presumably you have <a class="reference external" href="https://desktop.github.com/">GitHub for Windows</a> or
+something like it. Run a “git shell” and clone the repository into the
+directory of your choice.</p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">c</span><span class="p">:</span>\<span class="n">dev</span><span class="o">&gt;</span> <span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">PDAL</span><span class="o">/</span><span class="n">PDAL</span><span class="o">.</span><span class="n">git</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Switch to the <code class="docutils literal notranslate"><span class="pre">-maintenance</span></code> branch.</p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">c</span><span class="p">:</span>\<span class="n">dev</span><span class="o">&gt;</span> <span class="n">git</span> <span class="n">checkout</span> <span class="mf">1.9</span><span class="o">-</span><span class="n">maintenance</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>PDAL’s active development branch is <code class="docutils literal notranslate"><span class="pre">master</span></code>, and you are welcome to
+build it, but is not as stable as the major-versioned release
+branches are likely to be.</p>
+</div>
+</div></blockquote>
+</section>
+<section id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this heading"></a></h2>
+<p>PDAL uses <a class="reference external" href="http://www.cmake.org">CMake</a> for its build configuration. You will need to install CMake
+and have it available on your path to configure PDAL.</p>
+<p>Invoke your <code class="docutils literal notranslate"><span class="pre">cmake</span></code> command to configure the PDAL.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cmake</span> <span class="o">-</span><span class="n">G</span> <span class="s2">&quot;NMake Makefiles&quot;</span> <span class="o">.</span>
+</pre></div>
+</div>
+<p>A fully-featured build will require more specification of libraries, enabled
+features, and their locations. For more information on this, users can refer to the <code class="docutils literal notranslate"><span class="pre">examples.sh</span></code> step in the Action.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Placing your command in a <code class="docutils literal notranslate"><span class="pre">.bat</span></code> file will make for easy reuse.</p>
+</div>
+</section>
+<section id="building">
+<h2>Building<a class="headerlink" href="#building" title="Permalink to this heading"></a></h2>
+<p>If you chose <code class="docutils literal notranslate"><span class="pre">NMake</span> <span class="pre">Makefiles</span></code> as your CMake generator, you can
+invoke the build by calling <strong>nmake</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nmake</span> <span class="o">/</span><span class="n">f</span> <span class="n">Makefile</span>
+</pre></div>
+</div>
+<p>If you chose “Visual Studio 14 Win64” as your CMake generator, open <code class="docutils literal notranslate"><span class="pre">PDAL.sln</span></code>
+and chose your configuration to build.</p>
+</section>
+<section id="running">
+<h2>Running<a class="headerlink" href="#running" title="Permalink to this heading"></a></h2>
+<p>After you’ve built the tree, you can run <code class="docutils literal notranslate"><span class="pre">pdal.exe</span></code> by issuing it</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">c</span><span class="p">:</span>\<span class="n">dev</span>\<span class="n">pdal</span>\<span class="nb">bin</span>\<span class="n">pdal</span><span class="o">.</span><span class="n">exe</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You may need to have your Conda environment active to enable access to
+PDAL’s dependencies.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="dependencies.html" class="btn btn-neutral float-right" title="Dependencies" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="unix.html" class="btn btn-neutral float-left" title="Unix Compilation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <div class="info">
+      <a class="logo-link" href="https://hobu.co">
+        <div class="hobu-logo"></div>
+      </a>
+      <div class="copyright">
+      
+
+                    &copy;  2023
+                        <a href="https://github.com/abellgithub">Andrew Bell</a>,
+                        <a href="https://github.com/chambbj">Brad Chambers</a>,
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>.
+
+      
+      Last updated on May 22, 2023.
+      </div>
+    </div>
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="footer">
+        <div class="container">
+                    &copy;  2023
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        <a href="http://github.com/mpgerlek">Michael Gerlek</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>,
+                Last updated
+                    on May 22, 2023.
+        </div>
+    </div>
+
+</body>
+</html>

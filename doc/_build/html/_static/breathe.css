@@ -1,0 +1,30 @@
+
+/* -- breathe specific styles ----------------------------------------------- */
+
+/* So enum value descriptions are displayed inline to the item */
+.breatheenumvalues li tt + p {
+	display: inline;
+}
+
+/* So parameter descriptions are displayed inline to the item */
+.breatheparameterlist li tt + p {
+	display: inline;
+}
+
+
+
+.plugin .admonition-title{
+    background: #b92938;
+}
+
+.plugin .admonition-title::before{
+    content: '\f1e6';
+}
+
+.embed .admonition-title::before{
+    content: '\f00c';
+}
+
+.streamable .admonition-title::before{
+    content: '\f141';
+}

@@ -1,0 +1,380 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pdal::Options &mdash; pdal.io</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/pdal.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/breathe.css" type="text/css" />
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://pdal.io/api/cpp/options.html"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="copyright" title="Copyright" href="../../copyright.html" />
+    <link rel="next" title="pdal::PointTable" href="pointtable.html" />
+    <link rel="prev" title="pdal::Metadata" href="metadata.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+          </a>
+              <div class="version">
+                2.6.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../about.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../download.html">Download</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../apps/index.html">Applications</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../community.html">Community</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../pipeline.html">Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stages/stages.html">Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stages/readers.html">Readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stages/writers.html">Writers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stages/filters.html">Filters</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../dimensions.html">Dimensions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../types.html">Types</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../python.html">Python</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../java.html">Java</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../workshop/index.html">Workshop</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../project/index.html">Project</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">C++ API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="bounds.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::BOX2D</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="charbuf.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Charbuf</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="columnpointtable.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::ColumnPointTable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dimension.html"><code class="docutils literal notranslate"><span class="pre">pdal::Dimension</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="extractor.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Extractor</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileutils.html"><code class="docutils literal notranslate"><span class="pre">pdal::FileUtils</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="filter.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Filter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="istream.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::IStream</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="log.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Log</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="metadata.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Metadata</span></code></a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Options</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pointtable.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::PointTable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pointview.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::PointView</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="programargs.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::ProgramArgs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="reader.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Reader</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="rowpointtable.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::RowPointTable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="stage.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Stage</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="stagefactory.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::StageFactory</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html"><code class="docutils literal notranslate"><span class="pre">pdal::Utils</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="writer.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Writer</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../transition/index.html">libLAS C API to PDAL transition guide</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../copyright.html">License</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PDAL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html"> Documentation </a> &raquo;</li>
+      
+          <li><a href="../index.html">API</a> &raquo;</li>
+      
+          <li><a href="index.html">C++ API</a> &raquo;</li>
+      
+      <li><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Options</span></code></li>
+    
+
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/PDAL/PDAL/edit//master/doc/api/cpp/options.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="pointtable.html" class="btn btn-neutral float-right" title="pdal::PointTable" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="metadata.html" class="btn btn-neutral float-left" title="pdal::Metadata" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pdal-options">
+<span id="cpp-pdal-options"></span><h1><a class="reference internal" href="#_CPPv4N4pdal7OptionsE" title="pdal::Options"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Options</span></code></a><a class="headerlink" href="#pdal-options" title="Permalink to this heading"></a></h1>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal7OptionsE">
+<span id="_CPPv3N4pdal7OptionsE"></span><span id="_CPPv2N4pdal7OptionsE"></span><span id="pdal::Options"></span><span class="target" id="classpdal_1_1Options"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Options</span></span></span><a class="headerlink" href="#_CPPv4N4pdal7OptionsE" title="Permalink to this definition"></a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal7Options7OptionsEv">
+<span id="_CPPv3N4pdal7Options7OptionsEv"></span><span id="_CPPv2N4pdal7Options7OptionsEv"></span><span id="pdal::Options::Options"></span><span class="target" id="classpdal_1_1Options_1a8d60b2696f757e843ff676b649024d3e"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Options</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal7Options7OptionsEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal7Options7OptionsERK6Option">
+<span id="_CPPv3N4pdal7Options7OptionsERK6Option"></span><span id="_CPPv2N4pdal7Options7OptionsERK6Option"></span><span id="pdal::Options::Options__OptionCR"></span><span class="target" id="classpdal_1_1Options_1ab379e8c7e61c2eb6db89b13922cea7d2"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">explicit</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Options</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Option</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">opt</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal7Options7OptionsERK6Option" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal7Options3addERK6Option">
+<span id="_CPPv3N4pdal7Options3addERK6Option"></span><span id="_CPPv2N4pdal7Options3addERK6Option"></span><span id="pdal::Options::add__OptionCR"></span><span class="target" id="classpdal_1_1Options_1a30826da39f9c4716412141eeeb719032"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">add</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Option</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">option</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal7Options3addERK6Option" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal7Options3addERK7Options">
+<span id="_CPPv3N4pdal7Options3addERK7Options"></span><span id="_CPPv2N4pdal7Options3addERK7Options"></span><span id="pdal::Options::add__OptionsCR"></span><span class="target" id="classpdal_1_1Options_1a4a4ec87a929a55554dfff176be2451bc"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">add</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal7OptionsE" title="pdal::Options"><span class="n"><span class="pre">Options</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">options</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal7Options3addERK7Options" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal7Options14addConditionalERK6Option">
+<span id="_CPPv3N4pdal7Options14addConditionalERK6Option"></span><span id="_CPPv2N4pdal7Options14addConditionalERK6Option"></span><span id="pdal::Options::addConditional__OptionCR"></span><span class="target" id="classpdal_1_1Options_1aab2dd4f9208512ad8c38a71ad9d2c98b"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">addConditional</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Option</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">option</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal7Options14addConditionalERK6Option" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal7Options14addConditionalERK7Options">
+<span id="_CPPv3N4pdal7Options14addConditionalERK7Options"></span><span id="_CPPv2N4pdal7Options14addConditionalERK7Options"></span><span id="pdal::Options::addConditional__OptionsCR"></span><span class="target" id="classpdal_1_1Options_1a5b15c6e06c1bb43763c4b62994eff41a"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">addConditional</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal7OptionsE" title="pdal::Options"><span class="n"><span class="pre">Options</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">option</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal7Options14addConditionalERK7Options" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal7Options6removeERK6Option">
+<span id="_CPPv3N4pdal7Options6removeERK6Option"></span><span id="_CPPv2N4pdal7Options6removeERK6Option"></span><span id="pdal::Options::remove__OptionCR"></span><span class="target" id="classpdal_1_1Options_1a0d9ebe7f77b36dea85b51eb0098a5df0"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">remove</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Option</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">option</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal7Options6removeERK6Option" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal7Options7replaceERK6Option">
+<span id="_CPPv3N4pdal7Options7replaceERK6Option"></span><span id="_CPPv2N4pdal7Options7replaceERK6Option"></span><span id="pdal::Options::replace__OptionCR"></span><span class="target" id="classpdal_1_1Options_1ac68182ff4da939a6896f9cbb2fc0dd90"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">replace</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Option</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">option</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal7Options7replaceERK6Option" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal7Options10toMetadataER12MetadataNode">
+<span id="_CPPv3NK4pdal7Options10toMetadataER12MetadataNode"></span><span id="_CPPv2NK4pdal7Options10toMetadataER12MetadataNode"></span><span id="pdal::Options::toMetadata__MetadataNodeRC"></span><span class="target" id="classpdal_1_1Options_1af5d27879197bae2eb9118449f417d506"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">toMetadata</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="metadata.html#_CPPv4N4pdal12MetadataNodeE" title="pdal::MetadataNode"><span class="n"><span class="pre">MetadataNode</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">parent</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal7Options10toMetadataER12MetadataNode" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4I0EN4pdal7Options3addEvRKNSt6stringE1T">
+<span id="_CPPv3I0EN4pdal7Options3addERKNSt6stringE1T"></span><span id="_CPPv2I0EN4pdal7Options3addERKNSt6stringE1T"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">T</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classpdal_1_1Options_1a624637c92423c44df2701cdf23e11877"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">add</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">name</span></span>, <a class="reference internal" href="#_CPPv4I0EN4pdal7Options3addEvRKNSt6stringE1T" title="pdal::Options::add::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">value</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4I0EN4pdal7Options3addEvRKNSt6stringE1T" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal7Options3addERKNSt6stringERKNSt6stringE">
+<span id="_CPPv3N4pdal7Options3addERKNSt6stringERKNSt6stringE"></span><span id="_CPPv2N4pdal7Options3addERKNSt6stringERKNSt6stringE"></span><span id="pdal::Options::add__ssCR.ssCR"></span><span class="target" id="classpdal_1_1Options_1aed1c5c5a1e0046462274a45f022215be"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">add</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">name</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">value</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal7Options3addERKNSt6stringERKNSt6stringE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal7Options3addERKNSt6stringERKb">
+<span id="_CPPv3N4pdal7Options3addERKNSt6stringERKb"></span><span id="_CPPv2N4pdal7Options3addERKNSt6stringERKb"></span><span id="pdal::Options::add__ssCR.bCR"></span><span class="target" id="classpdal_1_1Options_1a4efbe465a37ae4b5594b69d93489d125"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">add</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">name</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">value</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal7Options3addERKNSt6stringERKb" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4I0EN4pdal7Options7replaceEvRKNSt6stringE1T">
+<span id="_CPPv3I0EN4pdal7Options7replaceERKNSt6stringE1T"></span><span id="_CPPv2I0EN4pdal7Options7replaceERKNSt6stringE1T"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">T</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classpdal_1_1Options_1a1cbc40c559acdc20851c5a24cbff55e7"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">replace</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">name</span></span>, <a class="reference internal" href="#_CPPv4I0EN4pdal7Options7replaceEvRKNSt6stringE1T" title="pdal::Options::replace::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">value</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4I0EN4pdal7Options7replaceEvRKNSt6stringE1T" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal7Options7replaceERKNSt6stringERKNSt6stringE">
+<span id="_CPPv3N4pdal7Options7replaceERKNSt6stringERKNSt6stringE"></span><span id="_CPPv2N4pdal7Options7replaceERKNSt6stringERKNSt6stringE"></span><span id="pdal::Options::replace__ssCR.ssCR"></span><span class="target" id="classpdal_1_1Options_1a7971d2f6db09be18a84695f59264cba2"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">replace</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">name</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">value</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal7Options7replaceERKNSt6stringERKNSt6stringE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal7Options7replaceERKNSt6stringERKb">
+<span id="_CPPv3N4pdal7Options7replaceERKNSt6stringERKb"></span><span id="_CPPv2N4pdal7Options7replaceERKNSt6stringERKb"></span><span id="pdal::Options::replace__ssCR.bCR"></span><span class="target" id="classpdal_1_1Options_1a6f0c920ab5e526449cd641932232cbdc"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">replace</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">name</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">value</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal7Options7replaceERKNSt6stringERKb" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal7Options9getValuesERKNSt6stringE">
+<span id="_CPPv3NK4pdal7Options9getValuesERKNSt6stringE"></span><span id="_CPPv2NK4pdal7Options9getValuesERKNSt6stringE"></span><span id="pdal::Options::getValues__ssCRC"></span><span class="target" id="classpdal_1_1Options_1a646f7472066072cb9cc8f73767fc7d70"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">StringList</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getValues</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">name</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal7Options9getValuesERKNSt6stringE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal7Options7getKeysEv">
+<span id="_CPPv3NK4pdal7Options7getKeysEv"></span><span id="_CPPv2NK4pdal7Options7getKeysEv"></span><span id="pdal::Options::getKeysC"></span><span class="target" id="classpdal_1_1Options_1abe199d55376355ea6406c76ab02e8723"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">StringList</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getKeys</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal7Options7getKeysEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal7Options10getOptionsERKNSt6stringE">
+<span id="_CPPv3NK4pdal7Options10getOptionsERKNSt6stringE"></span><span id="_CPPv2NK4pdal7Options10getOptionsERKNSt6stringE"></span><span id="pdal::Options::getOptions__ssCRC"></span><span class="target" id="classpdal_1_1Options_1a885e041713d787ce9a827a5d04a3b658"></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">Option</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getOptions</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">name</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="s"><span class="pre">&quot;&quot;</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal7Options10getOptionsERKNSt6stringE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal7Options13toCommandLineEv">
+<span id="_CPPv3NK4pdal7Options13toCommandLineEv"></span><span id="_CPPv2NK4pdal7Options13toCommandLineEv"></span><span id="pdal::Options::toCommandLineC"></span><span class="target" id="classpdal_1_1Options_1a3b558c3a93699c9bc571ae6e245f7914"></span><span class="n"><span class="pre">StringList</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">toCommandLine</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal7Options13toCommandLineEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Convert options to a string list appropriate for parsing with <a class="reference internal" href="programargs.html#classpdal_1_1ProgramArgs"><span class="std std-ref">ProgramArgs</span></a>. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of options as argument strings. </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-static-functions">Public Static Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal7Options8fromFileERKNSt6stringEb">
+<span id="_CPPv3N4pdal7Options8fromFileERKNSt6stringEb"></span><span id="_CPPv2N4pdal7Options8fromFileERKNSt6stringEb"></span><span id="pdal::Options::fromFile__ssCR.b"></span><span class="target" id="classpdal_1_1Options_1a541bdbfe72511dad8a22236f0a3cb2ab"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal7OptionsE" title="pdal::Options"><span class="n"><span class="pre">Options</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">fromFile</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">filename</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">throwOnOpenError</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">true</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal7Options8fromFileERKNSt6stringEb" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pointtable.html" class="btn btn-neutral float-right" title="pdal::PointTable" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="metadata.html" class="btn btn-neutral float-left" title="pdal::Metadata" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <div class="info">
+      <a class="logo-link" href="https://hobu.co">
+        <div class="hobu-logo"></div>
+      </a>
+      <div class="copyright">
+      
+
+                    &copy;  2023
+                        <a href="https://github.com/abellgithub">Andrew Bell</a>,
+                        <a href="https://github.com/chambbj">Brad Chambers</a>,
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>.
+
+      
+      Last updated on May 22, 2023.
+      </div>
+    </div>
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="footer">
+        <div class="container">
+                    &copy;  2023
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        <a href="http://github.com/mpgerlek">Michael Gerlek</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>,
+                Last updated
+                    on May 22, 2023.
+        </div>
+    </div>
+
+</body>
+</html>

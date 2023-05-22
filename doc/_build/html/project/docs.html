@@ -1,0 +1,324 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Docs &mdash; pdal.io</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/pdal.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/breathe.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="canonical" href="https://pdal.io/project/docs.html"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="copyright" title="Copyright" href="../copyright.html" />
+    <link rel="next" title="Building Docker Containers for PDAL" href="docker.html" />
+    <link rel="prev" title="Contributors" href="contributors.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+          </a>
+              <div class="version">
+                2.6.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../apps/index.html">Applications</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../community.html">Community</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stages/stages.html">Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stages/readers.html">Readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stages/writers.html">Writers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stages/filters.html">Filters</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../dimensions.html">Dimensions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../types.html">Types</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../python.html">Python</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../java.html">Java</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../workshop/index.html">Workshop</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Project</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="conventions.html">Coding Conventions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributors.html">Contributors</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Docs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#requirements">Requirements</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sphinx-and-breathe">Sphinx and Breathe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#doxygen">Doxygen</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">Latex</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">dvipng</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#generation">Generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#website">Website</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="docker.html">Building Docker Containers for PDAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="alpine.html">Alpine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing.html">Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="integration.html">Continuous Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../copyright.html">License</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PDAL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html"> Documentation </a> &raquo;</li>
+      
+          <li><a href="index.html">Project</a> &raquo;</li>
+      
+      <li>Docs</li>
+    
+
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/PDAL/PDAL/edit//master/doc/project/docs.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="docker.html" class="btn btn-neutral float-right" title="Building Docker Containers for PDAL" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="contributors.html" class="btn btn-neutral float-left" title="Contributors" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="docs">
+<span id="development-docs"></span><h1>Docs<a class="headerlink" href="#docs" title="Permalink to this heading"></a></h1>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this heading"></a></h2>
+<p>To build the PDAL documentation yourself, you need to install the following
+items:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="http://sphinx-doc.org/">Sphinx</a></p></li>
+<li><p><a class="reference external" href="https://github.com/michaeljones/breathe">Breathe</a></p></li>
+<li><p><a class="reference external" href="http://www.stack.nl/~dimitri/doxygen/">Doxygen</a></p></li>
+<li><p><a class="reference external" href="https://en.wikipedia.org/wiki/LaTeX">Latex</a></p></li>
+<li><p><a class="reference external" href="https://en.wikipedia.org/wiki/Dvipng">dvipng</a></p></li>
+</ul>
+<section id="sphinx-and-breathe">
+<h3><a class="reference external" href="http://sphinx-doc.org/">Sphinx</a> and <a class="reference external" href="https://github.com/michaeljones/breathe">Breathe</a><a class="headerlink" href="#sphinx-and-breathe" title="Permalink to this heading"></a></h3>
+<p>Python dependencies should be installed from <a class="reference external" href="https://pypi.python.org/pypi">PyPI</a> with <code class="docutils literal notranslate"><span class="pre">pip</span></code> or
+<code class="docutils literal notranslate"><span class="pre">easy_install</span></code>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">(</span>sudo<span class="o">)</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>sphinx<span class="w"> </span>sphinxconfig-bibtex<span class="w"> </span>breathe
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you are installing these packages to a system-wide directory, you may need
+the <strong>sudo</strong> in front of the <strong>pip</strong>, though it might be better that instead
+you use <a class="reference external" href="https://pypi.python.org/pypi/virtualenv">virtual environments</a> instead of installing the packages system-wide.</p>
+</div>
+</section>
+<section id="doxygen">
+<h3>Doxygen<a class="headerlink" href="#doxygen" title="Permalink to this heading"></a></h3>
+<p>The PDAL documentation also depends on <a class="reference external" href="http://www.stack.nl/~dimitri/doxygen/">Doxygen</a>, which can be installed from
+source or from binaries from the <a class="reference external" href="http://www.stack.nl/~dimitri/doxygen/download.html">doxygen website</a>.  If you are on Max OS X
+and use <a class="reference external" href="http://mxcl.github.io/homebrew/">homebrew</a>, you can install doxygen with a simple <code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">install</span>
+<span class="pre">doxygen</span></code>.</p>
+</section>
+<section id="id1">
+<h3>Latex<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/LaTeX">Latex</a> and <a class="reference external" href="https://www.tug.org/applications/pdftex/">pdflatex</a> are used to generate the companion PDF of the website.</p>
+</section>
+<section id="id2">
+<h3>dvipng<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
+<p>For math output, we depend on <a class="reference external" href="https://en.wikipedia.org/wiki/Dvipng">dvipng</a> to turn <a class="reference external" href="https://en.wikipedia.org/wiki/LaTeX">Latex</a> output into math PNGs.</p>
+</section>
+</section>
+<section id="generation">
+<h2>Generation<a class="headerlink" href="#generation" title="Permalink to this heading"></a></h2>
+<p>Once you have installed all the doc dependencies, you can then build the
+documentation itself.  The <code class="file docutils literal notranslate"><span class="pre">doc/</span></code> directory in the PDAL source tree
+contains a Makefile which can be used to build all documentation.  For a list
+of the output formats supported by Sphinx, simply type <code class="docutils literal notranslate"><span class="pre">make</span></code>.  For example,
+to build html documentation:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>doc
+make<span class="w"> </span>doxygen<span class="w"> </span>html
+</pre></div>
+</div>
+<p>The html docs will be placed in <code class="file docutils literal notranslate"><span class="pre">doc/build/html/</span></code>.  The <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">doxygen</span></code>
+is necessary to re-generate the API documentation from the source code using
+<a class="reference external" href="https://github.com/michaeljones/breathe">Breathe</a> and <a class="reference external" href="http://sphinx-doc.org/">Sphinx</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For a full build of the <a class="reference internal" href="../api/cpp/index.html#cppapi"><span class="std std-ref">C++ API</span></a> documentation, you need to
+<code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">doxygen</span></code> to have it build its XML output which is consumed
+by <a class="reference external" href="https://github.com/michaeljones/breathe">Breathe</a> before <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">html</span></code> can be issued.</p>
+</div>
+</section>
+<section id="website">
+<h2>Website<a class="headerlink" href="#website" title="Permalink to this heading"></a></h2>
+<p>The <a class="reference external" href="http://pdal.io">http://pdal.io</a> website is regenerated from the <code class="docutils literal notranslate"><span class="pre">*-maintenance</span></code> branch using
+Github Actions. It will be committed by the <code class="docutils literal notranslate"><span class="pre">PDAL-docs</span></code> <a class="reference external" href="http://github.com/PDAL/PDAL">GitHub</a> user and pushed
+to the <a class="reference external" href="https://github.com/PDAL/pdal.github.io">https://github.com/PDAL/pdal.github.io</a> repository. The website
+is then served via <a class="reference external" href="https://pages.github.com/">GitHub Pages</a>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="docker.html" class="btn btn-neutral float-right" title="Building Docker Containers for PDAL" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="contributors.html" class="btn btn-neutral float-left" title="Contributors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <div class="info">
+      <a class="logo-link" href="https://hobu.co">
+        <div class="hobu-logo"></div>
+      </a>
+      <div class="copyright">
+      
+
+                    &copy;  2023
+                        <a href="https://github.com/abellgithub">Andrew Bell</a>,
+                        <a href="https://github.com/chambbj">Brad Chambers</a>,
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>.
+
+      
+      Last updated on May 22, 2023.
+      </div>
+    </div>
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="footer">
+        <div class="container">
+                    &copy;  2023
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        <a href="http://github.com/mpgerlek">Michael Gerlek</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>,
+                Last updated
+                    on May 22, 2023.
+        </div>
+    </div>
+
+</body>
+</html>

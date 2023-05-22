@@ -1,0 +1,619 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>readers.rdb &mdash; pdal.io</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/pdal.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/breathe.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="canonical" href="https://pdal.io/stages/readers.rdb.html"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="copyright" title="Copyright" href="../copyright.html" />
+    <link rel="next" title="readers.rxp" href="readers.rxp.html" />
+    <link rel="prev" title="readers.qfit" href="readers.qfit.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+          </a>
+              <div class="version">
+                2.6.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../apps/index.html">Applications</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../community.html">Community</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stages.html">Stages</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="readers.html">Readers</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="readers.bpf.html">readers.bpf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.buffer.html">readers.buffer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.copc.html">readers.copc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.draco.html">readers.draco</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.ept.html">readers.ept</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.e57.html">readers.e57</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.faux.html">readers.faux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.fbi.html">readers.fbi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.gdal.html">readers.gdal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.hdf.html">readers.hdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.i3s.html">readers.i3s</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.ilvis2.html">readers.ilvis2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.las.html">readers.las</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.matlab.html">readers.matlab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.memoryview.html">readers.memoryview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.mbio.html">readers.mbio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.nitf.html">readers.nitf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.numpy.html">readers.numpy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.obj.html">readers.obj</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.optech.html">readers.optech</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.pcd.html">readers.pcd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.pgpointcloud.html">readers.pgpointcloud</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.ply.html">readers.ply</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.pts.html">readers.pts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.ptx.html">readers.ptx</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.qfit.html">readers.qfit</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">readers.rdb</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#options">Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dimensions">Dimensions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#metadata">Metadata</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#object-database">Object “database”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#list-dimensions">List “dimensions”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#object-metadata">Object “metadata”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#list-transactions">List “transactions”</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="readers.rxp.html">readers.rxp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.sbet.html">readers.sbet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.smrmsg.html">readers.smrmsg</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.slpk.html">readers.slpk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.stac.html">readers.stac</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.terrasolid.html">readers.terrasolid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.text.html">readers.text</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.tiledb.html">readers.tiledb</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.tindex.html">readers.tindex</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="writers.html">Writers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filters.html">Filters</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../dimensions.html">Dimensions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../types.html">Types</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../python.html">Python</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../java.html">Java</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../workshop/index.html">Workshop</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project/index.html">Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../copyright.html">License</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PDAL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html"> Documentation </a> &raquo;</li>
+      
+          <li><a href="readers.html">Readers</a> &raquo;</li>
+      
+      <li>readers.rdb</li>
+    
+
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/PDAL/PDAL/edit//master/doc/stages/readers.rdb.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="readers.rxp.html" class="btn btn-neutral float-right" title="readers.rxp" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="readers.qfit.html" class="btn btn-neutral float-left" title="readers.qfit" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="readers-rdb">
+<span id="id1"></span><h1>readers.rdb<a class="headerlink" href="#readers-rdb" title="Permalink to this heading"></a></h1>
+<p>The <strong>RDB reader</strong> reads from files in the RDB format, the in-house format
+used by <a class="reference external" href="http://www.riegl.com">RIEGL Laser Measurement Systems GmbH</a>.</p>
+<div class="admonition plugin" id="plugin-0">
+<p class="admonition-title">Dynamic Plugin</p>
+<p>This stage requires a dynamic plugin to operate</p>
+</div>
+<div class="admonition streamable" id="streamable-0">
+<p class="admonition-title">Streamable Stage</p>
+<p>This stage supports streaming operations</p>
+</div>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
+<p>To build PDAL with rdb support, <code class="docutils literal notranslate"><span class="pre">set</span> <span class="pre">rdb_DIR</span></code> to the path of your local
+rdblib installation. rdblib can be obtained from the <a class="reference external" href="http://www.riegl.com/members-area/software-downloads/libraries/">RIEGL download pages</a>
+with a properly enabled user account. The rdblib files do not need to be
+in a system-level directory, though they could be (e.g. they could be in
+<code class="docutils literal notranslate"><span class="pre">/usr/local</span></code>, or just in your home directory somewhere). For help building
+PDAL with optional libraries, see <a class="reference external" href="http://pdal.io/compilation/unix.html#configure-your-optional-libraries">the optional library documentation</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Minimum rdblib version required to build the driver and run
+the tests: 2.1.6</p></li>
+<li><p>This driver was developed and tested on Ubuntu 17.10 using GCC 7.2.0.</p></li>
+</ul>
+</div>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this heading"></a></h2>
+<p>This example pipeline reads points from a RDB file and stores them in LAS
+format. Only points classified as “ground points” are read since option
+<code class="docutils literal notranslate"><span class="pre">filter</span></code> is set to “riegl.class == 2” (see line 5).</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="p">[</span>
+<span class="linenos"> 2</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos"> 3</span><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;readers.rdb&quot;</span><span class="p">,</span>
+<span class="linenos"> 4</span><span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;autzen-thin-srs.rdbx&quot;</span><span class="p">,</span>
+<span class="hll"><span class="linenos"> 5</span><span class="w">        </span><span class="nt">&quot;filter&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;riegl.class == 2&quot;</span>
+</span><span class="linenos"> 6</span><span class="w">    </span><span class="p">},</span>
+<span class="linenos"> 7</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos"> 8</span><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;writers.las&quot;</span><span class="p">,</span>
+<span class="linenos"> 9</span><span class="w">        </span><span class="nt">&quot;filename&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;autzen-thin-srs.rdbx&quot;</span>
+<span class="linenos">10</span><span class="w">    </span><span class="p">}</span>
+<span class="linenos">11</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="options">
+<h2>Options<a class="headerlink" href="#options" title="Permalink to this heading"></a></h2>
+<dl class="simple">
+<dt>filename</dt><dd><p>Name of file to read
+[Required]</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>count</dt><dd><p>Maximum number of points to read. [Default: unlimited]</p>
+</dd>
+<dt>override_srs</dt><dd><p>Spatial reference to apply to the data.  Overrides any SRS in the input
+itself.  Can be specified as a WKT, proj.4 or EPSG string. Can’t use
+with ‘default_srs’. [Default: none]</p>
+</dd>
+<dt>default_srs</dt><dd><p>Spatial reference to apply to the data if the input does not specify
+one.  Can be specified as a WKT, proj.4 or EPSG string. Can’t use
+with ‘override_srs’. [Default: none]</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>filter</dt><dd><p>Point filter expression string (see RDB SDK documentation for details)
+[Optional]
+[Default: empty string (= no filter)]</p>
+</dd>
+<dt>extras</dt><dd><p>Read all available dimensions (<cite>true</cite>) or known PDAL dimensions only (<cite>false</cite>)
+[Optional]
+[Default: false]</p>
+</dd>
+</dl>
+</section>
+<section id="dimensions">
+<h2>Dimensions<a class="headerlink" href="#dimensions" title="Permalink to this heading"></a></h2>
+<p>The reader maps following default RDB point attributes to PDAL dimensions
+(if they exist in the RDB file):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>RDB attribute</p></th>
+<th class="head"><p>PDAL dimension(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>riegl.id</p></td>
+<td><p>Id::PointId</p></td>
+</tr>
+<tr class="row-odd"><td><p>riegl.source_cloud_id</p></td>
+<td><p>Id::OriginId</p></td>
+</tr>
+<tr class="row-even"><td><p>riegl.timestamp</p></td>
+<td><p>Id::InternalTime</p></td>
+</tr>
+<tr class="row-odd"><td><p>riegl.xyz</p></td>
+<td><p>Id::X,
+Id::Y,
+Id::Z</p></td>
+</tr>
+<tr class="row-even"><td><p>riegl.intensity</p></td>
+<td><p>Id::Intensity</p></td>
+</tr>
+<tr class="row-odd"><td><p>riegl.amplitude</p></td>
+<td><p>Id::Amplitude</p></td>
+</tr>
+<tr class="row-even"><td><p>riegl.reflectance</p></td>
+<td><p>Id::Reflectance</p></td>
+</tr>
+<tr class="row-odd"><td><p>riegl.deviation</p></td>
+<td><p>Id::Deviation</p></td>
+</tr>
+<tr class="row-even"><td><p>riegl.pulse_width</p></td>
+<td><p>Id::PulseWidth</p></td>
+</tr>
+<tr class="row-odd"><td><p>riegl.background_radiation</p></td>
+<td><p>Id::BackgroundRadiation</p></td>
+</tr>
+<tr class="row-even"><td><p>riegl.target_index</p></td>
+<td><p>Id::ReturnNumber</p></td>
+</tr>
+<tr class="row-odd"><td><p>riegl.target_count</p></td>
+<td><p>Id::NumberOfReturns</p></td>
+</tr>
+<tr class="row-even"><td><p>riegl.scan_direction</p></td>
+<td><p>Id::ScanDirectionFlag</p></td>
+</tr>
+<tr class="row-odd"><td><p>riegl.scan_angle</p></td>
+<td><p>Id::ScanAngleRank</p></td>
+</tr>
+<tr class="row-even"><td><p>riegl.class</p></td>
+<td><p>Id::Classification</p></td>
+</tr>
+<tr class="row-odd"><td><p>riegl.rgba</p></td>
+<td><p>Id::Red,
+Id::Green,
+Id::Blue</p></td>
+</tr>
+<tr class="row-even"><td><p>riegl.surface_normal</p></td>
+<td><p>Id::NormalX,
+Id::NormalY,
+Id::NormalZ</p></td>
+</tr>
+</tbody>
+</table>
+<p>All other point attributes that may exist in the RDB file are ignored unless
+the option <code class="docutils literal notranslate"><span class="pre">extras</span></code> is set to <cite>true</cite>. If so, a custom dimension is defined
+for each additional point attribute, whereas the dimension name is equal to
+the point attribute name.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Point attributes are read “as-is”, no scaling or unit conversion is done
+by the reader. The only exceptions are point coordinates (<code class="docutils literal notranslate"><span class="pre">riegl.xyz</span></code>)
+and surface normals (<code class="docutils literal notranslate"><span class="pre">riegl.surface_normal</span></code>) which are transformed to
+the RDB file’s SRS by applying the matrix defined in the (optional) RDB
+file metadata object <code class="docutils literal notranslate"><span class="pre">riegl.geo_tag</span></code>.</p>
+</div>
+</section>
+<section id="metadata">
+<h2>Metadata<a class="headerlink" href="#metadata" title="Permalink to this heading"></a></h2>
+<p>The reader adds following objects to the stage’s metadata node:</p>
+<section id="object-database">
+<h3>Object “database”<a class="headerlink" href="#object-database" title="Permalink to this heading"></a></h3>
+<p>Contains basic information about the RDB file such as the bounding box,
+number of points and the file ID.</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">Example:</span><a class="headerlink" href="#id2" title="Permalink to this code"></a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos"> 2</span><span class="w">   </span><span class="nt">&quot;bounds&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos"> 3</span><span class="w">     </span><span class="nt">&quot;maximum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos"> 4</span><span class="w">       </span><span class="nt">&quot;X&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-2504493.762</span><span class="p">,</span>
+<span class="linenos"> 5</span><span class="w">       </span><span class="nt">&quot;Y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-3846841.252</span><span class="p">,</span>
+<span class="linenos"> 6</span><span class="w">       </span><span class="nt">&quot;Z&quot;</span><span class="p">:</span><span class="w">  </span><span class="mf">4413210.394</span>
+<span class="linenos"> 7</span><span class="w">     </span><span class="p">},</span>
+<span class="linenos"> 8</span><span class="w">     </span><span class="nt">&quot;minimum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos"> 9</span><span class="w">       </span><span class="nt">&quot;X&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-2505882.459</span><span class="p">,</span>
+<span class="linenos">10</span><span class="w">       </span><span class="nt">&quot;Y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-3848231.393</span><span class="p">,</span>
+<span class="linenos">11</span><span class="w">       </span><span class="nt">&quot;Z&quot;</span><span class="p">:</span><span class="w">  </span><span class="mf">4412172.548</span>
+<span class="linenos">12</span><span class="w">     </span><span class="p">}</span>
+<span class="linenos">13</span><span class="w">   </span><span class="p">},</span>
+<span class="linenos">14</span><span class="w">   </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10653</span><span class="p">,</span>
+<span class="linenos">15</span><span class="w">   </span><span class="nt">&quot;uuid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;637de54d-7e6b-4004-b6ab-b6bc588ec9ea&quot;</span>
+<span class="linenos">16</span><span class="w"> </span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="list-dimensions">
+<h3>List “dimensions”<a class="headerlink" href="#list-dimensions" title="Permalink to this heading"></a></h3>
+<p>List of point attribute description objects.</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">Example:</span><a class="headerlink" href="#id3" title="Permalink to this code"></a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w"> </span><span class="p">[{</span>
+<span class="linenos"> 2</span><span class="w">   </span><span class="nt">&quot;compression_options&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;shuffle&quot;</span><span class="p">,</span>
+<span class="linenos"> 3</span><span class="w">   </span><span class="nt">&quot;default_value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="linenos"> 4</span><span class="w">   </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Cartesian point coordinates wrt. application coordinate system (0: X, 1: Y, 2: Z)&quot;</span><span class="p">,</span>
+<span class="linenos"> 5</span><span class="w">   </span><span class="nt">&quot;invalid_value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="linenos"> 6</span><span class="w">   </span><span class="nt">&quot;length&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="linenos"> 7</span><span class="w">   </span><span class="nt">&quot;maximum_value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">535000</span><span class="p">,</span>
+<span class="linenos"> 8</span><span class="w">   </span><span class="nt">&quot;minimum_value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-535000</span><span class="p">,</span>
+<span class="linenos"> 9</span><span class="w">   </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;riegl.xyz&quot;</span><span class="p">,</span>
+<span class="linenos">10</span><span class="w">   </span><span class="nt">&quot;resolution&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.00025</span><span class="p">,</span>
+<span class="linenos">11</span><span class="w">   </span><span class="nt">&quot;scale_factor&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="linenos">12</span><span class="w">   </span><span class="nt">&quot;storage_class&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;variable&quot;</span><span class="p">,</span>
+<span class="linenos">13</span><span class="w">   </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;XYZ&quot;</span><span class="p">,</span>
+<span class="linenos">14</span><span class="w">   </span><span class="nt">&quot;unit_symbol&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;m&quot;</span>
+<span class="linenos">15</span><span class="w"> </span><span class="p">},</span>
+<span class="linenos">16</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">17</span><span class="w">   </span><span class="nt">&quot;compression_options&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;shuffle&quot;</span><span class="p">,</span>
+<span class="linenos">18</span><span class="w">   </span><span class="nt">&quot;default_value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="linenos">19</span><span class="w">   </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Target surface reflectance&quot;</span><span class="p">,</span>
+<span class="linenos">20</span><span class="w">   </span><span class="nt">&quot;invalid_value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="linenos">21</span><span class="w">   </span><span class="nt">&quot;length&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="linenos">22</span><span class="w">   </span><span class="nt">&quot;maximum_value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">327.67</span><span class="p">,</span>
+<span class="linenos">23</span><span class="w">   </span><span class="nt">&quot;minimum_value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-327.68</span><span class="p">,</span>
+<span class="linenos">24</span><span class="w">   </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;riegl.reflectance&quot;</span><span class="p">,</span>
+<span class="linenos">25</span><span class="w">   </span><span class="nt">&quot;resolution&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.01</span><span class="p">,</span>
+<span class="linenos">26</span><span class="w">   </span><span class="nt">&quot;scale_factor&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="linenos">27</span><span class="w">   </span><span class="nt">&quot;storage_class&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;variable&quot;</span><span class="p">,</span>
+<span class="linenos">28</span><span class="w">   </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Reflectance&quot;</span><span class="p">,</span>
+<span class="linenos">29</span><span class="w">   </span><span class="nt">&quot;unit_symbol&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dB&quot;</span>
+<span class="linenos">30</span><span class="w"> </span><span class="p">}]</span>
+</pre></div>
+</div>
+</div>
+<p>Details about the point attribute properties see RDB SDK documentation.</p>
+</section>
+<section id="object-metadata">
+<h3>Object “metadata”<a class="headerlink" href="#object-metadata" title="Permalink to this heading"></a></h3>
+<p>Contains one sub-object for each metadata object stored in the RDB file.</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">Example:</span><a class="headerlink" href="#id4" title="Permalink to this code"></a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos"> 2</span><span class="w">   </span><span class="nt">&quot;riegl.scan_pattern&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos"> 3</span><span class="w">     </span><span class="nt">&quot;rectangular&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos"> 4</span><span class="w">       </span><span class="nt">&quot;phi_start&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">45.0</span><span class="p">,</span>
+<span class="linenos"> 5</span><span class="w">       </span><span class="nt">&quot;phi_stop&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">270.0</span><span class="p">,</span>
+<span class="linenos"> 6</span><span class="w">       </span><span class="nt">&quot;phi_increment&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.040</span><span class="p">,</span>
+<span class="linenos"> 7</span><span class="w">       </span><span class="nt">&quot;theta_start&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">30.0</span><span class="p">,</span>
+<span class="linenos"> 8</span><span class="w">       </span><span class="nt">&quot;theta_stop&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">130.0</span><span class="p">,</span>
+<span class="linenos"> 9</span><span class="w">       </span><span class="nt">&quot;theta_increment&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.040</span><span class="p">,</span>
+<span class="linenos">10</span><span class="w">       </span><span class="nt">&quot;program&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">11</span><span class="w">         </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;High Speed&quot;</span>
+<span class="linenos">12</span><span class="w">       </span><span class="p">}</span>
+<span class="linenos">13</span><span class="w">     </span><span class="p">}</span>
+<span class="linenos">14</span><span class="w">   </span><span class="p">},</span>
+<span class="linenos">15</span><span class="w">   </span><span class="nt">&quot;riegl.geo_tag&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">16</span><span class="w">     </span><span class="nt">&quot;crs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">17</span><span class="w">       </span><span class="nt">&quot;epsg&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4956</span><span class="p">,</span>
+<span class="linenos">18</span><span class="w">       </span><span class="nt">&quot;wkt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GEOCCS[\&quot;NAD83(HARN) \/ Geocentric\&quot;,DATUM[\&quot;NAD83(HARN)\&quot;,SPHEROID[\&quot;GRS 1980\&quot;,6378137.000,298.257222101,AUTHORITY[\&quot;EPSG\&quot;,\&quot;7019\&quot;]],AUTHORITY[\&quot;EPSG\&quot;,\&quot;6152\&quot;]],PRIMEM[\&quot;Greenwich\&quot;,0.0000000000000000,AUTHORITY[\&quot;EPSG\&quot;,\&quot;8901\&quot;]],UNIT[\&quot;Meter\&quot;,1.00000000000000000000,AUTHORITY[\&quot;EPSG\&quot;,\&quot;9001\&quot;]],AXIS[\&quot;X\&quot;,OTHER],AXIS[\&quot;Y\&quot;,EAST],AXIS[\&quot;Z\&quot;,NORTH],AUTHORITY[\&quot;EPSG\&quot;,\&quot;4956\&quot;]]&quot;</span>
+<span class="linenos">19</span><span class="w">     </span><span class="p">},</span>
+<span class="linenos">20</span><span class="w">     </span><span class="nt">&quot;pose&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="linenos">21</span><span class="w">        </span><span class="mf">0.837957447</span><span class="p">,</span><span class="w"> </span><span class="mf">0.379440385</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.392240121</span><span class="p">,</span><span class="w"> </span><span class="mf">-2505819.156</span><span class="p">,</span>
+<span class="linenos">22</span><span class="w">       </span><span class="mf">-0.545735575</span><span class="p">,</span><span class="w"> </span><span class="mf">0.582617132</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.602270669</span><span class="p">,</span><span class="w"> </span><span class="mf">-3847595.645</span><span class="p">,</span>
+<span class="linenos">23</span><span class="w">        </span><span class="mf">0.000000000</span><span class="p">,</span><span class="w"> </span><span class="mf">0.718736580</span><span class="p">,</span><span class="w">  </span><span class="mf">0.695282481</span><span class="p">,</span><span class="w">  </span><span class="mf">4412064.882</span><span class="p">,</span>
+<span class="linenos">24</span><span class="w">        </span><span class="mf">0.000000000</span><span class="p">,</span><span class="w"> </span><span class="mf">0.000000000</span><span class="p">,</span><span class="w">  </span><span class="mf">0.000000000</span><span class="p">,</span><span class="w">        </span><span class="mf">1.000</span>
+<span class="linenos">25</span><span class="w">     </span><span class="p">]</span>
+<span class="linenos">26</span><span class="w">   </span><span class="p">}</span>
+<span class="linenos">27</span><span class="w"> </span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">riegl.geo_tag</span></code> object defines the Spatial Reference System (SRS) of the
+file. The point coordinates are actually stored in a local coordinate system
+(usually horizontally leveled) which is based on the SRS. The transformation
+from the local system to the SRS is defined by the 4x4 matrix <code class="docutils literal notranslate"><span class="pre">pose</span></code> which
+is stored in row-wise order. Point coordinates (<code class="docutils literal notranslate"><span class="pre">riegl.xyz</span></code>) and surface
+normals (<code class="docutils literal notranslate"><span class="pre">riegl.surface_normal</span></code>) are automatically transformed to the SRS
+by the reader.</p>
+<p>Details about the metadata objects see RDB SDK documentation.</p>
+</section>
+<section id="list-transactions">
+<h3>List “transactions”<a class="headerlink" href="#list-transactions" title="Permalink to this heading"></a></h3>
+<p>List of transaction objects describing the history of the file.</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">Example:</span><a class="headerlink" href="#id5" title="Permalink to this code"></a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w"> </span><span class="p">[{</span>
+<span class="linenos"> 2</span><span class="w">   </span><span class="nt">&quot;agent&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RDB Library 2.1.6-1677 (x86_64-windows, Apr  5 2018, 10:58:39)&quot;</span><span class="p">,</span>
+<span class="linenos"> 3</span><span class="w">   </span><span class="nt">&quot;comments&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="linenos"> 4</span><span class="w">   </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="linenos"> 5</span><span class="w">   </span><span class="nt">&quot;rdb&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RDB Library 2.1.6-1677 (x86_64-windows, Apr  5 2018, 10:58:39)&quot;</span><span class="p">,</span>
+<span class="linenos"> 6</span><span class="w">   </span><span class="nt">&quot;settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos"> 7</span><span class="w">     </span><span class="nt">&quot;cache_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">524288000</span><span class="p">,</span>
+<span class="linenos"> 8</span><span class="w">     </span><span class="nt">&quot;chunk_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">65536</span><span class="p">,</span>
+<span class="linenos"> 9</span><span class="w">     </span><span class="nt">&quot;chunk_size_lod&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span>
+<span class="linenos">10</span><span class="w">     </span><span class="nt">&quot;compression_level&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="linenos">11</span><span class="w">     </span><span class="nt">&quot;primary_attribute&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">12</span><span class="w">       </span><span class="nt">&quot;compression_options&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;shuffle&quot;</span><span class="p">,</span>
+<span class="linenos">13</span><span class="w">       </span><span class="nt">&quot;default_value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="linenos">14</span><span class="w">       </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Cartesian point coordinates wrt. application coordinate system (0: X, 1: Y, 2: Z)&quot;</span><span class="p">,</span>
+<span class="linenos">15</span><span class="w">       </span><span class="nt">&quot;invalid_value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="linenos">16</span><span class="w">       </span><span class="nt">&quot;length&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="linenos">17</span><span class="w">       </span><span class="nt">&quot;maximum_value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">535000</span><span class="p">,</span>
+<span class="linenos">18</span><span class="w">       </span><span class="nt">&quot;minimum_value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-535000</span><span class="p">,</span>
+<span class="linenos">19</span><span class="w">       </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;riegl.xyz&quot;</span><span class="p">,</span>
+<span class="linenos">20</span><span class="w">       </span><span class="nt">&quot;resolution&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.00025</span><span class="p">,</span>
+<span class="linenos">21</span><span class="w">       </span><span class="nt">&quot;scale_factor&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="linenos">22</span><span class="w">       </span><span class="nt">&quot;storage_class&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;variable&quot;</span><span class="p">,</span>
+<span class="linenos">23</span><span class="w">       </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;XYZ&quot;</span><span class="p">,</span>
+<span class="linenos">24</span><span class="w">       </span><span class="nt">&quot;unit_symbol&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;m&quot;</span>
+<span class="linenos">25</span><span class="w">     </span><span class="p">}</span>
+<span class="linenos">26</span><span class="w">   </span><span class="p">},</span>
+<span class="linenos">27</span><span class="w">   </span><span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2018-04-06 10:10:39.336&quot;</span><span class="p">,</span>
+<span class="linenos">28</span><span class="w">   </span><span class="nt">&quot;stop&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2018-04-06 10:10:39.336&quot;</span><span class="p">,</span>
+<span class="linenos">29</span><span class="w">   </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Database creation&quot;</span>
+<span class="linenos">30</span><span class="w"> </span><span class="p">},</span>
+<span class="linenos">31</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">32</span><span class="w">   </span><span class="nt">&quot;agent&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;rdbconvert&quot;</span><span class="p">,</span>
+<span class="linenos">33</span><span class="w">   </span><span class="nt">&quot;comments&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="linenos">34</span><span class="w">   </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="linenos">35</span><span class="w">   </span><span class="nt">&quot;rdb&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RDB Library 2.1.6-1677 (x86_64-windows, Apr  5 2018, 10:58:39)&quot;</span><span class="p">,</span>
+<span class="linenos">36</span><span class="w">   </span><span class="nt">&quot;settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="linenos">37</span><span class="w">   </span><span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2018-04-06 10:10:39.339&quot;</span><span class="p">,</span>
+<span class="linenos">38</span><span class="w">   </span><span class="nt">&quot;stop&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2018-04-06 10:10:39.380&quot;</span><span class="p">,</span>
+<span class="linenos">39</span><span class="w">   </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Import&quot;</span>
+<span class="linenos">40</span><span class="w"> </span><span class="p">},</span>
+<span class="linenos">41</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">42</span><span class="w">   </span><span class="nt">&quot;agent&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RiSCAN PRO 64 bit v2.6.3&quot;</span><span class="p">,</span>
+<span class="linenos">43</span><span class="w">   </span><span class="nt">&quot;comments&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="linenos">44</span><span class="w">   </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="linenos">45</span><span class="w">   </span><span class="nt">&quot;rdb&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RDB Library 2.1.6-1677 (x86_64-windows, Apr  5 2018, 10:58:39)&quot;</span><span class="p">,</span>
+<span class="linenos">46</span><span class="w">   </span><span class="nt">&quot;settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="linenos">47</span><span class="w">   </span><span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2018-04-06 10:10:41.666&quot;</span><span class="p">,</span>
+<span class="linenos">48</span><span class="w">   </span><span class="nt">&quot;stop&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2018-04-06 10:10:41.666&quot;</span><span class="p">,</span>
+<span class="linenos">49</span><span class="w">   </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Meta data saved&quot;</span>
+<span class="linenos">50</span><span class="w"> </span><span class="p">}]</span>
+</pre></div>
+</div>
+</div>
+<p>Details about the transaction objects see RDB SDK documentation.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="readers.rxp.html" class="btn btn-neutral float-right" title="readers.rxp" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="readers.qfit.html" class="btn btn-neutral float-left" title="readers.qfit" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <div class="info">
+      <a class="logo-link" href="https://hobu.co">
+        <div class="hobu-logo"></div>
+      </a>
+      <div class="copyright">
+      
+
+                    &copy;  2023
+                        <a href="https://github.com/abellgithub">Andrew Bell</a>,
+                        <a href="https://github.com/chambbj">Brad Chambers</a>,
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>.
+
+      
+      Last updated on May 22, 2023.
+      </div>
+    </div>
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="footer">
+        <div class="container">
+                    &copy;  2023
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        <a href="http://github.com/mpgerlek">Michael Gerlek</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>,
+                Last updated
+                    on May 22, 2023.
+        </div>
+    </div>
+
+</body>
+</html>

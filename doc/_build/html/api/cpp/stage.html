@@ -1,0 +1,623 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pdal::Stage &mdash; pdal.io</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/pdal.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/breathe.css" type="text/css" />
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://pdal.io/api/cpp/stage.html"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="copyright" title="Copyright" href="../../copyright.html" />
+    <link rel="next" title="pdal::StageFactory" href="stagefactory.html" />
+    <link rel="prev" title="pdal::RowPointTable" href="rowpointtable.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+          </a>
+              <div class="version">
+                2.6.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../about.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../download.html">Download</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../apps/index.html">Applications</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../community.html">Community</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../pipeline.html">Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stages/stages.html">Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stages/readers.html">Readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stages/writers.html">Writers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stages/filters.html">Filters</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../dimensions.html">Dimensions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../types.html">Types</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../python.html">Python</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../java.html">Java</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../workshop/index.html">Workshop</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../project/index.html">Project</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">C++ API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="bounds.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::BOX2D</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="charbuf.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Charbuf</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="columnpointtable.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::ColumnPointTable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dimension.html"><code class="docutils literal notranslate"><span class="pre">pdal::Dimension</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="extractor.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Extractor</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileutils.html"><code class="docutils literal notranslate"><span class="pre">pdal::FileUtils</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="filter.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Filter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="istream.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::IStream</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="log.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Log</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="metadata.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Metadata</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="options.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Options</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pointtable.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::PointTable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pointview.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::PointView</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="programargs.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::ProgramArgs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="reader.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Reader</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="rowpointtable.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::RowPointTable</span></code></a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Stage</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="stagefactory.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::StageFactory</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html"><code class="docutils literal notranslate"><span class="pre">pdal::Utils</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="writer.html"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Writer</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../transition/index.html">libLAS C API to PDAL transition guide</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../copyright.html">License</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PDAL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html"> Documentation </a> &raquo;</li>
+      
+          <li><a href="../index.html">API</a> &raquo;</li>
+      
+          <li><a href="index.html">C++ API</a> &raquo;</li>
+      
+      <li><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Stage</span></code></li>
+    
+
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/PDAL/PDAL/edit//master/doc/api/cpp/stage.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="stagefactory.html" class="btn btn-neutral float-right" title="pdal::StageFactory" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="rowpointtable.html" class="btn btn-neutral float-left" title="pdal::RowPointTable" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <span class="target" id="cpp-pdal-stage"></span><section id="pdal-stage">
+<span id="index-0"></span><h1><a class="reference internal" href="#_CPPv4N4pdal5StageE" title="pdal::Stage"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Stage</span></code></a><a class="headerlink" href="#pdal-stage" title="Permalink to this heading"></a></h1>
+<p><a class="reference internal" href="#_CPPv4N4pdal5StageE" title="pdal::Stage"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Stage</span></code></a> is the base class of <a class="reference internal" href="filter.html#_CPPv4N4pdal6FilterE" title="pdal::Filter"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Filter</span></code></a>,
+<a class="reference internal" href="reader.html#_CPPv4N4pdal6ReaderE" title="pdal::Reader"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::Reader</span></code></a>, and <code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">pdal::MultiFilter</span></code> classes that
+implement the reading API in a PDAL pipeline.</p>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5StageE">
+<span id="_CPPv3N4pdal5StageE"></span><span id="_CPPv2N4pdal5StageE"></span><span id="pdal::Stage"></span><span class="target" id="classpdal_1_1Stage"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Stage</span></span></span><a class="headerlink" href="#_CPPv4N4pdal5StageE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>A stage performs the actual processing in PDAL. </p>
+<p>Stages may read data, modify or filter read data, create metadata or write processed data.</p>
+<p>Stages are linked with <a class="reference internal" href="#classpdal_1_1Stage_1abfd87d459bea04a919aace286b2e377e"><span class="std std-ref">setInput()</span></a> into a pipeline. The pipeline is run with by calling in sequence <a class="reference internal" href="#classpdal_1_1Stage_1a4b9296a59f8852b3d08630f1086bfbea"><span class="std std-ref">prepare()</span></a> and <a class="reference internal" href="#classpdal_1_1Stage_1a1615c4aa5ec5e48f90d73f0e7a796935"><span class="std std-ref">execute()</span></a> on the stage at the end of the pipeline. PipelineManager can also be used to create and run a pipeline. </p>
+<p>Subclassed by <a class="reference internal" href="filter.html#classpdal_1_1Filter"><span class="std std-ref">pdal::Filter</span></a>, <a class="reference internal" href="reader.html#classpdal_1_1Reader"><span class="std std-ref">pdal::Reader</span></a>, pdal::Streamable, <a class="reference internal" href="writer.html#classpdal_1_1Writer"><span class="std std-ref">pdal::Writer</span></a></p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp enum-class">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5Stage14WhereMergeModeE">
+<span id="_CPPv3N4pdal5Stage14WhereMergeModeE"></span><span id="_CPPv2N4pdal5Stage14WhereMergeModeE"></span><span class="target" id="classpdal_1_1Stage_1a3cf41936971e9bc364c76dbf6d45bab9"></span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">WhereMergeMode</span></span></span><a class="headerlink" href="#_CPPv4N4pdal5Stage14WhereMergeModeE" title="Permalink to this definition"></a><br /></dt>
+<dd><p><em>Values:</em></p>
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5Stage14WhereMergeMode4AutoE">
+<span id="_CPPv3N4pdal5Stage14WhereMergeMode4AutoE"></span><span id="_CPPv2N4pdal5Stage14WhereMergeMode4AutoE"></span><span class="target" id="classpdal_1_1Stage_1a3cf41936971e9bc364c76dbf6d45bab9a06b9281e396db002010bde1de57262eb"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Auto</span></span></span><a class="headerlink" href="#_CPPv4N4pdal5Stage14WhereMergeMode4AutoE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5Stage14WhereMergeMode4TrueE">
+<span id="_CPPv3N4pdal5Stage14WhereMergeMode4TrueE"></span><span id="_CPPv2N4pdal5Stage14WhereMergeMode4TrueE"></span><span class="target" id="classpdal_1_1Stage_1a3cf41936971e9bc364c76dbf6d45bab9af827cf462f62848df37c5e1e94a4da74"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">True</span></span></span><a class="headerlink" href="#_CPPv4N4pdal5Stage14WhereMergeMode4TrueE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5Stage14WhereMergeMode5FalseE">
+<span id="_CPPv3N4pdal5Stage14WhereMergeMode5FalseE"></span><span id="_CPPv2N4pdal5Stage14WhereMergeMode5FalseE"></span><span class="target" id="classpdal_1_1Stage_1a3cf41936971e9bc364c76dbf6d45bab9af8320b26d30ab433c5a54546d21f414c"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">False</span></span></span><a class="headerlink" href="#_CPPv4N4pdal5Stage14WhereMergeMode5FalseE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5Stage5StageEv">
+<span id="_CPPv3N4pdal5Stage5StageEv"></span><span id="_CPPv2N4pdal5Stage5StageEv"></span><span id="pdal::Stage::Stage"></span><span class="target" id="classpdal_1_1Stage_1a328a062e19310343a6e96ca0feae1f6a"></span><span class="sig-name descname"><span class="n"><span class="pre">Stage</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5Stage5StageEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5StageD0Ev">
+<span id="_CPPv3N4pdal5StageD0Ev"></span><span id="_CPPv2N4pdal5StageD0Ev"></span><span id="pdal::Stage::~Stage"></span><span class="target" id="classpdal_1_1Stage_1adeac58810357bff99ab4a5fd6537421f"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">~Stage</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5StageD0Ev" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5Stage8setInputER5Stage">
+<span id="_CPPv3N4pdal5Stage8setInputER5Stage"></span><span id="_CPPv2N4pdal5Stage8setInputER5Stage"></span><span id="pdal::Stage::setInput__StageR"></span><span class="target" id="classpdal_1_1Stage_1abfd87d459bea04a919aace286b2e377e"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setInput</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4N4pdal5StageE" title="pdal::Stage"><span class="n"><span class="pre">Stage</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">input</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5Stage8setInputER5Stage" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Add a stage to the input list of this stage. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input</strong> – <a class="reference internal" href="#classpdal_1_1Stage"><span class="std std-ref">Stage</span></a> to use as input. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5Stage13setProgressFdEi">
+<span id="_CPPv3N4pdal5Stage13setProgressFdEi"></span><span id="_CPPv2N4pdal5Stage13setProgressFdEi"></span><span id="pdal::Stage::setProgressFd__i"></span><span class="target" id="classpdal_1_1Stage_1a714dfe1f3b91fd41afe8146d94759b29"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setProgressFd</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">fd</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5Stage13setProgressFdEi" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Set a file descriptor to which progress information should be written. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fd</strong> – Progress file descriptor. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5Stage7previewEv">
+<span id="_CPPv3N4pdal5Stage7previewEv"></span><span id="_CPPv2N4pdal5Stage7previewEv"></span><span id="pdal::Stage::preview"></span><span class="target" id="classpdal_1_1Stage_1a25bb5ef4315f98fb88657876077ae7e4"></span><span class="n"><span class="pre">QuickInfo</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">preview</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5Stage7previewEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Retrieve some basic point information without reading all data when possible. </p>
+<p>Usually implemented only by Readers. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5Stage7prepareE13PointTableRef">
+<span id="_CPPv3N4pdal5Stage7prepareE13PointTableRef"></span><span id="_CPPv2N4pdal5Stage7prepareE13PointTableRef"></span><span id="pdal::Stage::prepare__PointTableRef"></span><span class="target" id="classpdal_1_1Stage_1a4b9296a59f8852b3d08630f1086bfbea"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">prepare</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PointTableRef</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">table</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5Stage7prepareE13PointTableRef" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Prepare a stage for execution. </p>
+<p>This function needs to be called on the terminal stage of a pipeline (linked set of stages) before <a class="reference internal" href="#classpdal_1_1Stage_1a1615c4aa5ec5e48f90d73f0e7a796935"><span class="std std-ref">execute</span></a> can be called. Prepare recurses through all input stages.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>table</strong> – PointTable being used for stage pipeline. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5Stage7executeE13PointTableRef">
+<span id="_CPPv3N4pdal5Stage7executeE13PointTableRef"></span><span id="_CPPv2N4pdal5Stage7executeE13PointTableRef"></span><span id="pdal::Stage::execute__PointTableRef"></span><span class="target" id="classpdal_1_1Stage_1a1615c4aa5ec5e48f90d73f0e7a796935"></span><span class="n"><span class="pre">PointViewSet</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">execute</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PointTableRef</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">table</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5Stage7executeE13PointTableRef" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Execute a prepared pipeline (linked set of stages). </p>
+<p>This performs the action associated with the stage by executing the run function of each stage in depth first order. Each stage is run to completion (all points are processed) before the next stages is run.o</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>table</strong> – Point table being used for stage pipeline. This must be the same table used in the <a class="reference internal" href="#classpdal_1_1Stage_1a4b9296a59f8852b3d08630f1086bfbea"><span class="std std-ref">prepare</span></a> function. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5Stage7executeER16StreamPointTable">
+<span id="_CPPv3N4pdal5Stage7executeER16StreamPointTable"></span><span id="_CPPv2N4pdal5Stage7executeER16StreamPointTable"></span><span id="pdal::Stage::execute__StreamPointTableR"></span><span class="target" id="classpdal_1_1Stage_1a3185b4e77be80b48b13e2baf161e8366"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">execute</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">StreamPointTable</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">table</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5Stage7executeER16StreamPointTable" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5Stage18pipelineStreamableEv">
+<span id="_CPPv3NK4pdal5Stage18pipelineStreamableEv"></span><span id="_CPPv2NK4pdal5Stage18pipelineStreamableEv"></span><span id="pdal::Stage::pipelineStreamableC"></span><span class="target" id="classpdal_1_1Stage_1aa4eee46b49e82d38a325710463064b11"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">pipelineStreamable</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5Stage18pipelineStreamableEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Determine if a pipeline with this stage as a sink is streamable. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Whether the pipeline is streamable. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5Stage17findNonstreamableEv">
+<span id="_CPPv3NK4pdal5Stage17findNonstreamableEv"></span><span id="_CPPv2NK4pdal5Stage17findNonstreamableEv"></span><span id="pdal::Stage::findNonstreamableC"></span><span class="target" id="classpdal_1_1Stage_1a295672003fad8f6e623da2ed5b5419e8"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N4pdal5StageE" title="pdal::Stage"><span class="n"><span class="pre">Stage</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">findNonstreamable</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5Stage17findNonstreamableEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Return a pointer to a pipeline’s first non-streamable stage, if one exists. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nullptr if the stage is streamable, a pointer to this stage otherwise. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5Stage19setSpatialReferenceERK16SpatialReference">
+<span id="_CPPv3N4pdal5Stage19setSpatialReferenceERK16SpatialReference"></span><span id="_CPPv2N4pdal5Stage19setSpatialReferenceERK16SpatialReference"></span><span id="pdal::Stage::setSpatialReference__SpatialReferenceCR"></span><span class="target" id="classpdal_1_1Stage_1af31ff3a4038bceeb17847b567d984ed7"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setSpatialReference</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">SpatialReference</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">srs</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5Stage19setSpatialReferenceERK16SpatialReference" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Set the spatial reference of a stage. </p>
+<p>Set the spatial reference that will override that being carried by the <a class="reference internal" href="pointview.html#classpdal_1_1PointView"><span class="std std-ref">PointView</span></a> being processed. This is usually used when reprojecting data to a new spatial reference. The stage spatial reference will be carried by PointViews processes by this stage to subsequent stages.</p>
+<p>If called by a <a class="reference internal" href="reader.html#classpdal_1_1Reader"><span class="std std-ref">Reader</span></a> whose spatial reference has been set with option ‘spatialreference’ or ‘override_srs’, then this function will have no effect.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>srs</strong> – Spatial reference to set. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5Stage19getSpatialReferenceEv">
+<span id="_CPPv3NK4pdal5Stage19getSpatialReferenceEv"></span><span id="_CPPv2NK4pdal5Stage19getSpatialReferenceEv"></span><span id="pdal::Stage::getSpatialReferenceC"></span><span class="target" id="classpdal_1_1Stage_1a6d87f622315bdbacacff8962db1b4fcc"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">SpatialReference</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getSpatialReference</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5Stage19getSpatialReferenceEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Get the spatial reference of the stage. </p>
+<p>Get the spatial reference that will override that being carried by the <a class="reference internal" href="pointview.html#classpdal_1_1PointView"><span class="std std-ref">PointView</span></a> being processed. This is usually used when reprojecting data to a new spatial reference. The stage spatial reference will be carried by PointViews processes by this stage to subsequent stages.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The stage’s spatial reference. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5Stage10setOptionsE7Options">
+<span id="_CPPv3N4pdal5Stage10setOptionsE7Options"></span><span id="_CPPv2N4pdal5Stage10setOptionsE7Options"></span><span id="pdal::Stage::setOptions__Options"></span><span class="target" id="classpdal_1_1Stage_1acb2434df20f371f1fec9577de3cf0046"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setOptions</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="options.html#_CPPv4N4pdal7OptionsE" title="pdal::Options"><span class="n"><span class="pre">Options</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">options</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5Stage10setOptionsE7Options" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Set a stage’s options. </p>
+<p>Set the options on a stage, clearing all previously set options.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>options</strong> – <a class="reference internal" href="options.html#classpdal_1_1Options"><span class="std std-ref">Options</span></a> to set. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5Stage21addConditionalOptionsERK7Options">
+<span id="_CPPv3N4pdal5Stage21addConditionalOptionsERK7Options"></span><span id="_CPPv2N4pdal5Stage21addConditionalOptionsERK7Options"></span><span id="pdal::Stage::addConditionalOptions__OptionsCR"></span><span class="target" id="classpdal_1_1Stage_1a782c57a2d5646a0a59af94321f9c5ba1"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">addConditionalOptions</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="options.html#_CPPv4N4pdal7OptionsE" title="pdal::Options"><span class="n"><span class="pre">Options</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">opts</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5Stage21addConditionalOptionsERK7Options" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Add options if an option with the same name doesn’t already exist on the stage. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>opts</strong> – <a class="reference internal" href="options.html#classpdal_1_1Options"><span class="std std-ref">Options</span></a> to add. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5Stage10addAllArgsER11ProgramArgs">
+<span id="_CPPv3N4pdal5Stage10addAllArgsER11ProgramArgs"></span><span id="_CPPv2N4pdal5Stage10addAllArgsER11ProgramArgs"></span><span id="pdal::Stage::addAllArgs__ProgramArgsR"></span><span class="target" id="classpdal_1_1Stage_1a75ff99f7b665c6573e304ed4148dd99e"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">addAllArgs</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="programargs.html#_CPPv4N4pdal11ProgramArgsE" title="pdal::ProgramArgs"><span class="n"><span class="pre">ProgramArgs</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">args</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5Stage10addAllArgsER11ProgramArgs" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Add a stage’s options to a <a class="reference internal" href="programargs.html#classpdal_1_1ProgramArgs"><span class="std std-ref">ProgramArgs</span></a> set. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> – <a class="reference internal" href="programargs.html#classpdal_1_1ProgramArgs"><span class="std std-ref">ProgramArgs</span></a> to add to. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5Stage10addOptionsERK7Options">
+<span id="_CPPv3N4pdal5Stage10addOptionsERK7Options"></span><span id="_CPPv2N4pdal5Stage10addOptionsERK7Options"></span><span id="pdal::Stage::addOptions__OptionsCR"></span><span class="target" id="classpdal_1_1Stage_1ace3043bc318e31d6d88a296c0a8cf62b"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">addOptions</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="options.html#_CPPv4N4pdal7OptionsE" title="pdal::Options"><span class="n"><span class="pre">Options</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">opts</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5Stage10addOptionsERK7Options" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Add options to the existing option set. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>opts</strong> – <a class="reference internal" href="options.html#classpdal_1_1Options"><span class="std std-ref">Options</span></a> to add. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5Stage13removeOptionsERK7Options">
+<span id="_CPPv3N4pdal5Stage13removeOptionsERK7Options"></span><span id="_CPPv2N4pdal5Stage13removeOptionsERK7Options"></span><span id="pdal::Stage::removeOptions__OptionsCR"></span><span class="target" id="classpdal_1_1Stage_1ab1fa73224209557248ed896eae7a1f4d"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">removeOptions</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="options.html#_CPPv4N4pdal7OptionsE" title="pdal::Options"><span class="n"><span class="pre">Options</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">opts</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5Stage13removeOptionsERK7Options" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Remove options from a stage’s option set. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>opts</strong> – <a class="reference internal" href="options.html#classpdal_1_1Options"><span class="std std-ref">Options</span></a> to remove. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5Stage6setLogERK6LogPtr">
+<span id="_CPPv3N4pdal5Stage6setLogERK6LogPtr"></span><span id="_CPPv2N4pdal5Stage6setLogERK6LogPtr"></span><span id="pdal::Stage::setLog__LogPtrCR"></span><span class="target" id="classpdal_1_1Stage_1a60752248e84e919958c52ecff78bf347"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setLog</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">LogPtr</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">log</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5Stage6setLogERK6LogPtr" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Set the stage’s log. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>log</strong> – <a class="reference internal" href="log.html#classpdal_1_1Log"><span class="std std-ref">Log</span></a> pointer. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5Stage3logEv">
+<span id="_CPPv3NK4pdal5Stage3logEv"></span><span id="_CPPv2NK4pdal5Stage3logEv"></span><span id="pdal::Stage::logC"></span><span class="target" id="classpdal_1_1Stage_1a5df23cde48c2012d8625f2a964d7350e"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="n"><span class="pre">LogPtr</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">log</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5Stage3logEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Return the stage’s log pointer. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="log.html#classpdal_1_1Log"><span class="std std-ref">Log</span></a> pointer. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5Stage12startLoggingEv">
+<span id="_CPPv3NK4pdal5Stage12startLoggingEv"></span><span id="_CPPv2NK4pdal5Stage12startLoggingEv"></span><span id="pdal::Stage::startLoggingC"></span><span class="target" id="classpdal_1_1Stage_1a6390ff0651dcfdeea3f1e19692cc8430"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">startLogging</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5Stage12startLoggingEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Push the stage’s leader into the log. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5Stage11stopLoggingEv">
+<span id="_CPPv3NK4pdal5Stage11stopLoggingEv"></span><span id="_CPPv2NK4pdal5Stage11stopLoggingEv"></span><span id="pdal::Stage::stopLoggingC"></span><span class="target" id="classpdal_1_1Stage_1a2b0cdf840f45d7e83d07d2016b8ceaef"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">stopLogging</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5Stage11stopLoggingEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Pop the stage’s leader from the log. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5Stage7isDebugEv">
+<span id="_CPPv3NK4pdal5Stage7isDebugEv"></span><span id="_CPPv2NK4pdal5Stage7isDebugEv"></span><span id="pdal::Stage::isDebugC"></span><span class="target" id="classpdal_1_1Stage_1a41dce858bb410475b722ca057b69ac0f"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">isDebug</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5Stage7isDebugEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Determine whether the stage is in debug mode or not. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The stage’s debug state. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5Stage7getNameEv">
+<span id="_CPPv3NK4pdal5Stage7getNameEv"></span><span id="_CPPv2NK4pdal5Stage7getNameEv"></span><span id="pdal::Stage::getNameC"></span><span class="target" id="classpdal_1_1Stage_1a6c81d6fbbac17ebe4cd63806916cc750"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getName</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><a class="headerlink" href="#_CPPv4NK4pdal5Stage7getNameEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Return the name of a stage. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The stage’s name. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5Stage6setTagERKNSt6stringE">
+<span id="_CPPv3N4pdal5Stage6setTagERKNSt6stringE"></span><span id="_CPPv2N4pdal5Stage6setTagERKNSt6stringE"></span><span id="pdal::Stage::setTag__ssCR"></span><span class="target" id="classpdal_1_1Stage_1a49584fa79b06e1ddb18a6bc837e6b6d8"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setTag</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">tag</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5Stage6setTagERKNSt6stringE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Set a specific tag name. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5Stage3tagEv">
+<span id="_CPPv3NK4pdal5Stage3tagEv"></span><span id="_CPPv2NK4pdal5Stage3tagEv"></span><span id="pdal::Stage::tagC"></span><span class="target" id="classpdal_1_1Stage_1aecc44d763656c9d14afe5aa0f98b7aa7"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">tag</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5Stage3tagEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Return the tag name of a stage. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The tag name. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5Stage9getInputsEv">
+<span id="_CPPv3N4pdal5Stage9getInputsEv"></span><span id="_CPPv2N4pdal5Stage9getInputsEv"></span><span id="pdal::Stage::getInputs"></span><span class="target" id="classpdal_1_1Stage_1a32600d2849bf09107ee0682dcaa07ee7"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N4pdal5StageE" title="pdal::Stage"><span class="n"><span class="pre">Stage</span></span></a><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getInputs</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5Stage9getInputsEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Return a list of the stage’s inputs. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A vector pointers to input stages. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5Stage11getMetadataEv">
+<span id="_CPPv3NK4pdal5Stage11getMetadataEv"></span><span id="_CPPv2NK4pdal5Stage11getMetadataEv"></span><span id="pdal::Stage::getMetadataC"></span><span class="target" id="classpdal_1_1Stage_1aaa34376712d6c64ddfffd7253850bc6f"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="metadata.html#_CPPv4N4pdal12MetadataNodeE" title="pdal::MetadataNode"><span class="n"><span class="pre">MetadataNode</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getMetadata</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5Stage11getMetadataEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Get the stage’s metadata node. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#classpdal_1_1Stage"><span class="std std-ref">Stage</span></a>’s metadata. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK4pdal5Stage9serializeE12MetadataNodeRN14PipelineWriter6TagMapE">
+<span id="_CPPv3NK4pdal5Stage9serializeE12MetadataNodeRN14PipelineWriter6TagMapE"></span><span id="_CPPv2NK4pdal5Stage9serializeE12MetadataNodeRN14PipelineWriter6TagMapE"></span><span id="pdal::Stage::serialize__MetadataNode.PipelineWriter::TagMapRC"></span><span class="target" id="classpdal_1_1Stage_1aa2fceaf1c2ea1bc8337b604a7fc72e2f"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">serialize</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="metadata.html#_CPPv4N4pdal12MetadataNodeE" title="pdal::MetadataNode"><span class="n"><span class="pre">MetadataNode</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">root</span></span>, <span class="n"><span class="pre">PipelineWriter</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">TagMap</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">tags</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK4pdal5Stage9serializeE12MetadataNodeRN14PipelineWriter6TagMapE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Serialize a stage by inserting apporpritate data into the provided <a class="reference internal" href="metadata.html#classpdal_1_1MetadataNode"><span class="std std-ref">MetadataNode</span></a>. </p>
+<p>Used to dump a pipeline specification in a portable format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>root</strong> – Node to which a stages metadata should be added. </p></li>
+<li><p><strong>tags</strong> – Pipeline writer’s current list of stage tags. </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-static-functions">Public Static Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5Stage9parseNameENSt6stringERNSt6string9size_typeE">
+<span id="_CPPv3N4pdal5Stage9parseNameENSt6stringERNSt6string9size_typeE"></span><span id="_CPPv2N4pdal5Stage9parseNameENSt6stringERNSt6string9size_typeE"></span><span id="pdal::Stage::parseName__ss.std::string::size_typeR"></span><span class="target" id="classpdal_1_1Stage_1aca3009ba4d0e25982ec2ebab343a8873"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">parseName</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">o</span></span>, <span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">size_type</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">pos</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5Stage9parseNameENSt6stringERNSt6string9size_typeE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Parse a stage name from a string. </p>
+<p>Return the name and update the position in the input string to the end of the stage name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>o</strong> – Input string to parse. </p></li>
+<li><p><strong>pos</strong> – Parsing start/end position. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether the parsed name is a valid stage name. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4pdal5Stage12parseTagNameENSt6stringERNSt6string9size_typeE">
+<span id="_CPPv3N4pdal5Stage12parseTagNameENSt6stringERNSt6string9size_typeE"></span><span id="_CPPv2N4pdal5Stage12parseTagNameENSt6stringERNSt6string9size_typeE"></span><span id="pdal::Stage::parseTagName__ss.std::string::size_typeR"></span><span class="target" id="classpdal_1_1Stage_1a2ed4e38b8dc11601c28b66a85624cdb0"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">parseTagName</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">o</span></span>, <span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">size_type</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">pos</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4pdal5Stage12parseTagNameENSt6stringERNSt6string9size_typeE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Parse a tag name from a string. </p>
+<p>Return the name and update the position in the input string to the end of the tag name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>o</strong> – Input string to parse. </p></li>
+<li><p><strong>pos</strong> – Parsing start/end position. </p></li>
+<li><p><strong>tag</strong> – Parsed tag name. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether the parsed name is a valid tag name. </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="stagefactory.html" class="btn btn-neutral float-right" title="pdal::StageFactory" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="rowpointtable.html" class="btn btn-neutral float-left" title="pdal::RowPointTable" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <div class="info">
+      <a class="logo-link" href="https://hobu.co">
+        <div class="hobu-logo"></div>
+      </a>
+      <div class="copyright">
+      
+
+                    &copy;  2023
+                        <a href="https://github.com/abellgithub">Andrew Bell</a>,
+                        <a href="https://github.com/chambbj">Brad Chambers</a>,
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>.
+
+      
+      Last updated on May 22, 2023.
+      </div>
+    </div>
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="footer">
+        <div class="container">
+                    &copy;  2023
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        <a href="http://github.com/mpgerlek">Michael Gerlek</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>,
+                Last updated
+                    on May 22, 2023.
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,384 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>info &mdash; pdal.io</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/pdal.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/breathe.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="canonical" href="https://pdal.io/apps/info.html"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="copyright" title="Copyright" href="../copyright.html" />
+    <link rel="next" title="merge" href="merge.html" />
+    <link rel="prev" title="hausdorff" href="hausdorff.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+          </a>
+              <div class="version">
+                2.6.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Applications</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="chamfer.html">chamfer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="delta.html">delta</a></li>
+<li class="toctree-l2"><a class="reference internal" href="density.html">density</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eval.html">eval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ground.html">ground</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hausdorff.html">hausdorff</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">info</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#example-1">Example 1:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-2">Example 2:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="merge.html">merge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html">pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="random.html">random</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sort.html">sort</a></li>
+<li class="toctree-l2"><a class="reference internal" href="split.html">split</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tile.html">tile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tindex.html">tindex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="translate.html">translate</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../community.html">Community</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stages/stages.html">Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stages/readers.html">Readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stages/writers.html">Writers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stages/filters.html">Filters</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../dimensions.html">Dimensions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../types.html">Types</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../python.html">Python</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../java.html">Java</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../workshop/index.html">Workshop</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project/index.html">Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../copyright.html">License</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PDAL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html"> Documentation </a> &raquo;</li>
+      
+          <li><a href="index.html">Applications</a> &raquo;</li>
+      
+      <li>info</li>
+    
+
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/PDAL/PDAL/edit//master/doc/apps/info.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="merge.html" class="btn btn-neutral float-right" title="merge" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="hausdorff.html" class="btn btn-neutral float-left" title="hausdorff" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="info">
+<span id="info-command"></span><h1>info<a class="headerlink" href="#info" title="Permalink to this heading"></a></h1>
+<p>Displays information about a point cloud file, such as:</p>
+<ul class="simple">
+<li><p>basic properties (extents, number of points, point format)</p></li>
+<li><p>coordinate reference system</p></li>
+<li><p>additional metadata</p></li>
+<li><p>summary statistics about the points</p></li>
+<li><p>the plain text format should be reStructured text if possible to allow a user
+to retransform the output into whatever they want with ease</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pdal info &lt;input&gt;
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="nb">input</span><span class="p">,</span> <span class="o">-</span><span class="n">i</span>               <span class="n">Input</span> <span class="n">file</span> <span class="n">name</span>
+<span class="o">--</span><span class="nb">all</span>                     <span class="n">Dump</span> <span class="n">statistics</span><span class="p">,</span> <span class="n">schema</span> <span class="ow">and</span> <span class="n">metadata</span>
+<span class="o">--</span><span class="n">point</span><span class="p">,</span> <span class="o">-</span><span class="n">p</span>               <span class="n">Point</span> <span class="n">to</span> <span class="n">dump</span> <span class="o">--</span><span class="n">point</span><span class="o">=</span><span class="s2">&quot;1-5,10,100-200&quot;</span> <span class="p">(</span><span class="mi">0</span> <span class="n">indexed</span><span class="p">)</span>
+<span class="o">--</span><span class="n">query</span>                   <span class="n">Return</span> <span class="n">points</span> <span class="ow">in</span> <span class="n">order</span> <span class="n">of</span> <span class="n">distance</span> <span class="kn">from</span> <span class="nn">the</span>
+    <span class="n">specified</span> <span class="n">location</span> <span class="p">(</span><span class="mi">2</span><span class="n">D</span> <span class="ow">or</span> <span class="mi">3</span><span class="n">D</span><span class="p">)</span> <span class="o">--</span><span class="n">query</span> <span class="n">Xcoord</span><span class="p">,</span><span class="n">Ycoord</span><span class="p">[,</span><span class="n">Zcoord</span><span class="p">][</span><span class="o">/</span><span class="n">count</span><span class="p">]</span>
+<span class="o">--</span><span class="n">stats</span>                   <span class="n">Dump</span> <span class="n">stats</span> <span class="n">on</span> <span class="nb">all</span> <span class="n">points</span> <span class="p">(</span><span class="n">reads</span> <span class="n">entire</span> <span class="n">dataset</span><span class="p">)</span>
+<span class="o">--</span><span class="n">boundary</span>                <span class="n">Compute</span> <span class="n">a</span> <span class="n">hexagonal</span> <span class="n">hull</span><span class="o">/</span><span class="n">boundary</span> <span class="n">of</span> <span class="n">dataset</span>
+<span class="o">--</span><span class="n">dimensions</span>              <span class="n">Dimensions</span> <span class="n">on</span> <span class="n">which</span> <span class="n">to</span> <span class="n">compute</span> <span class="n">statistics</span>
+<span class="o">--</span><span class="nb">enumerate</span>               <span class="n">Dimensions</span> <span class="n">whose</span> <span class="n">values</span> <span class="n">should</span> <span class="n">be</span> <span class="n">enumerated</span>
+<span class="o">--</span><span class="n">schema</span>                  <span class="n">Dump</span> <span class="n">the</span> <span class="n">schema</span>
+<span class="o">--</span><span class="n">pipeline</span><span class="o">-</span><span class="n">serialization</span>  <span class="n">Output</span> <span class="n">filename</span> <span class="k">for</span> <span class="n">pipeline</span> <span class="n">serialization</span>
+<span class="o">--</span><span class="n">summary</span>                 <span class="n">Dump</span> <span class="n">summary</span> <span class="n">of</span> <span class="n">the</span> <span class="n">info</span>
+<span class="o">--</span><span class="n">metadata</span>                <span class="n">Dump</span> <span class="n">file</span> <span class="n">metadata</span> <span class="n">info</span>
+<span class="o">--</span><span class="n">stdin</span><span class="p">,</span> <span class="o">-</span><span class="n">s</span>               <span class="n">Read</span> <span class="n">a</span> <span class="n">pipeline</span> <span class="n">file</span> <span class="kn">from</span> <span class="nn">standard</span> <span class="nb">input</span>
+</pre></div>
+</div>
+<p>If no options are provided, <code class="docutils literal notranslate"><span class="pre">--stats</span></code> is assumed.</p>
+<section id="example-1">
+<h2>Example 1:<a class="headerlink" href="#example-1" title="Permalink to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pdal info  test/data/las/1.2-with-color.las \
+    --query=&quot;636601.87, 849018.59, 425.10&quot;
+{
+  &quot;0&quot;:
+  {
+    &quot;Blue&quot;: 134,
+    &quot;Classssification&quot;: 1,
+    &quot;EdgeOfFlightLine&quot;: 0,
+    &quot;GpsTime&quot;: 245383.38808001476,
+    &quot;Green&quot;: 104,
+    &quot;Intensity&quot;: 124,
+    &quot;NumberOfReturns&quot;: 1,
+    &quot;PointSourceId&quot;: 7326,
+    &quot;Red&quot;: 134,
+    &quot;ReturnNumber&quot;: 1,
+    &quot;ScanAngleRank&quot;: -4,
+    &quot;ScanDirectionFlag&quot;: 1,
+    &quot;UserData&quot;: 126,
+    &quot;X&quot;: 636601.87,
+    &quot;Y&quot;: 849018.59999999998,
+    &quot;Z&quot;: 425.10000000000002
+  },
+  &quot;1&quot;:
+  {
+    &quot;Blue&quot;: 134,
+    &quot;Classification&quot;: 2,
+    &quot;EdgeOfFlightLine&quot;: 0,
+    &quot;GpsTime&quot;: 246099.17323102333,
+    &quot;Green&quot;: 106,
+    &quot;Intensity&quot;: 153,
+    &quot;NumberOfReturns&quot;: 1,
+    &quot;PointSourceId&quot;: 7327,
+    &quot;Red&quot;: 143,
+    &quot;ReturnNumber&quot;: 1,
+    &quot;ScanAngleRank&quot;: -10,
+    &quot;ScanDirectionFlag&quot;: 1,
+    &quot;UserData&quot;: 126,
+    &quot;X&quot;: 636606.76000000001,
+    &quot;Y&quot;: 849053.94000000006,
+    &quot;Z&quot;: 425.88999999999999
+  },
+  ...
+</pre></div>
+</div>
+</section>
+<section id="example-2">
+<h2>Example 2:<a class="headerlink" href="#example-2" title="Permalink to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pdal info test/data/1.2-with-color.las -p 0-10
+{
+  &quot;filename&quot;: &quot;../../test/data/las/1.2-with-color.las&quot;,
+  &quot;pdal_version&quot;: &quot;PDAL 1.0.0.b1 (116d7d) with GeoTIFF 1.4.1 GDAL 1.11.2 LASzip 2.2.0&quot;,
+  &quot;points&quot;:
+  {
+    &quot;point&quot;:
+    [
+      {
+        &quot;Blue&quot;: 88,
+        &quot;Classification&quot;: 1,
+        &quot;EdgeOfFlightLine&quot;: 0,
+        &quot;GpsTime&quot;: 245380.78254962614,
+        &quot;Green&quot;: 77,
+        &quot;Intensity&quot;: 143,
+        &quot;NumberOfReturns&quot;: 1,
+        &quot;PointId&quot;: 0,
+        &quot;PointSourceId&quot;: 7326,
+        &quot;Red&quot;: 68,
+        &quot;ReturnNumber&quot;: 1,
+        &quot;ScanAngleRank&quot;: -9,
+        &quot;ScanDirectionFlag&quot;: 1,
+        &quot;UserData&quot;: 132,
+        &quot;X&quot;: 637012.23999999999,
+        &quot;Y&quot;: 849028.31000000006,
+        &quot;Z&quot;: 431.66000000000003
+      },
+      {
+        &quot;Blue&quot;: 68,
+        &quot;Classification&quot;: 1,
+        &quot;EdgeOfFlightLine&quot;: 0,
+        &quot;GpsTime&quot;: 245381.45279923646,
+        &quot;Green&quot;: 66,
+        &quot;Intensity&quot;: 18,
+        &quot;NumberOfReturns&quot;: 2,
+        &quot;PointId&quot;: 1,
+        &quot;PointSourceId&quot;: 7326,
+        &quot;Red&quot;: 54,
+        &quot;ReturnNumber&quot;: 1,
+        &quot;ScanAngleRank&quot;: -11,
+        &quot;ScanDirectionFlag&quot;: 1,
+        &quot;UserData&quot;: 128,
+        &quot;X&quot;: 636896.32999999996,
+        &quot;Y&quot;: 849087.70000000007,
+        &quot;Z&quot;: 446.38999999999999
+      },
+      ...
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="merge.html" class="btn btn-neutral float-right" title="merge" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="hausdorff.html" class="btn btn-neutral float-left" title="hausdorff" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <div class="info">
+      <a class="logo-link" href="https://hobu.co">
+        <div class="hobu-logo"></div>
+      </a>
+      <div class="copyright">
+      
+
+                    &copy;  2023
+                        <a href="https://github.com/abellgithub">Andrew Bell</a>,
+                        <a href="https://github.com/chambbj">Brad Chambers</a>,
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>.
+
+      
+      Last updated on May 22, 2023.
+      </div>
+    </div>
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="footer">
+        <div class="container">
+                    &copy;  2023
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        <a href="http://github.com/mpgerlek">Michael Gerlek</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>,
+                Last updated
+                    on May 22, 2023.
+        </div>
+    </div>
+
+</body>
+</html>

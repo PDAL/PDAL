@@ -1,0 +1,398 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generating a DTM &mdash; pdal.io</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/pdal.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/breathe.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://pdal.io/workshop/exercises/analysis/dtm/dtm.html"/>
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../../../about.html" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="copyright" title="Copyright" href="../../../../copyright.html" />
+    <link rel="next" title="Creating surface meshes" href="../meshing/meshing.html" />
+    <link rel="prev" title="Identifying ground" href="../ground/ground.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html">
+            
+          </a>
+              <div class="version">
+                2.6.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../about.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../download.html">Download</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart.html">Quickstart</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../apps/index.html">Applications</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../community.html">Community</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pipeline.html">Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../stages/stages.html">Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../stages/readers.html">Readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../stages/writers.html">Writers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../stages/filters.html">Filters</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../dimensions.html">Dimensions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../types.html">Types</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../python.html">Python</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../java.html">Java</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/index.html">Tutorials</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../../index.html">Workshop</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../agenda.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../lidar-introduction.html">Introduction to LiDAR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../software.html">Software Installation</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../index.html">Exercises</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../index.html#basic-information">Basic Information</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../index.html#translation">Translation</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../../index.html#analysis">Analysis</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../boundary/boundary.html">Finding the boundary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../clipping/clipping.html">Clipping data with polygons</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../colorization/colorization.html">Colorizing points with imagery</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../denoising/denoising.html">Removing noise</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../density/density.html">Visualizing acquisition density</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../thinning/thinning.html">Thinning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../ground/ground.html">Identifying ground</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Generating a DTM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../meshing/meshing.html">Creating surface meshes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../rasterize/rasterize.html">Rasterizing Attributes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../index.html#python">Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../index.html#georeferencing">Georeferencing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../index.html#batch-processing">Batch Processing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../capstone.html">Final Project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes.html">Notes</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project/index.html">Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../copyright.html">License</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">PDAL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html"> Documentation </a> &raquo;</li>
+      
+          <li><a href="../../../index.html">Point Cloud Processing and Analysis with PDAL</a> &raquo;</li>
+      
+          <li><a href="../../index.html">Exercises</a> &raquo;</li>
+      
+      <li>Generating a DTM</li>
+    
+
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/PDAL/PDAL/edit//master/doc/workshop/exercises/analysis/dtm/dtm.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="../meshing/meshing.html" class="btn btn-neutral float-right" title="Creating surface meshes" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../ground/ground.html" class="btn btn-neutral float-left" title="Identifying ground" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="generating-a-dtm">
+<span id="workshop-dtm"></span><h1>Generating a DTM<a class="headerlink" href="#generating-a-dtm" title="Permalink to this heading"></a></h1>
+<p id="index-0">This exercise uses PDAL to generate an elevation model surface using the
+output from the <a class="reference internal" href="../ground/ground.html#workshop-ground"><span class="std std-ref">Identifying ground</span></a> exercise, PDAL’s <a class="reference internal" href="../../../../stages/writers.gdal.html#writers-gdal"><span class="std std-ref">writers.gdal</span></a>
+operation, and <a class="reference external" href="http://gdal.org/">GDAL</a> to generate an elevation and hillshade surface from
+point cloud data.</p>
+<section id="exercise">
+<h2>Exercise<a class="headerlink" href="#exercise" title="Permalink to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The primary input for <a class="reference external" href="https://en.wikipedia.org/wiki/Digital_elevation_model">Digital Terrain Model</a> generation is a point cloud
+with ground classifications. We created this file, called
+<code class="docutils literal notranslate"><span class="pre">denoised-ground-only.laz</span></code>, in the <a class="reference internal" href="../ground/ground.html#workshop-ground"><span class="std std-ref">Identifying ground</span></a> exercise. Please produce that
+file by following that exercise before starting this one.</p>
+</div>
+<section id="command">
+<h3>Command<a class="headerlink" href="#command" title="Permalink to this heading"></a></h3>
+<p>Invoke the following command, substituting accordingly, in your <cite>Conda Shell</cite>:</p>
+<p>PDAL capability to generate rasterized output is provided by the
+<a class="reference internal" href="../../../../stages/writers.gdal.html#writers-gdal"><span class="std std-ref">writers.gdal</span></a> stage. There is no <a class="reference internal" href="../../../../apps/index.html#apps"><span class="std std-ref">application</span></a> to drive this
+stage, and we must use a pipeline.</p>
+</section>
+<section id="pipeline-breakdown">
+<h3>Pipeline breakdown<a class="headerlink" href="#pipeline-breakdown" title="Permalink to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;pipeline&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;./exercises/analysis/ground/denoised-ground-only.laz&quot;</span><span class="p">,</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;filename&quot;</span><span class="p">:</span><span class="s2">&quot;./exercises/analysis/dtm/dtm.tif&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gdaldriver&quot;</span><span class="p">:</span><span class="s2">&quot;GTiff&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;output_type&quot;</span><span class="p">:</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;resolution&quot;</span><span class="p">:</span><span class="s2">&quot;2.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;writers.gdal&quot;</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This pipeline is available in your workshop materials in the
+<code class="docutils literal notranslate"><span class="pre">./exercises/analysis/dtm/gdal.json</span></code> file. Make sure to edit the
+filenames to match your paths.</p>
+</div>
+<section id="reader">
+<h4>1. Reader<a class="headerlink" href="#reader" title="Permalink to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">denoised-ground-only</span></code> is the <a class="reference external" href="http://laszip.org">LASzip</a> file we will clip. You should have
+created this output as part of the <a class="reference internal" href="../ground/ground.html#workshop-ground"><span class="std std-ref">Identifying ground</span></a> exercise.</p>
+</section>
+<section id="writers-gdal">
+<h4>2. <a class="reference internal" href="../../../../stages/writers.gdal.html#writers-gdal"><span class="std std-ref">writers.gdal</span></a><a class="headerlink" href="#writers-gdal" title="Permalink to this heading"></a></h4>
+<p>The <a class="reference internal" href="../../../../stages/writers.gdal.html#writers-gdal"><span class="std std-ref">writers.gdal</span></a> writer that bins the point cloud data into an elevation
+surface.</p>
+</section>
+</section>
+<section id="execution">
+<h3>Execution<a class="headerlink" href="#execution" title="Permalink to this heading"></a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pdal<span class="w"> </span>pipeline<span class="w"> </span>./exercises/analysis/dtm/gdal.json
+</pre></div>
+</div>
+</section>
+<section id="visualization">
+<h3>Visualization<a class="headerlink" href="#visualization" title="Permalink to this heading"></a></h3>
+<p>Something happened, and some files were written, but we cannot really
+see what was produced. Let us use <a class="reference internal" href="../../../qgis.html#qgis"><span class="std std-ref">QGIS</span></a> to visualize the output.</p>
+<ol class="arabic">
+<li><p>Open <a class="reference internal" href="../../../qgis.html#qgis"><span class="std std-ref">QGIS</span></a> and <cite>Add Raster Layer</cite>:</p>
+<blockquote>
+<div><a class="reference external image-reference" href="../../../../_images/dtm-add-raster-layer.png"><img alt="../../../../_images/dtm-add-raster-layer.png" src="../../../../_images/dtm-add-raster-layer.png" /></a>
+</div></blockquote>
+</li>
+<li><p>Add the <cite>dtm.tif</cite> file from your <code class="docutils literal notranslate"><span class="pre">./exercises/analysis/dtm</span></code>
+directory.</p>
+<blockquote>
+<div><a class="reference external image-reference" href="../../../../_images/dtm-add-raster-mean.png"><img alt="../../../../_images/dtm-add-raster-mean.png" src="../../../../_images/dtm-add-raster-mean.png" /></a>
+<a class="reference external image-reference" href="../../../../_images/dtm-qgis-added-no-fill.png"><img alt="../../../../_images/dtm-qgis-added-no-fill.png" src="../../../../_images/dtm-qgis-added-no-fill.png" /></a>
+</div></blockquote>
+</li>
+<li><p>Go to Raster -&gt; Analyze -&gt; Fill nodata… and select the default values</p>
+<blockquote>
+<div><a class="reference external image-reference" href="../../../_images/dtm-qgis-fill-nodata.png"><img alt="../../../../_images/dtm-qgis-fill-nodata.png" src="../../../../_images/dtm-qgis-fill-nodata.png" /></a>
+<a class="reference external image-reference" href="../../../../_images/dtm-qgis-added.png"><img alt="../../../../_images/dtm-qgis-added.png" src="../../../../_images/dtm-qgis-added.png" /></a>
+</div></blockquote>
+</li>
+<li><p>Classify the DTM by right-clicking on the <cite>Filled</cite> and choosing
+<cite>Properties</cite>. Pick the pseudocolor rendering type, and then
+choose a color ramp and click <cite>Classify</cite>.</p>
+<blockquote>
+<div><a class="reference external image-reference" href="../../../../_images/dtm-qgis-classify.png"><img alt="../../../../_images/dtm-qgis-classify.png" src="../../../../_images/dtm-qgis-classify.png" /></a>
+<a class="reference external image-reference" href="../../../../_images/dtm-qgis-colorize-dtm.png"><img alt="../../../../_images/dtm-qgis-colorize-dtm.png" src="../../../../_images/dtm-qgis-colorize-dtm.png" /></a>
+</div></blockquote>
+</li>
+<li><p><a class="reference internal" href="../../../qgis.html#qgis"><span class="std std-ref">QGIS</span></a> provides access to <a class="reference external" href="http://gdal.org/">GDAL</a> processing tools, and we
+are going to use that to create a hillshade of our surface.
+Choose <cite>Raster–&gt;Analysis–&gt;Hillshade</cite>:</p>
+<blockquote>
+<div><a class="reference external image-reference" href="../../../../_images/dtm-qgis-select-hillshade.png"><img alt="../../../../_images/dtm-qgis-select-hillshade.png" src="../../../../_images/dtm-qgis-select-hillshade.png" /></a>
+</div></blockquote>
+</li>
+<li><p>Click the window for the <cite>Output file</cite> and select a location
+to save the <code class="docutils literal notranslate"><span class="pre">hillshade.tif</span></code> file.</p>
+<blockquote>
+<div><a class="reference external image-reference" href="../../../../_images/dtm-qgis-gdaldem.png"><img alt="../../../../_images/dtm-qgis-gdaldem.png" src="../../../../_images/dtm-qgis-gdaldem.png" /></a>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>gdaldem<span class="w"> </span>hillshade<span class="w"> </span>./exercises/analysis/dtm/dtm.tif<span class="w"> </span><span class="se">\</span>
+./exercises/analysis/dtm/hillshade.tif<span class="w"> </span><span class="se">\</span>
+-z<span class="w"> </span><span class="m">1</span>.0<span class="w"> </span>-s<span class="w"> </span><span class="m">1</span>.0<span class="w"> </span>-az<span class="w"> </span><span class="m">315</span>.0<span class="w"> </span>-alt<span class="w"> </span><span class="m">45</span>.0<span class="w"> </span><span class="se">\</span>
+-of<span class="w"> </span>GTiff
+</pre></div>
+</div>
+<div class="highlight-doscon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;</span> gdaldem hillshade ./exercises/analysis/dtm/dtm.tif <span class="se">^</span>
+<span class="go">./exercises/analysis/dtm/hillshade.tif ^</span>
+<span class="go">-z 1.0 -s 1.0 -az 315.0 -alt 45.0 ^</span>
+<span class="go">-of GTiff</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>Click <cite>OK</cite> and the hillshade of your DTM is now available</p>
+<blockquote>
+<div><a class="reference external image-reference" href="../../../../_images/dtm-qgis-hillshade-done.png"><img alt="../../../../_images/dtm-qgis-hillshade-done.png" src="../../../../_images/dtm-qgis-hillshade-done.png" /></a>
+</div></blockquote>
+</li>
+</ol>
+</section>
+</section>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Permalink to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><a class="reference external" href="http://www.gdal.org/gdaldem.html">gdaldem</a>, which powers the <a class="reference internal" href="../../../qgis.html#qgis"><span class="std std-ref">QGIS</span></a> DEM tools, is a very powerful
+command line utility you can use for processing data.</p></li>
+<li><p><a class="reference internal" href="../../../../stages/writers.gdal.html#writers-gdal"><span class="std std-ref">writers.gdal</span></a> can be used for large data, but it does not interpolate
+a typical <a class="reference external" href="https://en.wikipedia.org/wiki/Triangulated_irregular_network">TIN</a> surface model.</p></li>
+</ol>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../meshing/meshing.html" class="btn btn-neutral float-right" title="Creating surface meshes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../ground/ground.html" class="btn btn-neutral float-left" title="Identifying ground" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <div class="info">
+      <a class="logo-link" href="https://hobu.co">
+        <div class="hobu-logo"></div>
+      </a>
+      <div class="copyright">
+      
+
+                    &copy;  2023
+                        <a href="https://github.com/abellgithub">Andrew Bell</a>,
+                        <a href="https://github.com/chambbj">Brad Chambers</a>,
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>.
+
+      
+      Last updated on May 22, 2023.
+      </div>
+    </div>
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="footer">
+        <div class="container">
+                    &copy;  2023
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        <a href="http://github.com/mpgerlek">Michael Gerlek</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>,
+                Last updated
+                    on May 22, 2023.
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,609 @@
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Writing a writer &mdash; pdal.io</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/pdal.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/breathe.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="canonical" href="https://pdal.io/development/writing-writer.html"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="copyright" title="Copyright" href="../copyright.html" />
+    <link rel="next" title="CMake" href="cmake.html" />
+    <link rel="prev" title="Writing a reader" href="writing-reader.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+          </a>
+              <div class="version">
+                2.6.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../download.html">Download</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../apps/index.html">Applications</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../community.html">Community</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stages/stages.html">Stages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stages/readers.html">Readers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stages/writers.html">Writers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stages/filters.html">Filters</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../dimensions.html">Dimensions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../types.html">Types</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../python.html">Python</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../java.html">Java</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../workshop/index.html">Workshop</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Development</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="overview.html">PDAL Architecture Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compilation/index.html">Compilation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="errorhandling.html">Errors and Error Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="metadata.html">Metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writing.html">Writing with PDAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugins.html">Writing and building a PDAL Plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writing-filter.html">Writing a filter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writing-kernel.html">Writing a kernel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="writing-reader.html">Writing a reader</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Writing a writer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-header">The header</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-source">The source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compiling-and-usage">Compiling and Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cmake.html">CMake</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../project/index.html">Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../copyright.html">License</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PDAL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html"> Documentation </a> &raquo;</li>
+      
+          <li><a href="index.html">Development</a> &raquo;</li>
+      
+      <li>Writing a writer</li>
+    
+
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/PDAL/PDAL/edit//master/doc/development/writing-writer.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="cmake.html" class="btn btn-neutral float-right" title="CMake" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="writing-reader.html" class="btn btn-neutral float-left" title="Writing a reader" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="writing-a-writer">
+<span id="writing-writer"></span><h1>Writing a writer<a class="headerlink" href="#writing-a-writer" title="Permalink to this heading"></a></h1>
+<dl class="field-list simple">
+<dt class="field-odd">Authors<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Bradley Chambers, Scott Lewis</p>
+</dd>
+<dt class="field-even">Contact<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="mailto:brad&#46;chambers&#37;&#52;&#48;gmail&#46;com">brad<span>&#46;</span>chambers<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+</dd>
+<dt class="field-odd">Date<span class="colon">:</span></dt>
+<dd class="field-odd"><p>10/26/2016</p>
+</dd>
+</dl>
+<p>PDAL’s command-line application can be extended through the development of
+writer functions. In this tutorial, we will give a brief example.</p>
+<section id="the-header">
+<h2>The header<a class="headerlink" href="#the-header" title="Permalink to this heading"></a></h2>
+<p>First, we provide a full listing of the writer header.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1">// MyWriter.hpp</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="cp">#pragma once</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;pdal/Writer.hpp&gt;</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string&gt;</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="k">namespace</span><span class="w"> </span><span class="nn">pdal</span><span class="p">{</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="w">  </span><span class="k">typedef</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&gt;</span><span class="w"> </span><span class="n">FileStreamPtr</span><span class="p">;</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">MyWriter</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Writer</span>
+<span class="linenos">14</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos">15</span><span class="w">  </span><span class="k">public</span><span class="o">:</span>
+<span class="linenos">16</span><span class="w">    </span><span class="n">MyWriter</span><span class="p">()</span>
+<span class="linenos">17</span><span class="w">    </span><span class="p">{}</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">getName</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span><span class="w">  </span><span class="k">private</span><span class="o">:</span>
+<span class="linenos">22</span><span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">addArgs</span><span class="p">(</span><span class="n">ProgramArgs</span><span class="o">&amp;</span><span class="w"> </span><span class="n">args</span><span class="p">);</span>
+<span class="linenos">23</span><span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">initialize</span><span class="p">();</span>
+<span class="linenos">24</span><span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">ready</span><span class="p">(</span><span class="n">PointTableRef</span><span class="w"> </span><span class="n">table</span><span class="p">);</span>
+<span class="linenos">25</span><span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">PointViewPtr</span><span class="w"> </span><span class="n">view</span><span class="p">);</span>
+<span class="linenos">26</span><span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">done</span><span class="p">(</span><span class="n">PointTableRef</span><span class="w"> </span><span class="n">table</span><span class="p">);</span>
+<span class="linenos">27</span>
+<span class="linenos">28</span><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">m_filename</span><span class="p">;</span>
+<span class="linenos">29</span><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">m_newline</span><span class="p">;</span>
+<span class="linenos">30</span><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">m_datafield</span><span class="p">;</span>
+<span class="linenos">31</span><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">m_precision</span><span class="p">;</span>
+<span class="linenos">32</span>
+<span class="linenos">33</span><span class="w">    </span><span class="n">FileStreamPtr</span><span class="w"> </span><span class="n">m_stream</span><span class="p">;</span>
+<span class="linenos">34</span><span class="w">    </span><span class="n">Dimension</span><span class="o">::</span><span class="n">Id</span><span class="w"> </span><span class="n">m_dataDim</span><span class="p">;</span>
+<span class="linenos">35</span><span class="w">  </span><span class="p">};</span>
+<span class="linenos">36</span>
+<span class="linenos">37</span><span class="p">}</span><span class="w"> </span><span class="c1">// namespace pdal</span>
+</pre></div>
+</div>
+<p>In your MyWriter class, you will declare the necessary methods and variables
+needed to make the writer work and meet the plugin specifications.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w">  </span><span class="k">typedef</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&gt;</span><span class="w"> </span><span class="n">FileStreamPtr</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>FileStreamPtr is defined to make the declaration of the stream easier to manage
+later on.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="nf">getName</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Every stage must return a unique name.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">addArgs</span><span class="p">(</span><span class="n">ProgramArgs</span><span class="o">&amp;</span><span class="w"> </span><span class="n">args</span><span class="p">);</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">initialize</span><span class="p">();</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">ready</span><span class="p">(</span><span class="n">PointTableRef</span><span class="w"> </span><span class="n">table</span><span class="p">);</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">PointViewPtr</span><span class="w"> </span><span class="n">view</span><span class="p">);</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">done</span><span class="p">(</span><span class="n">PointTableRef</span><span class="w"> </span><span class="n">table</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>These methods are used during various phases of the pipeline.  There are also
+more methods, which will not be covered in this tutorial.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">m_filename</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">m_newline</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">m_datafield</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">m_precision</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">FileStreamPtr</span><span class="w"> </span><span class="n">m_stream</span><span class="p">;</span>
+<span class="w">    </span><span class="n">Dimension</span><span class="o">::</span><span class="n">Id</span><span class="w"> </span><span class="n">m_dataDim</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>These are variables our Writer will use, such as the file to write to, the
+newline character to use, the name of the data field to use to write the MyData
+field, precision of the double outputs, the output stream, and the dimension
+that corresponds to the data field for easier lookup.</p>
+<p>As mentioned, there cen be additional configurations done as needed.</p>
+</section>
+<section id="the-source">
+<h2>The source<a class="headerlink" href="#the-source" title="Permalink to this heading"></a></h2>
+<p>We will start with a full listing of the writer source.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1">// MyWriter.cpp</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;MyWriter.hpp&quot;</span>
+<span class="linenos"> 4</span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;pdal/util/FileUtils.hpp&gt;</span>
+<span class="linenos"> 5</span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;pdal/util/ProgramArgs.hpp&gt;</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="k">namespace</span><span class="w"> </span><span class="nn">pdal</span>
+<span class="linenos"> 8</span><span class="p">{</span>
+<span class="linenos"> 9</span><span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">PluginInfo</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">s_info</span>
+<span class="linenos">10</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos">11</span><span class="w">    </span><span class="s">&quot;writers.mywriter&quot;</span><span class="p">,</span>
+<span class="linenos">12</span><span class="w">    </span><span class="s">&quot;My Awesome Writer&quot;</span><span class="p">,</span>
+<span class="linenos">13</span><span class="w">    </span><span class="s">&quot;http://path/to/documentation&quot;</span>
+<span class="linenos">14</span><span class="w">  </span><span class="p">};</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="w">  </span><span class="n">CREATE_SHARED_STAGE</span><span class="p">(</span><span class="n">MyWriter</span><span class="p">,</span><span class="w"> </span><span class="n">s_info</span><span class="p">);</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span><span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="nf">MyWriter::getName</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">s_info</span><span class="p">.</span><span class="n">name</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="linenos">19</span>
+<span class="linenos">20</span><span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">FileStreamDeleter</span>
+<span class="linenos">21</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos">22</span><span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<span class="linenos">23</span><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="k">operator</span><span class="p">()(</span><span class="n">T</span><span class="o">*</span><span class="w"> </span><span class="n">ptr</span><span class="p">)</span>
+<span class="linenos">24</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos">25</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ptr</span><span class="p">)</span>
+<span class="linenos">26</span><span class="w">      </span><span class="p">{</span>
+<span class="linenos">27</span><span class="w">        </span><span class="n">ptr</span><span class="o">-&gt;</span><span class="n">flush</span><span class="p">();</span>
+<span class="linenos">28</span><span class="w">        </span><span class="n">FileUtils</span><span class="o">::</span><span class="n">closeFile</span><span class="p">(</span><span class="n">ptr</span><span class="p">);</span>
+<span class="linenos">29</span><span class="w">      </span><span class="p">}</span>
+<span class="linenos">30</span><span class="w">    </span><span class="p">}</span>
+<span class="linenos">31</span><span class="w">  </span><span class="p">};</span>
+<span class="linenos">32</span>
+<span class="linenos">33</span><span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">MyWriter::addArgs</span><span class="p">(</span><span class="n">ProgramArgs</span><span class="o">&amp;</span><span class="w"> </span><span class="n">args</span><span class="p">)</span>
+<span class="linenos">34</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos">35</span><span class="w">    </span><span class="c1">// setPositional() Makes the argument required.</span>
+<span class="linenos">36</span><span class="w">    </span><span class="n">args</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;filename&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Output filename&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">m_filename</span><span class="p">).</span><span class="n">setPositional</span><span class="p">();</span>
+<span class="linenos">37</span><span class="w">    </span><span class="n">args</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;newline&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Line terminator&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">m_newline</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="linenos">38</span><span class="w">    </span><span class="n">args</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;datafield&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Data field&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">m_datafield</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;UserData&quot;</span><span class="p">);</span>
+<span class="linenos">39</span><span class="w">    </span><span class="n">args</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;precision&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Precision&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">m_precision</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
+<span class="linenos">40</span><span class="w">  </span><span class="p">}</span>
+<span class="linenos">41</span>
+<span class="linenos">42</span><span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">MyWriter::initialize</span><span class="p">()</span>
+<span class="linenos">43</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos">44</span><span class="w">    </span><span class="n">m_stream</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FileStreamPtr</span><span class="p">(</span><span class="n">FileUtils</span><span class="o">::</span><span class="n">createFile</span><span class="p">(</span><span class="n">m_filename</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">),</span>
+<span class="linenos">45</span><span class="w">      </span><span class="n">FileStreamDeleter</span><span class="p">());</span>
+<span class="linenos">46</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">m_stream</span><span class="p">)</span>
+<span class="linenos">47</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos">48</span><span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">stringstream</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="linenos">49</span><span class="w">      </span><span class="n">out</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;writers.mywriter couldn&#39;t open &#39;&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">m_filename</span><span class="w"> </span><span class="o">&lt;&lt;</span>
+<span class="linenos">50</span><span class="w">        </span><span class="s">&quot;&#39; for output.&quot;</span><span class="p">;</span>
+<span class="linenos">51</span><span class="w">      </span><span class="k">throw</span><span class="w"> </span><span class="n">pdal_error</span><span class="p">(</span><span class="n">out</span><span class="p">.</span><span class="n">str</span><span class="p">());</span>
+<span class="linenos">52</span><span class="w">    </span><span class="p">}</span>
+<span class="linenos">53</span><span class="w">  </span><span class="p">}</span>
+<span class="linenos">54</span>
+<span class="linenos">55</span>
+<span class="linenos">56</span><span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">MyWriter::ready</span><span class="p">(</span><span class="n">PointTableRef</span><span class="w"> </span><span class="n">table</span><span class="p">)</span>
+<span class="linenos">57</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos">58</span><span class="w">    </span><span class="n">m_stream</span><span class="o">-&gt;</span><span class="n">precision</span><span class="p">(</span><span class="n">m_precision</span><span class="p">);</span>
+<span class="linenos">59</span><span class="w">    </span><span class="o">*</span><span class="n">m_stream</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">fixed</span><span class="p">;</span>
+<span class="linenos">60</span>
+<span class="linenos">61</span><span class="w">    </span><span class="n">Dimension</span><span class="o">::</span><span class="n">Id</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">table</span><span class="p">.</span><span class="n">layout</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">findDim</span><span class="p">(</span><span class="n">m_datafield</span><span class="p">);</span>
+<span class="linenos">62</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">d</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">Dimension</span><span class="o">::</span><span class="n">Id</span><span class="o">::</span><span class="n">Unknown</span><span class="p">)</span>
+<span class="linenos">63</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos">64</span><span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">ostringstream</span><span class="w"> </span><span class="n">oss</span><span class="p">;</span>
+<span class="linenos">65</span><span class="w">      </span><span class="n">oss</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Dimension not found with name &#39;&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">m_datafield</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;&#39;&quot;</span><span class="p">;</span>
+<span class="linenos">66</span><span class="w">      </span><span class="k">throw</span><span class="w"> </span><span class="n">pdal_error</span><span class="p">(</span><span class="n">oss</span><span class="p">.</span><span class="n">str</span><span class="p">());</span>
+<span class="linenos">67</span><span class="w">    </span><span class="p">}</span>
+<span class="linenos">68</span>
+<span class="linenos">69</span><span class="w">    </span><span class="n">m_dataDim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">d</span><span class="p">;</span>
+<span class="linenos">70</span>
+<span class="linenos">71</span><span class="w">    </span><span class="o">*</span><span class="n">m_stream</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;#X:Y:Z:MyData&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">m_newline</span><span class="p">;</span>
+<span class="linenos">72</span><span class="w">  </span><span class="p">}</span>
+<span class="linenos">73</span>
+<span class="linenos">74</span>
+<span class="linenos">75</span><span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">MyWriter::write</span><span class="p">(</span><span class="n">PointViewPtr</span><span class="w"> </span><span class="n">view</span><span class="p">)</span>
+<span class="linenos">76</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos">77</span><span class="w">      </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">PointId</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">view</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">idx</span><span class="p">)</span>
+<span class="linenos">78</span><span class="w">      </span><span class="p">{</span>
+<span class="linenos">79</span><span class="w">        </span><span class="kt">double</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">view</span><span class="o">-&gt;</span><span class="n">getFieldAs</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Dimension</span><span class="o">::</span><span class="n">Id</span><span class="o">::</span><span class="n">X</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">);</span>
+<span class="linenos">80</span><span class="w">        </span><span class="kt">double</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">view</span><span class="o">-&gt;</span><span class="n">getFieldAs</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Dimension</span><span class="o">::</span><span class="n">Id</span><span class="o">::</span><span class="n">Y</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">);</span>
+<span class="linenos">81</span><span class="w">        </span><span class="kt">double</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">view</span><span class="o">-&gt;</span><span class="n">getFieldAs</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Dimension</span><span class="o">::</span><span class="n">Id</span><span class="o">::</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">);</span>
+<span class="linenos">82</span><span class="w">        </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">myData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="linenos">83</span>
+<span class="linenos">84</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">m_datafield</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">85</span><span class="w">          </span><span class="n">myData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">view</span><span class="o">-&gt;</span><span class="n">getFieldAs</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m_dataDim</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.5</span><span class="p">);</span>
+<span class="linenos">86</span><span class="w">        </span><span class="p">}</span>
+<span class="linenos">87</span>
+<span class="linenos">88</span><span class="w">        </span><span class="o">*</span><span class="n">m_stream</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;:&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;:&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;:&quot;</span>
+<span class="linenos">89</span><span class="w">          </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">myData</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">m_newline</span><span class="p">;</span>
+<span class="linenos">90</span><span class="w">      </span><span class="p">}</span>
+<span class="linenos">91</span><span class="w">  </span><span class="p">}</span>
+<span class="linenos">92</span>
+<span class="linenos">93</span>
+<span class="linenos">94</span><span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">MyWriter::done</span><span class="p">(</span><span class="n">PointTableRef</span><span class="p">)</span>
+<span class="linenos">95</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos">96</span><span class="w">    </span><span class="n">m_stream</span><span class="p">.</span><span class="n">reset</span><span class="p">();</span>
+<span class="linenos">97</span><span class="w">  </span><span class="p">}</span>
+<span class="linenos">98</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>In the writer implementation, we will use a macro defined in pdal_macros,
+which is included in the include chain we are using.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="n">PluginInfo</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">s_info</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="s">&quot;writers.mywriter&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s">&quot;My Awesome Writer&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s">&quot;http://path/to/documentation&quot;</span>
+<span class="w">  </span><span class="p">};</span>
+
+<span class="w">  </span><span class="n">CREATE_SHARED_STAGE</span><span class="p">(</span><span class="n">MyWriter</span><span class="p">,</span><span class="w"> </span><span class="n">s_info</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Here we define a struct with information regarding the writer, such as the
+name, a description, and a path to documentation.  We then use the macro
+to create a SHARED stage, which means it will be external to the main PDAL
+installation.  When using the macro, we specify the name of the Stage and
+the PluginInfo struct we defined earlier.</p>
+<p>When making a shared plugin, the name of the shared library must
+correspond with the name of the writer
+provided here.  The name of the generated shared object must be</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">libpdal_plugin_writer_</span><span class="o">&lt;</span><span class="n">writer</span> <span class="n">name</span><span class="o">&gt;.&lt;</span><span class="n">shared</span> <span class="n">library</span> <span class="n">extension</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">FileStreamDeleter</span>
+<span class="linenos"> 2</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos"> 3</span><span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<span class="linenos"> 4</span><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="k">operator</span><span class="p">()(</span><span class="n">T</span><span class="o">*</span><span class="w"> </span><span class="n">ptr</span><span class="p">)</span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos"> 6</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ptr</span><span class="p">)</span>
+<span class="linenos"> 7</span><span class="w">      </span><span class="p">{</span>
+<span class="linenos"> 8</span><span class="w">        </span><span class="n">ptr</span><span class="o">-&gt;</span><span class="n">flush</span><span class="p">();</span>
+<span class="linenos"> 9</span><span class="w">        </span><span class="n">FileUtils</span><span class="o">::</span><span class="n">closeFile</span><span class="p">(</span><span class="n">ptr</span><span class="p">);</span>
+<span class="linenos">10</span><span class="w">      </span><span class="p">}</span>
+<span class="linenos">11</span><span class="w">    </span><span class="p">}</span>
+<span class="linenos">12</span><span class="w">  </span><span class="p">};</span>
+</pre></div>
+</div>
+<p>This struct is used for helping with the FileStreamPtr for cleanup.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">MyWriter::addArgs</span><span class="p">(</span><span class="n">ProgramArgs</span><span class="o">&amp;</span><span class="w"> </span><span class="n">args</span><span class="p">)</span>
+<span class="linenos">2</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos">3</span><span class="w">    </span><span class="c1">// setPositional() Makes the argument required.</span>
+<span class="linenos">4</span><span class="w">    </span><span class="n">args</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;filename&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Output filename&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">m_filename</span><span class="p">).</span><span class="n">setPositional</span><span class="p">();</span>
+<span class="linenos">5</span><span class="w">    </span><span class="n">args</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;newline&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Line terminator&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">m_newline</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="linenos">6</span><span class="w">    </span><span class="n">args</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;datafield&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Data field&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">m_datafield</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;UserData&quot;</span><span class="p">);</span>
+<span class="linenos">7</span><span class="w">    </span><span class="n">args</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;precision&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Precision&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">m_precision</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
+<span class="linenos">8</span><span class="w">  </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>This method defines the arguments the writer provides and binds them to
+private variables.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">MyWriter::initialize</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_stream</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FileStreamPtr</span><span class="p">(</span><span class="n">FileUtils</span><span class="o">::</span><span class="n">createFile</span><span class="p">(</span><span class="n">m_filename</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">),</span>
+<span class="w">      </span><span class="n">FileStreamDeleter</span><span class="p">());</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">m_stream</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">stringstream</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="w">      </span><span class="n">out</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;writers.mywriter couldn&#39;t open &#39;&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">m_filename</span><span class="w"> </span><span class="o">&lt;&lt;</span>
+<span class="w">        </span><span class="s">&quot;&#39; for output.&quot;</span><span class="p">;</span>
+<span class="w">      </span><span class="k">throw</span><span class="w"> </span><span class="n">pdal_error</span><span class="p">(</span><span class="n">out</span><span class="p">.</span><span class="n">str</span><span class="p">());</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>This method initializes our file stream in preparation for writing.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">MyWriter::ready</span><span class="p">(</span><span class="n">PointTableRef</span><span class="w"> </span><span class="n">table</span><span class="p">)</span>
+<span class="linenos"> 2</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos"> 3</span><span class="w">    </span><span class="n">m_stream</span><span class="o">-&gt;</span><span class="n">precision</span><span class="p">(</span><span class="n">m_precision</span><span class="p">);</span>
+<span class="linenos"> 4</span><span class="w">    </span><span class="o">*</span><span class="n">m_stream</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">fixed</span><span class="p">;</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="n">Dimension</span><span class="o">::</span><span class="n">Id</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">table</span><span class="p">.</span><span class="n">layout</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">findDim</span><span class="p">(</span><span class="n">m_datafield</span><span class="p">);</span>
+<span class="linenos"> 7</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">d</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">Dimension</span><span class="o">::</span><span class="n">Id</span><span class="o">::</span><span class="n">Unknown</span><span class="p">)</span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="p">{</span>
+<span class="linenos"> 9</span><span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">ostringstream</span><span class="w"> </span><span class="n">oss</span><span class="p">;</span>
+<span class="linenos">10</span><span class="w">      </span><span class="n">oss</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Dimension not found with name &#39;&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">m_datafield</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;&#39;&quot;</span><span class="p">;</span>
+<span class="linenos">11</span><span class="w">      </span><span class="k">throw</span><span class="w"> </span><span class="n">pdal_error</span><span class="p">(</span><span class="n">oss</span><span class="p">.</span><span class="n">str</span><span class="p">());</span>
+<span class="linenos">12</span><span class="w">    </span><span class="p">}</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span><span class="w">    </span><span class="n">m_dataDim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">d</span><span class="p">;</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="w">    </span><span class="o">*</span><span class="n">m_stream</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;#X:Y:Z:MyData&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">m_newline</span><span class="p">;</span>
+<span class="linenos">17</span><span class="w">  </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>The ready method is used to prepare the writer for any number of PointViews that
+may be passed in.  In this case, we are setting the precision for our double
+writes, looking up the dimension specified as the one to write into MyData,
+and writing the header of the output file.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">MyWriter::write</span><span class="p">(</span><span class="n">PointViewPtr</span><span class="w"> </span><span class="n">view</span><span class="p">)</span>
+<span class="linenos"> 2</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos"> 3</span><span class="w">      </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">PointId</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">view</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">idx</span><span class="p">)</span>
+<span class="linenos"> 4</span><span class="w">      </span><span class="p">{</span>
+<span class="linenos"> 5</span><span class="w">        </span><span class="kt">double</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">view</span><span class="o">-&gt;</span><span class="n">getFieldAs</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Dimension</span><span class="o">::</span><span class="n">Id</span><span class="o">::</span><span class="n">X</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">);</span>
+<span class="linenos"> 6</span><span class="w">        </span><span class="kt">double</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">view</span><span class="o">-&gt;</span><span class="n">getFieldAs</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Dimension</span><span class="o">::</span><span class="n">Id</span><span class="o">::</span><span class="n">Y</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">);</span>
+<span class="linenos"> 7</span><span class="w">        </span><span class="kt">double</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">view</span><span class="o">-&gt;</span><span class="n">getFieldAs</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Dimension</span><span class="o">::</span><span class="n">Id</span><span class="o">::</span><span class="n">Z</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">);</span>
+<span class="linenos"> 8</span><span class="w">        </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">myData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">m_datafield</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">11</span><span class="w">          </span><span class="n">myData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">view</span><span class="o">-&gt;</span><span class="n">getFieldAs</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m_dataDim</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.5</span><span class="p">);</span>
+<span class="linenos">12</span><span class="w">        </span><span class="p">}</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span><span class="w">        </span><span class="o">*</span><span class="n">m_stream</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;:&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;:&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;:&quot;</span>
+<span class="linenos">15</span><span class="w">          </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">myData</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">m_newline</span><span class="p">;</span>
+<span class="linenos">16</span><span class="w">      </span><span class="p">}</span>
+<span class="linenos">17</span><span class="w">  </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>This method is the main method for writing.  In our case, we are writing a very
+simple file, with data in the format of X:Y:Z:MyData.  We loop through each
+index in the PointView, and for each one we take the X, Y, and Z values, as well
+as the value for the specified MyData dimension, and write this to the output
+file.   In particular, note the reading of MyData; in our case, MyData is an
+integer, but the field we are reading might be a double.  Converting from double
+to integer is done via truncation, not rounding, so by adding .5 before making
+the conversion will ensure rounding is done properly.</p>
+<p>Note that in this case, the output format is pretty simple.  For more complex
+outputs, you may need to generate helper methods (and possibly helper classes)
+to help generate the proper output.  The key is reading in the appropriate
+values from the PointView, and then writing those in whatever necessary format
+to the output stream.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">MyWriter::done</span><span class="p">(</span><span class="n">PointTableRef</span><span class="p">)</span>
+<span class="linenos">2</span><span class="w">  </span><span class="p">{</span>
+<span class="linenos">3</span><span class="w">    </span><span class="n">m_stream</span><span class="p">.</span><span class="n">reset</span><span class="p">();</span>
+<span class="linenos">4</span><span class="w">  </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>This method is called when the writing is done.  In this case, it simply cleans
+up the output stream by resetting it.</p>
+</section>
+<section id="compiling-and-usage">
+<h2>Compiling and Usage<a class="headerlink" href="#compiling-and-usage" title="Permalink to this heading"></a></h2>
+<p>To compile this reader, we will use cmake.  Here is the CMakeLists.txt file we
+will use for this process:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>cmake_minimum_required(VERSION 2.8.12)
+<span class="linenos"> 2</span>project(WriterTutorial)
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span>find_package(PDAL 2.0.0 REQUIRED CONFIG)
+<span class="linenos"> 5</span>set(CMAKE_CXX_STANDARD 17)
+<span class="linenos"> 6</span>set(CMAKE_CXX_STANDARD_REQUIRED ON)
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span>add_library(pdal_plugin_writer_mywriter SHARED MyWriter.cpp)
+<span class="linenos"> 9</span>target_link_libraries(pdal_plugin_writer_mywriter PRIVATE ${PDAL_LIBRARIES})
+<span class="linenos">10</span>
+<span class="linenos">11</span>target_link_directories(pdal_plugin_writer_mywriter PRIVATE ${PDAL_LIBRARY_DIRS})
+<span class="linenos">12</span>target_include_directories(pdal_plugin_writer_mywriter PRIVATE
+<span class="linenos">13</span>    ${PDAL_INCLUDE_DIRS})
+</pre></div>
+</div>
+<p>If this file is in the directory with the MyWriter.hpp and MyWriter.cpp files,
+simply run <code class="docutils literal notranslate"><span class="pre">cmake</span> <span class="pre">.</span></code> followed by <code class="docutils literal notranslate"><span class="pre">make</span></code>.  This will generate a file called
+<code class="docutils literal notranslate"><span class="pre">libpdal_plugin_writer_mywriter.dylib</span></code>.</p>
+<p>Put this dylib file into the directory pointed to by <code class="docutils literal notranslate"><span class="pre">PDAL_DRIVER_PATH</span></code>, and
+then when you run <code class="docutils literal notranslate"><span class="pre">pdal</span> <span class="pre">--drivers</span></code>, you will see an entry for
+writers.mywriter.</p>
+<p>To test the writer, we will put it into a pipeline and read in a LAS file and
+covert it to our output format.  For this example, use <a class="reference external" href="https://github.com/PDAL/PDAL/blob/master/test/data/interesting.las?raw=true">interesting.las</a>, and
+run it through <a class="reference external" href="https://github.com/PDAL/PDAL/blob/master/examples/writing-writer/pipeline-mywriter.json?raw=true">pipeline-mywriter.json</a>.</p>
+<p>If those files are in the same directory, you would just run the command
+<code class="docutils literal notranslate"><span class="pre">pdal</span> <span class="pre">pipeline</span> <span class="pre">pipeline-mywriter.json</span></code>, and it will generate an output file
+called output.txt, which will be in the proper format.  From there, if you
+wanted, you could run that output file through the MyReader that was created
+in the previous tutorial, as well.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="cmake.html" class="btn btn-neutral float-right" title="CMake" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="writing-reader.html" class="btn btn-neutral float-left" title="Writing a reader" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <div class="info">
+      <a class="logo-link" href="https://hobu.co">
+        <div class="hobu-logo"></div>
+      </a>
+      <div class="copyright">
+      
+
+                    &copy;  2023
+                        <a href="https://github.com/abellgithub">Andrew Bell</a>,
+                        <a href="https://github.com/chambbj">Brad Chambers</a>,
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>.
+
+      
+      Last updated on May 22, 2023.
+      </div>
+    </div>
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="footer">
+        <div class="container">
+                    &copy;  2023
+                        <a href="http://github.com/hobu">Howard Butler</a>,
+                        <a href="http://github.com/mpgerlek">Michael Gerlek</a>,
+                        and
+                        <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>,
+                Last updated
+                    on May 22, 2023.
+        </div>
+    </div>
+
+</body>
+</html>
