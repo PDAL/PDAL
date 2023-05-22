@@ -74,11 +74,6 @@ following command in your `Conda Shell`.
 .. _`jq`: https://stedolan.github.io/jq/
 .. _`Ruby JSON library`: https://ruby-doc.org/stdlib-3.0.2/libdoc/json/rdoc/JSON.html
 
-.. note::
-    We will be utilizing `jq`_ for the following steps. To add jq to your
-    conda environment, run the following command in your `Conda Shell`:
-
-    ``$ conda install -c conda-forge jq``
 
 Structured Metadata Output
 ................................................................................
@@ -101,6 +96,9 @@ flag for this particular file. Our simple ``pdal info --metadata`` command
 gives us that, but it also gives us a bunch of other stuff we don't need
 at the moment. Let's focus on extracting what we want using the
 ``jq`` command.
+
+If you do not have `jq`_ installed into your Conda environment, run the following 
+command in your `Conda Shell`: ``conda install -c conda-forge jq``
 
 .. code-block:: console
 
