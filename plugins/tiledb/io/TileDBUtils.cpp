@@ -192,8 +192,23 @@ FilterFactory::filterTypeFromString(const std::string& filter_str)
     else if (filter_str == "positive-delta")
         return TILEDB_FILTER_POSITIVE_DELTA;
     else
-        throw tiledb::TileDBError("Unable to parse compression type: " +
-                                  filter_str);
+    {
+        // Capitalize the filter name and convert '-' to '_'.
+        std::string filter_name = filter_str;
+        std::transform(
+            filter_name.cbegin(), filter_name.cend(), filter_name.begin(),
+            [](unsigned char c)
+            { return (c == '-') ? static_cast<int>('_') : std::toupper(c); });
+        // Get filter type from TileDB C-API.
+        tiledb_filter_type_t filter_type = TILEDB_FILTER_NONE;
+        auto rc =
+            tiledb_filter_type_from_str(filter_name.c_str(), &filter_type);
+        if (rc != TILEDB_OK)
+            throw tiledb::TileDBError(
+                "Unable to parse compression type '" + filter_str +
+                "' using TileDB compression string '" + filter_name + "'.");
+        return filter_type;
+    }
 }
 
 tiledb::FilterList FilterFactory::filterList(const tiledb::Context& ctx,

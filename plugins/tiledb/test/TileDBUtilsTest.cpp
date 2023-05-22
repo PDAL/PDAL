@@ -166,6 +166,44 @@ TEST(DomainBounds, parse_pair_missing_back_bracket_with_error)
     EXPECT_THROW(bounds.parsePair(ss, "Dim"), std::runtime_error);
 }
 
+TEST(FilterFactory, filter_type_from_string)
+{
+    std::vector<std::pair<std::string, tiledb_filter_type_t>> test_pairs{
+        {"", TILEDB_FILTER_NONE},
+        {"NONE", TILEDB_FILTER_NONE},
+        {"gzip", TILEDB_FILTER_GZIP},
+        {"GZIP", TILEDB_FILTER_GZIP},
+        {"zstd", TILEDB_FILTER_ZSTD},
+        {"ZSTD", TILEDB_FILTER_ZSTD},
+        {"lz4", TILEDB_FILTER_LZ4},
+        {"LZ4", TILEDB_FILTER_LZ4},
+        {"rle", TILEDB_FILTER_RLE},
+        {"RLE", TILEDB_FILTER_RLE},
+        {"bzip2", TILEDB_FILTER_BZIP2},
+        {"BZIP2", TILEDB_FILTER_BZIP2},
+        {"double-delta", TILEDB_FILTER_DOUBLE_DELTA},
+        {"DOUBLE_DELTA", TILEDB_FILTER_DOUBLE_DELTA},
+        {"bit-width-reduction", TILEDB_FILTER_BIT_WIDTH_REDUCTION},
+        {"BIT_WIDTH_REDUCTION", TILEDB_FILTER_BIT_WIDTH_REDUCTION},
+        {"bit-shuffle", TILEDB_FILTER_BITSHUFFLE},
+        {"BITSHUFFLE", TILEDB_FILTER_BITSHUFFLE},
+        {"byte-shuffle", TILEDB_FILTER_BYTESHUFFLE},
+        {"BYTESHUFFLE", TILEDB_FILTER_BYTESHUFFLE},
+        {"positive-delta", TILEDB_FILTER_POSITIVE_DELTA},
+        {"POSITIVE_DELTA", TILEDB_FILTER_POSITIVE_DELTA},
+        {"DICTIONARY_ENCODING", TILEDB_FILTER_DICTIONARY},
+        {"scale-float", TILEDB_FILTER_SCALE_FLOAT},
+        {"SCALE_FLOAT", TILEDB_FILTER_SCALE_FLOAT},
+        {"XOR", TILEDB_FILTER_XOR},
+        {"WEBP", TILEDB_FILTER_WEBP},
+    };
+    for (const auto& params : test_pairs)
+    {
+        auto result = FilterFactory::filterTypeFromString(params.first);
+        EXPECT_EQ(result, params.second);
+    }
+}
+
 TEST(FilterFactory, dim_with_unset_default_filter)
 {
     NL::json jsonOptions({});
