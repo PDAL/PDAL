@@ -49,6 +49,7 @@ target_link_libraries(${PDAL_UTIL_LIB_NAME}
 target_include_directories(${PDAL_UTIL_LIB_NAME}
     PRIVATE
         ${UTFCPP_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
 )
 
 set_target_properties(${PDAL_UTIL_LIB_NAME} PROPERTIES

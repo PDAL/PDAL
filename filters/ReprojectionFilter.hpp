@@ -73,6 +73,9 @@ private:
     std::vector<std::string> m_outAxisOrderingArg;
     std::vector<int> m_inAxisOrdering;
     std::vector<int> m_outAxisOrdering;
+    double m_inCoordEpochArg;
+    double m_outCoordEpochArg;
+
     bool m_errorOnFailure;
 };
 

@@ -107,10 +107,16 @@ in_axis_ordering
   example would swap X and Y, which may be commonly needed for
   something like "EPSG:4326".
 
+in_coord_epoch
+  Coordinate epoch for the input coordinate system as a double. [Default: 0]
+
 out_axis_ordering
   An array of numbers that override the axis order for the out_srs.
   "2, 1" for example would swap X and Y, which may be commonly needed for
   something like "EPSG:4326".
+
+out_coord_epoch
+  Coordinate epoch for the output coordinate system as a double. [Default: 0]
 
 error_on_failure
   If true and reprojection of any point fails, throw an exception that terminates
