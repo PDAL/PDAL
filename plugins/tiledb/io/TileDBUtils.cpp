@@ -147,22 +147,44 @@ tiledb::Filter FilterFactory::filter(const tiledb::Context& ctx,
 {
     if (options.empty())
         return tiledb::Filter(ctx, TILEDB_FILTER_NONE);
-    std::string compression = options["compression"];
-    auto filter_type = FilterFactory::filterTypeFromString(compression);
+    std::string filter_type_str = options["compression"];
+    auto filter_type = FilterFactory::filterTypeFromString(filter_type_str);
 
     tiledb::Filter filter{ctx, filter_type};
 
-    if (options.count("compression_level") > 0)
-        filter.set_option(TILEDB_COMPRESSION_LEVEL,
-                          options["compression_level"].get<int32_t>());
-
-    if (options.count("bit_width_max_window") > 0)
-        filter.set_option(TILEDB_BIT_WIDTH_MAX_WINDOW,
-                          options["bit_width_max_window"].get<int32_t>());
-
-    if (options.count("positive_delta_max_window") > 0)
-        filter.set_option(TILEDB_POSITIVE_DELTA_MAX_WINDOW,
-                          options["positive_delta_max_window"].get<int32_t>());
+    for (auto& opt : options.items())
+    {
+        const auto& key = opt.key();
+        if (key == "compression")
+            continue;
+        else if (key == "compression_level")
+            filter.set_option(TILEDB_COMPRESSION_LEVEL,
+                              options[key].get<int32_t>());
+        else if (key == "bit_width_max_window")
+            filter.set_option(TILEDB_BIT_WIDTH_MAX_WINDOW,
+                              options[key].get<int32_t>());
+        else if (key == "positive_delta_max_window")
+            filter.set_option(TILEDB_POSITIVE_DELTA_MAX_WINDOW,
+                              options[key].get<int32_t>());
+        else if (key == "bit_width_max_window")
+            filter.set_option(TILEDB_BIT_WIDTH_MAX_WINDOW,
+                              options[key].get<uint32_t>());
+        else if (key == "positive_delta_max_window")
+            filter.set_option(TILEDB_POSITIVE_DELTA_MAX_WINDOW,
+                              options[key].get<uint32_t>());
+        else if (key == "scale_float_bytewidth")
+            filter.set_option(TILEDB_SCALE_FLOAT_BYTEWIDTH,
+                              options[key].get<uint64_t>());
+        else if (key == "scale_float_factor")
+            filter.set_option(TILEDB_SCALE_FLOAT_FACTOR,
+                              options[key].get<double>());
+        else if (key == "scale_float_offset")
+            filter.set_option(TILEDB_SCALE_FLOAT_OFFSET,
+                              options[key].get<double>());
+        else
+            throw tiledb::TileDBError("Unable to set filter option '" + key +
+                                      "'. Not a valid TileDB filter option.");
+    }
     return filter;
 }
 
