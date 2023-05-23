@@ -101,6 +101,9 @@ see what was produced. Let us use :ref:`qgis` to visualize the output.
     .. image:: ../../../images/dtm-qgis-classify.png
         :target: ../../../../_images/dtm-qgis-classify.png
 
+    .. image:: ../../../images/dtm-qgis-colorize-dtm.png
+        :target: ../../../../_images/dtm-qgis-colorize-dtm.png
+
 
 5. :ref:`qgis` provides access to |GDAL| processing tools, and we
    are going to use that to create a hillshade of our surface.
