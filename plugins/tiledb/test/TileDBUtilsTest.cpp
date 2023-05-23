@@ -192,6 +192,7 @@ TEST(FilterFactory, filter_type_from_string)
         {"positive-delta", TILEDB_FILTER_POSITIVE_DELTA},
         {"POSITIVE_DELTA", TILEDB_FILTER_POSITIVE_DELTA},
         {"DICTIONARY_ENCODING", TILEDB_FILTER_DICTIONARY},
+        {"float-scale", TILEDB_FILTER_SCALE_FLOAT},
         {"scale-float", TILEDB_FILTER_SCALE_FLOAT},
         {"SCALE_FLOAT", TILEDB_FILTER_SCALE_FLOAT},
         {"XOR", TILEDB_FILTER_XOR},

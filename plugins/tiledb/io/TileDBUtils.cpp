@@ -216,6 +216,8 @@ FilterFactory::filterTypeFromString(const std::string& filter_str)
         return TILEDB_FILTER_BYTESHUFFLE;
     else if (filter_str == "positive-delta")
         return TILEDB_FILTER_POSITIVE_DELTA;
+    else if (filter_str == "float-scale")
+        return TILEDB_FILTER_SCALE_FLOAT;
     else
     {
         // Capitalize the filter name and convert '-' to '_'.
