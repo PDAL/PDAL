@@ -33,17 +33,19 @@
 ****************************************************************************/
 #include "StacReader.hpp"
 
-#include <pdal/util/ThreadPool.hpp>
-#include <pdal/util/ProgramArgs.hpp>
 #include <pdal/Kernel.hpp>
 #include <nlohmann/json.hpp>
 #include <schema-validator/json-schema.hpp>
-#include <pdal/util/Bounds.hpp>
 #include <pdal/Polygon.hpp>
-#include <pdal/util/IStream.hpp>
 #include <pdal/SrsBounds.hpp>
 #include <arbiter/arbiter.hpp>
 #include <pdal/PipelineManager.hpp>
+
+#include <pdal/util/ThreadPool.hpp>
+#include <pdal/util/ProgramArgs.hpp>
+#include <pdal/util/Bounds.hpp>
+#include <pdal/util/IStream.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 #include "private/connector/Connector.hpp"
 #include <pdal/StageWrapper.hpp>
@@ -387,8 +389,23 @@ std::string StacReader::extractDriverFromItem(const NL::json& asset) const
     return output;
 }
 
+// Create link relative to the Catalog/Item/Collection that is referencing it
+const std::string handleItemPath(std::string srcPath, std::string linkPath)
+{
+    //Make absolute path of current item's directory, then create relative path from that
 
-void StacReader::initializeItem(NL::json stacJson)
+    //Get driectory of src item
+    const std::string baseDir = FileUtils::getDirectory(srcPath);
+    if (FileUtils::isAbsolutePath(linkPath) ||
+            linkPath.find("://") != std::string::npos)
+        return linkPath;
+    //Create absolute path from src item filepath, if it's not already
+    // and join relative path to src item's dir path
+    return FileUtils::toAbsolutePath(linkPath, baseDir);
+
+}
+
+void StacReader::initializeItem(NL::json stacJson, std::string itemPath)
 {
     if (prune(stacJson))
         return;
@@ -411,7 +428,7 @@ void StacReader::initializeItem(NL::json stacJson)
 
     NL::json asset = stacJson.at("assets").at(assetName);
 
-    std::string dataUrl = asset.at("href").get<std::string>();
+    std::string dataUrl = handleItemPath(itemPath, asset.at("href").get<std::string>());
 
     std::string driver = extractDriverFromItem(asset);
 
@@ -451,7 +468,7 @@ void StacReader::initializeItem(NL::json stacJson)
 }
 
 
-void StacReader::initializeCatalog(NL::json stacJson, bool isRoot)
+void StacReader::initializeCatalog(NL::json stacJson, std::string catPath, bool isRoot)
 {
     if (!stacJson.contains("id"))
     {
@@ -491,8 +508,8 @@ void StacReader::initializeCatalog(NL::json stacJson, bool isRoot)
         if (!link.count("href") || !link.count("rel"))
             throw pdal::pdal_error("item does not contain 'href' or 'rel'");
 
-        std::string linkType = link.at("rel").get<std::string>();
-        std::string linkPath = link.at("href").get<std::string>();
+        const std::string linkType = link.at("rel").get<std::string>();
+        const std::string linkPath = handleItemPath(catPath, link.at("href").get<std::string>());
 
         m_p->m_pool->add([this, linkType, linkPath, link ]()
         {
@@ -501,12 +518,12 @@ void StacReader::initializeCatalog(NL::json stacJson, bool isRoot)
                 if (linkType == "item")
                 {
                     NL::json itemJson = m_p->m_connector->getJson(linkPath);
-                    initializeItem(itemJson);
+                    initializeItem(itemJson, linkPath);
                 }
                 else if (linkType == "catalog")
                 {
                     NL::json catalogJson = m_p->m_connector->getJson(linkPath);
-                    initializeCatalog(catalogJson);
+                    initializeCatalog(catalogJson, linkPath);
                 }
             }
             catch (std::exception& e)
@@ -534,7 +551,7 @@ void StacReader::initializeCatalog(NL::json stacJson, bool isRoot)
 
 }
 
-void StacReader::initializeItemCollection(NL::json stacJson)
+void StacReader::initializeItemCollection(NL::json stacJson, std::string icPath)
 {
     if (!stacJson.contains("features"))
         throw pdal_error("Missing required key 'features' in FeatureCollection.");
@@ -542,7 +559,7 @@ void StacReader::initializeItemCollection(NL::json stacJson)
     NL::json itemList = stacJson.at("features");
     for (NL::json& item: itemList)
     {
-        initializeItem(item);
+        initializeItem(item, icPath);
     }
     if (stacJson.contains("links"))
     {
@@ -554,9 +571,9 @@ void StacReader::initializeItemCollection(NL::json stacJson)
             std::string target = link.at("rel").get<std::string>();
             if (target == "next")
             {
-                std::string next = link.at("href").get<std::string>();
+                std::string next = handleItemPath(icPath, link.at("href").get<std::string>());
                 NL::json nextJson = m_p->m_connector->getJson(next);
-                initializeItemCollection(nextJson);
+                initializeItemCollection(nextJson, next);
             }
         }
     }
@@ -578,11 +595,11 @@ void StacReader::initialize()
 
     std::string stacType = stacJson.at("type");
     if (stacType == "Feature")
-        initializeItem(stacJson);
+        initializeItem(stacJson, m_filename);
     else if (stacType == "Catalog")
-        initializeCatalog(stacJson, true);
+        initializeCatalog(stacJson, m_filename, true);
     else if (stacType == "FeatureCollection")
-        initializeItemCollection(stacJson);
+        initializeItemCollection(stacJson, m_filename);
     else
         throw pdal_error("Could not initialize STAC object of type " + stacType);
 

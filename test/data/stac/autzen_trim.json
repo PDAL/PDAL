@@ -1,0 +1,341 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "id": "Autzen Trim",
+  "properties": {
+    "pc:type": "lidar",
+    "pc:schemas": [
+      {
+        "name": "X",
+        "size": 8,
+        "type": "floating"
+      },
+      {
+        "name": "Y",
+        "size": 8,
+        "type": "floating"
+      },
+      {
+        "name": "Z",
+        "size": 8,
+        "type": "floating"
+      },
+      {
+        "name": "Intensity",
+        "size": 2,
+        "type": "unsigned"
+      },
+      {
+        "name": "ReturnNumber",
+        "size": 1,
+        "type": "unsigned"
+      },
+      {
+        "name": "NumberOfReturns",
+        "size": 1,
+        "type": "unsigned"
+      },
+      {
+        "name": "ScanDirectionFlag",
+        "size": 1,
+        "type": "unsigned"
+      },
+      {
+        "name": "EdgeOfFlightLine",
+        "size": 1,
+        "type": "unsigned"
+      },
+      {
+        "name": "Classification",
+        "size": 1,
+        "type": "unsigned"
+      },
+      {
+        "name": "ScanAngleRank",
+        "size": 4,
+        "type": "floating"
+      },
+      {
+        "name": "UserData",
+        "size": 1,
+        "type": "unsigned"
+      },
+      {
+        "name": "PointSourceId",
+        "size": 2,
+        "type": "unsigned"
+      },
+      {
+        "name": "GpsTime",
+        "size": 8,
+        "type": "floating"
+      },
+      {
+        "name": "Red",
+        "size": 2,
+        "type": "unsigned"
+      },
+      {
+        "name": "Green",
+        "size": 2,
+        "type": "unsigned"
+      },
+      {
+        "name": "Blue",
+        "size": 2,
+        "type": "unsigned"
+      }
+    ],
+    "pc:count": 110000,
+    "pc:encoding": "application/vnd.laszip",
+    "proj:epsg": null,
+    "proj:projjson": {
+      "$schema": "https://proj.org/schemas/v0.6/projjson.schema.json",
+      "type": "ProjectedCRS",
+      "name": "NAD_1983_HARN_Lambert_Conformal_Conic",
+      "base_crs": {
+        "name": "NAD83(HARN)",
+        "datum": {
+          "type": "GeodeticReferenceFrame",
+          "name": "NAD83 (High Accuracy Reference Network)",
+          "ellipsoid": {
+            "name": "GRS 1980",
+            "semi_major_axis": 6378137,
+            "inverse_flattening": 298.257222101004
+          },
+          "id": {
+            "authority": "EPSG",
+            "code": 6152
+          }
+        },
+        "coordinate_system": {
+          "subtype": "ellipsoidal",
+          "axis": [
+            {
+              "name": "Longitude",
+              "abbreviation": "lon",
+              "direction": "east",
+              "unit": "degree"
+            },
+            {
+              "name": "Latitude",
+              "abbreviation": "lat",
+              "direction": "north",
+              "unit": "degree"
+            }
+          ]
+        }
+      },
+      "conversion": {
+        "name": "unnamed",
+        "method": {
+          "name": "Lambert Conic Conformal (2SP)",
+          "id": {
+            "authority": "EPSG",
+            "code": 9802
+          }
+        },
+        "parameters": [
+          {
+            "name": "Latitude of false origin",
+            "value": 41.75,
+            "unit": "degree",
+            "id": {
+              "authority": "EPSG",
+              "code": 8821
+            }
+          },
+          {
+            "name": "Longitude of false origin",
+            "value": -120.5,
+            "unit": "degree",
+            "id": {
+              "authority": "EPSG",
+              "code": 8822
+            }
+          },
+          {
+            "name": "Latitude of 1st standard parallel",
+            "value": 43,
+            "unit": "degree",
+            "id": {
+              "authority": "EPSG",
+              "code": 8823
+            }
+          },
+          {
+            "name": "Latitude of 2nd standard parallel",
+            "value": 45.5,
+            "unit": "degree",
+            "id": {
+              "authority": "EPSG",
+              "code": 8824
+            }
+          },
+          {
+            "name": "Easting at false origin",
+            "value": 1312335.95800525,
+            "unit": {
+              "type": "LinearUnit",
+              "name": "foot",
+              "conversion_factor": 0.3048
+            },
+            "id": {
+              "authority": "EPSG",
+              "code": 8826
+            }
+          },
+          {
+            "name": "Northing at false origin",
+            "value": 0,
+            "unit": {
+              "type": "LinearUnit",
+              "name": "foot",
+              "conversion_factor": 0.3048
+            },
+            "id": {
+              "authority": "EPSG",
+              "code": 8827
+            }
+          }
+        ]
+      },
+      "coordinate_system": {
+        "subtype": "Cartesian",
+        "axis": [
+          {
+            "name": "Easting",
+            "abbreviation": "",
+            "direction": "east",
+            "unit": {
+              "type": "LinearUnit",
+              "name": "foot",
+              "conversion_factor": 0.3048,
+              "id": {
+                "authority": "EPSG",
+                "code": 9002
+              }
+            }
+          },
+          {
+            "name": "Northing",
+            "abbreviation": "",
+            "direction": "north",
+            "unit": {
+              "type": "LinearUnit",
+              "name": "foot",
+              "conversion_factor": 0.3048,
+              "id": {
+                "authority": "EPSG",
+                "code": 9002
+              }
+            }
+          }
+        ]
+      }
+    },
+    "proj:geometry": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [
+            636677.98000012,
+            848701.12967697
+          ],
+          [
+            637277.97999998,
+            848701.12967697
+          ],
+          [
+            637277.97999998,
+            849567.15508076
+          ],
+          [
+            635977.9800003,
+            849567.15508076
+          ],
+          [
+            635977.9800003,
+            848874.33475773
+          ],
+          [
+            636377.9800002,
+            848874.33475773
+          ],
+          [
+            636677.98000012,
+            848701.12967697
+          ]
+        ]
+      ]
+    },
+    "proj:bbox": [
+      636001.76,
+      848935.2,
+      406.26,
+      637179.22,
+      849497.9,
+      520.51
+    ],
+    "datetime": "2015-09-10T00:00:00Z"
+  },
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -123.0707960215338,
+          44.04932235550377
+        ],
+        [
+          -123.06851459697643,
+          44.049373871436494
+        ],
+        [
+          -123.06861765073434,
+          44.05174889304999
+        ],
+        [
+          -123.07356093032239,
+          44.05163721295816
+        ],
+        [
+          -123.07347832820024,
+          44.04973719928541
+        ],
+        [
+          -123.0719573698375,
+          44.04977158415708
+        ],
+        [
+          -123.0707960215338,
+          44.04932235550377
+        ]
+      ]
+    ]
+  },
+  "links": [],
+  "assets": {
+    "data": {
+      "href": "../laz/autzen_trim.laz",
+      "type": "application/vnd.laszip",
+      "title": "LAS data",
+      "roles": [
+        "data"
+      ]
+    }
+  },
+  "bbox": [
+    -123.07346224955212,
+    44.04990616293895,
+    406.26,
+    -123.06891797646901,
+    44.05155048857137,
+    520.51
+  ],
+  "stac_extensions": [
+    "https://stac-extensions.github.io/projection/v1.1.0/schema.json",
+    "https://stac-extensions.github.io/pointcloud/v1.0.0/schema.json",
+    "https://stac-extensions.github.io/file/v2.1.0/schema.json"
+  ]
+}

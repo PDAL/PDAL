@@ -1,0 +1,47 @@
+{
+  "type": "Catalog",
+  "id": "3dep",
+  "stac_version": "1.0.0",
+  "description": "A catalog of USGS 3DEP Lidar hosted on AWS s3.",
+  "links": [
+    {
+      "rel": "root",
+      "href": "./catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "./MD_GoldenBeach_2012.json"
+    },
+    {
+      "rel": "item",
+      "href": "./MI_Charlevoix_Islands_TL_2018.json"
+    },
+    {
+      "rel": "item",
+      "href": "./IA_SouthCentral_1_2020.json"
+    }
+  ],
+  "stac_extensions": [
+  ],
+  "queryables": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://example.org/queryables",
+    "type": "object",
+    "title": "Queryables",
+    "properties": {
+      "datetime": {
+        "description": "Datetime",
+        "type": "string",
+        "title": "Acquired",
+        "format": "date-time",
+        "pattern": "(\\+00:00|Z)$"
+      },
+      "id": {
+        "title": "Item ID",
+        "description": "Item identifier",
+        "$ref": "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/item.json#/definitions/core/allOf/2/properties/id"
+      }
+    }
+  }
+}

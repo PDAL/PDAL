@@ -26,17 +26,17 @@
     "links": [
         {
             "rel": "root",
-            "href": "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/catalog.json",
+            "href": "./multi_type_catalog.json",
             "type": "application/json"
         },
         {
             "rel": "self",
-            "href": "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/catalog.json",
+            "href": "./multi_type_catalog.json",
             "type": "application/json"
         },
         {
             "rel": "catalog",
-            "href": "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/catalog.json"
+            "href": "./local_catalog/catalog.json"
         },
         {
             "rel": "item",

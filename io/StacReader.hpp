@@ -71,9 +71,9 @@ namespace pdal
             StageFactory m_factory;
 
             void handleReaderArgs();
-            void initializeItem(NL::json stacJson);
-            void initializeCatalog(NL::json stacJson, bool isRoot = false);
-            void initializeItemCollection(NL::json stacJson);
+            void initializeItem(NL::json stacJson, std::string itemPath);
+            void initializeCatalog(NL::json stacJson, std::string catPath, bool isRoot = false);
+            void initializeItemCollection(NL::json stacJson, std::string icPath);
             void initializeArgs();
             void validateSchema(NL::json stacJson);
             Options setReaderOptions(const NL::json& readerArgs,

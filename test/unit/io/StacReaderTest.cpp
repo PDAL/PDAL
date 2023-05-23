@@ -49,6 +49,49 @@
 
 using namespace pdal;
 
+TEST(StacReaderTest, local_data_test)
+{
+    Options options;
+
+    options.add("filename", Support::datapath("stac/autzen_trim.json"));
+    options.add("asset_names", "data");
+
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
+
+    PointTable table;
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    PointViewPtr view = *viewSet.begin();
+
+    EXPECT_EQ(view->size(), 110000);
+}
+
+
+TEST(StacReaderTest, local_catalog_test)
+{
+    Options options;
+
+    options.add("filename", Support::datapath("stac/local_catalog/catalog.json"));
+    options.add("asset_names", "ept.json");
+
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
+
+    QuickInfo qi = reader.preview();
+    NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
+    EXPECT_TRUE(jsonMetadata.contains("stac_ids"));
+    std::vector<std::string> idList = jsonMetadata["stac_ids"].get<std::vector<std::string>>();
+
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MI_Charlevoix_Islands_TL_2018") != idList.end());
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "IA_SouthCentral_1_2020") != idList.end());
+
+    EXPECT_EQ(qi.m_pointCount, 44851301750);
+
+}
 
 TEST(StacReaderTest, item_collection_test)
 {
