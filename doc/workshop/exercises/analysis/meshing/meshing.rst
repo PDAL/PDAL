@@ -67,11 +67,16 @@ Invoke the following command, substituting accordingly, in your `Conda Shell`:
     (pdal translate Debug) Executing pipeline in standard mode.
     (pdal translate filters.poisson Debug) Computing normal vectors
 
-You can view the mesh in Cloud Compare, you should see something similar to
+You can view the mesh in Cloud Compare, you should see something similar to:
 
 .. image:: ../../../images/first-mesh.png
     :target: ../../../../_images/first-mesh.png
 
+To colorize the points, select ``first-mesh`` in the left window. Under 
+``Properties`` set ``Colors`` to ``RGB``. You should see the following:
+
+.. image:: ../../../images/first-mesh-rgb.png
+    :target: ../../../../_images/first-mesh-rgb.png
 
 Filtering
 ................................................................................

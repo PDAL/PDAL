@@ -64,7 +64,7 @@ We will now use |QGIS| to visualize them.
 4. Right click on the ``density.sqlite`` layer in the `Layers` panel
    and then choose ``Properties``.
 
-5. Pick the ``Graduated`` drop down
+5. Within the ``Style`` tab, change ``Single Symbol`` to ``Graduated`` in the drop down
 
     .. image:: ../../../images/density-graduated-symbols-pick.png
         :target: ../../../../_images/density-graduated-symbols-pick.png
