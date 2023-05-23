@@ -3,7 +3,7 @@
 cmake .. \
     -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
-    -DBUILD_PLUGIN_CPD=ON \
+    -DBUILD_PLUGIN_CPD=OFF \
     -DBUILD_PLUGIN_I3S=ON \
     -DBUILD_PLUGIN_NITF=OFF \
     -DBUILD_PLUGIN_ICEBRIDGE=ON \

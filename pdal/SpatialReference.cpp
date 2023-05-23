@@ -64,11 +64,19 @@ struct OGRDeleter
 using OGRScopedSpatialReference =
     std::unique_ptr<OGRSpatialReference, OGRDeleter>;
 
-OGRScopedSpatialReference ogrCreateSrs(std::string s = "")
+OGRScopedSpatialReference ogrCreateSrs(std::string s = "", double epoch=0.0)
 {
-    return OGRScopedSpatialReference(
+    OGRScopedSpatialReference r(
         static_cast<OGRSpatialReference*>(
             OSRNewSpatialReference(s.size() ? s.c_str() : nullptr)));
+    if (!pdal::Utils::compare_approx(epoch, 0.0f, 0.00001f))
+    {
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,4,0)
+        r->SetCoordinateEpoch(epoch);
+#endif
+    }
+
+    return r;
 }
 
 }
@@ -106,7 +114,7 @@ bool SpatialReference::valid() const
 
 std::string SpatialReference::identifyHorizontalEPSG() const
 {
-    OGRScopedSpatialReference srs(ogrCreateSrs(getHorizontal()));
+    OGRScopedSpatialReference srs(ogrCreateSrs(getHorizontal(), m_epoch));
 
     if (!srs || srs->AutoIdentifyEPSG() != OGRERR_NONE)
         return "";
@@ -120,7 +128,7 @@ std::string SpatialReference::identifyHorizontalEPSG() const
 
 std::string SpatialReference::identifyVerticalEPSG() const
 {
-    OGRScopedSpatialReference srs(ogrCreateSrs(getVertical()));
+    OGRScopedSpatialReference srs(ogrCreateSrs(getVertical(), m_epoch));
 
     if (!srs || srs->AutoIdentifyEPSG() != OGRERR_NONE)
         return "";
@@ -137,9 +145,21 @@ std::string SpatialReference::getWKT() const
     return m_wkt;
 }
 
+
+double SpatialReference::getEpoch() const
+{
+    return m_epoch;
+}
+
+void SpatialReference::setEpoch( const double& epoch )
+{
+    m_epoch = epoch;
+}
+
+
 std::string SpatialReference::getPROJJSON() const
 {
-    OGRScopedSpatialReference poSRS = ogrCreateSrs(m_wkt);
+    OGRScopedSpatialReference poSRS = ogrCreateSrs(m_wkt, m_epoch);
     std::string json("");
 
 #if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,1,0)
@@ -225,7 +245,7 @@ std::string SpatialReference::getVertical() const
 {
     std::string tmp;
 
-    OGRScopedSpatialReference poSRS = ogrCreateSrs(m_wkt);
+    OGRScopedSpatialReference poSRS = ogrCreateSrs(m_wkt, m_epoch);
 
     // Above can fail if m_wkt is bad.
     if (!poSRS)
@@ -249,7 +269,7 @@ std::string SpatialReference::getVerticalUnits() const
 {
     std::string tmp;
 
-    OGRScopedSpatialReference poSRS = ogrCreateSrs(m_wkt);
+    OGRScopedSpatialReference poSRS = ogrCreateSrs(m_wkt, m_epoch);
     if (poSRS)
     {
         OGR_SRSNode* node = poSRS->GetAttrNode("VERT_CS");
@@ -274,7 +294,7 @@ std::string SpatialReference::getHorizontal() const
 {
     if (m_horizontalWkt.empty())
     {
-        OGRScopedSpatialReference poSRS = ogrCreateSrs(m_wkt);
+        OGRScopedSpatialReference poSRS = ogrCreateSrs(m_wkt, m_epoch);
 
         if (poSRS)
         {
@@ -291,7 +311,7 @@ std::string SpatialReference::getHorizontal() const
 
 std::string SpatialReference::getHorizontalUnits() const
 {
-    OGRScopedSpatialReference poSRS = ogrCreateSrs(m_wkt);
+    OGRScopedSpatialReference poSRS = ogrCreateSrs(m_wkt, m_epoch);
 
     if (!poSRS)
         return std::string();
@@ -313,8 +333,8 @@ bool SpatialReference::equals(const SpatialReference& input) const
     if (getWKT() == input.getWKT())
         return true;
 
-    OGRScopedSpatialReference current = ogrCreateSrs(getWKT());
-    OGRScopedSpatialReference other = ogrCreateSrs(input.getWKT());
+    OGRScopedSpatialReference current = ogrCreateSrs(getWKT(), m_epoch);
+    OGRScopedSpatialReference other = ogrCreateSrs(input.getWKT(), m_epoch);
 
     if (!current || !other)
         return false;
@@ -346,7 +366,7 @@ const std::string& SpatialReference::getName() const
 
 bool SpatialReference::isGeographic() const
 {
-    OGRScopedSpatialReference current = ogrCreateSrs(m_wkt);
+    OGRScopedSpatialReference current = ogrCreateSrs(m_wkt, m_epoch);
     if (!current)
         return false;
 
@@ -357,7 +377,7 @@ bool SpatialReference::isGeographic() const
 
 bool SpatialReference::isGeocentric() const
 {
-    OGRScopedSpatialReference current = ogrCreateSrs(m_wkt);
+    OGRScopedSpatialReference current = ogrCreateSrs(m_wkt, m_epoch);
     if (!current)
         return false;
 
@@ -368,7 +388,7 @@ bool SpatialReference::isGeocentric() const
 
 bool SpatialReference::isProjected() const
 {
-    OGRScopedSpatialReference current = ogrCreateSrs(m_wkt);
+    OGRScopedSpatialReference current = ogrCreateSrs(m_wkt, m_epoch);
     if (!current)
         return false;
 
@@ -379,7 +399,7 @@ bool SpatialReference::isProjected() const
 std::vector<int> SpatialReference::getAxisOrdering() const
 {
     std::vector<int> output;
-    OGRScopedSpatialReference current = ogrCreateSrs(m_wkt);
+    OGRScopedSpatialReference current = ogrCreateSrs(m_wkt, m_epoch);
     output = current.get()->GetDataAxisToSRSAxisMapping();
     return output;
 }
@@ -489,7 +509,7 @@ std::string SpatialReference::getWKT1() const
     if (wkt.empty())
         return wkt;
 
-    OGRScopedSpatialReference srs = ogrCreateSrs(wkt);
+    OGRScopedSpatialReference srs = ogrCreateSrs(wkt, m_epoch);
     std::string wkt1;
     if (srs)
     {
@@ -512,7 +532,7 @@ std::string SpatialReference::getWKT1() const
 
 int SpatialReference::getUTMZone() const
 {
-    OGRScopedSpatialReference current = ogrCreateSrs(m_wkt);
+    OGRScopedSpatialReference current = ogrCreateSrs(m_wkt, m_epoch);
     if (!current)
         throw pdal_error("Could not fetch current SRS");
 
