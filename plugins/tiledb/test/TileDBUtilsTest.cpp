@@ -232,6 +232,36 @@ TEST(FilterFactory, dim_with_set_default_filter)
     }
 }
 
+TEST(FilterFactory, user_set_scale_float)
+{
+    NL::json jsonOptions({});
+    jsonOptions["Z"] = {{{"compression", "scale-float"},
+                         {"scale_float_bytewidth", 2},
+                         {"scale_float_factor", 2.0},
+                         {"scale_float_offset", 100.0}}};
+    FilterFactory factory{jsonOptions, "zstd", 7};
+
+    tiledb::Context ctx{};
+    auto filterList = factory.filterList(ctx, "Z");
+    auto nfilters = filterList.nfilters();
+    EXPECT_EQ(nfilters, 1);
+
+    if (nfilters >= 1)
+    {
+        auto filter = filterList.filter(0);
+        EXPECT_EQ(filter.filter_type(), TILEDB_FILTER_SCALE_FLOAT);
+        uint64_t bytewidth{0};
+        double factor{1.0};
+        double offset{0.0};
+        filter.get_option<uint64_t>(TILEDB_SCALE_FLOAT_BYTEWIDTH, &bytewidth);
+        filter.get_option<double>(TILEDB_SCALE_FLOAT_FACTOR, &factor);
+        filter.get_option<double>(TILEDB_SCALE_FLOAT_OFFSET, &offset);
+        EXPECT_EQ(bytewidth, 2);
+        EXPECT_FLOAT_EQ(factor, 2.0);
+        EXPECT_FLOAT_EQ(offset, 100.0);
+    }
+}
+
 TEST(FilterFactory, user_set_two_filter_list)
 {
     NL::json jsonOptions({});

@@ -157,28 +157,31 @@ tiledb::Filter FilterFactory::filter(const tiledb::Context& ctx,
         const auto& key = opt.key();
         if (key == "compression")
             continue;
-        else if (key == "compression_level")
+        else if (key == "compression_level" || key == "COMPRESSION_LEVEL")
             filter.set_option(TILEDB_COMPRESSION_LEVEL,
                               options[key].get<int32_t>());
-        else if (key == "bit_width_max_window")
+        else if (key == "bit_width_max_window" || key == "BIT_WIDTH_MAX_WINDOW")
             filter.set_option(TILEDB_BIT_WIDTH_MAX_WINDOW,
                               options[key].get<int32_t>());
-        else if (key == "positive_delta_max_window")
+        else if (key == "positive_delta_max_window" ||
+                 key == "POSITIVE_DELTA_MAX_WINDOW")
             filter.set_option(TILEDB_POSITIVE_DELTA_MAX_WINDOW,
                               options[key].get<int32_t>());
-        else if (key == "bit_width_max_window")
+        else if (key == "bit_width_max_window" || key == "BIT_WIDTH_MAX_WINDOW")
             filter.set_option(TILEDB_BIT_WIDTH_MAX_WINDOW,
                               options[key].get<uint32_t>());
-        else if (key == "positive_delta_max_window")
+        else if (key == "positive_delta_max_window" ||
+                 key == "POSITIVE_DELTA_MAX_WINDOW")
             filter.set_option(TILEDB_POSITIVE_DELTA_MAX_WINDOW,
                               options[key].get<uint32_t>());
-        else if (key == "scale_float_bytewidth")
+        else if (key == "scale_float_bytewidth" ||
+                 key == "SCALE_FLOAT_BYTEWIDTH")
             filter.set_option(TILEDB_SCALE_FLOAT_BYTEWIDTH,
                               options[key].get<uint64_t>());
-        else if (key == "scale_float_factor")
+        else if (key == "scale_float_factor" || key == "SCALE_FLOAT_FACTOR")
             filter.set_option(TILEDB_SCALE_FLOAT_FACTOR,
                               options[key].get<double>());
-        else if (key == "scale_float_offset")
+        else if (key == "scale_float_offset" || key == "SCALE_FLOAT_OFFSET")
             filter.set_option(TILEDB_SCALE_FLOAT_OFFSET,
                               options[key].get<double>());
         else
