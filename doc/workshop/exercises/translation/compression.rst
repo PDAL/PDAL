@@ -20,7 +20,7 @@ This exercise uses PDAL to compress |ASPRSLAS| data into |LASzip|.
         $ pdal translate ./exercises/translation/interesting.las \
         ./exercises/translation/interesting.laz
 
-
+The translate command converts files based on their extensions.
     .. code-block:: doscon
 
         > pdal translate ./exercises/translation/interesting.las ^
@@ -60,7 +60,7 @@ Notes
    model, however, and will not be as efficient for other types of
    point cloud data.
 
-2. You can open and view LAZ data in web browsers using http://plas.io
+2. You can open and view LAZ data in web browsers using http://plas.io but we will be using QGIS as examples.
 
 .. _`CSV`: https://en.wikipedia.org/wiki/Comma-separated_values
 .. _`JSON`: https://en.wikipedia.org/wiki/JSON

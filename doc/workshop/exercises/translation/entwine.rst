@@ -25,6 +25,8 @@ US Geological Survey (USGS) example data is here: https://usgs.entwine.io/
 
 We will use a sample data set from Dublin, Ireland https://viewer.copc.io/?r=https://na-c.entwine.io/dublin/ept.json
 
+The |JSON| file defines the pipeline which you were previously creating in |jq|. This simplifies the task and allows for easy repetition
+of tasks.
 
 .. index:: Potree
 
@@ -98,7 +100,7 @@ We will use a sample data set from Dublin, Ireland https://viewer.copc.io/?r=htt
             "reader": "readers.las"
         }
 
-2. Visualize the data in http://plas.io
+2. Visualize the data in QGIS
 
     .. image:: ../../images/entwine-view.png
         :target: ../../../_images/entwine-view.png

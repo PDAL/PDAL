@@ -66,6 +66,49 @@ capability to reproject the data for us on-the-fly:
     :target: ../../../../_images/clipping-view-polygons.png
 
 .. note::
+    Notice the numbers on the buildings and trees. These are the classifations given in
+    the LIDAR Point Classes or `LAS Specification`_. You can sort and single out these in JSON filters.
+    ex. "expression": "Classification >= 3 && Classification <= 4" which only shows classes 3 to 4 which 
+    are medium and high vegitation. 
+
+.. _`LAS Specification`: https://www.asprs.org/wp-content/uploads/2019/03/LAS_1_4_r14.pdf
+
+.. list-table:: ASPRS Standard LiDAR Point Classes (Point Data Record Format 0-5)
+    :widths: 25 25
+    :header-rows: 1
+
+    * - Classification Value (bits 0:4)
+      - Meaning
+    * - 0
+      - Created, never classified
+    * - 1
+      - Unclassified
+    * - 2
+      - Ground 
+    * - 3
+      - Low Vegetation
+    * - 4
+      - Medium Vegetation
+    * - 5
+      - High Vegetation
+    * - 6
+      - Building
+    * - 7
+      - Low Point (noise)
+    * - 8
+      - Model Key-point (mass point)
+    * - 9
+      - Water
+    * - 10
+      - *Reserved for ASPRS Definition*
+    * - 11
+      - *Reserved for ASPRS Definition*
+    * - 12
+      - Overlap Points
+    * - 13-31
+      - *Reserved for ASPRS Definition*
+
+.. note::
 
     The GeoJSON file does not have an externally-defined coordinate system,
     so we are explicitly setting one with the LayerSRS parameter. If your
@@ -150,7 +193,6 @@ Notes
 
 .. _`CloudCompare`: http://www.danielgm.net/cc/
 
-.. _`ASPRS LAS`: http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
 .. _`LASzip`: http://laszip.org
 
 .. _`VRT`: http://www.gdal.org/drv_vrt.html
