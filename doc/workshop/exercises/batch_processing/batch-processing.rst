@@ -98,7 +98,7 @@ Exercise - Pipeline Substitions:
 For the most flexibility, pipelines are used to apply a series of operations to a file (or group
 of files). In this exercise, we build on the :ref:`workshop-dtm` pipeline example, but run this pipeline over 4 files and
 reproject, calculate a bare earth using the :ref:`filters.smrf` filter, remove those points that aren't bare earth
-with :ref:`filters.range` and then write the output using the :ref:`writers.gdal`.
+with :ref:`filters.expression` and then write the output using the :ref:`writers.gdal`.
 
 The pipeline we are using is:
 

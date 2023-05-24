@@ -144,11 +144,11 @@ polygons. Using the VRT we defined in `Data preparation`_,
 assign the values from the ``CLS`` column to the ``Classification`` field.
 
 
-3. :ref:`filters.range`
+3. :ref:`filters.expression`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The attributes in the ``attributes.json`` file include polygons with values
-``2``, ``5``, and ``6``. We will use :ref:`filters.range` to keep points with
+``2``, ``5``, and ``6``. We will use :ref:`filters.expression` to keep points with
 ``Classification`` values in the range of ``6:6``.
 
 4. Writer

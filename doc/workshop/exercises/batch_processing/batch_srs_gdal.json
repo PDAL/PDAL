@@ -10,8 +10,8 @@
             "type": "filters.smrf"
         },
         {
-            "type":"filters.range",
-            "limits":"Classification[2:2]"
+            "type":"filters.expression",
+            "expression":"Classification == 2"
         },
         {
             "gdaldriver":"GTiff",

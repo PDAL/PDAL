@@ -80,7 +80,7 @@ technique we learned about in :ref:`workshop-denoising`.
         ./exercises/analysis/ground/CSite1_orig-utm.laz \
         -o ./exercises/analysis/ground/ground.laz \
         smrf range \
-        --filters.range.limits="Classification[2:2]" \
+        --filters.expression.expression="Classification == 2" \
         -v 4
 
     .. code-block:: doscon
@@ -90,7 +90,7 @@ technique we learned about in :ref:`workshop-denoising`.
         ./exercises/analysis/ground/CSite1_orig-utm.laz ^
         -o ./exercises/analysis/ground/ground.laz ^
         smrf range ^
-        --filters.range.limits="Classification[2:2]" ^
+        --filters.expression.expression="Classification == 2"^
         -v 4
 
 
@@ -109,7 +109,7 @@ technique we learned about in :ref:`workshop-denoising`.
         --filters.outlier.method="statistical" \
         --filters.outlier.mean_k=8 --filters.outlier.multiplier=3.0 \
         --filters.smrf.ignore="Classification[7:7]"  \
-        --filters.range.limits="Classification[2:2]" \
+        --filters.expression.expression="Classification == 2" \
         --writers.las.compression=true \
         --verbose 4
 
@@ -121,7 +121,7 @@ technique we learned about in :ref:`workshop-denoising`.
         --filters.outlier.method="statistical" ^
         --filters.outlier.mean_k=8 --filters.outlier.multiplier=3.0 ^
         --filters.smrf.ignore="Classification[7:7]"  ^
-        --filters.range.limits="Classification[2:2]" ^
+        --filters.expression.expression="Classification == 2" ^
         --writers.las.compression=true ^
         --verbose 4
 

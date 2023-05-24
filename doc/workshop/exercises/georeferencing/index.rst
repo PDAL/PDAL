@@ -43,7 +43,7 @@ point cloud:
   particular, there are a few points *very* close to the sensor which were
   probably caused by air returns or laser light reflecting off of part of the
   airplane or sensor.  These points have very high intensity values, which will
-  screw up our visualization.  We will use the :ref:`filters.range` PDAL filter
+  screw up our visualization.  We will use the :ref:`filters.expression` PDAL filter
   to drop all points with very high intensity values.
 
 .. note::
