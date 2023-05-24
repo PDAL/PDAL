@@ -17,6 +17,11 @@
             "minor_version": "2",
             "dataformat_id": "0",
             "filename":"./exercises/analysis/denoising/clean.laz"
+        },
+        {
+            "type": "writers.copc",
+            "filename": "./exercises/analysis/denoising/clean.copc.laz",
+            "forward": "all"
         }
     ]
 }
