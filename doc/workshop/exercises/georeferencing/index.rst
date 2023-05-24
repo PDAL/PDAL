@@ -67,10 +67,10 @@ Invoke the following command, substituting accordingly, into your ` Conda Shell`
 Visualization
 .................
 
-View your georeferenced point cloud in http://plas.io.
+View your georeferenced point cloud in QGIS.
 
-.. figure:: ../../images/georeference-plasio.png
-    :target: ../../../_images/georeference-plasio.png
+.. figure:: ../../images/georeference-QGIS.png
+    :target: ../../../_images/georeference-QGIS.png
 
     Our airborne laser point cloud after georeferencing, reprojection, and
     intensity filtering.
