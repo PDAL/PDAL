@@ -29,7 +29,10 @@ Here's a summary of what's going on with that command invocation
    on. PDAL will be able to identify this file is an |ASPRSLAS| file from the
    extension, ``.las``, but not every file type is easily identified. You can
    use a :ref:`pipeline <pipeline_command>` to override which
-   :ref:`reader <readers>` PDAL will use to open the file.
+   :ref:`reader <readers>` PDAL will use to open the file. For this workshop, we 
+   will often output a :ref:`COPC <writers.copc>` file type. For our purposes, COPC files 
+   (In the format ``*.copc.laz``) can be visualized in |QGIS|. To read more about COPC, refer to 
+   `this article <https://mapscaping.com/podcast/cloud-optimized-point-clouds/>`_.
 
 4. ``-p 0``: ``-p`` corresponds to "print a point", and ``0`` means to print
    the first one (computer people count from 0).

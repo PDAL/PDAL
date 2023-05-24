@@ -1,6 +1,6 @@
 {
     "pipeline": [
-        "./exercises/analysis/ground/denoised-ground-only.laz",
+        "./exercises/analysis/ground/denoised-ground-only.copc.laz",
         {
             "filename":"./exercises/analysis/dtm/dtm.tif",
             "gdaldriver":"GTiff",

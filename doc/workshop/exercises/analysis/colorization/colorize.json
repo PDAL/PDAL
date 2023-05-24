@@ -15,6 +15,10 @@
             "minor_version": "2",
             "dataformat_id": "3",
             "filename":"./exercises/analysis/colorization/uncompahgre-colored.laz"
+        },
+        {
+            "type": "writers.copc",
+            "filename": "./exercises/analysis/colorization/uncompahgre-colored.copc.laz"
         }
     ]
 }

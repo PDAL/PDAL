@@ -108,9 +108,21 @@ add a few options to have finer control over what is written. These include:
    consume LAS.
 3. ``dataformat_id``: Format 0 supports both time and color information
 
+5. :ref:`writers.copc`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We will then turn the ``clean.laz`` file into a COPC file for vizualization with QGIS.
+
+::
+
+    {
+        "type": "writers.copc",
+        "filename": "./exercises/analysis/colorization/clean.copc.laz"
+    }
+
 .. note::
 
-    :ref:`writers.las` provides a number of possible options to control
+    :ref:`writers.las` and :ref:`writers.copc` provide a number of possible options to control
     how your LAS files are written.
 
 Execution
@@ -126,7 +138,7 @@ Visualization
 ................................................................................
 
 Use one of the point cloud visualization tools you installed to take a look at
-your ``clean.laz`` output. In the example below, we simply
+your ``clean.copc.laz`` output. In the example below, we simply
 opened the file using QGIS.
 
 .. image:: ../../../images/denoise-fugro.png

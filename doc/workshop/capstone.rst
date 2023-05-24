@@ -32,6 +32,10 @@ Given the following pipeline for fetching the data, complete the rest of the tas
                 "minor_version": "2",
                 "dataformat_id": "0",
                 "filename":"st-stephens.laz"
+            },
+            {
+                "type": "writers.copc",
+                "filename": "st-stephens.copc.laz"
             }
         ]
     }

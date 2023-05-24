@@ -26,7 +26,7 @@ US Geological Survey (USGS) example data is here: https://usgs.entwine.io/
 We will use a sample data set from Dublin, Ireland https://viewer.copc.io/?r=https://na-c.entwine.io/dublin/ept.json
 
 The |JSON| file defines the pipeline which you were previously creating in |jq|. This simplifies the task and allows for easy repetition
-of tasks.
+of tasks. This pipeline will collect the sample data set and convert it to a :ref:`COPC<writers.copc>` file.
 
 .. index:: Potree
 
@@ -59,11 +59,11 @@ of tasks.
 
 .. _`Developer Console`: https://developers.google.com/web/tools/chrome-devtools/console/
 
-1. Verify that the data look ok:
+1. Verify that the COPC data look ok:
 
     .. code-block:: console
 
-        $ pdal info dublin.laz | jq .stats.bbox.native.bbox
+        $ pdal info dublin.copc.laz | jq .stats.bbox.native.bbox
         {
             "maxx": -694128.96,
             "maxy": 7049938.84,
@@ -72,7 +72,7 @@ of tasks.
             "miny": 7044490.98,
             "minz": -144.24
         }
-        $ pdal info dublin.laz -p 0
+        $ pdal info dublin.copc.laz -p 0
         {
             "file_size": 56441298,
             "filename": "dublin.laz",
@@ -110,4 +110,4 @@ Notes
 --------------------------------------------------------------------------------
 
 1. :ref:`readers.ept` contains more detailed documentation about how to
-   use PDAL's EPT reader .
+   use PDAL's EPT reader.

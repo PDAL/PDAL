@@ -32,7 +32,7 @@ CloudCompare.
 .. note::
 
     This example will be using the output of using :ref:`workshop-clipping`
-    exercise, specifically using ``stadium.las`` file.  Please produce that
+    exercise, specifically using ``stadium.copc.las`` file.  Please produce that
     file by following that exercise before starting this one.
 
 .. note::
@@ -49,14 +49,14 @@ Invoke the following command, substituting accordingly, in your `Conda Shell`:
 
 .. code-block:: console
 
-    $ pdal translate -i ./exercises/analysis/clipping/stadium.las \
+    $ pdal translate -i ./exercises/analysis/clipping/stadium.copc.laz \
     -o ./exercises/analysis/meshing/first-mesh.ply \
     poisson --filters.poisson.depth=16 \
     --verbose 4
 
 .. code-block:: doscon
 
-    > pdal translate -i ./exercises/analysis/clipping/stadium.las ^
+    > pdal translate -i ./exercises/analysis/clipping/stadium.copc.laz ^
     -o ./exercises/analysis/meshing/first-mesh.ply ^
     poisson --filters.poisson.depth=16 ^
     --verbose 4
@@ -96,10 +96,10 @@ Invoke the following command, substituting accordingly, in your `Conda Shell`:
 
 .. code-block:: console
 
-    $ pdal translate -i ./exercises/analysis/clipping/stadium.las \
+    $ pdal translate -i ./exercises/analysis/clipping/stadium.copc.laz \
     -o ./exercises/analysis/meshing/building-exercise.ply \
     range poisson \
-    --filters.expression.expression="Classification == 2 && Classification == 6" \
+    --filters.range.limits="Classification[2:2],Classification[6:6]" \
     --filters.poisson.depth=16 \
     --verbose 4
 
@@ -107,8 +107,8 @@ Invoke the following command, substituting accordingly, in your `Conda Shell`:
 
     > pdal translate -i ept://http://act-2015-rgb.s3.amazonaws.com ^
     -o ./exercises/analysis/meshing/building-exercise.ply ^
-    range poisson ^
-    --filters.expression.expressionf="Classification == 2 && Classification == 6" ^
+    expression poisson ^
+    --filters.range.limits="Classification[2:2],Classification[6:6]" ^
     --filters.poisson.depth=16 ^
     --verbose 4
 

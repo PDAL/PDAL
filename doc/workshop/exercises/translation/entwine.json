@@ -11,6 +11,10 @@
             "minor_version": "2",
             "dataformat_id": "0",
             "filename":"dublin.laz"
+        },
+        {
+            "type": "writers.copc",
+            "filename": "dublin.copc.laz"
         }
     ]
 }
