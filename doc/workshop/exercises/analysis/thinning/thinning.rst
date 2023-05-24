@@ -50,14 +50,14 @@ Invoke the following command, substituting accordingly, in your `Conda Shell`:
 Visualization
 ................................................................................
 
-http://plas.io has the ability to switch on/off multiple data sets, and we
+GQIS has the ability to switch on/off multiple data sets, and we
 are going to use that ability to view both the ``uncompahgre.laz`` and the
 output ``uncompahgre-thin.copc.laz`` file.
 
 .. figure:: ../../../images/thinning-select-data.png
     :target: ../../../../_images/thinning-select-data.png
 
-    Selecting multiple data sets in http://plas.io
+    Selecting multiple data sets in QGIS
 
 .. figure:: ../../../images/thinning-full-res.png
     :target: ../../../../_images/thinning-select-data.png

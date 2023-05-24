@@ -22,7 +22,14 @@ We will create mesh models of a building and its surrounds using an entwine
 data input source.
 
 After running each command, the output `.ply` file can be viewed in Meshlab or
-CloudCompare.
+`CloudCompare`_.
+
+.. _`CloudCompare`: https://www.danielgm.net/cc/
+
+.. note:: 
+
+    Since QGIS doesn't support `.ply` files we can't use it for this exercise. 
+    In order to use QGIS you can covert the files to laz or `.copc` using PDAL.
 
 .. seealso::
 
