@@ -87,7 +87,7 @@ class 2, and buildings as 6.
 
 In this exercise we will create a poisson mesh surface of a building and the
 ground surrounding it, using the same data subset as above and adding a
-:ref:`filters.range` stage to limit the set of points used in mesh creation.
+:ref:`filters.expression` stage to limit the set of points used in mesh creation.
 
 Command
 ................................................................................
@@ -99,7 +99,7 @@ Invoke the following command, substituting accordingly, in your `Conda Shell`:
     $ pdal translate -i ./exercises/analysis/clipping/stadium.las \
     -o ./exercises/analysis/meshing/building-exercise.ply \
     range poisson \
-    --filters.range.limits="Classification[2:2],Classification[6:6]" \
+    --filters.expression.expression="Classification == 2 && Classification == 6" \
     --filters.poisson.depth=16 \
     --verbose 4
 
@@ -108,7 +108,7 @@ Invoke the following command, substituting accordingly, in your `Conda Shell`:
     > pdal translate -i ept://http://act-2015-rgb.s3.amazonaws.com ^
     -o ./exercises/analysis/meshing/building-exercise.ply ^
     range poisson ^
-    --filters.range.limits="Classification[2:2],Classification[6:6]" ^
+    --filters.expression.expressionf="Classification == 2 && Classification == 6" ^
     --filters.poisson.depth=16 ^
     --verbose 4
 

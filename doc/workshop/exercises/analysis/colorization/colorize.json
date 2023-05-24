@@ -6,8 +6,8 @@
             "raster": "./exercises/analysis/colorization/casi-2015-04-29-weekly-mosaic.tif"
         },
         {
-            "type": "filters.range",
-            "limits": "Red[1:]"
+            "type": "filters.expression",
+            "expression": "Red >= 1"
         },
         {
             "type": "writers.las",

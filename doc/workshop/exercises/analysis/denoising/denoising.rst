@@ -58,13 +58,13 @@ operation.
 
 
 
-3. :ref:`filters.range`
+3. :ref:`filters.expression`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 At this point, the outliers have been classified per the LAS specification as
 low/noise points with a classification value of 7. The :ref:`range
-filter<filters.range>` can remove these noise points by constructing a
-:ref:`range <ranges>` with the value ``Classification![7:7]``, which passes
+filter<filters.expression>` can remove these noise points by constructing a
+:ref:`range <ranges>` with the value ``Classification != 7``, which passes
 every point with a ``Classification`` value **not** equal to 7.
 
 Even with the :ref:`filters.outlier` operation, there is still a cluster of
@@ -74,13 +74,13 @@ another :ref:`range <ranges>` to keep only points that are within the range
 :math:`-100 <= Z <= 3000`.
 
 Both :ref:`ranges <ranges>` are passed as a comma-separated list to the
-:ref:`range filter<filters.range>` via the ``limits`` option.
+:ref:`range filter<filters.expression>` via the ``expression`` option.
 
 ::
 
     {
-        "type": "filters.range",
-        "limits": "Classification![7:7],Z[-100:3000]"
+        "type": "filters.expression",
+        "expression": "Classification != 7 && (Z >= -100 && Z <= 3000)"
     },
 
 .. index:: range filter, classifications

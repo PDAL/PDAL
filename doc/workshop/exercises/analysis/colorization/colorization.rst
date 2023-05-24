@@ -62,18 +62,18 @@ filter will create PDAL dimensions ``Red``, ``Green``, and ``Blue``.
     },
 
 
-3. :ref:`filters.range`
+3. :ref:`filters.expression`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A small challenge is the raster will colorize many points with NODATA values.
-We are going to use the :ref:`filters.range` to filter keep any points that
+We are going to use the :ref:`filters.expression` to filter keep any points that
 have ``Red >= 1``.
 
 ::
 
     {
-        "type": "filters.range",
-        "limits": "Red[1:]"
+        "type": "filters.expression",
+        "expression": "Red >= 1"
     },
 
 4. :ref:`writers.las`
