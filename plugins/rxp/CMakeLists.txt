@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.5)
+
 if (STANDALONE)
 cmake_minimum_required(VERSION 3.5)
 project(rivlib_pdal)
