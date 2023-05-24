@@ -1,5 +1,6 @@
 if (STANDALONE)
 cmake_minimum_required(VERSION 3.5)
+project(rivlib_pdal)
 set(ROOT_DIR "../../${PROJECT_SOURCE_DIR}")
 include(../../cmake/common.cmake NO_POLICY_SCOPE)
 include(FeatureSummary)
