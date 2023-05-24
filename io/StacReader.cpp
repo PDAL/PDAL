@@ -390,7 +390,7 @@ std::string StacReader::extractDriverFromItem(const NL::json& asset) const
 }
 
 // Create link relative to the Catalog/Item/Collection that is referencing it
-const std::string handleItemPath(std::string srcPath, std::string linkPath)
+const std::string getPath(std::string srcPath, std::string linkPath)
 {
     //Make absolute path of current item's directory, then create relative path from that
 
@@ -428,7 +428,7 @@ void StacReader::initializeItem(NL::json stacJson, std::string itemPath)
 
     NL::json asset = stacJson.at("assets").at(assetName);
 
-    std::string dataUrl = handleItemPath(itemPath, asset.at("href").get<std::string>());
+    std::string dataUrl = getPath(itemPath, asset.at("href").get<std::string>());
 
     std::string driver = extractDriverFromItem(asset);
 
@@ -509,7 +509,7 @@ void StacReader::initializeCatalog(NL::json stacJson, std::string catPath, bool 
             throw pdal::pdal_error("item does not contain 'href' or 'rel'");
 
         const std::string linkType = link.at("rel").get<std::string>();
-        const std::string linkPath = handleItemPath(catPath, link.at("href").get<std::string>());
+        const std::string linkPath = getPath(catPath, link.at("href").get<std::string>());
 
         m_p->m_pool->add([this, linkType, linkPath, link ]()
         {
@@ -571,7 +571,7 @@ void StacReader::initializeItemCollection(NL::json stacJson, std::string icPath)
             std::string target = link.at("rel").get<std::string>();
             if (target == "next")
             {
-                std::string next = handleItemPath(icPath, link.at("href").get<std::string>());
+                std::string next = getPath(icPath, link.at("href").get<std::string>());
                 NL::json nextJson = m_p->m_connector->getJson(next);
                 initializeItemCollection(nextJson, next);
             }
