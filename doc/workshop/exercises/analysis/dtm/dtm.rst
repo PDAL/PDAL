@@ -146,6 +146,9 @@ Notes
 
 2. :ref:`writers.gdal` can be used for large data, but it does not interpolate
    a typical `TIN`_ surface model.
+   
+3. If you are missing the Raster tab, check your plugins in QGIS. If you have none
+    you may need to reinstall through conda and make sure you have all the packages.
 
 .. _`TIN`: https://en.wikipedia.org/wiki/Triangulated_irregular_network
 .. _`gdaldem`: http://www.gdal.org/gdaldem.html
