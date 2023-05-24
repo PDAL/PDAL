@@ -305,12 +305,12 @@ public:
     KD2Index& build2dIndex();
 
     template <typename Compare>
-    void sort(Compare compare)
+    void stableSort(Compare compare)
     {
         auto order = m_index;
         std::stable_sort(
-            order.begin(), 
-            order.end(), 
+            order.begin(),
+            order.end(),
             [this, &compare](const PointId a, const PointId b)
             {
                 return compare(PointRef(*this, a), PointRef(*this, b));

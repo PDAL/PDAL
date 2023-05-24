@@ -61,7 +61,7 @@ void SkewnessBalancingFilter::processGround(PointViewPtr view)
     auto cmp = [](const PointRef& p1, const PointRef& p2) {
         return p1.compare(Dimension::Id::Z, p2);
     };
-    view->sort(cmp);
+    view->stableSort(cmp);
 
     auto setClass = [&view](PointId first, PointId last, int cl)
     {

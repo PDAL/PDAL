@@ -178,7 +178,7 @@ void Processor::writeCompressed(VoxelKey k, PointViewPtr v)
     lazperf::writer::chunk_compressor compressor(b.pointFormatId, b.numExtraBytes);
 
     // Sort by GPS time - no-op if there's no GPS time.
-    v->sort([](const PointRef& p1, const PointRef& p2)
+    v->stableSort([](const PointRef& p1, const PointRef& p2)
     {
         return p1.compare(Dimension::Id::GpsTime, p2);
     });

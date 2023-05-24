@@ -427,8 +427,8 @@ TEST(CopcReaderTest, stream)
     {
         return (a.compare(Dimension::Id::GpsTime, b));
     };
-    normalView.sort(cmp);
-    streamView.sort(cmp);
+    normalView.stableSort(cmp);
+    streamView.stableSort(cmp);
 
     for (PointId i(0); i < normalView.size(); ++i)
         for (const auto& dim : normalTable.layout()->dims())

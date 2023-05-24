@@ -50,20 +50,64 @@ public:
         m_tmp(false)
     {}
 
-    // PointRefs are not default-constructible - they always reference a point.
-    PointRef() = delete;
-
-    // PointRefs are not copyable or assignable - reordering may be implemented
-    // at the container scope e.g. PointView::sort.
-    PointRef(const PointRef& r) = delete;
-    PointRef(PointRef&& r) = delete;
-    PointRef& operator=(PointRef&& r) = delete;
-    PointRef& operator=(PointRef& r) = delete;
-
     ~PointRef()
     {
         if (m_tmp)
             m_container->freeTemp(m_idx);
+    }
+
+    // TODO: These next three special methods (which are not really intended for
+    // downstream usage but rather for allowing std::sort and friends to work)
+    // are not necessarily working in all compilers and should be avoided for
+    // mutating operations like std::sort (use PointView::stableSort instead).  
+    // Read-only operations like std::accumulate should be fine.  For now, 
+    // PointView::stableSort is a stopgap since PDAL sorts PointViews internally
+    // in several places.
+
+    // This ctor is normally used by some std::algorithm that needs a temporary.
+    // See the copy ctor below for more info.
+    PointRef() : m_container(nullptr), m_layout(nullptr), m_idx(0), m_tmp(false)
+    {}
+
+    // Normally a point ref shouldn't be copied. But a PointRef is the *value* type
+    // when using an algorithm on a PointView. Some algorithms create a temporary copy
+    // of data by invoking the copy ctor on the data, which in the case of a point
+    // view, means calling this function and having the new PointRef point to the
+    // same entry in the PointTable as the source. So we create a new entry in the
+    // PointView index that does this.
+    //
+    // In most of these sorting algorithms, the temporaries come and go all the time.
+    // Usually there's only one, but we don't know and don't control it.
+    // If we kept adding a new entry in the PointLayout index
+    // each time we needed a temporary, we'd expand the PointView index unnecessarily.
+    // So we track these temporary PointRefs separately (m_tmp) and when they go away,
+    // we stick their index on a stack to be reused (see the dtor). This is why we
+    // call getTemp() -- it *may* allow us to reuse an entry in the PointView index
+    // that was used for a previous temporary, rather than continuously expand the
+    // index, potentially causing allocations.
+    //
+    // I'm thinking there are better ways to deal with this.
+    //
+    PointRef(const PointRef& r) :
+        m_container(r.m_container), m_layout(r.m_layout), m_tmp(true)
+    {
+        m_idx = m_container->getTemp(r.m_idx);
+    }
+
+    // This is typically used by an std::sorting algorithm to copy to a temporary. See
+    // the info on the copy ctor above for more info.
+    PointRef& operator=(const PointRef& r)
+    {
+        if (!m_container)
+        {
+            m_container = r.m_container;
+            m_layout = r.m_layout;
+            m_idx = m_container->getTemp(r.m_idx);
+            m_tmp = true;
+        }
+        else
+            m_container->setItem(m_idx, r.m_idx);
+        return *this;
     }
 
     /**
