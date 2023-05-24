@@ -45,28 +45,25 @@ namespace pdal
 class PDAL_DLL PointRef
 {
 public:
-    PointRef(PointContainer& container, PointId idx = 0) :
-        m_container(&container), m_layout(container.layout()), m_idx(idx),
-        m_tmp(false)
-    {}
-
-    ~PointRef()
-    {
-        if (m_tmp)
-            m_container->freeTemp(m_idx);
-    }
-
-    // TODO: These next three special methods (which are not really intended for
-    // downstream usage but rather for allowing std::sort and friends to work)
-    // are not necessarily working in all compilers and should be avoided for
-    // mutating operations like std::sort (use PointView::stableSort instead).  
-    // Read-only operations like std::accumulate should be fine.  For now, 
-    // PointView::stableSort is a stopgap since PDAL sorts PointViews internally
-    // in several places.
+    // TODO: These three special methods:
+    //   PointRef()
+    //   PointRef(const PointRef&)
+    //   operator=(const PointRef&)
+    // which are not really intended for downstream usage but rather for 
+    // allowing std::sort and friends to work, are not necessarily working in 
+    // all compilers and should be avoided for mutating operations like 
+    // std::sort (use PointView::stableSort instead).  Read-only operations like
+    // std::accumulate should be fine.  For now, PointView::stableSort is a 
+    // stopgap since PDAL sorts PointViews internally in several places.
 
     // This ctor is normally used by some std::algorithm that needs a temporary.
     // See the copy ctor below for more info.
     PointRef() : m_container(nullptr), m_layout(nullptr), m_idx(0), m_tmp(false)
+    {}
+
+    PointRef(PointContainer& container, PointId idx = 0) :
+        m_container(&container), m_layout(container.layout()), m_idx(idx),
+        m_tmp(false)
     {}
 
     // Normally a point ref shouldn't be copied. But a PointRef is the *value* type
@@ -92,6 +89,12 @@ public:
         m_container(r.m_container), m_layout(r.m_layout), m_tmp(true)
     {
         m_idx = m_container->getTemp(r.m_idx);
+    }
+
+    ~PointRef()
+    {
+        if (m_tmp)
+            m_container->freeTemp(m_idx);
     }
 
     // This is typically used by an std::sorting algorithm to copy to a temporary. See
