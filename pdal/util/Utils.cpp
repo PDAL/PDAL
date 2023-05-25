@@ -136,7 +136,9 @@ void Utils::trimLeading(std::string& s)
     // Note, that this should be OK in C++11, which guarantees a NULL.
     while (isspace(s[pos]))
         pos++;
-    s = s.substr(pos);
+
+    // Iterator version of erase doesn't throw.
+    s.erase(s.begin(), s.begin() + pos);
 }
 
 
@@ -156,7 +158,8 @@ void Utils::trimTrailing(std::string& s)
         else
             pos--;
     }
-    s = s.substr(0, pos + 1);
+    // The iterator version of erase doesn't throw.
+    s.erase(s.begin() + pos + 1, s.end());
 }
 
 
