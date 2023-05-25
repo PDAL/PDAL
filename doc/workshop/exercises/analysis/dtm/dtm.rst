@@ -28,8 +28,6 @@ Exercise
 Command
 ................................................................................
 
-Invoke the following command, substituting accordingly, in your |Terminal|:
-
 PDAL capability to generate rasterized output is provided by the
 :ref:`writers.gdal` stage. There is no :ref:`application <apps>` to drive this
 stage, and we must use a pipeline.

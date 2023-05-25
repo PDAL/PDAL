@@ -93,8 +93,8 @@ Printing the first point confirms this problem:
         "ScanAngleRank": 0,
         "ScanDirectionFlag": 0,
         "UserData": 0,
-        "X": 9.167893439,
-        "Y": 48.78347733,
+        "X": 9.17,
+        "Y": 48.78,
         "Z": 316.88
         }
     },
