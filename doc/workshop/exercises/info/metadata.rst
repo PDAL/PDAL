@@ -97,6 +97,9 @@ gives us that, but it also gives us a bunch of other stuff we don't need
 at the moment. Let's focus on extracting what we want using the
 ``jq`` command.
 
+If you do not have `jq`_ installed into your Conda environment, run the following 
+command in your `Conda Shell`: ``conda install -c conda-forge jq``
+
 .. code-block:: console
 
     $ pdal info ./exercises/info/interesting.las --metadata \

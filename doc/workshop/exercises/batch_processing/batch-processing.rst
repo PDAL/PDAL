@@ -55,8 +55,8 @@ Example - Parallel Batch compression of LAS files to LAZ - PowerShell:
 
 This use of the `PowerShell` syntax doesn't allow a user to execute more than one process at a
 time. There is a free download of the `xargs` program that provides parallel execution available
-at http://www.pirosa.co.uk/demo/wxargs/ppx2.exe. For this tool, the file names are passed with
-using the `{}` syntax.
+at http://www.pirosa.co.uk/demo/wxargs/ppx2.exe. A clone of this program can be found at https://github.com/ghuls/ppx2.
+For this tool, the file names are passed with using the `{}` syntax.
 
 .. code-block:: powershell
 

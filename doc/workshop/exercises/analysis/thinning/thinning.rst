@@ -47,15 +47,12 @@ Invoke the following command, substituting accordingly, in your `Conda Shell`:
 .. literalinclude:: ./thinning-run-dartsample-win.txt
     :linenos:
 
-.. image:: ../../../images/thinning-command-run.png
-    :target: ../../../../_images/thinning-command-run.png
-
 Visualization
 ................................................................................
 
 http://plas.io has the ability to switch on/off multiple data sets, and we
 are going to use that ability to view both the ``uncompahgre.laz`` and the
-``uncompahgre-thin.laz`` file.
+``uncompahgre-thin.laz`` file. Ensure that you load both files at the same time.
 
 .. figure:: ../../../images/thinning-select-data.png
     :target: ../../../../_images/thinning-select-data.png

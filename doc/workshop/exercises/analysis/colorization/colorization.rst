@@ -119,7 +119,9 @@ Visualization
 
 Use one of the point cloud visualization tools you installed to take a look at
 your ``uncompahgre-colored.laz`` output. In the example below, we simply
-opened the file using the http://plas.io website.
+opened the file using the http://plas.io website. If the point cloud is not 
+colorized upon opening the file, drag one of the “Colorization” options onto the 
+cloud from the settings bar to the right.
 
 .. image:: ../../../images/colorize-umpaghre-colored.png
 
