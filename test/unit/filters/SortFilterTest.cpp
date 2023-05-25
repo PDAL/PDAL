@@ -94,7 +94,7 @@ void doSort(point_count_t count, Dimension::Id dim,
 TEST(SortFilterTest, simple)
 {
     // note that this also tests default sort order ASC /**
-    for (point_count_t count = 3; count < 8; count++)
+    for (point_count_t count = 3; count < 30; count++)
         doSort(count, Dimension::Id::X);
 }
 

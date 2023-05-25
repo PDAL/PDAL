@@ -45,6 +45,17 @@ namespace pdal
 class PDAL_DLL PointRef
 {
 public:
+    // TODO: These three special methods:
+    //   PointRef()
+    //   PointRef(const PointRef&)
+    //   operator=(const PointRef&)
+    // which are not really intended for downstream usage but rather for 
+    // allowing std::sort and friends to work, are not necessarily working in 
+    // all compilers and should be avoided for mutating operations like 
+    // std::sort (use PointView::stableSort instead).  Read-only operations like
+    // std::accumulate should be fine.  For now, PointView::stableSort is a 
+    // stopgap since PDAL sorts PointViews internally in several places.
+
     // This ctor is normally used by some std::algorithm that needs a temporary.
     // See the copy ctor below for more info.
     PointRef() : m_container(nullptr), m_layout(nullptr), m_idx(0), m_tmp(false)

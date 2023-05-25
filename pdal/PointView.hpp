@@ -304,6 +304,20 @@ public:
     KD3Index& build3dIndex();
     KD2Index& build2dIndex();
 
+    template <typename Compare>
+    void stableSort(Compare compare)
+    {
+        auto order = m_index;
+        std::stable_sort(
+            order.begin(),
+            order.end(),
+            [this, &compare](const PointId a, const PointId b)
+            {
+                return compare(PointRef(*this, a), PointRef(*this, b));
+            });
+        m_index = order;
+    }
+
 protected:
     PointTableRef m_pointTable;
     PointLayoutPtr m_layout;
