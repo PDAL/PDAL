@@ -29,7 +29,7 @@ After running each command, the output `.ply` file can be viewed in Meshlab or
 .. note:: 
 
     Since QGIS doesn't support `.ply` files we can't use it for this exercise. 
-    In order to use QGIS you can covert the files to laz or `.copc` using PDAL.
+    In order to use QGIS you can covert the files to OBJ or `.copc` using PDAL.
 
 .. seealso::
 
