@@ -38,11 +38,14 @@
 
 #include <nlohmann/json.hpp>
 
+#include <io/BufferReader.hpp>
 #include <io/FauxReader.hpp>
 #include <pdal/Filter.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_test_main.hpp>
 #include <pdal/util/FileUtils.hpp>
+
+#include <tiledb/tiledb>
 
 #include "Support.hpp"
 
@@ -285,4 +288,119 @@ TEST_F(TileDBReaderTest, unsupported_attribute)
     EXPECT_NO_THROW(rdr2.prepare(table));
 }
 
+TEST(TileDBRoundTripTest, delta_filter_test)
+{
+    // Raw data.
+    std::string uri = Support::temppath("tiledb_test_intensity_compression");
+    std::vector<double> xValues{0.0, 1.0, 2.0, 3.0, 4.0, 5.0};
+    std::vector<double> yValues(6, 0.0);
+    std::vector<double> zValues(6, 0.0);
+    std::vector<uint16_t> intensityValues{1, 1, 0, 0, 2, 3};
+    std::vector<double> gpsTimeValues{1306604063.0, 1306604064.0, 1306604078.0,
+                                      1306604064.0, 1306604064.0, 1306603982.0};
+
+    // Clean-up previous tests.
+    if (FileUtils::directoryExists(uri))
+        FileUtils::deleteDirectory(uri);
+
+    // Write the original data
+    {
+        // Create point table with dimension registry.
+        PointTable table;
+        table.layout()->registerDims(
+            {Dimension::Id::X, Dimension::Id::Y, Dimension::Id::Z,
+             Dimension::Id::Intensity, Dimension::Id::GpsTime});
+
+        // Create buffer reader with data.
+        BufferReader bufferReader;
+        PointViewPtr view(new PointView(table));
+        for (uint32_t index = 0; index < 6; ++index)
+        {
+            view->setField(Dimension::Id::X, index, xValues[index]);
+            view->setField(Dimension::Id::Y, index, yValues[index]);
+            view->setField(Dimension::Id::Z, index, zValues[index]);
+            view->setField(Dimension::Id::Intensity, index,
+                           intensityValues[index]);
+            view->setField(Dimension::Id::GpsTime, index, gpsTimeValues[index]);
+        }
+        bufferReader.addView(view);
+
+        // Set TileDB writer options.
+        Options writerOptions;
+        writerOptions.add("filename", uri);
+        writerOptions.add("x_tile_size", 6);
+        writerOptions.add("y_tile_size", 6);
+        writerOptions.add("z_tile_size", 6);
+        NL::json filters({});
+        filters["Intensity"] = {
+            {{"compression", "delta"}},
+            {{"compression", "zstd"}, {"compression_level", 5}}};
+        filters["GpsTime"] = {
+            {{"compression", "delta"}, {"reinterpret_datatype", "UINT64"}},
+            {{"compression", "bit_width_reduction"}},
+            {{"compression", "zstd"}, {"compression_level", 7}}};
+        writerOptions.add("filters", filters);
+
+        // Create TileDB writer, set options, and write data.
+        TileDBWriter writer;
+        writer.setOptions(writerOptions);
+        writer.setInput(bufferReader);
+        writer.prepare(table);
+#if TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR < 16
+        EXPECT_THROW(writer.execute(table), tiledb::TileDBError);
+    }
+#else
+        writer.execute(table);
+    }
+
+    // Read back the TileDB array.
+    {
+        // Check the array schema.
+        tiledb::Context ctx{};
+        tiledb::ArraySchema schema(ctx, uri);
+
+        auto gpsTimeFilterList = schema.attribute("GpsTime").filter_list();
+        EXPECT_EQ(gpsTimeFilterList.nfilters(), (uint32_t)3);
+        auto deltaFilter = gpsTimeFilterList.filter(0);
+        EXPECT_EQ(deltaFilter.filter_type(), TILEDB_FILTER_DELTA);
+        // schema.dump();
+        // EXPECT_TRUE(false);
+
+        tiledb_datatype_t delta_datatype{};
+        deltaFilter.get_option(TILEDB_COMPRESSION_REINTERPRET_DATATYPE,
+                               &delta_datatype);
+        EXPECT_EQ(delta_datatype, TILEDB_UINT64);
+
+        // Set reader options.
+        Options readerOptions;
+        readerOptions.add("filename", uri);
+
+        // Read data back from TileDB.
+        TileDBReader reader;
+        reader.setOptions(readerOptions);
+        PointTable readTable;
+        reader.prepare(readTable);
+        PointViewSet viewSet = reader.execute(readTable);
+        PointViewPtr view = *viewSet.begin();
+
+        // Check values.
+        for (uint32_t index = 0; index < 6; ++index)
+        {
+
+            EXPECT_FLOAT_EQ(view->getFieldAs<double>(Dimension::Id::X, index),
+                            xValues[index]);
+            EXPECT_FLOAT_EQ(view->getFieldAs<double>(Dimension::Id::Y, index),
+                            0.0);
+            EXPECT_FLOAT_EQ(view->getFieldAs<double>(Dimension::Id::Z, index),
+                            0.0);
+            EXPECT_FLOAT_EQ(
+                view->getFieldAs<uint16_t>(Dimension::Id::Intensity, index),
+                intensityValues[index]);
+            EXPECT_FLOAT_EQ(
+                view->getFieldAs<double>(Dimension::Id::GpsTime, index),
+                gpsTimeValues[index]);
+        }
+    }
+#endif
+}
 }; // namespace pdal

@@ -198,6 +198,29 @@ tiledb::Filter FilterFactory::filter(const tiledb::Context& ctx,
         else if (key == "scale_float_offset" || key == "SCALE_FLOAT_OFFSET")
             filter.set_option(TILEDB_SCALE_FLOAT_OFFSET,
                               options[key].get<double>());
+        else if (key == "reinterpret_datatype" ||
+                 key == "COMPRESSION_REINTERPRET_DATATYPE")
+        {
+#if TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR < 16
+            throw tiledb::TileDBError(
+                "Unable to set filter option '" + key +
+                "'. Requires TileDB version 2.16 or greater.");
+
+#else
+            auto datatype_str = options[key].get<std::string>();
+            tiledb_datatype_t output_datatype{};
+            auto rc = tiledb_datatype_from_str(datatype_str.c_str(),
+                                               &output_datatype);
+            if (rc != TILEDB_OK)
+                throw tiledb::TileDBError(
+                    "Unable to get TileDB datatype from datatype string '" +
+                    datatype_str + "'.");
+            uint8_t datatype_int = static_cast<uint8_t>(output_datatype);
+            filter.set_option<uint8_t>(TILEDB_COMPRESSION_REINTERPRET_DATATYPE,
+                                       datatype_int);
+
+#endif
+        }
         else
             throw tiledb::TileDBError("Unable to set filter option '" + key +
                                       "'. Not a valid TileDB filter option.");
@@ -318,6 +341,16 @@ tiledb::FilterList FilterFactory::defaultProfileFilterList(
         floatScale.set_option(TILEDB_SCALE_FLOAT_OFFSET, m_add_offset[index]);
         filterList.add_filter(floatScale);
 
+#if TILEDB_VERSION_MAJOR > 2 ||                                                \
+    (TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR >= 16)
+        // Delta filter
+        tiledb::Filter delta{ctx, TILEDB_FILTER_DELTA};
+        uint8_t deltaDatatype = static_cast<uint8_t>(TILEDB_INT32);
+        delta.set_option<uint8_t>(TILEDB_COMPRESSION_REINTERPRET_DATATYPE,
+                                  deltaDatatype);
+        filterList.add_filter(delta);
+#endif
+
         if (balanced)
         {
             // Bit shuffle filter
@@ -344,13 +377,15 @@ tiledb::FilterList FilterFactory::defaultProfileFilterList(
     }
     else if (dimName == "GpsTime")
     {
-        /* TODO: Implement before merging
-        // Type View filter
-        tiledb::Filter typed_view{ctx, TILEDB_FILTER_TYPED_VIEW};
-        typed_view.set_option<tiledb_datatype_t>(
-            TILEDB_TYPED_VIEW_OUTPUT_DATATYPE, TILEDB_UINT64);
-        filterList.add_filter(typed_view);
-        */
+#if TILEDB_VERSION_MAJOR > 2 ||                                                \
+    (TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR >= 16)
+        // Delta filter
+        tiledb::Filter delta{ctx, TILEDB_FILTER_DELTA};
+        uint8_t deltaDatatype = static_cast<uint8_t>(TILEDB_INT64);
+        delta.set_option<uint8_t>(TILEDB_COMPRESSION_REINTERPRET_DATATYPE,
+                                  deltaDatatype);
+        filterList.add_filter(delta);
+#endif
 
         // Bit width reduction
         tiledb::Filter bit_width_reduction{ctx,
@@ -374,6 +409,13 @@ tiledb::FilterList FilterFactory::defaultProfileFilterList(
     }
     else if (dimName == "Red" || dimName == "Green" || dimName == "Blue")
     {
+#if TILEDB_VERSION_MAJOR > 2 ||                                                \
+    (TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR >= 16)
+        // Delta filter
+        tiledb::Filter delta{ctx, TILEDB_FILTER_DELTA};
+        filterList.add_filter(delta);
+#endif
+
         // Bit width reduction
         tiledb::Filter bit_width_reduction{ctx,
                                            TILEDB_FILTER_BIT_WIDTH_REDUCTION};
@@ -397,6 +439,13 @@ tiledb::FilterList FilterFactory::defaultProfileFilterList(
     }
     else if (dimName == "Intensity")
     {
+#if TILEDB_VERSION_MAJOR > 2 ||                                                \
+    (TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR >= 16)
+        // Delta filter
+        tiledb::Filter delta{ctx, TILEDB_FILTER_DELTA};
+        filterList.add_filter(delta);
+#endif
+
         if (balanced)
         {
             // Zstd filter

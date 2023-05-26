@@ -361,7 +361,11 @@ TEST_F(TileDBWriterTest, default_options)
 
     tiledb::FilterList fl =
         array.schema().domain().dimension("X").filter_list();
+#if TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR < 16
     EXPECT_EQ(fl.nfilters(), 3U);
+#else
+    EXPECT_EQ(fl.nfilters(), 4U);
+#endif
 
     tiledb::Filter f1 = fl.filter(0);
     EXPECT_EQ(f1.filter_type(), TILEDB_FILTER_SCALE_FLOAT);

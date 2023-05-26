@@ -266,6 +266,34 @@ TEST(FilterFactory, user_set_scale_float)
     }
 }
 
+TEST(FilterFactory, user_set_delta)
+{
+    NL::json jsonOptions({});
+    jsonOptions["GpsTime"] = {
+        {{"compression", "delta"}, {"reinterpret_datatype", "UINT64"}}};
+    FilterFactory factory{jsonOptions,       "balanced", {{0.01, 0.01, 0.01}},
+                          {{1.0, 1.0, 1.0}}, "zstd",     7};
+
+    tiledb::Context ctx{};
+#if TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR < 16
+    EXPECT_THROW(factory.filterList(ctx, "GpsTime"), tiledb::TileDBError);
+#else
+    auto filterList = factory.filterList(ctx, "GpsTime");
+    auto nfilters = filterList.nfilters();
+    EXPECT_EQ(nfilters, 1);
+
+    if (nfilters >= 1)
+    {
+        auto filter = filterList.filter(0);
+        EXPECT_EQ(filter.filter_type(), TILEDB_FILTER_DELTA);
+        tiledb_datatype_t output_type{};
+        filter.get_option(TILEDB_COMPRESSION_REINTERPRET_DATATYPE,
+                          &output_type);
+        EXPECT_EQ(output_type, TILEDB_UINT64);
+    }
+#endif
+}
+
 TEST(FilterFactory, user_set_two_filter_list)
 {
     NL::json jsonOptions({});
