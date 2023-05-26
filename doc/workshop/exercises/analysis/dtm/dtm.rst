@@ -49,7 +49,7 @@ Pipeline breakdown
 1. Reader
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``denoised-ground-only`` is the :ref:`COPC <copc.io>` file we will clip. You should have
+``denoised-ground-only`` is the :ref:`COPC <https://copc.io>`__ file we will clip. You should have
 created this output as part of the :ref:`workshop-ground` exercise.
 
 
@@ -148,7 +148,7 @@ Notes
    a typical `TIN`_ surface model.
    
 3. If you are missing the Raster tab, check your plugins in QGIS. If you have none
-    you may need to reinstall through conda and make sure you have all the packages.
+    you may need to reinstall QGIS.
 
 .. _`TIN`: https://en.wikipedia.org/wiki/Triangulated_irregular_network
 .. _`gdaldem`: http://www.gdal.org/gdaldem.html
