@@ -20,7 +20,8 @@
         },
         {
             "type": "writers.copc",
-            "filename": "./exercises/analysis/denoising/clean.copc.laz"
+            "filename": "./exercises/analysis/denoising/clean.copc.laz",
+            "forward": "all"
         }
     ]
 }
