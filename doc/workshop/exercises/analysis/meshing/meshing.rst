@@ -39,7 +39,7 @@ After running each command, the output `.ply` file can be viewed in Meshlab or
 .. note::
 
     This example will be using the output of using :ref:`workshop-clipping`
-    exercise, specifically using ``stadium.copc.las`` file.  Please produce that
+    exercise, specifically using ``stadium.copc.laz`` file.  Please produce that
     file by following that exercise before starting this one.
 
 .. note::
