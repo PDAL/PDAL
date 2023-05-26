@@ -49,7 +49,7 @@ Pipeline breakdown
 1. Reader
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``denoised-ground-only`` is the :ref:`COPC <copc.io>` file we will clip. You should have
+``denoised-ground-only`` is the :ref:`COPC <https://copc.io>`__ file we will clip. You should have
 created this output as part of the :ref:`workshop-ground` exercise.
 
 
