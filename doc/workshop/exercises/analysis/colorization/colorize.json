@@ -18,7 +18,8 @@
         },
         {
             "type": "writers.copc",
-            "filename": "./exercises/analysis/colorization/uncompahgre-colored.copc.laz"
+            "filename": "./exercises/analysis/colorization/uncompahgre-colored.copc.laz",
+            "forward": "all"
         }
     ]
 }

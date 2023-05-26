@@ -101,14 +101,19 @@ add a few options to have finer control over what is written. These include:
 5. :ref:`writers.copc`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We will then turn the ``uncompahgre-colored.laz`` into a COPC file for vizualization with QGIS.
+We will then turn the ``uncompahgre-colored.laz`` into a COPC file for vizualization with QGIS
+using the stage below.
 
 ::
 
     {
         "type": "writers.copc",
         "filename": "./exercises/analysis/colorization/uncompahgre-colored.copc.laz"
+        "forward": "all"
     }
+
+1. ``forward``: List of header fields to be preserved from LAS input file. In this case, we want ``all``
+   fields to be preserved.
 
 .. note::
 
