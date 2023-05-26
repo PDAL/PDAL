@@ -35,7 +35,8 @@ Given the following pipeline for fetching the data, complete the rest of the tas
             },
             {
                 "type": "writers.copc",
-                "filename": "st-stephens.copc.laz"
+                "filename": "st-stephens.copc.laz",
+                "forward": "all"
             }
         ]
     }
