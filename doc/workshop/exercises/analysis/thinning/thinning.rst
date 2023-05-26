@@ -50,7 +50,7 @@ Invoke the following command, substituting accordingly, in your `Conda Shell`:
 Visualization
 ................................................................................
 
-GQIS has the ability to switch on/off multiple data sets, and we
+QGIS has the ability to switch on/off multiple data sets, and we
 are going to use that ability to view both the ``uncompahgre.laz`` and the
 output ``uncompahgre-thin.copc.laz`` file.
 
