@@ -161,12 +161,16 @@ std::unique_ptr<std::size_t> Arbiter::tryGetSize(const std::string path) const
     return getDriver(path)->tryGetSize(stripProtocol(path));
 }
 
-void Arbiter::put(const std::string path, const std::string& data) const
+std::vector<char> Arbiter::put(
+        const std::string path, 
+        const std::string& data) const
 {
     return getDriver(path)->put(stripProtocol(path), data);
 }
 
-void Arbiter::put(const std::string path, const std::vector<char>& data) const
+std::vector<char> Arbiter::put(
+        const std::string path, 
+        const std::vector<char>& data) const
 {
     return getDriver(path)->put(stripProtocol(path), data);
 }
@@ -203,7 +207,7 @@ std::unique_ptr<std::vector<char>> Arbiter::tryGetBinary(
     return getHttpDriver(path)->tryGetBinary(stripProtocol(path), headers, query);
 }
 
-void Arbiter::put(
+std::vector<char> Arbiter::put(
         const std::string path,
         const std::string& data,
         const http::Headers headers,
@@ -212,7 +216,7 @@ void Arbiter::put(
     return getHttpDriver(path)->put(stripProtocol(path), data, headers, query);
 }
 
-void Arbiter::put(
+std::vector<char> Arbiter::put(
         const std::string path,
         const std::vector<char>& data,
         const http::Headers headers,
@@ -485,7 +489,10 @@ std::unique_ptr<std::string> Driver::tryGet(const std::string path) const
 std::vector<char> Driver::getBinary(std::string path) const
 {
     std::vector<char> data;
-    if (!get(path, data)) throw ArbiterError("Could not read file " + m_protocol + "://" + path);
+    if (!get(path, data))
+    {
+        throw ArbiterError("Could not read file " + m_protocol + "://" + path);
+    }
     return data;
 }
 
@@ -499,12 +506,13 @@ std::unique_ptr<std::vector<char>> Driver::tryGetBinary(std::string path) const
 std::size_t Driver::getSize(const std::string path) const
 {
     if (auto size = tryGetSize(path)) return *size;
-    else throw ArbiterError("Could not get size of " + path);
+    else throw ArbiterError(
+        "Could not get size of " + m_protocol + "://" + path);
 }
 
-void Driver::put(std::string path, const std::string& data) const
+std::vector<char> Driver::put(std::string path, const std::string& data) const
 {
-    put(path, std::vector<char>(data.begin(), data.end()));
+    return put(path, std::vector<char>(data.begin(), data.end()));
 }
 
 void Driver::copy(std::string src, std::string dst) const
@@ -1021,7 +1029,7 @@ bool Fs::get(std::string path, std::vector<char>& data) const
     return good;
 }
 
-void Fs::put(std::string path, const std::vector<char>& data) const
+std::vector<char> Fs::put(std::string path, const std::vector<char>& data) const
 {
     path = expandTilde(path);
     std::ofstream stream(path, binaryTruncMode);
@@ -1037,6 +1045,7 @@ void Fs::put(std::string path, const std::vector<char>& data) const
     {
         throw ArbiterError("Error occurred while writing " + path);
     }
+    return std::vector<char>();
 }
 
 void Fs::copy(std::string src, std::string dst) const
@@ -1475,13 +1484,17 @@ std::unique_ptr<std::vector<char>> Http::tryGetBinary(
     return data;
 }
 
-void Http::put(
+std::vector<char> Http::put(
         std::string path,
         const std::string& data,
         const Headers headers,
         const Query query) const
 {
-    put(path, std::vector<char>(data.begin(), data.end()), headers, query);
+    return put(
+        path, 
+        std::vector<char>(data.begin(), data.end()), 
+        headers, 
+        query);
 }
 
 bool Http::get(
@@ -1504,18 +1517,21 @@ bool Http::get(
     return good;
 }
 
-void Http::put(
+std::vector<char> Http::put(
         const std::string path,
         const std::vector<char>& data,
         const Headers headers,
         const Query query) const
 {
     auto http(m_pool.acquire());
+    auto res(http.put(typedPath(path), data, headers, query));
 
-    if (!http.put(typedPath(path), data, headers, query).ok())
+    if (!res.ok())
     {
         throw ArbiterError("Couldn't HTTP PUT to " + path);
     }
+
+    return res.data();
 }
 
 void Http::post(
@@ -1659,6 +1675,7 @@ namespace
     // See:
     // https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html
     const std::string ec2CredIp("169.254.169.254");
+    const std::string ec2TokenBase(ec2CredIp + "/latest/api/token");
     const std::string ec2CredBase(
             ec2CredIp + "/latest/meta-data/iam/security-credentials");
 
@@ -1823,7 +1840,25 @@ std::unique_ptr<S3::Auth> S3::Auth::create(
     // be running in an EC2 instance with an instance profile set up.
     if (const auto iamRole = httpDriver.tryGet(ec2CredBase))
     {
-        return makeUnique<Auth>(ec2CredBase + "/" + *iamRole);
+        try
+        {
+            const auto token = httpDriver.put(
+                ec2TokenBase, 
+                std::vector<char>(),
+                {{ "X-aws-ec2-metadata-token-ttl-seconds", "21600" }}, 
+                {{ }});
+
+            if (const auto iamRole = httpDriver.tryGet(
+                ec2CredBase,
+                {{ 
+                    "X-aws-ec2-metadata-token", 
+                    std::string(token.data(), token.size())
+                }}))
+            {
+                return makeUnique<Auth>(ec2CredBase + "/" + *iamRole);
+            }
+        }
+        catch (...) { }
     }
 
     // We also may be running in Fargate, which looks very similar but with a
@@ -1988,7 +2023,24 @@ S3::AuthFields S3::Auth::fields() const
             http::Pool pool;
             drivers::Http httpDriver(pool);
 
-            const json creds(json::parse(httpDriver.get(*m_credUrl)));
+            // We could cache our token from our initial IAM role query and
+            // refresh it only on expiration, but this flow for the S3-level
+            // temporary creds/token only happens on an hourly basis so it
+            // doesn't much matter.
+            const auto token = httpDriver.put(
+                ec2TokenBase, 
+                std::vector<char>(),
+                {{ "X-aws-ec2-metadata-token-ttl-seconds", "21600" }},
+                {{ }});
+
+            const json creds = json::parse(
+                httpDriver.get(
+                    *m_credUrl,
+                    {{ 
+                        "X-aws-ec2-metadata-token", 
+                        std::string(token.data(), token.size())
+                    }}));
+
             m_access = creds.at("AccessKeyId").get<std::string>();
             m_hidden = creds.at("SecretAccessKey").get<std::string>();
             m_token = creds.at("Token").get<std::string>();
@@ -2087,7 +2139,7 @@ bool S3::get(
     }
 }
 
-void S3::put(
+std::vector<char> S3::put(
         const std::string rawPath,
         const std::vector<char>& data,
         const Headers userHeaders,
@@ -2126,6 +2178,8 @@ void S3::put(
                 "Couldn't S3 PUT to " + rawPath + ": " +
                 std::string(res.data().data(), res.data().size()));
     }
+
+    return res.data();
 }
 
 void S3::copy(const std::string src, const std::string dst) const
@@ -2835,7 +2889,7 @@ bool AZ::get(
     }
 }
 
-void AZ::put(
+std::vector<char> AZ::put(
         const std::string rawPath,
         const std::vector<char>& data,
         const Headers userHeaders,
@@ -2876,7 +2930,7 @@ void AZ::put(
                     "Couldn't Azure PUT to " + rawPath + ": " +
                     std::string(res.data().data(), res.data().size()));
         }
-        return;
+        return res.data();
     }
 
     const ApiV1 ApiV1(
@@ -2900,6 +2954,8 @@ void AZ::put(
                 "Couldn't Azure PUT to " + rawPath + ": " +
                 std::string(res.data().data(), res.data().size()));
     }
+
+    return res.data();
 }
 
 void AZ::copy(const std::string src, const std::string dst) const
@@ -3377,7 +3433,7 @@ bool Google::get(
     }
 }
 
-void Google::put(
+std::vector<char> Google::put(
         const std::string path,
         const std::vector<char>& data,
         const http::Headers userHeaders,
@@ -3396,6 +3452,8 @@ void Google::put(
 
     drivers::Https https(m_pool);
     const auto res(https.internalPost(url, data, headers, query));
+    if (!res.ok()) throw ArbiterError(res.str());
+    return res.data();
 }
 
 std::vector<std::string> Google::glob(std::string path, bool verbose) const
@@ -3848,7 +3906,7 @@ bool Dropbox::get(
     return false;
 }
 
-void Dropbox::put(
+std::vector<char> Dropbox::put(
         const std::string path,
         const std::vector<char>& data,
         const Headers userHeaders,
@@ -3863,6 +3921,7 @@ void Dropbox::put(
     const Response res(Http::internalPost(putUrl, data, headers, query));
 
     if (!res.ok()) throw ArbiterError(res.str());
+    return res.data();
 }
 
 std::string Dropbox::continueFileInfo(std::string cursor) const
@@ -4009,7 +4068,6 @@ std::vector<std::string> Dropbox::glob(std::string path, bool verbose) const
 #include <cstring>
 #include <ios>
 #include <iostream>
-#include <cstdio>
 
 #ifndef ARBITER_IS_AMALGAMATION
 #include <arbiter/util/curl.hpp>
@@ -4504,8 +4562,8 @@ Response Curl::post(
 #include <curl/curl.h>
 #endif
 
-#include <chrono>
 #include <cctype>
+#include <chrono>
 #include <iomanip>
 #include <iostream>
 #include <numeric>
