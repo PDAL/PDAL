@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: f17a62f31d4df0ec23636971f56f152a8c52b72c
+// Git SHA: e0efde40a177a8e731cb24106802e32b5a843878
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -3788,7 +3788,9 @@ public:
      *
      * @param path Path with the type-specifying prefix information stripped.
      */
-    virtual void put(std::string path, const std::vector<char>& data) const = 0;
+    virtual std::vector<char> put(
+        std::string path, 
+        const std::vector<char>& data) const = 0;
 
     /** True for remote paths, otherwise false.  If `true`, a fs::LocalHandle
      * request will download and write this file to the local filesystem.
@@ -3802,7 +3804,7 @@ public:
     std::size_t getSize(std::string path) const;
 
     /** Write string data. */
-    void put(std::string path, const std::string& data) const;
+    std::vector<char> put(std::string path, const std::string& data) const;
 
     /** Copy a file, where @p src and @p dst must both be of this driver
      * type.  Type-prefixes must be stripped from the input parameters.
@@ -3973,7 +3975,7 @@ public:
     virtual std::unique_ptr<std::size_t> tryGetSize(
             std::string path) const override;
 
-    virtual void put(
+    virtual std::vector<char> put(
             std::string path,
             const std::vector<char>& data) const override;
 
@@ -4055,11 +4057,11 @@ public:
     virtual std::unique_ptr<std::size_t> tryGetSize(
             std::string path) const override;
 
-    virtual void put(
+    virtual std::vector<char> put(
             std::string path,
             const std::vector<char>& data) const final override
     {
-        put(path, data, http::Headers(), http::Query());
+        return put(path, data, http::Headers(), http::Query());
     }
 
     /* HTTP-specific driver methods follow.  Since many drivers (S3, Dropbox,
@@ -4107,7 +4109,7 @@ public:
             http::Query query) const;
 
     /** Perform an HTTP PUT request. */
-    void put(
+    std::vector<char> put(
             std::string path,
             const std::string& data,
             http::Headers headers,
@@ -4118,7 +4120,7 @@ public:
      */
 
     /** Perform an HTTP PUT request. */
-    virtual void put(
+    virtual std::vector<char> put(
             std::string path,
             const std::vector<char>& data,
             http::Headers headers,
@@ -4284,7 +4286,7 @@ public:
             http::Query query = http::Query()) const override;
 
     /** Inherited from Drivers::Http. */
-    virtual void put(
+    virtual std::vector<char> put(
             std::string path,
             const std::vector<char>& data,
             http::Headers headers,
@@ -4514,7 +4516,7 @@ public:
             std::string path) const override;
 
     /** Inherited from Drivers::Http. */
-    virtual void put(
+    virtual std::vector<char> put(
             std::string path,
             const std::vector<char>& data,
             http::Headers headers,
@@ -4713,7 +4715,7 @@ public:
             std::string path) const override;
 
     /** Inherited from Drivers::Http. */
-    virtual void put(
+    virtual std::vector<char> put(
             std::string path,
             const std::vector<char>& data,
             http::Headers headers,
@@ -4812,7 +4814,7 @@ public:
         std::string j,
         std::string profile);
 
-    virtual void put(
+    virtual std::vector<char> put(
             std::string path,
             const std::vector<char>& data,
             http::Headers headers,
@@ -5278,10 +5280,12 @@ public:
     std::unique_ptr<std::size_t> tryGetSize(std::string path) const;
 
     /** Write data to path. */
-    void put(std::string path, const std::string& data) const;
+    std::vector<char> put(std::string path, const std::string& data) const;
 
     /** Write data to path. */
-    void put(std::string path, const std::vector<char>& data) const;
+    std::vector<char> put(
+            std::string path, 
+            const std::vector<char>& data) const;
 
     /** Get data with additional HTTP-specific parameters.  Throws if
      * isHttpDerived is false for this path. */
@@ -5313,7 +5317,7 @@ public:
 
     /** Write data to path with additional HTTP-specific parameters.
      * Throws if isHttpDerived is false for this path. */
-    void put(
+    std::vector<char> put(
             std::string path,
             const std::string& data,
             http::Headers headers,
@@ -5321,7 +5325,7 @@ public:
 
     /** Write data to path with additional HTTP-specific parameters.
      * Throws if isHttpDerived is false for this path. */
-    void put(
+    std::vector<char> put(
             std::string path,
             const std::vector<char>& data,
             http::Headers headers,
