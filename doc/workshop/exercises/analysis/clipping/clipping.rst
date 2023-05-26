@@ -68,7 +68,7 @@ capability to reproject the data for us on-the-fly:
 .. note::
     Notice the numbers on the buildings and trees. These are the classifations given in
     the LIDAR Point Classes or `LAS Specification`_. You can sort and single out these in JSON filters.
-    ex. "limits": "Classification[3:4]" which only shows classes 3 to 4 which 
+    ex. "expression": "Classification >= 3 && Classification <= 4"which only shows classes 3 to 4 which 
     are medium and high vegitation. 
 
 .. _`LAS Specification`: https://www.asprs.org/wp-content/uploads/2019/03/LAS_1_4_r14.pdf
