@@ -27,10 +27,10 @@ PDAL_ADD_PLUGIN(reader_libname reader tiledb
 #
 # TileDB Writer
 #
-
 PDAL_ADD_PLUGIN(writer_libname writer tiledb
     FILES
         io/TileDBWriter.cpp
+        io/TileDBUtils.cpp
     LINK_WITH
         ${TILEDB_LIBRARIES}
     INCLUDES
@@ -48,6 +48,7 @@ if (WITH_TESTS)
             ${TILEDB_LIBRARIES}
         INCLUDES
             ${TILEDB_INCLUDE_DIR}
+            ${NLOHMANN_INCLUDE_DIR}
     )
 
     PDAL_ADD_TEST(pdal_io_tiledb_writer_test
@@ -70,7 +71,7 @@ if (WITH_TESTS)
             ${TILEDB_LIBRARIES}
         INCLUDES
             ${TILEDB_INCLUDE_DIR}
-            ${NLOHMANN_INLCUDE_DIR}
+            ${NLOHMANN_INCLUDE_DIR}
     )
 
     PDAL_ADD_TEST(pdal_io_tiledb_time_writer_test
@@ -83,19 +84,20 @@ if (WITH_TESTS)
             ${TILEDB_LIBRARIES}
         INCLUDES
             ${TILEDB_INCLUDE_DIR}
+            ${NLOHMANN_INCLUDE_DIR}
     )
 
     PDAL_ADD_TEST(pdal_io_tiledb_time_reader_test
         FILES
             test/TileDBReaderTimeDimTest.cpp
             test/XYZTmUtils.cpp
-            io/TileDBUtils.cpp
         LINK_WITH
             ${reader_libname}
             ${writer_libname}
             ${TILEDB_LIBRARIES}
         INCLUDES
             ${TILEDB_INCLUDE_DIR}
+            ${NLOHMANN_INCLUDE_DIR}
     )
 
 

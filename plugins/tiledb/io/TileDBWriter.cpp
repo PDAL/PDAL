@@ -40,6 +40,7 @@
 
 #include <pdal/util/FileUtils.hpp>
 
+#include "TileDBUtils.hpp"
 #include "TileDBWriter.hpp"
 
 const char pathSeparator =
@@ -78,7 +79,6 @@ struct TileDBWriter::Args
     std::string m_compressor;
     int m_compressionLevel;
     NL::json m_filters;
-    NL::json m_defaults;
     bool m_append;
     uint64_t m_timeStamp = UINT64_MAX;
 };
@@ -161,126 +161,7 @@ tiledb::Attribute createAttribute(const tiledb::Context& ctx,
     }
 }
 
-std::unique_ptr<tiledb::Filter> createFilter(const tiledb::Context& ctx,
-                                             const NL::json& opts)
-{
-    std::unique_ptr<tiledb::Filter> filter;
-
-    if (!opts.empty())
-    {
-        std::string name = opts["compression"];
-
-        if (name.empty())
-            filter.reset(new tiledb::Filter(ctx, TILEDB_FILTER_NONE));
-        else if (name == "gzip")
-            filter.reset(new tiledb::Filter(ctx, TILEDB_FILTER_GZIP));
-        else if (name == "zstd")
-            filter.reset(new tiledb::Filter(ctx, TILEDB_FILTER_ZSTD));
-        else if (name == "lz4")
-            filter.reset(new tiledb::Filter(ctx, TILEDB_FILTER_LZ4));
-        else if (name == "rle")
-            filter.reset(new tiledb::Filter(ctx, TILEDB_FILTER_RLE));
-        else if (name == "bzip2")
-            filter.reset(new tiledb::Filter(ctx, TILEDB_FILTER_BZIP2));
-        else if (name == "double-delta")
-            filter.reset(new tiledb::Filter(ctx, TILEDB_FILTER_DOUBLE_DELTA));
-        else if (name == "bit-width-reduction")
-            filter.reset(
-                new tiledb::Filter(ctx, TILEDB_FILTER_BIT_WIDTH_REDUCTION));
-        else if (name == "bit-shuffle")
-            filter.reset(new tiledb::Filter(ctx, TILEDB_FILTER_BITSHUFFLE));
-        else if (name == "byte-shuffle")
-            filter.reset(new tiledb::Filter(ctx, TILEDB_FILTER_BYTESHUFFLE));
-        else if (name == "positive-delta")
-            filter.reset(new tiledb::Filter(ctx, TILEDB_FILTER_POSITIVE_DELTA));
-        else
-            throw tiledb::TileDBError("Unable to parse compression type: " +
-                                      name);
-
-        if (opts.count("compression_level") > 0)
-            filter->set_option(TILEDB_COMPRESSION_LEVEL,
-                               opts["compression_level"].get<int>());
-
-        if (opts.count("bit_width_max_window") > 0)
-            filter->set_option(TILEDB_BIT_WIDTH_MAX_WINDOW,
-                               opts["bit_width_max_window"].get<int>());
-
-        if (opts.count("positive_delta_max_window") > 0)
-            filter->set_option(TILEDB_POSITIVE_DELTA_MAX_WINDOW,
-                               opts["positive_delta_max_window"].get<int>());
-    }
-    else
-    {
-        filter.reset(new tiledb::Filter(ctx, TILEDB_FILTER_NONE));
-    }
-    return filter;
-}
-
-std::unique_ptr<tiledb::FilterList> createFilterList(const tiledb::Context& ctx,
-                                                     const NL::json& opts)
-{
-    std::unique_ptr<tiledb::FilterList> filterList(new tiledb::FilterList(ctx));
-    if (!opts.empty())
-    {
-        if (opts.is_array())
-        {
-            for (auto& el : opts.items())
-            {
-                auto v = el.value();
-                filterList->add_filter(*createFilter(ctx, v));
-            }
-        }
-        else
-        {
-            filterList->add_filter(*createFilter(ctx, opts));
-        }
-    }
-    return filterList;
-}
-
-std::unique_ptr<tiledb::FilterList>
-getDimFilter(const tiledb::Context& ctx, const std::string& dimName,
-             const NL::json& opts, const std::string& defaultCompressor,
-             const int& defaultCompressorLevel)
-{
-    NL::json dimOpts;
-    if (opts.count(dimName) > 0)
-    {
-        dimOpts = opts[dimName];
-    }
-    else if (!defaultCompressor.empty())
-    {
-        dimOpts["compression"] = defaultCompressor;
-        dimOpts["compression_level"] = defaultCompressorLevel;
-    }
-
-    return createFilterList(ctx, dimOpts);
-}
-
-TileDBWriter::TileDBWriter() : m_args(new TileDBWriter::Args)
-{
-    std::string attributeDefaults(R"(
-    {
-        "X" : {"compression": "zstd", "compression_level": 7},
-        "Y" : {"compression": "zstd", "compression_level": 7},
-        "Z" : {"compression": "zstd", "compression_level": 7},
-        "Intensity":{"compression": "bzip2", "compression_level": 5},
-        "ReturnNumber": {"compression": "zstd", "compression_level": 7},
-        "NumberOfReturns": {"compression": "zstd", "compression_level": 7},
-        "ScanDirectionFlag": {"compression": "bzip2", "compression_level": 5},
-        "EdgeOfFlightLine": {"compression": "bzip2", "compression_level": 5},
-        "Classification": {"compression": "gzip", "compression_level": 9},
-        "ScanAngleRank": {"compression": "bzip2", "compression_level": 5},
-        "UserData": {"compression": "gzip", "compression_level": 9},
-        "PointSourceId": {"compression": "bzip2"},
-        "Red": {"compression": "zstd", "compression_level": 7},
-        "Green": {"compression": "zstd", "compression_level": 7},
-        "Blue": {"compression": "zstd", "compression_level": 7},
-        "GpsTime": {"compression": "zstd", "compression_level": 7}
-    })");
-
-    m_args->m_defaults = NL::json::parse(attributeDefaults);
-}
+TileDBWriter::TileDBWriter() : m_args(new TileDBWriter::Args) {}
 
 TileDBWriter::~TileDBWriter() {}
 
@@ -359,7 +240,6 @@ void TileDBWriter::initialize()
 
         if (!m_args->m_append)
         {
-            m_args->m_defaults.update(m_args->m_filters);
             m_schema.reset(new tiledb::ArraySchema(*m_ctx, TILEDB_SPARSE));
             m_schema->set_allows_dups(true);
         }
@@ -384,6 +264,9 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
     // tiledb attributes
     if (!m_args->m_append)
     {
+        // Get filter factory class.
+        FilterFactory filterFactory{m_args->m_filters, m_args->m_compressor,
+                                    m_args->m_compressionLevel};
 
         // Check if using Hilbert order or row-major order. Use row-major if all
         // dimensions have positive tiles set. Otherwise, use Hilbert order.
@@ -414,18 +297,10 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
         tiledb::Domain domain(*m_ctx);
 
         // Get filters for the dimensions.
-        tiledb::FilterList xFltrs =
-            *getDimFilter(*m_ctx, "X", m_args->m_defaults, m_args->m_compressor,
-                          m_args->m_compressionLevel);
-        tiledb::FilterList yFltrs =
-            *getDimFilter(*m_ctx, "Y", m_args->m_defaults, m_args->m_compressor,
-                          m_args->m_compressionLevel);
-        tiledb::FilterList zFltrs =
-            *getDimFilter(*m_ctx, "Z", m_args->m_defaults, m_args->m_compressor,
-                          m_args->m_compressionLevel);
-        tiledb::FilterList tFltrs =
-            *getDimFilter(*m_ctx, "GpsTime", m_args->m_defaults,
-                          m_args->m_compressor, m_args->m_compressionLevel);
+        tiledb::FilterList xFltrs = filterFactory.filterList(*m_ctx, "X");
+        tiledb::FilterList yFltrs = filterFactory.filterList(*m_ctx, "Y");
+        tiledb::FilterList zFltrs = filterFactory.filterList(*m_ctx, "Z");
+        tiledb::FilterList tFltrs = filterFactory.filterList(*m_ctx, "GpsTime");
 
         // Set the domain values for the dimensions. Use the user provided
         // domain values, and update if they are the default domain or otherwise
@@ -572,12 +447,14 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
         Dimension::Type type = layout->dimType(d);
         if (!m_args->m_append)
         {
+            // Get filter factory class.
+            FilterFactory filterFactory{m_args->m_filters, m_args->m_compressor,
+                                        m_args->m_compressionLevel};
+
             if (!m_schema->domain().has_dimension(dimName))
             {
                 tiledb::Attribute att = createAttribute(*m_ctx, dimName, type);
-                att.set_filter_list(*getDimFilter(
-                    *m_ctx, dimName, m_args->m_defaults, m_args->m_compressor,
-                    m_args->m_compressionLevel));
+                att.set_filter_list(filterFactory.filterList(*m_ctx, dimName));
 
                 m_schema->add_attribute(att);
             }
