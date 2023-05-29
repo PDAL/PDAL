@@ -42,7 +42,8 @@
 
 #include "BpfCompressor.hpp"
 #include <pdal/util/Utils.hpp>
-#include <pdal/util/ProgramArgs.hpp>
+#include <arbiter/arbiter.hpp>
+
 
 namespace pdal
 {
@@ -98,6 +99,18 @@ void BpfWriter::addArgs(ProgramArgs& args)
 
 void BpfWriter::initialize()
 {
+
+    // Deal with remote files
+    if (Utils::isRemote(m_filename))
+    {
+
+        // swap our filename for a tmp file
+        std::string tmpname = Utils::tempFilename(m_filename);
+        m_remoteFilename = m_filename;
+        m_filename = tmpname;
+        m_isRemote = true;
+    }
+
     m_header.m_coordId = m_coordId.m_val;
     m_header.m_coordType = Utils::toNative(m_header.m_coordId ?
         BpfCoordType::UTM : BpfCoordType::Cartesian);
@@ -394,6 +407,16 @@ void BpfWriter::doneFile()
     m_header.writeDimensions(m_stream, m_dims);
     m_stream.close();
     getMetadata().addList("filename", m_curFilename);
+
+    if (m_isRemote)
+    {
+        arbiter::Arbiter a;
+        a.put(m_remoteFilename, a.getBinary(m_filename));
+
+        // Clean up temporary
+        FileUtils::deleteFile(m_filename);
+    }
+
 }
 
 } //namespace pdal
