@@ -237,12 +237,6 @@ void TileDBWriter::initialize()
         }
         else
             m_ctx.reset(new tiledb::Context());
-
-        if (!m_args->m_append)
-        {
-            m_schema.reset(new tiledb::ArraySchema(*m_ctx, TILEDB_SPARSE));
-            m_schema->set_allows_dups(true);
-        }
     }
     catch (const tiledb::TileDBError& err)
     {
@@ -252,18 +246,31 @@ void TileDBWriter::initialize()
 
 void TileDBWriter::ready(pdal::BasePointTable& table)
 {
+    // Create objects to store the buffer data.
     auto layout = table.layout();
-    auto all = layout->dims();
-    std::vector<tiledb::Dimension> dims;
+    for (const auto& dimId : layout->dims())
+    {
+        // Get the name and type of the dim.
+        std::string dimName = layout->dimName(dimId);
+        Dimension::Type dimType = layout->dimType(dimId);
 
+        // Allocate the buffer.
+        m_buffers.emplace_back(dimName, dimId, dimType);
+        m_buffers.back().m_buffer.resize(m_args->m_cache_size *
+                                         Dimension::size(dimType));
+    }
+
+    // Enable TileDB stats (if requested).
     if (m_args->m_stats)
         tiledb::Stats::enable();
 
-    // get a list of all the dimensions & their types and add to schema
-    // x,y,z will be tiledb dimensions other pdal dimensions will be
-    // tiledb attributes
+    // If not appending to an existing array, then create the TileDB array.
     if (!m_args->m_append)
     {
+
+        tiledb::ArraySchema schema{*m_ctx, TILEDB_SPARSE};
+        schema.set_allows_dups(true);
+
         // Get filter factory class.
         FilterFactory filterFactory{m_args->m_filters, m_args->m_compressor,
                                     m_args->m_compressionLevel};
@@ -417,80 +424,55 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
                                          .set_filter_list(tFltrs));
         }
 
-        m_schema->set_domain(domain);
-        m_schema->set_capacity(m_args->m_tile_capacity);
+        schema.set_domain(domain);
+        schema.set_capacity(m_args->m_tile_capacity);
         if (!hasValidTiles)
-            m_schema->set_cell_order(TILEDB_HILBERT);
-    }
-    else
-    {
-#if TILEDB_VERSION_MINOR < 15
-        if (m_args->m_timeStamp != UINT64_MAX)
-            m_array.reset(new tiledb::Array(*m_ctx, m_args->m_arrayName,
-                                            TILEDB_WRITE, m_args->m_timeStamp));
-        else
-            m_array.reset(
-                new tiledb::Array(*m_ctx, m_args->m_arrayName, TILEDB_WRITE));
-#else
-        m_array.reset(new tiledb::Array(
-            *m_ctx, m_args->m_arrayName, TILEDB_WRITE,
-            {tiledb::TimeTravelMarker(), m_args->m_timeStamp}));
-#endif
-        if (m_array->schema().domain().has_dimension("GpsTime"))
-            m_use_time = true;
-    }
+            schema.set_cell_order(TILEDB_HILBERT);
 
-    for (const auto& d : all)
-    {
-        std::string dimName = layout->dimName(d);
-
-        Dimension::Type type = layout->dimType(d);
-        if (!m_args->m_append)
+        // Set the attributes.
+        for (const auto& dimBuffer : m_buffers)
         {
-            // Get filter factory class.
-            FilterFactory filterFactory{m_args->m_filters, m_args->m_compressor,
-                                        m_args->m_compressionLevel};
-
-            if (!m_schema->domain().has_dimension(dimName))
+            // Create and add the attribute to the domain.
+            if (!domain.has_dimension(dimBuffer.m_name))
             {
-                tiledb::Attribute att = createAttribute(*m_ctx, dimName, type);
-                att.set_filter_list(filterFactory.filterList(*m_ctx, dimName));
-
-                m_schema->add_attribute(att);
+                tiledb::Attribute att =
+                    createAttribute(*m_ctx, dimBuffer.m_name, dimBuffer.m_type);
+                att.set_filter_list(
+                    filterFactory.filterList(*m_ctx, dimBuffer.m_name));
+                schema.add_attribute(att);
             }
         }
-        else
-        {
-            // check attribute and dimension exist in original tiledb array
-            auto attrs = m_array->schema().attributes();
-            auto it = attrs.find(dimName);
-            if (it == attrs.end() &&
-                (!m_array->schema().domain().has_dimension(dimName)))
-                throwError("Attribute/Dimension " + dimName +
-                           " does not exist in original array.");
-        }
 
-        m_attrs.emplace_back(dimName, d, type);
-        // Size the buffers.
-        m_attrs.back().m_buffer.resize(m_args->m_cache_size *
-                                       Dimension::size(type));
+        // Create the TileDB array.
+        tiledb::Array::create(m_args->m_arrayName, schema);
     }
 
-    if (!m_args->m_append)
-    {
-        tiledb::Array::create(m_args->m_arrayName, *m_schema);
+    // Open the array at the requested timestamp range.
 #if TILEDB_VERSION_MINOR < 15
-        if (m_args->m_timeStamp != UINT64_MAX)
-            m_array.reset(new tiledb::Array(*m_ctx, m_args->m_arrayName,
-                                            TILEDB_WRITE, m_args->m_timeStamp));
-        else
-            m_array.reset(
-                new tiledb::Array(*m_ctx, m_args->m_arrayName, TILEDB_WRITE));
+    if (m_args->m_timeStamp != UINT64_MAX)
+        m_array.reset(new tiledb::Array(*m_ctx, m_args->m_arrayName,
+                                        TILEDB_WRITE, m_args->m_timeStamp));
+    else
+        m_array.reset(
+            new tiledb::Array(*m_ctx, m_args->m_arrayName, TILEDB_WRITE));
 #else
-        m_array.reset(new tiledb::Array(
-            *m_ctx, m_args->m_arrayName, TILEDB_WRITE,
-            {tiledb::TimeTravelMarker(), m_args->m_timeStamp}));
+    m_array.reset(
+        new tiledb::Array(*m_ctx, m_args->m_arrayName, TILEDB_WRITE,
+                          {tiledb::TimeTravelMarker(), m_args->m_timeStamp}));
 #endif
+    const auto& schema = m_array->schema();
+
+    // Check if GpsTime is a dimension.
+    if (schema.domain().has_dimension("GpsTime"))
+        m_use_time = true;
+
+    for (const auto& dimBuffer : m_buffers)
+    {
+        // If appending, check the layout dim exists in the original schema.
+        if (m_args->m_append && !schema.has_attribute(dimBuffer.m_name) &&
+            !schema.domain().has_dimension(dimBuffer.m_name))
+            throwError("Attribute/Dimension '" + dimBuffer.m_name +
+                       "' does not exist in original array.");
     }
 
     m_current_idx = 0;
@@ -506,7 +488,7 @@ bool TileDBWriter::processOne(PointRef& point)
     if (m_use_time)
         tm = point.getFieldAs<double>(Dimension::Id::GpsTime);
 
-    for (auto& a : m_attrs)
+    for (auto& a : m_buffers)
         writeAttributeValue(a, point, m_current_idx);
 
     m_xs.push_back(x);
@@ -579,7 +561,7 @@ bool TileDBWriter::flushCache(size_t size)
         query.set_data_buffer("GpsTime", m_tms);
 
     // set tiledb buffers
-    for (const auto& a : m_attrs)
+    for (const auto& a : m_buffers)
     {
         uint8_t* buf = const_cast<uint8_t*>(a.m_buffer.data());
         switch (a.m_type)

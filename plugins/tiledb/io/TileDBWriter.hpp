@@ -82,9 +82,8 @@ private:
     size_t m_current_idx;
 
     std::unique_ptr<tiledb::Context> m_ctx;
-    std::unique_ptr<tiledb::ArraySchema> m_schema;
     std::unique_ptr<tiledb::Array> m_array;
-    std::vector<DimBuffer> m_attrs;
+    std::vector<DimBuffer> m_buffers;
     std::vector<double> m_xs;
     std::vector<double> m_ys;
     std::vector<double> m_zs;
