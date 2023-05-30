@@ -36,12 +36,13 @@
 #define NOMINMAX
 #endif
 
-#include <pdal/Filter.hpp>
-#include <pdal/pdal_test_main.hpp>
-#include <pdal/util/FileUtils.hpp>
+#include <nlohmann/json.hpp>
 
 #include <io/FauxReader.hpp>
+#include <pdal/Filter.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/pdal_test_main.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 #include "Support.hpp"
 
@@ -72,6 +73,9 @@ protected:
         writer_options.add("x_tile_size", 1);
         writer_options.add("y_tile_size", 1);
         writer_options.add("z_tile_size", 1);
+        writer_options.add("scale_x", 1.0e-9);
+        writer_options.add("scale_y", 1.0e-9);
+        writer_options.add("scale_z", 1.0e-9);
 
         reader_options.add("mode", "ramp");
         reader_options.add("count", count);

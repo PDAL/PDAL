@@ -130,10 +130,24 @@ std::ostream& operator<<(std::ostream& out, const DomainBounds& bounds)
 }
 
 FilterFactory::FilterFactory(const NL::json& userProvidedFilters,
+                             const std::string& filterProfile,
+                             const std::array<double, 3>& scaleFactor,
+                             const std::array<double, 3>& addOffset,
                              const std::string& defaultCompressor,
                              int32_t defaultCompressionLevel)
+    : m_scale_factor{scaleFactor}, m_add_offset{addOffset}
 {
     m_user_filters.update(userProvidedFilters);
+    if (filterProfile == "balanced")
+        m_filter_profile = FilterFactory::Profile::balanced;
+    else if (filterProfile == "aggressive")
+        m_filter_profile = FilterFactory::Profile::aggressive;
+    else if (filterProfile == "none")
+        m_filter_profile = FilterFactory::Profile::none;
+    else
+        throw tiledb::TileDBError("Filter profile '" + filterProfile +
+                                  "' is not a valid filter profile");
+
     if (!defaultCompressor.empty())
     {
         m_default_filter_type =
@@ -218,6 +232,8 @@ FilterFactory::filterTypeFromString(const std::string& filter_str)
         return TILEDB_FILTER_POSITIVE_DELTA;
     else if (filter_str == "float-scale")
         return TILEDB_FILTER_SCALE_FLOAT;
+    else if (filter_str == "none")
+        return TILEDB_FILTER_NONE;
     else
     {
         // Capitalize the filter name and convert '-' to '_'.
@@ -257,7 +273,17 @@ tiledb::FilterList FilterFactory::filterList(const tiledb::Context& ctx,
             filterList.add_filter(FilterFactory::filter(ctx, options));
         return filterList;
     }
-    return defaultProfileFilterList(ctx, dimName);
+    switch (m_filter_profile)
+    {
+    case FilterFactory::Profile::none:
+        return defaultFilterList(ctx);
+    case FilterFactory::Profile::balanced:
+        return defaultProfileFilterList(ctx, dimName, true);
+    case FilterFactory::Profile::aggressive:
+        return defaultProfileFilterList(ctx, dimName, false);
+    default:
+        throw std::logic_error("Invalid filter profile");
+    }
 }
 
 tiledb::FilterList
@@ -275,42 +301,147 @@ FilterFactory::defaultFilterList(const tiledb::Context& ctx) const
     return filterList;
 }
 
-tiledb::FilterList
-FilterFactory::defaultProfileFilterList(const tiledb::Context& ctx,
-                                        const std::string& dimName) const
+tiledb::FilterList FilterFactory::defaultProfileFilterList(
+    const tiledb::Context& ctx, const std::string& dimName, bool balanced) const
 {
     tiledb::FilterList filterList{ctx};
-    if (dimName == "X" || dimName == "Y" || dimName == "Z" ||
-        dimName == "Red" || dimName == "Green" || dimName == "Blue" ||
-        dimName == "GpsTime" || dimName == "ReturnNumber" ||
-        dimName == "NumberOfReturns")
+    if (dimName == "X" || dimName == "Y" || dimName == "Z")
     {
-        tiledb::Filter filter{ctx, TILEDB_FILTER_ZSTD};
-        filter.set_option(TILEDB_COMPRESSION_LEVEL, 7);
-        filterList.add_filter(filter);
-        return filterList;
+        // Float scale filter
+        uint32_t index{dimName == "X"
+                           ? (uint32_t)0
+                           : (dimName == "Y" ? (uint32_t)1 : (uint32_t)2)};
+        uint64_t bytewidth = 4;
+        tiledb::Filter floatScale{ctx, TILEDB_FILTER_SCALE_FLOAT};
+        floatScale.set_option(TILEDB_SCALE_FLOAT_BYTEWIDTH, bytewidth);
+        floatScale.set_option(TILEDB_SCALE_FLOAT_FACTOR, m_scale_factor[index]);
+        floatScale.set_option(TILEDB_SCALE_FLOAT_OFFSET, m_add_offset[index]);
+        filterList.add_filter(floatScale);
+
+        if (balanced)
+        {
+            // Bit shuffle filter
+            tiledb::Filter bit_shuffle{ctx, TILEDB_FILTER_BITSHUFFLE};
+            filterList.add_filter(bit_shuffle);
+
+            // Zstd filter
+            tiledb::Filter zstd{ctx, TILEDB_FILTER_ZSTD};
+            zstd.set_option(TILEDB_COMPRESSION_LEVEL, 7);
+            filterList.add_filter(zstd);
+        }
+        else
+        {
+            // Bit width reduction
+            tiledb::Filter bit_width_reduction{
+                ctx, TILEDB_FILTER_BIT_WIDTH_REDUCTION};
+            filterList.add_filter(bit_width_reduction);
+
+            // Bzip filter
+            tiledb::Filter bzip2{ctx, TILEDB_FILTER_BZIP2};
+            bzip2.set_option(TILEDB_COMPRESSION_LEVEL, 9);
+            filterList.add_filter(bzip2);
+        }
     }
-    if (dimName == "Intensity" || dimName == "ScanDirectionFlag" ||
-        dimName == "ScanAngleRank" || dimName == "EdgeOfFlightLine")
+    else if (dimName == "GpsTime")
     {
-        tiledb::Filter filter{ctx, TILEDB_FILTER_BZIP2};
-        filter.set_option(TILEDB_COMPRESSION_LEVEL, 5);
-        filterList.add_filter(filter);
-        return filterList;
+        /* TODO: Implement before merging
+        // Type View filter
+        tiledb::Filter typed_view{ctx, TILEDB_FILTER_TYPED_VIEW};
+        typed_view.set_option<tiledb_datatype_t>(
+            TILEDB_TYPED_VIEW_OUTPUT_DATATYPE, TILEDB_UINT64);
+        filterList.add_filter(typed_view);
+        */
+
+        // Bit width reduction
+        tiledb::Filter bit_width_reduction{ctx,
+                                           TILEDB_FILTER_BIT_WIDTH_REDUCTION};
+        filterList.add_filter(bit_width_reduction);
+
+        if (balanced)
+        {
+            // Zstd filter
+            tiledb::Filter zstd{ctx, TILEDB_FILTER_ZSTD};
+            zstd.set_option(TILEDB_COMPRESSION_LEVEL, 7);
+            filterList.add_filter(zstd);
+        }
+        else
+        {
+            // Bzip filter
+            tiledb::Filter bzip2{ctx, TILEDB_FILTER_BZIP2};
+            bzip2.set_option(TILEDB_COMPRESSION_LEVEL, 9);
+            filterList.add_filter(bzip2);
+        }
     }
-    if (dimName == "UserData" || dimName == "Classification")
+    else if (dimName == "Red" || dimName == "Green" || dimName == "Blue")
     {
-        tiledb::Filter filter{ctx, TILEDB_FILTER_GZIP};
-        filter.set_option(TILEDB_COMPRESSION_LEVEL, 9);
-        filterList.add_filter(filter);
-        return filterList;
+        // Bit width reduction
+        tiledb::Filter bit_width_reduction{ctx,
+                                           TILEDB_FILTER_BIT_WIDTH_REDUCTION};
+        filterList.add_filter(bit_width_reduction);
+
+        if (balanced)
+        {
+            // Zstd filter
+            tiledb::Filter zstd{ctx, TILEDB_FILTER_ZSTD};
+            zstd.set_option(TILEDB_COMPRESSION_LEVEL, 7);
+            filterList.add_filter(zstd);
+        }
+        else
+        {
+
+            // Bzip filter
+            tiledb::Filter bzip2{ctx, TILEDB_FILTER_BZIP2};
+            bzip2.set_option(TILEDB_COMPRESSION_LEVEL, 9);
+            filterList.add_filter(bzip2);
+        }
     }
-    if (dimName == "PointSourceId")
+    else if (dimName == "Intensity")
     {
-        filterList.add_filter(tiledb::Filter(ctx, TILEDB_FILTER_BZIP2));
-        return filterList;
+        if (balanced)
+        {
+            // Zstd filter
+            tiledb::Filter zstd{ctx, TILEDB_FILTER_ZSTD};
+            zstd.set_option(TILEDB_COMPRESSION_LEVEL, 5);
+            filterList.add_filter(zstd);
+        }
+        else
+        {
+            // Bit width reduction
+            tiledb::Filter bit_width_reduction{
+                ctx, TILEDB_FILTER_BIT_WIDTH_REDUCTION};
+            filterList.add_filter(bit_width_reduction);
+
+            // Bzip2 filter
+            tiledb::Filter bzip2{ctx, TILEDB_FILTER_BZIP2};
+            bzip2.set_option(TILEDB_COMPRESSION_LEVEL, 5);
+            filterList.add_filter(bzip2);
+        }
     }
-    return defaultFilterList(ctx);
+    else if (dimName == "Classification" || dimName == "ReturnNumber" ||
+             dimName == "NumberOfReturns" || dimName == "ScanDirectionFlag" ||
+             dimName == "ScanAngleRank" || dimName == "EdgeOfFlightLine" ||
+             dimName == "PointSourceId" || dimName == "UserData")
+    {
+        if (balanced)
+        {
+            // Zstd filter
+            tiledb::Filter zstd{ctx, TILEDB_FILTER_ZSTD};
+            zstd.set_option(TILEDB_COMPRESSION_LEVEL, 5);
+            filterList.add_filter(zstd);
+        }
+        else
+        {
+            // Bzip2 filter
+            tiledb::Filter bzip2{ctx, TILEDB_FILTER_BZIP2};
+            bzip2.set_option(TILEDB_COMPRESSION_LEVEL, 9);
+            filterList.add_filter(bzip2);
+        }
+    }
+    else
+    {
+        return defaultFilterList(ctx);
+    }
+    return filterList;
 }
 
 } // namespace pdal

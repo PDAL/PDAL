@@ -209,7 +209,8 @@ TEST(FilterFactory, dim_with_unset_default_filter)
 {
     NL::json jsonOptions({});
     tiledb::Context ctx{};
-    FilterFactory factory{jsonOptions, "", 0};
+    FilterFactory factory{jsonOptions,        "none", {{0.01, 0.01, 0.01}},
+                          {{1.0f, 1.0, 1.0}}, "",     0};
     auto filterList = factory.filterList(ctx, "Curvature");
     auto nfilters = filterList.nfilters();
     EXPECT_EQ(nfilters, 0);
@@ -219,7 +220,8 @@ TEST(FilterFactory, dim_with_set_default_filter)
 {
     NL::json jsonOptions({});
     tiledb::Context ctx{};
-    FilterFactory factory{jsonOptions, "zstd", 9};
+    FilterFactory factory{jsonOptions,       "none", {{0.01, 0.01, 0.01}},
+                          {{1.0, 1.0, 1.0}}, "zstd", 9};
     auto filterList = factory.filterList(ctx, "Curvature");
     auto nfilters = filterList.nfilters();
     EXPECT_EQ(nfilters, 1);
@@ -240,7 +242,8 @@ TEST(FilterFactory, user_set_scale_float)
                          {"scale_float_bytewidth", 2},
                          {"scale_float_factor", 2.0},
                          {"scale_float_offset", 100.0}}};
-    FilterFactory factory{jsonOptions, "zstd", 7};
+    FilterFactory factory{jsonOptions,       "balanced", {{0.01, 0.01, 0.01}},
+                          {{1.0, 1.0, 1.0}}, "zstd",     7};
 
     tiledb::Context ctx{};
     auto filterList = factory.filterList(ctx, "Z");
@@ -268,7 +271,8 @@ TEST(FilterFactory, user_set_two_filter_list)
     NL::json jsonOptions({});
     jsonOptions["X"] = {{{"compression", "bit-shuffle"}},
                         {{"compression", "gzip"}, {"compression_level", 9}}};
-    FilterFactory factory{jsonOptions, "zstd", 7};
+    FilterFactory factory{jsonOptions,       "balanced", {{0.01, 0.01, 0.01}},
+                          {{1.0, 1.0, 1.0}}, "zstd",     7};
 
     tiledb::Context ctx{};
     auto filterList = factory.filterList(ctx, "X");

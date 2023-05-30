@@ -212,12 +212,18 @@ public:
      Constructor.
 
      \param userProvidedFilters JSON containing the user defined filters.
+     \param filterProfile Filter profile to use for filters not set by user.
+     \param scaleFactor x, y, and z scale factors for float-scale filter.
+     \param addOffset x, y, and z add offset for float-scale filter.
      \param defaultCompressor Filter to use for the default filter.
      \param defaultCompressionLevel Compression level to use for the default
             filter.
 
      */
     FilterFactory(const NL::json& userProvidedFilters,
+                  const std::string& filterProfile,
+                  const std::array<double, 3>& scaleFactor,
+                  const std::array<double, 3>& addOffset,
                   const std::string& defaultCompressor,
                   int32_t defaultCompressionLevel);
 
@@ -286,14 +292,25 @@ public:
       \param ctx TileDB context object.
       \param dimName name of the dimension to get the default filter list for.
      */
-    tiledb::FilterList
-    defaultProfileFilterList(const tiledb::Context& ctx,
-                             const std::string& dimName) const;
+    tiledb::FilterList defaultProfileFilterList(const tiledb::Context& ctx,
+                                                const std::string& dimName,
+                                                bool balanced) const;
 
 private:
+    enum class Profile : uint8_t
+    {
+        none,
+        balanced,
+        aggressive
+    };
+
     NL::json m_user_filters{};
     std::optional<tiledb_filter_type_t> m_default_filter_type{std::nullopt};
     std::optional<int32_t> m_default_compression_level{std::nullopt};
+
+    Profile m_filter_profile;
+    std::array<double, 3> m_scale_factor;
+    std::array<double, 3> m_add_offset;
 };
 
 class TileDBDimBuffer
