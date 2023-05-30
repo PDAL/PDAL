@@ -50,7 +50,8 @@ Installing QGIS
 .. image:: ./images/qgis-install-progress.png
 
 
-4. Once installed, verify you can run |QGIS| by opening the application.
+4. Once installed, verify you can run |QGIS| by opening the application. At the top,
+   choose ``Layer --> Add Layer --> Add Raster Layer...``.
    Navigate to the ``C:\Users\hobu\PDAL\exercises\analysis\colorization``
    directory.
 
