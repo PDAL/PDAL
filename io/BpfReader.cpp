@@ -148,7 +148,6 @@ void BpfReader::initialize()
         std::string tmpname = Utils::tempFilename(m_filename);
         m_remoteFilename = m_filename;
         m_filename = tmpname;
-        m_isRemote = true;
         arbiter::Arbiter a;
         a.put(m_filename, a.getBinary(m_remoteFilename));
     }
@@ -339,7 +338,7 @@ void BpfReader::done(PointTableRef)
     m_stream.close();
     Utils::closeFile(m_istreamPtr);
 
-    if (m_isRemote)
+    if (Utils::isRemote(m_remoteFilename))
     {
         // Clean up temporary
         FileUtils::deleteFile(m_filename);

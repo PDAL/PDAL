@@ -74,7 +74,6 @@ private:
     std::string m_extraDataSpec;
     StringList m_bundledFilesSpec;
     std::string m_curFilename;
-    bool m_isRemote;
     std::string m_remoteFilename;
 
     virtual void addArgs(ProgramArgs& args);

@@ -108,7 +108,6 @@ void BpfWriter::initialize()
         std::string tmpname = Utils::tempFilename(m_filename);
         m_remoteFilename = m_filename;
         m_filename = tmpname;
-        m_isRemote = true;
     }
 
     m_header.m_coordId = m_coordId.m_val;
@@ -408,7 +407,7 @@ void BpfWriter::doneFile()
     m_stream.close();
     getMetadata().addList("filename", m_curFilename);
 
-    if (m_isRemote)
+    if (Utils::isRemote(m_filename))
     {
         arbiter::Arbiter a;
         a.put(m_remoteFilename, a.getBinary(m_filename));

@@ -88,7 +88,6 @@ private:
     std::vector<std::unique_ptr<ILeStream>> m_streams;
     std::vector<std::unique_ptr<Charbuf>> m_charbufs;
 
-    bool m_isRemote;
     std::string m_remoteFilename;
 
     virtual QuickInfo inspect();
