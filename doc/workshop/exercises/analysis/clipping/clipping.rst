@@ -74,7 +74,7 @@ capability to reproject the data for us on-the-fly:
 .. _`LAS Specification`: https://www.asprs.org/wp-content/uploads/2019/03/LAS_1_4_r14.pdf
 
 .. list-table:: ASPRS Standard LiDAR Point Classes (Point Data Record Format 0-5)
-    :widths: 25 25 50
+    :widths: 25 25
     :header-rows: 1
 
     * - Classification Value (bits 0:4)
