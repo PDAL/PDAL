@@ -3,7 +3,7 @@
 Entwine
 ================================================================================
 
-.. include:: ../../includes/substitutions.rst
+.. include:: ../includes/substitutions.rst
 
 Exercise
 --------------------------------------------------------------------------------
@@ -102,8 +102,8 @@ of tasks. This pipeline will collect the sample data set and convert it to a :re
 
 2. Visualize the data in QGIS
 
-    .. image:: ../../images/entwine-view.png
-        :target: ../../../_images/entwine-view.png
+    .. image:: ../images/entwine-view.png
+        :target: ../../_images/entwine-view.png
 
 
 Notes

@@ -3,7 +3,7 @@
 Clipping data with polygons
 ================================================================================
 
-.. include:: ../../../includes/substitutions.rst
+.. include:: ../../includes/substitutions.rst
 
 .. index:: Clipping, OGR, Vector
 
@@ -22,8 +22,8 @@ The ``autzen.laz`` file is a staple in PDAL and libLAS examples. You can
 this file to demonstrate clipping points with a geometry. We're going to clip
 out the stadium into a new LAS file.
 
-.. image:: ../../../images/clipping-autzen-view.png
-    :target: ../../../../_images/clipping-autzen-view.png
+.. image:: ../../images/clipping-autzen-view.png
+    :target: ../../../_images/clipping-autzen-view.png
 
 Data preparation
 ................................................................................
@@ -62,8 +62,8 @@ capability to reproject the data for us on-the-fly:
     definition of data and a processing operation into a single, readable data
     stream.
 
-.. image:: ../../../images/clipping-view-polygons.png
-    :target: ../../../../_images/clipping-view-polygons.png
+.. image:: ../../images/clipping-view-polygons.png
+    :target: ../../../_images/clipping-view-polygons.png
 
 .. note::
     Notice the numbers on the buildings and trees. These are the classifations given in
@@ -177,8 +177,8 @@ your ``./exercises/analysis/clipping/stadium.las`` output.
 In the example below, we opened the file to view it using QGIS.
 
 
-.. image:: ../../../images/clipping-stadium-clipped.png
-    :target: ../../../../_images/clipping-stadium-clipped.png
+.. image:: ../../images/clipping-stadium-clipped.png
+    :target: ../../../_images/clipping-stadium-clipped.png
 
 
 Notes

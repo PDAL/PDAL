@@ -3,7 +3,7 @@
 Identifying ground
 ================================================================================
 
-.. include:: ../../../includes/substitutions.rst
+.. include:: ../../includes/substitutions.rst
 
 .. index:: ground, classification, filtering
 
@@ -53,15 +53,15 @@ Invoke the following command, substituting accordingly, in your `Conda Shell`:
 As we can see, the algorithm does a great job of discriminating the points, but
 there's a few issues.
 
-.. image:: ../../../images/ground-classified-included.png
-    :target: ../../../../_images/ground-classified-included.png
+.. image:: ../../images/ground-classified-included.png
+    :target: ../../../_images/ground-classified-included.png
 
 
 There's noise underneath the main surface that will cause us trouble when we
 generate a terrain surface.
 
-.. image:: ../../../images/ground-classified-included-side.png
-    :target: ../../../../_images/ground-classified-included-side.png
+.. image:: ../../images/ground-classified-included-side.png
+    :target: ../../../_images/ground-classified-included-side.png
 
 Filtering
 ................................................................................
@@ -94,8 +94,8 @@ technique we learned about in :ref:`workshop-denoising`.
         -v 4
 
 
-    .. image:: ../../../images/ground-ground-only-view.png
-        :target: ../../../../_images/ground-ground-only-view.png
+    .. image:: ../../images/ground-ground-only-view.png
+        :target: ../../../_images/ground-ground-only-view.png
 
 
 2. Now we will instead use the :ref:`translate_command` command to stack the
@@ -129,4 +129,4 @@ Finally, we add a range filter to extract only the ground returns (i.e.,
 
 The result is a more accurate representation of the ground returns.
 
-.. image:: ../../../images/ground-filtered.png
+.. image:: ../../images/ground-filtered.png

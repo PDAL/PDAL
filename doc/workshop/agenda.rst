@@ -11,11 +11,11 @@ Introduction
 
 4. :ref:`basic-info`
 
-5. :ref:`translation`
+5. :ref:`manipulation`
 
-6. :ref:`analysisa`
+6. :ref:`generation`
 
-7. :ref:`georeferencing`
+
 
 Materials
 --------------------------------------------------------------------------------

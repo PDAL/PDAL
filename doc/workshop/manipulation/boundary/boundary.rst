@@ -1,7 +1,7 @@
 Finding the boundary
 ================================================================================
 
-.. include:: ../../../includes/substitutions.rst
+.. include:: ../../includes/substitutions.rst
 
 .. index:: boundary, QGIS, OGR
 
@@ -59,14 +59,14 @@ Once we've run the :ref:`tindex_command`, we can now visualize our output:
 
 Open :ref:`qgis` and select `Add Vector Layer`:
 
-.. image:: ../../../images/density-add-layer.png
-    :target: ../../../../_images/density-add-layer.png
+.. image:: ../../images/density-add-layer.png
+    :target: ../../../_images/density-add-layer.png
 
 Navigate to the ``exercises/analysis/boundary`` directory and
 then open the ``boundary.sqlite`` file:
 
-.. image:: ../../../images/boundary-qgis-view.png
-    :target: ../../../../_images/boundary-qgis-view.png
+.. image:: ../../images/boundary-qgis-view.png
+    :target: ../../../_images/boundary-qgis-view.png
 
 Notes
 --------------------------------------------------------------------------------

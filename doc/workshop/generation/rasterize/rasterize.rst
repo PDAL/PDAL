@@ -3,7 +3,7 @@
 Rasterizing Attributes
 ================================================================================
 
-.. include:: ../../../includes/substitutions.rst
+.. include:: ../../includes/substitutions.rst
 
 .. index:: classification, intensity, rasterization
 
@@ -82,8 +82,8 @@ Issue the :ref:`pipeline <pipeline>` operation to execute the interpolation:
 Visualization
 ................................................................................
 
-.. image:: ../../../images/rasterization-denmark-no-ramp.png
-      :target: ../../../../_images/rasterization-denmark-no-ramp.png
+.. image:: ../../images/rasterization-denmark-no-ramp.png
+      :target: ../../../_images/rasterization-denmark-no-ramp.png
 
 Basic interpolation of data with :ref:`writers.gdal` will output raw
 classification values into the resulting raster file. We will need to add a
@@ -105,8 +105,8 @@ With this ramp, you can load the color values into QGIS as a color ramp if you
 change the layer to Palatted/Unique Values, and then load the color ramp file:
 
 
-.. image:: ../../../images/rasterization-qgis-load-color-palette.png
-      :target: ../../../../_images/rasterization-qgis-load-color-palette.png
+.. image:: ../../images/rasterization-qgis-load-color-palette.png
+      :target: ../../../_images/rasterization-qgis-load-color-palette.png
 
 
 With the ramp, we can also use `gdaldem`_ to apply it to a new image:
@@ -116,8 +116,8 @@ With the ramp, we can also use `gdaldem`_ to apply it to a new image:
 
     $ gdaldem color-relief denmark-classification.tif ramp.txt classified-color.png -of PNG
 
-.. image:: ../../../images/rasterization-colored-classification.png
-    :target: ../../../../_images/rasterization-colored-classification.png
+.. image:: ../../images/rasterization-colored-classification.png
+    :target: ../../../_images/rasterization-colored-classification.png
 
 
 Intensity
@@ -171,8 +171,8 @@ relative intensity image:
 The same pipeline can be used to generate a preview image of the Intensity
 channel of the data by overriding pipeline arguments at the command line.
 
-.. image:: ../../../images/rasterization-colored-intensity.png
-    :target: ../../../../_images/rasterization-colored-intensity.png
+.. image:: ../../images/rasterization-colored-intensity.png
+    :target: ../../../_images/rasterization-colored-intensity.png
 
 
 Notes

@@ -3,7 +3,7 @@
 Searching near a point
 ================================================================================
 
-.. include:: ../../includes/substitutions.rst
+.. include:: ../includes/substitutions.rst
 
 .. index:: nearest, nearby, query, search
 

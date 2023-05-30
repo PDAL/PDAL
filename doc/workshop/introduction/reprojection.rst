@@ -5,7 +5,7 @@ Reprojection
 
 .. index:: Reprojection, WGS84, UTM
 
-.. include:: ../../includes/substitutions.rst
+.. include:: ../includes/substitutions.rst
 
 Exercise
 --------------------------------------------------------------------------------

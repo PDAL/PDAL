@@ -3,7 +3,7 @@
 Creating surface meshes
 ================================================================================
 
-.. include:: ../../../includes/substitutions.rst
+.. include:: ../../includes/substitutions.rst
 
 .. index:: ground, classification, filtering
 
@@ -76,14 +76,14 @@ Invoke the following command, substituting accordingly, in your `Conda Shell`:
 
 You can view the mesh in Cloud Compare, you should see something similar to:
 
-.. image:: ../../../images/first-mesh.png
-    :target: ../../../../_images/first-mesh.png
+.. image:: ../../images/first-mesh.png
+    :target: ../../../_images/first-mesh.png
 
 To colorize the points, select ``first-mesh`` in the left window. Under 
 ``Properties`` set ``Colors`` to ``RGB``. You should see the following:
 
-.. image:: ../../../images/first-mesh-rgb.png
-    :target: ../../../../_images/first-mesh-rgb.png
+.. image:: ../../images/first-mesh-rgb.png
+    :target: ../../../_images/first-mesh-rgb.png
 
 Filtering
 ................................................................................

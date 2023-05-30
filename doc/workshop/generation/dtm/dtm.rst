@@ -3,7 +3,7 @@
 Generating a DTM
 ================================================================================
 
-.. include:: ../../../includes/substitutions.rst
+.. include:: ../../includes/substitutions.rst
 
 .. index:: elevation model, DTM, DSM
 
@@ -74,49 +74,49 @@ see what was produced. Let us use :ref:`qgis` to visualize the output.
 
 1. Open :ref:`qgis` and `Add Raster Layer`:
 
-    .. image:: ../../../images/dtm-add-raster-layer.png
-        :target: ../../../../_images/dtm-add-raster-layer.png
+    .. image:: ../../images/dtm-add-raster-layer.png
+        :target: ../../../_images/dtm-add-raster-layer.png
 
 2. Add the `dtm.tif` file from your ``./exercises/analysis/dtm``
    directory.
 
-    .. image:: ../../../images/dtm-add-raster-mean.png
-        :target: ../../../../_images/dtm-add-raster-mean.png
+    .. image:: ../../images/dtm-add-raster-mean.png
+        :target: ../../../_images/dtm-add-raster-mean.png
 
-    .. image:: ../../../images/dtm-qgis-added-no-fill.png
-        :target: ../../../../_images/dtm-qgis-added-no-fill.png
+    .. image:: ../../images/dtm-qgis-added-no-fill.png
+        :target: ../../../_images/dtm-qgis-added-no-fill.png
 
 3. Go to Raster -> Analyze -> Fill nodata... and select the default values
 
-    .. image:: ../../../images/dtm-qgis-fill-nodata.png
+    .. image:: ../../images/dtm-qgis-fill-nodata.png
         :target: ../../../_images/dtm-qgis-fill-nodata.png
 
-    .. image:: ../../../images/dtm-qgis-added.png
-        :target: ../../../../_images/dtm-qgis-added.png
+    .. image:: ../../images/dtm-qgis-added.png
+        :target: ../../../_images/dtm-qgis-added.png
 
 4. Classify the DTM by right-clicking on the `Filled` and choosing
    `Properties`. Pick the pseudocolor rendering type, and then
    choose a color ramp and click `Classify`.
 
-    .. image:: ../../../images/dtm-qgis-classify.png
-        :target: ../../../../_images/dtm-qgis-classify.png
+    .. image:: ../../images/dtm-qgis-classify.png
+        :target: ../../../_images/dtm-qgis-classify.png
 
-    .. image:: ../../../images/dtm-qgis-colorize-dtm.png
-        :target: ../../../../_images/dtm-qgis-colorize-dtm.png
+    .. image:: ../../images/dtm-qgis-colorize-dtm.png
+        :target: ../../../_images/dtm-qgis-colorize-dtm.png
 
 
 5. :ref:`qgis` provides access to |GDAL| processing tools, and we
    are going to use that to create a hillshade of our surface.
    Choose `Raster-->Analysis-->Hillshade`:
 
-    .. image:: ../../../images/dtm-qgis-select-hillshade.png
-        :target: ../../../../_images/dtm-qgis-select-hillshade.png
+    .. image:: ../../images/dtm-qgis-select-hillshade.png
+        :target: ../../../_images/dtm-qgis-select-hillshade.png
 
 6. Click the window for the `Output file` and select a location
    to save the ``hillshade.tif`` file.
 
-    .. image:: ../../../images/dtm-qgis-gdaldem.png
-        :target: ../../../../_images/dtm-qgis-gdaldem.png
+    .. image:: ../../images/dtm-qgis-gdaldem.png
+        :target: ../../../_images/dtm-qgis-gdaldem.png
 
 
     .. code-block:: console
@@ -135,8 +135,8 @@ see what was produced. Let us use :ref:`qgis` to visualize the output.
 
 7. Click `OK` and the hillshade of your DTM is now available
 
-    .. image:: ../../../images/dtm-qgis-hillshade-done.png
-        :target: ../../../../_images/dtm-qgis-hillshade-done.png
+    .. image:: ../../images/dtm-qgis-hillshade-done.png
+        :target: ../../../_images/dtm-qgis-hillshade-done.png
 
 Notes
 --------------------------------------------------------------------------------
