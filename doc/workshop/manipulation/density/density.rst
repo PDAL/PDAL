@@ -3,7 +3,7 @@
 Visualizing acquisition density
 ================================================================================
 
-.. include:: ../../../includes/substitutions.rst
+.. include:: ../../includes/substitutions.rst
 
 .. index:: Density, OGR, hexagon tessellation
 
@@ -48,41 +48,41 @@ We will now use |QGIS| to visualize them.
 
 1. Add a vector layer
 
-    .. image:: ../../../images/density-add-layer.png
-        :target: ../../../../_images/density-add-layer.png
+    .. image:: ../../images/density-add-layer.png
+        :target: ../../../_images/density-add-layer.png
 
 2. Navigate to the output directory
 
-    .. image:: ../../../images/density-select-layer.png
-        :target: ../../../../_images/density-select-layer.png
+    .. image:: ../../images/density-select-layer.png
+        :target: ../../../_images/density-select-layer.png
 
 3. Add the ``density.sqlite`` file to the view
 
-    .. image:: ../../../images/density-file-open.png
-        :target: ../../../../_images/density-file-open.png
+    .. image:: ../../images/density-file-open.png
+        :target: ../../../_images/density-file-open.png
 
 4. Right click on the ``density.sqlite`` layer in the `Layers` panel
    and then choose ``Properties``.
 
 5. Within the ``Symbology`` tab, change ``Single Symbol`` to ``Graduated`` in the drop down
 
-    .. image:: ../../../images/density-graduated-symbols-pick.png
-        :target: ../../../../_images/density-graduated-symbols-pick.png
+    .. image:: ../../images/density-graduated-symbols-pick.png
+        :target: ../../../_images/density-graduated-symbols-pick.png
 
 6. Choose the ``Count`` column to visualize
 
-    .. image:: ../../../images/density-count-attribute.png
-        :target: ../../../../_images/density-count-attribute.png
+    .. image:: ../../images/density-count-attribute.png
+        :target: ../../../_images/density-count-attribute.png
 
 7. Choose the ``Classify`` button to add intervals
 
-    .. image:: ../../../images/density-graduated-symbols.png
-        :target: ../../../../_images/density-Graduated-symbols.png
+    .. image:: ../../images/density-graduated-symbols.png
+        :target: ../../../_images/density-Graduated-symbols.png
 
 8. Adjust the visualization as desired
 
-    .. image:: ../../../images/density-final-render.png
-        :target: ../../../../_images/density-final-render.png
+    .. image:: ../../images/density-final-render.png
+        :target: ../../../_images/density-final-render.png
 
 Notes
 --------------------------------------------------------------------------------

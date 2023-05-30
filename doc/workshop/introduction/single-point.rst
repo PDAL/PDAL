@@ -3,7 +3,7 @@
 Printing the first point
 ================================================================================
 
-.. include:: ../../includes/substitutions.rst
+.. include:: ../includes/substitutions.rst
 
 .. index:: info command, Start Here, installation
 

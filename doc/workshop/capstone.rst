@@ -52,5 +52,5 @@ Given the following pipeline for fetching the data, complete the rest of the tas
 
 .. note::
 
-    You should review specific :ref:`exercises` for specifics how to
+    You should review specific exercises for specifics how to
     achieve each task.

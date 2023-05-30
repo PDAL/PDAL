@@ -3,7 +3,7 @@
 Printing file metadata
 ================================================================================
 
-.. include:: ../../includes/substitutions.rst
+.. include:: ../includes/substitutions.rst
 
 .. index:: metadata, coordinate system, spatial reference system
 

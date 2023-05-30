@@ -20,6 +20,8 @@ Point Cloud Processing and Analysis with PDAL
    agenda
    lidar-introduction
    software
-   exercises/index
+   introduction/index
+   manipulation/index
+   generation/index
    capstone
    notes

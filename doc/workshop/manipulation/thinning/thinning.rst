@@ -3,7 +3,7 @@
 Thinning
 ================================================================================
 
-.. include:: ../../../includes/substitutions.rst
+.. include:: ../../includes/substitutions.rst
 
 .. index:: sample, thinning, poisson, voxel sampling, density
 
@@ -30,8 +30,8 @@ provides capability for all three:
 In this exercise, we are going to thin with the Poisson method, but the concept
 should operate similarly for the :ref:`filters.voxelcentroidnearestneighbor` approach.
 
-.. figure:: ../../../images/thinning-overview.png
-    :target: ../../../../_images/thinning-overview.png
+.. figure:: ../../images/thinning-overview.png
+    :target: ../../../_images/thinning-overview.png
 
     Thinning strategies available in PDAL
 
@@ -54,18 +54,18 @@ QGIS has the ability to switch on/off multiple data sets, and we
 are going to use that ability to view both the ``uncompahgre.laz`` and the
 output ``uncompahgre-thin.copc.laz`` file.
 
-.. figure:: ../../../images/thinning-select-data.png
-    :target: ../../../../_images/thinning-select-data.png
+.. figure:: ../../images/thinning-select-data.png
+    :target: ../../../_images/thinning-select-data.png
 
     Selecting multiple data sets in QGIS
 
-.. figure:: ../../../images/thinning-full-res.png
-    :target: ../../../../_images/thinning-select-data.png
+.. figure:: ../../images/thinning-full-res.png
+    :target: ../../../_images/thinning-select-data.png
 
     Full resolution Uncompahgre data set
 
-.. figure:: ../../../images/thinning-poisson-thin.png
-    :target: ../../../../_images/thinning-poisson-thin.png
+.. figure:: ../../images/thinning-poisson-thin.png
+    :target: ../../../_images/thinning-poisson-thin.png
 
     Uncompahgre thinned at a radius of 20m
 

@@ -3,7 +3,7 @@
 Removing noise
 ================================================================================
 
-.. include:: ../../../includes/substitutions.rst
+.. include:: ../../includes/substitutions.rst
 
 .. index:: Denoising, outliers
 
@@ -146,8 +146,8 @@ Use one of the point cloud visualization tools you installed to take a look at
 your ``clean.copc.laz`` output. In the example below, we simply
 opened the file using QGIS.
 
-.. image:: ../../../images/denoise-fugro.png
-    :target: ../../../../_images/denoise-fugro.png
+.. image:: ../../images/denoise-fugro.png
+    :target: ../../../_images/denoise-fugro.png
 
 
 

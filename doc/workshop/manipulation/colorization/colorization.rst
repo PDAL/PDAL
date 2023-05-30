@@ -3,7 +3,7 @@
 Colorizing points with imagery
 ================================================================================
 
-.. include:: ../../../includes/substitutions.rst
+.. include:: ../../includes/substitutions.rst
 
 .. index:: Colorization, GDAL, Raster, RGB
 
@@ -138,7 +138,7 @@ Use one of the point cloud visualization tools you installed to take a look at
 your ``uncompahgre-colored.laz`` output. In the example below, we simply
 opened the file using QGIS.
 
-.. image:: ../../../images/colorize-umpaghre-colored.png
+.. image:: ../../images/colorize-umpaghre-colored.png
 
 
 Notes
