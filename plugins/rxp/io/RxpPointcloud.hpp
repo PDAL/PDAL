@@ -64,7 +64,9 @@ struct Point {
         double beamOriginZ,
         double beamDirectionX,
         double beamDirectionY,
-        double beamDirectionZ);
+        double beamDirectionZ,
+        float roll,
+        float pitch);
 
     scanlib::target target;
     unsigned int returnNumber;
@@ -72,6 +74,7 @@ struct Point {
     bool edgeOfFlightLine;
     double beamOriginX, beamOriginY, beamOriginZ;
     double beamDirectionX, beamDirectionY, beamDirectionZ;
+    float roll, pitch;
 };
 
 
