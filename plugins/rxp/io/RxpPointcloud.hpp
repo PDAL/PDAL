@@ -102,6 +102,7 @@ protected:
     void on_echo_transformed(echo_type echo);
     void on_line_start_up(const scanlib::line_start_up<iterator_type> & arg);
     void on_line_start_dn(const scanlib::line_start_dn<iterator_type> & arg);
+    void on_hk_incl(const scanlib::hk_incl<iterator_type>& arg);
 
 private:
     bool readSavedPoint(PointRef& point);
@@ -109,14 +110,16 @@ private:
     void savePoints();
 
     bool m_syncToPps;
-    bool m_edge;
     bool m_reflectanceAsIntensity;
     float m_minReflectance;
     float m_maxReflectance;
     std::shared_ptr<scanlib::basic_rconnection> m_rc;
     scanlib::decoder_rxpmarker m_dec;
+    bool m_edge;
     scanlib::buffer m_rxpbuf;
     std::deque<Point> m_points;
+    float m_pitch;
+    float m_roll;
 
 };
 

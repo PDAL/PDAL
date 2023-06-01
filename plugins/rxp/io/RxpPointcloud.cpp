@@ -93,8 +93,8 @@ RxpPointcloud::RxpPointcloud(
     , m_minReflectance(minReflectance)
     , m_maxReflectance(maxReflectance)
     , m_rc(scanlib::basic_rconnection::create(uri))
-    , m_edge(false)
     , m_dec(m_rc)
+    , m_edge(false)
 {}
 
 
@@ -196,7 +196,8 @@ void RxpPointcloud::on_echo_transformed(echo_type echo)
     {
         //Only first return is marked as edge of flight line
         m_points.emplace_back(targets[i], returnNumber, target_count, m_edge, beam_origin[0],
-        beam_origin[1], beam_origin[2], beam_direction[0], beam_direction[1], beam_direction[2]);
+        beam_origin[1], beam_origin[2], beam_direction[0], beam_direction[1], beam_direction[2],
+        m_roll, m_pitch);
         if (m_edge)
             m_edge = false;
     }
@@ -212,6 +213,12 @@ void RxpPointcloud::on_line_start_dn(const scanlib::line_start_dn<iterator_type>
 {
     scanlib::pointcloud::on_line_start_dn(arg);
     m_edge = true;
+}
+
+void RxpPointcloud::on_hk_incl(const scanlib::hk_incl<iterator_type>& arg) {
+    scanlib::pointcloud::on_hk_incl(arg);
+    m_roll = (float)arg.ROLL * 0.001;
+    m_pitch = (float)arg.PITCH * 0.001;
 }
 
 } //pdal
