@@ -87,50 +87,6 @@ struct TileDBWriter::Args
 
 CREATE_SHARED_STAGE(TileDBWriter, s_info)
 
-void writeBufferValue(TileDBWriter::DimBuffer& dim, PointRef& point, size_t idx)
-{
-    Everything e;
-
-    switch (dim.m_type)
-    {
-    case Dimension::Type::Double:
-        e.d = point.getFieldAs<double>(dim.m_id);
-        break;
-    case Dimension::Type::Float:
-        e.f = point.getFieldAs<float>(dim.m_id);
-        break;
-    case Dimension::Type::Signed8:
-        e.s8 = point.getFieldAs<int8_t>(dim.m_id);
-        break;
-    case Dimension::Type::Signed16:
-        e.s16 = point.getFieldAs<int16_t>(dim.m_id);
-        break;
-    case Dimension::Type::Signed32:
-        e.s32 = point.getFieldAs<int32_t>(dim.m_id);
-        break;
-    case Dimension::Type::Signed64:
-        e.s64 = point.getFieldAs<int64_t>(dim.m_id);
-        break;
-    case Dimension::Type::Unsigned8:
-        e.u8 = point.getFieldAs<uint8_t>(dim.m_id);
-        break;
-    case Dimension::Type::Unsigned16:
-        e.u16 = point.getFieldAs<uint16_t>(dim.m_id);
-        break;
-    case Dimension::Type::Unsigned32:
-        e.u32 = point.getFieldAs<uint32_t>(dim.m_id);
-        break;
-    case Dimension::Type::Unsigned64:
-        e.u64 = point.getFieldAs<uint64_t>(dim.m_id);
-        break;
-    default:
-        throw pdal_error("Unsupported attribute type for " + dim.m_name);
-    }
-
-    size_t size = Dimension::size(dim.m_type);
-    memcpy(dim.m_buffer.data() + (idx * size), &e, size);
-}
-
 tiledb::Attribute createAttribute(const tiledb::Context& ctx,
                                   const std::string name, Dimension::Type t)
 {
@@ -314,9 +270,10 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
             // Check the user set valid tile extents, valid domains, or ran
             // stats on the point table.
             if (!hasValidTiles && !hasMetadataStats)
-                throwError("Must specify a tile extent for all dimensions, "
-                           "specify a valid domain for all dimensions, or "
-                           "execute a prior stats filter stage.");
+                throwError(
+                    "Must specify a valid domain for all dimensions, a valid "
+                    "tile extent for all dimensions, or execute a prior stats "
+                    "filter stage.");
 
             if (hasMetadataStats)
             {
@@ -435,7 +392,48 @@ bool TileDBWriter::processOne(PointRef& point)
 {
 
     for (auto& dimBuffer : m_buffers)
-        writeBufferValue(dimBuffer, point, m_current_idx);
+    {
+        Everything e;
+
+        switch (dimBuffer.m_type)
+        {
+        case Dimension::Type::Double:
+            e.d = point.getFieldAs<double>(dimBuffer.m_id);
+            break;
+        case Dimension::Type::Float:
+            e.f = point.getFieldAs<float>(dimBuffer.m_id);
+            break;
+        case Dimension::Type::Signed8:
+            e.s8 = point.getFieldAs<int8_t>(dimBuffer.m_id);
+            break;
+        case Dimension::Type::Signed16:
+            e.s16 = point.getFieldAs<int16_t>(dimBuffer.m_id);
+            break;
+        case Dimension::Type::Signed32:
+            e.s32 = point.getFieldAs<int32_t>(dimBuffer.m_id);
+            break;
+        case Dimension::Type::Signed64:
+            e.s64 = point.getFieldAs<int64_t>(dimBuffer.m_id);
+            break;
+        case Dimension::Type::Unsigned8:
+            e.u8 = point.getFieldAs<uint8_t>(dimBuffer.m_id);
+            break;
+        case Dimension::Type::Unsigned16:
+            e.u16 = point.getFieldAs<uint16_t>(dimBuffer.m_id);
+            break;
+        case Dimension::Type::Unsigned32:
+            e.u32 = point.getFieldAs<uint32_t>(dimBuffer.m_id);
+            break;
+        case Dimension::Type::Unsigned64:
+            e.u64 = point.getFieldAs<uint64_t>(dimBuffer.m_id);
+            break;
+        default:
+            throwError("Unsupported attribute type for " + dimBuffer.m_name);
+        }
+
+        size_t size = Dimension::size(dimBuffer.m_type);
+        memcpy(dimBuffer.m_buffer.data() + (m_current_idx * size), &e, size);
+    }
 
     if (++m_current_idx == m_args->m_cache_size)
     {
