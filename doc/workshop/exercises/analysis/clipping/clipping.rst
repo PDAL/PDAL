@@ -20,7 +20,7 @@ The ``autzen.laz`` file is a staple in PDAL and libLAS examples. You can
 `download this file here
 <https://github.com/PDAL/data/blob/master/autzen/autzen.laz>`_. We will use
 this file to demonstrate clipping points with a geometry. We're going to clip
-out the stadium into a new LAS file.
+out the stadium into a new COPC file.
 
 .. image:: ../../../images/clipping-autzen-view.png
     :target: ../../../../_images/clipping-autzen-view.png
@@ -62,14 +62,31 @@ capability to reproject the data for us on-the-fly:
     definition of data and a processing operation into a single, readable data
     stream.
 
+
+Overlaying Attributes
+................................................................................
+
+To add our ``attributes.vrt`` file, perform the following:
+
+  1. In QGIS, select Layer -> Add Layer -> Add Vector Layer
+  2. Add ``attributes.vrt`` as the Vector Layer
+  3. Right click the new layer and select properties
+  4. Under "Symbology" on the left, select "categorized" from the drop-down
+  5. Change ``value`` from ``$id`` to ``cls``
+  6. Below, select "Classify" and confirm
+  7. In the "Layer Rendering" drop-down, set "Opacity" to 50%
+  8. On the left, select "Labels". Set the drop-down to "Single Labels"
+  9. Change ``value`` from ``id`` to ``cls`` and select "OK" on the bottom right
+
+
 .. image:: ../../../images/clipping-view-polygons.png
     :target: ../../../../_images/clipping-view-polygons.png
 
 .. note::
     Notice the numbers on the buildings and trees. These are the classifations given in
     the LIDAR Point Classes or `LAS Specification`_. You can sort and single out these in JSON filters.
-    ex. "expression": "Classification >= 3 && Classification <= 4" which only shows classes 3 to 4 which 
-    are medium and high vegitation. 
+    ex. ``"expression": "Classification >= 3 && Classification <= 4"`` which only shows classes 3 to 4 which 
+    are medium and high vegetation. 
 
 .. _`LAS Specification`: https://www.asprs.org/wp-content/uploads/2019/03/LAS_1_4_r14.pdf
 

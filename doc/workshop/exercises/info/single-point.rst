@@ -43,8 +43,8 @@ Here's a summary of what's going on with that command invocation
    {
       "file_size": 37698,
       "filename": "./exercises/info/interesting.las",
-      "now": "2022-05-12T12:20:00-0700",
-      "pdal_version": "2.4.0 (git-version: Release)",
+      "now": "2023-05-30T16:11:25-0700",
+      "pdal_version": "2.5.4 (git-version: Release)",
       "points":
       {
          "point":

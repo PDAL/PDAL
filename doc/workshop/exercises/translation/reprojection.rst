@@ -135,7 +135,7 @@ have to compute it.
     (pdal translate writers.las Warning) Auto offset for 'X' requested in stream mode.  Using value of 9.16789.
     (pdal translate writers.las Warning) Auto offset for 'Y' requested in stream mode.  Using value of 48.7835.
 
-Run the `pdal info` command again to verify the ``X``, ``Y``, and ``Z``
+Run the ``pdal info`` command again to verify the ``X``, ``Y``, and ``Z``
 dimensions:
 
 .. code-block:: console

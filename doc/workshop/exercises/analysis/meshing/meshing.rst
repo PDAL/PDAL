@@ -112,9 +112,9 @@ Invoke the following command, substituting accordingly, in your `Conda Shell`:
 
 .. code-block:: doscon
 
-    > pdal translate -i ept://http://act-2015-rgb.s3.amazonaws.com ^
+    > pdal translate -i ./exercises/analysis/clipping/stadium.copc.laz ^
     -o ./exercises/analysis/meshing/building-exercise.ply ^
-    expression poisson ^
+    range poisson ^
     --filters.range.limits="Classification[2:2],Classification[6:6]" ^
     --filters.poisson.depth=16 ^
     --verbose 4

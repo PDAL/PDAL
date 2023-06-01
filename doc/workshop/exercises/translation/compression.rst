@@ -20,7 +20,8 @@ This exercise uses PDAL to compress |ASPRSLAS| data into |LASzip|.
         $ pdal translate ./exercises/translation/interesting.las \
         ./exercises/translation/interesting.laz
 
-The translate command converts files based on their extensions.
+    The translate command converts files based on their extensions.
+    
     .. code-block:: doscon
 
         > pdal translate ./exercises/translation/interesting.las ^

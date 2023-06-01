@@ -47,8 +47,8 @@ and return the three nearest points to it:
     {
     "file_size": 37698,
     "filename": "./exercises/info/interesting.las",
-    "now": "2022-05-13T12:37:54-0700",
-    "pdal_version": "2.4.0 (git-version: Release)",
+    "now": "2023-05-30T16:17:10-0700",
+    "pdal_version": "2.5.4 (git-version: Release)",
     "points":
     {
         "point":

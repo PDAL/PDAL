@@ -97,8 +97,10 @@ gives us that, but it also gives us a bunch of other stuff we don't need
 at the moment. Let's focus on extracting what we want using the
 ``jq`` command.
 
-If you do not have `jq`_ installed into your Conda environment, run the following 
-command in your `Conda Shell`: ``conda install -c conda-forge jq``
+If you do not have `jq`_ installed into your Conda environment and are not on Windows, 
+run the following command in your `Conda Shell`: ``conda install -c conda-forge jq``.
+Windows users should use `this link <https://github.com/jqlang/jq/releases/download/jq-1.6/jq-win64.exe>`_
+to install `jq`_
 
 .. code-block:: console
 
