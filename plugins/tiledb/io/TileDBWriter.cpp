@@ -267,13 +267,10 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
     // If not appending to an existing array, then create the TileDB array.
     if (!m_args->m_append)
     {
-
+        // Create schema and set basic properties.
         tiledb::ArraySchema schema{*m_ctx, TILEDB_SPARSE};
         schema.set_allows_dups(true);
-
-        // Get filter factory class.
-        FilterFactory filterFactory{m_args->m_filters, m_args->m_compressor,
-                                    m_args->m_compressionLevel};
+        schema.set_capacity(m_args->m_tile_capacity);
 
         // Check if using Hilbert order or row-major order. Use row-major if all
         // dimensions have positive tiles set. Otherwise, use Hilbert order.
@@ -281,6 +278,12 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
             ((m_args->m_x_tile_size > 0) && (m_args->m_y_tile_size > 0) &&
              (m_args->m_z_tile_size > 0) &&
              (!m_use_time || m_args->m_time_tile_size > 0));
+        if (!hasValidTiles)
+            schema.set_cell_order(TILEDB_HILBERT);
+
+        // Get filter factory class.
+        FilterFactory filterFactory{m_args->m_filters, m_args->m_compressor,
+                                    m_args->m_compressionLevel};
 
         // Check if the domain is set for all dimensions.
         bool hasValidDomain = (m_args->m_x_domain_end > m_args->m_x_domain_st &&
@@ -289,145 +292,97 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
                                (!m_use_time || m_args->m_time_domain_end >
                                                    m_args->m_time_domain_st));
 
-        // Get table metadata and check if it is valid.
-        MetadataNode meta =
-            table.metadata().findChild("filters.stats:bbox:native:bbox");
-        bool hasMetadataStats = meta.valid();
-
-        // Check the user set valid tile extents, valid domains, or ran stats on
-        // the point table.
-        if (!hasValidTiles && !hasMetadataStats && !hasValidDomain)
-            throwError("Must specify a tile extent for all dimensions, specify "
-                       "a valid domain for all dimensions, or execute a prior "
-                       "stats filter stage.");
-
         tiledb::Domain domain(*m_ctx);
 
-        // Get filters for the dimensions.
-        tiledb::FilterList xFltrs = filterFactory.filterList(*m_ctx, "X");
-        tiledb::FilterList yFltrs = filterFactory.filterList(*m_ctx, "Y");
-        tiledb::FilterList zFltrs = filterFactory.filterList(*m_ctx, "Z");
-        tiledb::FilterList tFltrs = filterFactory.filterList(*m_ctx, "GpsTime");
-
         // Set the domain values for the dimensions. Use the user provided
-        // domain values, and update if they are the default domain or otherwise
-        // not valid.
-        std::array<double, 2> xDomain{m_args->m_x_domain_st,
-                                      m_args->m_x_domain_end};
-        std::array<double, 2> yDomain{m_args->m_y_domain_st,
-                                      m_args->m_y_domain_end};
-        std::array<double, 2> zDomain{m_args->m_z_domain_st,
-                                      m_args->m_z_domain_end};
-        std::array<double, 2> gpsTimeDomain{m_args->m_time_domain_st,
-                                            m_args->m_time_domain_end};
+        // domain values, and update if they are the default domain or
+        // otherwise not valid.
+        std::array<std::array<double, 2>, 4> bbox{
+            {{m_args->m_x_domain_st, m_args->m_x_domain_end},
+             {m_args->m_y_domain_st, m_args->m_y_domain_end},
+             {m_args->m_z_domain_st, m_args->m_z_domain_end},
+             {m_args->m_time_domain_st, m_args->m_time_domain_end}}};
         if (!hasValidDomain)
         {
+            // Get table metadata and check if it is valid.
+            MetadataNode meta =
+                table.metadata().findChild("filters.stats:bbox:native:bbox");
+            bool hasMetadataStats = meta.valid();
+
+            // Check the user set valid tile extents, valid domains, or ran
+            // stats on the point table.
+            if (!hasValidTiles && !hasMetadataStats)
+                throwError("Must specify a tile extent for all dimensions, "
+                           "specify a valid domain for all dimensions, or "
+                           "execute a prior stats filter stage.");
+
             if (hasMetadataStats)
             {
-                // Use statistics from the point table to set the invalid
-                // domains.
-                if (xDomain[1] <= xDomain[0])
+                // Update any missing domains using table statistics.
+                auto updateWithStats = [&](const std::string& minStr,
+                                           const std::string& maxStr,
+                                           std::array<double, 2>& range)
                 {
-                    xDomain[0] = meta.findChild("minx").value<double>() - 1.0;
-                    xDomain[1] = meta.findChild("maxx").value<double>() + 1.0;
-                }
-                if (yDomain[1] <= yDomain[0])
-                {
-                    yDomain[0] = meta.findChild("miny").value<double>() - 1.0;
-                    yDomain[1] = meta.findChild("maxy").value<double>() + 1.0;
-                }
-                if (zDomain[1] <= zDomain[0])
-                {
-                    zDomain[0] = meta.findChild("minz").value<double>() - 1.0;
-                    zDomain[1] = meta.findChild("maxz").value<double>() + 1.0;
-                }
-                if (m_use_time && gpsTimeDomain[1] <= gpsTimeDomain[0])
-                {
-                    gpsTimeDomain[0] =
-                        meta.findChild("mintm").value<double>() - 1.0;
-                    gpsTimeDomain[1] =
-                        meta.findChild("maxtm").value<double>() + 1.0;
-                }
+                    if (range[1] <= range[0])
+                        range = {meta.findChild(minStr).value<double>() - 1.0,
+                                 meta.findChild(maxStr).value<double>() + 1.0};
+                };
+                updateWithStats("minx", "maxx", bbox[0]);
+                updateWithStats("miny", "maxy", bbox[1]);
+                updateWithStats("minz", "maxz", bbox[2]);
+                if (m_use_time)
+                    updateWithStats("mintm", "maxtm", bbox[3]);
             }
             else
             {
-                // Use the maximum possible domain to set the invalid domains.
-                double dimMin = std::numeric_limits<double>::lowest();
-                double dimMax = std::numeric_limits<double>::max();
-                if (xDomain[1] <= xDomain[0])
-                {
-                    xDomain[0] = dimMin;
-                    xDomain[1] = dimMax;
-                }
-                if (yDomain[1] <= yDomain[0])
-                {
-                    yDomain[0] = dimMin;
-                    yDomain[1] = dimMax;
-                }
-                if (zDomain[1] <= zDomain[0])
-                {
-                    zDomain[0] = dimMin;
-                    zDomain[1] = dimMax;
-                }
-                if (gpsTimeDomain[1] <= gpsTimeDomain[0])
-                {
-                    gpsTimeDomain[0] = dimMin;
-                    gpsTimeDomain[1] = dimMax;
-                }
+                // Update any missing domains to be the entire space.
+                for (auto& range : bbox)
+                    if (range[1] <= range[0])
+                        range = {std::numeric_limits<double>::lowest(),
+                                 std::numeric_limits<double>::max()};
             }
         }
 
         // Create and add dimensions to the TileDB domain.
         if (hasValidTiles)
         {
+            auto addDimension = [&](const std::string& dimName,
+                                    const std::array<double, 2>& range,
+                                    double tile_size)
+            {
+                auto filters = filterFactory.filterList(*m_ctx, dimName);
+                domain.add_dimension(tiledb::Dimension::create<double>(
+                                         *m_ctx, dimName, range, tile_size)
+                                         .set_filter_list(filters));
+            };
             if (m_use_time && m_time_first)
-                domain.add_dimension(tiledb::Dimension::create<double>(
-                                         *m_ctx, "GpsTime", gpsTimeDomain,
-                                         m_args->m_time_tile_size)
-                                         .set_filter_list(tFltrs));
-            domain.add_dimension(
-                tiledb::Dimension::create<double>(*m_ctx, "X", xDomain,
-                                                  m_args->m_x_tile_size)
-                    .set_filter_list(xFltrs));
-            domain.add_dimension(
-                tiledb::Dimension::create<double>(*m_ctx, "Y", yDomain,
-                                                  m_args->m_y_tile_size)
-                    .set_filter_list(yFltrs));
-            domain.add_dimension(
-                tiledb::Dimension::create<double>(*m_ctx, "Z", zDomain,
-                                                  m_args->m_z_tile_size)
-                    .set_filter_list(zFltrs));
+                addDimension("GpsTime", bbox[3], m_args->m_time_tile_size);
+            addDimension("X", bbox[0], m_args->m_x_tile_size);
+            addDimension("Y", bbox[1], m_args->m_y_tile_size);
+            addDimension("Z", bbox[2], m_args->m_z_tile_size);
             if (m_use_time && !m_time_first)
-                domain.add_dimension(tiledb::Dimension::create<double>(
-                                         *m_ctx, "GpsTime", gpsTimeDomain,
-                                         m_args->m_time_tile_size)
-                                         .set_filter_list(tFltrs));
+                addDimension("GpsTime", bbox[3], m_args->m_time_tile_size);
         }
         else
         {
+            auto addDimension = [&](const std::string& dimName,
+                                    const std::array<double, 2>& range)
+            {
+                auto filters = filterFactory.filterList(*m_ctx, dimName);
+                domain.add_dimension(
+                    tiledb::Dimension::create<double>(*m_ctx, dimName, range)
+                        .set_filter_list(filters));
+            };
             if (m_use_time && m_time_first)
-                domain.add_dimension(tiledb::Dimension::create<double>(
-                                         *m_ctx, "GpsTime", gpsTimeDomain)
-                                         .set_filter_list(tFltrs));
-            domain.add_dimension(
-                tiledb::Dimension::create<double>(*m_ctx, "X", xDomain)
-                    .set_filter_list(xFltrs));
-            domain.add_dimension(
-                tiledb::Dimension::create<double>(*m_ctx, "Y", yDomain)
-                    .set_filter_list(yFltrs));
-            domain.add_dimension(
-                tiledb::Dimension::create<double>(*m_ctx, "Z", zDomain)
-                    .set_filter_list(zFltrs));
+                addDimension("GpsTime", bbox[3]);
+            addDimension("X", bbox[0]);
+            addDimension("Y", bbox[1]);
+            addDimension("Z", bbox[2]);
             if (m_use_time && !m_time_first)
-                domain.add_dimension(tiledb::Dimension::create<double>(
-                                         *m_ctx, "GpsTime", gpsTimeDomain)
-                                         .set_filter_list(tFltrs));
+                addDimension("GpsTime", bbox[3]);
         }
 
         schema.set_domain(domain);
-        schema.set_capacity(m_args->m_tile_capacity);
-        if (!hasValidTiles)
-            schema.set_cell_order(TILEDB_HILBERT);
 
         // Set the attributes.
         for (const auto& dimBuffer : m_buffers)
