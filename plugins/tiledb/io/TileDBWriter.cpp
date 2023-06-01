@@ -80,6 +80,8 @@ struct TileDBWriter::Args
     int m_compressionLevel;
     NL::json m_filters;
     bool m_append;
+    bool m_use_time;
+    bool m_time_first;
     uint64_t m_timeStamp = UINT64_MAX;
 };
 
@@ -215,12 +217,12 @@ void TileDBWriter::addArgs(ProgramArgs& args)
     args.add("append", "Append to existing TileDB array", m_args->m_append,
              false);
     args.add("use_time_dim", "Use GpsTime coordinate data as array dimension",
-             m_use_time, false);
+             m_args->m_use_time, false);
     args.addSynonym("use_time_dim", "use_time");
     args.add("time_first",
              "If writing 4D array with XYZ and Time, choose to put time dim "
              "first or last (default)",
-             m_time_first, false);
+             m_args->m_time_first, false);
     args.add<uint64_t>("timestamp", "TileDB array timestamp",
                        m_args->m_timeStamp, UINT64_MAX);
 }
@@ -276,7 +278,7 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
         bool hasValidTiles =
             ((m_args->m_x_tile_size > 0) && (m_args->m_y_tile_size > 0) &&
              (m_args->m_z_tile_size > 0) &&
-             (!m_use_time || m_args->m_time_tile_size > 0));
+             (!m_args->m_use_time || m_args->m_time_tile_size > 0));
         if (!hasValidTiles)
             schema.set_cell_order(TILEDB_HILBERT);
 
@@ -285,11 +287,12 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
                                     m_args->m_compressionLevel};
 
         // Check if the domain is set for all dimensions.
-        bool hasValidDomain = (m_args->m_x_domain_end > m_args->m_x_domain_st &&
-                               m_args->m_y_domain_end > m_args->m_y_domain_st &&
-                               m_args->m_z_domain_end > m_args->m_z_domain_st &&
-                               (!m_use_time || m_args->m_time_domain_end >
-                                                   m_args->m_time_domain_st));
+        bool hasValidDomain =
+            (m_args->m_x_domain_end > m_args->m_x_domain_st &&
+             m_args->m_y_domain_end > m_args->m_y_domain_st &&
+             m_args->m_z_domain_end > m_args->m_z_domain_st &&
+             (!m_args->m_use_time ||
+              m_args->m_time_domain_end > m_args->m_time_domain_st));
 
         tiledb::Domain domain(*m_ctx);
 
@@ -329,7 +332,7 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
                 updateWithStats("minx", "maxx", bbox[0]);
                 updateWithStats("miny", "maxy", bbox[1]);
                 updateWithStats("minz", "maxz", bbox[2]);
-                if (m_use_time)
+                if (m_args->m_use_time)
                     updateWithStats("mintm", "maxtm", bbox[3]);
             }
             else
@@ -354,12 +357,12 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
                                          *m_ctx, dimName, range, tile_size)
                                          .set_filter_list(filters));
             };
-            if (m_use_time && m_time_first)
+            if (m_args->m_use_time && m_args->m_time_first)
                 addDimension("GpsTime", bbox[3], m_args->m_time_tile_size);
             addDimension("X", bbox[0], m_args->m_x_tile_size);
             addDimension("Y", bbox[1], m_args->m_y_tile_size);
             addDimension("Z", bbox[2], m_args->m_z_tile_size);
-            if (m_use_time && !m_time_first)
+            if (m_args->m_use_time && !m_args->m_time_first)
                 addDimension("GpsTime", bbox[3], m_args->m_time_tile_size);
         }
         else
@@ -372,12 +375,12 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
                     tiledb::Dimension::create<double>(*m_ctx, dimName, range)
                         .set_filter_list(filters));
             };
-            if (m_use_time && m_time_first)
+            if (m_args->m_use_time && m_args->m_time_first)
                 addDimension("GpsTime", bbox[3]);
             addDimension("X", bbox[0]);
             addDimension("Y", bbox[1]);
             addDimension("Z", bbox[2]);
-            if (m_use_time && !m_time_first)
+            if (m_args->m_use_time && !m_args->m_time_first)
                 addDimension("GpsTime", bbox[3]);
         }
 

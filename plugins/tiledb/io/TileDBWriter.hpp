@@ -84,8 +84,6 @@ private:
     std::unique_ptr<tiledb::Context> m_ctx;
     std::unique_ptr<tiledb::Array> m_array;
     std::vector<DimBuffer> m_buffers;
-    bool m_use_time;
-    bool m_time_first;
 
     TileDBWriter(const TileDBWriter&) = delete;
     TileDBWriter& operator=(const TileDBWriter&) = delete;
