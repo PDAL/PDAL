@@ -102,7 +102,7 @@ protected:
     void on_echo_transformed(echo_type echo);
     void on_line_start_up(const scanlib::line_start_up<iterator_type> & arg);
     void on_line_start_dn(const scanlib::line_start_dn<iterator_type> & arg);
-    void on_hk_incl(const scanlib::hk_incl<iterator_type>& arg);
+    void on_hk_incl_4axes(const scanlib::hk_incl<iterator_type>& arg);
 
 private:
     bool readSavedPoint(PointRef& point);
