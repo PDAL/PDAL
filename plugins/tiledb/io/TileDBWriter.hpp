@@ -84,10 +84,6 @@ private:
     std::unique_ptr<tiledb::Context> m_ctx;
     std::unique_ptr<tiledb::Array> m_array;
     std::vector<DimBuffer> m_buffers;
-    std::vector<double> m_xs;
-    std::vector<double> m_ys;
-    std::vector<double> m_zs;
-    std::vector<double> m_tms;
     bool m_use_time;
     bool m_time_first;
 

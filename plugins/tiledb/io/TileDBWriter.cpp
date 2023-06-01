@@ -85,8 +85,7 @@ struct TileDBWriter::Args
 
 CREATE_SHARED_STAGE(TileDBWriter, s_info)
 
-void writeAttributeValue(TileDBWriter::DimBuffer& dim, PointRef& point,
-                         size_t idx)
+void writeBufferValue(TileDBWriter::DimBuffer& dim, PointRef& point, size_t idx)
 {
     Everything e;
 
@@ -417,10 +416,6 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
 #endif
     const auto& schema = m_array->schema();
 
-    // Check if GpsTime is a dimension.
-    if (schema.domain().has_dimension("GpsTime"))
-        m_use_time = true;
-
     for (const auto& dimBuffer : m_buffers)
     {
         // If appending, check the layout dim exists in the original schema.
@@ -436,21 +431,8 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
 bool TileDBWriter::processOne(PointRef& point)
 {
 
-    double x = point.getFieldAs<double>(Dimension::Id::X);
-    double y = point.getFieldAs<double>(Dimension::Id::Y);
-    double z = point.getFieldAs<double>(Dimension::Id::Z);
-    double tm(0);
-    if (m_use_time)
-        tm = point.getFieldAs<double>(Dimension::Id::GpsTime);
-
-    for (auto& a : m_buffers)
-        writeAttributeValue(a, point, m_current_idx);
-
-    m_xs.push_back(x);
-    m_ys.push_back(y);
-    m_zs.push_back(z);
-    if (m_use_time)
-        m_tms.push_back(tm);
+    for (auto& dimBuffer : m_buffers)
+        writeBufferValue(dimBuffer, point, m_current_idx);
 
     if (++m_current_idx == m_args->m_cache_size)
     {
@@ -508,62 +490,56 @@ bool TileDBWriter::flushCache(size_t size)
     tiledb::Query query(*m_ctx, *m_array);
     query.set_layout(TILEDB_UNORDERED);
 
-    query.set_data_buffer("X", m_xs);
-    query.set_data_buffer("Y", m_ys);
-    query.set_data_buffer("Z", m_zs);
-
-    if (m_use_time)
-        query.set_data_buffer("GpsTime", m_tms);
-
     // set tiledb buffers
-    for (const auto& a : m_buffers)
+    for (const auto& dimBuffer : m_buffers)
     {
-        uint8_t* buf = const_cast<uint8_t*>(a.m_buffer.data());
-        switch (a.m_type)
+        uint8_t* buf = const_cast<uint8_t*>(dimBuffer.m_buffer.data());
+        switch (dimBuffer.m_type)
         {
         case Dimension::Type::Double:
-            query.set_data_buffer(a.m_name, reinterpret_cast<double*>(buf),
-                                  size);
+            query.set_data_buffer(dimBuffer.m_name,
+                                  reinterpret_cast<double*>(buf), size);
             break;
         case Dimension::Type::Float:
-            query.set_data_buffer(a.m_name, reinterpret_cast<float*>(buf),
-                                  size);
+            query.set_data_buffer(dimBuffer.m_name,
+                                  reinterpret_cast<float*>(buf), size);
             break;
         case Dimension::Type::Signed8:
-            query.set_data_buffer(a.m_name, reinterpret_cast<int8_t*>(buf),
-                                  size);
+            query.set_data_buffer(dimBuffer.m_name,
+                                  reinterpret_cast<int8_t*>(buf), size);
             break;
         case Dimension::Type::Signed16:
-            query.set_data_buffer(a.m_name, reinterpret_cast<int16_t*>(buf),
-                                  size);
+            query.set_data_buffer(dimBuffer.m_name,
+                                  reinterpret_cast<int16_t*>(buf), size);
             break;
         case Dimension::Type::Signed32:
-            query.set_data_buffer(a.m_name, reinterpret_cast<int32_t*>(buf),
-                                  size);
+            query.set_data_buffer(dimBuffer.m_name,
+                                  reinterpret_cast<int32_t*>(buf), size);
             break;
         case Dimension::Type::Signed64:
-            query.set_data_buffer(a.m_name, reinterpret_cast<int64_t*>(buf),
-                                  size);
+            query.set_data_buffer(dimBuffer.m_name,
+                                  reinterpret_cast<int64_t*>(buf), size);
             break;
         case Dimension::Type::Unsigned8:
-            query.set_data_buffer(a.m_name, reinterpret_cast<uint8_t*>(buf),
-                                  size);
+            query.set_data_buffer(dimBuffer.m_name,
+                                  reinterpret_cast<uint8_t*>(buf), size);
             break;
         case Dimension::Type::Unsigned16:
-            query.set_data_buffer(a.m_name, reinterpret_cast<uint16_t*>(buf),
-                                  size);
+            query.set_data_buffer(dimBuffer.m_name,
+                                  reinterpret_cast<uint16_t*>(buf), size);
             break;
         case Dimension::Type::Unsigned32:
-            query.set_data_buffer(a.m_name, reinterpret_cast<uint32_t*>(buf),
-                                  size);
+            query.set_data_buffer(dimBuffer.m_name,
+                                  reinterpret_cast<uint32_t*>(buf), size);
             break;
         case Dimension::Type::Unsigned64:
-            query.set_data_buffer(a.m_name, reinterpret_cast<uint64_t*>(buf),
-                                  size);
+            query.set_data_buffer(dimBuffer.m_name,
+                                  reinterpret_cast<uint64_t*>(buf), size);
             break;
         case Dimension::Type::None:
         default:
-            throw pdal_error("Unsupported attribute type for " + a.m_name);
+            throw pdal_error("Unsupported attribute type for " +
+                             dimBuffer.m_name);
         }
     }
 
@@ -576,10 +552,6 @@ bool TileDBWriter::flushCache(size_t size)
     }
 
     m_current_idx = 0;
-    m_xs.clear();
-    m_ys.clear();
-    m_zs.clear();
-    m_tms.clear();
 
     if (status == tiledb::Query::Status::FAILED)
         return false;
