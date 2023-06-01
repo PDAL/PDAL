@@ -215,7 +215,7 @@ void RxpPointcloud::on_line_start_dn(const scanlib::line_start_dn<iterator_type>
     m_edge = true;
 }
 
-void RxpPointcloud::on_hk_incl_4axes(const scanlib::hk_incl<iterator_type>& arg) {
+void RxpPointcloud::on_hk_incl(const scanlib::hk_incl<iterator_type>& arg) {
     scanlib::pointcloud::on_hk_incl(arg);
     m_roll = (float)arg.ROLL * 0.001;
     m_pitch = (float)arg.PITCH * 0.001;
