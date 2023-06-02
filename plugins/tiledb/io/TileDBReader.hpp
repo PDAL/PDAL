@@ -83,17 +83,19 @@ public:
 
     TileDBReader();
     ~TileDBReader();
-    std::string getName() const;
+
+    std::string getName() const override;
 
 private:
-    virtual void addArgs(ProgramArgs& args);
-    virtual void initialize();
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void prepared(PointTableRef);
-    virtual void ready(PointTableRef);
-    virtual bool processOne(PointRef& point);
-    virtual point_count_t read(PointViewPtr view, point_count_t count);
-    virtual void done(PointTableRef table);
+    virtual void addArgs(ProgramArgs& args) override;
+    virtual void initialize() override;
+    virtual void addDimensions(PointLayoutPtr layout) override;
+    virtual void prepared(PointTableRef) override;
+    virtual void ready(PointTableRef) override;
+    virtual bool processOne(PointRef& point) override;
+    virtual point_count_t read(PointViewPtr view, point_count_t count) override;
+    virtual void done(PointTableRef table) override;
+
     void localReady();
     bool processPoint(PointRef& point);
 
