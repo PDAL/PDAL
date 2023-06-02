@@ -83,6 +83,9 @@ use_time_dim
 time_first
   Put the GpsTime dimension first instead of last. Only used when `use_time_dim=true`. Not used when `append=true`. [Default: false]
 
+combine_bit_fields
+  Store all sub-byte fields together in an attribute named `BitFields`. Not used when `append=true`. [Default: true]
+
 chunk_size
   Point cache size for chunked writes. [Optional]
 

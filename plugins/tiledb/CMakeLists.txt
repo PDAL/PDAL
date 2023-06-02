@@ -110,5 +110,18 @@ if (WITH_TESTS)
             ${NLOHMANN_INCLUDE_DIR}
     )
 
+    PDAL_ADD_TEST(pdal_io_tiledb_bit_fields_test
+        FILES
+            test/TileDBBitFieldsTest.cpp
+        LINK_WITH
+            ${reader_libname}
+            ${writer_libname}
+            ${TileDB_LIBRARIES}
+        INCLUDES
+            ${TileDB_INCLUDE_DIR}
+            ${NLOHMANN_INCLUDE_DIR}
+    )
+
+
 
 endif()
