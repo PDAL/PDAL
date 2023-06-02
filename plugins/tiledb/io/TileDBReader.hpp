@@ -69,22 +69,16 @@ public:
         }
     };
 
-    enum class DimCategory
-    {
-        Dimension,
-        Attribute
-    };
-
     struct DimInfo
     {
+        std::string m_name;
+        Dimension::Id m_id;
+        Dimension::Type m_type;
         Buffer* m_buffer;
-        DimCategory m_dimCategory;
+
         size_t m_span;
         size_t m_offset;
         tiledb_datatype_t m_tileType;
-        Dimension::Type m_type;
-        Dimension::Id m_id;
-        std::string m_name;
     };
 
     TileDBReader();
