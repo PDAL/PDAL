@@ -65,63 +65,41 @@ struct TileDBReader::Args
     bool m_strict;
 };
 
+template <typename T> class TypedDimBuffer : public TileDBReader::DimBuffer
+{
+public:
+    TypedDimBuffer(const std::string& name, Dimension::Id id)
+        : m_name{name}, m_id{id}
+    {
+    }
+
+    virtual void setQuery(tiledb::Query* query, size_t count) override
+    {
+        m_data.resize(count);
+        query->set_data_buffer(m_name, m_data);
+    }
+
+    virtual void setFields(PointRef& point, size_t offset) override
+    {
+        point.setField(m_id, m_data[offset]);
+    }
+
+private:
+    /** Name of the dimension. */
+    std::string m_name;
+
+    /** PDAL dimension ID. */
+    Dimension::Id m_id;
+
+    /** Raw buffer data. */
+    std::vector<T> m_data;
+};
+
 CREATE_SHARED_STAGE(TileDBReader, s_info)
+
 std::string TileDBReader::getName() const
 {
     return s_info.name;
-}
-
-Dimension::Type getPdalType(tiledb_datatype_t t)
-{
-    switch (t)
-    {
-    case TILEDB_INT8:
-        return Dimension::Type::Signed8;
-    case TILEDB_UINT8:
-        return Dimension::Type::Unsigned8;
-    case TILEDB_INT16:
-        return Dimension::Type::Signed16;
-    case TILEDB_UINT16:
-        return Dimension::Type::Unsigned16;
-    case TILEDB_INT32:
-        return Dimension::Type::Signed32;
-    case TILEDB_UINT32:
-        return Dimension::Type::Unsigned32;
-    case TILEDB_INT64:
-        return Dimension::Type::Signed64;
-    case TILEDB_UINT64:
-        return Dimension::Type::Unsigned64;
-    case TILEDB_FLOAT32:
-        return Dimension::Type::Float;
-    case TILEDB_FLOAT64:
-        return Dimension::Type::Double;
-    case TILEDB_DATETIME_AS:
-    case TILEDB_DATETIME_DAY:
-    case TILEDB_DATETIME_FS:
-    case TILEDB_DATETIME_HR:
-    case TILEDB_DATETIME_MIN:
-    case TILEDB_DATETIME_MONTH:
-    case TILEDB_DATETIME_MS:
-    case TILEDB_DATETIME_NS:
-    case TILEDB_DATETIME_PS:
-    case TILEDB_DATETIME_SEC:
-    case TILEDB_DATETIME_US:
-    case TILEDB_DATETIME_WEEK:
-    case TILEDB_DATETIME_YEAR:
-    case TILEDB_TIME_HR:
-    case TILEDB_TIME_MIN:
-    case TILEDB_TIME_SEC:
-    case TILEDB_TIME_MS:
-    case TILEDB_TIME_US:
-    case TILEDB_TIME_NS:
-    case TILEDB_TIME_PS:
-    case TILEDB_TIME_FS:
-    case TILEDB_TIME_AS:
-        return Dimension::Type::Signed64;
-    default:
-        // Not supported tiledb domain types, return as None
-        return Dimension::Type::None;
-    }
 }
 
 TileDBReader::TileDBReader() : m_args(new TileDBReader::Args) {}
@@ -197,101 +175,58 @@ void TileDBReader::initialize()
     }
 }
 
-void TileDBReader::addDimensions(PointLayoutPtr layout)
+void TileDBReader::addDim(PointLayoutPtr layout, const std::string& name,
+                          tiledb_datatype_t type, bool required)
 {
-    // Dimensions are X/Y and maybe Z
-    std::vector<tiledb::Dimension> dims =
-        m_array->schema().domain().dimensions();
 
-    Dimension::Id id;
-    for (size_t i = 0; i < dims.size(); ++i)
-    {
-        tiledb::Dimension& dim = dims[i];
-
-        DimInfo di;
-
-        di.m_name = dim.name();
-
-        di.m_offset = 0;
-        di.m_span = 1;
-        di.m_tileType = dim.type();
-        di.m_type = getPdalType(di.m_tileType);
-
-        if (di.m_type == pdal::Dimension::Type::None)
-            throwError("Invalid Dim type from TileDB");
-
-        di.m_id = layout->registerOrAssignDim(dim.name(), di.m_type);
-        m_dims.push_back(di);
-    }
-
-    auto attrs = m_array->schema().attributes();
-    for (const auto& a : attrs)
-    {
-        DimInfo di;
-
-        di.m_name = a.first;
-        di.m_offset = 0;
-        di.m_span = 1;
-        di.m_tileType = a.second.type();
-        di.m_type = getPdalType(di.m_tileType);
-        if (di.m_type != pdal::Dimension::Type::None)
-        {
-            di.m_id = layout->registerOrAssignDim(a.first, di.m_type);
-            m_dims.push_back(di);
-        }
-        else
-        {
-            if (!m_args->m_strict)
-                std::cerr << "Skipping over unsupported attribute type - "
-                          << di.m_name << "!\n";
-            else
-                throwError("TileDB dimension '" + di.m_name +
-                           "' can't be mapped "
-                           "to trivial type.");
-        }
-    }
-
-    // ABELL
-    //  Should we check that X Y and Z exist and remap the primary/secondary
-    //  dimensions to X Y and Z if necessary?
-}
-
-template <typename T> void TileDBReader::setQueryBuffer(const DimInfo& di)
-{
-    m_query->set_data_buffer(di.m_name, di.m_buffer->get<T>(),
-                             di.m_buffer->count());
-}
-
-void TileDBReader::setQueryBuffer(const DimInfo& di)
-{
-    switch (di.m_tileType)
+    switch (type)
     {
     case TILEDB_INT8:
-        setQueryBuffer<int8_t>(di);
+        m_dims.emplace_back(new TypedDimBuffer<int8_t>(
+            name, layout->registerOrAssignDim(name, Dimension::Type::Signed8)));
         break;
     case TILEDB_UINT8:
-        setQueryBuffer<uint8_t>(di);
+        m_dims.emplace_back(new TypedDimBuffer<uint8_t>(
+            name,
+            layout->registerOrAssignDim(name, Dimension::Type::Unsigned8)));
         break;
     case TILEDB_INT16:
-        setQueryBuffer<int16_t>(di);
+        m_dims.emplace_back(new TypedDimBuffer<int16_t>(
+            name,
+            layout->registerOrAssignDim(name, Dimension::Type::Signed16)));
         break;
     case TILEDB_UINT16:
-        setQueryBuffer<uint16_t>(di);
+        m_dims.emplace_back(new TypedDimBuffer<uint16_t>(
+            name,
+            layout->registerOrAssignDim(name, Dimension::Type::Unsigned16)));
         break;
     case TILEDB_INT32:
-        setQueryBuffer<int32_t>(di);
+        m_dims.emplace_back(new TypedDimBuffer<int32_t>(
+            name,
+            layout->registerOrAssignDim(name, Dimension::Type::Signed32)));
         break;
     case TILEDB_UINT32:
-        setQueryBuffer<uint32_t>(di);
+        m_dims.emplace_back(new TypedDimBuffer<uint32_t>(
+            name,
+            layout->registerOrAssignDim(name, Dimension::Type::Unsigned32)));
+        break;
+    case TILEDB_INT64:
+        m_dims.emplace_back(new TypedDimBuffer<int64_t>(
+            name,
+            layout->registerOrAssignDim(name, Dimension::Type::Signed64)));
         break;
     case TILEDB_UINT64:
-        setQueryBuffer<uint64_t>(di);
+        m_dims.emplace_back(new TypedDimBuffer<uint64_t>(
+            name,
+            layout->registerOrAssignDim(name, Dimension::Type::Unsigned64)));
         break;
     case TILEDB_FLOAT32:
-        setQueryBuffer<float>(di);
+        m_dims.emplace_back(new TypedDimBuffer<float>(
+            name, layout->registerOrAssignDim(name, Dimension::Type::Float)));
         break;
     case TILEDB_FLOAT64:
-        setQueryBuffer<double>(di);
+        m_dims.emplace_back(new TypedDimBuffer<double>(
+            name, layout->registerOrAssignDim(name, Dimension::Type::Double)));
         break;
     case TILEDB_DATETIME_AS:
     case TILEDB_DATETIME_DAY:
@@ -315,14 +250,27 @@ void TileDBReader::setQueryBuffer(const DimInfo& di)
     case TILEDB_TIME_PS:
     case TILEDB_TIME_FS:
     case TILEDB_TIME_AS:
-    case TILEDB_INT64:
-        setQueryBuffer<int64_t>(di);
+        m_dims.emplace_back(new TypedDimBuffer<int64_t>(
+            name,
+            layout->registerOrAssignDim(name, Dimension::Type::Signed64)));
         break;
     default:
-        throwError("TileDB dimension '" + di.m_name +
-                   "' can't be mapped "
-                   "to trivial type.");
+        if (required)
+            throwError("Type for TileDB dimension or attribute '" + name +
+                       "' cannot be mapped to trivial type.");
+        else
+            std::cerr << "Skipping over attribute '" << name
+                      << "' with unsupported type!\n";
     }
+}
+
+void TileDBReader::addDimensions(PointLayoutPtr layout)
+{
+    for (const auto& dim : m_array->schema().domain().dimensions())
+        addDim(layout, dim.name(), dim.type(), true);
+
+    for (const auto& [attrName, attr] : m_array->schema().attributes())
+        addDim(layout, attrName, attr.type(), m_args->m_strict);
 }
 
 void TileDBReader::ready(PointTableRef)
@@ -343,15 +291,8 @@ void TileDBReader::localReady()
     m_query.reset(new tiledb::Query(*m_ctx, *m_array));
     m_query->set_layout(TILEDB_UNORDERED);
 
-    for (DimInfo& di : m_dims)
-    {
-        // All dimensions use the same buffer.
-        std::unique_ptr<Buffer> dimBuf(
-            new Buffer(di.m_tileType, m_args->m_chunkSize));
-        di.m_buffer = dimBuf.get();
-        m_buffers.push_back(std::move(dimBuf));
-        setQueryBuffer(di);
-    }
+    for (auto& buffer : m_dims)
+        buffer->setQuery(m_query.get(), m_args->m_chunkSize);
 
     // Set the subarray to query. The default for each dimension is to query
     // the entire dimension domain unless a range is explicitly set on it.
@@ -408,56 +349,6 @@ void TileDBReader::localReady()
     m_complete = false;
 }
 
-namespace
-{
-
-bool setField(PointRef& point, TileDBReader::DimInfo di, size_t bufOffset)
-{
-    // Span is a count of the number of elements in each set of data, so
-    // offset is a count of item types.  We're doing pointer arithmetic
-    // below, so the size of the type is accounted for.
-    bufOffset = bufOffset * di.m_span + di.m_offset;
-    TileDBReader::Buffer& buf = *di.m_buffer;
-    switch (di.m_type)
-    {
-    case Dimension::Type::Signed8:
-        point.setField(di.m_id, *(buf.get<int8_t>() + bufOffset));
-        break;
-    case Dimension::Type::Unsigned8:
-        point.setField(di.m_id, *(buf.get<uint8_t>() + bufOffset));
-        break;
-    case Dimension::Type::Signed16:
-        point.setField(di.m_id, *(buf.get<int16_t>() + bufOffset));
-        break;
-    case Dimension::Type::Unsigned16:
-        point.setField(di.m_id, *(buf.get<uint16_t>() + bufOffset));
-        break;
-    case Dimension::Type::Signed32:
-        point.setField(di.m_id, *(buf.get<int32_t>() + bufOffset));
-        break;
-    case Dimension::Type::Unsigned32:
-        point.setField(di.m_id, *(buf.get<uint32_t>() + bufOffset));
-        break;
-    case Dimension::Type::Signed64:
-        point.setField(di.m_id, *(buf.get<int64_t>() + bufOffset));
-        break;
-    case Dimension::Type::Unsigned64:
-        point.setField(di.m_id, *(buf.get<uint64_t>() + bufOffset));
-        break;
-    case Dimension::Type::Float:
-        point.setField(di.m_id, *(buf.get<float>() + bufOffset));
-        break;
-    case Dimension::Type::Double:
-        point.setField(di.m_id, *(buf.get<double>() + bufOffset));
-        break;
-    default:
-        return false;
-    }
-    return true;
-}
-
-} // unnamed namespace
-
 bool TileDBReader::processOne(PointRef& point)
 {
     try
@@ -493,10 +384,7 @@ bool TileDBReader::processPoint(PointRef& point)
 
             status = m_query->query_status();
 
-            // The result buffer count represents the total number of items
-            // returned by the query for dimensions.  So if there are three
-            // dimensions, the number of points returned is the buffer count
-            // divided by the number of dimensions.
+            // Get the number of elements read from the `X` dimension.
             m_resultSize = (int)m_query->result_buffer_elements()["X"].second;
 
             if (status == tiledb::Query::Status::INCOMPLETE &&
@@ -512,17 +400,13 @@ bool TileDBReader::processPoint(PointRef& point)
 
     if (m_resultSize > 0)
     {
-        for (DimInfo& dim : m_dims)
-            if (!setField(point, dim, m_offset))
-                throwError("Invalid dimension type when setting data.");
-
+        // Get the values read at m_offset and use to set the PDAL point values.
+        for (auto& buffer : m_dims)
+            buffer->setFields(point, m_offset);
         ++m_offset;
         return true;
     }
-    else
-    {
-        return false;
-    }
+    return false;
 }
 
 point_count_t TileDBReader::read(PointViewPtr view, point_count_t count)

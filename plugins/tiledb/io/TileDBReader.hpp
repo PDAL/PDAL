@@ -49,36 +49,12 @@ namespace pdal
 class PDAL_DLL TileDBReader : public Reader, public Streamable
 {
 public:
-    struct Buffer
+    class DimBuffer
     {
-        size_t m_count; // Number of instances of the type.
-        std::vector<uint8_t> m_data;
-
-        Buffer(tiledb_datatype_t type, size_t count)
-            : m_count(count), m_data(count * tiledb_datatype_size(type))
-        {
-        }
-        size_t count() const
-        {
-            return m_count;
-        }
-
-        template <typename T> T* get()
-        {
-            return reinterpret_cast<T*>(m_data.data());
-        }
-    };
-
-    struct DimInfo
-    {
-        std::string m_name;
-        Dimension::Id m_id;
-        Dimension::Type m_type;
-        Buffer* m_buffer;
-
-        size_t m_span;
-        size_t m_offset;
-        tiledb_datatype_t m_tileType;
+    public:
+        virtual ~DimBuffer() = default;
+        virtual void setQuery(tiledb::Query* query, size_t count) = 0;
+        virtual void setFields(PointRef& point, size_t bufOffset) = 0;
     };
 
     TileDBReader();
@@ -96,6 +72,8 @@ private:
     virtual point_count_t read(PointViewPtr view, point_count_t count) override;
     virtual void done(PointTableRef table) override;
 
+    void addDim(PointLayoutPtr layout, const std::string& name,
+                tiledb_datatype_t typeTileDB, bool required);
     void localReady();
     bool processPoint(PointRef& point);
 
@@ -105,8 +83,7 @@ private:
     point_count_t m_offset;
     point_count_t m_resultSize;
     bool m_complete;
-    std::vector<std::unique_ptr<Buffer>> m_buffers;
-    std::vector<DimInfo> m_dims;
+    std::vector<std::unique_ptr<DimBuffer>> m_dims;
 
     std::unique_ptr<tiledb::Context> m_ctx;
     std::unique_ptr<tiledb::Array> m_array;
@@ -114,9 +91,6 @@ private:
 
     TileDBReader(const TileDBReader&) = delete;
     TileDBReader& operator=(const TileDBReader&) = delete;
-
-    template <typename T> void setQueryBuffer(const DimInfo& di);
-    void setQueryBuffer(const DimInfo& di);
 };
 
 } // namespace pdal
