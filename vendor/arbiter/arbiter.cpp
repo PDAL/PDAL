@@ -1491,9 +1491,9 @@ std::vector<char> Http::put(
         const Query query) const
 {
     return put(
-        path, 
-        std::vector<char>(data.begin(), data.end()), 
-        headers, 
+        path,
+        std::vector<char>(data.begin(), data.end()),
+        headers,
         query);
 }
 
@@ -1563,18 +1563,34 @@ Response Http::internalGet(
         const std::string path,
         const Headers headers,
         const Query query,
-        const std::size_t reserve) const
+        const std::size_t reserve,
+        const int retry,
+        const std::size_t timeout) const
 {
-    return m_pool.acquire().get(typedPath(path), headers, query, reserve);
+    return m_pool.acquire().get(
+        typedPath(path),
+        headers,
+        query,
+        reserve,
+        retry,
+        timeout);
 }
 
 Response Http::internalPut(
         const std::string path,
         const std::vector<char>& data,
         const Headers headers,
-        const Query query) const
+        const Query query,
+        const int retry,
+        const std::size_t timeout) const
 {
-    return m_pool.acquire().put(typedPath(path), data, headers, query);
+    return m_pool.acquire().put(
+        typedPath(path),
+        data,
+        headers,
+        query,
+        retry,
+        timeout);
 }
 
 Response Http::internalHead(
@@ -1848,22 +1864,40 @@ std::unique_ptr<S3::Auth> S3::Auth::create(
             // which only support v1, this request will fail.  That's ok, the
             // next request looks the same anyway (except without the token of
             // course), and that corresponds to the IMDSv1 flow as a fallback.
-            const auto tokenvec = httpDriver.put(
+            const auto res = httpDriver.internalPut(
                 ec2TokenBase,
                 std::vector<char>(),
                 {{ "X-aws-ec2-metadata-token-ttl-seconds", "21600" }},
-                {{ }});
+                {{ }},
+                0,
+                1);
 
-            token = std::string(token.data(), token.size());
+
+            if (!res.ok()) throw ArbiterError("Failed to get IMDSv2 token");
+
+            const auto tokenvec = res.data();
+            token = std::string(tokenvec.data(), tokenvec.size());
         }
         catch (...) { }
 
         http::Headers headers;
         if (!token.empty()) headers["X-aws-ec2-metadata-token"] = token;
 
-        if (const auto iamRole = httpDriver.tryGet(ec2CredBase, headers))
+        const auto res = httpDriver.internalGet(
+            ec2CredBase,
+            headers,
+            {{ }},
+            0,
+            0,
+            1);
+        if (!res.ok()) throw ArbiterError("Failed to get IAM role");
+
+        const auto rolevec = res.data();
+        const auto iamRole = std::string(rolevec.begin(), rolevec.end());
+
+        if (!iamRole.empty())
         {
-            return makeUnique<Auth>(ec2CredBase + "/" + *iamRole);
+            return makeUnique<Auth>(ec2CredBase + "/" + iamRole);
         }
     }
     catch (...) { }
@@ -2038,13 +2072,19 @@ S3::AuthFields S3::Auth::fields() const
 
             try
             {
-                const auto tokenvec = httpDriver.put(
+                const auto res = httpDriver.internalPut(
                     ec2TokenBase,
                     std::vector<char>(),
                     {{ "X-aws-ec2-metadata-token-ttl-seconds", "21600" }},
-                    {{ }});
+                    {{ }},
+                    0,
+                    1);
 
-                token = std::string(token.data(), token.size());
+
+                if (!res.ok()) throw ArbiterError("Failed to get IMDSv2 token");
+
+                const auto tokenvec = res.data();
+                token = std::string(tokenvec.data(), tokenvec.size());
             }
             catch (...) { }
 
@@ -4392,7 +4432,8 @@ Response Curl::get(
         std::string path,
         Headers headers,
         Query query,
-        const std::size_t reserve)
+        const std::size_t reserve,
+        const std::size_t timeout)
 {
 #ifdef ARBITER_CURL
     std::vector<char> data;
@@ -4400,6 +4441,7 @@ Response Curl::get(
     if (reserve) data.reserve(reserve);
 
     init(path, headers, query);
+    if (timeout) curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, timeout);
 
     // Register callback function and data pointer to consume the result.
     curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, getCb);
@@ -4429,12 +4471,17 @@ Response Curl::get(
 #endif
 }
 
-Response Curl::head(std::string path, Headers headers, Query query)
+Response Curl::head(
+    std::string path,
+    Headers headers,
+    Query query,
+    const std::size_t timeout)
 {
 #ifdef ARBITER_CURL
     std::vector<char> data;
 
     init(path, headers, query);
+    if (timeout) curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, timeout);
 
     // Register callback function and data pointer to consume the result.
     curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, getCb);
@@ -4463,10 +4510,12 @@ Response Curl::put(
         std::string path,
         const std::vector<char>& data,
         Headers headers,
-        Query query)
+        Query query,
+        const std::size_t timeout)
 {
 #ifdef ARBITER_CURL
     init(path, headers, query);
+    if (timeout) curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, timeout);
 
     std::unique_ptr<PutData> putData(new PutData(data));
 
@@ -4503,10 +4552,12 @@ Response Curl::post(
         std::string path,
         const std::vector<char>& data,
         Headers headers,
-        Query query)
+        Query query,
+        const std::size_t timeout)
 {
 #ifdef ARBITER_CURL
     init(path, headers, query);
+    if (timeout) curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, timeout);
 
     std::unique_ptr<PutData> putData(new PutData(data));
     std::vector<char> writeData;
@@ -4653,12 +4704,14 @@ Response Resource::get(
         const std::string path,
         const Headers headers,
         const Query query,
-        const std::size_t reserve)
+        const std::size_t reserve,
+        const int retry,
+        const std::size_t timeout)
 {
-    return exec([this, path, headers, query, reserve]()->Response
+    return exec([this, path, headers, query, reserve, timeout]()->Response
     {
-        return m_curl.get(path, headers, query, reserve);
-    });
+        return m_curl.get(path, headers, query, reserve, timeout);
+    }, retry);
 }
 
 Response Resource::head(
@@ -4676,12 +4729,14 @@ Response Resource::put(
         std::string path,
         const std::vector<char>& data,
         const Headers headers,
-        const Query query)
+        const Query query,
+        const int retry,
+        const std::size_t timeout)
 {
-    return exec([this, path, &data, headers, query]()->Response
+    return exec([this, path, &data, headers, query, timeout]()->Response
     {
-        return m_curl.put(path, data, headers, query);
-    });
+        return m_curl.put(path, data, headers, query, timeout);
+    }, retry);
 }
 
 Response Resource::post(
@@ -4696,10 +4751,14 @@ Response Resource::post(
     });
 }
 
-Response Resource::exec(std::function<Response()> f)
+Response Resource::exec(std::function<Response()> f, const int userRetry)
 {
     Response res;
     std::size_t tries(0);
+
+    const std::size_t retry = userRetry == -1
+        ? m_retry
+        : static_cast<std::size_t>(userRetry);
 
     do
     {
@@ -4711,7 +4770,7 @@ Response Resource::exec(std::function<Response()> f)
 
         res = f();
     }
-    while (res.serverError() && tries++ < m_retry);
+    while (res.serverError() && tries++ < retry);
 
     return res;
 }

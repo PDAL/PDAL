@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: 71bf90f2a4eb26838189c0bf6ca838a3aa6249fc
+// Git SHA: 5c024291352d2586f536057f83ddeff95548d84e
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -2974,21 +2974,28 @@ public:
             std::string path,
             Headers headers,
             Query query,
-            std::size_t reserve);
+            std::size_t reserve,
+            std::size_t timeout = 0);
 
-    http::Response head(std::string path, Headers headers, Query query);
+    http::Response head(
+            std::string path,
+            Headers headers,
+            Query query,
+            std::size_t timeout = 0);
 
     http::Response put(
             std::string path,
             const std::vector<char>& data,
             Headers headers,
-            Query query);
+            Query query,
+            std::size_t timeout = 0);
 
     http::Response post(
             std::string path,
             const std::vector<char>& data,
             Headers headers,
-            Query query);
+            Query query,
+            std::size_t timeout = 0);
 
 private:
     Curl(std::string j);
@@ -3090,7 +3097,9 @@ public:
             std::string path,
             Headers headers = Headers(),
             Query query = Query(),
-            std::size_t reserve = 0);
+            std::size_t reserve = 0,
+            int retry = -1,
+            std::size_t timeout = 0);
 
     http::Response head(
             std::string path,
@@ -3101,7 +3110,9 @@ public:
             std::string path,
             const std::vector<char>& data,
             Headers headers = Headers(),
-            Query query = Query());
+            Query query = Query(),
+            int retry = -1,
+            std::size_t timeout = 0);
 
     http::Response post(
             std::string path,
@@ -3115,7 +3126,7 @@ private:
     std::size_t m_id;
     std::size_t m_retry;
 
-    http::Response exec(std::function<http::Response()> f);
+    http::Response exec(std::function<http::Response()> f, int retry = -1);
 };
 
 class ARBITER_DLL Pool
@@ -4144,13 +4155,17 @@ public:
             std::string path,
             http::Headers headers = http::Headers(),
             http::Query query = http::Query(),
-            std::size_t reserve = 0) const;
+            std::size_t reserve = 0,
+            int retry = -1,
+            std::size_t timeout = 0) const;
 
     http::Response internalPut(
             std::string path,
             const std::vector<char>& data,
             http::Headers headers = http::Headers(),
-            http::Query query = http::Query()) const;
+            http::Query query = http::Query(),
+            int retry = -1,
+            std::size_t timeout = 0) const;
 
     http::Response internalHead(
             std::string path,
