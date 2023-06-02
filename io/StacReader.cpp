@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2018, Kyle Mann (kyle@hobu.co)
+* Copyright (c) 2022, Kyle Mann (kyle@hobu.co)
 *
 * All rights reserved.
 *
@@ -47,6 +47,11 @@
 #include <pdal/util/IStream.hpp>
 #include <pdal/util/FileUtils.hpp>
 
+// #include "private/stac/Catalog.hpp"
+#include "private/stac/Item.hpp"
+#include "private/stac/Utils.hpp"
+// #include "private/stac/ItemCollection.hpp"
+
 #include "private/connector/Connector.hpp"
 #include <pdal/StageWrapper.hpp>
 
@@ -58,19 +63,19 @@ namespace pdal
 namespace
 {
 
-std::mutex mutex;
-std::unique_ptr<arbiter::Arbiter> arbiter;
+// std::mutex mutex;
+// std::unique_ptr<arbiter::Arbiter> arbiter;
 
-void schemaFetch(const nlohmann::json_uri& json_uri, nlohmann::json& json)
-{
-    {
-        std::lock_guard<std::mutex> lock(mutex);
-        if (!arbiter) arbiter.reset(new arbiter::Arbiter());
-    }
+// void schemaFetch(const nlohmann::json_uri& json_uri, nlohmann::json& json)
+// {
+//     {
+//         std::lock_guard<std::mutex> lock(mutex);
+//         if (!arbiter) arbiter.reset(new arbiter::Arbiter());
+//     }
 
-    std::string jsonStr = arbiter->get(json_uri.url());
-    json = nlohmann::json::parse(jsonStr);
-}
+//     std::string jsonStr = arbiter->get(json_uri.url());
+//     json = nlohmann::json::parse(jsonStr);
+// }
 
 }
 
@@ -100,7 +105,6 @@ struct StacReader::Args
     std::string catalogSchemaUrl;
     std::string featureSchemaUrl;
     bool validateSchema;
-    bool dryRun;
     int threads;
 
     NL::json m_query;
@@ -390,20 +394,19 @@ std::string StacReader::extractDriverFromItem(const NL::json& asset) const
 }
 
 // Create link relative to the Catalog/Item/Collection that is referencing it
-const std::string getPath(std::string srcPath, std::string linkPath)
-{
-    //Make absolute path of current item's directory, then create relative path from that
+// const std::string handleRelativePath(std::string srcPath, std::string linkPath)
+// {
+//     //Make absolute path of current item's directory, then create relative path from that
 
-    //Get driectory of src item
-    const std::string baseDir = FileUtils::getDirectory(srcPath);
-    if (FileUtils::isAbsolutePath(linkPath) ||
-            linkPath.find("://") != std::string::npos)
-        return linkPath;
-    //Create absolute path from src item filepath, if it's not already
-    // and join relative path to src item's dir path
-    return FileUtils::toAbsolutePath(linkPath, baseDir);
+//     //Get driectory of src item
+//     const std::string baseDir = FileUtils::getDirectory(srcPath);
+//     if (FileUtils::isAbsolutePath(linkPath))
+//         return linkPath;
+//     //Create absolute path from src item filepath, if it's not already
+//     // and join relative path to src item's dir path
+//     return FileUtils::toAbsolutePath(linkPath, baseDir);
 
-}
+// }
 
 void StacReader::initializeItem(NL::json stacJson, std::string itemPath)
 {
@@ -428,7 +431,8 @@ void StacReader::initializeItem(NL::json stacJson, std::string itemPath)
 
     NL::json asset = stacJson.at("assets").at(assetName);
 
-    std::string dataUrl = getPath(itemPath, asset.at("href").get<std::string>());
+    const std::string srcPath = asset.at("href").get<std::string>();
+    std::string dataUrl = handleRelativePath(itemPath, srcPath);
 
     std::string driver = extractDriverFromItem(asset);
 
@@ -509,7 +513,8 @@ void StacReader::initializeCatalog(NL::json stacJson, std::string catPath, bool 
             throw pdal::pdal_error("item does not contain 'href' or 'rel'");
 
         const std::string linkType = link.at("rel").get<std::string>();
-        const std::string linkPath = getPath(catPath, link.at("href").get<std::string>());
+        const std::string srcPath = link.at("href").get<std::string>();
+        const std::string linkPath = handleRelativePath(catPath, srcPath);
 
         m_p->m_pool->add([this, linkType, linkPath, link ]()
         {
@@ -571,9 +576,10 @@ void StacReader::initializeItemCollection(NL::json stacJson, std::string icPath)
             std::string target = link.at("rel").get<std::string>();
             if (target == "next")
             {
-                std::string next = getPath(icPath, link.at("href").get<std::string>());
-                NL::json nextJson = m_p->m_connector->getJson(next);
-                initializeItemCollection(nextJson, next);
+                const std::string nextLinkPath = link.at("href").get<std::string>();
+                std::string nextAbsPath = handleRelativePath(icPath, nextLinkPath);
+                NL::json nextJson = m_p->m_connector->getJson(nextAbsPath);
+                initializeItemCollection(nextJson, nextAbsPath);
             }
         }
     }
@@ -595,7 +601,11 @@ void StacReader::initialize()
 
     std::string stacType = stacJson.at("type");
     if (stacType == "Feature")
-        initializeItem(stacJson, m_filename);
+    {
+        // initializeItem(stacJson, m_filename);
+        stac::Item i(stacJson, m_filename, *(m_p->m_connector));
+        i.init(m_args->assetNames, m_args->readerArgs);
+    }
     else if (stacType == "Catalog")
         initializeCatalog(stacJson, m_filename, true);
     else if (stacType == "FeatureCollection")

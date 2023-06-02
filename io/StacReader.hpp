@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2018, Kyle Mann (kyle@hobu.co)
+* Copyright (c) 2022, Kyle Mann (kyle@hobu.co)
 *
 * All rights reserved.
 *
@@ -38,13 +38,9 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
-
-
 #include <pdal/JsonFwd.hpp>
 #include <pdal/StageFactory.hpp>
 #include <filters/MergeFilter.hpp>
-
-
 
 namespace pdal
 {
