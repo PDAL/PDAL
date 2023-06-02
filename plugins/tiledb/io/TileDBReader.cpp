@@ -32,11 +32,14 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include "TileDBReader.hpp"
+
+#include "TileDBUtils.hpp"
+
 #include <algorithm>
+#include <iostream>
 
 #include <nlohmann/json.hpp>
-
-#include "TileDBReader.hpp"
 
 const char pathSeparator =
 #ifdef _WIN32
@@ -50,6 +53,17 @@ namespace pdal
 static PluginInfo const s_info{"readers.tiledb",
                                "Read data from a TileDB array.",
                                "http://pdal.io/stages/readers.tiledb.html"};
+
+struct TileDBReader::Args
+{
+    std::string m_cfgFileName;
+    point_count_t m_chunkSize;
+    bool m_stats;
+    DomainBounds m_bbox;
+    uint64_t m_startTimeStamp;
+    uint64_t m_endTimeStamp;
+    bool m_strict;
+};
 
 CREATE_SHARED_STAGE(TileDBReader, s_info)
 std::string TileDBReader::getName() const
@@ -110,30 +124,35 @@ Dimension::Type getPdalType(tiledb_datatype_t t)
     }
 }
 
+TileDBReader::TileDBReader() : m_args(new TileDBReader::Args) {}
+
+TileDBReader::~TileDBReader() {}
+
 void TileDBReader::addArgs(ProgramArgs& args)
 {
     args.addSynonym("filename", "array_name");
     args.add("config_file", "TileDB configuration file location",
-             m_cfgFileName);
-    args.add("chunk_size", "TileDB read chunk size", m_chunkSize,
+             m_args->m_cfgFileName);
+    args.add("chunk_size", "TileDB read chunk size", m_args->m_chunkSize,
              point_count_t(1000000));
-    args.add("stats", "Dump TileDB query stats to stdout", m_stats, false);
+    args.add("stats", "Dump TileDB query stats to stdout", m_args->m_stats,
+             false);
     args.add("bbox3d",
              "Bounding box subarray to read from TileDB in format"
              "([minx, maxx], [miny, maxy], [minz, maxz])",
-             m_bbox);
+             m_args->m_bbox);
     args.add("bbox4d",
              "Bounding box subarray to read from TileDB in format"
              "([minx, maxx], [miny, maxy], [minz, maxz], [min_gpstime, "
              "max_gpstime] )",
-             m_bbox);
-    args.add("end_timestamp", "TileDB array timestamp", m_endTimeStamp,
+             m_args->m_bbox);
+    args.add("end_timestamp", "TileDB array timestamp", m_args->m_endTimeStamp,
              UINT64_MAX);
     args.addSynonym("end_timestamp", "timestamp");
     args.add<uint64_t>("start_timestamp", "TileDB array timestamp",
-                       m_startTimeStamp, 0);
-    args.add("strict", "Raise an error for unsupported attributes", m_strict,
-             true);
+                       m_args->m_startTimeStamp, 0);
+    args.add("strict", "Raise an error for unsupported attributes",
+             m_args->m_strict, true);
 }
 
 void TileDBReader::prepared(PointTableRef table)
@@ -145,9 +164,9 @@ void TileDBReader::prepared(PointTableRef table)
 
 void TileDBReader::initialize()
 {
-    if (!m_cfgFileName.empty())
+    if (!m_args->m_cfgFileName.empty())
     {
-        tiledb::Config cfg(m_cfgFileName);
+        tiledb::Config cfg(m_args->m_cfgFileName);
         m_ctx.reset(new tiledb::Context(cfg));
     }
     else
@@ -155,20 +174,21 @@ void TileDBReader::initialize()
 
     try
     {
-        if (m_stats)
+        if (m_args->m_stats)
             tiledb::Stats::enable();
 
 #if TILEDB_VERSION_MINOR < 15
         m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ));
-        if (m_startTimeStamp != 0)
-            m_array->set_open_timestamp_start(m_startTimeStamp);
-        if (m_endTimeStamp != UINT64_MAX)
+        if (m_args->m_startTimeStamp != 0)
+            m_array->set_open_timestamp_start(m_args->m_startTimeStamp);
+        if (m_args->m_endTimeStamp != UINT64_MAX)
             m_array->set_open_timestamp_end(m_endTimeStamp);
         m_array->reopen();
 #else
         m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ,
                                         {tiledb::TimestampStartEndMarker(),
-                                         m_startTimeStamp, m_endTimeStamp}));
+                                         m_args->m_startTimeStamp,
+                                         m_args->m_endTimeStamp}));
 #endif
     }
     catch (const tiledb::TileDBError& err)
@@ -191,8 +211,6 @@ void TileDBReader::addDimensions(PointLayoutPtr layout)
         DimInfo di;
 
         di.m_name = dim.name();
-        if (di.m_name == "GpsTime")
-            m_has_time = true;
 
         di.m_offset = 0;
         di.m_span = 1;
@@ -213,8 +231,6 @@ void TileDBReader::addDimensions(PointLayoutPtr layout)
         DimInfo di;
 
         di.m_name = a.first;
-        if (di.m_name == "GpsTime")
-            m_has_time = true;
         di.m_offset = 0;
         di.m_span = 1;
         di.m_dimCategory = DimCategory::Attribute;
@@ -227,7 +243,7 @@ void TileDBReader::addDimensions(PointLayoutPtr layout)
         }
         else
         {
-            if (!m_strict)
+            if (!m_args->m_strict)
                 std::cerr << "Skipping over unsupported attribute type - "
                           << di.m_name << "!\n";
             else
@@ -339,7 +355,8 @@ void TileDBReader::localReady()
     for (DimInfo& di : m_dims)
     {
         // All dimensions use the same buffer.
-        std::unique_ptr<Buffer> dimBuf(new Buffer(di.m_tileType, m_chunkSize));
+        std::unique_ptr<Buffer> dimBuf(
+            new Buffer(di.m_tileType, m_args->m_chunkSize));
         di.m_buffer = dimBuf.get();
         m_buffers.push_back(std::move(dimBuf));
         setQueryBuffer(di);
@@ -348,26 +365,29 @@ void TileDBReader::localReady()
     // Set the subarray to query. The default for each dimension is to query
     // the entire dimension domain unless a range is explicitly set on it.
     tiledb::Subarray subarray(*m_ctx, *m_array);
-    const auto ndim_bbox = m_bbox.ndim();
+    const auto ndim_bbox = m_args->m_bbox.ndim();
     const auto domain = m_array->schema().domain();
-    switch (m_bbox.ndim())
+    switch (m_args->m_bbox.ndim())
     {
     case 4:
         if (domain.has_dimension("GpsTime"))
-            subarray.add_range("GpsTime", m_bbox.minGpsTime(),
-                               m_bbox.maxGpsTime());
+            subarray.add_range("GpsTime", m_args->m_bbox.minGpsTime(),
+                               m_args->m_bbox.maxGpsTime());
         [[fallthrough]];
     case 3:
         if (domain.has_dimension("Z"))
-            subarray.add_range("Z", m_bbox.minZ(), m_bbox.maxZ());
+            subarray.add_range("Z", m_args->m_bbox.minZ(),
+                               m_args->m_bbox.maxZ());
         [[fallthrough]];
     case 2:
         if (domain.has_dimension("Y"))
-            subarray.add_range("Y", m_bbox.minY(), m_bbox.maxY());
+            subarray.add_range("Y", m_args->m_bbox.minY(),
+                               m_args->m_bbox.maxY());
         [[fallthrough]];
     case 1:
         if (domain.has_dimension("X"))
-            subarray.add_range("X", m_bbox.minX(), m_bbox.maxX());
+            subarray.add_range("X", m_args->m_bbox.minX(),
+                               m_args->m_bbox.maxX());
     }
     m_query->set_subarray(subarray);
 
@@ -474,7 +494,7 @@ bool TileDBReader::processPoint(PointRef& point)
 
             m_query->submit();
 
-            if (m_stats)
+            if (m_args->m_stats)
             {
                 tiledb::Stats::dump(stdout);
                 tiledb::Stats::reset();

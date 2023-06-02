@@ -38,11 +38,9 @@
 #define NOMINMAX
 #endif
 
-#include <iostream>
-
-#include "TileDBUtils.hpp"
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
+
 #include <tiledb/tiledb>
 
 namespace pdal
@@ -89,7 +87,8 @@ public:
         std::string m_name;
     };
 
-    TileDBReader() = default;
+    TileDBReader();
+    ~TileDBReader();
     std::string getName() const;
 
 private:
@@ -104,19 +103,14 @@ private:
     void localReady();
     bool processPoint(PointRef& point);
 
-    std::string m_cfgFileName;
-    point_count_t m_chunkSize;
+    struct Args;
+    std::unique_ptr<TileDBReader::Args> m_args;
+
     point_count_t m_offset;
     point_count_t m_resultSize;
-    uint64_t m_startTimeStamp;
-    uint64_t m_endTimeStamp;
-    bool m_strict;
     bool m_complete;
-    bool m_stats;
-    DomainBounds m_bbox;
     std::vector<std::unique_ptr<Buffer>> m_buffers;
     std::vector<DimInfo> m_dims;
-    bool m_has_time = false;
 
     std::unique_ptr<tiledb::Context> m_ctx;
     std::unique_ptr<tiledb::Array> m_array;
@@ -127,12 +121,6 @@ private:
 
     template <typename T> void setQueryBuffer(const DimInfo& di);
     void setQueryBuffer(const DimInfo& di);
-
-public:
-    bool hasTime()
-    {
-        return m_has_time;
-    };
 };
 
 } // namespace pdal
