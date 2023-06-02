@@ -1838,28 +1838,35 @@ std::unique_ptr<S3::Auth> S3::Auth::create(
 
     // Nothing found in the environment or on the filesystem.  However we may
     // be running in an EC2 instance with an instance profile set up.
-    if (const auto iamRole = httpDriver.tryGet(ec2CredBase))
+    try
     {
+        std::string token;
+
         try
         {
-            const auto token = httpDriver.put(
-                ec2TokenBase, 
+            // The below request is for the IMDSv2 token.  On EC2 instances
+            // which only support v1, this request will fail.  That's ok, the
+            // next request looks the same anyway (except without the token of
+            // course), and that corresponds to the IMDSv1 flow as a fallback.
+            const auto tokenvec = httpDriver.put(
+                ec2TokenBase,
                 std::vector<char>(),
-                {{ "X-aws-ec2-metadata-token-ttl-seconds", "21600" }}, 
+                {{ "X-aws-ec2-metadata-token-ttl-seconds", "21600" }},
                 {{ }});
 
-            if (const auto iamRole = httpDriver.tryGet(
-                ec2CredBase,
-                {{ 
-                    "X-aws-ec2-metadata-token", 
-                    std::string(token.data(), token.size())
-                }}))
-            {
-                return makeUnique<Auth>(ec2CredBase + "/" + *iamRole);
-            }
+            token = std::string(token.data(), token.size());
         }
         catch (...) { }
+
+        http::Headers headers;
+        if (!token.empty()) headers["X-aws-ec2-metadata-token"] = token;
+
+        if (const auto iamRole = httpDriver.tryGet(ec2CredBase, headers))
+        {
+            return makeUnique<Auth>(ec2CredBase + "/" + *iamRole);
+        }
     }
+    catch (...) { }
 
     // We also may be running in Fargate, which looks very similar but with a
     // different IP.
@@ -2027,19 +2034,25 @@ S3::AuthFields S3::Auth::fields() const
             // refresh it only on expiration, but this flow for the S3-level
             // temporary creds/token only happens on an hourly basis so it
             // doesn't much matter.
-            const auto token = httpDriver.put(
-                ec2TokenBase, 
-                std::vector<char>(),
-                {{ "X-aws-ec2-metadata-token-ttl-seconds", "21600" }},
-                {{ }});
+            std::string token;
+
+            try
+            {
+                const auto tokenvec = httpDriver.put(
+                    ec2TokenBase,
+                    std::vector<char>(),
+                    {{ "X-aws-ec2-metadata-token-ttl-seconds", "21600" }},
+                    {{ }});
+
+                token = std::string(token.data(), token.size());
+            }
+            catch (...) { }
+
+            http::Headers headers;
+            if (!token.empty()) headers["X-aws-ec2-metadata-token"] = token;
 
             const json creds = json::parse(
-                httpDriver.get(
-                    *m_credUrl,
-                    {{ 
-                        "X-aws-ec2-metadata-token", 
-                        std::string(token.data(), token.size())
-                    }}));
+                httpDriver.get(*m_credUrl, headers));
 
             m_access = creds.at("AccessKeyId").get<std::string>();
             m_hidden = creds.at("SecretAccessKey").get<std::string>();
