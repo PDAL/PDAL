@@ -242,7 +242,22 @@ void TileDBReader::addDimensions(PointLayoutPtr layout)
 
     for (const auto& [attrName, attr] : m_array->schema().attributes())
     {
-        addDim(layout, attrName, attr.type(), m_args->m_strict);
+        // Check for special packed bit-field dimension.
+        if (attrName == "BitFields")
+        {
+            if (attr.type() != TILEDB_UINT16)
+            {
+                if (m_args->m_strict)
+                    throwError("Cannot add type '" + attrName +
+                               "'. Unexpected type not equal to uint16_t.");
+                else
+                    std::cerr << "Skipping over attribute '" << attrName
+                              << "' with unexpected type!\n";
+            }
+            m_dims.emplace_back(new BitFieldsBuffer(attrName, layout));
+        }
+        else
+            addDim(layout, attrName, attr.type(), m_args->m_strict);
     }
 }
 

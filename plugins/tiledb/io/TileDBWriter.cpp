@@ -86,6 +86,7 @@ struct TileDBWriter::Args
     bool m_append;
     bool m_use_time;
     bool m_time_first;
+    bool m_combine_bit_fields;
     uint64_t m_timeStamp = UINT64_MAX;
 };
 
@@ -174,6 +175,9 @@ void TileDBWriter::addArgs(ProgramArgs& args)
              m_args->m_time_first, false);
     args.add<uint64_t>("timestamp", "TileDB array timestamp",
                        m_args->m_timeStamp, UINT64_MAX);
+    args.add("combine_bit_fields",
+             "Combine all bit fields into a single 2 byte attribute",
+             m_args->m_combine_bit_fields, true);
 }
 
 void TileDBWriter::initialize()
@@ -198,8 +202,21 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
 {
     // Create objects to store the buffer data.
     auto layout = table.layout();
+    bool hasBitFields = false;
+    std::array<std::optional<Dimension::Id>, 6> bitFieldIds;
     for (const auto& dimId : layout->dims())
     {
+        if (m_args->m_combine_bit_fields)
+        {
+            const auto& dimName = layout->dimName(dimId);
+            auto bitIndex = BitFieldsBuffer::bitFieldIndex(dimName);
+            if (bitIndex.has_value())
+            {
+                hasBitFields = true;
+                bitFieldIds[bitIndex.value()] = dimId;
+                continue;
+            }
+        }
         // Allocate the buffer.
         switch (layout->dimType(dimId))
         {
@@ -238,6 +255,12 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
             throw pdal_error("Unsupported attribute type for " +
                              layout->dimName(dimId));
         }
+
+        m_buffers.back()->resizeBuffer(m_args->m_cache_size);
+    }
+    if (hasBitFields)
+    {
+        m_buffers.emplace_back(new BitFieldsBuffer("BitFields", bitFieldIds));
 
         m_buffers.back()->resizeBuffer(m_args->m_cache_size);
     }
