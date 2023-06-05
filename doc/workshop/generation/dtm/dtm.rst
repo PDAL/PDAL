@@ -74,8 +74,6 @@ see what was produced. Let us use :ref:`qgis` to visualize the output.
 
 1. Open :ref:`qgis` and `Add Raster Layer`:
 
-    .. image:: ../../images/dtm-add-raster-layer.png
-        :target: ../../../_images/dtm-add-raster-layer.png
 
 2. Add the dtm.tif file from your ``./exercises/analysis/dtm``
    directory.
@@ -97,9 +95,6 @@ see what was produced. Let us use :ref:`qgis` to visualize the output.
 4. Classify the DTM by right-clicking on the `Filled` and choosing
    `Properties`. Pick the singleband pseudocolor for the rendering type, and then
    choose a color ramp and click `Classify`.
-
-    .. image:: ../../images/dtm-qgis-classify.png
-        :target: ../../../_images/dtm-qgis-classify.png
 
     .. image:: ../../images/dtm-qgis-colorize-dtm.png
         :target: ../../../_images/dtm-qgis-colorize-dtm.png

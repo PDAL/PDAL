@@ -93,11 +93,6 @@ technique we learned about in :ref:`workshop-denoising`.
         --filters.expression.expression="Classification == 2"^
         -v 4
 
-
-    .. image:: ../../images/ground-ground-only-view.png
-        :target: ../../../_images/ground-ground-only-view.png
-
-
 2. Now we will instead use the :ref:`translate_command` command to stack the
 :ref:`filters.outlier` and :ref:`filters.smrf` stages:
 
@@ -129,4 +124,6 @@ Finally, we add a range filter to extract only the ground returns (i.e.,
 
 The result is a more accurate representation of the ground returns.
 
-.. image:: ../../images/ground-filtered.png
+    .. image:: ../../images/ground-ground-only-view.png
+        :target: ../../../_images/ground-ground-only-view.png
+        

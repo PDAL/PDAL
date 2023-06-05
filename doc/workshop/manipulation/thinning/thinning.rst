@@ -59,11 +59,6 @@ output ``uncompahgre-thin.copc.laz`` file.
 
     Selecting multiple data sets in QGIS
 
-.. figure:: ../../images/thinning-full-res.png
-    :target: ../../../_images/thinning-select-data.png
-
-    Full resolution Uncompahgre data set
-
 .. figure:: ../../images/thinning-poisson-thin.png
     :target: ../../../_images/thinning-poisson-thin.png
 
