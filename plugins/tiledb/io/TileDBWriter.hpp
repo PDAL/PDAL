@@ -53,12 +53,18 @@ public:
         std::string m_name;
         Dimension::Id m_id;
         Dimension::Type m_type;
+        size_t m_dim_size;
         std::vector<uint8_t> m_buffer;
 
         DimBuffer(const std::string& name, Dimension::Id id,
-                  Dimension::Type type)
-            : m_name(name), m_id(id), m_type(type)
+                  Dimension::Type type, size_t dimSize)
+            : m_name(name), m_id(id), m_type(type), m_dim_size(dimSize)
         {
+        }
+
+        inline void resizeBuffer(size_t nelements)
+        {
+            m_buffer.resize(m_dim_size * nelements);
         }
     };
 

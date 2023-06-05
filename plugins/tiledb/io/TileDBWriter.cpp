@@ -207,14 +207,12 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
     auto layout = table.layout();
     for (const auto& dimId : layout->dims())
     {
-        // Get the name and type of the dim.
-        std::string dimName = layout->dimName(dimId);
-        Dimension::Type dimType = layout->dimType(dimId);
 
         // Allocate the buffer.
-        m_buffers.emplace_back(dimName, dimId, dimType);
-        m_buffers.back().m_buffer.resize(m_args->m_cache_size *
-                                         Dimension::size(dimType));
+        m_buffers.emplace_back(layout->dimName(dimId), dimId,
+                               layout->dimType(dimId), layout->dimSize(dimId));
+
+        m_buffers.back().resizeBuffer(m_args->m_cache_size);
     }
 
     // Enable TileDB stats (if requested).
@@ -431,8 +429,9 @@ bool TileDBWriter::processOne(PointRef& point)
             throwError("Unsupported attribute type for " + dimBuffer.m_name);
         }
 
-        size_t size = Dimension::size(dimBuffer.m_type);
-        memcpy(dimBuffer.m_buffer.data() + (m_current_idx * size), &e, size);
+        memcpy(dimBuffer.m_buffer.data() +
+                   (m_current_idx * dimBuffer.m_dim_size),
+               &e, dimBuffer.m_dim_size);
     }
 
     if (++m_current_idx == m_args->m_cache_size)
