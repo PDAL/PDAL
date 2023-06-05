@@ -1897,7 +1897,8 @@ std::unique_ptr<S3::Auth> S3::Auth::create(
 
         if (!iamRole.empty())
         {
-            return makeUnique<Auth>(ec2CredBase + "/" + iamRole);
+            const bool imdsv2 = !token.empty();
+            return makeUnique<Auth>(ec2CredBase + "/" + iamRole, imdsv2);
         }
     }
     catch (...) { }
@@ -2070,23 +2071,28 @@ S3::AuthFields S3::Auth::fields() const
             // doesn't much matter.
             std::string token;
 
-            try
+            if (m_imdsv2)
             {
-                const auto res = httpDriver.internalPut(
-                    ec2TokenBase,
-                    std::vector<char>(),
-                    {{ "X-aws-ec2-metadata-token-ttl-seconds", "21600" }},
-                    {{ }},
-                    0,
-                    1);
+                try
+                {
+                    const auto res = httpDriver.internalPut(
+                        ec2TokenBase,
+                        std::vector<char>(),
+                        {{ "X-aws-ec2-metadata-token-ttl-seconds", "21600" }},
+                        {{ }},
+                        0,
+                        1);
 
+                    if (!res.ok())
+                    {
+                        throw ArbiterError("Failed to get IMDSv2 token");
+                    }
 
-                if (!res.ok()) throw ArbiterError("Failed to get IMDSv2 token");
-
-                const auto tokenvec = res.data();
-                token = std::string(tokenvec.data(), tokenvec.size());
+                    const auto tokenvec = res.data();
+                    token = std::string(tokenvec.data(), tokenvec.size());
+                }
+                catch (...) { }
             }
-            catch (...) { }
 
             http::Headers headers;
             if (!token.empty()) headers["X-aws-ec2-metadata-token"] = token;
@@ -4382,8 +4388,8 @@ void Curl::init(
     curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_LIMIT, 1L);
     curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, m_timeout);
 
-    curl_easy_setopt(m_curl, CURLOPT_CONNECTTIMEOUT_MS, 2000L);
-    curl_easy_setopt(m_curl, CURLOPT_ACCEPTTIMEOUT_MS, 2000L);
+    curl_easy_setopt(m_curl, CURLOPT_CONNECTTIMEOUT_MS, 1000L);
+    curl_easy_setopt(m_curl, CURLOPT_ACCEPTTIMEOUT_MS, 1000L);
 
     auto toLong([](bool b) { return b ? 1L : 0L; });
 
