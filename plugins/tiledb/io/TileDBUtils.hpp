@@ -44,6 +44,9 @@
 #include <nlohmann/json.hpp>
 #include <tiledb/tiledb>
 
+#include <pdal/Reader.hpp>
+#include <pdal/Streamable.hpp>
+#include <pdal/Writer.hpp>
 #include <pdal/util/Utils.hpp>
 
 namespace pdal
@@ -291,6 +294,119 @@ private:
     NL::json m_user_filters{};
     std::optional<tiledb_filter_type_t> m_default_filter_type{std::nullopt};
     std::optional<int32_t> m_default_compression_level{std::nullopt};
+};
+
+class TileDBDimBuffer
+{
+public:
+    /** Desturctor. */
+    virtual ~TileDBDimBuffer() = default;
+
+    /**
+     * Copy data from the point to this buffer at the requested index.
+     *
+     * @param point The point to get the buffer data from.
+     * @param index The buffer index to update.
+     */
+    virtual void copyDataToBuffer(PointRef& point, size_t index) = 0;
+
+    /**
+     * Copy data from the buffer at the requested index to the point.
+     *
+     * @param point The point to update.
+     * @param index The buffer index to get data from.
+     */
+    virtual void copyDataToPoint(PointRef& point, size_t index) = 0;
+
+    /**
+     * Create a TileDB attribute compatible with the buffer.
+     *
+     * @param context TileDB context to create attribute with.
+     */
+    virtual tiledb::Attribute
+    createAttribute(const tiledb::Context& ctx) const = 0;
+
+    /** Returns the name of the TileDB dimension or attribute.*/
+    virtual const std::string& name() const = 0;
+
+    /**
+     * Resize the TileDB buffer to fit the requested number of elements.
+     *
+     * @param nelements Number of elements the buffer should fit.
+     */
+    virtual void resizeBuffer(size_t nelements) = 0;
+
+    /**
+     * Add this buffer to the query.
+     *
+     * @param TileDB query to add this buffer to.
+     */
+    virtual void setQueryBuffer(tiledb::Query& query) = 0;
+};
+
+template <typename T> class TypedDimBuffer : public TileDBDimBuffer
+{
+public:
+    /**
+     * Constructor.
+     *
+     * @param name TileDB dimension or attribute name.
+     * @param id PDAL dimension ID.
+     */
+    TypedDimBuffer(const std::string& name, Dimension::Id id)
+        : m_name{name}, m_id{id}
+    {
+    }
+
+    /** Constructor.
+     *
+     * @param layout Point layout that stores dimension information.
+     * @param id PDAL dimension ID.
+     */
+    TypedDimBuffer(PointLayoutPtr layout, Dimension::Id id)
+        : m_name(layout->dimName(id)), m_id(id)
+    {
+    }
+
+    void copyDataToBuffer(PointRef& point, size_t index) override
+    {
+        m_data[index] = point.getFieldAs<T>(m_id);
+    }
+
+    void copyDataToPoint(PointRef& point, size_t offset) override
+    {
+        point.setField(m_id, m_data[offset]);
+    }
+
+    tiledb::Attribute createAttribute(const tiledb::Context& ctx) const override
+    {
+        return tiledb::Attribute::create<T>(ctx, m_name);
+    }
+
+    const std::string& name() const override
+    {
+        return m_name;
+    }
+
+    void resizeBuffer(size_t nelements) override
+    {
+        m_data.resize(nelements);
+    }
+
+    void setQueryBuffer(tiledb::Query& query) override
+    {
+        query.set_data_buffer(m_name, m_data);
+    }
+
+private:
+    /** Name of the TileDB dimension or attribute. */
+    std::string m_name;
+
+    /** PDAL dimension ID. */
+    Dimension::Id m_id;
+
+    /** Raw buffer data. */
+    std::vector<T> m_data;
 };
 
 } // namespace pdal

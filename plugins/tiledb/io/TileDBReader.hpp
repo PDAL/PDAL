@@ -46,17 +46,11 @@
 namespace pdal
 {
 
+class TileDBDimBuffer;
+
 class PDAL_DLL TileDBReader : public Reader, public Streamable
 {
 public:
-    class DimBuffer
-    {
-    public:
-        virtual ~DimBuffer() = default;
-        virtual void setQuery(tiledb::Query* query, size_t count) = 0;
-        virtual void setFields(PointRef& point, size_t bufOffset) = 0;
-    };
-
     TileDBReader();
     ~TileDBReader();
 
@@ -83,7 +77,7 @@ private:
     point_count_t m_offset;
     point_count_t m_resultSize;
     bool m_complete;
-    std::vector<std::unique_ptr<DimBuffer>> m_dims;
+    std::vector<std::unique_ptr<TileDBDimBuffer>> m_dims;
 
     std::unique_ptr<tiledb::Context> m_ctx;
     std::unique_ptr<tiledb::Array> m_array;

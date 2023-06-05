@@ -65,36 +65,6 @@ struct TileDBReader::Args
     bool m_strict;
 };
 
-template <typename T> class TypedDimBuffer : public TileDBReader::DimBuffer
-{
-public:
-    TypedDimBuffer(const std::string& name, Dimension::Id id)
-        : m_name{name}, m_id{id}
-    {
-    }
-
-    virtual void setQuery(tiledb::Query* query, size_t count) override
-    {
-        m_data.resize(count);
-        query->set_data_buffer(m_name, m_data);
-    }
-
-    virtual void setFields(PointRef& point, size_t offset) override
-    {
-        point.setField(m_id, m_data[offset]);
-    }
-
-private:
-    /** Name of the dimension. */
-    std::string m_name;
-
-    /** PDAL dimension ID. */
-    Dimension::Id m_id;
-
-    /** Raw buffer data. */
-    std::vector<T> m_data;
-};
-
 CREATE_SHARED_STAGE(TileDBReader, s_info)
 
 std::string TileDBReader::getName() const
@@ -160,7 +130,7 @@ void TileDBReader::initialize()
         if (m_args->m_startTimeStamp != 0)
             m_array->set_open_timestamp_start(m_args->m_startTimeStamp);
         if (m_args->m_endTimeStamp != UINT64_MAX)
-            m_array->set_open_timestamp_end(m_endTimeStamp);
+            m_array->set_open_timestamp_end(m_args->m_endTimeStamp);
         m_array->reopen();
 #else
         m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ,
@@ -179,6 +149,7 @@ void TileDBReader::addDim(PointLayoutPtr layout, const std::string& name,
                           tiledb_datatype_t type, bool required)
 {
 
+    // Check remaining dimensions.
     switch (type)
     {
     case TILEDB_INT8:
@@ -270,7 +241,9 @@ void TileDBReader::addDimensions(PointLayoutPtr layout)
         addDim(layout, dim.name(), dim.type(), true);
 
     for (const auto& [attrName, attr] : m_array->schema().attributes())
+    {
         addDim(layout, attrName, attr.type(), m_args->m_strict);
+    }
 }
 
 void TileDBReader::ready(PointTableRef)
@@ -292,7 +265,10 @@ void TileDBReader::localReady()
     m_query->set_layout(TILEDB_UNORDERED);
 
     for (auto& buffer : m_dims)
-        buffer->setQuery(m_query.get(), m_args->m_chunkSize);
+    {
+        buffer->resizeBuffer(m_args->m_chunkSize);
+        buffer->setQueryBuffer(*m_query.get());
+    }
 
     // Set the subarray to query. The default for each dimension is to query
     // the entire dimension domain unless a range is explicitly set on it.
@@ -402,7 +378,7 @@ bool TileDBReader::processPoint(PointRef& point)
     {
         // Get the values read at m_offset and use to set the PDAL point values.
         for (auto& buffer : m_dims)
-            buffer->setFields(point, m_offset);
+            buffer->copyDataToPoint(point, m_offset);
         ++m_offset;
         return true;
     }
