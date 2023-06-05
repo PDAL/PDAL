@@ -53,12 +53,18 @@ public:
         std::string m_name;
         Dimension::Id m_id;
         Dimension::Type m_type;
+        size_t m_dim_size;
         std::vector<uint8_t> m_buffer;
 
         DimBuffer(const std::string& name, Dimension::Id id,
-                  Dimension::Type type)
-            : m_name(name), m_id(id), m_type(type)
+                  Dimension::Type type, size_t dimSize)
+            : m_name(name), m_id(id), m_type(type), m_dim_size(dimSize)
         {
+        }
+
+        inline void resizeBuffer(size_t nelements)
+        {
+            m_buffer.resize(m_dim_size * nelements);
         }
     };
 
@@ -82,15 +88,8 @@ private:
     size_t m_current_idx;
 
     std::unique_ptr<tiledb::Context> m_ctx;
-    std::unique_ptr<tiledb::ArraySchema> m_schema;
     std::unique_ptr<tiledb::Array> m_array;
-    std::vector<DimBuffer> m_attrs;
-    std::vector<double> m_xs;
-    std::vector<double> m_ys;
-    std::vector<double> m_zs;
-    std::vector<double> m_tms;
-    bool m_use_time;
-    bool m_time_first;
+    std::vector<DimBuffer> m_buffers;
 
     TileDBWriter(const TileDBWriter&) = delete;
     TileDBWriter& operator=(const TileDBWriter&) = delete;

@@ -80,55 +80,12 @@ struct TileDBWriter::Args
     int m_compressionLevel;
     NL::json m_filters;
     bool m_append;
+    bool m_use_time;
+    bool m_time_first;
     uint64_t m_timeStamp = UINT64_MAX;
 };
 
 CREATE_SHARED_STAGE(TileDBWriter, s_info)
-
-void writeAttributeValue(TileDBWriter::DimBuffer& dim, PointRef& point,
-                         size_t idx)
-{
-    Everything e;
-
-    switch (dim.m_type)
-    {
-    case Dimension::Type::Double:
-        e.d = point.getFieldAs<double>(dim.m_id);
-        break;
-    case Dimension::Type::Float:
-        e.f = point.getFieldAs<float>(dim.m_id);
-        break;
-    case Dimension::Type::Signed8:
-        e.s8 = point.getFieldAs<int8_t>(dim.m_id);
-        break;
-    case Dimension::Type::Signed16:
-        e.s16 = point.getFieldAs<int16_t>(dim.m_id);
-        break;
-    case Dimension::Type::Signed32:
-        e.s32 = point.getFieldAs<int32_t>(dim.m_id);
-        break;
-    case Dimension::Type::Signed64:
-        e.s64 = point.getFieldAs<int64_t>(dim.m_id);
-        break;
-    case Dimension::Type::Unsigned8:
-        e.u8 = point.getFieldAs<uint8_t>(dim.m_id);
-        break;
-    case Dimension::Type::Unsigned16:
-        e.u16 = point.getFieldAs<uint16_t>(dim.m_id);
-        break;
-    case Dimension::Type::Unsigned32:
-        e.u32 = point.getFieldAs<uint32_t>(dim.m_id);
-        break;
-    case Dimension::Type::Unsigned64:
-        e.u64 = point.getFieldAs<uint64_t>(dim.m_id);
-        break;
-    default:
-        throw pdal_error("Unsupported attribute type for " + dim.m_name);
-    }
-
-    size_t size = Dimension::size(dim.m_type);
-    memcpy(dim.m_buffer.data() + (idx * size), &e, size);
-}
 
 tiledb::Attribute createAttribute(const tiledb::Context& ctx,
                                   const std::string name, Dimension::Type t)
@@ -216,12 +173,12 @@ void TileDBWriter::addArgs(ProgramArgs& args)
     args.add("append", "Append to existing TileDB array", m_args->m_append,
              false);
     args.add("use_time_dim", "Use GpsTime coordinate data as array dimension",
-             m_use_time, false);
+             m_args->m_use_time, false);
     args.addSynonym("use_time_dim", "use_time");
     args.add("time_first",
              "If writing 4D array with XYZ and Time, choose to put time dim "
              "first or last (default)",
-             m_time_first, false);
+             m_args->m_time_first, false);
     args.add<uint64_t>("timestamp", "TileDB array timestamp",
                        m_args->m_timeStamp, UINT64_MAX);
 }
@@ -237,12 +194,6 @@ void TileDBWriter::initialize()
         }
         else
             m_ctx.reset(new tiledb::Context());
-
-        if (!m_args->m_append)
-        {
-            m_schema.reset(new tiledb::ArraySchema(*m_ctx, TILEDB_SPARSE));
-            m_schema->set_allows_dups(true);
-        }
     }
     catch (const tiledb::TileDBError& err)
     {
@@ -252,245 +203,184 @@ void TileDBWriter::initialize()
 
 void TileDBWriter::ready(pdal::BasePointTable& table)
 {
+    // Create objects to store the buffer data.
     auto layout = table.layout();
-    auto all = layout->dims();
-    std::vector<tiledb::Dimension> dims;
+    for (const auto& dimId : layout->dims())
+    {
 
+        // Allocate the buffer.
+        m_buffers.emplace_back(layout->dimName(dimId), dimId,
+                               layout->dimType(dimId), layout->dimSize(dimId));
+
+        m_buffers.back().resizeBuffer(m_args->m_cache_size);
+    }
+
+    // Enable TileDB stats (if requested).
     if (m_args->m_stats)
         tiledb::Stats::enable();
 
-    // get a list of all the dimensions & their types and add to schema
-    // x,y,z will be tiledb dimensions other pdal dimensions will be
-    // tiledb attributes
+    // If not appending to an existing array, then create the TileDB array.
     if (!m_args->m_append)
     {
-        // Get filter factory class.
-        FilterFactory filterFactory{m_args->m_filters, m_args->m_compressor,
-                                    m_args->m_compressionLevel};
+        // Create schema and set basic properties.
+        tiledb::ArraySchema schema{*m_ctx, TILEDB_SPARSE};
+        schema.set_allows_dups(true);
+        schema.set_capacity(m_args->m_tile_capacity);
 
         // Check if using Hilbert order or row-major order. Use row-major if all
         // dimensions have positive tiles set. Otherwise, use Hilbert order.
         bool hasValidTiles =
             ((m_args->m_x_tile_size > 0) && (m_args->m_y_tile_size > 0) &&
              (m_args->m_z_tile_size > 0) &&
-             (!m_use_time || m_args->m_time_tile_size > 0));
+             (!m_args->m_use_time || m_args->m_time_tile_size > 0));
+        if (!hasValidTiles)
+            schema.set_cell_order(TILEDB_HILBERT);
+
+        // Get filter factory class.
+        FilterFactory filterFactory{m_args->m_filters, m_args->m_compressor,
+                                    m_args->m_compressionLevel};
 
         // Check if the domain is set for all dimensions.
-        bool hasValidDomain = (m_args->m_x_domain_end > m_args->m_x_domain_st &&
-                               m_args->m_y_domain_end > m_args->m_y_domain_st &&
-                               m_args->m_z_domain_end > m_args->m_z_domain_st &&
-                               (!m_use_time || m_args->m_time_domain_end >
-                                                   m_args->m_time_domain_st));
-
-        // Get table metadata and check if it is valid.
-        MetadataNode meta =
-            table.metadata().findChild("filters.stats:bbox:native:bbox");
-        bool hasMetadataStats = meta.valid();
-
-        // Check the user set valid tile extents, valid domains, or ran stats on
-        // the point table.
-        if (!hasValidTiles && !hasMetadataStats && !hasValidDomain)
-            throwError("Must specify a tile extent for all dimensions, specify "
-                       "a valid domain for all dimensions, or execute a prior "
-                       "stats filter stage.");
+        bool hasValidDomain =
+            (m_args->m_x_domain_end > m_args->m_x_domain_st &&
+             m_args->m_y_domain_end > m_args->m_y_domain_st &&
+             m_args->m_z_domain_end > m_args->m_z_domain_st &&
+             (!m_args->m_use_time ||
+              m_args->m_time_domain_end > m_args->m_time_domain_st));
 
         tiledb::Domain domain(*m_ctx);
 
-        // Get filters for the dimensions.
-        tiledb::FilterList xFltrs = filterFactory.filterList(*m_ctx, "X");
-        tiledb::FilterList yFltrs = filterFactory.filterList(*m_ctx, "Y");
-        tiledb::FilterList zFltrs = filterFactory.filterList(*m_ctx, "Z");
-        tiledb::FilterList tFltrs = filterFactory.filterList(*m_ctx, "GpsTime");
-
         // Set the domain values for the dimensions. Use the user provided
-        // domain values, and update if they are the default domain or otherwise
-        // not valid.
-        std::array<double, 2> xDomain{m_args->m_x_domain_st,
-                                      m_args->m_x_domain_end};
-        std::array<double, 2> yDomain{m_args->m_y_domain_st,
-                                      m_args->m_y_domain_end};
-        std::array<double, 2> zDomain{m_args->m_z_domain_st,
-                                      m_args->m_z_domain_end};
-        std::array<double, 2> gpsTimeDomain{m_args->m_time_domain_st,
-                                            m_args->m_time_domain_end};
+        // domain values, and update if they are the default domain or
+        // otherwise not valid.
+        std::array<std::array<double, 2>, 4> bbox{
+            {{m_args->m_x_domain_st, m_args->m_x_domain_end},
+             {m_args->m_y_domain_st, m_args->m_y_domain_end},
+             {m_args->m_z_domain_st, m_args->m_z_domain_end},
+             {m_args->m_time_domain_st, m_args->m_time_domain_end}}};
         if (!hasValidDomain)
         {
+            // Get table metadata and check if it is valid.
+            MetadataNode meta =
+                table.metadata().findChild("filters.stats:bbox:native:bbox");
+            bool hasMetadataStats = meta.valid();
+
+            // Check the user set valid tile extents, valid domains, or ran
+            // stats on the point table.
+            if (!hasValidTiles && !hasMetadataStats)
+                throwError(
+                    "Must specify a valid domain for all dimensions, a valid "
+                    "tile extent for all dimensions, or execute a prior stats "
+                    "filter stage.");
+
             if (hasMetadataStats)
             {
-                // Use statistics from the point table to set the invalid
-                // domains.
-                if (xDomain[1] <= xDomain[0])
+                // Update any missing domains using table statistics.
+                auto updateWithStats = [&](const std::string& minStr,
+                                           const std::string& maxStr,
+                                           std::array<double, 2>& range)
                 {
-                    xDomain[0] = meta.findChild("minx").value<double>() - 1.0;
-                    xDomain[1] = meta.findChild("maxx").value<double>() + 1.0;
-                }
-                if (yDomain[1] <= yDomain[0])
-                {
-                    yDomain[0] = meta.findChild("miny").value<double>() - 1.0;
-                    yDomain[1] = meta.findChild("maxy").value<double>() + 1.0;
-                }
-                if (zDomain[1] <= zDomain[0])
-                {
-                    zDomain[0] = meta.findChild("minz").value<double>() - 1.0;
-                    zDomain[1] = meta.findChild("maxz").value<double>() + 1.0;
-                }
-                if (m_use_time && gpsTimeDomain[1] <= gpsTimeDomain[0])
-                {
-                    gpsTimeDomain[0] =
-                        meta.findChild("mintm").value<double>() - 1.0;
-                    gpsTimeDomain[1] =
-                        meta.findChild("maxtm").value<double>() + 1.0;
-                }
+                    if (range[1] <= range[0])
+                        range = {meta.findChild(minStr).value<double>() - 1.0,
+                                 meta.findChild(maxStr).value<double>() + 1.0};
+                };
+                updateWithStats("minx", "maxx", bbox[0]);
+                updateWithStats("miny", "maxy", bbox[1]);
+                updateWithStats("minz", "maxz", bbox[2]);
+                if (m_args->m_use_time)
+                    updateWithStats("mintm", "maxtm", bbox[3]);
             }
             else
             {
-                // Use the maximum possible domain to set the invalid domains.
-                double dimMin = std::numeric_limits<double>::lowest();
-                double dimMax = std::numeric_limits<double>::max();
-                if (xDomain[1] <= xDomain[0])
-                {
-                    xDomain[0] = dimMin;
-                    xDomain[1] = dimMax;
-                }
-                if (yDomain[1] <= yDomain[0])
-                {
-                    yDomain[0] = dimMin;
-                    yDomain[1] = dimMax;
-                }
-                if (zDomain[1] <= zDomain[0])
-                {
-                    zDomain[0] = dimMin;
-                    zDomain[1] = dimMax;
-                }
-                if (gpsTimeDomain[1] <= gpsTimeDomain[0])
-                {
-                    gpsTimeDomain[0] = dimMin;
-                    gpsTimeDomain[1] = dimMax;
-                }
+                // Update any missing domains to be the entire space.
+                for (auto& range : bbox)
+                    if (range[1] <= range[0])
+                        range = {std::numeric_limits<double>::lowest(),
+                                 std::numeric_limits<double>::max()};
             }
         }
 
         // Create and add dimensions to the TileDB domain.
         if (hasValidTiles)
         {
-            if (m_use_time && m_time_first)
-                domain.add_dimension(tiledb::Dimension::create<double>(
-                                         *m_ctx, "GpsTime", gpsTimeDomain,
-                                         m_args->m_time_tile_size)
-                                         .set_filter_list(tFltrs));
-            domain.add_dimension(
-                tiledb::Dimension::create<double>(*m_ctx, "X", xDomain,
-                                                  m_args->m_x_tile_size)
-                    .set_filter_list(xFltrs));
-            domain.add_dimension(
-                tiledb::Dimension::create<double>(*m_ctx, "Y", yDomain,
-                                                  m_args->m_y_tile_size)
-                    .set_filter_list(yFltrs));
-            domain.add_dimension(
-                tiledb::Dimension::create<double>(*m_ctx, "Z", zDomain,
-                                                  m_args->m_z_tile_size)
-                    .set_filter_list(zFltrs));
-            if (m_use_time && !m_time_first)
-                domain.add_dimension(tiledb::Dimension::create<double>(
-                                         *m_ctx, "GpsTime", gpsTimeDomain,
-                                         m_args->m_time_tile_size)
-                                         .set_filter_list(tFltrs));
-        }
-        else
-        {
-            if (m_use_time && m_time_first)
-                domain.add_dimension(tiledb::Dimension::create<double>(
-                                         *m_ctx, "GpsTime", gpsTimeDomain)
-                                         .set_filter_list(tFltrs));
-            domain.add_dimension(
-                tiledb::Dimension::create<double>(*m_ctx, "X", xDomain)
-                    .set_filter_list(xFltrs));
-            domain.add_dimension(
-                tiledb::Dimension::create<double>(*m_ctx, "Y", yDomain)
-                    .set_filter_list(yFltrs));
-            domain.add_dimension(
-                tiledb::Dimension::create<double>(*m_ctx, "Z", zDomain)
-                    .set_filter_list(zFltrs));
-            if (m_use_time && !m_time_first)
-                domain.add_dimension(tiledb::Dimension::create<double>(
-                                         *m_ctx, "GpsTime", gpsTimeDomain)
-                                         .set_filter_list(tFltrs));
-        }
-
-        m_schema->set_domain(domain);
-        m_schema->set_capacity(m_args->m_tile_capacity);
-        if (!hasValidTiles)
-            m_schema->set_cell_order(TILEDB_HILBERT);
-    }
-    else
-    {
-#if TILEDB_VERSION_MINOR < 15
-        if (m_args->m_timeStamp != UINT64_MAX)
-            m_array.reset(new tiledb::Array(*m_ctx, m_args->m_arrayName,
-                                            TILEDB_WRITE, m_args->m_timeStamp));
-        else
-            m_array.reset(
-                new tiledb::Array(*m_ctx, m_args->m_arrayName, TILEDB_WRITE));
-#else
-        m_array.reset(new tiledb::Array(
-            *m_ctx, m_args->m_arrayName, TILEDB_WRITE,
-            {tiledb::TimeTravelMarker(), m_args->m_timeStamp}));
-#endif
-        if (m_array->schema().domain().has_dimension("GpsTime"))
-            m_use_time = true;
-    }
-
-    for (const auto& d : all)
-    {
-        std::string dimName = layout->dimName(d);
-
-        Dimension::Type type = layout->dimType(d);
-        if (!m_args->m_append)
-        {
-            // Get filter factory class.
-            FilterFactory filterFactory{m_args->m_filters, m_args->m_compressor,
-                                        m_args->m_compressionLevel};
-
-            if (!m_schema->domain().has_dimension(dimName))
+            auto addDimension = [&](const std::string& dimName,
+                                    const std::array<double, 2>& range,
+                                    double tile_size)
             {
-                tiledb::Attribute att = createAttribute(*m_ctx, dimName, type);
-                att.set_filter_list(filterFactory.filterList(*m_ctx, dimName));
+                auto filters = filterFactory.filterList(*m_ctx, dimName);
+                domain.add_dimension(tiledb::Dimension::create<double>(
+                                         *m_ctx, dimName, range, tile_size)
+                                         .set_filter_list(filters));
+            };
+            if (m_args->m_use_time && m_args->m_time_first)
+                addDimension("GpsTime", bbox[3], m_args->m_time_tile_size);
+            addDimension("X", bbox[0], m_args->m_x_tile_size);
+            addDimension("Y", bbox[1], m_args->m_y_tile_size);
+            addDimension("Z", bbox[2], m_args->m_z_tile_size);
+            if (m_args->m_use_time && !m_args->m_time_first)
+                addDimension("GpsTime", bbox[3], m_args->m_time_tile_size);
+        }
+        else
+        {
+            auto addDimension = [&](const std::string& dimName,
+                                    const std::array<double, 2>& range)
+            {
+                auto filters = filterFactory.filterList(*m_ctx, dimName);
+                domain.add_dimension(
+                    tiledb::Dimension::create<double>(*m_ctx, dimName, range)
+                        .set_filter_list(filters));
+            };
+            if (m_args->m_use_time && m_args->m_time_first)
+                addDimension("GpsTime", bbox[3]);
+            addDimension("X", bbox[0]);
+            addDimension("Y", bbox[1]);
+            addDimension("Z", bbox[2]);
+            if (m_args->m_use_time && !m_args->m_time_first)
+                addDimension("GpsTime", bbox[3]);
+        }
 
-                m_schema->add_attribute(att);
+        schema.set_domain(domain);
+
+        // Set the attributes.
+        for (const auto& dimBuffer : m_buffers)
+        {
+            // Create and add the attribute to the domain.
+            if (!domain.has_dimension(dimBuffer.m_name))
+            {
+                tiledb::Attribute att =
+                    createAttribute(*m_ctx, dimBuffer.m_name, dimBuffer.m_type);
+                att.set_filter_list(
+                    filterFactory.filterList(*m_ctx, dimBuffer.m_name));
+                schema.add_attribute(att);
             }
         }
-        else
-        {
-            // check attribute and dimension exist in original tiledb array
-            auto attrs = m_array->schema().attributes();
-            auto it = attrs.find(dimName);
-            if (it == attrs.end() &&
-                (!m_array->schema().domain().has_dimension(dimName)))
-                throwError("Attribute/Dimension " + dimName +
-                           " does not exist in original array.");
-        }
 
-        m_attrs.emplace_back(dimName, d, type);
-        // Size the buffers.
-        m_attrs.back().m_buffer.resize(m_args->m_cache_size *
-                                       Dimension::size(type));
+        // Create the TileDB array.
+        tiledb::Array::create(m_args->m_arrayName, schema);
     }
 
-    if (!m_args->m_append)
-    {
-        tiledb::Array::create(m_args->m_arrayName, *m_schema);
+    // Open the array at the requested timestamp range.
 #if TILEDB_VERSION_MINOR < 15
-        if (m_args->m_timeStamp != UINT64_MAX)
-            m_array.reset(new tiledb::Array(*m_ctx, m_args->m_arrayName,
-                                            TILEDB_WRITE, m_args->m_timeStamp));
-        else
-            m_array.reset(
-                new tiledb::Array(*m_ctx, m_args->m_arrayName, TILEDB_WRITE));
+    if (m_args->m_timeStamp != UINT64_MAX)
+        m_array.reset(new tiledb::Array(*m_ctx, m_args->m_arrayName,
+                                        TILEDB_WRITE, m_args->m_timeStamp));
+    else
+        m_array.reset(
+            new tiledb::Array(*m_ctx, m_args->m_arrayName, TILEDB_WRITE));
 #else
-        m_array.reset(new tiledb::Array(
-            *m_ctx, m_args->m_arrayName, TILEDB_WRITE,
-            {tiledb::TimeTravelMarker(), m_args->m_timeStamp}));
+    m_array.reset(
+        new tiledb::Array(*m_ctx, m_args->m_arrayName, TILEDB_WRITE,
+                          {tiledb::TimeTravelMarker(), m_args->m_timeStamp}));
 #endif
+    const auto& schema = m_array->schema();
+
+    for (const auto& dimBuffer : m_buffers)
+    {
+        // If appending, check the layout dim exists in the original schema.
+        if (m_args->m_append && !schema.has_attribute(dimBuffer.m_name) &&
+            !schema.domain().has_dimension(dimBuffer.m_name))
+            throwError("Attribute/Dimension '" + dimBuffer.m_name +
+                       "' does not exist in original array.");
     }
 
     m_current_idx = 0;
@@ -499,21 +389,50 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
 bool TileDBWriter::processOne(PointRef& point)
 {
 
-    double x = point.getFieldAs<double>(Dimension::Id::X);
-    double y = point.getFieldAs<double>(Dimension::Id::Y);
-    double z = point.getFieldAs<double>(Dimension::Id::Z);
-    double tm(0);
-    if (m_use_time)
-        tm = point.getFieldAs<double>(Dimension::Id::GpsTime);
+    for (auto& dimBuffer : m_buffers)
+    {
+        Everything e;
 
-    for (auto& a : m_attrs)
-        writeAttributeValue(a, point, m_current_idx);
+        switch (dimBuffer.m_type)
+        {
+        case Dimension::Type::Double:
+            e.d = point.getFieldAs<double>(dimBuffer.m_id);
+            break;
+        case Dimension::Type::Float:
+            e.f = point.getFieldAs<float>(dimBuffer.m_id);
+            break;
+        case Dimension::Type::Signed8:
+            e.s8 = point.getFieldAs<int8_t>(dimBuffer.m_id);
+            break;
+        case Dimension::Type::Signed16:
+            e.s16 = point.getFieldAs<int16_t>(dimBuffer.m_id);
+            break;
+        case Dimension::Type::Signed32:
+            e.s32 = point.getFieldAs<int32_t>(dimBuffer.m_id);
+            break;
+        case Dimension::Type::Signed64:
+            e.s64 = point.getFieldAs<int64_t>(dimBuffer.m_id);
+            break;
+        case Dimension::Type::Unsigned8:
+            e.u8 = point.getFieldAs<uint8_t>(dimBuffer.m_id);
+            break;
+        case Dimension::Type::Unsigned16:
+            e.u16 = point.getFieldAs<uint16_t>(dimBuffer.m_id);
+            break;
+        case Dimension::Type::Unsigned32:
+            e.u32 = point.getFieldAs<uint32_t>(dimBuffer.m_id);
+            break;
+        case Dimension::Type::Unsigned64:
+            e.u64 = point.getFieldAs<uint64_t>(dimBuffer.m_id);
+            break;
+        default:
+            throwError("Unsupported attribute type for " + dimBuffer.m_name);
+        }
 
-    m_xs.push_back(x);
-    m_ys.push_back(y);
-    m_zs.push_back(z);
-    if (m_use_time)
-        m_tms.push_back(tm);
+        memcpy(dimBuffer.m_buffer.data() +
+                   (m_current_idx * dimBuffer.m_dim_size),
+               &e, dimBuffer.m_dim_size);
+    }
 
     if (++m_current_idx == m_args->m_cache_size)
     {
@@ -571,62 +490,56 @@ bool TileDBWriter::flushCache(size_t size)
     tiledb::Query query(*m_ctx, *m_array);
     query.set_layout(TILEDB_UNORDERED);
 
-    query.set_data_buffer("X", m_xs);
-    query.set_data_buffer("Y", m_ys);
-    query.set_data_buffer("Z", m_zs);
-
-    if (m_use_time)
-        query.set_data_buffer("GpsTime", m_tms);
-
     // set tiledb buffers
-    for (const auto& a : m_attrs)
+    for (const auto& dimBuffer : m_buffers)
     {
-        uint8_t* buf = const_cast<uint8_t*>(a.m_buffer.data());
-        switch (a.m_type)
+        uint8_t* buf = const_cast<uint8_t*>(dimBuffer.m_buffer.data());
+        switch (dimBuffer.m_type)
         {
         case Dimension::Type::Double:
-            query.set_data_buffer(a.m_name, reinterpret_cast<double*>(buf),
-                                  size);
+            query.set_data_buffer(dimBuffer.m_name,
+                                  reinterpret_cast<double*>(buf), size);
             break;
         case Dimension::Type::Float:
-            query.set_data_buffer(a.m_name, reinterpret_cast<float*>(buf),
-                                  size);
+            query.set_data_buffer(dimBuffer.m_name,
+                                  reinterpret_cast<float*>(buf), size);
             break;
         case Dimension::Type::Signed8:
-            query.set_data_buffer(a.m_name, reinterpret_cast<int8_t*>(buf),
-                                  size);
+            query.set_data_buffer(dimBuffer.m_name,
+                                  reinterpret_cast<int8_t*>(buf), size);
             break;
         case Dimension::Type::Signed16:
-            query.set_data_buffer(a.m_name, reinterpret_cast<int16_t*>(buf),
-                                  size);
+            query.set_data_buffer(dimBuffer.m_name,
+                                  reinterpret_cast<int16_t*>(buf), size);
             break;
         case Dimension::Type::Signed32:
-            query.set_data_buffer(a.m_name, reinterpret_cast<int32_t*>(buf),
-                                  size);
+            query.set_data_buffer(dimBuffer.m_name,
+                                  reinterpret_cast<int32_t*>(buf), size);
             break;
         case Dimension::Type::Signed64:
-            query.set_data_buffer(a.m_name, reinterpret_cast<int64_t*>(buf),
-                                  size);
+            query.set_data_buffer(dimBuffer.m_name,
+                                  reinterpret_cast<int64_t*>(buf), size);
             break;
         case Dimension::Type::Unsigned8:
-            query.set_data_buffer(a.m_name, reinterpret_cast<uint8_t*>(buf),
-                                  size);
+            query.set_data_buffer(dimBuffer.m_name,
+                                  reinterpret_cast<uint8_t*>(buf), size);
             break;
         case Dimension::Type::Unsigned16:
-            query.set_data_buffer(a.m_name, reinterpret_cast<uint16_t*>(buf),
-                                  size);
+            query.set_data_buffer(dimBuffer.m_name,
+                                  reinterpret_cast<uint16_t*>(buf), size);
             break;
         case Dimension::Type::Unsigned32:
-            query.set_data_buffer(a.m_name, reinterpret_cast<uint32_t*>(buf),
-                                  size);
+            query.set_data_buffer(dimBuffer.m_name,
+                                  reinterpret_cast<uint32_t*>(buf), size);
             break;
         case Dimension::Type::Unsigned64:
-            query.set_data_buffer(a.m_name, reinterpret_cast<uint64_t*>(buf),
-                                  size);
+            query.set_data_buffer(dimBuffer.m_name,
+                                  reinterpret_cast<uint64_t*>(buf), size);
             break;
         case Dimension::Type::None:
         default:
-            throw pdal_error("Unsupported attribute type for " + a.m_name);
+            throw pdal_error("Unsupported attribute type for " +
+                             dimBuffer.m_name);
         }
     }
 
@@ -639,10 +552,6 @@ bool TileDBWriter::flushCache(size_t size)
     }
 
     m_current_idx = 0;
-    m_xs.clear();
-    m_ys.clear();
-    m_zs.clear();
-    m_tms.clear();
 
     if (status == tiledb::Query::Status::FAILED)
         return false;
