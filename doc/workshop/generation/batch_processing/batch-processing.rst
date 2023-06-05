@@ -40,7 +40,7 @@ To compress a series of LAS files in one directory into compressed LAZ files in 
 directory, the `PowerShell` syntax would be:
 
 
-.. code-block:: powershell
+.. code-block:: console
 
   Get-ChildItem .\DIR1\*.las | foreach {pdal translate -i .\DIR1\$($_.BaseName).las ^
   -o .\DIR2\$($_.BaseName).laz}
@@ -58,7 +58,7 @@ time. There is a free download of the `xargs` program that provides parallel exe
 at http://www.pirosa.co.uk/demo/wxargs/ppx2.exe. A clone of this program can be found at https://github.com/ghuls/ppx2.
 For this tool, the file names are passed with using the `{}` syntax.
 
-.. code-block:: powershell
+.. code-block:: console
 
   Get-ChildItem .\dir1\ | Select-Object -ExpandProperty BaseName ^
   | .\ppx2.exe -P 3 pdal translate -i ".\dir1\{}.las" -o ".\dir2\{}.laz"
@@ -72,7 +72,7 @@ directory, the `Bash` syntax would be:
 
 .. code-block:: console
 
-  ls ./dir1/*.las | parallel -I{} \
+  $ ls ./dir1/*.las | parallel -I{} \
   pdal translate -i ./dir1/{/.}.las -o ./dir2/{/.}.laz
 
 In `Parallel`, then  `{/.}` syntax means strip the directory and the extension and just use the
@@ -88,7 +88,7 @@ jobs to run
 
 .. code-block:: console
 
-  ls ./dir1/*.las | parallel -I{} -j 4 \
+  $ ls ./dir1/*.las | parallel -I{} -j 4 \
   pdal translate -i ./dir1/{/.}.las -o ./dir2/{/.}.laz
 
 
@@ -121,7 +121,7 @@ using the substitutions syntax to do this.
 
  .. code-block::  console
 
-  ls ./exercises/batch_processing/source/*.laz | \
+  $ ls ./exercises/batch_processing/source/*.laz | \
   parallel -I{} pdal pipeline ./exercises/batch_processing/batch_srs_gdal.json \
    --readers.las.filename={} \
    --writers.gdal.filename=./exercises/batch_processing/dtm{/.}.tif \
@@ -132,7 +132,7 @@ Once you have your dtms created with pdal, combine them to a single file with:
 
 .. code-block:: console
 
-    gdalbuildvrt  ./exercises/batch_processing/dtm.vrt ./exercises/batch_processing/dtm*.tif
+  $ gdalbuildvrt  ./exercises/batch_processing/dtm.vrt ./exercises/batch_processing/dtm*.tif
 
 You can then visualize the vrt with `qgis`. Add the vrt twice, and set the properties of the lower
 layer to hillshade. Set the upper layer to Singleband PseudoColor and choose a pleasing color ramp.

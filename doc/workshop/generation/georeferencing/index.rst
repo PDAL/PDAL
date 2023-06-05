@@ -55,11 +55,13 @@ point cloud:
 Command
 .............
 
-Invoke the following command, substituting accordingly, into your ` Conda Shell`:
+Invoke the following command, substituting accordingly, into your `Conda Shell`:
 
 .. literalinclude:: georeferencing-command.txt
+  :language: console
 
 .. literalinclude:: georeferencing-command-win.txt
+  :language: doscon
 
 
 Visualization

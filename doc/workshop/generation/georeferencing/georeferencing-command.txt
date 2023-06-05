@@ -1,4 +1,4 @@
-pdal translate \
+$ pdal translate \
 ./exercises/georeferencing/S1C1_csd_004.csd \
 ./exercises/georeferencing/S1C1_csd_004.copc.laz \
 reprojection expression \
