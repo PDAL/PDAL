@@ -138,16 +138,20 @@ energy to measure distances.  The outgoing pulse of a LiDAR system is roughly
 (but not exactly) a Gaussian:
 
 .. figure:: images/reference-pulse.png
+  :scale: 30 %
+  :align: center
 
-    A real-world outgoing LiDAR pulse.
+  A real-world outgoing LiDAR pulse.
 
 This pulse can interact with multiple objects in a scene before it is returned to the sensor.
 Here is an example of a LiDAR return:
 
 .. figure:: images/return-pulse.png
+  :scale: 30 %
+  :align: center
 
-    A real-world incoming LiDAR return.
-    Potential discrete-return peaks are marked in red.
+  A real-world incoming LiDAR return.
+  Potential discrete-return peaks are marked in red.
 
 As you can see, this return pulse can be very complicated.  While there is more
 information contained in the "full waveform" picture displayed above, many

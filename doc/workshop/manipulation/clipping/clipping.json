@@ -1,0 +1,21 @@
+{
+    "pipeline": [
+        "./exercises/analysis/clipping/autzen.laz",
+        {
+            "column": "CLS",
+            "datasource": "./exercises/analysis/clipping/attributes.vrt",
+            "dimension": "Classification",
+            "layer": "OGRGeoJSON",
+            "type": "filters.overlay"
+        },
+        {
+            "expression": "Classification == 6",
+            "type": "filters.expression"
+        },
+        {
+            "type": "writers.copc",
+            "filename": "./exercises/analysis/clipping/stadium.copc.laz",
+            "forward": "all"
+        }
+    ]
+}

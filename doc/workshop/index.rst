@@ -9,7 +9,7 @@ Point Cloud Processing and Analysis with PDAL
 :Author: Michael Smith
 :Author: Dr. Adam Steer
 :Contact: howard@hobu.co
-:Date: 08/26/2019
+:Date: 06/01/2023
 
 
 .. include:: ./includes/substitutions.rst
@@ -20,6 +20,8 @@ Point Cloud Processing and Analysis with PDAL
    agenda
    lidar-introduction
    software
-   exercises/index
+   introduction/index
+   manipulation/index
+   generation/index
    capstone
    notes
