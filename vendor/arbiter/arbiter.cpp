@@ -1742,6 +1742,15 @@ namespace
         if (s.size() && std::isspace(s.back())) s.pop_back();
         return s;
     }
+
+    bool isVerbose()
+    {
+        std::string verbose;
+        if (auto e = env("VERBOSE")) verbose = *e;
+        else if (auto e = env("CURL_VERBOSE")) verbose = *e;
+        else if (auto e = env("ARBITER_VERBOSE")) verbose = *e;
+        return (!verbose.empty()) && !!std::stol(verbose);
+    }
 }
 
 namespace drivers
@@ -2065,10 +2074,6 @@ S3::AuthFields S3::Auth::fields() const
             http::Pool pool;
             drivers::Http httpDriver(pool);
 
-            // We could cache our token from our initial IAM role query and
-            // refresh it only on expiration, but this flow for the S3-level
-            // temporary creds/token only happens on an hourly basis so it
-            // doesn't much matter.
             std::string token;
 
             if (m_imdsv2)
@@ -2330,17 +2335,32 @@ std::vector<std::string> S3::glob(std::string path, bool verbose) const
                     }
                     else
                     {
+                        if (isVerbose())
+                        {
+                            const std::string xml(data.data(), data.size());
+                            std::cout << "Missing Key: " << xml << std::endl;
+                        }
                         throw ArbiterError(badResponse);
                     }
                 }
             }
             else
             {
+                if (isVerbose())
+                {
+                    const std::string xml(data.data(), data.size());
+                    std::cout << "Missing Contents: " << xml << std::endl;
+                }
                 throw ArbiterError(badResponse);
             }
         }
         else
         {
+            if (isVerbose())
+            {
+                const std::string xml(data.data(), data.size());
+                std::cout << "Missing ListBucketResult: " << xml << std::endl;
+            }
             throw ArbiterError(badResponse);
         }
 
