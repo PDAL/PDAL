@@ -1,0 +1,23 @@
+{
+    "pipeline": [
+        {
+            "type":"readers.las"
+        },
+        {
+            "type": "filters.reprojection"
+        },
+        {  
+            "type": "filters.smrf"
+        },
+        {
+            "type":"filters.expression",
+            "expression":"Classification == 2"
+        },
+        {
+            "gdaldriver":"GTiff",
+            "output_type":"idw",
+            "resolution" :"2.0",
+            "type": "writers.gdal"
+        }
+    ]
+}
