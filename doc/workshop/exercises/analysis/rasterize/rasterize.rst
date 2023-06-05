@@ -96,7 +96,7 @@ pixel values with values from 0-31 according to the ASPRS LAS specification.
 We want colors that correspond to the classification values a bit more
 directly. We can use a color ramp to assign explicit values. :ref:`qgis` allows
 us to create a text file color ramp that gdaldem can consume to apply colors to
-the data.
+the data. The filename is "./exercises/analysis/rasterize/ramp.txt".
 
 .. literalinclude:: ./ramp.txt
    :linenos:
