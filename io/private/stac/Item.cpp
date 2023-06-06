@@ -57,7 +57,7 @@ namespace stac
     Item::~Item()
     {}
 
-    void Item::init(std::vector<std::string> assetNames, NL::json readerArgs)
+    void Item::init(std::vector<std::string> assetNames, NL::json rawReaderArgs)
     {
         NL::json asset;
         for (auto& name: assetNames)
@@ -72,35 +72,9 @@ namespace stac
         }
         if (m_driver.empty())
             throw pdal_error("None of the asset names supplied exist in the STAC object.");
-
-        Stage *stage = m_factory.createStage(m_driver);
-
-        if (!stage)
-        {
-            std::stringstream msg;
-            msg << "Unable to create driver '" << m_driver << "' for "
-                << "for asset located at '" << m_dataPath <<"'";
-            throw pdal_error(msg.str());
-        }
-
-        m_reader = dynamic_cast<Reader*>(stage);
-        if (!m_reader)
-        {
-            std::stringstream msg;
-            msg << "Unable to cast stage to reader for '" << m_driver << "' for "
-                << "for asset located at '" << m_dataPath <<"'";
-            throw pdal_error(msg.str());
-        }
-
-        Options readerOptions = setReaderOptions(readerArgs, m_driver);
-        readerOptions.add("filename", m_dataPath);
-
-        m_reader->setOptions(readerOptions);
-
-        // std::lock_guard<std::mutex> lock(m_p->m_mutex);
-        // m_merge.setInput(*reader);
-        // reader->setLog(log());
-
+        NL::json readerArgs = handleReaderArgs(rawReaderArgs);
+        m_readerOptions = setReaderOptions(readerArgs, m_driver);
+        m_readerOptions.add("filename", m_dataPath);
     }
 
     std::string Item::driver()
@@ -108,11 +82,52 @@ namespace stac
         return m_driver;
     }
 
-    Reader* Item::reader()
+    std::string Item::dataPath()
     {
-        return m_reader;
+        return m_path;
     }
 
+    Options Item::options()
+    {
+        return m_readerOptions;
+    }
+
+    NL::json Item::handleReaderArgs(NL::json rawReaderArgs)
+    {
+        if (rawReaderArgs.is_object())
+        {
+            NL::json array_args = NL::json::array();
+            array_args.push_back(rawReaderArgs);
+            rawReaderArgs = array_args;
+        }
+        for (auto& opts: rawReaderArgs)
+            if (!opts.is_object())
+                throw pdal_error("Reader Args for reader '" + m_driver + "' must be a valid JSON object");
+
+        // log()->get(LogLevel::Debug) << "Reader Args: " << m_args->rawReaderArgs.dump() << std::endl;
+        NL::json readerArgs;
+        for (NL::json& readerPipeline: rawReaderArgs)
+        {
+            if (!readerPipeline.contains("type"))
+                throw pdal_error("No \"type\" key found in supplied reader arguments.");
+
+            std::string driver = readerPipeline.at("type").get<std::string>();
+            if (rawReaderArgs.contains(driver))
+                throw pdal_error("Multiple instances of the same driver in supplied reader arguments.");
+            readerArgs[driver] = { };
+
+            for (auto& arg: readerPipeline.items())
+            {
+                if (arg.key() == "type")
+                    continue;
+
+                std::string key = arg.key();
+                readerArgs[driver][key] = { };
+                readerArgs[driver][key] = arg.value();
+            }
+        }
+        return readerArgs;
+    }
 
     Options Item::setReaderOptions(const NL::json& readerArgs, const std::string& driver) const
     {
@@ -198,11 +213,6 @@ namespace stac
         }
 
         return output;
-    }
-
-    void Item::read()
-    {
-
     }
 
     void Item::validate()

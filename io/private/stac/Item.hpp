@@ -65,15 +65,17 @@ public:
         NL::json properties;
         NL::json::array_t dates;
     };
-    std::unique_ptr<Reader> m_reader;
-    std::string m_driver;
+
+    void init(std::vector<std::string> assetNames, NL::json rawReaderArgs);
+    NL::json handleReaderArgs(NL::json rawReaderArgs);
 
     std::string driver();
-    Reader* reader();
-    void init(std::vector<std::string> assetNames, NL::json readerArgs);
-    void read();
+    Options options();
+    std::string dataPath();
+
     void validate();
     bool prune(Filters filters);
+
 
 private:
 
@@ -83,6 +85,7 @@ private:
     const std::string m_path;
     const connector::Connector& m_connector;
 
+    std::string m_driver;
     std::string m_schemaUrl = "https://schemas.stacspec.org/v1.0.0/catalog-spec/json-schema/catalog.json";
     Options m_readerOptions;
     NL::json m_assets;

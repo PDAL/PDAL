@@ -195,29 +195,6 @@ void StacReader::validateSchema(NL::json stacJson)
     val.validate(stacJson);
 }
 
-void StacReader::handleReaderArgs()
-{
-    for (NL::json& readerPipeline: m_args->rawReaderArgs)
-    {
-        if (!readerPipeline.contains("type"))
-            throw pdal_error("No \"type\" key found in supplied reader arguments.");
-
-        std::string driver = readerPipeline.at("type").get<std::string>();
-        if (m_args->rawReaderArgs.contains(driver))
-            throw pdal_error("Multiple instances of the same driver in supplied reader arguments.");
-        m_args->readerArgs[driver] = { };
-
-        for (auto& arg: readerPipeline.items())
-        {
-            if (arg.key() == "type")
-                continue;
-
-            std::string key = arg.key();
-            m_args->readerArgs[driver][key] = { };
-            m_args->readerArgs[driver][key] = arg.value();
-        }
-    }
-}
 
 void StacReader::initializeArgs()
 {
@@ -256,21 +233,21 @@ void StacReader::initializeArgs()
         log()->get(LogLevel::Debug) << "Bounds: " << m_args->bounds << std::endl;
     }
 
-    if (!m_args->rawReaderArgs.empty())
-    {
-        if (m_args->rawReaderArgs.is_object())
-        {
-            NL::json array_args = NL::json::array();
-            array_args.push_back(m_args->rawReaderArgs);
-            m_args->rawReaderArgs = array_args;
-        }
-        for (auto& opts: m_args->rawReaderArgs)
-            if (!opts.is_object())
-                throw pdal_error("Reader Args must be a valid JSON object");
+    // if (!m_args->rawReaderArgs.empty())
+    // {
+    //     if (m_args->rawReaderArgs.is_object())
+    //     {
+    //         NL::json array_args = NL::json::array();
+    //         array_args.push_back(m_args->rawReaderArgs);
+    //         m_args->rawReaderArgs = array_args;
+    //     }
+    //     for (auto& opts: m_args->rawReaderArgs)
+    //         if (!opts.is_object())
+    //             throw pdal_error("Reader Args must be a valid JSON object");
 
-        log()->get(LogLevel::Debug) << "Reader Args: " << m_args->rawReaderArgs.dump() << std::endl;
-        handleReaderArgs();
-    }
+    //     log()->get(LogLevel::Debug) << "Reader Args: " << m_args->rawReaderArgs.dump() << std::endl;
+    //     handleReaderArgs();
+    // }
 
     if (!m_args->assetNames.empty())
     {
@@ -283,48 +260,6 @@ void StacReader::initializeArgs()
         log()->get(LogLevel::Debug) <<
             "JSON Schema validation flag is set." << std::endl;
 
-}
-
-Options StacReader::setReaderOptions(const NL::json& readerArgs, const std::string& driver) const
-{
-    Options readerOptions;
-    if (readerArgs.contains(driver)) {
-        NL::json args = readerArgs.at(driver).get<NL::json>();
-        for (auto& arg : args.items()) {
-            NL::detail::value_t type = readerArgs.at(driver).at(arg.key()).type();
-            switch(type)
-            {
-                case NL::detail::value_t::string:
-                {
-                    std::string val = arg.value().get<std::string>();
-                    readerOptions.add(arg.key(), arg.value().get<std::string>());
-                    break;
-                }
-                case NL::detail::value_t::number_float:
-                {
-                    readerOptions.add(arg.key(), arg.value().get<float>());
-                    break;
-                }
-                case NL::detail::value_t::number_integer:
-                {
-                    readerOptions.add(arg.key(), arg.value().get<int>());
-                    break;
-                }
-                case NL::detail::value_t::boolean:
-                {
-                    readerOptions.add(arg.key(), arg.value().get<bool>());
-                    break;
-                }
-                default:
-                {
-                    readerOptions.add(arg.key(), arg.value());
-                    break;
-                }
-            }
-        }
-    }
-
-    return readerOptions;
 }
 
 void StacReader::setConnectionForwards(StringMap& headers, StringMap& query)
@@ -350,110 +285,32 @@ void StacReader::setConnectionForwards(StringMap& headers, StringMap& query)
     }
 }
 
-
-std::string StacReader::extractDriverFromItem(const NL::json& asset) const
-{
-    std::string output;
-
-    std::map<std::string, std::string> contentTypes =
-    {
-        { "application/vnd.laszip+copc", "readers.copc"}
-    };
-
-    if (!asset.contains("href"))
-        throw pdal_error("asset does not contain an href!");
-    std::string dataUrl = asset.at("href").get<std::string>();
-
-    std::string contentType;
-
-    if (asset.contains("type"))
-    {
-        contentType = asset.at("type").get<std::string>();
-        for(const auto& ct: contentTypes)
-            if (Utils::iequals(ct.first, contentType))
-                return ct.second;
-    }
-
-    // Try to guess from the URL
-    std::string driver = m_factory.inferReaderDriver(dataUrl);
-    if (driver.size())
-        return driver;
-
-
-    // Try to make a HEAD request and get it from Content-Type
-    StringMap headers = m_p->m_connector->headRequest(dataUrl);
-    if (headers.find("Content-Type") != headers.end())
-    {
-        contentType = headers["Content-Type"];
-        for(const auto& ct: contentTypes)
-            if (Utils::iequals(ct.first, contentType))
-                return ct.second;
-    }
-
-    return output;
-}
-
 void StacReader::initializeItem(NL::json stacJson, std::string itemPath)
 {
-    if (prune(stacJson))
-        return;
-
-    if (m_args->validateSchema)
-        validateSchema(stacJson);
-
-    bool assetExists = false;
-    std::string assetName;
-    for (auto& name: m_args->assetNames)
-    {
-        if (stacJson.at("assets").contains(name))
-        {
-            assetName = name;
-            assetExists = true;
-        }
-    }
-    if (!assetExists)
-        throw pdal_error("None of the asset names supplied exist in the STAC object.");
-
-    NL::json asset = stacJson.at("assets").at(assetName);
-
-    const std::string srcPath = asset.at("href").get<std::string>();
-    std::string dataUrl = handleRelativePath(itemPath, srcPath);
-
-    std::string driver = extractDriverFromItem(asset);
-
-    log()->get(LogLevel::Debug) << "Using driver " << driver <<
-        " for file " << dataUrl << std::endl;
-
+    stac::Item item(stacJson, m_filename, *(m_p->m_connector));
+    item.init(m_args->assetNames, m_args->rawReaderArgs);
+    std::string driver = item.driver();
     Stage *stage = m_factory.createStage(driver);
+    // if (prune(stacJson))
+    //     return;
+
+    // if (m_args->validateSchema)
+    //     validateSchema(stacJson);
 
     if (!stage)
     {
         std::stringstream msg;
         msg << "Unable to create driver '" << driver << "' for "
-            << "for asset located at '" << dataUrl <<"'";
+            << "for asset located at '" << item.dataPath() <<"'";
         throw pdal_error(msg.str());
     }
-
     Reader* reader = dynamic_cast<Reader*>(stage);
-    if (!reader)
-    {
-        std::stringstream msg;
-        msg << "Unable to cast stage to reader for '" << driver << "' for "
-            << "for asset located at '" << dataUrl <<"'";
-        throw pdal_error(msg.str());
-    }
-
-    Options readerOptions = setReaderOptions(m_args->readerArgs, driver);
-
-    readerOptions.add("filename", dataUrl);
-    reader->setOptions(readerOptions);
+    reader->setOptions(item.options());
 
     std::lock_guard<std::mutex> lock(m_p->m_mutex);
     m_merge.setInput(*reader);
     reader->setLog(log());
-
     m_p->m_readerList.push_back(reader);
-
 }
 
 
@@ -586,18 +443,7 @@ void StacReader::initialize()
 
     std::string stacType = stacJson.at("type");
     if (stacType == "Feature")
-    {
-        // initializeItem(stacJson, m_filename);
-        stac::Item item(stacJson, m_filename, *(m_p->m_connector));
-        item.init(m_args->assetNames, m_args->readerArgs);
-        Reader* reader = item.reader();
-
-        m_merge.setInput(*reader);
-        reader->setLog(log());
-
-        m_p->m_readerList.push_back(reader);
-
-    }
+        initializeItem(stacJson, m_filename);
     else if (stacType == "Catalog")
         initializeCatalog(stacJson, m_filename, true);
     else if (stacType == "FeatureCollection")
