@@ -53,9 +53,11 @@ class Item
 {
 
 public:
-    Item(const NL::json& json, const std::string& itemPath, const connector::Connector& connector) :
-        m_json(json), m_path(itemPath), m_connector(connector)
-    {}
+    Item(const NL::json& json,
+        const std::string& itemPath,
+        const connector::Connector& connector);
+
+    ~Item();
 
     struct Filters {
         std::vector<RegEx> ids;
@@ -63,6 +65,8 @@ public:
         NL::json properties;
         NL::json::array_t dates;
     };
+    std::unique_ptr<Reader> m_reader;
+    std::string m_driver;
 
     std::string driver();
     Reader* reader();
@@ -80,10 +84,8 @@ private:
     const connector::Connector& m_connector;
 
     std::string m_schemaUrl = "https://schemas.stacspec.org/v1.0.0/catalog-spec/json-schema/catalog.json";
-    Reader* m_reader;
     Options m_readerOptions;
     NL::json m_assets;
-    std::string m_driver;
     std::string m_dataPath;
 
     std::string extractDriverFromItem(const NL::json& asset) const;

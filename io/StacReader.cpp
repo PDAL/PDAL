@@ -393,21 +393,6 @@ std::string StacReader::extractDriverFromItem(const NL::json& asset) const
     return output;
 }
 
-// Create link relative to the Catalog/Item/Collection that is referencing it
-// const std::string handleRelativePath(std::string srcPath, std::string linkPath)
-// {
-//     //Make absolute path of current item's directory, then create relative path from that
-
-//     //Get driectory of src item
-//     const std::string baseDir = FileUtils::getDirectory(srcPath);
-//     if (FileUtils::isAbsolutePath(linkPath))
-//         return linkPath;
-//     //Create absolute path from src item filepath, if it's not already
-//     // and join relative path to src item's dir path
-//     return FileUtils::toAbsolutePath(linkPath, baseDir);
-
-// }
-
 void StacReader::initializeItem(NL::json stacJson, std::string itemPath)
 {
     if (prune(stacJson))
@@ -603,8 +588,15 @@ void StacReader::initialize()
     if (stacType == "Feature")
     {
         // initializeItem(stacJson, m_filename);
-        stac::Item i(stacJson, m_filename, *(m_p->m_connector));
-        i.init(m_args->assetNames, m_args->readerArgs);
+        stac::Item item(stacJson, m_filename, *(m_p->m_connector));
+        item.init(m_args->assetNames, m_args->readerArgs);
+        Reader* reader = item.reader();
+
+        m_merge.setInput(*reader);
+        reader->setLog(log());
+
+        m_p->m_readerList.push_back(reader);
+
     }
     else if (stacType == "Catalog")
         initializeCatalog(stacJson, m_filename, true);

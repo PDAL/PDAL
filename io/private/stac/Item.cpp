@@ -48,7 +48,17 @@ namespace pdal
 namespace stac
 {
 
-    void Item::init(std::vector<std::string> assetNames, NL::json readerArgs) {
+    Item::Item(const NL::json& json,
+            const std::string& itemPath,
+            const connector::Connector& connector) :
+        m_json(json), m_path(itemPath), m_connector(connector)
+    {}
+
+    Item::~Item()
+    {}
+
+    void Item::init(std::vector<std::string> assetNames, NL::json readerArgs)
+    {
         NL::json asset;
         for (auto& name: assetNames)
         {
@@ -83,8 +93,8 @@ namespace stac
         }
 
         Options readerOptions = setReaderOptions(readerArgs, m_driver);
-
         readerOptions.add("filename", m_dataPath);
+
         m_reader->setOptions(readerOptions);
 
         // std::lock_guard<std::mutex> lock(m_p->m_mutex);
