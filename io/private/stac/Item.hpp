@@ -58,6 +58,7 @@ public:
         const connector::Connector& connector);
 
     ~Item();
+    Item(const Item& item);
 
     struct Filters {
         std::vector<RegEx> ids;
@@ -68,28 +69,25 @@ public:
 
     void init(std::vector<std::string> assetNames, NL::json rawReaderArgs);
     NL::json handleReaderArgs(NL::json rawReaderArgs);
-
-    std::string driver();
-    Options options();
-    std::string dataPath();
-
     void validate();
     bool prune(Filters filters);
 
+    std::string driver();
+    Options options();
+    std::string assetPath();
 
 private:
-
-    StageFactory m_factory;
 
     const NL::json m_json;
     const std::string m_path;
     const connector::Connector& m_connector;
 
+    StageFactory m_factory;
     std::string m_driver;
     std::string m_schemaUrl = "https://schemas.stacspec.org/v1.0.0/catalog-spec/json-schema/catalog.json";
     Options m_readerOptions;
     NL::json m_assets;
-    std::string m_dataPath;
+    std::string m_assetPath;
 
     std::string extractDriverFromItem(const NL::json& asset) const;
     Options setReaderOptions(const NL::json& readerArgs, const std::string& driver) const;

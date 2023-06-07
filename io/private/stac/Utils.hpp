@@ -41,12 +41,13 @@
 namespace pdal
 {
 
-namespace
+namespace stac
 {
-    std::mutex mutex;
-    std::unique_ptr<arbiter::Arbiter> arbiter;
+
     void schemaFetch(const nlohmann::json_uri& json_uri, nlohmann::json& json)
     {
+        std::mutex mutex;
+        std::unique_ptr<arbiter::Arbiter> arbiter;
         {
             std::lock_guard<std::mutex> lock(mutex);
             if (!arbiter) arbiter.reset(new arbiter::Arbiter());
@@ -70,7 +71,5 @@ namespace
 
     }
 
-}
-
-
-}
+}// stac
+}// pdal

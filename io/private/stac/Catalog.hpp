@@ -37,8 +37,10 @@
 #include <pdal/PointView.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/pdal_types.hpp>
-#include "ItemCollection.hpp"
+#include <pdal/util/ThreadPool.hpp>
+#include "../connector/Connector.hpp"
 #include "Item.hpp"
+
 
 namespace pdal
 {
@@ -50,12 +52,42 @@ class Catalog
 {
 
 public:
-    void read(NL::json stac);
-    bool validate(NL::json stac);
-    bool prune(NL::json stac, NL::json args);
+    Catalog(const NL::json& json,
+        const std::string& catPath,
+        const connector::Connector& connector,
+        ThreadPool& pool,
+        std::mutex& mutex,
+        const LogPtr& logPtr);
+    ~Catalog();
+
+    struct Filters {
+        std::vector<RegEx> ids;
+    };
+
+    void init(std::vector<std::string> assetNames, NL::json rawReaderArgs);
+    void validate();
+    bool filter(Filters filters);
+
+    std::vector<Item> items();
+    // std::string assetPath();
 
 private:
-    NL::json data;
+
+    const NL::json m_json;
+    const std::string m_path;
+    const connector::Connector& m_connector;
+    std::mutex& m_mutex;
+    ThreadPool& m_pool;
+    const LogPtr& m_log;
+
+    std::deque<std::pair<std::string, std::string>> m_errors;
+
+    std::vector<Item> m_itemList;
+    std::string m_driver;
+    std::string m_schemaUrl = "https://schemas.stacspec.org/v1.0.0/catalog-spec/json-schema/catalog.json";
+    Options m_readerOptions;
+    NL::json m_assets;
+    std::string m_dataPath;
 
 };
 

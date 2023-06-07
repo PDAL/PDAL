@@ -47,7 +47,7 @@
 #include <pdal/util/IStream.hpp>
 #include <pdal/util/FileUtils.hpp>
 
-// #include "private/stac/Catalog.hpp"
+#include "private/stac/Catalog.hpp"
 #include "private/stac/Item.hpp"
 #include "private/stac/Utils.hpp"
 // #include "private/stac/ItemCollection.hpp"
@@ -58,26 +58,6 @@
 
 namespace pdal
 {
-
-
-namespace
-{
-
-// std::mutex mutex;
-// std::unique_ptr<arbiter::Arbiter> arbiter;
-
-// void schemaFetch(const nlohmann::json_uri& json_uri, nlohmann::json& json)
-// {
-//     {
-//         std::lock_guard<std::mutex> lock(mutex);
-//         if (!arbiter) arbiter.reset(new arbiter::Arbiter());
-//     }
-
-//     std::string jsonStr = arbiter->get(json_uri.url());
-//     json = nlohmann::json::parse(jsonStr);
-// }
-
-}
 
 
 struct StacReader::Private
@@ -162,38 +142,38 @@ void StacReader::addArgs(ProgramArgs& args)
 }
 
 
-void StacReader::validateSchema(NL::json stacJson)
-{
-    std::function<void(const nlohmann::json_uri&, nlohmann::json&)> fetch = schemaFetch;
-    nlohmann::json_schema::json_validator val(
-        fetch,
-        [](const std::string &, const std::string &) {}
-    );
-    if (!stacJson.contains("type"))
-        throw pdal_error("Invalid STAC json");
-    std::string type = stacJson.at("type").get<std::string>();
-    std::string schemaUrl;
+// void StacReader::validateSchema(NL::json stacJson)
+// {
+//     std::function<void(const nlohmann::json_uri&, nlohmann::json&)> fetch = schemaFetch;
+//     nlohmann::json_schema::json_validator val(
+//         fetch,
+//         [](const std::string &, const std::string &) {}
+//     );
+//     if (!stacJson.contains("type"))
+//         throw pdal_error("Invalid STAC json");
+//     std::string type = stacJson.at("type").get<std::string>();
+//     std::string schemaUrl;
 
-    if (type == "Feature")
-    {
-        schemaUrl = m_args->featureSchemaUrl;
-        for (auto& extSchemaUrl: stacJson.at("stac_extensions"))
-        {
-            log()->get(LogLevel::Debug) << "Processing extension " << extSchemaUrl << std::endl;
-            NL::json schemaJson = m_p->m_connector->getJson(extSchemaUrl);
-            val.set_root_schema(schemaJson);
-            val.validate(stacJson);
-        }
-    }
-    else if (type == "Catalog")
-        schemaUrl = m_args->catalogSchemaUrl;
-    else
-        throw pdal_error("Invalid STAC type for PDAL consumption");
+//     if (type == "Feature")
+//     {
+//         schemaUrl = m_args->featureSchemaUrl;
+//         for (auto& extSchemaUrl: stacJson.at("stac_extensions"))
+//         {
+//             log()->get(LogLevel::Debug) << "Processing extension " << extSchemaUrl << std::endl;
+//             NL::json schemaJson = m_p->m_connector->getJson(extSchemaUrl);
+//             val.set_root_schema(schemaJson);
+//             val.validate(stacJson);
+//         }
+//     }
+//     else if (type == "Catalog")
+//         schemaUrl = m_args->catalogSchemaUrl;
+//     else
+//         throw pdal_error("Invalid STAC type for PDAL consumption");
 
-    NL::json schemaJson = m_p->m_connector->getJson(schemaUrl);
-    val.set_root_schema(schemaJson);
-    val.validate(stacJson);
-}
+//     NL::json schemaJson = m_p->m_connector->getJson(schemaUrl);
+//     val.set_root_schema(schemaJson);
+//     val.validate(stacJson);
+// }
 
 
 void StacReader::initializeArgs()
@@ -290,18 +270,19 @@ void StacReader::initializeItem(NL::json stacJson, std::string itemPath)
     stac::Item item(stacJson, m_filename, *(m_p->m_connector));
     item.init(m_args->assetNames, m_args->rawReaderArgs);
     std::string driver = item.driver();
-    Stage *stage = m_factory.createStage(driver);
     // if (prune(stacJson))
     //     return;
 
     // if (m_args->validateSchema)
     //     validateSchema(stacJson);
 
+    Stage *stage = m_factory.createStage(driver);
+
     if (!stage)
     {
         std::stringstream msg;
         msg << "Unable to create driver '" << driver << "' for "
-            << "for asset located at '" << item.dataPath() <<"'";
+            << "for asset located at '" << item.assetPath() <<"'";
         throw pdal_error(msg.str());
     }
     Reader* reader = dynamic_cast<Reader*>(stage);
@@ -316,85 +297,88 @@ void StacReader::initializeItem(NL::json stacJson, std::string itemPath)
 
 void StacReader::initializeCatalog(NL::json stacJson, std::string catPath, bool isRoot)
 {
-    if (!stacJson.contains("id"))
-    {
-        std::stringstream msg;
-        msg << "Invalid catalog. It is missing key 'id'.";
-        throw pdal_error(msg.str());
-    }
+    stac::Catalog catalog(stacJson, catPath, *(m_p->m_connector), *(m_p->m_pool), m_p->m_mutex, log());
+    catalog.init(m_args->assetNames, m_args->rawReaderArgs);
+    std::vector<stac::Item> items = catalog.items();
+    // if (!stacJson.contains("id"))
+    // {
+    //     std::stringstream msg;
+    //     msg << "Invalid catalog. It is missing key 'id'.";
+    //     throw pdal_error(msg.str());
+    // }
 
-    std::string catalogId = stacJson.at("id").get<std::string>();
+    // std::string catalogId = stacJson.at("id").get<std::string>();
 
-    if (!m_args->catalog_ids.empty() && !isRoot)
-    {
-        bool pruneFlag = true;
-        for (auto& id: m_args->catalog_ids)
-        {
-            if (catalogId == id)
-            {
-                pruneFlag = false;
-                break;
-            }
-        }
-        if (pruneFlag)
-            return;
-    }
-
-
-    if (m_args->validateSchema)
-        validateSchema(stacJson);
-    auto itemLinks = stacJson.at("links");
-
-    log()->get(LogLevel::Debug) << "Filtering..." << std::endl;
+    // if (!m_args->catalog_ids.empty() && !isRoot)
+    // {
+    //     bool pruneFlag = true;
+    //     for (auto& id: m_args->catalog_ids)
+    //     {
+    //         if (catalogId == id)
+    //         {
+    //             pruneFlag = false;
+    //             break;
+    //         }
+    //     }
+    //     if (pruneFlag)
+    //         return;
+    // }
 
 
-    for (const auto& link: itemLinks)
-    {
+    // if (m_args->validateSchema)
+    //     validateSchema(stacJson);
+    // auto itemLinks = stacJson.at("links");
 
-        if (!link.count("href") || !link.count("rel"))
-            throw pdal::pdal_error("item does not contain 'href' or 'rel'");
+    // log()->get(LogLevel::Debug) << "Filtering..." << std::endl;
 
-        const std::string linkType = link.at("rel").get<std::string>();
-        const std::string srcPath = link.at("href").get<std::string>();
-        const std::string linkPath = handleRelativePath(catPath, srcPath);
 
-        m_p->m_pool->add([this, linkType, linkPath, link ]()
-        {
-            try
-            {
-                if (linkType == "item")
-                {
-                    NL::json itemJson = m_p->m_connector->getJson(linkPath);
-                    initializeItem(itemJson, linkPath);
-                }
-                else if (linkType == "catalog")
-                {
-                    NL::json catalogJson = m_p->m_connector->getJson(linkPath);
-                    initializeCatalog(catalogJson, linkPath);
-                }
-            }
-            catch (std::exception& e)
-            {
-                std::lock_guard<std::mutex> lock(m_p->m_mutex);
-                std::pair<std::string, std::string> p {linkPath, e.what()};
-                m_p->m_errors.push_back(p);
-            }
-            catch (...)
-            {
-                std::lock_guard<std::mutex> lock(m_p->m_mutex);
-                m_p->m_errors.push_back({linkPath, "Unknown error"});
-            }
-        });
-    }
+    // for (const auto& link: itemLinks)
+    // {
 
-    if (m_p->m_errors.size())
-    {
-        for (auto& p: m_p->m_errors)
-        {
-            log()->get(LogLevel::Error) << "Failure fetching '" << p.first << "' with error '"
-                << p.second << "'";
-        }
-    }
+    //     if (!link.count("href") || !link.count("rel"))
+    //         throw pdal::pdal_error("item does not contain 'href' or 'rel'");
+
+    //     const std::string linkType = link.at("rel").get<std::string>();
+    //     const std::string srcPath = link.at("href").get<std::string>();
+    //     const std::string linkPath = handleRelativePath(catPath, srcPath);
+
+    //     m_p->m_pool->add([this, linkType, linkPath, link ]()
+    //     {
+    //         try
+    //         {
+    //             if (linkType == "item")
+    //             {
+    //                 NL::json itemJson = m_p->m_connector->getJson(linkPath);
+    //                 initializeItem(itemJson, linkPath);
+    //             }
+    //             else if (linkType == "catalog")
+    //             {
+    //                 NL::json catalogJson = m_p->m_connector->getJson(linkPath);
+    //                 initializeCatalog(catalogJson, linkPath);
+    //             }
+    //         }
+    //         catch (std::exception& e)
+    //         {
+    //             std::lock_guard<std::mutex> lock(m_p->m_mutex);
+    //             std::pair<std::string, std::string> p {linkPath, e.what()};
+    //             m_p->m_errors.push_back(p);
+    //         }
+    //         catch (...)
+    //         {
+    //             std::lock_guard<std::mutex> lock(m_p->m_mutex);
+    //             m_p->m_errors.push_back({linkPath, "Unknown error"});
+    //         }
+    //     });
+    // }
+
+    // if (m_p->m_errors.size())
+    // {
+    //     for (auto& p: m_p->m_errors)
+    //     {
+    //         log()->get(LogLevel::Error) << "Failure fetching '" << p.first << "' with error '"
+    //             << p.second << "'";
+    //     }
+    // }
 
 }
 
@@ -419,7 +403,7 @@ void StacReader::initializeItemCollection(NL::json stacJson, std::string icPath)
             if (target == "next")
             {
                 const std::string nextLinkPath = link.at("href").get<std::string>();
-                std::string nextAbsPath = handleRelativePath(icPath, nextLinkPath);
+                std::string nextAbsPath = stac::handleRelativePath(icPath, nextLinkPath);
                 NL::json nextJson = m_p->m_connector->getJson(nextAbsPath);
                 initializeItemCollection(nextJson, nextAbsPath);
             }

@@ -34,9 +34,6 @@
 
 #include "Item.hpp"
 #include "Utils.hpp"
-#include "../connector/Connector.hpp"
-
-#include <pdal/StageWrapper.hpp>
 #include <pdal/Polygon.hpp>
 
 #include <nlohmann/json.hpp>
@@ -57,6 +54,10 @@ namespace stac
     Item::~Item()
     {}
 
+    Item::Item(const Item& item):
+        m_json(item.m_json), m_path(item.m_path), m_connector(item.m_connector)
+    {}
+
     void Item::init(std::vector<std::string> assetNames, NL::json rawReaderArgs)
     {
         NL::json asset;
@@ -67,14 +68,14 @@ namespace stac
                 asset = m_json.at("assets").at(name);
                 m_driver = extractDriverFromItem(asset);
                 std::string assetPath = asset.at("href").get<std::string>();
-                m_dataPath = handleRelativePath(m_path, assetPath);
+                m_assetPath = handleRelativePath(m_path, assetPath);
             }
         }
         if (m_driver.empty())
             throw pdal_error("None of the asset names supplied exist in the STAC object.");
         NL::json readerArgs = handleReaderArgs(rawReaderArgs);
         m_readerOptions = setReaderOptions(readerArgs, m_driver);
-        m_readerOptions.add("filename", m_dataPath);
+        m_readerOptions.add("filename", m_assetPath);
     }
 
     std::string Item::driver()
@@ -82,9 +83,9 @@ namespace stac
         return m_driver;
     }
 
-    std::string Item::dataPath()
+    std::string Item::assetPath()
     {
-        return m_path;
+        return m_assetPath;
     }
 
     Options Item::options()
