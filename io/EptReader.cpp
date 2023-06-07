@@ -297,20 +297,32 @@ void EptReader::handleOriginQuery()
     // At the moment, we only care about the summary information, which contains
     // both the original file path and the bounds, and in each of these summary
     // formats, those specific entries are exactly the same.  So we just need to
-    // grab the right filename and can use the same logic thereafter.
-    std::string filename = m_p->info->version() == "1.0.0"
-        ? m_p->info->sourcesDir() + "list.json"
-        : m_p->info->sourcesDir() + "manifest.json";
+    // grab either file and can use the same logic thereafter.  Prefer manifest,
+    // if it exists, since it's the newer one.
 
     NL::json sources;
     try
     {
-        sources = m_p->connector->getJson(filename);
+        sources = m_p->connector->getJson(
+            m_p->info->sourcesDir() + "manifest.json");
     }
-    catch (const arbiter::ArbiterError& err)
+    catch (...) {}
+
+    if (sources.is_null())
     {
-        throwError(err.what());
+        try
+        {
+            sources = m_p->connector->getJson(
+                m_p->info->sourcesDir() + "list.json");
+        }
+        catch (...) {}
     }
+
+    if (sources.is_null())
+    {
+        throwError("Failed to fetch input sources metadata");
+    }
+
     log()->get(LogLevel::Debug) << "Fetched sources list" << std::endl;
 
     if (!sources.is_array())
