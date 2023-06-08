@@ -78,6 +78,11 @@ namespace stac
         m_readerOptions.add("filename", m_assetPath);
     }
 
+    std::string Item::id()
+    {
+        return m_json.at("id").get<std::string>();
+    }
+
     std::string Item::driver()
     {
         return m_driver;

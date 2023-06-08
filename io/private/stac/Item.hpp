@@ -72,6 +72,7 @@ public:
     void validate();
     bool prune(Filters filters);
 
+    std::string id();
     std::string driver();
     Options options();
     std::string assetPath();

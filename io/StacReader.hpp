@@ -41,6 +41,7 @@
 #include <pdal/JsonFwd.hpp>
 #include <pdal/StageFactory.hpp>
 #include <filters/MergeFilter.hpp>
+#include "private/stac/Item.hpp"
 
 
 namespace pdal
@@ -68,6 +69,7 @@ namespace pdal
             StageFactory m_factory;
 
             void handleReaderArgs();
+            void addItem(stac::Item& item);
             void initializeItem(NL::json stacJson, std::string itemPath);
             void initializeCatalog(NL::json stacJson, std::string catPath, bool isRoot = false);
             void initializeItemCollection(NL::json stacJson, std::string icPath);

@@ -48,7 +48,6 @@
 #include <pdal/util/FileUtils.hpp>
 
 #include "private/stac/Catalog.hpp"
-#include "private/stac/Item.hpp"
 #include "private/stac/Utils.hpp"
 // #include "private/stac/ItemCollection.hpp"
 
@@ -66,7 +65,7 @@ public:
     std::unique_ptr<Args> m_args;
     std::unique_ptr<ThreadPool> m_pool;
     std::vector<Reader*> m_readerList;
-    std::mutex m_mutex;
+    mutable std::mutex m_mutex;
     std::vector<std::string> m_idList;
     std::unique_ptr<connector::Connector> m_connector;
     std::deque <std::pair<std::string, std::string>> m_errors;
@@ -265,10 +264,8 @@ void StacReader::setConnectionForwards(StringMap& headers, StringMap& query)
     }
 }
 
-void StacReader::initializeItem(NL::json stacJson, std::string itemPath)
+void StacReader::addItem(stac::Item& item)
 {
-    stac::Item item(stacJson, m_filename, *(m_p->m_connector));
-    item.init(m_args->assetNames, m_args->rawReaderArgs);
     std::string driver = item.driver();
     //TODO introduce filter
     //TODO introduce validation
@@ -286,17 +283,32 @@ void StacReader::initializeItem(NL::json stacJson, std::string itemPath)
     reader->setOptions(item.options());
 
     std::lock_guard<std::mutex> lock(m_p->m_mutex);
+    m_p->m_idList.push_back(item.id());
     reader->setLog(log());
     m_merge.setInput(*reader);
     m_p->m_readerList.push_back(reader);
+
+}
+
+void StacReader::initializeItem(NL::json stacJson, std::string itemPath)
+{
+    stac::Item item(stacJson, m_filename, *m_p->m_connector);
+    item.init(m_args->assetNames, m_args->rawReaderArgs);
+    addItem(item);
 }
 
 
 void StacReader::initializeCatalog(NL::json stacJson, std::string catPath, bool isRoot)
 {
-    stac::Catalog catalog(stacJson, catPath, *(m_p->m_connector), *(m_p->m_pool), log());
+    stac::Catalog catalog(stacJson, catPath, *m_p->m_connector, *m_p->m_pool, log());
     catalog.init(m_args->assetNames, m_args->rawReaderArgs);
+    m_p->m_pool->join();
     std::vector<stac::Item> items = catalog.items();
+    for (stac::Item& item: items)
+    {
+        item.init(m_args->assetNames, m_args->rawReaderArgs);
+        addItem(item);
+    }
     // if (!stacJson.contains("id"))
     // {
     //     std::stringstream msg;

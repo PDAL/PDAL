@@ -120,6 +120,7 @@ namespace stac
                     m_errors.push_back({absLinkPath, "Unknown error"});
                 }
             });
+            m_pool.await();
         }
 
         if (m_errors.size())
