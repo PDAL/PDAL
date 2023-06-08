@@ -85,7 +85,7 @@ private:
 
     StageFactory m_factory;
     std::string m_driver;
-    std::string m_schemaUrl = "https://schemas.stacspec.org/v1.0.0/catalog-spec/json-schema/catalog.json";
+    std::string m_schemaUrl = "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/item.json";
     Options m_readerOptions;
     NL::json m_assets;
     std::string m_assetPath;

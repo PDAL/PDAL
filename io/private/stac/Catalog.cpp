@@ -147,14 +147,8 @@ namespace stac
             fetch,
             [](const std::string &, const std::string &) {}
         );
-        if (!m_json.contains("type"))
-            throw pdal_error("Invalid STAC json");
-        std::string type = m_json.at("type").get<std::string>();
-        std::string schemaUrl;
 
-        schemaUrl = m_schemaUrl;
-
-        NL::json schemaJson = m_connector.getJson(schemaUrl);
+        NL::json schemaJson = m_connector.getJson(m_schemaUrl);
         val.set_root_schema(schemaJson);
         val.validate(m_json);
     }

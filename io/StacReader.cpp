@@ -266,9 +266,12 @@ void StacReader::setConnectionForwards(StringMap& headers, StringMap& query)
 
 void StacReader::addItem(stac::Item& item)
 {
+    item.init(m_args->assetNames, m_args->rawReaderArgs);
     std::string driver = item.driver();
     //TODO introduce filter
-    //TODO introduce validation
+    // TODO introduce validation
+    if (m_args->validateSchema)
+        item.validate();
 
     Stage *stage = m_factory.createStage(driver);
 
@@ -290,108 +293,31 @@ void StacReader::addItem(stac::Item& item)
 
 }
 
-void StacReader::initializeItem(NL::json stacJson, std::string itemPath)
+void StacReader::handleItem(NL::json stacJson, std::string itemPath)
 {
     stac::Item item(stacJson, m_filename, *m_p->m_connector);
-    item.init(m_args->assetNames, m_args->rawReaderArgs);
     addItem(item);
 }
 
 
-void StacReader::initializeCatalog(NL::json stacJson, std::string catPath, bool isRoot)
+void StacReader::handleCatalog(NL::json stacJson, std::string catPath, bool isRoot)
 {
     stac::Catalog catalog(stacJson, catPath, *m_p->m_connector, *m_p->m_pool, log());
+
+    if (m_args->validateSchema)
+        catalog.validate();
+
     catalog.init(m_args->assetNames, m_args->rawReaderArgs);
     m_p->m_pool->join();
+
     std::vector<stac::Item> items = catalog.items();
     for (stac::Item& item: items)
     {
-        item.init(m_args->assetNames, m_args->rawReaderArgs);
         addItem(item);
     }
-    // if (!stacJson.contains("id"))
-    // {
-    //     std::stringstream msg;
-    //     msg << "Invalid catalog. It is missing key 'id'.";
-    //     throw pdal_error(msg.str());
-    // }
-
-    // std::string catalogId = stacJson.at("id").get<std::string>();
-
-    // if (!m_args->catalog_ids.empty() && !isRoot)
-    // {
-    //     bool pruneFlag = true;
-    //     for (auto& id: m_args->catalog_ids)
-    //     {
-    //         if (catalogId == id)
-    //         {
-    //             pruneFlag = false;
-    //             break;
-    //         }
-    //     }
-    //     if (pruneFlag)
-    //         return;
-    // }
-
-
-    // if (m_args->validateSchema)
-    //     validateSchema(stacJson);
-    // auto itemLinks = stacJson.at("links");
-
-    // log()->get(LogLevel::Debug) << "Filtering..." << std::endl;
-
-
-    // for (const auto& link: itemLinks)
-    // {
-
-    //     if (!link.count("href") || !link.count("rel"))
-    //         throw pdal::pdal_error("item does not contain 'href' or 'rel'");
-
-    //     const std::string linkType = link.at("rel").get<std::string>();
-    //     const std::string srcPath = link.at("href").get<std::string>();
-    //     const std::string linkPath = handleRelativePath(catPath, srcPath);
-
-    //     m_p->m_pool->add([this, linkType, linkPath, link ]()
-    //     {
-    //         try
-    //         {
-    //             if (linkType == "item")
-    //             {
-    //                 NL::json itemJson = m_p->m_connector->getJson(linkPath);
-    //                 initializeItem(itemJson, linkPath);
-    //             }
-    //             else if (linkType == "catalog")
-    //             {
-    //                 NL::json catalogJson = m_p->m_connector->getJson(linkPath);
-    //                 initializeCatalog(catalogJson, linkPath);
-    //             }
-    //         }
-    //         catch (std::exception& e)
-    //         {
-    //             std::lock_guard<std::mutex> lock(m_p->m_mutex);
-    //             std::pair<std::string, std::string> p {linkPath, e.what()};
-    //             m_p->m_errors.push_back(p);
-    //         }
-    //         catch (...)
-    //         {
-    //             std::lock_guard<std::mutex> lock(m_p->m_mutex);
-    //             m_p->m_errors.push_back({linkPath, "Unknown error"});
-    //         }
-    //     });
-    // }
-
-    // if (m_p->m_errors.size())
-    // {
-    //     for (auto& p: m_p->m_errors)
-    //     {
-    //         log()->get(LogLevel::Error) << "Failure fetching '" << p.first << "' with error '"
-    //             << p.second << "'";
-    //     }
-    // }
-
 }
 
-void StacReader::initializeItemCollection(NL::json stacJson, std::string icPath)
+void StacReader::handleItemCollection(NL::json stacJson, std::string icPath)
 {
     if (!stacJson.contains("features"))
         throw pdal_error("Missing required key 'features' in FeatureCollection.");
@@ -399,7 +325,7 @@ void StacReader::initializeItemCollection(NL::json stacJson, std::string icPath)
     NL::json itemList = stacJson.at("features");
     for (NL::json& item: itemList)
     {
-        initializeItem(item, icPath);
+        handleItem(item, icPath);
     }
     if (stacJson.contains("links"))
     {
@@ -414,7 +340,7 @@ void StacReader::initializeItemCollection(NL::json stacJson, std::string icPath)
                 const std::string nextLinkPath = link.at("href").get<std::string>();
                 std::string nextAbsPath = stac::handleRelativePath(icPath, nextLinkPath);
                 NL::json nextJson = m_p->m_connector->getJson(nextAbsPath);
-                initializeItemCollection(nextJson, nextAbsPath);
+                handleItemCollection(nextJson, nextAbsPath);
             }
         }
     }
@@ -436,11 +362,11 @@ void StacReader::initialize()
 
     std::string stacType = stacJson.at("type");
     if (stacType == "Feature")
-        initializeItem(stacJson, m_filename);
+        handleItem(stacJson, m_filename);
     else if (stacType == "Catalog")
-        initializeCatalog(stacJson, m_filename, true);
+        handleCatalog(stacJson, m_filename, true);
     else if (stacType == "FeatureCollection")
-        initializeItemCollection(stacJson, m_filename);
+        handleItemCollection(stacJson, m_filename);
     else
         throw pdal_error("Could not initialize STAC object of type " + stacType);
 

@@ -70,9 +70,9 @@ namespace pdal
 
             void handleReaderArgs();
             void addItem(stac::Item& item);
-            void initializeItem(NL::json stacJson, std::string itemPath);
-            void initializeCatalog(NL::json stacJson, std::string catPath, bool isRoot = false);
-            void initializeItemCollection(NL::json stacJson, std::string icPath);
+            void handleItem(NL::json stacJson, std::string itemPath);
+            void handleCatalog(NL::json stacJson, std::string catPath, bool isRoot = false);
+            void handleItemCollection(NL::json stacJson, std::string icPath);
             void initializeArgs();
             void validateSchema(NL::json stacJson);
             Options setReaderOptions(const NL::json& readerArgs,

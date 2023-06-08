@@ -228,7 +228,6 @@ namespace stac
             fetch,
             [](const std::string &, const std::string &) {}
         );
-        const std::string schemaUrl = m_schemaUrl;
         for (auto& extSchemaUrl: m_json.at("stac_extensions"))
         {
             // log()->get(LogLevel::Debug) << "Processing extension " << extSchemaUrl << std::endl;
@@ -237,7 +236,7 @@ namespace stac
             val.validate(m_json);
         }
 
-        NL::json schemaJson = m_connector.getJson(schemaUrl);
+        NL::json schemaJson = m_connector.getJson(m_schemaUrl);
         val.set_root_schema(schemaJson);
         val.validate(m_json);
     }

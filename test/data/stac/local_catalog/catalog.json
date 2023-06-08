@@ -22,8 +22,6 @@
       "href": "./IA_SouthCentral_1_2020.json"
     }
   ],
-  "stac_extensions": [
-  ],
   "queryables": {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "https://example.org/queryables",

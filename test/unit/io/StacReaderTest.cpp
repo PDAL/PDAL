@@ -340,21 +340,22 @@ TEST(StacReaderTest, catalog_test)
 //     EXPECT_THROW(QuickInfo qi = reader.preview(), pdal_error);
 // }
 
-// #ifndef _WIN32
-// TEST(StacReaderTest, schema_validate_test)
-// {
-//     Options options;
+#ifndef _WIN32
 
-//     options.add("filename", Support::datapath("stac/MD_GoldenBeach_2012.json"));
-//     options.add("asset_names", "ept.json");
-//     options.add("validate_schema", "true");
+TEST(StacReaderTest, schema_validate_test)
+{
+    Options options;
 
-//     StageFactory f;
-//     Stage& reader = *f.createStage("readers.stac");
-//     reader.setOptions(options);
+    options.add("filename", Support::datapath("stac/local_catalog/catalog.json"));
+    options.add("asset_names", "ept.json");
+    options.add("validate_schema", "true");
 
-//     QuickInfo qi = reader.preview();
-//     EXPECT_TRUE(qi.valid());
-//     EXPECT_EQ(qi.m_pointCount, 4860658);
-// }
-// #endif
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
+
+    QuickInfo qi = reader.preview();
+    EXPECT_TRUE(qi.valid());
+    EXPECT_EQ(qi.m_pointCount, 44851301750);
+}
+#endif
