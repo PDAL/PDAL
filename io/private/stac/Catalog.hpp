@@ -61,9 +61,10 @@ public:
 
     struct Filters {
         std::vector<RegEx> ids;
+        Item::Filters itemFilters;
     };
 
-    void init(std::vector<std::string> assetNames, NL::json rawReaderArgs);
+    bool init(Filters filters, NL::json rawReaderArgs, bool isRoot);
     void validate();
     bool filter(Filters filters);
 
@@ -78,6 +79,7 @@ private:
     std::mutex m_mutex;
     ThreadPool& m_pool;
     const LogPtr& m_log;
+    bool m_root;
 
     std::deque<std::pair<std::string, std::string>> m_errors;
 

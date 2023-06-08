@@ -55,14 +55,11 @@ namespace stac
     Catalog::~Catalog()
     {}
 
-    void Catalog::init(std::vector<std::string> assetNames, NL::json rawReaderArgs)
+    bool Catalog::init(Filters filters, NL::json rawReaderArgs, bool isRoot=false)
     {
-        if (!m_json.contains("id"))
-        {
-            std::stringstream msg;
-            msg << "Invalid catalog. It is missing key 'id'.";
-            throw pdal_error(msg.str());
-        }
+        m_root = isRoot;
+        if (!filter(filters))
+            return false;
 
         std::string catalogId = m_json.at("id").get<std::string>();
 
@@ -80,7 +77,7 @@ namespace stac
             const std::string linkPath = link.at("href").get<std::string>();
             const std::string absLinkPath = handleRelativePath(m_path, linkPath);
 
-            m_pool.add([this, linkType, absLinkPath, assetNames, rawReaderArgs]()
+            m_pool.add([this, linkType, absLinkPath, filters, rawReaderArgs]()
             {
                 try
                 {
@@ -88,8 +85,11 @@ namespace stac
                     {
                         NL::json itemJson = m_connector.getJson(absLinkPath);
                         Item item(itemJson, absLinkPath, m_connector);
-                        std::lock_guard<std::mutex> lock(m_mutex);
-                        m_itemList.push_back(item);
+                        if (item.init(filters.itemFilters, rawReaderArgs))
+                        {
+                            std::lock_guard<std::mutex> lock(m_mutex);
+                            m_itemList.push_back(item);
+                        }
                         // initializeItem(itemJson, absLinkPath);
                     }
                     else if (linkType == "catalog")
@@ -98,14 +98,17 @@ namespace stac
                         // initializeCatalog(catalogJson, absLinkPath);
                         Catalog catalog(catalogJson, absLinkPath, m_connector,
                             m_pool, m_log);
-                        catalog.init(assetNames, rawReaderArgs);
-                        std::vector<Item> items = catalog.items();
-                        std::lock_guard<std::mutex> lock(m_mutex);
-                        for (auto& i: items)
+
+                        if (catalog.init(filters, rawReaderArgs))
                         {
-                            m_itemList.push_back(i);
+                            std::vector<Item> items = catalog.items();
+                            std::lock_guard<std::mutex> lock(m_mutex);
+                            // m_itemList.insert(m_itemList.end(), items.begin(), items.end());
+                            for (auto& i: items)
+                            {
+                                m_itemList.push_back(i);
+                            }
                         }
-                        // m_itemList.insert(m_itemList.end(), items.size(), items);
                     }
                 }
                 catch (std::exception& e)
@@ -131,7 +134,7 @@ namespace stac
                     << p.second << "'";
             }
         }
-
+        return true;
     }
 
     std::vector<Item> Catalog::items()
@@ -153,21 +156,31 @@ namespace stac
         val.validate(m_json);
     }
 
+    //if catalog matches filter requirements, return true
     bool Catalog::filter(Filters filters) {
-        // if (!m_args->catalog_ids.empty() && !isRoot)
-        // {
-        //     bool pruneFlag = true;
-        //     for (auto& id: m_args->catalog_ids)
-        //     {
-        //         if (catalogId == id)
-        //         {
-        //             pruneFlag = false;
-        //             break;
-        //         }
-        //     }
-        //     if (pruneFlag)
-        //         return;
-        // }
+        if (!m_json.contains("id"))
+        {
+            std::stringstream msg;
+            msg << "Invalid catalog . It is missing key 'id'.";
+            throw pdal_error(msg.str());
+        }
+
+        if (!filters.ids.empty() && !m_root)
+        {
+            std::string id = m_json.at("id").get<std::string>();
+            bool pruneFlag = true;
+            for (auto& i: filters.ids)
+            {
+                if (std::regex_match(id, i.regex()))
+                {
+                    pruneFlag = false;
+                    break;
+                }
+            }
+            if (pruneFlag)
+                return false;
+        }
+
         return true;
     }
 

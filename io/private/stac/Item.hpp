@@ -65,12 +65,13 @@ public:
         SrsBounds bounds;
         NL::json properties;
         NL::json::array_t dates;
+        std::vector<std::string> assetNames;
     };
 
-    void init(std::vector<std::string> assetNames, NL::json rawReaderArgs);
+    bool init(Filters filters, NL::json rawReaderArgs);
     NL::json handleReaderArgs(NL::json rawReaderArgs);
     void validate();
-    bool prune(Filters filters);
+    bool filter(Filters filters);
 
     std::string id();
     std::string driver();

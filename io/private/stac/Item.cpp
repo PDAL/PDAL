@@ -58,24 +58,15 @@ namespace stac
         m_json(item.m_json), m_path(item.m_path), m_connector(item.m_connector)
     {}
 
-    void Item::init(std::vector<std::string> assetNames, NL::json rawReaderArgs)
+    bool Item::init(Filters filters, NL::json rawReaderArgs)
     {
-        NL::json asset;
-        for (auto& name: assetNames)
-        {
-            if (m_json.at("assets").contains(name))
-            {
-                asset = m_json.at("assets").at(name);
-                m_driver = extractDriverFromItem(asset);
-                std::string assetPath = asset.at("href").get<std::string>();
-                m_assetPath = handleRelativePath(m_path, assetPath);
-            }
-        }
-        if (m_driver.empty())
-            throw pdal_error("None of the asset names supplied exist in the STAC object.");
+        if (filter(filters))
+            return false;
+
         NL::json readerArgs = handleReaderArgs(rawReaderArgs);
         m_readerOptions = setReaderOptions(readerArgs, m_driver);
         m_readerOptions.add("filename", m_assetPath);
+        return true;
     }
 
     std::string Item::id()
@@ -251,7 +242,10 @@ namespace stac
         if (!json.contains("id"))
             throw pdal_error("JSON object does not contain required key 'id'");
 
-        const std::string id = json.at("id").get<std::string>();
+        std::string id = json.at("id").get<std::string>();
+
+        if (!json.contains("assets"))
+            throw pdal_error("JSON Object of id '"+ id +"' does not contain required key 'assets'");
 
         if (!json.contains("properties"))
             throw pdal_error("JSON object " + id + " does not contain required key 'properties'");
@@ -328,7 +322,8 @@ namespace stac
         return true;
     }
 
-    bool Item::prune(Filters filters)
+    //TODO reverse logic on this bool to match expected flow
+    bool Item::filter(Filters filters)
     {
         validateForPrune(m_json);
 
@@ -346,6 +341,21 @@ namespace stac
 
         // ID
         // If STAC ID matches *any* ID in supplied list, it will not be pruned.
+        NL::json asset;
+        for (auto& name: filters.assetNames)
+        {
+            if (m_json.at("assets").contains(name))
+            {
+                asset = m_json.at("assets").at(name);
+                m_driver = extractDriverFromItem(asset);
+                std::string assetPath = asset.at("href").get<std::string>();
+                m_assetPath = handleRelativePath(m_path, assetPath);
+            }
+        }
+        if (m_driver.empty())
+            return true;
+            // throw pdal_error("None of the asset names supplied exist in the STAC object.");
+
         std::string itemId = m_json.at("id");
         bool idFlag = true;
         if (!filters.ids.empty())

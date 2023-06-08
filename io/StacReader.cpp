@@ -69,10 +69,13 @@ public:
     std::vector<std::string> m_idList;
     std::unique_ptr<connector::Connector> m_connector;
     std::deque <std::pair<std::string, std::string>> m_errors;
+    stac::Item::Filters m_itemFilters;
+    stac::Catalog::Filters m_catFilters;
 };
 
 struct StacReader::Args
 {
+
     std::vector<RegEx> item_ids;
     std::vector<RegEx> catalog_ids;
     NL::json properties;
@@ -141,135 +144,10 @@ void StacReader::addArgs(ProgramArgs& args)
 }
 
 
-// void StacReader::validateSchema(NL::json stacJson)
-// {
-//     std::function<void(const nlohmann::json_uri&, nlohmann::json&)> fetch = schemaFetch;
-//     nlohmann::json_schema::json_validator val(
-//         fetch,
-//         [](const std::string &, const std::string &) {}
-//     );
-//     if (!stacJson.contains("type"))
-//         throw pdal_error("Invalid STAC json");
-//     std::string type = stacJson.at("type").get<std::string>();
-//     std::string schemaUrl;
-
-//     if (type == "Feature")
-//     {
-//         schemaUrl = m_args->featureSchemaUrl;
-//         for (auto& extSchemaUrl: stacJson.at("stac_extensions"))
-//         {
-//             log()->get(LogLevel::Debug) << "Processing extension " << extSchemaUrl << std::endl;
-//             NL::json schemaJson = m_p->m_connector->getJson(extSchemaUrl);
-//             val.set_root_schema(schemaJson);
-//             val.validate(stacJson);
-//         }
-//     }
-//     else if (type == "Catalog")
-//         schemaUrl = m_args->catalogSchemaUrl;
-//     else
-//         throw pdal_error("Invalid STAC type for PDAL consumption");
-
-//     NL::json schemaJson = m_p->m_connector->getJson(schemaUrl);
-//     val.set_root_schema(schemaJson);
-//     val.validate(stacJson);
-// }
-
-
-void StacReader::initializeArgs()
-{
-    if (!m_args->item_ids.empty())
-    {
-        log()->get(LogLevel::Debug) << "Selecting Items with ids: " << std::endl;
-        for (auto& id: m_args->item_ids)
-            log()->get(LogLevel::Debug) << "    " << id.m_str << std::endl;
-    }
-
-    if (!m_args->catalog_ids.empty())
-    {
-        log()->get(LogLevel::Debug) << "Selecting Catalogs with ids: " << std::endl;
-        for (auto& id: m_args->catalog_ids)
-            log()->get(LogLevel::Debug) << "    " << id.m_str << std::endl;
-    }
-
-    if (!m_args->dates.empty())
-    {
-        //TODO validate supplied dates?
-        log()->get(LogLevel::Debug) << "Dates selected: " << m_args->dates  << std::endl;
-    }
-
-    if (!m_args->properties.empty())
-    {
-        if (!m_args->properties.is_object())
-            throw pdal_error("Properties argument must be a valid JSON object.");
-        log()->get(LogLevel::Debug) << "Property Pruning: " <<
-            m_args->properties.dump() << std::endl;
-    }
-
-    if (!m_args->bounds.empty())
-    {
-        if (!m_args->bounds.valid())
-            throw pdal_error("Supplied bounds are not valid.");
-        log()->get(LogLevel::Debug) << "Bounds: " << m_args->bounds << std::endl;
-    }
-
-    // if (!m_args->rawReaderArgs.empty())
-    // {
-    //     if (m_args->rawReaderArgs.is_object())
-    //     {
-    //         NL::json array_args = NL::json::array();
-    //         array_args.push_back(m_args->rawReaderArgs);
-    //         m_args->rawReaderArgs = array_args;
-    //     }
-    //     for (auto& opts: m_args->rawReaderArgs)
-    //         if (!opts.is_object())
-    //             throw pdal_error("Reader Args must be a valid JSON object");
-
-    //     log()->get(LogLevel::Debug) << "Reader Args: " << m_args->rawReaderArgs.dump() << std::endl;
-    //     handleReaderArgs();
-    // }
-
-    if (!m_args->assetNames.empty())
-    {
-        log()->get(LogLevel::Debug) << "STAC Reader will look in these asset keys: ";
-        for (auto& name: m_args->assetNames)
-            log()->get(LogLevel::Debug) << name << std::endl;
-    }
-
-    if (m_args->validateSchema)
-        log()->get(LogLevel::Debug) <<
-            "JSON Schema validation flag is set." << std::endl;
-
-}
-
-void StacReader::setConnectionForwards(StringMap& headers, StringMap& query)
-{
-    try
-    {
-        if (!m_args->m_headers.is_null())
-            headers = m_args->m_headers.get<StringMap>();
-    }
-    catch (const std::exception& err)
-    {
-        throwError(std::string("Error parsing 'headers': ") + err.what());
-    }
-
-    try
-    {
-        if (!m_args->m_query.is_null())
-            query = m_args->m_query.get<StringMap>();
-    }
-    catch (const std::exception& err)
-    {
-        throwError(std::string("Error parsing 'query': ") + err.what());
-    }
-}
-
 void StacReader::addItem(stac::Item& item)
 {
-    item.init(m_args->assetNames, m_args->rawReaderArgs);
     std::string driver = item.driver();
-    //TODO introduce filter
-    // TODO introduce validation
+
     if (m_args->validateSchema)
         item.validate();
 
@@ -296,7 +174,8 @@ void StacReader::addItem(stac::Item& item)
 void StacReader::handleItem(NL::json stacJson, std::string itemPath)
 {
     stac::Item item(stacJson, m_filename, *m_p->m_connector);
-    addItem(item);
+    if (item.init(m_p->m_itemFilters, m_args->rawReaderArgs))
+        addItem(item);
 }
 
 
@@ -307,7 +186,7 @@ void StacReader::handleCatalog(NL::json stacJson, std::string catPath, bool isRo
     if (m_args->validateSchema)
         catalog.validate();
 
-    catalog.init(m_args->assetNames, m_args->rawReaderArgs);
+    catalog.init(m_p->m_catFilters, m_args->rawReaderArgs, true);
     m_p->m_pool->join();
 
     std::vector<stac::Item> items = catalog.items();
@@ -343,6 +222,85 @@ void StacReader::handleItemCollection(NL::json stacJson, std::string icPath)
                 handleItemCollection(nextJson, nextAbsPath);
             }
         }
+    }
+}
+
+void StacReader::initializeArgs()
+{
+    if (!m_args->item_ids.empty())
+    {
+        log()->get(LogLevel::Debug) << "Selecting Items with ids: " << std::endl;
+        for (auto& id: m_args->item_ids)
+            log()->get(LogLevel::Debug) << "    " << id.m_str << std::endl;
+        m_p->m_itemFilters.ids = m_args->item_ids;
+    }
+
+    if (!m_args->catalog_ids.empty())
+    {
+        log()->get(LogLevel::Debug) << "Selecting Catalogs with ids: " << std::endl;
+        for (auto& id: m_args->catalog_ids)
+            log()->get(LogLevel::Debug) << "    " << id.m_str << std::endl;
+        m_p->m_catFilters.ids = m_args->catalog_ids;
+    }
+
+    if (!m_args->dates.empty())
+    {
+        //TODO validate supplied dates?
+        log()->get(LogLevel::Debug) << "Dates selected: " << m_args->dates  << std::endl;
+        m_p->m_itemFilters.dates = m_args->dates;
+    }
+
+    if (!m_args->properties.empty())
+    {
+        if (!m_args->properties.is_object())
+            throw pdal_error("Properties argument must be a valid JSON object.");
+        log()->get(LogLevel::Debug) << "Property Pruning: " <<
+            m_args->properties.dump() << std::endl;
+        m_p->m_itemFilters.properties = m_args->properties;
+    }
+
+    if (!m_args->bounds.empty())
+    {
+        if (!m_args->bounds.valid())
+            throw pdal_error("Supplied bounds are not valid.");
+        log()->get(LogLevel::Debug) << "Bounds: " << m_args->bounds << std::endl;
+        m_p->m_itemFilters.bounds = m_args->bounds;
+    }
+
+    if (!m_args->assetNames.empty())
+    {
+        log()->get(LogLevel::Debug) << "STAC Reader will look in these asset keys: ";
+        for (auto& name: m_args->assetNames)
+            log()->get(LogLevel::Debug) << name << std::endl;
+        m_p->m_itemFilters.assetNames = m_args->assetNames;
+    }
+
+    if (m_args->validateSchema)
+        log()->get(LogLevel::Debug) <<
+            "JSON Schema validation flag is set." << std::endl;
+
+}
+
+void StacReader::setConnectionForwards(StringMap& headers, StringMap& query)
+{
+    try
+    {
+        if (!m_args->m_headers.is_null())
+            headers = m_args->m_headers.get<StringMap>();
+    }
+    catch (const std::exception& err)
+    {
+        throwError(std::string("Error parsing 'headers': ") + err.what());
+    }
+
+    try
+    {
+        if (!m_args->m_query.is_null())
+            query = m_args->m_query.get<StringMap>();
+    }
+    catch (const std::exception& err)
+    {
+        throwError(std::string("Error parsing 'query': ") + err.what());
     }
 }
 
