@@ -31,10 +31,10 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  ****************************************************************************/
+#pragma once
 
 #include <arbiter/arbiter.hpp>
 #include <pdal/JsonFwd.hpp>
-// #include <nlohmann/json.hpp>
 #include <schema-validator/json-schema.hpp>
 #include <pdal/util/FileUtils.hpp>
 
@@ -44,10 +44,13 @@ namespace pdal
 namespace stac
 {
 
-    void schemaFetch(const nlohmann::json_uri& json_uri, nlohmann::json& json)
+namespace
+{
+    std::mutex mutex;
+    std::unique_ptr<arbiter::Arbiter> arbiter;
+}
+    static void schemaFetch(const nlohmann::json_uri& json_uri, nlohmann::json& json)
     {
-        std::mutex mutex;
-        std::unique_ptr<arbiter::Arbiter> arbiter;
         {
             std::lock_guard<std::mutex> lock(mutex);
             if (!arbiter) arbiter.reset(new arbiter::Arbiter());
@@ -57,7 +60,7 @@ namespace stac
         json = nlohmann::json::parse(jsonStr);
     }
 
-    const std::string handleRelativePath(std::string srcPath, std::string linkPath)
+    static const std::string handleRelativePath(std::string srcPath, std::string linkPath)
     {
         //Make absolute path of current item's directory, then create relative path from that
 

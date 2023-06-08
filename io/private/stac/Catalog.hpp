@@ -56,7 +56,6 @@ public:
         const std::string& catPath,
         const connector::Connector& connector,
         ThreadPool& pool,
-        std::mutex& mutex,
         const LogPtr& logPtr);
     ~Catalog();
 
@@ -76,7 +75,7 @@ private:
     const NL::json m_json;
     const std::string m_path;
     const connector::Connector& m_connector;
-    std::mutex& m_mutex;
+    std::mutex m_mutex;
     ThreadPool& m_pool;
     const LogPtr& m_log;
 
