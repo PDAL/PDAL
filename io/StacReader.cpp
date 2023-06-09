@@ -187,7 +187,8 @@ void StacReader::handleCatalog(NL::json stacJson, std::string catPath, bool isRo
         catalog.validate();
 
     catalog.init(m_p->m_catFilters, m_args->rawReaderArgs, true);
-    m_p->m_pool->join();
+    // m_p->m_pool->await();
+    // m_p->m_pool->join();
 
     std::vector<stac::Item> items = catalog.items();
     for (stac::Item& item: items)
@@ -278,6 +279,7 @@ void StacReader::initializeArgs()
     if (m_args->validateSchema)
         log()->get(LogLevel::Debug) <<
             "JSON Schema validation flag is set." << std::endl;
+    m_p->m_catFilters.itemFilters = m_p->m_itemFilters;
 
 }
 

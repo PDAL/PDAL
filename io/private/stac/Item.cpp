@@ -55,7 +55,9 @@ namespace stac
     {}
 
     Item::Item(const Item& item):
-        m_json(item.m_json), m_path(item.m_path), m_connector(item.m_connector)
+        m_json(item.m_json), m_path(item.m_path), m_connector(item.m_connector),
+        m_driver(item.m_driver), m_readerOptions(item.m_readerOptions),
+        m_assetPath(item.m_assetPath)
     {}
 
     bool Item::init(Filters filters, NL::json rawReaderArgs)

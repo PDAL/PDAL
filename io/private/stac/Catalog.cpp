@@ -85,30 +85,25 @@ namespace stac
                     {
                         NL::json itemJson = m_connector.getJson(absLinkPath);
                         Item item(itemJson, absLinkPath, m_connector);
-                        if (item.init(filters.itemFilters, rawReaderArgs))
+                        bool valid = item.init(filters.itemFilters, rawReaderArgs);
+                        if (valid)
                         {
                             std::lock_guard<std::mutex> lock(m_mutex);
                             m_itemList.push_back(item);
                         }
-                        // initializeItem(itemJson, absLinkPath);
                     }
                     else if (linkType == "catalog")
                     {
                         NL::json catalogJson = m_connector.getJson(absLinkPath);
-                        // initializeCatalog(catalogJson, absLinkPath);
-                        Catalog catalog(catalogJson, absLinkPath, m_connector,
-                            m_pool, m_log);
-
-                        if (catalog.init(filters, rawReaderArgs))
+                        std::unique_ptr<Catalog> catalog(new Catalog(catalogJson, absLinkPath, m_connector, m_pool, m_log));
+                        bool valid = catalog->init(filters, rawReaderArgs);
+                        if (valid)
                         {
-                            std::vector<Item> items = catalog.items();
                             std::lock_guard<std::mutex> lock(m_mutex);
-                            // m_itemList.insert(m_itemList.end(), items.begin(), items.end());
-                            for (auto& i: items)
-                            {
-                                m_itemList.push_back(i);
-                            }
+                            m_subCatalogs.push_back(std::move(catalog));
                         }
+
+
                     }
                 }
                 catch (std::exception& e)
@@ -123,7 +118,6 @@ namespace stac
                     m_errors.push_back({absLinkPath, "Unknown error"});
                 }
             });
-            m_pool.await();
         }
 
         if (m_errors.size())
@@ -134,7 +128,23 @@ namespace stac
                     << p.second << "'";
             }
         }
+
+        if (isRoot)
+        {
+            m_pool.await();
+            m_pool.join();
+            handleNested();
+        }
         return true;
+    }
+
+    // Wait for all nested catalogs to finish processing their items so they can
+    // be added to the overarching itemlist
+    void Catalog::handleNested()
+    {
+        for (auto& catalog: m_subCatalogs)
+            for (auto& i: catalog->items())
+                m_itemList.push_back(i);
     }
 
     std::vector<Item> Catalog::items()

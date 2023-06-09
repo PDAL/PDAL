@@ -69,7 +69,6 @@ public:
     bool filter(Filters filters);
 
     std::vector<Item> items();
-    // std::string assetPath();
 
 private:
 
@@ -83,12 +82,15 @@ private:
 
     std::deque<std::pair<std::string, std::string>> m_errors;
 
+    std::vector<std::unique_ptr<Catalog>> m_subCatalogs;
     std::vector<Item> m_itemList;
     std::string m_driver;
     std::string m_schemaUrl = "https://schemas.stacspec.org/v1.0.0/catalog-spec/json-schema/catalog.json";
     Options m_readerOptions;
     NL::json m_assets;
     std::string m_dataPath;
+
+    void handleNested();
 
 };
 
