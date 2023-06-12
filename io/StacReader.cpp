@@ -49,7 +49,7 @@
 
 #include "private/stac/Catalog.hpp"
 #include "private/stac/Utils.hpp"
-// #include "private/stac/ItemCollection.hpp"
+#include "private/stac/ItemCollection.hpp"
 
 #include "private/connector/Connector.hpp"
 #include <pdal/StageWrapper.hpp>
@@ -71,6 +71,7 @@ public:
     std::deque <std::pair<std::string, std::string>> m_errors;
     stac::Item::Filters m_itemFilters;
     stac::Catalog::Filters m_catFilters;
+    stac::ItemCollection::Filters m_icFilters;
 };
 
 struct StacReader::Args
@@ -168,7 +169,6 @@ void StacReader::addItem(stac::Item& item)
     reader->setLog(log());
     m_merge.setInput(*reader);
     m_p->m_readerList.push_back(reader);
-
 }
 
 void StacReader::handleItem(NL::json stacJson, std::string itemPath)
@@ -186,44 +186,17 @@ void StacReader::handleCatalog(NL::json stacJson, std::string catPath, bool isRo
     if (m_args->validateSchema)
         catalog.validate();
 
-    catalog.init(m_p->m_catFilters, m_args->rawReaderArgs, true);
-    // m_p->m_pool->await();
-    // m_p->m_pool->join();
-
-    std::vector<stac::Item> items = catalog.items();
-    for (stac::Item& item: items)
-    {
-        addItem(item);
-    }
+    if (catalog.init(m_p->m_catFilters, m_args->rawReaderArgs, true))
+        for (stac::Item& item: catalog.items())
+            addItem(item);
 }
 
 void StacReader::handleItemCollection(NL::json stacJson, std::string icPath)
 {
-    if (!stacJson.contains("features"))
-        throw pdal_error("Missing required key 'features' in FeatureCollection.");
-
-    NL::json itemList = stacJson.at("features");
-    for (NL::json& item: itemList)
-    {
-        handleItem(item, icPath);
-    }
-    if (stacJson.contains("links"))
-    {
-        NL::json links = stacJson.at("links");
-        for (NL::json& link: links)
-        {
-            if (!link.contains("rel"))
-                throw pdal_error("Missing required key 'rel' in STAC Link object.");
-            std::string target = link.at("rel").get<std::string>();
-            if (target == "next")
-            {
-                const std::string nextLinkPath = link.at("href").get<std::string>();
-                std::string nextAbsPath = stac::handleRelativePath(icPath, nextLinkPath);
-                NL::json nextJson = m_p->m_connector->getJson(nextAbsPath);
-                handleItemCollection(nextJson, nextAbsPath);
-            }
-        }
-    }
+    stac::ItemCollection ic(stacJson, icPath, *m_p->m_connector);
+    if (ic.init(m_p->m_icFilters, m_args->rawReaderArgs))
+        for (auto& item: ic.items())
+            addItem(item);
 }
 
 void StacReader::initializeArgs()
@@ -280,6 +253,7 @@ void StacReader::initializeArgs()
         log()->get(LogLevel::Debug) <<
             "JSON Schema validation flag is set." << std::endl;
     m_p->m_catFilters.itemFilters = m_p->m_itemFilters;
+    m_p->m_icFilters.itemFilters = m_p->m_itemFilters;
 
 }
 
