@@ -2,7 +2,7 @@
 # TileDB plugin CMake configuration
 #
 include(${PDAL_CMAKE_DIR}/tiledb.cmake)
-if (NOT TILEDB_FOUND)
+if (NOT TileDB_FOUND)
     message(FATAL_ERROR "Can't find TileDB support required.")
 endif()
 
@@ -18,9 +18,9 @@ PDAL_ADD_PLUGIN(reader_libname reader tiledb
         io/TileDBReader.cpp
         io/TileDBUtils.cpp
     LINK_WITH
-        ${TILEDB_LIBRARIES}
+        ${TileDB_LIBRARIES}
     INCLUDES
-        ${TILEDB_INCLUDE_DIR}
+        ${TileDB_INCLUDE_DIR}
         ${NLOHMANN_INCLUDE_DIR}
 )
 
@@ -32,9 +32,9 @@ PDAL_ADD_PLUGIN(writer_libname writer tiledb
         io/TileDBWriter.cpp
         io/TileDBUtils.cpp
     LINK_WITH
-        ${TILEDB_LIBRARIES}
+        ${TileDB_LIBRARIES}
     INCLUDES
-        ${TILEDB_INCLUDE_DIR}
+        ${TileDB_INCLUDE_DIR}
         ${NLOHMANN_INCLUDE_DIR}
 )
 
@@ -45,9 +45,9 @@ if (WITH_TESTS)
             test/TileDBUtilsTest.cpp
             io/TileDBUtils.cpp
         LINK_WITH
-            ${TILEDB_LIBRARIES}
+            ${TileDB_LIBRARIES}
         INCLUDES
-            ${TILEDB_INCLUDE_DIR}
+            ${TileDB_INCLUDE_DIR}
             ${NLOHMANN_INCLUDE_DIR}
     )
 
@@ -56,9 +56,9 @@ if (WITH_TESTS)
             test/TileDBWriterTest.cpp
         LINK_WITH
             ${writer_libname}
-            ${TILEDB_LIBRARIES}
+            ${TileDB_LIBRARIES}
         INCLUDES
-            ${TILEDB_INCLUDE_DIR}
+            ${TileDB_INCLUDE_DIR}
             ${NLOHMANN_INCLUDE_DIR}
     )
 
@@ -68,9 +68,9 @@ if (WITH_TESTS)
         LINK_WITH
             ${reader_libname}
             ${writer_libname}
-            ${TILEDB_LIBRARIES}
+            ${TileDB_LIBRARIES}
         INCLUDES
-            ${TILEDB_INCLUDE_DIR}
+            ${TileDB_INCLUDE_DIR}
             ${NLOHMANN_INCLUDE_DIR}
     )
 
@@ -81,9 +81,9 @@ if (WITH_TESTS)
         LINK_WITH
             ${reader_libname}
             ${writer_libname}
-            ${TILEDB_LIBRARIES}
+            ${TileDB_LIBRARIES}
         INCLUDES
-            ${TILEDB_INCLUDE_DIR}
+            ${TileDB_INCLUDE_DIR}
             ${NLOHMANN_INCLUDE_DIR}
     )
 
@@ -94,9 +94,9 @@ if (WITH_TESTS)
         LINK_WITH
             ${reader_libname}
             ${writer_libname}
-            ${TILEDB_LIBRARIES}
+            ${TileDB_LIBRARIES}
         INCLUDES
-            ${TILEDB_INCLUDE_DIR}
+            ${TileDB_INCLUDE_DIR}
             ${NLOHMANN_INCLUDE_DIR}
     )
 
