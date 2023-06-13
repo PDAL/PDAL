@@ -42,8 +42,9 @@ namespace stac
 {
     ItemCollection::ItemCollection(const NL::json& json,
             const std::string& icPath,
-            const connector::Connector& connector):
-        m_json(json), m_path(icPath), m_connector(connector)
+            const connector::Connector& connector,
+            const LogPtr& log):
+        m_json(json), m_path(icPath), m_connector(connector), m_log(log)
     {}
 
 
@@ -63,7 +64,7 @@ namespace stac
         NL::json itemList = m_json.at("features");
         for (NL::json& itemJson: itemList)
         {
-            Item item(itemJson, m_path, m_connector);
+            Item item(itemJson, m_path, m_connector, m_log);
             if (item.init(filters.itemFilters, rawReaderArgs))
             {
                 m_itemList.push_back(item);
@@ -83,7 +84,7 @@ namespace stac
                     std::string nextAbsPath = stac::handleRelativePath(m_path, nextLinkPath);
                     NL::json nextJson = m_connector.getJson(nextAbsPath);
 
-                    ItemCollection ic(nextJson, nextAbsPath, m_connector);
+                    ItemCollection ic(nextJson, nextAbsPath, m_connector, m_log);
 
                     if (ic.init(filters, rawReaderArgs))
                         for (auto& item: ic.items())

@@ -47,8 +47,9 @@ namespace stac
 
     Item::Item(const NL::json& json,
             const std::string& itemPath,
-            const connector::Connector& connector) :
-        m_json(json), m_path(itemPath), m_connector(connector)
+            const connector::Connector& connector,
+            const LogPtr& log):
+        m_json(json), m_path(itemPath), m_connector(connector), m_log(log)
     {}
 
     Item::~Item()
@@ -56,8 +57,8 @@ namespace stac
 
     Item::Item(const Item& item):
         m_json(item.m_json), m_path(item.m_path), m_connector(item.m_connector),
-        m_driver(item.m_driver), m_readerOptions(item.m_readerOptions),
-        m_assetPath(item.m_assetPath)
+        m_log(item.m_log), m_driver(item.m_driver),
+        m_readerOptions(item.m_readerOptions), m_assetPath(item.m_assetPath)
     {}
 
     bool Item::init(Filters filters, NL::json rawReaderArgs)
@@ -103,7 +104,8 @@ namespace stac
             if (!opts.is_object())
                 throw pdal_error("Reader Args for reader '" + m_driver + "' must be a valid JSON object");
 
-        // log()->get(LogLevel::Debug) << "Reader Args: " << m_args->rawReaderArgs.dump() << std::endl;
+        if (!rawReaderArgs.empty())
+            m_log->get(LogLevel::Debug) << "Reader Args: " << rawReaderArgs.dump() << std::endl;
         NL::json readerArgs;
         for (NL::json& readerPipeline: rawReaderArgs)
         {
@@ -223,7 +225,7 @@ namespace stac
         );
         for (auto& extSchemaUrl: m_json.at("stac_extensions"))
         {
-            // log()->get(LogLevel::Debug) << "Processing extension " << extSchemaUrl << std::endl;
+            m_log->get(LogLevel::Debug) << "Processing extension " << extSchemaUrl << std::endl;
             NL::json schemaJson = m_connector.getJson(extSchemaUrl);
             val.set_root_schema(schemaJson);
             val.validate(m_json);
@@ -456,8 +458,8 @@ namespace stac
             {
                 if (!properties.contains(it.key()))
                 {
-                    // log()->get(LogLevel::Warning) << "STAC Item does not contain "
-                    //     "property " << it.key() << ". Continuing." << std::endl;
+                    m_log->get(LogLevel::Warning) << "STAC Item does not contain "
+                        "property " << it.key() << ". Continuing." << std::endl;
                     continue;
                 }
 
@@ -527,7 +529,7 @@ namespace stac
                 // TODO if we have a bad bbox?
                 if (bboxJson.size() != 4 || bboxJson.size() != 6)
                 {
-                    // log()->get(LogLevel::Error) << "bbox for '" << itemId << "' is not valid";
+                    m_log->get(LogLevel::Error) << "bbox for '" << itemId << "' is not valid";
                 }
 
                 if (bboxJson.size() == 4)
@@ -555,7 +557,7 @@ namespace stac
             }
         }
 
-        // log()->get(LogLevel::Debug) << "Including: " << itemId << std::endl;
+        m_log->get(LogLevel::Debug) << "Including: " << itemId << std::endl;
 
         // {
         //     std::lock_guard<std::mutex> lock(m_p->m_mutex);

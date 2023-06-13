@@ -47,7 +47,8 @@ class ItemCollection
 public:
     ItemCollection(const NL::json& json,
         const std::string& icPath,
-        const connector::Connector& connector);
+        const connector::Connector& connector,
+        const LogPtr& log);
     ~ItemCollection();
 
     struct Filters
@@ -62,8 +63,9 @@ private:
     NL::json m_json;
     std::string m_path;
     const connector::Connector& m_connector;
-    std::vector<Item> m_itemList;
+    const LogPtr& m_log;
 
+    std::vector<Item> m_itemList;
 };
 
 }//stac

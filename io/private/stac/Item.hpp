@@ -55,7 +55,8 @@ class Item
 public:
     Item(const NL::json& json,
         const std::string& itemPath,
-        const connector::Connector& connector);
+        const connector::Connector& connector,
+        const LogPtr& log);
 
     ~Item();
     Item(const Item& item);
@@ -83,6 +84,7 @@ private:
     const NL::json m_json;
     const std::string m_path;
     const connector::Connector& m_connector;
+    const LogPtr& m_log;
 
     StageFactory m_factory;
     std::string m_driver;

@@ -48,7 +48,6 @@
 #include <pdal/util/FileUtils.hpp>
 
 #include "private/stac/Catalog.hpp"
-#include "private/stac/Utils.hpp"
 #include "private/stac/ItemCollection.hpp"
 
 #include "private/connector/Connector.hpp"
@@ -173,7 +172,7 @@ void StacReader::addItem(stac::Item& item)
 
 void StacReader::handleItem(NL::json stacJson, std::string itemPath)
 {
-    stac::Item item(stacJson, m_filename, *m_p->m_connector);
+    stac::Item item(stacJson, m_filename, *m_p->m_connector, log());
     if (item.init(m_p->m_itemFilters, m_args->rawReaderArgs))
         addItem(item);
 }
@@ -193,7 +192,7 @@ void StacReader::handleCatalog(NL::json stacJson, std::string catPath, bool isRo
 
 void StacReader::handleItemCollection(NL::json stacJson, std::string icPath)
 {
-    stac::ItemCollection ic(stacJson, icPath, *m_p->m_connector);
+    stac::ItemCollection ic(stacJson, icPath, *m_p->m_connector, log());
     if (ic.init(m_p->m_icFilters, m_args->rawReaderArgs))
         for (auto& item: ic.items())
             addItem(item);

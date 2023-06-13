@@ -84,7 +84,7 @@ namespace stac
                     if (linkType == "item")
                     {
                         NL::json itemJson = m_connector.getJson(absLinkPath);
-                        Item item(itemJson, absLinkPath, m_connector);
+                        Item item(itemJson, absLinkPath, m_connector, m_log);
                         bool valid = item.init(filters.itemFilters, rawReaderArgs);
                         if (valid)
                         {
