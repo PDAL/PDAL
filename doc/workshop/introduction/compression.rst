@@ -43,10 +43,18 @@ This exercise uses PDAL to compress |ASPRSLAS| data into |LASzip|.
         -rw-r--r--@ 1 ogi  staff    36K Aug  8  2019 ./exercises/translation/interesting.las
         -rwxr-xr-x@ 1 ogi  staff    18K May  9 11:30 ./exercises/translation/interesting.laz
 
+
     .. code-block:: doscon
 
         > dir ./exercises/translation/interesting.la*
         ...
+..
+    Output:
+
+    .. code-block::  console
+
+        -rw-r--r--@ 1 ogi  staff    36K Aug  8  2019 ./exercises/translation/interesting.las
+        -rwxr-xr-x@ 1 ogi  staff    18K May  9 11:30 ./exercises/translation/interesting.laz
 
 .. seealso::
 

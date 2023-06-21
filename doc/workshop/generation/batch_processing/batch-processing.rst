@@ -11,7 +11,7 @@ other applications such as :ref:`translate_command`.
 
 
 Operating system variations
------------------------------
+................................................................................
 
 How substitutions are passed generally depends on the operating system and tools available.
 In the unix/linux environments, this is primarily using the `find` and `ls` programs to get
@@ -34,7 +34,7 @@ along with the `foreach` option to pass each separate filepath to the pdal appli
 
 
 Example - Batch compression of LAS files to LAZ - PowerShell:
---------------------------------------------------------------
+................................................................................
 
 To compress a series of LAS files in one directory into compressed LAZ files in another
 directory, the `PowerShell` syntax would be:
@@ -51,7 +51,7 @@ the path and extension manually.
 
 
 Example - Parallel Batch compression of LAS files to LAZ - PowerShell:
------------------------------------------------------------------------
+................................................................................
 
 This use of the `PowerShell` syntax doesn't allow a user to execute more than one process at a
 time. There is a free download of the `xargs` program that provides parallel execution available
@@ -64,8 +64,12 @@ For this tool, the file names are passed with using the `{}` syntax.
   | .\ppx2.exe -P 3 pdal translate -i ".\dir1\{}.las" -o ".\dir2\{}.laz"
 
 
+Unix/Linux native tools
+-----------------------
+
+
 Example - Batch compression of LAS files to LAZ - Bash:
---------------------------------------------------------
+................................................................................
 
 To compress a series of LAS files in one directory into compressed LAZ files in another
 directory, the `Bash` syntax would be:
@@ -81,7 +85,7 @@ basename of the file. This allows you to easily change the output format and the
 
 
 Example - Parallel Batch compression of LAS files to LAZ - Bash:
-------------------------------------------------------------------
+................................................................................
 
 Parallel, as its name implies, allows parallel operations. Adding the `-j` syntax indicates the number simultaneous
 jobs to run

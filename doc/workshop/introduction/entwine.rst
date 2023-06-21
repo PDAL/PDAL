@@ -31,7 +31,7 @@ of tasks. This pipeline will collect the sample data set and convert it to a :re
 .. index:: Potree
 
 
-1. View the ``entwine.json`` file in your editor.
+1. View the ``./exercises/translation/entwine.json`` file in your editor.
 
     .. literalinclude:: ./entwine.json
 

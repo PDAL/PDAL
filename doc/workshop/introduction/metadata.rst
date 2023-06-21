@@ -117,7 +117,12 @@ to install `jq`_
     false
     "HOBU-SYSTEMID"
 
-
+..
+    Output:
+    .. code-block:: console
+        
+        false
+        "HOBU-SYSTEMID"  
 .. note::
 
     PDAL's JSON output is very powerfully combined with the processing
