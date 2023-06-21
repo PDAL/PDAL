@@ -35,7 +35,6 @@ along with the `foreach` option to pass each separate filepath to the pdal appli
 
 Example - Batch compression of LAS files to LAZ - PowerShell:
 ................................................................................
-
 To compress a series of LAS files in one directory into compressed LAZ files in another
 directory, the `PowerShell` syntax would be:
 
@@ -52,7 +51,6 @@ the path and extension manually.
 
 Example - Parallel Batch compression of LAS files to LAZ - PowerShell:
 ................................................................................
-
 This use of the `PowerShell` syntax doesn't allow a user to execute more than one process at a
 time. There is a free download of the `xargs` program that provides parallel execution available
 at http://www.pirosa.co.uk/demo/wxargs/ppx2.exe. A clone of this program can be found at https://github.com/ghuls/ppx2.
@@ -67,10 +65,8 @@ For this tool, the file names are passed with using the `{}` syntax.
 Unix/Linux native tools
 -----------------------
 
-
 Example - Batch compression of LAS files to LAZ - Bash:
 ................................................................................
-
 To compress a series of LAS files in one directory into compressed LAZ files in another
 directory, the `Bash` syntax would be:
 
@@ -86,7 +82,6 @@ basename of the file. This allows you to easily change the output format and the
 
 Example - Parallel Batch compression of LAS files to LAZ - Bash:
 ................................................................................
-
 Parallel, as its name implies, allows parallel operations. Adding the `-j` syntax indicates the number simultaneous
 jobs to run
 
