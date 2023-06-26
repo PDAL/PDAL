@@ -57,15 +57,15 @@ Options getTileDBOptions()
 {
     Options options;
 
-    options.add("x_tile_size", 1);
-    options.add("y_tile_size", 1);
-    options.add("z_tile_size", 1);
-    options.add("x_domain_st", 0.);
-    options.add("x_domain_end", 1.);
-    options.add("y_domain_st", 0.);
-    options.add("y_domain_end", 1.);
-    options.add("z_domain_st", 0.);
-    options.add("z_domain_end", 1.);
+    options.add("x_tile_size", 0.5);
+    options.add("y_tile_size", 0.5);
+    options.add("z_tile_size", 0.5);
+    options.add("x_domain_st", 0.0);
+    options.add("x_domain_end", 1.0);
+    options.add("y_domain_st", 0.0);
+    options.add("y_domain_end", 1.0);
+    options.add("z_domain_st", 0.0);
+    options.add("z_domain_end", 1.0);
 
     return options;
 }
@@ -523,7 +523,7 @@ TEST_F(TileDBWriterTest, tile_sizes)
     reader.setOptions(reader_options);
 
     tiledb::Context ctx;
-    std::string pth = Support::temppath("tiledb_test_sf_curve_ts");
+    std::string pth = Support::temppath("tiledb_test_tile_sizes");
 
     if (FileUtils::directoryExists(pth))
         FileUtils::deleteDirectory(pth);
@@ -544,6 +544,13 @@ TEST_F(TileDBWriterTest, tile_sizes)
 
     tiledb::Array array(ctx, pth, TILEDB_READ);
     EXPECT_EQ(true, array.schema().cell_order() == TILEDB_ROW_MAJOR);
+
+    EXPECT_DOUBLE_EQ(
+        array.schema().domain().dimension("X").tile_extent<double>(), 0.5);
+    EXPECT_DOUBLE_EQ(
+        array.schema().domain().dimension("Y").tile_extent<double>(), 0.5);
+    EXPECT_DOUBLE_EQ(
+        array.schema().domain().dimension("Z").tile_extent<double>(), 0.5);
     array.close();
 }
 
