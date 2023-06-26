@@ -79,6 +79,28 @@ Example 2
       "input.las",
       {
           "type": "filters.assign",
+          "value" : [
+              "Red = Red * 256",
+              "Green = Green * 256",
+              "Blue = Blue * 256"
+          ]
+      },
+      "output.laz"
+  ]
+
+This scales the values of Red, Green and Blue by 256. If the input values are in the range 0 - 255, the output
+value will be in the range 0 - 65535. This can be handy when creating a :ref:`COPC <writers.copc>` file which
+(as defined in LAS 1.4) needs color values scaled in that range.
+
+Example 3
+=========
+
+.. code-block:: json
+
+  [
+      "input.las",
+      {
+          "type": "filters.assign",
           "value": [
               "Classification = 2 WHERE HeightAboveGround < 5",
               "Classification = 1 WHERE HeightAboveGround >= 5"
@@ -90,7 +112,7 @@ Example 2
 This sets the classification of points to either ``Ground`` or ``Unassigned`` depending on the
 value of the ``HeightAboveGround`` dimension.
 
-Example 3
+Example 4
 =========
 
 .. code-block:: json
