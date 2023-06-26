@@ -61,7 +61,7 @@ Example 1
   [
       "input.las",
       {
-          "type":"filters.assign",
+          "type": "filters.assign",
           "value" : "Red = Red / 256"
       },
       "output.laz"
@@ -78,7 +78,7 @@ Example 2
   [
       "input.las",
       {
-          "type":"filters.assign",
+          "type": "filters.assign",
           "value": [
               "Classification = 2 WHERE HeightAboveGround < 5",
               "Classification = 1 WHERE HeightAboveGround >= 5"
@@ -98,7 +98,7 @@ Example 3
   [
       "input.las",
       {
-          "type":"filters.assign",
+          "type": "filters.assign",
           "value": [
               "X = 1",
               "X = 2 WHERE X > 10"
