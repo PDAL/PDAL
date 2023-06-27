@@ -27,6 +27,10 @@ Given the following pipeline for fetching the data, complete the rest of the tas
 
             },
             {
+                "type" : "filters.assign",
+                "value" : "Classification = 0"
+            },
+            {
                 "type": "writers.las",
                 "compression": "true",
                 "minor_version": "2",
@@ -43,10 +47,10 @@ Given the following pipeline for fetching the data, complete the rest of the tas
 
 * Read data from an EPT resource using :ref:`readers.ept` (See :ref:`workshop-entwine`)
   
-This data is poorly classified; once it has been fetched, you should assign the classification
+Since this data is poorly classified, we are assigning the classification
 of all points to 0 using :ref:`filters.assign`
 
-* Thin it by 1.0 meter spacing using :ref:`filters.sample` (See :ref:`workshop-thinning`)
+* Thin it to 1.0 meter spacing using :ref:`filters.sample` (See :ref:`workshop-thinning`)
 * Filter out noise using :ref:`filters.outlier` (See :ref:`workshop-denoising`)
 * Classify ground points using :ref:`filters.smrf` (See :ref:`workshop-ground`)
 * Compute height above ground using :ref:`filters.hag_nn`
