@@ -46,10 +46,6 @@ Given the following pipeline for fetching the data, complete the rest of the tas
     }
 
 * Read data from an EPT resource using :ref:`readers.ept` (See :ref:`workshop-entwine`)
-  
-Since this data is poorly classified, we are assigning the classification
-of all points to 0 using :ref:`filters.assign`
-
 * Thin it to 1.0 meter spacing using :ref:`filters.sample` (See :ref:`workshop-thinning`)
 * Filter out noise using :ref:`filters.outlier` (See :ref:`workshop-denoising`)
 * Classify ground points using :ref:`filters.smrf` (See :ref:`workshop-ground`)
