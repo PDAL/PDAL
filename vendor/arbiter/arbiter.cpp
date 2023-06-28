@@ -1555,7 +1555,6 @@ void Http::post(
 
     if (!res.ok())
     {
-        std::cout << res.str() << std::endl;
         throw ArbiterError("Couldn't HTTP POST to " + path);
     }
 }
@@ -4245,11 +4244,6 @@ namespace
         return fullBytes;
     }
 
-    std::size_t eatLogging(void *out, size_t size, size_t num, void *in)
-    {
-        return size * num;
-    }
-
 #else
     const std::string fail("Arbiter was built without curl");
 #endif // ARBITER_CURL
@@ -4547,13 +4541,23 @@ Response Curl::put(
     if (timeout) curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, timeout);
 
     std::unique_ptr<PutData> putData(new PutData(data));
+    std::vector<char> writeData;
 
     // Register callback function and data pointer to create the request.
     curl_easy_setopt(m_curl, CURLOPT_READFUNCTION, putCb);
     curl_easy_setopt(m_curl, CURLOPT_READDATA, putData.get());
 
+    // Register callback function and data pointer to consume the result.
+    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, getCb);
+    curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &writeData);
+
     // Insert all headers into the request.
     curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, m_headers);
+
+    // Set up callback and data pointer for received headers.
+    Headers receivedHeaders;
+    curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, headerCb);
+    curl_easy_setopt(m_curl, CURLOPT_HEADERDATA, &receivedHeaders);
 
     // Specify that this is a PUT request.
     curl_easy_setopt(m_curl, CURLOPT_PUT, 1L);
@@ -4565,13 +4569,9 @@ Response Curl::put(
             CURLOPT_INFILESIZE_LARGE,
             static_cast<curl_off_t>(data.size()));
 
-    // Hide Curl's habit of printing things to console even with verbose set
-    // to false.
-    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, eatLogging);
-
     // Run the command.
     const int httpCode(perform());
-    return Response(httpCode);
+    return Response(httpCode, writeData, receivedHeaders);
 #else
     throw ArbiterError(fail);
 #endif
