@@ -109,6 +109,11 @@ of tasks. This pipeline will collect the sample data set and convert it to a :re
     .. image:: ../images/entwine-view.png
         :target: ../../_images/entwine-view.png
 
+.. note::
+
+    QGIS also supports uploading Entwine data directly from the cloud. Under 'Layer -> Add Layer -> Add 
+    Point Cloud Layer', select the source type as "Protocol: HTTP(S), cloud, etc." and insert the URL of 
+    an EPT index.  
 
 Notes
 --------------------------------------------------------------------------------
