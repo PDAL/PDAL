@@ -16,7 +16,7 @@ data. For example, if the workshop folder was located on your desktop:
 
 .. code-block:: console
 
-   $ cd Desktop/PDAL-Workshop-complete
+   $ cd Desktop/PDAL
 
 
 Issue the following command in your `Conda Shell`. 
