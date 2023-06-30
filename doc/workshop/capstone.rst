@@ -22,24 +22,16 @@ Given the following pipeline for fetching the data, complete the rest of the tas
         "pipeline": [
             {
                 "type": "readers.ept",
-                "filename":"http://na-c.entwine.io/dublin/ept.json",
-                "bounds":"([-697041.0, -696241.0], [7045398.0, 7046086.0],[-40, 400])"
-
+                "filename":"https://s3-us-west-2.amazonaws.com/usgs-lidar-public/MA_CentralEastern_1_2021/ept.json",
+                "bounds":"([-7911859.4, -7911077.0],[5213787.7, 5214543.3],[-40, 400])"
             },
             {
-                "type" : "filters.assign",
-                "value" : "Classification = 0"
-            },
-            {
-                "type": "writers.las",
-                "compression": "true",
-                "minor_version": "2",
-                "dataformat_id": "0",
-                "filename":"st-stephens.laz"
+                "type": "filters.expression",
+                "expression": "Classification < 31"
             },
             {
                 "type": "writers.copc",
-                "filename": "st-stephens.copc.laz",
+                "filename": "public-garden.copc.laz",
                 "forward": "all"
             }
         ]
