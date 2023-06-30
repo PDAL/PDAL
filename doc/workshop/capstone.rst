@@ -27,7 +27,14 @@ Given the following pipeline for fetching the data, complete the rest of the tas
             },
             {
                 "type": "filters.expression",
-                "expression": "Classification < 31"
+                "expression": "Classification < 20"
+            },
+            {
+                "type": "writers.las",
+                "compression": "true",
+                "minor_version": "4",
+                "dataformat_id": "0",
+                "filename":"public-garden.laz"
             },
             {
                 "type": "writers.copc",
