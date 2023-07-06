@@ -31,6 +31,7 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+
 #pragma once
 
 #include <time.h>
@@ -72,6 +73,7 @@ namespace pdal
             void addItem(stac::Item& item);
             void handleItem(NL::json stacJson, std::string itemPath);
             void handleCatalog(NL::json stacJson, std::string catPath, bool isRoot = false);
+            void handleCollection(NL::json stacJson, std::string catPath, bool isRoot = false);
             void handleItemCollection(NL::json stacJson, std::string icPath);
             void initializeArgs();
             void validateSchema(NL::json stacJson);

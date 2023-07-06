@@ -314,7 +314,23 @@
       ]
     ]
   },
-  "links": [],
+  "links": [
+    {
+      "rel": "root",
+      "href": "./test_collection.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "collection",
+      "href": "./test_collection.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "parent",
+      "href": "./test_collection.json",
+      "type": "application/json"
+    }
+  ],
   "assets": {
     "data": {
       "href": "../laz/autzen_trim.laz",
@@ -337,5 +353,6 @@
     "https://stac-extensions.github.io/projection/v1.1.0/schema.json",
     "https://stac-extensions.github.io/pointcloud/v1.0.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json"
-  ]
+  ],
+  "collection": "usgs-test"
 }

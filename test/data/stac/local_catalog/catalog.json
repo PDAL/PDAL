@@ -20,6 +20,10 @@
     {
       "rel": "item",
       "href": "./IA_SouthCentral_1_2020.json"
+    },
+    {
+      "rel": "collection",
+      "href": "../test_collection.json"
     }
   ],
   "queryables": {

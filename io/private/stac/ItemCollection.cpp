@@ -43,8 +43,10 @@ namespace stac
     ItemCollection::ItemCollection(const NL::json& json,
             const std::string& icPath,
             const connector::Connector& connector,
-            const LogPtr& log):
-        m_json(json), m_path(icPath), m_connector(connector), m_log(log)
+            const LogPtr& log,
+            bool validate):
+        m_json(json), m_path(icPath), m_connector(connector), m_log(log),
+        m_validate(validate)
     {}
 
 
@@ -56,16 +58,18 @@ namespace stac
         return m_itemList;
     }
 
-    bool ItemCollection::init(Filters filters, NL::json rawReaderArgs)
+    bool ItemCollection::init(Filters filters, NL::json rawReaderArgs,
+        SchemaUrls schemaUrls)
     {
         if (!m_json.contains("features"))
-            throw pdal_error("Missing required key 'features' in FeatureCollection.");
+            throw pdal_error("Missing required key 'features' in"
+                " FeatureCollection.");
 
         NL::json itemList = m_json.at("features");
         for (NL::json& itemJson: itemList)
         {
-            Item item(itemJson, m_path, m_connector, m_log);
-            if (item.init(filters.itemFilters, rawReaderArgs))
+            Item item(itemJson, m_path, m_connector, m_log, m_validate);
+            if (item.init(filters.itemFilters, rawReaderArgs, schemaUrls))
             {
                 m_itemList.push_back(item);
             }
@@ -76,17 +80,21 @@ namespace stac
             for (NL::json& link: links)
             {
                 if (!link.contains("rel"))
-                    throw pdal_error("Missing required key 'rel' in STAC Link object.");
+                    throw pdal_error("Missing required key 'rel' in STAC"
+                        " Link object.");
                 std::string target = link.at("rel").get<std::string>();
                 if (target == "next")
                 {
-                    const std::string nextLinkPath = link.at("href").get<std::string>();
-                    std::string nextAbsPath = stac::handleRelativePath(m_path, nextLinkPath);
+                    std::string nextLinkPath =
+                        link.at("href").get<std::string>();
+                    std::string nextAbsPath =
+                        stac::handleRelativePath(m_path, nextLinkPath);
                     NL::json nextJson = m_connector.getJson(nextAbsPath);
 
-                    ItemCollection ic(nextJson, nextAbsPath, m_connector, m_log);
+                    ItemCollection ic(nextJson, nextAbsPath, m_connector,
+                        m_log, m_validate);
 
-                    if (ic.init(filters, rawReaderArgs))
+                    if (ic.init(filters, rawReaderArgs, schemaUrls))
                         for (auto& item: ic.items())
                             m_itemList.push_back(item);
                 }

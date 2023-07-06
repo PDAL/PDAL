@@ -49,6 +49,13 @@ namespace pdal
 namespace stac
 {
 
+struct SchemaUrls
+{
+    std::string catalog;
+    std::string collection;
+    std::string item;
+};
+
 class Item
 {
 
@@ -56,7 +63,9 @@ public:
     Item(const NL::json& json,
         const std::string& itemPath,
         const connector::Connector& connector,
-        const LogPtr& log);
+        const LogPtr& log,
+        bool validate
+        );
 
     ~Item();
     Item(const Item& item);
@@ -67,9 +76,10 @@ public:
         NL::json properties;
         NL::json::array_t dates;
         std::vector<std::string> assetNames;
+        std::vector<RegEx> collections;
     };
 
-    bool init(Filters filters, NL::json rawReaderArgs);
+    bool init(Filters filters, NL::json rawReaderArgs, SchemaUrls schemaUrls);
     NL::json handleReaderArgs(NL::json rawReaderArgs);
     void validate();
     bool filter(Filters filters);
@@ -85,10 +95,11 @@ private:
     const std::string m_path;
     const connector::Connector& m_connector;
     const LogPtr& m_log;
+    bool m_validate;
 
     StageFactory m_factory;
     std::string m_driver;
-    std::string m_schemaUrl = "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/item.json";
+    SchemaUrls m_schemaUrls;
     Options m_readerOptions;
     NL::json m_assets;
     std::string m_assetPath;

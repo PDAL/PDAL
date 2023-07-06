@@ -48,8 +48,10 @@ namespace stac
     Item::Item(const NL::json& json,
             const std::string& itemPath,
             const connector::Connector& connector,
-            const LogPtr& log):
-        m_json(json), m_path(itemPath), m_connector(connector), m_log(log)
+            const LogPtr& log,
+            bool validate):
+        m_json(json), m_path(itemPath), m_connector(connector), m_log(log),
+        m_validate(validate)
     {}
 
     Item::~Item()
@@ -61,10 +63,16 @@ namespace stac
         m_readerOptions(item.m_readerOptions), m_assetPath(item.m_assetPath)
     {}
 
-    bool Item::init(Filters filters, NL::json rawReaderArgs)
+    bool Item::init(Filters filters, NL::json rawReaderArgs,
+            SchemaUrls schemaUrls)
     {
         if (filter(filters))
             return false;
+
+        m_schemaUrls = schemaUrls;
+        if (m_validate)
+            validate();
+
 
         NL::json readerArgs = handleReaderArgs(rawReaderArgs);
         m_readerOptions = setReaderOptions(readerArgs, m_driver);
@@ -219,50 +227,52 @@ namespace stac
     void Item::validate()
     {
         std::function<void(const nlohmann::json_uri&, nlohmann::json&)> fetch = schemaFetch;
+
         nlohmann::json_schema::json_validator val(
             fetch,
             [](const std::string &, const std::string &) {}
         );
         for (auto& extSchemaUrl: m_json.at("stac_extensions"))
         {
-            m_log->get(LogLevel::Debug) << "Processing extension " << extSchemaUrl << std::endl;
+            m_log->get(LogLevel::Debug) << "Processing extension "
+                << extSchemaUrl << std::endl;
             NL::json schemaJson = m_connector.getJson(extSchemaUrl);
             val.set_root_schema(schemaJson);
             val.validate(m_json);
         }
 
-        NL::json schemaJson = m_connector.getJson(m_schemaUrl);
+        NL::json schemaJson = m_connector.getJson(m_schemaUrls.item);
         val.set_root_schema(schemaJson);
         val.validate(m_json);
     }
 
-    void validateForPrune(NL::json json)
+    void validateForFilter(NL::json json)
     {
 
-        // TODO none of these error messages tell us
-        // *which* itemId is invalid. Someone who is given
-        // any of these errors is being told they're f'd right off and
-        // given no information to do anything about it
         if (!json.contains("id"))
             throw pdal_error("JSON object does not contain required key 'id'");
 
         std::string id = json.at("id").get<std::string>();
 
         if (!json.contains("assets"))
-            throw pdal_error("JSON Object of id '"+ id +"' does not contain required key 'assets'");
+            throw pdal_error("JSON Object of id '" + id +
+                "' does not contain required key 'assets'");
 
         if (!json.contains("properties"))
-            throw pdal_error("JSON object " + id + " does not contain required key 'properties'");
+            throw pdal_error("JSON object " + id +
+                " does not contain required key 'properties'");
 
         if (!json.contains("geometry") || !json.contains("bbox"))
-            throw pdal_error("JSON object " + id + " does not contain one of 'geometry' or 'bbox'");
+            throw pdal_error("JSON object " + id +
+                " does not contain one of 'geometry' or 'bbox'");
 
         NL::json prop = json.at("properties");
         if (
             !prop.contains("datetime") &&
             (!prop.contains("start_datetime") && !prop.contains("end_datetime"))
         )
-            throw pdal_error("JSON object " + id + "  properties value not contain required key"
+            throw pdal_error("JSON object " + id +
+                "  properties value not contain required key"
                 "'datetime' or 'start_datetime' and 'end_datetime'");
 
         // TODO validate the date ranges and other validation-type stuff
@@ -320,7 +330,8 @@ namespace stac
             }
             default:
             {
-                throw pdal_error("Data type of " + key + " is not supported for pruning.");
+                throw pdal_error("Data type of " + key +
+                    " is not supported for pruning.");
             }
         }
         return true;
@@ -329,19 +340,7 @@ namespace stac
     //TODO reverse logic on this bool to match expected flow
     bool Item::filter(Filters filters)
     {
-        validateForPrune(m_json);
-
-        // TODO compute a struct that tells you what kind of filtering
-        // we're going to be doing. Do not make this part of any public StacReader API
-        //
-        // filters = whichFilters
-        // filters.date, filters.bbox, filters.polygon, filters.date
-        //
-        // - write a filter function for each filter type that takes in a stacItem
-        // - have this prune method switch on the filters and those methods, then
-        //   there will only be one place to go to update or enhance this stuff
-        //   and it will be easier to read in pieces
-
+        validateForFilter(m_json);
 
         // ID
         // If STAC ID matches *any* ID in supplied list, it will not be pruned.
@@ -378,13 +377,36 @@ namespace stac
         if (idFlag)
             return true;
 
+        // check that collection matches filter
+        bool colFlag = true;
+        if (!filters.collections.empty())
+        {
+            if (!m_json.contains("collection"))
+                return true;
+
+            std::string colId = m_json.at("collection").get<std::string>();
+            for (auto& col: filters.collections)
+            {
+                if (std::regex_match(colId, col.regex()))
+                {
+                    colFlag = false;
+                }
+            }
+        }
+        else
+            colFlag = false;
+
+        if (colFlag)
+            return true;
+
         NL::json properties = m_json.at("properties");
 
         // DateTime
         // If STAC datetime fits in *any* of the supplied ranges, it will not be pruned
         if (!filters.dates.empty())
         {
-            if (properties.contains("datetime") && properties.at("datetime").type() != NL::detail::value_t::null)
+            if (properties.contains("datetime") &&
+                properties.at("datetime").type() != NL::detail::value_t::null)
             {
                 std::string stacDate = properties.at("datetime");
 
@@ -559,10 +581,6 @@ namespace stac
 
         m_log->get(LogLevel::Debug) << "Including: " << itemId << std::endl;
 
-        // {
-        //     std::lock_guard<std::mutex> lock(m_p->m_mutex);
-        //     m_p->m_idList.push_back(itemId);
-        // }
         return false;
     }
 

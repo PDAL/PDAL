@@ -38,9 +38,7 @@
 #include <pdal/Stage.hpp>
 #include <pdal/pdal_types.hpp>
 #include <pdal/util/ThreadPool.hpp>
-#include "../connector/Connector.hpp"
-#include "Item.hpp"
-
+#include "Catalog.hpp"
 
 namespace pdal
 {
@@ -48,55 +46,17 @@ namespace pdal
 namespace stac
 {
 
-class Catalog
-{
+class Collection: public Catalog {
 
 public:
-    Catalog(const NL::json& json,
-        const std::string& catPath,
-        const connector::Connector& connector,
-        ThreadPool& pool,
-        const LogPtr& logPtr,
-        bool validate);
-    Catalog(Catalog &cat);
-    virtual ~Catalog();
 
-    struct Filters {
-        std::vector<RegEx> ids;
-        Item::Filters itemFilters;
-        Filters* colFilters;
-    };
-
-    bool init(Filters filters, NL::json rawReaderArgs, SchemaUrls schemaUrls,
-            bool isRoot);
-    std::vector<Item> items();
+    using Catalog::Catalog;
+    ~Collection();
 
     virtual void validate();
-    bool filter(Filters filters);
-
-protected:
-    const NL::json m_json;
-    const std::string m_path;
-    const connector::Connector& m_connector;
-    std::mutex m_mutex;
-    ThreadPool& m_pool;
-    const LogPtr& m_log;
-    bool m_root;
-    bool m_validate;
-
-    std::deque<std::pair<std::string, std::string>> m_errors;
-
-    std::vector<std::unique_ptr<Catalog>> m_subCatalogs;
-    std::vector<Item> m_itemList;
-    std::string m_driver;
-    SchemaUrls m_schemaUrls;
-    Options m_readerOptions;
-    NL::json m_assets;
-    std::string m_dataPath;
-
-    void handleNested();
 
 };
 
-}
-}
+}//stac
+
+}//pdal

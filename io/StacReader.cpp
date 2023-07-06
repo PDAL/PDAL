@@ -47,7 +47,7 @@
 #include <pdal/util/IStream.hpp>
 #include <pdal/util/FileUtils.hpp>
 
-#include "private/stac/Catalog.hpp"
+#include "private/stac/Collection.hpp"
 #include "private/stac/ItemCollection.hpp"
 
 #include "private/connector/Connector.hpp"
@@ -68,24 +68,30 @@ public:
     std::vector<std::string> m_idList;
     std::unique_ptr<connector::Connector> m_connector;
     std::deque <std::pair<std::string, std::string>> m_errors;
+
     stac::Item::Filters m_itemFilters;
     stac::Catalog::Filters m_catFilters;
+    stac::Collection::Filters m_colFilters;
     stac::ItemCollection::Filters m_icFilters;
 };
 
 struct StacReader::Args
 {
 
-    std::vector<RegEx> item_ids;
-    std::vector<RegEx> catalog_ids;
+    std::vector<RegEx> items;
+    std::vector<RegEx> catalogs;
+    std::vector<RegEx> collections;
+
     NL::json properties;
     NL::json readerArgs;
     NL::json rawReaderArgs;
+
     NL::json::array_t dates;
     SrsBounds bounds;
     std::vector<std::string> assetNames;
-    std::string catalogSchemaUrl;
-    std::string featureSchemaUrl;
+
+    stac::SchemaUrls schemaUrls;
+
     bool validateSchema;
     int threads;
 
@@ -115,31 +121,41 @@ void StacReader::addArgs(ProgramArgs& args)
 {
     m_args.reset(new StacReader::Args());
 
-    args.add("asset_names", "List of asset names to look for in data consumption. Default: 'data'", m_args->assetNames, {"data"});
+    args.add("asset_names", "List of asset names to look for in data"
+        " consumption. Default: 'data'", m_args->assetNames, {"data"});
     args.add("date_ranges", "Date ranges to include in your search. "
         "Eg. dates'[[\"min1\",\"max1\"],...]'", m_args->dates);
     args.add("bounds", "Bounding box to select stac items by. This will "
         "propogate down through all readers being used.", m_args->bounds);
-    args.add("item_ids", "List of ID regexes to select STAC items based on.", m_args->item_ids);
-    args.add("catalog_ids", "List of ID regexes to select STAC items based on.", m_args->catalog_ids);
-    args.add("validate_schema", "Use JSON schema to validate your STAC objects. Default: false", m_args->validateSchema, false);
-    args.add("header", "Header fields to forward with HTTP requests", m_args->m_headers);
-    args.add("query", "Query parameters to forward with HTTP requests", m_args->m_query);
+    args.add("items", "List of Item ID regexes to select STAC items based on.",
+        m_args->items);
+    args.add("catalogs", "List of Catalog ID regexes to select STAC items "
+        "based on.", m_args->catalogs);
+    args.add("collections", "List of Collection ID regexes to select STAC "
+        "items based on.", m_args->collections);
+    args.add("validate_schema", "Use JSON schema to validate your STAC objects."
+        " Default: false", m_args->validateSchema, false);
+    args.add("header", "Header fields to forward with HTTP requests",
+        m_args->m_headers);
+    args.add("query", "Query parameters to forward with HTTP requests",
+        m_args->m_query);
     args.add("properties", "Map of STAC property names to regular expression "
         "values. ie. {\"pc:type\": \"(lidar|sonar)\"}. Selected items will "
         "match all properties.", m_args->properties);
-    args.add("reader_args", "Map of reader arguments to their values to pass through.",
-        m_args->rawReaderArgs);
-    args.add("catalog_schema_url", "URL of catalog schema you'd like to use for"
-        " JSON schema validation.", m_args->catalogSchemaUrl,
-        "https://schemas.stacspec.org/v1.0.0/catalog-spec/json-schema/catalog.json");
-    args.add("feature_schema_url", "URL of feature schema you'd like to use for"
-        " JSON schema validation.", m_args->featureSchemaUrl,
-        "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/item.json");
+    args.add("reader_args", "Map of reader arguments to their values to pass"
+        " through.", m_args->rawReaderArgs);
     args.add("requests", "Number of threads for fetching JSON files, Default: 8",
         m_args->threads, 8);
     args.addSynonym("requests", "threads");
-
+    args.add("catalog_schema_url", "URL of catalog schema you'd like to use for"
+        " JSON schema validation.", m_args->schemaUrls.catalog,
+        "https://schemas.stacspec.org/v1.0.0/catalog-spec/json-schema/catalog.json");
+    args.add("collection_schema_url", "URL of collection schema you'd like to use for"
+        " JSON schema validation.", m_args->schemaUrls.collection,
+        "https://schemas.stacspec.org/v1.0.0/collection-spec/json-schema/collection.json");
+    args.add("feature_schema_url", "URL of feature schema you'd like to use for"
+        " JSON schema validation.", m_args->schemaUrls.item,
+        "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/item.json");
 
 }
 
@@ -147,9 +163,6 @@ void StacReader::addArgs(ProgramArgs& args)
 void StacReader::addItem(stac::Item& item)
 {
     std::string driver = item.driver();
-
-    if (m_args->validateSchema)
-        item.validate();
 
     Stage *stage = m_factory.createStage(driver);
 
@@ -172,49 +185,78 @@ void StacReader::addItem(stac::Item& item)
 
 void StacReader::handleItem(NL::json stacJson, std::string itemPath)
 {
-    stac::Item item(stacJson, m_filename, *m_p->m_connector, log());
-    if (item.init(m_p->m_itemFilters, m_args->rawReaderArgs))
+    stac::Item item(stacJson, m_filename, *m_p->m_connector, log(),
+        m_args->validateSchema);
+    if (item.init(m_p->m_itemFilters, m_args->rawReaderArgs, m_args->schemaUrls))
         addItem(item);
 }
 
 
 void StacReader::handleCatalog(NL::json stacJson, std::string catPath, bool isRoot)
 {
-    stac::Catalog catalog(stacJson, catPath, *m_p->m_connector, *m_p->m_pool, log());
+    stac::Catalog catalog(stacJson, catPath, *m_p->m_connector, *m_p->m_pool,
+        log(), m_args->validateSchema);
 
-    if (m_args->validateSchema)
-        catalog.validate();
-
-    if (catalog.init(m_p->m_catFilters, m_args->rawReaderArgs, true))
+    if (catalog.init(m_p->m_catFilters, m_args->rawReaderArgs,
+            m_args->schemaUrls, true))
+    {
         for (stac::Item& item: catalog.items())
             addItem(item);
+    }
+}
+
+void StacReader::handleCollection(NL::json stacJson, std::string catPath, bool isRoot)
+{
+    stac::Collection collection(stacJson, catPath, *m_p->m_connector,
+            *m_p->m_pool, log(), m_args->validateSchema);
+
+    if (collection.init(m_p->m_catFilters, m_args->rawReaderArgs,
+            m_args->schemaUrls, true))
+    {
+        for (stac::Item& item: collection.items())
+            addItem(item);
+    }
 }
 
 void StacReader::handleItemCollection(NL::json stacJson, std::string icPath)
 {
-    stac::ItemCollection ic(stacJson, icPath, *m_p->m_connector, log());
-    if (ic.init(m_p->m_icFilters, m_args->rawReaderArgs))
+    stac::ItemCollection ic(stacJson, icPath, *m_p->m_connector, log(),
+            m_args->validateSchema);
+
+    if (ic.init(m_p->m_icFilters, m_args->rawReaderArgs, m_args->schemaUrls))
+    {
         for (auto& item: ic.items())
             addItem(item);
+    }
 }
 
 void StacReader::initializeArgs()
 {
-    if (!m_args->item_ids.empty())
+    if (!m_args->items.empty())
     {
         log()->get(LogLevel::Debug) << "Selecting Items with ids: " << std::endl;
-        for (auto& id: m_args->item_ids)
+        for (auto& id: m_args->items)
             log()->get(LogLevel::Debug) << "    " << id.m_str << std::endl;
-        m_p->m_itemFilters.ids = m_args->item_ids;
+        m_p->m_itemFilters.ids = m_args->items;
     }
 
-    if (!m_args->catalog_ids.empty())
+    if (!m_args->catalogs.empty())
     {
         log()->get(LogLevel::Debug) << "Selecting Catalogs with ids: " << std::endl;
-        for (auto& id: m_args->catalog_ids)
+        for (auto& id: m_args->catalogs)
             log()->get(LogLevel::Debug) << "    " << id.m_str << std::endl;
-        m_p->m_catFilters.ids = m_args->catalog_ids;
+        m_p->m_catFilters.ids = m_args->catalogs;
     }
+
+    if (!m_args->collections.empty())
+    {
+        log()->get(LogLevel::Debug) << "Selecting Catalogs with ids: " << std::endl;
+        for (auto& id: m_args->collections)
+            log()->get(LogLevel::Debug) << "    " << id.m_str << std::endl;
+        m_p->m_itemFilters.collections = m_args->collections;
+        m_p->m_colFilters.ids = m_args->collections;
+    }
+
 
     if (!m_args->dates.empty())
     {
@@ -251,7 +293,12 @@ void StacReader::initializeArgs()
     if (m_args->validateSchema)
         log()->get(LogLevel::Debug) <<
             "JSON Schema validation flag is set." << std::endl;
+
+    m_p->m_colFilters.itemFilters = m_p->m_itemFilters;
+
     m_p->m_catFilters.itemFilters = m_p->m_itemFilters;
+    m_p->m_catFilters.colFilters = &(m_p->m_colFilters);
+
     m_p->m_icFilters.itemFilters = m_p->m_itemFilters;
 
 }
@@ -298,6 +345,8 @@ void StacReader::initialize()
         handleItem(stacJson, m_filename);
     else if (stacType == "Catalog")
         handleCatalog(stacJson, m_filename, true);
+    else if (stacType == "Collection")
+        handleCollection(stacJson, m_filename, true);
     else if (stacType == "FeatureCollection")
         handleItemCollection(stacJson, m_filename);
     else
@@ -345,7 +394,8 @@ QuickInfo StacReader::inspect()
     if (metadata.contains("ids"))
     {
         std::string metadataStr = metadata["ids"].dump();
-        qi.m_metadata.addWithType("stac_ids", metadataStr, "json", "STAC Reader ID List");
+        qi.m_metadata.addWithType("stac_ids", metadataStr, "json",
+         "STAC Reader ID List");
     }
 
     qi.m_valid = true;

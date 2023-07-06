@@ -31,72 +31,39 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  ****************************************************************************/
+#include "Collection.hpp"
 
-#pragma once
-
-#include <pdal/PointView.hpp>
-#include <pdal/Stage.hpp>
-#include <pdal/pdal_types.hpp>
-#include <pdal/util/ThreadPool.hpp>
-#include "../connector/Connector.hpp"
-#include "Item.hpp"
-
+#include "Utils.hpp"
+#include <nlohmann/json.hpp>
+#include <schema-validator/json-schema.hpp>
 
 namespace pdal
 {
 
 namespace stac
 {
+    Collection::~Collection() {}
 
-class Catalog
-{
+    void Collection::validate() {
+        std::function<void(const nlohmann::json_uri&, nlohmann::json&)> fetch = schemaFetch;
 
-public:
-    Catalog(const NL::json& json,
-        const std::string& catPath,
-        const connector::Connector& connector,
-        ThreadPool& pool,
-        const LogPtr& logPtr,
-        bool validate);
-    Catalog(Catalog &cat);
-    virtual ~Catalog();
+        nlohmann::json_schema::json_validator val(
+            fetch,
+            [](const std::string &, const std::string &) {}
+        );
+        for (auto& extSchemaUrl: m_json.at("stac_extensions"))
+        {
+            m_log->get(LogLevel::Debug) << "Processing extension " << extSchemaUrl << std::endl;
+            NL::json schemaJson = m_connector.getJson(extSchemaUrl);
+            val.set_root_schema(schemaJson);
+            val.validate(m_json);
+        }
+        NL::json schemaJson = m_connector.getJson(m_schemaUrls.collection);
+        val.set_root_schema(schemaJson);
+        val.validate(m_json);
+    }
 
-    struct Filters {
-        std::vector<RegEx> ids;
-        Item::Filters itemFilters;
-        Filters* colFilters;
-    };
-
-    bool init(Filters filters, NL::json rawReaderArgs, SchemaUrls schemaUrls,
-            bool isRoot);
-    std::vector<Item> items();
-
-    virtual void validate();
-    bool filter(Filters filters);
-
-protected:
-    const NL::json m_json;
-    const std::string m_path;
-    const connector::Connector& m_connector;
-    std::mutex m_mutex;
-    ThreadPool& m_pool;
-    const LogPtr& m_log;
-    bool m_root;
-    bool m_validate;
-
-    std::deque<std::pair<std::string, std::string>> m_errors;
-
-    std::vector<std::unique_ptr<Catalog>> m_subCatalogs;
-    std::vector<Item> m_itemList;
-    std::string m_driver;
-    SchemaUrls m_schemaUrls;
-    Options m_readerOptions;
-    NL::json m_assets;
-    std::string m_dataPath;
-
-    void handleNested();
-
-};
 
 }
-}
+
+}//pdal

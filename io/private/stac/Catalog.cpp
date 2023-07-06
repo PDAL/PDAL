@@ -34,6 +34,7 @@
 
 #include "Catalog.hpp"
 #include "Utils.hpp"
+#include "Collection.hpp"
 
 #include <nlohmann/json.hpp>
 #include <schema-validator/json-schema.hpp>
@@ -47,19 +48,31 @@ namespace stac
             const std::string& catPath,
             const connector::Connector& connector,
             ThreadPool& pool,
-            const LogPtr& logPtr) :
+            const LogPtr& logPtr,
+            bool validate) :
         m_json(json), m_path(catPath), m_connector(connector),
-        m_pool(pool), m_log(logPtr)
+        m_pool(pool), m_log(logPtr), m_validate(validate)
+    {}
+
+    Catalog::Catalog(Catalog &cat):
+        m_json(cat.m_json), m_path(cat.m_path), m_connector(cat.m_connector),
+        m_pool(cat.m_pool), m_log(cat.m_log), m_validate(cat.m_validate)
     {}
 
     Catalog::~Catalog()
     {}
 
-    bool Catalog::init(Filters filters, NL::json rawReaderArgs, bool isRoot=false)
+    bool Catalog::init(Filters filters, NL::json rawReaderArgs,
+            SchemaUrls schemaUrls, bool isRoot=false)
     {
         m_root = isRoot;
         if (!filter(filters))
             return false;
+
+        m_schemaUrls = schemaUrls;
+        if (m_validate)
+            validate();
+
 
         std::string catalogId = m_json.at("id").get<std::string>();
 
@@ -84,8 +97,11 @@ namespace stac
                     if (linkType == "item")
                     {
                         NL::json itemJson = m_connector.getJson(absLinkPath);
-                        Item item(itemJson, absLinkPath, m_connector, m_log);
-                        bool valid = item.init(filters.itemFilters, rawReaderArgs);
+                        Item item(itemJson, absLinkPath, m_connector, m_log,
+                            m_validate);
+
+                        bool valid = item.init(filters.itemFilters,
+                            rawReaderArgs, m_schemaUrls);
                         if (valid)
                         {
                             std::lock_guard<std::mutex> lock(m_mutex);
@@ -95,15 +111,37 @@ namespace stac
                     else if (linkType == "catalog")
                     {
                         NL::json catalogJson = m_connector.getJson(absLinkPath);
-                        std::unique_ptr<Catalog> catalog(new Catalog(catalogJson, absLinkPath, m_connector, m_pool, m_log));
-                        bool valid = catalog->init(filters, rawReaderArgs);
+                        std::unique_ptr<Catalog> catalog(new Catalog(
+                            catalogJson, absLinkPath, m_connector, m_pool,
+                            m_log, m_validate));
+
+                        bool valid = catalog->init(filters, rawReaderArgs,
+                            m_schemaUrls);
                         if (valid)
                         {
                             std::lock_guard<std::mutex> lock(m_mutex);
                             m_subCatalogs.push_back(std::move(catalog));
                         }
+                    }
+                    else if (linkType == "collection")
+                    {
+                        NL::json collectionJson = m_connector.getJson(absLinkPath);
+                        Collection* collection(new Collection(
+                            collectionJson, absLinkPath, m_connector, m_pool,
+                            m_log, m_validate));
 
-
+                        bool valid = collection->init(filters, rawReaderArgs,
+                            m_schemaUrls);
+                        if (valid)
+                        {
+                            std::lock_guard<std::mutex> lock(m_mutex);
+                            Catalog* cat = dynamic_cast<Catalog*>(collection);
+                            if (cat) {
+                                m_subCatalogs.push_back(
+                                    std::unique_ptr<Catalog>(new Catalog(*cat))
+                                );
+                            }
+                        }
                     }
                 }
                 catch (std::exception& e)
@@ -124,8 +162,8 @@ namespace stac
         {
             for (auto& p: m_errors)
             {
-                m_log->get(LogLevel::Error) << "Failure fetching '" << p.first << "' with error '"
-                    << p.second << "'";
+                m_log->get(LogLevel::Error) << "Failure fetching '" << p.first
+                    << "' with error '" << p.second << "'";
             }
         }
 
@@ -152,16 +190,16 @@ namespace stac
         return m_itemList;
     }
 
-
     void Catalog::validate()
     {
-        std::function<void(const nlohmann::json_uri&, nlohmann::json&)> fetch = schemaFetch;
+        std::function<void( const nlohmann::json_uri&, nlohmann::json&)> fetch = schemaFetch;
+
         nlohmann::json_schema::json_validator val(
             fetch,
             [](const std::string &, const std::string &) {}
         );
 
-        NL::json schemaJson = m_connector.getJson(m_schemaUrl);
+        NL::json schemaJson = m_connector.getJson(m_schemaUrls.catalog);
         val.set_root_schema(schemaJson);
         val.validate(m_json);
     }
