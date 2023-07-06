@@ -363,7 +363,7 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
     }
 
     // Open the array at the requested timestamp range.
-#if TILEDB_VERSION_MINOR < 15
+#if TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR < 15
     if (m_args->m_timeStamp != UINT64_MAX)
         m_array.reset(new tiledb::Array(*m_ctx, m_args->m_arrayName,
                                         TILEDB_WRITE, m_args->m_timeStamp));
