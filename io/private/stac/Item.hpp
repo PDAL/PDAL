@@ -97,11 +97,12 @@ private:
     const LogPtr& m_log;
     bool m_validate;
 
+    bool m_initialized = false;
     StageFactory m_factory;
     std::string m_driver;
     SchemaUrls m_schemaUrls;
     Options m_readerOptions;
-    NL::json m_assets;
+    // NL::json m_assets;
     std::string m_assetPath;
 
     std::string extractDriverFromItem(const NL::json& asset) const;

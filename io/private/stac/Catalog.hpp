@@ -58,7 +58,6 @@ public:
         ThreadPool& pool,
         const LogPtr& logPtr,
         bool validate);
-    Catalog(Catalog &cat);
     virtual ~Catalog();
 
     struct Filters {
@@ -86,13 +85,11 @@ protected:
 
     std::deque<std::pair<std::string, std::string>> m_errors;
 
-    std::vector<std::unique_ptr<Catalog>> m_subCatalogs;
-    std::vector<Item> m_itemList;
-    std::string m_driver;
+    bool m_initialized = false;
+    std::vector<std::unique_ptr<Catalog>> m_subCatalogs = {};
+    std::vector<Item> m_itemList = {};
     SchemaUrls m_schemaUrls;
     Options m_readerOptions;
-    NL::json m_assets;
-    std::string m_dataPath;
 
     void handleNested();
 

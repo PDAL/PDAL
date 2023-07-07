@@ -59,8 +59,9 @@ namespace stac
 
     Item::Item(const Item& item):
         m_json(item.m_json), m_path(item.m_path), m_connector(item.m_connector),
-        m_log(item.m_log), m_driver(item.m_driver),
-        m_readerOptions(item.m_readerOptions), m_assetPath(item.m_assetPath)
+        m_log(item.m_log), m_initialized(item.m_initialized),
+        m_driver(item.m_driver), m_schemaUrls(item.m_schemaUrls),
+        m_readerOptions(item.m_readerOptions)
     {}
 
     bool Item::init(Filters filters, NL::json rawReaderArgs,
@@ -77,6 +78,7 @@ namespace stac
         NL::json readerArgs = handleReaderArgs(rawReaderArgs);
         m_readerOptions = setReaderOptions(readerArgs, m_driver);
         m_readerOptions.add("filename", m_assetPath);
+        m_initialized = true;
         return true;
     }
 

@@ -54,11 +54,6 @@ namespace stac
         m_pool(pool), m_log(logPtr), m_validate(validate)
     {}
 
-    Catalog::Catalog(Catalog &cat):
-        m_json(cat.m_json), m_path(cat.m_path), m_connector(cat.m_connector),
-        m_pool(cat.m_pool), m_log(cat.m_log), m_validate(cat.m_validate)
-    {}
-
     Catalog::~Catalog()
     {}
 
@@ -126,7 +121,7 @@ namespace stac
                     else if (linkType == "collection")
                     {
                         NL::json collectionJson = m_connector.getJson(absLinkPath);
-                        Collection* collection(new Collection(
+                        std::unique_ptr<Collection> collection(new Collection(
                             collectionJson, absLinkPath, m_connector, m_pool,
                             m_log, m_validate));
 
@@ -135,12 +130,11 @@ namespace stac
                         if (valid)
                         {
                             std::lock_guard<std::mutex> lock(m_mutex);
-                            Catalog* cat = dynamic_cast<Catalog*>(collection);
-                            if (cat) {
-                                m_subCatalogs.push_back(
-                                    std::unique_ptr<Catalog>(new Catalog(*cat))
-                                );
-                            }
+                            // Catalog* cat = dynamic_cast<Catalog*>(collection);
+                            // if (cat) {
+                                // std::unique_ptr<Catalog> newcat(new Catalog(*cat));
+                                m_subCatalogs.push_back(std::move(collection));
+                            // }
                         }
                     }
                 }
@@ -173,6 +167,8 @@ namespace stac
             m_pool.join();
             handleNested();
         }
+
+        m_initialized = true;
         return true;
     }
 
@@ -181,7 +177,8 @@ namespace stac
     void Catalog::handleNested()
     {
         for (auto& catalog: m_subCatalogs)
-            for (auto& i: catalog->items())
+            // m_itemList.push_back(std::move(catalog->items()));
+            for (Item& i: catalog->items())
                 m_itemList.push_back(i);
     }
 
