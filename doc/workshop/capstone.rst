@@ -45,6 +45,7 @@ Given the following pipeline for fetching the data, complete the rest of the tas
     }
 
 * Read data from an EPT resource using :ref:`readers.ept` (See :ref:`workshop-entwine`)
+
 .. note::
     The particular data we are pulling has some high classification values due to how it was processed.
     These aren't useful to us, and we can use :ref:`filters.expression` in the pipeline to only write
