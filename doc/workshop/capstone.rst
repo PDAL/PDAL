@@ -45,6 +45,11 @@ Given the following pipeline for fetching the data, complete the rest of the tas
     }
 
 * Read data from an EPT resource using :ref:`readers.ept` (See :ref:`workshop-entwine`)
+.. note::
+    The particular data we are pulling has some high classification values due to how it was processed.
+    These aren't useful to us, and we can use :ref:`filters.expression` in the pipeline to only write
+    points with a classification value under 20.
+
 * Thin it to 1.0 meter spacing using :ref:`filters.sample` (See :ref:`workshop-thinning`)
 * Filter out noise using :ref:`filters.outlier` (See :ref:`workshop-denoising`)
 * Classify ground points using :ref:`filters.smrf` (See :ref:`workshop-ground`)
@@ -54,5 +59,5 @@ Given the following pipeline for fetching the data, complete the rest of the tas
 
 .. note::
 
-    You should review specific exercises for specifics how to
+    You should review specific exercises for specifics on how to
     achieve each task.
