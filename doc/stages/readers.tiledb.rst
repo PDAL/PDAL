@@ -30,7 +30,7 @@ Options
 -------
 
 array_name
-  `TileDB`_ array to read from. [Required]
+  `TileDB`_ array to read from. Synonymous with `filename`. [Required]
 
 config_file
   `TileDB`_ configuration file [Optional]
@@ -44,14 +44,14 @@ stats
 bbox3d
   TileDB subarray to read in format ([minx, maxx], [miny, maxy], [minz, maxz]) [Optional]
 
-timestamp
-  Opens the array at a particular TileDB timestamp [Optional]
+start_timestamp
+  Opens the array between a timestamp range of start_timestamp and end_timestamp. Default is 0. [Optional]
 
 end_timestamp
-  Opens the array at a particular TileDB timestamp [Optional]
+  Opens the array between a timestamp range of start_timestamp and end_timestamp. Default is UINT64_MAX. [Optional]
 
-start_timestamp
-  Opens the array between a timestamp range of start_timestamp and end_timestamp [Optional]
+timestamp
+  Synonymous with start_timestamp. [Optional]
 
 strict
   Raise an error if the array contains a TileDB attribute not supported by PDAL, the default is set to true to raise an error for unsupported attribute types [Optional]

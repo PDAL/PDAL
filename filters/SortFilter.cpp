@@ -71,7 +71,7 @@ void SortFilter::filter(PointView& view)
         return (m_order == SortOrder::ASC) ? result : !result;
     };
 
-    std::stable_sort(view.begin(), view.end(), cmp);
+    view.stableSort(cmp);
 }
 
 std::istream& operator >> (std::istream& in, SortOrder& order)

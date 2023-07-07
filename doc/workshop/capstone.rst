@@ -22,7 +22,7 @@ Given the following pipeline for fetching the data, complete the rest of the tas
         "pipeline": [
             {
                 "type": "readers.ept",
-                "filename":"http://na-c.entwine.io/dublin/",
+                "filename":"http://na-c.entwine.io/dublin/ept.json",
                 "bounds":"([-697041.0, -696241.0], [7045398.0, 7046086.0],[-40, 400])"
 
             },
@@ -32,6 +32,11 @@ Given the following pipeline for fetching the data, complete the rest of the tas
                 "minor_version": "2",
                 "dataformat_id": "0",
                 "filename":"st-stephens.laz"
+            },
+            {
+                "type": "writers.copc",
+                "filename": "st-stephens.copc.laz",
+                "forward": "all"
             }
         ]
     }
@@ -43,9 +48,9 @@ Given the following pipeline for fetching the data, complete the rest of the tas
 * Classify ground points using :ref:`filters.smrf` (See :ref:`workshop-ground`)
 * Compute height above ground using :ref:`filters.hag_nn`
 * Generate a digital terrain model (DTM) using :ref:`writers.gdal` (See :ref:`workshop-dtm`)
-* Generate a average vegetative height model using :ref:`writers.gdal`
+* Find the average vegetative height model using :ref:`writers.gdal`
 
 .. note::
 
-    You should review specific :ref:`exercises` for specifics how to
+    You should review specific exercises for specifics how to
     achieve each task.

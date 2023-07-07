@@ -40,6 +40,9 @@
 namespace pdal
 {
 
+// Subclasses can create an output file for each point view when in standard mode.
+// A '#' in the output filename is replaced with an incrementing integer as each file is
+// written. If no '#' is seen, all point views are written to a single output file.
 class PDAL_DLL FlexWriter : public Writer
 {
 protected:
