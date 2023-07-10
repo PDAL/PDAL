@@ -1868,3 +1868,60 @@ TEST(LasWriterTest, issue3964)
         EXPECT_EQ(n.value(), "This is a test");
     }
 }
+
+TEST(LasWriterTest, header_bbox)
+{
+    using namespace Dimension;
+    std::string outfile(Support::temppath("out.las"));
+
+    FileUtils::deleteFile(outfile);
+
+    {
+        PointTable table;
+        table.layout()->registerDims({Id::X, Id::Y, Id::Z});
+
+        BufferReader bufferReader;
+
+        PointViewPtr view(new PointView(table));
+
+        view->setField(Id::X, 0, -136.8309503964847);
+        view->setField(Id::Y, 0, -165.4601240504369);
+        view->setField(Id::Z, 0, -20.415032985882097);
+        view->setField(Id::X, 1, 194.17314124182556);
+        view->setField(Id::Y, 1, 165.54376758787334);
+        view->setField(Id::Z, 1, 310.58878865242816);
+        bufferReader.addView(view);
+
+        Options writerOps;
+        writerOps.add("filename", outfile);
+        writerOps.add("scale_x", 0.0001);
+        writerOps.add("scale_y", 0.0001);
+        writerOps.add("scale_z", 0.0001);
+
+        LasWriter writer;
+        writer.setOptions(writerOps);
+        writer.setInput(bufferReader);
+
+        writer.prepare(table);
+        writer.execute(table);
+    }
+
+    {
+        LasReader reader;
+        Options readerOpts;
+        readerOpts.add("filename", outfile);
+        reader.setOptions(readerOpts);
+
+        PointTable table;
+        reader.prepare(table);
+        EXPECT_DOUBLE_EQ(reader.header().scaleX(), 0.0001);
+        EXPECT_DOUBLE_EQ(reader.header().scaleY(), 0.0001);
+        EXPECT_DOUBLE_EQ(reader.header().scaleZ(), 0.0001);
+        EXPECT_DOUBLE_EQ(reader.header().minX(), -136.8310);
+        EXPECT_DOUBLE_EQ(reader.header().maxX(), 194.1731);
+        EXPECT_DOUBLE_EQ(reader.header().minY(), -165.4601);
+        EXPECT_DOUBLE_EQ(reader.header().maxY(), 165.5438);
+        EXPECT_DOUBLE_EQ(reader.header().minZ(), -20.4150);
+        EXPECT_DOUBLE_EQ(reader.header().maxZ(), 310.5888);
+    }
+}
