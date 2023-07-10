@@ -119,7 +119,7 @@ void LasReader::addArgs(ProgramArgs& args)
         "invalid characters to '_'", d->opts.fixNames, true);
     args.add("nosrs", "Skip reading/processing file SRS", d->opts.nosrs);
     args.add("srs_consume_preference", "Preference order to read SRS VLRs",
-        d->opts.srsConsumePreference, "wkt2, projjson, wkt1, geotiff");
+        d->opts.srsConsumePreference, "wkt1, geotiff, wkt2, projjson");
 }
 
 

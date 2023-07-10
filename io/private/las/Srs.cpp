@@ -119,7 +119,7 @@ void Srs::init(const VlrList& vlrs, std::string srsConsumePreference, LogPtr log
 {
 
     if (srsConsumePreference.empty())
-        srsConsumePreference = "wkt2, projjson, wkt1, geotiff";
+        srsConsumePreference = "wkt1, geotiff, wkt2, projjson";
 
     auto prefs = Utils::split2(srsConsumePreference, [](char c) { return c == ','; });
     std::transform(prefs.cbegin(), prefs.cend(), prefs.begin(),

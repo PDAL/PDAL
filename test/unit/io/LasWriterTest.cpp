@@ -1536,7 +1536,7 @@ TEST(LasWriterTest, read_consume_order)
     };
     doTest ("projjson, wkt2, wkt1, geotiff", utm33);
     doTest ("wkt2, projjson, wkt1, geotiff", utm32);
-    doTest ("", utm32);
+    doTest ("", utm34); // default order reader
     doTest ("wkt1, geotiff", utm34);
 }
 
