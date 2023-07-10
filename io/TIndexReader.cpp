@@ -74,6 +74,7 @@ struct TIndexReader::Args
     BOX2D m_bounds;
     std::string m_sql;
     NL::json m_rawReaderArgs;
+    NL::json m_readerArgs;
 };
 
 
@@ -246,7 +247,8 @@ void TIndexReader::initialize()
         if (!reader)
             throwError("Unable to create reader for file '" + f.m_filename +
                 "'.");
-        Options readerOptions;
+        Options readerOptions = setReaderOptions(m_args->m_readerArgs, driver);
+
         readerOptions.add("filename", f.m_filename);
         reader->setOptions(readerOptions);
         Stage *premerge = reader;
@@ -336,6 +338,76 @@ PointViewSet TIndexReader::run(PointViewPtr view)
 {
     return StageWrapper::run(m_merge, view);
 }
+
+void TIndexReader::handleReaderArgs()
+{
+    for (NL::json& readerPipeline: m_args->m_rawReaderArgs)
+    {
+        if (!readerPipeline.contains("type"))
+            throw pdal_error("No \"type\" key found in supplied reader arguments.");
+
+        std::string driver = readerPipeline.at("type").get<std::string>();
+        if (m_args->m_rawReaderArgs.contains(driver))
+            throw pdal_error("Multiple instances of the same driver in supplied reader arguments.");
+        m_args->m_readerArgs[driver] = { };
+
+        for (auto& arg: readerPipeline.items())
+        {
+            if (arg.key() == "type")
+                continue;
+
+            std::string key = arg.key();
+            m_args->m_readerArgs[driver][key] = { };
+            m_args->m_readerArgs[driver][key] = arg.value();
+        }
+    }
+}
+
+
+Options TIndexReader::setReaderOptions(const NL::json& readerArgs, const std::string& driver) const
+{
+    Options readerOptions;
+    if (readerArgs.contains(driver)) {
+        NL::json args = readerArgs.at(driver).get<NL::json>();
+        for (auto& arg : args.items()) {
+            NL::detail::value_t type = readerArgs.at(driver).at(arg.key()).type();
+            switch(type)
+            {
+                case NL::detail::value_t::string:
+                {
+                    std::string val = arg.value().get<std::string>();
+                    readerOptions.add(arg.key(), arg.value().get<std::string>());
+                    break;
+                }
+                case NL::detail::value_t::number_float:
+                {
+                    readerOptions.add(arg.key(), arg.value().get<float>());
+                    break;
+                }
+                case NL::detail::value_t::number_integer:
+                {
+                    readerOptions.add(arg.key(), arg.value().get<int>());
+                    break;
+                }
+                case NL::detail::value_t::boolean:
+                {
+                    readerOptions.add(arg.key(), arg.value().get<bool>());
+                    break;
+                }
+                default:
+                {
+                    readerOptions.add(arg.key(), arg.value());
+                    break;
+                }
+            }
+        }
+    }
+
+    return readerOptions;
+}
+
+
+
 
 } // namespace pdal
 

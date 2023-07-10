@@ -39,6 +39,7 @@
 #include <pdal/StageFactory.hpp>
 #include <filters/MergeFilter.hpp>
 
+#include <pdal/JsonFwd.hpp>
 
 namespace pdal
 {
@@ -79,6 +80,10 @@ private:
     virtual PointViewSet run(PointViewPtr view) override;
     virtual point_count_t read(PointViewPtr view, point_count_t num) override;
     virtual bool processOne(PointRef& point) override;
+
+    void handleReaderArgs();
+    Options setReaderOptions(const NL::json& readerArgs,
+                             const std::string& driver) const;
 
     struct Args;
 
