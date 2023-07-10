@@ -304,6 +304,34 @@ public:
     KD3Index& build3dIndex();
     KD2Index& build2dIndex();
 
+    template <typename Compare>
+    void stableSort(Compare compare)
+    {
+        clearTemps();
+
+        // This vector of ascending IDs represents our current normal order.
+        std::vector<std::size_t> order;
+        order.reserve(size());
+        for (std::size_t i = 0; i < size(); ++i)
+            order.push_back(i);
+
+        // Sort these IDs into the proper order based on the comparator.
+        std::stable_sort(
+            order.begin(),
+            order.end(),
+            [this, &compare](const PointId a, const PointId b)
+            {
+                return compare(PointRef(*this, a), PointRef(*this, b));
+            });
+
+        // Now, overwrite our ordering index with the result of the sort.  Use
+        // a temporary copy of the index to avoid hammering over things as we
+        // are copying.
+        const auto old = m_index;
+        for (std::size_t i = 0; i < size(); ++i)
+            m_index[i] = old[order[i]];
+    }
+
 protected:
     PointTableRef m_pointTable;
     PointLayoutPtr m_layout;

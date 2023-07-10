@@ -56,38 +56,78 @@ evaluate to `true` for the ``ValueExpression`` to be applied.
 Example 1
 =========
 
-.. code-block::
+.. code-block:: json
 
-    "value" : "Red = Red / 256"
+  [
+      "input.las",
+      {
+          "type": "filters.assign",
+          "value" : "Red = Red / 256"
+      },
+      "output.laz"
+  ]
 
 This scales the ``Red`` value by 1/256. If the input values are in the range 0 - 65535, the output
 value will be in the range 0 - 255.
 
-
 Example 2
 =========
 
-.. code-block::
+.. code-block:: json
 
-    "value" :
-    [
-        "Classification = 2 WHERE HeightAboveGround < 5",
-        "Classification = 1 WHERE HeightAboveGround >= 5"
-    ]
+  [
+      "input.las",
+      {
+          "type": "filters.assign",
+          "value" : [
+              "Red = Red * 256",
+              "Green = Green * 256",
+              "Blue = Blue * 256"
+          ]
+      },
+      "output.laz"
+  ]
 
-This sets the classification of points to either ``Ground`` or ``Unassigned`` depending on the
-value of the ``HeightAboveGround`` dimension.
+This scales the values of Red, Green and Blue by 256. If the input values are in the range 0 - 255, the output
+value will be in the range 0 - 65535. This can be handy when creating a :ref:`COPC <writers.copc>` file which
+(as defined in LAS 1.4) needs color values scaled in that range.
 
 Example 3
 =========
 
-.. code-block::
+.. code-block:: json
 
-    "value" :
-    [
-        "X = 1",
-        "X = 2 WHERE X > 10"
-    ]
+  [
+      "input.las",
+      {
+          "type": "filters.assign",
+          "value": [
+              "Classification = 2 WHERE HeightAboveGround < 5",
+              "Classification = 1 WHERE HeightAboveGround >= 5"
+          ]
+      },
+      "output.laz"
+  ]
+
+This sets the classification of points to either ``Ground`` or ``Unassigned`` depending on the
+value of the ``HeightAboveGround`` dimension.
+
+Example 4
+=========
+
+.. code-block:: json
+
+  [
+      "input.las",
+      {
+          "type": "filters.assign",
+          "value": [
+              "X = 1",
+              "X = 2 WHERE X > 10"
+          ]
+      },
+      "output.laz"
+  ]
 
 This sets the value of ``X`` for all points to 1. The second statement is essentially ignored
 since the first statement sets the ``X`` value of all points to 1 and therefore no points

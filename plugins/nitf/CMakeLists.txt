@@ -2,6 +2,7 @@
 # NITF plugin CMake configuration
 #
 include(${PDAL_CMAKE_DIR}/nitro.cmake)
+include(${PDAL_CMAKE_DIR}/arbiter.cmake)
 if (NOT NITRO_FOUND)
     message(FATAL_ERROR "Can't find NITRO support required by NITF.")
 endif()
@@ -12,8 +13,13 @@ PDAL_ADD_PLUGIN(reader_libname reader nitf
         io/MetadataReader.cpp
         io/tre_plugins.cpp
         io/NitfReader.cpp
+    INCLUDES
+        ${GDAL_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
     LINK_WITH
         ${NITRO_LIBRARIES}
+        ${PDAL_ARBITER_LIB_NAME}
 )
 if (WIN32)
     target_compile_definitions(${reader_libname}

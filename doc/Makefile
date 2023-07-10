@@ -13,6 +13,7 @@ DATE=$(shell date +'%y.%m.%d %H:%M:%S')
 PAPEROPT_a4     = -D latex_paper_size=a4
 PAPEROPT_letter = -D latex_paper_size=letter
 ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
+WORKSHOPOPTS    = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) -E -c . ./workshop
 
 .PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest doxygen
 
@@ -35,6 +36,7 @@ help:
 	@echo "  changes    to make an overview of all changed/added/deprecated items"
 	@echo "  linkcheck  to check all external links for integrity"
 	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
+	@echo "  workshop_pdf   to generate a pdf of the workshop "
 
 clean:
 	-rm -rf $(BUILDDIR)/*
@@ -46,6 +48,12 @@ html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
+
+workshop_pdf:
+	$(SPHINXBUILD) -b latex $(WORKSHOPOPTS) $(BUILDDIR)/latex_workshop
+	@echo "Running LaTeX files through pdflatex..."
+	make -C $(BUILDDIR)/latex_workshop all-pdf
+	@echo "pdflatex finished; the PDF files are in $(BUILDDIR)/latex_workshop."
 
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml

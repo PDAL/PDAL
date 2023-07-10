@@ -60,7 +60,7 @@ std::string OptechReader::getName() const
     return s_info.name;
 }
 
-#ifndef _WIN32
+#ifndef _MSC_VER
 const size_t OptechReader::MaximumNumberOfReturns;
 const size_t OptechReader::MaxNumRecordsInBuffer;
 const size_t OptechReader::NumBytesInRecord;

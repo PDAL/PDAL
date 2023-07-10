@@ -869,13 +869,13 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
     double xOrig = point.getFieldAs<double>(Id::X);
     double yOrig = point.getFieldAs<double>(Id::Y);
     double zOrig = point.getFieldAs<double>(Id::Z);
-    double x = m_scaling.m_xXform.toScaled(xOrig);
-    double y = m_scaling.m_yXform.toScaled(yOrig);
-    double z = m_scaling.m_zXform.toScaled(zOrig);
+    int32_t x = converter(m_scaling.m_xXform.toScaled(xOrig), Id::X);
+    int32_t y = converter(m_scaling.m_yXform.toScaled(yOrig), Id::Y);
+    int32_t z = converter(m_scaling.m_zXform.toScaled(zOrig), Id::Z);
 
-    ostream << converter(x, Id::X);
-    ostream << converter(y, Id::Y);
-    ostream << converter(z, Id::Z);
+    ostream << x;
+    ostream << y;
+    ostream << z;
 
     uint16_t intensity(0);
     if (point.hasDim(Id::Intensity))
@@ -992,7 +992,10 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
         Utils::insertDim(ostream, dim.m_dimType.m_type, e);
     }
 
-    d->summary.addPoint(xOrig, yOrig, zOrig, returnNumber);
+    double xConverted = m_scaling.m_xXform.fromScaled(x);
+    double yConverted = m_scaling.m_yXform.fromScaled(y);
+    double zConverted = m_scaling.m_zXform.fromScaled(z);
+    d->summary.addPoint(xConverted, yConverted, zConverted, returnNumber);
     return true;
 }
 

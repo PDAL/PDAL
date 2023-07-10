@@ -39,6 +39,7 @@
 #include <io/LasReader.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <arbiter/arbiter.hpp>
 
 namespace pdal
 {
@@ -141,7 +142,7 @@ class PDAL_DLL NitfReader : public LasReader
     };
 
 public:
-    NitfReader() : LasReader(), m_offset(0), m_length(0)
+    NitfReader() : LasReader(), m_offset(0), m_length(0), m_isRemote(false)
     {}
     NitfReader& operator=(const NitfReader&) = delete;
     NitfReader(const NitfReader&) = delete;
@@ -151,16 +152,20 @@ public:
 protected:
     virtual void createStream()
     {
-        if (m_streamIf)
-            std::cerr << "Attempt to create stream twice!\n";
-        m_streamIf.reset(new NitfStreamIf(m_filename, m_offset));
+
+        if (!m_streamIf)
+            m_streamIf.reset(new NitfStreamIf(m_filename, m_offset));
     }
 
 private:
     uint64_t m_offset;
     uint64_t m_length;
+    bool m_isRemote;
+    std::string m_remoteFilename;
 
     virtual void initialize(PointTableRef table);
+    virtual void done(PointTableRef table);
+
 };
 
 } // namespace pdal

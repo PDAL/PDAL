@@ -123,8 +123,7 @@ point_count_t IcebridgeReader::read(PointViewPtr view, point_count_t count)
     point_count_t remaining = m_hdf5Handler.getNumPoints() - m_index;
     count = (std::min)(count, remaining);
 
-    std::unique_ptr<unsigned char>
-        rawData(new unsigned char[count * sizeof(float)]);
+    std::vector<uint8_t> rawData(count * sizeof(float));
 
     //Not loving the position-linked data, but fine for now.
     Dimension::IdList dims = dimensions();
@@ -137,9 +136,9 @@ point_count_t IcebridgeReader::read(PointViewPtr view, point_count_t count)
 
         try
         {
-            m_hdf5Handler.getColumnEntries(rawData.get(), column.name, count,
+            m_hdf5Handler.getColumnEntries(rawData.data(), column.name, count,
                 m_index);
-            void *p = (void *)rawData.get();
+            void *p = (void *)rawData.data();
 
             // This is ugly but avoids a test in a tight loop.
             if (column.predType == H5::PredType::NATIVE_FLOAT)

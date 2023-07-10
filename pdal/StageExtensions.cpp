@@ -63,6 +63,7 @@ static const Extensions readerExtensions =
   { "readers.slpk", { "slpk" } },
   { "readers.i3s", { "i3s" } },
   { "readers.obj", { "obj" } },
+  { "readers.stac", { "vpc" } },
   { "readers.e57", { "e57" } }
 };
 

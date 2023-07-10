@@ -58,7 +58,7 @@ TEST(GDALReaderTest, badfile)
 TEST(GDALReaderTest, simple)
 {
     Options ro;
-    ro.add("filename", Support::datapath("png/autzen-height.png"));
+    ro.add("filename", Support::datapath("gdal/autzen-height.tif"));
     ro.add("header", "Intensity,Userdata,Z");
 
     GDALReader gr;
