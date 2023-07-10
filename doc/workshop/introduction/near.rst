@@ -43,7 +43,7 @@ and return the three nearest points to it:
 
 .. code-block:: console
 
-    $ pdal info ./exercises/info/interesting.las --query "637301.20, 851217.57, 496.49/3"
+    $ pdal info ./exercises/info/interesting.las --query "637301.20, 851217.57, 496.49 /3"
     {
     "file_size": 37698,
     "filename": "./exercises/info/interesting.las",

@@ -106,18 +106,21 @@ to install `jq`_
 
     $ pdal info ./exercises/info/interesting.las --metadata \
     | jq  ".metadata.compressed, .metadata.system_id"
-    false
-    "HOBU-SYSTEMID"
 
 
 .. code-block:: doscon
 
     > pdal info ./exercises/info/interesting.las --metadata ^
     | jq  ".metadata.compressed, .metadata.system_id"
+
+
+
+Output:
+.. code-block:: console
+        
     false
-    "HOBU-SYSTEMID"
-
-
+    "HOBU-SYSTEMID"  
+    
 .. note::
 
     PDAL's JSON output is very powerfully combined with the processing
