@@ -47,6 +47,8 @@ Invoke the following command, substituting accordingly, in your `Conda Shell`:
 .. literalinclude:: ./thinning-run-dartsample-win.txt
     :linenos:
 
+By specifying our radius, we set the minimum distance between points to 20 meters. 
+
 Visualization
 ................................................................................
 
