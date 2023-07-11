@@ -116,27 +116,30 @@ void Geometry::update(const std::string& wkt_or_json)
     std::string srs;
     if (isJson)
     {
+        // createFromGeoJson may set the geometry's SRS for us
+        // because GeoJSON is 4326. If the user provided a 'srs'
+        // node, we're going to override with that, however
         newGeom = gdal::createFromGeoJson(wkt_or_json, srs);
         if (!newGeom)
             throw pdal_error("Unable to create geometry from input GeoJSON");
+
+        if (srs.size())
+            newGeom->assignSpatialReference(
+                new OGRSpatialReference(SpatialReference(srs).getWKT().data()));
     }
     else
     {
         newGeom = gdal::createFromWkt(wkt_or_json, srs);
         if (!newGeom)
             throw pdal_error("Unable to create geometry from input WKT");
+
+        if (!newGeom->getSpatialReference() && srs.size())
+            newGeom->assignSpatialReference(
+                new OGRSpatialReference(SpatialReference(srs).getWKT().data()));
     }
 
-    // m_geom may be null if update() is called from a ctor.
-    if (newGeom->getSpatialReference() && srs.size())
-        throw pdal_error("Geometry contains spatial reference and one was "
-            "also provided following the geometry specification.");
-    if (!newGeom->getSpatialReference() && srs.size())
-        newGeom->assignSpatialReference(
-            new OGRSpatialReference(SpatialReference(srs).getWKT().data()));
-    // m_geom may be null if update() is called from a ctor.
-    else if (m_geom)
-        newGeom->assignSpatialReference(m_geom->getSpatialReference());
+
+
     m_geom.reset(newGeom);
     modified();
 }
