@@ -89,7 +89,6 @@ private:
     std::string m_filename;
     bool m_validLidarSegments;
     nitf::Uint32 m_lidarDataSegment;
-    bool m_isRemote;
     std::string m_remoteFilename;
 
 };

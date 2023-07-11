@@ -31,7 +31,7 @@ of tasks. This pipeline will collect the sample data set and convert it to a :re
 .. index:: Potree
 
 
-1. View the ``entwine.json`` file in your editor.
+1. View the ``./exercises/translation/entwine.json`` file in your editor.
 
     .. literalinclude:: ./entwine.json
 
@@ -109,6 +109,11 @@ of tasks. This pipeline will collect the sample data set and convert it to a :re
     .. image:: ../images/entwine-view.png
         :target: ../../_images/entwine-view.png
 
+.. note::
+
+    QGIS also supports uploading Entwine data directly from the cloud. Under 'Layer -> Add Layer -> Add 
+    Point Cloud Layer', select the source type as "Protocol: HTTP(S), cloud, etc." and insert the URL of 
+    an EPT index.  
 
 Notes
 --------------------------------------------------------------------------------

@@ -10,8 +10,16 @@ Printing the first point
 Exercise
 --------------------------------------------------------------------------------
 
-This exercise uses PDAL to print information from the first point. Issue the
-following command in your `Conda Shell`.
+This exercise uses PDAL to print information from the first point. Before starting,
+be sure to set your working directory in Conda to the location of the PDAL workshop
+data. For example, if the workshop folder was located on your desktop:   
+
+.. code-block:: console
+
+   $ cd Desktop/PDAL
+
+
+Issue the following command in your `Conda Shell`. 
 
 .. code-block:: console
 
