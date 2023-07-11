@@ -103,6 +103,8 @@ public:
     NL::json ogr;
 
     int keepAliveChunkCount = 10;
+
+    std::string srsConsumePreference;
 };
 
 struct CopcReader::Private
@@ -174,6 +176,8 @@ void CopcReader::addArgs(ProgramArgs& args)
     args.add("vlr", "Read LAS VLRs and add to metadata.", m_args->doVlrs);
     args.add("keep_alive", "Number of chunks to keep alive in memory when working",
             m_args->keepAliveChunkCount, 10);
+    args.add("srs_consume_preference", "Preference order to read SRS VLRs",
+        m_args->srsConsumePreference, "wkt1, geotiff, wkt2, projjson");
 
 }
 
