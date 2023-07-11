@@ -361,7 +361,7 @@ namespace stac
             return true;
             // throw pdal_error("None of the asset names supplied exist in the STAC object.");
 
-        std::string itemId = m_json.at("id");
+        std::string itemId = m_json.at("id").get<std::string>();
         bool idFlag = true;
         if (!filters.ids.empty())
         {
