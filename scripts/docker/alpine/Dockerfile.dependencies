@@ -31,6 +31,7 @@ RUN \
         libxml2-dev \
         python3-dev \
         curl-dev \
+        postgresql-dev \
         sqlite-dev \
         zstd-dev \
         libcrypto1.1 \
