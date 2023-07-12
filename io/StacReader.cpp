@@ -174,6 +174,12 @@ void StacReader::addItem(stac::Item& item)
         throw pdal_error(msg.str());
     }
     Reader* reader = dynamic_cast<Reader*>(stage);
+    if (!reader)
+    {
+        std::stringstream msg;
+        msg << "Unable to cast stage of type '" << driver << "' to a reader";
+        throw pdal_error(msg.str());
+    }
     reader->setOptions(item.options());
 
     std::lock_guard<std::mutex> lock(m_p->m_mutex);
