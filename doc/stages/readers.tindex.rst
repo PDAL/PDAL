@@ -65,6 +65,20 @@ _`lyr_name`
   The OGR layer name for the data source to use to
   fetch the tile index information.
 
+
+reader_args
+    A list of JSON objects with keys of reader options and the values to pass through.
+    These will be in the exact same form as a Pipeline Stage object minus the filename.
+
+    Exmaple:
+
+.. code-block:: bash
+
+    --readers.stac.reader_args \
+    '[{"type": "readers.ept", "resolution": 100}, {"type": "readers.las", "nosrs": true}]'
+
+
+
 srs_column
   The column in the layer that provides the SRS
   information for the file. Use this if you wish to

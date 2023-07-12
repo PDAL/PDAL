@@ -88,6 +88,8 @@ private:
     std::vector<std::unique_ptr<ILeStream>> m_streams;
     std::vector<std::unique_ptr<Charbuf>> m_charbufs;
 
+    std::string m_remoteFilename;
+
     virtual QuickInfo inspect();
     virtual void initialize();
     virtual void addDimensions(PointLayoutPtr Layout);

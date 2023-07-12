@@ -33,76 +33,76 @@ Options
 -------
 
 array_name
-  `TileDB`_ array to write to. [Required]
+  `TileDB`_ array to write to. Synonymous with `filename`. [Required]
 
 config_file
-  `TileDB`_ configuration file [Optional]
+  `TileDB`_ configuration file. [Optional]
 
 data_tile_capacity
-  Number of points per tile [Optional]
+  Number of points per tile. Not used when `append=true`. [Optional]
 
 x_tile_size
-  Tile size (x) [Optional]
+  Tile size (x). Floating point value used for determining on-disk data order. Not used when `append=true`. [Optional]
 
 y_tile_size
-  Tile size (y) [Optional]
+  Tile size (y). Floating point value used for determining on-disk data order. Not used when `append=true`. [Optional]
 
 z_tile_size
-  Tile size (z) [Optional]
-  
-time_tile_size  
-  Tile size (time) [Optional]
+  Tile size (z). Floating point value used for determining on-disk data order. Not used when `append=true`. [Optional]
+
+time_tile_size
+  Tile size (time). Not used when `append=true`. [Optional]
 
 x_domain_st
-  Domain minimum in x [Optional]
+  Domain minimum for x. Not used when `append=true`. [Optional]
 
 x_domain_end
-  Domain maximum in x [Optional]
+  Domain maximum for x. Not used when `append=true`. [Optional]
 
 y_domain_st
-  Domain minimum in y [Optional]
+  Domain minimum for y. Not used when `append=true`. [Optional]
 
 y_domain_end
-  Domain maximum in y [Optional]
+  Domain maximum for y. Not used when `append=true`. [Optional]
 
 z_domain_st
-  Domain minimum in z [Optional]
+  Domain minimum for z. Not used when `append=true`. [Optional]
 
 z_domain_end
-  Domain maximum in z [Optional]
+  Domain maximum for z. Not used when `append=true`. [Optional]
 
 time_domain_st
-  Domain minimum in GpsTime [Optional]
+  Domain minimum for GpsTime. Not used when `append=true`. [Optional]
 
 time_domain_end
-  Domain maximum in GpsTime [Optional]
-  
+  Domain maximum for GpsTime. Not used when `append=true`. [Optional]
+
 use_time_dim
-  Use GpsTime coordinate data as array dimension [Optional]
+  Use GpsTime coordinate data as an array dimension instead of an array attribute. Not used when `append=true`. [Optional]
 
 time_first
-  If writing 4D array with XYZ and Time, choose to put time dim first or last (default) [Optional]
-  
+  Put the GpsTime dimension first instead of last. Only used when `use_time_dim=true`. Not used when `append=true`. Default is `false`. [Optional]
+
 chunk_size
-  Point cache size for chunked writes [Optional]
+  Point cache size for chunked writes. [Optional]
 
 compression
-  TileDB compression type for attributes, default is None [Optional]
+  The default TileDB compression filter to use. Only used if the dimension or attribute name is not included in `filters`. Not used when `append=true`. Default is None. [Optional]
 
 compression_level
-  TileDB compression level for chosen compression [Optional]
+  The TileDB compression level to use for the default compression. Option is ignored if set to `-1`. Not used when `append=true`. Default is `-1`. [Optional]
 
 append
-  Append to an existing TileDB array with the same schema [Optional]
+  Instead of creating a new array, append to an existing array that has the dimensions stored as a TileDB dimension or TileDB attribute. Default is `false`.  [Optional]
 
 stats
-  Dump query stats to stdout [Optional]
+  Dump query stats to stdout. [Optional]
 
 filters
-  JSON array or object of compression filters for either `dims` or `attributes` of the form {dim/attributename : {"compression": name, compression_options: value, ...}} [Optional]
+  JSON array or object of compression filters for either `dims` or `attributes` of the form {dim/attributename : {"compression": name, compression_options: value, ...}}.  Not used when `append=true`. [Optional]
 
 timestamp
-  Sets the TileDB timestamp for this write
+  Sets the TileDB timestamp for this write. [Optional]
 
 .. include:: writer_opts.rst
 

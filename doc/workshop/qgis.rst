@@ -19,7 +19,8 @@ How will we use QGIS?
 --------------------------------------------------------------------------------
 
 We're using |QGIS| to visualize raster and vector processing product during
-our workshop. If you have another GIS available to you, you are welcome to
+our workshop. We will also use |QGIS| to visualize point clouds by generating 
+:ref:`COPC <writers.copc>` files. If you have another GIS available to you, you are welcome to
 use it, but because |QGIS| is open source, we are installing it and using it
 to be sure you'll have something to look at data with.
 
@@ -49,7 +50,8 @@ Installing QGIS
 .. image:: ./images/qgis-install-progress.png
 
 
-4. Once installed, verify you can run |QGIS| by opening the application.
+4. Once installed, verify you can run |QGIS| by opening the application. At the top,
+   choose ``Layer --> Add Layer --> Add Raster Layer...``.
    Navigate to the ``C:\Users\hobu\PDAL\exercises\analysis\colorization``
    directory.
 
@@ -67,4 +69,4 @@ Conclusion
 --------------------------------------------------------------------------------
 
 |QGIS| allows everyone to have access to a fully-featured GIS. We are going to
-use it to visualize raster and vector data used throughout the workshop.
+use it to visualize raster, vector, and point cloud data used throughout the workshop.

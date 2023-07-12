@@ -2,6 +2,7 @@
 
 Introduction
 ================================================================================
+After the basic set up the workshop is divided into three 45 to 90 min sections with a final project at the end.
 
 1. :ref:`lidar-introduction`
 
@@ -11,11 +12,13 @@ Introduction
 
 4. :ref:`basic-info`
 
-5. :ref:`translation`
+5. :ref:`manipulation`
 
-6. :ref:`analysisa`
+6. :ref:`generation`
 
-7. :ref:`georeferencing`
+7. :ref:`capstone`
+
+
 
 Materials
 --------------------------------------------------------------------------------

@@ -303,8 +303,8 @@ void TileKernel::adder(PointRef& point, int xpos, int ypos)
                 m_outputFile + "'.");
         sw = dynamic_cast<Streamable *>(w);
         if (!sw)
-            throw pdal_error("Driver '" + w->getName() + "' for input file '" +
-                m_outputFile + "' is not streamable.");  
+            throw pdal_error("Driver '" + w->getName() + "' for output file '" +
+                m_outputFile + "' is not streamable.");
         m_writers[loc] = sw;
 
         sw->prepare(m_table);
