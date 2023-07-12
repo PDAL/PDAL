@@ -84,9 +84,6 @@ public:
     };
 
     bool init(Filters filters, NL::json rawReaderArgs, SchemaUrls schemaUrls);
-    NL::json handleReaderArgs(NL::json rawReaderArgs);
-    void validate();
-    bool filter(Filters filters);
 
     std::string id();
     std::string driver();
@@ -106,9 +103,22 @@ private:
     SchemaUrls m_schemaUrls;
     Options m_readerOptions;
     std::string m_assetPath;
+    std::string m_id;
 
     std::string extractDriverFromItem(const NL::json& asset) const;
     Options setReaderOptions(const NL::json& readerArgs, const std::string& driver) const;
+
+    NL::json handleReaderArgs(NL::json rawReaderArgs);
+    void validate();
+
+    bool filter(Filters filters);
+    bool filterAssets(std::vector<std::string> assetNames);
+    bool filterIds(std::vector<RegEx> ids);
+    bool filterCol(std::vector<RegEx> ids);
+    bool filterDates(NL::json::array_t dates);
+    bool filterProperties(NL::json props);
+    bool filterBounds(SrsBounds bounds);
+
 
 };
 

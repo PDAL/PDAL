@@ -66,7 +66,7 @@ namespace stac
             SchemaUrls schemaUrls)
     {
 
-        if (filter(filters))
+        if (!filter(filters))
             return false;
 
         m_schemaUrls = schemaUrls;
@@ -338,171 +338,38 @@ namespace stac
         return true;
     }
 
-    //TODO reverse logic on this bool to match expected flow
+
+
     bool Item::filter(Filters filters)
     {
         validateForFilter(m_json);
+        m_id = m_json.at("id").get<std::string>();
 
-        // ID
-        // If STAC ID matches *any* ID in supplied list, it will not be pruned.
-        NL::json asset;
-        for (auto& name: filters.assetNames)
-        {
-            if (m_json.at("assets").contains(name))
-            {
-                asset = m_json.at("assets").at(name);
-                m_driver = extractDriverFromItem(asset);
-                std::string assetPath = asset.at("href").get<std::string>();
-                m_assetPath = handleRelativePath(m_path, assetPath);
-            }
-        }
-        if (m_driver.empty())
-            return true;
-            // throw pdal_error("None of the asset names supplied exist in the STAC object.");
+        if (!filterAssets(filters.assetNames))
+            return false;
 
-        std::string itemId = m_json.at("id").get<std::string>();
-        bool idFlag = true;
-        if (!filters.ids.empty())
-        {
-            for (auto& id: filters.ids)
-            {
-                if (std::regex_match(itemId, id.regex()))
-                {
-                    idFlag = false;
-                }
-            }
-        }
-        else
-            idFlag = false;
+        if (!filterIds(filters.ids))
+            return false;
 
-        if (idFlag)
-            return true;
+        if (!filterCol(filters.collections))
+            return false;
 
-        // check that collection matches filter
-        bool colFlag = true;
-        if (!filters.collections.empty())
-        {
-            if (!m_json.contains("collection"))
-                return true;
+        if (!filterDates(filters.dates))
+            return false;
 
-            std::string colId = m_json.at("collection").get<std::string>();
-            for (auto& col: filters.collections)
-            {
-                if (std::regex_match(colId, col.regex()))
-                {
-                    colFlag = false;
-                }
-            }
-        }
-        else
-            colFlag = false;
+        if (!filterProperties(filters.properties))
+            return false;
 
-        if (colFlag)
-            return true;
+        if (!filterBounds(filters.bounds))
+            return false;
 
-        NL::json properties = m_json.at("properties");
 
-        // DateTime
-        // If STAC datetime fits in *any* of the supplied ranges, it will not be pruned
-        if (!filters.dates.empty())
-        {
-            if (properties.contains("datetime") &&
-                properties.at("datetime").type() != NL::detail::value_t::null)
-            {
-                std::string stacDate = properties.at("datetime").get<std::string>();
+        return true;
+    }
 
-                // TODO This would remove three lines of stuff and
-                // be much clearer
-                //
-                // bool haveDateFlag = !filters.dates.empty()
-                bool dateFlag = true;
-                if (filters.dates.empty())
-                    dateFlag = false;
-                for (auto& range: filters.dates)
-                {
-                    //If the extracted item date fits into any of the dates provided by
-                    //the user, then do not prune this item based on dates.
-                    if (range.size() != 2)
-                        throw pdal_error("Invalid date range size!");
-
-                    if (
-                        stacDate >= range[0].get<std::string>() &&
-                        stacDate <= range[1].get<std::string>()
-                    )
-                        dateFlag = false;
-                }
-                if (dateFlag)
-                    return true;
-            } else if (properties.contains("start_datetime") && properties.contains("end_datetime"))
-            {
-                // Handle if STAC object has start and end datetimes instead of one
-                std::string stacStartDate = properties.at("start_datetime").get<std::string>();
-                std::string stacEndDate = properties.at("end_datetime").get<std::string>();
-
-                bool dateFlag = true;
-                for (const auto& range: filters.dates)
-                {
-                    // If any of the date ranges overlap with the date range of the STAC
-                    // object, do not prune.
-                    if (range.size() != 2)
-                        throw pdal_error("Invalid date range size!");
-                    std::string userMinDate = range[0].get<std::string>();
-                    std::string userMaxDate = range[1].get<std::string>();
-                    //
-                    // TODO should we really be comparing dates as strings?
-                    if (userMinDate >= stacStartDate && userMinDate <= stacEndDate)
-                    {
-                        dateFlag = false;
-                    }
-                    else if (userMaxDate >= stacStartDate && userMaxDate <= stacEndDate)
-                    {
-                        dateFlag = false;
-                    }
-                    else if (userMinDate <= stacStartDate && userMaxDate >= stacEndDate)
-                    {
-                        dateFlag = false;
-                    }
-                }
-                if (dateFlag)
-                    return true;
-
-            }
-        }
-
-        // Properties
-        // If STAC properties match *all* the supplied properties, it will not be pruned
-        //
-        // TODO this reads backwards
-        // if match:
-        //     doPrune = true
-        if (!filters.properties.empty())
-        {
-            for (auto &it: filters.properties.items())
-            {
-                NL::detail::value_t type = properties.at(it.key()).type();
-                NL::detail::value_t argType = it.value().type();
-                //Array of possibilities are Or'd together
-                if (argType == NL::detail::value_t::array)
-                {
-                    bool arrFlag (true);
-                    for (auto& val: it.value())
-                        if (matchProperty(it.key(), val, properties, type))
-                            arrFlag = false;
-                    if (arrFlag)
-                        return true;
-                }
-                else
-                    if (!matchProperty(it.key(), it.value(), properties, type))
-                        return true;
-            }
-        }
-
-        // bbox
-        // If STAC bbox matches *any* of the supplied bounds, it will not be pruned
-
-        // TODO do we allow passing in of `polygon` options like readers.copc and
-        // readers.ept as well?
-        if (!filters.bounds.empty())
+    bool Item::filterBounds(SrsBounds bounds)
+    {
+        if (!bounds.empty())
         {
             if (m_json.contains("geometry"))
             {
@@ -512,15 +379,15 @@ namespace stac
                 {
                     std::stringstream msg;
                     msg << "Polygon created from STAC 'geometry' key for '"
-                        << itemId << "' is invalid";
+                        << m_id << "' is invalid";
                     throw pdal_error(msg.str());
                 }
 
                 // TODO if the bounds is 3d already, why
                 // do we convert it to 3d on the next line?
-                if (filters.bounds.is3d())
+                if (bounds.is3d())
                 {
-                    if (!filters.bounds.to3d().overlaps(f.bounds()))
+                    if (bounds.to3d().overlaps(f.bounds()))
                         return true;
                 }
                 else
@@ -530,8 +397,8 @@ namespace stac
                     // ie, we downcast the bounds to2d, then make
                     // a BOX3D from that and compare it to f.bounds()
                     // which is 2d or 3d?
-                    BOX2D bbox = filters.bounds.to2d();
-                    if (!BOX3D(bbox).overlaps(f.bounds()))
+                    BOX2D bbox = bounds.to2d();
+                    if (BOX3D(bbox).overlaps(f.bounds()))
                         return true;
                 }
             }
@@ -544,9 +411,7 @@ namespace stac
 
                 // TODO if we have a bad bbox?
                 if (bboxJson.size() != 4 || bboxJson.size() != 6)
-                {
-                    throw pdal_error("bbox for '" + itemId + "' is not valid");
-                }
+                    throw pdal_error("bbox for '" + m_id + "' is not valid");
 
                 if (bboxJson.size() == 4)
                 {
@@ -555,7 +420,7 @@ namespace stac
                     double maxx = bboxJson[2];
                     double maxy = bboxJson[3];
                     BOX2D bbox = BOX2D(minx, miny, maxx, maxy);
-                    if (!filters.bounds.to2d().overlaps(bbox))
+                    if (bounds.to2d().overlaps(bbox))
                         return true;
                 }
                 else if (bboxJson.size() == 6)
@@ -567,13 +432,159 @@ namespace stac
                     double maxy = bboxJson[4];
                     double maxz = bboxJson[5];
                     BOX3D bbox = BOX3D(minx, miny, minz, maxx, maxy, maxz);
-                    if (!filters.bounds.to3d().overlaps(bbox))
+                    if (bounds.to3d().overlaps(bbox))
                         return true;
                 }
             }
+            return false;
         }
+        return true;
 
-        return false;
+    }
+
+    bool Item::filterProperties(NL::json filterProps)
+    {
+
+        NL::json itemProperties = m_json.at("properties");
+        if (!filterProps.empty())
+        {
+            for (auto &it: filterProps.items())
+            {
+                NL::detail::value_t type = itemProperties.at(it.key()).type();
+                NL::detail::value_t argType = it.value().type();
+                //Array of possibilities are Or'd together
+                if (argType == NL::detail::value_t::array)
+                {
+                    bool arrFlag (true);
+                    for (auto& val: it.value())
+                        if (matchProperty(it.key(), val, itemProperties, type))
+                            return true;
+                }
+                else
+                    if (!matchProperty(it.key(), it.value(), itemProperties, type))
+                        return true;
+            }
+
+            return false;
+        }
+        return true;
+    }
+
+    bool Item::filterDates(NL::json::array_t dates)
+    {
+        NL::json properties = m_json.at("properties");
+
+        // DateTime
+        // If STAC datetime fits in *any* of the supplied ranges,
+        // it will be accepted.
+        if (!dates.empty())
+        {
+            if (properties.contains("datetime") &&
+                properties.at("datetime").type() != NL::detail::value_t::null)
+            {
+                std::string stacDate = properties.at("datetime").get<std::string>();
+
+                for (auto& range: dates)
+                {
+                    if (range.size() != 2)
+                        throw pdal_error("Invalid date range size!");
+
+                    if (
+                        stacDate >= range[0].get<std::string>() &&
+                        stacDate <= range[1].get<std::string>()
+                    )
+                        return true;
+                }
+                return false;
+            }
+            else if (properties.contains("start_datetime") &&
+                properties.contains("end_datetime"))
+            {
+                // Handle if STAC object has start and end datetimes instead of one
+                std::string stacStartDate = properties.at("start_datetime").get<std::string>();
+                std::string stacEndDate = properties.at("end_datetime").get<std::string>();
+
+                bool dateFlag = true;
+                for (const auto& range: dates)
+                {
+                    // If any of the date ranges overlap with the date range of the STAC
+                    // object, do not prune.
+                    if (range.size() != 2)
+                        throw pdal_error("Invalid date range size!");
+                    std::string userMinDate = range[0].get<std::string>();
+                    std::string userMaxDate = range[1].get<std::string>();
+                    //
+                    // TODO should we really be comparing dates as strings?
+                    if (userMinDate >= stacStartDate && userMinDate <= stacEndDate)
+                    {
+                        return true;
+                    }
+                    else if (userMaxDate >= stacStartDate && userMaxDate <= stacEndDate)
+                    {
+                        return true;
+                    }
+                    else if (userMinDate <= stacStartDate && userMaxDate >= stacEndDate)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            else
+                throw pdal_error("Unexpected layout of STAC dates for Item " +
+                    m_id + ". Cannot filter.");
+        }
+        return true;
+
+    }
+
+    bool Item::filterAssets(std::vector<std::string> assetNames)
+    {
+        NL::json asset;
+        for (auto& name: assetNames)
+        {
+            if (m_json.at("assets").contains(name))
+            {
+                asset = m_json.at("assets").at(name);
+                m_driver = extractDriverFromItem(asset);
+                std::string assetPath = asset.at("href").get<std::string>();
+                m_assetPath = handleRelativePath(m_path, assetPath);
+            }
+        }
+        if (m_driver.empty())
+            return false;
+        return true;
+    }
+
+    // If STAC ID matches *any* ID in supplied list, it will be accepted
+    bool Item::filterIds(std::vector<RegEx> ids)
+    {
+        if (!ids.empty())
+        {
+            for (auto& id: ids)
+                if (std::regex_match(m_id, id.regex()))
+                    return true;
+            return false;
+        }
+        return true;
+    }
+
+    bool Item::filterCol(std::vector<RegEx> ids)
+    {
+        if (!ids.empty())
+        {
+            if (!m_json.contains("collection"))
+                return false;
+
+            std::string colId = m_json.at("collection").get<std::string>();
+            for (auto& id: ids)
+                if (std::regex_match(colId, id.regex()))
+                    return true;
+
+            return false;
+        }
+        return true;
+
     }
 
 } //namespace stac
