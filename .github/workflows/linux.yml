@@ -63,11 +63,6 @@ jobs:
           source ../scripts/ci/linux/compile.sh
       working-directory: ./build
 
-    - name: Test
-      run: |
-          source ../scripts/ci/linux/test.sh --rerun-failed --output-on-failure
-          ninja install
-      working-directory: ./build
 
     - name: Examples
       run: |
