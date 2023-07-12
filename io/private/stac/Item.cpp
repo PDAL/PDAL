@@ -277,8 +277,7 @@ namespace stac
                 "'datetime' or 'start_datetime' and 'end_datetime'");
 
         // TODO validate the date ranges and other validation-type stuff
-        // that's going on in `prune`
-        //
+        // that's going on in `filter`
 
     }
 
