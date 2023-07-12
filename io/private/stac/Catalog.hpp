@@ -81,6 +81,7 @@ protected:
     ThreadPool& m_pool;
     bool m_root;
     bool m_validate;
+    std::string m_id;
 
     ErrorList m_errors;
 

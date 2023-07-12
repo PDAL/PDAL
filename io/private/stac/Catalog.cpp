@@ -67,8 +67,8 @@ namespace stac
         if (m_validate)
             validate();
 
-
         std::string catalogId = m_json.at("id").get<std::string>();
+        m_id = catalogId;
 
         auto itemLinks = m_json.at("links");
 
@@ -166,8 +166,9 @@ namespace stac
             for (const Item& i: catalog->items())
                 m_itemList.push_back(i);
 
-            ErrorList e = catalog->errors();
-            m_errors.insert(e.begin(), e.begin(), e.end());
+            ErrorList errorList = catalog->errors();
+            for (auto& e: errorList)
+                m_errors.push_back(e);
         }
 
     }
