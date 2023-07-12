@@ -48,7 +48,6 @@ public:
     ItemCollection(const NL::json& json,
         const std::string& icPath,
         const connector::Connector& connector,
-        const LogPtr& log,
         bool validate);
     ~ItemCollection();
 
@@ -58,16 +57,15 @@ public:
     };
 
     bool init(Filters filters, NL::json rawReaderArgs, SchemaUrls schemaUrls);
-    std::vector<Item> items();
+    ItemList items();
 
 private:
     NL::json m_json;
     std::string m_path;
     const connector::Connector& m_connector;
-    const LogPtr& m_log;
     bool m_validate;
 
-    std::vector<Item> m_itemList;
+    ItemList m_itemList;
 };
 
 }//stac

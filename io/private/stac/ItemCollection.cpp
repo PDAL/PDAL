@@ -43,9 +43,8 @@ namespace stac
     ItemCollection::ItemCollection(const NL::json& json,
             const std::string& icPath,
             const connector::Connector& connector,
-            const LogPtr& log,
             bool validate):
-        m_json(json), m_path(icPath), m_connector(connector), m_log(log),
+        m_json(json), m_path(icPath), m_connector(connector),
         m_validate(validate)
     {}
 
@@ -53,7 +52,7 @@ namespace stac
     ItemCollection::~ItemCollection()
     {}
 
-    std::vector<Item> ItemCollection::items()
+    ItemList ItemCollection::items()
     {
         return m_itemList;
     }
@@ -68,7 +67,7 @@ namespace stac
         NL::json itemList = m_json.at("features");
         for (NL::json& itemJson: itemList)
         {
-            Item item(itemJson, m_path, m_connector, m_log, m_validate);
+            Item item(itemJson, m_path, m_connector, m_validate);
             if (item.init(filters.itemFilters, rawReaderArgs, schemaUrls))
             {
                 m_itemList.push_back(item);
@@ -88,11 +87,11 @@ namespace stac
                     std::string nextLinkPath =
                         link.at("href").get<std::string>();
                     std::string nextAbsPath =
-                        stac::handleRelativePath(m_path, nextLinkPath);
+                        handleRelativePath(m_path, nextLinkPath);
                     NL::json nextJson = m_connector.getJson(nextAbsPath);
 
                     ItemCollection ic(nextJson, nextAbsPath, m_connector,
-                        m_log, m_validate);
+                        m_validate);
 
                     if (ic.init(filters, rawReaderArgs, schemaUrls))
                         for (auto& item: ic.items())
@@ -103,7 +102,6 @@ namespace stac
         return true;
     }
 
-
-
 }//stac
+
 }//pdal

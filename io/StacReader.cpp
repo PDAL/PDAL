@@ -185,7 +185,7 @@ void StacReader::addItem(stac::Item& item)
 
 void StacReader::handleItem(NL::json stacJson, std::string itemPath)
 {
-    stac::Item item(stacJson, m_filename, *m_p->m_connector, log(),
+    stac::Item item(stacJson, m_filename, *m_p->m_connector,
         m_args->validateSchema);
     if (item.init(m_p->m_itemFilters, m_args->rawReaderArgs, m_args->schemaUrls))
         addItem(item);
@@ -195,23 +195,32 @@ void StacReader::handleItem(NL::json stacJson, std::string itemPath)
 void StacReader::handleCatalog(NL::json stacJson, std::string catPath, bool isRoot)
 {
     stac::Catalog catalog(stacJson, catPath, *m_p->m_connector, *m_p->m_pool,
-        log(), m_args->validateSchema);
+        m_args->validateSchema);
 
     if (catalog.init(m_p->m_catFilters, m_args->rawReaderArgs,
-            m_args->schemaUrls, true))
+        m_args->schemaUrls, true))
     {
         for (stac::Item& item: catalog.items())
             addItem(item);
+    }
+    stac::ErrorList errors = catalog.errors();
+    if (errors.size())
+    {
+        for (auto& p: errors)
+        {
+            log()->get(LogLevel::Error) << "Failure fetching '" << p.first
+                << "' with error '" << p.second << "'";
+        }
     }
 }
 
 void StacReader::handleCollection(NL::json stacJson, std::string catPath, bool isRoot)
 {
     stac::Collection collection(stacJson, catPath, *m_p->m_connector,
-            *m_p->m_pool, log(), m_args->validateSchema);
+        *m_p->m_pool, m_args->validateSchema);
 
     if (collection.init(m_p->m_catFilters, m_args->rawReaderArgs,
-            m_args->schemaUrls, true))
+        m_args->schemaUrls, true))
     {
         for (stac::Item& item: collection.items())
             addItem(item);
@@ -220,7 +229,7 @@ void StacReader::handleCollection(NL::json stacJson, std::string catPath, bool i
 
 void StacReader::handleItemCollection(NL::json stacJson, std::string icPath)
 {
-    stac::ItemCollection ic(stacJson, icPath, *m_p->m_connector, log(),
+    stac::ItemCollection ic(stacJson, icPath, *m_p->m_connector,
             m_args->validateSchema);
 
     if (ic.init(m_p->m_icFilters, m_args->rawReaderArgs, m_args->schemaUrls))
@@ -234,7 +243,8 @@ void StacReader::initializeArgs()
 {
     if (!m_args->items.empty())
     {
-        log()->get(LogLevel::Debug) << "Selecting Items with ids: " << std::endl;
+        log()->get(LogLevel::Debug) <<
+            "Selecting Items with ids: " << std::endl;
         for (auto& id: m_args->items)
             log()->get(LogLevel::Debug) << "    " << id.m_str << std::endl;
         m_p->m_itemFilters.ids = m_args->items;
@@ -242,7 +252,8 @@ void StacReader::initializeArgs()
 
     if (!m_args->catalogs.empty())
     {
-        log()->get(LogLevel::Debug) << "Selecting Catalogs with ids: " << std::endl;
+        log()->get(LogLevel::Debug) <<
+            "Selecting Catalogs with ids: " << std::endl;
         for (auto& id: m_args->catalogs)
             log()->get(LogLevel::Debug) << "    " << id.m_str << std::endl;
         m_p->m_catFilters.ids = m_args->catalogs;
@@ -250,7 +261,8 @@ void StacReader::initializeArgs()
 
     if (!m_args->collections.empty())
     {
-        log()->get(LogLevel::Debug) << "Selecting Catalogs with ids: " << std::endl;
+        log()->get(LogLevel::Debug) <<
+            "Selecting Catalogs with ids: " << std::endl;
         for (auto& id: m_args->collections)
             log()->get(LogLevel::Debug) << "    " << id.m_str << std::endl;
         m_p->m_itemFilters.collections = m_args->collections;
@@ -261,7 +273,8 @@ void StacReader::initializeArgs()
     if (!m_args->dates.empty())
     {
         //TODO validate supplied dates?
-        log()->get(LogLevel::Debug) << "Dates selected: " << m_args->dates  << std::endl;
+        log()->get(LogLevel::Debug) <<
+            "Dates selected: " << m_args->dates << std::endl;
         m_p->m_itemFilters.dates = m_args->dates;
     }
 

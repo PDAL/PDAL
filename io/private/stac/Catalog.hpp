@@ -56,7 +56,6 @@ public:
         const std::string& catPath,
         const connector::Connector& connector,
         ThreadPool& pool,
-        const LogPtr& logPtr,
         bool validate);
     virtual ~Catalog();
 
@@ -68,7 +67,8 @@ public:
 
     bool init(Filters filters, NL::json rawReaderArgs, SchemaUrls schemaUrls,
             bool isRoot);
-    std::vector<Item> items();
+    ItemList& items();
+    ErrorList errors();
 
     virtual void validate();
     bool filter(Filters filters);
@@ -79,15 +79,13 @@ protected:
     const connector::Connector& m_connector;
     std::mutex m_mutex;
     ThreadPool& m_pool;
-    const LogPtr& m_log;
     bool m_root;
     bool m_validate;
 
-    std::deque<std::pair<std::string, std::string>> m_errors;
+    ErrorList m_errors;
 
-    bool m_initialized = false;
     std::vector<std::unique_ptr<Catalog>> m_subCatalogs = {};
-    std::vector<Item> m_itemList = {};
+    ItemList m_itemList = {};
     SchemaUrls m_schemaUrls;
     Options m_readerOptions;
 

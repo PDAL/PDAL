@@ -48,52 +48,65 @@
 namespace pdal
 {
 
-    class PDAL_DLL StacReader : public Reader, public Streamable
-    {
-        public:
+namespace stac {
+    class Item;
+    class Catalog;
+    class Collection;
+    class ItemCollection;
+};
 
-            StacReader();
-            ~StacReader();
 
-            std::string getName() const override;
+class PDAL_DLL StacReader : public Reader, public Streamable
+{
+    friend class stac::Item;
+    friend class stac::Catalog;
+    friend class stac::Collection;
+    friend class stac::ItemCollection;
 
-            using StringMap = std::map<std::string, std::string>;
+    public:
 
-        private:
+        StacReader();
+        ~StacReader();
 
-            struct Private;
-            struct Args;
+        std::string getName() const override;
 
-            std::unique_ptr<Args> m_args;
-            std::unique_ptr<Private> m_p;
+        using StringMap = std::map<std::string, std::string>;
 
-            StageFactory m_factory;
+    private:
 
-            void handleReaderArgs();
-            void addItem(stac::Item& item);
-            void handleItem(NL::json stacJson, std::string itemPath);
-            void handleCatalog(NL::json stacJson, std::string catPath, bool isRoot = false);
-            void handleCollection(NL::json stacJson, std::string catPath, bool isRoot = false);
-            void handleItemCollection(NL::json stacJson, std::string icPath);
-            void initializeArgs();
-            void validateSchema(NL::json stacJson);
-            Options setReaderOptions(const NL::json& readerArgs,
-                                     const std::string& driver) const;
-            void setConnectionForwards(StringMap& headers, StringMap& query);
-            std::string extractDriverFromItem(const NL::json& asset) const;
+        struct Private;
+        struct Args;
 
-            bool prune(NL::json stacJson);
+        std::unique_ptr<Args> m_args;
+        std::unique_ptr<Private> m_p;
 
-            virtual void initialize() override;
-            virtual void addArgs(ProgramArgs& args) override;
-            virtual QuickInfo inspect() override;
-            virtual void prepared(PointTableRef table) override;
-            virtual void ready(PointTableRef table) override;
-            virtual point_count_t read(PointViewPtr view, point_count_t num) override;
-            virtual bool processOne(PointRef& point) override;
-            virtual PointViewSet run(PointViewPtr view) override;
+        StageFactory m_factory;
 
-            MergeFilter m_merge;
+        void handleReaderArgs();
+        void addItem(stac::Item& item);
+        void handleItem(NL::json stacJson, std::string itemPath);
+        void handleCatalog(NL::json stacJson, std::string catPath, bool isRoot = false);
+        void handleCollection(NL::json stacJson, std::string catPath, bool isRoot = false);
+        void handleItemCollection(NL::json stacJson, std::string icPath);
+        void initializeArgs();
+        void validateSchema(NL::json stacJson);
+        Options setReaderOptions(const NL::json& readerArgs,
+                                    const std::string& driver) const;
+        void setConnectionForwards(StringMap& headers, StringMap& query);
+        std::string extractDriverFromItem(const NL::json& asset) const;
 
-    };
+        bool prune(NL::json stacJson);
+
+        virtual void initialize() override;
+        virtual void addArgs(ProgramArgs& args) override;
+        virtual QuickInfo inspect() override;
+        virtual void prepared(PointTableRef table) override;
+        virtual void ready(PointTableRef table) override;
+        virtual point_count_t read(PointViewPtr view, point_count_t num) override;
+        virtual bool processOne(PointRef& point) override;
+        virtual PointViewSet run(PointViewPtr view) override;
+
+        MergeFilter m_merge;
+
+};
 }

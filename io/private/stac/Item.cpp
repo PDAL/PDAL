@@ -48,9 +48,8 @@ namespace stac
     Item::Item(const NL::json& json,
             const std::string& itemPath,
             const connector::Connector& connector,
-            const LogPtr& log,
             bool validate):
-        m_json(json), m_path(itemPath), m_connector(connector), m_log(log),
+        m_json(json), m_path(itemPath), m_connector(connector),
         m_validate(validate)
     {}
 
@@ -59,7 +58,6 @@ namespace stac
 
     Item::Item(const Item& item):
         m_json(item.m_json), m_path(item.m_path), m_connector(item.m_connector),
-        m_log(item.m_log), m_initialized(item.m_initialized),
         m_driver(item.m_driver), m_schemaUrls(item.m_schemaUrls),
         m_readerOptions(item.m_readerOptions)
     {}
@@ -67,6 +65,7 @@ namespace stac
     bool Item::init(Filters filters, NL::json rawReaderArgs,
             SchemaUrls schemaUrls)
     {
+
         if (filter(filters))
             return false;
 
@@ -78,7 +77,6 @@ namespace stac
         NL::json readerArgs = handleReaderArgs(rawReaderArgs);
         m_readerOptions = setReaderOptions(readerArgs, m_driver);
         m_readerOptions.add("filename", m_assetPath);
-        m_initialized = true;
         return true;
     }
 
@@ -114,8 +112,6 @@ namespace stac
             if (!opts.is_object())
                 throw pdal_error("Reader Args for reader '" + m_driver + "' must be a valid JSON object");
 
-        if (!rawReaderArgs.empty())
-            m_log->get(LogLevel::Debug) << "Reader Args: " << rawReaderArgs.dump() << std::endl;
         NL::json readerArgs;
         for (NL::json& readerPipeline: rawReaderArgs)
         {
@@ -234,18 +230,21 @@ namespace stac
             fetch,
             [](const std::string &, const std::string &) {}
         );
-        for (auto& extSchemaUrl: m_json.at("stac_extensions"))
-        {
-            m_log->get(LogLevel::Debug) << "Processing extension "
-                << extSchemaUrl << std::endl;
-            NL::json schemaJson = m_connector.getJson(extSchemaUrl);
-            val.set_root_schema(schemaJson);
-            val.validate(m_json);
-        }
 
+        // Validate against base Item schema first
         NL::json schemaJson = m_connector.getJson(m_schemaUrls.item);
         val.set_root_schema(schemaJson);
         val.validate(m_json);
+
+        // Validate against stac extensions if present
+        if (m_json.contains("stac_extensions"))
+            for (auto& extSchemaUrl: m_json.at("stac_extensions"))
+            {
+                NL::json schemaJson = m_connector.getJson(extSchemaUrl);
+                val.set_root_schema(schemaJson);
+                val.validate(m_json);
+            }
+
     }
 
     void validateForFilter(NL::json json)
@@ -361,7 +360,7 @@ namespace stac
             return true;
             // throw pdal_error("None of the asset names supplied exist in the STAC object.");
 
-        std::string itemId = m_json.at("id");
+        std::string itemId = m_json.at("id").get<std::string>();
         bool idFlag = true;
         if (!filters.ids.empty())
         {
@@ -410,7 +409,7 @@ namespace stac
             if (properties.contains("datetime") &&
                 properties.at("datetime").type() != NL::detail::value_t::null)
             {
-                std::string stacDate = properties.at("datetime");
+                std::string stacDate = properties.at("datetime").get<std::string>();
 
                 // TODO This would remove three lines of stuff and
                 // be much clearer
@@ -480,13 +479,6 @@ namespace stac
         {
             for (auto &it: filters.properties.items())
             {
-                if (!properties.contains(it.key()))
-                {
-                    m_log->get(LogLevel::Warning) << "STAC Item does not contain "
-                        "property " << it.key() << ". Continuing." << std::endl;
-                    continue;
-                }
-
                 NL::detail::value_t type = properties.at(it.key()).type();
                 NL::detail::value_t argType = it.value().type();
                 //Array of possibilities are Or'd together
@@ -553,7 +545,7 @@ namespace stac
                 // TODO if we have a bad bbox?
                 if (bboxJson.size() != 4 || bboxJson.size() != 6)
                 {
-                    m_log->get(LogLevel::Error) << "bbox for '" << itemId << "' is not valid";
+                    throw pdal_error("bbox for '" + itemId + "' is not valid");
                 }
 
                 if (bboxJson.size() == 4)
@@ -580,8 +572,6 @@ namespace stac
                 }
             }
         }
-
-        m_log->get(LogLevel::Debug) << "Including: " << itemId << std::endl;
 
         return false;
     }

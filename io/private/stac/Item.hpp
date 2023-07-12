@@ -49,6 +49,12 @@ namespace pdal
 namespace stac
 {
 
+class Item;
+
+typedef std::pair<std::string, std::string> StacError;
+typedef std::deque<StacError> ErrorList;
+typedef std::vector<Item> ItemList;
+
 struct SchemaUrls
 {
     std::string catalog;
@@ -63,9 +69,7 @@ public:
     Item(const NL::json& json,
         const std::string& itemPath,
         const connector::Connector& connector,
-        const LogPtr& log,
-        bool validate
-        );
+        bool validate);
 
     ~Item();
     Item(const Item& item);
@@ -94,21 +98,20 @@ private:
     const NL::json m_json;
     const std::string m_path;
     const connector::Connector& m_connector;
-    const LogPtr& m_log;
     bool m_validate;
+    std::mutex m_mutex;
 
-    bool m_initialized = false;
     StageFactory m_factory;
     std::string m_driver;
     SchemaUrls m_schemaUrls;
     Options m_readerOptions;
-    // NL::json m_assets;
     std::string m_assetPath;
 
     std::string extractDriverFromItem(const NL::json& asset) const;
     Options setReaderOptions(const NL::json& readerArgs, const std::string& driver) const;
 
 };
+
 
 }
 }

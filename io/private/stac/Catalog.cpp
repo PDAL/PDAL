@@ -48,10 +48,9 @@ namespace stac
             const std::string& catPath,
             const connector::Connector& connector,
             ThreadPool& pool,
-            const LogPtr& logPtr,
             bool validate) :
         m_json(json), m_path(catPath), m_connector(connector),
-        m_pool(pool), m_log(logPtr), m_validate(validate)
+        m_pool(pool), m_validate(validate)
     {}
 
     Catalog::~Catalog()
@@ -73,13 +72,12 @@ namespace stac
 
         auto itemLinks = m_json.at("links");
 
-        m_log->get(LogLevel::Debug) << "Filtering..." << std::endl;
-
         for (const auto& link: itemLinks)
         {
 
             if (!link.count("href") || !link.count("rel"))
-                throw pdal::pdal_error("item does not contain 'href' or 'rel'");
+                throw pdal::pdal_error("Link does not contain 'href' or 'rel': "
+                    + link.dump());
 
             const std::string linkType = link.at("rel").get<std::string>();
             const std::string linkPath = link.at("href").get<std::string>();
@@ -92,8 +90,7 @@ namespace stac
                     if (linkType == "item")
                     {
                         NL::json itemJson = m_connector.getJson(absLinkPath);
-                        Item item(itemJson, absLinkPath, m_connector, m_log,
-                            m_validate);
+                        Item item(itemJson, absLinkPath, m_connector, m_validate);
 
                         bool valid = item.init(filters.itemFilters,
                             rawReaderArgs, m_schemaUrls);
@@ -108,7 +105,7 @@ namespace stac
                         NL::json catalogJson = m_connector.getJson(absLinkPath);
                         std::unique_ptr<Catalog> catalog(new Catalog(
                             catalogJson, absLinkPath, m_connector, m_pool,
-                            m_log, m_validate));
+                            m_validate));
 
                         bool valid = catalog->init(filters, rawReaderArgs,
                             m_schemaUrls);
@@ -123,43 +120,32 @@ namespace stac
                         NL::json collectionJson = m_connector.getJson(absLinkPath);
                         std::unique_ptr<Collection> collection(new Collection(
                             collectionJson, absLinkPath, m_connector, m_pool,
-                            m_log, m_validate));
+                            m_validate));
 
                         bool valid = collection->init(filters, rawReaderArgs,
                             m_schemaUrls);
                         if (valid)
                         {
                             std::lock_guard<std::mutex> lock(m_mutex);
-                            // Catalog* cat = dynamic_cast<Catalog*>(collection);
-                            // if (cat) {
-                                // std::unique_ptr<Catalog> newcat(new Catalog(*cat));
-                                m_subCatalogs.push_back(std::move(collection));
-                            // }
+                            m_subCatalogs.push_back(std::move(collection));
                         }
                     }
                 }
                 catch (std::exception& e)
                 {
                     std::lock_guard<std::mutex> lock(m_mutex);
-                    std::pair<std::string, std::string> p {absLinkPath, e.what()};
+                    StacError p {absLinkPath, e.what()};
                     m_errors.push_back(p);
                 }
                 catch (...)
                 {
                     std::lock_guard<std::mutex> lock(m_mutex);
-                    m_errors.push_back({absLinkPath, "Unknown error"});
+                    StacError p {absLinkPath, "Unknown error"};
+                    m_errors.push_back(p);
                 }
             });
         }
 
-        if (m_errors.size())
-        {
-            for (auto& p: m_errors)
-            {
-                m_log->get(LogLevel::Error) << "Failure fetching '" << p.first
-                    << "' with error '" << p.second << "'";
-            }
-        }
 
         if (isRoot)
         {
@@ -168,7 +154,6 @@ namespace stac
             handleNested();
         }
 
-        m_initialized = true;
         return true;
     }
 
@@ -177,14 +162,24 @@ namespace stac
     void Catalog::handleNested()
     {
         for (auto& catalog: m_subCatalogs)
-            // m_itemList.push_back(std::move(catalog->items()));
-            for (Item& i: catalog->items())
+        {
+            for (const Item& i: catalog->items())
                 m_itemList.push_back(i);
+
+            ErrorList e = catalog->errors();
+            m_errors.insert(e.begin(), e.begin(), e.end());
+        }
+
     }
 
-    std::vector<Item> Catalog::items()
+    ItemList& Catalog::items()
     {
         return m_itemList;
+    }
+
+    ErrorList Catalog::errors()
+    {
+        return m_errors;
     }
 
     void Catalog::validate()

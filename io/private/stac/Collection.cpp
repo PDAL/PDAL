@@ -51,16 +51,20 @@ namespace stac
             fetch,
             [](const std::string &, const std::string &) {}
         );
-        for (auto& extSchemaUrl: m_json.at("stac_extensions"))
-        {
-            m_log->get(LogLevel::Debug) << "Processing extension " << extSchemaUrl << std::endl;
-            NL::json schemaJson = m_connector.getJson(extSchemaUrl);
-            val.set_root_schema(schemaJson);
-            val.validate(m_json);
-        }
+
+        // Validate against base Item schema first
         NL::json schemaJson = m_connector.getJson(m_schemaUrls.collection);
         val.set_root_schema(schemaJson);
         val.validate(m_json);
+
+        // Validate against stac extensions if present
+        if (m_json.contains("stac_extensions"))
+            for (auto& extSchemaUrl: m_json.at("stac_extensions"))
+            {
+                NL::json schemaJson = m_connector.getJson(extSchemaUrl);
+                val.set_root_schema(schemaJson);
+                val.validate(m_json);
+            }
     }
 
 
