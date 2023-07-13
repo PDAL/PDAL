@@ -1,4 +1,4 @@
 #!/bin/bash
 
-ninja --verbose
+ninja
 ninja install

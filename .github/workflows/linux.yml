@@ -63,6 +63,10 @@ jobs:
           source ../scripts/ci/linux/compile.sh
       working-directory: ./build
 
+    - name: Test
+      run: |
+          source ../scripts/ci/linux/test.sh
+      working-directory: ./build
 
     - name: Examples
       run: |
