@@ -877,13 +877,27 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
     ostream << y;
     ostream << z;
 
-    ostream << point.getFieldAs<uint16_t>(Id::Intensity);
+    uint16_t intensity(0);
+    if (point.hasDim(Id::Intensity))
+        intensity = point.getFieldAs<uint16_t>(Id::Intensity);
+    ostream << intensity;
 
-    uint8_t scanChannel = point.getFieldAs<uint8_t>(Id::ScanChannel);
-    uint8_t scanDirectionFlag = point.getFieldAs<uint8_t>(Id::ScanDirectionFlag);
-    uint8_t edgeOfFlightLine = point.getFieldAs<uint8_t>(Id::EdgeOfFlightLine);
-    uint8_t classification = point.getFieldAs<uint8_t>(Id::Classification);
-    uint8_t classFlags;
+    uint8_t scanChannel(0);
+    if (point.hasDim(Id::ScanChannel))
+        scanChannel = point.getFieldAs<uint8_t>(Id::ScanChannel);
+
+    uint8_t scanDirectionFlag(0);
+    if (point.hasDim(Id::ScanDirectionFlag))
+        scanDirectionFlag = point.getFieldAs<uint8_t>(Id::ScanDirectionFlag);
+
+    uint8_t edgeOfFlightLine(0);
+    if (point.hasDim(Id::EdgeOfFlightLine))
+        edgeOfFlightLine = point.getFieldAs<uint8_t>(Id::EdgeOfFlightLine);
+
+    uint8_t classification(0);
+    if (point.hasDim(Id::Classification))
+        classification = point.getFieldAs<uint8_t>(Id::Classification);
+    uint8_t classFlags(0);
     if (point.hasDim(Id::ClassFlags))
     {
         // source file is PDRF >= 6
@@ -931,22 +945,32 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
 
     ostream << classification;
 
-    uint8_t userData = point.getFieldAs<uint8_t>(Id::UserData);
+    uint8_t userData(0);
+    if (point.hasDim(Id::UserData))
+        userData = point.getFieldAs<uint8_t>(Id::UserData);
+
     if (has14PointFormat)
     {
          // Guaranteed to fit if scan angle rank isn't wonky.
-        int16_t scanAngleRank =
-            static_cast<int16_t>(std::round(
-                point.getFieldAs<float>(Id::ScanAngleRank) / .006f));
+        int16_t scanAngleRank(0);
+        if (point.hasDim(Id::ScanAngleRank) )
+            scanAngleRank =
+                static_cast<int16_t>(std::round(
+                    point.getFieldAs<float>(Id::ScanAngleRank) / .006f));
         ostream << userData << scanAngleRank;
     }
     else
     {
-        int8_t scanAngleRank = point.getFieldAs<int8_t>(Id::ScanAngleRank);
+        int8_t scanAngleRank(0);
+        if (point.hasDim(Id::ScanAngleRank) )
+            scanAngleRank = point.getFieldAs<int8_t>(Id::ScanAngleRank);
         ostream << scanAngleRank << userData;
     }
 
-    ostream << point.getFieldAs<uint16_t>(Id::PointSourceId);
+    uint16_t pointSourceId(0);
+    if (point.hasDim(Id::PointSourceId))
+        pointSourceId = point.getFieldAs<uint16_t>(Id::PointSourceId);
+    ostream << pointSourceId;
 
     if (d->header.hasTime())
         ostream << point.getFieldAs<double>(Id::GpsTime);
