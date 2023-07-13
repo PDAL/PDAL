@@ -240,14 +240,20 @@ OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs)
     if (!newGeom)
         throw pdal_error("Couldn't convert GeoJSON to geometry.");
 
-    if (root.find("srs") != root.end())
+    if ((root.find("srs") != root.end()) || (root.find("crs") != root.end()))
     {
+        NL::json node;
+
         // We have an 'srs' object
-        NL::json& node = root.at("srs");
+        if (root.contains("crs"))
+            node = root.at("crs");
+        if (root.contains("srs"))
+            node = root.at("srs");
+
         if (node.is_string())
             srs = node.get<std::string>();
         else
-            throw pdal_error ("'srs' node was not a string");
+            throw pdal_error ("'srs' or 'crs' node was not a string");
 
         srs.erase(std::remove(srs.begin(), srs.end(), '\\'), srs.end());
     }
