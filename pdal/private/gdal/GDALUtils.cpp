@@ -240,7 +240,7 @@ OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs)
     if (!newGeom)
         throw pdal_error("Couldn't convert GeoJSON to geometry.");
 
-    if ((root.find("srs") != root.end()) || (root.find("crs") != root.end()))
+    if (root.contains("crs") || root.contains("srs"))
     {
         NL::json node;
 
