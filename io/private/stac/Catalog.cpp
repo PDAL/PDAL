@@ -166,8 +166,7 @@ namespace stac
             for (const Item& i: catalog->items())
                 m_itemList.push_back(i);
 
-            ErrorList errorList = catalog->errors();
-            for (auto& e: errorList)
+            for (StacError& e: catalog->errors())
                 m_errors.push_back(e);
         }
 

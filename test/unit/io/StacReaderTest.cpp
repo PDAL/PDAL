@@ -440,6 +440,24 @@ TEST(StacReaderTest, bounds_prune_reject_test)
     EXPECT_THROW(QuickInfo qi = reader.preview(), pdal_error);
 }
 
+TEST(StacReaderTest, wrench_test)
+{
+    Options options;
+    options.add("filename", Support::datapath("stac/wrench.vpc"));
+    options.add("validate_schema", "true");
+
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
+
+    PointTable table;
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    PointViewPtr view = *viewSet.begin();
+
+    EXPECT_EQ(view->size(), 111065);
+}
+
 #ifndef _WIN32
 
 TEST(StacReaderTest, schema_validate_test)

@@ -290,8 +290,9 @@ namespace stac
                 std::string desired = val.get<std::string>();
                 // std::regex desired(d);
                 std::string value = properties.at(key).get<std::string>();
-                if (value != desired)
-                    return false;
+                return value == desired;
+                // if (value != desired)
+                //     return false;
                 // if (!std::regex_match(value, desired))
                 //     return false;
                 break;
@@ -300,32 +301,36 @@ namespace stac
             {
                 uint64_t value = properties.at(key).get<uint64_t>();
                 uint64_t desired = val.get<uint64_t>();
-                if (value != desired)
-                    return false;
+                return value == desired;
+                // if (value != desired)
+                //     return false;
                 break;
             }
             case NL::detail::value_t::number_integer:
             {
                 int value = properties.at(key).get<int>();
                 int desired = val.get<int>();
-                if (value != desired)
-                    return false;
+                return value == desired;
+                // if (value != desired)
+                //     return false;
                 break;
             }
             case NL::detail::value_t::number_float:
             {
                 int value = properties.at(key).get<double>();
                 int desired = val.get<double>();
-                if (value != desired)
-                    return false;
+                return value == desired;
+                // if (value != desired)
+                //     return false;
                 break;
             }
             case NL::detail::value_t::boolean:
             {
                 bool value = properties.at(key).get<bool>();
                 bool desired = val.get<bool>();
-                if (value != desired)
-                    return false;
+                return value == desired;
+                // if (value != desired)
+                //     return false;
                 break;
             }
             default:

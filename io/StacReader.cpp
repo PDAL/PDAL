@@ -103,7 +103,7 @@ static PluginInfo const stacinfo
 {
     "readers.stac",
     "STAC Reader",
-    "http://pdal.io/stages/readers.stac.html"
+    "http://pdal.io/stages/readers.stac.html",
 };
 
 CREATE_STATIC_STAGE(StacReader, stacinfo)
