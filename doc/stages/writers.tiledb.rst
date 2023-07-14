@@ -42,15 +42,15 @@ data_tile_capacity
   Number of points per tile. Not used when `append=true`. [Optional]
 
 x_tile_size
-  Tile size (x). Not used when `append=true`. [Optional]
+  Tile size (x). Floating point value used for determining on-disk data order. Not used when `append=true`. [Optional]
 
 y_tile_size
-  Tile size (y). Not used when `append=true`. [Optional]
+  Tile size (y). Floating point value used for determining on-disk data order. Not used when `append=true`. [Optional]
 
 z_tile_size
-  Tile size (z). Not used when `append=true`. [Optional]
-  
-time_tile_size  
+  Tile size (z). Floating point value used for determining on-disk data order. Not used when `append=true`. [Optional]
+
+time_tile_size
   Tile size (time). Not used when `append=true`. [Optional]
 
 x_domain_st
@@ -76,13 +76,13 @@ time_domain_st
 
 time_domain_end
   Domain maximum for GpsTime. Not used when `append=true`. [Optional]
-  
+
 use_time_dim
   Use GpsTime coordinate data as an array dimension instead of an array attribute. Not used when `append=true`. [Optional]
 
 time_first
   Put the GpsTime dimension first instead of last. Only used when `use_time_dim=true`. Not used when `append=true`. Default is `false`. [Optional]
-  
+
 chunk_size
   Point cache size for chunked writes. [Optional]
 

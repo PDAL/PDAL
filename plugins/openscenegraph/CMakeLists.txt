@@ -1,3 +1,10 @@
+cmake_minimum_required(VERSION 3.5)
+
+if (STANDALONE)
+    project(pdal-openscenegraph)
+    include(../../cmake/standalone.cmake NO_POLICY_SCOPE)
+endif(STANDALONE)
+
 #
 # OpenScenGraph plugin CMake configuration
 #
@@ -15,6 +22,7 @@ PDAL_ADD_PLUGIN(reader_libname reader openscenegraph
         ${OPENTHREADS_LIBRARY}
         ${OSG_LIBRARY}
         ${OSGDB_LIBRARY}
+        ${PDAL_LIBRARIES}
     INCLUDES
         ${OSG_INCLUDE_DIRS}
 )

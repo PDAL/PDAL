@@ -1,15 +1,10 @@
 cmake_minimum_required(VERSION 3.5)
 
 if (STANDALONE)
-cmake_minimum_required(VERSION 3.5)
-project(rivlib_pdal)
-set(ROOT_DIR "../../${PROJECT_SOURCE_DIR}")
-include(../../cmake/common.cmake NO_POLICY_SCOPE)
-include(FeatureSummary)
-
-
-find_package(PDAL COMPONENTS REQUIRED)
+    project(pdal-rxp)
+    include("${CMAKE_SOURCE_DIR}/../../cmake/standalone.cmake" )
 endif(STANDALONE)
+
 set(RXP_TEST_NAME rxptest)
 
 find_package(RiVLib COMPONENTS scanlib REQUIRED)

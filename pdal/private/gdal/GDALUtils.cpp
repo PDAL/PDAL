@@ -209,61 +209,55 @@ OGRGeometry *createFromWkt(const std::string& s, std::string& srs)
 */
 OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs)
 {
-    // Go through a supposed JSON object string, looking for the
-    // closing brace.  Return just past its position.
-    auto findEnd = [](const std::string& s, std::string::size_type pos)
+    NL::json root;
+
+    std::string json(s);
+    json.erase(std::remove(json.begin(), json.end(), '\\'), json.end());
+    try
     {
-        bool inString(false);
-        std::string check("{}\"");
-        std::string::size_type startPos(pos);
-        pos = Utils::extractSpaces(s, pos);
-        if (s[pos++] != '{')
-            return std::string::npos;
-        int cnt = 1;
-        while (cnt && pos != std::string::npos)
-        {
-            pos = s.find_first_of(check, pos);
-            if (pos == std::string::npos)
-                return pos;
-            if (s[pos] == '"')
-            {
-                // We're guaranteed that the beginning seq. of chars is such
-                // we won't check an invalid ref.
-                if (!inString || s[pos - 1] != '\\' || s[pos - 2] == '\\')
-                    inString = !inString;
-            }
-            else if (!inString && s[pos] == '{')
-                cnt++;
-            else if (!inString && s[pos] == '}')
-                cnt--;
-            pos++;
-        }
-        if (cnt != 0)
-            return std::string::npos;
-        return pos;
-    };
+        root = NL::json::parse(json, /* callback */ nullptr,
+                                  /* allow exceptions */ true,
+                                  /* ignore_comments */ false);
+    }
+    catch (NL::json::parse_error& err)
+    {
+        // Look for a right bracket -- this indicates the start of the
+        // actual message from the parse error.
+        std::string s(err.what());
+        auto pos = s.find("]");
+        if (pos != std::string::npos)
+            s = s.substr(pos + 1);
+        std::stringstream msg;
 
-    // Search the string for the end of the JSON.
-    std::string::size_type pos = findEnd(s, 0);
+        msg << "Failed to parse GeoJSON with error: " <<  s;
+        throw pdal_error(msg.str());
+    }
 
-    // Just send the JSON stuff to the OGR function.
-    std::string ss = s.substr(0, pos);
 
-    OGRGeometry *newGeom = OGRGeometryFactory::createFromGeoJson(ss.data());
+    std::string text;
+    text = root.dump();
+    OGRGeometry *newGeom = OGRGeometryFactory::createFromGeoJson(text.c_str());
     if (!newGeom)
         throw pdal_error("Couldn't convert GeoJSON to geometry.");
 
-    srs = s.substr(pos);
-	pos = Utils::extractSpaces(srs, 0);
-	if (pos == srs.size())
-		srs.clear();
-    else
+    if (root.contains("crs") || root.contains("srs"))
     {
-        if (srs[pos++] != '/')
-            throw pdal_error("Invalid character following valid geometry.");
-        pos += Utils::extractSpaces(srs, pos);
-        srs = srs.substr(pos);
+        NL::json node;
+
+        // We have an 'srs' object
+        if (root.contains("crs"))
+            node = root.at("crs");
+        if (root.contains("srs"))
+            node = root.at("srs");
+
+        if (node.is_string())
+            srs = node.get<std::string>();
+        else
+            throw pdal_error ("'srs' or 'crs' node was not a string");
+
+        srs.erase(std::remove(srs.begin(), srs.end(), '\\'), srs.end());
     }
+
     return newGeom;
 }
 

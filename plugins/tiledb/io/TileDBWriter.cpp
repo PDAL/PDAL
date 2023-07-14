@@ -63,18 +63,18 @@ struct TileDBWriter::Args
     std::string m_arrayName;
     std::string m_cfgFileName;
     size_t m_tile_capacity;
-    size_t m_x_tile_size;
-    size_t m_y_tile_size;
-    size_t m_z_tile_size;
-    size_t m_time_tile_size;
-    float m_x_domain_st;
-    float m_x_domain_end;
-    float m_y_domain_st;
-    float m_y_domain_end;
-    float m_z_domain_st;
-    float m_z_domain_end;
-    float m_time_domain_st;
-    float m_time_domain_end;
+    double m_x_tile_size;
+    double m_y_tile_size;
+    double m_z_tile_size;
+    double m_time_tile_size;
+    double m_x_domain_st;
+    double m_x_domain_end;
+    double m_y_domain_st;
+    double m_y_domain_end;
+    double m_z_domain_st;
+    double m_z_domain_end;
+    double m_time_domain_st;
+    double m_time_domain_end;
     size_t m_cache_size;
     bool m_stats;
     std::string m_compressor;
@@ -106,30 +106,30 @@ void TileDBWriter::addArgs(ProgramArgs& args)
              m_args->m_cfgFileName);
     args.add("data_tile_capacity", "TileDB tile capacity",
              m_args->m_tile_capacity, size_t(100000));
-    args.add("x_tile_size", "TileDB tile size", m_args->m_x_tile_size,
-             size_t(0));
-    args.add("y_tile_size", "TileDB tile size", m_args->m_y_tile_size,
-             size_t(0));
-    args.add("z_tile_size", "TileDB tile size", m_args->m_z_tile_size,
-             size_t(0));
-    args.add("time_tile_size", "TileDB tile size", m_args->m_time_tile_size,
-             size_t(0));
-    args.add("x_domain_st", "TileDB start of domain in X",
-             m_args->m_x_domain_st, 0.f);
-    args.add("x_domain_end", "TileDB end of domain in X",
-             m_args->m_x_domain_end, 0.f);
-    args.add("y_domain_st", "TileDB start of domain in Y",
-             m_args->m_y_domain_st, 0.f);
-    args.add("y_domain_end", "TileDB end of domain in Y",
-             m_args->m_y_domain_end, 0.f);
-    args.add("z_domain_st", "TileDB start of domain in Z",
-             m_args->m_z_domain_st, 0.f);
-    args.add("z_domain_end", "TileDB end of domain in Z",
-             m_args->m_z_domain_end, 0.f);
-    args.add("time_domain_st", "TileDB start of domain in GpsTime",
-             m_args->m_time_domain_st, 0.f);
-    args.add("time_domain_end", "TileDB end of domain in GpsTime",
-             m_args->m_time_domain_end, 0.f);
+    args.add<double>("x_tile_size", "TileDB tile size", m_args->m_x_tile_size,
+                     0.0);
+    args.add<double>("y_tile_size", "TileDB tile size", m_args->m_y_tile_size,
+                     0.0);
+    args.add<double>("z_tile_size", "TileDB tile size", m_args->m_z_tile_size,
+                     0.0);
+    args.add<double>("time_tile_size", "TileDB tile size",
+                     m_args->m_time_tile_size, 0.0);
+    args.add<double>("x_domain_st", "TileDB start of domain in X",
+                     m_args->m_x_domain_st, 0.0);
+    args.add<double>("x_domain_end", "TileDB end of domain in X",
+                     m_args->m_x_domain_end, 0.0);
+    args.add<double>("y_domain_st", "TileDB start of domain in Y",
+                     m_args->m_y_domain_st, 0.0);
+    args.add<double>("y_domain_end", "TileDB end of domain in Y",
+                     m_args->m_y_domain_end, 0.0);
+    args.add<double>("z_domain_st", "TileDB start of domain in Z",
+                     m_args->m_z_domain_st, 0.0);
+    args.add<double>("z_domain_end", "TileDB end of domain in Z",
+                     m_args->m_z_domain_end, 0.0);
+    args.add<double>("time_domain_st", "TileDB start of domain in GpsTime",
+                     m_args->m_time_domain_st, 0.0);
+    args.add<double>("time_domain_end", "TileDB end of domain in GpsTime",
+                     m_args->m_time_domain_end, 0.0);
     args.add("chunk_size", "Point cache size for chunked writes",
              m_args->m_cache_size, size_t(10000));
     args.add("stats", "Dump TileDB query stats to stdout", m_args->m_stats,

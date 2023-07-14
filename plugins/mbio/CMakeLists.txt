@@ -1,3 +1,10 @@
+cmake_minimum_required(VERSION 3.5)
+
+if (STANDALONE)
+    project(pdal-mbio)
+    include(../../cmake/standalone.cmake NO_POLICY_SCOPE)
+endif(STANDALONE)
+
 #
 # MBIO plugin CMake configuration (MB-System)
 #
@@ -11,6 +18,7 @@ if (MBSYSTEM_FOUND)
             io/MbError.cpp
         LINK_WITH
             ${MBSYSTEM_LIBRARY}
+            ${PDAL_LIBRARIES}
         INCLUDES
             ${PDAL_IO_DIR}
             ${MBSYSTEM_INCLUDE_DIR}

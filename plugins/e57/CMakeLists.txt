@@ -1,3 +1,9 @@
+cmake_minimum_required(VERSION 3.5)
+
+if (STANDALONE)
+    include(../../cmake/standalone.cmake NO_POLICY_SCOPE)
+endif(STANDALONE)
+
 
 add_subdirectory(libE57Format)
 
@@ -14,7 +20,7 @@ PDAL_ADD_PLUGIN(e57plugin_reader reader e57
     INCLUDES
         libE57Format/include
 )
-target_compile_definitions(${e57plugin_reader}	
+target_compile_definitions(${e57plugin_reader}
     PRIVATE
         ARBITER_ZLIB
         ARBITER_DLL_IMPORT

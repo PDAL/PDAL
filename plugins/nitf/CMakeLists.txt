@@ -1,6 +1,18 @@
+cmake_minimum_required(VERSION 3.5)
+
+if (STANDALONE)
+    project(pdal-nitf)
+    include("${CMAKE_SOURCE_DIR}/../../cmake/standalone.cmake" )
+    include(${PDAL_CMAKE_DIR}/arbiter.cmake)
+    include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
+    add_subdirectory("${CMAKE_SOURCE_DIR}/../../vendor/arbiter" "vendor/arbiter")
+
+endif(STANDALONE)
+
 #
 # NITF plugin CMake configuration
 #
+
 include(${PDAL_CMAKE_DIR}/nitro.cmake)
 include(${PDAL_CMAKE_DIR}/arbiter.cmake)
 if (NOT NITRO_FOUND)
@@ -20,6 +32,7 @@ PDAL_ADD_PLUGIN(reader_libname reader nitf
     LINK_WITH
         ${NITRO_LIBRARIES}
         ${PDAL_ARBITER_LIB_NAME}
+        ${PDAL_LIBRARIES}
 )
 if (WIN32)
     target_compile_definitions(${reader_libname}
@@ -38,6 +51,8 @@ PDAL_ADD_PLUGIN(writer_libname writer nitf
     LINK_WITH
         ${NITRO_LIBRARIES}
         ${GDAL_LIBRARY}
+        ${PDAL_LIBRARIES}
+        ${PDAL_ARBITER_LIB_NAME}
     INCLUDES
         ${GDAL_INCLUDE_DIR}
 )
