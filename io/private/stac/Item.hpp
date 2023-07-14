@@ -54,6 +54,7 @@ class Item;
 typedef std::pair<std::string, std::string> StacError;
 typedef std::deque<StacError> ErrorList;
 typedef std::vector<Item> ItemList;
+typedef std::deque<std::pair<std::time_t, std::time_t>> DatePairs;
 
 struct SchemaUrls
 {
@@ -78,7 +79,7 @@ public:
         std::vector<RegEx> ids;
         SrsBounds bounds;
         NL::json properties;
-        NL::json::array_t dates;
+        DatePairs datePairs;
         std::vector<std::string> assetNames;
         std::vector<RegEx> collections;
     };
@@ -115,7 +116,7 @@ private:
     bool filterAssets(std::vector<std::string> assetNames);
     bool filterIds(std::vector<RegEx> ids);
     bool filterCol(std::vector<RegEx> ids);
-    bool filterDates(NL::json::array_t dates);
+    bool filterDates(DatePairs dates);
     bool filterProperties(NL::json props);
     bool filterBounds(SrsBounds bounds);
 

@@ -288,13 +288,8 @@ namespace stac
             case NL::detail::value_t::string:
             {
                 std::string desired = val.get<std::string>();
-                // std::regex desired(d);
                 std::string value = properties.at(key).get<std::string>();
                 return value == desired;
-                // if (value != desired)
-                //     return false;
-                // if (!std::regex_match(value, desired))
-                //     return false;
                 break;
             }
             case NL::detail::value_t::number_unsigned:
@@ -302,8 +297,6 @@ namespace stac
                 uint64_t value = properties.at(key).get<uint64_t>();
                 uint64_t desired = val.get<uint64_t>();
                 return value == desired;
-                // if (value != desired)
-                //     return false;
                 break;
             }
             case NL::detail::value_t::number_integer:
@@ -311,8 +304,6 @@ namespace stac
                 int value = properties.at(key).get<int>();
                 int desired = val.get<int>();
                 return value == desired;
-                // if (value != desired)
-                //     return false;
                 break;
             }
             case NL::detail::value_t::number_float:
@@ -320,8 +311,6 @@ namespace stac
                 int value = properties.at(key).get<double>();
                 int desired = val.get<double>();
                 return value == desired;
-                // if (value != desired)
-                //     return false;
                 break;
             }
             case NL::detail::value_t::boolean:
@@ -329,8 +318,6 @@ namespace stac
                 bool value = properties.at(key).get<bool>();
                 bool desired = val.get<bool>();
                 return value == desired;
-                // if (value != desired)
-                //     return false;
                 break;
             }
             default:
@@ -358,7 +345,7 @@ namespace stac
         if (!filterCol(filters.collections))
             return false;
 
-        if (!filterDates(filters.dates))
+        if (!filterDates(filters.datePairs))
             return false;
 
         if (!filterProperties(filters.properties))
@@ -474,7 +461,7 @@ namespace stac
         return true;
     }
 
-    bool Item::filterDates(NL::json::array_t dates)
+    bool Item::filterDates(DatePairs dates)
     {
         NL::json properties = m_json.at("properties");
 
@@ -486,51 +473,38 @@ namespace stac
             if (properties.contains("datetime") &&
                 properties.at("datetime").type() != NL::detail::value_t::null)
             {
-                std::string stacDate = properties.at("datetime").get<std::string>();
+                std::string stacDateStr = properties.at("datetime").get<std::string>();
+                std::time_t stacTime = getStacTime(stacDateStr);
 
-                for (auto& range: dates)
-                {
-                    if (range.size() != 2)
-                        throw pdal_error("Invalid date range size!");
-
-                    if (
-                        stacDate >= range[0].get<std::string>() &&
-                        stacDate <= range[1].get<std::string>()
-                    )
+                for (const auto& range: dates)
+                    if (stacTime >= range.first && stacTime <= range.second)
                         return true;
-                }
+
                 return false;
             }
             else if (properties.contains("start_datetime") &&
                 properties.contains("end_datetime"))
             {
                 // Handle if STAC object has start and end datetimes instead of one
-                std::string stacStartDate = properties.at("start_datetime").get<std::string>();
-                std::string stacEndDate = properties.at("end_datetime").get<std::string>();
+                std::string startDateStr = properties.at("start_datetime").get<std::string>();
+                std::time_t stacStartTime = getStacTime(startDateStr);
 
-                bool dateFlag = true;
+                std::string endDateStr = properties.at("end_datetime").get<std::string>();
+                std::time_t stacEndTime = getStacTime(endDateStr);
+
                 for (const auto& range: dates)
                 {
                     // If any of the date ranges overlap with the date range of the STAC
                     // object, do not prune.
-                    if (range.size() != 2)
-                        throw pdal_error("Invalid date range size!");
-                    std::string userMinDate = range[0].get<std::string>();
-                    std::string userMaxDate = range[1].get<std::string>();
-                    //
-                    // TODO should we really be comparing dates as strings?
-                    if (userMinDate >= stacStartDate && userMinDate <= stacEndDate)
-                    {
+                    std::time_t userMinTime = range.first;
+                    std::time_t userMaxTime = range.second;
+
+                    if (userMinTime >= stacStartTime && userMinTime <= stacEndTime)
                         return true;
-                    }
-                    else if (userMaxDate >= stacStartDate && userMaxDate <= stacEndDate)
-                    {
+                    else if (userMaxTime >= stacStartTime && userMaxTime <= stacEndTime)
                         return true;
-                    }
-                    else if (userMinDate <= stacStartDate && userMaxDate >= stacEndDate)
-                    {
+                    else if (userMinTime <= stacStartTime && userMaxTime >= stacEndTime)
                         return true;
-                    }
                 }
                 return false;
             }
