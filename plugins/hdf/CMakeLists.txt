@@ -5,6 +5,7 @@ if (STANDALONE)
     include("${CMAKE_SOURCE_DIR}/../../cmake/standalone.cmake" )
     include(${PDAL_CMAKE_DIR}/arbiter.cmake)
     include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
+    include(${PDAL_CMAKE_DIR}/libxml2.cmake)
     add_subdirectory("${CMAKE_SOURCE_DIR}/../../vendor/arbiter" "vendor/arbiter")
 endif(STANDALONE)
 
