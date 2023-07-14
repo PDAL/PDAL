@@ -1,3 +1,11 @@
+cmake_minimum_required(VERSION 3.5)
+
+if (STANDALONE)
+    project(pdal-tiledb)
+    include("${CMAKE_SOURCE_DIR}/../../cmake/standalone.cmake" )
+    include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
+endif(STANDALONE)
+
 #
 # TileDB plugin CMake configuration
 #
@@ -19,6 +27,7 @@ PDAL_ADD_PLUGIN(reader_libname reader tiledb
         io/TileDBUtils.cpp
     LINK_WITH
         ${TileDB_LIBRARIES}
+        ${PDAL_LIBRARIES}
     INCLUDES
         ${TileDB_INCLUDE_DIR}
         ${NLOHMANN_INCLUDE_DIR}
@@ -33,6 +42,7 @@ PDAL_ADD_PLUGIN(writer_libname writer tiledb
         io/TileDBUtils.cpp
     LINK_WITH
         ${TileDB_LIBRARIES}
+        ${PDAL_LIBRARIES}
     INCLUDES
         ${TileDB_INCLUDE_DIR}
         ${NLOHMANN_INCLUDE_DIR}

@@ -1,3 +1,11 @@
+cmake_minimum_required(VERSION 3.5)
+
+if (STANDALONE)
+    project(pdal-i3s)
+    include(../../cmake/standalone.cmake NO_POLICY_SCOPE)
+    include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
+endif(STANDALONE)
+
 include(${PDAL_CMAKE_DIR}/zlib.cmake)
 
 if (NOT ZLIB_FOUND)
@@ -16,6 +24,7 @@ PDAL_ADD_PLUGIN(i3s_reader_libname reader i3s
         ${PDAL_SRC_DIR}/private/MathUtils.cpp
     LINK_WITH
         ${WINSOCK_LIBRARY}
+        ${PDAL_LIBRARIES}
         lepcc
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
@@ -37,6 +46,7 @@ PDAL_ADD_PLUGIN(slpk_reader_libname reader slpk
         ${PDAL_SRC_DIR}/private/MathUtils.cpp
     LINK_WITH
         ${WINSOCK_LIBRARY}
+        ${PDAL_LIBRARIES}
         lepcc
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}

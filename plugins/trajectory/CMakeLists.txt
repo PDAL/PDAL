@@ -1,3 +1,10 @@
+cmake_minimum_required(VERSION 3.5)
+
+if (STANDALONE)
+    project(pdal-trajectory)
+    include(../../cmake/standalone.cmake NO_POLICY_SCOPE)
+endif(STANDALONE)
+
 
 find_package(Ceres REQUIRED)
 
@@ -8,6 +15,7 @@ PDAL_ADD_PLUGIN(libname filter trajectory
         filters/SplineFit.cpp
     LINK_WITH
         ${CERES_LIBRARIES}
+        ${PDAL_LIBRARIES}
     INCLUDES
         ${PDAL_VENDOR_DIR}/eigen
 )

@@ -72,6 +72,10 @@ jobs:
       run: |
           source ./scripts/ci/linux/examples.sh
 
+    - name: Standalone Plugins
+      run: |
+          source ./scripts/ci/linux/standalone.sh
+
     - name: Install German locale
       env:
         DEBIAN_FRONTEND: noninteractive
