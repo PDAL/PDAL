@@ -118,6 +118,7 @@ include(${PDAL_CMAKE_DIR}/zstd.cmake)
 include(${PDAL_CMAKE_DIR}/test.cmake)
 include(${PDAL_CMAKE_DIR}/ctest.cmake)
 include(${PDAL_CMAKE_DIR}/libxml2.cmake)
+include(${PDAL_CMAKE_DIR}/eigen.cmake)
 include(${PDAL_CMAKE_DIR}/dimension.cmake)
 include(${PDAL_CMAKE_DIR}/arbiter.cmake)
 include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
@@ -244,7 +245,6 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${ROOT_DIR}
         ${PROJECT_BINARY_DIR}/include
         ${PDAL_VENDOR_DIR}
-        ${PDAL_VENDOR_DIR}/eigen
         ${LIBXML2_INCLUDE_DIR}
         ${ZSTD_INCLUDE_DIRS}
         ${NLOHMANN_INCLUDE_DIR}
@@ -269,6 +269,7 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
         ${PDAL_KAZHDAN_LIB_NAME}
         ${PDAL_LAZPERF_LIB_NAME}
         ${UTFCPP_LIB_NAME}
+        Eigen3::Eigen
     INTERFACE
         ${PDAL_LIBDIR}
 )

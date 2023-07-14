@@ -7,6 +7,7 @@ if (STANDALONE)
 endif(STANDALONE)
 
 include(${PDAL_CMAKE_DIR}/zlib.cmake)
+include(${PDAL_CMAKE_DIR}/eigen.cmake)
 
 if (NOT ZLIB_FOUND)
     message(FATAL_ERROR "ZLIB can't be found. Can't build SLPK/I3S without ZLIB support")
@@ -26,6 +27,7 @@ PDAL_ADD_PLUGIN(i3s_reader_libname reader i3s
         ${WINSOCK_LIBRARY}
         ${PDAL_LIBRARIES}
         lepcc
+        Eigen3::Eigen
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
         ${PDAL_VENDOR_DIR}
@@ -48,6 +50,7 @@ PDAL_ADD_PLUGIN(slpk_reader_libname reader slpk
         ${WINSOCK_LIBRARY}
         ${PDAL_LIBRARIES}
         lepcc
+        Eigen3::Eigen
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
         ${PDAL_VENDOR_DIR}
@@ -72,6 +75,8 @@ if (WITH_TESTS)
         INCLUDES
             ${NLOHMANN_INCLUDE_DIR}
             ${PDAL_VENDOR_DIR}/eigen
+        LINK_WITH
+            Eigen3::Eigen
     )
 
     if (BUILD_I3S_TESTS)

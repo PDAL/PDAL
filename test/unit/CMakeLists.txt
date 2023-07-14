@@ -32,18 +32,18 @@ PDAL_ADD_TEST(pdal_eigen_test
     FILES
         EigenTest.cpp
         ${PDAL_SRC_DIR}/private/MathUtils.cpp
-
-    INCLUDES
-        ${PDAL_VENDOR_DIR}/eigen
+    LINK_WITH
+        Eigen3::Eigen
 )
 PDAL_ADD_TEST(pdal_file_utils_test FILES FileUtilsTest.cpp)
 PDAL_ADD_TEST(pdal_georeference_test FILES GeoreferenceTest.cpp)
 PDAL_ADD_TEST(pdal_kdindex_test
     FILES
         KDIndexTest.cpp
+    LINK_WITH
+        Eigen3::Eigen
     INCLUDES
         ${PDAL_VENDOR_DIR}
-        ${PDAL_VENDOR_DIR}/eigen
 )
 PDAL_ADD_TEST(pdal_kernel_test FILES KernelTest.cpp)
 PDAL_ADD_TEST(pdal_log_test FILES LogTest.cpp)
@@ -211,14 +211,14 @@ PDAL_ADD_TEST(pdal_io_optech_test FILES io/OptechReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_pcd_reader_test
     FILES
         io/PcdReaderTest.cpp
-    INCLUDES
-        ${PDAL_VENDOR_DIR}/eigen
+    LINK_WITH
+        Eigen3::Eigen
 )
 PDAL_ADD_TEST(pdal_io_pcd_writer_test
     FILES
         io/PcdWriterTest.cpp
-    INCLUDES
-        ${PDAL_VENDOR_DIR}/eigen
+    LINK_WITH
+        Eigen3::Eigen
 )
 PDAL_ADD_TEST(pdal_io_ply_reader_test
     FILES
@@ -255,9 +255,10 @@ PDAL_ADD_TEST(pdal_filters_assign_test FILES filters/AssignFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_chipper_test
     FILES
         filters/ChipperTest.cpp
+    LINK_WITH
+        Eigen3::Eigen
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
-        ${PDAL_VENDOR_DIR}/eigen
 )
 PDAL_ADD_TEST(pdal_filters_nndistance_test
     FILES
@@ -315,8 +316,8 @@ PDAL_ADD_TEST(pdal_filters_ht_test FILES filters/HeadTailFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_icp_test
     FILES
         filters/IcpFilterTest.cpp
-    INCLUDES
-        ${PDAL_VENDOR_DIR}/eigen
+    LINK_WITH
+        Eigen3::Eigen
 )
 PDAL_ADD_TEST(pdal_filters_info_test FILES filters/InfoFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_lloydkmeans_test FILES filters/LloydKMeansFilterTest.cpp)
@@ -336,8 +337,10 @@ PDAL_ADD_TEST(pdal_filters_overlay_test FILES filters/OverlayFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_planefit_test
     FILES
         filters/PlaneFitFilterTest.cpp
-    INCLUDES
-        ${PDAL_VENDOR_DIR}/eigen)
+    LINK_WITH
+        Eigen3::Eigen
+)
+
 PDAL_ADD_TEST(pdal_filters_pmf_test FILES filters/PMFFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_reprojection_test FILES
     filters/ReprojectionFilterTest.cpp)
@@ -362,8 +365,10 @@ PDAL_ADD_TEST(pdal_filters_sort_test
 PDAL_ADD_TEST(pdal_filters_splitter_test
     FILES
         filters/SplitterTest.cpp
-    INCLUDES
-        ${PDAL_VENDOR_DIR}/eigen)
+    LINK_WITH
+        Eigen3::Eigen
+
+        )
 PDAL_ADD_TEST(pdal_filters_stats_test FILES filters/StatsFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_transformation_test FILES
     filters/TransformationFilterTest.cpp)

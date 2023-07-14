@@ -3295,12 +3295,12 @@ private:
 #define SIG1(x) (ROTRIGHT(x,17) ^ ROTRIGHT(x,19) ^ ((x) >> 10))
 
 // MD5.
-#define F(x,y,z) ((x & y) | (~x & z))
+#define FAB(x,y,z) ((x & y) | (~x & z))
 #define G(x,y,z) ((x & z) | (y & ~z))
 #define H(x,y,z) (x ^ y ^ z)
 #define I(x,y,z) (y ^ (x | ~z))
 
-#define FF(a,b,c,d,m,s,t) { a += F(b,c,d) + m + t; \
+#define FF(a,b,c,d,m,s,t) { a += FAB(b,c,d) + m + t; \
                             a = b + ROTLEFT(a,s); }
 #define GG(a,b,c,d,m,s,t) { a += G(b,c,d) + m + t; \
                             a = b + ROTLEFT(a,s); }
@@ -3800,7 +3800,7 @@ public:
      * @param path Path with the type-specifying prefix information stripped.
      */
     virtual std::vector<char> put(
-        std::string path, 
+        std::string path,
         const std::vector<char>& data) const = 0;
 
     /** True for remote paths, otherwise false.  If `true`, a fs::LocalHandle
@@ -5301,7 +5301,7 @@ public:
 
     /** Write data to path. */
     std::vector<char> put(
-            std::string path, 
+            std::string path,
             const std::vector<char>& data) const;
 
     /** Get data with additional HTTP-specific parameters.  Throws if

@@ -13,8 +13,6 @@ dependencies:
   - nitro
   - ceres-solver
   - python=3.10
-  - mkl  # [win]
-  - blas  # [win]
   - compilers
   - ninja
   - cmake

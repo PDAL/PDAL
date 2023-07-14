@@ -42,6 +42,8 @@ target_link_libraries(${PDAL_UTIL_LIB_NAME}
 )
 
 target_link_libraries(${PDAL_UTIL_LIB_NAME}
+    PRIVATE
+        Eigen3::Eigen
     PUBLIC
         ${WINSOCK_LIBRARY}
 )
