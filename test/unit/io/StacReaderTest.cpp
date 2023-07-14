@@ -342,7 +342,6 @@ TEST(StacReaderTest, id_prune_test)
 TEST(StacReaderTest, date_prune_accept_test)
 {
     //Test using standard datetime measures
-    {
     Options options;
 
     options.add("filename", Support::datapath("stac/MD_GoldenBeach_2012.json"));
@@ -361,9 +360,11 @@ TEST(StacReaderTest, date_prune_accept_test)
     std::vector<std::string> idList = jsonMetadata["stac_ids"].get<std::vector<std::string>>();
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
     EXPECT_EQ(qi.m_pointCount, 4860658);
-    }
 
-    {
+}
+
+TEST(StacReaderTest, date_start_end_time_accept_test)
+{
     //Test usage of start_datetime and end_datetime
     Options options;
 
@@ -382,7 +383,6 @@ TEST(StacReaderTest, date_prune_accept_test)
     std::vector<std::string> idList = jsonMetadata["stac_ids"].get<std::vector<std::string>>();
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
     EXPECT_EQ(qi.m_pointCount, 4860658);
-    }
 }
 
 TEST(StacReaderTest, date_prune_reject_test)
