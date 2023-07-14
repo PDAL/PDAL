@@ -44,9 +44,13 @@ ComputationInfo computeFromTridiagonal_impl(DiagType& diag, SubDiagType& subdiag
   * \f$ v \f$ such that \f$ Av = \lambda v \f$.  The eigenvalues of a
   * selfadjoint matrix are always real. If \f$ D \f$ is a diagonal matrix with
   * the eigenvalues on the diagonal, and \f$ V \f$ is a matrix with the
-  * eigenvectors as its columns, then \f$ A = V D V^{-1} \f$ (for selfadjoint
-  * matrices, the matrix \f$ V \f$ is always invertible). This is called the
+  * eigenvectors as its columns, then \f$ A = V D V^{-1} \f$. This is called the
   * eigendecomposition.
+  *
+  * For a selfadjoint matrix, \f$ V \f$ is unitary, meaning its inverse is equal
+  * to its adjoint, \f$ V^{-1} = V^{\dagger} \f$. If \f$ A \f$ is real, then
+  * \f$ V \f$ is also real and therefore orthogonal, meaning its inverse is
+  * equal to its transpose, \f$ V^{-1} = V^T \f$.
   *
   * The algorithm exploits the fact that the matrix is selfadjoint, making it
   * faster and more accurate than the general purpose eigenvalue algorithms
@@ -121,6 +125,7 @@ template<typename _MatrixType> class SelfAdjointEigenSolver
         : m_eivec(),
           m_eivalues(),
           m_subdiag(),
+          m_hcoeffs(),
           m_info(InvalidInput),
           m_isInitialized(false),
           m_eigenvectorsOk(false)
@@ -143,6 +148,7 @@ template<typename _MatrixType> class SelfAdjointEigenSolver
         : m_eivec(size, size),
           m_eivalues(size),
           m_subdiag(size > 1 ? size - 1 : 1),
+          m_hcoeffs(size > 1 ? size - 1 : 1),
           m_isInitialized(false),
           m_eigenvectorsOk(false)
     {}
@@ -168,6 +174,7 @@ template<typename _MatrixType> class SelfAdjointEigenSolver
       : m_eivec(matrix.rows(), matrix.cols()),
         m_eivalues(matrix.cols()),
         m_subdiag(matrix.rows() > 1 ? matrix.rows() - 1 : 1),
+        m_hcoeffs(matrix.cols() > 1 ? matrix.cols() - 1 : 1),
         m_isInitialized(false),
         m_eigenvectorsOk(false)
     {
@@ -255,6 +262,11 @@ template<typename _MatrixType> class SelfAdjointEigenSolver
       * this object was used to solve the eigenproblem for the selfadjoint
       * matrix \f$ A \f$, then the matrix returned by this function is the
       * matrix \f$ V \f$ in the eigendecomposition \f$ A = V D V^{-1} \f$.
+      *
+      * For a selfadjoint matrix, \f$ V \f$ is unitary, meaning its inverse is equal
+      * to its adjoint, \f$ V^{-1} = V^{\dagger} \f$. If \f$ A \f$ is real, then
+      * \f$ V \f$ is also real and therefore orthogonal, meaning its inverse is
+      * equal to its transpose, \f$ V^{-1} = V^T \f$.
       *
       * Example: \include SelfAdjointEigenSolver_eigenvectors.cpp
       * Output: \verbinclude SelfAdjointEigenSolver_eigenvectors.out
@@ -369,6 +381,7 @@ template<typename _MatrixType> class SelfAdjointEigenSolver
     EigenvectorsType m_eivec;
     RealVectorType m_eivalues;
     typename TridiagonalizationType::SubDiagonalType m_subdiag;
+    typename TridiagonalizationType::CoeffVectorType m_hcoeffs;
     ComputationInfo m_info;
     bool m_isInitialized;
     bool m_eigenvectorsOk;
@@ -441,7 +454,8 @@ SelfAdjointEigenSolver<MatrixType>& SelfAdjointEigenSolver<MatrixType>
   if(scale==RealScalar(0)) scale = RealScalar(1);
   mat.template triangularView<Lower>() /= scale;
   m_subdiag.resize(n-1);
-  internal::tridiagonalization_inplace(mat, diag, m_subdiag, computeEigenvectors);
+  m_hcoeffs.resize(n-1);
+  internal::tridiagonalization_inplace(mat, diag, m_subdiag, m_hcoeffs, computeEigenvectors);
 
   m_info = internal::computeFromTridiagonal_impl(diag, m_subdiag, m_maxIterations, computeEigenvectors, m_eivec);
   
@@ -489,8 +503,6 @@ template<typename MatrixType, typename DiagType, typename SubDiagType>
 EIGEN_DEVICE_FUNC
 ComputationInfo computeFromTridiagonal_impl(DiagType& diag, SubDiagType& subdiag, const Index maxIterations, bool computeEigenvectors, MatrixType& eivec)
 {
-  EIGEN_USING_STD(abs);
-
   ComputationInfo info;
   typedef typename MatrixType::Scalar Scalar;
 
@@ -501,15 +513,23 @@ ComputationInfo computeFromTridiagonal_impl(DiagType& diag, SubDiagType& subdiag
   
   typedef typename DiagType::RealScalar RealScalar;
   const RealScalar considerAsZero = (std::numeric_limits<RealScalar>::min)();
-  const RealScalar precision = RealScalar(2)*NumTraits<RealScalar>::epsilon();
-  
+  const RealScalar precision_inv = RealScalar(1)/NumTraits<RealScalar>::epsilon();
   while (end>0)
   {
-    for (Index i = start; i<end; ++i)
-      if (internal::isMuchSmallerThan(abs(subdiag[i]),(abs(diag[i])+abs(diag[i+1])),precision) || abs(subdiag[i]) <= considerAsZero)
-        subdiag[i] = 0;
+    for (Index i = start; i<end; ++i) {
+      if (numext::abs(subdiag[i]) < considerAsZero) {
+        subdiag[i] = RealScalar(0);
+      } else {
+        // abs(subdiag[i]) <= epsilon * sqrt(abs(diag[i]) + abs(diag[i+1]))
+        // Scaled to prevent underflows.
+        const RealScalar scaled_subdiag = precision_inv * subdiag[i];
+        if (scaled_subdiag * scaled_subdiag <= (numext::abs(diag[i])+numext::abs(diag[i+1]))) {
+          subdiag[i] = RealScalar(0);
+        }
+      }
+    }
 
-    // find the largest unreduced block
+    // find the largest unreduced block at the end of the matrix.
     while (end>0 && subdiag[end-1]==RealScalar(0))
     {
       end--;
@@ -812,32 +832,38 @@ SelfAdjointEigenSolver<MatrixType>& SelfAdjointEigenSolver<MatrixType>
 }
 
 namespace internal {
+
+// Francis implicit QR step.
 template<int StorageOrder,typename RealScalar, typename Scalar, typename Index>
 EIGEN_DEVICE_FUNC
 static void tridiagonal_qr_step(RealScalar* diag, RealScalar* subdiag, Index start, Index end, Scalar* matrixQ, Index n)
 {
-  EIGEN_USING_STD(abs);
+  // Wilkinson Shift.
   RealScalar td = (diag[end-1] - diag[end])*RealScalar(0.5);
   RealScalar e = subdiag[end-1];
   // Note that thanks to scaling, e^2 or td^2 cannot overflow, however they can still
   // underflow thus leading to inf/NaN values when using the following commented code:
-//   RealScalar e2 = numext::abs2(subdiag[end-1]);
-//   RealScalar mu = diag[end] - e2 / (td + (td>0 ? 1 : -1) * sqrt(td*td + e2));
+  //   RealScalar e2 = numext::abs2(subdiag[end-1]);
+  //   RealScalar mu = diag[end] - e2 / (td + (td>0 ? 1 : -1) * sqrt(td*td + e2));
   // This explain the following, somewhat more complicated, version:
   RealScalar mu = diag[end];
-  if(td==RealScalar(0))
-    mu -= abs(e);
-  else
-  {
-    RealScalar e2 = numext::abs2(subdiag[end-1]);
-    RealScalar h = numext::hypot(td,e);
-    if(e2==RealScalar(0)) mu -= (e / (td + (td>RealScalar(0) ? RealScalar(1) : RealScalar(-1)))) * (e / h);
-    else                  mu -= e2 / (td + (td>RealScalar(0) ? h : -h));
+  if(td==RealScalar(0)) {
+    mu -= numext::abs(e);
+  } else if (e != RealScalar(0)) {
+    const RealScalar e2 = numext::abs2(e);
+    const RealScalar h = numext::hypot(td,e);
+    if(e2 == RealScalar(0)) {
+      mu -= e / ((td + (td>RealScalar(0) ? h : -h)) / e);
+    } else {
+      mu -= e2 / (td + (td>RealScalar(0) ? h : -h)); 
+    }
   }
-  
+
   RealScalar x = diag[start] - mu;
   RealScalar z = subdiag[start];
-  for (Index k = start; k < end; ++k)
+  // If z ever becomes zero, the Givens rotation will be the identity and
+  // z will stay zero for all future iterations.
+  for (Index k = start; k < end && z != RealScalar(0); ++k)
   {
     JacobiRotation<RealScalar> rot;
     rot.makeGivens(x, z);
@@ -850,12 +876,11 @@ static void tridiagonal_qr_step(RealScalar* diag, RealScalar* subdiag, Index sta
     diag[k+1] = rot.s() * sdk + rot.c() * dkp1;
     subdiag[k] = rot.c() * sdk - rot.s() * dkp1;
     
-
     if (k > start)
       subdiag[k - 1] = rot.c() * subdiag[k-1] - rot.s() * z;
 
+    // "Chasing the bulge" to return to triangular form.
     x = subdiag[k];
-
     if (k < end - 1)
     {
       z = -rot.s() * subdiag[k+1];

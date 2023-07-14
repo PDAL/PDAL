@@ -10,7 +10,7 @@
 #ifndef EIGEN_VISITOR_H
 #define EIGEN_VISITOR_H
 
-namespace Eigen { 
+namespace Eigen {
 
 namespace internal {
 
@@ -70,22 +70,22 @@ class visitor_evaluator
 public:
   EIGEN_DEVICE_FUNC
   explicit visitor_evaluator(const XprType &xpr) : m_evaluator(xpr), m_xpr(xpr) {}
-  
+
   typedef typename XprType::Scalar Scalar;
   typedef typename XprType::CoeffReturnType CoeffReturnType;
-  
+
   enum {
     RowsAtCompileTime = XprType::RowsAtCompileTime,
     CoeffReadCost = internal::evaluator<XprType>::CoeffReadCost
   };
-  
-  EIGEN_DEVICE_FUNC Index rows() const { return m_xpr.rows(); }
-  EIGEN_DEVICE_FUNC Index cols() const { return m_xpr.cols(); }
-  EIGEN_DEVICE_FUNC Index size() const { return m_xpr.size(); }
+
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR Index rows() const EIGEN_NOEXCEPT { return m_xpr.rows(); }
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR Index cols() const EIGEN_NOEXCEPT { return m_xpr.cols(); }
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR Index size() const EIGEN_NOEXCEPT { return m_xpr.size(); }
 
   EIGEN_DEVICE_FUNC CoeffReturnType coeff(Index row, Index col) const
   { return m_evaluator.coeff(row, col); }
-  
+
 protected:
   internal::evaluator<XprType> m_evaluator;
   const XprType &m_xpr;
@@ -106,7 +106,7 @@ protected:
   *
   * \note compared to one or two \em for \em loops, visitors offer automatic
   * unrolling for small fixed size matrix.
-  * 
+  *
   * \note if the matrix is empty, then the visitor is left unchanged.
   *
   * \sa minCoeff(Index*,Index*), maxCoeff(Index*,Index*), DenseBase::redux()
@@ -118,13 +118,13 @@ void DenseBase<Derived>::visit(Visitor& visitor) const
 {
   if(size()==0)
     return;
-  
+
   typedef typename internal::visitor_evaluator<Derived> ThisEvaluator;
   ThisEvaluator thisEval(derived());
-  
+
   enum {
     unroll =  SizeAtCompileTime != Dynamic
-           && SizeAtCompileTime * ThisEvaluator::CoeffReadCost + (SizeAtCompileTime-1) * internal::functor_traits<Visitor>::Cost <= EIGEN_UNROLLING_LIMIT
+           && SizeAtCompileTime * int(ThisEvaluator::CoeffReadCost) + (SizeAtCompileTime-1) * int(internal::functor_traits<Visitor>::Cost) <= EIGEN_UNROLLING_LIMIT
   };
   return internal::visitor_impl<Visitor, ThisEvaluator, unroll ? int(SizeAtCompileTime) : Dynamic>::run(thisEval, visitor);
 }
@@ -157,7 +157,7 @@ struct coeff_visitor
   *
   * \sa DenseBase::minCoeff(Index*, Index*)
   */
-template <typename Derived>
+template <typename Derived, int NaNPropagation>
 struct min_coeff_visitor : coeff_visitor<Derived>
 {
   typedef typename Derived::Scalar Scalar;
@@ -173,8 +173,40 @@ struct min_coeff_visitor : coeff_visitor<Derived>
   }
 };
 
-template<typename Scalar>
-struct functor_traits<min_coeff_visitor<Scalar> > {
+template <typename Derived>
+struct min_coeff_visitor<Derived, PropagateNumbers> : coeff_visitor<Derived>
+{
+  typedef typename Derived::Scalar Scalar;
+  EIGEN_DEVICE_FUNC
+  void operator() (const Scalar& value, Index i, Index j)
+  {
+    if((numext::isnan)(this->res) || (!(numext::isnan)(value) && value < this->res))
+    {
+      this->res = value;
+      this->row = i;
+      this->col = j;
+    }
+  }
+};
+
+template <typename Derived>
+struct min_coeff_visitor<Derived, PropagateNaN> : coeff_visitor<Derived>
+{
+  typedef typename Derived::Scalar Scalar;
+  EIGEN_DEVICE_FUNC
+  void operator() (const Scalar& value, Index i, Index j)
+  {
+    if((numext::isnan)(value) || value < this->res)
+    {
+      this->res = value;
+      this->row = i;
+      this->col = j;
+    }
+  }
+};
+
+template<typename Scalar, int NaNPropagation>
+    struct functor_traits<min_coeff_visitor<Scalar, NaNPropagation> > {
   enum {
     Cost = NumTraits<Scalar>::AddCost
   };
@@ -185,10 +217,10 @@ struct functor_traits<min_coeff_visitor<Scalar> > {
   *
   * \sa DenseBase::maxCoeff(Index*, Index*)
   */
-template <typename Derived>
+template <typename Derived, int NaNPropagation>
 struct max_coeff_visitor : coeff_visitor<Derived>
 {
-  typedef typename Derived::Scalar Scalar; 
+  typedef typename Derived::Scalar Scalar;
   EIGEN_DEVICE_FUNC
   void operator() (const Scalar& value, Index i, Index j)
   {
@@ -201,8 +233,40 @@ struct max_coeff_visitor : coeff_visitor<Derived>
   }
 };
 
-template<typename Scalar>
-struct functor_traits<max_coeff_visitor<Scalar> > {
+template <typename Derived>
+struct max_coeff_visitor<Derived, PropagateNumbers> : coeff_visitor<Derived>
+{
+  typedef typename Derived::Scalar Scalar;
+  EIGEN_DEVICE_FUNC
+  void operator() (const Scalar& value, Index i, Index j)
+  {
+    if((numext::isnan)(this->res) || (!(numext::isnan)(value) && value > this->res))
+    {
+      this->res = value;
+      this->row = i;
+      this->col = j;
+    }
+  }
+};
+
+template <typename Derived>
+struct max_coeff_visitor<Derived, PropagateNaN> : coeff_visitor<Derived>
+{
+  typedef typename Derived::Scalar Scalar;
+  EIGEN_DEVICE_FUNC
+  void operator() (const Scalar& value, Index i, Index j)
+  {
+    if((numext::isnan)(value) || value > this->res)
+    {
+      this->res = value;
+      this->row = i;
+      this->col = j;
+    }
+  }
+};
+
+template<typename Scalar, int NaNPropagation>
+struct functor_traits<max_coeff_visitor<Scalar, NaNPropagation> > {
   enum {
     Cost = NumTraits<Scalar>::AddCost
   };
@@ -212,22 +276,24 @@ struct functor_traits<max_coeff_visitor<Scalar> > {
 
 /** \fn DenseBase<Derived>::minCoeff(IndexType* rowId, IndexType* colId) const
   * \returns the minimum of all coefficients of *this and puts in *row and *col its location.
-  * 
+  *
+  * In case \c *this contains NaN, NaNPropagation determines the behavior:
+  *   NaNPropagation == PropagateFast : undefined
+  *   NaNPropagation == PropagateNaN : result is NaN
+  *   NaNPropagation == PropagateNumbers : result is maximum of elements that are not NaN
   * \warning the matrix must be not empty, otherwise an assertion is triggered.
-  * 
-  * \warning the result is undefined if \c *this contains NaN.
   *
   * \sa DenseBase::minCoeff(Index*), DenseBase::maxCoeff(Index*,Index*), DenseBase::visit(), DenseBase::minCoeff()
   */
 template<typename Derived>
-template<typename IndexType>
+template<int NaNPropagation, typename IndexType>
 EIGEN_DEVICE_FUNC
 typename internal::traits<Derived>::Scalar
 DenseBase<Derived>::minCoeff(IndexType* rowId, IndexType* colId) const
 {
   eigen_assert(this->rows()>0 && this->cols()>0 && "you are using an empty matrix");
 
-  internal::min_coeff_visitor<Derived> minVisitor;
+  internal::min_coeff_visitor<Derived, NaNPropagation> minVisitor;
   this->visit(minVisitor);
   *rowId = minVisitor.row;
   if (colId) *colId = minVisitor.col;
@@ -235,15 +301,17 @@ DenseBase<Derived>::minCoeff(IndexType* rowId, IndexType* colId) const
 }
 
 /** \returns the minimum of all coefficients of *this and puts in *index its location.
-  * 
+  *
+  * In case \c *this contains NaN, NaNPropagation determines the behavior:
+  *   NaNPropagation == PropagateFast : undefined
+  *   NaNPropagation == PropagateNaN : result is NaN
+  *   NaNPropagation == PropagateNumbers : result is maximum of elements that are not NaN
   * \warning the matrix must be not empty, otherwise an assertion is triggered.
-  * 
-  * \warning the result is undefined if \c *this contains NaN. 
   *
   * \sa DenseBase::minCoeff(IndexType*,IndexType*), DenseBase::maxCoeff(IndexType*,IndexType*), DenseBase::visit(), DenseBase::minCoeff()
   */
 template<typename Derived>
-template<typename IndexType>
+template<int NaNPropagation, typename IndexType>
 EIGEN_DEVICE_FUNC
 typename internal::traits<Derived>::Scalar
 DenseBase<Derived>::minCoeff(IndexType* index) const
@@ -251,7 +319,7 @@ DenseBase<Derived>::minCoeff(IndexType* index) const
   eigen_assert(this->rows()>0 && this->cols()>0 && "you are using an empty matrix");
 
   EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived)
-  internal::min_coeff_visitor<Derived> minVisitor;
+      internal::min_coeff_visitor<Derived, NaNPropagation> minVisitor;
   this->visit(minVisitor);
   *index = IndexType((RowsAtCompileTime==1) ? minVisitor.col : minVisitor.row);
   return minVisitor.res;
@@ -259,22 +327,24 @@ DenseBase<Derived>::minCoeff(IndexType* index) const
 
 /** \fn DenseBase<Derived>::maxCoeff(IndexType* rowId, IndexType* colId) const
   * \returns the maximum of all coefficients of *this and puts in *row and *col its location.
-  * 
+  *
+  * In case \c *this contains NaN, NaNPropagation determines the behavior:
+  *   NaNPropagation == PropagateFast : undefined
+  *   NaNPropagation == PropagateNaN : result is NaN
+  *   NaNPropagation == PropagateNumbers : result is maximum of elements that are not NaN
   * \warning the matrix must be not empty, otherwise an assertion is triggered.
-  * 
-  * \warning the result is undefined if \c *this contains NaN. 
   *
   * \sa DenseBase::minCoeff(IndexType*,IndexType*), DenseBase::visit(), DenseBase::maxCoeff()
   */
 template<typename Derived>
-template<typename IndexType>
+template<int NaNPropagation, typename IndexType>
 EIGEN_DEVICE_FUNC
 typename internal::traits<Derived>::Scalar
 DenseBase<Derived>::maxCoeff(IndexType* rowPtr, IndexType* colPtr) const
 {
   eigen_assert(this->rows()>0 && this->cols()>0 && "you are using an empty matrix");
 
-  internal::max_coeff_visitor<Derived> maxVisitor;
+  internal::max_coeff_visitor<Derived, NaNPropagation> maxVisitor;
   this->visit(maxVisitor);
   *rowPtr = maxVisitor.row;
   if (colPtr) *colPtr = maxVisitor.col;
@@ -282,15 +352,17 @@ DenseBase<Derived>::maxCoeff(IndexType* rowPtr, IndexType* colPtr) const
 }
 
 /** \returns the maximum of all coefficients of *this and puts in *index its location.
-  * 
-  * \warning the matrix must be not empty, otherwise an assertion is triggered.
   *
-  * \warning the result is undefined if \c *this contains NaN.
+  * In case \c *this contains NaN, NaNPropagation determines the behavior:
+  *   NaNPropagation == PropagateFast : undefined
+  *   NaNPropagation == PropagateNaN : result is NaN
+  *   NaNPropagation == PropagateNumbers : result is maximum of elements that are not NaN
+  * \warning the matrix must be not empty, otherwise an assertion is triggered.
   *
   * \sa DenseBase::maxCoeff(IndexType*,IndexType*), DenseBase::minCoeff(IndexType*,IndexType*), DenseBase::visitor(), DenseBase::maxCoeff()
   */
 template<typename Derived>
-template<typename IndexType>
+template<int NaNPropagation, typename IndexType>
 EIGEN_DEVICE_FUNC
 typename internal::traits<Derived>::Scalar
 DenseBase<Derived>::maxCoeff(IndexType* index) const
@@ -298,7 +370,7 @@ DenseBase<Derived>::maxCoeff(IndexType* index) const
   eigen_assert(this->rows()>0 && this->cols()>0 && "you are using an empty matrix");
 
   EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived)
-  internal::max_coeff_visitor<Derived> maxVisitor;
+      internal::max_coeff_visitor<Derived, NaNPropagation> maxVisitor;
   this->visit(maxVisitor);
   *index = (RowsAtCompileTime==1) ? maxVisitor.col : maxVisitor.row;
   return maxVisitor.res;

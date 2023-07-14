@@ -497,6 +497,45 @@ ceil() const
   return CeilReturnType(derived());
 }
 
+template<int N> struct ShiftRightXpr {
+  typedef CwiseUnaryOp<internal::scalar_shift_right_op<Scalar, N>, const Derived> Type;
+};
+
+/** \returns an expression of \c *this with the \a Scalar type arithmetically
+  * shifted right by \a N bit positions.
+  *
+  * The template parameter \a N specifies the number of bit positions to shift.
+  * 
+  * \sa shiftLeft()
+  */
+template<int N>
+EIGEN_DEVICE_FUNC
+typename ShiftRightXpr<N>::Type
+shiftRight() const
+{
+  return typename ShiftRightXpr<N>::Type(derived());
+}
+
+
+template<int N> struct ShiftLeftXpr {
+  typedef CwiseUnaryOp<internal::scalar_shift_left_op<Scalar, N>, const Derived> Type;
+};
+
+/** \returns an expression of \c *this with the \a Scalar type logically
+  * shifted left by \a N bit positions.
+  *
+  * The template parameter \a N specifies the number of bit positions to shift.
+  *
+  * \sa shiftRight()
+  */
+template<int N>
+EIGEN_DEVICE_FUNC
+typename ShiftLeftXpr<N>::Type
+shiftLeft() const
+{
+  return typename ShiftLeftXpr<N>::Type(derived());
+}
+
 /** \returns an expression of the coefficient-wise isnan of *this.
   *
   * Example: \include Cwise_isNaN.cpp

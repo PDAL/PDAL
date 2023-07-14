@@ -566,6 +566,17 @@ template<typename T> struct smart_memmove_helper<T,false> {
   }
 };
 
+#if EIGEN_HAS_RVALUE_REFERENCES
+template<typename T> EIGEN_DEVICE_FUNC T* smart_move(T* start, T* end, T* target)
+{
+  return std::move(start, end, target);
+}
+#else
+template<typename T> EIGEN_DEVICE_FUNC T* smart_move(T* start, T* end, T* target)
+{
+  return std::copy(start, end, target);
+}
+#endif
 
 /*****************************************************************************
 *** Implementation of runtime stack allocation (falling back to malloc)    ***
@@ -780,32 +791,45 @@ template<typename T> void swap(scoped_array<T> &a,scoped_array<T> &b)
 
 #else
 
-#if EIGEN_MAX_ALIGN_BYTES!=0
+// HIP does not support new/delete on device.
+#if EIGEN_MAX_ALIGN_BYTES!=0 && !defined(EIGEN_HIP_DEVICE_COMPILE)
   #define EIGEN_MAKE_ALIGNED_OPERATOR_NEW_NOTHROW(NeedsToAlign) \
+      EIGEN_DEVICE_FUNC \
       void* operator new(std::size_t size, const std::nothrow_t&) EIGEN_NO_THROW { \
         EIGEN_TRY { return Eigen::internal::conditional_aligned_malloc<NeedsToAlign>(size); } \
         EIGEN_CATCH (...) { return 0; } \
       }
   #define EIGEN_MAKE_ALIGNED_OPERATOR_NEW_IF(NeedsToAlign) \
+      EIGEN_DEVICE_FUNC \
       void *operator new(std::size_t size) { \
         return Eigen::internal::conditional_aligned_malloc<NeedsToAlign>(size); \
       } \
+      EIGEN_DEVICE_FUNC \
       void *operator new[](std::size_t size) { \
         return Eigen::internal::conditional_aligned_malloc<NeedsToAlign>(size); \
       } \
+      EIGEN_DEVICE_FUNC \
       void operator delete(void * ptr) EIGEN_NO_THROW { Eigen::internal::conditional_aligned_free<NeedsToAlign>(ptr); } \
+      EIGEN_DEVICE_FUNC \
       void operator delete[](void * ptr) EIGEN_NO_THROW { Eigen::internal::conditional_aligned_free<NeedsToAlign>(ptr); } \
+      EIGEN_DEVICE_FUNC \
       void operator delete(void * ptr, std::size_t /* sz */) EIGEN_NO_THROW { Eigen::internal::conditional_aligned_free<NeedsToAlign>(ptr); } \
+      EIGEN_DEVICE_FUNC \
       void operator delete[](void * ptr, std::size_t /* sz */) EIGEN_NO_THROW { Eigen::internal::conditional_aligned_free<NeedsToAlign>(ptr); } \
       /* in-place new and delete. since (at least afaik) there is no actual   */ \
       /* memory allocated we can safely let the default implementation handle */ \
       /* this particular case. */ \
+      EIGEN_DEVICE_FUNC \
       static void *operator new(std::size_t size, void *ptr) { return ::operator new(size,ptr); } \
+      EIGEN_DEVICE_FUNC \
       static void *operator new[](std::size_t size, void* ptr) { return ::operator new[](size,ptr); } \
+      EIGEN_DEVICE_FUNC \
       void operator delete(void * memory, void *ptr) EIGEN_NO_THROW { return ::operator delete(memory,ptr); } \
+      EIGEN_DEVICE_FUNC \
       void operator delete[](void * memory, void *ptr) EIGEN_NO_THROW { return ::operator delete[](memory,ptr); } \
       /* nothrow-new (returns zero instead of std::bad_alloc) */ \
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW_NOTHROW(NeedsToAlign) \
+      EIGEN_DEVICE_FUNC \
       void operator delete(void *ptr, const std::nothrow_t&) EIGEN_NO_THROW { \
         Eigen::internal::conditional_aligned_free<NeedsToAlign>(ptr); \
       } \
@@ -1048,20 +1072,32 @@ inline void queryCacheSizes_intel(int& l1, int& l2, int& l3, int max_std_funcs)
 {
   if(max_std_funcs>=4)
     queryCacheSizes_intel_direct(l1,l2,l3);
-  else
+  else if(max_std_funcs>=2)
     queryCacheSizes_intel_codes(l1,l2,l3);
+  else
+    l1 = l2 = l3 = 0;
 }
 
 inline void queryCacheSizes_amd(int& l1, int& l2, int& l3)
 {
   int abcd[4];
   abcd[0] = abcd[1] = abcd[2] = abcd[3] = 0;
-  EIGEN_CPUID(abcd,0x80000005,0);
-  l1 = (abcd[2] >> 24) * 1024; // C[31:24] = L1 size in KB
-  abcd[0] = abcd[1] = abcd[2] = abcd[3] = 0;
-  EIGEN_CPUID(abcd,0x80000006,0);
-  l2 = (abcd[2] >> 16) * 1024; // C[31;16] = l2 cache size in KB
-  l3 = ((abcd[3] & 0xFFFC000) >> 18) * 512 * 1024; // D[31;18] = l3 cache size in 512KB
+  
+  // First query the max supported function.
+  EIGEN_CPUID(abcd,0x80000000,0);
+  if(static_cast<numext::uint32_t>(abcd[0]) >= static_cast<numext::uint32_t>(0x80000006))
+  {
+    EIGEN_CPUID(abcd,0x80000005,0);
+    l1 = (abcd[2] >> 24) * 1024; // C[31:24] = L1 size in KB
+    abcd[0] = abcd[1] = abcd[2] = abcd[3] = 0;
+    EIGEN_CPUID(abcd,0x80000006,0);
+    l2 = (abcd[2] >> 16) * 1024; // C[31;16] = l2 cache size in KB
+    l3 = ((abcd[3] & 0xFFFC000) >> 18) * 512 * 1024; // D[31;18] = l3 cache size in 512KB
+  }
+  else
+  {
+    l1 = l2 = l3 = 0;
+  }
 }
 #endif
 
@@ -1077,7 +1113,7 @@ inline void queryCacheSizes(int& l1, int& l2, int& l3)
 
   // identify the CPU vendor
   EIGEN_CPUID(abcd,0x0,0);
-  int max_std_funcs = abcd[1];
+  int max_std_funcs = abcd[0];
   if(cpuid_is_vendor(abcd,GenuineIntel))
     queryCacheSizes_intel(l1,l2,l3,max_std_funcs);
   else if(cpuid_is_vendor(abcd,AuthenticAMD) || cpuid_is_vendor(abcd,AMDisbetter_))

@@ -101,8 +101,8 @@ class KLU : public SparseSolverBase<KLU<_MatrixType> >
       if(m_numeric)  klu_free_numeric(&m_numeric,&m_common);
     }
 
-    inline Index rows() const { return mp_matrix.rows(); }
-    inline Index cols() const { return mp_matrix.cols(); }
+    EIGEN_CONSTEXPR inline Index rows() const EIGEN_NOEXCEPT { return mp_matrix.rows(); }
+    EIGEN_CONSTEXPR inline Index cols() const EIGEN_NOEXCEPT { return mp_matrix.cols(); }
 
     /** \brief Reports whether previous computation was successful.
       *
@@ -253,7 +253,7 @@ class KLU : public SparseSolverBase<KLU<_MatrixType> >
 
       m_numeric = klu_factor(const_cast<StorageIndex*>(mp_matrix.outerIndexPtr()), const_cast<StorageIndex*>(mp_matrix.innerIndexPtr()), const_cast<Scalar*>(mp_matrix.valuePtr()),
                                     m_symbolic, &m_common, Scalar());
-                                         
+
 
       m_info = m_numeric ? Success : NumericalIssue;
       m_factorizationIsOk = m_numeric ? 1 : 0;

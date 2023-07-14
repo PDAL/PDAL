@@ -51,8 +51,11 @@ template<typename Derived> struct traits<SVDBase<Derived> >
  * smaller value among \a n and \a p, there are only \a m singular vectors; the remaining columns of \a U and \a V do not correspond to actual
  * singular vectors. Asking for \em thin \a U or \a V means asking for only their \a m first columns to be formed. So \a U is then a n-by-m matrix,
  * and \a V is then a p-by-m matrix. Notice that thin \a U and \a V are all you need for (least squares) solving.
+ * 
+ * The status of the computation can be retrived using the \a info() method. Unless \a info() returns \a Success, the results should be not
+ * considered well defined.
  *  
- * If the input matrix has inf or nan coefficients, the result of the computation is undefined, but the computation is guaranteed to
+ * If the input matrix has inf or nan coefficients, the result of the computation is undefined, and \a info() will return \a InvalidInput, but the computation is guaranteed to
  * terminate in finite (and reasonable) time.
  * \sa class BDCSVD, class JacobiSVD
  */
@@ -97,7 +100,7 @@ public:
    */
   const MatrixUType& matrixU() const
   {
-    eigen_assert(m_isInitialized && "SVD is not initialized.");
+    _check_compute_assertions();
     eigen_assert(computeU() && "This SVD decomposition didn't compute U. Did you ask for it?");
     return m_matrixU;
   }
@@ -113,7 +116,7 @@ public:
    */
   const MatrixVType& matrixV() const
   {
-    eigen_assert(m_isInitialized && "SVD is not initialized.");
+    _check_compute_assertions();
     eigen_assert(computeV() && "This SVD decomposition didn't compute V. Did you ask for it?");
     return m_matrixV;
   }
@@ -125,14 +128,14 @@ public:
    */
   const SingularValuesType& singularValues() const
   {
-    eigen_assert(m_isInitialized && "SVD is not initialized.");
+    _check_compute_assertions();
     return m_singularValues;
   }
 
   /** \returns the number of singular values that are not exactly 0 */
   Index nonzeroSingularValues() const
   {
-    eigen_assert(m_isInitialized && "SVD is not initialized.");
+    _check_compute_assertions();
     return m_nonzeroSingularValues;
   }
   
@@ -145,7 +148,7 @@ public:
   inline Index rank() const
   {
     using std::abs;
-    eigen_assert(m_isInitialized && "JacobiSVD is not initialized.");
+    _check_compute_assertions();
     if(m_singularValues.size()==0) return 0;
     RealScalar premultiplied_threshold = numext::maxi<RealScalar>(m_singularValues.coeff(0) * threshold(), (std::numeric_limits<RealScalar>::min)());
     Index i = m_nonzeroSingularValues-1;
@@ -224,6 +227,18 @@ public:
   solve(const MatrixBase<Rhs>& b) const;
   #endif
 
+
+  /** \brief Reports whether previous computation was successful.
+   *
+   * \returns \c Success if computation was successful.
+   */
+  EIGEN_DEVICE_FUNC
+  ComputationInfo info() const
+  {
+    eigen_assert(m_isInitialized && "SVD is not initialized.");
+    return m_info;
+  }
+
   #ifndef EIGEN_PARSED_BY_DOXYGEN
   template<typename RhsType, typename DstType>
   void _solve_impl(const RhsType &rhs, DstType &dst) const;
@@ -233,26 +248,31 @@ public:
   #endif
 
 protected:
-  
+
   static void check_template_parameters()
   {
     EIGEN_STATIC_ASSERT_NON_INTEGER(Scalar);
   }
 
+  void _check_compute_assertions() const {
+    eigen_assert(m_isInitialized && "SVD is not initialized.");
+  }
+
   template<bool Transpose_, typename Rhs>
   void _check_solve_assertion(const Rhs& b) const {
       EIGEN_ONLY_USED_FOR_DEBUG(b);
-      eigen_assert(m_isInitialized && "SVD is not initialized.");
+      _check_compute_assertions();
       eigen_assert(computeU() && computeV() && "SVDBase::solve(): Both unitaries U and V are required to be computed (thin unitaries suffice).");
       eigen_assert((Transpose_?cols():rows())==b.rows() && "SVDBase::solve(): invalid number of rows of the right hand side matrix b");
   }
-  
+
   // return true if already allocated
   bool allocate(Index rows, Index cols, unsigned int computationOptions) ;
 
   MatrixUType m_matrixU;
   MatrixVType m_matrixV;
   SingularValuesType m_singularValues;
+  ComputationInfo m_info;
   bool m_isInitialized, m_isAllocated, m_usePrescribedThreshold;
   bool m_computeFullU, m_computeThinU;
   bool m_computeFullV, m_computeThinV;
@@ -265,7 +285,8 @@ protected:
    * Default constructor of SVDBase
    */
   SVDBase()
-    : m_isInitialized(false),
+    : m_info(Success),
+      m_isInitialized(false),
       m_isAllocated(false),
       m_usePrescribedThreshold(false),
       m_computeFullU(false),
@@ -327,6 +348,7 @@ bool SVDBase<MatrixType>::allocate(Index rows, Index cols, unsigned int computat
 
   m_rows = rows;
   m_cols = cols;
+  m_info = Success;
   m_isInitialized = false;
   m_isAllocated = true;
   m_computationOptions = computationOptions;

@@ -86,7 +86,7 @@ MatrixBase<Derived>::dot(const MatrixBase<OtherDerived>& other) const
 
 //---------- implementation of L2 norm and related functions ----------
 
-/** \returns, for vectors, the squared \em l2 norm of \c *this, and for matrices the Frobenius norm.
+/** \returns, for vectors, the squared \em l2 norm of \c *this, and for matrices the squared Frobenius norm.
   * In both cases, it consists in the sum of the square of all the matrix entries.
   * For vectors, this is also equals to the dot product of \c *this with itself.
   *

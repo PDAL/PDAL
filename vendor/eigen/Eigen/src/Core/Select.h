@@ -10,7 +10,7 @@
 #ifndef EIGEN_SELECT_H
 #define EIGEN_SELECT_H
 
-namespace Eigen { 
+namespace Eigen {
 
 /** \class Select
   * \ingroup Core_Module
@@ -67,8 +67,10 @@ class Select : public internal::dense_xpr_base< Select<ConditionMatrixType, Then
       eigen_assert(m_condition.cols() == m_then.cols() && m_condition.cols() == m_else.cols());
     }
 
-    inline EIGEN_DEVICE_FUNC Index rows() const { return m_condition.rows(); }
-    inline EIGEN_DEVICE_FUNC Index cols() const { return m_condition.cols(); }
+    inline EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
+    Index rows() const EIGEN_NOEXCEPT { return m_condition.rows(); }
+    inline EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
+    Index cols() const EIGEN_NOEXCEPT { return m_condition.cols(); }
 
     inline EIGEN_DEVICE_FUNC
     const Scalar coeff(Index i, Index j) const

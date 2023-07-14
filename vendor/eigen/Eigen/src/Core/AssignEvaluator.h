@@ -450,7 +450,7 @@ struct dense_assignment_loop<Kernel, LinearVectorizedTraversal, CompleteUnrollin
 
     enum { size = DstXprType::SizeAtCompileTime,
            packetSize =unpacket_traits<PacketType>::size,
-           alignedSize = (size/packetSize)*packetSize };
+           alignedSize = (int(size)/packetSize)*packetSize };
 
     copy_using_evaluator_innervec_CompleteUnrolling<Kernel, 0, alignedSize>::run(kernel);
     copy_using_evaluator_DefaultTraversal_CompleteUnrolling<Kernel, alignedSize, size>::run(kernel);
@@ -591,7 +591,7 @@ struct dense_assignment_loop<Kernel, SliceVectorizedTraversal, InnerUnrolling>
 
     enum { innerSize = DstXprType::InnerSizeAtCompileTime,
            packetSize =unpacket_traits<PacketType>::size,
-           vectorizableSize = (innerSize/packetSize)*packetSize,
+           vectorizableSize = (int(innerSize) / int(packetSize)) * int(packetSize),
            size = DstXprType::SizeAtCompileTime };
 
     for(Index outer = 0; outer < kernel.outerSize(); ++outer)
@@ -638,15 +638,15 @@ public:
     #endif
   }
 
-  EIGEN_DEVICE_FUNC Index size() const        { return m_dstExpr.size(); }
-  EIGEN_DEVICE_FUNC Index innerSize() const   { return m_dstExpr.innerSize(); }
-  EIGEN_DEVICE_FUNC Index outerSize() const   { return m_dstExpr.outerSize(); }
-  EIGEN_DEVICE_FUNC Index rows() const        { return m_dstExpr.rows(); }
-  EIGEN_DEVICE_FUNC Index cols() const        { return m_dstExpr.cols(); }
-  EIGEN_DEVICE_FUNC Index outerStride() const { return m_dstExpr.outerStride(); }
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR Index size() const EIGEN_NOEXCEPT { return m_dstExpr.size(); }
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR Index innerSize() const EIGEN_NOEXCEPT { return m_dstExpr.innerSize(); }
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR Index outerSize() const EIGEN_NOEXCEPT { return m_dstExpr.outerSize(); }
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR Index rows() const EIGEN_NOEXCEPT { return m_dstExpr.rows(); }
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR Index cols() const EIGEN_NOEXCEPT { return m_dstExpr.cols(); }
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR Index outerStride() const EIGEN_NOEXCEPT { return m_dstExpr.outerStride(); }
 
-  EIGEN_DEVICE_FUNC DstEvaluatorType& dstEvaluator() { return m_dst; }
-  EIGEN_DEVICE_FUNC const SrcEvaluatorType& srcEvaluator() const { return m_src; }
+  EIGEN_DEVICE_FUNC DstEvaluatorType& dstEvaluator() EIGEN_NOEXCEPT { return m_dst; }
+  EIGEN_DEVICE_FUNC const SrcEvaluatorType& srcEvaluator() const EIGEN_NOEXCEPT { return m_src; }
 
   /// Assign src(row,col) to dst(row,col) through the assignment functor.
   EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void assignCoeff(Index row, Index col)
@@ -784,6 +784,16 @@ EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void call_dense_assignment_loop(DstXprType
 
   dense_assignment_loop<Kernel>::run(kernel);
 }
+
+// Specialization for filling the destination with a constant value.
+#ifndef EIGEN_GPU_COMPILE_PHASE
+template<typename DstXprType>
+EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void call_dense_assignment_loop(DstXprType& dst, const Eigen::CwiseNullaryOp<Eigen::internal::scalar_constant_op<typename DstXprType::Scalar>, DstXprType>& src, const internal::assign_op<typename DstXprType::Scalar,typename DstXprType::Scalar>& func)
+{
+  resize_if_allowed(dst, src, func);
+  std::fill_n(dst.data(), dst.size(), src.functor()());
+}
+#endif
 
 template<typename DstXprType, typename SrcXprType>
 EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void call_dense_assignment_loop(DstXprType& dst, const SrcXprType& src)

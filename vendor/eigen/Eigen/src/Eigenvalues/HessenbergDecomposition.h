@@ -267,7 +267,7 @@ template<typename _MatrixType> class HessenbergDecomposition
 
   private:
 
-    typedef Matrix<Scalar, 1, Size, Options | RowMajor, 1, MaxSize> VectorType;
+    typedef Matrix<Scalar, 1, Size, int(Options) | int(RowMajor), 1, MaxSize> VectorType;
     typedef typename NumTraits<Scalar>::Real RealScalar;
     static void _compute(MatrixType& matA, CoeffVectorType& hCoeffs, VectorType& temp);
 
