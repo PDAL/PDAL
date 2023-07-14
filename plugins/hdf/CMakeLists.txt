@@ -1,3 +1,14 @@
+cmake_minimum_required(VERSION 3.5)
+
+if (STANDALONE)
+    project(pdal-hdf)
+    include("${CMAKE_SOURCE_DIR}/../../cmake/standalone.cmake" )
+    include(${PDAL_CMAKE_DIR}/arbiter.cmake)
+    include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
+    include(${PDAL_CMAKE_DIR}/libxml2.cmake)
+    add_subdirectory("${CMAKE_SOURCE_DIR}/../../vendor/arbiter" "vendor/arbiter")
+endif(STANDALONE)
+
 #
 # HDF plugin CMake configuration
 #
@@ -15,6 +26,7 @@ PDAL_ADD_PLUGIN(libname reader hdf
         io/Hdf5Handler.cpp
     LINK_WITH
         ${HDF5_LIBRARIES}
+        ${PDAL_LIBRARIES}
     INCLUDES
         ${ROOT_DIR}
         ${NLOHMANN_INCLUDE_DIR}

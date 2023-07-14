@@ -1,3 +1,15 @@
+cmake_minimum_required(VERSION 3.5)
+
+if (STANDALONE)
+    project(pdal-pgpointcloud)
+    include("${CMAKE_SOURCE_DIR}/../../cmake/standalone.cmake" )
+    include(${PDAL_CMAKE_DIR}/arbiter.cmake)
+    include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
+    include(${PDAL_CMAKE_DIR}/libxml2.cmake)
+    add_subdirectory("${CMAKE_SOURCE_DIR}/../../vendor/arbiter" "vendor/arbiter")
+
+endif(STANDALONE)
+
 #
 # PgPointCloud plugin CMake configuration
 #
@@ -12,6 +24,7 @@ PDAL_ADD_PLUGIN(reader_libname reader pgpointcloud
     LINK_WITH
         PostgreSQL::PostgreSQL
         ${LIBXML2_LIBRARIES}
+        ${PDAL_LIBRARIES}
     INCLUDES
         ${LIBXML2_INCLUDE_DIR}
 )
@@ -25,6 +38,7 @@ PDAL_ADD_PLUGIN(writer_libname writer pgpointcloud
     LINK_WITH
         PostgreSQL::PostgreSQL
         ${LIBXML2_LIBRARIES}
+        ${PDAL_LIBRARIES}
     INCLUDES
         ${LIBXML2_INCLUDE_DIR}
 )
