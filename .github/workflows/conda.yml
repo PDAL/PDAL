@@ -27,19 +27,12 @@ jobs:
 
     env:
       PDAL_PLATFORM: ${{ matrix.platform }}
-      CACHE_NUMBER: 1
     steps:
     - uses: actions/checkout@v3
 
     - name: Support longpaths
       run: git config --system core.longpaths true
       if: matrix.platform == 'windows-latest'
-
-    - name: Cache Conda Environment
-      uses: actions/cache@v2
-      with:
-        path: ~/conda_pkgs_dir
-        key: ${{ runner.os }}-${{ steps.get-date.outputs.today }}-conda-${{ env.CACHE_NUMBER }}
 
     - uses: mamba-org/setup-micromamba@v1
       with:
