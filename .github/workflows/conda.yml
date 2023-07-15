@@ -24,9 +24,7 @@ jobs:
       fail-fast: true
       matrix:
         platform: ['windows-latest','macos-latest','ubuntu-latest']
-    defaults:
-      run:
-        shell: bash -l {0}
+
     env:
       PDAL_PLATFORM: ${{ matrix.platform }}
     steps:
