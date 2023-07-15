@@ -36,11 +36,14 @@ jobs:
 
     - uses: mamba-org/setup-micromamba@v1
       with:
-        init-shell: bash powershell cmd.exe
-        environment-file: scripts/ci/environment.yml
-        environment-name: "pdal-build"
+        init-shell: bash
+        environment-name: "test"
         cache-environment: true
         cache-downloads: true
+        create=args: >-
+          python=3.10
+          mamba
+          conda
 
     - uses: ilammy/msvc-dev-cmd@v1
       if: matrix.platform == 'windows-latest'
