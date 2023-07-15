@@ -34,6 +34,9 @@ jobs:
       run: git config --system core.longpaths true
       if: matrix.platform == 'windows-latest'
 
+    - uses: ilammy/msvc-dev-cmd@v1
+      if: matrix.platform == 'windows-latest'
+
     - uses: mamba-org/setup-micromamba@v1
       if: matrix.platform != 'windows-latest'
       with:
@@ -60,8 +63,6 @@ jobs:
           conda
           conda-build
 
-    - uses: ilammy/msvc-dev-cmd@v1
-      if: matrix.platform == 'windows-latest'
 
     - name: Setup
       run: |
