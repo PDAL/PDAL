@@ -15,10 +15,10 @@ if grep -q "macos" <<< "$PDAL_PLATFORM"; then
     CI_PLAT="osx"
 fi
 
-conda build recipe --clobber-file recipe/recipe_clobber.yaml --output-folder packages -m ".ci_support/${CI_PLAT}_64_.yaml"
-conda create -y -n test -c ./packages/$CI_PLAT-64 python pdal
-conda deactivate
+mamba build recipe --clobber-file recipe/recipe_clobber.yaml --output-folder packages -m ".ci_support/${CI_PLAT}_64_.yaml"
+mamba create -y -n test -c ./packages/$CI_PLAT-64 python pdal
+mamba deactivate
 
-conda activate test
+mamba activate test
 pdal --version
-conda deactivate
+mamba deactivate
