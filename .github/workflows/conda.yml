@@ -35,8 +35,22 @@ jobs:
       if: matrix.platform == 'windows-latest'
 
     - uses: mamba-org/setup-micromamba@v1
+      if: matrix.platform != 'windows-latest'
       with:
         init-shell: bash
+        environment-name: "test"
+        cache-environment: true
+        cache-downloads: true
+        create-args: >-
+          python=3.10
+          mamba
+          conda
+          conda-build
+
+    - uses: mamba-org/setup-micromamba@v1
+      if: matrix.platform == 'windows-latest'
+      with:
+        init-shell: cmd.exe
         environment-name: "test"
         cache-environment: true
         cache-downloads: true
@@ -58,11 +72,6 @@ jobs:
           source ../scripts/ci/conda/compile.sh
       working-directory: ./pdal-feedstock
 
-    - name: Debug
-      run: |
-          conda activate test
-          conda info
-          conda list
 
     - name: Test
       run: |
