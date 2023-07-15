@@ -40,10 +40,11 @@ jobs:
         environment-name: "test"
         cache-environment: true
         cache-downloads: true
-        create=args: >-
+        create-args: >-
           python=3.10
           mamba
           conda
+          conda-build
 
     - uses: ilammy/msvc-dev-cmd@v1
       if: matrix.platform == 'windows-latest'
