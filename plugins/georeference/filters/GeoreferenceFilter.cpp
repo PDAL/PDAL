@@ -3,10 +3,7 @@
 #include "GeoreferenceFilter.hpp"
 #include "private/Trajectory.hpp"
 #include "private/Utils.hpp"
-#include <GeographicLib/Geocentric.hpp>
-#include <GeographicLib/LocalCartesian.hpp>
-#include <GeographicLib/Geodesic.hpp>
-#include <GeographicLib/Constants.hpp>
+#include "private/LocalCartesian.hpp"
 
 #include <pdal/pdal_internal.hpp>
 
@@ -40,7 +37,7 @@ GeoreferenceFilter::GeoreferenceFilter()
   , m_reverse(false)
   , m_matrix(new TransformationFilter::Transform)
   , m_timeOffset(0.0)
-  , m_localCartesian(new GeographicLib::LocalCartesian(0.0, 0.0, 0.0, GeographicLib::Geocentric::WGS84()))
+  , m_localCartesian(new LocalCartesian(0.0, 0.0, 0.0))
 {
 }
 
@@ -87,14 +84,14 @@ bool GeoreferenceFilter::processOne(PointRef& point)
                                                            barycenter.azimuth - barycenter.wanderAngle) *
                                   m_config->m_scan2imu);
 
-  m_localCartesian->Reset(Utils::rad2deg(barycenter.y), Utils::rad2deg(barycenter.x), barycenter.z);
+  m_localCartesian->reset(Utils::rad2deg(barycenter.y), Utils::rad2deg(barycenter.x), barycenter.z);
   if (m_reverse)
   {
-    Eigen::Vector3d ned;
-    m_localCartesian->Forward(point.getFieldAs<double>(DimId::Y), point.getFieldAs<double>(DimId::X),
-                              point.getFieldAs<double>(DimId::Z), ned.y(), ned.x(), ned.z());
-    ned.z() = -ned.z();
-    const Eigen::Vector3d scan(transform.inverse() * ned);
+    m_localCartesian->forward(point);
+    //taking into account that scan2imu is given in ned ?
+    const Eigen::Vector3d scan(transform.inverse() * Eigen::Vector3d(point.getFieldAs<double>(DimId::Y)
+                                                                     point.getFieldAs<double>(DimId::X)
+                                                                     -point.getFieldAs<double>(DimId::Z)));
     point.setField(DimId::X, scan.x());
     point.setField(DimId::Y, scan.y());
     point.setField(DimId::Z, scan.z());
@@ -104,12 +101,11 @@ bool GeoreferenceFilter::processOne(PointRef& point)
     const Eigen::Vector3d ned(transform * Eigen::Vector3d(point.getFieldAs<double>(DimId::X),
                                                           point.getFieldAs<double>(DimId::Y),
                                                           point.getFieldAs<double>(DimId::Z)));
-
-    double lat(0.0), lon(0.0), h(0.0);
-    m_localCartesian->Reverse(ned.y(), ned.x(), -ned.z(), lat, lon, h);
-    point.setField(DimId::X, lon);
-    point.setField(DimId::Y, lat);
-    point.setField(DimId::Z, h);
+    //taking into account that scan2imu is given in ned ?
+    point.setField(DimId::X, ned.y());
+    point.setField(DimId::Y, ned.x());
+    point.setField(DimId::Z, -ned.z());
+    m_localCartesian->reverse(point);
   }
   return true;
 }

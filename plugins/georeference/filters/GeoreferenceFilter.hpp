@@ -6,14 +6,12 @@
 #include <pdal/pdal_internal.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-namespace GeographicLib
-{
-class LocalCartesian;
-}
+
 
 namespace pdal
 {
 class TransformationFilter;
+class LocalCartesian;
 
 class PDAL_DLL GeoreferenceFilter : public Filter, public Streamable
 {
