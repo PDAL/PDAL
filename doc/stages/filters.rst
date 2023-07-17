@@ -336,6 +336,7 @@ Predefined
    filters.projpipeline
    filters.reprojection
    filters.transformation
+   filters.georefence
 
 :ref:`filters.projpipeline`
     Apply coordinates operation on point triplets, based on PROJ pipeline string,
@@ -346,6 +347,9 @@ Predefined
 
 :ref:`filters.transformation`
     Transform each point using a 4x4 transformation matrix.
+
+:ref:`filters.georefence`
+    Georeference point cloud.
 
 
 Cull
