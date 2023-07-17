@@ -1,7 +1,7 @@
 .. _filters.georeference:
 
 filters.georeference
-==================
+====================
 
 The **georeference filter** georeferences point cloud expressed in scanner coordinates,
 using `GpsTime` Dimension as a synchronisation reference.
@@ -46,12 +46,7 @@ scan2imu
 reverse
    revert georeferencing (go back to scanner frame). [Default: false]
 
-tblock
-  Block size for cublic spline in seconds. [Default: 1.0]
-
-tout
-  Output data interval in seconds. [Default: .01]
+time_offset
+  timestamp offset between trajectory and scanner GpsTime. [Default: 0]
 
 .. include:: filter_opts.rst
-
-.. _`here`: ../papers/lidar-traj.pdf
