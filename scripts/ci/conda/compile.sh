@@ -19,6 +19,6 @@ mamba build recipe --clobber-file recipe/recipe_clobber.yaml --output-folder pac
 mamba create -y -n test -c ./packages/$CI_PLAT-64 python pdal
 mamba deactivate
 
-mamba activate test
+conda activate test
 pdal --version
-mamba deactivate
+conda deactivate
