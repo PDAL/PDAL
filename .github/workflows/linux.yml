@@ -63,7 +63,7 @@ jobs:
 
     - name: Test
       run: |
-          source ../scripts/ci/linux/test.sh --rerun-failed --output-on-failure
+          source ../scripts/ci/linux/test.sh
       working-directory: ./build
 
     - name: Examples
