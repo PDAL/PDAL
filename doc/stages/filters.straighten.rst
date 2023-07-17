@@ -11,11 +11,10 @@ and rotated along the segment accordingly to the average m/roll value.
 
 .. note::
 
-The new coordinate system (X', Y', Z') could be understood as :
-
-X' : curvilinear abcissa (or meter point)
-Y' : orthogonal distance to segment (or orthogonal distance to line)
-Z' : orthogonal distance from (rolling) plane
+  The new coordinate system (X', Y', Z') could be understood as :
+  * X' : curvilinear abcissa (or meter point)
+  * Y' : orthogonal distance to segment (or orthogonal distance to line)
+  * Z' : orthogonal distance from (rolling) plane
 
 Examples
 --------
