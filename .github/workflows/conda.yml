@@ -27,9 +27,8 @@ jobs:
 
     env:
       PDAL_PLATFORM: ${{ matrix.platform }}
-      CACHE_NUMBER: 1
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Support longpaths
       run: git config --system core.longpaths true
@@ -48,6 +47,7 @@ jobs:
         use-mamba: true
         auto-update-conda: true
         use-only-tar-bz2: false
+
 
     - uses: ilammy/msvc-dev-cmd@v1
       if: matrix.platform == 'windows-latest'
