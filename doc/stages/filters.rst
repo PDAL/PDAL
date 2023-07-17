@@ -336,6 +336,7 @@ Predefined
    filters.projpipeline
    filters.reprojection
    filters.transformation
+   filters.straighten
 
 :ref:`filters.projpipeline`
     Apply coordinates operation on point triplets, based on PROJ pipeline string,
@@ -347,6 +348,8 @@ Predefined
 :ref:`filters.transformation`
     Transform each point using a 4x4 transformation matrix.
 
+:ref:`filters.straighten`
+    Transforms each in a new parametric coordinate system along a given poyline.
 
 Cull
 ----
