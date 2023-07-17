@@ -17,6 +17,7 @@ class PDAL_DLL GeoreferenceFilter : public Filter, public Streamable
 {
 public:
   GeoreferenceFilter();
+  ~GeoreferenceFilter();
 
   GeoreferenceFilter& operator=(const GeoreferenceFilter&) = delete;
   GeoreferenceFilter(const GeoreferenceFilter&) = delete;
@@ -34,7 +35,7 @@ private:
   struct Config;
   std::unique_ptr<TransformationFilter::Transform> m_matrix;
   std::unique_ptr<Config> m_config;
-  std::unique_ptr<GeographicLib::LocalCartesian> m_localCartesian;
+  std::unique_ptr<LocalCartesian> m_localCartesian;
   std::string m_trajectory;
   std::string m_scan2imu;
   double m_timeOffset;
