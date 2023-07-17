@@ -1,6 +1,6 @@
 // GeoreferenceFilter.cpp
 #include <pdal/filters/TransformationFilter.hpp>
-#include <GeoreferenceFilter.hpp>
+#include "GeoreferenceFilter.hpp"
 #include "private/Trajectory.hpp"
 #include "private/Utils.hpp"
 #include <GeographicLib/Geocentric.hpp>
