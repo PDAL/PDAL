@@ -1,7 +1,6 @@
 // GeoreferenceFilter.hpp
 
 #pragma once
-#include "libpdal_plugin_filter_georeference_export.h"
 #include <pdal/Filter.hpp>
 #include <pdal/Streamable.hpp>
 #include <pdal/pdal_internal.hpp>
@@ -16,7 +15,7 @@ namespace pdal
 {
 class TransformationFilter;
 
-class LIBPDAL_PLUGIN_FILTER_GEOREFERENCE_EXPORT GeoreferenceFilter : public Filter, public Streamable
+class PDAL_DLL GeoreferenceFilter : public Filter, public Streamable
 {
 public:
   GeoreferenceFilter();
