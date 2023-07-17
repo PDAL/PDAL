@@ -1,6 +1,6 @@
 #!/bin/bash
 
-micromamba install -c conda-forge conda-build -y
+conda install -c conda-forge conda-build -y
 pwd
 ls
 git clone https://github.com/conda-forge/pdal-feedstock.git
