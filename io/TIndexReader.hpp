@@ -66,8 +66,7 @@ class PDAL_DLL TIndexReader : public Reader, public Streamable
     };
 
 public:
-    TIndexReader() : m_dataset(NULL) , m_layer(NULL)
-        {}
+    TIndexReader();
 
     std::string getName() const override;
 
