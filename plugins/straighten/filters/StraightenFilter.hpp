@@ -33,14 +33,13 @@
 ****************************************************************************/
 
 #pragma once
-#include "libpdal_plugin_filter_straighten_export.h"
 #include <pdal/Filter.hpp>
 #include <pdal/Streamable.hpp>
 #include <pdal/pdal_internal.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal {
-class LIBPDAL_PLUGIN_FILTER_STRAIGHTEN_EXPORT StraightenFilter
+class PDAL_DLL StraightenFilter
     : public Filter,
       public Streamable {
 public:
