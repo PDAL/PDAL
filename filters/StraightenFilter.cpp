@@ -32,9 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <StraightenFilter.hpp>
-#include "Polyline.hpp"
-#include "Utils.hpp"
+#include "StraightenFilter.hpp"
+#include "private/straighten/Polyline.hpp"
+#include "private/straighten/Utils.hpp"
 
 #include <pdal/pdal_internal.hpp>
 
