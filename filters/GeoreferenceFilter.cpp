@@ -35,7 +35,7 @@
 #include "private/georeference/LocalCartesian.hpp"
 #include "private/georeference/Trajectory.hpp"
 #include "private/georeference/Utils.hpp"
-#include <pdal/filters/TransformationFilter.hpp>
+#include "TransformationFilter.hpp"
 
 #include "GeoreferenceFilter.hpp"
 
