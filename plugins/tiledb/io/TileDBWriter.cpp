@@ -75,8 +75,11 @@ struct TileDBWriter::Args
     double m_z_domain_end;
     double m_time_domain_st;
     double m_time_domain_end;
+    std::array<double, 3> m_scale;
+    std::array<double, 3> m_offset;
     size_t m_cache_size;
     bool m_stats;
+    std::string m_filter_profile;
     std::string m_compressor;
     int m_compressionLevel;
     NL::json m_filters;
@@ -130,10 +133,30 @@ void TileDBWriter::addArgs(ProgramArgs& args)
                      m_args->m_time_domain_st, 0.0);
     args.add<double>("time_domain_end", "TileDB end of domain in GpsTime",
                      m_args->m_time_domain_end, 0.0);
+    args.add<double>("scale_x",
+                     "Scale factor to use for default x float-scale filter",
+                     m_args->m_scale[0], 0.01);
+    args.add<double>("scale_y",
+                     "Scale factor to use for default y float-scale fitler",
+                     m_args->m_scale[1], 0.01);
+    args.add<double>("scale_z",
+                     "Scale factor to use for default z float-scale filter",
+                     m_args->m_scale[2], 0.01);
+    args.add<double>("offset_x",
+                     "Add offset to use for default x float-scale filter",
+                     m_args->m_offset[0], 0.0);
+    args.add<double>("offset_y",
+                     "Add offset to use for default y float-scale filter",
+                     m_args->m_offset[1], 0.0);
+    args.add<double>("offset_z",
+                     "Add offset to use fo default x float-scale filter",
+                     m_args->m_offset[2], 0.0);
     args.add("chunk_size", "Point cache size for chunked writes",
              m_args->m_cache_size, size_t(10000));
     args.add("stats", "Dump TileDB query stats to stdout", m_args->m_stats,
              false);
+    args.add("filter_profile", "Filter profile to use for compression filters",
+             m_args->m_filter_profile, "balanced");
     args.add("compression", "TileDB compression type for attributes",
              m_args->m_compressor);
     args.add("compression_level", "TileDB compression level",
@@ -231,6 +254,12 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
         schema.set_allows_dups(true);
         schema.set_capacity(m_args->m_tile_capacity);
 
+        // Get filter factory class.
+        FilterFactory filterFactory{
+            m_args->m_filters,    m_args->m_filter_profile,
+            m_args->m_scale,      m_args->m_offset,
+            m_args->m_compressor, m_args->m_compressionLevel};
+
         // Check if using Hilbert order or row-major order. Use row-major if all
         // dimensions have positive tiles set. Otherwise, use Hilbert order.
         bool hasValidTiles =
@@ -239,10 +268,6 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
              (!m_args->m_use_time || m_args->m_time_tile_size > 0));
         if (!hasValidTiles)
             schema.set_cell_order(TILEDB_HILBERT);
-
-        // Get filter factory class.
-        FilterFactory filterFactory{m_args->m_filters, m_args->m_compressor,
-                                    m_args->m_compressionLevel};
 
         // Check if the domain is set for all dimensions.
         bool hasValidDomain =
