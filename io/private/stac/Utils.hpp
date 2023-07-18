@@ -77,7 +77,7 @@ namespace
     static std::time_t getStacTime(std::string in)
     {
         std::istringstream dateStr(in);
-        std::tm date;
+        std::tm date = {};
         dateStr >> std::get_time(&date, "%Y-%m-%dT%H:%M:%S");
         if (dateStr.fail())
             throw pdal_error("Date(" + dateStr.str() + ") cannot be parsed.");
