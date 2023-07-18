@@ -32,10 +32,10 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include "TransformationFilter.hpp"
 #include "private/georeference/LocalCartesian.hpp"
 #include "private/georeference/Trajectory.hpp"
 #include "private/georeference/Utils.hpp"
-#include "TransformationFilter.hpp"
 
 #include "GeoreferenceFilter.hpp"
 
@@ -54,7 +54,7 @@ using DimId = Dimension::Id;
 struct GeoreferenceFilter::Config
 {
 public:
-    Trajectory m_trajectory;
+    georeference::Trajectory m_trajectory;
     Eigen::Affine3d m_scan2imu;
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     Config(const std::string& trajFile,
@@ -71,7 +71,8 @@ public:
 
 GeoreferenceFilter::GeoreferenceFilter()
     : Filter(), Streamable(), m_matrix(new TransformationFilter::Transform),
-      m_config(nullptr), m_localCartesian(new LocalCartesian(0.0, 0.0, 0.0)),
+      m_config(nullptr),
+      m_localCartesian(new georeference::LocalCartesian(0.0, 0.0, 0.0)),
       m_trajectory(""), m_scan2imu(""), m_timeOffset(0.0), m_reverse(false)
 {
 }
@@ -99,37 +100,25 @@ void GeoreferenceFilter::initialize()
     m_config.reset(new Config(m_trajectory, *m_matrix));
 }
 
-void GeoreferenceFilter::addDimensions(PointLayoutPtr layout)
-{
-    layout->registerDim(DimId::ScanAngleRank);
-}
-
 void GeoreferenceFilter::prepared(PointTableRef table) {}
 
 bool GeoreferenceFilter::processOne(PointRef& point)
 {
-    TrajPoint barycenter;
+    georeference::TrajPoint barycenter;
     if (!m_config->m_trajectory.getTrajPoint(
             point.getFieldAs<double>(Dimension::Id::GpsTime) + m_timeOffset,
             barycenter))
         return false;
 
-    const Eigen::Vector3d scanAngle(
-        point.getFieldAs<double>(Dimension::Id::BeamDirectionX),
-        point.getFieldAs<double>(Dimension::Id::BeamDirectionY),
-        point.getFieldAs<double>(Dimension::Id::BeamDirectionZ));
-
-    point.setField(Dimension::Id::ScanAngleRank,
-                   Utils::rad2deg(std::atan2(scanAngle.y(), scanAngle.x())));
-
     const Eigen::Affine3d transform(
-        Utils::getTransformation(0.0, 0.0, 0.0, barycenter.roll,
-                                 barycenter.pitch,
-                                 barycenter.azimuth - barycenter.wanderAngle) *
+        georeference::Utils::getTransformation(
+            0.0, 0.0, 0.0, barycenter.roll, barycenter.pitch,
+            barycenter.azimuth - barycenter.wanderAngle) *
         m_config->m_scan2imu);
 
-    m_localCartesian->reset(Utils::rad2deg(barycenter.y),
-                            Utils::rad2deg(barycenter.x), barycenter.z);
+    m_localCartesian->reset(georeference::Utils::rad2deg(barycenter.y),
+                            georeference::Utils::rad2deg(barycenter.x),
+                            barycenter.z);
     if (m_reverse)
     {
         m_localCartesian->forward(point);

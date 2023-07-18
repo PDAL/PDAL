@@ -45,6 +45,8 @@
 
 namespace pdal
 {
+namespace georeference
+{
 struct TrajPoint;
 class Trajectory
 {
@@ -62,5 +64,5 @@ struct TrajPoint
 {
     double roll, pitch, azimuth, wanderAngle, x, y, z, time;
 };
-
+}; // namespace georeference
 }; // namespace pdal

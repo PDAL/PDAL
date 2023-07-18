@@ -34,8 +34,11 @@
 
 #include "LocalCartesian.hpp"
 #include <ogr_spatialref.h>
+#include <ostream>
 
 namespace pdal
+{
+namespace georeference
 {
 LocalCartesian::LocalCartesian(double lat0, double lon0, double h0)
 {
@@ -47,18 +50,19 @@ LocalCartesian::~LocalCartesian() {}
 void LocalCartesian::reset(double lat0, double lon0, double h0)
 {
     OGRCoordinateTransformationOptions coordTransfoOptions;
-    std::string coordOperation =
-        "+proj=pipeline +step +proj=cart +ellps=WGS84 +step +proj=topocentric "
-        "+ellps=WGS84 +lon_0=" +
-        std::to_string(lon0) + " +lat_0=" + std::to_string(lat0) +
-        " +h_0=" + std::to_string(h0);
-    coordTransfoOptions.SetCoordinateOperation(coordOperation.c_str(), false);
+    std::stringstream ss;
+    // By default OGRCoordinateTransformation class output angular unit are in
+    // radians. To change to degrees we need to apply a unit conversion step.
+    ss << std::fixed << std::setprecision(12)
+       << "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step "
+          "+proj=cart +ellps=WGS84 +step "
+          "+proj=topocentric +ellps=WGS84 +lon_0="
+       << lon0 << " +lat_0=" << lat0 << " +h_0=" << h0;
+    coordTransfoOptions.SetCoordinateOperation(ss.str().c_str(), false);
     OGRSpatialReference nullSrs("");
     m_forwardTransfo.reset(OGRCreateCoordinateTransformation(
         &nullSrs, &nullSrs, coordTransfoOptions));
-    coordTransfoOptions.SetCoordinateOperation(coordOperation.c_str(), true);
-    m_reverseTransfo.reset(OGRCreateCoordinateTransformation(
-        &nullSrs, &nullSrs, coordTransfoOptions));
+    m_reverseTransfo.reset(m_forwardTransfo->GetInverse());
 }
 
 bool LocalCartesian::forward(PointRef& point)
@@ -92,5 +96,5 @@ bool LocalCartesian::reverse(PointRef& point)
     }
     return ok;
 }
-
+} // namespace georeference
 } // namespace pdal

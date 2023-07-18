@@ -43,6 +43,8 @@
 
 namespace pdal
 {
+namespace georeference
+{
 using DimId = Dimension::Id;
 
 Trajectory::Trajectory(const std::filesystem::path& trajFile)
@@ -98,5 +100,5 @@ bool Trajectory::getTrajPoint(double time, TrajPoint& output) const
     }
     return false;
 }
-
+} // namespace georeference
 } // namespace pdal

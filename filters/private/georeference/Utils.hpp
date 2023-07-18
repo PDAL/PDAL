@@ -46,6 +46,8 @@
 
 namespace pdal
 {
+namespace georeference
+{
 namespace Utils
 {
 template <typename Scalar = double> inline Scalar rad2deg(Scalar radians)
@@ -134,6 +136,6 @@ getTransformation(Scalar x, Scalar y, Scalar z, Scalar roll, Scalar pitch,
     t(3, 3) = 1;
     return t;
 }
-
 }; // namespace Utils
+}; // namespace georeference
 }; // namespace pdal

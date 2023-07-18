@@ -42,6 +42,8 @@ class OGRCoordinateTransformation;
 
 namespace pdal
 {
+namespace georeference
+{
 class LocalCartesian
 {
     double m_lat0, m_lon0, m_h0;
@@ -57,4 +59,5 @@ public:
     bool forward(PointRef& point);
     bool reverse(PointRef& point);
 };
-} // namespace pdal
+}; // namespace georeference
+}; // namespace pdal
