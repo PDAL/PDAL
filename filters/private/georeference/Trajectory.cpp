@@ -39,7 +39,7 @@
 #include <filesystem>
 #include <pdal/pdal_types.hpp>
 
-#include <pdal/io/SbetReader.hpp>
+#include <io/SbetReader.hpp>
 
 namespace pdal
 {
