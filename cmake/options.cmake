@@ -90,14 +90,9 @@ add_feature_info("Trajectory plugin" BUILD_PLUGIN_TRAJECTORY
     "Compute trajectory from LAS input")
 
 option(BUILD_PLUGIN_E57
-        "Choose if e57 ui support should be built" FALSE)
+    "Choose if e57 ui support should be built" FALSE)
 add_feature_info("E57 plugin" BUILD_PLUGIN_E57
-        "read/write data to and from e57 format")
-
-option(BUILD_PLUGIN_GEOREFERENCE
-        "Choose if georeference support should be built" FALSE)
-add_feature_info("georeference plugin" BUILD_PLUGIN_GEOREFERENCE
-        "georeference point cloud")
+    "read/write data to and from e57 format")
 
 option(BUILD_TOOLS_NITFWRAP "Choose if nitfwrap tool should be built" FALSE)
 
