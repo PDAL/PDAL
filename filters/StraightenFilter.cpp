@@ -44,7 +44,7 @@ namespace pdal
 static PluginInfo const s_info{"filters.straighten", "Straighten filter",
                                "http://link/to/documentation"};
 
-CREATE_SHARED_STAGE(StraightenFilter, s_info)
+CREATE_STATIC_STAGE(StraightenFilter, s_info)
 
 struct StraightenFilter::Args
 {
