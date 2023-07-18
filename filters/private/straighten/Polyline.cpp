@@ -59,6 +59,8 @@
 
 namespace pdal
 {
+namespace straighten
+{
 
 Polyline::Polyline()
 {
@@ -336,5 +338,5 @@ double Polyline::closestSegment(const PointRef& point, double& x, double& y,
     }
     return sqrDist;
 }
-
+} // namespace straighten
 } // namespace pdal

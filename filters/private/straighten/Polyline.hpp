@@ -47,6 +47,9 @@ class KD2Index;
 class RowPointTable;
 class PointView;
 
+namespace straighten
+{
+
 // TODO : add a kdTree to look for segment more easily (using a pdal KDIndex ?)
 class Polyline : public Geometry
 {
@@ -80,5 +83,5 @@ private:
     std::unique_ptr<RowPointTable> m_table;
     std::unique_ptr<PointView> m_view;
 };
-
+} // namespace straighten
 } // namespace pdal

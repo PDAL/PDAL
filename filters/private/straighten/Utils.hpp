@@ -38,6 +38,8 @@
 
 namespace pdal
 {
+namespace straighten
+{
 namespace Utils
 {
 double sqrDistToLine(double ptX, double ptY, double x1, double y1, double x2,
@@ -93,4 +95,5 @@ void getTransformation(Scalar x, Scalar y, Scalar z, Scalar roll, Scalar pitch,
 }
 
 } // namespace Utils
+} // namespace straighten
 } // namespace pdal

@@ -36,6 +36,8 @@
 
 namespace pdal
 {
+namespace straighten
+{
 namespace Utils
 {
 double sqrDistToLine(double ptX, double ptY, double x1, double y1, double x2,
@@ -95,4 +97,5 @@ double angularRatio(double v1, double v2, double ratio)
 }
 
 } // namespace Utils
+} // namespace straighten
 } // namespace pdal
