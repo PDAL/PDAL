@@ -32,6 +32,16 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+// Avoid conflicting declaration of min/max macros in windows headers
+#if !defined(NOMINMAX) &&                                                      \
+    (defined(_WIN32) || defined(_WIN32_) || defined(WIN32) || defined(_WIN64))
+#define NOMINMAX
+#ifdef max
+#undef max
+#undef min
+#endif
+#endif
+
 #include <limits>
 #include <numeric>
 #pragma warning(push)
