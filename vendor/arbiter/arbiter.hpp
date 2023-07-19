@@ -4530,7 +4530,9 @@ public:
 
     // Overrides.
     virtual std::unique_ptr<std::size_t> tryGetSize(
-            std::string path) const override;
+            std::string path,
+            http::Headers headers,
+            http::Query query = http::Query()) const override;
 
     /** Inherited from Drivers::Http. */
     virtual std::vector<char> put(
