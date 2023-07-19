@@ -69,6 +69,7 @@ private:
     std::unique_ptr<georeference::LocalCartesian> m_localCartesian;
     std::string m_trajectory;
     std::string m_scan2imu;
+    std::string m_coordinateSystem;
     double m_timeOffset;
     bool m_reverse;
 };
