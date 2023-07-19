@@ -56,9 +56,11 @@ struct GeoreferenceFilter::Config
 public:
     georeference::Trajectory m_trajectory;
     Eigen::Affine3d m_scan2imu;
+    bool m_ned;
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     Config(const std::string& trajFile,
-           const TransformationFilter::Transform& matrix)
+           const TransformationFilter::Transform& matrix,
+           const std::string& coordinateSystem = "NED")
         : m_trajectory(trajFile)
     {
         Eigen::Matrix4d m;
@@ -66,12 +68,20 @@ public:
             matrix[6], matrix[7], matrix[8], matrix[9], matrix[10], matrix[11],
             matrix[12], matrix[13], matrix[14], matrix[15];
         m_scan2imu.matrix() = m;
+        std::string s = Utils::toupper(coordinateSystem);
+        if (s == "NED")
+            m_ned = true;
+        else if (s == "ENU")
+            m_ned = false;
+        else
+            throw pdal_error("Local Tangent Plane coordinate system " +
+                             coordinateSystem + " is not allowed.");
     }
 };
 
 GeoreferenceFilter::GeoreferenceFilter()
     : Filter(), Streamable(), m_matrix(new TransformationFilter::Transform),
-      m_config(nullptr),
+      m_config(nullptr), m_coordinateSystem("NED"),
       m_localCartesian(new georeference::LocalCartesian(0.0, 0.0, 0.0)),
       m_trajectory(""), m_scan2imu(""), m_timeOffset(0.0), m_reverse(false)
 {
@@ -93,11 +103,13 @@ void GeoreferenceFilter::addArgs(ProgramArgs& args)
     args.add("time_offset",
              "time offset between trajectory and scanner timestamps",
              m_timeOffset, m_timeOffset);
+    args.add("coordinate_system", "scan2imu coordinate system",
+             m_coordinateSystem, m_coordinateSystem);
 }
 
 void GeoreferenceFilter::initialize()
 {
-    m_config.reset(new Config(m_trajectory, *m_matrix));
+    m_config.reset(new Config(m_trajectory, *m_matrix, m_coordinateSystem));
 }
 
 void GeoreferenceFilter::prepared(PointTableRef table) {}
@@ -122,12 +134,15 @@ bool GeoreferenceFilter::processOne(PointRef& point)
     if (m_reverse)
     {
         m_localCartesian->forward(point);
-        // taking into account that scan2imu is given in ned ?
         const Eigen::Vector3d scan(
             transform.inverse() *
-            Eigen::Vector3d(point.getFieldAs<double>(DimId::Y),
-                            point.getFieldAs<double>(DimId::X),
-                            -point.getFieldAs<double>(DimId::Z)));
+            (m_config->m_ned
+                 ? Eigen::Vector3d(point.getFieldAs<double>(DimId::Y),
+                                   point.getFieldAs<double>(DimId::X),
+                                   -point.getFieldAs<double>(DimId::Z))
+                 : Eigen::Vector3d(point.getFieldAs<double>(DimId::X),
+                                   point.getFieldAs<double>(DimId::Y),
+                                   point.getFieldAs<double>(DimId::Z))));
         point.setField(DimId::X, scan.x());
         point.setField(DimId::Y, scan.y());
         point.setField(DimId::Z, scan.z());
@@ -138,10 +153,18 @@ bool GeoreferenceFilter::processOne(PointRef& point)
             transform * Eigen::Vector3d(point.getFieldAs<double>(DimId::X),
                                         point.getFieldAs<double>(DimId::Y),
                                         point.getFieldAs<double>(DimId::Z)));
-        // taking into account that scan2imu is given in ned ?
-        point.setField(DimId::X, ned.y());
-        point.setField(DimId::Y, ned.x());
-        point.setField(DimId::Z, -ned.z());
+        if (m_config->m_ned)
+        {
+            point.setField(DimId::X, ned.y());
+            point.setField(DimId::Y, ned.x());
+            point.setField(DimId::Z, -ned.z());
+        }
+        else
+        {
+            point.setField(DimId::X, ned.x());
+            point.setField(DimId::Y, ned.y());
+            point.setField(DimId::Z, ned.z());
+        }
         m_localCartesian->reverse(point);
     }
     return true;

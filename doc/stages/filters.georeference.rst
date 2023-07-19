@@ -41,12 +41,16 @@ trajectory
   path to a sbet trajectory file. [Mandatory]
 
 scan2imu
-  4x4 transformation matrix from scanner frame to body imu. [Mandatory]
+  4x4 transformation matrix from scanner frame to body imu. By default expressed in NED coordinates. [Mandatory]
 
 reverse
    revert georeferencing (go back to scanner frame). [Default: false]
 
 time_offset
   timestamp offset between trajectory and scanner GpsTime. [Default: 0]
+
+coordinate_system
+  Two right-handed variants exist for Local tangent plane coordinates: east, north, up (ENU) coordinates and north, east, down (NED). [Default : NED]
+  
 
 .. include:: filter_opts.rst
