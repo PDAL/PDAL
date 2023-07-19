@@ -196,6 +196,7 @@ PDAL_ADD_TEST(pdal_io_las_writer_test
     FILES
         io/LasWriterTest.cpp
     INCLUDES
+        ${GDAL_INCLUDE_DIR}
         ${NLOHMANN_INCLUDE_DIR}
 )
 

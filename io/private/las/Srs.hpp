@@ -46,7 +46,7 @@ namespace las
 class Srs
 {
 public:
-    void init(const VlrList& vlrs, bool useWkt, LogPtr log);
+    void init(const VlrList& vlrs, std::string srsConsumePreference, LogPtr log);
     SpatialReference get() const;
     std::string geotiffString() const;
 
