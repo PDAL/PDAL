@@ -38,7 +38,15 @@
 
 #include <memory>
 
-class OGRCoordinateTransformation;
+#include "proj/coordinateoperation.hpp"
+#include "proj/crs.hpp"
+#include "proj/io.hpp"
+#include "proj/util.hpp" // for nn_dynamic_pointer_cast
+
+using namespace NS_PROJ::crs;
+using namespace NS_PROJ::io;
+using namespace NS_PROJ::operation;
+using namespace NS_PROJ::util;
 
 namespace pdal
 {
@@ -46,18 +54,18 @@ namespace georeference
 {
 class LocalCartesian
 {
-    double m_lat0, m_lon0, m_h0;
-    std::unique_ptr<OGRCoordinateTransformation> m_forwardTransfo,
-        m_reverseTransfo;
-    ;
+    PJ_CONTEXT* m_ctx;
+    CoordinateTransformerNNPtr m_source2ecef, m_ecef2source;
+    CoordinateTransformerNNPtr m_deg2rad, m_rad2deg;
+    CoordinateTransformerNNPtr m_ecef2enu, m_enu2ecef;
 
 public:
-    LocalCartesian(double lat0, double lon0, double h = 0.0);
+    LocalCartesian(double lat0, double lon0, double h0 = 0.0);
     ~LocalCartesian();
 
     void reset(double lat0, double lon0, double h0 = 0.0);
-    bool forward(PointRef& point);
-    bool reverse(PointRef& point);
+    void forward(PointRef& point);
+    void reverse(PointRef& point);
 };
 }; // namespace georeference
 }; // namespace pdal
