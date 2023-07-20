@@ -81,9 +81,10 @@ public:
 
 GeoreferenceFilter::GeoreferenceFilter()
     : Filter(), Streamable(), m_matrix(new TransformationFilter::Transform),
-      m_config(nullptr), m_coordinateSystem("NED"),
+      m_config(nullptr),
       m_localCartesian(new georeference::LocalCartesian(0.0, 0.0, 0.0)),
-      m_trajectory(""), m_scan2imu(""), m_timeOffset(0.0), m_reverse(false)
+      m_trajectory(""), m_scan2imu(""), m_coordinateSystem("NED"),
+      m_timeOffset(0.0), m_reverse(false)
 {
 }
 GeoreferenceFilter::~GeoreferenceFilter() {}
