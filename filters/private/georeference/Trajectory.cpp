@@ -37,9 +37,11 @@
 #include <algorithm>
 #include <cmath>
 #include <filesystem>
+#include <pdal/Options.hpp>
 #include <pdal/pdal_types.hpp>
 
-#include <io/SbetReader.hpp>
+#include <pdal/Reader.hpp>
+#include <pdal/StageFactory.hpp>
 
 namespace pdal
 {
@@ -47,18 +49,60 @@ namespace georeference
 {
 using DimId = Dimension::Id;
 
-Trajectory::Trajectory(const std::filesystem::path& trajFile)
+Trajectory::Trajectory(const std::string& filename, const NL::json& opts)
 {
-    SbetReader reader;
+    std::string driver("");
+    if (opts.contains("type"))
+        driver = opts.at("type").get<std::string>();
+    if (driver.empty())
+        driver = StageFactory::inferReaderDriver(filename);
+    if (driver.empty())
+        throw pdal_error("Cannot determine reader for input file: " + filename);
 
     Options readerOptions;
-    readerOptions.add("filename", trajFile.string());
-    readerOptions.add("angles_as_degrees", false);
+    readerOptions.add("filename", filename);
+    for (auto& arg : opts.items())
+    {
+        if (arg.key() == "type")
+            continue;
 
-    reader.addOptions(readerOptions);
-    reader.prepare(m_table);
-    m_set = reader.execute(m_table);
+        NL::detail::value_t type = opts.at(arg.key()).type();
+        switch (type)
+        {
+        case NL::detail::value_t::string:
+        {
+            std::string val = arg.value().get<std::string>();
+            readerOptions.add(arg.key(), arg.value().get<std::string>());
+            break;
+        }
+        case NL::detail::value_t::number_float:
+        {
+            readerOptions.add(arg.key(), arg.value().get<float>());
+            break;
+        }
+        case NL::detail::value_t::number_integer:
+        {
+            readerOptions.add(arg.key(), arg.value().get<int>());
+            break;
+        }
+        case NL::detail::value_t::boolean:
+        {
+            readerOptions.add(arg.key(), arg.value().get<bool>());
+            break;
+        }
+        default:
+        {
+            readerOptions.add(arg.key(), arg.value());
+            break;
+        }
+        }
+    }
 
+    std::unique_ptr<StageFactory> factory(new StageFactory);
+    Stage* reader = factory->createStage(driver);
+    reader->setOptions(readerOptions);
+    reader->prepare(m_table);
+    m_set = reader->execute(m_table);
     m_pointView = *(m_set.begin());
 }
 

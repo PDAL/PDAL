@@ -61,17 +61,11 @@ private:
     virtual void initialize() override;
     virtual bool processOne(PointRef& point) override;
     virtual void filter(PointView& view) override;
-    virtual void prepared(PointTableRef table);
+    virtual void prepared(PointTableRef table) override;
 
     struct Config;
-    std::unique_ptr<TransformationFilter::Transform> m_matrix;
     std::unique_ptr<Config> m_config;
     std::unique_ptr<georeference::LocalCartesian> m_localCartesian;
-    std::string m_trajectory;
-    std::string m_scan2imu;
-    std::string m_coordinateSystem;
-    double m_timeOffset;
-    bool m_reverse;
 };
 
 } // namespace pdal

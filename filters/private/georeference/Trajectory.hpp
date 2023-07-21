@@ -33,11 +33,11 @@
  ****************************************************************************/
 
 #pragma once
+#include <nlohmann/json.hpp>
 #include <pdal/PointTable.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/pdal_types.hpp>
 
-#include <filesystem>
 #include <list>
 #include <map>
 #include <string>
@@ -55,7 +55,7 @@ class Trajectory
     pdal::PointViewSet m_set;
 
 public:
-    Trajectory(const std::filesystem::path& trajFile);
+    Trajectory(const std::string& trajFile, const NL::json& opts);
 
     bool getTrajPoint(double time, TrajPoint& trajPoint) const;
 };

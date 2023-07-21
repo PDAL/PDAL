@@ -4,13 +4,17 @@ filters.georeference
 ====================
 
 The **georeference filter** georeferences point cloud expressed in scanner coordinates,
-using `GpsTime` Dimension as a synchronisation reference.
+using `GpsTime` Dimension as a synchronisation reference with a given trajectory.
 
 .. streamable::
 
 .. note::
 
-  This filter works only with `sbet` trajectories.
+  This filter expects trajectory to :
+
+  * contains `X`, `Y`, `Z`, `Roll`, `Pitch`, `Yaw`, `WanderAngle` and `GpsTime` ;
+  * have coordinates expressed in `WGS84` system (EPSG:4979) ;
+  * have all its angle values expressed in radians.
 
 Examples
 --------
@@ -21,9 +25,15 @@ Examples
       "input.rxp",
       {
           "type": "filters.georeference",
-          "trajectory" : "sbet.out",
-          "scan2imu" : "0.547418069126518 0.629350569360448 0.055655 0.282019849017109 0.832472349301833 -0.476921998243165 -0.830192 -0.784992666412172 -0.085575961821537 -0.613566026143419 -0.099056 0.000 0.000 0.000 1.000"
-
+          "trajectory_file" : "sbet.out",
+          "trajectory_options": {
+            "type": "readers.sbet",
+            "angles_as_degrees": false
+        },
+          "scan2imu" : "-0.555809 0.545880 0.626970 0.053833 
+          0.280774 0.833144 -0.476484 -0.830238 
+          -0.782459 -0.088797 -0.616338 -0.099672 
+          0.000000 0.000000 0.000000 1.000000"
       },
       {
         "type" : "filters.reprojection",
@@ -37,8 +47,11 @@ Examples
 Options
 --------
 
-trajectory
+trajectory_file
   path to a sbet trajectory file. [Mandatory]
+
+trajectory_options
+  JSON object with keys of reader options and the values to pass through. [Default: {}]
 
 scan2imu
   4x4 transformation matrix from scanner frame to body imu. By default expressed in NED coordinates. [Mandatory]
