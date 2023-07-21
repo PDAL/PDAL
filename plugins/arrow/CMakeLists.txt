@@ -22,6 +22,15 @@ PDAL_ADD_PLUGIN(arrow_writer_libname writer arrow
         Parquet::parquet_shared
 )
 
+PDAL_ADD_PLUGIN(arrow_reader_libname reader arrow
+    FILES
+        io/ArrowReader.cpp
+    LINK_WITH
+        ${PDAL_LIBRARIES}
+        Arrow::arrow_shared
+        Parquet::parquet_shared
+)
+
 if (WITH_TESTS)
     PDAL_ADD_TEST(pdal_io_arrow_writer_test
         FILES
@@ -31,4 +40,14 @@ if (WITH_TESTS)
         Arrow::arrow_shared
         ${arrow_writer_libname}
     )
+
+    PDAL_ADD_TEST(pdal_io_arrow_reader_test
+        FILES
+            test/ArrowReaderTest.cpp
+    LINK_WITH
+        ${PDAL_LIBRARIES}
+        Arrow::arrow_shared
+        ${arrow_reader_libname}
+    )
+
 endif(WITH_TESTS)
