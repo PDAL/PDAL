@@ -1,7 +1,7 @@
 .. _writers.arrow:
 
 writers.arrow
-===========
+===============
 
 The **Arrow Writer** supports writing to `Apache Arrow`_ `Feather`_
 and `Parquet`_ file types.
@@ -9,8 +9,6 @@ and `Parquet`_ file types.
 .. plugin::
 
 .. streamable::
-
-.. note::
 
 
 
@@ -72,4 +70,5 @@ format
 
 .. _Apache Arrow: https://arrow.apache.org/
 .. _Feather: https://arrow.apache.org/docs/python/feather.html
+.. _Parquet: https://arrow.apache.org/docs/cpp/parquet.html
 
