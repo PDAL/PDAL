@@ -38,20 +38,8 @@
 #include <pdal/Writer.hpp>
 #include <pdal/Streamable.hpp>
 
-
-namespace arrow
-{
-    struct Array;
-    struct MemoryPool;
-    struct ArrayBuilder;
-    struct Field;
-    struct Table;
-    struct Schema;
-    namespace io
-    {
-        class FileOutputStream;
-    };
-};
+#include <arrow/type_fwd.h>
+#include <arrow/io/type_fwd.h>
 
 namespace pdal
 {
