@@ -1,1 +1,1 @@
-find_package(PROJ REQUIRED 9.3)
+find_package(PROJ REQUIRED)
