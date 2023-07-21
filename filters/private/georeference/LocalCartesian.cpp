@@ -77,7 +77,7 @@ void LocalCartesian::reset(const double lat0, const double lon0,
        << "+proj=topocentric +ellps=WGS84"
        << " +lon_0=" << lon0 << " +lat_0=" << lat0 << " +h_0=" << h0;
     m_ecef2enu = proj_create(m_ctx, ss.str().c_str());
-};
+}
 
 void LocalCartesian::forward(PointRef& point)
 {
@@ -92,7 +92,7 @@ void LocalCartesian::forward(PointRef& point)
     point.setField(Dimension::Id::X, c.v[0]);
     point.setField(Dimension::Id::Y, c.v[1]);
     point.setField(Dimension::Id::Z, c.v[2]);
-};
+}
 
 void LocalCartesian::reverse(PointRef& point)
 {

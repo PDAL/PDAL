@@ -39,7 +39,6 @@
 #include <memory>
 #include <proj.h>
 
-
 namespace pdal
 {
 namespace georeference
@@ -47,11 +46,9 @@ namespace georeference
 class LocalCartesian
 {
     PJ_CONTEXT* m_ctx;
-
-    PJ *m_source2ecef;
-    PJ *m_deg2rad;
-    PJ *m_ecef2enu;
-
+    PJ* m_source2ecef;
+    PJ* m_deg2rad;
+    PJ* m_ecef2enu;
 
 public:
     LocalCartesian(double lat0, double lon0, double h0 = 0.0);
