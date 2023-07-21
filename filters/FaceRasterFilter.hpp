@@ -60,6 +60,7 @@ private:
 
     std::unique_ptr<RasterLimits> m_limits;
     std::string m_meshName;
+    double m_maxTriangleEdgeLength;
     double m_noData;
     bool m_computeLimits;
 };
