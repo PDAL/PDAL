@@ -35,71 +35,48 @@
 #include "LocalCartesian.hpp"
 #include <ogr_spatialref.h>
 #include <ostream>
-#include <proj/io.hpp>
+
+#if PROJ_AT_LEAST_VERSION(9, 3, 0)
+#include "proj/util.hpp" // for nn_dynamic_pointer_cast
+#else
+#endif
 
 namespace pdal
 {
 namespace georeference
 {
 
-std::string enuProj(const double lat0, const double lon0, const double h0 = 0.0)
-{
-    std::stringstream ss;
-    ss << std::fixed << std::setprecision(12)
-       << "+proj=topocentric +ellps=WGS84"
-       << " +lon_0=" << lon0 << " +lat_0=" << lat0 << " +h_0=" << h0;
-    return ss.str();
-}
-
-// NNPtr has no default ctor so we must init all that here
 LocalCartesian::LocalCartesian(const double lat0, const double lon0,
                                const double h0)
-    : m_ctx(proj_context_create()),
-      m_source2ecef(NN_CHECK_THROW(nn_dynamic_pointer_cast<CoordinateOperation>(
-                                       createFromUserInput(
-                                           "+proj=cart +ellps=WGS84", m_ctx)))
-                        ->coordinateTransformer(m_ctx)),
-      m_ecef2source(
-          NN_CHECK_THROW(
-              nn_dynamic_pointer_cast<CoordinateOperation>(
-                  createFromUserInput("+proj=cart +ellps=WGS84 +inv", m_ctx)))
-              ->coordinateTransformer(m_ctx)),
-      m_deg2rad(
-          NN_CHECK_THROW(
-              nn_dynamic_pointer_cast<CoordinateOperation>(createFromUserInput(
-                  "+proj=unitconvert +xy_in=deg +xy_out=rad", m_ctx)))
-              ->coordinateTransformer(m_ctx)),
-      m_rad2deg(
-          NN_CHECK_THROW(
-              nn_dynamic_pointer_cast<CoordinateOperation>(createFromUserInput(
-                  "+proj=unitconvert +xy_in=rad +xy_out=deg", m_ctx)))
-              ->coordinateTransformer(m_ctx)),
-      m_ecef2enu(NN_CHECK_THROW(
-                     nn_dynamic_pointer_cast<CoordinateOperation>(
-                         createFromUserInput(enuProj(lat0, lon0, h0), m_ctx)))
-                     ->coordinateTransformer(m_ctx)),
-      m_enu2ecef(NN_CHECK_THROW(
-                     nn_dynamic_pointer_cast<CoordinateOperation>(
-                         createFromUserInput(enuProj(lat0, lon0, h0), m_ctx)))
-                     ->inverse()
-                     ->coordinateTransformer(m_ctx))
-
+    : m_ctx(proj_context_create()), m_ecef2enu(nullptr)
 {
+    std::string deg2rad("+proj=unitconvert +xy_in=deg +xy_out=rad");
+    m_deg2rad = proj_create(m_ctx, deg2rad.c_str());
+    std::string source2ecef("+proj=cart +ellps=WGS84");
+    m_source2ecef = proj_create(m_ctx, source2ecef.c_str());
+    reset(lat0, lon0, h0);
 }
 
 LocalCartesian::~LocalCartesian()
 {
+
+    proj_destroy(m_deg2rad);
+    proj_destroy(m_source2ecef);
+    proj_destroy(m_ecef2enu);
+
     proj_context_destroy(m_ctx);
 }
 
 void LocalCartesian::reset(const double lat0, const double lon0,
                            const double h0)
 {
-    auto ecef2enuOperation =
-        NN_CHECK_THROW(nn_dynamic_pointer_cast<CoordinateOperation>(
-            createFromUserInput(enuProj(lat0, lon0, h0), m_ctx)));
-    m_ecef2enu = ecef2enuOperation->coordinateTransformer(m_ctx);
-    m_enu2ecef = ecef2enuOperation->inverse()->coordinateTransformer(m_ctx);
+    if (m_ecef2enu)
+        proj_destroy(m_ecef2enu);
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(12)
+       << "+proj=topocentric +ellps=WGS84"
+       << " +lon_0=" << lon0 << " +lat_0=" << lat0 << " +h_0=" << h0;
+    m_ecef2enu = proj_create(m_ctx, ss.str().c_str());
 };
 
 void LocalCartesian::forward(PointRef& point)
@@ -108,12 +85,10 @@ void LocalCartesian::forward(PointRef& point)
                    point.getFieldAs<double>(Dimension::Id::Y),
                    point.getFieldAs<double>(Dimension::Id::Z), HUGE_VAL}};
 
-    std::cout << __PRETTY_FUNCTION__ << " " << c.v[0] << " " << c.v[1] << " "
-              << c.v[2] << std::endl;
-    c = m_ecef2enu->transform(
-        m_source2ecef->transform(m_deg2rad->transform(c)));
-    std::cout << __PRETTY_FUNCTION__ << " " << c.v[0] << " " << c.v[1] << " "
-              << c.v[2] << std::endl;
+    c = proj_trans(
+        m_ecef2enu, PJ_FWD,
+        proj_trans(m_source2ecef, PJ_FWD, proj_trans(m_deg2rad, PJ_FWD, c)));
+
     point.setField(Dimension::Id::X, c.v[0]);
     point.setField(Dimension::Id::Y, c.v[1]);
     point.setField(Dimension::Id::Z, c.v[2]);
@@ -125,8 +100,9 @@ void LocalCartesian::reverse(PointRef& point)
                    point.getFieldAs<double>(Dimension::Id::Y),
                    point.getFieldAs<double>(Dimension::Id::Z), HUGE_VAL}};
 
-    c = m_rad2deg->transform(
-        m_ecef2source->transform(m_enu2ecef->transform(c)));
+    c = proj_trans(
+        m_deg2rad, PJ_INV,
+        proj_trans(m_source2ecef, PJ_INV, proj_trans(m_ecef2enu, PJ_INV, c)));
 
     point.setField(Dimension::Id::X, c.v[0]);
     point.setField(Dimension::Id::Y, c.v[1]);
