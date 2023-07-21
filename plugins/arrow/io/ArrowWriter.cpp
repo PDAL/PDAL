@@ -41,6 +41,8 @@
 #include <arrow/api.h>
 #include <arrow/io/api.h>
 #include <arrow/ipc/feather.h>
+#include <arrow/adapters/orc/adapter.h>
+
 #include <parquet/arrow/writer.h>
 #include <parquet/exception.h>
 
@@ -336,7 +338,7 @@ bool ArrowWriter::processOne(PointRef& point)
 void ArrowWriter::addArgs(ProgramArgs& args)
 {
     args.add("filename", "Output filename", m_filename).setPositional();
-    args.add("format", "Output format ('feature','parquet')", m_format, "feather");
+    args.add("format", "Output format ('feature','parquet','orc')", m_format, "feather");
 }
 
 void ArrowWriter::ready(PointTableRef table)
@@ -391,10 +393,26 @@ void ArrowWriter::done(PointTableRef table)
 
 
         auto result = parquet::arrow::WriteTable(*m_table.get(),
-                                                   m_pool, m_file,
-                                                       /*chunk_size=*/3, props, arrow_props);
-
+                                                  m_pool, m_file,
+                                                  /*chunk_size=*/3, props, arrow_props);
         result = m_file->Close();
+    }
+
+    if (Utils::iequals(m_format, "orc"))
+    {
+        // https://arrow.apache.org/docs/cpp/orc.html
+        auto writer_options = arrow::adapters::orc::WriteOptions();
+        auto status = arrow::adapters::orc::ORCFileWriter::Open(m_file.get(), writer_options);
+        if (!status.ok()) {
+           throwError("Unable to instantiate ORC writer");
+        }
+        std::unique_ptr<arrow::adapters::orc::ORCFileWriter> writer = std::move(status.ValueOrDie());
+        if (!(writer->Write(*m_table.get())).ok()) {
+            throwError("Unable to write ORC data");
+        }
+        if (!(writer->Close()).ok()) {
+            throwError("Unable to close ORC writer");
+        }
     }
 }
 

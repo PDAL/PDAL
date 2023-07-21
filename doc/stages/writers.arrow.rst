@@ -45,6 +45,20 @@ Example
       }
   ]
 
+.. code-block:: json
+
+  [
+      {
+          "type":"readers.las",
+          "filename":"inputfile.las"
+      },
+      {
+          "type":"writers.arrow",
+          "format":"orc",
+          "filename":"outputfile.orc"
+      }
+  ]
+
 Options
 -------
 
@@ -52,7 +66,7 @@ filename
   Output file to write [Required]
 
 format
-  File type to write (feather, parquet) [Default: "feather"]
+  File type to write (feather, parquet, orc) [Default: "feather"]
 
 .. include:: writer_opts.rst
 
