@@ -121,6 +121,8 @@ void CopcWriter::addArgs(ProgramArgs& args)
     args.add("fixed_seed", "Fix the random seed", b->opts.fixedSeed).setHidden();
     args.add("a_srs", "Spatial reference to use to write output", b->opts.aSrs);
     args.add("threads", "", b->opts.threadCount).setHidden();
+    args.add("enhanced_srs_vlrs", "Write WKT2 and PROJJSON as VLR?", b->opts.enhancedSrsVlrs,
+        decltype(b->opts.enhancedSrsVlrs)(false));
 }
 
 void CopcWriter::fillForwardList()
