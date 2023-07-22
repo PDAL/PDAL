@@ -378,6 +378,20 @@ void CopcWriter::write(const PointViewPtr v)
     else
        b->srs = v->spatialReference();
 
+    if (b->opts.enhancedSrsVlrs) {
+        auto addVlr = [&](const std::string& userId, uint16_t recordId, const std::string& desc, const std::string& str)
+        {
+            if (!str.empty()) {
+                std::vector<char> strBytes(str.begin(), str.end());
+                strBytes.resize(strBytes.size() + 1, 0);
+                las::Evlr v(userId, recordId, desc, std::move(strBytes));
+                b->vlrs.push_back(v);
+            }
+        };
+        addVlr(las::TransformUserId, las::LASFWkt2recordId, "PDAL WKT2 Record", b->srs.getWKT2());
+        addVlr(las::PdalUserId, las::PdalProjJsonRecordId, "PDAL PROJJSON Record", b->srs.getPROJJSON());
+    }
+
     // Set the input string into scaling.
     b->scaling.m_xXform.m_scale.set(b->opts.scaleX.val());
     b->scaling.m_yXform.m_scale.set(b->opts.scaleY.val());
