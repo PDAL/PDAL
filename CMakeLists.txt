@@ -110,6 +110,7 @@ set(PDAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 #------------------------------------------------------------------------------
 
 include(${PDAL_CMAKE_DIR}/gdal.cmake)
+include(${PDAL_CMAKE_DIR}/proj.cmake)
 include(${PDAL_CMAKE_DIR}/geotiff.cmake)  # Optional (not really)
 include(${PDAL_CMAKE_DIR}/threads.cmake)
 include(${PDAL_CMAKE_DIR}/zlib.cmake)
@@ -250,12 +251,14 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${NLOHMANN_INCLUDE_DIR}
         ${UTFCPP_INCLUDE_DIR}
         ${GDAL_INCLUDE_DIR}
+        ${PROJ_INCLUDE_DIR}
 )
 target_link_libraries(${PDAL_BASE_LIB_NAME}
     PRIVATE
         ${CMAKE_THREAD_LIBS_INIT}
         ${CMAKE_DL_LIBS}
         ${GDAL_LIBRARY}
+        PROJ::proj
         ${GEOTIFF_LIBRARY}
         ${LIBXML2_LIBRARIES}
         ${ZLIB_LIBRARIES}
