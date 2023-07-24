@@ -69,6 +69,7 @@ private:
     std::shared_ptr<arrow::Table> m_table;
     std::shared_ptr<arrow::Schema> m_schema;
     std::map<pdal::Dimension::Id, std::unique_ptr<arrow::ArrayBuilder> > m_builders;
+    std::vector<pdal::Dimension::Id> m_dimIds;
     arrow::MemoryPool* m_pool;
 
     std::shared_ptr<arrow::io::FileOutputStream> m_file;

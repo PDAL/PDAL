@@ -34,7 +34,9 @@
 ****************************************************************************/
 
 #include "ArrowReader.hpp"
+#include "ArrowCommon.hpp"
 
+#include <memory>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/PDALUtils.hpp>
 
@@ -53,9 +55,25 @@ CREATE_SHARED_STAGE(ArrowReader, s_info)
 std::string ArrowReader::getName() const { return s_info.name; }
 
 
+ArrowReader::ArrowReader()
+    : pdal::Reader()
+    , pdal::Streamable()
+    , m_file(nullptr)
+    , m_batchReader(nullptr)
+    , m_currentBatch(nullptr)
+    , m_pool(arrow::default_memory_pool())
+    , m_batchCount(0)
+    , m_currentBatchIndex(0)
+    , m_currentBatchPointIndex(0)
+    , m_readMetadata(false)
+
+{}
+
+
+
 void ArrowReader::addArgs(ProgramArgs& args)
 {
-//     args.add("rdtp", "", m_isRdtp, DEFAULT_IS_RDTP);
+    args.add("metadata", "", m_readMetadata, false);
 }
 
 void ArrowReader::initialize()
@@ -63,6 +81,42 @@ void ArrowReader::initialize()
 
     if (pdal::Utils::isRemote(m_filename))
         m_filename = pdal::Utils::fetchRemote(m_filename);
+
+    auto result = arrow::io::ReadableFile::Open(m_filename);
+    if (result.ok())
+        m_file = result.ValueOrDie();
+    else
+    {
+        std::stringstream msg;
+        msg << "Unable to open '" << m_filename << "' for to read data!";
+        throwError(msg.str());
+    }
+    auto status = arrow::ipc::RecordBatchFileReader::Open(m_file);
+    if (!status.ok())
+    {
+        std::stringstream msg;
+        msg << "Unable to create RecordBatchFileReader for file '" << m_filename << "'";
+        throwError(msg.str());
+    }
+    m_batchReader = status.ValueOrDie();
+    m_batchCount = m_batchReader->num_record_batches();
+    m_currentBatchIndex = 0;
+
+
+    // Gather up a point count
+    while (readNextBatchHeaders())
+    {
+        m_count = m_count + m_currentBatch->num_rows();
+        m_currentBatchIndex++;
+    }
+
+    // add 1 to count
+    m_count++;
+
+    m_currentBatchIndex = 0;
+
+    // Read our first batch
+    readNextBatchHeaders();
 
 }
 
@@ -72,15 +126,27 @@ void ArrowReader::addDimensions(PointLayoutPtr layout)
     using namespace Dimension;
     Dimension::IdList ids;
 
-    ids.push_back(Id::X);
-    ids.push_back(Id::Y);
-    ids.push_back(Id::Z);
-    layout->registerDims(ids);
+    // We take the schema of the first batch. If the rest of the
+    // batches don't match the schema, we're f'd
+
+    std::shared_ptr<arrow::Schema> schema = m_currentBatch->schema();
+    int fieldPosition(0);
+    for(auto& f: schema->fields())
+    {
+        std::string name = f->name();
+        auto& dt = f->type();
+        arrow::Type::type t = dt->id();
+
+        pdal::Dimension::Id id = layout->registerOrAssignDim(name, computePDALTypeFromArrow(t));
+        m_arrayIds.insert({fieldPosition, id});
+        fieldPosition++;
+    }
 }
 
 
 void ArrowReader::ready(PointTableRef table)
 {
+    // gather dimensions from file
 }
 
 
@@ -88,23 +154,159 @@ point_count_t ArrowReader::read(PointViewPtr view, point_count_t num)
 {
     point_count_t numRead = 0;
     PointRef point(view->point(0));
-    while (numRead < num && true /*not at end of arrow array*/ ) {
+    bool didRead(true);
+    while (numRead < num && didRead ) {
         point.setPointId(numRead);
-        processOne(point);
+        didRead = processOne(point);
         ++numRead;
     }
     return numRead;
 }
 
 
+bool ArrowReader::readNextBatchHeaders()
+{
+    if (m_currentBatchIndex == m_batchCount)
+        return false;
+    auto readResult = m_batchReader->ReadRecordBatch(m_currentBatchIndex);
+    if (!readResult.ok())
+    {
+        std::stringstream msg;
+        msg << "Unable to read RecordBatch " << m_currentBatchIndex << " for file '" << m_filename << "'";
+        throwError(msg.str());
+    }
+    m_currentBatch = readResult.ValueOrDie();
+    return true;
+}
+
+
+bool ArrowReader::readNextBatchData()
+{
+
+    for(int columnNum = 0; columnNum < m_currentBatch->num_columns(); ++columnNum)
+    {
+        // https://arrow.apache.org/docs/cpp/api/array.html#_CPPv4N5arrow5ArrayE
+        std::shared_ptr<arrow::Array> array = m_currentBatch->column(columnNum);
+        m_arrays[m_arrayIds[columnNum]] = array;
+    }
+    return true;
+}
+
+bool ArrowReader::fillPoint(PointRef& point)
+{
+
+    for(int columnNum = 0; columnNum < m_currentBatch->num_columns(); ++columnNum)
+    {
+        // https://arrow.apache.org/docs/cpp/api/array.html#_CPPv4N5arrow5ArrayE
+        std::shared_ptr<arrow::Array> array = m_currentBatch->column(columnNum);
+        arrow::DoubleArray* dArray = dynamic_cast<arrow::DoubleArray*>(array.get());
+        if (dArray)
+        {
+            point.setField<double>(m_arrayIds[columnNum], dArray->Value(point.pointId()));
+            continue;
+        }
+        arrow::FloatArray* fArray = dynamic_cast<arrow::FloatArray*>(array.get());
+        if (fArray)
+        {
+            point.setField<float>(m_arrayIds[columnNum], fArray->Value(point.pointId()));
+            continue;
+        }
+        arrow::Int8Array* int8Array = dynamic_cast<arrow::Int8Array*>(array.get());
+        if (int8Array)
+        {
+            point.setField<int8_t>(m_arrayIds[columnNum], int8Array->Value(point.pointId()));
+            continue;
+        }
+        arrow::UInt8Array* uint8Array = dynamic_cast<arrow::UInt8Array*>(array.get());
+        if (uint8Array)
+        {
+            point.setField<uint8_t>(m_arrayIds[columnNum], uint8Array->Value(point.pointId()));
+            continue;
+        }
+        arrow::Int16Array* int16Array = dynamic_cast<arrow::Int16Array*>(array.get());
+        if (int16Array)
+        {
+            point.setField<int16_t>(m_arrayIds[columnNum], int16Array->Value(point.pointId()));
+            continue;
+        }
+        arrow::UInt16Array* uint16Array = dynamic_cast<arrow::UInt16Array*>(array.get());
+        if (uint16Array)
+        {
+            point.setField<uint16_t>(m_arrayIds[columnNum], uint16Array->Value(point.pointId()));
+            continue;
+        }
+        arrow::Int32Array* int32Array = dynamic_cast<arrow::Int32Array*>(array.get());
+        if (int32Array)
+        {
+            point.setField<int32_t>(m_arrayIds[columnNum], int32Array->Value(point.pointId()));
+            continue;
+        }
+        arrow::UInt32Array* uint32Array = dynamic_cast<arrow::UInt32Array*>(array.get());
+        if (uint32Array)
+        {
+            point.setField<uint32_t>(m_arrayIds[columnNum], uint32Array->Value(point.pointId()));
+            continue;
+        }
+        arrow::Int64Array* int64Array = dynamic_cast<arrow::Int64Array*>(array.get());
+        if (int64Array)
+        {
+            point.setField<int64_t>(m_arrayIds[columnNum], int64Array->Value(point.pointId()));
+            continue;
+        }
+        arrow::UInt64Array* uint64Array = dynamic_cast<arrow::UInt64Array*>(array.get());
+        if (uint64Array)
+        {
+            point.setField<uint64_t>(m_arrayIds[columnNum], uint64Array->Value(point.pointId()));
+            continue;
+        }
+
+        throwError("Unable to convert Arrow Datatype!");
+    }
+    return true;
+}
+
 bool ArrowReader::processOne(PointRef& point)
 {
+
+    if (m_currentBatchPointIndex == m_currentBatch->num_rows())
+    {
+        // go read a new batch
+        m_currentBatchIndex++;
+
+        bool nextBatch = readNextBatchHeaders();
+        if (!nextBatch) return false; // we're done
+
+        m_currentBatchPointIndex = 0;
+
+        // go read data for next batch
+        readNextBatchData();
+    }
+
+    return fillPoint(point);
+
+    for(int columnNum =0; columnNum < m_currentBatch->num_columns(); ++columnNum)
+    {
+        // https://arrow.apache.org/docs/cpp/api/array.html#_CPPv4N5arrow5ArrayE
+//         std::shared_ptr<arrow::Array> array = m_currentBatch->column(columnNum);
+//         auto result = array->GetScalar(m_currentBatchIndex);
+
+        pdal::Dimension::Id id = m_arrayIds[columnNum];
+        auto& array = m_arrays[id];
+        auto t = computePDALTypeFromArrow(array->type()->id());
+
+//         point.setField<double>(*array[m_currentBatchPointIndex], 42.0);
+    }
+
+    m_currentBatchPointIndex++;
+
     return true;
 }
 
 
 void ArrowReader::done(PointTableRef table)
 {
+    auto result = m_file->Close();
+
 }
 
 

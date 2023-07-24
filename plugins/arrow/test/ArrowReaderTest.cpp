@@ -87,15 +87,34 @@ TEST_F(ArrowReaderTest, ReadingPoints)
     EXPECT_EQ(view->size(), 1065);
 
     //some tests on the first point
-    EXPECT_NEAR(635618.98, view->getFieldAs<double>(Dimension::Id::X, 0),1e-4);
-    EXPECT_NEAR(848898.71, view->getFieldAs<double>(Dimension::Id::Y, 0),1e-4);
-    EXPECT_NEAR(405.59, view->getFieldAs<double>(Dimension::Id::Z, 0),1e-4);
-    EXPECT_DOUBLE_EQ(0, view->getFieldAs<double>(Dimension::Id::OffsetTime, 0));
-    EXPECT_EQ(55040, view->getFieldAs<uint16_t>(Dimension::Id::Intensity, 0));
-    EXPECT_EQ(0, view->getFieldAs<uint16_t>(Dimension::Id::PointSourceId, 0));
-    EXPECT_EQ(1, view->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 0));
-    EXPECT_EQ(0, view->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, 0));
-    EXPECT_EQ(20, view->getFieldAs<uint8_t>(Dimension::Id::Classification, 0));
+    int point_id(0);
+    EXPECT_NEAR(637012.240, view->getFieldAs<double>(Dimension::Id::X, point_id),1e-4);
+    EXPECT_NEAR(849028.310, view->getFieldAs<double>(Dimension::Id::Y, point_id),1e-4);
+    EXPECT_NEAR(431.660, view->getFieldAs<double>(Dimension::Id::Z, point_id),1e-4);
+    EXPECT_EQ(143, view->getFieldAs<uint16_t>(Dimension::Id::Intensity, point_id));
+    EXPECT_EQ(7326, view->getFieldAs<uint16_t>(Dimension::Id::PointSourceId, point_id));
+    EXPECT_EQ(68, view->getFieldAs<uint16_t>(Dimension::Id::Red, point_id));
+    EXPECT_EQ(77, view->getFieldAs<uint16_t>(Dimension::Id::Green, point_id));
+    EXPECT_EQ(88, view->getFieldAs<uint16_t>(Dimension::Id::Blue, point_id));
+    EXPECT_EQ(1, view->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, point_id));
+    EXPECT_EQ(1, (int)view->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, point_id));
+    EXPECT_EQ(1, view->getFieldAs<uint8_t>(Dimension::Id::Classification, 0));
+    EXPECT_EQ(-9, view->getFieldAs<int16_t>(Dimension::Id::ScanAngleRank, 0));
+
+
+    point_id = 8;
+    EXPECT_NEAR(636198.79, view->getFieldAs<double>(Dimension::Id::X, point_id),1e-4);
+    EXPECT_NEAR(849238.09, view->getFieldAs<double>(Dimension::Id::Y, point_id),1e-4);
+    EXPECT_NEAR(428.05, view->getFieldAs<double>(Dimension::Id::Z, point_id),1e-4);
+    EXPECT_EQ(142, view->getFieldAs<uint16_t>(Dimension::Id::Intensity, point_id));
+    EXPECT_EQ(7326, view->getFieldAs<uint16_t>(Dimension::Id::PointSourceId, point_id));
+    EXPECT_EQ(106, view->getFieldAs<uint16_t>(Dimension::Id::Red, point_id));
+    EXPECT_EQ(95, view->getFieldAs<uint16_t>(Dimension::Id::Green, point_id));
+    EXPECT_EQ(124, view->getFieldAs<uint16_t>(Dimension::Id::Blue, point_id));
+    EXPECT_EQ(1, view->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, point_id));
+    EXPECT_EQ(1, (int)view->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, point_id));
+    EXPECT_EQ(1, view->getFieldAs<uint8_t>(Dimension::Id::Classification, 0));
+    EXPECT_EQ(-9, view->getFieldAs<int16_t>(Dimension::Id::ScanAngleRank, 0));
 }
 }
 

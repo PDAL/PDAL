@@ -43,6 +43,10 @@
 #include <pdal/Streamable.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
+#include <arrow/type_fwd.h>
+#include <arrow/io/type_fwd.h>
+#include <arrow/ipc/type_fwd.h>
+
 namespace pdal
 {
 
@@ -50,12 +54,9 @@ namespace pdal
 class PDAL_DLL ArrowReader : public pdal::Reader, public pdal::Streamable
 {
 public:
-    ArrowReader()
-        : pdal::Reader()
-        , pdal::Streamable()
-    {}
-
+    ArrowReader();
     ~ArrowReader() {};
+
     std::string getName() const;
 
 private:
@@ -66,6 +67,22 @@ private:
     virtual point_count_t read(PointViewPtr view, point_count_t num);
     virtual bool processOne(PointRef& point);
     virtual void done(PointTableRef table);
+
+    bool readNextBatchHeaders();
+    bool readNextBatchData();
+    bool fillPoint(PointRef& point);
+
+    std::shared_ptr<arrow::io::ReadableFile> m_file;
+    std::shared_ptr<arrow::ipc::RecordBatchFileReader> m_batchReader;
+    std::shared_ptr<arrow::RecordBatch> m_currentBatch;
+    std::map<int, pdal::Dimension::Id> m_arrayIds;
+    std::map<pdal::Dimension::Id, std::shared_ptr<arrow::Array> > m_arrays;
+
+    arrow::MemoryPool* m_pool;
+    int m_batchCount;
+    int m_currentBatchIndex;
+    int64_t m_currentBatchPointIndex;
+    bool m_readMetadata;
 
 };
 
