@@ -40,7 +40,7 @@
 #include <arrow/ipc/reader.h>
 #include <arrow/adapters/orc/adapter.h>
 
-#include <parquet/arrow/writer.h>
+#include <parquet/arrow/reader.h>
 #include <parquet/exception.h>
 #include <parquet/arrow/writer.h>
 

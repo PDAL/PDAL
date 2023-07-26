@@ -38,6 +38,7 @@
 
 #include <memory>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/PDALUtils.hpp>
 
 namespace pdal
@@ -59,7 +60,8 @@ ArrowReader::ArrowReader()
     : pdal::Reader()
     , pdal::Streamable()
     , m_file(nullptr)
-    , m_batchReader(nullptr)
+    , m_ipcReader(nullptr)
+    , m_parquetReader(nullptr)
     , m_currentBatch(nullptr)
     , m_pool(arrow::default_memory_pool())
     , m_batchCount(0)
@@ -82,6 +84,15 @@ void ArrowReader::initialize()
     if (pdal::Utils::isRemote(m_filename))
         m_filename = pdal::Utils::fetchRemote(m_filename);
 
+    if (Utils::iequals(FileUtils::extension(m_filename), ".feather"))
+    {
+        m_formatType = Feather;
+    }
+    else if (Utils::iequals(FileUtils::extension(m_filename), ".parquet"))
+    {
+        m_formatType = Parquet;
+    }
+
     auto result = arrow::io::ReadableFile::Open(m_filename);
     if (result.ok())
         m_file = result.ValueOrDie();
@@ -91,32 +102,93 @@ void ArrowReader::initialize()
         msg << "Unable to open '" << m_filename << "' for to read data!";
         throwError(msg.str());
     }
-    auto status = arrow::ipc::RecordBatchFileReader::Open(m_file);
-    if (!status.ok())
+
+    if (m_formatType == Feather)
     {
-        std::stringstream msg;
-        msg << "Unable to create RecordBatchFileReader for file '" << m_filename << "'";
-        throwError(msg.str());
+        auto status = arrow::ipc::RecordBatchFileReader::Open(m_file);
+        if (!status.ok())
+        {
+            std::stringstream msg;
+            msg << "Unable to create RecordBatchFileReader for file '" << m_filename << "'";
+            throwError(msg.str());
+        }
+
+        m_ipcReader = status.ValueOrDie();
+        m_batchCount = m_ipcReader->num_record_batches();
+
+        m_currentBatchIndex = 0;
+
+
+        // Gather up a point count
+        while (readNextBatchHeaders())
+        {
+            m_count = m_count + m_currentBatch->num_rows();
+            m_currentBatchIndex++;
+        }
+
+        // add 1 to count
+        m_count++;
+
+        m_currentBatchIndex = 0;
+
+        // Read our first batch
+        readNextBatchHeaders();
+
     }
-    m_batchReader = status.ValueOrDie();
-    m_batchCount = m_batchReader->num_record_batches();
-    m_currentBatchIndex = 0;
-
-
-    // Gather up a point count
-    while (readNextBatchHeaders())
+    if (m_formatType == Parquet)
     {
-        m_count = m_count + m_currentBatch->num_rows();
-        m_currentBatchIndex++;
+        auto arrow_reader_props = parquet::ArrowReaderProperties();
+        arrow_reader_props.set_batch_size(128 * 1024);  // default 64 * 1024
+        auto reader_properties = parquet::ReaderProperties(m_pool);
+        parquet::arrow::FileReaderBuilder reader_builder;
+        reader_builder.memory_pool(m_pool);
+        reader_builder.properties(arrow_reader_props);
+
+        std::unique_ptr<parquet::arrow::FileReader> arrow_reader;
+
+        auto pOpenStatus = parquet::arrow::OpenFile(m_file, m_pool, &arrow_reader);
+
+        auto batchOpenStatus = arrow_reader->GetRecordBatchReader(&m_parquetReader);
+        if (!batchOpenStatus.ok())
+        {
+            std::stringstream msg;
+            msg << "Unable to create parquet RecordBatchFileReader for file '" << m_filename << "'";
+            throwError(msg.str());
+        }
+
+        for (arrow::Result<std::shared_ptr<arrow::RecordBatch>> maybe_batch : *m_parquetReader) {
+
+            m_batchCount++;
+        }
+        auto closeStatus = m_parquetReader->Close();
+
+        batchOpenStatus = arrow_reader->GetRecordBatchReader(&m_parquetReader);
+        if (!batchOpenStatus.ok())
+        {
+            std::stringstream msg;
+            msg << "Unable to create parquet RecordBatchFileReader for file '" << m_filename << "'";
+            throwError(msg.str());
+        }
+
+
+        auto batchIterator = m_parquetReader->begin();
+        auto result = *batchIterator;
+        if (!result.ok())
+        {
+            std::stringstream msg;
+            msg << "Unable to read first batch for file '" << m_filename << "'";
+            throwError(msg.str());
+        }
+        m_currentBatch = result.ValueOrDie();
+        if (!m_currentBatch)
+        {
+            std::stringstream msg;
+            msg << "Batch was null for file '" << m_filename << "'";
+            throwError(msg.str());
+        }
     }
 
-    // add 1 to count
-    m_count++;
 
-    m_currentBatchIndex = 0;
-
-    // Read our first batch
-    readNextBatchHeaders();
 
 }
 
@@ -168,7 +240,7 @@ bool ArrowReader::readNextBatchHeaders()
 {
     if (m_currentBatchIndex == m_batchCount)
         return false;
-    auto readResult = m_batchReader->ReadRecordBatch(m_currentBatchIndex);
+    auto readResult = m_ipcReader->ReadRecordBatch(m_currentBatchIndex);
     if (!readResult.ok())
     {
         std::stringstream msg;
@@ -265,6 +337,7 @@ bool ArrowReader::fillPoint(PointRef& point)
     return true;
 }
 
+
 bool ArrowReader::processOne(PointRef& point)
 {
 
@@ -282,24 +355,10 @@ bool ArrowReader::processOne(PointRef& point)
         readNextBatchData();
     }
 
+    m_currentBatchPointIndex++;
     return fillPoint(point);
 
-    for(int columnNum =0; columnNum < m_currentBatch->num_columns(); ++columnNum)
-    {
-        // https://arrow.apache.org/docs/cpp/api/array.html#_CPPv4N5arrow5ArrayE
-//         std::shared_ptr<arrow::Array> array = m_currentBatch->column(columnNum);
-//         auto result = array->GetScalar(m_currentBatchIndex);
 
-        pdal::Dimension::Id id = m_arrayIds[columnNum];
-        auto& array = m_arrays[id];
-        auto t = computePDALTypeFromArrow(array->type()->id());
-
-//         point.setField<double>(*array[m_currentBatchPointIndex], 42.0);
-    }
-
-    m_currentBatchPointIndex++;
-
-    return true;
 }
 
 

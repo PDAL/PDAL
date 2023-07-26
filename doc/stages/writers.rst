@@ -43,7 +43,7 @@ dimension type, while others only understand fixed dimension names.
     write Apache Arrow Feather- or Parquet-formatted files
 
 :ref:`writers.bpf`
-    write bpf version 3 files. bpf is an nga specification for point cloud data.
+    write BPF version 3 files. BPF is an NGA specification for point cloud data.
 
 :ref:`writers.copc`
     COPC, or Cloud Optimized Point Cloud, is an LAZ 1.4 file stored as a

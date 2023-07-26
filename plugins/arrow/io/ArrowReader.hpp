@@ -51,6 +51,13 @@ namespace pdal
 {
 
 
+enum ArrowFormatType {
+    Feather = 0,
+    ORC,
+    Parquet
+};
+
+
 class PDAL_DLL ArrowReader : public pdal::Reader, public pdal::Streamable
 {
 public:
@@ -73,8 +80,14 @@ private:
     bool fillPoint(PointRef& point);
 
     std::shared_ptr<arrow::io::ReadableFile> m_file;
-    std::shared_ptr<arrow::ipc::RecordBatchFileReader> m_batchReader;
+    std::shared_ptr<arrow::ipc::RecordBatchFileReader> m_ipcReader;
+    std::shared_ptr<::arrow::RecordBatchReader> m_parquetReader;
+
+    std::shared_ptr<::arrow::RecordBatchReader> rb_reader;
     std::shared_ptr<arrow::RecordBatch> m_currentBatch;
+
+    ArrowFormatType m_formatType;
+
     std::map<int, pdal::Dimension::Id> m_arrayIds;
     std::map<pdal::Dimension::Id, std::shared_ptr<arrow::Array> > m_arrays;
 

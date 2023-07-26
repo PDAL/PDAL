@@ -46,46 +46,19 @@ namespace pdal
 namespace
 {
 
-std::string getTestfilePath()
+std::string getFeatherTestfilePath()
 {
     return Support::datapath("arrow/1.2-with-color.feather");
 }
 
-class ArrowReaderTest : public ::testing::Test
+std::string getParquetTestfilePath()
 {
-public:
-    ArrowReaderTest()
-        : ::testing::Test()
-        , m_reader()
-    {
-        Options options;
-        options.add("filename", getTestfilePath());
-        m_reader.setOptions(options);
-    }
-
-    ArrowReader m_reader;
-};
+    return Support::datapath("arrow/1.2-with-color.parquet");
 }
 
-TEST_F(ArrowReaderTest, Constructor)
+
+void checkACouplePoints(PointViewPtr view)
 {
-    ArrowReader reader1;
-
-    StageFactory f;
-    Stage* reader2(f.createStage("readers.arrow"));
-}
-
-TEST_F(ArrowReaderTest, ReadingPoints)
-{
-    PointTable table;
-    m_reader.prepare(table);
-    PointViewSet viewSet = m_reader.execute(table);
-    EXPECT_EQ(viewSet.size(), 1u);
-
-    //number of points
-    PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 1065);
-
     //some tests on the first point
     int point_id(0);
     EXPECT_NEAR(637012.240, view->getFieldAs<double>(Dimension::Id::X, point_id),1e-4);
@@ -116,5 +89,48 @@ TEST_F(ArrowReaderTest, ReadingPoints)
     EXPECT_EQ(1, view->getFieldAs<uint8_t>(Dimension::Id::Classification, 0));
     EXPECT_EQ(-9, view->getFieldAs<int16_t>(Dimension::Id::ScanAngleRank, 0));
 }
+
+TEST(ArrowFeatherReaderTest, ReadingPoints)
+{
+    ArrowReader m_reader;
+    Options options;
+    options.add("filename",getFeatherTestfilePath());
+    m_reader.setOptions(options);
+
+    PointTable table;
+    m_reader.prepare(table);
+    PointViewSet viewSet = m_reader.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+
+    //number of points
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 1065);
+
+    checkACouplePoints(view);
+
 }
 
+TEST(ArrowParquetReaderTest, ReadingPoints)
+{
+    ArrowReader m_reader;
+    Options options;
+    options.add("filename",getParquetTestfilePath());
+    m_reader.setOptions(options);
+
+    PointTable table;
+    m_reader.prepare(table);
+    PointViewSet viewSet = m_reader.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+
+    //number of points
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 1065);
+
+    checkACouplePoints(view);
+
+}
+
+}
+
+
+}
