@@ -83,7 +83,6 @@ private:
     std::shared_ptr<arrow::ipc::RecordBatchFileReader> m_ipcReader;
     std::shared_ptr<::arrow::RecordBatchReader> m_parquetReader;
 
-    std::shared_ptr<::arrow::RecordBatchReader> rb_reader;
     std::shared_ptr<arrow::RecordBatch> m_currentBatch;
 
     ArrowFormatType m_formatType;
