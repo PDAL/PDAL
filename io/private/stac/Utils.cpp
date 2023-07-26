@@ -31,48 +31,43 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  ****************************************************************************/
-#include "Collection.hpp"
 
 #include "Utils.hpp"
-#include <nlohmann/json.hpp>
-#include <schema-validator/json-schema.hpp>
 
 namespace pdal
 {
 
 namespace stac
 {
-    Collection::~Collection() {}
 
-    void Collection::validate() {
-        // std::function<void(const nlohmann::json_uri&, nlohmann::json&)> fetch = m_utils.schemaFetch;
+    StacUtils::StacUtils() {}
+    StacUtils::~StacUtils() {}
 
-        nlohmann::json_schema::json_validator val(
-            [this](const nlohmann::json_uri& json_uri, nlohmann::json& json) {
-                NL::json tempJson = m_connector.getJson(json_uri.url());
+    std::string StacUtils::handleRelativePath(std::string srcPath, std::string linkPath)
+    {
+        //Make absolute path of current item's directory, then create relative path from that
 
-                std::lock_guard<std::mutex> lock(m_mutex);
-                json = tempJson;
-            },
-            [](const std::string &, const std::string &) {}
-        );
+        //Get driectory of src item
+        const std::string baseDir = FileUtils::getDirectory(srcPath);
+        if (FileUtils::isAbsolutePath(linkPath))
+            return linkPath;
+        //Create absolute path from src item filepath, if it's not already
+        // and join relative path to src item's dir path
+        return FileUtils::toAbsolutePath(linkPath, baseDir);
 
-        // Validate against base Item schema first
-        NL::json schemaJson = m_connector.getJson(m_schemaUrls.collection);
-        val.set_root_schema(schemaJson);
-        val.validate(m_json);
+    }
 
-        // Validate against stac extensions if present
-        if (m_json.contains("stac_extensions"))
-            for (auto& extSchemaUrl: m_json.at("stac_extensions"))
-            {
-                NL::json schemaJson = m_connector.getJson(extSchemaUrl);
-                val.set_root_schema(schemaJson);
-                val.validate(m_json);
-            }
+    std::time_t StacUtils::getStacTime(std::string in)
+    {
+        std::istringstream dateStr(in);
+        std::tm date {};
+        dateStr >> std::get_time(&date, "%Y-%m-%dT%H:%M:%S");
+        if (dateStr.fail())
+            throw stac_error("Specified date (" + dateStr.str() +
+                ") cannot be parsed. Dates must fit RFC 3339 specs.");
+        return std::mktime(&date);
     }
 
 
 }//stac
-
 }//pdal

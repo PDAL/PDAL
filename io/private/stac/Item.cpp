@@ -33,7 +33,6 @@
  ****************************************************************************/
 
 #include "Item.hpp"
-#include "Utils.hpp"
 #include <pdal/Polygon.hpp>
 
 #include <nlohmann/json.hpp>
@@ -188,10 +187,10 @@ namespace stac
         };
 
         if (!asset.contains("href"))
-            throw pdal_error("asset does not contain an href!");
+            throw stac_error(m_id, "item", "asset does not contain an href!");
 
         std::string assetPath = asset.at("href").get<std::string>();
-        std::string dataUrl = handleRelativePath(m_path, assetPath);
+        std::string dataUrl = m_utils.handleRelativePath(m_path, assetPath);
 
         std::string contentType;
 
@@ -224,25 +223,56 @@ namespace stac
 
     void Item::validate()
     {
-        std::function<void(const nlohmann::json_uri&, nlohmann::json&)> fetch = schemaFetch;
 
         nlohmann::json_schema::json_validator val(
-            fetch,
+            [this](const nlohmann::json_uri& json_uri, nlohmann::json& json) {
+                NL::json tempJson = m_connector.getJson(json_uri.url());
+
+                std::lock_guard<std::mutex> lock(m_mutex);
+                json = tempJson;
+            },
             [](const std::string &, const std::string &) {}
         );
 
         // Validate against base Item schema first
         NL::json schemaJson = m_connector.getJson(m_schemaUrls.item);
         val.set_root_schema(schemaJson);
-        val.validate(m_json);
+        try {
+            val.validate(m_json);
+        }
+        catch (std::exception &e)
+        {
+            throw stac_error(m_id, "item",
+                "STAC schema validation Error in root schema: " +
+                m_schemaUrls.item + ". \n\n" + e.what());
+        }
 
         // Validate against stac extensions if present
         if (m_json.contains("stac_extensions"))
             for (auto& extSchemaUrl: m_json.at("stac_extensions"))
             {
-                NL::json schemaJson = m_connector.getJson(extSchemaUrl);
-                val.set_root_schema(schemaJson);
-                val.validate(m_json);
+                std::string url;
+                try {
+                    url = extSchemaUrl.get<std::string>();
+                }
+                catch (NL::detail::type_error e)
+                {
+                    throw stac_error(m_id, "item",
+                        "Invalid stac extension: " + extSchemaUrl.dump());
+                }
+
+                try {
+                    NL::json schemaJson = m_connector.getJson(url);
+                    val.set_root_schema(schemaJson);
+                    val.validate(m_json);
+                }
+                catch (std::exception& e) {
+                    std::string msg  =
+                        "STAC Validation Error in extension: " + url +
+                        ". Errors found: \n" + e.what();
+                    throw stac_error(m_id, "item", msg);
+
+                }
             }
 
     }
@@ -256,28 +286,14 @@ namespace stac
         std::string id = json.at("id").get<std::string>();
 
         if (!json.contains("assets"))
-            throw pdal_error("JSON Object of id '" + id +
-                "' does not contain required key 'assets'");
+            throw stac_error(id, "item", "Missing required key 'assets'");
 
         if (!json.contains("properties"))
-            throw pdal_error("JSON object " + id +
-                " does not contain required key 'properties'");
+            throw stac_error(id, "item", "Missing required key 'properties'");
 
         if (!json.contains("geometry") || !json.contains("bbox"))
-            throw pdal_error("JSON object " + id +
-                " does not contain one of 'geometry' or 'bbox'");
-
-        NL::json prop = json.at("properties");
-        if (
-            !prop.contains("datetime") &&
-            (!prop.contains("start_datetime") && !prop.contains("end_datetime"))
-        )
-            throw pdal_error("JSON object " + id +
-                "  properties value not contain required key"
-                "'datetime' or 'start_datetime' and 'end_datetime'");
-
-        // TODO validate the date ranges and other validation-type stuff
-        // that's going on in `filter`
+            throw stac_error(id, "item",
+                "STAC Item must have either 'geometry' or 'bbox' key.");
 
     }
 
@@ -367,15 +383,10 @@ namespace stac
                 NL::json geometry = m_json.at("geometry").get<NL::json>();
                 Polygon f(geometry.dump());
                 if (!f.valid())
-                {
-                    std::stringstream msg;
-                    msg << "Polygon created from STAC 'geometry' key for '"
-                        << m_id << "' is invalid";
-                    throw pdal_error(msg.str());
-                }
+                    throw stac_error(m_id, "item",
+                        "Polygon created from STAC 'geometry' key is invalid");
 
-                // TODO if the bounds is 3d already, why
-                // do we convert it to 3d on the next line?
+                // Convert to BOX3D
                 if (bounds.is3d())
                 {
                     if (bounds.to3d().overlaps(f.bounds()))
@@ -383,11 +394,7 @@ namespace stac
                 }
                 else
                 {
-                    // TODO this is confusing, but I guess that
-                    // is a result of PDAL's bounds interface.
-                    // ie, we downcast the bounds to2d, then make
-                    // a BOX3D from that and compare it to f.bounds()
-                    // which is 2d or 3d?
+                    //Cast BOX2D to 3D to fit f.bounds which is 3d
                     BOX2D bbox = bounds.to2d();
                     if (BOX3D(bbox).overlaps(f.bounds()))
                         return true;
@@ -473,40 +480,67 @@ namespace stac
             if (properties.contains("datetime") &&
                 properties.at("datetime").type() != NL::detail::value_t::null)
             {
-                std::string stacDateStr = properties.at("datetime").get<std::string>();
-                std::time_t stacTime = getStacTime(stacDateStr);
+                std::string stacDateStr;
 
-                for (const auto& range: dates)
-                    if (stacTime >= range.first && stacTime <= range.second)
-                        return true;
+                try
+                {
+                    stacDateStr = properties.at("datetime").get<std::string>();
+                }
+                catch (NL::detail::type_error e)
+                {
+                        throw pdal_error("Item (" + m_id + ") datetime must be of "
+                            "type string and comply with RFC 3339 specs.");
+                }
+
+                try
+                {
+                    std::time_t stacTime = m_utils.getStacTime(stacDateStr);
+                    for (const auto& range: dates)
+                        if (stacTime >= range.first && stacTime <= range.second)
+                            return true;
+                }
+                catch (stac_error e)
+                {
+                    throw stac_error(m_id, "item", e.what());
+                }
 
                 return false;
             }
             else if (properties.contains("start_datetime") &&
                 properties.contains("end_datetime"))
             {
-                // Handle if STAC object has start and end datetimes instead of one
-                std::string startDateStr = properties.at("start_datetime").get<std::string>();
-                std::time_t stacStartTime = getStacTime(startDateStr);
+                    // Handle if STAC object has start and end datetimes instead of one
+                    std::string endDateStr;
+                    std::string startDateStr;
+                    try {
+                        endDateStr = properties.at("end_datetime").get<std::string>();
+                        startDateStr = properties.at("start_datetime").get<std::string>();
+                    }
+                    catch(NL::detail::type_error e)
+                    {
+                        throw pdal_error("Item (" + m_id + ") start and end "
+                            "datetimes must be of type string and comply with "
+                            "RFC 3339 specs.");
+                    }
 
-                std::string endDateStr = properties.at("end_datetime").get<std::string>();
-                std::time_t stacEndTime = getStacTime(endDateStr);
+                    std::time_t stacStartTime = m_utils.getStacTime(startDateStr);
+                    std::time_t stacEndTime = m_utils.getStacTime(endDateStr);
 
-                for (const auto& range: dates)
-                {
-                    // If any of the date ranges overlap with the date range of the STAC
-                    // object, do not prune.
-                    std::time_t userMinTime = range.first;
-                    std::time_t userMaxTime = range.second;
+                    for (const auto& range: dates)
+                    {
+                        // If any of the date ranges overlap with the date range of the STAC
+                        // object, do not prune.
+                        std::time_t userMinTime = range.first;
+                        std::time_t userMaxTime = range.second;
 
-                    if (userMinTime >= stacStartTime && userMinTime <= stacEndTime)
-                        return true;
-                    else if (userMaxTime >= stacStartTime && userMaxTime <= stacEndTime)
-                        return true;
-                    else if (userMinTime <= stacStartTime && userMaxTime >= stacEndTime)
-                        return true;
-                }
-                return false;
+                        if (userMinTime >= stacStartTime && userMinTime <= stacEndTime)
+                            return true;
+                        else if (userMaxTime >= stacStartTime && userMaxTime <= stacEndTime)
+                            return true;
+                        else if (userMinTime <= stacStartTime && userMaxTime >= stacEndTime)
+                            return true;
+                    }
+                    return false;
             }
             else
                 throw pdal_error("Unexpected layout of STAC dates for Item " +
@@ -526,7 +560,7 @@ namespace stac
                 asset = m_json.at("assets").at(name);
                 m_driver = extractDriverFromItem(asset);
                 std::string assetPath = asset.at("href").get<std::string>();
-                m_assetPath = handleRelativePath(m_path, assetPath);
+                m_assetPath = m_utils.handleRelativePath(m_path, assetPath);
             }
         }
         if (m_driver.empty())

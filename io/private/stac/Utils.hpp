@@ -34,8 +34,6 @@
 #pragma once
 
 #include <arbiter/arbiter.hpp>
-#include <pdal/JsonFwd.hpp>
-#include <schema-validator/json-schema.hpp>
 #include <pdal/util/FileUtils.hpp>
 
 namespace pdal
@@ -44,45 +42,31 @@ namespace pdal
 namespace stac
 {
 
-namespace
+class stac_error: public std::runtime_error
 {
-    std::mutex mutex;
-    std::unique_ptr<arbiter::Arbiter> arbiter;
-}
-    static void schemaFetch(const nlohmann::json_uri& json_uri, nlohmann::json& json)
-    {
-        {
-            std::lock_guard<std::mutex> lock(mutex);
-            if (!arbiter) arbiter.reset(new arbiter::Arbiter());
-        }
 
-        std::string jsonStr = arbiter->get(json_uri.url());
-        json = nlohmann::json::parse(jsonStr);
-    }
 
-    static const std::string handleRelativePath(std::string srcPath, std::string linkPath)
-    {
-        //Make absolute path of current item's directory, then create relative path from that
+public:
+    inline stac_error(std::string id, std::string stacType, std::string const& msg):
+        std::runtime_error("StacError (" + stacType + ": " + id + "): " + msg)
+    { }
+    inline stac_error(std::string const& msg):
+        std::runtime_error("StacError: " + msg)
+    { }
+};
 
-        //Get driectory of src item
-        const std::string baseDir = FileUtils::getDirectory(srcPath);
-        if (FileUtils::isAbsolutePath(linkPath))
-            return linkPath;
-        //Create absolute path from src item filepath, if it's not already
-        // and join relative path to src item's dir path
-        return FileUtils::toAbsolutePath(linkPath, baseDir);
+class StacUtils
+{
 
-    }
+public:
+    StacUtils();
+    ~StacUtils();
 
-    static std::time_t getStacTime(std::string in)
-    {
-        std::istringstream dateStr(in);
-        std::tm date;
-        dateStr >> std::get_time(&date, "%Y-%m-%dT%H:%M:%S");
-        if (dateStr.fail())
-            throw pdal_error("Date(" + dateStr.str() + ") cannot be parsed.");
-        return std::mktime(&date);
-    }
+    static std::string handleRelativePath(std::string srcPath,
+        std::string linkPath);
+    static std::time_t getStacTime(std::string in);
+
+};
 
 }// stac
 }// pdal

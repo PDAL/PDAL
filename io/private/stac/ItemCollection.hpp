@@ -60,6 +60,8 @@ public:
     ItemList items();
 
 private:
+    StacUtils m_utils;
+
     NL::json m_json;
     std::string m_path;
     const connector::Connector& m_connector;

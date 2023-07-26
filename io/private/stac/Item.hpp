@@ -40,6 +40,7 @@
 #include <pdal/PointView.hpp>
 #include <pdal/pdal_types.hpp>
 #include <pdal/SrsBounds.hpp>
+#include "Utils.hpp"
 
 #include "../connector/Connector.hpp"
 
@@ -92,6 +93,8 @@ public:
     std::string assetPath();
 
 private:
+
+    StacUtils m_utils;
 
     const NL::json m_json;
     const std::string m_path;

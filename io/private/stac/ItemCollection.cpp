@@ -33,7 +33,6 @@
  ****************************************************************************/
 
 #include "ItemCollection.hpp"
-#include "Utils.hpp"
 
 namespace pdal
 {
@@ -87,7 +86,7 @@ namespace stac
                     std::string nextLinkPath =
                         link.at("href").get<std::string>();
                     std::string nextAbsPath =
-                        handleRelativePath(m_path, nextLinkPath);
+                        m_utils.handleRelativePath(m_path, nextLinkPath);
                     NL::json nextJson = m_connector.getJson(nextAbsPath);
 
                     ItemCollection ic(nextJson, nextAbsPath, m_connector,

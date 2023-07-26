@@ -40,6 +40,8 @@
 #include <pdal/util/ThreadPool.hpp>
 #include "../connector/Connector.hpp"
 #include "Item.hpp"
+#include <pdal/JsonFwd.hpp>
+
 
 
 namespace pdal
@@ -74,6 +76,9 @@ public:
     bool filter(Filters filters);
 
 protected:
+    // friend NL::json_schema::json_validator;
+    StacUtils m_utils;
+
     const NL::json m_json;
     const std::string m_path;
     const connector::Connector& m_connector;

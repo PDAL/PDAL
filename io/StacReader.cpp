@@ -49,7 +49,6 @@
 
 #include "private/stac/Collection.hpp"
 #include "private/stac/ItemCollection.hpp"
-#include "private/stac/Utils.hpp"
 
 #include "private/connector/Connector.hpp"
 #include <pdal/StageWrapper.hpp>
@@ -122,6 +121,7 @@ void StacReader::addArgs(ProgramArgs& args)
 {
     m_args.reset(new StacReader::Args());
 
+    //Filter options
     args.add("asset_names", "List of asset names to look for in data"
         " consumption. Default: 'data'", m_args->assetNames, {"data"});
     args.add("date_ranges", "Date ranges to include in your search. Dates are"
@@ -129,27 +129,33 @@ void StacReader::addArgs(ProgramArgs& args)
         , m_args->dates);
     args.add("bounds", "Bounding box to select stac items by. This will "
         "propogate down through all readers being used.", m_args->bounds);
-    args.add("validate_schema", "Use JSON schema to validate your STAC objects."
-        " Default: false", m_args->validateSchema, false);
-    args.add("header", "Header fields to forward with HTTP requests",
-        m_args->m_headers);
-    args.add("query", "Query parameters to forward with HTTP requests",
-        m_args->m_query);
     args.add("properties", "Map of STAC property names to regular expression "
         "values. ie. {\"pc:type\": \"(lidar|sonar)\"}. Selected items will "
         "match all properties.", m_args->properties);
-    args.add("reader_args", "Map of reader arguments to their values to pass"
-        " through.", m_args->rawReaderArgs);
-    args.add("requests", "Number of threads for fetching JSON files, Default: 8",
-        m_args->threads, 8);
-
     args.add("items", "List of Item ID regexes to select STAC items based on.",
         m_args->items);
     args.add("catalogs", "List of Catalog ID regexes to select STAC items "
         "based on.", m_args->catalogs);
     args.add("collections", "List of Collection ID regexes to select STAC "
         "items based on.", m_args->collections);
+    args.addSynonym("items", "item_ids");
+    args.addSynonym("catalogs", "catalog_ids");
+    args.addSynonym("collections", "collection_ids");
 
+    //Reader options
+    args.add("validate_schema", "Use JSON schema to validate your STAC objects."
+        " Default: false", m_args->validateSchema, false);
+    args.add("header", "Header fields to forward with HTTP requests",
+        m_args->m_headers);
+    args.add("query", "Query parameters to forward with HTTP requests",
+        m_args->m_query);
+    args.add("reader_args", "Map of reader arguments to their values to pass"
+        " through.", m_args->rawReaderArgs);
+    args.add("requests", "Number of threads for fetching JSON files, Default: 8",
+        m_args->threads, 8);
+    args.addSynonym("requests", "threads");
+
+    //Schema options
     args.add("catalog_schema_url", "URL of catalog schema you'd like to use for"
         " JSON schema validation.", m_args->schemaUrls.catalog,
         "https://schemas.stacspec.org/v1.0.0/catalog-spec/json-schema/catalog.json");
@@ -159,11 +165,6 @@ void StacReader::addArgs(ProgramArgs& args)
     args.add("feature_schema_url", "URL of feature schema you'd like to use for"
         " JSON schema validation.", m_args->schemaUrls.item,
         "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/item.json");
-
-    args.addSynonym("requests", "threads");
-    args.addSynonym("items", "item_ids");
-    args.addSynonym("catalogs", "catalog_ids");
-    args.addSynonym("collections", "collection_ids");
 
 }
 
@@ -286,25 +287,34 @@ void StacReader::initializeArgs()
 
     if (!m_args->dates.empty())
     {
-        //TODO validate supplied dates?
+        stac::StacUtils stacUtils;
         log()->get(LogLevel::Debug) <<
             "Dates selected: " << m_args->dates << std::endl;
+
         for (auto& datepair: m_args->dates)
         {
-            std::istringstream minDate(datepair[0].get<std::string>());
-            std::istringstream maxDate(datepair[1].get<std::string>());
-            if (minDate.str().empty() || maxDate.str().empty())
+            if (datepair.size() != 2 ||
+                datepair.type() != NL::detail::value_t::array)
             {
-                throw pdal_error("Dates must be supplied in pairs"
-                    " of min and max dates");
+                throw pdal_error("User defined dates (" + datepair.dump() +
+                    ") must be a range of [min, max].");
             }
-            std::time_t minTime = stac::getStacTime(
-                datepair[0].get<std::string>());
 
-            std::time_t maxTime = stac::getStacTime(
-                datepair[1].get<std::string>());
+            try
+            {
+                std::string minDate(datepair[0].get<std::string>());
+                std::string maxDate(datepair[1].get<std::string>());
 
-            m_p->m_itemFilters.datePairs.push_back({ minTime, maxTime });
+                std::time_t minTime = stacUtils.getStacTime(minDate);
+                std::time_t maxTime = stacUtils.getStacTime(maxDate);
+                m_p->m_itemFilters.datePairs.push_back({ minTime, maxTime });
+            }
+            catch(NL::detail::type_error e)
+            {
+                throw pdal_error("User defined date range ("+ datepair.dump() +
+                    ") is invalid. It must be of type string and comply " +
+                    "with  RFC 3339.");
+            }
         }
     }
 

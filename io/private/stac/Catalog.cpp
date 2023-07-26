@@ -33,7 +33,6 @@
  ****************************************************************************/
 
 #include "Catalog.hpp"
-#include "Utils.hpp"
 #include "Collection.hpp"
 
 #include <nlohmann/json.hpp>
@@ -81,7 +80,7 @@ namespace stac
 
             const std::string linkType = link.at("rel").get<std::string>();
             const std::string linkPath = link.at("href").get<std::string>();
-            const std::string absLinkPath = handleRelativePath(m_path, linkPath);
+            const std::string absLinkPath = m_utils.handleRelativePath(m_path, linkPath);
 
             m_pool.add([this, linkType, absLinkPath, filters, rawReaderArgs]()
             {
@@ -184,10 +183,16 @@ namespace stac
 
     void Catalog::validate()
     {
-        std::function<void( const nlohmann::json_uri&, nlohmann::json&)> fetch = schemaFetch;
+        // std::function<void( const nlohmann::json_uri&, nlohmann::json&)> fetch
+        //     = m_utils.schemaFetch;
 
         nlohmann::json_schema::json_validator val(
-            fetch,
+            [this](const nlohmann::json_uri& json_uri, nlohmann::json& json) {
+                NL::json tempJson = m_connector.getJson(json_uri.url());
+
+                std::lock_guard<std::mutex> lock(m_mutex);
+                json = tempJson;
+            },
             [](const std::string &, const std::string &) {}
         );
 
