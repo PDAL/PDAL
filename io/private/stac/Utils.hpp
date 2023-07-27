@@ -78,15 +78,6 @@ public:
     static U stacValue(const NL::json& stac, std::string key = "",
         const NL::json& rootJson = {})
     {
-        NL::json stacCheck = stac;
-        if (!rootJson.empty())
-            stacCheck = rootJson;
-        std::string type = stacType(stacCheck);
-        std::string id;
-        if (type == "FeatureCollection")
-            id = icSelfPath(stacCheck);
-        else
-            id = stacId(stacCheck);
 
         try
         {
@@ -96,7 +87,22 @@ public:
         }
         catch (NL::detail::exception e)
         {
-            throw stac_error(id, type, e.what());
+            try {
+                NL::json stacCheck = stac;
+                if (!rootJson.empty())
+                    stacCheck = rootJson;
+                std::string type = stacType(stacCheck);
+                std::string id;
+                if (type == "FeatureCollection")
+                    id = icSelfPath(stacCheck);
+                else
+                    id = stacId(stacCheck);
+                throw stac_error(id, type, e.what());
+            }
+            catch (std::exception e2)
+            {
+                throw stac_error(e.what());
+            }
         }
     }
 
@@ -121,20 +127,20 @@ public:
 
     static std::string stacType(const NL::json& stac)
     {
-        std::string id = stacId(stac);
-        std::stringstream msg;
         try
         {
-            return stac.at("id").get<std::string>();
+            return stac.at("type").get<std::string>();
         }
         catch (NL::detail::out_of_range e)
         {
-            msg << "Missing required key 'type' in id(" + id + ")." << e.what();
+            std::stringstream msg;
+            msg << "Missing required key 'type'. " << e.what();
             throw pdal_error(msg.str());
         }
         catch (NL::detail::type_error e)
         {
-            msg << "Invalid key 'type' in id(" + id + "). " << e.what();
+            std::stringstream msg;
+            msg << "Invalid key value 'type'. " << e.what();
             throw pdal_error(msg.str());
         }
     }
@@ -151,8 +157,10 @@ public:
                     return jsonValue<std::string>(link, "href");
             }
         }
-        catch(NL::detail::exception)
-        { }
+        catch(std::runtime_error e)
+        {
+            return "";
+        }
 
         return "";
     }
