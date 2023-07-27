@@ -36,7 +36,6 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/Stage.hpp>
-#include <pdal/pdal_types.hpp>
 #include <pdal/util/ThreadPool.hpp>
 #include "../connector/Connector.hpp"
 #include "Item.hpp"
@@ -76,7 +75,6 @@ public:
     bool filter(Filters filters);
 
 protected:
-    // friend NL::json_schema::json_validator;
     StacUtils m_utils;
 
     const NL::json m_json;

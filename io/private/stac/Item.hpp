@@ -38,7 +38,6 @@
 #include <pdal/Reader.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/pdal_types.hpp>
 #include <pdal/SrsBounds.hpp>
 #include "Utils.hpp"
 
@@ -120,7 +119,7 @@ private:
     bool filterIds(std::vector<RegEx> ids);
     bool filterCol(std::vector<RegEx> ids);
     bool filterDates(DatePairs dates);
-    bool filterProperties(NL::json props);
+    bool filterProperties(const NL::json& props);
     bool filterBounds(SrsBounds bounds);
 
 

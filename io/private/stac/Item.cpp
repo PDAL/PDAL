@@ -81,7 +81,7 @@ namespace stac
 
     std::string Item::id()
     {
-        return m_json.at("id").get<std::string>();
+        return m_utils.stacId(m_json);
     }
 
     std::string Item::driver()
@@ -109,17 +109,17 @@ namespace stac
         }
         for (auto& opts: rawReaderArgs)
             if (!opts.is_object())
-                throw pdal_error("Reader Args for reader '" + m_driver + "' must be a valid JSON object");
+                throw pdal_error("Reader Args for reader '" + m_driver +
+                    "' must be a valid JSON object");
 
         NL::json readerArgs;
-        for (NL::json& readerPipeline: rawReaderArgs)
+        for (const NL::json& readerPipeline: rawReaderArgs)
         {
-            if (!readerPipeline.contains("type"))
-                throw pdal_error("No \"type\" key found in supplied reader arguments.");
-
-            std::string driver = readerPipeline.at("type").get<std::string>();
+            std::string driver =
+                m_utils.jsonValue<std::string>(readerPipeline, "type");
             if (rawReaderArgs.contains(driver))
-                throw pdal_error("Multiple instances of the same driver in supplied reader arguments.");
+                throw pdal_error("Multiple instances of the same driver in"
+                    " supplied reader arguments.");
             readerArgs[driver] = { };
 
             for (auto& arg: readerPipeline.items())
@@ -135,42 +135,26 @@ namespace stac
         return readerArgs;
     }
 
-    Options Item::setReaderOptions(const NL::json& readerArgs, const std::string& driver) const
+    Options Item::setReaderOptions(const NL::json& readerArgs,
+        const std::string& driver) const
     {
         Options readerOptions;
         if (readerArgs.contains(driver)) {
-            NL::json args = readerArgs.at(driver).get<NL::json>();
-            for (auto& arg : args.items()) {
-                NL::detail::value_t type = readerArgs.at(driver).at(arg.key()).type();
-                switch(type)
-                {
-                    case NL::detail::value_t::string:
-                    {
-                        std::string val = arg.value().get<std::string>();
-                        readerOptions.add(arg.key(), arg.value().get<std::string>());
-                        break;
-                    }
-                    case NL::detail::value_t::number_float:
-                    {
-                        readerOptions.add(arg.key(), arg.value().get<float>());
-                        break;
-                    }
-                    case NL::detail::value_t::number_integer:
-                    {
-                        readerOptions.add(arg.key(), arg.value().get<int>());
-                        break;
-                    }
-                    case NL::detail::value_t::boolean:
-                    {
-                        readerOptions.add(arg.key(), arg.value().get<bool>());
-                        break;
-                    }
-                    default:
-                    {
-                        readerOptions.add(arg.key(), arg.value());
-                        break;
-                    }
-                }
+            NL::json args = m_utils.jsonValue(readerArgs, driver);
+            for (auto& arg : args.items())
+            {
+                std::string key = arg.key();
+                NL::json val = arg.value();
+                NL::detail::value_t type = val.type();
+
+                // if value is of type string, dump() returns string with
+                // escaped string inside and kills pdal program args
+                std::string v;
+                if (type == NL::detail::value_t::string)
+                    v = m_utils.jsonValue<std::string>(val);
+                else
+                    v = arg.value().dump();
+                readerOptions.add(key, v);
             }
         }
 
@@ -187,16 +171,17 @@ namespace stac
         };
 
         if (!asset.contains("href"))
-            throw stac_error(m_id, "item", "asset does not contain an href!");
+            throw stac_error(m_id, "item", "asset does not contain an href.");
 
-        std::string assetPath = asset.at("href").get<std::string>();
+        std::string assetPath = m_utils.stacValue<std::string>(
+            asset, "href", m_json);
         std::string dataUrl = m_utils.handleRelativePath(m_path, assetPath);
 
         std::string contentType;
 
         if (asset.contains("type"))
         {
-            contentType = asset.at("type").get<std::string>();
+            contentType = m_utils.stacValue<std::string>(asset, "type", m_json);
             for(const auto& ct: contentTypes)
                 if (Utils::iequals(ct.first, contentType))
                     return ct.second;
@@ -249,17 +234,11 @@ namespace stac
 
         // Validate against stac extensions if present
         if (m_json.contains("stac_extensions"))
-            for (auto& extSchemaUrl: m_json.at("stac_extensions"))
+        {
+            NL::json extensions = m_utils.stacValue(m_json, "stac_extensions");
+            for (auto& extSchemaUrl: extensions)
             {
-                std::string url;
-                try {
-                    url = extSchemaUrl.get<std::string>();
-                }
-                catch (NL::detail::type_error e)
-                {
-                    throw stac_error(m_id, "item",
-                        "Invalid stac extension: " + extSchemaUrl.dump());
-                }
+                std::string url = m_utils.stacValue<std::string>(extSchemaUrl, "", m_json);
 
                 try {
                     NL::json schemaJson = m_connector.getJson(url);
@@ -274,65 +253,73 @@ namespace stac
 
                 }
             }
-
+        }
     }
 
     void validateForFilter(NL::json json)
     {
+        StacUtils u;
+        std::string id = u.stacId(json);
 
-        if (!json.contains("id"))
-            throw pdal_error("JSON object does not contain required key 'id'");
+        u.stacValue(json, "assets");
+        u.stacValue(json, "properties");
 
-        std::string id = json.at("id").get<std::string>();
-
-        if (!json.contains("assets"))
-            throw stac_error(id, "item", "Missing required key 'assets'");
-
-        if (!json.contains("properties"))
-            throw stac_error(id, "item", "Missing required key 'properties'");
-
-        if (!json.contains("geometry") || !json.contains("bbox"))
-            throw stac_error(id, "item",
-                "STAC Item must have either 'geometry' or 'bbox' key.");
-
+        try {
+            u.stacValue(json, "geometry");
+        }
+        catch (pdal_error e)
+        {
+            try {
+                u.stacValue(json, "bbox");
+            }
+            catch (pdal_error e2)
+            {
+                std::stringstream msg;
+                msg << "Must have one of 'geometry' or 'bbox' valid in STAC"
+                    " object. Errors found: \n" << e.what() << "\n" << e2.what();
+                throw pdal_error(msg.str());
+            }
+        }
     }
 
-    bool matchProperty(std::string key, NL::json val, NL::json properties, NL::detail::value_t type)
+    bool matchProperty(std::string key, NL::json val, NL::json properties,
+        NL::detail::value_t type)
     {
+        StacUtils u;
         switch (type)
         {
             case NL::detail::value_t::string:
             {
-                std::string desired = val.get<std::string>();
-                std::string value = properties.at(key).get<std::string>();
+                std::string desired = u.jsonValue<std::string>(val);
+                std::string value = u.jsonValue<std::string>(properties, key);
                 return value == desired;
                 break;
             }
             case NL::detail::value_t::number_unsigned:
             {
-                uint64_t value = properties.at(key).get<uint64_t>();
-                uint64_t desired = val.get<uint64_t>();
+                uint64_t value = u.jsonValue<uint64_t>(properties, key);
+                uint64_t desired = u.jsonValue<uint64_t>(val);
                 return value == desired;
                 break;
             }
             case NL::detail::value_t::number_integer:
             {
-                int value = properties.at(key).get<int>();
-                int desired = val.get<int>();
+                int value = u.jsonValue<int>(properties,key);
+                int desired = u.jsonValue<int>(val);
                 return value == desired;
                 break;
             }
             case NL::detail::value_t::number_float:
             {
-                int value = properties.at(key).get<double>();
-                int desired = val.get<double>();
+                double value = u.jsonValue<double>(properties, key);
+                double desired = u.jsonValue<double>(val);
                 return value == desired;
                 break;
             }
             case NL::detail::value_t::boolean:
             {
-                bool value = properties.at(key).get<bool>();
-                bool desired = val.get<bool>();
+                bool value = u.jsonValue<bool>(properties, key);
+                bool desired = u.jsonValue<bool>(val);
                 return value == desired;
                 break;
             }
@@ -350,7 +337,7 @@ namespace stac
     bool Item::filter(Filters filters)
     {
         validateForFilter(m_json);
-        m_id = m_json.at("id").get<std::string>();
+        m_id = m_utils.stacId(m_json);
 
         if (!filterAssets(filters.assetNames))
             return false;
@@ -380,7 +367,7 @@ namespace stac
         {
             if (m_json.contains("geometry"))
             {
-                NL::json geometry = m_json.at("geometry").get<NL::json>();
+                NL::json geometry = m_utils.jsonValue(m_json, "geometry");
                 Polygon f(geometry.dump());
                 if (!f.valid())
                     throw stac_error(m_id, "item",
@@ -405,7 +392,7 @@ namespace stac
             // or make one in PDALUtils
             else if (m_json.contains("bbox"))
             {
-                NL::json bboxJson = m_json.at("bbox").get<NL::json>();
+                NL::json bboxJson = m_utils.stacValue(m_json, "bbox");
 
                 // TODO if we have a bad bbox?
                 if (bboxJson.size() != 4 || bboxJson.size() != 6)
@@ -440,26 +427,30 @@ namespace stac
 
     }
 
-    bool Item::filterProperties(NL::json filterProps)
+    bool Item::filterProperties(const NL::json& filterProps)
     {
-
-        NL::json itemProperties = m_json.at("properties");
+        NL::json itemProperties = m_utils.stacValue(m_json, "properties");
         if (!filterProps.empty())
         {
             for (auto &it: filterProps.items())
             {
-                NL::detail::value_t type = itemProperties.at(it.key()).type();
-                NL::detail::value_t argType = it.value().type();
+                std::string key = it.key();
+                NL::json stacVal = m_utils.stacValue(itemProperties, key, m_json);
+                NL::detail::value_t stacType = stacVal.type();
+
+                NL::json filterVal = it.value();
+                NL::detail::value_t filterType = filterVal.type();
+
                 //Array of possibilities are Or'd together
-                if (argType == NL::detail::value_t::array)
+                if (filterType == NL::detail::value_t::array)
                 {
                     bool arrFlag (true);
-                    for (auto& val: it.value())
-                        if (matchProperty(it.key(), val, itemProperties, type))
+                    for (auto& val: filterVal)
+                        if (matchProperty(key, val, itemProperties, stacType))
                             return true;
                 }
                 else
-                    if (!matchProperty(it.key(), it.value(), itemProperties, type))
+                    if (matchProperty(key, filterVal, itemProperties, stacType))
                         return true;
             }
 
@@ -470,7 +461,7 @@ namespace stac
 
     bool Item::filterDates(DatePairs dates)
     {
-        NL::json properties = m_json.at("properties");
+        NL::json properties = m_utils.stacValue(m_json, "properties");
 
         // DateTime
         // If STAC datetime fits in *any* of the supplied ranges,
@@ -480,17 +471,8 @@ namespace stac
             if (properties.contains("datetime") &&
                 properties.at("datetime").type() != NL::detail::value_t::null)
             {
-                std::string stacDateStr;
-
-                try
-                {
-                    stacDateStr = properties.at("datetime").get<std::string>();
-                }
-                catch (NL::detail::type_error e)
-                {
-                        throw pdal_error("Item (" + m_id + ") datetime must be of "
-                            "type string and comply with RFC 3339 specs.");
-                }
+                std::string stacDateStr = m_utils.stacValue(properties,
+                    "datetime", m_json);
 
                 try
                 {
@@ -499,7 +481,7 @@ namespace stac
                         if (stacTime >= range.first && stacTime <= range.second)
                             return true;
                 }
-                catch (stac_error e)
+                catch (pdal_error e)
                 {
                     throw stac_error(m_id, "item", e.what());
                 }
@@ -510,21 +492,13 @@ namespace stac
                 properties.contains("end_datetime"))
             {
                     // Handle if STAC object has start and end datetimes instead of one
-                    std::string endDateStr;
-                    std::string startDateStr;
-                    try {
-                        endDateStr = properties.at("end_datetime").get<std::string>();
-                        startDateStr = properties.at("start_datetime").get<std::string>();
-                    }
-                    catch(NL::detail::type_error e)
-                    {
-                        throw pdal_error("Item (" + m_id + ") start and end "
-                            "datetimes must be of type string and comply with "
-                            "RFC 3339 specs.");
-                    }
+                    std::string endDateStr = m_utils.stacValue(properties,
+                        "end_datetime", m_json);
+                    std::string startDateStr = m_utils.stacValue(properties,
+                        "end_datetime", m_json);
 
-                    std::time_t stacStartTime = m_utils.getStacTime(startDateStr);
                     std::time_t stacEndTime = m_utils.getStacTime(endDateStr);
+                    std::time_t stacStartTime = m_utils.getStacTime(startDateStr);
 
                     for (const auto& range: dates)
                     {
@@ -543,8 +517,7 @@ namespace stac
                     return false;
             }
             else
-                throw pdal_error("Unexpected layout of STAC dates for Item " +
-                    m_id + ". Cannot filter.");
+                throw stac_error(m_id, "item", "Unexpected layout of STAC dates");
         }
         return true;
 
@@ -553,13 +526,14 @@ namespace stac
     bool Item::filterAssets(std::vector<std::string> assetNames)
     {
         NL::json asset;
+        NL::json assetList = m_utils.stacValue(m_json, "assets");
         for (auto& name: assetNames)
         {
-            if (m_json.at("assets").contains(name))
+            if (assetList.contains(name))
             {
-                asset = m_json.at("assets").at(name);
+                asset = m_utils.stacValue(assetList, name, m_json);
                 m_driver = extractDriverFromItem(asset);
-                std::string assetPath = asset.at("href").get<std::string>();
+                std::string assetPath = m_utils.stacValue(asset, "href", m_json);
                 m_assetPath = m_utils.handleRelativePath(m_path, assetPath);
             }
         }
@@ -568,7 +542,7 @@ namespace stac
         return true;
     }
 
-    // If STAC ID matches *any* ID in supplied list, it will be accepted
+    // If STAC ID matches any ID in supplied list, it will be accepted
     bool Item::filterIds(std::vector<RegEx> ids)
     {
         if (!ids.empty())
@@ -588,7 +562,8 @@ namespace stac
             if (!m_json.contains("collection"))
                 return false;
 
-            std::string colId = m_json.at("collection").get<std::string>();
+            std::string colId = m_utils.stacValue<std::string>(
+                m_json, "collection");
             for (auto& id: ids)
                 if (std::regex_match(colId, id.regex()))
                     return true;

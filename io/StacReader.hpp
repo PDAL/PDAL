@@ -48,21 +48,9 @@
 namespace pdal
 {
 
-namespace stac {
-    class Item;
-    class Catalog;
-    class Collection;
-    class ItemCollection;
-};
-
 
 class PDAL_DLL StacReader : public Reader, public Streamable
 {
-    friend class stac::Item;
-    friend class stac::Catalog;
-    friend class stac::Collection;
-    friend class stac::ItemCollection;
-
     public:
 
         StacReader();
@@ -82,20 +70,13 @@ class PDAL_DLL StacReader : public Reader, public Streamable
 
         StageFactory m_factory;
 
-        void handleReaderArgs();
         void addItem(stac::Item& item);
         void handleItem(NL::json stacJson, std::string itemPath);
         void handleCatalog(NL::json stacJson, std::string catPath, bool isRoot = false);
         void handleCollection(NL::json stacJson, std::string catPath, bool isRoot = false);
         void handleItemCollection(NL::json stacJson, std::string icPath);
         void initializeArgs();
-        void validateSchema(NL::json stacJson);
-        Options setReaderOptions(const NL::json& readerArgs,
-                                    const std::string& driver) const;
         void setConnectionForwards(StringMap& headers, StringMap& query);
-        std::string extractDriverFromItem(const NL::json& asset) const;
-
-        bool prune(NL::json stacJson);
 
         virtual void initialize() override;
         virtual void addArgs(ProgramArgs& args) override;

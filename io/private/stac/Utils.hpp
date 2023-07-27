@@ -35,25 +35,16 @@
 
 #include <arbiter/arbiter.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/pdal_types.hpp>
 
 namespace pdal
 {
 
 namespace stac
 {
+    pdal_error stac_error(std::string id, std::string stacType, std::string const& msg);
+    pdal_error stac_error(std::string const& msg);
 
-class stac_error: public std::runtime_error
-{
-
-
-public:
-    inline stac_error(std::string id, std::string stacType, std::string const& msg):
-        std::runtime_error("StacError (" + stacType + ": " + id + "): " + msg)
-    { }
-    inline stac_error(std::string const& msg):
-        std::runtime_error("StacError: " + msg)
-    { }
-};
 
 class StacUtils
 {
@@ -66,6 +57,105 @@ public:
         std::string linkPath);
     static std::time_t getStacTime(std::string in);
 
+    template <class T = NL::json>
+    static T jsonValue(const NL::json& json, std::string key = "")
+    {
+        try
+        {
+            if (key.empty())
+                return json.get<T>();
+            return json.at(key).get<T>();
+        }
+        catch (NL::detail::exception e)
+        {
+            std::stringstream msg;
+            msg << "Error: " << e.what() << ", for object " << json.dump();
+            throw pdal_error(msg.str());
+        }
+    }
+
+    template <class U = NL::json>
+    static U stacValue(const NL::json& stac, std::string key = "",
+        const NL::json& rootJson = {})
+    {
+        NL::json stacCheck = stac;
+        if (!rootJson.empty())
+            stacCheck = rootJson;
+        std::string type = stacType(stacCheck);
+        std::string id;
+        if (type == "FeatureCollection")
+            id = icSelfPath(stacCheck);
+        else
+            id = stacId(stacCheck);
+
+        try
+        {
+            if (key.empty())
+                return stac.get<U>();
+            return stac.at(key).get<U>();
+        }
+        catch (NL::detail::exception e)
+        {
+            throw stac_error(id, type, e.what());
+        }
+    }
+
+    static std::string stacId(const NL::json& stac)
+    {
+        std::stringstream msg;
+        try
+        {
+            return stac.at("id").get<std::string>();
+        }
+        catch (NL::detail::out_of_range e)
+        {
+            msg << "Missing required key 'id'. " << e.what();
+            throw pdal_error(msg.str());
+        }
+        catch (NL::detail::type_error e)
+        {
+            msg << "Required key 'id' is not of type 'string'. " << e.what();
+            throw pdal_error(msg.str());
+        }
+    }
+
+    static std::string stacType(const NL::json& stac)
+    {
+        std::string id = stacId(stac);
+        std::stringstream msg;
+        try
+        {
+            return stac.at("id").get<std::string>();
+        }
+        catch (NL::detail::out_of_range e)
+        {
+            msg << "Missing required key 'type' in id(" + id + ")." << e.what();
+            throw pdal_error(msg.str());
+        }
+        catch (NL::detail::type_error e)
+        {
+            msg << "Invalid key 'type' in id(" + id + "). " << e.what();
+            throw pdal_error(msg.str());
+        }
+    }
+
+    static std::string icSelfPath(const NL::json& json)
+    {
+        try
+        {
+            NL::json links = jsonValue(json, "links");
+            for (const NL::json& link: links)
+            {
+                std::string target = jsonValue<std::string>(link, "rel");
+                if (target == "self")
+                    return jsonValue<std::string>(link, "href");
+            }
+        }
+        catch(NL::detail::exception)
+        { }
+
+        return "";
+    }
 };
 
 }// stac

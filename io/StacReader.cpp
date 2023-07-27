@@ -287,7 +287,7 @@ void StacReader::initializeArgs()
 
     if (!m_args->dates.empty())
     {
-        stac::StacUtils stacUtils;
+        stac::StacUtils u;
         log()->get(LogLevel::Debug) <<
             "Dates selected: " << m_args->dates << std::endl;
 
@@ -297,23 +297,23 @@ void StacReader::initializeArgs()
                 datepair.type() != NL::detail::value_t::array)
             {
                 throw pdal_error("User defined dates (" + datepair.dump() +
-                    ") must be a range of [min, max].");
+                    ") are invalid. Must be a range of [min, max].");
             }
 
             try
             {
-                std::string minDate(datepair[0].get<std::string>());
-                std::string maxDate(datepair[1].get<std::string>());
+                std::string minDate(u.jsonValue<std::string>(datepair[0]));
+                std::string maxDate(u.jsonValue<std::string>(datepair[1]));
 
-                std::time_t minTime = stacUtils.getStacTime(minDate);
-                std::time_t maxTime = stacUtils.getStacTime(maxDate);
+                std::time_t minTime = u.getStacTime(minDate);
+                std::time_t maxTime = u.getStacTime(maxDate);
                 m_p->m_itemFilters.datePairs.push_back({ minTime, maxTime });
             }
             catch(NL::detail::type_error e)
             {
                 throw pdal_error("User defined date range ("+ datepair.dump() +
                     ") is invalid. It must be of type string and comply " +
-                    "with  RFC 3339.");
+                    "with  RFC 3339." + e.what());
             }
         }
     }
@@ -382,6 +382,7 @@ void StacReader::setConnectionForwards(StringMap& headers, StringMap& query)
 void StacReader::initialize()
 {
 
+    stac::StacUtils u;
     StringMap headers;
     StringMap query;
     setConnectionForwards(headers, query);
@@ -393,7 +394,7 @@ void StacReader::initialize()
 
     NL::json stacJson = m_p->m_connector->getJson(m_filename);
 
-    std::string stacType = stacJson.at("type");
+    std::string stacType = u.stacType(stacJson);
     if (stacType == "Feature")
         handleItem(stacJson, m_filename);
     else if (stacType == "Catalog")

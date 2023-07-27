@@ -36,7 +36,6 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/Stage.hpp>
-#include <pdal/pdal_types.hpp>
 #include <pdal/util/ThreadPool.hpp>
 #include "Catalog.hpp"
 

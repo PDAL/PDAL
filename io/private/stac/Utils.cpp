@@ -39,6 +39,17 @@ namespace pdal
 
 namespace stac
 {
+    pdal_error stac_error(std::string id, std::string stacType,
+        std::string const& msg)
+    {
+        return pdal_error("STACError (" + stacType + ": " + id + "): " + msg);
+    }
+
+    pdal_error stac_error(std::string const& msg)
+    {
+        return pdal_error("STACError: " + msg);
+    }
+
 
     StacUtils::StacUtils() {}
     StacUtils::~StacUtils() {}
@@ -67,7 +78,6 @@ namespace stac
                 ") cannot be parsed. Dates must fit RFC 3339 specs.");
         return std::mktime(&date);
     }
-
 
 }//stac
 }//pdal

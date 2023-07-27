@@ -66,20 +66,16 @@ namespace stac
         if (m_validate)
             validate();
 
-        std::string catalogId = m_json.at("id").get<std::string>();
-        m_id = catalogId;
-
-        auto itemLinks = m_json.at("links");
+        NL::json itemLinks = m_utils.stacValue(m_json, "links");
 
         for (const auto& link: itemLinks)
         {
 
-            if (!link.count("href") || !link.count("rel"))
-                throw pdal::pdal_error("Link does not contain 'href' or 'rel': "
-                    + link.dump());
+            const std::string linkType = m_utils.stacValue<std::string>(
+                link, "rel", m_json);
+            const std::string linkPath = m_utils.stacValue<std::string>(
+                link, "href", m_json);
 
-            const std::string linkType = link.at("rel").get<std::string>();
-            const std::string linkPath = link.at("href").get<std::string>();
             const std::string absLinkPath = m_utils.handleRelativePath(m_path, linkPath);
 
             m_pool.add([this, linkType, absLinkPath, filters, rawReaderArgs]()
@@ -183,9 +179,6 @@ namespace stac
 
     void Catalog::validate()
     {
-        // std::function<void( const nlohmann::json_uri&, nlohmann::json&)> fetch
-        //     = m_utils.schemaFetch;
-
         nlohmann::json_schema::json_validator val(
             [this](const nlohmann::json_uri& json_uri, nlohmann::json& json) {
                 NL::json tempJson = m_connector.getJson(json_uri.url());
@@ -198,25 +191,26 @@ namespace stac
 
         NL::json schemaJson = m_connector.getJson(m_schemaUrls.catalog);
         val.set_root_schema(schemaJson);
-        val.validate(m_json);
+        try {
+            val.validate(m_json);
+        }
+        catch (std::exception &e)
+        {
+            throw stac_error(m_id, "catalog",
+                "STAC schema validation Error in root schema: " +
+                m_schemaUrls.catalog + ". \n\n" + e.what());
+        }
     }
 
     //if catalog matches filter requirements, return true
     bool Catalog::filter(Filters filters) {
-        if (!m_json.contains("id"))
-        {
-            std::stringstream msg;
-            msg << "Invalid catalog . It is missing key 'id'.";
-            throw pdal_error(msg.str());
-        }
-
         if (!filters.ids.empty() && !m_root)
         {
-            std::string id = m_json.at("id").get<std::string>();
+            m_id = m_utils.stacId(m_json);
             bool pruneFlag = true;
             for (auto& i: filters.ids)
             {
-                if (std::regex_match(id, i.regex()))
+                if (std::regex_match(m_id, i.regex()))
                 {
                     pruneFlag = false;
                     break;

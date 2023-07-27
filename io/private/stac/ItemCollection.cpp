@@ -59,12 +59,8 @@ namespace stac
     bool ItemCollection::init(Filters filters, NL::json rawReaderArgs,
         SchemaUrls schemaUrls)
     {
-        if (!m_json.contains("features"))
-            throw pdal_error("Missing required key 'features' in"
-                " FeatureCollection.");
-
-        NL::json itemList = m_json.at("features");
-        for (NL::json& itemJson: itemList)
+        const NL::json itemList = m_utils.stacValue(m_json, "features");
+        for (const NL::json& itemJson: itemList)
         {
             Item item(itemJson, m_path, m_connector, m_validate);
             if (item.init(filters.itemFilters, rawReaderArgs, schemaUrls))
@@ -74,17 +70,15 @@ namespace stac
         }
         if (m_json.contains("links"))
         {
-            NL::json links = m_json.at("links");
-            for (NL::json& link: links)
+            const NL::json links = m_utils.stacValue(m_json, "links");
+            for (const NL::json& link: links)
             {
-                if (!link.contains("rel"))
-                    throw pdal_error("Missing required key 'rel' in STAC"
-                        " Link object.");
-                std::string target = link.at("rel").get<std::string>();
+                std::string target = m_utils.stacValue<std::string>(
+                    link, "rel", m_json);
                 if (target == "next")
                 {
-                    std::string nextLinkPath =
-                        link.at("href").get<std::string>();
+                    std::string nextLinkPath = m_utils.stacValue<std::string>(
+                        link, "href", m_json);
                     std::string nextAbsPath =
                         m_utils.handleRelativePath(m_path, nextLinkPath);
                     NL::json nextJson = m_connector.getJson(nextAbsPath);
