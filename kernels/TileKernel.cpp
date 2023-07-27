@@ -234,15 +234,14 @@ void TileKernel::process(const Readers& readers)
         while (!finished)
         {
             // Read subsequent points.
-            while (true)
+            for (; idx < m_table.capacity(); idx++)
             {
                 point.setPointId(idx);
                 finished = !StreamableWrapper::processOne(r, point);
-                idx++;
-                if (idx == m_table.capacity() || finished)
+                if (finished)
                     break;
             }
-            PointId last = idx - 1;
+            PointId end = idx;
 
             SpatialReference srs = r.getSpatialReference();
             if (!srs.empty())
@@ -250,7 +249,7 @@ void TileKernel::process(const Readers& readers)
             // Reproject if necessary.
             if (m_repro)
             {
-                for (idx = 0; idx < last; ++idx)
+                for (idx = 0; idx < end; ++idx)
                 {
                     point.setPointId(idx);
                     if (!StreamableWrapper::processOne(*m_repro, point))
@@ -262,14 +261,13 @@ void TileKernel::process(const Readers& readers)
             }
 
             // Split and write.
-            for (idx = 0; idx < last; ++idx)
+            for (idx = 0; idx < end; ++idx)
             {
                 if (skips[idx])
                     continue;
 
                 point.setPointId(idx);
                 m_splitter.processPoint(point, adder);
-
             }
             for (size_t i = 0; i < skips.size(); ++i)
                 skips[i] = false;
