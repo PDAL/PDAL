@@ -54,7 +54,7 @@ public:
     GeoreferenceFilter& operator=(const GeoreferenceFilter&) = delete;
     GeoreferenceFilter(const GeoreferenceFilter&) = delete;
 
-    std::string getName() const;
+    std::string getName() const override;
 
 private:
     virtual void addArgs(ProgramArgs& args) override;

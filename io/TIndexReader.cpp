@@ -78,8 +78,8 @@ struct TIndexReader::Args
 };
 
 TIndexReader::TIndexReader() :
-    m_dataset(nullptr),
     m_args(new TIndexReader::Args),
+    m_dataset(nullptr),
     m_layer(nullptr)
 {}
 
