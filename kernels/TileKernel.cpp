@@ -231,17 +231,21 @@ void TileKernel::process(const Readers& readers)
         }
 
         idx++;
+
         while (!finished)
         {
             // Read subsequent points.
-            for (; idx < m_table.capacity(); idx++)
+            while (true)
             {
                 point.setPointId(idx);
                 finished = !StreamableWrapper::processOne(r, point);
-                if (finished)
+                if (finished || idx == m_table.capacity() - 1)
                     break;
+                idx++;
             }
-            PointId end = idx;
+
+            // "end" points just beyond the last valid point ID
+            PointId end = finished ? idx : m_table.capacity();
 
             SpatialReference srs = r.getSpatialReference();
             if (!srs.empty())
