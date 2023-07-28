@@ -44,6 +44,8 @@
 
 #include "Support.hpp"
 
+#include <gdal_version.h>
+
 namespace pdal
 {
 
@@ -94,6 +96,11 @@ namespace
 
 TEST(CopcWriterTest, srsWkt2)
 {
+#if GDAL_VERSION_NUM <= GDAL_COMPUTE_VERSION(3,6,0)
+    // not working with PROJ >= 9.2.0 https://github.com/OSGeo/gdal/pull/6800
+    std::cerr << "Test disabled with GDAL <= 3.6.0" << std::endl;
+    return;
+#endif
     const auto filename = Support::temppath("srsWkt2.copc.las");
     {
         Options readerOps;
@@ -141,6 +148,51 @@ TEST(CopcWriterTest, srsWkt2)
 
         EXPECT_TRUE(Utils::startsWith(srs, "{\n  \"type\": \"DerivedProjectedCRS\","));
     }
+}
+
+TEST(CopcWriterTest, srsUTM)
+{
+    const auto filename = Support::temppath("srs.copc.las");
+    {
+        Options readerOps;
+        readerOps.add("filename", Support::datapath("las/utm15.las"));
+
+        LasReader reader;
+        reader.setOptions(readerOps);
+
+        Options writerOps;
+        writerOps.add("filename", filename);
+        writerOps.add("enhanced_srs_vlrs", true);
+        CopcWriter writer;
+        writer.setInput(reader);
+        writer.setOptions(writerOps);
+
+        PointTable table;
+        writer.prepare(table);
+        writer.execute(table);
+    }
+
+    Options ops;
+    ops.add("filename", filename);
+
+    LasReader r;
+    r.setOptions(ops);
+
+    PointTable t;
+    r.prepare(t);
+    r.execute(t);
+
+    const QuickInfo qi(r.preview());
+    std::string srs = qi.m_srs.getWKT();
+    EXPECT_TRUE(Utils::startsWith(srs, "PROJCS[\"NAD83 / UTM zone 15N\""));
+
+    const char *data = nullptr;
+    EXPECT_TRUE(r.vlrData("LASF_Projection", 4224, data) > 0);
+    EXPECT_TRUE(Utils::startsWith(data, "PROJCRS[\"NAD83 / UTM zone 15N\""));
+    EXPECT_TRUE(r.vlrData("PDAL", 4225, data) > 0);
+    EXPECT_TRUE(Utils::startsWith(data, "{\n  \"type\": \"ProjectedCRS\","));
+    EXPECT_TRUE(r.vlrData("LASF_Projection", 2112, data) > 0);
+    EXPECT_TRUE(Utils::startsWith(data, "PROJCS[\"NAD83 / UTM zone 15N\""));
 }
 
 } // namespace pdal
