@@ -347,8 +347,6 @@ namespace stac
         if (bounds.empty())
             return true;
 
-        //STAC Items must contain geometry and if it's not null then bbox must
-        //exist per https://datatracker.ietf.org/doc/html/rfc7946#section-3.2.
         //Skip bbox altogether and stick with geometry, which will be much
         //more descriptive than bbox
 
@@ -358,7 +356,7 @@ namespace stac
         if (geometry.type() == NL::detail::value_t::null)
             return false;
 
-        std::cout << "STAC Geom:" << geometry.dump() << std::endl;
+        //STAC's base geometries will always be represented in 4326.
         const SpatialReference stacSrs("EPSG:4326");
         Polygon stacPolygon(geometry.dump(), stacSrs);
         if (!stacPolygon.valid())
@@ -366,7 +364,7 @@ namespace stac
                 "Polygon created from STAC 'geometry' key is invalid");
 
         Polygon userPolygon(bounds);
-        if (!srs.empty())
+        if (!srs.empty() && srs != stacSrs)
         {
             userPolygon.setSpatialReference(srs);
             auto status = stacPolygon.transform(srs);
@@ -375,52 +373,13 @@ namespace stac
         }
         else
             userPolygon.setSpatialReference("EPSG:4326");
+
         if (!userPolygon.valid())
             throw pdal_error("User input polygon is invalid, " + bounds.toBox());
 
-        std::cout << "Userpolygon : " << userPolygon.bounds() << std::endl;
-        std::cout << "stacpolygon : " << stacPolygon.bounds() << std::endl;
-
-        if (stacPolygon.overlaps(userPolygon))
-        {
-            std::cout << "overlaps? true" << std::endl;
+        if (!stacPolygon.disjoint(userPolygon))
             return true;
-        }
-        std::cout << "overlaps? false" << std::endl;
 
-        // // TODO make a function that does bbox filtering or find one
-        // // or make one in PDALUtils
-        // else if (m_json.contains("bbox"))
-        // {
-        //     NL::json bboxJson = m_utils.stacValue(m_json, "bbox");
-
-        //     // TODO if we have a bad bbox?
-        //     if (bboxJson.size() != 4 || bboxJson.size() != 6)
-        //         throw stac_error(m_id, "item", "Invalid bbox found." + bboxJson.dump());
-
-        //     if (bboxJson.size() == 4)
-        //     {
-        //         double minx = bboxJson[0];
-        //         double miny = bboxJson[1];
-        //         double maxx = bboxJson[2];
-        //         double maxy = bboxJson[3];
-        //         BOX2D bbox = BOX2D(minx, miny, maxx, maxy);
-        //         if (bounds.to2d().overlaps(bbox))
-        //             return true;
-        //     }
-        //     else if (bboxJson.size() == 6)
-        //     {
-        //         double minx = bboxJson[0];
-        //         double miny = bboxJson[1];
-        //         double minz = bboxJson[2];
-        //         double maxx = bboxJson[3];
-        //         double maxy = bboxJson[4];
-        //         double maxz = bboxJson[5];
-        //         BOX3D bbox = BOX3D(minx, miny, minz, maxx, maxy, maxz);
-        //         if (bounds.to3d().overlaps(bbox))
-        //             return true;
-        //     }
-        //  }
         return false;
 
     }
