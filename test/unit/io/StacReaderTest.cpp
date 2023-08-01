@@ -454,41 +454,41 @@ TEST(StacReaderTest, bounds_prune_reject_test)
     EXPECT_THROW(QuickInfo qi = reader.preview(), pdal_error);
 }
 
-// TEST(StacReaderTest, wrench_test)
-// {
-//     Options options;
-//     options.add("filename", Support::datapath("stac/wrench.vpc"));
-//     options.add("validate_schema", "true");
+TEST(StacReaderTest, wrench_test)
+{
+    Options options;
+    options.add("filename", Support::datapath("stac/wrench.vpc"));
+    options.add("validate_schema", "true");
 
-//     StageFactory f;
-//     Stage& reader = *f.createStage("readers.stac");
-//     reader.setOptions(options);
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
 
-//     PointTable table;
-//     reader.prepare(table);
-//     PointViewSet viewSet = reader.execute(table);
-//     PointViewPtr view = *viewSet.begin();
+    PointTable table;
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    PointViewPtr view = *viewSet.begin();
 
-//     EXPECT_EQ(view->size(), 111065);
-// }
+    EXPECT_EQ(view->size(), 111065);
+}
 
-// #ifndef _WIN32
+#ifndef _WIN32
 
-// TEST(StacReaderTest, schema_validate_test)
-// {
-//     Options options;
+TEST(StacReaderTest, schema_validate_test)
+{
+    Options options;
 
-//     options.add("filename", Support::datapath("stac/local_catalog/catalog.json"));
-//     options.add("asset_names", "ept.json");
-//     options.add("asset_names", "data");
-//     options.add("validate_schema", "true");
+    options.add("filename", Support::datapath("stac/local_catalog/catalog.json"));
+    options.add("asset_names", "ept.json");
+    options.add("asset_names", "data");
+    options.add("validate_schema", "true");
 
-//     StageFactory f;
-//     Stage& reader = *f.createStage("readers.stac");
-//     reader.setOptions(options);
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
 
-//     QuickInfo qi = reader.preview();
-//     EXPECT_TRUE(qi.valid());
-//     EXPECT_EQ(qi.m_pointCount, 44851411750);
-// }
-// #endif
+    QuickInfo qi = reader.preview();
+    EXPECT_TRUE(qi.valid());
+    EXPECT_EQ(qi.m_pointCount, 44851411750);
+}
+#endif
