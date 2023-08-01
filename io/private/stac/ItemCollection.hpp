@@ -53,10 +53,10 @@ public:
 
     struct Filters
     {
-        Item::Filters itemFilters;
+        Item::Filters* itemFilters;
     };
 
-    bool init(Filters filters, NL::json rawReaderArgs, SchemaUrls schemaUrls);
+    bool init(const Filters& filters, NL::json rawReaderArgs, SchemaUrls schemaUrls);
     ItemList items();
 
 private:

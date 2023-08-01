@@ -55,7 +55,7 @@ namespace stac
     Catalog::~Catalog()
     {}
 
-    bool Catalog::init(Filters filters, NL::json rawReaderArgs,
+    bool Catalog::init(const Filters& filters, NL::json rawReaderArgs,
             SchemaUrls schemaUrls, bool isRoot=false)
     {
         m_root = isRoot;
@@ -87,7 +87,7 @@ namespace stac
                         NL::json itemJson = m_connector.getJson(absLinkPath);
                         Item item(itemJson, absLinkPath, m_connector, m_validate);
 
-                        bool valid = item.init(filters.itemFilters,
+                        bool valid = item.init(*filters.itemFilters,
                             rawReaderArgs, m_schemaUrls);
                         if (valid)
                         {
@@ -204,23 +204,15 @@ namespace stac
 
     //if catalog matches filter requirements, return true
     bool Catalog::filter(Filters filters) {
-        if (!filters.ids.empty() && !m_root)
-        {
-            m_id = m_utils.stacId(m_json);
-            bool pruneFlag = true;
-            for (auto& i: filters.ids)
-            {
-                if (std::regex_match(m_id, i.regex()))
-                {
-                    pruneFlag = false;
-                    break;
-                }
-            }
-            if (pruneFlag)
-                return false;
-        }
+        if (filters.ids.empty() || m_root)
+            return true;
 
-        return true;
+        m_id = m_utils.stacId(m_json);
+        for (auto& i: filters.ids)
+            if (std::regex_match(m_id, i.regex()))
+                return true;
+
+        return false;
     }
 
 

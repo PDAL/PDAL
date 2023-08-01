@@ -61,7 +61,7 @@ namespace stac
         m_readerOptions(item.m_readerOptions)
     {}
 
-    bool Item::init(Filters filters, NL::json rawReaderArgs,
+    bool Item::init(const Filters& filters, NL::json rawReaderArgs,
             SchemaUrls schemaUrls)
     {
 
@@ -170,9 +170,6 @@ namespace stac
             { "application/vnd.laszip+copc", "readers.copc"}
         };
 
-        if (!asset.contains("href"))
-            throw stac_error(m_id, "item", "asset does not contain an href.");
-
         std::string assetPath = m_utils.stacValue<std::string>(
             asset, "href", m_json);
         std::string dataUrl = m_utils.handleRelativePath(m_path, assetPath);
@@ -263,23 +260,7 @@ namespace stac
 
         u.stacValue(json, "assets");
         u.stacValue(json, "properties");
-
-        try {
-            u.stacValue(json, "geometry");
-        }
-        catch (pdal_error e)
-        {
-            try {
-                u.stacValue(json, "bbox");
-            }
-            catch (pdal_error e2)
-            {
-                std::stringstream msg;
-                msg << "Must have one of 'geometry' or 'bbox' valid in STAC"
-                    " object. Errors found: \n" << e.what() << "\n" << e2.what();
-                throw pdal_error(msg.str());
-            }
-        }
+        u.stacValue(json, "geometry");
     }
 
     bool matchProperty(std::string key, NL::json val, NL::json properties,
@@ -326,7 +307,7 @@ namespace stac
             default:
             {
                 throw pdal_error("Data type of " + key +
-                    " is not supported for pruning.");
+                    " is not supported for filtering.");
             }
         }
         return true;
@@ -334,7 +315,7 @@ namespace stac
 
 
 
-    bool Item::filter(Filters filters)
+    bool Item::filter(const Filters& filters)
     {
         validateForFilter(m_json);
         m_id = m_utils.stacId(m_json);
@@ -354,76 +335,93 @@ namespace stac
         if (!filterProperties(filters.properties))
             return false;
 
-        if (!filterBounds(filters.bounds))
+        if (!filterBounds(filters.bounds, filters.srs))
             return false;
 
 
         return true;
     }
 
-    bool Item::filterBounds(SrsBounds bounds)
+    bool Item::filterBounds(BOX3D bounds, SpatialReference srs)
     {
-        if (!bounds.empty())
-        {
-            if (m_json.contains("geometry"))
-            {
-                NL::json geometry = m_utils.jsonValue(m_json, "geometry");
-                Polygon f(geometry.dump());
-                if (!f.valid())
-                    throw stac_error(m_id, "item",
-                        "Polygon created from STAC 'geometry' key is invalid");
+        if (bounds.empty())
+            return true;
 
-                // Convert to BOX3D
-                if (bounds.is3d())
-                {
-                    if (bounds.to3d().overlaps(f.bounds()))
-                        return true;
-                }
-                else
-                {
-                    //Cast BOX2D to 3D to fit f.bounds which is 3d
-                    BOX2D bbox = bounds.to2d();
-                    if (BOX3D(bbox).overlaps(f.bounds()))
-                        return true;
-                }
-            }
+        //STAC Items must contain geometry and if it's not null then bbox must
+        //exist per https://datatracker.ietf.org/doc/html/rfc7946#section-3.2.
+        //Skip bbox altogether and stick with geometry, which will be much
+        //more descriptive than bbox
 
-            // TODO make a function that does bbox filtering or find one
-            // or make one in PDALUtils
-            else if (m_json.contains("bbox"))
-            {
-                NL::json bboxJson = m_utils.stacValue(m_json, "bbox");
-
-                // TODO if we have a bad bbox?
-                if (bboxJson.size() != 4 || bboxJson.size() != 6)
-                    throw pdal_error("bbox for '" + m_id + "' is not valid");
-
-                if (bboxJson.size() == 4)
-                {
-                    double minx = bboxJson[0];
-                    double miny = bboxJson[1];
-                    double maxx = bboxJson[2];
-                    double maxy = bboxJson[3];
-                    BOX2D bbox = BOX2D(minx, miny, maxx, maxy);
-                    if (bounds.to2d().overlaps(bbox))
-                        return true;
-                }
-                else if (bboxJson.size() == 6)
-                {
-                    double minx = bboxJson[0];
-                    double miny = bboxJson[1];
-                    double minz = bboxJson[2];
-                    double maxx = bboxJson[3];
-                    double maxy = bboxJson[4];
-                    double maxz = bboxJson[5];
-                    BOX3D bbox = BOX3D(minx, miny, minz, maxx, maxy, maxz);
-                    if (bounds.to3d().overlaps(bbox))
-                        return true;
-                }
-            }
+        //If stac item has null geometry and bounds have been included
+        //for filtering, then the Item will be excluded.
+        NL::json geometry = m_utils.stacValue(m_json, "geometry");
+        if (geometry.type() == NL::detail::value_t::null)
             return false;
+
+        std::cout << "STAC Geom:" << geometry.dump() << std::endl;
+        const SpatialReference stacSrs("EPSG:4326");
+        Polygon stacPolygon(geometry.dump(), stacSrs);
+        if (!stacPolygon.valid())
+            throw stac_error(m_id, "item",
+                "Polygon created from STAC 'geometry' key is invalid");
+
+        Polygon userPolygon(bounds);
+        if (!srs.empty())
+        {
+            userPolygon.setSpatialReference(srs);
+            auto status = stacPolygon.transform(srs);
+            if (!status)
+                throw stac_error(m_id, "item", status.what());
         }
-        return true;
+        else
+            userPolygon.setSpatialReference("EPSG:4326");
+        if (!userPolygon.valid())
+            throw pdal_error("User input polygon is invalid, " + bounds.toBox());
+
+        std::cout << "Userpolygon : " << userPolygon.bounds() << std::endl;
+        std::cout << "stacpolygon : " << stacPolygon.bounds() << std::endl;
+
+        if (stacPolygon.overlaps(userPolygon))
+        {
+            std::cout << "overlaps? true" << std::endl;
+            return true;
+        }
+        std::cout << "overlaps? false" << std::endl;
+
+        // // TODO make a function that does bbox filtering or find one
+        // // or make one in PDALUtils
+        // else if (m_json.contains("bbox"))
+        // {
+        //     NL::json bboxJson = m_utils.stacValue(m_json, "bbox");
+
+        //     // TODO if we have a bad bbox?
+        //     if (bboxJson.size() != 4 || bboxJson.size() != 6)
+        //         throw stac_error(m_id, "item", "Invalid bbox found." + bboxJson.dump());
+
+        //     if (bboxJson.size() == 4)
+        //     {
+        //         double minx = bboxJson[0];
+        //         double miny = bboxJson[1];
+        //         double maxx = bboxJson[2];
+        //         double maxy = bboxJson[3];
+        //         BOX2D bbox = BOX2D(minx, miny, maxx, maxy);
+        //         if (bounds.to2d().overlaps(bbox))
+        //             return true;
+        //     }
+        //     else if (bboxJson.size() == 6)
+        //     {
+        //         double minx = bboxJson[0];
+        //         double miny = bboxJson[1];
+        //         double minz = bboxJson[2];
+        //         double maxx = bboxJson[3];
+        //         double maxy = bboxJson[4];
+        //         double maxz = bboxJson[5];
+        //         BOX3D bbox = BOX3D(minx, miny, minz, maxx, maxy, maxz);
+        //         if (bounds.to3d().overlaps(bbox))
+        //             return true;
+        //     }
+        //  }
+        return false;
 
     }
 

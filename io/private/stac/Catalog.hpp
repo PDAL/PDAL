@@ -62,11 +62,11 @@ public:
 
     struct Filters {
         std::vector<RegEx> ids;
-        Item::Filters itemFilters;
+        Item::Filters* itemFilters;
         Filters* colFilters;
     };
 
-    bool init(Filters filters, NL::json rawReaderArgs, SchemaUrls schemaUrls,
+    bool init(const Filters& filters, NL::json rawReaderArgs, SchemaUrls schemaUrls,
             bool isRoot);
     ItemList& items();
     ErrorList errors();

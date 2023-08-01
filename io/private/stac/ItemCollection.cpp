@@ -56,14 +56,14 @@ namespace stac
         return m_itemList;
     }
 
-    bool ItemCollection::init(Filters filters, NL::json rawReaderArgs,
+    bool ItemCollection::init(const Filters& filters, NL::json rawReaderArgs,
         SchemaUrls schemaUrls)
     {
         const NL::json itemList = m_utils.stacValue(m_json, "features");
         for (const NL::json& itemJson: itemList)
         {
             Item item(itemJson, m_path, m_connector, m_validate);
-            if (item.init(filters.itemFilters, rawReaderArgs, schemaUrls))
+            if (item.init(*filters.itemFilters, rawReaderArgs, schemaUrls))
             {
                 m_itemList.push_back(item);
             }

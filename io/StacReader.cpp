@@ -34,12 +34,14 @@
 #include "StacReader.hpp"
 
 #include <pdal/Kernel.hpp>
-#include <nlohmann/json.hpp>
-#include <schema-validator/json-schema.hpp>
 #include <pdal/Polygon.hpp>
 #include <pdal/SrsBounds.hpp>
-#include <arbiter/arbiter.hpp>
 #include <pdal/PipelineManager.hpp>
+#include <pdal/private/SrsTransform.hpp>
+
+#include <arbiter/arbiter.hpp>
+#include <nlohmann/json.hpp>
+#include <schema-validator/json-schema.hpp>
 
 #include <pdal/util/ThreadPool.hpp>
 #include <pdal/util/ProgramArgs.hpp>
@@ -69,10 +71,10 @@ public:
     std::unique_ptr<connector::Connector> m_connector;
     std::deque <std::pair<std::string, std::string>> m_errors;
 
-    stac::Item::Filters m_itemFilters;
-    stac::Catalog::Filters m_catFilters;
-    stac::Collection::Filters m_colFilters;
-    stac::ItemCollection::Filters m_icFilters;
+    std::unique_ptr<stac::Item::Filters> m_itemFilters;
+    std::unique_ptr<stac::Catalog::Filters> m_catFilters;
+    std::unique_ptr<stac::Collection::Filters> m_colFilters;
+    std::unique_ptr<stac::ItemCollection::Filters> m_icFilters;
 };
 
 struct StacReader::Args
@@ -202,7 +204,7 @@ void StacReader::handleItem(NL::json stacJson, std::string itemPath)
 {
     stac::Item item(stacJson, m_filename, *m_p->m_connector,
         m_args->validateSchema);
-    if (item.init(m_p->m_itemFilters, m_args->rawReaderArgs, m_args->schemaUrls))
+    if (item.init(*m_p->m_itemFilters, m_args->rawReaderArgs, m_args->schemaUrls))
         addItem(item);
 }
 
@@ -212,7 +214,7 @@ void StacReader::handleCatalog(NL::json stacJson, std::string catPath, bool isRo
     stac::Catalog catalog(stacJson, catPath, *m_p->m_connector, *m_p->m_pool,
         m_args->validateSchema);
 
-    if (catalog.init(m_p->m_catFilters, m_args->rawReaderArgs,
+    if (catalog.init(*m_p->m_catFilters, m_args->rawReaderArgs,
         m_args->schemaUrls, true))
     {
         for (stac::Item& item: catalog.items())
@@ -234,7 +236,7 @@ void StacReader::handleCollection(NL::json stacJson, std::string catPath, bool i
     stac::Collection collection(stacJson, catPath, *m_p->m_connector,
         *m_p->m_pool, m_args->validateSchema);
 
-    if (collection.init(m_p->m_catFilters, m_args->rawReaderArgs,
+    if (collection.init(*m_p->m_colFilters, m_args->rawReaderArgs,
         m_args->schemaUrls, true))
     {
         for (stac::Item& item: collection.items())
@@ -247,7 +249,7 @@ void StacReader::handleItemCollection(NL::json stacJson, std::string icPath)
     stac::ItemCollection ic(stacJson, icPath, *m_p->m_connector,
             m_args->validateSchema);
 
-    if (ic.init(m_p->m_icFilters, m_args->rawReaderArgs, m_args->schemaUrls))
+    if (ic.init(*m_p->m_icFilters, m_args->rawReaderArgs, m_args->schemaUrls))
     {
         for (auto& item: ic.items())
             addItem(item);
@@ -256,13 +258,18 @@ void StacReader::handleItemCollection(NL::json stacJson, std::string icPath)
 
 void StacReader::initializeArgs()
 {
+    m_p->m_itemFilters = std::make_unique<stac::Item::Filters>();
+    m_p->m_catFilters = std::make_unique<stac::Catalog::Filters>();
+    m_p->m_colFilters = std::make_unique<stac::Catalog::Filters>();
+    m_p->m_icFilters = std::make_unique<stac::ItemCollection::Filters>();
+
     if (!m_args->items.empty())
     {
         log()->get(LogLevel::Debug) <<
             "Selecting Items with ids: " << std::endl;
         for (auto& id: m_args->items)
             log()->get(LogLevel::Debug) << "    " << id.m_str << std::endl;
-        m_p->m_itemFilters.ids = m_args->items;
+        m_p->m_itemFilters->ids = m_args->items;
     }
 
     if (!m_args->catalogs.empty())
@@ -271,7 +278,7 @@ void StacReader::initializeArgs()
             "Selecting Catalogs with ids: " << std::endl;
         for (auto& id: m_args->catalogs)
             log()->get(LogLevel::Debug) << "    " << id.m_str << std::endl;
-        m_p->m_catFilters.ids = m_args->catalogs;
+        m_p->m_catFilters->ids = m_args->catalogs;
     }
 
     if (!m_args->collections.empty())
@@ -280,8 +287,8 @@ void StacReader::initializeArgs()
             "Selecting Catalogs with ids: " << std::endl;
         for (auto& id: m_args->collections)
             log()->get(LogLevel::Debug) << "    " << id.m_str << std::endl;
-        m_p->m_itemFilters.collections = m_args->collections;
-        m_p->m_colFilters.ids = m_args->collections;
+        m_p->m_itemFilters->collections = m_args->collections;
+        m_p->m_colFilters->ids = m_args->collections;
     }
 
 
@@ -307,7 +314,7 @@ void StacReader::initializeArgs()
 
                 std::time_t minTime = stacUtils.getStacTime(minDate);
                 std::time_t maxTime = stacUtils.getStacTime(maxDate);
-                m_p->m_itemFilters.datePairs.push_back({ minTime, maxTime });
+                m_p->m_itemFilters->datePairs.push_back({ minTime, maxTime });
             }
             catch(NL::detail::type_error e)
             {
@@ -324,15 +331,33 @@ void StacReader::initializeArgs()
             throw pdal_error("Properties argument must be a valid JSON object.");
         log()->get(LogLevel::Debug) << "Property Pruning: " <<
             m_args->properties.dump() << std::endl;
-        m_p->m_itemFilters.properties = m_args->properties;
+        m_p->m_itemFilters->properties = m_args->properties;
     }
 
     if (!m_args->bounds.empty())
     {
+
         if (!m_args->bounds.valid())
             throw pdal_error("Supplied bounds are not valid.");
         log()->get(LogLevel::Debug) << "Bounds: " << m_args->bounds << std::endl;
-        m_p->m_itemFilters.bounds = m_args->bounds;
+
+        SpatialReference stacSrs("EPSG:4326");
+        SpatialReference userSrs = m_args->bounds.spatialReference();
+        if (m_args->bounds.is2d())
+        {
+            m_p->m_itemFilters->bounds = BOX3D(m_args->bounds.to2d());
+            m_p->m_itemFilters->bounds.minz =
+                (std::numeric_limits<double>::lowest)();
+            m_p->m_itemFilters->bounds.maxz =
+                (std::numeric_limits<double>::max)();
+        }
+        else
+        {
+            m_p->m_itemFilters->bounds = m_args->bounds.to3d();
+        }
+
+        if (!userSrs.valid())
+            m_p->m_itemFilters->srs = m_args->bounds.spatialReference();
     }
 
     if (!m_args->assetNames.empty())
@@ -340,19 +365,21 @@ void StacReader::initializeArgs()
         log()->get(LogLevel::Debug) << "STAC Reader will look in these asset keys: ";
         for (auto& name: m_args->assetNames)
             log()->get(LogLevel::Debug) << name << std::endl;
-        m_p->m_itemFilters.assetNames = m_args->assetNames;
+        auto it = m_p->m_itemFilters->assetNames.begin();
+        m_p->m_itemFilters->assetNames.insert(it, m_args->assetNames.begin(),
+            m_args->assetNames.end());
     }
 
     if (m_args->validateSchema)
         log()->get(LogLevel::Debug) <<
             "JSON Schema validation flag is set." << std::endl;
 
-    m_p->m_colFilters.itemFilters = m_p->m_itemFilters;
+    m_p->m_colFilters->itemFilters = m_p->m_itemFilters.get();
 
-    m_p->m_catFilters.itemFilters = m_p->m_itemFilters;
-    m_p->m_catFilters.colFilters = &(m_p->m_colFilters);
+    m_p->m_catFilters->itemFilters = m_p->m_itemFilters.get();
+    m_p->m_catFilters->colFilters = m_p->m_colFilters.get();
 
-    m_p->m_icFilters.itemFilters = m_p->m_itemFilters;
+    m_p->m_icFilters->itemFilters = m_p->m_itemFilters.get();
 
 }
 

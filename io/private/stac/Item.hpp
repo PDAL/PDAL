@@ -39,8 +39,8 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/SrsBounds.hpp>
-#include "Utils.hpp"
 
+#include "Utils.hpp"
 #include "../connector/Connector.hpp"
 
 namespace pdal
@@ -77,14 +77,15 @@ public:
 
     struct Filters {
         std::vector<RegEx> ids;
-        SrsBounds bounds;
+        BOX3D bounds;
+        SpatialReference srs;
         NL::json properties;
         DatePairs datePairs;
         std::vector<std::string> assetNames;
         std::vector<RegEx> collections;
     };
 
-    bool init(Filters filters, NL::json rawReaderArgs, SchemaUrls schemaUrls);
+    bool init(const Filters& filters, NL::json rawReaderArgs, SchemaUrls schemaUrls);
 
     std::string id();
     std::string driver();
@@ -97,6 +98,7 @@ private:
 
     const NL::json m_json;
     const std::string m_path;
+
     const connector::Connector& m_connector;
     bool m_validate;
     std::mutex m_mutex;
@@ -114,13 +116,13 @@ private:
     NL::json handleReaderArgs(NL::json rawReaderArgs);
     void validate();
 
-    bool filter(Filters filters);
+    bool filter(const Filters& filters);
     bool filterAssets(std::vector<std::string> assetNames);
     bool filterIds(std::vector<RegEx> ids);
     bool filterCol(std::vector<RegEx> ids);
     bool filterDates(DatePairs dates);
-    bool filterProperties(const NL::json& props);
-    bool filterBounds(SrsBounds bounds);
+    bool filterProperties(const NL::json& filterProps);
+    bool filterBounds(BOX3D bounds, SpatialReference srs);
 
 
 };
