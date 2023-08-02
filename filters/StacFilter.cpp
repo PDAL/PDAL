@@ -116,7 +116,10 @@ void StacFilter::extractMetadata(PointTableRef table)
 
     //Base STAC object
     MetadataNode properties = m_metadata.add("properties");
+    properties.add("datetime", "2022-11-15T16:06:02.616469Z");
     MetadataNode id = m_metadata.add("id", stem);
+    m_metadata.add("type", "Feature");
+    m_metadata.add("stac_version", "1.0.0");
 
     //extensions - pointcloud and projection extensions
     m_metadata.add("extensions", "https://stac-extensions.github.io/pointcloud/v1.0.0/schema.json");
@@ -125,7 +128,7 @@ void StacFilter::extractMetadata(PointTableRef table)
     //links - empty because this is defaulting to stdout.
     MetadataNode self = m_metadata.addList("links");
     self.add("rel", "derived_from");
-    self.add("target", m_inputFile);
+    self.add("href", m_inputFile);
 
     //assets - add source file to data asset
     MetadataNode assets = m_metadata.add("assets");
@@ -153,6 +156,12 @@ void StacFilter::extractMetadata(PointTableRef table)
     properties.add("pc:count", count);
     properties.add("pc:type", "lidar");
     properties.add("pc:encoding", fileExt);
+    auto dims = table.layout()->toMetadata().children();
+    // MetadataNode schemas = properties.addList("pc:schemas");
+    for (auto& c: dims)
+        properties.add(c.clone("pc:schemas"));
+    // schemas.add(dims.findChild("dimensions"));
+    // properties.add("pc:schemas", dims);
 
     // If we have X, Y, & Z dims, output bboxes
     auto xs = m_stats.find(Dimension::Id::X);
