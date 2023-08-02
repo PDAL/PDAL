@@ -115,9 +115,9 @@ void StacFilter::extractMetadata(PointTableRef table)
     std::string fileExt = FileUtils::extension(m_inputFile);
 
     //Base STAC object
+    MetadataNode id = m_metadata.add("id", stem);
     MetadataNode properties = m_metadata.add("properties");
     properties.add("datetime", "2022-11-15T16:06:02.616469Z");
-    MetadataNode id = m_metadata.add("id", stem);
     m_metadata.add("type", "Feature");
     m_metadata.add("stac_version", "1.0.0");
 
@@ -125,7 +125,7 @@ void StacFilter::extractMetadata(PointTableRef table)
     m_metadata.add("extensions", "https://stac-extensions.github.io/pointcloud/v1.0.0/schema.json");
     m_metadata.add("extensions", "https://stac-extensions.github.io/projection/v1.1.0/schema.json");
 
-    //links - empty because this is defaulting to stdout.
+    //links
     MetadataNode self = m_metadata.addList("links");
     self.add("rel", "derived_from");
     self.add("href", m_inputFile);
@@ -137,6 +137,7 @@ void StacFilter::extractMetadata(PointTableRef table)
     data.add("title", "Lidar data");
     assets.add(data.clone("data"));
 
+    //Add dimension statistics
     uint32_t position(0);
     point_count_t count = 0;
     bool bNoPoints(true);
@@ -147,23 +148,22 @@ void StacFilter::extractMetadata(PointTableRef table)
         bNoPoints = (bool)s.count();
         count = s.count();
 
-        // MetadataNode pcStats = properties.addList("pc:statistics");
-        // pcStats.add("position", position++);
-        // s.extractMetadata(pcStats);
+        MetadataNode pcStats = properties.addList("pc:statistics");
+        pcStats.add("position", position++);
+        s.extractMetadata(pcStats);
     }
 
-    //POINTCLOUD EXTENSIONS
+    //pointcloud extension
     properties.add("pc:count", count);
     properties.add("pc:type", "lidar");
     properties.add("pc:encoding", fileExt);
     auto dims = table.layout()->toMetadata().children();
-    // MetadataNode schemas = properties.addList("pc:schemas");
     for (auto& c: dims)
         properties.add(c.clone("pc:schemas"));
-    // schemas.add(dims.findChild("dimensions"));
-    // properties.add("pc:schemas", dims);
 
-    // If we have X, Y, & Z dims, output bboxes
+    //Projection and base geometry/bbox info. Base Bbox and geometry in stac
+    //should be in 4326, and anthing prefaced with 'proj' should be in the
+    //native srs. If there is no srs derived from the file, default it to 4326.
     auto xs = m_stats.find(Dimension::Id::X);
     auto ys = m_stats.find(Dimension::Id::Y);
     auto zs = m_stats.find(Dimension::Id::Z);
@@ -178,12 +178,8 @@ void StacFilter::extractMetadata(PointTableRef table)
         Polygon p(box);
         addBox(properties, "proj:bbox", box);
 
-        // MetadataNode bbox = Utils::toMetadata(box);
-        // MetadataNode metadata = box_metadata.add("native");
-
         MetadataNode projgeom = properties.addWithType("proj:geometry",
             p.json(), "json", "GeoJSON boundary");
-        // MetadataNode bbox = metadata.add(mbox);
         SpatialReference ref = table.anySpatialReference();
 
         // if we don't get an SRS from the PointTableRef,
@@ -192,26 +188,25 @@ void StacFilter::extractMetadata(PointTableRef table)
         {
             p.setSpatialReference(ref);
             properties.add("proj:wkt2", ref.getWKT2());
-            // properties.addWithType("proj:projjson", ref.getPROJJSON(), "json",
-            //     "PROJ JSON");
+            properties.addWithType("proj:projjson", ref.getPROJJSON(), "json",
+                "PROJ JSON");
 
             if (p.transform("EPSG:4326"))
             {
                 BOX3D ddbox = p.bounds();
-                // MetadataNode epsg_4326_box = Utils::toMetadata(ddbox);
                 m_metadata.addWithType("geometry", p.json(), "json", "GeoJSON boundary");
                 addBox(m_metadata, "bbox", ddbox);
             }
         }
-        else {
+        else
+        {
             SpatialReference r("EPSG:4326");
             properties.add("proj:epsg", 4326);
             properties.add("proj:wkt2", r.getWKT2());
             m_metadata.addWithType("geometry", p.json(), "json", "GeoJSON boundary");
             addBox(m_metadata, "bbox", box);
-            // properties.addWithType("proj:projjson", r.getPROJJSON(), "json",
-            //     "PROJ JSON");
-
+            properties.addWithType("proj:projjson", r.getPROJJSON(), "json",
+                "PROJ JSON");
         }
     }
 
