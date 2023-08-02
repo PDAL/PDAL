@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
+* Copyright (c) 2023, Kyle Mann (kyle@hobu.com)
 *
 * All rights reserved.
 *
@@ -34,65 +34,35 @@
 
 #pragma once
 
-#include <pdal/Kernel.hpp>
-#include <pdal/PipelineManager.hpp>
-#include <pdal/PointView.hpp>
-#include <pdal/Stage.hpp>
-#include <pdal/util/FileUtils.hpp>
-
-#ifdef __clang__
-#pragma GCC diagnostic ignored "-Wtautological-constant-out-of-range-compare"
-#endif
+#include "StatsFilter.hpp"
+#include <pdal/Filter.hpp>
+#include <pdal/Streamable.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
 
-class PDAL_DLL InfoKernel : public Kernel
+class PDAL_DLL StacFilter : public Filter, public Streamable
 {
 public:
+    StacFilter();
+    ~StacFilter();
+
     std::string getName() const;
-    int execute(); // overrride
-
-    InfoKernel();
-    void setup(const std::string& filename);
-    MetadataNode run(const std::string& filename);
-
-    inline bool showAll() { return m_showAll; }
-    inline void doShowAll(bool value) { m_showAll = value; }
-    inline void doComputeSummary(bool value) { m_showSummary = value; }
-    inline void doComputeBoundary(bool value) { m_boundary = value; }
 
 private:
-    void addSwitches(ProgramArgs& args);
-    void validateSwitches(ProgramArgs& args);
-    void makeReader(const std::string& filename);
-    void makePipeline();
-    void dump(MetadataNode& root);
-    MetadataNode dumpSummary(const QuickInfo& qi);
+    // virtual void addArgs(ProgramArgs& args);
+    virtual void addArgs(ProgramArgs& args);
+    virtual bool processOne(PointRef& point);
+    virtual void prepared(PointTableRef table);
+    virtual void done(PointTableRef table);
+    virtual void filter(PointView& view);
+    void extractMetadata(PointTableRef table);
 
+    std::map<Dimension::Id, stats::Summary> m_stats;
     std::string m_inputFile;
-    bool m_showStats;
-    bool m_showSchema;
-    bool m_showAll;
-    bool m_showMetadata;
-    bool m_boundary;
-    bool m_stac;
-    std::string m_pointIndexes;
-    std::string m_dimensions;
-    std::string m_enumerate;
-    std::string m_queryPoint;
-    std::string m_pipelineFile;
-    bool m_showSummary;
-    bool m_needPoints;
-    bool m_usestdin;
 
-    Stage *m_statsStage;
-    Stage *m_hexbinStage;
-    Stage *m_infoStage;
-    Stage *m_reader;
-    Stage *m_stacStage;
 
-    MetadataNode m_tree;
 };
 
-} // namespace pdal
+}

@@ -73,6 +73,7 @@ void InfoKernel::validateSwitches(ProgramArgs& args)
     if (!m_usestdin && m_inputFile.empty())
         throw pdal_error("No input file specified.");
 
+
     // All isn't really all.
     if (m_showAll)
     {
@@ -82,6 +83,17 @@ void InfoKernel::validateSwitches(ProgramArgs& args)
         m_boundary = true;
     }
 
+
+    if (m_stac)
+    {
+        if (m_queryPoint.size())
+            throw pdal_error("'query' option incompatible with 'stac' option.");
+        if (m_pointIndexes.size())
+            throw pdal_error("'point' option incompatible with 'stac' option.");
+
+        functions++;
+        m_needPoints = true;
+    }
     if (m_boundary)
     {
         functions++;
@@ -149,6 +161,7 @@ void InfoKernel::addSwitches(ProgramArgs& args)
     args.add("pipeline-serialization", "Output filename for pipeline "
         "serialization", m_pipelineFile);
     args.add("summary", "Dump summary of the info", m_showSummary);
+    args.add("stac", "Dump STAC Item representation of the info.", m_stac);
     args.add("metadata", "Dump file metadata info", m_showMetadata);
     args.add("stdin,s", "Read a pipeline file from standard input", m_usestdin);
 }
@@ -221,6 +234,12 @@ void InfoKernel::makePipeline()
             filterOptions.add({"enumerate", m_enumerate});
         stage = m_statsStage =
             &m_manager.makeFilter("filters.stats", *stage, filterOptions);
+    }
+    if (m_stac)
+    {
+        Options stacOptions;
+        stacOptions.add("input_file", m_inputFile);
+        m_stacStage = &m_manager.makeFilter("filters.stac", *stage, stacOptions);
     }
     if (m_boundary)
         m_hexbinStage = &m_manager.makeFilter("filters.hexbin", *stage);
@@ -306,6 +325,13 @@ void InfoKernel::dump(MetadataNode& root)
         }
         else
             root.add(m_hexbinStage->getMetadata().clone("boundary"));
+    }
+
+    // STAC stage.
+    if (m_stac)
+    {
+        MetadataNode stac = m_stacStage->getMetadata();
+        root.add(stac.clone("stac"));
     }
 }
 
