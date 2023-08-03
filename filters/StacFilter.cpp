@@ -137,10 +137,11 @@ void StacFilter::extractMetadata(PointTableRef table)
     data.add("title", "Lidar data");
     assets.add(data.clone("data"));
 
-    //Add dimension statistics
+    //pointcloud extension
     uint32_t position(0);
     point_count_t count = 0;
     bool bNoPoints(true);
+    //Add dimension statistics
     for (auto di = m_stats.begin(); di != m_stats.end(); ++di)
     {
         Summary& s = di->second;
@@ -152,8 +153,6 @@ void StacFilter::extractMetadata(PointTableRef table)
         pcStats.add("position", position++);
         s.extractMetadata(pcStats);
     }
-
-    //pointcloud extension
     properties.add("pc:count", count);
     properties.add("pc:type", "lidar");
     properties.add("pc:encoding", fileExt);

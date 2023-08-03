@@ -51,7 +51,6 @@ public:
     std::string getName() const;
 
 private:
-    // virtual void addArgs(ProgramArgs& args);
     virtual void addArgs(ProgramArgs& args);
     virtual bool processOne(PointRef& point);
     virtual void prepared(PointTableRef table);
