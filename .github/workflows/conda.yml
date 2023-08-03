@@ -49,9 +49,6 @@ jobs:
         use-only-tar-bz2: false
 
 
-    - uses: ilammy/msvc-dev-cmd@v1
-      if: matrix.platform == 'windows-latest'
-
     - name: Setup
       run: |
           source ./scripts/ci/conda/setup.sh
