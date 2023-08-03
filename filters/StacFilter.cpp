@@ -33,7 +33,6 @@
 ****************************************************************************/
 
 #include "StacFilter.hpp"
-#include "StatsFilter.hpp"
 #include <pdal/Polygon.hpp>
 #include <pdal/util/FileUtils.hpp>
 
@@ -59,28 +58,12 @@ std::string StacFilter::getName() const {
 
 void StacFilter::addArgs(ProgramArgs& args)
 {
-    args.add("input_file", "Input file.",  m_inputFile);
-}
-
-void StacFilter::filter(PointView& view)
-{
-    PointRef point(view, 0);
-    for (PointId idx = 0; idx < view.size(); ++idx)
-    {
-        point.setPointId(idx);
-        processOne(point);
-    }
-}
-
-bool StacFilter::processOne(PointRef& point)
-{
-    for (auto p = m_stats.begin(); p != m_stats.end(); ++p)
-    {
-        Dimension::Id d = p->first;
-        Summary& c = p->second;
-        c.insert(point.getFieldAs<double>(d));
-    }
-    return true;
+    args.add("filename", "Input file.",  m_filename);
+    args.add("default_srs", "Default SRS of the file if no SRS is found.",
+        m_defaultSrs);
+    args.add("pctype", "Pointcloud type, adjusts 'pc:type' key in properties"
+        " section of STAC Feature. Available options: lidar, eopc, radar,"
+        " sonar, other. Default: 'lidar'", m_pcType, "lidar");
 }
 
 void StacFilter::prepared(PointTableRef table)
@@ -92,11 +75,6 @@ void StacFilter::prepared(PointTableRef table)
         m_stats.insert(std::make_pair(id,
             Summary(layout->dimName(id), Summary::NoEnum, true)));
     }
-}
-
-void StacFilter::done(PointTableRef table)
-{
-    extractMetadata(table);
 }
 
 void addBox(MetadataNode& n, std::string name, const BOX3D& box)
@@ -111,8 +89,8 @@ void addBox(MetadataNode& n, std::string name, const BOX3D& box)
 
 void StacFilter::extractMetadata(PointTableRef table)
 {
-    std::string stem = FileUtils::stem(m_inputFile);
-    std::string fileExt = FileUtils::extension(m_inputFile);
+    std::string stem = FileUtils::stem(m_filename);
+    std::string absPath = FileUtils::toAbsolutePath(m_filename);
 
     //Base STAC object
     MetadataNode id = m_metadata.add("id", stem);
@@ -128,19 +106,28 @@ void StacFilter::extractMetadata(PointTableRef table)
     //links
     MetadataNode self = m_metadata.addList("links");
     self.add("rel", "derived_from");
-    self.add("href", m_inputFile);
+    self.add("href", absPath);
 
     //assets - add source file to data asset
     MetadataNode assets = m_metadata.add("assets");
     MetadataNode data;
-    data.add("href", m_inputFile);
+    data.add("href", absPath);
     data.add("title", "Lidar data");
     assets.add(data.clone("data"));
 
-    //pointcloud extension
+    pointcloud(properties, table);
+    projection(properties, table);
+
+}
+
+//Handle the pointcloud extension
+void StacFilter::pointcloud(MetadataNode& properties, PointTableRef& table)
+{
+    std::string fileExt = FileUtils::extension(m_filename);
     uint32_t position(0);
     point_count_t count = 0;
     bool bNoPoints(true);
+
     //Add dimension statistics
     for (auto di = m_stats.begin(); di != m_stats.end(); ++di)
     {
@@ -153,6 +140,8 @@ void StacFilter::extractMetadata(PointTableRef table)
         pcStats.add("position", position++);
         s.extractMetadata(pcStats);
     }
+    if (!bNoPoints)
+        throw pdal_error("No points found!");
     properties.add("pc:count", count);
     properties.add("pc:type", "lidar");
     properties.add("pc:encoding", fileExt);
@@ -160,55 +149,58 @@ void StacFilter::extractMetadata(PointTableRef table)
     for (auto& c: dims)
         properties.add(c.clone("pc:schemas"));
 
-    //Projection and base geometry/bbox info. Base Bbox and geometry in stac
-    //should be in 4326, and anthing prefaced with 'proj' should be in the
-    //native srs. If there is no srs derived from the file, default it to 4326.
+}
+
+//Handle projection extension and geometry/bbox calculations
+void StacFilter::projection(MetadataNode& properties, PointTableRef& table)
+{
+    //Make sure base x, y, z components exist and there are points to look at
     auto xs = m_stats.find(Dimension::Id::X);
     auto ys = m_stats.find(Dimension::Id::Y);
     auto zs = m_stats.find(Dimension::Id::Z);
-    if (xs != m_stats.end() &&
-        ys != m_stats.end() &&
-        zs != m_stats.end() &&
-        bNoPoints)
+    if (xs == m_stats.end() || ys == m_stats.end() || zs == m_stats.end())
     {
-        BOX3D box(xs->second.minimum(), ys->second.minimum(),
-            zs->second.minimum(), xs->second.maximum(), ys->second.maximum(),
-            zs->second.maximum());
-        Polygon p(box);
-        addBox(properties, "proj:bbox", box);
-
-        MetadataNode projgeom = properties.addWithType("proj:geometry",
-            p.json(), "json", "GeoJSON boundary");
-        SpatialReference ref = table.anySpatialReference();
-
-        // if we don't get an SRS from the PointTableRef,
-        // we won't add another metadata node
-        if (!ref.empty())
-        {
-            p.setSpatialReference(ref);
-            properties.add("proj:wkt2", ref.getWKT2());
-            properties.addWithType("proj:projjson", ref.getPROJJSON(), "json",
-                "PROJ JSON");
-
-            if (p.transform("EPSG:4326"))
-            {
-                BOX3D ddbox = p.bounds();
-                m_metadata.addWithType("geometry", p.json(), "json", "GeoJSON boundary");
-                addBox(m_metadata, "bbox", ddbox);
-            }
-        }
-        else
-        {
-            SpatialReference r("EPSG:4326");
-            properties.add("proj:epsg", 4326);
-            properties.add("proj:wkt2", r.getWKT2());
-            m_metadata.addWithType("geometry", p.json(), "json", "GeoJSON boundary");
-            addBox(m_metadata, "bbox", box);
-            properties.addWithType("proj:projjson", r.getPROJJSON(), "json",
-                "PROJ JSON");
-        }
+        throw pdal_error("Missing x, y, or z component.");
     }
 
+    //Projection and base geometry/bbox info. Base Bbox and geometry in stac
+    //should be in 4326, and anthing prefaced with 'proj' should be in the
+    //native srs. If there is no srs derived from the file, default it to 4326.
+    BOX3D box(xs->second.minimum(), ys->second.minimum(),
+        zs->second.minimum(), xs->second.maximum(), ys->second.maximum(),
+        zs->second.maximum());
+    Polygon p(box);
+
+    addBox(properties, "proj:bbox", box);
+
+    MetadataNode projgeom = properties.addWithType("proj:geometry",
+        p.json(), "json", "GeoJSON boundary");
+    SpatialReference ref = table.anySpatialReference();
+    if (ref.empty())
+    {
+        if (m_defaultSrs.empty())
+            throw pdal_error("Missing SRS, and no default SRS was provided.");
+        ref.set(m_defaultSrs);
+        if (!ref.valid())
+            throw pdal_error("User defined default SRS is invalid.");
+    }
+
+    p.setSpatialReference(ref);
+    properties.add("proj:wkt2", ref.getWKT2());
+    properties.addWithType("proj:projjson", ref.getPROJJSON(), "json",
+        "PROJ JSON");
+
+    auto status = p.transform("EPSG:4326");
+    if (status)
+    {
+        BOX3D ddbox = p.bounds();
+        m_metadata.addWithType("geometry", p.json(), "json", "GeoJSON boundary");
+        addBox(m_metadata, "bbox", ddbox);
+    }
+    else
+        throw pdal_error(status.what());
+
 }
+
 
 }//pdal

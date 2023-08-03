@@ -232,7 +232,7 @@ private:
     virtual void prepared(PointTableRef table);
     virtual void done(PointTableRef table);
     virtual void filter(PointView& view);
-    void extractMetadata(PointTableRef table);
+    virtual void extractMetadata(PointTableRef table);
 
     StringList m_dimNames;
     StringList m_enums;

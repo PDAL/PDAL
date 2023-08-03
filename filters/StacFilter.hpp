@@ -35,14 +35,11 @@
 #pragma once
 
 #include "StatsFilter.hpp"
-#include <pdal/Filter.hpp>
-#include <pdal/Streamable.hpp>
-#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
 
-class PDAL_DLL StacFilter : public Filter, public Streamable
+class PDAL_DLL StacFilter : public StatsFilter
 {
 public:
     StacFilter();
@@ -51,16 +48,17 @@ public:
     std::string getName() const;
 
 private:
-    virtual void addArgs(ProgramArgs& args);
-    virtual bool processOne(PointRef& point);
-    virtual void prepared(PointTableRef table);
-    virtual void done(PointTableRef table);
-    virtual void filter(PointView& view);
+    void addArgs(ProgramArgs& args);
+    void prepared(PointTableRef table);
     void extractMetadata(PointTableRef table);
 
-    std::map<Dimension::Id, stats::Summary> m_stats;
-    std::string m_inputFile;
+    void pointcloud(MetadataNode& n, PointTableRef& table);
+    void projection(MetadataNode& n, PointTableRef& table);
 
+    std::map<Dimension::Id, stats::Summary> m_stats;
+    std::string m_filename;
+    std::string m_defaultSrs;
+    std::string m_pcType;
 
 };
 
