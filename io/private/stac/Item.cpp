@@ -184,21 +184,32 @@ namespace stac
                     return ct.second;
         }
 
-        // Try to guess from the URL
+        if (!FileUtils::fileExists(dataUrl))
+        {
+            // Use this to test if dataUrl is a valid endpoint
+            // Try to make a HEAD request and get it from Content-Type
+            try
+            {
+                StringMap headers = m_connector.headRequest(dataUrl);
+                if (headers.find("Content-Type") != headers.end())
+                {
+                    contentType = headers["Content-Type"];
+                    for(const auto& ct: contentTypes)
+                        if (Utils::iequals(ct.first, contentType))
+                            return ct.second;
+                }
+            }
+            catch(std::exception e)
+            {
+                throw stac_error(m_id, "item", "Failed to HEAD " + dataUrl +
+                    ". " + e.what());
+            }
+        }
+
+        // Try to guess from the path
         std::string driver = m_factory.inferReaderDriver(dataUrl);
         if (driver.size())
             return driver;
-
-
-        // Try to make a HEAD request and get it from Content-Type
-        StringMap headers = m_connector.headRequest(dataUrl);
-        if (headers.find("Content-Type") != headers.end())
-        {
-            contentType = headers["Content-Type"];
-            for(const auto& ct: contentTypes)
-                if (Utils::iequals(ct.first, contentType))
-                    return ct.second;
-        }
 
         return output;
     }
