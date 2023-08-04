@@ -44,6 +44,8 @@ namespace pdal
 namespace stac
 {
 
+using namespace StacUtils;
+
 Catalog::Catalog(const NL::json& json,
         const std::string& catPath,
         const connector::Connector& connector,
@@ -67,17 +69,17 @@ bool Catalog::init(const Filters& filters, NL::json rawReaderArgs,
     if (m_validate)
         validate();
 
-    NL::json itemLinks = StacUtils::stacValue(m_json, "links");
+    NL::json itemLinks = stacValue(m_json, "links");
 
     for (const auto& link: itemLinks)
     {
 
-        const std::string linkType = StacUtils::stacValue<std::string>(
+        const std::string linkType = stacValue<std::string>(
             link, "rel", m_json);
-        const std::string linkPath = StacUtils::stacValue<std::string>(
+        const std::string linkPath = stacValue<std::string>(
             link, "href", m_json);
 
-        const std::string absLinkPath = StacUtils::handleRelativePath(m_path, linkPath);
+        const std::string absLinkPath = handleRelativePath(m_path, linkPath);
 
         m_pool.add([this, linkType, absLinkPath, filters, rawReaderArgs]()
         {
@@ -205,7 +207,7 @@ bool Catalog::filter(Filters filters) {
     if (filters.ids.empty() || m_root)
         return true;
 
-    m_id = StacUtils::stacId(m_json);
+    m_id = stacId(m_json);
     for (auto& i: filters.ids)
         if (std::regex_match(m_id, i.regex()))
             return true;

@@ -43,6 +43,8 @@ namespace pdal
 namespace stac
 {
 
+using namespace StacUtils;
+
 Collection::~Collection() {}
 
 void Collection::validate() {
@@ -69,10 +71,10 @@ void Collection::validate() {
     // Validate against stac extensions if present
     if (m_json.contains("stac_extensions"))
     {
-        NL::json extensions = StacUtils::stacValue(m_json, "stac_extensions");
+        NL::json extensions = stacValue(m_json, "stac_extensions");
         for (auto& extSchemaUrl: extensions)
         {
-            std::string url = StacUtils::stacValue<std::string>(extSchemaUrl,
+            std::string url = stacValue<std::string>(extSchemaUrl,
                 "", m_json);
 
             try {

@@ -40,6 +40,8 @@ namespace pdal
 namespace stac
 {
 
+using namespace StacUtils;
+
 ItemCollection::ItemCollection(const NL::json& json,
         const std::string& icPath,
         const connector::Connector& connector,
@@ -60,7 +62,7 @@ ItemList ItemCollection::items()
 bool ItemCollection::init(const Filters& filters, NL::json rawReaderArgs,
     SchemaUrls schemaUrls)
 {
-    const NL::json itemList = StacUtils::stacValue(m_json, "features");
+    const NL::json itemList = stacValue(m_json, "features");
     for (const NL::json& itemJson: itemList)
     {
         Item item(itemJson, m_path, m_connector, m_validate);
@@ -71,17 +73,17 @@ bool ItemCollection::init(const Filters& filters, NL::json rawReaderArgs,
     }
     if (m_json.contains("links"))
     {
-        const NL::json links = StacUtils::stacValue(m_json, "links");
+        const NL::json links = stacValue(m_json, "links");
         for (const NL::json& link: links)
         {
-            std::string target = StacUtils::stacValue<std::string>(
+            std::string target = stacValue<std::string>(
                 link, "rel", m_json);
             if (target == "next")
             {
-                std::string nextLinkPath = StacUtils::stacValue<std::string>(
+                std::string nextLinkPath = stacValue<std::string>(
                     link, "href", m_json);
                 std::string nextAbsPath =
-                    StacUtils::handleRelativePath(m_path, nextLinkPath);
+                    handleRelativePath(m_path, nextLinkPath);
                 NL::json nextJson = m_connector.getJson(nextAbsPath);
 
                 ItemCollection ic(nextJson, nextAbsPath, m_connector,

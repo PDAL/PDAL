@@ -51,11 +51,13 @@ pdal_error stac_error(std::string const& msg)
     return pdal_error("STACError: " + msg);
 }
 
+namespace StacUtils
+{
 
-StacUtils::StacUtils() {}
-StacUtils::~StacUtils() {}
+// StacUtils::StacUtils() {}
+// StacUtils::~StacUtils() {}
 
-std::string StacUtils::handleRelativePath(std::string srcPath, std::string linkPath)
+std::string handleRelativePath(std::string srcPath, std::string linkPath)
 {
     //Make absolute path of current item's directory, then create relative path from that
 
@@ -69,7 +71,7 @@ std::string StacUtils::handleRelativePath(std::string srcPath, std::string linkP
 
 }
 
-std::time_t StacUtils::getStacTime(std::string in)
+std::time_t getStacTime(std::string in)
 {
     std::istringstream dateStr(in);
     std::tm date {};
@@ -80,5 +82,66 @@ std::time_t StacUtils::getStacTime(std::string in)
     return std::mktime(&date);
 }
 
+std::string stacId(const NL::json& stac)
+{
+    std::stringstream msg;
+    try
+    {
+        return stac.at("id").get<std::string>();
+    }
+    catch (NL::detail::out_of_range e)
+    {
+        msg << "Missing required key 'id'. " << e.what();
+        throw pdal_error(msg.str());
+    }
+    catch (NL::detail::type_error e)
+    {
+        msg << "Required key 'id' is not of type 'string'. " << e.what();
+        throw pdal_error(msg.str());
+    }
+}
+
+std::string stacType(const NL::json& stac)
+{
+    try
+    {
+        return stac.at("type").get<std::string>();
+    }
+    catch (NL::detail::out_of_range e)
+    {
+        std::stringstream msg;
+        msg << "Missing required key 'type'. " << e.what();
+        throw pdal_error(msg.str());
+    }
+    catch (NL::detail::type_error e)
+    {
+        std::stringstream msg;
+        msg << "Invalid key value 'type'. " << e.what();
+        throw pdal_error(msg.str());
+    }
+}
+
+std::string icSelfPath(const NL::json& json)
+{
+    try
+    {
+        NL::json links = jsonValue(json, "links");
+        for (const NL::json& link: links)
+        {
+            std::string target = jsonValue<std::string>(link, "rel");
+            if (target == "self")
+                return jsonValue<std::string>(link, "href");
+        }
+    }
+    catch(std::runtime_error e)
+    {
+        return "";
+    }
+
+    return "";
+}
+
+
+}//StacUtils
 }//stac
 }//pdal

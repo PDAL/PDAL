@@ -46,19 +46,21 @@ namespace stac
     pdal_error stac_error(std::string const& msg);
 
 
-class StacUtils
+namespace StacUtils
 {
 
-public:
-    StacUtils();
-    ~StacUtils();
+// public:
+//     StacUtils();
+//     ~StacUtils();
 
-    static std::string handleRelativePath(std::string srcPath,
-        std::string linkPath);
-    static std::time_t getStacTime(std::string in);
+    std::string handleRelativePath(std::string srcPath, std::string linkPath);
+    std::time_t getStacTime(std::string in);
+    std::string stacId(const NL::json& stac);
+    std::string stacType(const NL::json& stac);
+    std::string icSelfPath(const NL::json& json);
 
     template <class T = NL::json>
-    static T jsonValue(const NL::json& json, std::string key = "")
+    inline T jsonValue(const NL::json& json, std::string key = "")
     {
         try
         {
@@ -75,7 +77,7 @@ public:
     }
 
     template <class U = NL::json>
-    static U stacValue(const NL::json& stac, std::string key = "",
+    inline U stacValue(const NL::json& stac, std::string key = "",
         const NL::json& rootJson = {})
     {
 
@@ -106,65 +108,6 @@ public:
         }
     }
 
-    static std::string stacId(const NL::json& stac)
-    {
-        std::stringstream msg;
-        try
-        {
-            return stac.at("id").get<std::string>();
-        }
-        catch (NL::detail::out_of_range e)
-        {
-            msg << "Missing required key 'id'. " << e.what();
-            throw pdal_error(msg.str());
-        }
-        catch (NL::detail::type_error e)
-        {
-            msg << "Required key 'id' is not of type 'string'. " << e.what();
-            throw pdal_error(msg.str());
-        }
-    }
-
-    static std::string stacType(const NL::json& stac)
-    {
-        try
-        {
-            return stac.at("type").get<std::string>();
-        }
-        catch (NL::detail::out_of_range e)
-        {
-            std::stringstream msg;
-            msg << "Missing required key 'type'. " << e.what();
-            throw pdal_error(msg.str());
-        }
-        catch (NL::detail::type_error e)
-        {
-            std::stringstream msg;
-            msg << "Invalid key value 'type'. " << e.what();
-            throw pdal_error(msg.str());
-        }
-    }
-
-    static std::string icSelfPath(const NL::json& json)
-    {
-        try
-        {
-            NL::json links = jsonValue(json, "links");
-            for (const NL::json& link: links)
-            {
-                std::string target = jsonValue<std::string>(link, "rel");
-                if (target == "self")
-                    return jsonValue<std::string>(link, "href");
-            }
-        }
-        catch(std::runtime_error e)
-        {
-            return "";
-        }
-
-        return "";
-    }
-};
-
+}//StacUtils
 }// stac
 }// pdal
