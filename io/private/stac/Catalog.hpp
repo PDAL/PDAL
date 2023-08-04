@@ -66,7 +66,7 @@ public:
         Filters* colFilters;
     };
 
-    bool init(const Filters& filters, NL::json rawReaderArgs, SchemaUrls schemaUrls,
+    bool init(Filters& filters, NL::json rawReaderArgs, SchemaUrls schemaUrls,
             bool isRoot);
     ItemList& items();
     ErrorList errors();
@@ -93,6 +93,9 @@ protected:
     Options m_readerOptions;
 
     void handleNested();
+    void handleItem(Item::Filters& f, NL::json readerArgs, std::string path);
+    void handleCat(Filters& f, NL::json readerArgs, std::string path);
+    void handleCol(Filters& f, NL::json readerArgs, std::string path);
 
 };
 

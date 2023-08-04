@@ -58,7 +58,7 @@ Catalog::Catalog(const NL::json& json,
 Catalog::~Catalog()
 {}
 
-bool Catalog::init(const Filters& filters, NL::json rawReaderArgs,
+bool Catalog::init(Filters& filters, NL::json rawReaderArgs,
         SchemaUrls schemaUrls, bool isRoot=false)
 {
     m_root = isRoot;
@@ -73,61 +73,20 @@ bool Catalog::init(const Filters& filters, NL::json rawReaderArgs,
 
     for (const auto& link: itemLinks)
     {
-
-        const std::string linkType = stacValue<std::string>(
-            link, "rel", m_json);
-        const std::string linkPath = stacValue<std::string>(
-            link, "href", m_json);
-
-        const std::string absLinkPath = handleRelativePath(m_path, linkPath);
-
-        m_pool.add([this, linkType, absLinkPath, filters, rawReaderArgs]()
+        m_pool.add([this, &filters, rawReaderArgs, link]()
         {
-            try
-            {
+            const std::string linkType = stacValue<std::string>(
+                link, "rel", m_json);
+            const std::string linkPath = stacValue<std::string>(
+                link, "href", m_json);
+            const std::string absLinkPath = handleRelativePath(m_path, linkPath);
+            try {
                 if (linkType == "item")
-                {
-                    NL::json itemJson = m_connector.getJson(absLinkPath);
-                    Item item(itemJson, absLinkPath, m_connector, m_validate);
-
-                    bool valid = item.init(*filters.itemFilters,
-                        rawReaderArgs, m_schemaUrls);
-                    if (valid)
-                    {
-                        std::lock_guard<std::mutex> lock(m_mutex);
-                        m_itemList.push_back(item);
-                    }
-                }
-                else if (linkType == "catalog")
-                {
-                    NL::json catalogJson = m_connector.getJson(absLinkPath);
-                    std::unique_ptr<Catalog> catalog(new Catalog(
-                        catalogJson, absLinkPath, m_connector, m_pool,
-                        m_validate));
-
-                    bool valid = catalog->init(filters, rawReaderArgs,
-                        m_schemaUrls);
-                    if (valid)
-                    {
-                        std::lock_guard<std::mutex> lock(m_mutex);
-                        m_subCatalogs.push_back(std::move(catalog));
-                    }
-                }
+                    handleItem(*filters.itemFilters, rawReaderArgs, link);
                 else if (linkType == "collection")
-                {
-                    NL::json collectionJson = m_connector.getJson(absLinkPath);
-                    std::unique_ptr<Collection> collection(new Collection(
-                        collectionJson, absLinkPath, m_connector, m_pool,
-                        m_validate));
-
-                    bool valid = collection->init(filters, rawReaderArgs,
-                        m_schemaUrls);
-                    if (valid)
-                    {
-                        std::lock_guard<std::mutex> lock(m_mutex);
-                        m_subCatalogs.push_back(std::move(collection));
-                    }
-                }
+                    handleCol(filters, rawReaderArgs, link);
+                else if (linkType == "catalog")
+                    handleCat(filters, rawReaderArgs, link);
             }
             catch (std::exception& e)
             {
@@ -143,7 +102,6 @@ bool Catalog::init(const Filters& filters, NL::json rawReaderArgs,
             }
         });
     }
-
 
     if (isRoot)
     {
@@ -168,6 +126,48 @@ void Catalog::handleNested()
             m_errors.push_back(e);
     }
 
+}
+
+
+void Catalog::handleItem(Item::Filters& f, NL::json readerArgs, std::string path)
+{
+        NL::json itemJson = m_connector.getJson(path);
+        Item item(itemJson, path, m_connector, m_validate);
+
+        bool valid = item.init(f, readerArgs, m_schemaUrls);
+        if (valid)
+        {
+            std::lock_guard<std::mutex> lock(m_mutex);
+            m_itemList.push_back(item);
+        }
+}
+
+void Catalog::handleCol(Filters& f, NL::json readerArgs, std::string path)
+{
+    NL::json collectionJson = m_connector.getJson(path);
+    std::unique_ptr<Collection> collection(new Collection(
+        collectionJson, path, m_connector, m_pool, m_validate));
+
+    bool valid = collection->init(f, readerArgs, m_schemaUrls);
+    if (valid)
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_subCatalogs.push_back(std::move(collection));
+    }
+}
+
+void Catalog::handleCat(Filters& f, NL::json readerArgs, std::string path)
+{
+    NL::json catalogJson = m_connector.getJson(path);
+    std::unique_ptr<Catalog> catalog(new Catalog(
+        catalogJson, path, m_connector, m_pool, m_validate));
+
+    bool valid = catalog->init(f, readerArgs, m_schemaUrls);
+    if (valid)
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_subCatalogs.push_back(std::move(catalog));
+    }
 }
 
 ItemList& Catalog::items()
