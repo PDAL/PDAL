@@ -49,6 +49,7 @@
 #include <pdal/util/IStream.hpp>
 #include <pdal/util/FileUtils.hpp>
 
+
 #include "private/stac/Collection.hpp"
 #include "private/stac/ItemCollection.hpp"
 
@@ -59,6 +60,7 @@
 namespace pdal
 {
 
+using namespace stac;
 
 struct StacReader::Private
 {
@@ -71,10 +73,10 @@ public:
     std::unique_ptr<connector::Connector> m_connector;
     std::deque <std::pair<std::string, std::string>> m_errors;
 
-    std::unique_ptr<stac::Item::Filters> m_itemFilters;
-    std::unique_ptr<stac::Catalog::Filters> m_catFilters;
-    std::unique_ptr<stac::Collection::Filters> m_colFilters;
-    std::unique_ptr<stac::ItemCollection::Filters> m_icFilters;
+    std::unique_ptr<Item::Filters> m_itemFilters;
+    std::unique_ptr<Catalog::Filters> m_catFilters;
+    std::unique_ptr<Collection::Filters> m_colFilters;
+    std::unique_ptr<ItemCollection::Filters> m_icFilters;
 };
 
 struct StacReader::Args
@@ -92,7 +94,7 @@ struct StacReader::Args
     SrsBounds bounds;
     std::vector<std::string> assetNames;
 
-    stac::SchemaUrls schemaUrls;
+    SchemaUrls schemaUrls;
 
     bool validateSchema;
     int threads;
@@ -171,7 +173,7 @@ void StacReader::addArgs(ProgramArgs& args)
 }
 
 
-void StacReader::addItem(stac::Item& item)
+void StacReader::addItem(Item& item)
 {
     std::string driver = item.driver();
 
@@ -202,25 +204,25 @@ void StacReader::addItem(stac::Item& item)
 
 void StacReader::handleItem(NL::json stacJson, std::string itemPath)
 {
-    stac::Item item(stacJson, m_filename, *m_p->m_connector,
+    Item item(stacJson, m_filename, *m_p->m_connector,
         m_args->validateSchema);
     if (item.init(*m_p->m_itemFilters, m_args->rawReaderArgs, m_args->schemaUrls))
         addItem(item);
 }
 
 
-void StacReader::handleCatalog(NL::json stacJson, std::string catPath, bool isRoot)
+void StacReader::handleCatalog(NL::json stacJson, std::string catPath)
 {
-    stac::Catalog catalog(stacJson, catPath, *m_p->m_connector, *m_p->m_pool,
+    Catalog catalog(stacJson, catPath, *m_p->m_connector, *m_p->m_pool,
         m_args->validateSchema);
 
     if (catalog.init(*m_p->m_catFilters, m_args->rawReaderArgs,
         m_args->schemaUrls, true))
     {
-        for (stac::Item& item: catalog.items())
+        for (Item& item: catalog.items())
             addItem(item);
     }
-    stac::ErrorList errors = catalog.errors();
+    ErrorList errors = catalog.errors();
     if (errors.size())
     {
         for (auto& p: errors)
@@ -231,22 +233,22 @@ void StacReader::handleCatalog(NL::json stacJson, std::string catPath, bool isRo
     }
 }
 
-void StacReader::handleCollection(NL::json stacJson, std::string catPath, bool isRoot)
+void StacReader::handleCollection(NL::json stacJson, std::string colPath)
 {
-    stac::Collection collection(stacJson, catPath, *m_p->m_connector,
+    Collection collection(stacJson, colPath, *m_p->m_connector,
         *m_p->m_pool, m_args->validateSchema);
 
     if (collection.init(*m_p->m_colFilters, m_args->rawReaderArgs,
         m_args->schemaUrls, true))
     {
-        for (stac::Item& item: collection.items())
+        for (Item& item: collection.items())
             addItem(item);
     }
 }
 
 void StacReader::handleItemCollection(NL::json stacJson, std::string icPath)
 {
-    stac::ItemCollection ic(stacJson, icPath, *m_p->m_connector,
+    ItemCollection ic(stacJson, icPath, *m_p->m_connector,
             m_args->validateSchema);
 
     if (ic.init(*m_p->m_icFilters, m_args->rawReaderArgs, m_args->schemaUrls))
@@ -258,10 +260,10 @@ void StacReader::handleItemCollection(NL::json stacJson, std::string icPath)
 
 void StacReader::initializeArgs()
 {
-    m_p->m_itemFilters = std::make_unique<stac::Item::Filters>();
-    m_p->m_catFilters = std::make_unique<stac::Catalog::Filters>();
-    m_p->m_colFilters = std::make_unique<stac::Catalog::Filters>();
-    m_p->m_icFilters = std::make_unique<stac::ItemCollection::Filters>();
+    m_p->m_itemFilters = std::make_unique<Item::Filters>();
+    m_p->m_catFilters = std::make_unique<Catalog::Filters>();
+    m_p->m_colFilters = std::make_unique<Catalog::Filters>();
+    m_p->m_icFilters = std::make_unique<ItemCollection::Filters>();
 
     if (!m_args->items.empty())
     {
@@ -294,7 +296,6 @@ void StacReader::initializeArgs()
 
     if (!m_args->dates.empty())
     {
-        stac::StacUtils stacUtils;
         log()->get(LogLevel::Debug) <<
             "Dates selected: " << m_args->dates << std::endl;
 
@@ -312,8 +313,8 @@ void StacReader::initializeArgs()
                 std::string minDate(datepair[0].get<std::string>());
                 std::string maxDate(datepair[1].get<std::string>());
 
-                std::time_t minTime = stacUtils.getStacTime(minDate);
-                std::time_t maxTime = stacUtils.getStacTime(maxDate);
+                std::time_t minTime = StacUtils::getStacTime(minDate);
+                std::time_t maxTime = StacUtils::getStacTime(maxDate);
                 m_p->m_itemFilters->datePairs.push_back({ minTime, maxTime });
             }
             catch(NL::detail::type_error e)
@@ -408,7 +409,6 @@ void StacReader::setConnectionForwards(StringMap& headers, StringMap& query)
 
 void StacReader::initialize()
 {
-    stac::StacUtils u;
     StringMap headers;
     StringMap query;
     setConnectionForwards(headers, query);
@@ -420,14 +420,13 @@ void StacReader::initialize()
 
     NL::json stacJson = m_p->m_connector->getJson(m_filename);
 
-    std::string stacType = u.jsonValue<std::string>(stacJson, "type");
-    // std::string stacType = stacJson.at("type").get<std::string>();
+    std::string stacType = StacUtils::jsonValue<std::string>(stacJson, "type");
     if (stacType == "Feature")
         handleItem(stacJson, m_filename);
     else if (stacType == "Catalog")
-        handleCatalog(stacJson, m_filename, true);
+        handleCatalog(stacJson, m_filename);
     else if (stacType == "Collection")
-        handleCollection(stacJson, m_filename, true);
+        handleCollection(stacJson, m_filename);
     else if (stacType == "FeatureCollection")
         handleItemCollection(stacJson, m_filename);
     else

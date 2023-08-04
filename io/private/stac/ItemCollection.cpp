@@ -39,61 +39,62 @@ namespace pdal
 
 namespace stac
 {
-    ItemCollection::ItemCollection(const NL::json& json,
-            const std::string& icPath,
-            const connector::Connector& connector,
-            bool validate):
-        m_json(json), m_path(icPath), m_connector(connector),
-        m_validate(validate)
-    {}
+
+ItemCollection::ItemCollection(const NL::json& json,
+        const std::string& icPath,
+        const connector::Connector& connector,
+        bool validate):
+    m_json(json), m_path(icPath), m_connector(connector),
+    m_validate(validate)
+{}
 
 
-    ItemCollection::~ItemCollection()
-    {}
+ItemCollection::~ItemCollection()
+{}
 
-    ItemList ItemCollection::items()
+ItemList ItemCollection::items()
+{
+    return m_itemList;
+}
+
+bool ItemCollection::init(const Filters& filters, NL::json rawReaderArgs,
+    SchemaUrls schemaUrls)
+{
+    const NL::json itemList = StacUtils::stacValue(m_json, "features");
+    for (const NL::json& itemJson: itemList)
     {
-        return m_itemList;
-    }
-
-    bool ItemCollection::init(const Filters& filters, NL::json rawReaderArgs,
-        SchemaUrls schemaUrls)
-    {
-        const NL::json itemList = m_utils.stacValue(m_json, "features");
-        for (const NL::json& itemJson: itemList)
+        Item item(itemJson, m_path, m_connector, m_validate);
+        if (item.init(*filters.itemFilters, rawReaderArgs, schemaUrls))
         {
-            Item item(itemJson, m_path, m_connector, m_validate);
-            if (item.init(*filters.itemFilters, rawReaderArgs, schemaUrls))
+            m_itemList.push_back(item);
+        }
+    }
+    if (m_json.contains("links"))
+    {
+        const NL::json links = StacUtils::stacValue(m_json, "links");
+        for (const NL::json& link: links)
+        {
+            std::string target = StacUtils::stacValue<std::string>(
+                link, "rel", m_json);
+            if (target == "next")
             {
-                m_itemList.push_back(item);
+                std::string nextLinkPath = StacUtils::stacValue<std::string>(
+                    link, "href", m_json);
+                std::string nextAbsPath =
+                    StacUtils::handleRelativePath(m_path, nextLinkPath);
+                NL::json nextJson = m_connector.getJson(nextAbsPath);
+
+                ItemCollection ic(nextJson, nextAbsPath, m_connector,
+                    m_validate);
+
+                if (ic.init(filters, rawReaderArgs, schemaUrls))
+                    for (auto& item: ic.items())
+                        m_itemList.push_back(item);
             }
         }
-        if (m_json.contains("links"))
-        {
-            const NL::json links = m_utils.stacValue(m_json, "links");
-            for (const NL::json& link: links)
-            {
-                std::string target = m_utils.stacValue<std::string>(
-                    link, "rel", m_json);
-                if (target == "next")
-                {
-                    std::string nextLinkPath = m_utils.stacValue<std::string>(
-                        link, "href", m_json);
-                    std::string nextAbsPath =
-                        m_utils.handleRelativePath(m_path, nextLinkPath);
-                    NL::json nextJson = m_connector.getJson(nextAbsPath);
-
-                    ItemCollection ic(nextJson, nextAbsPath, m_connector,
-                        m_validate);
-
-                    if (ic.init(filters, rawReaderArgs, schemaUrls))
-                        for (auto& item: ic.items())
-                            m_itemList.push_back(item);
-                }
-            }
-        }
-        return true;
     }
+    return true;
+}
 
 }//stac
 

@@ -94,14 +94,11 @@ public:
 
 private:
 
-    StacUtils m_utils;
-
     const NL::json m_json;
     const std::string m_path;
 
     const connector::Connector& m_connector;
     bool m_validate;
-    std::mutex m_mutex;
 
     StageFactory m_factory;
     std::string m_driver;

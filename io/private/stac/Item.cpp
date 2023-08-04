@@ -44,503 +44,497 @@ namespace pdal
 namespace stac
 {
 
-    Item::Item(const NL::json& json,
-            const std::string& itemPath,
-            const connector::Connector& connector,
-            bool validate):
-        m_json(json), m_path(itemPath), m_connector(connector),
-        m_validate(validate)
-    {}
+Item::Item(const NL::json& json,
+        const std::string& itemPath,
+        const connector::Connector& connector,
+        bool validate):
+    m_json(json), m_path(itemPath), m_connector(connector),
+    m_validate(validate)
+{}
 
-    Item::~Item()
-    {}
+Item::~Item()
+{}
 
-    Item::Item(const Item& item):
-        m_json(item.m_json), m_path(item.m_path), m_connector(item.m_connector),
-        m_driver(item.m_driver), m_schemaUrls(item.m_schemaUrls),
-        m_readerOptions(item.m_readerOptions)
-    {}
+Item::Item(const Item& item):
+    m_json(item.m_json), m_path(item.m_path), m_connector(item.m_connector),
+    m_driver(item.m_driver), m_schemaUrls(item.m_schemaUrls),
+    m_readerOptions(item.m_readerOptions)
+{}
 
-    bool Item::init(const Filters& filters, NL::json rawReaderArgs,
-            SchemaUrls schemaUrls)
-    {
+bool Item::init(const Filters& filters, NL::json rawReaderArgs,
+        SchemaUrls schemaUrls)
+{
 
-        if (!filter(filters))
-            return false;
-
-        m_schemaUrls = schemaUrls;
-        if (m_validate)
-            validate();
-
-
-        NL::json readerArgs = handleReaderArgs(rawReaderArgs);
-        m_readerOptions = setReaderOptions(readerArgs, m_driver);
-        m_readerOptions.add("filename", m_assetPath);
-        return true;
-    }
-
-    std::string Item::id()
-    {
-        return m_utils.stacId(m_json);
-    }
-
-    std::string Item::driver()
-    {
-        return m_driver;
-    }
-
-    std::string Item::assetPath()
-    {
-        return m_assetPath;
-    }
-
-    Options Item::options()
-    {
-        return m_readerOptions;
-    }
-
-    NL::json Item::handleReaderArgs(NL::json rawReaderArgs)
-    {
-        if (rawReaderArgs.is_object())
-        {
-            NL::json array_args = NL::json::array();
-            array_args.push_back(rawReaderArgs);
-            rawReaderArgs = array_args;
-        }
-        for (auto& opts: rawReaderArgs)
-            if (!opts.is_object())
-                throw pdal_error("Reader Args for reader '" + m_driver +
-                    "' must be a valid JSON object");
-
-        NL::json readerArgs;
-        for (const NL::json& readerPipeline: rawReaderArgs)
-        {
-            std::string driver =
-                m_utils.jsonValue<std::string>(readerPipeline, "type");
-            if (rawReaderArgs.contains(driver))
-                throw pdal_error("Multiple instances of the same driver in"
-                    " supplied reader arguments.");
-            readerArgs[driver] = { };
-
-            for (auto& arg: readerPipeline.items())
-            {
-                if (arg.key() == "type")
-                    continue;
-
-                std::string key = arg.key();
-                readerArgs[driver][key] = { };
-                readerArgs[driver][key] = arg.value();
-            }
-        }
-        return readerArgs;
-    }
-
-    Options Item::setReaderOptions(const NL::json& readerArgs,
-        const std::string& driver) const
-    {
-        Options readerOptions;
-        if (readerArgs.contains(driver)) {
-            NL::json args = m_utils.jsonValue(readerArgs, driver);
-            for (auto& arg : args.items())
-            {
-                std::string key = arg.key();
-                NL::json val = arg.value();
-                NL::detail::value_t type = val.type();
-
-                // if value is of type string, dump() returns string with
-                // escaped string inside and kills pdal program args
-                std::string v;
-                if (type == NL::detail::value_t::string)
-                    v = m_utils.jsonValue<std::string>(val);
-                else
-                    v = arg.value().dump();
-                readerOptions.add(key, v);
-            }
-        }
-
-        return readerOptions;
-    }
-
-    std::string Item::extractDriverFromItem(const NL::json& asset) const
-    {
-        std::string output;
-
-        std::map<std::string, std::string> contentTypes =
-        {
-            { "application/vnd.laszip+copc", "readers.copc"}
-        };
-
-        std::string assetPath = m_utils.stacValue<std::string>(
-            asset, "href", m_json);
-        std::string dataUrl = m_utils.handleRelativePath(m_path, assetPath);
-
-        std::string contentType;
-
-        if (asset.contains("type"))
-        {
-            contentType = m_utils.stacValue<std::string>(asset, "type", m_json);
-            for(const auto& ct: contentTypes)
-                if (Utils::iequals(ct.first, contentType))
-                    return ct.second;
-        }
-
-        if (!FileUtils::fileExists(dataUrl))
-        {
-            // Use this to test if dataUrl is a valid endpoint
-            // Try to make a HEAD request and get it from Content-Type
-            try
-            {
-                StringMap headers = m_connector.headRequest(dataUrl);
-                if (headers.find("Content-Type") != headers.end())
-                {
-                    contentType = headers["Content-Type"];
-                    for(const auto& ct: contentTypes)
-                        if (Utils::iequals(ct.first, contentType))
-                            return ct.second;
-                }
-            }
-            catch(std::exception e)
-            {
-                throw stac_error(m_id, "item", "Failed to HEAD " + dataUrl +
-                    ". " + e.what());
-            }
-        }
-
-        // Try to guess from the path
-        std::string driver = m_factory.inferReaderDriver(dataUrl);
-        if (driver.size())
-            return driver;
-
-        return output;
-    }
-
-    void Item::validate()
-    {
-
-        nlohmann::json_schema::json_validator val(
-            [this](const nlohmann::json_uri& json_uri, nlohmann::json& json) {
-                NL::json tempJson = m_connector.getJson(json_uri.url());
-
-                std::lock_guard<std::mutex> lock(m_mutex);
-                json = tempJson;
-            },
-            [](const std::string &, const std::string &) {}
-        );
-
-        // Validate against base Item schema first
-        NL::json schemaJson = m_connector.getJson(m_schemaUrls.item);
-        val.set_root_schema(schemaJson);
-        try {
-            val.validate(m_json);
-        }
-        catch (std::exception &e)
-        {
-            throw stac_error(m_id, "item",
-                "STAC schema validation Error in root schema: " +
-                m_schemaUrls.item + ". \n\n" + e.what());
-        }
-
-        // Validate against stac extensions if present
-        if (m_json.contains("stac_extensions"))
-        {
-            NL::json extensions = m_utils.stacValue(m_json, "stac_extensions");
-            for (auto& extSchemaUrl: extensions)
-            {
-                std::string url = m_utils.stacValue<std::string>(extSchemaUrl, "", m_json);
-
-                try {
-                    NL::json schemaJson = m_connector.getJson(url);
-                    val.set_root_schema(schemaJson);
-                    val.validate(m_json);
-                }
-                catch (std::exception& e) {
-                    std::string msg  =
-                        "STAC Validation Error in extension: " + url +
-                        ". Errors found: \n" + e.what();
-                    throw stac_error(m_id, "item", msg);
-
-                }
-            }
-        }
-    }
-
-    void validateForFilter(NL::json json)
-    {
-        StacUtils u;
-        std::string id = u.stacId(json);
-
-        u.stacValue(json, "assets");
-        u.stacValue(json, "properties");
-        u.stacValue(json, "geometry");
-    }
-
-    bool matchProperty(std::string key, NL::json val, NL::json properties,
-        NL::detail::value_t type)
-    {
-        StacUtils u;
-        switch (type)
-        {
-            case NL::detail::value_t::string:
-            {
-                std::string desired = u.jsonValue<std::string>(val);
-                std::string value = u.jsonValue<std::string>(properties, key);
-                return value == desired;
-                break;
-            }
-            case NL::detail::value_t::number_unsigned:
-            {
-                uint64_t value = u.jsonValue<uint64_t>(properties, key);
-                uint64_t desired = u.jsonValue<uint64_t>(val);
-                return value == desired;
-                break;
-            }
-            case NL::detail::value_t::number_integer:
-            {
-                int value = u.jsonValue<int>(properties,key);
-                int desired = u.jsonValue<int>(val);
-                return value == desired;
-                break;
-            }
-            case NL::detail::value_t::number_float:
-            {
-                double value = u.jsonValue<double>(properties, key);
-                double desired = u.jsonValue<double>(val);
-                return value == desired;
-                break;
-            }
-            case NL::detail::value_t::boolean:
-            {
-                bool value = u.jsonValue<bool>(properties, key);
-                bool desired = u.jsonValue<bool>(val);
-                return value == desired;
-                break;
-            }
-            default:
-            {
-                throw pdal_error("Data type of " + key +
-                    " is not supported for filtering.");
-            }
-        }
-        return true;
-    }
-
-
-
-    bool Item::filter(const Filters& filters)
-    {
-        validateForFilter(m_json);
-        m_id = m_utils.stacId(m_json);
-
-        if (!filterAssets(filters.assetNames))
-            return false;
-
-        if (!filterIds(filters.ids))
-            return false;
-
-        if (!filterCol(filters.collections))
-            return false;
-
-        if (!filterDates(filters.datePairs))
-            return false;
-
-        if (!filterProperties(filters.properties))
-            return false;
-
-        if (!filterBounds(filters.bounds, filters.srs))
-            return false;
-
-
-        return true;
-    }
-
-    bool Item::filterBounds(BOX3D bounds, SpatialReference srs)
-    {
-        if (bounds.empty())
-            return true;
-
-        //Skip bbox altogether and stick with geometry, which will be much
-        //more descriptive than bbox
-
-        //If stac item has null geometry and bounds have been included
-        //for filtering, then the Item will be excluded.
-        NL::json geometry = m_utils.stacValue(m_json, "geometry");
-        if (geometry.type() == NL::detail::value_t::null)
-            return false;
-
-        //STAC's base geometries will always be represented in 4326.
-        const SpatialReference stacSrs("EPSG:4326");
-        Polygon stacPolygon(geometry.dump(), stacSrs);
-        if (!stacPolygon.valid())
-            throw stac_error(m_id, "item",
-                "Polygon created from STAC 'geometry' key is invalid");
-
-        Polygon userPolygon(bounds);
-        if (!srs.empty() && srs != stacSrs)
-        {
-            userPolygon.setSpatialReference(srs);
-            auto status = stacPolygon.transform(srs);
-            if (!status)
-                throw stac_error(m_id, "item", status.what());
-        }
-        else
-            userPolygon.setSpatialReference("EPSG:4326");
-
-        if (!userPolygon.valid())
-            throw pdal_error("User input polygon is invalid, " + bounds.toBox());
-
-        if (!stacPolygon.disjoint(userPolygon))
-            return true;
-
+    if (!filter(filters))
         return false;
 
+    m_schemaUrls = schemaUrls;
+    if (m_validate)
+        validate();
+
+
+    NL::json readerArgs = handleReaderArgs(rawReaderArgs);
+    m_readerOptions = setReaderOptions(readerArgs, m_driver);
+    m_readerOptions.add("filename", m_assetPath);
+    return true;
+}
+
+std::string Item::id()
+{
+    return StacUtils::stacId(m_json);
+}
+
+std::string Item::driver()
+{
+    return m_driver;
+}
+
+std::string Item::assetPath()
+{
+    return m_assetPath;
+}
+
+Options Item::options()
+{
+    return m_readerOptions;
+}
+
+NL::json Item::handleReaderArgs(NL::json rawReaderArgs)
+{
+    if (rawReaderArgs.is_object())
+    {
+        NL::json array_args = NL::json::array();
+        array_args.push_back(rawReaderArgs);
+        rawReaderArgs = array_args;
+    }
+    for (auto& opts: rawReaderArgs)
+        if (!opts.is_object())
+            throw pdal_error("Reader Args for reader '" + m_driver +
+                "' must be a valid JSON object");
+
+    NL::json readerArgs;
+    for (const NL::json& readerPipeline: rawReaderArgs)
+    {
+        std::string driver =
+            StacUtils::StacUtils::jsonValue<std::string>(readerPipeline, "type");
+        if (rawReaderArgs.contains(driver))
+            throw pdal_error("Multiple instances of the same driver in"
+                " supplied reader arguments.");
+        readerArgs[driver] = { };
+
+        for (auto& arg: readerPipeline.items())
+        {
+            if (arg.key() == "type")
+                continue;
+
+            std::string key = arg.key();
+            readerArgs[driver][key] = { };
+            readerArgs[driver][key] = arg.value();
+        }
+    }
+    return readerArgs;
+}
+
+Options Item::setReaderOptions(const NL::json& readerArgs,
+    const std::string& driver) const
+{
+    Options readerOptions;
+    if (readerArgs.contains(driver)) {
+        NL::json args = StacUtils::StacUtils::jsonValue(readerArgs, driver);
+        for (auto& arg : args.items())
+        {
+            std::string key = arg.key();
+            NL::json val = arg.value();
+            NL::detail::value_t type = val.type();
+
+            // if value is of type string, dump() returns string with
+            // escaped string inside and kills pdal program args
+            std::string v;
+            if (type == NL::detail::value_t::string)
+                v = StacUtils::StacUtils::jsonValue<std::string>(val);
+            else
+                v = arg.value().dump();
+            readerOptions.add(key, v);
+        }
     }
 
-    bool Item::filterProperties(const NL::json& filterProps)
+    return readerOptions;
+}
+
+std::string Item::extractDriverFromItem(const NL::json& asset) const
+{
+    std::string output;
+
+    std::map<std::string, std::string> contentTypes =
     {
-        NL::json itemProperties = m_utils.stacValue(m_json, "properties");
-        if (!filterProps.empty())
+        { "application/vnd.laszip+copc", "readers.copc"}
+    };
+
+    std::string assetPath = StacUtils::stacValue<std::string>(
+        asset, "href", m_json);
+    std::string dataUrl = StacUtils::handleRelativePath(m_path, assetPath);
+
+    std::string contentType;
+
+    if (asset.contains("type"))
+    {
+        contentType = StacUtils::stacValue<std::string>(asset, "type", m_json);
+        for(const auto& ct: contentTypes)
+            if (Utils::iequals(ct.first, contentType))
+                return ct.second;
+    }
+
+    if (!FileUtils::fileExists(dataUrl))
+    {
+        // Use this to test if dataUrl is a valid endpoint
+        // Try to make a HEAD request and get it from Content-Type
+        try
         {
-            for (auto &it: filterProps.items())
+            StringMap headers = m_connector.headRequest(dataUrl);
+            if (headers.find("Content-Type") != headers.end())
             {
-                std::string key = it.key();
-                NL::json stacVal = m_utils.stacValue(itemProperties, key, m_json);
-                NL::detail::value_t stacType = stacVal.type();
+                contentType = headers["Content-Type"];
+                for(const auto& ct: contentTypes)
+                    if (Utils::iequals(ct.first, contentType))
+                        return ct.second;
+            }
+        }
+        catch(std::exception e)
+        {
+            throw stac_error(m_id, "item", "Failed to HEAD " + dataUrl +
+                ". " + e.what());
+        }
+    }
 
-                NL::json filterVal = it.value();
-                NL::detail::value_t filterType = filterVal.type();
+    // Try to guess from the path
+    std::string driver = m_factory.inferReaderDriver(dataUrl);
+    if (driver.size())
+        return driver;
 
-                //Array of possibilities are Or'd together
-                if (filterType == NL::detail::value_t::array)
-                {
-                    bool arrFlag (true);
-                    for (auto& val: filterVal)
-                        if (matchProperty(key, val, itemProperties, stacType))
-                            return true;
-                }
-                else
-                    if (matchProperty(key, filterVal, itemProperties, stacType))
+    return output;
+}
+
+void Item::validate()
+{
+
+    nlohmann::json_schema::json_validator val(
+        [this](const nlohmann::json_uri& json_uri, nlohmann::json& json) {
+            json = m_connector.getJson(json_uri.url());
+        },
+        [](const std::string &, const std::string &) {}
+    );
+
+    // Validate against base Item schema first
+    NL::json schemaJson = m_connector.getJson(m_schemaUrls.item);
+    val.set_root_schema(schemaJson);
+    try {
+        val.validate(m_json);
+    }
+    catch (std::exception &e)
+    {
+        throw stac_error(m_id, "item",
+            "STAC schema validation Error in root schema: " +
+            m_schemaUrls.item + ". \n\n" + e.what());
+    }
+
+    // Validate against stac extensions if present
+    if (m_json.contains("stac_extensions"))
+    {
+        NL::json extensions = StacUtils::stacValue(m_json, "stac_extensions");
+        for (auto& extSchemaUrl: extensions)
+        {
+            std::string url = StacUtils::stacValue<std::string>(extSchemaUrl, "", m_json);
+
+            try {
+                NL::json schemaJson = m_connector.getJson(url);
+                val.set_root_schema(schemaJson);
+                val.validate(m_json);
+            }
+            catch (std::exception& e) {
+                std::string msg  =
+                    "STAC Validation Error in extension: " + url +
+                    ". Errors found: \n" + e.what();
+                throw stac_error(m_id, "item", msg);
+
+            }
+        }
+    }
+}
+
+void validateForFilter(NL::json json)
+{
+    StacUtils::stacId(json);
+    StacUtils::stacValue(json, "assets");
+    StacUtils::stacValue(json, "properties");
+    StacUtils::stacValue(json, "geometry");
+}
+
+bool matchProperty(std::string key, NL::json val, NL::json properties,
+    NL::detail::value_t type)
+{
+    switch (type)
+    {
+        case NL::detail::value_t::string:
+        {
+            std::string desired = StacUtils::jsonValue<std::string>(val);
+            std::string value = StacUtils::jsonValue<std::string>(properties, key);
+            return value == desired;
+            break;
+        }
+        case NL::detail::value_t::number_unsigned:
+        {
+            uint64_t value = StacUtils::jsonValue<uint64_t>(properties, key);
+            uint64_t desired = StacUtils::jsonValue<uint64_t>(val);
+            return value == desired;
+            break;
+        }
+        case NL::detail::value_t::number_integer:
+        {
+            int value = StacUtils::jsonValue<int>(properties,key);
+            int desired = StacUtils::jsonValue<int>(val);
+            return value == desired;
+            break;
+        }
+        case NL::detail::value_t::number_float:
+        {
+            double value = StacUtils::jsonValue<double>(properties, key);
+            double desired = StacUtils::jsonValue<double>(val);
+            return value == desired;
+            break;
+        }
+        case NL::detail::value_t::boolean:
+        {
+            bool value = StacUtils::jsonValue<bool>(properties, key);
+            bool desired = StacUtils::jsonValue<bool>(val);
+            return value == desired;
+            break;
+        }
+        default:
+        {
+            throw pdal_error("Data type of " + key +
+                " is not supported for filtering.");
+        }
+    }
+    return true;
+}
+
+
+
+bool Item::filter(const Filters& filters)
+{
+    validateForFilter(m_json);
+    m_id = StacUtils::stacId(m_json);
+
+    if (!filterAssets(filters.assetNames))
+        return false;
+
+    if (!filterIds(filters.ids))
+        return false;
+
+    if (!filterCol(filters.collections))
+        return false;
+
+    if (!filterDates(filters.datePairs))
+        return false;
+
+    if (!filterProperties(filters.properties))
+        return false;
+
+    if (!filterBounds(filters.bounds, filters.srs))
+        return false;
+
+
+    return true;
+}
+
+bool Item::filterBounds(BOX3D bounds, SpatialReference srs)
+{
+    if (bounds.empty())
+        return true;
+
+    //Skip bbox altogether and stick with geometry, which will be much
+    //more descriptive than bbox
+
+    //If stac item has null geometry and bounds have been included
+    //for filtering, then the Item will be excluded.
+    NL::json geometry = StacUtils::stacValue(m_json, "geometry");
+    if (geometry.type() == NL::detail::value_t::null)
+        return false;
+
+    //STAC's base geometries will always be represented in 4326.
+    const SpatialReference stacSrs("EPSG:4326");
+    Polygon stacPolygon(geometry.dump(), stacSrs);
+    if (!stacPolygon.valid())
+        throw stac_error(m_id, "item",
+            "Polygon created from STAC 'geometry' key is invalid");
+
+    Polygon userPolygon(bounds);
+    if (!srs.empty() && srs != stacSrs)
+    {
+        userPolygon.setSpatialReference(srs);
+        auto status = stacPolygon.transform(srs);
+        if (!status)
+            throw stac_error(m_id, "item", status.what());
+    }
+    else
+        userPolygon.setSpatialReference("EPSG:4326");
+
+    if (!userPolygon.valid())
+        throw pdal_error("User input polygon is invalid, " + bounds.toBox());
+
+    if (!stacPolygon.disjoint(userPolygon))
+        return true;
+
+    return false;
+
+}
+
+bool Item::filterProperties(const NL::json& filterProps)
+{
+    NL::json itemProperties = StacUtils::stacValue(m_json, "properties");
+    if (!filterProps.empty())
+    {
+        for (auto &it: filterProps.items())
+        {
+            std::string key = it.key();
+            NL::json stacVal = StacUtils::stacValue(itemProperties, key, m_json);
+            NL::detail::value_t stacType = stacVal.type();
+
+            NL::json filterVal = it.value();
+            NL::detail::value_t filterType = filterVal.type();
+
+            //Array of possibilities are Or'd together
+            if (filterType == NL::detail::value_t::array)
+            {
+                bool arrFlag (true);
+                for (auto& val: filterVal)
+                    if (matchProperty(key, val, itemProperties, stacType))
                         return true;
             }
-
-            return false;
-        }
-        return true;
-    }
-
-    bool Item::filterDates(DatePairs dates)
-    {
-        NL::json properties = m_utils.stacValue(m_json, "properties");
-
-        // DateTime
-        // If STAC datetime fits in *any* of the supplied ranges,
-        // it will be accepted.
-        if (!dates.empty())
-        {
-            if (properties.contains("datetime") &&
-                properties.at("datetime").type() != NL::detail::value_t::null)
-            {
-                std::string stacDateStr = m_utils.stacValue(properties,
-                    "datetime", m_json);
-
-                try
-                {
-                    std::time_t stacTime = m_utils.getStacTime(stacDateStr);
-                    for (const auto& range: dates)
-                        if (stacTime >= range.first && stacTime <= range.second)
-                            return true;
-                }
-                catch (pdal_error e)
-                {
-                    throw stac_error(m_id, "item", e.what());
-                }
-
-                return false;
-            }
-            else if (properties.contains("start_datetime") &&
-                properties.contains("end_datetime"))
-            {
-                    // Handle if STAC object has start and end datetimes instead of one
-                    std::string endDateStr = m_utils.stacValue(properties,
-                        "end_datetime", m_json);
-                    std::string startDateStr = m_utils.stacValue(properties,
-                        "end_datetime", m_json);
-
-                    std::time_t stacEndTime = m_utils.getStacTime(endDateStr);
-                    std::time_t stacStartTime = m_utils.getStacTime(startDateStr);
-
-                    for (const auto& range: dates)
-                    {
-                        // If any of the date ranges overlap with the date range of the STAC
-                        // object, do not prune.
-                        std::time_t userMinTime = range.first;
-                        std::time_t userMaxTime = range.second;
-
-                        if (userMinTime >= stacStartTime && userMinTime <= stacEndTime)
-                            return true;
-                        else if (userMaxTime >= stacStartTime && userMaxTime <= stacEndTime)
-                            return true;
-                        else if (userMinTime <= stacStartTime && userMaxTime >= stacEndTime)
-                            return true;
-                    }
-                    return false;
-            }
             else
-                throw stac_error(m_id, "item", "Unexpected layout of STAC dates");
+                if (matchProperty(key, filterVal, itemProperties, stacType))
+                    return true;
         }
-        return true;
 
+        return false;
     }
+    return true;
+}
 
-    bool Item::filterAssets(std::vector<std::string> assetNames)
+bool Item::filterDates(DatePairs dates)
+{
+    NL::json properties = StacUtils::stacValue(m_json, "properties");
+
+    // DateTime
+    // If STAC datetime fits in *any* of the supplied ranges,
+    // it will be accepted.
+    if (!dates.empty())
     {
-        NL::json asset;
-        NL::json assetList = m_utils.stacValue(m_json, "assets");
-        for (auto& name: assetNames)
+        if (properties.contains("datetime") &&
+            properties.at("datetime").type() != NL::detail::value_t::null)
         {
-            if (assetList.contains(name))
+            std::string stacDateStr = StacUtils::stacValue(properties,
+                "datetime", m_json);
+
+            try
             {
-                asset = m_utils.stacValue(assetList, name, m_json);
-                m_driver = extractDriverFromItem(asset);
-                std::string assetPath = m_utils.stacValue(asset, "href", m_json);
-                m_assetPath = m_utils.handleRelativePath(m_path, assetPath);
+                std::time_t stacTime = StacUtils::getStacTime(stacDateStr);
+                for (const auto& range: dates)
+                    if (stacTime >= range.first && stacTime <= range.second)
+                        return true;
             }
-        }
-        if (m_driver.empty())
-            return false;
-        return true;
-    }
+            catch (pdal_error e)
+            {
+                throw stac_error(m_id, "item", e.what());
+            }
 
-    // If STAC ID matches any ID in supplied list, it will be accepted
-    bool Item::filterIds(std::vector<RegEx> ids)
-    {
-        if (!ids.empty())
-        {
-            for (auto& id: ids)
-                if (std::regex_match(m_id, id.regex()))
-                    return true;
             return false;
         }
-        return true;
-    }
-
-    bool Item::filterCol(std::vector<RegEx> ids)
-    {
-        if (!ids.empty())
+        else if (properties.contains("start_datetime") &&
+            properties.contains("end_datetime"))
         {
-            if (!m_json.contains("collection"))
+                // Handle if STAC object has start and end datetimes instead of one
+                std::string endDateStr = StacUtils::stacValue(properties,
+                    "end_datetime", m_json);
+                std::string startDateStr = StacUtils::stacValue(properties,
+                    "end_datetime", m_json);
+
+                std::time_t stacEndTime = StacUtils::getStacTime(endDateStr);
+                std::time_t stacStartTime = StacUtils::getStacTime(startDateStr);
+
+                for (const auto& range: dates)
+                {
+                    // If any of the date ranges overlap with the date range of the STAC
+                    // object, do not prune.
+                    std::time_t userMinTime = range.first;
+                    std::time_t userMaxTime = range.second;
+
+                    if (userMinTime >= stacStartTime && userMinTime <= stacEndTime)
+                        return true;
+                    else if (userMaxTime >= stacStartTime && userMaxTime <= stacEndTime)
+                        return true;
+                    else if (userMinTime <= stacStartTime && userMaxTime >= stacEndTime)
+                        return true;
+                }
                 return false;
-
-            std::string colId = m_utils.stacValue<std::string>(
-                m_json, "collection");
-            for (auto& id: ids)
-                if (std::regex_match(colId, id.regex()))
-                    return true;
-
-            return false;
         }
-        return true;
-
+        else
+            throw stac_error(m_id, "item", "Unexpected layout of STAC dates");
     }
+    return true;
+
+}
+
+bool Item::filterAssets(std::vector<std::string> assetNames)
+{
+    NL::json asset;
+    NL::json assetList = StacUtils::stacValue(m_json, "assets");
+    for (auto& name: assetNames)
+    {
+        if (assetList.contains(name))
+        {
+            asset = StacUtils::stacValue(assetList, name, m_json);
+            m_driver = extractDriverFromItem(asset);
+            std::string assetPath = StacUtils::stacValue(asset, "href", m_json);
+            m_assetPath = StacUtils::handleRelativePath(m_path, assetPath);
+        }
+    }
+    if (m_driver.empty())
+        return false;
+    return true;
+}
+
+// If STAC ID matches any ID in supplied list, it will be accepted
+bool Item::filterIds(std::vector<RegEx> ids)
+{
+    if (!ids.empty())
+    {
+        for (auto& id: ids)
+            if (std::regex_match(m_id, id.regex()))
+                return true;
+        return false;
+    }
+    return true;
+}
+
+bool Item::filterCol(std::vector<RegEx> ids)
+{
+    if (!ids.empty())
+    {
+        if (!m_json.contains("collection"))
+            return false;
+
+        std::string colId = StacUtils::stacValue<std::string>(
+            m_json, "collection");
+        for (auto& id: ids)
+            if (std::regex_match(colId, id.regex()))
+                return true;
+
+        return false;
+    }
+    return true;
+
+}
 
 } //namespace stac
 

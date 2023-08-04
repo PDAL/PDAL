@@ -42,58 +42,55 @@ namespace pdal
 
 namespace stac
 {
-    Collection::~Collection() {}
 
-    void Collection::validate() {
-        // std::function<void(const nlohmann::json_uri&, nlohmann::json&)> fetch = m_utils.schemaFetch;
+Collection::~Collection() {}
 
-        nlohmann::json_schema::json_validator val(
-            [this](const nlohmann::json_uri& json_uri, nlohmann::json& json) {
-                NL::json tempJson = m_connector.getJson(json_uri.url());
+void Collection::validate() {
+    nlohmann::json_schema::json_validator val(
+        [this](const nlohmann::json_uri& json_uri, nlohmann::json& json) {
+            json = m_connector.getJson(json_uri.url());
+        },
+        [](const std::string &, const std::string &) {}
+    );
 
-                std::lock_guard<std::mutex> lock(m_mutex);
-                json = tempJson;
-            },
-            [](const std::string &, const std::string &) {}
-        );
-
-        // Validate against base Collection schema first
-        NL::json schemaJson = m_connector.getJson(m_schemaUrls.collection);
-        val.set_root_schema(schemaJson);
-        try {
-            val.validate(m_json);
-        }
-        catch (std::exception &e)
-        {
-            throw stac_error(m_id, "collection",
-                "STAC schema validation Error in root schema: " +
-                m_schemaUrls.collection + ". \n\n" + e.what());
-        }
-
-        // Validate against stac extensions if present
-        if (m_json.contains("stac_extensions"))
-        {
-            NL::json extensions = m_utils.stacValue(m_json, "stac_extensions");
-            for (auto& extSchemaUrl: extensions)
-            {
-                std::string url = m_utils.stacValue<std::string>(extSchemaUrl, "", m_json);
-
-                try {
-                    NL::json schemaJson = m_connector.getJson(url);
-                    val.set_root_schema(schemaJson);
-                    val.validate(m_json);
-                }
-                catch (std::exception& e) {
-                    std::string msg  =
-                        "STAC Validation Error in extension: " + url +
-                        ". Errors found: \n" + e.what();
-                    throw stac_error(m_id, "collection", msg);
-
-                }
-            }
-
-        }
+    // Validate against base Collection schema first
+    NL::json schemaJson = m_connector.getJson(m_schemaUrls.collection);
+    val.set_root_schema(schemaJson);
+    try {
+        val.validate(m_json);
     }
+    catch (std::exception &e)
+    {
+        throw stac_error(m_id, "collection",
+            "STAC schema validation Error in root schema: " +
+            m_schemaUrls.collection + ". \n\n" + e.what());
+    }
+
+    // Validate against stac extensions if present
+    if (m_json.contains("stac_extensions"))
+    {
+        NL::json extensions = StacUtils::stacValue(m_json, "stac_extensions");
+        for (auto& extSchemaUrl: extensions)
+        {
+            std::string url = StacUtils::stacValue<std::string>(extSchemaUrl,
+                "", m_json);
+
+            try {
+                NL::json schemaJson = m_connector.getJson(url);
+                val.set_root_schema(schemaJson);
+                val.validate(m_json);
+            }
+            catch (std::exception& e) {
+                std::string msg  =
+                    "STAC Validation Error in extension: " + url +
+                    ". Errors found: \n" + e.what();
+                throw stac_error(m_id, "collection", msg);
+
+            }
+        }
+
+    }
+}
 
 
 }//stac

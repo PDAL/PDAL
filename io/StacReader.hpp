@@ -72,8 +72,8 @@ class PDAL_DLL StacReader : public Reader, public Streamable
 
         void addItem(stac::Item& item);
         void handleItem(NL::json stacJson, std::string itemPath);
-        void handleCatalog(NL::json stacJson, std::string catPath, bool isRoot = false);
-        void handleCollection(NL::json stacJson, std::string catPath, bool isRoot = false);
+        void handleCatalog(NL::json stacJson, std::string catPath);
+        void handleCollection(NL::json stacJson, std::string colPath);
         void handleItemCollection(NL::json stacJson, std::string icPath);
         void initializeArgs();
         void setConnectionForwards(StringMap& headers, StringMap& query);

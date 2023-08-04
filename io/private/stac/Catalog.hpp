@@ -75,7 +75,6 @@ public:
     bool filter(Filters filters);
 
 protected:
-    StacUtils m_utils;
 
     const NL::json m_json;
     const std::string m_path;

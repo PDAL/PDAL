@@ -43,177 +43,175 @@ namespace pdal
 
 namespace stac
 {
-    Catalog::Catalog(const NL::json& json,
-            const std::string& catPath,
-            const connector::Connector& connector,
-            ThreadPool& pool,
-            bool validate) :
-        m_json(json), m_path(catPath), m_connector(connector),
-        m_pool(pool), m_validate(validate)
-    {}
 
-    Catalog::~Catalog()
-    {}
+Catalog::Catalog(const NL::json& json,
+        const std::string& catPath,
+        const connector::Connector& connector,
+        ThreadPool& pool,
+        bool validate) :
+    m_json(json), m_path(catPath), m_connector(connector),
+    m_pool(pool), m_validate(validate)
+{}
 
-    bool Catalog::init(const Filters& filters, NL::json rawReaderArgs,
-            SchemaUrls schemaUrls, bool isRoot=false)
+Catalog::~Catalog()
+{}
+
+bool Catalog::init(const Filters& filters, NL::json rawReaderArgs,
+        SchemaUrls schemaUrls, bool isRoot=false)
+{
+    m_root = isRoot;
+    if (!filter(filters))
+        return false;
+
+    m_schemaUrls = schemaUrls;
+    if (m_validate)
+        validate();
+
+    NL::json itemLinks = StacUtils::stacValue(m_json, "links");
+
+    for (const auto& link: itemLinks)
     {
-        m_root = isRoot;
-        if (!filter(filters))
-            return false;
 
-        m_schemaUrls = schemaUrls;
-        if (m_validate)
-            validate();
+        const std::string linkType = StacUtils::stacValue<std::string>(
+            link, "rel", m_json);
+        const std::string linkPath = StacUtils::stacValue<std::string>(
+            link, "href", m_json);
 
-        NL::json itemLinks = m_utils.stacValue(m_json, "links");
+        const std::string absLinkPath = StacUtils::handleRelativePath(m_path, linkPath);
 
-        for (const auto& link: itemLinks)
+        m_pool.add([this, linkType, absLinkPath, filters, rawReaderArgs]()
         {
-
-            const std::string linkType = m_utils.stacValue<std::string>(
-                link, "rel", m_json);
-            const std::string linkPath = m_utils.stacValue<std::string>(
-                link, "href", m_json);
-
-            const std::string absLinkPath = m_utils.handleRelativePath(m_path, linkPath);
-
-            m_pool.add([this, linkType, absLinkPath, filters, rawReaderArgs]()
+            try
             {
-                try
+                if (linkType == "item")
                 {
-                    if (linkType == "item")
-                    {
-                        NL::json itemJson = m_connector.getJson(absLinkPath);
-                        Item item(itemJson, absLinkPath, m_connector, m_validate);
+                    NL::json itemJson = m_connector.getJson(absLinkPath);
+                    Item item(itemJson, absLinkPath, m_connector, m_validate);
 
-                        bool valid = item.init(*filters.itemFilters,
-                            rawReaderArgs, m_schemaUrls);
-                        if (valid)
-                        {
-                            std::lock_guard<std::mutex> lock(m_mutex);
-                            m_itemList.push_back(item);
-                        }
-                    }
-                    else if (linkType == "catalog")
+                    bool valid = item.init(*filters.itemFilters,
+                        rawReaderArgs, m_schemaUrls);
+                    if (valid)
                     {
-                        NL::json catalogJson = m_connector.getJson(absLinkPath);
-                        std::unique_ptr<Catalog> catalog(new Catalog(
-                            catalogJson, absLinkPath, m_connector, m_pool,
-                            m_validate));
-
-                        bool valid = catalog->init(filters, rawReaderArgs,
-                            m_schemaUrls);
-                        if (valid)
-                        {
-                            std::lock_guard<std::mutex> lock(m_mutex);
-                            m_subCatalogs.push_back(std::move(catalog));
-                        }
-                    }
-                    else if (linkType == "collection")
-                    {
-                        NL::json collectionJson = m_connector.getJson(absLinkPath);
-                        std::unique_ptr<Collection> collection(new Collection(
-                            collectionJson, absLinkPath, m_connector, m_pool,
-                            m_validate));
-
-                        bool valid = collection->init(filters, rawReaderArgs,
-                            m_schemaUrls);
-                        if (valid)
-                        {
-                            std::lock_guard<std::mutex> lock(m_mutex);
-                            m_subCatalogs.push_back(std::move(collection));
-                        }
+                        std::lock_guard<std::mutex> lock(m_mutex);
+                        m_itemList.push_back(item);
                     }
                 }
-                catch (std::exception& e)
+                else if (linkType == "catalog")
                 {
-                    std::lock_guard<std::mutex> lock(m_mutex);
-                    StacError p {absLinkPath, e.what()};
-                    m_errors.push_back(p);
+                    NL::json catalogJson = m_connector.getJson(absLinkPath);
+                    std::unique_ptr<Catalog> catalog(new Catalog(
+                        catalogJson, absLinkPath, m_connector, m_pool,
+                        m_validate));
+
+                    bool valid = catalog->init(filters, rawReaderArgs,
+                        m_schemaUrls);
+                    if (valid)
+                    {
+                        std::lock_guard<std::mutex> lock(m_mutex);
+                        m_subCatalogs.push_back(std::move(catalog));
+                    }
                 }
-                catch (...)
+                else if (linkType == "collection")
                 {
-                    std::lock_guard<std::mutex> lock(m_mutex);
-                    StacError p {absLinkPath, "Unknown error"};
-                    m_errors.push_back(p);
+                    NL::json collectionJson = m_connector.getJson(absLinkPath);
+                    std::unique_ptr<Collection> collection(new Collection(
+                        collectionJson, absLinkPath, m_connector, m_pool,
+                        m_validate));
+
+                    bool valid = collection->init(filters, rawReaderArgs,
+                        m_schemaUrls);
+                    if (valid)
+                    {
+                        std::lock_guard<std::mutex> lock(m_mutex);
+                        m_subCatalogs.push_back(std::move(collection));
+                    }
                 }
-            });
-        }
-
-
-        if (isRoot)
-        {
-            m_pool.await();
-            m_pool.join();
-            handleNested();
-        }
-
-        return true;
-    }
-
-    // Wait for all nested catalogs to finish processing their items so they can
-    // be added to the overarching itemlist
-    void Catalog::handleNested()
-    {
-        for (auto& catalog: m_subCatalogs)
-        {
-            for (const Item& i: catalog->items())
-                m_itemList.push_back(i);
-
-            for (StacError& e: catalog->errors())
-                m_errors.push_back(e);
-        }
-
-    }
-
-    ItemList& Catalog::items()
-    {
-        return m_itemList;
-    }
-
-    ErrorList Catalog::errors()
-    {
-        return m_errors;
-    }
-
-    void Catalog::validate()
-    {
-        nlohmann::json_schema::json_validator val(
-            [this](const nlohmann::json_uri& json_uri, nlohmann::json& json) {
-                NL::json tempJson = m_connector.getJson(json_uri.url());
-
+            }
+            catch (std::exception& e)
+            {
                 std::lock_guard<std::mutex> lock(m_mutex);
-                json = tempJson;
-            },
-            [](const std::string &, const std::string &) {}
-        );
-
-        NL::json schemaJson = m_connector.getJson(m_schemaUrls.catalog);
-        val.set_root_schema(schemaJson);
-        try {
-            val.validate(m_json);
-        }
-        catch (std::exception &e)
-        {
-            throw stac_error(m_id, "catalog",
-                "STAC schema validation Error in root schema: " +
-                m_schemaUrls.catalog + ". \n\n" + e.what());
-        }
+                StacError p {absLinkPath, e.what()};
+                m_errors.push_back(p);
+            }
+            catch (...)
+            {
+                std::lock_guard<std::mutex> lock(m_mutex);
+                StacError p {absLinkPath, "Unknown error"};
+                m_errors.push_back(p);
+            }
+        });
     }
 
-    //if catalog matches filter requirements, return true
-    bool Catalog::filter(Filters filters) {
-        if (filters.ids.empty() || m_root)
+
+    if (isRoot)
+    {
+        m_pool.await();
+        m_pool.join();
+        handleNested();
+    }
+
+    return true;
+}
+
+// Wait for all nested catalogs to finish processing their items so they can
+// be added to the overarching itemlist
+void Catalog::handleNested()
+{
+    for (auto& catalog: m_subCatalogs)
+    {
+        for (const Item& i: catalog->items())
+            m_itemList.push_back(i);
+
+        for (StacError& e: catalog->errors())
+            m_errors.push_back(e);
+    }
+
+}
+
+ItemList& Catalog::items()
+{
+    return m_itemList;
+}
+
+ErrorList Catalog::errors()
+{
+    return m_errors;
+}
+
+void Catalog::validate()
+{
+    nlohmann::json_schema::json_validator val(
+        [this](const nlohmann::json_uri& json_uri, nlohmann::json& json) {
+            json = m_connector.getJson(json_uri.url());
+        },
+        [](const std::string &, const std::string &) {}
+    );
+
+    NL::json schemaJson = m_connector.getJson(m_schemaUrls.catalog);
+    val.set_root_schema(schemaJson);
+    try {
+        val.validate(m_json);
+    }
+    catch (std::exception &e)
+    {
+        throw stac_error(m_id, "catalog",
+            "STAC schema validation Error in root schema: " +
+            m_schemaUrls.catalog + ". \n\n" + e.what());
+    }
+}
+
+//if catalog matches filter requirements, return true
+bool Catalog::filter(Filters filters) {
+    if (filters.ids.empty() || m_root)
+        return true;
+
+    m_id = StacUtils::stacId(m_json);
+    for (auto& i: filters.ids)
+        if (std::regex_match(m_id, i.regex()))
             return true;
 
-        m_id = m_utils.stacId(m_json);
-        for (auto& i: filters.ids)
-            if (std::regex_match(m_id, i.regex()))
-                return true;
-
-        return false;
-    }
+    return false;
+}
 
 
 }// stac

@@ -39,45 +39,46 @@ namespace pdal
 
 namespace stac
 {
-    pdal_error stac_error(std::string id, std::string stacType,
-        std::string const& msg)
-    {
-        return pdal_error("STACError (" + stacType + ": " + id + "): " + msg);
-    }
 
-    pdal_error stac_error(std::string const& msg)
-    {
-        return pdal_error("STACError: " + msg);
-    }
+pdal_error stac_error(std::string id, std::string stacType,
+    std::string const& msg)
+{
+    return pdal_error("STACError (" + stacType + ": " + id + "): " + msg);
+}
+
+pdal_error stac_error(std::string const& msg)
+{
+    return pdal_error("STACError: " + msg);
+}
 
 
-    StacUtils::StacUtils() {}
-    StacUtils::~StacUtils() {}
+StacUtils::StacUtils() {}
+StacUtils::~StacUtils() {}
 
-    std::string StacUtils::handleRelativePath(std::string srcPath, std::string linkPath)
-    {
-        //Make absolute path of current item's directory, then create relative path from that
+std::string StacUtils::handleRelativePath(std::string srcPath, std::string linkPath)
+{
+    //Make absolute path of current item's directory, then create relative path from that
 
-        //Get driectory of src item
-        const std::string baseDir = FileUtils::getDirectory(srcPath);
-        if (FileUtils::isAbsolutePath(linkPath))
-            return linkPath;
-        //Create absolute path from src item filepath, if it's not already
-        // and join relative path to src item's dir path
-        return FileUtils::toAbsolutePath(linkPath, baseDir);
+    //Get driectory of src item
+    const std::string baseDir = FileUtils::getDirectory(srcPath);
+    if (FileUtils::isAbsolutePath(linkPath))
+        return linkPath;
+    //Create absolute path from src item filepath, if it's not already
+    // and join relative path to src item's dir path
+    return FileUtils::toAbsolutePath(linkPath, baseDir);
 
-    }
+}
 
-    std::time_t StacUtils::getStacTime(std::string in)
-    {
-        std::istringstream dateStr(in);
-        std::tm date {};
-        dateStr >> std::get_time(&date, "%Y-%m-%dT%H:%M:%S");
-        if (dateStr.fail())
-            throw stac_error("Specified date (" + dateStr.str() +
-                ") cannot be parsed. Dates must fit RFC 3339 specs.");
-        return std::mktime(&date);
-    }
+std::time_t StacUtils::getStacTime(std::string in)
+{
+    std::istringstream dateStr(in);
+    std::tm date {};
+    dateStr >> std::get_time(&date, "%Y-%m-%dT%H:%M:%S");
+    if (dateStr.fail())
+        throw stac_error("Specified date (" + dateStr.str() +
+            ") cannot be parsed. Dates must fit RFC 3339 specs.");
+    return std::mktime(&date);
+}
 
 }//stac
 }//pdal
