@@ -216,20 +216,24 @@ void StacReader::handleCatalog(NL::json stacJson, std::string catPath)
     Catalog catalog(stacJson, catPath, *m_p->m_connector, *m_p->m_pool,
         m_args->validateSchema);
 
+    // if init returns false, the collection has no items in itself or in
+    // any sub-catalogs/collections.
     if (catalog.init(*m_p->m_catFilters, m_args->rawReaderArgs,
         m_args->schemaUrls, true))
     {
         for (Item& item: catalog.items())
             addItem(item);
     }
+
     ErrorList errors = catalog.errors();
     if (errors.size())
     {
         for (auto& p: errors)
         {
             log()->get(LogLevel::Error) << "Failure fetching '" << p.first
-                << "' with error '" << p.second << "'";
+                << "' with error '" << p.second << "'\n";
         }
+        throw pdal_error("Errors found during the processing of the Catalog.");
     }
 }
 
@@ -238,11 +242,24 @@ void StacReader::handleCollection(NL::json stacJson, std::string colPath)
     Collection collection(stacJson, colPath, *m_p->m_connector,
         *m_p->m_pool, m_args->validateSchema);
 
+    // if init returns false, the collection has no items in itself or in
+    // any sub-catalogs/collections.
     if (collection.init(*m_p->m_colFilters, m_args->rawReaderArgs,
         m_args->schemaUrls, true))
     {
         for (Item& item: collection.items())
             addItem(item);
+    }
+
+    ErrorList errors = collection.errors();
+    if (errors.size())
+    {
+        for (auto& p: errors)
+        {
+            log()->get(LogLevel::Error) << "Failure fetching '" << p.first
+                << "' with error '" << p.second << "'\n";
+        }
+        throw pdal_error("Errors found during the processing of the Collection.");
     }
 }
 
@@ -315,6 +332,9 @@ void StacReader::initializeArgs()
 
                 std::time_t minTime = StacUtils::getStacTime(minDate);
                 std::time_t maxTime = StacUtils::getStacTime(maxDate);
+                if (minTime > maxTime)
+                    log()->get(LogLevel::Warning) << "Min date (" << minDate <<
+                        ") is greater than Max date (" << maxDate << ").";
                 m_p->m_itemFilters->datePairs.push_back({ minTime, maxTime });
             }
             catch(NL::detail::type_error e)

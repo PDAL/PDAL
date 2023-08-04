@@ -108,6 +108,10 @@ bool Catalog::init(const Filters& filters, NL::json rawReaderArgs,
         m_pool.await();
         m_pool.join();
         handleNested();
+
+        // if has no items exist after joining everything together, return false
+        if (items().empty())
+            return false;
     }
 
     return true;
