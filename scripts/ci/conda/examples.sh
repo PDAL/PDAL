@@ -9,6 +9,7 @@ if [ "$PDAL_PLATFORM" == "windows-latest" ]; then
 
 export CC=cl.exe
 export CXX=cl.exe
+where cl
 fi
 
 for EXAMPLE in writing writing-filter writing-kernel \
