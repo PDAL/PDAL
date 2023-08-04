@@ -58,7 +58,7 @@ Catalog::Catalog(const NL::json& json,
 Catalog::~Catalog()
 {}
 
-bool Catalog::init(Filters& filters, NL::json rawReaderArgs,
+bool Catalog::init(const Filters& filters, NL::json rawReaderArgs,
         SchemaUrls schemaUrls, bool isRoot=false)
 {
     m_root = isRoot;
@@ -71,7 +71,7 @@ bool Catalog::init(Filters& filters, NL::json rawReaderArgs,
 
     NL::json itemLinks = stacValue(m_json, "links");
 
-    for (const auto& link: itemLinks)
+    for (auto link: itemLinks)
     {
         m_pool.add([this, &filters, rawReaderArgs, link]()
         {
@@ -82,11 +82,11 @@ bool Catalog::init(Filters& filters, NL::json rawReaderArgs,
             const std::string absLinkPath = handleRelativePath(m_path, linkPath);
             try {
                 if (linkType == "item")
-                    handleItem(*filters.itemFilters, rawReaderArgs, link);
+                    handleItem(*filters.itemFilters, rawReaderArgs, absLinkPath);
                 else if (linkType == "collection")
-                    handleCol(filters, rawReaderArgs, link);
+                    handleCol(filters, rawReaderArgs, absLinkPath);
                 else if (linkType == "catalog")
-                    handleCat(filters, rawReaderArgs, link);
+                    handleCat(filters, rawReaderArgs, absLinkPath);
             }
             catch (std::exception& e)
             {
@@ -129,7 +129,7 @@ void Catalog::handleNested()
 }
 
 
-void Catalog::handleItem(Item::Filters& f, NL::json readerArgs, std::string path)
+void Catalog::handleItem(const Item::Filters& f, NL::json readerArgs, std::string path)
 {
         NL::json itemJson = m_connector.getJson(path);
         Item item(itemJson, path, m_connector, m_validate);
@@ -142,7 +142,7 @@ void Catalog::handleItem(Item::Filters& f, NL::json readerArgs, std::string path
         }
 }
 
-void Catalog::handleCol(Filters& f, NL::json readerArgs, std::string path)
+void Catalog::handleCol(const Filters& f, NL::json readerArgs, std::string path)
 {
     NL::json collectionJson = m_connector.getJson(path);
     std::unique_ptr<Collection> collection(new Collection(
@@ -156,7 +156,7 @@ void Catalog::handleCol(Filters& f, NL::json readerArgs, std::string path)
     }
 }
 
-void Catalog::handleCat(Filters& f, NL::json readerArgs, std::string path)
+void Catalog::handleCat(const Filters& f, NL::json readerArgs, std::string path)
 {
     NL::json catalogJson = m_connector.getJson(path);
     std::unique_ptr<Catalog> catalog(new Catalog(
