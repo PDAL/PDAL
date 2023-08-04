@@ -109,6 +109,7 @@ struct Options
     bool fixedSeed;
     pdal::SpatialReference aSrs;
     int threadCount = 10;
+    bool enhancedSrsVlrs = false;
 };
 
 struct BaseInfo

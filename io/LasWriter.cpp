@@ -99,6 +99,7 @@ struct LasWriter::Options
     StringHeaderVal<0> offsetY;
     StringHeaderVal<0> offsetZ;
     std::vector<las::Evlr> userVlrs;
+    bool enhancedSrsVlrs;
 };
 
 struct LasWriter::Private
@@ -173,6 +174,8 @@ void LasWriter::addArgs(ProgramArgs& args)
     args.add("offset_y", "Y offset", d->opts.offsetY);
     args.add("offset_z", "Z offset", d->opts.offsetZ);
     args.add("vlrs", "List of VLRs to set", d->opts.userVlrs);
+    args.add("enhanced_srs_vlrs", "Write WKT2 and PROJJSON as VLR?", d->opts.enhancedSrsVlrs,
+        decltype(d->opts.enhancedSrsVlrs)(false));
 }
 
 void LasWriter::initialize()
@@ -524,8 +527,35 @@ void LasWriter::addGeotiffVlrs()
 /// \return  Whether the VLR was added.
 bool LasWriter::addWktVlr()
 {
+    // WKT2 and PROJJSON can be writen in PDAL VLRs
+    if (d->opts.enhancedSrsVlrs) {
+        const std::string wkt2 = m_srs.getWKT2();
+        if (!wkt2.empty()) {
+            std::vector<char> wktBytes(wkt2.begin(), wkt2.end());
+            wktBytes.resize(wktBytes.size() + 1, 0);
+            addVlr(las::TransformUserId, las::LASFWkt2recordId, "PDAL WKT2 Record", wktBytes);
+        }
+
+        const std::string projjson = m_srs.getPROJJSON();
+        if (!projjson.empty()) {
+            std::vector<char> wktBytes(projjson.begin(), projjson.end());
+            wktBytes.resize(wktBytes.size() + 1, 0);
+            addVlr(las::PdalUserId, las::PdalProjJsonRecordId, "PDAL PROJJSON Record", wktBytes);
+        }
+    }
+
     // LAS 1.4 requires WKTv1
-    std::string wkt = m_srs.getWKT1();
+    std::string wkt;
+    try
+    {
+        wkt = m_srs.getWKT1();
+    }
+    catch(const std::exception&)
+    {
+        if (!d->opts.enhancedSrsVlrs)
+            throw;
+    }
+
     if (wkt.empty())
         return false;
 

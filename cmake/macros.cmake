@@ -73,9 +73,9 @@ macro(PDAL_ADD_LIBRARY _name)
 
     install(TARGETS ${_name}
         EXPORT PDALTargets
-        RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
-        LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
-        ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endmacro(PDAL_ADD_LIBRARY)
 
 ###############################################################################
@@ -101,9 +101,9 @@ macro(PDAL_ADD_FREE_LIBRARY _name _library_type)
         target_compile_definitions(${_name} PRIVATE PDAL_DLL_EXPORT)
         install(TARGETS ${_name}
             EXPORT PDALTargets
-            RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
-            LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
-            ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
     else()
         set_target_properties(${_name} PROPERTIES
             POSITION_INDEPENDENT_CODE TRUE)
@@ -168,9 +168,9 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
         CLEAN_DIRECT_OUTPUT 1)
 
     install(TARGETS ${${_name}}
-        RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
-        LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
-        ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
     if (APPLE)
         set_target_properties(${${_name}} PROPERTIES
             INSTALL_NAME_DIR "@rpath")

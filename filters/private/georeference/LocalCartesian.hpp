@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2020, Hobu Inc.
+ * Copyright (c) 2023, Guilhem Villemin (guilhem.villemin@altametris.com)
  *
  * All rights reserved.
  *
@@ -13,7 +13,7 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided
  *       with the distribution.
- *     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+ *     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
  *       names of its contributors may be used to endorse or promote
  *       products derived from this software without specific prior
  *       written permission.
@@ -34,35 +34,29 @@
 
 #pragma once
 
-#include <memory>
-#include <string>
+#include <pdal/PointRef.hpp>
 
-#include <pdal/Filter.hpp>
+#include <memory>
+#include <proj.h>
 
 namespace pdal
 {
-
-struct RasterLimits;
-
-class PDAL_DLL FaceRasterFilter : public pdal::Filter
+namespace georeference
 {
+class LocalCartesian
+{
+    PJ_CONTEXT* m_ctx;
+    PJ* m_source2ecef;
+    PJ* m_deg2rad;
+    PJ* m_ecef2enu;
+
 public:
-    FaceRasterFilter();
-    FaceRasterFilter& operator=(const FaceRasterFilter&) = delete;
-    FaceRasterFilter(const FaceRasterFilter&) = delete;
+    LocalCartesian(double lat0, double lon0, double h0 = 0.0);
+    ~LocalCartesian();
 
-    std::string getName() const;
-
-private:
-    virtual void addArgs(ProgramArgs& args);
-    virtual void prepared(PointTableRef);
-    virtual void filter(PointView& view);
-
-    std::unique_ptr<RasterLimits> m_limits;
-    std::string m_meshName;
-    double m_maxTriangleEdgeLength;
-    double m_noData;
-    bool m_computeLimits;
+    void reset(double lat0, double lon0, double h0 = 0.0);
+    void forward(PointRef& point);
+    void reverse(PointRef& point);
 };
-
-} // namespace pdal
+}; // namespace georeference
+}; // namespace pdal

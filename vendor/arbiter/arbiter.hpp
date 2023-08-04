@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: 2d7719e4569f963874f7afbf11772eeeb9073e35
+// Git SHA: 3e8919a297f4dc357e1ef2473bb295d8d1eac226
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -4530,7 +4530,9 @@ public:
 
     // Overrides.
     virtual std::unique_ptr<std::size_t> tryGetSize(
-            std::string path) const override;
+            std::string path,
+            http::Headers headers,
+            http::Query query = http::Query()) const override;
 
     /** Inherited from Drivers::Http. */
     virtual std::vector<char> put(

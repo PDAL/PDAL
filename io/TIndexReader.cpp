@@ -78,9 +78,9 @@ struct TIndexReader::Args
 };
 
 TIndexReader::TIndexReader() :
+    m_args(new TIndexReader::Args),
     m_dataset(nullptr),
-    m_layer(nullptr),
-    m_args(new TIndexReader::Args)
+    m_layer(nullptr)
 {}
 
 TIndexReader::FieldIndexes TIndexReader::getFields()

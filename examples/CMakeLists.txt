@@ -27,6 +27,6 @@ add_library(dummy_lib OBJECT ${SRCS})
 add_dependencies(dummy_lib generate_dimension_hpp)
 target_include_directories(dummy_lib PRIVATE
     ${PDAL_INCLUDE_DIR}
-    ${PROJECT_BINARY_DIR}/include)
+    ${CMAKE_INSTALL_INCLUDEDIR}/include)
 PDAL_TARGET_COMPILE_SETTINGS(dummy_lib)
 

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2020, Hobu Inc.
+ * Copyright (c) 2023, Guilhem Villemin (guilhem.villemin@altametris.com)
  *
  * All rights reserved.
  *
@@ -13,7 +13,7 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided
  *       with the distribution.
- *     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+ *     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
  *       names of its contributors may be used to endorse or promote
  *       products derived from this software without specific prior
  *       written permission.
@@ -33,36 +33,36 @@
  ****************************************************************************/
 
 #pragma once
+#include <nlohmann/json.hpp>
+#include <pdal/PointTable.hpp>
+#include <pdal/PointView.hpp>
+#include <pdal/pdal_types.hpp>
 
-#include <memory>
+#include <list>
+#include <map>
 #include <string>
-
-#include <pdal/Filter.hpp>
+#include <utility>
 
 namespace pdal
 {
-
-struct RasterLimits;
-
-class PDAL_DLL FaceRasterFilter : public pdal::Filter
+namespace georeference
 {
+struct TrajPoint;
+class Trajectory
+{
+    pdal::PointViewPtr m_pointView;
+    pdal::PointTable m_table;
+    pdal::PointViewSet m_set;
+
 public:
-    FaceRasterFilter();
-    FaceRasterFilter& operator=(const FaceRasterFilter&) = delete;
-    FaceRasterFilter(const FaceRasterFilter&) = delete;
+    Trajectory(const std::string& trajFile, const NL::json& opts);
 
-    std::string getName() const;
-
-private:
-    virtual void addArgs(ProgramArgs& args);
-    virtual void prepared(PointTableRef);
-    virtual void filter(PointView& view);
-
-    std::unique_ptr<RasterLimits> m_limits;
-    std::string m_meshName;
-    double m_maxTriangleEdgeLength;
-    double m_noData;
-    bool m_computeLimits;
+    bool getTrajPoint(double time, TrajPoint& trajPoint) const;
 };
 
-} // namespace pdal
+struct TrajPoint
+{
+    double roll, pitch, azimuth, wanderAngle, x, y, z, time;
+};
+}; // namespace georeference
+}; // namespace pdal

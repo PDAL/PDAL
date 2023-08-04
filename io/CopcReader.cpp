@@ -103,6 +103,8 @@ public:
     NL::json ogr;
 
     int keepAliveChunkCount = 10;
+
+    std::string srsConsumePreference;
 };
 
 struct CopcReader::Private
@@ -174,6 +176,8 @@ void CopcReader::addArgs(ProgramArgs& args)
     args.add("vlr", "Read LAS VLRs and add to metadata.", m_args->doVlrs);
     args.add("keep_alive", "Number of chunks to keep alive in memory when working",
             m_args->keepAliveChunkCount, 10);
+    args.add("srs_consume_preference", "Preference order to read SRS VLRs",
+        m_args->srsConsumePreference, "wkt1, wkt2, projjson");
 
 }
 
@@ -337,9 +341,58 @@ void CopcReader::fetchHeader()
 
 las::Vlr CopcReader::fetchSrsVlr(const las::VlrCatalog& catalog)
 {
-    las::Vlr vlr(las::TransformUserId, las::WktRecordId);
-    vlr.dataVec = catalog.fetchWithDescription(las::TransformUserId, las::WktRecordId,
-        vlr.description);
+    std::string srsConsumePreference = m_args->srsConsumePreference;
+    if (srsConsumePreference.empty())
+        srsConsumePreference = "wkt1, wkt2, projjson";
+
+    auto prefs = Utils::split2(srsConsumePreference, [](char c) { return c == ','; });
+    std::transform(prefs.cbegin(), prefs.cend(), prefs.begin(),
+                   [](std::string s)
+                   { Utils::trim(s); return Utils::tolower(s); });
+
+    auto makeVlr = [&catalog] (const std::string userId, uint16_t recordId) {
+        las::Vlr vlr(userId, recordId);
+        vlr.dataVec = catalog.fetchWithDescription(userId, recordId, vlr.description);
+        return vlr;
+    };
+
+    las::Vlr vlr;
+    for (const std::string& pref : prefs)
+    {
+        if (pref == "wkt2")
+        {
+            vlr = makeVlr(las::TransformUserId, las::LASFWkt2recordId);
+            if (!vlr.empty())
+            {
+                log()->get(LogLevel::Debug) << "Using WKT2 VLR" << std::endl;
+                break;
+            }
+        }
+        else if (pref == "projjson")
+        {
+            vlr = makeVlr(las::PdalUserId, las::PdalProjJsonRecordId);
+            if (!vlr.empty())
+            {
+                log()->get(LogLevel::Debug) << "Using PROJJSON VLR" << std::endl;
+                break;
+            }
+        }
+        else if (pref == "wkt1")
+        {
+            vlr = makeVlr(las::TransformUserId, las::WktRecordId);
+            if (!vlr.empty())
+            {
+                log()->get(LogLevel::Debug) << "Using WKT1 VLR" << std::endl;
+                break;
+            }
+        }
+        else
+        {
+            log()->get(LogLevel::Warning) << "Unknown value [" << pref <<
+                "] in srs consume preference." << std::endl;
+        }
+    }
+
     if (!vlr.empty())
         setSpatialReference(std::string(vlr.data(), vlr.data() + vlr.dataSize()));
     return vlr;

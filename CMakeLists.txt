@@ -110,6 +110,7 @@ set(PDAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 #------------------------------------------------------------------------------
 
 include(${PDAL_CMAKE_DIR}/gdal.cmake)
+include(${PDAL_CMAKE_DIR}/proj.cmake)
 include(${PDAL_CMAKE_DIR}/geotiff.cmake)  # Optional (not really)
 include(${PDAL_CMAKE_DIR}/threads.cmake)
 include(${PDAL_CMAKE_DIR}/zlib.cmake)
@@ -250,12 +251,14 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${NLOHMANN_INCLUDE_DIR}
         ${UTFCPP_INCLUDE_DIR}
         ${GDAL_INCLUDE_DIR}
+        ${PROJ_INCLUDE_DIR}
 )
 target_link_libraries(${PDAL_BASE_LIB_NAME}
     PRIVATE
         ${CMAKE_THREAD_LIBS_INIT}
         ${CMAKE_DL_LIBS}
         ${GDAL_LIBRARY}
+        PROJ::proj
         ${GEOTIFF_LIBRARY}
         ${LIBXML2_LIBRARIES}
         ${ZLIB_LIBRARIES}
@@ -291,7 +294,7 @@ endif()
 #
 if (UNIX AND NOT APPLE)
     set(LIBNAME ${CMAKE_SHARED_LIBRARY_PREFIX}${PDAL_LIB_NAME})
-    install(FILES ${LIBNAME} DESTINATION ${PDAL_LIB_INSTALL_DIR}
+    install(FILES ${LIBNAME} DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RENAME ${LIBNAME}${CMAKE_SHARED_LIBRARY_SUFFIX})
 endif()
 
@@ -313,9 +316,12 @@ if (NOT PDAL_HAVE_LZMA)
     set(LZMA_EXCLUDES PATTERN pdal/compression/Lzma* EXCLUDE)
 endif()
 
-install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
-    DESTINATION include
+install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal/
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pdal"
     FILES_MATCHING PATTERN "*.hpp"
+    PERMISSIONS
+        GROUP_EXECUTE WORLD_EXECUTE OWNER_EXECUTE
+        GROUP_READ WORLD_READ OWNER_READ
 #    PATTERN "pdal/private" EXCLUDE
 #    PATTERN "pdal/io/private" EXCLUDE
 #    PATTERN "pdal/pdal/private" EXCLUDE
@@ -326,27 +332,43 @@ install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
 #    ${LZMA_EXCLUDES}
 )
 
-install(DIRECTORY ${PDAL_KERNELS_DIR}
-    DESTINATION include/pdal
+install(DIRECTORY ${PDAL_KERNELS_DIR}/
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pdal/kernels"
     FILES_MATCHING PATTERN "*.hpp"
+    PERMISSIONS
+        GROUP_EXECUTE WORLD_EXECUTE OWNER_EXECUTE
+        GROUP_READ WORLD_READ OWNER_READ
 #    PATTERN "private" EXCLUDE
 )
-install(DIRECTORY ${PDAL_IO_DIR}
-    DESTINATION include/pdal
+install(DIRECTORY ${PDAL_IO_DIR}/
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pdal/io"
     FILES_MATCHING PATTERN "*.hpp"
+    PERMISSIONS
+        GROUP_EXECUTE WORLD_EXECUTE OWNER_EXECUTE
+        GROUP_READ WORLD_READ OWNER_READ
 #    PATTERN "private" EXCLUDE
 )
-install(DIRECTORY ${PDAL_FILTERS_DIR}
-    DESTINATION include/pdal
+install(DIRECTORY ${PDAL_FILTERS_DIR}/
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pdal/filters"
     FILES_MATCHING PATTERN "*.hpp"
+    PERMISSIONS
+        GROUP_EXECUTE WORLD_EXECUTE OWNER_EXECUTE
+        GROUP_READ WORLD_READ OWNER_READ
 #    PATTERN "private" EXCLUDE
 )
 
-install(FILES ${DIMENSION_OUTFILE} ${pdal_features_hpp}
-  DESTINATION include/pdal
+install(FILES ${DIMENSION_OUTFILE} ${pdal_features_hpp}/
+  DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pdal"
+    PERMISSIONS
+        GROUP_EXECUTE WORLD_EXECUTE OWNER_EXECUTE
+        GROUP_READ WORLD_READ OWNER_READ
 )
 install(FILES ${PDAL_CMAKE_DIR}/pluginmacros.cmake
-    DESTINATION ${PDAL_LIB_INSTALL_DIR}/cmake/PDAL)
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/PDAL
+    PERMISSIONS
+        GROUP_EXECUTE WORLD_EXECUTE OWNER_EXECUTE
+        GROUP_READ WORLD_READ OWNER_READ
+        )
 
 #
 # CPACK
@@ -365,7 +387,7 @@ install(
     EXPORT
         PDALTargets
     DESTINATION
-        "${PDAL_LIB_INSTALL_DIR}/cmake/PDAL")
+        "${CMAKE_INSTALL_LIBDIR}/cmake/PDAL")
 include(${PDAL_CMAKE_DIR}/config.cmake)
 
 #
@@ -388,12 +410,12 @@ if (WITH_COMPLETION)
             FILES
                 "${PROJECT_SOURCE_DIR}/scripts/bash-completion/pdal"
             DESTINATION
-                "${CMAKE_INSTALL_PREFIX}/share/bash-completion/completions")
+                "${CMAKE_INSTALL_DATAROOTDIR}/share/bash-completion/completions")
     elseif (IS_DIRECTORY /etc/bash_completion.d)
         install(
             FILES
                 "${PROJECT_SOURCE_DIR}/scripts/bash-completion/pdal"
             DESTINATION
-                "${CMAKE_INSTALL_PREFIX}/etc/bash_completion.d")
+                "${CMAKE_INSTALL_DATAROOTDIR}/etc/bash_completion.d")
     endif()
 endif()

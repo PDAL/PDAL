@@ -161,6 +161,13 @@ PDAL_ADD_TEST(pdal_io_copc_reader_test
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
+PDAL_ADD_TEST(pdal_io_copc_writer_test
+    FILES
+        io/CopcWriterTest.cpp
+    INCLUDES
+        ${GDAL_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
+)
 PDAL_ADD_TEST(pdal_io_faux_test FILES io/FauxReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_gdal_reader_test
     FILES
@@ -196,6 +203,7 @@ PDAL_ADD_TEST(pdal_io_las_writer_test
     FILES
         io/LasWriterTest.cpp
     INCLUDES
+        ${GDAL_INCLUDE_DIR}
         ${NLOHMANN_INCLUDE_DIR}
 )
 
