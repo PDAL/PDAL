@@ -249,7 +249,7 @@ Delaunator::Delaunator(std::vector<double> const& in_coords)
     std::vector<double> dists;
     dists.reserve(n);
     for (index_t i = 0; i < n; i++)
-    {    
+    {
         const double& x = coords[2 * i];
         const double& y = coords[2 * i + 1];
         dists.push_back(dist(x, y, m_center.x(), m_center.y()));
@@ -271,8 +271,6 @@ Delaunator::Delaunator(std::vector<double> const& in_coords)
     hull_tri.resize(n);
 
     hull_start = i0;
-
-    index_t hull_size = 3;
 
     hull_next[i0] = hull_prev[i2] = i1;
     hull_next[i1] = hull_prev[i0] = i2;
@@ -342,7 +340,6 @@ Delaunator::Delaunator(std::vector<double> const& in_coords)
 
         hull_tri[i] = legalize(t + 2);
         hull_tri[e] = t;
-        hull_size++;
 
         // walk forward through the hull, adding more triangles and flipping recursively
         index_t next = hull_next[e];
@@ -352,7 +349,6 @@ Delaunator::Delaunator(std::vector<double> const& in_coords)
             t = add_triangle(next, i, q, hull_tri[i], INVALID_INDEX, hull_tri[next]);
             hull_tri[i] = legalize(t + 2);
             hull_next[next] = next; // mark as removed
-            hull_size--;
             next = q;
         }
 
@@ -365,7 +361,6 @@ Delaunator::Delaunator(std::vector<double> const& in_coords)
                 legalize(t + 2);
                 hull_tri[q] = t;
                 hull_next[e] = e; // mark as removed
-                hull_size--;
                 e = q;
             }
         }

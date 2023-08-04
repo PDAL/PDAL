@@ -3,10 +3,11 @@
 #
 set(CDIR "${CMAKE_CURRENT_LIST_DIR}")
 
-#
 # This must be first.
 #
 include(${CDIR}/directories.cmake)
+
+include(GNUInstallDirs)
 
 #
 # This must come before macros, but I don't understand why the policies

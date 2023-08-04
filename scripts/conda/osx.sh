@@ -25,7 +25,7 @@ CFLAGS= CXXFLAGS="-Werror=strict-aliasing" CC=/usr/bin/cc CXX=/usr/bin/c++ cmake
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
         -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address" \
         -DCMAKE_CXX_FLAGS="-fsanitize=address" \
-        -DBUILD_PLUGIN_TILEDB=ON \
+        -DBUILD_PLUGIN_TILEDB=OFF \
         -DWITH_ZSTD=ON \
         ..
 

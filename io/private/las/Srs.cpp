@@ -114,26 +114,73 @@ SpatialReference srsFromGeotiff(const Vlr *vlr, const VlrList& vlrs, LogPtr log,
 
 } // Unnamed namespace.
 
-void Srs::init(const VlrList& vlrs, bool useWkt, LogPtr log)
+
+void Srs::init(const VlrList& vlrs, std::string srsConsumePreference, LogPtr log)
 {
+
+    if (srsConsumePreference.empty())
+        srsConsumePreference = "wkt1, geotiff, wkt2, projjson";
+
+    auto prefs = Utils::split2(srsConsumePreference, [](char c) { return c == ','; });
+    std::transform(prefs.cbegin(), prefs.cend(), prefs.begin(),
+                   [](std::string s)
+                   { Utils::trim(s); return Utils::tolower(s); });
 
     m_srs = SpatialReference();
     m_geotiffString.clear();
 
-    const Vlr *wktVlr = findVlr(TransformUserId, WktRecordId, vlrs);
-    const Vlr *gtiffVlr = findVlr(TransformUserId, GeotiffDirectoryRecordId, vlrs);
-
-    if (wktVlr && gtiffVlr && log)
-        log->get(LogLevel::Debug) << "File contains both "
-            "WKT and GeoTiff VLRs which is disallowed." << std::endl;
-
-    if (useWkt && !wktVlr)
-        wktVlr = findVlr(LiblasUserId, WktRecordId, vlrs);
+    const Vlr* vlr = nullptr;
+    const Vlr* gtiffVlr = nullptr;
+    for (const std::string& pref : prefs)
+    {
+        if (pref == "wkt2")
+        {
+            if ((vlr = findVlr(TransformUserId, LASFWkt2recordId, vlrs)))
+            {
+                log->get(LogLevel::Debug) << "Using WKT2 VLR" << std::endl;
+                break;
+            }
+        }
+        else if (pref == "projjson")
+        {
+            if ((vlr = findVlr(PdalUserId, PdalProjJsonRecordId, vlrs)))
+            {
+                log->get(LogLevel::Debug) << "Using PROJJSON VLR" << std::endl;
+                break;
+            }
+        }
+        else if (pref == "wkt1")
+        {
+            if ((vlr = findVlr(TransformUserId, WktRecordId, vlrs)))
+            {
+                log->get(LogLevel::Debug) << "Using WKT1 VLR" << std::endl;
+                break;
+            }
+            else if ((vlr = findVlr(LiblasUserId, WktRecordId, vlrs)))
+            {
+                log->get(LogLevel::Debug) << "Using WKT1 (liblass) VLR" << std::endl;
+                break;
+            }
+        }
+        else if (pref == "geotiff")
+        {
+            if ((gtiffVlr = findVlr(TransformUserId, GeotiffDirectoryRecordId, vlrs)))
+            {
+                log->get(LogLevel::Debug) << "Using GeoTIFF VLR" << std::endl;
+                break;
+            }
+        }
+        else
+        {
+            log->get(LogLevel::Warning) << "Unknown value [" << pref <<
+                "] in srs consume preference." << std::endl;
+        }
+    }
 
     try
     {
-        if (useWkt)
-            m_srs = srsFromWkt(wktVlr);
+        if (vlr)
+            m_srs = srsFromWkt(vlr);
         else
             m_srs = srsFromGeotiff(gtiffVlr, vlrs, log, m_geotiffString);
     }

@@ -221,6 +221,7 @@ TEST_F(TileDBWriterTest, write_simple_compression)
     options.add("array_name", pth);
     options.add("compression", "zstd");
     options.add("compression_level", 7);
+    options.add("filter_profile", "none");
 
     if (FileUtils::directoryExists(pth))
         FileUtils::deleteDirectory(pth);
@@ -360,13 +361,23 @@ TEST_F(TileDBWriterTest, default_options)
 
     tiledb::FilterList fl =
         array.schema().domain().dimension("X").filter_list();
-    EXPECT_EQ(fl.nfilters(), 1U);
+#if TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR < 16
+    EXPECT_EQ(fl.nfilters(), 3U);
+#else
+    EXPECT_EQ(fl.nfilters(), 4U);
+#endif
 
     tiledb::Filter f1 = fl.filter(0);
-    EXPECT_EQ(f1.filter_type(), TILEDB_FILTER_ZSTD);
-    int32_t compressionLevel;
-    f1.get_option(TILEDB_COMPRESSION_LEVEL, &compressionLevel);
-    EXPECT_EQ(compressionLevel, 7);
+    EXPECT_EQ(f1.filter_type(), TILEDB_FILTER_SCALE_FLOAT);
+    uint64_t byteWidth;
+    f1.get_option<uint64_t>(TILEDB_SCALE_FLOAT_BYTEWIDTH, &byteWidth);
+    EXPECT_EQ(byteWidth, 4);
+    double scale;
+    f1.get_option<double>(TILEDB_SCALE_FLOAT_FACTOR, &scale);
+    EXPECT_NEAR(scale, 0.01, 1.0e-9);
+    double offset;
+    f1.get_option<double>(TILEDB_SCALE_FLOAT_OFFSET, &offset);
+    EXPECT_NEAR(offset, 0.0, 1.0e-9);
 
     tiledb::Attribute att = array.schema().attributes().begin()->second;
     tiledb::FilterList flAtts = att.filter_list();

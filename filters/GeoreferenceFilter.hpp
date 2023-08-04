@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2020, Hobu Inc.
+ * Copyright (c) 2023, Guilhem Villemin (guilhem.villemin@altametris.com)
  *
  * All rights reserved.
  *
@@ -13,7 +13,7 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided
  *       with the distribution.
- *     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+ *     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
  *       names of its contributors may be used to endorse or promote
  *       products derived from this software without specific prior
  *       written permission.
@@ -33,36 +33,39 @@
  ****************************************************************************/
 
 #pragma once
-
-#include <memory>
-#include <string>
-
 #include <pdal/Filter.hpp>
+#include <pdal/Streamable.hpp>
+#include <pdal/pdal_internal.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
-
-struct RasterLimits;
-
-class PDAL_DLL FaceRasterFilter : public pdal::Filter
+namespace georeference
+{
+class TransformationFilter;
+class LocalCartesian;
+} // namespace georeference
+class PDAL_DLL GeoreferenceFilter : public Filter, public Streamable
 {
 public:
-    FaceRasterFilter();
-    FaceRasterFilter& operator=(const FaceRasterFilter&) = delete;
-    FaceRasterFilter(const FaceRasterFilter&) = delete;
+    GeoreferenceFilter();
+    ~GeoreferenceFilter();
 
-    std::string getName() const;
+    GeoreferenceFilter& operator=(const GeoreferenceFilter&) = delete;
+    GeoreferenceFilter(const GeoreferenceFilter&) = delete;
+
+    std::string getName() const override;
 
 private:
-    virtual void addArgs(ProgramArgs& args);
-    virtual void prepared(PointTableRef);
-    virtual void filter(PointView& view);
+    virtual void addArgs(ProgramArgs& args) override;
+    virtual void initialize() override;
+    virtual bool processOne(PointRef& point) override;
+    virtual void filter(PointView& view) override;
+    virtual void prepared(PointTableRef table) override;
 
-    std::unique_ptr<RasterLimits> m_limits;
-    std::string m_meshName;
-    double m_maxTriangleEdgeLength;
-    double m_noData;
-    bool m_computeLimits;
+    struct Config;
+    std::unique_ptr<Config> m_config;
+    std::unique_ptr<georeference::LocalCartesian> m_localCartesian;
 };
 
 } // namespace pdal

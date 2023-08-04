@@ -122,6 +122,7 @@ public:
 
     std::string getWKT() const;
     std::string getWKT1() const;
+    std::string getWKT2() const;
 
     /// Parse the string starting at position `pos` as a spatial reference.
     /// \param s    String to parse.

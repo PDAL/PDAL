@@ -27,9 +27,8 @@ jobs:
 
     env:
       PDAL_PLATFORM: ${{ matrix.platform }}
-      CACHE_NUMBER: 1
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Support longpaths
       run: git config --system core.longpaths true
@@ -49,8 +48,6 @@ jobs:
         auto-update-conda: true
         use-only-tar-bz2: false
 
-    - uses: ilammy/msvc-dev-cmd@v1
-      if: matrix.platform == 'windows-latest'
 
     - name: Setup
       run: |
@@ -66,6 +63,9 @@ jobs:
           conda activate test
           conda info
           conda list
+
+    - uses: ilammy/msvc-dev-cmd@v1
+      if: matrix.platform == 'windows-latest'
 
     - name: Test
       run: |
