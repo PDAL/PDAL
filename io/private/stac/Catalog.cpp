@@ -65,6 +65,12 @@ bool Catalog::init(const Filters& filters, NL::json rawReaderArgs,
     if (!filter(filters))
         return false;
 
+    std::string type = stacValue<std::string>(m_json, "type");
+    if (type == "Catalog")
+        m_type = GroupType::catalog;
+    if (type == "Collection")
+        m_type = GroupType::collection;
+
     m_schemaUrls = schemaUrls;
     if (m_validate)
         validate();
@@ -152,8 +158,9 @@ void Catalog::handleCol(const Filters& f, NL::json readerArgs, std::string path)
     std::unique_ptr<Collection> collection(new Collection(
         collectionJson, path, m_connector, m_pool, m_validate));
 
-    bool valid = collection->init(f, readerArgs, m_schemaUrls);
-    if (valid)
+    //init will return false if collection has no items or sub catalogs/collections
+    bool passed = collection->init(f, readerArgs, m_schemaUrls);
+    if (passed)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_subCatalogs.push_back(std::move(collection));
@@ -166,8 +173,9 @@ void Catalog::handleCat(const Filters& f, NL::json readerArgs, std::string path)
     std::unique_ptr<Catalog> catalog(new Catalog(
         catalogJson, path, m_connector, m_pool, m_validate));
 
-    bool valid = catalog->init(f, readerArgs, m_schemaUrls);
-    if (valid)
+    //init will return false if catalog has no items or sub catalogs/collections
+    bool passed = catalog->init(f, readerArgs, m_schemaUrls);
+    if (passed)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_subCatalogs.push_back(std::move(catalog));
@@ -179,9 +187,26 @@ ItemList& Catalog::items()
     return m_itemList;
 }
 
+SubList& Catalog::subs()
+{
+    return m_subCatalogs;
+}
+
 ErrorList Catalog::errors()
 {
     return m_errors;
+}
+
+GroupType Catalog::type()
+{
+    return m_type;
+}
+
+std::string Catalog::id()
+{
+    if (m_id.empty())
+        m_id = stacId(m_json);
+    return m_id;
 }
 
 void Catalog::validate()

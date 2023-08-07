@@ -49,12 +49,6 @@ namespace pdal
 namespace stac
 {
 
-class Item;
-
-typedef std::pair<std::string, std::string> StacError;
-typedef std::deque<StacError> ErrorList;
-typedef std::vector<Item> ItemList;
-typedef std::deque<std::pair<std::time_t, std::time_t>> DatePairs;
 
 struct SchemaUrls
 {

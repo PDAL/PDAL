@@ -66,13 +66,17 @@ public:
         Filters* colFilters;
     };
 
+    ItemList& items();
+    SubList& subs();
+    std::string id();
+    ErrorList errors();
+    GroupType type();
+
     bool init(const Filters& filters, NL::json rawReaderArgs, SchemaUrls schemaUrls,
             bool isRoot);
-    ItemList& items();
-    ErrorList errors();
+    bool filter(Filters filters);
 
     virtual void validate();
-    bool filter(Filters filters);
 
 protected:
 
@@ -84,10 +88,11 @@ protected:
     bool m_root;
     bool m_validate;
     std::string m_id;
+    GroupType m_type;
 
     ErrorList m_errors;
 
-    std::vector<std::unique_ptr<Catalog>> m_subCatalogs = {};
+    SubList m_subCatalogs = {};
     ItemList m_itemList = {};
     SchemaUrls m_schemaUrls;
     Options m_readerOptions;

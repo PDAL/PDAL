@@ -106,6 +106,67 @@ collection_schema_url
 feature_schema_url
     URL of JSON schema you'd like to use for JSON schema validation of STAC Items/Features.
 
+Metadata
+--------------------------------------------------------------------------------
+Metadata outputs will include `ids` and `item_ids` both representings STAC Feature Ids,
+as well as `catalog_ids` and `collection_ids` representing STAC Catalogs and Collections,
+respectively.
+
+.. code-block:: bash
+
+    pdal info --summary --driver readers.stac \
+    --readers.stac.asset_names 'ept.json' \
+    --readers.stac.asset_names 'data' \
+    ${PDAL_DIR}/test/data/stac/local_catalog/catalog.json
+
+.. code-block:: json
+{
+  "file_size": 1177,
+  "filename": "/${PDAL_DIR}/test/data/stac/local_catalog/catalog.json",
+  "now": "2023-08-07T15:48:59-0500",
+  "pdal_version": "2.6.0 (git-version: 54be24)",
+  "reader": "readers.stac",
+  "summary":
+  {
+    "bounds":
+    {
+      "maxx": 637179.22,
+      "maxy": 5740737,
+      "maxz": 1069,
+      "minx": -10543360,
+      "miny": 848935.2,
+      "minz": -22
+    },
+    "dimensions": "ClassFlags, Classification, EdgeOfFlightLine, GpsTime, Intensity, NumberOfReturns, PointSourceId, ReturnNumber, ScanAngleRank, ScanChannel, ScanDirectionFlag, UserData, X, Y, Z, OriginId, Red, Green, Blue",
+    "metadata":
+    {
+      "catalog_ids":
+      [
+        "3dep"
+      ],
+      "collection_ids":
+      [
+        "usgs-test"
+      ],
+      "ids":
+      [
+        "IA_SouthCentral_1_2020",
+        "MI_Charlevoix_Islands_TL_2018",
+        "MD_GoldenBeach_2012",
+        "Autzen Trim"
+      ],
+      "item_ids":
+      [
+        "IA_SouthCentral_1_2020",
+        "MI_Charlevoix_Islands_TL_2018",
+        "MD_GoldenBeach_2012",
+        "Autzen Trim"
+      ]
+    },
+    "num_points": 44851411750
+  }
+}
+
 
 .. _Spatio Temporal Access Catalog (STAC): https://stacspec.org/en
 .. _Regular Expression: https://en.cppreference.com/w/cpp/regex

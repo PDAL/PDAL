@@ -42,16 +42,29 @@ namespace pdal
 
 namespace stac
 {
+    class Item;
+    class Catalog;
+    class Collection;
+    class ItemCollection;
+
+    typedef std::pair<std::string, std::string> StacError;
+    typedef std::deque<StacError> ErrorList;
+    typedef std::vector<Item> ItemList;
+    typedef std::vector<std::unique_ptr<Catalog>> SubList;
+    typedef std::deque<std::pair<std::time_t, std::time_t>> DatePairs;
+
+    enum GroupType
+    {
+        catalog,
+        collection
+    };
+
     pdal_error stac_error(std::string id, std::string stacType, std::string const& msg);
     pdal_error stac_error(std::string const& msg);
 
 
 namespace StacUtils
 {
-
-// public:
-//     StacUtils();
-//     ~StacUtils();
 
     std::string handleRelativePath(std::string srcPath, std::string linkPath);
     std::time_t getStacTime(std::string in);
@@ -108,6 +121,6 @@ namespace StacUtils
         }
     }
 
-}//StacUtils
+}// StacUtils
 }// stac
 }// pdal
