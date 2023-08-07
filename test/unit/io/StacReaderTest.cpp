@@ -84,8 +84,8 @@ TEST(StacReaderTest, local_catalog_test)
 
     QuickInfo qi = reader.preview();
     NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
-    EXPECT_TRUE(jsonMetadata.contains("stac_ids"));
-    std::vector<std::string> idList = jsonMetadata["stac_ids"].get<std::vector<std::string>>();
+    EXPECT_TRUE(jsonMetadata.contains("item_ids"));
+    std::vector<std::string> idList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
 
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "Autzen Trim") != idList.end());
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
@@ -208,8 +208,8 @@ TEST(StacReaderTest, item_collection_test)
     QuickInfo qi = reader.preview();
 
     NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
-    EXPECT_TRUE(jsonMetadata.contains("stac_ids"));
-    std::vector<std::string> idList = jsonMetadata["stac_ids"].get<std::vector<std::string>>();
+    EXPECT_TRUE(jsonMetadata.contains("item_ids"));
+    std::vector<std::string> idList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
 
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "AK_BrooksCamp_2012") != idList.end());
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "AK_NorthSlope_B1_2018") != idList.end());
@@ -331,8 +331,8 @@ TEST(StacReaderTest, id_prune_test)
 
 
     NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
-    EXPECT_TRUE(jsonMetadata.contains("stac_ids"));
-    std::vector<std::string> idList = jsonMetadata["stac_ids"].get<std::vector<std::string>>();
+    EXPECT_TRUE(jsonMetadata.contains("item_ids"));
+    std::vector<std::string> idList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
 
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "USGS_LPC_AK_Anchorage_2015_LAS_2017") != idList.end());
@@ -370,8 +370,8 @@ TEST(StacReaderTest, date_prune_accept_test)
     QuickInfo qi = reader.preview();
 
     NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
-    EXPECT_TRUE(jsonMetadata.contains("stac_ids"));
-    std::vector<std::string> idList = jsonMetadata["stac_ids"].get<std::vector<std::string>>();
+    EXPECT_TRUE(jsonMetadata.contains("item_ids"));
+    std::vector<std::string> idList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
     EXPECT_EQ(qi.m_pointCount, 4860658);
 
@@ -393,8 +393,8 @@ TEST(StacReaderTest, date_start_end_time_accept_test)
     QuickInfo qi = reader.preview();
 
     NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
-    EXPECT_TRUE(jsonMetadata.contains("stac_ids"));
-    std::vector<std::string> idList = jsonMetadata["stac_ids"].get<std::vector<std::string>>();
+    EXPECT_TRUE(jsonMetadata.contains("item_ids"));
+    std::vector<std::string> idList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
     EXPECT_EQ(qi.m_pointCount, 4860658);
 }
@@ -431,8 +431,8 @@ TEST(StacReaderTest, bounds_prune_accept_test)
     QuickInfo qi = reader.preview();
 
     NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
-    EXPECT_TRUE(jsonMetadata.contains("stac_ids"));
-    std::vector<std::string> idList = jsonMetadata["stac_ids"].get<std::vector<std::string>>();
+    EXPECT_TRUE(jsonMetadata.contains("item_ids"));
+    std::vector<std::string> idList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
     EXPECT_EQ(qi.m_pointCount, 4860658);
 
