@@ -113,7 +113,8 @@ bool Catalog::init(const Filters& filters, NL::json rawReaderArgs,
     {
         m_pool.await();
         m_pool.join();
-        handleNested();
+        hoistNested();
+        collectErrors();
 
         // if has no items exist after joining everything together, return false
         if (items().empty())
@@ -123,21 +124,29 @@ bool Catalog::init(const Filters& filters, NL::json rawReaderArgs,
     return true;
 }
 
-// Wait for all nested catalogs to finish processing their items so they can
-// be added to the overarching itemlist
-void Catalog::handleNested()
+//bring all nested catalogs and collections to the top layer for item extraction
+void Catalog::hoistNested()
 {
     for (auto& catalog: m_subCatalogs)
     {
-        for (const Item& i: catalog->items())
-            m_itemList.push_back(i);
-
-        for (StacError& e: catalog->errors())
-            m_errors.push_back(e);
+        catalog->hoistNested();
+        for (auto& cat: catalog->subs())
+        {
+            m_subCatalogs.push_back(std::move(cat));
+        }
     }
-
 }
 
+void Catalog::collectErrors()
+{
+    for (auto& catalog: m_subCatalogs)
+    {
+        for (auto e: catalog->errors())
+        {
+            m_errors.push_back(e);
+        }
+    }
+}
 
 void Catalog::handleItem(const Item::Filters& f, NL::json readerArgs, std::string path)
 {

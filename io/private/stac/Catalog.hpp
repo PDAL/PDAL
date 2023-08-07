@@ -97,7 +97,8 @@ protected:
     SchemaUrls m_schemaUrls;
     Options m_readerOptions;
 
-    void handleNested();
+    void hoistNested();
+    void collectErrors();
     void handleItem(const Item::Filters& f, NL::json readerArgs, std::string path);
     void handleCat(const Filters& f, NL::json readerArgs, std::string path);
     void handleCol(const Filters& f, NL::json readerArgs, std::string path);

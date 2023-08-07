@@ -216,33 +216,8 @@ void StacReader::handleItem(NL::json stacJson, std::string itemPath)
         addItem(item);
 }
 
-
-void StacReader::handleCatalog(NL::json stacJson, std::string catPath)
+void StacReader::printErrors(Catalog& c)
 {
-    Catalog c(stacJson, catPath, *m_p->m_connector, *m_p->m_pool,
-        m_args->validateSchema);
-
-    // if init returns false, the collection has no items in itself or in
-    // any sub-catalogs/collections.
-    m_p->m_catList.push_back(c.id());
-    if (c.init(*m_p->m_catFilters, m_args->rawReaderArgs,
-        m_args->schemaUrls, true))
-    {
-        //add sub col/cat ids to list for metadata bookkeeping
-        auto& subs = c.subs();
-        for (auto& sub: subs)
-        {
-            if (sub->type() == GroupType::catalog)
-                m_p->m_catList.push_back(sub->id());
-            else if (sub->type() == GroupType::collection)
-                m_p->m_colList.push_back(sub->id());
-        }
-
-
-        for (Item& item: c.items())
-            addItem(item);
-    }
-
     ErrorList errors = c.errors();
     if (errors.size())
     {
@@ -253,6 +228,40 @@ void StacReader::handleCatalog(NL::json stacJson, std::string catPath)
         }
         throw pdal_error("Errors found during initial processing of the Catalog.");
     }
+}
+
+
+void StacReader::handleCatalog(NL::json stacJson, std::string catPath)
+{
+    Catalog c(stacJson, catPath, *m_p->m_connector, *m_p->m_pool,
+        m_args->validateSchema);
+
+    // if init returns false, the collection has no items in itself or in
+    // any sub-catalogs/collections.
+    if (c.init(*m_p->m_catFilters, m_args->rawReaderArgs,
+        m_args->schemaUrls, true))
+    {
+        m_p->m_catList.push_back(c.id());
+        auto& subs = c.subs();
+        for (auto& sub: subs)
+        {
+            //add sub col/cat ids to list for metadata bookkeeping
+            if (sub->type() == GroupType::catalog)
+                m_p->m_catList.push_back(sub->id());
+            else if (sub->type() == GroupType::collection)
+                m_p->m_colList.push_back(sub->id());
+
+            //collect items from sub catalogs
+            for (Item& item: sub->items())
+                addItem(item);
+        }
+
+        //collect items from root
+        for (Item& item: c.items())
+            addItem(item);
+    }
+
+    printErrors(c);
 }
 
 void StacReader::handleCollection(NL::json stacJson, std::string colPath)
@@ -266,30 +275,26 @@ void StacReader::handleCollection(NL::json stacJson, std::string colPath)
         m_args->schemaUrls, true))
     {
         m_p->m_colList.push_back(c.id());
-        //add sub col/cat ids to list for metadata bookkeeping
         auto& subs = c.subs();
         for (auto& sub: subs)
         {
+            //add sub col/cat ids to list for metadata bookkeeping
             if (sub->type() == GroupType::catalog)
                 m_p->m_catList.push_back(sub->id());
             else if (sub->type() == GroupType::collection)
                 m_p->m_colList.push_back(sub->id());
+
+            //collect items from sub catalogs
+            for (Item& item: sub->items())
+                addItem(item);
         }
 
+        //collect items from root
         for (Item& item: c.items())
             addItem(item);
     }
 
-    ErrorList errors = c.errors();
-    if (errors.size())
-    {
-        for (auto& p: errors)
-        {
-            log()->get(LogLevel::Error) << "Failure fetching '" << p.first
-                << "' with error '" << p.second << "'\n";
-        }
-        throw pdal_error("Errors found during initial processing of the Collection.");
-    }
+    printErrors(c);
 }
 
 void StacReader::handleItemCollection(NL::json stacJson, std::string icPath)

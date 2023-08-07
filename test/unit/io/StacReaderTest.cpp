@@ -267,15 +267,33 @@ TEST(StacReaderTest, nested_catalog_test)
 {
     Options options;
     options.add("filename", Support::datapath("stac/multi_type_catalog.json"));
-    options.add("catalogs", "3dep");
-    options.add("items", "MD_GoldenBeach_2012");
     options.add("asset_names", "ept.json");
+    options.add("asset_names", "data");
 
     StageFactory f;
     Stage& reader = *f.createStage("readers.stac");
     reader.setOptions(options);
 
     QuickInfo qi = reader.preview();
+
+    NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
+    EXPECT_TRUE(jsonMetadata.contains("catalog_ids"));
+    EXPECT_TRUE(jsonMetadata.contains("collection_ids"));
+    EXPECT_TRUE(jsonMetadata.contains("item_ids"));
+
+    std::vector<std::string> catList = jsonMetadata["catalog_ids"].get<std::vector<std::string>>();
+    std::vector<std::string> colList = jsonMetadata["collection_ids"].get<std::vector<std::string>>();
+    std::vector<std::string> itemList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
+
+    EXPECT_TRUE(std::find(catList.begin(), catList.end(), "Test_Catalog") != catList.end());
+    EXPECT_TRUE(std::find(catList.begin(), catList.end(), "3dep") != catList.end());
+
+    EXPECT_TRUE(std::find(colList.begin(), colList.end(), "usgs-test") != colList.end());
+
+    EXPECT_TRUE(std::find(itemList.begin(), itemList.end(), "Autzen Trim") != itemList.end());
+    EXPECT_TRUE(std::find(itemList.begin(), itemList.end(), "MD_GoldenBeach_2012") != itemList.end());
+    EXPECT_TRUE(std::find(itemList.begin(), itemList.end(), "IA_SouthCentral_1_2020") != itemList.end());
+    EXPECT_TRUE(std::find(itemList.begin(), itemList.end(), "MI_Charlevoix_Islands_TL_2018") != itemList.end());
 
     EXPECT_EQ(qi.m_pointCount, 4860658);
 }
