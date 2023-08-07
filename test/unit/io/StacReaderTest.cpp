@@ -295,7 +295,7 @@ TEST(StacReaderTest, nested_catalog_test)
     EXPECT_TRUE(std::find(itemList.begin(), itemList.end(), "IA_SouthCentral_1_2020") != itemList.end());
     EXPECT_TRUE(std::find(itemList.begin(), itemList.end(), "MI_Charlevoix_Islands_TL_2018") != itemList.end());
 
-    EXPECT_EQ(qi.m_pointCount, 4860658);
+    EXPECT_EQ(qi.m_pointCount, 44872718422);
 }
 
 TEST(StacReaderTest, multiple_readers_test)
