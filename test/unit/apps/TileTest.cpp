@@ -37,6 +37,7 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/util/FileUtils.hpp>
+#include <io/LasReader.hpp>
 
 #include "Support.hpp"
 
@@ -99,7 +100,7 @@ TEST(Tile, test2)
 
     FileUtils::deleteDirectory(Support::temppath("tile"));
     FileUtils::createDirectory(Support::temppath("tile"));
-    
+
     std::string tx1_cmd = Support::binpath("pdal") + " translate \"" +
         infile + "\" \"" + file1 +
         "\" --readers.text.override_srs=\"EPSG:2029\"";
@@ -116,7 +117,7 @@ TEST(Tile, test2)
         "--filters.reprojection.in_srs=\"EPSG:2029\" "
         "--filters.reprojection.out_srs=\"EPSG:2958\"";
     Utils::run_shell_command(tx3_cmd, output);
-    
+
     std::string inSpec(Support::temppath("tile/file*.las"));
     std::string outSpec(Support::temppath("tile/out#.txt"));
 
@@ -132,4 +133,89 @@ TEST(Tile, test2)
     for (int i = 0; i < 3; ++i)
         for (int j = 0; j < 3; ++j)
             checkFile(i, j, 3, 500000, 5000000);
+}
+
+TEST(Tile, test3)
+{
+    std::string tmp(Support::temppath("tile/tile1.txt"));
+
+    FileUtils::deleteDirectory(Support::temppath("tile"));
+    FileUtils::createDirectory(Support::temppath("tile"));
+
+    // Write the test output.
+    std::ofstream out(tmp);
+    out << "X Y Z\n";
+
+    // Fill up a set with a strings representing the points. Then remove them when read
+    // to make sure that we have exactly the same points read as written.
+    std::set<std::string> points;
+    // This gets us 25600 points.
+    for (int x = 0; x < 160; ++x)
+        for (int y = 0; y < 160; ++y)
+        {
+            // Stick points in our test set just to account for each of them.
+            points.insert(std::to_string(x) + " " + std::to_string(y));
+
+            // Write points to our temp text file.
+            out << x << " " << y << " " << "0\n";
+        }
+    out.close();
+
+    // Create a file with no points.
+    tmp = Support::temppath("tile/tile2.txt");
+    std::ofstream out2(tmp);
+    out2 << "X Y Z\n";
+    out2.close();
+
+    // Create a file with one point.
+    tmp = Support::temppath("tile/tile3.txt");
+    std::ofstream out3(tmp);
+    out3 << "X Y Z\n";
+    out3 << "-1 -1 0\n";
+    out3.close();
+    points.insert("-1 -1");
+
+    // Run tile on the test output.
+    std::string outSpec(Support::temppath("tile/out#.las"));
+    std::string baseCmd = Support::binpath("pdal") + " tile \"" +
+        Support::temppath("tile/tile*.txt") + "\" \"" + outSpec + "\" ";
+
+    std::string cmd = baseCmd + "--length=30";
+    std::string output;
+    Utils::run_shell_command(cmd, output);
+
+    StringList files = FileUtils::directoryList(Support::temppath("tile"));
+
+    EXPECT_EQ(points.size(), 160u * 160u + 1);
+    for (std::string& f : files)
+    {
+        if (Utils::endsWith(f, ".las"))
+        {
+            Options o;
+            o.add("filename", f);
+            LasReader r;
+            r.setOptions(o);
+            PointTable t;
+            r.prepare(t);
+            PointViewSet s = r.execute(t);
+            EXPECT_EQ(s.size(), 1u);
+            PointViewPtr v = *s.begin();
+            for (PointId i = 0; i < v->size(); ++i)
+            {
+                int x = v->getFieldAs<int>(Dimension::Id::X, i);
+                int y = v->getFieldAs<int>(Dimension::Id::Y, i);
+
+                // Make sure that the point is valid and was one we wrote.
+                // Then remove the found point from our test set..
+                std::string s = std::to_string(x) + " " + std::to_string(y);
+                auto it = points.find(s);
+                EXPECT_TRUE(it != points.end());
+                points.erase(it);
+            }
+        }
+    }
+    // Make sure we removed all the points.
+    EXPECT_EQ(points.size(), 0u);
+
+    FileUtils::deleteDirectory(Support::temppath("tile"));
 }
