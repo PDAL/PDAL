@@ -1,0 +1,379 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "stac_extensions": [
+        "https://stac-extensions.github.io/pointcloud/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/projection/v1.1.0/schema.json"
+      ],
+      "id": "autzen_trim",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              -123.07339516203463,
+              44.049906162305206,
+              406.26
+            ],
+            [
+              -123.0734622480648,
+              44.05144932969857,
+              406.26
+            ],
+            [
+              -123.06898494402998,
+              44.051550487759314,
+              520.51
+            ],
+            [
+              -123.06891797456355,
+              44.05000731774758,
+              520.51
+            ],
+            [
+              -123.07339516203463,
+              44.049906162305206,
+              406.26
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "bbox": [
+        -123.0734622480648,
+        44.049906162305206,
+        406.26,
+        -123.06891797456355,
+        44.051550487759314,
+        520.51
+      ],
+      "properties": {
+        "datetime": "2015-09-10T00:00:00Z",
+        "pc:count": 110000,
+        "pc:encoding": "?",
+        "pc:schemas": [
+          {
+            "name": "X",
+            "size": 8,
+            "type": "floating"
+          },
+          {
+            "name": "Y",
+            "size": 8,
+            "type": "floating"
+          },
+          {
+            "name": "Z",
+            "size": 8,
+            "type": "floating"
+          },
+          {
+            "name": "Intensity",
+            "size": 2,
+            "type": "unsigned"
+          },
+          {
+            "name": "ReturnNumber",
+            "size": 1,
+            "type": "unsigned"
+          },
+          {
+            "name": "NumberOfReturns",
+            "size": 1,
+            "type": "unsigned"
+          },
+          {
+            "name": "ScanDirectionFlag",
+            "size": 1,
+            "type": "unsigned"
+          },
+          {
+            "name": "EdgeOfFlightLine",
+            "size": 1,
+            "type": "unsigned"
+          },
+          {
+            "name": "Classification",
+            "size": 1,
+            "type": "unsigned"
+          },
+          {
+            "name": "ScanAngleRank",
+            "size": 4,
+            "type": "floating"
+          },
+          {
+            "name": "UserData",
+            "size": 1,
+            "type": "unsigned"
+          },
+          {
+            "name": "PointSourceId",
+            "size": 2,
+            "type": "unsigned"
+          },
+          {
+            "name": "GpsTime",
+            "size": 8,
+            "type": "floating"
+          },
+          {
+            "name": "Red",
+            "size": 2,
+            "type": "unsigned"
+          },
+          {
+            "name": "Green",
+            "size": 2,
+            "type": "unsigned"
+          },
+          {
+            "name": "Blue",
+            "size": 2,
+            "type": "unsigned"
+          }
+        ],
+        "pc:type": "lidar",
+        "proj:bbox": [
+          636001.76,
+          848935.2,
+          406.26,
+          637179.22,
+          849497.9,
+          520.51
+        ],
+        "proj:geometry": {
+          "coordinates": [
+            [
+              [
+                636001.76,
+                848935.2,
+                406.26
+              ],
+              [
+                636001.76,
+                849497.9,
+                406.26
+              ],
+              [
+                637179.22,
+                849497.9,
+                520.51
+              ],
+              [
+                637179.22,
+                848935.2,
+                520.51
+              ],
+              [
+                636001.76,
+                848935.2,
+                406.26
+              ]
+            ]
+          ],
+          "type": "Polygon"
+        },
+        "proj:wkt2": "PROJCS[\"NAD_1983_HARN_Lambert_Conformal_Conic\",GEOGCS[\"NAD83(HARN)\",DATUM[\"NAD83_High_Accuracy_Reference_Network\",SPHEROID[\"GRS 1980\",6378137,298.257222101004,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6152\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Lambert_Conformal_Conic_2SP\"],PARAMETER[\"latitude_of_origin\",41.75],PARAMETER[\"central_meridian\",-120.5],PARAMETER[\"standard_parallel_1\",43],PARAMETER[\"standard_parallel_2\",45.5],PARAMETER[\"false_easting\",1312335.95800525],PARAMETER[\"false_northing\",0],UNIT[\"foot\",0.3048,AUTHORITY[\"EPSG\",\"9002\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]"
+      },
+      "links": [],
+      "assets": {
+        "data": {
+          "href": "./../laz/autzen_trim.laz",
+          "roles": [
+            "data"
+          ]
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "stac_extensions": [
+        "https://stac-extensions.github.io/pointcloud/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/projection/v1.1.0/schema.json"
+      ],
+      "id": "simple",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              635619.85,
+              848899.7,
+              406.59
+            ],
+            [
+              635619.85,
+              853535.43,
+              406.59
+            ],
+            [
+              638982.55,
+              853535.43,
+              586.38
+            ],
+            [
+              638982.55,
+              848899.7,
+              586.38
+            ],
+            [
+              635619.85,
+              848899.7,
+              406.59
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "bbox": [
+        635619.85,
+        848899.7,
+        406.59,
+        638982.55,
+        853535.43,
+        586.38
+      ],
+      "properties": {
+        "datetime": "0000-01-01T00:00:00Z",
+        "pc:count": 1065,
+        "pc:encoding": "?",
+        "pc:schemas": [
+          {
+            "name": "X",
+            "size": 8,
+            "type": "floating"
+          },
+          {
+            "name": "Y",
+            "size": 8,
+            "type": "floating"
+          },
+          {
+            "name": "Z",
+            "size": 8,
+            "type": "floating"
+          },
+          {
+            "name": "Intensity",
+            "size": 2,
+            "type": "unsigned"
+          },
+          {
+            "name": "ReturnNumber",
+            "size": 1,
+            "type": "unsigned"
+          },
+          {
+            "name": "NumberOfReturns",
+            "size": 1,
+            "type": "unsigned"
+          },
+          {
+            "name": "ScanDirectionFlag",
+            "size": 1,
+            "type": "unsigned"
+          },
+          {
+            "name": "EdgeOfFlightLine",
+            "size": 1,
+            "type": "unsigned"
+          },
+          {
+            "name": "Classification",
+            "size": 1,
+            "type": "unsigned"
+          },
+          {
+            "name": "ScanAngleRank",
+            "size": 4,
+            "type": "floating"
+          },
+          {
+            "name": "UserData",
+            "size": 1,
+            "type": "unsigned"
+          },
+          {
+            "name": "PointSourceId",
+            "size": 2,
+            "type": "unsigned"
+          },
+          {
+            "name": "GpsTime",
+            "size": 8,
+            "type": "floating"
+          },
+          {
+            "name": "Red",
+            "size": 2,
+            "type": "unsigned"
+          },
+          {
+            "name": "Green",
+            "size": 2,
+            "type": "unsigned"
+          },
+          {
+            "name": "Blue",
+            "size": 2,
+            "type": "unsigned"
+          }
+        ],
+        "pc:type": "lidar",
+        "proj:bbox": [
+          635619.85,
+          848899.7,
+          406.59,
+          638982.55,
+          853535.43,
+          586.38
+        ],
+        "proj:geometry": {
+          "coordinates": [
+            [
+              [
+                635619.85,
+                848899.7,
+                406.59
+              ],
+              [
+                635619.85,
+                853535.43,
+                406.59
+              ],
+              [
+                638982.55,
+                853535.43,
+                586.38
+              ],
+              [
+                638982.55,
+                848899.7,
+                586.38
+              ],
+              [
+                635619.85,
+                848899.7,
+                406.59
+              ]
+            ]
+          ],
+          "type": "Polygon"
+        },
+        "proj:wkt2": ""
+      },
+      "links": [],
+      "assets": {
+        "data": {
+          "href": "./../laz/simple.laz",
+          "roles": [
+            "data"
+          ]
+        }
+      }
+    }
+  ]
+}
