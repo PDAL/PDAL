@@ -42,12 +42,16 @@
 #include <pdal/JsonFwd.hpp>
 #include <pdal/StageFactory.hpp>
 #include <filters/MergeFilter.hpp>
-#include "private/stac/Item.hpp"
 
 
 namespace pdal
 {
 
+namespace stac
+{
+    class Item;
+    class Catalog;
+}
 
 class PDAL_DLL StacReader : public Reader, public Streamable
 {
