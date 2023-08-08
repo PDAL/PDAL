@@ -70,7 +70,8 @@ class PDAL_DLL StacReader : public Reader, public Streamable
 
         StageFactory m_factory;
 
-        void printErrors(stac::Catalog& cat);
+        void printErrors(stac::Catalog& c);
+        void handleNested(stac::Catalog& c);
         void addItem(stac::Item& item);
         void handleItem(NL::json stacJson, std::string itemPath);
         void handleCatalog(NL::json stacJson, std::string catPath);

@@ -108,7 +108,7 @@ feature_schema_url
 
 Metadata
 --------------------------------------------------------------------------------
-Metadata outputs will include `ids` and `item_ids` both representings STAC Feature Ids,
+Metadata outputs will include `ids` and `item_ids` for representings STAC Feature Ids,
 as well as `catalog_ids` and `collection_ids` representing STAC Catalogs and Collections,
 respectively.
 
@@ -120,9 +120,10 @@ respectively.
     ${PDAL_DIR}/test/data/stac/local_catalog/catalog.json
 
 .. code-block:: json
+
     {
         "file_size": 1177,
-        "filename": "/${PDAL_DIR}/test/data/stac/local_catalog/catalog.json",
+        "filename": "/PDAL_DIR/test/data/stac/local_catalog/catalog.json",
         "now": "2023-08-07T15:48:59-0500",
         "pdal_version": "2.6.0 (git-version: 54be24)",
         "reader": "readers.stac",

@@ -230,6 +230,23 @@ void StacReader::printErrors(Catalog& c)
     }
 }
 
+void StacReader::handleNested(Catalog& c)
+{
+    auto& subs = c.subs();
+    for (auto& sub: subs)
+    {
+        //add sub col/cat ids to list for metadata bookkeeping
+        if (sub->type() == GroupType::catalog)
+            m_p->m_catList.push_back(sub->id());
+        else if (sub->type() == GroupType::collection)
+            m_p->m_colList.push_back(sub->id());
+
+        //collect items from sub catalogs
+        for (Item& item: sub->items())
+            addItem(item);
+    }
+}
+
 
 void StacReader::handleCatalog(NL::json stacJson, std::string catPath)
 {
@@ -242,20 +259,8 @@ void StacReader::handleCatalog(NL::json stacJson, std::string catPath)
         m_args->schemaUrls, true))
     {
         m_p->m_catList.push_back(c.id());
-        auto& subs = c.subs();
-        for (auto& sub: subs)
-        {
-            //add sub col/cat ids to list for metadata bookkeeping
-            if (sub->type() == GroupType::catalog)
-                m_p->m_catList.push_back(sub->id());
-            else if (sub->type() == GroupType::collection)
-                m_p->m_colList.push_back(sub->id());
-
-            //collect items from sub catalogs
-            for (Item& item: sub->items())
-                addItem(item);
-        }
-
+        //iteracted
+        handleNested(c);
         //collect items from root
         for (Item& item: c.items())
             addItem(item);
@@ -275,20 +280,7 @@ void StacReader::handleCollection(NL::json stacJson, std::string colPath)
         m_args->schemaUrls, true))
     {
         m_p->m_colList.push_back(c.id());
-        auto& subs = c.subs();
-        for (auto& sub: subs)
-        {
-            //add sub col/cat ids to list for metadata bookkeeping
-            if (sub->type() == GroupType::catalog)
-                m_p->m_catList.push_back(sub->id());
-            else if (sub->type() == GroupType::collection)
-                m_p->m_colList.push_back(sub->id());
-
-            //collect items from sub catalogs
-            for (Item& item: sub->items())
-                addItem(item);
-        }
-
+        handleNested(c);
         //collect items from root
         for (Item& item: c.items())
             addItem(item);
