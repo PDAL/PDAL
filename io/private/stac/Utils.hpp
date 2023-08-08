@@ -33,6 +33,8 @@
  ****************************************************************************/
 #pragma once
 
+#include <deque>
+
 #include <arbiter/arbiter.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/pdal_types.hpp>
