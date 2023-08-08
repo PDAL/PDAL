@@ -497,7 +497,8 @@ QuickInfo CopcReader::inspect()
     qi.m_srs = getSpatialReference();
     qi.m_pointCount = h.pointCount();
 
-    PointLayoutPtr layout(new PointLayout);
+    auto plptr = std::make_unique<PointLayout>();
+    PointLayoutPtr layout(plptr.get());
     addDimensions(layout);
     for (Dimension::Id dim : layout->dims())
         qi.m_dimNames.push_back(layout->dimName(dim));
