@@ -201,7 +201,7 @@ std::string Item::extractDriverFromItem(const NL::json& asset) const
                         return ct.second;
             }
         }
-        catch(std::exception e)
+        catch(std::exception& e)
         {
             throw stac_error(m_id, "item", "Failed to HEAD " + dataUrl +
                 ". " + e.what());
@@ -445,7 +445,7 @@ bool Item::filterDates(DatePairs dates)
                     if (stacTime >= range.first && stacTime <= range.second)
                         return true;
             }
-            catch (pdal_error e)
+            catch (pdal_error& e)
             {
                 throw stac_error(m_id, "item", e.what());
             }

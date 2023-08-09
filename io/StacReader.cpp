@@ -363,7 +363,7 @@ void StacReader::initializeArgs()
                         ") is greater than Max date (" << maxDate << ").";
                 m_p->m_itemFilters->datePairs.push_back({ minTime, maxTime });
             }
-            catch(NL::detail::type_error e)
+            catch(NL::detail::type_error& e)
             {
                 throw pdal_error("User defined date range ("+ datepair.dump() +
                     ") is invalid. It must be of type string and comply " +
