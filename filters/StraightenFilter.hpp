@@ -48,7 +48,7 @@ public:
     StraightenFilter& operator=(const StraightenFilter&) = delete;
     StraightenFilter(const StraightenFilter&) = delete;
 
-    std::string getName() const;
+    virtual std::string getName() const override;
 
 private:
     virtual void addArgs(ProgramArgs& args) override;
