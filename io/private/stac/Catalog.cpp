@@ -232,7 +232,7 @@ void Catalog::validate()
     try {
         val.validate(m_json);
     }
-    catch (std::exception &e)
+    catch (std::exception& e)
     {
         throw stac_error(m_id, "catalog",
             "STAC schema validation Error in root schema: " +
