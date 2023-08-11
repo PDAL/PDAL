@@ -2237,3 +2237,53 @@ TEST(LasWriterTest, header_bbox)
         EXPECT_DOUBLE_EQ(reader.header().maxZ(), 310.5888);
     }
 }
+
+// Make sure that legacy return count is 0 when format is 1.4 with point data record >= 6
+// and is equal to return count on point data record < 6
+TEST(LasWriterTest, issue2235)
+{
+    // Read
+    Options readerOps;
+    readerOps.add("filename", Support::datapath("las/4_1.las"));
+
+    LasReader reader;
+    reader.setOptions(readerOps);
+
+    // Write with point data record < 6
+    Options writerOps41;
+    writerOps41.add("filename", Support::temppath("out_4_1.las"));
+    writerOps41.add("minor_version", 4);
+    writerOps41.add("dataformat_id", 1);
+
+    LasWriter writer41;
+    writer41.setInput(reader);
+    writer41.setOptions(writerOps41);
+
+    PointTable table41;
+    writer41.prepare(table41);
+    writer41.execute(table41);
+
+    LasTester tester41;
+    const las::Header& h41 = tester41.header(writer41);
+    EXPECT_EQ(h41.legacyPointCount, (int32_t)h41.pointCount());
+
+    // Write with point data record >= 6
+    Options writerOps46;
+    writerOps46.add("filename", Support::temppath("out_4_6.las"));
+    writerOps46.add("minor_version", 4);
+    writerOps46.add("dataformat_id", 6);
+
+    LasWriter writer46;
+    writer46.setInput(reader);
+    writer46.setOptions(writerOps46);
+
+    PointTable table46;
+    writer46.prepare(table46);
+    writer46.execute(table46);
+
+    LasTester tester46;
+    const las::Header& h46 = tester46.header(writer46);
+
+    EXPECT_EQ(h46.legacyPointCount, 0);
+    EXPECT_NE(h46.pointCount(), 0);
+}

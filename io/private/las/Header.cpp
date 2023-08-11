@@ -138,8 +138,10 @@ StringList Header::validate(uint64_t fileSize, bool nosrs) const
 void Header::setPointCount(uint64_t pointCount)
 {
     ePointCount = pointCount;
+    bool condition = (ePointCount <= (std::numeric_limits<uint32_t>::max)()) &&
+        !((versionMinor >= 4) && (pointFormat() >= 6) );
     legacyPointCount =
-        (ePointCount <= (std::numeric_limits<uint32_t>::max)()) ? (uint32_t)ePointCount : 0;
+        condition ? (uint32_t)ePointCount : 0;
 }
 
 void Header::setPointsByReturn(int returnNum, uint64_t pointCount)
