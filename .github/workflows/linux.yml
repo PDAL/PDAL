@@ -78,9 +78,8 @@ jobs:
       env:
         TEST_SET_LOCALE: de_DE.UTF-8
       run: |
-          # Exclude 4 tiledb io tests that fail due to TileDB library implementation
+          # Exclude 5 tiledb io tests that fail due to TileDB library implementation
           # and 2 e57 io tests for the same reason.
           # please, remove the exception rule here when fixed
-          source ../scripts/ci/linux/test.sh -E 'pdal_io_tiledb_(time_writer|time_reader|writer|reader)_test|pdal_io_e57_(write|read)_test|pdal_io_stac_reader_test'
+          source ../scripts/ci/linux/test.sh -E 'pdal_io_tiledb_(time_writer|time_reader|writer|reader|bit_fields)_test|pdal_io_e57_(write|read)_test|pdal_io_stac_reader_test'
       working-directory: ./build
-
