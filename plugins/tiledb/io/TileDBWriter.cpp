@@ -153,7 +153,7 @@ void TileDBWriter::addArgs(ProgramArgs& args)
                      "Add offset to use fo default x float-scale filter",
                      m_args->m_offset[2], 0.0);
     args.add("chunk_size", "Point cache size for chunked writes",
-             m_args->m_cache_size, size_t(10000));
+             m_args->m_cache_size, size_t(1000000));
     args.add("stats", "Dump TileDB query stats to stdout", m_args->m_stats,
              false);
     args.add("filter_profile", "Filter profile to use for compression filters",
