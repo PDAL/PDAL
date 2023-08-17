@@ -173,7 +173,7 @@ void CopcReader::addArgs(ProgramArgs& args)
     args.add("ogr", "OGR filter geometries", m_args->ogr);
     args.add("fix_dims", "Make invalid dimension names valid by changing invalid "
         "characters to '_'", m_args->fixNames, true);
-    args.add("vlr", "Read LAS VLRs and add to metadata.", m_args->doVlrs);
+    args.add("vlr", "Read LAS VLRs and add to metadata.", m_args->doVlrs, true);
     args.add("keep_alive", "Number of chunks to keep alive in memory when working",
             m_args->keepAliveChunkCount, 10);
     args.add("srs_consume_preference", "Preference order to read SRS VLRs",

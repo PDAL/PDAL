@@ -214,11 +214,12 @@ void CopcWriter::handleForwardVlrs(MetadataNode& forwards)
         if (userIdNode.valid() && recordIdNode.valid())
         {
 
+            const MetadataNode& descriptionNode = n.findChild("description");
             const std::vector<uint8_t>& data = Utils::base64_decode(n.findChild("data").value());
             const char *d = (const char *)data.data();
             std::vector<char> buf(d, d + data.size());
             las::Evlr e(userIdNode.value(), (uint16_t)std::stoi(recordIdNode.value()),
-                n.description(), std::move(buf));
+                descriptionNode.value(), std::move(buf));
             b->vlrs.push_back(e);
         }
     }
