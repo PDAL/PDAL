@@ -497,11 +497,10 @@ QuickInfo CopcReader::inspect()
     qi.m_srs = getSpatialReference();
     qi.m_pointCount = h.pointCount();
 
-    auto plptr = std::make_unique<PointLayout>();
-    PointLayoutPtr layout(plptr.get());
-    addDimensions(layout);
-    for (Dimension::Id dim : layout->dims())
-        qi.m_dimNames.push_back(layout->dimName(dim));
+    PointLayout layout;
+    addDimensions(&layout);
+    for (Dimension::Id dim : layout.dims())
+        qi.m_dimNames.push_back(layout.dimName(dim));
 
     // If there is a spatial filter from an explicit --bounds, an origin query,
     // or polygons, then we'll limit our number of points to be an upper bound,
