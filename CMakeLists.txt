@@ -251,17 +251,17 @@ target_link_libraries(${PDAL_LIB_NAME}
         ${ZLIB_LIBRARIES}
         ${LIBLZMA_LIBRARIES}
         ${ZSTD_LIBRARIES}
-        ${WINSOCK_LIBRARY}
         ${PDAL_REEXPORT}
-
         ${PDAL_ARBITER_LIB_NAME}
         ${JSON_SCHEMA_LIB_NAME}
         ${PDAL_KAZHDAN_LIB_NAME}
         ${PDAL_LAZPERF_LIB_NAME}
         ${UTFCPP_LIB_NAME}
+    PUBLIC
+        ${WINSOCK_LIBRARY}
     INTERFACE
         ${PDAL_LIBDIR}
-
+        ${WINSOCK_LIBRARY}
 )
 set_target_properties(${PDAL_LIB_NAME} PROPERTIES
     VERSION ${PDAL_BUILD_VERSION}
