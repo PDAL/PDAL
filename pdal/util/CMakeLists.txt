@@ -33,9 +33,9 @@ set(PDAL_UTIL_SOURCES
     "${PDAL_UTIL_DIR}/private/${BACKTRACE_SOURCE}"
 )
 
-PDAL_ADD_FREE_LIBRARY(${PDAL_UTIL_LIB_NAME} SHARED ${PDAL_UTIL_SOURCES})
+add_library(${PDAL_UTIL_LIB_NAME} OBJECT ${PDAL_UTIL_SOURCES})
 target_link_libraries(${PDAL_UTIL_LIB_NAME}
-    PRIVATE
+    PUBLIC
         ${BACKTRACE_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
         ${UTFCPP_LIB_NAME}
@@ -48,20 +48,21 @@ target_link_libraries(${PDAL_UTIL_LIB_NAME}
 
 target_include_directories(${PDAL_UTIL_LIB_NAME}
     PRIVATE
+        ${PDAL_INCLUDE_DIR}
         ${UTFCPP_INCLUDE_DIR}
         ${NLOHMANN_INCLUDE_DIR}
 )
 
-set_target_properties(${PDAL_UTIL_LIB_NAME} PROPERTIES
-    VERSION "${PDAL_BUILD_VERSION}"
-    SOVERSION "${PDAL_API_VERSION}"
-    CLEAN_DIRECT_OUTPUT 1)
+#set_target_properties(${PDAL_UTIL_LIB_NAME} PROPERTIES
+#    VERSION "${PDAL_BUILD_VERSION}"
+#    SOVERSION "${PDAL_API_VERSION}"
+#    CLEAN_DIRECT_OUTPUT 1)
 
 set_property(GLOBAL PROPERTY _UTIL_INCLUDED TRUE)
 
 # Compatibility for GCC8: std::filesystem requires linking with libstdc++fs
-target_link_libraries(
-  ${PDAL_UTIL_LIB_NAME}
-  PRIVATE
-  "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:-lstdc++fs>"
-)
+#target_link_libraries(
+#  ${PDAL_UTIL_LIB_NAME}
+#  PRIVATE
+#  "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:-lstdc++fs>"
+#)
