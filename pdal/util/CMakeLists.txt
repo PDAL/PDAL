@@ -34,6 +34,8 @@ set(PDAL_UTIL_SOURCES
 )
 
 add_library(${PDAL_UTIL_LIB_NAME} OBJECT ${PDAL_UTIL_SOURCES})
+set_property(TARGET ${PDAL_UTIL_LIB_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)
+
 target_link_libraries(${PDAL_UTIL_LIB_NAME}
     PUBLIC
         ${BACKTRACE_LIBRARIES}
@@ -61,8 +63,8 @@ target_include_directories(${PDAL_UTIL_LIB_NAME}
 set_property(GLOBAL PROPERTY _UTIL_INCLUDED TRUE)
 
 # Compatibility for GCC8: std::filesystem requires linking with libstdc++fs
-#target_link_libraries(
-#  ${PDAL_UTIL_LIB_NAME}
-#  PRIVATE
-#  "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:-lstdc++fs>"
-#)
+target_link_libraries(
+  ${PDAL_UTIL_LIB_NAME}
+  PRIVATE
+  "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:-lstdc++fs>"
+)
