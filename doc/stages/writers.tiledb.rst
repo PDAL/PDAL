@@ -39,7 +39,7 @@ config_file
   `TileDB`_ configuration file. [Optional]
 
 data_tile_capacity
-  Number of points per tile. Not used when `append=true`. [Optional]
+  Number of points per tile. Not used when `append=true`. [Default: 100,000]
 
 x_tile_size
   Tile size (x). Floating point value used for determining on-disk data order. Not used when `append=true`. [Optional]
@@ -83,14 +83,17 @@ use_time_dim
 time_first
   Put the GpsTime dimension first instead of last. Only used when `use_time_dim=true`. Not used when `append=true`. [Default: false]
 
+combine_bit_fields
+  Store all sub-byte fields together in an attribute named `BitFields`. Not used when `append=true`. [Default: true]
+
 chunk_size
-  Point cache size for chunked writes. [Optional]
+  Point cache size for chunked writes. [Default: 1,000,000]
 
 append
   Instead of creating a new array, append to an existing array that has the dimensions stored as a TileDB dimension or TileDB attribute. [Default: false]
 
 stats
-  Dump query stats to stdout. [Optional]
+  Dump query stats to stdout. [Default: false]
 
 filters
   JSON array or object of compression filters for either dimenions or attributes of the form {dimension/attribute name : {"compression": name, compression_options: value, ...}}.  Not used when `append=true`. [Optional]

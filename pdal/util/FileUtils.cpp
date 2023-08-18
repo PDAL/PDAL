@@ -418,6 +418,9 @@ bool isDirectory(const std::string& path)
 // Determine if the path is an absolute path
 bool isAbsolutePath(const std::string& path)
 {
+    if (path.find("://") != std::string::npos)
+        return true;
+
     return fs::path(toNative(path)).is_absolute();
 }
 

@@ -426,4 +426,65 @@ private:
     std::vector<T> m_data;
 };
 
+class BitFieldsBuffer : public TileDBDimBuffer
+{
+public:
+    /**
+     * Constructor.
+     *
+     * @param name TileDB dimension or attribute name.
+     * @param layout Point layout for PDAL dimensions.
+     */
+    BitFieldsBuffer(const std::string& name, PointLayoutPtr layout);
+
+    /**
+     * Constructor.
+     *
+     * @param name TileDB dimension or attribute name.
+     * @param bitFieldIds PDAL dimension IDs of the bit field dimensions.
+     */
+    BitFieldsBuffer(
+        const std::string& name,
+        const std::array<std::optional<Dimension::Id>, 6> bitFieldIds);
+
+    /**
+     * Returns bit field index given a dimension name.
+     *
+     * If the dimension name is not a bit field name, then return `nullopt`.
+     *
+     * @param dimName Name of the dimension to get the bit field index for.
+     */
+    static std::optional<uint32_t> bitFieldIndex(const std::string& dimName);
+
+    /**
+     * Returns bit field dimension name given an index.
+     *
+     * @param index Bit field index. Must be between 0 and 5.
+     */
+    static std::string bitFieldName(const uint32_t index);
+
+    tiledb::Attribute
+    createAttribute(const tiledb::Context& ctx) const override;
+
+    void copyDataToBuffer(PointRef& point, size_t index) override;
+
+    void copyDataToPoint(PointRef& point, size_t index) override;
+
+    const std::string& name() const override;
+
+    void resizeBuffer(size_t nelements) override;
+
+    void setQueryBuffer(tiledb::Query& query) override;
+
+private:
+    /** Name of the TileDB attribute. */
+    std::string m_name;
+
+    /** PDAL dimension IDs. */
+    std::array<std::optional<Dimension::Id>, 6> m_ids;
+
+    /** Raw buffer data. */
+    std::vector<uint16_t> m_data;
+};
+
 } // namespace pdal

@@ -3,7 +3,7 @@
 #
 # (based originally on the libLAS files copyright Mateusz Loskot)
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.13)
 
 project(PDAL VERSION 2.6.0 LANGUAGES CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
@@ -109,6 +109,7 @@ set(PDAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 #  Dependencies.
 #------------------------------------------------------------------------------
 
+include(${PDAL_CMAKE_DIR}/proj.cmake)
 include(${PDAL_CMAKE_DIR}/gdal.cmake)
 include(${PDAL_CMAKE_DIR}/geotiff.cmake)  # Optional (not really)
 include(${PDAL_CMAKE_DIR}/threads.cmake)
@@ -250,12 +251,14 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${NLOHMANN_INCLUDE_DIR}
         ${UTFCPP_INCLUDE_DIR}
         ${GDAL_INCLUDE_DIR}
+        ${PROJ_INCLUDE_DIR}
 )
 target_link_libraries(${PDAL_BASE_LIB_NAME}
     PRIVATE
         ${CMAKE_THREAD_LIBS_INIT}
         ${CMAKE_DL_LIBS}
         ${GDAL_LIBRARY}
+        ${PROJ_LIBRARIES}
         ${GEOTIFF_LIBRARY}
         ${LIBXML2_LIBRARIES}
         ${ZLIB_LIBRARIES}

@@ -469,7 +469,8 @@ tiledb::FilterList FilterFactory::defaultProfileFilterList(
     else if (dimName == "Classification" || dimName == "ReturnNumber" ||
              dimName == "NumberOfReturns" || dimName == "ScanDirectionFlag" ||
              dimName == "ScanAngleRank" || dimName == "EdgeOfFlightLine" ||
-             dimName == "PointSourceId" || dimName == "UserData")
+             dimName == "PointSourceId" || dimName == "UserData" ||
+             dimName == "BitFields")
     {
         if (balanced)
         {
@@ -491,6 +492,131 @@ tiledb::FilterList FilterFactory::defaultProfileFilterList(
         return defaultFilterList(ctx);
     }
     return filterList;
+}
+
+BitFieldsBuffer::BitFieldsBuffer(const std::string& name, PointLayoutPtr layout)
+    : m_name{name}
+{
+    for (uint32_t index = 0; index < 6; ++index)
+    {
+        const auto dimName = BitFieldsBuffer::bitFieldName(index);
+        m_ids[index] =
+            layout->registerOrAssignDim(dimName, Dimension::Type::Signed8);
+    }
+}
+
+BitFieldsBuffer::BitFieldsBuffer(
+    const std::string& name,
+    const std::array<std::optional<Dimension::Id>, 6> bitFieldIds)
+    : m_name{name}, m_ids{bitFieldIds}
+{
+}
+
+std::optional<uint32_t>
+BitFieldsBuffer::bitFieldIndex(const std::string& dimName)
+{
+    if (dimName == "ReturnNumber")
+        return 0;
+    if (dimName == "NumberOfReturns")
+        return 1;
+    if (dimName == "ClassFlags")
+        return 2;
+    if (dimName == "ScanChannel")
+        return 3;
+    if (dimName == "ScanDirectionFlag")
+        return 4;
+    if (dimName == "EdgeOfFlightLine")
+        return 5;
+    return std::nullopt;
+}
+
+std::string BitFieldsBuffer::bitFieldName(const uint32_t index)
+{
+    switch (index)
+    {
+    case 0:
+        return "ReturnNumber";
+    case 1:
+        return "NumberOfReturns";
+    case 2:
+        return "ClassFlags";
+    case 3:
+        return "ScanChannel";
+    case 4:
+        return "ScanDirectionFlag";
+    case 5:
+        return "EdgeOfFlightLine";
+    default:
+        throw tiledb::TileDBError("Bit field index " + std::to_string(index) +
+                                  " is out of bounds.");
+    }
+}
+
+void BitFieldsBuffer::copyDataToBuffer(PointRef& point, size_t index)
+{
+    // Get bit field data. Set to zero if bit field does not exist in table.
+    std::array<uint8_t, 6> unpacked{};
+    if (m_ids[0].has_value())
+        unpacked[0] = point.getFieldAs<uint8_t>(m_ids[0].value()) & 0x0F;
+    if (m_ids[1].has_value())
+        unpacked[1] = (point.getFieldAs<uint8_t>(m_ids[1].value()) & 0x0F) << 4;
+    if (m_ids[2].has_value())
+        unpacked[2] = point.getFieldAs<uint8_t>(m_ids[2].value()) & 0x0F;
+    if (m_ids[3].has_value())
+        unpacked[3] = (point.getFieldAs<uint8_t>(m_ids[3].value()) & 0x03) << 4;
+    if (m_ids[4].has_value())
+        unpacked[4] = (point.getFieldAs<uint8_t>(m_ids[4].value()) & 0x01) << 6;
+    if (m_ids[5].has_value())
+        unpacked[5] = (point.getFieldAs<uint8_t>(m_ids[5].value()) & 0x01) << 7;
+
+    // Set the 2 bytes of data in the buffer.
+    auto value1 = static_cast<uint16_t>(unpacked[0] | unpacked[1]) << 8;
+    auto value2 = static_cast<uint16_t>(unpacked[2] | unpacked[3] |
+                                        unpacked[4] | unpacked[5]);
+    m_data[index] = value1 | value2;
+}
+
+void BitFieldsBuffer::copyDataToPoint(PointRef& point, size_t index)
+{
+    // Read the 2 uint8_t values that store the packed bits.
+    const uint16_t full_value = m_data[index];
+    const auto value1 = static_cast<uint8_t>(0xFF & (full_value >> 8));
+    const auto value2 = static_cast<uint8_t>(0xFF & full_value);
+
+    // Unpack the bits.
+    std::array<uint8_t, 6> unpacked{};
+    unpacked[0] = value1 & 0x0F;
+    unpacked[1] = (value1 >> 4) & 0x0F;
+    unpacked[2] = value2 & 0x0F;
+    unpacked[3] = (value2 >> 4) & 0x03;
+    unpacked[4] = (value2 >> 6) & 0x01;
+    unpacked[5] = (value2 >> 7) & 0x01;
+
+    // Set the dimension data on the PDAL point.
+    for (uint32_t index = 0; index < 6; ++index)
+        point.setField(m_ids[index].value(), unpacked[index]);
+}
+
+const std::string& BitFieldsBuffer::name() const
+{
+    return m_name;
+}
+
+tiledb::Attribute
+BitFieldsBuffer::createAttribute(const tiledb::Context& ctx) const
+{
+    auto attr = tiledb::Attribute::create<uint16_t>(ctx, m_name);
+    return attr;
+}
+
+void BitFieldsBuffer::resizeBuffer(size_t nelements)
+{
+    m_data.resize(nelements);
+}
+
+void BitFieldsBuffer::setQueryBuffer(tiledb::Query& query)
+{
+    query.set_data_buffer(m_name, m_data);
 }
 
 } // namespace pdal

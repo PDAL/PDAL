@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2018, Kyle Mann (kyle@hobu.co)
+* Copyright (c) 2022, Kyle Mann (kyle@hobu.co)
 *
 * All rights reserved.
 *
@@ -31,6 +31,7 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+
 #pragma once
 
 #include <time.h>
@@ -38,61 +39,61 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
-
-
 #include <pdal/JsonFwd.hpp>
 #include <pdal/StageFactory.hpp>
 #include <filters/MergeFilter.hpp>
 
 
-
 namespace pdal
 {
 
-    class PDAL_DLL StacReader : public Reader, public Streamable
-    {
-        public:
+namespace stac
+{
+    class Item;
+    class Catalog;
+}
 
-            StacReader();
-            ~StacReader();
+class PDAL_DLL StacReader : public Reader, public Streamable
+{
+    public:
 
-            std::string getName() const override;
+        StacReader();
+        ~StacReader();
 
-            using StringMap = std::map<std::string, std::string>;
+        std::string getName() const override;
 
-        private:
+        using StringMap = std::map<std::string, std::string>;
 
-            struct Private;
-            struct Args;
+    private:
 
-            std::unique_ptr<Args> m_args;
-            std::unique_ptr<Private> m_p;
+        struct Private;
+        struct Args;
 
-            StageFactory m_factory;
+        std::unique_ptr<Args> m_args;
+        std::unique_ptr<Private> m_p;
 
-            void handleReaderArgs();
-            void initializeItem(NL::json stacJson);
-            void initializeCatalog(NL::json stacJson, bool isRoot = false);
-            void initializeItemCollection(NL::json stacJson);
-            void initializeArgs();
-            void validateSchema(NL::json stacJson);
-            Options setReaderOptions(const NL::json& readerArgs,
-                                     const std::string& driver) const;
-            void setConnectionForwards(StringMap& headers, StringMap& query);
-            std::string extractDriverFromItem(const NL::json& asset) const;
+        StageFactory m_factory;
 
-            bool prune(NL::json stacJson);
+        void printErrors(stac::Catalog& c);
+        void handleNested(stac::Catalog& c);
+        void addItem(stac::Item& item);
+        void handleItem(NL::json stacJson, std::string itemPath);
+        void handleCatalog(NL::json stacJson, std::string catPath);
+        void handleCollection(NL::json stacJson, std::string colPath);
+        void handleItemCollection(NL::json stacJson, std::string icPath);
+        void initializeArgs();
+        void setConnectionForwards(StringMap& headers, StringMap& query);
 
-            virtual void initialize() override;
-            virtual void addArgs(ProgramArgs& args) override;
-            virtual QuickInfo inspect() override;
-            virtual void prepared(PointTableRef table) override;
-            virtual void ready(PointTableRef table) override;
-            virtual point_count_t read(PointViewPtr view, point_count_t num) override;
-            virtual bool processOne(PointRef& point) override;
-            virtual PointViewSet run(PointViewPtr view) override;
+        virtual void initialize() override;
+        virtual void addArgs(ProgramArgs& args) override;
+        virtual QuickInfo inspect() override;
+        virtual void prepared(PointTableRef table) override;
+        virtual void ready(PointTableRef table) override;
+        virtual point_count_t read(PointViewPtr view, point_count_t num) override;
+        virtual bool processOne(PointRef& point) override;
+        virtual PointViewSet run(PointViewPtr view) override;
 
-            MergeFilter m_merge;
+        MergeFilter m_merge;
 
-    };
+};
 }

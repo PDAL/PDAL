@@ -15,6 +15,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <iostream>
 
 using nlohmann::json;
 using nlohmann::json_patch;
@@ -39,6 +40,7 @@ class schema
 {
 protected:
 	root_schema *root_;
+    json schema_json_ = {};
 	json default_value_ = nullptr;
 
 protected:
@@ -65,6 +67,8 @@ public:
 	}
 
 	void set_default_value(const json &v) { default_value_ = v; }
+    json get_json() { return schema_json_;}
+    void set_json(const json j) { schema_json_ = j; }
 
 	static std::shared_ptr<schema> make(json &schema,
 	                                    root_schema *root,
@@ -343,20 +347,20 @@ public:
 	              const json_uri &initial) const
 	{
 		if (!root_) {
-			e.error(ptr, "", "no root schema has yet been set for validating an instance");
+			e.error(ptr, "", "No root schema has yet been set for validating an instance.");
 			return;
 		}
 
 		auto file_entry = files_.find(initial.location());
 		if (file_entry == files_.end()) {
-			e.error(ptr, "", "no file found serving requested root-URI. " + initial.location());
+			e.error(ptr, "", "No file found serving requested root-URI. " + initial.location());
 			return;
 		}
 
 		auto &file = file_entry->second;
 		auto sch = file.schemas.find(initial.fragment());
 		if (sch == file.schemas.end()) {
-			e.error(ptr, "", "no schema find for request initial URI: " + initial.to_string());
+			e.error(ptr, "", "No schema find for request initial URI: " + initial.to_string());
 			return;
 		}
 
@@ -401,7 +405,8 @@ class logical_not : public schema
 		subschema_->validate(ptr, instance, patch, esub);
 
 		if (!esub)
-			e.error(ptr, instance, "the subschema has succeeded, but it is required to not validate");
+			e.error(ptr, instance, "The subschema(" + ptr.to_string() +
+                ") has succeeded, but it is required to not validate.");
 	}
 
 	const json &default_value(const json::json_pointer &ptr, const json &instance, error_handler &e) const override
@@ -434,11 +439,15 @@ class logical_combination : public schema
 	{
 		size_t count = 0;
 
+        std::vector<std::pair<json, std::string>> error_acc;
 		for (auto &s : subschemata_) {
 			first_error_handler esub;
 			s->validate(ptr, instance, patch, esub);
+
 			if (!esub)
 				count++;
+            else
+                error_acc.push_back({ s->get_json(), esub.message_ });
 
 			if (is_validate_complete(instance, ptr, e, esub, count))
 				return;
@@ -447,7 +456,13 @@ class logical_combination : public schema
 		// could accumulate esub details for anyOf and oneOf, but not clear how to select which subschema failure to report
 		// or how to report multiple such failures
 		if (count == 0)
-			e.error(ptr, instance, "no subschema has succeeded, but one of them is required to validate");
+        {
+            std::string msg;
+            for (auto &error: error_acc)
+                msg += "Error at schema: \n" + error.first.dump() +
+                    "\n\nError found: " + error.second + "\n\n";
+            e.error(ptr, instance, msg);
+        }
 	}
 
 	// specialized for each of the logical_combination_types
@@ -477,15 +492,21 @@ template <>
 const std::string logical_combination<oneOf>::key = "oneOf";
 
 template <>
-bool logical_combination<allOf>::is_validate_complete(const json &, const json::json_pointer &, error_handler &e, const first_error_handler &esub, size_t)
+bool logical_combination<allOf>::is_validate_complete(const json &instance, const json::json_pointer &ptr, error_handler &e, const first_error_handler &esub, size_t)
 {
 	if (esub)
-		e.error(esub.ptr_, esub.instance_, "at least one subschema has failed, but all of them are required to validate - " + esub.message_);
+    {
+        std::string key_name = ptr.to_string();
+        if (key_name.empty())
+            key_name = "/";
+		e.error(esub.ptr_, esub.instance_, "Failed validating 'allOf': \n" +
+            esub.message_);
+    }
 	return esub;
 }
 
 template <>
-bool logical_combination<anyOf>::is_validate_complete(const json &, const json::json_pointer &, error_handler &, const first_error_handler &, size_t count)
+bool logical_combination<anyOf>::is_validate_complete(const json &instance, const json::json_pointer &ptr, error_handler &e, const first_error_handler &esub, size_t count)
 {
 	return count == 1;
 }
@@ -494,7 +515,12 @@ template <>
 bool logical_combination<oneOf>::is_validate_complete(const json &instance, const json::json_pointer &ptr, error_handler &e, const first_error_handler &, size_t count)
 {
 	if (count > 1)
-		e.error(ptr, instance, "more than one subschema has succeeded, but exactly one of them is required to validate");
+    {
+        std::string key_name = ptr.to_string();
+        if (key_name.empty())
+            key_name = "/";
+		e.error(ptr, instance, "Failed validating 'oneOf', more than one schema passed validation.");
+    }
 	return count > 1;
 }
 
@@ -520,23 +546,35 @@ class type_schema : public schema
 		if (type)
 			type->validate(ptr, instance, patch, e);
 		else
-			e.error(ptr, instance, "unexpected instance type");
+			e.error(ptr, instance, "Unexpected instance type(" +
+                instance.dump() + ").");
 
-		if (enum_.first) {
+		if (enum_.first)
+        {
 			bool seen_in_enum = false;
+            std::string enums;
 			for (auto &v : enum_.second)
+            {
 				if (instance == v) {
 					seen_in_enum = true;
 					break;
 				}
+                enums += v.get<std::string>() + ", ";
+            }
 
 			if (!seen_in_enum)
-				e.error(ptr, instance, "instance not found in required enum");
+				e.error(ptr, instance, "Instance (" + instance.dump() +
+                    ") not found in required enum: " + enums);
 		}
 
 		if (const_.first &&
 		    const_.second != instance)
-			e.error(ptr, instance, "instance not const");
+        {
+            std::string msg = "Key(" + ptr.to_string() + ") value found(" +
+                instance.dump() + ") does not match expected value(" +
+                const_.second.dump() + ").";
+			e.error(ptr, instance, msg);
+        }
 
 		for (auto l : logic_)
 			l->validate(ptr, instance, patch, e);
@@ -972,9 +1010,13 @@ class required : public schema
 
 	void validate(const json::json_pointer &ptr, const json &instance, json_patch &, error_handler &e) const override final
 	{
+        std::string required_msg;
 		for (auto &r : required_)
+        {
 			if (instance.find(r) == instance.end())
-				e.error(ptr, instance, "required property '" + r + "' not found in object as a dependency");
+                required_msg += "- " + r + "\n";
+        }
+        e.error(ptr, instance, "Missing required properties: \n" + required_msg);
 	}
 
 public:
@@ -1006,9 +1048,17 @@ class object : public schema
 		if (minProperties_.first && instance.size() < minProperties_.second)
 			e.error(ptr, instance, "too few properties");
 
+        std::string required_msg;
 		for (auto &r : required_)
+        {
 			if (instance.find(r) == instance.end())
-				e.error(ptr, instance, "required property '" + r + "' not found in object");
+                required_msg += "- " + r + "\n";
+        }
+        if (!required_msg.empty())
+        {
+            e.error(ptr, instance,
+                "Missing required properties: \n" + required_msg);
+        }
 
 		// for each property in instance
 		for (auto &p : instance.items()) {
@@ -1311,10 +1361,14 @@ std::shared_ptr<schema> schema::make(json &schema,
 			uri = uri.append(key);
 
 	std::shared_ptr<::schema> sch;
+    json temp = schema;
 
 	// boolean schema
 	if (schema.type() == json::value_t::boolean)
+    {
 		sch = std::make_shared<boolean>(schema, root);
+        sch->set_json(temp);
+    }
 	else if (schema.type() == json::value_t::object) {
 
 		auto attr = schema.find("$id"); // if $id is present, this schema can be referenced by this ID
@@ -1356,6 +1410,8 @@ std::shared_ptr<schema> schema::make(json &schema,
 			sch = std::make_shared<type_schema>(schema, root, uris);
 		}
 
+        sch->set_json(temp);
+
 		schema.erase("$schema");
 		schema.erase("title");
 		schema.erase("description");
@@ -1377,7 +1433,7 @@ class throwing_error_handler : public error_handler
 {
 	void error(const json::json_pointer &ptr, const json &instance, const std::string &message) override
 	{
-		throw std::invalid_argument(std::string("At ") + ptr.to_string() + " of " + instance.dump() + " - " + message + "\n");
+		throw std::invalid_argument(message + "\n" + std::string("At ") + ptr.to_string() + " of " + instance.dump() + ".\n");
 	}
 };
 
