@@ -37,14 +37,14 @@ add_library(${PDAL_UTIL_LIB_NAME} OBJECT ${PDAL_UTIL_SOURCES})
 set_property(TARGET ${PDAL_UTIL_LIB_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 target_link_libraries(${PDAL_UTIL_LIB_NAME}
-    PUBLIC
+    PRIVATE
         ${BACKTRACE_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
         ${UTFCPP_LIB_NAME}
 )
 
 target_link_libraries(${PDAL_UTIL_LIB_NAME}
-    PUBLIC
+    PRIVATE
         ${WINSOCK_LIBRARY}
 )
 
