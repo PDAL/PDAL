@@ -125,9 +125,7 @@ void LasReader::addArgs(ProgramArgs& args)
 
 static StaticPluginInfo const s_info {
     "readers.las",
-    "ASPRS LAS 1.0 - 1.4 read support. LASzip support is also \n" \
-        "enabled through this driver if LASzip was found during \n" \
-        "compilation.",
+    "ASPRS LAS 1.0 - 1.4 read support",
     "http://pdal.io/stages/readers.las.html",
     { "las", "laz" }
 };
