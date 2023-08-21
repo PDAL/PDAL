@@ -19,15 +19,13 @@ endif(APPLE AND PDAL_BUNDLE)
 pdal_target_compile_settings(${PDAL_APP})
 target_link_libraries(${PDAL_APP}
     PRIVATE
-        ${PDAL_BASE_LIB_NAME}
-        ${PDAL_UTIL_LIB_NAME}
-        ${GDAL_LIBRARY}
+        ${PDAL_LIB_NAME}
+        GDAL::GDAL
         ${WINSOCK_LIBRARY}
 )
 target_include_directories(${PDAL_APP} PRIVATE
     ${NLOHMANN_INCLUDE_DIR}
     ${PDAL_INCLUDE_DIR}
-    ${GDAL_INCLUDE_DIR}
     ${PROJECT_BINARY_DIR}/include)
 
 IF(MSVC)

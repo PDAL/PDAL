@@ -3,7 +3,7 @@
 # a PDAL installation.
 #
 
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.13)
 project(PdalExamples)
 set(PDAL_EXAMPLES 1)
 include(FeatureSummary)
