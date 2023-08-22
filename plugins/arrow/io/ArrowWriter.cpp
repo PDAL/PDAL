@@ -39,8 +39,11 @@
 #include "ArrowCommon.hpp"
 
 #include <pdal/PointView.hpp>
+#include <pdal/pdal_config.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <io/private/las/Header.hpp>
+
+#include <nlohmann/json.hpp>
 
 #include <algorithm>
 #include <random>
@@ -61,7 +64,9 @@ std::string ArrowWriter::getName() const { return s_info.name; }
 
 
 ArrowWriter::ArrowWriter() :
-    m_pool(arrow::default_memory_pool())
+    m_formatType(arrowsupport::Unknown),
+    m_pool(arrow::default_memory_pool()),
+    m_writeGeoParquet(false)
 {
 }
 
@@ -80,6 +85,8 @@ void ArrowWriter::computeArrowSchema(pdal::PointTableRef table)
     auto dims = layout->dims();
     auto rng = std::default_random_engine {};
     std::shuffle(std::begin(dims), std::end(dims), rng);
+
+
 
     for (auto& id : dims)
     {
@@ -102,6 +109,7 @@ void ArrowWriter::computeArrowSchema(pdal::PointTableRef table)
         m_dimIds.push_back(id);
     }
 
+
     m_schema.reset(new arrow::Schema(fields));
 
     int num_fields = m_schema->num_fields();
@@ -111,13 +119,28 @@ void ArrowWriter::computeArrowSchema(pdal::PointTableRef table)
 
 void ArrowWriter::initialize()
 {
+    if (Utils::iequals("feather", m_formatString)) 
+        m_formatType = arrowsupport::Feather;
+    if (Utils::iequals("orc", m_formatString)) 
+        m_formatType = arrowsupport::ORC;
+    if (Utils::iequals("parquet", m_formatString)) 
+        m_formatType = arrowsupport::Parquet;
+
+    if (m_formatType == arrowsupport::Unknown)
+    {
+        std::stringstream msg;
+        msg << "Unknown format '" << m_formatString <<
+               "' provided. Unable to write array";
+        throwError(msg.str());
+    }
+
     auto result = arrow::io::FileOutputStream::Open(m_filename, /*append=*/false);
     if (result.ok())
         m_file = result.ValueOrDie();
     else
     {
         std::stringstream msg;
-        msg << "Unable to open '" << m_filename << "' for arrow output!";
+        msg << "Unable to open '" << m_filename << "' for arrow output with error " << result.status().ToString();
         throwError(msg.str());
     }
 }
@@ -133,31 +156,31 @@ bool ArrowWriter::processOne(PointRef& point)
 
         writePointData(point, id, t, builder);
     }
+    if (m_writeGeoParquet)
+    {
+        arrow::ArrayBuilder* builder = m_builders[m_wkbDimId].get();
+        writeWkb(point, builder);
 
+    }
     return true;
 }
 
 void ArrowWriter::addArgs(ProgramArgs& args)
 {
     args.add("filename", "Output filename", m_filename).setPositional();
-    args.add("format", "Output format ('feature','parquet','orc')", m_format, "feather");
+    args.add("format", "Output format ('feature','parquet','geoparquet','orc')", m_formatString, "feather");
+    args.add("geoparquet", "Write geoparquet when writing parquet?", m_writeGeoParquet, false);
 }
 
 void ArrowWriter::ready(PointTableRef table)
 {
     computeArrowSchema(table);
+}
 
-
-    if (!(Utils::iequals("feather", m_format) ||
-          Utils::iequals("orc", m_format) ||
-          Utils::iequals("parquet", m_format)))
-    {
-        std::stringstream msg;
-        msg << "Unknown format '" << m_format <<
-               "' provided. Unable to write array";
-        throwError(msg.str());
-    }
-
+void ArrowWriter::addDimensions(PointLayoutPtr layout)
+{
+    if (m_writeGeoParquet)
+        m_wkbDimId = layout->registerOrAssignDim("wkb", Dimension::Type::None);
 }
 
 
@@ -170,6 +193,130 @@ void ArrowWriter::write(const PointViewPtr view)
         point.setPointId(idx);
         processOne(point);
     }
+}
+
+void ArrowWriter::writeParquet(std::vector<std::shared_ptr<arrow::Array>> const& arrays,
+                               PointTableRef table)
+{
+
+    NL::json metadata;
+    NL::json version;
+    arrow::BuildInfo info = arrow::GetBuildInfo();
+    version["arrow"] = info.version_string;
+    version["pdal"] = pdal::Config::fullVersionString();
+
+
+    NL::json column;
+    column["encoding"] = "WKB";
+    column["geometry_types"] = std::vector<std::string> {"Point"};
+
+    SpatialReference ref = table.spatialReference();
+    if (ref.empty())
+        ref = SpatialReference("EPSG:4326");
+    column["edges"] = ref.isGeographic() ? "spherical" : "planar";
+    column["crs"] = pdal::Utils::replaceAll(ref.getPROJJSON(), "\n", "");
+
+    NL::json wkb;
+    wkb["wkb"] = column;
+
+    NL::json geo;
+    geo["version"] = "1.0.0-dev"; // GeoParquet version
+    geo["primary_column"] = "wkb";
+    geo["columns"] = wkb;
+
+    std::shared_ptr<const arrow::KeyValueMetadata> m_poKeyValueMetadata;
+
+    parquet::WriterProperties::Builder m_oWriterPropertiesBuilder{};
+    std::unique_ptr<parquet::arrow::FileWriter> m_poFileWriter{};
+
+    m_oWriterPropertiesBuilder = parquet::WriterProperties::Builder();
+    m_oWriterPropertiesBuilder.max_row_group_length(64 * 1024);
+    m_oWriterPropertiesBuilder.created_by(pdal::Config::fullVersionString());
+    m_oWriterPropertiesBuilder.version(parquet::ParquetVersion::PARQUET_2_6);
+    m_oWriterPropertiesBuilder.data_page_version(parquet::ParquetDataPageVersion::V2);
+    m_oWriterPropertiesBuilder.compression(parquet::Compression::SNAPPY);
+    m_oWriterPropertiesBuilder.build();
+
+    std::shared_ptr<parquet::ArrowWriterProperties> arrowWriterProperties =
+        parquet::ArrowWriterProperties::Builder().store_schema()->build();
+
+    std::shared_ptr<parquet::SchemaDescriptor> parquet_schema;
+    auto result = parquet::arrow::ToParquetSchema( &(*m_table->schema()), 
+                                                    *m_oWriterPropertiesBuilder.build(), 
+                                                    *arrowWriterProperties, 
+                                                    &parquet_schema);
+    if (!result.ok()) 
+    {
+        std::stringstream msg;
+        msg << "Unable to convert ToParquetSchema with error '" << result.ToString() << "'";
+        throwError(msg.str());
+    }
+
+    auto schema_node = std::static_pointer_cast<parquet::schema::GroupNode>(
+        parquet_schema->schema_root());
+
+    m_poKeyValueMetadata = m_table->schema()->metadata()
+                           ? m_table->schema()->metadata()->Copy()
+                           : std::make_shared<arrow::KeyValueMetadata>();
+
+
+    std::unique_ptr<parquet::ParquetFileWriter> base_writer;
+    base_writer = parquet::ParquetFileWriter::Open(
+                             m_file, schema_node,
+                             m_oWriterPropertiesBuilder.build(), m_poKeyValueMetadata);
+    if (!result.ok()) 
+    {
+        std::stringstream msg;
+        msg << "Unable to convert open ParquetFileWriter with error '" << result.ToString() << "'";
+        throwError(msg.str());
+    }
+
+    const_cast<arrow::KeyValueMetadata *>(m_poKeyValueMetadata.get())
+                ->Append("geo", geo.dump());
+
+    auto schema_ptr = std::make_shared<::arrow::Schema>(*m_table->schema());
+
+    result = parquet::arrow::FileWriter::Make(
+                m_pool, std::move(base_writer), std::move(schema_ptr),
+                arrowWriterProperties, &m_poFileWriter);
+    if (!result.ok()) 
+    {
+        std::stringstream msg;
+        msg << "Unable to make parquet::arrow::FileWriter " << result.ToString();
+        throwError(msg.str());
+    }
+
+    result = m_poFileWriter->NewRowGroup(m_builders[pdal::Dimension::Id::X]->length());
+    if (!result.ok())
+    {
+        std::stringstream msg;
+        msg << "Unable to make NewRowGroup" << result.ToString();
+        throwError(msg.str());
+    }
+
+    for(auto& array: arrays)
+    {
+        result = m_poFileWriter->WriteColumnChunk(*array);
+        if (!result.ok())
+        {
+            std::stringstream msg;
+            msg << "Unable to make WriteColumnChunk" << result.ToString();
+            throwError(msg.str());
+        }
+
+    }
+
+
+    result = m_poFileWriter->Close();
+    if (!result.ok())
+    {
+        std::stringstream msg;
+        msg << "Unable to close FileWriter" << result.ToString();
+        throwError(msg.str());
+    }
+
+    result = m_file->Close();
+
 }
 
 
@@ -201,37 +348,53 @@ void ArrowWriter::done(PointTableRef table)
 
     m_table = arrow::Table::Make(m_schema, arrays);
 
-    if (Utils::iequals(m_format, "feather"))
+    if (m_formatType == arrowsupport::Feather)
     {
         auto result = arrow::ipc::feather::WriteTable(*m_table, m_file.get());
         result = m_file->Close();
-        if (!result.ok()) {
-            throwError("Unable to close feather writer");
+        if (!result.ok()) 
+        {
+            std::stringstream msg;
+            msg << "Unable to open to write feather table for file '" << m_filename << "' for with error " << result.ToString();
+            throwError(msg.str());
         }
     }
 
-    if (Utils::iequals(m_format, "parquet"))
+
+
+    if (m_formatType == arrowsupport::Parquet)
     {
-        // https://arrow.apache.org/docs/cpp/parquet.html
-        // Choose compression
-        std::shared_ptr<parquet::WriterProperties> props =
-            parquet::WriterProperties::Builder().compression(arrow::Compression::SNAPPY)->build();
 
-        // Opt to store Arrow schema for easier reads back into Arrow
-        std::shared_ptr<parquet::ArrowWriterProperties> arrow_props =
-            parquet::ArrowWriterProperties::Builder().store_schema()->build();
+        writeParquet(arrays, table);
+        // // https://arrow.apache.org/docs/cpp/parquet.html
+        // // Choose compression
+        // std::shared_ptr<parquet::WriterProperties> props = parquet::WriterProperties::Builder()
+        //     .max_row_group_length(64 * 1024)
+        //     ->created_by(pdal::Config::fullVersionString())
+        //     ->version(parquet::ParquetVersion::PARQUET_2_6)
+        //     ->data_page_version(parquet::ParquetDataPageVersion::V2)
+        //     ->compression(parquet::Compression::SNAPPY)
+        //     ->build();
+ 
+        // // Opt to store Arrow schema for easier reads back into Arrow
+        // std::shared_ptr<parquet::ArrowWriterProperties> arrow_props =
+        //     parquet::ArrowWriterProperties::Builder().store_schema()->build();
 
 
-        auto result = parquet::arrow::WriteTable(*m_table.get(),
-                                                  m_pool, m_file,
-                                                  /*chunk_size=*/3, props, arrow_props);
-        if (!result.ok()) {
-            throwError("Unable to write parquet table");
-        }
-        result = m_file->Close();
+        // auto result = parquet::arrow::WriteTable(*m_table.get(),
+        //                                           m_pool, m_file,
+        //                                           /*chunk_size=*/3, props, arrow_props);
+
+        // if (!result.ok()) 
+        // {
+        //     std::stringstream msg;
+        //     msg << "Unable to open to write parquet table for file '" << m_filename << "' for with error " << result.ToString();
+        //     throwError(msg.str());
+        // }
+        // result = m_file->Close();
     }
 
-    if (Utils::iequals(m_format, "orc"))
+    if (m_formatType == arrowsupport::ORC)
     {
         // https://arrow.apache.org/docs/cpp/orc.html
         auto writer_options = arrow::adapters::orc::WriteOptions();

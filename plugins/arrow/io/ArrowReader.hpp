@@ -43,19 +43,14 @@
 #include <pdal/Streamable.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
+#include "ArrowCommon.hpp"
+
 #include <arrow/type_fwd.h>
 #include <arrow/io/type_fwd.h>
 #include <arrow/ipc/type_fwd.h>
 
 namespace pdal
 {
-
-
-enum ArrowFormatType {
-    Feather = 0,
-    ORC,
-    Parquet
-};
 
 
 class PDAL_DLL ArrowReader : public pdal::Reader, public pdal::Streamable
@@ -85,7 +80,8 @@ private:
 
     std::shared_ptr<arrow::RecordBatch> m_currentBatch;
 
-    ArrowFormatType m_formatType;
+    arrowsupport::ArrowFormatType m_formatType;
+
 
     std::map<int, pdal::Dimension::Id> m_arrayIds;
     std::map<pdal::Dimension::Id, std::shared_ptr<arrow::Array> > m_arrays;

@@ -63,7 +63,7 @@ ArrowReader::ArrowReader()
     , m_ipcReader(nullptr)
     , m_parquetReader(nullptr)
     , m_currentBatch(nullptr)
-    , m_formatType(Feather)
+    , m_formatType(arrowsupport::Unknown)
     , m_pool(arrow::default_memory_pool())
     , m_batchCount(0)
     , m_currentBatchIndex(0)
@@ -87,11 +87,11 @@ void ArrowReader::initialize()
 
     if (Utils::iequals(FileUtils::extension(m_filename), ".feather"))
     {
-        m_formatType = Feather;
+        m_formatType = arrowsupport::Feather;
     }
     else if (Utils::iequals(FileUtils::extension(m_filename), ".parquet"))
     {
-        m_formatType = Parquet;
+        m_formatType = arrowsupport::Parquet;
     }
 
     auto result = arrow::io::ReadableFile::Open(m_filename);
@@ -104,7 +104,7 @@ void ArrowReader::initialize()
         throwError(msg.str());
     }
 
-    if (m_formatType == Feather)
+    if (m_formatType == arrowsupport::Feather)
     {
         auto status = arrow::ipc::RecordBatchFileReader::Open(m_file);
         if (!status.ok())
@@ -136,7 +136,7 @@ void ArrowReader::initialize()
         readNextBatchHeaders();
 
     }
-    if (m_formatType == Parquet)
+    if (m_formatType == arrowsupport::Parquet)
     {
         auto arrow_reader_props = parquet::ArrowReaderProperties();
         arrow_reader_props.set_batch_size(128 * 1024);  // default 64 * 1024

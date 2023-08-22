@@ -44,7 +44,7 @@ namespace pdal
 namespace arrow
 {
 
-TEST(ArrowWriterTest, write_array)
+TEST(ArrowWriterTest, write_array_feather)
 {
 
     Options readerOps;
@@ -54,6 +54,27 @@ TEST(ArrowWriterTest, write_array)
 
     Options writerOps;
     writerOps.add("filename", Support::temppath("simple.feather"));
+    ArrowWriter writer;
+    writer.setInput(reader);
+    writer.setOptions(writerOps);
+
+    PointTable table;
+    writer.prepare(table);
+    PointViewSet viewSet = writer.execute(table);
+
+}
+TEST(ArrowWriterTest, write_array_parquet)
+{
+
+    Options readerOps;
+    readerOps.add("filename", Support::datapath("las/1.2-with-color.las"));
+    LasReader reader;
+    reader.setOptions(readerOps);
+
+    Options writerOps;
+    writerOps.add("filename", Support::temppath("simple.parquet"));
+    writerOps.add("format", "parquet");
+    writerOps.add("geoparquet", "true");
     ArrowWriter writer;
     writer.setInput(reader);
     writer.setOptions(writerOps);

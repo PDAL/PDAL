@@ -39,12 +39,35 @@
 #include <arrow/ipc/api.h>
 #include <arrow/ipc/reader.h>
 #include <arrow/adapters/orc/adapter.h>
+#include <arrow/util/key_value_metadata.h>
 
 #include <parquet/arrow/reader.h>
 #include <parquet/exception.h>
 #include <parquet/arrow/writer.h>
+#include <parquet/types.h>
+#include <parquet/metadata.h>
+#include <parquet/file_writer.h>
+#include <parquet/schema.h>
+#include <parquet/arrow/writer.h>
+#include <parquet/arrow/schema.h>
 
 #include <pdal/pdal_types.hpp>
+#include <pdal/Geometry.hpp>
+
+namespace pdal
+{
+
+namespace arrowsupport
+{
+enum ArrowFormatType {
+    Feather = 0,
+    ORC,
+    Parquet,
+    Unknown = 256
+};
+
+}
+}
 
 pdal::Dimension::Type computePDALTypeFromArrow(arrow::Type::type t)
 {
@@ -74,7 +97,7 @@ pdal::Dimension::Type computePDALTypeFromArrow(arrow::Type::type t)
         case arrow::Type::DOUBLE:
             return Dimension::Type::Double;
         default:
-            throw pdal_error("Unrecognized Arrow dimension type for dimension ");
+            return Dimension::Type::None;
 
     }
 
@@ -121,7 +144,8 @@ std::shared_ptr<arrow::Field> toArrowType(std::string name, pdal::Dimension::Typ
         field = arrow::field(name, arrow::int64(), false);
         break;
     case Dimension::Type::None:
-        throw pdal_error("PDAL 'none' type unsupported for dimension " + name);
+        field = arrow::field(name, arrow::binary(), false);
+        break;
     default:
         throw pdal_error("Unrecognized PDAL dimension type for dimension " + name);
 
@@ -132,6 +156,27 @@ std::shared_ptr<arrow::Field> toArrowType(std::string name, pdal::Dimension::Typ
 }
 
 
+
+void writeWkb(pdal::PointRef& point,
+             arrow::ArrayBuilder* builder)
+{
+    double x = point.getFieldAs<double>(pdal::Dimension::Id::X);
+    double y = point.getFieldAs<double>(pdal::Dimension::Id::Y);
+    double z = point.getFieldAs<double>(pdal::Dimension::Id::Z);
+    arrow::BinaryBuilder* bb = dynamic_cast<arrow::BinaryBuilder*>(builder);
+    if (!bb)
+        throw pdal::pdal_error ("unable to cast builder!");
+    
+    pdal::Geometry p(x, y, z);
+    auto ok = bb->Append(p.wkb());
+    if (!ok.ok())
+    {
+        std::stringstream msg;
+        msg << "Unable to write wkb binary value for point";
+        throw pdal::pdal_error(msg.str());
+    }   
+
+}
 
 void writePointData(pdal::PointRef& point,
                     pdal::Dimension::Id id,
@@ -304,7 +349,7 @@ void writePointData(pdal::PointRef& point,
             break;
         }
     case Dimension::Type::None:
-        throw pdal_error("PDAL 'none' type unsupported for dimension" );
+        break;
     default:
         throw pdal_error("Unrecognized PDAL dimension type for dimension");
 

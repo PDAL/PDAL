@@ -20,6 +20,8 @@ PDAL_ADD_PLUGIN(arrow_writer_libname writer arrow
         ${PDAL_LIBRARIES}
         Arrow::arrow_shared
         Parquet::parquet_shared
+    INCLUDES
+        ${NLOHMANN_INCLUDE_DIR}
 )
 
 PDAL_ADD_PLUGIN(arrow_reader_libname reader arrow

@@ -99,6 +99,20 @@ Geometry::Geometry(OGRGeometryH g, const SpatialReference& srs)
 }
 
 
+Geometry::Geometry(double x, double y, double z, SpatialReference ref)
+{
+    OGRGeometry* geom(nullptr);
+    OGRPoint point(x, y, z);
+    geom = reinterpret_cast<OGRGeometry *>(&point);
+
+    if (geom)
+        m_geom.reset(geom->clone());
+
+    setSpatialReference(ref);
+}
+
+
+
 Geometry::~Geometry()
 {}
 
@@ -280,6 +294,20 @@ std::string Geometry::wkt(double precision, bool bOutputZ) const
     CPLFree(buf);
     return wkt;
 }
+
+std::string Geometry::wkb() const
+{
+
+    std::string output(m_geom->WkbSize(), '\0');
+
+    char *buf;
+    OGRErr err = m_geom->exportToWkb(wkbNDR, (unsigned char*) output.data(), wkbVariantIso);
+    if (err != OGRERR_NONE)
+        throw pdal_error("Geometry::wkb: unable to export geometry to wkb.");
+
+    return output;
+}
+
 
 
 std::string Geometry::json(double precision) const

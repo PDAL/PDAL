@@ -38,8 +38,11 @@
 #include <pdal/Writer.hpp>
 #include <pdal/Streamable.hpp>
 
+#include "ArrowCommon.hpp"
+
 #include <arrow/type_fwd.h>
 #include <arrow/io/type_fwd.h>
+#include <parquet/type_fwd.h>
 
 namespace pdal
 {
@@ -61,11 +64,15 @@ private:
     virtual bool processOne(PointRef& point);
     virtual void done(PointTableRef table);
     virtual void write(const PointViewPtr view);
+    virtual void addDimensions(PointLayoutPtr layout); 
 
     void computeArrowSchema(pdal::PointTableRef table);
 
+    void writeParquet(std::vector<std::shared_ptr<arrow::Array>> const& arrays, PointTableRef table);
     std::string m_filename;
-    std::string m_format;
+    std::string m_formatString;
+    arrowsupport::ArrowFormatType m_formatType;
+
     std::shared_ptr<arrow::Table> m_table;
     std::shared_ptr<arrow::Schema> m_schema;
     std::map<pdal::Dimension::Id, std::unique_ptr<arrow::ArrayBuilder> > m_builders;
@@ -73,6 +80,10 @@ private:
     arrow::MemoryPool* m_pool;
 
     std::shared_ptr<arrow::io::FileOutputStream> m_file;
+    bool m_writeGeoParquet;
+    pdal::Dimension::Id m_wkbDimId;
+    
+
 
     ArrowWriter& operator=(const ArrowWriter&); // not implemented
     ArrowWriter(const ArrowWriter&); // not implemented
