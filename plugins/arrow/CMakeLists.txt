@@ -13,6 +13,7 @@ if (NOT Arrow_FOUND)
 endif()
 
 
+
 PDAL_ADD_PLUGIN(arrow_writer_libname writer arrow
     FILES
         io/ArrowWriter.cpp
@@ -34,6 +35,11 @@ PDAL_ADD_PLUGIN(arrow_reader_libname reader arrow
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
+
+if (WIN32)
+    target_compile_definitions(${arrow_writer_libname} PRIVATE NOMINMAX=1)
+    target_compile_definitions(${arrow_reader_libname} PRIVATE NOMINMAX=1)
+endif(WIN32)
 
 if (WITH_TESTS)
     PDAL_ADD_TEST(pdal_io_arrow_writer_test
