@@ -61,7 +61,6 @@ namespace arrowsupport
 {
 enum ArrowFormatType {
     Feather = 0,
-    ORC,
     Parquet,
     Unknown = 256
 };

@@ -40,6 +40,7 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/pdal_config.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <io/private/las/Header.hpp>
 
@@ -119,11 +120,11 @@ void ArrowWriter::computeArrowSchema(pdal::PointTableRef table)
 
 void ArrowWriter::initialize()
 {
-    if (Utils::iequals("feather", m_formatString)) 
+
+    std::string ext = Utils::tolower(FileUtils::extension(m_filename));
+    if (Utils::iequals("feather", m_formatString) || ext == ".feather")  
         m_formatType = arrowsupport::Feather;
-    if (Utils::iequals("orc", m_formatString)) 
-        m_formatType = arrowsupport::ORC;
-    if (Utils::iequals("parquet", m_formatString)) 
+    if (Utils::iequals("parquet", m_formatString) || ext == ".parquet") 
         m_formatType = arrowsupport::Parquet;
 
     if (m_formatType == arrowsupport::Unknown)
@@ -195,8 +196,7 @@ void ArrowWriter::write(const PointViewPtr view)
     }
 }
 
-void ArrowWriter::writeParquet(std::vector<std::shared_ptr<arrow::Array>> const& arrays,
-                               PointTableRef table)
+void ArrowWriter::gatherGeoMetadata(std::shared_ptr<arrow::KeyValueMetadata>& input, SpatialReference& ref)
 {
 
     NL::json metadata;
@@ -210,7 +210,6 @@ void ArrowWriter::writeParquet(std::vector<std::shared_ptr<arrow::Array>> const&
     column["encoding"] = "WKB";
     column["geometry_types"] = std::vector<std::string> {"Point"};
 
-    SpatialReference ref = table.spatialReference();
     if (ref.empty())
         ref = SpatialReference("EPSG:4326");
     column["edges"] = ref.isGeographic() ? "spherical" : "planar";
@@ -224,7 +223,17 @@ void ArrowWriter::writeParquet(std::vector<std::shared_ptr<arrow::Array>> const&
     geo["primary_column"] = "wkb";
     geo["columns"] = wkb;
 
-    std::shared_ptr<const arrow::KeyValueMetadata> m_poKeyValueMetadata;
+    input->Append("geo", geo.dump());
+
+
+
+
+}
+void ArrowWriter::writeParquet(std::vector<std::shared_ptr<arrow::Array>> const& arrays,
+                               PointTableRef table)
+{
+
+
 
     parquet::WriterProperties::Builder m_oWriterPropertiesBuilder{};
     std::unique_ptr<parquet::arrow::FileWriter> m_poFileWriter{};
@@ -255,6 +264,8 @@ void ArrowWriter::writeParquet(std::vector<std::shared_ptr<arrow::Array>> const&
     auto schema_node = std::static_pointer_cast<parquet::schema::GroupNode>(
         parquet_schema->schema_root());
 
+    std::shared_ptr<arrow::KeyValueMetadata> m_poKeyValueMetadata;
+
     m_poKeyValueMetadata = m_table->schema()->metadata()
                            ? m_table->schema()->metadata()->Copy()
                            : std::make_shared<arrow::KeyValueMetadata>();
@@ -271,8 +282,9 @@ void ArrowWriter::writeParquet(std::vector<std::shared_ptr<arrow::Array>> const&
         throwError(msg.str());
     }
 
-    const_cast<arrow::KeyValueMetadata *>(m_poKeyValueMetadata.get())
-                ->Append("geo", geo.dump());
+    SpatialReference ref = table.spatialReference();
+    gatherGeoMetadata(m_poKeyValueMetadata, ref);
+
 
     auto schema_ptr = std::make_shared<::arrow::Schema>(*m_table->schema());
 
@@ -348,6 +360,17 @@ void ArrowWriter::done(PointTableRef table)
 
     m_table = arrow::Table::Make(m_schema, arrays);
 
+    std::shared_ptr<arrow::KeyValueMetadata> m_poKeyValueMetadata;
+
+    m_poKeyValueMetadata = m_table->schema()->metadata()
+                           ? m_table->schema()->metadata()->Copy()
+                           : std::make_shared<arrow::KeyValueMetadata>();
+
+    SpatialReference ref = table.spatialReference();
+    gatherGeoMetadata(m_poKeyValueMetadata, ref);
+
+    m_table = m_table->ReplaceSchemaMetadata(m_poKeyValueMetadata);
+
     if (m_formatType == arrowsupport::Feather)
     {
         auto result = arrow::ipc::feather::WriteTable(*m_table, m_file.get());
@@ -360,55 +383,10 @@ void ArrowWriter::done(PointTableRef table)
         }
     }
 
-
-
     if (m_formatType == arrowsupport::Parquet)
     {
 
         writeParquet(arrays, table);
-        // // https://arrow.apache.org/docs/cpp/parquet.html
-        // // Choose compression
-        // std::shared_ptr<parquet::WriterProperties> props = parquet::WriterProperties::Builder()
-        //     .max_row_group_length(64 * 1024)
-        //     ->created_by(pdal::Config::fullVersionString())
-        //     ->version(parquet::ParquetVersion::PARQUET_2_6)
-        //     ->data_page_version(parquet::ParquetDataPageVersion::V2)
-        //     ->compression(parquet::Compression::SNAPPY)
-        //     ->build();
- 
-        // // Opt to store Arrow schema for easier reads back into Arrow
-        // std::shared_ptr<parquet::ArrowWriterProperties> arrow_props =
-        //     parquet::ArrowWriterProperties::Builder().store_schema()->build();
-
-
-        // auto result = parquet::arrow::WriteTable(*m_table.get(),
-        //                                           m_pool, m_file,
-        //                                           /*chunk_size=*/3, props, arrow_props);
-
-        // if (!result.ok()) 
-        // {
-        //     std::stringstream msg;
-        //     msg << "Unable to open to write parquet table for file '" << m_filename << "' for with error " << result.ToString();
-        //     throwError(msg.str());
-        // }
-        // result = m_file->Close();
-    }
-
-    if (m_formatType == arrowsupport::ORC)
-    {
-        // https://arrow.apache.org/docs/cpp/orc.html
-        auto writer_options = arrow::adapters::orc::WriteOptions();
-        auto status = arrow::adapters::orc::ORCFileWriter::Open(m_file.get(), writer_options);
-        if (!status.ok()) {
-           throwError("Unable to instantiate ORC writer");
-        }
-        std::unique_ptr<arrow::adapters::orc::ORCFileWriter> writer = std::move(status.ValueOrDie());
-        if (!(writer->Write(*m_table.get())).ok()) {
-            throwError("Unable to write ORC data");
-        }
-        if (!(writer->Close()).ok()) {
-            throwError("Unable to close ORC writer");
-        }
     }
 
 

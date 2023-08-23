@@ -74,6 +74,8 @@ private:
     bool readNextBatchData();
     bool fillPoint(PointRef& point);
 
+    void loadGeoMetadata(const std::shared_ptr<const arrow::KeyValueMetadata> &kv_metadata);
+
     std::shared_ptr<arrow::io::ReadableFile> m_file;
     std::shared_ptr<arrow::ipc::RecordBatchFileReader> m_ipcReader;
     std::shared_ptr<::arrow::RecordBatchReader> m_parquetReader;

@@ -41,6 +41,10 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/PDALUtils.hpp>
 
+
+#include <nlohmann/json.hpp>
+
+
 namespace pdal
 {
 
@@ -77,6 +81,70 @@ ArrowReader::ArrowReader()
 void ArrowReader::addArgs(ProgramArgs& args)
 {
     args.add("metadata", "", m_readMetadata, false);
+}
+
+
+void ArrowReader::loadGeoMetadata(const std::shared_ptr<const arrow::KeyValueMetadata> &kv_metadata)
+{
+    if (!kv_metadata)
+        return;
+    auto geo = kv_metadata->Get("geo");
+    NL::json metadata;
+
+    if (geo.ok())
+    {
+        // load up the JSON and set our stuff
+        try
+        {
+            metadata = NL::json::parse(*geo);
+            } catch (NL::json::parse_error& e)
+            {
+                log()->get(LogLevel::Warning) << "unable to parse GeoParquet 'geo' metadata with error '"
+                                              << e.what() << "'" << std::endl;
+                return;
+            }
+
+            if (!metadata.contains("primary_column"))
+            {
+                log()->get(LogLevel::Warning) << "GeoParquet metadata does not contain 'primary_column' entry" 
+                                              << std::endl;
+                return;
+
+            }
+
+            if (!metadata.contains("columns"))
+            {
+                log()->get(LogLevel::Warning) << "GeoParquet metadata does not contain 'columns' entry" 
+                                              << std::endl;
+                return;
+            }
+            NL::json columns = metadata["columns"];
+
+            std::string primary_column = metadata["primary_column"];
+            NL::json column = metadata["columns"][primary_column];
+
+            log()->get(LogLevel::Info) << "primary column is " << primary_column << std::endl;
+
+            if (!column.contains("crs"))
+            {
+                log()->get(LogLevel::Warning) << "no 'crs' key available to fetch spatial reference information" << std::endl;
+                return;
+            }
+
+            SpatialReference ref(column["crs"].get<std::string>());
+            if (column.contains("epoch"))
+            {
+
+                ref.setEpoch(column["epoch"].get<double>());
+            }
+
+            setSpatialReference(ref);
+    } else
+    {
+        log()->get(LogLevel::Warning) << "unable to fetch GeoParquet 'geo' metadata with error '"
+                                      << geo.status().ToString() << "'" << std::endl;
+    }
+
 }
 
 void ArrowReader::initialize()
@@ -117,6 +185,9 @@ void ArrowReader::initialize()
         m_ipcReader = status.ValueOrDie();
         m_batchCount = m_ipcReader->num_record_batches();
 
+        const auto metadata = m_ipcReader->schema()->metadata();
+        loadGeoMetadata(metadata);
+
         m_currentBatchIndex = 0;
 
 
@@ -148,6 +219,9 @@ void ArrowReader::initialize()
         std::unique_ptr<parquet::arrow::FileReader> arrow_reader;
 
         auto pOpenStatus = parquet::arrow::OpenFile(m_file, m_pool, &arrow_reader);
+
+        const auto metadata = arrow_reader->parquet_reader()->metadata();
+        loadGeoMetadata(metadata->key_value_metadata());
 
         auto batchOpenStatus = arrow_reader->GetRecordBatchReader(&m_parquetReader);
         if (!batchOpenStatus.ok())
@@ -188,9 +262,6 @@ void ArrowReader::initialize()
             throwError(msg.str());
         }
     }
-
-
-
 }
 
 

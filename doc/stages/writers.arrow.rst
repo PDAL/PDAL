@@ -39,21 +39,8 @@ Example
       {
           "type":"writers.arrow",
           "format":"parquet",
+          "geoparquet":"true",
           "filename":"outputfile.parquet"
-      }
-  ]
-
-.. code-block:: json
-
-  [
-      {
-          "type":"readers.las",
-          "filename":"inputfile.las"
-      },
-      {
-          "type":"writers.arrow",
-          "format":"orc",
-          "filename":"outputfile.orc"
       }
   ]
 
@@ -64,7 +51,10 @@ filename
   Output file to write [Required]
 
 format
-  File type to write (feather, parquet, orc) [Default: "feather"]
+  File type to write (feather, parquet) [Default: "feather"]
+
+geoparquet
+  Write WKB column and GeoParquet metadata when writing parquet output
 
 .. include:: writer_opts.rst
 

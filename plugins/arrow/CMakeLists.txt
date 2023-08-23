@@ -31,6 +31,8 @@ PDAL_ADD_PLUGIN(arrow_reader_libname reader arrow
         ${PDAL_LIBRARIES}
         Arrow::arrow_shared
         Parquet::parquet_shared
+    INCLUDES
+        ${NLOHMANN_INCLUDE_DIR}
 )
 
 if (WITH_TESTS)

@@ -69,6 +69,8 @@ private:
     void computeArrowSchema(pdal::PointTableRef table);
 
     void writeParquet(std::vector<std::shared_ptr<arrow::Array>> const& arrays, PointTableRef table);
+    void gatherGeoMetadata(std::shared_ptr<arrow::KeyValueMetadata>& input, SpatialReference& ref);
+
     std::string m_filename;
     std::string m_formatString;
     arrowsupport::ArrowFormatType m_formatType;

@@ -110,6 +110,31 @@ TEST(ArrowFeatherReaderTest, ReadingPoints)
 
 }
 
+TEST(ArrowFeatherReaderTest, SRS)
+{
+    ArrowReader m_reader;
+    Options options;
+    options.add("filename", Support::datapath("arrow/autzen-utm.feather"));
+    m_reader.setOptions(options);
+
+    PointTable table;
+    m_reader.prepare(table);
+    PointViewSet viewSet = m_reader.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+
+    //number of points
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 1065);
+
+
+    const SpatialReference utm10("EPSG:26910"); 
+    EXPECT_EQ(m_reader.getSpatialReference(), utm10);  
+
+
+}
+
+}
+
 TEST(ArrowParquetReaderTest, ReadingPoints)
 {
     ArrowReader m_reader;
@@ -130,7 +155,29 @@ TEST(ArrowParquetReaderTest, ReadingPoints)
 
 }
 
-}
+TEST(ArrowParquetReaderTest, SRS)
+{
+    ArrowReader m_reader;
+    Options options;
+    options.add("filename", Support::datapath("arrow/autzen-utm.parquet"));
+    m_reader.setOptions(options);
+
+    PointTable table;
+    m_reader.prepare(table);
+    PointViewSet viewSet = m_reader.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+
+    //number of points
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 1065);
+
+
+    const SpatialReference utm10("EPSG:26910"); 
+    EXPECT_EQ(m_reader.getSpatialReference(), utm10);  
 
 
 }
+
+}
+
+
