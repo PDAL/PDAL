@@ -168,7 +168,8 @@ void ArrowReader::initialize()
     else
     {
         std::stringstream msg;
-        msg << "Unable to open '" << m_filename << "' for to read data!";
+        msg << "Unable to open '" << m_filename << "' for to read data with message '"
+            << result.status().ToString() <<"'";
         throwError(msg.str());
     }
 
@@ -178,7 +179,8 @@ void ArrowReader::initialize()
         if (!status.ok())
         {
             std::stringstream msg;
-            msg << "Unable to create RecordBatchFileReader for file '" << m_filename << "'";
+            msg << "Unable to create RecordBatchFileReader for file  '" << m_filename << "' with message '"
+                << result.status().ToString() <<"'";
             throwError(msg.str());
         }
 
@@ -227,7 +229,8 @@ void ArrowReader::initialize()
         if (!batchOpenStatus.ok())
         {
             std::stringstream msg;
-            msg << "Unable to create parquet RecordBatchFileReader for file '" << m_filename << "'";
+            msg << "Unable to create parquet RecordBatchFileReader for file '" << m_filename << "' with message '"
+                << result.status().ToString() <<"'";
             throwError(msg.str());
         }
 
@@ -241,7 +244,8 @@ void ArrowReader::initialize()
         if (!batchOpenStatus.ok())
         {
             std::stringstream msg;
-            msg << "Unable to create parquet RecordBatchFileReader for file '" << m_filename << "'";
+            msg << "Unable to create parquet RecordBatchFileReader for file '" << m_filename << "' with message '"
+                << result.status().ToString() <<"'";
             throwError(msg.str());
         }
 
@@ -251,14 +255,16 @@ void ArrowReader::initialize()
         if (!result.ok())
         {
             std::stringstream msg;
-            msg << "Unable to read first batch for file '" << m_filename << "'";
+            msg << "Unable to read first batch for file '" << m_filename << "' with message '"
+                << result.status().ToString() <<"'";
             throwError(msg.str());
         }
         m_currentBatch = result.ValueOrDie();
         if (!m_currentBatch)
         {
             std::stringstream msg;
-            msg << "Batch was null for file '" << m_filename << "'";
+            msg << "Batch was null for file '" << m_filename << "' with message '"
+                << result.status().ToString() <<"'";
             throwError(msg.str());
         }
     }
@@ -316,7 +322,8 @@ bool ArrowReader::readNextBatchHeaders()
     if (!readResult.ok())
     {
         std::stringstream msg;
-        msg << "Unable to read RecordBatch " << m_currentBatchIndex << " for file '" << m_filename << "'";
+        msg << "Unable to read RecordBatch " << m_currentBatchIndex << " for file '" << m_filename << "' with message '"
+                << readResult.status().ToString() <<"'";
         throwError(msg.str());
     }
     m_currentBatch = readResult.ValueOrDie();
