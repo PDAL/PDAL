@@ -111,8 +111,9 @@ bool basic_file::Private::open(std::ostream& out, const header12& h, uint32_t cs
 
     if (compressed())
     {
-        // Seek past the chunk table offset.
-        out.seekp(sizeof(uint64_t), std::ios_base::cur);
+        // Reserve 8 bytes for the chunk table offset.
+        const uint64_t dummy = 0;
+        out.write(reinterpret_cast<const char*>(&dummy), sizeof(uint64_t));
     }
     stream.reset(new OutFileStream(out));
     return true;
