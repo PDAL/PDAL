@@ -213,7 +213,17 @@ void ArrowWriter::gatherGeoMetadata(std::shared_ptr<arrow::KeyValueMetadata>& in
     if (ref.empty())
         ref = SpatialReference("EPSG:4326");
     column["edges"] = ref.isGeographic() ? "spherical" : "planar";
-    column["crs"] = pdal::Utils::replaceAll(ref.getPROJJSON(), "\n", "");
+    
+    
+    NL::json projjson;
+    try
+    {
+        projjson  = NL::json::parse(ref.getPROJJSON());
+    } catch (NL::json::parse_error& e)
+    {
+        log()->get(LogLevel::Warning) << "unable to parse projjson" << std::endl;
+    }
+    column["crs"] = projjson;
 
     NL::json wkb;
     wkb["wkb"] = column;
@@ -223,7 +233,7 @@ void ArrowWriter::gatherGeoMetadata(std::shared_ptr<arrow::KeyValueMetadata>& in
     geo["primary_column"] = "wkb";
     geo["columns"] = wkb;
 
-    input->Append("geo", geo.dump());
+    input->Append("geo", geo.dump(-1));
 
 
 
@@ -360,19 +370,21 @@ void ArrowWriter::done(PointTableRef table)
 
     m_table = arrow::Table::Make(m_schema, arrays);
 
-    std::shared_ptr<arrow::KeyValueMetadata> m_poKeyValueMetadata;
-
-    m_poKeyValueMetadata = m_table->schema()->metadata()
-                           ? m_table->schema()->metadata()->Copy()
-                           : std::make_shared<arrow::KeyValueMetadata>();
-
-    SpatialReference ref = table.spatialReference();
-    gatherGeoMetadata(m_poKeyValueMetadata, ref);
-
-    m_table = m_table->ReplaceSchemaMetadata(m_poKeyValueMetadata);
 
     if (m_formatType == arrowsupport::Feather)
     {
+
+
+        std::shared_ptr<arrow::KeyValueMetadata> m_poKeyValueMetadata;
+
+        m_poKeyValueMetadata = m_table->schema()->metadata()
+                            ? m_table->schema()->metadata()->Copy()
+                            : std::make_shared<arrow::KeyValueMetadata>();
+
+        SpatialReference ref = table.spatialReference();
+        gatherGeoMetadata(m_poKeyValueMetadata, ref);
+
+        m_table = m_table->ReplaceSchemaMetadata(m_poKeyValueMetadata);
         auto result = arrow::ipc::feather::WriteTable(*m_table, m_file.get());
         result = m_file->Close();
         if (!result.ok()) 
