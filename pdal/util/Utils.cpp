@@ -607,40 +607,6 @@ double Utils::normalizeLongitude(double longitude)
 }
 
 
-// Useful for debug on occasion.
-std::string Utils::hexDump(const char *buf, size_t count)
-{
-   const unsigned char *cp = reinterpret_cast<const unsigned char *>(buf);
-   char foo[80];
-   int bytes, i, address = 0;
-   std::string out;
-
-   bytes = (count > 16) ? 16 : count;
-
-   while (bytes) {
-      sprintf(foo, "0x%06x ", address);
-      address += 16;
-      for (i = 0; i < 16; i++) {
-         if (i < bytes) {
-            sprintf(foo, "%02X ", cp[i]);
-            out += foo;
-         }
-         else
-            out += "   ";
-      }
-      out += "|";
-      for (i = 0; i < bytes; i++) {
-         sprintf(foo, "%c", isprint(cp[i]) ? cp[i] : '.');
-         out += foo;
-      }
-      out += "|\n";
-      count -= bytes;
-      cp += bytes;
-      bytes = (count > 16) ? 16 : count;
-   }
-   return (out);
-}
-
 
 std::vector<std::string> Utils::simpleWordexp(const std::string& cmdline)
 {
