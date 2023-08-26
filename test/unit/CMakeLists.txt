@@ -271,6 +271,7 @@ PDAL_ADD_TEST(pdal_i3s_obb_test
         ${PDAL_SRC_DIR}/private/MathUtils.cpp
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
+        ${PDAL_INCLUDE_DIR}
         ${PDAL_VENDOR_DIR}/eigen
 )
 
