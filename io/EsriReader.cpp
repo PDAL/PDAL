@@ -41,8 +41,8 @@
 #include <pdal/private/MathUtils.hpp>
 #include <pdal/private/SrsTransform.hpp>
 
-#include "Obb.hpp"
-#include "../lepcc/src/include/lepcc_types.h"
+#include "private/esri/Obb.hpp"
+#include "lepcc/src/include/lepcc_types.h"
 
 namespace pdal
 {
@@ -232,7 +232,7 @@ void EsriReader::initialize(PointTableRef table)
             throwError("Invalid wkid value '" + std::to_string(system) +
                 "' for spatial reference.");
     }
-    
+
     // If we're doing transform from 4326 to ECEF, go ahead and transform
     // the center of our clip box.
     if (system == 4326)
@@ -295,7 +295,7 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
         }
         else
         {
-            std::string dimTypeName = 
+            std::string dimTypeName =
                 el["attributeValues"]["valueType"].get<std::string>();
             auto typeIt = typeMapping.find(dimTypeName);
             if (typeIt == typeMapping.end())

@@ -51,6 +51,7 @@ set(PDAL_LIB_NAME pdalcpp)
 
 set(PDAL_UTIL_LIB_NAME pdal_util)
 set(PDAL_KAZHDAN_LIB_NAME pdal_kazhdan)
+set(PDAL_LEPCC_LIB_NAME pdal_lepcc)
 set(PDAL_TEST_SUPPORT_OBJS pdal_test_support)
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
@@ -169,6 +170,7 @@ add_subdirectory(vendor/schema-validator)
 add_subdirectory(vendor/kazhdan)
 add_subdirectory(vendor/lazperf)
 add_subdirectory(vendor/utfcpp)
+add_subdirectory(vendor/lepcc)
 add_subdirectory(pdal/util)
 add_subdirectory(tools)
 add_subdirectory(apps)
@@ -255,6 +257,7 @@ target_link_libraries(${PDAL_LIB_NAME}
         ${PDAL_ARBITER_LIB_NAME}
         ${JSON_SCHEMA_LIB_NAME}
         ${PDAL_KAZHDAN_LIB_NAME}
+        ${PDAL_LEPCC_LIB_NAME}
         ${PDAL_LAZPERF_LIB_NAME}
         ${UTFCPP_LIB_NAME}
     PUBLIC
