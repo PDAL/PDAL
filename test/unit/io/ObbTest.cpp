@@ -4,7 +4,7 @@
 
 #include "Support.hpp"
 
-#include "../io/Obb.hpp"
+#include <pdal/io/private/esri/Obb.hpp>
 
 namespace pdal
 {
