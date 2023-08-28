@@ -68,6 +68,11 @@ private:
     void makeReader(const std::string& filename);
     void makePipeline();
     void dump(MetadataNode& root);
+    void stacPointcloud(MetadataNode&, MetadataNode&, MetadataNode&,
+        MetadataNode&);
+    void stacProjection(MetadataNode&, MetadataNode&, MetadataNode&,
+        MetadataNode&);
+    void addStac(MetadataNode&, MetadataNode&, MetadataNode&, MetadataNode&);
     MetadataNode dumpSummary(const QuickInfo& qi);
 
     std::string m_inputFile;
@@ -76,6 +81,7 @@ private:
     bool m_showAll;
     bool m_showMetadata;
     bool m_boundary;
+    bool m_stac;
     std::string m_pointIndexes;
     std::string m_dimensions;
     std::string m_enumerate;
@@ -89,6 +95,7 @@ private:
     Stage *m_hexbinStage;
     Stage *m_infoStage;
     Stage *m_reader;
+    Stage *m_stacStage;
 
     MetadataNode m_tree;
 };
