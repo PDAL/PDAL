@@ -155,8 +155,7 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
     endif()
     target_link_libraries(${${_name}}
         PRIVATE
-            ${PDAL_BASE_LIB_NAME}
-            ${PDAL_UTIL_LIB_NAME}
+            ${PDAL_LIB_NAME}
             ${PDAL_ADD_PLUGIN_LINK_WITH}
             ${WINSOCK_LIBRARY}
     )
@@ -186,6 +185,11 @@ endmacro(PDAL_ADD_PLUGIN)
 #    INCLUDES header file directories
 #
 macro(PDAL_ADD_TEST _name)
+
+    if (NOT WITH_TESTS)
+        return()
+    endif(NOT WITH_TESTS)
+
     set(options)
     set(oneValueArgs)
     set(multiValueArgs FILES LINK_WITH INCLUDES SYSTEM_INCLUDES)
@@ -210,8 +214,7 @@ macro(PDAL_ADD_TEST _name)
     set_property(TARGET ${_name} PROPERTY FOLDER "Tests")
     target_link_libraries(${_name}
         PRIVATE
-            ${PDAL_BASE_LIB_NAME}
-            ${PDAL_UTIL_LIB_NAME}
+            ${PDAL_LIB_NAME}
             gtest
             ${PDAL_ADD_TEST_LINK_WITH}
             ${WINSOCK_LIBRARY}

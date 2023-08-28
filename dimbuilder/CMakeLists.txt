@@ -2,7 +2,7 @@
 # The seemingly strange arrangement of this cmake file allows you to build
 # this application as a standalone.
 #
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.13)
 
 set(MAKE_COLOR_MAKEFILE ON)
 

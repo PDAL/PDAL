@@ -256,6 +256,34 @@ PDAL_ADD_TEST(pdal_io_text_reader_test
 PDAL_ADD_TEST(pdal_io_gltf_writer_test FILES io/GltfWriterTest.cpp)
 PDAL_ADD_TEST(pdal_io_smrmsg_reader_test FILES io/SmrmsgReaderTest.cpp)
 
+
+if (PDAL_HAVE_ZLIB)
+
+PDAL_ADD_TEST(pdal_io_slpk_reader_test
+    FILES
+        io/SlpkReaderTest.cpp
+)
+
+PDAL_ADD_TEST(pdal_i3s_obb_test
+    FILES
+        io/ObbTest.cpp
+        ${PDAL_IO_DIR}/private/esri/Obb.cpp
+        ${PDAL_SRC_DIR}/private/MathUtils.cpp
+    INCLUDES
+        ${NLOHMANN_INCLUDE_DIR}
+        ${PDAL_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}/eigen
+)
+
+if (BUILD_I3S_TESTS)
+    PDAL_ADD_TEST(pdal_io_i3s_reader_test
+            FILES
+                io/i3sReaderTest.cpp
+    )
+endif()
+
+endif()
+
 #
 # sources for the native filters
 #
