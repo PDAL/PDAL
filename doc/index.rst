@@ -23,10 +23,25 @@ Finally, PDAL speaks Python by both embedding and extending it. Visit
 :ref:`python` to find out how you can use PDAL with Python to process point
 cloud data.
 
-The entire website is available as a single PDF at http://pdal.io/PDAL.pdf
+The entire website is available as a single PDF at http://pdal.io/_/downloads/en/latest/pdf/
 
 News
 --------------------------------------------------------------------------------
+
+**08-18-2023**
+................................................................................
+
+PDAL 2.5.6 was released. Visit :ref:`download` to grab a copy.
+
+**06-13-2023**
+................................................................................
+
+PDAL 2.5.5 was released. Visit :ref:`download` to grab a copy.
+
+**04-13-2023**
+................................................................................
+
+PDAL 2.5.3 was released. Visit :ref:`download` to grab a copy.
 
 **01-13-2023**
 ................................................................................
@@ -189,4 +204,5 @@ Indices and tables
 .. _`BSD`: http://www.opensource.org/licenses/bsd-license.php
 .. _`point cloud data`: http://en.wikipedia.org/wiki/Point_cloud
 .. _`LIDAR`: http://en.wikipedia.org/wiki/LIDAR
+
 
