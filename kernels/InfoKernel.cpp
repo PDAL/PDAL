@@ -34,6 +34,7 @@
 
 #include "InfoKernel.hpp"
 
+#include <time.h>
 #include <algorithm>
 
 #include <pdal/pdal_config.hpp>
@@ -358,6 +359,33 @@ void InfoKernel::dump(MetadataNode& root)
     }
 }
 
+int InfoKernel::execute()
+{
+    std::string filename = (m_usestdin ? std::string("STDIN") : m_inputFile);
+    MetadataNode root = run(filename);
+    Utils::toJSON(root, std::cout);
+
+    return 0;
+}
+
+std::string getDateStr(std::string year, std::string doy)
+{
+    int y = std::stoi(year);
+    int d = std::stoi(doy);
+
+    std::vector<int> dayCount = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    if (y % 4 == 0)
+        ++dayCount[1];
+
+    int m = 0;
+    while (d > dayCount[m])
+        d -= dayCount[m++];
+    ++m;
+    std::ostringstream oss;
+    oss << y << "-" << m << "-" << d << "T00:00:00Z";
+    return oss.str();
+}
+
 void InfoKernel::addStac(MetadataNode& root, MetadataNode& stats,
     MetadataNode& meta, MetadataNode& mdata)
 {
@@ -369,10 +397,11 @@ void InfoKernel::addStac(MetadataNode& root, MetadataNode& stats,
     //Base STAC object
     MetadataNode id = stac.add("id", stem);
     MetadataNode properties = stac.add("properties");
-    MetadataNode doy = meta.findChild("creation_doy");
-    MetadataNode year = meta.findChild("creation_year");
+    std::string doy = meta.findChild("creation_doy").value();
+    std::string year = meta.findChild("creation_year").value();
+    properties.add("datetime", getDateStr(year, doy));
+
     // TODO add from metadata?
-    properties.add("datetime", "2022-11-15T16:06:02.616469Z");
     stac.add("type", "Feature");
     stac.add("stac_version", "1.0.0");
 
@@ -391,7 +420,7 @@ void InfoKernel::addStac(MetadataNode& root, MetadataNode& stats,
     data.add("href", absPath);
     data.add("title", "Pointcloud data");
     assets.add(data.clone("data"));
-    stacPointcloud(root, stats, meta, properties);
+    stacPointcloud(root, stats, mdata, properties);
     stacProjection(root, stats, meta, stac);
 
     root.add(stac.clone("stac"));
@@ -467,14 +496,6 @@ void InfoKernel::stacProjection(MetadataNode& root, MetadataNode& stats,
 
 
 
-int InfoKernel::execute()
-{
-    std::string filename = (m_usestdin ? std::string("STDIN") : m_inputFile);
-    MetadataNode root = run(filename);
-    Utils::toJSON(root, std::cout);
-
-    return 0;
-}
 
 
 } // namespace pdal
