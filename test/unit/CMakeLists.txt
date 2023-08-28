@@ -267,7 +267,7 @@ PDAL_ADD_TEST(pdal_io_slpk_reader_test
 PDAL_ADD_TEST(pdal_i3s_obb_test
     FILES
         io/ObbTest.cpp
-        ../../../io/private/esri/Obb.cpp
+        ${PDAL_IO_DIR}/private/esri/Obb.cpp
         ${PDAL_SRC_DIR}/private/MathUtils.cpp
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}

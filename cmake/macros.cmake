@@ -185,6 +185,11 @@ endmacro(PDAL_ADD_PLUGIN)
 #    INCLUDES header file directories
 #
 macro(PDAL_ADD_TEST _name)
+
+    if (NOT WITH_TESTS)
+        return()
+    endif(NOT WITH_TESTS)
+
     set(options)
     set(oneValueArgs)
     set(multiValueArgs FILES LINK_WITH INCLUDES SYSTEM_INCLUDES)
