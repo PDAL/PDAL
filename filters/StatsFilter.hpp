@@ -238,6 +238,7 @@ private:
     StringList m_enums;
     StringList m_counts;
     StringList m_global;
+    std::string m_commonSrs;
     bool m_advanced;
     std::map<Dimension::Id, stats::Summary> m_stats;
 };
