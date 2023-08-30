@@ -34,7 +34,7 @@
 
 #include "InfoKernel.hpp"
 
-#include <time.h>
+#include <ctime>
 #include <algorithm>
 
 #include <pdal/pdal_config.hpp>
@@ -163,6 +163,8 @@ void InfoKernel::addSwitches(ProgramArgs& args)
         "serialization", m_pipelineFile);
     args.add("summary", "Dump summary of the info", m_showSummary);
     args.add("stac", "Dump STAC Item representation of the info.", m_stac);
+    args.add("pc_type", "Pointcloud type for STAC generation (lidar, "
+        "eopc, radar, sonar, other).", m_pcType, "lidar");
     args.add("metadata", "Dump file metadata info", m_showMetadata);
     args.add("stdin,s", "Read a pipeline file from standard input", m_usestdin);
 }
@@ -249,9 +251,6 @@ void InfoKernel::makePipeline()
         }
         else
             m_stacStage = stage;
-        // Options stacOptions;
-        // stacOptions.add("input_file", m_inputFile);
-        // m_stacStage = &m_manager.makeFilter("filters.stac", *stage, stacOptions);
     }
     if (m_boundary)
         m_hexbinStage = &m_manager.makeFilter("filters.hexbin", *stage);
@@ -370,19 +369,16 @@ int InfoKernel::execute()
 
 std::string getDateStr(std::string year, std::string doy)
 {
-    int y = std::stoi(year);
-    int d = std::stoi(doy);
+    std::tm tm = { };
+    tm.tm_mday = std::stoi(doy);
+    tm.tm_mon = 0;
+    tm.tm_year = std::stoi(year)-1900;
+    tm.tm_isdst = -1;
+    std::time_t time = std::mktime(&tm);
+    const struct std::tm *ntm = std::gmtime(&time);
 
-    std::vector<int> dayCount = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    if (y % 4 == 0)
-        ++dayCount[1];
-
-    int m = 0;
-    while (d > dayCount[m])
-        d -= dayCount[m++];
-    ++m;
     std::ostringstream oss;
-    oss << y << "-" << m << "-" << d << "T00:00:00Z";
+    oss << std::put_time(ntm, "%Y-%m-%dT00:00:00Z");
     return oss.str();
 }
 
@@ -397,6 +393,7 @@ void InfoKernel::addStac(MetadataNode& root, MetadataNode& stats,
     //Base STAC object
     MetadataNode id = stac.add("id", stem);
     MetadataNode properties = stac.add("properties");
+    //TODO make sure these are available
     std::string doy = meta.findChild("creation_doy").value();
     std::string year = meta.findChild("creation_year").value();
     properties.add("datetime", getDateStr(year, doy));
@@ -405,9 +402,9 @@ void InfoKernel::addStac(MetadataNode& root, MetadataNode& stats,
     stac.add("type", "Feature");
     stac.add("stac_version", "1.0.0");
 
-    //extensions - pointcloud and projection extensions
-    stac.add("extensions", "https://stac-extensions.github.io/pointcloud/v1.0.0/schema.json");
-    stac.add("extensions", "https://stac-extensions.github.io/projection/v1.1.0/schema.json");
+    //stac_extensions - pointcloud and projection extensions
+    stac.add("stac_extensions", "https://stac-extensions.github.io/pointcloud/v1.0.0/schema.json");
+    stac.add("stac_extensions", "https://stac-extensions.github.io/projection/v1.1.0/schema.json");
 
     //links
     MetadataNode self = stac.addList("links");
@@ -420,6 +417,7 @@ void InfoKernel::addStac(MetadataNode& root, MetadataNode& stats,
     data.add("href", absPath);
     data.add("title", "Pointcloud data");
     assets.add(data.clone("data"));
+    auto&& enc = meta.findChild("global_encoding");
     stacPointcloud(root, stats, mdata, properties);
     stacProjection(root, stats, meta, stac);
 
@@ -448,11 +446,11 @@ void InfoKernel::stacPointcloud(MetadataNode& root, MetadataNode& stats,
     }
     for (auto& schema: pc_schemas)
     {
-        props.addList(schema.clone("pc:schema"));
+        props.addList(schema.clone("pc:schemas"));
     }
     props.add(pc_count.clone("pc:count"));
     props.add("pc:encoding", fileExt);
-    props.add("pc:type", "lidar");
+    props.add("pc:type", m_pcType);
 }
 
 void addBox(MetadataNode& n, MetadataNode& box, std::string name)
@@ -483,14 +481,12 @@ void InfoKernel::stacProjection(MetadataNode& root, MetadataNode& stats,
     MetadataNode&& projJson = srs.findChild("json");
     MetadataNode&& projWkt2 = srs.findChild("wkt");
 
-    // props.add(projBbox.clone("proj:bbox"));
     addBox(props, projBbox, "proj:bbox");
     props.add(projGeom.clone("proj:geometry"));
-    props.add(projJson.clone("proj:json"));
+    props.add(projJson.clone("proj:projjson"));
     props.add(projWkt2.clone("proj:wkt2"));
 
     stac.add(stacGeom.clone("geometry"));
-    // stac.add(stacBbox.clone("bbox"));
     addBox(stac, stacBbox, "bbox");
 }
 

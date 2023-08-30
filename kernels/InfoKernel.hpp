@@ -68,11 +68,11 @@ private:
     void makeReader(const std::string& filename);
     void makePipeline();
     void dump(MetadataNode& root);
-    void stacPointcloud(MetadataNode&, MetadataNode&, MetadataNode&,
-        MetadataNode&);
+    void stacPointcloud(MetadataNode& root, MetadataNode& stats, MetadataNode& meta,
+        MetadataNode& props);
     void stacProjection(MetadataNode&, MetadataNode&, MetadataNode&,
         MetadataNode&);
-    void addStac(MetadataNode&, MetadataNode&, MetadataNode&, MetadataNode&);
+    void addStac(MetadataNode& root, MetadataNode& stats, MetadataNode& meta, MetadataNode& mdata);
     MetadataNode dumpSummary(const QuickInfo& qi);
 
     std::string m_inputFile;
@@ -87,6 +87,7 @@ private:
     std::string m_enumerate;
     std::string m_queryPoint;
     std::string m_pipelineFile;
+    std::string m_pcType;
     bool m_showSummary;
     bool m_needPoints;
     bool m_usestdin;
