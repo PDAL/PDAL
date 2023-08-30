@@ -336,7 +336,6 @@ void ArrowWriter::writeParquet(std::vector<std::shared_ptr<arrow::Array>> const&
         throwError(msg.str());
     }
 
-    base_writer->Close();
 
     result = m_file->Close();
     if (!result.ok())
