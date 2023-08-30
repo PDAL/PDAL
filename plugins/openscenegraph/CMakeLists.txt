@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.13)
 
 if (STANDALONE)
     project(pdal-openscenegraph)
-    include(../../cmake/standalone.cmake NO_POLICY_SCOPE)
+    find_package(PDAL REQUIRED)
+    include("${PROJECT_SOURCE_DIR}/../../cmake/standalone.cmake" )
 endif(STANDALONE)
 
 #

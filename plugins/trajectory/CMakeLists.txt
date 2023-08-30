@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.13)
 if (STANDALONE)
     project(pdal-trajectory)
     find_package(PDAL REQUIRED)
-    include(../../cmake/standalone.cmake NO_POLICY_SCOPE)
+    include("${PROJECT_SOURCE_DIR}../../cmake/standalone.cmake" NO_POLICY_SCOPE)
 endif(STANDALONE)
 
 

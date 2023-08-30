@@ -3,11 +3,11 @@ cmake_minimum_required(VERSION 3.13)
 if (STANDALONE)
     project(pdal-pgpointcloud)
     find_package(PDAL REQUIRED)
-    include("${CMAKE_SOURCE_DIR}/../../cmake/standalone.cmake" )
+    include("${PROJECT_SOURCE_DIR}/../../cmake/standalone.cmake" )
     include(${PDAL_CMAKE_DIR}/arbiter.cmake)
     include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
     include(${PDAL_CMAKE_DIR}/libxml2.cmake)
-    add_subdirectory("${CMAKE_SOURCE_DIR}/../../vendor/arbiter" "vendor/arbiter")
+    add_subdirectory("${PROJECT_SOURCE_DIR}/../../vendor/arbiter" "vendor/arbiter")
 
 endif(STANDALONE)
 
