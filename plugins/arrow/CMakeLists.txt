@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.5)
 
 if (STANDALONE)
     project(pdal-arrow)
-    include(../../cmake/standalone.cmake NO_POLICY_SCOPE)
+    find_package(PDAL REQUIRED)
+    include("${CMAKE_SOURCE_DIR}/../../cmake/standalone.cmake" )
     include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
 endif(STANDALONE)
 

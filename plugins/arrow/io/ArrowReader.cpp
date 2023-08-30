@@ -106,7 +106,7 @@ void ArrowReader::loadGeoMetadata(const std::shared_ptr<const arrow::KeyValueMet
 
             if (!metadata.contains("primary_column"))
             {
-                log()->get(LogLevel::Warning) << "GeoParquet metadata does not contain 'primary_column' entry" 
+                log()->get(LogLevel::Warning) << "GeoParquet metadata does not contain 'primary_column' entry"
                                               << std::endl;
                 return;
 
@@ -114,7 +114,7 @@ void ArrowReader::loadGeoMetadata(const std::shared_ptr<const arrow::KeyValueMet
 
             if (!metadata.contains("columns"))
             {
-                log()->get(LogLevel::Warning) << "GeoParquet metadata does not contain 'columns' entry" 
+                log()->get(LogLevel::Warning) << "GeoParquet metadata does not contain 'columns' entry"
                                               << std::endl;
                 return;
             }
@@ -131,7 +131,18 @@ void ArrowReader::loadGeoMetadata(const std::shared_ptr<const arrow::KeyValueMet
                 return;
             }
 
-            SpatialReference ref(column["crs"].get<std::string>());
+            SpatialReference ref;
+            NL::json crs = column["crs"];
+            if (crs.is_object())
+            {
+                ref.set(crs.dump());
+            }
+            else if (crs.is_string())
+            {
+
+                ref.set(column["crs"].get<std::string>());
+            }
+
             if (column.contains("epoch"))
             {
 
@@ -218,14 +229,14 @@ void ArrowReader::initialize()
         reader_builder.memory_pool(m_pool);
         reader_builder.properties(arrow_reader_props);
 
-        std::unique_ptr<parquet::arrow::FileReader> arrow_reader;
 
-        auto pOpenStatus = parquet::arrow::OpenFile(m_file, m_pool, &arrow_reader);
 
-        const auto metadata = arrow_reader->parquet_reader()->metadata();
+        auto pOpenStatus = parquet::arrow::OpenFile(m_file, m_pool, &m_arrow_reader);
+
+        const auto metadata = m_arrow_reader->parquet_reader()->metadata();
         loadGeoMetadata(metadata->key_value_metadata());
 
-        auto batchOpenStatus = arrow_reader->GetRecordBatchReader(&m_parquetReader);
+        auto batchOpenStatus = m_arrow_reader->GetRecordBatchReader(&m_parquetReader);
         if (!batchOpenStatus.ok())
         {
             std::stringstream msg;
@@ -240,7 +251,7 @@ void ArrowReader::initialize()
         }
         auto closeStatus = m_parquetReader->Close();
 
-        batchOpenStatus = arrow_reader->GetRecordBatchReader(&m_parquetReader);
+        batchOpenStatus = m_arrow_reader->GetRecordBatchReader(&m_parquetReader);
         if (!batchOpenStatus.ok())
         {
             std::stringstream msg;
@@ -318,15 +329,40 @@ bool ArrowReader::readNextBatchHeaders()
 {
     if (m_currentBatchIndex == m_batchCount)
         return false;
-    auto readResult = m_ipcReader->ReadRecordBatch(m_currentBatchIndex);
-    if (!readResult.ok())
+
+    if (m_formatType == arrowsupport::Feather){
+
+        auto readResult = m_ipcReader->ReadRecordBatch(m_currentBatchIndex);
+        if (!readResult.ok())
+        {
+            std::stringstream msg;
+            msg << "Unable to read RecordBatch " << m_currentBatchIndex << " for file '" << m_filename << "' with message '"
+                    << readResult.status().ToString() <<"'";
+            throwError(msg.str());
+        }
+        m_currentBatch = readResult.ValueOrDie();
+
+    } else if (m_formatType == arrowsupport::Parquet)
     {
-        std::stringstream msg;
-        msg << "Unable to read RecordBatch " << m_currentBatchIndex << " for file '" << m_filename << "' with message '"
-                << readResult.status().ToString() <<"'";
-        throwError(msg.str());
+        if (!(m_parquetReader.get()))
+        {
+            std::stringstream msg;
+            msg << "Reader is null!" << std::endl;
+            throwError(msg.str());
+        }
+
+        auto result = m_parquetReader->Next();
+        if (!result.ok())
+        {
+            std::stringstream msg;
+            msg << "Unable to read next batch for file '" << m_filename << "' with message '"
+                << result.status().ToString() <<"'";
+            throwError(msg.str());
+        }
+        m_currentBatch = result.ValueOrDie();
+
     }
-    m_currentBatch = readResult.ValueOrDie();
+
     return true;
 }
 
@@ -334,6 +370,7 @@ bool ArrowReader::readNextBatchHeaders()
 bool ArrowReader::readNextBatchData()
 {
 
+    m_arrays.clear();
     for(int columnNum = 0; columnNum < m_currentBatch->num_columns(); ++columnNum)
     {
         // https://arrow.apache.org/docs/cpp/api/array.html#_CPPv4N5arrow5ArrayE
@@ -346,6 +383,7 @@ bool ArrowReader::readNextBatchData()
 bool ArrowReader::fillPoint(PointRef& point)
 {
 
+
     for(int columnNum = 0; columnNum < m_currentBatch->num_columns(); ++columnNum)
     {
         // https://arrow.apache.org/docs/cpp/api/array.html#_CPPv4N5arrow5ArrayE
@@ -353,61 +391,61 @@ bool ArrowReader::fillPoint(PointRef& point)
         arrow::DoubleArray* dArray = dynamic_cast<arrow::DoubleArray*>(array.get());
         if (dArray)
         {
-            point.setField<double>(m_arrayIds[columnNum], dArray->Value(point.pointId()));
+            point.setField<double>(m_arrayIds[columnNum], dArray->Value(m_currentBatchPointIndex));
             continue;
         }
         arrow::FloatArray* fArray = dynamic_cast<arrow::FloatArray*>(array.get());
         if (fArray)
         {
-            point.setField<float>(m_arrayIds[columnNum], fArray->Value(point.pointId()));
+            point.setField<float>(m_arrayIds[columnNum], fArray->Value(m_currentBatchPointIndex));
             continue;
         }
         arrow::Int8Array* int8Array = dynamic_cast<arrow::Int8Array*>(array.get());
         if (int8Array)
         {
-            point.setField<int8_t>(m_arrayIds[columnNum], int8Array->Value(point.pointId()));
+            point.setField<int8_t>(m_arrayIds[columnNum], int8Array->Value(m_currentBatchPointIndex));
             continue;
         }
         arrow::UInt8Array* uint8Array = dynamic_cast<arrow::UInt8Array*>(array.get());
         if (uint8Array)
         {
-            point.setField<uint8_t>(m_arrayIds[columnNum], uint8Array->Value(point.pointId()));
+            point.setField<uint8_t>(m_arrayIds[columnNum], uint8Array->Value(m_currentBatchPointIndex));
             continue;
         }
         arrow::Int16Array* int16Array = dynamic_cast<arrow::Int16Array*>(array.get());
         if (int16Array)
         {
-            point.setField<int16_t>(m_arrayIds[columnNum], int16Array->Value(point.pointId()));
+            point.setField<int16_t>(m_arrayIds[columnNum], int16Array->Value(m_currentBatchPointIndex));
             continue;
         }
         arrow::UInt16Array* uint16Array = dynamic_cast<arrow::UInt16Array*>(array.get());
         if (uint16Array)
         {
-            point.setField<uint16_t>(m_arrayIds[columnNum], uint16Array->Value(point.pointId()));
+            point.setField<uint16_t>(m_arrayIds[columnNum], uint16Array->Value(m_currentBatchPointIndex));
             continue;
         }
         arrow::Int32Array* int32Array = dynamic_cast<arrow::Int32Array*>(array.get());
         if (int32Array)
         {
-            point.setField<int32_t>(m_arrayIds[columnNum], int32Array->Value(point.pointId()));
+            point.setField<int32_t>(m_arrayIds[columnNum], int32Array->Value(m_currentBatchPointIndex));
             continue;
         }
         arrow::UInt32Array* uint32Array = dynamic_cast<arrow::UInt32Array*>(array.get());
         if (uint32Array)
         {
-            point.setField<uint32_t>(m_arrayIds[columnNum], uint32Array->Value(point.pointId()));
+            point.setField<uint32_t>(m_arrayIds[columnNum], uint32Array->Value(m_currentBatchPointIndex));
             continue;
         }
         arrow::Int64Array* int64Array = dynamic_cast<arrow::Int64Array*>(array.get());
         if (int64Array)
         {
-            point.setField<int64_t>(m_arrayIds[columnNum], int64Array->Value(point.pointId()));
+            point.setField<int64_t>(m_arrayIds[columnNum], int64Array->Value(m_currentBatchPointIndex));
             continue;
         }
         arrow::UInt64Array* uint64Array = dynamic_cast<arrow::UInt64Array*>(array.get());
         if (uint64Array)
         {
-            point.setField<uint64_t>(m_arrayIds[columnNum], uint64Array->Value(point.pointId()));
+            point.setField<uint64_t>(m_arrayIds[columnNum], uint64Array->Value(m_currentBatchPointIndex));
             continue;
         }
 
@@ -434,8 +472,9 @@ bool ArrowReader::processOne(PointRef& point)
         readNextBatchData();
     }
 
+    bool retval = fillPoint(point);
     m_currentBatchPointIndex++;
-    return fillPoint(point);
+    return retval;
 
 
 }
@@ -443,7 +482,28 @@ bool ArrowReader::processOne(PointRef& point)
 
 void ArrowReader::done(PointTableRef table)
 {
+    if (m_formatType == arrowsupport::Feather)
+    {
+
+    }
+    else if (m_formatType == arrowsupport::Parquet)
+    {
+
+        auto result = m_parquetReader->Close();
+        if (!result.ok())
+        {
+            std::stringstream msg;
+            msg << "Unable to read next batch for file '" << m_filename << "' with message '"
+                << result.ToString() <<"'";
+            throwError(msg.str());
+        }
+
+    }
+
     auto result = m_file->Close();
+
+
+
 
 }
 

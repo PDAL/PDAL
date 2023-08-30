@@ -64,7 +64,7 @@ private:
     virtual bool processOne(PointRef& point);
     virtual void done(PointTableRef table);
     virtual void write(const PointViewPtr view);
-    virtual void addDimensions(PointLayoutPtr layout); 
+    virtual void addDimensions(PointLayoutPtr layout);
 
     void computeArrowSchema(pdal::PointTableRef table);
 
@@ -80,11 +80,13 @@ private:
     std::map<pdal::Dimension::Id, std::unique_ptr<arrow::ArrayBuilder> > m_builders;
     std::vector<pdal::Dimension::Id> m_dimIds;
     arrow::MemoryPool* m_pool;
+    int m_batchSize;
+    std::string m_geoParquetVersion;
 
     std::shared_ptr<arrow::io::FileOutputStream> m_file;
     bool m_writeGeoParquet;
     pdal::Dimension::Id m_wkbDimId;
-    
+
 
 
     ArrowWriter& operator=(const ArrowWriter&); // not implemented
