@@ -68,7 +68,7 @@ private:
 
     void computeArrowSchema(pdal::PointTableRef table);
 
-    void writeParquet(std::vector<std::shared_ptr<arrow::Array>> const& arrays, PointTableRef table);
+    void setupParquet(std::vector<std::shared_ptr<arrow::Array>> const& arrays, PointTableRef table);
     void gatherGeoMetadata(std::shared_ptr<arrow::KeyValueMetadata>& input, SpatialReference& ref);
 
     std::string m_filename;
@@ -77,6 +77,8 @@ private:
 
     std::shared_ptr<arrow::Table> m_table;
     std::shared_ptr<arrow::Schema> m_schema;
+    std::vector<std::shared_ptr<arrow::Array>> m_arrays;
+
     std::map<pdal::Dimension::Id, std::unique_ptr<arrow::ArrayBuilder> > m_builders;
     std::vector<pdal::Dimension::Id> m_dimIds;
     arrow::MemoryPool* m_pool;
@@ -84,8 +86,14 @@ private:
     std::string m_geoParquetVersion;
 
     std::shared_ptr<arrow::io::FileOutputStream> m_file;
+    std::unique_ptr<parquet::arrow::FileWriter> m_poFileWriter;
+    std::shared_ptr<arrow::KeyValueMetadata> m_poKeyValueMetadata;
+
     bool m_writeGeoParquet;
+    point_count_t m_batchIndex;
     pdal::Dimension::Id m_wkbDimId;
+
+    void FlushBatch(PointTableRef table);
 
 
 
