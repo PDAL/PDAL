@@ -67,7 +67,9 @@ std::string ArrowWriter::getName() const { return s_info.name; }
 ArrowWriter::ArrowWriter() :
     m_formatType(arrowsupport::Unknown),
     m_pool(arrow::default_memory_pool()),
-    m_writeGeoParquet(false)
+    m_writeGeoParquet(false),
+    m_batchIndex(0),
+    m_pointTablePtr(nullptr)
 {
 }
 
@@ -75,7 +77,7 @@ ArrowWriter::~ArrowWriter()
 {}
 
 
-void ArrowWriter::computeArrowSchema(pdal::PointTableRef table)
+void ArrowWriter::computeArrowSchema(PointTableRef table)
 {
     using namespace pdal;
 
@@ -84,11 +86,35 @@ void ArrowWriter::computeArrowSchema(pdal::PointTableRef table)
     int count = 0;
 
     auto dims = layout->dims();
-    auto rng = std::default_random_engine {};
-    std::shuffle(std::begin(dims), std::end(dims), rng);
+    for (auto& id : dims)
+    {
+        auto dimType = layout->dimType(id);
+        std::string name = layout->dimName(id);
+        std::shared_ptr<arrow::Field> field = toArrowType(name, dimType);
+
+        fields.push_back(field);
+        m_dimIds.push_back(id);
+    }
+
+    m_schema.reset(new arrow::Schema(fields));
+
+    int num_fields = m_schema->num_fields();
+    if ((int)layout->dims().size() != (int)num_fields)
+        throwError("Arrow schema size does not match PDAL schema size!");
+
+}
 
 
+void ArrowWriter::createBuilders(PointTableRef table)
+{
 
+    using namespace pdal;
+
+    const auto& layout = table.layout();
+
+    m_builders.clear();
+
+    auto dims = layout->dims();
     for (auto& id : dims)
     {
         auto dimType = layout->dimType(id);
@@ -106,17 +132,10 @@ void ArrowWriter::computeArrowSchema(pdal::PointTableRef table)
 
         m_builders.insert({id, std::move(builder)});
 
-        fields.push_back(field);
-        m_dimIds.push_back(id);
     }
 
-    m_schema.reset(new arrow::Schema(fields));
-
-    int num_fields = m_schema->num_fields();
-    if ((int)layout->dims().size() != (int)num_fields)
-        throwError("Arrow schema size does not match PDAL schema size!");
-
 }
+
 
 void ArrowWriter::initialize()
 {
@@ -152,6 +171,10 @@ bool ArrowWriter::processOne(PointRef& point)
     for (auto& id: m_dimIds)
     {
         arrow::ArrayBuilder* builder = m_builders[id].get();
+        if (!builder)
+        {
+            throwError("unable to fetch builder for dimension!");
+        }
         arrow::Type::type at = builder->type()->id();
         pdal::Dimension::Type t = computePDALTypeFromArrow(at);
 
@@ -167,7 +190,7 @@ bool ArrowWriter::processOne(PointRef& point)
 
     if (m_batchIndex == (point_count_t)m_batchSize)
     {
-        FlushBatch(point.layout());
+        FlushBatch(*m_pointTablePtr);
         m_batchIndex = 0;
     }
     return true;
@@ -184,15 +207,43 @@ void ArrowWriter::addArgs(ProgramArgs& args)
 
 void ArrowWriter::ready(PointTableRef table)
 {
-    computeArrowSchema(table);
+    m_pointTablePtr = static_cast<PointTable*>(&table);
 
+
+    std::vector<std::shared_ptr<arrow::Field>> fields;
+    int count = 0;
+
+    const auto& layout = table.layout();
+    auto dims = layout->dims();
+    for (auto& id : dims)
+    {
+        auto dimType = layout->dimType(id);
+        std::string name = layout->dimName(id);
+        std::shared_ptr<arrow::Field> field = toArrowType(name, dimType);
+
+        fields.push_back(field);
+        m_dimIds.push_back(id);
+        log()->get(LogLevel::Info) << "Adding dimension '" << name << "'" << std::endl;
+    }
+
+    m_schema.reset(new arrow::Schema(fields));
+
+    int num_fields = m_schema->num_fields();
+    if ((int)layout->dims().size() != (int)num_fields)
+        throwError("Arrow schema size does not match PDAL schema size!");
+
+    createBuilders(*m_pointTablePtr);
 
     m_table = arrow::Table::Make(m_schema, m_arrays);
-
 
     if (m_formatType == arrowsupport::Parquet)
     {
         setupParquet(m_arrays, table);
+    }
+
+    if (m_formatType == arrowsupport::Feather)
+    {
+        setupFeather(m_arrays, table);
     }
 }
 
@@ -252,15 +303,12 @@ void ArrowWriter::gatherGeoMetadata(std::shared_ptr<arrow::KeyValueMetadata>& in
 
     input->Append("geo", geo.dump(-1));
 
-
-
-
 }
+
+
 void ArrowWriter::setupParquet(std::vector<std::shared_ptr<arrow::Array>> const& arrays,
                                PointTableRef table)
 {
-
-
 
     parquet::WriterProperties::Builder m_oWriterPropertiesBuilder{};
 
@@ -290,12 +338,9 @@ void ArrowWriter::setupParquet(std::vector<std::shared_ptr<arrow::Array>> const&
     auto schema_node = std::static_pointer_cast<parquet::schema::GroupNode>(
         parquet_schema->schema_root());
 
-
-
     m_poKeyValueMetadata = m_table->schema()->metadata()
                            ? m_table->schema()->metadata()->Copy()
                            : std::make_shared<arrow::KeyValueMetadata>();
-
 
     std::unique_ptr<parquet::ParquetFileWriter> base_writer;
     base_writer = parquet::ParquetFileWriter::Open(
@@ -304,54 +349,66 @@ void ArrowWriter::setupParquet(std::vector<std::shared_ptr<arrow::Array>> const&
     if (!result.ok())
     {
         std::stringstream msg;
-        msg << "Unable to convert open ParquetFileWriter with error '" << result.ToString() << "'";
+        msg << "Unable to convert open ParquetFileWriter with error '"
+            << result.ToString() << "'";
         throwError(msg.str());
     }
 
     SpatialReference ref = table.spatialReference();
     gatherGeoMetadata(m_poKeyValueMetadata, ref);
 
-
     auto schema_ptr = std::make_shared<::arrow::Schema>(*m_table->schema());
 
-    result = parquet::arrow::FileWriter::Make(
-                m_pool, std::move(base_writer), std::move(schema_ptr),
-                arrowWriterProperties, &m_poFileWriter);
+    result = parquet::arrow::FileWriter::Make(m_pool,
+                                              std::move(base_writer),
+                                              std::move(schema_ptr),
+                                              arrowWriterProperties,
+                                              &m_parquetFileWriter);
     if (!result.ok())
     {
         std::stringstream msg;
-        msg << "Unable to make parquet::arrow::FileWriter " << result.ToString();
+        msg << "Unable to make parquet::arrow::FileWriter "
+            << result.ToString();
         throwError(msg.str());
     }
-
-//     result = m_poFileWriter->NewRowGroup(m_builders[pdal::Dimension::Id::X]->length());
-//     if (!result.ok())
-//     {
-//         std::stringstream msg;
-//         msg << "Unable to make NewRowGroup" << result.ToString();
-//         throwError(msg.str());
-//     }
-//
-//     for(auto& array: arrays)
-//     {
-//         result = m_poFileWriter->WriteColumnChunk(*array);
-//         if (!result.ok())
-//         {
-//             std::stringstream msg;
-//             msg << "Unable to make WriteColumnChunk" << result.ToString();
-//             throwError(msg.str());
-//         }
-//
-//     }
+}
 
 
+void ArrowWriter::setupFeather(std::vector<std::shared_ptr<arrow::Array>> const& arrays,
+                               PointTableRef table)
+{
+    arrow::ipc::IpcWriteOptions writeOptions;
+    m_poKeyValueMetadata = m_table->schema()->metadata()
+                           ? m_table->schema()->metadata()->Copy()
+                           : std::make_shared<arrow::KeyValueMetadata>();
 
+    SpatialReference ref = table.spatialReference();
+    gatherGeoMetadata(m_poKeyValueMetadata, ref);
+
+    auto schema_ptr = std::make_shared<::arrow::Schema>(*m_table->schema());
+
+    auto result = arrow::ipc::MakeFileWriter(m_file.get(),
+                                               std::move(schema_ptr),
+                                               writeOptions,
+                                               m_poKeyValueMetadata);
+    if (result.ok())
+        m_arrowFileWriter = result.ValueOrDie();
+    else
+    {
+        std::stringstream msg;
+        msg << "Unable to open '" << m_filename
+            << "' for arrow output with error "
+            << result.status().ToString();
+        throwError(msg.str());
+    }
 }
 
 
 void ArrowWriter::FlushBatch(PointTableRef table)
 {
 
+    // Wipe off our arrays we're making a new batch
+    m_arrays.clear();
     for (auto& id: m_dimIds)
     {
         arrow::ArrayBuilder* builder = m_builders[id].get();
@@ -366,42 +423,47 @@ void ArrowWriter::FlushBatch(PointTableRef table)
         m_arrays.push_back(array);
     }
 
-
-    auto result = m_poFileWriter->NewRowGroup(m_builders[pdal::Dimension::Id::X]->length());
-    if (!result.ok())
+    if (m_formatType == arrowsupport::Parquet)
     {
-        std::stringstream msg;
-        msg << "Unable to make NewRowGroup" << result.ToString();
-        throwError(msg.str());
-    }
-
-    for(auto& array: m_arrays)
-    {
-        result = m_poFileWriter->WriteColumnChunk(*array);
+        auto result = m_parquetFileWriter->NewRowGroup(m_builders[pdal::Dimension::Id::X]->length());
         if (!result.ok())
         {
             std::stringstream msg;
-            msg << "Unable to make WriteColumnChunk" << result.ToString();
+            msg << "Unable to make NewRowGroup" << result.ToString();
             throwError(msg.str());
+        }
+
+        for(auto& array: m_arrays)
+        {
+            result = m_parquetFileWriter->WriteColumnChunk(*array);
+            if (!result.ok())
+            {
+                std::stringstream msg;
+                msg << "Unable to make WriteColumnChunk" << result.ToString();
+                throwError(msg.str());
+            }
         }
 
     }
 
-    log()->get(LogLevel::Debug) << "Flushing batch" << m_batchSize << std::endl;
-
-    computeArrowSchema(table);
-
-
-    m_table = arrow::Table::Make(m_schema, m_arrays);
-
-
-    if (m_formatType == arrowsupport::Parquet)
+    if (m_formatType == arrowsupport::Feather)
     {
-        setupParquet(m_arrays, table);
+        std::shared_ptr<arrow::RecordBatch> batch = arrow::RecordBatch::Make(m_schema, m_batchIndex, m_arrays);
+
+        auto result = m_arrowFileWriter->WriteRecordBatch(*batch);
+        if (!result.ok())
+        {
+            std::stringstream msg;
+            msg << "Unable to write arrow batch" << result.ToString();
+            throwError(msg.str());
+        }
     }
 
+    m_builders.clear();
+    createBuilders(*m_pointTablePtr);
 
 }
+
 
 void ArrowWriter::done(PointTableRef table)
 {
@@ -409,41 +471,37 @@ void ArrowWriter::done(PointTableRef table)
     // flush our final batch
     FlushBatch(table);
 
-
     if (m_formatType == arrowsupport::Feather)
     {
-
-
-        std::shared_ptr<arrow::KeyValueMetadata> m_poKeyValueMetadata;
-
-        m_poKeyValueMetadata = m_table->schema()->metadata()
-                            ? m_table->schema()->metadata()->Copy()
-                            : std::make_shared<arrow::KeyValueMetadata>();
-
-        SpatialReference ref = table.spatialReference();
-        gatherGeoMetadata(m_poKeyValueMetadata, ref);
-
-        m_table = m_table->ReplaceSchemaMetadata(m_poKeyValueMetadata);
-        auto result = arrow::ipc::feather::WriteTable(*m_table, m_file.get());
+        auto result = m_arrowFileWriter->Close();
+        if (!result.ok())
+        {
+            std::stringstream msg;
+            msg << "Unable to open to close file writer for file '"
+                << m_filename
+                << "' for with error " << result.ToString();
+            throwError(msg.str());
+        }
         result = m_file->Close();
         if (!result.ok())
         {
             std::stringstream msg;
-            msg << "Unable to open to write feather table for file '" << m_filename << "' for with error " << result.ToString();
+            msg << "Unable to open to write feather table for file '"
+                << m_filename
+                << "' for with error " << result.ToString();
             throwError(msg.str());
         }
     }
 
     if (m_formatType == arrowsupport::Parquet)
     {
-        auto result = m_poFileWriter->Close();
+        auto result = m_parquetFileWriter->Close();
         if (!result.ok())
         {
             std::stringstream msg;
             msg << "Unable to close FileWriter" << result.ToString();
             throwError(msg.str());
         }
-
 
         result = m_file->Close();
         if (!result.ok())
@@ -455,8 +513,8 @@ void ArrowWriter::done(PointTableRef table)
 
     }
 
-
-    log()->get(LogLevel::Debug) << "total memory allocated " << m_pool->bytes_allocated() << std::endl;
+    log()->get(LogLevel::Debug) << "total memory allocated "
+                                << m_pool->bytes_allocated() << std::endl;
 
 }
 

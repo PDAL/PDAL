@@ -449,7 +449,8 @@ bool ArrowReader::fillPoint(PointRef& point)
             continue;
         }
 
-        throwError("Unable to convert Arrow Datatype!");
+        continue; // we don't know the data type so we can't do anything
+//         throwError("Unable to convert Arrow Datatype!");
     }
     return true;
 }
