@@ -1,4 +1,4 @@
-sphinx
+sphinx==7.1.0
 breathe
 sphinxcontrib-bibtex
 sphinx_rtd_theme
