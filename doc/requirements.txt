@@ -1,6 +1,6 @@
-sphinx
+sphinx==6
 breathe
 sphinxcontrib-bibtex
-sphinx_rtd_theme
+sphinx_rtd_theme==1.2.2
 sphinxcontrib-spelling
 sphinx-notfound-page
