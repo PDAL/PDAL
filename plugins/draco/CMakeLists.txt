@@ -73,7 +73,7 @@ if (UNIX)
 endif()
 
 
-if (WITH_TESTS)
+if (WITH_TESTS AND NOT STANDALONE)
 
     PDAL_ADD_TEST(pdal_io_draco_writer_test
         FILES

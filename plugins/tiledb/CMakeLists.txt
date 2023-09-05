@@ -49,7 +49,7 @@ PDAL_ADD_PLUGIN(writer_libname writer tiledb
         ${NLOHMANN_INCLUDE_DIR}
 )
 
-if (WITH_TESTS)
+if (WITH_TESTS AND NOT STANDALONE)
 
     PDAL_ADD_TEST(pdal_io_tiledb_utils_test
         FILES

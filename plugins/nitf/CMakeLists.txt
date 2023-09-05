@@ -65,7 +65,7 @@ if (WIN32)
     )
 endif()
 
-if (WITH_TESTS)
+if (WITH_TESTS AND NOT STANDALONE)
     PDAL_ADD_TEST(pdal_io_nitf_writer_test
         FILES
             test/NitfWriterTest.cpp
