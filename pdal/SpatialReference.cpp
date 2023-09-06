@@ -237,6 +237,8 @@ void SpatialReference::set(std::string v)
         throw pdal_error(oss.str());
     }
 
+    m_epoch = srs.GetCoordinateEpoch();
+
     m_wkt = exportToWkt(&srs);
 }
 
