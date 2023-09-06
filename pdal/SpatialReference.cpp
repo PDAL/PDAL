@@ -499,9 +499,11 @@ bool SpatialReference::isWKT2(const std::string& wkt)
 {
     StringList leaders {
         "GEODCRS", "GEODETICCRS",
+        "GEOGCRS", "GEOGRAPHICCRS",
         "PROJCRS", "PROJECTEDCRS",
-        "VERTCRS", "VERITCALCRS",
+        "VERTCRS", "VERTICALCRS",
         "ENGCRS", "ENGINEERINGCRS",
+        "BOUNDCRS",
         "IMAGECRS",
         "PARAMETRICCRS",
         "TIMECRS",
