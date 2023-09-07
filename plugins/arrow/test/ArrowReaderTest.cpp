@@ -36,8 +36,13 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/StageFactory.hpp>
+#include <io/LasReader.hpp>
+#include <io/LasWriter.hpp>
 #include "../io/ArrowReader.hpp"
 #include "Support.hpp"
+#include <pdal/util/FileUtils.hpp>
+
+using namespace pdal;
 
 namespace pdal
 {
@@ -46,68 +51,77 @@ namespace pdal
 namespace
 {
 
-std::string getFeatherTestfilePath()
+
+void compareArrowLasStreaming(const std::string& pcdFilename,
+                            const std::string& lasFilename)
 {
-    return Support::datapath("arrow/1.2-with-color.feather");
+    std::string tempname(Support::temppath("testlas.las"));
+
+    FileUtils::deleteFile(tempname);
+
+    ArrowReader t;
+    Options to;
+    to.add("filename", pcdFilename);
+    t.setOptions(to);
+
+    LasWriter w;
+    Options wo;
+    wo.add("filename", tempname);
+    w.setInput(t);
+    w.setOptions(wo);
+
+    FixedPointTable in(1000);
+    w.prepare(in);
+    w.execute(in);
+
+    LasReader l1;
+    Options l1o;
+    l1o.add("filename", lasFilename);
+    l1.setOptions(l1o);
+
+    LasReader l2;
+    Options l2o;
+    l2o.add("filename", tempname);
+    l2.setOptions(l2o);
+
+    PointTable t1;
+    l1.prepare(t1);
+    PointViewSet s1 = l1.execute(t1);
+    EXPECT_EQ(s1.size(), 1U);
+    PointViewPtr v1 = *s1.begin();
+
+    PointTable t2;
+    l2.prepare(t2);
+    PointViewSet s2 = l2.execute(t2);
+    EXPECT_EQ(s2.size(), 1U);
+    PointViewPtr v2 = *s2.begin();
+
+    EXPECT_EQ(v1->size(), v2->size());
+
+    // Validate some point data.
+    for (PointId i = 0; i < v1->size(); ++i)
+    {
+        EXPECT_DOUBLE_EQ(v1->getFieldAs<float>(Dimension::Id::X, i),
+                         v2->getFieldAs<float>(Dimension::Id::X, i));
+        EXPECT_DOUBLE_EQ(v1->getFieldAs<float>(Dimension::Id::Y, i),
+                         v2->getFieldAs<float>(Dimension::Id::Y, i));
+        EXPECT_DOUBLE_EQ(v1->getFieldAs<float>(Dimension::Id::Z, i),
+                         v2->getFieldAs<float>(Dimension::Id::Z, i));
+    }
 }
 
-std::string getParquetTestfilePath()
+
+
+TEST(ArrowParquetReaderTest, ReadingPoints)
 {
-    return Support::datapath("arrow/1.2-with-color.parquet");
-}
-
-
-void checkACouplePoints(PointViewPtr view)
-{
-    //some tests on the first point
-    int point_id(0);
-    EXPECT_NEAR(637012.240, view->getFieldAs<double>(Dimension::Id::X, point_id),1e-4);
-    EXPECT_NEAR(849028.310, view->getFieldAs<double>(Dimension::Id::Y, point_id),1e-4);
-    EXPECT_NEAR(431.660, view->getFieldAs<double>(Dimension::Id::Z, point_id),1e-4);
-    EXPECT_EQ(143, view->getFieldAs<uint16_t>(Dimension::Id::Intensity, point_id));
-    EXPECT_EQ(7326, view->getFieldAs<uint16_t>(Dimension::Id::PointSourceId, point_id));
-    EXPECT_EQ(68, view->getFieldAs<uint16_t>(Dimension::Id::Red, point_id));
-    EXPECT_EQ(77, view->getFieldAs<uint16_t>(Dimension::Id::Green, point_id));
-    EXPECT_EQ(88, view->getFieldAs<uint16_t>(Dimension::Id::Blue, point_id));
-    EXPECT_EQ(1, view->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, point_id));
-    EXPECT_EQ(1, (int)view->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, point_id));
-    EXPECT_EQ(1, view->getFieldAs<uint8_t>(Dimension::Id::Classification, 0));
-    EXPECT_EQ(-9, view->getFieldAs<int16_t>(Dimension::Id::ScanAngleRank, 0));
-
-
-    point_id = 8;
-    EXPECT_NEAR(636198.79, view->getFieldAs<double>(Dimension::Id::X, point_id),1e-4);
-    EXPECT_NEAR(849238.09, view->getFieldAs<double>(Dimension::Id::Y, point_id),1e-4);
-    EXPECT_NEAR(428.05, view->getFieldAs<double>(Dimension::Id::Z, point_id),1e-4);
-    EXPECT_EQ(142, view->getFieldAs<uint16_t>(Dimension::Id::Intensity, point_id));
-    EXPECT_EQ(7326, view->getFieldAs<uint16_t>(Dimension::Id::PointSourceId, point_id));
-    EXPECT_EQ(106, view->getFieldAs<uint16_t>(Dimension::Id::Red, point_id));
-    EXPECT_EQ(95, view->getFieldAs<uint16_t>(Dimension::Id::Green, point_id));
-    EXPECT_EQ(124, view->getFieldAs<uint16_t>(Dimension::Id::Blue, point_id));
-    EXPECT_EQ(1, view->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, point_id));
-    EXPECT_EQ(1, (int)view->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, point_id));
-    EXPECT_EQ(1, view->getFieldAs<uint8_t>(Dimension::Id::Classification, 0));
-    EXPECT_EQ(-9, view->getFieldAs<int16_t>(Dimension::Id::ScanAngleRank, 0));
+    compareArrowLasStreaming(Support::datapath("arrow/1.2-with-color.parquet"),
+                             Support::datapath("las/1.2-with-color.las"));
 }
 
 TEST(ArrowFeatherReaderTest, ReadingPoints)
 {
-    ArrowReader m_reader;
-    Options options;
-    options.add("filename",getFeatherTestfilePath());
-    m_reader.setOptions(options);
-
-    PointTable table;
-    m_reader.prepare(table);
-    PointViewSet viewSet = m_reader.execute(table);
-    EXPECT_EQ(viewSet.size(), 1u);
-
-    //number of points
-    PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 1065);
-
-    checkACouplePoints(view);
-
+    compareArrowLasStreaming(Support::datapath("arrow/1.2-with-color.feather"),
+                             Support::datapath("las/1.2-with-color.las"));
 }
 
 TEST(ArrowFeatherReaderTest, SRS)
@@ -127,33 +141,11 @@ TEST(ArrowFeatherReaderTest, SRS)
     EXPECT_EQ(view->size(), 1065);
 
 
-    const SpatialReference utm10("EPSG:26910"); 
-    EXPECT_EQ(m_reader.getSpatialReference(), utm10);  
-
-
-}
+    const SpatialReference utm10("EPSG:26910");
+    EXPECT_EQ(m_reader.getSpatialReference(), utm10);
 
 }
 
-TEST(ArrowParquetReaderTest, ReadingPoints)
-{
-    ArrowReader m_reader;
-    Options options;
-    options.add("filename",getParquetTestfilePath());
-    m_reader.setOptions(options);
-
-    PointTable table;
-    m_reader.prepare(table);
-    PointViewSet viewSet = m_reader.execute(table);
-    EXPECT_EQ(viewSet.size(), 1u);
-
-    //number of points
-    PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 1065);
-
-    checkACouplePoints(view);
-
-}
 
 TEST(ArrowParquetReaderTest, SRS)
 {
@@ -172,12 +164,13 @@ TEST(ArrowParquetReaderTest, SRS)
     EXPECT_EQ(view->size(), 1065);
 
 
-    const SpatialReference utm10("EPSG:26910"); 
-    EXPECT_EQ(m_reader.getSpatialReference(), utm10);  
+    const SpatialReference utm10("EPSG:26910");
+    EXPECT_EQ(m_reader.getSpatialReference(), utm10);
 
 
 }
 
 }
 
+}
 

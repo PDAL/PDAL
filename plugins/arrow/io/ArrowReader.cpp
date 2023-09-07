@@ -43,6 +43,7 @@
 
 
 #include <nlohmann/json.hpp>
+#include <ogr_geometry.h>
 
 
 namespace pdal
@@ -454,11 +455,17 @@ bool ArrowReader::fillPoint(PointRef& point)
             // Binary arrays are assumed to be WKT from GeoParquet
             std::string_view wkb = binaryArray->Value(m_currentBatchPointIndex);
             pdal::Geometry pt = pdal::Geometry(std::string(wkb));
-//             point.setField<uint64_t>(m_arrayIds[columnNum],);
+            OGRGeometry* g = (OGRGeometry*) pt.getOGRHandle();
+            OGRPoint* p = g->toPoint();
+            if (p)
+            {
+               point.setField<double>(Dimension::Id::X, p->getX());
+               point.setField<double>(Dimension::Id::Y, p->getY());
+               point.setField<double>(Dimension::Id::Z, p->getZ());
+            }
             continue;
         }
 
-//         continue; // we don't know the data type so we can't do anything
         throwError("Unable to convert Arrow Datatype!");
     }
     return true;
