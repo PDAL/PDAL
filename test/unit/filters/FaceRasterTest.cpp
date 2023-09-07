@@ -40,12 +40,11 @@
 
 #include "Support.hpp"
 
-// NOTE: The test data has an accompanying jpg that depicts the points,
-//  their triangulation and the interesting barycentric calculation.
 
 namespace pdal
 {
-
+// NOTE: The test data has an accompanying jpg that depicts the points,
+//  their triangulation and the interesting barycentric calculation.
 TEST(FaceRasterTest, basic)
 {
     Options ro;
@@ -104,6 +103,56 @@ TEST(FaceRasterTest, basic)
     size_t size = raster.width() * raster.height();
     for (size_t i = 0; i < size; ++i)
         EXPECT_NEAR(expected[i], data[i], .00001);
+}
+
+TEST(FaceRasterTest, numerical_imprecision)
+{
+    // Test for edgecase when the pixel center is on a triangle border but
+    // can be missed because of a numerical imprecision if no tolerance is applied
+    Options ro;
+    ro.add("filename", Support::datapath("filters/faceraster_numerical_imprecision.laz"));
+
+    StageFactory factory;
+    Stage& r = *(factory.createStage("readers.las"));
+    r.setOptions(ro);
+
+
+    Stage& d = *(factory.createStage("filters.delaunay"));
+    d.setInput(r);
+
+    Options fo;
+    fo.add("resolution", 0.1);
+    fo.add("height", 80);
+    fo.add("width", 80);
+    fo.add("origin_x", 687009.95);
+    fo.add("origin_y", 6232990.05);
+    Stage& f = *(factory.createStage("filters.faceraster"));
+    f.setInput(d);
+    f.setOptions(fo);
+
+    const std::string output_file = Support::temppath("test.tif");
+
+    Options wo;
+    wo.add("filename", output_file);
+    wo.add("gdaldriver", "GTiff");
+    wo.add("nodata", -9999);
+    Stage& w = *(factory.createStage("writers.raster"));
+    w.setInput(f);
+    w.setOptions(wo);
+
+    PointTable t1;
+    w.prepare(t1);
+    w.execute(t1);
+
+    gdal::Raster raster(output_file, "GTiff");
+    if (raster.open() != gdal::GDALError::None)
+        throw pdal_error(raster.errorMsg());
+    std::vector<double> data;
+    raster.readBand(data, 1);
+
+    size_t size = raster.width() * raster.height();
+    for (size_t i = 0; i < size; ++i)
+        EXPECT_TRUE(data[i] > 0);
 }
 
 } // namespace pdal
