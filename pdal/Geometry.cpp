@@ -129,9 +129,35 @@ void Geometry::update(const std::string& wkt_or_json)
     bool maybeWkt = (wkt_or_json.find("(") != wkt_or_json.npos) ||
                     (wkt_or_json.find(")") != wkt_or_json.npos);
 
-    OGRGeometry *newGeom;
+    // first byte is 00 or 01
+    bool maybeWkb = (wkt_or_json[0] == 0 || wkt_or_json[0] == 1);
+
+    OGRGeometry *newGeom (nullptr);
     std::string srs;
-    if (isJson)
+
+    if (maybeWkb)
+    {
+        // assume WKB
+        newGeom = gdal::createFromWkb(wkt_or_json, srs);
+        if (!newGeom)
+            throw pdal_error("Unable to create geometry from input WKB");
+
+        if (!newGeom->getSpatialReference() && srs.size())
+            newGeom->assignSpatialReference(
+                new OGRSpatialReference(SpatialReference(srs).getWKT().data()));
+
+    }
+    else if (maybeWkt)
+    {
+        newGeom = gdal::createFromWkt(wkt_or_json, srs);
+        if (!newGeom)
+                throw pdal_error("Unable to create geometry from input WKT");
+
+        if (!newGeom->getSpatialReference() && srs.size())
+            newGeom->assignSpatialReference(
+                new OGRSpatialReference(SpatialReference(srs).getWKT().data()));
+    }
+    else if (isJson)
     {
         // createFromGeoJson may set the geometry's SRS for us
         // because GeoJSON is 4326. If the user provided a 'srs'
@@ -144,31 +170,6 @@ void Geometry::update(const std::string& wkt_or_json)
             newGeom->assignSpatialReference(
                 new OGRSpatialReference(SpatialReference(srs).getWKT().data()));
     }
-    else
-    {
-        if (maybeWkt)
-        {
-            newGeom = gdal::createFromWkt(wkt_or_json, srs);
-            if (!newGeom)
-                throw pdal_error("Unable to create geometry from input WKT");
-
-            if (!newGeom->getSpatialReference() && srs.size())
-                newGeom->assignSpatialReference(
-                    new OGRSpatialReference(SpatialReference(srs).getWKT().data()));
-        } else
-        {
-            // assume WKB
-            newGeom = gdal::createFromWkb(wkt_or_json, srs);
-            if (!newGeom)
-                throw pdal_error("Unable to create geometry from input WKB");
-
-            if (!newGeom->getSpatialReference() && srs.size())
-                newGeom->assignSpatialReference(
-                    new OGRSpatialReference(SpatialReference(srs).getWKT().data()));
-
-        }
-    }
-
 
 
     m_geom.reset(newGeom);

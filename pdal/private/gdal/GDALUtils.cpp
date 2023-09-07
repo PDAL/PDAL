@@ -211,7 +211,12 @@ OGRGeometry *createFromWkb(const std::string& s, std::string& srs)
     OGRGeometry *newGeom(nullptr);
 
     size_t nBytesRead;
-    OGRErr err = OGRGeometryFactory::createFromWkb(s.data(), NULL, &newGeom, 0, wkbVariantIso, nBytesRead);
+    OGRErr err = OGRGeometryFactory::createFromWkb(s.c_str(),
+                                                   NULL,
+                                                   &newGeom,
+                                                   s.size(),
+                                                   wkbVariantIso,
+                                                   nBytesRead);
     if (!newGeom)
         throw pdal_error("Couldn't convert WKB string to geometry.");
 
