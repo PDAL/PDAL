@@ -448,9 +448,18 @@ bool ArrowReader::fillPoint(PointRef& point)
             point.setField<uint64_t>(m_arrayIds[columnNum], uint64Array->Value(m_currentBatchPointIndex));
             continue;
         }
+        arrow::BinaryArray* binaryArray = dynamic_cast<arrow::BinaryArray*>(array.get());
+        if (binaryArray)
+        {
+            // Binary arrays are assumed to be WKT from GeoParquet
+            std::string_view wkb = binaryArray->Value(m_currentBatchPointIndex);
+            pdal::Geometry pt = pdal::Geometry(std::string(wkb));
+//             point.setField<uint64_t>(m_arrayIds[columnNum],);
+            continue;
+        }
 
-        continue; // we don't know the data type so we can't do anything
-//         throwError("Unable to convert Arrow Datatype!");
+//         continue; // we don't know the data type so we can't do anything
+        throwError("Unable to convert Arrow Datatype!");
     }
     return true;
 }

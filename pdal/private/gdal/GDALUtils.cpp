@@ -200,6 +200,24 @@ OGRGeometry *createFromWkt(const std::string& s, std::string& srs)
     return newGeom;
 }
 
+/**
+  Create OGR geometry given a wkb string and text SRS.
+  \param s  WKT string to convert to OGR Geometry.
+  \param srs  Text representation of coordinate reference system.
+  \return  Pointer to new geometry.
+*/
+OGRGeometry *createFromWkb(const std::string& s, std::string& srs)
+{
+    OGRGeometry *newGeom(nullptr);
+
+    size_t nBytesRead;
+    OGRErr err = OGRGeometryFactory::createFromWkb(s.data(), NULL, &newGeom, 0, wkbVariantIso, nBytesRead);
+    if (!newGeom)
+        throw pdal_error("Couldn't convert WKB string to geometry.");
+
+    return newGeom;
+}
+
 
 /**
   Create OGR geometry given a GEOjson text string and text SRS.

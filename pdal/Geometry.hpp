@@ -52,7 +52,7 @@ class PDAL_DLL Geometry
 {
 
 public:
-    Geometry(const std::string& wkt_or_json,
+    Geometry(const std::string& wkt_or_wkb_or_json,
            SpatialReference ref = SpatialReference());
     Geometry();
     Geometry(const Geometry&);
