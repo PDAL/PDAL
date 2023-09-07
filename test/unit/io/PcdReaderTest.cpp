@@ -198,3 +198,10 @@ TEST(PcdReaderTest, throwMissingHeader)
     PointTable tt;
     EXPECT_THROW(t.prepare(tt), pdal_error);
 }
+
+TEST(PcdReaderTest, canReadDoubles)
+{
+    comparePcdLas(Support::datapath("pcd/autzen-utm.pcd"),
+                  Support::datapath("autzen/autzen-utm.las"));
+}
+
