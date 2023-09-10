@@ -1,6 +1,6 @@
-sphinx==6
-breathe
-sphinxcontrib-bibtex
-sphinx_rtd_theme==1.2.2
-sphinxcontrib-spelling
-sphinx-notfound-page
+sphinx==7.2.5
+breathe==4.35.0
+sphinxcontrib-bibtex==2.5.0
+sphinx-rtd-theme==1.3.0
+sphinxcontrib-spelling==8.0.0
+sphinx-notfound-page==1.0.0
