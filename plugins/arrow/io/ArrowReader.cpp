@@ -82,6 +82,7 @@ ArrowReader::ArrowReader()
 void ArrowReader::addArgs(ProgramArgs& args)
 {
     args.add("metadata", "", m_readMetadata, false);
+    args.add("geoarrow_dimension_name", "", m_geoArrowDimName, "xyz");
 }
 
 
@@ -299,6 +300,17 @@ void ArrowReader::addDimensions(PointLayoutPtr layout)
         auto& dt = f->type();
         arrow::Type::type t = dt->id();
 
+        if (t == arrow::Type::FIXED_SIZE_LIST)
+        {
+            if (Utils::iequals(name, m_geoArrowDimName))
+            {
+                layout->registerDim(pdal::Dimension::Id::X);
+                layout->registerDim(pdal::Dimension::Id::Y);
+                layout->registerDim(pdal::Dimension::Id::Z);
+            }
+
+        }
+
         pdal::Dimension::Id id = layout->registerOrAssignDim(name, computePDALTypeFromArrow(t));
         m_arrayIds.insert({fieldPosition, id});
         fieldPosition++;
@@ -389,84 +401,112 @@ bool ArrowReader::fillPoint(PointRef& point)
     {
         // https://arrow.apache.org/docs/cpp/api/array.html#_CPPv4N5arrow5ArrayE
         std::shared_ptr<arrow::Array> array = m_currentBatch->column(columnNum);
-        arrow::DoubleArray* dArray = dynamic_cast<arrow::DoubleArray*>(array.get());
-        if (dArray)
+
+        pdal::Dimension::Id pDimId = m_arrayIds[columnNum];
+        switch (array->type_id())
         {
-            point.setField<double>(m_arrayIds[columnNum], dArray->Value(m_currentBatchPointIndex));
-            continue;
-        }
-        arrow::FloatArray* fArray = dynamic_cast<arrow::FloatArray*>(array.get());
-        if (fArray)
-        {
-            point.setField<float>(m_arrayIds[columnNum], fArray->Value(m_currentBatchPointIndex));
-            continue;
-        }
-        arrow::Int8Array* int8Array = dynamic_cast<arrow::Int8Array*>(array.get());
-        if (int8Array)
-        {
-            point.setField<int8_t>(m_arrayIds[columnNum], int8Array->Value(m_currentBatchPointIndex));
-            continue;
-        }
-        arrow::UInt8Array* uint8Array = dynamic_cast<arrow::UInt8Array*>(array.get());
-        if (uint8Array)
-        {
-            point.setField<uint8_t>(m_arrayIds[columnNum], uint8Array->Value(m_currentBatchPointIndex));
-            continue;
-        }
-        arrow::Int16Array* int16Array = dynamic_cast<arrow::Int16Array*>(array.get());
-        if (int16Array)
-        {
-            point.setField<int16_t>(m_arrayIds[columnNum], int16Array->Value(m_currentBatchPointIndex));
-            continue;
-        }
-        arrow::UInt16Array* uint16Array = dynamic_cast<arrow::UInt16Array*>(array.get());
-        if (uint16Array)
-        {
-            point.setField<uint16_t>(m_arrayIds[columnNum], uint16Array->Value(m_currentBatchPointIndex));
-            continue;
-        }
-        arrow::Int32Array* int32Array = dynamic_cast<arrow::Int32Array*>(array.get());
-        if (int32Array)
-        {
-            point.setField<int32_t>(m_arrayIds[columnNum], int32Array->Value(m_currentBatchPointIndex));
-            continue;
-        }
-        arrow::UInt32Array* uint32Array = dynamic_cast<arrow::UInt32Array*>(array.get());
-        if (uint32Array)
-        {
-            point.setField<uint32_t>(m_arrayIds[columnNum], uint32Array->Value(m_currentBatchPointIndex));
-            continue;
-        }
-        arrow::Int64Array* int64Array = dynamic_cast<arrow::Int64Array*>(array.get());
-        if (int64Array)
-        {
-            point.setField<int64_t>(m_arrayIds[columnNum], int64Array->Value(m_currentBatchPointIndex));
-            continue;
-        }
-        arrow::UInt64Array* uint64Array = dynamic_cast<arrow::UInt64Array*>(array.get());
-        if (uint64Array)
-        {
-            point.setField<uint64_t>(m_arrayIds[columnNum], uint64Array->Value(m_currentBatchPointIndex));
-            continue;
-        }
-        arrow::BinaryArray* binaryArray = dynamic_cast<arrow::BinaryArray*>(array.get());
-        if (binaryArray)
-        {
-            // Binary arrays are assumed to be WKT from GeoParquet
-            std::string_view wkb = binaryArray->Value(m_currentBatchPointIndex);
-            pdal::Geometry pt = pdal::Geometry(std::string(wkb));
-            OGRGeometry* g = (OGRGeometry*) pt.getOGRHandle();
-            OGRPoint* p = g->toPoint();
-            if (p)
+            case arrow::Type::DOUBLE:
             {
-               point.setField<double>(Dimension::Id::X, p->getX());
-               point.setField<double>(Dimension::Id::Y, p->getY());
-               point.setField<double>(Dimension::Id::Z, p->getZ());
+                const auto castArray = static_cast<const arrow::DoubleArray*>(array.get());
+                point.setField<double>(pDimId, castArray->Value(m_currentBatchPointIndex));
+                break;
             }
-            continue;
+            case arrow::Type::FLOAT:
+            {
+                const auto castArray = static_cast<const arrow::FloatArray*>(array.get());
+                point.setField<float>(pDimId, castArray->Value(m_currentBatchPointIndex));
+                break;
+            }
+            case arrow::Type::INT8:
+            {
+                const auto castArray = static_cast<const arrow::Int8Array*>(array.get());
+                point.setField<int8_t>(pDimId, castArray->Value(m_currentBatchPointIndex));
+                break;
+            }
+            case arrow::Type::UINT8:
+            {
+                const auto castArray = static_cast<const arrow::UInt8Array*>(array.get());
+                point.setField<uint8_t>(pDimId, castArray->Value(m_currentBatchPointIndex));
+                break;
+            }
+            case arrow::Type::INT16:
+            {
+                const auto castArray = static_cast<const arrow::Int16Array*>(array.get());
+                point.setField<int16_t>(pDimId, castArray->Value(m_currentBatchPointIndex));
+                break;
+            }
+            case arrow::Type::UINT16:
+            {
+                const auto castArray = static_cast<const arrow::UInt16Array*>(array.get());
+                point.setField<uint16_t>(pDimId, castArray->Value(m_currentBatchPointIndex));
+                break;
+            }
+            case arrow::Type::INT32:
+            {
+                const auto castArray = static_cast<const arrow::Int32Array*>(array.get());
+                point.setField<int32_t>(pDimId, castArray->Value(m_currentBatchPointIndex));
+                break;
+            }
+            case arrow::Type::UINT32:
+            {
+                const auto castArray = static_cast<const arrow::UInt32Array*>(array.get());
+                point.setField<uint32_t>(pDimId, castArray->Value(m_currentBatchPointIndex));
+                break;
+            }
+            case arrow::Type::INT64:
+            {
+                const auto castArray = static_cast<const arrow::Int64Array*>(array.get());
+                point.setField<int64_t>(pDimId, castArray->Value(m_currentBatchPointIndex));
+                break;
+            }
+            case arrow::Type::UINT64:
+            {
+                const auto castArray = static_cast<const arrow::UInt64Array*>(array.get());
+                point.setField<uint64_t>(pDimId, castArray->Value(m_currentBatchPointIndex));
+                break;
+            }
+            case arrow::Type::BINARY:
+            {
+                // We assume any binary arrays are WKB. If they aren't we are throwing 
+                // an error
+                const auto castArray = static_cast<const arrow::BinaryArray*>(array.get());
+                std::string_view wkb = castArray->Value(m_currentBatchPointIndex); 
+                pdal::Geometry pt = pdal::Geometry(std::string(wkb));
+                OGRGeometry* g = (OGRGeometry*) pt.getOGRHandle();
+                OGRPoint* p = dynamic_cast<OGRPoint*>(g->toPoint());
+                if (p)
+                {
+                    point.setField<double>(Dimension::Id::X, p->getX());
+                    point.setField<double>(Dimension::Id::Y, p->getY());
+                    point.setField<double>(Dimension::Id::Z, p->getZ());
+                } else
+                {
+                    throwError("BinaryArray field was not WKB of type point!");
+                }
+                break;
+            }
+            case arrow::Type::FIXED_SIZE_LIST: 
+            case arrow::Type::LIST: 
+            {
+                const auto listArray = static_cast<const arrow::FixedSizeListArray*>(array.get());
+                assert(listArray->values()->type_id() == arrow::Type::DOUBLE);
+                const auto pointValues =
+                    std::static_pointer_cast<arrow::DoubleArray>(listArray->values());
+                
+                int nDim(3); // only xyz for now
+
+                point.setField<double>(Dimension::Id::X, pointValues->Value((nDim * m_currentBatchPointIndex)));
+                point.setField<double>(Dimension::Id::Y, pointValues->Value((nDim * m_currentBatchPointIndex) + 1));
+                point.setField<double>(Dimension::Id::Z, pointValues->Value((nDim * m_currentBatchPointIndex) + 2));
+                break;
+            }
+                
+            default:
+                throw pdal_error("Unrecognized PDAL dimension type for dimension");
+
+
         }
 
-        throwError("Unable to convert Arrow Datatype!");
     }
     return true;
 }

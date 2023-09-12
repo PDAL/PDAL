@@ -177,6 +177,39 @@ void writeWkb(pdal::PointRef& point,
 
 }
 
+
+#define THROW_IF_ARROW_NOT_OK(status)                             \
+    do                                                                         \
+    {                                                                          \
+        if (!(status).ok())                                                    \
+        {                                                                      \
+            std::stringstream msg;                                             \
+            msg << "Arrow operation faild with error '";                       \
+            msg << ARROW_STRINGIFY(status) << "'";                             \
+            throw pdal::pdal_error(msg.str());                                 \
+                 \
+        }                                                                      \
+    } while (false)
+
+
+void writeGeoArrow(pdal::PointRef& point,
+             arrow::ArrayBuilder* builder)
+{
+    double x = point.getFieldAs<double>(pdal::Dimension::Id::X);
+    double y = point.getFieldAs<double>(pdal::Dimension::Id::Y);
+    double z = point.getFieldAs<double>(pdal::Dimension::Id::Z);
+    
+    auto poPointBuilder = static_cast<arrow::FixedSizeListBuilder *>( builder);
+    auto poValueBuilder = static_cast<arrow::DoubleBuilder *>(
+        poPointBuilder->value_builder());
+    
+    THROW_IF_ARROW_NOT_OK(poPointBuilder->Append());
+    THROW_IF_ARROW_NOT_OK(poValueBuilder->Append(x));
+    THROW_IF_ARROW_NOT_OK(poValueBuilder->Append(y));
+    THROW_IF_ARROW_NOT_OK(poValueBuilder->Append(z));
+
+}
+
 void writePointData(pdal::PointRef& point,
                     pdal::Dimension::Id id,
                     pdal::Dimension::Type t,

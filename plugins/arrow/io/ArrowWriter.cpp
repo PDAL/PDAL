@@ -68,6 +68,7 @@ ArrowWriter::ArrowWriter() :
     m_formatType(arrowsupport::Unknown),
     m_pool(arrow::default_memory_pool()),
     m_writeGeoParquet(false),
+    m_writeGeoArrow(false),
     m_batchIndex(0),
     m_pointTablePtr(nullptr)
 {
@@ -76,50 +77,18 @@ ArrowWriter::ArrowWriter() :
 ArrowWriter::~ArrowWriter()
 {}
 
-
-void ArrowWriter::computeArrowSchema(PointTableRef table)
-{
-    using namespace pdal;
-
-    const auto& layout = table.layout();
-    std::vector<std::shared_ptr<arrow::Field>> fields;
-    int count = 0;
-
-    auto dims = layout->dims();
-    for (auto& id : dims)
-    {
-        auto dimType = layout->dimType(id);
-        std::string name = layout->dimName(id);
-        std::shared_ptr<arrow::Field> field = toArrowType(name, dimType);
-
-        fields.push_back(field);
-        m_dimIds.push_back(id);
-    }
-
-    m_schema.reset(new arrow::Schema(fields));
-
-    int num_fields = m_schema->num_fields();
-    if ((int)layout->dims().size() != (int)num_fields)
-        throwError("Arrow schema size does not match PDAL schema size!");
-
-}
-
-
 void ArrowWriter::createBuilders(PointTableRef table)
 {
 
     using namespace pdal;
 
+    m_builders.clear();
     const auto& layout = table.layout();
 
-    m_builders.clear();
-
-    auto dims = layout->dims();
-    for (auto& id : dims)
+    for (auto& field : m_schema->fields())
     {
-        auto dimType = layout->dimType(id);
+        auto id = layout->findDim(field->name());
         std::string name = layout->dimName(id);
-        std::shared_ptr<arrow::Field> field = toArrowType(name, dimType);
 
         std::unique_ptr<arrow::ArrayBuilder> builder;
         arrow::Status status = arrow::MakeBuilder(m_pool, field->type(), &builder);
@@ -129,11 +98,11 @@ void ArrowWriter::createBuilders(PointTableRef table)
             msg << "Unable to create builder for '" << name << "'";
             throwError(msg.str());
         }
-
+        auto found = m_builders.find(id);
+        if (found != m_builders.end())
+            throwError("Map already contains id");
         m_builders.insert({id, std::move(builder)});
-
     }
-
 }
 
 
@@ -168,6 +137,7 @@ void ArrowWriter::initialize()
 
 bool ArrowWriter::processOne(PointRef& point)
 {
+    bool bAddedStruct(false);
     for (auto& id: m_dimIds)
     {
         arrow::ArrayBuilder* builder = m_builders[id].get();
@@ -175,10 +145,26 @@ bool ArrowWriter::processOne(PointRef& point)
         {
             throwError("unable to fetch builder for dimension!");
         }
-        arrow::Type::type at = builder->type()->id();
-        pdal::Dimension::Type t = computePDALTypeFromArrow(at);
 
-        writePointData(point, id, t, builder);
+        if (m_writeGeoArrow && (id == pdal::Dimension::Id::X || 
+                                id == pdal::Dimension::Id::Y || 
+                                id == pdal::Dimension::Id::Z ||
+                                id == m_geoArrowDimId))
+        {
+            // Use the struct field instead
+            if (bAddedStruct)
+                continue ; // only add once
+            arrow::ArrayBuilder* builder = m_builders[m_geoArrowDimId].get();
+            writeGeoArrow(point, builder);
+            bAddedStruct = true;
+        }
+        else 
+        {
+            arrow::Type::type at = builder->type()->id();
+            pdal::Dimension::Type t = computePDALTypeFromArrow(at);
+            writePointData(point, id, t, builder);
+        }
+
     }
     if (m_writeGeoParquet)
     {
@@ -199,8 +185,9 @@ bool ArrowWriter::processOne(PointRef& point)
 void ArrowWriter::addArgs(ProgramArgs& args)
 {
     args.add("filename", "Output filename", m_filename).setPositional();
-    args.add("format", "Output format ('feature','parquet','geoparquet','orc')", m_formatString, "feather");
-    args.add("geoparquet", "Write geoparquet when writing parquet?", m_writeGeoParquet, false);
+    args.add("format", "Output format ('feather','parquet','geoparquet')", m_formatString, "feather");
+    args.add("geoparquet", "Write GeoParquet when writing Parquet?", m_writeGeoParquet, false);
+    args.add("geoarrow", "Write GeoArrow when writing Feather?", m_writeGeoArrow, true);
     args.add("batch_size", "Arrow batch size", m_batchSize, 65536*64);
     args.add("geoparquet_version", "GeoParquet version string", m_geoParquetVersion, "1.0.0-dev");
 }
@@ -209,27 +196,49 @@ void ArrowWriter::ready(PointTableRef table)
 {
     m_pointTablePtr = static_cast<PointTable*>(&table);
 
-
     std::vector<std::shared_ptr<arrow::Field>> fields;
-    int count = 0;
 
+    bool bAddedStruct(false);
     const auto& layout = table.layout();
     auto dims = layout->dims();
     for (auto& id : dims)
     {
-        auto dimType = layout->dimType(id);
-        std::string name = layout->dimName(id);
-        std::shared_ptr<arrow::Field> field = toArrowType(name, dimType);
+        if (m_writeGeoArrow && (id == pdal::Dimension::Id::X || 
+                                id == pdal::Dimension::Id::Y || 
+                                id == pdal::Dimension::Id::Z ||
+                                id == m_geoArrowDimId ))
+        {
+            // Use the struct field instead
+            if (bAddedStruct)
+                continue ; // only add once
 
-        fields.push_back(field);
-        m_dimIds.push_back(id);
-        log()->get(LogLevel::Info) << "Adding dimension '" << name << "'" << std::endl;
+            auto dimensionField = arrow::field("xyz", arrow::float64(), false);
+            std::shared_ptr<arrow::DataType> dt = arrow::fixed_size_list(dimensionField, 3);
+            auto field = arrow::field("xyz", dt, false);
+            fields.push_back(field);
+
+            m_dimIds.push_back(m_geoArrowDimId);
+
+
+            bAddedStruct = true;
+            log()->get(LogLevel::Info) << "Adding GeoArrow point struct" << std::endl;
+        }
+        else
+        {
+            auto dimType = layout->dimType(id);
+            std::string name = layout->dimName(id);
+            std::shared_ptr<arrow::Field> field = toArrowType(name, dimType);
+
+            fields.push_back(field);
+            m_dimIds.push_back(id);
+            log()->get(LogLevel::Info) << "Adding dimension '" << name << "'" << std::endl;
+        }
+
     }
 
     m_schema.reset(new arrow::Schema(fields));
 
-    int num_fields = m_schema->num_fields();
-    if ((int)layout->dims().size() != (int)num_fields)
+    if (m_dimIds.size() != m_schema->num_fields())
         throwError("Arrow schema size does not match PDAL schema size!");
 
     createBuilders(*m_pointTablePtr);
@@ -250,7 +259,14 @@ void ArrowWriter::ready(PointTableRef table)
 void ArrowWriter::addDimensions(PointLayoutPtr layout)
 {
     if (m_writeGeoParquet)
-        m_wkbDimId = layout->registerOrAssignDim("wkb", Dimension::Type::None);
+        m_wkbDimId = layout->assignDim("wkb", Dimension::Type::None);
+
+    if (m_writeGeoArrow)
+    {
+        m_geoArrowDimId = layout->assignDim("xyz", Dimension::Type::None);
+        if (m_geoArrowDimId == pdal::Dimension::Id::Unknown)
+            throwError("Unable to register geoarrow dimension!");
+    }
 }
 
 void ArrowWriter::write(const PointViewPtr view)
@@ -386,6 +402,7 @@ void ArrowWriter::setupFeather(std::vector<std::shared_ptr<arrow::Array>> const&
     gatherGeoMetadata(m_poKeyValueMetadata, ref);
 
     auto schema_ptr = std::make_shared<::arrow::Schema>(*m_table->schema());
+    schema_ptr = schema_ptr->WithMetadata(m_poKeyValueMetadata);
 
     auto result = arrow::ipc::MakeFileWriter(m_file.get(),
                                                std::move(schema_ptr),
@@ -425,7 +442,11 @@ void ArrowWriter::FlushBatch(PointTableRef table)
 
     if (m_formatType == arrowsupport::Parquet)
     {
-        auto result = m_parquetFileWriter->NewRowGroup(m_builders[pdal::Dimension::Id::X]->length());
+        auto builder = m_builders.begin()->second.get();
+        if (!builder)
+            throwError("Unable to get first dimension builder!");
+        int length = builder->length();
+        auto result = m_parquetFileWriter->NewRowGroup(length);
         if (!result.ok())
         {
             std::stringstream msg;

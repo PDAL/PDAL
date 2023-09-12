@@ -66,7 +66,6 @@ private:
     virtual void write(const PointViewPtr view);
     virtual void addDimensions(PointLayoutPtr layout);
 
-    void computeArrowSchema(pdal::PointTableRef table);
 
     void setupParquet(std::vector<std::shared_ptr<arrow::Array>> const& arrays, PointTableRef table);
     void setupFeather(std::vector<std::shared_ptr<arrow::Array>> const& arrays, PointTableRef table);
@@ -95,8 +94,10 @@ private:
     std::shared_ptr<arrow::KeyValueMetadata> m_poKeyValueMetadata;
 
     bool m_writeGeoParquet;
+    bool m_writeGeoArrow;
     point_count_t m_batchIndex;
     pdal::Dimension::Id m_wkbDimId;
+    pdal::Dimension::Id m_geoArrowDimId;
 
     PointTable* m_pointTablePtr;
 

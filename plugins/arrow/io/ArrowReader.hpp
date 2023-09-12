@@ -94,6 +94,7 @@ private:
     int m_currentBatchIndex;
     int64_t m_currentBatchPointIndex;
     bool m_readMetadata;
+    std::string m_geoArrowDimName;
 
 };
 
