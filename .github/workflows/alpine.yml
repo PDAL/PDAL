@@ -23,7 +23,7 @@ jobs:
       fail-fast: true
     container: pdal/alpinebase:latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Setup
       run: |
           source ./scripts/ci/alpine/setup.sh
