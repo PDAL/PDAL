@@ -238,7 +238,7 @@ void ArrowWriter::ready(PointTableRef table)
 
     m_schema.reset(new arrow::Schema(fields));
 
-    if (m_dimIds.size() != m_schema->num_fields())
+    if ((int)m_dimIds.size() != m_schema->num_fields())
         throwError("Arrow schema size does not match PDAL schema size!");
 
     createBuilders(*m_pointTablePtr);
