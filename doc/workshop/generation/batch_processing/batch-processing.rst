@@ -111,7 +111,7 @@ using the substitutions syntax to do this.
 
  .. code-block:: console
 
-  PS ./exercises/batch> Get-ChildItem  ./exercises/batch/source/*.laz | ^
+  PS ./exercises/batch> Get-ChildItem  ./exercises/batch_processing/source/*.laz | ^
   foreach {pdal pipeline ./exercises/batch/batch_srs_gdal.json ^
   --readers.las.filename=./source/$($_.BaseName).laz ^
   --writers.gdal.filename=./dtm/$($_.BaseName).tif ^
