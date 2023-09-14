@@ -47,10 +47,15 @@ namespace pdal
 
 namespace las
 {
-    struct Header;
-    struct Vlr;
-    using VlrList = std::vector<Vlr>;
-};
+struct Header;
+struct Vlr;
+using VlrList = std::vector<Vlr>;
+}
+
+namespace connector
+{
+class Connector;
+}
 
 class NitfReader;
 class LeExtractor;
@@ -58,10 +63,28 @@ class PointDimensions;
 class LazPerfVlrDecompressor;
 class LasHeader;
 
+class IRangeStream;
+
 class PDAL_DLL LasReader : public Reader, public Streamable
 {
 protected:
-    class LasStreamIf
+    // Interface for managing an inputstream for reading the LAS file.
+    class LasStream
+    {
+    public:
+        LasStream()
+        {}
+
+        virtual ~LasStream()
+        {}
+
+        virtual void prepareRangeForReading(uint64_t offset, int32_t size) = 0;
+
+        std::istream *m_istream;
+    };
+
+    // LasStream that manages a file inputstream for reading the LAS file.
+    class LasStreamIf : public LasStream
     {
     protected:
         LasStreamIf()
@@ -77,7 +100,23 @@ protected:
                 Utils::closeFile(m_istream);
         }
 
-        std::istream *m_istream;
+        virtual void prepareRangeForReading(uint64_t offset, int32_t size)
+        {
+            // No need to do anything - entire file is already prepared.
+        }
+    };
+
+    // LasStream that manages an input stream backed by one requested range at a time.
+    class LasStreamRange : public LasStream
+    {
+    public:
+        LasStreamRange(const std::string& filename);
+        ~LasStreamRange();
+        virtual void prepareRangeForReading(uint64_t offset, int32_t size);
+
+        std::unique_ptr<connector::Connector> m_connector;
+        std::unique_ptr<IRangeStream> m_iRangeStream;
+        uint64_t m_rangeOffset;
     };
 
     friend class NitfReader;
@@ -95,8 +134,9 @@ public:
 
 protected:
     virtual void createStream();
+    virtual void createRangeStream();
 
-    std::unique_ptr<LasStreamIf> m_streamIf;
+    std::unique_ptr<LasStream> m_stream;
 
 private:
     virtual void addArgs(ProgramArgs& args);
