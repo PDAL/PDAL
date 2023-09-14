@@ -266,7 +266,7 @@ void ArrowWriter::ready(PointTableRef table)
                                 : std::make_shared<arrow::KeyValueMetadata>();
             if (Utils::iequals("wkb", name))
             {
-                kvMetadata->Append("ARROW:extension:name", "WKB");   
+                kvMetadata->Append("ARROW:extension:name", "geoarrow.wkb");   
             }
 
             NL::json dimDetail;
@@ -339,8 +339,7 @@ void ArrowWriter::gatherParquetGeoMetadata(std::shared_ptr<arrow::KeyValueMetada
 
     if (ref.empty())
         ref = SpatialReference("EPSG:4326");
-    column["edges"] = ref.isGeographic() ? "spherical" : "planar";
-    column["crs"] = getPROJJSON(ref);
+    column.update(getPROJJSON(ref));
 
     NL::json wkb;
     wkb["wkb"] = column;
@@ -382,16 +381,35 @@ void ArrowWriter::setupParquet(std::vector<std::shared_ptr<arrow::Array>> const&
         throwError(msg.str());
     }
 
+
+
+
     auto schema_node = std::static_pointer_cast<parquet::schema::GroupNode>(
         parquet_schema->schema_root());
 
     m_poKeyValueMetadata = m_schema->metadata()
                          ? m_schema->metadata()->Copy()
                          : std::make_shared<arrow::KeyValueMetadata>();
+
+    auto status =
+        ::arrow::ipc::SerializeSchema(*m_schema, m_pool);
+    if (status.ok())
+    {
+        // The serialized schema is not UTF-8, which is required for
+        // Thrift
+        const std::string schema_as_string = (*status)->ToString();
+        const std::string schema_base64 =
+            ::arrow::util::base64_encode(schema_as_string);
+        static const std::string kArrowSchemaKey = "ARROW:schema";
+        const_cast<arrow::KeyValueMetadata *>(
+            m_poKeyValueMetadata.get())
+            ->Append(kArrowSchemaKey, schema_base64);
+    }
     SpatialReference ref = m_pointTablePtr->spatialReference();
     gatherParquetGeoMetadata(m_poKeyValueMetadata, ref);
     m_schema = m_schema->WithMetadata(m_poKeyValueMetadata);
     m_poKeyValueMetadata = m_schema->metadata()->Copy();
+
 
         log()->get(LogLevel::Warning) << m_poKeyValueMetadata->ToString() << std::endl;
 

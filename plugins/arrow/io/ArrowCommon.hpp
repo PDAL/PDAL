@@ -40,6 +40,7 @@
 #include <arrow/ipc/reader.h>
 #include <arrow/adapters/orc/adapter.h>
 #include <arrow/util/key_value_metadata.h>
+#include <arrow/util/base64.h>
 
 #include <parquet/arrow/reader.h>
 #include <parquet/exception.h>
