@@ -45,7 +45,33 @@ so much, and provides it for Windows, Linux, and macOS.
     distributed as a pip package, you can read about it at the 
     `pypackaging-native website`_
 
-Installing Conda
+
+Installing Conda Environment (Workshop USB)
+--------------------------------------------------------------------------------
+
+#. From the installer directory, install both QGIS_, CloudCompare_, and mambaforge_
+#. Once mambaforge_ is installed, open a terminal and navigate to the location of your USB drive
+#. Uncompress the environment, activate it, and use the ``conda-unpack`` command
+  
+  * macOS Users 
+
+     .. code-block:: bash
+
+        $ mkdir -p "$HOME/mambaforge/envs/pdal-workshop"
+        $ tar -xzf conda_environments/pdal-workshop_osx-arm64.tar.gz -C "$HOME/mambaforge/envs/pdal-workshop"
+        $ source "$HOME/mambaforge/envs/pdal-workshop/bin/activate"
+        (pdal-workshop) $ conda-unpack
+  * Windows Users 
+
+     .. code-block:: doscon
+      
+        > mkdir "%userprofile%\mambaforge\envs\pdal-workshop"
+        > tar -xvf ./conda_environments/pdal-workshop-win64.zip -C "%userprofile%\mambaforge\envs\pdal-workshop"
+        > call "%userprofile%\mambaforge\envs\pdal-workshop\scripts\activate"
+        (pdal-workshop) > conda-unpack 
+
+
+Installing Conda 
 --------------------------------------------------------------------------------
 
 1. Copy the entire contents of your workshop USB key to a ``PDAL`` directory in your
@@ -88,3 +114,6 @@ Alternatively use the following ``environment.yml`` file to create your environm
 
 .. _mambaforge: https://github.com/conda-forge/miniforge#mambaforge
 .. _pypackaging-native website: https://pypackaging-native.github.io/key-issues/native-dependencies/geospatial_stack/
+.. _QGIS: https://www.qgis.org/en/site/
+.. _cool-lidar: https://github.com/hobuinc/cool-lidar
+.. _CloudCompare: https://www.danielgm.net/cc/
