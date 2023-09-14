@@ -187,7 +187,8 @@ void ArrowReader::loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyV
 
             if (!column.contains("crs"))
             {
-                log()->get(LogLevel::Warning) << "no 'crs' key available to fetch spatial reference information" << std::endl;
+                log()->get(LogLevel::Warning) << "no 'crs' key available to fetch spatial reference information, setting to 4326" << std::endl;
+                ref.set("EPSG:4326");
                 return;
             }
 
