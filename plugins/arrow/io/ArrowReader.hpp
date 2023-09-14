@@ -65,7 +65,6 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
     virtual void addDimensions(PointLayoutPtr layout);
-    virtual void ready(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t num);
     virtual bool processOne(PointRef& point);
     virtual void done(PointTableRef table);
@@ -74,7 +73,8 @@ private:
     bool readNextBatchData();
     bool fillPoint(PointRef& point);
 
-    void loadGeoMetadata(const std::shared_ptr<const arrow::KeyValueMetadata> &kv_metadata);
+    void loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyValueMetadata> &kv_metadata);
+    void loadArrowGeoMetadata(const std::shared_ptr<const arrow::KeyValueMetadata> &kv_metadata);
 
     std::shared_ptr<arrow::io::ReadableFile> m_file;
     std::shared_ptr<arrow::ipc::RecordBatchFileReader> m_ipcReader;

@@ -182,6 +182,24 @@ bool ArrowWriter::processOne(PointRef& point)
     return true;
 }
 
+NL::json getPROJJSON(const pdal::SpatialReference& ref)
+{
+
+    NL::json projjson;
+    NL::json column;
+    try
+    {
+        projjson  = NL::json::parse(ref.getPROJJSON());
+    } catch (NL::json::parse_error& e)
+    {
+        column["error"] = e.what();
+    }
+    column["crs"] = projjson;
+    column["edges"] = ref.isGeographic() ? "spherical" : "planar";
+    return column;
+}
+
+
 void ArrowWriter::addArgs(ProgramArgs& args)
 {
     args.add("filename", "Output filename", m_filename).setPositional();
@@ -189,7 +207,7 @@ void ArrowWriter::addArgs(ProgramArgs& args)
     args.add("geoparquet", "Write GeoParquet when writing Parquet?", m_writeGeoParquet, false);
     args.add("geoarrow", "Write GeoArrow when writing Feather?", m_writeGeoArrow, true);
     args.add("batch_size", "Arrow batch size", m_batchSize, 65536*64);
-    args.add("geoparquet_version", "GeoParquet version string", m_geoParquetVersion, "1.0.0-dev");
+    args.add("geoparquet_version", "GeoParquet version string", m_geoParquetVersion, "1.0.0");
 }
 
 void ArrowWriter::ready(PointTableRef table)
@@ -208,17 +226,32 @@ void ArrowWriter::ready(PointTableRef table)
                                 id == pdal::Dimension::Id::Z ||
                                 id == m_geoArrowDimId ))
         {
-            // Use the struct field instead
+            // Use the struct field instead of adding XYZ dimensions
+            // to the output
             if (bAddedStruct)
                 continue ; // only add once
 
-            auto dimensionField = arrow::field("xyz", arrow::float64(), false);
+            auto dimensionField = arrow::field("dimension", arrow::float64(), false);
             std::shared_ptr<arrow::DataType> dt = arrow::fixed_size_list(dimensionField, 3);
             auto field = arrow::field("xyz", dt, false);
+
+            auto kvMetadata = field->metadata()
+                               ? field->metadata()->Copy()
+                               : std::make_shared<arrow::KeyValueMetadata>();
+            kvMetadata->Append("ARROW:extension:name", "geoarrow.point");   
+            kvMetadata->Append("ARROW:extension:metadata", getPROJJSON(table.spatialReference()).dump(-1));   
+            
+            NL::json dimDetail;
+            dimDetail["name"] = layout->dimName(id);
+            dimDetail["description"] = pdal::Dimension::description(id);
+            dimDetail["interpretation"] = pdal::Dimension::interpretationName(layout->dimType(id));
+            dimDetail["size"] = layout->dimSize(id);
+            kvMetadata->Append("PDAL:dimension:metadata", dimDetail.dump(-1));   
+
+            field = field->WithMetadata(kvMetadata); 
             fields.push_back(field);
 
             m_dimIds.push_back(m_geoArrowDimId);
-
 
             bAddedStruct = true;
             log()->get(LogLevel::Info) << "Adding GeoArrow point struct" << std::endl;
@@ -228,7 +261,22 @@ void ArrowWriter::ready(PointTableRef table)
             auto dimType = layout->dimType(id);
             std::string name = layout->dimName(id);
             std::shared_ptr<arrow::Field> field = toArrowType(name, dimType);
+            auto kvMetadata = field->metadata()
+                                ? field->metadata()->Copy()
+                                : std::make_shared<arrow::KeyValueMetadata>();
+            if (Utils::iequals("wkb", name))
+            {
+                kvMetadata->Append("ARROW:extension:name", "WKB");   
+            }
 
+            NL::json dimDetail;
+            dimDetail["name"] = layout->dimName(id);
+            dimDetail["description"] = pdal::Dimension::description(id);
+            dimDetail["interpretation"] = pdal::Dimension::interpretationName(layout->dimType(id));
+            dimDetail["size"] = layout->dimSize(id);
+            kvMetadata->Append("PDAL:dimension:metadata", dimDetail.dump(-1));   
+
+            field = field->WithMetadata(kvMetadata); 
             fields.push_back(field);
             m_dimIds.push_back(id);
             log()->get(LogLevel::Info) << "Adding dimension '" << name << "'" << std::endl;
@@ -262,11 +310,7 @@ void ArrowWriter::addDimensions(PointLayoutPtr layout)
         m_wkbDimId = layout->assignDim("wkb", Dimension::Type::None);
 
     if (m_writeGeoArrow)
-    {
         m_geoArrowDimId = layout->assignDim("xyz", Dimension::Type::None);
-        if (m_geoArrowDimId == pdal::Dimension::Id::Unknown)
-            throwError("Unable to register geoarrow dimension!");
-    }
 }
 
 void ArrowWriter::write(const PointViewPtr view)
@@ -280,7 +324,7 @@ void ArrowWriter::write(const PointViewPtr view)
     }
 }
 
-void ArrowWriter::gatherGeoMetadata(std::shared_ptr<arrow::KeyValueMetadata>& input, SpatialReference& ref)
+void ArrowWriter::gatherParquetGeoMetadata(std::shared_ptr<arrow::KeyValueMetadata>& input, SpatialReference& ref)
 {
 
     NL::json metadata;
@@ -289,7 +333,6 @@ void ArrowWriter::gatherGeoMetadata(std::shared_ptr<arrow::KeyValueMetadata>& in
     version["arrow"] = info.version_string;
     version["pdal"] = pdal::Config::fullVersionString();
 
-
     NL::json column;
     column["encoding"] = "WKB";
     column["geometry_types"] = std::vector<std::string> {"Point"};
@@ -297,17 +340,7 @@ void ArrowWriter::gatherGeoMetadata(std::shared_ptr<arrow::KeyValueMetadata>& in
     if (ref.empty())
         ref = SpatialReference("EPSG:4326");
     column["edges"] = ref.isGeographic() ? "spherical" : "planar";
-
-
-    NL::json projjson;
-    try
-    {
-        projjson  = NL::json::parse(ref.getPROJJSON());
-    } catch (NL::json::parse_error& e)
-    {
-        log()->get(LogLevel::Warning) << "unable to parse projjson" << std::endl;
-    }
-    column["crs"] = projjson;
+    column["crs"] = getPROJJSON(ref);
 
     NL::json wkb;
     wkb["wkb"] = column;
@@ -328,22 +361,20 @@ void ArrowWriter::setupParquet(std::vector<std::shared_ptr<arrow::Array>> const&
 
     parquet::WriterProperties::Builder m_oWriterPropertiesBuilder{};
 
-    m_oWriterPropertiesBuilder = parquet::WriterProperties::Builder();
     m_oWriterPropertiesBuilder.max_row_group_length(m_batchSize);
-    m_oWriterPropertiesBuilder.created_by(pdal::Config::fullVersionString());
+    m_oWriterPropertiesBuilder.created_by("pdal "+pdal::Config::fullVersionString());
     m_oWriterPropertiesBuilder.version(parquet::ParquetVersion::PARQUET_2_6);
     m_oWriterPropertiesBuilder.data_page_version(parquet::ParquetDataPageVersion::V2);
     m_oWriterPropertiesBuilder.compression(parquet::Compression::SNAPPY);
-    m_oWriterPropertiesBuilder.build();
 
     std::shared_ptr<parquet::ArrowWriterProperties> arrowWriterProperties =
         parquet::ArrowWriterProperties::Builder().store_schema()->build();
 
     std::shared_ptr<parquet::SchemaDescriptor> parquet_schema;
-    auto result = parquet::arrow::ToParquetSchema( &(*m_table->schema()),
-                                                    *m_oWriterPropertiesBuilder.build(),
-                                                    *arrowWriterProperties,
-                                                    &parquet_schema);
+    auto result = parquet::arrow::ToParquetSchema( m_schema.get(),
+                                                   *m_oWriterPropertiesBuilder.build(),
+                                                   *arrowWriterProperties,
+                                                   &parquet_schema);
     if (!result.ok())
     {
         std::stringstream msg;
@@ -354,13 +385,18 @@ void ArrowWriter::setupParquet(std::vector<std::shared_ptr<arrow::Array>> const&
     auto schema_node = std::static_pointer_cast<parquet::schema::GroupNode>(
         parquet_schema->schema_root());
 
-    m_poKeyValueMetadata = m_table->schema()->metadata()
-                           ? m_table->schema()->metadata()->Copy()
-                           : std::make_shared<arrow::KeyValueMetadata>();
+    m_poKeyValueMetadata = m_schema->metadata()
+                         ? m_schema->metadata()->Copy()
+                         : std::make_shared<arrow::KeyValueMetadata>();
+    SpatialReference ref = m_pointTablePtr->spatialReference();
+    gatherParquetGeoMetadata(m_poKeyValueMetadata, ref);
+    m_schema = m_schema->WithMetadata(m_poKeyValueMetadata);
+    m_poKeyValueMetadata = m_schema->metadata()->Copy();
 
-    std::unique_ptr<parquet::ParquetFileWriter> base_writer;
-    base_writer = parquet::ParquetFileWriter::Open(
-                             m_file, schema_node,
+        log()->get(LogLevel::Warning) << m_poKeyValueMetadata->ToString() << std::endl;
+
+    auto base_writer = parquet::ParquetFileWriter::Open(
+                             m_file, std::move(schema_node),
                              m_oWriterPropertiesBuilder.build(), m_poKeyValueMetadata);
     if (!result.ok())
     {
@@ -370,14 +406,11 @@ void ArrowWriter::setupParquet(std::vector<std::shared_ptr<arrow::Array>> const&
         throwError(msg.str());
     }
 
-    SpatialReference ref = table.spatialReference();
-    gatherGeoMetadata(m_poKeyValueMetadata, ref);
-
-    auto schema_ptr = std::make_shared<::arrow::Schema>(*m_table->schema());
+    auto schema_ptr = std::make_shared<::arrow::Schema>(*m_schema);
 
     result = parquet::arrow::FileWriter::Make(m_pool,
                                               std::move(base_writer),
-                                              std::move(schema_ptr),
+                                              m_schema,
                                               arrowWriterProperties,
                                               &m_parquetFileWriter);
     if (!result.ok())
@@ -394,18 +427,8 @@ void ArrowWriter::setupFeather(std::vector<std::shared_ptr<arrow::Array>> const&
                                PointTableRef table)
 {
     arrow::ipc::IpcWriteOptions writeOptions;
-    m_poKeyValueMetadata = m_table->schema()->metadata()
-                           ? m_table->schema()->metadata()->Copy()
-                           : std::make_shared<arrow::KeyValueMetadata>();
-
-    SpatialReference ref = table.spatialReference();
-    gatherGeoMetadata(m_poKeyValueMetadata, ref);
-
-    auto schema_ptr = std::make_shared<::arrow::Schema>(*m_table->schema());
-    schema_ptr = schema_ptr->WithMetadata(m_poKeyValueMetadata);
-
     auto result = arrow::ipc::MakeFileWriter(m_file.get(),
-                                               std::move(schema_ptr),
+                                               m_schema,
                                                writeOptions,
                                                m_poKeyValueMetadata);
     if (result.ok())
@@ -469,7 +492,9 @@ void ArrowWriter::FlushBatch(PointTableRef table)
 
     if (m_formatType == arrowsupport::Feather)
     {
-        std::shared_ptr<arrow::RecordBatch> batch = arrow::RecordBatch::Make(m_schema, m_batchIndex, m_arrays);
+        std::shared_ptr<arrow::RecordBatch> batch = arrow::RecordBatch::Make(m_schema, 
+                                                                             m_batchIndex, 
+                                                                             m_arrays);
 
         auto result = m_arrowFileWriter->WriteRecordBatch(*batch);
         if (!result.ok())
@@ -488,7 +513,6 @@ void ArrowWriter::FlushBatch(PointTableRef table)
 
 void ArrowWriter::done(PointTableRef table)
 {
-
     // flush our final batch
     FlushBatch(table);
 

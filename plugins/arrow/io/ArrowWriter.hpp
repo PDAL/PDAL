@@ -69,7 +69,7 @@ private:
 
     void setupParquet(std::vector<std::shared_ptr<arrow::Array>> const& arrays, PointTableRef table);
     void setupFeather(std::vector<std::shared_ptr<arrow::Array>> const& arrays, PointTableRef table);
-    void gatherGeoMetadata(std::shared_ptr<arrow::KeyValueMetadata>& input, SpatialReference& ref);
+    void gatherParquetGeoMetadata(std::shared_ptr<arrow::KeyValueMetadata>& input, SpatialReference& ref);
     void createBuilders(PointTableRef table);
     void FlushBatch(PointTableRef table);
 
@@ -100,6 +100,7 @@ private:
     pdal::Dimension::Id m_geoArrowDimId;
 
     PointTable* m_pointTablePtr;
+
 
 
 

@@ -86,7 +86,65 @@ void ArrowReader::addArgs(ProgramArgs& args)
 }
 
 
-void ArrowReader::loadGeoMetadata(const std::shared_ptr<const arrow::KeyValueMetadata> &kv_metadata)
+void ArrowReader::loadArrowGeoMetadata(const std::shared_ptr<const arrow::KeyValueMetadata> &kv_metadata)
+{
+    if (!kv_metadata)
+        return;
+    auto geo = kv_metadata->Get("ARROW:extension:metadata");
+    NL::json metadata;
+
+    if (geo.ok())
+    {
+        // load up the JSON and set our stuff
+        try
+        {
+            metadata = NL::json::parse(*geo);
+            } catch (NL::json::parse_error& e)
+            {
+                log()->get(LogLevel::Warning) << "unable to parse GeoArrow metadata with error '"
+                                              << e.what() << "'" << std::endl;
+                return;
+            }
+
+
+            // std::string dimType = metadata["ARROW:extension:name"];
+            // if (!Utils::iequals(dimType, "geoarrow.point"))
+            // {
+            //     std::stringstream oss;
+            //     oss << "GeoArrow metadata does not contain 'geoarrow.point' data. It contains '"
+            //                                   << dimType << "' data." << std::endl;
+            //     throwError(oss.str());
+            // }
+
+            if (!metadata.contains("crs"))
+            {
+                log()->get(LogLevel::Warning) << "GeoArrow metadata does not contain 'crs' entry"
+                                              << std::endl;
+                return;
+            }
+            NL::json crs = metadata["crs"];
+
+            SpatialReference ref;
+            if (crs.is_object())
+            {
+                ref.set(crs.dump());
+            }
+            else if (crs.is_string())
+            {
+
+                ref.set(crs.get<std::string>());
+            }
+
+
+            setSpatialReference(ref);
+    } else
+    {
+        log()->get(LogLevel::Warning) << "No GeoArrow metadata available for this column" <<std::endl;
+    }
+
+}
+
+void ArrowReader::loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyValueMetadata> &kv_metadata)
 {
     if (!kv_metadata)
         return;
@@ -154,7 +212,7 @@ void ArrowReader::loadGeoMetadata(const std::shared_ptr<const arrow::KeyValueMet
             setSpatialReference(ref);
     } else
     {
-        log()->get(LogLevel::Warning) << "unable to fetch GeoParquet 'geo' metadata with error '"
+        log()->get(LogLevel::Warning) << "unable to fetch GeoArrow metadata with error '"
                                       << geo.status().ToString() << "'" << std::endl;
     }
 
@@ -162,7 +220,6 @@ void ArrowReader::loadGeoMetadata(const std::shared_ptr<const arrow::KeyValueMet
 
 void ArrowReader::initialize()
 {
-
     if (pdal::Utils::isRemote(m_filename))
         m_filename = pdal::Utils::fetchRemote(m_filename);
 
@@ -200,11 +257,17 @@ void ArrowReader::initialize()
         m_ipcReader = status.ValueOrDie();
         m_batchCount = m_ipcReader->num_record_batches();
 
-        const auto metadata = m_ipcReader->schema()->metadata();
-        loadGeoMetadata(metadata);
+        const auto fields = m_ipcReader->schema()->fields();
+
+        for (const auto& field: fields)
+        {
+            auto metadata = field->metadata();
+            if (metadata)
+                if (metadata->Contains("ARROW:extension:metadata"))
+                    loadArrowGeoMetadata(metadata);
+        }
 
         m_currentBatchIndex = 0;
-
 
         // Gather up a point count
         while (readNextBatchHeaders())
@@ -236,7 +299,7 @@ void ArrowReader::initialize()
         auto pOpenStatus = parquet::arrow::OpenFile(m_file, m_pool, &m_arrow_reader);
 
         const auto metadata = m_arrow_reader->parquet_reader()->metadata();
-        loadGeoMetadata(metadata->key_value_metadata());
+        loadParquetGeoMetadata(metadata->key_value_metadata());
 
         auto batchOpenStatus = m_arrow_reader->GetRecordBatchReader(&m_parquetReader);
         if (!batchOpenStatus.ok())
@@ -315,12 +378,6 @@ void ArrowReader::addDimensions(PointLayoutPtr layout)
         m_arrayIds.insert({fieldPosition, id});
         fieldPosition++;
     }
-}
-
-
-void ArrowReader::ready(PointTableRef table)
-{
-    // gather dimensions from file
 }
 
 
