@@ -83,6 +83,7 @@ void ArrowReader::addArgs(ProgramArgs& args)
 {
     args.add("metadata", "", m_readMetadata, false);
     args.add("geoarrow_dimension_name", "", m_geoArrowDimName, "xyz");
+    args.add("format", "", m_formatTypeString, "");
 }
 
 
@@ -221,9 +222,6 @@ void ArrowReader::loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyV
 
 void ArrowReader::initialize()
 {
-    if (pdal::Utils::isRemote(m_filename))
-        m_filename = pdal::Utils::fetchRemote(m_filename);
-
     if (Utils::iequals(FileUtils::extension(m_filename), ".feather"))
     {
         m_formatType = arrowsupport::Feather;
@@ -231,6 +229,17 @@ void ArrowReader::initialize()
     else if (Utils::iequals(FileUtils::extension(m_filename), ".parquet"))
     {
         m_formatType = arrowsupport::Parquet;
+    }
+    if (m_formatTypeString.size())
+    {
+
+        if (Utils::iequals(m_formatTypeString, "geoarrow"))
+            m_formatType = arrowsupport::Feather;
+        else if (Utils::iequals(m_formatTypeString, "geoparquet"))
+            m_formatType = arrowsupport::Parquet;
+        else
+            throwError("Unknown format type " + m_formatTypeString);
+
     }
 
     auto result = arrow::io::ReadableFile::Open(m_filename);

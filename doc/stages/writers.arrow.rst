@@ -56,6 +56,12 @@ format
 geoparquet
   Write WKB column and GeoParquet metadata when writing parquet output
 
+batch_size
+  Number of rows to write as a batch [Default: 65536*64 ]
+
+geoarrow_dimension_name
+  Dimension name to write GeoArrow struct [Default: xyz]
+
 .. include:: writer_opts.rst
 
 .. _Apache Arrow: https://arrow.apache.org/

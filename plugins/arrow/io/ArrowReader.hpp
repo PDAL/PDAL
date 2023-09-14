@@ -84,6 +84,7 @@ private:
     std::shared_ptr<arrow::RecordBatch> m_currentBatch;
 
     arrowsupport::ArrowFormatType m_formatType;
+    std::string m_formatTypeString;
 
 
     std::map<int, pdal::Dimension::Id> m_arrayIds;

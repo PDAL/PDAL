@@ -67,8 +67,6 @@ std::string ArrowWriter::getName() const { return s_info.name; }
 ArrowWriter::ArrowWriter() :
     m_formatType(arrowsupport::Unknown),
     m_pool(arrow::default_memory_pool()),
-    m_writeGeoParquet(false),
-    m_writeGeoArrow(false),
     m_batchIndex(0),
     m_pointTablePtr(nullptr)
 {
@@ -146,10 +144,10 @@ bool ArrowWriter::processOne(PointRef& point)
             throwError("unable to fetch builder for dimension!");
         }
 
-        if (m_writeGeoArrow && (id == pdal::Dimension::Id::X || 
-                                id == pdal::Dimension::Id::Y || 
-                                id == pdal::Dimension::Id::Z ||
-                                id == m_geoArrowDimId))
+        if ((id == pdal::Dimension::Id::X || 
+             id == pdal::Dimension::Id::Y || 
+             id == pdal::Dimension::Id::Z ||
+             id == m_geoArrowDimId))
         {
             // Use the struct field instead
             if (bAddedStruct)
@@ -166,7 +164,7 @@ bool ArrowWriter::processOne(PointRef& point)
         }
 
     }
-    if (m_writeGeoParquet)
+    if (m_formatType == arrowsupport::Parquet)
     {
         arrow::ArrayBuilder* builder = m_builders[m_wkbDimId].get();
         writeWkb(point, builder);
@@ -204,8 +202,7 @@ void ArrowWriter::addArgs(ProgramArgs& args)
 {
     args.add("filename", "Output filename", m_filename).setPositional();
     args.add("format", "Output format ('feather','parquet','geoparquet')", m_formatString, "feather");
-    args.add("geoparquet", "Write GeoParquet when writing Parquet?", m_writeGeoParquet, false);
-    args.add("geoarrow", "Write GeoArrow when writing Feather?", m_writeGeoArrow, true);
+    args.add("geoarrow_dimension_name", "Dimension name for GeoArrow xyz struct", m_geoArrowDimensionName, "xyz");
     args.add("batch_size", "Arrow batch size", m_batchSize, 65536*64);
     args.add("geoparquet_version", "GeoParquet version string", m_geoParquetVersion, "1.0.0");
 }
@@ -221,10 +218,10 @@ void ArrowWriter::ready(PointTableRef table)
     auto dims = layout->dims();
     for (auto& id : dims)
     {
-        if (m_writeGeoArrow && (id == pdal::Dimension::Id::X || 
-                                id == pdal::Dimension::Id::Y || 
-                                id == pdal::Dimension::Id::Z ||
-                                id == m_geoArrowDimId ))
+        if ((id == pdal::Dimension::Id::X || 
+             id == pdal::Dimension::Id::Y || 
+             id == pdal::Dimension::Id::Z ||
+             id == m_geoArrowDimId ))
         {
             // Use the struct field instead of adding XYZ dimensions
             // to the output
@@ -233,7 +230,7 @@ void ArrowWriter::ready(PointTableRef table)
 
             auto dimensionField = arrow::field("dimension", arrow::float64(), false);
             std::shared_ptr<arrow::DataType> dt = arrow::fixed_size_list(dimensionField, 3);
-            auto field = arrow::field("xyz", dt, false);
+            auto field = arrow::field(m_geoArrowDimensionName, dt, false);
 
             auto kvMetadata = field->metadata()
                                ? field->metadata()->Copy()
@@ -306,11 +303,10 @@ void ArrowWriter::ready(PointTableRef table)
 
 void ArrowWriter::addDimensions(PointLayoutPtr layout)
 {
-    if (m_writeGeoParquet)
+    if (m_formatType == arrowsupport::Parquet)
         m_wkbDimId = layout->assignDim("wkb", Dimension::Type::None);
 
-    if (m_writeGeoArrow)
-        m_geoArrowDimId = layout->assignDim("xyz", Dimension::Type::None);
+    m_geoArrowDimId = layout->assignDim("xyz", Dimension::Type::None);
 }
 
 void ArrowWriter::write(const PointViewPtr view)
@@ -410,8 +406,7 @@ void ArrowWriter::setupParquet(std::vector<std::shared_ptr<arrow::Array>> const&
     m_schema = m_schema->WithMetadata(m_poKeyValueMetadata);
     m_poKeyValueMetadata = m_schema->metadata()->Copy();
 
-
-        log()->get(LogLevel::Warning) << m_poKeyValueMetadata->ToString() << std::endl;
+    log()->get(LogLevel::Info) << m_poKeyValueMetadata->ToString() << std::endl;
 
     auto base_writer = parquet::ParquetFileWriter::Open(
                              m_file, std::move(schema_node),

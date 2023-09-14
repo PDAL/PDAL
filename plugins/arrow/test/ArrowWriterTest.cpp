@@ -74,7 +74,6 @@ TEST(ArrowWriterTest, write_array_parquet)
     Options writerOps;
     writerOps.add("filename", Support::temppath("simple.parquet"));
     writerOps.add("format", "parquet");
-    writerOps.add("geoparquet", "true");
     ArrowWriter writer;
     writer.setInput(reader);
     writer.setOptions(writerOps);
