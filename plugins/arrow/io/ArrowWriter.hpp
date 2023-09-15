@@ -95,6 +95,7 @@ private:
 
     std::string m_geoArrowDimensionName;
     point_count_t m_batchIndex;
+    bool m_writePipelineMetadata;
     pdal::Dimension::Id m_wkbDimId;
     pdal::Dimension::Id m_geoArrowDimId;
 

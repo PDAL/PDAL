@@ -204,6 +204,7 @@ void ArrowWriter::addArgs(ProgramArgs& args)
     args.add("format", "Output format ('feather','parquet','geoparquet')", m_formatString, "feather");
     args.add("geoarrow_dimension_name", "Dimension name for GeoArrow xyz struct", m_geoArrowDimensionName, "xyz");
     args.add("batch_size", "Arrow batch size", m_batchSize, 65536*64);
+    args.add("write_pipeline_metadata", "Write PDAL metadata to schema", m_writePipelineMetadata, true);
     args.add("geoparquet_version", "GeoParquet version string", m_geoParquetVersion, "1.0.0");
 }
 
@@ -243,6 +244,14 @@ void ArrowWriter::ready(PointTableRef table)
             dimDetail["description"] = pdal::Dimension::description(id);
             dimDetail["interpretation"] = pdal::Dimension::interpretationName(layout->dimType(id));
             dimDetail["size"] = layout->dimSize(id);
+
+            if (m_writePipelineMetadata)
+            {
+                std::stringstream m;
+                Utils::toJSON(table.metadata(), m);
+                kvMetadata->Append("PDAL:pipeline:metadata", m.str());   
+            }
+
             kvMetadata->Append("PDAL:dimension:metadata", dimDetail.dump(-1));   
 
             field = field->WithMetadata(kvMetadata); 

@@ -47,20 +47,23 @@ Example
 Options
 -------
 
+batch_size
+  Number of rows to write as a batch [Default: 65536*64 ]
+
 filename
   Output file to write [Required]
-
 format
   File type to write (feather, parquet) [Default: "feather"]
+
+geoarrow_dimension_name
+  Dimension name to write GeoArrow struct [Default: xyz]
 
 geoparquet
   Write WKB column and GeoParquet metadata when writing parquet output
 
-batch_size
-  Number of rows to write as a batch [Default: 65536*64 ]
-
-geoarrow_dimension_name
-  Dimension name to write GeoArrow struct [Default: xyz]
+write_pipeline_metadata
+  Write PDAL pipeline metadata into `PDAL:pipeline:metadata` of 
+  `geoarrow_dimension_name`
 
 .. include:: writer_opts.rst
 
