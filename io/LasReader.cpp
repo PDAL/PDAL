@@ -113,14 +113,16 @@ public:
         setg(&*m_range.begin(), &*m_range.begin(), &*m_range.end());
     }
 
-    pos_type seekpos(pos_type sp, std::ios_base::openmode which) override
+    std::istream::pos_type seekpos(std::istream::pos_type sp,
+        std::ios_base::openmode which) override
     {
-        return seekoff(sp - pos_type(off_type(0)), std::ios_base::beg, which);
+        return seekoff(sp - std::istream::pos_type(std::istream::off_type(0)),
+            std::ios_base::beg, which);
     }
 
-    pos_type seekoff(off_type off,
-                     std::ios_base::seekdir dir,
-                     std::ios_base::openmode which = std::ios_base::in) override
+    std::istream::pos_type seekoff(std::istream::off_type off,
+        std::ios_base::seekdir dir,
+        std::ios_base::openmode which = std::ios_base::in) override
     {
         if (dir == std::ios_base::cur)
             gbump(off);
