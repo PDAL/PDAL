@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.13)
 
 if (STANDALONE)
     project(pdal-rxp)
-    find_package(PDAL REQUIRED)
     include("${CMAKE_CURRENT_LIST_DIR}/../../cmake/standalone.cmake" )
+    find_package(PDAL REQUIRED)    
 endif(STANDALONE)
 
 set(RXP_TEST_NAME rxptest)

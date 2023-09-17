@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.13)
 
 if (STANDALONE)
-    find_package(PDAL REQUIRED)
     include(../../cmake/standalone.cmake NO_POLICY_SCOPE)
+    find_package(PDAL REQUIRED)
 endif(STANDALONE)
 
 find_package(OpenMP QUIET REQUIRED)

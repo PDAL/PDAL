@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.13)
 
 if (STANDALONE)
     project(pdal-tiledb)
-    find_package(PDAL REQUIRED)
     include("${CMAKE_CURRENT_LIST_DIR}/../../cmake/standalone.cmake" )
     include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
+    find_package(PDAL REQUIRED)
 endif(STANDALONE)
 
 #

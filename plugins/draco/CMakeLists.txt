@@ -2,12 +2,12 @@ cmake_minimum_required(VERSION 3.13)
 
 if (STANDALONE)
     project(pdal-draco)
-    find_package(PDAL REQUIRED)
+
     include("${CMAKE_CURRENT_LIST_DIR}/../../cmake/standalone.cmake" )
     include(${PDAL_CMAKE_DIR}/arbiter.cmake)
     include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
     add_subdirectory("${PROJECT_SOURCE_DIR}/../../vendor/arbiter" "vendor/arbiter")
-
+    find_package(PDAL REQUIRED)    
 endif(STANDALONE)
 
 
