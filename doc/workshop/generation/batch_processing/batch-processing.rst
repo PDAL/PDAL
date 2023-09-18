@@ -39,9 +39,9 @@ To compress a series of LAS files in one directory into compressed LAZ files in 
 directory, the `PowerShell` syntax would be:
 
 
-.. code-block:: console
+.. code-block:: powershell
 
-  Get-ChildItem .\DIR1\*.las | foreach {pdal translate -i .\DIR1\$($_.BaseName).las ^
+  PS ./exercises/batch> Get-ChildItem .\DIR1\*.las | foreach {pdal translate -i .\DIR1\$($_.BaseName).las ^
   -o .\DIR2\$($_.BaseName).laz}
 
 Note the use of the `$($_.BaseName)` syntax for the files passed. This option on the `$($_)` shortcut for
@@ -56,9 +56,9 @@ time. There is a free download of the `xargs` program that provides parallel exe
 at http://www.pirosa.co.uk/demo/wxargs/ppx2.exe. A clone of this program can be found at https://github.com/ghuls/ppx2.
 For this tool, the file names are passed with using the `{}` syntax.
 
-.. code-block:: console
+.. code-block:: powershell
 
-  Get-ChildItem .\dir1\ | Select-Object -ExpandProperty BaseName ^
+  PS ./exercises/batch> Get-ChildItem .\dir1\ | Select-Object -ExpandProperty BaseName ^
   | .\ppx2.exe -P 3 pdal translate -i ".\dir1\{}.las" -o ".\dir2\{}.laz"
 
 
@@ -109,10 +109,10 @@ You might have spotted that this pipeline doesn't have any input or output file 
 output spatial reference. We will be adding those at the command line, not within the actual pipeline and
 using the substitutions syntax to do this.
 
- .. code-block:: console
+ .. code-block:: powershell
 
-  PS ./exercises/batch> Get-ChildItem  ./exercises/batch/source/*.laz | ^
-  foreach {pdal pipeline ./exercises/batch/batch_srs_gdal.json ^
+  PS ./exercises/batch> Get-ChildItem  ./exercises/batch_processing/source/*.laz | ^
+  foreach {pdal pipeline ./exercises/batch_processing/batch_srs_gdal.json ^
   --readers.las.filename=./source/$($_.BaseName).laz ^
   --writers.gdal.filename=./dtm/$($_.BaseName).tif ^
   --filters.reprojection.in_srs=epsg:3794 ^
