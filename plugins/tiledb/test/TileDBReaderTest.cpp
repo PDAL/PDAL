@@ -45,6 +45,11 @@
 #include <pdal/pdal_test_main.hpp>
 #include <pdal/util/FileUtils.hpp>
 
+#if defined(DELETE)
+#undef DELETE
+#endif
+
+
 #include <tiledb/tiledb>
 
 #include "Support.hpp"
