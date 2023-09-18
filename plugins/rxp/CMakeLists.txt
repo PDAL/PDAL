@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 
 if (STANDALONE)
     project(pdal-rxp)
+    find_package(PDAL REQUIRED)
     include("${CMAKE_SOURCE_DIR}/../../cmake/standalone.cmake" )
 endif(STANDALONE)
 

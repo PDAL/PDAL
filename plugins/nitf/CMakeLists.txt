@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 
 if (STANDALONE)
     project(pdal-nitf)
+    find_package(PDAL REQUIRED)
     include("${CMAKE_SOURCE_DIR}/../../cmake/standalone.cmake" )
     include(${PDAL_CMAKE_DIR}/arbiter.cmake)
     include(${PDAL_CMAKE_DIR}/nlohmann.cmake)

@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
 if (STANDALONE)
+    find_package(PDAL REQUIRED)
     include(../../cmake/standalone.cmake NO_POLICY_SCOPE)
 endif(STANDALONE)
 
