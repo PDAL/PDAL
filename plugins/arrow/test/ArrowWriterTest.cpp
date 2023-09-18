@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2023, Howard Butler (howard@hobu.co)*
 *
 * All rights reserved.
 *
@@ -30,52 +30,60 @@
 * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
+*
 ****************************************************************************/
+#include <pdal/pdal_test_main.hpp>
 
-#pragma once
+#include "Support.hpp"
+#include <io/LasReader.hpp>
+#include "../io/ArrowWriter.hpp"
 
-#include <pdal/JsonFwd.hpp>
-#include <pdal/SpatialReference.hpp>
-#include <pdal/util/Bounds.hpp>
-
-class OGRGeometry;
-typedef void *OGRGeometryH;
-
-#include <vector>
 
 namespace pdal
 {
-class Polygon;
-
-namespace gdal
+namespace arrow
 {
 
-PDAL_DLL void registerDrivers();
-PDAL_DLL void unregisterDrivers();
-PDAL_DLL bool reprojectBounds(Bounds& box, const SpatialReference& srcSrs,
-    const SpatialReference& dstSrs);
-PDAL_DLL bool reprojectBounds(BOX3D& box, const SpatialReference& srcSrs,
-    const SpatialReference& dstSrs);
-PDAL_DLL bool reprojectBounds(BOX2D& box, const SpatialReference& srcSrs,
-    const SpatialReference& dstSrs);
-PDAL_DLL bool reproject(double& x, double& y, double& z,
-    const SpatialReference& srcSrs, const SpatialReference& dstSrs);
-PDAL_DLL std::string lastError();
+TEST(ArrowWriterTest, write_array_feather)
+{
 
-// Exported for test support. Not sure why the above are exported.
-PDAL_DLL std::vector<Polygon> getPolygons(const NL::json& ogr);
+    Options readerOps;
+    readerOps.add("filename", Support::datapath("las/1.2-with-color.las"));
+    LasReader reader;
+    reader.setOptions(readerOps);
 
-// New signatures to support extraction of SRS from the end of geometry
-// specifications.
-OGRGeometry *createFromWkt(const std::string& s, std::string& srs);
-OGRGeometry *createFromWkb(const std::string& s, std::string& srs);
-OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs);
+    Options writerOps;
+    writerOps.add("filename", Support::temppath("simple.feather"));
+    ArrowWriter writer;
+    writer.setInput(reader);
+    writer.setOptions(writerOps);
 
-inline OGRGeometry *fromHandle(OGRGeometryH geom)
-{ return reinterpret_cast<OGRGeometry *>(geom); }
+    PointTable table;
+    writer.prepare(table);
+    PointViewSet viewSet = writer.execute(table);
 
-inline OGRGeometryH toHandle(OGRGeometry *h)
-{ return reinterpret_cast<OGRGeometryH>(h); }
+}
+TEST(ArrowWriterTest, write_array_parquet)
+{
 
-} // namespace gdal
+    Options readerOps;
+    readerOps.add("filename", Support::datapath("las/1.2-with-color.las"));
+    LasReader reader;
+    reader.setOptions(readerOps);
+
+    Options writerOps;
+    writerOps.add("filename", Support::temppath("simple.parquet"));
+    writerOps.add("format", "parquet");
+    ArrowWriter writer;
+    writer.setInput(reader);
+    writer.setOptions(writerOps);
+
+    PointTable table;
+    writer.prepare(table);
+    PointViewSet viewSet = writer.execute(table);
+
+}
+
+} // namespace arrow
 } // namespace pdal
+

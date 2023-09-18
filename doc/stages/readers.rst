@@ -16,6 +16,7 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
    :glob:
    :hidden:
 
+   readers.arrow
    readers.bpf
    readers.buffer
    readers.copc
