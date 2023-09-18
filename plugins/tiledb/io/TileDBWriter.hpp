@@ -41,6 +41,10 @@
 #include <pdal/Streamable.hpp>
 #include <pdal/Writer.hpp>
 
+#if defined(DELETE)
+#undef DELETE
+#endif
+
 #include <tiledb/tiledb>
 
 namespace pdal
