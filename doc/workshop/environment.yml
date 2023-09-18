@@ -1,0 +1,11 @@
+name: pdal-workshop
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pdal=2.5.6
+  - python-pdal
+  - gdal
+  - untwine
+  - geopandas
+  - conda-pack

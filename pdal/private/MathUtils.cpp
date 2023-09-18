@@ -403,18 +403,18 @@ Eigen::Vector3d rotate(const Eigen::Vector3d& v, const Eigen::Quaterniond& rot)
 /// \param x2, y2, z2  Coordinates of point 2.
 /// \param x3, y3, z3  Coordinates of point 3.
 /// \param x, y  X and Y coordinates of location to find an interpolated Z
+/// \param epsilon Tolerance for comparisons (to cope with numerical imprecision when x,y is
+/// on one of the triangle's edges)
 /// \return  Interpolated Z value or infinity.
 double barycentricInterpolation(double x1, double y1, double z1,
     double x2, double y2, double z2, double x3, double y3, double z3,
-    double x, double y)
+    double x, double y, double epsilon)
 {
     double z = std::numeric_limits<double>::infinity();
 
     double detT = ((y2-y3) * (x1-x3)) + ((x3-x2) * (y1-y3));
 
-    //ABELL - should probably check something close to 0, rather than
-    // exactly 0.
-    if (detT != 0.0)
+    if (abs(detT) > epsilon)
     {
         // Compute the barycentric coordinates of x,y (relative to
         // x1/y1, x2/y2, x3/y3).  Essentially the weight that each
@@ -429,10 +429,11 @@ double barycentricInterpolation(double x1, double y1, double z1,
         // triangle.
         double lambda1 = ((y2-y3) * (x-x3) + (x3-x2) * (y-y3)) / detT;
         double lambda2 = ((y3-y1) * (x-x3) + (x1-x3) * (y-y3)) / detT;
-        if (lambda1 >= 0 && lambda1 <= 1 && lambda2 >= 0 && lambda2 <= 1)
+        if (lambda1 + epsilon >= 0 && lambda1 - epsilon <= 1
+            && lambda2 + epsilon >= 0 && lambda2 - epsilon <= 1)
         {
             double sum = lambda1 + lambda2;
-            if (sum <= 1)
+            if (sum - epsilon <= 1)
             {
                 double lambda3 = 1 - sum;
                 z = (lambda1 * z1) + (lambda2 * z2) + (lambda3 * z3);

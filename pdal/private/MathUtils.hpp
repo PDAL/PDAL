@@ -70,7 +70,7 @@ PointViewPtr transform(const PointView&, double* matrix);
 void transformInPlace(PointView&, double* matrix);
 double barycentricInterpolation(double x1, double y1, double z1,
     double x2, double y2, double z2, double x3, double y3, double z3,
-    double x, double y);
+    double x, double y, double epsilon = 4 * std::numeric_limits<double>::epsilon() );
 
 /**
   Compute the centroid of a collection of points.
