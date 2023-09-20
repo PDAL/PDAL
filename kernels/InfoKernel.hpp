@@ -66,6 +66,7 @@ private:
     void addSwitches(ProgramArgs& args);
     void validateSwitches(ProgramArgs& args);
     void makeReader(const std::string& filename);
+    std::string makeLasSummaryReader(const std::string& filename);
     void makePipeline();
     void dump(MetadataNode& root);
     MetadataNode dumpSummary(const QuickInfo& qi);
