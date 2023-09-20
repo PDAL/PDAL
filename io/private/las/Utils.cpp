@@ -682,11 +682,27 @@ void V14BaseLoader::load(PointRef& point, const char *buf, int bufsize)
 void V14BaseLoader::pack(const PointRef& point, char *buf, int bufsize)
 {
     LeInserter ostream(buf, bufsize);
-    int32_t xi = (int32_t)m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::X));
-    int32_t yi = (int32_t)m_scaling.m_yXform.toScaled(point.getFieldAs<double>(Dimension::Id::Y));
-    int32_t zi = (int32_t)m_scaling.m_zXform.toScaled(point.getFieldAs<double>(Dimension::Id::Z));
 
-    ostream << xi << yi << zi;
+    auto converter = [](double val, Dimension::Id dim) -> int32_t
+    {
+        int32_t i(0);
+
+        if (!Utils::numericCast(val, i))
+            throw std::runtime_error("Unable to convert scaled value (" +
+                Utils::toString(val) + ") to "
+                "int32 for dimension '" + Dimension::name(dim) );
+        return i;
+    };
+
+    double xOrig = point.getFieldAs<double>(Dimension::Id::X);
+    double yOrig = point.getFieldAs<double>(Dimension::Id::Y);
+    double zOrig = point.getFieldAs<double>(Dimension::Id::Z);
+
+    int32_t x = converter(m_scaling.m_xXform.toScaled(xOrig), Dimension::Id::X);
+    int32_t y = converter(m_scaling.m_yXform.toScaled(yOrig), Dimension::Id::Y);
+    int32_t z = converter(m_scaling.m_zXform.toScaled(zOrig), Dimension::Id::Z);
+
+    ostream << x << y << z;
 
     uint16_t intensity = point.getFieldAs<uint16_t>(Dimension::Id::Intensity);
     int returnNum = point.getFieldAs<int>(Dimension::Id::ReturnNumber);
