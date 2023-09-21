@@ -43,6 +43,7 @@
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <io/BufferReader.hpp>
+#include <io/CopcWriter.hpp>
 #include <io/LasHeader.hpp>
 #include <io/LasReader.hpp>
 #include <io/LasWriter.hpp>
@@ -68,6 +69,8 @@ class LasTester
 public:
     const las::Header& header(LasWriter& w)
         { return w.header(); }
+    const las::Header& header(LasReader& r)
+        { return r.lasHeader(); }
     SpatialReference srs(LasWriter& w)
         { return w.m_srs; }
     void addVlr(LasWriter& w, const std::string& userId, uint16_t recordId,
@@ -2299,6 +2302,41 @@ TEST(LasWriterTest, issue2235)
             EXPECT_EQ(h46.legacyPointsByReturn[i], 0);
             if (i < returnsWithPoints)
                 EXPECT_NE(h46.ePointsByReturn[i], 0);
+        }
+    }
+
+    // test for COPC too
+    {
+        Options copcWriterOps;
+        copcWriterOps.add("filename", Support::temppath("out_4_6.copc.laz"));
+
+        CopcWriter copcWriter;
+        copcWriter.setInput(reader);
+        copcWriter.setOptions(copcWriterOps);
+
+        PointTable tableCopc;
+        copcWriter.prepare(tableCopc);
+        copcWriter.execute(tableCopc);
+
+        Options copcReaderOpts;
+        copcReaderOpts.add("filename", Support::temppath("out_4_6.copc.laz"));
+
+        LasReader readerCopc;
+        readerCopc.setOptions(copcReaderOpts);
+
+        PointTable tableCopcR;
+        readerCopc.prepare(tableCopcR);
+
+        const las::Header& headerCopc = tester.header(readerCopc);
+
+        EXPECT_EQ(headerCopc.legacyPointCount, 0);
+        EXPECT_NE(headerCopc.pointCount(), 0);
+
+        for (int i=0; i<headerCopc.LegacyReturnCount; i++)
+        {
+            EXPECT_EQ(headerCopc.legacyPointsByReturn[i], 0);
+            if (i < returnsWithPoints)
+                EXPECT_NE(headerCopc.ePointsByReturn[i], 0);
         }
     }
 }
