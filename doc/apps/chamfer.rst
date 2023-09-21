@@ -17,7 +17,6 @@ chamfer
 
       import pdal
       import numpy as np
-      from scipy.spatial.distance import cdist
 
       def chamfer_distance(arr1, arr2):
           distance_1_to_2 = 0
