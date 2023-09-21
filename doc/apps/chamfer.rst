@@ -59,7 +59,6 @@ chamfer
   original implementation, which summed the square of the distance to the
   nearest neighbor. We have elected not to update the PDAL implementation at
   this time.
-      
 
 The ``chamfer`` command is used to compute the Chamfer distance between two
 point clouds. The Chamfer distance is computed by summing the squared distances
