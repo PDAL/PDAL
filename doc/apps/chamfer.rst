@@ -4,6 +4,22 @@
 chamfer
 ********************************************************************************
 
+.. warning::
+
+  As of PDAL v2.6.0, the ``chamfer`` command is marked as DEPRECATED. It will be
+  removed from the default install in PDAL v2.7 and removed completely in PDAL
+  v2.8.
+
+  The following Python code can be used with the PDAL Python bindings to compute
+  the chamfer distance.
+
+  ::
+
+      import pdal
+
+      # compute Chamfer
+      ...
+
 The ``chamfer`` command is used to compute the Chamfer distance between two
 point clouds. The Chamfer distance is computed by summing the squared distances
 between nearest neighbor correspondences of two point clouds.
