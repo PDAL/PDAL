@@ -16,9 +16,51 @@ chamfer
   ::
 
       import pdal
+      import numpy as np
+      from scipy.spatial.distance import cdist
 
-      # compute Chamfer
-      ...
+      def chamfer_distance(arr1, arr2):
+          distance_1_to_2 = 0
+          distance_2_to_1 = 0
+
+          points1 = np.column_stack((arr1['X'], arr1['Y'], arr2['Z']))
+          points2 = np.column_stack((arr2['X'], arr2['Y'], arr2['Z']))
+          
+          # Compute distance from each point in arr1 to arr2
+          for p1 in points1:
+              distances = np.sqrt(np.sum((points2 - p1)**2, axis=1))
+              min_distance = np.min(distances)
+              distance_1_to_2 += min_distance
+          
+          # Compute distance from each point in arr2 to arr1
+          for p2 in points2:
+              distances = np.sqrt(np.sum((points1 - p2)**2, axis=1))
+              min_distance = np.min(distances)
+              distance_2_to_1 += min_distance
+          
+          return (distance_1_to_2 + distance_2_to_1) / (len(arr1) + len(arr2))
+
+      pipeline1 = pdal.Reader("/path/to/input1.laz").pipeline()
+      pipeline1.execute()
+      arr1 = pipeline1.array[0]
+
+      pipeline2 = pdal.Reader("/path/to/input2.laz").pipeline()
+      pipeline2.execute()
+      arr2 = pipeline2.array[0]
+
+      # Compute Chamfer distance
+      result = chamfer_distance(arr1, arr2)
+      print("Chamfer Distance:", result)
+
+  Popular Python packages such as scipy and sklearn have functions to compute
+  the pairwise distance between points and can be used to simplify the above
+  somewhat.
+
+  Note that the provided code does not match exactly the output of PDAL's
+  original implementation, which summed the square of the distance to the
+  nearest neighbor. We have elected not to update the PDAL implementation at
+  this time.
+      
 
 The ``chamfer`` command is used to compute the Chamfer distance between two
 point clouds. The Chamfer distance is computed by summing the squared distances
