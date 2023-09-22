@@ -187,6 +187,20 @@ void DimBuilder::extractDim(NL::json& dim)
     validateDimension(d.m_name);
     dim.erase(it);
 
+    if (dim.count("deprecated"))
+    {
+        if (!dim.at("deprecated").is_boolean())
+        {
+            std::ostringstream oss;
+            oss << "Dimension '" << d.m_name << 
+                "' deprecated field must be boolean if it exists.";
+            throw dimbuilder_error(oss.str());
+        }
+
+        d.m_deprecated = dim.at("deprecated").get<bool>();
+        dim.erase("deprecated");
+    }
+
     // Get dimension description.
     it = dim.find("description");
     if (it == dim.end())
@@ -335,6 +349,8 @@ void DimBuilder::writeOutput(std::ostream& out)
     writeIdToName(out);
     out << "\n";
     writeTypes(out);
+    out << "\n";
+    writeIsDeprecated(out);
     out << "\n";
     writeFooter(out);
 }
@@ -504,6 +520,29 @@ void DimBuilder::writeTypes(std::ostream& out)
     out << "    }\n";
     out << "    throw pdal_error(\"No type found for undefined "
         "dimension.\");\n";
+    out << "}\n";
+}
+
+void DimBuilder::writeIsDeprecated(std::ostream& out)
+{
+    out << "/// Check whether a predefined dimension is deprecated.\n";
+    out << "/// \\param[in] id  Dimension ID.\n";
+    out << "/// \\return  True if deprecated, otherwise false.\n";
+    out << "inline bool isDeprecated(Id id)\n";
+    out << "{\n";
+    out << "    switch (id)\n";
+    out << "    {\n";
+    for (auto& d : m_dims)
+    {
+        if (d.m_deprecated)
+        {
+            out << "    case Id::" << d.m_name << ":\n";
+        }
+    }
+    out << "        return true;\n";
+    out << "    default:\n";
+    out << "        return false;\n";
+    out << "    }\n";
     out << "}\n";
 }
 

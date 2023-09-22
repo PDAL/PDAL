@@ -267,9 +267,30 @@
     "description": "Height Above Ground"
     },
     {
+    "deprecated": true,
     "name": "ClassFlags",
     "type": "uint8",
-    "description": "Class Flags"
+    "description": "Class Flags - deprecated in favor of Synthetic/KeyPoint/Withheld/Overlap"
+    },
+    {
+    "name": "Synthetic",
+    "type": "uint8",
+    "description": "ASPRS Synthetic flag.  See LAS specification for details."
+    },
+    {
+    "name": "KeyPoint",
+    "type": "uint8",
+    "description": "ASPRS Key-Point flag.  See LAS specification for details."
+    },
+    {
+    "name": "Withheld",
+    "type": "uint8",
+    "description": "ASPRS Withheld flag.  See LAS specification for details."
+    },
+    {
+    "name": "Overlap",
+    "type": "uint8",
+    "description": "ASPRS Overlap flag.  See LAS specification for details."
     },
     {
     "name": "LvisLfid",

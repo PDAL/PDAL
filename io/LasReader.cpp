@@ -538,18 +538,34 @@ void LasReader::loadPointV10(PointRef& point, char *buf, size_t bufsize)
 
     uint16_t intensity;
     uint8_t flags;
-    uint8_t classification;
+    uint8_t classificationWithFlags;
     int8_t scanAngleRank;
     uint8_t user;
     uint16_t pointSourceId;
 
-    istream >> intensity >> flags >> classification >> scanAngleRank >>
+    istream >> intensity >> flags >> classificationWithFlags >> scanAngleRank >>
         user >> pointSourceId;
 
     uint8_t returnNum = flags & 0x07;
     uint8_t numReturns = (flags >> 3) & 0x07;
     uint8_t scanDirFlag = (flags >> 6) & 0x01;
     uint8_t flight = (flags >> 7) & 0x01;
+
+    uint8_t classification = classificationWithFlags & 0x1F;
+    uint8_t synthetic = (classificationWithFlags >> 5) & 0x01;
+    uint8_t keypoint = (classificationWithFlags >> 6) & 0x01;
+    uint8_t withheld = (classificationWithFlags >> 7) & 0x01;
+    uint8_t overlap = 0;
+
+    // For V10 PDRFs, "Overlap" was encoded as Classification=12.  This was
+    // split out into its own bitfield for the V14 PDRFs, so mimic that behavior
+    // here, setting the dedicated Overlap flag and resetting the Classification
+    // to "Never Classified".
+    if (classification == 12)
+    {
+        classification = 0;
+        overlap = 1;
+    }
 
     point.setField(Dimension::Id::X, x);
     point.setField(Dimension::Id::Y, y);
@@ -560,6 +576,10 @@ void LasReader::loadPointV10(PointRef& point, char *buf, size_t bufsize)
     point.setField(Dimension::Id::ScanDirectionFlag, scanDirFlag);
     point.setField(Dimension::Id::EdgeOfFlightLine, flight);
     point.setField(Dimension::Id::Classification, classification);
+    point.setField(Dimension::Id::Synthetic, synthetic);
+    point.setField(Dimension::Id::KeyPoint, keypoint);
+    point.setField(Dimension::Id::Withheld, withheld);
+    point.setField(Dimension::Id::Overlap, overlap);
     point.setField(Dimension::Id::ScanAngleRank, scanAngleRank);
     point.setField(Dimension::Id::UserData, user);
     point.setField(Dimension::Id::PointSourceId, pointSourceId);
@@ -612,7 +632,10 @@ void LasReader::loadPointV14(PointRef& point, char *buf, size_t bufsize)
 
     uint8_t returnNum = returnInfo & 0x0F;
     uint8_t numReturns = (returnInfo >> 4) & 0x0F;
-    uint8_t classFlags = flags & 0x0F;
+    uint8_t synthetic = (flags >> 0) & 0x01;
+    uint8_t keypoint = (flags >> 1) & 0x01;
+    uint8_t withheld = (flags >> 2) & 0x01;
+    uint8_t overlap = (flags >> 3) & 0x01;
     uint8_t scanChannel = (flags >> 4) & 0x03;
     uint8_t scanDirFlag = (flags >> 6) & 0x01;
     uint8_t flight = (flags >> 7) & 0x01;
@@ -623,7 +646,10 @@ void LasReader::loadPointV14(PointRef& point, char *buf, size_t bufsize)
     point.setField(Dimension::Id::Intensity, intensity);
     point.setField(Dimension::Id::ReturnNumber, returnNum);
     point.setField(Dimension::Id::NumberOfReturns, numReturns);
-    point.setField(Dimension::Id::ClassFlags, classFlags);
+    point.setField(Dimension::Id::Synthetic, synthetic);
+    point.setField(Dimension::Id::KeyPoint, keypoint);
+    point.setField(Dimension::Id::Withheld, withheld);
+    point.setField(Dimension::Id::Overlap, overlap);
     point.setField(Dimension::Id::ScanChannel, scanChannel);
     point.setField(Dimension::Id::ScanDirectionFlag, scanDirFlag);
     point.setField(Dimension::Id::EdgeOfFlightLine, flight);

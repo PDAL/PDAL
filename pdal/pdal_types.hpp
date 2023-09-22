@@ -245,7 +245,7 @@ namespace ClassLabel
     const uint8_t Water = 9;
     const uint8_t Rail = 10;
     const uint8_t RoadSurface = 11;
-    const uint8_t Overlap = 12;
+    // Overlap=12 is a legacy value - the value 12 is now reserved.
     const uint8_t WireGuard = 13;
     const uint8_t WireConductor = 14;
     const uint8_t TransmissionTower = 15;
@@ -256,9 +256,6 @@ namespace ClassLabel
     const uint8_t IgnoredGround = 20;
     const uint8_t Snow = 21;
     const uint8_t TemporalExclusion = 22;
-    const uint8_t Synthetic = 32;
-    const uint8_t Keypoint = 64;
-    const uint8_t Withheld = 128;
 }
 
 namespace
