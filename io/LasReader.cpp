@@ -139,6 +139,11 @@ const LasHeader& LasReader::header() const
     return d->apiHeader;
 }
 
+const las::Header& LasReader::lasHeader() const
+{
+    return d->header;
+}
+
 uint64_t LasReader::vlrData(const std::string& userId, uint16_t recordId, char const * & data)
 {
     const las::Vlr *vlr = las::findVlr(userId, recordId, d->vlrs);
