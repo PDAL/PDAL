@@ -561,9 +561,9 @@ void LasReader::loadPointV10(PointRef& point, char *buf, size_t bufsize)
     // split out into its own bitfield for the V14 PDRFs, so mimic that behavior
     // here, setting the dedicated Overlap flag and resetting the Classification
     // to "Never Classified".
-    if (classification == 12)
+    if (classification == ClassLabel::LegacyOverlap)
     {
-        classification = 0;
+        classification = ClassLabel::CreatedNeverClassified;
         overlap = 1;
     }
 

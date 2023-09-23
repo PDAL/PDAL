@@ -965,12 +965,12 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
         {
             // In the V10 PDRFs, we do not have a dedicated Overlap bit, instead
             // this was encoded as Classification=12.
-            if (classification == 0)
+            if (classification == ClassLabel::CreatedNeverClassified)
             {
                 // If the Overlap flag is set and the point is marked as "Never
                 // Classified", then set Classification=12 to mark the point as
                 // Overlap.
-                classification = 12;
+                classification = ClassLabel::LegacyOverlap;
             }
             else
             {
@@ -998,7 +998,7 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
                 << std::to_string(d->header.versionMajor) << "."
                 << std::to_string(d->header.versionMinor)
                 << ". Replaced with value 1." << std::endl;
-            classification = 1; // Unclassified
+            classification = ClassLabel::Unclassified;
         }
 
         uint8_t classificationWithFlags =

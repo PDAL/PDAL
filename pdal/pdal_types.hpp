@@ -245,7 +245,9 @@ namespace ClassLabel
     const uint8_t Water = 9;
     const uint8_t Rail = 10;
     const uint8_t RoadSurface = 11;
-    // Overlap=12 is a legacy value - the value 12 is now reserved.
+    // The value 12 is now reserved in favor of a dedicated Overlap flag, but
+    // may still be found in legacy PDRFs.
+    const uint8_t LegacyOverlap = 12;
     const uint8_t WireGuard = 13;
     const uint8_t WireConductor = 14;
     const uint8_t TransmissionTower = 15;
