@@ -263,6 +263,7 @@
     },
     {
     "name": "HeightAboveGround",
+    "alt_names": ["height above ground", "HAG"],
     "type": "double",
     "description": "Height Above Ground"
     },
@@ -348,19 +349,19 @@
     },
     {
     "name": "NormalX",
-    "alt_names": ["nx", "normal_x", "normalx" ],
+    "alt_names": ["nx", "normal_x", "normalx", "normal x" ],
     "type": "double",
     "description": "X component of a vector normal to surface at this point"
     },
     {
     "name": "NormalY",
-    "alt_names": ["ny", "normal_y", "normaly" ],
+    "alt_names": ["ny", "normal_y", "normaly", "normal y"],
     "type": "double",
     "description": "Y component of a vector normal to surface at this point"
     },
     {
     "name": "NormalZ",
-    "alt_names": ["nz", "normal_z", "normalz"],
+    "alt_names": ["nz", "normal_z", "normalz", "normal z"],
     "type": "double",
     "description": "Z component of a vector normal to surface at this point"
     },
