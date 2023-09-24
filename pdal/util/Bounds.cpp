@@ -304,7 +304,7 @@ void BOX2D::parse(const std::string& s, std::string::size_type& pos)
         isJson = true;
         isArray = b.is_array();
         isObject = b.is_object();
-    } catch (NL::json::parse_error& e)
+    } catch (std::exception& e)
     {
         jsonParseMessage = e.what();
         isJson = false;
@@ -396,7 +396,7 @@ void BOX3D::parse(const std::string& s, std::string::size_type& pos)
         isJson = true;
         isArray = b.is_array();
         isObject = b.is_object();
-    } catch (NL::json::parse_error& e)
+    } catch (std::exception& e)
     {
         jsonParseMessage = e.what();
         isJson = false;
@@ -527,7 +527,7 @@ std::istream& operator>>(std::istream& in, BOX3D& box)
         }
         catch (const BOX2D::error& err)
         {
-            throw Bounds::error(err.what());
+            throw BOX3D::error(err.what());
         }
     }
 
