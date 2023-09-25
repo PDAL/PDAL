@@ -67,6 +67,7 @@
     },
     {
     "name": "UserData",
+    "alt_names": "user_data",
     "type": "uint8",
     "description": "Unspecified user data"
     },

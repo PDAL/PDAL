@@ -351,6 +351,7 @@ void Stage::setupLog()
 void Stage::l_addArgs(ProgramArgs& args)
 {
     args.add("user_data", "User JSON", m_userDataJSON);
+    args.addSynonym("user_data", "UserData");
     args.add("log", "Debug output filename", m_logname);
     // We never really bind anything to this variable.  We extract the option
     // before parsing the command line.  This entry allows a line in the
