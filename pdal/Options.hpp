@@ -161,8 +161,9 @@ public:
                vs += *vi;
             }
 
+            bool isUserData = Utils::iequals(k, "user_data") || Utils::iequals(k, "userdata");
             // 'userData' keys on stages and such are JSON
-            if (!Utils::iequals(k, "user_data"))
+            if (!isUserData)
                 parent.add(k, vs);
             else
                 parent.addWithType(k, vs, "json", "User JSON");
