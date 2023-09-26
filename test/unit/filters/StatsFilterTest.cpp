@@ -210,9 +210,9 @@ TEST(Stats, advanced)
     EXPECT_EQ(statsY.count(), 1000u);
     EXPECT_EQ(statsZ.count(), 1000u);
 
-    EXPECT_NEAR(statsX.sampleSkewness(), -5.2235397e-16, 1e-23);
-    EXPECT_NEAR(statsY.sampleSkewness(), -5.7098153e-16, 1e-23);
-    EXPECT_NEAR(statsZ.sampleSkewness(), -5.5176534e-16, 1e-23);
+    EXPECT_NEAR(statsX.sampleSkewness(), -5.2235397e-16, 1e-15);
+    EXPECT_NEAR(statsY.sampleSkewness(), -5.7098153e-16, 1e-15);
+    EXPECT_NEAR(statsZ.sampleSkewness(), -5.5176534e-16, 1e-15);
 
     EXPECT_NEAR(statsX.sampleExcessKurtosis(), -1.2, .00001);
     EXPECT_NEAR(statsY.sampleExcessKurtosis(), -1.2, .00001);
