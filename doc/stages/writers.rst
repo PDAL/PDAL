@@ -16,6 +16,7 @@ dimension type, while others only understand fixed dimension names.
    :glob:
    :hidden:
 
+   writers.arrow
    writers.bpf
    writers.copc
    writers.draco
@@ -38,8 +39,11 @@ dimension type, while others only understand fixed dimension names.
    writers.text
    writers.tiledb
 
+:ref:`writers.arrow`
+    write Apache Arrow Feather- or Parquet-formatted files
+
 :ref:`writers.bpf`
-    Write BPF version 3 files. BPF is an NGA specification for point cloud data.
+    write BPF version 3 files. BPF is an NGA specification for point cloud data.
 
 :ref:`writers.copc`
     COPC, or Cloud Optimized Point Cloud, is an LAZ 1.4 file stored as a

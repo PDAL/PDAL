@@ -187,12 +187,21 @@ TEST(CopcWriterTest, srsUTM)
     EXPECT_TRUE(Utils::startsWith(srs, "PROJCS[\"NAD83 / UTM zone 15N\""));
 
     const char *data = nullptr;
+
     EXPECT_TRUE(r.vlrData("LASF_Projection", 4224, data) > 0);
     EXPECT_TRUE(Utils::startsWith(data, "PROJCRS[\"NAD83 / UTM zone 15N\""));
+
+    data = nullptr;
     EXPECT_TRUE(r.vlrData("PDAL", 4225, data) > 0);
     EXPECT_TRUE(Utils::startsWith(data, "{\n  \"type\": \"ProjectedCRS\","));
+
+    data = nullptr;
+    // This vlr data must not be null terminated and segfaults when startsWith
+    // tries to read it
     EXPECT_TRUE(r.vlrData("LASF_Projection", 2112, data) > 0);
-    EXPECT_TRUE(Utils::startsWith(data, "PROJCS[\"NAD83 / UTM zone 15N\""));
+    std::string info (data, 50);
+    bool test = Utils::startsWith(info, "PROJCS[\"NAD83 / UTM zone 15N\"" );
+    EXPECT_TRUE(test);
 }
 
 } // namespace pdal
