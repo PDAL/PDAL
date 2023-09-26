@@ -4,6 +4,12 @@
 ground
 ********************************************************************************
 
+.. warning::
+
+  As of PDAL v2.6.0, the ``ground`` command is marked as DEPRECATED. It will
+  be removed from the default install in PDAL v2.7 and removed completely in
+  PDAL v2.8.
+
 The ``ground`` command is used to segment the input point cloud into ground
 versus non-ground returns using :ref:`filters.smrf` and :ref:`filters.outlier`.
 
