@@ -23,7 +23,7 @@ random
           y_coords = np.random.uniform(y_min, y_max, num_points)
           z_coords = np.random.uniform(z_min, z_max, num_points)
             
-          dtype = [('X', float), ('Y', float), ('Z', float)]
+          dtype = [('X', '<f8'), ('Y', '<f8'), ('Z', '<f8')]
           points = np.zeros(num_points, dtype=dtype)
             
           points['X'] = x_coords
@@ -57,7 +57,7 @@ random
           y_coords = np.random.normal(y_mean, y_std, num_points)
           z_coords = np.random.normal(z_mean, z_std, num_points)
             
-          dtype = [('X', float), ('Y', float), ('Z', float)]
+          dtype = [('X', '<f8'), ('Y', '<f8'), ('Z', '<f8')]
           points = np.zeros(num_points, dtype=dtype)
             
           points['X'] = x_coords
