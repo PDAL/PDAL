@@ -393,10 +393,20 @@ void InfoKernel::addStac(MetadataNode& root, MetadataNode& stats,
     //Base STAC object
     MetadataNode id = stac.add("id", stem);
     MetadataNode properties = stac.add("properties");
+
     //TODO make sure these are available
-    std::string doy = meta.findChild("creation_doy").value();
-    std::string year = meta.findChild("creation_year").value();
-    properties.add("datetime", getDateStr(year, doy));
+    //For now, if there isn't date similar to laz/las/copc then use now.
+    try
+    {
+        std::string doy = meta.findChild("creation_doy").value();
+        std::string year = meta.findChild("creation_year").value();
+        properties.add("datetime", getDateStr(year, doy));
+    } catch (std::exception &e)
+    {
+        auto&& datetime = mdata.findChild("now");
+        properties.add("datetime", datetime);
+    }
+
 
     // TODO add from metadata?
     stac.add("type", "Feature");
@@ -489,8 +499,6 @@ void InfoKernel::stacProjection(MetadataNode& root, MetadataNode& stats,
     stac.add(stacGeom.clone("geometry"));
     addBox(stac, stacBbox, "bbox");
 }
-
-
 
 
 
