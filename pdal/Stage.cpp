@@ -175,6 +175,19 @@ void Stage::prepare(PointTableRef table)
 
 PointViewSet Stage::execute(PointTableRef table)
 {
+    if (!table.layout()->finalized())
+    {
+        for (const auto& id : table.layout()->dims())
+        {
+            if (Dimension::isDeprecated(id))
+            {
+                log()->get(LogLevel::Warning) << 
+                    "Dimension " << Dimension::name(id) << " is deprecated" <<
+                    std::endl;
+            }
+        }
+    }
+
     table.finalize();
 
     // We store stage instances instead of stages because a stage may get

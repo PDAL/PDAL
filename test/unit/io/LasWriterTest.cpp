@@ -1168,7 +1168,7 @@ TEST(LasWriterTest, fix1063_1064_1065)
 
     // https://github.com/PDAL/PDAL/issues/1063
     for (PointId idx = 0; idx < v->size(); ++idx)
-        EXPECT_EQ(8, v->getFieldAs<int>(Dimension::Id::ClassFlags, idx));
+        EXPECT_TRUE(v->getFieldAs<bool>(Dimension::Id::Overlap, idx));
 
     // https://github.com/PDAL/PDAL/issues/1064
     MetadataNode m = r.getMetadata();
@@ -1920,7 +1920,8 @@ TEST(LasWriterTest, las10_classification_from_las10_classification)
     const std::string FILENAME(Support::temppath("synthetic_test.las"));
     PointTable table;
 
-    table.layout()->registerDims({Id::X, Id::Y, Id::Z, Id::Classification});
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z, Id::Classification,
+        Id::Synthetic});
 
     BufferReader bufferReader;
 
@@ -1928,7 +1929,8 @@ TEST(LasWriterTest, las10_classification_from_las10_classification)
     view->setField(Id::X, 0, 1.0);
     view->setField(Id::Y, 0, 2.0);
     view->setField(Id::Z, 0, 3.0);
-    view->setField(Id::Classification, 0, ClassLabel::Ground | ClassLabel::Synthetic);
+    view->setField(Id::Classification, 0, ClassLabel::Ground);
+    view->setField(Id::Synthetic, 0, true);
     bufferReader.addView(view);
 
     Options writerOps;
@@ -1954,8 +1956,8 @@ TEST(LasWriterTest, las10_classification_from_las10_classification)
     EXPECT_EQ(viewSet.size(), 1u);
     view = *viewSet.begin();
     EXPECT_EQ(view->size(), 1u);
-    EXPECT_EQ(ClassLabel::Ground | ClassLabel::Synthetic,
-        view->getFieldAs<uint8_t>(Id::Classification, 0));
+    EXPECT_EQ(ClassLabel::Ground, view->getFieldAs<uint8_t>(Id::Classification, 0));
+    EXPECT_TRUE(view->getFieldAs<bool>(Id::Synthetic, 0));
 
     FileUtils::deleteFile(FILENAME);
 }
@@ -1969,7 +1971,7 @@ TEST(LasWriterTest, las10_classification_from_las14_classflags)
     const std::string FILENAME(Support::temppath("synthetic_test.las"));
     PointTable table;
 
-    table.layout()->registerDims({Id::X, Id::Y, Id::Z, Id::Classification, Id::ClassFlags});
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z, Id::Classification, Id::Synthetic});
 
     BufferReader bufferReader;
 
@@ -1978,7 +1980,7 @@ TEST(LasWriterTest, las10_classification_from_las14_classflags)
     view->setField(Id::Y, 0, 2.0);
     view->setField(Id::Z, 0, 3.0);
     view->setField(Id::Classification, 0, ClassLabel::Ground);
-    view->setField(Id::ClassFlags, 0, ClassLabel::Synthetic >> 5);
+    view->setField(Id::Synthetic, 0, true);
     bufferReader.addView(view);
 
     Options writerOps;
@@ -2004,8 +2006,8 @@ TEST(LasWriterTest, las10_classification_from_las14_classflags)
     EXPECT_EQ(viewSet.size(), 1u);
     view = *viewSet.begin();
     EXPECT_EQ(view->size(), 1u);
-    EXPECT_EQ(ClassLabel::Ground | ClassLabel::Synthetic,
-        view->getFieldAs<uint8_t>(Id::Classification, 0));
+    EXPECT_EQ(ClassLabel::Ground, view->getFieldAs<uint8_t>(Id::Classification, 0));
+    EXPECT_TRUE(view->getFieldAs<bool>(Id::Synthetic, 0));
 
     FileUtils::deleteFile(FILENAME);
 }
@@ -2019,7 +2021,7 @@ TEST(LasWriterTest, las14_classflags_from_las10_classification)
     const std::string FILENAME(Support::temppath("synthetic_test.las"));
     PointTable table;
 
-    table.layout()->registerDims({Id::X, Id::Y, Id::Z, Id::Classification});
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z, Id::Classification, Id::Synthetic});
 
     BufferReader bufferReader;
 
@@ -2027,7 +2029,8 @@ TEST(LasWriterTest, las14_classflags_from_las10_classification)
     view->setField(Id::X, 0, 1.0);
     view->setField(Id::Y, 0, 2.0);
     view->setField(Id::Z, 0, 3.0);
-    view->setField(Id::Classification, 0, ClassLabel::Ground | ClassLabel::Synthetic);
+    view->setField(Id::Classification, 0, ClassLabel::Ground);
+    view->setField(Id::Synthetic, 0, true);
     bufferReader.addView(view);
 
     Options writerOps;
@@ -2057,8 +2060,7 @@ TEST(LasWriterTest, las14_classflags_from_las10_classification)
     EXPECT_EQ(view->size(), 1u);
     EXPECT_EQ(ClassLabel::Ground,
         view->getFieldAs<uint8_t>(Id::Classification, 0));
-    EXPECT_EQ(ClassLabel::Synthetic >> 5,
-        view->getFieldAs<uint8_t>(Id::ClassFlags, 0));
+    EXPECT_TRUE(view->getFieldAs<bool>(Id::Synthetic, 0));
 
     FileUtils::deleteFile(FILENAME);
 }
@@ -2072,7 +2074,7 @@ TEST(LasWriterTest, las14_classflags_from_las14_classflags)
     const std::string FILENAME(Support::temppath("synthetic_test.las"));
     PointTable table;
 
-    table.layout()->registerDims({Id::X, Id::Y, Id::Z, Id::Classification, Id::ClassFlags});
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z, Id::Classification, Id::Synthetic});
 
     BufferReader bufferReader;
 
@@ -2081,7 +2083,7 @@ TEST(LasWriterTest, las14_classflags_from_las14_classflags)
     view->setField(Id::Y, 0, 2.0);
     view->setField(Id::Z, 0, 3.0);
     view->setField(Id::Classification, 0, ClassLabel::Ground);
-    view->setField(Id::ClassFlags, 0, ClassLabel::Synthetic >> 5);
+    view->setField(Id::Synthetic, 0, true);
     bufferReader.addView(view);
 
     Options writerOps;
@@ -2111,8 +2113,7 @@ TEST(LasWriterTest, las14_classflags_from_las14_classflags)
     EXPECT_EQ(view->size(), 1u);
     EXPECT_EQ(ClassLabel::Ground,
         view->getFieldAs<uint8_t>(Id::Classification, 0));
-    EXPECT_EQ(ClassLabel::Synthetic >> 5,
-        view->getFieldAs<uint8_t>(Id::ClassFlags, 0));
+    EXPECT_TRUE(view->getFieldAs<bool>(Id::Synthetic, 0));
 
     FileUtils::deleteFile(FILENAME);
 }

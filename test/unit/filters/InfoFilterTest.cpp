@@ -146,8 +146,8 @@ TEST(InfoFilterTest, misc)
     MetadataNode m = run(fOpts);
 
     MetadataNodeList s = m.findChild("schema").children();
-    EXPECT_EQ(s.size(), 16U);
-    if (s.size() == 16U)
+    EXPECT_EQ(s.size(), 20U);
+    if (s.size() == 20U)
     {
         auto orderbyname = [](const MetadataNode& m1, const MetadataNode& m2)
         {
@@ -157,9 +157,10 @@ TEST(InfoFilterTest, misc)
         };
         std::sort(s.begin(), s.end(), orderbyname);
         std::vector<std::string> dims { "Blue", "Classification",
-            "EdgeOfFlightLine", "GpsTime", "Green", "Intensity",
-            "NumberOfReturns", "PointSourceId", "Red", "ReturnNumber",
-            "ScanAngleRank", "ScanDirectionFlag", "UserData", "X", "Y", "Z" };
+            "EdgeOfFlightLine", "GpsTime", "Green", "Intensity", "KeyPoint",
+            "NumberOfReturns", "Overlap", "PointSourceId", "Red", "ReturnNumber",
+            "ScanAngleRank", "ScanDirectionFlag", "Synthetic", "UserData", "Withheld",
+            "X", "Y", "Z" };
 
         size_t i = 0;
         for (MetadataNode& m : s)
