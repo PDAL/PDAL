@@ -153,6 +153,14 @@ public:
         for (std::string& k : getKeys())
         {
             StringList l = getValues(k);
+            std::string vs;
+//             for (auto vi = l.begin(); vi != l.end(); ++vi)
+//             {
+//                if (vi != l.begin())
+//                    vs += ", ";
+//                vs += *vi;
+//             }
+
             bool isUserData = Utils::iequals(k, "user_data") || Utils::iequals(k, "userdata");
             // 'userData' keys on stages and such are JSON
             if (!isUserData)
