@@ -83,6 +83,7 @@ void InfoKernel::validateSwitches(ProgramArgs& args)
         m_showMetadata = true;
         m_showSchema = true;
         m_boundary = true;
+        m_stac = true;
     }
 
 
@@ -243,7 +244,7 @@ void InfoKernel::makePipeline()
     if (m_stac)
     {
         // filters required for stac: metadata, stats,
-        if (stage != m_statsStage)
+        if (!m_showStats)
         {
             Options stacOps;
             if (m_enumerate.size())
