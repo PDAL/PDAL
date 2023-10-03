@@ -104,6 +104,11 @@ option(WITH_ABSEIL
     "Choose if PDAL should be built with Abseil support for testing" FALSE)
 add_feature_info("Abseil debugging support " WITH_ABSEIL "unit tests")
 
+option(WITH_BACKTRACE
+    "Build with backtrace" ON)
+add_feature_info("Backtrace" WITH_BACKTRACE
+    "build with backtrace (Libunwind/Libexecinfo) support")
+
 #
 # Choose dependent options
 #

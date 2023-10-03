@@ -926,35 +926,66 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
     uint8_t classification(0);
     if (point.hasDim(Id::Classification))
         classification = point.getFieldAs<uint8_t>(Id::Classification);
-    uint8_t classFlags(0);
-    if (point.hasDim(Id::ClassFlags))
-    {
-        // source file is PDRF >= 6
-        classFlags = point.getFieldAs<uint8_t>(Id::ClassFlags);
-    }
-    else
-    {
-        // source file is PDRF < 6
-        classFlags = classification >> 5;
-        classification &= 0x1F;
-    }
+
+    uint8_t synthetic(0);
+    if (point.hasDim(Id::Synthetic))
+        synthetic = point.getFieldAs<uint8_t>(Id::Synthetic);
+    uint8_t keypoint(0);
+    if (point.hasDim(Id::KeyPoint))
+        keypoint = point.getFieldAs<uint8_t>(Id::KeyPoint);
+    uint8_t withheld(0);
+    if (point.hasDim(Id::Withheld))
+        withheld = point.getFieldAs<uint8_t>(Id::Withheld);
+    uint8_t overlap(0);
+    if (point.hasDim(Id::Overlap))
+        overlap = point.getFieldAs<uint8_t>(Id::Overlap);
 
     if (has14PointFormat)
     {
-        uint8_t bits = returnNumber | (numberOfReturns << 4);
-        ostream << bits;
+        uint8_t returnbits = returnNumber | (numberOfReturns << 4);
+        ostream << returnbits;
 
-        bits = (classFlags & 0x0F) |
+        uint8_t otherbits = 
+            ((synthetic & 0x01) << 0) |
+            ((keypoint & 0x01) << 1) |
+            ((withheld & 0x01) << 2) |
+            ((overlap & 0x01) << 3) |
             ((scanChannel & 0x03) << 4) |
             ((scanDirectionFlag & 0x01) << 6) |
             ((edgeOfFlightLine & 0x01) << 7);
-        ostream << bits;
+        ostream << otherbits << classification;
     }
     else
     {
         uint8_t bits = returnNumber | (numberOfReturns << 3) |
             (scanDirectionFlag << 6) | (edgeOfFlightLine << 7);
         ostream << bits;
+
+        if (overlap)
+        {
+            // In the V10 PDRFs, we do not have a dedicated Overlap bit, instead
+            // this was encoded as Classification=12.
+            if (classification == ClassLabel::CreatedNeverClassified)
+            {
+                // If the Overlap flag is set and the point is marked as "Never
+                // Classified", then set Classification=12 to mark the point as
+                // Overlap.
+                classification = ClassLabel::LegacyOverlap;
+            }
+            else
+            {
+                // Source file is PDRF 6+, which supports a dedicated Overlap
+                // bit which can be set independently of Classification, but
+                // we're writing to PDRF < 6 and can't support Overlap=1
+                // alongside another Classification.  Keep the Classification
+                // and we'll lose the Overlap bit.
+                log()->get(LogLevel::Warning)
+                    << "Point is marked as Overlap but also has a Classification - "
+                    << "ignoring overlap for LAS "
+                    << std::to_string(d->header.versionMajor) << "."
+                    << std::to_string(d->header.versionMinor) << "." << std::endl;
+            }
+        }
 
         if (classification > 31)
         {
@@ -967,12 +998,17 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
                 << std::to_string(d->header.versionMajor) << "."
                 << std::to_string(d->header.versionMinor)
                 << ". Replaced with value 1." << std::endl;
-            classification = 1; // Unclassified
+            classification = ClassLabel::Unclassified;
         }
-        classification = (classFlags << 5) | classification;
-    }
 
-    ostream << classification;
+        uint8_t classificationWithFlags =
+            (classification & 0x1F) | 
+            ((synthetic & 0x01) << 5) | 
+            ((keypoint & 0x01) << 6) | 
+            ((withheld & 0x01) << 7);
+
+        ostream << classificationWithFlags;
+    }
 
     uint8_t userData(0);
     if (point.hasDim(Id::UserData))

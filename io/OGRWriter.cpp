@@ -31,6 +31,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+// Add compatibility for deprecated integer data types no longer available
+// by default in GDAL 4.0 (GIntBig)
+#define GDAL_USE_OLD_INT_TYPES
+
 #include "OGRWriter.hpp"
 
 #include <sstream>
