@@ -34,7 +34,6 @@
 
 #include <array>
 #include <cfloat>
-#include <iomanip>
 #include <numeric>
 #include <vector>
 
