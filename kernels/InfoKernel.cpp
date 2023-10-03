@@ -45,6 +45,7 @@
 #include <pdal/PipelineWriter.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/StageFactory.hpp>
+#include "private/stac/StacInfo.hpp"
 
 namespace pdal
 {
@@ -309,13 +310,13 @@ void InfoKernel::dump(MetadataNode& root)
 
     // Info stage.
     auto info = dynamic_cast<InfoFilter *>(m_infoStage);
-    MetadataNode mdata = info->getMetadata();
-    MetadataNode points = mdata.findChild("points");
+    MetadataNode infoMeta = info->getMetadata();
+    MetadataNode points = infoMeta.findChild("points");
     if (points)
         root.add(points);
 
     if (m_showSchema)
-        root.add(mdata.findChild("schema"));
+        root.add(infoMeta.findChild("schema"));
 
     // Stats stage.
     if (m_showStats)
@@ -342,19 +343,19 @@ void InfoKernel::dump(MetadataNode& root)
     // STAC stage.
     if (m_stac)
     {
-        MetadataNode stats;
+        MetadataNode statsMeta;
         if (!m_showStats)
-            stats = m_stacStage->getMetadata();
+            statsMeta = m_stacStage->getMetadata();
         else
-            stats = root.findChild("stats");
+            statsMeta = root.findChild("stats");
 
-        MetadataNode meta;
+        MetadataNode readerMeta;
         if (!m_showMetadata)
-            meta = m_reader->getMetadata().clone("metadata");
+            readerMeta = m_reader->getMetadata().clone("metadata");
         else
-            meta = root.findChild("metadata");
+            readerMeta = root.findChild("metadata");
 
-        addStac(root, stats, meta, mdata);
+        addStacMetadata(root, statsMeta, readerMeta, infoMeta, m_pcType);
     }
 }
 
@@ -366,140 +367,6 @@ int InfoKernel::execute()
 
     return 0;
 }
-
-std::string getDateStr(std::string year, std::string doy)
-{
-    std::tm tm = { };
-    tm.tm_mday = std::stoi(doy);
-    tm.tm_mon = 0;
-    tm.tm_year = std::stoi(year)-1900;
-    tm.tm_isdst = -1;
-    std::time_t time = std::mktime(&tm);
-    const struct std::tm *ntm = std::gmtime(&time);
-
-    std::ostringstream oss;
-    oss << std::put_time(ntm, "%Y-%m-%dT00:00:00Z");
-    return oss.str();
-}
-
-void InfoKernel::addStac(MetadataNode& root, MetadataNode& stats,
-    MetadataNode& meta, MetadataNode& mdata)
-{
-    MetadataNode stac;
-    std::string filename = root.findChild("filename").value();
-    std::string stem = FileUtils::stem(filename);
-    std::string absPath = FileUtils::toAbsolutePath(filename);
-
-    //Base STAC object
-    MetadataNode id = stac.add("id", stem);
-    MetadataNode properties = stac.add("properties");
-
-    //TODO make sure these are available
-    //For now, if there isn't date similar to laz/las/copc then use now.
-    try
-    {
-        std::string doy = meta.findChild("creation_doy").value();
-        std::string year = meta.findChild("creation_year").value();
-        properties.add("datetime", getDateStr(year, doy));
-    } catch (std::exception &e)
-    {
-        auto&& datetime = mdata.findChild("now");
-        properties.add("datetime", datetime);
-    }
-
-
-    // TODO add from metadata?
-    stac.add("type", "Feature");
-    stac.add("stac_version", "1.0.0");
-
-    //stac_extensions - pointcloud and projection extensions
-    stac.add("stac_extensions", "https://stac-extensions.github.io/pointcloud/v1.0.0/schema.json");
-    stac.add("stac_extensions", "https://stac-extensions.github.io/projection/v1.1.0/schema.json");
-
-    //links
-    MetadataNode self = stac.addList("links");
-    self.add("rel", "derived_from");
-    self.add("href", absPath);
-
-    //assets - add source file to data asset
-    MetadataNode assets = stac.add("assets");
-    MetadataNode data;
-    data.add("href", absPath);
-    data.add("title", "Pointcloud data");
-    assets.add(data.clone("data"));
-    auto&& enc = meta.findChild("global_encoding");
-    stacPointcloud(root, stats, mdata, properties);
-    stacProjection(root, stats, meta, stac);
-
-    root.add(stac.clone("stac"));
-}
-
-void InfoKernel::stacPointcloud(MetadataNode& root, MetadataNode& stats,
-    MetadataNode& meta, MetadataNode& props)
-{
-    std::string filename = root.findChild("filename").value();
-    std::string fileExt = FileUtils::extension(filename);
-
-    uint32_t position(0);
-    point_count_t count = 0;
-    bool bNoPoints(true);
-    //Gather stac information for poinctloud extension
-    auto pc_stats = stats.findChildren([](MetadataNode& n)
-        { return n.name()=="statistic"; });
-    auto&& pc_count = meta.findChild("num_points");
-    auto pc_schemas = meta.findChild("schema").findChildren(
-        [](MetadataNode& n)
-        { return n.name()=="dimensions"; });
-
-    for (auto& stat: pc_stats) {
-        props.addList(stat.clone("pc:statistics"));
-    }
-    for (auto& schema: pc_schemas)
-    {
-        props.addList(schema.clone("pc:schemas"));
-    }
-    props.add(pc_count.clone("pc:count"));
-    props.add("pc:encoding", fileExt);
-    props.add("pc:type", m_pcType);
-}
-
-void addBox(MetadataNode& n, MetadataNode& box, std::string name)
-{
-    n.addWithType(name, box.findChild("minx").value(), "double", "");
-    n.addWithType(name, box.findChild("miny").value(), "double", "");
-    n.addWithType(name, box.findChild("minz").value(), "double", "");
-    n.addWithType(name, box.findChild("maxx").value(), "double", "");
-    n.addWithType(name, box.findChild("maxy").value(), "double", "");
-    n.addWithType(name, box.findChild("maxz").value(), "double", "");
-}
-
-void InfoKernel::stacProjection(MetadataNode& root, MetadataNode& stats,
-    MetadataNode& meta, MetadataNode& stac)
-{
-    MetadataNode&& props = stac.findChild("properties");
-
-    MetadataNodeList bbox = stats.findChild("bbox").children();
-
-    MetadataNode& epsg4326 = bbox[0];
-    MetadataNode&& stacGeom = epsg4326.findChild("boundary");
-    MetadataNode&& stacBbox = epsg4326.findChild("bbox");
-
-    MetadataNode& native = bbox[1];
-    MetadataNode&& projGeom = native.findChild("boundary");
-    MetadataNode&& projBbox = native.findChild("bbox");
-    MetadataNode&& srs = meta.findChild("srs");
-    MetadataNode&& projJson = srs.findChild("json");
-    MetadataNode&& projWkt2 = srs.findChild("wkt");
-
-    addBox(props, projBbox, "proj:bbox");
-    props.add(projGeom.clone("proj:geometry"));
-    props.add(projJson.clone("proj:projjson"));
-    props.add(projWkt2.clone("proj:wkt2"));
-
-    stac.add(stacGeom.clone("geometry"));
-    addBox(stac, stacBbox, "bbox");
-}
-
 
 
 } // namespace pdal
