@@ -17,11 +17,6 @@ option(BUILD_PLUGIN_DRACO
 add_feature_info("Draco plugin" BUILD_PLUGIN_DRACO
     "Read data in the draco format")
 
-option(BUILD_PLUGIN_I3S
-    "Choose if I3S and SLPK support should be built" FALSE)
-add_feature_info("I3S plugin" BUILD_PLUGIN_I3S
-    "Read from a I3S server or from a SLPK file")
-
 option(BUILD_PLUGIN_ICEBRIDGE
     "Choose if Icebridge support should be built" FALSE)
 add_feature_info("Icebridge plugin" BUILD_PLUGIN_ICEBRIDGE
@@ -108,6 +103,11 @@ option(ENABLE_CTEST
 option(WITH_ABSEIL
     "Choose if PDAL should be built with Abseil support for testing" FALSE)
 add_feature_info("Abseil debugging support " WITH_ABSEIL "unit tests")
+
+option(WITH_BACKTRACE
+    "Build with backtrace" ON)
+add_feature_info("Backtrace" WITH_BACKTRACE
+    "build with backtrace (Libunwind/Libexecinfo) support")
 
 #
 # Choose dependent options

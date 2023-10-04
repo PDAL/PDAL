@@ -211,6 +211,7 @@ void StatsFilter::addArgs(ProgramArgs& args)
         m_global);
     args.add("count", "Dimensions whose values should be counted", m_counts);
     args.add("advanced", "Calculate skewness and kurtosis", m_advanced);
+    args.add("commonsrs", "Common SRS to use for normalizing bounding boxes", m_commonSrs, "EPSG:4326");
 }
 
 
@@ -321,11 +322,11 @@ void StatsFilter::extractMetadata(PointTableRef table)
         if (!ref.empty())
         {
             p.setSpatialReference(ref);
-            if (p.transform("EPSG:4326"))
+            if (p.transform(m_commonSrs))
             {
                 BOX3D ddbox = p.bounds();
                 MetadataNode epsg_4326_box = Utils::toMetadata(ddbox);
-                MetadataNode dddbox = box_metadata.add("EPSG:4326");
+                MetadataNode dddbox = box_metadata.add(m_commonSrs);
                 dddbox.add(epsg_4326_box);
 
                 MetadataNode ddboundary = dddbox.addWithType("boundary",

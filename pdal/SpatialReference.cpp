@@ -208,16 +208,26 @@ void SpatialReference::parse(const std::string& s, std::string::size_type& pos)
 
 void SpatialReference::set(std::string v)
 {
+    m_wkt.clear();
+    m_wkt2.clear();
     m_horizontalWkt.clear();
     if (v.empty())
     {
-        m_wkt.clear();
         return;
     }
 
-    if (isWKT(v))
+    if (isWKT2(v))
     {
         m_wkt = v;
+        m_wkt2 = v;
+        return;
+    }
+    else if (isWKT1(v))
+    {
+        m_wkt = v;
+        OGRScopedSpatialReference srs = ogrCreateSrs(m_wkt);
+        if (srs)
+            m_wkt2 = exportToWkt(srs.get(), {"FORMAT=WKT2_2018"});
         return;
     }
 
@@ -237,7 +247,11 @@ void SpatialReference::set(std::string v)
         throw pdal_error(oss.str());
     }
 
+    m_epoch = srs.GetCoordinateEpoch();
+
     m_wkt = exportToWkt(&srs);
+
+    m_wkt2 = exportToWkt(&srs, {"FORMAT=WKT2_2018"});
 }
 
 
@@ -481,17 +495,15 @@ SpatialReference SpatialReference::wgs84FromZone(int zone)
 }
 
 
-bool SpatialReference::isWKT(const std::string& wkt)
+bool SpatialReference::isWKT2(const std::string& wkt)
 {
-    // List comes from GDAL.  WKT includes FITTED_CS, but this isn't
-    // included in GDAL list.  Not sure why.
-    StringList leaders { "PROJCS", "GEOGCS", "COMPD_CS", "GEOCCS",
-        "VERT_CS", "LOCAL_CS",
-    // New specification names.
+    StringList leaders {
         "GEODCRS", "GEODETICCRS",
+        "GEOGCRS", "GEOGRAPHICCRS",
         "PROJCRS", "PROJECTEDCRS",
-        "VERTCRS", "VERITCALCRS",
+        "VERTCRS", "VERTICALCRS",
         "ENGCRS", "ENGINEERINGCRS",
+        "BOUNDCRS",
         "IMAGECRS",
         "PARAMETRICCRS",
         "TIMECRS",
@@ -503,6 +515,27 @@ bool SpatialReference::isWKT(const std::string& wkt)
         if (wkt.compare(0, s.size(), s) == 0)
             return true;
     return false;
+}
+
+
+bool SpatialReference::isWKT1(const std::string& wkt)
+{
+    // List comes from GDAL.  WKT includes FITTED_CS, but this isn't
+    // included in GDAL list.  Not sure why.
+    StringList leaders { "PROJCS", "GEOGCS", "COMPD_CS", "GEOCCS",
+        "VERT_CS", "LOCAL_CS"
+    };
+
+    for (const std::string& s : leaders)
+        if (wkt.compare(0, s.size(), s) == 0)
+            return true;
+    return false;
+}
+
+
+bool SpatialReference::isWKT(const std::string& wkt)
+{
+    return isWKT1(wkt) || isWKT2(wkt);
 }
 
 
@@ -533,9 +566,7 @@ std::string SpatialReference::getWKT1() const
 
 std::string SpatialReference::getWKT2() const
 {
-    std::string wkt = getWKT();
-    OGRScopedSpatialReference srs = ogrCreateSrs(wkt);
-    return exportToWkt(srs.get(), {"FORMAT=WKT2_2018"});
+    return m_wkt2;
 }
 
 int SpatialReference::getUTMZone() const

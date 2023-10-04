@@ -256,6 +256,34 @@ PDAL_ADD_TEST(pdal_io_text_reader_test
 PDAL_ADD_TEST(pdal_io_gltf_writer_test FILES io/GltfWriterTest.cpp)
 PDAL_ADD_TEST(pdal_io_smrmsg_reader_test FILES io/SmrmsgReaderTest.cpp)
 
+
+if (PDAL_HAVE_ZLIB)
+
+PDAL_ADD_TEST(pdal_io_slpk_reader_test
+    FILES
+        io/SlpkReaderTest.cpp
+)
+
+PDAL_ADD_TEST(pdal_i3s_obb_test
+    FILES
+        io/ObbTest.cpp
+        ${PDAL_IO_DIR}/private/esri/Obb.cpp
+        ${PDAL_SRC_DIR}/private/MathUtils.cpp
+    INCLUDES
+        ${NLOHMANN_INCLUDE_DIR}
+        ${PDAL_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}/eigen
+)
+
+if (BUILD_I3S_TESTS)
+    PDAL_ADD_TEST(pdal_io_i3s_reader_test
+            FILES
+                io/i3sReaderTest.cpp
+    )
+endif()
+
+endif()
+
 #
 # sources for the native filters
 #
@@ -353,6 +381,7 @@ if (GDAL_3)
     PDAL_ADD_TEST(pdal_filters_projpipeline_test FILES filters/ProjPipelineFilterTest.cpp)
 endif()
 PDAL_ADD_TEST(pdal_filters_range_test FILES filters/RangeFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_relaxation_dart_throwing_test FILES filters/RelaxationDartThrowingTest.cpp)
 PDAL_ADD_TEST(pdal_filters_expression_test FILES filters/ExpressionFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_randomize_test FILES filters/RandomizeFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_reciprocity_test FILES filters/ReciprocityFilterTest.cpp)

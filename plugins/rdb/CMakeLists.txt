@@ -1,8 +1,9 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.13)
 
 if (STANDALONE)
     project(pdal-rdb)
-    include("${CMAKE_SOURCE_DIR}/../../cmake/standalone.cmake" )
+    include("${CMAKE_CURRENT_LIST_DIR}/../../cmake/standalone.cmake" )
+    find_package(PDAL REQUIRED)
 endif(STANDALONE)
 
 find_package(rdb COMPONENTS REQUIRED)

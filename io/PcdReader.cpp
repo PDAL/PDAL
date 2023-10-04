@@ -191,19 +191,70 @@ bool PcdReader::processOne(PointRef& point)
             switch (i.m_type)
             {
             case PcdFieldType::I:
-                int32_t ival;
-                m_stream >> ival;
-                point.setField(i.m_id, ival);
+                if (i.m_size == 1)
+                {
+                    int8_t ival;
+                    m_stream >> ival;
+                    point.setField(i.m_id, ival);
+                }
+                if (i.m_size == 2)
+                {
+                    int16_t ival;
+                    m_stream >> ival;
+                    point.setField(i.m_id, ival);
+                }
+                if (i.m_size == 4)
+                {
+                    int32_t ival;
+                    m_stream >> ival;
+                    point.setField(i.m_id, ival);
+                }
+                if (i.m_size == 8)
+                {
+                    int64_t ival;
+                    m_stream >> ival;
+                    point.setField(i.m_id, ival);
+                }
                 break;
             case PcdFieldType::F:
-                float fval;
-                m_stream >> fval;
-                point.setField(i.m_id, fval);
+                if (i.m_size == sizeof(float))
+                {
+                    float fval;
+                    m_stream >> fval;
+                    point.setField(i.m_id, fval);
+                }
+                if (i.m_size == sizeof(double))
+                {
+                    double fval;
+                    m_stream >> fval;
+                    point.setField(i.m_id, fval);
+                }
                 break;
             case PcdFieldType::U:
-                uint32_t uval;
-                m_stream >> uval;
-                point.setField(i.m_id, uval);
+                if (i.m_size == 1)
+                {
+                    uint8_t uval;
+                    m_stream >> uval;
+                    point.setField(i.m_id, uval);
+                }
+                if (i.m_size == 2)
+                {
+                    uint16_t uval;
+                    m_stream >> uval;
+                    point.setField(i.m_id, uval);
+                }
+                if (i.m_size == 4)
+                {
+                    uint32_t uval;
+                    m_stream >> uval;
+                    point.setField(i.m_id, uval);
+                }
+                if (i.m_size == 8)
+                {
+                    uint64_t uval;
+                    m_stream >> uval;
+                    point.setField(i.m_id, uval);
+                }
                 break;
             case PcdFieldType::unknown:
             default:

@@ -1,9 +1,10 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.13)
 
 if (STANDALONE)
     project(pdal-tiledb)
-    include("${CMAKE_SOURCE_DIR}/../../cmake/standalone.cmake" )
+    include("${CMAKE_CURRENT_LIST_DIR}/../../cmake/standalone.cmake" )
     include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
+    find_package(PDAL REQUIRED)
 endif(STANDALONE)
 
 #
@@ -48,7 +49,7 @@ PDAL_ADD_PLUGIN(writer_libname writer tiledb
         ${NLOHMANN_INCLUDE_DIR}
 )
 
-if (WITH_TESTS)
+if (WITH_TESTS AND NOT STANDALONE)
 
     PDAL_ADD_TEST(pdal_io_tiledb_utils_test
         FILES

@@ -1,4 +1,4 @@
-INFO: Open of `/Users/rcoup/code/point-clouds/pdal/test/data/../temp/ogr/attrs_measure.shp'
+INFO: Open of `pdal/test/data/../temp/ogr/attrs_measure.shp'
       using driver `ESRI Shapefile' successful.
 
 Layer name: attrs_measure
@@ -12,6 +12,10 @@ ReturnNumb: Integer (9.0)
 NumberOfRe: Integer (9.0)
 ScanDirect: Integer (9.0)
 EdgeOfFlig: Integer (9.0)
+Synthetic: Integer (9.0)
+KeyPoint: Integer (9.0)
+Withheld: Integer (9.0)
+Overlap: Integer (9.0)
 ScanAngleR: Real (24.15)
 UserData: Integer (9.0)
 PointSourc: Integer (9.0)
@@ -25,6 +29,10 @@ OGRFeature(attrs_measure):0
   NumberOfRe (Integer) = 2
   ScanDirect (Integer) = 0
   EdgeOfFlig (Integer) = 0
+  Synthetic (Integer) = 0
+  KeyPoint (Integer) = 0
+  Withheld (Integer) = 0
+  Overlap (Integer) = 0
   ScanAngleR (Real) = 15.000000000000000
   UserData (Integer) = 125
   PointSourc (Integer) = 7327
@@ -40,6 +48,10 @@ OGRFeature(attrs_measure):1
   NumberOfRe (Integer) = 1
   ScanDirect (Integer) = 1
   EdgeOfFlig (Integer) = 0
+  Synthetic (Integer) = 0
+  KeyPoint (Integer) = 0
+  Withheld (Integer) = 0
+  Overlap (Integer) = 0
   ScanAngleR (Real) = 6.000000000000000
   UserData (Integer) = 124
   PointSourc (Integer) = 7327
@@ -55,6 +67,10 @@ OGRFeature(attrs_measure):2
   NumberOfRe (Integer) = 1
   ScanDirect (Integer) = 1
   EdgeOfFlig (Integer) = 0
+  Synthetic (Integer) = 0
+  KeyPoint (Integer) = 0
+  Withheld (Integer) = 0
+  Overlap (Integer) = 0
   ScanAngleR (Real) = -11.000000000000000
   UserData (Integer) = 126
   PointSourc (Integer) = 7329
@@ -70,6 +86,10 @@ OGRFeature(attrs_measure):3
   NumberOfRe (Integer) = 1
   ScanDirect (Integer) = 1
   EdgeOfFlig (Integer) = 0
+  Synthetic (Integer) = 0
+  KeyPoint (Integer) = 0
+  Withheld (Integer) = 0
+  Overlap (Integer) = 0
   ScanAngleR (Real) = 0.000000000000000
   UserData (Integer) = 124
   PointSourc (Integer) = 7328
@@ -85,6 +105,10 @@ OGRFeature(attrs_measure):4
   NumberOfRe (Integer) = 1
   ScanDirect (Integer) = 0
   EdgeOfFlig (Integer) = 0
+  Synthetic (Integer) = 0
+  KeyPoint (Integer) = 0
+  Withheld (Integer) = 0
+  Overlap (Integer) = 0
   ScanAngleR (Real) = -7.000000000000000
   UserData (Integer) = 126
   PointSourc (Integer) = 7326
@@ -100,6 +124,10 @@ OGRFeature(attrs_measure):5
   NumberOfRe (Integer) = 2
   ScanDirect (Integer) = 0
   EdgeOfFlig (Integer) = 0
+  Synthetic (Integer) = 0
+  KeyPoint (Integer) = 0
+  Withheld (Integer) = 0
+  Overlap (Integer) = 0
   ScanAngleR (Real) = 10.000000000000000
   UserData (Integer) = 126
   PointSourc (Integer) = 7329
@@ -115,6 +143,10 @@ OGRFeature(attrs_measure):6
   NumberOfRe (Integer) = 2
   ScanDirect (Integer) = 0
   EdgeOfFlig (Integer) = 0
+  Synthetic (Integer) = 0
+  KeyPoint (Integer) = 0
+  Withheld (Integer) = 0
+  Overlap (Integer) = 0
   ScanAngleR (Real) = -1.000000000000000
   UserData (Integer) = 126
   PointSourc (Integer) = 7327
@@ -130,6 +162,10 @@ OGRFeature(attrs_measure):7
   NumberOfRe (Integer) = 2
   ScanDirect (Integer) = 1
   EdgeOfFlig (Integer) = 0
+  Synthetic (Integer) = 0
+  KeyPoint (Integer) = 0
+  Withheld (Integer) = 0
+  Overlap (Integer) = 0
   ScanAngleR (Real) = -3.000000000000000
   UserData (Integer) = 130
   PointSourc (Integer) = 7330
@@ -145,6 +181,10 @@ OGRFeature(attrs_measure):8
   NumberOfRe (Integer) = 1
   ScanDirect (Integer) = 0
   EdgeOfFlig (Integer) = 0
+  Synthetic (Integer) = 0
+  KeyPoint (Integer) = 0
+  Withheld (Integer) = 0
+  Overlap (Integer) = 0
   ScanAngleR (Real) = 1.000000000000000
   UserData (Integer) = 126
   PointSourc (Integer) = 7327
@@ -160,6 +200,10 @@ OGRFeature(attrs_measure):9
   NumberOfRe (Integer) = 1
   ScanDirect (Integer) = 1
   EdgeOfFlig (Integer) = 0
+  Synthetic (Integer) = 0
+  KeyPoint (Integer) = 0
+  Withheld (Integer) = 0
+  Overlap (Integer) = 0
   ScanAngleR (Real) = 7.000000000000000
   UserData (Integer) = 126
   PointSourc (Integer) = 7332

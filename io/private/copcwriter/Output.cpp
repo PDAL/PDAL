@@ -80,6 +80,10 @@ Output::Output(const BaseInfo& b) : b(b)
     m_header.minz = b.stats[(int)stats::Index::Z].minimum();
     m_header.maxz = b.stats[(int)stats::Index::Z].maximum();
 
+    // legacy point counts are all zero, since COPC is LAS 1.4 only.
+    std::fill(std::begin(m_header.points_by_return), std::end(m_header.points_by_return), 0);
+    m_header.point_count = 0;
+
     for (int i = 1; i <= 15; ++i)
     {
         point_count_t count = 0;
@@ -91,17 +95,7 @@ Output::Output(const BaseInfo& b) : b(b)
         {}
 
         m_header.points_by_return_14[i - 1] = count;
-        if (i <= 5)
-        {
-            if (m_header.points_by_return_14[i] <= (std::numeric_limits<uint32_t>::max)())
-                m_header.points_by_return[i - 1] = m_header.points_by_return_14[i - 1];
-            else
-                m_header.points_by_return[i - 1] = 0;
-        }
     }
-
-    if (m_header.point_count_14 > (std::numeric_limits<uint32_t>::max)())
-        m_header.point_count = 0;
 
     // Note that only these VLRs go in the standard VLR area. The rest are written as
     // extended VLRs.
@@ -231,7 +225,6 @@ uint64_t Output::newChunk(const VoxelKey& key, int32_t size, int32_t count)
     m_pointPos += size;
     assert(count <= (std::numeric_limits<int32_t>::max)() && count >= 0);
     m_chunkTable.push_back({(uint64_t)count, (uint64_t)size});
-    m_header.point_count += count;
     m_header.point_count_14 += count;
     m_hierarchy[key] = { chunkStart, size, count };
     return chunkStart;

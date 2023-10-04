@@ -43,6 +43,7 @@
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <io/BufferReader.hpp>
+#include <io/CopcWriter.hpp>
 #include <io/LasHeader.hpp>
 #include <io/LasReader.hpp>
 #include <io/LasWriter.hpp>
@@ -68,6 +69,8 @@ class LasTester
 public:
     const las::Header& header(LasWriter& w)
         { return w.header(); }
+    const las::Header& header(LasReader& r)
+        { return r.lasHeader(); }
     SpatialReference srs(LasWriter& w)
         { return w.m_srs; }
     void addVlr(LasWriter& w, const std::string& userId, uint16_t recordId,
@@ -1165,7 +1168,7 @@ TEST(LasWriterTest, fix1063_1064_1065)
 
     // https://github.com/PDAL/PDAL/issues/1063
     for (PointId idx = 0; idx < v->size(); ++idx)
-        EXPECT_EQ(8, v->getFieldAs<int>(Dimension::Id::ClassFlags, idx));
+        EXPECT_TRUE(v->getFieldAs<bool>(Dimension::Id::Overlap, idx));
 
     // https://github.com/PDAL/PDAL/issues/1064
     MetadataNode m = r.getMetadata();
@@ -1917,7 +1920,8 @@ TEST(LasWriterTest, las10_classification_from_las10_classification)
     const std::string FILENAME(Support::temppath("synthetic_test.las"));
     PointTable table;
 
-    table.layout()->registerDims({Id::X, Id::Y, Id::Z, Id::Classification});
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z, Id::Classification,
+        Id::Synthetic});
 
     BufferReader bufferReader;
 
@@ -1925,7 +1929,8 @@ TEST(LasWriterTest, las10_classification_from_las10_classification)
     view->setField(Id::X, 0, 1.0);
     view->setField(Id::Y, 0, 2.0);
     view->setField(Id::Z, 0, 3.0);
-    view->setField(Id::Classification, 0, ClassLabel::Ground | ClassLabel::Synthetic);
+    view->setField(Id::Classification, 0, ClassLabel::Ground);
+    view->setField(Id::Synthetic, 0, true);
     bufferReader.addView(view);
 
     Options writerOps;
@@ -1951,8 +1956,8 @@ TEST(LasWriterTest, las10_classification_from_las10_classification)
     EXPECT_EQ(viewSet.size(), 1u);
     view = *viewSet.begin();
     EXPECT_EQ(view->size(), 1u);
-    EXPECT_EQ(ClassLabel::Ground | ClassLabel::Synthetic,
-        view->getFieldAs<uint8_t>(Id::Classification, 0));
+    EXPECT_EQ(ClassLabel::Ground, view->getFieldAs<uint8_t>(Id::Classification, 0));
+    EXPECT_TRUE(view->getFieldAs<bool>(Id::Synthetic, 0));
 
     FileUtils::deleteFile(FILENAME);
 }
@@ -1966,7 +1971,7 @@ TEST(LasWriterTest, las10_classification_from_las14_classflags)
     const std::string FILENAME(Support::temppath("synthetic_test.las"));
     PointTable table;
 
-    table.layout()->registerDims({Id::X, Id::Y, Id::Z, Id::Classification, Id::ClassFlags});
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z, Id::Classification, Id::Synthetic});
 
     BufferReader bufferReader;
 
@@ -1975,7 +1980,7 @@ TEST(LasWriterTest, las10_classification_from_las14_classflags)
     view->setField(Id::Y, 0, 2.0);
     view->setField(Id::Z, 0, 3.0);
     view->setField(Id::Classification, 0, ClassLabel::Ground);
-    view->setField(Id::ClassFlags, 0, ClassLabel::Synthetic >> 5);
+    view->setField(Id::Synthetic, 0, true);
     bufferReader.addView(view);
 
     Options writerOps;
@@ -2001,8 +2006,8 @@ TEST(LasWriterTest, las10_classification_from_las14_classflags)
     EXPECT_EQ(viewSet.size(), 1u);
     view = *viewSet.begin();
     EXPECT_EQ(view->size(), 1u);
-    EXPECT_EQ(ClassLabel::Ground | ClassLabel::Synthetic,
-        view->getFieldAs<uint8_t>(Id::Classification, 0));
+    EXPECT_EQ(ClassLabel::Ground, view->getFieldAs<uint8_t>(Id::Classification, 0));
+    EXPECT_TRUE(view->getFieldAs<bool>(Id::Synthetic, 0));
 
     FileUtils::deleteFile(FILENAME);
 }
@@ -2016,7 +2021,7 @@ TEST(LasWriterTest, las14_classflags_from_las10_classification)
     const std::string FILENAME(Support::temppath("synthetic_test.las"));
     PointTable table;
 
-    table.layout()->registerDims({Id::X, Id::Y, Id::Z, Id::Classification});
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z, Id::Classification, Id::Synthetic});
 
     BufferReader bufferReader;
 
@@ -2024,7 +2029,8 @@ TEST(LasWriterTest, las14_classflags_from_las10_classification)
     view->setField(Id::X, 0, 1.0);
     view->setField(Id::Y, 0, 2.0);
     view->setField(Id::Z, 0, 3.0);
-    view->setField(Id::Classification, 0, ClassLabel::Ground | ClassLabel::Synthetic);
+    view->setField(Id::Classification, 0, ClassLabel::Ground);
+    view->setField(Id::Synthetic, 0, true);
     bufferReader.addView(view);
 
     Options writerOps;
@@ -2054,8 +2060,7 @@ TEST(LasWriterTest, las14_classflags_from_las10_classification)
     EXPECT_EQ(view->size(), 1u);
     EXPECT_EQ(ClassLabel::Ground,
         view->getFieldAs<uint8_t>(Id::Classification, 0));
-    EXPECT_EQ(ClassLabel::Synthetic >> 5,
-        view->getFieldAs<uint8_t>(Id::ClassFlags, 0));
+    EXPECT_TRUE(view->getFieldAs<bool>(Id::Synthetic, 0));
 
     FileUtils::deleteFile(FILENAME);
 }
@@ -2069,7 +2074,7 @@ TEST(LasWriterTest, las14_classflags_from_las14_classflags)
     const std::string FILENAME(Support::temppath("synthetic_test.las"));
     PointTable table;
 
-    table.layout()->registerDims({Id::X, Id::Y, Id::Z, Id::Classification, Id::ClassFlags});
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z, Id::Classification, Id::Synthetic});
 
     BufferReader bufferReader;
 
@@ -2078,7 +2083,7 @@ TEST(LasWriterTest, las14_classflags_from_las14_classflags)
     view->setField(Id::Y, 0, 2.0);
     view->setField(Id::Z, 0, 3.0);
     view->setField(Id::Classification, 0, ClassLabel::Ground);
-    view->setField(Id::ClassFlags, 0, ClassLabel::Synthetic >> 5);
+    view->setField(Id::Synthetic, 0, true);
     bufferReader.addView(view);
 
     Options writerOps;
@@ -2108,8 +2113,7 @@ TEST(LasWriterTest, las14_classflags_from_las14_classflags)
     EXPECT_EQ(view->size(), 1u);
     EXPECT_EQ(ClassLabel::Ground,
         view->getFieldAs<uint8_t>(Id::Classification, 0));
-    EXPECT_EQ(ClassLabel::Synthetic >> 5,
-        view->getFieldAs<uint8_t>(Id::ClassFlags, 0));
+    EXPECT_TRUE(view->getFieldAs<bool>(Id::Synthetic, 0));
 
     FileUtils::deleteFile(FILENAME);
 }
@@ -2245,45 +2249,95 @@ TEST(LasWriterTest, issue2235)
     // Read
     Options readerOps;
     readerOps.add("filename", Support::datapath("las/4_1.las"));
+    const int returnsWithPoints = 4;
 
     LasReader reader;
     reader.setOptions(readerOps);
 
+    LasTester tester;
+
     // Write with point data record < 6
-    Options writerOps41;
-    writerOps41.add("filename", Support::temppath("out_4_1.las"));
-    writerOps41.add("minor_version", 4);
-    writerOps41.add("dataformat_id", 1);
+    {
+        Options writerOps41;
+        writerOps41.add("filename", Support::temppath("out_4_1.las"));
+        writerOps41.add("minor_version", 4);
+        writerOps41.add("dataformat_id", 1);
 
-    LasWriter writer41;
-    writer41.setInput(reader);
-    writer41.setOptions(writerOps41);
+        LasWriter writer41;
+        writer41.setInput(reader);
+        writer41.setOptions(writerOps41);
 
-    PointTable table41;
-    writer41.prepare(table41);
-    writer41.execute(table41);
+        PointTable table41;
+        writer41.prepare(table41);
+        writer41.execute(table41);
 
-    LasTester tester41;
-    const las::Header& h41 = tester41.header(writer41);
-    EXPECT_EQ(h41.legacyPointCount, (int32_t)h41.pointCount());
+        const las::Header& h41 = tester.header(writer41);
+        EXPECT_EQ(h41.legacyPointCount, (int32_t)h41.pointCount());
+
+        for (int i=0; i<h41.LegacyReturnCount; i++)
+            EXPECT_EQ(h41.legacyPointsByReturn[i], h41.ePointsByReturn[i]);
+    }
 
     // Write with point data record >= 6
-    Options writerOps46;
-    writerOps46.add("filename", Support::temppath("out_4_6.las"));
-    writerOps46.add("minor_version", 4);
-    writerOps46.add("dataformat_id", 6);
+    {
+        Options writerOps46;
+        writerOps46.add("filename", Support::temppath("out_4_6.las"));
+        writerOps46.add("minor_version", 4);
+        writerOps46.add("dataformat_id", 6);
 
-    LasWriter writer46;
-    writer46.setInput(reader);
-    writer46.setOptions(writerOps46);
+        LasWriter writer46;
+        writer46.setInput(reader);
+        writer46.setOptions(writerOps46);
 
-    PointTable table46;
-    writer46.prepare(table46);
-    writer46.execute(table46);
+        PointTable table46;
+        writer46.prepare(table46);
+        writer46.execute(table46);
 
-    LasTester tester46;
-    const las::Header& h46 = tester46.header(writer46);
+        const las::Header& h46 = tester.header(writer46);
 
-    EXPECT_EQ(h46.legacyPointCount, 0);
-    EXPECT_NE(h46.pointCount(), 0);
+        EXPECT_EQ(h46.legacyPointCount, 0);
+        EXPECT_NE(h46.pointCount(), 0);
+
+        for (int i=0; i<h46.LegacyReturnCount; i++)
+        {
+            EXPECT_EQ(h46.legacyPointsByReturn[i], 0);
+            if (i < returnsWithPoints)
+                EXPECT_NE(h46.ePointsByReturn[i], 0);
+        }
+    }
+
+    // test for COPC too
+    {
+        Options copcWriterOps;
+        copcWriterOps.add("filename", Support::temppath("out_4_6.copc.laz"));
+
+        CopcWriter copcWriter;
+        copcWriter.setInput(reader);
+        copcWriter.setOptions(copcWriterOps);
+
+        PointTable tableCopc;
+        copcWriter.prepare(tableCopc);
+        copcWriter.execute(tableCopc);
+
+        Options copcReaderOpts;
+        copcReaderOpts.add("filename", Support::temppath("out_4_6.copc.laz"));
+
+        LasReader readerCopc;
+        readerCopc.setOptions(copcReaderOpts);
+
+        PointTable tableCopcR;
+        readerCopc.prepare(tableCopcR);
+
+        const las::Header& headerCopc = tester.header(readerCopc);
+
+        EXPECT_EQ(headerCopc.legacyPointCount, 0);
+        EXPECT_NE(headerCopc.pointCount(), 0);
+
+        for (int i=0; i<headerCopc.LegacyReturnCount; i++)
+        {
+            EXPECT_EQ(headerCopc.legacyPointsByReturn[i], 0);
+            if (i < returnsWithPoints)
+                EXPECT_NE(headerCopc.ePointsByReturn[i], 0);
+        }
+    }
 }

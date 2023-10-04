@@ -7,6 +7,11 @@ readers.i3s
 3D Scene Layer and scene services. The I3S reader handles RESTful webservices in an I3S
 file structure/format.
 
+.. embed::
+
+.. streamable::
+
+
 Example
 --------------------------------------------------------------------------------
 This example will download the Autzen dataset from the ArcGIS scene server and output it to a las file. This is done through PDAL's command line interface or through the pipeline.

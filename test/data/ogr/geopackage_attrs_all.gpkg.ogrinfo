@@ -1,4 +1,4 @@
-INFO: Open of `/Users/rcoup/code/point-clouds/pdal/test/data/../temp/ogr/geopackage_attrs_all.gpkg'
+INFO: Open of `pdal/test/data/../temp/ogr/geopackage_attrs_all.gpkg'
       using driver `GPKG' successful.
 
 Layer name: points
@@ -32,6 +32,10 @@ NumberOfReturns: Integer (0.0)
 ScanDirectionFlag: Integer (0.0)
 EdgeOfFlightLine: Integer (0.0)
 Classification: Integer (0.0)
+Synthetic: Integer (0.0)
+KeyPoint: Integer (0.0)
+Withheld: Integer (0.0)
+Overlap: Integer (0.0)
 ScanAngleRank: Real (0.0)
 UserData: Integer (0.0)
 PointSourceId: Integer (0.0)
@@ -46,6 +50,10 @@ OGRFeature(points):1
   ScanDirectionFlag (Integer) = 0
   EdgeOfFlightLine (Integer) = 0
   Classification (Integer) = 1
+  Synthetic (Integer) = 0
+  KeyPoint (Integer) = 0
+  Withheld (Integer) = 0
+  Overlap (Integer) = 0
   ScanAngleRank (Real) = 15
   UserData (Integer) = 125
   PointSourceId (Integer) = 7327
@@ -62,6 +70,10 @@ OGRFeature(points):2
   ScanDirectionFlag (Integer) = 1
   EdgeOfFlightLine (Integer) = 0
   Classification (Integer) = 1
+  Synthetic (Integer) = 0
+  KeyPoint (Integer) = 0
+  Withheld (Integer) = 0
+  Overlap (Integer) = 0
   ScanAngleRank (Real) = 6
   UserData (Integer) = 124
   PointSourceId (Integer) = 7327
@@ -78,6 +90,10 @@ OGRFeature(points):3
   ScanDirectionFlag (Integer) = 1
   EdgeOfFlightLine (Integer) = 0
   Classification (Integer) = 2
+  Synthetic (Integer) = 0
+  KeyPoint (Integer) = 0
+  Withheld (Integer) = 0
+  Overlap (Integer) = 0
   ScanAngleRank (Real) = -11
   UserData (Integer) = 126
   PointSourceId (Integer) = 7329
@@ -94,6 +110,10 @@ OGRFeature(points):4
   ScanDirectionFlag (Integer) = 1
   EdgeOfFlightLine (Integer) = 0
   Classification (Integer) = 1
+  Synthetic (Integer) = 0
+  KeyPoint (Integer) = 0
+  Withheld (Integer) = 0
+  Overlap (Integer) = 0
   ScanAngleRank (Real) = 0
   UserData (Integer) = 124
   PointSourceId (Integer) = 7328
@@ -110,6 +130,10 @@ OGRFeature(points):5
   ScanDirectionFlag (Integer) = 0
   EdgeOfFlightLine (Integer) = 0
   Classification (Integer) = 1
+  Synthetic (Integer) = 0
+  KeyPoint (Integer) = 0
+  Withheld (Integer) = 0
+  Overlap (Integer) = 0
   ScanAngleRank (Real) = -7
   UserData (Integer) = 126
   PointSourceId (Integer) = 7326
@@ -126,6 +150,10 @@ OGRFeature(points):6
   ScanDirectionFlag (Integer) = 0
   EdgeOfFlightLine (Integer) = 0
   Classification (Integer) = 1
+  Synthetic (Integer) = 0
+  KeyPoint (Integer) = 0
+  Withheld (Integer) = 0
+  Overlap (Integer) = 0
   ScanAngleRank (Real) = 10
   UserData (Integer) = 126
   PointSourceId (Integer) = 7329
@@ -142,6 +170,10 @@ OGRFeature(points):7
   ScanDirectionFlag (Integer) = 0
   EdgeOfFlightLine (Integer) = 0
   Classification (Integer) = 2
+  Synthetic (Integer) = 0
+  KeyPoint (Integer) = 0
+  Withheld (Integer) = 0
+  Overlap (Integer) = 0
   ScanAngleRank (Real) = -1
   UserData (Integer) = 126
   PointSourceId (Integer) = 7327
@@ -158,6 +190,10 @@ OGRFeature(points):8
   ScanDirectionFlag (Integer) = 1
   EdgeOfFlightLine (Integer) = 0
   Classification (Integer) = 2
+  Synthetic (Integer) = 0
+  KeyPoint (Integer) = 0
+  Withheld (Integer) = 0
+  Overlap (Integer) = 0
   ScanAngleRank (Real) = -3
   UserData (Integer) = 130
   PointSourceId (Integer) = 7330
@@ -174,6 +210,10 @@ OGRFeature(points):9
   ScanDirectionFlag (Integer) = 0
   EdgeOfFlightLine (Integer) = 0
   Classification (Integer) = 1
+  Synthetic (Integer) = 0
+  KeyPoint (Integer) = 0
+  Withheld (Integer) = 0
+  Overlap (Integer) = 0
   ScanAngleRank (Real) = 1
   UserData (Integer) = 126
   PointSourceId (Integer) = 7327
@@ -190,6 +230,10 @@ OGRFeature(points):10
   ScanDirectionFlag (Integer) = 1
   EdgeOfFlightLine (Integer) = 0
   Classification (Integer) = 1
+  Synthetic (Integer) = 0
+  KeyPoint (Integer) = 0
+  Withheld (Integer) = 0
+  Overlap (Integer) = 0
   ScanAngleRank (Real) = 7
   UserData (Integer) = 126
   PointSourceId (Integer) = 7332

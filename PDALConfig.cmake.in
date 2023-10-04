@@ -16,6 +16,6 @@ include("${CMAKE_CURRENT_LIST_DIR}/PDALTargets.cmake")
 #   an actual library that cmake knows about.  If you can figure this out,
 #   a change would be nice.
 #
-set(PDAL_LIBRARIES @PDAL_BASE_LIB_NAME@ @PDAL_UTIL_LIB_NAME@)
+set(PDAL_LIBRARIES @PDAL_LIB_NAME@)
 
 check_required_components(PDAL)

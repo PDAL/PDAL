@@ -6,13 +6,6 @@ if (BUILD_PLUGIN_TRAJECTORY)
 endif()
 
 
-if(BUILD_PLUGIN_I3S)
-    if(NOT ZLIB_FOUND)
-        message(FATAL_ERROR "Can't build i3s and slpk plugins without zlib")
-    endif()
-    add_subdirectory(i3s)
-endif()
-
 if(BUILD_PLUGIN_CPD)
     add_subdirectory(cpd)
 endif(BUILD_PLUGIN_CPD)
@@ -73,4 +66,8 @@ endif()
 
 if(BUILD_PLUGIN_E57)
     add_subdirectory(e57)
+endif()
+
+if(BUILD_PLUGIN_ARROW)
+    add_subdirectory(arrow)
 endif()

@@ -42,6 +42,11 @@
 #include <vector>
 
 #include <nlohmann/json.hpp>
+
+#if defined(DELETE)
+#undef DELETE
+#endif
+
 #include <tiledb/tiledb>
 
 #include <pdal/Reader.hpp>

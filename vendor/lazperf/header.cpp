@@ -122,6 +122,14 @@ void header12::read(std::istream& in)
     s >> file_source_id >> global_encoding;
     s.get(guid, 16);
     s >> version.major >> version.minor;
+
+    if (version.minor < 2)
+    {
+      global_encoding = 0;
+      if (version.minor == 0)
+        file_source_id = 0;
+    }
+
     s.get(system_identifier, 32);
     s.get(generating_software, 32);
     s >> creation.day >> creation.year;

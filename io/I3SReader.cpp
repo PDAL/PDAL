@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #include "I3SReader.hpp"
-#include "EsriUtil.hpp"
+#include "private/esri/EsriUtil.hpp"
 
 #include <thread>
 
@@ -49,7 +49,7 @@ static PluginInfo const i3sInfo
     "http://pdal.io/stages/readers.i3s.html"
 };
 
-CREATE_SHARED_STAGE(I3SReader, i3sInfo)
+CREATE_STATIC_STAGE(I3SReader, i3sInfo)
 
 std::string I3SReader::getName() const { return i3sInfo.name; }
 

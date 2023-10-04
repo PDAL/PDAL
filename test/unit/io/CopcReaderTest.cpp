@@ -118,9 +118,10 @@ TEST(EptReaderTest, protocol)
 TEST(CopcReaderTest, inspect)
 {
     const std::vector<std::string> dimNames = {
-         "ClassFlags", "Classification", "EdgeOfFlightLine", "GpsTime", "Intensity",
-         "NumberOfReturns", "PointSourceId", "ReturnNumber", "ScanAngleRank", "ScanChannel",
-         "ScanDirectionFlag", "UserData", "X", "Y", "Z"
+         "Classification", "EdgeOfFlightLine", "GpsTime", "Intensity", "KeyPoint",
+         "NumberOfReturns", "Overlap", "PointSourceId", "ReturnNumber", "ScanAngleRank", 
+         "ScanChannel", "ScanDirectionFlag", "Synthetic", "UserData", "Withheld",
+         "X", "Y", "Z"
     };
 
     Options options;

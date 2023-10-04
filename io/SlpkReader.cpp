@@ -36,7 +36,7 @@
 #include <pdal/util/IStream.hpp>
 #include <pdal/compression/GzipCompression.hpp>
 
-#include "EsriUtil.hpp"
+#include "private/esri/EsriUtil.hpp"
 
 namespace pdal
 {
@@ -48,7 +48,7 @@ static PluginInfo const slpkInfo
     "http://pdal.io/stages/readers.slpk.html"
 };
 
-CREATE_SHARED_STAGE(SlpkReader, slpkInfo)
+CREATE_STATIC_STAGE(SlpkReader, slpkInfo)
 
 std::string SlpkReader::getName() const { return slpkInfo.name; }
 

@@ -464,17 +464,6 @@ namespace Utils
     PDAL_DLL double normalizeLongitude(double longitude);
 
     /**
-      Convert an input buffer to a hexadecimal string representation similar
-      to the output of the UNIX command 'od'.  This is mostly used as an
-      occasional debugging aid.
-
-      \param buf  Point to buffer to dump.
-      \param count  Size of buffer.
-      \return  Buffer converted to hex string.
-    */
-    PDAL_DLL std::string hexDump(const char *buf, size_t count);
-
-    /**
       Count the number of characters in a string that meet a predicate.
 
       \param s  String in which to start counting characters.

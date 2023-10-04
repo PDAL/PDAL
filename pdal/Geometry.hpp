@@ -52,10 +52,11 @@ class PDAL_DLL Geometry
 {
 
 public:
-    Geometry(const std::string& wkt_or_json,
+    Geometry(const std::string& wkt_or_wkb_or_json,
            SpatialReference ref = SpatialReference());
     Geometry();
     Geometry(const Geometry&);
+    Geometry(double x, double y, double z, SpatialReference ref = SpatialReference());
     Geometry(Geometry&&);
     Geometry(OGRGeometryH g);
     Geometry(OGRGeometryH g, const SpatialReference& srs);
@@ -77,6 +78,7 @@ public:
     Utils::StatusWithReason transform(SpatialReference ref);
 
     std::string wkt(double precision=15, bool bOutputZ=false) const;
+    std::string wkb() const;
     std::string json(double precision=15) const;
 
     BOX3D bounds() const;

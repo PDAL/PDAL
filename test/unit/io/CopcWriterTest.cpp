@@ -36,6 +36,8 @@
 
 #include <pdal/pdal_test_main.hpp>
 
+#include <pdal/util/FileUtils.hpp>
+#include <io/BufferReader.hpp>
 #include <io/CopcReader.hpp>
 #include <io/CopcWriter.hpp>
 #include <io/LasReader.hpp>
@@ -187,12 +189,73 @@ TEST(CopcWriterTest, srsUTM)
     EXPECT_TRUE(Utils::startsWith(srs, "PROJCS[\"NAD83 / UTM zone 15N\""));
 
     const char *data = nullptr;
+
     EXPECT_TRUE(r.vlrData("LASF_Projection", 4224, data) > 0);
     EXPECT_TRUE(Utils::startsWith(data, "PROJCRS[\"NAD83 / UTM zone 15N\""));
+
+    data = nullptr;
     EXPECT_TRUE(r.vlrData("PDAL", 4225, data) > 0);
     EXPECT_TRUE(Utils::startsWith(data, "{\n  \"type\": \"ProjectedCRS\","));
+
+    data = nullptr;
+    // This vlr data must not be null terminated and segfaults when startsWith
+    // tries to read it
     EXPECT_TRUE(r.vlrData("LASF_Projection", 2112, data) > 0);
-    EXPECT_TRUE(Utils::startsWith(data, "PROJCS[\"NAD83 / UTM zone 15N\""));
+    std::string info (data, 50);
+    bool test = Utils::startsWith(info, "PROJCS[\"NAD83 / UTM zone 15N\"" );
+    EXPECT_TRUE(test);
+}
+
+TEST(CopcWriterTest, scaling)
+{
+    using namespace Dimension;
+
+    const std::string FILENAME(Support::temppath("copc_scaling.las"));
+    PointTable table;
+
+    table.layout()->registerDims({Id::X, Id::Y, Id::Z});
+
+    BufferReader bufferReader;
+
+    PointViewPtr view(new PointView(table));
+    view->setField(Id::X, 0, 1406018.497);
+    view->setField(Id::Y, 0, 4917487.174);
+    view->setField(Id::Z, 0, 62.276);
+    bufferReader.addView(view);
+
+    Options writerOps;
+    writerOps.add("filename", FILENAME);
+    writerOps.add("offset_x", "1000000");
+    writerOps.add("scale_x", "0.001");
+    writerOps.add("offset_y", "5000000");
+    writerOps.add("scale_y", "0.001");
+    writerOps.add("offset_z", "0");
+    writerOps.add("scale_z", "0.001");
+
+    CopcWriter writer;
+    writer.setOptions(writerOps);
+    writer.setInput(bufferReader);
+
+    writer.prepare(table);
+    writer.execute(table);
+
+    Options readerOps;
+    readerOps.add("filename", FILENAME);
+
+    PointTable readTable;
+
+    LasReader reader;
+    reader.setOptions(readerOps);
+
+    reader.prepare(readTable);
+    PointViewSet viewSet = reader.execute(readTable);
+    EXPECT_EQ(viewSet.size(), 1u);
+    view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 1u);
+    EXPECT_NEAR(1406018.497, view->getFieldAs<double>(Id::X, 0), .00001);
+    EXPECT_NEAR(4917487.174, view->getFieldAs<double>(Id::Y, 0), .00001);
+    EXPECT_NEAR(62.276, view->getFieldAs<double>(Id::Z, 0), .00001);
+    FileUtils::deleteFile(FILENAME);
 }
 
 } // namespace pdal

@@ -47,8 +47,8 @@
 #include <pdal/Streamable.hpp>
 #include <pdal/util/Bounds.hpp>
 
-#include "EsriUtil.hpp"
-#include "PageManager.hpp"
+#include "private/esri/EsriUtil.hpp"
+#include "private/esri/PageManager.hpp"
 
 namespace pdal
 {

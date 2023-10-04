@@ -27,7 +27,7 @@ jobs:
     env:
       BUILD_TYPE: ${{ matrix.type }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: mamba-org/setup-micromamba@v1
       with:
         init-shell: bash
