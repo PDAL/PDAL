@@ -99,7 +99,8 @@ public:
     std::string geotiffString() const;
 
 private:
-    SpatialReference extractGeotiff(const Vlr *vlr, const VlrList& vlrs, LogPtr log);
+    void extractGeotiff(const Vlr *vlr, const VlrList& vlrs, LogPtr log);
+    void extractWkt(const Vlr *vlr);
 
     std::string m_geotiffString;
     SpatialReference m_srs;

@@ -41,32 +41,6 @@ namespace pdal
 namespace las
 {
 
-namespace
-{
-
-SpatialReference extractWkt(const Vlr *vlr)
-{
-    if (!vlr || vlr->empty())
-        return SpatialReference();
-
-    // There is supposed to be a NULL byte at the end of the data,
-    // but sometimes there isn't because some people don't follow the
-    // rules.  If there is a NULL byte, don't stick it in the
-    // wkt string.
-    size_t len = vlr->dataSize();
-    const char *c = vlr->data() + len - 1;
-    if (*c == 0)
-        len--;
-    std::string wkt(vlr->data(), len);
-    // Strip any excess NULL bytes from the WKT.
-    wkt.erase(std::find(wkt.begin(), wkt.end(), '\0'), wkt.end());
-
-    return SpatialReference(wkt);
-}
-
-} // Unnamed namespace.
-
-
 void Srs::init(const VlrList& vlrs, std::vector<SrsType> srsOrder, bool useWkt, LogPtr log)
 {
     m_srs = SpatialReference();
@@ -124,10 +98,10 @@ void Srs::init(const VlrList& vlrs, std::vector<SrsType> srsOrder, bool useWkt, 
     }
 }
 
-SpatialReference Srs::extractGeotiff(const Vlr *vlr, const VlrList& vlrs, LogPtr log)
+void Srs::extractGeotiff(const Vlr *vlr, const VlrList& vlrs, LogPtr log)
 {
     if (!vlr)
-        return SpatialReference();
+        return;
 
     const char *data = vlr->data();
     size_t dataLen = vlr->dataSize();
@@ -161,15 +135,35 @@ SpatialReference Srs::extractGeotiff(const Vlr *vlr, const VlrList& vlrs, LogPtr
         m_geotiffString = geotiffSrs.gtiffPrintString();
         if (log)
             log->get(LogLevel::Debug3) << m_geotiffString << std::endl;
-        srs = geotiffSrs.srs();
+        m_srs = geotiffSrs.srs();
     }
     catch (Geotiff::error& err)
     {
         if (log)
             log->get(LogLevel::Error) << "Could not create an SRS: " << err.what() << ".\n";
     }
-    return srs;
 }
+
+void Srs::extractWkt(const Vlr *vlr)
+{
+    if (!vlr || vlr->empty())
+        return;
+
+    // There is supposed to be a NULL byte at the end of the data,
+    // but sometimes there isn't because some people don't follow the
+    // rules.  If there is a NULL byte, don't stick it in the
+    // wkt string.
+    size_t len = vlr->dataSize();
+    const char *c = vlr->data() + len - 1;
+    if (*c == 0)
+        len--;
+    std::string wkt(vlr->data(), len);
+    // Strip any excess NULL bytes from the WKT.
+    wkt.erase(std::find(wkt.begin(), wkt.end(), '\0'), wkt.end());
+
+    m_srs = SpatialReference(wkt);
+}
+
 
 SpatialReference Srs::get() const
 {
