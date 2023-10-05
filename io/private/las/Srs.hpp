@@ -43,14 +43,64 @@ namespace pdal
 namespace las
 {
 
+enum class SrsType
+{
+    Wkt1,
+    Geotiff,
+    Proj,
+    Wkt2
+};
+
+inline std::istream& operator>>(std::istream& in, SrsType& type)
+{
+    std::string s;
+    in >> s;
+
+    s = Utils::tolower(s);
+    if (s == "wkt1")
+        type = SrsType::Wkt1;
+    else if (s == "geotiff")
+        type = SrsType::Geotiff;
+    else if (s == "proj")
+        type = SrsType::Proj;
+    else if (s == "wkt2")
+        type = SrsType::Wkt2;
+    else
+        throw pdal_error("Invalid SRS type '" + s + "'. Must be one of 'wkt1', 'geotiff', "
+            "'proj' or 'wk2'.");
+    return in;
+}
+
+inline std::ostream& operator<<(std::ostream& out, SrsType type)
+{
+    switch (type)
+    {
+    case SrsType::Wkt1:
+        out << "wkt1";
+        break;
+    case SrsType::Geotiff:
+        out << "geotiff";
+        break;
+    case SrsType::Proj:
+        out << "proj";
+        break;
+    case SrsType::Wkt2:
+        out << "wkt2";
+        break;
+    }
+    return out;
+}
+
 class Srs
 {
 public:
-    void init(const VlrList& vlrs, std::string srsConsumePreference, LogPtr log);
+    void init(const VlrList& vlrs, std::vector<SrsType> srsOrder, bool useWkt, LogPtr log);
     SpatialReference get() const;
     std::string geotiffString() const;
 
 private:
+    SpatialReference extractGeotiff(const Vlr *vlr, const VlrList& vlrs, LogPtr log);
+
     std::string m_geotiffString;
     SpatialReference m_srs;
 };

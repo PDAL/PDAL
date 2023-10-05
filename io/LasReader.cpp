@@ -77,7 +77,7 @@ struct LasReader::Options
     bool fixNames;
     PointId start;
     bool nosrs;
-    std::string srsConsumePreference;
+    std::vector<las::SrsType> srsVlrOrder;
 };
 
 struct LasReader::Private
@@ -118,8 +118,8 @@ void LasReader::addArgs(ProgramArgs& args)
     args.add("fix_dims", "Make invalid dimension names valid by changing "
         "invalid characters to '_'", d->opts.fixNames, true);
     args.add("nosrs", "Skip reading/processing file SRS", d->opts.nosrs);
-    args.add("srs_consume_preference", "Preference order to read SRS VLRs",
-        d->opts.srsConsumePreference, "wkt1, geotiff, wkt2, projjson");
+    args.add("srs_vlr_order", "Preference order to read SRS VLRs",
+        d->opts.srsVlrOrder);
 }
 
 
@@ -318,7 +318,8 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     }
 
     if (!d->opts.nosrs)
-        d->srs.init(d->vlrs, d->opts.srsConsumePreference, log());
+        d->srs.init(d->vlrs, d->opts.srsVlrOrder, d->header.mustUseWkt(),
+            log());
 
     if (d->opts.start > d->header.pointCount())
         throwError("'start' value of " + std::to_string(d->opts.start) + " is too large. "
