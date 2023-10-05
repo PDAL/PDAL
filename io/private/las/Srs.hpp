@@ -46,33 +46,12 @@ namespace las
 
 enum class SrsType
 {
-    Wkt1,
+    Wkt1 = 0,
     Geotiff,
     Proj,
     Wkt2
 };
-
-/**
-inline std::istream& operator>>(std::istream& in, SrsType& type)
-{
-    std::string s;
-    in >> s;
-
-    s = Utils::tolower(s);
-    if (s == "wkt1")
-        type = SrsType::Wkt1;
-    else if (s == "geotiff")
-        type = SrsType::Geotiff;
-    else if (s == "proj")
-        type = SrsType::Proj;
-    else if (s == "wkt2")
-        type = SrsType::Wkt2;
-    else
-        throw pdal_error("Invalid SRS type '" + s + "'. Must be one of 'wkt1', 'geotiff', "
-            "'proj' or 'wk2'.");
-    return in;
-}
-**/
+const std::array<std::string, 4> srsTypeNames { "wkt1", "geotiff", "proj", "wkt2" };
 
 inline std::ostream& operator<<(std::ostream& out, SrsType type)
 {
@@ -110,40 +89,4 @@ private:
 };
 
 } // namespace las
-
-namespace Utils
-{
-
-template<>
-inline StatusWithReason fromString(const std::string& from,
-    std::vector<las::SrsType>& srsOrder)
-{
-    using namespace las;
-
-     static const std::map<std::string, SrsType> typemap =
-        { { "wkt2", SrsType::Wkt2 },
-          { "wkt1", SrsType::Wkt1 },
-          { "proj", SrsType::Proj },
-          { "geotiff", SrsType::Geotiff } };
-
-    StringList srsTypes = Utils::split2(from, ',');
-    std::transform(srsTypes.cbegin(), srsTypes.cend(), srsTypes.begin(),
-        [](std::string s){ Utils::trim(s); return Utils::tolower(s); });
-
-    for (std::string& stype : srsTypes)
-    {
-        auto it = typemap.find(stype);
-        if (it == typemap.end())
-            return { -1, "Invalid SRS type '" + stype + "'." };
-        SrsType type = it->second;
-        if (Utils::contains(srsOrder, type))
-            return { -1,
-                "Duplicate SRS type '" + stype + "' in 'vlr_srs_order'" };
-        srsOrder.push_back(type);
-    }
-    return 0;
-}
-
-} // namespace Utils
-
 } // namespace pdal
