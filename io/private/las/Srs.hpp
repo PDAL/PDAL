@@ -37,6 +37,7 @@
 #include "Vlr.hpp"
 
 #include  <pdal/Log.hpp>
+#include  <pdal/util/Algorithm.hpp>
 
 namespace pdal
 {
@@ -51,6 +52,7 @@ enum class SrsType
     Wkt2
 };
 
+/**
 inline std::istream& operator>>(std::istream& in, SrsType& type)
 {
     std::string s;
@@ -70,6 +72,7 @@ inline std::istream& operator>>(std::istream& in, SrsType& type)
             "'proj' or 'wk2'.");
     return in;
 }
+**/
 
 inline std::ostream& operator<<(std::ostream& out, SrsType type)
 {
@@ -107,4 +110,40 @@ private:
 };
 
 } // namespace las
+
+namespace Utils
+{
+
+template<>
+inline StatusWithReason fromString(const std::string& from,
+    std::vector<las::SrsType>& srsOrder)
+{
+    using namespace las;
+
+     static const std::map<std::string, SrsType> typemap =
+        { { "wkt2", SrsType::Wkt2 },
+          { "wkt1", SrsType::Wkt1 },
+          { "proj", SrsType::Proj },
+          { "geotiff", SrsType::Geotiff } };
+
+    StringList srsTypes = Utils::split2(from, ',');
+    std::transform(srsTypes.cbegin(), srsTypes.cend(), srsTypes.begin(),
+        [](std::string s){ Utils::trim(s); return Utils::tolower(s); });
+
+    for (std::string& stype : srsTypes)
+    {
+        auto it = typemap.find(stype);
+        if (it == typemap.end())
+            return { -1, "Invalid SRS type '" + stype + "'." };
+        SrsType type = it->second;
+        if (Utils::contains(srsOrder, type))
+            return { -1,
+                "Duplicate SRS type '" + stype + "' in 'vlr_srs_order'" };
+        srsOrder.push_back(type);
+    }
+    return 0;
+}
+
+} // namespace Utils
+
 } // namespace pdal
