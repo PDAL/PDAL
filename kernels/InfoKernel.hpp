@@ -76,11 +76,13 @@ private:
     bool m_showAll;
     bool m_showMetadata;
     bool m_boundary;
+    bool m_stac;
     std::string m_pointIndexes;
     std::string m_dimensions;
     std::string m_enumerate;
     std::string m_queryPoint;
     std::string m_pipelineFile;
+    std::string m_pcType;
     bool m_showSummary;
     bool m_needPoints;
     bool m_usestdin;
@@ -89,6 +91,7 @@ private:
     Stage *m_hexbinStage;
     Stage *m_infoStage;
     Stage *m_reader;
+    Stage *m_stacStage;
 
     MetadataNode m_tree;
 };

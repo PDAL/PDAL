@@ -34,6 +34,7 @@
 
 #include "InfoKernel.hpp"
 
+#include <ctime>
 #include <algorithm>
 
 #include <pdal/pdal_config.hpp>
@@ -44,6 +45,7 @@
 #include <pdal/PipelineWriter.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/StageFactory.hpp>
+#include "private/stac/StacInfo.hpp"
 
 namespace pdal
 {
@@ -73,6 +75,7 @@ void InfoKernel::validateSwitches(ProgramArgs& args)
     if (!m_usestdin && m_inputFile.empty())
         throw pdal_error("No input file specified.");
 
+
     // All isn't really all.
     if (m_showAll)
     {
@@ -80,8 +83,20 @@ void InfoKernel::validateSwitches(ProgramArgs& args)
         m_showMetadata = true;
         m_showSchema = true;
         m_boundary = true;
+        m_stac = true;
     }
 
+
+    if (m_stac)
+    {
+        if (m_queryPoint.size())
+            throw pdal_error("'query' option incompatible with 'stac' option.");
+        if (m_pointIndexes.size())
+            throw pdal_error("'point' option incompatible with 'stac' option.");
+
+        functions++;
+        m_needPoints = true;
+    }
     if (m_boundary)
     {
         functions++;
@@ -149,6 +164,9 @@ void InfoKernel::addSwitches(ProgramArgs& args)
     args.add("pipeline-serialization", "Output filename for pipeline "
         "serialization", m_pipelineFile);
     args.add("summary", "Dump summary of the info", m_showSummary);
+    args.add("stac", "Dump STAC Item representation of the info.", m_stac);
+    args.add("pc_type", "Pointcloud type for STAC generation (lidar, "
+        "eopc, radar, sonar, other).", m_pcType, "lidar");
     args.add("metadata", "Dump file metadata info", m_showMetadata);
     args.add("stdin,s", "Read a pipeline file from standard input", m_usestdin);
 }
@@ -222,6 +240,20 @@ void InfoKernel::makePipeline()
         stage = m_statsStage =
             &m_manager.makeFilter("filters.stats", *stage, filterOptions);
     }
+
+    if (m_stac)
+    {
+        // filters required for stac: metadata, stats,
+        if (!m_showStats)
+        {
+            Options stacOps;
+            if (m_enumerate.size())
+                stacOps.add({"enumerate", m_enumerate});
+            m_stacStage = stage = &m_manager.makeFilter("filters.stats", *stage, stacOps);
+        }
+        else
+            m_stacStage = stage;
+    }
     if (m_boundary)
         m_hexbinStage = &m_manager.makeFilter("filters.hexbin", *stage);
 }
@@ -232,6 +264,9 @@ MetadataNode InfoKernel::run(const std::string& filename)
     MetadataNode root;
 
     makeReader(filename);
+    root.add("filename", filename);
+    root.add("pdal_version", Config::fullVersionString());
+
     if (m_showSummary)
     {
         QuickInfo qi = m_manager.getStage()->preview();
@@ -249,8 +284,6 @@ MetadataNode InfoKernel::run(const std::string& filename)
             m_manager.prepare();
         dump(root);
     }
-    root.add("filename", filename);
-    root.add("pdal_version", Config::fullVersionString());
 
     std::time_t now
     = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
@@ -278,13 +311,13 @@ void InfoKernel::dump(MetadataNode& root)
 
     // Info stage.
     auto info = dynamic_cast<InfoFilter *>(m_infoStage);
-    MetadataNode node = info->getMetadata();
-    MetadataNode points = node.findChild("points");
+    MetadataNode infoMeta = info->getMetadata();
+    MetadataNode points = infoMeta.findChild("points");
     if (points)
         root.add(points);
 
     if (m_showSchema)
-        root.add(node.findChild("schema"));
+        root.add(infoMeta.findChild("schema"));
 
     // Stats stage.
     if (m_showStats)
@@ -307,8 +340,25 @@ void InfoKernel::dump(MetadataNode& root)
         else
             root.add(m_hexbinStage->getMetadata().clone("boundary"));
     }
-}
 
+    // STAC stage.
+    if (m_stac)
+    {
+        MetadataNode statsMeta;
+        if (!m_showStats)
+            statsMeta = m_stacStage->getMetadata();
+        else
+            statsMeta = root.findChild("stats");
+
+        MetadataNode readerMeta;
+        if (!m_showMetadata)
+            readerMeta = m_reader->getMetadata().clone("metadata");
+        else
+            readerMeta = root.findChild("metadata");
+
+        addStacMetadata(root, statsMeta, readerMeta, infoMeta, m_pcType);
+    }
+}
 
 int InfoKernel::execute()
 {
