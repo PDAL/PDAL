@@ -84,7 +84,7 @@ StatusWithReason fromString(const std::string& from,
      static const std::map<std::string, SrsType> typemap =
         { { "wkt2", SrsType::Wkt2 },
           { "wkt1", SrsType::Wkt1 },
-          { "proj", SrsType::Proj },
+          { "projjson", SrsType::Proj },
           { "geotiff", SrsType::Geotiff } };
 
     StringList srsTypes = Utils::split2(from, ',');
@@ -95,7 +95,8 @@ StatusWithReason fromString(const std::string& from,
     {
         auto it = typemap.find(stype);
         if (it == typemap.end())
-            return { -1, "Invalid SRS type '" + stype + "'." };
+            return { -1, "Invalid SRS type '" + stype + "'. Must be one of 'wkt1', "
+                "'geotiff', 'wkt' or 'projjson'." };
         SrsType type = it->second;
         if (Utils::contains(srsOrder.types, type))
             return { -1,

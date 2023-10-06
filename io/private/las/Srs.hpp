@@ -51,7 +51,7 @@ enum class SrsType
     Proj,
     Wkt2
 };
-const std::array<std::string, 4> srsTypeNames { "wkt1", "geotiff", "proj", "wkt2" };
+const std::array<std::string, 4> srsTypeNames { "wkt1", "geotiff", "projjson", "wkt2" };
 
 inline std::ostream& operator<<(std::ostream& out, SrsType type)
 {
@@ -64,7 +64,7 @@ inline std::ostream& operator<<(std::ostream& out, SrsType type)
         out << "geotiff";
         break;
     case SrsType::Proj:
-        out << "proj";
+        out << "projjson";
         break;
     case SrsType::Wkt2:
         out << "wkt2";
