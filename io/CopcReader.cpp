@@ -275,6 +275,10 @@ void CopcReader::initialize(PointTableRef table)
     m_p->depthEnd = m_args->resolution ?
         (std::max)(1, (int)ceil(log2(m_p->copc_info.spacing / m_args->resolution)) + 1) :
         0;
+    
+    if (m_args->resolution)
+        log()->get(LogLevel::Debug) << "Maximum depth: " << m_p->depthEnd << 
+            std::endl;
 }
 
 
@@ -444,15 +448,37 @@ void CopcReader::createSpatialFilters()
     // Create transformations from our source data to the bounds SRS.
     if (m_args->clip.valid())
     {
+        const SpatialReference& boundsSrs = m_args->clip.spatialReference();
         if (m_args->clip.is2d())
         {
             m_p->clip.box = BOX3D(m_args->clip.to2d());
             m_p->clip.box.minz = (std::numeric_limits<double>::lowest)();
             m_p->clip.box.maxz = (std::numeric_limits<double>::max)();
+
+            if (boundsSrs.isGeographic())
+            {
+                try
+                {
+                    // TODO: This isn't quite right.
+                    const auto j = NL::json::parse(boundsSrs.getPROJJSON());
+                    const double radius = 
+                        j.at("datum").at("ellipsoid").at("radius").get<double>();
+                    m_p->clip.box.minz = -radius / 16;
+                    m_p->clip.box.maxz = radius / 16;
+                    log()->get(LogLevel::Debug) << 
+                        "Adjusted geographic query minimum altitude: " <<
+                        m_p->clip.box.minz << std::endl;
+                }
+                catch (...)
+                {
+                    log()->get(LogLevel::Debug) << 
+                        "Failed to adjust geographic query minimum altitude" <<
+                        std::endl;
+                }
+            }
         }
         else
             m_p->clip.box = m_args->clip.to3d();
-        const SpatialReference& boundsSrs = m_args->clip.spatialReference();
         if (getSpatialReference().valid() && boundsSrs.valid())
             m_p->clip.xform = SrsTransform(getSpatialReference(), boundsSrs);
     }
@@ -581,6 +607,7 @@ void CopcReader::ready(PointTableRef table)
         log()->get(LogLevel::Warning) << totalPoints << " will be downloaded" << std::endl;
 
     m_p->tileCount = m_p->hierarchy.size();
+    log()->get(LogLevel::Debug) << m_p->tileCount << " overlapping nodes" << std::endl;
 
     m_p->pool.reset(new ThreadPool(m_p->pool->numThreads()));
     m_p->done = false;
@@ -664,7 +691,7 @@ bool CopcReader::passesSpatialFilter(const copc::Key& key) const
     const BOX3D& tileBounds = key.bounds(m_p->rootNodeExtent);
 
     // Reproject the tile bounds to the largest rect. solid that contains all the corners.
-    auto reproject = [](BOX3D src, SrsTransform& xform) -> BOX3D
+    auto reproject = [](BOX3D src, SrsTransform& xform, bool bcbfToLonLat = false) -> BOX3D
     {
         if (!xform.valid())
             return src;
@@ -684,15 +711,61 @@ bool CopcReader::passesSpatialFilter(const copc::Key& key) const
         reprogrow(src.maxx, src.miny, src.maxz);
         reprogrow(src.minx, src.maxy, src.maxz);
         reprogrow(src.maxx, src.maxy, src.maxz);
+
+        // TODO: More specializations might be needed, and these should not live
+        // here.  They also need to be used by the EPT reader.
+        if (!bcbfToLonLat) return b;
+
+        // If the Y-values cross the equator, make sure to include the equator.
+        if (src.miny < 0 && src.maxy > 0)
+        {
+            reprogrow(src.minx, 0, src.minz);
+            reprogrow(src.maxx, 0, src.minz);
+            reprogrow(src.minx, 0, src.maxz);
+            reprogrow(src.maxx, 0, src.maxz);
+        }
+
+        // Maybe go from -180 to 360 to capture queries in the 0-360 range?
+        for (int x = -180; x <= 180; x += 90)
+        {
+            if (x < src.minx || x > src.maxx) continue;
+
+            reprogrow(x, src.miny, src.minz);
+            reprogrow(x, src.maxy, src.minz);
+            reprogrow(x, src.miny, src.maxz);
+            reprogrow(x, src.maxy, src.maxz);
+
+            if (src.miny < 0 && src.maxy > 0)
+            {
+                reprogrow(x, 0, src.minz);
+                reprogrow(x, 0, src.maxz);
+            }
+        }
+
         return b;
     };
 
-    auto boxOverlaps = [this, &reproject, &tileBounds]() -> bool
+    auto boxOverlaps = [this, key, &reproject, &tileBounds]() -> bool
     {
         if (!m_p->clip.box.valid())
             return true;
 
-        // If the reprojected source bounds doesn't overlap our query bounds, we're done.
+        const bool sourceIsBcbf = getSpatialReference().isGeocentric();
+        const bool targetIsLonLat = m_args->clip.spatialReference().isGeographic();
+
+        // This is a concrete use-case encountered - a global coverage ECEF/BCBF
+        // dataset which is to be queried in lon/lat.  The 8 corners of the BCBF
+        // cube, reprojected into lon/lat, do not give you the equivalent 
+        // coverage in lon/lat, so we need some special logic.  Other
+        // combinations of src/dst geographic/geocentric/projected CRSes may
+        // also need to be handled separately.
+        if (sourceIsBcbf && targetIsLonLat)
+        {
+            const SpatialReference& llsrs = m_args->clip.spatialReference();
+            SrsTransform xform(llsrs, getSpatialReference());
+            return reproject(m_p->clip.box, xform, true).overlaps(tileBounds);
+        }
+
         return reproject(tileBounds, m_p->clip.xform).overlaps(m_p->clip.box);
     };
 
