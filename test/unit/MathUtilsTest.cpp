@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
+* Copyright (c) 2016, Howard Butler <howard@hobu.co>
 *
 * All rights reserved.
 *
@@ -32,69 +32,63 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/pdal_test_main.hpp>
+#include <pdal/private/MathUtils.hpp>
 
-#include <pdal/Kernel.hpp>
-#include <pdal/PipelineManager.hpp>
-#include <pdal/PointView.hpp>
-#include <pdal/Stage.hpp>
-#include <pdal/util/FileUtils.hpp>
-
-#ifdef __clang__
-#pragma GCC diagnostic ignored "-Wtautological-constant-out-of-range-compare"
-#endif
+#include "Support.hpp"
 
 namespace pdal
 {
 
-class PDAL_DLL InfoKernel : public Kernel
+TEST(MathUtilsTest, barycentric)
 {
-public:
-    std::string getName() const;
-    int execute(); // overrride
+    using namespace math;
 
-    InfoKernel();
-    void setup(const std::string& filename);
-    MetadataNode run(const std::string& filename);
+    // Triangle (1, 1), (5, 4), (3, 6) -- z's 55, 25, 100
+    double x1 = 1;
+    double y1 = 1;
+    double z1 = 55;
+    double x2 = 5;
+    double y2 = 4;
+    double z2 = 25;
+    double x3 = 3;
+    double y3 = 6;
+    double z3 = 100;
 
-    inline bool showAll() { return m_showAll; }
-    inline void doShowAll(bool value) { m_showAll = value; }
-    inline void doComputeSummary(bool value) { m_showSummary = value; }
-    inline void doComputeBoundary(bool value) { m_boundary = value; }
+    struct point
+    {
+        double x;
+        double y;
+    };
 
-private:
-    void addSwitches(ProgramArgs& args);
-    void validateSwitches(ProgramArgs& args);
-    void makeReader(const std::string& filename);
-    std::string makeLasSummaryReader(const std::string& filename);
-    void makePipeline();
-    void dump(MetadataNode& root);
-    MetadataNode dumpSummary(const QuickInfo& qi);
+    std::vector<point> points { { 3, 3 }, {4, 2}, {5, 4}, {4, 6}, {1, 5},
+        {4, 5}, {2, 7.0 / 4}, {3, 4}, {3, 6} };
 
-    std::string m_inputFile;
-    bool m_showStats;
-    bool m_showSchema;
-    bool m_showAll;
-    bool m_showMetadata;
-    bool m_boundary;
-    bool m_stac;
-    std::string m_pointIndexes;
-    std::string m_dimensions;
-    std::string m_enumerate;
-    std::string m_queryPoint;
-    std::string m_pipelineFile;
-    std::string m_pcType;
-    bool m_showSummary;
-    bool m_needPoints;
-    bool m_usestdin;
+    double inf = std::numeric_limits<double>::infinity();
+    std::vector<double> results { 48.57142857142, inf, 25, inf, inf,
+        62.5, 47.5, 65.7142857142, 100 };
 
-    Stage *m_statsStage;
-    Stage *m_hexbinStage;
-    Stage *m_infoStage;
-    Stage *m_reader;
-    Stage *m_stacStage;
+    double z;
+    for (size_t i = 0; i < points.size(); ++i)
+    {
+        const point& p = points[i];
+        z = barycentricInterpolation(x1, y1, z1, x2, y2, z2, x3, y3, z3, p.x, p.y);
+        if (std::isinf(results[i]))
+            EXPECT_TRUE(std::isinf(z));
+        else
+            EXPECT_NEAR(z, results[i], .0000000001);
+    }
 
-    MetadataNode m_tree;
-};
+    // Re-order triangle points (x2 is before x1 in input).  Results should be the same.
+    for (size_t i = 0; i < points.size(); ++i)
+    {
+        const point& p = points[i];
+        z = barycentricInterpolation(x2, y2, z2, x1, y1, z1, x3, y3, z3, p.x, p.y);
+        if (std::isinf(results[i]))
+            EXPECT_TRUE(std::isinf(z));
+        else
+            EXPECT_NEAR(z, results[i], .0000000001);
+    }
+}
 
 } // namespace pdal

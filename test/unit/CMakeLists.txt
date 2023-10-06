@@ -47,6 +47,13 @@ PDAL_ADD_TEST(pdal_kdindex_test
 )
 PDAL_ADD_TEST(pdal_kernel_test FILES KernelTest.cpp)
 PDAL_ADD_TEST(pdal_log_test FILES LogTest.cpp)
+PDAL_ADD_TEST(pdal_math_utils_test
+    FILES
+        MathUtilsTest.cpp
+        ${PDAL_SRC_DIR}/private/MathUtils.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/eigen
+)
 PDAL_ADD_TEST(pdal_metadata_test FILES MetadataTest.cpp)
 PDAL_ADD_TEST(pdal_oldpclblock_test FILES OldPCLBlockTest.cpp)
 
@@ -381,6 +388,7 @@ if (GDAL_3)
     PDAL_ADD_TEST(pdal_filters_projpipeline_test FILES filters/ProjPipelineFilterTest.cpp)
 endif()
 PDAL_ADD_TEST(pdal_filters_range_test FILES filters/RangeFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_relaxation_dart_throwing_test FILES filters/RelaxationDartThrowingTest.cpp)
 PDAL_ADD_TEST(pdal_filters_expression_test FILES filters/ExpressionFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_randomize_test FILES filters/RandomizeFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_reciprocity_test FILES filters/ReciprocityFilterTest.cpp)

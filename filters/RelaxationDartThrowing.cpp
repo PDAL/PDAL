@@ -62,6 +62,7 @@ void RelaxationDartThrowing::addArgs(ProgramArgs& args)
 {
     args.add("decay", "Decay rate", m_decay, 0.9);
     args.add("radius", "Minimum radius (initial)", m_startRadius, 1.0);
+    args.add("terminal_radius", "Minimum radius (terminal)", m_terminalRadius, 0.001);
     args.add("count", "Target number of points after sampling", m_maxSize,
              (point_count_t)1000);
     args.add("shuffle", "Shuffle points prior to sampling?", m_shuffle, true);
@@ -71,12 +72,22 @@ void RelaxationDartThrowing::addArgs(ProgramArgs& args)
 PointViewSet RelaxationDartThrowing::run(PointViewPtr inView)
 {
     point_count_t np = inView->size();
-
+    
     // Return empty PointViewSet if the input PointView has no points.
-    // Otherwise, make a new output PointView.
     PointViewSet viewSet;
     if (!np)
         return viewSet;
+    // Return inView if the PointView is already smaller than m_maxSize.
+    if (np < m_maxSize)
+    {
+        log()->get(LogLevel::Debug)
+            << "Input point cloud has fewer points " << np
+            << " than requested output size of " << m_maxSize
+            << ". Terminating." << std::endl;
+        viewSet.insert(inView);
+        return viewSet;
+    }
+    // Otherwise, make a new output PointView.
     PointViewPtr outView = inView->makeNew();
 
     // Build the 3D KD-tree.
@@ -85,6 +96,7 @@ PointViewSet RelaxationDartThrowing::run(PointViewPtr inView)
     PointIdList finalIds;
 
     double radius(m_startRadius);
+    double sqrTerminalRadius(m_terminalRadius * m_terminalRadius);
 
     PointIdList shuffledIds(np);
     std::iota(shuffledIds.begin(), shuffledIds.end(), 0);
@@ -102,6 +114,15 @@ PointViewSet RelaxationDartThrowing::run(PointViewPtr inView)
     while (finalIds.size() < m_maxSize)
     {
         double sqr_radius = radius * radius;
+        if (sqr_radius < sqrTerminalRadius)
+        {
+            log()->get(LogLevel::Debug)
+                << "Minimum radius of " << m_terminalRadius
+                << " reached at " << radius
+                << ". Terminating with " << finalIds.size()
+                << " points." << std::endl;
+            break;
+        }
 
         // All points are marked as kept (1) by default. As they are masked by
         // neighbors within the user-specified radius, their value is changed to
@@ -176,7 +197,7 @@ PointViewSet RelaxationDartThrowing::run(PointViewPtr inView)
         if (finalIds.size() < m_maxSize)
         {
             radius = m_decay * radius;
-            log()->get(LogLevel::Debug)
+            log()->get(LogLevel::Debug2)
                 << "Currently have " << finalIds.size()
                 << " ids, reducing radius to " << radius << std::endl;
         }
@@ -187,7 +208,7 @@ PointViewSet RelaxationDartThrowing::run(PointViewPtr inView)
 
     // Simply calculate the percentage of retained points.
     double frac = (double)outView->size() / (double)inView->size();
-    log()->get(LogLevel::Debug2)
+    log()->get(LogLevel::Debug)
         << "Retaining " << outView->size() << " of " << inView->size()
         << " points (" << 100 * frac << "%)\n";
 

@@ -292,6 +292,17 @@ TEST(BoundsTest, test_parse)
     EXPECT_EQ(b1, b2);
 }
 
+TEST(BoundsTest, test_parse2)
+{
+    std::istringstream iss1("([-79.0,-74.0],[38.0,39.0])");
+
+    BOX3D b1;
+
+    iss1 >> b1;
+
+}
+
+
 TEST(BoundsTest, test_parse_geojson)
 {
     std::istringstream iss1("([1,101],[2,102],[3,103])");

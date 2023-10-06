@@ -126,6 +126,18 @@ void Streamable::execute(StreamPointTable& table)
     StreamableList stages;
     StreamableList lastRunStages;
 
+    if (!table.layout()->finalized())
+    {
+        for (const auto& id : table.layout()->dims())
+        {
+            if (Dimension::isDeprecated(id))
+            {
+                log()->get(LogLevel::Warning) << 
+                    "Dimension " << Dimension::name(id) << " is deprecated" <<
+                    std::endl;
+            }
+        }
+    }
     table.finalize();
 
     // Walk from the current stage backwards.  As we add each input, copy

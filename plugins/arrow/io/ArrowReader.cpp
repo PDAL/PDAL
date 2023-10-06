@@ -311,7 +311,7 @@ void ArrowReader::initialize()
         const auto metadata = m_arrow_reader->parquet_reader()->metadata();
         loadParquetGeoMetadata(metadata->key_value_metadata());
 
-        auto batchOpenStatus = m_arrow_reader->GetRecordBatchReader(&m_parquetReader);
+        auto batchOpenStatus = m_arrow_reader->GetRecordBatchReader({0},&m_parquetReader);
         if (!batchOpenStatus.ok())
         {
             std::stringstream msg;
@@ -326,7 +326,7 @@ void ArrowReader::initialize()
         }
         auto closeStatus = m_parquetReader->Close();
 
-        batchOpenStatus = m_arrow_reader->GetRecordBatchReader(&m_parquetReader);
+        batchOpenStatus = m_arrow_reader->GetRecordBatchReader({0}, &m_parquetReader);
         if (!batchOpenStatus.ok())
         {
             std::stringstream msg;
@@ -534,10 +534,10 @@ bool ArrowReader::fillPoint(PointRef& point)
             }
             case arrow::Type::BINARY:
             {
-                // We assume any binary arrays are WKB. If they aren't we are throwing 
+                // We assume any binary arrays are WKB. If they aren't we are throwing
                 // an error
                 const auto castArray = static_cast<const arrow::BinaryArray*>(array.get());
-                std::string_view wkb = castArray->Value(m_currentBatchPointIndex); 
+                std::string_view wkb = castArray->Value(m_currentBatchPointIndex);
                 pdal::Geometry pt = pdal::Geometry(std::string(wkb));
                 OGRGeometry* g = (OGRGeometry*) pt.getOGRHandle();
                 OGRPoint* p = dynamic_cast<OGRPoint*>(g->toPoint());
@@ -552,14 +552,14 @@ bool ArrowReader::fillPoint(PointRef& point)
                 }
                 break;
             }
-            case arrow::Type::FIXED_SIZE_LIST: 
-            case arrow::Type::LIST: 
+            case arrow::Type::FIXED_SIZE_LIST:
+            case arrow::Type::LIST:
             {
                 const auto listArray = static_cast<const arrow::FixedSizeListArray*>(array.get());
                 assert(listArray->values()->type_id() == arrow::Type::DOUBLE);
                 const auto pointValues =
                     std::static_pointer_cast<arrow::DoubleArray>(listArray->values());
-                
+
                 int nDim(3); // only xyz for now
 
                 point.setField<double>(Dimension::Id::X, pointValues->Value((nDim * m_currentBatchPointIndex)));
@@ -567,7 +567,7 @@ bool ArrowReader::fillPoint(PointRef& point)
                 point.setField<double>(Dimension::Id::Z, pointValues->Value((nDim * m_currentBatchPointIndex) + 2));
                 break;
             }
-                
+
             default:
                 throw pdal_error("Unrecognized PDAL dimension type for dimension");
 

@@ -55,6 +55,7 @@ public:
 private:
     double m_decay;
     double m_startRadius;
+    double m_terminalRadius;
     point_count_t m_maxSize;
     bool m_shuffle;
     Arg* m_seedArg;

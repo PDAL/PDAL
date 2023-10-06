@@ -60,6 +60,8 @@ class LasHeader;
 
 class PDAL_DLL LasReader : public Reader, public Streamable
 {
+    friend class LasTester;
+
 protected:
     class LasStreamIf
     {
@@ -120,6 +122,8 @@ private:
     void loadPointV14(PointRef& point, char *buf, size_t bufsize);
     void loadExtraDims(LeExtractor& istream, PointRef& data);
     point_count_t readFileBlock(std::vector<char>& buf, point_count_t maxPoints);
+
+    const las::Header& lasHeader() const;
 
     struct Options;
     struct Private;

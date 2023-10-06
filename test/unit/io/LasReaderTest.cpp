@@ -47,32 +47,6 @@
 
 using namespace pdal;
 
-namespace {
-template<typename LeftIter, typename RightIter>
-::testing::AssertionResult CheckEqualCollections(LeftIter left_begin,
-    LeftIter left_end, RightIter right_begin)
-{
-    bool equal(true);
-
-    std::string message;
-    size_t index(0);
-    while (left_begin != left_end)
-    {
-        if (*left_begin++ != *right_begin++)
-        {
-            equal = false;
-            message += "\n\tMismatch at index " + std::to_string(index);
-        }
-        ++index;
-    }
-    if (message.size())
-        message += "\n\t";
-    return equal ? ::testing::AssertionSuccess() :
-        ::testing::AssertionFailure() << message;
-}
-
-} // unnamed namespace
-
 TEST(LasReaderTest, string_header_val)
 {
     using namespace std::string_literals;
@@ -282,25 +256,34 @@ TEST(LasReaderTest, inspect)
         -94.660631099999989, 31.047329099999999, 78.119000200000002);
     EXPECT_EQ(qi.m_bounds, bounds);
 
-    const char *dims[] =
+    const std::set<std::string> exp =
     {
         "Classification",
         "EdgeOfFlightLine",
         "Intensity",
         "NumberOfReturns",
+        "Overlap",
+        "KeyPoint",
         "PointSourceId",
         "ReturnNumber",
         "ScanAngleRank",
         "ScanDirectionFlag",
+        "Synthetic",
         "UserData",
+        "Withheld",
         "X",
         "Y",
         "Z"
     };
 
-    std::sort(qi.m_dimNames.begin(), qi.m_dimNames.end());
-    EXPECT_TRUE(CheckEqualCollections(qi.m_dimNames.begin(),
-        qi.m_dimNames.end(), std::begin(dims)));
+    const std::set<std::string> got(qi.m_dimNames.begin(), qi.m_dimNames.end());
+
+    for (const auto& name : exp)
+        EXPECT_TRUE(got.count(name)) << "Missing dimension " << name;
+    for (const auto& name : got)
+        EXPECT_TRUE(exp.count(name)) << "Unexpected dimension " << name;
+
+    EXPECT_EQ(qi.m_dimNames.size(), exp.size());
 }
 
 TEST(LasReaderTest, test_vlr)
@@ -352,7 +335,7 @@ TEST(LasReaderTest, extraBytes)
     reader.prepare(table);
 
     DimTypeList dimTypes = layout->dimTypes();
-    EXPECT_EQ(dimTypes.size(), (size_t)22);
+    EXPECT_EQ(dimTypes.size(), (size_t)26);
 
     Dimension::Id color0 = layout->findProprietaryDim("Colors0");
     EXPECT_EQ(layout->dimType(color0), Dimension::Type::Unsigned16);
@@ -624,8 +607,10 @@ TEST(LasReaderTest, SyntheticPoints)
     PointViewSet viewSet = reader.execute(table);
     PointViewPtr outView = *viewSet.begin();
 
-    EXPECT_EQ(ClassLabel::CreatedNeverClassified | ClassLabel::Synthetic,
+    EXPECT_EQ(ClassLabel::CreatedNeverClassified,
         outView->getFieldAs<uint8_t>(Id::Classification, 0));
+
+    EXPECT_TRUE(outView->getFieldAs<bool>(Id::Synthetic, 0));
 }
 
 TEST(LasReaderTest, Start)

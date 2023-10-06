@@ -337,6 +337,15 @@ std::vector<Polygon> getPolygons(const NL::json& ogr)
 
         if (!poLayer)
             throw pdal_error("Unable to read OGR layer: " + layer.dump());
+    } else
+    {
+        int nLayer = ds->GetLayerCount();
+        if (nLayer < 1)
+        {
+            throw pdal_error("No layers available on datasource " + datasource.dump());
+        }
+        // We just grab the first layer
+        poLayer = ds->GetLayer(0);
     }
 
     OGRFeature *poFeature (nullptr);
@@ -389,7 +398,13 @@ std::vector<Polygon> getPolygons(const NL::json& ogr)
         polys.emplace_back(poFeature->GetGeometryRef());
         OGRFeature::DestroyFeature( poFeature );
     }
-    ds->ReleaseResultSet(poLayer);
+
+    // if we used a SQL filter, we need to release the
+    // dataset
+    if (ogr.count("sql"))
+    {
+        ds->ReleaseResultSet(poLayer);
+    }
     return polys;
 }
 
