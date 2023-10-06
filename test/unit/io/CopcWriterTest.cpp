@@ -186,8 +186,7 @@ TEST(CopcWriterTest, srsUTM)
 
     const QuickInfo qi(r.preview());
     std::string srs = qi.m_srs.getWKT();
-    std::cerr << "Copc SRS = " << srs << "!\n";
-    EXPECT_TRUE(Utils::startsWith(srs, "PROJCS[\"NAD83 / UTM zone 15N\""));
+    EXPECT_TRUE(Utils::startsWith(srs, "PROJCRS[\"NAD83 / UTM zone 15N\",BASEGEOGCRS"));
 
     const char *data = nullptr;
 
