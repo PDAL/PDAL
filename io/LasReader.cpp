@@ -111,9 +111,11 @@ std::string toString(const SrsOrderSpec& srsOrder)
 {
     using namespace las;
 
+    static const std::array<std::string, 4> srsTypeNames { "wkt1", "geotiff", "projjson", "wkt2" };
+
     std::string out;
     for (SrsType type : srsOrder.types)
-        out += las::srsTypeNames[Utils::toNative(type)] + ",";
+        out += srsTypeNames[Utils::toNative(type)] + ",";
     if (out.size())
         out.erase(out.size() - 1);
     return out;
@@ -387,7 +389,6 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     las::extractSrsMetadata(d->srs, m);
     for (int i = 0; i < (int)d->vlrs.size(); ++i)
         las::addVlrMetadata(d->vlrs[i], "vlr_" + std::to_string(i), forward, m);
-
 }
 
 

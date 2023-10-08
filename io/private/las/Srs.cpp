@@ -43,6 +43,8 @@ namespace las
 
 void Srs::init(const VlrList& vlrs, std::vector<SrsType> srsOrder, bool useWkt, LogPtr log)
 {
+    bool specifiedOrder = srsOrder.size();
+
     m_srs = SpatialReference();
     m_geotiffString.clear();
 
@@ -96,6 +98,8 @@ void Srs::init(const VlrList& vlrs, std::vector<SrsType> srsOrder, bool useWkt, 
         if (log)
             log->get(LogLevel::Error) << "Could not create an SRS.\n";
     }
+    if (specifiedOrder && m_srs.empty() && log)
+        log->get(LogLevel::Warning) << "'srs_vlr_order' specified but no valid VLR was found.";
 }
 
 void Srs::extractGeotiff(const Vlr *vlr, const VlrList& vlrs, LogPtr log)
@@ -165,7 +169,7 @@ void Srs::extractWkt(const Vlr *vlr)
 }
 
 
-SpatialReference Srs::get() const
+const SpatialReference& Srs::get() const
 {
     return m_srs;
 }

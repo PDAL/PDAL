@@ -51,7 +51,6 @@ enum class SrsType
     Proj,
     Wkt2
 };
-const std::array<std::string, 4> srsTypeNames { "wkt1", "geotiff", "projjson", "wkt2" };
 
 inline std::ostream& operator<<(std::ostream& out, SrsType type)
 {
@@ -77,7 +76,7 @@ class Srs
 {
 public:
     void init(const VlrList& vlrs, std::vector<SrsType> srsOrder, bool useWkt, LogPtr log);
-    SpatialReference get() const;
+    const SpatialReference& get() const;
     std::string geotiffString() const;
 
 private:
