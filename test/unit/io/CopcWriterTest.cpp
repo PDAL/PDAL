@@ -140,7 +140,7 @@ TEST(CopcWriterTest, srsWkt2)
     {
         Options options;
         options.add("filename", filename);
-        options.add("srs_consume_preference", "projjson, wkt2");
+        options.add("srs_vlr_order", "projjson, wkt2");
 
         CopcReader creader;
         creader.setOptions(options);
