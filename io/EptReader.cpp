@@ -172,6 +172,7 @@ public:
     std::condition_variable contentsCv;
     std::vector<PolyXform> polys;
     BoxXform bounds;
+    SrsTransform llToBcbfTransform;
 };
 
 EptReader::EptReader() : m_args(new EptReader::Args), m_p(new EptReader::Private),
@@ -275,6 +276,15 @@ void EptReader::initialize()
             m_p->bounds.box = m_args->m_bounds.to3d();
         if (boundsSrs.valid() && m_p->info->srs().valid())
             m_p->bounds.xform = SrsTransform(m_p->info->srs(), boundsSrs);
+
+        const bool sourceIsBcbf = getSpatialReference().isGeocentric();
+        const bool targetIsLonLat = boundsSrs.isGeographic();
+
+        if (sourceIsBcbf && targetIsLonLat)
+        {
+            const SpatialReference& llsrs = m_args->m_bounds.spatialReference();
+            m_p->llToBcbfTransform.set(llsrs, getSpatialReference());
+        }
     }
 
     // Create transform from the point source SRS to the poly SRS.
@@ -704,20 +714,9 @@ bool EptReader::passesSpatialFilter(const BOX3D& tileBounds) const
         if (!m_p->bounds.box.valid())
             return true;
 
-        const bool sourceIsBcbf = getSpatialReference().isGeocentric();
-        const bool targetIsLonLat = m_args->m_bounds.spatialReference().isGeographic();
-
-        // This is a concrete use-case encountered - a global coverage ECEF/BCBF
-        // dataset which is to be queried in lon/lat.  The 8 corners of the BCBF
-        // cube, reprojected into lon/lat, do not give you the equivalent 
-        // coverage in lon/lat, so we need some special logic.  Other
-        // combinations of src/dst geographic/geocentric/projected CRSes may
-        // also need to be handled separately.
-        if (sourceIsBcbf && targetIsLonLat)
+        if (m_p->llToBcbfTransform.valid())
         {
-            const SpatialReference& llsrs = m_args->m_bounds.spatialReference();
-            SrsTransform xform(llsrs, getSpatialReference());
-            return reprojectBoundsBcbfToLonLat(m_p->bounds.box, xform)
+            return reprojectBoundsBcbfToLonLat(m_p->bounds.box, m_p->llToBcbfTransform)
                 .overlaps(tileBounds);
         }
 

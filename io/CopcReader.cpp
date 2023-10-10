@@ -193,6 +193,7 @@ public:
     copc::Info copc_info;
     point_count_t hierarchyPointCount;
     bool done;
+    SrsTransform llToBcbfTransform;
 };
 
 CopcReader::CopcReader() : m_args(new CopcReader::Args), m_p(new CopcReader::Private)
@@ -523,6 +524,15 @@ void CopcReader::createSpatialFilters()
             m_p->clip.box = m_args->clip.to3d();
         if (getSpatialReference().valid() && boundsSrs.valid())
             m_p->clip.xform = SrsTransform(getSpatialReference(), boundsSrs);
+
+        // We'll have to do some special checks for this type of comparison.
+        const bool sourceIsBcbf = getSpatialReference().isGeocentric();
+        const bool targetIsLonLat = boundsSrs.isGeographic();
+        if (sourceIsBcbf && targetIsLonLat)
+        {
+            const SpatialReference& llsrs = m_args->clip.spatialReference();
+            m_p->llToBcbfTransform.set(llsrs, getSpatialReference());
+        }
     }
 
     // Read polygons from OGR and add to the polygon list.
@@ -737,20 +747,9 @@ bool CopcReader::passesSpatialFilter(const copc::Key& key) const
         if (!m_p->clip.box.valid())
             return true;
 
-        const bool sourceIsBcbf = getSpatialReference().isGeocentric();
-        const bool targetIsLonLat = m_args->clip.spatialReference().isGeographic();
-
-        // This is a concrete use-case encountered - a global coverage ECEF/BCBF
-        // dataset which is to be queried in lon/lat.  The 8 corners of the BCBF
-        // cube, reprojected into lon/lat, do not give you the equivalent 
-        // coverage in lon/lat, so we need some special logic.  Other
-        // combinations of src/dst geographic/geocentric/projected CRSes may
-        // also need to be handled separately.
-        if (sourceIsBcbf && targetIsLonLat)
+        if (m_p->llToBcbfTransform.valid())
         {
-            const SpatialReference& llsrs = m_args->clip.spatialReference();
-            SrsTransform xform(llsrs, getSpatialReference());
-            return reprojectBoundsBcbfToLonLat(m_p->clip.box, xform)
+            return reprojectBoundsBcbfToLonLat(m_p->clip.box, m_p->llToBcbfTransform)
                 .overlaps(tileBounds);
         }
 
