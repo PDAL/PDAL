@@ -683,32 +683,6 @@ bool EptReader::hasSpatialFilter() const
 // Determine if an EPT tile overlaps our query boundary
 bool EptReader::passesSpatialFilter(const BOX3D& tileBounds) const
 {
-    /*
-    // Reproject the tile bounds to the largest rect. solid that contains all the corners.
-    auto reproject = [](BOX3D src, SrsTransform& xform) -> BOX3D
-    {
-        if (!xform.valid())
-            return src;
-
-        BOX3D b;
-        auto reprogrow = [&b, &xform](double x, double y, double z)
-        {
-            xform.transform(x, y, z);
-            b.grow(x, y, z);
-        };
-
-        reprogrow(src.minx, src.miny, src.minz);
-        reprogrow(src.maxx, src.miny, src.minz);
-        reprogrow(src.minx, src.maxy, src.minz);
-        reprogrow(src.maxx, src.maxy, src.minz);
-        reprogrow(src.minx, src.miny, src.maxz);
-        reprogrow(src.maxx, src.miny, src.maxz);
-        reprogrow(src.minx, src.maxy, src.maxz);
-        reprogrow(src.maxx, src.maxy, src.maxz);
-        return b;
-    };
-    */
-
     auto boxOverlaps = [this, &tileBounds]() -> bool
     {
         if (!m_p->bounds.box.valid())
