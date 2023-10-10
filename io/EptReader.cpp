@@ -261,15 +261,18 @@ void EptReader::initialize()
     // Create transformations from our source data to the bounds SRS.
     if (m_args->m_bounds.valid())
     {
+        const SpatialReference& boundsSrs = m_args->m_bounds.spatialReference();
         if (m_args->m_bounds.is2d())
         {
+            if (boundsSrs.isGeographic() && !getSpatialReference().isGeographic())
+                throwError("For lon/lat 'bounds', bounds must be 3D");
+
             m_p->bounds.box = BOX3D(m_args->m_bounds.to2d());
             m_p->bounds.box.minz = (std::numeric_limits<double>::lowest)();
             m_p->bounds.box.maxz = (std::numeric_limits<double>::max)();
         }
         else
             m_p->bounds.box = m_args->m_bounds.to3d();
-        const SpatialReference& boundsSrs = m_args->m_bounds.spatialReference();
         if (boundsSrs.valid() && m_p->info->srs().valid())
             m_p->bounds.xform = SrsTransform(m_p->info->srs(), boundsSrs);
     }
