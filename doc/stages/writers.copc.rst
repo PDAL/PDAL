@@ -159,10 +159,7 @@ threads
 enhanced_srs_vlrs
   Write WKT2 and PROJJSON as VLR [Default: false]
 
-nosrs
-  Don't read the SRS VLRs. The data will not be assigned an SRS. This option is
-  for use only in special cases where processing the SRS could cause performance
-  issues. [Default: false]
+
 
 .. include:: writer_opts.rst
 
