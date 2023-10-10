@@ -106,11 +106,17 @@ BOX3D reprojectBoundsBcbfToLonLat(BOX3D src, SrsTransform& xform)
         reprogrow(b, xform, src.maxx, 0, src.maxz);
     }
 
-    // Maybe go from -180 to 360 to capture queries in the 0-360 range?
-    for (int x = -180; x <= 180; x += 90)
-    {
-        if (x < src.minx || x > src.maxx) continue;
+    // Round the minimum longitude up to the nearest multiple of 90 degrees.
+    int x = std::ceil(src.minx);
+    const int remainder = std::abs(x) % 90;
+    if (x < 0)
+        x = -(std::abs(x) - remainder);
+    else if (x > 0)
+        x = x + 90 - remainder;
 
+    // And include the reprojected bounds at every 90 degrees within the query.
+    for ( ; x <= src.maxx; x += 90)
+    {
         reprogrow(b, xform, x, src.miny, src.minz);
         reprogrow(b, xform, x, src.maxy, src.minz);
         reprogrow(b, xform, x, src.miny, src.maxz);
