@@ -65,6 +65,67 @@ const StaticPluginInfo s_info
     { "ept" }
 };
 
+void reprogrow(BOX3D& b, SrsTransform& xform, double x, double y, double z)
+{
+    xform.transform(x, y, z);
+    b.grow(x, y, z);
+}
+
+BOX3D reprojectBoundsViaCorner(BOX3D src, SrsTransform& xform)
+{
+    if (!xform.valid())
+        return src;
+
+    BOX3D b;
+
+    reprogrow(b, xform, src.minx, src.miny, src.minz);
+    reprogrow(b, xform, src.maxx, src.miny, src.minz);
+    reprogrow(b, xform, src.minx, src.maxy, src.minz);
+    reprogrow(b, xform, src.maxx, src.maxy, src.minz);
+    reprogrow(b, xform, src.minx, src.miny, src.maxz);
+    reprogrow(b, xform, src.maxx, src.miny, src.maxz);
+    reprogrow(b, xform, src.minx, src.maxy, src.maxz);
+    reprogrow(b, xform, src.maxx, src.maxy, src.maxz);
+
+    return b;
+}
+
+BOX3D reprojectBoundsBcbfToLonLat(BOX3D src, SrsTransform& xform)
+{
+    if (!xform.valid())
+        return src;
+
+    BOX3D b = reprojectBoundsViaCorner(src, xform);
+
+    // If the Y-values cross the equator, make sure to include the equator.
+    if (src.miny < 0 && src.maxy > 0)
+    {
+        reprogrow(b, xform, src.minx, 0, src.minz);
+        reprogrow(b, xform, src.maxx, 0, src.minz);
+        reprogrow(b, xform, src.minx, 0, src.maxz);
+        reprogrow(b, xform, src.maxx, 0, src.maxz);
+    }
+
+    // Maybe go from -180 to 360 to capture queries in the 0-360 range?
+    for (int x = -180; x <= 180; x += 90)
+    {
+        if (x < src.minx || x > src.maxx) continue;
+
+        reprogrow(b, xform, x, src.miny, src.minz);
+        reprogrow(b, xform, x, src.maxy, src.minz);
+        reprogrow(b, xform, x, src.miny, src.maxz);
+        reprogrow(b, xform, x, src.maxy, src.maxz);
+
+        if (src.miny < 0 && src.maxy > 0)
+        {
+            reprogrow(b, xform, x, 0, src.minz);
+            reprogrow(b, xform, x, 0, src.maxz);
+        }
+    }
+
+    return b;
+}
+
 }
 
 CREATE_STATIC_STAGE(EptReader, s_info);
@@ -609,6 +670,7 @@ bool EptReader::hasSpatialFilter() const
 // Determine if an EPT tile overlaps our query boundary
 bool EptReader::passesSpatialFilter(const BOX3D& tileBounds) const
 {
+    /*
     // Reproject the tile bounds to the largest rect. solid that contains all the corners.
     auto reproject = [](BOX3D src, SrsTransform& xform) -> BOX3D
     {
@@ -632,25 +694,44 @@ bool EptReader::passesSpatialFilter(const BOX3D& tileBounds) const
         reprogrow(src.maxx, src.maxy, src.maxz);
         return b;
     };
+    */
 
-    auto boxOverlaps = [this, &reproject, &tileBounds]() -> bool
+    auto boxOverlaps = [this, &tileBounds]() -> bool
     {
         if (!m_p->bounds.box.valid())
             return true;
 
+        const bool sourceIsBcbf = getSpatialReference().isGeocentric();
+        const bool targetIsLonLat = m_args->m_bounds.spatialReference().isGeographic();
+
+        // This is a concrete use-case encountered - a global coverage ECEF/BCBF
+        // dataset which is to be queried in lon/lat.  The 8 corners of the BCBF
+        // cube, reprojected into lon/lat, do not give you the equivalent 
+        // coverage in lon/lat, so we need some special logic.  Other
+        // combinations of src/dst geographic/geocentric/projected CRSes may
+        // also need to be handled separately.
+        if (sourceIsBcbf && targetIsLonLat)
+        {
+            const SpatialReference& llsrs = m_args->m_bounds.spatialReference();
+            SrsTransform xform(llsrs, getSpatialReference());
+            return reprojectBoundsBcbfToLonLat(m_p->bounds.box, xform)
+                .overlaps(tileBounds);
+        }
+
         // If the reprojected source bounds doesn't overlap our query bounds, we're done.
-        return reproject(tileBounds, m_p->bounds.xform).overlaps(m_p->bounds.box);
+        return reprojectBoundsViaCorner(tileBounds, m_p->bounds.xform)
+            .overlaps(m_p->bounds.box);
     };
 
     // Check the box of the key against our query polygon(s). If it doesn't overlap,
     // we can skip
-    auto polysOverlap = [this, &reproject, &tileBounds]() -> bool
+    auto polysOverlap = [this, &tileBounds]() -> bool
     {
         if (m_p->polys.empty())
             return true;
 
         for (auto& ps : m_p->polys)
-            if (!ps.poly.disjoint(reproject(tileBounds, ps.xform)))
+            if (!ps.poly.disjoint(reprojectBoundsViaCorner(tileBounds, ps.xform)))
                 return true;
         return false;
     };
