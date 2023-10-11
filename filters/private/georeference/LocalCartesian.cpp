@@ -36,11 +36,6 @@
 #include <ogr_spatialref.h>
 #include <ostream>
 
-#if PROJ_AT_LEAST_VERSION(9, 3, 0)
-#include "proj/util.hpp" // for nn_dynamic_pointer_cast
-#else
-#endif
-
 namespace pdal
 {
 namespace georeference
