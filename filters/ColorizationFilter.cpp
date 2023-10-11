@@ -202,11 +202,12 @@ void ColorizationFilter::ready(PointTableRef table)
 bool ColorizationFilter::processOne(PointRef& point)
 {
     static std::vector<double> data;
+    static std::array<double, 2> pix;
 
     double x = point.getFieldAs<double>(Dimension::Id::X);
     double y = point.getFieldAs<double>(Dimension::Id::Y);
 
-    if (m_raster->read(x, y, data) == gdal::GDALError::None)
+    if (m_raster->read(x, y, data, pix) == gdal::GDALError::None)
     {
         int i(0);
         for (auto bi = m_bands.begin(); bi != m_bands.end(); ++bi)

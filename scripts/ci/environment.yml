@@ -12,6 +12,11 @@ dependencies:
   - openssl
   - nitro
   - ceres-solver
+  - python=3.10
+  - conda
+  - mamba
+  - conda-build
+  - arrow-cpp
   - mkl  # [win]
   - blas  # [win]
   - compilers

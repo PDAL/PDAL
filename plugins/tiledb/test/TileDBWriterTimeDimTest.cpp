@@ -415,7 +415,6 @@ TEST_F(TileDBWriterTimeDimTest, append_write_with_time)
     reader_options.add("xyz_mode", "ramp");
     reader_options.add("bounds", rdr_bounds);
     reader_options.add("density", 2.0);
-    reader_options.add("use_time", false);
 
     XYZTimeFauxReader reader;
     reader.setOptions(reader_options);

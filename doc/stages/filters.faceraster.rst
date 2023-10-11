@@ -69,5 +69,9 @@ _`width`
 _`height`
   Number of cells in the Y direction. [Default: None]
 
+max_triangle_edge_length
+  Maximum triangle edge length; triangles larger than this size will not be
+  rasterized. [Default: Infinity]
+
 .. include:: filter_opts.rst
 

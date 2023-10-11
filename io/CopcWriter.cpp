@@ -121,6 +121,8 @@ void CopcWriter::addArgs(ProgramArgs& args)
     args.add("fixed_seed", "Fix the random seed", b->opts.fixedSeed).setHidden();
     args.add("a_srs", "Spatial reference to use to write output", b->opts.aSrs);
     args.add("threads", "", b->opts.threadCount).setHidden();
+    args.add("enhanced_srs_vlrs", "Write WKT2 and PROJJSON as VLR?", b->opts.enhancedSrsVlrs,
+        decltype(b->opts.enhancedSrsVlrs)(false));
 }
 
 void CopcWriter::fillForwardList()
@@ -212,11 +214,12 @@ void CopcWriter::handleForwardVlrs(MetadataNode& forwards)
         if (userIdNode.valid() && recordIdNode.valid())
         {
 
+            const MetadataNode& descriptionNode = n.findChild("description");
             const std::vector<uint8_t>& data = Utils::base64_decode(n.findChild("data").value());
             const char *d = (const char *)data.data();
             std::vector<char> buf(d, d + data.size());
             las::Evlr e(userIdNode.value(), (uint16_t)std::stoi(recordIdNode.value()),
-                n.description(), std::move(buf));
+                descriptionNode.value(), std::move(buf));
             b->vlrs.push_back(e);
         }
     }
@@ -253,12 +256,12 @@ void CopcWriter::prepared(PointTableRef table)
         DimType dimType = layout->findDimType(name);
         Dimension::Detail const* detail = layout->dimDetail(id);
         size_t size = detail->size();
-        b->extraDims.emplace_back(name, 
-                                  type, 
+        b->extraDims.emplace_back(name,
+                                  type,
                                   id,
                                   size,
-                                  las::baseCount(b->pointFormatId) + b->numExtraBytes, 
-                                  dimType.m_xform.m_scale.m_val, 
+                                  las::baseCount(b->pointFormatId) + b->numExtraBytes,
+                                  dimType.m_xform.m_scale.m_val,
                                   dimType.m_xform.m_offset.m_val);
         b->numExtraBytes += size;
     }
@@ -375,6 +378,20 @@ void CopcWriter::write(const PointViewPtr v)
        b->srs = b->opts.aSrs;
     else
        b->srs = v->spatialReference();
+
+    if (b->opts.enhancedSrsVlrs) {
+        auto addVlr = [&](const std::string& userId, uint16_t recordId, const std::string& desc, const std::string& str)
+        {
+            if (!str.empty()) {
+                std::vector<char> strBytes(str.begin(), str.end());
+                strBytes.resize(strBytes.size() + 1, 0);
+                las::Evlr v(userId, recordId, desc, std::move(strBytes));
+                b->vlrs.push_back(v);
+            }
+        };
+        addVlr(las::TransformUserId, las::LASFWkt2recordId, "PDAL WKT2 Record", b->srs.getWKT2());
+        addVlr(las::PdalUserId, las::PdalProjJsonRecordId, "PDAL PROJJSON Record", b->srs.getPROJJSON());
+    }
 
     // Set the input string into scaling.
     b->scaling.m_xXform.m_scale.set(b->opts.scaleX.val());

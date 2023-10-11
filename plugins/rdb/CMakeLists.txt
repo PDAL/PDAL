@@ -1,12 +1,9 @@
+cmake_minimum_required(VERSION 3.13)
 
 if (STANDALONE)
-cmake_minimum_required(VERSION 3.5)
-set(ROOT_DIR "../../${PROJECT_SOURCE_DIR}")
-include(../../cmake/common.cmake NO_POLICY_SCOPE)
-include(FeatureSummary)
-
-
-find_package(PDAL COMPONENTS REQUIRED)
+    project(pdal-rdb)
+    include("${CMAKE_CURRENT_LIST_DIR}/../../cmake/standalone.cmake" )
+    find_package(PDAL REQUIRED)
 endif(STANDALONE)
 
 find_package(rdb COMPONENTS REQUIRED)

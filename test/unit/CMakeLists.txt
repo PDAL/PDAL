@@ -47,6 +47,13 @@ PDAL_ADD_TEST(pdal_kdindex_test
 )
 PDAL_ADD_TEST(pdal_kernel_test FILES KernelTest.cpp)
 PDAL_ADD_TEST(pdal_log_test FILES LogTest.cpp)
+PDAL_ADD_TEST(pdal_math_utils_test
+    FILES
+        MathUtilsTest.cpp
+        ${PDAL_SRC_DIR}/private/MathUtils.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/eigen
+)
 PDAL_ADD_TEST(pdal_metadata_test FILES MetadataTest.cpp)
 PDAL_ADD_TEST(pdal_oldpclblock_test FILES OldPCLBlockTest.cpp)
 
@@ -161,6 +168,13 @@ PDAL_ADD_TEST(pdal_io_copc_reader_test
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
+PDAL_ADD_TEST(pdal_io_copc_writer_test
+    FILES
+        io/CopcWriterTest.cpp
+    INCLUDES
+        ${GDAL_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
+)
 PDAL_ADD_TEST(pdal_io_faux_test FILES io/FauxReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_gdal_reader_test
     FILES
@@ -196,6 +210,7 @@ PDAL_ADD_TEST(pdal_io_las_writer_test
     FILES
         io/LasWriterTest.cpp
     INCLUDES
+        ${GDAL_INCLUDE_DIR}
         ${NLOHMANN_INCLUDE_DIR}
 )
 
@@ -247,6 +262,34 @@ PDAL_ADD_TEST(pdal_io_text_reader_test
 )
 PDAL_ADD_TEST(pdal_io_gltf_writer_test FILES io/GltfWriterTest.cpp)
 PDAL_ADD_TEST(pdal_io_smrmsg_reader_test FILES io/SmrmsgReaderTest.cpp)
+
+
+if (PDAL_HAVE_ZLIB)
+
+PDAL_ADD_TEST(pdal_io_slpk_reader_test
+    FILES
+        io/SlpkReaderTest.cpp
+)
+
+PDAL_ADD_TEST(pdal_i3s_obb_test
+    FILES
+        io/ObbTest.cpp
+        ${PDAL_IO_DIR}/private/esri/Obb.cpp
+        ${PDAL_SRC_DIR}/private/MathUtils.cpp
+    INCLUDES
+        ${NLOHMANN_INCLUDE_DIR}
+        ${PDAL_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}/eigen
+)
+
+if (BUILD_I3S_TESTS)
+    PDAL_ADD_TEST(pdal_io_i3s_reader_test
+            FILES
+                io/i3sReaderTest.cpp
+    )
+endif()
+
+endif()
 
 #
 # sources for the native filters
@@ -345,6 +388,7 @@ if (GDAL_3)
     PDAL_ADD_TEST(pdal_filters_projpipeline_test FILES filters/ProjPipelineFilterTest.cpp)
 endif()
 PDAL_ADD_TEST(pdal_filters_range_test FILES filters/RangeFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_relaxation_dart_throwing_test FILES filters/RelaxationDartThrowingTest.cpp)
 PDAL_ADD_TEST(pdal_filters_expression_test FILES filters/ExpressionFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_randomize_test FILES filters/RandomizeFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_reciprocity_test FILES filters/ReciprocityFilterTest.cpp)

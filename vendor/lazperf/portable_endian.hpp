@@ -12,7 +12,7 @@
 
 // use standard posix style headers for apple emscripten builds as well since emscripten sdk now ships its own
 // libc headers
-#if defined(__linux__) || defined(__CYGWIN__) || defined(__EMSCRIPTEN__)
+#if defined(__linux__) || defined(__CYGWIN__) || defined(__EMSCRIPTEN__) || defined(__GNU__)
 
 #   include <endian.h>
 

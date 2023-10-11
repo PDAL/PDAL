@@ -62,11 +62,11 @@ std::istream& operator>>(std::istream& in, PointClasses& classes)
     for (const std::string& c : sl)
     {
         if (c == "keypoint")
-            classes.m_classes |= ClassLabel::Keypoint;
+            classes.m_classes |= PointClasses::Keypoint;
         else if (c == "synthetic")
-            classes.m_classes |= ClassLabel::Synthetic;
+            classes.m_classes |= PointClasses::Synthetic;
         else if (c == "withheld")
-            classes.m_classes |= ClassLabel::Withheld;
+            classes.m_classes |= PointClasses::Withheld;
         else
             in.setstate(std::ios::failbit);
     }
@@ -76,11 +76,11 @@ std::istream& operator>>(std::istream& in, PointClasses& classes)
 std::ostream& operator<<(std::ostream& out, const PointClasses& classes)
 {
     std::string s;
-    if (classes.m_classes & ClassLabel::Keypoint)
+    if (classes.m_classes & PointClasses::Keypoint)
         s += "keypoint,";
-    if (classes.m_classes & ClassLabel::Synthetic)
+    if (classes.m_classes & PointClasses::Synthetic)
         s += "synthetic,";
-    if (classes.m_classes & ClassLabel::Withheld)
+    if (classes.m_classes & PointClasses::Withheld)
         s += "withheld,";
     if (Utils::endsWith(s, ","))
         s.resize(s.size() - 1);

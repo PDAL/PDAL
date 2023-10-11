@@ -21,11 +21,13 @@ CFLAGS= CXXFLAGS="-Werror=strict-aliasing" CC=/usr/bin/cc CXX=/usr/bin/c++ cmake
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_HDF=ON \
+        -DBUILD_PLUGIN_ARROW=ON \
         -DBUILD_PLUGIN_DRACO=ON \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
+        -DBUILD_I3S_TESTS=ON \
         -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address" \
         -DCMAKE_CXX_FLAGS="-fsanitize=address" \
-        -DBUILD_PLUGIN_TILEDB=ON \
+        -DBUILD_PLUGIN_TILEDB=OFF \
         -DWITH_ZSTD=ON \
         ..
 

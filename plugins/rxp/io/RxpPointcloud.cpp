@@ -62,7 +62,9 @@ Point::Point(
         double beamOriginZ,
         double beamDirectionX,
         double beamDirectionY,
-        double beamDirectionZ)
+        double beamDirectionZ,
+        float roll,
+        float pitch)
     : target(target)
     , returnNumber(returnNumber)
     , numberOfReturns(numberOfReturns)
@@ -73,6 +75,8 @@ Point::Point(
     , beamDirectionX(beamDirectionX)
     , beamDirectionY(beamDirectionY)
     , beamDirectionZ(beamDirectionZ)
+    , roll(roll)
+    , pitch(pitch)
 {}
 
 
@@ -155,6 +159,8 @@ void RxpPointcloud::copyPoint(const Point& from, PointRef& to) const {
     to.setField(Id::BeamOriginX, from.beamOriginX);
     to.setField(Id::BeamOriginY, from.beamOriginY);
     to.setField(Id::BeamOriginZ, from.beamOriginZ);
+    to.setField(Id::Roll, from.roll);
+    to.setField(Id::Pitch, from.pitch);
 
     if (m_reflectanceAsIntensity) {
         uint16_t intensity;
@@ -167,7 +173,7 @@ void RxpPointcloud::copyPoint(const Point& from, PointRef& to) const {
                         (from.target.reflectance - m_minReflectance) / (m_maxReflectance - m_minReflectance)));
         }
         to.setField(Id::Intensity, intensity);
-    }    
+    }
 }
 
 
@@ -189,8 +195,9 @@ void RxpPointcloud::on_echo_transformed(echo_type echo)
     for (scanlib::pointcloud::target_count_type i = 0; i < target_count; ++i, ++returnNumber)
     {
         //Only first return is marked as edge of flight line
-        m_points.emplace_back(targets[i], returnNumber, target_count, m_edge, beam_origin[0], 
-        beam_origin[1], beam_origin[2], beam_direction[0], beam_direction[1], beam_direction[2]);
+        m_points.emplace_back(targets[i], returnNumber, target_count, m_edge, beam_origin[0],
+        beam_origin[1], beam_origin[2], beam_direction[0], beam_direction[1], beam_direction[2],
+        m_roll, m_pitch);
         if (m_edge)
             m_edge = false;
     }
@@ -206,6 +213,12 @@ void RxpPointcloud::on_line_start_dn(const scanlib::line_start_dn<iterator_type>
 {
     scanlib::pointcloud::on_line_start_dn(arg);
     m_edge = true;
+}
+
+void RxpPointcloud::on_hk_incl(const scanlib::hk_incl<iterator_type>& arg) {
+    scanlib::pointcloud::on_hk_incl(arg);
+    m_roll = (float)arg.ROLL * 0.001;
+    m_pitch = (float)arg.PITCH * 0.001;
 }
 
 } //pdal

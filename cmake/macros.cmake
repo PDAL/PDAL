@@ -73,9 +73,9 @@ macro(PDAL_ADD_LIBRARY _name)
 
     install(TARGETS ${_name}
         EXPORT PDALTargets
-        RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
-        LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
-        ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endmacro(PDAL_ADD_LIBRARY)
 
 ###############################################################################
@@ -101,9 +101,9 @@ macro(PDAL_ADD_FREE_LIBRARY _name _library_type)
         target_compile_definitions(${_name} PRIVATE PDAL_DLL_EXPORT)
         install(TARGETS ${_name}
             EXPORT PDALTargets
-            RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
-            LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
-            ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
     else()
         set_target_properties(${_name} PROPERTIES
             POSITION_INDEPENDENT_CODE TRUE)
@@ -126,7 +126,7 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
     set(multiValueArgs FILES LINK_WITH INCLUDES SYSTEM_INCLUDES)
     cmake_parse_arguments(PDAL_ADD_PLUGIN "${options}" "${oneValueArgs}"
         "${multiValueArgs}" ${ARGN})
-    if(WIN32)
+    if(MSVC)
         set(${_name} "libpdal_plugin_${_type}_${_shortname}")
     else()
         set(${_name} "pdal_plugin_${_type}_${_shortname}")
@@ -155,8 +155,7 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
     endif()
     target_link_libraries(${${_name}}
         PRIVATE
-            ${PDAL_BASE_LIB_NAME}
-            ${PDAL_UTIL_LIB_NAME}
+            ${PDAL_LIB_NAME}
             ${PDAL_ADD_PLUGIN_LINK_WITH}
             ${WINSOCK_LIBRARY}
     )
@@ -168,9 +167,9 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
         CLEAN_DIRECT_OUTPUT 1)
 
     install(TARGETS ${${_name}}
-        RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
-        LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
-        ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
     if (APPLE)
         set_target_properties(${${_name}} PROPERTIES
             INSTALL_NAME_DIR "@rpath")
@@ -186,6 +185,11 @@ endmacro(PDAL_ADD_PLUGIN)
 #    INCLUDES header file directories
 #
 macro(PDAL_ADD_TEST _name)
+
+    if (NOT WITH_TESTS)
+        return()
+    endif(NOT WITH_TESTS)
+
     set(options)
     set(oneValueArgs)
     set(multiValueArgs FILES LINK_WITH INCLUDES SYSTEM_INCLUDES)
@@ -210,8 +214,7 @@ macro(PDAL_ADD_TEST _name)
     set_property(TARGET ${_name} PROPERTY FOLDER "Tests")
     target_link_libraries(${_name}
         PRIVATE
-            ${PDAL_BASE_LIB_NAME}
-            ${PDAL_UTIL_LIB_NAME}
+            ${PDAL_LIB_NAME}
             gtest
             ${PDAL_ADD_TEST_LINK_WITH}
             ${WINSOCK_LIBRARY}

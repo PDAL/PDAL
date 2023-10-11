@@ -1,3 +1,10 @@
+cmake_minimum_required(VERSION 3.13)
+
+if (STANDALONE)
+    project(pdal-cpd)
+    include(../../cmake/standalone.cmake NO_POLICY_SCOPE)
+endif(STANDALONE)
+
 set(Cpd_VERSION 0.5)
 
 find_package(Cpd ${Cpd_VERSION} REQUIRED)

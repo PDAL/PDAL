@@ -27,16 +27,15 @@ jobs:
 
     env:
       PDAL_PLATFORM: ${{ matrix.platform }}
-      CACHE_NUMBER: 1
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Support longpaths
       run: git config --system core.longpaths true
       if: matrix.platform == 'windows-latest'
 
     - name: Cache Conda Environment
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/conda_pkgs_dir
         key: ${{ runner.os }}-${{ steps.get-date.outputs.today }}-conda-${{ env.CACHE_NUMBER }}
@@ -49,8 +48,6 @@ jobs:
         auto-update-conda: true
         use-only-tar-bz2: false
 
-    - uses: ilammy/msvc-dev-cmd@v1
-      if: matrix.platform == 'windows-latest'
 
     - name: Setup
       run: |
@@ -67,11 +64,14 @@ jobs:
           conda info
           conda list
 
+    - uses: ilammy/msvc-dev-cmd@v1
+      if: matrix.platform == 'windows-latest'
+
     - name: Test
       run: |
           source ./scripts/ci/conda/examples.sh
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: ${{ matrix.platform }}-conda-package
         path: ./pdal-feedstock/packages/

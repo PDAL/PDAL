@@ -64,8 +64,7 @@ namespace pdal
 static StaticPluginInfo const s_info
 {
     "writers.las",
-    "ASPRS LAS 1.0 - 1.4 writer. LASzip support is also \n" \
-        "available if enabled at compile-time.",
+    "ASPRS LAS 1.0 - 1.4 writer",
     "http://pdal.io/stages/writers.las.html",
     { "las", "laz" }
 };
@@ -99,6 +98,7 @@ struct LasWriter::Options
     StringHeaderVal<0> offsetY;
     StringHeaderVal<0> offsetZ;
     std::vector<las::Evlr> userVlrs;
+    bool enhancedSrsVlrs;
 };
 
 struct LasWriter::Private
@@ -173,6 +173,8 @@ void LasWriter::addArgs(ProgramArgs& args)
     args.add("offset_y", "Y offset", d->opts.offsetY);
     args.add("offset_z", "Z offset", d->opts.offsetZ);
     args.add("vlrs", "List of VLRs to set", d->opts.userVlrs);
+    args.add("enhanced_srs_vlrs", "Write WKT2 and PROJJSON as VLR?", d->opts.enhancedSrsVlrs,
+        decltype(d->opts.enhancedSrsVlrs)(false));
 }
 
 void LasWriter::initialize()
@@ -524,8 +526,35 @@ void LasWriter::addGeotiffVlrs()
 /// \return  Whether the VLR was added.
 bool LasWriter::addWktVlr()
 {
+    // WKT2 and PROJJSON can be writen in PDAL VLRs
+    if (d->opts.enhancedSrsVlrs) {
+        const std::string wkt2 = m_srs.getWKT2();
+        if (!wkt2.empty()) {
+            std::vector<char> wktBytes(wkt2.begin(), wkt2.end());
+            wktBytes.resize(wktBytes.size() + 1, 0);
+            addVlr(las::TransformUserId, las::LASFWkt2recordId, "PDAL WKT2 Record", wktBytes);
+        }
+
+        const std::string projjson = m_srs.getPROJJSON();
+        if (!projjson.empty()) {
+            std::vector<char> wktBytes(projjson.begin(), projjson.end());
+            wktBytes.resize(wktBytes.size() + 1, 0);
+            addVlr(las::PdalUserId, las::PdalProjJsonRecordId, "PDAL PROJJSON Record", wktBytes);
+        }
+    }
+
     // LAS 1.4 requires WKTv1
-    std::string wkt = m_srs.getWKT1();
+    std::string wkt;
+    try
+    {
+        wkt = m_srs.getWKT1();
+    }
+    catch(const std::exception&)
+    {
+        if (!d->opts.enhancedSrsVlrs)
+            throw;
+    }
+
     if (wkt.empty())
         return false;
 
@@ -869,49 +898,94 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
     double xOrig = point.getFieldAs<double>(Id::X);
     double yOrig = point.getFieldAs<double>(Id::Y);
     double zOrig = point.getFieldAs<double>(Id::Z);
-    double x = m_scaling.m_xXform.toScaled(xOrig);
-    double y = m_scaling.m_yXform.toScaled(yOrig);
-    double z = m_scaling.m_zXform.toScaled(zOrig);
+    int32_t x = converter(m_scaling.m_xXform.toScaled(xOrig), Id::X);
+    int32_t y = converter(m_scaling.m_yXform.toScaled(yOrig), Id::Y);
+    int32_t z = converter(m_scaling.m_zXform.toScaled(zOrig), Id::Z);
 
-    ostream << converter(x, Id::X);
-    ostream << converter(y, Id::Y);
-    ostream << converter(z, Id::Z);
+    ostream << x;
+    ostream << y;
+    ostream << z;
 
-    ostream << point.getFieldAs<uint16_t>(Id::Intensity);
+    uint16_t intensity(0);
+    if (point.hasDim(Id::Intensity))
+        intensity = point.getFieldAs<uint16_t>(Id::Intensity);
+    ostream << intensity;
 
-    uint8_t scanChannel = point.getFieldAs<uint8_t>(Id::ScanChannel);
-    uint8_t scanDirectionFlag = point.getFieldAs<uint8_t>(Id::ScanDirectionFlag);
-    uint8_t edgeOfFlightLine = point.getFieldAs<uint8_t>(Id::EdgeOfFlightLine);
-    uint8_t classification = point.getFieldAs<uint8_t>(Id::Classification);
-    uint8_t classFlags;
-    if (point.hasDim(Id::ClassFlags))
-    {
-        // source file is PDRF >= 6
-        classFlags = point.getFieldAs<uint8_t>(Id::ClassFlags);
-    }
-    else
-    {
-        // source file is PDRF < 6
-        classFlags = classification >> 5;
-        classification &= 0x1F;
-    }
+    uint8_t scanChannel(0);
+    if (point.hasDim(Id::ScanChannel))
+        scanChannel = point.getFieldAs<uint8_t>(Id::ScanChannel);
+
+    uint8_t scanDirectionFlag(0);
+    if (point.hasDim(Id::ScanDirectionFlag))
+        scanDirectionFlag = point.getFieldAs<uint8_t>(Id::ScanDirectionFlag);
+
+    uint8_t edgeOfFlightLine(0);
+    if (point.hasDim(Id::EdgeOfFlightLine))
+        edgeOfFlightLine = point.getFieldAs<uint8_t>(Id::EdgeOfFlightLine);
+
+    uint8_t classification(0);
+    if (point.hasDim(Id::Classification))
+        classification = point.getFieldAs<uint8_t>(Id::Classification);
+
+    uint8_t synthetic(0);
+    if (point.hasDim(Id::Synthetic))
+        synthetic = point.getFieldAs<uint8_t>(Id::Synthetic);
+    uint8_t keypoint(0);
+    if (point.hasDim(Id::KeyPoint))
+        keypoint = point.getFieldAs<uint8_t>(Id::KeyPoint);
+    uint8_t withheld(0);
+    if (point.hasDim(Id::Withheld))
+        withheld = point.getFieldAs<uint8_t>(Id::Withheld);
+    uint8_t overlap(0);
+    if (point.hasDim(Id::Overlap))
+        overlap = point.getFieldAs<uint8_t>(Id::Overlap);
 
     if (has14PointFormat)
     {
-        uint8_t bits = returnNumber | (numberOfReturns << 4);
-        ostream << bits;
+        uint8_t returnbits = returnNumber | (numberOfReturns << 4);
+        ostream << returnbits;
 
-        bits = (classFlags & 0x0F) |
+        uint8_t otherbits = 
+            ((synthetic & 0x01) << 0) |
+            ((keypoint & 0x01) << 1) |
+            ((withheld & 0x01) << 2) |
+            ((overlap & 0x01) << 3) |
             ((scanChannel & 0x03) << 4) |
             ((scanDirectionFlag & 0x01) << 6) |
             ((edgeOfFlightLine & 0x01) << 7);
-        ostream << bits;
+        ostream << otherbits << classification;
     }
     else
     {
         uint8_t bits = returnNumber | (numberOfReturns << 3) |
             (scanDirectionFlag << 6) | (edgeOfFlightLine << 7);
         ostream << bits;
+
+        if (overlap)
+        {
+            // In the V10 PDRFs, we do not have a dedicated Overlap bit, instead
+            // this was encoded as Classification=12.
+            if (classification == ClassLabel::CreatedNeverClassified)
+            {
+                // If the Overlap flag is set and the point is marked as "Never
+                // Classified", then set Classification=12 to mark the point as
+                // Overlap.
+                classification = ClassLabel::LegacyOverlap;
+            }
+            else
+            {
+                // Source file is PDRF 6+, which supports a dedicated Overlap
+                // bit which can be set independently of Classification, but
+                // we're writing to PDRF < 6 and can't support Overlap=1
+                // alongside another Classification.  Keep the Classification
+                // and we'll lose the Overlap bit.
+                log()->get(LogLevel::Warning)
+                    << "Point is marked as Overlap but also has a Classification - "
+                    << "ignoring overlap for LAS "
+                    << std::to_string(d->header.versionMajor) << "."
+                    << std::to_string(d->header.versionMinor) << "." << std::endl;
+            }
+        }
 
         if (classification > 31)
         {
@@ -924,29 +998,44 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
                 << std::to_string(d->header.versionMajor) << "."
                 << std::to_string(d->header.versionMinor)
                 << ". Replaced with value 1." << std::endl;
-            classification = 1; // Unclassified
+            classification = ClassLabel::Unclassified;
         }
-        classification = (classFlags << 5) | classification;
+
+        uint8_t classificationWithFlags =
+            (classification & 0x1F) | 
+            ((synthetic & 0x01) << 5) | 
+            ((keypoint & 0x01) << 6) | 
+            ((withheld & 0x01) << 7);
+
+        ostream << classificationWithFlags;
     }
 
-    ostream << classification;
+    uint8_t userData(0);
+    if (point.hasDim(Id::UserData))
+        userData = point.getFieldAs<uint8_t>(Id::UserData);
 
-    uint8_t userData = point.getFieldAs<uint8_t>(Id::UserData);
     if (has14PointFormat)
     {
          // Guaranteed to fit if scan angle rank isn't wonky.
-        int16_t scanAngleRank =
-            static_cast<int16_t>(std::round(
-                point.getFieldAs<float>(Id::ScanAngleRank) / .006f));
+        int16_t scanAngleRank(0);
+        if (point.hasDim(Id::ScanAngleRank) )
+            scanAngleRank =
+                static_cast<int16_t>(std::round(
+                    point.getFieldAs<float>(Id::ScanAngleRank) / .006f));
         ostream << userData << scanAngleRank;
     }
     else
     {
-        int8_t scanAngleRank = point.getFieldAs<int8_t>(Id::ScanAngleRank);
+        int8_t scanAngleRank(0);
+        if (point.hasDim(Id::ScanAngleRank) )
+            scanAngleRank = point.getFieldAs<int8_t>(Id::ScanAngleRank);
         ostream << scanAngleRank << userData;
     }
 
-    ostream << point.getFieldAs<uint16_t>(Id::PointSourceId);
+    uint16_t pointSourceId(0);
+    if (point.hasDim(Id::PointSourceId))
+        pointSourceId = point.getFieldAs<uint16_t>(Id::PointSourceId);
+    ostream << pointSourceId;
 
     if (d->header.hasTime())
         ostream << point.getFieldAs<double>(Id::GpsTime);
@@ -968,7 +1057,10 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
         Utils::insertDim(ostream, dim.m_dimType.m_type, e);
     }
 
-    d->summary.addPoint(xOrig, yOrig, zOrig, returnNumber);
+    double xConverted = m_scaling.m_xXform.fromScaled(x);
+    double yConverted = m_scaling.m_yXform.fromScaled(y);
+    double zConverted = m_scaling.m_zXform.fromScaled(z);
+    d->summary.addPoint(xConverted, yConverted, zConverted, returnNumber);
     return true;
 }
 

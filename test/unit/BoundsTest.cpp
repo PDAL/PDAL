@@ -292,6 +292,90 @@ TEST(BoundsTest, test_parse)
     EXPECT_EQ(b1, b2);
 }
 
+TEST(BoundsTest, test_parse2)
+{
+    std::istringstream iss1("([-79.0,-74.0],[38.0,39.0])");
+
+    BOX3D b1;
+
+    iss1 >> b1;
+
+}
+
+
+TEST(BoundsTest, test_parse_geojson)
+{
+    std::istringstream iss1("([1,101],[2,102],[3,103])");
+    std::istringstream iss2("[1, 2, 3, 101, 102, 103]");
+
+    BOX3D b1;
+    BOX3D b2;
+
+    iss1 >> b1;
+    iss2 >> b2;
+
+    EXPECT_EQ(b1, b2);
+
+    std::istringstream iss3("([1,101],[2,102])");
+    std::istringstream iss4("[1, 2, 101, 102]");
+
+    BOX2D b3;
+    BOX2D b4;
+
+    iss3 >> b3;
+    iss4 >> b4;
+
+    EXPECT_EQ(b3, b4);
+}
+
+TEST(BoundsTest, test_parse_object)
+{
+    std::istringstream iss1("([1,101],[2,102],[3,103])");
+    std::istringstream iss2("{\"minx\": 1,\"miny\": 2,\"minz\": 3,\"maxx\": 101,\"maxy\": 102,\"maxz\": 103}");
+
+    BOX3D b1;
+    BOX3D b2;
+
+    iss1 >> b1;
+    iss2 >> b2;
+
+    EXPECT_EQ(b1, b2);
+
+    std::istringstream iss3("([1,101],[2,102])");
+    std::istringstream iss4("{\"minx\": 1,\"miny\": 2,\"maxx\": 101,\"maxy\": 102}");
+
+    BOX2D b3;
+    BOX2D b4;
+
+    iss3 >> b3;
+    iss4 >> b4;
+
+    EXPECT_EQ(b3, b4);
+
+
+
+
+    SrsBounds sb;
+    std::string t("{\"minx\": 1,\"miny\": 2,\"maxx\": 101,\"maxy\": 102, \"crs\":\"EPSG:2596\"}");
+    Utils::fromString(t, sb);
+
+    EXPECT_FALSE(sb.is3d());
+    EXPECT_TRUE(sb.to3d().empty());
+
+    BOX2D box = sb.to2d();
+    EXPECT_EQ(box.minx, 1.0);
+    EXPECT_EQ(box.miny, 2.0);
+    EXPECT_EQ(box.maxx, 101.0);
+    EXPECT_EQ(box.maxy, 102.0);
+
+    EXPECT_NE(std::string::npos,
+        sb.spatialReference().getWKT().find("Krassowsky 1940"));
+
+
+}
+
+
+
 TEST(BoundsTest, test_wkt)
 {
     BOX2D b(1.1,2.2,101.1,102.2);

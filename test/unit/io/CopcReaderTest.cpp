@@ -118,9 +118,10 @@ TEST(EptReaderTest, protocol)
 TEST(CopcReaderTest, inspect)
 {
     const std::vector<std::string> dimNames = {
-         "ClassFlags", "Classification", "EdgeOfFlightLine", "GpsTime", "Intensity",
-         "NumberOfReturns", "PointSourceId", "ReturnNumber", "ScanAngleRank", "ScanChannel",
-         "ScanDirectionFlag", "UserData", "X", "Y", "Z"
+         "Classification", "EdgeOfFlightLine", "GpsTime", "Intensity", "KeyPoint",
+         "NumberOfReturns", "Overlap", "PointSourceId", "ReturnNumber", "ScanAngleRank", 
+         "ScanChannel", "ScanDirectionFlag", "Synthetic", "UserData", "Withheld",
+         "X", "Y", "Z"
     };
 
     Options options;
@@ -427,8 +428,8 @@ TEST(CopcReaderTest, stream)
     {
         return (a.compare(Dimension::Id::GpsTime, b));
     };
-    std::sort(normalView.begin(), normalView.end(), cmp);
-    std::sort(streamView.begin(), streamView.end(), cmp);
+    normalView.stableSort(cmp);
+    streamView.stableSort(cmp);
 
     for (PointId i(0); i < normalView.size(); ++i)
         for (const auto& dim : normalTable.layout()->dims())
@@ -486,6 +487,55 @@ TEST(EptReaderTest, boundedCrop)
     EXPECT_EQ(v->size(), 47u);
     EXPECT_EQ(v2->size(), 47u);
 }
+
+
+TEST(EptReaderTest, boundedCropGeoJSON)
+{
+    std::string wkt = FileUtils::readFileIntoString(
+        Support::datapath("autzen/autzen-selection.json"));
+
+    // First we'll query the EptReader for these bounds.
+    CopcReader reader;
+    {
+        Options options;
+        options.add("filename", copcAutzenPath);
+        Option polygon("polygon", wkt);
+        options.add(polygon);
+        reader.setOptions(options);
+    }
+
+    PointTable copcTable;
+    reader.prepare(copcTable);
+    PointViewSet s = reader.execute(copcTable);
+    PointViewPtr v = *s.begin();
+
+    // Now we'll check the result against a crop filter of the source file with
+    // the same bounds.
+    LasReader source;
+    {
+        Options options;
+        options.add("filename", Support::datapath("las/1.2-with-color.las"));
+        source.setOptions(options);
+    }
+    CropFilter crop;
+    {
+        Options options;
+        Option polygon("polygon", wkt);
+        options.add(polygon);
+        crop.setOptions(options);
+        crop.setInput(source);
+    }
+    PointTable sourceTable;
+    crop.prepare(sourceTable);
+    PointViewSet s2 = crop.execute(sourceTable);
+    PointViewPtr v2 = *s2.begin();
+
+    EXPECT_EQ(v->size(), v2->size());
+    EXPECT_EQ(v->size(), 47u);
+    EXPECT_EQ(v2->size(), 47u);
+}
+
+
 
 TEST(CopcReaderTest, polygonAndBoundsCrop)
 {

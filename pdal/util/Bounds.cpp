@@ -42,6 +42,8 @@
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/Utils.hpp>
 
+#include <nlohmann/json.hpp>
+
 namespace pdal
 {
 
@@ -57,6 +59,7 @@ void BOX2D::clear()
 {
     minx = HIGHEST; miny = HIGHEST;
     maxx = LOWEST; maxy = LOWEST;
+    wkt = "";
 }
 
 void BOX3D::clear()
@@ -64,6 +67,7 @@ void BOX3D::clear()
     BOX2D::clear();
     minz = HIGHEST;
     maxz = LOWEST;
+    wkt = "";
 }
 
 bool BOX2D::empty() const
@@ -154,6 +158,7 @@ void Bounds::reset(const BOX2D& box)
     m_box.maxy = box.maxy;
     m_box.minz = HIGHEST;
     m_box.maxz = LOWEST;
+    m_box.wkt = box.wkt;
 }
 
 
@@ -287,6 +292,72 @@ void parsePair(std::istringstream& ss, double& low, double& high)
 // This parses the guts of a 2D range.
 void BOX2D::parse(const std::string& s, std::string::size_type& pos)
 {
+
+    bool isJson(false);
+    bool isArray(false);
+    bool isObject(false);
+    std::string jsonParseMessage("");
+    NL::json b;
+    try
+    {
+        b = NL::json::parse(s);
+        isJson = true;
+        isArray = b.is_array();
+        isObject = b.is_object();
+    } catch (std::exception& e)
+    {
+        jsonParseMessage = e.what();
+        isJson = false;
+    }
+
+    if (isArray && isJson)
+    {
+        if (b.size() != 4)
+        {
+            std::stringstream msg;
+            msg << "GeoJSON array size must be 4 for BOX2d. It was " << b.size();
+            throw error(msg.str());
+        }
+        minx = b[0].get<double>();
+        miny = b[1].get<double>();
+        maxx = b[2].get<double>();
+        maxy = b[3].get<double>();
+
+        // parsed. we are done
+        pos = s.size();
+        return;
+    }
+
+    if (isObject && isJson)
+    {
+        if (!b.contains("minx"))
+            throw error("Object must contain 'minx'");
+        minx = b["minx"].get<double>();
+
+        if (!b.contains("miny"))
+            throw error("Object must contain 'miny'");
+        miny = b["miny"].get<double>();
+
+        if (!b.contains("maxx"))
+            throw error("Object must contain 'maxx'");
+        maxx = b["maxx"].get<double>();
+
+        if (!b.contains("maxy"))
+            throw error("Object must contain 'maxy'");
+        maxy = b["maxy"].get<double>();
+
+        if (b.contains("crs"))
+            wkt = b["crs"].get<std::string>();
+
+        if (b.contains("srs"))
+            wkt = b["srs"].get<std::string>();
+
+        // parsed. we are done
+        pos = s.size();
+        return;
+
+    }
+
     static thread_local Utils::IStringStreamClassicLocale ss;
     ss.clear();
     ss.str(s);
@@ -313,9 +384,86 @@ void BOX2D::parse(const std::string& s, std::string::size_type& pos)
 
 void BOX3D::parse(const std::string& s, std::string::size_type& pos)
 {
+
+    bool isJson(false);
+    bool isArray(false);
+    bool isObject(false);
+    std::string jsonParseMessage("");
+    NL::json b;
+    try
+    {
+        b = NL::json::parse(s);
+        isJson = true;
+        isArray = b.is_array();
+        isObject = b.is_object();
+    } catch (std::exception& e)
+    {
+        jsonParseMessage = e.what();
+        isJson = false;
+    }
+
+    if (isArray && isJson)
+    {
+        if (b.size() != 6)
+        {
+            std::stringstream msg;
+            msg << "GeoJSON array must be 6. It was " << b.size();
+            throw error(msg.str());
+        }
+        // Unpack GeoJSON array
+        minx = b[0].get<double>();
+        miny = b[1].get<double>();
+        minz = b[2].get<double>();
+        maxx = b[3].get<double>();
+        maxy = b[4].get<double>();
+        maxz = b[5].get<double>();
+
+        // Parsed. We are done.
+        pos = s.size();
+        return;
+    }
+
+    if (isObject && isJson)
+    {
+        if (!b.contains("minx"))
+            throw error("Object must contain 'minx'");
+        minx = b["minx"].get<double>();
+
+        if (!b.contains("miny"))
+            throw error("Object must contain 'miny'");
+        miny = b["miny"].get<double>();
+
+        if (!b.contains("maxx"))
+            throw error("Object must contain 'maxx'");
+        maxx = b["maxx"].get<double>();
+
+        if (!b.contains("maxy"))
+            throw error("Object must contain 'maxy'");
+        maxy = b["maxy"].get<double>();
+
+        if (b.contains("minz"))
+        {
+            if (!b.contains("maxx"))
+                throw error("Object must contain 'maxz' if 'minz' is provided");
+            minz = b["minz"].get<double>();
+            maxz = b["maxz"].get<double>();
+        }
+
+        if (b.contains("crs"))
+            wkt = b["crs"].get<std::string>();
+
+        if (b.contains("srs"))
+            wkt = b["srs"].get<std::string>();
+
+        // Parsed. We are done.
+        pos = s.size();
+        return;
+    }
+
     static thread_local Utils::IStringStreamClassicLocale ss;
     ss.clear();
     ss.str(s);
+
 
     moveForward(ss, pos);
 
@@ -363,9 +511,26 @@ std::istream& operator>>(std::istream& in, BOX3D& box)
     std::getline(in, s);
     std::string::size_type pos(0);
 
-    box.parse(s, pos);
-    if (pos != s.size())
-        throw BOX3D::error("Invalid characters following valid 3d-bounds.");
+    try
+    {
+        BOX3D box3d;
+        box.parse(s, pos);
+    }
+    catch (const BOX3D::error&)
+    {
+        try
+        {
+            pos = 0;
+            BOX2D box2d;
+            box2d.parse(s, pos);
+            box = BOX3D(box2d);
+        }
+        catch (const BOX2D::error& err)
+        {
+            throw BOX3D::error(err.what());
+        }
+    }
+
     return in;
 }
 

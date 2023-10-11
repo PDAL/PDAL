@@ -8,6 +8,11 @@ for their 3D Scene Layer and scene services. SLPK is a format that allows you
 to package all the necessary :ref:`I3S <readers.i3s>` files together and store them locally rather
 than find information through REST.
 
+.. embed::
+
+.. streamable::
+
+
 Example
 --------------------------------------------------------------------------------
 This example will unarchive the slpk file, store it in a temp directory,

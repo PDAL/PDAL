@@ -43,7 +43,7 @@ SrsTransform::SrsTransform(const SrsTransform& src)
 {
     if (src.valid())
         set(*(src.m_transform->GetSourceCS()), *(src.m_transform->GetTargetCS()));
-}    
+}
 
 
 SrsTransform::SrsTransform(SrsTransform&& src) : m_transform(std::move(src.m_transform))
@@ -53,6 +53,26 @@ SrsTransform::SrsTransform(SrsTransform&& src) : m_transform(std::move(src.m_tra
 SrsTransform::~SrsTransform()
 {}
 
+
+void SrsTransform::setSrcEpoch(double epoch)
+{
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,4,0)
+    OGRSpatialReference target(*m_transform->GetTargetCS());
+    OGRSpatialReference source(*m_transform->GetSourceCS());
+    source.SetCoordinateEpoch(epoch);
+    set(target, source);
+#endif
+}
+
+void SrsTransform::setDstEpoch(double epoch)
+{
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,4,0)
+    OGRSpatialReference target(*m_transform->GetTargetCS());
+    OGRSpatialReference source(*m_transform->GetSourceCS());
+    target.SetCoordinateEpoch(epoch);
+    set(target, source);
+#endif
+}
 
 SrsTransform& SrsTransform::operator=(SrsTransform&& src)
 {
@@ -77,8 +97,10 @@ SrsTransform::SrsTransform(const SpatialReference& src,
                            const SpatialReference& dst,
                            std::vector<int> dstOrder)
 {
-    OGRSpatialReference srcRef(src.getWKT().data());
-    OGRSpatialReference dstRef(dst.getWKT().data());
+    OGRSpatialReference srcRef(src.getWKT2().data());
+    srcRef.SetCoordinateEpoch(src.getEpoch());
+    OGRSpatialReference dstRef(dst.getWKT2().data());
+    dstRef.SetCoordinateEpoch(dst.getEpoch());
 
 // Starting with version 3, the axes (X, Y, Z or lon, lat, h or whatever)
 // are mapped according to the WKT definition.  In particular, this means
@@ -97,7 +119,11 @@ SrsTransform::SrsTransform(const SpatialReference& src,
 
 void SrsTransform::set(const SpatialReference& src, const SpatialReference& dst)
 {
-    set(OGRSpatialReference(src.getWKT().data()), OGRSpatialReference(dst.getWKT().data()));
+    OGRSpatialReference osrSrc(src.getWKT2().data());
+    osrSrc.SetCoordinateEpoch(src.getEpoch());
+    OGRSpatialReference osrDst(dst.getWKT2().data());
+    osrDst.SetCoordinateEpoch(dst.getEpoch());
+    set(osrSrc, osrDst);
 }
 
 

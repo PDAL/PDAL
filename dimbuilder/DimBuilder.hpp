@@ -55,6 +55,7 @@ struct DimSpec
     std::string m_description;
     Dimension::Type m_type;
     std::vector<std::string> m_altNames;
+    bool m_deprecated = false;
 };
 
 class DimBuilder
@@ -80,6 +81,7 @@ private:
     void writeNameToId(std::ostream& out);
     void writeIdToName(std::ostream& out);
     void writeTypes(std::ostream& out);
+    void writeIsDeprecated(std::ostream& out);
     void validateDimension(const std::string& dimName);
 };
 

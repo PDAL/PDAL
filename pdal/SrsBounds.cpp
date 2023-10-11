@@ -47,16 +47,28 @@ namespace pdal
 {
 
 SrsBounds::SrsBounds(const BOX3D& box) : Bounds(box)
-{}
+{
+    const std::string& wkt = box.to2d().wkt;
+    if (wkt.size())
+       m_srs.set(wkt);
+}
 
 
 SrsBounds::SrsBounds(const BOX3D& box, const SpatialReference& srs) :
     Bounds(box), m_srs(srs)
-{}
+{
+    const std::string& wkt = box.to2d().wkt;
+    if (wkt.size())
+       m_srs.set(wkt);
+}
 
 
 SrsBounds::SrsBounds(const BOX2D& box) : Bounds(box)
-{}
+{
+    const std::string& wkt = box.wkt;
+    if (wkt.size())
+       m_srs.set(wkt);
+}
 
 
 SrsBounds::SrsBounds(const BOX2D& box, const SpatialReference& srs) :
@@ -68,6 +80,7 @@ void SrsBounds::parse(const std::string& s, std::string::size_type& pos)
 {
     Bounds::parse(s, pos);
     pos += Utils::extractSpaces(s, pos);
+    m_srs.set(to2d().wkt);
     if (pos == s.size())
         return;
 

@@ -60,6 +60,8 @@ class LasHeader;
 
 class PDAL_DLL LasReader : public Reader, public Streamable
 {
+    friend class LasTester;
+
 protected:
     class LasStreamIf
     {
@@ -129,6 +131,8 @@ private:
     void queueNext();
     void queueNextCompressedChunk();
     void queueNextStandardChunk();
+
+    const las::Header& lasHeader() const;
 
     struct Options;
     struct Private;

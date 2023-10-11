@@ -68,6 +68,7 @@ PDAL_DLL std::vector<Polygon> getPolygons(const NL::json& ogr);
 // New signatures to support extraction of SRS from the end of geometry
 // specifications.
 OGRGeometry *createFromWkt(const std::string& s, std::string& srs);
+OGRGeometry *createFromWkb(const std::string& s, std::string& srs);
 OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs);
 
 inline OGRGeometry *fromHandle(OGRGeometryH geom)

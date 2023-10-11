@@ -81,6 +81,7 @@ struct LasReader::Options
     PointId start;
     bool nosrs;
     int numThreads;
+    std::string srsConsumePreference;
 };
 
 struct LasReader::Private
@@ -134,14 +135,14 @@ void LasReader::addArgs(ProgramArgs& args)
         "invalid characters to '_'", d->opts.fixNames, true);
     args.add("nosrs", "Skip reading/processing file SRS", d->opts.nosrs);
     args.add("threads", "Thread pool size", d->opts.numThreads, 7);
+    args.add("srs_consume_preference", "Preference order to read SRS VLRs",
+        d->opts.srsConsumePreference, "wkt1, geotiff, wkt2, projjson");
 }
 
 
 static StaticPluginInfo const s_info {
     "readers.las",
-    "ASPRS LAS 1.0 - 1.4 read support. LASzip support is also \n" \
-        "enabled through this driver if LASzip was found during \n" \
-        "compilation.",
+    "ASPRS LAS 1.0 - 1.4 read support",
     "http://pdal.io/stages/readers.las.html",
     { "las", "laz" }
 };
@@ -153,6 +154,11 @@ std::string LasReader::getName() const { return s_info.name; }
 const LasHeader& LasReader::header() const
 {
     return d->apiHeader;
+}
+
+const las::Header& LasReader::lasHeader() const
+{
+    return d->header;
 }
 
 uint64_t LasReader::vlrData(const std::string& userId, uint16_t recordId, char const * & data)
@@ -332,7 +338,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     }
 
     if (!d->opts.nosrs)
-        d->srs.init(d->vlrs, d->header.mustUseWkt(), log());
+        d->srs.init(d->vlrs, d->opts.srsConsumePreference, log());
 
     d->end = d->header.pointCount();
     if (d->header.pointCount())
@@ -655,18 +661,34 @@ void LasReader::loadPointV10(PointRef& point, const char *buf, size_t bufsize)
 
     uint16_t intensity;
     uint8_t flags;
-    uint8_t classification;
+    uint8_t classificationWithFlags;
     int8_t scanAngleRank;
     uint8_t user;
     uint16_t pointSourceId;
 
-    istream >> intensity >> flags >> classification >> scanAngleRank >>
+    istream >> intensity >> flags >> classificationWithFlags >> scanAngleRank >>
         user >> pointSourceId;
 
     uint8_t returnNum = flags & 0x07;
     uint8_t numReturns = (flags >> 3) & 0x07;
     uint8_t scanDirFlag = (flags >> 6) & 0x01;
     uint8_t flight = (flags >> 7) & 0x01;
+
+    uint8_t classification = classificationWithFlags & 0x1F;
+    uint8_t synthetic = (classificationWithFlags >> 5) & 0x01;
+    uint8_t keypoint = (classificationWithFlags >> 6) & 0x01;
+    uint8_t withheld = (classificationWithFlags >> 7) & 0x01;
+    uint8_t overlap = 0;
+
+    // For V10 PDRFs, "Overlap" was encoded as Classification=12.  This was
+    // split out into its own bitfield for the V14 PDRFs, so mimic that behavior
+    // here, setting the dedicated Overlap flag and resetting the Classification
+    // to "Never Classified".
+    if (classification == ClassLabel::LegacyOverlap)
+    {
+        classification = ClassLabel::CreatedNeverClassified;
+        overlap = 1;
+    }
 
     point.setField(Dimension::Id::X, x);
     point.setField(Dimension::Id::Y, y);
@@ -677,6 +699,10 @@ void LasReader::loadPointV10(PointRef& point, const char *buf, size_t bufsize)
     point.setField(Dimension::Id::ScanDirectionFlag, scanDirFlag);
     point.setField(Dimension::Id::EdgeOfFlightLine, flight);
     point.setField(Dimension::Id::Classification, classification);
+    point.setField(Dimension::Id::Synthetic, synthetic);
+    point.setField(Dimension::Id::KeyPoint, keypoint);
+    point.setField(Dimension::Id::Withheld, withheld);
+    point.setField(Dimension::Id::Overlap, overlap);
     point.setField(Dimension::Id::ScanAngleRank, scanAngleRank);
     point.setField(Dimension::Id::UserData, user);
     point.setField(Dimension::Id::PointSourceId, pointSourceId);
@@ -729,7 +755,10 @@ void LasReader::loadPointV14(PointRef& point, const char *buf, size_t bufsize)
 
     uint8_t returnNum = returnInfo & 0x0F;
     uint8_t numReturns = (returnInfo >> 4) & 0x0F;
-    uint8_t classFlags = flags & 0x0F;
+    uint8_t synthetic = (flags >> 0) & 0x01;
+    uint8_t keypoint = (flags >> 1) & 0x01;
+    uint8_t withheld = (flags >> 2) & 0x01;
+    uint8_t overlap = (flags >> 3) & 0x01;
     uint8_t scanChannel = (flags >> 4) & 0x03;
     uint8_t scanDirFlag = (flags >> 6) & 0x01;
     uint8_t flight = (flags >> 7) & 0x01;
@@ -740,7 +769,10 @@ void LasReader::loadPointV14(PointRef& point, const char *buf, size_t bufsize)
     point.setField(Dimension::Id::Intensity, intensity);
     point.setField(Dimension::Id::ReturnNumber, returnNum);
     point.setField(Dimension::Id::NumberOfReturns, numReturns);
-    point.setField(Dimension::Id::ClassFlags, classFlags);
+    point.setField(Dimension::Id::Synthetic, synthetic);
+    point.setField(Dimension::Id::KeyPoint, keypoint);
+    point.setField(Dimension::Id::Withheld, withheld);
+    point.setField(Dimension::Id::Overlap, overlap);
     point.setField(Dimension::Id::ScanChannel, scanChannel);
     point.setField(Dimension::Id::ScanDirectionFlag, scanDirFlag);
     point.setField(Dimension::Id::EdgeOfFlightLine, flight);

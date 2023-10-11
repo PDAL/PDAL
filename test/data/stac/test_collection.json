@@ -1,0 +1,39 @@
+{
+  "type": "Collection",
+  "id": "usgs-test",
+  "stac_version": "1.0.0",
+  "description": "For PDAL Testing",
+  "links": [
+    {
+      "rel": "root",
+      "href": "./test_collection.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "./autzen_trim.json",
+      "type": "application/json"
+    }
+  ],
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -123.07346224955212,
+          44.04990616293895,
+          406.26,
+          -123.06891797646901
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2015-09-10T00:00:00Z",
+          "2015-09-10T00:00:00Z"
+        ]
+      ]
+    }
+  },
+  "license": "proprietary"
+}

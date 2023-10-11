@@ -39,6 +39,7 @@
 #include <pdal/StageFactory.hpp>
 #include <filters/MergeFilter.hpp>
 
+#include <pdal/JsonFwd.hpp>
 
 namespace pdal
 {
@@ -65,8 +66,7 @@ class PDAL_DLL TIndexReader : public Reader, public Streamable
     };
 
 public:
-    TIndexReader() : m_dataset(NULL) , m_layer(NULL)
-        {}
+    TIndexReader();
 
     std::string getName() const override;
 
@@ -80,18 +80,13 @@ private:
     virtual point_count_t read(PointViewPtr view, point_count_t num) override;
     virtual bool processOne(PointRef& point) override;
 
-    std::string m_layerName;
-    std::string m_driverName;
-    std::string m_tileIndexColumnName;
-    std::string m_srsColumnName;
-    std::string m_wkt;
-    std::string m_tgtSrsString;
-    std::string m_filterSRS;
-    std::string m_attributeFilter;
-    std::string m_dialect;
-    BOX2D m_bounds;
-    std::string m_sql;
+    void handleReaderArgs();
+    Options setReaderOptions(const NL::json& readerArgs,
+                             const std::string& driver) const;
 
+    struct Args;
+
+    std::unique_ptr<Args> m_args;
     std::unique_ptr<gdal::SpatialRef> m_out_ref;
     void *m_dataset;
     void *m_layer;

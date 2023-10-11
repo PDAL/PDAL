@@ -297,20 +297,32 @@ void EptReader::handleOriginQuery()
     // At the moment, we only care about the summary information, which contains
     // both the original file path and the bounds, and in each of these summary
     // formats, those specific entries are exactly the same.  So we just need to
-    // grab the right filename and can use the same logic thereafter.
-    std::string filename = m_p->info->version() == "1.0.0"
-        ? m_p->info->sourcesDir() + "list.json"
-        : m_p->info->sourcesDir() + "manifest.json";
+    // grab either file and can use the same logic thereafter.  Prefer manifest,
+    // if it exists, since it's the newer one.
 
     NL::json sources;
     try
     {
-        sources = m_p->connector->getJson(filename);
+        sources = m_p->connector->getJson(
+            m_p->info->sourcesDir() + "manifest.json");
     }
-    catch (const arbiter::ArbiterError& err)
+    catch (...) {}
+
+    if (sources.is_null())
     {
-        throwError(err.what());
+        try
+        {
+            sources = m_p->connector->getJson(
+                m_p->info->sourcesDir() + "list.json");
+        }
+        catch (...) {}
     }
+
+    if (sources.is_null())
+    {
+        throwError("Failed to fetch input sources metadata");
+    }
+
     log()->get(LogLevel::Debug) << "Fetched sources list" << std::endl;
 
     if (!sources.is_array())
@@ -363,6 +375,14 @@ void EptReader::handleOriginQuery()
     try
     {
         BOX3D q(toBox3d(found.at("bounds")));
+        // Bloat the query bounds slightly (we'll choose one tick of the EPT's
+        // scale) to make sure we don't miss any points due to them being 
+        // precisely on the bounds edge.
+        q.grow(
+            (std::max)(
+                m_p->info->dims().at("X").m_xform.m_scale.m_val,
+                m_p->info->dims().at("Y").m_xform.m_scale.m_val
+            ));
 
         if (m_p->bounds.box.valid())
             m_p->bounds.box.clip(q);
@@ -495,6 +515,22 @@ void EptReader::ready(PointTableRef table)
     // origins and ordering for an EPT writer.
     m_nodeIdDim = table.layout()->findDim("EptNodeId");
     m_pointIdDim = table.layout()->findDim("EptPointId");
+
+    if (
+        m_queryOriginId != -1 && 
+        !table.layout()->hasDim(Dimension::Id::OriginId))
+    {
+        // In this case we can't compare the OriginId for each point since the
+        // EPT data does not have that attribute saved.  We will keep the 
+        // spatial query to limit the data to the extents of the requested
+        // origin, but if other origins overlap these extents, then their points
+        // will also be included.
+        m_queryOriginId = -1;
+
+        log()->get(LogLevel::Warning) << 
+            "An origin query was given but no OriginId dimension exists - " <<
+            "points from other origins may be included" << std::endl;
+    }
 
     m_p->hierarchy.reset(new ept::Hierarchy);
 
@@ -719,9 +755,11 @@ bool EptReader::processPoint(PointRef& dst, const ept::TileContents& tile)
     PointId pointId = m_pointId++;
 
     PointRef p(t, pointId);
-    int64_t originId = p.getFieldAs<int64_t>(Id::OriginId);
-    if (m_queryOriginId != -1 && originId != m_queryOriginId)
+    if (m_queryOriginId != -1 && 
+        p.getFieldAs<int64_t>(Id::OriginId)!= m_queryOriginId)
+    {
         return false;
+    }
 
     auto passesBoundsFilter = [this](double x, double y, double z)
     {
@@ -858,6 +896,7 @@ void EptReader::process(PointViewPtr dstView, const ept::TileContents& tile,
 
 void EptReader::done(PointTableRef)
 {
+    m_p->pool->await();
     m_p->connector.reset();
 }
 
