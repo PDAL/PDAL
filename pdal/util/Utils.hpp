@@ -90,7 +90,7 @@ namespace Utils
             else
                 m_code = -1;
         }
-        StatusWithReason(int code);  // Not defined
+        StatusWithReason(int code) = delete;
         StatusWithReason(int code, const std::string& what) :
             m_code(code), m_what(what)
         {}

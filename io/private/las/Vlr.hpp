@@ -157,10 +157,21 @@ public:
     using ReadFunc = std::function<std::vector<char>(uint64_t offset, int32_t size)>;
     struct Entry
     {
+        Entry()
+        {}
+
+        Entry(const std::string& userId, uint16_t recordId) :
+            userId(userId), recordId(recordId)
+        {}
+
+        Entry(const std::string& userId, uint16_t recordId, uint64_t offset, uint64_t length) :
+            userId(userId), recordId(recordId), offset(offset), length(length)
+        {}
+
         std::string userId;
-        uint16_t recordId;
-        uint64_t offset;
-        uint64_t length;
+        uint16_t recordId = 0;
+        uint64_t offset = 0;
+        uint64_t length = 0;
     };
 
 private:
@@ -174,6 +185,7 @@ public:
         ReadFunc f);
 
     void load(uint64_t vlrOffset, uint32_t vlrCount, uint64_t evlrOffset, uint32_t evlrCount);
+    const Entry& find(const std::string& userId, uint16_t recordId) const;
     std::vector<char> fetch(const std::string& userId, uint16_t recordId) const;
     std::vector<char> fetchWithDescription(const std::string& userId, uint16_t recordId,
         std::string& outDescrip) const;
@@ -191,12 +203,22 @@ public:
         { return m_entries.end(); }
     size_t size() const
         { return m_entries.size(); }
+    bool exists(const std::string& userId, uint16_t recordId) const;
 
 private:
     void walkVlrs(uint64_t vlrOffset, uint32_t vlrCount);
     void walkEvlrs(uint64_t vlrOffset, uint32_t vlrCount);
     void insert(const Entry& entry);
 };
+
+inline bool operator==(const VlrCatalog::Entry& e1, const VlrCatalog::Entry& e2)
+    { return e1.userId == e2.userId && e1.recordId == e2.recordId; }
+
+inline bool VlrCatalog::exists(const std::string& userId, uint16_t recordId) const
+{
+    Entry e(userId, recordId);
+    return find(e.userId, e.recordId) == e;
+}
 
 } // namespace las
 } // namespace pdal

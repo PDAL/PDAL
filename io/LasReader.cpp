@@ -65,7 +65,63 @@ struct invalid_stream : public std::runtime_error
         {}
 };
 
+struct SrsOrderSpec
+{
+    std::vector<las::SrsType> types;
+};
+
 } // unnamed namespace
+
+namespace Utils
+{
+
+template<>
+StatusWithReason fromString(const std::string& from,
+    SrsOrderSpec& srsOrder)
+{
+    using namespace las;
+
+     static const std::map<std::string, SrsType> typemap =
+        { { "wkt2", SrsType::Wkt2 },
+          { "wkt1", SrsType::Wkt1 },
+          { "projjson", SrsType::Proj },
+          { "geotiff", SrsType::Geotiff } };
+
+    StringList srsTypes = Utils::split2(from, ',');
+    std::transform(srsTypes.cbegin(), srsTypes.cend(), srsTypes.begin(),
+        [](std::string s){ Utils::trim(s); return Utils::tolower(s); });
+
+    for (std::string& stype : srsTypes)
+    {
+        auto it = typemap.find(stype);
+        if (it == typemap.end())
+            return { -1, "Invalid SRS type '" + stype + "'. Must be one of 'wkt1', "
+                "'geotiff', 'wkt' or 'projjson'." };
+        SrsType type = it->second;
+        if (Utils::contains(srsOrder.types, type))
+            return { -1,
+                "Duplicate SRS type '" + stype + "' in 'vlr_srs_order'" };
+        srsOrder.types.push_back(type);
+    }
+    return true;
+}
+
+template<>
+std::string toString(const SrsOrderSpec& srsOrder)
+{
+    using namespace las;
+
+    static const std::array<std::string, 4> srsTypeNames { "wkt1", "geotiff", "projjson", "wkt2" };
+
+    std::string out;
+    for (SrsType type : srsOrder.types)
+        out += srsTypeNames[Utils::toNative(type)] + ",";
+    if (out.size())
+        out.erase(out.size() - 1);
+    return out;
+}
+
+} // namespace Utils
 
 struct LasReader::Options
 {
@@ -77,7 +133,7 @@ struct LasReader::Options
     bool fixNames;
     PointId start;
     bool nosrs;
-    std::string srsConsumePreference;
+    SrsOrderSpec srsVlrOrder;
 };
 
 struct LasReader::Private
@@ -118,8 +174,8 @@ void LasReader::addArgs(ProgramArgs& args)
     args.add("fix_dims", "Make invalid dimension names valid by changing "
         "invalid characters to '_'", d->opts.fixNames, true);
     args.add("nosrs", "Skip reading/processing file SRS", d->opts.nosrs);
-    args.add("srs_consume_preference", "Preference order to read SRS VLRs",
-        d->opts.srsConsumePreference, "wkt1, geotiff, wkt2, projjson");
+    args.add("srs_vlr_order", "Preference order to read SRS VLRs",
+        d->opts.srsVlrOrder);
 }
 
 
@@ -318,7 +374,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     }
 
     if (!d->opts.nosrs)
-        d->srs.init(d->vlrs, d->opts.srsConsumePreference, log());
+        d->srs.init(d->vlrs, d->opts.srsVlrOrder.types, d->header.mustUseWkt(), log());
 
     if (d->opts.start > d->header.pointCount())
         throwError("'start' value of " + std::to_string(d->opts.start) + " is too large. "
@@ -333,7 +389,6 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     las::extractSrsMetadata(d->srs, m);
     for (int i = 0; i < (int)d->vlrs.size(); ++i)
         las::addVlrMetadata(d->vlrs[i], "vlr_" + std::to_string(i), forward, m);
-
 }
 
 

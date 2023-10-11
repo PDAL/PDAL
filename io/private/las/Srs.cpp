@@ -41,34 +41,71 @@ namespace pdal
 namespace las
 {
 
-namespace
+void Srs::init(const VlrList& vlrs, std::vector<SrsType> srsOrder, bool useWkt, LogPtr log)
 {
+    bool specifiedOrder = srsOrder.size();
 
-SpatialReference srsFromWkt(const Vlr *vlr)
-{
-    if (!vlr || vlr->empty())
-        return SpatialReference();
+    m_srs = SpatialReference();
+    m_geotiffString.clear();
 
-    // There is supposed to be a NULL byte at the end of the data,
-    // but sometimes there isn't because some people don't follow the
-    // rules.  If there is a NULL byte, don't stick it in the
-    // wkt string.
-    size_t len = vlr->dataSize();
-    const char *c = vlr->data() + len - 1;
-    if (*c == 0)
-        len--;
-    std::string wkt(vlr->data(), len);
-    // Strip any excess NULL bytes from the WKT.
-    wkt.erase(std::find(wkt.begin(), wkt.end(), '\0'), wkt.end());
+    if (srsOrder.empty())
+    {
+        if (useWkt)
+            srsOrder = { SrsType::Wkt2, SrsType::Proj, SrsType::Wkt1 };
+        else
+            srsOrder = { SrsType::Wkt2, SrsType::Proj, SrsType::Geotiff };
+    }
 
-    return SpatialReference(wkt);
+    const Vlr *wkt2 = findVlr(TransformUserId, LASFWkt2recordId, vlrs);
+    const Vlr *proj = findVlr(PdalUserId, PdalProjJsonRecordId, vlrs);
+    const Vlr *gtiff = findVlr(TransformUserId, GeotiffDirectoryRecordId, vlrs);
+    const Vlr *wkt1 = findVlr(TransformUserId, WktRecordId, vlrs);
+    if (!wkt1)
+        wkt1 = findVlr(LiblasUserId, WktRecordId, vlrs);
+
+    if (wkt1 && gtiff && log)
+        log->get(LogLevel::Debug) << "File contains both "
+            "WKT and GeoTiff VLRs which is disallowed." << std::endl;
+
+    try
+    {
+        for (const SrsType& type : srsOrder)
+        {
+            if (type == SrsType::Wkt2 && wkt2)
+            {
+                extractWkt(wkt2);
+                break;
+            }
+            else if (type == SrsType::Proj && proj)
+            {
+                extractWkt(proj);
+                break;
+            }
+            else if (type == SrsType::Wkt1 && wkt1)
+            {
+                extractWkt(wkt1);
+                break;
+            }
+            else if (type == SrsType::Geotiff && gtiff)
+            {
+                extractGeotiff(gtiff, vlrs, log);
+                break;
+            }
+        }
+    }
+    catch (...)
+    {
+        if (log)
+            log->get(LogLevel::Error) << "Could not create an SRS.\n";
+    }
+    if (specifiedOrder && m_srs.empty() && log)
+        log->get(LogLevel::Warning) << "'srs_vlr_order' specified but no valid VLR was found.";
 }
 
-SpatialReference srsFromGeotiff(const Vlr *vlr, const VlrList& vlrs, LogPtr log,
-    std::string& geotiff)
+void Srs::extractGeotiff(const Vlr *vlr, const VlrList& vlrs, LogPtr log)
 {
     if (!vlr)
-        return SpatialReference();
+        return;
 
     const char *data = vlr->data();
     size_t dataLen = vlr->dataSize();
@@ -99,99 +136,40 @@ SpatialReference srsFromGeotiff(const Vlr *vlr, const VlrList& vlrs, LogPtr log,
     try
     {
         GeotiffSrs geotiffSrs(directoryRec, doublesRec, asciiRec, log);
-        geotiff = geotiffSrs.gtiffPrintString();
+        m_geotiffString = geotiffSrs.gtiffPrintString();
         if (log)
-            log->get(LogLevel::Debug3) << geotiff << std::endl;
-        srs = geotiffSrs.srs();
+            log->get(LogLevel::Debug3) << m_geotiffString << std::endl;
+        m_srs = geotiffSrs.srs();
     }
     catch (Geotiff::error& err)
     {
         if (log)
             log->get(LogLevel::Error) << "Could not create an SRS: " << err.what() << ".\n";
     }
-    return srs;
 }
 
-} // Unnamed namespace.
-
-
-void Srs::init(const VlrList& vlrs, std::string srsConsumePreference, LogPtr log)
+void Srs::extractWkt(const Vlr *vlr)
 {
+    if (!vlr || vlr->empty())
+        return;
 
-    if (srsConsumePreference.empty())
-        srsConsumePreference = "wkt1, geotiff, wkt2, projjson";
+    // There is supposed to be a NULL byte at the end of the data,
+    // but sometimes there isn't because some people don't follow the
+    // rules.  If there is a NULL byte, don't stick it in the
+    // wkt string.
+    size_t len = vlr->dataSize();
+    const char *c = vlr->data() + len - 1;
+    if (*c == 0)
+        len--;
+    std::string wkt(vlr->data(), len);
+    // Strip any excess NULL bytes from the WKT.
+    wkt.erase(std::find(wkt.begin(), wkt.end(), '\0'), wkt.end());
 
-    auto prefs = Utils::split2(srsConsumePreference, [](char c) { return c == ','; });
-    std::transform(prefs.cbegin(), prefs.cend(), prefs.begin(),
-                   [](std::string s)
-                   { Utils::trim(s); return Utils::tolower(s); });
-
-    m_srs = SpatialReference();
-    m_geotiffString.clear();
-
-    const Vlr* vlr = nullptr;
-    const Vlr* gtiffVlr = nullptr;
-    for (const std::string& pref : prefs)
-    {
-        if (pref == "wkt2")
-        {
-            if ((vlr = findVlr(TransformUserId, LASFWkt2recordId, vlrs)))
-            {
-                log->get(LogLevel::Debug) << "Using WKT2 VLR" << std::endl;
-                break;
-            }
-        }
-        else if (pref == "projjson")
-        {
-            if ((vlr = findVlr(PdalUserId, PdalProjJsonRecordId, vlrs)))
-            {
-                log->get(LogLevel::Debug) << "Using PROJJSON VLR" << std::endl;
-                break;
-            }
-        }
-        else if (pref == "wkt1")
-        {
-            if ((vlr = findVlr(TransformUserId, WktRecordId, vlrs)))
-            {
-                log->get(LogLevel::Debug) << "Using WKT1 VLR" << std::endl;
-                break;
-            }
-            else if ((vlr = findVlr(LiblasUserId, WktRecordId, vlrs)))
-            {
-                log->get(LogLevel::Debug) << "Using WKT1 (liblass) VLR" << std::endl;
-                break;
-            }
-        }
-        else if (pref == "geotiff")
-        {
-            if ((gtiffVlr = findVlr(TransformUserId, GeotiffDirectoryRecordId, vlrs)))
-            {
-                log->get(LogLevel::Debug) << "Using GeoTIFF VLR" << std::endl;
-                break;
-            }
-        }
-        else
-        {
-            log->get(LogLevel::Warning) << "Unknown value [" << pref <<
-                "] in srs consume preference." << std::endl;
-        }
-    }
-
-    try
-    {
-        if (vlr)
-            m_srs = srsFromWkt(vlr);
-        else
-            m_srs = srsFromGeotiff(gtiffVlr, vlrs, log, m_geotiffString);
-    }
-    catch (...)
-    {
-        if (log)
-            log->get(LogLevel::Error) << "Could not create an SRS.\n";
-    }
+    m_srs = SpatialReference(wkt);
 }
 
-SpatialReference Srs::get() const
+
+const SpatialReference& Srs::get() const
 {
     return m_srs;
 }

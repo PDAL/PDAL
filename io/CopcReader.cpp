@@ -55,6 +55,7 @@
 #include "private/copc/Info.hpp"
 #include "private/copc/Tile.hpp"
 #include "private/las/Header.hpp"
+#include "private/las/Srs.hpp"
 #include "private/las/Utils.hpp"
 #include "private/las/Vlr.hpp"
 
@@ -139,7 +140,63 @@ BOX3D reprojectBoundsBcbfToLonLat(BOX3D src, SrsTransform& xform)
     return b;
 }
 
+struct SrsOrderSpec
+{
+    std::vector<las::SrsType> types;
+};
+
+} // unnamed namespace
+
+namespace Utils
+{
+
+template<>
+StatusWithReason fromString(const std::string& from,
+    SrsOrderSpec& srsOrder)
+{
+    using namespace las;
+
+     static const std::map<std::string, SrsType> typemap =
+        { { "wkt2", SrsType::Wkt2 },
+          { "wkt1", SrsType::Wkt1 },
+          { "projjson", SrsType::Proj } };
+
+    StringList srsTypes = Utils::split2(from, ',');
+    std::transform(srsTypes.cbegin(), srsTypes.cend(), srsTypes.begin(),
+        [](std::string s){ Utils::trim(s); return Utils::tolower(s); });
+
+    for (std::string& stype : srsTypes)
+    {
+        auto it = typemap.find(stype);
+        if (it == typemap.end())
+            return { -1, "Invalid SRS type '" + stype + "'. Must be one of 'wkt1', "
+                "'wkt' or 'projjson'." };
+        SrsType type = it->second;
+        if (Utils::contains(srsOrder.types, type))
+            return { -1,
+                "Duplicate SRS type '" + stype + "' in 'vlr_srs_order'" };
+        srsOrder.types.push_back(type);
+    }
+    return true;
 }
+
+template<>
+std::string toString(const SrsOrderSpec& srsOrder)
+{
+    using namespace las;
+
+    // Note: geotiff is invalid for COPC and should never appear in a valid SrsOrderSpec.
+    static const std::array<std::string, 4> srsTypeNames { "wkt1", "geotiff", "projjson", "wkt2" };
+
+    std::string out;
+    for (SrsType type : srsOrder.types)
+        out += srsTypeNames[Utils::toNative(type)] + ",";
+    if (out.size())
+        out.erase(out.size() - 1);
+    return out;
+}
+
+} // namespace Utils
 
 CREATE_STATIC_STAGE(CopcReader, s_info);
 
@@ -170,8 +227,7 @@ public:
     NL::json ogr;
 
     int keepAliveChunkCount = 10;
-
-    std::string srsConsumePreference;
+    SrsOrderSpec srsVlrOrder;
     bool nosrs;
 };
 
@@ -245,10 +301,9 @@ void CopcReader::addArgs(ProgramArgs& args)
     args.add("vlr", "Read LAS VLRs and add to metadata.", m_args->doVlrs, true);
     args.add("keep_alive", "Number of chunks to keep alive in memory when working",
             m_args->keepAliveChunkCount, 10);
+    args.add("srs_vlr_order", "Preference order to read SRS VLRs "
+        "(list of 'wkt1', 'wkt2' or 'projjson'", m_args->srsVlrOrder);
     args.add("nosrs", "Skip reading/processing file SRS", m_args->nosrs, false);
-    args.add("srs_consume_preference", "Preference order to read SRS VLRs",
-        m_args->srsConsumePreference, "wkt1, wkt2, projjson");
-
 }
 
 
@@ -295,7 +350,6 @@ void CopcReader::initialize(PointTableRef table)
     // alert consumers that we are a COPC file
     m.add("copc", true);
 
-
     fetchHeader();
 
     MetadataNode copc_metadata = m.add("copc_info");
@@ -316,21 +370,28 @@ void CopcReader::initialize(PointTableRef table)
     catalog.load(las::Header::Size14, m_p->header.vlrCount, m_p->header.evlrOffset,
         m_p->header.evlrCount);
     las::Vlr ebVlr = fetchEbVlr(catalog);
-    las::Vlr srsVlr = fetchSrsVlr(catalog);
+
+    las::VlrList srsVlrs = fetchSrsVlrs(catalog);
+    las::Srs srs;
+    srs.init(srsVlrs, m_args->srsVlrOrder.types, true, log());
+    setSpatialReference(srs.get());
 
     if (m_args->doVlrs)
     {
         int i = 0;
+        // This simply avoids re-requesting the VLR data from a remote source for those
+        // VLRs where we already have data.
         if (ebVlr.dataSize())
             las::addVlrMetadata(ebVlr, "vlr_" + std::to_string(i++), forward, m);
-        if (srsVlr.dataSize())
-            las::addVlrMetadata(srsVlr, "vlr_" + std::to_string(i++), forward, m);
+        for (const las::Vlr& vlr : srsVlrs)
+            if (vlr.dataSize())
+                las::addVlrMetadata(vlr, "vlr_" + std::to_string(i++), forward, m);
 
         las::VlrList ignored = las::parseIgnoreVlrs({});
         for (const las::VlrCatalog::Entry& e : catalog)
         {
             las::Vlr vlr(e.userId, e.recordId);
-            if (las::shouldIgnoreVlr(vlr, ignored) || vlr == ebVlr || vlr == srsVlr)
+            if (las::shouldIgnoreVlr(vlr, ignored) || vlr == ebVlr || Utils::contains(srsVlrs, vlr))
                 continue;
             vlr.dataVec = catalog.fetchWithDescription(e.userId, e.recordId, vlr.description);
             las::addVlrMetadata(vlr, "vlr_" + std::to_string(i++), forward, m);
@@ -413,63 +474,27 @@ void CopcReader::fetchHeader()
 }
 
 
-las::Vlr CopcReader::fetchSrsVlr(const las::VlrCatalog& catalog)
+las::VlrList CopcReader::fetchSrsVlrs(const las::VlrCatalog& catalog)
 {
-    std::string srsConsumePreference = m_args->srsConsumePreference;
-    if (srsConsumePreference.empty())
-        srsConsumePreference = "wkt1, wkt2, projjson";
+    las::VlrList vlrs;
 
-    auto prefs = Utils::split2(srsConsumePreference, [](char c) { return c == ','; });
-    std::transform(prefs.cbegin(), prefs.cend(), prefs.begin(),
-                   [](std::string s)
-                   { Utils::trim(s); return Utils::tolower(s); });
+    auto fetchVlr = [&catalog, &vlrs] (const std::string userId, uint16_t recordId) {
+        if (!catalog.exists(userId, recordId))
+            return;
 
-    auto makeVlr = [&catalog] (const std::string userId, uint16_t recordId) {
         las::Vlr vlr(userId, recordId);
         vlr.dataVec = catalog.fetchWithDescription(userId, recordId, vlr.description);
-        return vlr;
+        vlrs.push_back(std::move(vlr));
     };
 
-    las::Vlr vlr;
-    for (const std::string& pref : prefs)
-    {
-        if (pref == "wkt2")
-        {
-            vlr = makeVlr(las::TransformUserId, las::LASFWkt2recordId);
-            if (!vlr.empty())
-            {
-                log()->get(LogLevel::Debug) << "Using WKT2 VLR" << std::endl;
-                break;
-            }
-        }
-        else if (pref == "projjson")
-        {
-            vlr = makeVlr(las::PdalUserId, las::PdalProjJsonRecordId);
-            if (!vlr.empty())
-            {
-                log()->get(LogLevel::Debug) << "Using PROJJSON VLR" << std::endl;
-                break;
-            }
-        }
-        else if (pref == "wkt1")
-        {
-            vlr = makeVlr(las::TransformUserId, las::WktRecordId);
-            if (!vlr.empty())
-            {
-                log()->get(LogLevel::Debug) << "Using WKT1 VLR" << std::endl;
-                break;
-            }
-        }
-        else
-        {
-            log()->get(LogLevel::Warning) << "Unknown value [" << pref <<
-                "] in srs consume preference." << std::endl;
-        }
-    }
-
-    if (!vlr.empty() && !m_args->nosrs)
-        setSpatialReference(std::string(vlr.data(), vlr.data() + vlr.dataSize()));
-    return vlr;
+    fetchVlr(las::TransformUserId, las::LASFWkt2recordId);
+    fetchVlr(las::PdalUserId, las::PdalProjJsonRecordId);
+    fetchVlr(las::TransformUserId, las::WktRecordId);
+    
+    // User told us to ditch them
+    if (m_args->nosrs)
+        vlrs.clear();
+    return vlrs;
 }
 
 
@@ -583,11 +608,10 @@ QuickInfo CopcReader::inspect()
     qi.m_srs = getSpatialReference();
     qi.m_pointCount = h.pointCount();
 
-    auto plptr = std::make_unique<PointLayout>();
-    PointLayoutPtr layout(plptr.get());
-    addDimensions(layout);
-    for (Dimension::Id dim : layout->dims())
-        qi.m_dimNames.push_back(layout->dimName(dim));
+    PointLayout layout;
+    addDimensions(&layout);
+    for (Dimension::Id dim : layout.dims())
+        qi.m_dimNames.push_back(layout.dimName(dim));
 
     // If there is a spatial filter from an explicit --bounds, an origin query,
     // or polygons, then we'll limit our number of points to be an upper bound,
