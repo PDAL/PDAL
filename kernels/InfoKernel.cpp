@@ -40,11 +40,14 @@
 #include <pdal/pdal_config.hpp>
 #include <pdal/pdal_features.hpp>
 
+#include "arbiter/arbiter.hpp"
 #include <filters/InfoFilter.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/PipelineWriter.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/util/IStream.hpp>
+#include <pdal/util/OStream.hpp>
 #include "private/stac/StacInfo.hpp"
 
 namespace pdal
@@ -217,7 +220,6 @@ void InfoKernel::makeReader(const std::string& filename)
     m_reader = &(m_manager.makeReader(filename, m_driverOverride, rOps));
 }
 
-
 void InfoKernel::makePipeline()
 {
     Stage *stage = m_reader;
@@ -258,12 +260,21 @@ void InfoKernel::makePipeline()
         m_hexbinStage = &m_manager.makeFilter("filters.hexbin", *stage);
 }
 
-
 MetadataNode InfoKernel::run(const std::string& filename)
 {
     MetadataNode root;
+    std::unique_ptr<arbiter::LocalHandle> localHandle;
+    std::string readerDriver = m_driverOverride.size()
+        ? m_driverOverride : StageFactory::inferReaderDriver(filename);
 
-    makeReader(filename);
+    if (!m_needPoints && readerDriver == "readers.las" && Utils::isRemote(filename))
+    {
+        localHandle = getPointlessLasFile(filename);
+        makeReader(localHandle->localPath());
+    }
+    else
+        makeReader(filename);
+
     root.add("filename", filename);
     root.add("pdal_version", Config::fullVersionString());
 

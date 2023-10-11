@@ -177,7 +177,7 @@ void Polyline::interpolate(const PointRef& point, double& x, double& y,
 {
     OGRLineString* p = static_cast<OGRLineString*>(m_geom.get());
     const double pk = point.getFieldAs<double>(Dimension::Id::X);
-    int size = m_view->size();
+    point_count_t size = m_view->size();
     if (size == 0 || size == 1)
         throw pdal::pdal_error("pdal::Polyline() has not enough points (" +
                                std::to_string(size) + ").");
@@ -276,7 +276,7 @@ double Polyline::closestSegment(const PointRef& point, double& x, double& y,
         list = final;
     }
 
-    int size = list.size();
+    point_count_t size = list.size();
     if (size == 0 || size == 1)
         return -1;
 
