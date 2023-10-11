@@ -53,6 +53,7 @@ namespace las
     struct Header;
     struct Vlr;
     class VlrCatalog;
+    using VlrList = std::vector<Vlr>;
 }
 
 namespace copc
@@ -86,7 +87,7 @@ private:
     void setForwards(StringMap& headers, StringMap& query);
     std::vector<char> fetch(uint64_t offset, int32_t size);
     void fetchHeader();
-    las::Vlr fetchSrsVlr(const las::VlrCatalog& catalog);
+    las::VlrList fetchSrsVlrs(const las::VlrCatalog& catalog);
     las::Vlr fetchEbVlr(const las::VlrCatalog& catalog);
     void validateHeader(const las::Header& h);
     void validateVlrInfo(const las::Vlr& v, const copc::Info& i);
