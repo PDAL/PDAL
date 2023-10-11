@@ -161,6 +161,7 @@ public:
 
     int keepAliveChunkCount = 10;
     SrsOrderSpec srsVlrOrder;
+    bool nosrs;
 };
 
 struct CopcReader::Private
@@ -234,6 +235,7 @@ void CopcReader::addArgs(ProgramArgs& args)
             m_args->keepAliveChunkCount, 10);
     args.add("srs_vlr_order", "Preference order to read SRS VLRs "
         "(list of 'wkt1', 'wkt2' or 'projjson'", m_args->srsVlrOrder);
+    args.add("nosrs", "Skip reading/processing file SRS", m_args->nosrs, false);
 }
 
 
@@ -416,6 +418,10 @@ las::VlrList CopcReader::fetchSrsVlrs(const las::VlrCatalog& catalog)
     fetchVlr(las::TransformUserId, las::LASFWkt2recordId);
     fetchVlr(las::PdalUserId, las::PdalProjJsonRecordId);
     fetchVlr(las::TransformUserId, las::WktRecordId);
+    
+    // User told us to ditch them
+    if (m_args->nosrs)
+        vlrs.clear();
     return vlrs;
 }
 

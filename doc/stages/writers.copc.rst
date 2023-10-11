@@ -159,6 +159,8 @@ threads
 enhanced_srs_vlrs
   Write WKT2 and PROJJSON as VLR [Default: false]
 
+
+
 .. include:: writer_opts.rst
 
 .. _COPC format: https://copc.io/

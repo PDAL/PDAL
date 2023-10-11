@@ -47,6 +47,13 @@ PDAL_ADD_TEST(pdal_kdindex_test
 )
 PDAL_ADD_TEST(pdal_kernel_test FILES KernelTest.cpp)
 PDAL_ADD_TEST(pdal_log_test FILES LogTest.cpp)
+PDAL_ADD_TEST(pdal_math_utils_test
+    FILES
+        MathUtilsTest.cpp
+        ${PDAL_SRC_DIR}/private/MathUtils.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/eigen
+)
 PDAL_ADD_TEST(pdal_metadata_test FILES MetadataTest.cpp)
 PDAL_ADD_TEST(pdal_oldpclblock_test FILES OldPCLBlockTest.cpp)
 

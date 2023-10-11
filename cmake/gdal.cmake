@@ -20,9 +20,9 @@ if (GDAL_FOUND)
     #
     # Older versions of FindGDAL.cmake don't properly set GDAL_VERSION
     #
-    if (GDAL_VERSION VERSION_LESS 3.0.0)
+    if (GDAL_VERSION VERSION_LESS 3.4.0)
         message(FATAL_ERROR
-            "Found GDAL version ${GDAL_VERSION}.  Version 3.0+ is required")
+            "Found GDAL version ${GDAL_VERSION}.  Version 3.4+ is required")
     endif()
     mark_as_advanced(CLEAR GDAL_INCLUDE_DIR)
     mark_as_advanced(CLEAR GDAL_LIBRARY)
