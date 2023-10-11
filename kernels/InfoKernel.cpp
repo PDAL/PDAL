@@ -220,116 +220,6 @@ void InfoKernel::makeReader(const std::string& filename)
     m_reader = &(m_manager.makeReader(filename, m_driverOverride, rOps));
 }
 
-arbiter::http::Headers getRangeHeader(int start, int end = 0)
-{
-    arbiter::http::Headers h;
-    h["Range"] = "bytes=" + std::to_string(start) + "-" +
-        (end ? std::to_string(end - 1) : "");
-    return h;
-}
-
-std::string getPointlessLasFile(
-    const std::string& path,
-    const std::string& tmp,
-    const arbiter::Arbiter& a)
-{
-    const uint64_t maxHeaderSize(375);
-
-    const uint64_t minorVersionPos(25);
-    const uint64_t headerSizePos(94);
-    const uint64_t pointOffsetPos(96);
-    const uint64_t evlrOffsetPos(235);
-    const uint64_t evlrNumberPos(evlrOffsetPos + 8);
-
-    std::string fileSignature;
-    uint8_t minorVersion(0);
-    uint16_t headerSize(0);
-    uint32_t pointOffset(0);
-    uint64_t evlrOffset(0);
-    uint32_t evlrNumber(0);
-
-    std::string header(a.get(path, getRangeHeader(0, maxHeaderSize)));
-
-    std::stringstream headerStream(
-            header,
-            std::ios_base::in | std::ios_base::out | std::ios_base::binary);
-
-    pdal::ILeStream is(&headerStream);
-    pdal::OLeStream os(&headerStream);
-
-    is.seek(0);
-    is.get(fileSignature, 4);
-
-    if (fileSignature != "LASF")
-    {
-        throw std::runtime_error(
-            "Invalid file signature for .las or .laz file: must be LASF");
-    }
-
-    is.seek(minorVersionPos);
-    is >> minorVersion;
-
-    is.seek(headerSizePos);
-    is >> headerSize;
-
-    is.seek(pointOffsetPos);
-    is >> pointOffset;
-
-    if (minorVersion >= 4)
-    {
-        is.seek(evlrOffsetPos);
-        is >> evlrOffset;
-
-        is.seek(evlrNumberPos);
-        is >> evlrNumber;
-
-        // Modify the header such that the EVLRs come directly after the VLRs -
-        // removing the point data itself.
-        os.seek(evlrOffsetPos);
-        os << pointOffset;
-    }
-
-    // Extract the modified header, VLRs, and append the EVLRs.
-    header = headerStream.str();
-    std::vector<char> data(header.data(), header.data() + headerSize);
-
-    const bool hasVlrs = headerSize < pointOffset;
-    if (hasVlrs)
-    {
-        const auto vlrs = a.getBinary(
-            path,
-            getRangeHeader(headerSize, pointOffset));
-        data.insert(data.end(), vlrs.begin(), vlrs.end());
-    }
-
-    const bool hasEvlrs = evlrNumber && evlrOffset;
-    if (hasEvlrs)
-    {
-        const auto evlrs = a.getBinary(path, getRangeHeader(evlrOffset));
-        data.insert(data.end(), evlrs.begin(), evlrs.end());
-    }
-
-    const std::string extension(arbiter::getExtension(path));
-    const std::string basename(
-        std::to_string(arbiter::randomNumber()) +
-        (extension.size() ? "." + extension : ""));
-
-    const std::string localPath = arbiter::join(tmp, basename);
-    a.put(localPath, data);
-    return localPath;
-}
-
-std::string InfoKernel::makeLasSummaryReader(const std::string& filename)
-{
-    Options rOps;
-    rOps.add("count", 0);
-    arbiter::Arbiter a;
-    const std::string localPath = getPointlessLasFile(filename, "/tmp/", a);
-    m_reader = &(m_manager.makeReader(localPath, "readers.las", rOps));
-    return localPath;
-}
-
-
 void InfoKernel::makePipeline()
 {
     Stage *stage = m_reader;
@@ -370,14 +260,18 @@ void InfoKernel::makePipeline()
         m_hexbinStage = &m_manager.makeFilter("filters.hexbin", *stage);
 }
 
-
 MetadataNode InfoKernel::run(const std::string& filename)
 {
     MetadataNode root;
-
     std::unique_ptr<arbiter::LocalHandle> localHandle;
-    if (m_showSummary && m_driverOverride == "readers.las")
-        localHandle.reset(new arbiter::LocalHandle(makeLasSummaryReader(filename), true));
+    std::string readerDriver = m_driverOverride.size()
+        ? m_driverOverride : StageFactory::inferReaderDriver(filename);
+
+    if (!m_needPoints && readerDriver == "readers.las" && Utils::isRemote(filename))
+    {
+        localHandle = getPointlessLasFile(filename);
+        makeReader(localHandle->localPath());
+    }
     else
         makeReader(filename);
 

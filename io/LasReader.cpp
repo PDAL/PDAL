@@ -339,6 +339,8 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 
 void LasReader::ready(PointTableRef table)
 {
+    if (m_count == 0) return;
+
     createStream();
     std::istream *stream(m_streamIf->m_istream);
 
