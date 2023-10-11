@@ -105,6 +105,7 @@ public:
     int keepAliveChunkCount = 10;
 
     std::string srsConsumePreference;
+    bool nosrs;
 };
 
 struct CopcReader::Private
@@ -176,6 +177,7 @@ void CopcReader::addArgs(ProgramArgs& args)
     args.add("vlr", "Read LAS VLRs and add to metadata.", m_args->doVlrs, true);
     args.add("keep_alive", "Number of chunks to keep alive in memory when working",
             m_args->keepAliveChunkCount, 10);
+    args.add("nosrs", "Skip reading/processing file SRS", m_args->nosrs, false);
     args.add("srs_consume_preference", "Preference order to read SRS VLRs",
         m_args->srsConsumePreference, "wkt1, wkt2, projjson");
 
@@ -393,7 +395,7 @@ las::Vlr CopcReader::fetchSrsVlr(const las::VlrCatalog& catalog)
         }
     }
 
-    if (!vlr.empty())
+    if (!vlr.empty() && !m_args->nosrs)
         setSpatialReference(std::string(vlr.data(), vlr.data() + vlr.dataSize()));
     return vlr;
 }

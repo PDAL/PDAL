@@ -133,3 +133,8 @@ fix_dims
 
 srs_consume_preference
   Preference order to read SRS VLRs. [Default: 'wkt1, wkt2, projjson']
+
+nosrs
+  Don't read the SRS VLRs. The data will not be assigned an SRS. This option is
+  for use only in special cases where processing the SRS could cause performance
+  issues. [Default: false]
