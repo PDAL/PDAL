@@ -42,7 +42,7 @@ namespace pdal
 static StaticPluginInfo const s_info
 {
     "kernels.random",
-    "Random Kernel",
+    "Random Kernel [DEPRECATED]",
     "http://pdal.io/apps/random.html"
 };
 
