@@ -146,7 +146,7 @@ std::string E57Writer::getName() const
 void E57Writer::addArgs(ProgramArgs& args)
 {
     args.add("filename", "Output filename", m_filename).setPositional();
-    args.add("doublePrecision",
+    args.add("double_precision",
              "Double precision for storage (false by default)", m_doublePrecision);
     args.add("extra_dims", "Extra dimensions to write to E57 data",
              m_extraDimsSpec);
