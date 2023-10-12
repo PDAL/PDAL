@@ -65,6 +65,73 @@ const StaticPluginInfo s_info
     { "ept" }
 };
 
+void reprogrow(BOX3D& b, SrsTransform& xform, double x, double y, double z)
+{
+    xform.transform(x, y, z);
+    b.grow(x, y, z);
+}
+
+BOX3D reprojectBoundsViaCorner(BOX3D src, SrsTransform& xform)
+{
+    if (!xform.valid())
+        return src;
+
+    BOX3D b;
+
+    reprogrow(b, xform, src.minx, src.miny, src.minz);
+    reprogrow(b, xform, src.maxx, src.miny, src.minz);
+    reprogrow(b, xform, src.minx, src.maxy, src.minz);
+    reprogrow(b, xform, src.maxx, src.maxy, src.minz);
+    reprogrow(b, xform, src.minx, src.miny, src.maxz);
+    reprogrow(b, xform, src.maxx, src.miny, src.maxz);
+    reprogrow(b, xform, src.minx, src.maxy, src.maxz);
+    reprogrow(b, xform, src.maxx, src.maxy, src.maxz);
+
+    return b;
+}
+
+BOX3D reprojectBoundsBcbfToLonLat(BOX3D src, SrsTransform& xform)
+{
+    if (!xform.valid())
+        return src;
+
+    BOX3D b = reprojectBoundsViaCorner(src, xform);
+
+    // If the Y-values cross the equator, make sure to include the equator.
+    if (src.miny < 0 && src.maxy > 0)
+    {
+        reprogrow(b, xform, src.minx, 0, src.minz);
+        reprogrow(b, xform, src.maxx, 0, src.minz);
+        reprogrow(b, xform, src.minx, 0, src.maxz);
+        reprogrow(b, xform, src.maxx, 0, src.maxz);
+    }
+
+    // Round the minimum longitude up to the nearest multiple of 90 degrees.
+    int x = std::ceil(src.minx);
+    const int remainder = std::abs(x) % 90;
+    if (x < 0)
+        x = -(std::abs(x) - remainder);
+    else if (x > 0)
+        x = x + 90 - remainder;
+
+    // And include the reprojected bounds at every 90 degrees within the query.
+    for ( ; x <= src.maxx; x += 90)
+    {
+        reprogrow(b, xform, x, src.miny, src.minz);
+        reprogrow(b, xform, x, src.maxy, src.minz);
+        reprogrow(b, xform, x, src.miny, src.maxz);
+        reprogrow(b, xform, x, src.maxy, src.maxz);
+
+        if (src.miny < 0 && src.maxy > 0)
+        {
+            reprogrow(b, xform, x, 0, src.minz);
+            reprogrow(b, xform, x, 0, src.maxz);
+        }
+    }
+
+    return b;
+}
+
 }
 
 CREATE_STATIC_STAGE(EptReader, s_info);
@@ -111,6 +178,7 @@ public:
     std::condition_variable contentsCv;
     std::vector<PolyXform> polys;
     BoxXform bounds;
+    SrsTransform llToBcbfTransform;
 };
 
 EptReader::EptReader() : m_args(new EptReader::Args), m_p(new EptReader::Private),
@@ -200,17 +268,29 @@ void EptReader::initialize()
     // Create transformations from our source data to the bounds SRS.
     if (m_args->m_bounds.valid())
     {
+        const SpatialReference& boundsSrs = m_args->m_bounds.spatialReference();
         if (m_args->m_bounds.is2d())
         {
+            if (boundsSrs.isGeographic() && !getSpatialReference().isGeographic())
+                throwError("For lon/lat 'bounds', bounds must be 3D");
+
             m_p->bounds.box = BOX3D(m_args->m_bounds.to2d());
             m_p->bounds.box.minz = (std::numeric_limits<double>::lowest)();
             m_p->bounds.box.maxz = (std::numeric_limits<double>::max)();
         }
         else
             m_p->bounds.box = m_args->m_bounds.to3d();
-        const SpatialReference& boundsSrs = m_args->m_bounds.spatialReference();
         if (boundsSrs.valid() && m_p->info->srs().valid())
             m_p->bounds.xform = SrsTransform(m_p->info->srs(), boundsSrs);
+
+        const bool sourceIsBcbf = getSpatialReference().isGeocentric();
+        const bool targetIsLonLat = boundsSrs.isGeographic();
+
+        if (sourceIsBcbf && targetIsLonLat)
+        {
+            const SpatialReference& llsrs = m_args->m_bounds.spatialReference();
+            m_p->llToBcbfTransform.set(llsrs, getSpatialReference());
+        }
     }
 
     // Create transform from the point source SRS to the poly SRS.
@@ -609,48 +689,31 @@ bool EptReader::hasSpatialFilter() const
 // Determine if an EPT tile overlaps our query boundary
 bool EptReader::passesSpatialFilter(const BOX3D& tileBounds) const
 {
-    // Reproject the tile bounds to the largest rect. solid that contains all the corners.
-    auto reproject = [](BOX3D src, SrsTransform& xform) -> BOX3D
-    {
-        if (!xform.valid())
-            return src;
-
-        BOX3D b;
-        auto reprogrow = [&b, &xform](double x, double y, double z)
-        {
-            xform.transform(x, y, z);
-            b.grow(x, y, z);
-        };
-
-        reprogrow(src.minx, src.miny, src.minz);
-        reprogrow(src.maxx, src.miny, src.minz);
-        reprogrow(src.minx, src.maxy, src.minz);
-        reprogrow(src.maxx, src.maxy, src.minz);
-        reprogrow(src.minx, src.miny, src.maxz);
-        reprogrow(src.maxx, src.miny, src.maxz);
-        reprogrow(src.minx, src.maxy, src.maxz);
-        reprogrow(src.maxx, src.maxy, src.maxz);
-        return b;
-    };
-
-    auto boxOverlaps = [this, &reproject, &tileBounds]() -> bool
+    auto boxOverlaps = [this, &tileBounds]() -> bool
     {
         if (!m_p->bounds.box.valid())
             return true;
 
+        if (m_p->llToBcbfTransform.valid())
+        {
+            return reprojectBoundsBcbfToLonLat(m_p->bounds.box, m_p->llToBcbfTransform)
+                .overlaps(tileBounds);
+        }
+
         // If the reprojected source bounds doesn't overlap our query bounds, we're done.
-        return reproject(tileBounds, m_p->bounds.xform).overlaps(m_p->bounds.box);
+        return reprojectBoundsViaCorner(tileBounds, m_p->bounds.xform)
+            .overlaps(m_p->bounds.box);
     };
 
     // Check the box of the key against our query polygon(s). If it doesn't overlap,
     // we can skip
-    auto polysOverlap = [this, &reproject, &tileBounds]() -> bool
+    auto polysOverlap = [this, &tileBounds]() -> bool
     {
         if (m_p->polys.empty())
             return true;
 
         for (auto& ps : m_p->polys)
-            if (!ps.poly.disjoint(reproject(tileBounds, ps.xform)))
+            if (!ps.poly.disjoint(reprojectBoundsViaCorner(tileBounds, ps.xform)))
                 return true;
         return false;
     };
