@@ -397,50 +397,50 @@ Eigen::Vector3d rotate(const Eigen::Vector3d& v, const Eigen::Quaterniond& rot)
 // http://blackpawn.com/texts/pointinpoly/default.html
 //
 /// Return the interpolated Z value at location X/Y. If the X/Y location is not
-/// in the triangle, return infinity.  If the determinant is 0, the input points
-/// aren't a triangle (they're collinear).
+/// in the triangle, return infinity.  If the determinant (areaTotal) is 0, the
+/// input points aren't a triangle (they're collinear).
 /// \param x1, y1, z1  Coordinates of point 1.
 /// \param x2, y2, z2  Coordinates of point 2.
 /// \param x3, y3, z3  Coordinates of point 3.
 /// \param x, y  X and Y coordinates of location to find an interpolated Z
-/// \param epsilon Tolerance for comparisons (to cope with numerical imprecision when x,y is
-/// on one of the triangle's edges)
 /// \return  Interpolated Z value or infinity.
 double barycentricInterpolation(double x1, double y1, double z1,
     double x2, double y2, double z2, double x3, double y3, double z3,
-    double x, double y, double epsilon)
+    double x, double y)
 {
-    double z = std::numeric_limits<double>::infinity();
+    // Find twice the total area of the triangle.
+    double areaTotal = ((x2-x1) * (y3-y2)) - ((y2-y1) * (x3-x2));
+    if (areaTotal == 0)
+        return std::numeric_limits<double>::infinity();
 
-    double detT = ((y2-y3) * (x1-x3)) + ((x3-x2) * (y1-y3));
+    // Find the sign of the area so that we can account for the winding order of the
+    // points that make up the triangle.
+    bool signtotal = std::signbit(areaTotal);
 
-    if (abs(detT) > epsilon)
-    {
-        // Compute the barycentric coordinates of x,y (relative to
-        // x1/y1, x2/y2, x3/y3).  Essentially the weight that each
-        // corner of the triangle contributes to the point in question.
+    // Find twice the area of each triangle formed by a triangle edge and the test point.
+    // Things are arranged such that if the point is inside the triangle, the sign of the
+    // total calculation above should be the same as the calculation of each area. If
+    // the signs differ, the test point is outside. We treat zero (a point on an edge)
+    // as inside the triangle.
 
-        // Another way to think about this is that we're making a basis
-        // for the system with the basis vectors being two sides of
-        // the triangle.  You can rearrange the z calculation below in
-        // terms of lambda1 and lambda2 to see this.  Also note that
-        // since lambda1 and lambda2 are coefficients of the basis vectors,
-        // any values outside of the range [0,1] are necessarily out of the
-        // triangle.
-        double lambda1 = ((y2-y3) * (x-x3) + (x3-x2) * (y-y3)) / detT;
-        double lambda2 = ((y3-y1) * (x-x3) + (x1-x3) * (y-y3)) / detT;
-        if (lambda1 + epsilon >= 0 && lambda1 - epsilon <= 1
-            && lambda2 + epsilon >= 0 && lambda2 - epsilon <= 1)
-        {
-            double sum = lambda1 + lambda2;
-            if (sum - epsilon <= 1)
-            {
-                double lambda3 = 1 - sum;
-                z = (lambda1 * z1) + (lambda2 * z2) + (lambda3 * z3);
-            }
-        }
-    }
-    return z;
+    // Another way to think about this is that we're making a basis
+    // for a system with the basis vectors being two sides of
+    // the triangle where one point is (0,0), one is (1, 0) and the other is (0, 1)
+    // and points in or on the triangle take on X and Y values [0, 1].
+    double area12 = (x2-x1) * (y-y1) - (y2-y1) * (x-x1);
+    if (area12 && std::signbit(area12) != signtotal)
+        return std::numeric_limits<double>::infinity();
+    double area23 = (x3-x2) * (y-y2) - (y3-y2) * (x-x2);
+    if (area23 && std::signbit(area23) != signtotal)
+        return std::numeric_limits<double>::infinity();
+    double area31 = (x1-x3) * (y-y3) - (y1-y3) * (x-x3);
+    if (area31 && std::signbit(area31) != signtotal)
+        return std::numeric_limits<double>::infinity();
+
+    // Compute the z value of the test point as a weighted sum of each of corner z values,
+    // dividing by the total triangle area so that area of each sub-triangle is a fraction
+    // of the total area.
+    return (area12 * z3 + area23 * z1 + area31 * z2) / areaTotal;
 }
 
 } // namespace math

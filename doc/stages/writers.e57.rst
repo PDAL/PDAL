@@ -40,7 +40,7 @@ Example
       {
           "type":"writers.e57",
           "filename":"outputfile.e57",
-            "doublePrecision":false
+            "double_precision":false
       }
   ]
 
@@ -51,7 +51,7 @@ Options
 _`filename`
   E57 file to write [Required]
 
-doublePrecision
+double_precision
   Use double precision for storage (false by default).
 
 .. include:: writer_opts.rst

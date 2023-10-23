@@ -45,7 +45,7 @@ namespace pdal
 static PluginInfo const s_info
 {
     "kernels.density",
-    "Density Kernel",
+    "Density Kernel [DEPRECATED]",
     "http://pdal.io/apps/density.html"
 };
 

@@ -54,9 +54,6 @@ pdal_error stac_error(std::string const& msg)
 namespace StacUtils
 {
 
-// StacUtils::StacUtils() {}
-// StacUtils::~StacUtils() {}
-
 std::string handleRelativePath(std::string srcPath, std::string linkPath)
 {
     //Make absolute path of current item's directory, then create relative path from that

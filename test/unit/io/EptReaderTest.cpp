@@ -83,6 +83,9 @@ namespace
     const std::string ellipsoidEptNoPointsPath(
             Support::datapath("ept/ellipsoid-nopoints/ept.json"));
 
+    const std::string bcbfPath(
+            Support::datapath("ept/bcbf/ept.json"));
+
     const point_count_t ellipsoidNumPoints(100000);
     const BOX3D ellipsoidBoundsConforming(-8242746, 4966506, -50,
             -8242446, 4966706, 50);
@@ -938,6 +941,61 @@ TEST(EptReaderTest, ogrCrop)
     EXPECT_LE(sourceNp, 89u);
     EXPECT_GE(eptNp, 86u);
     EXPECT_GE(sourceNp, 86u);
+}
+
+TEST(EptReaderTest, bcbfToLonLat2dBoundsThrows)
+{
+    // A 2D bounds is not allowed for this lon/lat queries against BCBF data.
+    SrsBounds bounds(
+        BOX2D(-180, 80, 180, 90),
+        "+proj=longlat +R=1000 +no_defs +type=crs");
+
+    EptReader reader;
+    {
+        Options options;
+        options.add("filename", bcbfPath);
+        options.add("bounds", bounds);
+        reader.setOptions(options);
+    }
+    PointTable eptTable;
+    EXPECT_THROW(reader.prepare(eptTable), pdal_error);
+}
+
+TEST(EptReaderTest, bcbfToLonLat)
+{
+    SrsBounds bounds(
+        BOX3D(-180, 80, -50, 180, 90, 50),
+        "+proj=longlat +R=1000 +no_defs +type=crs");
+
+    EptReader reader;
+    {
+        Options options;
+        // See the readme in this EPT directory for a description of the data.
+        options.add("filename", bcbfPath);
+        options.add("bounds", bounds);
+        reader.setOptions(options);
+    }
+    PointTable eptTable;
+    reader.prepare(eptTable);
+    const auto set(reader.execute(eptTable));
+
+    double x, y, z;
+    uint64_t np(0);
+    for (const PointViewPtr& view : set)
+    {
+        for (point_count_t i(0); i < view->size(); ++i)
+        {
+            ++np;
+            x = view->getFieldAs<double>(Dimension::Id::X, i);
+            y = view->getFieldAs<double>(Dimension::Id::Y, i);
+            z = view->getFieldAs<double>(Dimension::Id::Z, i);
+            EXPECT_EQ(x, 1);
+            EXPECT_EQ(y, 1);
+            EXPECT_EQ(z, 999);
+        }
+    }
+
+    EXPECT_EQ(np, 5);
 }
 
 } // namespace pdal

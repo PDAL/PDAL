@@ -55,6 +55,7 @@
 #include "private/copc/Info.hpp"
 #include "private/copc/Tile.hpp"
 #include "private/las/Header.hpp"
+#include "private/las/Srs.hpp"
 #include "private/las/Utils.hpp"
 #include "private/las/Vlr.hpp"
 
@@ -72,7 +73,130 @@ const StaticPluginInfo s_info
     { "copc" }
 };
 
+void reprogrow(BOX3D& b, SrsTransform& xform, double x, double y, double z)
+{
+    xform.transform(x, y, z);
+    b.grow(x, y, z);
 }
+
+BOX3D reprojectBoundsViaCorner(BOX3D src, SrsTransform& xform)
+{
+    if (!xform.valid())
+        return src;
+
+    BOX3D b;
+
+    reprogrow(b, xform, src.minx, src.miny, src.minz);
+    reprogrow(b, xform, src.maxx, src.miny, src.minz);
+    reprogrow(b, xform, src.minx, src.maxy, src.minz);
+    reprogrow(b, xform, src.maxx, src.maxy, src.minz);
+    reprogrow(b, xform, src.minx, src.miny, src.maxz);
+    reprogrow(b, xform, src.maxx, src.miny, src.maxz);
+    reprogrow(b, xform, src.minx, src.maxy, src.maxz);
+    reprogrow(b, xform, src.maxx, src.maxy, src.maxz);
+
+    return b;
+}
+
+BOX3D reprojectBoundsBcbfToLonLat(BOX3D src, SrsTransform& xform)
+{
+    if (!xform.valid())
+        return src;
+
+    BOX3D b = reprojectBoundsViaCorner(src, xform);
+
+    // If the Y-values cross the equator, make sure to include the equator.
+    if (src.miny < 0 && src.maxy > 0)
+    {
+        reprogrow(b, xform, src.minx, 0, src.minz);
+        reprogrow(b, xform, src.maxx, 0, src.minz);
+        reprogrow(b, xform, src.minx, 0, src.maxz);
+        reprogrow(b, xform, src.maxx, 0, src.maxz);
+    }
+
+    // Round the minimum longitude up to the nearest multiple of 90 degrees.
+    int x = std::ceil(src.minx);
+    const int remainder = std::abs(x) % 90;
+    if (x < 0)
+        x = -(std::abs(x) - remainder);
+    else if (x > 0)
+        x = x + 90 - remainder;
+
+    // And include the reprojected bounds at every 90 degrees within the query.
+    for ( ; x <= src.maxx; x += 90)
+    {
+        reprogrow(b, xform, x, src.miny, src.minz);
+        reprogrow(b, xform, x, src.maxy, src.minz);
+        reprogrow(b, xform, x, src.miny, src.maxz);
+        reprogrow(b, xform, x, src.maxy, src.maxz);
+
+        if (src.miny < 0 && src.maxy > 0)
+        {
+            reprogrow(b, xform, x, 0, src.minz);
+            reprogrow(b, xform, x, 0, src.maxz);
+        }
+    }
+
+    return b;
+}
+
+struct SrsOrderSpec
+{
+    std::vector<las::SrsType> types;
+};
+
+} // unnamed namespace
+
+namespace Utils
+{
+
+template<>
+StatusWithReason fromString(const std::string& from,
+    SrsOrderSpec& srsOrder)
+{
+    using namespace las;
+
+     static const std::map<std::string, SrsType> typemap =
+        { { "wkt2", SrsType::Wkt2 },
+          { "wkt1", SrsType::Wkt1 },
+          { "projjson", SrsType::Proj } };
+
+    StringList srsTypes = Utils::split2(from, ',');
+    std::transform(srsTypes.cbegin(), srsTypes.cend(), srsTypes.begin(),
+        [](std::string s){ Utils::trim(s); return Utils::tolower(s); });
+
+    for (std::string& stype : srsTypes)
+    {
+        auto it = typemap.find(stype);
+        if (it == typemap.end())
+            return { -1, "Invalid SRS type '" + stype + "'. Must be one of 'wkt1', "
+                "'wkt' or 'projjson'." };
+        SrsType type = it->second;
+        if (Utils::contains(srsOrder.types, type))
+            return { -1,
+                "Duplicate SRS type '" + stype + "' in 'vlr_srs_order'" };
+        srsOrder.types.push_back(type);
+    }
+    return true;
+}
+
+template<>
+std::string toString(const SrsOrderSpec& srsOrder)
+{
+    using namespace las;
+
+    // Note: geotiff is invalid for COPC and should never appear in a valid SrsOrderSpec.
+    static const std::array<std::string, 4> srsTypeNames { "wkt1", "geotiff", "projjson", "wkt2" };
+
+    std::string out;
+    for (SrsType type : srsOrder.types)
+        out += srsTypeNames[Utils::toNative(type)] + ",";
+    if (out.size())
+        out.erase(out.size() - 1);
+    return out;
+}
+
+} // namespace Utils
 
 CREATE_STATIC_STAGE(CopcReader, s_info);
 
@@ -103,8 +227,8 @@ public:
     NL::json ogr;
 
     int keepAliveChunkCount = 10;
-
-    std::string srsConsumePreference;
+    SrsOrderSpec srsVlrOrder;
+    bool nosrs;
 };
 
 struct CopcReader::Private
@@ -132,6 +256,7 @@ public:
     copc::Info copc_info;
     point_count_t hierarchyPointCount;
     bool done;
+    SrsTransform llToBcbfTransform;
 };
 
 CopcReader::CopcReader() : m_args(new CopcReader::Args), m_p(new CopcReader::Private)
@@ -176,9 +301,9 @@ void CopcReader::addArgs(ProgramArgs& args)
     args.add("vlr", "Read LAS VLRs and add to metadata.", m_args->doVlrs, true);
     args.add("keep_alive", "Number of chunks to keep alive in memory when working",
             m_args->keepAliveChunkCount, 10);
-    args.add("srs_consume_preference", "Preference order to read SRS VLRs",
-        m_args->srsConsumePreference, "wkt1, wkt2, projjson");
-
+    args.add("srs_vlr_order", "Preference order to read SRS VLRs "
+        "(list of 'wkt1', 'wkt2' or 'projjson'", m_args->srsVlrOrder);
+    args.add("nosrs", "Skip reading/processing file SRS", m_args->nosrs, false);
 }
 
 
@@ -225,7 +350,6 @@ void CopcReader::initialize(PointTableRef table)
     // alert consumers that we are a COPC file
     m.add("copc", true);
 
-
     fetchHeader();
 
     MetadataNode copc_metadata = m.add("copc_info");
@@ -246,21 +370,28 @@ void CopcReader::initialize(PointTableRef table)
     catalog.load(las::Header::Size14, m_p->header.vlrCount, m_p->header.evlrOffset,
         m_p->header.evlrCount);
     las::Vlr ebVlr = fetchEbVlr(catalog);
-    las::Vlr srsVlr = fetchSrsVlr(catalog);
+
+    las::VlrList srsVlrs = fetchSrsVlrs(catalog);
+    las::Srs srs;
+    srs.init(srsVlrs, m_args->srsVlrOrder.types, true, log());
+    setSpatialReference(srs.get());
 
     if (m_args->doVlrs)
     {
         int i = 0;
+        // This simply avoids re-requesting the VLR data from a remote source for those
+        // VLRs where we already have data.
         if (ebVlr.dataSize())
             las::addVlrMetadata(ebVlr, "vlr_" + std::to_string(i++), forward, m);
-        if (srsVlr.dataSize())
-            las::addVlrMetadata(srsVlr, "vlr_" + std::to_string(i++), forward, m);
+        for (const las::Vlr& vlr : srsVlrs)
+            if (vlr.dataSize())
+                las::addVlrMetadata(vlr, "vlr_" + std::to_string(i++), forward, m);
 
         las::VlrList ignored = las::parseIgnoreVlrs({});
         for (const las::VlrCatalog::Entry& e : catalog)
         {
             las::Vlr vlr(e.userId, e.recordId);
-            if (las::shouldIgnoreVlr(vlr, ignored) || vlr == ebVlr || vlr == srsVlr)
+            if (las::shouldIgnoreVlr(vlr, ignored) || vlr == ebVlr || Utils::contains(srsVlrs, vlr))
                 continue;
             vlr.dataVec = catalog.fetchWithDescription(e.userId, e.recordId, vlr.description);
             las::addVlrMetadata(vlr, "vlr_" + std::to_string(i++), forward, m);
@@ -275,6 +406,10 @@ void CopcReader::initialize(PointTableRef table)
     m_p->depthEnd = m_args->resolution ?
         (std::max)(1, (int)ceil(log2(m_p->copc_info.spacing / m_args->resolution)) + 1) :
         0;
+    
+    if (m_args->resolution)
+        log()->get(LogLevel::Debug) << "Maximum depth: " << m_p->depthEnd << 
+            std::endl;
 }
 
 
@@ -339,63 +474,27 @@ void CopcReader::fetchHeader()
 }
 
 
-las::Vlr CopcReader::fetchSrsVlr(const las::VlrCatalog& catalog)
+las::VlrList CopcReader::fetchSrsVlrs(const las::VlrCatalog& catalog)
 {
-    std::string srsConsumePreference = m_args->srsConsumePreference;
-    if (srsConsumePreference.empty())
-        srsConsumePreference = "wkt1, wkt2, projjson";
+    las::VlrList vlrs;
 
-    auto prefs = Utils::split2(srsConsumePreference, [](char c) { return c == ','; });
-    std::transform(prefs.cbegin(), prefs.cend(), prefs.begin(),
-                   [](std::string s)
-                   { Utils::trim(s); return Utils::tolower(s); });
+    auto fetchVlr = [&catalog, &vlrs] (const std::string userId, uint16_t recordId) {
+        if (!catalog.exists(userId, recordId))
+            return;
 
-    auto makeVlr = [&catalog] (const std::string userId, uint16_t recordId) {
         las::Vlr vlr(userId, recordId);
         vlr.dataVec = catalog.fetchWithDescription(userId, recordId, vlr.description);
-        return vlr;
+        vlrs.push_back(std::move(vlr));
     };
 
-    las::Vlr vlr;
-    for (const std::string& pref : prefs)
-    {
-        if (pref == "wkt2")
-        {
-            vlr = makeVlr(las::TransformUserId, las::LASFWkt2recordId);
-            if (!vlr.empty())
-            {
-                log()->get(LogLevel::Debug) << "Using WKT2 VLR" << std::endl;
-                break;
-            }
-        }
-        else if (pref == "projjson")
-        {
-            vlr = makeVlr(las::PdalUserId, las::PdalProjJsonRecordId);
-            if (!vlr.empty())
-            {
-                log()->get(LogLevel::Debug) << "Using PROJJSON VLR" << std::endl;
-                break;
-            }
-        }
-        else if (pref == "wkt1")
-        {
-            vlr = makeVlr(las::TransformUserId, las::WktRecordId);
-            if (!vlr.empty())
-            {
-                log()->get(LogLevel::Debug) << "Using WKT1 VLR" << std::endl;
-                break;
-            }
-        }
-        else
-        {
-            log()->get(LogLevel::Warning) << "Unknown value [" << pref <<
-                "] in srs consume preference." << std::endl;
-        }
-    }
-
-    if (!vlr.empty())
-        setSpatialReference(std::string(vlr.data(), vlr.data() + vlr.dataSize()));
-    return vlr;
+    fetchVlr(las::TransformUserId, las::LASFWkt2recordId);
+    fetchVlr(las::PdalUserId, las::PdalProjJsonRecordId);
+    fetchVlr(las::TransformUserId, las::WktRecordId);
+    
+    // User told us to ditch them
+    if (m_args->nosrs)
+        vlrs.clear();
+    return vlrs;
 }
 
 
@@ -444,17 +543,29 @@ void CopcReader::createSpatialFilters()
     // Create transformations from our source data to the bounds SRS.
     if (m_args->clip.valid())
     {
+        const SpatialReference& boundsSrs = m_args->clip.spatialReference();
         if (m_args->clip.is2d())
         {
+            if (boundsSrs.isGeographic() && !getSpatialReference().isGeographic())
+                throwError("For lon/lat 'bounds', bounds must be 3D");
+
             m_p->clip.box = BOX3D(m_args->clip.to2d());
             m_p->clip.box.minz = (std::numeric_limits<double>::lowest)();
             m_p->clip.box.maxz = (std::numeric_limits<double>::max)();
         }
         else
             m_p->clip.box = m_args->clip.to3d();
-        const SpatialReference& boundsSrs = m_args->clip.spatialReference();
         if (getSpatialReference().valid() && boundsSrs.valid())
             m_p->clip.xform = SrsTransform(getSpatialReference(), boundsSrs);
+
+        // We'll have to do some special checks for this type of comparison.
+        const bool sourceIsBcbf = getSpatialReference().isGeocentric();
+        const bool targetIsLonLat = boundsSrs.isGeographic();
+        if (sourceIsBcbf && targetIsLonLat)
+        {
+            const SpatialReference& llsrs = m_args->clip.spatialReference();
+            m_p->llToBcbfTransform.set(llsrs, getSpatialReference());
+        }
     }
 
     // Read polygons from OGR and add to the polygon list.
@@ -580,6 +691,7 @@ void CopcReader::ready(PointTableRef table)
         log()->get(LogLevel::Warning) << totalPoints << " will be downloaded" << std::endl;
 
     m_p->tileCount = m_p->hierarchy.size();
+    log()->get(LogLevel::Debug) << m_p->tileCount << " overlapping nodes" << std::endl;
 
     m_p->pool.reset(new ThreadPool(m_p->pool->numThreads()));
     m_p->done = false;
@@ -662,49 +774,31 @@ bool CopcReader::passesSpatialFilter(const copc::Key& key) const
 {
     const BOX3D& tileBounds = key.bounds(m_p->rootNodeExtent);
 
-    // Reproject the tile bounds to the largest rect. solid that contains all the corners.
-    auto reproject = [](BOX3D src, SrsTransform& xform) -> BOX3D
-    {
-        if (!xform.valid())
-            return src;
-
-        BOX3D b;
-        auto reprogrow = [&b, &xform](double x, double y, double z)
-        {
-            xform.transform(x, y, z);
-            b.grow(x, y, z);
-        };
-
-        reprogrow(src.minx, src.miny, src.minz);
-        reprogrow(src.maxx, src.miny, src.minz);
-        reprogrow(src.minx, src.maxy, src.minz);
-        reprogrow(src.maxx, src.maxy, src.minz);
-        reprogrow(src.minx, src.miny, src.maxz);
-        reprogrow(src.maxx, src.miny, src.maxz);
-        reprogrow(src.minx, src.maxy, src.maxz);
-        reprogrow(src.maxx, src.maxy, src.maxz);
-        return b;
-    };
-
-    auto boxOverlaps = [this, &reproject, &tileBounds]() -> bool
+    auto boxOverlaps = [this, &tileBounds]() -> bool
     {
         if (!m_p->clip.box.valid())
             return true;
 
-        // If the reprojected source bounds doesn't overlap our query bounds, we're done.
-        return reproject(tileBounds, m_p->clip.xform).overlaps(m_p->clip.box);
+        if (m_p->llToBcbfTransform.valid())
+        {
+            return reprojectBoundsBcbfToLonLat(m_p->clip.box, m_p->llToBcbfTransform)
+                .overlaps(tileBounds);
+        }
+
+        return reprojectBoundsViaCorner(tileBounds, m_p->clip.xform)
+            .overlaps(m_p->clip.box);
     };
 
     // Check the box of the key against our query polygon(s). If it doesn't overlap,
     // we can skip
-    auto polysOverlap = [this, &reproject, &tileBounds]() -> bool
+    auto polysOverlap = [this, &tileBounds]() -> bool
     {
         if (m_p->polys.empty())
             return true;
 
         for (auto& ps : m_p->polys)
         {
-            if (!ps.poly.disjoint(reproject(tileBounds, ps.xform)))
+            if (!ps.poly.disjoint(reprojectBoundsViaCorner(tileBounds, ps.xform)))
                 return true;
         }
         return false;

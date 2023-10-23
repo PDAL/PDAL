@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2016, Howard Butler <howard@hobu.co>
 *
 * All rights reserved.
 *
@@ -32,71 +32,63 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "HausdorffKernel.hpp"
+#include <pdal/pdal_test_main.hpp>
+#include <pdal/private/MathUtils.hpp>
 
-#include <memory>
-
-#include <pdal/PDALUtils.hpp>
-#include <pdal/PointView.hpp>
-#include <pdal/pdal_config.hpp>
+#include "Support.hpp"
 
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+TEST(MathUtilsTest, barycentric)
 {
-    "kernels.hausdorff",
-    "Hausdorff Kernel [DEPRECATED]",
-    "http://pdal.io/apps/hausdorff.html"
-};
+    using namespace math;
 
-CREATE_STATIC_KERNEL(HausdorffKernel, s_info)
+    // Triangle (1, 1), (5, 4), (3, 6) -- z's 55, 25, 100
+    double x1 = 1;
+    double y1 = 1;
+    double z1 = 55;
+    double x2 = 5;
+    double y2 = 4;
+    double z2 = 25;
+    double x3 = 3;
+    double y3 = 6;
+    double z3 = 100;
 
-std::string HausdorffKernel::getName() const
-{
-    return s_info.name;
-}
+    struct point
+    {
+        double x;
+        double y;
+    };
 
-void HausdorffKernel::addSwitches(ProgramArgs& args)
-{
-    Arg& source = args.add("source", "Source filename", m_sourceFile);
-    source.setPositional();
-    Arg& candidate = args.add("candidate", "Candidate filename",
-                              m_candidateFile);
-    candidate.setPositional();
-}
+    std::vector<point> points { { 3, 3 }, {4, 2}, {5, 4}, {4, 6}, {1, 5},
+        {4, 5}, {2, 7.0 / 4}, {3, 4}, {3, 6} };
 
+    double inf = std::numeric_limits<double>::infinity();
+    std::vector<double> results { 48.57142857142, inf, 25, inf, inf,
+        62.5, 47.5, 65.7142857142, 100 };
 
-PointViewPtr HausdorffKernel::loadSet(const std::string& filename,
-                                      PointTableRef table)
-{
-    Stage& reader = makeReader(filename, "");
-    reader.prepare(table);
-    PointViewSet viewSet = reader.execute(table);
-    assert(viewSet.size() == 1);
-    return *viewSet.begin();
-}
+    double z;
+    for (size_t i = 0; i < points.size(); ++i)
+    {
+        const point& p = points[i];
+        z = barycentricInterpolation(x1, y1, z1, x2, y2, z2, x3, y3, z3, p.x, p.y);
+        if (std::isinf(results[i]))
+            EXPECT_TRUE(std::isinf(z));
+        else
+            EXPECT_NEAR(z, results[i], .0000000001);
+    }
 
-
-int HausdorffKernel::execute()
-{
-    ColumnPointTable srcTable;
-    PointViewPtr srcView = loadSet(m_sourceFile, srcTable);
-
-    ColumnPointTable candTable;
-    PointViewPtr candView = loadSet(m_candidateFile, candTable);
-
-    std::pair<double, double> result = Utils::computeHausdorffPair(srcView, candView);
-
-    MetadataNode root;
-    root.add("filenames", m_sourceFile);
-    root.add("filenames", m_candidateFile);
-    root.add("hausdorff", result.first);
-    root.add("modified_hausdorff", result.second);
-    root.add("pdal_version", Config::fullVersionString());
-    Utils::toJSON(root, std::cout);
-
-    return 0;
+    // Re-order triangle points (x2 is before x1 in input).  Results should be the same.
+    for (size_t i = 0; i < points.size(); ++i)
+    {
+        const point& p = points[i];
+        z = barycentricInterpolation(x2, y2, z2, x1, y1, z1, x3, y3, z3, p.x, p.y);
+        if (std::isinf(results[i]))
+            EXPECT_TRUE(std::isinf(z));
+        else
+            EXPECT_NEAR(z, results[i], .0000000001);
+    }
 }
 
 } // namespace pdal
