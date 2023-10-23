@@ -80,7 +80,7 @@ technique we learned about in :ref:`workshop-denoising`.
         ./exercises/analysis/ground/CSite1_orig-utm.laz \
         -o ./exercises/analysis/ground/ground.copc.laz \
         smrf expression \
-        --filters.expression.expression="Classification == 2"\
+        --filters.expression.expression="Classification == 2" \
         -v 4
 
     .. code-block:: doscon
@@ -90,7 +90,7 @@ technique we learned about in :ref:`workshop-denoising`.
         ./exercises/analysis/ground/CSite1_orig-utm.laz ^
         -o ./exercises/analysis/ground/ground.copc.laz ^
         smrf expression ^
-        --filters.expression.expression="Classification == 2"^
+        --filters.expression.expression="Classification == 2" ^
         -v 4
 
 2. Now we will instead use the :ref:`translate_command` command to stack the
