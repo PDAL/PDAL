@@ -106,7 +106,7 @@ add a few options to have finer control over what is written. These include:
 2. ``minor_version``: We want to make sure to output LAS 1.2, which will
    provide the widest compatibility with other softwares that can
    consume LAS.
-3. ``dataformat_id``: Format 0 supports both time and color information
+3. ``dataformat_id``: Format 0 supports neither time nor color information
 
 5. :ref:`writers.copc`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
