@@ -280,7 +280,7 @@ double Polyline::closestSegment(const PointRef& point, double& x, double& y,
     if (size == 0 || size == 1)
         return -1;
 
-    for (int i = 1; i < size; ++i)
+    for (size_t i = 1; i < size; ++i)
     {
         const double prevX =
             m_view->getFieldAs<double>(Dimension::Id::X, list[i - 1]);

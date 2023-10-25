@@ -412,9 +412,7 @@ void LasReader::ready(PointTableRef table)
         d->nextReadChunk = 0;
     }
 
-//ABELL - Set numThreads.
-    const int numThreads = 3;
-    for (int i = 0; i < numThreads; ++i)
+    for (int i = 0; i < d->opts.numThreads; ++i)
         queueNext();
 }
 
