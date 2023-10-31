@@ -279,7 +279,7 @@ void LiTreeFilter::filter(PointView& view)
 
     // "...stop when Ui is empty."
     int64_t tree_id(1);
-    while (Ui.size() > 1)
+    while (Ui.size() > m_minSize)
     {
         // "We find the highest point t0 (global maximum) in Ui, which is assumed
         // to be the top of the tallest tree i in Ui."
