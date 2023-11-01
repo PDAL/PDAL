@@ -108,6 +108,7 @@ struct LasReader::Private
     uint64_t nextFetchPoint;
     // The index of the chunk (tile) we want to read data from.
     uint32_t nextReadChunk;
+    std::function<void()> queueNext;
     std::mutex mutex;
     std::condition_variable processedCv;
 
@@ -258,6 +259,11 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     if (!las::pointFormatSupported(d->header.pointFormat()))
         throwError("Unsupported LAS input point format: " +
             Utils::toString((int)d->header.pointFormat()) + ".");
+
+    // Set the queue function based on whether we're compressed or not.
+    d->queueNext = d->header.dataCompressed() ?
+        std::bind(&LasReader::queueNextCompressedChunk, this) :
+        std::bind(&LasReader::queueNextStandardChunk, this);
 
     // Go peek into header and see if we are COPC
     // If we over-read the file, the error state will be set, but things are really fine for
@@ -412,16 +418,7 @@ void LasReader::ready(PointTableRef table)
     }
 
     for (int i = 0; i < d->opts.numThreads; ++i)
-        queueNext();
-}
-
-// Use a function instead of if statement.
-void LasReader::queueNext()
-{
-    if (d->header.dataCompressed())
-        queueNextCompressedChunk();
-    else
-        queueNextStandardChunk();
+        d->queueNext();
 }
 
 void LasReader::queueNextCompressedChunk()
@@ -608,7 +605,7 @@ bool LasReader::processOne(PointRef& point)
 
         // Found the tile we wanted.
         d->nextReadChunk++;
-        queueNext();
+        d->queueNext();
     }
     loadPoint(point);
     d->index++;
