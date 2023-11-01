@@ -62,6 +62,8 @@ namespace pdal
 namespace
 {
 
+constexpr int DefaultNumThreads = 7;
+
 struct invalid_stream : public std::runtime_error
 {
     invalid_stream(const std::string& msg) : std::runtime_error(msg)
@@ -109,19 +111,15 @@ struct LasReader::Private
     std::mutex mutex;
     std::condition_variable processedCv;
 
-    //ABELL - Thread count here...
-    Private() : apiHeader(header, srs, vlrs), index(0), pool(7)
+    Private() : apiHeader(header, srs, vlrs), index(0), pool(DefaultNumThreads)
     {}
 };
 
 LasReader::LasReader() : d(new Private)
 {}
 
-
 LasReader::~LasReader()
-{
-}
-
+{}
 
 void LasReader::addArgs(ProgramArgs& args)
 {
@@ -134,7 +132,7 @@ void LasReader::addArgs(ProgramArgs& args)
     args.add("fix_dims", "Make invalid dimension names valid by changing "
         "invalid characters to '_'", d->opts.fixNames, true);
     args.add("nosrs", "Skip reading/processing file SRS", d->opts.nosrs);
-    args.add("threads", "Thread pool size", d->opts.numThreads, 7);
+    args.add("threads", "Thread pool size", d->opts.numThreads, DefaultNumThreads);
     args.add("srs_consume_preference", "Preference order to read SRS VLRs",
         d->opts.srsConsumePreference, "wkt1, geotiff, wkt2, projjson");
 }
@@ -213,11 +211,11 @@ QuickInfo LasReader::inspect()
 LasReader::LasStreamPtr LasReader::createStream()
 {
     LasStreamPtr s(new LasStreamIf(m_filename));
-    if (!s->open())
+    if (!s->isOpen())
     {
         std::ostringstream oss;
         oss << "Unable to open stream for '"
-            << m_filename <<"' with error '" << strerror(errno) << "'";
+            << m_filename << "' with error '" << strerror(errno) << "'";
         throw pdal_error(oss.str());
     }
     return s;
@@ -240,7 +238,8 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     if (error.size())
         throwError(error);
 
-    auto lasStream = createStream();
+    // This will throw if the stream can't be opened.
+    LasStreamPtr lasStream = createStream();
     std::istream& stream(*lasStream);
 
     stream.seekg(0);
@@ -261,8 +260,8 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
             Utils::toString((int)d->header.pointFormat()) + ".");
 
     // Go peek into header and see if we are COPC
-    // Clear the error state since we potentially over-read the header, leaving
-    // the stream in error when things are really fine for zero-point file.
+    // If we over-read the file, the error state will be set, but things are really fine for
+    // a zero-point file, so clear the error.
     stream.clear();
     stream.seekg(377);
     char copcBuf[4] {};
@@ -327,12 +326,12 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
                 continue;
             }
             evlr.dataVec.resize(evlr.promisedDataSize);
+            std::streampos pos = stream.tellg();
             stream.read(evlr.data(), evlr.promisedDataSize);
 
-            //ABELL - Better error message.
             if (stream.gcount() != (std::streamsize)evlr.promisedDataSize)
-                throwError("Couldn't read EVLR " + std::to_string(i + 1) +
-                    ". End of file reached.");
+                throwError("Couldn't read EVLR " + std::to_string(i + 1) + " at offset " +
+                    std::to_string(pos) + ". Location is past the end of the file.");
             d->vlrs.push_back(std::move(evlr));
         }
     }
@@ -495,7 +494,7 @@ void LasReader::queueNextStandardChunk()
     uint64_t count = (std::min)(chunkSize, d->end - start);
     d->pool.add([this, chunk, count, start]()
     {
-        auto lasStream = createStream();
+        LasStreamPtr lasStream = createStream();
         std::istream& in(*lasStream);
 
         las::TilePtr tile = std::make_unique<las::Tile>(chunk, count * d->header.pointSize);
@@ -608,7 +607,6 @@ bool LasReader::processOne(PointRef& point)
         }
 
         // Found the tile we wanted.
-//        checkTile(d->currentTile);
         d->nextReadChunk++;
         queueNext();
     }
@@ -829,7 +827,7 @@ void LasReader::loadExtraDims(LeExtractor& istream, PointRef& point)
 
 void LasReader::done(PointTableRef)
 {
-    //ABELL - Anything?
+    d->pool.join();
 }
 
 bool LasReader::eof()

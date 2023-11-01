@@ -78,10 +78,11 @@ protected:
             if (m_istream)
                 Utils::closeFile(m_istream);
         }
+
         operator std::istream& ()
         { return *m_istream; }
 
-        bool open() const
+        bool isOpen() const
         {
             return m_istream && m_istream->good();
         }
