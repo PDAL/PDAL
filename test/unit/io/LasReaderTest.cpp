@@ -531,7 +531,7 @@ TEST(LasReaderTest, stream)
 {
     // Compression option is ignored for non-compressed file.
     streamTest(Support::datapath("las/autzen_trim.las"));
-    //streamTest(Support::datapath("laz/autzen_trim.laz"));
+    streamTest(Support::datapath("laz/autzen_trim.laz"));
 }
 
 
@@ -654,6 +654,7 @@ TEST(LasReaderTest, Start)
         EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::Y, 0), start + 100);
         EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::Z, 0), start + 500);
     };
+    // Can't start at 70'000 when there are only 70'000 points.
     auto test2 = [source, &f]()
     {
         Stage *las = f.createStage("readers.las");

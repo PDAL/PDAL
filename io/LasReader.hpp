@@ -123,7 +123,6 @@ private:
     void readExtraBytesVlr();
     void extractHeaderMetadata(MetadataNode& forward, MetadataNode& m);
     void extractVlrMetadata(MetadataNode& forward, MetadataNode& m);
-    void loadPoint(PointRef& point);
     void loadPointV10(PointRef& point, const char *buf, size_t bufsize);
     void loadPointV14(PointRef& point, const char *buf, size_t bufsize);
     void loadExtraDims(LeExtractor& istream, PointRef& data);

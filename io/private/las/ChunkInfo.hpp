@@ -73,7 +73,7 @@ public:
             m_chunks = lazperf::decompress_chunk_table(stream, numChunks, variable);
 
         // If the chunk size is fixed, set the counts to the chunk size since
-        // they aren't stored in the chunk table..
+        // they aren't stored in the chunk table.
         if (!variable)
         {
             uint64_t remaining = m_numPoints;

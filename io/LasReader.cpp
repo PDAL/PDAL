@@ -109,6 +109,7 @@ struct LasReader::Private
     // The index of the chunk (tile) we want to read data from.
     uint32_t nextReadChunk;
     std::function<void()> queueNext;
+    std::function<void(PointRef&, const char *, size_t)> loadPoint;
     std::mutex mutex;
     std::condition_variable processedCv;
 
@@ -264,6 +265,12 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     d->queueNext = d->header.dataCompressed() ?
         std::bind(&LasReader::queueNextCompressedChunk, this) :
         std::bind(&LasReader::queueNextStandardChunk, this);
+
+    // Set the load function based on whether we're 1.4 format or not.
+    using namespace std::placeholders;
+    d->loadPoint = d->header.has14PointFormat() ?
+        std::bind(&LasReader::loadPointV14, this, _1, _2, _3) :
+        std::bind(&LasReader::loadPointV10, this, _1, _2, _3);
 
     // Go peek into header and see if we are COPC
     // If we over-read the file, the error state will be set, but things are really fine for
@@ -590,6 +597,7 @@ bool LasReader::processOne(PointRef& point)
     if (eof())
         return false;
 
+    // If we don't have an active tile, get the next one or wait for it to be ready.
     if (!d->currentTile)
     {
         {
@@ -603,11 +611,16 @@ bool LasReader::processOne(PointRef& point)
             }
         }
 
-        // Found the tile we wanted.
+        // Found the tile we wanted. Queue the next file read.
         d->nextReadChunk++;
         d->queueNext();
     }
-    loadPoint(point);
+
+    // Load the point and advance the tile location.
+    d->loadPoint(point, d->currentTile->pos(), d->header.pointSize);
+    if (!d->currentTile->advance(d->header.pointSize))
+        d->currentTile.reset();
+
     d->index++;
     return true;
 }
@@ -626,17 +639,6 @@ point_count_t LasReader::read(PointViewPtr view, point_count_t count)
             m_cb(*view, id);
     }
     return (point_count_t)i;
-}
-
-
-void LasReader::loadPoint(PointRef& point)
-{
-    if (d->header.has14PointFormat())
-        loadPointV14(point, d->currentTile->pos(), d->header.pointSize);
-    else
-        loadPointV10(point, d->currentTile->pos(), d->header.pointSize);
-    if (!d->currentTile->advance(d->header.pointSize))
-        d->currentTile.reset();
 }
 
 
