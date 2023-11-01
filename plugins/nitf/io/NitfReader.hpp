@@ -154,7 +154,7 @@ protected:
     {
 
         LasStreamPtr s(new NitfStreamIf(m_filename, m_offset));
-        if (!s->open())
+        if (!s->isOpen())
         {
             std::ostringstream oss;
             oss << "Unable to open stream for '"
