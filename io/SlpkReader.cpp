@@ -99,6 +99,8 @@ struct zheader
 #pragma pack()
 
     ILeStream in(m_filename);
+    if (!in)
+        throwError("Couldn't open file '" + m_filename + "'.");
 
     zheader h;
     std::string name;
