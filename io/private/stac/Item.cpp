@@ -186,6 +186,11 @@ std::string Item::extractDriverFromItem(const NL::json& asset) const
                 return ct.second;
     }
 
+    // Try to guess from the path
+    std::string driver = m_factory.inferReaderDriver(dataUrl);
+    if (driver.size())
+        return driver;
+
     if (!FileUtils::fileExists(dataUrl))
     {
         // Use this to test if dataUrl is a valid endpoint
@@ -207,11 +212,6 @@ std::string Item::extractDriverFromItem(const NL::json& asset) const
                 ". " + e.what());
         }
     }
-
-    // Try to guess from the path
-    std::string driver = m_factory.inferReaderDriver(dataUrl);
-    if (driver.size())
-        return driver;
 
     return output;
 }
