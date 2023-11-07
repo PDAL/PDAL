@@ -453,6 +453,11 @@ void StacReader::setConnectionForwards(StringMap& headers, StringMap& query)
     }
 }
 
+void StacReader::addDimensions(PointLayoutPtr layout)
+{
+    StageWrapper::addDimensions(m_merge, layout);
+}
+
 void StacReader::initialize()
 {
     StringMap headers;
