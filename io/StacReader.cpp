@@ -490,6 +490,7 @@ void StacReader::initialize()
         throw pdal_error("Reader list is empty after filtering.");
 
     setInput(m_merge);
+    StageWrapper::initialize(m_merge);
 }
 
 QuickInfo StacReader::inspect()
