@@ -1,14 +1,14 @@
-.. _filters.crop:
+.. _filters.griddecimation:
 
-filters.crop
-============
+filters.griddecimation
+===========================================================================================================================================================================
 
-The **grid decimation filter** keeps only one point in a grid. The point selected could be the highest or the lowest point. It can be used to quickly filter vegetation points in order to keep only the canopy points.
+The **grid decimation filter** transform only one point in each cells of a grid calculated from the points cloud and a resolution therm. The transformation is done by the value information. The selected point could be the highest or the lowest point on the cell. It can be used, for exemple, to quickly filter vegetation points in order to keep only the canopy points.
 
 .. embed::
 
 Example
--------
+---------------------------------------------------------------------------------------------------------
 This example transform highest points of classification 5 in classification 9, on a grid of 0.75m square.
 
 .. code-block:: json
@@ -30,10 +30,10 @@ This example transform highest points of classification 5 in classification 9, o
 
 
 Options
--------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 output_type
-  The type of points kept. The value should be ``"max"`` for kept the highest point, or ``"min"`` for the lowest. [Default: false]
+  The type of points transform by the value information. The value should be ``"max"`` for transform the highest point, or ``"min"`` for the lowest. [Default: false]
 
 resolution
   The resolution of the cells in meter. [Default: 1.]
