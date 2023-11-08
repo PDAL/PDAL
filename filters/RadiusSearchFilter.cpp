@@ -105,23 +105,7 @@ void RadiusSearchFilter::doOneNoDomain(PointRef &point, PointRef &temp,
     if (iNeighbors.size() == 0)
         return;
 
-    bool shouldUpdate = false;
-    for (auto ptId: iNeighbors)
-    {
-        temp.setPointId(ptId);
-        for (DimRange& r : m_referenceDomain)
-        {   // process only points that satisfy a domain condition
-            if (r.valuePasses(temp.getFieldAs<double>(r.m_id)))
-            {
-                shouldUpdate = true;
-                break;
-            }
-        }
-        if (shouldUpdate)
-            break;
-    }
-    if (shouldUpdate)
-        m_newValue[point.pointId()] = m_outputValue;
+    m_newValue[point.pointId()] = m_outputValue;
 }
 
 // update point.  kdi and temp both reference the NN point cloud
@@ -145,12 +129,35 @@ bool RadiusSearchFilter::doOne(PointRef& point, PointRef &temp,
 void RadiusSearchFilter::filter(PointView& view)
 {
     PointRef point_src(view, 0);
-    KD2Index& kdiSrc = view.build2dIndex();
-    PointRef point_nn(view, 0);
+    // Create a kd tree only with the points in the reference domain (to make the search faster)
+    PointViewPtr refView;
+    PointRef temp(view, 0);
+    if (m_referenceDomain.empty())
+        for (PointId id = 0; id < view.size(); ++id)
+            refView->appendPoint(view, id);
+    else
+    {
+        refView = view.makeNew();
+        for (PointId id = 0; id < view.size(); ++id)
+        {
+            for (DimRange& r : m_referenceDomain)
+            {   // process only points that satisfy a domain condition
+                temp.setPointId(id);
+                if (r.valuePasses(temp.getFieldAs<double>(r.m_id)))
+                {
+                    refView->appendPoint(view, id);
+                    break;
+                }
+            }
+        }
+    }
+
+    KD2Index& kdiRef = refView->build2dIndex();
+    PointRef point_nn(*refView, 0);
     for (PointId id = 0; id < view.size(); ++id)
     {
         point_src.setPointId(id);
-        doOne(point_src, point_nn, kdiSrc);
+        doOne(point_src, point_nn, kdiRef);
     }
 
     for (auto& p : m_newValue)
