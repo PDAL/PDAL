@@ -87,6 +87,7 @@ test/data/local
 # OS X stuff
 #
 .DS_Store
+xcode/
 
 /_build*
 /build*
@@ -97,6 +98,7 @@ Makefile
 doc/build
 bin/
 lib/
+include/
 test/unit/CMakeScripts/
 test/unit/TestConfig.hpp
 *.pyc
