@@ -3,7 +3,7 @@
 filters.crop
 ============
 
-The **grid decimation filter** keept only one point in a grid. The point selected could be the highest or the lower point. It can be used to quickly filter vegetation points in order to keep only the canopy points.
+The **grid decimation filter** keeps only one point in a grid. The point selected could be the highest or the lowest point. It can be used to quickly filter vegetation points in order to keep only the canopy points.
 
 .. embed::
 
@@ -33,7 +33,7 @@ Options
 -------
 
 output_type
-  The type of points kept. The value should be ``"max"`` for keeps the highest point, or ``"min"`` for the lower.
+  The type of points kept. The value should be ``"max"`` for kept the highest point, or ``"min"`` for the lowest.
 
 resolution
   The resolution of the cells in meter.
