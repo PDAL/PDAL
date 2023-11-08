@@ -33,13 +33,13 @@ Options
 -------
 
 output_type
-  The type of points kept. The value should be ``"max"`` for kept the highest point, or ``"min"`` for the lowest.
+  The type of points kept. The value should be ``"max"`` for kept the highest point, or ``"min"`` for the lowest. [Default: false]
 
 resolution
-  The resolution of the cells in meter.
+  The resolution of the cells in meter. [Default: 1.]
 
-outside
-  Invert the cropping logic and only take points outside the cropping
-  bounds or polygon. [Default: false]
+value
+  A list of :ref:`assignment expressions <Assignment Expressions>` to be applied to points.
+  The list of values is evaluated in order. [Default: none]
 
 .. include:: filter_opts.rst
