@@ -176,13 +176,6 @@ tiledb::Filter FilterFactory::filter(const tiledb::Context& ctx,
                               options[key].get<int32_t>());
         else if (key == "bit_width_max_window" || key == "BIT_WIDTH_MAX_WINDOW")
             filter.set_option(TILEDB_BIT_WIDTH_MAX_WINDOW,
-                              options[key].get<int32_t>());
-        else if (key == "positive_delta_max_window" ||
-                 key == "POSITIVE_DELTA_MAX_WINDOW")
-            filter.set_option(TILEDB_POSITIVE_DELTA_MAX_WINDOW,
-                              options[key].get<int32_t>());
-        else if (key == "bit_width_max_window" || key == "BIT_WIDTH_MAX_WINDOW")
-            filter.set_option(TILEDB_BIT_WIDTH_MAX_WINDOW,
                               options[key].get<uint32_t>());
         else if (key == "positive_delta_max_window" ||
                  key == "POSITIVE_DELTA_MAX_WINDOW")
@@ -198,6 +191,33 @@ tiledb::Filter FilterFactory::filter(const tiledb::Context& ctx,
         else if (key == "scale_float_offset" || key == "SCALE_FLOAT_OFFSET")
             filter.set_option(TILEDB_SCALE_FLOAT_OFFSET,
                               options[key].get<double>());
+        else if (key == "webp_quality" || key == "WEBP_QUALITY")
+            filter.set_option(TILEDB_WEBP_QUALITY, options[key].get<float>());
+        else if (key == "webp_input_format" || key == "WEBP_INPUT_FORMAT")
+        {
+            auto input_format_str = options[key].get<std::string>();
+            uint8_t input_format = 0;
+            if (input_format_str == "none")
+                input_format = 0;
+            else if (input_format_str == "rgb")
+                input_format = 1;
+            else if (input_format_str == "bgr")
+                input_format = 2;
+            else if (input_format_str == "rgba")
+                input_format = 3;
+            else if (input_format_str == "bgra")
+                input_format = 4;
+            else
+                throw tiledb::TileDBError("Unrecognized webp input format '" +
+                                          input_format_str + "'.");
+            filter.set_option<uint8_t>(TILEDB_WEBP_INPUT_FORMAT, input_format);
+        }
+        else if (key == "webp_lossless" || key == "WEBP_LOSSLESS")
+        {
+            bool lossless = options[key].get<bool>();
+            filter.set_option<uint8_t>(TILEDB_WEBP_LOSSLESS,
+                                       static_cast<uint8_t>(lossless));
+        }
         else if (key == "reinterpret_datatype" ||
                  key == "COMPRESSION_REINTERPRET_DATATYPE")
         {
