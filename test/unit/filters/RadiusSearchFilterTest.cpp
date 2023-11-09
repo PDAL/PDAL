@@ -9,7 +9,7 @@
 namespace pdal
 {
 
-TEST(RadiusSearchFilterTest, singleRange)
+TEST(RadiusSearchFilterTest, basic_usage)
 {
     Options ro;
     ro.add("filename", Support::datapath("las/4_6.las"));
@@ -26,8 +26,7 @@ TEST(RadiusSearchFilterTest, singleRange)
         Options fo;
         fo.add("src_domain", "Classification[2:2]");
         fo.add("reference_domain", "Classification[1:1]");
-        fo.add("output_dim", "UserData");
-        fo.add("output_value", 1);
+        fo.add("update_expression", "UserData = 1");
         fo.add("radius", radVals[ii]);
 
         Stage& f = *(factory.createStage("filters.radiussearch"));
@@ -67,5 +66,33 @@ TEST(RadiusSearchFilterTest, singleRange)
     // Check that using a bigger radius updates more points
     EXPECT_GT(nbUpdatedPoints[1], nbUpdatedPoints[0]);
 }
+
+
+TEST(RadiusSearchFilterTest, missing_param)
+{
+    Options ro;
+    ro.add("filename", Support::datapath("las/4_6.las"));
+
+    StageFactory factory;
+    Stage& r = *(factory.createStage("readers.las"));
+    r.setOptions(ro);
+
+    std::vector<unsigned int> nbUpdatedPoints = {0, 0};
+
+    Options fo;
+    fo.add("src_domain", "Classification[2:2]");
+    fo.add("reference_domain", "Classification[1:1]");
+    fo.add("radius", 1);
+
+    Stage& f = *(factory.createStage("filters.radiussearch"));
+    f.setInput(r);
+    f.setOptions(fo);
+
+    PointTable table;
+    // Expect error due to missing update_expression argument
+    EXPECT_ANY_THROW(f.prepare(table));
+    PointViewSet viewSet = f.execute(table);
+}
+
 
 } // namespace pdal
