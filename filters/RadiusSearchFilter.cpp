@@ -34,10 +34,9 @@ void RadiusSearchFilter::addArgs(ProgramArgs& args)
         "potential neighbors", m_referenceDomainSpec);
     args.add("radius", "Distance of neighbors to consult",
         m_radius);
-    args.add("output_dim", "Dimension for which to assign a value when at least one neighbor is found",
-        m_outputDimName);
-    args.add("output_value", "Value to assign when at least one neighbor is found",
-        m_outputValue);
+    args.add("update_expression", "Value to assign to dimension of points of src_domain "
+            "that have at least one neighbor in reference domain based on expression.",
+        m_updateExpr);
 }
 
 
@@ -66,6 +65,9 @@ void RadiusSearchFilter::initialize()
     if (m_radius <= 0)
         throwError("Invalid 'radius' option: " + std::to_string(m_radius) +
             ", must be > 0");
+    if (m_updateExpr.size() == 0)
+        throwError("Empty 'update_epxression' option, must be set to apply any change on the data");
+
 }
 
 void RadiusSearchFilter::preparedDomain(std::vector<DimRange> &domain, PointLayoutPtr layout)
@@ -86,40 +88,43 @@ void RadiusSearchFilter::prepared(PointTableRef table)
     this->preparedDomain(m_srcDomain, layout);
     this->preparedDomain(m_referenceDomain, layout);
 
-    m_outputDim = layout->findDim(m_outputDimName);
-    if (m_outputDim == Dimension::Id::Unknown)
-        throwError("Invalid dimension name '" + m_outputDimName + "'.");
-}
 
+    for (expr::AssignStatement& expr : m_updateExpr)
+    {
+        auto status = expr.prepare(layout);
+        if (!status)
+            throwError("Invalid assignment expression in 'update_expression' option: " +
+            status.what());
+    }
+}
 
 void RadiusSearchFilter::ready(PointTableRef)
 {
-    m_newValue.clear();
+    m_ptsToUpdate.clear();
 }
 
 
-void RadiusSearchFilter::doOneNoDomain(PointRef &point, PointRef &temp,
-    KD2Index &kdi)
+void RadiusSearchFilter::doOneNoDomain(PointRef &point, KD2Index &kdi)
 {
     PointIdList iNeighbors = kdi.radius(point, m_radius);
     if (iNeighbors.size() == 0)
         return;
 
-    m_newValue[point.pointId()] = m_outputValue;
+    m_ptsToUpdate.push_back(point.pointId());
+
 }
 
 // update point.  kdi and temp both reference the NN point cloud
-bool RadiusSearchFilter::doOne(PointRef& point, PointRef &temp,
-    KD2Index &kdi)
+bool RadiusSearchFilter::doOne(PointRef& point, KD2Index &kdi)
 {
     if (m_srcDomain.empty())  // No domain, process all points
-        doOneNoDomain(point, temp, kdi);
+        doOneNoDomain(point, kdi);
 
     for (DimRange& r : m_srcDomain)
     {   // process only points that satisfy a domain condition
         if (r.valuePasses(point.getFieldAs<double>(r.m_id)))
         {
-            doOneNoDomain(point, temp, kdi);
+            doOneNoDomain(point, kdi);
             break;
         }
     }
@@ -153,15 +158,18 @@ void RadiusSearchFilter::filter(PointView& view)
     }
 
     KD2Index& kdiRef = refView->build2dIndex();
-    PointRef point_nn(*refView, 0);
     for (PointId id = 0; id < view.size(); ++id)
     {
         point_src.setPointId(id);
-        doOne(point_src, point_nn, kdiRef);
+        doOne(point_src, kdiRef);
     }
-
-    for (auto& p : m_newValue)
-        view.setField(m_outputDim, p.first, p.second);
+    for (auto id: m_ptsToUpdate)
+    {
+        temp.setPointId(id);
+        for (expr::AssignStatement& expr : m_updateExpr)
+            // if (expr.conditionalExpr().eval(temp))
+                temp.setField(expr.identExpr().eval(), expr.valueExpr().eval(temp));
+    }
 }
 
 } // namespace pdal
