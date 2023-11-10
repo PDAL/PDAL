@@ -1,4 +1,4 @@
-#include "RadiusSearchFilter.hpp"
+#include "RadiusAssignFilter.hpp"
 
 #include <pdal/PipelineManager.hpp>
 #include <pdal/StageFactory.hpp>
@@ -12,21 +12,21 @@ namespace pdal
 {
 
 static PluginInfo const s_info = PluginInfo(
-    "filters.radiussearch",
+    "filters.radiusassign",
     "Re-assign some point attributes based KNN voting",
-    "http://pdal.io/stages/filters.radiussearch.html" );
+    "http://pdal.io/stages/filters.radiusassign.html" );
 
-CREATE_STATIC_STAGE(RadiusSearchFilter, s_info)
+CREATE_STATIC_STAGE(RadiusAssignFilter, s_info)
 
-RadiusSearchFilter::RadiusSearchFilter()
+RadiusAssignFilter::RadiusAssignFilter()
 {}
 
 
-RadiusSearchFilter::~RadiusSearchFilter()
+RadiusAssignFilter::~RadiusAssignFilter()
 {}
 
 
-void RadiusSearchFilter::addArgs(ProgramArgs& args)
+void RadiusAssignFilter::addArgs(ProgramArgs& args)
 {
     args.add("src_domain", "Selects which points will be subject to "
         "radius-based neighbors search", m_srcDomainSpec);
@@ -40,7 +40,7 @@ void RadiusSearchFilter::addArgs(ProgramArgs& args)
 }
 
 
-void RadiusSearchFilter::initializeDomain(StringList domainSpec, std::vector<DimRange> &domain)
+void RadiusAssignFilter::initializeDomain(StringList domainSpec, std::vector<DimRange> &domain)
 {
     for (auto const& r : domainSpec)
     {
@@ -57,7 +57,7 @@ void RadiusSearchFilter::initializeDomain(StringList domainSpec, std::vector<Dim
     }
 }
 
-void RadiusSearchFilter::initialize()
+void RadiusAssignFilter::initialize()
 {
     this->initializeDomain(m_referenceDomainSpec, m_referenceDomain);
     this->initializeDomain(m_srcDomainSpec, m_srcDomain);
@@ -70,7 +70,7 @@ void RadiusSearchFilter::initialize()
 
 }
 
-void RadiusSearchFilter::preparedDomain(std::vector<DimRange> &domain, PointLayoutPtr layout)
+void RadiusAssignFilter::preparedDomain(std::vector<DimRange> &domain, PointLayoutPtr layout)
 {
     for (auto& r : domain)
     {
@@ -82,7 +82,7 @@ void RadiusSearchFilter::preparedDomain(std::vector<DimRange> &domain, PointLayo
     std::sort(domain.begin(), domain.end());
 }
 
-void RadiusSearchFilter::prepared(PointTableRef table)
+void RadiusAssignFilter::prepared(PointTableRef table)
 {
     PointLayoutPtr layout(table.layout());
     this->preparedDomain(m_srcDomain, layout);
@@ -98,13 +98,13 @@ void RadiusSearchFilter::prepared(PointTableRef table)
     }
 }
 
-void RadiusSearchFilter::ready(PointTableRef)
+void RadiusAssignFilter::ready(PointTableRef)
 {
     m_ptsToUpdate.clear();
 }
 
 
-void RadiusSearchFilter::doOneNoDomain(PointRef &point, KD2Index &kdi)
+void RadiusAssignFilter::doOneNoDomain(PointRef &point, KD2Index &kdi)
 {
     PointIdList iNeighbors = kdi.radius(point, m_radius);
     if (iNeighbors.size() == 0)
@@ -115,7 +115,7 @@ void RadiusSearchFilter::doOneNoDomain(PointRef &point, KD2Index &kdi)
 }
 
 // update point.  kdi and temp both reference the NN point cloud
-bool RadiusSearchFilter::doOne(PointRef& point, KD2Index &kdi)
+bool RadiusAssignFilter::doOne(PointRef& point, KD2Index &kdi)
 {
     if (m_srcDomain.empty())  // No domain, process all points
         doOneNoDomain(point, kdi);
@@ -131,7 +131,7 @@ bool RadiusSearchFilter::doOne(PointRef& point, KD2Index &kdi)
     return true;
 }
 
-void RadiusSearchFilter::filter(PointView& view)
+void RadiusAssignFilter::filter(PointView& view)
 {
     PointRef point_src(view, 0);
     // Create a kd tree only with the points in the reference domain (to make the search faster)
