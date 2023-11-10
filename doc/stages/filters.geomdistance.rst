@@ -58,6 +58,9 @@ dimension
   The dimension to write the distance into
   bounds or polygon. [Default: distance]
 
+ogr
+  An `ogr` block (described in :ref:`readers.ept`)
+
 ring
   Use the outer ring of the polygon (so as to get distances to the exterior
   ring instead of all points inside the polygon having distance ``0``).
