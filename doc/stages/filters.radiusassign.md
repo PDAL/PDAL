@@ -1,9 +1,8 @@
-(filters.radiussearch)=
+(filters.radiusassign)=
 
-# filters.radiussearch
-==========================
+# filters.radiusassign
 
-The **radius search filter** allows you update the value of a dimension (using
+The **radius assign filter** allows you update the value of a dimension (using
 an assignment expression) for specific points depending on their neighbors
 in a given radius:
 For each point in the domain src_domain_, if it has any neighbor with a
@@ -21,12 +20,12 @@ This pipeline updates the Keypoint dimension of all points with classification
 classification 6 (building)
 
 
-.. code-block:: json
+```json
 
   [
       "las/4_6.las",
       {
-          "type" : "filters.radiussearch",
+          "type" : "filters.radiusassign",
           "src_domain" : "Classification[1:2]",
           "reference_domain" : "Classification[6:6]"
           "radius" : 1
@@ -35,6 +34,7 @@ classification 6 (building)
       "output.las"
   ]
 
+```
 
 ## Options
 
@@ -55,7 +55,7 @@ radius
 
 update_expression
 
-: A list of :ref:`assignment expressions <Assignment Expressions>` to be applied to
+: A list of {ref}`assignment expressions <Assignment Expressions>` to be applied to
   the points that satisfy the radius search.   The list of values is evaluated in order.
 
 

@@ -9,7 +9,7 @@
 namespace pdal
 {
 
-TEST(RadiusSearchFilterTest, basic_usage)
+TEST(RadiusAssignFilterTest, basic_usage)
 {
     Options ro;
     ro.add("filename", Support::datapath("las/4_6.las"));
@@ -29,7 +29,7 @@ TEST(RadiusSearchFilterTest, basic_usage)
         fo.add("update_expression", "UserData = 1");
         fo.add("radius", radVals[ii]);
 
-        Stage& f = *(factory.createStage("filters.radiussearch"));
+        Stage& f = *(factory.createStage("filters.radiusassign"));
         f.setInput(r);
         f.setOptions(fo);
 
@@ -68,7 +68,7 @@ TEST(RadiusSearchFilterTest, basic_usage)
 }
 
 
-TEST(RadiusSearchFilterTest, missing_param)
+TEST(RadiusAssignFilterTest, missing_param)
 {
     Options ro;
     ro.add("filename", Support::datapath("las/4_6.las"));
@@ -84,7 +84,7 @@ TEST(RadiusSearchFilterTest, missing_param)
     fo.add("reference_domain", "Classification[1:1]");
     fo.add("radius", 1);
 
-    Stage& f = *(factory.createStage("filters.radiussearch"));
+    Stage& f = *(factory.createStage("filters.radiusassign"));
     f.setInput(r);
     f.setOptions(fo);
 
