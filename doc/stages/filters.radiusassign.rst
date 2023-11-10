@@ -1,6 +1,6 @@
-.. _filters.radiussearch:
+.. _filters.radiusassign:
 
-filters.radiussearch
+filters.radiusassign
 ==========================
 
 The **radius search filter** allows you update the value of a dimension (using
@@ -26,7 +26,7 @@ classification 6 (building)
   [
       "las/4_6.las",
       {
-          "type" : "filters.radiussearch",
+          "type" : "filters.radiusassign",
           "src_domain" : "Classification[1:2]",
           "reference_domain" : "Classification[6:6]"
           "radius" : 1

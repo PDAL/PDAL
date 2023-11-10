@@ -6,23 +6,23 @@
 #include "private/expr/AssignStatement.hpp"
 
 
-extern "C" int32_t RadiusSearchFilter_ExitFunc();
-extern "C" PF_ExitFunc RadiusSearchFilter_InitPlugin();
+extern "C" int32_t RadiusAssignFilter_ExitFunc();
+extern "C" PF_ExitFunc RadiusAssignFilter_InitPlugin();
 
 namespace pdal
 {
 
 struct DimRange;
 
-class PDAL_DLL RadiusSearchFilter : public Filter
+class PDAL_DLL RadiusAssignFilter : public Filter
 {
 public:
-    RadiusSearchFilter();
-    ~RadiusSearchFilter();
+    RadiusAssignFilter();
+    ~RadiusAssignFilter();
 
     static void * create();
     static int32_t destroy(void *);
-    std::string getName() const { return "filters.RadiusSearch"; }
+    std::string getName() const { return "filters.radiusassign"; }
 
 private:
     virtual void addArgs(ProgramArgs& args);
@@ -34,9 +34,9 @@ private:
     virtual void initializeDomain(StringList domainSpec, std::vector<DimRange> &domain);
     virtual void initialize();
     virtual void ready(PointTableRef);
-    RadiusSearchFilter& operator=(
-        const RadiusSearchFilter&) = delete;
-    RadiusSearchFilter(const RadiusSearchFilter&) = delete;
+    RadiusAssignFilter& operator=(
+        const RadiusAssignFilter&) = delete;
+    RadiusAssignFilter(const RadiusAssignFilter&) = delete;
     StringList m_referenceDomainSpec;
     std::vector<DimRange> m_referenceDomain;
     StringList m_srcDomainSpec;
