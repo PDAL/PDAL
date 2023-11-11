@@ -106,11 +106,11 @@ int main(int argc, char* argv[])
     using namespace pdal;
     
     // A point cloud. Only one point at a time will be in memory
-    StreamedPointCloud gr;
+    StreamedPointCloud stream_cloud;
 
     // Will copy here each point and then stream it to disk    
     FixedPointTable t(1);
-    gr.prepare(t);
+    stream_cloud.prepare(t);
 
     // Set the output filename
     Options write_options;
@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
     Stage *writer = factory.createStage("writers.las");
 
     // Stream the point cloud to disk
-    writer->setInput(gr);
+    writer->setInput(stream_cloud);
     writer->setOptions(write_options);
     writer->prepare(t);
     writer->execute(t);
