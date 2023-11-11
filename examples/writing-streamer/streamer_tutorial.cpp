@@ -105,12 +105,11 @@ int main(int argc, char* argv[])
 {
     using namespace pdal;
     
-    // A point cloud. Only one point at a time will be in memory
+    // Streamed cloud structure
     StreamedPointCloud stream_cloud;
 
-    // Will copy here each point and then stream it to disk.
     // buf_size is the number of points that will be
-    // processed and kept in memory at the same time. 
+    // processed and kept in this table at the same time. 
     // A somewhat bigger value may result in some efficiencies.
     int buf_size = 5;
     FixedPointTable t(buf_size);
