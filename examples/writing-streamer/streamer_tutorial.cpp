@@ -49,10 +49,10 @@ StreamedPointCloud::~StreamedPointCloud()
 // reaches this size.
 void StreamedPointCloud::initialize()
 {
-    m_size = 5;
+    m_size = 500;
 }
 
-// Set the cloud dimensions. Only X, Y and Z are supported.
+// Set the cloud dimensions.
 void StreamedPointCloud::addDimensions(PointLayoutPtr layout)
 {
     layout->registerDim(pdal::Dimension::Id::X);
@@ -108,8 +108,12 @@ int main(int argc, char* argv[])
     // A point cloud. Only one point at a time will be in memory
     StreamedPointCloud stream_cloud;
 
-    // Will copy here each point and then stream it to disk    
-    FixedPointTable t(1);
+    // Will copy here each point and then stream it to disk.
+    // buf_size is the number of points that will be
+    // processed and kept in memory at the same time. 
+    // A somewhat bigger value may result in some efficiencies.
+    int buf_size = 5;
+    FixedPointTable t(buf_size);
     stream_cloud.prepare(t);
 
     // Set the output filename
