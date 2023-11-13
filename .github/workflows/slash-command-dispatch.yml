@@ -1,0 +1,49 @@
+name: Slash Command Dispatch
+on:
+  issue_comment:
+    # Type "edited" added here for test purposes. Where possible, avoid 
+    # using to prevent processing unnecessary events.
+    types: [created, edited]
+jobs:
+  slashCommandDispatch:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout is necessary here due to referencing a local action.
+      # It's also necessary when using the 'config-from-file' option.
+      # Otherwise, avoid using checkout to keep this workflow fast.
+      - uses: actions/checkout@v4
+
+      # # Basic configuration
+      # - name: Slash Command Dispatch
+      #   uses: ./
+      #   with:
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      #     commands: |
+      #       render
+      #     permission: none
+      #     issue-type: issue
+
+      # Advanced JSON configuration
+      - name: Slash Command Dispatch (JSON)
+        id: scd
+        uses: ./
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config: >
+            [
+              {
+                "command": "help",
+                "permission": "none",
+                "issue_type": "pull-request",
+                "repository": "PDAL/slash-command-dispatch-processor",
+                "event_type_suffix": "-pr-command"
+              },
+            ]
+
+      - name: Edit comment with error message
+        if: steps.scd.outputs.error-message
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          body: |
+            > ${{ steps.scd.outputs.error-message }}
