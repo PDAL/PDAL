@@ -37,7 +37,7 @@ jobs:
                 "issue_type": "pull-request",
                 "repository": "PDAL/slash-command-dispatch-processor",
                 "event_type_suffix": "-pr-command"
-              },
+              }
             ]
 
       - name: Edit comment with error message
