@@ -11,7 +11,7 @@ jobs:
       # Checkout is necessary here due to referencing a local action.
       # It's also necessary when using the 'config-from-file' option.
       # Otherwise, avoid using checkout to keep this workflow fast.
-      - uses: actions/checkout@v4
+      # - uses: actions/checkout@v4
 
       # # Basic configuration
       # - name: Slash Command Dispatch
