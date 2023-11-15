@@ -301,8 +301,6 @@ Output::Entry Output::emitRoot(const VoxelKey& root, const CountMap& counts)
     {
         VoxelKey& key = it->first;
         Entry& e = it->second;
-        std::cerr << "writing key VLR " << key.level() << "-" << key.x() << "-" << key.y() << "-" << key.z() << std::endl;
-                std::cerr << e.offset << "-" << e.byteSize << "-" << e.pointCount << std::endl;
         out << key.level() << key.x() << key.y() << key.z();
         out << e.offset << e.byteSize << e.pointCount;
     }
