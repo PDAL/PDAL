@@ -453,6 +453,11 @@ void StacReader::setConnectionForwards(StringMap& headers, StringMap& query)
     }
 }
 
+void StacReader::addDimensions(PointLayoutPtr layout)
+{
+    StageWrapper::addDimensions(m_merge, layout);
+}
+
 void StacReader::initialize()
 {
     StringMap headers;
@@ -485,6 +490,7 @@ void StacReader::initialize()
         throw pdal_error("Reader list is empty after filtering.");
 
     setInput(m_merge);
+    StageWrapper::initialize(m_merge);
 }
 
 QuickInfo StacReader::inspect()
