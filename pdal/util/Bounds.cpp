@@ -252,17 +252,6 @@ bool discardSpacesBefore(std::istringstream& ss, char nextChar)
     return Utils::eatcharacter(ss, nextChar);
 }
 
-std::string::size_type countRemaining(std::istringstream& ss)
-{
-    std::string::size_type count = 0;
-    while (!ss.eof())
-    {
-        ss.get();
-        count++;
-    }
-    return count;
-}
-
 template <typename T>
 void parsePair(std::istringstream& ss, double& low, double& high)
 {
@@ -378,7 +367,7 @@ void BOX2D::parse(const std::string& s, std::string::size_type& pos)
         throw error("No closing ')'.");
 
     Utils::eatwhitespace(ss);
-    pos = s.size() - countRemaining(ss);
+    pos = ss.eof() ? s.size() : (std::string::size_type)ss.tellg();
 }
 
 
@@ -486,7 +475,7 @@ void BOX3D::parse(const std::string& s, std::string::size_type& pos)
         throw error("No closing ')'.");
 
     Utils::eatwhitespace(ss);
-    pos = s.size() - countRemaining(ss);
+    pos = ss.eof() ? s.size() : (std::string::size_type)ss.tellg();
 }
 
 
