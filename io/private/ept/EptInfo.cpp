@@ -155,8 +155,29 @@ void EptInfo::initialize()
         double offset = element.value("offset", 0);
 
         name = Dimension::fixName(name);
-        Dimension::Id id = m_remoteLayout.registerOrAssignFixedDim(name, type);
-        m_dims[name] = DimType(id, type, scale, offset);
+
+        if (Utils::iequals(name, "ClassFlags"))
+        {
+            // do some special
+            m_remoteLayout.registerDim(Dimension::Id::Withheld);
+            m_dims["Withheld"] = DimType(Dimension::Id::Withheld, Dimension::Type::Unsigned8, 1.0, 0);
+
+            m_remoteLayout.registerDim(Dimension::Id::Overlap);
+            m_dims["Overlap"] = DimType(Dimension::Id::Overlap, Dimension::Type::Unsigned8, 1.0, 0);
+
+            m_remoteLayout.registerDim(Dimension::Id::Synthetic);
+            m_dims["Synthetic"] = DimType(Dimension::Id::Synthetic, Dimension::Type::Unsigned8, 1.0, 0);
+
+            m_remoteLayout.registerDim(Dimension::Id::KeyPoint);
+            m_dims["KeyPoint"] = DimType(Dimension::Id::KeyPoint, Dimension::Type::Unsigned8, 1.0, 0);
+
+        }
+        else
+        {
+
+            Dimension::Id id = m_remoteLayout.registerOrAssignFixedDim(name, type);
+            m_dims[name] = DimType(id, type, scale, offset);
+        }
     }
     m_remoteLayout.finalize();
 }

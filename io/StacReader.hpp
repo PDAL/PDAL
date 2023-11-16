@@ -86,6 +86,7 @@ class PDAL_DLL StacReader : public Reader, public Streamable
 
         virtual void initialize() override;
         virtual void addArgs(ProgramArgs& args) override;
+        virtual void addDimensions(PointLayoutPtr layout) override;
         virtual QuickInfo inspect() override;
         virtual void prepared(PointTableRef table) override;
         virtual void ready(PointTableRef table) override;
