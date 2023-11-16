@@ -274,6 +274,8 @@ private:
     std::vector<bool> m_skips;
 };
 
+// A concrete implementation of StreamPointTable that uses a fixed-size
+// buffer for point data.
 class PDAL_DLL FixedPointTable : public StreamPointTable
 {
 public:
