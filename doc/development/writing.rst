@@ -92,3 +92,11 @@ After the project is built, you can run it by typing:
 .. code-block:: bash
 
   $ ./tutorial
+
+Streaming
+-------------------------------------------------------------------------------
+
+Writing in streaming mode creates and writes the cloud one point at a time,
+and the implementation is somewhat different. An example is given in 
+``examples/writing-streamer``.
+
