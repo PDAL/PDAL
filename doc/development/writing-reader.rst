@@ -214,3 +214,10 @@ except in a CSV style format, and with the Z values scaled by .001.
 
 .. _`pipeline-myreader.json`: https://github.com/PDAL/PDAL/blob/master/examples/writing-reader/pipeline-myreader.json?raw=true
 .. _`test-reader-input.txt`: https://github.com/PDAL/PDAL/blob/master/examples/writing-reader/test-reader-input.txt?raw=true
+
+Streaming Reader
+-------------------------------------------------------------------------------
+
+PDAL's reader interface does not offer access to streaming points from a cloud.
+This can be accomplished via creating a custom writer class that can query the
+reader. An example is in ``examples/reading-streamer``.
