@@ -101,11 +101,12 @@ pipeline stages are executed.  Most functions receive a PointTableRef object,
 which refers to the active point table.  A PointTableRef can be stored
 or copied cheaply.
 
-A subclass of PointTable called StreamingPointTable exists to allow a pipeline
-to run without loading all points in memory.  A StreamingPointTable holds a
+A subclass of PointTable called FixedPointTable exists to allow a pipeline
+to run without loading all points in memory.  A FixedPointTable holds a
 fixed number of points.  Some filters can't operate in streaming mode and
 an attempt to run a pipeline with a stage that doesn't support streaming
-will raise an exception.
+will raise an exception. A custom implementation of this can be created
+by inheriting from a class called StreamPointTable.
 
 Point View
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

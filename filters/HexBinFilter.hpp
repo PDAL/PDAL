@@ -72,6 +72,7 @@ private:
     bool m_doSmooth;
     point_count_t m_count;
     bool m_preserve_topology;
+    std::string m_DensityOutput;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void ready(PointTableRef table);

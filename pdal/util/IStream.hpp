@@ -99,9 +99,8 @@ public:
     {
         if (m_stream)
              return -1;
-        
-        m_stream = FileUtils::openFile(filename);
 
+        m_stream = FileUtils::openFile(filename);
         m_fstream = dynamic_cast<std::ifstream*>(m_stream);
         return 0;
     }
@@ -123,7 +122,7 @@ public:
       \return  The state of the underlying stream.
     */
     PDAL_DLL operator bool ()
-        { return (bool)(*m_stream); }
+        { return m_stream && *m_stream; }
 
     /**
       Seek to a position in the underlying stream.

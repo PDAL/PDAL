@@ -140,7 +140,7 @@ TEST(CopcWriterTest, srsWkt2)
     {
         Options options;
         options.add("filename", filename);
-        options.add("srs_consume_preference", "projjson, wkt2");
+        options.add("srs_vlr_order", "projjson, wkt2");
 
         CopcReader creader;
         creader.setOptions(options);
@@ -186,7 +186,7 @@ TEST(CopcWriterTest, srsUTM)
 
     const QuickInfo qi(r.preview());
     std::string srs = qi.m_srs.getWKT();
-    EXPECT_TRUE(Utils::startsWith(srs, "PROJCS[\"NAD83 / UTM zone 15N\""));
+    EXPECT_TRUE(Utils::startsWith(srs, "PROJCRS[\"NAD83 / UTM zone 15N\",BASEGEOGCRS"));
 
     const char *data = nullptr;
 

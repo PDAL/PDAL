@@ -1460,7 +1460,7 @@ TEST(LasWriterTest, pdal_wkt2_read_as_projjson)
     PointTable t2;
     Options readerOpts2;
     readerOpts2.add("filename", outfile);
-    readerOpts2.add("srs_consume_preference", "projjson, wkt2, wkt1, geotiff");
+    readerOpts2.add("srs_vlr_order", "projjson, wkt2, wkt1, geotiff");
     LasReader reader2;
     reader2.setOptions(readerOpts2);
 
@@ -1470,7 +1470,7 @@ TEST(LasWriterTest, pdal_wkt2_read_as_projjson)
     EXPECT_EQ(reader2.header().srs(), SpatialReference(wkt2DerivedProjected));
 }
 
-TEST(LasWriterTest, read_consume_order)
+TEST(LasWriterTest, read_srs_order)
 {
     PointTable table;
 
@@ -1528,18 +1528,18 @@ TEST(LasWriterTest, read_consume_order)
         Options readerOpts2;
         readerOpts2.add("filename", outfile);
         if (!preference.empty())
-            readerOpts2.add("srs_consume_preference", preference);
+            readerOpts2.add("srs_vlr_order", preference);
         LasReader reader2;
         reader2.setOptions(readerOpts2);
 
         reader2.prepare(t2);
         reader2.execute(t2);
         pdal::SpatialReference srs(srs_id);
-        EXPECT_EQ(reader2.header().srs(), srs) << " using srs_consume_preference " << preference;
+        EXPECT_EQ(reader2.header().srs(), srs) << " using srs_vlr_order " << preference;;
     };
     doTest ("projjson, wkt2, wkt1, geotiff", utm33);
     doTest ("wkt2, projjson, wkt1, geotiff", utm32);
-    doTest ("", utm34); // default order reader
+    doTest ("", utm32); // default order reader
     doTest ("wkt1, geotiff", utm34);
 }
 

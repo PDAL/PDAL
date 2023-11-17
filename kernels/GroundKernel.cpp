@@ -73,7 +73,7 @@ struct GroundKernel::Args
 static StaticPluginInfo const s_info
 {
     "kernels.ground",
-    "Ground Kernel",
+    "Ground Kernel [DEPRECATED]",
     "http://pdal.io/apps/ground.html"
 };
 

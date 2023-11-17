@@ -46,7 +46,7 @@ namespace pdal
 static StaticPluginInfo const s_info
 {
     "kernels.hausdorff",
-    "Hausdorff Kernel",
+    "Hausdorff Kernel [DEPRECATED]",
     "http://pdal.io/apps/hausdorff.html"
 };
 
