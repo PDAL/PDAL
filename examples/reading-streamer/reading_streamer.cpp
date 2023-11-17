@@ -11,7 +11,8 @@ namespace pdal
 
 // A class to read a point cloud from a file point by point, without
 // loading it fully in memory. The points are printed to the screen,
-// but this can be replaced with any other processing.
+// but this can be replaced with any other processing. See the LasWriter
+// class for a more detailed example.
  
 class PDAL_DLL StreamProcessor: public Writer, public Streamable
 {
@@ -27,7 +28,7 @@ private:
     virtual void initialize();
     virtual void writeView(const PointViewPtr view);
     virtual bool processOne(PointRef& point);
-
+    virtual void done(PointTableRef table);
     StreamProcessor& operator=(const StreamProcessor&) = delete;
     StreamProcessor(const StreamProcessor&) = delete;
     StreamProcessor(const StreamProcessor&&) = delete;
@@ -56,6 +57,9 @@ bool StreamProcessor::processOne(PointRef& point)
              << point.getFieldAs<double>(Dimension::Id::Y) << ", " 
              << point.getFieldAs<double>(Dimension::Id::Z) << std::endl;
     return true;  
+}
+
+void StreamProcessor::done(PointTableRef table) {
 }
 
 void StreamProcessor::writeView(const PointViewPtr view)
