@@ -38,7 +38,7 @@
 
 #include <pdal/pdal_export.hpp>
 #include <pdal/pdal_features.hpp>
-#include <pdal/PDALUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
 
