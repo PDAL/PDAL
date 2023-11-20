@@ -71,12 +71,12 @@ protected:
 
     public:
         LasStreamIf(const std::string& filename)
-            { m_istream = Utils::openFile(filename); }
+            { m_istream = FileUtils::openFile(filename); }
 
         virtual ~LasStreamIf()
         {
             if (m_istream)
-                Utils::closeFile(m_istream);
+                FileUtils::closeFile(m_istream);
         }
 
         operator std::istream& ()
@@ -127,6 +127,7 @@ private:
     void loadPointV14(PointRef& point, const char *buf, size_t bufsize);
     void loadExtraDims(LeExtractor& istream, PointRef& data);
 
+    void tryLoadRemote();
     bool eof();
     void queueNextCompressedChunk();
     void queueNextStandardChunk();

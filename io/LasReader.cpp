@@ -55,6 +55,7 @@
 #include <pdal/util/IStream.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <lazperf/readers.hpp>
+#include <arbiter/arbiter.hpp>
 
 namespace pdal
 {
@@ -168,8 +169,9 @@ struct LasReader::Private
     std::function<void(PointRef&, const char *, size_t)> loadPoint;
     std::mutex mutex;
     std::condition_variable processedCv;
+    bool isRemote;
 
-    Private() : apiHeader(header, srs, vlrs), index(0), pool(DefaultNumThreads)
+    Private() : apiHeader(header, srs, vlrs), index(0), pool(DefaultNumThreads), isRemote(false)
     {}
 };
 
@@ -234,7 +236,24 @@ point_count_t LasReader::getNumPoints() const
 
 void LasReader::initialize(PointTableRef table)
 {
+    tryLoadRemote();
     initializeLocal(table, m_metadata);
+}
+
+void LasReader::tryLoadRemote()
+{
+    d->isRemote = Utils::isRemote(m_filename);
+    if (d->isRemote)
+    {
+        // Here, we're assigning the local filename to "remoteFilename".
+        // This is fixed by the swap on the next line.
+        std::string remoteFilename = Utils::tempFilename(m_filename);
+        std::swap(remoteFilename, m_filename);
+
+        // Fetch the remote file and write to the local file.
+        arbiter::Arbiter a;
+        a.put(m_filename, a.getBinary(remoteFilename));
+    }
 }
 
 QuickInfo LasReader::inspect()
@@ -883,6 +902,8 @@ void LasReader::loadExtraDims(LeExtractor& istream, PointRef& point)
 void LasReader::done(PointTableRef)
 {
     d->pool.join();
+    if (d->isRemote)
+        FileUtils::deleteFile(m_filename);
 }
 
 bool LasReader::eof()
