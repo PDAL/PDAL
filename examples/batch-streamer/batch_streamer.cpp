@@ -27,17 +27,20 @@ void makeConsumer()
     while (true)
     {
         {
-            // Make the consumer ready
+            // Tell the producer that the consumer is ready
             std::lock_guard l(mutex);
             ready = true;
         }
 
+        // Exit the lock first, so the producer can grab the lock and do work
         cv.notify_one();
         
         {
+            // Wait for the point to be produced
             std::unique_lock l(mutex);
             cv.wait(l, []{ return produced; });
             
+            // Consume the point
             std::cout << "Consumed point: " << x << ", " << y << ", " << z 
                       << " (count: " << point_count << ")\n";
             produced = false;   
@@ -55,8 +58,8 @@ void makeConsumer()
 bool producePoint(pdal::PointRef& p)
 {
     {
-        // Waiting for the consumer to be ready and to have consumed previous
-        // point
+        // Waiting for the consumer to be ready and to have consumed the
+        // previous point
         std::unique_lock<std::mutex> l(mutex);
         cv.wait(l, []{ return ready; });
         cv.wait(l, []{ return !produced; });
