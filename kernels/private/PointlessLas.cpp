@@ -66,8 +66,10 @@ std::unique_ptr<arbiter::LocalHandle> getPointlessLasFile(const std::string& pat
     const uint64_t minorVersionPos(25);
     const uint64_t headerSizePos(94);
     const uint64_t pointOffsetPos(96);
+    const uint64_t legacyPointCountPos(107);
     const uint64_t evlrOffsetPos(235);
     const uint64_t evlrNumberPos(evlrOffsetPos + 8);
+    const uint64_t pointCountPos(247);
 
     std::string fileSignature;
     uint8_t minorVersion(0);
@@ -105,6 +107,10 @@ std::unique_ptr<arbiter::LocalHandle> getPointlessLasFile(const std::string& pat
     is.seek(pointOffsetPos);
     is >> pointOffset;
 
+    // Set the legacy point count to 0 since we are removing the point data.
+    os.seek(legacyPointCountPos);
+    os << (uint32_t)0;
+
     if (minorVersion >= 4)
     {
         is.seek(evlrOffsetPos);
@@ -117,6 +123,10 @@ std::unique_ptr<arbiter::LocalHandle> getPointlessLasFile(const std::string& pat
         // removing the point data itself.
         os.seek(evlrOffsetPos);
         os << pointOffset;
+
+        // Set the 1.4 point count to 0 since we are removing the point data.
+        os.seek(pointCountPos);
+        os << (uint64_t)0;
     }
 
     // Extract the modified header, VLRs, and append the EVLRs.
