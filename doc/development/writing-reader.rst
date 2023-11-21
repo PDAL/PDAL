@@ -218,6 +218,17 @@ except in a CSV style format, and with the Z values scaled by .001.
 Streaming Reader
 -------------------------------------------------------------------------------
 
-PDAL's reader interface does not offer access to streaming points from a cloud.
-This can be accomplished via creating a custom writer class that can query the
-reader. An example is in ``examples/reading-streamer``.
+Streaming points from a cloud can be accomplished via creating a custom writer
+class that will query the file reader. An example of this, which also shows all
+the member functions that are needed for a writer, is in
+``examples/reading-streamer``.
+
+Fine-grained Streaming Control
+-------------------------------------------------------------------------------
+
+Normally PDAL expects that the points will be streamed from a file without any
+interruption, and be consumed as they arrive. An example showing how to
+pause/resume streaming points is in ``examples/batch-streamer``. 
+
+This example also shows how to use a callback, rather than creating a full
+writer class. All the variables that must be shared are global.
