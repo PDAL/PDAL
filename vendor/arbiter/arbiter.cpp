@@ -1751,6 +1751,11 @@ namespace
         else if (auto e = env("ARBITER_VERBOSE")) verbose = *e;
         return (!verbose.empty()) && !!std::stol(verbose);
     }
+
+    bool doSignRequests()
+    {
+        return !env("AWS_NO_SIGN_REQUEST");
+    }
 }
 
 namespace drivers
@@ -1780,9 +1785,7 @@ std::unique_ptr<S3> S3::create(
         if (auto p = env("AWS_PROFILE")) profile = *p;
     }
 
-    auto auth(Auth::create(s, profile));
-    if (!auth) return std::unique_ptr<S3>();
-
+    auto auth(doSignRequests() ? Auth::create(s, profile) : nullptr);
     auto config = makeUnique<Config>(s, profile);
     return makeUnique<S3>(pool, profile, std::move(auth), std::move(config));
 }
@@ -1952,11 +1955,6 @@ S3::Config::Config(const std::string s, const std::string profile)
             {
                 m_baseHeaders[p.key()] = p.value().get<std::string>();
             }
-        }
-        else
-        {
-            std::cout << "s3.headers expected to be object - skipping" <<
-                std::endl;
         }
     }
 }
@@ -2142,7 +2140,7 @@ std::unique_ptr<std::size_t> S3::tryGetSize(
             "HEAD",
             m_config->region(),
             resource,
-            m_auth->fields(),
+            authFields(),
             query,
             headers,
             empty);
@@ -2178,7 +2176,7 @@ bool S3::get(
             "GET",
             m_config->region(),
             resource,
-            m_auth->fields(),
+            authFields(),
             query,
             headers,
             empty);
@@ -2196,11 +2194,10 @@ bool S3::get(
         data = res.data();
         return true;
     }
-    else
-    {
-        std::cout << res.code() << ": " << res.str() << std::endl;
-        return false;
-    }
+
+    if (isVerbose()) std::cout << res.code() << ": " << res.str() << std::endl;
+
+    return false;
 }
 
 std::vector<char> S3::put(
@@ -2223,7 +2220,7 @@ std::vector<char> S3::put(
             "PUT",
             m_config->region(),
             resource,
-            m_auth->fields(),
+            authFields(),
             query,
             headers,
             data);
@@ -2373,6 +2370,11 @@ std::vector<std::string> S3::glob(std::string path, bool verbose) const
     return results;
 }
 
+S3::AuthFields S3::authFields() const
+{
+    return m_auth ? m_auth->fields() : S3::AuthFields();
+}
+
 S3::ApiV4::ApiV4(
         const std::string verb,
         const std::string& region,
@@ -2406,6 +2408,8 @@ S3::ApiV4::ApiV4(
         m_headers.erase("Transfer-Encoding");
         m_headers.erase("Expect");
     }
+
+    if (!m_authFields) return;
 
     const Headers normalizedHeaders(
             std::accumulate(
@@ -4445,7 +4449,11 @@ int Curl::perform()
 
     if (code != CURLE_OK)
     {
-        std::cerr << "Curl failure: " << curl_easy_strerror(code) << std::endl;
+        if (m_verbose)
+        {
+            std::cout << "Curl failure: " << curl_easy_strerror(code) << 
+                std::endl;
+        }
         httpCode = 550;
     }
 
