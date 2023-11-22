@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: 3e8919a297f4dc357e1ef2473bb295d8d1eac226
+// Git SHA: e22de9894155621a3b2ec122ea560f942d87394e
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -4321,6 +4321,8 @@ private:
             std::string path,
             bool verbose) const override;
 
+    AuthFields authFields() const;
+
     class ApiV4;
     class Resource;
 
@@ -4331,13 +4333,15 @@ private:
 class S3::AuthFields
 {
 public:
-    AuthFields(std::string access, std::string hidden, std::string token = "")
+    AuthFields(std::string access = "", std::string hidden = "", std::string token = "")
         : m_access(access), m_hidden(hidden), m_token(token)
     { }
 
     const std::string& access() const { return m_access; }
     const std::string& hidden() const { return m_hidden; }
     const std::string& token() const { return m_token; }
+
+    explicit operator bool() const { return m_access.size() || m_hidden.size() || m_token.size(); }
 
 private:
     std::string m_access;
