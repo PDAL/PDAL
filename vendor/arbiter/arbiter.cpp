@@ -1695,6 +1695,8 @@ namespace
     const std::string ec2CredBase(
             ec2CredIp + "/latest/meta-data/iam/security-credentials");
 
+    const std::string defaultDnsSuffix = "amazonaws.com";
+
     // https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html
     const std::string fargateCredIp("169.254.170.2");
 
@@ -2022,8 +2024,6 @@ std::string S3::Config::extractBaseUrl(
         endpointsPath = *e;
     }
 
-    std::string dnsSuffix("amazonaws.com");
-
     drivers::Fs fsDriver;
     if (std::unique_ptr<std::string> e = fsDriver.tryGet(endpointsPath))
     {
@@ -2031,32 +2031,42 @@ std::string S3::Config::extractBaseUrl(
 
         for (const auto& partition : ep["partitions"])
         {
-            if (partition.count("dnsSuffix"))
+            if (
+                !partition.count("regions") || 
+                !partition.at("regions").count(region))
             {
-                dnsSuffix = partition["dnsSuffix"].get<std::string>();
+                continue;
             }
 
-            const auto& endpoints(
-                    partition.at("services").at("s3").at("endpoints"));
-
-            for (const auto& r : endpoints.items())
+            // Look for an explicit hostname for this region/service.
+            if (
+                partition.count("services") && 
+                partition["services"].count("s3") &&
+                partition["services"]["s3"].count("endpoints"))
             {
-                if (r.key() == region &&
-                        endpoints.value("region", json::object())
-                            .count("hostname"))
+                const auto& endpoints(partition["services"]["s3"]["endpoints"]);
+
+                for (const auto& r : endpoints.items())
                 {
-                    return endpoints["region"]["hostname"].get<std::string>() +
-                        '/';
+                    if (r.key() == region &&
+                            endpoints.value("region", json::object())
+                                .count("hostname"))
+                    {
+                        return endpoints["region"]["hostname"].get<std::string>() +
+                            '/';
+                    }
                 }
             }
+
+            // No explicit hostname found, so build it from our region/DNS suffix.
+            std::string dnsSuffix = partition.value("dnsSuffix", defaultDnsSuffix);
+            return "s3." + region + "." + dnsSuffix + "/";
         }
     }
 
-    if (dnsSuffix.size() && dnsSuffix.back() != '/') dnsSuffix += '/';
-
     // https://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
-    if (region == "us-east-1") return "s3." + dnsSuffix;
-    else return "s3-" + region + "." + dnsSuffix;
+    if (region == "us-east-1") return "s3." + defaultDnsSuffix + "/";
+    else return "s3-" + region + "." + defaultDnsSuffix + "/";
 }
 
 S3::AuthFields S3::Auth::fields() const
