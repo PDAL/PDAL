@@ -105,7 +105,7 @@ option(WITH_ABSEIL
 add_feature_info("Abseil debugging support " WITH_ABSEIL "unit tests")
 
 option(WITH_BACKTRACE
-    "Build with backtrace" ON)
+    "Build with backtrace" OFF)
 add_feature_info("Backtrace" WITH_BACKTRACE
     "build with backtrace (Libunwind/Libexecinfo) support")
 

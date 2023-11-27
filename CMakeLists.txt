@@ -260,6 +260,7 @@ target_link_libraries(${PDAL_LIB_NAME}
         ${PDAL_LEPCC_LIB_NAME}
         ${PDAL_LAZPERF_LIB_NAME}
         ${UTFCPP_LIB_NAME}
+        ${LIBUNWIND_LIBRARIES}
     PUBLIC
         ${WINSOCK_LIBRARY}
     INTERFACE
