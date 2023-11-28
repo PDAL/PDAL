@@ -280,16 +280,12 @@ double Polyline::closestSegment(const PointRef& point, double& x, double& y,
     if (size == 0 || size == 1)
         return -1;
 
-    for (int i = 1; i < size; ++i)
+    double prevX = m_view->getFieldAs<double>(Dimension::Id::X, list[0]);
+    double prevY = m_view->getFieldAs<double>(Dimension::Id::Y, list[0]);
+    for (size_t i = 1; i < size; ++i)
     {
-        const double prevX =
-            m_view->getFieldAs<double>(Dimension::Id::X, list[i - 1]);
-        const double prevY =
-            m_view->getFieldAs<double>(Dimension::Id::Y, list[i - 1]);
-        const double currentX =
-            m_view->getFieldAs<double>(Dimension::Id::X, list[i]);
-        const double currentY =
-            m_view->getFieldAs<double>(Dimension::Id::Y, list[i]);
+        const double currentX = m_view->getFieldAs<double>(Dimension::Id::X, list[i]);
+        const double currentY = m_view->getFieldAs<double>(Dimension::Id::Y, list[i]);
         testDist = Utils::sqrDistToLine(candX, candY, prevX, prevY, currentX,
                                         currentY, segmentPtX, segmentPtY);
         if (testDist < sqrDist)
@@ -335,6 +331,8 @@ double Polyline::closestSegment(const PointRef& point, double& x, double& y,
                 m_view->getFieldAs<double>(Dimension::Id::Roll, list[i]),
                 ratio);
         }
+	prevX = currentX;
+	prevY = currentY;
     }
     return sqrDist;
 }

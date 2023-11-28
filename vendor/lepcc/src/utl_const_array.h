@@ -40,7 +40,13 @@ namespace lepcc
   public:
     typedef const T* const_iterator;
     const_array(const T* data, size_t size) : m_data(data), m_size(size) {}
-    const T& operator[](size_t i) const _NOEXCEPT{ LEPCC_ASSERT(i >= 0 && i < m_size); return m_data[i]; }
+
+// For unsigned types, the assertion generates a warning -- suppress.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtype-limits"
+    const T& operator[](size_t i) const _NOEXCEPT
+    { LEPCC_ASSERT(i >= 0 && i < m_size); return m_data[i]; }
+#pragma GCC diagnostic pop
     const T* data() const _NOEXCEPT{ return m_data; }
     size_t size() const  _NOEXCEPT{ return m_size; }
 
