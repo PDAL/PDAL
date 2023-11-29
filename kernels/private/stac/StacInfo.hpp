@@ -124,8 +124,6 @@ inline bool stacProjection(MetadataNode& root, MetadataNode& statsMeta,
         props.add(projJson.clone("proj:projjson"));
         props.add(projWkt2.clone("proj:wkt2"));
     }
-    else
-        return false;
 
     return false;
 }
