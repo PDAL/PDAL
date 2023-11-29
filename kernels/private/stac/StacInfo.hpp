@@ -153,12 +153,8 @@ inline void addStacMetadata(MetadataNode& root, MetadataNode& statsMeta,
         properties.add("datetime", datetime);
     }
 
-
-    // TODO add from metadata?
     stac.add("type", "Feature");
     stac.add("stac_version", "1.0.0");
-
-    //stac_extensions - pointcloud and projection extensions
 
     //links
     MetadataNode self = stac.addList("links");
@@ -171,7 +167,6 @@ inline void addStacMetadata(MetadataNode& root, MetadataNode& statsMeta,
     data.add("href", absPath);
     data.add("title", "Pointcloud data");
     assets.add(data.clone("data"));
-    auto&& enc = readerMeta.findChild("global_encoding");
 
     stac.add("stac_extensions", "https://stac-extensions.github.io/pointcloud/v1.0.0/schema.json");
     stacPointcloud(root, statsMeta, infoMeta, properties, pcType);
