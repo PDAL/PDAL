@@ -93,31 +93,41 @@ inline void addBox(MetadataNode& n, MetadataNode& box, std::string name)
     n.addWithType(name, box.findChild("maxz").value(), "double", "");
 }
 
-inline void stacProjection(MetadataNode& root, MetadataNode& statsMeta,
+inline bool stacProjection(MetadataNode& root, MetadataNode& statsMeta,
     MetadataNode& readerMeta, MetadataNode& stac)
 {
-    MetadataNode&& props = stac.findChild("properties");
+    MetadataNode props = stac.findChild("properties");
 
-    MetadataNodeList bbox = statsMeta.findChild("bbox").children();
+    MetadataNode bbox = statsMeta.findChild("bbox");
+    if (bbox.findChild("EPSG:4326").empty())
+    {
+        MetadataNode epsg4326 = bbox.findChild("EPSG:4326");
+        MetadataNode stacGeom = epsg4326.findChild("boundary");
+        MetadataNode stacBbox = epsg4326.findChild("bbox");
+        stac.add(stacGeom.clone("geometry"));
+        addBox(stac, stacBbox, "bbox");
+    }
+    else
+        return false;
 
-    MetadataNode& epsg4326 = bbox[0];
-    MetadataNode&& stacGeom = epsg4326.findChild("boundary");
-    MetadataNode&& stacBbox = epsg4326.findChild("bbox");
+    if (!bbox.findChild("native").empty())
+    {
+        stac.add("stac_extensions", "https://stac-extensions.github.io/projection/v1.1.0/schema.json");
+        MetadataNode native = bbox.findChild("native");
+        MetadataNode projGeom = native.findChild("boundary");
+        MetadataNode projBbox = native.findChild("bbox");
+        MetadataNode srs = readerMeta.findChild("srs");
+        MetadataNode projJson = srs.findChild("json");
+        MetadataNode projWkt2 = srs.findChild("wkt");
+        addBox(props, projBbox, "proj:bbox");
+        props.add(projGeom.clone("proj:geometry"));
+        props.add(projJson.clone("proj:projjson"));
+        props.add(projWkt2.clone("proj:wkt2"));
+    }
+    else
+        return false;
 
-    MetadataNode& native = bbox[1];
-    MetadataNode&& projGeom = native.findChild("boundary");
-    MetadataNode&& projBbox = native.findChild("bbox");
-    MetadataNode&& srs = readerMeta.findChild("srs");
-    MetadataNode&& projJson = srs.findChild("json");
-    MetadataNode&& projWkt2 = srs.findChild("wkt");
-
-    addBox(props, projBbox, "proj:bbox");
-    props.add(projGeom.clone("proj:geometry"));
-    props.add(projJson.clone("proj:projjson"));
-    props.add(projWkt2.clone("proj:wkt2"));
-
-    stac.add(stacGeom.clone("geometry"));
-    addBox(stac, stacBbox, "bbox");
+    return false;
 }
 
 inline void addStacMetadata(MetadataNode& root, MetadataNode& statsMeta,
@@ -151,8 +161,6 @@ inline void addStacMetadata(MetadataNode& root, MetadataNode& statsMeta,
     stac.add("stac_version", "1.0.0");
 
     //stac_extensions - pointcloud and projection extensions
-    stac.add("stac_extensions", "https://stac-extensions.github.io/pointcloud/v1.0.0/schema.json");
-    stac.add("stac_extensions", "https://stac-extensions.github.io/projection/v1.1.0/schema.json");
 
     //links
     MetadataNode self = stac.addList("links");
@@ -166,10 +174,22 @@ inline void addStacMetadata(MetadataNode& root, MetadataNode& statsMeta,
     data.add("title", "Pointcloud data");
     assets.add(data.clone("data"));
     auto&& enc = readerMeta.findChild("global_encoding");
-    stacPointcloud(root, statsMeta, infoMeta, properties, pcType);
-    stacProjection(root, statsMeta, readerMeta, stac);
 
-    root.add(stac.clone("stac"));
+    stac.add("stac_extensions", "https://stac-extensions.github.io/pointcloud/v1.0.0/schema.json");
+    stacPointcloud(root, statsMeta, infoMeta, properties, pcType);
+    bool proj = stacProjection(root, statsMeta, readerMeta, stac);
+    if (!proj)
+    {
+        MetadataNode msg;
+        std::string message = "STAC Item could not be created, no SRS"
+            " information found in source file.";
+        msg.addWithType("message", message, "string", "Error message");
+        root.add(msg.clone("stac"));
+    }
+    else
+    {
+        root.add(stac.clone("stac"));
+    }
 }
 
 
