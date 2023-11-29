@@ -38,6 +38,15 @@
 namespace pdal
 {
 
+inline MetadataNode getChild(MetadataNode& m, std::string key)
+{
+    MetadataNode n = m.findChild(key);
+    if (n.empty())
+        throw std::out_of_range(key);
+    else
+        return n;
+}
+
 inline std::string getDateStr(std::string year, std::string doy)
 {
     std::tm tm = { };
@@ -57,7 +66,7 @@ inline std::string getDateStr(std::string year, std::string doy)
 inline void stacPointcloud(MetadataNode& root, MetadataNode& statsMeta,
     MetadataNode& readerMeta, MetadataNode& props, std::string pcType)
 {
-    std::string filename = root.findChild("filename").value();
+    std::string filename = getChild(root, "filename").value();
     std::string fileExt = FileUtils::extension(filename);
 
     uint32_t position(0);
@@ -66,8 +75,8 @@ inline void stacPointcloud(MetadataNode& root, MetadataNode& statsMeta,
     //Gather stac information for poinctloud extension
     auto pc_stats = statsMeta.findChildren([](MetadataNode& n)
         { return n.name()=="statistic"; });
-    auto&& pc_count = readerMeta.findChild("num_points");
-    auto pc_schemas = readerMeta.findChild("schema").findChildren(
+    auto&& pc_count = getChild(readerMeta, "num_points");
+    auto pc_schemas = getChild(readerMeta, "schema").findChildren(
         [](MetadataNode& n)
         { return n.name()=="dimensions"; });
 
@@ -85,40 +94,38 @@ inline void stacPointcloud(MetadataNode& root, MetadataNode& statsMeta,
 
 inline void addBox(MetadataNode& n, MetadataNode& box, std::string name)
 {
-    n.addWithType(name, box.findChild("minx").value(), "double", "");
-    n.addWithType(name, box.findChild("miny").value(), "double", "");
-    n.addWithType(name, box.findChild("minz").value(), "double", "");
-    n.addWithType(name, box.findChild("maxx").value(), "double", "");
-    n.addWithType(name, box.findChild("maxy").value(), "double", "");
-    n.addWithType(name, box.findChild("maxz").value(), "double", "");
+    n.addWithType(name, getChild(box, "minx").value(), "double", "");
+    n.addWithType(name, getChild(box, "miny").value(), "double", "");
+    n.addWithType(name, getChild(box, "minz").value(), "double", "");
+    n.addWithType(name, getChild(box, "maxx").value(), "double", "");
+    n.addWithType(name, getChild(box, "maxy").value(), "double", "");
+    n.addWithType(name, getChild(box, "maxz").value(), "double", "");
 }
 
 inline bool stacProjection(MetadataNode& root, MetadataNode& statsMeta,
     MetadataNode& readerMeta, MetadataNode& stac)
 {
-    MetadataNode props = stac.findChild("properties");
+    MetadataNode props = getChild(stac, "properties");
 
-    MetadataNode bbox = statsMeta.findChild("bbox");
-    if (bbox.findChild("EPSG:4326").empty())
-    {
-        MetadataNode epsg4326 = bbox.findChild("EPSG:4326");
-        MetadataNode stacGeom = epsg4326.findChild("boundary");
-        MetadataNode stacBbox = epsg4326.findChild("bbox");
-        stac.add(stacGeom.clone("geometry"));
-        addBox(stac, stacBbox, "bbox");
-    }
-    else
-        return false;
+    MetadataNode bbox = getChild(statsMeta, "bbox");
 
+    MetadataNode epsg4326 = getChild(bbox, "EPSG:4326");
+    MetadataNode stacGeom = getChild(epsg4326, "boundary");
+    MetadataNode stacBbox = getChild(epsg4326, "bbox");
+    stac.add(stacGeom.clone("geometry"));
+    addBox(stac, stacBbox, "bbox");
+
+    // don't need to throw with this one, can exist without proj
+    // extension if need be.
     if (!bbox.findChild("native").empty())
     {
         stac.add("stac_extensions", "https://stac-extensions.github.io/projection/v1.1.0/schema.json");
-        MetadataNode native = bbox.findChild("native");
-        MetadataNode projGeom = native.findChild("boundary");
-        MetadataNode projBbox = native.findChild("bbox");
-        MetadataNode srs = readerMeta.findChild("srs");
-        MetadataNode projJson = srs.findChild("json");
-        MetadataNode projWkt2 = srs.findChild("wkt");
+        MetadataNode native = getChild(bbox, "native");
+        MetadataNode projGeom = getChild(native, "boundary");
+        MetadataNode projBbox = getChild(native, "bbox");
+        MetadataNode srs = getChild(readerMeta, "srs");
+        MetadataNode projJson = getChild(srs, "json");
+        MetadataNode projWkt2 = getChild(srs, "wkt");
         addBox(props, projBbox, "proj:bbox");
         props.add(projGeom.clone("proj:geometry"));
         props.add(projJson.clone("proj:projjson"));
@@ -131,57 +138,57 @@ inline bool stacProjection(MetadataNode& root, MetadataNode& statsMeta,
 inline void addStacMetadata(MetadataNode& root, MetadataNode& statsMeta,
     MetadataNode& readerMeta, MetadataNode& infoMeta, std::string pcType)
 {
-    MetadataNode stac;
-    std::string filename = root.findChild("filename").value();
-    std::string stem = FileUtils::stem(filename);
-    std::string absPath = FileUtils::toAbsolutePath(filename);
+    try {
+        MetadataNode stac;
+        std::string filename = getChild(root, "filename").value();
+        std::string stem = FileUtils::stem(filename);
+        std::string absPath = FileUtils::toAbsolutePath(filename);
 
-    //Base STAC object
-    MetadataNode id = stac.add("id", stem);
-    MetadataNode properties = stac.add("properties");
+        //Base STAC object
+        MetadataNode id = stac.add("id", stem);
+        MetadataNode properties = stac.add("properties");
 
-    //TODO make sure these are available
-    //For now, if there isn't date similar to laz/las/copc then use now.
-    try
-    {
-        std::string doy = readerMeta.findChild("creation_doy").value();
-        std::string year = readerMeta.findChild("creation_year").value();
-        properties.add("datetime", getDateStr(year, doy));
-    } catch (std::exception &e)
-    {
-        auto&& datetime = infoMeta.findChild("now");
-        properties.add("datetime", datetime);
+        //TODO make sure these are available
+        //For now, if there isn't date similar to laz/las/copc then use now.
+        try
+        {
+            std::string doy = getChild(readerMeta, "creation_doy").value();
+            std::string year = getChild(readerMeta, "creation_year").value();
+            properties.add("datetime", getDateStr(year, doy));
+        } catch (std::exception &e)
+        {
+            auto&& datetime = getChild(infoMeta, "now");
+            properties.add("datetime", datetime);
+        }
+
+        stac.add("type", "Feature");
+        stac.add("stac_version", "1.0.0");
+
+        //links
+        MetadataNode self = stac.addList("links");
+        self.add("rel", "derived_from");
+        self.add("href", absPath);
+
+        //assets - add source file to data asset
+        MetadataNode assets = stac.add("assets");
+        MetadataNode data;
+        data.add("href", absPath);
+        data.add("title", "Pointcloud data");
+        assets.add(data.clone("data"));
+
+        stac.add("stac_extensions", "https://stac-extensions.github.io/pointcloud/v1.0.0/schema.json");
+        stacPointcloud(root, statsMeta, infoMeta, properties, pcType);
+        stacProjection(root, statsMeta, readerMeta, stac);
+        root.add(stac.clone("stac"));
     }
-
-    stac.add("type", "Feature");
-    stac.add("stac_version", "1.0.0");
-
-    //links
-    MetadataNode self = stac.addList("links");
-    self.add("rel", "derived_from");
-    self.add("href", absPath);
-
-    //assets - add source file to data asset
-    MetadataNode assets = stac.add("assets");
-    MetadataNode data;
-    data.add("href", absPath);
-    data.add("title", "Pointcloud data");
-    assets.add(data.clone("data"));
-
-    stac.add("stac_extensions", "https://stac-extensions.github.io/pointcloud/v1.0.0/schema.json");
-    stacPointcloud(root, statsMeta, infoMeta, properties, pcType);
-    bool proj = stacProjection(root, statsMeta, readerMeta, stac);
-    if (!proj)
+    catch (const std::out_of_range& e)
     {
         MetadataNode msg;
-        std::string message = "STAC Item could not be created, no SRS"
-            " information found in source file.";
-        msg.addWithType("message", message, "string", "Error message");
+        std::stringstream message;
+        message << "Failed to create STAC Feature with missing key. '" << e.what() << "'";
+        msg.addWithType("status", "error", "string", "Error status");
+        msg.addWithType("message", message.str(), "string", "Error message");
         root.add(msg.clone("stac"));
-    }
-    else
-    {
-        root.add(stac.clone("stac"));
     }
 }
 
