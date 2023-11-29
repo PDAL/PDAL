@@ -211,3 +211,36 @@ std::string r = R"foo(
 )foo";
     test("--all", r);
 }
+
+TEST(Info, stac)
+{
+std::string r = R"foo(
+    "properties":
+    {
+      "datetime": "2015-09-10T00:00:00Z",
+      "pc:count": 110000,
+      "pc:encoding": ".las",
+)foo";
+    test("--stac", r);
+
+
+//anything other than message and status is a success
+std::string validation = R"foo(
+  "stac":
+  {
+    "message": "Failed to create STAC Feature with missing key. 'EPSG:4326'",
+    "status": "error"
+  }
+)foo";
+
+    std::string cmd;
+
+    std::string output;
+    cmd = appName() + " " + "--stac" + " " +
+        Support::datapath("las/sample_c.las") + " 2>&1";
+
+    EXPECT_EQ(Utils::run_shell_command(cmd, output), 0);
+    EXPECT_NE(output.find(validation), std::string::npos)
+        << "Found: '" << output << "'" << std::endl
+        << "expected: '" << validation<<"'" << std::endl;
+}

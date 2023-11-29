@@ -38,9 +38,23 @@
 namespace pdal
 {
 
+class StacKey
+{
+public:
+    StacKey(std::string key):
+        m_key(key)
+        {};
+    ~StacKey(){};
+
+    inline bool operator()(const MetadataNode& n) {return n.name() == m_key;};
+private:
+    std::string m_key;
+};
+
 inline MetadataNode getChild(MetadataNode& m, std::string key)
 {
-    MetadataNode n = m.findChild(key);
+    StacKey sk(key);
+    MetadataNode n = m.findChild(sk);
     if (n.empty())
         throw std::out_of_range(key);
     else
@@ -102,7 +116,7 @@ inline void addBox(MetadataNode& n, MetadataNode& box, std::string name)
     n.addWithType(name, getChild(box, "maxz").value(), "double", "");
 }
 
-inline bool stacProjection(MetadataNode& root, MetadataNode& statsMeta,
+inline void stacProjection(MetadataNode& root, MetadataNode& statsMeta,
     MetadataNode& readerMeta, MetadataNode& stac)
 {
     MetadataNode props = getChild(stac, "properties");
@@ -131,8 +145,6 @@ inline bool stacProjection(MetadataNode& root, MetadataNode& statsMeta,
         props.add(projJson.clone("proj:projjson"));
         props.add(projWkt2.clone("proj:wkt2"));
     }
-
-    return false;
 }
 
 inline void addStacMetadata(MetadataNode& root, MetadataNode& statsMeta,
