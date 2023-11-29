@@ -14,7 +14,6 @@ pdal_target_compile_settings(nitfwrap)
 add_dependencies(nitfwrap generate_dimension_hpp)
 target_link_libraries(nitfwrap PRIVATE
     ${PDAL_BASE_LIB_NAME}
-    ${PDAL_UTIL_LIB_NAME}
     ${NITRO_LIBRARIES}
 )
 
