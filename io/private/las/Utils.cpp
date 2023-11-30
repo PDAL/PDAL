@@ -455,6 +455,7 @@ void LoaderDriver::init(int pdrf, const Scaling& scaling, const ExtraDims& dims)
 {
     switch (pdrf)
     {
+    /*
     case 0:
         m_loaders.push_back(PointLoaderPtr(new V10BaseLoader(scaling)));
         break;
@@ -471,6 +472,7 @@ void LoaderDriver::init(int pdrf, const Scaling& scaling, const ExtraDims& dims)
         m_loaders.push_back(PointLoaderPtr(new GpstimeLoader(20)));
         m_loaders.push_back(PointLoaderPtr(new ColorLoader(28)));
         break;
+    */
     case 6:
         m_loaders.push_back(PointLoaderPtr(new V14BaseLoader(scaling)));
         break;
@@ -483,6 +485,8 @@ void LoaderDriver::init(int pdrf, const Scaling& scaling, const ExtraDims& dims)
         m_loaders.push_back(PointLoaderPtr(new ColorLoader(30)));
         m_loaders.push_back(PointLoaderPtr(new NirLoader(36)));
         break;
+    default:
+        throw std::runtime_error("Only LAS 1.4 supported by this utility");
     }
     if (dims.size())
         m_loaders.push_back(PointLoaderPtr(new ExtraDimLoader(dims)));
@@ -530,7 +534,7 @@ void V10BaseLoader::load(PointRef& point, const char *buf, int bufsize)
     uint8_t scanDirFlag = (flags >> 6) & 0x01;
     uint8_t flight = (flags >> 7) & 0x01;
 
-    uint8_t classification = classificationWithFlags & 0x05;
+    uint8_t classification = classificationWithFlags & 0x1F;
     uint8_t synthetic = (classificationWithFlags >> 5) & 0x01;
     uint8_t keypoint = (classificationWithFlags >> 6) & 0x01;
     uint8_t withheld = (classificationWithFlags >> 7) & 0x01;
