@@ -267,9 +267,13 @@ MetadataNode InfoKernel::run(const std::string& filename)
     std::string readerDriver = m_driverOverride.size()
         ? m_driverOverride : StageFactory::inferReaderDriver(filename);
 
+    uint64_t pointCountOverride = 0;
+
     if (!m_needPoints && readerDriver == "readers.las" && Utils::isRemote(filename))
     {
-        localHandle = getPointlessLasFile(filename);
+        auto pointless = getPointlessLasFile(filename);
+        pointCountOverride = pointless.pointCount;
+        localHandle = std::move(pointless.handle);
         makeReader(localHandle->localPath());
     }
     else
@@ -284,6 +288,13 @@ MetadataNode InfoKernel::run(const std::string& filename)
         if (!qi.valid())
             throw pdal_error("No summary data available for '" +
                 filename + "'.");
+
+        // Correct our point count with the actual value.
+        if (pointCountOverride)
+        {
+            m_reader->getMetadata().addOrUpdate("count", pointCountOverride);
+            qi.m_pointCount = pointCountOverride;
+        }
         root.add(dumpSummary(qi).clone("summary"));
     }
     else
@@ -293,6 +304,11 @@ MetadataNode InfoKernel::run(const std::string& filename)
             m_manager.execute(ExecMode::PreferStream);
         else
             m_manager.prepare();
+        
+        // Correct our point count with the actual value.
+        if (pointCountOverride)
+            m_reader->getMetadata().addOrUpdate("count", pointCountOverride);
+
         dump(root);
     }
 

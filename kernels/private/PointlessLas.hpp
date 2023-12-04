@@ -42,9 +42,17 @@
 namespace pdal
 {
 
+struct PointlessLas
+{
+    uint64_t pointCount;
+    std::unique_ptr<arbiter::LocalHandle> handle;
+};
+
 // Uses arbiter to make range requests to fetch the LAS header and VLRs of a remote LAS file.
 // Returns a LocalHandle to a temporary file that has the same LAS header / VLRs as the remote
 // file (except for changed byte-offsets where necessary) but doesn't contain any points.
-std::unique_ptr<arbiter::LocalHandle> getPointlessLasFile(const std::string& filename);
+// Since the points are removed from the result, and the header values for point count are
+// zeroed to make the file correct, we return the point count alongside the pointless file.
+PointlessLas getPointlessLasFile(const std::string& filename);
 
 } // namespace pdal

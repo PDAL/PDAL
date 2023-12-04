@@ -75,7 +75,9 @@ extern "C"
 // These functions are available from GDAL, but they aren't provided in a header file.
 char PDAL_DLL * GTIFGetOGISDefn(GTIF*, GTIFDefn*);
 int PDAL_DLL GTIFSetFromOGISDefn(GTIF*, const char*);
+#ifndef VSIFree
 void VSIFree(void *data);
+#endif
 
 int PDALGeoTIFFPrint(char* data, void* aux)
 {

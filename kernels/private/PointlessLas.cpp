@@ -57,7 +57,7 @@ arbiter::http::Headers getRangeHeader(int start, int end = 0)
 
 } // namespace
 
-std::unique_ptr<arbiter::LocalHandle> getPointlessLasFile(const std::string& path)
+PointlessLas getPointlessLasFile(const std::string& path)
 {
     assert(Utils::isRemote(path));
 
@@ -66,8 +66,10 @@ std::unique_ptr<arbiter::LocalHandle> getPointlessLasFile(const std::string& pat
     const uint64_t minorVersionPos(25);
     const uint64_t headerSizePos(94);
     const uint64_t pointOffsetPos(96);
+    const uint64_t legacyPointCountPos(107);
     const uint64_t evlrOffsetPos(235);
     const uint64_t evlrNumberPos(evlrOffsetPos + 8);
+    const uint64_t pointCountPos(247);
 
     std::string fileSignature;
     uint8_t minorVersion(0);
@@ -75,6 +77,8 @@ std::unique_ptr<arbiter::LocalHandle> getPointlessLasFile(const std::string& pat
     uint32_t pointOffset(0);
     uint64_t evlrOffset(0);
     uint32_t evlrNumber(0);
+    uint32_t legacyPointCount(0);
+    uint64_t pointCount(0);
 
     arbiter::Arbiter a;
 
@@ -105,6 +109,14 @@ std::unique_ptr<arbiter::LocalHandle> getPointlessLasFile(const std::string& pat
     is.seek(pointOffsetPos);
     is >> pointOffset;
 
+    is.seek(legacyPointCountPos);
+    is >> legacyPointCount;
+    pointCount = legacyPointCount;
+
+    // Set the legacy point count to 0 since we are removing the point data.
+    os.seek(legacyPointCountPos);
+    os << (uint32_t)0;
+
     if (minorVersion >= 4)
     {
         is.seek(evlrOffsetPos);
@@ -113,10 +125,17 @@ std::unique_ptr<arbiter::LocalHandle> getPointlessLasFile(const std::string& pat
         is.seek(evlrNumberPos);
         is >> evlrNumber;
 
+        is.seek(pointCountPos);
+        is >> pointCount;
+
         // Modify the header such that the EVLRs come directly after the VLRs -
         // removing the point data itself.
         os.seek(evlrOffsetPos);
         os << pointOffset;
+
+        // Set the 1.4 point count to 0 since we are removing the point data.
+        os.seek(pointCountPos);
+        os << (uint64_t)0;
     }
 
     // Extract the modified header, VLRs, and append the EVLRs.
@@ -146,7 +165,10 @@ std::unique_ptr<arbiter::LocalHandle> getPointlessLasFile(const std::string& pat
 
     const std::string localPath = arbiter::join(arbiter::getTempPath(), basename);
     a.put(localPath, data);
-    return std::make_unique<arbiter::LocalHandle>(localPath, /*isRemote=*/ false);
+    return PointlessLas {
+        pointCount,
+        std::make_unique<arbiter::LocalHandle>(localPath, /*isRemote=*/ false)
+    };
 }
 
 } // namespace pdal
