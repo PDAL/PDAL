@@ -519,8 +519,8 @@ TEST_F(TileDBWriterTest, sf_curve)
     FixedPointTable table(count);
     writer.prepare(table);
 
-    // check that error is thrown if the tile size or domain is not specified
-    EXPECT_THROW(writer.execute(table), pdal_error);
+    // check no errors when creating array with no tiles and no domain
+    writer.execute(table);
 }
 
 TEST_F(TileDBWriterTest, tile_sizes)
@@ -644,6 +644,66 @@ TEST_F(TileDBWriterTest, sf_curve_stats)
     EXPECT_TRUE(metaDoc["root"].contains("writers.tiledb"));
 
     array.close();
+}
+
+TEST(AdditionalTileDBWriterTest, domain_from_stats)
+{
+    // Set filename for output.
+    std::string uri = Support::temppath("tiledb_domain_from_stats");
+    if (FileUtils::directoryExists(uri))
+        FileUtils::deleteDirectory(uri);
+
+    // Create the stage factory.
+    StageFactory factory;
+
+    // Create faux reader for input data.
+    Stage* reader = factory.createStage("readers.faux");
+    Options reader_options;
+    reader_options.add("mode", "grid");
+    reader_options.add("bounds", "([0, 10],[0, 20],[0, 30])");
+    reader->setOptions(reader_options);
+
+    // Create stats filter and link it to the faux reader.
+    Stage* stats_filter = factory.createStage("filters.stats");
+    stats_filter->setInput(*reader);
+
+    // Create TileDB writer and link it to the stats filter and reader.
+    Stage* writer = factory.createStage("writers.tiledb");
+    Options writer_options;
+    writer_options.add("filename", uri);
+    writer->setInput(*stats_filter);
+    writer->setOptions(writer_options);
+
+    // Execute
+    PointTable table;
+    writer->prepare(table);
+    writer->execute(table);
+
+    // Check schema.
+    {
+        tiledb::Context ctx{};
+        tiledb::ArraySchema schema(ctx, uri);
+        auto domain = schema.domain();
+        EXPECT_EQ(domain.ndim(), 3);
+
+        // Check X domain.
+        std::pair<double, double> x_domain =
+            domain.dimension(0).domain<double>();
+        EXPECT_DOUBLE_EQ(x_domain.first, -1.0);
+        EXPECT_DOUBLE_EQ(x_domain.second, 10.0);
+
+        // Check Y domain.
+        std::pair<double, double> y_domain =
+            domain.dimension(1).domain<double>();
+        EXPECT_DOUBLE_EQ(y_domain.first, -1.0);
+        EXPECT_DOUBLE_EQ(y_domain.second, 20.0);
+
+        // Check Z domain.
+        std::pair<double, double> z_domain =
+            domain.dimension(2).domain<double>();
+        EXPECT_DOUBLE_EQ(z_domain.first, -1.0);
+        EXPECT_DOUBLE_EQ(z_domain.second, 30.0);
+    }
 }
 
 } // namespace pdal

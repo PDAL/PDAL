@@ -32,6 +32,7 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include <algorithm>
 #include <cctype>
 #include <limits>
 #include <optional>
@@ -363,22 +364,17 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
              {m_args->m_y_domain_st, m_args->m_y_domain_end},
              {m_args->m_z_domain_st, m_args->m_z_domain_end},
              {m_args->m_time_domain_st, m_args->m_time_domain_end}}};
-        if (!hasValidDomain)
+
+        // If X, Y, or Z domain are not valid, then attempt to update with
+        // the stats filter bbox.
+        if (bbox[0][1] <= bbox[0][0] || bbox[1][1] <= bbox[1][0] ||
+            bbox[2][1] <= bbox[2][0])
         {
-            // Get table metadata and check if it is valid.
+
+            // Check if we can update with
             MetadataNode meta =
                 table.metadata().findChild("filters.stats:bbox:native:bbox");
-            bool hasMetadataStats = meta.valid();
-
-            // Check the user set valid tile extents, valid domains, or ran
-            // stats on the point table.
-            if (!hasValidTiles && !hasMetadataStats)
-                throwError(
-                    "Must specify a valid domain for all dimensions, a valid "
-                    "tile extent for all dimensions, or execute a prior stats "
-                    "filter stage.");
-
-            if (hasMetadataStats)
+            if (meta.valid())
             {
                 // Update any missing domains using table statistics.
                 auto updateWithStats = [&](const std::string& minStr,
@@ -392,18 +388,53 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
                 updateWithStats("minx", "maxx", bbox[0]);
                 updateWithStats("miny", "maxy", bbox[1]);
                 updateWithStats("minz", "maxz", bbox[2]);
-                if (m_args->m_use_time)
-                    updateWithStats("mintm", "maxtm", bbox[3]);
-            }
-            else
-            {
-                // Update any missing domains to be the entire space.
-                for (auto& range : bbox)
-                    if (range[1] <= range[0])
-                        range = {std::numeric_limits<double>::lowest(),
-                                 std::numeric_limits<double>::max()};
             }
         }
+
+        // If using time as a dimension and the GPSTime domain is not valid,
+        // attempt to update with the stats filter GPSTime dimension.
+        if (m_args->m_use_time && bbox[3][1] <= bbox[3][0])
+        {
+            MetadataNode stats_meta =
+                table.metadata().findChild("filters.stats");
+
+            if (stats_meta.valid())
+            {
+
+                for (const auto& dim_summary : stats_meta.children("statistic"))
+                {
+                    // Iterate over the dimension summary and see if the name
+                    // of this dimension is "GpsTime".
+                    auto dim_details = dim_summary.children();
+                    bool is_gps_time =
+                        std::any_of(dim_details.cbegin(), dim_details.cend(),
+                                    [](const auto& detail) {
+                                        return detail.name() == "name" &&
+                                               detail.value() == "GpsTime";
+                                    });
+
+                    // If this dimension is for GpsTime, then use the statistics
+                    // to set the domain.
+                    if (is_gps_time)
+                    {
+                        auto min_stat = dim_summary.findChild("minimum");
+                        auto max_stat = dim_summary.findChild("maximum");
+                        if (min_stat.valid() && max_stat.valid())
+                        {
+                            bbox[3] = {min_stat.value<double>() - 1.0,
+                                       max_stat.value<double>() + 1.0};
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Update any remaining invalid domains to be the whole valid domain.
+        for (auto& range : bbox)
+            if (range[1] <= range[0])
+                range = {std::numeric_limits<double>::lowest(),
+                         std::numeric_limits<double>::max()};
 
         // Create and add dimensions to the TileDB domain.
         if (hasValidTiles)
