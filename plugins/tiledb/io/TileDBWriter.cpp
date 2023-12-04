@@ -62,6 +62,8 @@ struct TileDBWriter::Args
 {
     std::string m_arrayName;
     std::string m_cfgFileName;
+    std::string m_cell_order;
+    std::string m_tile_order;
     size_t m_tile_capacity;
     double m_x_tile_size;
     double m_y_tile_size;
@@ -108,6 +110,9 @@ void TileDBWriter::addArgs(ProgramArgs& args)
     args.addSynonym("array_name", "filename");
     args.add("config_file", "TileDB configuration file location",
              m_args->m_cfgFileName);
+    args.add("cell_order", "TileDB cell order", m_args->m_cell_order, "auto");
+    args.add("tile_order", "TileDB tile order", m_args->m_tile_order,
+             "row-major");
     args.add("data_tile_capacity", "TileDB tile capacity",
              m_args->m_tile_capacity, size_t(100000));
     args.add<double>("x_tile_size", "TileDB tile size", m_args->m_x_tile_size,
@@ -272,25 +277,74 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
     // If not appending to an existing array, then create the TileDB array.
     if (!m_args->m_append)
     {
+        // Check if any or all of the tiles are set to valid sizes.
+        bool hasValidTiles =
+            ((m_args->m_x_tile_size > 0) && (m_args->m_y_tile_size > 0) &&
+             (m_args->m_z_tile_size > 0) &&
+             (!m_args->m_use_time || m_args->m_time_tile_size > 0));
+        bool anyTiles =
+            ((m_args->m_x_tile_size > 0) || (m_args->m_y_tile_size > 0) ||
+             (m_args->m_z_tile_size > 0) ||
+             (!m_args->m_use_time || m_args->m_time_tile_size > 0));
+
         // Create schema and set basic properties.
         tiledb::ArraySchema schema{*m_ctx, TILEDB_SPARSE};
         schema.set_allows_dups(true);
         schema.set_capacity(m_args->m_tile_capacity);
+
+        // Set tile order.
+        if (m_args->m_tile_order == "row-major" || m_args->m_tile_order == "R")
+            schema.set_tile_order(TILEDB_ROW_MAJOR);
+        else if (m_args->m_tile_order == "col-major" ||
+                 m_args->m_tile_order == "C")
+            schema.set_tile_order(TILEDB_COL_MAJOR);
+        else
+            throwError("Invalid tile order option '" + m_args->m_tile_order +
+                       "'.");
+
+        // Set cell order.
+        if (m_args->m_cell_order == "auto")
+        {
+            // Use Hilbert order if not all tiles are set, and row-major if they
+            // are.
+            if (!hasValidTiles)
+            {
+                if (anyTiles)
+                    std::cerr << "WARNING: Not all tile sizes are valid. "
+                                 "Ignoring tile sizes.";
+                schema.set_cell_order(TILEDB_HILBERT);
+            }
+            else
+                schema.set_cell_order(TILEDB_ROW_MAJOR);
+        }
+        else if (m_args->m_cell_order == "row-major" ||
+                 m_args->m_cell_order == "R")
+        {
+            if (!hasValidTiles)
+                throwError("The tile size must be set for all dimensions when "
+                           "using row major cell order.");
+            schema.set_cell_order(TILEDB_ROW_MAJOR);
+        }
+        else if (m_args->m_cell_order == "col-major" ||
+                 m_args->m_cell_order == "C")
+        {
+            if (!hasValidTiles)
+                throwError("The tile size must be set for all dimensions when "
+                           "using column major cell order.");
+            schema.set_cell_order(TILEDB_COL_MAJOR);
+        }
+        else if (m_args->m_cell_order == "hilbert" ||
+                 m_args->m_cell_order == "H")
+            schema.set_cell_order(TILEDB_HILBERT);
+        else
+            throwError("Invalid cell order option '" + m_args->m_cell_order +
+                       "'.");
 
         // Get filter factory class.
         FilterFactory filterFactory{
             m_args->m_filters,    m_args->m_filter_profile,
             m_args->m_scale,      m_args->m_offset,
             m_args->m_compressor, m_args->m_compressionLevel};
-
-        // Check if using Hilbert order or row-major order. Use row-major if all
-        // dimensions have positive tiles set. Otherwise, use Hilbert order.
-        bool hasValidTiles =
-            ((m_args->m_x_tile_size > 0) && (m_args->m_y_tile_size > 0) &&
-             (m_args->m_z_tile_size > 0) &&
-             (!m_args->m_use_time || m_args->m_time_tile_size > 0));
-        if (!hasValidTiles)
-            schema.set_cell_order(TILEDB_HILBERT);
 
         // Check if the domain is set for all dimensions.
         bool hasValidDomain =

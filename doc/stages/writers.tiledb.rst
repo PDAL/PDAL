@@ -41,6 +41,12 @@ config_file
 data_tile_capacity
   Number of points per tile. Not used when `append=true`. [Default: 100,000]
 
+cell_order
+  The layout to use for TileDB cells. May be `auto`, `row-major`, `col-major`, or `hilbert`. Not used when `append=true`. [Default: auto]
+
+tile_order
+  The layout to use for TileDB tiles. May be `row-major` or `col-major`. Not used when `append=true`. [Default: row-major]
+
 x_tile_size
   Tile size (x). Floating point value used for determining on-disk data order. Not used when `append=true`. [Optional]
 
@@ -216,21 +222,21 @@ Filters set by the `aggressive` filter profile (the delta filter is skipped if u
   1. Float-scale filter (factor=`scale_x`, offset=`offset_x`, scale_float_bytewidth=4)
   2. Delta filter (reinterpret_datatype=`INT32`)
   3. Bit width reduction filter
-  4. BZIP2 filter (level=5)
+  4. BZIP2 filter (level=9)
 
 * Y
 
   1. Float-scale filter (factor=`scale_y`, offset=`offset_y`, scale_float_bytewidth=4)
   2. Delta filter (reinterpret_datatype=`INT32`)
   3. Bit width reduction filter
-  4. BZIP2 filter (level=5)
+  4. BZIP2 filter (level=9)
 
 * Z
 
   1. Float-scale filter (factor=`scale_z`, offset=`offset_z`, scale_float_bytewidth=4)
   2. Delta filter (reinterpret_datatype=`INT32`)
   3. Bit width reduction filter
-  4. BZIP2 filter (level=5)
+  4. BZIP2 filter (level=9)
 
 * GPSTime
 
