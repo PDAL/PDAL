@@ -285,7 +285,7 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
         if (!hasValidTiles &&
             ((m_args->m_x_tile_size > 0) || (m_args->m_y_tile_size > 0) ||
              (m_args->m_z_tile_size > 0) ||
-             (!m_args->m_use_time || m_args->m_time_tile_size > 0)))
+             (m_args->m_use_time && m_args->m_time_tile_size > 0)))
             std::cerr << "WARNING: Not all tile sizes are valid. Ignoring tile "
                          "sizes.";
 
