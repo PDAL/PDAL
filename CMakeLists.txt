@@ -35,21 +35,11 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+#
 # Name of C++ library
 #
-# To facilitate one-library linking, we do special things for various platforms.
-#
-# On Linux we install a linker script that we call libpdalcpp.so and it
-# in turn links libpdal_base.so and libpdal_util.so
-#
-# On OSX we reexport the symbols from libpdal_util.dylib into libpdalcpp.dylib
-# See below for the rest of the magic.
-#
-
 set(PDAL_LIB_NAME pdalcpp)
 
-
-set(PDAL_UTIL_LIB_NAME pdal_util)
 set(PDAL_KAZHDAN_LIB_NAME pdal_kazhdan)
 set(PDAL_LEPCC_LIB_NAME pdal_lepcc)
 set(PDAL_TEST_SUPPORT_OBJS pdal_test_support)
@@ -108,6 +98,7 @@ set(PDAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 #  Dependencies.
 #------------------------------------------------------------------------------
 
+include(${PDAL_CMAKE_DIR}/backtrace.cmake)
 include(${PDAL_CMAKE_DIR}/proj.cmake)
 include(${PDAL_CMAKE_DIR}/gdal.cmake)
 include(${PDAL_CMAKE_DIR}/geotiff.cmake)  # Optional (not really)
@@ -171,7 +162,6 @@ add_subdirectory(vendor/kazhdan)
 add_subdirectory(vendor/lazperf)
 add_subdirectory(vendor/utfcpp)
 add_subdirectory(vendor/lepcc)
-add_subdirectory(pdal/util)
 add_subdirectory(tools)
 add_subdirectory(apps)
 
@@ -180,12 +170,14 @@ file(GLOB BASE_SRCS
     ${PDAL_IO_DIR}/*.cpp
     ${PDAL_KERNELS_DIR}/*.cpp
     ${PDAL_SRC_DIR}/*.cpp
-    ${PDAL_SRC_DIR}/compression/*.cpp)
+    ${PDAL_SRC_DIR}/compression/*.cpp
+    ${PDAL_SRC_DIR}/util/*.cpp)
 file(GLOB_RECURSE PRIVATE_SRCS
     ${PDAL_FILTERS_DIR}/private/*.cpp
     ${PDAL_IO_DIR}/private/*.cpp
     ${PDAL_KERNELS_DIR}/private/*.cpp
-    ${PDAL_SRC_DIR}/private/*.cpp)
+    ${PDAL_SRC_DIR}/private/*.cpp
+    ${BACKTRACE_SOURCE})
 list(APPEND SRCS ${BASE_SRCS} ${PRIVATE_SRCS})
 
 #
@@ -217,13 +209,7 @@ if (NOT PDAL_HAVE_LZMA)
     list(REMOVE_ITEM SRCS ${LZMA_SRCS})
 endif()
 
-if (GDAL_VERSION VERSION_LESS 3.0.0)
-    file(GLOB PROJPIPELINE_FILTER_SRCS
-        ${PDAL_FILTERS_DIR}/ProjPipelineFilter.cpp)
-    list(REMOVE_ITEM SRCS ${PROJPIPELINE_FILTER_SRCS})
-endif()
-
-PDAL_ADD_LIBRARY(${PDAL_LIB_NAME} ${SRCS} ${RPLY_SRCS} $<TARGET_OBJECTS:${PDAL_UTIL_LIB_NAME}>)
+PDAL_ADD_LIBRARY(${PDAL_LIB_NAME} ${SRCS})
 add_library(PDAL::PDAL ALIAS ${PDAL_LIB_NAME})
 #
 # Interface include directories allow downstream project to get the directory
@@ -260,6 +246,8 @@ target_link_libraries(${PDAL_LIB_NAME}
         ${PDAL_LEPCC_LIB_NAME}
         ${PDAL_LAZPERF_LIB_NAME}
         ${UTFCPP_LIB_NAME}
+        ${BACKTRACE_LIBRARIES}
+       "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:-lstdc++fs>"
     PUBLIC
         ${WINSOCK_LIBRARY}
     INTERFACE
@@ -271,21 +259,9 @@ set_target_properties(${PDAL_LIB_NAME} PROPERTIES
     SOVERSION ${PDAL_API_VERSION}
     CLEAN_DIRECT_OUTPUT 1)
 
-
 # shut off -Wpedantic selectively
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" )
-set_source_files_properties(filters/PoissonFilter.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
-endif()
-
-#
-# On Linux, we install a linker script as libpdalcpp.so.  That file
-# specifies linking in libpdal_base.so and libpdal_util.so.  This allows
-# users to link a single library, libpdalcpp
-#
-if (UNIX AND NOT APPLE)
-    set(LIBNAME ${CMAKE_SHARED_LIBRARY_PREFIX}${PDAL_LIB_NAME})
-    install(FILES ${LIBNAME} DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RENAME ${LIBNAME}${CMAKE_SHARED_LIBRARY_SUFFIX})
+    set_source_files_properties(filters/PoissonFilter.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
 endif()
 
 #
@@ -364,7 +340,7 @@ install(FILES ${PDAL_CMAKE_DIR}/pluginmacros.cmake
         GROUP_EXECUTE WORLD_EXECUTE OWNER_EXECUTE
         GROUP_READ WORLD_READ OWNER_READ
         OWNER_WRITE
-        )
+)
 
 #
 # CPACK
@@ -393,9 +369,6 @@ include(${PDAL_CMAKE_DIR}/config.cmake)
 target_include_directories(${PDAL_LIB_NAME}
     INTERFACE
         $<INSTALL_INTERFACE:include>)
-#target_include_directories(${PDAL_UTIL_LIB_NAME}
-#    INTERFACE
-#        $<INSTALL_INTERFACE:include>)
 
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)
 
