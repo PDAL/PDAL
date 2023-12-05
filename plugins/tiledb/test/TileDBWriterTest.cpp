@@ -565,6 +565,45 @@ TEST_F(TileDBWriterTest, tile_sizes)
     array.close();
 }
 
+TEST_F(TileDBWriterTest, set_cell_tile_order)
+{
+    Options reader_options;
+    FauxReader reader;
+    BOX3D bounds(1.0, 1.0, 1.0, 2.0, 2.0, 2.0);
+    reader_options.add("bounds", bounds);
+    reader_options.add("mode", "constant");
+    reader_options.add("count", count);
+    reader.setOptions(reader_options);
+
+    tiledb::Context ctx;
+    std::string pth = Support::temppath("tiledb_test_cell_tile_order");
+
+    if (FileUtils::directoryExists(pth))
+        FileUtils::deleteDirectory(pth);
+
+    Options writer_options = getTileDBOptions();
+    writer_options.add("array_name", pth);
+    writer_options.add("cell_order", "hilbert");
+    writer_options.add("tile_order", "col-major");
+
+    TileDBWriter writer;
+    writer.setOptions(writer_options);
+    writer.setInput(reader);
+
+    FixedPointTable table(count);
+    writer.prepare(table);
+    writer.execute(table);
+
+    EXPECT_EQ(true, tiledb::Object::object(ctx, pth).type() ==
+                        tiledb::Object::Type::Array);
+
+    tiledb::Array array(ctx, pth, TILEDB_READ);
+    EXPECT_EQ(true, array.schema().cell_order() == TILEDB_HILBERT);
+    EXPECT_EQ(true, array.schema().tile_order() == TILEDB_COL_MAJOR);
+
+    array.close();
+}
+
 TEST_F(TileDBWriterTest, sf_curve_stats)
 {
     tiledb::Context ctx;
@@ -606,4 +645,5 @@ TEST_F(TileDBWriterTest, sf_curve_stats)
 
     array.close();
 }
+
 } // namespace pdal
