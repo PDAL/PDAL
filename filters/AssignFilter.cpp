@@ -157,6 +157,11 @@ void AssignFilter::prepared(PointTableRef table)
     }
     for (expr::AssignStatement& expr : m_args->m_statements)
     {
+        expr::IdentExpression& ident = expr.identExpr();
+        if (ident.eval() ==  Dimension::Id::Unknown)
+        {
+
+        }
         auto status = expr.prepare(layout);
         if (!status)
             throwError(status.what());
