@@ -43,11 +43,11 @@ Utils::StatusWithReason AssignStatement::prepare(PointLayoutPtr layout)
 {
     auto status = m_identExpr.prepare(layout);
     if (!status)
-        return {-1, m_identExpr.error()};
+        return status;
 
     status = m_valueExpr.prepare(layout);
     if (!status)
-        return {-1, m_identExpr.error()};
+        return status;
 
     return m_conditionalExpr.prepare(layout);
 }
