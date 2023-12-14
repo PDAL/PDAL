@@ -234,3 +234,40 @@ TEST(AssignFilterTest, test_condition)
     EXPECT_EQ(v->size(), 10u);
     EXPECT_EQ(ielse, 7);
 }
+
+
+TEST(AssignFilterTest, test_creation)
+{
+    StageFactory factory;
+
+    Stage& r = *factory.createStage("readers.las");
+    Stage& f = *factory.createStage("filters.assign");
+
+    // utm17.las contains 5 points with intensity of 280, 3 of 260 and 2 of 240
+    Options ro;
+    ro.add("filename", Support::datapath("las/utm17.las"));
+    r.setOptions(ro);
+
+    Options fo;
+    fo.add("value", "xi = X * 10.0");
+
+    f.setInput(r);
+    f.setOptions(fo);
+
+    PointTable t;
+    f.prepare(t);
+    PointViewSet s = f.execute(t);
+    PointViewPtr v = *s.begin();
+
+    PointLayoutPtr l = v->layout();
+    Dimension::Id xiDimensionId = l->findDim("xi");
+
+    int ielse = 0;
+    int i6 = 0;
+    for (PointId i = 0; i < v->size(); ++i)
+    {
+        int xi = v->getFieldAs<int>(xiDimensionId, i);
+        double x = v->getFieldAs<double>(Dimension::Id::X, i);
+        EXPECT_DOUBLE_EQ(std::floor(x), xi / 10);
+    }
+}
