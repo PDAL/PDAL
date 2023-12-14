@@ -3,7 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - python=3.11
-  - pdal=2.5.6
+  - pdal=2.6.2
   - python-pdal
   - gdal
   - untwine
