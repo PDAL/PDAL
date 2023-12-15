@@ -162,7 +162,6 @@ void AssignFilter::prepared(PointTableRef table)
         if (ident.eval() ==  Dimension::Id::Unknown)
         {
             layout->registerOrAssignDim(dimName, Dimension::Type::Double);
-
         }
         auto status = expr.prepare(layout);
         if (!status)
