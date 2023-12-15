@@ -48,7 +48,7 @@ bool AssignParser::where(AssignStatement& expr)
         std::string ident = Utils::toupper(curToken().sval());
         if (ident != "WHERE")
         {
-            setError("Expected keyword 'WHERE' to precede condition assignment.");
+            setError("Expected keyword 'WHERE'. Found identifier '" + curToken().sval() + "'.");
             return false;
         }
     }
