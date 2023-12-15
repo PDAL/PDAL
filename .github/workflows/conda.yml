@@ -71,7 +71,7 @@ jobs:
       run: |
           source ./scripts/ci/conda/examples.sh
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.platform }}-conda-package
         path: ./pdal-feedstock/packages/
