@@ -262,8 +262,6 @@ TEST(AssignFilterTest, test_creation)
     PointLayoutPtr l = v->layout();
     Dimension::Id xiDimensionId = l->findDim("xi");
 
-    int ielse = 0;
-    int i6 = 0;
     for (PointId i = 0; i < v->size(); ++i)
     {
         int xi = v->getFieldAs<int>(xiDimensionId, i);

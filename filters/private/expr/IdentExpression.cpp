@@ -18,7 +18,6 @@ std::string IdentExpression::name() const
 {
     const VarNode *n = dynamic_cast<const VarNode *>(topNode());
 
-    n->name();
     if (n)
         return n->name();
     else
