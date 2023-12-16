@@ -22,7 +22,7 @@ hausdorff
           max_min_distance_1_to_2 = 0
           max_min_distance_2_to_1 = 0
 
-          points1 = np.column_stack((arr1['X'], arr1['Y'], arr2['Z']))
+          points1 = np.column_stack((arr1['X'], arr1['Y'], arr1['Z']))
           points2 = np.column_stack((arr2['X'], arr2['Y'], arr2['Z']))
           
           # Compute distance from each point in arr1 to arr2
@@ -41,11 +41,11 @@ hausdorff
 
       pipeline1 = pdal.Reader("/path/to/input1.laz").pipeline()
       pipeline1.execute()
-      arr1 = pipeline1.array[0]
+      arr1 = pipeline1.arrays[0]
 
       pipeline2 = pdal.Reader("/path/to/input2.laz").pipeline()
       pipeline2.execute()
-      arr2 = pipeline2.array[0]
+      arr2 = pipeline2.arrays[0]
 
       # Compute Hausdorff distance
       result = hausdorff_distance(arr1, arr2)
