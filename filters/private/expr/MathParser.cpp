@@ -167,9 +167,29 @@ bool MathParser::primary(Expression& expr)
 
 bool MathParser::function(Expression& expr)
 {
+    using namespace std;
     static const std::vector<Func1> funcs {
         { "floor", ::floor },
-        { "exp", ::exp }
+        { "ceil", ::ceil },
+        { "round", ::round },
+        { "abs", ::abs },
+        { "sqrt", ::sqrt },
+        { "sin", ::sin },
+        { "cos", ::cos },
+        { "tan", ::tan },
+        { "asin", ::asin },
+        { "acos", ::acos },
+        { "atan", ::atan },
+        { "sinh", ::sinh },
+        { "cosh", ::cosh },
+        { "tanh", ::tanh },
+        { "asinh", ::asinh },
+        { "acosh", ::acosh },
+        { "log", ::log },
+        { "log2", ::log2 },
+        { "log10", ::log10 },
+        { "exp", ::exp },
+        { "exp2", ::exp2 },
     };
 
     std::string name = curToken().sval();
