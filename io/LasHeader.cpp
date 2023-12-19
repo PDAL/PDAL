@@ -226,12 +226,12 @@ void LasHeader::setPointOffset(uint32_t offset)
 
 uint8_t LasHeader::pointFormat() const
 {
-    return d->h.pointFormatBits;
+    return d->h.pointFormat();
 }
 
 void LasHeader::setPointFormat(uint8_t format)
 {
-    d->h.pointFormatBits = format;
+    d->h.setPointFormat(format);
 }
 
 Utils::StatusWithReason LasHeader::pointFormatSupported() const

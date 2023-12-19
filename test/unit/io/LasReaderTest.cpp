@@ -93,45 +93,50 @@ TEST(LasReaderTest, create)
 
 TEST(LasReaderTest, header)
 {
-    PointTable table;
-    Options ops;
-    ops.add("filename", Support::datapath("las/simple.las"));
+    auto testLasHeader = [](const std::string& filePath, bool compressed){
+        PointTable table;
+        Options ops;
+        ops.add("filename", Support::datapath(filePath));
 
-    LasReader reader;
-    reader.setOptions(ops);
+        LasReader reader;
+        reader.setOptions(ops);
 
-    reader.prepare(table);
-    // This tests the copy ctor, too.
-    const LasHeader& h = reader.header();
+        reader.prepare(table);
+        // This tests the copy ctor, too.
+        const LasHeader& h = reader.header();
 
-    EXPECT_EQ(h.fileSignature(), "LASF");
-    EXPECT_EQ(h.fileSourceId(), 0);
-    EXPECT_TRUE(h.projectId().isNull());
-    EXPECT_EQ(h.versionMajor(), 1);
-    EXPECT_EQ(h.versionMinor(), 2);
-    EXPECT_EQ(h.creationDOY(), 0);
-    EXPECT_EQ(h.creationYear(), 0);
-    EXPECT_EQ(h.vlrOffset(), 227);
-    EXPECT_EQ(h.pointFormat(), 3);
-    EXPECT_EQ(h.pointCount(), 1065u);
-    EXPECT_DOUBLE_EQ(h.scaleX(), .01);
-    EXPECT_DOUBLE_EQ(h.scaleY(), .01);
-    EXPECT_DOUBLE_EQ(h.scaleZ(), .01);
-    EXPECT_DOUBLE_EQ(h.offsetX(), 0);
-    EXPECT_DOUBLE_EQ(h.offsetY(), 0);
-    EXPECT_DOUBLE_EQ(h.offsetZ(), 0);
-    EXPECT_DOUBLE_EQ(h.maxX(), 638982.55);
-    EXPECT_DOUBLE_EQ(h.maxY(), 853535.43);
-    EXPECT_DOUBLE_EQ(h.maxZ(), 586.38);
-    EXPECT_DOUBLE_EQ(h.minX(), 635619.85);
-    EXPECT_DOUBLE_EQ(h.minY(), 848899.70);
-    EXPECT_DOUBLE_EQ(h.minZ(), 406.59);
-    EXPECT_EQ(h.compressed(), false);
-    EXPECT_EQ(h.pointCountByReturn(0), 925u);
-    EXPECT_EQ(h.pointCountByReturn(1), 114);
-    EXPECT_EQ(h.pointCountByReturn(2), 21);
-    EXPECT_EQ(h.pointCountByReturn(3), 5);
-    EXPECT_EQ(h.pointCountByReturn(4), 0);
+        EXPECT_EQ(h.fileSignature(), "LASF");
+        EXPECT_EQ(h.fileSourceId(), 0);
+        EXPECT_TRUE(h.projectId().isNull());
+        EXPECT_EQ(h.versionMajor(), 1);
+        EXPECT_EQ(h.versionMinor(), 2);
+        EXPECT_EQ(h.creationDOY(), 0);
+        EXPECT_EQ(h.creationYear(), 0);
+        EXPECT_EQ(h.vlrOffset(), 227);
+        EXPECT_EQ(h.pointFormat(), 3);
+        EXPECT_EQ(h.pointCount(), 1065u);
+        EXPECT_DOUBLE_EQ(h.scaleX(), .01);
+        EXPECT_DOUBLE_EQ(h.scaleY(), .01);
+        EXPECT_DOUBLE_EQ(h.scaleZ(), .01);
+        EXPECT_DOUBLE_EQ(h.offsetX(), 0);
+        EXPECT_DOUBLE_EQ(h.offsetY(), 0);
+        EXPECT_DOUBLE_EQ(h.offsetZ(), 0);
+        EXPECT_DOUBLE_EQ(h.maxX(), 638982.55);
+        EXPECT_DOUBLE_EQ(h.maxY(), 853535.43);
+        EXPECT_DOUBLE_EQ(h.maxZ(), 586.38);
+        EXPECT_DOUBLE_EQ(h.minX(), 635619.85);
+        EXPECT_DOUBLE_EQ(h.minY(), 848899.70);
+        EXPECT_DOUBLE_EQ(h.minZ(), 406.59);
+        EXPECT_EQ(h.compressed(), compressed);
+        EXPECT_EQ(h.pointCountByReturn(0), 925u);
+        EXPECT_EQ(h.pointCountByReturn(1), 114);
+        EXPECT_EQ(h.pointCountByReturn(2), 21);
+        EXPECT_EQ(h.pointCountByReturn(3), 5);
+        EXPECT_EQ(h.pointCountByReturn(4), 0);
+    };
+
+    testLasHeader("las/simple.las", false);
+    testLasHeader("laz/simple.laz", true);
 }
 
 TEST(LasReaderTest, vlr)
