@@ -189,7 +189,7 @@ bool MathParser::function(Expression& expr)
         { "log2", ::log2 },
         { "log10", ::log10 },
         { "exp", ::exp },
-        { "exp2", ::exp2 },
+        { "exp2", ::exp2 }
     };
 
     std::string name = curToken().sval();
