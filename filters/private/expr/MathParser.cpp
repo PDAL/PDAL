@@ -173,7 +173,7 @@ bool MathParser::function(Expression& expr)
         { "ceil", ::ceil },
         { "round", ::round },
         { "abs", ::fabs },
-        { "abs", ::fabs },
+        { "fabs", ::fabs },
         { "sqrt", ::sqrt },
         { "sin", ::sin },
         { "cos", ::cos },
