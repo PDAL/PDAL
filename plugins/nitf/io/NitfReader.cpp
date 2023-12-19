@@ -101,18 +101,7 @@ std::string NitfReader::getName() const { return s_info.name; }
 
 void NitfReader::initialize(PointTableRef table)
 {
-
-    if (Utils::isRemote(m_filename))
-    {
-        // swap our filename for a tmp file
-        std::string tmpname = Utils::tempFilename(m_filename);
-        m_remoteFilename = m_filename;
-        m_filename = tmpname;
-        m_isRemote = true;
-        arbiter::Arbiter a;
-        a.put(m_filename, a.getBinary(m_remoteFilename));
-    }
-
+    tryLoadRemote();
     try
     {
         NitfFileReader nitf(m_filename);
@@ -131,18 +120,6 @@ void NitfReader::initialize(PointTableRef table)
     MetadataNode lasNode = m_metadata.add(LasReader::getName());
     initializeLocal(table, lasNode);
 }
-
-
-void NitfReader::done(PointTableRef table)
-{
-    if (m_isRemote)
-    {
-        // Clean up temporary
-        FileUtils::deleteFile(m_filename);
-    }
-
-}
-
 
 } // namespace pdal
 

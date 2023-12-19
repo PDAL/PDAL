@@ -38,7 +38,7 @@
 
 #include <pdal/pdal_export.hpp>
 #include <pdal/pdal_features.hpp>
-#include <pdal/PDALUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
 
@@ -71,16 +71,26 @@ protected:
 
     public:
         LasStreamIf(const std::string& filename)
-            { m_istream = Utils::openFile(filename); }
+            { m_istream = FileUtils::openFile(filename); }
 
         virtual ~LasStreamIf()
         {
             if (m_istream)
-                Utils::closeFile(m_istream);
+                FileUtils::closeFile(m_istream);
         }
 
+        operator std::istream& ()
+        { return *m_istream; }
+
+        bool isOpen() const
+        {
+            return m_istream && m_istream->good();
+        }
+
+    protected:
         std::istream *m_istream;
     };
+    using LasStreamPtr = std::unique_ptr<LasStreamIf>;
 
     friend class NitfReader;
 public:
@@ -96,9 +106,7 @@ public:
     point_count_t getNumPoints() const;
 
 protected:
-    virtual void createStream();
-
-    std::unique_ptr<LasStreamIf> m_streamIf;
+    virtual LasStreamPtr createStream();
 
 private:
     virtual void addArgs(ProgramArgs& args);
@@ -110,18 +118,19 @@ private:
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual bool processOne(PointRef& point);
     virtual void done(PointTableRef table);
-    virtual bool eof();
 
-    void handleCompressionOption();
     void setSrs(MetadataNode& m);
     void readExtraBytesVlr();
     void extractHeaderMetadata(MetadataNode& forward, MetadataNode& m);
     void extractVlrMetadata(MetadataNode& forward, MetadataNode& m);
-    void loadPoint(PointRef& point, char *buf, size_t bufsize);
-    void loadPointV10(PointRef& point, char *buf, size_t bufsize);
-    void loadPointV14(PointRef& point, char *buf, size_t bufsize);
+    void loadPointV10(PointRef& point, const char *buf, size_t bufsize);
+    void loadPointV14(PointRef& point, const char *buf, size_t bufsize);
     void loadExtraDims(LeExtractor& istream, PointRef& data);
-    point_count_t readFileBlock(std::vector<char>& buf, point_count_t maxPoints);
+
+    void tryLoadRemote();
+    bool eof();
+    void queueNextCompressedChunk();
+    void queueNextStandardChunk();
 
     const las::Header& lasHeader() const;
 
