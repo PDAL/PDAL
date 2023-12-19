@@ -210,9 +210,7 @@ TEST(AssignFilterTest, test_condition)
     fo.add("condition", "Intensity[260:260]");
     fo.add("assignment", "PointSourceId[:]=6");
     **/
-    //fo.add("value", "PointSourceId = foo(6) where intensity == 260");
-//    fo.add("value", "PointSourceId = foo(6)");
-    fo.add("value", "Z = floor(exp(6+))");
+    fo.add("value", "PointSourceId = 6 where intensity == 260");
 
     f.setInput(r);
     f.setOptions(fo);
@@ -222,12 +220,6 @@ TEST(AssignFilterTest, test_condition)
     PointViewSet s = f.execute(t);
     PointViewPtr v = *s.begin();
 
-    for (PointId i = 0; i < v->size(); ++i)
-    {
-        double d= v->getFieldAs<double>(Dimension::Id::Z, i);
-        std::cerr << "Got value = " << d << "!\n";
-    }
-    /**
     int ielse = 0;
     int i6 = 0;
     for (PointId i = 0; i < v->size(); ++i)
@@ -241,5 +233,4 @@ TEST(AssignFilterTest, test_condition)
     EXPECT_EQ(i6, 3);
     EXPECT_EQ(v->size(), 10u);
     EXPECT_EQ(ielse, 7);
-    **/
 }

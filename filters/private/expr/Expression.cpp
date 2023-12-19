@@ -347,10 +347,7 @@ Utils::StatusWithReason VarNode::prepare(PointLayoutPtr l)
 {
     m_id = l->findDim(m_name);
     if (m_id == Dimension::Id::Unknown)
-{
-std::cerr << "Unknown dimension!\n";
         return { -1, "Unknown dimension '" + m_name + "' in assignment." };
-}
     return true;
 }
 

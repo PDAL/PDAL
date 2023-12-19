@@ -12,10 +12,7 @@ bool MathParser::expression(Expression& expr)
 {
     // Only success if we've properly parsed the expression AND we're add the end of
     // a math expression.
-//    return addexpr(expr) && checkEnd();
-bool status = addexpr(expr) && checkEnd();
-std::cerr << "Expr = " << expr.print() << "\n";;
-return status;
+    return addexpr(expr) && checkEnd();
 }
 
 bool MathParser::addexpr(Expression& expr)
@@ -194,7 +191,6 @@ bool MathParser::function(Expression& expr)
 
     if (!addexpr(expr))
     {
-std::cerr << "Current error = " << error() << "!\n";
         setError("Expecting expression following '" + name + "('.");
         return false;
     }

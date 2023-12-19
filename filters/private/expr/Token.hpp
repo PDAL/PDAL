@@ -1,7 +1,6 @@
-
 #pragma once
 
-#include <string>
+#include <pdal/util/Utils.hpp>
 
 namespace pdal
 {
@@ -103,7 +102,7 @@ public:
     {
         bool match = (m_type == other.m_type);
         if (match && m_type == TokenType::Identifier && !sval().empty())
-            match = (sval() == other.sval());
+            match = Utils::iequals(sval(), other.sval());
         return match;
     }
 
