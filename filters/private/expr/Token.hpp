@@ -62,8 +62,16 @@ public:
             std::string::size_type end) :
         m_type(type), m_start(start), m_end(end)
     {}
+
+    Token(TokenType type, const std::string& sval) : m_type(type), m_start(0), m_end(0)
+    {
+        m_val.s = sval;
+        m_val.d = 0;
+    }
+
     Token(TokenType type) : m_type(type), m_start(0), m_end(0)
     {}
+
     Token() : m_type(TokenType::Error), m_start(0), m_end(0)
     {}
 
@@ -92,13 +100,18 @@ public:
     { return m_type == type; }
 
     bool operator == (const Token& other) const
-    { return m_type == other.m_type; }
+    {
+        bool match = (m_type == other.m_type);
+        if (match && m_type == TokenType::Identifier && !sval().empty())
+            match = (sval() == other.sval());
+        return match;
+    }
 
     bool operator != (TokenType type) const
     { return m_type != type; }
 
     bool operator != (const Token& other) const
-    { return m_type != other.m_type; }
+    { return !(*this == other); }
 
 private:
     TokenType m_type;
