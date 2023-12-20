@@ -167,7 +167,6 @@ bool MathParser::primary(Expression& expr)
 
 bool MathParser::function(Expression& expr)
 {
-    using namespace std;
     static const std::vector<Func1> funcs {
         { "floor", ::floor },
         { "ceil", ::ceil },
