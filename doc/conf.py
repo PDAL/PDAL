@@ -154,7 +154,8 @@ html_context = {
   'theme_vcs_pageview_mode': 'edit',
   'github_user': 'PDAL',
   'github_repo': 'PDAL',
-  'github_version': '/master/doc/'
+  'github_version': 'master',
+  'conf_py_path': '/doc/'
 }
 
 html_theme_options = {
