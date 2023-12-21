@@ -31,8 +31,7 @@
 // #                                                                                     #
 // #######################################################################################
 
-#ifndef _POINT_CLOUD_H_
-#define _POINT_CLOUD_H_
+#pragma once
 
 #include <vector>
 
@@ -58,6 +57,3 @@ public:
 };
 
 }
-
-
-#endif // ifndef _POINT_CLOUD_H_

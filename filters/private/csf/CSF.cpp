@@ -31,6 +31,7 @@ CSF::CSF(int index) {
     params.bSloopSmooth     = true;
     params.time_step        = 0.65;
     params.class_threshold  = 0.5;
+    params.height_threshold  = 0.3;
     params.cloth_resolution = 1;
     params.rigidness        = 3;
     params.interations      = 500;
@@ -42,6 +43,7 @@ CSF::CSF() {
     params.bSloopSmooth     = true;
     params.time_step        = 0.65;
     params.class_threshold  = 0.5;
+    params.height_threshold  = 0.3;
     params.cloth_resolution = 1;
     params.rigidness        = 3;
     params.interations      = 500;
@@ -151,7 +153,7 @@ void CSF::do_filtering(std::vector<int>& groundIndexes,
         height_num,
         params.cloth_resolution,
         params.cloth_resolution,
-        0.3,
+        params.height_threshold,
         9999,
         params.rigidness,
         params.time_step,

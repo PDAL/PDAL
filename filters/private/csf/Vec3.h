@@ -15,9 +15,7 @@
 // limitations under the License.
 // ======================================================================================
 
-#ifndef _VEC3_H_
-#define _VEC3_H_
-
+#pragma once
 
 #include <cmath>
 #include <string>
@@ -88,6 +86,3 @@ public:
         return f[0] * v.f[0] + f[1] * v.f[1] + f[2] * v.f[2];
     }
 };
-
-
-#endif // ifndef _VEC3_H_

@@ -44,6 +44,9 @@ returns
 threshold
   Classification threshold. [Default: **0.5**]
 
+hdiff
+  Height difference threshold. [Default: **0.5**]
+
 smooth
   Perform slope post-processing? [Default: **true**]
 

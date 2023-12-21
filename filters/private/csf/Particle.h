@@ -15,8 +15,7 @@
 // limitations under the License.
 // ======================================================================================
 
-#ifndef _PARTICLE_H_
-#define _PARTICLE_H_
+#pragma once
 
 #include "Vec3.h"
 #include <vector>
@@ -149,6 +148,3 @@ public:
     //    cout << s << ": " << this->getPos().f[0] << " movable:  " << this->movable << endl;
     //}
 };
-
-
-#endif // ifndef _PARTICLE_H_
