@@ -234,6 +234,7 @@ public:
     virtual Utils::StatusWithReason prepare(PointLayoutPtr l);
     virtual Result eval(PointRef& p) const;
     Dimension::Id eval() const;
+    inline std::string const& name() const { return m_name; }
 
 private:
     std::string m_name;
