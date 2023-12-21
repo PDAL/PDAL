@@ -3,6 +3,7 @@
 #include <stack>
 #include <string>
 #include <memory>
+#include <functional>
 
 #include <pdal/Dimension.hpp>
 #include <pdal/PointLayout.hpp>
@@ -32,6 +33,7 @@ enum class NodeType
     Negative,
     Value,
     Identifier,
+    Function,
     None
 };
 
@@ -52,6 +54,17 @@ struct Result
     double m_dval;
     bool m_bval;
     Type m_type;
+};
+
+// Currently all we deal with is a function that takes a single double argument and returns
+// a double.
+struct Func1
+{
+    using Ptr = double(*)(double);
+//    using Ptr = std::function<double(double)>;
+
+    std::string name;
+    Ptr function;
 };
 
 class Node
@@ -111,6 +124,21 @@ public:
 private:
     NodePtr m_left;
     NodePtr m_right;
+};
+
+// We currently only support a couple of single-argument functions.
+class FuncNode : public ValueNode
+{
+public:
+    FuncNode(NodeType type, Func1 func, NodePtr sub);
+
+    virtual std::string print() const;
+    virtual Utils::StatusWithReason prepare(PointLayoutPtr l);
+    virtual Result eval(PointRef& p) const;
+
+private:
+    Func1 m_func;
+    NodePtr m_sub;
 };
 
 class UnMathNode : public ValueNode

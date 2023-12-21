@@ -17,8 +17,6 @@ dependencies:
   - mamba
   - conda-build
   - arrow-cpp
-  - mkl  # [win]
-  - blas  # [win]
   - compilers
   - ninja
   - cmake

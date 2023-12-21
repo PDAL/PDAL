@@ -173,7 +173,28 @@ Result BoolNode::eval(PointRef& p) const
     }
     assert(false);
     return false;
+}
 
+//
+// FuncNode
+//
+FuncNode::FuncNode(NodeType type, Func1 func, NodePtr sub) :
+    ValueNode(type), m_func(func), m_sub(std::move(sub))
+{}
+
+Utils::StatusWithReason FuncNode::prepare(PointLayoutPtr l)
+{
+    return m_sub->prepare(l);
+}
+
+Result FuncNode::eval(PointRef& p) const
+{
+    return m_func.function(m_sub->eval(p).m_dval);
+}
+
+std::string FuncNode::print() const
+{
+    return m_func.name + "(" + m_sub->print() + ")";
 }
 
 //

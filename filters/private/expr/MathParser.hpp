@@ -10,8 +10,7 @@ namespace expr
 class MathParser : public BaseParser
 {
 public:
-    MathParser(Lexer& lexer) : BaseParser(lexer)
-    {}
+    using BaseParser::BaseParser;
 
     bool expression(Expression& expr);
 
@@ -22,6 +21,7 @@ protected:
     bool uminus(Expression& expr);
     bool primary(Expression& expr);
     bool parexpr(Expression& expr);
+    bool function(Expression& expr);
 };
 
 } // namespace expr
