@@ -33,8 +33,8 @@
 
 
 // cloth simulation filter for airborne lidar filtering
-#ifndef _CSF_H_
-#define _CSF_H_
+#pragma once
+
 #include <vector>
 #include <string>
 #include "point_cloud.h"
@@ -47,6 +47,7 @@ struct Params {
     bool bSloopSmooth;
     double time_step;
     double class_threshold;
+    double height_threshold;
     double cloth_resolution;
     int rigidness;
     int interations;
@@ -127,5 +128,3 @@ public:
     Params params;
     int index;
 };
-
-#endif // ifndef _CSF_H_
