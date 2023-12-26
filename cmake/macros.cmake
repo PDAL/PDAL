@@ -228,9 +228,9 @@ macro(PDAL_ADD_TEST _name)
     # https://github.com/PDAL/PDAL/issues/840
     if (WIN32)
         set_property(TEST ${_name} PROPERTY ENVIRONMENT
-            "PDAL_DRIVER_PATH=$CMAKE_RUNTIME_OUTPUT_DIRECTORY")
+            "PDAL_DRIVER_PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
     else()
         set_property(TEST ${_name} PROPERTY ENVIRONMENT
-            "PDAL_DRIVER_PATH=$CMAKE_LIBRARY_OUTPUT_DIRECTORY")
+            "PDAL_DRIVER_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
     endif()
 endmacro(PDAL_ADD_TEST)
