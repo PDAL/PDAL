@@ -46,19 +46,26 @@ set(PDAL_TEST_SUPPORT_OBJS pdal_test_support)
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 
-set(PDAL_OUTPUT_LIB_DIR "${PDAL_BINARY_DIR}/${PDAL_LIB_INSTALL_DIR}")
-set(PDAL_OUTPUT_BIN_DIR "${PDAL_BINARY_DIR}/${PDAL_BIN_INSTALL_DIR}")
+set(PDAL_OUTPUT_LIB_DIR "${PROJECT_BINARY_DIR}/lib")
+set(PDAL_OUTPUT_BIN_DIR "${PROJECT_BINARY_DIR}/bin")
+
+
+if (NOT CMAKE_LIBRARY_OUTPUT_DIRECTORY)
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
+endif()
+
+if (NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
+endif()
 
 # allow override of PDAL_PLUGIN_INSTALL_PATH path
 if (NOT PDAL_PLUGIN_INSTALL_PATH)
     if (WIN32)
-        set(PDAL_PLUGIN_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}/${PDAL_BIN_INSTALL_DIR}" CACHE PATH "PDAL Plugin install location")
+        set(PDAL_PLUGIN_INSTALL_PATH "${CMAKE_INSTALL_BINDIR}" CACHE PATH "PDAL Plugin install location")
     else()
-        set(PDAL_PLUGIN_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}/${PDAL_LIB_INSTALL_DIR}" CACHE PATH "PDAL Plugin install location")
+        set(PDAL_PLUGIN_INSTALL_PATH "${CMAKE_INSTALL_LIBDIR}" CACHE PATH "PDAL Plugin install location")
     endif()
 endif()
-file(MAKE_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
-file(MAKE_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
 
 include(${PDAL_CMAKE_DIR}/rpath.cmake)
 
@@ -76,13 +83,6 @@ if(WIN32)
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CMAKE_BUILD_TYPE} "${PDAL_OUTPUT_BIN_DIR}" )
 endif(WIN32)
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
-if(WIN32)
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
-else()
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
-endif()
 
 # Choose package components
 
@@ -254,6 +254,22 @@ target_link_libraries(${PDAL_LIB_NAME}
         ${PDAL_LIBDIR}
         ${WINSOCK_LIBRARY}
 )
+
+#
+# Allow downstream cmake projects to find PDAL header files without
+# being explicit.
+#
+target_include_directories(${PDAL_LIB_NAME}
+    INTERFACE
+        $<INSTALL_INTERFACE:include>)
+
+if(WIN32)
+    target_compile_definitions(${PDAL_LIB_NAME}
+        PUBLIC
+            PDAL_DLL_EXPORT=1
+    )
+endif(WIN32)
+
 set_target_properties(${PDAL_LIB_NAME} PROPERTIES
     VERSION ${PDAL_BUILD_VERSION}
     SOVERSION ${PDAL_API_VERSION}
@@ -362,13 +378,7 @@ install(
         "${CMAKE_INSTALL_LIBDIR}/cmake/PDAL")
 include(${PDAL_CMAKE_DIR}/config.cmake)
 
-#
-# Allow downstream cmake projects to find PDAL header files without
-# being explicit.
-#
-target_include_directories(${PDAL_LIB_NAME}
-    INTERFACE
-        $<INSTALL_INTERFACE:include>)
+
 
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)
 

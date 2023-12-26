@@ -33,7 +33,7 @@ else()
     )
 
     if (WITH_TESTS)
-        PDAL_ADD_TEST(icetest
+        PDAL_ADD_TEST(pdal_io_icebridge_reader_test
             FILES test/IcebridgeReaderTest.cpp
             LINK_WITH ${libname})
     endif()
