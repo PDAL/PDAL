@@ -198,6 +198,11 @@ TEST_F(TileDBReaderTest, read)
     options.add("array_name", data_path);
 
     tiledb::Array array(ctx, data_path, TILEDB_READ);
+
+    tiledb_datatype_t v_type = (tiledb_datatype_t)std::numeric_limits<int32_t>::max();
+    EXPECT_TRUE(array.has_metadata("dataset_type", &v_type));
+    EXPECT_EQ(v_type, TILEDB_STRING_UTF8);
+
     tiledb::Query q(ctx, array, TILEDB_READ);
 
     std::vector<double> xs(count);
