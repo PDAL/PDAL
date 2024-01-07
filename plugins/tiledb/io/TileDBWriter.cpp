@@ -574,6 +574,9 @@ void TileDBWriter::done(PointTableRef table)
             std::string m = pdal::Utils::toJSON(node);
             m_array->put_metadata("_pdal", TILEDB_UINT8, m.length() + 1,
                                   m.c_str());
+            // add tiledb pointcloud tag
+            std::string datasetType = "pointcloud";
+            m_array->put_metadata("dataset_type", TILEDB_STRING_UTF8, datasetType.size(), datasetType.data());
         }
         m_array->close();
     }
