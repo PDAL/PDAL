@@ -86,12 +86,12 @@ void CopcWriter::addArgs(ProgramArgs& args)
     std::time_t now;
     std::time(&now);
     uint16_t year = 1900;
-    uint16_t doy = 0;
+    uint16_t doy = 1;
     std::tm* ptm = std::gmtime(&now);
     if (ptm)
     {
         year += ptm->tm_year;
-        doy = ptm->tm_yday;
+        doy += ptm->tm_yday;
     }
 
     args.add("filename", "Output filename.", b->opts.filename);
