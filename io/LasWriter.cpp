@@ -126,12 +126,12 @@ void LasWriter::addArgs(ProgramArgs& args)
     std::time(&now);
 
     uint16_t year = 1900;
-    uint16_t doy = 0;
-    std::tm* ptm = std::gmtime(&now);
+    uint16_t doy = 1;
+    std::tm *ptm = std::gmtime(&now);
     if (ptm)
     {
         year += ptm->tm_year;
-        doy = 0;
+        doy += ptm->tm_yday;
     }
 
     args.add("filename", "Output filename", m_filename).setPositional();
@@ -945,7 +945,7 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
         uint8_t returnbits = returnNumber | (numberOfReturns << 4);
         ostream << returnbits;
 
-        uint8_t otherbits = 
+        uint8_t otherbits =
             ((synthetic & 0x01) << 0) |
             ((keypoint & 0x01) << 1) |
             ((withheld & 0x01) << 2) |
@@ -1002,9 +1002,9 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
         }
 
         uint8_t classificationWithFlags =
-            (classification & 0x1F) | 
-            ((synthetic & 0x01) << 5) | 
-            ((keypoint & 0x01) << 6) | 
+            (classification & 0x1F) |
+            ((synthetic & 0x01) << 5) |
+            ((keypoint & 0x01) << 6) |
             ((withheld & 0x01) << 7);
 
         ostream << classificationWithFlags;
