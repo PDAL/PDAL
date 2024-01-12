@@ -374,22 +374,17 @@ bool Item::filterBounds(BOX3D bounds, SpatialReference srs)
     if (!srs.empty() && srs != stacSrs)
     {
         userPolygon.setSpatialReference(srs);
-        auto status = stacPolygon.transform(srs);
-        if (!status)
-            throw stac_error(m_id, "item", status.what());
     }
     else
     {
+        // Look for proj:epsg, then proj:projjson, then proj:wkt2, and if none
+        // of those exist fall back to 4326 as the default srs
         NL::json props = stacValue(m_json, "properties");
         try
         {
             int projepsg = jsonValue(props, "proj:epsg");
             const SpatialReference srs("EPSG:" + std::to_string(projepsg));
             userPolygon.setSpatialReference(srs);
-
-            auto status = stacPolygon.transform(srs);
-            if (!status)
-                throw stac_error(m_id, "item", status.what());
         }
         catch (const std::exception& e)
         {
@@ -398,17 +393,26 @@ bool Item::filterBounds(BOX3D bounds, SpatialReference srs)
                 NL::json projjson = jsonValue(props, "proj:projjson");
                 const SpatialReference srs(projjson.dump());
                 userPolygon.setSpatialReference(srs);
-
-
-                auto status = stacPolygon.transform(srs);
-                if (!status)
-                    throw stac_error(m_id, "item", status.what());
             }
             catch (const std::exception& e)
             {
-                userPolygon.setSpatialReference("EPSG:4326");
+                try
+                {
+                    std::string wkt = jsonValue(props, "proj:wkt2");
+                    const SpatialReference srs(wkt);
+                    userPolygon.setSpatialReference(srs);
+                }
+                catch(const std::exception& e)
+                {
+                    userPolygon.setSpatialReference("EPSG:4326");
+                }
             }
         }
+
+        const SpatialReference srs(userPolygon.getSpatialReference());
+        if (srs != stacPolygon.getSpatialReference())
+            stacPolygon.transform(srs);
+
     }
 
     if (!userPolygon.valid())
