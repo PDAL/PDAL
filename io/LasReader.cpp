@@ -135,6 +135,7 @@ struct LasReader::Options
     std::string compression;
     bool useEbVlr;
     StringList ignoreVLROption;
+    bool ignoreMissingVLRs;
     bool fixNames;
     PointId start;
     bool nosrs;
@@ -187,6 +188,8 @@ void LasReader::addArgs(ProgramArgs& args)
     args.add("compression", "Decompressor to use", d->opts.compression, "EITHER");
     args.add("use_eb_vlr", "Use extra bytes VLR for 1.0 - 1.3 files", d->opts.useEbVlr);
     args.add("ignore_vlr", "VLR userid/recordid to ignore", d->opts.ignoreVLROption );
+    args.add("ignore_missing_vlrs", "Ignore any missing VLRs rather than throwing an error",
+             d->opts.ignoreMissingVLRs);
     args.add("start", "Point at which reading should start (0-indexed).", d->opts.start);
     args.add("fix_dims", "Make invalid dimension names valid by changing "
         "invalid characters to '_'", d->opts.fixNames, true);
@@ -369,12 +372,21 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 
         stream.read((char *)vlrHeaderBuf, las::Vlr::HeaderSize);
         if (stream.gcount() != las::Vlr::HeaderSize)
-            throwError("Couldn't read VLR " + std::to_string(i + 1) + ". End of file reached.");
+        {
+            if (d->opts.ignoreMissingVLRs)
+                break;
+            throwError("Couldn't read VLR " + std::to_string(i + 1) +
+                       ". End of file reached.");
+        }
         vlr.fillHeader(vlrHeaderBuf);
         if ((uint64_t)stream.tellg() + vlr.promisedDataSize > d->header.pointOffset)
-            throwError("VLR " + std::to_string(i + 1) +
-                "(" + vlr.userId + "/" + std::to_string(vlr.recordId) + ") "
-                "size too large -- flows into point data.");
+        {
+            if (d->opts.ignoreMissingVLRs)
+                break;
+            throwError("VLR " + std::to_string(i + 1) + "(" + vlr.userId + "/" +
+                       std::to_string(vlr.recordId) + ") "
+                       "size too large -- flows into point data.");
+        }
         if (las::shouldIgnoreVlr(vlr, d->ignoreVlrs))
         {
             stream.seekg(vlr.promisedDataSize, std::ios::cur);
@@ -384,7 +396,12 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
         stream.read(vlr.data(), vlr.promisedDataSize);
 
         if (stream.gcount() != (std::streamsize)vlr.promisedDataSize)
-            throwError("Couldn't read VLR " + std::to_string(i + 1) + ". End of file reached.");
+        {
+            if (d->opts.ignoreMissingVLRs)
+                break;
+            throwError("Couldn't read VLR " + std::to_string(i + 1) +
+                       ". End of file reached.");
+        }
         d->vlrs.push_back(std::move(vlr));
     }
 
