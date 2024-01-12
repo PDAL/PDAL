@@ -403,7 +403,7 @@ void StacReader::initializeArgs()
             m_p->m_itemFilters->bounds = m_args->bounds.to3d();
         }
 
-        if (!userSrs.valid())
+        if (userSrs.valid())
             m_p->m_itemFilters->srs = m_args->bounds.spatialReference();
     }
 

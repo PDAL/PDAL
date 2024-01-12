@@ -379,7 +379,39 @@ bool Item::filterBounds(BOX3D bounds, SpatialReference srs)
             throw stac_error(m_id, "item", status.what());
     }
     else
-        userPolygon.setSpatialReference("EPSG:4326");
+    {
+        NL::json props = stacValue(m_json, "properties");
+        try
+        {
+            int projepsg = jsonValue(props, "proj:epsg");
+            const SpatialReference srs("EPSG:" + std::to_string(projepsg));
+            userPolygon.setSpatialReference(srs);
+
+            auto status = stacPolygon.transform(srs);
+            if (!status)
+                throw stac_error(m_id, "item", status.what());
+        }
+        catch (const std::exception& e)
+        {
+            try
+            {
+                std::cout << e.what() << std::endl;
+                NL::json projjson = jsonValue(props, "proj:projjson");
+                const SpatialReference srs(projjson.dump());
+                userPolygon.setSpatialReference(srs);
+
+
+                auto status = stacPolygon.transform(srs);
+                if (!status)
+                    throw stac_error(m_id, "item", status.what());
+            }
+            catch (const std::exception& e)
+            {
+                std::cout << e.what() << std::endl;
+                userPolygon.setSpatialReference("EPSG:4326");
+            }
+        }
+    }
 
     if (!userPolygon.valid())
         throw pdal_error("User input polygon is invalid, " + bounds.toBox());
