@@ -395,7 +395,6 @@ bool Item::filterBounds(BOX3D bounds, SpatialReference srs)
         {
             try
             {
-                std::cout << e.what() << std::endl;
                 NL::json projjson = jsonValue(props, "proj:projjson");
                 const SpatialReference srs(projjson.dump());
                 userPolygon.setSpatialReference(srs);
@@ -407,7 +406,6 @@ bool Item::filterBounds(BOX3D bounds, SpatialReference srs)
             }
             catch (const std::exception& e)
             {
-                std::cout << e.what() << std::endl;
                 userPolygon.setSpatialReference("EPSG:4326");
             }
         }
