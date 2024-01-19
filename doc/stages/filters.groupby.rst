@@ -26,6 +26,9 @@ only points of a single ``Classification``.
       "output_#.las"
   ]
 
+.. note::
+   By default the groups are ordered according to the order of first occurance within the input. To change this, use ``filters.sort`` first to order the points according to ``dimension``.
+
 Options
 -------
 
