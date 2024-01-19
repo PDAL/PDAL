@@ -598,6 +598,34 @@ TEST(LasReaderTest, IgnoreVLRs)
     }
 }
 
+TEST(LasReaderTest, IgnoreBadVLRs)
+{
+    PointTable table;
+
+    Options readOps;
+    readOps.add("filename", Support::datapath("las/bad_vlr_count.las"));
+    readOps.add("ignore_missing_vlrs", true);
+    LasReader reader;
+    reader.setOptions(readOps);
+
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+
+    // First two VLRs are SRS info, the third one 
+    // doesn't exist, but we want to ignore that.
+    MetadataNode root = reader.getMetadata();
+    for (size_t i = 2; i < 3; ++i)
+    {
+        std::string name("vlr_");
+        name += std::to_string(i);
+        MetadataNode m = root.findChild(name);
+        EXPECT_FALSE(!m.empty()) << "No node " << i;
+        m = m.findChild("data");
+        EXPECT_FALSE(!m.empty()) << "No value for node " << i;
+    }
+}
+
+
 TEST(LasReaderTest, SyntheticPoints)
 {
     using namespace Dimension;
