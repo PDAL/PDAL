@@ -62,11 +62,9 @@ private:
 
     std::unique_ptr<GeomDistanceArgs> m_args;
 
-    virtual void ready(PointTableRef table) override;
     virtual void addArgs(ProgramArgs& args) override;
     virtual void addDimensions(PointLayoutPtr layout) override;
     virtual void prepared(PointTableRef table) override;
-    virtual PointViewSet run(PointViewPtr view) override;
     virtual bool processOne(PointRef& point) override;
 
     GeomDistanceFilter& operator=(const GeomDistanceFilter&); // not implemented

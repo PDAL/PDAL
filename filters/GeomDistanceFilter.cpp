@@ -96,17 +96,13 @@ void GeomDistanceFilter::addArgs(ProgramArgs& args)
     args.add("ring", "Compare edges (demote polygons to linearrings)", m_args->m_doRingMode, false);
     args.add("ogr", "OGR filter geometries", m_args->m_ogr);
 
-}
-
-void GeomDistanceFilter::ready(PointTableRef table)
-{
     if (!m_args->m_ogr.is_null())
     {
         std::vector<Polygon> polys = gdal::getPolygons(m_args->m_ogr);
         if (!polys.size())
             throwError("No polygons were selected from 'ogr'!");
         m_args->m_geometry = polys[0];
-        log()->get(LogLevel::Debug) << "First polygon selected from 'ogr' data" << std::endl;
+        // log()->get(LogLevel::Debug) << "First polygon selected from 'ogr' data" << std::endl;
 
     }
 
@@ -140,25 +136,6 @@ bool GeomDistanceFilter::processOne(PointRef& point)
     point.setField(m_args->m_dim, distance);
 
     return true;
-}
-
-PointViewSet GeomDistanceFilter::run(PointViewPtr inView)
-{
-    PointViewSet viewSet;
-    if (!inView->size())
-        return viewSet;
-
-    PointViewPtr outView = inView->makeNew();
-
-    for (PointId i = 0; i < inView->size(); ++i)
-    {
-        PointRef point = inView->point(i);
-        if (processOne(point))
-            outView->appendPoint(*inView, i);
-    }
-
-    viewSet.insert(outView);
-    return viewSet;
 }
 
 
