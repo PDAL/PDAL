@@ -123,6 +123,16 @@ void GeomDistanceFilter::prepared(PointTableRef table)
 }
 
 
+void GeomDistanceFilter::filter(PointView& view)
+{
+    PointRef point = view.point(0);
+    for (PointId idx = 0; idx < view.size(); ++idx)
+    {
+        point.setPointId(idx);
+        processOne(point);
+    }
+}
+
 bool GeomDistanceFilter::processOne(PointRef& point)
 {
     static std::vector<double> data;

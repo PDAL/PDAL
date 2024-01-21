@@ -63,6 +63,7 @@ private:
     std::unique_ptr<GeomDistanceArgs> m_args;
 
     virtual void addArgs(ProgramArgs& args) override;
+    virtual void filter(PointView& view) override;
     virtual void addDimensions(PointLayoutPtr layout) override;
     virtual void prepared(PointTableRef table) override;
     virtual bool processOne(PointRef& point) override;
