@@ -153,12 +153,14 @@ pipeline
 vlrs
     Add VLRS specified as json. See `VLRs`_ above for details.
 
+a_srs
+    Spatial reference to use to write output.
+
 threads
     Number of threads to use when writing [Default: 10]
 
 enhanced_srs_vlrs
   Write WKT2 and PROJJSON as VLR [Default: false]
-
 
 
 .. include:: writer_opts.rst
