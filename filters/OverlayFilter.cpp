@@ -34,6 +34,7 @@
 
 #include "OverlayFilter.hpp"
 
+#include <thread>
 #include <vector>
 
 #include <ogr_api.h>
@@ -69,6 +70,7 @@ void OverlayFilter::addArgs(ProgramArgs& args)
         "datasource to fetch geometry and attributes", m_query);
     args.add("layer", "Datasource layer to use", m_layer);
     args.add("bounds", "Bounds to limit query using with OGR_L_SetSpatialFilter", m_bounds);
+    args.add("threads", "Number of threads used to run this filter", m_threads, 1);
 }
 
 
@@ -141,6 +143,12 @@ void OverlayFilter::ready(PointTableRef table)
         feature = OGRFeaturePtr(OGR_L_GetNextFeature(m_lyr), featureDeleter);
     }
     while (feature);
+
+    // Required to initialise m_grids, otherwise this will lead to errors when using threading.
+    for (const auto& poly : m_polygons)
+    {
+        poly.geom.contains(42.0, 42.0);
+    }
 }
 
 
@@ -175,13 +183,28 @@ bool OverlayFilter::processOne(PointRef& point)
 
 void OverlayFilter::filter(PointView& view)
 {
-    PointRef point(view, 0);
-    for (PointId id = 0; id < view.size(); ++id)
+    point_count_t nloops = view.size();
+    std::vector<std::thread> threadList(m_threads);
+
+    for (int t = 0; t < m_threads; t++)
     {
-        point.setPointId(id);
-        processOne(point);
+        threadList[t] = std::thread(std::bind(
+            [&](const PointId start, const PointId end) {
+                PointRef point(view, start);
+
+                for (PointId id = start; id < end; id++)
+                {
+                    point.setPointId(id);
+                    processOne(point);
+                }
+            },
+            t * nloops / m_threads,
+            (t + 1) == m_threads ? nloops : (t + 1) * nloops / m_threads));
     }
+
+    for (auto& t : threadList)
+        t.join();
+
 }
 
 } // namespace pdal
-
