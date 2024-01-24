@@ -90,12 +90,9 @@ void GeomDistanceFilter::addArgs(ProgramArgs& args)
     args.add("dimension", "Dimension to create to place distance values", m_args->m_dimName, "distance");
     args.add("ring", "Compare edges (demote polygons to linearrings)", m_args->m_doRingMode, false);
 
-}
-
-void GeomDistanceFilter::ready(PointTableRef table)
-{
     if (m_args->m_doRingMode)
         m_args->m_geometry = m_args->m_geometry.getRing();
+
 }
 
 
@@ -110,6 +107,16 @@ void GeomDistanceFilter::prepared(PointTableRef table)
 }
 
 
+void GeomDistanceFilter::filter(PointView& view)
+{
+    PointRef point = view.point(0);
+    for (PointId idx = 0; idx < view.size(); ++idx)
+    {
+        point.setPointId(idx);
+        processOne(point);
+    }
+}
+
 bool GeomDistanceFilter::processOne(PointRef& point)
 {
     static std::vector<double> data;
@@ -123,25 +130,6 @@ bool GeomDistanceFilter::processOne(PointRef& point)
     point.setField(m_args->m_dim, distance);
 
     return true;
-}
-
-PointViewSet GeomDistanceFilter::run(PointViewPtr inView)
-{
-    PointViewSet viewSet;
-    if (!inView->size())
-        return viewSet;
-
-    PointViewPtr outView = inView->makeNew();
-
-    for (PointId i = 0; i < inView->size(); ++i)
-    {
-        PointRef point = inView->point(i);
-        if (processOne(point))
-            outView->appendPoint(*inView, i);
-    }
-
-    viewSet.insert(outView);
-    return viewSet;
 }
 
 
