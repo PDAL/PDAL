@@ -37,7 +37,6 @@
 #include <pdal/Filter.hpp>
 #include <pdal/Streamable.hpp>
 
-#include <cstdint>
 #include <memory>
 #include <string>
 
@@ -59,7 +58,6 @@ public:
     std::string getName() const override;
 
 private:
-
     std::unique_ptr<GeomDistanceArgs> m_args;
 
     virtual void addArgs(ProgramArgs& args) override;
@@ -68,8 +66,8 @@ private:
     virtual void prepared(PointTableRef table) override;
     virtual bool processOne(PointRef& point) override;
 
-    GeomDistanceFilter& operator=(const GeomDistanceFilter&); // not implemented
-    GeomDistanceFilter(const GeomDistanceFilter&); // not implemented
+    GeomDistanceFilter& operator=(const GeomDistanceFilter&) = delete;
+    GeomDistanceFilter(const GeomDistanceFilter&) = delete;
 };
 
 } // namespace pdal
