@@ -85,6 +85,8 @@ void OverlayFilter::prepared(PointTableRef table)
     m_dim = table.layout()->findDim(m_dimName);
     if (m_dim == Dimension::Id::Unknown)
         throwError("Dimension '" + m_dimName + "' not found.");
+    if (m_threads < 1)
+        throwError("Number of threads should be positive.");
 }
 
 
@@ -144,10 +146,11 @@ void OverlayFilter::ready(PointTableRef table)
     }
     while (feature);
 
-    // Required to initialise m_grids, otherwise this will lead to errors when using threading.
+    // Initialise m_grids, otherwise this will lead to a race condition when
+    // using threading.
     for (const auto& poly : m_polygons)
     {
-        poly.geom.contains(42.0, 42.0);
+        poly.geom.initGrids();
     }
 }
 
@@ -183,7 +186,9 @@ bool OverlayFilter::processOne(PointRef& point)
 
 void OverlayFilter::filter(PointView& view)
 {
-    point_count_t nloops = view.size();
+    point_count_t npoints = view.size();
+    unsigned int chunk_size = npoints / m_threads;
+    if (npoints % m_threads) chunk_size++;
     std::vector<std::thread> threadList(m_threads);
 
     for (int t = 0; t < m_threads; t++)
@@ -198,8 +203,8 @@ void OverlayFilter::filter(PointView& view)
                     processOne(point);
                 }
             },
-            t * nloops / m_threads,
-            (t + 1) == m_threads ? nloops : (t + 1) * nloops / m_threads));
+            t * chunk_size,
+            (t + 1) == m_threads ? npoints : (t + 1) * chunk_size));
     }
 
     for (auto& t : threadList)

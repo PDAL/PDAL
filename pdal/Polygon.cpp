@@ -96,6 +96,11 @@ void Polygon::init()
             "because OGR geometry is not Polygon or MultiPolygon.");
     }
 }
+void Polygon::initGrids() const
+{
+    for (const Polygon& p : polygons())
+        m_pd->m_grids.emplace_back(p.exteriorRing(), p.interiorRings());
+}
 
 
 Polygon::Polygon(const std::string& wkt_or_json, SpatialReference ref) :
@@ -298,8 +303,7 @@ bool Polygon::intersects(const Polygon& p) const
 bool Polygon::contains(double x, double y) const
 {
     if (m_pd->m_grids.empty())
-        for (const Polygon& p : polygons())
-            m_pd->m_grids.emplace_back(p.exteriorRing(), p.interiorRings());
+        initGrids();
     for (auto& g : m_pd->m_grids)
         if (g.inside(x, y))
             return true;
