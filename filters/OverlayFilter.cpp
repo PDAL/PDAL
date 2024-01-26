@@ -187,7 +187,7 @@ bool OverlayFilter::processOne(PointRef& point)
 void OverlayFilter::filter(PointView& view)
 {
     point_count_t npoints = view.size();
-    unsigned int chunk_size = npoints / m_threads;
+    point_count_t chunk_size = npoints / m_threads;
     if (npoints % m_threads) chunk_size++;
     std::vector<std::thread> threadList(m_threads);
 
