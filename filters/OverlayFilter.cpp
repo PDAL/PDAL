@@ -193,7 +193,7 @@ void OverlayFilter::filter(PointView& view)
 
     for (int t = 0; t < m_threads; t++)
     {
-        threadList[t] = std::thread(std::bind(
+        threadList[t] = std::thread(
             [&](const PointId start, const PointId end) {
                 PointRef point(view, start);
 
@@ -204,7 +204,7 @@ void OverlayFilter::filter(PointView& view)
                 }
             },
             t * chunk_size,
-            (t + 1) == m_threads ? npoints : (t + 1) * chunk_size));
+            (t + 1) == m_threads ? npoints : (t + 1) * chunk_size);
     }
 
     for (auto& t : threadList)
