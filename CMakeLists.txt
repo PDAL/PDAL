@@ -374,17 +374,17 @@ feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)
 
 # TODO: move under scripts/bash-completion ?
 if (WITH_COMPLETION)
-    if (IS_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/bash-completion/completions)
+    if (IS_DIRECTORY ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATAROOTDIR}/bash-completion/completions)
         install(
             FILES
                 "${PROJECT_SOURCE_DIR}/scripts/bash-completion/pdal"
             DESTINATION
-                "${CMAKE_INSTALL_DATAROOTDIR}/share/bash-completion/completions")
+                "${CMAKE_INSTALL_DATAROOTDIR}/bash-completion/completions")
     elseif (IS_DIRECTORY /etc/bash_completion.d)
         install(
             FILES
                 "${PROJECT_SOURCE_DIR}/scripts/bash-completion/pdal"
             DESTINATION
-                "${CMAKE_INSTALL_DATAROOTDIR}/etc/bash_completion.d")
+                "${CMAKE_INSTALL_SYSCONFDIR}/bash_completion.d")
     endif()
 endif()
