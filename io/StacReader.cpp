@@ -181,6 +181,7 @@ void StacReader::addArgs(ProgramArgs& args)
 
 void StacReader::addItem(Item& item)
 {
+    log()->get(LogLevel::Debug) << "Selected Item: " << item.id() << std::endl;
     std::string driver = item.driver();
 
     Stage *stage = m_factory.createStage(driver);
@@ -213,7 +214,10 @@ void StacReader::handleItem(NL::json stacJson, std::string itemPath)
     Item item(stacJson, m_filename, *m_p->m_connector,
         m_args->validateSchema);
     if (item.init(*m_p->m_itemFilters, m_args->rawReaderArgs, m_args->schemaUrls))
+    {
+
         addItem(item);
+    }
 }
 
 void StacReader::printErrors(Catalog& c)

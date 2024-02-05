@@ -382,8 +382,8 @@ bool Item::filterBounds(BOX3D bounds, SpatialReference srs)
         NL::json props = stacValue(m_json, "properties");
         try
         {
-            int projepsg = jsonValue(props, "proj:epsg");
-            const SpatialReference srs("EPSG:" + std::to_string(projepsg));
+            std::string wkt = jsonValue(props, "proj:wkt2");
+            const SpatialReference srs(wkt);
             userPolygon.setSpatialReference(srs);
         }
         catch (const std::exception& e)
@@ -398,8 +398,8 @@ bool Item::filterBounds(BOX3D bounds, SpatialReference srs)
             {
                 try
                 {
-                    std::string wkt = jsonValue(props, "proj:wkt2");
-                    const SpatialReference srs(wkt);
+                    int projepsg = jsonValue(props, "proj:epsg");
+                    const SpatialReference srs("EPSG:" + std::to_string(projepsg));
                     userPolygon.setSpatialReference(srs);
                 }
                 catch(const std::exception& e)
