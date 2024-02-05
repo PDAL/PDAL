@@ -161,7 +161,7 @@ Clustering
 
 :ref:`filters.litree`
     Segment and label individual trees. Returns a new dimension ``TreeID`` that
-    indicates the tree that a point belongs to. ``TreeID`` starts at 1, wich
+    indicates the tree that a point belongs to. ``TreeID`` starts at 1, with
     non-tree points given a ``TreeID`` of 0. [Li2012]_.
 
 :ref:`filters.lloydkmeans`
