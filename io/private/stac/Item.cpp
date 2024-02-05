@@ -412,10 +412,10 @@ bool Item::filterBounds(BOX3D bounds, SpatialReference srs)
 
         NL::json props = stacValue(m_json, "properties");
         SpatialReference ref = extractSRS(props);
-        userPolygon.setSpatialReference(srs);
+        userPolygon.setSpatialReference(ref);
 
         const SpatialReference srs(userPolygon.getSpatialReference());
-        if (srs != stacPolygon.getSpatialReference())
+        if (ref != stacPolygon.getSpatialReference())
             stacPolygon.transform(srs);
     }
 
