@@ -71,7 +71,7 @@ public:
 
     struct Filters {
         std::vector<RegEx> ids;
-        BOX3D bounds;
+        SrsBounds bounds;
         SpatialReference srs;
         NL::json properties;
         DatePairs datePairs;
@@ -113,7 +113,7 @@ private:
     bool filterCol(std::vector<RegEx> ids);
     bool filterDates(DatePairs dates);
     bool filterProperties(const NL::json& filterProps);
-    bool filterBounds(BOX3D bounds, SpatialReference srs);
+    bool filterBounds(SrsBounds bounds);
 
 
 };

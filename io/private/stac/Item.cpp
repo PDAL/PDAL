@@ -342,7 +342,7 @@ bool Item::filter(const Filters& filters)
     if (!filterProperties(filters.properties))
         return false;
 
-    if (!filterBounds(filters.bounds, filters.srs))
+    if (!filterBounds(filters.bounds))
         return false;
 
 
@@ -380,7 +380,7 @@ SpatialReference extractSRS(NL::json& props)
     return srs;
 }
 
-bool Item::filterBounds(BOX3D bounds, SpatialReference srs)
+bool Item::filterBounds(SrsBounds bounds)
 {
     if (bounds.empty())
         return true;
@@ -401,26 +401,31 @@ bool Item::filterBounds(BOX3D bounds, SpatialReference srs)
         throw stac_error(m_id, "item",
             "Polygon created from STAC 'geometry' key is invalid");
 
-    Polygon userPolygon(bounds);
-    if (!srs.empty() && srs != stacSrs)
+    // If the user didn't provide an SRS via option, we can only filter
+    // assuming it is 4326. Otherwise, we'll set or polygon's srs to
+    // the bounds as well.
+    BOX2D b3d = bounds.to2d();
+
+    Polygon userPolygon(bounds.to2d());
+    if (bounds.spatialReference().empty())
     {
-        userPolygon.setSpatialReference(srs);
+        userPolygon.setSpatialReference(stacSrs);
+    } else
+    {
+        userPolygon.setSpatialReference(bounds.spatialReference());
     }
-    else
+
+    // If the SRSs don't match, we'll project the STAC Item's boundary
+    // to the same as the SRS given by the bounds and test accordingly
+    if (userPolygon.getSpatialReference() != stacPolygon.getSpatialReference())
     {
-
-
         NL::json props = stacValue(m_json, "properties");
         SpatialReference ref = extractSRS(props);
-        userPolygon.setSpatialReference(ref);
-
-        const SpatialReference srs(userPolygon.getSpatialReference());
-        if (ref != stacPolygon.getSpatialReference())
-            stacPolygon.transform(srs);
+        stacPolygon.transform(ref);
     }
 
     if (!userPolygon.valid())
-        throw pdal_error("User input polygon is invalid, " + bounds.toBox());
+        throw pdal_error("User input polygon is invalid, " + bounds.to2d().toBox());
 
     if (!stacPolygon.disjoint(userPolygon))
         return true;
