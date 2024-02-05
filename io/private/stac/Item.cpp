@@ -349,6 +349,37 @@ bool Item::filter(const Filters& filters)
     return true;
 }
 
+
+SpatialReference extractSRS(NL::json& props)
+{
+
+    bool havePROJJSON = props.contains("proj:projjson");
+    bool haveWKT2 = props.contains("proj:wkt2");
+    bool haveWKT = props.contains("proj:wkt");
+    bool haveEPSG = props.contains("proj:epsg");
+
+    SpatialReference srs;
+    if (havePROJJSON)
+    {
+        NL::json projjson = jsonValue(props, "proj:projjson");
+        srs.set(projjson.dump());
+    } else if (haveWKT2)
+    {
+        std::string wkt = jsonValue(props, "proj:wkt2");
+        srs.set(wkt);
+    } else if (haveEPSG)
+    {
+        int projepsg = jsonValue(props, "proj:epsg");
+        srs.set("EPSG:" + std::to_string(projepsg));
+    } else if (haveWKT)
+    {
+        std::string wkt = jsonValue(props, "proj:wkt");
+        srs.set(wkt);
+    }
+
+    return srs;
+}
+
 bool Item::filterBounds(BOX3D bounds, SpatialReference srs)
 {
     if (bounds.empty())
@@ -377,42 +408,15 @@ bool Item::filterBounds(BOX3D bounds, SpatialReference srs)
     }
     else
     {
-        // Look for proj:epsg, then proj:projjson, then proj:wkt2, and if none
-        // of those exist fall back to 4326 as the default srs
+
+
         NL::json props = stacValue(m_json, "properties");
-        try
-        {
-            std::string wkt = jsonValue(props, "proj:wkt2");
-            const SpatialReference srs(wkt);
-            userPolygon.setSpatialReference(srs);
-        }
-        catch (const std::exception& e)
-        {
-            try
-            {
-                NL::json projjson = jsonValue(props, "proj:projjson");
-                const SpatialReference srs(projjson.dump());
-                userPolygon.setSpatialReference(srs);
-            }
-            catch (const std::exception& e)
-            {
-                try
-                {
-                    int projepsg = jsonValue(props, "proj:epsg");
-                    const SpatialReference srs("EPSG:" + std::to_string(projepsg));
-                    userPolygon.setSpatialReference(srs);
-                }
-                catch(const std::exception& e)
-                {
-                    userPolygon.setSpatialReference("EPSG:4326");
-                }
-            }
-        }
+        SpatialReference ref = extractSRS(props);
+        userPolygon.setSpatialReference(srs);
 
         const SpatialReference srs(userPolygon.getSpatialReference());
         if (srs != stacPolygon.getSpatialReference())
             stacPolygon.transform(srs);
-
     }
 
     if (!userPolygon.valid())
