@@ -13,7 +13,7 @@ set(PDAL_SOLIB_MAJOR 16)
 #
 # Change if there's a new release with no ABI change
 #
-set(PDAL_SOLIB_MINOR 2)
+set(PDAL_SOLIB_MINOR 3)
 #
 # Build number.  Increment for builds within minor versions.  Probably
 # always 0 for PDAL
