@@ -342,14 +342,45 @@ bool Item::filter(const Filters& filters)
     if (!filterProperties(filters.properties))
         return false;
 
-    if (!filterBounds(filters.bounds, filters.srs))
+    if (!filterBounds(filters.bounds))
         return false;
 
 
     return true;
 }
 
-bool Item::filterBounds(BOX3D bounds, SpatialReference srs)
+
+SpatialReference extractSRS(NL::json& props)
+{
+
+    bool havePROJJSON = props.contains("proj:projjson");
+    bool haveWKT2 = props.contains("proj:wkt2");
+    bool haveWKT = props.contains("proj:wkt");
+    bool haveEPSG = props.contains("proj:epsg");
+
+    SpatialReference srs;
+    if (havePROJJSON)
+    {
+        NL::json projjson = jsonValue(props, "proj:projjson");
+        srs.set(projjson.dump());
+    } else if (haveWKT2)
+    {
+        std::string wkt = jsonValue(props, "proj:wkt2");
+        srs.set(wkt);
+    } else if (haveEPSG)
+    {
+        int projepsg = jsonValue(props, "proj:epsg");
+        srs.set("EPSG:" + std::to_string(projepsg));
+    } else if (haveWKT)
+    {
+        std::string wkt = jsonValue(props, "proj:wkt");
+        srs.set(wkt);
+    }
+
+    return srs;
+}
+
+bool Item::filterBounds(SrsBounds bounds)
 {
     if (bounds.empty())
         return true;
@@ -370,19 +401,31 @@ bool Item::filterBounds(BOX3D bounds, SpatialReference srs)
         throw stac_error(m_id, "item",
             "Polygon created from STAC 'geometry' key is invalid");
 
-    Polygon userPolygon(bounds);
-    if (!srs.empty() && srs != stacSrs)
+    // If the user didn't provide an SRS via option, we can only filter
+    // assuming it is 4326. Otherwise, we'll set or polygon's srs to
+    // the bounds as well.
+    BOX2D b3d = bounds.to2d();
+
+    Polygon userPolygon(bounds.to2d());
+    if (bounds.spatialReference().empty())
     {
-        userPolygon.setSpatialReference(srs);
-        auto status = stacPolygon.transform(srs);
-        if (!status)
-            throw stac_error(m_id, "item", status.what());
+        userPolygon.setSpatialReference(stacSrs);
+    } else
+    {
+        userPolygon.setSpatialReference(bounds.spatialReference());
     }
-    else
-        userPolygon.setSpatialReference("EPSG:4326");
+
+    // If the SRSs don't match, we'll project the STAC Item's boundary
+    // to the same as the SRS given by the bounds and test accordingly
+    if (userPolygon.getSpatialReference() != stacPolygon.getSpatialReference())
+    {
+        NL::json props = stacValue(m_json, "properties");
+        SpatialReference ref = extractSRS(props);
+        stacPolygon.transform(ref);
+    }
 
     if (!userPolygon.valid())
-        throw pdal_error("User input polygon is invalid, " + bounds.toBox());
+        throw pdal_error("User input polygon is invalid, " + bounds.to2d().toBox());
 
     if (!stacPolygon.disjoint(userPolygon))
         return true;
