@@ -1,15 +1,23 @@
+# For most projects, this workflow file will not need changing; you simply need
+# to commit it to your repository.
+#
+# You may wish to alter this file to override the set of languages analyzed,
+# or to provide custom queries or build logic.
+#
+# ******** NOTE ********
+# We have attempted to detect the languages in your repository. Please check
+# the `language` matrix defined below to confirm you have the correct set of
+# supported CodeQL languages.
+#
 name: "CodeQL"
 
 on:
   push:
+    branches: [ "master", "2.*-maintenance" ]
   pull_request:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
-  cancel-in-progress: true
-
-permissions:
-  contents: read
+    branches: [ "master", "2.*-maintenance" ]
+  schedule:
+    - cron: '35 7 * * 2'
 
 jobs:
   analyze:
@@ -22,9 +30,12 @@ jobs:
     runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
     timeout-minutes: ${{ (matrix.language == 'swift' && 120) || 360 }}
     permissions:
+      # required for all workflows
+      security-events: write
+
+      # only required for workflows in private repositories
       actions: read
       contents: read
-      security-events: write
 
     strategy:
       fail-fast: false
@@ -37,11 +48,11 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      uses: actions/checkout@v4
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@e8893c57a1f3a2b659b6b55564fdfdbbd2982911 # v3.24.0
+      uses: github/codeql-action/init@v3
       with:
         languages: ${{ matrix.language }}
         # If you wish to specify custom queries, you can do so here or in a config file.
@@ -50,10 +61,6 @@ jobs:
 
         # For more details on CodeQL's query packs, refer to: https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
         # queries: security-extended,security-and-quality
-        config: |
-          query-filters:
-            - exclude:
-                id: cpp/non-https-url
 
     - name: Install dependencies
       run: |
@@ -69,30 +76,6 @@ jobs:
             libxml2-dev \
             libgdal-dev
 
-    # cache the .ccache directory
-    # key it on the runner os, build type, deps, and arch
-    # It's especially important to include arch in the key because we
-    # may get runtime errors with -mavx2 from objects built on a
-    # different architecture.
-    - name: Restore build cache
-      if: matrix.language == 'c-cpp'
-      id: restore-cache
-      uses: actions/cache/restore@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
-      with:
-        path: ${{ github.workspace }}/.ccache
-        key: ${{ matrix.id }}-${{ steps.get-arch.outputs.arch }}-${{ github.ref_name }}-${{ github.run_id }}
-        restore-keys: |
-          ${{ matrix.id }}-${{ steps.get-arch.outputs.arch }}-${{ github.ref_name }}
-          ${{ matrix.id }}-${{ steps.get-arch.outputs.arch }}
-
-    - name: Configure ccache
-      if: matrix.language == 'c-cpp'
-      run: |
-          echo CCACHE_BASEDIR=${{ github.workspace }} >> ${GITHUB_ENV}
-          echo CCACHE_DIR=${{ github.workspace }}/.ccache >> ${GITHUB_ENV}
-          echo CCACHE_MAXSIZE=250M >> ${GITHUB_ENV}
-          ccache -z
-
     - name: Build
       if: matrix.language == 'c-cpp'
       run: |
@@ -101,20 +84,24 @@ jobs:
           cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUSE_CCACHE=YES
           make -j$(nproc)
 
-    - name: Summarize ccache
-      if: matrix.language == 'c-cpp'
-      run: |
-        ccache -s
+    # Autobuild attempts to build any compiled languages (C/C++, C#, Go, Java, or Swift).
+    # If this step fails, then you should remove it and run the build manually (see below)
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v3
 
-    - name: Save build cache
-      if: matrix.language == 'c-cpp'
-      uses: actions/cache/save@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
-      with:
-        path: ${{ github.workspace }}/.ccache
-        key: ${{ steps.restore-cache.outputs.cache-primary-key }}
+    # ℹ️ Command-line programs to run using the OS shell.
+    # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
+
+    #   If the Autobuild fails above, remove it and uncomment the following three lines.
+    #   modify them (or add more) to build your code if your project, please refer to the EXAMPLE below for guidance.
+
+    # - run: |
+    #     echo "Run, Build Application using script"
+    #     ./location_of_script_within_repo/buildscript.sh
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@e8893c57a1f3a2b659b6b55564fdfdbbd2982911 # v3.24.0
+      uses: github/codeql-action/analyze@v3
       with:
         category: "/language:${{matrix.language}}"
+
 
