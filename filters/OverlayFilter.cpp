@@ -204,7 +204,8 @@ void OverlayFilter::filter(PointView& view)
                 }
             },
             t * chunk_size,
-            (t + 1) == m_threads ? npoints : (t + 1) * chunk_size);
+            (t + 1) == m_threads ? npoints : (t + 1) * chunk_size
+        );
     }
 
     for (auto& t : threadList)
