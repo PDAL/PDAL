@@ -51,5 +51,8 @@ Options
 knn
   The number of k nearest neighbors. [Default: 8]
 
+threads
+  The number of threads to use. Only valid in :ref:`standard mode <processing_modes>`. [Default: 1]
+
 .. include:: filter_opts.rst
 
