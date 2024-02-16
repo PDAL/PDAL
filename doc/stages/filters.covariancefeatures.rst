@@ -88,7 +88,7 @@ knn
   [Default: 10]
 
 threads
-  The number of threads used for computing the feature descriptors. [Default: 1]
+  The number of threads to use. Only valid in :ref:`standard mode <processing_modes>`. [Default: 1]
 
 feature_set
   A comma-separated list of individual features or feature presets (e.g.,

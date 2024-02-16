@@ -96,6 +96,7 @@ private:
     Dimension::Id m_dim;
     std::vector<PolyVal> m_polygons;
     BOX2D m_bounds;
+    int m_threads;
 
 };
 

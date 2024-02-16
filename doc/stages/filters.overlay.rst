@@ -101,5 +101,8 @@ _`query`
 layer
   The data source's layer to use. [Default: first layer]
 
+threads
+  The number of threads to use. Only valid in :ref:`standard mode <processing_modes>`. [Default: 1]
+
 .. include:: filter_opts.rst
 

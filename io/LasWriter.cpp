@@ -140,7 +140,8 @@ void LasWriter::addArgs(ProgramArgs& args)
         las::Compression::False);
     args.add("discard_high_return_numbers", "Discard points with out-of-spec "
         "return numbers.", d->opts.discardHighReturnNumbers);
-    args.add("extra_dims", "Dimensions to write above those in point format", d->opts.extraDimSpec);
+    args.add("extra_dims", "List of dimension names to write in addition to those of the "
+        "point format or 'all' for all available dimensions", d->opts.extraDimSpec);
     args.add("forward", "Dimensions to forward from LAS reader", d->opts.forwardSpec);
 
     args.add("filesource_id", "File source ID number.", d->opts.filesourceId,

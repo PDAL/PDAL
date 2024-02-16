@@ -41,6 +41,7 @@
 #include <io/CopcReader.hpp>
 #include <io/CopcWriter.hpp>
 #include <io/LasReader.hpp>
+#include <filters/FerryFilter.hpp>
 
 #include <pdal/PDALUtils.hpp>
 
@@ -210,7 +211,7 @@ TEST(CopcWriterTest, scaling)
 {
     using namespace Dimension;
 
-    const std::string FILENAME(Support::temppath("copc_scaling.las"));
+    const std::string filename(Support::temppath("copc_scaling.las"));
     PointTable table;
 
     table.layout()->registerDims({Id::X, Id::Y, Id::Z});
@@ -224,7 +225,7 @@ TEST(CopcWriterTest, scaling)
     bufferReader.addView(view);
 
     Options writerOps;
-    writerOps.add("filename", FILENAME);
+    writerOps.add("filename", filename);
     writerOps.add("offset_x", "1000000");
     writerOps.add("scale_x", "0.001");
     writerOps.add("offset_y", "5000000");
@@ -240,7 +241,7 @@ TEST(CopcWriterTest, scaling)
     writer.execute(table);
 
     Options readerOps;
-    readerOps.add("filename", FILENAME);
+    readerOps.add("filename", filename);
 
     PointTable readTable;
 
@@ -255,7 +256,76 @@ TEST(CopcWriterTest, scaling)
     EXPECT_NEAR(1406018.497, view->getFieldAs<double>(Id::X, 0), .00001);
     EXPECT_NEAR(4917487.174, view->getFieldAs<double>(Id::Y, 0), .00001);
     EXPECT_NEAR(62.276, view->getFieldAs<double>(Id::Z, 0), .00001);
-    FileUtils::deleteFile(FILENAME);
+    FileUtils::deleteFile(filename);
+}
+
+TEST(CopcWriterTest, extradim)
+{
+    std::string filename(Support::datapath("las/1.2-with-color.las"));
+    std::string outFilename(Support::temppath("copcdims.copc.laz"));
+
+    FileUtils::deleteFile(outFilename);
+
+    auto createFile = [&](const std::string& extraDims)
+    {
+
+        LasReader r;
+
+        Options ro;
+        ro.add("filename", filename);
+
+        r.setOptions(ro);
+
+        // Make Q, R & S as extra dims.
+        FerryFilter f;
+        Options fo;
+        fo.add("dimensions", "X=>Q, Y=>R, Red=>S");
+
+        f.setOptions(fo);
+        f.setInput(r);
+
+        CopcWriter w;
+        Options wo;
+        wo.add("filename", outFilename);
+        wo.add("extra_dims", extraDims);
+
+        w.setOptions(wo);
+        w.setInput(f);
+
+        PointTable t;
+        w.prepare(t);
+        w.execute(t);
+    };
+
+    auto verifyFile = [&](bool q, bool r, bool s) -> bool
+    {
+        LasReader r2;
+        Options r2o;
+        r2o.add("filename", outFilename);
+
+        r2.setOptions(r2o);
+
+        PointTable t2;
+        r2.prepare(t2);
+        PointLayoutPtr layout = t2.layout();
+
+        return ((q == (layout->findDim("Q") != Dimension::Id::Unknown)) &&
+                (r == (layout->findDim("R") != Dimension::Id::Unknown)) &&
+                (s == (layout->findDim("S") != Dimension::Id::Unknown)));
+        FileUtils::deleteFile(outFilename);
+    };
+
+
+    createFile("Q=int32");                                // Q, but no R, S
+    EXPECT_TRUE(verifyFile(true, false, false));
+    createFile("all");                                    // Q, R, and S
+    EXPECT_TRUE(verifyFile(true, true, true));
+    createFile("Q=int32, S=double");                      // Q, and S, no R
+    EXPECT_TRUE(verifyFile(true, false, true));
+
+    EXPECT_THROW(createFile("Q=int32, S"), pdal_error);   // No type for S
+    EXPECT_THROW(createFile("X=int32"), pdal_error);      // Existing dimension.
+    EXPECT_THROW(createFile("Z=int32"), pdal_error);      // Unknown dimension.
 }
 
 } // namespace pdal

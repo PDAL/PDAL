@@ -373,12 +373,12 @@ const Dimension::IdList& pdrfDims(int pdrf)
         // 7
         { D::X, D::Y, D::Z, D::Intensity, D::ReturnNumber, D::NumberOfReturns, D::ScanDirectionFlag,
           D::EdgeOfFlightLine, D::Classification, D::Synthetic, D::KeyPoint, D::Withheld, D::Overlap,
-          D::ScanAngleRank, D::UserData, D::PointSourceId, D::GpsTime, D::ScanChannel, 
+          D::ScanAngleRank, D::UserData, D::PointSourceId, D::GpsTime, D::ScanChannel,
           D::Red, D::Green, D::Blue },
         // 8
         { D::X, D::Y, D::Z, D::Intensity, D::ReturnNumber, D::NumberOfReturns, D::ScanDirectionFlag,
           D::EdgeOfFlightLine, D::Classification, D::Synthetic, D::KeyPoint, D::Withheld, D::Overlap,
-          D::ScanAngleRank, D::UserData, D::PointSourceId, D::GpsTime, D::ScanChannel, 
+          D::ScanAngleRank, D::UserData, D::PointSourceId, D::GpsTime, D::ScanChannel,
           D::Red, D::Green, D::Blue, D::Infrared },
         {},
         {}
@@ -397,6 +397,7 @@ std::string generateSoftwareId()
 }
 
 // Throws las::error. Be sure to catch it.
+// 'allOk' accepts the keyword 'all'.
 std::vector<ExtraDim> parse(const StringList& dimString, bool allOk)
 {
     std::vector<ExtraDim> extraDims;
@@ -540,7 +541,7 @@ void V10BaseLoader::load(PointRef& point, const char *buf, int bufsize)
     uint8_t withheld = (classificationWithFlags >> 7) & 0x01;
     uint8_t overlap = 0;
 
-    // For PDRFs 0-6, there is no dedicated overlap flag and instead a 
+    // For PDRFs 0-6, there is no dedicated overlap flag and instead a
     // Classification of 12 indicates overlap.
     if (classification == 12)
     {
@@ -609,10 +610,10 @@ void V10BaseLoader::pack(const PointRef& point, char *buf, int bufsize)
     uint8_t keypoint = point.getFieldAs<uint8_t>(Dimension::Id::KeyPoint);
     uint8_t withheld = point.getFieldAs<uint8_t>(Dimension::Id::Withheld);
     uint8_t overlap = point.getFieldAs<uint8_t>(Dimension::Id::Overlap);
-    uint8_t classificationWithFlags = 
-        (classification & 0x1F) | 
-        ((synthetic & 0x01) << 5) | 
-        ((keypoint & 0x01) << 6) | 
+    uint8_t classificationWithFlags =
+        (classification & 0x1F) |
+        ((synthetic & 0x01) << 5) |
+        ((keypoint & 0x01) << 6) |
         ((withheld & 0x01) << 7);
 
     int8_t scanAngleRank = point.getFieldAs<int8_t>(Dimension::Id::ScanAngleRank);
@@ -764,7 +765,7 @@ void V14BaseLoader::pack(const PointRef& point, char *buf, int bufsize)
     uint8_t flight = point.getFieldAs<uint8_t>(Dimension::Id::EdgeOfFlightLine);
     uint8_t classification = point.getFieldAs<uint8_t>(Dimension::Id::Classification);
 
-    uint8_t classFlags = 
+    uint8_t classFlags =
         synthetic | (keypoint << 1) | (withheld << 2) | (overlap << 3);
 
     uint8_t flags = (classFlags & 0x0F) |

@@ -181,6 +181,7 @@ void StacReader::addArgs(ProgramArgs& args)
 
 void StacReader::addItem(Item& item)
 {
+    log()->get(LogLevel::Debug) << "Selected Item: " << item.id() << std::endl;
     std::string driver = item.driver();
 
     Stage *stage = m_factory.createStage(driver);
@@ -213,7 +214,10 @@ void StacReader::handleItem(NL::json stacJson, std::string itemPath)
     Item item(stacJson, m_filename, *m_p->m_connector,
         m_args->validateSchema);
     if (item.init(*m_p->m_itemFilters, m_args->rawReaderArgs, m_args->schemaUrls))
+    {
+
         addItem(item);
+    }
 }
 
 void StacReader::printErrors(Catalog& c)
@@ -388,23 +392,7 @@ void StacReader::initializeArgs()
             throw pdal_error("Supplied bounds are not valid.");
         log()->get(LogLevel::Debug) << "Bounds: " << m_args->bounds << std::endl;
 
-        SpatialReference stacSrs("EPSG:4326");
-        SpatialReference userSrs = m_args->bounds.spatialReference();
-        if (m_args->bounds.is2d())
-        {
-            m_p->m_itemFilters->bounds = BOX3D(m_args->bounds.to2d());
-            m_p->m_itemFilters->bounds.minz =
-                (std::numeric_limits<double>::lowest)();
-            m_p->m_itemFilters->bounds.maxz =
-                (std::numeric_limits<double>::max)();
-        }
-        else
-        {
-            m_p->m_itemFilters->bounds = m_args->bounds.to3d();
-        }
-
-        if (!userSrs.valid())
-            m_p->m_itemFilters->srs = m_args->bounds.spatialReference();
+        m_p->m_itemFilters->bounds = m_args->bounds;
     }
 
     if (!m_args->assetNames.empty())

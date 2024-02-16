@@ -91,6 +91,7 @@ struct Options
 {
     std::string filename;
     StringList forwardSpec;
+    StringList extraDimSpec;
     NumHeaderVal<uint16_t, 0, 65535> filesourceId;
     NumHeaderVal<uint16_t, 0, 31> globalEncoding;
     UuidHeaderVal projectId;
