@@ -2007,6 +2007,12 @@ std::string S3::Config::extractBaseUrl(
     const std::string s,
     const std::string region)
 {
+    if (auto p = env("AWS_ENDPOINT_URL"))
+    {
+        const std::string path = *p;
+        return path.back() == '/' ? path : path + '/';
+    }
+
     const json c(s.size() ? json::parse(s) : json());
 
     if (!c.is_null() &&
@@ -2914,7 +2920,7 @@ std::unique_ptr<std::size_t> AZ::tryGetSize(
     if (m_config->hasSasToken())
     {
         Query q = m_config->sasToken();
-        q.insert(std::cbegin(query),std::cend(query));
+        q.insert(std::begin(query), std::end(query));
         res.reset(new Response(http.internalHead(resource.url(), headers, q)));
     }
     else
