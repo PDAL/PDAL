@@ -109,6 +109,11 @@ option(WITH_BACKTRACE
 add_feature_info("Backtrace" WITH_BACKTRACE
     "build with backtrace (Libunwind/Libexecinfo) support")
 
+option(WITH_GCS
+    "Build with Google storage IO support" TRUE)
+add_feature_info("Google Cloud Storage" WITH_GCS
+    "build with OpenSSL and others for Google storage IO support")
+
 #
 # Choose dependent options
 #
