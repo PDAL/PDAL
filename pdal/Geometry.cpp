@@ -151,7 +151,7 @@ void Geometry::update(const std::string& wkt_or_json)
     {
         newGeom = gdal::createFromWkt(wkt_or_json, srs);
         if (!newGeom)
-                throw pdal_error("Unable to create geometry from input WKT");
+            throw pdal_error("Unable to create geometry from input WKT");
 
         if (!newGeom->getSpatialReference() && srs.size())
             newGeom->assignSpatialReference(
@@ -170,7 +170,8 @@ void Geometry::update(const std::string& wkt_or_json)
             newGeom->assignSpatialReference(
                 new OGRSpatialReference(SpatialReference(srs).getWKT().data()));
     }
-
+    if (!newGeom)
+        throw pdal_error("Unable to create geometry from unknown input string.");
 
     m_geom.reset(newGeom);
     modified();
@@ -209,8 +210,9 @@ Utils::StatusWithReason Geometry::transform(SpatialReference out)
 
     const OGRSpatialReference *inSrs = m_geom->getSpatialReference();
     SrsTransform transform(*inSrs, OGRSpatialReference(out.getWKT().data()));
-    if (m_geom->transform(transform.get()) != OGRERR_NONE)
+    if (!transform.valid() || m_geom->transform(transform.get()) != OGRERR_NONE)
         return StatusWithReason(-1, "Geometry::transform() failed.");
+
     modified();
     return StatusWithReason();
 }
