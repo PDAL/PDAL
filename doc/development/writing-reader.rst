@@ -214,3 +214,21 @@ except in a CSV style format, and with the Z values scaled by .001.
 
 .. _`pipeline-myreader.json`: https://github.com/PDAL/PDAL/blob/master/examples/writing-reader/pipeline-myreader.json?raw=true
 .. _`test-reader-input.txt`: https://github.com/PDAL/PDAL/blob/master/examples/writing-reader/test-reader-input.txt?raw=true
+
+Streaming Reader
+-------------------------------------------------------------------------------
+
+Streaming points from a cloud can be accomplished via creating a custom writer
+class that will query the file reader. An example of this, which also shows all
+the member functions that are needed for a writer, is in
+``examples/reading-streamer``.
+
+Fine-grained Streaming Control
+-------------------------------------------------------------------------------
+
+Normally PDAL expects that the points will be streamed from a file without any
+interruption, and be consumed as they arrive. An example showing how to
+pause/resume streaming points is in ``examples/batch-streamer``. 
+
+This example also shows how to use a callback, rather than creating a full
+writer class. All the variables that must be shared are global.
