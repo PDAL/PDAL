@@ -65,7 +65,7 @@ std::string ExpressionFilter::getName() const
 
 struct ExpressionFilter::Args
 {
-    expr::ConditionalExpression m_expression;
+    std::vector<expr::ConditionalExpression> m_expressions;
     Arg *m_whereArg;
 };
 
@@ -82,29 +82,35 @@ void ExpressionFilter::addArgs(ProgramArgs& args)
 {
     m_args->m_whereArg = &args.add("expression",
         "Conditional expression describing points to be passed to this filter",
-        m_args->m_expression).setPositional();
+        m_args->m_expressions).setPositional();
 }
 
 
 void ExpressionFilter::prepared(PointTableRef table)
 {
-     if (!m_args->m_expression.valid())
-     {
-         std::stringstream oss;
-         oss << "The expression '" <<  m_args->m_expression
-             << "' is invalid";
-         throwError(oss.str());
-     }
+    for (auto& expression: m_args->m_expressions)
+    {
+        if (!expression.valid())
+        {
+            std::stringstream oss;
+            oss << "The expression '" <<  expression
+                << "' is invalid";
+            throwError(oss.str());
+        }
 
-     auto status = m_args->m_expression.prepare(table.layout());
+        auto status = expression.prepare(table.layout());
         if (!status)
             throwError("Invalid 'where': " + status.what());
+    }
 }
 
 
 bool ExpressionFilter::processOne(PointRef& point)
 {
-    bool status = m_args->m_expression.eval(point);
+    if (!(m_args->m_expressions.size() == 1))
+        throwError("Streaming of expressions only works with a single expression");
+
+    bool status = m_args->m_expressions[0].eval(point);
     return status;
 }
 
@@ -112,18 +118,34 @@ bool ExpressionFilter::processOne(PointRef& point)
 PointViewSet ExpressionFilter::run(PointViewPtr inView)
 {
     PointViewSet viewSet;
-    PointViewPtr outView = inView->makeNew();
-
     if (!inView->size())
         return viewSet;
 
-    for (PointRef p : *inView)
+    // make a view for each one of our expressions
+    std::map<expr::ConditionalExpression*, PointViewPtr> views;
+    for (expr::ConditionalExpression& expr: m_args->m_expressions)
     {
-        if (processOne(p))
-            outView->appendPoint(*inView, p.pointId());
+        PointViewPtr outView = inView->makeNew();
+        views.insert(std::make_pair(&expr, outView));
     }
 
-    viewSet.insert(outView);
+    // eval our expression across each point for each view.
+    // TODO: make this threaded
+    for(auto& p: views)
+    {
+        auto& expr = p.first;
+        auto& view = p.second;
+        for (PointRef point : *inView)
+        {
+            bool status = expr->eval(point);
+            if (status)
+                view->appendPoint(*inView.get(), point.pointId());
+        }
+    }
+
+    for(auto& p: views)
+        viewSet.insert(p.second);
+
     return viewSet;
 }
 
