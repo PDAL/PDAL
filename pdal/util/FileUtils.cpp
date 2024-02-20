@@ -399,13 +399,8 @@ std::string getDirectory(const std::string& path)
 std::string stem(const std::string& path)
 {
     std::string f = getFilename(path);
-    if (f != "." && f != "..")
-    {
-        std::string::size_type pos = f.find_last_of(".");
-        if (pos != std::string::npos)
-            f = f.substr(0, pos);
-    }
-    return f;
+    fs::path p(f);
+    return p.stem();
 }
 
 

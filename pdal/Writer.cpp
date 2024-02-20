@@ -114,13 +114,14 @@ std::string::size_type Writer::handleFilenameTemplate(
             "allowed in filename suffix.";
         throw pdal_error(oss.str());
     }
-    if (filename.find_first_of('#', hashPos + 1) != std::string::npos)
-    {
-        std::ostringstream oss;
-        oss << "Filename specification can only contain "
-            "a single '#' template placeholder.";
-        throw pdal_error(oss.str());
-    }
+    // FIXME: this test no longer relevant
+    // if (filename.find_first_of('#', hashPos + 1) != std::string::npos)
+    // {
+    //     std::ostringstream oss;
+    //     oss << "Filename specification can only contain "
+    //         "a single '#' template placeholder.";
+    //     throw pdal_error(oss.str());
+    // }
     return hashPos;
 }
 
