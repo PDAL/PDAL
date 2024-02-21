@@ -36,6 +36,7 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Scaling.hpp>
 #include <pdal/Writer.hpp>
+#include <pdal/util/Uuid.hpp>
 
 namespace pdal
 {
@@ -82,9 +83,28 @@ private:
     std::string generateFilename()
     {
         std::string filename = m_filename;
-        if (m_hashPos != std::string::npos) {
-            std::string fileCount = std::to_string(m_filenum++);
-            filename.replace(m_hashPos, 1, fileCount);
+        if (m_hashPos != std::string::npos)
+        {
+            // If we have two #'s, and the string between them
+            // is 'uuid', substitute in a UUID
+            std::string::size_type secondHashPos = filename.find_first_of('#', m_hashPos + 1);
+
+            // one hash is just for the file number increment
+            if (secondHashPos == std::string::npos)
+            {
+                std::string fileCount = std::to_string(m_filenum++);
+                filename.replace(m_hashPos, 1, fileCount);
+            } else
+            {
+                std::string id = filename.substr(m_hashPos, secondHashPos);
+                if (Utils::iequals(id, "UUID"))
+                {
+                    pdal::Uuid u;
+                    filename.replace(m_hashPos, secondHashPos, u.toString());
+                }
+
+            }
+
         }
         return filename;
     }
