@@ -107,7 +107,7 @@ void ExpressionFilter::prepared(PointTableRef table)
 
 bool ExpressionFilter::processOne(PointRef& point)
 {
-    if (!(m_args->m_expressions.size() == 1))
+    if (m_args->m_expressions.size() != 1)
         throwError("Streaming of expressions only works with a single expression");
 
     bool status = m_args->m_expressions[0].eval(point);
@@ -122,29 +122,31 @@ PointViewSet ExpressionFilter::run(PointViewPtr inView)
         return viewSet;
 
     // make a view for each one of our expressions
-    std::map<expr::ConditionalExpression*, PointViewPtr> views;
+
+    std::vector<PointViewPtr> views;
     for (expr::ConditionalExpression& expr: m_args->m_expressions)
     {
         PointViewPtr outView = inView->makeNew();
-        views.insert(std::make_pair(&expr, outView));
+        views.push_back(outView);
     }
 
     // eval our expression across each point for each view.
     // TODO: make this threaded
-    for(auto& p: views)
+    for (PointRef point : *inView)
     {
-        auto& expr = p.first;
-        auto& view = p.second;
-        for (PointRef point : *inView)
+        for (size_t i = 0; i < views.size(); i++)
         {
-            bool status = expr->eval(point);
+            auto& view = views[i];
+            auto& expr = m_args->m_expressions[i];
+
+            bool status = expr.eval(point);
             if (status)
                 view->appendPoint(*inView.get(), point.pointId());
         }
     }
 
-    for(auto& p: views)
-        viewSet.insert(p.second);
+    for(auto& v: views)
+        viewSet.insert(v);
 
     return viewSet;
 }
