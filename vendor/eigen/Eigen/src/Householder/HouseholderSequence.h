@@ -11,7 +11,7 @@
 #ifndef EIGEN_HOUSEHOLDER_SEQUENCE_H
 #define EIGEN_HOUSEHOLDER_SEQUENCE_H
 
-namespace Eigen { 
+namespace Eigen {
 
 /** \ingroup Householder_Module
   * \householder_module
@@ -34,8 +34,8 @@ namespace Eigen {
   * form \f$ H = \prod_{i=0}^{n-1} H_i \f$ where the i-th Householder reflection is \f$ H_i = I - h_i v_i
   * v_i^* \f$. The i-th Householder coefficient \f$ h_i \f$ is a scalar and the i-th Householder vector \f$
   * v_i \f$ is a vector of the form
-  * \f[ 
-  * v_i = [\underbrace{0, \ldots, 0}_{i-1\mbox{ zeros}}, 1, \underbrace{*, \ldots,*}_{n-i\mbox{ arbitrary entries}} ]. 
+  * \f[
+  * v_i = [\underbrace{0, \ldots, 0}_{i-1\mbox{ zeros}}, 1, \underbrace{*, \ldots,*}_{n-i\mbox{ arbitrary entries}} ].
   * \f]
   * The last \f$ n-i \f$ entries of \f$ v_i \f$ are called the essential part of the Householder vector.
   *
@@ -120,7 +120,7 @@ template<typename VectorsType, typename CoeffsType, int Side> class HouseholderS
   : public EigenBase<HouseholderSequence<VectorsType,CoeffsType,Side> >
 {
     typedef typename internal::hseq_side_dependent_impl<VectorsType,CoeffsType,Side>::EssentialVectorType EssentialVectorType;
-  
+
   public:
     enum {
       RowsAtCompileTime = internal::traits<HouseholderSequence>::RowsAtCompileTime,
@@ -198,18 +198,18 @@ template<typename VectorsType, typename CoeffsType, int Side> class HouseholderS
     }
 
     /** \brief Number of rows of transformation viewed as a matrix.
-      * \returns Number of rows 
+      * \returns Number of rows
       * \details This equals the dimension of the space that the transformation acts on.
       */
-    EIGEN_DEVICE_FUNC
-    Index rows() const { return Side==OnTheLeft ? m_vectors.rows() : m_vectors.cols(); }
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
+    Index rows() const EIGEN_NOEXCEPT { return Side==OnTheLeft ? m_vectors.rows() : m_vectors.cols(); }
 
     /** \brief Number of columns of transformation viewed as a matrix.
       * \returns Number of columns
       * \details This equals the dimension of the space that the transformation acts on.
       */
-    EIGEN_DEVICE_FUNC
-    Index cols() const { return rows(); }
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
+    Index cols() const EIGEN_NOEXCEPT { return rows(); }
 
     /** \brief Essential part of a Householder vector.
       * \param[in]  k  Index of Householder reflection
@@ -217,8 +217,8 @@ template<typename VectorsType, typename CoeffsType, int Side> class HouseholderS
       *
       * This function returns the essential part of the Householder vector \f$ v_i \f$. This is a vector of
       * length \f$ n-i \f$ containing the last \f$ n-i \f$ entries of the vector
-      * \f[ 
-      * v_i = [\underbrace{0, \ldots, 0}_{i-1\mbox{ zeros}}, 1, \underbrace{*, \ldots,*}_{n-i\mbox{ arbitrary entries}} ]. 
+      * \f[
+      * v_i = [\underbrace{0, \ldots, 0}_{i-1\mbox{ zeros}}, 1, \underbrace{*, \ldots,*}_{n-i\mbox{ arbitrary entries}} ].
       * \f]
       * The index \f$ i \f$ equals \p k + shift(), corresponding to the k-th column of the matrix \p v
       * passed to the constructor.
@@ -381,7 +381,7 @@ template<typename VectorsType, typename CoeffsType, int Side> class HouseholderS
           Index k = m_reverse ? i : (std::max)(Index(0),end-blockSize);
           Index bs = end-k;
           Index start = k + m_shift;
-          
+
           typedef Block<typename internal::remove_all<VectorsType>::type,Dynamic,Dynamic> SubVectorsType;
           SubVectorsType sub_vecs1(m_vectors.const_cast_derived(), Side==OnTheRight ? k : start,
                                                                    Side==OnTheRight ? start : k,
@@ -519,7 +519,7 @@ typename internal::matrix_type_times_scalar_type<typename VectorsType::Scalar,Ot
 }
 
 /** \ingroup Householder_Module \householder_module
-  * \brief Convenience function for constructing a Householder sequence. 
+  * \brief Convenience function for constructing a Householder sequence.
   * \returns A HouseholderSequence constructed from the specified arguments.
   */
 template<typename VectorsType, typename CoeffsType>
@@ -529,7 +529,7 @@ HouseholderSequence<VectorsType,CoeffsType> householderSequence(const VectorsTyp
 }
 
 /** \ingroup Householder_Module \householder_module
-  * \brief Convenience function for constructing a Householder sequence. 
+  * \brief Convenience function for constructing a Householder sequence.
   * \returns A HouseholderSequence constructed from the specified arguments.
   * \details This function differs from householderSequence() in that the template argument \p OnTheSide of
   * the constructed HouseholderSequence is set to OnTheRight, instead of the default OnTheLeft.

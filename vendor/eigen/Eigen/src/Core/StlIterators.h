@@ -7,6 +7,9 @@
 // Public License v. 2.0. If a copy of the MPL was not distributed
 // with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+#ifndef EIGEN_STLITERATORS_H
+#define EIGEN_STLITERATORS_H
+
 namespace Eigen {
 
 namespace internal {
@@ -30,10 +33,10 @@ public:
   typedef Index difference_type;
   typedef std::random_access_iterator_tag iterator_category;
 
-  indexed_based_stl_iterator_base() : mp_xpr(0), m_index(0) {}
-  indexed_based_stl_iterator_base(XprType& xpr, Index index) : mp_xpr(&xpr), m_index(index) {}
+  indexed_based_stl_iterator_base() EIGEN_NO_THROW : mp_xpr(0), m_index(0) {}
+  indexed_based_stl_iterator_base(XprType& xpr, Index index) EIGEN_NO_THROW : mp_xpr(&xpr), m_index(index) {}
 
-  indexed_based_stl_iterator_base(const non_const_iterator& other)
+  indexed_based_stl_iterator_base(const non_const_iterator& other) EIGEN_NO_THROW
     : mp_xpr(other.mp_xpr), m_index(other.m_index)
   {}
 
@@ -190,17 +193,17 @@ public:
   typedef typename internal::conditional<bool(is_lvalue), value_type&, const value_type&>::type reference;
 
 
-  pointer_based_stl_iterator() : m_ptr(0) {}
-  pointer_based_stl_iterator(XprType& xpr, Index index) : m_incr(xpr.innerStride())
+  pointer_based_stl_iterator() EIGEN_NO_THROW : m_ptr(0) {}
+  pointer_based_stl_iterator(XprType& xpr, Index index) EIGEN_NO_THROW : m_incr(xpr.innerStride())
   {
     m_ptr = xpr.data() + index * m_incr.value();
   }
 
-  pointer_based_stl_iterator(const non_const_iterator& other)
+  pointer_based_stl_iterator(const non_const_iterator& other) EIGEN_NO_THROW
     : m_ptr(other.m_ptr), m_incr(other.m_incr)
   {}
 
-  pointer_based_stl_iterator& operator=(const non_const_iterator& other)
+  pointer_based_stl_iterator& operator=(const non_const_iterator& other) EIGEN_NO_THROW
   {
     m_ptr = other.m_ptr;
     m_incr.setValue(other.m_incr);
@@ -456,3 +459,5 @@ inline typename DenseBase<Derived>::const_iterator DenseBase<Derived>::cend() co
 }
 
 } // namespace Eigen
+
+#endif // EIGEN_STLITERATORS_H

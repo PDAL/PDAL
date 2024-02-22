@@ -45,7 +45,7 @@ namespace internal {
   * matrix \f$ A \f$ such that \f$ A =  P^TLDL^*P \f$, where P is a permutation matrix, L
   * is lower triangular with a unit diagonal and D is a diagonal matrix.
   *
-  * The decomposition uses pivoting to ensure stability, so that L will have
+  * The decomposition uses pivoting to ensure stability, so that D will have
   * zeros in the bottom right rank(A) - n submatrix. Avoiding the square root
   * on D also stabilizes the computation.
   *
@@ -200,7 +200,7 @@ template<typename _MatrixType, int _UpLo> class LDLT
       * \f$ L^* y_4 = y_3 \f$ and \f$ P x = y_4 \f$ in succession. If the matrix \f$ A \f$ is singular, then
       * \f$ D \f$ will also be singular (all the other matrices are invertible). In that case, the
       * least-square solution of \f$ D y_3 = y_2 \f$ is computed. This does not mean that this function
-      * computes the least-square solution of \f$ A x = b \f$ is \f$ A \f$ is singular.
+      * computes the least-square solution of \f$ A x = b \f$ if \f$ A \f$ is singular.
       *
       * \sa MatrixBase::ldlt(), SelfAdjointView::ldlt()
       */
@@ -246,8 +246,8 @@ template<typename _MatrixType, int _UpLo> class LDLT
       */
     const LDLT& adjoint() const { return *this; };
 
-    EIGEN_DEVICE_FUNC inline Index rows() const { return m_matrix.rows(); }
-    EIGEN_DEVICE_FUNC inline Index cols() const { return m_matrix.cols(); }
+    EIGEN_DEVICE_FUNC inline EIGEN_CONSTEXPR Index rows() const EIGEN_NOEXCEPT { return m_matrix.rows(); }
+    EIGEN_DEVICE_FUNC inline EIGEN_CONSTEXPR Index cols() const EIGEN_NOEXCEPT { return m_matrix.cols(); }
 
     /** \brief Reports whether previous computation was successful.
       *

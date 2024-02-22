@@ -39,90 +39,6 @@ template<typename Index,
          typename RhsScalar, typename RhsMapper, bool ConjugateRhs, int Version=Specialized>
 struct general_matrix_vector_product;
 
-
-template<bool Conjugate> struct conj_if;
-
-template<> struct conj_if<true> {
-  template<typename T>
-  inline T operator()(const T& x) const { return numext::conj(x); }
-  template<typename T>
-  inline T pconj(const T& x) const { return internal::pconj(x); }
-};
-
-template<> struct conj_if<false> {
-  template<typename T>
-  inline const T& operator()(const T& x) const { return x; }
-  template<typename T>
-  inline const T& pconj(const T& x) const { return x; }
-};
-
-// Generic implementation for custom complex types.
-template<typename LhsScalar, typename RhsScalar, bool ConjLhs, bool ConjRhs>
-struct conj_helper
-{
-  typedef typename ScalarBinaryOpTraits<LhsScalar,RhsScalar>::ReturnType Scalar;
-
-  EIGEN_STRONG_INLINE Scalar pmadd(const LhsScalar& x, const RhsScalar& y, const Scalar& c) const
-  { return padd(c, pmul(x,y)); }
-
-  EIGEN_STRONG_INLINE Scalar pmul(const LhsScalar& x, const RhsScalar& y) const
-  { return conj_if<ConjLhs>()(x) *  conj_if<ConjRhs>()(y); }
-};
-
-template<typename Scalar> struct conj_helper<Scalar,Scalar,false,false>
-{
-  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE Scalar pmadd(const Scalar& x, const Scalar& y, const Scalar& c) const { return internal::pmadd(x,y,c); }
-  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE Scalar pmul(const Scalar& x, const Scalar& y) const { return internal::pmul(x,y); }
-};
-
-template<typename RealScalar> struct conj_helper<std::complex<RealScalar>, std::complex<RealScalar>, false,true>
-{
-  typedef std::complex<RealScalar> Scalar;
-  EIGEN_STRONG_INLINE Scalar pmadd(const Scalar& x, const Scalar& y, const Scalar& c) const
-  { return c + pmul(x,y); }
-
-  EIGEN_STRONG_INLINE Scalar pmul(const Scalar& x, const Scalar& y) const
-  { return Scalar(numext::real(x)*numext::real(y) + numext::imag(x)*numext::imag(y), numext::imag(x)*numext::real(y) - numext::real(x)*numext::imag(y)); }
-};
-
-template<typename RealScalar> struct conj_helper<std::complex<RealScalar>, std::complex<RealScalar>, true,false>
-{
-  typedef std::complex<RealScalar> Scalar;
-  EIGEN_STRONG_INLINE Scalar pmadd(const Scalar& x, const Scalar& y, const Scalar& c) const
-  { return c + pmul(x,y); }
-
-  EIGEN_STRONG_INLINE Scalar pmul(const Scalar& x, const Scalar& y) const
-  { return Scalar(numext::real(x)*numext::real(y) + numext::imag(x)*numext::imag(y), numext::real(x)*numext::imag(y) - numext::imag(x)*numext::real(y)); }
-};
-
-template<typename RealScalar> struct conj_helper<std::complex<RealScalar>, std::complex<RealScalar>, true,true>
-{
-  typedef std::complex<RealScalar> Scalar;
-  EIGEN_STRONG_INLINE Scalar pmadd(const Scalar& x, const Scalar& y, const Scalar& c) const
-  { return c + pmul(x,y); }
-
-  EIGEN_STRONG_INLINE Scalar pmul(const Scalar& x, const Scalar& y) const
-  { return Scalar(numext::real(x)*numext::real(y) - numext::imag(x)*numext::imag(y), - numext::real(x)*numext::imag(y) - numext::imag(x)*numext::real(y)); }
-};
-
-template<typename RealScalar,bool Conj> struct conj_helper<std::complex<RealScalar>, RealScalar, Conj,false>
-{
-  typedef std::complex<RealScalar> Scalar;
-  EIGEN_STRONG_INLINE Scalar pmadd(const Scalar& x, const RealScalar& y, const Scalar& c) const
-  { return padd(c, pmul(x,y)); }
-  EIGEN_STRONG_INLINE Scalar pmul(const Scalar& x, const RealScalar& y) const
-  { return conj_if<Conj>()(x)*y; }
-};
-
-template<typename RealScalar,bool Conj> struct conj_helper<RealScalar, std::complex<RealScalar>, false,Conj>
-{
-  typedef std::complex<RealScalar> Scalar;
-  EIGEN_STRONG_INLINE Scalar pmadd(const RealScalar& x, const Scalar& y, const Scalar& c) const
-  { return padd(c, pmul(x,y)); }
-  EIGEN_STRONG_INLINE Scalar pmul(const RealScalar& x, const Scalar& y) const
-  { return x*conj_if<Conj>()(y); }
-};
-
 template<typename From,typename To> struct get_factor {
   EIGEN_DEVICE_FUNC static EIGEN_STRONG_INLINE To run(const From& x) { return To(x); }
 };
@@ -602,7 +518,7 @@ struct blas_traits<const T>
 
 template<typename T, bool HasUsableDirectAccess=blas_traits<T>::HasUsableDirectAccess>
 struct extract_data_selector {
-  static const typename T::Scalar* run(const T& m)
+  EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE static const typename T::Scalar* run(const T& m)
   {
     return blas_traits<T>::extract(m).data();
   }
@@ -613,10 +529,52 @@ struct extract_data_selector<T,false> {
   static typename T::Scalar* run(const T&) { return 0; }
 };
 
-template<typename T> const typename T::Scalar* extract_data(const T& m)
+template<typename T>
+EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE const typename T::Scalar* extract_data(const T& m)
 {
   return extract_data_selector<T>::run(m);
 }
+
+/**
+ * \c combine_scalar_factors extracts and multiplies factors from GEMM and GEMV products.
+ * There is a specialization for booleans
+ */
+template<typename ResScalar, typename Lhs, typename Rhs>
+struct combine_scalar_factors_impl
+{
+  EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE static ResScalar run(const Lhs& lhs, const Rhs& rhs)
+  {
+    return blas_traits<Lhs>::extractScalarFactor(lhs) * blas_traits<Rhs>::extractScalarFactor(rhs);
+  }
+  EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE static ResScalar run(const ResScalar& alpha, const Lhs& lhs, const Rhs& rhs)
+  {
+    return alpha * blas_traits<Lhs>::extractScalarFactor(lhs) * blas_traits<Rhs>::extractScalarFactor(rhs);
+  }
+};
+template<typename Lhs, typename Rhs>
+struct combine_scalar_factors_impl<bool, Lhs, Rhs>
+{
+  EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE static bool run(const Lhs& lhs, const Rhs& rhs)
+  {
+    return blas_traits<Lhs>::extractScalarFactor(lhs) && blas_traits<Rhs>::extractScalarFactor(rhs);
+  }
+  EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE static bool run(const bool& alpha, const Lhs& lhs, const Rhs& rhs)
+  {
+    return alpha && blas_traits<Lhs>::extractScalarFactor(lhs) && blas_traits<Rhs>::extractScalarFactor(rhs);
+  }
+};
+
+template<typename ResScalar, typename Lhs, typename Rhs>
+EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE ResScalar combine_scalar_factors(const ResScalar& alpha, const Lhs& lhs, const Rhs& rhs)
+{
+  return combine_scalar_factors_impl<ResScalar,Lhs,Rhs>::run(alpha, lhs, rhs);
+}
+template<typename ResScalar, typename Lhs, typename Rhs>
+EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE ResScalar combine_scalar_factors(const Lhs& lhs, const Rhs& rhs)
+{
+  return combine_scalar_factors_impl<ResScalar,Lhs,Rhs>::run(lhs, rhs);
+}
+
 
 } // end namespace internal
 

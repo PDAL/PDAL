@@ -16,8 +16,8 @@
 //------------------------------------------------------------------------------------------
 
 #define EIGEN_WORLD_VERSION 3
-#define EIGEN_MAJOR_VERSION 3
-#define EIGEN_MINOR_VERSION 90
+#define EIGEN_MAJOR_VERSION 4
+#define EIGEN_MINOR_VERSION 0
 
 #define EIGEN_VERSION_AT_LEAST(x,y,z) (EIGEN_WORLD_VERSION>x || (EIGEN_WORLD_VERSION>=x && \
                                       (EIGEN_MAJOR_VERSION>y || (EIGEN_MAJOR_VERSION>=y && \
@@ -162,8 +162,8 @@
 
 /// \internal EIGEN_COMP_IBM set to xlc version if the compiler is IBM XL C++
 // XLC   version
-// 3.1   0x0301	
-// 4.5   0x0405	
+// 3.1   0x0301
+// 4.5   0x0405
 // 5.0   0x0500
 // 12.1  0x0C01
 #if defined(__IBMCPP__) || defined(__xlc__) || defined(__ibmxl__)
@@ -226,7 +226,7 @@
 //------------------------------------------------------------------------------------------
 
 
-#if defined(__x86_64__) || defined(_M_X64) || defined(__amd64)
+#if defined(__x86_64__) || (defined(_M_X64) && !defined(_M_ARM64EC)) || defined(__amd64)
   #define EIGEN_ARCH_x86_64 1
 #else
   #define EIGEN_ARCH_x86_64 0
@@ -252,7 +252,7 @@
 #endif
 
 /// \internal EIGEN_ARCH_ARM64 set to 1 if the architecture is ARM64
-#if defined(__aarch64__)
+#if defined(__aarch64__) || defined(_M_ARM64) || defined(_M_ARM64EC)
   #define EIGEN_ARCH_ARM64 1
 #else
   #define EIGEN_ARCH_ARM64 0
@@ -264,6 +264,14 @@
 #else
   #define EIGEN_ARCH_ARM_OR_ARM64 0
 #endif
+
+/// \internal EIGEN_ARCH_ARMV8 set to 1 if the architecture is armv8 or greater.
+#if EIGEN_ARCH_ARM_OR_ARM64 && defined(__ARM_ARCH) && __ARM_ARCH >= 8
+#define EIGEN_ARCH_ARMV8 1
+#else
+#define EIGEN_ARCH_ARMV8 0
+#endif
+
 
 /// \internal EIGEN_HAS_ARM64_FP16 set to 1 if the architecture provides an IEEE
 /// compliant Arm fp16 type
@@ -597,18 +605,44 @@
 #define EIGEN_HAS_STATIC_ARRAY_TEMPLATE 0
 #endif
 
+// The macro EIGEN_CPLUSPLUS is a replacement for __cplusplus/_MSVC_LANG that
+// works for both platforms, indicating the C++ standard version number.
+//
+// With MSVC, without defining /Zc:__cplusplus, the __cplusplus macro will
+// report 199711L regardless of the language standard specified via /std.
+// We need to rely on _MSVC_LANG instead, which is only available after
+// VS2015.3.
+#if EIGEN_COMP_MSVC_LANG > 0
+#define EIGEN_CPLUSPLUS EIGEN_COMP_MSVC_LANG
+#elif EIGEN_COMP_MSVC >= 1900
+#define EIGEN_CPLUSPLUS 201103L
+#elif defined(__cplusplus)
+#define EIGEN_CPLUSPLUS __cplusplus
+#else
+#define EIGEN_CPLUSPLUS 0
+#endif
 
 // The macro EIGEN_COMP_CXXVER defines the c++ verson expected by the compiler.
 // For instance, if compiling with gcc and -std=c++17, then EIGEN_COMP_CXXVER
 // is defined to 17.
-#if   (defined(__cplusplus) && (__cplusplus >  201402L) || EIGEN_COMP_MSVC_LANG > 201402L)
-#define EIGEN_COMP_CXXVER 17
-#elif (defined(__cplusplus) && (__cplusplus >  201103L) || EIGEN_COMP_MSVC >= 1910)
-#define EIGEN_COMP_CXXVER 14
-#elif (defined(__cplusplus) && (__cplusplus >= 201103L) || EIGEN_COMP_MSVC >= 1900)
-#define EIGEN_COMP_CXXVER 11
+#if EIGEN_CPLUSPLUS > 201703L
+  #define EIGEN_COMP_CXXVER 20
+#elif EIGEN_CPLUSPLUS > 201402L
+  #define EIGEN_COMP_CXXVER 17
+#elif EIGEN_CPLUSPLUS > 201103L
+  #define EIGEN_COMP_CXXVER 14
+#elif EIGEN_CPLUSPLUS >= 201103L
+  #define EIGEN_COMP_CXXVER 11
 #else
-#define EIGEN_COMP_CXXVER 03
+  #define EIGEN_COMP_CXXVER 03
+#endif
+
+#ifndef EIGEN_HAS_CXX14_VARIABLE_TEMPLATES
+  #if defined(__cpp_variable_templates) && __cpp_variable_templates >= 201304 && EIGEN_MAX_CPP_VER>=14
+    #define EIGEN_HAS_CXX14_VARIABLE_TEMPLATES 1
+  #else
+    #define EIGEN_HAS_CXX14_VARIABLE_TEMPLATES 0
+  #endif
 #endif
 
 
@@ -633,8 +667,7 @@
 #ifndef EIGEN_HAS_RVALUE_REFERENCES
 #if EIGEN_MAX_CPP_VER>=11 && \
     (__has_feature(cxx_rvalue_references) || \
-    (defined(__cplusplus) && __cplusplus >= 201103L) || \
-    (EIGEN_COMP_MSVC >= 1600))
+     (EIGEN_COMP_CXXVER >= 11) || (EIGEN_COMP_MSVC >= 1600))
   #define EIGEN_HAS_RVALUE_REFERENCES 1
 #else
   #define EIGEN_HAS_RVALUE_REFERENCES 0
@@ -657,14 +690,31 @@
 #endif
 
 // Does the compiler support result_of?
-// It's likely that MSVC 2013 supports result_of but I couldn't not find a good source for that,
-// so let's be conservative.
+// result_of was deprecated in c++17 and removed in c++ 20
 #ifndef EIGEN_HAS_STD_RESULT_OF
-#if EIGEN_MAX_CPP_VER>=11 && \
-    (__has_feature(cxx_lambdas) || (defined(__cplusplus) && __cplusplus >= 201103L) || EIGEN_COMP_MSVC >= 1900)
+#if EIGEN_HAS_CXX11 && EIGEN_COMP_CXXVER < 17
 #define EIGEN_HAS_STD_RESULT_OF 1
 #else
 #define EIGEN_HAS_STD_RESULT_OF 0
+#endif
+#endif
+
+// Does the compiler support std::hash?
+#ifndef EIGEN_HAS_STD_HASH
+// The std::hash struct is defined in C++11 but is not labelled as a __device__
+// function and is not constexpr, so cannot be used on device.
+#if EIGEN_HAS_CXX11 && !defined(EIGEN_GPU_COMPILE_PHASE)
+#define EIGEN_HAS_STD_HASH 1
+#else
+#define EIGEN_HAS_STD_HASH 0
+#endif
+#endif  // EIGEN_HAS_STD_HASH
+
+#ifndef EIGEN_HAS_STD_INVOKE_RESULT
+#if EIGEN_MAX_CPP_VER >= 17 && EIGEN_COMP_CXXVER >= 17
+#define EIGEN_HAS_STD_INVOKE_RESULT 1
+#else
+#define EIGEN_HAS_STD_INVOKE_RESULT 0
 #endif
 #endif
 
@@ -700,12 +750,12 @@
 
 // Does the compiler support variadic templates?
 #ifndef EIGEN_HAS_VARIADIC_TEMPLATES
-#if EIGEN_MAX_CPP_VER>=11 && (__cplusplus > 199711L || EIGEN_COMP_MSVC >= 1900) \
+#if EIGEN_MAX_CPP_VER>=11 && (EIGEN_COMP_CXXVER >= 11) \
   && (!defined(__NVCC__) || !EIGEN_ARCH_ARM_OR_ARM64 || (EIGEN_COMP_NVCC >= 80000) )
     // ^^ Disable the use of variadic templates when compiling with versions of nvcc older than 8.0 on ARM devices:
     //    this prevents nvcc from crashing when compiling Eigen on Tegra X1
 #define EIGEN_HAS_VARIADIC_TEMPLATES 1
-#elif  EIGEN_MAX_CPP_VER>=11 && (__cplusplus > 199711L || EIGEN_COMP_MSVC >= 1900) && defined(SYCL_DEVICE_ONLY)
+#elif  EIGEN_MAX_CPP_VER>=11 && (EIGEN_COMP_CXXVER >= 11) && defined(SYCL_DEVICE_ONLY)
 #define EIGEN_HAS_VARIADIC_TEMPLATES 1
 #else
 #define EIGEN_HAS_VARIADIC_TEMPLATES 0
@@ -716,12 +766,12 @@
 #ifndef EIGEN_HAS_CONSTEXPR
   #if defined(EIGEN_CUDACC)
   // Const expressions are supported provided that c++11 is enabled and we're using either clang or nvcc 7.5 or above
-    #if EIGEN_MAX_CPP_VER>=14 && (__cplusplus > 199711L && (EIGEN_COMP_CLANG || EIGEN_COMP_NVCC >= 70500))
+    #if EIGEN_MAX_CPP_VER>=14 && (EIGEN_COMP_CXXVER >= 11 && (EIGEN_COMP_CLANG || EIGEN_COMP_NVCC >= 70500))
       #define EIGEN_HAS_CONSTEXPR 1
     #endif
-  #elif EIGEN_MAX_CPP_VER>=14 && (__has_feature(cxx_relaxed_constexpr) || (defined(__cplusplus) && __cplusplus >= 201402L) || \
-    (EIGEN_GNUC_AT_LEAST(4,8) && (__cplusplus > 199711L)) || \
-    (EIGEN_COMP_CLANG >= 306 && (__cplusplus > 199711L)))
+  #elif EIGEN_MAX_CPP_VER>=14 && (__has_feature(cxx_relaxed_constexpr) || (EIGEN_COMP_CXXVER >= 14) || \
+    (EIGEN_GNUC_AT_LEAST(4,8) && (EIGEN_COMP_CXXVER >= 11)) || \
+    (EIGEN_COMP_CLANG >= 306 && (EIGEN_COMP_CXXVER >= 11)))
     #define EIGEN_HAS_CONSTEXPR 1
   #endif
 
@@ -740,7 +790,7 @@
 // Does the compiler support C++11 math?
 // Let's be conservative and enable the default C++11 implementation only if we are sure it exists
 #ifndef EIGEN_HAS_CXX11_MATH
-  #if EIGEN_MAX_CPP_VER>=11 && ((__cplusplus > 201103L) || (__cplusplus >= 201103L) && (EIGEN_COMP_GNUC_STRICT || EIGEN_COMP_CLANG || EIGEN_COMP_MSVC || EIGEN_COMP_ICC)  \
+  #if EIGEN_MAX_CPP_VER>=11 && ((EIGEN_COMP_CXXVER > 11) || (EIGEN_COMP_CXXVER == 11) && (EIGEN_COMP_GNUC_STRICT || EIGEN_COMP_CLANG || EIGEN_COMP_MSVC || EIGEN_COMP_ICC)  \
       && (EIGEN_ARCH_i386_OR_x86_64) && (EIGEN_OS_GNULINUX || EIGEN_OS_WIN_STRICT || EIGEN_OS_MAC))
     #define EIGEN_HAS_CXX11_MATH 1
   #else
@@ -751,9 +801,8 @@
 // Does the compiler support proper C++11 containers?
 #ifndef EIGEN_HAS_CXX11_CONTAINERS
   #if    EIGEN_MAX_CPP_VER>=11 && \
-         ((__cplusplus > 201103L) \
-      || ((__cplusplus >= 201103L) && (EIGEN_COMP_GNUC_STRICT || EIGEN_COMP_CLANG || EIGEN_COMP_ICC>=1400)) \
-      || EIGEN_COMP_MSVC >= 1900)
+         ((EIGEN_COMP_CXXVER > 11) \
+      || ((EIGEN_COMP_CXXVER == 11) && (EIGEN_COMP_GNUC_STRICT || EIGEN_COMP_CLANG || EIGEN_COMP_MSVC || EIGEN_COMP_ICC>=1400)))
     #define EIGEN_HAS_CXX11_CONTAINERS 1
   #else
     #define EIGEN_HAS_CXX11_CONTAINERS 0
@@ -764,9 +813,8 @@
 #ifndef EIGEN_HAS_CXX11_NOEXCEPT
   #if    EIGEN_MAX_CPP_VER>=11 && \
          (__has_feature(cxx_noexcept) \
-      || (__cplusplus > 201103L) \
-      || ((__cplusplus >= 201103L) && (EIGEN_COMP_GNUC_STRICT || EIGEN_COMP_CLANG || EIGEN_COMP_ICC>=1400)) \
-      || EIGEN_COMP_MSVC >= 1900)
+      || (EIGEN_COMP_CXXVER > 11) \
+      || ((EIGEN_COMP_CXXVER == 11) && (EIGEN_COMP_GNUC_STRICT || EIGEN_COMP_CLANG || EIGEN_COMP_MSVC || EIGEN_COMP_ICC>=1400)))
     #define EIGEN_HAS_CXX11_NOEXCEPT 1
   #else
     #define EIGEN_HAS_CXX11_NOEXCEPT 0
@@ -776,8 +824,8 @@
 #ifndef EIGEN_HAS_CXX11_ATOMIC
   #if    EIGEN_MAX_CPP_VER>=11 && \
          (__has_feature(cxx_atomic) \
-      || (__cplusplus > 201103L) \
-      || ((__cplusplus >= 201103L) && (EIGEN_COMP_MSVC==0 || EIGEN_COMP_MSVC >= 1700)))
+      || (EIGEN_COMP_CXXVER > 11) \
+      || ((EIGEN_COMP_CXXVER == 11) && (EIGEN_COMP_MSVC==0 || EIGEN_COMP_MSVC >= 1700)))
     #define EIGEN_HAS_CXX11_ATOMIC 1
   #else
     #define EIGEN_HAS_CXX11_ATOMIC 0
@@ -786,14 +834,14 @@
 
 #ifndef EIGEN_HAS_CXX11_OVERRIDE_FINAL
   #if    EIGEN_MAX_CPP_VER>=11 && \
-       (__cplusplus >= 201103L || EIGEN_COMP_MSVC >= 1700)
+       (EIGEN_COMP_CXXVER >= 11 || EIGEN_COMP_MSVC >= 1700)
     #define EIGEN_HAS_CXX11_OVERRIDE_FINAL 1
   #else
     #define EIGEN_HAS_CXX11_OVERRIDE_FINAL 0
   #endif
 #endif
 
-// NOTE: the required Apple's clang version is very conservative 
+// NOTE: the required Apple's clang version is very conservative
 //       and it could be that XCode 9 works just fine.
 // NOTE: the MSVC version is based on https://en.cppreference.com/w/cpp/compiler_support
 //       and not tested.
@@ -863,7 +911,7 @@
 // but it still doesn't use GCC's always_inline. This is useful in (common) situations where MSVC needs forceinline
 // but GCC is still doing fine with just inline.
 #ifndef EIGEN_STRONG_INLINE
-#if EIGEN_COMP_MSVC || EIGEN_COMP_ICC
+#if (EIGEN_COMP_MSVC || EIGEN_COMP_ICC) && !defined(EIGEN_GPUCC)
 #define EIGEN_STRONG_INLINE __forceinline
 #else
 #define EIGEN_STRONG_INLINE inline
@@ -922,7 +970,7 @@
   #endif
   #define EIGEN_DEVICE_FUNC __attribute__((flatten)) __attribute__((always_inline))
 // All functions callable from CUDA/HIP code must be qualified with __device__
-#elif defined(EIGEN_GPUCC) 
+#elif defined(EIGEN_GPUCC)
     #define EIGEN_DEVICE_FUNC __host__ __device__
 #else
   #define EIGEN_DEVICE_FUNC
@@ -949,7 +997,7 @@
   #else
     #define eigen_plain_assert(x)
   #endif
-#else 
+#else
   #if EIGEN_SAFE_TO_USE_STANDARD_ASSERT_MACRO
     namespace Eigen {
     namespace internal {
@@ -1036,6 +1084,67 @@ namespace Eigen {
 #endif
 
 
+// Acts as a barrier preventing operations involving `X` from crossing. This
+// occurs, for example, in the fast rounding trick where a magic constant is
+// added then subtracted, which is otherwise compiled away with -ffast-math.
+//
+// See bug 1674
+#if !defined(EIGEN_OPTIMIZATION_BARRIER)
+  #if EIGEN_COMP_GNUC
+    // According to https://gcc.gnu.org/onlinedocs/gcc/Constraints.html:
+    //   X: Any operand whatsoever.
+    //   r: A register operand is allowed provided that it is in a general
+    //      register.
+    //   g: Any register, memory or immediate integer operand is allowed, except
+    //      for registers that are not general registers.
+    //   w: (AArch32/AArch64) Floating point register, Advanced SIMD vector
+    //      register or SVE vector register.
+    //   x: (SSE) Any SSE register.
+    //      (AArch64) Like w, but restricted to registers 0 to 15 inclusive.
+    //   v: (PowerPC) An Altivec vector register.
+    //   wa:(PowerPC) A VSX register.
+    //
+    // "X" (uppercase) should work for all cases, though this seems to fail for
+    // some versions of GCC for arm/aarch64 with
+    //   "error: inconsistent operand constraints in an 'asm'"
+    // Clang x86_64/arm/aarch64 seems to require "g" to support both scalars and
+    // vectors, otherwise
+    //   "error: non-trivial scalar-to-vector conversion, possible invalid
+    //    constraint for vector type"
+    //
+    // GCC for ppc64le generates an internal compiler error with x/X/g.
+    // GCC for AVX generates an internal compiler error with X.
+    //
+    // Tested on icc/gcc/clang for sse, avx, avx2, avx512dq
+    //           gcc for arm, aarch64,
+    //           gcc for ppc64le,
+    // both vectors and scalars.
+    //
+    // Note that this is restricted to plain types - this will not work
+    // directly for std::complex<T>, Eigen::half, Eigen::bfloat16. For these,
+    // you will need to apply to the underlying POD type.
+    #if EIGEN_ARCH_PPC && EIGEN_COMP_GNUC_STRICT
+      // This seems to be broken on clang.  Packet4f is loaded into a single
+      //   register rather than a vector, zeroing out some entries.  Integer
+      //   types also generate a compile error.
+      // General, Altivec, VSX.
+      #define EIGEN_OPTIMIZATION_BARRIER(X)  __asm__  ("" : "+r,v,wa" (X));
+    #elif EIGEN_ARCH_ARM_OR_ARM64
+      // General, NEON.
+      #define EIGEN_OPTIMIZATION_BARRIER(X)  __asm__  ("" : "+g,w" (X));
+    #elif EIGEN_ARCH_i386_OR_x86_64
+      // General, SSE.
+      #define EIGEN_OPTIMIZATION_BARRIER(X)  __asm__  ("" : "+g,x" (X));
+    #else
+      // Not implemented for other architectures.
+      #define EIGEN_OPTIMIZATION_BARRIER(X)
+    #endif
+  #else
+    // Not implemented for other compilers.
+    #define EIGEN_OPTIMIZATION_BARRIER(X)
+  #endif
+#endif
+
 #if EIGEN_COMP_MSVC
   // NOTE MSVC often gives C4127 warnings with compiletime if statements. See bug 1362.
   // This workaround is ugly, but it does the job.
@@ -1076,8 +1185,12 @@ namespace Eigen {
   #define EIGEN_USING_STD(FUNC) using std::FUNC;
 #endif
 
-#if EIGEN_COMP_MSVC_STRICT && (EIGEN_COMP_MSVC < 1900 || EIGEN_COMP_NVCC)
-  // for older MSVC versions, as well as 1900 && CUDA 8, using the base operator is sufficient (cf Bugs 1000, 1324)
+#if EIGEN_COMP_MSVC_STRICT && (EIGEN_COMP_MSVC < 1900 || (EIGEN_COMP_MSVC == 1900 && EIGEN_COMP_NVCC))
+  // For older MSVC versions, as well as 1900 && CUDA 8, using the base operator is necessary,
+  //   otherwise we get duplicate definition errors
+  // For later MSVC versions, we require explicit operator= definition, otherwise we get
+  //   use of implicitly deleted operator errors.
+  // (cf Bugs 920, 1000, 1324, 2291)
   #define EIGEN_INHERIT_ASSIGNMENT_EQUAL_OPERATOR(Derived) \
     using Base::operator =;
 #elif EIGEN_COMP_CLANG // workaround clang bug (see http://forum.kde.org/viewtopic.php?f=74&t=102653)

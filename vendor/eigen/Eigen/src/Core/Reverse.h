@@ -12,7 +12,7 @@
 #ifndef EIGEN_REVERSE_H
 #define EIGEN_REVERSE_H
 
-namespace Eigen { 
+namespace Eigen {
 
 namespace internal {
 
@@ -44,7 +44,7 @@ template<typename PacketType> struct reverse_packet_cond<PacketType,false>
   static inline PacketType run(const PacketType& x) { return x; }
 };
 
-} // end namespace internal 
+} // end namespace internal
 
 /** \class Reverse
   * \ingroup Core_Module
@@ -89,8 +89,10 @@ template<typename MatrixType, int Direction> class Reverse
 
     EIGEN_INHERIT_ASSIGNMENT_OPERATORS(Reverse)
 
-    EIGEN_DEVICE_FUNC inline Index rows() const { return m_matrix.rows(); }
-    EIGEN_DEVICE_FUNC inline Index cols() const { return m_matrix.cols(); }
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
+    inline Index rows() const EIGEN_NOEXCEPT { return m_matrix.rows(); }
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
+    inline Index cols() const EIGEN_NOEXCEPT { return m_matrix.cols(); }
 
     EIGEN_DEVICE_FUNC inline Index innerStride() const
     {
@@ -98,7 +100,7 @@ template<typename MatrixType, int Direction> class Reverse
     }
 
     EIGEN_DEVICE_FUNC const typename internal::remove_all<typename MatrixType::Nested>::type&
-    nestedExpression() const 
+    nestedExpression() const
     {
       return m_matrix;
     }
@@ -161,7 +163,7 @@ EIGEN_DEVICE_FUNC inline void DenseBase<Derived>::reverseInPlace()
 }
 
 namespace internal {
-  
+
 template<int Direction>
 struct vectorwise_reverse_inplace_impl;
 

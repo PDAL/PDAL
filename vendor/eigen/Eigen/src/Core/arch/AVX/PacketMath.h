@@ -273,6 +273,15 @@ template<> EIGEN_STRONG_INLINE Packet8i padd<Packet8i>(const Packet8i& a, const 
 
 template<> EIGEN_STRONG_INLINE Packet8f psub<Packet8f>(const Packet8f& a, const Packet8f& b) { return _mm256_sub_ps(a,b); }
 template<> EIGEN_STRONG_INLINE Packet4d psub<Packet4d>(const Packet4d& a, const Packet4d& b) { return _mm256_sub_pd(a,b); }
+template<> EIGEN_STRONG_INLINE Packet8i psub<Packet8i>(const Packet8i& a, const Packet8i& b) {
+#ifdef EIGEN_VECTORIZE_AVX2
+  return _mm256_sub_epi32(a,b);
+#else
+  __m128i lo = _mm_sub_epi32(_mm256_extractf128_si256(a, 0), _mm256_extractf128_si256(b, 0));
+  __m128i hi = _mm_sub_epi32(_mm256_extractf128_si256(a, 1), _mm256_extractf128_si256(b, 1));
+  return _mm256_insertf128_si256(_mm256_castsi128_si256(lo), (hi), 1);
+#endif
+}
 
 template<> EIGEN_STRONG_INLINE Packet8f pnegate(const Packet8f& a)
 {
@@ -379,6 +388,7 @@ template<> EIGEN_STRONG_INLINE Packet4d pmin<Packet4d>(const Packet4d& a, const 
   return _mm256_min_pd(b,a);
 #endif
 }
+
 template<> EIGEN_STRONG_INLINE Packet8f pmax<Packet8f>(const Packet8f& a, const Packet8f& b) {
 #if EIGEN_COMP_GNUC && EIGEN_COMP_GNUC < 63
   // See pmin above
@@ -724,12 +734,13 @@ template<> EIGEN_STRONG_INLINE Packet4d pabs(const Packet4d& a)
 }
 
 template<> EIGEN_STRONG_INLINE Packet8f pfrexp<Packet8f>(const Packet8f& a, Packet8f& exponent) {
-  return pfrexp_float(a,exponent);
+  return pfrexp_generic(a,exponent);
 }
 
-template<> EIGEN_STRONG_INLINE Packet4d pfrexp<Packet4d>(const Packet4d& a, Packet4d& exponent) {
-  const Packet4d cst_1022d = pset1<Packet4d>(1022.0);
-  const Packet4d cst_half = pset1<Packet4d>(0.5);
+// Extract exponent without existence of Packet4l.
+template<>
+EIGEN_STRONG_INLINE  
+Packet4d pfrexp_generic_get_biased_exponent(const Packet4d& a) {
   const Packet4d cst_exp_mask  = pset1frombits<Packet4d>(static_cast<uint64_t>(0x7ff0000000000000ull));
   __m256i a_expo = _mm256_castpd_si256(pand(a, cst_exp_mask));
 #ifdef EIGEN_VECTORIZE_AVX2
@@ -744,29 +755,44 @@ template<> EIGEN_STRONG_INLINE Packet4d pfrexp<Packet4d>(const Packet4d& a, Pack
 #endif
   Packet2d exponent_lo = _mm_cvtepi32_pd(vec4i_swizzle1(lo, 0, 2, 1, 3));
   Packet2d exponent_hi = _mm_cvtepi32_pd(vec4i_swizzle1(hi, 0, 2, 1, 3));
-  exponent = _mm256_insertf128_pd(exponent, exponent_lo, 0);
+  Packet4d exponent = _mm256_insertf128_pd(_mm256_setzero_pd(), exponent_lo, 0);
   exponent = _mm256_insertf128_pd(exponent, exponent_hi, 1);
-  exponent = psub(exponent, cst_1022d);
-  const Packet4d cst_mant_mask  = pset1frombits<Packet4d>(static_cast<uint64_t>(~0x7ff0000000000000ull));
-  return por(pand(a, cst_mant_mask), cst_half);
+  return exponent;
+}
+
+
+template<> EIGEN_STRONG_INLINE Packet4d pfrexp<Packet4d>(const Packet4d& a, Packet4d& exponent) {
+  return pfrexp_generic(a, exponent);
 }
 
 template<> EIGEN_STRONG_INLINE Packet8f pldexp<Packet8f>(const Packet8f& a, const Packet8f& exponent) {
-  return pldexp_float(a,exponent);
+  return pldexp_generic(a, exponent);
 }
 
 template<> EIGEN_STRONG_INLINE Packet4d pldexp<Packet4d>(const Packet4d& a, const Packet4d& exponent) {
-  // Build e=2^n by constructing the exponents in a 128-bit vector and
-  // shifting them to where they belong in double-precision values.
-  Packet4i cst_1023 = pset1<Packet4i>(1023);
-  __m128i emm0 = _mm256_cvtpd_epi32(exponent);
-  emm0 = _mm_add_epi32(emm0, cst_1023);
-  emm0 = _mm_shuffle_epi32(emm0, _MM_SHUFFLE(3, 1, 2, 0));
-  __m128i lo = _mm_slli_epi64(emm0, 52);
-  __m128i hi = _mm_slli_epi64(_mm_srli_epi64(emm0, 32), 52);
-  __m256i e = _mm256_insertf128_si256(_mm256_setzero_si256(), lo, 0);
-  e = _mm256_insertf128_si256(e, hi, 1);
-  return pmul(a,_mm256_castsi256_pd(e));
+  // Clamp exponent to [-2099, 2099]
+  const Packet4d max_exponent = pset1<Packet4d>(2099.0);
+  const Packet4i e = _mm256_cvtpd_epi32(pmin(pmax(exponent, pnegate(max_exponent)), max_exponent));
+  
+  // Split 2^e into four factors and multiply.
+  const Packet4i bias = pset1<Packet4i>(1023);
+  Packet4i b = parithmetic_shift_right<2>(e);  // floor(e/4)
+  
+  // 2^b
+  Packet4i hi = vec4i_swizzle1(padd(b, bias), 0, 2, 1, 3);
+  Packet4i lo = _mm_slli_epi64(hi, 52);
+  hi = _mm_slli_epi64(_mm_srli_epi64(hi, 32), 52);
+  Packet4d c = _mm256_castsi256_pd(_mm256_insertf128_si256(_mm256_castsi128_si256(lo), hi, 1));
+  Packet4d out = pmul(pmul(pmul(a, c), c), c);  // a * 2^(3b)
+  
+  // 2^(e - 3b)
+  b = psub(psub(psub(e, b), b), b);  // e - 3b
+  hi = vec4i_swizzle1(padd(b, bias), 0, 2, 1, 3);
+  lo = _mm_slli_epi64(hi, 52);
+  hi = _mm_slli_epi64(_mm_srli_epi64(hi, 32), 52);
+  c = _mm256_castsi256_pd(_mm256_insertf128_si256(_mm256_castsi128_si256(lo), hi, 1));
+  out = pmul(out, c); // a * 2^e
+  return out;
 }
 
 template<> EIGEN_STRONG_INLINE float predux<Packet8f>(const Packet8f& a)
@@ -1248,12 +1274,7 @@ EIGEN_STRONG_INLINE Packet8f Bf16ToF32(const Packet8bf& a) {
 EIGEN_STRONG_INLINE Packet8bf F32ToBf16(const Packet8f& a) {
   Packet8bf r;
 
-  // Flush input denormals value to zero with hardware capability.
-  _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
-  __m256 flush = _mm256_and_ps(a, a);
-  _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_OFF);
-
-  __m256i input = _mm256_castps_si256(flush);
+  __m256i input = _mm256_castps_si256(a);
 
 #ifdef EIGEN_VECTORIZE_AVX2
   // uint32_t lsb = (input >> 16);
@@ -1267,7 +1288,7 @@ EIGEN_STRONG_INLINE Packet8bf F32ToBf16(const Packet8f& a) {
   // input = input >> 16;
   t = _mm256_srli_epi32(t, 16);
   // Check NaN before converting back to bf16
-  __m256 mask = _mm256_cmp_ps(flush, flush, _CMP_ORD_Q);
+  __m256 mask = _mm256_cmp_ps(a, a, _CMP_ORD_Q);
   __m256i nan = _mm256_set1_epi32(0x7fc0);
   t = _mm256_blendv_epi8(nan, t, _mm256_castps_si256(mask));
   // output = numext::bit_cast<uint16_t>(input);
@@ -1290,7 +1311,7 @@ EIGEN_STRONG_INLINE Packet8bf F32ToBf16(const Packet8f& a) {
   lo = _mm_srli_epi32(lo, 16);
   hi = _mm_srli_epi32(hi, 16);
   // Check NaN before converting back to bf16
-  __m256 mask = _mm256_cmp_ps(flush, flush, _CMP_ORD_Q);
+  __m256 mask = _mm256_cmp_ps(a, a, _CMP_ORD_Q);
   __m128i nan = _mm_set1_epi32(0x7fc0);
   lo = _mm_blendv_epi8(nan, lo, _mm_castps_si128(_mm256_castps256_ps128(mask)));
   hi = _mm_blendv_epi8(nan, hi, _mm_castps_si128(_mm256_extractf128_ps(mask, 1)));

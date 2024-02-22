@@ -228,8 +228,7 @@ template<> struct gemv_dense_selector<OnTheRight,ColMajor,true>
     ActualLhsType actualLhs = LhsBlasTraits::extract(lhs);
     ActualRhsType actualRhs = RhsBlasTraits::extract(rhs);
 
-    ResScalar actualAlpha = alpha * LhsBlasTraits::extractScalarFactor(lhs)
-                                  * RhsBlasTraits::extractScalarFactor(rhs);
+    ResScalar actualAlpha = combine_scalar_factors(alpha, lhs, rhs);
 
     // make sure Dest is a compile-time vector type (bug 1166)
     typedef typename conditional<Dest::IsVectorAtCompileTime, Dest, typename Dest::ColXpr>::type ActualDest;
@@ -320,8 +319,7 @@ template<> struct gemv_dense_selector<OnTheRight,RowMajor,true>
     typename add_const<ActualLhsType>::type actualLhs = LhsBlasTraits::extract(lhs);
     typename add_const<ActualRhsType>::type actualRhs = RhsBlasTraits::extract(rhs);
 
-    ResScalar actualAlpha = alpha * LhsBlasTraits::extractScalarFactor(lhs)
-                                  * RhsBlasTraits::extractScalarFactor(rhs);
+    ResScalar actualAlpha = combine_scalar_factors(alpha, lhs, rhs);
 
     enum {
       // FIXME find a way to allow an inner stride on the result if packet_traits<Scalar>::size==1
