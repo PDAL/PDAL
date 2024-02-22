@@ -126,7 +126,7 @@ void ArrowWriter::initialize()
     else
     {
         std::stringstream msg;
-        msg << "Unable to open '" << m_filename << "' for arrow output with error " <<
+        msg << "Unable to open '" << filename() << "' for arrow output with error " <<
             result.status().ToString();
         throwError(msg.str());
     }

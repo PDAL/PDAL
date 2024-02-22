@@ -100,8 +100,7 @@ private:
 
     FileStreamPtr m_stream;
 
-    std::unique_ptr<draco::PointCloud> m_pc =
-        std::unique_ptr<draco::PointCloud>(new draco::PointCloud());
+    std::unique_ptr<draco::PointCloud> m_pc { new draco::PointCloud() };
     int m_precision;
 
     DracoWriter(const DracoWriter&) = delete;
