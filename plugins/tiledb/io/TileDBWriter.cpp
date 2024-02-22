@@ -106,9 +106,7 @@ std::string TileDBWriter::getName() const
 
 void TileDBWriter::addArgs(ProgramArgs& args)
 {
-    args.add("array_name", "TileDB array name", m_args->m_arrayName)
-        .setPositional();
-    args.addSynonym("array_name", "filename");
+    args.addSynonym("filename", "array_name");
     args.add("config_file", "TileDB configuration file location",
              m_args->m_cfgFileName);
     args.add("cell_order", "TileDB cell order", m_args->m_cell_order, "auto");
