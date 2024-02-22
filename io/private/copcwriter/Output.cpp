@@ -109,7 +109,7 @@ Output::Output(const BaseInfo& b) : b(b)
     // as points are written.
     m_pointPos = m_chunkOffsetPos + sizeof(uint64_t);
 
-    m_f.open(b.opts.filename, std::ios::out | std::ios::binary);
+    m_f.open(b.filename, std::ios::out | std::ios::binary);
 }
 
 // For this to work properly, the VLRs can't change size.

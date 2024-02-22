@@ -53,11 +53,13 @@ class PDAL_DLL ArrowWriter  : public Writer, public Streamable
 {
 public:
     ArrowWriter();
-    std::string getName() const;
+    ArrowWriter& operator=(const ArrowWriter&) = delete;
+    ArrowWriter(const ArrowWriter&) = delete;
     ~ArrowWriter();
 
-private:
+    std::string getName() const;
 
+private:
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
     virtual void ready(PointTableRef table);
@@ -66,14 +68,15 @@ private:
     virtual void write(const PointViewPtr view);
     virtual void addDimensions(PointLayoutPtr layout);
 
-
-    void setupParquet(std::vector<std::shared_ptr<arrow::Array>> const& arrays, PointTableRef table);
-    void setupFeather(std::vector<std::shared_ptr<arrow::Array>> const& arrays, PointTableRef table);
-    void gatherParquetGeoMetadata(std::shared_ptr<arrow::KeyValueMetadata>& input, SpatialReference& ref);
+    void setupParquet(std::vector<std::shared_ptr<arrow::Array>> const& arrays,
+        PointTableRef table);
+    void setupFeather(std::vector<std::shared_ptr<arrow::Array>> const& arrays,
+        PointTableRef table);
+    void gatherParquetGeoMetadata(std::shared_ptr<arrow::KeyValueMetadata>& input,
+        SpatialReference& ref);
     void createBuilders(PointTableRef table);
     void FlushBatch(PointTableRef table);
 
-    std::string m_filename;
     std::string m_formatString;
     arrowsupport::ArrowFormatType m_formatType;
 
@@ -100,13 +103,6 @@ private:
     pdal::Dimension::Id m_geoArrowDimId;
 
     PointTable* m_pointTablePtr;
-
-
-
-
-
-    ArrowWriter& operator=(const ArrowWriter&); // not implemented
-    ArrowWriter(const ArrowWriter&); // not implemented
 };
 
 } // namespace pdal

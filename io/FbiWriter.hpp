@@ -54,12 +54,8 @@ public:
     std::string getName() const override;
 
 private:
-    
     std::unique_ptr<fbi::FbiHdr> hdr;
     virtual void write(const PointViewPtr view) override;
-    virtual void addArgs(ProgramArgs& args) override;
-    
-    std::string m_filename;
 };
 
 

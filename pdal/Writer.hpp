@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <filesystem>
 #include <memory>
 
 #include <pdal/Options.hpp>
@@ -69,12 +70,18 @@ public:
     Writer& operator=(const Writer&) = delete;
     Writer(const Writer&) = delete;
 
+    std::string filename() const;
+    void setFilename(const std::string& filename);
+
     /**
       Locate template placeholder ('#') and validate filename with respect
       to placeholder.
     */
-    static std::string::size_type
-        handleFilenameTemplate(const std::string& filename);
+    static std::string::size_type handleFilenameTemplate(const std::string& filename);
+    /**
+      Replace special tags (such as '#uuid#') with something (like a UUID string).
+    */
+    static std::string replaceTags(std::string filename);
 
 private:
     virtual PointViewSet run(PointViewPtr view)

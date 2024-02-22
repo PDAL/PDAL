@@ -62,7 +62,6 @@ std::string GDALWriter::getName() const
 
 void GDALWriter::addArgs(ProgramArgs& args)
 {
-    args.add("filename", "Output filename", m_filename).setPositional();
     args.add("resolution", "Cell edge size, in units of X/Y",
         m_edgeLength).setPositional();
     m_radiusArg = &args.add("radius", "Radius from cell center to use to locate"
@@ -184,8 +183,7 @@ void GDALWriter::prepared(PointTableRef table)
 }
 
 
-void GDALWriter::readyFile(const std::string& filename,
-    const SpatialReference& srs)
+void GDALWriter::readyFile(const std::string& filename, const SpatialReference& srs)
 {
     m_outputFilename = filename;
     m_srs = srs;
@@ -331,7 +329,7 @@ void GDALWriter::doneFile()
     if (err != gdal::GDALError::None)
         throwError(raster.errorMsg());
 
-    getMetadata().addList("filename", m_filename);
+    getMetadata().addList("filename", filename());
 
     std::vector<std::string> gdalitems = Utils::split(m_GDAL_metadata, ',');
     for (auto& v: gdalitems)

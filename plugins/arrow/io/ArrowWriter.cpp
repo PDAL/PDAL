@@ -106,8 +106,7 @@ void ArrowWriter::createBuilders(PointTableRef table)
 
 void ArrowWriter::initialize()
 {
-
-    std::string ext = Utils::tolower(FileUtils::extension(m_filename));
+    std::string ext = Utils::tolower(FileUtils::extension(filename()));
     if (Utils::iequals("feather", m_formatString) || ext == ".feather")
         m_formatType = arrowsupport::Feather;
     if (Utils::iequals("parquet", m_formatString) || ext == ".parquet")
@@ -121,13 +120,14 @@ void ArrowWriter::initialize()
         throwError(msg.str());
     }
 
-    auto result = arrow::io::FileOutputStream::Open(m_filename, /*append=*/false);
+    auto result = arrow::io::FileOutputStream::Open(filename(), /*append=*/false);
     if (result.ok())
         m_file = result.ValueOrDie();
     else
     {
         std::stringstream msg;
-        msg << "Unable to open '" << m_filename << "' for arrow output with error " << result.status().ToString();
+        msg << "Unable to open '" << m_filename << "' for arrow output with error " <<
+            result.status().ToString();
         throwError(msg.str());
     }
 }
@@ -144,8 +144,8 @@ bool ArrowWriter::processOne(PointRef& point)
             throwError("unable to fetch builder for dimension!");
         }
 
-        if ((id == pdal::Dimension::Id::X || 
-             id == pdal::Dimension::Id::Y || 
+        if ((id == pdal::Dimension::Id::X ||
+             id == pdal::Dimension::Id::Y ||
              id == pdal::Dimension::Id::Z ||
              id == m_geoArrowDimId))
         {
@@ -156,7 +156,7 @@ bool ArrowWriter::processOne(PointRef& point)
             writeGeoArrow(point, builder);
             bAddedStruct = true;
         }
-        else 
+        else
         {
             arrow::Type::type at = builder->type()->id();
             pdal::Dimension::Type t = computePDALTypeFromArrow(at);
@@ -200,11 +200,13 @@ NL::json getPROJJSON(const pdal::SpatialReference& ref)
 
 void ArrowWriter::addArgs(ProgramArgs& args)
 {
-    args.add("filename", "Output filename", m_filename).setPositional();
-    args.add("format", "Output format ('feather','parquet','geoparquet')", m_formatString, "feather");
-    args.add("geoarrow_dimension_name", "Dimension name for GeoArrow xyz struct", m_geoArrowDimensionName, "xyz");
-    args.add("batch_size", "Arrow batch size", m_batchSize, 65536*64);
-    args.add("write_pipeline_metadata", "Write PDAL metadata to schema", m_writePipelineMetadata, true);
+    args.add("format", "Output format ('feather','parquet','geoparquet')", m_formatString,
+        "feather");
+    args.add("geoarrow_dimension_name", "Dimension name for GeoArrow xyz struct",
+        m_geoArrowDimensionName, "xyz");
+    args.add("batch_size", "Arrow batch size", m_batchSize, 65536 * 64);
+    args.add("write_pipeline_metadata", "Write PDAL metadata to schema",
+        m_writePipelineMetadata, true);
     args.add("geoparquet_version", "GeoParquet version string", m_geoParquetVersion, "1.0.0");
 }
 
@@ -219,8 +221,8 @@ void ArrowWriter::ready(PointTableRef table)
     auto dims = layout->dims();
     for (auto& id : dims)
     {
-        if ((id == pdal::Dimension::Id::X || 
-             id == pdal::Dimension::Id::Y || 
+        if ((id == pdal::Dimension::Id::X ||
+             id == pdal::Dimension::Id::Y ||
              id == pdal::Dimension::Id::Z ||
              id == m_geoArrowDimId ))
         {
@@ -236,9 +238,9 @@ void ArrowWriter::ready(PointTableRef table)
             auto kvMetadata = field->metadata()
                                ? field->metadata()->Copy()
                                : std::make_shared<arrow::KeyValueMetadata>();
-            kvMetadata->Append("ARROW:extension:name", "geoarrow.point");   
-            kvMetadata->Append("ARROW:extension:metadata", getPROJJSON(table.spatialReference()).dump(-1));   
-            
+            kvMetadata->Append("ARROW:extension:name", "geoarrow.point");
+            kvMetadata->Append("ARROW:extension:metadata", getPROJJSON(table.spatialReference()).dump(-1));
+
             NL::json dimDetail;
             dimDetail["name"] = layout->dimName(id);
             dimDetail["description"] = pdal::Dimension::description(id);
@@ -249,12 +251,12 @@ void ArrowWriter::ready(PointTableRef table)
             {
                 std::stringstream m;
                 Utils::toJSON(table.metadata(), m);
-                kvMetadata->Append("PDAL:pipeline:metadata", m.str());   
+                kvMetadata->Append("PDAL:pipeline:metadata", m.str());
             }
 
-            kvMetadata->Append("PDAL:dimension:metadata", dimDetail.dump(-1));   
+            kvMetadata->Append("PDAL:dimension:metadata", dimDetail.dump(-1));
 
-            field = field->WithMetadata(kvMetadata); 
+            field = field->WithMetadata(kvMetadata);
             fields.push_back(field);
 
             m_dimIds.push_back(m_geoArrowDimId);
@@ -272,7 +274,7 @@ void ArrowWriter::ready(PointTableRef table)
                                 : std::make_shared<arrow::KeyValueMetadata>();
             if (Utils::iequals("wkb", name))
             {
-                kvMetadata->Append("ARROW:extension:name", "geoarrow.wkb");   
+                kvMetadata->Append("ARROW:extension:name", "geoarrow.wkb");
             }
 
             NL::json dimDetail;
@@ -280,9 +282,9 @@ void ArrowWriter::ready(PointTableRef table)
             dimDetail["description"] = pdal::Dimension::description(id);
             dimDetail["interpretation"] = pdal::Dimension::interpretationName(layout->dimType(id));
             dimDetail["size"] = layout->dimSize(id);
-            kvMetadata->Append("PDAL:dimension:metadata", dimDetail.dump(-1));   
+            kvMetadata->Append("PDAL:dimension:metadata", dimDetail.dump(-1));
 
-            field = field->WithMetadata(kvMetadata); 
+            field = field->WithMetadata(kvMetadata);
             fields.push_back(field);
             m_dimIds.push_back(id);
             log()->get(LogLevel::Info) << "Adding dimension '" << name << "'" << std::endl;
@@ -458,9 +460,8 @@ void ArrowWriter::setupFeather(std::vector<std::shared_ptr<arrow::Array>> const&
     else
     {
         std::stringstream msg;
-        msg << "Unable to open '" << m_filename
-            << "' for arrow output with error "
-            << result.status().ToString();
+        msg << "Unable to open '" << filename() << "' for arrow output with error " <<
+            result.status().ToString();
         throwError(msg.str());
     }
 }
@@ -514,8 +515,8 @@ void ArrowWriter::FlushBatch(PointTableRef table)
 
     if (m_formatType == arrowsupport::Feather)
     {
-        std::shared_ptr<arrow::RecordBatch> batch = arrow::RecordBatch::Make(m_schema, 
-                                                                             m_batchIndex, 
+        std::shared_ptr<arrow::RecordBatch> batch = arrow::RecordBatch::Make(m_schema,
+                                                                             m_batchIndex,
                                                                              m_arrays);
 
         auto result = m_arrowFileWriter->WriteRecordBatch(*batch);
@@ -544,18 +545,16 @@ void ArrowWriter::done(PointTableRef table)
         if (!result.ok())
         {
             std::stringstream msg;
-            msg << "Unable to open to close file writer for file '"
-                << m_filename
-                << "' for with error " << result.ToString();
+            msg << "Unable to open to close file writer for file '" << filename() <<
+                "' for with error " << result.ToString();
             throwError(msg.str());
         }
         result = m_file->Close();
         if (!result.ok())
         {
             std::stringstream msg;
-            msg << "Unable to open to write feather table for file '"
-                << m_filename
-                << "' for with error " << result.ToString();
+            msg << "Unable to open to write feather table for file '" << filename() <<
+                "' for with error " << result.ToString();
             throwError(msg.str());
         }
     }

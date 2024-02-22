@@ -62,7 +62,6 @@ PlyWriter::PlyWriter()
 
 void PlyWriter::addArgs(ProgramArgs& args)
 {
-    args.add("filename", "Output filename", m_filename).setPositional();
     args.add("storage_mode", "PLY Storage Mode", m_format, Format::Ascii);
     args.add("dims", "Dimension names", m_dimNames);
     args.add("faces", "Write faces", m_faces);

@@ -192,12 +192,12 @@ void Processor::writeCompressed(VoxelKey k, PointViewPtr v)
     std::vector<unsigned char> chunk = compressor.done();
     uint64_t location = m_manager.newChunk(k, (uint32_t)chunk.size(), (uint32_t)v->size());
 
-    std::ofstream out(b.opts.filename, std::ios::out | std::ios::in | std::ios::binary);
+    std::ofstream out(b.filename, std::ios::out | std::ios::in | std::ios::binary);
     out.seekp(std::ofstream::pos_type(location));
     out.write(reinterpret_cast<const char *>(chunk.data()), chunk.size());
     out.close();
     if (!out)
-        throw pdal_error("Failure writing to '" + b.opts.filename + "'.");
+        throw pdal_error("Failure writing to '" + b.filename + "'.");
 }
 
 } // namespace copcwriter
