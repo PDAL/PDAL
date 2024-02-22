@@ -89,7 +89,6 @@ constexpr int RootCellCount = int(128 * Sqrt3 / 1.5);
 
 struct Options
 {
-    std::string filename;
     StringList forwardSpec;
     StringList extraDimSpec;
     NumHeaderVal<uint16_t, 0, 65535> filesourceId;
@@ -138,6 +137,7 @@ struct BaseInfo
         stats::Summary("GpsTime", stats::Summary::NoEnum),
         stats::Summary("ReturnNumber", stats::Summary::Enumerate),
     };
+    std::string filename;
 };
 
 } // namespace copcwriter

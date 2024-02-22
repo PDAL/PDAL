@@ -98,7 +98,6 @@ struct FileStreamDeleter
 
 void TextWriter::addArgs(ProgramArgs& args)
 {
-    args.add("filename", "Output filename", m_filename);
     args.add("format", "Output format", m_outputType, OutputType::CSV);
     args.add("jscallback", "", m_callback);
     args.add("keep_unspecified", "Write all dimensions", m_writeAllDims, true);
@@ -159,9 +158,9 @@ bool TextWriter::findDim(Dimension::Id id, DimSpec& ds)
 
 void TextWriter::ready(PointTableRef table)
 {
-    m_stream = FileStreamPtr(Utils::createFile(m_filename, true), FileStreamDeleter());
+    m_stream = FileStreamPtr(Utils::createFile(filename(), true), FileStreamDeleter());
     if (!m_stream)
-        throwError("Couldn't open '" + m_filename + "' for output.");
+        throwError("Couldn't open '" + filename() + "' for output.");
 
     *m_stream << std::fixed;
 
@@ -210,8 +209,7 @@ void TextWriter::ready(PointTableRef table)
 
 void TextWriter::writeHeader(PointTableRef table)
 {
-    log()->get(LogLevel::Debug) << "Writing header to filename: " <<
-        m_filename << std::endl;
+    log()->get(LogLevel::Debug) << "Writing header to filename: " << filename() << std::endl;
     if (m_outputType == OutputType::GEOJSON)
         writeGeoJSONHeader();
     else if (m_outputType == OutputType::CSV)
@@ -333,7 +331,7 @@ void TextWriter::write(const PointViewPtr view)
 void TextWriter::done(PointTableRef /*table*/)
 {
     writeFooter();
-    getMetadata().addList("filename", m_filename);
+    getMetadata().addList("filename", filename());
 }
 
 } // namespace pdal

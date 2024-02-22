@@ -64,8 +64,7 @@ std::string TileKernel::getName() const
 void TileKernel::addSwitches(ProgramArgs& args)
 {
     args.add("input,i", "Input file/path name", m_inputFile).setPositional();
-    args.add("output,o", "Output filename template",
-        m_outputFile).setPositional();
+    args.add("output,o", "Output filename template", m_outputFile).setPositional();
     args.add("length", "Edge length for cells", m_length, 1000.0);
     args.add("origin_x", "Origin in X axis for cells", m_xOrigin,
         std::numeric_limits<double>::quiet_NaN());
@@ -80,6 +79,7 @@ void TileKernel::addSwitches(ProgramArgs& args)
 
 void TileKernel::validateSwitches(ProgramArgs& args)
 {
+    m_outputFile = Writer::replaceTags(m_outputFile);
     m_hashPos = Writer::handleFilenameTemplate(m_outputFile);
     if (m_hashPos == std::string::npos)
         throw pdal_error("Output filename must contain a single '#' "

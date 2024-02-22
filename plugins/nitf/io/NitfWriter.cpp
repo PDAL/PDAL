@@ -107,8 +107,7 @@ void NitfWriter::writeView(const PointViewPtr view)
 }
 
 
-void NitfWriter::readyFile(const std::string& filename,
-    const SpatialReference& srs)
+void NitfWriter::readyFile(const std::string& filename, const SpatialReference& srs)
 {
     m_nitf.setFilename(filename);
 

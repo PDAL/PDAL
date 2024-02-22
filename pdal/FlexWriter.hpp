@@ -50,13 +50,11 @@ protected:
     FlexWriter() : m_filenum(1)
     {}
 
-    std::string m_filename;
     Scaling m_scaling;
 
     void validateFilename(PointTableRef table)
     {
-        if (!table.supportsView() &&
-            (m_filename.find('#') != std::string::npos))
+        if (!table.supportsView() && (filename().find('#') != std::string::npos))
         {
             std::ostringstream oss;
             oss << getName() << ": Can't write with template-based "
@@ -72,7 +70,7 @@ private:
     {
         Writer::l_initialize(table);
         try {
-            m_hashPos = handleFilenameTemplate(m_filename);
+            m_hashPos = handleFilenameTemplate(filename());
         }
         catch (const pdal_error& err)
         {
@@ -82,36 +80,14 @@ private:
 
     std::string generateFilename()
     {
-        std::string filename = m_filename;
+        std::string filename = this->filename();
         if (m_hashPos != std::string::npos)
         {
-            // If we have two #'s, and the string between them
-            // is 'uuid', substitute in a UUID
-            std::string::size_type secondHashPos = filename.find_first_of('#', m_hashPos + 1);
-
-            // one hash is just for the file number increment
-            if (secondHashPos == std::string::npos)
-            {
-                std::string fileCount = std::to_string(m_filenum++);
-                filename.replace(m_hashPos, 1, fileCount);
-            } else
-            {
-                std::string id = filename.substr(m_hashPos, secondHashPos);
-                if (Utils::iequals(id, "UUID"))
-                {
-                    pdal::Uuid u;
-                    filename.replace(m_hashPos, secondHashPos, u.toString());
-                }
-
-            }
-
+            std::string fileCount = std::to_string(m_filenum++);
+            filename.replace(m_hashPos, 1, fileCount);
         }
         return filename;
     }
-
-#if (__GNUG__ < 4 || (__GNUG__ == 4 && __GNUG_MINOR__ < 7))
-#define final final
-#endif
 
     virtual bool srsOverridden() const
     { return false; }
@@ -125,7 +101,7 @@ private:
         {
             if (!table.spatialReferenceUnique() && !srsOverridden())
                 log()->get(LogLevel::Error) << getName() <<
-                    ": Attempting to write '" << m_filename <<
+                    ": Attempting to write '" << filename() <<
                     "' with multiple point spatial references." << std::endl;
             readyFile(generateFilename(), table.spatialReference());
         }

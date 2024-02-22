@@ -53,10 +53,11 @@ namespace pdal
 class PDAL_DLL DracoWriter : public Writer/*, public Streamable*/
 {
 public:
-
     DracoWriter();
     ~DracoWriter();
+
     std::string getName() const;
+
 private:
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize(PointTableRef table);
@@ -83,7 +84,6 @@ private:
     DimensionInfo *findDimInfo(Dimension::Id pt);
 
     std::vector<DimensionInfo> m_dims;
-    std::string m_filename;
     NL::json m_userDimJson;
     //these are the default quanitization levels. They will be overridden by any
     //quantization levels specified in the json argument "quantization"
@@ -100,8 +100,7 @@ private:
 
     FileStreamPtr m_stream;
 
-    std::unique_ptr<draco::PointCloud> m_pc =
-        std::unique_ptr<draco::PointCloud>(new draco::PointCloud());
+    std::unique_ptr<draco::PointCloud> m_pc(new draco::PointCloud());
     int m_precision;
 
     DracoWriter(const DracoWriter&) = delete;

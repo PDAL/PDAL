@@ -92,9 +92,9 @@ std::string DracoWriter::getName() const { return s_info.name; }
 
 void DracoWriter::addArgs(ProgramArgs& args)
 {
-    args.add("filename", "Output filename", m_filename).setPositional();
     args.add("dimensions", "Json mapping of pdal dimensions to desired data types", m_userDimJson);
-    args.add("quantization", "Json mapping of Draco Attributes to desired quantization level", m_userQuant);
+    args.add("quantization", "Json mapping of Draco Attributes to desired quantization level",
+        m_userQuant);
 }
 
 struct FileStreamDeleter
@@ -113,15 +113,16 @@ struct FileStreamDeleter
 
 void DracoWriter::initialize(PointTableRef table)
 {
-    m_stream = FileStreamPtr(Utils::createFile(m_filename, true),
+    m_stream = FileStreamPtr(Utils::createFile(filename(), true),
         FileStreamDeleter());
     if (!m_stream)
-        throwError("Couldn't open '" + m_filename + "' for output.");
+        throwError("Couldn't open '" + filename() + "' for output.");
 
     parseQuants();
 }
 
-void DracoWriter::parseQuants() {
+void DracoWriter::parseQuants()
+{
     if (!m_userQuant.is_object()) {
         if (std::string(m_userQuant.type_name()) == "null") return;
         throw pdal_error("Option 'quantization' must be a JSON object, not a " +

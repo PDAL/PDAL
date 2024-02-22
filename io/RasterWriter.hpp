@@ -54,7 +54,6 @@ private:
     virtual void write(const PointViewPtr view);
     virtual void done(PointTableRef table);
 
-    std::string m_filename;
     std::string m_drivername;
     StringList m_options;
     StringList m_rasterNames;
