@@ -67,7 +67,7 @@ void SparseSurfaceFilter::prepared(PointTableRef table)
 void SparseSurfaceFilter::filter(PointView& view)
 {
     // Step 1: Relabel all points as unclassified
-    for (auto& point : view)
+    for (auto point : view)
         point.setField(Id::Classification, ClassLabel::Unclassified);
 
     // Step 2: Generate a sorted Z index
