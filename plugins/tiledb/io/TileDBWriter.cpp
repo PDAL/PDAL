@@ -488,7 +488,7 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
         }
 
         // Create the TileDB array.
-        tiledb::Array::create(m_arrayName(), schema);
+        tiledb::Array::create(arrayName(), schema);
     }
 
     // Open the array at the requested timestamp range.
