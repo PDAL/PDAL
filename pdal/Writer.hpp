@@ -107,5 +107,11 @@ private:
     std::unique_ptr<Args> m_args;
 };
 
+class PDAL_DLL NoFilenameWriter : public Writer
+{
+public:
+    using Writer::Writer;
+};
+
 } // namespace pdal
 

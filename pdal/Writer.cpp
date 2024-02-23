@@ -83,7 +83,11 @@ void Writer::l_initialize(PointTableRef table)
 void Writer::l_addArgs(ProgramArgs& args)
 {
     Stage::l_addArgs(args);
-    args.add("filename", "Output filename", m_args->filename).setPositional();
+
+    // Only add the filename argument if this isn't a NoFilenameWriter. (This seemed to me
+    // the worst back hack to handle this.)
+    if (!dynamic_cast<NoFilenameWriter *>(this))
+        args.add("filename", "Output filename", m_args->filename).setPositional();
     m_args->whereArg = &args.add("where", "Expression describing points to be passed to this "
         "filter", m_args->where);
     m_args->whereMergeArg = &args.add("where_merge", "If 'where' option is set, describes "
