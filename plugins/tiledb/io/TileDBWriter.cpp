@@ -61,7 +61,6 @@ static PluginInfo const s_info{
 
 struct TileDBWriter::Args
 {
-    std::string m_arrayName;
     std::string m_cfgFileName;
     std::string m_cell_order;
     std::string m_tile_order;
@@ -489,20 +488,19 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
         }
 
         // Create the TileDB array.
-        tiledb::Array::create(m_args->m_arrayName, schema);
+        tiledb::Array::create(m_arrayName(), schema);
     }
 
     // Open the array at the requested timestamp range.
 #if TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR < 15
     if (m_args->m_timeStamp != UINT64_MAX)
-        m_array.reset(new tiledb::Array(*m_ctx, m_args->m_arrayName,
-                                        TILEDB_WRITE, m_args->m_timeStamp));
+        m_array.reset(new tiledb::Array(*m_ctx, arrayName(), TILEDB_WRITE, m_args->m_timeStamp));
     else
         m_array.reset(
-            new tiledb::Array(*m_ctx, m_args->m_arrayName, TILEDB_WRITE));
+            new tiledb::Array(*m_ctx, arrayName(), TILEDB_WRITE));
 #else
     m_array.reset(
-        new tiledb::Array(*m_ctx, m_args->m_arrayName, TILEDB_WRITE,
+        new tiledb::Array(*m_ctx, arrayName(), TILEDB_WRITE,
                           {tiledb::TimeTravelMarker(), m_args->m_timeStamp}));
 #endif
     const auto& schema = m_array->schema();
