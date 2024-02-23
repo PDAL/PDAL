@@ -232,7 +232,7 @@ void exec5(const std::string& where, size_t expKeep)
     ro.add("mode", "ramp");
     r->setOptions(ro);
 
-    class TestWriter : public Writer, public Streamable
+    class TestWriter : public NoFilenameWriter, public Streamable
     {
         std::string getName() const
         { return "writers.test"; }
