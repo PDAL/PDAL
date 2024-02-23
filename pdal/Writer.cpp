@@ -108,8 +108,13 @@ void Writer::l_prepared(PointTableRef table)
 std::string Writer::replaceTags(std::string filename)
 {
     // Replace '#uuid# placeholder with actual uuid.
-    while (auto pos = filename.find("#uuid#") != std::string::npos)
-        filename.replace(pos, 6, Uuid().toString());
+    while (true)
+    {
+        auto pos = filename.find("#uuid#");
+        if (pos == std::string::npos)
+            break;
+        filename.replace(pos, 6, RandomUuid().toString());
+    }
     return filename;
 }
 
