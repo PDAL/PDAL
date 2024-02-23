@@ -188,7 +188,7 @@ void exec4(const std::string& where, size_t expKeep, size_t expViews,
     ro.add("mode", "ramp");
     r->setOptions(ro);
 
-    class TestWriter : public Writer
+    class TestWriter : public NoFilenameWriter
     {
         std::string getName() const
         { return "writers.test"; }
