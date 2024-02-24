@@ -1,7 +1,7 @@
 #
 # TileDB support
 #
-find_package(TileDB QUIET 2.3.0 REQUIRED)
+find_package(TileDB QUIET 2.18.0 REQUIRED)
 
 set_package_properties(TileDB PROPERTIES
         TYPE OPTIONAL
