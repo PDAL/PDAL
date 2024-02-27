@@ -54,7 +54,6 @@ private:
     double m_radius;
 
     virtual void addArgs(ProgramArgs& args);
-    virtual void prepared(PointTableRef table);
     virtual void filter(PointView& view);
 };
 
