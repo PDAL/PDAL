@@ -57,13 +57,6 @@ void SparseSurfaceFilter::addArgs(ProgramArgs& args)
              m_radius, 1.0);
 }
 
-void SparseSurfaceFilter::prepared(PointTableRef table)
-{
-    // const PointLayoutPtr layout(table.layout());
-    // if (!layout->hasDim(Id::HeightAboveGround))
-    //     throwError("Missing HeightAboveGround dimension in input PointView.");
-}
-
 void SparseSurfaceFilter::filter(PointView& view)
 {
     // Step 1: Relabel all points as unclassified
