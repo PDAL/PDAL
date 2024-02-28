@@ -208,6 +208,7 @@ protected:
   using Base::m_computeThinV;
   using Base::m_matrixU;
   using Base::m_matrixV;
+  using Base::m_info;
   using Base::m_isInitialized;
   using Base::m_nonzeroSingularValues;
 
@@ -256,16 +257,25 @@ BDCSVD<MatrixType>& BDCSVD<MatrixType>::compute(const MatrixType& matrix, unsign
   {
     // FIXME this line involves temporaries
     JacobiSVD<MatrixType> jsvd(matrix,computationOptions);
-    if(computeU()) m_matrixU = jsvd.matrixU();
-    if(computeV()) m_matrixV = jsvd.matrixV();
-    m_singularValues = jsvd.singularValues();
-    m_nonzeroSingularValues = jsvd.nonzeroSingularValues();
     m_isInitialized = true;
+    m_info = jsvd.info();
+    if (m_info == Success || m_info == NoConvergence) {
+      if(computeU()) m_matrixU = jsvd.matrixU();
+      if(computeV()) m_matrixV = jsvd.matrixV();
+      m_singularValues = jsvd.singularValues();
+      m_nonzeroSingularValues = jsvd.nonzeroSingularValues();
+    }
     return *this;
   }
   
   //**** step 0 - Copy the input matrix and apply scaling to reduce over/under-flows
-  RealScalar scale = matrix.cwiseAbs().maxCoeff();
+  RealScalar scale = matrix.cwiseAbs().template maxCoeff<PropagateNaN>();
+  if (!(numext::isfinite)(scale)) {
+    m_isInitialized = true;
+    m_info = InvalidInput;
+    return *this;
+  }
+
   if(scale==Literal(0)) scale = Literal(1);
   MatrixX copy;
   if (m_isTranspose) copy = matrix.adjoint()/scale;
@@ -282,7 +292,11 @@ BDCSVD<MatrixType>& BDCSVD<MatrixType>::compute(const MatrixType& matrix, unsign
   m_computed.topRows(m_diagSize) = bid.bidiagonal().toDenseMatrix().transpose();
   m_computed.template bottomRows<1>().setZero();
   divide(0, m_diagSize - 1, 0, 0, 0);
-
+  if (m_info != Success && m_info != NoConvergence) {
+    m_isInitialized = true;
+    return *this;
+  }
+    
   //**** step 3 - Copy singular values and vectors
   for (int i=0; i<m_diagSize; i++)
   {
@@ -394,7 +408,7 @@ void BDCSVD<MatrixType>::structured_update(Block<MatrixXr,Dynamic,Dynamic> A, co
 //@param shift : Each time one takes the left submatrix, one must add 1 to the shift. Why? Because! We actually want the last column of the U submatrix 
 // to become the first column (*coeff) and to shift all the other columns to the right. There are more details on the reference paper.
 template<typename MatrixType>
-void BDCSVD<MatrixType>::divide (Eigen::Index firstCol, Eigen::Index lastCol, Eigen::Index firstRowW, Eigen::Index firstColW, Eigen::Index shift)
+void BDCSVD<MatrixType>::divide(Eigen::Index firstCol, Eigen::Index lastCol, Eigen::Index firstRowW, Eigen::Index firstColW, Eigen::Index shift)
 {
   // requires rows = cols + 1;
   using std::pow;
@@ -414,6 +428,8 @@ void BDCSVD<MatrixType>::divide (Eigen::Index firstCol, Eigen::Index lastCol, Ei
   {
     // FIXME this line involves temporaries
     JacobiSVD<MatrixXr> b(m_computed.block(firstCol, firstCol, n + 1, n), ComputeFullU | (m_compV ? ComputeFullV : 0));
+    m_info = b.info();
+    if (m_info != Success && m_info != NoConvergence) return;
     if (m_compU)
       m_naiveU.block(firstCol, firstCol, n + 1, n + 1).real() = b.matrixU();
     else 
@@ -433,7 +449,9 @@ void BDCSVD<MatrixType>::divide (Eigen::Index firstCol, Eigen::Index lastCol, Ei
   // and the divide of the right submatrice reads one column of the left submatrice. That's why we need to treat the 
   // right submatrix before the left one. 
   divide(k + 1 + firstCol, lastCol, k + 1 + firstRowW, k + 1 + firstColW, shift);
+  if (m_info != Success && m_info != NoConvergence) return;
   divide(firstCol, k - 1 + firstCol, firstRowW, firstColW + 1, shift + 1);
+  if (m_info != Success && m_info != NoConvergence) return;
 
   if (m_compU)
   {
@@ -1330,7 +1348,6 @@ void BDCSVD<MatrixType>::deflation(Eigen::Index firstCol, Eigen::Index lastCol, 
 #endif
 }//end deflation
 
-#if !defined(EIGEN_GPUCC)
 /** \svd_module
   *
   * \return the singular value decomposition of \c *this computed by Divide & Conquer algorithm
@@ -1343,7 +1360,6 @@ MatrixBase<Derived>::bdcSvd(unsigned int computationOptions) const
 {
   return BDCSVD<PlainObject>(*this, computationOptions);
 }
-#endif
 
 } // end namespace Eigen
 

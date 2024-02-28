@@ -78,7 +78,7 @@ template<typename T, typename EnableIf = void> struct get_compile_time_incr {
 
 // Analogue of std::get<0>(x), but tailored for our needs.
 template<typename T>
-Index first(const T& x) { return x.first(); }
+EIGEN_CONSTEXPR Index first(const T& x) EIGEN_NOEXCEPT { return x.first(); }
 
 // IndexedViewCompatibleType/makeIndexedViewCompatible turn an arbitrary object of type T into something usable by MatrixSlice
 // The generic implementation is a no-op
@@ -100,8 +100,8 @@ struct SingleRange {
   };
   SingleRange(Index val) : m_value(val) {}
   Index operator[](Index) const { return m_value; }
-  Index size() const { return 1; }
-  Index first() const { return m_value; }
+  static EIGEN_CONSTEXPR Index size() EIGEN_NOEXCEPT { return 1; }
+  Index first() const EIGEN_NOEXCEPT { return m_value; }
   Index m_value;
 };
 
@@ -141,9 +141,9 @@ template<int XprSize>
 struct AllRange {
   enum { SizeAtCompileTime = XprSize };
   AllRange(Index size = XprSize) : m_size(size) {}
-  Index operator[](Index i) const { return i; }
-  Index size() const { return m_size.value(); }
-  Index first() const { return 0; }
+  EIGEN_CONSTEXPR Index operator[](Index i) const EIGEN_NOEXCEPT { return i; }
+  EIGEN_CONSTEXPR Index size() const EIGEN_NOEXCEPT { return m_size.value(); }
+  EIGEN_CONSTEXPR Index first() const EIGEN_NOEXCEPT { return 0; }
   variable_if_dynamic<Index,XprSize> m_size;
 };
 

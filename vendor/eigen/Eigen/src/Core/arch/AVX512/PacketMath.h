@@ -88,7 +88,7 @@ struct packet_traits<half> : default_packet_traits {
     HasCeil   = 1,
     HasRint   = 1,
     HasBessel = 1,
-    HasNdtri  = 1,
+    HasNdtri  = 1
   };
 };
 
@@ -140,6 +140,7 @@ template<> struct packet_traits<double> : default_packet_traits
     HasHalfPacket = 1,
 #if EIGEN_GNUC_AT_LEAST(5, 3) || (!EIGEN_COMP_GNUC_STRICT)
     HasLog  = 1,
+    HasExp = 1,
     HasSqrt = EIGEN_FAST_MATH,
     HasRsqrt = EIGEN_FAST_MATH,
 #endif
@@ -486,7 +487,7 @@ template<> EIGEN_STRONG_INLINE Packet16f pcmp_lt(const Packet16f& a, const Packe
 }
 
 template<> EIGEN_STRONG_INLINE Packet16f pcmp_lt_or_nan(const Packet16f& a, const Packet16f& b) {
-  __mmask16 mask = _mm512_cmp_ps_mask(a, b, _CMP_NGT_UQ);
+  __mmask16 mask = _mm512_cmp_ps_mask(a, b, _CMP_NGE_UQ);
   return _mm512_castsi512_ps(
       _mm512_mask_set1_epi32(_mm512_set1_epi32(0), mask, 0xffffffffu));
 }
@@ -517,7 +518,7 @@ EIGEN_STRONG_INLINE Packet8d pcmp_lt(const Packet8d& a, const Packet8d& b) {
 }
 template <>
 EIGEN_STRONG_INLINE Packet8d pcmp_lt_or_nan(const Packet8d& a, const Packet8d& b) {
-  __mmask8 mask = _mm512_cmp_pd_mask(a, b, _CMP_NGT_UQ);
+  __mmask8 mask = _mm512_cmp_pd_mask(a, b, _CMP_NGE_UQ);
   return _mm512_castsi512_pd(
       _mm512_mask_set1_epi64(_mm512_set1_epi64(0), mask, 0xffffffffffffffffu));
 }
@@ -895,38 +896,55 @@ EIGEN_STRONG_INLINE Packet8d pabs(const Packet8d& a) {
 
 template<>
 EIGEN_STRONG_INLINE Packet16f pfrexp<Packet16f>(const Packet16f& a, Packet16f& exponent){
-  return pfrexp_float(a, exponent);
+  return pfrexp_generic(a, exponent);
+}
+
+// Extract exponent without existence of Packet8l.
+template<>
+EIGEN_STRONG_INLINE  
+Packet8d pfrexp_generic_get_biased_exponent(const Packet8d& a) {
+  const Packet8d cst_exp_mask  = pset1frombits<Packet8d>(static_cast<uint64_t>(0x7ff0000000000000ull));
+  #ifdef EIGEN_VECTORIZE_AVX512DQ
+  return _mm512_cvtepi64_pd(_mm512_srli_epi64(_mm512_castpd_si512(pand(a, cst_exp_mask)), 52));
+  #else
+  return _mm512_cvtepi32_pd(_mm512_cvtepi64_epi32(_mm512_srli_epi64(_mm512_castpd_si512(pand(a, cst_exp_mask)), 52)));
+  #endif
 }
 
 template<>
 EIGEN_STRONG_INLINE Packet8d pfrexp<Packet8d>(const Packet8d& a, Packet8d& exponent) {
-  const Packet8d cst_1022d = pset1<Packet8d>(1022.0);
-#ifdef EIGEN_TEST_AVX512DQ
-  exponent = psub(_mm512_cvtepi64_pd(_mm512_srli_epi64(_mm512_castpd_si512(a), 52)), cst_1022d);
-#else
-  exponent = psub(_mm512_cvtepi32_pd(_mm512_cvtepi64_epi32(_mm512_srli_epi64(_mm512_castpd_si512(a), 52))),
-                                     cst_1022d);
-#endif
-  const Packet8d cst_half = pset1<Packet8d>(0.5);
-  const Packet8d cst_inv_mant_mask  = pset1frombits<Packet8d>(static_cast<uint64_t>(~0x7ff0000000000000ull));
-  return por(pand(a, cst_inv_mant_mask), cst_half);
+  return pfrexp_generic(a, exponent);
 }
 
 template<> EIGEN_STRONG_INLINE Packet16f pldexp<Packet16f>(const Packet16f& a, const Packet16f& exponent) {
-  return pldexp_float(a,exponent);
+  return pldexp_generic(a, exponent);
 }
 
 template<> EIGEN_STRONG_INLINE Packet8d pldexp<Packet8d>(const Packet8d& a, const Packet8d& exponent) {
-  // Build e=2^n by constructing the exponents in a 256-bit vector and
-  // shifting them to where they belong in double-precision values.
-  Packet8i cst_1023 = pset1<Packet8i>(1023);
-  __m256i emm0 = _mm512_cvtpd_epi32(exponent);
-  emm0 = _mm256_add_epi32(emm0, cst_1023);
-  emm0 = _mm256_shuffle_epi32(emm0, _MM_SHUFFLE(3, 1, 2, 0));
-  __m256i lo = _mm256_slli_epi64(emm0, 52);
-  __m256i hi = _mm256_slli_epi64(_mm256_srli_epi64(emm0, 32), 52);
-  __m512d b = _mm512_castsi512_pd(_mm512_inserti64x4(_mm512_castsi256_si512(lo), hi, 1));
-  return pmul(a, b);
+  // Clamp exponent to [-2099, 2099]
+  const Packet8d max_exponent = pset1<Packet8d>(2099.0);
+  const Packet8i e = _mm512_cvtpd_epi32(pmin(pmax(exponent, pnegate(max_exponent)), max_exponent));
+  
+  // Split 2^e into four factors and multiply.
+  const Packet8i bias = pset1<Packet8i>(1023);
+  Packet8i b = parithmetic_shift_right<2>(e);  // floor(e/4)
+  
+  // 2^b
+  const Packet8i permute_idx = _mm256_setr_epi32(0, 4, 1, 5, 2, 6, 3, 7);
+  Packet8i hi = _mm256_permutevar8x32_epi32(padd(b, bias), permute_idx);
+  Packet8i lo = _mm256_slli_epi64(hi, 52);
+  hi = _mm256_slli_epi64(_mm256_srli_epi64(hi, 32), 52);
+  Packet8d c = _mm512_castsi512_pd(_mm512_inserti64x4(_mm512_castsi256_si512(lo), hi, 1));
+  Packet8d out = pmul(pmul(pmul(a, c), c), c);  // a * 2^(3b)
+  
+  // 2^(e - 3b)
+  b = psub(psub(psub(e, b), b), b);  // e - 3b
+  hi = _mm256_permutevar8x32_epi32(padd(b, bias), permute_idx);
+  lo = _mm256_slli_epi64(hi, 52);
+  hi = _mm256_slli_epi64(_mm256_srli_epi64(hi, 32), 52);
+  c = _mm512_castsi512_pd(_mm512_inserti64x4(_mm512_castsi256_si512(lo), hi, 1));
+  out = pmul(out, c);  // a * 2^e
+  return out;
 }
 
 #ifdef EIGEN_VECTORIZE_AVX512DQ
@@ -1927,23 +1945,15 @@ EIGEN_STRONG_INLINE Packet16f Bf16ToF32(const Packet16bf& a) {
 EIGEN_STRONG_INLINE Packet16bf F32ToBf16(const Packet16f& a) {
   Packet16bf r;
 
-  // Flush input denormals value to zero with hardware capability.
-  _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
-#if defined(EIGEN_VECTORIZE_AVX512DQ)
-  __m512 flush = _mm512_and_ps(a, a);
-#else
-  __m512 flush = _mm512_max_ps(a, a);
-#endif // EIGEN_VECTORIZE_AVX512DQ
-  _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_OFF);
-
 #if defined(EIGEN_VECTORIZE_AVX512BF16) && EIGEN_GNUC_AT_LEAST(10, 1)
   // Since GCC 10.1 supports avx512bf16 and C style explicit cast
   // (C++ static_cast is not supported yet), do converion via intrinsic
   // and register path for performance.
-  r = (__m256i)(_mm512_cvtneps_pbh(flush));
+  r = (__m256i)(_mm512_cvtneps_pbh(a));
+
 #else
   __m512i t;
-  __m512i input = _mm512_castps_si512(flush);
+  __m512i input = _mm512_castps_si512(a);
   __m512i nan = _mm512_set1_epi32(0x7fc0);
 
   // uint32_t lsb = (input >> 16) & 1;
@@ -1956,9 +1966,9 @@ EIGEN_STRONG_INLINE Packet16bf F32ToBf16(const Packet16f& a) {
   t = _mm512_srli_epi32(t, 16);
 
   // Check NaN before converting back to bf16
-  __mmask16 mask = _mm512_cmp_ps_mask(flush, flush, _CMP_ORD_Q);
-  t = _mm512_mask_blend_epi32(mask, nan, t);
+  __mmask16 mask = _mm512_cmp_ps_mask(a, a, _CMP_ORD_Q);
 
+  t = _mm512_mask_blend_epi32(mask, nan, t);
   // output.value = static_cast<uint16_t>(input);
   r = _mm512_cvtepi32_epi16(t);
 #endif // EIGEN_VECTORIZE_AVX512BF16

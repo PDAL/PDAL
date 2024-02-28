@@ -145,7 +145,7 @@ struct evaluator<PartialReduxExpr<ArgType, MemberOp, Direction> >
   enum {
     CoeffReadCost = TraversalSize==Dynamic ? HugeCost
                   : TraversalSize==0 ? 1
-                  : TraversalSize * evaluator<ArgType>::CoeffReadCost + int(CostOpType::value),
+                  : int(TraversalSize) * int(evaluator<ArgType>::CoeffReadCost) + int(CostOpType::value),
     
     _ArgFlags = evaluator<ArgType>::Flags,
 

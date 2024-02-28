@@ -50,11 +50,10 @@
 #include "src/Geometry/Umeyama.h"
 
 // Use the SSE optimized version whenever possible.
-#if defined EIGEN_VECTORIZE_SSE
-#include "src/Geometry/arch/Geometry_SSE.h"
+#if (defined EIGEN_VECTORIZE_SSE) || (defined EIGEN_VECTORIZE_NEON)
+#include "src/Geometry/arch/Geometry_SIMD.h"
 #endif
 
 #include "src/Core/util/ReenableStupidWarnings.h"
 
 #endif // EIGEN_GEOMETRY_MODULE_H
-/* vim: set filetype=cpp et sw=2 ts=2 ai: */

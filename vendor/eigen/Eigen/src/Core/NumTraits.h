@@ -135,9 +135,18 @@ EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC Tgt bit_cast(const Src& src) {
   * \li A dummy_precision() function returning a weak epsilon value. It is mainly used as a default
   *     value by the fuzzy comparison operators.
   * \li highest() and lowest() functions returning the highest and lowest possible values respectively.
+  * \li digits() function returning the number of radix digits (non-sign digits for integers, mantissa for floating-point). This is
+  *     the analogue of <a href="http://en.cppreference.com/w/cpp/types/numeric_limits/digits">std::numeric_limits<T>::digits</a>
+  *     which is used as the default implementation if specialized.
   * \li digits10() function returning the number of decimal digits that can be represented without change. This is
   *     the analogue of <a href="http://en.cppreference.com/w/cpp/types/numeric_limits/digits10">std::numeric_limits<T>::digits10</a>
   *     which is used as the default implementation if specialized.
+  * \li min_exponent() and max_exponent() functions returning the highest and lowest possible values, respectively,
+  *     such that the radix raised to the power exponent-1 is a normalized floating-point number.  These are equivalent to
+  *     <a href="http://en.cppreference.com/w/cpp/types/numeric_limits/min_exponent">std::numeric_limits<T>::min_exponent</a>/
+  *     <a href="http://en.cppreference.com/w/cpp/types/numeric_limits/max_exponent">std::numeric_limits<T>::max_exponent</a>.
+  * \li infinity() function returning a representation of positive infinity, if available.
+  * \li quiet_NaN function returning a non-signaling "not-a-number", if available.
   */
 
 template<typename T> struct GenericNumTraits
@@ -180,12 +189,23 @@ template<typename T> struct GenericNumTraits
   }
 
   EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
+  static inline int min_exponent()
+  {
+    return numext::numeric_limits<T>::min_exponent;
+  }
+
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
+  static inline int max_exponent()
+  {
+    return numext::numeric_limits<T>::max_exponent;
+  }
+
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static inline Real dummy_precision()
   {
     // make sure to override this for floating-point types
     return Real(0);
   }
-
 
   EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static inline T highest() {
@@ -269,9 +289,9 @@ struct NumTraits<Array<Scalar, Rows, Cols, Options, MaxRows, MaxCols> >
     IsInteger = NumTraits<Scalar>::IsInteger,
     IsSigned  = NumTraits<Scalar>::IsSigned,
     RequireInitialization = 1,
-    ReadCost = ArrayType::SizeAtCompileTime==Dynamic ? HugeCost : ArrayType::SizeAtCompileTime * NumTraits<Scalar>::ReadCost,
-    AddCost  = ArrayType::SizeAtCompileTime==Dynamic ? HugeCost : ArrayType::SizeAtCompileTime * NumTraits<Scalar>::AddCost,
-    MulCost  = ArrayType::SizeAtCompileTime==Dynamic ? HugeCost : ArrayType::SizeAtCompileTime * NumTraits<Scalar>::MulCost
+    ReadCost = ArrayType::SizeAtCompileTime==Dynamic ? HugeCost : ArrayType::SizeAtCompileTime * int(NumTraits<Scalar>::ReadCost),
+    AddCost  = ArrayType::SizeAtCompileTime==Dynamic ? HugeCost : ArrayType::SizeAtCompileTime * int(NumTraits<Scalar>::AddCost),
+    MulCost  = ArrayType::SizeAtCompileTime==Dynamic ? HugeCost : ArrayType::SizeAtCompileTime * int(NumTraits<Scalar>::MulCost)
   };
 
   EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
