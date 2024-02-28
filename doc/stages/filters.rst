@@ -44,6 +44,7 @@ Ground/Unclassified
    filters.pmf
    filters.skewnessbalancing
    filters.smrf
+   filters.sparsesurface
    filters.trajectory
 
 :ref:`filters.csf`
@@ -57,6 +58,9 @@ Ground/Unclassified
 
 :ref:`filters.smrf`
     Label ground/non-ground returns using [Pingel2013]_.
+
+:ref:`filters.sparsesurface`
+    Sparsify ground returns and label neighbors as low noise.
 
 :ref:`filters.trajectory`
     Label ground/non-ground returns using estimate flight trajectory given
