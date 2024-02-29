@@ -167,7 +167,7 @@ inline void addStacMetadata(MetadataNode& root, MetadataNode& statsMeta,
             std::string doy = getChild(readerMeta, "creation_doy").value();
             std::string year = getChild(readerMeta, "creation_year").value();
             properties.add("datetime", getDateStr(year, doy));
-        } catch (std::exception &e)
+        } catch (std::exception &)
         {
             auto&& datetime = getChild(infoMeta, "now");
             properties.add("datetime", datetime);

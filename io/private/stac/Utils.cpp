@@ -130,7 +130,7 @@ std::string icSelfPath(const NL::json& json)
                 return jsonValue<std::string>(link, "href");
         }
     }
-    catch(std::runtime_error& e)
+    catch(std::runtime_error& )
     {
         return "";
     }

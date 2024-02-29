@@ -154,7 +154,7 @@ PointlessLas getPointlessLasFile(const std::string& path)
     const bool hasEvlrs = evlrNumber && evlrOffset;
     if (hasEvlrs)
     {
-        const auto evlrs = a.getBinary(path, getRangeHeader(evlrOffset));
+        const auto evlrs = a.getBinary(path, getRangeHeader((int)evlrOffset));
         data.insert(data.end(), evlrs.begin(), evlrs.end());
     }
 

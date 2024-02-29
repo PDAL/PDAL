@@ -124,27 +124,29 @@ public:
         if (ci == m_chunks.begin()) // Should never happen.
             return -1;
         ci--;
-        return std::distance(m_chunks.begin(), ci);
+        size_t distance = std::distance(m_chunks.begin(), ci);
+        return static_cast<int32_t>(distance);
     }
 
     // Find the offset of a point in a chunk. -1 if the offset isn't in the provided chunk.
     int32_t index(uint64_t point, int32_t chunk) const
     {
         if (point > m_chunks[chunk + 1].count || point < m_chunks[chunk].count)
-            return -1;
-        return point - m_chunks[chunk].count;
+            return -1L;
+        return static_cast<int32_t>(point - m_chunks[chunk].count);
     }
 
     // Get the number of points in the chunk.
     uint32_t chunkPoints(int32_t chunk)
     {
-        return m_chunks[chunk + 1].count - m_chunks[chunk].count;
+        size_t sum = m_chunks[chunk + 1].count - m_chunks[chunk].count;
+        return static_cast<uint32_t>(sum);
     }
 
     // Get the ID of the first point in the chunk.
     uint32_t firstPoint(int32_t chunk)
     {
-        return m_chunks[chunk].count;
+        return static_cast<uint32_t>(m_chunks[chunk].count);
     }
 
     // Get the position of the chunk in the file.

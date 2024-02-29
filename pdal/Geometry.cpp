@@ -320,7 +320,6 @@ std::string Geometry::wkb() const
 
     std::string output(m_geom->WkbSize(), '\0');
 
-    char *buf;
     OGRErr err = m_geom->exportToWkb(wkbNDR, (unsigned char*) output.data(), wkbVariantIso);
     if (err != OGRERR_NONE)
         throw pdal_error("Geometry::wkb: unable to export geometry to wkb.");
