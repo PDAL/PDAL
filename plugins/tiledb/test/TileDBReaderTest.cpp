@@ -49,7 +49,6 @@
 #undef DELETE
 #endif
 
-
 #include <tiledb/tiledb>
 
 #include "Support.hpp"
@@ -199,7 +198,8 @@ TEST_F(TileDBReaderTest, read)
 
     tiledb::Array array(ctx, data_path, TILEDB_READ);
 
-    tiledb_datatype_t v_type = (tiledb_datatype_t)std::numeric_limits<int32_t>::max();
+    tiledb_datatype_t v_type =
+        (tiledb_datatype_t)std::numeric_limits<int32_t>::max();
     EXPECT_TRUE(array.has_metadata("dataset_type", &v_type));
     EXPECT_EQ(v_type, TILEDB_STRING_UTF8);
 
@@ -356,10 +356,6 @@ TEST(TileDBRoundTripTest, delta_filter_test)
         writer.setOptions(writerOptions);
         writer.setInput(bufferReader);
         writer.prepare(table);
-#if TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR < 16
-        EXPECT_THROW(writer.execute(table), tiledb::TileDBError);
-    }
-#else
         writer.execute(table);
     }
 
@@ -411,6 +407,5 @@ TEST(TileDBRoundTripTest, delta_filter_test)
                 gpsTimeValues[index]);
         }
     }
-#endif
 }
 }; // namespace pdal

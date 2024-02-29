@@ -74,10 +74,10 @@ class CwiseNullaryOp : public internal::dense_xpr_base< CwiseNullaryOp<NullaryOp
             && (ColsAtCompileTime == Dynamic || ColsAtCompileTime == cols));
     }
 
-    EIGEN_DEVICE_FUNC
-    EIGEN_STRONG_INLINE Index rows() const { return m_rows.value(); }
-    EIGEN_DEVICE_FUNC
-    EIGEN_STRONG_INLINE Index cols() const { return m_cols.value(); }
+    EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE EIGEN_CONSTEXPR
+    Index rows() const { return m_rows.value(); }
+    EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE EIGEN_CONSTEXPR
+    Index cols() const { return m_cols.value(); }
 
     /** \returns the functor representing the nullary operation */
     EIGEN_DEVICE_FUNC
@@ -131,7 +131,7 @@ DenseBase<Derived>::NullaryExpr(Index rows, Index cols, const CustomNullaryOp& f
   *
   * Here is an example with C++11 random generators: \include random_cpp11.cpp
   * Output: \verbinclude random_cpp11.out
-  * 
+  *
   * \sa class CwiseNullaryOp
   */
 template<typename Derived>
@@ -383,6 +383,33 @@ PlainObjectBase<Derived>::setConstant(Index rows, Index cols, const Scalar& val)
   return setConstant(val);
 }
 
+/** Resizes to the given size, changing only the number of columns, and sets all
+  * coefficients in this expression to the given value \a val. For the parameter
+  * of type NoChange_t, just pass the special value \c NoChange.
+  *
+  * \sa MatrixBase::setConstant(const Scalar&), setConstant(Index,const Scalar&), class CwiseNullaryOp, MatrixBase::Constant(const Scalar&)
+  */
+template<typename Derived>
+EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE Derived&
+PlainObjectBase<Derived>::setConstant(NoChange_t, Index cols, const Scalar& val)
+{
+  return setConstant(rows(), cols, val);
+}
+
+/** Resizes to the given size, changing only the number of rows, and sets all
+  * coefficients in this expression to the given value \a val. For the parameter
+  * of type NoChange_t, just pass the special value \c NoChange.
+  *
+  * \sa MatrixBase::setConstant(const Scalar&), setConstant(Index,const Scalar&), class CwiseNullaryOp, MatrixBase::Constant(const Scalar&)
+  */
+template<typename Derived>
+EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE Derived&
+PlainObjectBase<Derived>::setConstant(Index rows, NoChange_t, const Scalar& val)
+{
+  return setConstant(rows, cols(), val);
+}
+
+
 /**
   * \brief Sets a linearly spaced vector.
   *
@@ -556,6 +583,32 @@ PlainObjectBase<Derived>::setZero(Index rows, Index cols)
   return setConstant(Scalar(0));
 }
 
+/** Resizes to the given size, changing only the number of columns, and sets all
+  * coefficients in this expression to zero. For the parameter of type NoChange_t,
+  * just pass the special value \c NoChange.
+  *
+  * \sa DenseBase::setZero(), setZero(Index), setZero(Index, Index), setZero(Index, NoChange_t), class CwiseNullaryOp, DenseBase::Zero()
+  */
+template<typename Derived>
+EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE Derived&
+PlainObjectBase<Derived>::setZero(NoChange_t, Index cols)
+{
+  return setZero(rows(), cols);
+}
+
+/** Resizes to the given size, changing only the number of rows, and sets all
+  * coefficients in this expression to zero. For the parameter of type NoChange_t,
+  * just pass the special value \c NoChange.
+  *
+  * \sa DenseBase::setZero(), setZero(Index), setZero(Index, Index), setZero(NoChange_t, Index), class CwiseNullaryOp, DenseBase::Zero()
+  */
+template<typename Derived>
+EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE Derived&
+PlainObjectBase<Derived>::setZero(Index rows, NoChange_t)
+{
+  return setZero(rows, cols());
+}
+
 // ones:
 
 /** \returns an expression of a matrix where all coefficients equal one.
@@ -680,6 +733,32 @@ PlainObjectBase<Derived>::setOnes(Index rows, Index cols)
 {
   resize(rows, cols);
   return setConstant(Scalar(1));
+}
+
+/** Resizes to the given size, changing only the number of rows, and sets all
+  * coefficients in this expression to one. For the parameter of type NoChange_t,
+  * just pass the special value \c NoChange.
+  *
+ * \sa MatrixBase::setOnes(), setOnes(Index), setOnes(Index, Index), setOnes(NoChange_t, Index), class CwiseNullaryOp, MatrixBase::Ones()
+  */
+template<typename Derived>
+EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE Derived&
+PlainObjectBase<Derived>::setOnes(Index rows, NoChange_t)
+{
+  return setOnes(rows, cols());
+}
+
+/** Resizes to the given size, changing only the number of columns, and sets all
+  * coefficients in this expression to one. For the parameter of type NoChange_t,
+  * just pass the special value \c NoChange.
+  *
+ * \sa MatrixBase::setOnes(), setOnes(Index), setOnes(Index, Index), setOnes(Index, NoChange_t) class CwiseNullaryOp, MatrixBase::Ones()
+  */
+template<typename Derived>
+EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE Derived&
+PlainObjectBase<Derived>::setOnes(NoChange_t, Index cols)
+{
+  return setOnes(rows(), cols);
 }
 
 // Identity:

@@ -70,7 +70,7 @@ struct enable_if_ref<Ref<T>,Derived> {
   * The data of the LU decomposition can be directly accessed through the methods matrixLU(), permutationP().
   *
   * This class supports the \link InplaceDecomposition inplace decomposition \endlink mechanism.
-  * 
+  *
   * \sa MatrixBase::partialPivLu(), MatrixBase::determinant(), MatrixBase::inverse(), MatrixBase::computeInverse(), class FullPivLU
   */
 template<typename _MatrixType> class PartialPivLU
@@ -216,8 +216,8 @@ template<typename _MatrixType> class PartialPivLU
 
     MatrixType reconstructedMatrix() const;
 
-    inline Index rows() const { return m_lu.rows(); }
-    inline Index cols() const { return m_lu.cols(); }
+    EIGEN_CONSTEXPR inline Index rows() const EIGEN_NOEXCEPT { return m_lu.rows(); }
+    EIGEN_CONSTEXPR inline Index cols() const EIGEN_NOEXCEPT { return m_lu.cols(); }
 
     #ifndef EIGEN_PARSED_BY_DOXYGEN
     template<typename RhsType, typename DstType>
@@ -504,8 +504,13 @@ struct partial_lu_impl
 template<typename MatrixType, typename TranspositionType>
 void partial_lu_inplace(MatrixType& lu, TranspositionType& row_transpositions, typename TranspositionType::StorageIndex& nb_transpositions)
 {
+  // Special-case of zero matrix.
+  if (lu.rows() == 0 || lu.cols() == 0) {
+    nb_transpositions = 0;
+    return;
+  }
   eigen_assert(lu.cols() == row_transpositions.size());
-  eigen_assert((&row_transpositions.coeffRef(1)-&row_transpositions.coeffRef(0)) == 1);
+  eigen_assert(row_transpositions.size() < 2 || (&row_transpositions.coeffRef(1)-&row_transpositions.coeffRef(0)) == 1);
 
   partial_lu_impl
     < typename MatrixType::Scalar, MatrixType::Flags&RowMajorBit?RowMajor:ColMajor,

@@ -15,12 +15,16 @@ namespace Eigen {
 namespace internal {
 
 // Read-only data cached load available.
-#if defined(EIGEN_HIP_DEVICE_COMPILE) || EIGEN_CUDA_ARCH >= 350
+#if defined(EIGEN_HIP_DEVICE_COMPILE) || (defined(EIGEN_CUDA_ARCH) && EIGEN_CUDA_ARCH >= 350)
 #define EIGEN_GPU_HAS_LDG 1
 #endif
 
 // FP16 math available.
-#if defined(EIGEN_HIP_DEVICE_COMPILE) || EIGEN_CUDA_ARCH >= 530
+#if (defined(EIGEN_CUDA_ARCH) && EIGEN_CUDA_ARCH >= 530)
+#define EIGEN_CUDA_HAS_FP16_ARITHMETIC 1
+#endif
+
+#if defined(EIGEN_HIP_DEVICE_COMPILE) || defined(EIGEN_CUDA_HAS_FP16_ARITHMETIC)
 #define EIGEN_GPU_HAS_FP16_ARITHMETIC 1
 #endif
 
@@ -603,7 +607,8 @@ EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void pstoreu(Eigen::half* to,
 EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE half2 ploadt_ro_aligned(
     const Eigen::half* from) {
 #if defined(EIGEN_GPU_HAS_LDG)
-  return __ldg((const half2*)from);
+  // Input is guaranteed to be properly aligned.
+  return __ldg(reinterpret_cast<const half2*>(from));
 #else
   return combine_half(*(from+0), *(from+1));
 #endif
@@ -922,7 +927,7 @@ EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE half2 pexpm1(const half2& a) {
   return __floats2half2_rn(r1, r2);
 }
 
-#if (EIGEN_CUDA_SDK_VER >= 80000 && defined EIGEN_CUDA_ARCH && EIGEN_CUDA_ARCH >= 530) || \
+#if (EIGEN_CUDA_SDK_VER >= 80000 && defined(EIGEN_CUDA_HAS_FP16_ARITHMETIC)) || \
   defined(EIGEN_HIP_DEVICE_COMPILE)
 
 EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE
@@ -1033,7 +1038,7 @@ EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE Packet4h2
 ploadt_ro<Packet4h2, Aligned>(const Eigen::half* from) {
 #if defined(EIGEN_GPU_HAS_LDG)
   Packet4h2 r;
-  r = __ldg((const Packet4h2*)from);
+  r = __ldg(reinterpret_cast<const Packet4h2*>(from));
   return r;
 #else
   Packet4h2 r;
@@ -1226,7 +1231,7 @@ plset<Packet4h2>(const Eigen::half& a) {
   p_alias[3] = __halves2half2(__hadd(a, __float2half(6.0f)),
                               __hadd(a, __float2half(7.0f)));
   return r;
-#elif EIGEN_CUDA_ARCH >= 530
+#elif defined(EIGEN_CUDA_HAS_FP16_ARITHMETIC)
   Packet4h2 r;
   half2* r_alias = reinterpret_cast<half2*>(&r);
 
@@ -1478,7 +1483,7 @@ EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE Eigen::half predux_max<Packet4h2>(
                             predux_max(a_alias[3]));
   __half first  = predux_max(m0);
   __half second = predux_max(m1);
-#if EIGEN_CUDA_ARCH >= 530
+#if defined(EIGEN_CUDA_HAS_FP16_ARITHMETIC)
   return (__hgt(first, second) ? first : second);
 #else
   float ffirst  = __half2float(first);
@@ -1497,7 +1502,7 @@ EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE Eigen::half predux_min<Packet4h2>(
                             predux_min(a_alias[3]));
   __half first  = predux_min(m0);
   __half second = predux_min(m1);
-#if EIGEN_CUDA_ARCH >= 530
+#if defined(EIGEN_CUDA_HAS_FP16_ARITHMETIC)
   return (__hlt(first, second) ? first : second);
 #else
   float ffirst  = __half2float(first);
@@ -1669,6 +1674,7 @@ EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE half2 pmax<half2>(const half2& a,
 #endif // defined(EIGEN_HAS_CUDA_FP16) || defined(EIGEN_HAS_HIP_FP16)
 
 #undef EIGEN_GPU_HAS_LDG
+#undef EIGEN_CUDA_HAS_FP16_ARITHMETIC
 #undef EIGEN_GPU_HAS_FP16_ARITHMETIC
 
 } // end namespace internal

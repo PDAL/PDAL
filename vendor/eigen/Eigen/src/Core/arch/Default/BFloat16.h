@@ -67,7 +67,7 @@ struct bfloat16 : public bfloat16_impl::bfloat16_base {
       : bfloat16_impl::bfloat16_base(bfloat16_impl::raw_uint16_to_bfloat16(b ? 0x3f80 : 0)) {}
 
   template<class T>
-  explicit EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR bfloat16(const T& val)
+  explicit EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR bfloat16(T val)
       : bfloat16_impl::bfloat16_base(bfloat16_impl::float_to_bfloat16_rtne<internal::is_integral<T>::value>(static_cast<float>(val))) {}
 
   explicit EIGEN_DEVICE_FUNC bfloat16(float f)
@@ -250,10 +250,6 @@ EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC __bfloat16_raw truncate_to_bfloat16(const 
   if (Eigen::numext::isnan EIGEN_NOT_A_MACRO(v)) {
     output.value = std::signbit(v) ? 0xFFC0: 0x7FC0;
     return output;
-  } else if (std::fabs(v) < std::numeric_limits<float>::min EIGEN_NOT_A_MACRO()) {
-    // Flush denormal to +/- 0.
-    output.value = std::signbit(v) ? 0x8000 : 0;
-    return output;
   }
   const uint16_t* p = reinterpret_cast<const uint16_t*>(&v);
 #if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
@@ -288,9 +284,6 @@ EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC __bfloat16_raw float_to_bfloat16_rtne<fals
     // qNaN magic: All exponent bits set + most significant bit of fraction
     // set.
     output.value = std::signbit(ff) ? 0xFFC0: 0x7FC0;
-  } else if (std::fabs(ff) < std::numeric_limits<float>::min EIGEN_NOT_A_MACRO()) {
-    // Flush denormal to +/- 0.0
-    output.value = std::signbit(ff) ? 0x8000 : 0;
   } else {
     // Fast rounding algorithm that rounds a half value to nearest even. This
     // reduces expected error when we convert a large number of floats. Here
@@ -562,11 +555,14 @@ EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC bfloat16 atanh(const bfloat16& a) {
 EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC bfloat16 floor(const bfloat16& a) {
   return bfloat16(::floorf(float(a)));
 }
+EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC bfloat16 ceil(const bfloat16& a) {
+  return bfloat16(::ceilf(float(a)));
+}
 EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC bfloat16 rint(const bfloat16& a) {
   return bfloat16(::rintf(float(a)));
 }
-EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC bfloat16 ceil(const bfloat16& a) {
-  return bfloat16(::ceilf(float(a)));
+EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC bfloat16 round(const bfloat16& a) {
+  return bfloat16(::roundf(float(a)));
 }
 EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC bfloat16 fmod(const bfloat16& a, const bfloat16& b) {
   return bfloat16(::fmodf(float(a), float(b)));
@@ -655,20 +651,6 @@ template<> struct NumTraits<Eigen::bfloat16>
 
 } // namespace Eigen
 
-namespace std {
-
-#if __cplusplus > 199711L
-template <>
-struct hash<Eigen::bfloat16> {
-  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE std::size_t operator()(const Eigen::bfloat16& a) const {
-    return hash<float>()(static_cast<float>(a));
-  }
-};
-#endif
-
-} // namespace std
-
-
 namespace Eigen {
 namespace numext {
 
@@ -702,5 +684,17 @@ EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC uint16_t bit_cast<uint16_t, Eigen::bfloat1
 
 }  // namespace numext
 }  // namespace Eigen
+
+#if EIGEN_HAS_STD_HASH
+namespace std {
+template <>
+struct hash<Eigen::bfloat16> {
+  EIGEN_STRONG_INLINE std::size_t operator()(const Eigen::bfloat16& a) const {
+    return static_cast<std::size_t>(Eigen::numext::bit_cast<Eigen::numext::uint16_t>(a));
+  }
+};
+} // namespace std
+#endif
+
 
 #endif // EIGEN_BFLOAT16_H
