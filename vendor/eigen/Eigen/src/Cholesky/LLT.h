@@ -199,10 +199,10 @@ template<typename _MatrixType, int _UpLo> class LLT
       * This method is provided for compatibility with other matrix decompositions, thus enabling generic code such as:
       * \code x = decomposition.adjoint().solve(b) \endcode
       */
-    const LLT& adjoint() const { return *this; };
+    const LLT& adjoint() const EIGEN_NOEXCEPT { return *this; };
 
-    inline Index rows() const { return m_matrix.rows(); }
-    inline Index cols() const { return m_matrix.cols(); }
+    inline EIGEN_CONSTEXPR Index rows() const EIGEN_NOEXCEPT { return m_matrix.rows(); }
+    inline EIGEN_CONSTEXPR Index cols() const EIGEN_NOEXCEPT { return m_matrix.cols(); }
 
     template<typename VectorType>
     LLT & rankUpdate(const VectorType& vec, const RealScalar& sigma = 1);

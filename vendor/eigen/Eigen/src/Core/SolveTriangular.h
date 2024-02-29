@@ -168,7 +168,7 @@ EIGEN_DEVICE_FUNC void TriangularViewImpl<MatrixType,Mode,Dense>::solveInPlace(c
 {
   OtherDerived& other = _other.const_cast_derived();
   eigen_assert( derived().cols() == derived().rows() && ((Side==OnTheLeft && derived().cols() == other.rows()) || (Side==OnTheRight && derived().cols() == other.cols())) );
-  eigen_assert((!(Mode & ZeroDiag)) && bool(Mode & (Upper|Lower)));
+  eigen_assert((!(int(Mode) & int(ZeroDiag))) && bool(int(Mode) & (int(Upper) | int(Lower))));
   // If solving for a 0x0 matrix, nothing to do, simply return.
   if (derived().cols() == 0)
     return;
@@ -213,8 +213,8 @@ template<int Side, typename TriangularType, typename Rhs> struct triangular_solv
     : m_triangularMatrix(tri), m_rhs(rhs)
   {}
 
-  inline Index rows() const { return m_rhs.rows(); }
-  inline Index cols() const { return m_rhs.cols(); }
+  inline EIGEN_CONSTEXPR Index rows() const EIGEN_NOEXCEPT { return m_rhs.rows(); }
+  inline EIGEN_CONSTEXPR Index cols() const EIGEN_NOEXCEPT { return m_rhs.cols(); }
 
   template<typename Dest> inline void evalTo(Dest& dst) const
   {

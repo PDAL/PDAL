@@ -68,6 +68,7 @@ jobs:
 
     - name: Install dependencies
       run: |
+          sudo apt-get update
           sudo apt-get install -y \
             ccache cmake g++ \
             libcurl4-gnutls-dev \

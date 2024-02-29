@@ -63,10 +63,38 @@ struct half;
 
 namespace half_impl {
 
-#if !defined(EIGEN_HAS_GPU_FP16)
+// We want to use the __half_raw struct from the HIP header file only during the device compile phase.
+// This is required because of a quirk in the way TensorFlow GPU builds are done.
+// When compiling TensorFlow source code with GPU support, files that
+//  * contain GPU kernels (i.e. *.cu.cc files) are compiled via hipcc
+//  * do not contain GPU kernels ( i.e. *.cc files) are compiled via gcc (typically)
+//
+// Tensorflow uses the Eigen::half type as its FP16 type, and there are functions that
+//  * are defined in a file that gets compiled via hipcc AND
+//  * have Eigen::half as a pass-by-value argument AND
+//  * are called in a file that gets compiled via gcc
+//
+// In the scenario described above the caller and callee will see different versions
+// of the Eigen::half base class __half_raw, and they will be compiled by different compilers
+//
+// There appears to be an ABI mismatch between gcc and clang (which is called by hipcc) that results in
+// the callee getting corrupted values for the Eigen::half argument.
+//
+// Making the host side compile phase of hipcc use the same Eigen::half impl, as the gcc compile, resolves
+// this error, and hence the following convoluted #if condition
+#if !defined(EIGEN_HAS_GPU_FP16) || !defined(EIGEN_GPU_COMPILE_PHASE)
 // Make our own __half_raw definition that is similar to CUDA's.
 struct __half_raw {
+#if (defined(EIGEN_HAS_GPU_FP16) && !defined(EIGEN_GPU_COMPILE_PHASE))
+  // Eigen::half can be used as the datatype for shared memory declarations (in Eigen and TF)
+  // The element type for shared memory cannot have non-trivial constructors
+  // and hence the following special casing (which skips the zero-initilization).
+  // Note that this check gets done even in the host compilation phase, and
+  // hence the need for this
+  EIGEN_DEVICE_FUNC __half_raw() {}
+#else
   EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR __half_raw() : x(0) {}
+#endif
 #if defined(EIGEN_HAS_ARM64_FP16_SCALAR_ARITHMETIC)
   explicit EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR __half_raw(numext::uint16_t raw) : x(numext::bit_cast<__fp16>(raw)) {
   }
@@ -115,7 +143,10 @@ struct half : public half_impl::half_base {
 
   // Writing this out as separate #if-else blocks to make the code easier to follow
   // The same applies to most #if-else blocks in this file
-#if !defined(EIGEN_HAS_GPU_FP16)
+#if !defined(EIGEN_HAS_GPU_FP16) || !defined(EIGEN_GPU_COMPILE_PHASE)
+  // Use the same base class for the following two scenarios
+  // * when compiling without GPU support enabled
+  // * during host compile phase when compiling with GPU support enabled
   typedef half_impl::__half_raw __half_raw;
 #elif defined(EIGEN_HAS_HIP_FP16)
   // Nothing to do here
@@ -147,7 +178,7 @@ struct half : public half_impl::half_base {
   explicit EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR half(bool b)
       : half_impl::half_base(half_impl::raw_uint16_to_half(b ? 0x3c00 : 0)) {}
   template<class T>
-  explicit EIGEN_DEVICE_FUNC half(const T& val)
+  explicit EIGEN_DEVICE_FUNC half(T val)
       : half_impl::half_base(half_impl::float_to_half_rtne(static_cast<float>(val))) {}
   explicit EIGEN_DEVICE_FUNC half(float f)
       : half_impl::half_base(half_impl::float_to_half_rtne(f)) {}
@@ -161,6 +192,14 @@ struct half : public half_impl::half_base {
    EIGEN_DEVICE_FUNC operator float() const {  // NOLINT: Allow implicit conversion to float, because it is lossless.
     return half_impl::half_to_float(*this);
   }
+
+#if defined(EIGEN_HAS_GPU_FP16) && !defined(EIGEN_GPU_COMPILE_PHASE)
+  EIGEN_DEVICE_FUNC operator __half() const {
+    ::__half_raw hr;
+    hr.x = x;
+    return __half(hr);
+  }
+#endif
 };
 
 } // end namespace Eigen
@@ -426,6 +465,28 @@ EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC half operator / (const half& a, Index b) {
   return half(static_cast<float>(a) / static_cast<float>(b));
 }
 
+EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC half operator++(half& a) {
+  a += half(1);
+  return a;
+}
+
+EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC half operator--(half& a) {
+  a -= half(1);
+  return a;
+}
+
+EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC half operator++(half& a, int) {
+  half original_value = a;
+  ++a;
+  return original_value;
+}
+
+EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC half operator--(half& a, int) {
+  half original_value = a;
+  --a;
+  return original_value;
+}
+
 // Conversion routines, including fallbacks for the host or older CUDA.
 // Note that newer Intel CPUs (Haswell or newer) have vectorized versions of
 // these in hardware. If we need more performance on older/other CPUs, they are
@@ -657,9 +718,6 @@ EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC half floor(const half& a) {
   return half(::floorf(float(a)));
 #endif
 }
-EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC half rint(const half& a) {
-  return half(::rintf(float(a)));
-}
 EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC half ceil(const half& a) {
 #if (EIGEN_CUDA_SDK_VER >= 80000 && defined EIGEN_CUDA_ARCH && EIGEN_CUDA_ARCH >= 300) || \
   defined(EIGEN_HIP_DEVICE_COMPILE)
@@ -667,6 +725,15 @@ EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC half ceil(const half& a) {
 #else
   return half(::ceilf(float(a)));
 #endif
+}
+EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC half rint(const half& a) {
+  return half(::rintf(float(a)));
+}
+EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC half round(const half& a) {
+  return half(::roundf(float(a)));
+}
+EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC half fmod(const half& a, const half& b) {
+  return half(::fmodf(float(a), float(b)));
 }
 
 EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC half (min)(const half& a, const half& b) {
@@ -757,19 +824,6 @@ template<> struct NumTraits<Eigen::half>
   #pragma pop_macro("EIGEN_CONSTEXPR")
 #endif
 
-namespace std {
-
-#if __cplusplus > 199711L
-template <>
-struct hash<Eigen::half> {
-  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE std::size_t operator()(const Eigen::half& a) const {
-    return static_cast<std::size_t>(a.x);
-  }
-};
-#endif
-
-} // end namespace std
-
 namespace Eigen {
 namespace numext {
 
@@ -822,19 +876,23 @@ EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC uint16_t bit_cast<uint16_t, Eigen::half>(c
 #if defined(EIGEN_HAS_CUDA_FP16) && EIGEN_CUDA_SDK_VER >= 90000
 
 __device__ EIGEN_STRONG_INLINE Eigen::half __shfl_sync(unsigned mask, Eigen::half var, int srcLane, int width=warpSize) {
-  return static_cast<Eigen::half>(__shfl_sync(mask, static_cast<__half>(var), srcLane, width));
+  const __half h = var;
+  return static_cast<Eigen::half>(__shfl_sync(mask, h, srcLane, width));
 }
 
 __device__ EIGEN_STRONG_INLINE Eigen::half __shfl_up_sync(unsigned mask, Eigen::half var, unsigned int delta, int width=warpSize) {
-  return static_cast<Eigen::half>(__shfl_up_sync(mask, static_cast<__half>(var), delta, width));
+  const __half h = var;
+  return static_cast<Eigen::half>(__shfl_up_sync(mask, h, delta, width));
 }
 
 __device__ EIGEN_STRONG_INLINE Eigen::half __shfl_down_sync(unsigned mask, Eigen::half var, unsigned int delta, int width=warpSize) {
-  return static_cast<Eigen::half>(__shfl_down_sync(mask, static_cast<__half>(var), delta, width));
+  const __half h = var;
+  return static_cast<Eigen::half>(__shfl_down_sync(mask, h, delta, width));
 }
 
 __device__ EIGEN_STRONG_INLINE Eigen::half __shfl_xor_sync(unsigned mask, Eigen::half var, int laneMask, int width=warpSize) {
-  return static_cast<Eigen::half>(__shfl_xor_sync(mask, static_cast<__half>(var), laneMask, width));
+  const __half h = var;
+  return static_cast<Eigen::half>(__shfl_xor_sync(mask, h, laneMask, width));
 }
 
 #else // HIP or CUDA SDK < 9.0
@@ -869,5 +927,16 @@ EIGEN_STRONG_INLINE __device__ Eigen::half __ldg(const Eigen::half* ptr) {
   return Eigen::half_impl::raw_uint16_to_half(__ldg(reinterpret_cast<const Eigen::numext::uint16_t*>(ptr)));
 }
 #endif // __ldg
+
+#if EIGEN_HAS_STD_HASH
+namespace std {
+template <>
+struct hash<Eigen::half> {
+  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE std::size_t operator()(const Eigen::half& a) const {
+    return static_cast<std::size_t>(Eigen::numext::bit_cast<Eigen::numext::uint16_t>(a));
+  }
+};
+} // end namespace std
+#endif
 
 #endif // EIGEN_HALF_H

@@ -579,10 +579,12 @@ class SparseMatrix
       else if (innerChange < 0) 
       {
         // Inner size decreased: allocate a new m_innerNonZeros
-        m_innerNonZeros = static_cast<StorageIndex*>(std::malloc((m_outerSize+outerChange+1) * sizeof(StorageIndex)));
+        m_innerNonZeros = static_cast<StorageIndex*>(std::malloc((m_outerSize + outerChange) * sizeof(StorageIndex)));
         if (!m_innerNonZeros) internal::throw_std_bad_alloc();
-        for(Index i = 0; i < m_outerSize; i++)
+        for(Index i = 0; i < m_outerSize + (std::min)(outerChange, Index(0)); i++)
           m_innerNonZeros[i] = m_outerIndex[i+1] - m_outerIndex[i];
+        for(Index i = m_outerSize; i < m_outerSize + outerChange; i++)
+          m_innerNonZeros[i] = 0;
       }
       
       // Change the m_innerNonZeros in case of a decrease of inner size

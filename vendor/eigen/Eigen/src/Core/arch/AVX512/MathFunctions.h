@@ -119,77 +119,40 @@ pexp<Packet16f>(const Packet16f& _x) {
   return pmax(pmul(y, _mm512_castsi512_ps(emm0)), _x);
 }
 
-/*template <>
+template <>
 EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet8d
 pexp<Packet8d>(const Packet8d& _x) {
-  Packet8d x = _x;
-
-  _EIGEN_DECLARE_CONST_Packet8d(1, 1.0);
-  _EIGEN_DECLARE_CONST_Packet8d(2, 2.0);
-
-  _EIGEN_DECLARE_CONST_Packet8d(exp_hi, 709.437);
-  _EIGEN_DECLARE_CONST_Packet8d(exp_lo, -709.436139303);
-
-  _EIGEN_DECLARE_CONST_Packet8d(cephes_LOG2EF, 1.4426950408889634073599);
-
-  _EIGEN_DECLARE_CONST_Packet8d(cephes_exp_p0, 1.26177193074810590878e-4);
-  _EIGEN_DECLARE_CONST_Packet8d(cephes_exp_p1, 3.02994407707441961300e-2);
-  _EIGEN_DECLARE_CONST_Packet8d(cephes_exp_p2, 9.99999999999999999910e-1);
-
-  _EIGEN_DECLARE_CONST_Packet8d(cephes_exp_q0, 3.00198505138664455042e-6);
-  _EIGEN_DECLARE_CONST_Packet8d(cephes_exp_q1, 2.52448340349684104192e-3);
-  _EIGEN_DECLARE_CONST_Packet8d(cephes_exp_q2, 2.27265548208155028766e-1);
-  _EIGEN_DECLARE_CONST_Packet8d(cephes_exp_q3, 2.00000000000000000009e0);
-
-  _EIGEN_DECLARE_CONST_Packet8d(cephes_exp_C1, 0.693145751953125);
-  _EIGEN_DECLARE_CONST_Packet8d(cephes_exp_C2, 1.42860682030941723212e-6);
-
-  // clamp x
-  x = pmax(pmin(x, p8d_exp_hi), p8d_exp_lo);
-
-  // Express exp(x) as exp(g + n*log(2)).
-  const Packet8d n =
-      _mm512_mul_round_pd(p8d_cephes_LOG2EF, x, _MM_FROUND_TO_NEAREST_INT);
-
-  // Get the remainder modulo log(2), i.e. the "g" described above. Subtract
-  // n*log(2) out in two steps, i.e. n*C1 + n*C2, C1+C2=log2 to get the last
-  // digits right.
-  const Packet8d nC1 = pmul(n, p8d_cephes_exp_C1);
-  const Packet8d nC2 = pmul(n, p8d_cephes_exp_C2);
-  x = psub(x, nC1);
-  x = psub(x, nC2);
-
-  const Packet8d x2 = pmul(x, x);
-
-  // Evaluate the numerator polynomial of the rational interpolant.
-  Packet8d px = p8d_cephes_exp_p0;
-  px = pmadd(px, x2, p8d_cephes_exp_p1);
-  px = pmadd(px, x2, p8d_cephes_exp_p2);
-  px = pmul(px, x);
-
-  // Evaluate the denominator polynomial of the rational interpolant.
-  Packet8d qx = p8d_cephes_exp_q0;
-  qx = pmadd(qx, x2, p8d_cephes_exp_q1);
-  qx = pmadd(qx, x2, p8d_cephes_exp_q2);
-  qx = pmadd(qx, x2, p8d_cephes_exp_q3);
-
-  // I don't really get this bit, copied from the SSE2 routines, so...
-  // TODO(gonnet): Figure out what is going on here, perhaps find a better
-  // rational interpolant?
-  x = _mm512_div_pd(px, psub(qx, px));
-  x = pmadd(p8d_2, x, p8d_1);
-
-  // Build e=2^n.
-  const Packet8d e = _mm512_castsi512_pd(_mm512_slli_epi64(
-      _mm512_add_epi64(_mm512_cvtpd_epi64(n), _mm512_set1_epi64(1023)), 52));
-
-  // Construct the result 2^n * exp(g) = e * x. The max is used to catch
-  // non-finite values in the input.
-  return pmax(pmul(x, e), _x);
-  }*/
+  return pexp_double(_x);
+}
 
 F16_PACKET_FUNCTION(Packet16f, Packet16h, pexp)
 BF16_PACKET_FUNCTION(Packet16f, Packet16bf, pexp)
+
+template <>
+EIGEN_STRONG_INLINE Packet16h pfrexp(const Packet16h& a, Packet16h& exponent) {
+  Packet16f fexponent;
+  const Packet16h out = float2half(pfrexp<Packet16f>(half2float(a), fexponent));
+  exponent = float2half(fexponent);
+  return out;
+}
+
+template <>
+EIGEN_STRONG_INLINE Packet16h pldexp(const Packet16h& a, const Packet16h& exponent) {
+  return float2half(pldexp<Packet16f>(half2float(a), half2float(exponent)));
+}
+
+template <>
+EIGEN_STRONG_INLINE Packet16bf pfrexp(const Packet16bf& a, Packet16bf& exponent) {
+  Packet16f fexponent;
+  const Packet16bf out = F32ToBf16(pfrexp<Packet16f>(Bf16ToF32(a), fexponent));
+  exponent = F32ToBf16(fexponent);
+  return out;
+}
+
+template <>
+EIGEN_STRONG_INLINE Packet16bf pldexp(const Packet16bf& a, const Packet16bf& exponent) {
+  return F32ToBf16(pldexp<Packet16f>(Bf16ToF32(a), Bf16ToF32(exponent)));
+}
 
 // Functions for sqrt.
 // The EIGEN_FAST_MATH version uses the _mm_rsqrt_ps approximation and one step

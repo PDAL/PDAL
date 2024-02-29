@@ -191,6 +191,7 @@ Pointwise Features
    filters.radialdensity
    filters.reciprocity
    filters.zsmooth
+   filters.griddecimation
 
 :ref:`filters.approximatecoplanar`
     Estimate pointwise planarity, based on k-nearest neighbors. Returns a new
@@ -237,6 +238,9 @@ Pointwise Features
 
 :ref:`filters.zsmooth`
     Compute a smoothed 'Z' value based on the 'Z' value of neighboring points.
+
+:ref:`filters.griddecimation`
+    Assign values for one point (the highest or lowest) per cell of a 2d regular grid.
 
 Assignment
 ..........
