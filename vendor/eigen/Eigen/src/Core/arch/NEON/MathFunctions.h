@@ -44,6 +44,18 @@ BF16_PACKET_FUNCTION(Packet4f, Packet4bf, plog)
 BF16_PACKET_FUNCTION(Packet4f, Packet4bf, pexp)
 BF16_PACKET_FUNCTION(Packet4f, Packet4bf, ptanh)
 
+template <>
+EIGEN_STRONG_INLINE Packet4bf pfrexp(const Packet4bf& a, Packet4bf& exponent) {
+  Packet4f fexponent;
+  const Packet4bf out = F32ToBf16(pfrexp<Packet4f>(Bf16ToF32(a), fexponent));
+  exponent = F32ToBf16(fexponent);
+  return out;
+}
+
+template <>
+EIGEN_STRONG_INLINE Packet4bf pldexp(const Packet4bf& a, const Packet4bf& exponent) {
+  return F32ToBf16(pldexp<Packet4f>(Bf16ToF32(a), Bf16ToF32(exponent)));
+}
 
 //---------- double ----------
 

@@ -74,7 +74,7 @@ class CwiseBinaryOpImpl;
   * \sa MatrixBase::binaryExpr(const MatrixBase<OtherDerived> &,const CustomBinaryOp &) const, class CwiseUnaryOp, class CwiseNullaryOp
   */
 template<typename BinaryOp, typename LhsType, typename RhsType>
-class CwiseBinaryOp : 
+class CwiseBinaryOp :
   public CwiseBinaryOpImpl<
           BinaryOp, LhsType, RhsType,
           typename internal::cwise_promote_storage_type<typename internal::traits<LhsType>::StorageKind,
@@ -83,7 +83,7 @@ class CwiseBinaryOp :
   internal::no_assignment_operator
 {
   public:
-    
+
     typedef typename internal::remove_all<BinaryOp>::type Functor;
     typedef typename internal::remove_all<LhsType>::type Lhs;
     typedef typename internal::remove_all<RhsType>::type Rhs;
@@ -102,7 +102,7 @@ class CwiseBinaryOp :
 
 #if EIGEN_COMP_MSVC && EIGEN_HAS_CXX11
     //Required for Visual Studio or the Copy constructor will probably not get inlined!
-    EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE
+    EIGEN_STRONG_INLINE
     CwiseBinaryOp(const CwiseBinaryOp<BinaryOp,LhsType,RhsType>&) = default;
 #endif
 
@@ -116,21 +116,15 @@ class CwiseBinaryOp :
       eigen_assert(aLhs.rows() == aRhs.rows() && aLhs.cols() == aRhs.cols());
     }
 
-    EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE
-    Index rows() const {
+    EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE EIGEN_CONSTEXPR
+    Index rows() const EIGEN_NOEXCEPT {
       // return the fixed size type if available to enable compile time optimizations
-      if (internal::traits<typename internal::remove_all<LhsNested>::type>::RowsAtCompileTime==Dynamic)
-        return m_rhs.rows();
-      else
-        return m_lhs.rows();
+      return internal::traits<typename internal::remove_all<LhsNested>::type>::RowsAtCompileTime==Dynamic ? m_rhs.rows() : m_lhs.rows();
     }
-    EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE
-    Index cols() const {
+    EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE EIGEN_CONSTEXPR
+    Index cols() const EIGEN_NOEXCEPT {
       // return the fixed size type if available to enable compile time optimizations
-      if (internal::traits<typename internal::remove_all<LhsNested>::type>::ColsAtCompileTime==Dynamic)
-        return m_rhs.cols();
-      else
-        return m_lhs.cols();
+      return internal::traits<typename internal::remove_all<LhsNested>::type>::ColsAtCompileTime==Dynamic ? m_rhs.cols() : m_lhs.cols();
     }
 
     /** \returns the left hand side nested expression */

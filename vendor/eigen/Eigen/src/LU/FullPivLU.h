@@ -404,8 +404,10 @@ template<typename _MatrixType> class FullPivLU
 
     MatrixType reconstructedMatrix() const;
 
-    EIGEN_DEVICE_FUNC inline Index rows() const { return m_lu.rows(); }
-    EIGEN_DEVICE_FUNC inline Index cols() const { return m_lu.cols(); }
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
+    inline Index rows() const EIGEN_NOEXCEPT { return m_lu.rows(); }
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
+    inline Index cols() const EIGEN_NOEXCEPT { return m_lu.cols(); }
 
     #ifndef EIGEN_PARSED_BY_DOXYGEN
     template<typename RhsType, typename DstType>

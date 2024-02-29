@@ -125,19 +125,10 @@ void TileDBReader::initialize()
         if (m_args->m_stats)
             tiledb::Stats::enable();
 
-#if TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR < 15
-        m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ));
-        if (m_args->m_startTimeStamp != 0)
-            m_array->set_open_timestamp_start(m_args->m_startTimeStamp);
-        if (m_args->m_endTimeStamp != UINT64_MAX)
-            m_array->set_open_timestamp_end(m_args->m_endTimeStamp);
-        m_array->reopen();
-#else
         m_array.reset(new tiledb::Array(*m_ctx, m_filename, TILEDB_READ,
                                         {tiledb::TimestampStartEndMarker(),
                                          m_args->m_startTimeStamp,
                                          m_args->m_endTimeStamp}));
-#endif
     }
     catch (const tiledb::TileDBError& err)
     {

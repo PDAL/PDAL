@@ -2,6 +2,7 @@
 // for linear algebra.
 //
 // Copyright (C) 2006-2010 Benoit Jacob <jacob.benoit.1@gmail.com>
+// Copyright (c) 2021, NVIDIA CORPORATION. All rights reserved.
 //
 // This Source Code Form is subject to the terms of the Mozilla
 // Public License v. 2.0. If a copy of the MPL was not distributed
@@ -214,12 +215,12 @@ struct imag_ref_default_impl
 template<typename Scalar>
 struct imag_ref_default_impl<Scalar, false>
 {
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static inline Scalar run(Scalar&)
   {
     return Scalar(0);
   }
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static inline const Scalar run(const Scalar&)
   {
     return Scalar(0);
@@ -260,19 +261,8 @@ struct conj_default_impl<Scalar,true>
   }
 };
 
-template<typename Scalar> struct conj_impl : conj_default_impl<Scalar> {};
-
-#if defined(EIGEN_GPU_COMPILE_PHASE)
-template<typename T>
-struct conj_impl<std::complex<T> >
-{
-  EIGEN_DEVICE_FUNC
-  static inline std::complex<T> run(const std::complex<T>& x)
-  {
-    return std::complex<T>(x.real(), -x.imag());
-  }
-};
-#endif
+template<typename Scalar, bool IsComplex = NumTraits<Scalar>::IsComplex>
+struct conj_impl : conj_default_impl<Scalar, IsComplex> {};
 
 template<typename Scalar>
 struct conj_retval
@@ -321,6 +311,65 @@ template<typename Scalar>
 struct abs2_retval
 {
   typedef typename NumTraits<Scalar>::Real type;
+};
+
+/****************************************************************************
+* Implementation of sqrt/rsqrt                                             *
+****************************************************************************/
+
+template<typename Scalar>
+struct sqrt_impl
+{
+  EIGEN_DEVICE_FUNC
+  static EIGEN_ALWAYS_INLINE Scalar run(const Scalar& x)
+  {
+    EIGEN_USING_STD(sqrt);
+    return sqrt(x);
+  }
+};
+
+// Complex sqrt defined in MathFunctionsImpl.h.
+template<typename T> EIGEN_DEVICE_FUNC std::complex<T> complex_sqrt(const std::complex<T>& a_x);
+
+// Custom implementation is faster than `std::sqrt`, works on
+// GPU, and correctly handles special cases (unlike MSVC).
+template<typename T>
+struct sqrt_impl<std::complex<T> >
+{
+  EIGEN_DEVICE_FUNC
+  static EIGEN_ALWAYS_INLINE std::complex<T> run(const std::complex<T>& x)
+  {
+    return complex_sqrt<T>(x);
+  }
+};
+
+template<typename Scalar>
+struct sqrt_retval
+{
+  typedef Scalar type;
+};
+
+// Default implementation relies on numext::sqrt, at bottom of file.
+template<typename T>
+struct rsqrt_impl;
+
+// Complex rsqrt defined in MathFunctionsImpl.h.
+template<typename T> EIGEN_DEVICE_FUNC std::complex<T> complex_rsqrt(const std::complex<T>& a_x);
+
+template<typename T>
+struct rsqrt_impl<std::complex<T> >
+{
+  EIGEN_DEVICE_FUNC
+  static EIGEN_ALWAYS_INLINE std::complex<T> run(const std::complex<T>& x)
+  {
+    return complex_rsqrt<T>(x);
+  }
+};
+
+template<typename Scalar>
+struct rsqrt_retval
+{
+  typedef Scalar type;
 };
 
 /****************************************************************************
@@ -417,31 +466,59 @@ inline NewType cast(const OldType& x)
 * Implementation of round                                                   *
 ****************************************************************************/
 
-#if EIGEN_HAS_CXX11_MATH
-  template<typename Scalar>
-  struct round_impl {
-    EIGEN_DEVICE_FUNC
-    static inline Scalar run(const Scalar& x)
-    {
-      EIGEN_STATIC_ASSERT((!NumTraits<Scalar>::IsComplex), NUMERIC_TYPE_MUST_BE_REAL)
-      EIGEN_USING_STD(round);
-      return Scalar(round(x));
-    }
-  };
-#else
-  template<typename Scalar>
-  struct round_impl
+template<typename Scalar>
+struct round_impl
+{
+  EIGEN_DEVICE_FUNC
+  static inline Scalar run(const Scalar& x)
   {
-    EIGEN_DEVICE_FUNC
-    static inline Scalar run(const Scalar& x)
-    {
-      EIGEN_STATIC_ASSERT((!NumTraits<Scalar>::IsComplex), NUMERIC_TYPE_MUST_BE_REAL)
-      EIGEN_USING_STD(floor);
-      EIGEN_USING_STD(ceil);
-      return (x > Scalar(0)) ? floor(x + Scalar(0.5)) : ceil(x - Scalar(0.5));
-    }
-  };
+    EIGEN_STATIC_ASSERT((!NumTraits<Scalar>::IsComplex), NUMERIC_TYPE_MUST_BE_REAL)
+#if EIGEN_HAS_CXX11_MATH
+    EIGEN_USING_STD(round);
 #endif
+    return Scalar(round(x));
+  }
+};
+
+#if !EIGEN_HAS_CXX11_MATH
+#if EIGEN_HAS_C99_MATH
+// Use ::roundf for float.
+template<>
+struct round_impl<float> {
+  EIGEN_DEVICE_FUNC
+  static inline float run(const float& x)
+  {
+    return ::roundf(x);
+  }
+};
+#else
+template<typename Scalar>
+struct round_using_floor_ceil_impl
+{
+  EIGEN_DEVICE_FUNC
+  static inline Scalar run(const Scalar& x)
+  {
+    EIGEN_STATIC_ASSERT((!NumTraits<Scalar>::IsComplex), NUMERIC_TYPE_MUST_BE_REAL)
+    // Without C99 round/roundf, resort to floor/ceil.
+    EIGEN_USING_STD(floor);
+    EIGEN_USING_STD(ceil);
+    // If not enough precision to resolve a decimal at all, return the input.
+    // Otherwise, adding 0.5 can trigger an increment by 1.
+    const Scalar limit = Scalar(1ull << (NumTraits<Scalar>::digits() - 1));
+    if (x >= limit || x <= -limit) {
+      return x;
+    }
+    return (x > Scalar(0)) ? Scalar(floor(x + Scalar(0.5))) : Scalar(ceil(x - Scalar(0.5)));
+  }
+};
+
+template<>
+struct round_impl<float> : round_using_floor_ceil_impl<float> {};
+
+template<>
+struct round_impl<double> : round_using_floor_ceil_impl<double> {};
+#endif // EIGEN_HAS_C99_MATH
+#endif // !EIGEN_HAS_CXX11_MATH
 
 template<typename Scalar>
 struct round_retval
@@ -495,46 +572,67 @@ struct rint_retval
 * Implementation of arg                                                     *
 ****************************************************************************/
 
-#if EIGEN_HAS_CXX11_MATH
-  template<typename Scalar>
-  struct arg_impl {
-    EIGEN_DEVICE_FUNC
-    static inline Scalar run(const Scalar& x)
-    {
-      #if defined(EIGEN_HIP_DEVICE_COMPILE)
-      // HIP does not seem to have a native device side implementation for the math routine "arg"
-      using std::arg;
-      #else
-      EIGEN_USING_STD(arg);
-      #endif
-      return arg(x);
-    }
-  };
+// Visual Studio 2017 has a bug where arg(float) returns 0 for negative inputs.
+// This seems to be fixed in VS 2019.
+#if EIGEN_HAS_CXX11_MATH && (!EIGEN_COMP_MSVC || EIGEN_COMP_MSVC >= 1920)
+// std::arg is only defined for types of std::complex, or integer types or float/double/long double
+template<typename Scalar,
+          bool HasStdImpl = NumTraits<Scalar>::IsComplex || is_integral<Scalar>::value
+                            || is_same<Scalar, float>::value || is_same<Scalar, double>::value
+                            || is_same<Scalar, long double>::value >
+struct arg_default_impl;
+
+template<typename Scalar>
+struct arg_default_impl<Scalar, true> {
+  typedef typename NumTraits<Scalar>::Real RealScalar;
+  EIGEN_DEVICE_FUNC
+  static inline RealScalar run(const Scalar& x)
+  {
+    #if defined(EIGEN_HIP_DEVICE_COMPILE)
+    // HIP does not seem to have a native device side implementation for the math routine "arg"
+    using std::arg;
+    #else
+    EIGEN_USING_STD(arg);
+    #endif
+    return static_cast<RealScalar>(arg(x));
+  }
+};
+
+// Must be non-complex floating-point type (e.g. half/bfloat16).
+template<typename Scalar>
+struct arg_default_impl<Scalar, false> {
+  typedef typename NumTraits<Scalar>::Real RealScalar;
+  EIGEN_DEVICE_FUNC
+  static inline RealScalar run(const Scalar& x)
+  {
+    return (x < Scalar(0)) ? RealScalar(EIGEN_PI) : RealScalar(0);
+  }
+};
 #else
-  template<typename Scalar, bool IsComplex = NumTraits<Scalar>::IsComplex>
-  struct arg_default_impl
+template<typename Scalar, bool IsComplex = NumTraits<Scalar>::IsComplex>
+struct arg_default_impl
+{
+  typedef typename NumTraits<Scalar>::Real RealScalar;
+  EIGEN_DEVICE_FUNC
+  static inline RealScalar run(const Scalar& x)
   {
-    typedef typename NumTraits<Scalar>::Real RealScalar;
-    EIGEN_DEVICE_FUNC
-    static inline RealScalar run(const Scalar& x)
-    {
-      return (x < Scalar(0)) ? Scalar(EIGEN_PI) : Scalar(0); }
-  };
+    return (x < RealScalar(0)) ? RealScalar(EIGEN_PI) : RealScalar(0);
+  }
+};
 
-  template<typename Scalar>
-  struct arg_default_impl<Scalar,true>
+template<typename Scalar>
+struct arg_default_impl<Scalar,true>
+{
+  typedef typename NumTraits<Scalar>::Real RealScalar;
+  EIGEN_DEVICE_FUNC
+  static inline RealScalar run(const Scalar& x)
   {
-    typedef typename NumTraits<Scalar>::Real RealScalar;
-    EIGEN_DEVICE_FUNC
-    static inline RealScalar run(const Scalar& x)
-    {
-      EIGEN_USING_STD(arg);
-      return arg(x);
-    }
-  };
-
-  template<typename Scalar> struct arg_impl : arg_default_impl<Scalar> {};
+    EIGEN_USING_STD(arg);
+    return arg(x);
+  }
+};
 #endif
+template<typename Scalar> struct arg_impl : arg_default_impl<Scalar> {};
 
 template<typename Scalar>
 struct arg_retval
@@ -586,40 +684,34 @@ struct expm1_impl {
   }
 };
 
-// Specialization for complex types that are not supported by std::expm1.
-template <typename RealScalar>
-struct expm1_impl<std::complex<RealScalar> > {
-  EIGEN_DEVICE_FUNC static inline std::complex<RealScalar> run(
-      const std::complex<RealScalar>& x) {
-    EIGEN_STATIC_ASSERT_NON_INTEGER(RealScalar)
-    RealScalar xr = x.real();
-    RealScalar xi = x.imag();
-    // expm1(z) = exp(z) - 1
-    //          = exp(x +  i * y) - 1
-    //          = exp(x) * (cos(y) + i * sin(y)) - 1
-    //          = exp(x) * cos(y) - 1 + i * exp(x) * sin(y)
-    // Imag(expm1(z)) = exp(x) * sin(y)
-    // Real(expm1(z)) = exp(x) * cos(y) - 1
-    //          = exp(x) * cos(y) - 1.
-    //          = expm1(x) + exp(x) * (cos(y) - 1)
-    //          = expm1(x) + exp(x) * (2 * sin(y / 2) ** 2)
-
-    // TODO better use numext::expm1 and numext::sin (but that would require forward declarations or moving this specialization down).
-    RealScalar erm1 = expm1_impl<RealScalar>::run(xr);
-    RealScalar er = erm1 + RealScalar(1.);
-    EIGEN_USING_STD(sin);
-    RealScalar sin2 = sin(xi / RealScalar(2.));
-    sin2 = sin2 * sin2;
-    RealScalar s = sin(xi);
-    RealScalar real_part = erm1 - RealScalar(2.) * er * sin2;
-    return std::complex<RealScalar>(real_part, er * s);
-  }
-};
-
 template<typename Scalar>
 struct expm1_retval
 {
   typedef Scalar type;
+};
+
+/****************************************************************************
+* Implementation of log                                                     *
+****************************************************************************/
+
+// Complex log defined in MathFunctionsImpl.h.
+template<typename T> EIGEN_DEVICE_FUNC std::complex<T> complex_log(const std::complex<T>& z);
+
+template<typename Scalar>
+struct log_impl {
+  EIGEN_DEVICE_FUNC static inline Scalar run(const Scalar& x)
+  {
+    EIGEN_USING_STD(log);
+    return static_cast<Scalar>(log(x));
+  }
+};
+
+template<typename Scalar>
+struct log_impl<std::complex<Scalar> > {
+  EIGEN_DEVICE_FUNC static inline std::complex<Scalar> run(const std::complex<Scalar>& z)
+  {
+    return complex_log(z);
+  }
 };
 
 /****************************************************************************
@@ -635,7 +727,7 @@ namespace std_fallback {
     typedef typename NumTraits<Scalar>::Real RealScalar;
     EIGEN_USING_STD(log);
     Scalar x1p = RealScalar(1) + x;
-    Scalar log_1p = log(x1p);
+    Scalar log_1p = log_impl<Scalar>::run(x1p);
     const bool is_small = numext::equal_strict(x1p, Scalar(1));
     const bool is_inf = numext::equal_strict(x1p, log_1p);
     return (is_small || is_inf) ? x : x * (log_1p / (x1p - RealScalar(1)));
@@ -1368,12 +1460,11 @@ inline int log2(int x)
   *
   * It's usage is justified in performance critical functions, like norm/normalize.
   */
-template<typename T>
-EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE
-T sqrt(const T &x)
+template<typename Scalar>
+EIGEN_DEVICE_FUNC
+EIGEN_ALWAYS_INLINE EIGEN_MATHFUNC_RETVAL(sqrt, Scalar) sqrt(const Scalar& x)
 {
-  EIGEN_USING_STD(sqrt);
-  return sqrt(x);
+  return EIGEN_MATHFUNC_IMPL(sqrt, Scalar)::run(x);
 }
 
 // Boolean specialization, avoids implicit float to bool conversion (-Wimplicit-conversion-floating-point-to-bool).
@@ -1385,11 +1476,18 @@ bool sqrt<bool>(const bool &x) { return x; }
 SYCL_SPECIALIZE_FLOATING_TYPES_UNARY(sqrt, sqrt)
 #endif
 
+/** \returns the reciprocal square root of \a x. **/
+template<typename T>
+EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE
+T rsqrt(const T& x)
+{
+  return internal::rsqrt_impl<T>::run(x);
+}
+
 template<typename T>
 EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE
 T log(const T &x) {
-  EIGEN_USING_STD(log);
-  return log(x);
+  return internal::log_impl<T>::run(x);
 }
 
 #if defined(SYCL_DEVICE_ONLY)
@@ -1566,7 +1664,7 @@ template<typename T>
 EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE
 T acosh(const T &x) {
   EIGEN_USING_STD(acosh);
-  return acosh(x);
+  return static_cast<T>(acosh(x));
 }
 #endif
 
@@ -1595,7 +1693,7 @@ template<typename T>
 EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE
 T asinh(const T &x) {
   EIGEN_USING_STD(asinh);
-  return asinh(x);
+  return static_cast<T>(asinh(x));
 }
 #endif
 
@@ -1616,7 +1714,7 @@ template<typename T>
 EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE
 T atan(const T &x) {
   EIGEN_USING_STD(atan);
-  return atan(x);
+  return static_cast<T>(atan(x));
 }
 
 #if EIGEN_HAS_CXX11_MATH
@@ -1624,7 +1722,7 @@ template<typename T>
 EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE
 T atanh(const T &x) {
   EIGEN_USING_STD(atanh);
-  return atanh(x);
+  return static_cast<T>(atanh(x));
 }
 #endif
 
@@ -1646,7 +1744,7 @@ template<typename T>
 EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE
 T cosh(const T &x) {
   EIGEN_USING_STD(cosh);
-  return cosh(x);
+  return static_cast<T>(cosh(x));
 }
 
 #if defined(SYCL_DEVICE_ONLY)
@@ -1665,7 +1763,7 @@ template<typename T>
 EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE
 T sinh(const T &x) {
   EIGEN_USING_STD(sinh);
-  return sinh(x);
+  return static_cast<T>(sinh(x));
 }
 
 #if defined(SYCL_DEVICE_ONLY)
@@ -1900,6 +1998,57 @@ template<> struct scalar_fuzzy_impl<bool>
 
 };
 
+} // end namespace internal
+
+// Default implementations that rely on other numext implementations
+namespace internal {
+
+// Specialization for complex types that are not supported by std::expm1.
+template <typename RealScalar>
+struct expm1_impl<std::complex<RealScalar> > {
+  EIGEN_DEVICE_FUNC static inline std::complex<RealScalar> run(
+      const std::complex<RealScalar>& x) {
+    EIGEN_STATIC_ASSERT_NON_INTEGER(RealScalar)
+    RealScalar xr = x.real();
+    RealScalar xi = x.imag();
+    // expm1(z) = exp(z) - 1
+    //          = exp(x +  i * y) - 1
+    //          = exp(x) * (cos(y) + i * sin(y)) - 1
+    //          = exp(x) * cos(y) - 1 + i * exp(x) * sin(y)
+    // Imag(expm1(z)) = exp(x) * sin(y)
+    // Real(expm1(z)) = exp(x) * cos(y) - 1
+    //          = exp(x) * cos(y) - 1.
+    //          = expm1(x) + exp(x) * (cos(y) - 1)
+    //          = expm1(x) + exp(x) * (2 * sin(y / 2) ** 2)
+    RealScalar erm1 = numext::expm1<RealScalar>(xr);
+    RealScalar er = erm1 + RealScalar(1.);
+    RealScalar sin2 = numext::sin(xi / RealScalar(2.));
+    sin2 = sin2 * sin2;
+    RealScalar s = numext::sin(xi);
+    RealScalar real_part = erm1 - RealScalar(2.) * er * sin2;
+    return std::complex<RealScalar>(real_part, er * s);
+  }
+};
+
+template<typename T>
+struct rsqrt_impl {
+  EIGEN_DEVICE_FUNC
+  static EIGEN_ALWAYS_INLINE T run(const T& x) {
+    return T(1)/numext::sqrt(x);
+  }
+};
+
+#if defined(EIGEN_GPU_COMPILE_PHASE)
+template<typename T>
+struct conj_impl<std::complex<T>, true>
+{
+  EIGEN_DEVICE_FUNC
+  static inline std::complex<T> run(const std::complex<T>& x)
+  {
+    return std::complex<T>(numext::real(x), -numext::imag(x));
+  }
+};
+#endif
 
 } // end namespace internal
 

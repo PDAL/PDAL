@@ -10,10 +10,6 @@
 #ifndef EIGEN_STABLENORM_H
 #define EIGEN_STABLENORM_H
 
-#if EIGEN_HAS_CXX11_ATOMIC
-#include <atomic>
-#endif
-
 namespace Eigen { 
 
 namespace internal {
@@ -138,9 +134,9 @@ blueNorm_impl(const EigenBase<Derived>& _vec)
   // statements can be replaced
   static const int ibeta = std::numeric_limits<RealScalar>::radix;  // base for floating-point numbers
   static const int it    = NumTraits<RealScalar>::digits();  // number of base-beta digits in mantissa
-  static const int iemin = std::numeric_limits<RealScalar>::min_exponent;  // minimum exponent
-  static const int iemax = std::numeric_limits<RealScalar>::max_exponent; // maximum exponent
-  static const RealScalar rbig   = (std::numeric_limits<RealScalar>::max)();  // largest floating-point number
+  static const int iemin = NumTraits<RealScalar>::min_exponent();  // minimum exponent
+  static const int iemax = NumTraits<RealScalar>::max_exponent();  // maximum exponent
+  static const RealScalar rbig   = NumTraits<RealScalar>::highest();  // largest floating-point number
   static const RealScalar b1     = RealScalar(pow(RealScalar(ibeta),RealScalar(-((1-iemin)/2))));  // lower boundary of midrange
   static const RealScalar b2     = RealScalar(pow(RealScalar(ibeta),RealScalar((iemax + 1 - it)/2)));  // upper boundary of midrange
   static const RealScalar s1m    = RealScalar(pow(RealScalar(ibeta),RealScalar((2-iemin)/2)));  // scaling factor for lower range

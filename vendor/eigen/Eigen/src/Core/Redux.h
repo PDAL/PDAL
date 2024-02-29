@@ -58,7 +58,7 @@ public:
 public:
   enum {
     Cost = Evaluator::SizeAtCompileTime == Dynamic ? HugeCost
-         : Evaluator::SizeAtCompileTime * Evaluator::CoeffReadCost + (Evaluator::SizeAtCompileTime-1) * functor_traits<Func>::Cost,
+         : int(Evaluator::SizeAtCompileTime) * int(Evaluator::CoeffReadCost) + (Evaluator::SizeAtCompileTime-1) * functor_traits<Func>::Cost,
     UnrollingLimit = EIGEN_UNROLLING_LIMIT * (int(Traversal) == int(DefaultTraversal) ? 1 : int(PacketSize))
   };
 
@@ -331,7 +331,7 @@ struct redux_impl<Func, Evaluator, LinearVectorizedTraversal, CompleteUnrolling>
   enum {
     PacketSize = redux_traits<Func, Evaluator>::PacketSize,
     Size = Evaluator::SizeAtCompileTime,
-    VectorizedSize = (Size / PacketSize) * PacketSize
+    VectorizedSize = (int(Size) / int(PacketSize)) * int(PacketSize)
   };
 
   template<typename XprType>
@@ -419,25 +419,33 @@ DenseBase<Derived>::redux(const Func& func) const
 }
 
 /** \returns the minimum of all coefficients of \c *this.
+  * In case \c *this contains NaN, NaNPropagation determines the behavior:
+  *   NaNPropagation == PropagateFast : undefined
+  *   NaNPropagation == PropagateNaN : result is NaN
+  *   NaNPropagation == PropagateNumbers : result is minimum of elements that are not NaN
   * \warning the matrix must be not empty, otherwise an assertion is triggered.
-  * \warning the result is undefined if \c *this contains NaN.
   */
 template<typename Derived>
+template<int NaNPropagation>
 EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE typename internal::traits<Derived>::Scalar
 DenseBase<Derived>::minCoeff() const
 {
-  return derived().redux(Eigen::internal::scalar_min_op<Scalar,Scalar>());
+  return derived().redux(Eigen::internal::scalar_min_op<Scalar,Scalar, NaNPropagation>());
 }
 
-/** \returns the maximum of all coefficients of \c *this.
+/** \returns the maximum of all coefficients of \c *this. 
+  * In case \c *this contains NaN, NaNPropagation determines the behavior:
+  *   NaNPropagation == PropagateFast : undefined
+  *   NaNPropagation == PropagateNaN : result is NaN
+  *   NaNPropagation == PropagateNumbers : result is maximum of elements that are not NaN
   * \warning the matrix must be not empty, otherwise an assertion is triggered.
-  * \warning the result is undefined if \c *this contains NaN.
   */
 template<typename Derived>
+template<int NaNPropagation>
 EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE typename internal::traits<Derived>::Scalar
 DenseBase<Derived>::maxCoeff() const
 {
-  return derived().redux(Eigen::internal::scalar_max_op<Scalar,Scalar>());
+  return derived().redux(Eigen::internal::scalar_max_op<Scalar,Scalar, NaNPropagation>());
 }
 
 /** \returns the sum of all coefficients of \c *this

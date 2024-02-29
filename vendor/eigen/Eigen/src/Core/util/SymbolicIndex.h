@@ -65,7 +65,7 @@ class ValueExpr<internal::FixedInt<N> > {
 public:
   ValueExpr() {}
   template<typename T>
-  Index eval_impl(const T&) const { return N; }
+  EIGEN_CONSTEXPR Index eval_impl(const T&) const { return N; }
 };
 
 

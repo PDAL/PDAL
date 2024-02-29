@@ -492,17 +492,10 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
     }
 
     // Open the array at the requested timestamp range.
-#if TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR < 15
-    if (m_args->m_timeStamp != UINT64_MAX)
-        m_array.reset(new tiledb::Array(*m_ctx, arrayName(), TILEDB_WRITE, m_args->m_timeStamp));
-    else
-        m_array.reset(
-            new tiledb::Array(*m_ctx, arrayName(), TILEDB_WRITE));
-#else
+
     m_array.reset(
         new tiledb::Array(*m_ctx, arrayName(), TILEDB_WRITE,
                           {tiledb::TimeTravelMarker(), m_args->m_timeStamp}));
-#endif
     const auto& schema = m_array->schema();
 
     for (const auto& dimBuffer : m_buffers)
@@ -572,7 +565,8 @@ void TileDBWriter::done(PointTableRef table)
                                   m.c_str());
             // add tiledb pointcloud tag
             std::string datasetType = "pointcloud";
-            m_array->put_metadata("dataset_type", TILEDB_STRING_UTF8, datasetType.size(), datasetType.data());
+            m_array->put_metadata("dataset_type", TILEDB_STRING_UTF8,
+                                  datasetType.size(), datasetType.data());
         }
         m_array->close();
     }

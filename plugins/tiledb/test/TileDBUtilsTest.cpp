@@ -275,9 +275,6 @@ TEST(FilterFactory, user_set_delta)
                           {{1.0, 1.0, 1.0}}, "zstd",     7};
 
     tiledb::Context ctx{};
-#if TILEDB_VERSION_MAJOR == 2 && TILEDB_VERSION_MINOR < 16
-    EXPECT_THROW(factory.filterList(ctx, "GpsTime"), tiledb::TileDBError);
-#else
     auto filterList = factory.filterList(ctx, "GpsTime");
     auto nfilters = filterList.nfilters();
     EXPECT_EQ(nfilters, 1);
@@ -291,7 +288,6 @@ TEST(FilterFactory, user_set_delta)
                           &output_type);
         EXPECT_EQ(output_type, TILEDB_UINT64);
     }
-#endif
 }
 
 TEST(FilterFactory, user_set_bzip2)
