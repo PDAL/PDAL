@@ -672,7 +672,7 @@ std::vector<int> SMRFilter::progressiveFilter(std::vector<double> const& ZImin,
     {
         // "On the first iteration, the minimum surface (ZImin) is opened using
         // a disk-shaped structuring element with a radius of one pixel."
-        math::erodeDiamond(erosion, m_rows, m_cols, 1);
+        math::erodeDiamond(erosion, m_rows, m_cols, radius);
         std::vector<double> curOpening = erosion;
         math::dilateDiamond(curOpening, m_rows, m_cols, radius);
 
