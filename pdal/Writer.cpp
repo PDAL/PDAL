@@ -113,7 +113,7 @@ std::string Writer::replaceTags(std::string filename)
         auto pos = filename.find("#uuid#");
         if (pos == std::string::npos)
             break;
-        filename.replace(pos, 6, RandomUuid().toString());
+        filename.replace(pos, 6, Utils::tolower(RandomUuid().toString()));
     }
     return filename;
 }
