@@ -452,3 +452,4 @@ if(PDAL_HAVE_LIBXML2)
             ${LIBXML2_INCLUDE_DIR}
     )
 endif()
+PDAL_ADD_TEST(pdal_io_writer_test FILES io/WriterTest.cpp)
