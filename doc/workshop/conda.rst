@@ -49,7 +49,6 @@ so much, and provides it for Windows, Linux, and macOS.
 Installing Conda Environment (Workshop USB)
 --------------------------------------------------------------------------------
 
-#. From the installer directory, install both QGIS_, CloudCompare_, and mambaforge_
 #. Once mambaforge_ is installed, open a terminal and navigate to the location of your USB drive
 #. Uncompress the environment, activate it, and use the ``conda-unpack`` command
   
@@ -111,6 +110,32 @@ Alternatively use the following ``environment.yml`` file to create your environm
 
     The ``conda-pack`` package is used for packaging the pdal-workshop conda environment to go
     to the USB image, and is not needed otherwise
+
+
+Using Conda From ArcGIS Pro 
+--------------------------------------------------------------------------------
+
+1. Launch the ``Python Command Prompt``
+
+2. After launching, create the conda environment for the workshop
+
+   .. code-block:: doscon
+
+      > conda create -n pdal-workshop -c conda-forge python=3.11 --yes
+
+
+3. Activate the newly created environment
+
+   .. code-block:: doscon
+
+      > activate pdal-workshop
+
+
+4. Install ``pdal``
+
+   .. code-block:: doscon
+
+      > conda install -c conda-forge pdal
 
 .. _mambaforge: https://github.com/conda-forge/miniforge#mambaforge
 .. _pypackaging-native website: https://pypackaging-native.github.io/key-issues/native-dependencies/geospatial_stack/
