@@ -664,5 +664,10 @@
     "name": "SphericalElevation",
     "type": "double",
     "description": "Elevation in context of spherical coordinates."
+    },
+    {
+    "name": "H3",
+    "type": "uint64",
+    "description": "H3 index id"
     }
 ] }

@@ -71,3 +71,7 @@ endif()
 if(BUILD_PLUGIN_ARROW)
     add_subdirectory(arrow)
 endif()
+
+if(BUILD_PLUGIN_H3)
+    add_subdirectory(h3)
+endif()
