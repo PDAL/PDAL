@@ -111,6 +111,7 @@ include(${PDAL_CMAKE_DIR}/ctest.cmake)
 include(${PDAL_CMAKE_DIR}/libxml2.cmake)
 include(${PDAL_CMAKE_DIR}/dimension.cmake)
 include(${PDAL_CMAKE_DIR}/arbiter.cmake)
+include(${PDAL_CMAKE_DIR}/h3.cmake)
 include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
 include(${PDAL_CMAKE_DIR}/schema-validator.cmake)
 include(${PDAL_CMAKE_DIR}/lazperf.cmake)
@@ -162,6 +163,7 @@ add_subdirectory(vendor/kazhdan)
 add_subdirectory(vendor/lazperf)
 add_subdirectory(vendor/utfcpp)
 add_subdirectory(vendor/lepcc)
+add_subdirectory(vendor/h3)
 add_subdirectory(tools)
 add_subdirectory(apps)
 
@@ -221,6 +223,7 @@ target_include_directories(${PDAL_LIB_NAME}
         ${PROJECT_BINARY_DIR}/include
         ${PDAL_VENDOR_DIR}
         ${PDAL_VENDOR_DIR}/eigen
+        ${PDAL_VENDOR_DIR}/h3/include
         ${LIBXML2_INCLUDE_DIR}
         ${ZSTD_INCLUDE_DIRS}
         ${NLOHMANN_INCLUDE_DIR}
@@ -241,6 +244,7 @@ target_link_libraries(${PDAL_LIB_NAME}
         ${ZSTD_LIBRARIES}
         ${PDAL_REEXPORT}
         ${PDAL_ARBITER_LIB_NAME}
+        ${PDAL_H3_LIB_NAME}
         ${JSON_SCHEMA_LIB_NAME}
         ${PDAL_KAZHDAN_LIB_NAME}
         ${PDAL_LEPCC_LIB_NAME}
@@ -262,6 +266,10 @@ target_link_libraries(${PDAL_LIB_NAME}
 target_include_directories(${PDAL_LIB_NAME}
     INTERFACE
         $<INSTALL_INTERFACE:include>)
+
+target_compile_definitions(${PDAL_LIB_NAME}
+    PRIVATE
+    H3_PREFIX=PDALH3)
 
 if(WIN32)
     target_compile_definitions(${PDAL_LIB_NAME}

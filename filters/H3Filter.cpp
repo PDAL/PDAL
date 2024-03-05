@@ -45,7 +45,7 @@
 #include <string>
 #include <vector>
 
-#include <h3/h3api.h>
+#include <h3api.h>
 
 namespace pdal
 {
@@ -106,12 +106,12 @@ bool H3Filter::processOne(PointRef& point)
     if (ok)
     {
         // x is longitude
-        double xrad = degsToRads(x);
-        double yrad = degsToRads(y);
+        double xrad = PDALH3degsToRads(x);
+        double yrad = PDALH3degsToRads(y);
         ll.lat = yrad;
         ll.lng = xrad;
 
-        H3Error err = latLngToCell(&ll, m_args->m_resolution, &index);
+        H3Error err = PDALH3latLngToCell(&ll, m_args->m_resolution, &index);
         if (err == E_SUCCESS)
         {
             point.setField(Dimension::Id::H3, index);
