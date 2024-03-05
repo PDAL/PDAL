@@ -41,8 +41,6 @@
 #include <mutex>
 #include <condition_variable>
 
-#include <arbiter/arbiter.hpp>
-
 #include <pdal/Reader.hpp>
 #include <pdal/Streamable.hpp>
 #include <pdal/util/Bounds.hpp>
@@ -50,9 +48,15 @@
 #include "private/esri/EsriUtil.hpp"
 #include "private/esri/PageManager.hpp"
 
+#include <nlohmann/json.hpp>
+
+namespace arbiter
+{
+    class Arbiter;
+}
+
 namespace pdal
 {
-
 class SrsTransform;
 class ThreadPool;
 
