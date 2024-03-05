@@ -65,7 +65,6 @@ private:
     void writeJsonChunk();
     void writeBinHeader();
 
-    std::string m_filename;
     std::unique_ptr<OLeStream> m_stream;
     std::vector<ViewData> m_viewData;
     size_t m_totalSize;

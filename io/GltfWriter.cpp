@@ -73,7 +73,6 @@ std::string GltfWriter::getName() const
 
 void GltfWriter::addArgs(ProgramArgs& args)
 {
-    args.add("filename", "Output gltf filename", m_filename).setPositional();
     args.add("metallic", "Metallic factor [0-1]", m_metallic);
     args.add("roughness", "Roughness factor [0-1]", m_roughness);
     args.add("red", "Base red factor [0-1]", m_red);
@@ -121,7 +120,7 @@ void GltfWriter::prepared(PointTableRef table)
 
 void GltfWriter::ready(PointTableRef table)
 {
-    m_stream.reset(new OLeStream(m_filename));
+    m_stream.reset(new OLeStream(filename()));
 
     // We write the data before we write the header.  To facilitate, we seek
     // to a point where we're pretty darn sure that we can write the header

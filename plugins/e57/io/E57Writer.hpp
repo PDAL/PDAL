@@ -101,7 +101,6 @@ private:
     void setupWriter();
 
     // Writer parameters
-    std::string m_filename;
     bool m_doublePrecision;
 
     // e57 file objects

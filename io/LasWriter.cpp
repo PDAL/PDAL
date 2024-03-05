@@ -134,7 +134,6 @@ void LasWriter::addArgs(ProgramArgs& args)
         doy += ptm->tm_yday;
     }
 
-    args.add("filename", "Output filename", m_filename).setPositional();
     args.add("a_srs", "Spatial reference to use to write output", d->opts.aSrs);
     args.add("compression", "Use LAZ compression when writing file", d->opts.compression,
         las::Compression::False);
@@ -180,7 +179,7 @@ void LasWriter::addArgs(ProgramArgs& args)
 
 void LasWriter::initialize()
 {
-    std::string ext = FileUtils::extension(m_filename);
+    std::string ext = FileUtils::extension(filename());
     ext = Utils::tolower(ext);
     if (ext == ".laz")
         d->opts.compression = las::Compression::True;
@@ -212,7 +211,7 @@ void LasWriter::spatialReferenceChanged(const SpatialReference&)
 {
     if (++m_srsCnt > 1 && d->opts.aSrs.empty())
         log()->get(LogLevel::Error) << getName() <<
-            ": Attempting to write '" << m_filename << "' with multiple "
+            ": Attempting to write '" << filename() << "' with multiple "
             "point spatial references." << std::endl;
 }
 

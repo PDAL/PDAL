@@ -55,9 +55,11 @@
 #pragma once
 
 #include <cstdint>
+#include <cstring>
 #include <sstream>
 #include <string>
 #include <iomanip>
+#include <random>
 
 #include "pdal_util_export.hpp"
 
@@ -202,8 +204,24 @@ public:
     static constexpr size_t size()
         { return sizeof(m_data); }
 
-private:
+protected:
     uuid m_data;
+};
+
+class PDAL_DLL RandomUuid : public Uuid
+{
+public:
+    RandomUuid()
+    {
+        static std::random_device rd;
+        static std::mt19937_64 gen(rd());
+        static std::uniform_int_distribution<uint64_t> dist;
+
+        uint64_t r = dist(gen);
+        std::memcpy(&m_data, &r, sizeof(r));
+        r = dist(gen);
+        std::memcpy(&m_data.clock_seq, &r, sizeof(r));
+    }
 };
 
 PDAL_DLL inline bool operator == (const Uuid& u1, const Uuid& u2)

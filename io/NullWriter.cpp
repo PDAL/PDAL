@@ -16,4 +16,4 @@ CREATE_STATIC_STAGE(NullWriter, s_info)
 
 std::string NullWriter::getName() const { return s_info.name; }
 
-}
+} // namespace pdal

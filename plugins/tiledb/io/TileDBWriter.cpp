@@ -61,7 +61,6 @@ static PluginInfo const s_info{
 
 struct TileDBWriter::Args
 {
-    std::string m_arrayName;
     std::string m_cfgFileName;
     std::string m_cell_order;
     std::string m_tile_order;
@@ -106,9 +105,7 @@ std::string TileDBWriter::getName() const
 
 void TileDBWriter::addArgs(ProgramArgs& args)
 {
-    args.add("array_name", "TileDB array name", m_args->m_arrayName)
-        .setPositional();
-    args.addSynonym("array_name", "filename");
+    args.addSynonym("filename", "array_name");
     args.add("config_file", "TileDB configuration file location",
              m_args->m_cfgFileName);
     args.add("cell_order", "TileDB cell order", m_args->m_cell_order, "auto");
@@ -491,12 +488,13 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
         }
 
         // Create the TileDB array.
-        tiledb::Array::create(m_args->m_arrayName, schema);
+        tiledb::Array::create(arrayName(), schema);
     }
 
     // Open the array at the requested timestamp range.
+
     m_array.reset(
-        new tiledb::Array(*m_ctx, m_args->m_arrayName, TILEDB_WRITE,
+        new tiledb::Array(*m_ctx, arrayName(), TILEDB_WRITE,
                           {tiledb::TimeTravelMarker(), m_args->m_timeStamp}));
     const auto& schema = m_array->schema();
 

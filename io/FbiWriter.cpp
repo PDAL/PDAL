@@ -251,11 +251,6 @@ void writeFbiHeader(const fbi::FbiHdr& hdr, std::ostream* ofFBI)
     ofFBI->write(reinterpret_cast<const char *>(&hdr.Reserved6), sizeof(hdr.Reserved6));
 }
 
-void FbiWriter::addArgs(ProgramArgs& args)
-{
-    args.add("filename", "Output filename", m_filename).setPositional();
-}
-
 void NrmVecSet(fbi::NrmVec *Vp, int Dim, double X, double Y, double Z)
 {
     double Hml = 32767.0 / fbi::hc_2pi ;
@@ -284,7 +279,7 @@ void FbiWriter::write(const PointViewPtr view)
 
     PointRef point(*view, 0);
 
-    std::ostream* ofFBI = Utils::createFile(m_filename, true);
+    std::ostream* ofFBI = Utils::createFile(filename(), true);
 
     writeFbiHeader(*hdr.get(), ofFBI);
 

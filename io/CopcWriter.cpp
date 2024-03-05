@@ -102,7 +102,7 @@ void CopcWriter::addArgs(ProgramArgs& args)
         doy += ptm->tm_yday;
     }
 
-    args.add("filename", "Output filename.", b->opts.filename);
+//    args.add("filename", "Output filename.", b->opts.filename);
     args.add("forward", "Dimensions to forward from LAS reader", b->opts.forwardSpec);
 
     args.add("filesource_id", "File source ID number.", b->opts.filesourceId,
@@ -298,13 +298,13 @@ void CopcWriter::prepared(PointTableRef table)
 void CopcWriter::ready(PointTableRef table)
 {
     // Deal with remote files
-    if (Utils::isRemote(b->opts.filename))
+    if (Utils::isRemote(filename()))
     {
 
         // swap our filename for a tmp file
-        std::string tmpname = Utils::tempFilename(b->opts.filename);
-        remoteFilename = b->opts.filename;
-        b->opts.filename = tmpname;
+        std::string tmpname = Utils::tempFilename(filename());
+        remoteFilename = filename();
+        filename() = tmpname;
         isRemote = true;
     }
 
@@ -450,6 +450,7 @@ void CopcWriter::write(const PointViewPtr v)
     if (b->scaling.m_zXform.m_offset.m_auto)
         b->scaling.m_zXform.m_offset = XForm::XFormComponent(t[2]);
 
+    b->filename = filename();
     BuPyramid bu(*b);
     bu.run(mgr);
 }
@@ -459,10 +460,10 @@ void CopcWriter::done(PointTableRef table)
     if (isRemote)
     {
         arbiter::Arbiter a;
-        a.put(remoteFilename, a.getBinary(b->opts.filename));
+        a.put(remoteFilename, a.getBinary(filename()));
 
         // Clean up temporary
-        FileUtils::deleteFile(b->opts.filename);
+        FileUtils::deleteFile(filename());
     }
 }
 

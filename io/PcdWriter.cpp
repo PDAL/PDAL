@@ -64,15 +64,11 @@ PcdWriter::PcdWriter()
 
 void PcdWriter::addArgs(ProgramArgs& args)
 {
-    args.add("filename", "PCD output filename", m_filename).setPositional();
-    args.add("compression",
-             "Level of PCD compression to use "
-             "(ascii, binary, compressed)",
-             m_compression_string, "ascii");
+    args.add("compression", "Level of PCD compression to use (ascii, binary, compressed)",
+        m_compression_string, "ascii");
     args.add("keep_unspecified", "Write all dimensions", m_writeAllDims, true);
     args.add("order", "Dimension order", m_dimOrder);
-    args.add("precision", "ASCII precision", m_precision,
-             static_cast<uint32_t>(2));
+    args.add("precision", "ASCII precision", m_precision, static_cast<uint32_t>(2));
 }
 
 
@@ -195,9 +191,9 @@ bool PcdWriter::findDim(Id id, DimSpec& ds)
 
 void PcdWriter::ready(PointTableRef table)
 {
-    m_ostream = Utils::createFile(m_filename, false);
+    m_ostream = Utils::createFile(filename(), false);
     if (!m_ostream)
-        throwError("Couldn't open '" + m_filename + "' for output.");
+        throwError("Couldn't open '" + filename() + "' for output.");
 
     PcdField field;
     field.m_label = table.layout()->dimName(Id::X);
@@ -378,7 +374,7 @@ void PcdWriter::done(PointTableRef table)
 {
     Utils::closeFile(m_ostream);
     m_ostream = nullptr;
-    getMetadata().addList("filename", m_filename);
+    getMetadata().addList("filename", filename());
 }
 
 } // namespaces

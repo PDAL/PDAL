@@ -145,23 +145,21 @@ std::string E57Writer::getName() const
 
 void E57Writer::addArgs(ProgramArgs& args)
 {
-    args.add("filename", "Output filename", m_filename).setPositional();
-    args.add("double_precision",
-             "Double precision for storage (false by default)", m_doublePrecision);
-    args.add("extra_dims", "Extra dimensions to write to E57 data",
-             m_extraDimsSpec);
+    args.add("double_precision", "Double precision for storage (false by default)",
+        m_doublePrecision);
+    args.add("extra_dims", "Extra dimensions to write to E57 data", m_extraDimsSpec);
 }
 
 void E57Writer::initialize()
 {
     try
     {
-        m_imageFile.reset(new e57::ImageFile(m_filename, "w"));
+        m_imageFile.reset(new e57::ImageFile(filename(), "w"));
         setupFileHeader();
     }
     catch (...)
     {
-        throwError("Could not open file '" + m_filename + "'.");
+        throwError("Could not open file '" + filename() + "'.");
     }
 }
 

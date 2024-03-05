@@ -66,7 +66,6 @@ RasterWriter::~RasterWriter()
 
 void RasterWriter::addArgs(ProgramArgs& args)
 {
-    args.add("filename", "Output filename", m_filename).setPositional();
     args.add("gdaldriver", "GDAL driver name", m_drivername, "GTiff");
     args.add("gdalopts", "GDAL driver options (name=value,name=value...)",
         m_options);
@@ -136,7 +135,7 @@ void RasterWriter::done(PointTableRef table)
     pixelToPos[3] = limits.yOrigin + (limits.edgeLength * limits.height);
     pixelToPos[4] = 0;
     pixelToPos[5] = -limits.edgeLength;
-    gdal::Raster rasterFile(m_filename, m_drivername, table.anySpatialReference(), pixelToPos);
+    gdal::Raster rasterFile(filename(), m_drivername, table.anySpatialReference(), pixelToPos);
 
     gdal::GDALError err = rasterFile.open(limits.width, limits.height,
         rasters.size(), m_dataType, m_noData, m_options);
@@ -152,7 +151,7 @@ void RasterWriter::done(PointTableRef table)
             throwError(rasterFile.errorMsg());
     }
 
-    getMetadata().addList("filename", m_filename);
+    getMetadata().addList("filename", filename());
 }
 
 } // namespace pdal

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2015, Peter J. Gadomski <pete.gadomski@gmail.com>
+ * Copyright (c) 2024, Hobu Inc. (info@hobu.co)
  *
  * All rights reserved.
  *
@@ -13,7 +13,7 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided
  *       with the distribution.
- *     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+ *     * Neither the name of Hobu, Inc. nor the
  *       names of its contributors may be used to endorse or promote
  *       products derived from this software without specific prior
  *       written permission.
@@ -32,36 +32,60 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#pragma once
+#include <pdal/pdal_test_main.hpp>
 
-#include <string>
+#include "Support.hpp"
 
-#include <mat.h>
+#include <pdal/util/FileUtils.hpp>
+#include <pdal/FlexWriter.hpp>
+#include <io/TextReader.hpp>
 
-#include <pdal/Writer.hpp>
+#include <regex>
 
 namespace pdal
 {
 
-class PDAL_DLL MatlabWriter : public Writer
+// Make sure
+TEST(WriterTest, issue4261)
 {
-public:
-    std::string getName() const;
+    std::string outfile(Support::temppath("#_#uuid#_foo.txt"));
+    std::string infile(Support::datapath("text/utm17_1.txt"));
 
-private:
-    virtual void addArgs(ProgramArgs& args);
-    virtual void prepared(PointTableRef table);
-    virtual void ready(PointTableRef table);
-    virtual void write(const PointViewPtr view);
-    virtual void done(PointTableRef table);
+    FileUtils::deleteFile(outfile);
 
-    std::string m_structName;
-    StringList m_outputDims; ///< List of dimensions to write
-    // Can't use unique_ptr b/c MATFile is an incomplete type.
-    MATFile * m_matfile;
-    Dimension::IdList m_dims;
-    MetadataNode m_tableMetadata;
-};
+    TextReader r;
+    Options ro;
 
+    ro.add("filename", infile);
+    r.setOptions(ro);
 
+    class FooWriter : public FlexWriter
+    {
+    public:
+        std::string getName() const override
+            { return "FooWriter"; }
+        void readyFile(const std::string& filename, const SpatialReference& srs) override
+        {
+            std::string s = FileUtils::getFilename(filename);
+            std::regex re("1_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_foo.txt");
+            std::smatch sm;
+            EXPECT_TRUE(std::regex_match(s, sm, re));
+        }
+        void writeView(const PointViewPtr view) override
+        {}
+    };
+
+    FooWriter w;
+    Options wo;
+
+    wo.add("filename", outfile);
+    w.setOptions(wo);
+    w.setInput(r);
+
+    PointTable t;
+
+    w.prepare(t);
+    w.execute(t);
 }
+
+} // namespace pdal

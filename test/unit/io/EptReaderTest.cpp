@@ -230,7 +230,7 @@ TEST(EptReaderTest, unreadableDataIgnored)
 
 TEST(EptReaderTest, unreadableDataIgnoredStreaming)
 {
-    class TestWriter : public Writer, public Streamable
+    class TestWriter : public NoFilenameWriter, public Streamable
     {
         std::string getName() const
         { return "writers.test"; }
