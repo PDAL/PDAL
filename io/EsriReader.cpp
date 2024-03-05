@@ -32,14 +32,19 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <arbiter/arbiter.hpp>
 #include "EsriReader.hpp"
 
 #include <Eigen/Geometry>
+
 
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/ThreadPool.hpp>
 #include <pdal/private/MathUtils.hpp>
 #include <pdal/private/SrsTransform.hpp>
+
+
+
 
 #include "private/esri/Obb.hpp"
 #include "lepcc/src/include/lepcc_types.h"

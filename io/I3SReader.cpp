@@ -32,6 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <arbiter/arbiter.hpp>
 #include "I3SReader.hpp"
 #include "private/esri/EsriUtil.hpp"
 
