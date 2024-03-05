@@ -526,7 +526,7 @@ void LasReader::queueNextCompressedChunk()
         return;
 
     uint32_t chunk = d->nextFetchChunk;
-    uint32_t start = d->nextFetchPoint;
+    uint32_t start = (uint32_t)d->nextFetchPoint;
 
     d->pool.add([this, chunk, start]()
     {

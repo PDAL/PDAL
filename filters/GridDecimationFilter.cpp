@@ -90,7 +90,7 @@ void GridDecimationFilter::processOne(BOX2D bounds, PointRef& point, PointViewPt
 
     if (ptRefid==-1)
     {
-        this->grid[ std::make_pair(width,height) ] = point.pointId();
+        this->grid[ std::make_pair(width,height) ] = (long) point.pointId();
         return;
     }
     
@@ -100,9 +100,9 @@ void GridDecimationFilter::processOne(BOX2D bounds, PointRef& point, PointViewPt
     double zRef = ptRef.getFieldAs<double>(Dimension::Id::Z);
 
     if (this->m_args->m_methodKeep == "max" && z>zRef)
-        this->grid[ std::make_pair(width,height) ] = point.pointId();
+        this->grid[ std::make_pair(width,height) ] = (long) point.pointId();
     if (this->m_args->m_methodKeep == "min" && z<zRef)
-        this->grid[ std::make_pair(width,height) ] = point.pointId();
+        this->grid[ std::make_pair(width,height) ] = (long) point.pointId();
 }
 
 void GridDecimationFilter::createGrid(BOX2D bounds)

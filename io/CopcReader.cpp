@@ -115,7 +115,7 @@ BOX3D reprojectBoundsBcbfToLonLat(BOX3D src, SrsTransform& xform)
     }
 
     // Round the minimum longitude up to the nearest multiple of 90 degrees.
-    int x = std::ceil(src.minx);
+    int x = (int) std::ceil(src.minx);
     const int remainder = std::abs(x) % 90;
     if (x < 0)
         x = -(std::abs(x) - remainder);

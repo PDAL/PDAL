@@ -298,9 +298,9 @@ void FbiWriter::write(const PointViewPtr view)
         double Y = point.getFieldAs<double>(Dimension::Id::Y);
         double Z = point.getFieldAs<double>(Dimension::Id::Z);
 
-        fbi::UINT xr = (fbi::UINT) (X - hdr->OrgX)*Mul;
-        fbi::UINT yr = (fbi::UINT) (Y - hdr->OrgY)*Mul;
-        fbi::UINT zr = (fbi::UINT) (Z - hdr->OrgZ)*Mul;
+        fbi::UINT xr = (fbi::UINT) ((X - hdr->OrgX)*Mul);
+        fbi::UINT yr = (fbi::UINT) ((Y - hdr->OrgY)*Mul);
+        fbi::UINT zr = (fbi::UINT) ((Z - hdr->OrgZ)*Mul);
 
         ofFBI->write(reinterpret_cast<const char *>(&xr), hdr->BitsX/8);
         ofFBI->write(reinterpret_cast<const char *>(&yr), hdr->BitsY/8);
