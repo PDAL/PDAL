@@ -4,7 +4,7 @@ filters.h3
 ===========================
 
 The **H3 filter** adds a `H3 <https://h3geo.org/docs/api/indexing/>`__ ID at a given ``resolution``. The
-`uint64_t` integer corresponds to the H3 index of the point.
+`uint64_t` integer corresponds to the `H3 index <https://h3geo.org/docs/core-library/latLngToCellDesc>`__ of the point.
 
 
 .. streamable::
