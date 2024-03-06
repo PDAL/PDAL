@@ -60,6 +60,7 @@ target_compile_definitions(${PDAL_H3_LIB_NAME}
 
 target_include_directories(${PDAL_H3_LIB_NAME}
     PRIVATE
+    SYSTEM
         "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 

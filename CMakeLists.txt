@@ -218,12 +218,15 @@ add_library(PDAL::PDAL ALIAS ${PDAL_LIB_NAME})
 # without specification.
 #
 target_include_directories(${PDAL_LIB_NAME}
+    PRIVATE SYSTEM
+        ${PDAL_VENDOR_DIR}/eigen
+        ${PDAL_VENDOR_DIR}/h3/include
+)
+target_include_directories(${PDAL_LIB_NAME}
     PRIVATE
         ${ROOT_DIR}
         ${PROJECT_BINARY_DIR}/include
         ${PDAL_VENDOR_DIR}
-        ${PDAL_VENDOR_DIR}/eigen
-        ${PDAL_VENDOR_DIR}/h3/include
         ${LIBXML2_INCLUDE_DIR}
         ${ZSTD_INCLUDE_DIRS}
         ${NLOHMANN_INCLUDE_DIR}
@@ -231,6 +234,7 @@ target_include_directories(${PDAL_LIB_NAME}
         ${GDAL_INCLUDE_DIR}
         ${PROJ_INCLUDE_DIR}
 )
+
 target_link_libraries(${PDAL_LIB_NAME}
     PRIVATE
         ${CMAKE_THREAD_LIBS_INIT}
@@ -285,7 +289,7 @@ set_target_properties(${PDAL_LIB_NAME} PROPERTIES
 
 # shut off -Wpedantic selectively
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" )
-    set_source_files_properties(filters/PoissonFilter.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
+    set_source_files_properties(filters/PoissonFilter.cpp PROPERTIES COMPILE_FLAGS "-Wno-pedantic -Wno-array-parameter")
 endif()
 
 #
