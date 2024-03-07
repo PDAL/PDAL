@@ -151,9 +151,6 @@ std::string SpatialReference::identifyVerticalEPSG() const
 {
     OGRScopedSpatialReference srs(ogrCreateSrs(getVertical(), m_epoch));
 
-    if (!srs || srs->AutoIdentifyEPSG() != OGRERR_NONE)
-        return "";
-
     if (const char* c = srs->GetAuthorityCode(nullptr))
         return std::string(c);
 
