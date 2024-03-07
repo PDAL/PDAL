@@ -346,6 +346,7 @@ Predefined
    filters.transformation
    filters.straighten
    filters.georeference
+   filters.h3
 
 :ref:`filters.projpipeline`
     Apply coordinates operation on point triplets, based on PROJ pipeline string,
@@ -363,6 +364,9 @@ Predefined
 
 :ref:`filters.georeference`
     Georeference point cloud.
+
+:ref:`filters.h3`
+    Compute H3 index values for the Longitude/Latitude of the point cloud
 
 Cull
 ----
