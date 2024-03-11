@@ -206,7 +206,7 @@ void ArrowWriter::addArgs(ProgramArgs& args)
         "feather");
     args.add("geoarrow_dimension_name", "Dimension name for GeoArrow xyz struct",
         m_geoArrowDimensionName, "xyz");
-    args.add("batch_size", "Arrow batch size", m_batchSize, 65536 * 64);
+    args.add("batch_size", "Arrow batch size", m_batchSize, 65536 * 4);
     args.add("write_pipeline_metadata", "Write PDAL metadata to schema",
         m_writePipelineMetadata, true);
     args.add("geoparquet_version", "GeoParquet version string", m_geoParquetVersion, "1.0.0");
