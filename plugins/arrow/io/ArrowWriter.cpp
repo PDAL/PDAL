@@ -130,6 +130,8 @@ void ArrowWriter::initialize()
             result.status().ToString();
         throwError(msg.str());
     }
+
+    m_ogrPoint.reset(new pdal::Geometry(0.0, 0.0, 0.0, getSpatialReference()));
 }
 
 
@@ -167,7 +169,7 @@ bool ArrowWriter::processOne(PointRef& point)
     if (m_formatType == arrowsupport::Parquet)
     {
         arrow::ArrayBuilder* builder = m_builders[m_wkbDimId].get();
-        writeWkb(point, builder);
+        writeWkb(point, *m_ogrPoint.get(), builder);
     }
 
     m_batchIndex++;
