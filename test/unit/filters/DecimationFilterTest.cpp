@@ -49,7 +49,7 @@ TEST(DecimationFilterTest, create)
     EXPECT_TRUE(filter);
 }
 
-TEST(DecimationFilterTest, DecimationFilterTest_test1)
+TEST(DecimationFilterTest, test1)
 {
     BOX3D srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
 
@@ -82,6 +82,41 @@ TEST(DecimationFilterTest, DecimationFilterTest_test1)
     EXPECT_EQ(t0, 0u);
     EXPECT_EQ(t1, 10u);
     EXPECT_EQ(t2, 20u);
+}
+
+TEST(DecimationFilterTest, fpstep)
+{
+    BOX3D srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
+
+    Options ops;
+    ops.add("bounds", srcBounds);
+    ops.add("mode", "random");
+    ops.add("count", 30);
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    Options decimationOps;
+    decimationOps.add("step", 4.2);
+
+    DecimationFilter filter;
+    filter.setOptions(decimationOps);
+    filter.setInput(reader);
+
+    PointTable table;
+
+    filter.prepare(table);
+    PointViewSet viewSet = filter.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 7u);
+
+    const std::vector<uint64_t> expectedTimes = {0, 4, 8, 13, 17, 21, 25};
+
+    for (size_t i = 0; i < view->size(); ++i)
+    {
+        uint64_t t = view->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, i);
+        EXPECT_EQ(t, expectedTimes[i]);
+    }
 }
 
 TEST(DecimationFilterTest, stream)
@@ -124,5 +159,48 @@ TEST(DecimationFilterTest, stream)
 
     filter.prepare(t);
     filter.execute(t);
+}
+
+TEST(DecimationFilterTest, stream_fpstep)
+{
+    BOX3D srcBounds(0.0, 0.0, 0.0, 99.0, 99.0, 99.0);
+
+    Options ops;
+    ops.add("bounds", srcBounds);
+    ops.add("mode", "ramp");
+    ops.add("count", 100);
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    Options decimationOps;
+    decimationOps.add("step", 2.6);
+    decimationOps.add("offset", 10);
+    decimationOps.add("limit", 90);
+
+    DecimationFilter dec;
+    dec.setOptions(decimationOps);
+    dec.setInput(reader);
+
+    StreamCallbackFilter filter;
+
+    std::vector<PointId> kept;
+
+    auto cb = [&kept](PointRef& point)
+    {
+        kept.push_back(point.getFieldAs<uint64_t>(Dimension::Id::OffsetTime));
+        return true;
+    };
+    filter.setCallback(cb);
+    filter.setInput(dec);
+
+    FixedPointTable t(2);
+
+    filter.prepare(t);
+    filter.execute(t);
+
+    const std::vector<PointId> expectedKept = {10, 13, 15, 18, 20, 23, 26, 28, 31, 33, 36, 39, 41, 44, 46, 49, 52, 54, 57, 59, 62, 65, 67, 70, 72, 75, 78, 80, 83, 85, 88};
+
+    EXPECT_EQ(kept.size(), 31u);
+    EXPECT_EQ(kept, expectedKept);
 }
 
