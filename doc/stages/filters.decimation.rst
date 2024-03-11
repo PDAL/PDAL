@@ -35,7 +35,8 @@ Options
 step
   Number of points to skip between each sample point.  A step of 1 will skip
   no points.  A step of 2 will skip every other point.  A step of 100 will
-  reduce the input by ~99%. [Default: 1]
+  reduce the input by ~99%. A step of 1.6 will retain ``100 / 1.6 = 62.5%`` of
+  the points. [Default: 1.0]
 
 offset
   Point index to start sampling.  Point indexes start at 0.  [Default: 0]
