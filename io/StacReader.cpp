@@ -181,7 +181,6 @@ void StacReader::addArgs(ProgramArgs& args)
 
 void StacReader::addItem(Item& item)
 {
-    log()->get(LogLevel::Debug) << "Selected Item: " << item.id() << std::endl;
     std::string driver = item.driver();
 
     Stage *stage = m_factory.createStage(driver);
@@ -212,7 +211,7 @@ void StacReader::addItem(Item& item)
 void StacReader::handleItem(NL::json stacJson, std::string itemPath)
 {
     Item item(stacJson, m_filename, *m_p->m_connector,
-        m_args->validateSchema);
+        m_args->validateSchema, log());
     if (item.init(*m_p->m_itemFilters, m_args->rawReaderArgs, m_args->schemaUrls))
     {
 
@@ -255,7 +254,7 @@ void StacReader::handleNested(Catalog& c)
 void StacReader::handleCatalog(NL::json stacJson, std::string catPath)
 {
     Catalog c(stacJson, catPath, *m_p->m_connector, *m_p->m_pool,
-        m_args->validateSchema);
+        m_args->validateSchema, log());
 
     // if init returns false, the collection has no items in itself or in
     // any sub-catalogs/collections.
@@ -276,7 +275,7 @@ void StacReader::handleCatalog(NL::json stacJson, std::string catPath)
 void StacReader::handleCollection(NL::json stacJson, std::string colPath)
 {
     Collection c(stacJson, colPath, *m_p->m_connector,
-        *m_p->m_pool, m_args->validateSchema);
+        *m_p->m_pool, m_args->validateSchema, log());
 
     // if init returns false, the collection has no items in itself or in
     // any sub-catalogs/collections.
@@ -296,7 +295,7 @@ void StacReader::handleCollection(NL::json stacJson, std::string colPath)
 void StacReader::handleItemCollection(NL::json stacJson, std::string icPath)
 {
     ItemCollection ic(stacJson, icPath, *m_p->m_connector,
-            m_args->validateSchema);
+            m_args->validateSchema, log());
 
     if (ic.init(*m_p->m_icFilters, m_args->rawReaderArgs, m_args->schemaUrls))
     {
@@ -451,9 +450,7 @@ void StacReader::initialize()
     StringMap headers;
     StringMap query;
     setConnectionForwards(headers, query);
-    m_p->m_connector.reset(new connector::Connector(headers, query));
-
-    m_p->m_pool.reset(new ThreadPool(m_args->threads));
+    connector::Connector conn(m_filename, headers, query);
 
     initializeArgs();
 
@@ -560,6 +557,12 @@ void StacReader::ready(PointTableRef table)
 PointViewSet StacReader::run(PointViewPtr view)
 {
     return StageWrapper::run(m_merge, view);
+}
+
+void StacReader::done(PointTableRef)
+{
+    m_p->m_pool->stop();
+    m_p->m_connector.reset();
 }
 
 

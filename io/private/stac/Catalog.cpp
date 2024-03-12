@@ -50,9 +50,10 @@ Catalog::Catalog(const NL::json& json,
         const std::string& catPath,
         const connector::Connector& connector,
         ThreadPool& pool,
-        bool validate) :
+        bool validate,
+        LogPtr log) :
     m_json(json), m_path(catPath), m_connector(connector),
-    m_pool(pool), m_validate(validate)
+    m_pool(pool), m_validate(validate), m_log(log)
 {}
 
 Catalog::~Catalog()
@@ -151,7 +152,7 @@ void Catalog::collectErrors()
 void Catalog::handleItem(const Item::Filters& f, NL::json readerArgs, std::string path)
 {
         NL::json itemJson = m_connector.getJson(path);
-        Item item(itemJson, path, m_connector, m_validate);
+        Item item(itemJson, path, m_connector, m_validate, m_log);
 
         bool valid = item.init(f, readerArgs, m_schemaUrls);
         if (valid)
@@ -165,7 +166,7 @@ void Catalog::handleCol(const Filters& f, NL::json readerArgs, std::string path)
 {
     NL::json collectionJson = m_connector.getJson(path);
     std::unique_ptr<Collection> collection(new Collection(
-        collectionJson, path, m_connector, m_pool, m_validate));
+        collectionJson, path, m_connector, m_pool, m_validate, m_log));
 
     //init will return false if collection has no items or sub catalogs/collections
     bool passed = collection->init(f, readerArgs, m_schemaUrls);
@@ -180,7 +181,7 @@ void Catalog::handleCat(const Filters& f, NL::json readerArgs, std::string path)
 {
     NL::json catalogJson = m_connector.getJson(path);
     std::unique_ptr<Catalog> catalog(new Catalog(
-        catalogJson, path, m_connector, m_pool, m_validate));
+        catalogJson, path, m_connector, m_pool, m_validate, m_log));
 
     //init will return false if catalog has no items or sub catalogs/collections
     bool passed = catalog->init(f, readerArgs, m_schemaUrls);
