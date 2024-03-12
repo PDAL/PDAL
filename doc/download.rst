@@ -100,7 +100,7 @@ required dependencies and build PDAL from source.
    "NITF", "X",  "",  "", "X"
    "pgpointcloud", "X",  "",  "X", "X"
    "SLPK", "", "", "", "X"
-   "TileDB", "X", "", "", "X"
+   "TileDB", "X", "", "", "mac/linux"
 
 
 Windows
