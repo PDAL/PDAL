@@ -55,6 +55,8 @@
 #include <pdal/pdal_types.hpp>
 #include <pdal/Geometry.hpp>
 
+#include <ogr_geometry.h>
+
 namespace pdal
 {
 
@@ -158,23 +160,29 @@ std::shared_ptr<arrow::Field> toArrowType(std::string name, pdal::Dimension::Typ
 
 
 void writeWkb(pdal::PointRef& point,
+             pdal::Geometry& ogr_point,
              arrow::ArrayBuilder* builder)
 {
     double x = point.getFieldAs<double>(pdal::Dimension::Id::X);
     double y = point.getFieldAs<double>(pdal::Dimension::Id::Y);
     double z = point.getFieldAs<double>(pdal::Dimension::Id::Z);
-    arrow::BinaryBuilder* bb = dynamic_cast<arrow::BinaryBuilder*>(builder);
+    arrow::BinaryBuilder* bb = static_cast<arrow::BinaryBuilder*>(builder);
     if (!bb)
         throw pdal::pdal_error ("unable to cast builder!");
-    
-    pdal::Geometry p(x, y, z);
-    auto ok = bb->Append(p.wkb());
+
+
+    OGRGeometryH og = ogr_point.getOGRHandle();
+    OGRPoint* g = (OGRPoint*) og;
+    g->setX(x); g->setY(y); g->setZ(z);
+
+
+    auto ok = bb->Append(ogr_point.wkb());
     if (!ok.ok())
     {
         std::stringstream msg;
         msg << "Unable to write wkb binary value for point";
         throw pdal::pdal_error(msg.str());
-    }   
+    }
 
 }
 
@@ -199,11 +207,11 @@ void writeGeoArrow(pdal::PointRef& point,
     double x = point.getFieldAs<double>(pdal::Dimension::Id::X);
     double y = point.getFieldAs<double>(pdal::Dimension::Id::Y);
     double z = point.getFieldAs<double>(pdal::Dimension::Id::Z);
-    
+
     auto poPointBuilder = static_cast<arrow::FixedSizeListBuilder *>( builder);
     auto poValueBuilder = static_cast<arrow::DoubleBuilder *>(
         poPointBuilder->value_builder());
-    
+
     THROW_IF_ARROW_NOT_OK(poPointBuilder->Append());
     THROW_IF_ARROW_NOT_OK(poValueBuilder->Append(x));
     THROW_IF_ARROW_NOT_OK(poValueBuilder->Append(y));
@@ -223,7 +231,7 @@ void writePointData(pdal::PointRef& point,
 
     case Dimension::Type::Unsigned8:
         {
-            arrow::UInt8Builder* uint8b = dynamic_cast<arrow::UInt8Builder*>(builder);
+            arrow::UInt8Builder* uint8b = static_cast<arrow::UInt8Builder*>(builder);
             if (uint8b)
             {
                 uint8_t value = point.getFieldAs<uint8_t>(id);
@@ -239,7 +247,7 @@ void writePointData(pdal::PointRef& point,
         }
     case Dimension::Type::Signed8:
         {
-            arrow::Int8Builder* int8b = dynamic_cast<arrow::Int8Builder*>(builder);
+            arrow::Int8Builder* int8b = static_cast<arrow::Int8Builder*>(builder);
             if (int8b)
             {
                 int8_t value = point.getFieldAs<int8_t>(id);
@@ -255,7 +263,7 @@ void writePointData(pdal::PointRef& point,
         }
     case Dimension::Type::Unsigned16:
         {
-            arrow::UInt16Builder* uint16b = dynamic_cast<arrow::UInt16Builder*>(builder);
+            arrow::UInt16Builder* uint16b = static_cast<arrow::UInt16Builder*>(builder);
             if (uint16b)
             {
                 uint16_t value = point.getFieldAs<uint16_t>(id);
@@ -271,7 +279,7 @@ void writePointData(pdal::PointRef& point,
         }
     case Dimension::Type::Signed16:
         {
-            arrow::Int16Builder* int16b = dynamic_cast<arrow::Int16Builder*>(builder);
+            arrow::Int16Builder* int16b = static_cast<arrow::Int16Builder*>(builder);
             if (int16b)
             {
                 int16_t value = point.getFieldAs<int16_t>(id);
@@ -287,7 +295,7 @@ void writePointData(pdal::PointRef& point,
         }
     case Dimension::Type::Unsigned32:
         {
-            arrow::UInt32Builder* uint32b = dynamic_cast<arrow::UInt32Builder*>(builder);
+            arrow::UInt32Builder* uint32b = static_cast<arrow::UInt32Builder*>(builder);
             if (uint32b)
             {
                 uint32_t value = point.getFieldAs<uint32_t>(id);
@@ -303,7 +311,7 @@ void writePointData(pdal::PointRef& point,
         }
     case Dimension::Type::Signed32:
         {
-            arrow::Int32Builder* int32b = dynamic_cast<arrow::Int32Builder*>(builder);
+            arrow::Int32Builder* int32b = static_cast<arrow::Int32Builder*>(builder);
             if (int32b)
             {
                 int32_t value = point.getFieldAs<int32_t>(id);
@@ -319,7 +327,7 @@ void writePointData(pdal::PointRef& point,
         }
     case Dimension::Type::Float:
         {
-            arrow::FloatBuilder* float32b = dynamic_cast<arrow::FloatBuilder*>(builder);
+            arrow::FloatBuilder* float32b = static_cast<arrow::FloatBuilder*>(builder);
             if (float32b)
             {
                 float value = point.getFieldAs<float>(id);
@@ -335,7 +343,7 @@ void writePointData(pdal::PointRef& point,
         }
     case Dimension::Type::Double:
         {
-            arrow::DoubleBuilder* float64b = dynamic_cast<arrow::DoubleBuilder*>(builder);
+            arrow::DoubleBuilder* float64b = static_cast<arrow::DoubleBuilder*>(builder);
             if (float64b)
             {
                 double value = point.getFieldAs<double>(id);
@@ -351,7 +359,7 @@ void writePointData(pdal::PointRef& point,
         }
     case Dimension::Type::Unsigned64:
         {
-            arrow::UInt64Builder* uint64b = dynamic_cast<arrow::UInt64Builder*>(builder);
+            arrow::UInt64Builder* uint64b = static_cast<arrow::UInt64Builder*>(builder);
             if (uint64b)
             {
                 uint64_t value = point.getFieldAs<uint64_t>(id);
@@ -367,7 +375,7 @@ void writePointData(pdal::PointRef& point,
         }
     case Dimension::Type::Signed64:
         {
-            arrow::Int64Builder* int64b = dynamic_cast<arrow::Int64Builder*>(builder);
+            arrow::Int64Builder* int64b = static_cast<arrow::Int64Builder*>(builder);
             if (int64b)
             {
                 int64_t value = point.getFieldAs<int64_t>(id);
