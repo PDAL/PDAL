@@ -59,8 +59,8 @@ target_compile_definitions(${PDAL_H3_LIB_NAME}
     H3_PREFIX=PDALH3)
 
 target_include_directories(${PDAL_H3_LIB_NAME}
+    SYSTEM AFTER
     PRIVATE
-    SYSTEM
         "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 target_compile_options(${PDAL_H3_LIB_NAME} PRIVATE -Wno-cast-qual)

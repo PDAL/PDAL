@@ -6,11 +6,14 @@ function(pdal_target_compile_settings target)
         # VERSION_GREATER_EQUAL doesn't come until cmake 3.7
         #
         if (NOT ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 7.0)
+            target_compile_options(${target}
+                PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wno-except-type>
+                        $<$<COMPILE_LANGUAGE:C>:-Wno-class-memaccess>
+            )
             target_compile_options(${target} PRIVATE
                 -Wno-implicit-fallthrough
                 -Wno-int-in-bool-context
                 -Wno-dangling-else
-                -Wno-noexcept-type
             )
         endif()
         set(PDAL_COMPILER_GCC 1)
