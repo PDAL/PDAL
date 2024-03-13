@@ -59,7 +59,7 @@ target_compile_definitions(${PDAL_H3_LIB_NAME}
     H3_PREFIX=PDALH3)
 
 target_include_directories(${PDAL_H3_LIB_NAME}
-    SYSTEM BEFORE
+    BEFORE
     PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
