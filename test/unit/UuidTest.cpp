@@ -62,3 +62,14 @@ TEST(UuidTest, initialization)
     Uuid uuid2(std::string("foo"));
     EXPECT_TRUE(uuid2.isNull());
 }
+
+TEST(UuidTest, random)
+{
+    for (int i = 0; i < 100; ++i)
+    {
+        RandomUuid uuid;
+        std::string s = uuid.toString();
+        EXPECT_TRUE(s[14] == '4');
+        EXPECT_TRUE(s[19] >= '8' && s[19] <= 'B');
+    }
+}

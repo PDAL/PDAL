@@ -168,6 +168,24 @@ respectively.
         }
     }
 
+Curl Timeouts
+--------------------------------------------------------------------------------
+STAC reader, and PDAL as a whole, rely on curl for external requests. The curl
+requests default to a timeout of 5s. If your requests are failing, it could be
+because the timeout is too short. You can set `CURL_TIMEOUT` in your environment
+to get around this.
+
+To debug your requests to make sure that the timeout is the problem, set `VERBOSE=1`
+in your environment before running your PDAL task.
+
+.. code-block:: bash
+
+    VERBOSE=1 CURL_TIMEOUT=30 \
+        pdal info --summary --driver readers.stac \
+        --readers.stac.asset_names 'ept.json' \
+        --readers.stac.asset_names 'data' \
+        ${PDAL_DIR}/test/data/stac/local_catalog/catalog.json
+
 
 .. _Spatio Temporal Access Catalog (STAC): https://stacspec.org/en
 .. _Regular Expression: https://en.cppreference.com/w/cpp/regex
