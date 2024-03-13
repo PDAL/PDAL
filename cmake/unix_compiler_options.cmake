@@ -7,8 +7,10 @@ function(pdal_target_compile_settings target)
         #
         if (NOT ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 7.0)
             target_compile_options(${target}
-                PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wno-except-type>
-                        $<$<COMPILE_LANGUAGE:C>:-Wno-class-memaccess>
+                PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-noexcept-type>
+                        $<$<COMPILE_LANGUAGE:CXX>:-Wno-class-memaccess>
+                        $<$<COMPILE_LANGUAGE:CXX>:-Wno-psabi>
+
             )
             target_compile_options(${target} PRIVATE
                 -Wno-implicit-fallthrough
@@ -52,7 +54,8 @@ endfunction()
 function(pdal_lib_compile_settings target)
     pdal_target_compile_settings(${target})
 
-    target_compile_options(${target} PRIVATE
-        -fvisibility=hidden
-        -fvisibility-inlines-hidden)
+    target_compile_options(${target}
+        PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fvisibility-inlines-hidden>
+                -fvisibility=hidden
+    )
 endfunction()
