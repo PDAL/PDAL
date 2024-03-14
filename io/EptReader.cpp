@@ -559,7 +559,6 @@ void EptReader::load(const ept::Overlap& overlap)
         {
             // Read the tile.
             ept::TileContents tile(overlap, *m_p->info, *m_p->connector, m_p->addons);
-            static int tilenum = 0;
 
             tile.read();
 
@@ -1015,7 +1014,6 @@ top:
     // we're done.
     if (m_pointId == m_p->currentTile->size())
     {
-std::cerr << "Tile = " << m_tileCount << "!\n";
         m_pointId = 0;
         m_p->currentTile.reset();
         --m_tileCount;
