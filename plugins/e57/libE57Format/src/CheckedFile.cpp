@@ -547,6 +547,8 @@ void CheckedFile::close()
 
 void CheckedFile::unlink()
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
    close();
 
    /// Try to unlink the file, don't report a failure
@@ -562,6 +564,7 @@ void CheckedFile::unlink()
       cout << "::unlink() failed, result=" << result << endl;
    }
 #endif
+#pragma GCC diagnostic pop
 }
 
 inline uint32_t swap_uint32( uint32_t val )
