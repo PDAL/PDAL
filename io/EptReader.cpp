@@ -456,7 +456,7 @@ void EptReader::handleOriginQuery()
     {
         BOX3D q(toBox3d(found.at("bounds")));
         // Bloat the query bounds slightly (we'll choose one tick of the EPT's
-        // scale) to make sure we don't miss any points due to them being 
+        // scale) to make sure we don't miss any points due to them being
         // precisely on the bounds edge.
         q.grow(
             (std::max)(
@@ -553,10 +553,13 @@ void EptReader::addDimensions(PointLayoutPtr layout)
 // stick the tile on the queue and notify the main thread.
 void EptReader::load(const ept::Overlap& overlap)
 {
+    using namespace std::chrono_literals;
+
     m_p->pool->add([this, overlap]()
         {
             // Read the tile.
             ept::TileContents tile(overlap, *m_p->info, *m_p->connector, m_p->addons);
+            static int tilenum = 0;
 
             tile.read();
 
@@ -571,9 +574,23 @@ void EptReader::load(const ept::Overlap& overlap)
                 // Put the tile on the output queue.  Note that if the tile has
                 // an error and ignoreUnreadable isn't set, this will be fatal
                 // but that will occur downstream outside of this pool thread.
-                std::unique_lock<std::mutex> l(m_p->mutex);
-                m_p->contents.push(std::move(tile));
-                l.unlock();
+
+                // Loop to push the tile on the queue until there is room.
+                while (true)
+                {
+                    {
+                        std::lock_guard<std::mutex> l(m_p->mutex);
+                        if (m_p->contents.size() < m_p->pool->numThreads())
+                        {
+                            m_p->contents.push(std::move(tile));
+                            break;
+                        }
+                    }
+                    // No room on queue, sleep. Could do a condition variable but that's
+                    // more complex and probably makes no difference in most cases where
+                    // this would come up.
+                    std::this_thread::sleep_for(50ms);
+                }
             }
             else
             {
@@ -597,17 +614,17 @@ void EptReader::ready(PointTableRef table)
     m_pointIdDim = table.layout()->findDim("EptPointId");
 
     if (
-        m_queryOriginId != -1 && 
+        m_queryOriginId != -1 &&
         !table.layout()->hasDim(Dimension::Id::OriginId))
     {
         // In this case we can't compare the OriginId for each point since the
-        // EPT data does not have that attribute saved.  We will keep the 
+        // EPT data does not have that attribute saved.  We will keep the
         // spatial query to limit the data to the extents of the requested
         // origin, but if other origins overlap these extents, then their points
         // will also be included.
         m_queryOriginId = -1;
 
-        log()->get(LogLevel::Warning) << 
+        log()->get(LogLevel::Warning) <<
             "An origin query was given but no OriginId dimension exists - " <<
             "points from other origins may be included" << std::endl;
     }
@@ -818,7 +835,7 @@ bool EptReader::processPoint(PointRef& dst, const ept::TileContents& tile)
     PointId pointId = m_pointId++;
 
     PointRef p(t, pointId);
-    if (m_queryOriginId != -1 && 
+    if (m_queryOriginId != -1 &&
         p.getFieldAs<int64_t>(Id::OriginId)!= m_queryOriginId)
     {
         return false;
@@ -998,6 +1015,7 @@ top:
     // we're done.
     if (m_pointId == m_p->currentTile->size())
     {
+std::cerr << "Tile = " << m_tileCount << "!\n";
         m_pointId = 0;
         m_p->currentTile.reset();
         --m_tileCount;
