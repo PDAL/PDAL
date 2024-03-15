@@ -993,11 +993,13 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
             // to 255, but we're writing to PDRF < 6 and can't write values
             // over 31.
             log()->get(LogLevel::Warning)
-                << "Classification " << (int)classification
-                << " can't be written to LAS "
+                << "The source file Classification " << (int)classification
+                << " can't be written to LAS with Point Data Record Format "
+                << std::to_string(d->header.pointFormat()) << " and LAS version "
                 << std::to_string(d->header.versionMajor) << "."
                 << std::to_string(d->header.versionMinor)
-                << ". Replaced with value 1." << std::endl;
+                << ". It was replaced with value 1. "
+                "Use a different PDRF if you need to support classifications greater than 31" << std::endl;
             classification = ClassLabel::Unclassified;
         }
 
