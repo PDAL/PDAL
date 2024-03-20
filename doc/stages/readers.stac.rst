@@ -179,6 +179,7 @@ To debug your requests to make sure that the timeout is the problem, set `VERBOS
 in your environment before running your PDAL task.
 
 .. code-block:: bash
+
     VERBOSE=1 CURL_TIMEOUT=30 \
     pdal info --summary --driver readers.stac \
     --readers.stac.asset_names 'ept.json' \
