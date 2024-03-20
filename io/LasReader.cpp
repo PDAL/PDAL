@@ -472,6 +472,9 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 
 void LasReader::ready(PointTableRef table)
 {
+    if (getNumPoints() == 0)
+        return;
+
     d->pool.resize(d->opts.numThreads);
     LasStreamPtr lasStream(createStream());
     std::istream& stream(*lasStream);
