@@ -212,9 +212,9 @@ void StacReader::handleItem(NL::json stacJson, std::string itemPath)
 {
     Item item(stacJson, m_filename, *m_p->m_connector,
         m_args->validateSchema, log());
+    log()->get(LogLevel::Debug) << "Found STAC Item " << item.id() << ".";
     if (item.init(*m_p->m_itemFilters, m_args->rawReaderArgs, m_args->schemaUrls))
     {
-
         addItem(item);
     }
 }
@@ -304,6 +304,17 @@ void StacReader::handleItemCollection(NL::json stacJson, std::string icPath)
     }
 }
 
+std::string idListStr(std::string type, std::vector<RegEx> ids)
+{
+    std::stringstream s;
+    s << type << " Ids: [";
+    for (auto& id: ids)
+        s << id.m_str << ", " << std::endl;
+    s.seekp(-3, std::ios_base::end);
+    s << "]";
+    return s.str();
+}
+
 void StacReader::initializeArgs()
 {
     m_p->m_itemFilters = std::make_unique<Item::Filters>();
@@ -311,30 +322,28 @@ void StacReader::initializeArgs()
     m_p->m_colFilters = std::make_unique<Catalog::Filters>();
     m_p->m_icFilters = std::make_unique<ItemCollection::Filters>();
 
+    log()->get(LogLevel::Debug) << "Filters: " << std::endl;
     if (!m_args->items.empty())
     {
-        log()->get(LogLevel::Debug) <<
-            "Selecting Items with ids: " << std::endl;
-        for (auto& id: m_args->items)
-            log()->get(LogLevel::Debug) << "    " << id.m_str << std::endl;
+        std::string itIdStr = idListStr("Item", m_args->items);
+        log()->get(LogLevel::Debug) << itIdStr;
+
         m_p->m_itemFilters->ids = m_args->items;
     }
 
     if (!m_args->catalogs.empty())
     {
-        log()->get(LogLevel::Debug) <<
-            "Selecting Catalogs with ids: " << std::endl;
-        for (auto& id: m_args->catalogs)
-            log()->get(LogLevel::Debug) << "    " << id.m_str << std::endl;
+        std::string caIdStr = idListStr("Catalog", m_args->catalogs);
+        log()->get(LogLevel::Debug) << caIdStr;
+
         m_p->m_catFilters->ids = m_args->catalogs;
     }
 
     if (!m_args->collections.empty())
     {
-        log()->get(LogLevel::Debug) <<
-            "Selecting Catalogs with ids: " << std::endl;
-        for (auto& id: m_args->collections)
-            log()->get(LogLevel::Debug) << "    " << id.m_str << std::endl;
+        std::string coIdStr = idListStr("Collection", m_args->collections);
+        log()->get(LogLevel::Debug) << coIdStr;
+
         m_p->m_itemFilters->collections = m_args->collections;
         m_p->m_colFilters->ids = m_args->collections;
     }
@@ -343,7 +352,7 @@ void StacReader::initializeArgs()
     if (!m_args->dates.empty())
     {
         log()->get(LogLevel::Debug) <<
-            "Dates selected: " << m_args->dates << std::endl;
+            "Dates: " << m_args->dates << std::endl;
 
         for (auto& datepair: m_args->dates)
         {
@@ -393,13 +402,16 @@ void StacReader::initializeArgs()
 
         m_p->m_itemFilters->bounds = m_args->bounds;
     }
-
     if (!m_args->assetNames.empty())
     {
-        log()->get(LogLevel::Debug) << "STAC Reader will look in these asset keys: ";
+        std::stringstream s;
+        s << "Asset Keys: [";
         for (auto& name: m_args->assetNames)
-            log()->get(LogLevel::Debug) << name << std::endl;
+            s << name << ", " << std::endl;
+        s.seekp(-3, std::ios_base::end);
+        s << "]";
         auto it = m_p->m_itemFilters->assetNames.begin();
+        log()->get(LogLevel::Debug) << s.str();
         m_p->m_itemFilters->assetNames.insert(it, m_args->assetNames.begin(),
             m_args->assetNames.end());
     }
@@ -450,8 +462,9 @@ void StacReader::initialize()
     StringMap headers;
     StringMap query;
     setConnectionForwards(headers, query);
-    connector::Connector conn(m_filename, headers, query);
+    m_p->m_connector.reset(new connector::Connector(headers, query));
 
+    m_p->m_pool.reset(new ThreadPool(m_args->threads));
     initializeArgs();
 
     NL::json stacJson = m_p->m_connector->getJson(m_filename);

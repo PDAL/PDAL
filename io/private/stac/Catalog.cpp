@@ -68,9 +68,15 @@ bool Catalog::init(const Filters& filters, NL::json rawReaderArgs,
 
     std::string type = stacValue<std::string>(m_json, "type");
     if (type == "Catalog")
+    {
+        m_log->get(LogLevel::Debug) << "Selected Catalog: " << id() << std::endl;
         m_type = GroupType::catalog;
+    }
     if (type == "Collection")
+    {
+        m_log->get(LogLevel::Debug) << "Selected Collection: " << id() << std::endl;
         m_type = GroupType::collection;
+    }
 
     m_schemaUrls = schemaUrls;
     if (m_validate)
