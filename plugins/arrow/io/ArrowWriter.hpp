@@ -103,6 +103,7 @@ private:
     pdal::Dimension::Id m_geoArrowDimId;
 
     PointTable* m_pointTablePtr;
+    std::unique_ptr<pdal::Geometry> m_ogrPoint;
 };
 
 } // namespace pdal

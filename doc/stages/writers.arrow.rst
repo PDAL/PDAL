@@ -48,7 +48,7 @@ Options
 -------
 
 batch_size
-  Number of rows to write as a batch [Default: 65536*64 ]
+  Number of rows to write as a batch [Default: 65536*4 ]
 
 filename
   Output file to write [Required]
@@ -62,7 +62,7 @@ geoparquet
   Write WKB column and GeoParquet metadata when writing parquet output
 
 write_pipeline_metadata
-  Write PDAL pipeline metadata into `PDAL:pipeline:metadata` of 
+  Write PDAL pipeline metadata into `PDAL:pipeline:metadata` of
   `geoarrow_dimension_name`
 
 .. include:: writer_opts.rst

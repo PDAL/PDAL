@@ -59,10 +59,13 @@ target_compile_definitions(${PDAL_H3_LIB_NAME}
     H3_PREFIX=PDALH3)
 
 target_include_directories(${PDAL_H3_LIB_NAME}
+    BEFORE
     PRIVATE
-    SYSTEM
         "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
+if (NOT MSVC)
+    target_compile_options(${PDAL_H3_LIB_NAME} PRIVATE -Wno-cast-qual)
+endif()
 
 
 # H3 is built static but is included in a shared lib.

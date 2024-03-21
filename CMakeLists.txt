@@ -218,8 +218,9 @@ add_library(PDAL::PDAL ALIAS ${PDAL_LIB_NAME})
 # without specification.
 #
 target_include_directories(${PDAL_LIB_NAME}
-    PRIVATE SYSTEM
+    SYSTEM BEFORE PRIVATE
         ${PDAL_VENDOR_DIR}/eigen
+        ${PDAL_VENDOR_DIR}/kazhdan
         ${PDAL_VENDOR_DIR}/h3/include
 )
 target_include_directories(${PDAL_LIB_NAME}

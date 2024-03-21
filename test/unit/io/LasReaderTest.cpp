@@ -460,13 +460,13 @@ TEST(LasReaderTest, lazperf)
     size_t pointSize = view1->pointSize();
     EXPECT_EQ(view1->pointSize(), view2->pointSize());
     // Validate some point data.
-    std::unique_ptr<char> buf1(new char[pointSize]);
-    std::unique_ptr<char> buf2(new char[pointSize]);
+    std::vector<char> buf1(pointSize);
+    std::vector<char> buf2(pointSize);
     for (PointId i = 0; i < 110000; i += 100)
     {
-       view1->getPackedPoint(dims, i, buf1.get());
-       view2->getPackedPoint(dims, i, buf2.get());
-       EXPECT_EQ(memcmp(buf1.get(), buf2.get(), pointSize), 0);
+       view1->getPackedPoint(dims, i, buf1.data());
+       view2->getPackedPoint(dims, i, buf2.data());
+       EXPECT_EQ(memcmp(buf1.data(), buf2.data(), pointSize), 0);
     }
 }
 
@@ -611,7 +611,7 @@ TEST(LasReaderTest, IgnoreBadVLRs)
     reader.prepare(table);
     PointViewSet viewSet = reader.execute(table);
 
-    // First two VLRs are SRS info, the third one 
+    // First two VLRs are SRS info, the third one
     // doesn't exist, but we want to ignore that.
     MetadataNode root = reader.getMetadata();
     for (size_t i = 2; i < 3; ++i)

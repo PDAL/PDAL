@@ -85,6 +85,30 @@ struct PDAL_DLL uuid
 
     void clear()
     { memset(this, 0, sizeof(struct uuid)); }
+
+    void randomize()
+    {
+        static std::random_device rd;
+        static std::mt19937_64 gen(rd());
+        static std::uniform_int_distribution<uint64_t> dist;
+
+        uint64_t r = dist(gen);
+        const char *c = reinterpret_cast<const char *>(&r);
+        memcpy(&time_low, c, sizeof(time_low)); c += sizeof(time_low);
+        memcpy(&time_mid, c, sizeof(time_mid)); c += sizeof(time_mid);
+        memcpy(&time_hi_and_version, c, sizeof(time_hi_and_version));
+
+        r = dist(gen);
+        c = reinterpret_cast<const char *>(&r);
+        std::memcpy(&clock_seq, c, sizeof(clock_seq)); c += sizeof(clock_seq);
+        std::memcpy(node, c, sizeof(node));
+
+        // Set the high nibble to 4 (version 4).
+        time_hi_and_version = (time_hi_and_version & 0x0FFF) | 0x4000;
+
+        // Set the high two bits to 2 (variant for RFC 4122)
+        clock_seq = (clock_seq & 0x3FFF) | 0x8000;
+    }
 };
 #pragma pack(pop)
 
@@ -213,14 +237,7 @@ class PDAL_DLL RandomUuid : public Uuid
 public:
     RandomUuid()
     {
-        static std::random_device rd;
-        static std::mt19937_64 gen(rd());
-        static std::uniform_int_distribution<uint64_t> dist;
-
-        uint64_t r = dist(gen);
-        std::memcpy(&m_data, &r, sizeof(r));
-        r = dist(gen);
-        std::memcpy(&m_data.clock_seq, &r, sizeof(r));
+        m_data.randomize();
     }
 };
 
