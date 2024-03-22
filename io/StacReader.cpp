@@ -304,14 +304,14 @@ void StacReader::handleItemCollection(NL::json stacJson, std::string icPath)
     }
 }
 
-std::string idListStr(std::string type, std::vector<RegEx> ids)
+std::string listStr(std::string key, std::vector<RegEx> ids)
 {
     std::stringstream s;
-    s << type << " Ids: [";
+    s << key << ": [";
     for (auto& id: ids)
-        s << id.m_str << ", " << std::endl;
-    s.seekp(-3, std::ios_base::end);
-    s << "]";
+        s << id.m_str << ", ";
+    s.seekp(-2, std::ios_base::end);
+    s << "]" << std::endl;
     return s.str();
 }
 
@@ -325,7 +325,7 @@ void StacReader::initializeArgs()
     log()->get(LogLevel::Debug) << "Filters: " << std::endl;
     if (!m_args->items.empty())
     {
-        std::string itIdStr = idListStr("Item", m_args->items);
+        std::string itIdStr = listStr("Item Ids", m_args->items);
         log()->get(LogLevel::Debug) << itIdStr;
 
         m_p->m_itemFilters->ids = m_args->items;
@@ -333,7 +333,7 @@ void StacReader::initializeArgs()
 
     if (!m_args->catalogs.empty())
     {
-        std::string caIdStr = idListStr("Catalog", m_args->catalogs);
+        std::string caIdStr = listStr("Catalog Ids", m_args->catalogs);
         log()->get(LogLevel::Debug) << caIdStr;
 
         m_p->m_catFilters->ids = m_args->catalogs;
@@ -341,7 +341,7 @@ void StacReader::initializeArgs()
 
     if (!m_args->collections.empty())
     {
-        std::string coIdStr = idListStr("Collection", m_args->collections);
+        std::string coIdStr = listStr("Collection Ids", m_args->collections);
         log()->get(LogLevel::Debug) << coIdStr;
 
         m_p->m_itemFilters->collections = m_args->collections;
@@ -407,9 +407,9 @@ void StacReader::initializeArgs()
         std::stringstream s;
         s << "Asset Keys: [";
         for (auto& name: m_args->assetNames)
-            s << name << ", " << std::endl;
-        s.seekp(-3, std::ios_base::end);
-        s << "]";
+            s << name << ", ";
+        s.seekp(-2, std::ios_base::end);
+        s << "]" << std::endl;
         auto it = m_p->m_itemFilters->assetNames.begin();
         log()->get(LogLevel::Debug) << s.str();
         m_p->m_itemFilters->assetNames.insert(it, m_args->assetNames.begin(),
