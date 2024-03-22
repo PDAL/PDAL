@@ -235,6 +235,8 @@ void LiTreeFilter::segmentTree(PointView& view, PointIdList& Ui,
     PointId n0 = locateDummyPoint(view, Ui, t0);
     Ni.push_back(n0);
 
+    double initialRadius = m_dummyRadius; // Remember the initial radius to reset if needed
+
     // "For iteration i, we classify each point in Ui as Pi or Ni."
     double tx = view.getFieldAs<double>(Id::X, t0);
     double ty = view.getFieldAs<double>(Id::Y, t0);
@@ -252,6 +254,34 @@ void LiTreeFilter::segmentTree(PointView& view, PointIdList& Ui,
     log()->get(LogLevel::Debug3)
         << "|Pi| = " << Pi.size() << ", |Ni| = " << Ni.size() << std::endl;
 
+   // Check if Ni is equal to Ui, indicating the radius might be too short
+    if (Ni.size() == Ui.size() && Pi.size() == 1)
+    {
+        log()->get(LogLevel::Warning) << "Expanding search radius as |Ni| == |Ui|.\n";
+        m_dummyRadius += 10; // decide here how to increase the radius
+
+        // Reset Ni and retry segmentation with the updated radius
+        Ni.clear();
+        
+         n0 = locateDummyPoint(view, Ui, t0); // Recompute n0 with the new radius
+      
+        Ni.push_back(n0); // Reinsert the dummy point with the updated radius
+
+        // Reclassify points with the updated radius
+        for (PointId const& ui : Ui)
+        {
+            double ux = view.getFieldAs<double>(Id::X, ui);
+            double uy = view.getFieldAs<double>(Id::Y, ui);
+            double d = (ux - tx) * (ux - tx) + (uy - ty) * (uy - ty);
+            if (d < 100.0)
+                classifyPoint(ui, view, Ni, Pi);
+            else
+                Ni.push_back(ui);
+        }
+
+        m_dummyRadius = initialRadius; // Reset the radius for future iterations
+    }
+  
     // Use Pi to assign current tree_id to TreeID dimension, only if minimum
     // size is met
     if (Pi.size() >= m_minSize)
