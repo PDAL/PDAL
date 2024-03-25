@@ -295,9 +295,21 @@ void CopcWriter::prepared(PointTableRef table)
             ") " << " to COPC extra bytes." << std::endl;
     }
 
-    b->sortDim = layout->findDim(b->sortDimName);
-    if (b->sortDim == Dimension::Id::Unknown)
-        throwError("Dimension '" + b->sortDimName + "' not found in layout");
+    // User-provided sorting dimension
+    // If we can't find our dimension but the user used the default
+    // dimension of GpsTime, we're just going to use that.
+    Dimension::Id sortDim = layout->findDim(b->sortDimName);
+    if (sortDim == Dimension::Id::Unknown)
+    {
+        if (Utils::iequals(b->sortDimName, "GPSTIME"))
+            b->sortDim = Dimension::Id::GpsTime;
+        else
+            throwError("Dimension '" + b->sortDimName + "' not found in layout");
+    } else
+    {
+        b->sortDim = sortDim;
+    }
+
 }
 
 void CopcWriter::ready(PointTableRef table)
