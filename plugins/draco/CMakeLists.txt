@@ -7,7 +7,7 @@ if (STANDALONE)
     include(${PDAL_CMAKE_DIR}/arbiter.cmake)
     include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
     add_subdirectory("${PROJECT_SOURCE_DIR}/../../vendor/arbiter" "vendor/arbiter")
-    find_package(PDAL REQUIRED)    
+    find_package(PDAL REQUIRED)
 endif(STANDALONE)
 
 
@@ -16,7 +16,7 @@ endif(STANDALONE)
 #
 
 
-find_package(Draco 1.5.6 REQUIRED CONFIG)
+find_package(Draco 1.5 REQUIRED CONFIG)
 
 set (DRACO_LIBRARIES "draco::draco")
 
