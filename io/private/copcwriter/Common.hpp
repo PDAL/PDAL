@@ -138,8 +138,6 @@ struct BaseInfo
         stats::Summary("ReturnNumber", stats::Summary::Enumerate),
     };
     std::string filename;
-    std::string sortDimName;
-    Dimension::Id sortDim = Dimension::Id::GpsTime;
 };
 
 } // namespace copcwriter
