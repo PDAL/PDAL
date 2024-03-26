@@ -49,7 +49,8 @@ public:
     ItemCollection(const NL::json& json,
         const std::string& icPath,
         const connector::Connector& connector,
-        bool validate);
+        bool validate,
+        LogPtr log);
     ~ItemCollection();
 
     struct Filters
@@ -65,6 +66,7 @@ private:
     std::string m_path;
     const connector::Connector& m_connector;
     bool m_validate;
+    const LogPtr m_log;
 
     ItemList m_itemList;
 };

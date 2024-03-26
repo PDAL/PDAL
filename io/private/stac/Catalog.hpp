@@ -57,7 +57,8 @@ public:
         const std::string& catPath,
         const connector::Connector& connector,
         ThreadPool& pool,
-        bool validate);
+        bool validate,
+        LogPtr log);
     virtual ~Catalog();
 
     struct Filters {
@@ -87,6 +88,7 @@ protected:
     ThreadPool& m_pool;
     bool m_root;
     bool m_validate;
+    const LogPtr m_log;
     std::string m_id;
     GroupType m_type;
 
