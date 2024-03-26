@@ -93,6 +93,7 @@ class PDAL_DLL StacReader : public Reader, public Streamable
         virtual point_count_t read(PointViewPtr view, point_count_t num) override;
         virtual bool processOne(PointRef& point) override;
         virtual PointViewSet run(PointViewPtr view) override;
+        virtual void done(PointTableRef) override;
 
         MergeFilter m_merge;
 

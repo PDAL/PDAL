@@ -45,9 +45,9 @@ using namespace StacUtils;
 ItemCollection::ItemCollection(const NL::json& json,
         const std::string& icPath,
         const connector::Connector& connector,
-        bool validate):
+        bool validate, LogPtr log):
     m_json(json), m_path(icPath), m_connector(connector),
-    m_validate(validate)
+    m_validate(validate), m_log(log)
 {}
 
 
@@ -65,7 +65,7 @@ bool ItemCollection::init(const Filters& filters, NL::json rawReaderArgs,
     const NL::json itemList = stacValue(m_json, "features");
     for (const NL::json& itemJson: itemList)
     {
-        Item item(itemJson, m_path, m_connector, m_validate);
+        Item item(itemJson, m_path, m_connector, m_validate, m_log);
         if (item.init(*filters.itemFilters, rawReaderArgs, schemaUrls))
         {
             m_itemList.push_back(item);
@@ -87,7 +87,7 @@ bool ItemCollection::init(const Filters& filters, NL::json rawReaderArgs,
                 NL::json nextJson = m_connector.getJson(nextAbsPath);
 
                 ItemCollection ic(nextJson, nextAbsPath, m_connector,
-                    m_validate);
+                    m_validate, m_log);
 
                 if (ic.init(filters, rawReaderArgs, schemaUrls))
                     for (auto& item: ic.items())

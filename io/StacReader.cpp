@@ -181,7 +181,6 @@ void StacReader::addArgs(ProgramArgs& args)
 
 void StacReader::addItem(Item& item)
 {
-    log()->get(LogLevel::Debug) << "Selected Item: " << item.id() << std::endl;
     std::string driver = item.driver();
 
     Stage *stage = m_factory.createStage(driver);
@@ -212,10 +211,10 @@ void StacReader::addItem(Item& item)
 void StacReader::handleItem(NL::json stacJson, std::string itemPath)
 {
     Item item(stacJson, m_filename, *m_p->m_connector,
-        m_args->validateSchema);
+        m_args->validateSchema, log());
+    log()->get(LogLevel::Debug) << "Found STAC Item " << item.id() << ".";
     if (item.init(*m_p->m_itemFilters, m_args->rawReaderArgs, m_args->schemaUrls))
     {
-
         addItem(item);
     }
 }
@@ -255,7 +254,7 @@ void StacReader::handleNested(Catalog& c)
 void StacReader::handleCatalog(NL::json stacJson, std::string catPath)
 {
     Catalog c(stacJson, catPath, *m_p->m_connector, *m_p->m_pool,
-        m_args->validateSchema);
+        m_args->validateSchema, log());
 
     // if init returns false, the collection has no items in itself or in
     // any sub-catalogs/collections.
@@ -276,7 +275,7 @@ void StacReader::handleCatalog(NL::json stacJson, std::string catPath)
 void StacReader::handleCollection(NL::json stacJson, std::string colPath)
 {
     Collection c(stacJson, colPath, *m_p->m_connector,
-        *m_p->m_pool, m_args->validateSchema);
+        *m_p->m_pool, m_args->validateSchema, log());
 
     // if init returns false, the collection has no items in itself or in
     // any sub-catalogs/collections.
@@ -296,13 +295,24 @@ void StacReader::handleCollection(NL::json stacJson, std::string colPath)
 void StacReader::handleItemCollection(NL::json stacJson, std::string icPath)
 {
     ItemCollection ic(stacJson, icPath, *m_p->m_connector,
-            m_args->validateSchema);
+            m_args->validateSchema, log());
 
     if (ic.init(*m_p->m_icFilters, m_args->rawReaderArgs, m_args->schemaUrls))
     {
         for (auto& item: ic.items())
             addItem(item);
     }
+}
+
+std::string listStr(std::string key, std::vector<RegEx> ids)
+{
+    std::stringstream s;
+    s << key << ": [";
+    for (auto& id: ids)
+        s << id.m_str << ", ";
+    s.seekp(-2, std::ios_base::end);
+    s << "]" << std::endl;
+    return s.str();
 }
 
 void StacReader::initializeArgs()
@@ -312,30 +322,28 @@ void StacReader::initializeArgs()
     m_p->m_colFilters = std::make_unique<Catalog::Filters>();
     m_p->m_icFilters = std::make_unique<ItemCollection::Filters>();
 
+    log()->get(LogLevel::Debug) << "Filters: " << std::endl;
     if (!m_args->items.empty())
     {
-        log()->get(LogLevel::Debug) <<
-            "Selecting Items with ids: " << std::endl;
-        for (auto& id: m_args->items)
-            log()->get(LogLevel::Debug) << "    " << id.m_str << std::endl;
+        std::string itIdStr = listStr("Item Ids", m_args->items);
+        log()->get(LogLevel::Debug) << itIdStr;
+
         m_p->m_itemFilters->ids = m_args->items;
     }
 
     if (!m_args->catalogs.empty())
     {
-        log()->get(LogLevel::Debug) <<
-            "Selecting Catalogs with ids: " << std::endl;
-        for (auto& id: m_args->catalogs)
-            log()->get(LogLevel::Debug) << "    " << id.m_str << std::endl;
+        std::string caIdStr = listStr("Catalog Ids", m_args->catalogs);
+        log()->get(LogLevel::Debug) << caIdStr;
+
         m_p->m_catFilters->ids = m_args->catalogs;
     }
 
     if (!m_args->collections.empty())
     {
-        log()->get(LogLevel::Debug) <<
-            "Selecting Catalogs with ids: " << std::endl;
-        for (auto& id: m_args->collections)
-            log()->get(LogLevel::Debug) << "    " << id.m_str << std::endl;
+        std::string coIdStr = listStr("Collection Ids", m_args->collections);
+        log()->get(LogLevel::Debug) << coIdStr;
+
         m_p->m_itemFilters->collections = m_args->collections;
         m_p->m_colFilters->ids = m_args->collections;
     }
@@ -344,7 +352,7 @@ void StacReader::initializeArgs()
     if (!m_args->dates.empty())
     {
         log()->get(LogLevel::Debug) <<
-            "Dates selected: " << m_args->dates << std::endl;
+            "Dates: " << m_args->dates << std::endl;
 
         for (auto& datepair: m_args->dates)
         {
@@ -394,13 +402,16 @@ void StacReader::initializeArgs()
 
         m_p->m_itemFilters->bounds = m_args->bounds;
     }
-
     if (!m_args->assetNames.empty())
     {
-        log()->get(LogLevel::Debug) << "STAC Reader will look in these asset keys: ";
+        std::stringstream s;
+        s << "Asset Keys: [";
         for (auto& name: m_args->assetNames)
-            log()->get(LogLevel::Debug) << name << std::endl;
+            s << name << ", ";
+        s.seekp(-2, std::ios_base::end);
+        s << "]" << std::endl;
         auto it = m_p->m_itemFilters->assetNames.begin();
+        log()->get(LogLevel::Debug) << s.str();
         m_p->m_itemFilters->assetNames.insert(it, m_args->assetNames.begin(),
             m_args->assetNames.end());
     }
@@ -454,7 +465,6 @@ void StacReader::initialize()
     m_p->m_connector.reset(new connector::Connector(headers, query));
 
     m_p->m_pool.reset(new ThreadPool(m_args->threads));
-
     initializeArgs();
 
     NL::json stacJson = m_p->m_connector->getJson(m_filename);
@@ -560,6 +570,12 @@ void StacReader::ready(PointTableRef table)
 PointViewSet StacReader::run(PointViewPtr view)
 {
     return StageWrapper::run(m_merge, view);
+}
+
+void StacReader::done(PointTableRef)
+{
+    m_p->m_pool->stop();
+    m_p->m_connector.reset();
 }
 
 
