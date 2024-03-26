@@ -126,6 +126,9 @@ compression_level
 timestamp
   Sets the TileDB timestamp for this write. [Optional]
 
+allow_dups
+  Allow duplicate points. [Default: true]
+
 .. include:: writer_opts.rst
 
 
