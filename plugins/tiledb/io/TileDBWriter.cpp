@@ -89,6 +89,7 @@ struct TileDBWriter::Args
     bool m_use_time;
     bool m_time_first;
     bool m_combine_bit_fields;
+    bool m_allow_dups;
     uint64_t m_timeStamp = UINT64_MAX;
 };
 
@@ -181,6 +182,9 @@ void TileDBWriter::addArgs(ProgramArgs& args)
     args.add("combine_bit_fields",
              "Combine all bit fields into a single 2 byte attribute",
              m_args->m_combine_bit_fields, true);
+    args.add("allow_dups", "Allow duplicate points (default is True)", m_args->m_allow_dups,
+             true);
+
 }
 
 void TileDBWriter::initialize()
@@ -289,7 +293,7 @@ void TileDBWriter::ready(pdal::BasePointTable& table)
 
         // Create schema and set basic properties.
         tiledb::ArraySchema schema{*m_ctx, TILEDB_SPARSE};
-        schema.set_allows_dups(true);
+        schema.set_allows_dups(m_args->m_allow_dups);
         schema.set_capacity(m_args->m_tile_capacity);
 
         // Set tile order.

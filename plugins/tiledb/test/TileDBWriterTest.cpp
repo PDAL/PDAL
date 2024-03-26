@@ -489,6 +489,56 @@ TEST_F(TileDBWriterTest, dup_points)
         EXPECT_EQ(xs[i], 1.0); // points are always at the minimum of the box
 }
 
+TEST_F(TileDBWriterTest, no_dup_points)
+{
+    Options reader_options;
+    FauxReader reader;
+    BOX3D bounds(1.0, 1.0, 1.0, 2.0, 2.0, 2.0);
+    reader_options.add("bounds", bounds);
+    reader_options.add("mode", "constant");
+    reader_options.add("count", count);
+    reader.setOptions(reader_options);
+
+    tiledb::Context ctx;
+    std::string pth = Support::temppath("tiledb_test_no_dup_points");
+
+    Options writer_options = getTileDBOptions();
+    writer_options.add("array_name", pth);
+    // force flush on every point  so that we can write duplicates to separate fragments
+    writer_options.add("chunk_size", 1);
+    writer_options.add("allow_dups", false);
+
+    if (FileUtils::directoryExists(pth))
+        FileUtils::deleteDirectory(pth);
+
+    TileDBWriter writer;
+    writer.setOptions(writer_options);
+    writer.setInput(reader);
+
+    FixedPointTable table(count);
+    writer.prepare(table);
+    writer.execute(table);
+
+    tiledb::Array array(ctx, pth, TILEDB_READ);
+    tiledb::Query q(ctx, array, TILEDB_READ);
+
+    std::vector<double> xs(count);
+    std::vector<double> ys(count);
+    std::vector<double> zs(count);
+
+    q.set_data_buffer("X", xs).set_data_buffer("Y", ys).set_data_buffer("Z",
+                                                                        zs);
+
+    q.submit();
+    array.close();
+
+    auto result_num = (int)q.result_buffer_elements()["X"].second;
+    EXPECT_EQ(1, result_num); // test de-duplication allow_dups set to false
+    EXPECT_EQ(xs[0], 1.0); // points are always at the minimum of the box
+    EXPECT_EQ(ys[0], 1.0); // points are always at the minimum of the box
+    EXPECT_EQ(zs[0], 1.0); // points are always at the minimum of the box
+}
+
 TEST_F(TileDBWriterTest, sf_curve)
 {
     Options reader_options;
