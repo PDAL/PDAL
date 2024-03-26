@@ -219,8 +219,10 @@ void LiTreeFilter::segmentTree(PointView& view, PointIdList& Ui,
     Pi.push_back(t0);
 
     // "We then insert a dummy point n0 that is far away (e.g., 100m) from t0
-    // into Ni."  If the dummy point is the target point, then the target point is
-    // geographically isolated. We remove it and try to find the next tree.
+    // into Ni."
+    //
+    // If the found dummy point is the target point, then the target point is
+    // geographically isolated. We remove it and return.
     PointId n0 = locateDummyPoint(view, Ui, t0);
     if (n0 == t0)
     {
