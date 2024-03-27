@@ -39,6 +39,7 @@
 #include "LiTreeFilter.hpp"
 
 #include <pdal/KDIndex.hpp>
+#include <pdal/util/Algorithm.hpp>
 
 #include <numeric>
 
@@ -152,16 +153,6 @@ void LiTreeFilter::computeLocalMax(PointView& view)
 void LiTreeFilter::classifyPoint(PointId ui, PointView& view, PointIdList& Ni,
                                  PointIdList& Pi)
 {
-    // Skip the points that were used to seed Pi and Ni, else they will be
-    // repeated.
-    if (std::count(Pi.begin(), Pi.end(), ui))
-        return;
-    if (std::count(Ni.begin(), Ni.end(), ui))
-        return;
-
-    PointRef u = view.point(ui);
-    double Zu = u.getFieldAs<double>(Id::HeightAboveGround);
-
     // compute dmin1 and dmin2 (nearest neighbor in each set)
     auto mindist = [&ui, &view](PointIdList idx) {
         double ux = view.getFieldAs<double>(Id::X, ui);
@@ -181,11 +172,6 @@ void LiTreeFilter::classifyPoint(PointId ui, PointView& view, PointIdList& Ni,
     double dmin1 = mindist(Pi);
     double dmin2 = mindist(Ni);
 
-    // determine appropriate threshold based on HAG of current point
-    double dt = 1.5;
-    if (Zu > 15)
-        dt = 2.0;
-
     if (!m_localMax[ui])
     {
         if (dmin1 <= dmin2)
@@ -195,6 +181,8 @@ void LiTreeFilter::classifyPoint(PointId ui, PointView& view, PointIdList& Ni,
     }
     else
     {
+        // determine appropriate threshold based on HAG of current point
+        double dt = view.getFieldAs<double>(Id::HeightAboveGround, ui) <= 15 ? 1.5 : 2.0;
         if (dmin1 > dt)
         {
             Ni.push_back(ui);
@@ -232,7 +220,15 @@ void LiTreeFilter::segmentTree(PointView& view, PointIdList& Ui,
 
     // "We then insert a dummy point n0 that is far away (e.g., 100m) from t0
     // into Ni."
+    //
+    // If the found dummy point is the target point, then the target point is
+    // geographically isolated. We remove it and return.
     PointId n0 = locateDummyPoint(view, Ui, t0);
+    if (n0 == t0)
+    {
+        Utils::remove(Ui, t0);
+        return;
+    }
     Ni.push_back(n0);
 
     // "For iteration i, we classify each point in Ui as Pi or Ni."
@@ -240,8 +236,15 @@ void LiTreeFilter::segmentTree(PointView& view, PointIdList& Ui,
     double ty = view.getFieldAs<double>(Id::Y, t0);
     for (PointId const& ui : Ui)
     {
+        // t0 and n0 are already in Pi or Ni.
+        if (ui == t0 || ui == n0)
+            continue;
+
         double ux = view.getFieldAs<double>(Id::X, ui);
         double uy = view.getFieldAs<double>(Id::Y, ui);
+        //ABELL - This is strange. We've already done a radius search to locate a dummy point
+        //  and the distance used is 100, so we already have the points that are within that
+        //  distance, so there's really no need to do it again, is there?
         double d = (ux - tx) * (ux - tx) + (uy - ty) * (uy - ty);
         if (d < 100.0)
             classifyPoint(ui, view, Ni, Pi);
@@ -251,7 +254,6 @@ void LiTreeFilter::segmentTree(PointView& view, PointIdList& Ui,
 
     log()->get(LogLevel::Debug3)
         << "|Pi| = " << Pi.size() << ", |Ni| = " << Ni.size() << std::endl;
-
     // Use Pi to assign current tree_id to TreeID dimension, only if minimum
     // size is met
     if (Pi.size() >= m_minSize)
