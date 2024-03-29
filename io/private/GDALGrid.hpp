@@ -47,6 +47,18 @@ namespace pdal
 class GDALGrid
 {
     FRIEND_TEST(GDALWriterTest, issue_2095);
+
+    struct Point
+    {
+        double x;
+        double y;
+    };
+    struct Cell
+    {
+        int i;
+        int j;
+    };
+
 public:
     static const int statCount = 1;
     static const int statMin = 2;
@@ -116,6 +128,9 @@ private:
     // Determine the distance from the center of cell at coordinate i, j to
     // a point at absolute coordinate x, y.
     double distance(int i, int j, double x, double y) const;
+
+    // Convert an x/y point to a grid cell location.
+    Cell pointToCell(const Point& p);
 
     // Update cells in the Nth quadrant about point at (x, y, z)
     void updateFirstQuadrant(double x, double y, double z);

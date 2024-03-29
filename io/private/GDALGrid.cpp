@@ -179,6 +179,19 @@ double *GDALGrid::data(const std::string& name)
     return nullptr;
 }
 
+GDALGrid::Cell GDALGrid::pointToCell(const Point& p)
+{
+    bool okX, okY;
+
+    Cell cell;
+    cell.i = m_count->xCell(p.x, okX);
+    cell.j = m_count->yCell(p.y, okY);
+    if (!okX)
+        throw error("Range of X coordinates exceeds limits.");
+    if (!okY)
+        throw error("Range of Y coordinates exceeds limits.");
+    return cell;
+}
 
 void GDALGrid::addPoint(double x, double y, double z)
 {
@@ -210,38 +223,26 @@ void GDALGrid::addPoint(double x, double y, double z)
     //       <--- | v
     //         <- v
 
+    Cell origin = pointToCell({x, y});
+    double d;
+
     if (!m_binMode)
     {
         updateFirstQuadrant(x, y, z);
         updateSecondQuadrant(x, y, z);
         updateThirdQuadrant(x, y, z);
         updateFourthQuadrant(x, y, z);
-
-        int iOrigin = m_count->xCell(x);
-        int jOrigin = m_count->yCell(y);
-
-        // This is a questionable case.  If a point is in a cell, shouldn't
-        // it just be counted?
-        double d = distance(iOrigin, jOrigin, x, y);
-        if (d < m_radius &&
-            iOrigin >= 0 && jOrigin >= 0 &&
-            iOrigin < width() && jOrigin < height())
-            update(iOrigin, jOrigin, z, d);
-    } else
-    {
-
-        // If we are in bin mode we only care about points
-        // that are inside the cell. We don't care about distance, and
-        // we are not interpolating anything.
-        int iOrigin = m_count->xCell(x);
-        int jOrigin = m_count->yCell(y);
-
-        if (
-            iOrigin >= 0 && jOrigin >= 0 &&
-            iOrigin < width() && jOrigin < height())
-            update(iOrigin, jOrigin, z, 0.0f);
-
+        d = distance(origin.i, origin.j, x, y);
     }
+    else
+        d = 0;
+
+    // In non bin mode, this case is where a point lies in a cell.
+    // In bin mode, this is the only case and distance is zero.
+    if ((m_binMode || d < m_radius) &&
+        origin.i >= 0 && origin.j >= 0 &&
+        origin.i < width() && origin.j < height())
+        update(origin.i, origin.j, z, d);
 }
 
 
@@ -249,11 +250,11 @@ void GDALGrid::updateFirstQuadrant(double x, double y, double z)
 {
     int i, j;
     int iStart;
-    int iOrigin = m_count->xCell(x);
-    int jOrigin = m_count->yCell(y);
 
-    i = iStart = (std::max)(0, iOrigin + 1);
-    j = (std::min)(jOrigin, (height() - 1));
+    Cell origin = pointToCell({x, y});
+
+    i = iStart = (std::max)(0, origin.i + 1);
+    j = (std::min)(origin.j, (height() - 1));
 
     if (iStart >= width())
         return;
@@ -283,11 +284,11 @@ void GDALGrid::updateSecondQuadrant(double x, double y, double z)
 {
     int i, j;
     int jStart;
-    int iOrigin = m_count->xCell(x);
-    int jOrigin = m_count->yCell(y);
 
-    i = (std::min)(iOrigin, (width() - 1));
-    j = jStart = (std::min)(jOrigin - 1, (height() - 1));
+    Cell origin = pointToCell({x, y});
+
+    i = (std::min)(origin.i, (width() - 1));
+    j = jStart = (std::min)(origin.j - 1, (height() - 1));
 
     if (jStart < 0)
         return;
@@ -317,11 +318,11 @@ void GDALGrid::updateThirdQuadrant(double x, double y, double z)
 {
     int i, j;
     int iStart;
-    int iOrigin = m_count->xCell(x);
-    int jOrigin = m_count->yCell(y);
 
-    i = iStart = (std::min)(iOrigin - 1, (width() - 1));
-    j = (std::max)(jOrigin, 0);
+    Cell origin = pointToCell({x, y});
+
+    i = iStart = (std::min)(origin.i - 1, (width() - 1));
+    j = (std::max)(origin.j, 0);
 
     if (iStart < 0)
         return;
@@ -349,14 +350,13 @@ void GDALGrid::updateThirdQuadrant(double x, double y, double z)
 
 void GDALGrid::updateFourthQuadrant(double x, double y, double z)
 {
-
     int i, j;
     int jStart;
-    int iOrigin = m_count->xCell(x);
-    int jOrigin = m_count->yCell(y);
 
-    i = (std::max)(iOrigin, 0);
-    j = jStart = (std::max)(jOrigin + 1, 0);
+    Cell origin = pointToCell({x, y});
+
+    i = (std::max)(origin.i, 0);
+    j = jStart = (std::max)(origin.j + 1, 0);
 
     if (jStart >= height())
         return;
@@ -371,7 +371,6 @@ void GDALGrid::updateFourthQuadrant(double x, double y, double z)
             if (j < height())
                 continue;
         }
-
 
         // Either d >= m_radius or we've hit the end of a column (j == height())
         // so move to the next row.

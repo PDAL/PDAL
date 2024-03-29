@@ -48,24 +48,36 @@ void Raster<T>::setLimits(const RasterLimits& limits)
 
 
 template <typename T>
-void Raster<T>::expandToInclude(double x, double y)
+bool Raster<T>::expandToInclude(double x, double y)
 {
-    int xi = xCell(x);
-    int yi = yCell(y);
+    bool okX, okY;
+    int xi = xCell(x, okX);
+    int yi = yCell(y, okY);
+    if (!okX || !okY)
+        return false;
 
     if (xi >= 0 && yi >= 0 && xi < width() && yi < height())
-        return;
+        return true;
 
-    int w = (std::max)(width(), xi + 1);
-    int h = (std::max)(height(), yi + 1);
-    int xshift = (std::max)(-xi, 0);
-    int yshift = (std::max)(-yi, 0);
+    int64_t w = (std::max)(width(), xi + 1);
+    int64_t h = (std::max)(height(), yi + 1);
+    int64_t xshift = (std::max)(-xi, 0);
+    int64_t yshift = (std::max)(-yi, 0);
 
     if (xshift)
         w += xshift;
     if (yshift)
         h += yshift;
-    expand(w, h, xshift, yshift);
+
+    // w or h could have overflowed an integer with the above additions.
+    if (w < std::numeric_limits<int>::lowest() ||
+        w > (std::numeric_limits<int>::max)() ||
+        h < std::numeric_limits<int>::lowest() ||
+        h > (std::numeric_limits<int>::max)())
+        return false;
+
+    return expand(static_cast<int>(w), static_cast<int>(h),
+        static_cast<int>(xshift), static_cast<int>(yshift));
 }
 
 
@@ -95,7 +107,7 @@ Utils::StatusWithReason Raster<T>::expand(int newWidth, int newHeight, int xshif
     // Note: that i, j are internal to the raster and start at the top left and
     //   move across and down.
     DataVec& src = m_data;
-    DataVec dst(newWidth * newHeight, m_initializer);
+    DataVec dst((size_t)newWidth * newHeight, m_initializer);
     for (int j = 0; j < height(); ++j)
     {
         size_t srcPos = index(0, j);

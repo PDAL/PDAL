@@ -47,17 +47,6 @@ class GDALGrid;
 
 class PDAL_DLL GDALWriter : public FlexWriter, public Streamable
 {
-    struct Cell
-    {
-        long x;
-        long y;
-    };
-    struct Position
-    {
-        double x;
-        double y;
-    };
-
 public:
     std::string getName() const;
 
