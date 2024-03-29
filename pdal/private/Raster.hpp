@@ -149,11 +149,25 @@ public:
     T initializer() const
         { return m_initializer; }
 
-    int xCell(double x) const
-        { return (int)std::floor((x - m_limits.xOrigin) / m_limits.edgeLength); }
+    int xCell(double x, bool& ok) const
+    {
+        double cell = std::floor((x - m_limits.xOrigin) / m_limits.edgeLength);
+        // We check cell + 1 for validity because we make a raster with width one
+        // larger than the limit.
+        ok = (cell >= std::numeric_limits<int>::lowest() &&
+              cell + 1 <= (std::numeric_limits<int>::max)());
+        return static_cast<int>(cell);
+    }
 
-    int yCell(double y) const
-        { return (int)std::floor((y - m_limits.yOrigin) / m_limits.edgeLength); }
+    int yCell(double y, bool& ok) const
+    {
+        double cell = std::floor((y - m_limits.yOrigin) / m_limits.edgeLength);
+        // We check cell + 1 for validity because we make a raster with height one
+        // larger than the limit.
+        ok = (cell >= std::numeric_limits<int>::lowest() &&
+              cell + 1 <= (std::numeric_limits<int>::max)());
+        return static_cast<int>(cell);
+    }
 
     double xCellPos(size_t i) const
         { return m_limits.xOrigin + (i + .5) * edgeLength(); }
@@ -197,7 +211,7 @@ public:
     const_iterator end() const
         { return m_data.end(); }
 
-    void expandToInclude(double x, double y);
+    bool expandToInclude(double x, double y);
 
     //ABELL - This should probably call expand().
     void setLimits(const RasterLimits& limits);
@@ -218,7 +232,7 @@ private:
 
     // You need to pass in internal (Y down) indices.
     size_t index(int i, int j) const
-        { return (j * width()) + i; }
+        { return ((size_t)j * width()) + i; }
 
 };
 

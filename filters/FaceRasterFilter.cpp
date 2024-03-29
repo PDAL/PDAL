@@ -135,12 +135,21 @@ void FaceRasterFilter::filter(PointView& v)
         // minimum position is exactly aligned with a cell center (we could simply start one cell
         // lower and to the left, but this small adjustment eliminates that extra row/col in most
         // cases).
-        int ax = raster->xCell(xmin + halfEdge - edgeBit);
-        int ay = raster->yCell(ymin + halfEdge - edgeBit);
+        bool okX, okY;
+        int ax = raster->xCell(xmin + halfEdge - edgeBit, okX);
+        int ay = raster->yCell(ymin + halfEdge - edgeBit, okY);
+        if (!okX)
+            throwError("X value out of range for raster.");
+        if (!okY)
+            throwError("Y value out of range for raster.");
 
         // edgeBit adjustment not necessary here since we're rounding up for exact values.
-        int bx = raster->xCell(xmax + halfEdge);
-        int by = raster->yCell(ymax + halfEdge);
+        int bx = raster->xCell(xmax + halfEdge, okX);
+        int by = raster->yCell(ymax + halfEdge, okY);
+        if (!okX)
+            throwError("X value out of range for raster.");
+        if (!okY)
+            throwError("Y value out of range for raster.");
 
         ax = Utils::clamp(ax, 0, (int)m_limits->width);
         bx = Utils::clamp(bx, 0, (int)m_limits->width);

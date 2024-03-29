@@ -485,7 +485,7 @@ void StacReader::initialize()
     m_p->m_pool->stop();
 
     if (m_p->m_readerList.empty())
-        throw pdal_error("Reader list is empty after filtering.");
+        throwError("Reader list is empty after filtering.");
 
     setInput(m_merge);
     StageWrapper::initialize(m_merge);
