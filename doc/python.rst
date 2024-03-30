@@ -22,7 +22,7 @@ their own applications.
     data is provided to both the filters ands the extension as
     Numpy arrays.
 
-.. _NumPy: http://www.numpy.org/
+.. _NumPy: https://numpy.org
 
 Versions
 --------------------------------------------------------------------------------
@@ -55,7 +55,7 @@ Extend
 
 .. index:: Extension, Python
 
-PDAL provides a Python `extension <https://pypi.python.org/pypi/PDAL>`_
+PDAL provides a Python `extension <https://pypi.org/project/pdal/>`_
 that gives users access to executing
 :ref:`pipeline <pipeline>` instantiations and capturing the results
 as `Numpy`_ arrays.
@@ -120,7 +120,7 @@ As administrator, you can install PDAL using pip:
 .. note::
 
     To install pip please read
-    `here <https://pip.pypa.io/en/stable/installing/>`_
+    `here <https://pip.pypa.io/en/stable/installation/>`_
 
 Installation from Source
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -162,4 +162,4 @@ into a new environment and activate that environment ::
     specified with the ``-c`` option, as shown in the examples above.
 
 .. _`pip`: https://pip.pypa.io/en/stable/
-.. _`Conda`: https://conda.io/docs/
+.. _`Conda`: https://conda.io/projects/conda/en/latest/
