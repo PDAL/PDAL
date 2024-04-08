@@ -65,7 +65,7 @@ public:
     // This ctor is normally used by some std::algorithm that needs a temporary.
     // See the copy ctor below for more info.
     PointRef() : m_table(nullptr), m_idx(0), m_view(nullptr), m_viewIdx(0)
-    { std::cerr << "Temp!\n"; }
+    {}
 
     PointRef(PointView& v, PointId idx = 0);
 

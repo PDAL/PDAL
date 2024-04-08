@@ -37,7 +37,6 @@
 #include <pdal/DimDetail.hpp>
 #include <pdal/DimType.hpp>
 #include <pdal/Mesh.hpp>
-#include <pdal/PointContainer.hpp>
 #include <pdal/PointLayout.hpp>
 #include <pdal/PointTable.hpp>
 #include <pdal/PointRef.hpp>
@@ -49,10 +48,6 @@
 
 namespace pdal
 {
-namespace plang
-{
-    class Invocation;
-}
 
 struct PointViewLess;
 class PointView;
@@ -69,11 +64,10 @@ using Rasterd = Raster<double>;
 typedef std::shared_ptr<PointView> PointViewPtr;
 typedef std::set<PointViewPtr, PointViewLess> PointViewSet;
 
-class PDAL_DLL PointView : public PointContainer
+class PDAL_DLL PointView
 {
     FRIEND_TEST(VoxelTest, center);
     friend class Stage;
-    friend class plang::Invocation;
     friend class PointRef;
     friend class PointViewIter;
     friend struct PointViewLess;
@@ -82,7 +76,7 @@ public:
     PointView& operator=(const PointView&) = delete;
     PointView(PointTableRef pointTable);
     PointView(PointTableRef pointTable, const SpatialReference& srs);
-    virtual ~PointView();
+    ~PointView();
 
     PointViewIter begin();
     PointViewIter end();
@@ -140,7 +134,7 @@ public:
         return (getFieldInternal<T>(dim, id1) < getFieldInternal<T>(dim, id2));
     }
 
-    virtual bool compare(Dimension::Id dim, PointId id1, PointId id2) const
+    bool compare(Dimension::Id dim, PointId id1, PointId id2) const
     {
         const Dimension::Detail *dd = layout()->dimDetail(dim);
 
@@ -316,11 +310,10 @@ private:
         { return idx >= size() ? 0 : m_index[idx]; }
 
     PointId addPoint();
-    virtual void setFieldInternal(Dimension::Id dim, PointId idx,
-        const void *buf);
-    virtual void getFieldInternal(Dimension::Id dim, PointId idx, void *buf) const
+//    void setFieldInternal(Dimension::Id dim, PointId idx, const void *buf);
+    void getFieldInternal(Dimension::Id dim, PointId idx, void *buf) const
         { m_pointTable.getFieldInternal(dim, m_index[idx], buf); }
-    virtual void swapItems(PointId id1, PointId id2)
+    void swapItems(PointId id1, PointId id2)
     {
         PointId temp = m_index[id2];
         m_index[id2] = m_index[id1];
