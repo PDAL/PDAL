@@ -16,7 +16,7 @@ dependencies:
   - conda
   - mamba
   - conda-build
-  - arrow-cpp
+  - libarrow
   - compilers
   - ninja
   - cmake
