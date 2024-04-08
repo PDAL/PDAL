@@ -45,6 +45,7 @@ TEST(SkewnessTest, t1)
     StageFactory f;
 
     Stage *reader(f.createStage("readers.las"));
+
     Options rOpts;
     rOpts.add("filename", Support::datapath("las/autzen_trim.las"));
     reader->setOptions(rOpts);

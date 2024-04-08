@@ -61,46 +61,30 @@ PointView::PointView(PointTableRef pointTable, const SpatialReference& srs) :
 PointView::~PointView()
 {}
 
-
 PointViewIter PointView::begin()
 {
     return PointViewIter(this, 0);
 }
-
 
 PointViewIter PointView::end()
 {
     return PointViewIter(this, size());
 }
 
-
-PointId PointView::tableId(PointId idx)
+PointId PointView::addPoint()
 {
-    if (idx > size())
-        throw pdal_error("Point index must increment.");
-    if (idx == size())
-    {
-        PointId rawId = m_pointTable.addPoint();
-        m_index.push_back(rawId);
-        m_size++;
-        assert(m_temps.empty());
-        return rawId;
-    }
-    return m_index[idx];
+    PointId tableId = m_pointTable.addPoint();
+    m_index.push_back(tableId);
+    m_size++;
+    return tableId;
 }
-
 
 void PointView::setFieldInternal(Dimension::Id dim, PointId idx,
     const void *buf)
 {
-    PointId rawId = 0;
+    PointId tableId = 0;
     if (idx == size())
-    {
-        rawId = m_pointTable.addPoint();
-        m_index.push_back(rawId);
-        m_size++;
-        assert(m_temps.empty());
-    }
+        tableId = addPoint();
     else if (idx > size())
     {
         std::cerr << "Point index must increment.\n";
@@ -109,9 +93,9 @@ void PointView::setFieldInternal(Dimension::Id dim, PointId idx,
     }
     else
     {
-        rawId = m_index[idx];
+        tableId = m_index[idx];
     }
-    m_pointTable.setFieldInternal(dim, rawId, buf);
+    m_pointTable.setFieldInternal(dim, tableId, buf);
 }
 
 

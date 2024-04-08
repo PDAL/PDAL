@@ -43,6 +43,8 @@
 #include <filters/SortFilter.hpp>
 #include "Support.hpp"
 
+PDAL_DLL void setPdalView(pdal::PointView *);
+
 using namespace pdal;
 
 namespace
@@ -204,6 +206,7 @@ TEST(SortFilterTest, issue1382)
 
 TEST(SortFilterTest, issue1121_simpleSortOrderDesc)
 {
+//        doSort(7, Dimension::Id::X, "DESC");
     point_count_t inc = 1;
     for (point_count_t count = 3; count < 100000; count += inc, inc *= 2)
     {
@@ -211,4 +214,69 @@ TEST(SortFilterTest, issue1121_simpleSortOrderDesc)
         doSort(count, Dimension::Id::X, "DESC");
     }
 }
+
+/**
+TEST(SortFilterTest, t1)
+{
+    PointTable t;
+    PointView v(t);
+    PointLayoutPtr l = v.layout();
+    l->registerDims({ Dimension::Id::X, Dimension::Id::Y, Dimension::Id::Z });
+    t.finalize();
+
+    v.setField(Dimension::Id::X, 0, 10);
+    v.setField(Dimension::Id::X, 1, 3);
+    v.setField(Dimension::Id::X, 2, 5);
+    v.setField(Dimension::Id::X, 3, 7);
+    v.setField(Dimension::Id::X, 4, -5);
+    v.setField(Dimension::Id::X, 5, 2);
+
+    auto cmp = [](const PointRef& p1, const PointRef& p2)
+    {
+        return p1.compare(Dimension::Id::X, p2);
+    };
+
+    setPdalView(&v);
+
+    std::sort(v.begin(), v.end(), cmp);
+
+    setPdalView(nullptr);
+
+    for (PointId i = 0; i < v.size(); ++i)
+        std::cerr << "X = " << v.getFieldAs<double>(Dimension::Id::X, i) << "\n";
+}
+
+TEST(SortFilterTest, t2)
+{
+    PointTable t;
+    PointView v(t);
+    PointLayoutPtr l = v.layout();
+    l->registerDims({ Dimension::Id::X, Dimension::Id::Y, Dimension::Id::Z });
+    t.finalize();
+
+    v.setField(Dimension::Id::X, 0, 'A');
+    v.setField(Dimension::Id::X, 1, 'G');
+    v.setField(Dimension::Id::X, 2, 'B');
+    v.setField(Dimension::Id::X, 3, 'C');
+    v.setField(Dimension::Id::X, 4, 'E');
+    v.setField(Dimension::Id::X, 5, 'D');
+    v.setField(Dimension::Id::X, 6, 'F');
+
+    auto cmp = [](const PointRef& p1, const PointRef& p2)
+    {
+        return p1.compare(Dimension::Id::X, p2);
+    };
+
+    setPdalView(&v);
+
+    std::sort(v.begin(), v.end(), cmp);
+
+    setPdalView(nullptr);
+
+    for (PointId i = 0; i < v.size(); ++i)
+        std::cerr << "X = " << v.getFieldAs<char>(Dimension::Id::X, i) << "\n";
+    for (PointId i = 1; i < v.size(); ++i)
+        EXPECT_LT(std::cerr << "X = " << v.getFieldAs<char>(Dimension::Id::X, i) << "\n";
+}
+**/
 

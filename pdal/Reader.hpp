@@ -82,7 +82,6 @@ private:
     {
         PointViewSet viewSet;
 
-        view->clearTemps();
         read(view, m_count);
         viewSet.insert(view);
         return viewSet;

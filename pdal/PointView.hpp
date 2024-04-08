@@ -47,8 +47,6 @@
 #include <set>
 #include <deque>
 
-//#pragma warning(disable: 4244)  // conversion from 'type1' to 'type2', possible loss of data
-
 namespace pdal
 {
 namespace plang
@@ -76,7 +74,8 @@ class PDAL_DLL PointView : public PointContainer
     FRIEND_TEST(VoxelTest, center);
     friend class Stage;
     friend class plang::Invocation;
-    friend class PointIdxRef;
+    friend class PointRef;
+    friend class PointViewIter;
     friend struct PointViewLess;
 public:
     PointView(const PointView&) = delete;
@@ -107,7 +106,6 @@ public:
         auto bufEnd = buf.m_index.begin() + buf.size();
         m_index.insert(thisEnd, buf.m_index.begin(), bufEnd);
         m_size += buf.size();
-        clearTemps();
     }
 
     /// Return a new point view with the same point table as this
@@ -117,10 +115,12 @@ public:
         return PointViewPtr(new PointView(m_pointTable, m_spatialReference));
     }
 
-    // This depends on RVO (copy elision) so as not to invoke the PointRef copy ctor,
-    // which creates temp points. This is guaranteed by C++17.
     PointRef point(PointId id)
-        { return PointRef(*this, id); }
+    {
+        if (id == m_index.size())
+            addPoint();
+        return PointRef(*this, id);
+    }
 
     template<class T>
     T getFieldAs(Dimension::Id dim, PointId pointIndex) const;
@@ -203,7 +203,7 @@ public:
         { return layout()->dimTypes(); }
     PointLayoutPtr layout() const
         { return m_layout; }
-    inline PointTableRef table() const
+    PointTableRef table() const
         { return m_pointTable;}
     SpatialReference spatialReference() const
         { return m_spatialReference; }
@@ -248,20 +248,11 @@ public:
         {
             m_index.push_back(m_pointTable.addPoint());
             ++m_size;
-            assert(m_temps.empty());
         }
 
         return m_pointTable.getPoint(m_index.at(id));
     }
 
-    // The standard idiom is swapping with a stack-created empty queue, but
-    // that invokes the ctor and may allocate.  We've probably only got
-    // one or two things in our queue, so just pop until we're empty.
-    void clearTemps()
-    {
-        while (!m_temps.empty())
-            m_temps.pop();
-    }
     MetadataNode toMetadata() const;
 
     void invalidateProducts();
@@ -304,34 +295,6 @@ public:
     KD3Index& build3dIndex();
     KD2Index& build2dIndex();
 
-    template <typename Compare>
-    void stableSort(Compare compare)
-    {
-        clearTemps();
-
-        // This vector of ascending IDs represents our current normal order.
-        std::vector<std::size_t> order;
-        order.reserve(size());
-        for (std::size_t i = 0; i < size(); ++i)
-            order.push_back(i);
-
-        // Sort these IDs into the proper order based on the comparator.
-        std::stable_sort(
-            order.begin(),
-            order.end(),
-            [this, &compare](const PointId a, const PointId b)
-            {
-                return compare(PointRef(*this, a), PointRef(*this, b));
-            });
-
-        // Now, overwrite our ordering index with the result of the sort.  Use
-        // a temporary copy of the index to avoid hammering over things as we
-        // are copying.
-        const auto old = m_index;
-        for (std::size_t i = 0; i < size(); ++i)
-            m_index[i] = old[order[i]];
-    }
-
 protected:
     PointTableRef m_pointTable;
     PointLayoutPtr m_layout;
@@ -340,7 +303,6 @@ protected:
     // references.
     point_count_t m_size;
     int m_id;
-    std::queue<PointId> m_temps;
     SpatialReference m_spatialReference;
     std::map<std::string, std::unique_ptr<TriangularMesh>> m_meshes;
     std::map<std::string, std::unique_ptr<Rasterd>> m_rasters;
@@ -350,12 +312,13 @@ protected:
 private:
     static int m_lastId;
 
-    PointId tableId(PointId idx);
+    PointId tableId(PointId idx)
+        { return idx >= size() ? 0 : m_index[idx]; }
 
+    PointId addPoint();
     virtual void setFieldInternal(Dimension::Id dim, PointId idx,
         const void *buf);
-    virtual void getFieldInternal(Dimension::Id dim, PointId idx,
-            void *buf) const
+    virtual void getFieldInternal(Dimension::Id dim, PointId idx, void *buf) const
         { m_pointTable.getFieldInternal(dim, m_index[idx], buf); }
     virtual void swapItems(PointId id1, PointId id2)
     {
@@ -363,16 +326,14 @@ private:
         m_index[id2] = m_index[id1];
         m_index[id1] = temp;
     }
-    virtual void setItem(PointId dst, PointId src)
+    void setTableId(PointId dst, PointId tableId)
     {
-        m_index[dst] = m_index[src];
+        m_index[dst] = tableId;
     }
 
     template<class T>
     T getFieldInternal(Dimension::Id dim, PointId pointIndex) const;
-    inline PointId getTemp(PointId id);
-    void freeTemp(PointId id)
-        { m_temps.push(id); }
+
     void setSpatialReference(const SpatialReference& spatialRef)
         { m_spatialReference = spatialRef; }
 
@@ -492,7 +453,7 @@ inline T PointView::getFieldAs(Dimension::Id dim,
     const Dimension::Detail *dd = m_layout->dimDetail(dim);
     Everything e;
 
-    PointId rawIdx = m_index[pointIndex];
+    PointId tableIdx = m_index[pointIndex];
     // Note that getFieldInternal() can't be hoisted out of the switch
     // because we don't want to call it in the case where the dimension
     // type isn't known.  A separate test could be made, but that *might*
@@ -500,43 +461,43 @@ inline T PointView::getFieldAs(Dimension::Id dim,
     switch (dd->type())
     {
     case Dimension::Type::Float:
-        m_pointTable.getFieldInternal(dim, rawIdx, &e);
+        m_pointTable.getFieldInternal(dim, tableIdx, &e);
         ok = Utils::numericCast(e.f, retval);
         break;
     case Dimension::Type::Double:
-        m_pointTable.getFieldInternal(dim, rawIdx, &e);
+        m_pointTable.getFieldInternal(dim, tableIdx, &e);
         ok = Utils::numericCast(e.d, retval);
         break;
     case Dimension::Type::Signed8:
-        m_pointTable.getFieldInternal(dim, rawIdx, &e);
+        m_pointTable.getFieldInternal(dim, tableIdx, &e);
         ok = Utils::numericCast(e.s8, retval);
         break;
     case Dimension::Type::Signed16:
-        m_pointTable.getFieldInternal(dim, rawIdx, &e);
+        m_pointTable.getFieldInternal(dim, tableIdx, &e);
         ok = Utils::numericCast(e.s16, retval);
         break;
     case Dimension::Type::Signed32:
-        m_pointTable.getFieldInternal(dim, rawIdx, &e);
+        m_pointTable.getFieldInternal(dim, tableIdx, &e);
         ok = Utils::numericCast(e.s32, retval);
         break;
     case Dimension::Type::Signed64:
-        m_pointTable.getFieldInternal(dim, rawIdx, &e);
+        m_pointTable.getFieldInternal(dim, tableIdx, &e);
         ok = Utils::numericCast(e.s64, retval);
         break;
     case Dimension::Type::Unsigned8:
-        m_pointTable.getFieldInternal(dim, rawIdx, &e);
+        m_pointTable.getFieldInternal(dim, tableIdx, &e);
         ok = Utils::numericCast(e.u8, retval);
         break;
     case Dimension::Type::Unsigned16:
-        m_pointTable.getFieldInternal(dim, rawIdx, &e);
+        m_pointTable.getFieldInternal(dim, tableIdx, &e);
         ok = Utils::numericCast(e.u16, retval);
         break;
     case Dimension::Type::Unsigned32:
-        m_pointTable.getFieldInternal(dim, rawIdx, &e);
+        m_pointTable.getFieldInternal(dim, tableIdx, &e);
         ok = Utils::numericCast(e.u32, retval);
         break;
     case Dimension::Type::Unsigned64:
-        m_pointTable.getFieldInternal(dim, rawIdx, &e);
+        m_pointTable.getFieldInternal(dim, tableIdx, &e);
         ok = Utils::numericCast(e.u64, retval);
         break;
     case Dimension::Type::None:
@@ -604,7 +565,11 @@ void PointView::setField(Dimension::Id dim, PointId idx, T val)
         return;
     }
     if (ok)
+    {
+        if (idx == m_index.size())
+            addPoint();
         m_pointTable.setFieldInternal(dim, tableId(idx), &e);
+    }
     else
     {
         std::ostringstream oss;
@@ -619,30 +584,10 @@ void PointView::setField(Dimension::Id dim, PointId idx, T val)
 inline void PointView::appendPoint(const PointView& buffer, PointId id)
 {
     // Invalid 'id' is a programmer error.
-    PointId rawId = buffer.m_index[id];
-    m_index.push_back(rawId);
+    m_index.push_back(buffer.m_index[id]);
     m_size++;
-    assert(m_temps.empty());
 }
 
-
-// Make a temporary copy of a point by adding an entry to the index.
-inline PointId PointView::getTemp(PointId id)
-{
-    PointId newid;
-    if (m_temps.size())
-    {
-        newid = m_temps.front();
-        m_temps.pop();
-        m_index[newid] = m_index[id];
-    }
-    else
-    {
-        newid = (PointId)m_index.size();
-        m_index.push_back(m_index[id]);
-    }
-    return newid;
-}
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const PointView&);
 

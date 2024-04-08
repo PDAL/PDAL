@@ -633,8 +633,8 @@ void streamTest(const std::string src)
         return !b.compare(nodeIdDim, a) && a.compare(pointIdDim, b);
     });
 
-    normalView.stableSort(sort);
-    streamView.stableSort(sort);
+    std::sort(normalView.begin(), normalView.end(), sort);
+    std::sort(streamView.begin(), streamView.end(), sort);
 
     for (PointId i(0); i < normalView.size(); ++i)
     {
