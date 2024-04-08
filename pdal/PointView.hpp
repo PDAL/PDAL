@@ -119,19 +119,25 @@ public:
     template<class T>
     T getFieldAs(Dimension::Id dim, PointId pointIndex) const;
 
-    inline void getField(char *pos, Dimension::Id d,
-        Dimension::Type type, PointId id) const;
+    // Not sure why 'type' was being passed in here.
+    void getField(char *pos, Dimension::Id d, Dimension::Type, PointId id) const
+        { m_pointTable.getFieldInternal(d, m_index[id], pos); }
 
     template<typename T>
     void setField(Dimension::Id dim, PointId idx, T val);
 
-    inline void setField(Dimension::Id dim, Dimension::Type type,
-        PointId idx, const void *val);
+    // Not sure why type was being passed here.
+    void setField(Dimension::Id dim, Dimension::Type, PointId idx, const void *val)
+    {
+        if (idx == m_index.size())
+            addPoint();
+        m_pointTable.setFieldInternal(dim, idx, val);
+    }
 
     template <typename T>
     bool compare(Dimension::Id dim, PointId id1, PointId id2) const
     {
-        return (getFieldInternal<T>(dim, id1) < getFieldInternal<T>(dim, id2));
+        return (getFieldAs<T>(dim, id1) < getFieldAs<T>(dim, id2));
     }
 
     bool compare(Dimension::Id dim, PointId id1, PointId id2) const
@@ -210,7 +216,7 @@ public:
     {
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
-            getField(buf, di->m_id, di->m_type, idx);
+            m_pointTable.getFieldInternal(di->m_id, m_index[idx], buf);
             buf += Dimension::size(di->m_type);
         }
     }
@@ -222,9 +228,11 @@ public:
     /// \param[in] buf   Packed data buffer.
     void setPackedPoint(const DimTypeList& dims, PointId idx, const char *buf)
     {
+        if (idx == m_index.size())
+            addPoint();
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
-            setField(di->m_id, di->m_type, idx, (const void *)buf);
+            m_pointTable.setFieldInternal(di->m_id, idx, (const void *)buf);
             buf += Dimension::size(di->m_type);
         }
     }
@@ -310,9 +318,6 @@ private:
         { return idx >= size() ? 0 : m_index[idx]; }
 
     PointId addPoint();
-//    void setFieldInternal(Dimension::Id dim, PointId idx, const void *buf);
-    void getFieldInternal(Dimension::Id dim, PointId idx, void *buf) const
-        { m_pointTable.getFieldInternal(dim, m_index[idx], buf); }
     void swapItems(PointId id1, PointId id2)
     {
         PointId temp = m_index[id2];
@@ -323,9 +328,6 @@ private:
     {
         m_index[dst] = tableId;
     }
-
-    template<class T>
-    T getFieldInternal(Dimension::Id dim, PointId pointIndex) const;
 
     void setSpatialReference(const SpatialReference& spatialRef)
         { m_spatialReference = spatialRef; }
@@ -342,103 +344,7 @@ struct PointViewLess
 };
 
 template <class T>
-T PointView::getFieldInternal(Dimension::Id dim, PointId id) const
-{
-    T t;
-
-    getFieldInternal(dim, id, &t);
-    return t;
-}
-
-inline void PointView::getField(char *pos, Dimension::Id d,
-    Dimension::Type type, PointId id) const
-{
-    Everything e;
-
-    switch (type)
-    {
-    case Dimension::Type::Float:
-        e.f = getFieldAs<float>(d, id);
-        break;
-    case Dimension::Type::Double:
-        e.d = getFieldAs<double>(d, id);
-        break;
-    case Dimension::Type::Signed8:
-        e.s8 = getFieldAs<int8_t>(d, id);
-        break;
-    case Dimension::Type::Signed16:
-        e.s16 = getFieldAs<int16_t>(d, id);
-        break;
-    case Dimension::Type::Signed32:
-        e.s32 = getFieldAs<int32_t>(d, id);
-        break;
-    case Dimension::Type::Signed64:
-        e.s64 = getFieldAs<int64_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned8:
-        e.u8 = getFieldAs<uint8_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned16:
-        e.u16 = getFieldAs<uint16_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned32:
-        e.u32 = getFieldAs<uint32_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned64:
-        e.u64 = getFieldAs<uint64_t>(d, id);
-        break;
-    case Dimension::Type::None:
-        break;
-    }
-    memcpy(pos, &e, Dimension::size(type));
-}
-
-inline void PointView::setField(Dimension::Id dim,
-    Dimension::Type type, PointId idx, const void *val)
-{
-    Everything e;
-
-    memcpy(&e, val, Dimension::size(type));
-    switch (type)
-    {
-        case Dimension::Type::Float:
-            setField(dim, idx, e.f);
-            break;
-        case Dimension::Type::Double:
-            setField(dim, idx, e.d);
-            break;
-        case Dimension::Type::Signed8:
-            setField(dim, idx, e.s8);
-            break;
-        case Dimension::Type::Signed16:
-            setField(dim, idx, e.s16);
-            break;
-        case Dimension::Type::Signed32:
-            setField(dim, idx, e.s32);
-            break;
-        case Dimension::Type::Signed64:
-            setField(dim, idx, e.s64);
-            break;
-        case Dimension::Type::Unsigned8:
-            setField(dim, idx, e.u8);
-            break;
-        case Dimension::Type::Unsigned16:
-            setField(dim, idx, e.u16);
-            break;
-        case Dimension::Type::Unsigned32:
-            setField(dim, idx, e.u32);
-            break;
-        case Dimension::Type::Unsigned64:
-            setField(dim, idx, e.u64);
-            break;
-        case Dimension::Type::None:
-            break;
-    }
-}
-
-template <class T>
-inline T PointView::getFieldAs(Dimension::Id dim,
-    PointId pointIndex) const
+inline T PointView::getFieldAs(Dimension::Id dim, PointId pointIndex) const
 {
     assert(pointIndex < m_size);
     T retval;

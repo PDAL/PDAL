@@ -80,26 +80,6 @@ PointId PointView::addPoint()
     return tableId;
 }
 
-void PointView::setFieldInternal(Dimension::Id dim, PointId idx,
-    const void *buf)
-{
-    PointId tableId = 0;
-    if (idx == size())
-        tableId = addPoint();
-    else if (idx > size())
-    {
-        std::cerr << "Point index must increment.\n";
-        //error - throw?
-        return;
-    }
-    else
-    {
-        tableId = m_index[idx];
-    }
-    m_pointTable.setFieldInternal(dim, tableId, buf);
-}
-
-
 void PointView::calculateBounds(BOX2D& output) const
 {
     for (PointId idx = 0; idx < size(); idx++)
@@ -250,52 +230,52 @@ void PointView::dump(std::ostream& ostr) const
             {
             case Dimension::Type::Signed8:
                 {
-                    ostr << (int)(getFieldInternal<int8_t>(d, idx));
+                    ostr << (int)(getFieldAs<int8_t>(d, idx));
                     break;
                 }
             case Dimension::Type::Signed16:
                 {
-                    ostr << getFieldInternal<int16_t>(d, idx);
+                    ostr << getFieldAs<int16_t>(d, idx);
                     break;
                 }
             case Dimension::Type::Signed32:
                 {
-                    ostr << getFieldInternal<int32_t>(d, idx);
+                    ostr << getFieldAs<int32_t>(d, idx);
                     break;
                 }
             case Dimension::Type::Signed64:
                 {
-                    ostr << getFieldInternal<int64_t>(d, idx);
+                    ostr << getFieldAs<int64_t>(d, idx);
                     break;
                 }
             case Dimension::Type::Unsigned8:
                 {
-                    ostr << (unsigned)(getFieldInternal<uint8_t>(d, idx));
+                    ostr << (unsigned)(getFieldAs<uint8_t>(d, idx));
                     break;
                 }
             case Dimension::Type::Unsigned16:
                 {
-                    ostr << getFieldInternal<uint16_t>(d, idx);
+                    ostr << getFieldAs<uint16_t>(d, idx);
                     break;
                 }
             case Dimension::Type::Unsigned32:
                 {
-                    ostr << getFieldInternal<uint32_t>(d, idx);
+                    ostr << getFieldAs<uint32_t>(d, idx);
                     break;
                 }
             case Dimension::Type::Unsigned64:
                 {
-                    ostr << getFieldInternal<uint64_t>(d, idx);
+                    ostr << getFieldAs<uint64_t>(d, idx);
                     break;
                 }
             case Dimension::Type::Float:
                 {
-                    ostr << getFieldInternal<float>(d, idx);
+                    ostr << getFieldAs<float>(d, idx);
                     break;
                 }
             case Dimension::Type::Double:
                 {
-                    ostr << getFieldInternal<double>(d, idx);
+                    ostr << getFieldAs<double>(d, idx);
                     break;
                 }
             case Dimension::Type::None:
@@ -306,7 +286,6 @@ void PointView::dump(std::ostream& ostr) const
         }
     }
 }
-
 
 std::ostream& operator<<(std::ostream& ostr, const PointView& buf)
 {

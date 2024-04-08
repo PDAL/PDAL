@@ -8,8 +8,6 @@ PointRef::PointRef(PointView& v, PointId idx) : m_table(&v.table()),
     m_idx(v.tableId(idx)), m_view(&v), m_viewIdx(idx)
 {}
 
-// This is typically used by an std::sorting algorithm to copy to a temporary. See
-// the info on the copy ctor above for more info.
 PointRef& PointRef::operator=(const PointRef& r)
 {
     assert(m_view == r.m_view);
