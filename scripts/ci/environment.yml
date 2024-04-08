@@ -17,8 +17,6 @@ dependencies:
   - mamba
   - conda-build
   - libarrow
-  - libarrow-dataset
-  - libparquet
   - compilers
   - ninja
   - cmake
