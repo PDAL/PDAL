@@ -119,19 +119,93 @@ public:
     template<class T>
     T getFieldAs(Dimension::Id dim, PointId pointIndex) const;
 
-    // Not sure why 'type' was being passed in here.
-    void getField(char *pos, Dimension::Id d, Dimension::Type, PointId id) const
-        { m_pointTable.getFieldInternal(d, m_index[id], pos); }
+    // Get value, converting to type 'type' and storing into 'pos'.
+    void getField(char *pos, Dimension::Id d, Dimension::Type type, PointId id) const
+    {
+        Everything e;
+
+        switch (type)
+        {
+            case Dimension::Type::Float:
+                e.f = getFieldAs<float>(d, id);
+                break;
+            case Dimension::Type::Double:
+                e.d = getFieldAs<double>(d, id);
+                break;
+            case Dimension::Type::Signed8:
+                e.s8 = getFieldAs<int8_t>(d, id);
+                break;
+            case Dimension::Type::Signed16:
+                e.s16 = getFieldAs<int16_t>(d, id);
+                break;
+            case Dimension::Type::Signed32:
+                e.s32 = getFieldAs<int32_t>(d, id);
+                break;
+            case Dimension::Type::Signed64:
+                e.s64 = getFieldAs<int64_t>(d, id);
+                break;
+            case Dimension::Type::Unsigned8:
+                e.u8 = getFieldAs<uint8_t>(d, id);
+                break;
+            case Dimension::Type::Unsigned16:
+                e.u16 = getFieldAs<uint16_t>(d, id);
+                break;
+            case Dimension::Type::Unsigned32:
+                e.u32 = getFieldAs<uint32_t>(d, id);
+                break;
+            case Dimension::Type::Unsigned64:
+                e.u64 = getFieldAs<uint64_t>(d, id);
+                break;
+            case Dimension::Type::None:
+                break;
+        }
+        memcpy(pos, &e, Dimension::size(type));
+    }
 
     template<typename T>
     void setField(Dimension::Id dim, PointId idx, T val);
 
-    // Not sure why type was being passed here.
-    void setField(Dimension::Id dim, Dimension::Type, PointId idx, const void *val)
+    // Set value of type 'type' pointed to by 'val'.
+    void setField(Dimension::Id dim, Dimension::Type type, PointId idx, const void *val)
     {
-        if (idx == m_index.size())
-            addPoint();
-        m_pointTable.setFieldInternal(dim, idx, val);
+        Everything e;
+
+        memcpy(&e, val, Dimension::size(type));
+        switch (type)
+        {
+            case Dimension::Type::Float:
+                setField(dim, idx, e.f);
+                break;
+            case Dimension::Type::Double:
+                setField(dim, idx, e.d);
+                break;
+            case Dimension::Type::Signed8:
+                setField(dim, idx, e.s8);
+                break;
+            case Dimension::Type::Signed16:
+                setField(dim, idx, e.s16);
+                break;
+            case Dimension::Type::Signed32:
+                setField(dim, idx, e.s32);
+                break;
+            case Dimension::Type::Signed64:
+                setField(dim, idx, e.s64);
+                break;
+            case Dimension::Type::Unsigned8:
+                setField(dim, idx, e.u8);
+                break;
+            case Dimension::Type::Unsigned16:
+                setField(dim, idx, e.u16);
+                break;
+            case Dimension::Type::Unsigned32:
+                setField(dim, idx, e.u32);
+                break;
+            case Dimension::Type::Unsigned64:
+                setField(dim, idx, e.u64);
+                break;
+            case Dimension::Type::None:
+                break;
+        }
     }
 
     template <typename T>
