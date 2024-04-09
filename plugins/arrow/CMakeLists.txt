@@ -22,10 +22,8 @@ PDAL_ADD_PLUGIN(arrow_writer_libname writer arrow
         ${PDAL_LIBRARIES}
         Arrow::arrow_shared
         Parquet::parquet_shared
-        GDAL::GDAL
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
-        ${GDAL_INCLUDE_DIR}
 )
 
 PDAL_ADD_PLUGIN(arrow_reader_libname reader arrow
@@ -35,10 +33,8 @@ PDAL_ADD_PLUGIN(arrow_reader_libname reader arrow
         ${PDAL_LIBRARIES}
         Arrow::arrow_shared
         Parquet::parquet_shared
-        GDAL::GDAL
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
-        ${GDAL_INCLUDE_DIR}
 )
 
 if (WIN32)
