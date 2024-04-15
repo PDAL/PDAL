@@ -73,6 +73,8 @@ PgWriter::PgWriter()
     , m_srid(0)
     , m_pcid(0)
     , m_overwrite(true)
+    , m_pg_use_copy(false)
+    , m_in_copy_mode(false)
     , m_schema_is_initialized(false)
 {}
 
@@ -98,6 +100,8 @@ void PgWriter::addArgs(ProgramArgs& args)
     args.add("pcid", "PCID", m_pcid);
     args.add("pre_sql", "SQL to execute before query", m_pre_sql);
     args.add("post_sql", "SQL to execute after query", m_post_sql);
+    // a new option to switch to COPY FROM mode
+    args.add("pg_use_copy", "True to use PG COPY mode, false for INSERT", m_pg_use_copy);
 }
 
 
@@ -155,12 +159,24 @@ void PgWriter::writeInit()
 void PgWriter::write(const PointViewPtr view)
 {
     writeInit();
-    writeTile(view);
+    if (m_pg_use_copy)
+    {
+        copyTile(view);        
+    } else
+    {
+        writeTile(view);    
+    }
 }
 
 
 void PgWriter::done(PointTableRef /*table*/)
 {
+    // check if we are in copy mode, if so, we have to finish it and check for errors:
+    if (m_in_copy_mode)
+    {
+        pg_put_copy_end(m_session);
+        m_in_copy_mode = false;
+    }
     //CreateIndex(m_schema_name, m_table_name, m_column_name);
 
     if (m_post_sql.size())
@@ -479,6 +495,93 @@ void PgWriter::writeTile(const PointViewPtr view)
     m_insert.append("')");
 
     pg_execute(m_session, m_insert);
+}
+
+// brute force copy of writeTile function: todo: factorize pg patch creation
+// copy from with libpqxx can be done with (from doc: https://www.postgresql.org/docs/16/libpq-copy.html):
+// PQputCopyData; PQputCopyEnd
+void PgWriter::copyTile(const PointViewPtr view)
+{
+    std::vector<char> storage(packedPointSize());
+    std::string hexrep;
+    size_t maxHexrepSize = packedPointSize() * view->size() * 2;
+    hexrep.reserve(maxHexrepSize);
+
+    m_copy.clear();
+    m_copy_data.clear();
+    m_copy_data.reserve(maxHexrepSize + 3000);
+
+    for (PointId idx = 0; idx < view->size(); ++idx)
+    {
+        size_t size = readPoint(*view.get(), idx, storage.data());
+
+        /* We are always getting uncompressed bytes off the block_data */
+        /* so we always used compression type 0 (uncompressed) in writing */
+        /* our WKB */
+        static char syms[] = "0123456789ABCDEF";
+        for (size_t i = 0; i != size; i++)
+        {
+            hexrep.push_back(syms[((storage[i] >> 4) & 0xf)]);
+            hexrep.push_back(syms[storage[i] & 0xf]);
+        }
+    }
+
+    // Not in copy mode ? we build the copy command
+    if (!m_in_copy_mode)
+    {
+        std::string copy_from("COPY ");
+        std::string cols(" (" + pg_quote_identifier(m_column_name) + ") FROM STDIN");
+
+        m_copy.append(copy_from);
+
+        if (m_schema_name.size())
+        {
+            m_copy.append(pg_quote_identifier(m_schema_name));
+            m_copy.append(".");
+        }
+
+        m_copy.append(pg_quote_identifier(m_table_name));
+        m_copy.append(cols);
+    }
+    std::ostringstream options;
+
+    if (view->size() > (std::numeric_limits<uint32_t>::max)())
+        throwError("Too many points for tile.");
+    uint32_t num_points = htobe32(static_cast<uint32_t>(view->size()));
+    int32_t pcid = htobe32(m_pcid);
+    CompressionType compression_v = CompressionType::None;
+    uint32_t compression = htobe32(static_cast<uint32_t>(compression_v));
+
+#if BYTE_ORDER == LITTLE_ENDIAN
+    options << "01";
+#elif BYTE_ORDER == BIG_ENDIAN
+    options << "00";
+#endif
+
+    // needs to be 4 bytes
+    options << std::hex << std::setfill('0') << std::setw(8) << pcid;
+    // needs to be 4 bytes
+    options << std::hex << std::setfill('0') << std::setw(8) << compression;
+    // needs to be 4 bytes
+    options << std::hex << std::setfill('0') << std::setw(8) << num_points;
+
+    m_copy_data.append(options.str());
+    m_copy_data.append(hexrep);
+    m_copy_data.append("\n");
+
+    if (!m_in_copy_mode)
+    {
+        pg_execute_copy_from(m_session, m_copy);
+    }
+    // in all cases, send the view data to the databse
+    pg_put_copy_data(m_session, m_copy_data.data());
+
+    // finally, set copy mode if we enter it:
+    if (!m_in_copy_mode)
+    {
+        m_in_copy_mode = true;
+    }
+    // end of copy mode will be done in destructor
 }
 
 } // namespace pdal

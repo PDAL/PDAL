@@ -84,6 +84,9 @@ Options getDbOptions()
     options.add(Option("connection", getTestDBTempConn()));
     options.add(Option("table", "4dal-\"test\"-table")); // intentional quotes
     options.add(Option("column", "p\"a")); // intentional quotes
+    // fake filename to avoid missing arg exception.
+    // todo: ticket for pdal, as it also occurs on current version with pdal pipeline cmd
+    options.add(Option("filename", "nullfilename"));
 
     return options;
 }
@@ -194,6 +197,7 @@ void optionsWrite(const Options& writerOps)
     reader->setOptions(options);
 
     Stage* writer(f.createStage("writers.pgpointcloud"));
+    const std::string fakeFname = "null";
     writer->setOptions(writerOps);
     writer->setInput(*reader);
 
@@ -219,6 +223,17 @@ TEST_F(PgpointcloudWriterTest, write)
     }
 
     optionsWrite(getDbOptions());
+}
+
+TEST_F(PgpointcloudWriterTest, writeCopy)
+{
+    if (shouldSkipTests())
+    {
+        return;
+    }
+    Options ops = getDbOptions();
+    ops.add("pg_use_copy", true);
+    optionsWrite(ops);
 }
 
 TEST_F(PgpointcloudWriterTest, writeScaled)

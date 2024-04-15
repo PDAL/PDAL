@@ -96,6 +96,55 @@ inline void pg_execute(PGconn* session, std::string const& sql)
     PQclear(result);
 }
 
+// PG COPY mode support:
+// a dedicated function to execute a 'copy from stdin' sql command and checks
+// if we are in the right state, throw error otherwise
+inline void pg_execute_copy_from(PGconn* session, std::string const& sql)
+{
+
+    PGresult *result = PQexec(session, sql.c_str());
+    if ( (!result) || (PQresultStatus(result) != PGRES_COPY_IN) )
+    {
+        std::string errmsg = std::string(PQerrorMessage(session));
+        if( result )
+            PQclear(result);
+        throw pdal_error(errmsg);
+    }
+    PQclear(result);
+}
+
+// 'copy data from stdin' helper fn
+inline void pg_put_copy_data(PGconn* session, std::string const& data)
+{
+    // TODO: safe ??
+    const char* buffer = &data[0];
+
+    if (PQputCopyData(session, buffer, data.length()) != 1)
+    {
+        std::string errmsg = std::string(PQerrorMessage(session));
+        throw pdal_error(errmsg);
+    }
+}
+
+// ends copy from mode
+inline void pg_put_copy_end(PGconn* session)
+{
+
+    const uint32_t ret = PQputCopyEnd(session, NULL);
+    std::string err;
+    if (ret == 0)
+    {
+        err = "could not queue the termination message because of full buffers";
+    } else if (ret != 1)
+    {
+        err = std::string(PQerrorMessage(session));
+    }
+    if (!err.empty())
+    {
+        throw pdal_error(err);
+    }
+}
+
 inline void pg_begin(PGconn* session)
 {
     std::string sql = "BEGIN";
