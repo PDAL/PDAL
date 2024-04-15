@@ -497,7 +497,7 @@ void PgWriter::writeTile(const PointViewPtr view)
 }
 
 // brute force copy of writeTile function: todo: factorize pg patch creation
-// copy from with libpqxx can be done with (from doc: https://www.postgresql.org/docs/16/libpq-copy.html):
+// copy from with libpq can be done with (from doc: https://www.postgresql.org/docs/16/libpq-copy.html):
 // PQputCopyData; PQputCopyEnd
 void PgWriter::copyTile(const PointViewPtr view)
 {
