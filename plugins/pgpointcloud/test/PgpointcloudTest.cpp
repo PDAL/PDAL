@@ -197,7 +197,7 @@ void optionsWrite(const Options& writerOps)
     reader->setOptions(options);
 
     Stage* writer(f.createStage("writers.pgpointcloud"));
-    const std::string fakeFname = "null";
+    const std::string fakeFname = "nullfn";
     writer->setOptions(writerOps);
     writer->setInput(*reader);
 

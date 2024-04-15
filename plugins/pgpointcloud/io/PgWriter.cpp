@@ -56,7 +56,6 @@ CREATE_SHARED_STAGE(PgWriter, s_info)
 std::string PgWriter::getName() const { return s_info.name; }
 
 // TO DO:
-// - change INSERT into COPY
 //
 // - PCID / Schema consistency. If a PCID is specified,
 // must it be consistent with the buffer schema? Or should
