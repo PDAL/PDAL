@@ -1551,7 +1551,7 @@ void CompressedVectorWriterImpl::write(const size_t requestedRecordCount)
              {
                 //!!! For now, process up to 50 records at a time
                 uint64_t recordCount = endRecordIndex - bytestream->currentRecordIndex();
-                recordCount = (std::min)(recordCount, 50ULL);
+                recordCount = (std::min)(recordCount, (uint64_t)50);
                 bytestream->processRecords(static_cast<unsigned>(recordCount));
             }
         }
