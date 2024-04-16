@@ -263,22 +263,25 @@ H3Error lineHexEstimate(const LatLng *origin, const LatLng *destination,
  * @param scale Scale factor
  */
 void scaleBBox(BBox *bbox, double scale) {
+
+    const double half_pi = M_PI / 2;
+
     double width = bboxWidthRads(bbox);
     double height = bboxHeightRads(bbox);
     double widthBuffer = (width * scale - width) / 2;
     double heightBuffer = (height * scale - height) / 2;
     // Scale north and south, clamping to latitude domain
     bbox->north += heightBuffer;
-    if (bbox->north > M_PI_2) bbox->north = M_PI_2;
+    if (bbox->north > half_pi) bbox->north = half_pi;
     bbox->south -= heightBuffer;
-    if (bbox->south < -M_PI_2) bbox->south = -M_PI_2;
+    if (bbox->south < -half_pi) bbox->south = -half_pi;
     // Scale east and west, clamping to longitude domain
     bbox->east += widthBuffer;
-    if (bbox->east > M_PI) bbox->east -= M_2PI;
-    if (bbox->east < -M_PI) bbox->east += M_2PI;
+    if (bbox->east > M_PI) bbox->east -= half_pi;
+    if (bbox->east < -M_PI) bbox->east += half_pi;
     bbox->west -= widthBuffer;
-    if (bbox->west > M_PI) bbox->west -= M_2PI;
-    if (bbox->west < -M_PI) bbox->west += M_2PI;
+    if (bbox->west > M_PI) bbox->west -= half_pi;
+    if (bbox->west < -M_PI) bbox->west += half_pi;
 }
 
 /**
