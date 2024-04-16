@@ -362,8 +362,9 @@ int64_t SourceDestBufferImpl::getNextInt64(double scale, double offset)
         default:
             throw E57_EXCEPTION2(E57_ERROR_INTERNAL, "pathName=" + pathName_);
     }
+
     /// Make sure that value is representable in an int64_t
-    if (doubleRawValue < E57_INT64_MIN || E57_INT64_MAX < doubleRawValue) {
+    if (doubleRawValue < E57_INT64_MIN || E57_INT64_MAX < (int64_t)doubleRawValue) {
         throw E57_EXCEPTION2(E57_ERROR_SCALED_VALUE_NOT_REPRESENTABLE,
                              "pathName=" + pathName_
                              + " value=" + toString(doubleRawValue));
