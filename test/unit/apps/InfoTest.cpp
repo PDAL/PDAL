@@ -96,6 +96,7 @@ std::string r = R"foo(
   },
 )foo";
 
+    SCOPED_TRACE("point");
     test("-p 5", r);
 }
 
@@ -127,6 +128,7 @@ std::string r = R"foo(
       },
 )foo";
 
+    SCOPED_TRACE("query");
     test("--query 0,0/5", r);
 }
 
@@ -157,6 +159,7 @@ std::string r = R"foo(
       },
 )foo";
 
+    SCOPED_TRACE("stats");
     test("", r);
 
 // 10-Jan-20 - Broken by a change to proj which converts meters to ft, I think.
@@ -192,6 +195,7 @@ std::string r = R"foo(
         "type": "unsigned"
       },
 )foo";
+    SCOPED_TRACE("schema");
     test("--schema", r);
 }
 
@@ -209,6 +213,7 @@ std::string r = R"foo(
         "type": "unsigned"
       },
 )foo";
+    SCOPED_TRACE("all");
     test("--all", r);
 }
 
@@ -221,6 +226,7 @@ std::string r = R"foo(
       "pc:count": 110000,
       "pc:encoding": ".las",
 )foo";
+    SCOPED_TRACE("stac");
     test("--stac", r);
 
 
