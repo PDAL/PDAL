@@ -1540,20 +1540,6 @@ void CompressedVectorWriterImpl::write(const size_t requestedRecordCount)
             continue;  /// restart loop so recalc statistics (packet size may not be zero after write, if have too much data)
         }
 
-        ///??? useful?
-        /// Get approximation of number of bytes per record of CompressedVector and total of bytes used
-        float totalBitsPerRecord = 0;  // an estimate of future performance
-        for ( auto &bytestream : bytestreams_ )
-        {
-            totalBitsPerRecord += bytestream->bitsPerRecord();
-        }
-
-#ifdef E57_MAX_VERBOSE
-        float totalBytesPerRecord = max(totalBitsPerRecord/8, 0.1F); //??? trust
-
-        cout << "  totalBytesPerRecord=" << totalBytesPerRecord << endl; //???
-#endif
-
         /// Don't allow straggler to get too far behind. ???
         /// Don't allow a single channel to get too far ahead ???
         /// Process channels that are furthest behind first. ???
@@ -1565,7 +1551,7 @@ void CompressedVectorWriterImpl::write(const size_t requestedRecordCount)
              {
                 //!!! For now, process up to 50 records at a time
                 uint64_t recordCount = endRecordIndex - bytestream->currentRecordIndex();
-                recordCount = (recordCount<50ULL)?recordCount:50ULL; //min(recordCount, 50ULL);
+                recordCount = (std::min)(recordCount, (uint64_t)50);
                 bytestream->processRecords(static_cast<unsigned>(recordCount));
             }
         }
