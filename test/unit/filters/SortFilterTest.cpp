@@ -43,13 +43,13 @@
 #include <filters/SortFilter.hpp>
 #include "Support.hpp"
 
-using namespace pdal;
+namespace pdal
+{
 
 namespace
 {
 
-void doSort(point_count_t count, Dimension::Id dim,
-    const std::string & order="")
+void doSort(point_count_t count, Dimension::Id dim, const std::string & order="")
 {
     Options opts;
 
@@ -212,3 +212,4 @@ TEST(SortFilterTest, issue1121_simpleSortOrderDesc)
     }
 }
 
+} // namespace pdal

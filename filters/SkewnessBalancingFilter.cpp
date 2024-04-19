@@ -58,10 +58,9 @@ void SkewnessBalancingFilter::addDimensions(PointLayoutPtr layout)
 
 void SkewnessBalancingFilter::processGround(PointViewPtr view)
 {
-    auto cmp = [](const PointRef& p1, const PointRef& p2) {
-        return p1.compare(Dimension::Id::Z, p2);
-    };
-    view->stableSort(cmp);
+    // Sort by height.
+    std::sort(view->begin(), view->end(), [](const PointRef& p1, const PointRef& p2) {
+        return p1.compare(Dimension::Id::Z, p2); } );
 
     auto setClass = [&view](PointId first, PointId last, int cl)
     {

@@ -40,7 +40,6 @@
 
 #include "pdal/SpatialReference.hpp"
 #include "pdal/Dimension.hpp"
-#include "pdal/PointContainer.hpp"
 #include "pdal/PointLayout.hpp"
 #include "pdal/Metadata.hpp"
 
@@ -49,9 +48,10 @@ namespace pdal
 
 class ArtifactManager;
 
-class PDAL_DLL BasePointTable : public PointContainer
+class PDAL_DLL BasePointTable
 {
     FRIEND_TEST(PointTable, srs);
+    friend class PointRef;
     friend class PointView;
 
 protected:
@@ -99,6 +99,8 @@ private:
     // Point data operations.
     virtual PointId addPoint() = 0;
     virtual char *getDimension(const Dimension::Detail *d, PointId idx) = 0;
+    virtual void setFieldInternal(Dimension::Id dim, PointId idx, const void *val) = 0;
+    virtual void getFieldInternal(Dimension::Id dim, PointId idx, void *val) const = 0;
 
 protected:
     virtual char *getPoint(PointId idx) = 0;
@@ -124,12 +126,10 @@ protected:
         { return m_layoutRef.pointSize() * numPts; }
 
 private:
-    virtual void setFieldInternal(Dimension::Id id, PointId idx,
-        const void *value);
-    virtual void getFieldInternal(Dimension::Id id, PointId idx,
-        void *value) const;
+    void setFieldInternal(Dimension::Id id, PointId idx, const void *value) override;
+    void getFieldInternal(Dimension::Id id, PointId idx, void *value) const override;
 
-    char *getDimension(const Dimension::Detail *d, PointId idx)
+     char *getDimension(const Dimension::Detail *d, PointId idx) override
         { return getPoint(idx) + d->offset(); }
 
     const char *getDimension(const Dimension::Detail *d, PointId idx) const
@@ -155,15 +155,15 @@ public:
     RowPointTable() : SimplePointTable(m_layout), m_numPts(0)
         {}
     virtual ~RowPointTable();
-    virtual bool supportsView() const
+    bool supportsView() const override
         { return true; }
 
 protected:
-    virtual char *getPoint(PointId idx);
+    char *getPoint(PointId idx) override;
 
 private:
     // Point data operations.
-    virtual PointId addPoint();
+    PointId addPoint() override;
 
     PointLayout m_layout;
 };
@@ -189,23 +189,21 @@ public:
     ColumnPointTable() : SimplePointTable(m_layout), m_numPts(0)
         {}
     virtual ~ColumnPointTable();
-    virtual bool supportsView() const
+    bool supportsView() const override
         { return true; }
-    virtual void finalize();
-    virtual char *getPoint(PointId idx)
+    void finalize() override;
+    char *getPoint(PointId idx) override
         { return nullptr; }
 
 private:
-    virtual void setFieldInternal(Dimension::Id id, PointId idx,
-        const void *value);
-    virtual void getFieldInternal(Dimension::Id id, PointId idx,
-        void *value) const;
+    void setFieldInternal(Dimension::Id id, PointId idx, const void *value) override;
+    void getFieldInternal(Dimension::Id id, PointId idx, void *value) const override;
 
-    virtual PointId addPoint();
+    PointId addPoint() override;
 
     // Hide base class calls for now.
     const char *getDimension(const Dimension::Detail *d, PointId idx) const;
-    char *getDimension(const Dimension::Detail *d, PointId idx);
+    char *getDimension(const Dimension::Detail *d, PointId idx) override;
 
     PointLayout m_layout;
 };
@@ -228,12 +226,12 @@ protected:
 public:
     /// Called when a new point should be added.  Probably a no-op for
     /// streaming.
-    virtual PointId addPoint()
+    PointId addPoint() override
         { return 0; }
 
     /// Called when execute() is started.  Typically used to set buffer size
     /// when all dimensions are known.
-    virtual void finalize()
+    void finalize() override
         {}
 
     void clear(point_count_t count)
@@ -283,7 +281,7 @@ public:
         : StreamPointTable(m_layout, capacity)
     {}
 
-    virtual void finalize()
+    void finalize() override
     {
         if (!m_layout.finalized())
         {
@@ -293,10 +291,10 @@ public:
     }
 
 protected:
-    virtual void reset()
+    void reset() override
         { std::fill(m_buf.begin(), m_buf.end(), 0); }
 
-    virtual char *getPoint(PointId idx)
+    char *getPoint(PointId idx) override
         { return m_buf.data() + pointsToBytes(idx); }
 
 private:

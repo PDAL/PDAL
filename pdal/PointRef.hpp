@@ -35,8 +35,7 @@
 #pragma once
 
 #include <pdal/PDALUtils.hpp>
-#include <pdal/PointContainer.hpp>
-#include <pdal/PointLayout.hpp>
+#include <pdal/PointTable.hpp>
 #include <pdal/util/Utils.hpp>
 
 namespace pdal
@@ -44,74 +43,28 @@ namespace pdal
 
 class PDAL_DLL PointRef
 {
+private:
+    template <typename T>
+    bool compareLocal(Dimension::Id dim, const PointRef& r) const
+    {
+        return getFieldAs<T>(dim) < r.getFieldAs<T>(dim);
+    }
+
 public:
-    // TODO: These three special methods:
-    //   PointRef()
-    //   PointRef(const PointRef&)
-    //   operator=(const PointRef&)
-    // which are not really intended for downstream usage but rather for 
-    // allowing std::sort and friends to work, are not necessarily working in 
-    // all compilers and should be avoided for mutating operations like 
-    // std::sort (use PointView::stableSort instead).  Read-only operations like
-    // std::accumulate should be fine.  For now, PointView::stableSort is a 
-    // stopgap since PDAL sorts PointViews internally in several places.
-
-    // This ctor is normally used by some std::algorithm that needs a temporary.
-    // See the copy ctor below for more info.
-    PointRef() : m_container(nullptr), m_layout(nullptr), m_idx(0), m_tmp(false)
+    PointRef() : m_table(nullptr), m_idx(0), m_view(nullptr), m_viewIdx(0)
     {}
 
-    PointRef(PointContainer& container, PointId idx = 0) :
-        m_container(&container), m_layout(container.layout()), m_idx(idx),
-        m_tmp(false)
+    PointRef(PointView& v, PointId idx = 0);
+
+    PointRef(PointTableRef t, PointId idx = 0) : m_table(&t), m_idx(idx),
+        m_view(nullptr), m_viewIdx(0)
     {}
 
-    // Normally a point ref shouldn't be copied. But a PointRef is the *value* type
-    // when using an algorithm on a PointView. Some algorithms create a temporary copy
-    // of data by invoking the copy ctor on the data, which in the case of a point
-    // view, means calling this function and having the new PointRef point to the
-    // same entry in the PointTable as the source. So we create a new entry in the
-    // PointView index that does this.
-    //
-    // In most of these sorting algorithms, the temporaries come and go all the time.
-    // Usually there's only one, but we don't know and don't control it.
-    // If we kept adding a new entry in the PointLayout index
-    // each time we needed a temporary, we'd expand the PointView index unnecessarily.
-    // So we track these temporary PointRefs separately (m_tmp) and when they go away,
-    // we stick their index on a stack to be reused (see the dtor). This is why we
-    // call getTemp() -- it *may* allow us to reuse an entry in the PointView index
-    // that was used for a previous temporary, rather than continuously expand the
-    // index, potentially causing allocations.
-    //
-    // I'm thinking there are better ways to deal with this.
-    //
-    PointRef(const PointRef& r) :
-        m_container(r.m_container), m_layout(r.m_layout), m_tmp(true)
-    {
-        m_idx = m_container->getTemp(r.m_idx);
-    }
+    PointRef(const PointRef& r) : m_table(r.m_table), m_idx(r.m_idx),
+        m_view(r.m_view), m_viewIdx(r.m_viewIdx)
+    {}
 
-    ~PointRef()
-    {
-        if (m_tmp)
-            m_container->freeTemp(m_idx);
-    }
-
-    // This is typically used by an std::sorting algorithm to copy to a temporary. See
-    // the info on the copy ctor above for more info.
-    PointRef& operator=(const PointRef& r)
-    {
-        if (!m_container)
-        {
-            m_container = r.m_container;
-            m_layout = r.m_layout;
-            m_idx = m_container->getTemp(r.m_idx);
-            m_tmp = true;
-        }
-        else
-            m_container->setItem(m_idx, r.m_idx);
-        return *this;
-    }
+    PointRef& operator=(const PointRef& r);
 
     /**
       Determine if the point contains the specified dimension (defers to
@@ -121,7 +74,7 @@ public:
       \return  Whether the point has a dimension.
     */
     bool hasDim(Dimension::Id dim) const
-    { return m_layout->hasDim(dim); }
+    { return m_table->layout()->hasDim(dim); }
 
     /**
       Get the value of a field/dimension, converting it to the type as
@@ -137,7 +90,7 @@ public:
         T val(0);
         bool success = true;
         Everything e;
-        Dimension::Type type = m_layout->dimDetail(dim)->type();
+        Dimension::Type type = m_table->layout()->dimDetail(dim)->type();
 
         // We don't hoist getFieldInternal() out of the switch stmt.
         // because we don't want to call if the type is bad.  We also
@@ -145,43 +98,43 @@ public:
         switch (type)
         {
         case Dimension::Type::Unsigned8:
-            m_container->getFieldInternal(dim, m_idx, &e);
+            m_table->getFieldInternal(dim, m_idx, &e);
             success = Utils::numericCast(e.u8, val);
             break;
         case Dimension::Type::Unsigned16:
-            m_container->getFieldInternal(dim, m_idx, &e);
+            m_table->getFieldInternal(dim, m_idx, &e);
             success = Utils::numericCast(e.u16, val);
             break;
         case Dimension::Type::Unsigned32:
-            m_container->getFieldInternal(dim, m_idx, &e);
+            m_table->getFieldInternal(dim, m_idx, &e);
             success = Utils::numericCast(e.u32, val);
             break;
         case Dimension::Type::Unsigned64:
-            m_container->getFieldInternal(dim, m_idx, &e);
+            m_table->getFieldInternal(dim, m_idx, &e);
             success = Utils::numericCast(e.u64, val);
             break;
         case Dimension::Type::Signed8:
-            m_container->getFieldInternal(dim, m_idx, &e);
+            m_table->getFieldInternal(dim, m_idx, &e);
             success = Utils::numericCast(e.s8, val);
             break;
         case Dimension::Type::Signed16:
-            m_container->getFieldInternal(dim, m_idx, &e);
+            m_table->getFieldInternal(dim, m_idx, &e);
             success = Utils::numericCast(e.s16, val);
             break;
         case Dimension::Type::Signed32:
-            m_container->getFieldInternal(dim, m_idx, &e);
+            m_table->getFieldInternal(dim, m_idx, &e);
             success = Utils::numericCast(e.s32, val);
             break;
         case Dimension::Type::Signed64:
-            m_container->getFieldInternal(dim, m_idx, &e);
+            m_table->getFieldInternal(dim, m_idx, &e);
             success = Utils::numericCast(e.s64, val);
             break;
         case Dimension::Type::Float:
-            m_container->getFieldInternal(dim, m_idx, &e);
+            m_table->getFieldInternal(dim, m_idx, &e);
             success = Utils::numericCast(e.f, val);
             break;
         case Dimension::Type::Double:
-            m_container->getFieldInternal(dim, m_idx, &e);
+            m_table->getFieldInternal(dim, m_idx, &e);
             success = Utils::numericCast(e.d, val);
             break;
         case Dimension::Type::None:
@@ -210,7 +163,7 @@ public:
     template<typename T>
     void setField(Dimension::Id dim, T val)
     {
-        Dimension::Type type = m_layout->dimDetail(dim)->type();
+        Dimension::Type type = m_table->layout()->dimDetail(dim)->type();
         Everything e;
         bool success = false;
 
@@ -251,7 +204,7 @@ public:
         }
 
         if (success)
-            m_container->setFieldInternal(dim, m_idx, &e);
+            setFieldInternal(dim, &e);
     }
 
     /**
@@ -259,8 +212,7 @@ public:
 
       \param idx  point ID
     */
-    void setPointId(PointId idx)
-        { m_idx = idx; }
+    void setPointId(PointId idx);
 
     /**
       Fetch the ID of a PointRef.
@@ -268,7 +220,9 @@ public:
       \return  Current point ID.
     */
     PointId pointId() const
-        { return m_idx; }
+    {
+        return m_view ? m_viewIdx : m_idx;
+    }
 
     inline void getField(char *val, Dimension::Id d,
         Dimension::Type type) const;
@@ -306,24 +260,65 @@ public:
 
     bool compare(Dimension::Id dim, const PointRef& r) const
     {
-        assert(m_container == r.m_container);
-        return m_container->compare(dim, m_idx, r.m_idx);
+        const Dimension::Detail *dd = m_table->layout()->dimDetail(dim);
+
+        switch (dd->type())
+        {
+            case Dimension::Type::Float:
+                return compareLocal<float>(dim, r);
+                break;
+            case Dimension::Type::Double:
+                return compareLocal<double>(dim, r);
+                break;
+            case Dimension::Type::Signed8:
+                return compareLocal<int8_t>(dim, r);
+                break;
+            case Dimension::Type::Signed16:
+                return compareLocal<int16_t>(dim, r);
+                break;
+            case Dimension::Type::Signed32:
+                return compareLocal<int32_t>(dim, r);
+                break;
+            case Dimension::Type::Signed64:
+                return compareLocal<int64_t>(dim, r);
+                break;
+            case Dimension::Type::Unsigned8:
+                return compareLocal<uint8_t>(dim, r);
+                break;
+            case Dimension::Type::Unsigned16:
+                return compareLocal<uint16_t>(dim, r);
+                break;
+            case Dimension::Type::Unsigned32:
+                return compareLocal<uint32_t>(dim, r);
+                break;
+            case Dimension::Type::Unsigned64:
+                return compareLocal<uint64_t>(dim, r);
+                break;
+            case Dimension::Type::None:
+            default:
+                return false;
+                break;
+        }
     }
 
-    static void swap(const PointRef& r1, const PointRef& r2)
-    {
-        assert(r1.m_container == r2.m_container);
-        r1.m_container->swapItems(r1.m_idx, r2.m_idx);
-    }
+    static void swap(const PointRef& r1, const PointRef& r2);
+    static void swap(PointRef& r1, PointRef& r2);
 
 private:
-    PointContainer *m_container;
-    PointLayout *m_layout;
+    BasePointTable *m_table;
     PointId m_idx;
-    bool m_tmp;
+    PointView *m_view;
+    PointId m_viewIdx;
+
+    void setFieldInternal(Dimension::Id dim, void *val);
 };
 
-inline void swap(const PointRef& r1, const PointRef& r2)
+inline void swap(const PointRef& r1, const PointRef& r2) noexcept
+{
+    PointRef::swap(r1, r2);
+}
+
+inline void swap(PointRef& r1, PointRef& r2) noexcept
 {
     PointRef::swap(r1, r2);
 }
@@ -452,10 +447,12 @@ inline MetadataNode PointRef::toMetadata() const
 */
 inline void PointRef::toMetadata(MetadataNode root) const
 {
-    for (Dimension::Id id : m_layout->dims())
+    PointLayoutPtr layout = m_table->layout();
+
+    for (Dimension::Id id : layout->dims())
     {
         double v = getFieldAs<double>(id);
-        root.add(m_layout->dimName(id), v);
+        root.add(layout->dimName(id), v);
     }
 }
 
