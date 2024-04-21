@@ -115,7 +115,7 @@ double H3_EXPORT(radsToDegs)(double radians) { return radians * M_180_PI; }
  * @return The corrected lat value
  */
 double constrainLat(double lat) {
-    while (lat > M_PI_2) {
+    while (lat > M_PI / 2) {
         lat = lat - M_PI;
     }
     return lat;
@@ -222,6 +222,7 @@ void _geoAzDistanceRads(const LatLng *p1, double az, double distance,
     }
 
     double sinlat, sinlng, coslng;
+    const double half_pi = M_PI / 2;
 
     az = _posAngleRads(az);
 
@@ -232,13 +233,13 @@ void _geoAzDistanceRads(const LatLng *p1, double az, double distance,
         else  // due south
             p2->lat = p1->lat - distance;
 
-        if (fabs(p2->lat - M_PI_2) < EPSILON)  // north pole
+        if (fabs(p2->lat - half_pi) < EPSILON)  // north pole
         {
-            p2->lat = M_PI_2;
+            p2->lat = half_pi;
             p2->lng = 0.0;
-        } else if (fabs(p2->lat + M_PI_2) < EPSILON)  // south pole
+        } else if (fabs(p2->lat + half_pi) < EPSILON)  // south pole
         {
-            p2->lat = -M_PI_2;
+            p2->lat = -half_pi;
             p2->lng = 0.0;
         } else
             p2->lng = constrainLng(p1->lng);
@@ -249,13 +250,13 @@ void _geoAzDistanceRads(const LatLng *p1, double az, double distance,
         if (sinlat > 1.0) sinlat = 1.0;
         if (sinlat < -1.0) sinlat = -1.0;
         p2->lat = asin(sinlat);
-        if (fabs(p2->lat - M_PI_2) < EPSILON)  // north pole
+        if (fabs(p2->lat - half_pi) < EPSILON)  // north pole
         {
-            p2->lat = M_PI_2;
+            p2->lat = half_pi;
             p2->lng = 0.0;
-        } else if (fabs(p2->lat + M_PI_2) < EPSILON)  // south pole
+        } else if (fabs(p2->lat + half_pi) < EPSILON)  // south pole
         {
-            p2->lat = -M_PI_2;
+            p2->lat = -half_pi;
             p2->lng = 0.0;
         } else {
             sinlng = sin(az) * sin(distance) / cos(p2->lat);
