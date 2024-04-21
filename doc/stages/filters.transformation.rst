@@ -150,7 +150,7 @@ shown below.
   [
       {
           "type":"filters.transformation",
-          "matrix":"0  0  -1  0  1  0  0  0  0  0  1  0  0  0  0  1"
+          "matrix":"0  -1  0  0  1  0  0  0  0  0  1  0  0  0  0  1"
       }
   ]
 
