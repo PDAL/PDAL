@@ -1,6 +1,6 @@
 #!/bin/bash
 
-conda install -c conda-forge conda-build -y
+conda install -c conda-forge conda-build boa -y
 pwd
 ls
 git clone https://github.com/conda-forge/pdal-feedstock.git
