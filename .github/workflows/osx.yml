@@ -18,13 +18,12 @@ jobs:
   build:
     name: OSX
 
-    runs-on: ${{ matrix.platform }}
+    runs-on: 'macos-latest'
     if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
     strategy:
       fail-fast: true
       matrix:
         type: ['floating']
-        platform: ['macos-latest', 'macOS-14']
     env:
       BUILD_TYPE: ${{ matrix.type }}
     defaults:
