@@ -6,7 +6,6 @@ ls
 git clone https://github.com/conda-forge/pdal-feedstock.git
 
 cd pdal-feedstock
-git checkout rc
 
 cat > recipe/recipe_clobber.yaml <<EOL
 source:
