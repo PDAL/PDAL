@@ -9,7 +9,6 @@ endif()
 
 
 set(H3SRCS
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/h3Assert.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/alloc.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/bbox.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/polygon.h"
@@ -31,7 +30,6 @@ set(H3SRCS
     "${CMAKE_CURRENT_SOURCE_DIR}/include/constants.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/coordijk.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/algos.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/lib/h3Assert.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/lib/algos.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/lib/coordijk.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/lib/bbox.c"
@@ -70,7 +68,6 @@ endif()
 
 # H3 is built static but is included in a shared lib.
 set_target_properties(${PDAL_H3_LIB_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
-
 
 
 set_target_properties(${PDAL_H3_LIB_NAME} PROPERTIES

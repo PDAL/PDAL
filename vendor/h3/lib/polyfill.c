@@ -207,7 +207,7 @@ static BBox RES0_BBOXES[NUM_BASE_CELLS] = {
     {-1.20305471830087, -1.52480158339146, -0.60112285060716,
      2.53494381704943}};
 
-static BBox VALID_RANGE_BBOX = {M_PI_2, -M_PI_2, M_PI, -M_PI};
+static BBox VALID_RANGE_BBOX = {M_PI / 2, -M_PI / 2, M_PI, -M_PI};
 
 /**
  * For a given cell, return its bounding box. If coverChildren is true, the bbox
@@ -247,17 +247,17 @@ H3Error cellToBBox(H3Index cell, BBox *out, bool coverChildren) {
 
     // Cell that contains the north pole
     if (cell == NORTH_POLE_CELLS[res]) {
-        out->north = M_PI_2;
+        out->north = M_PI / 2;
     }
 
     // Cell that contains the south pole
     if (cell == SOUTH_POLE_CELLS[res]) {
-        out->south = -M_PI_2;
+        out->south = -M_PI / 2;
     }
 
     // If we contain a pole, expand the longitude to include the full domain,
     // effectively making the bbox a circle around the pole.
-    if (out->north == M_PI_2 || out->south == -M_PI_2) {
+    if (out->north == M_PI / 2 || out->south == -M_PI / 2) {
         out->east = M_PI;
         out->west = -M_PI;
     }

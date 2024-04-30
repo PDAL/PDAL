@@ -727,10 +727,9 @@ point_count_t LasReader::read(PointViewPtr view, point_count_t count)
     for (i = 0; i < count; i++)
     {
         PointRef point = view->point(i);
-        PointId id = view->size();
         processOne(point);
         if (m_cb)
-            m_cb(*view, id);
+            m_cb(*view, view->size() - 1);
     }
     return (point_count_t)i;
 }
