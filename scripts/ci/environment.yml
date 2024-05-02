@@ -3,6 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - libgdal
+  - boa
   - libpq
   - curl
   - hdf5
