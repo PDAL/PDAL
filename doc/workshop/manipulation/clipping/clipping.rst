@@ -19,7 +19,7 @@ Exercise
 The ``autzen.laz`` file is a staple in PDAL and libLAS examples. You can
 `download this file here
 <https://github.com/PDAL/data/blob/master/autzen/autzen.laz>`_ and move it to 
-``./exercises/analysis/clipping`` in your drive. We will use
+``./exercises/analysis/clipping`` in your drive if you don't have it. We will use
 this file to demonstrate clipping points with a geometry. We're going to clip
 out the stadium into a new COPC file:
 

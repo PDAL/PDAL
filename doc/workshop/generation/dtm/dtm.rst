@@ -28,9 +28,8 @@ Exercise
 Command
 ................................................................................
 
-PDAL capability to generate rasterized output is provided by the
-:ref:`writers.gdal` stage. There is no :ref:`application <apps>` to drive this
-stage, and we must use a pipeline.
+PDAL capability to generate rasterized output is provided by the :ref:`writers.gdal` stage. 
+There is no :ref:`application <apps>` to drive this stage, and we must use a pipeline.
 
 Pipeline breakdown
 ................................................................................
