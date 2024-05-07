@@ -29,7 +29,7 @@ private:
       required_alignment = unpacket_traits<PacketScalar>::alignment,
       packet_access_bit = (packet_traits<_Scalar>::Vectorizable && (EIGEN_UNALIGNED_VECTORIZE || (actual_alignment>=required_alignment))) ? PacketAccessBit : 0
     };
-    
+
 public:
   typedef _Scalar Scalar;
   typedef Dense StorageKind;
@@ -44,7 +44,7 @@ public:
     Options = _Options,
     InnerStrideAtCompileTime = 1,
     OuterStrideAtCompileTime = (Options&RowMajor) ? ColsAtCompileTime : RowsAtCompileTime,
-    
+
     // FIXME, the following flag in only used to define NeedsToAlign in PlainObjectBase
     EvaluatorFlags = LinearAccessBit | DirectAccessBit | packet_access_bit | row_major_bit,
     Alignment = actual_alignment
@@ -278,7 +278,7 @@ class Matrix
     EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE
     Matrix& operator=(Matrix&& other) EIGEN_NOEXCEPT_IF(std::is_nothrow_move_assignable<Scalar>::value)
     {
-      other.swap(*this);
+      Base::operator=(std::move(other));
       return *this;
     }
 #endif
@@ -297,24 +297,24 @@ class Matrix
       : Base(a0, a1, a2, a3, args...) {}
 
     /** \brief Constructs a Matrix and initializes it from the coefficients given as initializer-lists grouped by row. \cpp11
-      * 
+      *
       * In the general case, the constructor takes a list of rows, each row being represented as a list of coefficients:
-      * 
+      *
       * Example: \include Matrix_initializer_list_23_cxx11.cpp
       * Output: \verbinclude Matrix_initializer_list_23_cxx11.out
-      * 
+      *
       * Each of the inner initializer lists must contain the exact same number of elements, otherwise an assertion is triggered.
-      * 
+      *
       * In the case of a compile-time column vector, implicit transposition from a single row is allowed.
       * Therefore <code>VectorXd{{1,2,3,4,5}}</code> is legal and the more verbose syntax
       * <code>RowVectorXd{{1},{2},{3},{4},{5}}</code> can be avoided:
-      * 
+      *
       * Example: \include Matrix_initializer_list_vector_cxx11.cpp
       * Output: \verbinclude Matrix_initializer_list_vector_cxx11.out
-      * 
+      *
       * In the case of fixed-sized matrices, the initializer list sizes must exactly match the matrix sizes,
       * and implicit transposition is allowed for compile-time vectors only.
-      * 
+      *
       * \sa Matrix(const Scalar& a0, const Scalar& a1, const Scalar& a2,  const Scalar& a3, const ArgTypes&... args)
       */
     EIGEN_DEVICE_FUNC
@@ -351,7 +351,7 @@ class Matrix
       * This is useful for dynamic-size vectors. For fixed-size vectors,
       * it is redundant to pass these parameters, so one should use the default constructor
       * Matrix() instead.
-      * 
+      *
       * \warning This constructor is disabled for fixed-size \c 1x1 matrices. For instance,
       * calling Matrix<double,1,1>(1) will call the initialization constructor: Matrix(const Scalar&).
       * For fixed-size \c 1x1 matrices it is therefore recommended to use the default
@@ -367,7 +367,7 @@ class Matrix
       * This is useful for dynamic-size matrices. For fixed-size matrices,
       * it is redundant to pass these parameters, so one should use the default constructor
       * Matrix() instead.
-      * 
+      *
       * \warning This constructor is disabled for fixed-size \c 1x2 and \c 2x1 vectors. For instance,
       * calling Matrix2f(2,1) will call the initialization constructor: Matrix(const Scalar& x, const Scalar& y).
       * For fixed-size \c 1x2 or \c 2x1 vectors it is therefore recommended to use the default
@@ -376,7 +376,7 @@ class Matrix
       */
     EIGEN_DEVICE_FUNC
     Matrix(Index rows, Index cols);
-    
+
     /** \brief Constructs an initialized 2D vector with given coefficients
       * \sa Matrix(const Scalar&, const Scalar&, const Scalar&,  const Scalar&, const ArgTypes&...) */
     Matrix(const Scalar& x, const Scalar& y);
@@ -423,8 +423,10 @@ class Matrix
       : Base(other.derived())
     { }
 
-    EIGEN_DEVICE_FUNC inline Index innerStride() const { return 1; }
-    EIGEN_DEVICE_FUNC inline Index outerStride() const { return this->innerSize(); }
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
+    inline Index innerStride() const EIGEN_NOEXCEPT { return 1; }
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
+    inline Index outerStride() const EIGEN_NOEXCEPT { return this->innerSize(); }
 
     /////////// Geometry module ///////////
 
@@ -463,14 +465,14 @@ class Matrix
   *
   * There are also \c VectorSizeType and \c RowVectorSizeType which are self-explanatory. For example, \c Vector4cf is
   * a fixed-size vector of 4 complex floats.
-  * 
+  *
   * With \cpp11, template alias are also defined for common sizes.
   * They follow the same pattern as above except that the scalar type suffix is replaced by a
   * template parameter, i.e.:
   *   - `MatrixSize<Type>` where `Size` can be \c 2,\c 3,\c 4 for fixed size square matrices or \c X for dynamic size.
   *   - `MatrixXSize<Type>` and `MatrixSizeX<Type>` where `Size` can be \c 2,\c 3,\c 4 for hybrid dynamic/fixed matrices.
   *   - `VectorSize<Type>` and `RowVectorSize<Type>` for column and row vectors.
-  * 
+  *
   * With \cpp11, you can also use fully generic column and row vector types: `Vector<Type,Size>` and `RowVector<Type,Size>`.
   *
   * \sa class Matrix

@@ -81,6 +81,8 @@ Dimension::IdList getRxpDimensions(bool syncToPps, bool reflectanceAsIntensity)
     ids.push_back(Id::BeamOriginX);
     ids.push_back(Id::BeamOriginY);
     ids.push_back(Id::BeamOriginZ);
+    ids.push_back(Id::Roll);
+    ids.push_back(Id::Pitch);
     if (reflectanceAsIntensity) {
         ids.push_back(Id::Intensity);
     }

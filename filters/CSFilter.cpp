@@ -32,10 +32,10 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-// PDAL implementation of T. J. Pingel, K. C. Clarke, and W. A. McBride, “An
-// improved simple morphological filter for the terrain classification of
-// airborne LIDAR data,” ISPRS J. Photogramm. Remote Sens., vol. 77, pp. 21–30,
-// 2013.
+// PDAL implementation of Zhang W, Qi J, Wan P, Wang H, Xie D, Wang X, Yan G,
+// "An Easy-to-Use Airborne LiDAR Data Filtering Method Based on Cloth
+// Simulation", Remote Sensing. 2016; 8(6):501.
+// https://doi.org/10.3390/rs8060501
 
 #include "CSFilter.hpp"
 
@@ -65,7 +65,7 @@ using namespace Eigen;
 
 static StaticPluginInfo const s_info{
     "filters.csf", "Cloth Simulation Filter (Zhang et al., 2016)",
-    "http://pdal.io/stages/filters.csf.html"};
+    "https://pdal.io/stages/filters.csf.html"};
 
 CREATE_STATIC_STAGE(CSFilter, s_info)
 
@@ -74,6 +74,7 @@ struct CSArgs
     bool m_smooth;
     double m_step;
     double m_threshold;
+    double m_hdiff;
     double m_resolution;
     int m_rigid;
     int m_iterations;
@@ -97,6 +98,7 @@ void CSFilter::addArgs(ProgramArgs& args)
     args.add("smooth", "Slope postprocessing?", m_args->m_smooth, true);
     args.add("step", "Time step", m_args->m_step, 0.65);
     args.add("threshold", "Classification threshold", m_args->m_threshold, 0.5);
+    args.add("hdiff", "Height difference threshold", m_args->m_hdiff, 0.3);
     args.add("resolution", "Cloth resolution", m_args->m_resolution, 1.0);
     args.add("rigidness", "Rigidness", m_args->m_rigid, 3);
     args.add("iterations", "Max iterations", m_args->m_iterations, 500);
@@ -229,6 +231,7 @@ PointViewSet CSFilter::run(PointViewPtr view)
     c.params.bSloopSmooth = m_args->m_smooth;
     c.params.time_step = m_args->m_step;
     c.params.class_threshold = m_args->m_threshold;
+    c.params.height_threshold = m_args->m_hdiff;
     c.params.cloth_resolution = m_args->m_resolution;
     c.params.rigidness = m_args->m_rigid;
     c.params.interations = m_args->m_iterations;

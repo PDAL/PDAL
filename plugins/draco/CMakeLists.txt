@@ -1,9 +1,22 @@
+cmake_minimum_required(VERSION 3.13)
+
+if (STANDALONE)
+    project(pdal-draco)
+
+    include("${CMAKE_CURRENT_LIST_DIR}/../../cmake/standalone.cmake" )
+    include(${PDAL_CMAKE_DIR}/arbiter.cmake)
+    include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
+    add_subdirectory("${PROJECT_SOURCE_DIR}/../../vendor/arbiter" "vendor/arbiter")
+    find_package(PDAL REQUIRED)
+endif(STANDALONE)
+
+
 #
 # Draco plugin CMake configuration
 #
 
 
-find_package(Draco 1.5.6 REQUIRED CONFIG)
+find_package(Draco 1.5 REQUIRED CONFIG)
 
 set (DRACO_LIBRARIES "draco::draco")
 
@@ -23,6 +36,7 @@ PDAL_ADD_PLUGIN(reader_libname reader draco
         io/DracoReader.cpp
     LINK_WITH
         ${DRACO_LIBRARIES}
+        ${PDAL_LIBRARIES}
     INCLUDES
         ${DRACO_INCLUDE_DIRS}
         ${NLOHMANN_INCLUDE_DIR}
@@ -46,6 +60,7 @@ PDAL_ADD_PLUGIN(writer_libname writer draco
         io/DracoWriter.cpp
     LINK_WITH
         ${DRACO_LIBRARIES}
+        ${PDAL_LIBRARIES}
     INCLUDES
         ${DRACO_INCLUDE_DIRS}
         ${NLOHMANN_INCLUDE_DIR}
@@ -58,7 +73,7 @@ if (UNIX)
 endif()
 
 
-if (WITH_TESTS)
+if (WITH_TESTS AND NOT STANDALONE)
 
     PDAL_ADD_TEST(pdal_io_draco_writer_test
         FILES

@@ -51,16 +51,19 @@ namespace Segmentation
 
 class PointClasses
 {
+    static const uint8_t Synthetic = 32;
+    static const uint8_t Keypoint = 64;
+    static const uint8_t Withheld = 128;
 public:
     PointClasses() : m_classes(0)
     {}
 
     bool isWithheld() const
-    { return m_classes & ClassLabel::Withheld; }
+    { return m_classes & Withheld; }
     bool isKeypoint() const
-    { return m_classes & ClassLabel::Keypoint; }
+    { return m_classes & Keypoint; }
     bool isSynthetic() const
-    { return m_classes & ClassLabel::Synthetic; }
+    { return m_classes & Synthetic; }
     bool isNone() const
     { return m_classes == 0; }
     uint32_t bits() const

@@ -67,11 +67,12 @@ void SortFilter::filter(PointView& view)
 {
     auto cmp = [this](const PointRef& p1, const PointRef& p2)
     {
-        bool result = p1.compare(m_dim, p2);
-        return (m_order == SortOrder::ASC) ? result : !result;
+        if (m_order == SortOrder::ASC)
+            return p1.compare(m_dim, p2);
+        return p2.compare(m_dim, p1);
     };
 
-    std::stable_sort(view.begin(), view.end(), cmp);
+    std::sort(view.begin(), view.end(), cmp);
 }
 
 std::istream& operator >> (std::istream& in, SortOrder& order)

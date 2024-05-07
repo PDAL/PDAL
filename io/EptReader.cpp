@@ -65,6 +65,73 @@ const StaticPluginInfo s_info
     { "ept" }
 };
 
+void reprogrow(BOX3D& b, SrsTransform& xform, double x, double y, double z)
+{
+    xform.transform(x, y, z);
+    b.grow(x, y, z);
+}
+
+BOX3D reprojectBoundsViaCorner(BOX3D src, SrsTransform& xform)
+{
+    if (!xform.valid())
+        return src;
+
+    BOX3D b;
+
+    reprogrow(b, xform, src.minx, src.miny, src.minz);
+    reprogrow(b, xform, src.maxx, src.miny, src.minz);
+    reprogrow(b, xform, src.minx, src.maxy, src.minz);
+    reprogrow(b, xform, src.maxx, src.maxy, src.minz);
+    reprogrow(b, xform, src.minx, src.miny, src.maxz);
+    reprogrow(b, xform, src.maxx, src.miny, src.maxz);
+    reprogrow(b, xform, src.minx, src.maxy, src.maxz);
+    reprogrow(b, xform, src.maxx, src.maxy, src.maxz);
+
+    return b;
+}
+
+BOX3D reprojectBoundsBcbfToLonLat(BOX3D src, SrsTransform& xform)
+{
+    if (!xform.valid())
+        return src;
+
+    BOX3D b = reprojectBoundsViaCorner(src, xform);
+
+    // If the Y-values cross the equator, make sure to include the equator.
+    if (src.miny < 0 && src.maxy > 0)
+    {
+        reprogrow(b, xform, src.minx, 0, src.minz);
+        reprogrow(b, xform, src.maxx, 0, src.minz);
+        reprogrow(b, xform, src.minx, 0, src.maxz);
+        reprogrow(b, xform, src.maxx, 0, src.maxz);
+    }
+
+    // Round the minimum longitude up to the nearest multiple of 90 degrees.
+    int x = (int) std::ceil(src.minx);
+    const int remainder = std::abs(x) % 90;
+    if (x < 0)
+        x = -(std::abs(x) - remainder);
+    else if (x > 0)
+        x = x + 90 - remainder;
+
+    // And include the reprojected bounds at every 90 degrees within the query.
+    for ( ; x <= src.maxx; x += 90)
+    {
+        reprogrow(b, xform, x, src.miny, src.minz);
+        reprogrow(b, xform, x, src.maxy, src.minz);
+        reprogrow(b, xform, x, src.miny, src.maxz);
+        reprogrow(b, xform, x, src.maxy, src.maxz);
+
+        if (src.miny < 0 && src.maxy > 0)
+        {
+            reprogrow(b, xform, x, 0, src.minz);
+            reprogrow(b, xform, x, 0, src.maxz);
+        }
+    }
+
+    return b;
+}
+
 }
 
 CREATE_STATIC_STAGE(EptReader, s_info);
@@ -111,6 +178,7 @@ public:
     std::condition_variable contentsCv;
     std::vector<PolyXform> polys;
     BoxXform bounds;
+    SrsTransform llToBcbfTransform;
 };
 
 EptReader::EptReader() : m_args(new EptReader::Args), m_p(new EptReader::Private),
@@ -200,17 +268,29 @@ void EptReader::initialize()
     // Create transformations from our source data to the bounds SRS.
     if (m_args->m_bounds.valid())
     {
+        const SpatialReference& boundsSrs = m_args->m_bounds.spatialReference();
         if (m_args->m_bounds.is2d())
         {
+            if (boundsSrs.isGeographic() && !getSpatialReference().isGeographic())
+                throwError("For lon/lat 'bounds', bounds must be 3D");
+
             m_p->bounds.box = BOX3D(m_args->m_bounds.to2d());
             m_p->bounds.box.minz = (std::numeric_limits<double>::lowest)();
             m_p->bounds.box.maxz = (std::numeric_limits<double>::max)();
         }
         else
             m_p->bounds.box = m_args->m_bounds.to3d();
-        const SpatialReference& boundsSrs = m_args->m_bounds.spatialReference();
         if (boundsSrs.valid() && m_p->info->srs().valid())
             m_p->bounds.xform = SrsTransform(m_p->info->srs(), boundsSrs);
+
+        const bool sourceIsBcbf = getSpatialReference().isGeocentric();
+        const bool targetIsLonLat = boundsSrs.isGeographic();
+
+        if (sourceIsBcbf && targetIsLonLat)
+        {
+            const SpatialReference& llsrs = m_args->m_bounds.spatialReference();
+            m_p->llToBcbfTransform.set(llsrs, getSpatialReference());
+        }
     }
 
     // Create transform from the point source SRS to the poly SRS.
@@ -297,20 +377,32 @@ void EptReader::handleOriginQuery()
     // At the moment, we only care about the summary information, which contains
     // both the original file path and the bounds, and in each of these summary
     // formats, those specific entries are exactly the same.  So we just need to
-    // grab the right filename and can use the same logic thereafter.
-    std::string filename = m_p->info->version() == "1.0.0"
-        ? m_p->info->sourcesDir() + "list.json"
-        : m_p->info->sourcesDir() + "manifest.json";
+    // grab either file and can use the same logic thereafter.  Prefer manifest,
+    // if it exists, since it's the newer one.
 
     NL::json sources;
     try
     {
-        sources = m_p->connector->getJson(filename);
+        sources = m_p->connector->getJson(
+            m_p->info->sourcesDir() + "manifest.json");
     }
-    catch (const arbiter::ArbiterError& err)
+    catch (...) {}
+
+    if (sources.is_null())
     {
-        throwError(err.what());
+        try
+        {
+            sources = m_p->connector->getJson(
+                m_p->info->sourcesDir() + "list.json");
+        }
+        catch (...) {}
     }
+
+    if (sources.is_null())
+    {
+        throwError("Failed to fetch input sources metadata");
+    }
+
     log()->get(LogLevel::Debug) << "Fetched sources list" << std::endl;
 
     if (!sources.is_array())
@@ -363,6 +455,14 @@ void EptReader::handleOriginQuery()
     try
     {
         BOX3D q(toBox3d(found.at("bounds")));
+        // Bloat the query bounds slightly (we'll choose one tick of the EPT's
+        // scale) to make sure we don't miss any points due to them being
+        // precisely on the bounds edge.
+        q.grow(
+            (std::max)(
+                m_p->info->dims().at("X").m_xform.m_scale.m_val,
+                m_p->info->dims().at("Y").m_xform.m_scale.m_val
+            ));
 
         if (m_p->bounds.box.valid())
             m_p->bounds.box.clip(q);
@@ -453,6 +553,8 @@ void EptReader::addDimensions(PointLayoutPtr layout)
 // stick the tile on the queue and notify the main thread.
 void EptReader::load(const ept::Overlap& overlap)
 {
+    using namespace std::chrono_literals;
+
     m_p->pool->add([this, overlap]()
         {
             // Read the tile.
@@ -471,9 +573,23 @@ void EptReader::load(const ept::Overlap& overlap)
                 // Put the tile on the output queue.  Note that if the tile has
                 // an error and ignoreUnreadable isn't set, this will be fatal
                 // but that will occur downstream outside of this pool thread.
-                std::unique_lock<std::mutex> l(m_p->mutex);
-                m_p->contents.push(std::move(tile));
-                l.unlock();
+
+                // Loop to push the tile on the queue until there is room.
+                while (true)
+                {
+                    {
+                        std::lock_guard<std::mutex> l(m_p->mutex);
+                        if (m_p->contents.size() < m_p->pool->numThreads())
+                        {
+                            m_p->contents.push(std::move(tile));
+                            break;
+                        }
+                    }
+                    // No room on queue, sleep. Could do a condition variable but that's
+                    // more complex and probably makes no difference in most cases where
+                    // this would come up.
+                    std::this_thread::sleep_for(50ms);
+                }
             }
             else
             {
@@ -495,6 +611,22 @@ void EptReader::ready(PointTableRef table)
     // origins and ordering for an EPT writer.
     m_nodeIdDim = table.layout()->findDim("EptNodeId");
     m_pointIdDim = table.layout()->findDim("EptPointId");
+
+    if (
+        m_queryOriginId != -1 &&
+        !table.layout()->hasDim(Dimension::Id::OriginId))
+    {
+        // In this case we can't compare the OriginId for each point since the
+        // EPT data does not have that attribute saved.  We will keep the
+        // spatial query to limit the data to the extents of the requested
+        // origin, but if other origins overlap these extents, then their points
+        // will also be included.
+        m_queryOriginId = -1;
+
+        log()->get(LogLevel::Warning) <<
+            "An origin query was given but no OriginId dimension exists - " <<
+            "points from other origins may be included" << std::endl;
+    }
 
     m_p->hierarchy.reset(new ept::Hierarchy);
 
@@ -573,48 +705,31 @@ bool EptReader::hasSpatialFilter() const
 // Determine if an EPT tile overlaps our query boundary
 bool EptReader::passesSpatialFilter(const BOX3D& tileBounds) const
 {
-    // Reproject the tile bounds to the largest rect. solid that contains all the corners.
-    auto reproject = [](BOX3D src, SrsTransform& xform) -> BOX3D
-    {
-        if (!xform.valid())
-            return src;
-
-        BOX3D b;
-        auto reprogrow = [&b, &xform](double x, double y, double z)
-        {
-            xform.transform(x, y, z);
-            b.grow(x, y, z);
-        };
-
-        reprogrow(src.minx, src.miny, src.minz);
-        reprogrow(src.maxx, src.miny, src.minz);
-        reprogrow(src.minx, src.maxy, src.minz);
-        reprogrow(src.maxx, src.maxy, src.minz);
-        reprogrow(src.minx, src.miny, src.maxz);
-        reprogrow(src.maxx, src.miny, src.maxz);
-        reprogrow(src.minx, src.maxy, src.maxz);
-        reprogrow(src.maxx, src.maxy, src.maxz);
-        return b;
-    };
-
-    auto boxOverlaps = [this, &reproject, &tileBounds]() -> bool
+    auto boxOverlaps = [this, &tileBounds]() -> bool
     {
         if (!m_p->bounds.box.valid())
             return true;
 
+        if (m_p->llToBcbfTransform.valid())
+        {
+            return reprojectBoundsBcbfToLonLat(m_p->bounds.box, m_p->llToBcbfTransform)
+                .overlaps(tileBounds);
+        }
+
         // If the reprojected source bounds doesn't overlap our query bounds, we're done.
-        return reproject(tileBounds, m_p->bounds.xform).overlaps(m_p->bounds.box);
+        return reprojectBoundsViaCorner(tileBounds, m_p->bounds.xform)
+            .overlaps(m_p->bounds.box);
     };
 
     // Check the box of the key against our query polygon(s). If it doesn't overlap,
     // we can skip
-    auto polysOverlap = [this, &reproject, &tileBounds]() -> bool
+    auto polysOverlap = [this, &tileBounds]() -> bool
     {
         if (m_p->polys.empty())
             return true;
 
         for (auto& ps : m_p->polys)
-            if (!ps.poly.disjoint(reproject(tileBounds, ps.xform)))
+            if (!ps.poly.disjoint(reprojectBoundsViaCorner(tileBounds, ps.xform)))
                 return true;
         return false;
     };
@@ -719,9 +834,11 @@ bool EptReader::processPoint(PointRef& dst, const ept::TileContents& tile)
     PointId pointId = m_pointId++;
 
     PointRef p(t, pointId);
-    int64_t originId = p.getFieldAs<int64_t>(Id::OriginId);
-    if (m_queryOriginId != -1 && originId != m_queryOriginId)
+    if (m_queryOriginId != -1 &&
+        p.getFieldAs<int64_t>(Id::OriginId)!= m_queryOriginId)
+    {
         return false;
+    }
 
     auto passesBoundsFilter = [this](double x, double y, double z)
     {
@@ -858,6 +975,7 @@ void EptReader::process(PointViewPtr dstView, const ept::TileContents& tile,
 
 void EptReader::done(PointTableRef)
 {
+    m_p->pool->await();
     m_p->connector.reset();
 }
 

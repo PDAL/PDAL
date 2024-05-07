@@ -50,12 +50,14 @@ public:
     std::string getName() const;
 
 private:
-    uint32_t m_step;
-    uint32_t m_offset;
+    double m_step;
+    point_count_t m_offset;
     point_count_t m_limit;
-    PointId m_index;
+    PointId m_index = 0;
+    point_count_t m_kept = 0;
 
     virtual void addArgs(ProgramArgs& args);
+    virtual void initialize();
     void ready(PointTableRef table)
         { m_index = 0; }
     bool processOne(PointRef& point);

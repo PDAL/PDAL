@@ -25,8 +25,40 @@
 
 #endif
 
-#if EIGEN_COMP_ICC>=1600 &&  __cplusplus >= 201103L
+// Recent versions of ICC require <cstdint> for pointer types below.
+#define EIGEN_ICC_NEEDS_CSTDINT (EIGEN_COMP_ICC>=1600 && EIGEN_COMP_CXXVER >= 11)
+
+// Define portable (u)int{32,64} types
+#if EIGEN_HAS_CXX11 || EIGEN_ICC_NEEDS_CSTDINT
 #include <cstdint>
+namespace Eigen {
+namespace numext {
+typedef std::uint8_t  uint8_t;
+typedef std::int8_t   int8_t;
+typedef std::uint16_t uint16_t;
+typedef std::int16_t  int16_t;
+typedef std::uint32_t uint32_t;
+typedef std::int32_t  int32_t;
+typedef std::uint64_t uint64_t;
+typedef std::int64_t  int64_t;
+}
+}
+#else
+// Without c++11, all compilers able to compile Eigen also
+// provide the C99 stdint.h header file.
+#include <stdint.h>
+namespace Eigen {
+namespace numext {
+typedef ::uint8_t  uint8_t;
+typedef ::int8_t   int8_t;
+typedef ::uint16_t uint16_t;
+typedef ::int16_t  int16_t;
+typedef ::uint32_t uint32_t;
+typedef ::int32_t  int32_t;
+typedef ::uint64_t uint64_t;
+typedef ::int64_t  int64_t;
+}
+}
 #endif
 
 namespace Eigen {
@@ -52,13 +84,14 @@ namespace internal {
 
 // Only recent versions of ICC complain about using ptrdiff_t to hold pointers,
 // and older versions do not provide *intptr_t types.
-#if EIGEN_COMP_ICC>=1600 &&  __cplusplus >= 201103L
+#if EIGEN_ICC_NEEDS_CSTDINT
 typedef std::intptr_t  IntPtr;
 typedef std::uintptr_t UIntPtr;
 #else
 typedef std::ptrdiff_t IntPtr;
 typedef std::size_t UIntPtr;
 #endif
+#undef EIGEN_ICC_NEEDS_CSTDINT
 
 struct true_type {  enum { value = 1 }; };
 struct false_type { enum { value = 0 }; };
@@ -161,9 +194,15 @@ template<> struct make_unsigned<signed __int64>   { typedef unsigned __int64 typ
 template<> struct make_unsigned<unsigned __int64> { typedef unsigned __int64 type; };
 #endif
 
-// TODO: Some platforms define int64_t as long long even for C++03. In this case
-// we are missing the definition for make_unsigned. If we just define it, we get
-// duplicated definitions for platforms defining int64_t as signed long for C++03
+// Some platforms define int64_t as `long long` even for C++03, where
+// `long long` is not guaranteed by the standard. In this case we are missing
+// the definition for make_unsigned. If we just define it, we run into issues
+// where `long long` doesn't exist in some compilers for C++03. We therefore add
+// the specialization for these platforms only.
+#if EIGEN_OS_MAC || EIGEN_COMP_MINGW
+template<> struct make_unsigned<unsigned long long> { typedef unsigned long long type; };
+template<> struct make_unsigned<long long>          { typedef unsigned long long type; };
+#endif
 #endif
 
 template <typename T> struct add_const { typedef const T type; };
@@ -236,7 +275,7 @@ template<bool Condition, typename T=void> struct enable_if;
 template<typename T> struct enable_if<true,T>
 { typedef T type; };
 
-#if defined(EIGEN_GPU_COMPILE_PHASE)
+#if defined(EIGEN_GPU_COMPILE_PHASE) && !EIGEN_HAS_CXX11
 #if !defined(__FLT_EPSILON__)
 #define __FLT_EPSILON__ FLT_EPSILON
 #define __DBL_EPSILON__ DBL_EPSILON
@@ -247,7 +286,7 @@ namespace device {
 template<typename T> struct numeric_limits
 {
   EIGEN_DEVICE_FUNC
-  static T epsilon() { return 0; }
+  static EIGEN_CONSTEXPR T epsilon() { return 0; }
   static T (max)() { assert(false && "Highest not supported for this type"); }
   static T (min)() { assert(false && "Lowest not supported for this type"); }
   static T infinity() { assert(false && "Infinity not supported for this type"); }
@@ -255,7 +294,7 @@ template<typename T> struct numeric_limits
 };
 template<> struct numeric_limits<float>
 {
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static float epsilon() { return __FLT_EPSILON__; }
   EIGEN_DEVICE_FUNC
   static float (max)() {
@@ -265,7 +304,7 @@ template<> struct numeric_limits<float>
     return HIPRT_MAX_NORMAL_F;
   #endif
   }
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static float (min)() { return FLT_MIN; }
   EIGEN_DEVICE_FUNC
   static float infinity() {
@@ -286,11 +325,11 @@ template<> struct numeric_limits<float>
 };
 template<> struct numeric_limits<double>
 {
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static double epsilon() { return __DBL_EPSILON__; }
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static double (max)() { return DBL_MAX; }
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static double (min)() { return DBL_MIN; }
   EIGEN_DEVICE_FUNC
   static double infinity() {
@@ -311,71 +350,71 @@ template<> struct numeric_limits<double>
 };
 template<> struct numeric_limits<int>
 {
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static int epsilon() { return 0; }
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static int (max)() { return INT_MAX; }
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static int (min)() { return INT_MIN; }
 };
 template<> struct numeric_limits<unsigned int>
 {
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static unsigned int epsilon() { return 0; }
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static unsigned int (max)() { return UINT_MAX; }
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static unsigned int (min)() { return 0; }
 };
 template<> struct numeric_limits<long>
 {
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static long epsilon() { return 0; }
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static long (max)() { return LONG_MAX; }
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static long (min)() { return LONG_MIN; }
 };
 template<> struct numeric_limits<unsigned long>
 {
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static unsigned long epsilon() { return 0; }
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static unsigned long (max)() { return ULONG_MAX; }
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static unsigned long (min)() { return 0; }
 };
 template<> struct numeric_limits<long long>
 {
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static long long epsilon() { return 0; }
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static long long (max)() { return LLONG_MAX; }
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static long long (min)() { return LLONG_MIN; }
 };
 template<> struct numeric_limits<unsigned long long>
 {
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static unsigned long long epsilon() { return 0; }
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static unsigned long long (max)() { return ULLONG_MAX; }
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static unsigned long long (min)() { return 0; }
 };
 template<> struct numeric_limits<bool>
 {
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static bool epsilon() { return false; }
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
   static bool (max)() { return true; }
-  EIGEN_DEVICE_FUNC
+  EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR 
   static bool (min)() { return false; }
 };
 
 }
 
-#endif
+#endif // defined(EIGEN_GPU_COMPILE_PHASE) && !EIGEN_HAS_CXX11
 
 /** \internal
   * A base class do disable default copy ctor and copy assignment operator.
@@ -437,19 +476,35 @@ template<typename T, std::size_t N> struct array_size<std::array<T,N> > {
   *
   */
 template<typename T>
-Index size(const T& x) { return x.size(); }
+EIGEN_CONSTEXPR Index size(const T& x) { return x.size(); }
 
 template<typename T,std::size_t N>
-Index size(const T (&) [N]) { return N; }
+EIGEN_CONSTEXPR Index size(const T (&) [N]) { return N; }
 
 /** \internal
-  * Convenient struct to get the result type of a unary or binary functor.
-  *
-  * It supports both the current STL mechanism (using the result_type member) as well as
-  * upcoming next STL generation (using a templated result member).
-  * If none of these members is provided, then the type of the first argument is returned. FIXME, that behavior is a pretty bad hack.
+  * Convenient struct to get the result type of a nullary, unary, binary, or
+  * ternary functor.
+  * 
+  * Pre C++11:
+  * Supports both a Func::result_type member and templated
+  * Func::result<Func(ArgTypes...)>::type member.
+  * 
+  * If none of these members is provided, then the type of the first
+  * argument is returned.
+  * 
+  * Post C++11:
+  * This uses std::result_of. However, note the `type` member removes
+  * const and converts references/pointers to their corresponding value type.
   */
-#if EIGEN_HAS_STD_RESULT_OF
+#if EIGEN_HAS_STD_INVOKE_RESULT
+template<typename T> struct result_of;
+
+template<typename F, typename... ArgTypes>
+struct result_of<F(ArgTypes...)> {
+  typedef typename std::invoke_result<F, ArgTypes...>::type type1;
+  typedef typename remove_all<type1>::type type;
+};
+#elif EIGEN_HAS_STD_RESULT_OF
 template<typename T> struct result_of {
   typedef typename std::result_of<T>::type type1;
   typedef typename remove_all<type1>::type type;
@@ -460,6 +515,28 @@ template<typename T> struct result_of { };
 struct has_none {int a[1];};
 struct has_std_result_type {int a[2];};
 struct has_tr1_result {int a[3];};
+
+template<typename Func, int SizeOf>
+struct nullary_result_of_select {};
+
+template<typename Func>
+struct nullary_result_of_select<Func, sizeof(has_std_result_type)> {typedef typename Func::result_type type;};
+
+template<typename Func>
+struct nullary_result_of_select<Func, sizeof(has_tr1_result)> {typedef typename Func::template result<Func()>::type type;};
+
+template<typename Func>
+struct result_of<Func()> {
+    template<typename T>
+    static has_std_result_type    testFunctor(T const *, typename T::result_type const * = 0);
+    template<typename T>
+    static has_tr1_result         testFunctor(T const *, typename T::template result<T()>::type const * = 0);
+    static has_none               testFunctor(...);
+
+    // note that the following indirection is needed for gcc-3.3
+    enum {FunctorType = sizeof(testFunctor(static_cast<Func*>(0)))};
+    typedef typename nullary_result_of_select<Func, FunctorType>::type type;
+};
 
 template<typename Func, typename ArgType, int SizeOf=sizeof(has_none)>
 struct unary_result_of_select {typedef typename internal::remove_all<ArgType>::type type;};
@@ -530,6 +607,45 @@ struct result_of<Func(ArgType0,ArgType1,ArgType2)> {
     enum {FunctorType = sizeof(testFunctor(static_cast<Func*>(0)))};
     typedef typename ternary_result_of_select<Func, ArgType0, ArgType1, ArgType2, FunctorType>::type type;
 };
+
+#endif
+
+#if EIGEN_HAS_STD_INVOKE_RESULT
+template<typename F, typename... ArgTypes>
+struct invoke_result {
+  typedef typename std::invoke_result<F, ArgTypes...>::type type1;
+  typedef typename remove_all<type1>::type type;
+};
+#elif EIGEN_HAS_CXX11
+template<typename F, typename... ArgTypes>
+struct invoke_result {
+  typedef typename result_of<F(ArgTypes...)>::type type1;
+  typedef typename remove_all<type1>::type type;
+};
+#else
+template<typename F, typename ArgType0 = void, typename ArgType1 = void, typename ArgType2 = void>
+struct invoke_result {
+  typedef typename result_of<F(ArgType0, ArgType1, ArgType2)>::type type1;
+  typedef typename remove_all<type1>::type type;
+};
+
+template<typename F>
+struct invoke_result<F, void, void, void> {
+  typedef typename result_of<F()>::type type1;
+  typedef typename remove_all<type1>::type type;
+};
+
+template<typename F, typename ArgType0>
+struct invoke_result<F, ArgType0, void, void> {
+  typedef typename result_of<F(ArgType0)>::type type1;
+  typedef typename remove_all<type1>::type type;
+};
+
+template<typename F, typename ArgType0, typename ArgType1>
+struct invoke_result<F, ArgType0, ArgType1, void> {
+  typedef typename result_of<F(ArgType0, ArgType1)>::type type1;
+  typedef typename remove_all<type1>::type type;
+};
 #endif
 
 struct meta_yes { char a[1]; };
@@ -599,19 +715,24 @@ class meta_sqrt<Y, InfX, SupX, true> { public:  enum { ret = (SupX*SupX <= Y) ? 
 
 
 /** \internal Computes the least common multiple of two positive integer A and B
-  * at compile-time. It implements a naive algorithm testing all multiples of A.
-  * It thus works better if A>=B.
+  * at compile-time. 
   */
-template<int A, int B, int K=1, bool Done = ((A*K)%B)==0>
+template<int A, int B, int K=1, bool Done = ((A*K)%B)==0, bool Big=(A>=B)>
 struct meta_least_common_multiple
 {
   enum { ret = meta_least_common_multiple<A,B,K+1>::ret };
 };
+template<int A, int B, int K, bool Done>
+struct meta_least_common_multiple<A,B,K,Done,false>
+{
+  enum { ret = meta_least_common_multiple<B,A,K>::ret };
+};
 template<int A, int B, int K>
-struct meta_least_common_multiple<A,B,K,true>
+struct meta_least_common_multiple<A,B,K,true,true>
 {
   enum { ret = A*K };
 };
+
 
 /** \internal determines whether the product of two numeric types is allowed and what the return type is */
 template<typename T, typename U> struct scalar_product_traits
@@ -645,7 +766,7 @@ template<typename T> EIGEN_DEVICE_FUNC   void swap(T &a, T &b) { T tmp = b; b = 
 template<typename T> EIGEN_STRONG_INLINE void swap(T &a, T &b) { std::swap(a,b); }
 #endif
 
-#if defined(EIGEN_GPU_COMPILE_PHASE)
+#if defined(EIGEN_GPU_COMPILE_PHASE) && !EIGEN_HAS_CXX11
 using internal::device::numeric_limits;
 #else
 using std::numeric_limits;
@@ -687,38 +808,5 @@ bool not_equal_strict(const double& x,const double& y) { return std::not_equal_t
 } // end namespace numext
 
 } // end namespace Eigen
-
-// Define portable (u)int{32,64} types
-#if EIGEN_HAS_CXX11
-#include <cstdint>
-namespace Eigen {
-namespace numext {
-typedef std::uint8_t  uint8_t;
-typedef std::int8_t   int8_t;
-typedef std::uint16_t uint16_t;
-typedef std::int16_t  int16_t;
-typedef std::uint32_t uint32_t;
-typedef std::int32_t  int32_t;
-typedef std::uint64_t uint64_t;
-typedef std::int64_t  int64_t;
-}
-}
-#else
-// Without c++11, all compilers able to compile Eigen also
-// provides the C99 stdint.h header file.
-#include <stdint.h>
-namespace Eigen {
-namespace numext {
-typedef ::uint8_t  uint8_t;
-typedef ::int8_t   int8_t;
-typedef ::uint16_t uint16_t;
-typedef ::int16_t  int16_t;
-typedef ::uint32_t uint32_t;
-typedef ::int32_t  int32_t;
-typedef ::uint64_t uint64_t;
-typedef ::int64_t  int64_t;
-}
-}
-#endif
 
 #endif // EIGEN_META_H

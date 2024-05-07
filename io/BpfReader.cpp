@@ -38,6 +38,8 @@
 
 #include <pdal/Options.hpp>
 #include <pdal/pdal_features.hpp>
+#include <pdal/util/FileUtils.hpp>
+#include <arbiter/arbiter.hpp>
 
 #ifdef PDAL_HAVE_ZLIB
 #include <zlib.h>
@@ -139,6 +141,16 @@ void BpfReader::initialize()
 {
     if (m_filename.empty())
         throwError("Can't read BPF file without filename.");
+
+    if (Utils::isRemote(m_filename))
+    {
+        // swap our filename for a tmp file
+        std::string tmpname = Utils::tempFilename(m_filename);
+        m_remoteFilename = m_filename;
+        m_filename = tmpname;
+        arbiter::Arbiter a;
+        a.put(m_filename, a.getBinary(m_remoteFilename));
+    }
 
     // Logfile doesn't get set until options are processed.
     m_header.setLog(log());
@@ -325,6 +337,12 @@ void BpfReader::done(PointTableRef)
         delete s;
     m_stream.close();
     Utils::closeFile(m_istreamPtr);
+
+    if (Utils::isRemote(m_remoteFilename))
+    {
+        // Clean up temporary
+        FileUtils::deleteFile(m_filename);
+    }
 }
 
 

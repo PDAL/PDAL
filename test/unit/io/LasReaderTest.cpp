@@ -47,32 +47,6 @@
 
 using namespace pdal;
 
-namespace {
-template<typename LeftIter, typename RightIter>
-::testing::AssertionResult CheckEqualCollections(LeftIter left_begin,
-    LeftIter left_end, RightIter right_begin)
-{
-    bool equal(true);
-
-    std::string message;
-    size_t index(0);
-    while (left_begin != left_end)
-    {
-        if (*left_begin++ != *right_begin++)
-        {
-            equal = false;
-            message += "\n\tMismatch at index " + std::to_string(index);
-        }
-        ++index;
-    }
-    if (message.size())
-        message += "\n\t";
-    return equal ? ::testing::AssertionSuccess() :
-        ::testing::AssertionFailure() << message;
-}
-
-} // unnamed namespace
-
 TEST(LasReaderTest, string_header_val)
 {
     using namespace std::string_literals;
@@ -119,45 +93,50 @@ TEST(LasReaderTest, create)
 
 TEST(LasReaderTest, header)
 {
-    PointTable table;
-    Options ops;
-    ops.add("filename", Support::datapath("las/simple.las"));
+    auto testLasHeader = [](const std::string& filePath, bool compressed){
+        PointTable table;
+        Options ops;
+        ops.add("filename", Support::datapath(filePath));
 
-    LasReader reader;
-    reader.setOptions(ops);
+        LasReader reader;
+        reader.setOptions(ops);
 
-    reader.prepare(table);
-    // This tests the copy ctor, too.
-    const LasHeader& h = reader.header();
+        reader.prepare(table);
+        // This tests the copy ctor, too.
+        const LasHeader& h = reader.header();
 
-    EXPECT_EQ(h.fileSignature(), "LASF");
-    EXPECT_EQ(h.fileSourceId(), 0);
-    EXPECT_TRUE(h.projectId().isNull());
-    EXPECT_EQ(h.versionMajor(), 1);
-    EXPECT_EQ(h.versionMinor(), 2);
-    EXPECT_EQ(h.creationDOY(), 0);
-    EXPECT_EQ(h.creationYear(), 0);
-    EXPECT_EQ(h.vlrOffset(), 227);
-    EXPECT_EQ(h.pointFormat(), 3);
-    EXPECT_EQ(h.pointCount(), 1065u);
-    EXPECT_DOUBLE_EQ(h.scaleX(), .01);
-    EXPECT_DOUBLE_EQ(h.scaleY(), .01);
-    EXPECT_DOUBLE_EQ(h.scaleZ(), .01);
-    EXPECT_DOUBLE_EQ(h.offsetX(), 0);
-    EXPECT_DOUBLE_EQ(h.offsetY(), 0);
-    EXPECT_DOUBLE_EQ(h.offsetZ(), 0);
-    EXPECT_DOUBLE_EQ(h.maxX(), 638982.55);
-    EXPECT_DOUBLE_EQ(h.maxY(), 853535.43);
-    EXPECT_DOUBLE_EQ(h.maxZ(), 586.38);
-    EXPECT_DOUBLE_EQ(h.minX(), 635619.85);
-    EXPECT_DOUBLE_EQ(h.minY(), 848899.70);
-    EXPECT_DOUBLE_EQ(h.minZ(), 406.59);
-    EXPECT_EQ(h.compressed(), false);
-    EXPECT_EQ(h.pointCountByReturn(0), 925u);
-    EXPECT_EQ(h.pointCountByReturn(1), 114);
-    EXPECT_EQ(h.pointCountByReturn(2), 21);
-    EXPECT_EQ(h.pointCountByReturn(3), 5);
-    EXPECT_EQ(h.pointCountByReturn(4), 0);
+        EXPECT_EQ(h.fileSignature(), "LASF");
+        EXPECT_EQ(h.fileSourceId(), 0);
+        EXPECT_TRUE(h.projectId().isNull());
+        EXPECT_EQ(h.versionMajor(), 1);
+        EXPECT_EQ(h.versionMinor(), 2);
+        EXPECT_EQ(h.creationDOY(), 0);
+        EXPECT_EQ(h.creationYear(), 0);
+        EXPECT_EQ(h.vlrOffset(), 227);
+        EXPECT_EQ(h.pointFormat(), 3);
+        EXPECT_EQ(h.pointCount(), 1065u);
+        EXPECT_DOUBLE_EQ(h.scaleX(), .01);
+        EXPECT_DOUBLE_EQ(h.scaleY(), .01);
+        EXPECT_DOUBLE_EQ(h.scaleZ(), .01);
+        EXPECT_DOUBLE_EQ(h.offsetX(), 0);
+        EXPECT_DOUBLE_EQ(h.offsetY(), 0);
+        EXPECT_DOUBLE_EQ(h.offsetZ(), 0);
+        EXPECT_DOUBLE_EQ(h.maxX(), 638982.55);
+        EXPECT_DOUBLE_EQ(h.maxY(), 853535.43);
+        EXPECT_DOUBLE_EQ(h.maxZ(), 586.38);
+        EXPECT_DOUBLE_EQ(h.minX(), 635619.85);
+        EXPECT_DOUBLE_EQ(h.minY(), 848899.70);
+        EXPECT_DOUBLE_EQ(h.minZ(), 406.59);
+        EXPECT_EQ(h.compressed(), compressed);
+        EXPECT_EQ(h.pointCountByReturn(0), 925u);
+        EXPECT_EQ(h.pointCountByReturn(1), 114);
+        EXPECT_EQ(h.pointCountByReturn(2), 21);
+        EXPECT_EQ(h.pointCountByReturn(3), 5);
+        EXPECT_EQ(h.pointCountByReturn(4), 0);
+    };
+
+    testLasHeader("las/simple.las", false);
+    testLasHeader("laz/simple.laz", true);
 }
 
 TEST(LasReaderTest, vlr)
@@ -282,25 +261,34 @@ TEST(LasReaderTest, inspect)
         -94.660631099999989, 31.047329099999999, 78.119000200000002);
     EXPECT_EQ(qi.m_bounds, bounds);
 
-    const char *dims[] =
+    const std::set<std::string> exp =
     {
         "Classification",
         "EdgeOfFlightLine",
         "Intensity",
         "NumberOfReturns",
+        "Overlap",
+        "KeyPoint",
         "PointSourceId",
         "ReturnNumber",
         "ScanAngleRank",
         "ScanDirectionFlag",
+        "Synthetic",
         "UserData",
+        "Withheld",
         "X",
         "Y",
         "Z"
     };
 
-    std::sort(qi.m_dimNames.begin(), qi.m_dimNames.end());
-    EXPECT_TRUE(CheckEqualCollections(qi.m_dimNames.begin(),
-        qi.m_dimNames.end(), std::begin(dims)));
+    const std::set<std::string> got(qi.m_dimNames.begin(), qi.m_dimNames.end());
+
+    for (const auto& name : exp)
+        EXPECT_TRUE(got.count(name)) << "Missing dimension " << name;
+    for (const auto& name : got)
+        EXPECT_TRUE(exp.count(name)) << "Unexpected dimension " << name;
+
+    EXPECT_EQ(qi.m_dimNames.size(), exp.size());
 }
 
 TEST(LasReaderTest, test_vlr)
@@ -352,7 +340,7 @@ TEST(LasReaderTest, extraBytes)
     reader.prepare(table);
 
     DimTypeList dimTypes = layout->dimTypes();
-    EXPECT_EQ(dimTypes.size(), (size_t)22);
+    EXPECT_EQ(dimTypes.size(), (size_t)26);
 
     Dimension::Id color0 = layout->findProprietaryDim("Colors0");
     EXPECT_EQ(layout->dimType(color0), Dimension::Type::Unsigned16);
@@ -472,13 +460,13 @@ TEST(LasReaderTest, lazperf)
     size_t pointSize = view1->pointSize();
     EXPECT_EQ(view1->pointSize(), view2->pointSize());
     // Validate some point data.
-    std::unique_ptr<char> buf1(new char[pointSize]);
-    std::unique_ptr<char> buf2(new char[pointSize]);
+    std::vector<char> buf1(pointSize);
+    std::vector<char> buf2(pointSize);
     for (PointId i = 0; i < 110000; i += 100)
     {
-       view1->getPackedPoint(dims, i, buf1.get());
-       view2->getPackedPoint(dims, i, buf2.get());
-       EXPECT_EQ(memcmp(buf1.get(), buf2.get(), pointSize), 0);
+       view1->getPackedPoint(dims, i, buf1.data());
+       view2->getPackedPoint(dims, i, buf2.data());
+       EXPECT_EQ(memcmp(buf1.data(), buf2.data(), pointSize), 0);
     }
 }
 
@@ -493,6 +481,7 @@ void streamTest(const std::string src)
     PointTable t;
     lasReader.prepare(t);
     PointViewSet s = lasReader.execute(t);
+
     PointViewPtr p = *s.begin();
 
     class Checker : public Filter, public Streamable
@@ -609,6 +598,34 @@ TEST(LasReaderTest, IgnoreVLRs)
     }
 }
 
+TEST(LasReaderTest, IgnoreBadVLRs)
+{
+    PointTable table;
+
+    Options readOps;
+    readOps.add("filename", Support::datapath("las/bad_vlr_count.las"));
+    readOps.add("ignore_missing_vlrs", true);
+    LasReader reader;
+    reader.setOptions(readOps);
+
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+
+    // First two VLRs are SRS info, the third one
+    // doesn't exist, but we want to ignore that.
+    MetadataNode root = reader.getMetadata();
+    for (size_t i = 2; i < 3; ++i)
+    {
+        std::string name("vlr_");
+        name += std::to_string(i);
+        MetadataNode m = root.findChild(name);
+        EXPECT_FALSE(!m.empty()) << "No node " << i;
+        m = m.findChild("data");
+        EXPECT_FALSE(!m.empty()) << "No value for node " << i;
+    }
+}
+
+
 TEST(LasReaderTest, SyntheticPoints)
 {
     using namespace Dimension;
@@ -624,8 +641,10 @@ TEST(LasReaderTest, SyntheticPoints)
     PointViewSet viewSet = reader.execute(table);
     PointViewPtr outView = *viewSet.begin();
 
-    EXPECT_EQ(ClassLabel::CreatedNeverClassified | ClassLabel::Synthetic,
+    EXPECT_EQ(ClassLabel::CreatedNeverClassified,
         outView->getFieldAs<uint8_t>(Id::Classification, 0));
+
+    EXPECT_TRUE(outView->getFieldAs<bool>(Id::Synthetic, 0));
 }
 
 TEST(LasReaderTest, Start)
@@ -668,6 +687,7 @@ TEST(LasReaderTest, Start)
         EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::Y, 0), start + 100);
         EXPECT_EQ(v->getFieldAs<int>(Dimension::Id::Z, 0), start + 500);
     };
+    // Can't start at 70'000 when there are only 70'000 points.
     auto test2 = [source, &f]()
     {
         Stage *las = f.createStage("readers.las");
@@ -677,10 +697,7 @@ TEST(LasReaderTest, Start)
         las->setOptions(opts);
 
         PointTable t;
-        las->prepare(t);
-        PointViewSet s = las->execute(t);
-        PointViewPtr v = *s.begin();
-        EXPECT_EQ(v->size(), (point_count_t)0);
+        EXPECT_THROW(las->prepare(t), pdal_error);
     };
     auto test3 = [&f](int start, float xval, float yval, float zval)
     {
@@ -706,7 +723,6 @@ TEST(LasReaderTest, Start)
     test3(84226, 515387.0385, 4918363.847, 2336.32075);
     test3(84227, 515397.9628, 4918365.138, 2324.47825);
     test3(518861, 515398.052, 4918371.589, 2325.831);
-
     // Delete the created file.
     FileUtils::deleteFile(source);
 }

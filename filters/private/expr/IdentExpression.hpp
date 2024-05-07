@@ -12,6 +12,7 @@ class IdentExpression : public Expression
 public:
     Utils::StatusWithReason prepare(PointLayoutPtr layout);
     Dimension::Id eval() const;
+    std::string name() const;
 };
 
 } // namespace expr

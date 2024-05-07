@@ -43,13 +43,13 @@
 #include <filters/SortFilter.hpp>
 #include "Support.hpp"
 
-using namespace pdal;
+namespace pdal
+{
 
 namespace
 {
 
-void doSort(point_count_t count, Dimension::Id dim,
-    const std::string & order="")
+void doSort(point_count_t count, Dimension::Id dim, const std::string & order="")
 {
     Options opts;
 
@@ -94,8 +94,51 @@ void doSort(point_count_t count, Dimension::Id dim,
 TEST(SortFilterTest, simple)
 {
     // note that this also tests default sort order ASC /**
-    for (point_count_t count = 3; count < 8; count++)
+    for (point_count_t count = 3; count < 30; count++)
         doSort(count, Dimension::Id::X);
+}
+
+TEST(SortFilterTest, partial)
+{
+    const Dimension::Id dim = Dimension::Id::X;
+    Options opts;
+
+    opts.add("dimension", Dimension::name(dim));
+
+    SortFilter filter;
+    filter.setOptions(opts);
+
+    PointTable table;
+    PointViewPtr full(new PointView(table));
+
+    table.layout()->registerDim(dim);
+    table.finalize();
+
+    const point_count_t count = 10;
+    std::default_random_engine generator;
+    std::uniform_real_distribution<double> dist(0.0, (double)count * 2);
+
+    for (PointId i = 0; i < count * 2; ++i)
+        full->setField(dim, i, dist(generator));
+
+    PointViewPtr view = full->makeNew();
+
+    for (PointId i = 0; i < full->size(); ++i)
+        if (i % 2 == 0) view->appendPoint(*full, i);
+    ASSERT_EQ(count, view->size());
+
+    filter.prepare(table);
+    FilterWrapper::ready(filter, table);
+    FilterWrapper::filter(filter, *view.get());
+    FilterWrapper::done(filter, table);
+
+    EXPECT_EQ(count, view->size());
+    for (PointId i = 1; i < count; ++i)
+    {
+        double d1 = view->getFieldAs<double>(dim, i - 1);
+        double d2 = view->getFieldAs<double>(dim, i);
+        EXPECT_TRUE(d1 <= d2);
+    }
 }
 
 TEST(SortFilterTest, testUnknownOptions)
@@ -169,3 +212,4 @@ TEST(SortFilterTest, issue1121_simpleSortOrderDesc)
     }
 }
 
+} // namespace pdal

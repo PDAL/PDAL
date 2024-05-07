@@ -178,11 +178,8 @@ void Processor::writeCompressed(VoxelKey k, PointViewPtr v)
     lazperf::writer::chunk_compressor compressor(b.pointFormatId, b.numExtraBytes);
 
     // Sort by GPS time - no-op if there's no GPS time.
-    std::sort(v->begin(), v->end(),
-        [](const PointRef& p1, const PointRef& p2)
-        {
-            return p1.compare(Dimension::Id::GpsTime, p2);
-        });
+    std::sort(v->begin(), v->end(), [](const PointRef& p1, const PointRef& p2)
+        { return p1.compare(Dimension::Id::GpsTime, p2); });
 
     for (PointId idx = 0; idx < v->size(); ++idx)
     {
@@ -193,12 +190,12 @@ void Processor::writeCompressed(VoxelKey k, PointViewPtr v)
     std::vector<unsigned char> chunk = compressor.done();
     uint64_t location = m_manager.newChunk(k, (uint32_t)chunk.size(), (uint32_t)v->size());
 
-    std::ofstream out(b.opts.filename, std::ios::out | std::ios::in | std::ios::binary);
+    std::ofstream out(b.filename, std::ios::out | std::ios::in | std::ios::binary);
     out.seekp(std::ofstream::pos_type(location));
     out.write(reinterpret_cast<const char *>(chunk.data()), chunk.size());
     out.close();
     if (!out)
-        throw pdal_error("Failure writing to '" + b.opts.filename + "'.");
+        throw pdal_error("Failure writing to '" + b.filename + "'.");
 }
 
 } // namespace copcwriter

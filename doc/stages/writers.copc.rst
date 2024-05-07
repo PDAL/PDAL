@@ -153,8 +153,25 @@ pipeline
 vlrs
     Add VLRS specified as json. See `VLRs`_ above for details.
 
+a_srs
+    Spatial reference to use to write output.
+
 threads
     Number of threads to use when writing [Default: 10]
+
+extra_dims
+  Extra dimensions to be written as part of each point beyond those specified
+  by the LAS point format.  The format of the option is
+  ``<dimension_name>=<type> [, ...]``.  Any valid PDAL :ref:`type <types>`
+  can be specified.
+
+  The special value ``all`` can be used in place of a dimension/type list
+  to request that all dimensions that can't be stored in the predefined
+  LAS point record get added as extra data at the end of each point record.
+
+enhanced_srs_vlrs
+  Write WKT2 and PROJJSON as VLR [Default: false]
+
 
 .. include:: writer_opts.rst
 

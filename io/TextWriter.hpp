@@ -64,6 +64,8 @@ class PDAL_DLL TextWriter : public Writer, public Streamable
 public:
     TextWriter()
     {}
+    TextWriter& operator=(const TextWriter&) = delete;
+    TextWriter(const TextWriter&) = delete;
 
     std::string getName() const;
 
@@ -84,7 +86,6 @@ private:
     DimSpec extractDim(std::string dim, PointTableRef table);
     bool findDim(Dimension::Id id, DimSpec& ds);
 
-    std::string m_filename;
     OutputType m_outputType;
     std::string m_callback;
     bool m_writeAllDims;
@@ -93,7 +94,6 @@ private:
     std::string m_newline;
     std::string m_delimiter;
     bool m_quoteHeader;
-    bool m_packRgb;
     int m_precision;
     PointId m_idx;
 
@@ -102,9 +102,6 @@ private:
     DimSpec m_xDim;
     DimSpec m_yDim;
     DimSpec m_zDim;
-
-    TextWriter& operator=(const TextWriter&); // not implemented
-    TextWriter(const TextWriter&); // not implemented
 };
 
 } // namespace pdal

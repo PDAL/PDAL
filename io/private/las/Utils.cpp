@@ -350,33 +350,36 @@ const Dimension::IdList& pdrfDims(int pdrf)
     {
         // 0
         { D::X, D::Y, D::Z, D::Intensity, D::ReturnNumber, D::NumberOfReturns, D::ScanDirectionFlag,
-          D::EdgeOfFlightLine, D::Classification, D::ScanAngleRank, D::UserData, D::PointSourceId },
+          D::EdgeOfFlightLine, D::Classification, D::Synthetic, D::KeyPoint, D::Withheld, D::Overlap,
+          D::ScanAngleRank, D::UserData, D::PointSourceId },
         // 1
         { D::X, D::Y, D::Z, D::Intensity, D::ReturnNumber, D::NumberOfReturns, D::ScanDirectionFlag,
-          D::EdgeOfFlightLine, D::Classification, D::ScanAngleRank, D::UserData, D::PointSourceId,
-          D::GpsTime },
+          D::EdgeOfFlightLine, D::Classification, D::Synthetic, D::KeyPoint, D::Withheld, D::Overlap,
+          D::ScanAngleRank, D::UserData, D::PointSourceId, D::GpsTime },
         // 2
         { D::X, D::Y, D::Z, D::Intensity, D::ReturnNumber, D::NumberOfReturns, D::ScanDirectionFlag,
-          D::EdgeOfFlightLine, D::Classification, D::ScanAngleRank, D::UserData, D::PointSourceId,
-          D::Red, D::Green, D::Blue },
+          D::EdgeOfFlightLine, D::Classification, D::Synthetic, D::KeyPoint, D::Withheld, D::Overlap,
+          D::ScanAngleRank, D::UserData, D::PointSourceId, D::Red, D::Green, D::Blue },
         // 3
         { D::X, D::Y, D::Z, D::Intensity, D::ReturnNumber, D::NumberOfReturns, D::ScanDirectionFlag,
-          D::EdgeOfFlightLine, D::Classification, D::ScanAngleRank, D::UserData, D::PointSourceId,
-          D::GpsTime, D::Red, D::Green, D::Blue },
+          D::EdgeOfFlightLine, D::Classification, D::Synthetic, D::KeyPoint, D::Withheld, D::Overlap,
+          D::ScanAngleRank, D::UserData, D::PointSourceId, D::GpsTime, D::Red, D::Green, D::Blue },
         {},
         {},
         // 6
         { D::X, D::Y, D::Z, D::Intensity, D::ReturnNumber, D::NumberOfReturns, D::ScanDirectionFlag,
-          D::EdgeOfFlightLine, D::Classification, D::ScanAngleRank, D::UserData, D::PointSourceId,
-          D::GpsTime, D::ScanChannel, D::ClassFlags },
+          D::EdgeOfFlightLine, D::Classification, D::Synthetic, D::KeyPoint, D::Withheld, D::Overlap,
+          D::ScanAngleRank, D::UserData, D::PointSourceId, D::GpsTime, D::ScanChannel },
         // 7
         { D::X, D::Y, D::Z, D::Intensity, D::ReturnNumber, D::NumberOfReturns, D::ScanDirectionFlag,
-          D::EdgeOfFlightLine, D::Classification, D::ScanAngleRank, D::UserData, D::PointSourceId,
-          D::GpsTime, D::ScanChannel, D::ClassFlags, D::Red, D::Green, D::Blue },
+          D::EdgeOfFlightLine, D::Classification, D::Synthetic, D::KeyPoint, D::Withheld, D::Overlap,
+          D::ScanAngleRank, D::UserData, D::PointSourceId, D::GpsTime, D::ScanChannel,
+          D::Red, D::Green, D::Blue },
         // 8
         { D::X, D::Y, D::Z, D::Intensity, D::ReturnNumber, D::NumberOfReturns, D::ScanDirectionFlag,
-          D::EdgeOfFlightLine, D::Classification, D::ScanAngleRank, D::UserData, D::PointSourceId,
-          D::GpsTime, D::ScanChannel, D::ClassFlags, D::Red, D::Green, D::Blue, D::Infrared },
+          D::EdgeOfFlightLine, D::Classification, D::Synthetic, D::KeyPoint, D::Withheld, D::Overlap,
+          D::ScanAngleRank, D::UserData, D::PointSourceId, D::GpsTime, D::ScanChannel,
+          D::Red, D::Green, D::Blue, D::Infrared },
         {},
         {}
     };
@@ -394,6 +397,7 @@ std::string generateSoftwareId()
 }
 
 // Throws las::error. Be sure to catch it.
+// 'allOk' accepts the keyword 'all'.
 std::vector<ExtraDim> parse(const StringList& dimString, bool allOk)
 {
     std::vector<ExtraDim> extraDims;
@@ -452,6 +456,7 @@ void LoaderDriver::init(int pdrf, const Scaling& scaling, const ExtraDims& dims)
 {
     switch (pdrf)
     {
+    /*
     case 0:
         m_loaders.push_back(PointLoaderPtr(new V10BaseLoader(scaling)));
         break;
@@ -468,6 +473,7 @@ void LoaderDriver::init(int pdrf, const Scaling& scaling, const ExtraDims& dims)
         m_loaders.push_back(PointLoaderPtr(new GpstimeLoader(20)));
         m_loaders.push_back(PointLoaderPtr(new ColorLoader(28)));
         break;
+    */
     case 6:
         m_loaders.push_back(PointLoaderPtr(new V14BaseLoader(scaling)));
         break;
@@ -480,6 +486,8 @@ void LoaderDriver::init(int pdrf, const Scaling& scaling, const ExtraDims& dims)
         m_loaders.push_back(PointLoaderPtr(new ColorLoader(30)));
         m_loaders.push_back(PointLoaderPtr(new NirLoader(36)));
         break;
+    default:
+        throw std::runtime_error("Only LAS 1.4 supported by this utility");
     }
     if (dims.size())
         m_loaders.push_back(PointLoaderPtr(new ExtraDimLoader(dims)));
@@ -515,17 +523,31 @@ void V10BaseLoader::load(PointRef& point, const char *buf, int bufsize)
 
     uint16_t intensity;
     uint8_t flags;
-    uint8_t classification;
+    uint8_t classificationWithFlags;
     int8_t scanAngleRank;
     uint8_t user;
     uint16_t pointSourceId;
 
-    istream >> intensity >> flags >> classification >> scanAngleRank >> user >> pointSourceId;
+    istream >> intensity >> flags >> classificationWithFlags >> scanAngleRank >> user >> pointSourceId;
 
     uint8_t returnNum = flags & 0x07;
     uint8_t numReturns = (flags >> 3) & 0x07;
     uint8_t scanDirFlag = (flags >> 6) & 0x01;
     uint8_t flight = (flags >> 7) & 0x01;
+
+    uint8_t classification = classificationWithFlags & 0x1F;
+    uint8_t synthetic = (classificationWithFlags >> 5) & 0x01;
+    uint8_t keypoint = (classificationWithFlags >> 6) & 0x01;
+    uint8_t withheld = (classificationWithFlags >> 7) & 0x01;
+    uint8_t overlap = 0;
+
+    // For PDRFs 0-6, there is no dedicated overlap flag and instead a
+    // Classification of 12 indicates overlap.
+    if (classification == 12)
+    {
+        overlap = 1;
+        classification = 0;
+    }
 
     point.setField(Dimension::Id::X, x);
     point.setField(Dimension::Id::Y, y);
@@ -536,6 +558,10 @@ void V10BaseLoader::load(PointRef& point, const char *buf, int bufsize)
     point.setField(Dimension::Id::ScanDirectionFlag, scanDirFlag);
     point.setField(Dimension::Id::EdgeOfFlightLine, flight);
     point.setField(Dimension::Id::Classification, classification);
+    point.setField(Dimension::Id::Synthetic, synthetic);
+    point.setField(Dimension::Id::KeyPoint, keypoint);
+    point.setField(Dimension::Id::Withheld, withheld);
+    point.setField(Dimension::Id::Overlap, overlap);
     point.setField(Dimension::Id::ScanAngleRank, scanAngleRank);
     point.setField(Dimension::Id::UserData, user);
     point.setField(Dimension::Id::PointSourceId, pointSourceId);
@@ -545,11 +571,29 @@ void V10BaseLoader::pack(const PointRef& point, char *buf, int bufsize)
 {
     LeInserter ostream(buf, bufsize);
 
-    int32_t xi = (int32_t)m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::X));
-    int32_t yi = (int32_t)m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::Y));
-    int32_t zi = (int32_t)m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::Z));
 
-    ostream << xi << yi << zi;
+    auto converter = [](double val, Dimension::Id dim) -> int32_t
+    {
+        int32_t i(0);
+
+        if (!Utils::numericCast(val, i))
+            throw std::runtime_error("Unable to convert scaled value (" +
+                Utils::toString(val) + ") to "
+                "int32 for dimension '" + Dimension::name(dim) );
+        return i;
+    };
+
+    double xOrig = point.getFieldAs<double>(Dimension::Id::X);
+    double yOrig = point.getFieldAs<double>(Dimension::Id::Y);
+    double zOrig = point.getFieldAs<double>(Dimension::Id::Z);
+
+    int32_t x = converter(m_scaling.m_xXform.toScaled(xOrig), Dimension::Id::X);
+    int32_t y = converter(m_scaling.m_yXform.toScaled(yOrig), Dimension::Id::Y);
+    int32_t z = converter(m_scaling.m_zXform.toScaled(zOrig), Dimension::Id::Z);
+
+    ostream << x;
+    ostream << y;
+    ostream << z;
 
     int returnNum = point.getFieldAs<int>(Dimension::Id::ReturnNumber);
     int numReturns = point.getFieldAs<int>(Dimension::Id::NumberOfReturns);
@@ -558,11 +602,25 @@ void V10BaseLoader::pack(const PointRef& point, char *buf, int bufsize)
 
     uint8_t flags = returnNum | (numReturns << 3) | (scanDir << 6) | (eofFlag << 7);
     uint8_t classification = point.getFieldAs<uint8_t>(Dimension::Id::Classification);
+    // Follow the LasWriter's example and replace Classification>31 with 1.
+    if (classification > 31)
+        classification = 1;
+
+    uint8_t synthetic = point.getFieldAs<uint8_t>(Dimension::Id::Synthetic);
+    uint8_t keypoint = point.getFieldAs<uint8_t>(Dimension::Id::KeyPoint);
+    uint8_t withheld = point.getFieldAs<uint8_t>(Dimension::Id::Withheld);
+    uint8_t overlap = point.getFieldAs<uint8_t>(Dimension::Id::Overlap);
+    uint8_t classificationWithFlags =
+        (classification & 0x1F) |
+        ((synthetic & 0x01) << 5) |
+        ((keypoint & 0x01) << 6) |
+        ((withheld & 0x01) << 7);
+
     int8_t scanAngleRank = point.getFieldAs<int8_t>(Dimension::Id::ScanAngleRank);
     uint8_t user = point.getFieldAs<uint8_t>(Dimension::Id::UserData);
     uint16_t pointSourceId = point.getFieldAs<uint16_t>(Dimension::Id::PointSourceId);
 
-    ostream << flags << classification << scanAngleRank << user << pointSourceId;
+    ostream << flags << classificationWithFlags << scanAngleRank << user << pointSourceId;
 }
 
 void GpstimeLoader::load(PointRef& point, const char *buf, int bufsize)
@@ -639,7 +697,10 @@ void V14BaseLoader::load(PointRef& point, const char *buf, int bufsize)
 
     uint8_t returnNum = returnInfo & 0x0F;
     uint8_t numReturns = (returnInfo >> 4) & 0x0F;
-    uint8_t classFlags = flags & 0x0F;
+    uint8_t synthetic = flags & 0x01;
+    uint8_t keypoint = (flags >> 1) & 0x01;
+    uint8_t withheld = (flags >> 2) & 0x01;
+    uint8_t overlap = (flags >> 3) & 0x01;
     uint8_t scanChannel = (flags >> 4) & 0x03;
     uint8_t scanDirFlag = (flags >> 6) & 0x01;
     uint8_t flight = (flags >> 7) & 0x01;
@@ -650,7 +711,10 @@ void V14BaseLoader::load(PointRef& point, const char *buf, int bufsize)
     point.setField(Dimension::Id::Intensity, intensity);
     point.setField(Dimension::Id::ReturnNumber, returnNum);
     point.setField(Dimension::Id::NumberOfReturns, numReturns);
-    point.setField(Dimension::Id::ClassFlags, classFlags);
+    point.setField(Dimension::Id::Synthetic, synthetic);
+    point.setField(Dimension::Id::KeyPoint, keypoint);
+    point.setField(Dimension::Id::Withheld, withheld);
+    point.setField(Dimension::Id::Overlap, overlap);
     point.setField(Dimension::Id::ScanChannel, scanChannel);
     point.setField(Dimension::Id::ScanDirectionFlag, scanDirFlag);
     point.setField(Dimension::Id::EdgeOfFlightLine, flight);
@@ -664,30 +728,47 @@ void V14BaseLoader::load(PointRef& point, const char *buf, int bufsize)
 void V14BaseLoader::pack(const PointRef& point, char *buf, int bufsize)
 {
     LeInserter ostream(buf, bufsize);
-    int32_t xi = (int32_t)m_scaling.m_xXform.toScaled(point.getFieldAs<double>(Dimension::Id::X));
-    int32_t yi = (int32_t)m_scaling.m_yXform.toScaled(point.getFieldAs<double>(Dimension::Id::Y));
-    int32_t zi = (int32_t)m_scaling.m_zXform.toScaled(point.getFieldAs<double>(Dimension::Id::Z));
 
-    ostream << xi << yi << zi;
+    auto converter = [](double val, Dimension::Id dim) -> int32_t
+    {
+        int32_t i(0);
+
+        if (!Utils::numericCast(val, i))
+            throw std::runtime_error("Unable to convert scaled value (" +
+                Utils::toString(val) + ") to "
+                "int32 for dimension '" + Dimension::name(dim) );
+        return i;
+    };
+
+    double xOrig = point.getFieldAs<double>(Dimension::Id::X);
+    double yOrig = point.getFieldAs<double>(Dimension::Id::Y);
+    double zOrig = point.getFieldAs<double>(Dimension::Id::Z);
+
+    int32_t x = converter(m_scaling.m_xXform.toScaled(xOrig), Dimension::Id::X);
+    int32_t y = converter(m_scaling.m_yXform.toScaled(yOrig), Dimension::Id::Y);
+    int32_t z = converter(m_scaling.m_zXform.toScaled(zOrig), Dimension::Id::Z);
+
+    ostream << x << y << z;
 
     uint16_t intensity = point.getFieldAs<uint16_t>(Dimension::Id::Intensity);
     int returnNum = point.getFieldAs<int>(Dimension::Id::ReturnNumber);
     int numReturns = point.getFieldAs<int>(Dimension::Id::NumberOfReturns);
     uint8_t returnInfo = returnNum | (numReturns << 4);
 
+    uint8_t synthetic = point.getFieldAs<uint8_t>(Dimension::Id::Synthetic);
+    uint8_t keypoint = point.getFieldAs<uint8_t>(Dimension::Id::KeyPoint);
+    uint8_t withheld = point.getFieldAs<uint8_t>(Dimension::Id::Withheld);
+    uint8_t overlap = point.getFieldAs<uint8_t>(Dimension::Id::Overlap);
+
     uint8_t scanChannel = point.getFieldAs<uint8_t>(Dimension::Id::ScanChannel);
     uint8_t scanDirFlag = point.getFieldAs<uint8_t>(Dimension::Id::ScanDirectionFlag);
     uint8_t flight = point.getFieldAs<uint8_t>(Dimension::Id::EdgeOfFlightLine);
     uint8_t classification = point.getFieldAs<uint8_t>(Dimension::Id::Classification);
 
-    uint8_t flags;
-    uint8_t classFlags = 0;
-    if (point.hasDim(Dimension::Id::ClassFlags))
-        classFlags = point.getFieldAs<uint8_t>(Dimension::Id::ClassFlags);
-    else
-        classFlags = classification >> 5;
+    uint8_t classFlags =
+        synthetic | (keypoint << 1) | (withheld << 2) | (overlap << 3);
 
-    flags = (classFlags & 0x0F) |
+    uint8_t flags = (classFlags & 0x0F) |
             ((scanChannel & 0x03) << 4) |
             ((scanDirFlag & 0x01) << 6) |
             ((flight & 0x01) << 7);

@@ -433,28 +433,29 @@ std::vector<char> VlrCatalog::fetch(const std::string& userId, uint16_t recordId
     return vlrdata;
 }
 
+const VlrCatalog::Entry& VlrCatalog::find(const std::string& userId, uint16_t recordId) const
+{
+    static const VlrCatalog::Entry nullEntry;
+
+    auto it = std::find_if(m_entries.begin(), m_entries.end(),
+        [&](const Entry& e){ return e.userId == userId && e.recordId == recordId; });
+    return it == m_entries.end() ? nullEntry : *it;
+}
+
 std::vector<char> VlrCatalog::fetchWithDescription(const std::string& userId, uint16_t recordId,
     std::string& outDescrip) const
 {
-    uint64_t offset = 0;
-    uint32_t length = 0;
-
     // We don't lock m_entries because we assume that the load has already occurred at the
     // time you want to fetch.
     std::vector<char> vlrdata;
-    for (const Entry& e : m_entries)
-        if (e.userId == userId && e.recordId == recordId)
-        {
-            // We don't support VLRs with size > 4GB)
-            if (e.length > (std::numeric_limits<uint32_t>::max)())
-                return vlrdata;
+    const Entry& e = find(userId, recordId);
 
-            offset = e.offset;
-            length = (uint32_t)e.length;
-            break;
-        }
-    if (length == 0)
+    // We don't support VLRs with size > 4GB
+    if (e.length == 0 || e.length > (std::numeric_limits<uint32_t>::max)())
         return vlrdata;
+
+    uint64_t offset = e.offset;
+    uint32_t length = (uint32_t)e.length;
 
     // Load the data plus the description.
     const int DescripLen = 32;

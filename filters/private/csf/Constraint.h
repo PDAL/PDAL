@@ -15,9 +15,7 @@
 // limitations under the License.
 // ======================================================================================
 
-#ifndef _CONSTRAINT_H_
-#define _CONSTRAINT_H_
-
+#pragma once
 
 #include "Vec3.h"
 #include "Particle.h"
@@ -40,6 +38,3 @@ public:
      * by Cloth.time_step() many times per frame*/
     void satisfyConstraint(int constraintTimes);
 };
-
-
-#endif // ifndef _CONSTRAINT_H_

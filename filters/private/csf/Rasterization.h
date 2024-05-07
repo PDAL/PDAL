@@ -15,8 +15,7 @@
 // limitations under the License.
 // ======================================================================================
 
-#ifndef _KNN_H_
-#define _KNN_H_
+#pragma once
 
 #include "point_cloud.h"
 #include "Cloth.h"
@@ -40,5 +39,3 @@ public:
                                 csf::PointCloud& pc,
                                 vector<double> & heightVal);
 };
-
-#endif // ifndef _KNN_H_

@@ -85,6 +85,7 @@ namespace
     json getConfig(const std::string& s)
     {
         json in(s.size() ? json::parse(s) : json::object());
+        if (in.is_null()) in = json::object();
 
         json config;
         std::string path = in.value("configFile", "~/.arbiter/config.json");
@@ -161,12 +162,16 @@ std::unique_ptr<std::size_t> Arbiter::tryGetSize(const std::string path) const
     return getDriver(path)->tryGetSize(stripProtocol(path));
 }
 
-void Arbiter::put(const std::string path, const std::string& data) const
+std::vector<char> Arbiter::put(
+        const std::string path,
+        const std::string& data) const
 {
     return getDriver(path)->put(stripProtocol(path), data);
 }
 
-void Arbiter::put(const std::string path, const std::vector<char>& data) const
+std::vector<char> Arbiter::put(
+        const std::string path,
+        const std::vector<char>& data) const
 {
     return getDriver(path)->put(stripProtocol(path), data);
 }
@@ -203,7 +208,7 @@ std::unique_ptr<std::vector<char>> Arbiter::tryGetBinary(
     return getHttpDriver(path)->tryGetBinary(stripProtocol(path), headers, query);
 }
 
-void Arbiter::put(
+std::vector<char> Arbiter::put(
         const std::string path,
         const std::string& data,
         const http::Headers headers,
@@ -212,7 +217,7 @@ void Arbiter::put(
     return getHttpDriver(path)->put(stripProtocol(path), data, headers, query);
 }
 
-void Arbiter::put(
+std::vector<char> Arbiter::put(
         const std::string path,
         const std::vector<char>& data,
         const http::Headers headers,
@@ -485,7 +490,10 @@ std::unique_ptr<std::string> Driver::tryGet(const std::string path) const
 std::vector<char> Driver::getBinary(std::string path) const
 {
     std::vector<char> data;
-    if (!get(path, data)) throw ArbiterError("Could not read file " + m_protocol + "://" + path);
+    if (!get(path, data))
+    {
+        throw ArbiterError("Could not read file " + m_protocol + "://" + path);
+    }
     return data;
 }
 
@@ -499,12 +507,13 @@ std::unique_ptr<std::vector<char>> Driver::tryGetBinary(std::string path) const
 std::size_t Driver::getSize(const std::string path) const
 {
     if (auto size = tryGetSize(path)) return *size;
-    else throw ArbiterError("Could not get size of " + path);
+    else throw ArbiterError(
+        "Could not get size of " + m_protocol + "://" + path);
 }
 
-void Driver::put(std::string path, const std::string& data) const
+std::vector<char> Driver::put(std::string path, const std::string& data) const
 {
-    put(path, std::vector<char>(data.begin(), data.end()));
+    return put(path, std::vector<char>(data.begin(), data.end()));
 }
 
 void Driver::copy(std::string src, std::string dst) const
@@ -1021,7 +1030,7 @@ bool Fs::get(std::string path, std::vector<char>& data) const
     return good;
 }
 
-void Fs::put(std::string path, const std::vector<char>& data) const
+std::vector<char> Fs::put(std::string path, const std::vector<char>& data) const
 {
     path = expandTilde(path);
     std::ofstream stream(path, binaryTruncMode);
@@ -1037,6 +1046,7 @@ void Fs::put(std::string path, const std::vector<char>& data) const
     {
         throw ArbiterError("Error occurred while writing " + path);
     }
+    return std::vector<char>();
 }
 
 void Fs::copy(std::string src, std::string dst) const
@@ -1475,13 +1485,17 @@ std::unique_ptr<std::vector<char>> Http::tryGetBinary(
     return data;
 }
 
-void Http::put(
+std::vector<char> Http::put(
         std::string path,
         const std::string& data,
         const Headers headers,
         const Query query) const
 {
-    put(path, std::vector<char>(data.begin(), data.end()), headers, query);
+    return put(
+        path,
+        std::vector<char>(data.begin(), data.end()),
+        headers,
+        query);
 }
 
 bool Http::get(
@@ -1504,18 +1518,21 @@ bool Http::get(
     return good;
 }
 
-void Http::put(
+std::vector<char> Http::put(
         const std::string path,
         const std::vector<char>& data,
         const Headers headers,
         const Query query) const
 {
     auto http(m_pool.acquire());
+    auto res(http.put(typedPath(path), data, headers, query));
 
-    if (!http.put(typedPath(path), data, headers, query).ok())
+    if (!res.ok())
     {
         throw ArbiterError("Couldn't HTTP PUT to " + path);
     }
+
+    return res.data();
 }
 
 void Http::post(
@@ -1538,7 +1555,6 @@ void Http::post(
 
     if (!res.ok())
     {
-        std::cout << res.str() << std::endl;
         throw ArbiterError("Couldn't HTTP POST to " + path);
     }
 }
@@ -1547,18 +1563,34 @@ Response Http::internalGet(
         const std::string path,
         const Headers headers,
         const Query query,
-        const std::size_t reserve) const
+        const std::size_t reserve,
+        const int retry,
+        const std::size_t timeout) const
 {
-    return m_pool.acquire().get(typedPath(path), headers, query, reserve);
+    return m_pool.acquire().get(
+        typedPath(path),
+        headers,
+        query,
+        reserve,
+        retry,
+        timeout);
 }
 
 Response Http::internalPut(
         const std::string path,
         const std::vector<char>& data,
         const Headers headers,
-        const Query query) const
+        const Query query,
+        const int retry,
+        const std::size_t timeout) const
 {
-    return m_pool.acquire().put(typedPath(path), data, headers, query);
+    return m_pool.acquire().put(
+        typedPath(path),
+        data,
+        headers,
+        query,
+        retry,
+        timeout);
 }
 
 Response Http::internalHead(
@@ -1659,8 +1691,11 @@ namespace
     // See:
     // https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html
     const std::string ec2CredIp("169.254.169.254");
+    const std::string ec2TokenBase(ec2CredIp + "/latest/api/token");
     const std::string ec2CredBase(
             ec2CredIp + "/latest/meta-data/iam/security-credentials");
+
+    const std::string defaultDnsSuffix = "amazonaws.com";
 
     // https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html
     const std::string fargateCredIp("169.254.170.2");
@@ -1709,6 +1744,20 @@ namespace
         if (s.size() && std::isspace(s.back())) s.pop_back();
         return s;
     }
+
+    bool isVerbose()
+    {
+        std::string verbose;
+        if (auto e = env("VERBOSE")) verbose = *e;
+        else if (auto e = env("CURL_VERBOSE")) verbose = *e;
+        else if (auto e = env("ARBITER_VERBOSE")) verbose = *e;
+        return (!verbose.empty()) && !!std::stol(verbose);
+    }
+
+    bool doSignRequests()
+    {
+        return !env("AWS_NO_SIGN_REQUEST");
+    }
 }
 
 namespace drivers
@@ -1738,9 +1787,7 @@ std::unique_ptr<S3> S3::create(
         if (auto p = env("AWS_PROFILE")) profile = *p;
     }
 
-    auto auth(Auth::create(s, profile));
-    if (!auth) return std::unique_ptr<S3>();
-
+    auto auth(doSignRequests() ? Auth::create(s, profile) : nullptr);
     auto config = makeUnique<Config>(s, profile);
     return makeUnique<S3>(pool, profile, std::move(auth), std::move(config));
 }
@@ -1821,10 +1868,54 @@ std::unique_ptr<S3::Auth> S3::Auth::create(
 
     // Nothing found in the environment or on the filesystem.  However we may
     // be running in an EC2 instance with an instance profile set up.
-    if (const auto iamRole = httpDriver.tryGet(ec2CredBase))
+    try
     {
-        return makeUnique<Auth>(ec2CredBase + "/" + *iamRole);
+        std::string token;
+
+        try
+        {
+            // The below request is for the IMDSv2 token.  On EC2 instances
+            // which only support v1, this request will fail.  That's ok, the
+            // next request looks the same anyway (except without the token of
+            // course), and that corresponds to the IMDSv1 flow as a fallback.
+            const auto res = httpDriver.internalPut(
+                ec2TokenBase,
+                std::vector<char>(),
+                {{ "X-aws-ec2-metadata-token-ttl-seconds", "21600" }},
+                {{ }},
+                0,
+                1);
+
+
+            if (!res.ok()) throw ArbiterError("Failed to get IMDSv2 token");
+
+            const auto tokenvec = res.data();
+            token = std::string(tokenvec.data(), tokenvec.size());
+        }
+        catch (...) { }
+
+        http::Headers headers;
+        if (!token.empty()) headers["X-aws-ec2-metadata-token"] = token;
+
+        const auto res = httpDriver.internalGet(
+            ec2CredBase,
+            headers,
+            {{ }},
+            0,
+            0,
+            1);
+        if (!res.ok()) throw ArbiterError("Failed to get IAM role");
+
+        const auto rolevec = res.data();
+        const auto iamRole = std::string(rolevec.begin(), rolevec.end());
+
+        if (!iamRole.empty())
+        {
+            const bool imdsv2 = !token.empty();
+            return makeUnique<Auth>(ec2CredBase + "/" + iamRole, imdsv2);
+        }
     }
+    catch (...) { }
 
     // We also may be running in Fargate, which looks very similar but with a
     // different IP.
@@ -1866,11 +1957,6 @@ S3::Config::Config(const std::string s, const std::string profile)
             {
                 m_baseHeaders[p.key()] = p.value().get<std::string>();
             }
-        }
-        else
-        {
-            std::cout << "s3.headers expected to be object - skipping" <<
-                std::endl;
         }
     }
 }
@@ -1921,6 +2007,12 @@ std::string S3::Config::extractBaseUrl(
     const std::string s,
     const std::string region)
 {
+    if (auto p = env("AWS_ENDPOINT_URL"))
+    {
+        const std::string path = *p;
+        return path.back() == '/' ? path : path + '/';
+    }
+
     const json c(s.size() ? json::parse(s) : json());
 
     if (!c.is_null() &&
@@ -1938,8 +2030,6 @@ std::string S3::Config::extractBaseUrl(
         endpointsPath = *e;
     }
 
-    std::string dnsSuffix("amazonaws.com");
-
     drivers::Fs fsDriver;
     if (std::unique_ptr<std::string> e = fsDriver.tryGet(endpointsPath))
     {
@@ -1947,32 +2037,42 @@ std::string S3::Config::extractBaseUrl(
 
         for (const auto& partition : ep["partitions"])
         {
-            if (partition.count("dnsSuffix"))
+            if (
+                !partition.count("regions") || 
+                !partition.at("regions").count(region))
             {
-                dnsSuffix = partition["dnsSuffix"].get<std::string>();
+                continue;
             }
 
-            const auto& endpoints(
-                    partition.at("services").at("s3").at("endpoints"));
-
-            for (const auto& r : endpoints.items())
+            // Look for an explicit hostname for this region/service.
+            if (
+                partition.count("services") && 
+                partition["services"].count("s3") &&
+                partition["services"]["s3"].count("endpoints"))
             {
-                if (r.key() == region &&
-                        endpoints.value("region", json::object())
-                            .count("hostname"))
+                const auto& endpoints(partition["services"]["s3"]["endpoints"]);
+
+                for (const auto& r : endpoints.items())
                 {
-                    return endpoints["region"]["hostname"].get<std::string>() +
-                        '/';
+                    if (r.key() == region &&
+                            endpoints.value("region", json::object())
+                                .count("hostname"))
+                    {
+                        return endpoints["region"]["hostname"].get<std::string>() +
+                            '/';
+                    }
                 }
             }
+
+            // No explicit hostname found, so build it from our region/DNS suffix.
+            std::string dnsSuffix = partition.value("dnsSuffix", defaultDnsSuffix);
+            return "s3." + region + "." + dnsSuffix + "/";
         }
     }
 
-    if (dnsSuffix.size() && dnsSuffix.back() != '/') dnsSuffix += '/';
-
     // https://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
-    if (region == "us-east-1") return "s3." + dnsSuffix;
-    else return "s3-" + region + "." + dnsSuffix;
+    if (region == "us-east-1") return "s3." + defaultDnsSuffix + "/";
+    else return "s3-" + region + "." + defaultDnsSuffix + "/";
 }
 
 S3::AuthFields S3::Auth::fields() const
@@ -1988,7 +2088,37 @@ S3::AuthFields S3::Auth::fields() const
             http::Pool pool;
             drivers::Http httpDriver(pool);
 
-            const json creds(json::parse(httpDriver.get(*m_credUrl)));
+            std::string token;
+
+            if (m_imdsv2)
+            {
+                try
+                {
+                    const auto res = httpDriver.internalPut(
+                        ec2TokenBase,
+                        std::vector<char>(),
+                        {{ "X-aws-ec2-metadata-token-ttl-seconds", "21600" }},
+                        {{ }},
+                        0,
+                        1);
+
+                    if (!res.ok())
+                    {
+                        throw ArbiterError("Failed to get IMDSv2 token");
+                    }
+
+                    const auto tokenvec = res.data();
+                    token = std::string(tokenvec.data(), tokenvec.size());
+                }
+                catch (...) { }
+            }
+
+            http::Headers headers;
+            if (!token.empty()) headers["X-aws-ec2-metadata-token"] = token;
+
+            const json creds = json::parse(
+                httpDriver.get(*m_credUrl, headers));
+
             m_access = creds.at("AccessKeyId").get<std::string>();
             m_hidden = creds.at("SecretAccessKey").get<std::string>();
             m_token = creds.at("Token").get<std::string>();
@@ -2026,7 +2156,7 @@ std::unique_ptr<std::size_t> S3::tryGetSize(
             "HEAD",
             m_config->region(),
             resource,
-            m_auth->fields(),
+            authFields(),
             query,
             headers,
             empty);
@@ -2062,7 +2192,7 @@ bool S3::get(
             "GET",
             m_config->region(),
             resource,
-            m_auth->fields(),
+            authFields(),
             query,
             headers,
             empty);
@@ -2080,14 +2210,13 @@ bool S3::get(
         data = res.data();
         return true;
     }
-    else
-    {
-        std::cout << res.code() << ": " << res.str() << std::endl;
-        return false;
-    }
+
+    if (isVerbose()) std::cout << res.code() << ": " << res.str() << std::endl;
+
+    return false;
 }
 
-void S3::put(
+std::vector<char> S3::put(
         const std::string rawPath,
         const std::vector<char>& data,
         const Headers userHeaders,
@@ -2107,7 +2236,7 @@ void S3::put(
             "PUT",
             m_config->region(),
             resource,
-            m_auth->fields(),
+            authFields(),
             query,
             headers,
             data);
@@ -2126,6 +2255,8 @@ void S3::put(
                 "Couldn't S3 PUT to " + rawPath + ": " +
                 std::string(res.data().data(), res.data().size()));
     }
+
+    return res.data();
 }
 
 void S3::copy(const std::string src, const std::string dst) const
@@ -2165,6 +2296,8 @@ std::vector<std::string> S3::glob(std::string path, bool verbose) const
             throw ArbiterError("Couldn't S3 GET " + bucket);
         }
 
+        // XML parsing mucks with the data, so copy it out in case we need it.
+        const std::string datastring(data.data(), data.size());
         data.push_back('\0');
 
         Xml::xml_document<> xml;
@@ -2217,17 +2350,32 @@ std::vector<std::string> S3::glob(std::string path, bool verbose) const
                     }
                     else
                     {
+                        if (isVerbose())
+                        {
+                            std::cout << "Missing Key: " << datastring <<
+                             std::endl;
+                        }
                         throw ArbiterError(badResponse);
                     }
                 }
             }
             else
             {
+                if (isVerbose())
+                {
+                    std::cout << "Missing Contents: " << datastring <<
+                        std::endl;
+                }
                 throw ArbiterError(badResponse);
             }
         }
         else
         {
+            if (isVerbose())
+            {
+                std::cout << "Missing ListBucketResult: " << datastring <<
+                    std::endl;
+            }
             throw ArbiterError(badResponse);
         }
 
@@ -2236,6 +2384,11 @@ std::vector<std::string> S3::glob(std::string path, bool verbose) const
     while (more);
 
     return results;
+}
+
+S3::AuthFields S3::authFields() const
+{
+    return m_auth ? m_auth->fields() : S3::AuthFields();
 }
 
 S3::ApiV4::ApiV4(
@@ -2271,6 +2424,8 @@ S3::ApiV4::ApiV4(
         m_headers.erase("Transfer-Encoding");
         m_headers.erase("Expect");
     }
+
+    if (!m_authFields) return;
 
     const Headers normalizedHeaders(
             std::accumulate(
@@ -2561,7 +2716,7 @@ AZ::AZ(
         Pool& pool,
         std::string profile,
         std::unique_ptr<Config> config)
-    : Http(pool, "az", profile == "default" ? "" : profile)
+    : Http(pool, "az", "http", profile == "default" ? "" : profile)
     , m_config(std::move(config))
 { }
 
@@ -2751,7 +2906,10 @@ std::string AZ::Config::extractBaseUrl(
     return account + "." + service + "." + endpoint + "/";
 }
 
-std::unique_ptr<std::size_t> AZ::tryGetSize(std::string rawPath) const
+std::unique_ptr<std::size_t> AZ::tryGetSize(
+    const std::string rawPath,
+    const http::Headers userHeaders,
+    const http::Query query) const
 {
     Headers headers(m_config->baseHeaders());
 
@@ -2762,6 +2920,7 @@ std::unique_ptr<std::size_t> AZ::tryGetSize(std::string rawPath) const
     if (m_config->hasSasToken())
     {
         Query q = m_config->sasToken();
+        q.insert(std::begin(query), std::end(query));
         res.reset(new Response(http.internalHead(resource.url(), headers, q)));
     }
     else
@@ -2770,7 +2929,7 @@ std::unique_ptr<std::size_t> AZ::tryGetSize(std::string rawPath) const
                 "HEAD",
                 resource,
                 m_config->authFields(),
-                Query(),
+                query,
                 headers,
                 emptyVect);
         res.reset(new Response(http.internalHead(resource.url(), ApiV1.headers())));
@@ -2835,7 +2994,7 @@ bool AZ::get(
     }
 }
 
-void AZ::put(
+std::vector<char> AZ::put(
         const std::string rawPath,
         const std::vector<char>& data,
         const Headers userHeaders,
@@ -2876,7 +3035,7 @@ void AZ::put(
                     "Couldn't Azure PUT to " + rawPath + ": " +
                     std::string(res.data().data(), res.data().size()));
         }
-        return;
+        return res.data();
     }
 
     const ApiV1 ApiV1(
@@ -2900,6 +3059,8 @@ void AZ::put(
                 "Couldn't Azure PUT to " + rawPath + ": " +
                 std::string(res.data().data(), res.data().size()));
     }
+
+    return res.data();
 }
 
 void AZ::copy(const std::string src, const std::string dst) const
@@ -3377,7 +3538,7 @@ bool Google::get(
     }
 }
 
-void Google::put(
+std::vector<char> Google::put(
         const std::string path,
         const std::vector<char>& data,
         const http::Headers userHeaders,
@@ -3396,6 +3557,8 @@ void Google::put(
 
     drivers::Https https(m_pool);
     const auto res(https.internalPost(url, data, headers, query));
+    if (!res.ok()) throw ArbiterError(res.str());
+    return res.data();
 }
 
 std::vector<std::string> Google::glob(std::string path, bool verbose) const
@@ -3848,7 +4011,7 @@ bool Dropbox::get(
     return false;
 }
 
-void Dropbox::put(
+std::vector<char> Dropbox::put(
         const std::string path,
         const std::vector<char>& data,
         const Headers userHeaders,
@@ -3863,6 +4026,7 @@ void Dropbox::put(
     const Response res(Http::internalPost(putUrl, data, headers, query));
 
     if (!res.ok()) throw ArbiterError(res.str());
+    return res.data();
 }
 
 std::string Dropbox::continueFileInfo(std::string cursor) const
@@ -4009,7 +4173,6 @@ std::vector<std::string> Dropbox::glob(std::string path, bool verbose) const
 #include <cstring>
 #include <ios>
 #include <iostream>
-#include <cstdio>
 
 #ifndef ARBITER_IS_AMALGAMATION
 #include <arbiter/util/curl.hpp>
@@ -4103,11 +4266,6 @@ namespace
         (*out)[key] = val;
 
         return fullBytes;
-    }
-
-    std::size_t eatLogging(void *out, size_t size, size_t num, void *in)
-    {
-        return size * num;
     }
 
 #else
@@ -4271,8 +4429,8 @@ void Curl::init(
     curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_LIMIT, 1L);
     curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, m_timeout);
 
-    curl_easy_setopt(m_curl, CURLOPT_CONNECTTIMEOUT_MS, 2000L);
-    curl_easy_setopt(m_curl, CURLOPT_ACCEPTTIMEOUT_MS, 2000L);
+    curl_easy_setopt(m_curl, CURLOPT_CONNECTTIMEOUT_MS, 1000L);
+    curl_easy_setopt(m_curl, CURLOPT_ACCEPTTIMEOUT_MS, 1000L);
 
     auto toLong([](bool b) { return b ? 1L : 0L; });
 
@@ -4307,7 +4465,11 @@ int Curl::perform()
 
     if (code != CURLE_OK)
     {
-        std::cerr << "Curl failure: " << curl_easy_strerror(code) << std::endl;
+        if (m_verbose)
+        {
+            std::cout << "Curl failure: " << curl_easy_strerror(code) << 
+                std::endl;
+        }
         httpCode = 550;
     }
 
@@ -4321,7 +4483,8 @@ Response Curl::get(
         std::string path,
         Headers headers,
         Query query,
-        const std::size_t reserve)
+        const std::size_t reserve,
+        const std::size_t timeout)
 {
 #ifdef ARBITER_CURL
     std::vector<char> data;
@@ -4329,6 +4492,7 @@ Response Curl::get(
     if (reserve) data.reserve(reserve);
 
     init(path, headers, query);
+    if (timeout) curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, timeout);
 
     // Register callback function and data pointer to consume the result.
     curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, getCb);
@@ -4358,12 +4522,17 @@ Response Curl::get(
 #endif
 }
 
-Response Curl::head(std::string path, Headers headers, Query query)
+Response Curl::head(
+    std::string path,
+    Headers headers,
+    Query query,
+    const std::size_t timeout)
 {
 #ifdef ARBITER_CURL
     std::vector<char> data;
 
     init(path, headers, query);
+    if (timeout) curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, timeout);
 
     // Register callback function and data pointer to consume the result.
     curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, getCb);
@@ -4392,19 +4561,31 @@ Response Curl::put(
         std::string path,
         const std::vector<char>& data,
         Headers headers,
-        Query query)
+        Query query,
+        const std::size_t timeout)
 {
 #ifdef ARBITER_CURL
     init(path, headers, query);
+    if (timeout) curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, timeout);
 
     std::unique_ptr<PutData> putData(new PutData(data));
+    std::vector<char> writeData;
 
     // Register callback function and data pointer to create the request.
     curl_easy_setopt(m_curl, CURLOPT_READFUNCTION, putCb);
     curl_easy_setopt(m_curl, CURLOPT_READDATA, putData.get());
 
+    // Register callback function and data pointer to consume the result.
+    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, getCb);
+    curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &writeData);
+
     // Insert all headers into the request.
     curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, m_headers);
+
+    // Set up callback and data pointer for received headers.
+    Headers receivedHeaders;
+    curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, headerCb);
+    curl_easy_setopt(m_curl, CURLOPT_HEADERDATA, &receivedHeaders);
 
     // Specify that this is a PUT request.
     curl_easy_setopt(m_curl, CURLOPT_PUT, 1L);
@@ -4416,13 +4597,9 @@ Response Curl::put(
             CURLOPT_INFILESIZE_LARGE,
             static_cast<curl_off_t>(data.size()));
 
-    // Hide Curl's habit of printing things to console even with verbose set
-    // to false.
-    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, eatLogging);
-
     // Run the command.
     const int httpCode(perform());
-    return Response(httpCode);
+    return Response(httpCode, writeData, receivedHeaders);
 #else
     throw ArbiterError(fail);
 #endif
@@ -4432,10 +4609,12 @@ Response Curl::post(
         std::string path,
         const std::vector<char>& data,
         Headers headers,
-        Query query)
+        Query query,
+        const std::size_t timeout)
 {
 #ifdef ARBITER_CURL
     init(path, headers, query);
+    if (timeout) curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, timeout);
 
     std::unique_ptr<PutData> putData(new PutData(data));
     std::vector<char> writeData;
@@ -4504,8 +4683,8 @@ Response Curl::post(
 #include <curl/curl.h>
 #endif
 
-#include <chrono>
 #include <cctype>
+#include <chrono>
 #include <iomanip>
 #include <iostream>
 #include <numeric>
@@ -4582,12 +4761,14 @@ Response Resource::get(
         const std::string path,
         const Headers headers,
         const Query query,
-        const std::size_t reserve)
+        const std::size_t reserve,
+        const int retry,
+        const std::size_t timeout)
 {
-    return exec([this, path, headers, query, reserve]()->Response
+    return exec([this, path, headers, query, reserve, timeout]()->Response
     {
-        return m_curl.get(path, headers, query, reserve);
-    });
+        return m_curl.get(path, headers, query, reserve, timeout);
+    }, retry);
 }
 
 Response Resource::head(
@@ -4605,12 +4786,14 @@ Response Resource::put(
         std::string path,
         const std::vector<char>& data,
         const Headers headers,
-        const Query query)
+        const Query query,
+        const int retry,
+        const std::size_t timeout)
 {
-    return exec([this, path, &data, headers, query]()->Response
+    return exec([this, path, &data, headers, query, timeout]()->Response
     {
-        return m_curl.put(path, data, headers, query);
-    });
+        return m_curl.put(path, data, headers, query, timeout);
+    }, retry);
 }
 
 Response Resource::post(
@@ -4625,10 +4808,14 @@ Response Resource::post(
     });
 }
 
-Response Resource::exec(std::function<Response()> f)
+Response Resource::exec(std::function<Response()> f, const int userRetry)
 {
     Response res;
     std::size_t tries(0);
+
+    const std::size_t retry = userRetry == -1
+        ? m_retry
+        : static_cast<std::size_t>(userRetry);
 
     do
     {
@@ -4640,7 +4827,7 @@ Response Resource::exec(std::function<Response()> f)
 
         res = f();
     }
-    while (res.serverError() && tries++ < m_retry);
+    while (res.serverError() && tries++ < retry);
 
     return res;
 }
@@ -4802,8 +4989,24 @@ Contents parse(const std::string& s)
 
 #ifndef ARBITER_IS_AMALGAMATION
 #include <arbiter/util/md5.hpp>
-#include <arbiter/util/macros.hpp>
 #endif
+
+// Various crypto utilities.
+#define ROTLEFT(a,b) (((a) << (b)) | ((a) >> (32-(b))))
+#define ROTRIGHT(a,b) (((a) >> (b)) | ((a) << (32-(b))))
+#define F(x,y,z) ((x & y) | (~x & z))
+#define G(x,y,z) ((x & z) | (y & ~z))
+#define H(x,y,z) (x ^ y ^ z)
+#define I(x,y,z) (y ^ (x | ~z))
+
+#define FF(a,b,c,d,m,s,t) { a += F(b,c,d) + m + t; \
+                            a = b + ROTLEFT(a,s); }
+#define GG(a,b,c,d,m,s,t) { a += G(b,c,d) + m + t; \
+                            a = b + ROTLEFT(a,s); }
+#define HH(a,b,c,d,m,s,t) { a += H(b,c,d) + m + t; \
+                            a = b + ROTLEFT(a,s); }
+#define II(a,b,c,d,m,s,t) { a += I(b,c,d) + m + t; \
+                            a = b + ROTLEFT(a,s); }
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
@@ -5025,8 +5228,18 @@ std::string md5(const std::string& data)
 
 #ifndef ARBITER_IS_AMALGAMATION
 #include <arbiter/util/sha256.hpp>
-#include <arbiter/util/macros.hpp>
 #endif
+
+
+// Various crypto utilities.
+#define ROTLEFT(a,b) (((a) << (b)) | ((a) >> (32-(b))))
+#define ROTRIGHT(a,b) (((a) >> (b)) | ((a) << (32-(b))))
+#define CH(x,y,z) (((x) & (y)) ^ (~(x) & (z)))
+#define MAJ(x,y,z) (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
+#define EP0(x) (ROTRIGHT(x,2) ^ ROTRIGHT(x,13) ^ ROTRIGHT(x,22))
+#define EP1(x) (ROTRIGHT(x,6) ^ ROTRIGHT(x,11) ^ ROTRIGHT(x,25))
+#define SIG0(x) (ROTRIGHT(x,7) ^ ROTRIGHT(x,18) ^ ((x) >> 3))
+#define SIG1(x) (ROTRIGHT(x,17) ^ ROTRIGHT(x,19) ^ ((x) >> 10))
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE

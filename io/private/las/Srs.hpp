@@ -37,20 +37,52 @@
 #include "Vlr.hpp"
 
 #include  <pdal/Log.hpp>
+#include  <pdal/util/Algorithm.hpp>
 
 namespace pdal
 {
 namespace las
 {
 
+enum class SrsType
+{
+    Wkt1 = 0,
+    Geotiff,
+    Proj,
+    Wkt2
+};
+
+inline std::ostream& operator<<(std::ostream& out, SrsType type)
+{
+    switch (type)
+    {
+    case SrsType::Wkt1:
+        out << "wkt1";
+        break;
+    case SrsType::Geotiff:
+        out << "geotiff";
+        break;
+    case SrsType::Proj:
+        out << "projjson";
+        break;
+    case SrsType::Wkt2:
+        out << "wkt2";
+        break;
+    }
+    return out;
+}
+
 class Srs
 {
 public:
-    void init(const VlrList& vlrs, bool useWkt, LogPtr log);
-    SpatialReference get() const;
+    void init(const VlrList& vlrs, std::vector<SrsType> srsOrder, bool useWkt, LogPtr log);
+    const SpatialReference& get() const;
     std::string geotiffString() const;
 
 private:
+    void extractGeotiff(const Vlr *vlr, const VlrList& vlrs, LogPtr log);
+    void extractWkt(const Vlr *vlr);
+
     std::string m_geotiffString;
     SpatialReference m_srs;
 };

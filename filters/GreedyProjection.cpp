@@ -203,7 +203,7 @@ void GreedyProjection::filter(PointView& view)
   // Initializing
   PointId isFree = 0;
   bool done = false;
-  int nr_parts=0, increase_nnn4fn=0, increase_nnn4s=0, increase_dist=0, nr_touched = 0;
+  int nr_parts=0, increase_nnn4fn=0, increase_nnn4s=0, increase_dist=0;
   bool is_fringe;
   angles_.resize(nnn_);
   std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d> > uvn_nn (nnn_);
@@ -1057,10 +1057,10 @@ void GreedyProjection::filter(PointView& view)
               angles_[*(it+1)].index) && (!gaps[*it]);
           next_is_sfn_ = (sfn_[current_index_] ==
               angles_[*(it+1)].index) && (!gaps[*it]);
-          if (!prev_is_ffn_ && !next_is_sfn_ && !prev_is_sfn_ && !next_is_ffn_)
-          {
-            nr_touched++;
-          }
+//           if (!prev_is_ffn_ && !next_is_sfn_ && !prev_is_sfn_ && !next_is_ffn_)
+//           {
+//             nr_touched++;
+//           }
         }
 
         if (gaps[*it])

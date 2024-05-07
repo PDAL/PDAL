@@ -31,6 +31,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+// Add compatibility for deprecated integer data types no longer available
+// by default in GDAL 4.0 (GIntBig)
+#define GDAL_USE_OLD_INT_TYPES
+
 #include "OGRWriter.hpp"
 
 #include <sstream>
@@ -73,14 +77,14 @@ std::string OGRWriter::getName() const
 
 void OGRWriter::addArgs(ProgramArgs& args)
 {
-    args.add("filename", "Output filename", m_filename).setPositional();
     args.add("multicount", "Group 'multicount' points into a structure",
         m_multiCount, (size_t)1);
     args.add("measure_dim", "Use dimensions as a measure value",
         m_measureDimName);
     args.add("ogrdriver", "OGR writer driver name", m_driverName, m_driverName);
     args.add("ogr_options", "OGR layer creation options", m_ogrOptions);
-    args.add("attr_dims", "Dimension to use as attributes, 'all' for all. Incompatible with multicount>1", m_attrDimNames);
+    args.add("attr_dims", "Dimension to use as attributes, 'all' for all. "
+        "Incompatible with multicount>1", m_attrDimNames);
 }
 
 
@@ -107,7 +111,7 @@ void OGRWriter::prepared(PointTableRef table)
 
     if (m_driverName.empty())
     {
-        if (FileUtils::extension(m_filename) == ".geojson")
+        if (FileUtils::extension(filename()) == ".geojson")
             m_driverName = "GeoJSON";
         else
             m_driverName = "ESRI Shapefile";
@@ -190,8 +194,7 @@ void OGRWriter::readyTable(PointTableRef table)
 }
 
 
-void OGRWriter::readyFile(const std::string& filename,
-    const SpatialReference& srs)
+void OGRWriter::readyFile(const std::string& filename, const SpatialReference& srs)
 {
     m_curCount = 0;
     m_outputFilename = filename;

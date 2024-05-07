@@ -44,6 +44,7 @@ Ground/Unclassified
    filters.pmf
    filters.skewnessbalancing
    filters.smrf
+   filters.sparsesurface
    filters.trajectory
 
 :ref:`filters.csf`
@@ -57,6 +58,9 @@ Ground/Unclassified
 
 :ref:`filters.smrf`
     Label ground/non-ground returns using [Pingel2013]_.
+
+:ref:`filters.sparsesurface`
+    Sparsify ground returns and label neighbors as low noise.
 
 :ref:`filters.trajectory`
     Label ground/non-ground returns using estimate flight trajectory given
@@ -161,7 +165,7 @@ Clustering
 
 :ref:`filters.litree`
     Segment and label individual trees. Returns a new dimension ``TreeID`` that
-    indicates the tree that a point belongs to. ``TreeID`` starts at 1, wich
+    indicates the tree that a point belongs to. ``TreeID`` starts at 1, with
     non-tree points given a ``TreeID`` of 0. [Li2012]_.
 
 :ref:`filters.lloydkmeans`
@@ -191,6 +195,7 @@ Pointwise Features
    filters.radialdensity
    filters.reciprocity
    filters.zsmooth
+   filters.griddecimation
 
 :ref:`filters.approximatecoplanar`
     Estimate pointwise planarity, based on k-nearest neighbors. Returns a new
@@ -237,6 +242,9 @@ Pointwise Features
 
 :ref:`filters.zsmooth`
     Compute a smoothed 'Z' value based on the 'Z' value of neighboring points.
+
+:ref:`filters.griddecimation`
+    Assign values for one point (the highest or lowest) per cell of a 2d regular grid.
 
 Assignment
 ..........
@@ -336,6 +344,9 @@ Predefined
    filters.projpipeline
    filters.reprojection
    filters.transformation
+   filters.straighten
+   filters.georeference
+   filters.h3
 
 :ref:`filters.projpipeline`
     Apply coordinates operation on point triplets, based on PROJ pipeline string,
@@ -347,6 +358,15 @@ Predefined
 :ref:`filters.transformation`
     Transform each point using a 4x4 transformation matrix.
 
+
+:ref:`filters.straighten`
+    Transforms each in a new parametric coordinate system along a given poyline.
+
+:ref:`filters.georeference`
+    Georeference point cloud.
+
+:ref:`filters.h3`
+    Compute H3 index values for the Longitude/Latitude of the point cloud
 
 Cull
 ----

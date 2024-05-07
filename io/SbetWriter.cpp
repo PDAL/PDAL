@@ -56,14 +56,14 @@ std::string SbetWriter::getName() const { return s_info.name; }
 
 void SbetWriter::addArgs(ProgramArgs& args)
 {
-    args.add("filename", "Output filename", m_filename).setPositional();
-    args.add("angles_are_degrees", "Angles coming into the writer are in degrees", m_anglesAreDegrees, true);
+    args.add("angles_are_degrees", "Angles coming into the writer are in degrees",
+        m_anglesAreDegrees, true);
 }
 
 
 void SbetWriter::ready(PointTableRef)
 {
-    m_stream.reset(new OLeStream(m_filename));
+    m_stream.reset(new OLeStream(filename()));
 }
 
 
@@ -91,7 +91,7 @@ void SbetWriter::write(const PointViewPtr view)
 
 void SbetWriter::done(PointTableRef table)
 {
-    getMetadata().addList("filename", m_filename);
+    getMetadata().addList("filename", filename());
 }
 
 } // namespace pdal

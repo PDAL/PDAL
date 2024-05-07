@@ -40,7 +40,7 @@ placeholder character is replaced with an X/Y index of the tile as a part
 of a cartesian system.  For example, if the output filename is specified as
 ``out#.las``, the tile containing the origin will be named ``out0_0.las``.
 The tile to its right will be named ``out1_0.las``.  The tile above it
-will be named ``out0_1.las``.  The command does not create directories -- 
+will be named ``out0_1.las``.  The command does not create directories --
 create any desired directories before running.
 
 If an origin is not supplied with as argument, the first point read is
@@ -73,5 +73,5 @@ a set of text files in the current directory.
 
 --------------------------------------------------------------------------------
 
-.. note:: Tile does not wotk with nor-streamable formats, for example, copc. 
+.. note:: Tile does not work with non-streamable formats, for example, :ref:`writers.copc`.
 

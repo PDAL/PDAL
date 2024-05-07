@@ -26,23 +26,15 @@ jobs:
         type: ['floating','fixed']
     env:
       BUILD_TYPE: ${{ matrix.type }}
-      CACHE_NUMBER: 0
     steps:
-    - uses: actions/checkout@v2
-    - name: Cache Conda Environment
-      uses: actions/cache@v2
+    - uses: actions/checkout@v4
+    - uses: mamba-org/setup-micromamba@v1
       with:
-        path: ~/conda_pkgs_dir
-        key: ${{ runner.os }}-${{ steps.get-date.outputs.today }}-conda-${{ env.CACHE_NUMBER }}
-    - uses: conda-incubator/setup-miniconda@v2
-      with:
-        miniforge-variant: Mambaforge
-        miniforge-version: latest
+        init-shell: bash
         environment-file: scripts/ci/environment.yml
-        python-version: "3.10"
-        activate-environment: "pdal-build"
-        use-mamba: true
-        auto-update-conda: true
+        environment-name: "pdal-build"
+        cache-environment: true
+        cache-downloads: true
 
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1.2
@@ -65,12 +57,16 @@ jobs:
 
     - name: Test
       run: |
-          source ../scripts/ci/linux/test.sh --rerun-failed --output-on-failure
+          source ../scripts/ci/linux/test.sh
       working-directory: ./build
 
     - name: Examples
       run: |
           source ./scripts/ci/linux/examples.sh
+
+    - name: Standalone Plugins
+      run: |
+          source ./scripts/ci/linux/standalone.sh
 
     - name: Install German locale
       env:
@@ -82,9 +78,8 @@ jobs:
       env:
         TEST_SET_LOCALE: de_DE.UTF-8
       run: |
-          # Exclude 4 tiledb io tests that fail due to TileDB library implementation
+          # Exclude 5 tiledb io tests that fail due to TileDB library implementation
           # and 2 e57 io tests for the same reason.
           # please, remove the exception rule here when fixed
-          source ../scripts/ci/linux/test.sh -E 'pdal_io_tiledb_(time_writer|time_reader|writer|reader)_test|pdal_io_e57_(write|read)_test|pdal_io_stac_reader_test'
+          source ../scripts/ci/linux/test.sh -E 'pdal_io_tiledb_(time_writer|time_reader|writer|reader|bit_fields)_test|pdal_io_e57_(write|read)_test|pdal_io_stac_reader_test'
       working-directory: ./build
-

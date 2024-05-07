@@ -47,17 +47,6 @@ class GDALGrid;
 
 class PDAL_DLL GDALWriter : public FlexWriter, public Streamable
 {
-    struct Cell
-    {
-        long x;
-        long y;
-    };
-    struct Position
-    {
-        double x;
-        double y;
-    };
-
 public:
     std::string getName() const;
 
@@ -69,8 +58,7 @@ private:
     virtual void initialize();
     virtual void prepared(PointTableRef table);
     virtual void readyTable(PointTableRef table);
-    virtual void readyFile(const std::string& filename,
-        const SpatialReference& srs);
+    virtual void readyFile(const std::string& filename, const SpatialReference& srs);
     virtual void writeView(const PointViewPtr view);
     virtual bool processOne(PointRef& point);
     virtual void doneFile();

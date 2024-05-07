@@ -7,14 +7,8 @@ namespace expr
 
 bool BaseParser::checkEnd()
 {
-    // If we're at the end, we should have exhausted all tokens.
-    Token tok = m_lexer.get();
-    if (tok != TokenType::Eof)
-    {
-        m_error = "Found '" + tok.sval() + "' after valid expression.";
-        return false;
-    }
-    return true;
+    Token tok = peekToken();
+    return std::find(m_endTokens.begin(), m_endTokens.end(), tok) != m_endTokens.end();
 }
 
 Token BaseParser::peekToken()

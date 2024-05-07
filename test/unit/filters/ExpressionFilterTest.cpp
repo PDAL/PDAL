@@ -417,3 +417,45 @@ TEST(ExpressionFilterTest, nan)
     EXPECT_EQ(1u, viewSet.size());
     EXPECT_EQ(0u, view->size());
 }
+
+TEST(ExpressionFilterTest, multipleExpressions)
+{
+    BOX3D srcBounds(0.0, 1.0, 1.0, 0.0, 10.0, 10.0);
+
+    Options ops;
+    ops.add("bounds", srcBounds);
+    ops.add("mode", "ramp");
+    ops.add("count", 10);
+
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    Options rangeOps;
+    rangeOps.add("expression", "Y >= 4.0");
+    rangeOps.add("expression", "Y <= 6.0");
+    rangeOps.add("expression", "Z >= 4.0");
+    rangeOps.add("expression", "Z <= 6.0");
+
+    ExpressionFilter filter;
+    filter.setOptions(rangeOps);
+    filter.setInput(reader);
+
+    PointTable table;
+    filter.prepare(table);
+    PointViewSet viewSet = filter.execute(table);
+    PointViewPtr view = *viewSet.begin();
+
+    EXPECT_EQ(4u, viewSet.size());
+
+    static int total_cnt = 0;
+    std::vector<PointViewPtr> views;
+    for (auto v : viewSet)
+    {
+        views.push_back(v);
+    }
+
+    EXPECT_EQ(7u, views[0]->size());
+    EXPECT_EQ(6u, views[1]->size());
+    EXPECT_EQ(7u, views[2]->size());
+    EXPECT_EQ(6u, views[3]->size());
+}

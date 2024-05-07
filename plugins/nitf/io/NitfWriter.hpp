@@ -47,6 +47,9 @@ class PDAL_DLL NitfWriter : public LasWriter
 {
 public:
     NitfWriter();
+    NitfWriter& operator=(const NitfWriter&) = delete;
+    NitfWriter(const NitfWriter&) = delete;
+
     std::string getName() const;
 
 private:
@@ -55,14 +58,10 @@ private:
     BOX3D m_bounds;
 
     virtual void addArgs(ProgramArgs& args);
-    virtual void readyFile(const std::string& filename,
-        const SpatialReference& srs);
+    virtual void readyFile(const std::string& filename, const SpatialReference& srs);
     virtual void doneFile();
     virtual void writeView(const PointViewPtr view);
     BOX3D reprojectBoxToDD(const SpatialReference& reference, const BOX3D& box);
-
-    NitfWriter& operator=(const NitfWriter&); // not implemented
-    NitfWriter(const NitfWriter&); // not implemented
 };
 
 } // namespace pdal

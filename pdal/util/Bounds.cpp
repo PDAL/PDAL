@@ -252,17 +252,6 @@ bool discardSpacesBefore(std::istringstream& ss, char nextChar)
     return Utils::eatcharacter(ss, nextChar);
 }
 
-std::string::size_type countRemaining(std::istringstream& ss)
-{
-    std::string::size_type count = 0;
-    while (!ss.eof())
-    {
-        ss.get();
-        count++;
-    }
-    return count;
-}
-
 template <typename T>
 void parsePair(std::istringstream& ss, double& low, double& high)
 {
@@ -304,7 +293,7 @@ void BOX2D::parse(const std::string& s, std::string::size_type& pos)
         isJson = true;
         isArray = b.is_array();
         isObject = b.is_object();
-    } catch (NL::json::parse_error& e)
+    } catch (std::exception& e)
     {
         jsonParseMessage = e.what();
         isJson = false;
@@ -378,7 +367,7 @@ void BOX2D::parse(const std::string& s, std::string::size_type& pos)
         throw error("No closing ')'.");
 
     Utils::eatwhitespace(ss);
-    pos = s.size() - countRemaining(ss);
+    pos = ss.eof() ? s.size() : (std::string::size_type)ss.tellg();
 }
 
 
@@ -396,7 +385,7 @@ void BOX3D::parse(const std::string& s, std::string::size_type& pos)
         isJson = true;
         isArray = b.is_array();
         isObject = b.is_object();
-    } catch (NL::json::parse_error& e)
+    } catch (std::exception& e)
     {
         jsonParseMessage = e.what();
         isJson = false;
@@ -486,7 +475,7 @@ void BOX3D::parse(const std::string& s, std::string::size_type& pos)
         throw error("No closing ')'.");
 
     Utils::eatwhitespace(ss);
-    pos = s.size() - countRemaining(ss);
+    pos = ss.eof() ? s.size() : (std::string::size_type)ss.tellg();
 }
 
 
@@ -511,9 +500,26 @@ std::istream& operator>>(std::istream& in, BOX3D& box)
     std::getline(in, s);
     std::string::size_type pos(0);
 
-    box.parse(s, pos);
-    if (pos != s.size())
-        throw BOX3D::error("Invalid characters following valid 3d-bounds.");
+    try
+    {
+        BOX3D box3d;
+        box.parse(s, pos);
+    }
+    catch (const BOX3D::error&)
+    {
+        try
+        {
+            pos = 0;
+            BOX2D box2d;
+            box2d.parse(s, pos);
+            box = BOX3D(box2d);
+        }
+        catch (const BOX2D::error& err)
+        {
+            throw BOX3D::error(err.what());
+        }
+    }
+
     return in;
 }
 

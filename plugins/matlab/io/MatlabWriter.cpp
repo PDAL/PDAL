@@ -52,7 +52,6 @@ std::string MatlabWriter::getName() const { return s_info.name; }
 
 void MatlabWriter::addArgs(ProgramArgs& args)
 {
-    args.add("filename", "Output filename", m_filename).setPositional();
     args.add("output_dims", "Output dimensions", m_outputDims);
     args.add("struct", "Matlab struct name", m_structName, "PDAL");
 }
@@ -81,9 +80,9 @@ void MatlabWriter::prepared(PointTableRef table)
 
 void MatlabWriter::ready(PointTableRef table)
 {
-    m_matfile = matOpen(m_filename.c_str(), "w");
+    m_matfile = matOpen(filename().c_str(), "w");
     if (!m_matfile)
-        throwError("Could not open file '" + m_filename + "' for writing.");
+        throwError("Could not open file '" + filename() + "' for writing.");
 
     m_tableMetadata = table.metadata();
 }
@@ -94,7 +93,7 @@ void MatlabWriter::write(const PointViewPtr view)
 
     mxArray* data = mlang::Script::setMatlabStruct(view, m_dims, "", m_tableMetadata, log());
     if (matPutVariable(m_matfile, m_structName.c_str(), data))
-        throwError("Could not write points to file '" + m_filename + "'.");
+        throwError("Could not write points to file '" + filename() + "'.");
 
     mxDestroyArray(data);
 }
@@ -104,7 +103,7 @@ void MatlabWriter::done(PointTableRef table)
 {
     if (matClose(m_matfile))
         throwError("Unsuccessful write.");
-    getMetadata().addList("filename", m_filename);
+    getMetadata().addList("filename", filename());
 }
 
-}
+} // namespace pdal

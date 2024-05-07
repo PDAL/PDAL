@@ -20,8 +20,8 @@ Example
             "type": "readers.stac",
             "filename": "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/catalog.json",
             "reader_args": [{"type": "readers.ept", "resolution": 100}],
-            "item_ids": ["MD_GoldenBeach_2012"],
-            "catalog_ids": ["3dep"],
+            "items": ["MD_GoldenBeach_2012"],
+            "catalogs": ["3dep"],
             "properties": { "pc:type": ["lidar", "sonar"], "pc:encoding": "ept" },
             "asset_name": "ept.json",
             "date_ranges": [
@@ -57,14 +57,20 @@ bounds
     Form: ``([minx,maxx],[miny,maxy],[minz,maxz])``
     Example: ``--readers.stac.bounds '([-79.0,-74.0],[38.0,39.0])'``
 
-item_ids
+items
     List of `Regular Expression`_ strings to prune STAC Item IDs by.
-    Example: ``--readers.stac.item_ids '["MD_GoldenBeach_2012", "USGS_LPC\\w{0,}"]'``
+    Example: ``--readers.stac.items '["MD_GoldenBeach_2012", "USGS_LPC\\w{0,}"]'``
 
-catalog_ids
+catalogs
     List of `Regular Expression`_ strings to prune STAC Catalog IDs by.
     Root catalog IDs are always included in the list.
-    Example: ``--readers.stac.catalog_ids '["3dep-\*", "USGS"]'``
+    Example: ``--readers.stac.catalogs '["3dep-test", "USGS"]'``
+
+collections
+    List of `Regular Expression`_ strings to prune STAC Collection IDs by.
+    This will filter by the `collections` key in a STAC Item and the `id` key
+    of the STAC Collection.
+    Example: ``--readers.stac.collections '["3dep-test", "USGS"]'``
 
 validate_schema
     Boolean value determining if the reader should validate the supplied STAC as
@@ -94,8 +100,91 @@ reader_args
 catalog_schema_url
     URL of JSON schema you'd like to use for JSON schema validation of STAC Catalogs.
 
+collection_schema_url
+    URL of JSON schema you'd like to use for JSON schema validation of STAC Collections.
+
 feature_schema_url
     URL of JSON schema you'd like to use for JSON schema validation of STAC Items/Features.
+
+Metadata
+--------------------------------------------------------------------------------
+Metadata outputs will include `ids` and `item_ids` for representings STAC Feature Ids,
+as well as `catalog_ids` and `collection_ids` representing STAC Catalogs and Collections,
+respectively.
+
+.. code-block:: bash
+
+    pdal info --summary --driver readers.stac \
+    --readers.stac.asset_names 'ept.json' \
+    --readers.stac.asset_names 'data' \
+    ${PDAL_DIR}/test/data/stac/local_catalog/catalog.json
+
+.. code-block:: json
+
+    {
+        "file_size": 1177,
+        "filename": "/PDAL_DIR/test/data/stac/local_catalog/catalog.json",
+        "now": "2023-08-07T15:48:59-0500",
+        "pdal_version": "2.6.0 (git-version: 54be24)",
+        "reader": "readers.stac",
+        "summary":
+        {
+            "bounds":
+            {
+                "maxx": 637179.22,
+                "maxy": 5740737,
+                "maxz": 1069,
+                "minx": -10543360,
+                "miny": 848935.2,
+                "minz": -22
+            },
+            "dimensions": "ClassFlags, Classification, EdgeOfFlightLine, GpsTime, Intensity, NumberOfReturns, PointSourceId, ReturnNumber, ScanAngleRank, ScanChannel, ScanDirectionFlag, UserData, X, Y, Z, OriginId, Red, Green, Blue",
+            "metadata":
+            {
+                "catalog_ids":
+                [
+                    "3dep"
+                ],
+                "collection_ids":
+                [
+                    "usgs-test"
+                ],
+                "ids":
+                [
+                    "IA_SouthCentral_1_2020",
+                    "MI_Charlevoix_Islands_TL_2018",
+                    "MD_GoldenBeach_2012",
+                    "Autzen Trim"
+                ],
+                "item_ids":
+                [
+                    "IA_SouthCentral_1_2020",
+                    "MI_Charlevoix_Islands_TL_2018",
+                    "MD_GoldenBeach_2012",
+                    "Autzen Trim"
+                ]
+            },
+            "num_points": 44851411750
+        }
+    }
+
+Curl Timeouts
+--------------------------------------------------------------------------------
+STAC reader, and PDAL as a whole, rely on curl for external requests. The curl
+requests default to a timeout of 5s. If your requests are failing, it could be
+because the timeout is too short. You can set `CURL_TIMEOUT` in your environment
+to get around this.
+
+To debug your requests to make sure that the timeout is the problem, set `VERBOSE=1`
+in your environment before running your PDAL task.
+
+.. code-block:: bash
+
+    VERBOSE=1 CURL_TIMEOUT=30 \
+        pdal info --summary --driver readers.stac \
+        --readers.stac.asset_names 'ept.json' \
+        --readers.stac.asset_names 'data' \
+        ${PDAL_DIR}/test/data/stac/local_catalog/catalog.json
 
 
 .. _Spatio Temporal Access Catalog (STAC): https://stacspec.org/en

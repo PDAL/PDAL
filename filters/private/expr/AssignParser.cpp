@@ -28,7 +28,13 @@ bool AssignParser::assignment(AssignStatement& expr)
         return false;
     }
 
-    MathParser parser(lexer());
+    static const std::vector<Token> endTokens
+    {
+        Token(TokenType::Eof),
+        Token(TokenType::Identifier, "WHERE")
+    };
+
+    MathParser parser(lexer(), endTokens);
     if (!parser.expression(expr.valueExpr()))
     {
         setError(parser.error());
@@ -46,17 +52,19 @@ bool AssignParser::where(AssignStatement& expr)
     if (match(TokenType::Identifier))
     {
         std::string ident = Utils::toupper(curToken().sval());
-        if (ident != "WHERE")
+        if (ident == "WHERE")
         {
-            setError("Expected keyword 'WHERE' to precede condition assignment.");
-            return false;
+            ConditionalParser parser(lexer());
+            bool status = parser.expression(expr.conditionalExpr());
+            if (!status)
+                setError(parser.error());
+            return status;
         }
     }
-    ConditionalParser parser(lexer());
-    bool status = parser.expression(expr.conditionalExpr());
-    if (!status)
-        setError(parser.error());
-    return status;
+
+    setError("Expected keyword 'WHERE' to precede condition assignment. Found '" +
+        peekToken().sval() + "' instead.");
+    return false;
 }
 
 } // namespace expr

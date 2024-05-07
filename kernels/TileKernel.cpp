@@ -64,8 +64,7 @@ std::string TileKernel::getName() const
 void TileKernel::addSwitches(ProgramArgs& args)
 {
     args.add("input,i", "Input file/path name", m_inputFile).setPositional();
-    args.add("output,o", "Output filename template",
-        m_outputFile).setPositional();
+    args.add("output,o", "Output filename template", m_outputFile).setPositional();
     args.add("length", "Edge length for cells", m_length, 1000.0);
     args.add("origin_x", "Origin in X axis for cells", m_xOrigin,
         std::numeric_limits<double>::quiet_NaN());
@@ -80,6 +79,7 @@ void TileKernel::addSwitches(ProgramArgs& args)
 
 void TileKernel::validateSwitches(ProgramArgs& args)
 {
+    m_outputFile = Writer::replaceTags(m_outputFile);
     m_hashPos = Writer::handleFilenameTemplate(m_outputFile);
     if (m_hashPos == std::string::npos)
         throw pdal_error("Output filename must contain a single '#' "
@@ -231,6 +231,7 @@ void TileKernel::process(const Readers& readers)
         }
 
         idx++;
+
         while (!finished)
         {
             // Read subsequent points.
@@ -238,11 +239,13 @@ void TileKernel::process(const Readers& readers)
             {
                 point.setPointId(idx);
                 finished = !StreamableWrapper::processOne(r, point);
-                idx++;
-                if (idx == m_table.capacity() || finished)
+                if (finished || idx == m_table.capacity() - 1)
                     break;
+                idx++;
             }
-            PointId last = idx - 1;
+
+            // "end" points just beyond the last valid point ID
+            PointId end = finished ? idx : m_table.capacity();
 
             SpatialReference srs = r.getSpatialReference();
             if (!srs.empty())
@@ -250,7 +253,7 @@ void TileKernel::process(const Readers& readers)
             // Reproject if necessary.
             if (m_repro)
             {
-                for (idx = 0; idx < last; ++idx)
+                for (idx = 0; idx < end; ++idx)
                 {
                     point.setPointId(idx);
                     if (!StreamableWrapper::processOne(*m_repro, point))
@@ -262,14 +265,13 @@ void TileKernel::process(const Readers& readers)
             }
 
             // Split and write.
-            for (idx = 0; idx < last; ++idx)
+            for (idx = 0; idx < end; ++idx)
             {
                 if (skips[idx])
                     continue;
 
                 point.setPointId(idx);
                 m_splitter.processPoint(point, adder);
-
             }
             for (size_t i = 0; i < skips.size(); ++i)
                 skips[i] = false;
@@ -303,8 +305,8 @@ void TileKernel::adder(PointRef& point, int xpos, int ypos)
                 m_outputFile + "'.");
         sw = dynamic_cast<Streamable *>(w);
         if (!sw)
-            throw pdal_error("Driver '" + w->getName() + "' for input file '" +
-                m_outputFile + "' is not streamable.");  
+            throw pdal_error("Driver '" + w->getName() + "' for output file '" +
+                m_outputFile + "' is not streamable.");
         m_writers[loc] = sw;
 
         sw->prepare(m_table);

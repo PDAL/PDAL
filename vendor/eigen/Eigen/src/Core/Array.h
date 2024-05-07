@@ -117,7 +117,7 @@ class Array
     {
       return Base::_set(other);
     }
-    
+
     /** Default constructor.
       *
       * For fixed-size matrices, does nothing.
@@ -157,7 +157,7 @@ class Array
     EIGEN_DEVICE_FUNC
     Array& operator=(Array&& other) EIGEN_NOEXCEPT_IF(std::is_nothrow_move_assignable<Scalar>::value)
     {
-      other.swap(*this);
+      Base::operator=(std::move(other));
       return *this;
     }
 #endif
@@ -177,24 +177,24 @@ class Array
       : Base(a0, a1, a2, a3, args...) {}
 
     /** \brief Constructs an array and initializes it from the coefficients given as initializer-lists grouped by row. \cpp11
-      * 
+      *
       * In the general case, the constructor takes a list of rows, each row being represented as a list of coefficients:
-      * 
+      *
       * Example: \include Array_initializer_list_23_cxx11.cpp
       * Output: \verbinclude Array_initializer_list_23_cxx11.out
-      * 
+      *
       * Each of the inner initializer lists must contain the exact same number of elements, otherwise an assertion is triggered.
-      * 
+      *
       * In the case of a compile-time column 1D array, implicit transposition from a single row is allowed.
       * Therefore <code> Array<int,Dynamic,1>{{1,2,3,4,5}}</code> is legal and the more verbose syntax
       * <code>Array<int,Dynamic,1>{{1},{2},{3},{4},{5}}</code> can be avoided:
-      * 
+      *
       * Example: \include Array_initializer_list_vector_cxx11.cpp
       * Output: \verbinclude Array_initializer_list_vector_cxx11.out
-      * 
+      *
       * In the case of fixed-sized arrays, the initializer list sizes must exactly match the array sizes,
       * and implicit transposition is allowed for compile-time 1D arrays only.
-      * 
+      *
       * \sa  Array(const Scalar& a0, const Scalar& a1, const Scalar& a2, const Scalar& a3, const ArgTypes&... args)
       */
     EIGEN_DEVICE_FUNC
@@ -241,7 +241,7 @@ class Array
     /** constructs an initialized 2D vector with given coefficients
       * \sa Array(const Scalar& a0, const Scalar& a1, const Scalar& a2, const Scalar& a3, const ArgTypes&... args) */
     Array(const Scalar& val0, const Scalar& val1);
-    #endif  // end EIGEN_PARSED_BY_DOXYGEN 
+    #endif  // end EIGEN_PARSED_BY_DOXYGEN
 
     /** constructs an initialized 3D vector with given coefficients
       * \sa Array(const Scalar& a0, const Scalar& a1, const Scalar& a2, const Scalar& a3, const ArgTypes&... args)
@@ -288,8 +288,10 @@ class Array
       : Base(other.derived())
     { }
 
-    EIGEN_DEVICE_FUNC inline Index innerStride() const { return 1; }
-    EIGEN_DEVICE_FUNC inline Index outerStride() const { return this->innerSize(); }
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
+    inline Index innerStride() const EIGEN_NOEXCEPT{ return 1; }
+    EIGEN_DEVICE_FUNC EIGEN_CONSTEXPR
+    inline Index outerStride() const EIGEN_NOEXCEPT { return this->innerSize(); }
 
     #ifdef EIGEN_ARRAY_PLUGIN
     #include EIGEN_ARRAY_PLUGIN
@@ -322,7 +324,7 @@ class Array
   * template parameter, i.e.:
   *   - `ArrayRowsCols<Type>` where `Rows` and `Cols` can be \c 2,\c 3,\c 4, or \c X for fixed or dynamic size.
   *   - `ArraySize<Type>` where `Size` can be \c 2,\c 3,\c 4 or \c X for fixed or dynamic size 1D arrays.
-  * 
+  *
   * \sa class Array
   */
 
@@ -367,7 +369,7 @@ using Array##SizeSuffix##SizeSuffix = Array<Type, Size, Size>;    \
 /** \ingroup arraytypedefs */                                     \
 /** \brief \cpp11 */                                              \
 template <typename Type>                                          \
-using Array##SizeSuffix = Array<Type, Size, 1>; 
+using Array##SizeSuffix = Array<Type, Size, 1>;
 
 #define EIGEN_MAKE_ARRAY_FIXED_TYPEDEFS(Size)                     \
 /** \ingroup arraytypedefs */                                     \
@@ -391,7 +393,7 @@ EIGEN_MAKE_ARRAY_FIXED_TYPEDEFS(4)
 #undef EIGEN_MAKE_ARRAY_FIXED_TYPEDEFS
 
 #endif // EIGEN_HAS_CXX11
-  
+
 #define EIGEN_USING_ARRAY_TYPEDEFS_FOR_TYPE_AND_SIZE(TypeSuffix, SizeSuffix) \
 using Eigen::Matrix##SizeSuffix##TypeSuffix; \
 using Eigen::Vector##SizeSuffix##TypeSuffix; \

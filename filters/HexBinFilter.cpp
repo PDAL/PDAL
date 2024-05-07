@@ -36,6 +36,8 @@
 
 #include "private/hexer/HexGrid.hpp"
 #include "private/hexer/HexIter.hpp"
+
+#include "../kernels/private/density/OGR.hpp"
 #include <pdal/Polygon.hpp>
 
 using namespace hexer;
@@ -85,6 +87,8 @@ void HexBin::addArgs(ProgramArgs& args)
     args.add("smooth", "Smooth boundary output", m_doSmooth, true);
     args.add("preserve_topology", "Preserve topology when smoothing",
         m_preserve_topology, true);
+    args.add("density", "Emit a density tessellation GeoJSON FeatureCollection in metadata",
+        m_DensityOutput, "");
 }
 
 
@@ -188,6 +192,12 @@ void HexBin::done(PointTableRef table)
         }
         m_metadata.add("hex_boundary", polygon.str(),
             "Boundary MULTIPOLYGON of domain");
+    }
+
+    if (m_DensityOutput.size())
+    {
+        OGR writer(m_DensityOutput, getSpatialReference().getWKT(), "GeoJSON", "hexbins");
+        writer.writeDensity(m_grid.get());
     }
 
     SpatialReference srs(table.anySpatialReference());

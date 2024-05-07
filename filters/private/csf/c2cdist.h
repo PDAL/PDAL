@@ -15,9 +15,7 @@
 // limitations under the License.
 // ======================================================================================
 
-#ifndef _C2CDIST_H_
-#define _C2CDIST_H_
-
+#pragma once
 
 #include "Cloth.h"
 #include "point_cloud.h"
@@ -39,8 +37,5 @@ public:
 
 private:
 
-    double class_treshold; //
+    double class_treshold;
 };
-
-
-#endif // ifndef _C2CDIST_H_

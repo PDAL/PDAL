@@ -3,9 +3,9 @@
 #
 # (based originally on the libLAS files copyright Mateusz Loskot)
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.13)
 
-project(PDAL VERSION 2.6.0 LANGUAGES CXX C)
+project(PDAL VERSION 2.7.0 LANGUAGES CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
@@ -28,62 +28,44 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 
 #
 # Must be changed if there is an ABI change.  This builds the SONAME
-# that's embedded in the library itself.
-#
-set(PDAL_SOLIB_MAJOR 16)
-#
-# Change if there's a new release with no ABI change
-#
-set(PDAL_SOLIB_MINOR 0)
-#
-# Build number.  Increment for builds within minor versions.  Probably
-# always 0 for PDAL
-#
-set(PDAL_SOLIB_BUILD 0)
+# that's embedded in the library and any plugins.
+include(${ROOT_DIR}/cmake/libraries.cmake NO_POLICY_SCOPE)
 
-
-set(PDAL_API_VERSION ${PDAL_SOLIB_MAJOR})
-set(PDAL_BUILD_VERSION
-    "${PDAL_SOLIB_MAJOR}.${PDAL_SOLIB_MINOR}.${PDAL_SOLIB_BUILD}")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+#
 # Name of C++ library
 #
-# To facilitate one-library linking, we do special things for various platforms.
-#
-# On Linux we install a linker script that we call libpdalcpp.so and it
-# in turn links libpdal_base.so and libpdal_util.so
-#
-# On OSX we reexport the symbols from libpdal_util.dylib into libpdalcpp.dylib
-# See below for the rest of the magic.
-#
-if (APPLE OR WIN32)
-    set(PDAL_BASE_LIB_NAME pdalcpp)
-else()
-    set(PDAL_BASE_LIB_NAME pdal_base)
-endif()
 set(PDAL_LIB_NAME pdalcpp)
-set(PDAL_UTIL_LIB_NAME pdal_util)
+
 set(PDAL_KAZHDAN_LIB_NAME pdal_kazhdan)
+set(PDAL_LEPCC_LIB_NAME pdal_lepcc)
 set(PDAL_TEST_SUPPORT_OBJS pdal_test_support)
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 
-set(PDAL_OUTPUT_LIB_DIR "${PDAL_BINARY_DIR}/${PDAL_LIB_INSTALL_DIR}")
-set(PDAL_OUTPUT_BIN_DIR "${PDAL_BINARY_DIR}/${PDAL_BIN_INSTALL_DIR}")
+set(PDAL_OUTPUT_LIB_DIR "${PROJECT_BINARY_DIR}/lib")
+set(PDAL_OUTPUT_BIN_DIR "${PROJECT_BINARY_DIR}/bin")
+
+
+if (NOT CMAKE_LIBRARY_OUTPUT_DIRECTORY)
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
+endif()
+
+if (NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
+endif()
 
 # allow override of PDAL_PLUGIN_INSTALL_PATH path
 if (NOT PDAL_PLUGIN_INSTALL_PATH)
     if (WIN32)
-        set(PDAL_PLUGIN_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}/${PDAL_BIN_INSTALL_DIR}")
+        set(PDAL_PLUGIN_INSTALL_PATH "${CMAKE_INSTALL_BINDIR}" CACHE PATH "PDAL Plugin install location")
     else()
-        set(PDAL_PLUGIN_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}/${PDAL_LIB_INSTALL_DIR}")
+        set(PDAL_PLUGIN_INSTALL_PATH "${CMAKE_INSTALL_LIBDIR}" CACHE PATH "PDAL Plugin install location")
     endif()
 endif()
-file(MAKE_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
-file(MAKE_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
 
 include(${PDAL_CMAKE_DIR}/rpath.cmake)
 
@@ -94,20 +76,13 @@ set_directory_properties(PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
 
 if(WIN32)
   add_definitions("-DPDAL_DLL_EXPORT=1")
-  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CMAKE_BUILD_TYPE} "${PDAL_OUTPUT_LIB_DIR}")
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CMAKE_BUILD_TYPE} "${PDAL_OUTPUT_BIN_DIR}")
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CMAKE_BUILD_TYPE} "${PDAL_OUTPUT_LIB_DIR}" )
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CMAKE_BUILD_TYPE} "${PDAL_OUTPUT_BIN_DIR}" )
   # ---[ Windows requires DLLs (shared libraries) to be installed in
   # ---[ the same directory as executables
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CMAKE_BUILD_TYPE} "${PDAL_OUTPUT_BIN_DIR}")
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CMAKE_BUILD_TYPE} "${PDAL_OUTPUT_BIN_DIR}" )
 endif(WIN32)
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
-if(WIN32)
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
-else()
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
-endif()
 
 # Choose package components
 
@@ -123,6 +98,8 @@ set(PDAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 #  Dependencies.
 #------------------------------------------------------------------------------
 
+include(${PDAL_CMAKE_DIR}/backtrace.cmake)
+include(${PDAL_CMAKE_DIR}/proj.cmake)
 include(${PDAL_CMAKE_DIR}/gdal.cmake)
 include(${PDAL_CMAKE_DIR}/geotiff.cmake)  # Optional (not really)
 include(${PDAL_CMAKE_DIR}/threads.cmake)
@@ -134,10 +111,11 @@ include(${PDAL_CMAKE_DIR}/ctest.cmake)
 include(${PDAL_CMAKE_DIR}/libxml2.cmake)
 include(${PDAL_CMAKE_DIR}/dimension.cmake)
 include(${PDAL_CMAKE_DIR}/arbiter.cmake)
+include(${PDAL_CMAKE_DIR}/h3.cmake)
 include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
 include(${PDAL_CMAKE_DIR}/schema-validator.cmake)
 include(${PDAL_CMAKE_DIR}/lazperf.cmake)
-include(${PDAL_CMAKE_DIR}/openssl.cmake) # Optional
+include(${PDAL_CMAKE_DIR}/gcs.cmake) # Optional
 include(${PDAL_CMAKE_DIR}/utfcpp.cmake)
 
 #------------------------------------------------------------------------------
@@ -184,33 +162,24 @@ add_subdirectory(vendor/schema-validator)
 add_subdirectory(vendor/kazhdan)
 add_subdirectory(vendor/lazperf)
 add_subdirectory(vendor/utfcpp)
-add_subdirectory(pdal/util)
+add_subdirectory(vendor/lepcc)
+add_subdirectory(vendor/h3)
 add_subdirectory(tools)
 add_subdirectory(apps)
-#
-# On OSX we reexport the symbols in libpdal_util.dylib into libpdalcpp.dylib
-# so that users only need link libpdalcpp.
-#
-if (APPLE)
-    set(PDAL_REEXPORT "-Wl,-reexport_library,$<TARGET_FILE:${PDAL_UTIL_LIB_NAME}>")
-    #
-    # This allows the rpath reference for the reexported library (above) to
-    # be found.
-    #
-    set(PDAL_LIBDIR "-L$<TARGET_FILE_DIR:${PDAL_UTIL_LIB_NAME}>")
-endif()
 
 file(GLOB BASE_SRCS
     ${PDAL_FILTERS_DIR}/*.cpp
     ${PDAL_IO_DIR}/*.cpp
     ${PDAL_KERNELS_DIR}/*.cpp
     ${PDAL_SRC_DIR}/*.cpp
-    ${PDAL_SRC_DIR}/compression/*.cpp)
+    ${PDAL_SRC_DIR}/compression/*.cpp
+    ${PDAL_SRC_DIR}/util/*.cpp)
 file(GLOB_RECURSE PRIVATE_SRCS
     ${PDAL_FILTERS_DIR}/private/*.cpp
     ${PDAL_IO_DIR}/private/*.cpp
     ${PDAL_KERNELS_DIR}/private/*.cpp
-    ${PDAL_SRC_DIR}/private/*.cpp)
+    ${PDAL_SRC_DIR}/private/*.cpp
+    ${BACKTRACE_SOURCE})
 list(APPEND SRCS ${BASE_SRCS} ${PRIVATE_SRCS})
 
 #
@@ -242,71 +211,86 @@ if (NOT PDAL_HAVE_LZMA)
     list(REMOVE_ITEM SRCS ${LZMA_SRCS})
 endif()
 
-if (GDAL_VERSION VERSION_LESS 3.0.0)
-    file(GLOB PROJPIPELINE_FILTER_SRCS
-        ${PDAL_FILTERS_DIR}/ProjPipelineFilter.cpp)
-    list(REMOVE_ITEM SRCS ${PROJPIPELINE_FILTER_SRCS})
-endif()
-PDAL_ADD_LIBRARY(${PDAL_BASE_LIB_NAME} ${SRCS} ${RPLY_SRCS})
-
+PDAL_ADD_LIBRARY(${PDAL_LIB_NAME} ${SRCS})
+add_library(PDAL::PDAL ALIAS ${PDAL_LIB_NAME})
 #
 # Interface include directories allow downstream project to get the directory
 # without specification.
 #
-target_include_directories(${PDAL_BASE_LIB_NAME}
+target_include_directories(${PDAL_LIB_NAME}
+    SYSTEM BEFORE PRIVATE
+        ${PDAL_VENDOR_DIR}/eigen
+        ${PDAL_VENDOR_DIR}/kazhdan
+        ${PDAL_VENDOR_DIR}/h3/include
+)
+target_include_directories(${PDAL_LIB_NAME}
     PRIVATE
         ${ROOT_DIR}
         ${PROJECT_BINARY_DIR}/include
         ${PDAL_VENDOR_DIR}
-        ${PDAL_VENDOR_DIR}/eigen
         ${LIBXML2_INCLUDE_DIR}
         ${ZSTD_INCLUDE_DIRS}
         ${NLOHMANN_INCLUDE_DIR}
         ${UTFCPP_INCLUDE_DIR}
         ${GDAL_INCLUDE_DIR}
+        ${PROJ_INCLUDE_DIR}
 )
-target_link_libraries(${PDAL_BASE_LIB_NAME}
+
+target_link_libraries(${PDAL_LIB_NAME}
     PRIVATE
         ${CMAKE_THREAD_LIBS_INIT}
         ${CMAKE_DL_LIBS}
         ${GDAL_LIBRARY}
+        ${PROJ_LIBRARIES}
         ${GEOTIFF_LIBRARY}
         ${LIBXML2_LIBRARIES}
         ${ZLIB_LIBRARIES}
         ${LIBLZMA_LIBRARIES}
         ${ZSTD_LIBRARIES}
-        ${WINSOCK_LIBRARY}
         ${PDAL_REEXPORT}
-        ${PDAL_UTIL_LIB_NAME}
         ${PDAL_ARBITER_LIB_NAME}
+        ${PDAL_H3_LIB_NAME}
         ${JSON_SCHEMA_LIB_NAME}
         ${PDAL_KAZHDAN_LIB_NAME}
+        ${PDAL_LEPCC_LIB_NAME}
         ${PDAL_LAZPERF_LIB_NAME}
         ${UTFCPP_LIB_NAME}
+        ${BACKTRACE_LIBRARIES}
+       "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:-lstdc++fs>"
+    PUBLIC
+        ${WINSOCK_LIBRARY}
     INTERFACE
         ${PDAL_LIBDIR}
+        ${WINSOCK_LIBRARY}
 )
-set_target_properties(${PDAL_BASE_LIB_NAME} PROPERTIES
+
+#
+# Allow downstream cmake projects to find PDAL header files without
+# being explicit.
+#
+target_include_directories(${PDAL_LIB_NAME}
+    INTERFACE
+        $<INSTALL_INTERFACE:include>)
+
+target_compile_definitions(${PDAL_LIB_NAME}
+    PRIVATE
+    H3_PREFIX=PDALH3)
+
+if(WIN32)
+    target_compile_definitions(${PDAL_LIB_NAME}
+        PUBLIC
+            PDAL_DLL_EXPORT=1
+    )
+endif(WIN32)
+
+set_target_properties(${PDAL_LIB_NAME} PROPERTIES
     VERSION ${PDAL_BUILD_VERSION}
     SOVERSION ${PDAL_API_VERSION}
     CLEAN_DIRECT_OUTPUT 1)
 
-
-
 # shut off -Wpedantic selectively
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" )
-set_source_files_properties(filters/PoissonFilter.cpp PROPERTIES COMPILE_FLAGS -Wno-pedantic)
-endif()
-
-#
-# On Linux, we install a linker script as libpdalcpp.so.  That file
-# specifies linking in libpdal_base.so and libpdal_util.so.  This allows
-# users to link a single library, libpdalcpp
-#
-if (UNIX AND NOT APPLE)
-    set(LIBNAME ${CMAKE_SHARED_LIBRARY_PREFIX}${PDAL_LIB_NAME})
-    install(FILES ${LIBNAME} DESTINATION ${PDAL_LIB_INSTALL_DIR}
-        RENAME ${LIBNAME}${CMAKE_SHARED_LIBRARY_SUFFIX})
+    set_source_files_properties(filters/PoissonFilter.cpp PROPERTIES COMPILE_FLAGS "-Wno-pedantic -Wno-array-parameter")
 endif()
 
 #
@@ -327,9 +311,13 @@ if (NOT PDAL_HAVE_LZMA)
     set(LZMA_EXCLUDES PATTERN pdal/compression/Lzma* EXCLUDE)
 endif()
 
-install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
-    DESTINATION include
+install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal/
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pdal"
     FILES_MATCHING PATTERN "*.hpp"
+    PERMISSIONS
+        GROUP_EXECUTE WORLD_EXECUTE OWNER_EXECUTE
+        GROUP_READ WORLD_READ OWNER_READ
+        OWNER_WRITE
 #    PATTERN "pdal/private" EXCLUDE
 #    PATTERN "pdal/io/private" EXCLUDE
 #    PATTERN "pdal/pdal/private" EXCLUDE
@@ -340,27 +328,48 @@ install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
 #    ${LZMA_EXCLUDES}
 )
 
-install(DIRECTORY ${PDAL_KERNELS_DIR}
-    DESTINATION include/pdal
+install(DIRECTORY ${PDAL_KERNELS_DIR}/
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pdal/kernels"
     FILES_MATCHING PATTERN "*.hpp"
+    PERMISSIONS
+        GROUP_EXECUTE WORLD_EXECUTE OWNER_EXECUTE
+        GROUP_READ WORLD_READ OWNER_READ
+        OWNER_WRITE
 #    PATTERN "private" EXCLUDE
 )
-install(DIRECTORY ${PDAL_IO_DIR}
-    DESTINATION include/pdal
+install(DIRECTORY ${PDAL_IO_DIR}/
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pdal/io"
     FILES_MATCHING PATTERN "*.hpp"
+    PERMISSIONS
+        GROUP_EXECUTE WORLD_EXECUTE OWNER_EXECUTE
+        GROUP_READ WORLD_READ OWNER_READ
+        OWNER_WRITE
 #    PATTERN "private" EXCLUDE
 )
-install(DIRECTORY ${PDAL_FILTERS_DIR}
-    DESTINATION include/pdal
+install(DIRECTORY ${PDAL_FILTERS_DIR}/
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pdal/filters"
     FILES_MATCHING PATTERN "*.hpp"
+    PERMISSIONS
+        GROUP_EXECUTE WORLD_EXECUTE OWNER_EXECUTE
+        GROUP_READ WORLD_READ OWNER_READ
+        OWNER_WRITE
 #    PATTERN "private" EXCLUDE
 )
 
-install(FILES ${DIMENSION_OUTFILE} ${pdal_features_hpp}
-  DESTINATION include/pdal
+install(FILES ${DIMENSION_OUTFILE} ${pdal_features_hpp}/
+  DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pdal"
+    PERMISSIONS
+        GROUP_EXECUTE WORLD_EXECUTE OWNER_EXECUTE
+        GROUP_READ WORLD_READ OWNER_READ
+        OWNER_WRITE
 )
 install(FILES ${PDAL_CMAKE_DIR}/pluginmacros.cmake
-    DESTINATION ${PDAL_LIB_INSTALL_DIR}/cmake/PDAL)
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/PDAL
+    PERMISSIONS
+        GROUP_EXECUTE WORLD_EXECUTE OWNER_EXECUTE
+        GROUP_READ WORLD_READ OWNER_READ
+        OWNER_WRITE
+)
 
 #
 # CPACK
@@ -371,7 +380,7 @@ add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
 export(
     TARGETS
-        ${PDAL_BASE_LIB_NAME} ${PDAL_UTIL_LIB_NAME}
+        ${PDAL_LIB_NAME}
     FILE
         "${PDAL_BINARY_DIR}/PDALTargets.cmake")
 
@@ -379,35 +388,26 @@ install(
     EXPORT
         PDALTargets
     DESTINATION
-        "${PDAL_LIB_INSTALL_DIR}/cmake/PDAL")
+        "${CMAKE_INSTALL_LIBDIR}/cmake/PDAL")
 include(${PDAL_CMAKE_DIR}/config.cmake)
 
-#
-# Allow downstream cmake projects to find PDAL header files without
-# being explicit.
-#
-target_include_directories(${PDAL_BASE_LIB_NAME}
-    INTERFACE
-        $<INSTALL_INTERFACE:include>)
-target_include_directories(${PDAL_UTIL_LIB_NAME}
-    INTERFACE
-        $<INSTALL_INTERFACE:include>)
+
 
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)
 
 # TODO: move under scripts/bash-completion ?
 if (WITH_COMPLETION)
-    if (IS_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/bash-completion/completions)
+    if (IS_DIRECTORY ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATAROOTDIR}/bash-completion/completions)
         install(
             FILES
                 "${PROJECT_SOURCE_DIR}/scripts/bash-completion/pdal"
             DESTINATION
-                "${CMAKE_INSTALL_PREFIX}/share/bash-completion/completions")
+                "${CMAKE_INSTALL_DATAROOTDIR}/bash-completion/completions")
     elseif (IS_DIRECTORY /etc/bash_completion.d)
         install(
             FILES
                 "${PROJECT_SOURCE_DIR}/scripts/bash-completion/pdal"
             DESTINATION
-                "${CMAKE_INSTALL_PREFIX}/etc/bash_completion.d")
+                "${CMAKE_INSTALL_SYSCONFDIR}/bash_completion.d")
     endif()
 endif()

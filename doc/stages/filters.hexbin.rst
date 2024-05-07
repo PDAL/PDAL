@@ -101,6 +101,11 @@ As a convenience, the ``pdal info`` command will produce similar output:
 Options
 -------
 
+density
+  Output a density tessellation as a GeoJSON FeatureCollection to
+  the specified filename. If no file name is provided, nothing
+  is written.
+
 _`edge_size`
   If not set, the hexbin filter will estimate a hex size based on a sample of
   the data. If set, hexbin will use the provided size in constructing the

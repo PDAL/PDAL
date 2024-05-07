@@ -53,11 +53,17 @@ std::string DecimationFilter::getName() const { return s_info.name; }
 
 void DecimationFilter::addArgs(ProgramArgs& args)
 {
-    args.add("step", "Points to delete between each kept point", m_step, 1U);
+    args.add("step", "Points to delete between each kept point", m_step, 1.0);
     args.add("offset", "Index of first point to consider including in output",
         m_offset);
     args.add("limit", "Index of last point to consider including in output",
         m_limit, (std::numeric_limits<point_count_t>::max)());
+}
+
+void DecimationFilter::initialize()
+{
+    if (m_step < 1.0)
+        throwError("Option step must be >= 1.0");
 }
 
 PointViewSet DecimationFilter::run(PointViewPtr inView)
@@ -75,8 +81,11 @@ bool DecimationFilter::processOne(PointRef& point)
     bool keep = true;
     if (m_index < m_offset || m_index >= m_limit)
         keep = false;
-    else if ((m_index - m_offset) % m_step != 0)
+    else if (m_index != (m_offset + std::llround(m_kept * m_step)))
         keep = false;
+    else
+        m_kept++;
+
     m_index++;
     return keep;
 }
@@ -84,9 +93,12 @@ bool DecimationFilter::processOne(PointRef& point)
 
 void DecimationFilter::decimate(PointView& input, PointView& output)
 {
-    PointId last_idx = (std::min)(m_limit, input.size());
-    for (PointId idx = m_offset; idx < last_idx; idx += m_step)
-        output.appendPoint(input, idx);
+
+    uint64_t last_idx = (std::min)(m_limit, input.size());
+    uint64_t count = std::llround((last_idx - m_offset) / m_step);
+
+    for (uint64_t idx = 0; idx < count; ++idx)
+        output.appendPoint(input, m_offset + std::llround(idx * m_step));
 }
 
 } // pdal

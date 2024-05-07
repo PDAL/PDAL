@@ -86,17 +86,17 @@ Packet4f pcos<Packet4f>(const Packet4f& _x)
 template<> EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED
 Packet4f psqrt<Packet4f>(const Packet4f& _x)
 {
-  Packet4f half = pmul(_x, pset1<Packet4f>(.5f));
-  Packet4f denormal_mask = _mm_and_ps(
-      _mm_cmpge_ps(_x, _mm_setzero_ps()),
-      _mm_cmplt_ps(_x, pset1<Packet4f>((std::numeric_limits<float>::min)())));
+  Packet4f minus_half_x = pmul(_x, pset1<Packet4f>(-0.5f));
+  Packet4f denormal_mask = pandnot(
+      pcmp_lt(_x, pset1<Packet4f>((std::numeric_limits<float>::min)())),
+      pcmp_lt(_x, pzero(_x)));
 
   // Compute approximate reciprocal sqrt.
   Packet4f x = _mm_rsqrt_ps(_x);
   // Do a single step of Newton's iteration.
-  x = pmul(x, psub(pset1<Packet4f>(1.5f), pmul(half, pmul(x,x))));
+  x = pmul(x, pmadd(minus_half_x, pmul(x,x), pset1<Packet4f>(1.5f)));
   // Flush results for denormals to zero.
-  return _mm_andnot_ps(denormal_mask, pmul(_x,x));
+  return pandnot(pmul(_x,x), denormal_mask);
 }
 
 #else
@@ -150,7 +150,7 @@ Packet4f prsqrt<Packet4f>(const Packet4f& _x) {
 
 template<> EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED
 Packet4f prsqrt<Packet4f>(const Packet4f& x) {
-  // Unfortunately we can't use the much faster mm_rqsrt_ps since it only provides an approximation.
+  // Unfortunately we can't use the much faster mm_rsqrt_ps since it only provides an approximation.
   return _mm_div_ps(pset1<Packet4f>(1.0f), _mm_sqrt_ps(x));
 }
 
@@ -158,7 +158,6 @@ Packet4f prsqrt<Packet4f>(const Packet4f& x) {
 
 template<> EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED
 Packet2d prsqrt<Packet2d>(const Packet2d& x) {
-  // Unfortunately we can't use the much faster mm_rqsrt_pd since it only provides an approximation.
   return _mm_div_pd(pset1<Packet2d>(1.0), _mm_sqrt_pd(x));
 }
 

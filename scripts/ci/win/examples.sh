@@ -9,5 +9,5 @@ do
     cd $BASE/examples/$EXAMPLE
     mkdir -p _build || exit 1
     cd _build || exit 1
-    cmake -G "Ninja" .. -DPDAL_DIR=$CONDA_PREFIX/lib/cmake/PDAL && ninja
+    cmake -G "Ninja" .. -DCMAKE_BUILD_TYPE=Release -DPDAL_DIR=$CONDA_PREFIX/lib/cmake/PDAL && ninja
 done

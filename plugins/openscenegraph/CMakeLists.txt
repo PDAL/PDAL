@@ -1,3 +1,11 @@
+cmake_minimum_required(VERSION 3.13)
+
+if (STANDALONE)
+    project(pdal-openscenegraph)
+    include("${CMAKE_CURRENT_LIST_DIR}/../../cmake/standalone.cmake" )
+    find_package(PDAL REQUIRED)
+endif(STANDALONE)
+
 #
 # OpenScenGraph plugin CMake configuration
 #
@@ -15,6 +23,7 @@ PDAL_ADD_PLUGIN(reader_libname reader openscenegraph
         ${OPENTHREADS_LIBRARY}
         ${OSG_LIBRARY}
         ${OSGDB_LIBRARY}
+        ${PDAL_LIBRARIES}
     INCLUDES
         ${OSG_INCLUDE_DIRS}
 )

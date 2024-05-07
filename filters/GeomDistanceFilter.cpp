@@ -38,9 +38,12 @@
 #include <vector>
 
 #include <pdal/Geometry.hpp>
+#include <pdal/Polygon.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
+
+#include <nlohmann/json.hpp>
 
 namespace pdal
 {
@@ -61,6 +64,8 @@ struct GeomDistanceArgs
     std::string m_dimName;
     pdal::Geometry m_geometry;
     bool m_doRingMode;
+    NL::json m_ogr;
+
 };
 
 
@@ -89,13 +94,21 @@ void GeomDistanceFilter::addArgs(ProgramArgs& args)
             "Must be valid GeoJSON/WKT");
     args.add("dimension", "Dimension to create to place distance values", m_args->m_dimName, "distance");
     args.add("ring", "Compare edges (demote polygons to linearrings)", m_args->m_doRingMode, false);
+    args.add("ogr", "OGR filter geometries", m_args->m_ogr);
 
-}
+    if (!m_args->m_ogr.is_null())
+    {
+        std::vector<Polygon> polys = gdal::getPolygons(m_args->m_ogr);
+        if (!polys.size())
+            throwError("No polygons were selected from 'ogr'!");
+        m_args->m_geometry = polys[0];
+        // log()->get(LogLevel::Debug) << "First polygon selected from 'ogr' data" << std::endl;
 
-void GeomDistanceFilter::ready(PointTableRef table)
-{
+    }
+
     if (m_args->m_doRingMode)
         m_args->m_geometry = m_args->m_geometry.getRing();
+
 }
 
 
@@ -110,6 +123,16 @@ void GeomDistanceFilter::prepared(PointTableRef table)
 }
 
 
+void GeomDistanceFilter::filter(PointView& view)
+{
+    PointRef point = view.point(0);
+    for (PointId idx = 0; idx < view.size(); ++idx)
+    {
+        point.setPointId(idx);
+        processOne(point);
+    }
+}
+
 bool GeomDistanceFilter::processOne(PointRef& point)
 {
     static std::vector<double> data;
@@ -123,25 +146,6 @@ bool GeomDistanceFilter::processOne(PointRef& point)
     point.setField(m_args->m_dim, distance);
 
     return true;
-}
-
-PointViewSet GeomDistanceFilter::run(PointViewPtr inView)
-{
-    PointViewSet viewSet;
-    if (!inView->size())
-        return viewSet;
-
-    PointViewPtr outView = inView->makeNew();
-
-    for (PointId i = 0; i < inView->size(); ++i)
-    {
-        PointRef point = inView->point(i);
-        if (processOne(point))
-            outView->appendPoint(*inView, i);
-    }
-
-    viewSet.insert(outView);
-    return viewSet;
 }
 
 

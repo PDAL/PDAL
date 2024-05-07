@@ -73,7 +73,11 @@ namespace pdal
 {
 
 void SchemaStructuredErrorHandler
+#if LIBXML_VERSION >= 21200
+(void * /*userData*/, const xmlError *error)
+#else
 (void * /*userData*/, xmlErrorPtr error)
+#endif
 {
     std::ostringstream oss;
 
@@ -98,14 +102,22 @@ void SchemaStructuredErrorHandler
 }
 
 void SchemaParserStructuredErrorHandler
+#if LIBXML_VERSION >= 21200
+(void * /*userData*/, const xmlError *error)
+#else
 (void * /*userData*/, xmlErrorPtr error)
+#endif
 {
     std::cerr << "Schema parsing error: '" << error->message << "' " <<
         "on line " << error->line << std::endl;
 }
 
 void SchemaValidationStructuredErrorHandler
+#if LIBXML_VERSION >= 21200
+(void * /*userData*/, const xmlError *error)
+#else
 (void * /*userData*/, xmlErrorPtr error)
+#endif
 {
     std::cerr << "Schema validation error: '" << error->message << "' " <<
         "on line " << error->line << std::endl;

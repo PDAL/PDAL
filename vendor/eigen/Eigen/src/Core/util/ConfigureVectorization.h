@@ -2,6 +2,7 @@
 // for linear algebra.
 //
 // Copyright (C) 2008-2018 Gael Guennebaud <gael.guennebaud@inria.fr>
+// Copyright (C) 2020, Arm Limited and Contributors
 //
 // This Source Code Form is subject to the terms of the Mozilla
 // Public License v. 2.0. If a copy of the MPL was not distributed
@@ -384,34 +385,50 @@
     #undef vector
     #undef pixel
 
-  #elif (defined  __ARM_NEON) || (defined __ARM_NEON__)
+  #elif ((defined  __ARM_NEON) || (defined __ARM_NEON__)) && !(defined EIGEN_ARM64_USE_SVE)
 
     #define EIGEN_VECTORIZE
     #define EIGEN_VECTORIZE_NEON
     #include <arm_neon.h>
 
-  #elif (defined __s390x__ && defined __VEC__)
+  // We currently require SVE to be enabled explicitly via EIGEN_ARM64_USE_SVE and
+  // will not select the backend automatically
+  #elif (defined __ARM_FEATURE_SVE) && (defined EIGEN_ARM64_USE_SVE)
 
     #define EIGEN_VECTORIZE
-    #define EIGEN_VECTORIZE_ZVECTOR
-    #include <vecintrin.h>
+    #define EIGEN_VECTORIZE_SVE
+    #include <arm_sve.h>
 
-  #elif defined __mips_msa
+    // Since we depend on knowing SVE vector lengths at compile-time, we need
+    // to ensure a fixed lengths is set
+    #if defined __ARM_FEATURE_SVE_BITS
+      #define EIGEN_ARM64_SVE_VL __ARM_FEATURE_SVE_BITS
+    #else
+#error "Eigen requires a fixed SVE lector length but EIGEN_ARM64_SVE_VL is not set."
+#endif
 
-    // Limit MSA optimizations to little-endian CPUs for now.
-    // TODO: Perhaps, eventually support MSA optimizations on big-endian CPUs?
-    #if defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
-      #if defined(__LP64__)
-        #define EIGEN_MIPS_64
-      #else
-        #define EIGEN_MIPS_32
-      #endif
-      #define EIGEN_VECTORIZE
-      #define EIGEN_VECTORIZE_MSA
-      #include <msa.h>
-    #endif
+#elif (defined __s390x__ && defined __VEC__)
 
-  #endif
+#define EIGEN_VECTORIZE
+#define EIGEN_VECTORIZE_ZVECTOR
+#include <vecintrin.h>
+
+#elif defined __mips_msa
+
+// Limit MSA optimizations to little-endian CPUs for now.
+// TODO: Perhaps, eventually support MSA optimizations on big-endian CPUs?
+#if defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
+#if defined(__LP64__)
+#define EIGEN_MIPS_64
+#else
+#define EIGEN_MIPS_32
+#endif
+#define EIGEN_VECTORIZE
+#define EIGEN_VECTORIZE_MSA
+#include <msa.h>
+#endif
+
+#endif
 #endif
 
 // Following the Arm ACLE arm_neon.h should also include arm_fp16.h but not all
@@ -478,6 +495,8 @@ inline static const char *SimdInstructionSetsInUse(void) {
   return "VSX";
 #elif defined(EIGEN_VECTORIZE_NEON)
   return "ARM NEON";
+#elif defined(EIGEN_VECTORIZE_SVE)
+  return "ARM SVE";
 #elif defined(EIGEN_VECTORIZE_ZVECTOR)
   return "S390X ZVECTOR";
 #elif defined(EIGEN_VECTORIZE_MSA)

@@ -17,14 +17,27 @@ namespace internal {
 // implemented in GenericPacketMathFunctions.h
 // This is needed to workaround a circular dependency.
 
-template<typename Packet> EIGEN_STRONG_INLINE Packet
-pfrexp_float(const Packet& a, Packet& exponent);
+/***************************************************************************
+ * Some generic implementations to be used by implementors
+***************************************************************************/
 
-template<typename Packet> EIGEN_STRONG_INLINE Packet
-pfrexp_double(const Packet& a, Packet& exponent);
+/** Default implementation of pfrexp.
+  * It is expected to be called by implementers of template<> pfrexp.
+  */
+template<typename Packet> EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC
+Packet pfrexp_generic(const Packet& a, Packet& exponent);
 
-template<typename Packet> EIGEN_STRONG_INLINE Packet
-pldexp_float(Packet a, Packet exponent);
+// Extracts the biased exponent value from Packet p, and casts the results to
+// a floating-point Packet type. Used by pfrexp_generic. Override this if
+// there is no unpacket_traits<Packet>::integer_packet.
+template<typename Packet> EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC
+Packet pfrexp_generic_get_biased_exponent(const Packet& p);
+
+/** Default implementation of pldexp.
+  * It is expected to be called by implementers of template<> pldexp.
+  */
+template<typename Packet> EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC
+Packet pldexp_generic(const Packet& a, const Packet& exponent);
 
 /** \internal \returns log(x) for single precision float */
 template <typename Packet>

@@ -61,7 +61,7 @@ Utils::BacktraceEntries Utils::backtraceImpl()
         unw_get_reg(&cursor, UNW_REG_IP, &val);
         if (val == 0)
             break;
-        *(reinterpret_cast<unw_word_t *>(&entry.addr)) = val;
+        entry.addr = reinterpret_cast<void *>(val);
 
         unw_word_t offset;
         char sym[1000];

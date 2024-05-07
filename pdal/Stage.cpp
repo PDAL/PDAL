@@ -159,22 +159,60 @@ QuickInfo Stage::preview()
 
 void Stage::prepare(PointTableRef table)
 {
-    m_args.reset(new ProgramArgs);
-    for (Stage *prev : m_inputs)
-        prev->prepare(table);
-    handleOptions();
-    startLogging();
-    l_initialize(table);
-    initialize(table);
-    addDimensions(table.layout());
-    l_prepared(table);
-    prepared(table);
-    stopLogging();
+    // Linearize
+    std::stack<Stage *> pending;
+    std::vector<Stage *> stages;
+
+    pending.push(this);
+    while (pending.size())
+    {
+        Stage *s = pending.top();
+        pending.pop();
+        stages.push_back(s);
+        for (Stage *in : s->m_inputs)
+            pending.push(in);
+    }
+
+    // Initialize each stage.
+    for (auto it = stages.rbegin(); it != stages.rend(); it++)
+    {
+        Stage *s = *it;
+        s->m_args.reset(new ProgramArgs);
+        s->handleOptions();
+        s->startLogging();
+        s->l_initialize(table);
+        s->initialize(table);
+        s->addDimensions(table.layout());
+        s->stopLogging();
+    }
+
+    // Call prepared() now that all stages are initialized.
+    for (auto it = stages.rbegin(); it != stages.rend(); it++)
+    {
+        Stage *s = *it;
+        s->startLogging();
+        s->l_prepared(table);
+        s->prepared(table);
+        s->stopLogging();
+    }
 }
 
 
 PointViewSet Stage::execute(PointTableRef table)
 {
+    if (!table.layout()->finalized())
+    {
+        for (const auto& id : table.layout()->dims())
+        {
+            if (Dimension::isDeprecated(id))
+            {
+                log()->get(LogLevel::Warning) <<
+                    "Dimension " << Dimension::name(id) << " is deprecated" <<
+                    std::endl;
+            }
+        }
+    }
+
     table.finalize();
 
     // We store stage instances instead of stages because a stage may get
@@ -351,6 +389,7 @@ void Stage::setupLog()
 void Stage::l_addArgs(ProgramArgs& args)
 {
     args.add("user_data", "User JSON", m_userDataJSON);
+    args.addSynonym("user_data", "UserData");
     args.add("log", "Debug output filename", m_logname);
     // We never really bind anything to this variable.  We extract the option
     // before parsing the command line.  This entry allows a line in the

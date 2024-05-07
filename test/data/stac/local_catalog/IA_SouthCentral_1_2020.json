@@ -1,0 +1,494 @@
+{
+    "type": "Feature",
+    "stac_version": "1.0.0",
+    "id": "IA_SouthCentral_1_2020",
+    "properties": {
+        "description": "A USGS Lidar pointcloud in Entwine/EPT format",
+        "pc:count": 44835699695,
+        "pc:type": "lidar",
+        "pc:encoding": "ept",
+        "pc:schemas": [
+            {
+                "name": "X",
+                "offset": -10484205,
+                "scale": 0.001,
+                "size": 4,
+                "type": "signed"
+            },
+            {
+                "name": "Y",
+                "offset": 5018304,
+                "scale": 0.001,
+                "size": 4,
+                "type": "signed"
+            },
+            {
+                "name": "Z",
+                "offset": 489,
+                "scale": 0.001,
+                "size": 4,
+                "type": "signed"
+            },
+            {
+                "name": "Intensity",
+                "size": 2,
+                "type": "unsigned"
+            },
+            {
+                "name": "ReturnNumber",
+                "size": 1,
+                "type": "unsigned"
+            },
+            {
+                "name": "NumberOfReturns",
+                "size": 1,
+                "type": "unsigned"
+            },
+            {
+                "name": "ScanDirectionFlag",
+                "size": 1,
+                "type": "unsigned"
+            },
+            {
+                "name": "EdgeOfFlightLine",
+                "size": 1,
+                "type": "unsigned"
+            },
+            {
+                "name": "Classification",
+                "size": 1,
+                "type": "unsigned"
+            },
+            {
+                "name": "ScanAngleRank",
+                "size": 4,
+                "type": "floating"
+            },
+            {
+                "name": "UserData",
+                "size": 1,
+                "type": "unsigned"
+            },
+            {
+                "name": "PointSourceId",
+                "size": 2,
+                "type": "unsigned"
+            },
+            {
+                "name": "GpsTime",
+                "size": 8,
+                "type": "floating"
+            },
+            {
+                "name": "ScanChannel",
+                "size": 1,
+                "type": "unsigned"
+            },
+            {
+                "name": "ClassFlags",
+                "size": 1,
+                "type": "unsigned"
+            }
+        ],
+        "proj:epsg": 3857,
+        "proj:projjson": {
+            "$schema": "https://proj.org/schemas/v0.6/projjson.schema.json",
+            "type": "ProjectedCRS",
+            "name": "WGS 84 / Pseudo-Mercator",
+            "base_crs": {
+                "name": "WGS 84",
+                "datum_ensemble": {
+                    "name": "World Geodetic System 1984 ensemble",
+                    "members": [
+                        {
+                            "name": "World Geodetic System 1984 (Transit)",
+                            "id": {
+                                "authority": "EPSG",
+                                "code": 1166
+                            }
+                        },
+                        {
+                            "name": "World Geodetic System 1984 (G730)",
+                            "id": {
+                                "authority": "EPSG",
+                                "code": 1152
+                            }
+                        },
+                        {
+                            "name": "World Geodetic System 1984 (G873)",
+                            "id": {
+                                "authority": "EPSG",
+                                "code": 1153
+                            }
+                        },
+                        {
+                            "name": "World Geodetic System 1984 (G1150)",
+                            "id": {
+                                "authority": "EPSG",
+                                "code": 1154
+                            }
+                        },
+                        {
+                            "name": "World Geodetic System 1984 (G1674)",
+                            "id": {
+                                "authority": "EPSG",
+                                "code": 1155
+                            }
+                        },
+                        {
+                            "name": "World Geodetic System 1984 (G1762)",
+                            "id": {
+                                "authority": "EPSG",
+                                "code": 1156
+                            }
+                        },
+                        {
+                            "name": "World Geodetic System 1984 (G2139)",
+                            "id": {
+                                "authority": "EPSG",
+                                "code": 1309
+                            }
+                        }
+                    ],
+                    "ellipsoid": {
+                        "name": "WGS 84",
+                        "semi_major_axis": 6378137,
+                        "inverse_flattening": 298.257223563
+                    },
+                    "accuracy": "2.0",
+                    "id": {
+                        "authority": "EPSG",
+                        "code": 6326
+                    }
+                },
+                "coordinate_system": {
+                    "subtype": "ellipsoidal",
+                    "axis": [
+                        {
+                            "name": "Geodetic latitude",
+                            "abbreviation": "Lat",
+                            "direction": "north",
+                            "unit": "degree"
+                        },
+                        {
+                            "name": "Geodetic longitude",
+                            "abbreviation": "Lon",
+                            "direction": "east",
+                            "unit": "degree"
+                        }
+                    ]
+                },
+                "id": {
+                    "authority": "EPSG",
+                    "code": 4326
+                }
+            },
+            "conversion": {
+                "name": "Popular Visualisation Pseudo-Mercator",
+                "method": {
+                    "name": "Popular Visualisation Pseudo Mercator",
+                    "id": {
+                        "authority": "EPSG",
+                        "code": 1024
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "Latitude of natural origin",
+                        "value": 0,
+                        "unit": "degree",
+                        "id": {
+                            "authority": "EPSG",
+                            "code": 8801
+                        }
+                    },
+                    {
+                        "name": "Longitude of natural origin",
+                        "value": 0,
+                        "unit": "degree",
+                        "id": {
+                            "authority": "EPSG",
+                            "code": 8802
+                        }
+                    },
+                    {
+                        "name": "False easting",
+                        "value": 0,
+                        "unit": "metre",
+                        "id": {
+                            "authority": "EPSG",
+                            "code": 8806
+                        }
+                    },
+                    {
+                        "name": "False northing",
+                        "value": 0,
+                        "unit": "metre",
+                        "id": {
+                            "authority": "EPSG",
+                            "code": 8807
+                        }
+                    }
+                ]
+            },
+            "coordinate_system": {
+                "subtype": "Cartesian",
+                "axis": [
+                    {
+                        "name": "Easting",
+                        "abbreviation": "X",
+                        "direction": "east",
+                        "unit": "metre"
+                    },
+                    {
+                        "name": "Northing",
+                        "abbreviation": "Y",
+                        "direction": "north",
+                        "unit": "metre"
+                    }
+                ]
+            },
+            "scope": "Web mapping and visualisation.",
+            "area": "World between 85.06°S and 85.06°N.",
+            "bbox": {
+                "south_latitude": -85.06,
+                "west_longitude": -180,
+                "north_latitude": 85.06,
+                "east_longitude": 180
+            },
+            "id": {
+                "authority": "EPSG",
+                "code": 3857
+            }
+        },
+        "datetime": "2023-05-22T15:59:48.372908Z"
+    },
+    "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+            [
+                [
+                    [
+                        -94.06848197369266,
+                        40.55913805407004
+                    ],
+                    [
+                        -94.04153251517624,
+                        40.55913805407004
+                    ],
+                    [
+                        -94.01009148023925,
+                        40.57686710226657
+                    ],
+                    [
+                        -93.92025995184976,
+                        40.57686710226657
+                    ],
+                    [
+                        -93.90229364617186,
+                        40.56504825865241
+                    ],
+                    [
+                        -93.87534418765546,
+                        40.57686710226657
+                    ],
+                    [
+                        -93.83941157629967,
+                        40.57686710226657
+                    ],
+                    [
+                        -93.78102108284627,
+                        40.55913805407004
+                    ],
+                    [
+                        -93.71813901297317,
+                        40.55913805407004
+                    ],
+                    [
+                        -93.70017270729528,
+                        40.57095794139014
+                    ],
+                    [
+                        -93.65076536668126,
+                        40.56504825865241
+                    ],
+                    [
+                        -93.63279906100337,
+                        40.58868385836815
+                    ],
+                    [
+                        -93.63279906100337,
+                        40.67134268953518
+                    ],
+                    [
+                        -93.65076536668126,
+                        40.68314274075055
+                    ],
+                    [
+                        -93.64627379026156,
+                        41.50977479491753
+                    ],
+                    [
+                        -94.02356620949836,
+                        41.50977479491753
+                    ],
+                    [
+                        -94.04153251517624,
+                        41.49812229588375
+                    ],
+                    [
+                        -94.29306079466683,
+                        41.49812229588375
+                    ],
+                    [
+                        -94.31102710034473,
+                        41.50977479491753
+                    ],
+                    [
+                        -94.69730267242001,
+                        41.50977479491753
+                    ],
+                    [
+                        -94.71526897809791,
+                        41.49812229588375
+                    ],
+                    [
+                        -94.7107774016782,
+                        41.37564447716567
+                    ],
+                    [
+                        -94.7287437073561,
+                        41.363967870428844
+                    ],
+                    [
+                        -94.7287437073561,
+                        41.32892547675617
+                    ],
+                    [
+                        -94.7107774016782,
+                        41.31724048807648
+                    ],
+                    [
+                        -94.7287437073561,
+                        41.305553404185815
+                    ],
+                    [
+                        -94.7107774016782,
+                        41.28217295121477
+                    ],
+                    [
+                        -94.71526897809791,
+                        41.15928811769485
+                    ],
+                    [
+                        -94.69730267242001,
+                        41.14757275943868
+                    ],
+                    [
+                        -94.49967330996313,
+                        41.14757275943868
+                    ],
+                    [
+                        -94.48170700428521,
+                        41.13585530761239
+                    ],
+                    [
+                        -94.48170700428521,
+                        40.77157653847307
+                    ],
+                    [
+                        -94.49967330996313,
+                        40.759792155695536
+                    ],
+                    [
+                        -94.49967330996313,
+                        40.73621712163554
+                    ],
+                    [
+                        -94.48170700428521,
+                        40.7244264706101
+                    ],
+                    [
+                        -94.48619858070403,
+                        40.57686710226657
+                    ],
+                    [
+                        -94.46823227502611,
+                        40.56504825865241
+                    ],
+                    [
+                        -94.4322996636703,
+                        40.56504825865241
+                    ],
+                    [
+                        -94.41433335799242,
+                        40.57686710226657
+                    ],
+                    [
+                        -94.38738389947602,
+                        40.56504825865241
+                    ],
+                    [
+                        -94.32450182960292,
+                        40.56504825865241
+                    ],
+                    [
+                        -94.30653552392502,
+                        40.57686710226657
+                    ],
+                    [
+                        -94.27958606540864,
+                        40.56504825865241
+                    ],
+                    [
+                        -94.21670399553554,
+                        40.56504825865241
+                    ],
+                    [
+                        -94.18975453701914,
+                        40.57686710226657
+                    ],
+                    [
+                        -94.17178823134125,
+                        40.56504825865241
+                    ],
+                    [
+                        -94.09543143220995,
+                        40.57095794139014
+                    ],
+                    [
+                        -94.06848197369266,
+                        40.55913805407004
+                    ]
+                ]
+            ]
+        ]
+    },
+    "links": [
+        {
+            "rel": "self",
+            "href": "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/IA_SouthCentral_1_2020.json"
+        },
+        {
+            "rel": "parent",
+            "href": "https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/catalog.json"
+        }
+    ],
+    "assets": {
+        "ept.json": {
+            "href": "https://s3-us-west-2.amazonaws.com/usgs-lidar-public/IA_SouthCentral_1_2020/ept.json",
+            "title": "entwine",
+            "description": "The ept.json for accessing data"
+        }
+    },
+    "bbox": [
+        -94.7287437073561,
+        40.55913805407004,
+        -93.63279906100337,
+        41.50977479491753
+    ],
+    "stac_extensions": [
+        "https://stac-extensions.github.io/pointcloud/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/projection/v1.1.0/schema.json"
+    ]
+}

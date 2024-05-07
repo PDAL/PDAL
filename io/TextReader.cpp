@@ -262,7 +262,7 @@ point_count_t TextReader::read(PointViewPtr view, point_count_t numPts)
 {
     PointId idx = view->size();
     point_count_t cnt = 0;
-    PointRef point(*view, idx);
+    PointRef point(*view);
     while (cnt < numPts)
     {
         point.setPointId(idx);

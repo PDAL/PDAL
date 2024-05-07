@@ -76,7 +76,6 @@ private:
 
     PcdHeader m_header;
     std::ostream* m_ostream;
-    std::string m_filename;
     std::string m_compression_string;
     bool m_writeAllDims;
     std::string m_dimOrder;

@@ -43,7 +43,7 @@ namespace pdal
 static StaticPluginInfo const s_info
 {
     "kernels.delta",
-    "Delta Kernel",
+    "Delta Kernel [DEPRECATED]",
     "http://pdal.io/apps/delta.html"
 };
 

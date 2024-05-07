@@ -136,3 +136,10 @@ Set up a ``CMakeLists.txt`` file to compile your filter against PDAL:
     CMakeLists.txt contents may vary slightly depending on your project
     requirements, operating system, and compilter.
 
+Stand-alone program
+...............................................................................
+
+An example of a standalone program that will read a point cloud from disk, apply
+a filter, and write it back to disk to a new file is given in
+``examples/filter-streamer``. This will also show how to adjust the offset and
+scale of points in a way that is consistent with the filtering method.

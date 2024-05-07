@@ -78,6 +78,14 @@ std::string CopcWriter::getName() const { return s_info.name; }
 
 void CopcWriter::initialize(PointTableRef table)
 {
+    try
+    {
+        b->extraDims = las::parse(b->opts.extraDimSpec, true);
+    }
+    catch (const las::error& err)
+    {
+        throwError(err.what());
+    }
     fillForwardList();
 }
 
@@ -86,15 +94,15 @@ void CopcWriter::addArgs(ProgramArgs& args)
     std::time_t now;
     std::time(&now);
     uint16_t year = 1900;
-    uint16_t doy = 0;
+    uint16_t doy = 1;
     std::tm* ptm = std::gmtime(&now);
     if (ptm)
     {
         year += ptm->tm_year;
-        doy = ptm->tm_yday;
+        doy += ptm->tm_yday;
     }
 
-    args.add("filename", "Output filename.", b->opts.filename);
+//    args.add("filename", "Output filename.", b->opts.filename);
     args.add("forward", "Dimensions to forward from LAS reader", b->opts.forwardSpec);
 
     args.add("filesource_id", "File source ID number.", b->opts.filesourceId,
@@ -121,6 +129,10 @@ void CopcWriter::addArgs(ProgramArgs& args)
     args.add("fixed_seed", "Fix the random seed", b->opts.fixedSeed).setHidden();
     args.add("a_srs", "Spatial reference to use to write output", b->opts.aSrs);
     args.add("threads", "", b->opts.threadCount).setHidden();
+    args.add("enhanced_srs_vlrs", "Write WKT2 and PROJJSON as VLR?", b->opts.enhancedSrsVlrs,
+        decltype(b->opts.enhancedSrsVlrs)(false));
+    args.add("extra_dims", "List of dimension names to write in addition to those of the "
+        "point format or 'all' for all available dimensions", b->opts.extraDimSpec);
 }
 
 void CopcWriter::fillForwardList()
@@ -212,11 +224,12 @@ void CopcWriter::handleForwardVlrs(MetadataNode& forwards)
         if (userIdNode.valid() && recordIdNode.valid())
         {
 
+            const MetadataNode& descriptionNode = n.findChild("description");
             const std::vector<uint8_t>& data = Utils::base64_decode(n.findChild("data").value());
             const char *d = (const char *)data.data();
             std::vector<char> buf(d, d + data.size());
             las::Evlr e(userIdNode.value(), (uint16_t)std::stoi(recordIdNode.value()),
-                n.description(), std::move(buf));
+                descriptionNode.value(), std::move(buf));
             b->vlrs.push_back(e);
         }
     }
@@ -245,35 +258,53 @@ void CopcWriter::prepared(PointTableRef table)
     std::set_difference(allDims.begin(), allDims.end(), stdDims.begin(), stdDims.end(),
         std::inserter(edIds, edIds.end()));
 
-    b->numExtraBytes = 0;
-    for (Dimension::Id id : edIds)
+    // If 'all' was specified, add all extra dimensions to the list.
+    if (b->extraDims.size() == 1 && b->extraDims[0].m_name == "all")
     {
-        std::string name (layout->dimName(id));
-        Dimension::Type type (layout->dimType(id));
-        DimType dimType = layout->findDimType(name);
-        Dimension::Detail const* detail = layout->dimDetail(id);
-        size_t size = detail->size();
-        b->extraDims.emplace_back(name, 
-                                  type, 
-                                  id,
-                                  size,
-                                  las::baseCount(b->pointFormatId) + b->numExtraBytes, 
-                                  dimType.m_xform.m_scale.m_val, 
-                                  dimType.m_xform.m_offset.m_val);
-        b->numExtraBytes += size;
+        b->extraDims.clear();
+        int byteOffset = 0;
+        for (Dimension::Id id : edIds)
+        {
+            Dimension::Type type = layout->dimType(id);
+            const std::string& name = layout->dimName(id);
+
+            b->extraDims.push_back(las::ExtraDim(name, type, byteOffset));
+            byteOffset += Dimension::size(type);
+        }
+    }
+
+    b->numExtraBytes = 0;
+    for (las::ExtraDim& dim : b->extraDims)
+    {
+        dim.m_dimType.m_id = layout->findDim(dim.m_name);
+        if (dim.m_dimType.m_id == Dimension::Id::Unknown)
+            throwError("Dimension '" + dim.m_name + "' specified in "
+                "'extra_dim' option not found.");
+        if (Utils::contains(stdDims, dim.m_dimType.m_id))
+            throwError("Dimension '" + dim.m_name + "' specified in "
+                "'extra_dim' option is a standard dimension.");
+
+        // Point loader works on offsets from the start of the buffer. EB arg parsing
+        // works from zero.
+        dim.m_byteOffset += las::baseCount(b->pointFormatId);
+        b->numExtraBytes += Dimension::size(dim.m_dimType.m_type);
+        log()->get(LogLevel::Info) << getName() << ": Writing dimension " <<
+            dim.m_name <<
+            "(" << Dimension::interpretationName(dim.m_dimType.m_type) <<
+            ") " << " to COPC extra bytes." << std::endl;
     }
 }
 
 void CopcWriter::ready(PointTableRef table)
 {
     // Deal with remote files
-    if (Utils::isRemote(b->opts.filename))
+    if (Utils::isRemote(filename()))
     {
 
         // swap our filename for a tmp file
-        std::string tmpname = Utils::tempFilename(b->opts.filename);
-        remoteFilename = b->opts.filename;
-        b->opts.filename = tmpname;
+        std::string tmpname = Utils::tempFilename(filename());
+        remoteFilename = filename();
+        filename() = tmpname;
         isRemote = true;
     }
 
@@ -376,6 +407,23 @@ void CopcWriter::write(const PointViewPtr v)
     else
        b->srs = v->spatialReference();
 
+    if (b->opts.enhancedSrsVlrs) {
+        auto addVlr = [&](const std::string& userId, uint16_t recordId, const std::string& desc,
+            const std::string& str)
+        {
+            if (!str.empty()) {
+                std::vector<char> strBytes(str.begin(), str.end());
+                strBytes.resize(strBytes.size() + 1, 0);
+                las::Evlr v(userId, recordId, desc, std::move(strBytes));
+                b->vlrs.push_back(v);
+            }
+        };
+        addVlr(las::TransformUserId, las::LASFWkt2recordId, "PDAL WKT2 Record",
+            b->srs.getWKT2());
+        addVlr(las::PdalUserId, las::PdalProjJsonRecordId, "PDAL PROJJSON Record",
+            b->srs.getPROJJSON());
+    }
+
     // Set the input string into scaling.
     b->scaling.m_xXform.m_scale.set(b->opts.scaleX.val());
     b->scaling.m_yXform.m_scale.set(b->opts.scaleY.val());
@@ -402,23 +450,21 @@ void CopcWriter::write(const PointViewPtr v)
     if (b->scaling.m_zXform.m_offset.m_auto)
         b->scaling.m_zXform.m_offset = XForm::XFormComponent(t[2]);
 
+    b->filename = filename();
     BuPyramid bu(*b);
     bu.run(mgr);
 }
 
 void CopcWriter::done(PointTableRef table)
 {
-
-
     if (isRemote)
     {
         arbiter::Arbiter a;
-        a.put(remoteFilename, a.getBinary(b->opts.filename));
+        a.put(remoteFilename, a.getBinary(filename()));
 
         // Clean up temporary
-        FileUtils::deleteFile(b->opts.filename);
+        FileUtils::deleteFile(filename());
     }
-
 }
 
 } // namespace pdal

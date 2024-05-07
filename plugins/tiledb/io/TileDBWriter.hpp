@@ -37,31 +37,24 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
+
 #include <pdal/Streamable.hpp>
 #include <pdal/Writer.hpp>
+
+#if defined(DELETE)
+#undef DELETE
+#endif
 
 #include <tiledb/tiledb>
 
 namespace pdal
 {
 
+class TileDBDimBuffer;
+
 class PDAL_DLL TileDBWriter : public Writer, public Streamable
 {
 public:
-    struct DimBuffer
-    {
-        std::string m_name;
-        Dimension::Id m_id;
-        Dimension::Type m_type;
-        std::vector<uint8_t> m_buffer;
-
-        DimBuffer(const std::string& name, Dimension::Id id,
-                  Dimension::Type type)
-            : m_name(name), m_id(id), m_type(type)
-        {
-        }
-    };
-
     TileDBWriter();
     ~TileDBWriter();
     std::string getName() const;
@@ -74,7 +67,10 @@ private:
     virtual bool processOne(PointRef& point);
     virtual void done(PointTableRef table);
 
-    bool flushCache(size_t size);
+    bool flushCache();
+
+    std::string arrayName() const
+    { return filename(); }
 
     struct Args;
     std::unique_ptr<TileDBWriter::Args> m_args;
@@ -82,15 +78,8 @@ private:
     size_t m_current_idx;
 
     std::unique_ptr<tiledb::Context> m_ctx;
-    std::unique_ptr<tiledb::ArraySchema> m_schema;
     std::unique_ptr<tiledb::Array> m_array;
-    std::vector<DimBuffer> m_attrs;
-    std::vector<double> m_xs;
-    std::vector<double> m_ys;
-    std::vector<double> m_zs;
-    std::vector<double> m_tms;
-    bool m_use_time;
-    bool m_time_first;
+    std::vector<std::unique_ptr<TileDBDimBuffer>> m_buffers;
 
     TileDBWriter(const TileDBWriter&) = delete;
     TileDBWriter& operator=(const TileDBWriter&) = delete;

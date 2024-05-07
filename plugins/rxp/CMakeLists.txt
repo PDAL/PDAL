@@ -1,3 +1,11 @@
+cmake_minimum_required(VERSION 3.13)
+
+if (STANDALONE)
+    project(pdal-rxp)
+    include("${CMAKE_CURRENT_LIST_DIR}/../../cmake/standalone.cmake" )
+    find_package(PDAL REQUIRED)    
+endif(STANDALONE)
+
 set(RXP_TEST_NAME rxptest)
 
 find_package(RiVLib COMPONENTS scanlib REQUIRED)
@@ -12,6 +20,7 @@ PDAL_ADD_PLUGIN(libname reader rxp
         io/RxpReader.cpp
     LINK_WITH
         ${RiVLib_SCANLIB_LIBRARY}
+       ${PDAL_LIBRARIES}
     INCLUDES
         ${RiVLib_INCLUDE_DIRS}
 )

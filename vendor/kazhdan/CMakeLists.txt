@@ -10,6 +10,7 @@ PDAL_ADD_FREE_LIBRARY(${PDAL_KAZHDAN_LIB_NAME} STATIC
 )
 if (UNIX)
     target_compile_options(${PDAL_KAZHDAN_LIB_NAME} PRIVATE -fPIC)
+    target_compile_options(${PDAL_KAZHDAN_LIB_NAME} PRIVATE -Wno-maybe-uninitialized)
 endif()
 target_link_libraries(${PDAL_KAZHDAN_LIB_NAME})
 

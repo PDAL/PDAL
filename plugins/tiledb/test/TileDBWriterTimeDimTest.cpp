@@ -36,6 +36,8 @@
 #define NOMINMAX
 #endif
 
+#include <io/BufferReader.hpp>
+#include <pdal/StageFactory.hpp>
 #include <pdal/pdal_test_main.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <stdio.h>
@@ -415,7 +417,6 @@ TEST_F(TileDBWriterTimeDimTest, append_write_with_time)
     reader_options.add("xyz_mode", "ramp");
     reader_options.add("bounds", rdr_bounds);
     reader_options.add("density", 2.0);
-    reader_options.add("use_time", false);
 
     XYZTimeFauxReader reader;
     reader.setOptions(reader_options);
@@ -451,6 +452,189 @@ TEST_F(TileDBWriterTimeDimTest, append_write_with_time)
     result_num = (int)q.result_buffer_elements()["X"].second;
 
     EXPECT_EQ(result_num, reader.count() + m_reader.count());
+}
+
+TEST(AdditionalTileDBWriterTimeDimTest, domain_from_stats)
+{
+
+    // Create buffers with the data.
+    std::vector<double> xData{0.0, 3.0};
+    std::vector<double> yData{4.0, 9.0};
+    std::vector<double> zData{-13.0, -10.0};
+    std::vector<double> timeData{100.0, 300.0};
+    std::vector<uint16_t> intensityData{1, 1};
+
+    // Clean-up previous tests.
+    std::string uri = Support::temppath("tiledb_domain_with_time_from_stats");
+    if (FileUtils::directoryExists(uri))
+        FileUtils::deleteDirectory(uri);
+
+    // Write to TileDB.
+    // Create point table with dimension registry.
+    PointTable table;
+    table.layout()->registerDims({Dimension::Id::X, Dimension::Id::Y,
+                                  Dimension::Id::Z, Dimension::Id::Intensity,
+                                  Dimension::Id::GpsTime});
+
+    // Create buffer reader with data.
+    BufferReader bufferReader;
+    PointViewPtr view(new PointView(table));
+    for (uint32_t index = 0; index < 2; ++index)
+    {
+        view->setField(Dimension::Id::X, index, xData[index]);
+        view->setField(Dimension::Id::Y, index, yData[index]);
+        view->setField(Dimension::Id::Z, index, zData[index]);
+        view->setField(Dimension::Id::GpsTime, index, timeData[index]);
+        view->setField(Dimension::Id::Intensity, index, intensityData[index]);
+    }
+    bufferReader.addView(view);
+
+    // Create the stage factory.
+    StageFactory factory;
+
+    // Create stats filter and link it to the faux reader.
+    Stage* stats_filter = factory.createStage("filters.stats");
+    stats_filter->setInput(bufferReader);
+
+    // Create TileDB writer, set options, and write data.
+    Stage* writer = factory.createStage("writers.tiledb");
+
+    // Set TileDB writer options.
+    Options writerOptions;
+    writerOptions.add("filename", uri);
+    writerOptions.add("use_time_dim", true);
+    writer->setOptions(writerOptions);
+    writer->setInput(*stats_filter);
+
+    // Submit.
+    writer->prepare(table);
+    writer->execute(table);
+
+    // Check schema.
+    {
+        tiledb::Context ctx{};
+        tiledb::ArraySchema schema(ctx, uri);
+        auto domain = schema.domain();
+        EXPECT_EQ(domain.ndim(), 4);
+
+        // Check X domain.
+        std::pair<double, double> x_domain =
+            domain.dimension(0).domain<double>();
+        EXPECT_DOUBLE_EQ(x_domain.first, -1.0);
+        EXPECT_DOUBLE_EQ(x_domain.second, 4.0);
+
+        // Check Y domain.
+        std::pair<double, double> y_domain =
+            domain.dimension(1).domain<double>();
+        EXPECT_DOUBLE_EQ(y_domain.first, 3.0);
+        EXPECT_DOUBLE_EQ(y_domain.second, 10.0);
+
+        // Check Z domain.
+        std::pair<double, double> z_domain =
+            domain.dimension(2).domain<double>();
+        EXPECT_DOUBLE_EQ(z_domain.first, -14.0);
+        EXPECT_DOUBLE_EQ(z_domain.second, -9.0);
+
+        // Check GpsTime domain.
+        std::pair<double, double> time_domain =
+            domain.dimension(3).domain<double>();
+        EXPECT_DOUBLE_EQ(time_domain.first, 99.0);
+        EXPECT_DOUBLE_EQ(time_domain.second, 301.0);
+    }
+}
+
+TEST(AdditionalTileDBWriterTimeDimTest, spatial_only_from_stats)
+{
+
+    // Create buffers with the data.
+    std::vector<double> xData{0.0, 3.0};
+    std::vector<double> yData{4.0, 9.0};
+    std::vector<double> zData{-13.0, -10.0};
+    std::vector<double> timeData{100.0, 300.0};
+    std::vector<uint16_t> intensityData{1, 1};
+
+    // Clean-up previous tests.
+    std::string uri = Support::temppath("tiledb_domain_with_time_from_stats");
+    if (FileUtils::directoryExists(uri))
+        FileUtils::deleteDirectory(uri);
+
+    // Write to TileDB.
+    // Create point table with dimension registry.
+    PointTable table;
+    table.layout()->registerDims({Dimension::Id::X, Dimension::Id::Y,
+                                  Dimension::Id::Z, Dimension::Id::Intensity,
+                                  Dimension::Id::GpsTime});
+
+    // Create buffer reader with data.
+    BufferReader bufferReader;
+    PointViewPtr view(new PointView(table));
+    for (uint32_t index = 0; index < 2; ++index)
+    {
+        view->setField(Dimension::Id::X, index, xData[index]);
+        view->setField(Dimension::Id::Y, index, yData[index]);
+        view->setField(Dimension::Id::Z, index, zData[index]);
+        view->setField(Dimension::Id::GpsTime, index, timeData[index]);
+        view->setField(Dimension::Id::Intensity, index, intensityData[index]);
+    }
+    bufferReader.addView(view);
+
+    // Create the stage factory.
+    StageFactory factory;
+
+    // Create stats filter and link it to the faux reader.
+    Stage* stats_filter = factory.createStage("filters.stats");
+    Options statsOptions;
+    statsOptions.add("dimensions", "X,Y,Z");
+    stats_filter->setOptions(statsOptions);
+    stats_filter->setInput(bufferReader);
+
+    // Create TileDB writer, set options, and write data.
+    Stage* writer = factory.createStage("writers.tiledb");
+
+    // Set TileDB writer options.
+    Options writerOptions;
+    writerOptions.add("filename", uri);
+    writerOptions.add("use_time_dim", true);
+    writer->setOptions(writerOptions);
+    writer->setInput(*stats_filter);
+
+    // Submit.
+    writer->prepare(table);
+    writer->execute(table);
+
+    // Check schema.
+    {
+        tiledb::Context ctx{};
+        tiledb::ArraySchema schema(ctx, uri);
+        auto domain = schema.domain();
+        EXPECT_EQ(domain.ndim(), 4);
+
+        // Check X domain.
+        std::pair<double, double> x_domain =
+            domain.dimension(0).domain<double>();
+        EXPECT_DOUBLE_EQ(x_domain.first, -1.0);
+        EXPECT_DOUBLE_EQ(x_domain.second, 4.0);
+
+        // Check Y domain.
+        std::pair<double, double> y_domain =
+            domain.dimension(1).domain<double>();
+        EXPECT_DOUBLE_EQ(y_domain.first, 3.0);
+        EXPECT_DOUBLE_EQ(y_domain.second, 10.0);
+
+        // Check Z domain.
+        std::pair<double, double> z_domain =
+            domain.dimension(2).domain<double>();
+        EXPECT_DOUBLE_EQ(z_domain.first, -14.0);
+        EXPECT_DOUBLE_EQ(z_domain.second, -9.0);
+
+        // Check GpsTime domain.
+        std::pair<double, double> time_domain =
+            domain.dimension(3).domain<double>();
+        EXPECT_DOUBLE_EQ(time_domain.first,
+                         std::numeric_limits<double>::lowest());
+        EXPECT_DOUBLE_EQ(time_domain.second,
+                         std::numeric_limits<double>::max());
+    }
 }
 
 } // namespace pdal

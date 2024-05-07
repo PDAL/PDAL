@@ -97,8 +97,10 @@ SrsTransform::SrsTransform(const SpatialReference& src,
                            const SpatialReference& dst,
                            std::vector<int> dstOrder)
 {
-    OGRSpatialReference srcRef(src.getWKT().data());
-    OGRSpatialReference dstRef(dst.getWKT().data());
+    OGRSpatialReference srcRef(src.getWKT2().data());
+    srcRef.SetCoordinateEpoch(src.getEpoch());
+    OGRSpatialReference dstRef(dst.getWKT2().data());
+    dstRef.SetCoordinateEpoch(dst.getEpoch());
 
 // Starting with version 3, the axes (X, Y, Z or lon, lat, h or whatever)
 // are mapped according to the WKT definition.  In particular, this means
@@ -117,7 +119,11 @@ SrsTransform::SrsTransform(const SpatialReference& src,
 
 void SrsTransform::set(const SpatialReference& src, const SpatialReference& dst)
 {
-    set(OGRSpatialReference(src.getWKT().data()), OGRSpatialReference(dst.getWKT().data()));
+    OGRSpatialReference osrSrc(src.getWKT2().data());
+    osrSrc.SetCoordinateEpoch(src.getEpoch());
+    OGRSpatialReference osrDst(dst.getWKT2().data());
+    osrDst.SetCoordinateEpoch(dst.getEpoch());
+    set(osrSrc, osrDst);
 }
 
 

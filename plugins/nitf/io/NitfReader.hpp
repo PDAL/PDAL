@@ -149,17 +149,26 @@ public:
     std::string getName() const;
 
 protected:
-    virtual void createStream()
+    virtual LasStreamPtr createStream()
     {
-        if (!m_streamIf)
-            m_streamIf.reset(new NitfStreamIf(m_filename, m_offset));
+
+        LasStreamPtr s(new NitfStreamIf(m_filename, m_offset));
+        if (!s->isOpen())
+        {
+            std::ostringstream oss;
+            oss << "Unable to open stream for '"
+                << m_filename <<"' with error '" << strerror(errno) << "'";
+            throw pdal_error(oss.str());
+        }
+        return s;
     }
 
 private:
     uint64_t m_offset;
     uint64_t m_length;
 
-    virtual void initialize(PointTableRef table);
+    void initialize(PointTableRef table);
+
 };
 
 } // namespace pdal

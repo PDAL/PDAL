@@ -13,17 +13,23 @@ Download
 Current Release(s)
 ------------------------------------------------------------------------------
 
-* **2023-01-13** `PDAL-2.5.0-src.tar.bz2`_ `Release Notes`_ (`md5`_)
+* **2024-03-02** `PDAL-2.7.0-src.tar.bz2`_ `Release Notes`_ (`md5`_)
 
-.. _`PDAL-2.5.0-src.tar.bz2`: https://github.com/PDAL/PDAL/releases/download/2.5.0/PDAL-2.5.0-src.tar.bz2
-.. _`Release Notes`: https://github.com/PDAL/PDAL/releases/tag/2.5.0
-.. _`md5`: https://github.com/PDAL/PDAL/releases/download/2.5.0/PDAL-2.5.0-src.tar.bz2.md5
+.. _`PDAL-2.7.0-src.tar.bz2`: https://github.com/PDAL/PDAL/releases/download/2.7.0/PDAL-2.7.0-src.tar.bz2
+.. _`Release Notes`: https://github.com/PDAL/PDAL/releases/tag/2.7.0
+.. _`md5`: https://github.com/PDAL/PDAL/releases/download/2.7.0/PDAL-2.7.0-src.tar.bz2.md5
 
 
 
 Past Releases
 ------------------------------------------------------------------------------
 
+* **2024-02-05** `PDAL-2.6.3-src.tar.bz2`_
+* **2023-12-11** `PDAL-2.6.2-src.tar.bz2`_
+* **2023-11-24** `PDAL-2.6.1-src.tar.bz2`_
+* **2023-10-12** `PDAL-2.6.0-src.tar.bz2`_
+* **2023-08-18** `PDAL-2.5.6-src.tar.bz2`_
+* **2023-01-13** `PDAL-2.5.0-src.tar.bz2`_
 * **2022-03-18** `PDAL-2.4.0-src.tar.bz2`_
 * **2021-05-19** `PDAL-2.3.0-src.tar.bz2`_
 * **2020-08-20** `PDAL-2.2.0-src.tar.bz2`_
@@ -31,6 +37,18 @@ Past Releases
 * **2019-08-23** `PDAL-2.0.1-src.tar.bz2`_
 * **2019-05-09** `PDAL-1.9.1-src.tar.bz2`_
 
+
+.. _`PDAL-2.6.3-src.tar.bz2`: https://github.com/PDAL/PDAL/releases/download/2.6.3/PDAL-2.6.3-src.tar.bz2
+.. _`PDAL-2.6.2-src.tar.bz2`: https://github.com/PDAL/PDAL/releases/download/2.6.2/PDAL-2.6.2-src.tar.bz2
+.. _`PDAL-2.6.1-src.tar.bz2`: https://github.com/PDAL/PDAL/releases/download/2.6.1/PDAL-2.6.1-src.tar.bz2
+.. _`PDAL-2.6.0-src.tar.bz2`: https://github.com/PDAL/PDAL/releases/download/2.6.0/PDAL-2.6.0-src.tar.bz2
+.. _`PDAL-2.5.6-src.tar.bz2`: https://github.com/PDAL/PDAL/releases/download/2.5.6/PDAL-2.5.6-src.tar.bz2
+.. _`PDAL-2.5.5-src.tar.bz2`: https://github.com/PDAL/PDAL/releases/download/2.5.5/PDAL-2.5.5-src.tar.bz2
+.. _`PDAL-2.5.4-src.tar.bz2`: https://github.com/PDAL/PDAL/releases/download/2.5.4/PDAL-2.5.4-src.tar.bz2
+.. _`PDAL-2.5.3-src.tar.bz2`: https://github.com/PDAL/PDAL/releases/download/2.5.3/PDAL-2.5.3-src.tar.bz2
+.. _`PDAL-2.5.2-src.tar.bz2`: https://github.com/PDAL/PDAL/releases/download/2.5.2/PDAL-2.5.2-src.tar.bz2
+.. _`PDAL-2.5.1-src.tar.bz2`: https://github.com/PDAL/PDAL/releases/download/2.5.1/PDAL-2.5.1-src.tar.bz2
+.. _`PDAL-2.5.0-src.tar.bz2`: https://github.com/PDAL/PDAL/releases/download/2.5.0/PDAL-2.5.0-src.tar.bz2
 .. _`PDAL-2.4.2-src.tar.bz2`: https://github.com/PDAL/PDAL/releases/download/2.4.2/PDAL-2.4.2-src.tar.bz2
 .. _`PDAL-2.4.0-src.tar.bz2`: https://github.com/PDAL/PDAL/releases/download/2.4.0/PDAL-2.4.0-src.tar.bz2
 .. _`PDAL-2.3.0-src.tar.bz2`: https://github.com/PDAL/PDAL/releases/download/2.3.0/PDAL-2.3.0-src.tar.bz2
@@ -82,7 +100,7 @@ required dependencies and build PDAL from source.
    "NITF", "X",  "",  "", "X"
    "pgpointcloud", "X",  "",  "X", "X"
    "SLPK", "", "", "", "X"
-   "TileDB", "X", "", "", "X"
+   "TileDB", "X", "", "", "mac/linux"
 
 
 Windows
@@ -174,4 +192,5 @@ extension is
 It is strongly recommended that you make use of Conda's environment management
 system and install PDAL in a separate environment (i.e., not the base
 environment). Instructions can be found on the Conda website.
+
 

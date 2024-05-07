@@ -30,8 +30,7 @@ fi
 
 
 mamba update --all -y -n base
-DEBIAN_FRONTEND=noninteractive apt-get update -y && apt-get install gcc g++ -y
-mamba install -c conda-forge -y -n base cmake make ninja gdal
+mamba install -c conda-forge -y -n base cmake make ninja gdal compilers
 
 git clone https://github.com/PDAL/PDAL.git;
 cd /PDAL;

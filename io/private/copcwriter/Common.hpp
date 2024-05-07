@@ -89,8 +89,8 @@ constexpr int RootCellCount = int(128 * Sqrt3 / 1.5);
 
 struct Options
 {
-    std::string filename;
     StringList forwardSpec;
+    StringList extraDimSpec;
     NumHeaderVal<uint16_t, 0, 65535> filesourceId;
     NumHeaderVal<uint16_t, 0, 31> globalEncoding;
     UuidHeaderVal projectId;
@@ -109,6 +109,7 @@ struct Options
     bool fixedSeed;
     pdal::SpatialReference aSrs;
     int threadCount = 10;
+    bool enhancedSrsVlrs = false;
 };
 
 struct BaseInfo
@@ -136,6 +137,7 @@ struct BaseInfo
         stats::Summary("GpsTime", stats::Summary::NoEnum),
         stats::Summary("ReturnNumber", stats::Summary::Enumerate),
     };
+    std::string filename;
 };
 
 } // namespace copcwriter

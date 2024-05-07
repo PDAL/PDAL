@@ -37,7 +37,6 @@
 #include <pdal/DimDetail.hpp>
 #include <pdal/DimType.hpp>
 #include <pdal/Mesh.hpp>
-#include <pdal/PointContainer.hpp>
 #include <pdal/PointLayout.hpp>
 #include <pdal/PointTable.hpp>
 #include <pdal/PointRef.hpp>
@@ -47,14 +46,8 @@
 #include <set>
 #include <deque>
 
-//#pragma warning(disable: 4244)  // conversion from 'type1' to 'type2', possible loss of data
-
 namespace pdal
 {
-namespace plang
-{
-    class Invocation;
-}
 
 struct PointViewLess;
 class PointView;
@@ -71,19 +64,19 @@ using Rasterd = Raster<double>;
 typedef std::shared_ptr<PointView> PointViewPtr;
 typedef std::set<PointViewPtr, PointViewLess> PointViewSet;
 
-class PDAL_DLL PointView : public PointContainer
+class PDAL_DLL PointView
 {
     FRIEND_TEST(VoxelTest, center);
     friend class Stage;
-    friend class plang::Invocation;
-    friend class PointIdxRef;
+    friend class PointRef;
+    friend class PointViewIter;
     friend struct PointViewLess;
 public:
     PointView(const PointView&) = delete;
     PointView& operator=(const PointView&) = delete;
     PointView(PointTableRef pointTable);
     PointView(PointTableRef pointTable, const SpatialReference& srs);
-    virtual ~PointView();
+    ~PointView();
 
     PointViewIter begin();
     PointViewIter end();
@@ -107,7 +100,6 @@ public:
         auto bufEnd = buf.m_index.begin() + buf.size();
         m_index.insert(thisEnd, buf.m_index.begin(), bufEnd);
         m_size += buf.size();
-        clearTemps();
     }
 
     /// Return a new point view with the same point table as this
@@ -117,30 +109,112 @@ public:
         return PointViewPtr(new PointView(m_pointTable, m_spatialReference));
     }
 
-    // This depends on RVO (copy elision) so as not to invoke the PointRef copy ctor,
-    // which creates temp points. This is guaranteed by C++17.
     PointRef point(PointId id)
-        { return PointRef(*this, id); }
+    {
+        if (id == m_index.size())
+            addPoint();
+        return PointRef(*this, id);
+    }
 
     template<class T>
     T getFieldAs(Dimension::Id dim, PointId pointIndex) const;
 
-    inline void getField(char *pos, Dimension::Id d,
-        Dimension::Type type, PointId id) const;
+    // Get value, converting to type 'type' and storing into 'pos'.
+    void getField(char *pos, Dimension::Id d, Dimension::Type type, PointId id) const
+    {
+        Everything e;
+
+        switch (type)
+        {
+            case Dimension::Type::Float:
+                e.f = getFieldAs<float>(d, id);
+                break;
+            case Dimension::Type::Double:
+                e.d = getFieldAs<double>(d, id);
+                break;
+            case Dimension::Type::Signed8:
+                e.s8 = getFieldAs<int8_t>(d, id);
+                break;
+            case Dimension::Type::Signed16:
+                e.s16 = getFieldAs<int16_t>(d, id);
+                break;
+            case Dimension::Type::Signed32:
+                e.s32 = getFieldAs<int32_t>(d, id);
+                break;
+            case Dimension::Type::Signed64:
+                e.s64 = getFieldAs<int64_t>(d, id);
+                break;
+            case Dimension::Type::Unsigned8:
+                e.u8 = getFieldAs<uint8_t>(d, id);
+                break;
+            case Dimension::Type::Unsigned16:
+                e.u16 = getFieldAs<uint16_t>(d, id);
+                break;
+            case Dimension::Type::Unsigned32:
+                e.u32 = getFieldAs<uint32_t>(d, id);
+                break;
+            case Dimension::Type::Unsigned64:
+                e.u64 = getFieldAs<uint64_t>(d, id);
+                break;
+            case Dimension::Type::None:
+                break;
+        }
+        memcpy(pos, &e, Dimension::size(type));
+    }
 
     template<typename T>
     void setField(Dimension::Id dim, PointId idx, T val);
 
-    inline void setField(Dimension::Id dim, Dimension::Type type,
-        PointId idx, const void *val);
+    // Set value of type 'type' pointed to by 'val'.
+    void setField(Dimension::Id dim, Dimension::Type type, PointId idx, const void *val)
+    {
+        Everything e;
+
+        memcpy(&e, val, Dimension::size(type));
+        switch (type)
+        {
+            case Dimension::Type::Float:
+                setField(dim, idx, e.f);
+                break;
+            case Dimension::Type::Double:
+                setField(dim, idx, e.d);
+                break;
+            case Dimension::Type::Signed8:
+                setField(dim, idx, e.s8);
+                break;
+            case Dimension::Type::Signed16:
+                setField(dim, idx, e.s16);
+                break;
+            case Dimension::Type::Signed32:
+                setField(dim, idx, e.s32);
+                break;
+            case Dimension::Type::Signed64:
+                setField(dim, idx, e.s64);
+                break;
+            case Dimension::Type::Unsigned8:
+                setField(dim, idx, e.u8);
+                break;
+            case Dimension::Type::Unsigned16:
+                setField(dim, idx, e.u16);
+                break;
+            case Dimension::Type::Unsigned32:
+                setField(dim, idx, e.u32);
+                break;
+            case Dimension::Type::Unsigned64:
+                setField(dim, idx, e.u64);
+                break;
+            case Dimension::Type::None:
+                break;
+        }
+    }
 
     template <typename T>
     bool compare(Dimension::Id dim, PointId id1, PointId id2) const
     {
-        return (getFieldInternal<T>(dim, id1) < getFieldInternal<T>(dim, id2));
+        return (getFieldAs<T>(dim, id1) < getFieldAs<T>(dim, id2));
     }
 
-    virtual bool compare(Dimension::Id dim, PointId id1, PointId id2) const
+    bool compare(Dimension::Id dim, PointId id1, PointId id2) const
     {
         const Dimension::Detail *dd = layout()->dimDetail(dim);
 
@@ -203,7 +277,7 @@ public:
         { return layout()->dimTypes(); }
     PointLayoutPtr layout() const
         { return m_layout; }
-    inline PointTableRef table() const
+    PointTableRef table() const
         { return m_pointTable;}
     SpatialReference spatialReference() const
         { return m_spatialReference; }
@@ -216,7 +290,7 @@ public:
     {
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
-            getField(buf, di->m_id, di->m_type, idx);
+            m_pointTable.getFieldInternal(di->m_id, m_index[idx], buf);
             buf += Dimension::size(di->m_type);
         }
     }
@@ -228,9 +302,11 @@ public:
     /// \param[in] buf   Packed data buffer.
     void setPackedPoint(const DimTypeList& dims, PointId idx, const char *buf)
     {
+        if (idx == m_index.size())
+            addPoint();
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
-            setField(di->m_id, di->m_type, idx, (const void *)buf);
+            m_pointTable.setFieldInternal(di->m_id, idx, (const void *)buf);
             buf += Dimension::size(di->m_type);
         }
     }
@@ -248,20 +324,11 @@ public:
         {
             m_index.push_back(m_pointTable.addPoint());
             ++m_size;
-            assert(m_temps.empty());
         }
 
         return m_pointTable.getPoint(m_index.at(id));
     }
 
-    // The standard idiom is swapping with a stack-created empty queue, but
-    // that invokes the ctor and may allocate.  We've probably only got
-    // one or two things in our queue, so just pop until we're empty.
-    void clearTemps()
-    {
-        while (!m_temps.empty())
-            m_temps.pop();
-    }
     MetadataNode toMetadata() const;
 
     void invalidateProducts();
@@ -312,7 +379,6 @@ protected:
     // references.
     point_count_t m_size;
     int m_id;
-    std::queue<PointId> m_temps;
     SpatialReference m_spatialReference;
     std::map<std::string, std::unique_ptr<TriangularMesh>> m_meshes;
     std::map<std::string, std::unique_ptr<Rasterd>> m_rasters;
@@ -322,29 +388,21 @@ protected:
 private:
     static int m_lastId;
 
-    PointId tableId(PointId idx);
+    PointId tableId(PointId idx)
+        { return idx >= size() ? 0 : m_index[idx]; }
 
-    virtual void setFieldInternal(Dimension::Id dim, PointId idx,
-        const void *buf);
-    virtual void getFieldInternal(Dimension::Id dim, PointId idx,
-            void *buf) const
-        { m_pointTable.getFieldInternal(dim, m_index[idx], buf); }
-    virtual void swapItems(PointId id1, PointId id2)
+    PointId addPoint();
+    void swapItems(PointId id1, PointId id2)
     {
         PointId temp = m_index[id2];
         m_index[id2] = m_index[id1];
         m_index[id1] = temp;
     }
-    virtual void setItem(PointId dst, PointId src)
+    void setTableId(PointId dst, PointId tableId)
     {
-        m_index[dst] = m_index[src];
+        m_index[dst] = tableId;
     }
 
-    template<class T>
-    T getFieldInternal(Dimension::Id dim, PointId pointIndex) const;
-    inline PointId getTemp(PointId id);
-    void freeTemp(PointId id)
-        { m_temps.push(id); }
     void setSpatialReference(const SpatialReference& spatialRef)
         { m_spatialReference = spatialRef; }
 
@@ -360,103 +418,7 @@ struct PointViewLess
 };
 
 template <class T>
-T PointView::getFieldInternal(Dimension::Id dim, PointId id) const
-{
-    T t;
-
-    getFieldInternal(dim, id, &t);
-    return t;
-}
-
-inline void PointView::getField(char *pos, Dimension::Id d,
-    Dimension::Type type, PointId id) const
-{
-    Everything e;
-
-    switch (type)
-    {
-    case Dimension::Type::Float:
-        e.f = getFieldAs<float>(d, id);
-        break;
-    case Dimension::Type::Double:
-        e.d = getFieldAs<double>(d, id);
-        break;
-    case Dimension::Type::Signed8:
-        e.s8 = getFieldAs<int8_t>(d, id);
-        break;
-    case Dimension::Type::Signed16:
-        e.s16 = getFieldAs<int16_t>(d, id);
-        break;
-    case Dimension::Type::Signed32:
-        e.s32 = getFieldAs<int32_t>(d, id);
-        break;
-    case Dimension::Type::Signed64:
-        e.s64 = getFieldAs<int64_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned8:
-        e.u8 = getFieldAs<uint8_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned16:
-        e.u16 = getFieldAs<uint16_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned32:
-        e.u32 = getFieldAs<uint32_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned64:
-        e.u64 = getFieldAs<uint64_t>(d, id);
-        break;
-    case Dimension::Type::None:
-        break;
-    }
-    memcpy(pos, &e, Dimension::size(type));
-}
-
-inline void PointView::setField(Dimension::Id dim,
-    Dimension::Type type, PointId idx, const void *val)
-{
-    Everything e;
-
-    memcpy(&e, val, Dimension::size(type));
-    switch (type)
-    {
-        case Dimension::Type::Float:
-            setField(dim, idx, e.f);
-            break;
-        case Dimension::Type::Double:
-            setField(dim, idx, e.d);
-            break;
-        case Dimension::Type::Signed8:
-            setField(dim, idx, e.s8);
-            break;
-        case Dimension::Type::Signed16:
-            setField(dim, idx, e.s16);
-            break;
-        case Dimension::Type::Signed32:
-            setField(dim, idx, e.s32);
-            break;
-        case Dimension::Type::Signed64:
-            setField(dim, idx, e.s64);
-            break;
-        case Dimension::Type::Unsigned8:
-            setField(dim, idx, e.u8);
-            break;
-        case Dimension::Type::Unsigned16:
-            setField(dim, idx, e.u16);
-            break;
-        case Dimension::Type::Unsigned32:
-            setField(dim, idx, e.u32);
-            break;
-        case Dimension::Type::Unsigned64:
-            setField(dim, idx, e.u64);
-            break;
-        case Dimension::Type::None:
-            break;
-    }
-}
-
-template <class T>
-inline T PointView::getFieldAs(Dimension::Id dim,
-    PointId pointIndex) const
+inline T PointView::getFieldAs(Dimension::Id dim, PointId pointIndex) const
 {
     assert(pointIndex < m_size);
     T retval;
@@ -464,7 +426,7 @@ inline T PointView::getFieldAs(Dimension::Id dim,
     const Dimension::Detail *dd = m_layout->dimDetail(dim);
     Everything e;
 
-    PointId rawIdx = m_index[pointIndex];
+    PointId tableIdx = m_index[pointIndex];
     // Note that getFieldInternal() can't be hoisted out of the switch
     // because we don't want to call it in the case where the dimension
     // type isn't known.  A separate test could be made, but that *might*
@@ -472,43 +434,43 @@ inline T PointView::getFieldAs(Dimension::Id dim,
     switch (dd->type())
     {
     case Dimension::Type::Float:
-        m_pointTable.getFieldInternal(dim, rawIdx, &e);
+        m_pointTable.getFieldInternal(dim, tableIdx, &e);
         ok = Utils::numericCast(e.f, retval);
         break;
     case Dimension::Type::Double:
-        m_pointTable.getFieldInternal(dim, rawIdx, &e);
+        m_pointTable.getFieldInternal(dim, tableIdx, &e);
         ok = Utils::numericCast(e.d, retval);
         break;
     case Dimension::Type::Signed8:
-        m_pointTable.getFieldInternal(dim, rawIdx, &e);
+        m_pointTable.getFieldInternal(dim, tableIdx, &e);
         ok = Utils::numericCast(e.s8, retval);
         break;
     case Dimension::Type::Signed16:
-        m_pointTable.getFieldInternal(dim, rawIdx, &e);
+        m_pointTable.getFieldInternal(dim, tableIdx, &e);
         ok = Utils::numericCast(e.s16, retval);
         break;
     case Dimension::Type::Signed32:
-        m_pointTable.getFieldInternal(dim, rawIdx, &e);
+        m_pointTable.getFieldInternal(dim, tableIdx, &e);
         ok = Utils::numericCast(e.s32, retval);
         break;
     case Dimension::Type::Signed64:
-        m_pointTable.getFieldInternal(dim, rawIdx, &e);
+        m_pointTable.getFieldInternal(dim, tableIdx, &e);
         ok = Utils::numericCast(e.s64, retval);
         break;
     case Dimension::Type::Unsigned8:
-        m_pointTable.getFieldInternal(dim, rawIdx, &e);
+        m_pointTable.getFieldInternal(dim, tableIdx, &e);
         ok = Utils::numericCast(e.u8, retval);
         break;
     case Dimension::Type::Unsigned16:
-        m_pointTable.getFieldInternal(dim, rawIdx, &e);
+        m_pointTable.getFieldInternal(dim, tableIdx, &e);
         ok = Utils::numericCast(e.u16, retval);
         break;
     case Dimension::Type::Unsigned32:
-        m_pointTable.getFieldInternal(dim, rawIdx, &e);
+        m_pointTable.getFieldInternal(dim, tableIdx, &e);
         ok = Utils::numericCast(e.u32, retval);
         break;
     case Dimension::Type::Unsigned64:
-        m_pointTable.getFieldInternal(dim, rawIdx, &e);
+        m_pointTable.getFieldInternal(dim, tableIdx, &e);
         ok = Utils::numericCast(e.u64, retval);
         break;
     case Dimension::Type::None:
@@ -576,7 +538,11 @@ void PointView::setField(Dimension::Id dim, PointId idx, T val)
         return;
     }
     if (ok)
+    {
+        if (idx == m_index.size())
+            addPoint();
         m_pointTable.setFieldInternal(dim, tableId(idx), &e);
+    }
     else
     {
         std::ostringstream oss;
@@ -591,30 +557,10 @@ void PointView::setField(Dimension::Id dim, PointId idx, T val)
 inline void PointView::appendPoint(const PointView& buffer, PointId id)
 {
     // Invalid 'id' is a programmer error.
-    PointId rawId = buffer.m_index[id];
-    m_index.push_back(rawId);
+    m_index.push_back(buffer.m_index[id]);
     m_size++;
-    assert(m_temps.empty());
 }
 
-
-// Make a temporary copy of a point by adding an entry to the index.
-inline PointId PointView::getTemp(PointId id)
-{
-    PointId newid;
-    if (m_temps.size())
-    {
-        newid = m_temps.front();
-        m_temps.pop();
-        m_index[newid] = m_index[id];
-    }
-    else
-    {
-        newid = (PointId)m_index.size();
-        m_index.push_back(m_index[id]);
-    }
-    return newid;
-}
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const PointView&);
 

@@ -77,14 +77,18 @@ std::string r = R"foo(
       "GpsTime": 245379.401,
       "Green": 98,
       "Intensity": 1,
+      "KeyPoint": 0,
       "NumberOfReturns": 1,
+      "Overlap": 0,
       "PointId": 5,
       "PointSourceId": 7326,
       "Red": 82,
       "ReturnNumber": 1,
       "ScanAngleRank": -17,
       "ScanDirectionFlag": 1,
+      "Synthetic": 0,
       "UserData": 130,
+      "Withheld": 0,
       "X": 637176.73,
       "Y": 849397.08,
       "Z": 410.89
@@ -92,6 +96,7 @@ std::string r = R"foo(
   },
 )foo";
 
+    SCOPED_TRACE("point");
     test("-p 5", r);
 }
 
@@ -105,20 +110,25 @@ std::string r = R"foo(
         "GpsTime": 245385.9092,
         "Green": 127,
         "Intensity": 84,
+        "KeyPoint": 0,
         "NumberOfReturns": 1,
+        "Overlap": 0,
         "PointId": 109811,
         "PointSourceId": 7326,
         "Red": 114,
         "ReturnNumber": 1,
         "ScanAngleRank": -1,
         "ScanDirectionFlag": 0,
+        "Synthetic": 0,
         "UserData": 122,
+        "Withheld": 0,
         "X": 636125.88,
         "Y": 848971.06,
         "Z": 428.05
       },
 )foo";
 
+    SCOPED_TRACE("query");
     test("--query 0,0/5", r);
 }
 
@@ -149,6 +159,7 @@ std::string r = R"foo(
       },
 )foo";
 
+    SCOPED_TRACE("stats");
     test("", r);
 
 // 10-Jan-20 - Broken by a change to proj which converts meters to ft, I think.
@@ -184,6 +195,7 @@ std::string r = R"foo(
         "type": "unsigned"
       },
 )foo";
+    SCOPED_TRACE("schema");
     test("--schema", r);
 }
 
@@ -201,5 +213,40 @@ std::string r = R"foo(
         "type": "unsigned"
       },
 )foo";
+    SCOPED_TRACE("all");
     test("--all", r);
+}
+
+TEST(Info, stac)
+{
+std::string r = R"foo(
+    "properties":
+    {
+      "datetime": "2015-09-10T00:00:00Z",
+      "pc:count": 110000,
+      "pc:encoding": ".las",
+)foo";
+    SCOPED_TRACE("stac");
+    test("--stac", r);
+
+
+//anything other than message and status is a success
+std::string validation = R"foo(
+  "stac":
+  {
+    "message": "Failed to create STAC Feature with missing key. 'EPSG:4326'",
+    "status": "error"
+  }
+)foo";
+
+    std::string cmd;
+
+    std::string output;
+    cmd = appName() + " " + "--stac" + " " +
+        Support::datapath("las/sample_c.las") + " 2>&1";
+
+    EXPECT_EQ(Utils::run_shell_command(cmd, output), 0);
+    EXPECT_NE(output.find(validation), std::string::npos)
+        << "Found: '" << output << "'" << std::endl
+        << "expected: '" << validation<<"'" << std::endl;
 }

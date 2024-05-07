@@ -1,5 +1,9 @@
-#cmake_minimum_required(VERSION 3.1...3.15)
-#project(pdalteaser)
+cmake_minimum_required(VERSION 3.13)
+
+if (STANDALONE)
+    include(../../cmake/standalone.cmake NO_POLICY_SCOPE)
+    find_package(PDAL REQUIRED)
+endif(STANDALONE)
 
 find_package(OpenMP QUIET REQUIRED)
 set_package_properties(OpenMP PROPERTIES

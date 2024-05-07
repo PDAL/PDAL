@@ -80,18 +80,23 @@ void ReciprocityFilter::addDimensions(PointLayoutPtr layout)
 
 void ReciprocityFilter::filter(PointView& view)
 {
-    point_count_t nloops = view.size();
+    point_count_t npoints = view.size();
+    point_count_t chunk_size = npoints / m_threads;
+    if (npoints % m_threads) chunk_size++;
     std::vector<std::thread> threadList(m_threads);
+
     for (int t = 0; t < m_threads; t++)
     {
-        threadList[t] = std::thread(std::bind(
+        threadList[t] = std::thread(
             [&](const PointId start, const PointId end) {
                 for (PointId i = start; i < end; i++)
                     setReciprocity(view, i);
             },
-            t * nloops / m_threads,
-            (t + 1) == m_threads ? nloops : (t + 1) * nloops / m_threads));
+            t * chunk_size,
+            (t + 1) == m_threads ? npoints : (t + 1) * chunk_size
+        );
     }
+
     for (auto& t : threadList)
         t.join();
 }

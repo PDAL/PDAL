@@ -79,8 +79,7 @@ ArtifactManager& BasePointTable::artifactManager()
 }
 
 
-void SimplePointTable::setFieldInternal(Dimension::Id id, PointId idx,
-    const void *value)
+void SimplePointTable::setFieldInternal(Dimension::Id id, PointId idx, const void *value)
 {
     const Dimension::Detail *d = m_layoutRef.dimDetail(id);
     const char *src  = (const char *)value;
@@ -89,8 +88,7 @@ void SimplePointTable::setFieldInternal(Dimension::Id id, PointId idx,
 }
 
 
-void SimplePointTable::getFieldInternal(Dimension::Id id, PointId idx,
-    void *value) const
+void SimplePointTable::getFieldInternal(Dimension::Id id, PointId idx, void *value) const
 {
     const Dimension::Detail *d = m_layoutRef.dimDetail(id);
     const char *src = getDimension(d, idx);

@@ -101,6 +101,7 @@ std::string NitfReader::getName() const { return s_info.name; }
 
 void NitfReader::initialize(PointTableRef table)
 {
+    tryLoadRemote();
     try
     {
         NitfFileReader nitf(m_filename);

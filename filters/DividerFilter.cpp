@@ -71,8 +71,10 @@ std::ostream& operator<<(std::ostream& out, const DividerFilter::Mode& mode)
     {
     case DividerFilter::Mode::RoundRobin:
         out << "round_robin";
+        break;
     case DividerFilter::Mode::Partition:
         out << "partition";
+        break;
     }
     return out;
 }

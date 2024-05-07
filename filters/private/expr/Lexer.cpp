@@ -128,7 +128,7 @@ Token Lexer::top(char c)
         tok = letter();
         break;
     default:
-        tok = Token(TokenType::Error, m_tokPos, m_pos, "Syntax error.");    
+        tok = Token(TokenType::Error, m_tokPos, m_pos, std::string(1, c));
         break;
     }
     return tok;
@@ -222,10 +222,10 @@ Token Lexer::letter()
         if (!std::isalnum(c) && c != '_')
         {
             putChar();
-            return Token(TokenType::Identifier, m_tokPos, m_pos, 
+            return Token(TokenType::Identifier, m_tokPos, m_pos,
                 m_buf.substr(m_tokPos, m_pos - m_tokPos));
         }
-    } 
+    }
 }
 
 } // namespace expr

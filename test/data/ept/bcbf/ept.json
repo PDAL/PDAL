@@ -1,0 +1,15 @@
+{
+  "bounds": [-1000, -1000, -1000, 1000, 1000, 1000],
+  "boundsConforming": [-1000, -1000, -1000, 1000, 1000, 1000],
+  "dataType": "binary",
+  "hierarchyType": "json",
+  "points": 10,
+  "schema": [
+    { "name": "X", "size": 4, "type": "signed" },
+    { "name": "Y", "size": 4, "type": "signed" },
+    { "name": "Z", "size": 4, "type": "signed" }
+  ],
+  "span": 128,
+  "srs": { "wkt": "+proj=geocent +R=1000 +units=m +no_defs" },
+  "version": "1.1.0"
+}

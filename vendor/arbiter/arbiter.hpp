@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: f17a62f31d4df0ec23636971f56f152a8c52b72c
+// Git SHA: 4d61535996946414317c6617724c20a2bc4d9bbf
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -2974,21 +2974,28 @@ public:
             std::string path,
             Headers headers,
             Query query,
-            std::size_t reserve);
+            std::size_t reserve,
+            std::size_t timeout = 0);
 
-    http::Response head(std::string path, Headers headers, Query query);
+    http::Response head(
+            std::string path,
+            Headers headers,
+            Query query,
+            std::size_t timeout = 0);
 
     http::Response put(
             std::string path,
             const std::vector<char>& data,
             Headers headers,
-            Query query);
+            Query query,
+            std::size_t timeout = 0);
 
     http::Response post(
             std::string path,
             const std::vector<char>& data,
             Headers headers,
-            Query query);
+            Query query,
+            std::size_t timeout = 0);
 
 private:
     Curl(std::string j);
@@ -3090,7 +3097,9 @@ public:
             std::string path,
             Headers headers = Headers(),
             Query query = Query(),
-            std::size_t reserve = 0);
+            std::size_t reserve = 0,
+            int retry = -1,
+            std::size_t timeout = 0);
 
     http::Response head(
             std::string path,
@@ -3101,7 +3110,9 @@ public:
             std::string path,
             const std::vector<char>& data,
             Headers headers = Headers(),
-            Query query = Query());
+            Query query = Query(),
+            int retry = -1,
+            std::size_t timeout = 0);
 
     http::Response post(
             std::string path,
@@ -3115,7 +3126,7 @@ private:
     std::size_t m_id;
     std::size_t m_retry;
 
-    http::Response exec(std::function<http::Response()> f);
+    http::Response exec(std::function<http::Response()> f, int retry = -1);
 };
 
 class ARBITER_DLL Pool
@@ -3259,48 +3270,6 @@ private:
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/util/time.hpp
-// //////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-// //////////////////////////////////////////////////////////////////////
-// Beginning of content of file: arbiter/util/macros.hpp
-// //////////////////////////////////////////////////////////////////////
-
-#pragma once
-
-#define ROTLEFT(a,b) (((a) << (b)) | ((a) >> (32-(b))))
-#define ROTRIGHT(a,b) (((a) >> (b)) | ((a) << (32-(b))))
-
-// SHA256.
-#define CH(x,y,z) (((x) & (y)) ^ (~(x) & (z)))
-#define MAJ(x,y,z) (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
-#define EP0(x) (ROTRIGHT(x,2) ^ ROTRIGHT(x,13) ^ ROTRIGHT(x,22))
-#define EP1(x) (ROTRIGHT(x,6) ^ ROTRIGHT(x,11) ^ ROTRIGHT(x,25))
-#define SIG0(x) (ROTRIGHT(x,7) ^ ROTRIGHT(x,18) ^ ((x) >> 3))
-#define SIG1(x) (ROTRIGHT(x,17) ^ ROTRIGHT(x,19) ^ ((x) >> 10))
-
-// MD5.
-#define F(x,y,z) ((x & y) | (~x & z))
-#define G(x,y,z) ((x & z) | (y & ~z))
-#define H(x,y,z) (x ^ y ^ z)
-#define I(x,y,z) (y ^ (x | ~z))
-
-#define FF(a,b,c,d,m,s,t) { a += F(b,c,d) + m + t; \
-                            a = b + ROTLEFT(a,s); }
-#define GG(a,b,c,d,m,s,t) { a += G(b,c,d) + m + t; \
-                            a = b + ROTLEFT(a,s); }
-#define HH(a,b,c,d,m,s,t) { a += H(b,c,d) + m + t; \
-                            a = b + ROTLEFT(a,s); }
-#define II(a,b,c,d,m,s,t) { a += I(b,c,d) + m + t; \
-                            a = b + ROTLEFT(a,s); }
-
-
-// //////////////////////////////////////////////////////////////////////
-// End of content of file: arbiter/util/macros.hpp
 // //////////////////////////////////////////////////////////////////////
 
 
@@ -3788,7 +3757,9 @@ public:
      *
      * @param path Path with the type-specifying prefix information stripped.
      */
-    virtual void put(std::string path, const std::vector<char>& data) const = 0;
+    virtual std::vector<char> put(
+        std::string path, 
+        const std::vector<char>& data) const = 0;
 
     /** True for remote paths, otherwise false.  If `true`, a fs::LocalHandle
      * request will download and write this file to the local filesystem.
@@ -3802,7 +3773,7 @@ public:
     std::size_t getSize(std::string path) const;
 
     /** Write string data. */
-    void put(std::string path, const std::string& data) const;
+    std::vector<char> put(std::string path, const std::string& data) const;
 
     /** Copy a file, where @p src and @p dst must both be of this driver
      * type.  Type-prefixes must be stripped from the input parameters.
@@ -3973,7 +3944,7 @@ public:
     virtual std::unique_ptr<std::size_t> tryGetSize(
             std::string path) const override;
 
-    virtual void put(
+    virtual std::vector<char> put(
             std::string path,
             const std::vector<char>& data) const override;
 
@@ -4055,11 +4026,11 @@ public:
     virtual std::unique_ptr<std::size_t> tryGetSize(
             std::string path) const override;
 
-    virtual void put(
+    virtual std::vector<char> put(
             std::string path,
             const std::vector<char>& data) const final override
     {
-        put(path, data, http::Headers(), http::Query());
+        return put(path, data, http::Headers(), http::Query());
     }
 
     /* HTTP-specific driver methods follow.  Since many drivers (S3, Dropbox,
@@ -4107,7 +4078,7 @@ public:
             http::Query query) const;
 
     /** Perform an HTTP PUT request. */
-    void put(
+    std::vector<char> put(
             std::string path,
             const std::string& data,
             http::Headers headers,
@@ -4118,7 +4089,7 @@ public:
      */
 
     /** Perform an HTTP PUT request. */
-    virtual void put(
+    virtual std::vector<char> put(
             std::string path,
             const std::vector<char>& data,
             http::Headers headers,
@@ -4142,13 +4113,17 @@ public:
             std::string path,
             http::Headers headers = http::Headers(),
             http::Query query = http::Query(),
-            std::size_t reserve = 0) const;
+            std::size_t reserve = 0,
+            int retry = -1,
+            std::size_t timeout = 0) const;
 
     http::Response internalPut(
             std::string path,
             const std::vector<char>& data,
             http::Headers headers = http::Headers(),
-            http::Query query = http::Query()) const;
+            http::Query query = http::Query(),
+            int retry = -1,
+            std::size_t timeout = 0) const;
 
     http::Response internalHead(
             std::string path,
@@ -4284,7 +4259,7 @@ public:
             http::Query query = http::Query()) const override;
 
     /** Inherited from Drivers::Http. */
-    virtual void put(
+    virtual std::vector<char> put(
             std::string path,
             const std::vector<char>& data,
             http::Headers headers,
@@ -4304,6 +4279,8 @@ private:
             std::string path,
             bool verbose) const override;
 
+    AuthFields authFields() const;
+
     class ApiV4;
     class Resource;
 
@@ -4314,13 +4291,15 @@ private:
 class S3::AuthFields
 {
 public:
-    AuthFields(std::string access, std::string hidden, std::string token = "")
+    AuthFields(std::string access = "", std::string hidden = "", std::string token = "")
         : m_access(access), m_hidden(hidden), m_token(token)
     { }
 
     const std::string& access() const { return m_access; }
     const std::string& hidden() const { return m_hidden; }
     const std::string& token() const { return m_token; }
+
+    explicit operator bool() const { return m_access.size() || m_hidden.size() || m_token.size(); }
 
 private:
     std::string m_access;
@@ -4337,8 +4316,9 @@ public:
         , m_token(token)
     { }
 
-    Auth(std::string credUrl)
+    Auth(std::string credUrl, bool imdsv2 = true)
         : m_credUrl(internal::makeUnique<std::string>(credUrl))
+        , m_imdsv2(imdsv2)
     { }
 
     static std::unique_ptr<Auth> create(std::string profile, std::string s);
@@ -4351,6 +4331,7 @@ private:
     mutable std::string m_token;
 
     std::unique_ptr<std::string> m_credUrl;
+    bool m_imdsv2 = true;
     mutable std::unique_ptr<Time> m_expiration;
     mutable std::mutex m_mutex;
 };
@@ -4511,10 +4492,12 @@ public:
 
     // Overrides.
     virtual std::unique_ptr<std::size_t> tryGetSize(
-            std::string path) const override;
+            std::string path,
+            http::Headers headers,
+            http::Query query = http::Query()) const override;
 
     /** Inherited from Drivers::Http. */
-    virtual void put(
+    virtual std::vector<char> put(
             std::string path,
             const std::vector<char>& data,
             http::Headers headers,
@@ -4713,7 +4696,7 @@ public:
             std::string path) const override;
 
     /** Inherited from Drivers::Http. */
-    virtual void put(
+    virtual std::vector<char> put(
             std::string path,
             const std::vector<char>& data,
             http::Headers headers,
@@ -4812,7 +4795,7 @@ public:
         std::string j,
         std::string profile);
 
-    virtual void put(
+    virtual std::vector<char> put(
             std::string path,
             const std::vector<char>& data,
             http::Headers headers,
@@ -5278,10 +5261,12 @@ public:
     std::unique_ptr<std::size_t> tryGetSize(std::string path) const;
 
     /** Write data to path. */
-    void put(std::string path, const std::string& data) const;
+    std::vector<char> put(std::string path, const std::string& data) const;
 
     /** Write data to path. */
-    void put(std::string path, const std::vector<char>& data) const;
+    std::vector<char> put(
+            std::string path, 
+            const std::vector<char>& data) const;
 
     /** Get data with additional HTTP-specific parameters.  Throws if
      * isHttpDerived is false for this path. */
@@ -5313,7 +5298,7 @@ public:
 
     /** Write data to path with additional HTTP-specific parameters.
      * Throws if isHttpDerived is false for this path. */
-    void put(
+    std::vector<char> put(
             std::string path,
             const std::string& data,
             http::Headers headers,
@@ -5321,7 +5306,7 @@ public:
 
     /** Write data to path with additional HTTP-specific parameters.
      * Throws if isHttpDerived is false for this path. */
-    void put(
+    std::vector<char> put(
             std::string path,
             const std::vector<char>& data,
             http::Headers headers,

@@ -121,7 +121,7 @@ query
   HTTP query parameters to forward for remote endpoints. Specify as a JSON
   object of key/value string pairs.
 
-las
+vlr
   Read LAS VLRs and import as metadata. [Default: false]
 
 keep_alive
@@ -130,3 +130,12 @@ keep_alive
 fix_dims
   Make invalid dimension names valid by converting disallowed characters to '_'. Only
   applies to names specified in an extra-bytes VLR. [Default: true]
+
+srs_vlr_order
+  Preference order to read SRS VLRs (list of 'wkt1', 'wkt2', or 'projjson').
+  [Default: 'wkt1, wkt2, projjson']
+
+nosrs
+  Don't read the SRS VLRs. The data will not be assigned an SRS. This option is
+  for use only in special cases where processing the SRS could cause performance
+  issues. [Default: false]

@@ -65,7 +65,8 @@ void FaceRasterFilter::addArgs(ProgramArgs& args)
     m_limits->addArgs(args);
     args.add("mesh", "Mesh name", m_meshName);
     args.add("nodata", "No data value", m_noData, std::numeric_limits<double>::quiet_NaN());
-    args.add("edge_length", "Triangle edge length", m_limits->edgeLength);
+    args.add("max_triangle_edge_length", "Max triangle edge length",
+             m_maxTriangleEdgeLength,std::numeric_limits<double>::infinity());
 }
 
 void FaceRasterFilter::prepared(PointTableRef)
@@ -110,9 +111,18 @@ void FaceRasterFilter::filter(PointView& v)
         double y2 = v.getFieldAs<double>(Dimension::Id::Y, t.m_b);
         double z2 = v.getFieldAs<double>(Dimension::Id::Z, t.m_b);
 
+        if (!std::isinf(m_maxTriangleEdgeLength) &&
+            std::hypot(x2 - x1, y2 - y1) > m_maxTriangleEdgeLength)
+            continue;
+
         double x3 = v.getFieldAs<double>(Dimension::Id::X, t.m_c);
         double y3 = v.getFieldAs<double>(Dimension::Id::Y, t.m_c);
         double z3 = v.getFieldAs<double>(Dimension::Id::Z, t.m_c);
+
+        if (!std::isinf(m_maxTriangleEdgeLength) &&
+            (std::hypot(x2 - x3, y2 - y3) > m_maxTriangleEdgeLength ||
+             std::hypot(x1 - x3, y1 - y3) > m_maxTriangleEdgeLength))
+            continue;
 
         double xmax = (std::max)((std::max)(x1, x2), x3);
         double xmin = (std::min)((std::min)(x1, x2), x3);
@@ -125,12 +135,21 @@ void FaceRasterFilter::filter(PointView& v)
         // minimum position is exactly aligned with a cell center (we could simply start one cell
         // lower and to the left, but this small adjustment eliminates that extra row/col in most
         // cases).
-        int ax = raster->xCell(xmin + halfEdge - edgeBit);
-        int ay = raster->yCell(ymin + halfEdge - edgeBit);
+        bool okX, okY;
+        int ax = raster->xCell(xmin + halfEdge - edgeBit, okX);
+        int ay = raster->yCell(ymin + halfEdge - edgeBit, okY);
+        if (!okX)
+            throwError("X value out of range for raster.");
+        if (!okY)
+            throwError("Y value out of range for raster.");
 
         // edgeBit adjustment not necessary here since we're rounding up for exact values.
-        int bx = raster->xCell(xmax + halfEdge);
-        int by = raster->yCell(ymax + halfEdge);
+        int bx = raster->xCell(xmax + halfEdge, okX);
+        int by = raster->yCell(ymax + halfEdge, okY);
+        if (!okX)
+            throwError("X value out of range for raster.");
+        if (!okY)
+            throwError("Y value out of range for raster.");
 
         ax = Utils::clamp(ax, 0, (int)m_limits->width);
         bx = Utils::clamp(bx, 0, (int)m_limits->width);

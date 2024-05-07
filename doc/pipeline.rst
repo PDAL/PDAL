@@ -104,8 +104,6 @@ with the :ref:`writers.gdal` writer:
 .. _`UTM`: http://spatialreference.org/ref/epsg/nad83-utm-zone-16n/
 .. _`Geographic`: http://spatialreference.org/ref/epsg/4326/
 
-.. _processing_modes:
-
 Point Views and Multiple Outputs
 ................................................................................
 
@@ -133,6 +131,8 @@ files from a single pipeline.  The crop filter creates two output point views
       },
       "output#.las"
   ]
+
+.. _processing_modes:
 
 Processing Modes
 --------------------------------------------------------------------------------

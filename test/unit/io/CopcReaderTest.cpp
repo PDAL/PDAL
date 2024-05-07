@@ -61,66 +61,13 @@ namespace
     const point_count_t numPoints(518862);
 }
 
-/**
-namespace
-{
-    const BOX3D expBoundsConforming(515368, 4918340, 2322,
-            515402, 4918382, 2339);
-    const point_count_t expNumPoints(518862);
-    const std::vector<std::string> expDimNames = {
-         "X", "Y", "Z", "Intensity", "ReturnNumber", "NumberOfReturns",
-         "ScanDirectionFlag", "EdgeOfFlightLine", "Classification",
-         "ScanAngleRank", "UserData", "PointSourceId", "GpsTime", "OriginId"
-    };
-
-    // Most of our tests will exercise this laszip-based EPT dataset based on
-    // a 4-tile split of Lone Star Geyser.
-    const std::string sourceFilePath(
-            Support::datapath("ept/source/lone-star.laz"));
-    const std::string eptAutzenPath(
-            Support::datapath("ept/1.2-with-color/ept.json"));
-    const std::string attributesPath(
-            Support::datapath("autzen/attributes.json"));
-
-    // Also test a basic read of binary/zstandard versions of a smaller dataset.
-    const std::string ellipsoidEptBinaryPath(
-            Support::datapath("ept/ellipsoid-binary/ept.json"));
-    const std::string ellipsoidEptZstandardPath(
-            Support::datapath("ept/ellipsoid-zstandard/ept.json"));
-
-    const point_count_t ellipsoidNumPoints(100000);
-    const BOX3D ellipsoidBoundsConforming(-8242746, 4966506, -50,
-            -8242446, 4966706, 50);
-}
-
-TEST(EptReaderTest, protocol)
-{
-    Options opts;
-    opts.add("filename", "ept://http://testfile");
-
-    EptReader reader;
-    reader.setOptions(opts);
-
-    bool gotEx = false;
-    try
-    {
-        reader.preview();
-    }
-    catch (const pdal_error& err)
-    {
-        EXPECT_TRUE(strstr(err.what(), "ept.json"));
-        gotEx = true;
-    }
-    EXPECT_TRUE(gotEx);
-}
-**/
-
 TEST(CopcReaderTest, inspect)
 {
     const std::vector<std::string> dimNames = {
-         "ClassFlags", "Classification", "EdgeOfFlightLine", "GpsTime", "Intensity",
-         "NumberOfReturns", "PointSourceId", "ReturnNumber", "ScanAngleRank", "ScanChannel",
-         "ScanDirectionFlag", "UserData", "X", "Y", "Z"
+         "Classification", "EdgeOfFlightLine", "GpsTime", "Intensity", "KeyPoint",
+         "NumberOfReturns", "Overlap", "PointSourceId", "ReturnNumber", "ScanAngleRank",
+         "ScanChannel", "ScanDirectionFlag", "Synthetic", "UserData", "Withheld",
+         "X", "Y", "Z"
     };
 
     Options options;
@@ -486,6 +433,55 @@ TEST(EptReaderTest, boundedCrop)
     EXPECT_EQ(v->size(), 47u);
     EXPECT_EQ(v2->size(), 47u);
 }
+
+
+TEST(EptReaderTest, boundedCropGeoJSON)
+{
+    std::string wkt = FileUtils::readFileIntoString(
+        Support::datapath("autzen/autzen-selection.json"));
+
+    // First we'll query the EptReader for these bounds.
+    CopcReader reader;
+    {
+        Options options;
+        options.add("filename", copcAutzenPath);
+        Option polygon("polygon", wkt);
+        options.add(polygon);
+        reader.setOptions(options);
+    }
+
+    PointTable copcTable;
+    reader.prepare(copcTable);
+    PointViewSet s = reader.execute(copcTable);
+    PointViewPtr v = *s.begin();
+
+    // Now we'll check the result against a crop filter of the source file with
+    // the same bounds.
+    LasReader source;
+    {
+        Options options;
+        options.add("filename", Support::datapath("las/1.2-with-color.las"));
+        source.setOptions(options);
+    }
+    CropFilter crop;
+    {
+        Options options;
+        Option polygon("polygon", wkt);
+        options.add(polygon);
+        crop.setOptions(options);
+        crop.setInput(source);
+    }
+    PointTable sourceTable;
+    crop.prepare(sourceTable);
+    PointViewSet s2 = crop.execute(sourceTable);
+    PointViewPtr v2 = *s2.begin();
+
+    EXPECT_EQ(v->size(), v2->size());
+    EXPECT_EQ(v->size(), 47u);
+    EXPECT_EQ(v2->size(), 47u);
+}
+
+
 
 TEST(CopcReaderTest, polygonAndBoundsCrop)
 {

@@ -42,7 +42,8 @@
 
 #include "BpfCompressor.hpp"
 #include <pdal/util/Utils.hpp>
-#include <pdal/util/ProgramArgs.hpp>
+#include <arbiter/arbiter.hpp>
+
 
 namespace pdal
 {
@@ -83,7 +84,6 @@ std::ostream& operator<<(std::ostream& out, const BpfWriter::CoordId& id)
 
 void BpfWriter::addArgs(ProgramArgs& args)
 {
-    args.add("filename", "Output filename", m_filename).setPositional();
     args.add("compression", "Output compression", m_compression);
     args.add("header_data", "Base64-encoded header data", m_extraDataSpec);
     args.add("format", "Output format", m_header.m_pointFormat,
@@ -98,6 +98,15 @@ void BpfWriter::addArgs(ProgramArgs& args)
 
 void BpfWriter::initialize()
 {
+    // Deal with remote files
+    if (Utils::isRemote(filename()))
+    {
+        // swap our filename for a tmp file
+        std::string tmpname = Utils::tempFilename(filename());
+        m_remoteFilename = filename();
+        setFilename(tmpname);
+    }
+
     m_header.m_coordId = m_coordId.m_val;
     m_header.m_coordType = Utils::toNative(m_header.m_coordId ?
         BpfCoordType::UTM : BpfCoordType::Cartesian);
@@ -394,6 +403,19 @@ void BpfWriter::doneFile()
     m_header.writeDimensions(m_stream, m_dims);
     m_stream.close();
     getMetadata().addList("filename", m_curFilename);
+
+    if (m_remoteFilename.size())
+    {
+        arbiter::Arbiter a;
+        a.put(m_remoteFilename, a.getBinary(filename()));
+
+        // Clean up temporary
+        FileUtils::deleteFile(filename());
+
+        // Set the remote filename back as the filename and clear.
+        setFilename(m_remoteFilename);
+        m_remoteFilename.clear();
+    }
 }
 
 } //namespace pdal

@@ -6,7 +6,7 @@ filters.chipper
 The **Chipper Filter** takes a single large point cloud and converts it
 into a set
 of smaller clouds, or chips. The chips are all spatially contiguous and
-non-overlapping, so the result is a an irregular tiling of the input data.
+non-overlapping, so the result is an irregular tiling of the input data.
 
 .. note::
 

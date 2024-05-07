@@ -1,3 +1,6 @@
+#include <cmath>
+#include <vector>
+
 #include "MathParser.hpp"
 
 namespace pdal
@@ -7,7 +10,9 @@ namespace expr
 
 bool MathParser::expression(Expression& expr)
 {
-    return addexpr(expr);
+    // Only success if we've properly parsed the expression AND we're add the end of
+    // a math expression.
+    return addexpr(expr) && checkEnd();
 }
 
 bool MathParser::addexpr(Expression& expr)
@@ -149,19 +154,85 @@ bool MathParser::primary(Expression& expr)
     }
     else if (match(TokenType::Identifier))
     {
-        expr.pushNode(NodePtr(new VarNode(curToken().sval())));
+        if (!function(expr))
+            expr.pushNode(NodePtr(new VarNode(curToken().sval())));
         return true;
     }
+    bool status = parexpr(expr);
+    if (!status)
+        setError("Expecting value expression, instead found '" + peekToken().sval() + "'.");
 
-    return parexpr(expr);
+    return status;
 }
-    
+
+bool MathParser::function(Expression& expr)
+{
+    static const std::vector<Func1> funcs {
+        { "floor", ::floor },
+        { "ceil", ::ceil },
+        { "round", ::round },
+        { "abs", ::fabs },
+        { "fabs", ::fabs },
+        { "sqrt", ::sqrt },
+        { "sin", ::sin },
+        { "cos", ::cos },
+        { "tan", ::tan },
+        { "asin", ::asin },
+        { "acos", ::acos },
+        { "atan", ::atan },
+        { "sinh", ::sinh },
+        { "cosh", ::cosh },
+        { "tanh", ::tanh },
+        { "asinh", ::asinh },
+        { "acosh", ::acosh },
+        { "log", ::log },
+        { "log2", ::log2 },
+        { "log10", ::log10 },
+        { "exp", ::exp },
+        { "exp2", ::exp2 }
+    };
+
+    std::string name = curToken().sval();
+    auto it = std::find_if(funcs.begin(), funcs.end(),
+        [&name](const Func1& f){ return f.name == name; });
+
+    if (it == funcs.end())
+    {
+        if (peekToken() == TokenType::Lparen)
+            setError("Invalid function name '" + name + "'");
+        return false;
+    }
+
+    if (!match(TokenType::Lparen))
+    {
+        setError("Expecting '(' to open function invocation of '" + name + "'.");
+        return false;
+    }
+
+    if (!addexpr(expr))
+    {
+        setError("Expecting expression following '" + name + "('.");
+        return false;
+    }
+
+    if (!match(TokenType::Rparen))
+    {
+        setError("Expecting ')' following '" + name + "' argument.");
+        return false;
+    }
+
+    NodePtr sub = expr.popNode();  // Pop the primary.
+    expr.pushNode(NodePtr(new FuncNode(NodeType::Function, *it, std::move(sub))));
+
+    return true;
+}
+
 bool MathParser::parexpr(Expression& expr)
 {
     if (!match(TokenType::Lparen))
         return false;
 
-    if (!expression(expr))
+    if (!addexpr(expr))
     {
         setError("Expected expression following '('.");
         return false;

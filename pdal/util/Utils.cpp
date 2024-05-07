@@ -136,7 +136,9 @@ void Utils::trimLeading(std::string& s)
     // Note, that this should be OK in C++11, which guarantees a NULL.
     while (isspace(s[pos]))
         pos++;
-    s = s.substr(pos);
+
+    // Iterator version of erase doesn't throw.
+    s.erase(s.begin(), s.begin() + pos);
 }
 
 
@@ -156,7 +158,8 @@ void Utils::trimTrailing(std::string& s)
         else
             pos--;
     }
-    s = s.substr(0, pos + 1);
+    // The iterator version of erase doesn't throw.
+    s.erase(s.begin() + pos + 1, s.end());
 }
 
 
@@ -603,40 +606,6 @@ double Utils::normalizeLongitude(double longitude)
     return longitude;
 }
 
-
-// Useful for debug on occasion.
-std::string Utils::hexDump(const char *buf, size_t count)
-{
-   const unsigned char *cp = reinterpret_cast<const unsigned char *>(buf);
-   char foo[80];
-   int bytes, i, address = 0;
-   std::string out;
-
-   bytes = (count > 16) ? 16 : count;
-
-   while (bytes) {
-      sprintf(foo, "0x%06x ", address);
-      address += 16;
-      for (i = 0; i < 16; i++) {
-         if (i < bytes) {
-            sprintf(foo, "%02X ", cp[i]);
-            out += foo;
-         }
-         else
-            out += "   ";
-      }
-      out += "|";
-      for (i = 0; i < bytes; i++) {
-         sprintf(foo, "%c", isprint(cp[i]) ? cp[i] : '.');
-         out += foo;
-      }
-      out += "|\n";
-      count -= bytes;
-      cp += bytes;
-      bytes = (count > 16) ? 16 : count;
-   }
-   return (out);
-}
 
 
 std::vector<std::string> Utils::simpleWordexp(const std::string& cmdline)

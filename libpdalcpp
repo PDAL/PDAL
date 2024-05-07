@@ -1,1 +1,0 @@
-INPUT (-lpdal_base -lpdal_util)

@@ -107,8 +107,7 @@ private:
     virtual void initialize();
     virtual void prepared(PointTableRef table);
     virtual void readyTable(PointTableRef table);
-    virtual void readyFile(const std::string& filename,
-        const SpatialReference& srs);
+    virtual void readyFile(const std::string& filename, const SpatialReference& srs);
     virtual bool srsOverridden() const;
     void prerunFile(const PointViewSet& pvSet);
     virtual void writeView(const PointViewPtr view);

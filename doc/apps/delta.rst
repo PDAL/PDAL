@@ -4,6 +4,12 @@
 delta
 ******************************************************************************
 
+.. warning::
+
+  As of PDAL v2.6.0, the ``delta`` command is marked as DEPRECATED. It will
+  be removed from the default install in PDAL v2.7 and removed completely in
+  PDAL v2.8.
+
 The ``delta`` command is used to select a nearest point from a candidate file
 for each point in the source file.
 

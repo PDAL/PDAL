@@ -34,6 +34,7 @@
 
 #include "../io/TileDBUtils.hpp"
 #include <pdal/pdal_test_main.hpp>
+#include <tiledb/tiledb>
 
 namespace pdal
 {
@@ -163,6 +164,253 @@ TEST(DomainBounds, parse_pair_missing_back_bracket_with_error)
     std::istringstream ss("[-1.0, 1.0)");
     DomainBounds bounds;
     EXPECT_THROW(bounds.parsePair(ss, "Dim"), std::runtime_error);
+}
+
+TEST(FilterFactory, filter_type_from_string)
+{
+    std::vector<std::pair<std::string, tiledb_filter_type_t>> test_pairs{
+        {"", TILEDB_FILTER_NONE},
+        {"NONE", TILEDB_FILTER_NONE},
+        {"gzip", TILEDB_FILTER_GZIP},
+        {"GZIP", TILEDB_FILTER_GZIP},
+        {"zstd", TILEDB_FILTER_ZSTD},
+        {"ZSTD", TILEDB_FILTER_ZSTD},
+        {"lz4", TILEDB_FILTER_LZ4},
+        {"LZ4", TILEDB_FILTER_LZ4},
+        {"rle", TILEDB_FILTER_RLE},
+        {"RLE", TILEDB_FILTER_RLE},
+        {"bzip2", TILEDB_FILTER_BZIP2},
+        {"BZIP2", TILEDB_FILTER_BZIP2},
+        {"double-delta", TILEDB_FILTER_DOUBLE_DELTA},
+        {"DOUBLE_DELTA", TILEDB_FILTER_DOUBLE_DELTA},
+        {"bit-width-reduction", TILEDB_FILTER_BIT_WIDTH_REDUCTION},
+        {"BIT_WIDTH_REDUCTION", TILEDB_FILTER_BIT_WIDTH_REDUCTION},
+        {"bit-shuffle", TILEDB_FILTER_BITSHUFFLE},
+        {"BITSHUFFLE", TILEDB_FILTER_BITSHUFFLE},
+        {"byte-shuffle", TILEDB_FILTER_BYTESHUFFLE},
+        {"BYTESHUFFLE", TILEDB_FILTER_BYTESHUFFLE},
+        {"positive-delta", TILEDB_FILTER_POSITIVE_DELTA},
+        {"POSITIVE_DELTA", TILEDB_FILTER_POSITIVE_DELTA},
+        {"DICTIONARY_ENCODING", TILEDB_FILTER_DICTIONARY},
+        {"float-scale", TILEDB_FILTER_SCALE_FLOAT},
+        {"scale-float", TILEDB_FILTER_SCALE_FLOAT},
+        {"SCALE_FLOAT", TILEDB_FILTER_SCALE_FLOAT},
+        {"XOR", TILEDB_FILTER_XOR},
+        {"WEBP", TILEDB_FILTER_WEBP},
+    };
+    for (const auto& params : test_pairs)
+    {
+        auto result = FilterFactory::filterTypeFromString(params.first);
+        EXPECT_EQ(result, params.second);
+    }
+}
+
+TEST(FilterFactory, dim_with_unset_default_filter)
+{
+    NL::json jsonOptions({});
+    tiledb::Context ctx{};
+    FilterFactory factory{jsonOptions,        "none", {{0.01, 0.01, 0.01}},
+                          {{1.0f, 1.0, 1.0}}, "",     0};
+    auto filterList = factory.filterList(ctx, "Curvature");
+    auto nfilters = filterList.nfilters();
+    EXPECT_EQ(nfilters, 0);
+}
+
+TEST(FilterFactory, dim_with_set_default_filter)
+{
+    NL::json jsonOptions({});
+    tiledb::Context ctx{};
+    FilterFactory factory{jsonOptions,       "none", {{0.01, 0.01, 0.01}},
+                          {{1.0, 1.0, 1.0}}, "zstd", 9};
+    auto filterList = factory.filterList(ctx, "Curvature");
+    auto nfilters = filterList.nfilters();
+    EXPECT_EQ(nfilters, 1);
+    if (nfilters >= 1)
+    {
+        auto filter = filterList.filter(0);
+        EXPECT_EQ(filter.filter_type(), TILEDB_FILTER_ZSTD);
+        int32_t compressionLevel;
+        filter.get_option<int32_t>(TILEDB_COMPRESSION_LEVEL, &compressionLevel);
+        EXPECT_EQ(compressionLevel, 9);
+    }
+}
+
+TEST(FilterFactory, user_set_scale_float)
+{
+    NL::json jsonOptions({});
+    jsonOptions["Z"] = {{{"compression", "scale-float"},
+                         {"scale_float_bytewidth", 2},
+                         {"scale_float_factor", 2.0},
+                         {"scale_float_offset", 100.0}}};
+    FilterFactory factory{jsonOptions,       "balanced", {{0.01, 0.01, 0.01}},
+                          {{1.0, 1.0, 1.0}}, "zstd",     7};
+
+    tiledb::Context ctx{};
+    auto filterList = factory.filterList(ctx, "Z");
+    auto nfilters = filterList.nfilters();
+    EXPECT_EQ(nfilters, 1);
+
+    if (nfilters >= 1)
+    {
+        auto filter = filterList.filter(0);
+        EXPECT_EQ(filter.filter_type(), TILEDB_FILTER_SCALE_FLOAT);
+        uint64_t bytewidth{0};
+        double factor{1.0};
+        double offset{0.0};
+        filter.get_option<uint64_t>(TILEDB_SCALE_FLOAT_BYTEWIDTH, &bytewidth);
+        filter.get_option<double>(TILEDB_SCALE_FLOAT_FACTOR, &factor);
+        filter.get_option<double>(TILEDB_SCALE_FLOAT_OFFSET, &offset);
+        EXPECT_EQ(bytewidth, 2);
+        EXPECT_FLOAT_EQ(factor, 2.0);
+        EXPECT_FLOAT_EQ(offset, 100.0);
+    }
+}
+
+TEST(FilterFactory, user_set_delta)
+{
+    NL::json jsonOptions({});
+    jsonOptions["GpsTime"] = {
+        {{"compression", "delta"}, {"reinterpret_datatype", "UINT64"}}};
+    FilterFactory factory{jsonOptions,       "balanced", {{0.01, 0.01, 0.01}},
+                          {{1.0, 1.0, 1.0}}, "zstd",     7};
+
+    tiledb::Context ctx{};
+    auto filterList = factory.filterList(ctx, "GpsTime");
+    auto nfilters = filterList.nfilters();
+    EXPECT_EQ(nfilters, 1);
+
+    if (nfilters >= 1)
+    {
+        auto filter = filterList.filter(0);
+        EXPECT_EQ(filter.filter_type(), TILEDB_FILTER_DELTA);
+        tiledb_datatype_t output_type{};
+        filter.get_option(TILEDB_COMPRESSION_REINTERPRET_DATATYPE,
+                          &output_type);
+        EXPECT_EQ(output_type, TILEDB_UINT64);
+    }
+}
+
+TEST(FilterFactory, user_set_bzip2)
+{
+    NL::json jsonOptions({});
+    jsonOptions["Z"] = {{{"compression", "bzip2"}, {"compression_level", 9}}};
+    FilterFactory factory{jsonOptions,       "balanced", {{0.01, 0.01, 0.01}},
+                          {{1.0, 1.0, 1.0}}, "zstd",     7};
+
+    tiledb::Context ctx{};
+    auto filterList = factory.filterList(ctx, "Z");
+    auto nfilters = filterList.nfilters();
+    EXPECT_EQ(nfilters, 1);
+
+    if (nfilters >= 1)
+    {
+        auto filter = filterList.filter(0);
+        EXPECT_EQ(filter.filter_type(), TILEDB_FILTER_BZIP2);
+        auto level = filter.get_option<int32_t>(TILEDB_COMPRESSION_LEVEL);
+        EXPECT_EQ(level, 9);
+    }
+}
+
+TEST(FilterFactory, user_set_bit_width_reduction)
+{
+    NL::json jsonOptions({});
+    jsonOptions["Z"] = {
+        {{"compression", "bit-width-reduction"}, {"bit_width_max_window", 10}}};
+    FilterFactory factory{jsonOptions,       "balanced", {{0.01, 0.01, 0.01}},
+                          {{1.0, 1.0, 1.0}}, "zstd",     7};
+
+    tiledb::Context ctx{};
+    auto filterList = factory.filterList(ctx, "Z");
+    auto nfilters = filterList.nfilters();
+    EXPECT_EQ(nfilters, 1);
+
+    if (nfilters >= 1)
+    {
+        auto filter = filterList.filter(0);
+        EXPECT_EQ(filter.filter_type(), TILEDB_FILTER_BIT_WIDTH_REDUCTION);
+        auto window = filter.get_option<uint32_t>(TILEDB_BIT_WIDTH_MAX_WINDOW);
+        EXPECT_EQ(window, 10);
+    }
+}
+
+TEST(FilterFactory, user_set_webp)
+{
+    NL::json jsonOptions({});
+    jsonOptions["Z"] = {{{"compression", "webp"},
+                         {"webp_quality", 90.0},
+                         {"webp_input_format", "bgr"},
+                         {"webp_lossless", false}}};
+    FilterFactory factory{jsonOptions,       "balanced", {{0.01, 0.01, 0.01}},
+                          {{1.0, 1.0, 1.0}}, "zstd",     7};
+
+    tiledb::Context ctx{};
+    auto filterList = factory.filterList(ctx, "Z");
+    auto nfilters = filterList.nfilters();
+    EXPECT_EQ(nfilters, 1);
+
+    if (nfilters >= 1)
+    {
+        auto filter = filterList.filter(0);
+        EXPECT_EQ(filter.filter_type(), TILEDB_FILTER_WEBP);
+        auto quality = filter.get_option<float>(TILEDB_WEBP_QUALITY);
+        EXPECT_FLOAT_EQ(quality, 90.0);
+        auto input_format =
+            filter.get_option<uint8_t>(TILEDB_WEBP_INPUT_FORMAT);
+        EXPECT_EQ(input_format, 2);
+        auto lossless = filter.get_option<uint8_t>(TILEDB_WEBP_LOSSLESS);
+        EXPECT_EQ(lossless, 0);
+    }
+}
+
+TEST(FilterFactory, user_set_positive_delta)
+{
+    NL::json jsonOptions({});
+    jsonOptions["Z"] = {
+        {{"compression", "positive-delta"}, {"positive_delta_max_window", 10}}};
+    FilterFactory factory{jsonOptions,       "balanced", {{0.01, 0.01, 0.01}},
+                          {{1.0, 1.0, 1.0}}, "zstd",     7};
+
+    tiledb::Context ctx{};
+    auto filterList = factory.filterList(ctx, "Z");
+    auto nfilters = filterList.nfilters();
+    EXPECT_EQ(nfilters, 1);
+
+    if (nfilters >= 1)
+    {
+        auto filter = filterList.filter(0);
+        EXPECT_EQ(filter.filter_type(), TILEDB_FILTER_POSITIVE_DELTA);
+        auto window =
+            filter.get_option<uint32_t>(TILEDB_POSITIVE_DELTA_MAX_WINDOW);
+        EXPECT_EQ(window, 10);
+    }
+}
+
+TEST(FilterFactory, user_set_two_filter_list)
+{
+    NL::json jsonOptions({});
+    jsonOptions["X"] = {{{"compression", "bit-shuffle"}},
+                        {{"compression", "gzip"}, {"compression_level", 9}}};
+    FilterFactory factory{jsonOptions,       "balanced", {{0.01, 0.01, 0.01}},
+                          {{1.0, 1.0, 1.0}}, "zstd",     7};
+
+    tiledb::Context ctx{};
+    auto filterList = factory.filterList(ctx, "X");
+    auto nfilters = filterList.nfilters();
+    EXPECT_EQ(nfilters, 2);
+    if (nfilters >= 1)
+    {
+        auto filter0 = filterList.filter(0);
+        EXPECT_EQ(filter0.filter_type(), TILEDB_FILTER_BITSHUFFLE);
+    }
+    if (nfilters >= 2)
+    {
+        auto filter1 = filterList.filter(1);
+        EXPECT_EQ(filter1.filter_type(), TILEDB_FILTER_GZIP);
+        int32_t compressionLevel;
+        filter1.get_option<int32_t>(TILEDB_COMPRESSION_LEVEL,
+                                    &compressionLevel);
+        EXPECT_EQ(compressionLevel, 9);
+    }
 }
 
 } // namespace pdal

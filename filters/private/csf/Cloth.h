@@ -36,9 +36,7 @@
  */
 // using discrete steps (drop and pull) to approximate the physical process
 
-#ifndef _CLOTH_H_
-#define _CLOTH_H_
-
+#pragma once
 
 #ifdef _WIN32
 # include <windows.h>
@@ -164,6 +162,3 @@ public:
 
     void saveMovableToFile(string path = "");
 };
-
-
-#endif // ifndef _CLOTH_H_

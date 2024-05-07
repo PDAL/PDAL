@@ -292,6 +292,17 @@ TEST(BoundsTest, test_parse)
     EXPECT_EQ(b1, b2);
 }
 
+TEST(BoundsTest, test_parse2)
+{
+    std::istringstream iss1("([-79.0,-74.0],[38.0,39.0])");
+
+    BOX3D b1;
+
+    iss1 >> b1;
+
+}
+
+
 TEST(BoundsTest, test_parse_geojson)
 {
     std::istringstream iss1("([1,101],[2,102],[3,103])");
@@ -340,9 +351,6 @@ TEST(BoundsTest, test_parse_object)
     iss4 >> b4;
 
     EXPECT_EQ(b3, b4);
-
-
-
 
     SrsBounds sb;
     std::string t("{\"minx\": 1,\"miny\": 2,\"maxx\": 101,\"maxy\": 102, \"crs\":\"EPSG:2596\"}");
@@ -462,13 +470,14 @@ TEST(BoundsTest, b1)
     EXPECT_EQ(box.maxx, 1.0);
     EXPECT_EQ(box.maxy, 1.0);
 
-    std::string t("([+0e0,1.00000],[0,1e0]) / EPSG:2596");
+    std::string t("([+0e0,1.00000],[0,1e0])/EPSG:2596");
 
     SrsBounds sb;
     Utils::fromString(t, sb);
 
     EXPECT_FALSE(sb.is3d());
     EXPECT_TRUE(sb.to3d().empty());
+    EXPECT_TRUE(sb.spatialReference().getWKT().find("Pulkovo") != std::string::npos);
 
     box = sb.to2d();
     EXPECT_EQ(box.minx, 0.0);

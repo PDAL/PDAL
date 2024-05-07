@@ -36,23 +36,25 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Scaling.hpp>
 #include <pdal/Writer.hpp>
+#include <pdal/util/Uuid.hpp>
 
 namespace pdal
 {
 
+// Subclasses can create an output file for each point view when in standard mode.
+// A '#' in the output filename is replaced with an incrementing integer as each file is
+// written. If no '#' is seen, all point views are written to a single output file.
 class PDAL_DLL FlexWriter : public Writer
 {
 protected:
     FlexWriter() : m_filenum(1)
     {}
 
-    std::string m_filename;
     Scaling m_scaling;
 
     void validateFilename(PointTableRef table)
     {
-        if (!table.supportsView() &&
-            (m_filename.find('#') != std::string::npos))
+        if (!table.supportsView() && (filename().find('#') != std::string::npos))
         {
             std::ostringstream oss;
             oss << getName() << ": Can't write with template-based "
@@ -68,7 +70,7 @@ private:
     {
         Writer::l_initialize(table);
         try {
-            m_hashPos = handleFilenameTemplate(m_filename);
+            m_hashPos = handleFilenameTemplate(filename());
         }
         catch (const pdal_error& err)
         {
@@ -78,17 +80,14 @@ private:
 
     std::string generateFilename()
     {
-        std::string filename = m_filename;
-        if (m_hashPos != std::string::npos) {
+        std::string filename = this->filename();
+        if (m_hashPos != std::string::npos)
+        {
             std::string fileCount = std::to_string(m_filenum++);
             filename.replace(m_hashPos, 1, fileCount);
         }
         return filename;
     }
-
-#if (__GNUG__ < 4 || (__GNUG__ == 4 && __GNUG_MINOR__ < 7))
-#define final final
-#endif
 
     virtual bool srsOverridden() const
     { return false; }
@@ -102,7 +101,7 @@ private:
         {
             if (!table.spatialReferenceUnique() && !srsOverridden())
                 log()->get(LogLevel::Error) << getName() <<
-                    ": Attempting to write '" << m_filename <<
+                    ": Attempting to write '" << filename() <<
                     "' with multiple point spatial references." << std::endl;
             readyFile(generateFilename(), table.spatialReference());
         }

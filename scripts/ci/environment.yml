@@ -3,6 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - libgdal
+  - boa
   - libpq
   - curl
   - hdf5
@@ -12,8 +13,11 @@ dependencies:
   - openssl
   - nitro
   - ceres-solver
-  - mkl  # [win]
-  - blas  # [win]
+  - python=3.10
+  - conda
+  - mamba
+  - conda-build
+  - libarrow
   - compilers
   - ninja
   - cmake

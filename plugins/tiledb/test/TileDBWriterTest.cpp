@@ -57,15 +57,15 @@ Options getTileDBOptions()
 {
     Options options;
 
-    options.add("x_tile_size", 1);
-    options.add("y_tile_size", 1);
-    options.add("z_tile_size", 1);
-    options.add("x_domain_st", 0.);
-    options.add("x_domain_end", 1.);
-    options.add("y_domain_st", 0.);
-    options.add("y_domain_end", 1.);
-    options.add("z_domain_st", 0.);
-    options.add("z_domain_end", 1.);
+    options.add("x_tile_size", 0.5);
+    options.add("y_tile_size", 0.5);
+    options.add("z_tile_size", 0.5);
+    options.add("x_domain_st", 0.0);
+    options.add("x_domain_end", 1.0);
+    options.add("y_domain_st", 0.0);
+    options.add("y_domain_end", 1.0);
+    options.add("z_domain_st", 0.0);
+    options.add("z_domain_end", 1.0);
 
     return options;
 }
@@ -221,6 +221,7 @@ TEST_F(TileDBWriterTest, write_simple_compression)
     options.add("array_name", pth);
     options.add("compression", "zstd");
     options.add("compression_level", 7);
+    options.add("filter_profile", "none");
 
     if (FileUtils::directoryExists(pth))
         FileUtils::deleteDirectory(pth);
@@ -360,13 +361,19 @@ TEST_F(TileDBWriterTest, default_options)
 
     tiledb::FilterList fl =
         array.schema().domain().dimension("X").filter_list();
-    EXPECT_EQ(fl.nfilters(), 1U);
+    EXPECT_EQ(fl.nfilters(), 4U);
 
     tiledb::Filter f1 = fl.filter(0);
-    EXPECT_EQ(f1.filter_type(), TILEDB_FILTER_ZSTD);
-    int32_t compressionLevel;
-    f1.get_option(TILEDB_COMPRESSION_LEVEL, &compressionLevel);
-    EXPECT_EQ(compressionLevel, 7);
+    EXPECT_EQ(f1.filter_type(), TILEDB_FILTER_SCALE_FLOAT);
+    uint64_t byteWidth;
+    f1.get_option<uint64_t>(TILEDB_SCALE_FLOAT_BYTEWIDTH, &byteWidth);
+    EXPECT_EQ(byteWidth, 4);
+    double scale;
+    f1.get_option<double>(TILEDB_SCALE_FLOAT_FACTOR, &scale);
+    EXPECT_NEAR(scale, 0.01, 1.0e-9);
+    double offset;
+    f1.get_option<double>(TILEDB_SCALE_FLOAT_OFFSET, &offset);
+    EXPECT_NEAR(offset, 0.0, 1.0e-9);
 
     tiledb::Attribute att = array.schema().attributes().begin()->second;
     tiledb::FilterList flAtts = att.filter_list();
@@ -482,6 +489,56 @@ TEST_F(TileDBWriterTest, dup_points)
         EXPECT_EQ(xs[i], 1.0); // points are always at the minimum of the box
 }
 
+TEST_F(TileDBWriterTest, no_dup_points)
+{
+    Options reader_options;
+    FauxReader reader;
+    BOX3D bounds(1.0, 1.0, 1.0, 2.0, 2.0, 2.0);
+    reader_options.add("bounds", bounds);
+    reader_options.add("mode", "constant");
+    reader_options.add("count", count);
+    reader.setOptions(reader_options);
+
+    tiledb::Context ctx;
+    std::string pth = Support::temppath("tiledb_test_no_dup_points");
+
+    Options writer_options = getTileDBOptions();
+    writer_options.add("array_name", pth);
+    // force flush on every point  so that we can write duplicates to separate fragments
+    writer_options.add("chunk_size", 1);
+    writer_options.add("allow_dups", false);
+
+    if (FileUtils::directoryExists(pth))
+        FileUtils::deleteDirectory(pth);
+
+    TileDBWriter writer;
+    writer.setOptions(writer_options);
+    writer.setInput(reader);
+
+    FixedPointTable table(count);
+    writer.prepare(table);
+    writer.execute(table);
+
+    tiledb::Array array(ctx, pth, TILEDB_READ);
+    tiledb::Query q(ctx, array, TILEDB_READ);
+
+    std::vector<double> xs(count);
+    std::vector<double> ys(count);
+    std::vector<double> zs(count);
+
+    q.set_data_buffer("X", xs).set_data_buffer("Y", ys).set_data_buffer("Z",
+                                                                        zs);
+
+    q.submit();
+    array.close();
+
+    auto result_num = (int)q.result_buffer_elements()["X"].second;
+    EXPECT_EQ(1, result_num); // test de-duplication allow_dups set to false
+    EXPECT_EQ(xs[0], 1.0); // points are always at the minimum of the box
+    EXPECT_EQ(ys[0], 1.0); // points are always at the minimum of the box
+    EXPECT_EQ(zs[0], 1.0); // points are always at the minimum of the box
+}
+
 TEST_F(TileDBWriterTest, sf_curve)
 {
     Options reader_options;
@@ -508,8 +565,8 @@ TEST_F(TileDBWriterTest, sf_curve)
     FixedPointTable table(count);
     writer.prepare(table);
 
-    // check that error is thrown if the tile size or domain is not specified
-    EXPECT_THROW(writer.execute(table), pdal_error);
+    // check no errors when creating array with no tiles and no domain
+    writer.execute(table);
 }
 
 TEST_F(TileDBWriterTest, tile_sizes)
@@ -523,7 +580,7 @@ TEST_F(TileDBWriterTest, tile_sizes)
     reader.setOptions(reader_options);
 
     tiledb::Context ctx;
-    std::string pth = Support::temppath("tiledb_test_sf_curve_ts");
+    std::string pth = Support::temppath("tiledb_test_tile_sizes");
 
     if (FileUtils::directoryExists(pth))
         FileUtils::deleteDirectory(pth);
@@ -544,6 +601,52 @@ TEST_F(TileDBWriterTest, tile_sizes)
 
     tiledb::Array array(ctx, pth, TILEDB_READ);
     EXPECT_EQ(true, array.schema().cell_order() == TILEDB_ROW_MAJOR);
+
+    EXPECT_DOUBLE_EQ(
+        array.schema().domain().dimension("X").tile_extent<double>(), 0.5);
+    EXPECT_DOUBLE_EQ(
+        array.schema().domain().dimension("Y").tile_extent<double>(), 0.5);
+    EXPECT_DOUBLE_EQ(
+        array.schema().domain().dimension("Z").tile_extent<double>(), 0.5);
+    array.close();
+}
+
+TEST_F(TileDBWriterTest, set_cell_tile_order)
+{
+    Options reader_options;
+    FauxReader reader;
+    BOX3D bounds(1.0, 1.0, 1.0, 2.0, 2.0, 2.0);
+    reader_options.add("bounds", bounds);
+    reader_options.add("mode", "constant");
+    reader_options.add("count", count);
+    reader.setOptions(reader_options);
+
+    tiledb::Context ctx;
+    std::string pth = Support::temppath("tiledb_test_cell_tile_order");
+
+    if (FileUtils::directoryExists(pth))
+        FileUtils::deleteDirectory(pth);
+
+    Options writer_options = getTileDBOptions();
+    writer_options.add("array_name", pth);
+    writer_options.add("cell_order", "hilbert");
+    writer_options.add("tile_order", "col-major");
+
+    TileDBWriter writer;
+    writer.setOptions(writer_options);
+    writer.setInput(reader);
+
+    FixedPointTable table(count);
+    writer.prepare(table);
+    writer.execute(table);
+
+    EXPECT_EQ(true, tiledb::Object::object(ctx, pth).type() ==
+                        tiledb::Object::Type::Array);
+
+    tiledb::Array array(ctx, pth, TILEDB_READ);
+    EXPECT_EQ(true, array.schema().cell_order() == TILEDB_HILBERT);
+    EXPECT_EQ(true, array.schema().tile_order() == TILEDB_COL_MAJOR);
+
     array.close();
 }
 
@@ -588,4 +691,65 @@ TEST_F(TileDBWriterTest, sf_curve_stats)
 
     array.close();
 }
+
+TEST(AdditionalTileDBWriterTest, domain_from_stats)
+{
+    // Set filename for output.
+    std::string uri = Support::temppath("tiledb_domain_from_stats");
+    if (FileUtils::directoryExists(uri))
+        FileUtils::deleteDirectory(uri);
+
+    // Create the stage factory.
+    StageFactory factory;
+
+    // Create faux reader for input data.
+    Stage* reader = factory.createStage("readers.faux");
+    Options reader_options;
+    reader_options.add("mode", "grid");
+    reader_options.add("bounds", "([0, 10],[0, 20],[0, 30])");
+    reader->setOptions(reader_options);
+
+    // Create stats filter and link it to the faux reader.
+    Stage* stats_filter = factory.createStage("filters.stats");
+    stats_filter->setInput(*reader);
+
+    // Create TileDB writer and link it to the stats filter and reader.
+    Stage* writer = factory.createStage("writers.tiledb");
+    Options writer_options;
+    writer_options.add("filename", uri);
+    writer->setInput(*stats_filter);
+    writer->setOptions(writer_options);
+
+    // Execute
+    PointTable table;
+    writer->prepare(table);
+    writer->execute(table);
+
+    // Check schema.
+    {
+        tiledb::Context ctx{};
+        tiledb::ArraySchema schema(ctx, uri);
+        auto domain = schema.domain();
+        EXPECT_EQ(domain.ndim(), 3);
+
+        // Check X domain.
+        std::pair<double, double> x_domain =
+            domain.dimension(0).domain<double>();
+        EXPECT_DOUBLE_EQ(x_domain.first, -1.0);
+        EXPECT_DOUBLE_EQ(x_domain.second, 10.0);
+
+        // Check Y domain.
+        std::pair<double, double> y_domain =
+            domain.dimension(1).domain<double>();
+        EXPECT_DOUBLE_EQ(y_domain.first, -1.0);
+        EXPECT_DOUBLE_EQ(y_domain.second, 20.0);
+
+        // Check Z domain.
+        std::pair<double, double> z_domain =
+            domain.dimension(2).domain<double>();
+        EXPECT_DOUBLE_EQ(z_domain.first, -1.0);
+        EXPECT_DOUBLE_EQ(z_domain.second, 30.0);
+    }
+}
+
 } // namespace pdal

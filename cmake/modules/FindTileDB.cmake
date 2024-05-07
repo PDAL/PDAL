@@ -3,12 +3,12 @@
 # CMake module to search for the TileDB library
 #
 # On success, the macro sets the following variables:
-# TILEDB_FOUND       = if the library found
-# TILEDB_LIBRARIES   = full path to the library
-# TILEDB_INCLUDE_DIR = where to find the library headers also defined,
+# TileDB_FOUND       = if the library found
+# TileDB_LIBRARIES   = full path to the library
+# TileDB_INCLUDE_DIR = where to find the library headers also defined,
 #                       but not for general use are
-# TILEDB_LIBRARY     = where to find the hexer library.
-# TILEDB_VERSION     = version of library which was found, e.g. "1.4.1"
+# TileDB_LIBRARY     = where to find the hexer library.
+# TileDB_VERSION     = version of library which was found, e.g. "1.4.1"
 #
 # Copyright (c) 2019 TileDB, Inc
 #
@@ -17,65 +17,71 @@
 #
 ###############################################################################
 
-IF(TILEDB_INCLUDE_DIR)
+IF(TileDB_INCLUDE_DIR)
     # Already in cache, be silent
-    SET(TILEDB_FIND_QUIETLY TRUE)
+    SET(TileDB_FIND_QUIETLY TRUE)
 ENDIF()
 
+# Note: the environment variable is all caps unlike the find_module components.
 IF(DEFINED ENV{TILEDB_HOME})
-    set(TILEDB_HOME $ENV{TILEDB_HOME})
+    set(TileDB_HOME $ENV{TILEDB_HOME})
 ENDIF()
 
-FIND_PATH(TILEDB_INCLUDE_DIR
+FIND_PATH(TileDB_INCLUDE_DIR
         tiledb
         PATHS
         /usr/include
         /usr/local/include
-        ${TILEDB_HOME}/dist/include)
+        ${TileDB_HOME}/dist/include)
 
-FIND_LIBRARY(TILEDB_LIBRARY
+FIND_LIBRARY(TileDB_LIBRARY
         NAMES tiledb
         PATHS
         /usr/lib
         /usr/local/lib
-        ${TILEDB_HOME}/dist/lib)
+        ${TileDB_HOME}/dist/lib)
 
-SET(TILEDB_VERSION_H "${TILEDB_INCLUDE_DIR}/tiledb/tiledb_version.h")
-IF(TILEDB_INCLUDE_DIR AND EXISTS ${TILEDB_VERSION_H})
-    SET(TILEDB_VERSION 0)
+SET(TileDB_VERSION_H "${TileDB_INCLUDE_DIR}/tiledb/tiledb_version.h")
+IF(TileDB_INCLUDE_DIR AND EXISTS ${TileDB_VERSION_H})
+    SET(TileDB_VERSION 0)
 
-    FILE(READ ${TILEDB_VERSION_H} TILEDB_VERSION_H_CONTENTS)
+    FILE(READ ${TileDB_VERSION_H} TileDB_VERSION_H_CONTENTS)
 
-    IF (DEFINED TILEDB_VERSION_H_CONTENTS)
-        string(REGEX REPLACE ".*#define TILEDB_VERSION_MAJOR ([0-9]+).*" "\\1" TILEDB_VERSION_MAJOR "${TILEDB_VERSION_H_CONTENTS}")
-        string(REGEX REPLACE ".*#define TILEDB_VERSION_MINOR ([0-9]+).*" "\\1" TILEDB_VERSION_MINOR "${TILEDB_VERSION_H_CONTENTS}")
-        string(REGEX REPLACE ".*#define TILEDB_VERSION_PATCH ([0-9]+).*" "\\1" TILEDB_VERSION_PATCH "${TILEDB_VERSION_H_CONTENTS}")
+    IF (DEFINED TileDB_VERSION_H_CONTENTS)
+        string(REGEX REPLACE ".*#define TILEDB_VERSION_MAJOR ([0-9]+).*" "\\1" TileDB_VERSION_MAJOR "${TileDB_VERSION_H_CONTENTS}")
+        string(REGEX REPLACE ".*#define TILEDB_VERSION_MINOR ([0-9]+).*" "\\1" TileDB_VERSION_MINOR "${TileDB_VERSION_H_CONTENTS}")
+        string(REGEX REPLACE ".*#define TILEDB_VERSION_PATCH ([0-9]+).*" "\\1" TileDB_VERSION_PATCH "${TileDB_VERSION_H_CONTENTS}")
 
-        if(NOT "${TILEDB_VERSION_MAJOR}" MATCHES "^[0-9]+$")
+        if(NOT "${TileDB_VERSION_MAJOR}" MATCHES "^[0-9]+$")
             message(FATAL_ERROR "TileDB version parsing failed for \"TILEDB_API_VERSION_MAJOR\"")
         endif()
-        if(NOT "${TILEDB_VERSION_MINOR}" MATCHES "^[0-9]+$")
+        if(NOT "${TileDB_VERSION_MINOR}" MATCHES "^[0-9]+$")
             message(FATAL_ERROR "TileDB version parsing failed for \"TILEDB_VERSION_MINOR\"")
         endif()
-        if(NOT "${TILEDB_VERSION_PATCH}" MATCHES "^[0-9]+$")
+        if(NOT "${TileDB_VERSION_PATCH}" MATCHES "^[0-9]+$")
             message(FATAL_ERROR "TileDB version parsing failed for \"TILEDB_VERSION_PATCH\"")
         endif()
 
-        SET(TILEDB_VERSION "${TILEDB_VERSION_MAJOR}.${TILEDB_VERSION_MINOR}.${TILEDB_VERSION_PATCH}"
+        SET(TileDB_VERSION "${TileDB_VERSION_MAJOR}.${TileDB_VERSION_MINOR}.${TileDB_VERSION_PATCH}"
                 CACHE INTERNAL "The version string for TileDB library")
 
-        IF (TILEDB_VERSION VERSION_LESS TILEDB_FIND_VERSION)
-            MESSAGE(FATAL_ERROR "TileDB version check failed. Version ${TILEDB_VERSION} was found, at least version ${TILEDB_FIND_VERSION} is required")
+        IF (TileDB_VERSION VERSION_LESS TileDB_FIND_VERSION)
+            MESSAGE(FATAL_ERROR "TileDB version check failed. Version ${TileDB_VERSION} was found, at least version ${TileDB_FIND_VERSION} is required")
         ENDIF()
     ELSE()
-        MESSAGE(FATAL_ERROR "Failed to open ${TILEDB_VERSION_H} file")
+        MESSAGE(FATAL_ERROR "Failed to open ${TileDB_VERSION_H} file")
     ENDIF()
 
 ENDIF()
 
-SET(TILEDB_LIBRARIES ${TILEDB_LIBRARY})
+SET(TileDB_LIBRARIES ${TileDB_LIBRARY})
 
-# Handle the QUIETLY and REQUIRED arguments and set TILEDB_FOUND to TRUE
+# Handle the QUIETLY and REQUIRED arguments and set TileDB_FOUND to TRUE
 # if all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(TILEDB DEFAULT_MSG TILEDB_LIBRARY TILEDB_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(
+    TileDB
+    REQUIRED_VARS TileDB_LIBRARY TileDB_INCLUDE_DIR
+    VERSION_VAR TileDB_VERSION
+    HANDLE_VERSION_RANGE
+)

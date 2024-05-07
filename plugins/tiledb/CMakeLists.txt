@@ -1,8 +1,17 @@
+cmake_minimum_required(VERSION 3.13)
+
+if (STANDALONE)
+    project(pdal-tiledb)
+    include("${CMAKE_CURRENT_LIST_DIR}/../../cmake/standalone.cmake" )
+    include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
+    find_package(PDAL REQUIRED)
+endif(STANDALONE)
+
 #
 # TileDB plugin CMake configuration
 #
 include(${PDAL_CMAKE_DIR}/tiledb.cmake)
-if (NOT TILEDB_FOUND)
+if (NOT TileDB_FOUND)
     message(FATAL_ERROR "Can't find TileDB support required.")
 endif()
 
@@ -18,36 +27,39 @@ PDAL_ADD_PLUGIN(reader_libname reader tiledb
         io/TileDBReader.cpp
         io/TileDBUtils.cpp
     LINK_WITH
-        ${TILEDB_LIBRARIES}
+        ${TileDB_LIBRARIES}
+        ${PDAL_LIBRARIES}
     INCLUDES
-        ${TILEDB_INCLUDE_DIR}
+        ${TileDB_INCLUDE_DIR}
         ${NLOHMANN_INCLUDE_DIR}
 )
 
 #
 # TileDB Writer
 #
-
 PDAL_ADD_PLUGIN(writer_libname writer tiledb
     FILES
         io/TileDBWriter.cpp
+        io/TileDBUtils.cpp
     LINK_WITH
-        ${TILEDB_LIBRARIES}
+        ${TileDB_LIBRARIES}
+        ${PDAL_LIBRARIES}
     INCLUDES
-        ${TILEDB_INCLUDE_DIR}
+        ${TileDB_INCLUDE_DIR}
         ${NLOHMANN_INCLUDE_DIR}
 )
 
-if (WITH_TESTS)
+if (WITH_TESTS AND NOT STANDALONE)
 
     PDAL_ADD_TEST(pdal_io_tiledb_utils_test
         FILES
             test/TileDBUtilsTest.cpp
             io/TileDBUtils.cpp
         LINK_WITH
-            ${TILEDB_LIBRARIES}
+            ${TileDB_LIBRARIES}
         INCLUDES
-            ${TILEDB_INCLUDE_DIR}
+            ${TileDB_INCLUDE_DIR}
+            ${NLOHMANN_INCLUDE_DIR}
     )
 
     PDAL_ADD_TEST(pdal_io_tiledb_writer_test
@@ -55,9 +67,9 @@ if (WITH_TESTS)
             test/TileDBWriterTest.cpp
         LINK_WITH
             ${writer_libname}
-            ${TILEDB_LIBRARIES}
+            ${TileDB_LIBRARIES}
         INCLUDES
-            ${TILEDB_INCLUDE_DIR}
+            ${TileDB_INCLUDE_DIR}
             ${NLOHMANN_INCLUDE_DIR}
     )
 
@@ -67,10 +79,10 @@ if (WITH_TESTS)
         LINK_WITH
             ${reader_libname}
             ${writer_libname}
-            ${TILEDB_LIBRARIES}
+            ${TileDB_LIBRARIES}
         INCLUDES
-            ${TILEDB_INCLUDE_DIR}
-            ${NLOHMANN_INLCUDE_DIR}
+            ${TileDB_INCLUDE_DIR}
+            ${NLOHMANN_INCLUDE_DIR}
     )
 
     PDAL_ADD_TEST(pdal_io_tiledb_time_writer_test
@@ -80,23 +92,37 @@ if (WITH_TESTS)
         LINK_WITH
             ${reader_libname}
             ${writer_libname}
-            ${TILEDB_LIBRARIES}
+            ${TileDB_LIBRARIES}
         INCLUDES
-            ${TILEDB_INCLUDE_DIR}
+            ${TileDB_INCLUDE_DIR}
+            ${NLOHMANN_INCLUDE_DIR}
     )
 
     PDAL_ADD_TEST(pdal_io_tiledb_time_reader_test
         FILES
             test/TileDBReaderTimeDimTest.cpp
             test/XYZTmUtils.cpp
-            io/TileDBUtils.cpp
         LINK_WITH
             ${reader_libname}
             ${writer_libname}
-            ${TILEDB_LIBRARIES}
+            ${TileDB_LIBRARIES}
         INCLUDES
-            ${TILEDB_INCLUDE_DIR}
+            ${TileDB_INCLUDE_DIR}
+            ${NLOHMANN_INCLUDE_DIR}
     )
+
+    PDAL_ADD_TEST(pdal_io_tiledb_bit_fields_test
+        FILES
+            test/TileDBBitFieldsTest.cpp
+        LINK_WITH
+            ${reader_libname}
+            ${writer_libname}
+            ${TileDB_LIBRARIES}
+        INCLUDES
+            ${TileDB_INCLUDE_DIR}
+            ${NLOHMANN_INCLUDE_DIR}
+    )
+
 
 
 endif()

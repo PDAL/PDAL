@@ -38,6 +38,7 @@
 
 #include <io/StacReader.hpp>
 #include <io/EptReader.hpp>
+#include <io/private/stac/Utils.hpp>
 
 #include <pdal/PipelineManager.hpp>
 #include <pdal/StageFactory.hpp>
@@ -49,6 +50,147 @@
 
 using namespace pdal;
 
+TEST(StacReaderTest, local_data_test)
+{
+    Options options;
+
+    options.add("filename", Support::datapath("stac/autzen_trim.json"));
+    options.add("asset_names", "data");
+
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
+
+    PointTable table;
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    PointViewPtr view = *viewSet.begin();
+
+    EXPECT_EQ(view->size(), 110000);
+}
+
+
+TEST(StacReaderTest, local_catalog_test)
+{
+    Options options;
+
+    options.add("filename", Support::datapath("stac/local_catalog/catalog.json"));
+    options.add("asset_names", "ept.json");
+    options.add("asset_names", "data");
+
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
+
+    QuickInfo qi = reader.preview();
+    NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
+    EXPECT_TRUE(jsonMetadata.contains("item_ids"));
+    std::vector<std::string> idList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
+
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "Autzen Trim") != idList.end());
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MI_Charlevoix_Islands_TL_2018") != idList.end());
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "IA_SouthCentral_1_2020") != idList.end());
+
+    EXPECT_EQ(qi.m_pointCount, 44851411750);
+
+}
+
+TEST(StacReaderTest, collection_filter_test)
+{
+    // with collection
+    {
+        Options options;
+
+        options.add("filename", Support::datapath("stac/test_collection.json"));
+        options.add("asset_names", "data");
+        options.add("collections", "usgs-test");
+
+
+        StageFactory f;
+        Stage& reader = *f.createStage("readers.stac");
+        reader.setOptions(options);
+
+        PointTable table;
+        reader.prepare(table);
+        PointViewSet viewSet = reader.execute(table);
+        PointViewPtr view = *viewSet.begin();
+
+        EXPECT_EQ(view->size(), 110000);
+    }
+    {
+        Options options;
+
+        options.add("filename", Support::datapath("stac/test_collection.json"));
+        options.add("asset_names", "data");
+        options.add("collections", "fake-collection");
+
+
+        StageFactory f;
+        Stage& reader = *f.createStage("readers.stac");
+        reader.setOptions(options);
+
+        PointTable table;
+        EXPECT_THROW(reader.prepare(table), pdal_error);
+
+    }
+
+    // with Item
+    {
+        Options options;
+
+        options.add("filename", Support::datapath("stac/autzen_trim.json"));
+        options.add("asset_names", "data");
+        options.add("collections", "usgs-test");
+
+        StageFactory f;
+        Stage& reader = *f.createStage("readers.stac");
+        reader.setOptions(options);
+
+        PointTable table;
+        reader.prepare(table);
+        PointViewSet viewSet = reader.execute(table);
+        PointViewPtr view = *viewSet.begin();
+
+        EXPECT_EQ(view->size(), 110000);
+    }
+
+    {
+        Options options;
+
+        options.add("filename", Support::datapath("stac/autzen_trim.json"));
+        options.add("asset_names", "data");
+        options.add("collections", "fake-collection");
+
+        StageFactory f;
+        Stage& reader = *f.createStage("readers.stac");
+        reader.setOptions(options);
+
+        PointTable table;
+        EXPECT_THROW(reader.prepare(table), pdal_error);
+    }
+
+}
+
+TEST(StacReaderTest, collection_test)
+{
+    Options options;
+
+    options.add("filename", Support::datapath("stac/test_collection.json"));
+    options.add("asset_names", "data");
+
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
+
+    PointTable table;
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    PointViewPtr view = *viewSet.begin();
+
+    EXPECT_EQ(view->size(), 110000);
+
+}
 
 TEST(StacReaderTest, item_collection_test)
 {
@@ -56,7 +198,8 @@ TEST(StacReaderTest, item_collection_test)
 
     options.add("filename", Support::datapath("stac/test_item_collection.json"));
     options.add("asset_names", "ept.json");
-    options.add("item_ids", "AK_NorthSlope_\\w{0,}");
+    options.add("items", "AK_NorthSlope_\\w{0,}");
+    options.add("items", "AK_BrooksCamp_2012");
 
     StageFactory f;
     Stage& reader = *f.createStage("readers.stac");
@@ -65,9 +208,10 @@ TEST(StacReaderTest, item_collection_test)
     QuickInfo qi = reader.preview();
 
     NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
-    EXPECT_TRUE(jsonMetadata.contains("stac_ids"));
-    std::vector<std::string> idList = jsonMetadata["stac_ids"].get<std::vector<std::string>>();
+    EXPECT_TRUE(jsonMetadata.contains("item_ids"));
+    std::vector<std::string> idList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
 
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "AK_BrooksCamp_2012") != idList.end());
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "AK_NorthSlope_B1_2018") != idList.end());
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "AK_NorthSlope_B2_2018") != idList.end());
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "AK_NorthSlope_B3_2018") != idList.end());
@@ -83,7 +227,7 @@ TEST(StacReaderTest, item_collection_test)
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "AK_NorthSlope_B13_2018") != idList.end());
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "AK_NorthSlope_B14_2018") != idList.end());
 
-    EXPECT_EQ(qi.m_pointCount, 9050847242);
+    EXPECT_EQ(qi.m_pointCount, 9580132559);
 }
 
 TEST(StacReaderTest, remote_item_test)
@@ -123,9 +267,8 @@ TEST(StacReaderTest, nested_catalog_test)
 {
     Options options;
     options.add("filename", Support::datapath("stac/multi_type_catalog.json"));
-    options.add("catalog_ids", "3dep");
-    options.add("item_ids", "MD_GoldenBeach_2012");
     options.add("asset_names", "ept.json");
+    options.add("asset_names", "data");
 
     StageFactory f;
     Stage& reader = *f.createStage("readers.stac");
@@ -133,7 +276,26 @@ TEST(StacReaderTest, nested_catalog_test)
 
     QuickInfo qi = reader.preview();
 
-    EXPECT_EQ(qi.m_pointCount, 4860658);
+    NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
+    EXPECT_TRUE(jsonMetadata.contains("catalog_ids"));
+    EXPECT_TRUE(jsonMetadata.contains("collection_ids"));
+    EXPECT_TRUE(jsonMetadata.contains("item_ids"));
+
+    std::vector<std::string> catList = jsonMetadata["catalog_ids"].get<std::vector<std::string>>();
+    std::vector<std::string> colList = jsonMetadata["collection_ids"].get<std::vector<std::string>>();
+    std::vector<std::string> itemList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
+
+    EXPECT_TRUE(std::find(catList.begin(), catList.end(), "Test_Catalog") != catList.end());
+    EXPECT_TRUE(std::find(catList.begin(), catList.end(), "3dep") != catList.end());
+
+    EXPECT_TRUE(std::find(colList.begin(), colList.end(), "usgs-test") != colList.end());
+
+    EXPECT_TRUE(std::find(itemList.begin(), itemList.end(), "Autzen Trim") != itemList.end());
+    EXPECT_TRUE(std::find(itemList.begin(), itemList.end(), "MD_GoldenBeach_2012") != itemList.end());
+    EXPECT_TRUE(std::find(itemList.begin(), itemList.end(), "IA_SouthCentral_1_2020") != itemList.end());
+    EXPECT_TRUE(std::find(itemList.begin(), itemList.end(), "MI_Charlevoix_Islands_TL_2018") != itemList.end());
+
+    EXPECT_EQ(qi.m_pointCount, 44872718422);
 }
 
 TEST(StacReaderTest, multiple_readers_test)
@@ -154,8 +316,8 @@ TEST(StacReaderTest, multiple_readers_test)
     options.add("reader_args", reader_args);
     options.add("asset_names", "data");
     options.add("asset_names", "ept.json");
-    options.add("item_ids", "IA_SouthCentral_1_2020");
-    options.add("item_ids", "Autzen Classified");
+    options.add("items", "IA_SouthCentral_1_2020");
+    options.add("items", "Autzen Classified");
     options.add("properties", "{\"pc:encoding\": [\"ept\",\"application/vnd.laszip+copc\"]}");
 
     StageFactory f;
@@ -175,8 +337,8 @@ TEST(StacReaderTest, id_prune_test)
     Options options;
 
     options.add("filename", Support::datapath("stac/remote_catalog.json"));
-    options.add("item_ids", "MD_GoldenBeach_2012");
-    options.add("item_ids", "USGS_LPC\\w{0,}");
+    options.add("items", "MD_GoldenBeach_2012");
+    options.add("items", "USGS_LPC\\w{0,}");
     options.add("asset_names", "ept.json");
 
     StageFactory f;
@@ -187,8 +349,8 @@ TEST(StacReaderTest, id_prune_test)
 
 
     NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
-    EXPECT_TRUE(jsonMetadata.contains("stac_ids"));
-    std::vector<std::string> idList = jsonMetadata["stac_ids"].get<std::vector<std::string>>();
+    EXPECT_TRUE(jsonMetadata.contains("item_ids"));
+    std::vector<std::string> idList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
 
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "USGS_LPC_AK_Anchorage_2015_LAS_2017") != idList.end());
@@ -196,16 +358,28 @@ TEST(StacReaderTest, id_prune_test)
     EXPECT_EQ(qi.m_pointCount, 36134211758);
 }
 
+TEST(StacReaderTest, date_validate_test)
+{
+    Options options;
+    options.add("filename", Support::datapath("stac/autzen_trim.json"));
+    options.add("asset_names", "data");
+    options.add("date_ranges", "[\"11-11-2022T0:00:0Z\",\"2022-11-20T0:00:0Z\"]");//bad
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
+
+    EXPECT_THROW(QuickInfo qi = reader.preview(), pdal_error);
+}
+
 TEST(StacReaderTest, date_prune_accept_test)
 {
     //Test using standard datetime measures
-    {
     Options options;
 
     options.add("filename", Support::datapath("stac/MD_GoldenBeach_2012.json"));
     options.add("asset_names", "ept.json");
-    options.add("date_ranges", "[\"2022-11-11T0:00:0Z\",\"2022-11-20T0:00:0Z\"]");
-    options.add("date_ranges", "[\"2022-05-21T0:00:0Z\",\"2022-05-20T0:00:0Z\"]");
+    options.add("date_ranges", "[\"2022-11-11T0:00:0Z\",\"2022-11-20T0:00:0Z\"]"); //good
+    options.add("date_ranges", "[\"2022-05-21T0:00:0Z\",\"2022-05-20T0:00:0Z\"]"); // good
 
     StageFactory f;
     Stage& reader = *f.createStage("readers.stac");
@@ -214,13 +388,15 @@ TEST(StacReaderTest, date_prune_accept_test)
     QuickInfo qi = reader.preview();
 
     NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
-    EXPECT_TRUE(jsonMetadata.contains("stac_ids"));
-    std::vector<std::string> idList = jsonMetadata["stac_ids"].get<std::vector<std::string>>();
+    EXPECT_TRUE(jsonMetadata.contains("item_ids"));
+    std::vector<std::string> idList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
     EXPECT_EQ(qi.m_pointCount, 4860658);
-    }
 
-    {
+}
+
+TEST(StacReaderTest, date_start_end_time_accept_test)
+{
     //Test usage of start_datetime and end_datetime
     Options options;
 
@@ -235,11 +411,10 @@ TEST(StacReaderTest, date_prune_accept_test)
     QuickInfo qi = reader.preview();
 
     NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
-    EXPECT_TRUE(jsonMetadata.contains("stac_ids"));
-    std::vector<std::string> idList = jsonMetadata["stac_ids"].get<std::vector<std::string>>();
+    EXPECT_TRUE(jsonMetadata.contains("item_ids"));
+    std::vector<std::string> idList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
     EXPECT_EQ(qi.m_pointCount, 4860658);
-    }
 }
 
 TEST(StacReaderTest, date_prune_reject_test)
@@ -261,7 +436,7 @@ TEST(StacReaderTest, date_prune_reject_test)
 TEST(StacReaderTest, bounds_prune_accept_test)
 {
     Options options;
-    std::string bounds = "([-79.0,-74.0],[38.0,39.0])";
+    std::string bounds = "([-79.0,-74.0],[38.0,39.0]) / EPSG:4326";
 
     options.add("filename", Support::datapath("stac/MD_GoldenBeach_2012.json"));
     options.add("asset_names", "ept.json");
@@ -274,8 +449,8 @@ TEST(StacReaderTest, bounds_prune_accept_test)
     QuickInfo qi = reader.preview();
 
     NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
-    EXPECT_TRUE(jsonMetadata.contains("stac_ids"));
-    std::vector<std::string> idList = jsonMetadata["stac_ids"].get<std::vector<std::string>>();
+    EXPECT_TRUE(jsonMetadata.contains("item_ids"));
+    std::vector<std::string> idList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
     EXPECT_EQ(qi.m_pointCount, 4860658);
 
@@ -297,13 +472,33 @@ TEST(StacReaderTest, bounds_prune_reject_test)
     EXPECT_THROW(QuickInfo qi = reader.preview(), pdal_error);
 }
 
+TEST(StacReaderTest, wrench_test)
+{
+    Options options;
+    options.add("filename", Support::datapath("stac/wrench.vpc"));
+    options.add("validate_schema", "true");
+
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
+
+    PointTable table;
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    PointViewPtr view = *viewSet.begin();
+
+    EXPECT_EQ(view->size(), 111065);
+}
+
 #ifndef _WIN32
+
 TEST(StacReaderTest, schema_validate_test)
 {
     Options options;
 
-    options.add("filename", Support::datapath("stac/MD_GoldenBeach_2012.json"));
+    options.add("filename", Support::datapath("stac/local_catalog/catalog.json"));
     options.add("asset_names", "ept.json");
+    options.add("asset_names", "data");
     options.add("validate_schema", "true");
 
     StageFactory f;
@@ -312,6 +507,6 @@ TEST(StacReaderTest, schema_validate_test)
 
     QuickInfo qi = reader.preview();
     EXPECT_TRUE(qi.valid());
-    EXPECT_EQ(qi.m_pointCount, 4860658);
+    EXPECT_EQ(qi.m_pointCount, 44851411750);
 }
 #endif

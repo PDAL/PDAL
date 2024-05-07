@@ -1,8 +1,0 @@
-1. :ref:`Front Matter<introduction>`
-2. :ref:`Introduction to LiDAR <lidar_intro>`
-3. :ref:`Introduction to PDAL <pdal_intro>`
-4. :ref:`Software installation <software>`
-5. :ref:`Basic Information <basic_info>`
-6. :ref:`Translation <translation>`
-7. :ref:`Analysis <analysis>`
-8. :ref:`Georeferencing <georeferencing>`

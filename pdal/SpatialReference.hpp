@@ -122,6 +122,7 @@ public:
 
     std::string getWKT() const;
     std::string getWKT1() const;
+    std::string getWKT2() const;
 
     /// Parse the string starting at position `pos` as a spatial reference.
     /// \param s    String to parse.
@@ -181,12 +182,15 @@ public:
 
 private:
     std::string m_wkt;
+    std::string m_wkt2;
     double m_epoch = 0.0f;
     mutable std::string m_horizontalWkt;
     friend PDAL_DLL std::ostream& operator<<(std::ostream& ostr,
         const SpatialReference& srs);
     friend PDAL_DLL std::istream& operator>>(std::istream& istr,
         SpatialReference& srs);
+    static bool isWKT1(const std::string& wkt);
+    static bool isWKT2(const std::string& wkt);
 };
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr,
