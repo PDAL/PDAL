@@ -18,7 +18,7 @@ PDAL provides the :ref:`outlier filter<filters.outlier>` to apply a statistical
 filter to data.
 
 Because this operation is somewhat complex, we are going to use a pipeline to
-define it.
+define it:
 
 .. include:: ./denoise.json
     :literal:
@@ -35,7 +35,7 @@ Pipeline breakdown
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 After our pipeline errata, the first item we define in the pipeline is the
-point cloud file we're going to read.
+point cloud file we're going to read it:
 
 .. code-block:: json
 
@@ -45,7 +45,7 @@ point cloud file we're going to read.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The PDAL :ref:`outlier filter<filters.outlier>` does most of the work for this
-operation.
+operation:
 
 .. code-block:: json
 
@@ -72,6 +72,8 @@ points with extremely negative ``Z`` values. These are some artifact or
 mis-computation of processing, and we don't want these points. We can construct
 another :ref:`range <filters.expression>` to keep only points that are within the range
 :math:`-100 <= Z <= 3000`.
+
+Below is this implementation:
 
 Both :ref:`ranges <filters.expression>` are passed as a AND-separated list to the
 :ref:`expression based range filter<filters.expression>` via the ``expression`` option.
@@ -106,13 +108,13 @@ add a few options to have finer control over what is written. These include:
 2. ``minor_version``: We want to make sure to output LAS 1.2, which will
    provide the widest compatibility with other softwares that can
    consume LAS.
-3. ``dataformat_id``: Format 0 supports neither time nor color information
+3. ``dataformat_id``: Format 0 supports neither time nor color information.
 
 5. :ref:`writers.copc`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We will then turn the ``clean.laz`` file into a COPC file for vizualization with QGIS
-using the stage below.
+using the stage below:
 
 .. code-block:: json
 
@@ -144,7 +146,7 @@ Visualization
 
 Use one of the point cloud visualization tools you installed to take a look at
 your ``clean.copc.laz`` output. In the example below, we simply
-opened the file using QGIS.
+opened the file using QGIS:
 
 .. image:: ../../images/denoise-fugro.png
     :target: ../../../_images/denoise-fugro.png

@@ -34,7 +34,7 @@ After running each command, the output `.ply` file can be viewed in Meshlab or
 .. seealso::
 
     PDAL implements Mischa Kazhdan's Poisson surface reconstruction algorithm.
-    For details see `[Kazhdan2006]_`
+    For details see `[Kazhdan2006]_`.
 
 .. note::
 

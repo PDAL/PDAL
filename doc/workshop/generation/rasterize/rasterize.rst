@@ -17,7 +17,7 @@ Exercise
 .. note::
     The exercise fetches its data from a `Entwine`_ service that organizes the
     point cloud collection for the entire country of Denmark. You can view the
-    data online at http://potree.entwine.io/data/denmark.html
+    data online at http://potree.entwine.io/data/denmark.html.
 
 .. _`Digital Terrain Model`: https://en.wikipedia.org/wiki/Digital_elevation_model
 
@@ -56,7 +56,7 @@ that is the limited to a spatial resolution of 5m.
 2. :ref:`writers.gdal`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The :ref:`writers.gdal` writer that bins the point cloud data with
+The :ref:`writers.gdal` writer bins the point cloud data with
 classification values.
 
 .. literalinclude:: ./classification.json
@@ -97,6 +97,8 @@ We want colors that correspond to the classification values a bit more
 directly. We can use a color ramp to assign explicit values. :ref:`qgis` allows
 us to create a text file color ramp that gdaldem can consume to apply colors to
 the data. The filename is "./exercises/analysis/rasterize/ramp.txt".
+
+Should look like this:
 
 .. literalinclude:: ./ramp.txt
    :linenos:
@@ -169,7 +171,7 @@ relative intensity image:
     0...10...20...30...40...50...60...70...80...90...100 - done.
 
 The same pipeline can be used to generate a preview image of the Intensity
-channel of the data by overriding pipeline arguments at the command line.
+channel of the data by overriding pipeline arguments at the command line:
 
 .. image:: ../../images/rasterization-colored-intensity.png
     :target: ../../../_images/rasterization-colored-intensity.png

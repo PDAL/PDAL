@@ -67,7 +67,7 @@ Invoke the following command, substituting accordingly, into your `Conda Shell`:
 Visualization
 .................
 
-View your georeferenced point cloud in QGIS.
+View your georeferenced point cloud in QGIS:
 
 .. figure:: ../../images/georeference-QGIS.png
     :target: ../../../_images/georeference-QGIS.png

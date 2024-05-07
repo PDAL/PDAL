@@ -21,7 +21,7 @@ raster files onto point cloud data. Think of this operation as a top-down
 projection of RGB color values on the points.
 
 Because this operation is somewhat complex, we are going to use a pipeline
-to define it.
+to define it:
 
 
 .. literalinclude:: ./colorize.json
@@ -41,7 +41,7 @@ Pipeline breakdown
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 After our pipeline errata, the first item we define in the pipeline is the
-point cloud file we're going to read.
+point cloud file we're going to read:
 
 ::
 
@@ -52,7 +52,7 @@ point cloud file we're going to read.
 
 The :ref:`filters.colorization` PDAL filter does most of the work for this
 operation. We're going to use the default data scaling options. This
-filter will create PDAL dimensions ``Red``, ``Green``, and ``Blue``.
+filter will create PDAL dimensions ``Red``, ``Green``, and ``Blue``:
 
 ::
 
@@ -67,7 +67,7 @@ filter will create PDAL dimensions ``Red``, ``Green``, and ``Blue``.
 
 A small challenge is the raster will colorize many points with NODATA values.
 We are going to use the :ref:`filters.expression` to filter keep any points that
-have ``Red >= 1``.
+have ``Red >= 1``:
 
 ::
 
@@ -96,13 +96,13 @@ add a few options to have finer control over what is written. These include:
 2. ``minor_version``: We want to make sure to output LAS 1.2, which will
    provide the widest compatibility with other softwares that can
    consume LAS.
-3. ``dataformat_id``: Format 3 supports both time and color information
+3. ``dataformat_id``: Format 3 supports both time and color information.
 
 5. :ref:`writers.copc`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We will then turn the ``uncompahgre-colored.laz`` into a COPC file for vizualization with QGIS
-using the stage below.
+using the stage below:
 
 ::
 
@@ -136,7 +136,7 @@ Visualization
 
 Use one of the point cloud visualization tools you installed to take a look at
 your ``uncompahgre-colored.laz`` output. In the example below, we simply
-opened the file using QGIS.
+opened the file using QGIS:
 
 .. image:: ../../images/colorize-umpaghre-colored.png
 

@@ -55,7 +55,7 @@ We can leverage this capability to output a contiguous boundary of the
     --filespec ./exercises/analysis/density/uncompahgre.laz ^
     -f SQLite
 
-Once we've run the :ref:`tindex_command`, we can now visualize our output:
+Once we've run the :ref:`tindex_command`, we can now visualize our output.
 
 Open :ref:`qgis` and select `Add Vector Layer`:
 

@@ -72,11 +72,11 @@ Visualization
 Something happened, and some files were written, but we cannot really
 see what was produced. Let us use :ref:`qgis` to visualize the output.
 
-1. Open :ref:`qgis` and `Add Raster Layer`:
+1. Open :ref:`qgis` and `Add Raster Layer`
 
 
 2. Add the dtm.tif file from your ``./exercises/analysis/dtm``
-   directory.
+   directory
 
     .. image:: ../../images/dtm-add-raster-mean.png
         :target: ../../../_images/dtm-add-raster-mean.png
@@ -94,7 +94,7 @@ see what was produced. Let us use :ref:`qgis` to visualize the output.
 
 4. Classify the DTM by right-clicking on the `Filled` and choosing
    `Properties`. Pick the singleband pseudocolor for the rendering type, and then
-   choose a color ramp and click `Classify`.
+   choose a color ramp and click `Classify`
 
     .. image:: ../../images/dtm-qgis-colorize-dtm.png
         :target: ../../../_images/dtm-qgis-colorize-dtm.png
@@ -102,13 +102,13 @@ see what was produced. Let us use :ref:`qgis` to visualize the output.
 
 5. :ref:`qgis` provides access to |GDAL| processing tools, and we
    are going to use that to create a hillshade of our surface.
-   Choose `Raster-->Analysis-->Hillshade`:
+   Choose `Raster-->Analysis-->Hillshade`
 
     .. image:: ../../images/dtm-qgis-select-hillshade.png
         :target: ../../../_images/dtm-qgis-select-hillshade.png
 
 6. Click the window for the `Output file` and select a location
-   to save the ``hillshade.tif`` file.
+   to save the ``hillshade.tif`` file
 
     .. image:: ../../images/dtm-qgis-gdaldem.png
         :target: ../../../_images/dtm-qgis-gdaldem.png
