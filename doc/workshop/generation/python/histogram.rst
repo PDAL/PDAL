@@ -34,7 +34,7 @@ PDAL Pipeline
 ................................................................................
 
 We're going to create a PDAL :ref:`pipeline` to tell PDAL to run our Python
-script in a :ref:`filters.python` stage.
+script in a :ref:`filters.python` stage:
 
 
 .. literalinclude:: ./histogram.json

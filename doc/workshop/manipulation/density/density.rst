@@ -41,7 +41,7 @@ Visualization
 ................................................................................
 
 The command uses GDAL to output a `SQLite`_ file containing hexagon polygons.
-We will now use |QGIS| to visualize them.
+We will now use |QGIS| to visualize them:
 
 .. _`SQLite`: http://sqlite.org
 
@@ -62,7 +62,7 @@ We will now use |QGIS| to visualize them.
         :target: ../../../_images/density-file-open.png
 
 4. Right click on the ``density.sqlite`` layer in the `Layers` panel
-   and then choose ``Properties``.
+   and then choose ``Properties``
 
 5. Within the ``Symbology`` tab, change ``Single Symbol`` to ``Graduated`` in the drop down
 

@@ -27,7 +27,7 @@ USB Drive
 ................................................................................
 
 A companion USB drive containing everything needed to do the workshop without
-internet connectivity
+internet connectivity:
 
 .. image:: ./images/agenda-usb-drive.jpg
     :width: 400
@@ -35,10 +35,10 @@ internet connectivity
 .. note::
 
     A drive image is available for download at
-    https://pdal.s3.amazonaws.com/workshop/PDAL-Workshop-complete.zip
+    https://pdal.s3.amazonaws.com/workshop/PDAL-Workshop-complete.zip.
 
 
-Included in the USB driver are
+Included in the USB driver are:
 
 * Installers for QGIS_, CloudCompare_, and mambaforge_.
 * Conda environments for macOS (x86_64 and arm64) and Windows platforms with needed dependencies
