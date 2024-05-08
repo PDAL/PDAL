@@ -51,14 +51,14 @@ Invoke the following command, substituting accordingly, in your `Conda Shell`:
     -v 4
 
 As we can see, the algorithm does a great job of discriminating the points, but
-there's a few issues.
+there's a few issues:
 
 .. image:: ../../images/ground-classified-included.png
     :target: ../../../_images/ground-classified-included.png
 
 
 There's noise underneath the main surface that will cause us trouble when we
-generate a terrain surface.
+generate a terrain surface:
 
 .. image:: ../../images/ground-classified-included-side.png
     :target: ../../../_images/ground-classified-included-side.png
@@ -122,7 +122,7 @@ outliers are then ignored during SMRF processing with the ``ignore`` option.
 Finally, we add a range filter to extract only the ground returns (i.e.,
 ``Classification`` value of 2).
 
-The result is a more accurate representation of the ground returns.
+The result is a more accurate representation of the ground returns:
 
     .. image:: ../../images/ground-ground-only-view.png
         :target: ../../../_images/ground-ground-only-view.png

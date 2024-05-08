@@ -54,7 +54,7 @@ Example - Parallel Batch compression of LAS files to LAZ - PowerShell:
 This use of the `PowerShell` syntax doesn't allow a user to execute more than one process at a
 time. There is a free download of the `xargs` program that provides parallel execution available
 at http://www.pirosa.co.uk/demo/wxargs/ppx2.exe. A clone of this program can be found at https://github.com/ghuls/ppx2.
-For this tool, the file names are passed with using the `{}` syntax.
+For this tool, the file names are passed with using the `{}` syntax:
 
 .. code-block:: powershell
 
@@ -83,7 +83,7 @@ basename of the file. This allows you to easily change the output format and the
 Example - Parallel Batch compression of LAS files to LAZ - Bash:
 ................................................................................
 Parallel, as its name implies, allows parallel operations. Adding the `-j` syntax indicates the number simultaneous
-jobs to run
+jobs to run:
 
 .. code-block:: console
 
@@ -107,7 +107,7 @@ The pipeline we are using is:
 
 You might have spotted that this pipeline doesn't have any input or output file references, or a value for the
 output spatial reference. We will be adding those at the command line, not within the actual pipeline and
-using the substitutions syntax to do this.
+using the substitutions syntax to do this:
 
  .. code-block:: powershell
 
@@ -136,6 +136,8 @@ Once you have your dtms created with pdal, combine them to a single file with:
 You can then visualize the vrt with `qgis`. Add the vrt twice, and set the properties of the lower
 layer to hillshade. Set the upper layer to Singleband PseudoColor and choose a pleasing color ramp.
 Then set the transparency of the upper layer to 50% and you'll get a nice display of the terrain.
+
+Should look like this:
 
 .. image:: ../../images/batch-processing-dtm-qgis.png
     :target: ../../../_images/batch-processing-dtm-qgis.png
