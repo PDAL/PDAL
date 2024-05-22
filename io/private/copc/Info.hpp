@@ -61,7 +61,7 @@ public:
 
         s >> center_x >> center_y >> center_z >> halfsize >> spacing;
         s >> root_hier_offset >> root_hier_size;
-        s >> gpstime_minimum >> gpstime_minimum;
+        s >> gpstime_minimum >> gpstime_maximum;
         for (int i = 0; i < 11; ++i)
             s >> reserved[i];
     }
