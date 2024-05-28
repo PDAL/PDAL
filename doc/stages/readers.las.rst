@@ -119,3 +119,6 @@ nosrs
   Don't read the SRS VLRs. The data will not be assigned an SRS. This option is
   for use only in special cases where processing the SRS could cause performance
   issues. [Default: false]
+
+threads
+  Thread pool size. Number of threads used to decode laz chunk tables (Default: 7)
