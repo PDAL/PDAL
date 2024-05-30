@@ -54,6 +54,9 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
    readers.tiledb
    readers.tindex
 
+:ref: `readers.arrow`
+    Read GeoArrow/GeoParquet formatted data.
+
 :ref:`readers.bpf`
     Read BPF files encoded as version 1, 2, or 3. BPF is an NGA specification
     for point cloud data.
@@ -156,6 +159,9 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
 
 :ref:`readers.slpk`
     Read data stored in an Esri SLPK file.
+
+:ref:`readers.smrmsg`
+    Read from POSPac MMS post-processed accuracy files.
 
 :ref:`readers.stac`
     Read STAC JSON Catalogs and Items with the Pointcloud extension.
