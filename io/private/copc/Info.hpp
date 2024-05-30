@@ -44,16 +44,16 @@ namespace copc
 struct Info
 {
 public:
-    double center_x;
-    double center_y;
-    double center_z;
-    double halfsize;
-    double spacing;
-    uint64_t root_hier_offset;
-    uint64_t root_hier_size;
-    double gpstime_minimum;
-    double gpstime_maximum;
-    double reserved[11];
+    double center_x = 0;
+    double center_y = 0;
+    double center_z = 0;
+    double halfsize = 0;
+    double spacing = 0;
+    uint64_t root_hier_offset = 0;
+    uint64_t root_hier_size = 0;
+    double gpstime_minimum = 0;
+    double gpstime_maximum = 0;
+    double reserved[11] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     void fill(const char *buf, size_t bufsize)
     {
@@ -61,7 +61,7 @@ public:
 
         s >> center_x >> center_y >> center_z >> halfsize >> spacing;
         s >> root_hier_offset >> root_hier_size;
-        s >> gpstime_minimum >> gpstime_minimum;
+        s >> gpstime_minimum >> gpstime_maximum;
         for (int i = 0; i < 11; ++i)
             s >> reserved[i];
     }
