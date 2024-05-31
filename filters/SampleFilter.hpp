@@ -62,6 +62,9 @@ private:
     double m_originX;
     double m_originY;
     double m_originZ;
+    Arg* m_dimensionArg;
+    std::string m_dimensionName;
+    pdal::Dimension::Id m_dimension;
     Arg* m_originXArg;
     Arg* m_originYArg;
     Arg* m_originZArg;
