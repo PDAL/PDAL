@@ -16,7 +16,16 @@ fi
 rm -rf $BUILDDIR
 mkdir -p $BUILDDIR
 cd $BUILDDIR
-CFLAGS= CXXFLAGS="-Werror=strict-aliasing" CC=/usr/bin/cc CXX=/usr/bin/c++ cmake   -G "Ninja"  \
+
+
+#SANITIZE="-fsanitize=address,alignment,unreachable,vla-bound,vptr"
+#SANITIZE="-fsanitize=address,alignment,undefined"
+SANITIZE=""
+
+#CC=/usr/bin/cc
+#CXX=/usr/bin/c++
+
+cmake   -G "Ninja"  \
         -DCMAKE_LIBRARY_PATH:FILEPATH="$CONDA_PREFIX/lib" \
         -DCMAKE_INCLUDE_PATH:FILEPATH="$CONDA_PREFIX/include" \
         -DCMAKE_FIND_FRAMEWORK="NEVER" \
@@ -33,14 +42,14 @@ CFLAGS= CXXFLAGS="-Werror=strict-aliasing" CC=/usr/bin/cc CXX=/usr/bin/c++ cmake
         -DCMAKE_INSTALL_SBINDIR="$INSTALL_PREFIX/sbin" \
         -DCMAKE_INSTALL_OLDINCLUDEDIR="$INSTALL_PREFIX/include" \
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
+        -DCMAKE_EXE_LINKER_FLAGS="$SANITIZE" \
+        -DCMAKE_CXX_FLAGS="$SANITIZE" \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_HDF=ON \
         -DBUILD_PLUGIN_ARROW=ON \
         -DBUILD_PLUGIN_DRACO=ON \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
         -DBUILD_I3S_TESTS=ON \
-        -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address" \
-        -DCMAKE_CXX_FLAGS="-fsanitize=address" \
         -DBUILD_PLUGIN_TILEDB=OFF \
         -DWITH_ZSTD=ON \
         -DWITH_TESTS=ON \
