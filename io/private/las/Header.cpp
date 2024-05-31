@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "Header.hpp"
+#include <io/private/las/Utils.hpp>
 
 #include <pdal/util/Extractor.hpp>
 #include <pdal/util/Inserter.hpp>
@@ -115,16 +116,13 @@ std::vector<char> Header::data() const
     return buf;
 }
 
-StringList Header::validate(uint64_t fileSize, bool nosrs) const
+StringList Header::validate(uint64_t fileSize) const
 {
     StringList errors;
 
     if (magic != "LASF")
         errors.push_back("Invalid file signature. Was expecting 'LASF', Check the first four "
             " bytes of the file.");
-    if (!nosrs)
-        if (has14PointFormat() && !useWkt())
-            errors.push_back("Global encoding WKT flag not set for point format 6 - 10.");
     if (!dataCompressed() && (pointOffset > fileSize))
         errors.push_back("Invalid point offset - exceeds file size.");
     if (!dataCompressed() && (pointOffset + pointCount() * pointSize > fileSize))
@@ -132,6 +130,9 @@ StringList Header::validate(uint64_t fileSize, bool nosrs) const
             ". Number of points too large for file size.");
     if (vlrOffset > fileSize)
         errors.push_back("Invalid VLR offset - exceeds file size.");
+    if (!pointFormatSupported(pointFormat()))
+        errors.push_back("Unsupported LAS input point format: " +
+            Utils::toString((int)pointFormat()) + ".");
     return errors;
 }
 
