@@ -333,6 +333,11 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     StringList errors = d->header.validate(fileSize, d->opts.nosrs);
     if (errors.size())
         throwError(errors.front());
+
+    if (!d->opts.nosrs)
+        if (header.has14PointFormat() && !header.useWkt())
+            log()->get(LogLevel::Warning) << "Global encoding WKT flag not set for point format 6 - 10." << std::endl;;
+
     // Verify
     if (!las::pointFormatSupported(d->header.pointFormat()))
         throwError("Unsupported LAS input point format: " +
