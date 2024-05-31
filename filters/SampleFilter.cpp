@@ -58,6 +58,9 @@ void SampleFilter::addArgs(ProgramArgs& args)
 {
     m_cellArg = &args.add("cell", "Cell size", m_cell);
     m_radiusArg = &args.add("radius", "Minimum radius", m_radius);
+    m_originXArg = &args.add("origin_x", "Voxelization origin X (default to first point)", m_originX);
+    m_originYArg = &args.add("origin_y", "Voxelization origin Y (default to first point)", m_originY);
+    m_originZArg = &args.add("origin_z", "Voxelization origin Z (default to first point)", m_originZ);
 }
 
 void SampleFilter::prepared(PointTableRef table)
@@ -109,9 +112,12 @@ bool SampleFilter::voxelize(PointRef& point)
     // derive integer voxel indices.
     if (m_populatedVoxels.empty())
     {
-	m_originX = x;
-        m_originY = y;
-        m_originZ = z;
+        if (!m_originXArg->set())
+            m_originX = x;
+        if (!m_originYArg->set())
+            m_originY = y;
+        if (!m_originZArg->set())
+            m_originZ = y;
     }
 
     // Get voxel indices for current point.

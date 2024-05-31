@@ -62,6 +62,9 @@ private:
     double m_originX;
     double m_originY;
     double m_originZ;
+    Arg* m_originXArg;
+    Arg* m_originYArg;
+    Arg* m_originZArg;
     std::map<Voxel, CoordList> m_populatedVoxels;
 
     virtual void addArgs(ProgramArgs& args);
