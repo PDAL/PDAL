@@ -80,13 +80,17 @@ void GridDecimationFilter::processOne(BOX2D bounds, PointRef& point, PointViewPt
     double y = point.getFieldAs<double>(Dimension::Id::Y);
     int id = point.getFieldAs<double>(Dimension::Id::PointId);
 
-    double d_width_pt = std::floor((x - bounds.minx) / m_args->m_edgeLength) + 1;
-    double d_height_pt = std::floor((y - bounds.miny) / m_args->m_edgeLength) + 1;
+    // if x==(xmax of the cell), we assume the point are in the upper cell
+    // if y==(ymax of the cell), we assume the point are in the right cell
+    double d_width_pt = (x - bounds.minx) / m_args->m_edgeLength;
+    double d_height_pt = (y - bounds.miny) / m_args->m_edgeLength;
 
     int width = static_cast<int>(d_width_pt);
     int height = static_cast<int>(d_height_pt);
 
-    auto ptRefid = this->grid[ std::make_pair(width,height) ];
+    auto mptRefid = this->grid.find( std::make_pair(width,height) );
+    assert( mptRefid !=  this->grid.end());
+    auto ptRefid = mptRefid->second;
 
     if (ptRefid==-1)
     {
@@ -107,9 +111,9 @@ void GridDecimationFilter::processOne(BOX2D bounds, PointRef& point, PointViewPt
 
 void GridDecimationFilter::createGrid(BOX2D bounds)
 {
-    double d_width = std::floor((bounds.maxx - bounds.minx) / m_args->m_edgeLength) + 1;
-    double d_height = std::floor((bounds.maxy - bounds.miny) / m_args->m_edgeLength) + 1;
-    
+    double d_width = std::round((bounds.maxx - bounds.minx) / m_args->m_edgeLength);
+    double d_height = std::round((bounds.maxy - bounds.miny) / m_args->m_edgeLength);
+
     if (d_width < 0.0 || d_width > (std::numeric_limits<int>::max)())
         throwError("Grid width out of range.");
     if (d_height < 0.0 || d_height > (std::numeric_limits<int>::max)())

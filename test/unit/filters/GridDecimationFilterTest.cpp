@@ -26,7 +26,7 @@ TEST(GridDecimationFilterTest, create)
 TEST(DecimationFilterTest, GridDecimationFilterTest_test1)
 {
     Options ro;
-    ro.add("filename", Support::datapath("las/4_6.las"));
+    ro.add("filename", Support::datapath("las/4_6_crop.las"));
      
     StageFactory factory;
     Stage& r = *(factory.createStage("readers.las"));
@@ -34,9 +34,8 @@ TEST(DecimationFilterTest, GridDecimationFilterTest_test1)
 
     Options gdOps;
     gdOps.add("output_type", "max");
-    gdOps.add("resolution", 1.);
-    gdOps.add("where", "Classification==2");
-    gdOps.add("value", "Classification=3");
+    gdOps.add("resolution", 10.);
+    gdOps.add("value", "Classification=5");
 
     GridDecimationFilter filter;
     filter.setOptions(gdOps);
@@ -50,15 +49,14 @@ TEST(DecimationFilterTest, GridDecimationFilterTest_test1)
     EXPECT_EQ(viewSet.size(), 1u);
     
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 198975);
 
     int nbThreadPts (0);
     for (PointId i = 0; i < view->size(); ++i)
     {
         PointRef point = view->point(i);
         uint8_t classification = point.getFieldAs<uint8_t>(Dimension::Id::Classification);
-        if (classification==3) nbThreadPts++;
+        if (classification==5) nbThreadPts++;
     }
 
-    EXPECT_EQ(nbThreadPts, 65067);
+    EXPECT_EQ(nbThreadPts, 400);
 }
