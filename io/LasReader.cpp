@@ -330,13 +330,12 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     d->header.fill(headerBuf, las::Header::Size14);
 
     uint64_t fileSize = Utils::fileSize(m_filename);
-    StringList errors = d->header.validate(fileSize, d->opts.nosrs);
+    StringList errors = d->header.validate(fileSize);
     if (errors.size())
         throwError(errors.front());
-    // Verify
-    if (!las::pointFormatSupported(d->header.pointFormat()))
-        throwError("Unsupported LAS input point format: " +
-            Utils::toString((int)d->header.pointFormat()) + ".");
+    if (d->header.has14PointFormat() && !d->header.useWkt())
+        log()->get(LogLevel::Warning) <<
+            "Global encoding WKT flag not set for point format 6 - 10.";
 
     // Set the queue function based on whether we're compressed or not.
     d->queueNext = d->header.dataCompressed() ?
