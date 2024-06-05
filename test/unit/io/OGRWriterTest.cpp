@@ -124,6 +124,7 @@ void runOgrWriterInfo(const Options& wo, const std::string& infile,
 
 uint32_t diff_geojson(const std::string& file1, const std::string& file2, int32_t ignoreLine1=-1)
 {
+
     // GeoJSON files depend on PROJ version, later versions write a much different
     // SRS format. Crudely ignore lines between ^GEOGCRS[ and ^OGRFeature
 
