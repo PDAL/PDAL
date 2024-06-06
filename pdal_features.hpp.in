@@ -15,6 +15,11 @@
 #define PDAL_VERSION_MINOR @PDAL_VERSION_MINOR@
 #define PDAL_VERSION_PATCH @PDAL_VERSION_PATCH@
 
+/*
+ * GDAL version
+ */
+#define PDAL_GDAL_VERSION { "@GDAL_VERSION@" }
+
 namespace pdal
 {
 
@@ -23,6 +28,7 @@ const int pdalVersionMinor { @PDAL_VERSION_MINOR@ };
 const int pdalVersionPatch { @PDAL_VERSION_PATCH@ };
 const std::string pdalVersion { "@PDAL_VERSION@" };
 const std::string pdalSha { "@GIT_SHA1@" };
+const std::string gdalVersion { "@PDAL_GDAL_VERSION@" };
 
 } // namespace pdal
 

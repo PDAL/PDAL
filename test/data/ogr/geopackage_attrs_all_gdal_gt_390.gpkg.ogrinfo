@@ -1,4 +1,4 @@
-INFO: Open of `pdal/test/data/../temp/ogr/geopackage_attrs_all.gpkg'
+INFO: Open of `../test/data/ogr/geopackage_attrs_all.gpkg'
       using driver `GPKG' successful.
 
 Layer name: points
@@ -6,24 +6,7 @@ Geometry: 3D Measured Point
 Feature Count: 10
 Extent: (635619.850000, 849017.320000) - (635685.330000, 852165.120000)
 Layer SRS WKT:
-GEOGCRS["Undefined geographic SRS",
-    DATUM["unknown",
-        ELLIPSOID["unknown",6378137,298.257223563,
-            LENGTHUNIT["metre",1,
-                ID["EPSG",9001]]]],
-    PRIMEM["Greenwich",0,
-        ANGLEUNIT["degree",0.0174532925199433,
-            ID["EPSG",9122]]],
-    CS[ellipsoidal,2],
-        AXIS["latitude",north,
-            ORDER[1],
-            ANGLEUNIT["degree",0.0174532925199433,
-                ID["EPSG",9122]]],
-        AXIS["longitude",east,
-            ORDER[2],
-            ANGLEUNIT["degree",0.0174532925199433,
-                ID["EPSG",9122]]]]
-Data axis to CRS axis mapping: 2,1
+(unknown)
 FID Column = fid
 Geometry Column = geom
 Intensity: Integer (0.0)

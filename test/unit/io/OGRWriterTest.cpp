@@ -124,7 +124,6 @@ void runOgrWriterInfo(const Options& wo, const std::string& infile,
 
 uint32_t diff_geojson(const std::string& file1, const std::string& file2, int32_t ignoreLine1=-1)
 {
-
     // GeoJSON files depend on PROJ version, later versions write a much different
     // SRS format. Crudely ignore lines between ^GEOGCRS[ and ^OGRFeature
 
@@ -255,14 +254,18 @@ TEST(OGRWriterTest, geopackage)
 TEST(OGRWriterTest, creation_options)
 {
     std::string infile = Support::datapath("las/simple.las");
-    std::string infofile = Support::datapath("ogr/creation_options.geojson.ogrinfo");
+    #ifdef strcmp(PDAL_GDAL_VERSION, "3.9.0") >= 0
+        std::string infofile = Support::datapath("ogr/creation_options_gdal_gt_390.geojson.ogrinfo");
+    #else
+        std::string infofile = Support::datapath("ogr/creation_options.geojson.ogrinfo");
+    #endif
 
-    Options wo;
-    wo.add("ogrdriver", "GeoJSON");
-    wo.add("ogr_options", "WRITE_BBOX=YES");
-    wo.add("ogr_options", "COORDINATE_PRECISION=1");
+        Options wo;
+        wo.add("ogrdriver", "GeoJSON");
+        wo.add("ogr_options", "WRITE_BBOX=YES");
+        wo.add("ogr_options", "COORDINATE_PRECISION=1");
 
-    runOgrWriterInfo(wo, infile, infofile, ".geojson", 10, &diff_geojson);
+        runOgrWriterInfo(wo, infile, infofile, ".geojson", 10, &diff_geojson);
 }
 
 TEST(OGRWriterTest, shapefile_measure)
@@ -292,7 +295,13 @@ TEST(OGRWriterTest, attrs_all)
 TEST(OGRWriterTest, geopackage_attrs_all)
 {
     std::string infile = Support::datapath("las/simple.las");
-    std::string infofile = Support::datapath("ogr/geopackage_attrs_all.gpkg.ogrinfo");
+
+    #ifdef strcmp(PDAL_GDAL_VERSION, "3.9.0") >= 0
+        std::string infofile = Support::datapath("ogr/geopackage_attrs_all_gdal_gt_390.gpkg.ogrinfo");
+    #else
+        std::string infofile = Support::datapath("ogr/geopackage_attrs_all.gpkg.ogrinfo");
+    #endif
+
 
     Options wo;
     wo.add("ogrdriver", "GPKG");

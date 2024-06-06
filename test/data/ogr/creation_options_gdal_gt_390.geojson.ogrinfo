@@ -1,0 +1,68 @@
+INFO: Open of `../test/data/ogr/creation_options2.geojson'
+      using driver `GeoJSON' successful.
+
+Layer name: points
+Geometry: 3D Point
+Feature Count: 10
+Extent: (635619.800000, 849017.300000) - (635685.300000, 852165.100000)
+Layer SRS WKT:
+GEOGCRS["WGS 84",
+    ENSEMBLE["World Geodetic System 1984 ensemble",
+        MEMBER["World Geodetic System 1984 (Transit)"],
+        MEMBER["World Geodetic System 1984 (G730)"],
+        MEMBER["World Geodetic System 1984 (G873)"],
+        MEMBER["World Geodetic System 1984 (G1150)"],
+        MEMBER["World Geodetic System 1984 (G1674)"],
+        MEMBER["World Geodetic System 1984 (G1762)"],
+        MEMBER["World Geodetic System 1984 (G2139)"],
+        ELLIPSOID["WGS 84",6378137,298.257223563,
+            LENGTHUNIT["metre",1]],
+        ENSEMBLEACCURACY[2.0]],
+    PRIMEM["Greenwich",0,
+        ANGLEUNIT["degree",0.0174532925199433]],
+    CS[ellipsoidal,3],
+        AXIS["geodetic latitude (Lat)",north,
+            ORDER[1],
+            ANGLEUNIT["degree",0.0174532925199433]],
+        AXIS["geodetic longitude (Lon)",east,
+            ORDER[2],
+            ANGLEUNIT["degree",0.0174532925199433]],
+        AXIS["ellipsoidal height (h)",up,
+            ORDER[3],
+            LENGTHUNIT["metre",1]],
+    USAGE[
+        SCOPE["Geodesy. Navigation and positioning using GPS satellite system."],
+        AREA["World."],
+        BBOX[-90,-180,90,180]],
+    ID["EPSG",4979]]
+Data axis to CRS axis mapping: 2,1,3
+OGRFeature(points):0
+  POINT Z (635619.8 850064.0 447.0)
+
+OGRFeature(points):1
+  POINT Z (635640.4 849758.8 422.7)
+
+OGRFeature(points):2
+  POINT Z (635651.0 850244.0 424.9)
+
+OGRFeature(points):3
+  POINT Z (635673.5 850157.6 435.7)
+
+OGRFeature(points):4
+  POINT Z (635674.1 849017.3 428.0)
+
+OGRFeature(points):5
+  POINT Z (635678.9 851351.4 436.4)
+
+OGRFeature(points):6
+  POINT Z (635680.5 849362.7 421.6)
+
+OGRFeature(points):7
+  POINT Z (635681.1 851383.8 419.0)
+
+OGRFeature(points):8
+  POINT Z (635684.0 849494.4 407.1)
+
+OGRFeature(points):9
+  POINT Z (635685.3 852165.1 421.8)
+
