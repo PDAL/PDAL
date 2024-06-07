@@ -296,9 +296,11 @@ TEST(OGRWriterTest, geopackage_attrs_all)
 {
     std::string infile = Support::datapath("las/simple.las");
 
-    #ifdef PDAL_GDAL_VERSION_3_9_0
+    #if PDAL_GDAL_VERSION_3_9_0
+        #warning "Creating tests using GDAL>=3.9.0 filepaths"
         std::string infofile = Support::datapath("ogr/geopackage_attrs_all_gdal_gt_390.gpkg.ogrinfo");
     #else
+        #warning "Creating tests using GDAL<3.9.0 filepaths"
         std::string infofile = Support::datapath("ogr/geopackage_attrs_all.gpkg.ogrinfo");
     #endif
 

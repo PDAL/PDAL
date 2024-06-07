@@ -24,9 +24,15 @@ if (GDAL_FOUND)
         message(FATAL_ERROR
             "Found GDAL version ${GDAL_VERSION}.  Version 3.4+ is required")
     endif()
+
     if (GDAL_VERSION VERSION_GREATER_EQUAL 3.9.0)
+        message(STATUS "Compiling tests with GDAL version 3.9.0 or greater.")
         set(GDAL_VERSION_3_9_0 1)
+    else()
+        message(STATUS "Compiling tests with GDAL below version 3.9.0.")
+        set(GDAL_VERSION_3_9_0 0)
     endif()
+
     mark_as_advanced(CLEAR GDAL_INCLUDE_DIR)
     mark_as_advanced(CLEAR GDAL_LIBRARY)
 else()
