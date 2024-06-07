@@ -1,7 +1,6 @@
 #
 # Matlab
 #
-find_library(Matlab REQUIRED)
 find_package(Matlab COMPONENTS MX_LIBRARY ENG_LIBRARY MAT_LIBRARY REQUIRED)
 
 if(Matlab_FOUND)
