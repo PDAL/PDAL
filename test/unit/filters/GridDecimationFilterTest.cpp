@@ -83,7 +83,7 @@ TEST(DecimationFilterTest, GridDecimationFilterTest_test1)
                 
                 BOX2D dstBounds(xmin + c*res, ymin + l*res, xmin + (c+1)*res, ymin + (l+1)*res);
                 
-                int nbThreadPtsCrop (0), nbPoints(0);
+                int nbThreadPtsCrop (0);
                 double Zmax(0), ZmaxGrid(0);
                 for (PointId i = 0; i < view->size(); ++i)
                 {
@@ -92,7 +92,6 @@ TEST(DecimationFilterTest, GridDecimationFilterTest_test1)
                     double y_pt = point.getFieldAs<double>(Dimension::Id::Y);
                     if (!contains(dstBounds, x_pt, y_pt)) continue;
                     
-                    nbPoints++;
                     double z_pt = point.getFieldAs<double>(Dimension::Id::Z);
                     if (Zmax==0 or z_pt > Zmax) Zmax = z_pt;
                     
