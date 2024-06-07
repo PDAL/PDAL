@@ -25,6 +25,11 @@ TEST(GridDecimationFilterTest, create)
     EXPECT_TRUE(filter);
 }
 
+// to be coherent with the grid decimation algorithm
+bool contains(BOX2D box, double x, double y)
+    { return box.minx <= x && x < box.maxx && box.miny <= y && y < box.maxy; }
+
+
 TEST(DecimationFilterTest, GridDecimationFilterTest_test1)
 {
     Options ro;
@@ -34,71 +39,71 @@ TEST(DecimationFilterTest, GridDecimationFilterTest_test1)
     Stage& r = *(factory.createStage("readers.las"));
     r.setOptions(ro);
 
-    double resolution = 10.;
+    std::vector<double> resolution = {10., 10.3, 9.8, 9.6};
     
-    Options gdOps;
-    gdOps.add("output_type", "max");
-    gdOps.add("resolution", resolution);
-    gdOps.add("value", "Classification=5");
-
-    GridDecimationFilter filter;
-    filter.setOptions(gdOps);
-    filter.setInput(r);
-
-    PointTable table;
-
-    filter.prepare(table);
-    PointViewSet viewSet = filter.execute(table);
-    
-    EXPECT_EQ(viewSet.size(), 1u);
-    
-    PointViewPtr view = *viewSet.begin();
-    
-    int nbThreadPts (0);
-    for (PointId i = 0; i < view->size(); ++i)
+    for (auto res : resolution)
     {
-        PointRef point = view->point(i);
-        uint8_t classification = point.getFieldAs<uint8_t>(Dimension::Id::Classification);
-        if (classification==5) nbThreadPts++;
-    }
-    
-    EXPECT_EQ(nbThreadPts, 400);
-    
-    double xmin = 1639600.0;
-    double ymin = 1454500.02;
-    
-    for (size_t l(0); l<20; l++){
-        for (size_t c(0); l<20; l++){
-            
-            BOX2D dstBounds(xmin + c*resolution, ymin + l*resolution, xmin + (c+1)*resolution, ymin + (l+1)*resolution);
-            
-            Options cropOpts;
-            cropOpts.add("bounds", dstBounds);
-            CropFilter cropfilter;
-            cropfilter.setOptions(cropOpts);
-
-            PointTable cropTable;
-            cropfilter.prepare(cropTable);
-            cropfilter.setInput(filter);
-            viewSet = cropfilter.execute(table);
-            view = *viewSet.begin();
-
-            int nbThreadPtsCrop (0);
-            double Zmax, ZmaxGrid;
-            for (PointId i = 0; i < view->size(); ++i)
-            {
-                PointRef point = view->point(i);
-                double z_pt = point.getFieldAs<double>(Dimension::Id::Z);
-                if (i==0) Zmax = z_pt;
-                else if (z_pt > Zmax) Zmax = z_pt;
-                uint8_t classification = point.getFieldAs<uint8_t>(Dimension::Id::Classification);
-                if (classification==5) {nbThreadPtsCrop++; ZmaxGrid=z_pt;}
+        Options gdOps;
+        gdOps.add("output_type", "max");
+        gdOps.add("resolution", res);
+        gdOps.add("value", "Classification=5");
+        
+        GridDecimationFilter filter;
+        filter.setOptions(gdOps);
+        filter.setInput(r);
+        
+        PointTable table;
+        
+        filter.prepare(table);
+        PointViewSet viewSet = filter.execute(table);
+        
+        EXPECT_EQ(viewSet.size(), 1u);
+        
+        PointViewPtr view = *viewSet.begin();
+        
+        int nbThreadPts (0);
+        for (PointId i = 0; i < view->size(); ++i)
+        {
+            PointRef point = view->point(i);
+            uint8_t classification = point.getFieldAs<uint8_t>(Dimension::Id::Classification);
+            if (classification==5) nbThreadPts++;
+        }
+        
+        BOX2D bounds;
+        view->calculateBounds(bounds);
+        size_t d_width = std::floor((bounds.maxx - bounds.minx) / res) + 1;
+        size_t d_height = std::floor((bounds.maxy - bounds.miny) / res) + 1;
+        EXPECT_EQ(nbThreadPts, d_width*d_height);
+        
+        double xmin = bounds.minx;
+        double ymin = bounds.miny;
+        
+        for (size_t l(0); l<d_height; l++){
+            for (size_t c(0); c<d_width; c++){
+                
+                BOX2D dstBounds(xmin + c*res, ymin + l*res, xmin + (c+1)*res, ymin + (l+1)*res);
+                
+                int nbThreadPtsCrop (0), nbPoints(0);
+                double Zmax(0), ZmaxGrid(0);
+                for (PointId i = 0; i < view->size(); ++i)
+                {
+                    PointRef point = view->point(i);
+                    double x_pt = point.getFieldAs<double>(Dimension::Id::X);
+                    double y_pt = point.getFieldAs<double>(Dimension::Id::Y);
+                    if (!contains(dstBounds, x_pt, y_pt)) continue;
+                    
+                    nbPoints++;
+                    double z_pt = point.getFieldAs<double>(Dimension::Id::Z);
+                    if (Zmax==0 or z_pt > Zmax) Zmax = z_pt;
+                    
+                    uint8_t classification = point.getFieldAs<uint8_t>(Dimension::Id::Classification);
+                    if (classification==5) {nbThreadPtsCrop++; ZmaxGrid=z_pt;}
+                }
+                
+                EXPECT_EQ(nbThreadPtsCrop, 1);
+                EXPECT_EQ(Zmax, ZmaxGrid);
             }
-            
-            EXPECT_EQ(nbThreadPtsCrop, 1);
-            EXPECT_EQ(Zmax, ZmaxGrid);
         }
     }
-    
    
 }
