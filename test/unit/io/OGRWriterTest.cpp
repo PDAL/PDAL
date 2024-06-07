@@ -255,10 +255,8 @@ TEST(OGRWriterTest, creation_options)
 {
     std::string infile = Support::datapath("las/simple.las");
     #if PDAL_GDAL_VERSION_3_9_0
-        #warning "Creation option test made using GDAL>=3.9.0 filepaths"
         std::string infofile = Support::datapath("ogr/creation_options_gdal_gt_390.geojson.ogrinfo");
     #else
-        #warning "Creation option test made using GDAL<3.9.0 filepaths"
         std::string infofile = Support::datapath("ogr/creation_options.geojson.ogrinfo");
     #endif
 
@@ -299,10 +297,8 @@ TEST(OGRWriterTest, geopackage_attrs_all)
     std::string infile = Support::datapath("las/simple.las");
 
     #if PDAL_GDAL_VERSION_3_9_0
-        #warning "Geopackage_attrs_all test made using GDAL>=3.9.0 filepaths"
         std::string infofile = Support::datapath("ogr/geopackage_attrs_all_gdal_gt_390.gpkg.ogrinfo");
     #else
-        #warning "Geopackage_attrs_all test made using GDAL<3.9.0 filepaths"
         std::string infofile = Support::datapath("ogr/geopackage_attrs_all.gpkg.ogrinfo");
     #endif
 

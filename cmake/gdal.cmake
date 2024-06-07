@@ -26,10 +26,8 @@ if (GDAL_FOUND)
     endif()
 
     if (GDAL_VERSION VERSION_GREATER_EQUAL 3.9.0)
-        message(STATUS "Compiling tests with GDAL version 3.9.0 or greater.")
         set(GDAL_VERSION_3_9_0 1)
     else()
-        message(STATUS "Compiling tests with GDAL below version 3.9.0.")
         set(GDAL_VERSION_3_9_0 0)
     endif()
 
