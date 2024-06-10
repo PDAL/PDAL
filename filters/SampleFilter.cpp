@@ -103,23 +103,10 @@ PointViewSet SampleFilter::run(PointViewPtr view)
     PointViewPtr output = view->makeNew();
     for (PointRef point : *view)
     {
-        bool kept = voxelize(point);
-        if (kept)
+        if (keepPoint(point))
         {
-            // Write a 1 if the user set a 'dimension' argument
-            if (m_dimension != pdal::Dimension::Id::Unknown)
-                point.setField(m_dimension, 1);
-
+            bool kept = voxelize(point);
             output->appendPoint(*view, point.pointId());
-        } else
-        {
-            // If the user set a dimension, write 0s be cause we didn't
-            // keep the point. Otherwise we drop it on the floor.
-            if (m_dimension != pdal::Dimension::Id::Unknown)
-            {
-                point.setField(m_dimension, 0);
-                output->appendPoint(*view, point.pointId());
-            }
         }
     }
 
@@ -231,26 +218,20 @@ bool SampleFilter::voxelize(PointRef& point)
     return true;
 }
 
+bool SampleFilter::keepPoint(PointRef& point)
+{
+  bool keep = voxelize(point);
+  if (m_dimension != pdal::Dimension::Id::Unknown)
+  {
+    point.setField(m_dimension, keep);
+    keep = true;
+  }
+  return keep;
+}
+
 bool SampleFilter::processOne(PointRef& point)
 {
-    bool kept = voxelize(point);
-    if (kept)
-    {
-        // Write a 1 if the user set a 'dimension' argument
-        if (m_dimension != pdal::Dimension::Id::Unknown)
-            point.setField(m_dimension, 1);
-        return true;
-    } else
-    {
-        // If the user set a dimension, write 0s be cause we didn't
-        // keep the point. Otherwise we drop it on the floor.
-        if (m_dimension != pdal::Dimension::Id::Unknown)
-        {
-            point.setField(m_dimension, 0);
-            return true;
-        } else
-            return false;
-    }
+    return keepPoint(point);
 }
 
 } // namespace pdal

@@ -76,6 +76,8 @@ private:
     virtual void ready(PointTableRef);
     virtual PointViewSet run(PointViewPtr view);
 
+    bool keepPoint(PointRef& point);
+
     bool voxelize(PointRef& point);
 };
 
