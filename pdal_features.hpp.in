@@ -15,11 +15,6 @@
 #define PDAL_VERSION_MINOR @PDAL_VERSION_MINOR@
 #define PDAL_VERSION_PATCH @PDAL_VERSION_PATCH@
 
-/*
- * GDAL version
- */
-#define PDAL_GDAL_VERSION_3_9_0 @GDAL_VERSION_3_9_0@
-
 namespace pdal
 {
 
