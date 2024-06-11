@@ -14,6 +14,7 @@ endif(STANDALONE)
 # PgPointCloud plugin CMake configuration
 #
 include(${PDAL_CMAKE_DIR}/postgres.cmake)
+include(${PDAL_CMAKE_DIR}/libxml2.cmake)
 
 #
 # PgPointCloud Reader
