@@ -254,14 +254,18 @@ TEST(OGRWriterTest, geopackage)
 TEST(OGRWriterTest, creation_options)
 {
     std::string infile = Support::datapath("las/simple.las");
-    std::string infofile = Support::datapath("ogr/creation_options.geojson.ogrinfo");
+    #if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,9,0)
+        std::string infofile = Support::datapath("ogr/creation_options_gdal_gt_390.geojson.ogrinfo");
+    #else
+        std::string infofile = Support::datapath("ogr/creation_options.geojson.ogrinfo");
+    #endif
 
-    Options wo;
-    wo.add("ogrdriver", "GeoJSON");
-    wo.add("ogr_options", "WRITE_BBOX=YES");
-    wo.add("ogr_options", "COORDINATE_PRECISION=1");
+        Options wo;
+        wo.add("ogrdriver", "GeoJSON");
+        wo.add("ogr_options", "WRITE_BBOX=YES");
+        wo.add("ogr_options", "COORDINATE_PRECISION=1");
 
-    runOgrWriterInfo(wo, infile, infofile, ".geojson", 10, &diff_geojson);
+        runOgrWriterInfo(wo, infile, infofile, ".geojson", 10, &diff_geojson);
 }
 
 TEST(OGRWriterTest, shapefile_measure)
@@ -291,7 +295,13 @@ TEST(OGRWriterTest, attrs_all)
 TEST(OGRWriterTest, geopackage_attrs_all)
 {
     std::string infile = Support::datapath("las/simple.las");
-    std::string infofile = Support::datapath("ogr/geopackage_attrs_all.gpkg.ogrinfo");
+
+    #if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,9,0)
+        std::string infofile = Support::datapath("ogr/geopackage_attrs_all_gdal_gt_390.gpkg.ogrinfo");
+    #else
+        std::string infofile = Support::datapath("ogr/geopackage_attrs_all.gpkg.ogrinfo");
+    #endif
+
 
     Options wo;
     wo.add("ogrdriver", "GPKG");
