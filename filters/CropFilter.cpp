@@ -96,7 +96,7 @@ void CropFilter::addArgs(ProgramArgs& args)
     args.add("point", "Center of circular/spherical crop region.  Use with "
         "'distance'.", m_args->m_centers).
         setErrorText("Invalid point specification.  Must be valid "
-            "GeoJSON/WKT. Ex: \"(1.00, 1.00)\" or \"(1.00, 1.00, 1.00)\"");
+            "GeoJSON/WKT. Ex: \"POINT (1 1)\" or \"POINT (1 1 1)\"");
     args.add("distance", "Crop with this distance from 2D or 3D 'point'",
         m_args->m_distance);
     args.add("polygon", "Bounding polying for cropped points", m_args->m_polys).

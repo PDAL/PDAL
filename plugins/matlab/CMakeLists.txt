@@ -53,11 +53,11 @@ if (WITH_TESTS)
             ${PDAL_IO_DIR}
             ${Matlab_INCLUDE_DIR}
     )
-    set_target_properties(pdal_io_matlab_writer_test
-        PROPERTIES
-        INSTALL_RPATH "${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES}:${MATLAB_LIB_DIR}"
-        BUILD_WITH_INSTALL_RPATH true
-    )
+#    set_target_properties(pdal_io_matlab_writer_test
+#        PROPERTIES
+#        INSTALL_RPATH "${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES}:${MATLAB_LIB_DIR}"
+#        BUILD_WITH_INSTALL_RPATH true
+#    )
 
 
     PDAL_ADD_TEST(pdal_io_matlab_reader_test
@@ -69,11 +69,11 @@ if (WITH_TESTS)
             ${PDAL_IO_DIR}
             ${Matlab_INCLUDE_DIR}
     )
-    set_target_properties(pdal_io_matlab_reader_test
-        PROPERTIES
-        INSTALL_RPATH "${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES}:${MATLAB_LIB_DIR}"
-        BUILD_WITH_INSTALL_RPATH true
-    )
+#    set_target_properties(pdal_io_matlab_reader_test
+#        PROPERTIES
+#        INSTALL_RPATH "${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES}:${MATLAB_LIB_DIR}"
+#        BUILD_WITH_INSTALL_RPATH true
+#    )
 
     PDAL_ADD_TEST(pdal_filters_matlab_test
         FILES
@@ -88,11 +88,11 @@ if (WITH_TESTS)
             ${ROOT_DIR}
             ${Matlab_INCLUDE_DIR}
     )
-    set_target_properties(pdal_filters_matlab_test
-        PROPERTIES
-        INSTALL_RPATH "${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES}:${MATLAB_LIB_DIR}:${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
-        BUILD_WITH_INSTALL_RPATH true
-    )
+#    set_target_properties(pdal_filters_matlab_test
+#        PROPERTIES
+#        INSTALL_RPATH "${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES}:${MATLAB_LIB_DIR}:${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
+#        BUILD_WITH_INSTALL_RPATH true
+#    )
 
 endif()
 
