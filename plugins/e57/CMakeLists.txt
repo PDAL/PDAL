@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.13)
 if (STANDALONE)
     find_package(PDAL REQUIRED)
     include("${PROJECT_SOURCE_DIR}/../../cmake/standalone.cmake" )
+    include("${PROJECT_SOURCE_DIR}/../../cmake/nlohmann.cmake" )
 endif(STANDALONE)
 
 
@@ -18,6 +19,7 @@ PDAL_ADD_PLUGIN(e57plugin_reader reader e57
         ${PDAL_VENDOR_DIR}
     LINK_WITH
         E57Format
+        ${PDAL_LIBRARIES}
     INCLUDES
         libE57Format/include
 )
@@ -34,6 +36,7 @@ PDAL_ADD_PLUGIN(e57plugin_writer writer e57
         io/Uuid.cpp
     LINK_WITH
         E57Format
+        ${PDAL_LIBRARIES}
     INCLUDES
         libE57Format/include
 )
