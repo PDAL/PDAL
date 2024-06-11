@@ -62,6 +62,12 @@ private:
     double m_originX;
     double m_originY;
     double m_originZ;
+    Arg* m_dimensionArg;
+    std::string m_dimensionName;
+    pdal::Dimension::Id m_dimension;
+    Arg* m_originXArg;
+    Arg* m_originYArg;
+    Arg* m_originZArg;
     std::map<Voxel, CoordList> m_populatedVoxels;
 
     virtual void addArgs(ProgramArgs& args);
@@ -69,6 +75,8 @@ private:
     virtual bool processOne(PointRef& point);
     virtual void ready(PointTableRef);
     virtual PointViewSet run(PointViewPtr view);
+
+    bool keepPoint(PointRef& point);
 
     bool voxelize(PointRef& point);
 };
