@@ -85,7 +85,7 @@ void GridDecimationFilter::processOne(BOX2D bounds, PointRef& point, PointViewPt
     int width = static_cast<int>((x - bounds.minx) / m_args->m_edgeLength);
     int height = static_cast<int>((y - bounds.miny) / m_args->m_edgeLength);
 
-    // to avoid numreic pb with the division (append if the point is on the grid)
+    // to avoid numeric pb due to the division (append if the point is on the grid)
     if (x < bounds.minx+width*m_args->m_edgeLength) width--;
     if (y < bounds.miny+height*m_args->m_edgeLength) height--;
     if (x >= bounds.minx+(width+1)*m_args->m_edgeLength) width++;
@@ -114,8 +114,9 @@ void GridDecimationFilter::processOne(BOX2D bounds, PointRef& point, PointViewPt
 
 void GridDecimationFilter::createGrid(BOX2D bounds)
 {
-    size_t d_width = std::floor((bounds.maxx - bounds.minx) / m_args->m_edgeLength) + 1;
-    size_t d_height = std::floor((bounds.maxy - bounds.miny) / m_args->m_edgeLength) + 1;
+    // +2 to be sur to deal with all points (avoid some numeric precision issue due to the division)
+    size_t d_width = std::floor((bounds.maxx - bounds.minx) / m_args->m_edgeLength) + 2;
+    size_t d_height = std::floor((bounds.maxy - bounds.miny) / m_args->m_edgeLength) + 2;
 
     if (d_width < 0.0 || d_width > (std::numeric_limits<int>::max)())
         throwError("Grid width out of range.");
