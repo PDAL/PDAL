@@ -264,7 +264,7 @@ Filename Globbing
 Option Files
 ................................................................................
 
-All stages accept the ``option file`` option that allows extra options for a
+All stages accept the ``option_file`` option that allows extra options for a
 stage to be placed in a separate file.  The value of the option is the filename
 in which the additional options are located.
 
