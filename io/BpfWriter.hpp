@@ -56,6 +56,9 @@ public:
         CoordId() : m_auto(false), m_val(0)
         {}
 
+        CoordId(bool isAuto, int val) : m_auto(isAuto), m_val(val)
+        {}
+
         bool m_auto;
         int m_val;
     };
