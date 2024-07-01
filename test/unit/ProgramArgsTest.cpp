@@ -37,7 +37,7 @@
 #include <nlohmann/json.hpp>
 
 // No wordexp() on windows and I don't feel like doing something special.
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__OpenBSD__)
 
 #include <wordexp.h>
 #include <pdal/pdal_internal.hpp>
