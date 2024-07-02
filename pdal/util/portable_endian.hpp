@@ -10,7 +10,8 @@
    
 #endif
     
-#if defined(__linux__) || defined(__CYGWIN__) || defined(__GNU__)
+#if defined(__linux__) || defined(__CYGWIN__) || defined(__GNU__) || \
+    defined(__FreeBSD_kernel__) || defined(__OpenBSD__)
      
 #   include <endian.h>
       
@@ -41,14 +42,10 @@
 #   define __PDP_ENDIAN    PDP_ENDIAN
 **/
             
-#elif defined(__OpenBSD__) || defined(__NetBSD__) || defined(__FreeBSD__) || defined(__DragonFly__)
+#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
 
 #   include <sys/endian.h>
 
-#elif defined(__FreeBSD_kernel__)
-     
-#   include <endian.h>
-      
 #elif defined(__WINDOWS__)
                     
 #   include <winsock2.h>
