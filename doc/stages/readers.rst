@@ -54,7 +54,7 @@ like :ref:`readers.pgpointcloud`, or a network service like :ref:`readers.ept`.
    readers.tiledb
    readers.tindex
 
-:ref: `readers.arrow`
+:ref:`readers.arrow`
     Read GeoArrow/GeoParquet formatted data.
 
 :ref:`readers.bpf`
