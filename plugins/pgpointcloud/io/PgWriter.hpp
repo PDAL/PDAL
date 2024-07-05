@@ -60,6 +60,8 @@ private:
 
     void writeInit();
     void writeTile(const PointViewPtr view);
+    // new copy mode
+    void copyTile(const PointViewPtr view);
 
     bool CheckTableExists(std::string const& name);
     bool CheckPointCloudExists();
@@ -96,6 +98,11 @@ private:
     Orientation m_orientation;
     std::string m_pre_sql;
     std::string m_post_sql;
+    // new: copy mode management
+    bool m_pg_use_copy;
+    bool m_in_copy_mode; // copy management between copyTile invocations, to control when to send data or not
+    std::string m_copy;
+    std::string m_copy_data;
 
     // lose this
     bool m_schema_is_initialized;

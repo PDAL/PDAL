@@ -44,7 +44,8 @@ Example
           "connection":"host='localhost' dbname='lidar' user='pramsey'",
           "table":"example",
           "compression":"dimensional",
-          "srid":"26916"
+          "srid":"26916",
+          "pg_use_copy": true
       }
   ]
 
@@ -104,6 +105,10 @@ scale_x, scale_y, scale_z / offset_x, offset_y, offset_z
 output_dims
   If specified, limits the dimensions written for each point.  Dimensions
   are listed by name and separated by commas.
+
+pg_use_copy
+  Set to true to use PostgreSQL COPY mode for inserting data,
+  false to use SQL INSERT (default to false)
 
 .. include:: writer_opts.rst
 
