@@ -22,7 +22,7 @@ chamfer
           distance_1_to_2 = 0
           distance_2_to_1 = 0
 
-          points1 = np.column_stack((arr1['X'], arr1['Y'], arr2['Z']))
+          points1 = np.column_stack((arr1['X'], arr1['Y'], arr1['Z']))
           points2 = np.column_stack((arr2['X'], arr2['Y'], arr2['Z']))
           
           # Compute distance from each point in arr1 to arr2
