@@ -31,6 +31,7 @@ if(${WITH_TESTS})
         FILES
             test/CpdFilterTest.cpp
         LINK_WITH
+            ${filter_libname}
             Cpd::Library-C++
         INCLUDES
             "${include_dirs}"
