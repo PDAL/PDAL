@@ -43,9 +43,10 @@ as shown:
               "filename": "path-to-my-file.input"
               },
               {
-              "description": "A description under 32 bytes",
+              "description": "Write metadata as EVLR",
               "record_id": 44,
               "user_id": "hobu",
+              "evlr': true,
               "metadata": "metadata_keyname"
               }],
           "filename":"outputfile.las"

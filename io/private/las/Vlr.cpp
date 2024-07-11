@@ -320,6 +320,13 @@ std::istream& operator>>(std::istream& in, las::Evlr& v)
 
             v.dataFunc = MetadataFunc(metadataId);
         }
+        else if (el.key() == "evlr")
+        {
+            if (!el.value().is_boolean())
+                throw pdal_error("LAS VLR metadata key must be specified as a string.");
+            bool doEVLR = el.value().get<bool>();
+            v.writeAsEVLR = doEVLR;
+        }
         else
             throw pdal_error("Invalid key '" + el.key() + "' in VLR specification.");
     }

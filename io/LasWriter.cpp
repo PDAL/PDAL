@@ -629,7 +629,7 @@ void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
 /// \param  evlr  VLR to add.
 void LasWriter::addVlr(const las::Evlr& evlr)
 {
-    if (evlr.dataSize() > las::Vlr::MaxDataSize)
+    if (evlr.dataSize() > las::Vlr::MaxDataSize || evlr.writeAsEVLR)
     {
         if (d->header.versionAtLeast(1, 4))
             m_evlrs.push_back(std::move(evlr));

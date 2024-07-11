@@ -85,10 +85,10 @@ public:
 
     Vlr() = default;
     Vlr(const std::string& userId, uint16_t recordId, const std::string& description) :
-        userId(userId), recordId(recordId), description(description)
+        userId(userId), recordId(recordId), description(description), writeAsEVLR(false)
     {}
     Vlr(const std::string& userId, uint16_t recordId) :
-        userId(userId), recordId(recordId)
+        userId(userId), recordId(recordId), writeAsEVLR(false)
     {}
     virtual ~Vlr() = default;
 
@@ -111,6 +111,9 @@ public:
     std::string description;
     std::vector<char> dataVec;
     std::string metadataId;
+
+    // User specified we want to write this at the back of the file
+    bool writeAsEVLR;
 };
 
 inline bool operator==(const Vlr& v1, const Vlr& v2)
