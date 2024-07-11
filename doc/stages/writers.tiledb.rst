@@ -17,7 +17,7 @@ Example
   [
       {
           "type":"readers.las",
-          "array_name":"input.las"
+          "filename":"input.las"
       },
       {
           "type":"filters.stats"
