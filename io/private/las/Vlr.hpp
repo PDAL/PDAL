@@ -130,11 +130,11 @@ struct Evlr : public Vlr
     Evlr(const std::string& userId, uint16_t recordId,
             const std::string& description, const std::vector<char>& data) :
         Vlr(userId, recordId, description)
-    { dataVec = data; }
+    { dataVec = data; writeAsEVLR = false;}
     Evlr(const std::string& userId, uint16_t recordId,
             const std::string& description, std::vector<char>&& data) :
         Vlr(userId, recordId, description)
-    { dataVec = data; }
+    { dataVec = data; writeAsEVLR = false;}
 
     virtual void fillHeader(const char *buf) override;
     virtual std::vector<char> headerData() const override;
