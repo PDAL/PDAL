@@ -629,7 +629,7 @@ void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
 /// \param  evlr  VLR to add.
 void LasWriter::addVlr(const las::Evlr& evlr)
 {
-    if (evlr.dataSize() > las::Vlr::MaxDataSize || evlr.writeAsEVLR)
+    if (evlr.dataSize() > las::Vlr::MaxDataSize)
     {
         if (d->header.versionAtLeast(1, 4))
             m_evlrs.push_back(std::move(evlr));
@@ -637,6 +637,12 @@ void LasWriter::addVlr(const las::Evlr& evlr)
             throwError("Can't write VLR with user ID/record ID = " +
                 evlr.userId + "/" + std::to_string(evlr.recordId) +
                 ".  The data size exceeds the maximum supported.");
+    } else if (evlr.writeAsEVLR)
+    {
+        if (d->header.versionAtLeast(1, 4))
+            m_evlrs.push_back(std::move(evlr));
+        else
+            throwError("User specified writing as EVLR but the file is not a 1.4+ file!");
     }
     else
         m_vlrs.push_back(std::move(evlr));

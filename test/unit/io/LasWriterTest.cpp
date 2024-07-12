@@ -1262,10 +1262,21 @@ TEST(LasWriterTest, pdal_add_vlr)
           "metadata": "software_id"
           })"
     );
+    std::string vlr4(
+      R"({
+          "description": "An explicit EVLR",
+          "record_id": 45,
+          "user_id": "hobu",
+          "evlr": true,
+          "metadata": "software_id"
+          })"
+    );
     Options writerOpts;
     writerOpts.add("vlrs", vlr1);
     writerOpts.add("vlrs", vlr2);
     writerOpts.add("vlrs", vlr3);
+    writerOpts.add("vlrs", vlr4);
+    writerOpts.add("minor_version", 4);
     writerOpts.add("filename", outfile);
 
     LasReader reader;
@@ -1287,7 +1298,7 @@ TEST(LasWriterTest, pdal_add_vlr)
     reader2.execute(t2);
 
     const VlrList& vlrs = reader2.header().vlrs();
-    EXPECT_EQ(vlrs.size(), 3u);
+    EXPECT_EQ(vlrs.size(), 4u);
 
     const LasVLR& v0 = vlrs[0];
     std::string s0(v0.data(), v0.data() + v0.dataLen());
@@ -1300,6 +1311,10 @@ TEST(LasWriterTest, pdal_add_vlr)
     const LasVLR& v2 = vlrs[2];
     std::string s2(v2.data(), v2.data() + v2.dataLen());
     EXPECT_EQ(s2, "TerraScan");
+
+    const LasVLR& v3 = vlrs[3];
+    std::string s3(v3.data(), v3.data() + v3.dataLen());
+    EXPECT_EQ(s3, "TerraScan");
 }
 
 TEST(LasWriterTest, pdal_wkt2_vlr)
