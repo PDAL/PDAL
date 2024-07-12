@@ -113,7 +113,7 @@ public:
     std::string metadataId;
 
     // User specified we want to write this at the back of the file
-    bool writeAsEVLR;
+    bool writeAsEVLR = false;
 };
 
 inline bool operator==(const Vlr& v1, const Vlr& v2)
