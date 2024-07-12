@@ -46,7 +46,7 @@ as shown:
               "description": "Write metadata as EVLR",
               "record_id": 44,
               "user_id": "hobu",
-              "evlr': true,
+              "evlr": true,
               "metadata": "metadata_keyname"
               }],
           "filename":"outputfile.las"
