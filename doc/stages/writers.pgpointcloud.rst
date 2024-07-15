@@ -10,7 +10,7 @@ patch in turn contains a large number of spatially nearby points.
 
 While you can theoretically store the contents of a whole file of points in a
 single patch, it is more practical to store a table full of smaller patches,
-where the patches are under the PostgreSQL page size (8kb). For most LIDAR
+where the patches are under the PostgreSQL page size (8KB). For most LIDAR
 data, this practically means a patch size of between 400 and 600 points.
 
 In order to create patches of the right size, the Pointcloud writer should be
