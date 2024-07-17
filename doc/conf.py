@@ -95,11 +95,9 @@ def read_version(filename):
 
     version = None
     for line in data:
-        if str(token) in line:
-            match = re.search(r'\d.\d.\d', line)
-            if match is not None:
-                version = match.group(0)
-                break
+        if token in line:
+            if match := re.search(r'\d+.\d+.\d+', line):
+                return match.group(0)
     return version
 
 release = read_version('../CMakeLists.txt')
