@@ -95,11 +95,9 @@ def read_version(filename):
 
     version = None
     for line in data:
-        if str(token) in line:
-            match = re.search(r'\d.\d.\d', line)
-            if match is not None:
-                version = match.group(0)
-                break
+        if token in line:
+            if match := re.search(r'\d+.\d+.\d+', line):
+                return match.group(0)
     return version
 
 release = read_version('../CMakeLists.txt')
@@ -148,6 +146,7 @@ html_theme = 'pdal_rtd'
 html_theme_path = ['.']
 html_title = "pdal.io"
 
+html_baseurl = os.environ.get("READTHEDOCS_CANONICAL_URL", "")
 
 html_context = {
   'display_github': True,
@@ -157,6 +156,8 @@ html_context = {
   'github_version': 'master',
   'conf_py_path': '/doc/'
 }
+if os.environ.get("READTHEDOCS", "") == "True":
+    html_context["READTHEDOCS"] = True
 
 html_theme_options = {
     'canonical_url': 'https://pdal.io/',
