@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        type: ['floating']
+        type: ['current']
     env:
       BUILD_TYPE: ${{ matrix.type }}
     defaults:
@@ -35,7 +35,7 @@ jobs:
     - uses: mamba-org/setup-micromamba@v1
       with:
         init-shell: bash
-        environment-file: scripts/ci/environment.yml
+        environment-file: "scripts/ci/${{ matrix.type }}-environment.yml"
         environment-name: "pdal-build"
         cache-environment: true
         cache-downloads: true
