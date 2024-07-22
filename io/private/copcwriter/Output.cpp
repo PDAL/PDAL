@@ -347,6 +347,7 @@ void Output::writeEvlrs()
     }
 }
 
+
 } // namespace copcwriter
 } // namespace pdal
 

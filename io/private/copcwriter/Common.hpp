@@ -91,6 +91,7 @@ struct Options
 {
     StringList forwardSpec;
     StringList extraDimSpec;
+    StringList sortDimSpec;
     NumHeaderVal<uint16_t, 0, 65535> filesourceId;
     NumHeaderVal<uint16_t, 0, 31> globalEncoding;
     UuidHeaderVal projectId;
@@ -110,6 +111,7 @@ struct Options
     pdal::SpatialReference aSrs;
     int threadCount = 10;
     bool enhancedSrsVlrs = false;
+
 };
 
 struct BaseInfo
@@ -138,6 +140,8 @@ struct BaseInfo
         stats::Summary("ReturnNumber", stats::Summary::Enumerate),
     };
     std::string filename;
+
+    Dimension::IdList sortDims;
 };
 
 } // namespace copcwriter

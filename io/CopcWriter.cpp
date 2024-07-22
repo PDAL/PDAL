@@ -133,6 +133,8 @@ void CopcWriter::addArgs(ProgramArgs& args)
         decltype(b->opts.enhancedSrsVlrs)(false));
     args.add("extra_dims", "List of dimension names to write in addition to those of the "
         "point format or 'all' for all available dimensions", b->opts.extraDimSpec);
+    args.add("sort_dims", "List of dimension names and their ordering for chunk sorting",
+         b->opts.sortDimSpec);
 }
 
 void CopcWriter::fillForwardList()
@@ -292,6 +294,17 @@ void CopcWriter::prepared(PointTableRef table)
             dim.m_name <<
             "(" << Dimension::interpretationName(dim.m_dimType.m_type) <<
             ") " << " to COPC extra bytes." << std::endl;
+    }
+
+    // If 'sort_dims' was specified, go check we have them and set our options
+    for (std::string const& dimName : b->opts.sortDimSpec)
+    {
+        // b->sortDims
+        Dimension::Id dimId = layout->findDim(dimName);
+        if (dimId == Dimension::Id::Unknown)
+            throwError("Dimension '" + dimName + "' specified in "
+                "'sort_dims' option not found.");
+        b->sortDims.push_back(dimId);
     }
 }
 

@@ -177,9 +177,21 @@ void Processor::writeCompressed(VoxelKey k, PointViewPtr v)
     std::vector<char> buf(lazperf::baseCount(b.pointFormatId) + b.numExtraBytes);
     lazperf::writer::chunk_compressor compressor(b.pointFormatId, b.numExtraBytes);
 
-    // Sort by GPS time - no-op if there's no GPS time.
-    std::sort(v->begin(), v->end(), [](const PointRef& p1, const PointRef& p2)
-        { return p1.compare(Dimension::Id::GpsTime, p2); });
+    if (b.sortDims.size())
+    {
+        // Sort based on the dimensions and ordering we were given
+        for (Dimension::Id dimId: b.sortDims)
+        {
+            std::sort(v->begin(), v->end(), [dimId](const PointRef& p1, const PointRef& p2)
+                { return p1.compare(dimId, p2); });
+        }
+    } else
+    {
+        // Sort by GPS time - no-op if there's no GPS time.
+        std::sort(v->begin(), v->end(), [](const PointRef& p1, const PointRef& p2)
+            { return p1.compare(Dimension::Id::GpsTime, p2); });
+
+    }
 
     for (PointId idx = 0; idx < v->size(); ++idx)
     {
