@@ -2,7 +2,7 @@ name: pdal-build
 channels:
   - conda-forge
 dependencies:
-  - libgdal
+  - libgdal=3.8
   - boa
   - libpq
   - curl
