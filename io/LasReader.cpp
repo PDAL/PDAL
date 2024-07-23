@@ -179,7 +179,7 @@ LasReader::LasReader() : d(new Private)
 {}
 
 LasReader::~LasReader()
-{}
+{ cleanup(); }
 
 void LasReader::addArgs(ProgramArgs& args)
 {
@@ -917,6 +917,11 @@ void LasReader::loadExtraDims(LeExtractor& istream, PointRef& point)
 
 
 void LasReader::done(PointTableRef)
+{
+    cleanup();
+}
+
+void LasReader::cleanup()
 {
     d->pool.join();
     if (d->isRemote)
