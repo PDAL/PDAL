@@ -335,7 +335,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
         throwError(errors.front());
     if (d->header.has14PointFormat() && !d->header.useWkt())
         log()->get(LogLevel::Warning) <<
-            "Global encoding WKT flag not set for point format 6 - 10.";
+            "Global encoding WKT flag not set for point format 6 - 10.\n";
 
     // Set the queue function based on whether we're compressed or not.
     d->queueNext = d->header.dataCompressed() ?
@@ -628,7 +628,7 @@ void LasReader::readExtraBytesVlr()
 
     if (vlr->dataSize() % las::ExtraBytesSpecSize != 0)
     {
-        log()->get(LogLevel::Warning) << "Bad size for extra bytes VLR.  Ignoring.";
+        log()->get(LogLevel::Warning) << "Bad size for extra bytes VLR.  Ignoring.\n";
         return;
     }
 
@@ -638,7 +638,7 @@ void LasReader::readExtraBytesVlr()
     if (d->extraDims.size() && d->extraDims != extraDims)
         log()->get(LogLevel::Warning) << "Extra byte dimensions specified "
             "in pipeline and VLR don't match.  Ignoring pipeline-specified "
-            "dimensions";
+            "dimensions\n";
     d->extraDims = std::move(extraDims);
 }
 
