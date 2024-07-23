@@ -647,7 +647,7 @@ void EptReader::ready(PointTableRef table)
     if (overlapPoints > 1e8)
     {
         log()->get(LogLevel::Warning) << overlapPoints <<
-            " will be downloaded" << std::endl;
+            " points will be downloaded" << std::endl;
     }
 
     m_pointId = 0;
