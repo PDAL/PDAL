@@ -88,7 +88,7 @@ void BpfWriter::addArgs(ProgramArgs& args)
     args.add("header_data", "Base64-encoded header data", m_extraDataSpec);
     args.add("format", "Output format", m_header.m_pointFormat,
         BpfFormat::DimMajor);
-    args.add("coord_id", "UTM coordinate ID", m_coordId);
+    args.add("coord_id", "UTM coordinate ID", m_coordId, {true, 0});
     args.add("bundledfile", "List of files to bundle in output",
         m_bundledFilesSpec);
     args.add("output_dims", "Output dimensions", m_outputDims);
