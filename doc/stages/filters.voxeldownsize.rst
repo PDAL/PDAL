@@ -25,6 +25,8 @@ Example
       "output.las"
   ]
 
+.. streamable::
+
 .. seealso::
 
     :ref:`filters.voxelcenternearestneighbor` offers a similar solution,
@@ -51,4 +53,4 @@ mode
     values of retained points.  This may invalidate other dimensions of
     the point if they depend on this location or the location of other points
     in the input.
-  
+
