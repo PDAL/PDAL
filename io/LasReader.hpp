@@ -127,6 +127,7 @@ private:
     void loadPointV14(PointRef& point, const char *buf, size_t bufsize);
     void loadExtraDims(LeExtractor& istream, PointRef& data);
 
+    void cleanup();
     void tryLoadRemote();
     bool eof();
     void queueNextCompressedChunk();
