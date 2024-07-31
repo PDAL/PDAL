@@ -1,4 +1,4 @@
-sphinx==7.4.7
+sphinx==8.0.2
 breathe==4.35.0
 sphinxcontrib-bibtex==2.6.2
 sphinx-rtd-theme==2.0.0
