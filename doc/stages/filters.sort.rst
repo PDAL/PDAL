@@ -28,8 +28,8 @@ Example
 Options
 -------
 
-_`dimension`
-  The dimension on which to sort the points. [Required]
+_`dimensions`
+  A list of dimensions in the order on which to sort the points. [Required]
 
 _`order`
   The order in which to sort, ASC or DESC [Default: "ASC"]

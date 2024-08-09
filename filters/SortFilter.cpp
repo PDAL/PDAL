@@ -50,29 +50,43 @@ std::string SortFilter::getName() const { return s_info.name; }
 
 void SortFilter::addArgs(ProgramArgs& args)
 {
-    args.add("dimension", "Dimension on which to sort", m_dimName).
+    args.add("dimensions", "Dimensions and ordering on which to sort", m_dimNames).
         setPositional();
+
+    args.addSynonym("dimensions", "dimension");
+
     args.add("order", "Sort order ASC(ending) or DESC(ending)", m_order,
         SortOrder::ASC);
 }
 
 void SortFilter::prepared(PointTableRef table)
 {
-    m_dim = table.layout()->findDim(m_dimName);
-    if (m_dim == Dimension::Id::Unknown)
-        throwError("Dimension '" + m_dimName + "' not found.");
+    PointLayoutPtr layout(table.layout());
+    for (auto& s : m_dimNames)
+    {
+        Dimension::Id dimId = layout->findDim(s);
+        if (layout->findDim(s) == Dimension::Id::Unknown)
+            throwError("Cannot sort because dimension '" + s + "' was not found.");
+        m_dims.push_back(dimId);
+    }
+
+    if (!m_dimNames.size())
+        throwError("At least one valid dimension name must be provided!");
 }
 
 void SortFilter::filter(PointView& view)
 {
-    auto cmp = [this](const PointRef& p1, const PointRef& p2)
-    {
-        if (m_order == SortOrder::ASC)
-            return p1.compare(m_dim, p2);
-        return p2.compare(m_dim, p1);
-    };
 
-    std::sort(view.begin(), view.end(), cmp);
+    for (Dimension::Id dimId: m_dims)
+    {
+        std::stable_sort(view.begin(), view.end(), [this,dimId](const PointRef& p1, const PointRef& p2)
+            {
+                if (m_order == SortOrder::ASC)
+                    return p1.compare(dimId, p2);
+                return p2.compare(dimId, p1);
+
+            });
+    }
 }
 
 std::istream& operator >> (std::istream& in, SortOrder& order)
