@@ -212,6 +212,9 @@ Pointwise Features
 :ref:`filters.estimaterank`
     Compute pointwise rank, based on k-nearest neighbors.
 
+:ref:`filters.label_duplicates`
+    Label points as duplicate if the specified dimensions are equal.
+
 :ref:`filters.lof`
     Compute pointwise Local Outlier Factor (along with K-Distance and Local
     Reachability Distance).
