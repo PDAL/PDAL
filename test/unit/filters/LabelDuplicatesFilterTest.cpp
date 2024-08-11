@@ -45,12 +45,12 @@ namespace pdal
 {
 
 
-void testDimensions(std::string const& dimensions)
+void testDimensions(std::string const& data, std::string const& dimensions)
 {
 
     TextReader t;
     Options textOptions;
-    textOptions.add("filename", Support::datapath("text/duplicates-sorted.txt"));
+    textOptions.add("filename", Support::datapath(data));
     t.setOptions(textOptions);
 
 
@@ -84,12 +84,24 @@ void testDimensions(std::string const& dimensions)
 
 }
 
-TEST(LabelDuplicatesFilterTest, simple)
+TEST(LabelDuplicatesFilterTest, sorted)
 {
-    testDimensions("X");
-    testDimensions("X,Y");
-    testDimensions("X,Y,Z");
-    testDimensions("X,Y,Z,GpsTime");
-    testDimensions("X,Y,Z,GpsTime,PointSourceId,UserData");
+    std::string data("text/duplicates-sorted.txt");
+    testDimensions(data, "X");
+    testDimensions(data, "X,Y");
+    testDimensions(data, "X,Y,Z");
+    testDimensions(data, "X,Y,Z,GpsTime");
+    testDimensions(data, "X,Y,Z,GpsTime,PointSourceId,UserData");
 }
+
+TEST(LabelDuplicatesFilterTest, unsorted)
+{
+    std::string data("text/duplicates-unsorted.txt");
+    testDimensions(data, "X");
+    testDimensions(data, "X,Y");
+    testDimensions(data, "X,Y,Z");
+    testDimensions(data, "X,Y,Z,GpsTime");
+    testDimensions(data, "X,Y,Z,GpsTime,PointSourceId,UserData");
+}
+
 }
