@@ -10,7 +10,6 @@ PointRef::PointRef(PointView& v, PointId idx) : m_table(&v.table()),
 
 PointRef& PointRef::operator=(const PointRef& r)
 {
-    assert(m_view == r.m_view);
     assert(m_table == r.m_table);
 
     if (m_view)
