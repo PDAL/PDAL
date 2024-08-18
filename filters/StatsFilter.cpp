@@ -101,10 +101,38 @@ void Summary::extractMetadata(MetadataNode &m)
     }
     else if (m_enumerate == Count)
     {
+        // For some reason we first started adding 'counts' items that look like this:
+        //
+        //         "counts":
+        //         [
+        //           "1.000000/108",
+        //           "7.000000/24",
+        //           "9.000000/122704"
+        //         ]
+
+        // But these are hard to use and require custom parsing. They aren't JSON. Why aren't
+        // they JSON?
+        //
+        // I'm adding a "bins" parameter that at least won't require custom parsing, but
+        // we are not simply replacing "counts" because people could now be parsing the silly
+        // things.
+        //
+        //         "bins":
+        //         {
+        //           "1.000000": "108",
+        //           "7.000000": "24",
+        //           "9.000000": "122704"
+        //         }
+
+        MetadataNode bins = m.add("bins");
+
         for (auto& v : m_values)
         {
             std::string val =
                 std::to_string(v.first) + "/" + std::to_string(v.second);
+
+            MetadataNode bin = bins.add(std::to_string(v.first), std::to_string(v.second));
+
             m.addList("counts", val);
         }
     }
