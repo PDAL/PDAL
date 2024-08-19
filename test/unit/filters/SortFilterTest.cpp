@@ -49,13 +49,14 @@ namespace pdal
 namespace
 {
 
-void doSort(point_count_t count, Dimension::Id dim, const std::string & order, bool stable)
+void doSort(point_count_t count, Dimension::Id dim, const std::string& order,
+    const std::string& algorithm)
 {
     Options opts;
 
     opts.add("dimension", Dimension::name(dim));
     opts.add("order", order);
-    opts.add("stable", stable);
+    opts.add("algorithm", algorithm);
 
     SortFilter filter;
     filter.setOptions(opts);
@@ -96,10 +97,10 @@ TEST(SortFilterTest, simple)
     // note that this also tests default sort order ASC /**
     for (point_count_t count = 3; count < 30; count++)
     {
-        doSort(count, Dimension::Id::X, "ASC", false);
-        doSort(count, Dimension::Id::X, "DESC", false);
-        doSort(count, Dimension::Id::X, "ASC", true);
-        doSort(count, Dimension::Id::X, "DESC", true);
+        doSort(count, Dimension::Id::X, "ASC", "NORMAL");
+        doSort(count, Dimension::Id::X, "DESC", "normal");
+        doSort(count, Dimension::Id::X, "ASC", "STABLE");
+        doSort(count, Dimension::Id::X, "DESC", "stable");
     }
 }
 
@@ -148,7 +149,7 @@ TEST(SortFilterTest, partial)
 
 TEST(SortFilterTest, testUnknownOptions)
 {
-    EXPECT_THROW(doSort(1, Dimension::Id::X, "not an order", false), std::exception);
+    EXPECT_THROW(doSort(1, Dimension::Id::X, "not an order", "normal"), std::exception);
 }
 
 TEST(SortFilterTest, pipelineJSON)
@@ -173,30 +174,36 @@ TEST(SortFilterTest, pipelineJSON)
 
 TEST(SortFilterTest, issue1382)
 {
-    LasReader r;
-    Options ro;
 
-    ro.add("filename", Support::datapath("autzen/autzen-utm.las"));
-    r.setOptions(ro);
-
-    SortFilter f;
-    Options fo;
-
-    fo.add("dimension", "Z");
-    f.setOptions(fo);
-    f.setInput(r);
-
-    PointTable t;
-    f.prepare(t);
-    PointViewSet s = f.execute(t);
-    PointViewPtr v = *s.begin();
-
-    for (PointId i = 1; i < v->size(); ++i)
+    auto doSort = [](bool stable)
     {
-        double d1 = v->getFieldAs<double>(Dimension::Id::Z, i - 1);
-        double d2 = v->getFieldAs<double>(Dimension::Id::Z, i);
-        EXPECT_TRUE(d1 <= d2) << "Values " << d1 << "/" << d2 << " out of order at " << (i - 1) << "!\n";;
-    }
+        LasReader r;
+        Options ro;
+        ro.add("filename", Support::datapath("autzen/autzen-utm.las"));
+        r.setOptions(ro);
+
+        SortFilter f;
+        Options fo;
+
+        fo.add("dimension", "Z");
+        fo.add("algorithm", stable ? "stable" : "normal");
+        f.setOptions(fo);
+        f.setInput(r);
+
+        PointTable t;
+        f.prepare(t);
+        PointViewSet s = f.execute(t);
+        PointViewPtr v = *s.begin();
+
+        for (PointId i = 1; i < v->size(); ++i)
+        {
+            double d1 = v->getFieldAs<double>(Dimension::Id::Z, i - 1);
+            double d2 = v->getFieldAs<double>(Dimension::Id::Z, i);
+            EXPECT_TRUE(d1 <= d2);
+        }
+    };
+    doSort(false);
+    doSort(true);
 }
 
 TEST(SortFilterTest, issue1121_simpleSortOrderDesc)
@@ -204,8 +211,10 @@ TEST(SortFilterTest, issue1121_simpleSortOrderDesc)
     point_count_t inc = 1;
     for (point_count_t count = 3; count < 100000; count += inc, inc *= 2)
     {
-        doSort(count, Dimension::Id::X, "ASC", false);
-        doSort(count, Dimension::Id::X, "DESC", false);
+        doSort(count, Dimension::Id::X, "ASC", "normal");
+        doSort(count, Dimension::Id::X, "DESC", "normal");
+        doSort(count, Dimension::Id::X, "ASC", "stable");
+        doSort(count, Dimension::Id::X, "DESC", "stable");
     }
 }
 

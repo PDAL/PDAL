@@ -49,6 +49,15 @@ enum class SortOrder
 std::istream& operator >> (std::istream& in, SortOrder& order);
 std::ostream& operator << (std::ostream& in, const SortOrder& order);
 
+enum class SortAlgorithm
+{
+    Normal,
+    Stable
+};
+
+std::istream& operator >> (std::istream& in, SortAlgorithm& order);
+std::ostream& operator << (std::ostream& in, const SortAlgorithm& order);
+
 
 class PDAL_DLL SortFilter : public Filter
 {
@@ -66,7 +75,7 @@ private:
 
     // Sort order.
     SortOrder m_order;
-    bool m_stable;
+    SortAlgorithm m_algorithm;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void prepared(PointTableRef table);
