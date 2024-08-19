@@ -51,17 +51,17 @@ private:
     }
 
 public:
-    PointRef() : m_table(nullptr), m_idx(0), m_view(nullptr), m_viewIdx(0)
+    PointRef() : m_table(nullptr), m_idx(0), m_view(nullptr), m_viewIdx(0), m_orig(false)
     {}
 
     PointRef(PointView& v, PointId idx = 0);
 
     PointRef(PointTableRef t, PointId idx = 0) : m_table(&t), m_idx(idx),
-        m_view(nullptr), m_viewIdx(0)
+        m_view(nullptr), m_viewIdx(0), m_orig(false)
     {}
 
     PointRef(const PointRef& r) : m_table(r.m_table), m_idx(r.m_idx),
-        m_view(nullptr), m_viewIdx(0)
+        m_view(r.m_view), m_viewIdx(r.m_viewIdx), m_orig(false)
     {}
 
     PointRef& operator=(const PointRef& r);
@@ -309,6 +309,7 @@ private:
     PointId m_idx;
     PointView *m_view;
     PointId m_viewIdx;
+    bool m_orig;
 
     void setFieldInternal(Dimension::Id dim, void *val);
 };

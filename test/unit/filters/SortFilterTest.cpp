@@ -49,13 +49,13 @@ namespace pdal
 namespace
 {
 
-void doSort(point_count_t count, Dimension::Id dim, const std::string & order="")
+void doSort(point_count_t count, Dimension::Id dim, const std::string & order, bool stable)
 {
     Options opts;
 
     opts.add("dimension", Dimension::name(dim));
-    if (!order.empty())
-        opts.add("order", order);
+    opts.add("order", order);
+    opts.add("stable", stable);
 
     SortFilter filter;
     filter.setOptions(opts);
@@ -95,7 +95,12 @@ TEST(SortFilterTest, simple)
 {
     // note that this also tests default sort order ASC /**
     for (point_count_t count = 3; count < 30; count++)
-        doSort(count, Dimension::Id::X);
+    {
+        doSort(count, Dimension::Id::X, "ASC", false);
+        doSort(count, Dimension::Id::X, "DESC", false);
+        doSort(count, Dimension::Id::X, "ASC", true);
+        doSort(count, Dimension::Id::X, "DESC", true);
+    }
 }
 
 TEST(SortFilterTest, partial)
@@ -143,7 +148,7 @@ TEST(SortFilterTest, partial)
 
 TEST(SortFilterTest, testUnknownOptions)
 {
-    EXPECT_THROW(doSort(1, Dimension::Id::X, "not an order"), std::exception);
+    EXPECT_THROW(doSort(1, Dimension::Id::X, "not an order", false), std::exception);
 }
 
 TEST(SortFilterTest, pipelineJSON)
@@ -181,24 +186,16 @@ TEST(SortFilterTest, issue1382)
     f.setOptions(fo);
     f.setInput(r);
 
-    LasWriter w;
-    Options wo;
-
-    wo.add("filename", Support::temppath("out.las"));
-    w.setOptions(wo);
-    w.setInput(f);
-
     PointTable t;
-
-    w.prepare(t);
-    PointViewSet s = w.execute(t);
+    f.prepare(t);
+    PointViewSet s = f.execute(t);
     PointViewPtr v = *s.begin();
 
     for (PointId i = 1; i < v->size(); ++i)
     {
         double d1 = v->getFieldAs<double>(Dimension::Id::Z, i - 1);
         double d2 = v->getFieldAs<double>(Dimension::Id::Z, i);
-        EXPECT_TRUE(d1 <= d2);
+        EXPECT_TRUE(d1 <= d2) << "Values " << d1 << "/" << d2 << " out of order at " << (i - 1) << "!\n";;
     }
 }
 
@@ -207,8 +204,8 @@ TEST(SortFilterTest, issue1121_simpleSortOrderDesc)
     point_count_t inc = 1;
     for (point_count_t count = 3; count < 100000; count += inc, inc *= 2)
     {
-        doSort(count, Dimension::Id::X, "ASC");
-        doSort(count, Dimension::Id::X, "DESC");
+        doSort(count, Dimension::Id::X, "ASC", false);
+        doSort(count, Dimension::Id::X, "DESC", false);
     }
 }
 

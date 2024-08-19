@@ -66,6 +66,7 @@ private:
 
     // Sort order.
     SortOrder m_order;
+    bool m_stable;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void prepared(PointTableRef table);

@@ -54,6 +54,7 @@ void SortFilter::addArgs(ProgramArgs& args)
         setPositional();
     args.add("order", "Sort order ASC(ending) or DESC(ending)", m_order,
         SortOrder::ASC);
+    args.add("stable", "Use stable sorting", m_stable);
 }
 
 void SortFilter::prepared(PointTableRef table)
@@ -72,7 +73,13 @@ void SortFilter::filter(PointView& view)
         return p2.compare(m_dim, p1);
     };
 
-    std::sort(view.begin(), view.end(), cmp);
+    /**
+    if (m_stable)
+        std::stable_sort(view.begin(), view.end(), cmp);
+    else
+        std::sort(view.begin(), view.end(), cmp);
+        **/
+        std::stable_sort(view.begin(), view.end(), cmp);
 }
 
 std::istream& operator >> (std::istream& in, SortOrder& order)
