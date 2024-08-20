@@ -40,7 +40,7 @@
 #include <io/LasReader.hpp>
 #include <io/TextReader.hpp>
 
-#include "../filters/H3Filter.hpp"
+#include "filters/H3Filter.hpp"
 
 
 #include "Support.hpp"

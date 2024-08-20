@@ -57,7 +57,7 @@ static StaticPluginInfo const s_info
     "http://pdal.io/stages/filters.h3.html"
 };
 
-CREATE_SHARED_STAGE(H3Filter, s_info)
+CREATE_STATIC_STAGE(H3Filter, s_info)
 
 std::string H3Filter::getName() const
 {
@@ -95,6 +95,8 @@ void H3Filter::addDimensions(PointLayoutPtr layout)
 
 bool H3Filter::processOne(PointRef& point)
 {
+
+
 
     double x(point.getFieldAs<double>(Dimension::Id::X));
     double y(point.getFieldAs<double>(Dimension::Id::Y));
@@ -138,6 +140,21 @@ void H3Filter::createTransform(const SpatialReference& srsSRS)
         throwError("source data has no spatial reference");
 
     m_transform.reset(new SrsTransform(srsSRS, "EPSG:4326"));
+}
+
+void H3Filter::filter(PointView& view)
+{
+    if (!m_transform)
+    {
+        createTransform(view.spatialReference());
+    }
+
+    PointRef point = view.point(0);
+    for (PointId idx = 0; idx < view.size(); ++idx)
+    {
+        point.setPointId(idx);
+        processOne(point);
+    }
 }
 
 
