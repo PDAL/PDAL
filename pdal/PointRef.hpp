@@ -309,7 +309,7 @@ private:
     PointId m_idx;
     PointView *m_view;
     PointId m_viewIdx;
-    bool m_orig;
+    bool m_orig;  // Marks non-temporary PointRefs (true). Not copied.
 
     void setFieldInternal(Dimension::Id dim, void *val);
 };
