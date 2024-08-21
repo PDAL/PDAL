@@ -14,6 +14,8 @@ for the points are equal.
     The filter **requires** the data to be sorted **before** the labeling can
     work. It simply checks the dimensions and points in order, and if each
     dimension is equal from one point to the next, it is labeled a duplicate.
+    The `STABLE` algorithm **must** be set or it will fail to properly label
+    duplicates.
 
 Example
 -------
@@ -25,18 +27,22 @@ Example
       "unsorted.las",
       {
           "type":"filters.sort",
+          "algorithm":"STABLE",
           "dimension":"X"
       },
       {
           "type":"filters.sort",
+          "algorithm":"STABLE",
           "dimension":"Y"
       },
       {
           "type":"filters.sort",
+          "algorithm":"STABLE",
           "dimension":"Z"
       },
       {
           "type":"filters.sort",
+          "algorithm":"STABLE",
           "dimension":"GPStime"
       },
       {

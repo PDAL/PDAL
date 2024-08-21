@@ -64,6 +64,7 @@ void testDimensions(std::string const& data, std::string const& dimensions)
         SortFilter* filter = new SortFilter();
         Options opts;
         opts.add("dimension", dimension);
+        opts.add("algorithm", "STABLE");
         filter->setOptions(opts);
         prev->setInput(*filter);
     }
