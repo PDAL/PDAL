@@ -478,6 +478,7 @@ TEST(LasWriterTest, extra_dims)
 
     Options writerOps;
     writerOps.add("extra_dims", "Red=int32, Blue = int16, Green = int32_t");
+    writerOps.add("minor_version", "2");
     writerOps.add("filename", Support::temppath("simple.las"));
     LasWriter writer;
     writer.setInput(reader);
@@ -1766,6 +1767,7 @@ TEST(LasWriterTest, oversize_vlr)
     Options o;
 
     o.add("filename", "out.las");
+    o.add("minor_version", "2");
     w.addOptions(o);
 
     PointTable t;
