@@ -5,14 +5,14 @@ namespace pdal
 {
 
 PointRef::PointRef(PointView& v, PointId idx) : m_table(&v.table()),
-    m_idx(v.tableId(idx)), m_view(&v), m_viewIdx(idx)
+    m_idx(v.tableId(idx)), m_view(&v), m_viewIdx(idx), m_orig(true)
 {}
 
 PointRef& PointRef::operator=(const PointRef& r)
 {
     assert(m_table == r.m_table);
 
-    if (m_view)
+    if (m_orig)
         m_view->setTableId(m_viewIdx, r.m_idx);
     m_idx = r.m_idx;
     m_viewIdx = r.m_viewIdx;
