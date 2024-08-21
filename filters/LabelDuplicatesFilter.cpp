@@ -95,26 +95,24 @@ void LabelDuplicatesFilter::filter(PointView& view)
     if (view.size() < 2)
         return;
 
-    bool isDuplicatePoint(true);
-    for (PointId idx = 1; idx < view.size(); ++idx)
+    auto isDuplicatePoint = [&view, this](auto idx)
     {
-        bool isDuplicateDimension(true);
+        assert (idx > 0);
+
         for(auto dimId: m_dims)
         {
             double current = view.getFieldAs<double>(dimId, idx);
             double previous = view.getFieldAs<double>(dimId, idx - 1);
-
-            isDuplicateDimension = current == previous;
-            if (!isDuplicateDimension)
-            {
-                isDuplicatePoint = false;
-                break;
-            }
+            if (current != previous)
+                return false;
         }
-        view.setField(Dimension::Id::Duplicate, idx, (uint8_t)(isDuplicatePoint));
 
-        // reset for checking the next point
-        isDuplicatePoint = true;
+        return true;
+    };
+
+    for (PointId idx = 1; idx < view.size(); ++idx)
+    {
+        view.setField(Dimension::Id::Duplicate, idx, (uint8_t)(isDuplicatePoint(idx)));
     }
 }
 
