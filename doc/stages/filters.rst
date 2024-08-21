@@ -186,6 +186,7 @@ Pointwise Features
    filters.covariancefeatures
    filters.eigenvalues
    filters.estimaterank
+   filters.label_duplicates
    filters.lof
    filters.miniball
    filters.nndistance
