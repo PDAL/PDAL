@@ -539,7 +539,6 @@ TEST(Stats, counts)
     filter.execute(table);
 
     MetadataNode m = filter.getMetadata();
-    std::cerr << Utils::toJSON(m) << "!\n\n";
     std::vector<MetadataNode> children = m.children("statistic");
     auto findNode = [](MetadataNode m,
         const std::string name, const std::string val)
