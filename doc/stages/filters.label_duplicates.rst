@@ -56,8 +56,8 @@ Example
 Options
 -------
 
-_`dimensions`
-  The dimensions which must be equal for the point to be declared a duplicate. [Required]
+dimensions
+  The :ref:`dimensions` which must be equal for the point to be declared a duplicate. [Required]
 
 
 .. include:: filter_opts.rst
