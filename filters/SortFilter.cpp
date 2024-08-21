@@ -50,10 +50,9 @@ std::string SortFilter::getName() const { return s_info.name; }
 
 void SortFilter::addArgs(ProgramArgs& args)
 {
-    args.add("dimension", "Dimension on which to sort", m_dimName).
-        setPositional();
-    args.add("order", "Sort order ASC(ending) or DESC(ending)", m_order,
-        SortOrder::ASC);
+    args.add("dimension", "Dimension on which to sort", m_dimName).setPositional();
+    args.add("order", "Sort order ASC(ending) or DESC(ending)", m_order, SortOrder::ASC);
+    args.add("algorithm", "NORMAL (default) or STABLE", m_algorithm, SortAlgorithm::Normal);
 }
 
 void SortFilter::prepared(PointTableRef table)
@@ -72,7 +71,10 @@ void SortFilter::filter(PointView& view)
         return p2.compare(m_dim, p1);
     };
 
-    std::stable_sort(view.begin(), view.end(), cmp);
+    if (m_algorithm == SortAlgorithm::Stable)
+        std::stable_sort(view.begin(), view.end(), cmp);
+    else if (m_algorithm == SortAlgorithm::Normal)
+        std::sort(view.begin(), view.end(), cmp);
 }
 
 std::istream& operator >> (std::istream& in, SortOrder& order)
@@ -98,6 +100,33 @@ std::ostream& operator<<(std::ostream& out, const SortOrder& order)
         out << "ASC";
     case SortOrder::DESC:
         out << "DESC";
+    }
+    return out;
+}
+
+std::istream& operator >> (std::istream& in, SortAlgorithm& order)
+{
+    std::string s;
+
+    in >> s;
+    s = Utils::toupper(s);
+    if (s == "NORMAL")
+        order = SortAlgorithm::Normal;
+    else if (s == "STABLE")
+        order = SortAlgorithm::Stable;
+    else
+        in.setstate(std::ios::failbit);
+    return in;
+}
+
+std::ostream& operator<<(std::ostream& out, const SortAlgorithm& order)
+{
+    switch (order)
+    {
+    case SortAlgorithm::Normal:
+        out << "NORMAL";
+    case SortAlgorithm::Stable:
+        out << "STABLE";
     }
     return out;
 }
