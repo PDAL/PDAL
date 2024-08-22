@@ -51,6 +51,13 @@ Additional attributes created by the
 
 For more details about addon dimensions and how to produce them, see :ref:`writers.ept_addon`.
 
+.. note::
+
+    The ``forward`` option of :ref:`writers.copc` or :ref:`writers.las` cannot work
+    with EPT due to how EPT can mix content and files. There is no single unified metadata
+    value to forward. You will have to explicitly set any output options that you
+    would expect to come from EPT on any writers.
+
 Options
 --------------------------------------------------------------------------------
 
