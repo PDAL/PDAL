@@ -148,7 +148,7 @@ void LasWriter::addArgs(ProgramArgs& args)
     args.add("major_version", "LAS major version", d->opts.majorVersion,
         decltype(d->opts.majorVersion)(1));
     args.add("minor_version", "LAS minor version", d->opts.minorVersion,
-        decltype(d->opts.minorVersion)(2));
+        decltype(d->opts.minorVersion)(4));
     args.add("dataformat_id", "Point format", d->opts.dataformatId,
         decltype(d->opts.dataformatId)(3));
     args.add("format", "Point format", d->opts.dataformatId,
