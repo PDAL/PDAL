@@ -158,11 +158,10 @@ void AssignFilter::prepared(PointTableRef table)
     for (expr::AssignStatement& expr : m_args->m_statements)
     {
         expr::IdentExpression& ident = expr.identExpr();
-        std::string dimName = ident.name();
-        if (ident.eval() ==  Dimension::Id::Unknown)
-        {
-            layout->registerOrAssignDim(dimName, Dimension::Type::Double);
-        }
+        if (!expr.prepare(layout) && ident.eval() == Dimension::Id::Unknown)
+            layout->registerOrAssignDim(ident.name(), Dimension::Type::Double);
+
+        // Try to prepare again after potentially adding a dimension.
         auto status = expr.prepare(layout);
         if (!status)
             throwError(status.what());
