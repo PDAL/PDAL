@@ -479,7 +479,6 @@ TEST(LasWriterTest, extra_dims)
     Options writerOps;
     writerOps.add("extra_dims", "Red=int32, Blue = int16, Green = int32_t");
     writerOps.add("minor_version", "2");
-    writerOps.add("dataformat_id", "3");
     writerOps.add("filename", Support::temppath("simple.las"));
     LasWriter writer;
     writer.setInput(reader);
@@ -618,7 +617,6 @@ TEST(LasWriterTest, forward)
     Options writerOps;
     writerOps.add("forward", "header");
     writerOps.add("minor_version", 3);
-    writerOps.add("dataformat_id", 3);
     writerOps.add("filename", testfile);
 
     LasWriter w;
@@ -835,7 +833,6 @@ TEST(LasWriterTest, lazperf)
     Options writerOps;
     writerOps.add("filename", testfile);
     writerOps.add("compression", "lazperf");
-    writerOps.add("forward", "dataformat_id");
 
     LasWriter lazWriter;
     lazWriter.setOptions(writerOps);
@@ -1771,7 +1768,6 @@ TEST(LasWriterTest, oversize_vlr)
 
     o.add("filename", "out.las");
     o.add("minor_version", "2");
-    o.add("dataformat_id", "3");
     w.addOptions(o);
 
     PointTable t;

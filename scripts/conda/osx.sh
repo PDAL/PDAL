@@ -48,6 +48,7 @@ cmake   -G "Ninja"  \
         -DBUILD_PLUGIN_HDF=ON \
         -DBUILD_PLUGIN_ARROW=ON \
         -DBUILD_PLUGIN_DRACO=ON \
+        -DBUILD_PLUGIN_E57=ON \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
         -DBUILD_I3S_TESTS=ON \
         -DBUILD_PLUGIN_TILEDB=OFF \
