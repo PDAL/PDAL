@@ -49,7 +49,7 @@ TEST(Random, extra_ops)
     std::string outfile(Support::temppath("out.las"));
 
     const std::string cmd = Support::binpath("pdal") + " random "
-        "--count=100 --writers.las.minor_version=3 " + outfile;
+        "--count=100 --writers.las.dataformat_id=3 --writers.las.minor_version=3 " + outfile;
 
     FileUtils::deleteFile(outfile);
     std::string output;
