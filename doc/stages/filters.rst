@@ -601,6 +601,7 @@ invalidate an existing KD-tree.
    filters.hexbin
    filters.info
    filters.stats
+   filters.expressionstats
 
 :ref:`filters.hexbin`
     Tessellate XY domain and determine point density and/or point boundary.
@@ -611,6 +612,9 @@ invalidate an existing KD-tree.
 
 :ref:`filters.stats`
     Compute statistics about each dimension (mean, min, max, etc.).
+
+:ref:`filters.expressionstats`
+    Apply expressions for a given dimension and summarize counts
 
 
 Mesh
