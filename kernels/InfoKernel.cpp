@@ -87,6 +87,7 @@ void InfoKernel::validateSwitches(ProgramArgs& args)
         m_showSchema = true;
         m_boundary = true;
         m_stac = true;
+        m_breakout = true;
     }
 
 
