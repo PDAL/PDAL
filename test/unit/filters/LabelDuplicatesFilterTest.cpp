@@ -53,31 +53,21 @@ void testDimensions(std::string const& data, std::string const& dimensions)
     textOptions.add("filename", Support::datapath(data));
     t.setOptions(textOptions);
 
-
     PointTable table;
+    SortFilter sortFilter;
+    Options filterOpts;
+    filterOpts.add("dimensions", dimensions);
+    sortFilter.setOptions(filterOpts);
+    sortFilter.setInput(t);
 
-    StringList splitDimension = Utils::split2(dimensions, ',');
+    Options labelOpts;
+    labelOpts.add("dimensions", dimensions);
+    LabelDuplicatesFilter labelFilter;
+    labelFilter.setOptions(labelOpts);
+    labelFilter.setInput(sortFilter);
 
-    Stage* prev = &t;
-    for (auto dimension: splitDimension)
-    {
-        SortFilter* filter = new SortFilter();
-        Options opts;
-        opts.add("dimension", dimension);
-        opts.add("algorithm", "STABLE");
-        filter->setOptions(opts);
-        prev->setInput(*filter);
-    }
-
-    Options opts;
-    opts.add("dimensions", dimensions);
-    LabelDuplicatesFilter filter;
-    filter.setOptions(opts);
-    prev->setInput(filter);
-
-
-    prev->prepare(table);
-    PointViewSet views = filter.execute(table);
+    labelFilter.prepare(table);
+    PointViewSet views = labelFilter.execute(table);
     PointViewPtr view = *views.begin();
 
     for (PointId i = dimensions.size(); i < view->size(); ++i) {
