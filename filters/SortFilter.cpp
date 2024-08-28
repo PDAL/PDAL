@@ -97,8 +97,8 @@ void SortFilter::filter(PointView& view)
 
         if (m_dims.size() > 1)
         {
-            // If we have multiple dimensions, stable_sort the first one
-            // and then sort the rest
+            // If we have multiple dimensions, sort the first one
+            // and then stable_sort the rest
             if (i == 0)
                 std::sort(view.begin(), view.end(), cmp);
             else
