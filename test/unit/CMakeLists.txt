@@ -354,6 +354,7 @@ PDAL_ADD_TEST(pdal_filters_groupby_test FILES filters/GroupByFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_gpstimeconvert_test FILES filters/GpsTimeConvertTest.cpp)
 PDAL_ADD_TEST(pdal_filters_hag_test FILES filters/HAGFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_separatescanline_test FILES filters/SeparatescanlineFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_h3_test FILES filters/H3FilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_ht_test FILES filters/HeadTailFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_icp_test
     FILES
@@ -374,6 +375,7 @@ PDAL_ADD_TEST(pdal_filters_additional_merge_test
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
+PDAL_ADD_TEST(pdal_filters_labelduplicates_test FILES filters/LabelDuplicatesFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_normal_test FILES filters/NormalFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_overlay_test FILES filters/OverlayFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_planefit_test

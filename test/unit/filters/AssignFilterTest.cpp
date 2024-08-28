@@ -250,6 +250,7 @@ TEST(AssignFilterTest, test_creation)
 
     Options fo;
     fo.add("value", "xi = X * 10.0");
+    fo.add("value", "ReturnNumber = 3");
 
     f.setInput(r);
     f.setOptions(fo);
@@ -268,4 +269,8 @@ TEST(AssignFilterTest, test_creation)
         double x = v->getFieldAs<double>(Dimension::Id::X, i);
         EXPECT_DOUBLE_EQ(std::floor(x), xi / 10);
     }
+
+    // Verify that Return number is a byte.
+    EXPECT_EQ(l->dimType(Dimension::Id::ReturnNumber), Dimension::Type::Unsigned8);
 }
+

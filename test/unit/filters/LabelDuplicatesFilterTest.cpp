@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2024, Howard Butler (info@hobu.co)
+* Copyright (c) 2024, Hobu Inc. (hobu@hobu.co)
 *
 * All rights reserved.
 *
@@ -34,43 +34,75 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-#include <pdal/PointView.hpp>
-#include <pdal/StageFactory.hpp>
-#include <io/FauxReader.hpp>
-#include <io/LasReader.hpp>
+#include <random>
+
 #include <io/TextReader.hpp>
-
-#include "filters/H3Filter.hpp"
-
-
+#include <filters/SortFilter.hpp>
+#include <filters/LabelDuplicatesFilter.hpp>
 #include "Support.hpp"
 
-using namespace pdal;
-
-TEST(H3FilterTest, createStage)
+namespace pdal
 {
-    StageFactory f;
-    Stage* filter(f.createStage("filters.h3"));
-    EXPECT_TRUE(filter);
+
+
+void testDimensions(std::string const& data, std::string const& dimensions)
+{
+
+    TextReader t;
+    Options textOptions;
+    textOptions.add("filename", Support::datapath(data));
+    t.setOptions(textOptions);
+
+
+    PointTable table;
+
+    StringList splitDimension = Utils::split2(dimensions, ',');
+
+    Stage* prev = &t;
+    for (auto dimension: splitDimension)
+    {
+        SortFilter* filter = new SortFilter();
+        Options opts;
+        opts.add("dimension", dimension);
+        opts.add("algorithm", "STABLE");
+        filter->setOptions(opts);
+        prev->setInput(*filter);
+    }
+
+    Options opts;
+    opts.add("dimensions", dimensions);
+    LabelDuplicatesFilter filter;
+    filter.setOptions(opts);
+    prev->setInput(filter);
+
+
+    prev->prepare(table);
+    PointViewSet views = filter.execute(table);
+    PointViewPtr view = *views.begin();
+
+    for (PointId i = dimensions.size(); i < view->size(); ++i) {
+        EXPECT_EQ(1, view->getFieldAs<uint8_t>(Dimension::Id::Duplicate, i)); }
+
 }
 
-TEST(H3FilterTest, stream_test_2)
+TEST(LabelDuplicatesFilterTest, sorted)
 {
-    // Fill table 1 with UTM17 data.
-    Options ops1;
-    ops1.add("filename", Support::datapath("las/test_utm17.las"));
-    LasReader reader1;
-    reader1.setOptions(ops1);
-
-    Options ops1a;
-    H3Filter h3;
-    ops1a.add("resolution", 12);
-    h3.setInput(reader1);
-    h3.setOptions(ops1a);
-
-    PointTable table1;
-    h3.prepare(table1);
-    PointViewSet s1 = h3.execute(table1);
-    PointViewPtr v1 = *(s1.begin());
+    std::string data("text/duplicates-sorted.txt");
+    testDimensions(data, "X");
+    testDimensions(data, "X,Y");
+    testDimensions(data, "X,Y,Z");
+    testDimensions(data, "X,Y,Z,GpsTime");
+    testDimensions(data, "X,Y,Z,GpsTime,PointSourceId,UserData");
 }
 
+TEST(LabelDuplicatesFilterTest, unsorted)
+{
+    std::string data("text/duplicates-unsorted.txt");
+    testDimensions(data, "X");
+    testDimensions(data, "X,Y");
+    testDimensions(data, "X,Y,Z");
+    testDimensions(data, "X,Y,Z,GpsTime");
+    testDimensions(data, "X,Y,Z,GpsTime,PointSourceId,UserData");
+}
+
+}

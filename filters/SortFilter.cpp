@@ -57,6 +57,9 @@ void SortFilter::addArgs(ProgramArgs& args)
 
     args.add("order", "Sort order ASC(ending) or DESC(ending)", m_order,
         SortOrder::ASC);
+
+    args.add("algorithm", "NORMAL (default) or STABLE", m_algorithm,
+        SortAlgorithm::Normal);
 }
 
 void SortFilter::prepared(PointTableRef table)
@@ -72,20 +75,41 @@ void SortFilter::prepared(PointTableRef table)
 
     if (!m_dimNames.size())
         throwError("At least one valid dimension name must be provided!");
+    m_activeDim = &m_dims[0];
 }
 
 void SortFilter::filter(PointView& view)
 {
 
-    for (Dimension::Id dimId: m_dims)
+    auto cmp = [this](const PointRef& p1, const PointRef& p2)
     {
-        std::stable_sort(view.begin(), view.end(), [this,dimId](const PointRef& p1, const PointRef& p2)
-            {
-                if (m_order == SortOrder::ASC)
-                    return p1.compare(dimId, p2);
-                return p2.compare(dimId, p1);
+        if (m_order == SortOrder::ASC)
+            return p1.compare(*m_activeDim, p2);
+        return p2.compare(*m_activeDim, p1);
+    };
 
-            });
+
+    for (Dimension::IdList::size_type i=0; i < m_dims.size(); ++i)
+    {
+
+
+        m_activeDim = &m_dims[i];
+
+        if (m_dims.size() > 1)
+        {
+            // If we have multiple dimensions, stable_sort the first one
+            // and then sort the rest
+            if (i == 0)
+                std::stable_sort(view.begin(), view.end(), cmp);
+            else
+                std::sort(view.begin(), view.end(), cmp);
+        } else
+        {
+            if (m_algorithm == SortAlgorithm::Stable)
+                std::stable_sort(view.begin(), view.end(), cmp);
+            else if (m_algorithm == SortAlgorithm::Normal)
+                std::sort(view.begin(), view.end(), cmp);
+        }
     }
 }
 
@@ -112,6 +136,33 @@ std::ostream& operator<<(std::ostream& out, const SortOrder& order)
         out << "ASC";
     case SortOrder::DESC:
         out << "DESC";
+    }
+    return out;
+}
+
+std::istream& operator >> (std::istream& in, SortAlgorithm& order)
+{
+    std::string s;
+
+    in >> s;
+    s = Utils::toupper(s);
+    if (s == "NORMAL")
+        order = SortAlgorithm::Normal;
+    else if (s == "STABLE")
+        order = SortAlgorithm::Stable;
+    else
+        in.setstate(std::ios::failbit);
+    return in;
+}
+
+std::ostream& operator<<(std::ostream& out, const SortAlgorithm& order)
+{
+    switch (order)
+    {
+    case SortAlgorithm::Normal:
+        out << "NORMAL";
+    case SortAlgorithm::Stable:
+        out << "STABLE";
     }
     return out;
 }

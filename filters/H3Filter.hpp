@@ -65,6 +65,7 @@ private:
     virtual bool processOne(PointRef& point);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void spatialReferenceChanged(const SpatialReference& srs);
+    virtual void filter(PointView& view);
 
     void createTransform(const SpatialReference& srs);
     std::unique_ptr<SrsTransform> m_transform;

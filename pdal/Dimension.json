@@ -669,5 +669,10 @@
     "name": "H3",
     "type": "uint64",
     "description": "H3 index id"
+    },
+    {
+    "name": "Duplicate",
+    "type": "uint8",
+    "description": "Indicator of whether or not a point is a labeled duplicate"
     }
 ] }

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Hobu Inc. (hobu@hobu.co)
+* Copyright (c) 2024, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -35,53 +35,34 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
 
-enum class SortOrder
-{
-    ASC, // ascending
-    DESC // descending
-};
+class PointLayout;
+class PointView;
+class ProgramArgs;
 
-std::istream& operator >> (std::istream& in, SortOrder& order);
-std::ostream& operator << (std::ostream& in, const SortOrder& order);
-
-enum class SortAlgorithm
-{
-    Normal,
-    Stable
-};
-
-std::istream& operator >> (std::istream& in, SortAlgorithm& order);
-std::ostream& operator << (std::ostream& in, const SortAlgorithm& order);
-
-
-class PDAL_DLL SortFilter : public Filter
+class PDAL_DLL LabelDuplicatesFilter : public Filter
 {
 public:
-    SortFilter()
-    {}
+    LabelDuplicatesFilter();
+
+    LabelDuplicatesFilter& operator=(const LabelDuplicatesFilter&) = delete;
+    LabelDuplicatesFilter(const LabelDuplicatesFilter&) = delete;
 
     std::string getName() const;
 
 private:
 
-    StringList m_dimNames;
-    Dimension::IdList m_dims;
-
-    // Sort order.
-    SortOrder m_order;
-    SortAlgorithm m_algorithm;
-
     virtual void addArgs(ProgramArgs& args);
-    virtual void prepared(PointTableRef table);
+    virtual void addDimensions(PointLayoutPtr layout);
     virtual void filter(PointView& view);
+    virtual void prepared(PointTableRef table);
 
-    SortFilter& operator=(const SortFilter&) = delete;
-    SortFilter(const SortFilter&) = delete;
+    Dimension::IdList m_dims;
+    StringList m_dimNames;
+
 };
 
 } // namespace pdal
