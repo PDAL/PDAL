@@ -100,9 +100,9 @@ void SortFilter::filter(PointView& view)
             // If we have multiple dimensions, stable_sort the first one
             // and then sort the rest
             if (i == 0)
-                std::stable_sort(view.begin(), view.end(), cmp);
-            else
                 std::sort(view.begin(), view.end(), cmp);
+            else
+                std::stable_sort(view.begin(), view.end(), cmp);
         } else
         {
             if (m_algorithm == SortAlgorithm::Stable)

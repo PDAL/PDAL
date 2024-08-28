@@ -28,10 +28,10 @@ Example
 Options
 -------
 
-_`dimensions`
+dimensions
   A list of dimensions in the order on which to sort the points. [Required]
 
-_`order`
+order
   The order in which to sort, ASC or DESC [Default: "ASC"]
 
 .. include:: filter_opts.rst
