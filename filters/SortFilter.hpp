@@ -68,10 +68,10 @@ public:
     std::string getName() const;
 
 private:
-    // Dimension on which to sort.
-    Dimension::Id m_dim;
-    // Dimension name.
-    std::string m_dimName;
+
+    StringList m_dimNames;
+    Dimension::IdList m_dims;
+    Dimension::Id* m_activeDim;
 
     // Sort order.
     SortOrder m_order;

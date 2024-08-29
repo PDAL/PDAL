@@ -50,31 +50,67 @@ std::string SortFilter::getName() const { return s_info.name; }
 
 void SortFilter::addArgs(ProgramArgs& args)
 {
-    args.add("dimension", "Dimension on which to sort", m_dimName).setPositional();
-    args.add("order", "Sort order ASC(ending) or DESC(ending)", m_order, SortOrder::ASC);
-    args.add("algorithm", "NORMAL (default) or STABLE", m_algorithm, SortAlgorithm::Normal);
+    args.add("dimensions", "Dimensions and ordering on which to sort", m_dimNames).
+        setPositional();
+
+    args.addSynonym("dimensions", "dimension");
+
+    args.add("order", "Sort order ASC(ending) or DESC(ending)", m_order,
+        SortOrder::ASC);
+
+    args.add("algorithm", "NORMAL (default) or STABLE", m_algorithm,
+        SortAlgorithm::Normal);
 }
 
 void SortFilter::prepared(PointTableRef table)
 {
-    m_dim = table.layout()->findDim(m_dimName);
-    if (m_dim == Dimension::Id::Unknown)
-        throwError("Dimension '" + m_dimName + "' not found.");
+    PointLayoutPtr layout(table.layout());
+    for (auto& s : m_dimNames)
+    {
+        Dimension::Id dimId = layout->findDim(s);
+        if (layout->findDim(s) == Dimension::Id::Unknown)
+            throwError("Cannot sort because dimension '" + s + "' was not found.");
+        m_dims.push_back(dimId);
+    }
+
+    if (!m_dimNames.size())
+        throwError("At least one valid dimension name must be provided!");
+    m_activeDim = &m_dims[0];
 }
 
 void SortFilter::filter(PointView& view)
 {
+
     auto cmp = [this](const PointRef& p1, const PointRef& p2)
     {
         if (m_order == SortOrder::ASC)
-            return p1.compare(m_dim, p2);
-        return p2.compare(m_dim, p1);
+            return p1.compare(*m_activeDim, p2);
+        return p2.compare(*m_activeDim, p1);
     };
 
-    if (m_algorithm == SortAlgorithm::Stable)
-        std::stable_sort(view.begin(), view.end(), cmp);
-    else if (m_algorithm == SortAlgorithm::Normal)
-        std::sort(view.begin(), view.end(), cmp);
+
+    for (Dimension::IdList::size_type i=0; i < m_dims.size(); ++i)
+    {
+
+
+        m_activeDim = &m_dims[i];
+
+        if (m_dims.size() > 1)
+        {
+            // If we have multiple dimensions, sort the first one
+            // and then stable_sort the rest
+            if (i == 0)
+                std::sort(view.begin(), view.end(), cmp);
+            else
+                std::stable_sort(view.begin(), view.end(), cmp);
+        } else
+        {
+            if (m_algorithm == SortAlgorithm::Stable)
+                std::stable_sort(view.begin(), view.end(), cmp);
+            else if (m_algorithm == SortAlgorithm::Normal)
+                std::sort(view.begin(), view.end(), cmp);
+        }
+    }
 }
 
 std::istream& operator >> (std::istream& in, SortOrder& order)

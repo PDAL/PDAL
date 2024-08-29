@@ -82,7 +82,7 @@ void LabelDuplicatesFilter::prepared(PointTableRef table)
         Dimension::Id dimId = layout->findDim(dimName);
         if (dimId == Dimension::Id::Unknown)
             throwError("Dimension '" + dimName + "' specified in "
-                "'sort_dims' option not found.");
+                "'dimensions' option not found in layout.");
         m_dims.push_back(dimId);
     }
 }
