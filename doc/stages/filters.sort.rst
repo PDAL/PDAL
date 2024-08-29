@@ -3,8 +3,8 @@
 filters.sort
 ============
 
-The sort filter orders a point view based on the values of a dimension_. The
-sorting can be done in increasing (ascending) or decreasing (descending) order_.
+The sort filter orders a point view based on the values of a :ref:`dimensions`. The
+sorting can be done in increasing (ascending) or decreasing (descending) order.
 
 .. embed::
 
@@ -24,6 +24,10 @@ Example
       "sorted.las"
   ]
 
+.. note::
+
+    See :ref:`filters.label_duplicates` for an example of using :ref:`filters.sort` to
+    sort multiple dimensions at once.
 
 Options
 -------
