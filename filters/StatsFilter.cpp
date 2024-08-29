@@ -125,15 +125,10 @@ void Summary::extractMetadata(MetadataNode &m)
         //         }
 
         MetadataNode bins = m.add("bins");
-
         for (auto& v : m_values)
         {
-            std::string val =
-                std::to_string(v.first) + "/" + std::to_string(v.second);
-
-            MetadataNode bin = bins.add(std::to_string(v.first), std::to_string(v.second));
-
-            m.addList("counts", val);
+            bins.add(std::to_string(v.first), uint64_t(v.second));
+            m.addList("counts", std::to_string(v.first) + "/" + std::to_string(v.second));
         }
     }
 }

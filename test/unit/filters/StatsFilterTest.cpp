@@ -504,3 +504,63 @@ TEST(Stats, merge)
             EXPECT_EQ(wm[(double)i], pm[(double)i]);
     }
 }
+
+TEST(Stats, counts)
+{
+    PointTable table;
+
+    table.layout()->registerDim(Dimension::Id::Classification);
+
+    PointViewPtr view(new PointView(table));
+
+    int cnt = 0;
+    int val = 1;
+    for (int i = 0; i < 500; ++i)
+    {
+        view->setField(Dimension::Id::Classification, i, val);
+        cnt++;
+        if (cnt == val)
+        {
+            val++;
+            cnt = 0;
+        }
+    }
+
+    BufferReader reader;
+    reader.addView(view);
+
+    Options o;
+    StatsFilter filter;
+    o.add("count", "Classification");
+    filter.setInput(reader);
+    filter.setOptions(o);
+
+    filter.prepare(table);
+    filter.execute(table);
+
+    MetadataNode m = filter.getMetadata();
+    std::vector<MetadataNode> children = m.children("statistic");
+    auto findNode = [](MetadataNode m,
+        const std::string name, const std::string val)
+    {
+        auto findNameVal = [name, val](MetadataNode m)
+            { return (m.name() == name && m.value() == val); };
+
+        return m.find(findNameVal);
+    };
+
+    for (auto mi = children.begin(); mi != children.end(); ++mi)
+    {
+        if (findNode(*mi, "name", "Classification").valid())
+        {
+            for (int i = 1; i < 32; ++i)
+            {
+                MetadataNode m = mi->findChild("bins:" + std::to_string((double)i));
+                EXPECT_EQ(m.value<int>(), i);
+            }
+            std::vector<MetadataNode> nodes = mi->children("counts");
+            for (int i = 1; i < 32; ++i)
+                EXPECT_EQ(nodes[i - 1].value(), std::to_string((double)i) + "/" + std::to_string(i));
+        }
+    }
+}
