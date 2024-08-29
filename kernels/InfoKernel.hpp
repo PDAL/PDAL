@@ -79,6 +79,7 @@ private:
     bool m_showMetadata;
     bool m_boundary;
     bool m_stac;
+    bool m_breakout;
     std::string m_pointIndexes;
     std::string m_dimensions;
     std::string m_enumerate;
@@ -90,6 +91,7 @@ private:
     bool m_usestdin;
 
     Stage *m_statsStage;
+    Stage *m_expressionStatsStage;
     Stage *m_hexbinStage;
     Stage *m_infoStage;
     Stage *m_reader;

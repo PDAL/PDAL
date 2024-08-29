@@ -87,6 +87,7 @@ void InfoKernel::validateSwitches(ProgramArgs& args)
         m_showSchema = true;
         m_boundary = true;
         m_stac = true;
+        m_breakout = true;
     }
 
 
@@ -157,6 +158,8 @@ void InfoKernel::addSwitches(ProgramArgs& args)
          m_queryPoint);
     args.add("stats", "Dump stats on all points (reads entire dataset)",
         m_showStats);
+    args.add("breakout", "Breakout Classification by typical flags",
+        m_breakout, false);
     args.add("boundary", "Compute a hexagonal hull/boundary of dataset",
         m_boundary);
     args.add("dimensions", "Dimensions on which to compute statistics",
@@ -241,6 +244,18 @@ void InfoKernel::makePipeline()
             filterOptions.add({"enumerate", m_enumerate});
         stage = m_statsStage =
             &m_manager.makeFilter("filters.stats", *stage, filterOptions);
+
+        if (m_breakout)
+        {
+            Options expressionStatsFilterOptions;
+            expressionStatsFilterOptions.add("dimension", "Classification");
+            expressionStatsFilterOptions.add("expressions", "Withheld == 1");
+            expressionStatsFilterOptions.add("expressions", "Keypoint == 1");
+            expressionStatsFilterOptions.add("expressions", "Overlap == 1");
+            expressionStatsFilterOptions.add("expressions", "Synthetic == 1");
+            stage = m_expressionStatsStage =
+                &m_manager.makeFilter("filters.expressionstats", *stage, expressionStatsFilterOptions);
+        }
     }
 
     if (m_stac)
@@ -304,7 +319,7 @@ MetadataNode InfoKernel::run(const std::string& filename)
             m_manager.execute(ExecMode::PreferStream);
         else
             m_manager.prepare();
-        
+
         // Correct our point count with the actual value.
         if (pointCountOverride)
             m_reader->getMetadata().addOrUpdate("count", pointCountOverride);
@@ -348,7 +363,11 @@ void InfoKernel::dump(MetadataNode& root)
 
     // Stats stage.
     if (m_showStats)
-        root.add(m_statsStage->getMetadata().clone("stats"));
+    {
+        MetadataNode stats = root.add(m_statsStage->getMetadata().clone("stats"));
+        if (m_breakout)
+            stats.add(m_expressionStatsStage->getMetadata().clone("breakout"));
+    }
 
     // Hexbin stage.
     if (m_hexbinStage)
