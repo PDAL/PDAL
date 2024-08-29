@@ -555,12 +555,12 @@ TEST(Stats, counts)
         {
             for (int i = 1; i < 32; ++i)
             {
-                MetadataNode m = mi->findChild("bins:" + std::to_string(i) + ".000000");
+                MetadataNode m = mi->findChild("bins:" + std::to_string((double)i));
                 EXPECT_EQ(m.value<int>(), i);
             }
             std::vector<MetadataNode> nodes = mi->children("counts");
             for (int i = 1; i < 32; ++i)
-                EXPECT_EQ(nodes[i - 1].value(), std::to_string(i) + ".000000/" + std::to_string(i));
+                EXPECT_EQ(nodes[i - 1].value(), std::to_string((double)i) + "/" + std::to_string(i));
         }
     }
 }
