@@ -214,7 +214,7 @@ void CopcWriter::handleHeaderForwards(MetadataNode& forward)
 
 void CopcWriter::handleForwardVlrs(MetadataNode& forwards)
 {
-    if (!b.forwardVlrs)
+    if (!b->forwardVlrs)
         return;
 
     MetadataNodeList nodes = forwards.findChildren([](MetadataNode n)
