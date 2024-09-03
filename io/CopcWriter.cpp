@@ -102,7 +102,6 @@ void CopcWriter::addArgs(ProgramArgs& args)
         doy += ptm->tm_yday;
     }
 
-//    args.add("filename", "Output filename.", b->opts.filename);
     args.add("forward", "Dimensions to forward from LAS reader", b->opts.forwardSpec);
 
     args.add("filesource_id", "File source ID number.", b->opts.filesourceId,
@@ -215,6 +214,9 @@ void CopcWriter::handleHeaderForwards(MetadataNode& forward)
 
 void CopcWriter::handleForwardVlrs(MetadataNode& forwards)
 {
+    if (!b.forwardVlrs)
+        return;
+
     MetadataNodeList nodes = forwards.findChildren([](MetadataNode n)
         { return Utils::startsWith(n.name(), "vlr_"); });
     for (auto& n : nodes)
