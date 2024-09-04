@@ -257,6 +257,8 @@ void PoissonFilter::addDimensions(PointLayoutPtr layout)
     else
         layout->registerDims( {Dimension::Id::NormalX, Dimension::Id::NormalY,
              Dimension::Id::NormalZ} );
+    if (m_density)
+        layout->registerDim(Dimension::Id::Density);
 }
 
 
