@@ -194,6 +194,7 @@ Pointwise Features
    filters.optimalneighborhood
    filters.planefit
    filters.radialdensity
+   filters.radiusassign
    filters.reciprocity
    filters.zsmooth
    filters.griddecimation
@@ -240,6 +241,9 @@ Pointwise Features
 :ref:`filters.radialdensity`
     Compute pointwise density of points within a given radius.
 
+:ref:`filters.radiusassign`
+    update the value of a dimension (using an assignment expression) for specific points
+    depending on their neighbors in a given radius
 :ref:`filters.reciprocity`
     Compute the percentage of points that are considered uni-directional
     neighbors of a point.
