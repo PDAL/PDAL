@@ -21,6 +21,13 @@ limited ability to impute associated data.  However, if color dimensions
 in the output point set. This filter will also run the
 :ref:`normal filter <filters.normal>` on the output point set.
 
+.. note::
+  The filter only supports 8-bit color. It does not scale input or output at this
+  time. If your input is something other than 8-bit color, you must scale it
+  using filters.assign before running the filter. You may also want to scale
+  the 8-bit output depending on your needs. See the example below that scales
+  from and to 16-bit color.
+
 This integration of the algorithm with PDAL only supports a limited set of
 the options available to the implementation.  If you need support for further
 options, please let us know.
@@ -35,7 +42,23 @@ Example
   [
       "dense.las",
       {
+          "type":"filters.assign"
+          "value": [
+              "Red = Red / 256",
+              "Green = Green / 256",
+              "Blue = Blue / 256"
+        ]
+      },
+      {
           "type":"filters.poisson"
+      },
+      {
+          "type":"filters.assign"
+          "value": [
+              "Red = Red * 256",
+              "Green = Green * 256",
+              "Blue = Blue * 256"
+        ]
       },
       {
           "type":"writers.ply",
