@@ -1,0 +1,17 @@
+# Table of contents
+# Learn more at https://jupyterbook.org/customize/toc.html
+
+format: jb-book
+root: notebooks
+# parts:
+# - caption: Basic examples 🪄
+#   chapters:
+#   - file: markdown
+#   - file: notebooks
+#   - file: markdown-notebooks
+# - caption: Cool extensions 🕶️
+#   chapters:
+#   - file: intersphinx
+#   - file: sphinx-examples
+#   - file: sphinx-hoverxref
+#   - file: sphinx-proof
