@@ -12,6 +12,8 @@ build:
   jobs:
     pre_build:
       - doxygen ./doc/doxygen/doxygen.conf 1> /dev/null
+      # Generate on-the-fly Sphinx configuration from Jupyter Book's _config.yml
+      - "jupyter-book config sphinx doc/notebooks"
   apt_packages:
     - graphviz
 
