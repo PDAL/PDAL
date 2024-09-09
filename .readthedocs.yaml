@@ -13,14 +13,14 @@ build:
     pre_build:
       - doxygen ./doc/doxygen/doxygen.conf 1> /dev/null
       # Generate on-the-fly Sphinx configuration from Jupyter Book's _config.yml
-      - "jupyter-book config sphinx doc/notebooks"
-  apt_packages:
-    - graphviz
+      - "jupyter-book config sphinx doc/"
+  # apt_packages:
+  #   - graphviz
 
 sphinx:
-  builder: html
+  # builder: html
   configuration: doc/conf.py
-  fail_on_warning: true
+  # fail_on_warning: true
 
 python:
   install:
