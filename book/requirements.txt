@@ -1,3 +1,2 @@
 jupyter-book
-matplotlib
-numpy
+pdal
