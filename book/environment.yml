@@ -1,7 +1,6 @@
-name: book
 channels:
   - conda-forge
-  - defaults
 dependencies:
   - python-pdal
   - jupyter-book
+  - proj

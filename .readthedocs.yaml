@@ -8,7 +8,7 @@ version: 2
 build:
   os: "ubuntu-22.04"
   tools:
-    python: "mambaforge-22.9"
+    python: "mambaforge-latest"
   jobs:
     pre_build:
       # - doxygen ./doc/doxygen/doxygen.conf 1> /dev/null
@@ -27,6 +27,6 @@ sphinx:
 #     - requirements: book/requirements.txt
 
 conda:
-  environment: jb-environment.yml
+  environment: book/environment.yml
 
 formats: all
