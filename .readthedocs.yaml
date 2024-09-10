@@ -11,9 +11,9 @@ build:
     python: "3.11"
   jobs:
     pre_build:
-      - doxygen ./doc/doxygen/doxygen.conf 1> /dev/null
+      # - doxygen ./doc/doxygen/doxygen.conf 1> /dev/null
       # Generate on-the-fly Sphinx configuration from Jupyter Book's _config.yml
-      - "jupyter-book config sphinx doc/"
+      - "jupyter-book config sphinx book/"
   # apt_packages:
   #   - graphviz
 
