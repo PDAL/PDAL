@@ -27,6 +27,6 @@ sphinx:
 #     - requirements: book/requirements.txt
 
 conda:
-  environment: environment.yml
+  environment: jb-environment.yml
 
 formats: all
