@@ -17,9 +17,9 @@ build:
   # apt_packages:
   #   - graphviz
 
-# sphinx:
+sphinx:
   # builder: html
-  # configuration: doc/conf.py
+  configuration: doc/conf.py
   # fail_on_warning: true
 
 python:
