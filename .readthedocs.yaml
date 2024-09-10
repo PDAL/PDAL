@@ -19,11 +19,11 @@ build:
 
 sphinx:
   # builder: html
-  configuration: doc/conf.py
+  configuration: book/conf.py
   # fail_on_warning: true
 
 python:
   install:
-    - requirements: doc/requirements.txt
+    - requirements: book/requirements.txt
 
 formats: all
