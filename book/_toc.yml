@@ -7,7 +7,23 @@ parts:
   - caption: Resources
     chapters:
       - file: notebooks
-      # - file: stages/filter_opts
+  - caption: Apps
+    chapters:
+      - file: apps/chamfer
+      - file: apps/delta
+      - file: apps/density
+      - file: apps/eval
+      - file: apps/ground
+      - file: apps/hausdorff
+      - file: apps/info
+      - file: apps/merge
+      - file: apps/pipeline
+      - file: apps/random
+      - file: apps/sort
+      - file: apps/split
+      - file: apps/tile
+      - file: apps/tindex
+      - file: apps/translate
 # - caption: Basic examples 🪄
 #   chapters:
 #   - file: markdown
