@@ -43,10 +43,3 @@ $ pdal translate \
 :::{note}
 Driver-specific options can be identified using the `pdal <command> --help` invocation.
 :::
-
-```{toctree}
-:glob: true
-:maxdepth: 2
-
-*
-```
