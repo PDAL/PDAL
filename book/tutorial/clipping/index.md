@@ -1,11 +1,3 @@
----
-Author: Howard Butler
-Contact: <mailto:howard@hobu.co>
-Date: 11/09/2015
----
-
-(clipping)=
-
 # Clipping with Geometries
 
 ## Introduction

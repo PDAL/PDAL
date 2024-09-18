@@ -4,7 +4,13 @@
 format: jb-book
 root: index
 parts:
-  - caption: Resources
+  - caption: About
+    chapters:
+      - file: about
+  - caption: Download
+    chapters:
+      - file: download
+  - caption: Notebooks
     chapters:
       - file: notebooks
   - caption: Apps
@@ -24,14 +30,3 @@ parts:
       - file: apps/tile
       - file: apps/tindex
       - file: apps/translate
-# - caption: Basic examples 🪄
-#   chapters:
-#   - file: markdown
-#   - file: notebooks
-#   - file: markdown-notebooks
-# - caption: Cool extensions 🕶️
-#   chapters:
-#   - file: intersphinx
-#   - file: sphinx-examples
-#   - file: sphinx-hoverxref
-#   - file: sphinx-proof

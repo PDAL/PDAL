@@ -61,22 +61,6 @@ PDAL 2.2.1 has been released. You can {ref}`download <download>` the source
 code or follow the {ref}`quickstart <quickstart>` to get going in a
 hurry with Conda.
 
-## About
-
-```{toctree}
-:maxdepth: 2
-
-about
-```
-
-## Download
-
-```{toctree}
-:maxdepth: 2
-
-download
-```
-
 ## Quickstart
 
 ```{toctree}
