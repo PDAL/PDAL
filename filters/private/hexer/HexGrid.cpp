@@ -1,63 +1,14 @@
-/******************************************************************************
- * Copyright (c) 2014, Hobu Inc. (howard@hobu.co)
- *
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following
- * conditions are met:
- *
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in
- *       the documentation and/or other materials provided
- *       with the distribution.
- *     * Neither the name of the Howard Butler or Hobu, Inc.
- *       the names of its contributors may be
- *       used to endorse or promote products derived from this software
- *       without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
- * OF SUCH DAMAGE.
- ****************************************************************************/
-
-
-#include <cmath>
-#include <algorithm>
-
-#include "HexGrid.hpp"
-#include "HexIter.hpp"
-#include "Mathpair.hpp"
-#include "Processor.hpp"
-#include "Segment.hpp"
-
-#include "pdal/util/Utils.hpp"
-
-using namespace std;
+#include <hexer/BaseGrid.hpp>
+#include <hexer/HexGrid.hpp>
 
 namespace hexer
 {
 
-HexGrid::HexGrid(int dense_limit) : m_height(-1.0), m_width(-1.0),
-    m_pos_roots(HexCompare()), m_dense_limit(dense_limit), m_miny(1)
-{}
-
-void HexGrid::initialize(double height)
+void HexGrid::processHeight(double height)
 {
     m_maxSample = 10000;
     m_height = height;
-    m_miny = 1;
+    m_minY = 1;
     m_width = (3 / (2 * SQRT_3)) * m_height;
     m_offsets[0] = Point(0, 0);
     m_offsets[1] = Point(-m_width / 3, m_height / 2);
@@ -65,84 +16,7 @@ void HexGrid::initialize(double height)
     m_offsets[3] = Point(2 * m_width / 3, m_height);
     m_offsets[4] = Point(m_width, m_height / 2);
     m_offsets[5] = Point(2 * m_width / 3, 0);
-    m_center_offset = Point(m_width / 3, m_height / 2);
-}
-
-bool HexGrid::dense(Hexagon *h)
-{
-    return h->count() >= m_dense_limit;
-}
-
-void HexGrid::addPoint(Point p)
-{
-    if (m_width < 0)
-    {
-        m_sample.push_back(p);
-        if (m_sample.size() >= m_maxSample)
-            processSample();
-        return;
-    }
-
-    Hexagon *h = findHexagon(p);
-    h->increment();
-    if (!h->dense())
-    {
-        if (dense(h))
-        {
-            h->setDense();
-            m_miny = std::min(m_miny, h->y() - 1);
-            if (h->possibleRoot())
-                m_pos_roots.insert(h);
-            markNeighborBelow(h);
-        }
-    }
-}
-
-void HexGrid::processSample()
-{
-    if (m_width > 0 || m_sample.empty())
-        return;
-
-    double height = computeHexSize(m_sample, m_dense_limit);
-    initialize(height);
-    for (auto pi = m_sample.begin(); pi != m_sample.end(); ++pi)
-        addPoint(*pi);
-    m_sample.clear();
-}
-
-// A debugging function that can be used to make a particular hexagon
-// dense.
-void HexGrid::addDenseHexagon(int x, int y)
-{
-    Hexagon *h = getHexagon(x, y);
-    if (!h->dense())
-    {
-        h->setCount(m_dense_limit);
-        h->setDense();
-        m_miny = std::min(m_miny, h->y() - 1);
-        if (h->possibleRoot())
-            m_pos_roots.insert(h);
-        markNeighborBelow(h);
-    }
-}
-
-HexIter HexGrid::hexBegin()
-{
-    return HexIter(m_hexes.begin(), this);
-}
-
-HexIter HexGrid::hexEnd()
-{
-    return HexIter(m_hexes.end(), this);
-}
-
-void HexGrid::markNeighborBelow(Hexagon *h)
-{
-    Coord c = h->neighborCoord(3);
-    Hexagon *neighbor = getHexagon(c);
-    neighbor->setDenseNeighbor(0);
-    if (neighbor->dense() && !neighbor->possibleRoot())
-        m_pos_roots.erase(neighbor);
+    m_centerOffset = Point(m_width / 3, m_height / 2);
 }
 
 //  first point (origin) and start of column 0
@@ -180,18 +54,14 @@ void HexGrid::markNeighborBelow(Hexagon *h)
 // The first point, whatever it's X/Y location, is made the origin, and is
 // placed at the top-left edge of hexagon 0,0.
 //
-Hexagon *HexGrid::findHexagon(Point p)
+HexId HexGrid::findHexagon(Point p)
 {
     int x, y;
 
-    if (m_hexes.empty())
+    if (m_counts.empty())
     {
         m_origin = p;
-        // Make a hex at the origin and insert it.  Return a pointer
-        // to the hexagon in the map.
-        HexMap::value_type hexpair(Hexagon::key(0, 0), Hexagon(0, 0));
-        HexMap::iterator it = m_hexes.insert(hexpair).first;
-        return &it->second;
+        return HexId{0,0};
     }
 
     // Offset by the origin.
@@ -252,153 +122,46 @@ Hexagon *HexGrid::findHexagon(Point p)
             }
         }
     }
-    return getHexagon(x, y);
+
+    // minimum Y (HexId.j) value, used in inGrid() for finding root/child paths in parentOrChild(); 
+    // set as y - 1 to account for m_hexPaths containing hexagons across edge 3
+    m_minY = std::min(m_minY, y - 1);
+
+    return HexId{x, y};
 }
 
-// Get the hexagon at position x, y.  If it doesn't exist, create it.
-// Never returns NULL.
-Hexagon *HexGrid::getHexagon(int x, int y)
+HexId HexGrid::edgeHex(HexId hex, int edge) const
 {
-    // Stick a hexagon into the map if necessary.
-    HexMap::value_type hexpair(Hexagon::key(x, y), Hexagon(x, y));
-    std::pair<HexMap::iterator,bool> retval;
-    retval = m_hexes.insert(hexpair);
-    HexMap::iterator it = retval.first;
+    //               (+ Y)
+    //                __3_
+    //             2 /    \ 4 
+    //              /      \
+    //              \      /
+    //             1 \____/ 5  
+    //                  0
+    //               (- Y)
 
-    Hexagon *hex_p = &(it->second);
+    static const HexId even[] = {{0, -1}, {-1, -1}, {-1, 0}, {0, 1}, {1, 0}, {1, -1}};
+    static const HexId odd[] = {{0, -1}, {-1, 0}, {-1, 1}, {0, 1}, {1, 1}, {1, 0}};
 
-    // Return a pointer to the located hexagon.
-    return hex_p;
+    if (hex.i % 2)
+        return hex + odd[edge];
+    else
+        return hex + even[edge];
+
 }
 
-/**
-// Walk the outside of the hexagons to make a path.  Hexagon sides are labeled:
-//
-//     __0_
-//  1 /    \ 5
-//   /      \
-//   \      /
-//  2 \____/ 4
-//      3
-**/
-void HexGrid::findShapes()
+Point HexGrid::findPoint(Segment& s)
 {
-    if (m_pos_roots.empty())
-    {
-        throw hexer_error("No areas of sufficient density - no shapes. "
-            "Decrease density or area size.");
-    }
+    HexId hex = s.hex;
+    Point pos;
 
-    while (m_pos_roots.size())
-    {
-        Hexagon *h = *m_pos_roots.begin();
-        findShape(h);
-    }
+    pos.m_x = hex.i * m_width;
+    pos.m_y = hex.j * m_height;
+    if (hex.i % 2)
+        pos.m_y += (m_height / 2);
+
+    return pos + offset(s.edge) + m_origin;
 }
 
-void HexGrid::findParentPaths()
-{
-    std::vector<Path *> roots;
-    for (size_t i = 0; i < m_paths.size(); ++i)
-    {
-        Path *p = m_paths[i];
-        findParentPath(p);
-        // Either add the path to the root list or the parent's list of
-        // children.
-        !p->parent() ?  roots.push_back(p) : p->parent()->addChild(p);
-    }
-    for (size_t i = 0; i < roots.size(); ++i)
-       roots[i]->finalize(CLOCKWISE);
-
-    // In the end, the list of paths is just the root paths.  Children can
-    // be retrieved from their parents.
-    m_paths = roots;
-}
-
-void HexGrid::findParentPath(Path *p)
-{
-    Segment s = p->rootSegment();
-    Hexagon *h = s.hex();
-    int y = h->y();
-    while (y >= m_miny)
-    {
-        HexPathMap::iterator it = m_hex_paths.find(h);
-        if (it != m_hex_paths.end())
-        {
-            Path *parentPath = it->second;
-            if (parentPath == p->parent())
-            {
-               p->setParent(NULL);
-            }
-            else if (!p->parent() && parentPath != p)
-            {
-               p->setParent(parentPath);
-            }
-        }
-        h = getHexagon(h->x(), --y);
-    }
-}
-
-void HexGrid::findShape(Hexagon *hex)
-{
-    if (!hex)
-        throw hexer_error("hexagon was null!");
-
-    Path *p = new Path(this, CLOCKWISE);
-    Segment first(hex, 0);
-    Segment cur(first);
-    do {
-        cleanPossibleRoot(cur, p);
-        p->push_back(cur);
-        Segment next = cur.leftClockwise(this);
-        if (!next.hex()->dense())
-            next = cur.rightClockwise(this);
-        cur = next;
-    } while (cur != first);
-    m_paths.push_back(p);
-}
-
-void HexGrid::cleanPossibleRoot(Segment s, Path *p)
-{
-    if (s.possibleRoot(this))
-        m_pos_roots.erase(s.hex());
-    if (s.horizontal())
-    {
-        s.normalize(this);
-        HexPathMap::value_type hexpath(s.hex(), p);
-        m_hex_paths.insert(hexpath);
-    }
-}
-
-void HexGrid::toWKT(std::ostream& out) const
-{
-    auto writePath = [this, &out](size_t pathNum)
-    {
-       rootPaths()[pathNum]->toWKT(out);
-    };
-
-    out << "MULTIPOLYGON (";
-
-    if (rootPaths().size())
-        writePath(0);
-    for (size_t pi = 1; pi < rootPaths().size(); ++pi)
-    {
-        out << ",";
-        writePath(pi);
-    }
-    out << ")";
-}
-
-size_t HexGrid::densePointCount() const
-{
-    size_t count = 0;
-    for (auto it = m_hexes.begin(); it != m_hexes.end(); ++it)
-    {
-        const Hexagon& h = it->second;
-        if (h.dense())
-            count += h.count();
-    }
-    return count;
-}
-
-} //namespace hexer
+} // namespace hexer

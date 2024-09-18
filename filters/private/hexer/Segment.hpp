@@ -34,57 +34,40 @@
 #pragma once
 
 #include <iostream>
-#include <stdlib.h>
-#include <vector>
 
-#include "Mathpair.hpp"
+#include "HexId.hpp"
 
 namespace hexer
 {
 
-class Hexagon;
-class HexGrid;
-
-class Segment
+struct Segment
 {
-public:
-    Segment() : m_hex(NULL), m_side(0)
-        {}
+    Segment(HexId hex, int edge) : hex(hex), edge(edge)
+    {}
 
-    Segment(Hexagon *h, int side) : m_hex(h), m_side(side)
-        {}
-
-    Hexagon *hex()
-        { return m_hex; }
-
-    int side()
-        { return m_side; }
-
-    bool horizontal()
-        { return (m_side == 0 || m_side == 3); }
-
-    void normalize(HexGrid *grid);
-    bool possibleRoot(HexGrid *grid);
-
-    Segment rightAntiClockwise(HexGrid *grid);
-    Segment leftAntiClockwise(HexGrid *grid);
-    Segment rightClockwise(HexGrid *grid);
-    Segment leftClockwise(HexGrid *grid);
-    Point startPos(HexGrid *grid) const;
-    Point endPos(HexGrid *grid) const;
-
-    friend bool operator == (const Segment& s1, const Segment &s2);
-    friend bool operator != (const Segment& s1, const Segment &s2);
-    friend std::ostream& operator << (std::ostream& os, const Segment &s);
-
-private:
-    Point pos(HexGrid *grid, const Point& offset) const;
+    bool horizontal() const
+    { return edge == 0 || edge == 3; }
 
     /// Hexagon who's side is the segment.
-    Hexagon *m_hex;
+    HexId hex;
     /// Which side of the hexagon.
-    int m_side;
+    int edge;
 };
 
-} // namespace
+inline bool operator == (const Segment& s1, const Segment& s2)
+{
+    return s1.hex == s2.hex && s1.edge == s2.edge;
+}
 
+inline bool operator != (const Segment& s1, const Segment& s2)
+{
+    return !(s1 == s2);
+}
+
+inline std::ostream& operator << (std::ostream& out, const Segment& s)
+{
+    out << "(" << s.hex.i << "," << s.hex.j << " - " << s.edge << ")";
+    return out;
+}
+
+} // namespace hexer

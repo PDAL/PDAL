@@ -35,6 +35,7 @@
 
 #include <vector>
 #include <ostream>
+#include <iostream>
 
 #include "Mathpair.hpp"
 #include "Segment.hpp"
@@ -48,65 +49,56 @@ enum Orientation
     ANTICLOCKWISE  // Hole
 };
 
-class HexGrid;
-class Path;
-using PathPtrList = std::vector<Path *>;
-
 class Path
 {
 public:
-    Path(HexGrid *m_grid, Orientation orient) :
-        m_grid(m_grid), m_parent(NULL), m_orientation(orient)
+    Path(HexId root_hex) : m_rootHex(root_hex), m_parent(NULL)
     {}
 
-    ~Path()
-    {
-        for (auto p : m_children)
-            delete p;
-    }
+    void toWKT(std::ostream& output) const;
 
-    void push_back(const Segment& s)
-        { m_segs.push_back(s); }
-    Segment rootSegment()
-        { return m_segs[0]; }
-    Path *parent()
-        { return m_parent; }
+    void addChild(Path *path)
+        { m_children.push_back(path); }
     void setParent(Path *p)
         { m_parent = p; }
-    void addChild(Path *p)
-        { m_children.push_back(p); }
+    Path *parent()
+        { return m_parent; }
+    const std::vector<Path*>& subPaths() const
+        { return m_children; }
+    const std::vector<Point>& points() const
+    {
+        return m_points;
+    }
+    HexId rootHex() const
+        { return m_rootHex; }
+    void addPoint(Point p)
+        { m_points.push_back(p); }
     void finalize(Orientation o)
     {
         m_orientation = o;
         for (size_t i = 0; i < m_children.size(); ++i)
             m_children[i]->finalize(o == CLOCKWISE ? ANTICLOCKWISE : CLOCKWISE);
+        if (o == ANTICLOCKWISE){
+            std::reverse(m_points.begin(), m_points.end());
+        }
     }
-    size_t pathLength() const
-        { return m_segs.size(); }
-    Point getPoint(size_t pointnum) const;
-    Orientation orientation() const
-        { return m_orientation; }
-    std::vector<Point> points() const;
-    PathPtrList subPaths() const
-        { return m_children; }
-    void toWKT( std::ostream& output) const;
+    int numChildren()
+        { return m_children.size(); }
+    int numPoints()
+        { return m_points.size(); }
 
 private:
-    /// Grid that owns the path.
-    HexGrid *m_grid;
-    /// Parent path (NULL if root path)
+    /// Hexagon associated with path, used for finding child paths
+    HexId m_rootHex;
+    /// Parent path (NULL if root)
     Path *m_parent;
     /// Children
-    PathPtrList m_children;
-    /// Orientation of path AT EXTRACTION - segments are ALWAYS ordered
-    /// clockwise.
+    std::vector<Path *> m_children;
+    /// Orientation of path AT EXTRACTION - points are ordered clockwise
+    /// until finalize() sets orientation.
     Orientation m_orientation;
-    /// List of segments that make up the path.
-    std::vector<Segment> m_segs;
-
-    void writeRing(std::ostream& out) const;
-    PathPtrList writePolygon(std::ostream& out) const;
+    /// points that make up the path
+    std::vector<Point> m_points;
 };
 
 } //namespace hexer
-

@@ -40,7 +40,7 @@
 
 namespace hexer
 {
-    class HexGrid;
+    class BaseGrid;
 };
 
 namespace pdal
@@ -56,10 +56,10 @@ public:
     HexBin(const HexBin&) = delete;
 
     std::string getName() const;
-    hexer::HexGrid* grid() const;
+    hexer::BaseGrid* grid() const;
 
 private:
-    std::unique_ptr<hexer::HexGrid> m_grid;
+    std::unique_ptr<hexer::BaseGrid> m_grid;
     std::string m_xDimName;
     std::string m_yDimName;
     uint32_t m_precision;
@@ -73,6 +73,9 @@ private:
     point_count_t m_count;
     bool m_preserve_topology;
     std::string m_DensityOutput;
+    std::string m_boundaryOutput;
+    bool m_isH3;
+    int m_h3Res;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void ready(PointTableRef table);

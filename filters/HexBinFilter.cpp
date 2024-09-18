@@ -34,8 +34,9 @@
 
 #include "HexBinFilter.hpp"
 
+#include "private/hexer/BaseGrid.hpp"
 #include "private/hexer/HexGrid.hpp"
-#include "private/hexer/HexIter.hpp"
+#include "private/hexer/H3Grid.hpp"
 
 #include "../kernels/private/density/OGR.hpp"
 #include <pdal/Polygon.hpp>
@@ -65,7 +66,7 @@ std::string HexBin::getName() const
 }
 
 
-hexer::HexGrid *HexBin::grid() const
+hexer::BaseGrid *HexBin::grid() const
 {
     return m_grid.get();
 }
@@ -89,19 +90,37 @@ void HexBin::addArgs(ProgramArgs& args)
         m_preserve_topology, true);
     args.add("density", "Emit a density tessellation GeoJSON FeatureCollection in metadata",
         m_DensityOutput, "");
+    args.add("boundary", "Emit a density tessellation GeoJSON FeatureCollection in metadata",
+        m_boundaryOutput, "");
+    args.add("h3_grid", "Create a grid using H3 (https://h3geo.org/docs) Hexagons",
+        m_isH3, false);
+    args.add("h3_resolution", "H3 grid resolution: 0 (coarsest) - 15 (finest). See "
+        "https://h3geo.org/docs/core-library/restable", m_h3Res, -1)
 }
 
 
 void HexBin::ready(PointTableRef table)
 {
     m_count = 0;
-    if (m_edgeLength == 0.0)  // 0 can always be represented exactly.
+    if (m_isH3)
     {
-        m_grid.reset(new HexGrid(m_density));
-        m_grid->setSampleSize(m_sampleSize);
+        if (m_h3Res == 0) {
+            if (m_edgeLength)
+                log()->get(LogLevel::Warning) << "Ignoring edge length for H3 processing! "
+                    "Auto-calculating resolution; set 'h3_resolution' argument to "
+                    "specify cell size";
+            m_grid.reset(new H3Grid(m_density))
+        }
+        else
+            m_grid.reset(new H3Grid(m_h3Res, m_density));
     }
     else
-        m_grid.reset(new HexGrid(m_edgeLength * sqrt(3), m_density));
+    {
+        if (m_edgeLength == 0.0)  // 0 can always be represented exactly.
+            m_grid.reset(new HexGrid(m_density));
+        else
+            m_grid.reset(new HexGrid(m_edgeLength * sqrt(3), m_density));
+    }
 }
 
 
@@ -113,6 +132,7 @@ void HexBin::filter(PointView& view)
         p.setPointId(idx);
         processOne(p);
     }
+    m_grid->setSampleSize(std::min(m_count, m_sampleSize));
 }
 
 
@@ -120,7 +140,7 @@ bool HexBin::processOne(PointRef& point)
 {
     double x = point.getFieldAs<double>(Dimension::Id::X);
     double y = point.getFieldAs<double>(Dimension::Id::Y);
-    m_grid->addPoint(x, y);
+    m_grid->addXY(x, y);
     m_count++;
     return true;
 }
@@ -128,8 +148,6 @@ bool HexBin::processOne(PointRef& point)
 
 void HexBin::done(PointTableRef table)
 {
-    m_grid->processSample();
-
     try
     {
         m_grid->findShapes();
@@ -144,34 +162,38 @@ void HexBin::done(PointTableRef table)
         return;
     }
 
-    Utils::OStringStreamClassicLocale offsets;
-    offsets << "MULTIPOINT (";
-    for (int i = 0; i < 6; ++i)
-    {
-        hexer::Point p = m_grid->offset(i);
-        offsets << p.m_x << " " << p.m_y;
-        if (i != 5)
-            offsets << ", ";
-    }
-    offsets << ")";
-
-    m_metadata.add("edge_length", m_edgeLength, "The edge length of the "
-        "hexagon to use in situations where you do not want to estimate "
-        "based on a sample");
-    m_metadata.add("estimated_edge", m_grid->height(),
-        "Estimated computed edge distance");
     m_metadata.add("threshold", m_grid->denseLimit(),
         "Minimum number of points inside a hexagon to be considered full");
     m_metadata.add("sample_size", m_sampleSize, "Number of samples to use "
         "when estimating hexagon edge size. Specify 0.0 or omit options "
         "for edge_size if you want to compute one.");
-    m_metadata.add("hex_offsets", offsets.str(), "Offset of hex corners from "
-        "hex centers.");
 
     Utils::OStringStreamClassicLocale polygon;
     polygon.setf(std::ios_base::fixed, std::ios_base::floatfield);
     polygon.precision(m_precision);
     m_grid->toWKT(polygon);
+
+    if (!m_isH3)
+    {
+        Utils::OStringStreamClassicLocale offsets;
+        offsets << "MULTIPOINT (";
+        for (int i = 0; i < 6; ++i)
+        {
+            hexer::Point p = m_grid->offset(i);
+            offsets << p.m_x << " " << p.m_y;
+            if (i != 5)
+                offsets << ", ";
+        }
+        offsets << ")";
+
+        m_metadata.add("edge_length", m_edgeLength, "The edge length of the "
+            "hexagon to use in situations where you do not want to estimate "
+            "based on a sample");
+        m_metadata.add("estimated_edge", m_grid->height(),
+            "Estimated computed edge distance");
+        m_metadata.add("hex_offsets", offsets.str(), "Offset of hex corners from "
+            "hex centers.");
+    }
 
     if (m_outputTesselation)
     {
