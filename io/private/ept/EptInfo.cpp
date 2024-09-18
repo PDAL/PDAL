@@ -145,6 +145,26 @@ void EptInfo::initialize()
         throw pdal_error("Unrecognized EPT dataType: " + dt);
 
     NL::json& schema = m_info["schema"];
+
+    // There are 2 cases where we do some special things regarding flags:
+    //  - If the ClassFlags dimension exists, we will instead use the constituent flags
+    //  - If the data-type is laszip, then we should always add these flags.  Since EPT
+    //    metadata cannot represent bitfields, these fields can be packed into
+    //    Classification so we need to expand them out here.
+    auto addFlags([this]() {
+        m_remoteLayout.registerDim(Dimension::Id::Withheld);
+        m_dims["Withheld"] = DimType(Dimension::Id::Withheld, Dimension::Type::Unsigned8, 1.0, 0);
+
+        m_remoteLayout.registerDim(Dimension::Id::Overlap);
+        m_dims["Overlap"] = DimType(Dimension::Id::Overlap, Dimension::Type::Unsigned8, 1.0, 0);
+
+        m_remoteLayout.registerDim(Dimension::Id::Synthetic);
+        m_dims["Synthetic"] = DimType(Dimension::Id::Synthetic, Dimension::Type::Unsigned8, 1.0, 0);
+
+        m_remoteLayout.registerDim(Dimension::Id::KeyPoint);
+        m_dims["KeyPoint"] = DimType(Dimension::Id::KeyPoint, Dimension::Type::Unsigned8, 1.0, 0);
+    });
+
     for (NL::json element: schema)
     {
         std::string name = element["name"].get<std::string>();
@@ -158,27 +178,16 @@ void EptInfo::initialize()
 
         if (Utils::iequals(name, "ClassFlags"))
         {
-            // do some special
-            m_remoteLayout.registerDim(Dimension::Id::Withheld);
-            m_dims["Withheld"] = DimType(Dimension::Id::Withheld, Dimension::Type::Unsigned8, 1.0, 0);
-
-            m_remoteLayout.registerDim(Dimension::Id::Overlap);
-            m_dims["Overlap"] = DimType(Dimension::Id::Overlap, Dimension::Type::Unsigned8, 1.0, 0);
-
-            m_remoteLayout.registerDim(Dimension::Id::Synthetic);
-            m_dims["Synthetic"] = DimType(Dimension::Id::Synthetic, Dimension::Type::Unsigned8, 1.0, 0);
-
-            m_remoteLayout.registerDim(Dimension::Id::KeyPoint);
-            m_dims["KeyPoint"] = DimType(Dimension::Id::KeyPoint, Dimension::Type::Unsigned8, 1.0, 0);
-
+            addFlags();
         }
         else
         {
-
             Dimension::Id id = m_remoteLayout.registerOrAssignFixedDim(name, type);
             m_dims[name] = DimType(id, type, scale, offset);
         }
     }
+    if (m_dataType == DataType::Laszip)
+        addFlags();
     m_remoteLayout.finalize();
 }
 
