@@ -12,8 +12,6 @@
 #include "Path.hpp"
 #include "HexId.hpp"
 
-#include <h3api.h>
-
 namespace hexer
 {
 
@@ -24,13 +22,15 @@ class BaseGrid
 {
 public:
     void addPoint(Point& p);
-    void findShapes();
-    void findParentPaths();
     bool isDense(HexId hex);
-    void toWKT(std::ostream& output) const;
-    
+
+    // exported for testing
+    PDAL_DLL void findShapes();
+    PDAL_DLL void findParentPaths();
+    PDAL_DLL void toWKT(std::ostream& output) const;
+
     // test function: adds pre-defined hexagon coordinates to the grid 
-    void setHexes(const std::vector<HexId>& hexes);
+    PDAL_DLL void setHexes(const std::vector<HexId>& hexes);
 
     void setSampleSize(int num)
         {m_maxSample = num; }
@@ -39,6 +39,8 @@ public:
     // returns all hexagons in the grid and their counts
     std::unordered_map<HexId, int> const& getHexes()
         { return m_counts; }
+    int denseLimit() const
+        { return m_denseLimit; }
 
     virtual void addXY(double& x, double& y) = 0;
     virtual Point findPoint(Segment& s) = 0;
@@ -48,12 +50,19 @@ public:
         { return 0; }
     virtual HexId h32ij(H3Index h3)
         { return {0,0}; }
+    virtual Point offset(int idx) const
+        { return Point{0,0}; }
+    virtual int getRes() const
+        { return -1; }
+    virtual double height() const
+        { return 0; }
 
 protected:
     BaseGrid(int dense_limit) : m_denseLimit{dense_limit}
     {}
     int increment(HexId hex);
 
+    /// maximum sample size for auto hex size calculation
     int m_maxSample;
     /// map of cells bordering paths at side 0 or 3
     std::unordered_map<HexId, Path *> m_hexPaths;

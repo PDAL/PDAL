@@ -12,7 +12,7 @@ class HexGrid : public BaseGrid
 public:
     HexGrid(double height, int denseLimit) : BaseGrid(denseLimit)
         { processHeight(height); }
-    HexGrid(int denseLimit) : BaseGrid(denseLimit), m_width{-1.0}
+    PDAL_DLL HexGrid(int denseLimit) : BaseGrid(denseLimit), m_width{-1.0}
         {}
 
 
@@ -25,6 +25,8 @@ public:
         { return m_width < 0; }
     Point offset(int idx) const
         { return m_offsets[idx]; }
+    double height() const
+        { return m_height; }
     bool inGrid(HexId& h)
         { return h.j >= m_minY; }
     bool isH3()

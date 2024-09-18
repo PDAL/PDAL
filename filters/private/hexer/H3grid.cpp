@@ -1,6 +1,8 @@
 #include <assert.h>
 #include <sstream>
 
+#include <h3api.h>
+
 #include "BaseGrid.hpp"
 #include "H3grid.hpp"
 #include "Processor.hpp"
@@ -19,7 +21,7 @@ void H3Grid::processHeight(double height)
     const std::array<double, 7> resHeights { 2.0, 2.62e-4, 6.28e-5, 2.09e-5, 8.73e-6,
                                              3.32e-6, 1.4e-6 };
 
-    for (int i = 0; i < resHeights.size(); ++i) {
+    for (size_t i = 0; i < resHeights.size(); ++i) {
         if (height < resHeights[i])
             m_res = i + 8;
     }
@@ -32,7 +34,7 @@ HexId H3Grid::findHexagon(Point p)
 {
     H3Index index(0);
     LatLng ll{p.m_y, p.m_x};
-    if (latLngToCell(&ll, m_res, &index) != E_SUCCESS) {
+    if (PDALH3latLngToCell(&ll, m_res, &index) != E_SUCCESS) {
             std::ostringstream oss;
             oss << "Can't convert LatLng (" << ll.lat <<
                 ", " << ll.lng <<") to H3Index.";
@@ -53,7 +55,7 @@ HexId H3Grid::findHexagon(Point p)
 Point H3Grid::findPoint(Segment& s)
 {
     DirEdge dir_edge;
-    if (cellsToDirectedEdge(ij2h3(s.hex), ij2h3(edgeHex(s.hex, s.edge)), &dir_edge) != E_SUCCESS) {
+    if (PDALH3cellsToDirectedEdge(ij2h3(s.hex), ij2h3(edgeHex(s.hex, s.edge)), &dir_edge) != E_SUCCESS) {
         std::ostringstream oss;
         oss << "Can't get directed edge between hexagons (" << s.hex.i <<
             ", " << s.hex.j <<") and (" << edgeHex(s.hex, s.edge).i <<", " << 
@@ -63,10 +65,10 @@ Point H3Grid::findPoint(Segment& s)
 
     CellBoundary edge_bound;
 
-    if (directedEdgeToBoundary(dir_edge, &edge_bound) != E_SUCCESS)
+    if (PDALH3directedEdgeToBoundary(dir_edge, &edge_bound) != E_SUCCESS)
         throw hexer_error("unable to get cell boundary from directed edge!");
-    double x = radsToDegs(edge_bound.verts[1].lng);
-    double y = radsToDegs(edge_bound.verts[1].lat);
+    double x = PDALH3radsToDegs(edge_bound.verts[1].lng);
+    double y = PDALH3radsToDegs(edge_bound.verts[1].lat);
 
     return Point{x, y};
 }

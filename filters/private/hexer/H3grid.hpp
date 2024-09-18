@@ -13,13 +13,13 @@ public:
     H3Grid(int dense_limit)
         : BaseGrid{dense_limit}, m_res{-1}, m_origin{0}
         {}
-    H3Grid(int res, int dense_limit)
+    PDAL_DLL H3Grid(int res, int dense_limit)
         : BaseGrid{dense_limit}, m_res{res}, m_origin{0}
         {}
 
     H3Index ij2h3(HexId ij)
         {   H3Index h3;
-            if (localIjToCell(m_origin, &ij, 0, &h3) != E_SUCCESS) {
+            if (PDALH3localIjToCell(m_origin, &ij, 0, &h3) != E_SUCCESS) {
                 std::ostringstream oss;
                 oss << "Can't convert IJ (" << ij.i <<
                     ", " << ij.j <<") to H3Index.";
@@ -30,7 +30,7 @@ public:
     // Convert H3 index to IJ coordinates
     HexId h32ij(H3Index h3)
         {   HexId ij;
-            if (cellToLocalIj(m_origin, h3, 0, &ij) != E_SUCCESS) {
+            if (PDALH3cellToLocalIj(m_origin, h3, 0, &ij) != E_SUCCESS) {
                 std::ostringstream oss;
                 oss << "Can't convert H3 index " << h3 <<
                     " to IJ.";
@@ -44,7 +44,7 @@ public:
 
     void addXY(double& x, double& y)
         { 
-          Point p{degsToRads(x), degsToRads(y)};
+          Point p{PDALH3degsToRads(x), PDALH3degsToRads(y)};
           addPoint(p);        
         }
     bool sampling() const
@@ -58,10 +58,10 @@ public:
 
     // test function: used when inserting pre-defined grids in tests, 
     // sets origin outside of findHexagon()
-    void setOrigin(H3Index idx)
+    PDAL_DLL void setOrigin(H3Index idx)
         { m_origin = idx; }
     // test function: used to get grid resolution to run h3 latLngToCell()
-    int getRes() const
+    PDAL_DLL int getRes() const
         { return m_res; }
 
 private:

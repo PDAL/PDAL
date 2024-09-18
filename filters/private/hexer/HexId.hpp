@@ -1,6 +1,6 @@
 #pragma once
 
-#include <h3api.h>
+#include <vendor/h3/include/h3api.h>
 
 namespace hexer
 {

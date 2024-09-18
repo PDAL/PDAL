@@ -36,7 +36,7 @@
 
 #include "private/hexer/BaseGrid.hpp"
 #include "private/hexer/HexGrid.hpp"
-#include "private/hexer/H3Grid.hpp"
+#include "private/hexer/H3grid.hpp"
 
 #include "../kernels/private/density/OGR.hpp"
 #include <pdal/Polygon.hpp>
@@ -95,7 +95,7 @@ void HexBin::addArgs(ProgramArgs& args)
     args.add("h3_grid", "Create a grid using H3 (https://h3geo.org/docs) Hexagons",
         m_isH3, false);
     args.add("h3_resolution", "H3 grid resolution: 0 (coarsest) - 15 (finest). See "
-        "https://h3geo.org/docs/core-library/restable", m_h3Res, -1)
+        "https://h3geo.org/docs/core-library/restable", m_h3Res, -1);
 }
 
 
@@ -104,12 +104,12 @@ void HexBin::ready(PointTableRef table)
     m_count = 0;
     if (m_isH3)
     {
-        if (m_h3Res == 0) {
+        if (m_h3Res == -1) {
             if (m_edgeLength)
                 log()->get(LogLevel::Warning) << "Ignoring edge length for H3 processing! "
                     "Auto-calculating resolution; set 'h3_resolution' argument to "
                     "specify cell size";
-            m_grid.reset(new H3Grid(m_density))
+            m_grid.reset(new H3Grid(m_density));
         }
         else
             m_grid.reset(new H3Grid(m_h3Res, m_density));
@@ -132,7 +132,7 @@ void HexBin::filter(PointView& view)
         p.setPointId(idx);
         processOne(p);
     }
-    m_grid->setSampleSize(std::min(m_count, m_sampleSize));
+    m_grid->setSampleSize(std::min(int(m_count), int(m_sampleSize)));
 }
 
 
@@ -173,40 +173,16 @@ void HexBin::done(PointTableRef table)
     polygon.precision(m_precision);
     m_grid->toWKT(polygon);
 
-    if (!m_isH3)
-    {
-        Utils::OStringStreamClassicLocale offsets;
-        offsets << "MULTIPOINT (";
-        for (int i = 0; i < 6; ++i)
-        {
-            hexer::Point p = m_grid->offset(i);
-            offsets << p.m_x << " " << p.m_y;
-            if (i != 5)
-                offsets << ", ";
-        }
-        offsets << ")";
-
-        m_metadata.add("edge_length", m_edgeLength, "The edge length of the "
-            "hexagon to use in situations where you do not want to estimate "
-            "based on a sample");
-        m_metadata.add("estimated_edge", m_grid->height(),
-            "Estimated computed edge distance");
-        m_metadata.add("hex_offsets", offsets.str(), "Offset of hex corners from "
-            "hex centers.");
-    }
-
-    if (m_outputTesselation)
+/*     if (m_outputTesselation)
     {
         MetadataNode hexes = m_metadata.add("hexagons");
-        for (HexIter hi = m_grid->hexBegin(); hi != m_grid->hexEnd(); ++hi)
+        for (auto& [coord, count] : m_grid->getHexes())
         {
-            HexInfo h = *hi;
-
             MetadataNode hex = hexes.addList("hexagon");
-            hex.add("density", h.density());
+            hex.add("density", count);
 
-            hex.add("gridpos", Utils::toString(h.xgrid()) + " " +
-                Utils::toString((h.ygrid())));
+            hex.add("gridpos", Utils::toString(coord.i) + " " +
+                Utils::toString((coord.j)));
             Utils::OStringStreamClassicLocale oss;
             // Using stream limits precision (default 6)
             oss << "POINT (" << h.x() << " " << h.y() << ")";
@@ -214,12 +190,13 @@ void HexBin::done(PointTableRef table)
         }
         m_metadata.add("hex_boundary", polygon.str(),
             "Boundary MULTIPOLYGON of domain");
-    }
+    } */
 
     if (m_DensityOutput.size())
     {
-        OGR writer(m_DensityOutput, getSpatialReference().getWKT(), "GeoJSON", "hexbins");
-        writer.writeDensity(m_grid.get());
+        OGR writer(m_DensityOutput, getSpatialReference().getWKT(), m_grid->isH3(),
+            "GeoJSON", "hexbins");
+        writer.writeDensity(*m_grid);
     }
 
     SpatialReference srs(table.anySpatialReference());
@@ -281,17 +258,46 @@ void HexBin::done(PointTableRef table)
 
     int n(0);
     point_count_t totalCount(0);
-    for (HexIter hi = m_grid->hexBegin(); hi != m_grid->hexEnd(); ++hi)
+    for (auto& [coord, count] : m_grid->getHexes())
     {
-        HexInfo h = *hi;
-        totalCount += h.density();
-        ++n;
+        if (m_grid->isDense(coord))
+        {
+            totalCount += count;
+            n++;
+        }
     }
 
     double hexArea(((3 * SQRT_3)/2.0) * (m_grid->height() * m_grid->height()));
     double avg_density = (n * hexArea) / totalCount;
     m_metadata.add("avg_pt_per_sq_unit", avg_density, "Area / point count "
         "(ignore contrary metadata item name. This is '(n * hexArea) / totalCount')");
+    if (!m_isH3)
+    {
+        Utils::OStringStreamClassicLocale offsets;
+        offsets << "MULTIPOINT (";
+        for (int i = 0; i < 6; ++i)
+        {
+            hexer::Point p = m_grid->offset(i);
+            offsets << p.m_x << " " << p.m_y;
+            if (i != 5)
+                offsets << ", ";
+        }
+        offsets << ")";
+
+        m_metadata.add("edge_length", m_edgeLength, "The edge length of the "
+            "hexagon to use in situations where you do not want to estimate "
+            "based on a sample");
+        m_metadata.add("estimated_edge", m_grid->height(),
+            "Estimated computed edge distance");
+        m_metadata.add("hex_offsets", offsets.str(), "Offset of hex corners from "
+            "hex centers.");
+    }
+    else
+    {
+        m_metadata.add("h3_resolution", m_grid->getRes(), "The H3 resolution level "
+            "of the grid. See https://h3geo.org/docs/core-library/restable "
+            "for more information" );
+    }
 }
 
 } // namespace pdal

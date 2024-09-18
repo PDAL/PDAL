@@ -1,5 +1,4 @@
-#include <hexer/BaseGrid.hpp>
-#include <hexer/HexGrid.hpp>
+#include "HexGrid.hpp"
 
 namespace hexer
 {

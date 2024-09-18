@@ -1,8 +1,10 @@
 #include <set>
+#include <iostream>
+
+#include <h3api.h>
 
 #include "BaseGrid.hpp"
 #include "Path.hpp"
-#include <iostream>
 
 namespace hexer
 {
