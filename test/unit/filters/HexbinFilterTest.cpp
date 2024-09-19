@@ -43,6 +43,8 @@
 #include <pdal/PointView.hpp>
 #include <pdal/util/FileUtils.hpp>
 
+#include <h3api.h>
+
 #include "filters/HexBinFilter.hpp"
 #include "Support.hpp"
 

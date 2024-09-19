@@ -1,5 +1,7 @@
 #pragma once
 
+#include <h3api.h>
+
 #include "BaseGrid.hpp"
 
 namespace hexer
