@@ -313,18 +313,11 @@ void TextWriter::write(const PointViewPtr view)
 {
     PointRef point(*view, 0);
 
-    if (m_outputType == OutputType::CSV)
-        for (PointId idx = 0; idx < view->size(); ++idx)
-        {
-            point.setPointId(idx);
-            processOneCSV(point);
-        }
-    else if (m_outputType == OutputType::GEOJSON)
-        for (PointId idx = 0; idx < view->size(); ++idx)
-        {
-            point.setPointId(idx);
-            processOneGeoJSON(point);
-        }
+    for (PointId idx = 0; idx < view->size(); ++idx)
+    {
+        point.setPointId(idx);
+        processOne(point);
+    }
 }
 
 
