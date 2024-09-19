@@ -1,4 +1,4 @@
-(filters-info)=
+(filters.info)=
 
 # filters.info
 

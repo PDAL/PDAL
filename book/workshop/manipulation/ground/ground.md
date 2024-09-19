@@ -12,11 +12,11 @@
 This exercise uses PDAL to classify ground returns using the `Simple
 Morphological Filter (SMRF)` technique.
 
-:::{note}
+```{note}
 This exercise is an adaptation of the {ref}`ground-filters` tutorial on the
 PDAL website by Brad Chambers. You can find more detail and example
 invocations there.
-:::
+```
 
 ## Exercise
 
@@ -25,10 +25,10 @@ ground vs. not-ground classifications. In this example, we will use an
 algorithm provided by PDAL, the `Simple Morphological Filter` technique to
 generate a ground surface.
 
-:::{seealso}
+```{seealso}
 You can read more about the specifics of the {ref}`Simple Morphological
 Filter (SMRF) <filters.smrf>`
-:::
+```
 
 ### Command
 

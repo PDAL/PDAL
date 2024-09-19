@@ -1,4 +1,4 @@
-(writers-tiledb)=
+(writers.tiledb)=
 
 # writers.tiledb
 

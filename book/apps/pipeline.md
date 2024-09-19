@@ -1,4 +1,4 @@
-(pipeline-command)=
+(pipeline_command)=
 
 # pipeline
 

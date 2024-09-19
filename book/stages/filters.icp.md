@@ -1,4 +1,4 @@
-(filters-icp)=
+(filters.icp)=
 
 # filters.icp
 
@@ -10,7 +10,7 @@ the filter are the "moving" points after the calculated transformation has been
 applied, one point view per input.  The transformation matrix is inserted into
 the stage's metadata.
 
-:::{note}
+```{note}
 ICP requires the initial pose of the two point sets to be adequately close,
 which is not always possible, especially when the transformation is
 non-rigid.  ICP can handle limited non-rigid transformations but be aware
@@ -28,7 +28,7 @@ converges within a very small basin in the parameter space, and it easily
 becomes trapped in local minima. Therefore, the results of ICP are very
 sensitive to the initialization, especially when high levels of noise and
 large proportions of outliers exist.
-:::
+```
 
 ## Examples
 
@@ -97,14 +97,14 @@ would be similar to:
 ]
 ```
 
-:::{note}
+```{note}
 The `composed` metadata matrix is a composition of the three transformation steps outlined above, and can be used in a single call to `filters.transformation` as opposed to the three separate calls.
-:::
+```
 
-:::{seealso}
+```{seealso}
 {ref}`filters.transformation` to apply a transform to other points.
 {ref}`filters.cpd` for the use of a probabilistic assignment of correspondences between pointsets.
-:::
+```
 
 ## Options
 

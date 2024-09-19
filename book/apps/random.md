@@ -1,8 +1,8 @@
-(random-command)=
+(random_command)=
 
 # random
 
-:::{warning}
+````{warning}
 As of PDAL v2.6.0, the `random` command is marked as DEPRECATED. It will
 be removed from the default install in PDAL v2.7 and removed completely in
 PDAL v2.8.
@@ -74,7 +74,7 @@ points_normal = generate_points_normal(num_points_normal, x_mean, x_std, y_mean,
 pipeline = pdal.Writer("output_normal.laz").pipeline(points_normal)
 pipeline.execute()
 ```
-:::
+````
 
 The `random` command is used to create a random point cloud. It uses
 {ref}`readers.faux` to create a point cloud containing `count` points

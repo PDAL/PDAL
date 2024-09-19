@@ -11,11 +11,11 @@ to allow you to write Python programs that interact with data using
 extension that Python programmers can use to leverage PDAL capabilities in
 their own applications.
 
-:::{note}
+```{note}
 PDAL's Python story always revolves around [Numpy] support. PDAL's
 data is provided to both the filters ands the extension as
 Numpy arrays.
-:::
+```
 
 ## Versions
 
@@ -37,10 +37,10 @@ something works well enough, maybe one takes on the effort to formalize it, but
 that isn't necessary. PDAL's embed of Python allows you to be as grimy as you
 need to get the job done.
 
-:::{figure} ./images/python-pdal-pipeline.png
+```{figure} ./images/python-pdal-pipeline.png
 Embedding a Python function to take Z values read from a
 {ref}`readers.las` and then output them to a {ref}`writers.bpf`.
-:::
+```
 
 ## Extend
 
@@ -89,13 +89,13 @@ The PDAL Python extension requires a working
 method, make sure that you a current, working version of PDAL before
 installing the extension.
 
-:::{note}
+```{note}
 Previous to PDAL 2.1, Python support was spread across the embedded
 stages ({ref}`readers.numpy` and {ref}`filters.python`) which were installed
 by PDAL itself and the PDAL extension that was installed from PyPI.
 As of PDAL 2.1 and PDAL/python 2.3, both the embedded stages and the
 extension are installed from PyPI.
-:::
+```
 
 #### Installation Using pip
 
@@ -108,10 +108,10 @@ As administrator, you can install PDAL using pip:
 pip install PDAL
 ```
 
-:::{note}
+```{note}
 To install pip please read
 [here](https://pip.pypa.io/en/stable/installation/)
-:::
+```
 
 #### Installation from Source
 
@@ -152,11 +152,11 @@ conda create -n <environment name> -c conda-forge python-pdal
 conda activate <environment name>
 ```
 
-:::{note}
+```{note}
 The official `pdal` and `python-pdal` packages reside in the
 conda-forge channel, which can be added via `conda config` or manually
 specified with the `-c` option, as shown in the examples above.
-:::
+```
 
 [conda]: https://conda.io/projects/conda/en/latest/
 [embeds]: https://docs.python.org/3/extending/embedding.html

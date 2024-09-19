@@ -1,4 +1,4 @@
-(filters-greedyprojection)=
+(filters.greedyprojection)=
 
 # filters.greedyprojection
 

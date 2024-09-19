@@ -1,4 +1,4 @@
-(filters-skewnessbalancing)=
+(filters.skewnessbalancing)=
 
 # filters.skewnessbalancing
 
@@ -9,11 +9,11 @@ in [^cite_bartels2010].
 .. embed::
 ```
 
-:::{note}
+```{note}
 For Skewness Balancing to work well, the scene being processed needs to be
 quite flat, otherwise many above ground features will begin to be included
 in the ground surface.
-:::
+```
 
 ## Example
 
@@ -41,9 +41,9 @@ returns to the output file.
 .. include:: filter_opts.rst
 ```
 
-:::{note}
+```{note}
 The Skewness Balancing method is touted as being threshold-free. We may
 still in the future add convenience parameters that are common to other
 ground segmentation filters, such as `returns` or `ignore` to limit the
 points under consideration for filtering.
-:::
+```

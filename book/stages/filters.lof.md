@@ -1,4 +1,4 @@
-(filters-lof)=
+(filters.lof)=
 
 # filters.lof
 
@@ -26,15 +26,15 @@ difficult. The authors present some work on establishing upper and lower bounds
 on LOF values, and provide some guidelines on selecting [minpts] values, which
 users of this filter should find instructive.
 
-:::{note}
+```{note}
 To inspect the newly created, non-standard dimensions, be sure to write to an
 output format that can support arbitrary dimensions, such as BPF.
-:::
+```
 
-:::{note}
+```{note}
 In earlier PDAL releases (up to v2.2.0), `NNDistance` was stored in the
 `KDistance` Dimemsion.
-:::
+```
 
 ```{eval-rst}
 .. embed::

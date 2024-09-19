@@ -1,4 +1,4 @@
-(readers-obj)=
+(readers.obj)=
 
 # readers.obj
 
@@ -37,8 +37,7 @@ the vertices as a point to a LAS file.
 
 ## Options
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 filename

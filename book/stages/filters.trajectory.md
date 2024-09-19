@@ -1,4 +1,4 @@
-(filters-trajectory)=
+(filters.trajectory)=
 
 # filters.trajectory
 
@@ -9,10 +9,10 @@ work.
 
 The method is described in detail [here]. It extends the method of {cite}`Gatziolis2019`.
 
-:::{note}
+```{note}
 This filter creates a new dataset describing the trajectory of the sensor,
 replacing the input dataset.
-:::
+```
 
 ## Examples
 

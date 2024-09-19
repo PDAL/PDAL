@@ -1,4 +1,4 @@
-(filters-georeference)=
+(filters.georeference)=
 
 # filters.georeference
 
@@ -9,13 +9,13 @@ using `GpsTime` Dimension as a synchronisation reference with a given trajectory
 .. streamable::
 ```
 
-:::{note}
+```{note}
 This filter expects trajectory to :
 
 - contains `X`, `Y`, `Z`, `Roll`, `Pitch`, `Yaw`, `WanderAngle` and `GpsTime` ;
 - have coordinates expressed in `WGS84` system (EPSG:4979) ;
 - have all its angle values expressed in radians.
-:::
+```
 
 ## Examples
 

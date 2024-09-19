@@ -1,4 +1,4 @@
-(sort-command)=
+(sort_command)=
 
 # sort
 

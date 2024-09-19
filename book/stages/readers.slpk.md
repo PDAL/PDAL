@@ -1,4 +1,4 @@
-(readers-slpk)=
+(readers.slpk)=
 
 # readers.slpk
 
@@ -61,8 +61,7 @@ filename
 : SLPK file must have a file extension of .slpk.
   Example: `pdal translate /PDAL/test/data/i3s/SMALL_AUTZEN_LAS_ALL.slpk output.las`
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 obb

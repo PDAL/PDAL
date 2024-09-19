@@ -1,4 +1,4 @@
-(filters-streamcallback)=
+(filters.streamcallback)=
 
 # filters.streamcallback
 

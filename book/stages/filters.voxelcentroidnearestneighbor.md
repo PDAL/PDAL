@@ -1,4 +1,4 @@
-(filters-voxelcentroidnearestneighbor)=
+(filters.voxelcentroidnearestneighbor)=
 
 # filters.voxelcentroidnearestneighbor
 
@@ -30,10 +30,10 @@ dimensions.
 ]
 ```
 
-:::{seealso}
+```{seealso}
 {ref}`filters.voxelcenternearestneighbor` offers a similar solution, using
 the voxel center as opposed to the voxel centroid for the query point.
-:::
+```
 
 ## Options
 

@@ -4,29 +4,263 @@
 format: jb-book
 root: index
 parts:
-  - caption: About
-    chapters:
-      - file: about
-  - caption: Download
-    chapters:
-      - file: download
-  - caption: Notebooks
-    chapters:
-      - file: notebooks
-  - caption: Apps
-    chapters:
-      - file: apps/chamfer
-      - file: apps/delta
-      - file: apps/density
-      - file: apps/eval
-      - file: apps/ground
-      - file: apps/hausdorff
-      - file: apps/info
-      - file: apps/merge
-      - file: apps/pipeline
-      - file: apps/random
-      - file: apps/sort
-      - file: apps/split
-      - file: apps/tile
-      - file: apps/tindex
-      - file: apps/translate
+- caption: Getting Started
+  chapters:
+  - file: about
+  - file: download
+  - file: quickstart
+- caption: Concepts
+  chapters:
+  - file: apps/index
+    sections:
+    - file: apps/chamfer
+    - file: apps/delta
+    - file: apps/density
+    - file: apps/eval
+    - file: apps/ground
+    - file: apps/hausdorff
+    - file: apps/info
+    - file: apps/merge
+    - file: apps/pipeline
+    - file: apps/random
+    - file: apps/sort
+    - file: apps/split
+    - file: apps/tile
+    - file: apps/tindex
+    - file: apps/translate
+  - file: pipeline
+  - file: stages/stages
+    sections:
+    - file: stages/readers
+      sections:
+      - file: stages/readers.arrow
+      - file: stages/readers.bpf
+      - file: stages/readers.buffer
+      - file: stages/readers.copc
+      - file: stages/readers.draco
+      - file: stages/readers.ept
+      - file: stages/readers.e57
+      - file: stages/readers.faux
+      - file: stages/readers.fbi
+      - file: stages/readers.gdal
+      - file: stages/readers.hdf
+      - file: stages/readers.i3s
+      - file: stages/readers.ilvis2
+      - file: stages/readers.las
+      - file: stages/readers.matlab
+      - file: stages/readers.memoryview
+      - file: stages/readers.mbio
+      - file: stages/readers.nitf
+      - file: stages/readers.numpy
+      - file: stages/readers.obj
+      - file: stages/readers.optech
+      - file: stages/readers.pcd
+      - file: stages/readers.pgpointcloud
+      - file: stages/readers.ply
+      - file: stages/readers.pts
+      - file: stages/readers.ptx
+      - file: stages/readers.qfit
+      - file: stages/readers.rdb
+      - file: stages/readers.rxp
+      - file: stages/readers.sbet
+      - file: stages/readers.smrmsg
+      - file: stages/readers.slpk
+      - file: stages/readers.stac
+      - file: stages/readers.terrasolid
+      - file: stages/readers.text
+      - file: stages/readers.tiledb
+      - file: stages/readers.tindex
+    - file: stages/writers
+      sections:
+      - file: stages/writers.arrow
+      - file: stages/writers.bpf
+      - file: stages/writers.copc
+      - file: stages/writers.draco
+      - file: stages/writers.ept_addon
+      - file: stages/writers.e57
+      - file: stages/writers.fbi
+      - file: stages/writers.fbx
+      - file: stages/writers.gdal
+      - file: stages/writers.gltf
+      - file: stages/writers.las
+      - file: stages/writers.matlab
+      - file: stages/writers.nitf
+      - file: stages/writers.null
+      - file: stages/writers.ogr
+      - file: stages/writers.pcd
+      - file: stages/writers.pgpointcloud
+      - file: stages/writers.ply
+      - file: stages/writers.raster
+      - file: stages/writers.sbet
+      - file: stages/writers.text
+      - file: stages/writers.tiledb
+    - file: stages/filters
+      sections:
+      # create ground
+      - file: stages/filters.csf
+      - file: stages/filters.pmf
+      - file: stages/filters.skewnessbalancing
+      - file: stages/filters.smrf
+      - file: stages/filters.sparsesurface
+      - file: stages/filters.trajectory
+      # create noise
+      - file: stages/filters.elm
+      - file: stages/filters.outlier
+      # create consensus
+      - file: stages/filters.neighborclassifier
+      # create HAG
+      - file: stages/filters.hag_delaunay
+      - file: stages/filters.hag_dem
+      - file: stages/filters.hag_nn
+      # create colorization
+      - file: stages/filters.colorinterp
+      - file: stages/filters.colorization
+      # create clustering
+      - file: stages/filters.cluster
+      - file: stages/filters.dbscan
+      - file: stages/filters.litree
+      - file: stages/filters.lloydkmeans
+      # create features
+      - file: stages/filters.approximatecoplanar
+      - file: stages/filters.covariancefeatures
+      - file: stages/filters.eigenvalues
+      - file: stages/filters.estimaterank
+      - file: stages/filters.label_duplicates
+      - file: stages/filters.lof
+      - file: stages/filters.miniball
+      - file: stages/filters.nndistance
+      - file: stages/filters.normal
+      - file: stages/filters.optimalneighborhood
+      - file: stages/filters.planefit
+      - file: stages/filters.radialdensity
+      - file: stages/filters.reciprocity
+      - file: stages/filters.zsmooth
+      - file: stages/filters.griddecimation
+      # create assignment
+      - file: stages/filters.assign
+      - file: stages/filters.overlay
+      # create dimension
+      - file: stages/filters.ferry
+      # order
+      - file: stages/filters.mortonorder
+      - file: stages/filters.randomize
+      - file: stages/filters.sort
+      # move registration
+      - file: stages/filters.cpd
+      - file: stages/filters.icp
+      - file: stages/filters.teaser
+      # move predefined
+      - file: stages/filters.projpipeline
+      - file: stages/filters.reprojection
+      - file: stages/filters.transformation
+      - file: stages/filters.straighten
+      - file: stages/filters.georeference
+      - file: stages/filters.h3
+      # cull spatial
+      - file: stages/filters.crop
+      - file: stages/filters.geomdistance
+      # cull resample
+      - file: stages/filters.decimation
+      - file: stages/filters.fps
+      - file: stages/filters.relaxationdartthrowing
+      - file: stages/filters.sample
+      # cull conditional
+      - file: stages/filters.dem
+      - file: stages/filters.iqr
+      - file: stages/filters.mad
+      # cull voxel
+      - file: stages/filters.voxelcenternearestneighbor
+      - file: stages/filters.voxelcentroidnearestneighbor
+      - file: stages/filters.voxeldownsize
+      # cull position
+      - file: stages/filters.expression
+      - file: stages/filters.head
+      - file: stages/filters.locate
+      - file: stages/filters.mongo
+      - file: stages/filters.range
+      - file: stages/filters.tail
+      # new spatial
+      - file: stages/filters.chipper
+      - file: stages/filters.divider
+      - file: stages/filters.splitter
+      # new dimension
+      - file: stages/filters.gpstimeconvert
+      - file: stages/filters.groupby
+      - file: stages/filters.returns
+      - file: stages/filters.separatescanline
+      # join
+      - file: stages/filters.merge
+      # metadata
+      - file: stages/filters.hexbin
+      - file: stages/filters.info
+      - file: stages/filters.stats
+      - file: stages/filters.expressionstats
+      # mesh
+      - file: stages/filters.delaunay
+      - file: stages/filters.greedyprojection
+      - file: stages/filters.poisson
+      - file: stages/filters.faceraster
+      # languages
+      - file: stages/filters.matlab
+      - file: stages/filters.python
+      - file: stages/filters.julia
+      # other
+      - file: stages/filters.streamcallback
+  - file: dimensions
+  - file: types
+  - file: python
+  - file: java
+- caption: Examples
+  chapters:
+  - file: tutorial/index
+    sections:
+    - file: tutorial/reading
+    - file: tutorial/iowa-entwine
+    - file: tutorial/las
+    - file: tutorial/clipping/index
+    - file: tutorial/ground-filters
+    - file: tutorial/grid-shift
+  - file: workshop/index
+    sections:
+    - file: workshop/agenda
+    - file: workshop/lidar-introduction
+    - file: workshop/software
+    - file: workshop/introduction/index
+    - file: workshop/manipulation/index
+    - file: workshop/generation/index
+    - file: workshop/capstone
+    - file: workshop/notes
+    title: Workshop
+  - file: notebooks
+- caption: Reference
+  chapters:
+  - file: community
+  - file: api/index
+    sections:
+    - file: api/cpp/index
+    - file: api/transition/index
+  - file: development/index
+    sections:
+    - file: development/overview
+    - file: development/compilation/index
+    - file: development/errorhandling
+    - file: development/metadata
+    - file: development/writing
+    - file: development/plugins
+    - file: development/writing-filter
+    - file: development/writing-kernel
+    - file: development/writing-reader
+    - file: development/writing-writer
+    - file: development/cmake
+  - file: project/index
+    sections:
+    - file: project/conventions
+    - file: project/contributors
+    - file: project/docs
+    - file: project/docker
+    - file: project/alpine
+    - file: project/testing
+    - file: project/integration
+  - file: faq
+  - file: copyright
+  - file: references

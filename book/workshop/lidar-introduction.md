@@ -34,10 +34,10 @@ LiDAR systems, generally speaking, come in one of three types:
   amounts of noise and other operational restrictions, making them
   significantly less common than linear-mode systems.
 
-:::{note}
+```{note}
 Unless otherwise noted, if we talk about a LiDAR scanner in this program,
 we will be referring to a pulse-based (linear) system.
-:::
+```
 
 ## Modes of LiDAR Collection
 
@@ -58,10 +58,10 @@ of an integrated GNSS/IMU (Global Navigation Satellite System/Inertial Motion
 Unit), which provides information about the position, rotation, and motion of
 the scanning platform.
 
-:::{note}
+```{note}
 As stated in the class description, we will focus on mobile and airborne
 laser scanning (MLS/ALS), though we will also use some TLS data.
-:::
+```
 
 (georeferencing-introduction)=
 
@@ -115,7 +115,7 @@ measurements are interpolated to line up with the LiDAR measurements.  Then,
 these positions and attitudes are combined via Equation {eq}`georeferencing` to
 create a final, georeferenced point cloud.
 
-:::{note}
+```{note}
 While lever-arm offsets are usually taken from the schematic drawings of
 the LiDAR mounting system, the boresight matrix cannot be reliably
 determined from drawings alone.  The boresight matrix must therefore be
@@ -123,7 +123,7 @@ determined either via manual or automated boresight calibration using
 actual LiDAR data of planar surfaces, such as the roof and sides of
 buildings.  The process for determining a boresight calibration from LiDAR
 data is beyond the scope of this class.
-:::
+```
 
 ## Discrete-Return vs. Full-Waveform
 
@@ -131,23 +131,23 @@ Pulse-based LiDAR systems use the round-trip travel time of a pulse of laser
 energy to measure distances.  The outgoing pulse of a LiDAR system is roughly
 (but not exactly) a Gaussian:
 
-:::{figure} images/reference-pulse.png
+```{figure} images/reference-pulse.png
 :align: center
 :scale: 30 %
 
 A real-world outgoing LiDAR pulse.
-:::
+```
 
 This pulse can interact with multiple objects in a scene before it is returned to the sensor.
 Here is an example of a LiDAR return:
 
-:::{figure} images/return-pulse.png
+```{figure} images/return-pulse.png
 :align: center
 :scale: 30 %
 
 A real-world incoming LiDAR return.
 Potential discrete-return peaks are marked in red.
-:::
+```
 
 As you can see, this return pulse can be very complicated.  While there is more
 information contained in the "full waveform" picture displayed above, many
@@ -158,10 +158,10 @@ Full waveform data is used only in specialized circumstances.  If you have or
 receive LiDAR data, it will usually be discrete return (point clouds).
 Processing full waveform data is beyond the scope of this class.
 
-:::{note}
+```{note}
 PDAL is a discrete-return point cloud processing library.
 It does not have any functionality to analyze or process full waveform data.
-:::
+```
 
 ```{eval-rst}
 .. bibliography:: bibliography.bib

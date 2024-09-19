@@ -1,4 +1,4 @@
-(filters-relaxationdartthrowing)=
+(filters.relaxationdartthrowing)=
 
 # filters.relaxationdartthrowing
 
@@ -8,16 +8,16 @@ identically to {ref}`filters.sample`, except it will continue to shrink the
 radius with each pass through the point cloud until the desired number of
 output points is reached.
 
-:::{seealso}
+```{seealso}
 {ref}`filters.decimation`, {ref}`filters.fps` and {ref}`filters.sample` all
 perform some form of thinning or resampling.
-:::
+```
 
-:::{note}
+```{note}
 The `shuffle` option does not reorder points in the PointView, but
 shuffles the order in which the points are visited while processing, which
 can improve the quality of the result.
-:::
+```
 
 ```{eval-rst}
 .. embed::

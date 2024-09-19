@@ -1,4 +1,4 @@
-(writers-pgpointcloud)=
+(writers.pgpointcloud)=
 
 # writers.pgpointcloud
 

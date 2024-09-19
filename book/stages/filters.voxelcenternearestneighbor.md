@@ -1,4 +1,4 @@
-(filters-voxelcenternearestneighbor)=
+(filters.voxelcenternearestneighbor)=
 
 # filters.voxelcenternearestneighbor
 
@@ -27,13 +27,13 @@ cloud, along with any existing dimensions.
 ]
 ```
 
-:::{seealso}
+```{seealso}
 {ref}`filters.voxelcentroidnearestneighbor` offers a similar solution,
 using as the query point the centroid of all points falling within the voxel as
 opposed to the voxel center coordinates.  The drawback with this approach is that
 all dimensional data is lost, leaving the the sampled cloud consisting of only
 XYZ coordinates.
-:::
+```
 
 ## Options
 

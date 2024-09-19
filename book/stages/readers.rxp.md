@@ -1,17 +1,17 @@
-(readers-rxp)=
+(readers.rxp)=
 
 # readers.rxp
 
 The **RXP reader** read from files in the RXP format, the in-house streaming format used by [RIEGL Laser Measurement Systems GmbH].
 
-:::{warning}
+```{warning}
 This software has not been developed by RIEGL, and RIEGL will not provide
 any support for this driver.  Please do not contact RIEGL with any
 questions or issues regarding this driver.  RIEGL is not responsible
 for damages or other issues that arise from use of this driver.
 This driver has been tested against RiVLib version 1.39 on a Ubuntu
 14.04 using gcc43.
-:::
+```
 
 ```{eval-rst}
 .. plugin::
@@ -65,8 +65,7 @@ filename
 
 : File to read from, or rdtp URI for network-accessible scanner. \[Required\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 rdtp

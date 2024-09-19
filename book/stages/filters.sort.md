@@ -1,4 +1,4 @@
-(filters-sort)=
+(filters.sort)=
 
 # filters.sort
 
@@ -23,10 +23,10 @@ sorting can be done in increasing (ascending) or decreasing (descending) order.
 ]
 ```
 
-:::{note}
+```{note}
 See {ref}`filters.label_duplicates` for an example of using {ref}`filters.sort` to
 sort multiple dimensions at once.
-:::
+```
 
 ## Options
 

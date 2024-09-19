@@ -1,4 +1,4 @@
-(readers-qfit)=
+(readers.qfit)=
 
 # readers.qfit
 
@@ -33,8 +33,7 @@ filename
 
 : File to read from \[Required\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 flip_coordinates

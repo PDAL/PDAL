@@ -1,4 +1,4 @@
-(readers-memoryview)=
+(readers.memoryview)=
 
 # readers.memoryview
 

@@ -47,11 +47,11 @@ Given the following pipeline for fetching the data, complete the rest of the tas
 
 - Read data from an EPT resource using {ref}`readers.ept` (See {ref}`workshop-entwine`)
 
-:::{note}
+```{note}
 The particular data we are pulling has some high classification values due to how it was processed.
 These aren't useful to us, and we can use {ref}`filters.expression` in the pipeline to only write
 points with a classification value under 20.
-:::
+```
 
 - Thin it to 1.0 meter spacing using {ref}`filters.sample` (See {ref}`workshop-thinning`)
 - Filter out noise using {ref}`filters.outlier` (See {ref}`workshop-denoising`)
@@ -60,7 +60,7 @@ points with a classification value under 20.
 - Generate a digital terrain model (DTM) using {ref}`writers.gdal` (See {ref}`workshop-dtm`)
 - Find the average vegetative height model using {ref}`writers.gdal`
 
-:::{note}
+```{note}
 You should review specific exercises for specifics on how to
 achieve each task.
-:::
+```

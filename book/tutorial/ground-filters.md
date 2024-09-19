@@ -26,9 +26,9 @@ the context of a ground segmentation workflow. Specifically, we will discuss:
 - Considering only last returns during ground segmentation
 - Extracting ground returns as a post-processing step
 
-:::{note}
+```{note}
 The pipeline discussed in this tutorial requires [PDAL v1.5](https://github.com/PDAL/PDAL/releases/tag/1.5.0).
-:::
+```
 
 ## The Pipeline
 
@@ -40,14 +40,14 @@ contents.
 :linenos: true
 ```
 
-:::{note}
+```{note}
 For users familiar with PDAL pipelines, this example may seem to be missing
 a couple of very important stages, namely the reader and writer! A new
 feature of PDAL is the ability to provide a PDAL pipeline with no reader or
 writer stages to the {ref}`translate_command` command. The input and output
 filenames can be specified on the command line and will be automatically
 inserted into the pipeline by the application.
-:::
+```
 
 ## The Explanation
 
@@ -88,11 +88,11 @@ dimension for every point.
 :lines: 7-10
 ```
 
-:::{note}
+```{note}
 Previously, you could do the same thing (with a slightly different syntax)
 using `filters.attribute`, but this filter has been deprecated and split
 into {ref}`filters.assign` and {ref}`filters.overlay`.
-:::
+```
 
 ### Extended Local Minimum
 
@@ -156,7 +156,7 @@ available. Again, returns that are not "last returns" are still retained in the
 output dataset - they are simply ignored for the purposes of ground
 segmentation.
 
-:::{note}
+```{note}
 Many lidar systems provide return information. This includes the number of
 returns per pulse and the order of a particular return within the pulse.
 Where the return number and number of returns are equal, we call this a last
@@ -179,9 +179,9 @@ setting `last=false`.
 For an example of how to filter on last returns outside the context of SMRF
 and PMF, see [this](https://github.com/PDAL/PDAL/blob/master/test/data/pipeline/predicate-keep-last-return.json.in)
 within PDAL's source tree.
-:::
+```
 
-:::{note}
+```{note}
 SMRF is not intended to be a replacement for the {ref}`Progressive
 Morphological Filter (PMF) <filters.pmf>` [^cite_zhang2003]. Rather, it is
 offered as an alternative. PMF has been a part of PDAL since v1.0, first as
@@ -189,7 +189,7 @@ part of the PCL plugin and now as `filters.pmf`. Since PDAL v1.4, we have
 fixed a number of bugs, and have accelerated the approximate mode by
 implementing iterative morphological operations and using a diamond
 structuring element.
-:::
+```
 
 ### Extracting Ground Returns
 
@@ -209,14 +209,14 @@ identifies the dimension(s) on which to filter and the {ref}`range <ranges>` of
 values to passthrough. In this case, we are indicating that the filter should
 only pass points whose `Classification` value is equal to 2.
 
-:::{note}
+```{note}
 The default behavior of both {ref}`PMF <filters.pmf>` and {ref}`SMRF
 <filters.smrf>` is to classify points, which has not changed from previous
 versions of PDAL. The `extract` and `classify` options have been removed
 in PDAL v1.5. These filters now **only** classify points, such that ground
 points can be identified and filtered downstream, as we have shown with the
 range filter above.
-:::
+```
 
 ## Running the Pipeline
 

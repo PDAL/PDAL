@@ -1,4 +1,4 @@
-(filters-zsmooth)=
+(filters.zsmooth)=
 
 # filters.zsmooth
 

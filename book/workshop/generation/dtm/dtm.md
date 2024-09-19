@@ -16,12 +16,12 @@ point cloud data.
 
 ## Exercise
 
-:::{note}
+```{note}
 The primary input for [Digital Terrain Model] generation is a point cloud
 with ground classifications. We created this file, called
 `denoised-ground-only.laz`, in the {ref}`workshop-ground` exercise. Please produce that
 file by following that exercise before starting this one.
-:::
+```
 
 ### Command
 
@@ -35,11 +35,11 @@ There is no {ref}`application <apps>` to drive this stage, and we must use a pip
     :literal:
 ```
 
-:::{note}
+```{note}
 This pipeline is available in your workshop materials in the
 `./exercises/analysis/dtm/gdal.json` file. Make sure to edit the
 filenames to match your paths.
-:::
+```
 
 #### 1. Reader
 

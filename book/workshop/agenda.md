@@ -23,10 +23,10 @@ internet connectivity:
 :width: 400
 ```
 
-:::{note}
+```{note}
 A drive image is available for download at
 <https://pdal.s3.amazonaws.com/workshop/PDAL-Workshop-complete.zip>.
-:::
+```
 
 Included in the USB driver are:
 

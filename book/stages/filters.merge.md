@@ -1,4 +1,4 @@
-(filters-merge)=
+(filters.merge)=
 
 # filters.merge
 

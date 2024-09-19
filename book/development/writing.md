@@ -12,12 +12,12 @@ This tutorial will describe a complete example of using PDAL C++ objects
 to write a LAS file. The example will show fetching data from your own
 data source rather than interacting with a PDAL stage.
 
-:::{note}
+```{note}
 If you implement your own {ref}`readers` that conforms to
 PDAL's {cpp:class}`pdal::Stage`, you can implement a simple
 read-filter-write pipeline using {ref}`pipeline` and not have to
 code anything explicit yourself.
-:::
+```
 
 ## Includes
 
@@ -64,9 +64,9 @@ and sends it to a writer.
 
 ## Compiling and running the program
 
-:::{note}
+```{note}
 Refer to {ref}`building` for information on how to build PDAL.
-:::
+```
 
 To build this example, simply copy the files tutorial.cpp and CMakeLists.txt
 from the examples/writing directory of the PDAL source tree.
@@ -75,9 +75,9 @@ from the examples/writing directory of the PDAL source tree.
 :language: cmake
 ```
 
-:::{note}
+```{note}
 Refer to {ref}`using` for an explanation of the basic CMakeLists.
-:::
+```
 
 Begin by configuring your project using CMake (shown here on Unix) and building
 using make.

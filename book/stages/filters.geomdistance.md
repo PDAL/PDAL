@@ -1,4 +1,4 @@
-(filters-geomdistance)=
+(filters.geomdistance)=
 
 # filters.geomdistance
 
@@ -33,21 +33,21 @@ This example computes the 2D distance of points to the given geometry.
 ]
 ```
 
-:::{figure} ../images/filters.geomdistance-normal-mode.png
+```{figure} ../images/filters.geomdistance-normal-mode.png
 :alt: Normal mode distance of Autzen to selection
 :scale: 75%
 
 Normal distance mode causes any points *within* the given polygon to have a distance of 0.
-:::
+```
 
-:::{figure} ../images/filters.geomdistance-ring-mode.png
+```{figure} ../images/filters.geomdistance-ring-mode.png
 :alt: Ring mode distance of Autzen to selection
 :scale: 75%
 
 `ring` of `True` causes the polygon external ring to be used
 for distance computation, resulting in distances **inside** the
 polygon to be computed.
-:::
+```
 
 ## Options
 

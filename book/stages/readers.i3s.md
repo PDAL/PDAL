@@ -1,4 +1,4 @@
-(readers-i3s)=
+(readers.i3s)=
 
 # readers.i3s
 
@@ -55,8 +55,7 @@ pdal translate i3s://https://tiles.arcgis.com/tiles/8cv2FuXuWSfF0nbL/arcgis/rest
 
 ## Options
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 filename

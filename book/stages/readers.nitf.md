@@ -1,4 +1,4 @@
-(readers-nitf)=
+(readers.nitf)=
 
 # readers.nitf
 
@@ -15,16 +15,16 @@ reading that data, if the NITF file supports it.
 The dimensions produced by the reader match exactly to the LAS dimension names
 and types for convenience in file format transformation.
 
-:::{note}
+```{note}
 Only LAS or LAZ data may be stored in the LIDARA segment. PDAL uses
 the {ref}`readers.las` and {ref}`writers.las`
 to actually read and write the data.
-:::
+```
 
-:::{note}
+```{note}
 PDAL uses a fork of the [NITF Nitro] library available at
 <https://github.com/hobu/nitro> for NITF read and write support.
-:::
+```
 
 ```{eval-rst}
 .. embed::
@@ -56,8 +56,7 @@ filename
 
 : Filename to read from \[Required\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 extra_dims
@@ -67,11 +66,11 @@ extra_dims
   `<dimension_name>=<type>[, ...]`.  Any PDAL {ref}`type <types>` can
   be specified.
 
-  :::{note}
+  ```{note}
   The presence of an extra bytes VLR when reading a version
   1.4 file or a version 1.0 - 1.3 file with **use_eb_vlr** set
   causes this option to be ignored.
-  :::
+  ```
 
 use_eb_vlr
 

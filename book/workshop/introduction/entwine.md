@@ -2,9 +2,8 @@
 
 # Entwine
 
-```{eval-rst}
-.. include:: ../includes/substitutions.rst
-```
+<!-- ```{include} ../includes/substitutions.md
+``` -->
 
 ## Exercise
 
@@ -37,12 +36,12 @@ of tasks. This pipeline will collect the sample data set and convert it to a {re
    > ```{literalinclude} ./entwine.json
    > ```
    >
-   > :::{note}
+   > ```{note}
    > If you use the [Developer Console] when visiting
    > <http://speck.ly> or <http://potree.entwine.io>, you can see the
    > browser making requests against the EPT resource at
    > <http://na-c.entwine.io/dublin/ept.json>
-   > :::
+   > ```
 
 2. Issue the following command in your `Conda Shell`.
 
@@ -110,11 +109,11 @@ of tasks. This pipeline will collect the sample data set and convert it to a {re
    > :target: ../../_images/entwine-view.png
    > ```
 
-:::{note}
+```{note}
 QGIS also supports uploading Entwine data directly from the cloud. Under 'Layer -> Add Layer -> Add
 Point Cloud Layer', select the source type as "Protocol: HTTP(S), cloud, etc." and insert the URL of
 an EPT index.
-:::
+```
 
 ## Notes
 

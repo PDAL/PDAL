@@ -1,4 +1,4 @@
-(writers-bpf)=
+(writers.bpf)=
 
 # writers.bpf
 
@@ -96,11 +96,11 @@ offset_x, offset_y, offset_z
 
   Note: written value = (nominal value - offset) / scale.
 
-  :::{note}
+  ```{note}
   Because BPF data is always stored in UTM, the XYZ offsets are set to
   "auto" by default. This is to avoid truncation of the decimal digits
   (which may occur with offsets left at 0).
-  :::
+  ```
 
 output_dims
 

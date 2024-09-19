@@ -1,4 +1,4 @@
-(writers-pcd)=
+(writers.pcd)=
 
 # writers.pcd
 
@@ -16,20 +16,20 @@ formatted data.
 .. streamable::
 ```
 
-:::{note}
+```{note}
 X, Y, and Z dimensions will be written as single-precision floats by
 default to be compatible with most of the existing PCL point types. These
 dimensions can be forced to double-precision using the `order` option, but
 the PCL code reading this data must be capable of reading double-precision
 fields (i.e., it is not the responsibility of PDAL to ensure this
 compatibility).
-:::
+```
 
-:::{note}
+```{note}
 When working with large coordinate values it is recommended that users
 first translate the coordinate values using {ref}`filters.transformation`
 to avoid loss of precision when writing single-precision XYZ data.
-:::
+```
 
 ## Example
 

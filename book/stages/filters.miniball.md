@@ -1,4 +1,4 @@
-(filters-miniball)=
+(filters.miniball)=
 
 # filters.miniball
 
@@ -17,10 +17,10 @@ but demonstrates poor outlier detection for points close to a smooth surface.
 The filter creates a single new dimension, `Miniball`, that records the
 Miniball criterion for the current point.
 
-:::{note}
+```{note}
 To inspect the newly created, non-standard dimensions, be sure to write to an
 output format that can support arbitrary dimensions, such as BPF.
-:::
+```
 
 ```{eval-rst}
 .. embed::

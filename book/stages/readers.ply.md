@@ -1,4 +1,4 @@
-(readers-ply)=
+(readers.ply)=
 
 # readers.ply
 
@@ -35,8 +35,7 @@ filename
 
 : ply file to read \[Required\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 [polygon file format]: http://paulbourke.net/dataformats/ply/

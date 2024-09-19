@@ -1,4 +1,4 @@
-(filters-range)=
+(filters.range)=
 
 # filters.range
 
@@ -15,12 +15,12 @@ based on a set of criteria on the given dimensions.
 
 ```
 
-:::{note}
+```{note}
 We suggest you start using {ref}`filters.expression` for PDAL 2.5.x+.
 The syntax is simpler, and it is the same syntax that is used by
 the `where` option of many stages. `filters.range` will
 be deprecated starting PDAL 3.0.
-:::
+```
 
 ## Example
 

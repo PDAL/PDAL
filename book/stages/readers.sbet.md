@@ -1,4 +1,4 @@
-(readers-sbet)=
+(readers.sbet)=
 
 # readers.sbet
 
@@ -29,8 +29,7 @@ filename
 
 : File to read from \[Required\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 angles_as_degrees

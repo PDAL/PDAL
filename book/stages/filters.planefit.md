@@ -1,4 +1,4 @@
-(filters-planefit)=
+(filters.planefit)=
 
 # filters.planefit
 
@@ -19,10 +19,10 @@ produces poor results around small features and creases.
 The filter creates a single new dimension, `PlaneFit`, that records the
 Plane Fit criterion for the current point.
 
-:::{note}
+```{note}
 To inspect the newly created, non-standard dimensions, be sure to write to an
 output format that can support arbitrary dimensions, such as BPF.
-:::
+```
 
 ```{eval-rst}
 .. embed::

@@ -22,11 +22,11 @@ Python dependencies should be installed from [PyPI] with `pip` or
 (sudo) pip install sphinx sphinxconfig-bibtex breathe
 ```
 
-:::{note}
+```{note}
 If you are installing these packages to a system-wide directory, you may need
 the **sudo** in front of the **pip**, though it might be better that instead
 you use [virtual environments] instead of installing the packages system-wide.
-:::
+```
 
 ### Doxygen
 
@@ -60,11 +60,11 @@ The html docs will be placed in {file}`doc/build/html/`.  The `make doxygen`
 is necessary to re-generate the API documentation from the source code using
 [Breathe] and [Sphinx].
 
-:::{note}
+```{note}
 For a full build of the {ref}`cppapi` documentation, you need to
 `make doxygen` to have it build its XML output which is consumed
 by [Breathe] before `make html` can be issued.
-:::
+```
 
 ## Website
 

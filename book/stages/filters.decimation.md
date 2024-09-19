@@ -1,4 +1,4 @@
-(filters-decimation)=
+(filters.decimation)=
 
 # filters.decimation
 

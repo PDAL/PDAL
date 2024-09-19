@@ -1,4 +1,4 @@
-(filters-iqr)=
+(filters.iqr)=
 
 # filters.iqr
 
@@ -10,12 +10,12 @@ are determined by adding 1.5 times the IQR to the third quartile or subtracting
 1.5 times the IQR from the first quartile. The multiplier, which defaults to
 1.5, can be adjusted by the user.
 
-:::{note}
+```{note}
 This method can remove real data, especially ridges and valleys in rugged
 terrain, or tall features such as towers and rooftops in flat terrain. While
 the number of deviations can be adjusted to account for such content-specific
 considerations, it must be used with care.
-:::
+```
 
 ```{eval-rst}
 .. embed::

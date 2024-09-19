@@ -1,4 +1,4 @@
-(filters-neighborclassifier)=
+(filters.neighborclassifier)=
 
 # filters.neighborclassifier
 

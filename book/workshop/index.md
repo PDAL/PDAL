@@ -8,9 +8,8 @@ Date: 06/01/2023
 
 # Point Cloud Processing and Analysis with PDAL
 
-```{eval-rst}
-.. include:: ./includes/substitutions.rst
-```
+<!-- ```{include} ./includes/substitutions.md
+``` -->
 
 ```{toctree}
 :maxdepth: 3

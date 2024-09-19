@@ -11,9 +11,9 @@
 
 This exercise uses PDAL to apply to clip data with polygon geometries.
 
-:::{note}
+```{note}
 This exercise is an adaption of the {ref}`PDAL tutorial <clipping>`.
-:::
+```
 
 ## Exercise
 
@@ -51,7 +51,7 @@ capability to reproject the data for us on-the-fly:
 </OGRVRTDataSource>
 ```
 
-:::{note}
+```{note}
 This VRT file is available in your workshop materials in the
 `./exercises/analysis/clipping/attributes.vrt` file. You will need to
 open this file, go to line 4 and replace `./` with
@@ -61,7 +61,7 @@ A GDAL or OGR VRT
 is a kind of "virtual" data source definition type that combines a
 definition of data and a processing operation into a single, readable data
 stream.
-:::
+```
 
 ### Overlaying Attributes
 
@@ -81,12 +81,12 @@ To add our `attributes.vrt` file, perform the following:
 :target: ../../../_images/clipping-view-polygons.png
 ```
 
-:::{note}
+```{note}
 Notice the numbers on the buildings and trees. These are the classifations given in
 the LIDAR Point Classes or [LAS Specification]. You can sort and single out these in JSON filters.
 ex. `"expression": "Classification >= 3 && Classification <= 4"` which only shows classes 3 to 4 which
 are medium and high vegetation.
-:::
+```
 
 ```{eval-rst}
 .. list-table:: ASPRS Standard LiDAR Point Classes (Point Data Record Format 0-5)
@@ -125,12 +125,12 @@ are medium and high vegetation.
       - *Reserved for ASPRS Definition*
 ```
 
-:::{note}
+```{note}
 The GeoJSON file does not have an externally-defined coordinate system,
 so we are explicitly setting one with the LayerSRS parameter. If your
 data does have coordinate system information, you don't need to do that.
 See the [OGR VRT documentation] for more details.
-:::
+```
 
 ### Pipeline breakdown
 
@@ -139,12 +139,12 @@ See the [OGR VRT documentation] for more details.
     :code: json
 ```
 
-:::{note}
+```{note}
 This pipeline is available in your workshop materials in the
 `./exercises/analysis/clipping/clipping.json` file. Remember
 to replace each of the three occurrences of `./`
 in this file with the correct location for your machine.
-:::
+```
 
 #### 1. Reader
 

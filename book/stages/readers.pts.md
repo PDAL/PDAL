@@ -1,4 +1,4 @@
-(readers-pts)=
+(readers.pts)=
 
 # readers.pts
 
@@ -31,6 +31,5 @@ filename
 
 : File to read. \[Required\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```

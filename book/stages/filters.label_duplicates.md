@@ -1,4 +1,4 @@
-(filters-label-duplicates)=
+(filters.label_duplicates)=
 
 # filters.label_duplicates
 
@@ -10,13 +10,13 @@ for the points are equal.
 .. embed::
 ```
 
-:::{warning}
+```{warning}
 The filter **requires** the data to be sorted **before** the labeling can
 work. It simply checks the dimensions and points in order, and if each
 dimension is equal from one point to the next, it is labeled a duplicate.
 The `STABLE` algorithm **must** be set or it will fail to properly label
 duplicates.
-:::
+```
 
 ## Example
 

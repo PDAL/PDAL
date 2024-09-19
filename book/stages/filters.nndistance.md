@@ -1,4 +1,4 @@
-(filters-nndistance)=
+(filters.nndistance)=
 
 # filters.nndistance
 

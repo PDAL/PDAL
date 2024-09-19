@@ -14,21 +14,21 @@ PDAL filters commonly create new dimensions (e.g., `HeightAboveGround`) or
 alter existing ones (e.g., `Classification`). These filters will not
 invalidate an existing KD-tree.
 
-:::{note}
+```{note}
 We treat those filters that alter XYZ coordinates separately.
-:::
+```
 
-:::{note}
+```{note}
 When creating new dimensions, be mindful of the writer you are using and
 whether or not the custom dimension can be written to disk if that is the
 desired behavior.
-:::
+```
 
 ### Classification
 
 #### Ground/Unclassified
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
@@ -39,7 +39,7 @@ filters.skewnessbalancing
 filters.smrf
 filters.sparsesurface
 filters.trajectory
-```
+``` -->
 
 {ref}`filters.csf`
 
@@ -68,14 +68,14 @@ filters.trajectory
 
 #### Noise
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
 
 filters.elm
 filters.outlier
-```
+``` -->
 
 {ref}`filters.elm`
 
@@ -87,13 +87,13 @@ filters.outlier
 
 #### Consensus
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
 
 filters.neighborclassifier
-```
+``` -->
 
 {ref}`filters.neighborclassifier`
 
@@ -101,7 +101,7 @@ filters.neighborclassifier
 
 ### Height Above Ground
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
@@ -109,7 +109,7 @@ filters.neighborclassifier
 filters.hag_delaunay
 filters.hag_dem
 filters.hag_nn
-```
+``` -->
 
 {ref}`filters.hag_delaunay`
 
@@ -127,14 +127,14 @@ filters.hag_nn
 
 ### Colorization
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
 
 filters.colorinterp
 filters.colorization
-```
+``` -->
 
 {ref}`filters.colorinterp`
 
@@ -146,7 +146,7 @@ filters.colorization
 
 ### Clustering
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
@@ -155,7 +155,7 @@ filters.cluster
 filters.dbscan
 filters.litree
 filters.lloydkmeans
-```
+``` -->
 
 {ref}`filters.cluster`
 
@@ -182,7 +182,7 @@ filters.lloydkmeans
 
 ### Pointwise Features
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
@@ -202,7 +202,7 @@ filters.radialdensity
 filters.reciprocity
 filters.zsmooth
 filters.griddecimation
-```
+``` -->
 
 {ref}`filters.approximatecoplanar`
 
@@ -272,7 +272,7 @@ filters.griddecimation
 : Assign values for one point (the highest or lowest) per cell of a 2d regular grid.
 
 ### Assignment
-
+<!-- 
 ```{toctree}
 :glob: true
 :hidden: true
@@ -280,7 +280,7 @@ filters.griddecimation
 
 filters.assign
 filters.overlay
-```
+``` -->
 
 {ref}`filters.assign`
 
@@ -293,13 +293,13 @@ filters.overlay
 
 ### Dimension Create/Copy
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
 
 filters.ferry
-```
+``` -->
 
 {ref}`filters.ferry`
 
@@ -310,7 +310,7 @@ filters.ferry
 There are currently three PDAL filters that can be used to reorder points. These
 filters will invalidate an existing KD-tree.
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
@@ -318,7 +318,7 @@ filters will invalidate an existing KD-tree.
 filters.mortonorder
 filters.randomize
 filters.sort
-```
+``` -->
 
 {ref}`filters.mortonorder`
 
@@ -338,7 +338,7 @@ PDAL filters that move XYZ coordinates will invalidate an existing KD-tree.
 
 ### Registration
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
@@ -346,7 +346,7 @@ PDAL filters that move XYZ coordinates will invalidate an existing KD-tree.
 filters.cpd
 filters.icp
 filters.teaser
-```
+``` -->
 
 {ref}`filters.cpd`
 
@@ -364,7 +364,7 @@ filters.teaser
 
 ### Predefined
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
@@ -375,7 +375,7 @@ filters.transformation
 filters.straighten
 filters.georeference
 filters.h3
-```
+``` -->
 
 {ref}`filters.projpipeline`
 
@@ -409,14 +409,14 @@ the input. These filters will invalidate an existing KD-tree.
 
 ### Spatial
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
 
 filters.crop
 filters.geomdistance
-```
+``` -->
 
 {ref}`filters.crop`
 
@@ -428,7 +428,7 @@ filters.geomdistance
 
 ### Resampling
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
@@ -437,7 +437,7 @@ filters.decimation
 filters.fps
 filters.relaxationdartthrowing
 filters.sample
-```
+``` -->
 
 {ref}`filters.decimation`
 
@@ -461,7 +461,7 @@ filters.sample
 
 ### Conditional
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
@@ -469,7 +469,7 @@ filters.sample
 filters.dem
 filters.iqr
 filters.mad
-```
+``` -->
 
 {ref}`filters.dem`
 
@@ -488,7 +488,7 @@ filters.mad
 
 ### Voxel
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
@@ -496,7 +496,7 @@ filters.mad
 filters.voxelcenternearestneighbor
 filters.voxelcentroidnearestneighbor
 filters.voxeldownsize
-```
+``` -->
 
 {ref}`filters.voxelcenternearestneighbor`
 
@@ -513,7 +513,7 @@ filters.voxeldownsize
 
 ### Position
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
@@ -524,7 +524,7 @@ filters.locate
 filters.mongo
 filters.range
 filters.tail
-```
+``` -->
 
 {ref}`filters.expression`
 
@@ -557,7 +557,7 @@ filters will invalidate an existing KD-tree.
 
 ### Spatial
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
@@ -565,7 +565,7 @@ filters will invalidate an existing KD-tree.
 filters.chipper
 filters.divider
 filters.splitter
-```
+``` -->
 
 {ref}`filters.chipper`
 
@@ -583,7 +583,7 @@ filters.splitter
 
 ### Dimension
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
@@ -592,7 +592,7 @@ filters.gpstimeconvert
 filters.groupby
 filters.returns
 filters.separatescanline
-```
+``` -->
 
 {ref}`filters.gpstimeconvert`
 
@@ -615,13 +615,13 @@ filters.separatescanline
 Multiple point clouds can be joined to form a single point cloud. These filters
 will invalidate an existing KD-tree.
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
 
 filters.merge
-```
+``` -->
 
 {ref}`filters.merge`
 
@@ -632,12 +632,12 @@ filters.merge
 PDAL filters can be used to create new metadata. These filters will not
 invalidate an existing KD-tree.
 
-:::{note}
+```{note}
 {ref}`filters.cpd` and {ref}`filters.icp` can optionally create metadata as
 well, inserting the computed transformation matrix.
-:::
+```
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
@@ -646,7 +646,7 @@ filters.hexbin
 filters.info
 filters.stats
 filters.expressionstats
-```
+``` -->
 
 {ref}`filters.hexbin`
 
@@ -670,7 +670,7 @@ filters.expressionstats
 Meshes can be computed from point clouds. These filters will invalidate an
 existing KD-tree.
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
@@ -679,7 +679,7 @@ filters.delaunay
 filters.greedyprojection
 filters.poisson
 filters.faceraster
-```
+``` -->
 
 {ref}`filters.delaunay`
 
@@ -703,7 +703,7 @@ filters.faceraster
 PDAL has three filters than can be used to pass point clouds to other
 languages. These filters will invalidate an existing KD-tree.
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
@@ -711,7 +711,7 @@ languages. These filters will invalidate an existing KD-tree.
 filters.matlab
 filters.python
 filters.julia
-```
+``` -->
 
 {ref}`filters.matlab`
 
@@ -727,13 +727,13 @@ filters.julia
 
 ## Other
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
 
 filters.streamcallback
-```
+``` -->
 
 {ref}`filters.streamcallback`
 

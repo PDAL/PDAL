@@ -1,4 +1,4 @@
-(readers-buffer)=
+(readers.buffer)=
 
 # readers.buffer
 
@@ -18,6 +18,5 @@ See {ref}`writing` for an example usage scenario for {ref}`readers.buffer`.
 
 ## Options
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```

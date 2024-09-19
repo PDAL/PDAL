@@ -1,4 +1,4 @@
-(filters-splitter)=
+(filters.splitter)=
 
 # filters.splitter
 

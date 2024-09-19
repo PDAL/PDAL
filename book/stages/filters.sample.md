@@ -1,4 +1,4 @@
-(filters-sample)=
+(filters.sample)=
 
 # filters.sample
 
@@ -17,38 +17,38 @@ neighboring voxels (limiting the search to those that are populated) without
 the need to create a KD-tree from the entire input `PointView` first and
 performing costly spatial searches.
 
-:::{seealso}
+```{seealso}
 {ref}`filters.decimation`, {ref}`filters.fps`,
 {ref}`filters.relaxationdartthrowing`,
 {ref}`filters.voxelcenternearestneighbor`,
 {ref}`filters.voxelcentroidnearestneighbor`, and {ref}`filters.voxeldownsize` also
 perform decimation.
-:::
+```
 
-:::{note}
+```{note}
 Starting with PDAL v2.3, the `filters.sample` now supports streaming
 mode. As a result, there is no longer an option to `shuffle` points (or
 to provide a `seed` for the shuffle).
-:::
+```
 
-:::{note}
+```{note}
 Starting with PDAL v2.3, a `cell` option has been added that works with
 the existing `radius`. The user must provide one or the other, but not
 both. The provided option will be used to automatically compute the other.
 The relationship between `cell` and `radius` is such that the
 `radius` defines the radius of a sphere that circumscribes a voxel with
 edge length defined by `cell`.
-:::
+```
 
-:::{note}
+```{note}
 Care must be taken with selection of the `cell`/`radius` option.
 Although the filter can now operate in streaming mode, if the extents of
 the point cloud are large (or conversely, if the cell size is small) the
 voxel occupancy map which grows as a function of these variables can still
 require a large memory footprint.
-:::
+```
 
-:::{note}
+```{note}
 To operate in streaming mode, the filter will typically retain the first
 point to occupy a voxel (subject to the minimum distance criterion set
 forth earlier). This means that point ordering matters, and in fact, it is
@@ -59,7 +59,7 @@ order (ordered by GpsTime, if available) does produce reliable results,
 although to require this sort either internally or by inserting
 {ref}`filters.sort` prior to sampling would break our ability to stream the
 data.
-:::
+```
 
 ```{eval-rst}
 .. embed::

@@ -76,11 +76,11 @@ $ pdal info ./exercises/info/interesting.las --query "637301.20, 851217.57, 496.
     ...
 ```
 
-:::{note}
+```{note}
 The `/3` portion of our query string tells the `query`
 command to give us the 3 nearest points. Adjust this value to
 return data in closest-distance ordering.
-:::
+```
 
 ## Notes
 

@@ -1,4 +1,4 @@
-(filters-chipper)=
+(filters.chipper)=
 
 # filters.chipper
 
@@ -7,29 +7,29 @@ into a set
 of smaller clouds, or chips. The chips are all spatially contiguous and
 non-overlapping, so the result is an irregular tiling of the input data.
 
-:::{note}
+```{note}
 Each chip will have approximately, but not exactly, the [capacity] point
 count specified.
-:::
+```
 
-:::{seealso}
+```{seealso}
 The {ref}`PDAL split command <split_command>` utilizes the
 {ref}`filters.chipper` to split data by capacity.
-:::
+```
 
-:::{figure} filters.chipper.img1.png
+```{figure} filters.chipper.img1.png
 :alt: Points before chipping
 :scale: 100 %
 
 Before chipping, the points are all in one collection.
-:::
+```
 
-:::{figure} filters.chipper.img2.png
+```{figure} filters.chipper.img2.png
 :alt: Points after chipping
 :scale: 100 %
 
 After chipping, the points are tiled into smaller contiguous chips.
-:::
+```
 
 Chipping is usually applied to data read from files (which produce one large
 stream of points) before the points are written to a database (which prefer

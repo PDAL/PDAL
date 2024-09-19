@@ -1,14 +1,14 @@
-(filters-head)=
+(filters.head)=
 
 # filters.head
 
 The **Head filter** returns a specified number of points from the beginning
 of a `PointView`.
 
-:::{note}
+```{note}
 If the requested number of points exceeds the size of the point cloud, all
 points are passed with a warning.
-:::
+```
 
 ```{eval-rst}
 .. embed::
@@ -56,9 +56,9 @@ Compute height above ground and extract the ten highest points.
 ]
 ```
 
-:::{seealso}
+```{seealso}
 {ref}`filters.tail` is the dual to {ref}`filters.head`.
-:::
+```
 
 ## Options
 

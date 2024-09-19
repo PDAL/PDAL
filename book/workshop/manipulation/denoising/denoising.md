@@ -25,10 +25,10 @@ define it:
     :literal:
 ```
 
-:::{note}
+```{note}
 This pipeline is available in your workshop materials in the
 `./exercises/analysis/denoising/denoise.json` file.
-:::
+```
 
 ### Pipeline breakdown
 
@@ -121,10 +121,10 @@ using the stage below:
 1. `forward`: List of header fields to be preserved from LAS input file. In this case, we want `all`
    fields to be preserved.
 
-:::{note}
+```{note}
 {ref}`writers.las` and {ref}`writers.copc` provide a number of possible options to control
 how your LAS files are written.
-:::
+```
 
 ### Execution
 

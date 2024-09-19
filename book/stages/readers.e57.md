@@ -1,4 +1,4 @@
-(readers-e57)=
+(readers.e57)=
 
 # readers.e57
 
@@ -6,23 +6,23 @@ The **E57 Reader** supports reading from E57 files.
 
 The reader supports E57 files with Cartesian point clouds.
 
-:::{note}
+```{note}
 E57 files can contain multiple point clouds stored in a single
 file.  If that is the case, the reader will read all the points
 from all of the internal point clouds as one.
 
 Only dimensions present in all of the point clouds will be read.
-:::
+```
 
-:::{note}
+```{note}
 Point clouds stored in spherical format are not supported.
-:::
+```
 
-:::{note}
+```{note}
 The E57 `cartesianInvalidState` dimension is mapped to the Omit
 PDAL dimension.  A range filter can be used to filter out the
 invalid points.
-:::
+```
 
 ```{eval-rst}
 .. plugin::
@@ -73,6 +73,5 @@ invalid points.
 
 : E57 file to read \[Required\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```

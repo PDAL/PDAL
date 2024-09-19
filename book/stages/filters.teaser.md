@@ -1,4 +1,4 @@
-(filters-teaser)=
+(filters.teaser)=
 
 # filters.teaser
 
@@ -10,10 +10,10 @@ points. The output from the filter are the "moving" points after the calculated
 transformation has been applied, one point view per input. The transformation
 matrix is inserted into the stage's metadata.
 
-:::{seealso}
+```{seealso}
 The plugin wraps the TEASER++ library, which can be found at
 <https://github.com/MIT-SPARK/TEASER-plusplus>.
-:::
+```
 
 ```{eval-rst}
 .. plugin::
@@ -86,13 +86,13 @@ above metadata, the pipeline would be similar to:
 ]
 ```
 
-:::{note}
+```{note}
 The `composed` metadata matrix is a composition of the three transformation steps outlined above, and can be used in a single call to `filters.transformation` as opposed to the three separate calls.
-:::
+```
 
-:::{seealso}
+```{seealso}
 {ref}`filters.transformation` to apply a transform to other points.
-:::
+```
 
 ## Options
 

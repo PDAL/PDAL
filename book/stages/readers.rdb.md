@@ -1,4 +1,4 @@
-(readers-rdb)=
+(readers.rdb)=
 
 # readers.rdb
 
@@ -22,11 +22,11 @@ in a system-level directory, though they could be (e.g. they could be in
 `/usr/local`, or just in your home directory somewhere). For help building
 PDAL with optional libraries, see [the optional library documentation].
 
-:::{note}
+```{note}
 - Minimum rdblib version required to build the driver and run
   the tests: 2.1.6
 - This driver was developed and tested on Ubuntu 17.10 using GCC 7.2.0.
-:::
+```
 
 ## Example
 
@@ -58,8 +58,7 @@ filename
 : Name of file to read
   \[Required\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 filter
@@ -104,13 +103,13 @@ the option `extras` is set to `true`. If so, a custom dimension is defined
 for each additional point attribute, whereas the dimension name is equal to
 the point attribute name.
 
-:::{note}
+```{note}
 Point attributes are read "as-is", no scaling or unit conversion is done
 by the reader. The only exceptions are point coordinates (`riegl.xyz`)
 and surface normals (`riegl.surface_normal`) which are transformed to
 the RDB file's SRS by applying the matrix defined in the (optional) RDB
 file metadata object `riegl.geo_tag`.
-:::
+```
 
 ## Metadata
 

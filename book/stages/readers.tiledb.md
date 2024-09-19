@@ -1,4 +1,4 @@
-(readers-tiledb)=
+(readers.tiledb)=
 
 # readers.tiledb
 
@@ -65,8 +65,7 @@ strict
 
 : Raise an error if the array contains a TileDB attribute not supported by PDAL, the default is set to true to raise an error for unsupported attribute types \[Optional\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 [tiledb]: https://tiledb.io

@@ -2,11 +2,11 @@
 
 # Dependencies
 
-:::{note}
+```{note}
 The absolute best source of build and configuration examples is the
 PDAL GitHub repository. Specifically, the continuous integration
 scripts at <https://github.com/PDAL/PDAL/tree/master/scripts/ci>
-:::
+```
 
 PDAL depends on a number of libraries to do its work.  Make sure
 those dependencies are installed on your system before installing PDAL
@@ -39,7 +39,7 @@ Source: https://github.com/OSGeo/libgeotiff
 Conda: https://anaconda.org/conda-forge/geotiff
 ```
 
-:::{note}
+```{note}
 `GDAL` surreptitiously embeds a copy of [GeoTIFF] in its library build
 but there is no way for you to know this.  In addition to embedding
 libgeotiff, it also strips away the library symbols that PDAL needs,
@@ -49,7 +49,7 @@ using the "External libgeotiff" option, which will prevent the
 insanity that can ensue on some platforms.  [Conda Forge] users, including
 those using that platform to link and build PDAL themselves, do
 not need to worry about this issue.
-:::
+```
 
 ## Plugin Dependencies
 

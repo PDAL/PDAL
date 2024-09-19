@@ -8,11 +8,11 @@ Date: 11/20/2020
 
 # Building Under Windows
 
-:::{note}
+```{note}
 {ref}`conda` contains a pre-built up-to-date 64 bit Windows binary. It
 is fully-featured, and if you do not need anything custom, it is likely
 the fastest way to get going.
-:::
+```
 
 ## Introduction
 
@@ -22,12 +22,12 @@ are also available via that packaging system. This document assumes you
 will be using Conda Forge as your base, and anything more advanced is beyond
 the scope of the document.
 
-:::{note}
+```{note}
 The GitHub Action build system uses the PDAL project's configuration on the Conda Forge
 system. It contains a rich resource of known working examples. See
 <https://github.com/PDAL/PDAL/blob/master/.github/workflows/win.yml> and
 <https://github.com/PDAL/PDAL/tree/master/scripts/ci/win> for inspiration.
-:::
+```
 
 ## Required Compiler
 
@@ -57,11 +57,11 @@ conda install geotiff laszip nitro curl ^
    sqlite hdf5 tiledb conda-build ninja -y
 ```
 
-:::{note}
+```{note}
 The package list here might change over time. The canonnical location
 to learn the  prerequisite list for PDAL is the `scripts/ci/win`
 directory in PDAL's source tree.
-:::
+```
 
 ## Fetching the Source
 
@@ -79,11 +79,11 @@ Switch to the `-maintenance` branch.
 > c:\dev> git checkout 1.9-maintenance
 > ```
 >
-> :::{note}
+> ```{note}
 > PDAL's active development branch is `master`, and you are welcome to
 > build it, but is not as stable as the major-versioned release
 > branches are likely to be.
-> :::
+> ```
 
 ## Configuration
 
@@ -99,9 +99,9 @@ cmake -G "NMake Makefiles" .
 A fully-featured build will require more specification of libraries, enabled
 features, and their locations. For more information on this, users can refer to the `examples.sh` step in the Action.
 
-:::{note}
+```{note}
 Placing your command in a `.bat` file will make for easy reuse.
-:::
+```
 
 ## Building
 
@@ -123,10 +123,10 @@ After you've built the tree, you can run `pdal.exe` by issuing it
 c:\dev\pdal\bin\pdal.exe
 ```
 
-:::{note}
+```{note}
 You may need to have your Conda environment active to enable access to
 PDAL's dependencies.
-:::
+```
 
 [cmake]: http://www.cmake.org
 [github actions]: https://github.com/PDAL/PDAL/actions

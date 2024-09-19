@@ -1,4 +1,4 @@
-(filters-outlier)=
+(filters.outlier)=
 
 # filters.outlier
 
@@ -53,18 +53,18 @@ outlier_i = \begin{cases}
 \end{cases}
 $$
 
-:::{figure} filters.statisticaloutlier.img1.png
+```{figure} filters.statisticaloutlier.img1.png
 :alt: Points before outlier removal
 :scale: 70 %
-:::
+```
 
 Before outlier removal, noise points can be found both above and below the
 scene.
 
-:::{figure} filters.statisticaloutlier.img2.png
+```{figure} filters.statisticaloutlier.img2.png
 :alt: Points after outlier removal
 :scale: 60 %
-:::
+```
 
 After outlier removal, the noise points are removed.
 

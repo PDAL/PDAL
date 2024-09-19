@@ -1,4 +1,4 @@
-(filters-eigenvalues)=
+(filters.eigenvalues)=
 
 # filters.eigenvalues
 

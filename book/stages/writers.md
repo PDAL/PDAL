@@ -5,12 +5,12 @@
 Writers consume data provided by {ref}`readers`. Some writers can consume any
 dimension type, while others only understand fixed dimension names.
 
-:::{note}
+```{note}
 PDAL predefined dimension names can be found in the dimension registry:
 {ref}`dimensions`
-:::
+```
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
@@ -37,7 +37,7 @@ writers.raster
 writers.sbet
 writers.text
 writers.tiledb
-```
+``` -->
 
 {ref}`writers.arrow`
 

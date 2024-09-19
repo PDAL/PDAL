@@ -14,11 +14,11 @@ point cloud with PDAL's {ref}`writers.gdal`.
 
 ## Exercise
 
-:::{note}
+```{note}
 The exercise fetches its data from a [Entwine] service that organizes the
 point cloud collection for the entire country of Denmark. You can view the
 data online at <http://potree.entwine.io/data/denmark.html>.
-:::
+```
 
 ### Command
 
@@ -31,11 +31,11 @@ stage, and we must use a pipeline.
 ```{literalinclude} ./classification.json
 ```
 
-:::{note}
+```{note}
 This pipeline is available in your workshop materials in the
 `./exercises/analysis/rasterize/classification.json` file. Make sure to
 edit the filenames to match your paths.
-:::
+```
 
 #### 1. Reader
 

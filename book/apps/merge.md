@@ -1,4 +1,4 @@
-(merge-command)=
+(merge_command)=
 
 # merge
 

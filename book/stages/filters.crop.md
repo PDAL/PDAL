@@ -1,4 +1,4 @@
-(filters-crop)=
+(filters.crop)=
 
 # filters.crop
 
@@ -69,14 +69,14 @@ bounds
   `"([xmin, xmax], [ymin, ymax])"`.  This option can be specified more than
   once by placing values in an array.
 
-  :::{note}
+  ```{note}
   3D bounds can be given in the form `([xmin, xmax], [ymin, ymax], [zmin, zmax])`.
-  :::
+  ```
 
-  :::{warning}
+  ```{warning}
   If a 3D bounds is given to the filter, a 3D crop will be attempted, even
   if the Z values are invalid or inconsistent with the data.
-  :::
+  ```
 
 polygon
 

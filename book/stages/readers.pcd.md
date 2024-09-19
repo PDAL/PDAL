@@ -1,4 +1,4 @@
-(readers-pcd)=
+(readers.pcd)=
 
 # readers.pcd
 
@@ -35,8 +35,7 @@ filename
 
 : PCD file to read \[Required\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 [point cloud data (pcd)]: https://pcl-tutorials.readthedocs.io/en/latest/pcd_file_format.html

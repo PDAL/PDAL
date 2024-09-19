@@ -1,4 +1,4 @@
-(filters-poisson)=
+(filters.poisson)=
 
 # filters.poisson
 
@@ -43,18 +43,18 @@ options, please let us know.
 ]
 ```
 
-:::{note}
+```{note}
 The algorithm is slow.  On a reasonable desktop machine, the surface
 reconstruction shown below took about 15 minutes.
-:::
+```
 
-:::{figure} ../images/poisson_points.png
+```{figure} ../images/poisson_points.png
 Point cloud (800,000 points)
-:::
+```
 
-:::{figure} ../images/poisson_edges.png
+```{figure} ../images/poisson_edges.png
 Reconstruction (1.8 million vertices, 3.7 million faces)
-:::
+```
 
 ## Options
 

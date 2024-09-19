@@ -1,4 +1,4 @@
-(readers-terrasolid)=
+(readers.terrasolid)=
 
 # readers.terrasolid
 
@@ -26,8 +26,7 @@ filename
 
 : Input file name \[Required\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 [terrasolid]: https://www.terrasolid.com/home.php

@@ -1,4 +1,4 @@
-(filters-reprojection)=
+(filters.reprojection)=
 
 # filters.reprojection
 
@@ -9,12 +9,12 @@ If you want to preserve the old coordinates for future processing, use a
 {ref}`filters.ferry` to create copies of the original dimensions before
 reprojecting.
 
-:::{note}
+```{note}
 When coordinates are reprojected, it may significantly change the precision
 necessary to represent the values in some output formats.  Make sure
 that you're familiar with any scaling necessary for your output format
 based on the projection you've used.
-:::
+```
 
 ```{eval-rst}
 .. embed::

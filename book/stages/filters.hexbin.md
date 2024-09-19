@@ -1,4 +1,4 @@
-(filters-hexbin)=
+(filters.hexbin)=
 
 # filters.hexbin
 
@@ -7,13 +7,13 @@ point cloud collection is. Files generally provide only rectangular bounds, but
 often the points inside the files only fill up a small percentage of the area
 within the bounds.
 
-:::{figure} filters.hexbin.img1.jpg
+```{figure} filters.hexbin.img1.jpg
 :alt: Hexbin derived from input point buffer
 :scale: 50 %
 
 Hexbin output shows boundary of actual points in point buffer, not
 just rectangular extents.
-:::
+```
 
 The hexbin filter reads a point stream and writes out a metadata record that
 contains a boundary, expressed as a well-known text polygon. The filter counts

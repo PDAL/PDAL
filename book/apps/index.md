@@ -40,6 +40,6 @@ $ pdal translate \
     output.las
 ```
 
-:::{note}
+```{note}
 Driver-specific options can be identified using the `pdal <command> --help` invocation.
-:::
+```

@@ -1,4 +1,4 @@
-(readers-las)=
+(readers.las)=
 
 # readers.las
 
@@ -12,7 +12,7 @@ In order to use compressed LAS (LAZ), your version of PDAL must be built
 with one of the two supported decompressors, [LASzip] or [LAZperf].
 See the {ref}`compression <las_compression>` option below for more information.
 
-:::{note}
+```{note}
 LAS stores X, Y and Z dimensions as scaled integers.  Users converting an
 input LAS file to an output LAS file will frequently want to use the same
 scale factors and offsets in the output file as existed in the input
@@ -20,9 +20,9 @@ file in order to
 maintain the precision of the data.  Use the `forward` option on the
 {ref}`writers.las` to facilitate transfer of header information from
 source to destination LAS/LAZ files.
-:::
+```
 
-:::{note}
+```{note}
 LAS 1.4 files can contain datatypes that are actually arrays rather than
 individual dimensions.  Since PDAL doesn't support these datatypes, it
 must map them into datatypes it supports.  This is done by appending the
@@ -34,13 +34,13 @@ three dimensional arrays and a field of type 21 with the name Bar would
 cause PDAL to create dimensions Bar0, Bar1 and Bar2.  See the information
 on the extra bytes VLR in the [LAS Specification] for more information
 on the extra bytes VLR and array datatypes.
-:::
+```
 
-:::{warning}
+```{warning}
 LAS 1.4 files that use the extra bytes VLR and datatype 0 will be accepted,
 but the data associated with a dimension of datatype 0 will be ignored
 (no PDAL dimension will be created).
-:::
+```
 
 ```{eval-rst}
 .. embed::
@@ -72,8 +72,7 @@ but the data associated with a dimension of datatype 0 will be ignored
 
 : LAS file to read \[Required\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 `` _`start` ``
@@ -88,11 +87,11 @@ but the data associated with a dimension of datatype 0 will be ignored
   `<dimension_name>=<type>[, ...]`.  Any valid PDAL {ref}`type <types>` can be
   specified.
 
-  :::{note}
+  ```{note}
   The presence of an extra bytes VLR when reading a version
   1.4 file or a version 1.0 - 1.3 file with **use_eb_vlr** set
   causes this option to be ignored.
-  :::
+  ```
 
 `` _`use_eb_vlr` ``
 
@@ -100,7 +99,7 @@ but the data associated with a dimension of datatype 0 will be ignored
   were in a 1.4 file. This option has no effect when reading a version 1.4 file.
   \[Default: false\]
 
-(las-compression)=
+(las_compression)=
 
 compression
 

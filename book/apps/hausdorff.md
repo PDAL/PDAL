@@ -1,8 +1,8 @@
-(hausdorff-command)=
+(hausdorff_command)=
 
 # hausdorff
 
-:::{warning}
+````{warning}
 As of PDAL v2.6.0, the `hausdorff` command is marked as DEPRECATED. It will
 be removed from the default install in PDAL v2.7 and removed completely in
 PDAL v2.8.
@@ -77,7 +77,7 @@ arr2 = pipeline2.array[0]
 result = hausdorff_distance(arr1, arr2)
 print("Hausdorff Distance:", result)
 ```
-:::
+````
 
 The `hausdorff` command is used to compute the Hausdorff distance between two
 point clouds. In this context, the Hausdorff distance is the greatest of all
@@ -123,7 +123,7 @@ $ pdal hausdorff source.las candidate.las
 }
 ```
 
-:::{note}
+```{note}
 The `hausdorff` is computed for XYZ coordinates only and as such says
 nothing about differences in other dimensions or metadata.
-:::
+```

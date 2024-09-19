@@ -1,4 +1,4 @@
-(filters-gpstimeconvert)=
+(filters.gpstimeconvert)=
 
 # filters.gpstimeconvert
 
@@ -24,12 +24,12 @@ conversion:
 - When converting to GPS week seconds, the week second wrapping preference
   should be specified with the [wrap] option.
 
-:::{note}
+```{note}
 The filter assumes points are ordered by ascending time, which can be
 accomplished by running {ref}`filters.sort` prior to
 `filters.gpstimeconvert`. Note that GPS week second times that span a new
 GPS week should not be sorted unless they are unwrapped.
-:::
+```
 
 ## Example #1
 

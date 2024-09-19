@@ -1,4 +1,4 @@
-(filters-randomize)=
+(filters.randomize)=
 
 # filters.randomize
 

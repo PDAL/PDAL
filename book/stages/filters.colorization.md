@@ -1,4 +1,4 @@
-(filters-colorization)=
+(filters.colorization)=
 
 # filters.colorization
 
@@ -7,17 +7,17 @@ values read from a raster file. Commonly this is used to add Red/Green/Blue
 values to points from an aerial photograph of an area. However, any band can be
 read from the raster and applied to any dimension name desired.
 
-:::{figure} filters.colorization.img1.jpg
+```{figure} filters.colorization.img1.jpg
 :alt: Points after colorization
 :scale: 50 %
 
 After colorization, points take on the colors provided by the input image
-:::
+```
 
-:::{note}
+```{note}
 [GDAL] is used to read the color information and any GDAL-readable
 supported [format] can be read.
-:::
+```
 
 The bands of the raster to apply to each are selected using the "band" option,
 and the values of the band may be scaled before being written to the dimension.

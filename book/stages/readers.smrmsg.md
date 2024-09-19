@@ -1,4 +1,4 @@
-(readers-smrmsg)=
+(readers.smrmsg)=
 
 # readers.smrmsg
 
@@ -28,6 +28,5 @@ filename
 
 : File to read from \[Required\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```

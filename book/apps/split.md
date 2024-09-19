@@ -1,4 +1,4 @@
-(split-command)=
+(split_command)=
 
 # split
 

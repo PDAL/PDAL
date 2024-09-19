@@ -1,4 +1,4 @@
-(readers-text)=
+(readers.text)=
 
 # readers.text
 
@@ -104,8 +104,7 @@ filename
 
 : text file to read, or “STDIN” to read from standard in \[Required\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 `` _`header` ``

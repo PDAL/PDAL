@@ -1,4 +1,4 @@
-(pdal-test)=
+(pdal_test)=
 
 # Testing
 
@@ -314,7 +314,7 @@ $ bin/<test_name> --help
 Key among these flags are the ability to list tests (`--gtest_list_tests`)
 and to run only select tests (`--gtest_filter`).
 
-:::{note}
+```{note}
 If the PostgreSQL PointCloud plugin was enabled on the CMake command line
 (with `-DBUILD_PLUGIN_PGPOINTCLOUD=ON`) then `ctest` will attempt to run
 the `pgpointcloud` tests. And you will get PostgreSQL connection errors
@@ -324,7 +324,7 @@ This is for example how you can run the `pgpointcloud` tests:
 ```
 $ PGUSER=pdal PGPASSWORD=pdal PGHOST=localhost ctest -R pgpointcloudtest
 ```
-:::
+```
 
 ## Test Data
 

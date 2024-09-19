@@ -1,4 +1,4 @@
-(filters-covariancefeatures)=
+(filters.covariancefeatures)=
 
 # filters.covariancefeatures
 
@@ -26,11 +26,11 @@ Supported features include:
 - SurfaceVariation
 - Verticality
 
-:::{note}
+```{note}
 Density requires both `OptimalKNN` and `OptimalRadius` which can be
 computed by running {ref}`filters.optimalneighborhood` prior to
 `filters.covariancefeatures`.
-:::
+```
 
 ## Example #1
 

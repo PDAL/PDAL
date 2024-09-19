@@ -1,4 +1,4 @@
-(writers-gdal)=
+(writers.gdal)=
 
 # writers.gdal
 
@@ -138,10 +138,10 @@ gdalopts
   format is name=value,name=value,...  The option may be specified
   any number of times.
 
-  :::{note}
+  ```{note}
   The INTERLEAVE GDAL driver option is not supported.  writers.gdal
   always uses BAND interleaving.
-  :::
+  ```
 
 (data-type)=
 
@@ -225,15 +225,15 @@ pdal_metadata:
 .. include:: writer_opts.rst
 ```
 
-:::{note}
+```{note}
 You may use the 'bounds' option, or 'origin_x', 'origin_y', 'width'
 and 'height', but not both.
-:::
+```
 
-:::{note}
+```{note}
 Unless the raster being written is empty, the spatial reference will automatically
 come from the data and does not need to be set with 'override_srs' or 'default_srs'.
-:::
+```
 
 [driver that supports creation of rasters]: http://www.gdal.org/formats_list.html
 [gdal]: http://gdal.org

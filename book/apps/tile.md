@@ -1,4 +1,4 @@
-(tile-command)=
+(tile_command)=
 
 # tile
 
@@ -67,8 +67,8 @@ a set of text files in the current directory.
 
 ______________________________________________________________________
 
-:::{note}
+```{note}
 Tile does not work with non-streamable formats, for example, {ref}`writers.copc`.
-:::
+```
 
 [glob pattern]: https://en.wikipedia.org/wiki/Glob_%28programming%29

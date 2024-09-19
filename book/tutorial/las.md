@@ -1,4 +1,4 @@
-(las-tutorial)=
+(las_tutorial)=
 
 # LAS Reading and Writing with PDAL
 
@@ -63,12 +63,12 @@ file. Depending on the features you need, this may or may not be what you want.
 ]
 ```
 
-:::{note}
+```{note}
 PDAL defaults to writing a LAS 1.2 version if no `minor_version` is
 specified
 or the `forward` option of {ref}`writers.las` is not used to carry along
 a version from a previously read file.
-:::
+```
 
 ## Spatial Reference System
 
@@ -105,20 +105,20 @@ The following example sets the `a_srs` option of the {ref}`writers.las` to
 ]
 ```
 
-:::{note}
+```{note}
 Remember to set `offset_x`, `offset_y`, `scale_x`, and
 `scale_y` values to something appropriate if your are storing decimal
 degree data in LAS files. The special value `auto` can be used for the
 offset values, but you should set an explicit value for the scale values
 to prevent overdriving the precision of the data and disrupting
 [Compression] with {{ LASzip }}.
-:::
+```
 
 ### Vertical Datum Example
 
 Vertical coordinate control is important in {{ LiDAR }} and PDAL supports
 assignment
-and reprojection/transform of vertical coordinates using {{ Proj.4 }} and {{ GDAL }}.
+and reprojection/transform of vertical coordinates using {{ Proj }} and {{ GDAL }}.
 The coordinate system description magic happens in GDAL, and you assign a
 compound coordinate system (both vertical and horizontal definitions) using
 the following syntax:
@@ -178,14 +178,14 @@ coordinate system for a file to [UTM Zone 15N NAD83] for horizontal and
 ]
 ```
 
-:::{note}
+```{note}
 Any coordinate system description format supported by GDAL's
 [SetFromUserInput]
 method can be used to assign or set the coordinate system in PDAL.
-This includes WKT, {{ Proj.4 }} definitions, or OGC URNs. It is your
+This includes WKT, {{ Proj }} definitions, or OGC URNs. It is your
 responsibility, however, to escape or massage any input data to
 make it be valid JSON.
-:::
+```
 
 ### Reprojection Example
 
@@ -213,12 +213,12 @@ PDAL is {ref}`filters.reprojection`.
 ]
 ```
 
-:::{note}
+```{note}
 If the input data doesn't specify a projection, you must specify the
 `in_srs` option of {ref}`filters.reprojection`.  `in_srs` can also
 be used to override an existing spatial reference attached to the input
 point set.
-:::
+```
 
 ## Point Formats
 
@@ -277,10 +277,10 @@ all possible header values from the source file to the new, smaller file.
 ]
 ```
 
-:::{note}
+```{note}
 The {{ LASzip }} storage of GPSTime and Red/Green/Blue fields with no
 data is perfectly efficient.
-:::
+```
 
 ## Extra Dimensions
 
@@ -367,14 +367,14 @@ extent information, and format settings.
 ]
 ```
 
-:::{note}
+```{note}
 If multiple input LAS files are being written to an output file, the
 `forward` option can only preserve values when they are the same in
 all input files.  If the values differ, a default will be used (as it
 would if the `forward` option weren't supplied).  You can specify
 specific option values for output that will also override any forwarded
 data.
-:::
+```
 
 ## Coordinate Scaling
 
@@ -472,13 +472,13 @@ Common VLR data include:
 - Processing history
 - Indexing
 
-:::{note}
+```{note}
 There are VLRs that are defined by the specification, and they
 have the VLR `user_id` of `LASF_Spec` or `LASF_Projection`.
 `LASF_Spec` VLRs provide a description of the data beyond that
 available in the header.  `LASF_Projection` VLRs store the spatial
 coordinate system of the data.
-:::
+```
 
 For LAS 1.0-1.3, the VLR length could be no larger than
 65535 bytes. Version 1.4 introduced extended VLRs, stored at the end of the
@@ -552,11 +552,11 @@ can be written into VLRs in {{ ASPRSLAS }} files under the `PDAL` [VLR key].
 ]
 ```
 
-:::{warning}
+```{warning}
 LAS versions prior to 1.4 only support VLRs of at most 64K of information.
 It is possible, though improbable, that the metadata or pipeline stored
 in the VLRs will not fit in that space.
-:::
+```
 
 [base64]: https://en.wikipedia.org/wiki/Base64
 [egm08]: http://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/egm08_wgs84.html

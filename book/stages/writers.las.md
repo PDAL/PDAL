@@ -1,14 +1,14 @@
-(writers-las)=
+(writers.las)=
 
 # writers.las
 
 The **LAS Writer** supports writing to [LAS format] files, the standard
 interchange file format for LIDAR data.
 
-:::{warning}
+```{warning}
 Scale/offset are not preserved from an input LAS file.  See below for
 information on the scale/offset options and the [forward] option.
-:::
+```
 
 ```{eval-rst}
 .. embed::
@@ -55,11 +55,11 @@ as shown:
 ]
 ```
 
-:::{note}
+```{note}
 One of `data`, `filename` or `metadata` must be specified. Data must be
 specified as base64 encoded strings. The content of a file is inserted as
 binary. The metadata key specified must refer to a string or base64 encoded data.
-:::
+```
 
 ## Example
 

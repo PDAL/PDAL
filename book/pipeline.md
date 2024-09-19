@@ -15,10 +15,10 @@ a pipeline provides useful advantages for many workflows:
 3. You can construct complex operations using the [JSON] manipulation
    facilities of whatever language you want.
 
-:::{note}
+```{note}
 {ref}`pipeline_command` is used to invoke pipeline operations
 via the command line.
-:::
+```
 
 ## Introduction
 
@@ -45,10 +45,10 @@ writer from filenames, and able to be specified as a set of sequential steps:
 ]
 ```
 
-:::{figure} ./images/las-crop-bpf-pipeline.png
+```{figure} ./images/las-crop-bpf-pipeline.png
 A simple pipeline to convert {ref}`LAS <readers.las>` to {ref}`BPF <readers.bpf>`
 while only keeping points inside the box $[0 \leq x \leq 100, 0 \leq y \leq 100]$.
-:::
+```
 
 ### Reprojection Example
 
@@ -87,11 +87,11 @@ with the {ref}`writers.gdal` writer:
 ]
 ```
 
-:::{figure} ./images/reproject-merge-pipeline.png
+```{figure} ./images/reproject-merge-pipeline.png
 A more complex pipeline that merges two inputs together but uses
 {ref}`filters.reprojection` to transform the coordinate system of
 file `B.las` from [UTM] to [Geographic].
-:::
+```
 
 ### Point Views and Multiple Outputs
 
@@ -120,7 +120,7 @@ files from a single pipeline.  The crop filter creates two output point views
 ]
 ```
 
-(processing-modes)=
+(processing_modes)=
 
 ## Processing Modes
 
@@ -148,7 +148,7 @@ processing mode.
 
 PDAL JSON pipelines are an array of stages.
 
-:::{note}
+````{note}
 In versions of PDAL prior to 1.9, the array of stages needed to be the
 value of a key named "pipeline" which was encapsulated in an object.
 The earlier format is still accepted for backward compatibility.
@@ -173,7 +173,7 @@ Equivalent new format:
     "outputfile"
 ]
 ```
-:::
+````
 
 - The pipeline array may have any number of string or {ref}`stage_object`
   elements.
@@ -181,7 +181,7 @@ Equivalent new format:
   the proper driver from the file extension and position in the array. A writer
   stage will only be created if the string is the final element in the array.
 
-(stage-object)=
+(stage_object)=
 
 ### Stage Objects
 
@@ -289,10 +289,10 @@ the Z values to a surface model. These height above ground values are then
 written back into the Z dimension for further analysis. See the Python
 code at [hag.py].
 
-:::{seealso}
+```{seealso}
 {ref}`filters.hag_nn` describes using a specific filter to do
 this job in more detail.
-:::
+```
 
 ```json
 [
@@ -411,17 +411,17 @@ multiple input LAS files from a given directory.
 ]
 ```
 
-:::{seealso}
+```{seealso}
 The PDAL source tree contains a number of example pipelines that
 are used for testing. You might find these inspiring. Go to
 <https://github.com/PDAL/PDAL/tree/master/test/data/pipeline> to find
 more.
-:::
+```
 
-:::{note}
+```{note}
 Issuing the command `pdal info --options` will list all available
 stages and their options. See {ref}`info_command` for more.
-:::
+```
 
 [geographic]: http://spatialreference.org/ref/epsg/4326/
 [hag.py]: https://raw.githubusercontent.com/PDAL/PDAL/master/test/data/autzen/hag.py.in

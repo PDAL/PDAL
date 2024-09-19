@@ -1,9 +1,3 @@
----
-Author: Vaclav Petras
-Contact: <mailto:wenzeslaus@gmail.com>
-Date: 09/04/2015
----
-
 (liblas-to-pdal)=
 
 # libLAS C API to PDAL transition guide

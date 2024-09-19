@@ -18,13 +18,13 @@ The tutorial will be reprojecting point cloud files from:
 
 Historically in New Zealand, heights were defined in terms of 13 local vertical datums (LVD) referenced to an estimate of the local mean sea level (MSL).
 
-:::{figure} ../images/nz_lvd.png
-:::
+```{figure} ../images/nz_lvd.png
+```
 
 In 2016, New Zealand Vertical Datum 2016 (NZVD2016), which is defined by the NZGeoid2016 geoid, became the official national vertical datum for New Zealand. The general relationship between the different datums is shown in the diagram below.
 
-:::{figure} ../images/nz_relationships.png
-:::
+```{figure} ../images/nz_relationships.png
+```
 
 Available on the  [LINZ Data Service] (LDS) are [relationship grids] which model the difference between the local vertical datums and NZVD2016 (O in the above diagram).
 
@@ -32,8 +32,8 @@ The [NZ Quasigeoid 2016], also a relationship grid, models the difference betwee
 
 The equations to transform heights using the published values in the relationship grids are:
 
-:::{figure} ../images/nz_formulas.png
-:::
+```{figure} ../images/nz_formulas.png
+```
 
 ## Before we begin
 
@@ -65,9 +65,9 @@ Download [Miniconda], selecting the 64-bit installer for your platform and insta
    conda activate vd-reproject
    ```
 
-   :::{note}
+   ```{note}
    After the environment is activated the name of the environment appears as `(vd-reproject)` at the beginning of the command line. This indicates that you’re now inside the environment.
-   :::
+   ```
 
 5. Finally, we need to install the tools/packages we will be using.
 
@@ -113,8 +113,8 @@ You can create your own GTX file using the relationship grids available on the L
 
 1. Download the **‘Moturiki 1953 to NZVD2016 Conversion Raster’** as a TIFF from the LDS in **‘WGS 84 (EPSG:4326 Geographic)’** Map projection. <https://data.linz.govt.nz/layer/103959-moturiki-1953-to-nzvd2016-conversion-raster/>.
 
-   :::{figure} ../images/nz_lds_screenshot.png
-   :::
+   ```{figure} ../images/nz_lds_screenshot.png
+   ```
 
 2. Open the Anaconda Prompt from the start menu and activate the environment we created earlier:
 
@@ -130,9 +130,9 @@ You can create your own GTX file using the relationship grids available on the L
    gdal_translate -ot Float32 "moturiki-1953-to-nzvd2016-conversion-raster.tif" "moturiki-1953-to-nzvd2016-conversion-raster.gtx"
    ```
 
-   :::{note}
+   ```{note}
    `-ot Float32` indicates the data type of the output image’s bands. GTX files only support Float32.
-   :::
+   ```
 
 ## Step 2: Prepare a JSON Pipeline file
 
@@ -146,9 +146,9 @@ Using a text editor, create a JSON file named pipeline.json containing the conte
 
 Update the srs details for `in_srs`, `out_srs` and `a_srs` to the EPSG code of the horizontal map projection your source LAS files are in. In the example above we are using New Zealand Transverse Mercator 2000 (EPSG:2193).
 
-:::{warning}
+```{warning}
 Be aware `"forward": "all"` under the writers.las section represents the header fields whose values should be preserved from the source LAS file. `all` will transfer all header fields, including scale and offset values, as well as VLRs. If you desire to transfer only specific header fields, refer to <https://pdal.io/stages/writers.las.html> for more information about this option.
-:::
+```
 
 ## Step 3: Use PDAL to reproject
 
@@ -170,9 +170,9 @@ pdal pipeline "path/to/your/pipeline.json" — readers.las.filename="path/to/sou
 
 Below is a python script which executes multiple LAS files. Save to your computer as `lvd_to_nzvd2016.py`, then open in a text editor and update `src_directory`, `gtxfile`, `jsonfile`, `horizontal_srs` with the necessary information.
 
-:::{note}
+```{note}
 The file is also available from  <https://gist.github.com/rclarkelinz/d48de5c0432f5c00d02a452e6d1d3bc3>
-:::
+```
 
 ```{literalinclude} ./lvd_to_nzvd2016.py
 :language: python

@@ -1,4 +1,4 @@
-(filters-overlay)=
+(filters.overlay)=
 
 # filters.overlay
 
@@ -21,11 +21,11 @@ be used instead of the entire OGR data source. At this time it is
 not possible to further filter the OGR query based on a geometry
 but that may be added in the future.
 
-:::{note}
+```{note}
 The OGR SQL support follows the rules specified in [ExecuteSQL]
 documentation, and it will pass SQL down to the underlying
 datasource if it can do so.
-:::
+```
 
 ## Example 1
 

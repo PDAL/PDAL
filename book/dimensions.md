@@ -10,10 +10,10 @@ of the dimension and its description.
 The following table provides a list of known dimension names you can use in
 {ref}`filters`, {ref}`writers`, and {ref}`readers`.
 
-:::{note}
+```{note}
 Types are default types. Stage developers should set the dimension type
 explicitly if the default dimension isn't suitable.
-:::
+```
 
 ```{eval-rst}
 .. csv-table::

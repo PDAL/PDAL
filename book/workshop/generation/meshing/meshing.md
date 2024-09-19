@@ -25,28 +25,28 @@ data input source.
 After running each command, the output `.ply` file can be viewed in Meshlab or
 [CloudCompare].
 
-:::{note}
+```{note}
 Since QGIS doesn't support `.ply` files we can't use it for this exercise.
 In order to use QGIS you can covert the files to OBJ or `.copc` using PDAL.
-:::
+```
 
-:::{seealso}
+```{seealso}
 PDAL implements Mischa Kazhdan's Poisson surface reconstruction algorithm.
 For details see `[Kazhdan2006]_`.
-:::
+```
 
-:::{note}
+```{note}
 This example will be using the output of using {ref}`workshop-clipping`
 exercise, specifically using `stadium.copc.laz` file.  Please produce that
 file by following that exercise before starting this one.
-:::
+```
 
-:::{note}
+```{note}
 `writers.ply` will write out mesh vertices by default. In this exercise we
 set the attribute `faces="true"`. Try using the ply writer without it. Also,
 if you're using a machine with a lot of processing power, try increasing the
 `depth` parameter for a more detailed mesh.
-:::
+```
 
 ### Mesh Command
 

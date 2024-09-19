@@ -1,4 +1,4 @@
-(filters-assign)=
+(filters.assign)=
 
 # filters.assign
 
@@ -13,10 +13,10 @@ to a provided value that pass a range filter.
 .. streamable::
 ```
 
-:::{note}
+```{note}
 The `assignment` and `condition` options are deprecated and may be removed in a
 future release.
-:::
+```
 
 ## Options
 
@@ -60,10 +60,10 @@ subtraction(`-`), multiplication(`*`) and division(`\\`).
 A {ref}`ConditionalExpression <PDAL expression>` is an optional boolean value that must
 evaluate to `true` for the `ValueExpression` to be applied.
 
-:::{note}
+```{note}
 As of PDAL 2.7.0, assignment to a dimension that does not exist will cause
 it to be created. It will always be created with type double, however.
-:::
+```
 
 # Example 1
 

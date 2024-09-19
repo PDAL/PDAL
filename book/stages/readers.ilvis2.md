@@ -1,13 +1,13 @@
-(readers-ilvis2)=
+(readers.ilvis2)=
 
 # readers.ilvis2
 
 The **ILVIS2 reader** read from files in the ILVIS2 format. See the
 [product spec](https://nsidc.org/data/ilvis2) for more information.
 
-:::{figure} readers.ilvis2.metadata.png
+```{figure} readers.ilvis2.metadata.png
 Dimensions provided by the ILVIS2 reader
-:::
+```
 
 ```{eval-rst}
 .. embed::
@@ -39,8 +39,7 @@ filename
 
 : File to read from \[Required\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 mapping

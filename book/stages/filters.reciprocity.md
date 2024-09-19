@@ -1,4 +1,4 @@
-(filters-reciprocity)=
+(filters.reciprocity)=
 
 # filters.reciprocity
 
@@ -17,10 +17,10 @@ The filter creates a single new dimension, `Reciprocity`, that records the
 percentage of points(in the range 0 to 100) that are considered uni-directional
 neighbors of the current point.
 
-:::{note}
+```{note}
 To inspect the newly created, non-standard dimensions, be sure to write to an
 output format that can support arbitrary dimensions, such as BPF.
-:::
+```
 
 ```{eval-rst}
 .. embed::

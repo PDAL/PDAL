@@ -1,4 +1,4 @@
-(readers-numpy)=
+(readers.numpy)=
 
 # readers.numpy
 
@@ -8,10 +8,10 @@ convenient to read data from [Numpy] for processing in PDAL.
 [Numpy] supports saving files with the `save` method, usually with the
 extension `.npy`. As of PDAL 1.7.0, `.npz` files were not yet supported.
 
-:::{warning}
+```{warning}
 It is untested whether problems may occur if the versions of Python used
 in writing the file and for reading the file don't match.
-:::
+```
 
 ## Array Types
 
@@ -217,13 +217,13 @@ fargs
 
 : The function args to pass to the function
 
-:::{note}
+```{note}
 The functionality of the 'assign_z' option in previous versions is
 provided with {ref}`filters.assign`
 
 The functionality of the 'x', 'y', and 'z' options in previous versions
 are generally handled with the current 'order' option.
-:::
+```
 
 [formatted]: http://en.cppreference.com/w/cpp/string/basic_string/stof
 [laspy]: https://github.com/laspy/laspy

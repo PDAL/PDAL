@@ -1,14 +1,14 @@
-(filters-transformation)=
+(filters.transformation)=
 
 # filters.transformation
 
 The transformation filter applies an arbitrary homography
 transformation, represented as a 4x4 [matrix], to each xyz triplet.
 
-:::{note}
+```{note}
 The transformation filter does not apply or consider any spatial
 reference information.
-:::
+```
 
 ```{eval-rst}
 .. embed::

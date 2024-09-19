@@ -1,4 +1,4 @@
-(readers-bpf)=
+(readers.bpf)=
 
 # readers.bpf
 
@@ -46,6 +46,5 @@ fix_dims
   order to make the names valid.
   \[Default: true\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```

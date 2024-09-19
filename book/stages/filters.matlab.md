@@ -1,4 +1,4 @@
-(filters-matlab)=
+(filters.matlab)=
 
 # filters.matlab
 
@@ -10,14 +10,14 @@ available that Matlab functions can interact with.
 The Matlab interpreter must exit and always set "ans==true" upon success. If
 "ans==false", an error would be thrown and the {ref}`pipeline` exited.
 
-:::{seealso}
+```{seealso}
 {ref}`writers.matlab` can be used to write `.mat` files.
-:::
+```
 
-:::{note}
+```{note}
 {ref}`filters.matlab` embeds the entire Matlab interpreter, and it
 will require a fully licensed version of Matlab to execute your script.
-:::
+```
 
 ```{eval-rst}
 .. plugin::

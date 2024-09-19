@@ -1,4 +1,4 @@
-(filters-pmf)=
+(filters.pmf)=
 
 # filters.pmf
 
@@ -60,10 +60,10 @@ of the method described in
 }
 ```
 
-:::{note}
+```{note}
 [^cite_zhang2003] describes the consequences and relationships of the parameters
 in more detail and is the canonical resource on the topic.
-:::
+```
 
 ## Options
 

@@ -59,24 +59,24 @@ PDAL uses the concept of [pipelines] to describe the reading, filtering, and wri
 of point cloud data. We will construct a pipeline that will do a number of things
 in succession.
 
-:::{figure} ../images/pipeline-example-overview.png
+```{figure} ../images/pipeline-example-overview.png
 :scale: 75%
 
 Pipeline diagram. The data are read from the [Entwine Point Tile] resource at
 <https://usgs.entwine.io> for Iowa using {ref}`readers.ept` and filtered through a
 number of steps until processing is complete. The data are then written to
 an `iowa.laz` and `iowa.tif` file.
-:::
+```
 
 ### Pipeline
 
 1. Create a file called `iowa.json` with the following content:
 
-   :::{note}
+   ```{note}
    The file is also available from
    <https://gist.github.com/hobu/ee22084e24ed7e3c0d10600798a94c31> for
    convenient copy/paste)
-   :::
+   ```
 
 ```{literalinclude} ./iowa.json
 :language: js
@@ -91,26 +91,26 @@ it a URL to the root of the resource in the `filename` option, and we also
 give it a `bounds` object to define the window in which we should select data
 from.
 
-:::{note}
+```{note}
 The full URL to the EPT root file (`ept.json`)) must be given
 to the filename parameter for PDAL 2.2+. This was a change in
 behavior of the {ref}`readers.ept` driver.
-:::
+```
 
 The `bounds` object is in the form `([minx, maxx], [miny, maxy])`.
 
-:::{warning}
+```{warning}
 If you do not define a `bounds` option, PDAL will try to read the
 data for the entire state of Iowa, which is about 160 billion points.
 Maybe you have enough memory for this...
-:::
+```
 
-:::{figure} ../images/pipeline-example-readers.ept.png
+```{figure} ../images/pipeline-example-readers.ept.png
 :scale: 50%
 
 The EPT reader reads data from an EPT resource with PDAL. Options available
 in PDAL 1.9+ allow users to select data at or above specified resolutions.
-:::
+```
 
 #### filters.range
 
@@ -118,13 +118,13 @@ The data we are selecting may have noise properly classified, and we can use
 {ref}`filters.range` to keep all data that does not have a `Classification` {ref}`dimensions`
 value of `7`.
 
-:::{figure} ../images/pipeline-example-filters.range1.png
+```{figure} ../images/pipeline-example-filters.range1.png
 :scale: 50%
 
 The {ref}`filters.range` filter utilizes range selection to allow users to
 select data for processing or removal. The {ref}`filters.mongo`
 filter can be used for even more complex logic operations.
-:::
+```
 
 #### filters.assign
 
@@ -133,13 +133,13 @@ of the classification values in the point data. {ref}`filters.assign` takes the
 expression `Classification [:]=0` and assigns the `Classification` for
 each point to `0`.
 
-:::{figure} ../images/pipeline-example-filters.assign.png
+```{figure} ../images/pipeline-example-filters.assign.png
 :scale: 50%
 
 {ref}`filters.assign` can also take in an option to apply assignments
 based on a conditional. If you want to assign values based on a
 bounding geometry, use {ref}`filters.overlay`.
-:::
+```
 
 #### filters.reprojection
 
@@ -147,25 +147,25 @@ The data on the AWS 3DEP Public Dataset are stored in [Web Mercator]
 coordinate system, which is not suitable for many operations. We need to
 reproject them into an appropriate UTM coordinate system ([EPSG:26915](https://epsg.io/32615)).
 
-:::{figure} ../images/pipeline-example-filters.reprojection.png
+```{figure} ../images/pipeline-example-filters.reprojection.png
 :scale: 50%
 
 {ref}`filters.reprojection` can also take override the incoming coordinate
 system using the `a_srs` option.
-:::
+```
 
 #### filters.smrf
 
 The Simple Morphological Filter ({ref}`filters.smrf`) classifies points as ground
 or not-ground.
 
-:::{figure} ../images/pipeline-example-filters.smrf.png
+```{figure} ../images/pipeline-example-filters.smrf.png
 :scale: 50%
 
 {ref}`filters.smrf` provides a number of tuning options, but the
 defaults tend to work quite well for mixed urban environments on
 flat ground (ie, Iowa).
-:::
+```
 
 #### filters.range
 
@@ -173,12 +173,12 @@ After we have executed the SMRF filter, we only want to keep points that
 are actually classified as ground in our point stream. Selecting for
 points with `Classification[2:2]` does that for us.
 
-:::{figure} ../images/pipeline-example-filters.range2.png
+```{figure} ../images/pipeline-example-filters.range2.png
 :scale: 50%
 
 Remove any point that is not ground classification for our
 DTM generation.
-:::
+```
 
 #### writers.gdal
 
@@ -188,22 +188,22 @@ to set the `nodata` value, specify only outputting the inverse distance
 weighted raster, and assigning a resolution of `1` (m). See {ref}`writers.gdal`
 for more options.
 
-:::{figure} ../images/pipeline-example-writers.gdal.png
+```{figure} ../images/pipeline-example-writers.gdal.png
 :scale: 50%
 
 Output a DTM at 1m resolution.
-:::
+```
 
 #### writers.las
 
 We can also write a LAZ file containing the same points that were used to
 make the elevation model in the section above. See {ref}`writers.las` for more options.
 
-:::{figure} ../images/pipeline-example-writers.las.png
+```{figure} ../images/pipeline-example-writers.las.png
 :scale: 50%
 
 Also output the LAZ file as part of our processing pipeline.
-:::
+```
 
 ## Execute the Pipeline
 
@@ -250,9 +250,9 @@ Also output the LAZ file as part of our processing pipeline.
 
 5. View your raster
 
-   :::{figure} ../images/pipeline-example-iowa-colors.png
+   ```{figure} ../images/pipeline-example-iowa-colors.png
    :align: left
-   :::
+   ```
 
 [conda]: https://conda.io
 [conda environment]: https://docs.conda.io/projects/conda/en/latest/user-guide/concepts.html

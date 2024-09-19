@@ -1,4 +1,4 @@
-(info-command)=
+(info_command)=
 
 # info
 

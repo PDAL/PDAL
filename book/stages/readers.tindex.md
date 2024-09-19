@@ -1,4 +1,4 @@
-(readers-tindex)=
+(readers.tindex)=
 
 # readers.tindex
 
@@ -51,8 +51,7 @@ filename
 
 : OGROpen'able raster file to read \[Required\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 `` _`lyr_name` ``

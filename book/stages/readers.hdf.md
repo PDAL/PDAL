@@ -1,4 +1,4 @@
-(readers-hdf)=
+(readers.hdf)=
 
 # readers.hdf
 
@@ -60,15 +60,15 @@ properly mapped and then outputs a LAS file.
 ]
 ```
 
-:::{note}
+```{note}
 All dimensions must be simple numeric HDF datasets with
 equal lengths. Compound types, enum types, string types,
 etc. are not supported.
-:::
+```
 
-:::{warning}
+```{warning}
 The HDF reader does not set an SRS.
-:::
+```
 
 ## Common Use Cases
 
@@ -76,9 +76,9 @@ A possible use case for this driver is reading NASA's [ICESat-2](https://icesat-
 This example reads the X, Y, and Z coordinates from the ICESat-2
 [ATL03](https://icesat-2.gsfc.nasa.gov/sites/default/files/page_files/ICESat2_ATL03_ATBD_r002.pdf) format and converts them into a LAS file.
 
-:::{note}
+```{note}
 ICESat-2 data use [EPSG:7912](https://epsg.io/7912). ICESat-2 Data products documentation can be found [here](https://icesat-2.gsfc.nasa.gov/science/data-products)
-:::
+```
 
 ```json
 [
@@ -101,8 +101,7 @@ ICESat-2 data use [EPSG:7912](https://epsg.io/7912). ICESat-2 Data products docu
 
 ## Options
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 dimensions

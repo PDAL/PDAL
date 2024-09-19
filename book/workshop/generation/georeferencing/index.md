@@ -20,12 +20,12 @@ reader includes built in georeferencing support.
 In this section, we will demonstrate how to georeference an {{ Optech }} csd file
 and reproject that file into a UTM projection.
 
-:::{note}
+```{note}
 [Optech's](http://www.teledyneoptech.com/) csd format is just one of
 several vendor-specific data formats PDAL supports; we also support data
 files directly from {{ RIEGL }} sensors and from several project-specific
 government platforms.
-:::
+```
 
 ## Exercise
 
@@ -46,11 +46,11 @@ point cloud:
   screw up our visualization.  We will use the {ref}`filters.expression` PDAL filter
   to drop all points with very high intensity values.
 
-:::{note}
+```{note}
 These data were provided by Dr. Craig Glennie and were collected by
 {{ NCALM }}, the National Center for Airborne Laser Mapping.  The collect area
 is southwest of Austin, TX.
-:::
+```
 
 ### Command
 
@@ -68,9 +68,9 @@ Invoke the following command, substituting accordingly, into your `Conda Shell`:
 
 View your georeferenced point cloud in QGIS:
 
-:::{figure} ../../images/georeference-QGIS.png
+```{figure} ../../images/georeference-QGIS.png
 :target: ../../../_images/georeference-QGIS.png
 
 Our airborne laser point cloud after georeferencing, reprojection, and
 intensity filtering.
-:::
+```

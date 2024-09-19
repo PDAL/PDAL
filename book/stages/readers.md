@@ -9,7 +9,7 @@ Database drivers typically return unstructured lists of dimensions.  A reader
 might provide a simple file type, like {ref}`readers.text`, a complex database
 like {ref}`readers.pgpointcloud`, or a network service like {ref}`readers.ept`.
 
-```{toctree}
+<!-- ```{toctree}
 :glob: true
 :hidden: true
 :maxdepth: 1
@@ -51,7 +51,7 @@ readers.terrasolid
 readers.text
 readers.tiledb
 readers.tindex
-```
+``` -->
 
 {ref}`readers.arrow`
 

@@ -39,10 +39,10 @@ be described later.
 Various other override methods for the stage.  There are a few others that
 could be overridden, which will not be discussed in this tutorial.
 
-:::{note}
+```{note}
 See `./include/pdal/Reader.hpp` of the source tree for more methods
 that a reader can override or implement.
-:::
+```
 
 ## The source
 

@@ -1,4 +1,4 @@
-(readers-matlab)=
+(readers.matlab)=
 
 # readers.matlab
 
@@ -13,11 +13,11 @@ from the first array in the struct. If the array has fewer
 elements than the first array in the struct, the point's field
 beyond that number is set to zero.
 
-:::{note}
+```{note}
 The Matlab reader requires the Mat-File API from MathWorks, and it must be
 explicitly enabled at compile time with the `BUILD_PLUGIN_MATLAB=ON`
 variable
-:::
+```
 
 ```{eval-rst}
 .. plugin::
@@ -49,8 +49,7 @@ filename
 
 : Input file name. \[Required\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 struct

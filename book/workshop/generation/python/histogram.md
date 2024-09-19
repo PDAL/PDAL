@@ -23,10 +23,10 @@ a nice histogram. These histograms can be useful diagnostics in an analysis
 pipeline. We will combine a Python script to make a histogram plot with a
 {ref}`pipeline_command`.
 
-:::{note}
+```{note}
 Python allows you to enhance and build functionality that you can use
 in the context of other {ref}`pipeline` operations.
-:::
+```
 
 ### PDAL Pipeline
 
@@ -37,10 +37,10 @@ script in a {ref}`filters.python` stage:
 :linenos: true
 ```
 
-:::{note}
+```{note}
 This pipeline is available in your workshop materials in the
 `./exercises/python/histogram.json` file.
-:::
+```
 
 ### Python script
 
@@ -51,10 +51,10 @@ Python except for the `ins` and `outs` arguments to the function -- those
 are special arguments that PDAL expects to be a dictionary of Numpy
 dictionaries.
 
-:::{note}
+```{note}
 This Python file is available in your workshop materials in the
 `./exercises/python/histogram.py` file.
-:::
+```
 
 ```{literalinclude} ./histogram.py
 :emphasize-lines: 21,34-40

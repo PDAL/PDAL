@@ -22,10 +22,10 @@ This exercise will print the first point of an {ref}`ASPRS LAS <readers.las>`
 file. It will utilize the PDAL {ref}`command line application <apps>` to
 inspect the file.
 
-:::{note}
+```{note}
 If you need to compile your own copy of PDAL, see {ref}`building` for
 more details.
-:::
+```
 
 ## Install Conda
 
@@ -36,11 +36,11 @@ through them a bit for your platform so you have an idea what to expect.
 - [macOS](https://conda.io/projects/conda/en/latest/user-guide/install/macos.html)
 - [Linux](https://conda.io/projects/conda/en/latest/user-guide/install/linux.html)
 
-:::{note}
+```{note}
 We will assume you are running on Windows, but the same commands should
 work in macOS or Linux too -- though definition of file paths might provide
 a significant difference.
-:::
+```
 
 ### Run Conda
 
@@ -60,12 +60,12 @@ A PDAL package based on the latest release, including all recent patches, is
 pushed to the [conda-forge] channel on anaconda.org with every code change on
 the PDAL maintenance branch.
 
-:::{warning}
+```{warning}
 It is a good idea to install PDAL in it's own environment (or
 add it to an existing one). You will **NOT** want to add it to your default
 environment named `base`. Managing environments is beyond the scope of
 the quickstart, but you can read more about it [here](https://conda.io/projects/conda/en/latest/user-guide/getting-started.html#managing-envs).
-:::
+```
 
 To install the PDAL package so that we can use it to run PDAL commands, we run
 the following command to create an environment named `myenv`, installing PDAL
@@ -175,12 +175,12 @@ Executing transaction: done
 #     $ conda deactivate
 ```
 
-:::{note}
+```{note}
 PDAL's Python extension is managed separately from the PDAL package. To
 install it, replace `pdal` with `python-pdal` in any of the commands in
 this section. Seeing as how PDAL is a dependency of the Python extension,
 you will actually get two for the price of one!
-:::
+```
 
 To install PDAL to an existing environment names `myenv`, we would run the
 following command.
@@ -273,9 +273,9 @@ Warning 1: Cannot find ellipsoid.csv
 - {ref}`python` describes how PDAL embeds and extends Python and
   how you can leverage these capabilities in your own programs.
 
-:::{seealso}
+```{seealso}
 {ref}`community` is a good source to reach out to when you're stuck.
-:::
+```
 
 [conda]: https://conda.io/docs/
 [conda-forge]: https://anaconda.org/conda-forge/pdal

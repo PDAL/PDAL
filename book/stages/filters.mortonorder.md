@@ -1,4 +1,4 @@
-(filters-mortonorder)=
+(filters.mortonorder)=
 
 # filters.mortonorder
 
@@ -9,15 +9,15 @@ representation from the end to the beginning. This way, points are sorted
 with a good dispersement. For example, by successively selecting N
 representative points within tiles:
 
-:::{figure} filters.mortonorder.img1.png
+```{figure} filters.mortonorder.img1.png
 :alt: Reverse Morton indexing
 :scale: 100 %
-:::
+```
 
-:::{seealso}
+```{seealso}
 See [LOPoCS] and [pgmorton] for some use case examples of the
 Reverse Morton algorithm.
-:::
+```
 
 ```{eval-rst}
 .. embed::

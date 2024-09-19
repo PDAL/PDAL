@@ -110,9 +110,9 @@ substitutions:
   PDAL also supports reading and writing PCL PCD files using {ref}`readers.pcd`
   and {ref}`writers.pcd`.
 
-  :::{seealso}
+  ```{seealso}
   {ref}`about_pcl` describes PDAL and PCL's relationship.
-  :::
+  ```
 
   {{ nbsp }}
 
@@ -135,10 +135,10 @@ substitutions:
   under an open source license (this applies to the whole library and
   all command line tools).
 
-  :::{seealso}
+  ```{seealso}
   {ref}`apps` describes application operations you can
   achieve with PDAL.
-  :::
+  ```
 
   {{ nbsp }}
 

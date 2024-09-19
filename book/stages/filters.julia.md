@@ -1,4 +1,4 @@
-(filters-julia)=
+(filters.julia)=
 
 # filters.julia
 
@@ -9,9 +9,9 @@ datatype.
 The supplied julia function must take a [TypedTables] FlexTable as an argument
 and return the same object (with modifications).
 
-:::{warning}
+```{warning}
 The returned Table contains all the {ref}`dimensions` of the incoming `ins` Table
-:::
+```
 
 ```{eval-rst}
 .. plugin::

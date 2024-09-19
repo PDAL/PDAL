@@ -1,4 +1,4 @@
-(filters-griddecimation)=
+(filters.griddecimation)=
 
 # filters.griddecimation
 

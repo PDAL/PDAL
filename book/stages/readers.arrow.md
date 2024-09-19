@@ -1,4 +1,4 @@
-(readers-arrow)=
+(readers.arrow)=
 
 # readers.arrow
 
@@ -19,7 +19,6 @@ Caveats:
 
 - Which schema is read is chosen by the file name extension, but can be
   overridden with the `format` option set to `geoarrow` or `geoparquet`
--
 
 ## Options
 
@@ -32,6 +31,5 @@ format
 : `geoarrow` or `geoparquet` option to override any filename extension
   hinting of data type \[Optional\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```

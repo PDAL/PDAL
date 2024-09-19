@@ -1,4 +1,4 @@
-(writers-matlab)=
+(writers.matlab)=
 
 # writers.matlab
 
@@ -9,11 +9,11 @@ The produced files has a single variable, `PDAL`, an array struct.
 ```{image} ./writers.matlab.png
 ```
 
-:::{note}
+```{note}
 The Matlab writer requires the Mat-File API from MathWorks, and
 it must be explicitly enabled at compile time with the
 `BUILD_PLUGIN_MATLAB=ON` variable
-:::
+```
 
 ```{eval-rst}
 .. plugin::

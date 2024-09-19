@@ -1,4 +1,4 @@
-(filters-straighten)=
+(filters.straighten)=
 
 # filters.straighten
 
@@ -10,12 +10,12 @@ and rotated along the segment accordingly to the average m/roll value.
 .. streamable::
 ```
 
-:::{note}
+```{note}
 The new coordinate system (X', Y', Z') could be understood as :
 \* X' : curvilinear abcissa (or meter point)
 \* Y' : orthogonal distance to segment (or orthogonal distance to line)
 \* Z' : orthogonal distance from (rolling) plane
-:::
+```
 
 ## Examples
 

@@ -1,12 +1,12 @@
-(eval-command)=
+(eval_command)=
 
 # eval
 
-:::{warning}
+```{warning}
 As of PDAL v2.6.0, the `eval` command is marked as DEPRECATED. It will
 be removed from the default install in PDAL v2.7 and removed completely in
 PDAL v2.8.
-:::
+```
 
 The `eval` command is used to compare the `Classification` dimensions of two
 point clouds.

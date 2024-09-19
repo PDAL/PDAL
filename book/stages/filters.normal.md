@@ -1,4 +1,4 @@
-(filters-normal)=
+(filters.normal)=
 
 # filters.normal
 
@@ -27,21 +27,21 @@ flag is set to `false`. Users can optionally set any of the XYZ coordinates to
 specify a custom [viewpoint] or set them all to zero to effectively disable the
 normal flipping.
 
-:::{note}
+```{note}
 By default, the Normal filter will invert normals such that they are always
 pointed "up" (positive Z). If the user provides a [viewpoint], normals will
 instead be inverted such that they are oriented towards the viewpoint,
 regardless of the [always_up] flag. To disable all normal flipping, do not
 provide a [viewpoint] and set [always_up] to false.
-:::
+```
 
 In addition to [always_up] and [viewpoint], users can run a refinement step (off
 by default) that propagates normals using a minimum spanning tree. The
 propagated normals can lead to much more consistent results across the dataset.
 
-:::{note}
+```{note}
 To enable normal propagation, users can set [refine] to `true`.
-:::
+```
 
 ```{eval-rst}
 .. embed::

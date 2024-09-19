@@ -54,13 +54,13 @@ $ pdal info ./exercises/info/interesting.las --metadata
     ...
 ```
 
-:::{note}
+```{note}
 PDAL {ref}`metadata <metadata>` is returned a in a tree
 structure corresponding to processing pipeline that produced
 it.
-:::
+```
 
-:::{seealso}
+```{seealso}
 Use the {{ JSON }} processing capabilities of your favorite processing
 software to selectively access and manipulate values.
 
@@ -68,7 +68,7 @@ software to selectively access and manipulate values.
 - [jsawk] (like `awk` but for JSON data)
 - [jq] (command line processor for JSON)
 - [Ruby JSON library]
-:::
+```
 
 ### Structured Metadata Output
 
@@ -91,12 +91,12 @@ gives us that, but it also gives us a bunch of other stuff we don't need
 at the moment. Let's focus on extracting what we want using the
 `jq` command.
 
-:::{note}
+```{note}
 If you do not have [jq] installed into your Conda environment and are not on Windows,
 run the following command in your `Conda Shell`: `conda install -c conda-forge jq`.
 Windows users should use [this link](https://github.com/jqlang/jq/releases/download/jq-1.7/jq-win64.exe)
 to install [jq]
-:::
+```
 
 ```console
 $ pdal info ./exercises/info/interesting.las --metadata \
@@ -115,7 +115,7 @@ false
 "HOBU-SYSTEMID"
 ```
 
-:::{note}
+```{note}
 PDAL's JSON output is very powerfully combined with the processing
 capabilities of other programming languages such as JavaScript or Python.
 Both of these languages have excellent built-in tools for consuming
@@ -123,7 +123,7 @@ JSON, along with plenty of other features to allow you to do something
 with the data inside the data structures. As we will see later
 in the workshop, this PDAL feature is one that makes construction
 of custom data processing workflows with PDAL very convenient.
-:::
+```
 
 ## Notes
 

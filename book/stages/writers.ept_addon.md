@@ -1,4 +1,4 @@
-(writers-ept-addon)=
+(writers.ept_addon)=
 
 # writers.ept_addon
 
@@ -112,9 +112,9 @@ addons
   and whose corresponding values represent the attributes to be written to
   these addon dimensions. \[Required\]
 
-:::{note}
+```{note}
 The `addons` option is reversed between the EPT reader and addon-writer: in each case, the right-hand side represents an assignment to the left-hand side.  In the writer, the dimension value is assigned to an addon path.  In the reader, the addon path is assigned to a dimension.
-:::
+```
 
 threads
 

@@ -1,16 +1,16 @@
-(writers-nitf)=
+(writers.nitf)=
 
 # writers.nitf
 
 The [NITF] format is a US Department of Defense format for the transmission
 of imagery.  It supports various formats inside a generic wrapper.
 
-:::{note}
+```{note}
 LAS inside of NITF is widely supported by software that uses NITF
 for point cloud storage, and LAZ is supported by some softwares.
 No other content type beyond those two is widely supported as
 of January of 2016.
-:::
+```
 
 ```{eval-rst}
 .. embed::

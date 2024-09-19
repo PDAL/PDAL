@@ -1,4 +1,4 @@
-(writers-copc)=
+(writers.copc)=
 
 # writers.copc
 
@@ -11,11 +11,11 @@ organized stored as a clustered octree.
 
 ```
 
-:::{note}
+```{note}
 Visit <https://viewer.copc.io> to view COPC files in your browser.
 Simply drag-n-drop the file from your desktop onto the page,
 or use
-:::
+```
 
 ## VLRs
 
@@ -53,11 +53,11 @@ as shown:
 ]
 ```
 
-:::{note}
+```{note}
 One of `data`, `filename` or `metadata` must be specified. Data must be
 specified as base64 encoded strings. The content of a file is inserted as
 binary. The metadata key specified must refer to a string or base64 encoded data.
-:::
+```
 
 ## Example
 

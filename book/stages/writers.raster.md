@@ -1,4 +1,4 @@
-(writers-raster)=
+(writers.raster)=
 
 # writers.raster
 
@@ -60,10 +60,10 @@ gdalopts
   format is name=value,name=value,...  The option may be specified
   any number of times.
 
-  :::{note}
+  ```{note}
   The INTERLEAVE GDAL driver option is not supported.  writers.gdal
   always uses BAND interleaving.
-  :::
+  ```
 
 rasters
 

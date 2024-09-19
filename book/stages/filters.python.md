@@ -1,4 +1,4 @@
-(filters-python)=
+(filters.python)=
 
 # filters.python
 
@@ -11,20 +11,20 @@ The function must have two [NumPy] arrays as arguments, `ins` and `outs`.
 The `ins` array represents the points before the `filters.python`
 filter and the `outs` array represents the points after filtering.
 
-:::{warning}
+```{warning}
 Make sure [NumPy] is installed in your [Python] environment.
 
 ```shell
 $ python3 -c "import numpy; print(numpy.__version__)"
 1.18.1
 ```
-:::
+```
 
-:::{warning}
+```{warning}
 Each array contains all the {ref}`dimensions` of the incoming `ins`
 point schema.  Each array in the `outs` list matches the [NumPy]
 array of the same type as provided as `ins` for shape and type.
-:::
+```
 
 ```{eval-rst}
 .. plugin::
@@ -126,18 +126,18 @@ def filter(ins,outs):
    return True
 ```
 
-:::{note}
+```{note}
 {ref}`filters.range` is a specialized filter that implements the exact
 functionality described in this Python operation. It is likely to be much
 faster than Python, but not as flexible. {ref}`filters.python` is the tool
 you can use for prototyping point stream processing operations.
-:::
+```
 
-:::{seealso}
+```{seealso}
 If you want to read a {ref}`pipeline` of operations into a numpy
 array, the [PDAL Python extension](https://pypi.python.org/pypi/PDAL)
 is available.
-:::
+```
 
 ### Example pipeline
 
@@ -180,9 +180,9 @@ def myfunc(ins,outs):
 
 ### Setting stage metadata
 
-:::{note}
+```{note}
 The name of the output metadata variable has changed from `metadata` to `out_metadata`.
-:::
+```
 
 Stage metadata can be created by using the `out_metadata` dictionary **global** variable.
 The `name` key must be set. The type of the `value` can usually be inferred, but

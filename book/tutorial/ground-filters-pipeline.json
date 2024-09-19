@@ -1,0 +1,31 @@
+{
+  "pipeline":[
+    {
+      "type":"filters.reprojection",
+      "out_srs":"EPSG:32632"
+    },
+    {
+      "type":"filters.assign",
+      "value":"Classification = 0"
+    },
+    {
+      "type":"filters.elm"
+    },
+    {
+      "type":"filters.outlier"
+    },
+    {
+      "type":"filters.smrf",
+      "returns":"last",
+      "where":"!(Classification == 7)",
+      "slope":0.2,
+      "window":16,
+      "threshold":0.45,
+      "scalar":1.2
+    },
+    {
+      "type":"filters.expression",
+      "expression":"Classification == 2"
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-(filters-optimalneighborhood)=
+(filters.optimalneighborhood)=
 
 # filters.optimalneighborhood
 

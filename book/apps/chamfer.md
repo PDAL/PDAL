@@ -1,8 +1,8 @@
-(chamfer-command)=
+(chamfer_command)=
 
 # chamfer
 
-:::{warning}
+````{warning}
 As of PDAL v2.6.0, the `chamfer` command is marked as DEPRECATED. It will be
 removed from the default install in PDAL v2.7 and removed completely in PDAL
 v2.8.
@@ -56,7 +56,7 @@ Note that the provided code does not match exactly the output of PDAL's
 original implementation, which summed the square of the distance to the
 nearest neighbor. We have elected not to update the PDAL implementation at
 this time.
-:::
+````
 
 The `chamfer` command is used to compute the Chamfer distance between two
 point clouds. The Chamfer distance is computed by summing the squared distances
@@ -98,7 +98,7 @@ $ pdal chamfer source.las candidate.las
 }
 ```
 
-:::{note}
+```{note}
 The Chamfer distance is computed for XYZ coordinates only and as such says
 nothing about differences in other dimensions or metadata.
-:::
+```

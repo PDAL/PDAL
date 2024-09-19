@@ -1,4 +1,4 @@
-(readers-draco)=
+(readers.draco)=
 
 # readers.draco
 
@@ -24,8 +24,7 @@ filename
 
 : Input file name. \[Required\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 [draco]: https://github.com/google/draco

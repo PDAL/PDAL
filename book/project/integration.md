@@ -35,14 +35,14 @@ PDAL {ref}`regression tests <pdal_test>` are run on a per-commit basis using
 
 ## Status
 
-:::{only} html
+```{only} html
 {{ alpinestatus }}
 {{ linuxstatus }}
 {{ osxstatus }}
 {{ windowstatus }}
 {{ docsstatus }}
 {{ dockerstatus }}
-:::
+```
 
 ## Configuration
 

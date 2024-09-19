@@ -24,13 +24,13 @@ This exercise uses PDAL to compress {{ ASPRSLAS }} data into {{ LASzip }}.
    > ./exercises/translation/interesting.laz
    > ```
    >
-   > :::{note}
+   > ```{note}
    > LAS is a very fluffy binary format. Because of the way the data are
    > stored, there is ample redundant information, and {{ LASzip }} is an open
    > source solution for compressing this information. Note that we are
    > actually inflating the data here. Its laz from the workshop and we are
    > converting it to las.
-   > :::
+   > ```
 
 2. Verify that the laz data is compressed over the las:
 
@@ -51,10 +51,10 @@ Output:
 > -rwxr-xr-x@ 1 ogi  staff    18K May  9 11:30 ./exercises/translation/interesting.laz
 > ```
 
-:::{seealso}
+```{seealso}
 {ref}`las_tutorial` contains many pointers about settings for {{ ASPRSLAS }}
 data and how to achieve specific data behaviors with PDAL.
-:::
+```
 
 ## Notes
 

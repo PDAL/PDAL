@@ -1,0 +1,17 @@
+{
+    "pipeline": [
+        {
+            "filename": "./exercises/python/athletic-fields.laz"
+        },
+        {
+            "type": "filters.python",
+            "function": "make_plot",
+            "module": "anything",
+            "pdalargs": "{\"filename\":\"./exercises/python/histogram.png\"}",
+            "script": "./exercises/python/histogram.py"
+        },
+        {
+            "type": "writers.null"
+        }
+    ]
+}

@@ -2,7 +2,7 @@
 orphan: true
 ---
 
-(filters-shell)=
+(filters.shell)=
 
 # filters.shell
 
@@ -14,14 +14,14 @@ follow-on items or orchestration of complex workflows.
 .. embed::
 ```
 
-:::{warning}
+```{warning}
 To use {ref}`filters.shell`, you must set `PDAL_ALLOW_SHELL=1`
 PDAL's execution environment. Without the environment variable
 set, every attempt at execution will result in the following
 error:
 
 > PDAL_ALLOW_SHELL environment variable not set, shell access is not allowed
-:::
+```
 
 ## Example
 

@@ -1,4 +1,4 @@
-(filters-expressionstats)=
+(filters.expressionstats)=
 
 # filters.expressionstats
 
@@ -14,11 +14,11 @@ that are conveniently countable.
 .. streamable::
 ```
 
-:::{warning}
+```{warning}
 The `dimension` selected should be an integer, not floating point dimension.
 Additionally, a dimension with lots of unique values is likely to generate a
 many entries in the map. This may not be what you want.
-:::
+```
 
 ## Example
 

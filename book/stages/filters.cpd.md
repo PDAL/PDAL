@@ -1,4 +1,4 @@
-(filters-cpd)=
+(filters.cpd)=
 
 # filters.cpd
 
@@ -9,11 +9,11 @@ rigid and affine are what you'd expect; the nonrigid transformation uses Motion
 Coherence Theory {cite}`Yuille1998` to "bend" the points to find a best
 alignment.
 
-:::{note}
+```{note}
 CPD is computationally intensive and can be slow when working with many
 points (i.e. > 10,000).  Nonrigid is significantly slower
 than rigid and affine.
-:::
+```
 
 The first input to the change filter are considered the "fixed" points, and all
 subsequent inputs are "moving" points.  The output from the change filter are
@@ -76,10 +76,10 @@ The metadata output might start something like:
     },
 ```
 
-:::{seealso}
+```{seealso}
 {ref}`filters.transformation` to apply a transform to other points.
 {ref}`filters.icp` for deterministic binary point pair assignments.
-:::
+```
 
 ## Options
 

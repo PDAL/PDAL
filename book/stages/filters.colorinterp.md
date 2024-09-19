@@ -1,4 +1,4 @@
-(filters-colorinterp)=
+(filters.colorinterp)=
 
 # filters.colorinterp
 
@@ -17,9 +17,9 @@ but a number of pre-defined ramps are embedded in PDAL.  The default ramps
 provided by PDAL are 256x1 RGB images, and might be a good starting point for
 creating your own scale factors. See [Default Ramps] for more information.
 
-:::{note}
+```{note}
 {ref}`filters.colorinterp` will use the entire band to scale the colors.
-:::
+```
 
 ```{eval-rst}
 .. embed::
@@ -41,12 +41,12 @@ creating your own scale factors. See [Default Ramps] for more information.
 ]
 ```
 
-:::{figure} ../images/pestel_scaled_helheim.png
+```{figure} ../images/pestel_scaled_helheim.png
 :scale: 80%
 
 Image data with interpolated colors based on `Z` dimension and `pestel_shades`
 ramp.
-:::
+```
 
 ## Default Ramps
 

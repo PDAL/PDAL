@@ -1,4 +1,4 @@
-(tindex-command)=
+(tindex_command)=
 
 # tindex
 

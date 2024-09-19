@@ -1,4 +1,4 @@
-(writers-gltf)=
+(writers.gltf)=
 
 # writers.gltf
 

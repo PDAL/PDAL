@@ -1,4 +1,4 @@
-(filters-voxeldownsize)=
+(filters.voxeldownsize)=
 
 # filters.voxeldownsize
 
@@ -27,12 +27,12 @@ filtered out.
 .. streamable::
 ```
 
-:::{seealso}
+```{seealso}
 {ref}`filters.voxelcenternearestneighbor` offers a similar solution,
 using the coordinates of the voxel center as the query point in a 3D
 nearest neighbor search.  The nearest neighbor is then added to the
 output point cloud, along with any existing dimensions.
-:::
+```
 
 ## Options
 
@@ -51,9 +51,9 @@ mode
 .. include:: filter_opts.rst
 ```
 
-:::{warning}
+```{warning}
 If you choose **center** mode, you are overwriting the X, Y and Z
 values of retained points.  This may invalidate other dimensions of
 the point if they depend on this location or the location of other points
 in the input.
-:::
+```

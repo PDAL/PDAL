@@ -1,4 +1,4 @@
-(readers-pgpointcloud)=
+(readers.pgpointcloud)=
 
 # readers.pgpointcloud
 
@@ -35,8 +35,7 @@ with a "where" clause.
 
 ## Options
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 connection

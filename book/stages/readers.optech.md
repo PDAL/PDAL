@@ -1,4 +1,4 @@
-(readers-optech)=
+(readers.optech)=
 
 # readers.optech
 
@@ -32,6 +32,5 @@ filename
 
 : csd file to read \[Required\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```

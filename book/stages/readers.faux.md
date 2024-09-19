@@ -1,4 +1,4 @@
-(readers-faux)=
+(readers.faux)=
 
 # readers.faux
 

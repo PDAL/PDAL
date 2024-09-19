@@ -1,4 +1,4 @@
-(filters-delaunay)=
+(filters.delaunay)=
 
 # filters.delaunay
 

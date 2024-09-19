@@ -86,9 +86,7 @@ with {ref}`filters.expression` and then write the output using the {ref}`writers
 
 The pipeline we are using is:
 
-```{eval-rst}
-.. include:: ./batch_srs_gdal.json
-    :literal:
+```{include} ./batch_srs_gdal.json
 ```
 
 You might have spotted that this pipeline doesn't have any input or output file references, or a value for the

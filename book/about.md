@@ -44,10 +44,10 @@ have a simple pipeline composed of a {ref}`LAS Reader <readers.las>` stage, a
 specialized program to perform this operation, you can dynamically compose it
 as a sequence of steps or operations.
 
-:::{figure} ./images/las-reproject-pgpointcloud.png
+```{figure} ./images/las-reproject-pgpointcloud.png
 A simple PDAL pipeline composed of a reader, filter, and writer
 stages.
-:::
+```
 
 A PDAL JSON {ref}`pipeline` that composes this operation to reproject
 and load the data into PostgreSQL might look something like the following:
@@ -81,11 +81,11 @@ clipping, tiling, transforming into a processing pipeline and reuse as
 necessary. It allows you to define these pipelines as [JSON], and it
 provides a command, {ref}`pipeline_command`, to allow you to execute them.
 
-:::{note}
+```{note}
 Raster processing tools often compose operations with this approach.
 PDAL conceptually steals its pipeline modeling from {{ GDAL }}'s
 [Virtual Raster Format].
-:::
+```
 
 ## How is it different than other tools?
 
@@ -114,7 +114,7 @@ philosophy in a number of important ways:
 5. PDAL is an open source project, with all of its development activities
    available online at <https://github.com/PDAL/PDAL>
 
-(about-pcl)=
+(about_pcl)=
 
 ### PCL
 
@@ -157,10 +157,10 @@ and [Entwine Point Tile] content.
 [LASzip] compressed LAS. You can find the software at
 <https://github.com/potree/potree/>
 
-:::{note}
+```{note}
 See Potree in action using the USGS 3DEP AWS Public Dataset at
 <https://usgs.entwine.io>
-:::
+```
 
 ### Others
 
@@ -177,13 +177,13 @@ might find useful bits of functionality in them. These other tools include:
 - [Fusion]
 - [OrfeoToolbox]
 
-:::{note}
+```{note}
 The [libLAS] project is an open source project that predates PDAL, and
 provides some of the processing capabilities provided by PDAL. It is
 currently in maintenance mode due to its dependence on LAS, the release of
 relevant LAStools capabilities as open source, and the completion of
 [Python LAS] software.
-:::
+```
 
 ## Where did PDAL come from?
 
@@ -220,10 +220,10 @@ organization is extremely important to be able to efficiently leverage the
 available computing. These characteristics demand a library oriented toward
 these approaches and PDAL achieves it.
 
-:::{note}
+```{note}
 Possible point cloud dimension types provided and supported by PDAL
 can be found at {ref}`dimensions`.
-:::
+```
 
 ## What tasks are PDAL good at?
 
@@ -271,11 +271,11 @@ cross-platform C++, and it can compile and run on Linux, OS X, and Windows. The
 best place to learn how to use PDAL's C++ API is the {ref}`test suite
 <pdal_test>` and its [source code](https://github.com/PDAL/PDAL/tree/master/test/unit).
 
-:::{seealso}
+```{seealso}
 PDAL {ref}`software <reading>` {ref}`development <writing>`
 {ref}`tutorials <writing-reader>` have more information on how to
 use the library from a software developer's perspective.
-:::
+```
 
 ### Command Line Utilities
 
@@ -302,12 +302,12 @@ users can achieve with these applications include:
 
 - {ref}`Catalog <tindex_command>` collections of data
 
-:::{note}
+```{note}
 The command line utilities are often simply {ref}`pipeline_command` and
 {ref}`pipeline` collected into a convenient application. In
 many cases you can replicate the functionality of an application
 entirely within a single pipeline.
-:::
+```
 
 ### Python API
 
@@ -318,10 +318,10 @@ PDAL supports both embedding {{ Python }} and extending with {{ Python }}. These
 allow you to dynamically interact with point cloud data in a more
 comfortable and familiar language environment for geospatial practitioners.
 
-:::{seealso}
+```{seealso}
 The {ref}`python` document contains information on how to
 install and use the PDAL Python extension.
-:::
+```
 
 ### Julia Plugin
 
@@ -337,12 +337,12 @@ Additionally the TypedTables.jl, RoamesGeometry.jl and AcceleratedArrays.jl
 libraries provide some very high-level interfaces for writing efficient
 filters.
 
-:::{seealso}
+```{seealso}
 The github repo at <https://github.com/cognitive-earth/PDAL-julia> contains
 a docker image, build instructions and some sample filters.
 
 Documentation for the stage {ref}`filters.julia`
-:::
+```
 
 ## Conclusion
 

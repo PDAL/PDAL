@@ -5,10 +5,6 @@
 ```{index} QGIS
 ```
 
-```{eval-rst}
-.. include:: ./includes/substitutions.rst
-```
-
 ## What is {{ QGIS }}?
 
 {{ QGIS }} is an open source GIS. It is extensible with {{ Python }}, it integrates
@@ -33,11 +29,11 @@ to be sure you'll have something to look at data with.
 ```{image} ./images/qgis-select-qgis.png
 ```
 
-:::{note}
+```{note}
 It is assumed your {{ Hobu }} USB drive has all of its contents
 copied to the `C:\Users\hobu\PDAL` folder. Please adjust your
 locations when reading these tutorial documents accordingly.
-:::
+```
 
 3. Choose the install image, Windows or Mac, and install {{ QGIS }}
    prepare your machine to run the examples.

@@ -12,10 +12,10 @@ so the following instructions use that build tool, though building with
 GNU Makefiles works similarly (simply replace "ninja" with "make" when
 running the build tool).
 
-:::{note}
+```{note}
 The [PDAL continuous integration](https://github.com/PDAL/PDAL/tree/master/scripts/ci)
 provides example configuration and build recipes for Linux, Windows, and OSX.
-:::
+```
 
 ## Dependencies
 

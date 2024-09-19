@@ -1,4 +1,4 @@
-(readers-gdal)=
+(readers.gdal)=
 
 # readers.gdal
 
@@ -49,11 +49,11 @@ RGB values of an [ASPRS LAS] file using {ref}`writers.las`.
 ]
 ```
 
-:::{note}
+```{note}
 {ref}`readers.gdal` is quite sensitive to GDAL's cache settings. See the
 `GDAL_CACHEMAX` value at <https://gdal.org/user/configoptions.html> for
 more information.
-:::
+```
 
 ## Options
 
@@ -61,8 +61,7 @@ filename
 
 : [GDALOpen] 'able raster file to read \[Required\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 header

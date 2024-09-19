@@ -21,9 +21,9 @@ from the command line.
 Our first example to demonstrate PDAL's utility will be to simply query an
 [LAS] file to determine the data that are in it in the very first point.
 
-:::{note}
+```{note}
 The [interesting.las] file in these examples can be found on github.
-:::
+```
 
 `pdal info` outputs JavaScript [JSON].
 

@@ -1,4 +1,4 @@
-(readers-mbio)=
+(readers.mbio)=
 
 # readers.mbio
 
@@ -46,8 +46,7 @@ filename
 
 : Filename to read from \[Required\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 format

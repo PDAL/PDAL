@@ -18,11 +18,11 @@ and report issues that you might have.
 
 <http://lists.osgeo.org/mailman/listinfo/pdal>
 
-:::{note}
+```{note}
 Please remember that an email to the PDAL list is going to 100s of
 individuals. Do your diligence the best you can on your question before
 asking, but don't be afraid to ask. We won't bite. Promise.
-:::
+```
 
 ## GitHub
 
@@ -33,10 +33,10 @@ take contributions in all forms, and we welcome those who are willing to roll
 up their sleeves and start filing tickets, pushing code, generating builds, and
 answering questions.
 
-:::{seealso}
+```{seealso}
 {ref}`development_index` provides more information on how the PDAL software
 development activities operate.
-:::
+```
 
 ## Gitter
 

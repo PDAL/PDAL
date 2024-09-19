@@ -1,4 +1,4 @@
-(filters-divider)=
+(filters.divider)=
 
 # filters.divider
 
@@ -56,6 +56,6 @@ This pipeline will create 10 output files from the input file readers.las.
 .. include:: filter_opts.rst
 ```
 
-:::{warning}
+```{warning}
 You must specify exactly one of either [count] or [capacity].
-:::
+```

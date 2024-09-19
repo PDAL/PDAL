@@ -1,18 +1,18 @@
-(filters-projpipeline)=
+(filters.projpipeline)=
 
 # filters.projpipeline
 
 The projpipeline filter applies a coordinates transformation pipeline. The pipeline could be specified as PROJ string (single step operation or multiple step string starting with +proj=pipeline), a WKT2 string describing a CoordinateOperation, or a “<urn:ogc:def:coordinateOperation:EPSG::XXXX>” URN.
 
-:::{note}
+```{note}
 The projpipeline filter does not consider any spatial reference information.
 However user could specify an output srs, but no check is done to ensure
 the compliance with the provided transformation pipeline.
-:::
+```
 
-:::{note}
+```{note}
 The projpipeline filter is enabled if the version of GDAL is superior or equal to 3.0
-:::
+```
 
 ```{eval-rst}
 .. streamable::
@@ -55,11 +55,11 @@ to WGS84, using the `reverse_transfo` flag. It also set the output srs
 ]
 ```
 
-:::{note}
+```{note}
 PDAL use the GDAL `OGRCoordinateTransformation` class to transform coordinates.
 By default output angular unit are in radians. To change to degrees we need to
 apply a unit conversion step.
-:::
+```
 
 ## Options
 

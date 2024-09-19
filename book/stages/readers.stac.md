@@ -1,4 +1,4 @@
-(readers-stac)=
+(readers.stac)=
 
 # readers.stac
 

@@ -1,4 +1,4 @@
-(filters-lloydkmeans)=
+(filters.lloydkmeans)=
 
 # filters.lloydkmeans
 
@@ -9,8 +9,8 @@ associated cluster ID (starting at 0).
 .. embed::
 ```
 
-:::{versionadded} 2.1
-:::
+```{versionadded} 2.1
+```
 
 ## Example
 

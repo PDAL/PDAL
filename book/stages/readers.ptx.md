@@ -1,11 +1,11 @@
-(readers-ptx)=
+(readers.ptx)=
 
 # readers.ptx
 
 The **PTX reader** reads data from [Leica Cyclone PTX] files. It infers
 dimensions from points stored in a text file.
 
-:::{note}
+```{note}
 PTX files can contain multiple point clouds stored in a single
 file.  If that is the case, the reader will read all the points
 from all of the internal point clouds as one.
@@ -37,8 +37,7 @@ filename
 
 : File to read. \[Required\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 `` _`discard_missing_points` ``

@@ -2,7 +2,7 @@
 orphan: true
 ---
 
-(pdal-expression)=
+(pdal_expression)=
 
 # Expression Syntax
 

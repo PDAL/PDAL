@@ -29,19 +29,19 @@ Fortunately, Conda provides us a fully-featured known
 configuration to run our examples and exercises without having to suffer
 so much, and provides it for Windows, Linux, and macOS.
 
-:::{note}
+```{note}
 Not everyone uses Conda. Another alternative to get a known configuration
 is to go through the workshop using {ref}`docker <development_docker>` as your platform. A
 previous edition of the workshop was provided using Docker, but it was
 found to be a bit too difficult to follow.
-:::
+```
 
-:::{note}
+```{note}
 PDAL does not have a python wheel package and thus is distributed via `conda-forge` conda
 channel. If you would like to know more about the limitations that prevent PDAL from being
 distributed as a pip package, you can read about it at the
 [pypackaging-native website]
-:::
+```
 
 ## Installing Conda Environment (Workshop USB)
 
@@ -98,10 +98,10 @@ Alternatively use the following `environment.yml` file to create your environmen
 > :language: yaml
 > ```
 >
-> :::{note}
+> ```{note}
 > The `conda-pack` package is used for packaging the pdal-workshop conda environment to go
 > to the USB image, and is not needed otherwise
-> :::
+> ```
 
 ## Using Conda From ArcGIS Pro
 

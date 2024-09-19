@@ -1,4 +1,4 @@
-(readers-ept)=
+(readers.ept)=
 
 # readers.ept
 
@@ -53,12 +53,12 @@ Additional attributes created by the
 
 For more details about addon dimensions and how to produce them, see {ref}`writers.ept_addon`.
 
-:::{note}
+```{note}
 The `forward` option of {ref}`writers.copc` or {ref}`writers.las` cannot work
 with EPT due to how EPT can mix content and files. There is no single unified metadata
 value to forward. You will have to explicitly set any output options that you
 would expect to come from EPT on any writers.
-:::
+```
 
 ## Options
 
@@ -122,11 +122,11 @@ origin
   dimension, which can be determined from  the file's position in EPT
   metadata file `entwine-files.json`.
 
-:::{note}
+```{note}
 When using `pdal info --summary`, using the `origin` option will cause the
 resulting bounds to be clipped to those of the selected origin, and the resulting
 number of points to be an upper bound for this selection.
-:::
+```
 
 polygon
 
@@ -137,17 +137,17 @@ polygon
   can be followed by a slash ('/') and a spatial reference specification to apply to
   the polygon.
 
-:::{note}
+```{note}
 When using `pdal info --summary`, using the `polygon` option will cause the
 resulting bounds to be clipped to the maximal extents of all provided polygons,
 and the resulting number of points to be an upper bound for this polygon selection.
-:::
+```
 
-:::{note}
+```{note}
 When both the `bounds` and `polygon` options are specified, only
 the points that fall within *both* the bounds and the polygon(s) will be
 returned.
-:::
+```
 
 ogr
 

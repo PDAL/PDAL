@@ -15,10 +15,10 @@ boundary, which means we must first install it on our system.
 
 ## Exercise
 
-:::{note}
+```{note}
 We are going to run using the Uncompahgre data in the `./density`
 directory.
-:::
+```
 
 ```console
 $ pdal info ./exercises/analysis/density/uncompahgre.laz --boundary

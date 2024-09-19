@@ -1,3 +1,5 @@
+(clipping)=
+
 # Clipping with Geometries
 
 ## Introduction
@@ -31,18 +33,18 @@ point values based on polygons read from [OGR]. The second is
 {ref}`filters.range`, which allows you to keep or reject points from the
 set that match given criteria.
 
-:::{seealso}
+```{seealso}
 {ref}`filters.python` allow you to construct sophisticated logic
 for keeping or rejecting points in a more expressive environment.
-:::
+```
 
 ## Data Preparation
 
-:::{figure} autzen-shapes-point-cloud.png
+```{figure} autzen-shapes-point-cloud.png
 :scale: 30%
 
 Autzen Stadium, a 100 million+ point cloud file.
-:::
+```
 
 The data are mixed in two different coordinate systems. The {ref}`LAZ
 <readers.las>` file is in [Oregon State Plane Ft.] and the [GeoJSON] defining
@@ -65,11 +67,11 @@ for us on-the-fly:
 </OGRVRTDataSource>
 ```
 
-:::{note}
+```{note}
 The GeoJSON file does not have an externally-defined coordinate system,
 so we are explicitly setting one with the LayerSRS parameter. If your
 data does have coordinate system information, you don't need to do that.
-:::
+```
 
 Save this VRT definition to a file, called `attributes.vrt` in the same
 location where you
@@ -80,12 +82,12 @@ For our scenario, we want to clip out the yellow-green polygon, marked
 number "5",
 in the upper right hand corner.
 
-:::{figure} autzen-shapes-to-clip.png
+```{figure} autzen-shapes-to-clip.png
 :scale: 30%
 
 We want to clip out the polygon in the upper right hand corner. We can
 view the [GeoJSON] geometry using something like [QGIS]
-:::
+```
 
 ## Pipeline
 
@@ -121,13 +123,13 @@ apply to data as they are read, filtered, and written.
   we're only keeping those points with a classification value of 5.
 - {ref}`writers.las`: write our content out using an [ASPRS LAS] writer.
 
-:::{note}
+```{note}
 You don't have to use only `Classification` to set the attributes
 with {ref}`filters.overlay`. Any valid dimension name could work, but
 most LiDAR softwares will display categorical coloring for the
 `Classification` field, and we can leverage that behavior in this
 scenario.
-:::
+```
 
 ## Processing
 

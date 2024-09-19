@@ -1,4 +1,4 @@
-(development-docker)=
+(development_docker)=
 
 # Building Docker Containers for PDAL
 
@@ -9,12 +9,12 @@ building of [Docker] containers. PDAL keeps three Docker containers current.
 - `pdal/pdal:latest` -- PDAL master
 - `pdal/pdal:1.5` -- PDAL maintenance branch
 
-:::{note}
+```{note}
 Containers are built upon the [Dependencies] container, but the
 [Dependencies] container is not pinned to specific Bionic or PDAL release
 times. It corresponds to where ever the `dependencies` tag of the PDAL
 source tree at <https://github.com/PDAL/PDAL> resides
-:::
+```
 
 ## Dependencies
 
@@ -31,10 +31,10 @@ git tag -f dependencies
 git push origin refs/tags/dependencies -f
 ```
 
-:::{note}
+```{note}
 The dependencies container is currently built upon [Ubuntu Bionic]. When
 the next Ubuntu LTS is released, the PDAL project will likely move to it.
-:::
+```
 
 ## Maintenance
 
@@ -44,9 +44,9 @@ example, the `1.4-maintenance` branch will have a corresponding
 `pdal/pdal:1.4` container made with every commit on [DockerHub]. Users are
 encouraged to use these containers for testing, bug confirmation, and deployment
 
-:::{figure} ../images/docker-maintenance-branch.png
+```{figure} ../images/docker-maintenance-branch.png
 Docker containers on maintenance branch correspond to major PDAL releases.
-:::
+```
 
 ## Latest (or master)
 
@@ -57,16 +57,16 @@ testing and verification of fixes, and it is recommended that users looking to
 depend on PDAL's Docker containers always use known release versions off of the
 last stable release branch.
 
-:::{warning}
+```{warning}
 You should be using the [Maintenance] Docker container for any
 production-oriented operations. Only use the latest one to test or prototype
 a latest, unreleased feature.
-:::
+```
 
-:::{figure} ../images/docker-master-branch.png
+```{figure} ../images/docker-master-branch.png
 The `pdal/pdal:latest` branch is current relative to the `docker-master`
 branch in GitHub.
-:::
+```
 
 ```
 $ git tag -f docker-master

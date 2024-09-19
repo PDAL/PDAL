@@ -1,4 +1,4 @@
-(translate-command)=
+(translate_command)=
 
 # translate
 

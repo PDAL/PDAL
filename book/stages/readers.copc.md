@@ -1,4 +1,4 @@
-(readers-copc)=
+(readers.copc)=
 
 # readers.copc
 
@@ -6,7 +6,7 @@ The **COPC Reader** supports reading from [COPC format] files. A COPC file is
 a [LASzip] (compressed LAS) file that organizes its data spatially, allowing for
 incremental loading and spatial filtering.
 
-:::{note}
+```{note}
 LAS stores X, Y and Z dimensions as scaled integers.  Users converting an
 input LAS file to an output LAS file will frequently want to use the same
 scale factors and offsets in the output file as existed in the input
@@ -14,9 +14,9 @@ file in order to
 maintain the precision of the data.  Use the `forward` option of
 {ref}`writers.las` to facilitate transfer of header information from
 source COPC files to destination LAS/LAZ files.
-:::
+```
 
-:::{note}
+```{note}
 COPC files can contain datatypes that are actually arrays rather than
 individual dimensions.  Since PDAL doesn't support these datatypes, it
 must map them into datatypes it supports.  This is done by appending the
@@ -28,13 +28,13 @@ three dimensional arrays and a field of type 21 with the name Bar would
 cause PDAL to create dimensions Bar0, Bar1 and Bar2.  See the information
 on the extra bytes VLR in the [LAS Specification] for more information
 on the extra bytes VLR and array datatypes.
-:::
+```
 
-:::{warning}
+```{warning}
 COPC files that use the extra bytes VLR and datatype 0 will be accepted,
 but the data associated with a dimension of datatype 0 will be ignored
 (no PDAL dimension will be created).
-:::
+```
 
 ```{eval-rst}
 .. embed::
@@ -67,8 +67,7 @@ but the data associated with a dimension of datatype 0 will be ignored
 : COPC file to read. Remote file specifications (http, AWS, Google, Azure, Dropbox) are supported.
   \[Required\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 bounds
