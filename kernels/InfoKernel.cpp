@@ -87,7 +87,6 @@ void InfoKernel::validateSwitches(ProgramArgs& args)
         m_showSchema = true;
         m_boundary = true;
         m_stac = true;
-        m_breakout = true;
     }
 
 
@@ -158,8 +157,8 @@ void InfoKernel::addSwitches(ProgramArgs& args)
          m_queryPoint);
     args.add("stats", "Dump stats on all points (reads entire dataset)",
         m_showStats);
-    args.add("breakout", "Breakout Classification by typical flags",
-        m_breakout, false);
+    args.add("breakout", "Breakout dimension by typical flags",
+        m_breakoutDimension );
     args.add("boundary", "Compute a hexagonal hull/boundary of dataset",
         m_boundary);
     args.add("dimensions", "Dimensions on which to compute statistics",
@@ -245,10 +244,10 @@ void InfoKernel::makePipeline()
         stage = m_statsStage =
             &m_manager.makeFilter("filters.stats", *stage, filterOptions);
 
-        if (m_breakout)
+        if (m_breakoutDimension.size())
         {
             Options expressionStatsFilterOptions;
-            expressionStatsFilterOptions.add("dimension", "Classification");
+            expressionStatsFilterOptions.add("dimension", m_breakoutDimension);
             expressionStatsFilterOptions.add("expressions", "Withheld == 1");
             expressionStatsFilterOptions.add("expressions", "Keypoint == 1");
             expressionStatsFilterOptions.add("expressions", "Overlap == 1");
