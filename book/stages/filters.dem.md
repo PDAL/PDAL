@@ -43,8 +43,7 @@ band
 
 : GDAL Band number to read (count from 1) \[Default: 1\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```
 
 [gdal]: http://gdal.org

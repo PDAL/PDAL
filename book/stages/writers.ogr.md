@@ -77,8 +77,7 @@ driver can be specified with the `ogrdriver` option.
   `OPTION=VALUE` string. Separate multiple values with `,` or repeat the
   option. \[Default: None\]
 
-```{eval-rst}
-.. include:: writer_opts.rst
+```{include} writer_opts.md
 ```
 
 [vector formats]: https://gdal.org/drivers/vector/index.html

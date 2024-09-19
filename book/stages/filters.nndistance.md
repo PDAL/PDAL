@@ -40,6 +40,5 @@ metric described by the [mode] of the filter.
 
 : The number of k nearest neighbors to consider. \[Default: **10**\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

@@ -77,8 +77,7 @@ keep_unspecified
 : If true, writes all dimensions. Dimensions specified with the [order] option
   precede those not specified. \[Default: **true**\]
 
-```{eval-rst}
-.. include:: writer_opts.rst
+```{include} writer_opts.md
 ```
 
 [point cloud data (pcd)]: https://pcl-tutorials.readthedocs.io/en/latest/pcd_file_format.html

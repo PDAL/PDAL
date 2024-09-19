@@ -46,6 +46,5 @@ seed
 
 : Seed for random number generator, used only with shuffle.
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

@@ -66,8 +66,7 @@ precision
   See the [printf] reference for more information.
   \[Default: g-style formatting (variable precision)\]
 
-```{eval-rst}
-.. include:: writer_opts.rst
+```{include} writer_opts.md
 ```
 
 [polygon file format]: http://paulbourke.net/dataformats/ply/

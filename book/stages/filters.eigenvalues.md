@@ -48,8 +48,7 @@ normalize
 
 : Normalize eigenvalues such that the sum is 1. \[Default: false\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```
 
 [selfadjointeigensolver]: https://eigen.tuxfamily.org/dox/classEigen_1_1SelfAdjointEigenSolver.html

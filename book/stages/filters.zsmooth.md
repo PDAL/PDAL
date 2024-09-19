@@ -50,6 +50,5 @@ dim
 
 : The name of a dimension to use for the adjusted Z value. Cannot be 'Z'. \[Required\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

@@ -65,6 +65,5 @@ advanced
 
 : Calculate advanced statistics (skewness, kurtosis). \[Default: false\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

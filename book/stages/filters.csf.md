@@ -67,6 +67,5 @@ iterations
 
 : Maximum number of iterations. \[Default: **500**\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

@@ -11,14 +11,14 @@ The function must have two [NumPy] arrays as arguments, `ins` and `outs`.
 The `ins` array represents the points before the `filters.python`
 filter and the `outs` array represents the points after filtering.
 
-```{warning}
+````{warning}
 Make sure [NumPy] is installed in your [Python] environment.
 
 ```shell
 $ python3 -c "import numpy; print(numpy.__version__)"
 1.18.1
 ```
-```
+````
 
 ```{warning}
 Each array contains all the {ref}`dimensions` of the incoming `ins`
@@ -275,8 +275,7 @@ function
 : A JSON dictionary of items you wish to pass into the modules globals as the
   `pdalargs` object.
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```
 
 [numpy]: http://www.numpy.org/

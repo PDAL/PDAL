@@ -59,6 +59,5 @@ and then filters out those points where the rank is three using
 
 : The threshold used to identify nonzero singular values. \[Default: 0.01\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

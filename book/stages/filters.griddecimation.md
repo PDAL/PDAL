@@ -44,6 +44,5 @@ value
 : A list of {ref}`assignment expressions <Assignment Expressions>` to be applied to points.
   The list of values is evaluated in order. \[Default: none\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

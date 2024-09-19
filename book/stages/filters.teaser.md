@@ -108,6 +108,5 @@ fpfh
 
 : Use FPFH to find correspondences? \[Default: **true**\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

@@ -105,8 +105,7 @@ threads
 
 : The number of threads to use. Only valid in {ref}`standard mode <processing_modes>`. \[Default: 1\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```
 
 [executesql]: http://www.gdal.org/ogr__api_8h.html#a9892ecb0bf61add295bd9decdb13797a

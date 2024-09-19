@@ -37,6 +37,5 @@ minmax
 
 : Whether to return the minimum or maximum value in the dimension.
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

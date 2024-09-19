@@ -43,6 +43,5 @@ The radius $r$ can be adjusted by changing the [radius] option.
 
 : Radius. \[Default: 1.0\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

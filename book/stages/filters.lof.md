@@ -67,6 +67,5 @@ exceeds 1.2 before writing the output.
 
 : The number of k nearest neighbors. \[Default: 10\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

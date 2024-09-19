@@ -124,8 +124,7 @@ optimized
   Requires {ref}`filters.optimalneighborhood` be run prior to this stage.
   \[Default: false\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```
 
 (dimensionality)=

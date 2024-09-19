@@ -63,6 +63,5 @@ thresh2
 
 : The threshold to be applied to the second smallest eigenvalue. \[Default: 6\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

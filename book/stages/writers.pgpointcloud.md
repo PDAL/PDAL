@@ -115,8 +115,7 @@ output_dims
 : If specified, limits the dimensions written for each point.  Dimensions
   are listed by name and separated by commas.
 
-```{eval-rst}
-.. include:: writer_opts.rst
+```{include} writer_opts.md
 ```
 
 [epsg code]: http://www.epsg.org

@@ -128,6 +128,5 @@ tt
 
 : Translation threshold. \[Default: **9e-8**\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

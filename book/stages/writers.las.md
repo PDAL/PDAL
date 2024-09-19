@@ -242,8 +242,7 @@ vlrs
 
 : Add VLRS specified as json. See [VLRs] above for details.
 
-```{eval-rst}
-.. include:: writer_opts.rst
+```{include} writer_opts.md
 ```
 
 [json]: http://www.json.org/

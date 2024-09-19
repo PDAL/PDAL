@@ -42,8 +42,7 @@ Reverse Morton algorithm.
 
 ## Options
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```
 
 [lopocs]: https://github.com/Oslandia/lopocs

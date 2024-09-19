@@ -52,8 +52,7 @@ This pipeline will create 10 output files from the input file readers.las.
 : Maximum number of points in each output view.  Views will contain
   approximately equal numbers of points.  \[Default: none\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```
 
 ```{warning}

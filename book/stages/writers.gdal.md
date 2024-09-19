@@ -221,8 +221,7 @@ pdal_metadata:
 
 : Write PDAL's pipeline and metadata as base64 to the GDAL PAM metadata \[Default: False\]
 
-```{eval-rst}
-.. include:: writer_opts.rst
+```{include} writer_opts.md
 ```
 
 ```{note}

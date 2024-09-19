@@ -51,6 +51,5 @@ dimension
 
 : The name of the dimension to filter.
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

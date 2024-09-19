@@ -83,8 +83,7 @@ delimiter
 
 : When producing CSV, what character to use as a delimiter? \[Default: ","\]
 
-```{eval-rst}
-.. include:: writer_opts.rst
+```{include} writer_opts.md
 ```
 
 [csv]: http://en.wikipedia.org/wiki/Comma-separated_values

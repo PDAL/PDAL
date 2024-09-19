@@ -103,8 +103,7 @@ outside
   it is assumed that the spatial reference of the bounding region matches
   that of the points.
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```
 
 ## Notes

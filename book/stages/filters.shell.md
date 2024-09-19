@@ -74,6 +74,5 @@ command
 : The shell command to run. It is run in relation to the current
   working directory of the pipeline executing it.
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

@@ -62,6 +62,5 @@ data segmented into smaller blocks).
 : How many points to fit into each chip. The number of points in each chip will
   not exceed this value, and will sometimes be less than it. \[Default: 5000\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

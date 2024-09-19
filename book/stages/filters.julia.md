@@ -145,8 +145,7 @@ function
 
 : A dimension name or an array of dimension names to add to the pipeline that do not already exist.
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```
 
 [julia]: https://julialang.org/

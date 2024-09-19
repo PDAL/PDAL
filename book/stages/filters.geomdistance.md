@@ -71,6 +71,5 @@ ring
   ring instead of all points inside the polygon having distance `0`).
   \[Default: false\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

@@ -96,6 +96,5 @@ window
 
 : Max window size. \[Default: **18.0**\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

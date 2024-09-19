@@ -37,8 +37,7 @@ returns to the output file.
 
 ## Options
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```
 
 ```{note}

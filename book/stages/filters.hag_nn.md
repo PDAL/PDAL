@@ -130,6 +130,5 @@ allow_extrapolation
   extrapolation is used to assign the `HeightAboveGround` value.  \[Default:
   false\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

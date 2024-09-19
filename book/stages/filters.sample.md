@@ -100,6 +100,5 @@ radius
   Whether specified or derived, `radius` defines the minimum allowable
   distance between points.
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

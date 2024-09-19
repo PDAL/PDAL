@@ -76,8 +76,7 @@ normals
 
 : Write vertex normals. NormalX, NormalY and NormalZ dimensions must exist. \[Default: false\]
 
-```{eval-rst}
-.. include:: writer_opts.rst
+```{include} writer_opts.md
 ```
 
 [specification]: https://www.khronos.org/gltf/

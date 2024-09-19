@@ -88,6 +88,5 @@ zero_ground
   `Z` value to raster DEM.
   \[Default: true\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

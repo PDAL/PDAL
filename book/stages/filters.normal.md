@@ -89,6 +89,5 @@ inspection.
 : A flag indicating whether or not to reorient normals using minimum spanning
   tree propagation. \[Default: false\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

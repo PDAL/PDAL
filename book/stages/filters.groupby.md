@@ -36,6 +36,5 @@ By default the groups are ordered according to the order of first occurance with
 
 : The dimension containing data to be grouped.
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

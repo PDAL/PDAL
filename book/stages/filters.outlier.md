@@ -147,8 +147,7 @@ method
 
 : Standard deviation threshold (statistical method only). \[Default: 2.0\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```
 
 [las specification]: http://www.asprs.org/a/society/committees/standards/LAS_1_4_r13.pdf

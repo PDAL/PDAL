@@ -66,6 +66,5 @@ count
 
 : Number of points to return. \[Default: 10\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

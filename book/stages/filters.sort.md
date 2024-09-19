@@ -38,6 +38,5 @@ order
 
 : The order in which to sort, ASC or DESC \[Default: "ASC"\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

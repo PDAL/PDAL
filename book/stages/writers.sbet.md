@@ -28,6 +28,5 @@ angles_are_degrees
 : Convert all angular values from degrees to radians before write.
   \[Default: true\]
 
-```{eval-rst}
-.. include:: writer_opts.rst
+```{include} writer_opts.md
 ```

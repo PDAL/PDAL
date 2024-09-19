@@ -83,6 +83,5 @@ apply a unit conversion step.
   No check is done to ensure the compliance with the specified coordinate
   operation \[Default: Not set\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

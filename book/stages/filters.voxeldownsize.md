@@ -47,8 +47,7 @@ mode
   be modified to be the center of the voxel.
   **first**: Only the first point found in each voxel is retained.
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```
 
 ```{warning}

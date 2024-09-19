@@ -49,6 +49,5 @@ is3d
   if `is3d` is set to false, it will instead consider neighbors in a 2D
   cylinder (XY plane only). \[Default: true\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

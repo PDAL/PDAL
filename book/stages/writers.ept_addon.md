@@ -120,8 +120,7 @@ threads
 
 : Number of worker threads used to write EPT addon data.  A minimum of 4 will be used no matter what value is specified.
 
-```{eval-rst}
-.. include:: writer_opts.rst
+```{include} writer_opts.md
 ```
 
 [entwine point tile]: https://entwine.io/entwine-point-tile.html

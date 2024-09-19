@@ -108,8 +108,7 @@ output_dims
   are listed by name and separated by commas.  X, Y and Z are required and
   must be explicitly listed.
 
-```{eval-rst}
-.. include:: writer_opts.rst
+```{include} writer_opts.md
 ```
 
 [nga specification]: https://nsgreg.nga.mil/doc/view?i=4202

@@ -57,6 +57,5 @@ reverse
 
 : whether to straighten or unstraighten the point cloud \[Default: `false`\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

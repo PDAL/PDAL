@@ -56,8 +56,7 @@ expression
 : A JSON query {ref}`expression <Mongo expression>` containing a combination of query comparisons
   and logical operators.
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```
 
 (mongo-expression)=

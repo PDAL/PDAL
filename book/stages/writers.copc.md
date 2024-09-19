@@ -186,8 +186,7 @@ enhanced_srs_vlrs
 
 : Write WKT2 and PROJJSON as VLR \[Default: false\]
 
-```{eval-rst}
-.. include:: writer_opts.rst
+```{include} writer_opts.md
 ```
 
 [copc format]: https://copc.io/

@@ -79,6 +79,5 @@ max_triangle_edge_length
 : Maximum triangle edge length; triangles larger than this size will not be
   rasterized. \[Default: Infinity\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

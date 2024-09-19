@@ -73,8 +73,7 @@ write_pipeline_metadata
 : Write PDAL pipeline metadata into `PDAL:pipeline:metadata` of
   `geoarrow_dimension_name`
 
-```{eval-rst}
-.. include:: writer_opts.rst
+```{include} writer_opts.md
 ```
 
 [apache arrow]: https://arrow.apache.org/

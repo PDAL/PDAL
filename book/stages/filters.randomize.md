@@ -25,6 +25,5 @@ The randomize filter reorders the points in a point view randomly.
 
 ## Options
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

@@ -57,6 +57,5 @@ dimensions
 
 : The {ref}`dimensions` which must be equal for the point to be declared a duplicate. \[Required\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

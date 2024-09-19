@@ -133,6 +133,5 @@ smooth
 
 : Use GEOS simplify operations to smooth boundary to a tolerance \[Default: true\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

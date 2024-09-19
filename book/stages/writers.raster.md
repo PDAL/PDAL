@@ -85,8 +85,7 @@ nodata
   \[Default: depends on the `data_type`.  -9999 for double, float, int and short, 9999 for
   unsigned int and unsigned short, 255 for unsigned char and -128 for char\]
 
-```{eval-rst}
-.. include:: writer_opts.rst
+```{include} writer_opts.md
 ```
 
 [driver that supports creation of rasters]: http://www.gdal.org/formats_list.html

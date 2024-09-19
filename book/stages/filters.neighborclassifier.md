@@ -73,6 +73,5 @@ assigned based on the closest point in pred.txt.
 : An integer which specifies the number of neighbors which vote on each
   selected point.
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

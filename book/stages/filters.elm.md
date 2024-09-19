@@ -78,6 +78,5 @@ returns that are not marked as noise.
 
 : Threshold value to identify low noise points. \[Default: 1.0\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

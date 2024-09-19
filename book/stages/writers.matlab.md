@@ -51,6 +51,5 @@ struct
 
 : Array structure name to read \[Default: "PDAL"\]
 
-```{eval-rst}
-.. include:: writer_opts.rst
+```{include} writer_opts.md
 ```

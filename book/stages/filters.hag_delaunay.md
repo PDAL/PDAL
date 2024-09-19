@@ -91,6 +91,5 @@ allow_extrapolation
   difference between the heights of the non-ground point and nearest
   ground point.  \[Default: false\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

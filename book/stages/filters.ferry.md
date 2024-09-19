@@ -92,6 +92,5 @@ dimensions
   Note: the old syntax that used '=' instead of '=>' between dimension names
   is still supported.
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

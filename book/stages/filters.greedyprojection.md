@@ -60,8 +60,7 @@ eps_angle
 
 : Maximum normal difference angle for triangulation consideration. \[Default: 45 degrees\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```
 
 [pcl]: http://www.pointclouds.org/documentation/tutorials/greedy_projection.php

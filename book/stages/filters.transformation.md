@@ -49,8 +49,7 @@ invert
   The matrix is assumed to be presented in row-major order.
   Only matrices with sixteen elements are allowed.
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```
 
 ## Further details

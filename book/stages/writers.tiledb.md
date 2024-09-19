@@ -160,9 +160,7 @@ allow_dups
 
 : Allow duplicate points. \[Default: true\]
 
-```{eval-rst}
-.. include:: writer_opts.rst
-
+```{include} writer_opts.md
 ```
 
 TileDB provides default filter profiles. The filters can be over-written by the `filters` option. If a TileDB attribute is not set by the filter profile or the `filter` option, the compression filter set by the compression option is used.

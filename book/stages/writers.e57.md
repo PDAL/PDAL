@@ -56,6 +56,5 @@ double_precision
 
 : Use double precision for storage (false by default).
 
-```{eval-rst}
-.. include:: writer_opts.rst
+```{include} writer_opts.md
 ```

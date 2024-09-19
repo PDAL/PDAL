@@ -33,8 +33,7 @@ and `Y` dimensions of the point cloud.
 
 ## Options
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```
 
 [delaunator]: https://github.com/mapbox/delaunator

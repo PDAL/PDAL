@@ -75,6 +75,5 @@ and "utm2.las", while "out2.las" contains the points from "utm3.las".
 
 ## Options
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

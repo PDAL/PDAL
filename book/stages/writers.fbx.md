@@ -19,10 +19,9 @@ to obtain a current copy of the SDK.
 
 Example Windows CMake configuration
 
-::
-
-: -DFBX_ROOT_DIR:FILEPATH="C:fbx2019.0" ^
-  -DBUILD_PLUGIN_FBX=ON ^
+```
+-DFBX_ROOT_DIR:FILEPATH="C:fbx2019.0" -DBUILD_PLUGIN_FBX=ON
+```
 
 ## Example
 
@@ -42,9 +41,9 @@ Example Windows CMake configuration
 ]
 ```
 
-..code-block:: shell
-
-> pdal translate autzen.las autzen.fbx -f poisson
+```
+pdal translate autzen.las autzen.fbx -f poisson
+```
 
 ## Options
 
@@ -56,6 +55,5 @@ ascii
 
 : Write ASCII FBX format.  \[Default: false\]
 
-```{eval-rst}
-.. include:: writer_opts.rst
+```{include} writer_opts.md
 ```

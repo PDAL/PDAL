@@ -43,6 +43,5 @@ spatial reference, and points meeting a query criteria.
   nearest to the location are returned.  The [query] option can't be used
   with the [point] option. \[Default: no points are selected.\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

@@ -89,8 +89,7 @@ The metadata output might start something like:
   Valid values are "rigid", "affine", and "nonrigid".
   \[Default: "rigid""\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```
 
 ```{eval-rst}

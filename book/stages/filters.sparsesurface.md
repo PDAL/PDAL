@@ -67,6 +67,5 @@ radius
 
 : Mask neighbor points as low noise. \[Default: **1.0**\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

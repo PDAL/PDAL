@@ -64,8 +64,7 @@ struct
 
 : Array structure name to read \[Default: "PDAL"\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```
 
 [matlab]: https://www.mathworks.com/products/matlab.html

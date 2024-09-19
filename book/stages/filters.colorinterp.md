@@ -154,8 +154,7 @@ and it will be used. Otherwise, provide a [GDAL]-readable raster filename.
 : MAD threshold multiplier. Used in conjunction with [k] to threshold the
   differencing. \[Default: 1.4862\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```
 
 [gdal]: http://www.gdal.org

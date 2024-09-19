@@ -101,6 +101,5 @@ returns
 
 : Slope. \[Default: 1.0\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

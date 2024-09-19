@@ -17,6 +17,5 @@ programmers extending PDAL functionality and isn't useful to end users.
 
 ## Options
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

@@ -32,6 +32,5 @@ only 10 scan lines.
 
 : The number of lines to be grouped by. \[Default : 1\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

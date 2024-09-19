@@ -25,6 +25,5 @@ count
 
 : Desired number of output samples. \[Default: 1000\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

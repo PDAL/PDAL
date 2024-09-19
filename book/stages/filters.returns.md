@@ -40,6 +40,5 @@ returns.
 : Comma-separated list of return number groupings. Valid options are "first",
   "last", "intermediate" or "only". \[Default: "last"\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

@@ -104,6 +104,5 @@ expressions
 
 : An array of expressions to apply.
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

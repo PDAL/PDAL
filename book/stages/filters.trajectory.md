@@ -48,8 +48,7 @@ tout
 
 : Output data interval in seconds. \[Default: .01\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```
 
 [here]: ../papers/lidar-traj.pdf

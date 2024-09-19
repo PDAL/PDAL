@@ -73,8 +73,7 @@ quantization
 }
 ```
 
-```{eval-rst}
-.. include:: writer_opts.rst
+```{include} writer_opts.md
 ```
 
 [draco]: https://github.com/google/draco

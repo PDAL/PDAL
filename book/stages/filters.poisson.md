@@ -69,6 +69,5 @@ depth
   to this parameter.  Increase if the results appear unsatisfactory.
   \[Default: 8\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

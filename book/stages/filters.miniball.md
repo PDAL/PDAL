@@ -55,6 +55,5 @@ threads
 
 : The number of threads to use. Only valid in {ref}`standard mode <processing_modes>`. \[Default: 1\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```

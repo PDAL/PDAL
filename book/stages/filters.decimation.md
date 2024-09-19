@@ -48,6 +48,5 @@ limit
 
 : Point index at which sampling should stop (exclusive).  \[Default: No limit\]
 
-```{eval-rst}
-.. include:: filter_opts.rst
+```{include} filter_opts.md
 ```
