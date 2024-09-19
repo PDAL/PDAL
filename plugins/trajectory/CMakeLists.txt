@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.13)
 if (STANDALONE)
     project(pdal-trajectory)
     include("${CMAKE_CURRENT_LIST_DIR}/../../cmake/standalone.cmake" NO_POLICY_SCOPE)
-    find_package(PDAL REQUIRED)    
+    find_package(PDAL REQUIRED)
 endif(STANDALONE)
 
 
@@ -18,7 +18,7 @@ PDAL_ADD_PLUGIN(libname filter trajectory
         ${CERES_LIBRARIES}
         ${PDAL_LIBRARIES}
     INCLUDES
-        ${PDAL_VENDOR_DIR}/eigen
+        ${EIGEN_INCLUDE_DIRS}
 )
 
 if (WITH_TRAJECTORY_TEST)

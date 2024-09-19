@@ -217,9 +217,12 @@ add_library(PDAL::PDAL ALIAS ${PDAL_LIB_NAME})
 # Interface include directories allow downstream project to get the directory
 # without specification.
 #
+
+set (EIGEN_INCLUDE_DIRS "${PDAL_VENDOR_DIR}/eigen" CACHE PATH "Eigen vendor PATH")
+
 target_include_directories(${PDAL_LIB_NAME}
     SYSTEM BEFORE PRIVATE
-        ${PDAL_VENDOR_DIR}/eigen
+        ${EIGEN_INCLUDE_DIRS}
         ${PDAL_VENDOR_DIR}/kazhdan
         ${PDAL_VENDOR_DIR}/h3/include
 )
