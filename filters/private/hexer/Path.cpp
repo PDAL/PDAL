@@ -1,35 +1,67 @@
+#include <cassert>
+
 #include "Path.hpp"
 
 namespace hexer 
 {
 
-void Path::toWKT(std::ostream& output) const
+void Path::writeRing(std::ostream& out) const
 {
-    std::vector<Point> pts = m_points;
-
-    auto outputPoint = [&output](Point& p)
+    auto outputPoint = [&out](const Point& p)
     {
-        output << p.m_x << " " << p.m_y;
+        out << p.m_x << " " << p.m_y;
     };
 
-    output << "(";
-
-    auto pi = pts.begin();
-    if (pi != pts.end())
-        outputPoint(*pi++);
-    for (; pi != pts.end(); ++pi)
+    const std::vector<Point>& pts = points();
+    assert(pts.size() > 2);
+    out << "(";
+    outputPoint(pts.front());
+    for (auto it = pts.begin() + 1; it != pts.end(); ++it)
     {
-        output << ", ";
-        outputPoint(*pi);
+        out << ", ";
+        outputPoint(*it);
     }
+    out << ")";
+}
 
-    output << ")";
+// WKT (or GeoJSON) doesn't allow nesting of polygons.  You can just have
+// polygons and holes.  Islands within the holes need to be described as
+// separate polygons.  To that end, we gather the islands from all holes
+// and return them to be processed as separate polygons.
+std::vector<Path *> Path::writePolygon(std::ostream& out) const
+{
+    std::vector<Path *> islands;
 
-    std::vector<Path *> paths = subPaths();
-    for (auto p : paths)
+    out << "(";
+    writeRing(out);
+    const std::vector<Path *>& paths = subPaths();
+    for (auto& p : paths)
     {
-        output <<",";
-        p->toWKT(output);
+        out << ", ";
+        p->writeRing(out);
+        const std::vector<Path *>& subs(p->subPaths());
+        islands.insert(islands.end(), subs.begin(), subs.end());
+    }
+    out << ")";
+
+    return islands;
+}
+
+void Path::toWKT(std::ostream& output) const
+{
+    std::vector<Path *> islands = writePolygon(output);
+
+    // See the note on writePolygon()
+    while (islands.size())
+    {
+        std::vector<Path *> paths;
+        paths.swap(islands);
+        for (Path *p : paths)
+        {
+            output << ", ";
+            std::vector<Path *> subIslands = p->writePolygon(output);
+            islands.insert(islands.end(), subIslands.begin(), subIslands.end());
+        }
     }
 }
 } // namespace hexer

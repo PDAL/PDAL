@@ -88,6 +88,9 @@ public:
         { return m_points.size(); }
 
 private:
+    void writeRing(std::ostream& out) const;
+    std::vector<Path *> writePolygon(std::ostream& out) const;
+
     /// Hexagon associated with path, used for finding child paths
     HexId m_rootHex;
     /// Parent path (NULL if root)

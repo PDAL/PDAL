@@ -122,7 +122,6 @@ void BaseGrid::findShape(HexId root)
             m_hexPaths.insert({pathHex, &path});
         }
         path.addPoint(findPoint(cur));
-
         const auto& [left, right] = nextSegments(cur);
         // left.hex: the hexagon we would "walk into" moving clockwise from the
         // current segment.
@@ -224,9 +223,7 @@ void BaseGrid::toWKT(std::ostream& output) const
 {
     auto outputPath = [&output](Path *p)
     {
-        output << "(";
         p->toWKT(output);
-        output << ")";
     };
 
     std::vector<Path *> paths = rootPaths();

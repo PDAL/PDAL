@@ -13,7 +13,7 @@ public:
     HexGrid(double height, int denseLimit) : BaseGrid(denseLimit)
         { processHeight(height); }
     HexGrid(int denseLimit) : BaseGrid(denseLimit), m_height(-1.0),
-        m_width(-1.0), m_minY(-1)
+        m_width(-1.0), m_minY(1)
     {}
     ~HexGrid();
 
