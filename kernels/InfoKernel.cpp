@@ -364,7 +364,7 @@ void InfoKernel::dump(MetadataNode& root)
     if (m_showStats)
     {
         MetadataNode stats = root.add(m_statsStage->getMetadata().clone("stats"));
-        if (m_breakout)
+        if (m_breakoutDimension.size())
             stats.add(m_expressionStatsStage->getMetadata().clone("breakout"));
     }
 
