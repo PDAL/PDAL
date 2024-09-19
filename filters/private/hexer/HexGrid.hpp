@@ -7,38 +7,42 @@ namespace hexer
 
 static const double SQRT_3 = 1.732050808;
 
-class HexGrid : public BaseGrid
+class PDAL_DLL HexGrid : public BaseGrid
 {
 public:
     HexGrid(double height, int denseLimit) : BaseGrid(denseLimit)
         { processHeight(height); }
-    PDAL_DLL HexGrid(int denseLimit) : BaseGrid(denseLimit), m_width{-1.0}
-        {}
+    HexGrid(int denseLimit) : BaseGrid(denseLimit), m_height(-1.0),
+        m_width(-1.0), m_minY(-1)
+    {}
+    ~HexGrid();
 
 
     void addXY(double& x, double& y)
         { 
           Point p{x, y};
-          addPoint(p);        
+          addPoint(p);
         }
-    bool sampling() const
-        { return m_width < 0; }
+
     Point offset(int idx) const
         { return m_offsets[idx]; }
     double height() const
         { return m_height; }
-    bool inGrid(HexId& h)
-        { return h.j >= m_minY; }
     bool isH3()
         { return false; }
-    HexId moveCoord(HexId& h)
-        { return HexId{h.i, h.j - 1}; }
     Point findPoint(Segment& s);
 
 private:
     void processHeight(double height);
     HexId findHexagon(Point p);
     HexId edgeHex(HexId hex, int edge) const;
+
+    bool sampling() const
+        { return m_width < 0; }
+    bool inGrid(HexId& h)
+        { return h.j >= m_minY; }
+    HexId moveCoord(HexId& h)
+        { return HexId{h.i, h.j - 1}; }
 
     /// Height of the hexagons in the grid (2x apothem)
     double m_height;

@@ -198,6 +198,12 @@ void HexBin::done(PointTableRef table)
             "GeoJSON", "hexbins");
         writer.writeDensity(*m_grid);
     }
+    if (m_boundaryOutput.size())
+    {
+        OGR writer(m_boundaryOutput, getSpatialReference().getWKT(), m_grid->isH3(),
+            "GeoJSON", "hexbins");
+        writer.writeBoundary(*m_grid); 
+    }
 
     SpatialReference srs(table.anySpatialReference());
     pdal::Polygon p(polygon.str(), srs);

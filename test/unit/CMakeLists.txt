@@ -414,7 +414,19 @@ PDAL_ADD_TEST(pdal_filters_splitter_test
 PDAL_ADD_TEST(pdal_filters_stats_test FILES filters/StatsFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_transformation_test FILES
     filters/TransformationFilterTest.cpp)
-PDAL_ADD_TEST(pdal_filters_hexbin_test FILES filters/HexbinFilterTest.cpp)
+    PDAL_ADD_TEST(pdal_filters_hexbin_test
+    FILES
+        filters/HexbinFilterTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/h3/include
+    LINK_WITH
+        ${PDAL_H3_LIB_NAME}
+)
+target_compile_definitions(pdal_filters_hexbin_test
+    PRIVATE
+        H3_PREFIX=PDALH3
+)
+
 PDAL_ADD_TEST(pdal_filters_voxel_test FILES filters/VoxelTest.cpp)
 PDAL_ADD_TEST(pdal_filters_voxel_downsize_test FILES filters/VoxelDownsizeFilterTest.cpp)
 

@@ -3,6 +3,9 @@
 namespace hexer
 {
 
+HexGrid::~HexGrid()
+{}
+
 void HexGrid::processHeight(double height)
 {
     m_maxSample = 10000;
@@ -122,7 +125,7 @@ HexId HexGrid::findHexagon(Point p)
         }
     }
 
-    // minimum Y (HexId.j) value, used in inGrid() for finding root/child paths in parentOrChild(); 
+    // minimum Y (HexId.j) value, used in inGrid() for finding root/child paths in parentOrChild();
     // set as y - 1 to account for m_hexPaths containing hexagons across edge 3
     m_minY = std::min(m_minY, y - 1);
 
@@ -133,10 +136,10 @@ HexId HexGrid::edgeHex(HexId hex, int edge) const
 {
     //               (+ Y)
     //                __3_
-    //             2 /    \ 4 
+    //             2 /    \ 4
     //              /      \
     //              \      /
-    //             1 \____/ 5  
+    //             1 \____/ 5
     //                  0
     //               (- Y)
 

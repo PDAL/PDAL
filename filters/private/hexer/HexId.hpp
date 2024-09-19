@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vendor/h3/include/h3api.h>
+#include <h3api.h>
 
 namespace hexer
 {
@@ -18,9 +18,9 @@ inline bool operator == (const HexId& h1, const HexId& h2)
     return h1.i == h2.i && h1.j == h2.j;
 }
 
-static HexId operator+(HexId const& c1, HexId const& c2)
+inline HexId operator+(HexId const& c1, HexId const& c2)
     {   return {c1.i + c2.i, c1.j + c2.j};  }
-}
+} // namespace hexer
 
 namespace std
 {
@@ -34,4 +34,4 @@ namespace std
             return h(id.i) ^ (h(id.j) << 1);
         }
     };
-}
+} // namespace std

@@ -10,6 +10,9 @@
 namespace hexer
 {
 
+H3Grid::~H3Grid()
+{}
+
 void H3Grid::processHeight(double height)
 {
     // bins for H3 auto resolution:
@@ -46,7 +49,7 @@ HexId H3Grid::findHexagon(Point p)
     }
     HexId ij = h32ij(index);
 
-    // minimum i value, used in inGrid() for finding root/child paths in parentOrChild(); 
+    // minimum i value, used in inGrid() for finding root/child paths in parentOrChild();
     // set as i - 1 to account for m_hexPaths containing hexagons across edge 3 (-i direction)
     m_minI = std::min(m_minI, ij.i - 1);
     return ij;
@@ -58,7 +61,7 @@ Point H3Grid::findPoint(Segment& s)
     if (PDALH3cellsToDirectedEdge(ij2h3(s.hex), ij2h3(edgeHex(s.hex, s.edge)), &dir_edge) != E_SUCCESS) {
         std::ostringstream oss;
         oss << "Can't get directed edge between hexagons (" << s.hex.i <<
-            ", " << s.hex.j <<") and (" << edgeHex(s.hex, s.edge).i <<", " << 
+            ", " << s.hex.j <<") and (" << edgeHex(s.hex, s.edge).i <<", " <<
             edgeHex(s.hex, s.edge).j << ").";
         throw hexer_error(oss.str());
     }

@@ -9,15 +9,16 @@ namespace hexer
 
 using DirEdge = H3Index;
 
-class H3Grid : public BaseGrid
+class PDAL_DLL H3Grid : public BaseGrid
 {
 public:
     H3Grid(int dense_limit)
         : BaseGrid{dense_limit}, m_res{-1}, m_origin{0}
         {}
-    PDAL_DLL H3Grid(int res, int dense_limit)
+    H3Grid(int res, int dense_limit)
         : BaseGrid{dense_limit}, m_res{res}, m_origin{0}
         {}
+    ~H3Grid();
 
     H3Index ij2h3(HexId ij)
         {   H3Index h3;
@@ -40,21 +41,14 @@ public:
             }
             return ij;  }
 
-    HexId findHexagon(Point p);
-    HexId edgeHex(HexId hex, int edge) const;
     Point findPoint(Segment& s);
 
     void addXY(double& x, double& y)
-        { 
+        {
           Point p{PDALH3degsToRads(x), PDALH3degsToRads(y)};
           addPoint(p);        
         }
-    bool sampling() const
-        { return m_res < 0; }
-    bool inGrid(HexId& h)
-        { return h.i >= m_minI; }
-    HexId moveCoord(HexId& h)
-        { return HexId{h.i - 1, h.j}; }
+
     bool isH3()
         { return true; }
 
@@ -68,6 +62,15 @@ public:
 
 private:
     void processHeight(double height);
+    HexId findHexagon(Point p);
+    HexId edgeHex(HexId hex, int edge) const;
+
+    bool sampling() const
+        { return m_res < 0; }
+    bool inGrid(HexId& h)
+        { return h.i >= m_minI; }
+    HexId moveCoord(HexId& h)
+        { return HexId{h.i - 1, h.j}; }
 
     /// H3 resolution of the grid (0-15)
     int m_res;
