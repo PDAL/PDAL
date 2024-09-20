@@ -3,7 +3,7 @@
 # filters.csf
 
 The **Cloth Simulation Filter (CSF)** classifies ground points based on the
-approach outlined in [^cite_zhang2016].
+approach outlined in {cite:p}`zhang2016easy`.
 
 ```{eval-rst}
 .. embed::

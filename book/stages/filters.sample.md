@@ -4,8 +4,8 @@
 
 The **Sample Filter** performs Poisson sampling of the input `PointView`. The
 practice of performing Poisson sampling via "Dart Throwing" was introduced
-in the mid-1980's by [^cite_cook1986] and [^cite_dippe1985], and has been applied to
-point clouds in other software [^cite_mesh2009].
+in the mid-1980's by {cite:p}`cook1986stochastic` and {cite:p}`dippe1985antialiasing`, and has been applied to
+point clouds in other software {cite:p}`cite_mesh2009`.
 
 Our implementation of Poisson sampling is made streamable by voxelizing the
 space and only adding points to the output `PointView` if they do not violate

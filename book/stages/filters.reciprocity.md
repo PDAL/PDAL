@@ -2,7 +2,7 @@
 
 # filters.reciprocity
 
-The **Nearest-Neighbor Reciprocity Criterion** was introduced in [^cite_weyrich2004]
+The **Nearest-Neighbor Reciprocity Criterion** was introduced in {cite:p}`weyrich2004post`
 and is based on a simple assumption, that valid points may be in the
 k-neighborhood of an outlier, but the outlier will most likely not be part of
 the valid point's k-neighborhood.

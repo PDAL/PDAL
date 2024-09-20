@@ -3,7 +3,7 @@
 # filters.skewnessbalancing
 
 **Skewness Balancing** classifies ground points based on the approach outlined
-in [^cite_bartels2010].
+in {cite:p}`bartels2010threshold`.
 
 ```{eval-rst}
 .. embed::

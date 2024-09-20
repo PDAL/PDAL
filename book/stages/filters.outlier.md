@@ -68,7 +68,7 @@ scene.
 
 After outlier removal, the noise points are removed.
 
-See [^cite_rusu2008] for more information.
+See {cite:p}`rusu2008towards` for more information.
 
 ### Example
 

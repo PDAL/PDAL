@@ -5,7 +5,7 @@
 The **Local Outlier Factor (LOF) filter** was introduced as a method
 of determining the degree to which an object is an outlier. This filter
 is an implementation of the method
-described in [^cite_breunig2000].
+described in {cite:p}`breunig2000lof`.
 
 The filter creates three new dimensions, `NNDistance`,
 `LocalReachabilityDistance` and `LocalOutlierFactor`, all of which are

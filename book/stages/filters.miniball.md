@@ -2,11 +2,11 @@
 
 # filters.miniball
 
-The **Miniball Criterion** was introduced in [^cite_weyrich2004] and is based on the
+The **Miniball Criterion** was introduced in {cite:p}`weyrich2004post` and is based on the
 assumption that points that are distant to the cluster built by their
 k-neighborhood are likely to be outliers. First, the smallest enclosing ball is
 computed for the k-neighborhood, giving a center point and radius
-[^cite_fischer2010]. The miniball criterion is then computed by comparing the
+{cite:p}`fischer2003fast`. The miniball criterion is then computed by comparing the
 distance (from the current point to the miniball center) to the radius of the
 miniball.
 

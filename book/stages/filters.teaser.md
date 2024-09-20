@@ -3,7 +3,7 @@
 # filters.teaser
 
 The **TEASER filter** uses the Truncated least squares Estimation And
-SEmidefinite Relaxation (TEASER) algorithm [^cite_yang2020] to calculate a **rigid**
+SEmidefinite Relaxation (TEASER) algorithm {cite:p}`yang2020teaser` to calculate a **rigid**
 transformation that best aligns two datasets. The first input to the ICP filter
 is considered the "fixed" points, and all subsequent points are "moving"
 points. The output from the filter are the "moving" points after the calculated

@@ -3,7 +3,7 @@
 # filters.smrf
 
 The **Simple Morphological Filter (SMRF)** classifies ground points based
-on the approach outlined in [^cite_pingel2013].
+on the approach outlined in {cite:p}`pingel2013improved`.
 
 ```{eval-rst}
 .. embed::
@@ -32,7 +32,7 @@ output file.
 ## Example #2
 
 A more complete example, specifying some options. These match the
-optimized parameters for Sample 1 given in Table 3 of [^cite_pingel2013].
+optimized parameters for Sample 1 given in Table 3 of {cite:p}`pingel2013improved`.
 
 ```json
 [

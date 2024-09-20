@@ -131,9 +131,9 @@ optimized
 
 ### Dimensionality feature set
 
-The features introduced in [^cite_demantke2011] describe the shape of the
+The features introduced in {cite:p}`demantke2011dimensionality` describe the shape of the
 neighborhood, indicating whether the local geometry is more linear (1D), planar
-(2D) or volumetric (3D) while the one introduced in [^cite_guinard2017] adds the
+(2D) or volumetric (3D) while the one introduced in {cite:p}`guinard2017weakly` adds the
 idea of a structure being vertical.
 
 The dimensionality filter introduces the following four descriptors that are

@@ -3,7 +3,7 @@
 # filters.relaxationdartthrowing
 
 The **Relaxation Dart Throwing Filter** is a variation on Poisson sampling. The
-approach was first introduced by [^cite_mccool1992]. The filter operates nearly
+approach was first introduced by {cite:p}`mccool1992hierarchical`. The filter operates nearly
 identically to {ref}`filters.sample`, except it will continue to shrink the
 radius with each pass through the point cloud until the desired number of
 output points is reached.

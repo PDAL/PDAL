@@ -98,7 +98,7 @@ into {ref}`filters.assign` and {ref}`filters.overlay`.
 
 The {ref}`Extended Local Minimum (ELM) method <filters.elm>` helps to identify
 low noise points that can adversely affect ground segmentation algorithms. ELM
-was first published in [^cite_chen2012] as part of the upward-fusion method of DTM
+was first published in {cite:p}`chen2012upward` as part of the upward-fusion method of DTM
 generation. Noise points are **classified** with a value of `7` in keeping
 with the LAS specification.
 
@@ -123,7 +123,7 @@ points that are isolated and likely arise from noise sources. Noise points are
 
 ### Ground Segmentation
 
-The {ref}`Simple Morphological Filter (SMRF) <filters.smrf>` [^cite_pingel2013] is a
+The {ref}`Simple Morphological Filter (SMRF) <filters.smrf>` {cite:p}`pingel2013improved` is a
 newer addition to PDAL that has quietly existed in an alpha state since v1.3.
 With the release of PDAL v1.5, our SMRF implementation is much more complete,
 although it only implements nearest neighbor void filling and not the authors'
@@ -183,7 +183,7 @@ within PDAL's source tree.
 
 ```{note}
 SMRF is not intended to be a replacement for the {ref}`Progressive
-Morphological Filter (PMF) <filters.pmf>` [^cite_zhang2003]. Rather, it is
+Morphological Filter (PMF) <filters.pmf>` {cite:p}`zhang2003progressive`. Rather, it is
 offered as an alternative. PMF has been a part of PDAL since v1.0, first as
 part of the PCL plugin and now as `filters.pmf`. Since PDAL v1.4, we have
 fixed a number of bugs, and have accelerated the approximate mode by

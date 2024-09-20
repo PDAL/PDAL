@@ -3,7 +3,7 @@
 # filters.elm
 
 The Extended Local Minimum (ELM) filter marks low points as noise. This filter
-is an implementation of the method described in [^cite_chen2012].
+is an implementation of the method described in {cite:p}`chen2012upward`.
 
 ELM begins by rasterizing the input point cloud data at the given [cell] size.
 Within each cell, the lowest point is considered noise if the next lowest point

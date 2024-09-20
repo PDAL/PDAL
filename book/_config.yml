@@ -31,46 +31,21 @@ html:
   use_issues_button: true
   use_repository_button: true
 
-# sphinx:
-#   config:
-#     intersphinx_mapping:
-#       ebp:
-#         - "https://executablebooks.org/en/latest/"
-#         - null
-#       myst-parser:
-#         - "https://myst-parser.readthedocs.io/en/latest/"
-#         - null
-#       myst-nb:
-#         - "https://myst-nb.readthedocs.io/en/latest/"
-#         - null
-#       sphinx:
-#         - "https://www.sphinx-doc.org/en/master"
-#         - null
-#       nbformat:
-#         - "https://nbformat.readthedocs.io/en/latest"
-#         - null
-#       sd:
-#         - "https://sphinx-design.readthedocs.io/en/latest"
-#         - null
-#       sphinxproof:
-#         - "https://sphinx-proof.readthedocs.io/en/latest/"
-#         - null
-#     hoverxref_intersphinx:
-#      - "sphinxproof"
-#     mathjax3_config:
-#       tex:
-#         macros:
-#           "N": "\\mathbb{N}"
-#           "floor": ["\\lfloor#1\\rfloor", 1]
-#           "bmat": ["\\left[\\begin{array}"]
-#           "emat": ["\\end{array}\\right]"]
-        
-#   extra_extensions:
-#     - sphinx.ext.intersphinx
-#     - sphinx_inline_tabs
-#     - sphinx_proof
-#     - sphinx_examples
-#     - hoverxref.extension
+sphinx:
+  config:
+    bibtex_bibfiles:
+      - references.bib
+    bibtex_reference_style: author_year
+  local_extensions:
+    embed: ./_ext
+  extra_extensions:
+    - breathe
+    - sphinx.ext.autodoc
+    - sphinx.ext.mathjax
+    - sphinx.ext.intersphinx
+    - sphinxcontrib.bibtex
+    - notfound.extension
+    - sphinxcontrib.jquery
 
 parse:
   myst_substitutions:

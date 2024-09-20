@@ -5,7 +5,7 @@
 The **Progressive Morphological Filter (PMF)** is a method of
 segmenting ground and non-ground returns. This filter is an implementation
 of the method described in
-[^cite_zhang2003].
+{cite:p}`zhang2003progressive`.
 
 ```{eval-rst}
 .. embed::
@@ -61,7 +61,7 @@ of the method described in
 ```
 
 ```{note}
-[^cite_zhang2003] describes the consequences and relationships of the parameters
+{cite:p}`zhang2003progressive` describes the consequences and relationships of the parameters
 in more detail and is the canonical resource on the topic.
 ```
 

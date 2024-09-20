@@ -4,7 +4,7 @@
 
 The **Poisson Filter** passes data Mischa Kazhdan's poisson surface
 reconstruction
-algorithm. [^cite_kazhdan2006]  It creates a watertight surface from the original
+algorithm. {cite:p}`kazhdan2006poisson`  It creates a watertight surface from the original
 point set by creating an entirely new point set representing the imputed
 isosurface.  The algorithm requires normal vectors to each point in order
 to run.  If the x, y and z normal dimensions are present in the input point

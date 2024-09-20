@@ -5,12 +5,10 @@
 The assign filter allows you set the value of a dimension for all points
 to a provided value that pass a range filter.
 
-```{eval-rst}
-.. embed::
+```{embed}
 ```
 
-```{eval-rst}
-.. streamable::
+```{streamable}
 ```
 
 ```{note}

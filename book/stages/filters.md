@@ -43,19 +43,19 @@ filters.trajectory
 
 {ref}`filters.csf`
 
-: Label ground/non-ground returns using [^cite_zhang2016].
+: Label ground/non-ground returns using {cite:p}`zhang2016easy`.
 
 {ref}`filters.pmf`
 
-: Label ground/non-ground returns using [^cite_zhang2003].
+: Label ground/non-ground returns using {cite:p}`zhang2003progressive`.
 
 {ref}`filters.skewnessbalancing`
 
-: Label ground/non-ground returns using [^cite_bartels2010].
+: Label ground/non-ground returns using {cite:p}`bartels2010threshold`.
 
 {ref}`filters.smrf`
 
-: Label ground/non-ground returns using [^cite_pingel2013].
+: Label ground/non-ground returns using {cite:p}`pingel2013improved`.
 
 {ref}`filters.sparsesurface`
 
@@ -166,19 +166,19 @@ filters.lloydkmeans
 {ref}`filters.dbscan`
 
 : Perform Density-Based Spatial Clustering of Applications with Noise
-  (DBSCAN) [^cite_ester1996].
+  (DBSCAN) {cite:p}`ester1996density`.
 
 {ref}`filters.litree`
 
 : Segment and label individual trees. Returns a new dimension `TreeID` that
   indicates the tree that a point belongs to. `TreeID` starts at 1, with
-  non-tree points given a `TreeID` of 0. [^cite_li2012].
+  non-tree points given a `TreeID` of 0. {cite:p}`li2012new`.
 
 {ref}`filters.lloydkmeans`
 
 : Perform K-means clustering using Lloyd's algorithm. Returns a new dimension
   `ClusterID` with each point being assigned to a cluster. `ClusterID`
-  starts at 0. [^cite_lloyd1982].
+  starts at 0. {cite:p}`lloyd1982least`.
 
 ### Pointwise Features
 
@@ -692,7 +692,7 @@ filters.faceraster
 {ref}`filters.poisson`
 
 : Create mesh using the Poisson surface reconstruction algorithm
-  [^cite_kazhdan2006].
+  {cite:p}`kazhdan2006poisson`.
 
 {ref}`filters.faceraster`
 

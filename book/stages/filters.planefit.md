@@ -2,7 +2,7 @@
 
 # filters.planefit
 
-The **Plane Fit Criterion** was introduced in [^cite_weyrich2004] and computes the
+The **Plane Fit Criterion** was introduced in {cite:p}`weyrich2004post` and computes the
 deviation of a point from a manifold approximating its neighbors.  First, a
 plane is fit to each point's k-neighborhood by performing an eigenvalue
 decomposition. Next, the mean point to plane distance is computed by

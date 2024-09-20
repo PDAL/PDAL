@@ -3,7 +3,7 @@
 # filters.dbscan
 
 The DBSCAN filter performs Density-Based Spatial Clustering of Applications
-with Noise (DBSCAN) [^cite_ester1996] and labels each point with its associated
+with Noise (DBSCAN) {cite:p}`ester1996density` and labels each point with its associated
 cluster ID. Points that do not belong to a cluster are given a Cluster ID of
 -1. The remaining clusters are labeled as integers starting from 0.
 

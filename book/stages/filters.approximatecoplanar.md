@@ -4,7 +4,7 @@
 
 The **approximate coplanar filter** implements a portion of the algorithm
 presented
-in [^cite_limberger2015]. Prior to clustering points, the authors first apply an
+in {cite:p}`limberger2015real`. Prior to clustering points, the authors first apply an
 approximate coplanarity test, where points that meet the following criteria are
 labeled as approximately coplanar.
 
