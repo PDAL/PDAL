@@ -14,9 +14,7 @@ build:
       # - doxygen ./doc/doxygen/doxygen.conf 1> /dev/null
       # Generate on-the-fly Sphinx configuration from Jupyter Book's _config.yml
       - "jupyter-book config sphinx book/"
-      - |
-        sed -i '1i\
-        import os, sys; sys.path.append(os.path.abspath("./_ext"))' book/conf.py
+      - sed -i "1i\ import os, sys; sys.path.append(os.path.abspath(\"./_ext\"))" book/conf.py
 
   # apt_packages:
   #   - graphviz
