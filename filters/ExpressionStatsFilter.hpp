@@ -67,8 +67,6 @@ private:
     std::string m_dimName;
     std::map<std::string, std::map<double, point_count_t>> m_stats;
 
-//     std::unordered_map<std::string, point_count_t> m_stats;
-
     void extractMetadata(PointTableRef table);
     ExpressionStatsFilter& operator=(const ExpressionStatsFilter&) = delete;
     ExpressionStatsFilter(const ExpressionStatsFilter&) = delete;
