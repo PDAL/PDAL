@@ -76,6 +76,7 @@ private:
     std::string m_boundaryOutput;
     bool m_isH3;
     int m_h3Res;
+    SpatialReference m_srs;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void ready(PointTableRef table);

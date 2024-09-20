@@ -33,6 +33,7 @@ public:
     // Convert H3 index to IJ coordinates
     HexId h32ij(H3Index h3)
         {   HexId ij;
+            std::cout << "doing h32ij on " << h3;
             if (PDALH3cellToLocalIj(m_origin, h3, 0, &ij) != E_SUCCESS) {
                 std::ostringstream oss;
                 oss << "Can't convert H3 index " << h3 <<

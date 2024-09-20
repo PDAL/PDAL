@@ -126,7 +126,13 @@ void HexBin::ready(PointTableRef table)
 
 void HexBin::filter(PointView& view)
 {
-    PointRef p(view, 0);
+    m_srs = getSpatialReference();
+    std::cout << m_srs.identifyHorizontalEPSG(); 
+    if (m_isH3 && (m_srs.identifyHorizontalEPSG() != (std::string)"4326"))
+        log()->get(LogLevel::Error) << "Cannot compute H3 hexbins with spatial reference "
+            "EPSG:" << m_srs.identifyHorizontalEPSG() << "! Input must be EPSG:4326";
+
+/*     PointRef p(view, 0);
     if (m_count == 0)
         m_grid->setSampleSize(std::min((int)m_sampleSize, (int)view.size()));
 
@@ -134,7 +140,7 @@ void HexBin::filter(PointView& view)
     {
         p.setPointId(idx);
         processOne(p);
-    }
+    } */
 }
 
 
@@ -150,6 +156,7 @@ bool HexBin::processOne(PointRef& point)
 
 void HexBin::done(PointTableRef table)
 {
+    std::cout << "running";
     try
     {
         m_grid->findShapes();
