@@ -18,15 +18,9 @@ build:
   #   - graphviz
 
 sphinx:
-<<<<<<< HEAD
   # builder: html
   configuration: book/conf.py
   # fail_on_warning: true
-=======
-  builder: html
-  configuration: doc/conf.py
-  fail_on_warning: false
->>>>>>> origin
 
 # python:
 #   install:
