@@ -79,7 +79,7 @@ private:
     bool m_showMetadata;
     bool m_boundary;
     bool m_stac;
-    bool m_breakout;
+    std::string m_breakoutDimension;
     std::string m_pointIndexes;
     std::string m_dimensions;
     std::string m_enumerate;
