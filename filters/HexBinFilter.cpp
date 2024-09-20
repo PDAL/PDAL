@@ -127,12 +127,14 @@ void HexBin::ready(PointTableRef table)
 void HexBin::filter(PointView& view)
 {
     PointRef p(view, 0);
+    if (m_count == 0)
+        m_grid->setSampleSize(std::min((int)m_sampleSize, (int)view.size()));
+
     for (PointId idx = 0; idx < view.size(); ++idx)
     {
         p.setPointId(idx);
         processOne(p);
     }
-    m_grid->setSampleSize(std::min(int(m_count), int(m_sampleSize)));
 }
 
 
@@ -192,6 +194,7 @@ void HexBin::done(PointTableRef table)
             "Boundary MULTIPOLYGON of domain");
     } */
 
+    // density and boundary writing with OGR does not support polygon smoothing
     if (m_DensityOutput.size())
     {
         OGR writer(m_DensityOutput, getSpatialReference().getWKT(), m_grid->isH3(),
@@ -207,29 +210,6 @@ void HexBin::done(PointTableRef table)
 
     SpatialReference srs(table.anySpatialReference());
     pdal::Polygon p(polygon.str(), srs);
-
-    /***
-      We want to make these bumps on edges go away, which means that
-      we want to elimnate both B and C.  If we take a line from A -> C,
-      we need the tolerance to eliminate B.  After that we're left with
-      the triangle ACD and we want to eliminate C.  The perpendicular
-      distance from AD to C is the hexagon height / 2, so we set the
-      tolerance a little larger than that.  This is larger than the
-      perpendicular distance needed to eliminate B in ABC, so should
-      serve for both cases.
-
-         B ______  C
-          /      \
-       A /        \ D
-
-    ***/
-    if (m_doSmooth)
-    {
-        double tolerance = 1.1 * m_grid->height() / 2;
-        double cull = m_cullArg->set() ?
-            m_cullArea : (6 * tolerance * tolerance);
-        p.simplify(tolerance, cull, m_preserve_topology);
-    }
 
     // If the SRS was geographic, use relevant
     // UTM for area and density computation
@@ -279,6 +259,29 @@ void HexBin::done(PointTableRef table)
         "(ignore contrary metadata item name. This is '(n * hexArea) / totalCount')");
     if (!m_isH3)
     {
+        /***
+        We want to make these bumps on edges go away, which means that
+        we want to elimnate both B and C.  If we take a line from A -> C,
+        we need the tolerance to eliminate B.  After that we're left with
+        the triangle ACD and we want to eliminate C.  The perpendicular
+        distance from AD to C is the hexagon height / 2, so we set the
+        tolerance a little larger than that.  This is larger than the
+        perpendicular distance needed to eliminate B in ABC, so should
+        serve for both cases.
+
+           B ______  C
+            /      \
+         A /        \ D
+
+        ***/
+        if (m_doSmooth)
+        {
+            double tolerance = 1.1 * m_grid->height() / 2;
+            double cull = m_cullArg->set() ?
+                m_cullArea : (6 * tolerance * tolerance);
+            p.simplify(tolerance, cull, m_preserve_topology);
+        }
+
         Utils::OStringStreamClassicLocale offsets;
         offsets << "MULTIPOINT (";
         for (int i = 0; i < 6; ++i)
@@ -300,6 +303,8 @@ void HexBin::done(PointTableRef table)
     }
     else
     {
+        if (m_doSmooth)
+            log()->get(LogLevel::Warning) << "Smoothing not supported for H3 processing!"; 
         m_metadata.add("h3_resolution", m_grid->getRes(), "The H3 resolution level "
             "of the grid. See https://h3geo.org/docs/core-library/restable "
             "for more information" );

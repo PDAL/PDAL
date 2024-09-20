@@ -54,10 +54,10 @@ public:
 
     // test function: used when inserting pre-defined grids in tests, 
     // sets origin outside of findHexagon()
-    PDAL_DLL void setOrigin(H3Index idx)
+    void setOrigin(H3Index idx)
         { m_origin = idx; }
     // test function: used to get grid resolution to run h3 latLngToCell()
-    PDAL_DLL int getRes() const
+    int getRes() const
         { return m_res; }
 
 private:
