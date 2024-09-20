@@ -25,7 +25,7 @@ PDAL_ADD_PLUGIN(libname reader rdb
         ${RDB_INCLUDE_C_DIR}
         ${PDAL_INCLUDE_DIRS}
 )
-target_include_directories(${libname} PRIVATE "${EIGEN_INCLUDE_DIRS}")
+target_include_directories(${libname} PRIVATE "${PDAL_VENDOR_EIGEN_DIR}")
 target_include_directories(${libname} PUBLIC "${CMAKE_CURRENT_LIST_DIR}/../../vendor/nlohmann/")
 #target_include_directories(${libname} PUBLIC "${CMAKE_CURRENT_LIST_DIR}/../../vendor/eigen/")
 
@@ -54,7 +54,7 @@ if (BUILD_RDBLIB_TESTS)
             ${PROJECT_SOURCE_DIR}/plugins/rdb/io
             ${RDB_INCLUDE_CPP_DIR}
             ${RDB_INCLUDE_C_DIR}
-            ${EIGEN_INCLUDE_DIRS}
+            ${PDAL_VENDOR_EIGEN_DIR}
 
     )
 endif()
