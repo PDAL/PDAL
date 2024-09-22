@@ -13,7 +13,7 @@ find_package(Fgt REQUIRED CONFIG)
 option(BUILD_PLUGIN_CPD "Build Coherent Point Drift support" ${Cpd_FOUND})
 
 set(files filters/CpdFilter.cpp)
-set(include_dirs "${CMAKE_CURRENT_LIST_DIR}" "${PDAL_VENDOR_DIR}/eigen")
+set(include_dirs "${CMAKE_CURRENT_LIST_DIR}" "${EIGEN_INCLUDE_DIRS}")
 
 PDAL_ADD_PLUGIN(filter_libname filter cpd
     FILES
@@ -22,7 +22,7 @@ PDAL_ADD_PLUGIN(filter_libname filter cpd
         Cpd::Library-C++
         ${PDAL_LIBRARIES}
     INCLUDES
-        ${PDAL_VENDOR_DIR}/eigen
+        ${EIGEN_INCLUDE_DIRS}
         ${CMAKE_CURRENT_LIST_DIR}
     )
 
