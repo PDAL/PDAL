@@ -61,7 +61,8 @@ namespace
     const std::vector<std::string> expDimNames = {
          "X", "Y", "Z", "Intensity", "ReturnNumber", "NumberOfReturns",
          "ScanDirectionFlag", "EdgeOfFlightLine", "Classification",
-         "ScanAngleRank", "UserData", "PointSourceId", "GpsTime", "OriginId"
+         "ScanAngleRank", "UserData", "PointSourceId", "GpsTime", "OriginId", "Withheld","KeyPoint",
+         "Synthetic", "Overlap"
     };
 
     // Most of our tests will exercise this laz-based EPT dataset based on
