@@ -127,6 +127,7 @@ import sys
 conda_env_path = os.environ.get('CONDA_PREFIX', sys.prefix)
 proj_data = os.path.join(os.path.join(conda_env_path, 'share'), 'proj')
 os.environ["PROJ_DATA"] = proj_data
+os.environ["PROJ_NETWORK"] = "ON"
 
 import pdal
 ```

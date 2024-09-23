@@ -1,31 +1,3 @@
-<!-- ---
-substitutions:
-  alpinestatus: |-
-    ```{image} https://github.com/PDAL/PDAL/workflows/Alpine/badge.svg
-    :target: https://github.com/PDAL/PDAL/actions?query=workflow%3AAlpine
-    ```
-  dockerstatus: |-
-    ```{image} https://github.com/PDAL/PDAL/workflows/Docker/badge.svg
-    :target: https://github.com/PDAL/PDAL/actions?query=workflow%3ADocker
-    ```
-  docsstatus: |-
-    ```{image} https://github.com/PDAL/PDAL/workflows/Docs/badge.svg
-    :target: https://github.com/PDAL/PDAL/actions?query=workflow%3ADocs
-    ```
-  linuxstatus: |-
-    ```{image} https://github.com/PDAL/PDAL/workflows/Linux/badge.svg
-    :target: https://github.com/PDAL/PDAL/actions?query=workflow%3ALinux
-    ```
-  osxstatus: |-
-    ```{image} https://github.com/PDAL/PDAL/workflows/OSX/badge.svg
-    :target: https://github.com/PDAL/PDAL/actions?query=workflow%3AOSX
-    ```
-  windowstatus: |-
-    ```{image} https://github.com/PDAL/PDAL/workflows/Windows/badge.svg
-    :target: https://github.com/PDAL/PDAL/actions?query=workflow%3AWindows
-    ```
---- -->
-
 (integration)=
 
 # Continuous Integration
@@ -35,14 +7,7 @@ PDAL {ref}`regression tests <pdal_test>` are run on a per-commit basis using
 
 ## Status
 
-```{only} html
-{{ alpinestatus }}
-{{ linuxstatus }}
-{{ osxstatus }}
-{{ windowstatus }}
-{{ docsstatus }}
-{{ dockerstatus }}
-```
+{{ alpinestatus }}  {{ linuxstatus }}  {{ osxstatus }}  {{ windowstatus }}  {{ docsstatus }}  {{ dockerstatus }}
 
 ## Configuration
 

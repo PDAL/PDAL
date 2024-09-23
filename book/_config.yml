@@ -83,6 +83,13 @@ parse:
     XML: '[XML](https://en.wikipedia.org/wiki/XML)'
     jq: '[jq](https://stedolan.github.io/jq/)'
     libLAS: '[libLAS](http://liblas.org/)'
+    nbsp: '&#160;'
+    alpinestatus: "[![Alpine Status](https://github.com/PDAL/PDAL/workflows/Alpine/badge.svg)](https://github.com/PDAL/PDAL/actions?query=workflow%3AAlpine)"
+    dockerstatus: "[![Docker Status](https://github.com/PDAL/PDAL/workflows/Docker/badge.svg)](https://github.com/PDAL/PDAL/actions?query=workflow%3ADocker)"
+    docsstatus: "[![Docs Status](https://github.com/PDAL/PDAL/workflows/Docs/badge.svg)](https://github.com/PDAL/PDAL/actions?query=workflow%3ADocs)"
+    linuxstatus: "[![Linux Status](https://github.com/PDAL/PDAL/workflows/Linux/badge.svg)](https://github.com/PDAL/PDAL/actions?query=workflow%3ALinux)"
+    osxstatus: "[![OSX Status](https://github.com/PDAL/PDAL/workflows/OSX/badge.svg)](https://github.com/PDAL/PDAL/actions?query=workflow%3AOSX)"
+    windowstatus: "[![Windows Status](https://github.com/PDAL/PDAL/workflows/Windows/badge.svg)](https://github.com/PDAL/PDAL/actions?query=workflow%3AWindows)"
   myst_enable_extensions:
     - substitution
     - deflist
