@@ -28,6 +28,17 @@ returns, using default options, and writing only the ground returns to the
 output file.
 
 ```{code-cell}
+:tags: [remove-cell]
+
+import os
+import sys
+
+conda_env_path = os.environ.get('CONDA_PREFIX', sys.prefix)
+proj_data = os.path.join(os.path.join(conda_env_path, 'share'), 'proj')
+os.environ["PROJ_DATA"] = proj_data
+```
+
+```{code-cell}
 json = """
 [
     {
