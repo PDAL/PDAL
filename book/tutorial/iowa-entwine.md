@@ -1,3 +1,15 @@
+---
+jupytext:
+  formats: md:myst
+  text_representation:
+    extension: .md
+    format_name: myst
+kernelspec:
+  display_name: Python 3
+  language: python
+  name: python3
+---
+
 # Reading data from EPT
 
 ## Introduction
@@ -72,12 +84,6 @@ an `iowa.laz` and `iowa.tif` file.
 
 1. Create a file called `iowa.json` with the following content:
 
-   ```{note}
-   The file is also available from
-   <https://gist.github.com/hobu/ee22084e24ed7e3c0d10600798a94c31> for
-   convenient copy/paste)
-   ```
-
 ```{literalinclude} ./iowa.json
 :language: js
 ```
@@ -112,6 +118,19 @@ The EPT reader reads data from an EPT resource with PDAL. Options available
 in PDAL 1.9+ allow users to select data at or above specified resolutions.
 ```
 
+```{code-cell}
+:tags: [remove-cell]
+
+import pdal
+```
+
+```{code-cell}
+pipeline = pdal.Reader.ept(
+    "https://s3-us-west-2.amazonaws.com/usgs-lidar-public/IA_FullState/ept.json",
+    bounds="([-10425171.940, -10423171.940], [5164494.710, 5166494.710])"
+)
+```
+
 #### filters.range
 
 The data we are selecting may have noise properly classified, and we can use
@@ -124,6 +143,10 @@ value of `7`.
 The {ref}`filters.range` filter utilizes range selection to allow users to
 select data for processing or removal. The {ref}`filters.mongo`
 filter can be used for even more complex logic operations.
+```
+
+```{code-cell}
+pipeline |= pdal.Filter.expression(expression="Classification != 7")
 ```
 
 #### filters.assign
@@ -141,6 +164,10 @@ based on a conditional. If you want to assign values based on a
 bounding geometry, use {ref}`filters.overlay`.
 ```
 
+```{code-cell}
+pipeline |= pdal.Filter.assign(assignment="Classification[:]=0")
+```
+
 #### filters.reprojection
 
 The data on the AWS 3DEP Public Dataset are stored in [Web Mercator]
@@ -152,6 +179,10 @@ reproject them into an appropriate UTM coordinate system ([EPSG:26915](https://e
 
 {ref}`filters.reprojection` can also take override the incoming coordinate
 system using the `a_srs` option.
+```
+
+```{code-cell}
+pipeline |= pdal.Filter.reprojection(out_srs="EPSG:26915")
 ```
 
 #### filters.smrf
@@ -167,6 +198,10 @@ defaults tend to work quite well for mixed urban environments on
 flat ground (ie, Iowa).
 ```
 
+```{code-cell}
+pipeline |= pdal.Filter.smrf()
+```
+
 #### filters.range
 
 After we have executed the SMRF filter, we only want to keep points that
@@ -178,6 +213,10 @@ points with `Classification[2:2]` does that for us.
 
 Remove any point that is not ground classification for our
 DTM generation.
+```
+
+```{code-cell}
+pipeline |= pdal.Filter.expression(expression="Classification == 2")
 ```
 
 #### writers.gdal
@@ -194,6 +233,17 @@ for more options.
 Output a DTM at 1m resolution.
 ```
 
+```{code-cell}
+pipeline |= pdal.Writer.gdal(
+   "iowa.tif",
+   gdalopts="tiled=yes, compress=deflate",
+   nodata=-9999,
+   output_type="idw",
+   resolution=1,
+   window_size=6
+)
+```
+
 #### writers.las
 
 We can also write a LAZ file containing the same points that were used to
@@ -203,6 +253,10 @@ make the elevation model in the section above. See {ref}`writers.las` for more o
 :scale: 50%
 
 Also output the LAZ file as part of our processing pipeline.
+```
+
+```{code-cell}
+pipeline |= pdal.Writer("iowa.laz")
 ```
 
 ## Execute the Pipeline
@@ -221,6 +275,13 @@ Also output the LAZ file as part of our processing pipeline.
    ```
    pdal pipeline iowa.json --debug
    ```
+
+   or
+
+```{code-cell}
+pipeline.execute()
+print(f"Processed point cloud contains {len(pipeline.arrays[0])} points")
+```
 
 3. Save a color scheme to `dem-colors.txt`
 

@@ -2,10 +2,6 @@
 
 # Visualizing acquisition density
 
-```{eval-rst}
-.. include:: ../../includes/substitutions.rst
-```
-
 ```{index} Density, OGR, hexagon tessellation
 ```
 

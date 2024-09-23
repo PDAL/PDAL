@@ -191,8 +191,7 @@ filename
   a function that returns a Numpy array using the
   `module`, `function`, and `fargs` options. \[Required\]
 
-```{eval-rst}
-.. include:: reader_opts.rst
+```{include} reader_opts.md
 ```
 
 dimension

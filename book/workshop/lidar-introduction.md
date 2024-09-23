@@ -162,7 +162,3 @@ Processing full waveform data is beyond the scope of this class.
 PDAL is a discrete-return point cloud processing library.
 It does not have any functionality to analyze or process full waveform data.
 ```
-
-```{eval-rst}
-.. bibliography:: bibliography.bib
-```

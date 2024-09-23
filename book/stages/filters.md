@@ -528,7 +528,7 @@ filters.tail
 
 {ref}`filters.expression`
 
-: Pass only points given an {ref}`expression <PDAL expression>`
+: Pass only points given an {ref}`expression <pdal_expression>`
 
 {ref}`filters.head`
 

@@ -1,11 +1,11 @@
----
+<!-- ---
 substitutions:
   nbsp: |-
     ```{eval-rst}
     .. unicode:: 0xA0
        :trim:
     ```
----
+--- -->
 
 (faq)=
 

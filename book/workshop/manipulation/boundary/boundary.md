@@ -1,9 +1,5 @@
 # Finding the boundary
 
-```{eval-rst}
-.. include:: ../../includes/substitutions.rst
-```
-
 ```{index} boundary, QGIS, OGR
 ```
 

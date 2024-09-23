@@ -1,4 +1,4 @@
----
+<!-- ---
 substitutions:
   alpinestatus: |-
     ```{image} https://github.com/PDAL/PDAL/workflows/Alpine/badge.svg
@@ -24,7 +24,7 @@ substitutions:
     ```{image} https://github.com/PDAL/PDAL/workflows/Windows/badge.svg
     :target: https://github.com/PDAL/PDAL/actions?query=workflow%3AWindows
     ```
----
+--- -->
 
 (integration)=
 

@@ -2,10 +2,6 @@
 
 # Rasterizing Attributes
 
-```{eval-rst}
-.. include:: ../../includes/substitutions.rst
-```
-
 ```{index} classification, intensity, rasterization
 ```
 

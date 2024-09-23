@@ -1,3 +1,15 @@
+---
+jupytext:
+  formats: md:myst
+  text_representation:
+    extension: .md
+    format_name: myst
+kernelspec:
+  display_name: Python 3
+  language: python
+  name: python3
+---
+
 (filters.smrf)=
 
 # filters.smrf
@@ -15,9 +27,14 @@ The sample pipeline below uses the SMRF filter to segment ground and non-ground
 returns, using default options, and writing only the ground returns to the
 output file.
 
-```json
+```{code-cell}
+json = """
 [
-    "input.las",
+    {
+        "bounds": "([-10425171.940, -10423171.940], [5164494.710, 5166494.710])",
+        "filename": "https://s3-us-west-2.amazonaws.com/usgs-lidar-public/IA_FullState/ept.json",
+        "type": "readers.ept"
+    },
     {
         "type":"filters.smrf"
     },
@@ -27,6 +44,12 @@ output file.
     },
     "output.laz"
 ]
+"""
+
+import pdal
+pipeline = pdal.Pipeline(json)
+count = pipeline.execute()
+print(f"Output contains {count} points")
 ```
 
 ## Example #2
@@ -34,9 +57,14 @@ output file.
 A more complete example, specifying some options. These match the
 optimized parameters for Sample 1 given in Table 3 of {cite:p}`pingel2013improved`.
 
-```json
+```{code-cell}
+json = """
 [
-    "input.las",
+    {
+        "bounds": "([-10425171.940, -10423171.940], [5164494.710, 5166494.710])",
+        "filename": "https://s3-us-west-2.amazonaws.com/usgs-lidar-public/IA_FullState/ept.json",
+        "type": "readers.ept"
+    },
     {
         "type":"filters.smrf",
         "scalar":1.2,
@@ -50,6 +78,12 @@ optimized parameters for Sample 1 given in Table 3 of {cite:p}`pingel2013improve
     },
     "output.laz"
 ]
+"""
+
+import pdal
+pipeline = pdal.Pipeline(json)
+count = pipeline.execute()
+print(f"Output contains {count} points")
 ```
 
 ## Options

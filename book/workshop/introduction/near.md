@@ -2,10 +2,6 @@
 
 # Searching near a point
 
-```{eval-rst}
-.. include:: ../includes/substitutions.rst
-```
-
 ```{index} nearest, nearby, query, search
 ```
 

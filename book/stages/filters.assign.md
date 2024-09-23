@@ -31,17 +31,17 @@ condition
 
 value
 
-: A list of {ref}`assignment expressions <Assignment Expressions>` to be applied to points.
+: A list of {ref}`assignment expressions <assignment_expressions>` to be applied to points.
   The list of values is evaluated in order. \[Default: none\]
 
 ```{include} filter_opts.md
 ```
 
-(assignment-expressions)=
+(assignment_expressions)=
 
 # Assignment Expressions
 
-The assignment expression syntax is an expansion on the {ref}`PDAL expression` syntax
+The assignment expression syntax is an expansion on the {ref}`PDAL expression <pdal_expression>` syntax
 that provides for assignment of values to points. The generic expression is:
 
 ```
@@ -54,7 +54,7 @@ A `ValueExpression` consists of constants, dimension names and mathematical oper
 that evaluates to a numeric value.  The supported mathematical operations are addition(`+`),
 subtraction(`-`), multiplication(`*`) and division(`\\`).
 
-A {ref}`ConditionalExpression <PDAL expression>` is an optional boolean value that must
+A {ref}`ConditionalExpression <pdal_expression>` is an optional boolean value that must
 evaluate to `true` for the `ValueExpression` to be applied.
 
 ```{note}

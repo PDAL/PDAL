@@ -2,10 +2,6 @@
 
 # Clipping data with polygons
 
-```{eval-rst}
-.. include:: ../../includes/substitutions.rst
-```
-
 ```{index} Clipping, OGR, Vector
 ```
 

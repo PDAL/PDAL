@@ -229,7 +229,7 @@ For more on PDAL stages and their options, check the PDAL documentation on
   work when a filename is provided as an option through a command-line
   application like `pdal pipeline` or `pdal translate`.
 
-(option-files)=
+(option_files)=
 
 ### Option Files
 

@@ -2,10 +2,6 @@
 
 # Removing noise
 
-```{eval-rst}
-.. include:: ../../includes/substitutions.rst
-```
-
 ```{index} Denoising, outliers
 ```
 

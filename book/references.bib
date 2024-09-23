@@ -215,3 +215,73 @@
   url          = {http://meshlabstuff.blogspot.com/2009/09/meshing-point-clouds.html},
   note         = {Accessed: 2015-11-13},
 }
+
+@article{Myronenko,
+  abstract = {Point set registration is a key component in many computer vision tasks. The goal of point set registration is to assign correspondences between two sets of points and to recover the transformation that maps one point set to the other. Multiple factors, including an unknown nonrigid spatial transformation, large dimensionality of point set, noise, and outliers, make the point set registration a challenging problem. We introduce a probabilistic method, called the Coherent Point Drift (CPD) algorithm, for both rigid and nonrigid point set registration. We consider the alignment of two point sets as a probability density estimation problem. We fit the Gaussian mixture model (GMM) centroids (representing the first point set) to the data (the second point set) by maximizing the likelihood. We force the GMM centroids to move coherently as a group to preserve the topological structure of the point sets. In the rigid case, we impose the coherence constraint by reparameterization of GMM centroid locations with rigid parameters and derive a closed form solution of the maximization step of the EM algorithm in arbitrary dimensions. In the nonrigid case, we impose the coherence constraint by regularizing the displacement field and using the variational calculus to derive the optimal transformation. We also introduce a fast algorithm that reduces the method computation complexity to linear. We test the CPD algorithm for both rigid and nonrigid transformations in the presence of noise, outliers, and missing points, where CPD shows accurate results and outperforms current state-of-the-art methods.},
+  author = {Myronenko, Andriy and Song, Xubo},
+  issn = {1939-3539},
+  journal = {IEEE transactions on pattern analysis and machine intelligence},
+  month = {dec},
+  number = {12},
+  pages = {2262--75},
+  pmid = {20975122},
+  publisher = {Institute of Electrical {\&} Electronics Engineers (IEEE)},
+  title = {{Point set registration: coherent point drift.}},
+  volume = {32},
+  year = {2010}
+}
+
+@article{Yuille1998,
+  author = {Yuille, Alan L. and Grzywacz, Norberto M.},
+  journal = {Second International Conference on Computer Vision},
+  title = {{The Motion Coherence Theory}},
+  year = {1988}
+}
+
+@article{Gatziolis2019,
+  author = {D. Gatziolis and R. J. McGaughey},
+  journal = {Remote Sensing},
+  title = {{Reconstructing aircraft trajectories from multi-return airborne laser-scanning data}},
+  volume = {11},
+  number = {19},
+  year = {2019}
+}
+
+@article{Xuechen2019,
+  abstract = {The rigid registration of two 3D point sets is a fundamental problem in
+  computer vision. The current trend is to solve this problem globally using the
+  BnB optimization framework. However, the existing global methods are slow for
+  two main reasons: the computational complexity of BnB is exponential to the
+  problem dimensionality (which is six for 3D rigid registration), and the bound
+  evaluation used in BnB is inefficient. In this paper, we propose two
+  techniques to address these problems. First, we introduce the idea of
+  translation invariant vectors, which allows us to decompose the search of a 6D
+  rigid transformation into a search of 3D rotation followed by a search of 3D
+  translation, each of which is solved by a separate BnB algorithm. This
+  transformation decomposition reduces the problem dimensionality of BnB
+  algorithms and substantially improves its efficiency. Then, we propose a new
+  data structure, named 3D Integral Volume, to accelerate the bound evaluation
+  in both BnB algorithms. By combining these two techniques, we implement an
+  efficient algorithm for rigid registration of 3D point sets. Extensive
+  experiments on both synthetic and real data show that the proposed algorithm
+  is three orders of magnitude faster than the existing state-of-the-art global
+  methods.},
+  author = {Xuechen Li and Yinlong Liu and Yiru Wang and Chen Wang and Manning Wang and Zhijian Song},
+  title = {{Fast and Globally Optimal Rigid Registration of 3D Point Sets by Transformation Decomposition}},
+  year = {2019},
+  journal = {unknown},
+  note = {Available at \url{https://arxiv.org/pdf/1812.11307.pdf}}
+}
+
+@article{Glennie2007,
+  author = {Glennie, Craig L.},
+  file = {:Users/gadomski/Documents/Mendeley Desktop/Glennie - 2007 - Rigorous 3D error analysis of kinematic scanning LIDAR systems.pdf:pdf},
+  journal = {Journal of Applied Geodesy},
+  keywords = {lidar},
+  month = {jan},
+  number = {3},
+  publisher = {Walter de Gruyter GmbH},
+  title = {{Rigorous 3D error analysis of kinematic scanning LIDAR systems}},
+  volume = {1},
+  year = {2007}
+}

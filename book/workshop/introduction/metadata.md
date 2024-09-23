@@ -2,10 +2,6 @@
 
 # Printing file metadata
 
-```{eval-rst}
-.. include:: ../includes/substitutions.rst
-```
-
 ```{index} metadata, coordinate system, spatial reference system
 ```
 

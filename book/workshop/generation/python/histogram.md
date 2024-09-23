@@ -2,10 +2,6 @@
 
 # Plotting a histogram
 
-```{eval-rst}
-.. include:: ../../includes/substitutions.rst
-```
-
 ## Exercise
 
 PDAL doesn't provide every possible analysis option, but it strives to make it

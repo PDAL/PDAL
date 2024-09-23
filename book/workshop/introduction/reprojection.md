@@ -5,10 +5,6 @@
 ```{index} Reprojection, WGS84, UTM
 ```
 
-```{eval-rst}
-.. include:: ../includes/substitutions.rst
-```
-
 ## Exercise
 
 This exercise uses PDAL to reproject {{ ASPRSLAS }} data

@@ -43,4 +43,4 @@ $ pdal translate -i input.las -o filtered.las -f range --filters.expression.expr
 
 expression
 
-: An {ref}`expression <PDAL expression>` that limits points passed to a filter.
+: An {ref}`expression <pdal_expression>` that limits points passed to a filter.

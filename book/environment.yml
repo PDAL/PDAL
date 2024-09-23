@@ -8,3 +8,4 @@ dependencies:
   - sphinxcontrib-jquery
   - sphinxcontrib-bibtex
   - sphinx-notfound-page
+  - sphinx-inline-tabs

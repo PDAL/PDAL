@@ -2,10 +2,6 @@
 
 # Printing the first point
 
-```{eval-rst}
-.. include:: ../includes/substitutions.rst
-```
-
 ```{index} info command, Start Here, installation
 ```
 

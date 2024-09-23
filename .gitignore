@@ -102,7 +102,10 @@ include/
 test/unit/CMakeScripts/
 test/unit/TestConfig.hpp
 *.pyc
+
+# JupyterBook
 book/_build
+book/conf.py
 
 test/data/bpf/bpf.xml
 test/data/bpf/bpf2nitf.xml

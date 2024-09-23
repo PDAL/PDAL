@@ -11,11 +11,3 @@ RHEL Linux systems.
 ```
 
 Contents:
-
-```{toctree}
-:maxdepth: 1
-
-unix
-windows
-dependencies
-```

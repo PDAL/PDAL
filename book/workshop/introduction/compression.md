@@ -2,10 +2,6 @@
 
 # Compression
 
-```{eval-rst}
-.. include:: ../includes/substitutions.rst
-```
-
 ## Exercise
 
 This exercise uses PDAL to compress {{ ASPRSLAS }} data into {{ LASzip }}.

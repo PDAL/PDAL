@@ -2,10 +2,6 @@
 
 # Generating a DTM
 
-```{eval-rst}
-.. include:: ../../includes/substitutions.rst
-```
-
 ```{index} elevation model, DTM, DSM
 ```
 

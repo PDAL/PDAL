@@ -2,9 +2,6 @@
 
 # Entwine
 
-<!-- ```{include} ../includes/substitutions.md
-``` -->
-
 ## Exercise
 
 This exercise uses PDAL to fetch data from an Entwine index stored in an Amazon

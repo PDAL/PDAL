@@ -1,0 +1,27 @@
+{
+    "pipeline": [
+        "./exercises/analysis/denoising/18TWK820985.laz",
+        {
+            "type": "filters.outlier",
+            "method": "statistical",
+            "multiplier": 3,
+            "mean_k": 8
+        },
+        {
+            "type": "filters.expression",
+            "expression": "(Classification != 7) && (Z >= -100 && Z <= 3000)"
+        },
+        {
+            "type": "writers.las",
+            "compression": "true",
+            "minor_version": "2",
+            "dataformat_id": "0",
+            "filename":"./exercises/analysis/denoising/clean.laz"
+        },
+        {
+            "type": "writers.copc",
+            "filename": "./exercises/analysis/denoising/clean.copc.laz",
+            "forward": "all"
+        }
+    ]
+}

@@ -2,10 +2,6 @@
 
 # Identifying ground
 
-```{eval-rst}
-.. include:: ../../includes/substitutions.rst
-```
-
 ```{index} ground, classification, filtering
 ```
 

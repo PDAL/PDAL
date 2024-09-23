@@ -2,10 +2,6 @@
 
 # Final Project
 
-```{eval-rst}
-.. include:: ./includes/substitutions.rst
-```
-
 ```{index} capstone, project
 ```
 

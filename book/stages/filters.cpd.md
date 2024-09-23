@@ -2,6 +2,8 @@
 
 # filters.cpd
 
+<!-- Missing citations in references.bib, make sure to add. Also the syntax is wrong here. -->
+
 The **Coherent Point Drift (CPD) filter** uses the algorithm of
 {cite}`Myronenko` algorithm to
 compute a rigid, nonrigid, or affine transformation between datasets.  The
@@ -51,7 +53,7 @@ Summarized from the [Non-rigid point set registration: Coherent Point Drift](htt
 ]
 ```
 
-If [method] is not provided, the cpd filter will default to using the
+If [](method) is not provided, the cpd filter will default to using the
 rigid registration method.  To get the transform matrix, you'll need to
 use the "metadata" option of the pipeline command:
 
@@ -83,7 +85,8 @@ The metadata output might start something like:
 
 ## Options
 
-`` _`method` ``
+(method)=
+method
 
 : Change detection method to use.
   Valid values are "rigid", "affine", and "nonrigid".
@@ -92,8 +95,8 @@ The metadata output might start something like:
 ```{include} filter_opts.md
 ```
 
-```{eval-rst}
+<!-- ```{eval-rst}
 .. bibliography:: references.bib
 ```
 
-[coherent point drift (cpd)]: https://github.com/gadomski/cpd
+[coherent point drift (cpd)]: https://github.com/gadomski/cpd -->

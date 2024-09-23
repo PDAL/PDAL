@@ -3,10 +3,6 @@
 # LAS Reading and Writing with PDAL
 
 ```{eval-rst}
-.. include:: ../workshop/includes/substitutions.rst
-```
-
-```{eval-rst}
 
 :Author: Howard Butler
 :Contact: howard@hobu.co

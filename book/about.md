@@ -2,10 +2,6 @@
 
 # About
 
-```{eval-rst}
-.. include:: ./workshop/includes/substitutions.rst
-```
-
 ## What is PDAL?
 
 {{ PDAL }} is Point Data Abstraction Library.  It is a C/C++ open source library
@@ -194,7 +190,7 @@ a variety of raster and vector formats. PDAL provides the same capability for
 point cloud data types.
 
 PDAL evolved out of the development of database storage and access capabilities
-for the {{ USACE }} [CRREL](http://www.erdc.usace.army.mil/Media/Fact-Sheets/Fact-Sheet-Article-View/Article/476649/remote-sensinggeographic-information-systems-center/) {{ GRiD }} project. Functionality that was creeping into {{ libLAS }}
+for the {{ USACE }} [CRREL](http://www.erdc.usace.army.mil/Media/Fact-Sheets/Fact-Sheet-Article-View/Article/476649/remote-sensinggeographic-information-systems-center/) {{ GRID }} project. Functionality that was creeping into {{ libLAS }}
 was pulled into a new library, and it was designed from the ground up to mimic
 successful extract, transform, and load libraries in the geospatial software
 domain. PDAL has steadily attracted more contributors as other software

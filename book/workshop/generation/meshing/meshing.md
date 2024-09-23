@@ -2,10 +2,6 @@
 
 # Creating surface meshes
 
-```{eval-rst}
-.. include:: ../../includes/substitutions.rst
-```
-
 ```{index} ground, classification, filtering
 ```
 

@@ -5,13 +5,6 @@
 ```{index} Conda, software installation
 ```
 
-```{eval-rst}
-.. include:: ./includes/substitutions.rst
-
-
-
-```
-
 ## What is Conda
 
 Conda is an open source package management system and environment management system that runs

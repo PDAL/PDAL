@@ -41,7 +41,7 @@ resolution
 
 value
 
-: A list of {ref}`assignment expressions <Assignment Expressions>` to be applied to points.
+: A list of {ref}`assignment expressions <assignment_expressions>` to be applied to points.
   The list of values is evaluated in order. \[Default: none\]
 
 ```{include} filter_opts.md

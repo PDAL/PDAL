@@ -53,13 +53,13 @@ is greater than 1.
 
 expression
 
-: A JSON query {ref}`expression <Mongo expression>` containing a combination of query comparisons
+: A JSON query {ref}`expression <mongo_expression>` containing a combination of query comparisons
   and logical operators.
 
 ```{include} filter_opts.md
 ```
 
-(mongo-expression)=
+(mongo_expression)=
 
 ## Expression
 

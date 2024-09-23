@@ -5,10 +5,6 @@
 ```{index} georeferencing, Optech, RIEGL, GNSS/IMU, csd, UTM, WGS84
 ```
 
-```{eval-rst}
-.. include:: ../../includes/substitutions.rst
-```
-
 As discussed {ref}`in the introduction <georeferencing-introduction>`, laser
 returns from a mobile {{ LiDAR }} system must be georeferenced, i.e. placed into a
 local or global coordinate system by combining data from the laser and from a

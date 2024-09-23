@@ -2,10 +2,6 @@
 
 # Colorizing points with imagery
 
-```{eval-rst}
-.. include:: ../../includes/substitutions.rst
-```
-
 ```{index} Colorization, GDAL, Raster, RGB
 ```
 

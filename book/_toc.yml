@@ -225,13 +225,37 @@ parts:
     - file: workshop/agenda
     - file: workshop/lidar-introduction
     - file: workshop/software
+      sections:
+      - file: workshop/conda
+      - file: workshop/qgis
     - file: workshop/introduction/index
+      sections:
+      - file: workshop/introduction/single-point
+      - file: workshop/introduction/metadata
+      - file: workshop/introduction/near
+      - file: workshop/introduction/compression
+      - file: workshop/introduction/reprojection
+      - file: workshop/introduction/entwine
     - file: workshop/manipulation/index
+      sections:
+      - file: workshop/manipulation/boundary/boundary
+      - file: workshop/manipulation/clipping/clipping
+      - file: workshop/manipulation/colorization/colorization
+      - file: workshop/manipulation/denoising/denoising
+      - file: workshop/manipulation/density/density
+      - file: workshop/manipulation/thinning/thinning
+      - file: workshop/manipulation/ground/ground
     - file: workshop/generation/index
+      sections:
+      - file: workshop/generation/dtm/dtm
+      - file: workshop/generation/meshing/meshing
+      - file: workshop/generation/rasterize/rasterize
+      - file: workshop/generation/python/histogram
+      - file: workshop/generation/georeferencing/index
+      - file: workshop/generation/batch_processing/batch-processing
     - file: workshop/capstone
     - file: workshop/notes
     title: Workshop
-  - file: notebooks
 - caption: Reference
   chapters:
   - file: community
@@ -243,6 +267,10 @@ parts:
     sections:
     - file: development/overview
     - file: development/compilation/index
+      sections:
+      - file: development/compilation/unix
+      - file: development/compilation/windows
+      - file: development/compilation/dependencies
     - file: development/errorhandling
     - file: development/metadata
     - file: development/writing
