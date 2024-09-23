@@ -121,6 +121,13 @@ in PDAL 1.9+ allow users to select data at or above specified resolutions.
 ```{code-cell}
 :tags: [remove-cell]
 
+import os
+import sys
+
+conda_env_path = os.environ.get('CONDA_PREFIX', sys.prefix)
+proj_data = os.path.join(os.path.join(conda_env_path, 'share'), 'proj')
+os.environ["PROJ_DATA"] = proj_data
+
 import pdal
 ```
 
