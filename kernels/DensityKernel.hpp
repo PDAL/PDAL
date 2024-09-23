@@ -41,7 +41,7 @@
 
 namespace pdal
 {
-
+/* 
 class PDAL_DLL DensityKernel : public Kernel
 {
 public:
@@ -62,7 +62,7 @@ private:
 
     virtual void addSwitches(ProgramArgs& args);
     void outputDensity(pdal::SpatialReference const& ref);
-};
+}; */
 
 } // namespace pdal
 

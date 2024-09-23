@@ -37,7 +37,7 @@
 
 namespace hexer
 {
-    class HexGrid;
+    class BaseGrid;
 }
 
 namespace pdal
@@ -49,12 +49,12 @@ class OGR
     using OGRLayerH = void *;
 
 public:
-    OGR(std::string const& filename, const std::string& srs,
+    OGR(std::string const& filename, const std::string& srs, bool h3,
         std::string driver = "ESRI Shapefile", std::string layerName ="");
     ~OGR();
 
-    void writeBoundary(hexer::HexGrid *grid);
-    void writeDensity(hexer::HexGrid *grid);
+    void writeBoundary(hexer::BaseGrid& grid);
+    void writeDensity(hexer::BaseGrid& grid);
 
 private:
     std::string m_filename;
@@ -63,6 +63,7 @@ private:
     OGRDataSourceH m_ds;
     OGRLayerH m_layer;
     std::string m_layerName;
+    bool m_isH3;
 
     void createLayer(const std::string& wkt);
 };

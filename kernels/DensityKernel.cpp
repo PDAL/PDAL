@@ -41,7 +41,7 @@
 
 namespace pdal
 {
-
+/* 
 static PluginInfo const s_info
 {
     "kernels.density",
@@ -108,6 +108,6 @@ int DensityKernel::execute()
     m_manager.execute();
     outputDensity(m_manager.pointTable().anySpatialReference());
     return 0;
-}
+} */
 
 } // namespace pdal
