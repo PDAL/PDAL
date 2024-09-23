@@ -5,8 +5,6 @@
 namespace hexer
 {
 
-static const double SQRT_3 = 1.732050808;
-
 class PDAL_DLL HexGrid : public BaseGrid
 {
 public:
@@ -26,8 +24,10 @@ public:
 
     Point offset(int idx) const
         { return m_offsets[idx]; }
-    double height() const
+    double height()
         { return m_height; }
+    bool sampling() const
+        { return m_width < 0; }
     bool isH3()
         { return false; }
     Point findPoint(Segment& s);
@@ -37,8 +37,6 @@ private:
     HexId findHexagon(Point p);
     HexId edgeHex(HexId hex, int edge) const;
 
-    bool sampling() const
-        { return m_width < 0; }
     bool inGrid(HexId& h)
         { return h.j >= m_minY; }
     HexId moveCoord(HexId& h)

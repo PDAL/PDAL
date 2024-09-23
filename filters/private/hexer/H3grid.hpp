@@ -33,7 +33,6 @@ public:
     // Convert H3 index to IJ coordinates
     HexId h32ij(H3Index h3)
         {   HexId ij;
-            std::cout << "doing h32ij on " << h3;
             if (PDALH3cellToLocalIj(m_origin, h3, 0, &ij) != E_SUCCESS) {
                 std::ostringstream oss;
                 oss << "Can't convert H3 index " << h3 <<
@@ -49,7 +48,18 @@ public:
           Point p{PDALH3degsToRads(x), PDALH3degsToRads(y)};
           addPoint(p);        
         }
-
+    double height()
+        {
+            double edge_length;
+            HexId origin = h32ij(m_origin);
+            Segment s1(origin, 0);
+            Segment s2(origin, 1);
+            Point p1 = findPoint(s1);
+            Point p2 = findPoint(s2);
+            return 2 * ((SQRT_3 / 2.0) * distance(p1, p2));
+        }
+    bool sampling() const
+        { return m_res < 0; }
     bool isH3()
         { return true; }
 
@@ -66,8 +76,6 @@ private:
     HexId findHexagon(Point p);
     HexId edgeHex(HexId hex, int edge) const;
 
-    bool sampling() const
-        { return m_res < 0; }
     bool inGrid(HexId& h)
         { return h.i >= m_minI; }
     HexId moveCoord(HexId& h)

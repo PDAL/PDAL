@@ -82,6 +82,7 @@ private:
     virtual void ready(PointTableRef table);
     virtual void filter(PointView& view);
     virtual bool processOne(PointRef& point);
+    virtual void spatialReferenceChanged(const SpatialReference& srs);
     virtual void done(PointTableRef table);
 };
 

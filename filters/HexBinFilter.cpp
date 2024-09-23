@@ -85,6 +85,7 @@ void HexBin::addArgs(ProgramArgs& args)
     args.add("precision", "Output precision", m_precision, 8U);
     m_cullArg = &args.add("hole_cull_area_tolerance", "Tolerance area to "
         "apply to holes before cull", m_cullArea);
+    // default true or false for smooth?
     args.add("smooth", "Smooth boundary output", m_doSmooth, true);
     args.add("preserve_topology", "Preserve topology when smoothing",
         m_preserve_topology, true);
@@ -104,12 +105,15 @@ void HexBin::ready(PointTableRef table)
     m_count = 0;
     if (m_isH3)
     {
-        if (m_h3Res == -1) {
+        m_doSmooth = false;
+        if (m_h3Res == -1) 
+        {
             if (m_edgeLength)
-                log()->get(LogLevel::Warning) << "Ignoring edge length for H3 processing! "
-                    "Auto-calculating resolution; set 'h3_resolution' argument to "
+                log()->get(LogLevel::Warning) << "Ignoring edge length for H3 processing. "
+                    "Auto-calculating resolution; set 'h3_resolution' option to "
                     "specify cell size";
             m_grid.reset(new H3Grid(m_density));
+            m_grid->setSampleSize(m_sampleSize);
         }
         else
             m_grid.reset(new H3Grid(m_h3Res, m_density));
@@ -117,7 +121,10 @@ void HexBin::ready(PointTableRef table)
     else
     {
         if (m_edgeLength == 0.0)  // 0 can always be represented exactly.
+        {
             m_grid.reset(new HexGrid(m_density));
+            m_grid->setSampleSize(m_sampleSize);
+        }
         else
             m_grid.reset(new HexGrid(m_edgeLength * sqrt(3), m_density));
     }
@@ -126,21 +133,13 @@ void HexBin::ready(PointTableRef table)
 
 void HexBin::filter(PointView& view)
 {
-    m_srs = getSpatialReference();
-    std::cout << m_srs.identifyHorizontalEPSG(); 
-    if (m_isH3 && (m_srs.identifyHorizontalEPSG() != (std::string)"4326"))
-        log()->get(LogLevel::Error) << "Cannot compute H3 hexbins with spatial reference "
-            "EPSG:" << m_srs.identifyHorizontalEPSG() << "! Input must be EPSG:4326";
-
-/*     PointRef p(view, 0);
-    if (m_count == 0)
-        m_grid->setSampleSize(std::min((int)m_sampleSize, (int)view.size()));
+    PointRef p(view, 0);
 
     for (PointId idx = 0; idx < view.size(); ++idx)
     {
         p.setPointId(idx);
         processOne(p);
-    } */
+    }
 }
 
 
@@ -153,10 +152,30 @@ bool HexBin::processOne(PointRef& point)
     return true;
 }
 
+void HexBin::spatialReferenceChanged(const SpatialReference& srs)
+{
+    m_srs = srs;
+    if (m_isH3 && (m_srs.identifyHorizontalEPSG() != (std::string)"4326")) {
+        Utils::OStringStreamClassicLocale oss;
+        oss << "Cannot find H3 hexbin locations with spatial reference: ("
+            << m_srs.getProj4() << ")! Input must be EPSG:4326";
+        throwError(oss.str());
+    }
+}
+
 
 void HexBin::done(PointTableRef table)
 {
-    std::cout << "running";
+    if (m_grid->sampling())
+    {
+        Utils::OStringStreamClassicLocale oss;
+        oss << "Sampling for hexbin auto-edge length calculation failed! ";
+        if (m_sampleSize > m_count)
+            oss << "Decrease sample size: sample size of " << m_sampleSize 
+                << " with " << m_count << " points.";
+        throwError(oss.str());
+    }
+
     try
     {
         m_grid->findShapes();
@@ -182,24 +201,11 @@ void HexBin::done(PointTableRef table)
     polygon.precision(m_precision);
     m_grid->toWKT(polygon);
 
-/*     if (m_outputTesselation)
+    if (m_outputTesselation)
     {
-        MetadataNode hexes = m_metadata.add("hexagons");
-        for (auto& [coord, count] : m_grid->getHexes())
-        {
-            MetadataNode hex = hexes.addList("hexagon");
-            hex.add("density", count);
-
-            hex.add("gridpos", Utils::toString(coord.i) + " " +
-                Utils::toString((coord.j)));
-            Utils::OStringStreamClassicLocale oss;
-            // Using stream limits precision (default 6)
-            oss << "POINT (" << h.x() << " " << h.y() << ")";
-            hex.add("center", oss.str());
-        }
         m_metadata.add("hex_boundary", polygon.str(),
             "Boundary MULTIPOLYGON of domain");
-    } */
+    }
 
     // density and boundary writing with OGR does not support polygon smoothing
     if (m_DensityOutput.size())
@@ -215,13 +221,12 @@ void HexBin::done(PointTableRef table)
         writer.writeBoundary(*m_grid); 
     }
 
-    SpatialReference srs(table.anySpatialReference());
-    pdal::Polygon p(polygon.str(), srs);
+    pdal::Polygon p(polygon.str(), m_srs);
 
     // If the SRS was geographic, use relevant
     // UTM for area and density computation
     Polygon density_p(p);
-    if (srs.isGeographic())
+    if (m_srs.isGeographic())
     {
         // Compute a UTM polygon
         BOX3D box = p.bounds();
@@ -244,11 +249,6 @@ void HexBin::done(PointTableRef table)
     m_metadata.add("avg_pt_spacing", std::sqrt(1 / density),
         "Avg point spacing (x/y units)");
 
-    m_metadata.add("boundary", p.wkt(m_precision),
-        "Approximated MULTIPOLYGON of domain");
-    m_metadata.addWithType("boundary_json", p.json(), "json",
-        "Approximated MULTIPOLYGON of domain");
-
     int n(0);
     point_count_t totalCount(0);
     for (auto& [coord, count] : m_grid->getHexes())
@@ -260,10 +260,12 @@ void HexBin::done(PointTableRef table)
         }
     }
 
+    // what's the purpose of this? rename it?
     double hexArea(((3 * SQRT_3)/2.0) * (m_grid->height() * m_grid->height()));
     double avg_density = (n * hexArea) / totalCount;
     m_metadata.add("avg_pt_per_sq_unit", avg_density, "Area / point count "
         "(ignore contrary metadata item name. This is '(n * hexArea) / totalCount')");
+
     if (!m_isH3)
     {
         /***
@@ -310,12 +312,18 @@ void HexBin::done(PointTableRef table)
     }
     else
     {
-        if (m_doSmooth)
-            log()->get(LogLevel::Warning) << "Smoothing not supported for H3 processing!"; 
+        /* if (m_doSmooth)
+            log()->get(LogLevel::Warning) << "Smoothing not supported for H3 processing! "
+                "Set 'smooth' option to false to silence this warning.";  */
         m_metadata.add("h3_resolution", m_grid->getRes(), "The H3 resolution level "
             "of the grid. See https://h3geo.org/docs/core-library/restable "
             "for more information" );
     }
+    
+    m_metadata.add("boundary", p.wkt(m_precision),
+        "Approximated MULTIPOLYGON of domain");
+    m_metadata.addWithType("boundary_json", p.json(), "json",
+        "Approximated MULTIPOLYGON of domain");
 }
 
 } // namespace pdal

@@ -18,6 +18,8 @@ namespace hexer
 class HexGrid;
 class H3Grid;
 
+static const double SQRT_3 = 1.732050808;
+
 class PDAL_DLL BaseGrid
 {
 public:
@@ -44,7 +46,9 @@ public:
 
     virtual void addXY(double& x, double& y) = 0;
     virtual Point findPoint(Segment& s) = 0;
+    virtual bool sampling() const = 0;
     virtual bool isH3() = 0;
+    virtual double height() = 0;
 
     virtual H3Index ij2h3(HexId ij)
         { return 0; }
@@ -54,12 +58,11 @@ public:
         { return Point{0,0}; }
     virtual int getRes() const
         { return -1; }
-    virtual double height() const
-        { return 0; }
 
 protected:
     BaseGrid(int dense_limit) : m_denseLimit{dense_limit}
     {}
+    double distance(const Point& p1, const Point& p2);
     int increment(HexId hex);
 
     /// maximum sample size for auto hex size calculation
@@ -70,7 +73,6 @@ protected:
     std::unordered_map<HexId, int> m_counts;
 
 private:
-    virtual bool sampling() const = 0;
     virtual HexId findHexagon(Point p) = 0;
     virtual HexId edgeHex(HexId hex, int edge) const = 0;
     virtual void processHeight(double height) = 0;
@@ -81,7 +83,6 @@ private:
     void addRoot(HexId hex);
     void removeRoot(HexId hex);
     void findShape(HexId root);
-    double distance(const Point& p1, const Point& p2);
     double computeHexSize();
     void parentOrChild(Path& p);
     std::pair<Segment, Segment> nextSegments(const Segment& s) const;
