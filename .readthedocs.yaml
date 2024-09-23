@@ -24,10 +24,6 @@ sphinx:
   configuration: book/conf.py
   # fail_on_warning: true
 
-# python:
-#   install:
-#     - requirements: book/requirements.txt
-
 conda:
   environment: book/environment.yml
 
