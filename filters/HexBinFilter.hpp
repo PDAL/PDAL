@@ -77,6 +77,7 @@ private:
     bool m_isH3;
     int m_h3Res;
     SpatialReference m_srs;
+    std::string m_driver;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void ready(PointTableRef table);

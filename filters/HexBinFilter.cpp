@@ -89,14 +89,16 @@ void HexBin::addArgs(ProgramArgs& args)
     args.add("smooth", "Smooth boundary output", m_doSmooth, true);
     args.add("preserve_topology", "Preserve topology when smoothing",
         m_preserve_topology, true);
-    args.add("density", "Emit a density tessellation GeoJSON FeatureCollection in metadata",
-        m_DensityOutput, "");
-    args.add("boundary", "Emit a density tessellation GeoJSON FeatureCollection in metadata",
-        m_boundaryOutput, "");
+    args.add("density", "Emit a density tessellation to a specified OGR-compatible output file. "
+        "Defaults to GeoJSON unless 'ogr_driver' option is set.", m_DensityOutput, "");
+    args.add("boundary", "Emit a boundary tessellation to a specified OGR-compatible output file. "
+        "Defaults to GeoJSON unless 'ogr_driver' option is set.", m_boundaryOutput, "");
     args.add("h3_grid", "Create a grid using H3 (https://h3geo.org/docs) Hexagons",
         m_isH3, false);
     args.add("h3_resolution", "H3 grid resolution: 0 (coarsest) - 15 (finest). See "
         "https://h3geo.org/docs/core-library/restable", m_h3Res, -1);
+    args.add("ogr_driver", "GDAL OGR vector driver for writing with 'density' or 'boundary' "
+        "options.", m_driver, "GeoJSON");
 }
 
 
@@ -211,13 +213,15 @@ void HexBin::done(PointTableRef table)
     if (m_DensityOutput.size())
     {
         OGR writer(m_DensityOutput, getSpatialReference().getWKT(), m_grid->isH3(),
-            "GeoJSON", "hexbins");
+            m_driver, "hexbins");
         writer.writeDensity(*m_grid);
     }
     if (m_boundaryOutput.size())
     {
+        auto idx = m_boundaryOutput.find_last_of('.');
+        std::string ext = m_boundaryOutput.substr(idx);
         OGR writer(m_boundaryOutput, getSpatialReference().getWKT(), m_grid->isH3(),
-            "GeoJSON", "hexbins");
+            m_driver, "hexbins");
         writer.writeBoundary(*m_grid); 
     }
 
