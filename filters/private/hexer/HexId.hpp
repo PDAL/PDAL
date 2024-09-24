@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <h3api.h>
 
 namespace hexer

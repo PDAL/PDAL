@@ -36,6 +36,7 @@
 #include <vector>
 #include <ostream>
 #include <iostream>
+#include <algorithm>
 
 #include "Mathpair.hpp"
 #include "Segment.hpp"

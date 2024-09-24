@@ -1,5 +1,6 @@
 #include <set>
 #include <iostream>
+#include <cmath>
 
 #include <h3api.h>
 
