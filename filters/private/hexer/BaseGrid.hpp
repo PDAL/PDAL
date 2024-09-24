@@ -3,7 +3,7 @@
 #include <vector>
 #include <list>
 #include <unordered_map>
-#include <unordered_set>
+#include <set>
 
 #include <pdal/pdal_export.hpp>
 
@@ -92,7 +92,7 @@ private:
     /// Vector of points to use to determine hex height
     std::vector<Point> m_sample;
     /// Set of hexagons with non-dense neighbors at side 0
-    std::unordered_set<HexId> m_possibleRoots;
+    std::set<HexId> m_possibleRoots;
     /// List of all paths
     std::list<Path> m_paths;
     /// List of pointers to paths in m_paths to be written as roots
