@@ -16,15 +16,15 @@ H3Grid::~H3Grid()
 void H3Grid::processHeight(double height)
 {
     // bins for H3 auto resolution:
-    // - H3 level ~roughly~ equivalent to hexer hexagon size at same edge value
+    // - H3 level roughly equivalent to hexer hexagon size at same edge value
     //     - (since our coords are in degrees, the appropriate values will vary based on
     //       location. Some way of scaling this by latitude would be more accurate)
     // - does not automatically make very large (>1km^2) or very small (<6m^2) hexagons
     // We ignore resolutions 1 through 7, so add 8 to the entry we find..
-    static const std::array<double, 7> resHeights { 2.0, 2.62e-4, 6.28e-5, 2.09e-5, 
-                                                    8.73e-6, 3.32e-6, 1.4e-6 };
+    static const double resHeights[] { 2.0, 2.62e-4, 6.28e-5, 2.09e-5, 
+                                        8.73e-6, 3.32e-6, 1.4e-6 };
 
-    for (size_t i = 0; i < resHeights.size(); ++i) {
+    for (size_t i = 0; i < 6; ++i) {
         if (height < resHeights[i])
             m_res = i + 8;
     }

@@ -43,6 +43,8 @@ public:
 
     // test function: adds pre-defined hexagon coordinates to the grid
     void setHexes(const std::vector<HexId>& hexes);
+    // test function: sorts paths for consistent output
+    void sortPaths();
 
     virtual void addXY(double& x, double& y) = 0;
     virtual Point findPoint(Segment& s) = 0;

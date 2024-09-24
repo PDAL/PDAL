@@ -220,6 +220,16 @@ double BaseGrid::computeHexSize()
     return ((m_denseLimit * dist) / m_sample.size());
 }
 
+void BaseGrid::sortPaths()
+{
+    std::sort(m_roots.begin(), m_roots.end(), [](const Path* p1, const Path* p2) 
+        { return p1->rootHex() < p2->rootHex(); });
+    for (Path* p : m_roots)
+    {
+        p->sortPath();
+    }
+}
+
 void BaseGrid::toWKT(std::ostream& output) const
 {
     auto outputPath = [&output](Path *p)

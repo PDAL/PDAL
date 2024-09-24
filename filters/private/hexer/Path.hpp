@@ -88,6 +88,17 @@ public:
     int numPoints()
         { return m_points.size(); }
 
+    // Test function
+    void sortPath()
+    {
+        std::sort(m_children.begin(), m_children.end(), [](const Path* p1, const Path* p2) 
+            { return p1->rootHex() < p2->rootHex(); });
+        for (Path* p : m_children)
+        {
+            p->sortPath();
+        }
+    }
+
 private:
     void writeRing(std::ostream& out) const;
     std::vector<Path *> writePolygon(std::ostream& out) const;
