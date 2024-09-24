@@ -41,7 +41,7 @@
 
 namespace pdal
 {
-/* 
+
 static PluginInfo const s_info
 {
     "kernels.density",
@@ -69,6 +69,10 @@ void DensityKernel::addSwitches(ProgramArgs& args)
     args.add("hole_cull_area_tolerance", "Tolerance area to "
             "apply to holes before cull", m_cullArea);
     args.add("smooth", "Smooth boundary output", m_doSmooth, true);
+    args.add("h3_grid", "Create a grid using H3 (https://h3geo.org/docs) Hexagons",
+        m_isH3, false);
+    args.add("h3_resolution", "H3 grid resolution: 0 (coarsest) - 15 (finest). See "
+        "https://h3geo.org/docs/core-library/restable", m_h3Res, -1);
 }
 
 
@@ -78,10 +82,10 @@ void DensityKernel::outputDensity(pdal::SpatialReference const& reference)
     if (!hexbin)
         throw pdal::pdal_error("unable to fetch filters.hexbin stage!");
 
-    hexer::HexGrid* grid = hexbin->grid();
+    hexer::BaseGrid* grid = hexbin->grid();
 
-    OGR writer(m_outputFile, reference.getWKT(), m_driverName, m_layerName);
-    writer.writeDensity(grid);
+    OGR writer(m_outputFile, reference.getWKT(), m_isH3, m_driverName, m_layerName);
+    writer.writeDensity(*grid);
 }
 
 
@@ -103,11 +107,13 @@ int DensityKernel::execute()
     options.add("edge_length", m_edgeLength);
     options.add("hole_cull_area_tolerance", m_cullArea);
     options.add("smooth", m_doSmooth);
+    options.add("h3_grid", m_isH3);
+    options.add("h3_resolution", m_h3Res);
     m_hexbinStage = &(m_manager.makeFilter("filters.hexbin",
         *m_manager.getStage(), options));
     m_manager.execute();
     outputDensity(m_manager.pointTable().anySpatialReference());
     return 0;
-} */
+}
 
 } // namespace pdal

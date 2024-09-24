@@ -97,7 +97,7 @@ void HexBin::addArgs(ProgramArgs& args)
         m_isH3, false);
     args.add("h3_resolution", "H3 grid resolution: 0 (coarsest) - 15 (finest). See "
         "https://h3geo.org/docs/core-library/restable", m_h3Res, -1);
-    args.add("ogr_driver", "GDAL OGR vector driver for writing with 'density' or 'boundary' "
+    args.add("ogrdriver", "GDAL OGR vector driver for writing with 'density' or 'boundary' "
         "options.", m_driver, "GeoJSON");
 }
 
@@ -153,6 +153,7 @@ bool HexBin::processOne(PointRef& point)
     m_count++;
     return true;
 }
+
 
 void HexBin::spatialReferenceChanged(const SpatialReference& srs)
 {
