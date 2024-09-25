@@ -271,6 +271,7 @@ parts:
       - file: development/compilation/unix
       - file: development/compilation/windows
       - file: development/compilation/dependencies
+    - file: development/documentation-quickstart
     - file: development/errorhandling
     - file: development/metadata
     - file: development/writing
