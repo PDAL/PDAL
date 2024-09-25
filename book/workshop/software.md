@@ -1,3 +1,0 @@
-(software)=
-
-# Software Installation

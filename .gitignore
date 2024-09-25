@@ -104,8 +104,6 @@ test/unit/TestConfig.hpp
 *.pyc
 
 # JupyterBook
-book/_build
-book/conf.py
 doc/_build
 doc/conf.py
 

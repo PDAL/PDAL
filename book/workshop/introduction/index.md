@@ -1,3 +1,0 @@
-(basic-info)=
-
-# Getting Started

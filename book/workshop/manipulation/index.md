@@ -1,3 +1,0 @@
-(manipulation)=
-
-# Manipulation
