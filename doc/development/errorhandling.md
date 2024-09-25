@@ -1,17 +1,13 @@
-.. _development_errorhandling:
+(development-errorhandling)=
 
-================================================================================
-Errors and Error Handling
-================================================================================
+# Errors and Error Handling
 
-Exceptions
-================================================================================
+## Exceptions
 
-PDAL typically throws a ``std::runtime_error`` for error conditions that is
-catchable as ``pdal::pdal_error``.
+PDAL typically throws a `std::runtime_error` for error conditions that is
+catchable as `pdal::pdal_error`.
 
-PDAL Position on (Non)conformance
-================================================================================
+## PDAL Position on (Non)conformance
 
 PDAL proudly and unabashedly supports formal standards/specifications for
 file formats.  We recognize, however, that in some cases files will not
@@ -20,11 +16,10 @@ carelessness.
 
 When reading files that are not formatted correctly:
 
-* PDAL may try to compensate for the error.  This is typically done when as
+- PDAL may try to compensate for the error.  This is typically done when as
   a practical matter the market needs support for well-known or pervasive,
   but nonetheless "broken", upstream implementations.
-
-* PDAL may explicitly reject such files.  This is typically done where we do
+- PDAL may explicitly reject such files.  This is typically done where we do
   not wish to continue to promote or support mistakes that should be fixed
   upstream.
 

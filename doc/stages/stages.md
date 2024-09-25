@@ -1,10 +1,9 @@
-.. _stages:
+(stages)=
 
-Stages
-=======
+# Stages
 
-The stages of a PDAL :ref:`pipeline` are divided into :ref:`readers`, :ref:`filters`
-and :ref:`writers`. Stages may support :ref:`streaming mode <processing_modes>` or
+The stages of a PDAL {ref}`pipeline` are divided into {ref}`readers`, {ref}`filters`
+and {ref}`writers`. Stages may support {ref}`streaming mode <processing_modes>` or
 not, depending on
 their functionality or particular implementation.  Many stages are built into the
 base PDAL library (the file pdalcpp.so on Unix, pdalcpp.dylib on OSX and pdalcpp.dll
@@ -21,21 +20,21 @@ be little used and its addition would unnecessarily increase the size of the PDA
 PDAL will automatically load plugins when necessary. PDAL plugins have a specific naming
 pattern:
 
-::
+```
+libpdal_plugin_<plugin type>_<plugin name>.<shared library extension>
+```
 
-  libpdal_plugin_<plugin type>_<plugin name>.<shared library extension>
-
-Where <plugin type> is "reader", "writer" or "filter" and <shared library extension> is
+Where \<plugin type> is "reader", "writer" or "filter" and \<shared library extension> is
 ".dll" on Windows, ".dylib" on OSX and ".so" on UNIX systems.
 
-The <plugin name> must start with a letter or number, which can be followed by letters,
-numbers, or an underscore ('_').
+The \<plugin name> must start with a letter or number, which can be followed by letters,
+numbers, or an underscore ('\_').
 
 PDAL looks for plugins in the directory that contains the PDAL library itself, as well
-as the directories ``.``, ``./lib``, ``../lib``, ``./bin``, ``../bin``. Those paths
+as the directories `.`, `./lib`, `../lib`, `./bin`, `../bin`. Those paths
 are relative to the current working directory.  These locations can be overridden by
-setting the environment variable ``PDAL_DRIVER_PATH`` to a list of directories delimited
-by ``;`` on Windows and ``:`` on other platforms.
+setting the environment variable `PDAL_DRIVER_PATH` to a list of directories delimited
+by `;` on Windows and `:` on other platforms.
 
-You can use ``pdal --drivers`` to show stages that PDAL is able to load.  Verify the above
+You can use `pdal --drivers` to show stages that PDAL is able to load.  Verify the above
 if you are having trouble loading specific plugins.

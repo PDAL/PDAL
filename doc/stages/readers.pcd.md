@@ -1,40 +1,42 @@
-.. _readers.pcd:
+(readers.pcd)=
 
-readers.pcd
-===========
+# readers.pcd
 
-The **PCD Reader** supports reading from `Point Cloud Data (PCD)`_ formatted
-files, which are used by the `Point Cloud Library (PCL)`_.
+The **PCD Reader** supports reading from [Point Cloud Data (PCD)] formatted
+files, which are used by the [Point Cloud Library (PCL)].
 
+```{eval-rst}
 .. embed::
+```
 
+```{eval-rst}
 .. streamable::
 
+```
 
-Example
--------
+## Example
 
-.. code-block:: json
+```json
+[
+    {
+        "type":"readers.pcd",
+        "filename":"inputfile.pcd"
+    },
+    {
+        "type":"writers.text",
+        "filename":"outputfile.txt"
+    }
+]
+```
 
-  [
-      {
-          "type":"readers.pcd",
-          "filename":"inputfile.pcd"
-      },
-      {
-          "type":"writers.text",
-          "filename":"outputfile.txt"
-      }
-  ]
-
-Options
--------
+## Options
 
 filename
-  PCD file to read [Required]
 
-.. include:: reader_opts.rst
+: PCD file to read \[Required\]
 
-.. _Point Cloud Data (PCD): https://pcl-tutorials.readthedocs.io/en/latest/pcd_file_format.html
-.. _Point Cloud Library (PCL): http://pointclouds.org
+```{include} reader_opts.md
+```
 
+[point cloud data (pcd)]: https://pcl-tutorials.readthedocs.io/en/latest/pcd_file_format.html
+[point cloud library (pcl)]: http://pointclouds.org

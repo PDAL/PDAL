@@ -1,11 +1,10 @@
-.. _readers.mbio:
+(readers.mbio)=
 
-readers.mbio
-============
+# readers.mbio
 
 The mbio reader allows sonar bathymetry data to be read into PDAL and
-treated as data collected using LIDAR sources.  PDAL uses the `MB-System`_
-library to read the data and therefore supports `all formats`_ supported by
+treated as data collected using LIDAR sources.  PDAL uses the [MB-System]
+library to read the data and therefore supports [all formats] supported by
 that library.  Some common sonar systems are NOT supported by MB-System,
 notably Kongsberg, Reson and Norbit.  The mbio reader reads each "beam"
 of data after averaging and processing by the MB-System software and stores
@@ -14,55 +13,61 @@ longitude and latitude for units and the Z values are in meters (negative,
 being below the surface).  Units for 'Amplitude' is not specified and may
 vary.
 
+```{eval-rst}
 .. plugin::
+```
 
+```{eval-rst}
 .. streamable::
 
+```
 
-Example
--------
+## Example
 
 This reads beams from a sonar data file and writes points to a LAS file.
 
-.. code-block:: json
+```json
+[
+    {
+        "type" : "readers.mbio",
+        "filename" : "shipdata.m57",
+        "format" : "MBF_EM3000RAW"
+    },
+    {
+        "type":"writers.las",
+        "filename":"outputfile.las"
+    }
+]
+```
 
-  [
-      {
-          "type" : "readers.mbio",
-          "filename" : "shipdata.m57",
-          "format" : "MBF_EM3000RAW"
-      },
-      {
-          "type":"writers.las",
-          "filename":"outputfile.las"
-      }
-  ]
-
-
-Options
--------
+## Options
 
 filename
-  Filename to read from [Required]
 
-.. include:: reader_opts.rst
+: Filename to read from \[Required\]
+
+```{include} reader_opts.md
+```
 
 format
-  Name of number of format of file being read.  See MB-System documentation
-  for a list of `all formats`_. [Required]
+
+: Name of number of format of file being read.  See MB-System documentation
+  for a list of [all formats]. \[Required\]
 
 datatype
-  Type of data to read.  Either 'multibeam' or 'sidescan'.
-  [Default: 'multibeam']
+
+: Type of data to read.  Either 'multibeam' or 'sidescan'.
+  \[Default: 'multibeam'\]
 
 timegap
-  The maximum number of seconds that can elapse between pings before the
-  end of the data stream is assumed. [Default: 1.0]
+
+: The maximum number of seconds that can elapse between pings before the
+  end of the data stream is assumed. \[Default: 1.0\]
 
 speedmin
-  The minimum speed that the ship can be moving to before the end of the
-  data stream is assumed. [Default: 0]
 
-.. _MB-System: https://www.mbari.org/products/research-software/mb-system/
-.. _all formats: http://www3.mbari.org/products/mbsystem/html/mbsystem_formats.html
+: The minimum speed that the ship can be moving to before the end of the
+  data stream is assumed. \[Default: 0\]
 
+[all formats]: http://www3.mbari.org/products/mbsystem/html/mbsystem_formats.html
+[mb-system]: https://www.mbari.org/products/research-software/mb-system/

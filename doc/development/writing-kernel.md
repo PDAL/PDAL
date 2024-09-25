@@ -1,55 +1,56 @@
-.. _writing-kernel:
+---
+Author: Bradley Chambers
+Contact: <mailto:brad.chambers@gmail.com>
+Date: 11/02/2017
+---
 
-===============================================================================
-Writing a kernel
-===============================================================================
+(writing-kernel)=
 
-:Author: Bradley Chambers
-:Contact: brad.chambers@gmail.com
-:Date: 11/02/2017
-
+# Writing a kernel
 
 PDAL's command-line application can be extended through the development of
 kernel functions. In this tutorial, we will give a brief example.
 
-The header
--------------------------------------------------------------------------------
+## The header
 
 First, we provide a full listing of the kernel header.
 
-.. literalinclude:: ../../examples/writing-kernel/MyKernel.hpp
-   :language: cpp
-   :linenos:
+```{literalinclude} ../../examples/writing-kernel/MyKernel.hpp
+:language: cpp
+:linenos: true
+```
 
 As with other plugins, the MyKernel class needs to return a name.
 
-.. literalinclude:: ../../examples/writing-kernel/MyKernel.hpp
-   :language: cpp
-   :lines: 17
+```{literalinclude} ../../examples/writing-kernel/MyKernel.hpp
+:language: cpp
+:lines: 17
+```
 
-
-The source
--------------------------------------------------------------------------------
+## The source
 
 Again, we start with a full listing of the kernel source.
 
-.. literalinclude:: ../../examples/writing-kernel/MyKernel.cpp
-   :language: cpp
-   :linenos:
+```{literalinclude} ../../examples/writing-kernel/MyKernel.cpp
+:language: cpp
+:linenos: true
+```
 
 In your kernel implementation, you will use a macro defined in pdal_macros.
 This macro registers the plugin with the PluginManager.
 
-.. literalinclude:: ../../examples/writing-kernel/MyKernel.cpp
-   :language: cpp
-   :lines: 23
+```{literalinclude} ../../examples/writing-kernel/MyKernel.cpp
+:language: cpp
+:lines: 23
+```
 
 To build up a processing pipeline in this example, we need to create two
-objects: the :cpp:class:`pdal::PointTable`.
+objects: the {cpp:class}`pdal::PointTable`.
 
-.. literalinclude:: ../../examples/writing-kernel/MyKernel.cpp
-   :language: cpp
-   :lines: 35-53
+```{literalinclude} ../../examples/writing-kernel/MyKernel.cpp
+:language: cpp
+:lines: 35-53
+```
 
 To implement the actual kernel logic we implement execute().  In this case,
 the kernel reads a las file, decimates the data (eliminates some points) and
@@ -58,26 +59,21 @@ writes the result to a text file.  The base kernel class provides functions
 The pipeline that has been created can be run by preparing and executing the
 last stage in the pipeline.
 
-
 When compiled, a dynamic library file will be created; in this case,
-``libpdal_plugin_kernel_mykernel.dylib``
+`libpdal_plugin_kernel_mykernel.dylib`
 
-Put this file in whatever directory ``PDAL_DRIVER_PATH`` is pointing to.  Then,
-if you run ``pdal --drivers``, you should see ``mykernel`` listed in the
+Put this file in whatever directory `PDAL_DRIVER_PATH` is pointing to.  Then,
+if you run `pdal --drivers`, you should see `mykernel` listed in the
 possible commands.
 
-To run this kernel, you would use ``pdal mykernel -i <input las file> -o
-<output text file>``.
+To run this kernel, you would use `pdal mykernel -i <input las file> -o
+<output text file>`.
 
-Compilation
-...............................................................................
+### Compilation
 
-Set up a ``CMakeLists.txt`` file to compile your kernel against PDAL:
+Set up a `CMakeLists.txt` file to compile your kernel against PDAL:
 
-.. literalinclude:: ../../examples/writing-kernel/CMakeLists.txt
-   :language: cmake
-   :linenos:
-
-
-
-
+```{literalinclude} ../../examples/writing-kernel/CMakeLists.txt
+:language: cmake
+:linenos: true
+```

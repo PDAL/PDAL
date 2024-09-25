@@ -1,29 +1,28 @@
-.. _cppapi:
+(cppapi)=
 
-******************************************************************************
-C++ API
-******************************************************************************
+# C++ API
 
-.. toctree::
-   :maxdepth: 2
+```{toctree}
+:maxdepth: 2
 
-   bounds
-   charbuf
-   columnpointtable
-   dimension
-   extractor
-   fileutils
-   filter
-   istream
-   log
-   metadata
-   options
-   pointtable
-   pointview
-   programargs
-   reader
-   rowpointtable
-   stage
-   stagefactory
-   utils
-   writer
+bounds
+charbuf
+columnpointtable
+dimension
+extractor
+fileutils
+filter
+istream
+log
+metadata
+options
+pointtable
+pointview
+programargs
+reader
+rowpointtable
+stage
+stagefactory
+utils
+writer
+```

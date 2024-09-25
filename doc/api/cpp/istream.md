@@ -1,11 +1,10 @@
-.. _cpp-pdal-istream:
+(cpp-pdal-istream)=
 
-******************************************************************************
-:cpp:class:`pdal::IStream`
-******************************************************************************
+# {cpp:class}`pdal::IStream`
 
+```{eval-rst}
 .. doxygenclass:: pdal::IStream
    :members:
    :undoc-members:
 
-
+```

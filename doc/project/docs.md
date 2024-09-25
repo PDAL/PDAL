@@ -1,101 +1,86 @@
-.. _development_docs:
+(development-docs)=
 
-================================================================================
-Docs
-================================================================================
+# Docs
 
-
-Requirements
-================================================================================
+## Requirements
 
 To build the PDAL documentation yourself, you need to install the following
 items:
 
-* Sphinx_
-* Breathe_
-* `Doxygen`_
-* `Latex`_
-* `dvipng`_
+- [Sphinx]
+- [Breathe]
+- [Doxygen]
+- [Latex]
+- [dvipng]
 
-.. _`dvipng`: https://en.wikipedia.org/wiki/Dvipng
-.. _`Latex`: https://en.wikipedia.org/wiki/LaTeX
-.. _`pdflatex`: https://www.tug.org/applications/pdftex/
+### [Sphinx] and [Breathe]
 
-Sphinx_ and Breathe_
---------------------------------------------------------------------------------
+Python dependencies should be installed from [PyPI] with `pip` or
+`easy_install`.
 
-Python dependencies should be installed from PyPI_ with ``pip`` or
-``easy_install``.
+```bash
+(sudo) pip install sphinx sphinxconfig-bibtex breathe
+```
 
-.. code-block:: bash
+```{note}
+If you are installing these packages to a system-wide directory, you may need
+the **sudo** in front of the **pip**, though it might be better that instead
+you use [virtual environments] instead of installing the packages system-wide.
+```
 
-    (sudo) pip install sphinx sphinxconfig-bibtex breathe
+### Doxygen
 
-.. note::
+The PDAL documentation also depends on [Doxygen], which can be installed from
+source or from binaries from the [doxygen website](http://www.stack.nl/~dimitri/doxygen/download.html).  If you are on Max OS X
+and use [homebrew], you can install doxygen with a simple `brew install
+doxygen`.
 
-    If you are installing these packages to a system-wide directory, you may need
-    the **sudo** in front of the **pip**, though it might be better that instead
-    you use `virtual environments`_ instead of installing the packages system-wide.
+### Latex
 
-Doxygen
---------------------------------------------------------------------------------
+[Latex] and [pdflatex] are used to generate the companion PDF of the website.
 
-The PDAL documentation also depends on `Doxygen`_, which can be installed from
-source or from binaries from the `doxygen website
-<http://www.stack.nl/~dimitri/doxygen/download.html>`_.  If you are on Max OS X
-and use `homebrew`_, you can install doxygen with a simple ``brew install
-doxygen``.
+### dvipng
 
-Latex
---------------------------------------------------------------------------------
+For math output, we depend on [dvipng] to turn [Latex] output into math PNGs.
 
-`Latex`_ and `pdflatex`_ are used to generate the companion PDF of the website.
-
-dvipng
---------------------------------------------------------------------------------
-
-For math output, we depend on `dvipng`_ to turn `Latex`_ output into math PNGs.
-
-Generation
-================================================================================
+## Generation
 
 Once you have installed all the doc dependencies, you can then build the
-documentation itself.  The :file:`doc/` directory in the PDAL source tree
+documentation itself.  The {file}`doc/` directory in the PDAL source tree
 contains a Makefile which can be used to build all documentation.  For a list
-of the output formats supported by Sphinx, simply type ``make``.  For example,
+of the output formats supported by Sphinx, simply type `make`.  For example,
 to build html documentation:
 
-.. code-block:: bash
+```bash
+cd doc
+make doxygen html
+```
 
-    cd doc
-    make doxygen html
-
-The html docs will be placed in :file:`doc/build/html/`.  The ``make doxygen``
+The html docs will be placed in {file}`doc/build/html/`.  The `make doxygen`
 is necessary to re-generate the API documentation from the source code using
-`Breathe`_ and `Sphinx`_.
+[Breathe] and [Sphinx].
 
+```{note}
+For a full build of the {ref}`cppapi` documentation, you need to
+`make doxygen` to have it build its XML output which is consumed
+by [Breathe] before `make html` can be issued.
+```
 
-.. note::
+## Website
 
-    For a full build of the :ref:`cppapi` documentation, you need to
-    ``make doxygen`` to have it build its XML output which is consumed
-    by `Breathe`_ before ``make html`` can be issued.
+The <http://pdal.io> website is regenerated from the `*-maintenance` branch using
+Github Actions. It will be committed by the `PDAL-docs` [GitHub] user and pushed
+to the <https://github.com/PDAL/pdal.github.io> repository. The website
+is then served via [GitHub Pages].
 
-
-Website
-================================================================================
-
-The http://pdal.io website is regenerated from the ``*-maintenance`` branch using
-Github Actions. It will be committed by the ``PDAL-docs`` `GitHub`_ user and pushed
-to the https://github.com/PDAL/pdal.github.io repository. The website
-is then served via `GitHub Pages`_.
-
-
-.. _`GitHub Pages`: https://pages.github.com/
-.. _`GitHub`: http://github.com/PDAL/PDAL
-.. _Sphinx: http://sphinx-doc.org/
-.. _Breathe: https://github.com/michaeljones/breathe
-.. _virtual environments: https://pypi.python.org/pypi/virtualenv
-.. _pypi: https://pypi.python.org/pypi
-.. _Doxygen: http://www.stack.nl/~dimitri/doxygen/
-.. _homebrew: http://mxcl.github.io/homebrew/
+[breathe]: https://github.com/michaeljones/breathe
+[doxygen]: http://www.stack.nl/~dimitri/doxygen/
+[dvipng]: https://en.wikipedia.org/wiki/Dvipng
+[github]: http://github.com/PDAL/PDAL
+[github pages]: https://pages.github.com/
+[homebrew]: http://mxcl.github.io/homebrew/
+[latex]: https://en.wikipedia.org/wiki/LaTeX
+[pdflatex]: https://www.tug.org/applications/pdftex/
+[pypi]: https://pypi.python.org/pypi
+[sphinx]: http://sphinx-doc.org/
+[virtual environments]: https://pypi.python.org/pypi/virtualenv

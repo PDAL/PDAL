@@ -1,7 +1,6 @@
-.. _readers.memoryview:
+(readers.memoryview)=
 
-readers.memoryview
-==================
+# readers.memoryview
 
 The memoryview reader is a special stage that allows
 the reading of point data arranged in rows directly from memory --
@@ -14,8 +13,7 @@ points to be read.
 Note that the memoryview reader does not currently work with columnar
 data (data where individual dimensions are packed into arrays).
 
-Usage
------
+## Usage
 
 The memoryview reader cannot be used from the command-line.  It is for use
 by software using the PDAL API.
@@ -25,30 +23,28 @@ call pushField() for every dimension that should be read from memory.
 pushField() takes a single argument, a MemoryViewReader::Field, that consists
 of a dimension name, a type and an offset from the point base address:
 
-.. code-block:: c++
+```c++
+struct Field
+{
+    std::string m_name;
+    Dimension::Type m_type;
+    size_t m_offset;
+};
 
-    struct Field
-    {
-        std::string m_name;
-        Dimension::Type m_type;
-        size_t m_offset;
-    };
-
-    void pushField(const Field&);
+void pushField(const Field&);
+```
 
 The user should also call setIncrementer(), a function that takes a
 single argument, a std::function that receives the ID of the point to
 be added and should return the base address of the point data, or a
 null pointer if there are no more points to be read.
 
-.. code-block:: c++
+```c++
+using PointIncrementer = std::function<char *(PointId)>;
 
-    using PointIncrementer = std::function<char *(PointId)>;
+void setIncrementer(PointIncrementer inc);
+```
 
-    void setIncrementer(PointIncrementer inc);
-
-
-Options
--------
+## Options
 
 None.

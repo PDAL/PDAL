@@ -1,63 +1,71 @@
-.. _filters.csf:
+(filters.csf)=
 
-filters.csf
-===============================================================================
+# filters.csf
 
 The **Cloth Simulation Filter (CSF)** classifies ground points based on the
-approach outlined in [Zhang2016]_.
+approach outlined in {cite:p}`zhang2016easy`.
 
+```{eval-rst}
 .. embed::
+```
 
-Example
--------
+## Example
 
 The sample pipeline below uses CSF to segment ground and non-ground returns,
 using default options, and writing only the ground returns to the output file.
 
-.. code-block:: json
+```json
+[
+    "input.las",
+    {
+        "type":"filters.csf"
+    },
+    {
+        "type":"filters.range",
+        "limits":"Classification[2:2]"
+    },
+    "output.laz"
+]
+```
 
-  [
-      "input.las",
-      {
-          "type":"filters.csf"
-      },
-      {
-          "type":"filters.range",
-          "limits":"Classification[2:2]"
-      },
-      "output.laz"
-  ]
-
-Options
--------------------------------------------------------------------------------
+## Options
 
 resolution
-  Cloth resolution. [Default: **1.0**]
+
+: Cloth resolution. \[Default: **1.0**\]
 
 ignore
-  A :ref:`range <ranges>` of values of a dimension to ignore.
+
+: A {ref}`range <ranges>` of values of a dimension to ignore.
 
 returns
-  Return types to include in output.  Valid values are "first", "last",
-  "intermediate" and "only". [Default: **"last, only"**]
+
+: Return types to include in output.  Valid values are "first", "last",
+  "intermediate" and "only". \[Default: **"last, only"**\]
 
 threshold
-  Classification threshold. [Default: **0.5**]
+
+: Classification threshold. \[Default: **0.5**\]
 
 hdiff
-  Height difference threshold. [Default: **0.3**]
+
+: Height difference threshold. \[Default: **0.3**\]
 
 smooth
-  Perform slope post-processing? [Default: **true**]
+
+: Perform slope post-processing? \[Default: **true**\]
 
 step
-  Time step. [Default: **0.65**]
+
+: Time step. \[Default: **0.65**\]
 
 rigidness
-  Rigidness. [Default: **3**]
+
+: Rigidness. \[Default: **3**\]
 
 iterations
-  Maximum number of iterations. [Default: **500**]
 
-.. include:: filter_opts.rst
+: Maximum number of iterations. \[Default: **500**\]
 
+```{include} filter_opts.md
+```

@@ -1,16 +1,18 @@
-.. _cpp-pdal-utils:
+(cpp-pdal-utils)=
 
-******************************************************************************
-``pdal::Utils``
-******************************************************************************
+# `pdal::Utils`
 
-.. index:: Utils
+```{index} Utils
+```
 
+```{eval-rst}
 .. cpp:namespace:: pdal::Utils
+```
 
 `pdal::Utils` is a set of utility functions.
 
+```{eval-rst}
 .. doxygennamespace:: pdal::Utils
    :members:
    :undoc-members:
-
+```

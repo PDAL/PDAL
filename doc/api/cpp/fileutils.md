@@ -1,8 +1,7 @@
-.. _cpp-pdal-fileutils:
+(cpp-pdal-fileutils)=
 
-******************************************************************************
-``pdal::FileUtils``
-******************************************************************************
+# `pdal::FileUtils`
 
+```{eval-rst}
 .. doxygennamespace:: pdal::FileUtils
-
+```

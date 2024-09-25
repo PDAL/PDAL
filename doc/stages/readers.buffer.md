@@ -1,22 +1,22 @@
-.. _readers.buffer:
+(readers.buffer)=
 
-readers.buffer
-==============
+# readers.buffer
 
-The :ref:`readers.buffer` stage is a special stage that allows
+The {ref}`readers.buffer` stage is a special stage that allows
 you to read data from your own PointView rather than
-fetching the data from a specific reader. In the :ref:`writing` example,
+fetching the data from a specific reader. In the {ref}`writing` example,
 it is used to take a simple listing of points and turn them into an
 LAS file.
 
+```{eval-rst}
 .. embed::
+```
 
-Example
--------
+## Example
 
-See :ref:`writing` for an example usage scenario for :ref:`readers.buffer`.
+See {ref}`writing` for an example usage scenario for {ref}`readers.buffer`.
 
-Options
--------
+## Options
 
-.. include:: reader_opts.rst
+```{include} reader_opts.md
+```

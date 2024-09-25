@@ -1,7 +1,6 @@
-.. _filters.voxelcentroidnearestneighbor:
+(filters.voxelcentroidnearestneighbor)=
 
-filters.voxelcentroidnearestneighbor
-===============================================================================
+# filters.voxelcentroidnearestneighbor
 
 The **VoxelCentroidNearestNeighbor Filter** is a voxel-based sampling filter.
 The input point cloud is divided into 3D voxels at the given cell size. For
@@ -14,33 +13,33 @@ search (considering only those points lying within the voxel). The nearest
 neighbor is then added to the output point cloud, along with any existing
 dimensions.
 
+```{eval-rst}
 .. embed::
+```
 
-Example
--------
+## Example
 
+```json
+[
+    "input.las",
+    {
+        "type":"filters.voxelcentroidnearestneighbor",
+        "cell":10.0
+    },
+    "output.las"
+]
+```
 
-.. code-block:: json
+```{seealso}
+{ref}`filters.voxelcenternearestneighbor` offers a similar solution, using
+the voxel center as opposed to the voxel centroid for the query point.
+```
 
-  [
-      "input.las",
-      {
-          "type":"filters.voxelcentroidnearestneighbor",
-          "cell":10.0
-      },
-      "output.las"
-  ]
-
-.. seealso::
-
-    :ref:`filters.voxelcenternearestneighbor` offers a similar solution, using
-    the voxel center as opposed to the voxel centroid for the query point.
-
-Options
--------------------------------------------------------------------------------
+## Options
 
 cell
-  Cell size in the ``X``, ``Y``, and ``Z`` dimension. [Default: 1.0]
 
-.. include:: filter_opts.rst
+: Cell size in the `X`, `Y`, and `Z` dimension. \[Default: 1.0\]
 
+```{include} filter_opts.md
+```

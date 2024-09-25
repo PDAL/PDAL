@@ -1,8 +1,6 @@
-.. _contributors:
+(contributors)=
 
-******************************************************************************
-Contributors
-******************************************************************************
+# Contributors
 
 Numerous organizations, companies, and individuals have contributed time,
 money, and code to build PDAL up into a highly capable software package.
@@ -13,67 +11,61 @@ management. We hope you'll find it useful too.
 
 This page is to recognize these contributors and their contributions. Thanks.
 
-Engineering Contributors
---------------------------------------------------------------------------------
+## Engineering Contributors
 
-.. image:: https://hobu.co/theme/images/hobulogo.png
-    :target: http://hobu.co
+```{image} https://hobu.co/theme/images/hobulogo.png
+:target: http://hobu.co
+```
 
-`Hobu`_ is the primary company behind the design, testing, development, and
+[Hobu] is the primary company behind the design, testing, development, and
 distribution of PDAL. Two Hobu team members primarily interact with PDAL.
-`Howard Butler`_ founded the project, and he provides project leadership and
-software development.  `Andrew Bell`_ has contributed design, refactoring, and
+[Howard Butler] founded the project, and he provides project leadership and
+software development.  [Andrew Bell] has contributed design, refactoring, and
 new feature development of PDAL over the past couple of years.
 
-.. _`Howard Butler`: https://github.com/hobu
-.. _`Andrew Bell`: https://github.com/abellgithub
-.. _`Hobu`: http://hobu.co
-
-
-`Michael Gerlek`_ helped bootstrap PDAL by providing its first design, basic
+[Michael Gerlek] helped bootstrap PDAL by providing its first design, basic
 primitive objects, and first stage implementations.
 
-.. _`Michael Gerlek`: http://github.com/mpgerlek
+```{image} ./GCS_SmallLogo.png
+:target: https://grovercsllc.com/
+:width: 300px
+```
 
-
-.. image:: ./GCS_SmallLogo.png
-    :width: 300px
-    :target: https://grovercsllc.com/
-
-`Bradley Chambers`_ from `Grover Consulting Services`_ has contributed numerous
-features and capabilities to the PDAL project, including :ref:`Poisson sampling
+[Bradley Chambers] from [Grover Consulting Services] has contributed numerous
+features and capabilities to the PDAL project, including {ref}`Poisson sampling
 <filters.sample>` and classification filters such as
-:ref:`the SMRF filter<filters.smrf>`.  He is also a prolific :ref:`tutorial` writer.
+{ref}`the SMRF filter<filters.smrf>`.  He is also a prolific {ref}`tutorial` writer.
 
-.. _`Bradley Chambers`: https://github.com/chambbj
-.. _`Grover Consulting Services`: https://grovercsllc.com/
+## Funding Contributors
 
-
-Funding Contributors
---------------------------------------------------------------------------------
-
-.. image:: ../development/rsgis_logo.png
-    :target: http://www.erdc.usace.army.mil/Locations/CRREL.aspx
+```{image} ../development/rsgis_logo.png
+:target: http://www.erdc.usace.army.mil/Locations/CRREL.aspx
+```
 
 The US Army Corps of Engineers Remote Sensing / GIS Center of Expertise at
-`CRREL`_ sponsors development of PDAL for its use in point cloud data
-management systems. `CRREL`_'s `GRiD`_ project manages LiDAR and point cloud
+[CRREL] sponsors development of PDAL for its use in point cloud data
+management systems. [CRREL]'s [GRiD] project manages LiDAR and point cloud
 data for a multitude of U.S. Army Corps missions. Find out more about GRiD in
-this `LiDAR Magazine article`_.
+this [LiDAR Magazine article].
 
-.. image:: ../development/nsf1.png
-    :target: http://www.nsf.gov
+```{image} ../development/nsf1.png
+:target: http://www.nsf.gov
+```
 
-.. image:: ../development/uoh.png
-    :target: http://www.uh.edu
+```{image} ../development/uoh.png
+:target: http://www.uh.edu
+```
 
-`NSF <http://www.nsf.gov>`_, in collaboration with `Dr. Craig Glennie
-<http://www.cive.uh.edu/faculty/glennie>`_ at the `University of Houston
-<http://www.uh.edu>`_ supports PDAL with funding support to develop and enhance
+[NSF](http://www.nsf.gov), in collaboration with [Dr. Craig Glennie](http://www.cive.uh.edu/faculty/glennie) at the [University of Houston](http://www.uh.edu) supports PDAL with funding support to develop and enhance
 statistical methods, transformation operations, tutorial and example
-development, and `PCL <http://pointclouds.org>`_ integration.
+development, and [PCL](http://pointclouds.org) integration.
 
-
-.. _`GRiD`: http://lidar.io/about.html
-.. _`LiDAR Magazine article`: http://www.lidarmag.com/content/view/11343/198/
-.. _`CRREL`: http://www.erdc.usace.army.mil/Locations/CRREL.aspx
+[andrew bell]: https://github.com/abellgithub
+[bradley chambers]: https://github.com/chambbj
+[crrel]: http://www.erdc.usace.army.mil/Locations/CRREL.aspx
+[grid]: http://lidar.io/about.html
+[grover consulting services]: https://grovercsllc.com/
+[hobu]: http://hobu.co
+[howard butler]: https://github.com/hobu
+[lidar magazine article]: http://www.lidarmag.com/content/view/11343/198/
+[michael gerlek]: http://github.com/mpgerlek

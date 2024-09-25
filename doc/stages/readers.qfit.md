@@ -1,51 +1,52 @@
-.. _readers.qfit:
+(readers.qfit)=
 
-******************************************************************************
-readers.qfit
-******************************************************************************
+# readers.qfit
 
-The **QFIT reader** read from files in the `QFIT format`_ originated for the
+The **QFIT reader** read from files in the [QFIT format] originated for the
 Airborne Topographic Mapper (ATM) project at NASA Goddard Space Flight Center.
 
+```{eval-rst}
 .. embed::
 
+```
 
-Example
--------
+## Example
 
-.. code-block:: json
+```json
+[
+    {
+        "type":"readers.qfit",
+        "filename":"inputfile.qi",
+        "flip_coordinates":"false",
+        "scale_z":"1.0"
+    },
+    {
+        "type":"writers.las",
+        "filename":"outputfile.las"
+    }
+]
+```
 
-  [
-      {
-          "type":"readers.qfit",
-          "filename":"inputfile.qi",
-          "flip_coordinates":"false",
-          "scale_z":"1.0"
-      },
-      {
-          "type":"writers.las",
-          "filename":"outputfile.las"
-      }
-  ]
-
-Options
--------
+## Options
 
 filename
-  File to read from [Required]
 
-.. include:: reader_opts.rst
+: File to read from \[Required\]
+
+```{include} reader_opts.md
+```
 
 flip_coordinates
-  Flip coordinates from 0-360 to -180-180 [Default: **true**]
+
+: Flip coordinates from 0-360 to -180-180 \[Default: **true**\]
 
 scale_z
-  Z scale. Use 0.001 to go from mm to m. [Default: **1**]
+
+: Z scale. Use 0.001 to go from mm to m. \[Default: **1**\]
 
 little_endian
-  Are data in little endian format? This should be automatically detected
-  by the driver. [Optional]
 
-.. _QFIT format: http://nsidc.org/data/docs/daac/icebridge/ilatm1b/docs/ReadMe.qfit.txt
+: Are data in little endian format? This should be automatically detected
+  by the driver. \[Optional\]
 
-
+[qfit format]: http://nsidc.org/data/docs/daac/icebridge/ilatm1b/docs/ReadMe.qfit.txt

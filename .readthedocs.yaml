@@ -13,18 +13,18 @@ build:
     pre_build:
       # - doxygen ./doc/doxygen/doxygen.conf 1> /dev/null
       # Generate on-the-fly Sphinx configuration from Jupyter Book's _config.yml
-      - "jupyter-book config sphinx book/"
-      - sed -i "1i\import os, sys; sys.path.append(os.path.abspath(\"./_ext\"))" book/conf.py
+      - "jupyter-book config sphinx doc/"
+      - sed -i "1i\import os, sys; sys.path.append(os.path.abspath(\"./_ext\"))" doc/conf.py
 
   # apt_packages:
   #   - graphviz
 
 sphinx:
   # builder: html
-  configuration: book/conf.py
+  configuration: doc/conf.py
   # fail_on_warning: true
 
 conda:
-  environment: book/environment.yml
+  environment: doc/environment.yml
 
 formats: all

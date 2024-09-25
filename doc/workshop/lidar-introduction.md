@@ -1,7 +1,6 @@
-.. _lidar-introduction:
+(lidar-introduction)=
 
-Introduction to LiDAR
-================================================================================
+# Introduction to LiDAR
 
 LiDAR is a remote sensing technique that uses visible or near-infrared laser
 energy to measure the distance between a sensor and an object.  LiDAR sensors
@@ -10,8 +9,7 @@ make detailed topographic measurements from space.  Before diving into LiDAR
 data processing, we will spend a bit of time reviewing some LiDAR fundamentals
 and discussing some terms of art.
 
-Types of LiDAR
------------------
+## Types of LiDAR
 
 LiDAR systems, generally speaking, come in one of three types:
 
@@ -36,13 +34,12 @@ LiDAR systems, generally speaking, come in one of three types:
   amounts of noise and other operational restrictions, making them
   significantly less common than linear-mode systems.
 
-.. note::
+```{note}
+Unless otherwise noted, if we talk about a LiDAR scanner in this program,
+we will be referring to a pulse-based (linear) system.
+```
 
-    Unless otherwise noted, if we talk about a LiDAR scanner in this program,
-    we will be referring to a pulse-based (linear) system.
-
-Modes of LiDAR Collection
----------------------------
+## Modes of LiDAR Collection
 
 LiDAR collects are generally categorized into four subjective types:
 
@@ -61,17 +58,17 @@ of an integrated GNSS/IMU (Global Navigation Satellite System/Inertial Motion
 Unit), which provides information about the position, rotation, and motion of
 the scanning platform.
 
-.. note::
+```{note}
+As stated in the class description, we will focus on mobile and airborne
+laser scanning (MLS/ALS), though we will also use some TLS data.
+```
 
-    As stated in the class description, we will focus on mobile and airborne
-    laser scanning (MLS/ALS), though we will also use some TLS data.
+(georeferencing-introduction)=
 
-.. _georeferencing-introduction:
+```{index} georeferencing, GNSS/IMU, SOCS
+```
 
-.. index:: georeferencing, GNSS/IMU, SOCS
-
-Georeferencing
-------------------
+## Georeferencing
 
 LiDAR scanners collect information in the Scanner's Own Coordinate System
 (SOCS); this is a coordinate system centered at the scanner.  The process of
@@ -89,25 +86,23 @@ post-processing workflow.  Since this is a common operation for mobile and
 airborne LiDAR collects, we will spend a moment discussing the methods and
 complications for georeferencing mobile LiDAR and GNSS/IMU data.
 
-Integrating LiDAR and GNSS/IMU data
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Integrating LiDAR and GNSS/IMU data
 
 The LiDAR georeferencing equation is well-established; we present a version
-here from :cite:`Glennie2007`:
+here from {cite}`Glennie2007`:
 
-.. math::
-    :label: georeferencing
-
-    \mathbf{p}^l_G = \mathbf{p}^l_{GPS} + \mathbf{R}^l_b \left( \mathbf{R}^b_s \mathbf{r}^s - \mathbf{l}^b \right)
+$$
+\mathbf{p}^l_G = \mathbf{p}^l_{GPS} + \mathbf{R}^l_b \left( \mathbf{R}^b_s \mathbf{r}^s - \mathbf{l}^b \right)
+$$ (georeferencing)
 
 where:
 
-- :math:`\mathbf{p}^l_G` are the coordinates of the target point in the global reference frame
-- :math:`\mathbf{p}^l_{GPS}` are the coordinates of the GNSS sensor in the global reference frame
-- :math:`\mathbf{R}^l_b` is the rotation matrix from the navigation frame to the global reference frame
-- :math:`\mathbf{R}^b_s` is the rotation matrix from the scanner's frame to the navigation frame (boresight matrix)
-- :math:`\mathbf{r}^s` is the coordinates of the laser point in the scanner's frame
-- :math:`\mathbf{l}^b` is the lever-arm offset between the scanner's original and the navigation's origin
+- $\mathbf{p}^l_G$ are the coordinates of the target point in the global reference frame
+- $\mathbf{p}^l_{GPS}$ are the coordinates of the GNSS sensor in the global reference frame
+- $\mathbf{R}^l_b$ is the rotation matrix from the navigation frame to the global reference frame
+- $\mathbf{R}^b_s$ is the rotation matrix from the scanner's frame to the navigation frame (boresight matrix)
+- $\mathbf{r}^s$ is the coordinates of the laser point in the scanner's frame
+- $\mathbf{l}^b$ is the lever-arm offset between the scanner's original and the navigation's origin
 
 This equation contains fourteen unknowns, and in order to georeference a single
 LiDAR return we must determine all fourteen variables at the time of the pulse.
@@ -117,41 +112,42 @@ As a rule of thumb, the position, attitude, and motion of the scanning platform
 of the laser — rates of ~1Hz are common for GNSS/IMU sampling.  In order to
 match the GNSS/IMU sampling rate with the sampling rate of the laser, GNSS/IMU
 measurements are interpolated to line up with the LiDAR measurements.  Then,
-these positions and attitudes are combined via Equation :eq:`georeferencing` to
+these positions and attitudes are combined via Equation {eq}`georeferencing` to
 create a final, georeferenced point cloud.
 
-.. note::
+```{note}
+While lever-arm offsets are usually taken from the schematic drawings of
+the LiDAR mounting system, the boresight matrix cannot be reliably
+determined from drawings alone.  The boresight matrix must therefore be
+determined either via manual or automated boresight calibration using
+actual LiDAR data of planar surfaces, such as the roof and sides of
+buildings.  The process for determining a boresight calibration from LiDAR
+data is beyond the scope of this class.
+```
 
-    While lever-arm offsets are usually taken from the schematic drawings of
-    the LiDAR mounting system, the boresight matrix cannot be reliably
-    determined from drawings alone.  The boresight matrix must therefore be
-    determined either via manual or automated boresight calibration using
-    actual LiDAR data of planar surfaces, such as the roof and sides of
-    buildings.  The process for determining a boresight calibration from LiDAR
-    data is beyond the scope of this class.
-
-Discrete-Return vs. Full-Waveform
--------------------------------------
+## Discrete-Return vs. Full-Waveform
 
 Pulse-based LiDAR systems use the round-trip travel time of a pulse of laser
 energy to measure distances.  The outgoing pulse of a LiDAR system is roughly
 (but not exactly) a Gaussian:
 
-.. figure:: images/reference-pulse.png
-  :scale: 30 %
-  :align: center
+```{figure} images/reference-pulse.png
+:align: center
+:scale: 30 %
 
-  A real-world outgoing LiDAR pulse.
+A real-world outgoing LiDAR pulse.
+```
 
 This pulse can interact with multiple objects in a scene before it is returned to the sensor.
 Here is an example of a LiDAR return:
 
-.. figure:: images/return-pulse.png
-  :scale: 30 %
-  :align: center
+```{figure} images/return-pulse.png
+:align: center
+:scale: 30 %
 
-  A real-world incoming LiDAR return.
-  Potential discrete-return peaks are marked in red.
+A real-world incoming LiDAR return.
+Potential discrete-return peaks are marked in red.
+```
 
 As you can see, this return pulse can be very complicated.  While there is more
 information contained in the "full waveform" picture displayed above, many
@@ -162,9 +158,7 @@ Full waveform data is used only in specialized circumstances.  If you have or
 receive LiDAR data, it will usually be discrete return (point clouds).
 Processing full waveform data is beyond the scope of this class.
 
-.. note::
-
-    PDAL is a discrete-return point cloud processing library.
-    It does not have any functionality to analyze or process full waveform data.
-
-.. bibliography:: bibliography.bib
+```{note}
+PDAL is a discrete-return point cloud processing library.
+It does not have any functionality to analyze or process full waveform data.
+```

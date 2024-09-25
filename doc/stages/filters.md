@@ -1,685 +1,740 @@
-.. _filters:
+(filters)=
 
-Filters
-=======
+# Filters
 
 Filters operate on data as inline operations. They can remove, modify,
 reorganize, and add points to the data stream as it goes by. Some filters can
-only operate on dimensions they understand (consider :ref:`filters.reprojection`
+only operate on dimensions they understand (consider {ref}`filters.reprojection`
 doing geographic reprojection on XYZ coordinates), while others do not
 interrogate the point data at all and simply reorganize or split data.
 
+## Create
 
-Create
-------
-
-PDAL filters commonly create new dimensions (e.g., ``HeightAboveGround``) or
-alter existing ones (e.g., ``Classification``). These filters will not
+PDAL filters commonly create new dimensions (e.g., `HeightAboveGround`) or
+alter existing ones (e.g., `Classification`). These filters will not
 invalidate an existing KD-tree.
 
-.. note::
+```{note}
+We treat those filters that alter XYZ coordinates separately.
+```
 
-  We treat those filters that alter XYZ coordinates separately.
+```{note}
+When creating new dimensions, be mindful of the writer you are using and
+whether or not the custom dimension can be written to disk if that is the
+desired behavior.
+```
 
-.. note::
+### Classification
 
-  When creating new dimensions, be mindful of the writer you are using and
-  whether or not the custom dimension can be written to disk if that is the
-  desired behavior.
+#### Ground/Unclassified
 
+<!-- ```{toctree}
+:glob: true
+:hidden: true
+:maxdepth: 1
 
-Classification
-..............
+filters.csf
+filters.pmf
+filters.skewnessbalancing
+filters.smrf
+filters.sparsesurface
+filters.trajectory
+``` -->
 
+{ref}`filters.csf`
 
-Ground/Unclassified
-~~~~~~~~~~~~~~~~~~~
+: Label ground/non-ground returns using {cite:p}`zhang2016easy`.
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
+{ref}`filters.pmf`
 
-   filters.csf
-   filters.pmf
-   filters.skewnessbalancing
-   filters.smrf
-   filters.sparsesurface
-   filters.trajectory
+: Label ground/non-ground returns using {cite:p}`zhang2003progressive`.
 
-:ref:`filters.csf`
-    Label ground/non-ground returns using [Zhang2016]_.
+{ref}`filters.skewnessbalancing`
 
-:ref:`filters.pmf`
-    Label ground/non-ground returns using [Zhang2003]_.
+: Label ground/non-ground returns using {cite:p}`bartels2010threshold`.
 
-:ref:`filters.skewnessbalancing`
-    Label ground/non-ground returns using [Bartels2010]_.
+{ref}`filters.smrf`
 
-:ref:`filters.smrf`
-    Label ground/non-ground returns using [Pingel2013]_.
+: Label ground/non-ground returns using {cite:p}`pingel2013improved`.
 
-:ref:`filters.sparsesurface`
-    Sparsify ground returns and label neighbors as low noise.
+{ref}`filters.sparsesurface`
 
-:ref:`filters.trajectory`
-    Label ground/non-ground returns using estimate flight trajectory given
-    multi-return point cloud data with timing information.
+: Sparsify ground returns and label neighbors as low noise.
 
+{ref}`filters.trajectory`
 
-Noise
-~~~~~
+: Label ground/non-ground returns using estimate flight trajectory given
+  multi-return point cloud data with timing information.
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
+#### Noise
 
-   filters.elm
-   filters.outlier
+<!-- ```{toctree}
+:glob: true
+:hidden: true
+:maxdepth: 1
 
-:ref:`filters.elm`
-    Marks low points as noise.
+filters.elm
+filters.outlier
+``` -->
 
-:ref:`filters.outlier`
-    Label noise points using either a statistical or radius outlier detection.
+{ref}`filters.elm`
 
+: Marks low points as noise.
 
-Consensus
-~~~~~~~~~
+{ref}`filters.outlier`
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
+: Label noise points using either a statistical or radius outlier detection.
 
-   filters.neighborclassifier
+#### Consensus
 
-:ref:`filters.neighborclassifier`
-    Update pointwise classification using k-nearest neighbor consensus voting.
+<!-- ```{toctree}
+:glob: true
+:hidden: true
+:maxdepth: 1
 
+filters.neighborclassifier
+``` -->
 
-Height Above Ground
-...................
+{ref}`filters.neighborclassifier`
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
+: Update pointwise classification using k-nearest neighbor consensus voting.
 
-   filters.hag_delaunay
-   filters.hag_dem
-   filters.hag_nn
+### Height Above Ground
 
-:ref:`filters.hag_delaunay`
-    Compute pointwise height above ground using triangulation. Requires points to
-    classified as ground/non-ground prior to estimating.
+<!-- ```{toctree}
+:glob: true
+:hidden: true
+:maxdepth: 1
 
-:ref:`filters.hag_dem`
-    Compute pointwise height above GDAL-readable DEM raster.
+filters.hag_delaunay
+filters.hag_dem
+filters.hag_nn
+``` -->
 
-:ref:`filters.hag_nn`
-    Compute pointwise height above ground estimate. Requires points to be
-    classified as ground/non-ground prior to estimating.
+{ref}`filters.hag_delaunay`
 
-
-Colorization
-............
+: Compute pointwise height above ground using triangulation. Requires points to
+  classified as ground/non-ground prior to estimating.
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
+{ref}`filters.hag_dem`
 
-   filters.colorinterp
-   filters.colorization
+: Compute pointwise height above GDAL-readable DEM raster.
 
-:ref:`filters.colorinterp`
-    Assign RGB colors based on a dimension and a ramp
+{ref}`filters.hag_nn`
 
-:ref:`filters.colorization`
-    Fetch and assign RGB color information from a GDAL-readable datasource.
+: Compute pointwise height above ground estimate. Requires points to be
+  classified as ground/non-ground prior to estimating.
 
+### Colorization
 
-Clustering
-..........
+<!-- ```{toctree}
+:glob: true
+:hidden: true
+:maxdepth: 1
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
+filters.colorinterp
+filters.colorization
+``` -->
 
-   filters.cluster
-   filters.dbscan
-   filters.litree
-   filters.lloydkmeans
+{ref}`filters.colorinterp`
 
-:ref:`filters.cluster`
-    Extract and label clusters using Euclidean distance metric. Returns a new
-    dimension ``ClusterID`` that indicates the cluster that a point belongs
-    to. Points not belonging to a cluster are given a cluster ID of 0.
+: Assign RGB colors based on a dimension and a ramp
 
-:ref:`filters.dbscan`
-    Perform Density-Based Spatial Clustering of Applications with Noise
-    (DBSCAN) [Ester1996]_.
+{ref}`filters.colorization`
 
-:ref:`filters.litree`
-    Segment and label individual trees. Returns a new dimension ``TreeID`` that
-    indicates the tree that a point belongs to. ``TreeID`` starts at 1, with
-    non-tree points given a ``TreeID`` of 0. [Li2012]_.
+: Fetch and assign RGB color information from a GDAL-readable datasource.
 
-:ref:`filters.lloydkmeans`
-    Perform K-means clustering using Lloyd's algorithm. Returns a new dimension
-    ``ClusterID`` with each point being assigned to a cluster. ``ClusterID``
-    starts at 0. [Lloyd1982]_.
+### Clustering
 
+<!-- ```{toctree}
+:glob: true
+:hidden: true
+:maxdepth: 1
 
-Pointwise Features
-..................
+filters.cluster
+filters.dbscan
+filters.litree
+filters.lloydkmeans
+``` -->
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
+{ref}`filters.cluster`
 
-   filters.approximatecoplanar
-   filters.covariancefeatures
-   filters.eigenvalues
-   filters.estimaterank
-   filters.label_duplicates
-   filters.lof
-   filters.miniball
-   filters.nndistance
-   filters.normal
-   filters.optimalneighborhood
-   filters.planefit
-   filters.radialdensity
-   filters.reciprocity
-   filters.zsmooth
-   filters.griddecimation
+: Extract and label clusters using Euclidean distance metric. Returns a new
+  dimension `ClusterID` that indicates the cluster that a point belongs
+  to. Points not belonging to a cluster are given a cluster ID of 0.
 
-:ref:`filters.approximatecoplanar`
-    Estimate pointwise planarity, based on k-nearest neighbors. Returns a new
-    dimension ``Coplanar`` where a value of 1 indicates that a point is part of
-    a coplanar neighborhood (0 otherwise).
+{ref}`filters.dbscan`
 
-:ref:`filters.covariancefeatures`
-    Filter that calculates local features based on the covariance matrix of a
-    point's neighborhood.
+: Perform Density-Based Spatial Clustering of Applications with Noise
+  (DBSCAN) {cite:p}`ester1996density`.
 
-:ref:`filters.eigenvalues`
-    Compute pointwise eigenvalues, based on k-nearest neighbors.
+{ref}`filters.litree`
 
-:ref:`filters.estimaterank`
-    Compute pointwise rank, based on k-nearest neighbors.
+: Segment and label individual trees. Returns a new dimension `TreeID` that
+  indicates the tree that a point belongs to. `TreeID` starts at 1, with
+  non-tree points given a `TreeID` of 0. {cite:p}`li2012new`.
 
-:ref:`filters.label_duplicates`
-    Label points as duplicate if the specified dimensions are equal.
+{ref}`filters.lloydkmeans`
 
-:ref:`filters.lof`
-    Compute pointwise Local Outlier Factor (along with K-Distance and Local
-    Reachability Distance).
+: Perform K-means clustering using Lloyd's algorithm. Returns a new dimension
+  `ClusterID` with each point being assigned to a cluster. `ClusterID`
+  starts at 0. {cite:p}`lloyd1982least`.
 
-:ref:`filters.miniball`
-    Compute a criterion for point neighbors based on the miniball algorithm.
+### Pointwise Features
 
-:ref:`filters.nndistance`
-    Compute a distance metric based on nearest neighbors.
+<!-- ```{toctree}
+:glob: true
+:hidden: true
+:maxdepth: 1
 
-:ref:`filters.normal`
-    Compute pointwise normal and curvature, based on k-nearest neighbors.
+filters.approximatecoplanar
+filters.covariancefeatures
+filters.eigenvalues
+filters.estimaterank
+filters.label_duplicates
+filters.lof
+filters.miniball
+filters.nndistance
+filters.normal
+filters.optimalneighborhood
+filters.planefit
+filters.radialdensity
+filters.reciprocity
+filters.zsmooth
+filters.griddecimation
+``` -->
 
-:ref:`filters.optimalneighborhood`
-    Compute optimal k nearest neighbors and corresponding radius by minimizing
-    pointwise eigenentropy. Creates two new dimensions ``OptimalKNN`` and
-    ``OptimalRadius``.
+{ref}`filters.approximatecoplanar`
 
-:ref:`filters.planefit`
-    Compute a deviation of a point from a manifold approximating its neighbors.
+: Estimate pointwise planarity, based on k-nearest neighbors. Returns a new
+  dimension `Coplanar` where a value of 1 indicates that a point is part of
+  a coplanar neighborhood (0 otherwise).
 
-:ref:`filters.radialdensity`
-    Compute pointwise density of points within a given radius.
+{ref}`filters.covariancefeatures`
 
-:ref:`filters.reciprocity`
-    Compute the percentage of points that are considered uni-directional
-    neighbors of a point.
+: Filter that calculates local features based on the covariance matrix of a
+  point's neighborhood.
 
-:ref:`filters.zsmooth`
-    Compute a smoothed 'Z' value based on the 'Z' value of neighboring points.
+{ref}`filters.eigenvalues`
 
-:ref:`filters.griddecimation`
-    Assign values for one point (the highest or lowest) per cell of a 2d regular grid.
+: Compute pointwise eigenvalues, based on k-nearest neighbors.
 
-Assignment
-..........
+{ref}`filters.estimaterank`
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
+: Compute pointwise rank, based on k-nearest neighbors.
 
-   filters.assign
-   filters.overlay
+{ref}`filters.label_duplicates`
 
-:ref:`filters.assign`
-    Assign values for a dimension range to a specified value.
+: Label points as duplicate if the specified dimensions are equal.
 
-:ref:`filters.overlay`
-    Assign values to a dimension based on the extent of an OGR-readable data
-    source or an OGR SQL query.
+{ref}`filters.lof`
 
+: Compute pointwise Local Outlier Factor (along with K-Distance and Local
+  Reachability Distance).
 
-Dimension Create/Copy
-.....................
+{ref}`filters.miniball`
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
+: Compute a criterion for point neighbors based on the miniball algorithm.
 
-   filters.ferry
+{ref}`filters.nndistance`
 
-:ref:`filters.ferry`
-    Copy data from one dimension to another.
+: Compute a distance metric based on nearest neighbors.
 
+{ref}`filters.normal`
 
-Order
------
+: Compute pointwise normal and curvature, based on k-nearest neighbors.
+
+{ref}`filters.optimalneighborhood`
+
+: Compute optimal k nearest neighbors and corresponding radius by minimizing
+  pointwise eigenentropy. Creates two new dimensions `OptimalKNN` and
+  `OptimalRadius`.
+
+{ref}`filters.planefit`
+
+: Compute a deviation of a point from a manifold approximating its neighbors.
+
+{ref}`filters.radialdensity`
+
+: Compute pointwise density of points within a given radius.
+
+{ref}`filters.reciprocity`
+
+: Compute the percentage of points that are considered uni-directional
+  neighbors of a point.
+
+{ref}`filters.zsmooth`
+
+: Compute a smoothed 'Z' value based on the 'Z' value of neighboring points.
+
+{ref}`filters.griddecimation`
+
+: Assign values for one point (the highest or lowest) per cell of a 2d regular grid.
+
+### Assignment
+<!-- 
+```{toctree}
+:glob: true
+:hidden: true
+:maxdepth: 1
+
+filters.assign
+filters.overlay
+``` -->
+
+{ref}`filters.assign`
+
+: Assign values for a dimension range to a specified value.
+
+{ref}`filters.overlay`
+
+: Assign values to a dimension based on the extent of an OGR-readable data
+  source or an OGR SQL query.
+
+### Dimension Create/Copy
+
+<!-- ```{toctree}
+:glob: true
+:hidden: true
+:maxdepth: 1
+
+filters.ferry
+``` -->
+
+{ref}`filters.ferry`
+
+: Copy data from one dimension to another.
+
+## Order
 
 There are currently three PDAL filters that can be used to reorder points. These
 filters will invalidate an existing KD-tree.
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
+<!-- ```{toctree}
+:glob: true
+:hidden: true
+:maxdepth: 1
 
-   filters.mortonorder
-   filters.randomize
-   filters.sort
+filters.mortonorder
+filters.randomize
+filters.sort
+``` -->
 
-:ref:`filters.mortonorder`
-    Sort XY data using Morton ordering (aka Z-order/Z-curve).
+{ref}`filters.mortonorder`
 
-:ref:`filters.randomize`
-    Randomize points in a view.
+: Sort XY data using Morton ordering (aka Z-order/Z-curve).
 
-:ref:`filters.sort`
-    Sort data based on a given dimension.
+{ref}`filters.randomize`
 
+: Randomize points in a view.
 
-Move
-----
+{ref}`filters.sort`
+
+: Sort data based on a given dimension.
+
+## Move
 
 PDAL filters that move XYZ coordinates will invalidate an existing KD-tree.
 
+### Registration
 
-Registration
-............
+<!-- ```{toctree}
+:glob: true
+:hidden: true
+:maxdepth: 1
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
+filters.cpd
+filters.icp
+filters.teaser
+``` -->
 
-   filters.cpd
-   filters.icp
-   filters.teaser
+{ref}`filters.cpd`
 
-:ref:`filters.cpd`
-    Compute and apply transformation between two point clouds using the
-    Coherent Point Drift algorithm.
+: Compute and apply transformation between two point clouds using the
+  Coherent Point Drift algorithm.
 
-:ref:`filters.icp`
-    Compute and apply transformation between two point clouds using the
-    Iterative Closest Point algorithm.
+{ref}`filters.icp`
 
-:ref:`filters.teaser`
-    Compute a rigid transformation between two point clouds using the teaser algorithm.
+: Compute and apply transformation between two point clouds using the
+  Iterative Closest Point algorithm.
 
-Predefined
-..........
+{ref}`filters.teaser`
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
+: Compute a rigid transformation between two point clouds using the teaser algorithm.
 
-   filters.projpipeline
-   filters.reprojection
-   filters.transformation
-   filters.straighten
-   filters.georeference
-   filters.h3
+### Predefined
 
-:ref:`filters.projpipeline`
-    Apply coordinates operation on point triplets, based on PROJ pipeline string,
-    WKT2 coordinates operations or URN definitions.
+<!-- ```{toctree}
+:glob: true
+:hidden: true
+:maxdepth: 1
 
-:ref:`filters.reprojection`
-    Reproject data using GDAL from one coordinate system to another.
+filters.projpipeline
+filters.reprojection
+filters.transformation
+filters.straighten
+filters.georeference
+filters.h3
+``` -->
 
-:ref:`filters.transformation`
-    Transform each point using a 4x4 transformation matrix.
+{ref}`filters.projpipeline`
 
+: Apply coordinates operation on point triplets, based on PROJ pipeline string,
+  WKT2 coordinates operations or URN definitions.
 
-:ref:`filters.straighten`
-    Transforms each in a new parametric coordinate system along a given poyline.
+{ref}`filters.reprojection`
 
-:ref:`filters.georeference`
-    Georeference point cloud.
+: Reproject data using GDAL from one coordinate system to another.
 
-:ref:`filters.h3`
-    Compute H3 index values for the Longitude/Latitude of the point cloud
+{ref}`filters.transformation`
 
-Cull
-----
+: Transform each point using a 4x4 transformation matrix.
+
+{ref}`filters.straighten`
+
+: Transforms each in a new parametric coordinate system along a given poyline.
+
+{ref}`filters.georeference`
+
+: Georeference point cloud.
+
+{ref}`filters.h3`
+
+: Compute H3 index values for the Longitude/Latitude of the point cloud
+
+## Cull
 
 Some PDAL filters will cull points, returning a point cloud that is smaller than
 the input. These filters will invalidate an existing KD-tree.
 
+### Spatial
 
-Spatial
-.......
+<!-- ```{toctree}
+:glob: true
+:hidden: true
+:maxdepth: 1
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
+filters.crop
+filters.geomdistance
+``` -->
 
-   filters.crop
-   filters.geomdistance
+{ref}`filters.crop`
 
-:ref:`filters.crop`
-    Filter points inside or outside a bounding box or a polygon
+: Filter points inside or outside a bounding box or a polygon
 
-:ref:`filters.geomdistance`
-    Compute 2D distance from a polygon to points
+{ref}`filters.geomdistance`
 
-Resampling
-..........
+: Compute 2D distance from a polygon to points
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
+### Resampling
 
-   filters.decimation
-   filters.fps
-   filters.relaxationdartthrowing
-   filters.sample
+<!-- ```{toctree}
+:glob: true
+:hidden: true
+:maxdepth: 1
 
-:ref:`filters.decimation`
-    Keep every Nth point.
+filters.decimation
+filters.fps
+filters.relaxationdartthrowing
+filters.sample
+``` -->
 
-:ref:`filters.fps`
-    The Farthest Point Sampling Filter adds points from the input to the output
-    PointView one at a time by selecting the point from the input cloud that is
-    farthest from any point currently in the output.
+{ref}`filters.decimation`
 
-:ref:`filters.relaxationdartthrowing`
-    Relaxation dart throwing is a hierarchical variant of Poisson disk
-    sampling, shrinking the minimum radius between iterations until the target
-    number of output points is achieved.
+: Keep every Nth point.
 
-:ref:`filters.sample`
-    Perform Poisson sampling and return only a subset of the input points.
+{ref}`filters.fps`
 
+: The Farthest Point Sampling Filter adds points from the input to the output
+  PointView one at a time by selecting the point from the input cloud that is
+  farthest from any point currently in the output.
 
-Conditional
-...........
+{ref}`filters.relaxationdartthrowing`
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
+: Relaxation dart throwing is a hierarchical variant of Poisson disk
+  sampling, shrinking the minimum radius between iterations until the target
+  number of output points is achieved.
 
-   filters.dem
-   filters.iqr
-   filters.mad
+{ref}`filters.sample`
 
-:ref:`filters.dem`
-    Remove points that are in a raster cell but have a value far from the
-    value of the raster.
+: Perform Poisson sampling and return only a subset of the input points.
 
-:ref:`filters.iqr`
-    Cull points falling outside the computed Interquartile Range for a given
-    dimension.
+### Conditional
 
-:ref:`filters.mad`
-    Cull points falling outside the computed Median Absolute Deviation for a
-    given dimension.
+<!-- ```{toctree}
+:glob: true
+:hidden: true
+:maxdepth: 1
 
+filters.dem
+filters.iqr
+filters.mad
+``` -->
 
-Voxel
-.....
+{ref}`filters.dem`
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
+: Remove points that are in a raster cell but have a value far from the
+  value of the raster.
 
-   filters.voxelcenternearestneighbor
-   filters.voxelcentroidnearestneighbor
-   filters.voxeldownsize
+{ref}`filters.iqr`
 
-:ref:`filters.voxelcenternearestneighbor`
-    Return the point within each voxel that is nearest the voxel center.
+: Cull points falling outside the computed Interquartile Range for a given
+  dimension.
 
-:ref:`filters.voxelcentroidnearestneighbor`
-    Return the point within each voxel that is nearest the voxel centroid.
+{ref}`filters.mad`
 
-:ref:`filters.voxeldownsize`
-    Retain either first point detected in each voxel or center of a populated
-    voxel, depending on mode argument.
+: Cull points falling outside the computed Median Absolute Deviation for a
+  given dimension.
 
+### Voxel
 
-Position
-........
+<!-- ```{toctree}
+:glob: true
+:hidden: true
+:maxdepth: 1
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
+filters.voxelcenternearestneighbor
+filters.voxelcentroidnearestneighbor
+filters.voxeldownsize
+``` -->
 
-   filters.expression
-   filters.head
-   filters.locate
-   filters.mongo
-   filters.range
-   filters.tail
+{ref}`filters.voxelcenternearestneighbor`
 
-:ref:`filters.expression`
-    Pass only points given an :ref:`expression <PDAL expression>`
+: Return the point within each voxel that is nearest the voxel center.
 
-:ref:`filters.head`
-    Return N points from beginning of the point cloud.
+{ref}`filters.voxelcentroidnearestneighbor`
 
-:ref:`filters.locate`
-    Return a single point with min/max value in the named dimension.
+: Return the point within each voxel that is nearest the voxel centroid.
 
-:ref:`filters.mongo`
-    Cull points using MongoDB-style expression syntax.
+{ref}`filters.voxeldownsize`
 
-:ref:`filters.range`
-    Pass only points given a dimension/range.
+: Retain either first point detected in each voxel or center of a populated
+  voxel, depending on mode argument.
 
-:ref:`filters.tail`
-    Return N points from end of the point cloud.
+### Position
 
+<!-- ```{toctree}
+:glob: true
+:hidden: true
+:maxdepth: 1
 
-New
----
+filters.expression
+filters.head
+filters.locate
+filters.mongo
+filters.range
+filters.tail
+``` -->
+
+{ref}`filters.expression`
+
+: Pass only points given an {ref}`expression <pdal_expression>`
+
+{ref}`filters.head`
+
+: Return N points from beginning of the point cloud.
+
+{ref}`filters.locate`
+
+: Return a single point with min/max value in the named dimension.
+
+{ref}`filters.mongo`
+
+: Cull points using MongoDB-style expression syntax.
+
+{ref}`filters.range`
+
+: Pass only points given a dimension/range.
+
+{ref}`filters.tail`
+
+: Return N points from end of the point cloud.
+
+## New
 
 PDAL filters can be used to split the incoming point cloud into subsets. These
 filters will invalidate an existing KD-tree.
 
+### Spatial
 
-Spatial
-.......
+<!-- ```{toctree}
+:glob: true
+:hidden: true
+:maxdepth: 1
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
+filters.chipper
+filters.divider
+filters.splitter
+``` -->
 
-   filters.chipper
-   filters.divider
-   filters.splitter
+{ref}`filters.chipper`
 
-:ref:`filters.chipper`
-    Organize points into spatially contiguous, squarish, and non-overlapping
-    chips.
+: Organize points into spatially contiguous, squarish, and non-overlapping
+  chips.
 
-:ref:`filters.divider`
-    Divide points into approximately equal sized groups based on a simple
-    scheme.
+{ref}`filters.divider`
 
-:ref:`filters.splitter`
-    Split data based on a X/Y box length.
+: Divide points into approximately equal sized groups based on a simple
+  scheme.
 
+{ref}`filters.splitter`
 
-Dimension
-.........
+: Split data based on a X/Y box length.
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
+### Dimension
 
-   filters.gpstimeconvert
-   filters.groupby
-   filters.returns
-   filters.separatescanline
+<!-- ```{toctree}
+:glob: true
+:hidden: true
+:maxdepth: 1
 
-:ref:`filters.gpstimeconvert`
-    Convert between three LAS format GPS time standards
+filters.gpstimeconvert
+filters.groupby
+filters.returns
+filters.separatescanline
+``` -->
 
-:ref:`filters.groupby`
-    Split data categorically by dimension.
+{ref}`filters.gpstimeconvert`
 
-:ref:`filters.returns`
-    Split data by return order (e.g., 'first', 'last', 'intermediate', 'only').
+: Convert between three LAS format GPS time standards
 
-:ref:`filters.separatescanline`
-    Split data based on scan lines.
+{ref}`filters.groupby`
 
+: Split data categorically by dimension.
 
-Join
-----
+{ref}`filters.returns`
+
+: Split data by return order (e.g., 'first', 'last', 'intermediate', 'only').
+
+{ref}`filters.separatescanline`
+
+: Split data based on scan lines.
+
+## Join
 
 Multiple point clouds can be joined to form a single point cloud. These filters
 will invalidate an existing KD-tree.
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
+<!-- ```{toctree}
+:glob: true
+:hidden: true
+:maxdepth: 1
 
-   filters.merge
+filters.merge
+``` -->
 
-:ref:`filters.merge`
-    Merge data from two different readers into a single stream.
+{ref}`filters.merge`
 
+: Merge data from two different readers into a single stream.
 
-Metadata
---------
+## Metadata
 
 PDAL filters can be used to create new metadata. These filters will not
 invalidate an existing KD-tree.
 
-.. note::
+```{note}
+{ref}`filters.cpd` and {ref}`filters.icp` can optionally create metadata as
+well, inserting the computed transformation matrix.
+```
 
-  :ref:`filters.cpd` and :ref:`filters.icp` can optionally create metadata as
-  well, inserting the computed transformation matrix.
+<!-- ```{toctree}
+:glob: true
+:hidden: true
+:maxdepth: 1
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
+filters.hexbin
+filters.info
+filters.stats
+filters.expressionstats
+``` -->
 
-   filters.hexbin
-   filters.info
-   filters.stats
-   filters.expressionstats
+{ref}`filters.hexbin`
 
-:ref:`filters.hexbin`
-    Tessellate XY domain and determine point density and/or point boundary.
+: Tessellate XY domain and determine point density and/or point boundary.
 
-:ref:`filters.info`
-    Generate metadata about the point set, including a point count and
-    spatial reference information.
+{ref}`filters.info`
 
-:ref:`filters.stats`
-    Compute statistics about each dimension (mean, min, max, etc.).
+: Generate metadata about the point set, including a point count and
+  spatial reference information.
 
-:ref:`filters.expressionstats`
-    Apply expressions for a given dimension and summarize counts
+{ref}`filters.stats`
 
+: Compute statistics about each dimension (mean, min, max, etc.).
 
-Mesh
-----
+{ref}`filters.expressionstats`
+
+: Apply expressions for a given dimension and summarize counts
+
+## Mesh
 
 Meshes can be computed from point clouds. These filters will invalidate an
 existing KD-tree.
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
+<!-- ```{toctree}
+:glob: true
+:hidden: true
+:maxdepth: 1
 
-   filters.delaunay
-   filters.greedyprojection
-   filters.poisson
-   filters.faceraster
+filters.delaunay
+filters.greedyprojection
+filters.poisson
+filters.faceraster
+``` -->
 
-:ref:`filters.delaunay`
-    Create mesh using Delaunay triangulation.
+{ref}`filters.delaunay`
 
-:ref:`filters.greedyprojection`
-    Create mesh using the Greedy Projection Triangulation approach.
+: Create mesh using Delaunay triangulation.
 
-:ref:`filters.poisson`
-    Create mesh using the Poisson surface reconstruction algorithm
-    [Kazhdan2006]_.
+{ref}`filters.greedyprojection`
 
-:ref:`filters.faceraster`
-    Create a raster from an existing triangulation.
+: Create mesh using the Greedy Projection Triangulation approach.
 
-Languages
----------
+{ref}`filters.poisson`
+
+: Create mesh using the Poisson surface reconstruction algorithm
+  {cite:p}`kazhdan2006poisson`.
+
+{ref}`filters.faceraster`
+
+: Create a raster from an existing triangulation.
+
+## Languages
 
 PDAL has three filters than can be used to pass point clouds to other
 languages. These filters will invalidate an existing KD-tree.
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
+<!-- ```{toctree}
+:glob: true
+:hidden: true
+:maxdepth: 1
 
-   filters.matlab
-   filters.python
-   filters.julia
+filters.matlab
+filters.python
+filters.julia
+``` -->
 
-:ref:`filters.matlab`
-    Embed MATLAB software in a pipeline.
+{ref}`filters.matlab`
 
-:ref:`filters.python`
-    Embed Python software in a pipeline.
+: Embed MATLAB software in a pipeline.
 
-:ref:`filters.julia`
-    Embed Julia software in a pipeline.
+{ref}`filters.python`
 
+: Embed Python software in a pipeline.
 
-Other
------
+{ref}`filters.julia`
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-   :hidden:
+: Embed Julia software in a pipeline.
 
-   filters.streamcallback
+## Other
 
-:ref:`filters.streamcallback`
-    Provide a hook for a simple point-by-point callback.
+<!-- ```{toctree}
+:glob: true
+:hidden: true
+:maxdepth: 1
+
+filters.streamcallback
+``` -->
+
+{ref}`filters.streamcallback`
+
+: Provide a hook for a simple point-by-point callback.

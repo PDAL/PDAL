@@ -1,9 +1,9 @@
-.. _cpp-pdal-rowpointtable:
+(cpp-pdal-rowpointtable)=
 
-******************************************************************************
-:cpp:class:`pdal::RowPointTable`
-******************************************************************************
+# {cpp:class}`pdal::RowPointTable`
 
+```{eval-rst}
 .. doxygenclass:: pdal::RowPointTable
    :members:
    :undoc-members:
+```

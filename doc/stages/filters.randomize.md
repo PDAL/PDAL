@@ -1,30 +1,29 @@
-.. _filters.randomize:
+(filters.randomize)=
 
-filters.randomize
-=================
+# filters.randomize
 
 The randomize filter reorders the points in a point view randomly.
 
+```{eval-rst}
 .. embed::
+```
 
-Example
--------
+## Example
 
-.. code-block:: json
+```json
+[
+    "input.las",
+    {
+        "type":"filters.randomize"
+    },
+    {
+        "type":"writers.las",
+        "filename":"output.las"
+    }
+]
+```
 
-  [
-      "input.las",
-      {
-          "type":"filters.randomize"
-      },
-      {
-          "type":"writers.las",
-          "filename":"output.las"
-      }
-  ]
+## Options
 
-Options
--------
-
-.. include:: filter_opts.rst
-
+```{include} filter_opts.md
+```

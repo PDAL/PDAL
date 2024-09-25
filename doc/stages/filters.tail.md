@@ -1,49 +1,46 @@
-.. _filters.tail:
+(filters.tail)=
 
-filters.tail
-===============================================================================
+# filters.tail
 
 The **Tail Filter** returns a specified number of points from the end of the
-``PointView``.
+`PointView`.
 
-.. note::
+```{note}
+If the requested number of points exceeds the size of the point cloud, all
+points are passed with a warning.
+```
 
-    If the requested number of points exceeds the size of the point cloud, all
-    points are passed with a warning.
-
+```{eval-rst}
 .. embed::
+```
 
-Example
--------
+## Example
 
 Sort and extract the 100 lowest intensity points.
 
+```json
+[
+    {
+        "type":"filters.sort",
+        "dimension":"Intensity",
+        "order":"DESC"
+    },
+    {
+        "type":"filters.tail",
+        "count":100
+    }
+]
+```
 
-.. code-block:: json
+```{seealso}
+{ref}`filters.head` is the dual to {ref}`filters.tail`.
+```
 
-  [
-      {
-          "type":"filters.sort",
-          "dimension":"Intensity",
-          "order":"DESC"
-      },
-      {
-          "type":"filters.tail",
-          "count":100
-      }
-  ]
-
-
-.. seealso::
-
-    :ref:`filters.head` is the dual to :ref:`filters.tail`.
-
-
-Options
--------------------------------------------------------------------------------
+## Options
 
 count
-  Number of points to return. [Default: 10]
 
-.. include:: filter_opts.rst
+: Number of points to return. \[Default: 10\]
 
+```{include} filter_opts.md
+```

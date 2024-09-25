@@ -1,12 +1,10 @@
-.. _cpp-pdal-filter:
+(cpp-pdal-filter)=
 
-******************************************************************************
-:cpp:class:`pdal::Filter`
-******************************************************************************
+# {cpp:class}`pdal::Filter`
 
-
+```{eval-rst}
 .. doxygenclass:: pdal::Filter
    :members:
    :undoc-members:
 
-
+```

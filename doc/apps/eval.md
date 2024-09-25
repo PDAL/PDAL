@@ -1,26 +1,25 @@
-.. _eval_command:
+(eval_command)=
 
-********************************************************************************
-eval
-********************************************************************************
+# eval
 
-.. warning::
+```{warning}
+As of PDAL v2.6.0, the `eval` command is marked as DEPRECATED. It will
+be removed from the default install in PDAL v2.7 and removed completely in
+PDAL v2.8.
+```
 
-  As of PDAL v2.6.0, the ``eval`` command is marked as DEPRECATED. It will
-  be removed from the default install in PDAL v2.7 and removed completely in
-  PDAL v2.8.
-
-The ``eval`` command is used to compare the ``Classification`` dimensions of two
+The `eval` command is used to compare the `Classification` dimensions of two
 point clouds.
-::
 
-    $ pdal eval <predicted> <truth> --labels <labels>
+```
+$ pdal eval <predicted> <truth> --labels <labels>
+```
 
-::
-
-    --predicted arg     Positional argument specifying point cloud filename containing predicted labels.
-    --truth arg         Positional argument specifying point cloud filename containing truth labels.
-    --labels arg        Comma-separated list of classification labels to evaluate.
+```
+--predicted arg     Positional argument specifying point cloud filename containing predicted labels.
+--truth arg         Positional argument specifying point cloud filename containing truth labels.
+--labels arg        Comma-separated list of classification labels to evaluate.
+```
 
 The command returns 0 along with a JSON-formatted classification report
 summarizing various classification metrics.
@@ -31,40 +30,40 @@ accordance with the LAS specification. Both point clouds also contain some
 number of classifications that are either unlabeled or do not fall into the
 specificied classes.
 
-::
-
-    $ pdal eval predicted.las truth.las --labels 2,4
+```
+$ pdal eval predicted.las truth.las --labels 2,4
+{
+  "confusion_matrix": "[[5240537,3860,24102],[268015,3179304,326677],[111453,115516,2950315]]",
+  "f1_score": 0.944,
+  "labels": [
     {
-      "confusion_matrix": "[[5240537,3860,24102],[268015,3179304,326677],[111453,115516,2950315]]",
-      "f1_score": 0.944,
-      "labels": [
-        {
-          "accuracy": 0.967,
-          "f1_score": 0.973,
-          "intersection_over_union": 0.947,
-          "label": "1",
-          "precision": 0.951,
-          "sensitivity": 0.995,
-          "specificity": 0.929,
-          "support": 5268499
-        },
-        {
-          "accuracy": 0.934,
-          "f1_score": 0.914,
-          "intersection_over_union": 0.842,
-          "label": "2",
-          "precision": 0.999,
-          "sensitivity": 0.842,
-          "specificity": 0.999,
-          "support": 3773996
-        }
-      ],
-      "mean_intersection_over_union": 0.894,
-      "overall_accuracy": 0.931,
-      "pdal_version": "2.2.0 (git-version: 6e80b9)",
-      "predicted_file": "predicted.las",
-      "truth_file": "truth.las"
+      "accuracy": 0.967,
+      "f1_score": 0.973,
+      "intersection_over_union": 0.947,
+      "label": "1",
+      "precision": 0.951,
+      "sensitivity": 0.995,
+      "specificity": 0.929,
+      "support": 5268499
+    },
+    {
+      "accuracy": 0.934,
+      "f1_score": 0.914,
+      "intersection_over_union": 0.842,
+      "label": "2",
+      "precision": 0.999,
+      "sensitivity": 0.842,
+      "specificity": 0.999,
+      "support": 3773996
     }
+  ],
+  "mean_intersection_over_union": 0.894,
+  "overall_accuracy": 0.931,
+  "pdal_version": "2.2.0 (git-version: 6e80b9)",
+  "predicted_file": "predicted.las",
+  "truth_file": "truth.las"
+}
+```
 
 Most of the returned metrics will be self explanatory, with scores reported
 both for individual classes and at a summary level. The returned confusion

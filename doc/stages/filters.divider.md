@@ -1,7 +1,6 @@
-.. _filters.divider:
+(filters.divider)=
 
-filters.divider
-===============================================================================
+# filters.divider
 
 The **Divider Filter** breaks a point view into a set of smaller point views
 based on simple criteria.  The number of subsets can be specified explicitly,
@@ -13,46 +12,49 @@ Normally points are divided into subsets to facilitate output by writers
 that support creating multiple output files with a template (LAS and BPF
 are notable examples).
 
+```{eval-rst}
 .. embed::
+```
 
-Example
--------
+## Example
 
 This pipeline will create 10 output files from the input file readers.las.
 
-.. code-block:: json
+```json
+[
+    "example.las",
+    {
+        "type":"filters.divider",
+        "count":"10"
+    },
+    {
+        "type":"writers.las",
+        "filename":"out_#.las"
+    }
+]
+```
 
-  [
-      "example.las",
-      {
-          "type":"filters.divider",
-          "count":"10"
-      },
-      {
-          "type":"writers.las",
-          "filename":"out_#.las"
-      }
-  ]
+## Options
 
-Options
--------
+`` _`mode` ``
 
-_`mode`
-  A mode of "partition" will write sequential points to an output view until
+: A mode of "partition" will write sequential points to an output view until
   the view meets its predetermined size. "round_robin" mode will iterate
   through the output views as it writes sequential points.
-  [Default: "partition"]
+  \[Default: "partition"\]
 
-_`count`
-  Number of output views.  [Default: none]
+`` _`count` ``
 
-_`capacity`
-  Maximum number of points in each output view.  Views will contain
-  approximately equal numbers of points.  [Default: none]
+: Number of output views.  \[Default: none\]
 
-.. include:: filter_opts.rst
+`` _`capacity` ``
 
-.. warning::
+: Maximum number of points in each output view.  Views will contain
+  approximately equal numbers of points.  \[Default: none\]
 
-    You must specify exactly one of either count_ or capacity_.
+```{include} filter_opts.md
+```
 
+```{warning}
+You must specify exactly one of either [count] or [capacity].
+```

@@ -1,9 +1,9 @@
-.. _cpp-pdal-columnpointtable:
+(cpp-pdal-columnpointtable)=
 
-******************************************************************************
-:cpp:class:`pdal::ColumnPointTable`
-******************************************************************************
+# {cpp:class}`pdal::ColumnPointTable`
 
+```{eval-rst}
 .. doxygenclass:: pdal::ColumnPointTable
    :members:
    :undoc-members:
+```

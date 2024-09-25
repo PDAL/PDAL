@@ -1,12 +1,12 @@
-.. _overview:
+---
+Author: Andrew Bell
+Contact: <mailto:andrew@hobu.co>
+Date: 5/15/2016
+---
 
-******************************************************************************
-PDAL Architecture Overview
-******************************************************************************
+(overview)=
 
-:Author: Andrew Bell
-:Contact: andrew@hobu.co
-:Date: 5/15/2016
+# PDAL Architecture Overview
 
 PDAL is a set of applications and library to facilitate translation of point
 cloud data between various formats.  In addition, it provides some facilities
@@ -16,11 +16,9 @@ provides point classification algorithms.
 PDAL provides an API that can be used by programmers for integration into their
 own projects or to allow extension of existing capabilities.
 
+(the-pdal-model)=
 
-.. _the-pdal-model:
-
-The PDAL model
---------------------------------------------------------------------------------
+## The PDAL model
 
 PDAL reads data from a set of input sources using format-specific readers.
 Point data can be passed through various filters that transform data or create
@@ -29,7 +27,8 @@ format-specific writer.  PDAL can merge data from various input sources into a
 single output source, preserving attribute data where supported by the input
 and output formats.
 
-.. image:: pipeline.png
+```{image} pipeline.png
+```
 
 The above diagram shows a possible arrangement of PDAL readers, filters and
 writers, all of which are known as stages.  Any merge operation or filter
@@ -39,16 +38,14 @@ that they may create more than one set of points to be further filtered or
 written.  The arrangement of readers, filters and writers is called a PDAL
 pipeline.  Pipelines can be specified using JSON as detailed later.
 
-Extending PDAL
-................................................................................
+### Extending PDAL
 
 PDAL is simple to extend by implementing subclasses of existing stages.  All
 processing in PDAL is completely synchronous.  No parallel processing occurs,
 eliminating locking or other concurrency issues.  Understanding of several
 auxiliary classes is necessary to effectively create a new stage.
 
-Dimension
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Dimension
 
 Point cloud formats support various data elements.  In order to be useful, all
 formats must provide some notion of location for points (X, Y and perhaps Z),
@@ -81,16 +78,14 @@ requested type is a 16 bit unsigned integer (Unsigned16), PDAL will use a
 32 bit signed integer as the storage type for the dimension so that both
 16 bit storage types can be successfully accommodated.
 
-Point Layout
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Point Layout
 
 PDAL stores the dimension information in a point layout structure
 (PointLayout object).  It stores information about the physical layout of
 data of each point in memory and also stores the type and name of each
 dimension.
 
-Point Table
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Point Table
 
 PDAL stores points in what is called a point table (PointTable object).  Each
 point table has an associated point layout describing its format.  All
@@ -108,8 +103,7 @@ an attempt to run a pipeline with a stage that doesn't support streaming
 will raise an exception. A custom implementation of this can be created
 by inheriting from a class called StreamPointTable.
 
-Point View
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Point View
 
 A point view (PointView object) stores references to points.  Storage
 and retrieval of points is done through a point view rather than directly
@@ -132,15 +126,13 @@ point reference does not create a new point.  Rather, it creates another
 reference to an existing point.  There are currently no built-in facilities for
 creating copies of points.
 
-Point Reference
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Point Reference
 
 Some functions take a reference to a single point (PointRef object).
 In streaming mode, stages implement the processOne() function which operates
 on a point reference instead of a point view.
 
-Making a Stage (Reader, Filter or Writer):
-................................................................................
+### Making a Stage (Reader, Filter or Writer):
 
 All stages (Stage object) share a common interface, though readers, filters and
 writers each have a simplified interface if the generic stage interface is more
@@ -152,8 +144,7 @@ constructor.
 When a pipeline is started, each of its stages is processed in two distinct
 steps.  First, all stages are prepared.
 
-Stage Preparation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Stage Preparation
 
 Preparation of a stage is done by calling the prepare() function of the stage
 at the end of the pipeline.  prepare() executes the following private virtual
@@ -161,42 +152,40 @@ functions calls, none of which need to be implemented in a stage unless desired.
 Each stage is guaranteed to be prepared after all stages that precede it in the
 pipeline.
 
-1) void addArgs(ProgramArgs& args)
+1. void addArgs(ProgramArgs& args)
 
-    Stages can accept various options to control processing.  These options
-    can be declared and bound to variables in this function.  When arguments
-    are added, the stage also provides a description and optionally a default
-    value for the argument.
+   > Stages can accept various options to control processing.  These options
+   > can be declared and bound to variables in this function.  When arguments
+   > are added, the stage also provides a description and optionally a default
+   > value for the argument.
 
-2) void initialize() OR void initialize(PointTableRef)
+2. void initialize() OR void initialize(PointTableRef)
 
-    Some stages, particularly readers, may need to do things such as open files
-    to extract header information before the next step in processing.  Other
-    general processing that needs to take place before any stage is executed
-    should occur at this time.  If the initialization requires knowledge of
-    the point table, implement the function that accepts one, otherwise
-    implement the no-argument version.  Whether to place initialization code
-    at this step or in prepared() or ready() (see below) is a judgment call,
-    but detection of errors earlier in the process allows faster termination of
-    a command.  Files opened in this step should also be closed before
-    returning.
+   > Some stages, particularly readers, may need to do things such as open files
+   > to extract header information before the next step in processing.  Other
+   > general processing that needs to take place before any stage is executed
+   > should occur at this time.  If the initialization requires knowledge of
+   > the point table, implement the function that accepts one, otherwise
+   > implement the no-argument version.  Whether to place initialization code
+   > at this step or in prepared() or ready() (see below) is a judgment call,
+   > but detection of errors earlier in the process allows faster termination of
+   > a command.  Files opened in this step should also be closed before
+   > returning.
 
-3) void addDimensions(PointLayoutPtr layout)
+3. void addDimensions(PointLayoutPtr layout)
 
-    This method allows stages to inform a point table's layout of the dimensions
-    that it would like as part of the record of each point.  Usually, only
-    readers add dimensions to a point table, but there is no prohibition on
-    filters or writers from adding dimensions if necessary.  Dimensions should
-    not be added to the layout outside of this method.
+   > This method allows stages to inform a point table's layout of the dimensions
+   > that it would like as part of the record of each point.  Usually, only
+   > readers add dimensions to a point table, but there is no prohibition on
+   > filters or writers from adding dimensions if necessary.  Dimensions should
+   > not be added to the layout outside of this method.
 
-4) void prepared(PointTableRef)
+4. void prepared(PointTableRef)
 
-    Called after dimensions are added.  It can be used to verify state and
-    raise exceptions before stage execution.
+   > Called after dimensions are added.  It can be used to verify state and
+   > raise exceptions before stage execution.
 
-
-Stage Execution
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Stage Execution
 
 After all stages are prepared, processing continues with the execution of each
 stage by calling execute().  Each stage will be executed only after all stages
@@ -205,33 +194,32 @@ invoking the following private virtual methods.  It is important to note
 that ready() and done() are called only once for each stage while run()
 is called once for each point view to be processed by the stage.
 
-1) void ready(PointTablePtr table)
+1. void ready(PointTablePtr table)
 
-    This function allows preprocessing to be performed prior to actual
-    processing of the points in a point view.  For example, filters may
-    initialize internal data structures or libraries, readers may connect to
-    databases and writers may write a file header.  If there is a choice between
-    performing operations in the preparation stage (in the initialize() method)
-    or the execution stage (in ready()), prefer to defer the operation until
-    this point.
+   > This function allows preprocessing to be performed prior to actual
+   > processing of the points in a point view.  For example, filters may
+   > initialize internal data structures or libraries, readers may connect to
+   > databases and writers may write a file header.  If there is a choice between
+   > performing operations in the preparation stage (in the initialize() method)
+   > or the execution stage (in ready()), prefer to defer the operation until
+   > this point.
 
-2) PointViewSet run(PointViewPtr buf)
+2. PointViewSet run(PointViewPtr buf)
 
-    This is the method in which processing of individual points occurs.  One
-    might read points into the view, transform point values in some way, or
-    distribute the point references in the input view into numerous output
-    views.  This method is called once for each point view passed to the
-    stage.
+   > This is the method in which processing of individual points occurs.  One
+   > might read points into the view, transform point values in some way, or
+   > distribute the point references in the input view into numerous output
+   > views.  This method is called once for each point view passed to the
+   > stage.
 
-3) void done(PointTablePtr table)
+3. void done(PointTablePtr table)
 
-    This function allows a stage to clean up resources not released by a
-    stage’s destructor.  It also allows other execution of termination
-    functions, such a closing of databases, writing file footers,
-    rewriting headers or closing or renaming files.
+   > This function allows a stage to clean up resources not released by a
+   > stage’s destructor.  It also allows other execution of termination
+   > functions, such a closing of databases, writing file footers,
+   > rewriting headers or closing or renaming files.
 
-Streaming Stage Execution
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Streaming Stage Execution
 
 PDAL normally processes all points through each stage before passing the
 points to the next stage.  This means that all point data is held in memory
@@ -245,15 +233,14 @@ implement processOne(), an exception is thrown.
 
 bool processOne(PointRef& ref)
 
-    This method allows processing of a single point.  A reader will typically
-    read a point from an input source.  When a reader returns 'false' from
-    this function, it indicates that there are no more points to be read.
-    When a filter returns 'false' from this function, it indicates
-    that the point just processed should be filtered out and not passed
-    to subsequent stages for processing.
+> This method allows processing of a single point.  A reader will typically
+> read a point from an input source.  When a reader returns 'false' from
+> this function, it indicates that there are no more points to be read.
+> When a filter returns 'false' from this function, it indicates
+> that the point just processed should be filtered out and not passed
+> to subsequent stages for processing.
 
-Implementing a Reader
-................................................................................
+### Implementing a Reader
 
 A reader is a stage that takes input from a point cloud format supported by
 PDAL and loads points into a point table through a point view.
@@ -271,32 +258,32 @@ type of the variable using the enumeration Dimension::Type.
 In this example, the reader informs the point table's layout that it will
 reference the dimensions X, Y and Z.
 
-    ::
-
-        void Reader::addDimensions(PointLayoutPtr layout)
-        {
-           layout->registerDim(Dimension::Id::X);
-           layout->registerDim(Dimension::Id::Y);
-           layout->registerDim(Dimension::Id::Z);
-        }
+> ```
+> void Reader::addDimensions(PointLayoutPtr layout)
+> {
+>    layout->registerDim(Dimension::Id::X);
+>    layout->registerDim(Dimension::Id::Y);
+>    layout->registerDim(Dimension::Id::Z);
+> }
+> ```
 
 Here a reader determines dimensions from an input source and registers or
 assigns them.  All of the input dimension values are in this case double
 precision floating point.
 
-::
+```
+void Reader::addDimensions(PointLayoutPtr layout)
+{
+    FileHeader header;
 
-    void Reader::addDimensions(PointLayoutPtr layout)
+    for (auto di = header.names.begin(), di != header.names.end(); ++di)
     {
-        FileHeader header;
-
-        for (auto di = header.names.begin(), di != header.names.end(); ++di)
-        {
-            std::string dimName = *di;
-            Dimension::Id id = layout->registerOrAssignDim(dimName,
-                Dimension::Type::Double);
-        }
+        std::string dimName = *di;
+        Dimension::Id id = layout->registerOrAssignDim(dimName,
+            Dimension::Type::Double);
     }
+}
+```
 
 If a reader implements initialize() and opens a source file during the function,
 the file should be closed again before exiting the function to ensure that
@@ -311,115 +298,114 @@ the input source into the provided point view:
 
 point_count_t read(PointViewPtr view, point_count_t count)
 
-    The reader should read at most 'count' points from the input source and
-    place them in the view.  The reader must keep track of its current
-    position in the input source and points should be read until no points
-    remain or 'count' points have been added to the view.  The current
-    location in the input source is typically tracked with a integer variable
-    called the index.
+> The reader should read at most 'count' points from the input source and
+> place them in the view.  The reader must keep track of its current
+> position in the input source and points should be read until no points
+> remain or 'count' points have been added to the view.  The current
+> location in the input source is typically tracked with a integer variable
+> called the index.
+>
+> As each point is read from the input source, it must be placed at the end
+> of the point view.  The ID of the end of the point view can be
+> determined by calling size() function of the point view.  read() should
+> return the number of points read by during the function call.
+>
+> ```
+> point_count_t MyFormat::read(PointViewPtr view, point_count_t count)
+> {
+>     // Determine the number of points remaining in the input.
+>     point_count_t remainingInput = m_totalNumPts - m_index;
+>
+>     // Determine the number of points to read.
+>     count = std::min(count, remainingInput);
+>
+>     // Determine the ID of the next point in the point view
+>     PointId nextId = view->size();
+>
+>     // Determine the current input position.
+>     auto pos = m_pointSize * m_index;
+>
+>     point_count_t remaining = count;
+>     while (remaining--)
+>     {
+>         double x, y, z;
+>
+>         // Read X, Y and Z from input source.
+>         x = m_file.read<double>(pos);
+>         pos += sizeof(double);
+>         y = m_file.read<double>(pos);
+>         pos += sizeof(double);
+>         z = m_file.read<double>(pos);
+>         pos += sizeof(double);
+>
+>         // Set X, Y and Z into the pointView.
+>         view->setField(Dimension::Id::X, nextId, x);
+>         view->setField(Dimension::Id::Y, nextId, y);
+>         view->setField(Dimension::Id::Z, nextId, z);
+>
+>         nextId++;
+>     }
+>     m_index += count;
+>     return count;
+> }
+> ```
+>
+> Note that we don't read more points than requested, we don't read past
+> the end of the input stream and we keep track of our location in the
+> input so that subsequent calls to read() will result in all points being
+> read.
+>
+> Here's the same function written so that streaming can be supported:
+>
+> ```
+> point_count_t MyFormat::read(PointViewPtr view, point_count_t count)
+> {
+>     // Determine the number of points remaining in the input.
+>     point_count_t remainingInput = m_totalNumPts - m_index;
+>
+>     // Determine the number of points to read.
+>     count = std::min(count, remainingInput);
+>
+>     // Determine the ID of the next point in the point view
+>     PointId nextId = view->size();
+>
+>     // Determine the current input position.
+>     auto pos = m_pointSize * m_index;
+>
+>     point_count_t remaining = count;
+>     while (remaining--)
+>     {
+>         PointRef point(view->point(nextId));
+>
+>         processOne(point);
+>         nextId++;
+>     }
+>     m_index += count;
+>     return count;
+> }
+>
+> bool MyFormat::processOne(PointRef& point)
+> {
+>     double x, y, z;
+>
+>     // Read X, Y and Z from input source.
+>     x = m_file.read<double>(pos);
+>     pos += sizeof(double);
+>     y = m_file.read<double>(pos);
+>     pos += sizeof(double);
+>     z = m_file.read<double>(pos);
+>     pos += sizeof(double);
+>
+>     point.setField(Dimension::Id::X, x);
+>     point.setField(Dimension::Id::Y, y);
+>     point.setField(Dimension::Id::Z, z);
+>     return m_file.ok();
+> }
+> ```
 
-    As each point is read from the input source, it must be placed at the end
-    of the point view.  The ID of the end of the point view can be
-    determined by calling size() function of the point view.  read() should
-    return the number of points read by during the function call.
+(implementing-a-filter)=
 
-    ::
-
-        point_count_t MyFormat::read(PointViewPtr view, point_count_t count)
-        {
-            // Determine the number of points remaining in the input.
-            point_count_t remainingInput = m_totalNumPts - m_index;
-
-            // Determine the number of points to read.
-            count = std::min(count, remainingInput);
-
-            // Determine the ID of the next point in the point view
-            PointId nextId = view->size();
-
-            // Determine the current input position.
-            auto pos = m_pointSize * m_index;
-
-            point_count_t remaining = count;
-            while (remaining--)
-            {
-                double x, y, z;
-
-                // Read X, Y and Z from input source.
-                x = m_file.read<double>(pos);
-                pos += sizeof(double);
-                y = m_file.read<double>(pos);
-                pos += sizeof(double);
-                z = m_file.read<double>(pos);
-                pos += sizeof(double);
-
-                // Set X, Y and Z into the pointView.
-                view->setField(Dimension::Id::X, nextId, x);
-                view->setField(Dimension::Id::Y, nextId, y);
-                view->setField(Dimension::Id::Z, nextId, z);
-
-                nextId++;
-            }
-            m_index += count;
-            return count;
-        }
-
-    Note that we don't read more points than requested, we don't read past
-    the end of the input stream and we keep track of our location in the
-    input so that subsequent calls to read() will result in all points being
-    read.
-
-    Here's the same function written so that streaming can be supported:
-
-    ::
-
-        point_count_t MyFormat::read(PointViewPtr view, point_count_t count)
-        {
-            // Determine the number of points remaining in the input.
-            point_count_t remainingInput = m_totalNumPts - m_index;
-
-            // Determine the number of points to read.
-            count = std::min(count, remainingInput);
-
-            // Determine the ID of the next point in the point view
-            PointId nextId = view->size();
-
-            // Determine the current input position.
-            auto pos = m_pointSize * m_index;
-
-            point_count_t remaining = count;
-            while (remaining--)
-            {
-                PointRef point(view->point(nextId));
-
-                processOne(point);
-                nextId++;
-            }
-            m_index += count;
-            return count;
-        }
-
-        bool MyFormat::processOne(PointRef& point)
-        {
-            double x, y, z;
-
-            // Read X, Y and Z from input source.
-            x = m_file.read<double>(pos);
-            pos += sizeof(double);
-            y = m_file.read<double>(pos);
-            pos += sizeof(double);
-            z = m_file.read<double>(pos);
-            pos += sizeof(double);
-
-            point.setField(Dimension::Id::X, x);
-            point.setField(Dimension::Id::Y, y);
-            point.setField(Dimension::Id::Z, z);
-            return m_file.ok();
-        }
-
-.. _implementing-a-filter:
-
-Implementing a Filter
-................................................................................
+### Implementing a Filter
 
 A filter is a stage that allows processing of data after it has been read into a
 pipeline’s point table.  In many filters, the only function that need be
@@ -428,62 +414,60 @@ input and output is a point view provided by the previous stage:
 
 void filter(PointViewPtr view)
 
-    One should implement filter() instead of run() if its interface is
-    sufficient.  The expectation is that a filter will iterate through the
-    points currently in the point view and apply some transformation or gather
-    some data to be output as pipeline metadata.
+> One should implement filter() instead of run() if its interface is
+> sufficient.  The expectation is that a filter will iterate through the
+> points currently in the point view and apply some transformation or gather
+> some data to be output as pipeline metadata.
+>
+> Here as an example is the actual filter function from the reprojection
+> filter:
+>
+> ```
+> void Reprojection::filter(PointViewPtr view)
+> {
+>     for (PointId id = 0; id < view->size(); ++id)
+>     {
+>         double x = view->getFieldAs<double>(Dimension::Id::X, id);
+>         double y = view->getFieldAs<double>(Dimension::Id::Y, id);
+>         double z = view->getFieldAs<double>(Dimension::Id::Z, id);
+>
+>         transform(x, y, z);
+>
+>         view->setField(Dimension::Id::X, id, x);
+>         view->setField(Dimension::Id::Y, id, y);
+>         view->setField(Dimension::Id::Z, id, z);
+>     }
+> }
+> ```
+>
+> The filter simply loops through the points, retrieving the X, Y and Z
+> values of each point, transforms those value using a reprojection
+> algorithm and then stores the transformed values in the point table
+> using the point view’s setField() function.
+>
+> A filter may need to use the run() function instead of filter(), typically
+> because it needs to create multiple output point views from a single input
+> view.  The following example puts every other input point into one of two
+> output point views:
+>
+> ```
+> PointViewSet Alternator::run(PointViewPtr view)
+> {
+>     PointViewSet viewSet;
+>     PointViewPtr even = view();
+>     PointViewPtr odd = view();
+>     viewSet.insert(even);
+>     viewSet.insert(odd);
+>     for (PointId idx = 0; idx < view->size(); ++idx)
+>     {
+>         PointViewPtr out = idx % 2 ? even : odd;
+>         out->appendPoint(*view.get(), idx);
+>     }
+>     return viewSet;
+> }
+> ```
 
-    Here as an example is the actual filter function from the reprojection
-    filter:
-
-    ::
-
-        void Reprojection::filter(PointViewPtr view)
-        {
-            for (PointId id = 0; id < view->size(); ++id)
-            {
-                double x = view->getFieldAs<double>(Dimension::Id::X, id);
-                double y = view->getFieldAs<double>(Dimension::Id::Y, id);
-                double z = view->getFieldAs<double>(Dimension::Id::Z, id);
-
-                transform(x, y, z);
-
-                view->setField(Dimension::Id::X, id, x);
-                view->setField(Dimension::Id::Y, id, y);
-                view->setField(Dimension::Id::Z, id, z);
-            }
-        }
-
-    The filter simply loops through the points, retrieving the X, Y and Z
-    values of each point, transforms those value using a reprojection
-    algorithm and then stores the transformed values in the point table
-    using the point view’s setField() function.
-
-    A filter may need to use the run() function instead of filter(), typically
-    because it needs to create multiple output point views from a single input
-    view.  The following example puts every other input point into one of two
-    output point views:
-
-    ::
-
-        PointViewSet Alternator::run(PointViewPtr view)
-        {
-            PointViewSet viewSet;
-            PointViewPtr even = view();
-            PointViewPtr odd = view();
-            viewSet.insert(even);
-            viewSet.insert(odd);
-            for (PointId idx = 0; idx < view->size(); ++idx)
-            {
-                PointViewPtr out = idx % 2 ? even : odd;
-                out->appendPoint(*view.get(), idx);
-            }
-            return viewSet;
-        }
-
-
-Implementing a Writer:
-................................................................................
+### Implementing a Writer:
 
 Analogous to the filter() method in a filter is the write() method of a writer.
 This function is usually the appropriate one to override when implementing
@@ -504,23 +488,23 @@ that they behave reasonably if passed multiple point views -- they
 correctly handle write() being called multiple times after a single
 call to ready().
 
-::
+```
+void write(const PointViewPtr view)
+{
+    ostream& out = *m_out;
 
-    void write(const PointViewPtr view)
+    for (PointId id = 0; id < view->size(); ++id)
     {
-        ostream& out = *m_out;
-
-        for (PointId id = 0; id < view->size(); ++id)
-        {
-            out << setw(10) << view->getFieldAs<double>(Dimension::Id::X, id);
-            out << setw(10) << view->getFieldAs<double>(Dimension::Id::Y, id);
-            out << setw(10) << view->getFieldAs<double>(Dimension::Id::Z, id);
-        }
+        out << setw(10) << view->getFieldAs<double>(Dimension::Id::X, id);
+        out << setw(10) << view->getFieldAs<double>(Dimension::Id::Y, id);
+        out << setw(10) << view->getFieldAs<double>(Dimension::Id::Z, id);
     }
+}
 
-    bool processOne(PointRef& point)
-    {
-        out << setw(10) << point.getFieldAs<double>(Dimension::Id::X);
-        out << setw(10) << point.getFieldAs<double>(Dimension::Id::Y);
-        out << setw(10) << point.getFieldAs<double>(Dimension::Id::Z);
-    }
+bool processOne(PointRef& point)
+{
+    out << setw(10) << point.getFieldAs<double>(Dimension::Id::X);
+    out << setw(10) << point.getFieldAs<double>(Dimension::Id::Y);
+    out << setw(10) << point.getFieldAs<double>(Dimension::Id::Z);
+}
+```

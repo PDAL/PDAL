@@ -1,32 +1,32 @@
-.. _readers.smrmsg:
+(readers.smrmsg)=
 
-readers.smrmsg
-================
+# readers.smrmsg
 
-The **SMRMSG reader** read from POSPac MMS post-processed accuracy files, used to describes the accuracy of the post-processed solution (SBET file) and 
-contains the position, orientation and velocity RMS after smoothing. See :ref:`writers.sbet`.
+The **SMRMSG reader** read from POSPac MMS post-processed accuracy files, used to describes the accuracy of the post-processed solution (SBET file) and
+contains the position, orientation and velocity RMS after smoothing. See {ref}`writers.sbet`.
 
+```{eval-rst}
 .. embed::
+```
 
+```{eval-rst}
 .. streamable::
+```
 
-Example
--------
+## Example
 
+```json
+[
+    "smrmsg_xxx.out",
+    "output.txt"
+]
+```
 
-.. code-block:: json
-
-  [
-      "smrmsg_xxx.out",
-      "output.txt"
-  ]
-
-
-Options
--------
+## Options
 
 filename
-  File to read from [Required]
 
-.. include:: reader_opts.rst
+: File to read from \[Required\]
 
+```{include} reader_opts.md
+```
