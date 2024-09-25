@@ -1,8 +1,8 @@
 #pragma once
 
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
+#if WINDOWS
+#undef max
+#endif // WINDOWS
 
 #include <h3api.h>
 
