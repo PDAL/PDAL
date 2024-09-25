@@ -1,6 +1,7 @@
 #pragma once
 
 #if WINDOWS
+#undef min
 #undef max
 #endif // WINDOWS
 
