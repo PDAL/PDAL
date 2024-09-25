@@ -103,6 +103,10 @@ test/unit/CMakeScripts/
 test/unit/TestConfig.hpp
 *.pyc
 
+# JupyterBook
+doc/_build
+doc/conf.py
+
 test/data/bpf/bpf.xml
 test/data/bpf/bpf2nitf.xml
 test/data/ept/addon/*
