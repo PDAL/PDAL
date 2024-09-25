@@ -47,6 +47,7 @@ void BaseGrid::setHexes(const std::vector<HexId>& ids)
         m_counts[h] = m_denseLimit + 1;
         HexId above = edgeHex(h, 0);
         HexId below = edgeHex(h, 3);
+
         if (!isDense(above))
             addRoot(h);
         removeRoot(below);
@@ -121,6 +122,10 @@ void BaseGrid::findShape(HexId root)
             // so hexagons can be processed separately in parentOrChild()
             HexId pathHex = (cur.edge == 0 ? cur.hex : edgeHex(cur.hex, 3));
             m_hexPaths.insert({pathHex, &path});
+
+            // here we set the minimum I or J coordinate, to be used for finding
+            // parents and children from m_hexPaths
+            setMinCoord(pathHex);
         }
         path.addPoint(findPoint(cur));
         const auto& [left, right] = nextSegments(cur);
@@ -237,14 +242,12 @@ void BaseGrid::toWKT(std::ostream& output) const
         p->toWKT(output);
     };
 
-    std::vector<Path *> paths = rootPaths();
-
     output << "MULTIPOLYGON (";
 
-    auto it = paths.begin();
-    if (it != paths.end())
+    auto it = m_roots.begin();
+    if (it != m_roots.end())
         outputPath(*it++);
-    for (; it != paths.end(); ++it)
+    for (; it != m_roots.end(); ++it)
     {
         output << ",";
         outputPath(*it);

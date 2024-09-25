@@ -13,11 +13,13 @@ class PDAL_DLL H3Grid : public BaseGrid
 {
 public:
     H3Grid(int dense_limit)
-        : BaseGrid{dense_limit}, m_res{-1}, m_origin{0}
-        {}
+        : BaseGrid{dense_limit}, m_res{-1}, 
+            m_minI{std::numeric_limits<int>::max()}, m_origin{0}
+    {}
     H3Grid(int res, int dense_limit)
-        : BaseGrid{dense_limit}, m_res{res}, m_origin{0}
-        {}
+        : BaseGrid{dense_limit}, m_res{res}, 
+            m_minI{std::numeric_limits<int>::max()}, m_origin{0}
+    {}
     ~H3Grid();
 
     H3Index ij2h3(HexId ij)
@@ -80,6 +82,10 @@ private:
         { return h.i >= m_minI; }
     HexId moveCoord(HexId& h)
         { return HexId{h.i - 1, h.j}; }
+
+    // minimum i value, used in inGrid() for finding root/child paths in parentOrChild()
+    void setMinCoord(HexId& h)
+        { m_minI = std::min(m_minI, h.i); }
 
     /// H3 resolution of the grid (0-15)
     int m_res;

@@ -10,7 +10,7 @@ void HexGrid::processHeight(double height)
 {
     m_maxSample = 10000;
     m_height = height;
-    m_minY = 1;
+    m_minY = std::numeric_limits<int>::max();
     m_width = (3 / (2 * SQRT_3)) * m_height;
     m_offsets[0] = Point(0, 0);
     m_offsets[1] = Point(-m_width / 3, m_height / 2);
@@ -124,10 +124,6 @@ HexId HexGrid::findHexagon(Point p)
             }
         }
     }
-
-    // minimum Y (HexId.j) value, used in inGrid() for finding root/child paths in parentOrChild();
-    // set as y - 1 to account for m_hexPaths containing hexagons across edge 3
-    m_minY = std::min(m_minY, y - 1);
 
     return HexId{x, y};
 }

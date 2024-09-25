@@ -43,15 +43,11 @@ HexId H3Grid::findHexagon(Point p)
                 ", " << ll.lng <<") to H3Index.";
             throw hexer_error(oss.str());
     }
-    if (m_origin == 0) {
+    if (!m_origin) 
         m_origin = index;
-        m_minI = h32ij(index).i;
-    }
+    
     HexId ij = h32ij(index);
 
-    // minimum i value, used in inGrid() for finding root/child paths in parentOrChild();
-    // set as i - 1 to account for m_hexPaths containing hexagons across edge 3 (-i direction)
-    m_minI = std::min(m_minI, ij.i - 1);
     return ij;
 }
 

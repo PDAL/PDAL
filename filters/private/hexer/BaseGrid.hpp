@@ -80,6 +80,7 @@ private:
     virtual void processHeight(double height) = 0;
     virtual bool inGrid(HexId& h) = 0;
     virtual HexId moveCoord(HexId& h) = 0;
+    virtual void setMinCoord(HexId& h) = 0;
 
     void handleSamplePoint(Point& p);
     void addRoot(HexId hex);
