@@ -89,9 +89,9 @@ void HexBin::addArgs(ProgramArgs& args)
     args.add("preserve_topology", "Preserve topology when smoothing",
         m_preserve_topology, true);
     args.add("density", "Emit a density tessellation to a specified OGR-compatible output file. "
-        "Defaults to GeoJSON unless 'ogr_driver' option is set.", m_DensityOutput, "");
+        "Defaults to GeoJSON unless 'ogrdriver' option is set.", m_DensityOutput, "");
     args.add("boundary", "Emit a boundary tessellation to a specified OGR-compatible output file. "
-        "Defaults to GeoJSON unless 'ogr_driver' option is set.", m_boundaryOutput, "");
+        "Defaults to GeoJSON unless 'ogrdriver' option is set.", m_boundaryOutput, "");
     args.add("h3_grid", "Create a grid using H3 (https://h3geo.org/docs) Hexagons",
         m_isH3, false);
     args.add("h3_resolution", "H3 grid resolution: 0 (coarsest) - 15 (finest). See "
