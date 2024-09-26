@@ -40,16 +40,17 @@ void BaseGrid::addPoint(Point& p)
     }
 }
 
-void BaseGrid::setHexes(const std::vector<HexId>& ids)
+void BaseGrid::addHexagon(HexId& hex)
 {
-    for (HexId h : ids)
+    int count = increment(hex);
+
+    if (count == m_denseLimit)
     {
-        m_counts[h] = m_denseLimit + 1;
-        HexId above = edgeHex(h, 0);
-        HexId below = edgeHex(h, 3);
+        HexId above = edgeHex(hex, 0);
+        HexId below = edgeHex(hex, 3);
 
         if (!isDense(above))
-            addRoot(h);
+            addRoot(hex);
         removeRoot(below);
     }
 }

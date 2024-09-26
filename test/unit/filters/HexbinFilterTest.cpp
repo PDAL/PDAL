@@ -110,7 +110,7 @@ TEST(HexbinFilterTest, HexGrid_issue_2507)
     // Here's a link to the picture.  The green numbers indicate the hexes
     // listed here:
     // https://photos.app.goo.gl/P3B3mU4Zre6zADEQ6
-    grid.setHexes( {
+    std::vector<hexer::HexId> hexes {
         {0, 3}, {0, 4}, {0,5}, {0, 6},
         {1, 2}, {1, 6},
         {2, 2}, {2, 4}, {2, 5}, {2, 7},
@@ -120,7 +120,9 @@ TEST(HexbinFilterTest, HexGrid_issue_2507)
         {6, 1}, {6, 3}, {6, 4}, {6, 8},
         {7, 1}, {7, 3}, {7, 4}, {7, 5}, {7, 7},
         {8, 2}, {8, 3}, {8, 4}, {8, 5}, {8, 6}, {8, 7}
-    } );
+    };
+    for (hexer::HexId h : hexes)
+        grid.addHexagon(h);
 
     grid.findShapes();
     grid.findParentPaths();
@@ -141,7 +143,7 @@ TEST(HexbinFilterTest, H3Grid_issue_2507)
 
     // This is the same grid as the previous test, but adapted for
     // the H3 IJ indexing scheme.
-    grid.setHexes( {
+    std::vector<hexer::HexId> hexes {
         {5, 2}, {5, 3},
         {6, 2}, {6, 4},
         {7, 3}, {7, 4},
@@ -154,7 +156,9 @@ TEST(HexbinFilterTest, H3Grid_issue_2507)
         {9, 3}, {9, 5}, {9, 7}, {9, 8},
         {10, 4}, {10, 8},
         {11, 5}, {11, 6}, {11, 7}, {11, 8},
-    } );
+    };
+    for (hexer::HexId h : hexes)
+        grid.addHexagon(h);
 
     LatLng location{PDALH3degsToRads(40.689167), PDALH3degsToRads(-74.044444)};
     int resolution = grid.getRes();

@@ -33,6 +33,17 @@ void H3Grid::processHeight(double height)
     //std::cout << "H3 resolution: " << m_res << std::endl;
 }
 
+void H3Grid::addH3Dim(H3Index h3)
+{
+    if (!m_origin)
+    {
+        m_origin = h3;
+        m_res = PDALH3getResolution(h3);
+    }
+    HexId ij = h32ij(h3);
+    addHexagon(ij);
+}
+
 HexId H3Grid::findHexagon(Point p)
 {
     H3Index index(0);

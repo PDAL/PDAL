@@ -48,6 +48,7 @@ public:
             }
             return ij;  }
 
+    void addH3Dim(H3Index h3);
     Point findPoint(Segment& s);
 
     void addXY(double& x, double& y)

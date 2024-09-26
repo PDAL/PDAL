@@ -43,7 +43,7 @@ public:
         { return m_denseLimit; }
 
     // test function: adds pre-defined hexagon coordinates to the grid
-    void setHexes(const std::vector<HexId>& hexes);
+    void addHexagon(HexId& hex);
     // test function: sorts paths for consistent output
     void sortPaths();
 
@@ -54,6 +54,8 @@ public:
     virtual bool isH3() = 0;
     virtual double height() = 0;
 
+    virtual void addH3Dim(H3Index h3)
+        {}
     virtual H3Index ij2h3(HexId ij)
         { return 0; }
     virtual HexId h32ij(H3Index h3)
