@@ -24,7 +24,7 @@ and whose `Classification` equals 2 (corresponding to ground in LAS).
     "input.las",
     {
         "type":"filters.expression",
-        "expression":"(Z >= 0 && Z <= 100) && Classifcation == 2"
+        "expression":"(Z >= 0 && Z <= 100) && Classification == 2"
     },
     {
         "type":"writers.las",
@@ -36,7 +36,7 @@ and whose `Classification` equals 2 (corresponding to ground in LAS).
 The equivalent pipeline invoked via the PDAL `translate` command would be
 
 ```bash
-$ pdal translate -i input.las -o filtered.las -f range --filters.expression.expression="(Z >= 0 && Z <= 100) && Classifcation == 2"
+$ pdal translate -i input.las -o filtered.las -f range --filters.expression.expression="(Z >= 0 && Z <= 100) && Classification == 2"
 ```
 
 ## Options
