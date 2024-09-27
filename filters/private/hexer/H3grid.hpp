@@ -57,13 +57,19 @@ public:
         }
     double height()
         {
-            double edge_length;
             HexId origin = h32ij(m_origin);
             Segment s1(origin, 0);
             Segment s2(origin, 1);
             Point p1 = findPoint(s1);
             Point p2 = findPoint(s2);
-            return 2 * ((SQRT_3 / 2.0) * distance(p1, p2));
+            return (SQRT_3 * distance(p1, p2));
+        }
+    bool checkSRS(pdal::SpatialReference& srs)
+        {   
+            if (srs.identifyHorizontalEPSG() == "4326")
+                return true;
+            else
+                return false; 
         }
     bool sampling() const
         { return m_res < 0; }

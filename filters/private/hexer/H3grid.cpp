@@ -46,11 +46,10 @@ HexId H3Grid::findHexagon(Point p)
     if (!m_origin) 
         m_origin = index;
     
-    HexId ij = h32ij(index);
-
-    return ij;
+    return h32ij(index);
 }
 
+// Returns the second endpoint in a segment to be used as a hexagon's vertex
 Point H3Grid::findPoint(Segment& s)
 {
     DirEdge dir_edge;

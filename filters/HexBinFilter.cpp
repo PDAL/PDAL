@@ -34,7 +34,6 @@
 
 #include "HexBinFilter.hpp"
 
-#include "private/hexer/BaseGrid.hpp"
 #include "private/hexer/HexGrid.hpp"
 #include "private/hexer/H3grid.hpp"
 
@@ -101,18 +100,42 @@ void HexBin::addArgs(ProgramArgs& args)
 }
 
 
+void HexBin::initialize()
+{
+    if (m_isH3)
+    {
+        if (m_edgeLength) {
+            if (m_h3Res == -1)
+                throwError("'edge_length' not implemented for H3 processing. "
+                    "Set 'h3_resolution' option to specify cell size.");
+            else
+                log()->get(LogLevel::Warning) << "'edge_length' not implemented "
+                    "for H3 processing. Using 'h3_resolution'\n";
+        }
+        if (m_cullArea || !m_preserve_topology)
+            throwError("Smoothing not implemented for H3 processing. "
+                "'preserve_topology' and 'hole_cull_area_tolerance' "
+                "options are ignored.");
+    }
+    if (!m_isH3 && (m_h3Res != -1))
+    {
+        if (!m_edgeLength)
+            throwError("'h3_resolution' not implemented for standard "
+                "processing. Set 'edge_length' option to specify cell size.");
+        else
+            log()->get(LogLevel::Warning) << "'h3_resolution' not implemented "
+                "for standard processing. Using 'edge_length'\n"; 
+    }
+}
+
+
 void HexBin::ready(PointTableRef table)
 {
     m_count = 0;
     if (m_isH3)
     {
-        m_doSmooth = false;
-        if (m_h3Res == -1) 
+        if (m_h3Res == -1)
         {
-            if (m_edgeLength)
-                log()->get(LogLevel::Warning) << "Ignoring edge length for H3 processing. "
-                    "Auto-calculating resolution; set 'h3_resolution' option to "
-                    "specify cell size";
             m_grid.reset(new H3Grid(m_density));
             m_grid->setSampleSize(m_sampleSize);
         }
@@ -121,7 +144,7 @@ void HexBin::ready(PointTableRef table)
     }
     else
     {
-        if (m_edgeLength == 0.0)  // 0 can always be represented exactly.
+        if (m_edgeLength == 0.0)
         {
             m_grid.reset(new HexGrid(m_density));
             m_grid->setSampleSize(m_sampleSize);
@@ -157,8 +180,8 @@ bool HexBin::processOne(PointRef& point)
 void HexBin::spatialReferenceChanged(const SpatialReference& srs)
 {
     m_srs = srs;
-    if (m_isH3 && (m_srs.identifyHorizontalEPSG() != (std::string)"4326")) {
-        Utils::OStringStreamClassicLocale oss;
+    if (!m_grid->checkSRS(m_srs)) {
+        std::ostringstream oss;
         oss << "Cannot find H3 hexbin locations with spatial reference: ("
             << m_srs.getProj4() << ")! Input must be EPSG:4326";
         throwError(oss.str());
@@ -170,7 +193,7 @@ void HexBin::done(PointTableRef table)
 {
     if (m_grid->sampling())
     {
-        Utils::OStringStreamClassicLocale oss;
+        std::ostringstream oss;
         oss << "Sampling for hexbin auto-edge length calculation failed! ";
         if (m_sampleSize > m_count)
             oss << "Decrease sample size: sample size of " << m_sampleSize 
@@ -218,8 +241,6 @@ void HexBin::done(PointTableRef table)
     }
     if (m_boundaryOutput.size())
     {
-        auto idx = m_boundaryOutput.find_last_of('.');
-        std::string ext = m_boundaryOutput.substr(idx);
         OGR writer(m_boundaryOutput, getSpatialReference().getWKT(), m_grid->isH3(),
             m_driver, "hexbins");
         writer.writeBoundary(*m_grid); 
@@ -316,9 +337,6 @@ void HexBin::done(PointTableRef table)
     }
     else
     {
-        /* if (m_doSmooth)
-            log()->get(LogLevel::Warning) << "Smoothing not supported for H3 processing! "
-                "Set 'smooth' option to false to silence this warning.";  */
         m_metadata.add("h3_resolution", m_grid->getRes(), "The H3 resolution level "
             "of the grid. See https://h3geo.org/docs/core-library/restable "
             "for more information" );

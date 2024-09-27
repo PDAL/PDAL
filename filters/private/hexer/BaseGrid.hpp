@@ -6,9 +6,10 @@
 #include <set>
 
 #include <pdal/pdal_export.hpp>
+#include <pdal/SpatialReference.hpp>
 
 #include "exception.hpp"
-#include "Mathpair.hpp"
+#include "Point.hpp"
 #include "Path.hpp"
 #include "HexId.hpp"
 
@@ -47,6 +48,7 @@ public:
     void sortPaths();
 
     virtual void addXY(double& x, double& y) = 0;
+    // returns a single point from a segment to be used as the vertex of a hexagon
     virtual Point findPoint(Segment& s) = 0;
     virtual bool sampling() const = 0;
     virtual bool isH3() = 0;
@@ -60,6 +62,8 @@ public:
         { return Point{0,0}; }
     virtual int getRes() const
         { return -1; }
+    virtual bool checkSRS(pdal::SpatialReference& srs)
+        { return true; }
 
 protected:
     BaseGrid(int dense_limit) : m_denseLimit{dense_limit}

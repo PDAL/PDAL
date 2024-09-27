@@ -10,7 +10,7 @@ void HexGrid::processHeight(double height)
 {
     m_maxSample = 10000;
     m_height = height;
-    m_minY = std::numeric_limits<int>::max();
+    m_minY = (std::numeric_limits<int>::max)();
     m_width = (3 / (2 * SQRT_3)) * m_height;
     m_offsets[0] = Point(0, 0);
     m_offsets[1] = Point(-m_width / 3, m_height / 2);

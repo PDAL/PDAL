@@ -39,7 +39,7 @@
 #include <chrono>
 
 #include "Processor.hpp"
-#include "Mathpair.hpp"
+#include "Point.hpp"
 
 namespace hexer
 {

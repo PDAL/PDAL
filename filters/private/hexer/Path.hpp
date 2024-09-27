@@ -38,7 +38,7 @@
 #include <iostream>
 #include <algorithm>
 
-#include "Mathpair.hpp"
+#include "Point.hpp"
 #include "Segment.hpp"
 
 namespace hexer

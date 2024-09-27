@@ -127,6 +127,7 @@ void BaseGrid::findShape(HexId root)
             // parents and children from m_hexPaths
             setMinCoord(pathHex);
         }
+        // adds the first point of the segment to the path
         path.addPoint(findPoint(cur));
         const auto& [left, right] = nextSegments(cur);
         // left.hex: the hexagon we would "walk into" moving clockwise from the
@@ -177,8 +178,7 @@ void BaseGrid::findParentPaths()
 // Finds whether a path should be a root path or child path
 void BaseGrid::parentOrChild(Path& p)
 {
-    // Determines how many paths are walked through in the direction of
-    // a path's parent is always null to start
+    // get the possible root hexagon that was used to initialize the path
     HexId hex = p.rootHex();
     // get the i or j component of the hexagon, depending on which indexing
     // system is being moved through (-I for H3Grid, -J for HexGrid)
@@ -191,7 +191,8 @@ void BaseGrid::parentOrChild(Path& p)
             // get the path associated with the current hexagon
             Path *parentPath = it->second;
             // if we pass through another path an even number of times,
-            // it can't be our path's parent
+            // it can't be our path's parent.
+            // a path's parent is always null to start
             if (parentPath == p.parent())
                 p.setParent(NULL);
             // if a unique path is passed through an odd # of times, it's

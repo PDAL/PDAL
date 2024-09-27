@@ -60,8 +60,6 @@ public:
 
 private:
     std::unique_ptr<hexer::BaseGrid> m_grid;
-    std::string m_xDimName;
-    std::string m_yDimName;
     uint32_t m_precision;
     uint32_t m_sampleSize;
     double m_cullArea;
@@ -80,6 +78,7 @@ private:
     std::string m_driver;
 
     virtual void addArgs(ProgramArgs& args);
+    virtual void initialize();
     virtual void ready(PointTableRef table);
     virtual void filter(PointView& view);
     virtual bool processOne(PointRef& point);

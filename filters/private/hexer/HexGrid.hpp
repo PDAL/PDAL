@@ -1,10 +1,5 @@
 #pragma once
 
-#if WINDOWS
-#undef min
-#undef max
-#endif // WINDOWS
-
 #include "BaseGrid.hpp"
 
 namespace hexer
@@ -16,7 +11,7 @@ public:
     HexGrid(double height, int denseLimit) : BaseGrid(denseLimit)
         { processHeight(height); }
     HexGrid(int denseLimit) : BaseGrid(denseLimit), m_height(-1.0),
-        m_width(-1.0), m_minY(std::numeric_limits<int>::max())
+        m_width(-1.0), m_minY((std::numeric_limits<int>::max)())
     {}
     ~HexGrid();
 
@@ -49,7 +44,7 @@ private:
 
     // minimum Y (HexId.j) value, used in inGrid() for finding root/child paths in parentOrChild()
     void setMinCoord(HexId& h)
-        { m_minY = std::min(m_minY, h.j); }
+        { m_minY = (std::min)(m_minY, h.j); }
 
     /// Height of the hexagons in the grid (2x apothem)
     double m_height;
