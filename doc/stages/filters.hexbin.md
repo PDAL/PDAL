@@ -160,7 +160,7 @@ preserve_topology
 
 smooth
 
-: Use GEOS simplify operations to smooth boundary to a tolerance. Not compatible with H3 \[Default: true\]
+: Use GEOS simplify operations to smooth boundary to a tolerance. Not implemented with H3 \[Default: true\]
 
 ```{include} filter_opts.md
 ```

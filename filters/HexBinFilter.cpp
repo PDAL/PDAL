@@ -171,6 +171,7 @@ bool HexBin::processOne(PointRef& point)
 {
     if (m_isH3 && point.hasDim(Dimension::Id::H3))
     {
+        // this should throw a more descriptive error
         m_grid->addH3Dim(point.getFieldAs<H3Index>(Dimension::Id::H3));
     }
     else
@@ -242,13 +243,13 @@ void HexBin::done(PointTableRef table)
     // density and boundary writing with OGR does not support polygon smoothing
     if (m_DensityOutput.size())
     {
-        OGR writer(m_DensityOutput, getSpatialReference().getWKT(),
+        OGR writer(m_DensityOutput, m_srs.getWKT(),
             m_driver, "hexbins");
         writer.writeDensity(*m_grid);
     }
     if (m_boundaryOutput.size())
     {
-        OGR writer(m_boundaryOutput, getSpatialReference().getWKT(),
+        OGR writer(m_boundaryOutput, m_srs.getWKT(),
             m_driver, "hexbins");
         writer.writeBoundary(*m_grid); 
     }
@@ -292,7 +293,6 @@ void HexBin::done(PointTableRef table)
         }
     }
 
-    // what's the purpose of this? rename it?
     double hexArea(((3 * SQRT_3)/2.0) * (m_grid->height() * m_grid->height()));
     double avg_density = (n * hexArea) / totalCount;
     m_metadata.add("avg_pt_per_sq_unit", avg_density, "Area / point count "
