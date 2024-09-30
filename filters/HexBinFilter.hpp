@@ -76,9 +76,11 @@ private:
     int m_h3Res;
     SpatialReference m_srs;
     std::string m_driver;
+    bool m_h3Dim;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
+    virtual void prepared(PointTableRef table);
     virtual void ready(PointTableRef table);
     virtual void filter(PointView& view);
     virtual bool processOne(PointRef& point);

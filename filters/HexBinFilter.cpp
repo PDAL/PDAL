@@ -129,6 +129,13 @@ void HexBin::initialize()
 }
 
 
+void HexBin::prepared(PointTableRef table)
+{
+   const PointLayoutPtr layout(table.layout());
+   m_h3Dim = layout->hasDim(Dimension::Id::H3);
+}
+
+
 void HexBin::ready(PointTableRef table)
 {
     m_count = 0;
@@ -169,7 +176,7 @@ void HexBin::filter(PointView& view)
 
 bool HexBin::processOne(PointRef& point)
 {
-    if (m_isH3 && point.hasDim(Dimension::Id::H3))
+    if (m_isH3 && m_h3Dim)
     {
         // this should throw a more descriptive error
         m_grid->addH3Dim(point.getFieldAs<H3Index>(Dimension::Id::H3));
@@ -188,7 +195,7 @@ bool HexBin::processOne(PointRef& point)
 void HexBin::spatialReferenceChanged(const SpatialReference& srs)
 {
     m_srs = srs;
-    if (!m_grid->checkSRS(m_srs)) {
+    if (!m_grid->checkSRS(m_srs) && !m_h3Dim) {
         std::ostringstream oss;
         oss << "Cannot find H3 hexbin locations with spatial reference: ("
             << m_srs.getProj4() << ")! Input must be EPSG:4326";
