@@ -37,7 +37,7 @@
 #include "private/hexer/HexGrid.hpp"
 #include "private/hexer/H3grid.hpp"
 
-#include "../kernels/private/density/OGR.hpp"
+#include "private/hexer/OGR.hpp"
 #include <pdal/Polygon.hpp>
 
 using namespace hexer;

@@ -35,7 +35,7 @@
 #include "DensityKernel.hpp"
 
 #include "../filters/HexBinFilter.hpp"
-#include "private/density/OGR.hpp"
+#include "../filters/private/hexer/OGR.hpp"
 
 #include <pdal/util/FileUtils.hpp>
 
