@@ -53,6 +53,8 @@ public:
     virtual bool sampling() const = 0;
     virtual bool isH3() = 0;
     virtual double height() = 0;
+    // is there a better way to do this? taking two arguments seems weird
+    virtual uint64_t getID(int& n, const HexId& ij) = 0;
 
     virtual void addH3Dim(H3Index h3)
         {}

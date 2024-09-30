@@ -242,13 +242,13 @@ void HexBin::done(PointTableRef table)
     // density and boundary writing with OGR does not support polygon smoothing
     if (m_DensityOutput.size())
     {
-        OGR writer(m_DensityOutput, getSpatialReference().getWKT(), m_grid->isH3(),
+        OGR writer(m_DensityOutput, getSpatialReference().getWKT(),
             m_driver, "hexbins");
         writer.writeDensity(*m_grid);
     }
     if (m_boundaryOutput.size())
     {
-        OGR writer(m_boundaryOutput, getSpatialReference().getWKT(), m_grid->isH3(),
+        OGR writer(m_boundaryOutput, getSpatialReference().getWKT(),
             m_driver, "hexbins");
         writer.writeBoundary(*m_grid); 
     }

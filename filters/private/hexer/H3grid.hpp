@@ -76,6 +76,8 @@ public:
         { return m_res < 0; }
     bool isH3()
         { return true; }
+    uint64_t getID(int& n, const HexId& ij)
+        { return ij2h3(ij); }
 
     // test function: used when inserting pre-defined grids in tests, 
     // sets origin outside of findHexagon()
