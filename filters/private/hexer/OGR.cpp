@@ -40,6 +40,7 @@
 
 #include <gdal.h>
 #include <ogr_api.h>
+#include <cpl_string.h>
 
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
@@ -143,8 +144,12 @@ void OGR::createLayer(const std::string& wkt)
     if (m_layerName.empty())
         m_layerName = m_filename;
     gdal::SpatialRef srs(wkt);
+    char **papszOptions = nullptr;
+    papszOptions = CSLAddNameValue(papszOptions, "RFC7946", "YES");
+
     m_layer = GDALDatasetCreateLayer(m_ds, m_layerName.c_str(), srs.get(),
-        wkbMultiPolygon, NULL);
+        wkbMultiPolygon, papszOptions);
+    CSLDestroy(papszOptions);
     if (m_layer == NULL)
         throw pdal_error("Layer creation was null!");
 
