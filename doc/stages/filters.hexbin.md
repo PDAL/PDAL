@@ -22,6 +22,14 @@ with other H3 datasets. When writing to a file with `density`, a unique [H3Index
 is provided for each hexagon. Boundary smoothing is disabled for H3, and
 `h3_resolution` is used in place of `edge_length`.
 
+```{note}
+H3 processing can also work with an existing "H3" dimension in the point input, 
+created by {ref}`filters.h3`. If `h3_grid` is set to "true", point clouds 
+containing an H3 field will always be processed using the data in that field; all 
+H3 indices must be at the same resolution, which will override the `h3_resolution` 
+option.
+```
+
 The hexbin filter reads a point stream and writes out a metadata record that
 contains a boundary, expressed as a well-known text polygon. The filter counts
 the points in each hexagonal area to determine if that area should be included

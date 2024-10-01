@@ -33,15 +33,22 @@ void H3Grid::processHeight(double height)
     //std::cout << "H3 resolution: " << m_res << std::endl;
 }
 
-void H3Grid::addH3Dim(H3Index h3)
+bool H3Grid::addH3Dim(H3Index h3)
 {
     if (!m_origin)
     {
         m_origin = h3;
         m_res = PDALH3getResolution(h3);
     }
-    HexId ij = h32ij(h3);
-    addHexagon(ij);
+    HexId ij;
+    // using this instead of h32ij to throw a better error
+    if (PDALH3cellToLocalIj(m_origin, h3, 0, &ij) != E_SUCCESS)
+        return false;
+    else
+    {
+        addHexagon(ij);
+        return true;
+    }
 }
 
 HexId H3Grid::findHexagon(Point p)

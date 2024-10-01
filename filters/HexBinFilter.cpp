@@ -133,6 +133,9 @@ void HexBin::prepared(PointTableRef table)
 {
    const PointLayoutPtr layout(table.layout());
    m_h3Dim = layout->hasDim(Dimension::Id::H3);
+   if (m_h3Dim && (m_h3Res != -1) && m_isH3)
+        log()->get(LogLevel::Warning) << "Processing hexes using H3 indices in "
+            "input file's 'H3' field. Ignoring user-provided 'h3_resolution'\n"; 
 }
 
 
@@ -178,8 +181,10 @@ bool HexBin::processOne(PointRef& point)
 {
     if (m_isH3 && m_h3Dim)
     {
-        // this should throw a more descriptive error
-        m_grid->addH3Dim(point.getFieldAs<H3Index>(Dimension::Id::H3));
+        if (!m_grid->addH3Dim(point.getFieldAs<H3Index>(Dimension::Id::H3)))
+            throwError("Unable to process H3 dimension from input file! "
+                "All values must be valid H3 cell indexes at a single "
+                "resolution.");
     }
     else
     {

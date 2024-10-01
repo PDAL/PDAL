@@ -56,8 +56,8 @@ public:
     // is there a better way to do this? taking two arguments seems weird
     virtual uint64_t getID(int& n, const HexId& ij) = 0;
 
-    virtual void addH3Dim(H3Index h3)
-        {}
+    virtual bool addH3Dim(H3Index h3)
+        { return true; }
     virtual H3Index ij2h3(HexId ij)
         { return 0; }
     virtual HexId h32ij(H3Index h3)
