@@ -259,6 +259,9 @@ BOX3D Geometry::bounds() const
 double Geometry::distance(double x, double y, double z) const
 {
     OGRPoint p(x, y, z);
+    throwNoGeos();
+    if(!m_geom)
+        throw pdal_error("Cannot compare distance of null geometry!");
     return m_geom->Distance((OGRGeometry*)&p);
 }
 
