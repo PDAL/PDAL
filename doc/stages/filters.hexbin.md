@@ -15,6 +15,13 @@ Hexbin output shows boundary of actual points in point buffer, not
 just rectangular extents.
 ```
 
+In addition to the original method of processing hexbins, density surfaces and
+boundaries can be processed using [H3]. This references hexbin products to a 
+global grid of fixed hexagons at 16 [resolutions], allowing joins and comparisons
+with other H3 datasets. When writing to a file with `density`, a unique [H3Index]
+is provided for each hexagon. Boundary smoothing is disabled for H3, and
+`h3_resolution` is used in place of `edge_length`.
+
 The hexbin filter reads a point stream and writes out a metadata record that
 contains a boundary, expressed as a well-known text polygon. The filter counts
 the points in each hexagonal area to determine if that area should be included
@@ -25,6 +32,11 @@ invoked using the "--pipeline-serialization" option:
 ```{eval-rst}
 .. streamable::
 ```
+
+As an alternative to writing geometry to metadata, GDAL OGR can write to
+any [OGR-compatible] vector driver by specifying a filename with the `density` 
+or `boundary` options. A valid driver that matches the file extension can be
+specified with `ogrdriver`; default is GeoJSON.
 
 ## Example 1
 
@@ -100,11 +112,28 @@ $ pdal info --boundary /Users/me/test/data/las/autzen_trim.las
 
 density
 
-: Output a density tessellation as a GeoJSON FeatureCollection to
-  the specified filename. If no file name is provided, nothing
-  is written.
+: Output a density tessellation to the specified filename. `ogrdriver` must be compatible with the filename 
+  (default: GeoJSON FeatureCollection). If no file name is provided, nothing is written.
 
-`` _`edge_size` ``
+boundary
+
+: Output the grid's boundary to the specified filename. `ogrdriver` must be compatible with the filename 
+  (default: GeoJSON FeatureCollection). If no file name is provided, nothing is written.
+
+ogrdriver
+
+: GDAL [OGR-compatible] vector driver for writing with `density` or `boundary`. \[Default: "GeoJSON"\]
+
+h3_grid
+
+: Create the hexbins using [H3] hexagons. \[Default: false\]
+
+h3_resolution
+
+: H3 resolution level the hexagons are created at (0, coarsest - 15, finest). Auto-calculates
+  resolution if none is set.
+
+edge_length
 
 : If not set, the hexbin filter will estimate a hex size based on a sample of
   the data. If set, hexbin will use the provided size in constructing the
@@ -113,7 +142,7 @@ density
 sample_size
 
 : How many points to sample when automatically calculating the edge
-  size? Only applies if [edge_size] is not explicitly set. \[Default: 5000\]
+  size? Only applies if `edge_length` is not explicitly set. \[Default: 5000\]
 
 threshold
 
@@ -131,7 +160,12 @@ preserve_topology
 
 smooth
 
-: Use GEOS simplify operations to smooth boundary to a tolerance \[Default: true\]
+: Use GEOS simplify operations to smooth boundary to a tolerance. Not compatible with H3 \[Default: true\]
 
 ```{include} filter_opts.md
 ```
+
+[H3]: https://h3geo.org/
+[resolutions]: https://h3geo.org/docs/core-library/restable
+[H3Index]: https://h3geo.org/docs/library/index/cell
+[OGR-compatible]: https://gdal.org/en/latest/drivers/vector/index.html

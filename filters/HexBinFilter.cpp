@@ -35,7 +35,7 @@
 #include "HexBinFilter.hpp"
 
 #include "private/hexer/HexGrid.hpp"
-#include "private/hexer/HexIter.hpp"
+#include "private/hexer/H3grid.hpp"
 
 #include "../kernels/private/density/OGR.hpp"
 #include <pdal/Polygon.hpp>
@@ -65,7 +65,7 @@ std::string HexBin::getName() const
 }
 
 
-hexer::HexGrid *HexBin::grid() const
+hexer::BaseGrid *HexBin::grid() const
 {
     return m_grid.get();
 }
@@ -87,27 +87,78 @@ void HexBin::addArgs(ProgramArgs& args)
     args.add("smooth", "Smooth boundary output", m_doSmooth, true);
     args.add("preserve_topology", "Preserve topology when smoothing",
         m_preserve_topology, true);
-    args.add("density", "Emit a density tessellation GeoJSON FeatureCollection in metadata",
-        m_DensityOutput, "");
+    args.add("density", "Emit a density tessellation to a specified OGR-compatible output file. "
+        "Defaults to GeoJSON unless 'ogrdriver' option is set.", m_DensityOutput, "");
+    args.add("boundary", "Emit a boundary tessellation to a specified OGR-compatible output file. "
+        "Defaults to GeoJSON unless 'ogrdriver' option is set.", m_boundaryOutput, "");
+    args.add("h3_grid", "Create a grid using H3 (https://h3geo.org/docs) Hexagons",
+        m_isH3, false);
+    args.add("h3_resolution", "H3 grid resolution: 0 (coarsest) - 15 (finest). See "
+        "https://h3geo.org/docs/core-library/restable", m_h3Res, -1);
+    args.add("ogrdriver", "GDAL OGR vector driver for writing with 'density' or 'boundary' "
+        "options.", m_driver, "GeoJSON");
+}
+
+
+void HexBin::initialize()
+{
+    if (m_isH3)
+    {
+        if (m_edgeLength) {
+            if (m_h3Res == -1)
+                throwError("'edge_length' not implemented for H3 processing. "
+                    "Set 'h3_resolution' option to specify cell size.");
+            else
+                log()->get(LogLevel::Warning) << "'edge_length' not implemented "
+                    "for H3 processing. Using 'h3_resolution'\n";
+        }
+        if (m_cullArea || !m_preserve_topology)
+            throwError("Smoothing not implemented for H3 processing. "
+                "'preserve_topology' and 'hole_cull_area_tolerance' "
+                "options are ignored.");
+    }
+    if (!m_isH3 && (m_h3Res != -1))
+    {
+        if (!m_edgeLength)
+            throwError("'h3_resolution' not implemented for standard "
+                "processing. Set 'edge_length' option to specify cell size.");
+        else
+            log()->get(LogLevel::Warning) << "'h3_resolution' not implemented "
+                "for standard processing. Using 'edge_length'\n"; 
+    }
 }
 
 
 void HexBin::ready(PointTableRef table)
 {
     m_count = 0;
-    if (m_edgeLength == 0.0)  // 0 can always be represented exactly.
+    if (m_isH3)
     {
-        m_grid.reset(new HexGrid(m_density));
-        m_grid->setSampleSize(m_sampleSize);
+        if (m_h3Res == -1)
+        {
+            m_grid.reset(new H3Grid(m_density));
+            m_grid->setSampleSize(m_sampleSize);
+        }
+        else
+            m_grid.reset(new H3Grid(m_h3Res, m_density));
     }
     else
-        m_grid.reset(new HexGrid(m_edgeLength * sqrt(3), m_density));
+    {
+        if (m_edgeLength == 0.0)
+        {
+            m_grid.reset(new HexGrid(m_density));
+            m_grid->setSampleSize(m_sampleSize);
+        }
+        else
+            m_grid.reset(new HexGrid(m_edgeLength * sqrt(3), m_density));
+    }
 }
 
 
 void HexBin::filter(PointView& view)
 {
     PointRef p(view, 0);
+
     for (PointId idx = 0; idx < view.size(); ++idx)
     {
         p.setPointId(idx);
@@ -120,15 +171,35 @@ bool HexBin::processOne(PointRef& point)
 {
     double x = point.getFieldAs<double>(Dimension::Id::X);
     double y = point.getFieldAs<double>(Dimension::Id::Y);
-    m_grid->addPoint(x, y);
+    m_grid->addXY(x, y);
     m_count++;
     return true;
 }
 
 
+void HexBin::spatialReferenceChanged(const SpatialReference& srs)
+{
+    m_srs = srs;
+    if (!m_grid->checkSRS(m_srs)) {
+        std::ostringstream oss;
+        oss << "Cannot find H3 hexbin locations with spatial reference: ("
+            << m_srs.getProj4() << ")! Input must be EPSG:4326";
+        throwError(oss.str());
+    }
+}
+
+
 void HexBin::done(PointTableRef table)
 {
-    m_grid->processSample();
+    if (m_grid->sampling())
+    {
+        std::ostringstream oss;
+        oss << "Sampling for hexbin auto-edge length calculation failed! ";
+        if (m_sampleSize > m_count)
+            oss << "Decrease sample size: sample size of " << m_sampleSize 
+                << " with " << m_count << " points.";
+        throwError(oss.str());
+    }
 
     try
     {
@@ -144,29 +215,11 @@ void HexBin::done(PointTableRef table)
         return;
     }
 
-    Utils::OStringStreamClassicLocale offsets;
-    offsets << "MULTIPOINT (";
-    for (int i = 0; i < 6; ++i)
-    {
-        hexer::Point p = m_grid->offset(i);
-        offsets << p.m_x << " " << p.m_y;
-        if (i != 5)
-            offsets << ", ";
-    }
-    offsets << ")";
-
-    m_metadata.add("edge_length", m_edgeLength, "The edge length of the "
-        "hexagon to use in situations where you do not want to estimate "
-        "based on a sample");
-    m_metadata.add("estimated_edge", m_grid->height(),
-        "Estimated computed edge distance");
     m_metadata.add("threshold", m_grid->denseLimit(),
         "Minimum number of points inside a hexagon to be considered full");
     m_metadata.add("sample_size", m_sampleSize, "Number of samples to use "
         "when estimating hexagon edge size. Specify 0.0 or omit options "
         "for edge_size if you want to compute one.");
-    m_metadata.add("hex_offsets", offsets.str(), "Offset of hex corners from "
-        "hex centers.");
 
     Utils::OStringStreamClassicLocale polygon;
     polygon.setf(std::ios_base::fixed, std::ios_base::floatfield);
@@ -175,61 +228,30 @@ void HexBin::done(PointTableRef table)
 
     if (m_outputTesselation)
     {
-        MetadataNode hexes = m_metadata.add("hexagons");
-        for (HexIter hi = m_grid->hexBegin(); hi != m_grid->hexEnd(); ++hi)
-        {
-            HexInfo h = *hi;
-
-            MetadataNode hex = hexes.addList("hexagon");
-            hex.add("density", h.density());
-
-            hex.add("gridpos", Utils::toString(h.xgrid()) + " " +
-                Utils::toString((h.ygrid())));
-            Utils::OStringStreamClassicLocale oss;
-            // Using stream limits precision (default 6)
-            oss << "POINT (" << h.x() << " " << h.y() << ")";
-            hex.add("center", oss.str());
-        }
         m_metadata.add("hex_boundary", polygon.str(),
             "Boundary MULTIPOLYGON of domain");
     }
 
+    // density and boundary writing with OGR does not support polygon smoothing
     if (m_DensityOutput.size())
     {
-        OGR writer(m_DensityOutput, getSpatialReference().getWKT(), "GeoJSON", "hexbins");
-        writer.writeDensity(m_grid.get());
+        OGR writer(m_DensityOutput, getSpatialReference().getWKT(), m_grid->isH3(),
+            m_driver, "hexbins");
+        writer.writeDensity(*m_grid);
     }
-
-    SpatialReference srs(table.anySpatialReference());
-    pdal::Polygon p(polygon.str(), srs);
-
-    /***
-      We want to make these bumps on edges go away, which means that
-      we want to elimnate both B and C.  If we take a line from A -> C,
-      we need the tolerance to eliminate B.  After that we're left with
-      the triangle ACD and we want to eliminate C.  The perpendicular
-      distance from AD to C is the hexagon height / 2, so we set the
-      tolerance a little larger than that.  This is larger than the
-      perpendicular distance needed to eliminate B in ABC, so should
-      serve for both cases.
-
-         B ______  C
-          /      \
-       A /        \ D
-
-    ***/
-    if (m_doSmooth)
+    if (m_boundaryOutput.size())
     {
-        double tolerance = 1.1 * m_grid->height() / 2;
-        double cull = m_cullArg->set() ?
-            m_cullArea : (6 * tolerance * tolerance);
-        p.simplify(tolerance, cull, m_preserve_topology);
+        OGR writer(m_boundaryOutput, getSpatialReference().getWKT(), m_grid->isH3(),
+            m_driver, "hexbins");
+        writer.writeBoundary(*m_grid); 
     }
+
+    pdal::Polygon p(polygon.str(), m_srs);
 
     // If the SRS was geographic, use relevant
     // UTM for area and density computation
     Polygon density_p(p);
-    if (srs.isGeographic())
+    if (m_srs.isGeographic())
     {
         // Compute a UTM polygon
         BOX3D box = p.bounds();
@@ -252,24 +274,78 @@ void HexBin::done(PointTableRef table)
     m_metadata.add("avg_pt_spacing", std::sqrt(1 / density),
         "Avg point spacing (x/y units)");
 
-    m_metadata.add("boundary", p.wkt(m_precision),
-        "Approximated MULTIPOLYGON of domain");
-    m_metadata.addWithType("boundary_json", p.json(), "json",
-        "Approximated MULTIPOLYGON of domain");
-
     int n(0);
     point_count_t totalCount(0);
-    for (HexIter hi = m_grid->hexBegin(); hi != m_grid->hexEnd(); ++hi)
+    for (auto& [coord, count] : m_grid->getHexes())
     {
-        HexInfo h = *hi;
-        totalCount += h.density();
-        ++n;
+        if (m_grid->isDense(coord))
+        {
+            totalCount += count;
+            n++;
+        }
     }
 
+    // what's the purpose of this? rename it?
     double hexArea(((3 * SQRT_3)/2.0) * (m_grid->height() * m_grid->height()));
     double avg_density = (n * hexArea) / totalCount;
     m_metadata.add("avg_pt_per_sq_unit", avg_density, "Area / point count "
         "(ignore contrary metadata item name. This is '(n * hexArea) / totalCount')");
+
+    if (!m_isH3)
+    {
+        /***
+        We want to make these bumps on edges go away, which means that
+        we want to elimnate both B and C.  If we take a line from A -> C,
+        we need the tolerance to eliminate B.  After that we're left with
+        the triangle ACD and we want to eliminate C.  The perpendicular
+        distance from AD to C is the hexagon height / 2, so we set the
+        tolerance a little larger than that.  This is larger than the
+        perpendicular distance needed to eliminate B in ABC, so should
+        serve for both cases.
+
+           B ______  C
+            /      \
+         A /        \ D
+
+        ***/
+        if (m_doSmooth)
+        {
+            double tolerance = 1.1 * m_grid->height() / 2;
+            double cull = m_cullArg->set() ?
+                m_cullArea : (6 * tolerance * tolerance);
+            p.simplify(tolerance, cull, m_preserve_topology);
+        }
+
+        Utils::OStringStreamClassicLocale offsets;
+        offsets << "MULTIPOINT (";
+        for (int i = 0; i < 6; ++i)
+        {
+            hexer::Point p = m_grid->offset(i);
+            offsets << p.m_x << " " << p.m_y;
+            if (i != 5)
+                offsets << ", ";
+        }
+        offsets << ")";
+
+        m_metadata.add("edge_length", m_edgeLength, "The edge length of the "
+            "hexagon to use in situations where you do not want to estimate "
+            "based on a sample");
+        m_metadata.add("estimated_edge", m_grid->height(),
+            "Estimated computed edge distance");
+        m_metadata.add("hex_offsets", offsets.str(), "Offset of hex corners from "
+            "hex centers.");
+    }
+    else
+    {
+        m_metadata.add("h3_resolution", m_grid->getRes(), "The H3 resolution level "
+            "of the grid. See https://h3geo.org/docs/core-library/restable "
+            "for more information" );
+    }
+    
+    m_metadata.add("boundary", p.wkt(m_precision),
+        "Approximated MULTIPOLYGON of domain");
+    m_metadata.addWithType("boundary_json", p.json(), "json",
+        "Approximated MULTIPOLYGON of domain");
 }
 
 } // namespace pdal

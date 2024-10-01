@@ -59,6 +59,8 @@ private:
     double m_edgeLength;
     double m_cullArea;
     bool m_doSmooth;
+    bool m_isH3;
+    int m_h3Res;
 
     virtual void addSwitches(ProgramArgs& args);
     void outputDensity(pdal::SpatialReference const& ref);
