@@ -264,16 +264,7 @@ CopcReader::CopcReader() : m_args(new CopcReader::Args), m_p(new CopcReader::Pri
 
 
 CopcReader::~CopcReader()
-{
-    if (m_p)
-    {
-        if (m_p->pool)
-        {
-            m_p->pool->stop();
-        }
-        m_p->connector.reset();
-    }
-}
+{}
 
 
 std::string CopcReader::getName() const
