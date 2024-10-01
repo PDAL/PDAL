@@ -28,8 +28,6 @@ public:
         { return m_height; }
     bool sampling() const
         { return m_width < 0; }
-    bool isH3()
-        { return false; }
     uint64_t getID(int& n, const HexId& ij)
         { return n; }
     Point findPoint(Segment& s);

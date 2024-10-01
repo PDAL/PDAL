@@ -51,9 +51,7 @@ public:
     // returns a single point from a segment to be used as the vertex of a hexagon
     virtual Point findPoint(Segment& s) = 0;
     virtual bool sampling() const = 0;
-    virtual bool isH3() = 0;
     virtual double height() = 0;
-    // is there a better way to do this? taking two arguments seems weird
     virtual uint64_t getID(int& n, const HexId& ij) = 0;
 
     virtual bool addH3Dim(H3Index h3)

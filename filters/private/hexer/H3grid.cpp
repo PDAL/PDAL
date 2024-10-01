@@ -5,7 +5,6 @@
 
 #include "BaseGrid.hpp"
 #include "H3grid.hpp"
-#include "Processor.hpp"
 
 namespace hexer
 {
@@ -30,7 +29,6 @@ void H3Grid::processHeight(double height)
     }
     if (m_res == -1)
         throw hexer_error("unable to calculate H3 grid size!");
-    //std::cout << "H3 resolution: " << m_res << std::endl;
 }
 
 bool H3Grid::addH3Dim(H3Index h3)
