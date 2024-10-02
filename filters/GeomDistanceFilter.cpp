@@ -86,6 +86,10 @@ void GeomDistanceFilter::addDimensions(PointLayoutPtr layout)
             Dimension::Type::Double);
 }
 
+void GeomDistanceFilter::initialize()
+{
+    gdal::registerDrivers();
+}
 
 void GeomDistanceFilter::addArgs(ProgramArgs& args)
 {
@@ -96,18 +100,6 @@ void GeomDistanceFilter::addArgs(ProgramArgs& args)
     args.add("ring", "Compare edges (demote polygons to linearrings)", m_args->m_doRingMode, false);
     args.add("ogr", "OGR filter geometries", m_args->m_ogr);
 
-    if (!m_args->m_ogr.is_null())
-    {
-        std::vector<Polygon> polys = gdal::getPolygons(m_args->m_ogr);
-        if (!polys.size())
-            throwError("No polygons were selected from 'ogr'!");
-        m_args->m_geometry = polys[0];
-        // log()->get(LogLevel::Debug) << "First polygon selected from 'ogr' data" << std::endl;
-
-    }
-
-    if (m_args->m_doRingMode)
-        m_args->m_geometry = m_args->m_geometry.getRing();
 
 }
 
@@ -120,6 +112,23 @@ void GeomDistanceFilter::prepared(PointTableRef table)
         throwError("Missing dimension with name '" + m_args->m_dimName +
             "'in input PointView.");
 
+}
+
+void GeomDistanceFilter::ready(PointTableRef table)
+{
+    if (!m_args->m_ogr.is_null())
+    {
+        std::vector<Polygon> polys = gdal::getPolygons(m_args->m_ogr);
+        if (!polys.size())
+            throwError("No polygons were selected from 'ogr'!");
+        m_args->m_geometry = polys[0];
+    }
+
+    if (m_args->m_doRingMode)
+        m_args->m_geometry = m_args->m_geometry.getRing();
+
+    if (!m_args->m_geometry.getOGRHandle())
+        throwError("Candidate polygon in filters.geomdistance was NULL!");
 }
 
 
