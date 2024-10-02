@@ -64,6 +64,8 @@ private:
     virtual void filter(PointView& view) override;
     virtual void addDimensions(PointLayoutPtr layout) override;
     virtual void prepared(PointTableRef table) override;
+    virtual void initialize() override;
+    virtual void ready(PointTableRef table) override;
     virtual bool processOne(PointRef& point) override;
 
     GeomDistanceFilter& operator=(const GeomDistanceFilter&) = delete;
