@@ -92,7 +92,7 @@ private:
     pdal::Polygon prepareGeometry(const FileInfo& fileInfo);
     void createFields();
     bool fastBoundary(Stage& reader, FileInfo& fileInfo);
-    bool slowBoundary(Stage& hexer, FileInfo& fileInfo);
+    bool slowBoundary(PipelineManager& manager, FileInfo& fileInfo);
 
     bool isFileIndexed( const FieldIndexes& indexes, const FileInfo& fileInfo);
 
