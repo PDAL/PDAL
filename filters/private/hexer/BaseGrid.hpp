@@ -43,7 +43,7 @@ public:
         { return m_denseLimit; }
 
     // test function: adds pre-defined hexagon coordinates to the grid
-    void setHexes(const std::vector<HexId>& hexes);
+    void addHexagon(HexId& hex);
     // test function: sorts paths for consistent output
     void sortPaths();
 
@@ -51,9 +51,11 @@ public:
     // returns a single point from a segment to be used as the vertex of a hexagon
     virtual Point findPoint(Segment& s) = 0;
     virtual bool sampling() const = 0;
-    virtual bool isH3() = 0;
     virtual double height() = 0;
+    virtual uint64_t getID(int& n, const HexId& ij) = 0;
 
+    virtual bool addH3Dim(H3Index h3)
+        { return true; }
     virtual H3Index ij2h3(HexId ij)
         { return 0; }
     virtual HexId h32ij(H3Index h3)

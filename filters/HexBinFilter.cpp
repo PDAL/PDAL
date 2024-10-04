@@ -37,7 +37,7 @@
 #include "private/hexer/HexGrid.hpp"
 #include "private/hexer/H3grid.hpp"
 
-#include "../kernels/private/density/OGR.hpp"
+#include "private/hexer/OGR.hpp"
 #include <pdal/Polygon.hpp>
 
 using namespace hexer;
@@ -129,6 +129,16 @@ void HexBin::initialize()
 }
 
 
+void HexBin::prepared(PointTableRef table)
+{
+   const PointLayoutPtr layout(table.layout());
+   m_h3Dim = layout->hasDim(Dimension::Id::H3);
+   if (m_h3Dim && (m_h3Res != -1) && m_isH3)
+        log()->get(LogLevel::Warning) << "Processing hexes using H3 indices in "
+            "input file's 'H3' field. Ignoring user-provided 'h3_resolution'\n"; 
+}
+
+
 void HexBin::ready(PointTableRef table)
 {
     m_count = 0;
@@ -169,9 +179,19 @@ void HexBin::filter(PointView& view)
 
 bool HexBin::processOne(PointRef& point)
 {
-    double x = point.getFieldAs<double>(Dimension::Id::X);
-    double y = point.getFieldAs<double>(Dimension::Id::Y);
-    m_grid->addXY(x, y);
+    if (m_isH3 && m_h3Dim)
+    {
+        if (!m_grid->addH3Dim(point.getFieldAs<H3Index>(Dimension::Id::H3)))
+            throwError("Unable to process H3 dimension from input file! "
+                "All values must be valid H3 cell indexes at a single "
+                "resolution.");
+    }
+    else
+    {
+        double x = point.getFieldAs<double>(Dimension::Id::X);
+        double y = point.getFieldAs<double>(Dimension::Id::Y);
+        m_grid->addXY(x, y);
+    }
     m_count++;
     return true;
 }
@@ -180,7 +200,7 @@ bool HexBin::processOne(PointRef& point)
 void HexBin::spatialReferenceChanged(const SpatialReference& srs)
 {
     m_srs = srs;
-    if (!m_grid->checkSRS(m_srs)) {
+    if (!m_grid->checkSRS(m_srs) && !m_h3Dim) {
         std::ostringstream oss;
         oss << "Cannot find H3 hexbin locations with spatial reference: ("
             << m_srs.getProj4() << ")! Input must be EPSG:4326";
@@ -235,13 +255,13 @@ void HexBin::done(PointTableRef table)
     // density and boundary writing with OGR does not support polygon smoothing
     if (m_DensityOutput.size())
     {
-        OGR writer(m_DensityOutput, getSpatialReference().getWKT(), m_grid->isH3(),
+        OGR writer(m_DensityOutput, m_srs.getWKT(),
             m_driver, "hexbins");
         writer.writeDensity(*m_grid);
     }
     if (m_boundaryOutput.size())
     {
-        OGR writer(m_boundaryOutput, getSpatialReference().getWKT(), m_grid->isH3(),
+        OGR writer(m_boundaryOutput, m_srs.getWKT(),
             m_driver, "hexbins");
         writer.writeBoundary(*m_grid); 
     }
@@ -285,7 +305,6 @@ void HexBin::done(PointTableRef table)
         }
     }
 
-    // what's the purpose of this? rename it?
     double hexArea(((3 * SQRT_3)/2.0) * (m_grid->height() * m_grid->height()));
     double avg_density = (n * hexArea) / totalCount;
     m_metadata.add("avg_pt_per_sq_unit", avg_density, "Area / point count "

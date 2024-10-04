@@ -40,6 +40,7 @@
 
 #include <gdal.h>
 #include <ogr_api.h>
+#include <cpl_string.h>
 
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
@@ -104,13 +105,12 @@ OGRGeometryH collectHexagon(hexer::HexId const& id, hexer::BaseGrid& grid)
 
 
 OGR::OGR(std::string const& filename, const std::string& wkt,
-        bool h3, std::string driver, std::string layerName)
+        std::string driver, std::string layerName)
     : m_filename(filename)
     , m_driver(driver)
     , m_ds(0)
     , m_layer(0)
     , m_layerName(layerName)
-    , m_isH3(h3)
 {
     createLayer(wkt);
 }
@@ -144,13 +144,17 @@ void OGR::createLayer(const std::string& wkt)
     if (m_layerName.empty())
         m_layerName = m_filename;
     gdal::SpatialRef srs(wkt);
+    char **papszOptions = nullptr;
+    papszOptions = CSLAddNameValue(papszOptions, "RFC7946", "YES");
+
     m_layer = GDALDatasetCreateLayer(m_ds, m_layerName.c_str(), srs.get(),
-        wkbMultiPolygon, NULL);
+        wkbMultiPolygon, papszOptions);
+    CSLDestroy(papszOptions);
     if (m_layer == NULL)
         throw pdal_error("Layer creation was null!");
 
     OGRFieldDefnH hFieldDefn;
-    hFieldDefn = OGR_Fld_Create("ID", OFTInteger);
+    hFieldDefn = OGR_Fld_Create("ID", OFTInteger64);
     if (OGR_L_CreateField(m_layer, hFieldDefn, TRUE) != OGRERR_NONE)
     {
         std::ostringstream oss;
@@ -169,19 +173,6 @@ void OGR::createLayer(const std::string& wkt)
         throw pdal::pdal_error(oss.str());
     }
     OGR_Fld_Destroy(hFieldDefn);
-
-    if (m_isH3)
-    {
-        hFieldDefn = OGR_Fld_Create("H3_ID", OFTInteger64);
-        if (OGR_L_CreateField(m_layer, hFieldDefn, TRUE) != OGRERR_NONE)
-        {
-            std::ostringstream oss;
-            oss << "Could not create H3_ID field on layer with error '"
-                << CPLGetLastErrorMsg() << "'";
-            throw pdal::pdal_error(oss.str());
-        }
-        OGR_Fld_Destroy(hFieldDefn);
-    }
 }
 
 void OGR::writeBoundary(hexer::BaseGrid& grid)
@@ -205,7 +196,7 @@ void OGR::writeBoundary(hexer::BaseGrid& grid)
     OGRFeatureH hFeature;
 
     hFeature = OGR_F_Create(OGR_L_GetLayerDefn(m_layer));
-    OGR_F_SetFieldInteger( hFeature, OGR_F_GetFieldIndex(hFeature, "ID"), 0);
+    OGR_F_SetFieldInteger64( hFeature, OGR_F_GetFieldIndex(hFeature, "ID"), 0);
 
     OGR_F_SetGeometry(hFeature, multi);
     OGR_G_DestroyGeometry(multi);
@@ -230,18 +221,11 @@ void OGR::writeDensity(hexer::BaseGrid& grid)
             OGRFeatureH hFeature;
 
             hFeature = OGR_F_Create(OGR_L_GetLayerDefn(m_layer));
-            OGR_F_SetFieldInteger( hFeature, OGR_F_GetFieldIndex(hFeature, "ID"),
-                counter);
+            OGR_F_SetFieldInteger64( hFeature, OGR_F_GetFieldIndex(hFeature, "ID"),
+                grid.getID(counter, coord));
             OGR_F_SetFieldInteger( hFeature, OGR_F_GetFieldIndex(hFeature, "COUNT"),
                 count);
 
-            if (m_isH3)
-            {
-                H3Index idx = grid.ij2h3(coord);
-
-                OGR_F_SetFieldInteger64( hFeature, OGR_F_GetFieldIndex(hFeature, "H3_ID"),
-                    idx);
-            }
             OGR_F_SetGeometry(hFeature, polygon);
             OGR_G_DestroyGeometry(polygon);
 

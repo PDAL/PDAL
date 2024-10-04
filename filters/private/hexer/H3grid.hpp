@@ -48,6 +48,7 @@ public:
             }
             return ij;  }
 
+    bool addH3Dim(H3Index h3);
     Point findPoint(Segment& s);
 
     void addXY(double& x, double& y)
@@ -73,8 +74,8 @@ public:
         }
     bool sampling() const
         { return m_res < 0; }
-    bool isH3()
-        { return true; }
+    uint64_t getID(int& n, const HexId& ij)
+        { return ij2h3(ij); }
 
     // test function: used when inserting pre-defined grids in tests, 
     // sets origin outside of findHexagon()

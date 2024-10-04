@@ -5,7 +5,6 @@
 
 #include "BaseGrid.hpp"
 #include "H3grid.hpp"
-#include "Processor.hpp"
 
 namespace hexer
 {
@@ -30,7 +29,24 @@ void H3Grid::processHeight(double height)
     }
     if (m_res == -1)
         throw hexer_error("unable to calculate H3 grid size!");
-    //std::cout << "H3 resolution: " << m_res << std::endl;
+}
+
+bool H3Grid::addH3Dim(H3Index h3)
+{
+    if (!m_origin)
+    {
+        m_origin = h3;
+        m_res = PDALH3getResolution(h3);
+    }
+    HexId ij;
+    // using this instead of h32ij to throw a better error
+    if (PDALH3cellToLocalIj(m_origin, h3, 0, &ij) != E_SUCCESS)
+        return false;
+    else
+    {
+        addHexagon(ij);
+        return true;
+    }
 }
 
 HexId H3Grid::findHexagon(Point p)
