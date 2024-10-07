@@ -477,10 +477,9 @@ bool TIndexKernel::fastBoundary(Stage& reader, FileInfo& fileInfo)
 
 bool TIndexKernel::slowBoundary(PipelineManager& manager, FileInfo& fileInfo)
 {
-    std::cout << "running slow bounds\n";
     manager.prepare();
-    manager.execute(ExecMode::Stream);
-    PointViewSet set = manager.views();
+    manager.execute(ExecMode::PreferStream);
+    //PointViewSet set = manager.views();
     MetadataNode root = manager.getMetadata();
 
     // If we had an error set, bail out
@@ -491,9 +490,9 @@ bool TIndexKernel::slowBoundary(PipelineManager& manager, FileInfo& fileInfo)
     MetadataNode m = root.findChild("filters.hexbin:boundary");
     fileInfo.m_boundary = m.value();
 
-    PointViewPtr v = *set.begin();
+/*     PointViewPtr v = *set.begin();
     if (!v->spatialReference().empty())
-        fileInfo.m_srs = v->spatialReference().getWKT();
+        fileInfo.m_srs = v->spatialReference().getWKT(); */
     return true;
 }
 
