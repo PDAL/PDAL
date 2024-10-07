@@ -22,6 +22,8 @@ protected:
     bool primary(Expression& expr);
     bool parexpr(Expression& expr);
     bool function(Expression& expr);
+    bool function0(Expression& expr);
+    bool function1(Expression& expr);
 };
 
 } // namespace expr
