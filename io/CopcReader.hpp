@@ -93,6 +93,7 @@ private:
     void validateVlrInfo(const las::Vlr& v, const copc::Info& i);
     void createSpatialFilters();
 
+    void done();
     void loadHierarchy();
     void loadHierarchy(copc::Hierarchy& hierarchy, const copc::HierarchyPage& page,
         const copc::Entry& entry);
