@@ -642,7 +642,6 @@ QuickInfo CopcReader::inspect()
             qi.m_bounds.clip(b);
     }
     qi.m_valid = true;
-    done(t);
 
     return qi;
 }
