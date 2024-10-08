@@ -277,8 +277,6 @@ void TIndexKernel::createFile()
     StageFactory factory(false);
     for (auto f : m_files)
     {
-        const std::chrono::time_point<std::chrono::steady_clock> start =
-            std::chrono::steady_clock::now();
         //ABELL - Not sure why we need to get absolute path here.
         f = FileUtils::toAbsolutePath(f);
         FileInfo info;
@@ -295,9 +293,6 @@ void TIndexKernel::createFile()
                         "for file '" << f << "'" << std::endl;
             }
         }
-        const std::chrono::time_point<std::chrono::steady_clock> end =
-            std::chrono::steady_clock::now();
-        std::cout << "file processing took " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " milliseconds\n";
     }
     if (!filecount)
         throw pdal_error("Couldn't index any files.");
@@ -475,12 +470,13 @@ bool TIndexKernel::fastBoundary(Stage& reader, FileInfo& fileInfo)
 }
 
 
-bool TIndexKernel::slowBoundary(PipelineManager& manager, FileInfo& fileInfo)
+bool TIndexKernel::slowBoundary(Stage& hexer, FileInfo& fileInfo)
 {
-    manager.prepare();
-    manager.execute(ExecMode::PreferStream);
-    //PointViewSet set = manager.views();
-    MetadataNode root = manager.getMetadata();
+    ColumnPointTable table;
+    hexer.prepare(table);
+    PointViewSet set = hexer.execute(table);
+
+    MetadataNode root = table.metadata();
 
     // If we had an error set, bail out
     MetadataNode e = root.findChild("filters.hexbin:error");
@@ -490,9 +486,9 @@ bool TIndexKernel::slowBoundary(PipelineManager& manager, FileInfo& fileInfo)
     MetadataNode m = root.findChild("filters.hexbin:boundary");
     fileInfo.m_boundary = m.value();
 
-/*     PointViewPtr v = *set.begin();
+    PointViewPtr v = *set.begin();
     if (!v->spatialReference().empty())
-        fileInfo.m_srs = v->spatialReference().getWKT(); */
+        fileInfo.m_srs = v->spatialReference().getWKT();
     return true;
 }
 
@@ -515,7 +511,7 @@ bool TIndexKernel::getFileInfo(StageFactory& factory,
         if (!fast)
         {
             Stage& hexer = manager.makeFilter("filters.hexbin", reader);
-            fast = !slowBoundary(manager, fileInfo);
+            fast = !slowBoundary(hexer, fileInfo);
         }
     }
     catch (pdal_error&)
