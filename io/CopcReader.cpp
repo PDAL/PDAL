@@ -34,9 +34,10 @@
 
 #include "CopcReader.hpp"
 
+#include <algorithm>
+#include <atomic>
 #include <functional>
 #include <limits>
-#include <algorithm>
 
 #include <nlohmann/json.hpp>
 
