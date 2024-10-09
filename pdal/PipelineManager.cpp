@@ -229,7 +229,7 @@ PipelineManager::ExecResult PipelineManager::execute(ExecMode mode)
     Stage *s = getStage();
     if (!s)
         return result;
-                
+
     if (mode == ExecMode::PreferStream)
     {
         // If a pipeline isn't streamable before being prepared, it's not
@@ -530,7 +530,6 @@ void PipelineManager::replace(Stage *sOld, Stage *sNew)
     }
 }
 
-
 void PipelineManager::destroyStage(Stage *s)
 {
     if (s)
@@ -539,5 +538,12 @@ void PipelineManager::destroyStage(Stage *s)
         m_factory.reset(new StageFactory());
 }
 
+
+// Set allowed dimensions on both tables since we don't know which one we're going to use.
+void PipelineManager::setAllowedDims(const StringList& dimNames)
+{
+    m_table.layout()->setAllowedDims(dimNames);
+    m_streamTable.layout()->setAllowedDims(dimNames);
+}
 
 } // namespace pdal

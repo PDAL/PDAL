@@ -34,9 +34,10 @@
 
 #include "CopcReader.hpp"
 
+#include <algorithm>
+#include <atomic>
 #include <functional>
 #include <limits>
-#include <algorithm>
 
 #include <nlohmann/json.hpp>
 
@@ -234,14 +235,14 @@ public:
 struct CopcReader::Private
 {
 public:
+    std::mutex mutex;
+    std::queue<copc::Tile> contents;
     std::unique_ptr<ThreadPool> pool;
     std::unique_ptr<copc::Tile> currentTile;
 
     std::unique_ptr<connector::Connector> connector;
-    std::queue<copc::Tile> contents;
     copc::Hierarchy hierarchy;
     las::LoaderDriver loader;
-    std::mutex mutex;
     std::condition_variable contentsCv;
     std::condition_variable consumedCv;
     std::vector<PolyXform> polys;
@@ -255,7 +256,7 @@ public:
     las::Header header;
     copc::Info copc_info;
     point_count_t hierarchyPointCount;
-    bool done;
+    std::atomic<bool> done;
     SrsTransform llToBcbfTransform;
 };
 
@@ -264,7 +265,12 @@ CopcReader::CopcReader() : m_args(new CopcReader::Args), m_p(new CopcReader::Pri
 
 
 CopcReader::~CopcReader()
-{}
+{
+    // We join the pool rather than let the dtor do it because the workers use m_p
+    // which will get 0'ed in the dtor before access through m_p is complete in
+    // the workers.
+    done();
+}
 
 
 std::string CopcReader::getName() const
@@ -333,11 +339,11 @@ void CopcReader::setForwards(StringMap& headers, StringMap& query)
 
 void CopcReader::initialize(PointTableRef table)
 {
-    const std::size_t threads(m_args->threads);
-    if (threads > 100)
+    if (m_args->threads > 100)
         log()->get(LogLevel::Warning) << "Using a large thread count: " <<
-            threads << " threads" << std::endl;
-    m_p->pool.reset(new ThreadPool(threads));
+            m_args->threads << " threads" << std::endl;
+    // Make sure we allow at least as many chunks as we have threads.
+    m_args->keepAliveChunkCount = (std::max)(m_args->threads, (size_t)m_args->keepAliveChunkCount);
 
     StringMap headers;
     StringMap query;
@@ -406,10 +412,9 @@ void CopcReader::initialize(PointTableRef table)
     m_p->depthEnd = m_args->resolution ?
         (std::max)(1, (int)ceil(log2(m_p->copc_info.spacing / m_args->resolution)) + 1) :
         0;
-    
+
     if (m_args->resolution)
-        log()->get(LogLevel::Debug) << "Maximum depth: " << m_p->depthEnd << 
-            std::endl;
+        log()->get(LogLevel::Debug) << "Maximum depth: " << m_p->depthEnd << std::endl;
 }
 
 
@@ -490,7 +495,7 @@ las::VlrList CopcReader::fetchSrsVlrs(const las::VlrCatalog& catalog)
     fetchVlr(las::TransformUserId, las::LASFWkt2recordId);
     fetchVlr(las::PdalUserId, las::PdalProjJsonRecordId);
     fetchVlr(las::TransformUserId, las::WktRecordId);
-    
+
     // User told us to ditch them
     if (m_args->nosrs)
         vlrs.clear();
@@ -638,7 +643,6 @@ QuickInfo CopcReader::inspect()
             qi.m_bounds.clip(b);
     }
     qi.m_valid = true;
-    done(t);
 
     return qi;
 }
@@ -672,6 +676,7 @@ void CopcReader::addDimensions(PointLayoutPtr layout)
 
 void CopcReader::ready(PointTableRef table)
 {
+    m_p->pool.reset(new ThreadPool(m_args->threads));
     // Determine all overlapping data files we'll need to fetch.
     try
     {
@@ -694,7 +699,6 @@ void CopcReader::ready(PointTableRef table)
     m_p->tileCount = m_p->hierarchy.size();
     log()->get(LogLevel::Debug) << m_p->tileCount << " overlapping nodes" << std::endl;
 
-    m_p->pool.reset(new ThreadPool(m_p->pool->numThreads()));
     m_p->done = false;
     for (const copc::Entry& entry : m_p->hierarchy)
         load(entry);
@@ -833,10 +837,9 @@ void CopcReader::load(const copc::Entry& entry)
 
             // Put the tile on the output queue.
             std::unique_lock<std::mutex> l(m_p->mutex);
-            if (m_p->done)
-                return;
-            while (m_p->contents.size() >= (std::max)((size_t)m_args->keepAliveChunkCount, m_p->pool->numThreads()))
-                m_p->consumedCv.wait(l);
+            m_p->consumedCv.wait(l, [this] {
+                return (m_p->done ||
+                    m_p->contents.size() < (size_t)m_args->keepAliveChunkCount);});
             m_p->contents.push(std::move(tile));
             l.unlock();
             m_p->contentsCv.notify_one();
@@ -1005,13 +1008,18 @@ top:
 
 void CopcReader::done(PointTableRef)
 {
+    done();
+}
+
+void CopcReader::done()
+{
+    if (m_p->pool)
     {
-        std::unique_lock<std::mutex> l(m_p->mutex);
         m_p->done = true;
+        m_p->consumedCv.notify_all();
+        m_p->pool->stop();
+        m_p->connector.reset();
     }
-    m_p->consumedCv.notify_all();
-    m_p->pool->stop();
-    m_p->connector.reset();
 }
 
 } // namespace pdal
