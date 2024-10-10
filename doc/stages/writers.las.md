@@ -124,7 +124,7 @@ filename
 minor_version
 
 : All LAS files are version 1, but the minor version (0 - 4) can be specified
-  with this option. \[Default: 2\]
+  with this option. \[Default: 4 (was 2 for PDAL 1.0 - 2.7)\]
 
 software_id
 
@@ -150,9 +150,9 @@ dataformat_id
   - 3 == color and time are stored
   - 4 \[Not Currently Supported\]
   - 5 \[Not Currently Supported\]
-  - 6 == time is stored (version 1.4+ only)
-  - 7 == time and color are stored (version 1.4+ only)
-  - 8 == time, color and near infrared are stored (version 1.4+ only)
+  - 6 == time is stored (LAS version 1.4+ only)
+  - 7 == time and color are stored (LAS version 1.4+ only)
+  - 8 == time, color and near infrared are stored (LAS version 1.4+ only)
   - 9 \[Not Currently Supported\]
   - 10 \[Not Currently Supported\]
 
