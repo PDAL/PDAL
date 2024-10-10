@@ -162,7 +162,7 @@ list and types are in [Dimension.json]. Most of these are not enabled by default
 LAS file format minor version should be set to 4, the value of the `extra_dims` writer option should be `all`, 
 and the attributes should be registered with the function ``registerDim()``.
 
-## Compiling and Usage
+## Compiling and usage
 
 To compile this reader, we will use cmake.  Here is the CMakeLists.txt file we
 will use for this process:
@@ -189,6 +189,11 @@ called output.txt, which will be in the proper format.  From there, if you
 wanted, you could run that output file through the MyReader that was created
 in the previous tutorial, as well.
 
+## See also
+
+The [LAS tutorial] has a high-level overview of how reading and writing a LAS file works.
+
 [interesting.las]: https://github.com/PDAL/PDAL/blob/master/test/data/interesting.las?raw=true
 [pipeline-mywriter.json]: https://github.com/PDAL/PDAL/blob/master/examples/writing-writer/pipeline-mywriter.json?raw=true
 [Dimension.json]: https://github.com/PDAL/PDAL/blob/master/pdal/Dimension.json
+[LAS tutorial]: https://pdal.io/en/latest/tutorial/las.html
