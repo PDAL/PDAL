@@ -155,6 +155,13 @@ to the output stream.
 This method is called when the writing is done.  In this case, it simply cleans
 up the output stream by resetting it.
 
+## Other fields
+
+In addition to the X, Y, Z coordinates of a point, PDAL can write many other attributes. Their full 
+list and types are in [Dimension.json]. Most of these are not enabled by default. To enable them, the 
+LAS file format minor version should be set to 4, the value of the `extra_dims` writer option should be `all`, 
+and the attributes should be registered with the function ``registerDim()``.
+
 ## Compiling and Usage
 
 To compile this reader, we will use cmake.  Here is the CMakeLists.txt file we
@@ -184,3 +191,4 @@ in the previous tutorial, as well.
 
 [interesting.las]: https://github.com/PDAL/PDAL/blob/master/test/data/interesting.las?raw=true
 [pipeline-mywriter.json]: https://github.com/PDAL/PDAL/blob/master/examples/writing-writer/pipeline-mywriter.json?raw=true
+[Dimension.json]: https://github.com/PDAL/PDAL/blob/master/pdal/Dimension.json
