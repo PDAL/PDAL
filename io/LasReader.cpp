@@ -34,6 +34,7 @@
 
 #include "LasHeader.hpp"
 #include "LasReader.hpp"
+#include "private/connector/Connector.hpp"
 #include "private/las/ChunkInfo.hpp"
 #include "private/las/Header.hpp"
 #include "private/las/Srs.hpp"
@@ -54,7 +55,6 @@
 #include <pdal/util/IStream.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <lazperf/readers.hpp>
-#include <arbiter/arbiter.hpp>
 
 namespace pdal
 {
@@ -141,6 +141,8 @@ struct LasReader::Options
     bool nosrs;
     int numThreads;
     SrsOrderSpec srsVlrOrder;
+    NL::json httpQuery;
+    NL::json htppHeaders;
 };
 
 struct LasReader::Private
@@ -197,6 +199,31 @@ void LasReader::addArgs(ProgramArgs& args)
     args.add("threads", "Thread pool size", d->opts.numThreads, DefaultNumThreads);
     args.add("srs_vlr_order", "Preference order to read SRS VLRs",
         d->opts.srsVlrOrder);
+    args.add("header", "Header fields to forward with HTTP requests", d->opts.htppHeaders);
+    args.add("query", "Query parameters to forward with HTTP requests", d->opts.httpQuery);
+}
+
+void LasReader::setForwards(StringMap& headers, StringMap& query)
+{
+    try
+    {
+        if (!d->opts.htppHeaders.is_null())
+            headers = d->opts.htppHeaders.get<StringMap>();
+    }
+    catch (const std::exception& err)
+    {
+        throwError(std::string("Error parsing 'headers': ") + err.what());
+    }
+
+    try
+    {
+        if (!d->opts.httpQuery.is_null())
+            query = d->opts.httpQuery.get<StringMap>();
+    }
+    catch (const std::exception& err)
+    {
+        throwError(std::string("Error parsing 'query': ") + err.what());
+    }
 }
 
 
@@ -247,14 +274,17 @@ void LasReader::tryLoadRemote()
     d->isRemote = Utils::isRemote(m_filename);
     if (d->isRemote)
     {
+        StringMap headers;
+        StringMap query;
+        setForwards(headers, query);
         // Here, we're assigning the local filename to "remoteFilename".
         // This is fixed by the swap on the next line.
         std::string remoteFilename = Utils::tempFilename(m_filename);
         std::swap(remoteFilename, m_filename);
 
         // Fetch the remote file and write to the local file.
-        arbiter::Arbiter a;
-        a.put(m_filename, a.getBinary(remoteFilename));
+        connector::Connector connector (headers, query);
+        connector.put(m_filename, connector.getBinary(remoteFilename));
     }
 }
 
