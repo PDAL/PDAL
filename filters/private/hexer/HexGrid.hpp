@@ -29,7 +29,7 @@ public:
     bool sampling() const
         { return m_width < 0; }
     uint64_t getID(HexId ij)
-        { return (((uint64_t)ij.i << 32) | (uint64_t)ij.j); }
+        { return (((uint64_t)ij.i << 32) | (uint32_t)ij.j); }
     Point findPoint(Segment& s);
 
 private:
