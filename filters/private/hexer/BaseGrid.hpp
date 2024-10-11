@@ -51,7 +51,7 @@ public:
     // returns a single point from a segment to be used as the vertex of a hexagon
     virtual Point findPoint(Segment& s) = 0;
     virtual bool sampling() const = 0;
-    virtual bool isH3() = 0;
+    virtual uint64_t getID(int& n, const HexId& ij) = 0;
     virtual double height() = 0;
 
     virtual H3Index ij2h3(HexId ij)
