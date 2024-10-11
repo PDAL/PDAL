@@ -208,7 +208,6 @@ void OGR::writeBoundary(hexer::BaseGrid& grid)
 
 void OGR::writeDensity(hexer::BaseGrid& grid)
 {
-    int counter(0);
     for (auto& [coord, count] : grid.getHexes()) {
         if (grid.isDense(coord))
         {
@@ -216,8 +215,8 @@ void OGR::writeDensity(hexer::BaseGrid& grid)
             OGRFeatureH hFeature;
 
             hFeature = OGR_F_Create(OGR_L_GetLayerDefn(m_layer));
-            OGR_F_SetFieldInteger( hFeature, OGR_F_GetFieldIndex(hFeature, "ID"),
-                grid.getID(counter, coord));
+            OGR_F_SetFieldInteger64( hFeature, OGR_F_GetFieldIndex(hFeature, "ID"),
+                grid.getID(coord));
             OGR_F_SetFieldInteger( hFeature, OGR_F_GetFieldIndex(hFeature, "COUNT"),
                 count);
 
@@ -232,7 +231,6 @@ void OGR::writeDensity(hexer::BaseGrid& grid)
                 throw pdal::pdal_error(oss.str());
             }
             OGR_F_Destroy( hFeature );
-            counter++;
         }
     }
 }

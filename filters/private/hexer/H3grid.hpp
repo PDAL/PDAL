@@ -73,7 +73,7 @@ public:
         }
     bool sampling() const
         { return m_res < 0; }
-    uint64_t getID(int& n, const HexId& ij)
+    uint64_t getID(HexId ij)
         { return ij2h3(ij); }
 
     // test function: used when inserting pre-defined grids in tests, 

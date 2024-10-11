@@ -28,8 +28,8 @@ public:
         { return m_height; }
     bool sampling() const
         { return m_width < 0; }
-    uint64_t getID(int& n, const HexId& ij)
-        { return n; }
+    uint64_t getID(HexId ij)
+        { return (((uint64_t)ij.i << 32) | (uint64_t)ij.j); }
     Point findPoint(Segment& s);
 
 private:
