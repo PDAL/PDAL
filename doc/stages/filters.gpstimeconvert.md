@@ -90,18 +90,18 @@ conversion
 : The time conversion. Must be one of the following: "gst2gt", "gst2gws",
   "gt2gst", "gt2gws", "gws2gst", or "gws2gt". \[Required\]
 
-`` _`start_date` ``
+start_date
 
 : When the input times are in GPS week seconds, the date on which the data
   collection started must be supplied in the GMT time zone. Must be in
   "YYYY-MM-DD" format. \[Required for the "gws2gt" and "gws2gst" conversions\]
 
-`` _`wrap` ``
+wrap
 
 : Whether to output wrapped (true) or unwrapped (false) GPS week seconds.
   \[Default: false\]
 
-`` _`wrapped` ``
+wrapped
 
 : Specifies whether input GPS week seconds are wrapped (true) or unwrapped
   (false). \[Default: false\]

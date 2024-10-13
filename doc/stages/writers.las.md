@@ -90,7 +90,7 @@ filename
   {ref}`filters.divider`.
   \[Required\]
 
-`` _`forward` ``
+forward
 
 : List of header fields whose values should be preserved from a source
   LAS file.  The

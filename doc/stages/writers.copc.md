@@ -78,7 +78,7 @@ filename
 
 : Output filename.  \[Required\]
 
-`` _`forward` ``
+forward
 
 : List of header fields whose values should be preserved from a source
   LAS file.  The option can be specified multiple times, which has the same effect as

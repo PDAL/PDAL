@@ -83,7 +83,7 @@ dimension
 
 : Name of the dimension whose value should be altered.  \[Required\]
 
-`` _`datasource` ``
+datasource
 
 : OGR-readable datasource for Polygon or MultiPolygon data.  \[Required\]
 
@@ -92,7 +92,7 @@ column
 : The OGR datasource column from which to read the attribute.
   \[Default: first column\]
 
-`` _`query` ``
+query
 
 : OGR SQL query to execute on the datasource to fetch geometry and attributes.
   The entire layer is fetched if no query is provided.  \[Default: none\]

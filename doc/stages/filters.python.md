@@ -266,11 +266,11 @@ function
 
 : The function to call. \[Required\]
 
-`` _`add_dimension` ``
+add_dimension
 
 : A dimension name or an array of dimension names to add to the pipeline that do not already exist.
 
-`` _`pdalargs` ``
+pdalargs
 
 : A JSON dictionary of items you wish to pass into the modules globals as the
   `pdalargs` object.

@@ -51,11 +51,11 @@ and then filters out those points where the rank is three using
 
 ## Options
 
-`` _`knn` ``
+knn
 
 : The number of k-nearest neighbors. \[Default: 8\]
 
-`` _`thresh` ``
+thresh
 
 : The threshold used to identify nonzero singular values. \[Default: 0.01\]
 

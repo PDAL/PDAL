@@ -42,12 +42,12 @@ format
 
 : Output format to use. One of `geojson` or `csv`. \[Default: "csv"\]
 
-`` _`precision` ``
+precision
 
 : Decimal Precision for output of values. This can be overridden for
   individual dimensions using the order option. \[Default: 3\]
 
-`` _`order` ``
+order
 
 : Comma-separated list of dimension names in the desired output order.
   For example "X,Y,Z,Red,Green,Blue". Dimension names

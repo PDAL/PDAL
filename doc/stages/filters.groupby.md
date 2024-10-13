@@ -32,7 +32,7 @@ By default the groups are ordered according to the order of first occurance with
 
 ## Options
 
-`` _`dimension` ``
+dimension
 
 : The dimension containing data to be grouped.
 
