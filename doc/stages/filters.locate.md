@@ -29,7 +29,7 @@ This example returns the point at the highest elevation.
 
 ## Options
 
-`` _`dimension` ``
+dimension
 
 : Name of the dimension in which to search for min/max value.
 

@@ -44,7 +44,7 @@ k
 
 : The number of deviations from the median. \[Default: 2.0\]
 
-`` _`dimension` ``
+dimension
 
 : The name of the dimension to filter.
 

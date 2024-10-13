@@ -63,7 +63,7 @@ exceeds 1.2 before writing the output.
 
 ## Options
 
-`` _`minpts` ``
+minpts
 
 : The number of k nearest neighbors. \[Default: 10\]
 
