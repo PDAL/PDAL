@@ -78,7 +78,7 @@ elevation is
 
 ## Options
 
-`` _`count` ``
+count
 
 : The number of ground neighbors to consider when determining the height
   above ground for a non-ground point.  \[Default: 10\]

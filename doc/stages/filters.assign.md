@@ -16,26 +16,7 @@ The `assignment` and `condition` options are deprecated and may be removed in a
 future release.
 ```
 
-## Options
 
-assignment
-
-: A {ref}`range <ranges>` followed by an assignment of a value (see example).
-  Can be specified multiple times.  The assignments are applied sequentially
-  to the dimension value as set when the filter began processing. \[Required\]
-
-condition
-
-: A single {ref}`ranges <ranges>` that a point's values must pass in order
-  for the assignment to be performed. \[Default: none\] \[Deprecated - use 'value'\]
-
-value
-
-: A list of {ref}`assignment expressions <assignment_expressions>` to be applied to points.
-  The list of values is evaluated in order. \[Default: none\]
-
-```{include} filter_opts.md
-```
 
 (assignment_expressions)=
 
@@ -137,3 +118,24 @@ value of the `HeightAboveGround` dimension.
 This sets the value of `X` for all points to 1. The second statement is essentially ignored
 since the first statement sets the `X` value of all points to 1 and therefore no points
 the `ConditionalExpression` of the second statement.
+
+## Options
+
+assignment
+
+: A {ref}`range <ranges>` followed by an assignment of a value (see example).
+  Can be specified multiple times.  The assignments are applied sequentially
+  to the dimension value as set when the filter began processing. \[Required\]
+
+condition
+
+: A single {ref}`ranges <ranges>` that a point's values must pass in order
+  for the assignment to be performed. \[Default: none\] \[Deprecated - use 'value'\]
+
+value
+
+: A list of {ref}`assignment expressions <assignment_expressions>` to be applied to points.
+  The list of values is evaluated in order. \[Default: none\]
+
+```{include} filter_opts.md
+```

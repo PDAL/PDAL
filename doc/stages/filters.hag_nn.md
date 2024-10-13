@@ -113,7 +113,7 @@ or {ref}`filters.smrf` to label ground returns, as shown
 
 ## Options
 
-`` _`count` ``
+count
 
 : The number of ground neighbors to consider when determining the height
   above ground for a non-ground point.  \[Default: 1\]

@@ -54,7 +54,7 @@ filename
 ```{include} reader_opts.md
 ```
 
-`` _`lyr_name` ``
+lyr_name
 
 : The OGR layer name for the data source to use to
   fetch the tile index information.
@@ -88,12 +88,12 @@ sql
 
 : [OGR SQL] to use to define the tile index layer.
 
-`` _`bounds` ``
+bounds
 
 : A 2D box to pre-filter the tile index. If it is set,
   it will override any [wkt] option.
 
-`` _`wkt` ``
+wkt
 
 : A geometry to pre-filter the tile index using
   OGR.

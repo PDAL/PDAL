@@ -131,19 +131,19 @@ method
 : The outlier removal method (either "statistical" or "radius").
   \[Default: "statistical"\]
 
-`` _`min_k` ``
+min_k
 
 : Minimum number of neighbors in radius (radius method only). \[Default: 2\]
 
-`` _`radius` ``
+radius
 
 : Radius (radius method only). \[Default: 1.0\]
 
-`` _`mean_k` ``
+mean_k
 
 : Mean number of neighbors (statistical method only). \[Default: 8\]
 
-`` _`multiplier` ``
+multiplier
 
 : Standard deviation threshold (statistical method only). \[Default: 2.0\]
 

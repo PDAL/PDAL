@@ -62,7 +62,7 @@ but the data associated with a dimension of datatype 0 will be ignored
 
 ## Options
 
-`` _`filename` ``
+filename
 
 : COPC file to read. Remote file specifications (http, AWS, Google, Azure, Dropbox) are supported.
   \[Required\]
@@ -151,5 +151,5 @@ nosrs
   issues. \[Default: false\]
 
 [copc format]: https://copc.io/
-[las specification]: http://www.asprs.org/wp-content/uploads/2019/07/LAS_1_4_r15.pdf
+[las specification]: https://www.asprs.org/wp-content/uploads/2019/03/LAS_1_4_r14.pdf
 [laszip]: http://laszip.org
