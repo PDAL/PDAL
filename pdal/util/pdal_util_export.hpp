@@ -39,19 +39,19 @@
 
 
 #ifdef _WIN32
-#   define PDAL_DLL   __declspec(dllexport)
+#   define PDAL_EXPORT   __declspec(dllexport)
 #   define PDAL_LOCAL
-#   define PDAL_DLL_UNIX
+#   define PDAL_EXPORT_UNIX
 #ifdef __GNUC__
-#   define PDAL_DLL_DEPRECATED __attribute__((deprecated)) PDAL_DLL
+#   define PDAL_EXPORT_DEPRECATED __attribute__((deprecated)) PDAL_EXPORT
 #else
-#   define PDAL_DLL_DEPRECATED   __declspec(deprecated, dllexport)
+#   define PDAL_EXPORT_DEPRECATED   __declspec(deprecated, dllexport)
 #endif
 #else
-#   define PDAL_DLL     __attribute__ ((visibility("default")))
+#   define PDAL_EXPORT     __attribute__ ((visibility("default")))
 #   define PDAL_LOCAL   __attribute__((visibility("hidden")))
-#   define PDAL_DLL_UNIX   __attribute__ ((visibility("default")))
-#   define PDAL_DLL_DEPRECATED   __attribute__((deprecated))
+#   define PDAL_EXPORT_UNIX   __attribute__ ((visibility("default")))
+#   define PDAL_EXPORT_DEPRECATED   __attribute__((deprecated))
 #endif // _WIN32
 
 
