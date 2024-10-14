@@ -43,7 +43,7 @@
 namespace pdal
 {
 
-class PDAL_DLL MatlabWriter : public Writer
+class PDAL_EXPORT MatlabWriter : public Writer
 {
 public:
     std::string getName() const;

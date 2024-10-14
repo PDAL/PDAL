@@ -53,7 +53,7 @@ namespace stac
     class Catalog;
 }
 
-class PDAL_DLL StacReader : public Reader, public Streamable
+class PDAL_EXPORT StacReader : public Reader, public Streamable
 {
     public:
 

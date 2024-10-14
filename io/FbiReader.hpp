@@ -45,7 +45,7 @@
 namespace pdal
 {
 
-class PDAL_DLL FbiReader : public pdal::Reader
+class PDAL_EXPORT FbiReader : public pdal::Reader
 {
 public:
     FbiReader();

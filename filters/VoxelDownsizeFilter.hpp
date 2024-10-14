@@ -45,7 +45,7 @@ namespace pdal
 class PointLayout;
 class PointView;
 
-class PDAL_DLL VoxelDownsizeFilter : public Filter, public Streamable
+class PDAL_EXPORT VoxelDownsizeFilter : public Filter, public Streamable
 {
     using Voxel = std::tuple<int, int, int>;
     enum class Mode

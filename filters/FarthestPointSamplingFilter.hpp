@@ -39,7 +39,7 @@
 namespace pdal
 {
 
-class PDAL_DLL FarthestPointSamplingFilter : public pdal::Filter
+class PDAL_EXPORT FarthestPointSamplingFilter : public pdal::Filter
 {
 public:
     FarthestPointSamplingFilter();

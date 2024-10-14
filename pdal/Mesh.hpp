@@ -40,7 +40,7 @@
 namespace pdal
 {
 
-class PDAL_DLL Triangle
+class PDAL_EXPORT Triangle
 {
 public:
     Triangle(PointId a, PointId b, PointId c) : m_a(a), m_b(b), m_c(c)
@@ -78,14 +78,14 @@ class TriangularMesh : public Mesh
 public:
     using const_iterator = std::deque<Triangle>::const_iterator;
 
-    PDAL_DLL TriangularMesh()
+    PDAL_EXPORT TriangularMesh()
     {}
 
-    size_t PDAL_DLL size() const
+    size_t PDAL_EXPORT size() const
         { return m_index.size(); }
-    void PDAL_DLL add(PointId a, PointId b, PointId c)
+    void PDAL_EXPORT add(PointId a, PointId b, PointId c)
         { m_index.emplace_back(a, b, c); }
-    const PDAL_DLL Triangle& operator[](PointId id) const
+    const PDAL_EXPORT Triangle& operator[](PointId id) const
         { return m_index[id]; }
     const_iterator begin() const
         { return m_index.begin(); }

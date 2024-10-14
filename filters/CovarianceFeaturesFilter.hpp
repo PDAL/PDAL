@@ -40,7 +40,7 @@
 
 namespace pdal {
 
-class PDAL_DLL CovarianceFeaturesFilter: public Filter
+class PDAL_EXPORT CovarianceFeaturesFilter: public Filter
 {
 public:
     CovarianceFeaturesFilter() {}

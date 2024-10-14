@@ -46,7 +46,7 @@ namespace pdal
 
 struct DimRange;
 
-class PDAL_DLL NeighborClassifierFilter : public Filter
+class PDAL_EXPORT NeighborClassifierFilter : public Filter
 {
 public:
     NeighborClassifierFilter();

@@ -55,7 +55,7 @@ namespace mlang
 class Environment;
 typedef Environment *EnvironmentPtr;
 
-class PDAL_DLL Environment
+class PDAL_EXPORT Environment
 {
 public:
     Environment();

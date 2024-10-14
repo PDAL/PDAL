@@ -41,7 +41,7 @@ namespace pdal
 
 struct CSArgs;
 
-class PDAL_DLL CSFilter : public Filter
+class PDAL_EXPORT CSFilter : public Filter
 {
 public:
     CSFilter();

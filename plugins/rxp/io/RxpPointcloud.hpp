@@ -78,7 +78,7 @@ struct Point {
 };
 
 
-class PDAL_DLL RxpPointcloud : public scanlib::pointcloud
+class PDAL_EXPORT RxpPointcloud : public scanlib::pointcloud
 {
 public:
     RxpPointcloud(

@@ -42,7 +42,7 @@
 namespace pdal
 {
 
-class PDAL_DLL SbetWriter : public Writer
+class PDAL_EXPORT SbetWriter : public Writer
 {
 public:
     std::string getName() const;

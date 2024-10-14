@@ -40,7 +40,7 @@
 namespace pdal
 {
 
-class PDAL_DLL MergeFilter : public Filter, public Streamable
+class PDAL_EXPORT MergeFilter : public Filter, public Streamable
 {
 public:
     MergeFilter ()

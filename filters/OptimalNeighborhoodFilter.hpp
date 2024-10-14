@@ -39,7 +39,7 @@
 namespace pdal
 {
 
-class PDAL_DLL OptimalNeighborhood : public Filter
+class PDAL_EXPORT OptimalNeighborhood : public Filter
 {
 public:
     OptimalNeighborhood();

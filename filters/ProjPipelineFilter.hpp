@@ -45,7 +45,7 @@ namespace pdal
 {
 
 
-class PDAL_DLL ProjPipelineFilter : public Filter, public Streamable
+class PDAL_EXPORT ProjPipelineFilter : public Filter, public Streamable
 {
 public:
     class CoordTransform;

@@ -43,7 +43,7 @@ namespace pdal
 
 class PointView;
 
-class PDAL_DLL ChamferKernel : public Kernel
+class PDAL_EXPORT ChamferKernel : public Kernel
 {
 public:
     std::string getName() const;

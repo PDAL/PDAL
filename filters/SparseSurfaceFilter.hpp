@@ -41,7 +41,7 @@
 namespace pdal
 {
 
-class PDAL_DLL SparseSurfaceFilter : public Filter
+class PDAL_EXPORT SparseSurfaceFilter : public Filter
 {
 public:
     SparseSurfaceFilter() : Filter() {}

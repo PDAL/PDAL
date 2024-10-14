@@ -57,7 +57,7 @@ namespace pdal
 //
 // all the processing that is NITF-file specific goes in here
 //
-class PDAL_DLL NitfFileWriter
+class PDAL_EXPORT NitfFileWriter
 {
 public:
     struct error : public std::runtime_error

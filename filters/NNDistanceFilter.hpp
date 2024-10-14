@@ -43,7 +43,7 @@ class PointLayout;
 class PointView;
 class ProgramArgs;
 
-class PDAL_DLL NNDistanceFilter : public Filter
+class PDAL_EXPORT NNDistanceFilter : public Filter
 {
 public:
     NNDistanceFilter();

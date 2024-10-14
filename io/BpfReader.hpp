@@ -52,7 +52,7 @@
 namespace pdal
 {
 
-class PDAL_DLL BpfReader : public Reader, public Streamable
+class PDAL_EXPORT BpfReader : public Reader, public Streamable
 {
     struct Args;
 public:

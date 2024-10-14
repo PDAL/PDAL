@@ -48,8 +48,8 @@ namespace PipelineWriter
 {
     typedef std::map<const Stage *, std::string> TagMap;
 
-    PDAL_DLL void writePipeline(Stage *s, const std::string& filename);
-    PDAL_DLL void writePipeline(Stage *s, std::ostream& strm);
+    PDAL_EXPORT void writePipeline(Stage *s, const std::string& filename);
+    PDAL_EXPORT void writePipeline(Stage *s, std::ostream& strm);
 }
 
 } // namespace pdal

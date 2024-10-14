@@ -40,7 +40,7 @@
 
 namespace pdal
 {
-class PDAL_DLL StraightenFilter : public Filter, public Streamable
+class PDAL_EXPORT StraightenFilter : public Filter, public Streamable
 {
 public:
     StraightenFilter();

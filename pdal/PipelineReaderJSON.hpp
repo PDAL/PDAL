@@ -49,7 +49,7 @@ namespace pdal
 class Stage;
 class PipelineManager;
 
-class PDAL_DLL PipelineReaderJSON
+class PDAL_EXPORT PipelineReaderJSON
 {
     friend class PipelineManager;
 

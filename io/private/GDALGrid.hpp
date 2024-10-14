@@ -74,7 +74,7 @@ public:
     };
 
     // Exported for testing.
-    PDAL_DLL GDALGrid(double xOrigin, double yOrigin, size_t width, size_t height,
+    PDAL_EXPORT GDALGrid(double xOrigin, double yOrigin, size_t width, size_t height,
         double edgeLength, double radius, int outputTypes, size_t windowSize,
         double power, bool binMode=false);
 

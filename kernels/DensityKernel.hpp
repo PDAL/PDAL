@@ -42,7 +42,7 @@
 namespace pdal
 {
 
-class PDAL_DLL DensityKernel : public Kernel
+class PDAL_EXPORT DensityKernel : public Kernel
 {
 public:
     std::string getName() const;

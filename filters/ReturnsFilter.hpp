@@ -44,7 +44,7 @@ namespace pdal
 class PointView;
 class ProgramArgs;
 
-class PDAL_DLL ReturnsFilter : public Filter
+class PDAL_EXPORT ReturnsFilter : public Filter
 {
 public:
     ReturnsFilter() {}

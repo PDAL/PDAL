@@ -45,7 +45,7 @@
 namespace pdal
 {
 
-class PDAL_DLL TranslateKernel : public Kernel
+class PDAL_EXPORT TranslateKernel : public Kernel
 {
 public:
     std::string getName() const;

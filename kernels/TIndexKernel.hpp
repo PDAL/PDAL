@@ -49,7 +49,7 @@ namespace gdal
 
 class StageFactory;
 
-class PDAL_DLL TIndexKernel : public SubcommandKernel
+class PDAL_EXPORT TIndexKernel : public SubcommandKernel
 {
     struct FileInfo
     {

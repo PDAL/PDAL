@@ -40,7 +40,7 @@
 
 namespace pdal
 {
-class PDAL_DLL SlpkReader : public EsriReader
+class PDAL_EXPORT SlpkReader : public EsriReader
 {
     struct Location
     {

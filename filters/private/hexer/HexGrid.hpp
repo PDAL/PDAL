@@ -5,7 +5,7 @@
 namespace hexer
 {
 
-class PDAL_DLL HexGrid : public BaseGrid
+class PDAL_EXPORT HexGrid : public BaseGrid
 {
 public:
     HexGrid(double height, int denseLimit) : BaseGrid(denseLimit)

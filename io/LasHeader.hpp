@@ -63,11 +63,11 @@ namespace las
     using VlrList = std::vector<Vlr>;
 }
 
-[[deprecated]] PDAL_DLL ILeStream& operator>>(ILeStream&, LasHeader& h);
+[[deprecated]] PDAL_EXPORT ILeStream& operator>>(ILeStream&, LasHeader& h);
 [[deprecated]] OLeStream& operator<<(OLeStream&, const LasHeader& h);
 [[deprecated]] std::ostream& operator<<(std::ostream& ostr, const LasHeader& h);
 
-class PDAL_DLL LasHeader
+class PDAL_EXPORT LasHeader
 {
 public:
     static const size_t LEGACY_RETURN_COUNT {5};
