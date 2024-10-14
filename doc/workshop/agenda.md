@@ -38,5 +38,5 @@ Included in the USB driver are:
 
 [cloudcompare]: https://www.danielgm.net/cc/
 [cool-lidar]: https://github.com/hobuinc/cool-lidar
-[mambaforge]: https://github.com/conda-forge/miniforge#mambaforge
+[mambaforge]:https://github.com/conda-forge/miniforge#miniforge3
 [qgis]: https://www.qgis.org/en/site/

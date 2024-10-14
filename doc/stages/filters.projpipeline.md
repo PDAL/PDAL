@@ -2,7 +2,7 @@
 
 # filters.projpipeline
 
-The projpipeline filter applies a coordinates transformation pipeline. The pipeline could be specified as PROJ string (single step operation or multiple step string starting with +proj=pipeline), a WKT2 string describing a CoordinateOperation, or a “<urn:ogc:def:coordinateOperation:EPSG::XXXX>” URN.
+The projpipeline filter applies a coordinates transformation pipeline. The pipeline could be specified as PROJ string (single step operation or multiple step string starting with +proj=pipeline), a WKT2 string describing a CoordinateOperation, or a `<urn:ogc:def:coordinateOperation:EPSG::XXXX>` URN.
 
 ```{note}
 The projpipeline filter does not consider any spatial reference information.

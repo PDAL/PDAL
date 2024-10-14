@@ -182,5 +182,5 @@ called output.txt, which will be in the proper format.  From there, if you
 wanted, you could run that output file through the MyReader that was created
 in the previous tutorial, as well.
 
-[interesting.las]: https://github.com/PDAL/PDAL/blob/master/test/data/interesting.las?raw=true
+[interesting.las]: https://github.com/PDAL/PDAL/raw/refs/heads/master/test/data/las/interesting.las
 [pipeline-mywriter.json]: https://github.com/PDAL/PDAL/blob/master/examples/writing-writer/pipeline-mywriter.json?raw=true

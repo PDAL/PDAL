@@ -190,7 +190,7 @@ a variety of raster and vector formats. PDAL provides the same capability for
 point cloud data types.
 
 PDAL evolved out of the development of database storage and access capabilities
-for the {{ USACE }} [CRREL](http://www.erdc.usace.army.mil/Media/Fact-Sheets/Fact-Sheet-Article-View/Article/476649/remote-sensinggeographic-information-systems-center/) {{ GRID }} project. Functionality that was creeping into {{ libLAS }}
+for the {{ USACE }} [CRREL](https://www.erdc.usace.army.mil/Locations/CRREL/) {{ GRID }} project. Functionality that was creeping into {{ libLAS }}
 was pulled into a new library, and it was designed from the ground up to mimic
 successful extract, transform, and load libraries in the geospatial software
 domain. PDAL has steadily attracted more contributors as other software
@@ -348,25 +348,24 @@ extensions. There are many open source software projects for interacting
 with point cloud data, and PDAL's niche is in processing, translation,
 and automation.
 
-[asprs las]: http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
-[cloudcompare]: http://www.danielgm.net/cc/
+[asprs las]: https://www.asprs.org/divisions-committees/lidar-division/laser-las-file-format-exchange-activities
+[cloudcompare]: https://www.danielgm.net/cc/
 [entwine]: https://entwine.io
 [entwine point tile]: https://entwine.io/entwine-point-tile.html
-[fusion]: http://www.idaholidar.org/tools/fusion-ldv/
-[greyhound]: http://greyhound.io
+[fusion]: https://research.fs.usda.gov/pnw/products/dataandtools/tools/fusion/ldv-lidar-processing-and-visualization-software-version-4.40
 [hobu, inc.]: https://hobu.co
 [json]: https://en.wikipedia.org/wiki/JSON
-[lastools]: http://lastools.org
-[laszip]: http://laszip.org
-[liblas]: http://liblas.org
-[martin isenburg]: https://www.cs.unc.edu/~isenburg/
-[numpy]: http://www.numpy.org/
+[lastools]: https://lastools.org
+[laszip]: https://laszip.org
+[liblas]: https://liblas.org
+[martin isenburg]: https://lidarmag.com/2021/10/30/in-memoriam-martin-isenburg-1972-2021/
+[numpy]: https://numpy.org/
 [orfeotoolbox]: https://www.orfeo-toolbox.org/
 [osi]: https://opensource.org/licenses
-[pcl]: http://pointclouds.org
+[pcl]: https://pointclouds.org
 [point cloud data]: https://en.wikipedia.org/wiki/Point_cloud
-[potree]: http://potree.org
-[python las]: https://pypi.python.org/pypi/laspy/1.4.1
+[potree]: https://potree.org
+[python las]: https://pypi.python.org/pypi/laspy/
 [untwine]: https://github.com/hobuinc/untwine
-[virtual raster format]: http://www.gdal.org/gdal_vrttut.html
+[virtual raster format]: https://gdal.org/en/latest/drivers/raster/vrt.html
 [webgl]: https://en.wikipedia.org/wiki/WebGL

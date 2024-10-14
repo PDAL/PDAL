@@ -36,7 +36,7 @@ The type of the index
 file can be specified by specifying the OGR code for the format using the
 `--ogrdriver` option.  If no driver is specified, the format defaults to "ESRI
 Shapefile".  Any filetype that can be handled by
-[OGR](http://www.gdal.org/ogr_formats.html) is acceptable.
+[OGR](https://gdal.org/en/latest/drivers/vector/) is acceptable.
 
 In vector file-speak, each file specified by `filespec` is stored as a
 feature in a layer in the index file. The `filespec` is a [glob pattern](http://man7.org/linux/man-pages/man7/glob.7.html).  and normally needs to be
@@ -85,6 +85,6 @@ $ pdal tindex create index.sqlite "*.las" -f "SQLite" --lyr_name "pdal" \
     --t_srs "EPSG:4326"
 ```
 
-[gdal]: http://www.gdal.org
-[gdaltindex]: http://www.gdal.org/gdaltindex.html
+[gdal]: https://gdal.org
+[gdaltindex]: https://gdal.org/en/latest/programs/gdaltindex.html
 [sqlite]: http://www.sqlite.org
