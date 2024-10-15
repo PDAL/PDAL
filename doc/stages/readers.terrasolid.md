@@ -29,4 +29,4 @@ filename
 ```{include} reader_opts.md
 ```
 
-[terrasolid]: https://www.terrasolid.com/home.php
+[terrasolid]: https://terrasolid.com/products/terrascan/

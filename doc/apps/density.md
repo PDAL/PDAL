@@ -27,4 +27,4 @@ $ pdal density <input> <output>
 --smooth           Smooth boundary output
 ```
 
-[ogr layer]: http://www.gdal.org/ogr_utilities.html
+[ogr layer]: https://gdal.org/en/latest/drivers/vector/index.html

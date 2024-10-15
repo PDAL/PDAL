@@ -2,7 +2,8 @@
 # Learn more at https://jupyterbook.org/customize/config.html
 
 title: Point Data Abstraction Library (PDAL)
-author: PDAL team
+author: ''
+copyright: "2024"
 # logo: _static/pdal_logo.png
 
 # Force re-execution of notebooks on each build.
@@ -15,29 +16,75 @@ execute:
 # Define the name of the latex output file for PDF builds
 latex:
   latex_documents:
-    targetname: book.tex
-
-# Add a bibtex file so that we can create citations
-# bibtex_bibfiles:
-  # - references.bib
+    targetname: pdal.tex
 
 # Information about where the book exists on the web
 repository:
   url: https://github.com/PDAL/PDAL  # Online location of your book
   path_to_book: book/  # Optional path to your book, relative to the repository root
-  branch: main  # Which branch of the repository should be used when creating links (optional)
+  branch: master  # Which branch of the repository should be used when creating links (optional)
 
 # Add GitHub buttons to your book
 # See https://jupyterbook.org/customize/config.html#add-a-link-to-your-repository
 html:
   use_issues_button: true
   use_repository_button: true
+  extra_navbar: ""
+  use_edit_page_button: true
+  favicon: './_static/logo/favicon.ico'
+  short_title: "Documentation"
+  html_show_copyright: false
+  html_short_title: PDAL
+  html_title: PDAL2
+  extra_footer: |
+    <a href="https://hobu.co/access.html"><img width="30px" src="./_static/logo/hobu.png" /></a> <a href="/copyright.html">Copyright</a> ©2024 <a href="https://github.com/abellgithub">Andrew Bell</a>, <a href="https://github.com/chambbj">Brad Chambers</a>, <a href="http://github.com/hobu">Howard Butler</a>, and <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>
+
 
 sphinx:
   config:
+    html_show_copyright: false
     bibtex_bibfiles:
       - references.bib
     bibtex_reference_style: author_year
+    breathe_projects:
+      api: "doxygen/xml"
+    breathe_diagram:
+      - path: "./doxygen/html"
+      - html-path: "../../../doxygen/html"
+      - project: "api"
+      - no-link: false
+    breathe_domain_by_extension:
+      hpp: "cpp"
+      h: "cpp"
+    breathe_default_project: api
+    latex_logo: "./_static/logo/pdal_logo_only.png"
+    latex_use_parts: false
+    latex_show_urls: "inline"
+    latex_elements:
+      preamble: '
+  \makeatother
+  %\color {blue}
+  %\normalcolor {dark blue}
+  \definecolor{VerbatimColor}{RGB}{239, 239, 239}
+  \definecolor{VerbatimBorderColor}{RGB}{148, 148, 148}
+  \usepackage{geometry}
+   \geometry{
+   letterpaper,
+   left={30mm},
+  }
+  \raggedright'
+      figure_align: 'htbp'
+      releasename: ''
+      tocdepth: 4
+      pointsize: '12pt'
+      papersize: 'letterpaper'
+    pygments_style: "sphinx"
+#    latex_documents:
+#      - "index"
+#      - "pdal.tex"
+#      - "PDAL: Point cloud Data Abstraction Library"
+#      - 'Andrew Bell\\Brad Chambers\\Howard Butler\\Michael Gerlek\\PDAL Contributors'
+#      - "manual"
   local_extensions:
     embed: ./_ext
   extra_extensions:
@@ -51,16 +98,16 @@ sphinx:
 
 parse:
   myst_substitutions:
-    ASPRSLAS: '[ASPRS LAS](http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html)'
+    ASPRSLAS: '[ASPRS LAS](https://www.asprs.org/divisions-committees/lidar-division/laser-las-file-format-exchange-activities)'
     Bash: '[Bash](https://en.wikipedia.org/wiki/Bash_(Unix_shell))'
-    CRREL: '[CRREL](http://www.erdc.usace.army.mil/Locations/ColdRegionsResearchandEngineeringLaboratory.aspx)'
+    CRREL: '[CRREL](https://www.erdc.usace.army.mil/Locations/CRREL/)'
     CSV: '[CSV](https://en.wikipedia.org/wiki/Comma-separated_values)'
     Docker: '[Docker](https://www.docker.com/)'
-    Entwine: '[Entwine](http://entwine.io/)'
+    Entwine: '[Entwine](https://entwine.io/)'
     GDAL: '[GDAL](http://gdal.org/)'
-    GEOS: '[GEOS](https://trac.osgeo.org/geos/)'
-    GRID: '[GRiD](http://lidar.io/)'
-    GeoTIFF: '[GeoTIFF](https://trac.osgeo.org/geotiff/)'
+    GEOS: '[GEOS](https://libgeos.org)'
+    GRID: '[GRiD](https://grid.nga.mil/grid/)'
+    GeoTIFF: '[GeoTIFF](https://github.com/OSGeo/libgeotiff)'
     Hobu: '[Hobu](https://hobu.co/)'
     JSON: '[JSON](https://en.wikipedia.org/wiki/JSON)'
     Julia: '[Julia](https://julialand.org)'
@@ -71,18 +118,18 @@ parse:
     Optech: '[Optech](http://www.teledyneoptech.com/)'
     PCL: '[PCL](http://pointclouds.org)'
     PDAL: '[PDAL](https://pdal.io/)'
-    Proj: '[Proj.4](http://proj4.org)'
-    Python: '[Python](http://python.org/)'
-    QGIS: '[QGIS](http://qgis.org)'
-    RIEGL: '[RIEGL](http://riegl.com/)'
+    PROJ: '[PROJ](https://proj4.org)'
+    Python: '[Python](https://python.org/)'
+    QGIS: '[QGIS](https://qgis.org)'
+    RIEGL: '[RIEGL](https://riegl.com/)'
     Terminal: '`Conda Shell`'
     USACE: U.S. Army Corps of Engineers
     UTM: '[UTM](https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system)'
     WGS84: '[WGS84](https://en.wikipedia.org/wiki/Geodetic_datum)'
-    WellKnownText: '[Well Known Text](https://en.wikipedia.org/wiki/Well-known_text#Coordinate_reference_systems)'
+    WellKnownText: '[Well Known Text](https://en.wikipedia.org/wiki/Well-known_text_representation_of_coordinate_reference_systems)'
     XML: '[XML](https://en.wikipedia.org/wiki/XML)'
     jq: '[jq](https://stedolan.github.io/jq/)'
-    libLAS: '[libLAS](http://liblas.org/)'
+    libLAS: '[libLAS](https://liblas.org/)'
     nbsp: '&#160;'
     alpinestatus: "[![Alpine Status](https://github.com/PDAL/PDAL/workflows/Alpine/badge.svg)](https://github.com/PDAL/PDAL/actions?query=workflow%3AAlpine)"
     dockerstatus: "[![Docker Status](https://github.com/PDAL/PDAL/workflows/Docker/badge.svg)](https://github.com/PDAL/PDAL/actions?query=workflow%3ADocker)"

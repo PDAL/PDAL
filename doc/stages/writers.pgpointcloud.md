@@ -118,6 +118,6 @@ output_dims
 ```{include} writer_opts.md
 ```
 
-[epsg code]: http://www.epsg.org
+[epsg code]: https://www.iogp.org/bookstore/product/epsg-geodetic-parameter-relational-database-developers-guide/
 [laz-perf]: https://github.com/hobu/laz-perf
 [postgresql pointcloud]: http://github.com/pramsey/pointcloud

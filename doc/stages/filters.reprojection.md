@@ -63,10 +63,10 @@ precision in the output coordinates.
 ## Example 2
 
 In some cases it is not possible to use a EPSG-code as a spatial reference.
-Instead [Proj.4](http:/proj4.org) parameters can be used to define a spatial
+Instead {{ PROJ }} parameters can be used to define a spatial
 reference.  In this example the vertical component of points in a laz file is
 converted from geometric (ellipsoidal) heights to orthometric heights by using
-the `geoidgrids` parameter from Proj.4.  Here we change the vertical datum
+the `geoidgrids` parameter from PROJ.  Here we change the vertical datum
 from the GRS80 ellipsoid to DVR90, the vertical datum in Denmark. In the
 writing stage of the pipeline the spatial reference of the file is set to
 EPSG:7416. The last step is needed since PDAL will otherwise reference the
@@ -93,13 +93,13 @@ vertical datum as "Unnamed Vertical Datum" in the spatial reference VLR.
 in_srs
 
 : Spatial reference system of the input data. Express as an EPSG string (eg
-  "EPSG:4326" for WGS84 geographic), Proj.4 string or a well-known text
+  "EPSG:4326" for WGS84 geographic), PROJ string or a well-known text
   string. \[Required if not part of the input data set\]
 
 out_srs
 
 : Spatial reference system of the output data. Express as an EPSG string (eg
-  "EPSG:4326" for WGS84 geographic), Proj.4 string or a well-known text
+  "EPSG:4326" for WGS84 geographic), PROJ string or a well-known text
   string. \[Required\]
 
 in_axis_ordering

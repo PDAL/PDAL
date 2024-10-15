@@ -86,4 +86,4 @@ gdalopts
 [asprs las]: http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
 [gdal]: http://gdal.org
 [gdal readable raster]: http://www.gdal.org/formats_list.html
-[gdalopen]: https://gdal.org/api/raster_c_api.html#gdal_8h_1aca05455472359964151f9c891d678d5e
+[gdalopen]: https://gdal.org/en/latest/api/raster_c_api.html#gdal_8h_1a9cb8585d0b3c16726b08e25bcc94274a

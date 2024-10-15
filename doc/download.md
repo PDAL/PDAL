@@ -9,19 +9,9 @@
 ## Past Releases
 
 - **2024-03-27** [PDAL-2.7.1-src.tar.bz2]
-- **2024-03-02** [PDAL-2.7.0-src.tar.bz2]
 - **2024-02-05** [PDAL-2.6.3-src.tar.bz2]
-- **2023-12-11** [PDAL-2.6.2-src.tar.bz2]
-- **2023-11-24** [PDAL-2.6.1-src.tar.bz2]
-- **2023-10-12** [PDAL-2.6.0-src.tar.bz2]
 - **2023-08-18** [PDAL-2.5.6-src.tar.bz2]
-- **2023-01-13** [PDAL-2.5.0-src.tar.bz2]
 - **2022-03-18** [PDAL-2.4.0-src.tar.bz2]
-- **2021-05-19** [PDAL-2.3.0-src.tar.bz2]
-- **2020-08-20** [PDAL-2.2.0-src.tar.bz2]
-- **2020-03-20** [PDAL-2.1.0-src.tar.bz2]
-- **2019-08-23** [PDAL-2.0.1-src.tar.bz2]
-- **2019-05-09** [PDAL-1.9.1-src.tar.bz2]
 
 (source)=
 
@@ -54,16 +44,17 @@ required dependencies and build PDAL from source.
    :widths: 20, 20, 20, 20, 20
 
    "Platform(s)", "linux", "linux",  "linux", "win64, mac, linux"
-   "PDAL version", "2.5", "",  "2.4", "2.5"
-   "CPD", "", "",  "X", ""
-   "E57", "X", "",  "", "X"
-   "HDF", "X", "",  "", "X"
-   "I3S", "", "", "",  "X"
-   "Icebridge", "X",   "", "X", "X"
-   "NITF", "X",  "",  "", "X"
-   "pgpointcloud", "X",  "",  "X", "X"
-   "SLPK", "", "", "", "X"
-   "TileDB", "X", "", "", "mac/linux"
+   "PDAL version", "2.8", "",  "2.6", "2.8"
+   ":ref:`readers.arrow`, :ref:`writers.arrow`", "", "",  "", "X"
+   ":ref:`filters.cpd`", "", "",  "X", "X"
+   ":ref:`readers.draco`, :ref:`writers.draco`", "", "",  "", "X"
+   ":ref:`readers.e57`, :ref:`writers.e57`", "X", "",  "", "X"
+   ":ref:`readers.hdf`", "X", "",  "", "X"
+   ":ref:`readers.i3s`, :ref:`readers.slpk`", "", "", "",  "X"
+   ":ref:`readers.nitf`, :ref:`writers.nitf`", "X",  "",  "", "X"
+   ":ref:`readers.pgpointcloud`, :ref:`writers.pgpointcloud`", "X",  "",  "X", "X"
+   ":ref:`readers.tiledb`, :ref:`writers.tiledb`", "X", "", "", "X"
+   ":ref:`filters.trajectory`", "", "",  "", "X"
 
 ```
 
