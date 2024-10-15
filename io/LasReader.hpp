@@ -45,8 +45,6 @@
 namespace pdal
 {
 
-using StringMap = std::map<std::string, std::string>;
-
 namespace las
 {
     struct Header;
@@ -136,8 +134,6 @@ private:
     void queueNextStandardChunk();
 
     const las::Header& lasHeader() const;
-
-    void setForwards(StringMap& headers, StringMap& query);
 
     struct Options;
     struct Private;

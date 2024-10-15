@@ -39,6 +39,8 @@
 
 #include <functional>
 
+#include "io/private/connector/Connector.hpp"
+
 namespace pdal
 {
 
@@ -54,8 +56,7 @@ class PDAL_EXPORT Reader : public virtual Stage
 public:
     typedef std::function<void(PointView&, PointId)> PointReadFunc;
 
-    Reader()
-    {}
+    Reader();
 
     void setReadCb(PointReadFunc cb)
         { m_cb = cb; }
@@ -71,8 +72,14 @@ protected:
     Arg *m_filenameArg;
     Arg *m_countArg;
 
+    NL::json m_query;
+    NL::json m_headers;
+    std::unique_ptr<connector::Connector> m_connector;
+
     SpatialReference m_overrideSrs;
     SpatialReference m_defaultSrs;
+
+    void setConnecter();
 
     virtual void setSpatialReference(MetadataNode& m,
             const SpatialReference& srs);

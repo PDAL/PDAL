@@ -49,6 +49,9 @@ Stage::WhereMergeMode Reader::mergeMode() const
     return WhereMergeMode::True;
 }
 
+Reader::Reader() : m_connector(std::make_unique<connector::Connector>())
+{}
+
 
 void Reader::l_addArgs(ProgramArgs& args)
 {
@@ -64,6 +67,38 @@ void Reader::l_addArgs(ProgramArgs& args)
     args.add("default_srs",
             "Spatial reference to apply to data if one cannot be inferred",
             m_defaultSrs);
+
+    args.add("header", "Header fields to forward with HTTP requests", m_headers);
+    args.add("query", "Query parameters to forward with HTTP requests", m_query);
+}
+
+
+void Reader::setConnecter()
+{
+    StringMap headers;
+    StringMap query;
+    
+    try
+    {
+        if (!m_headers.is_null())
+            headers = m_headers.get<StringMap>();
+    }
+    catch (const std::exception& err)
+    {
+        throwError(std::string("Error parsing 'headers': ") + err.what());
+    }
+
+    try
+    {
+        if (!m_query.is_null())
+            query = m_query.get<StringMap>();
+    }
+    catch (const std::exception& err)
+    {
+        throwError(std::string("Error parsing 'query': ") + err.what());
+    }
+
+    m_connector.reset(new connector::Connector(headers, query));
 }
 
 
