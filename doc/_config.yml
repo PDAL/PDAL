@@ -37,7 +37,7 @@ html:
   html_short_title: PDAL
   html_title: PDAL2
   extra_footer: |
-    <a href="https://hobu.co/access.html"><img src="/_static/logo/hobu.png" /></a><a href="/copyright.html">Copyright</a> ©2024 <a href="https://github.com/abellgithub">Andrew Bell</a>, <a href="https://github.com/chambbj">Brad Chambers</a>, <a href="http://github.com/hobu">Howard Butler</a>, and <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>
+    <a href="https://hobu.co/access.html"><img width="30px" src="./_static/logo/hobu.png" /></a> <a href="/copyright.html">Copyright</a> ©2024 <a href="https://github.com/abellgithub">Andrew Bell</a>, <a href="https://github.com/chambbj">Brad Chambers</a>, <a href="http://github.com/hobu">Howard Butler</a>, and <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>
 
 
 sphinx:
@@ -60,6 +60,24 @@ sphinx:
     latex_logo: "./_static/logo/pdal_logo_only.png"
     latex_use_parts: false
     latex_show_urls: "inline"
+    latex_elements:
+      preamble: '
+  \makeatother
+  %\color {blue}
+  %\normalcolor {dark blue}
+  \definecolor{VerbatimColor}{RGB}{239, 239, 239}
+  \definecolor{VerbatimBorderColor}{RGB}{148, 148, 148}
+  \usepackage{geometry}
+   \geometry{
+   letterpaper,
+   left={30mm},
+  }
+  \raggedright'
+      figure_align: 'htbp'
+      releasename: ''
+      tocdepth: 4
+      pointsize: '12pt'
+      papersize: 'letterpaper'
     pygments_style: "sphinx"
 #    latex_documents:
 #      - "index"
