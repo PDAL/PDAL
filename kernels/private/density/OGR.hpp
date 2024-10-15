@@ -49,7 +49,7 @@ class OGR
     using OGRLayerH = void *;
 
 public:
-    OGR(std::string const& filename, const std::string& srs, bool h3,
+    OGR(std::string const& filename, const std::string& srs,
         std::string driver = "ESRI Shapefile", std::string layerName ="");
     ~OGR();
 
@@ -63,7 +63,6 @@ private:
     OGRDataSourceH m_ds;
     OGRLayerH m_layer;
     std::string m_layerName;
-    bool m_isH3;
 
     void createLayer(const std::string& wkt);
 };
