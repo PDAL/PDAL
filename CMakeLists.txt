@@ -150,7 +150,7 @@ if (WITH_TESTS)
     enable_testing()
 endif()
 
-add_subdirectory(plugins)
+# add_subdirectory(plugins)
 
 if (WITH_TESTS)
     include (${PDAL_CMAKE_DIR}/gtest.cmake)
