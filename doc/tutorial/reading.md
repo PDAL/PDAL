@@ -167,5 +167,5 @@ foreach-object {
 
 [interesting.las]: https://github.com/PDAL/PDAL/blob/master/test/data/las/interesting.las?raw=true
 [json]: http://www.json.org/
-[las]: http://www.asprs.org/a/society/committees/standards/lidar_exchange_format.html
+[las]: https://www.asprs.org/divisions-committees/lidar-division/laser-las-file-format-exchange-activities
 [uuid]: http://en.wikipedia.org/wiki/Universally_unique_identifier

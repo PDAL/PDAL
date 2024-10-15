@@ -120,7 +120,7 @@ dialect
 : [OGR SQL] dialect to use when querying tile index layer
   \[Default: OGRSQL\]
 
-[gdal]: http://gdal.org
-[gdal tile index]: http://www.gdal.org/gdaltindex.html
-[ogr]: http://gdal.org/ogr/
-[ogr sql]: http://www.gdal.org/ogr_sql.html
+[gdal]: https://gdal.org
+[gdal tile index]: https://gdal.org/en/latest/programs/gdaltindex.html
+[ogr]: https://gdal.org/ogr/
+[ogr sql]: https://gdal.org/en/latest/user/ogr_sql_dialect.html

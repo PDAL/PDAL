@@ -86,7 +86,7 @@ compression
   doesn't support version 1 LAZ files or version 1.4 of LAS.
   \[Default: "none"\]
 
-[des segment]: http://jitc.fhu.disa.mil/cgi/nitf/registers/desreg.aspx
+[des segment]: https://nsgreg.nga.mil/doc/view?i=5402
 [nitf]: http://en.wikipedia.org/wiki/National_Imagery_Transmission_Format
-[nitf 2.1]: http://www.gwg.nga.mil/ntb/baseline/docs/2500c/index.html
-[nitf nitro]: http://nitro-nitf.sourceforge.net/wikka.php?wakka=HomePage
+[nitf 2.1]: https://gwg.nga.mil/gwg/focus-groups/NITFS_NTB_Documentation.html
+[nitf nitro]: https://github.com/mdaus/nitro

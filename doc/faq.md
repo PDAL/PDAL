@@ -158,4 +158,4 @@
   ```
 
 [geohipster interview]: http://geohipster.com/2018/03/05/howard-butler-like-good-song-open-source-software-chance-immortal/
-[libgeotiff]: https://trac.osgeo.org/geotif
+[libgeotiff]: https://github.com/OSGeo/libgeotiff

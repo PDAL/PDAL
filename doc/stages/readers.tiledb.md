@@ -68,4 +68,4 @@ strict
 ```{include} reader_opts.md
 ```
 
-[tiledb]: https://tiledb.io
+[tiledb]: https://tiledb.com
