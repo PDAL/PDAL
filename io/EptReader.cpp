@@ -157,9 +157,6 @@ public:
     double m_resolution = 0;
     std::vector<Polygon> m_polys;
     NL::json m_addons;
-
-    NL::json m_query;
-    NL::json m_headers;
     NL::json m_ogr;
     bool m_ignoreUnreadable = false;
 };
@@ -167,7 +164,6 @@ public:
 struct EptReader::Private
 {
 public:
-    std::unique_ptr<connector::Connector> connector;
     std::unique_ptr<ept::EptInfo> info;
     std::unique_ptr<ThreadPool> pool;
     std::unique_ptr<ept::TileContents> currentTile;
@@ -201,36 +197,11 @@ void EptReader::addArgs(ProgramArgs& args)
     args.add("polygon", "Bounding polygon(s) to crop requests",
         m_args->m_polys).setErrorText("Invalid polygon specification. "
             "Must be valid GeoJSON/WKT");
-    args.add("header", "Header fields to forward with HTTP requests", m_args->m_headers);
-    args.add("query", "Query parameters to forward with HTTP requests", m_args->m_query);
     args.add("ogr", "OGR filter geometries", m_args->m_ogr);
     args.add("ignore_unreadable", "Ignore errors for missing point data nodes",
         m_args->m_ignoreUnreadable);
 }
 
-
-void EptReader::setForwards(StringMap& headers, StringMap& query)
-{
-    try
-    {
-        if (!m_args->m_headers.is_null())
-            headers = m_args->m_headers.get<StringMap>();
-    }
-    catch (const std::exception& err)
-    {
-        throwError(std::string("Error parsing 'headers': ") + err.what());
-    }
-
-    try
-    {
-        if (!m_args->m_query.is_null())
-            query = m_args->m_query.get<StringMap>();
-    }
-    catch (const std::exception& err)
-    {
-        throwError(std::string("Error parsing 'query': ") + err.what());
-    }
-}
 
 void EptReader::initialize()
 {
@@ -242,16 +213,13 @@ void EptReader::initialize()
             threads << " threads" << std::endl;
     m_p->pool.reset(new ThreadPool(threads));
 
-    StringMap headers;
-    StringMap query;
-    setForwards(headers, query);
-    m_p->connector.reset(new connector::Connector(headers, query));
+    setConnecter();
 
     try
     {
-        m_p->info.reset(new ept::EptInfo(m_filename, *m_p->connector));
+        m_p->info.reset(new ept::EptInfo(m_filename, *m_connector));
         setSpatialReference(m_p->info->srs());
-        m_p->addons = ept::Addon::load(*m_p->connector, m_args->m_addons);
+        m_p->addons = ept::Addon::load(*m_connector, m_args->m_addons);
     }
     catch (const arbiter::ArbiterError& err)
     {
@@ -383,7 +351,7 @@ void EptReader::handleOriginQuery()
     NL::json sources;
     try
     {
-        sources = m_p->connector->getJson(
+        sources = m_connector->getJson(
             m_p->info->sourcesDir() + "manifest.json");
     }
     catch (...) {}
@@ -392,7 +360,7 @@ void EptReader::handleOriginQuery()
     {
         try
         {
-            sources = m_p->connector->getJson(
+            sources = m_connector->getJson(
                 m_p->info->sourcesDir() + "list.json");
         }
         catch (...) {}
@@ -558,7 +526,7 @@ void EptReader::load(const ept::Overlap& overlap)
     m_p->pool->add([this, overlap]()
         {
             // Read the tile.
-            ept::TileContents tile(overlap, *m_p->info, *m_p->connector, m_p->addons);
+            ept::TileContents tile(overlap, *m_p->info, *m_connector, m_p->addons);
 
             tile.read();
 
@@ -681,7 +649,7 @@ void EptReader::overlaps()
         std::string filename = m_p->info->hierarchyDir() + key.toString() + ".json";
 
         // First, determine the overlapping nodes from the EPT resource.
-        overlaps(*m_p->hierarchy, m_p->connector->getJson(filename), key);
+        overlaps(*m_p->hierarchy, m_connector->getJson(filename), key);
     }
     m_p->pool->await();
 
@@ -690,7 +658,7 @@ void EptReader::overlaps()
     {
         m_nodeId = 1;
         std::string filename = addon.hierarchyDir() + key.toString() + ".json";
-        overlaps(addon.hierarchy(), m_p->connector->getJson(filename), key);
+        overlaps(addon.hierarchy(), m_connector->getJson(filename), key);
         m_p->pool->await();
     }
 }
@@ -780,7 +748,7 @@ void EptReader::overlaps(ept::Hierarchy& target, const NL::json& hier, const ept
             try
             {
                 std::string filename = m_p->info->hierarchyDir() + key.toString() + ".json";
-                const auto subRoot(m_p->connector->getJson(filename));
+                const auto subRoot(m_connector->getJson(filename));
                 overlaps(target, subRoot, key);
             }
             catch (const arbiter::ArbiterError& err)
@@ -950,7 +918,7 @@ point_count_t EptReader::read(PointViewPtr view, point_count_t count)
     {
         ept::ArtifactPtr artifact
             (new ept::Artifact(std::move(m_p->info), std::move(m_p->hierarchy),
-                std::move(m_p->connector), m_hierarchyStep));
+                std::move(m_connector), m_hierarchyStep));
         m_artifactMgr->put("ept", artifact);
     }
 
@@ -976,7 +944,7 @@ void EptReader::process(PointViewPtr dstView, const ept::TileContents& tile,
 void EptReader::done(PointTableRef)
 {
     m_p->pool->await();
-    m_p->connector.reset();
+    m_connector.reset();
 }
 
 
