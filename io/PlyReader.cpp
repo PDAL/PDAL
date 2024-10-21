@@ -313,7 +313,7 @@ QuickInfo PlyReader::inspect()
     // We have to read the points to actually get the bounds
     PointViewPtr v(new PointView(t));
     ready(t);
-    read(v, 1000000);
+    read(v, qi.m_pointCount);
     done(t);
     for (PointRef p : *v)
     {
