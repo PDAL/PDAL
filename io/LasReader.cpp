@@ -237,25 +237,11 @@ point_count_t LasReader::getNumPoints() const
 
 void LasReader::initialize(PointTableRef table)
 {
-    tryLoadRemote();
-    initializeLocal(table, m_metadata);
-}
-
-void LasReader::tryLoadRemote()
-{
+    setConnector();
     d->isRemote = Utils::isRemote(m_filename);
-    if (d->isRemote)
-    {
-        setConnecter();
-
-        // Here, we're assigning the local filename to "remoteFilename".
-        // This is fixed by the swap on the next line.
-        std::string remoteFilename = Utils::tempFilename(m_filename);
-        std::swap(remoteFilename, m_filename);
-
-        // Fetch the remote file and write to the local file.
-        m_connector->put(m_filename, m_connector->getBinary(remoteFilename));
-    }
+    auto handle = m_connector->getLocalHandle(m_filename);
+    m_filename = handle.release();
+    initializeLocal(table, m_metadata);
 }
 
 QuickInfo LasReader::inspect()

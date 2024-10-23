@@ -213,7 +213,7 @@ void EptReader::initialize()
             threads << " threads" << std::endl;
     m_p->pool.reset(new ThreadPool(threads));
 
-    setConnecter();
+    setConnector();
 
     try
     {

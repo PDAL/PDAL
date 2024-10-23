@@ -79,7 +79,7 @@ protected:
     SpatialReference m_overrideSrs;
     SpatialReference m_defaultSrs;
 
-    void setConnecter();
+    void setConnector();
 
     virtual void setSpatialReference(MetadataNode& m,
             const SpatialReference& srs);

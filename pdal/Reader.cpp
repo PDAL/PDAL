@@ -73,7 +73,7 @@ void Reader::l_addArgs(ProgramArgs& args)
 }
 
 
-void Reader::setConnecter()
+void Reader::setConnector()
 {
     StringMap headers;
     StringMap query;
