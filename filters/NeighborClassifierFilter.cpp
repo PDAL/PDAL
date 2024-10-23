@@ -34,32 +34,32 @@
 
 #include "NeighborClassifierFilter.hpp"
 
+#include <pdal/KDIndex.hpp>
 #include <pdal/PipelineManager.hpp>
-#include <pdal/StageFactory.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "private/DimRange.hpp"
 
-#include <iostream>
-#include <utility>
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
+static PluginInfo const s_info
+{
     "filters.neighborclassifier",
     "Re-assign some point attributes based KNN voting",
-    "http://pdal.io/stages/filters.neighborclassifier.html" );
+    "http://pdal.io/stages/filters.neighborclassifier.html"
+};
 
 CREATE_STATIC_STAGE(NeighborClassifierFilter, s_info)
 
-NeighborClassifierFilter::NeighborClassifierFilter() :
-    m_dim(Dimension::Id::Classification)
+NeighborClassifierFilter::NeighborClassifierFilter()
 {}
 
 
-NeighborClassifierFilter::~NeighborClassifierFilter()
-{}
-
+std::string NeighborClassifierFilter::getName() const
+{
+    return s_info.name;
+}
 
 void NeighborClassifierFilter::addArgs(ProgramArgs& args)
 {
@@ -68,6 +68,8 @@ void NeighborClassifierFilter::addArgs(ProgramArgs& args)
     args.add("k", "Number of nearest neighbors to consult",
         m_k).setPositional();
     args.add("candidate", "candidate file name", m_candidateFile);
+    args.add("dimension", "Dimension on which votes are calculated (treated as an integer).",
+        m_dimName, "Classification");
 }
 
 void NeighborClassifierFilter::initialize()
@@ -94,6 +96,10 @@ void NeighborClassifierFilter::initialize()
 void NeighborClassifierFilter::prepared(PointTableRef table)
 {
     PointLayoutPtr layout(table.layout());
+
+    m_dimId = layout->findDim(m_dimName);
+    if (m_dimId == Dimension::Id::Unknown)
+        throwError("Dimension '" + m_dimName + "' does not exist.");
 
     for (auto& r : m_domain)
     {
@@ -125,7 +131,7 @@ void NeighborClassifierFilter::doOneNoDomain(PointRef &point, PointRef &temp,
     for (PointId id : iSrc)
     {
         temp.setPointId(id);
-        counts[temp.getFieldAs<int>(m_dim)]++;
+        counts[temp.getFieldAs<int>(m_dimId)]++;
     }
 
     // pick winner of the vote
@@ -134,7 +140,7 @@ void NeighborClassifierFilter::doOneNoDomain(PointRef &point, PointRef &temp,
         { return p1.second < p2.second; });
 
     // update point
-    auto oldclass = point.getFieldAs<double>(m_dim);
+    auto oldclass = point.getFieldAs<int>(m_dimId);
     auto newclass = pr.first;
     if (pr.second > thresh && oldclass != newclass)
         m_newClass[point.pointId()] = newclass;
@@ -197,8 +203,8 @@ void NeighborClassifierFilter::filter(PointView& view)
         }
     }
 
-    for (auto& p : m_newClass)
-        view.setField(m_dim, p.first, p.second);
+    for (auto& [pointId, classification] : m_newClass)
+        view.setField(m_dimId, pointId, classification);
 }
 
 } // namespace pdal
