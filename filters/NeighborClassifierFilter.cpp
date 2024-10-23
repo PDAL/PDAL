@@ -34,14 +34,12 @@
 
 #include "NeighborClassifierFilter.hpp"
 
+#include <pdal/KDIndex.hpp>
 #include <pdal/PipelineManager.hpp>
-#include <pdal/StageFactory.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "private/DimRange.hpp"
 
-#include <iostream>
-#include <utility>
 namespace pdal
 {
 

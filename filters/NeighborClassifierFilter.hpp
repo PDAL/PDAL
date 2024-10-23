@@ -35,16 +35,13 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/KDIndex.hpp>
 #include <unordered_map>
-
-extern "C" int32_t NeighborClassifierFilter_ExitFunc();
-extern "C" PF_ExitFunc NeighborClassifierFilter_InitPlugin();
 
 namespace pdal
 {
 
 struct DimRange;
+class KD3Index;
 
 class PDAL_DLL NeighborClassifierFilter : public Filter
 {
@@ -65,6 +62,7 @@ private:
     NeighborClassifierFilter& operator=(
         const NeighborClassifierFilter&) = delete;
     NeighborClassifierFilter(const NeighborClassifierFilter&) = delete;
+
     StringList m_domainSpec;
     std::vector<DimRange> m_domain;
     int m_k;
