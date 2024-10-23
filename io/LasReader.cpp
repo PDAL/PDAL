@@ -54,7 +54,6 @@
 #include <pdal/util/IStream.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <lazperf/readers.hpp>
-#include <arbiter/arbiter.hpp>
 
 namespace pdal
 {
@@ -238,24 +237,11 @@ point_count_t LasReader::getNumPoints() const
 
 void LasReader::initialize(PointTableRef table)
 {
-    tryLoadRemote();
-    initializeLocal(table, m_metadata);
-}
-
-void LasReader::tryLoadRemote()
-{
+    setConnector();
     d->isRemote = Utils::isRemote(m_filename);
-    if (d->isRemote)
-    {
-        // Here, we're assigning the local filename to "remoteFilename".
-        // This is fixed by the swap on the next line.
-        std::string remoteFilename = Utils::tempFilename(m_filename);
-        std::swap(remoteFilename, m_filename);
-
-        // Fetch the remote file and write to the local file.
-        arbiter::Arbiter a;
-        a.put(m_filename, a.getBinary(remoteFilename));
-    }
+    auto handle = m_connector->getLocalHandle(m_filename);
+    m_filename = handle.release();
+    initializeLocal(table, m_metadata);
 }
 
 QuickInfo LasReader::inspect()

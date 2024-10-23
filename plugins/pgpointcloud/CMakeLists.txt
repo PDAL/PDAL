@@ -28,6 +28,8 @@ PDAL_ADD_PLUGIN(reader_libname reader pgpointcloud
         ${PDAL_LIBRARIES}
     INCLUDES
         ${LIBXML2_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}
 )
 
 #

@@ -88,7 +88,6 @@ private:
     // bounds to the bounds of the specified origin and set m_queryOriginId to
     // the selected OriginId value.  If the selected origin is not found, throw.
     void handleOriginQuery();
-    void setForwards(StringMap& headers, StringMap& query);
 
     // Aggregate all EPT keys overlapping our query bounds and their number of
     // points from a walk through the hierarchy.  Each of these keys will be

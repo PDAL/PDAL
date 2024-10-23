@@ -120,6 +120,16 @@ threads
 
 : Thread pool size. Number of threads used to decode laz chunk tables (Default: 7)
 
+header
+
+: HTTP headers to forward for remote Las endpoints, specified as a JSON
+  object of key/value string pairs.
+
+query
+
+: HTTP query parameters to forward for remote Las endpoints, specified as a
+  JSON object of key/value string pairs.
+
 [las format]: http://asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
 [las specification]: http://www.asprs.org/a/society/committees/standards/LAS_1_4_r13.pdf
 [laszip]: http://laszip.org
