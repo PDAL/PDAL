@@ -368,6 +368,8 @@ void LasWriter::prepOutput(std::ostream *outStream, const SpatialReference& srs)
     // have a valid count, so fill the header again.
     fillHeader();
 
+    validateHeader();
+
     // Write the header.
     std::vector<char> headerBuf = d->header.data();
     m_ostream->write(headerBuf.data(), headerBuf.size());
@@ -728,8 +730,10 @@ void LasWriter::fillHeader()
     d->header.globalEncoding = d->opts.globalEncoding.val();
     if (d->header.versionAtLeast(1, 4))
         d->header.globalEncoding |= las::Header::WktMask;
+}
 
-    // Validation
+void LasWriter::validateHeader()
+{
     if (m_scaling.m_xXform.m_scale.m_val == 0.0)
         throwError("X scale of 0.0 is invalid.");
     if (m_scaling.m_yXform.m_scale.m_val == 0.0)
@@ -748,7 +752,6 @@ void LasWriter::fillHeader()
         throwError("LAS version 1." + std::to_string(d->header.versionMinor) +
             " only supports point formats 0-5.");
 }
-
 
 void LasWriter::readyCompression()
 {
