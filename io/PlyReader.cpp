@@ -293,20 +293,34 @@ QuickInfo PlyReader::inspect()
 {
     QuickInfo qi;
 
+    PointTable t;
     initialize();
+    addDimensions(t.layout());
+    t.finalize();
 
     if (m_vertexElt)
     {
-        // Get quick info information from the vertex element (if initialised). We ignore the bounds 
+        // Get quick info information from the vertex element (if initialised). We ignore the bounds
         // since calculating that would require reading the entire file. We also ignore the spatial
         // reference since we don't have that.
 
         qi.m_valid = true;
         qi.m_pointCount = static_cast<point_count_t>(m_vertexElt->m_count);
         for (auto& prop : m_vertexElt->m_properties)
-        {
             qi.m_dimNames.push_back(prop->m_name);
-        }
+    }
+
+    // We have to read the points to actually get the bounds
+    PointViewPtr v(new PointView(t));
+    ready(t);
+    read(v, qi.m_pointCount);
+    done(t);
+    for (PointRef p : *v)
+    {
+        float x = p.getFieldAs<float>(Dimension::Id::X);
+        float y = p.getFieldAs<float>(Dimension::Id::Y);
+        float z = p.getFieldAs<float>(Dimension::Id::Z);
+        qi.m_bounds.grow(x, y, z);
     }
 
     return qi;
