@@ -73,7 +73,7 @@ k
 : An integer which specifies the number of neighbors which vote on each
   selected point.
 
-`` _`dimension` ``
+dimension
 
 : A dimension that is treated as classification for voting purposes and whose value is
   set after voting. It is treated as an integer value. [Default: Classification]
