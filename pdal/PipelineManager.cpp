@@ -538,6 +538,11 @@ void PipelineManager::destroyStage(Stage *s)
         m_factory.reset(new StageFactory());
 }
 
+void PipelineManager::addStage(Stage *s)
+{
+    m_stages.push_back(s);
+}
+
 
 // Set allowed dimensions on both tables since we don't know which one we're going to use.
 void PipelineManager::setAllowedDims(const StringList& dimNames)

@@ -152,6 +152,7 @@ public:
     const std::vector<Stage *> stages() const
         { return m_stages; }
     void destroyStage(Stage *s = nullptr);
+    void addStage(Stage *s);
     void setAllowedDims(const StringList& dimNames);
 
 private:
