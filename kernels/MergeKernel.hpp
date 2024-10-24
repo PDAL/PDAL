@@ -39,7 +39,7 @@
 namespace pdal
 {
 
-class PDAL_DLL MergeKernel : public Kernel
+class PDAL_EXPORT MergeKernel : public Kernel
 {
 public:
     std::string getName() const;

@@ -45,7 +45,7 @@
 namespace pdal
 {
 
-class PDAL_DLL PlyReader : public Reader, public Streamable
+class PDAL_EXPORT PlyReader : public Reader, public Streamable
 {
 public:
     std::string getName() const;

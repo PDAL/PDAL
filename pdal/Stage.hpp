@@ -72,7 +72,7 @@ namespace expr
   stage at the end of the pipeline.  PipelineManager can also be used to
   create and run a pipeline.
 */
-class PDAL_DLL Stage
+class PDAL_EXPORT Stage
 {
     FRIEND_TEST(OptionsTest, conditional);
     friend class StageWrapper;
@@ -512,8 +512,8 @@ private:
     const Options& getOptions() const
         { return m_options; }
 
-    friend PDAL_DLL std::istream& operator>>(std::istream& in, WhereMergeMode& mode);
-    friend PDAL_DLL std::ostream& operator<<(std::ostream& out, const WhereMergeMode& mode);
+    friend PDAL_EXPORT std::istream& operator>>(std::istream& in, WhereMergeMode& mode);
+    friend PDAL_EXPORT std::ostream& operator<<(std::ostream& out, const WhereMergeMode& mode);
 };
 
 } // namespace pdal

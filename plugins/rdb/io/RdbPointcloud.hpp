@@ -47,7 +47,7 @@ namespace pdal
 /*!
  * Core RIEGL RDB point cloud reader class
  */
-class PDAL_DLL RdbPointcloud
+class PDAL_EXPORT RdbPointcloud
 {
 public:
     RdbPointcloud(

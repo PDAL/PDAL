@@ -53,7 +53,7 @@ class PointView;
 
 typedef std::shared_ptr<PointView> PointViewPtr;
 
-class PDAL_DLL Kernel
+class PDAL_EXPORT Kernel
 {
     FRIEND_TEST(KernelTest, parseOption);
 
@@ -134,6 +134,6 @@ private:
     std::string m_label;
 };
 
-PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Kernel&);
+PDAL_EXPORT std::ostream& operator<<(std::ostream& ostr, const Kernel&);
 
 } // namespace pdal

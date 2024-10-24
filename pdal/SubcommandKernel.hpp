@@ -39,7 +39,7 @@
 namespace pdal
 {
 
-class PDAL_DLL SubcommandKernel : public Kernel
+class PDAL_EXPORT SubcommandKernel : public Kernel
 {
 public:
     SubcommandKernel& operator=(const Kernel&) = delete;

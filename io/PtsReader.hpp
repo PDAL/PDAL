@@ -41,7 +41,7 @@
 namespace pdal
 {
 
-class PDAL_DLL PtsReader : public Reader
+class PDAL_EXPORT PtsReader : public Reader
 {
 public:
     PtsReader() : m_separator(' '), m_PointCount(0), m_istream(NULL)

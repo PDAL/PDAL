@@ -49,7 +49,7 @@ namespace expr
     class ConditionalExpression;
 }
 
-class PDAL_DLL Reader : public virtual Stage
+class PDAL_EXPORT Reader : public virtual Stage
 {
 public:
     typedef std::function<void(PointView&, PointId)> PointReadFunc;

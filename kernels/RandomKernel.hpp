@@ -40,7 +40,7 @@
 namespace pdal
 {
 
-class PDAL_DLL RandomKernel : public Kernel
+class PDAL_EXPORT RandomKernel : public Kernel
 {
 public:
     RandomKernel();

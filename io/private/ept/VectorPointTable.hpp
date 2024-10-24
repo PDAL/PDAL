@@ -39,7 +39,7 @@
 namespace pdal
 {
 
-class PDAL_DLL VectorPointTable : public SimplePointTable
+class PDAL_EXPORT VectorPointTable : public SimplePointTable
 {
 public:
     VectorPointTable(PointLayout& layout) : SimplePointTable(layout)

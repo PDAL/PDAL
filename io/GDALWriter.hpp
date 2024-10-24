@@ -45,7 +45,7 @@ namespace pdal
 
 class GDALGrid;
 
-class PDAL_DLL GDALWriter : public FlexWriter, public Streamable
+class PDAL_EXPORT GDALWriter : public FlexWriter, public Streamable
 {
 public:
     std::string getName() const;

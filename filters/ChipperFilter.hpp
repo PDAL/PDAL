@@ -51,9 +51,9 @@ namespace pdal
 class Stage;
 
 
-class PDAL_DLL ChipperFilter;
+class PDAL_EXPORT ChipperFilter;
 
-class PDAL_DLL ChipPtRef
+class PDAL_EXPORT ChipPtRef
 {
     friend class ChipRefList;
     friend class ChipperFilter;
@@ -71,7 +71,7 @@ public:
 };
 
 
-class PDAL_DLL ChipRefList
+class PDAL_EXPORT ChipRefList
 {
     friend class ChipperFilter;
 
@@ -109,7 +109,7 @@ private:
 };
 
 
-class PDAL_DLL ChipperFilter : public pdal::Filter
+class PDAL_EXPORT ChipperFilter : public pdal::Filter
 {
 public:
     ChipperFilter() {}

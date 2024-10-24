@@ -47,7 +47,7 @@ namespace gdal { class Raster; }
 // Provides GDAL-based raster overlay that places output data in
 // specified dimensions. It also supports scaling the data by a multiplier
 // on a per-dimension basis.
-class PDAL_DLL ColorizationFilter : public Filter, public Streamable
+class PDAL_EXPORT ColorizationFilter : public Filter, public Streamable
 {
 public:
     struct BandInfo

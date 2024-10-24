@@ -83,7 +83,7 @@ typedef std::vector<XMLDim> XMLDimList;
 inline bool operator < (const XMLDim& d1, const XMLDim& d2)
     { return d1.m_position < d2.m_position; }
 
-class PDAL_DLL XMLSchema
+class PDAL_EXPORT XMLSchema
 {
 public:
     XMLSchema(std::string xml, std::string xsd = "",

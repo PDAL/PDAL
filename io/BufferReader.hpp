@@ -41,7 +41,7 @@
 namespace pdal
 {
 
-class PDAL_DLL BufferReader : public pdal::Reader
+class PDAL_EXPORT BufferReader : public pdal::Reader
 {
 public:
     BufferReader() : Reader()

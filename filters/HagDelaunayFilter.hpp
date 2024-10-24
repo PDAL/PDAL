@@ -47,7 +47,7 @@ class Options;
 class PointLayout;
 class PointView;
 
-class PDAL_DLL HagDelaunayFilter : public Filter
+class PDAL_EXPORT HagDelaunayFilter : public Filter
 {
 public:
     HagDelaunayFilter();

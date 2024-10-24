@@ -14,7 +14,7 @@ namespace pdal
 // but this can be replaced with any other processing. See the LasWriter
 // class for a more detailed example.
  
-class PDAL_DLL StreamProcessor: public Writer, public Streamable
+class PDAL_EXPORT StreamProcessor: public Writer, public Streamable
 {
 
 public:

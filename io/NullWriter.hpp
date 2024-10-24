@@ -40,7 +40,7 @@
 namespace pdal
 {
 
-class PDAL_DLL NullWriter : public NoFilenameWriter, public Streamable
+class PDAL_EXPORT NullWriter : public NoFilenameWriter, public Streamable
 {
 public:
     std::string getName() const;

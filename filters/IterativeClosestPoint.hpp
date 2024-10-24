@@ -39,7 +39,7 @@
 namespace pdal
 {
 
-class PDAL_DLL IterativeClosestPoint : public Filter
+class PDAL_EXPORT IterativeClosestPoint : public Filter
 {
 public:
     IterativeClosestPoint() : Filter(), m_fixed(nullptr), m_complete(false)

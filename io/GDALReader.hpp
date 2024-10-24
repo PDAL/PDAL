@@ -49,7 +49,7 @@ namespace gdal { class Raster; }
 
 typedef std::map<std::string, Dimension::Id> DimensionMap;
 
-class PDAL_DLL GDALReader : public Reader , public Streamable
+class PDAL_EXPORT GDALReader : public Reader , public Streamable
 {
 public:
     std::string getName() const;

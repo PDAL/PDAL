@@ -42,7 +42,7 @@
 namespace pdal
 {
 
-class PDAL_DLL PipelineKernel : public Kernel
+class PDAL_EXPORT PipelineKernel : public Kernel
 {
 public:
     std::string getName() const;

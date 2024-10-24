@@ -39,7 +39,7 @@
 namespace pdal
 {
 
-class PDAL_DLL SplitterFilter : public pdal::Filter
+class PDAL_EXPORT SplitterFilter : public pdal::Filter
 {
 private:
     //This used to be a lambda, but the VS compiler exploded, I guess.

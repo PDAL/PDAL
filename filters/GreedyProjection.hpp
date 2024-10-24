@@ -129,7 +129,7 @@ namespace pdal
     * \author Zoltan Csaba Marton
     * \ingroup surface
     */
-  class PDAL_DLL GreedyProjection : public Filter
+  class PDAL_EXPORT GreedyProjection : public Filter
   {
     public:
 

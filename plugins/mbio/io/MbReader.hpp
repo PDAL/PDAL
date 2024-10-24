@@ -54,7 +54,7 @@ namespace pdal
 
 struct BathData;
 
-class PDAL_DLL MbReader : public Reader, public Streamable
+class PDAL_EXPORT MbReader : public Reader, public Streamable
 {
     struct BathData
     {

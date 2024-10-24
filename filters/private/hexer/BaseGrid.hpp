@@ -21,7 +21,7 @@ class H3Grid;
 
 static const double SQRT_3 = 1.732050808;
 
-class PDAL_DLL BaseGrid
+class PDAL_EXPORT BaseGrid
 {
 public:
     virtual ~BaseGrid();

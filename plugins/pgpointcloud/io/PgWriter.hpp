@@ -42,7 +42,7 @@
 namespace pdal
 {
 
-class PDAL_DLL PgWriter : public DbWriter
+class PDAL_EXPORT PgWriter : public DbWriter
 {
 public:
     PgWriter();

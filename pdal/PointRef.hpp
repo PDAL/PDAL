@@ -41,7 +41,7 @@
 namespace pdal
 {
 
-class PDAL_DLL PointRef
+class PDAL_EXPORT PointRef
 {
 private:
     template <typename T>

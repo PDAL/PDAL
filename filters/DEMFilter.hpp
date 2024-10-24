@@ -51,7 +51,7 @@ class Options;
 class PointLayout;
 class PointView;
 
-class PDAL_DLL DEMFilter : public Filter, public Streamable
+class PDAL_EXPORT DEMFilter : public Filter, public Streamable
 {
 public:
     DEMFilter();

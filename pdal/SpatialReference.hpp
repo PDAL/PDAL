@@ -54,7 +54,7 @@ class MetadataNode;
 /// more than one spatial reference, PointTable::spatialReference() will
 /// return an empty spatial reference and PointTable::spatialReferenceUnique()
 /// will return false.
-class PDAL_DLL SpatialReference
+class PDAL_EXPORT SpatialReference
 {
 public:
     /**
@@ -185,17 +185,17 @@ private:
     std::string m_wkt2;
     double m_epoch = 0.0f;
     mutable std::string m_horizontalWkt;
-    friend PDAL_DLL std::ostream& operator<<(std::ostream& ostr,
+    friend PDAL_EXPORT std::ostream& operator<<(std::ostream& ostr,
         const SpatialReference& srs);
-    friend PDAL_DLL std::istream& operator>>(std::istream& istr,
+    friend PDAL_EXPORT std::istream& operator>>(std::istream& istr,
         SpatialReference& srs);
     static bool isWKT1(const std::string& wkt);
     static bool isWKT2(const std::string& wkt);
 };
 
-PDAL_DLL std::ostream& operator<<(std::ostream& ostr,
+PDAL_EXPORT std::ostream& operator<<(std::ostream& ostr,
     const SpatialReference& srs);
-PDAL_DLL std::istream& operator>>(std::istream& istr, SpatialReference& srs);
+PDAL_EXPORT std::istream& operator>>(std::istream& istr, SpatialReference& srs);
 
 } // namespace pdal
 

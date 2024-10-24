@@ -48,7 +48,7 @@ namespace pdal
 /*!
  * PDAL reader for RIEGL RDB point cloud files
  */
-class PDAL_DLL RdbReader : public pdal::Reader, public pdal::Streamable
+class PDAL_EXPORT RdbReader : public pdal::Reader, public pdal::Streamable
 {
 public:
     RdbReader();

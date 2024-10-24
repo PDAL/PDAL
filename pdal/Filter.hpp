@@ -45,7 +45,7 @@ class Filter;
 
 class FilterWrapper;
 
-class PDAL_DLL Filter : public virtual Stage
+class PDAL_EXPORT Filter : public virtual Stage
 {
     friend class FilterWrapper;
 
@@ -68,8 +68,8 @@ private:
     virtual void filter(PointView& /*view*/)
     {}
 
-    friend PDAL_DLL std::istream& operator>>(std::istream& in, Filter::WhereMergeMode& mode);
-    friend PDAL_DLL std::ostream& operator<<(std::ostream& out, const Filter::WhereMergeMode& mode);
+    friend PDAL_EXPORT std::istream& operator>>(std::istream& in, Filter::WhereMergeMode& mode);
+    friend PDAL_EXPORT std::ostream& operator<<(std::ostream& out, const Filter::WhereMergeMode& mode);
 
     std::unique_ptr<Args> m_args;
 };

@@ -46,7 +46,7 @@ namespace hexer
 namespace pdal
 {
 
-class PDAL_DLL HexBin : public Filter, public Streamable
+class PDAL_EXPORT HexBin : public Filter, public Streamable
 {
 public:
     HexBin();

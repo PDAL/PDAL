@@ -39,7 +39,7 @@
 namespace pdal
 {
 
-class PDAL_DLL SplitKernel : public Kernel
+class PDAL_EXPORT SplitKernel : public Kernel
 {
 public:
     std::string getName() const;

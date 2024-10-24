@@ -46,7 +46,7 @@ namespace pdal
 
 struct DimRange;
 
-class PDAL_DLL RangeFilter : public Filter,  public Streamable
+class PDAL_EXPORT RangeFilter : public Filter,  public Streamable
 {
 public:
     RangeFilter();

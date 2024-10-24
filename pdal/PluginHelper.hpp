@@ -44,7 +44,7 @@
 
 //DEPRECATED
 #define CREATE_SHARED_PLUGIN(version_major, version_minor, T, type, info) \
-    extern "C" PDAL_DLL void PF_initPlugin() \
+    extern "C" PDAL_EXPORT void PF_initPlugin() \
     { \
         bool stage = std::is_convertible<T*, Stage *>::value; \
         if (stage) \
@@ -54,11 +54,11 @@
     }
 
 #define CREATE_SHARED_KERNEL(T, info) \
-    extern "C" PDAL_DLL void PF_initPlugin() \
+    extern "C" PDAL_EXPORT void PF_initPlugin() \
     { pdal::PluginManager<pdal::Kernel>::registerPlugin<T>(info); }
 
 #define CREATE_SHARED_STAGE(T, info) \
-    extern "C" PDAL_DLL void PF_initPlugin() \
+    extern "C" PDAL_EXPORT void PF_initPlugin() \
     { pdal::PluginManager<pdal::Stage>::registerPlugin<T>(info); }
 
 #define CREATE_STATIC_KERNEL(T, info) \

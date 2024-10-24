@@ -43,7 +43,7 @@
 namespace pdal
 {
 
-PDAL_DLL std::vector<std::string> Utils::backtrace()
+PDAL_EXPORT std::vector<std::string> Utils::backtrace()
 {
     std::vector<std::string> lines;
     BacktraceEntries entries = backtraceImpl();

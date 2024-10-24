@@ -13,7 +13,7 @@ namespace pdal {
 // having it all in memory at the same time. It will be streamed to
 // disk. See the GDALReader class for how to add more fields
 // and read from disk.
-class PDAL_DLL StreamedPointCloud : public Reader, public Streamable
+class PDAL_EXPORT StreamedPointCloud : public Reader, public Streamable
 {
 public:
     std::string getName() const;

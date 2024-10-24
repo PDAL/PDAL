@@ -37,7 +37,7 @@
 namespace pdal
 {
 
-PDAL_DLL void ThreadPool::go()
+PDAL_EXPORT void ThreadPool::go()
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     if (m_running)

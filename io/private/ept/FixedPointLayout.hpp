@@ -54,7 +54,7 @@ public:
         Dimension::Type type);
 
 protected:
-    PDAL_DLL virtual bool update(pdal::Dimension::Detail dimDetail,
+    PDAL_EXPORT virtual bool update(pdal::Dimension::Detail dimDetail,
         const std::string& name) override;
 };
 

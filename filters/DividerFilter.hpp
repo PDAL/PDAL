@@ -39,7 +39,7 @@
 namespace pdal
 {
 
-class PDAL_DLL DividerFilter : public Filter
+class PDAL_EXPORT DividerFilter : public Filter
 {
 public:
 

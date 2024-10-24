@@ -43,7 +43,7 @@ namespace pdal
 {
 
 
-class PDAL_DLL NitfWriter : public LasWriter
+class PDAL_EXPORT NitfWriter : public LasWriter
 {
 public:
     NitfWriter();

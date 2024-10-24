@@ -58,7 +58,7 @@ typedef std::shared_ptr<void> OGRGeometryPtr;
 
 class Arg;
 
-class PDAL_DLL OverlayFilter : public Filter, public Streamable
+class PDAL_EXPORT OverlayFilter : public Filter, public Streamable
 {
     struct PolyVal
     {

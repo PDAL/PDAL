@@ -44,7 +44,7 @@
 namespace pdal
 {
 
-class PDAL_DLL MemoryViewReader : public Reader, public Streamable
+class PDAL_EXPORT MemoryViewReader : public Reader, public Streamable
 {
 public:
     enum class Order

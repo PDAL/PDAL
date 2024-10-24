@@ -39,7 +39,7 @@
 namespace pdal
 {
 
-class PDAL_DLL DelaunayFilter : public Filter
+class PDAL_EXPORT DelaunayFilter : public Filter
 {
 public:
     DelaunayFilter& operator=(const DelaunayFilter&) = delete;

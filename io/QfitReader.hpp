@@ -52,7 +52,7 @@ enum QFIT_Format_Type
     QFIT_Format_Unknown = 128
 };
 
-class PDAL_DLL QfitReader : public pdal::Reader
+class PDAL_EXPORT QfitReader : public pdal::Reader
 {
 public:
     QfitReader();

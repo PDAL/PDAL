@@ -95,7 +95,7 @@ std::ostream& operator<<(std::ostream& out, const PointClasses& classes);
   \returns a deque of clusters (themselves vectors of PointIds).
 */
 template <class KDINDEX>
-PDAL_DLL std::deque<PointIdList> extractClusters(PointView& view, uint64_t min_points,
+PDAL_EXPORT std::deque<PointIdList> extractClusters(PointView& view, uint64_t min_points,
                                                  uint64_t max_points, double tolerance)
 {
     // Index the incoming PointView for subsequent radius searches.
@@ -157,22 +157,22 @@ PDAL_DLL std::deque<PointIdList> extractClusters(PointView& view, uint64_t min_p
     return clusters;
 }
 
-PDAL_DLL void ignoreDimRange(DimRange dr, PointViewPtr input, PointViewPtr keep,
+PDAL_EXPORT void ignoreDimRange(DimRange dr, PointViewPtr input, PointViewPtr keep,
                              PointViewPtr ignore);
-PDAL_DLL void ignoreDimRanges(std::vector<DimRange>& ranges,
+PDAL_EXPORT void ignoreDimRanges(std::vector<DimRange>& ranges,
     PointViewPtr input, PointViewPtr keep, PointViewPtr ignore);
 
-PDAL_DLL void ignoreClassBits(PointViewPtr input, PointViewPtr keep,
+PDAL_EXPORT void ignoreClassBits(PointViewPtr input, PointViewPtr keep,
                               PointViewPtr ignore, PointClasses classbits);
 
-PDAL_DLL void segmentLastReturns(PointViewPtr input, PointViewPtr last,
+PDAL_EXPORT void segmentLastReturns(PointViewPtr input, PointViewPtr last,
                                  PointViewPtr other);
 
-PDAL_DLL void segmentReturns(PointViewPtr input, PointViewPtr first,
+PDAL_EXPORT void segmentReturns(PointViewPtr input, PointViewPtr first,
                              PointViewPtr second, StringList returns);
 
 
-PDAL_DLL PointIdList farthestPointSampling(PointView& view, point_count_t count);
+PDAL_EXPORT PointIdList farthestPointSampling(PointView& view, point_count_t count);
 
 } // namespace Segmentation
 } // namespace pdal

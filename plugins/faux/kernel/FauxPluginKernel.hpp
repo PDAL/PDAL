@@ -39,7 +39,7 @@
 namespace pdal
 {
 
-class PDAL_DLL FauxPluginKernel : public Kernel
+class PDAL_EXPORT FauxPluginKernel : public Kernel
 {
 public:
     std::string getName() const;

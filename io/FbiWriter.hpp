@@ -45,7 +45,7 @@
 namespace pdal
 {
 
-class PDAL_DLL FbiWriter : public Writer
+class PDAL_EXPORT FbiWriter : public Writer
 {
 public:
     FbiWriter();

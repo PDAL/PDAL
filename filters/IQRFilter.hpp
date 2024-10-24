@@ -44,7 +44,7 @@ namespace pdal
 class ProgramArgs;
 class PointView;
 
-class PDAL_DLL IQRFilter : public Filter
+class PDAL_EXPORT IQRFilter : public Filter
 {
 public:
     IQRFilter() : Filter()

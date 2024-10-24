@@ -64,7 +64,7 @@ typedef std::vector<MetadataNodeImplPtr> MetadataImplList;
 typedef std::map<std::string, MetadataImplList> MetadataSubnodes;
 typedef std::vector<MetadataNode> MetadataNodeList;
 
-class PDAL_DLL MetadataNodeImpl
+class PDAL_EXPORT MetadataNodeImpl
 {
     friend class MetadataNode;
 
@@ -268,7 +268,7 @@ inline void MetadataNodeImpl::setValue(const double& d,
 }
 
 template <>
-void PDAL_DLL MetadataNodeImpl::setValue(const SpatialReference& ref);
+void PDAL_EXPORT MetadataNodeImpl::setValue(const SpatialReference& ref);
 
 template <>
 inline void MetadataNodeImpl::setValue(const BOX3D& b)
@@ -407,7 +407,7 @@ inline std::string value(const std::string&, const std::string& value)
 } // namespace MetadataDetail
 
 
-class PDAL_DLL MetadataNode
+class PDAL_EXPORT MetadataNode
 {
     friend class Metadata;
     friend inline
@@ -787,7 +787,7 @@ public:
     MetadataNode getNode() const
         { return m_root; }
 
-    static std::string PDAL_DLL inferType(const std::string& val);
+    static std::string PDAL_EXPORT inferType(const std::string& val);
 private:
     MetadataNode m_root;
     MetadataNode m_private;

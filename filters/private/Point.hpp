@@ -45,7 +45,7 @@ namespace pdal
 namespace filter
 {
 
-class PDAL_DLL Point : public Geometry
+class PDAL_EXPORT Point : public Geometry
 {
 public:
     Point();

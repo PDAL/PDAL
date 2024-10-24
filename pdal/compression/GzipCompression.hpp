@@ -45,11 +45,11 @@ class DeflateDecompressorImpl;
 class GzipDecompressor : public Decompressor
 {
 public:
-    PDAL_DLL GzipDecompressor(BlockCb cb);
-    PDAL_DLL ~GzipDecompressor();
+    PDAL_EXPORT GzipDecompressor(BlockCb cb);
+    PDAL_EXPORT ~GzipDecompressor();
 
-    PDAL_DLL void decompress(const char *buf, size_t bufsize);
-    PDAL_DLL void done();
+    PDAL_EXPORT void decompress(const char *buf, size_t bufsize);
+    PDAL_EXPORT void done();
 
 private:
     // Gzip uses deflate.

@@ -43,7 +43,7 @@ namespace copcwriter
     struct BaseInfo;
 }
 
-class PDAL_DLL CopcWriter : public Writer
+class PDAL_EXPORT CopcWriter : public Writer
 {
 public:
     CopcWriter();

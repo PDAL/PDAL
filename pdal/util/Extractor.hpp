@@ -46,7 +46,7 @@ namespace pdal
 /**
   Buffer wrapper for input of binary data from a buffer.
 */
-class PDAL_DLL Extractor
+class PDAL_EXPORT Extractor
 {
 public:
     /**
@@ -192,7 +192,7 @@ protected:
 /**
   Wrapper extraction of little-endian data from a buffer to host ordering.
 */
-class PDAL_DLL LeExtractor : public Extractor
+class PDAL_EXPORT LeExtractor : public Extractor
 {
 public:
     /**
@@ -347,7 +347,7 @@ public:
 /**
   Wrapper extraction of big-endian data from a buffer to host ordering.
 */
-class PDAL_DLL BeExtractor : public Extractor
+class PDAL_EXPORT BeExtractor : public Extractor
 {
 public:
     /**
@@ -503,7 +503,7 @@ public:
   Wrapper extraction of data from a buffer to host ordering.  Endianness of
   buffered data can be specified at run-time.
 */
-class PDAL_DLL SwitchableExtractor : public Extractor
+class PDAL_EXPORT SwitchableExtractor : public Extractor
 {
 public:
     static const bool DefaultIsLittleEndian = true;

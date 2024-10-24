@@ -41,7 +41,7 @@
 namespace pdal
 {
 
-class PDAL_DLL RasterWriter : public Writer
+class PDAL_EXPORT RasterWriter : public Writer
 {
 public:
     std::string getName() const;

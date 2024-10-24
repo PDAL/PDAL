@@ -39,7 +39,7 @@
 namespace pdal
 {
 
-class PDAL_DLL LiTreeFilter : public Filter
+class PDAL_EXPORT LiTreeFilter : public Filter
 {
 public:
     LiTreeFilter() : Filter() {}

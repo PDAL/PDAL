@@ -264,22 +264,22 @@ inline void writeProgress(int fd, const std::string& type,
 }
 
 std::string dllDir();
-std::string PDAL_DLL toJSON(const MetadataNode& m);
-void PDAL_DLL toJSON(const MetadataNode& m, std::ostream& o);
-uintmax_t PDAL_DLL fileSize(const std::string& path);
-std::istream PDAL_DLL *openFile(const std::string& path, bool asBinary = true);
-std::ostream PDAL_DLL *createFile(const std::string& path,
+std::string PDAL_EXPORT toJSON(const MetadataNode& m);
+void PDAL_EXPORT toJSON(const MetadataNode& m, std::ostream& o);
+uintmax_t PDAL_EXPORT fileSize(const std::string& path);
+std::istream PDAL_EXPORT *openFile(const std::string& path, bool asBinary = true);
+std::ostream PDAL_EXPORT *createFile(const std::string& path,
     bool asBinary = true);
-void PDAL_DLL closeFile(std::istream *in);
-void PDAL_DLL closeFile(std::ostream *out);
-std::string PDAL_DLL fetchRemote(const std::string& path);
-bool PDAL_DLL isRemote(const std::string& path);
-bool PDAL_DLL fileExists(const std::string& path);
-std::vector<std::string> PDAL_DLL maybeGlob(const std::string& path);
-double PDAL_DLL computeHausdorff(PointViewPtr srcView, PointViewPtr candView);
-std::pair<double, double> PDAL_DLL computeHausdorffPair(PointViewPtr srcView, PointViewPtr candView);
-double PDAL_DLL computeChamfer(PointViewPtr srcView, PointViewPtr candView);
-std::string PDAL_DLL tempFilename(const std::string& path);
+void PDAL_EXPORT closeFile(std::istream *in);
+void PDAL_EXPORT closeFile(std::ostream *out);
+std::string PDAL_EXPORT fetchRemote(const std::string& path);
+bool PDAL_EXPORT isRemote(const std::string& path);
+bool PDAL_EXPORT fileExists(const std::string& path);
+std::vector<std::string> PDAL_EXPORT maybeGlob(const std::string& path);
+double PDAL_EXPORT computeHausdorff(PointViewPtr srcView, PointViewPtr candView);
+std::pair<double, double> PDAL_EXPORT computeHausdorffPair(PointViewPtr srcView, PointViewPtr candView);
+double PDAL_EXPORT computeChamfer(PointViewPtr srcView, PointViewPtr candView);
+std::string PDAL_EXPORT tempFilename(const std::string& path);
 
 
 } // namespace Utils

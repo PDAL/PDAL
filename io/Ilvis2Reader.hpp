@@ -54,7 +54,7 @@ namespace pdal
 
 namespace pdal
 {
-class PDAL_DLL Ilvis2Reader : public Reader, public Streamable
+class PDAL_EXPORT Ilvis2Reader : public Reader, public Streamable
 {
 public:
     enum class IlvisMapping

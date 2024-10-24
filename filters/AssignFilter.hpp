@@ -42,7 +42,7 @@ namespace pdal
 
 struct AssignArgs;
 
-class PDAL_DLL AssignFilter : public Filter, public Streamable
+class PDAL_EXPORT AssignFilter : public Filter, public Streamable
 {
 public:
     AssignFilter();

@@ -39,7 +39,7 @@
 namespace pdal
 {
 
-class PDAL_DLL GpsTimeConvert : public Filter
+class PDAL_EXPORT GpsTimeConvert : public Filter
 {
 public:
     GpsTimeConvert() : Filter()

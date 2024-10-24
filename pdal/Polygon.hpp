@@ -44,7 +44,7 @@ namespace pdal
 class BOX2D;
 class BOX3D;
 
-class PDAL_DLL Polygon : public Geometry
+class PDAL_EXPORT Polygon : public Geometry
 {
     using Point = std::pair<double, double>;
     using Ring = std::vector<Point>;

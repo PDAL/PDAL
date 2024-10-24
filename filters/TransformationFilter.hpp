@@ -44,7 +44,7 @@
 namespace pdal
 {
 
-class PDAL_DLL TransformationFilter : public Filter, public Streamable
+class PDAL_EXPORT TransformationFilter : public Filter, public Streamable
 {
 public:
     class Transform;
@@ -78,20 +78,20 @@ public:
     typedef double ValueType;
     typedef std::array<ValueType, Size> ArrayType;
 
-    PDAL_DLL Transform();
-    PDAL_DLL Transform(const ArrayType& arr);
+    PDAL_EXPORT Transform();
+    PDAL_EXPORT Transform(const ArrayType& arr);
 
-    PDAL_DLL double operator[](size_t off) const
+    PDAL_EXPORT double operator[](size_t off) const
         { return m_vals[off]; }
-    PDAL_DLL double& operator[](size_t off)
+    PDAL_EXPORT double& operator[](size_t off)
         { return m_vals[off]; }
 
 private:
     ArrayType m_vals;
 
-    PDAL_DLL friend std::istream& operator>>(std::istream& in,
+    PDAL_EXPORT friend std::istream& operator>>(std::istream& in,
         pdal::TransformationFilter::Transform& xform);
-    PDAL_DLL friend std::ostream& operator<<(std::ostream& out,
+    PDAL_EXPORT friend std::ostream& operator<<(std::ostream& out,
         const pdal::TransformationFilter::Transform& xform);
 };
 

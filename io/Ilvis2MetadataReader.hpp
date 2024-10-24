@@ -45,7 +45,7 @@
 namespace pdal
 {
 
-class PDAL_DLL Ilvis2MetadataReader
+class PDAL_EXPORT Ilvis2MetadataReader
 {
 public:
     struct error : public std::runtime_error

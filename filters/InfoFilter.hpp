@@ -44,7 +44,7 @@ class BOX3D;
 
 // This is just a pass-through filter, which collects some data about
 // the points that are fed through it
-class PDAL_DLL InfoFilter : public Filter, public Streamable
+class PDAL_EXPORT InfoFilter : public Filter, public Streamable
 {
     struct NearPoint
     {

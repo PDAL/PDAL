@@ -41,10 +41,10 @@
 
 namespace pdal
 {
-class PDAL_DLL E57Writer : public pdal::Writer, public pdal::Streamable
+class PDAL_EXPORT E57Writer : public pdal::Writer, public pdal::Streamable
 {
 
-    class PDAL_DLL ChunkWriter
+    class PDAL_EXPORT ChunkWriter
     {
     public:
         ChunkWriter(const std::vector<std::string>& dimensionsToWrite,

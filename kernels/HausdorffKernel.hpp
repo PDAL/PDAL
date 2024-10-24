@@ -43,7 +43,7 @@ namespace pdal
 
 class PointView;
 
-class PDAL_DLL HausdorffKernel : public Kernel
+class PDAL_EXPORT HausdorffKernel : public Kernel
 {
 public:
     std::string getName() const;

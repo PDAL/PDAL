@@ -40,7 +40,7 @@
 namespace pdal
 {
 
-class PDAL_DLL SampleFilter : public Filter, public Streamable
+class PDAL_EXPORT SampleFilter : public Filter, public Streamable
 {
     using Voxel = std::tuple<int, int, int>;
     using Coord = std::tuple<double, double, double>;

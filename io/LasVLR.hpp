@@ -74,7 +74,7 @@ static const char PDAL_USER_ID[] = "PDAL";
 class LasVLR;
 typedef std::vector<LasVLR> VlrList;
 
-class PDAL_DLL LasVLR
+class PDAL_EXPORT LasVLR
 {
 public:
     static const uint16_t MAX_DATA_SIZE = 65535;

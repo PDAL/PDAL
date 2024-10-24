@@ -43,7 +43,7 @@ namespace pdal
 struct DimRange;
 class KD3Index;
 
-class PDAL_DLL NeighborClassifierFilter : public Filter
+class PDAL_EXPORT NeighborClassifierFilter : public Filter
 {
 public:
     NeighborClassifierFilter();

@@ -49,7 +49,7 @@ namespace pdal
 
     typedef std::map<pdal::Dimension::Id, std::unique_ptr<arrow::ArrayBuilder> > DimBuilderMap;
 
-class PDAL_DLL ArrowWriter  : public Writer, public Streamable
+class PDAL_EXPORT ArrowWriter  : public Writer, public Streamable
 {
 public:
     ArrowWriter();

@@ -46,7 +46,7 @@ namespace pdal
 
 namespace gdal { class SpatialRef; }
 
-class PDAL_DLL TIndexReader : public Reader, public Streamable
+class PDAL_EXPORT TIndexReader : public Reader, public Streamable
 {
     struct FileInfo
     {

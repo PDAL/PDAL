@@ -41,7 +41,7 @@
 
 namespace e57
 {
-class PDAL_DLL Scan
+class PDAL_EXPORT Scan
 {
 
 public:

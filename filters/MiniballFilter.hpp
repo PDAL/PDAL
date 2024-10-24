@@ -41,7 +41,7 @@
 namespace pdal
 {
 
-class PDAL_DLL MiniballFilter : public Filter
+class PDAL_EXPORT MiniballFilter : public Filter
 {
 public:
     MiniballFilter()

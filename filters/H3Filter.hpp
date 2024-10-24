@@ -48,7 +48,7 @@ namespace pdal
 class SrsTransform;
 
 
-class PDAL_DLL H3Filter : public Filter,  public Streamable
+class PDAL_EXPORT H3Filter : public Filter,  public Streamable
 {
 public:
     H3Filter();

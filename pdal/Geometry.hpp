@@ -48,7 +48,7 @@ namespace pdal
 
 class BOX3D;
 
-class PDAL_DLL Geometry
+class PDAL_EXPORT Geometry
 {
 
 public:
@@ -94,9 +94,9 @@ public:
 protected:
     std::unique_ptr<OGRGeometry> m_geom;
 
-    friend PDAL_DLL std::ostream& operator<<(std::ostream& ostr,
+    friend PDAL_EXPORT std::ostream& operator<<(std::ostream& ostr,
         const Geometry& p);
-    friend PDAL_DLL std::istream& operator>>(std::istream& istr,
+    friend PDAL_EXPORT std::istream& operator>>(std::istream& istr,
         Geometry& p);
 };
 

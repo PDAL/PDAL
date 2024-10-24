@@ -43,7 +43,7 @@ namespace pdal
 
 class Expression;
 
-class PDAL_DLL MongoExpressionFilter : public Filter, public Streamable
+class PDAL_EXPORT MongoExpressionFilter : public Filter, public Streamable
 {
 public:
     MongoExpressionFilter();

@@ -67,7 +67,7 @@ namespace copc
     using HierarchyPage = Hierarchy;
 }
 
-class PDAL_DLL CopcReader : public Reader, public Streamable
+class PDAL_EXPORT CopcReader : public Reader, public Streamable
 {
 public:
     CopcReader();

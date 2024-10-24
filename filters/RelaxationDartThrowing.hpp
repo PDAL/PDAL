@@ -43,7 +43,7 @@ namespace pdal
 
 class Options;
 
-class PDAL_DLL RelaxationDartThrowing : public pdal::Filter
+class PDAL_EXPORT RelaxationDartThrowing : public pdal::Filter
 {
 public:
     RelaxationDartThrowing() : Filter() {}

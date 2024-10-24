@@ -44,7 +44,7 @@ namespace pdal
 
 struct RasterLimits;
 
-class PDAL_DLL FaceRasterFilter : public pdal::Filter
+class PDAL_EXPORT FaceRasterFilter : public pdal::Filter
 {
 public:
     FaceRasterFilter();

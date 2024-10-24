@@ -48,7 +48,7 @@ namespace pdal
 */
 #pragma warning (push)
 #pragma warning (disable: 4251)
-class PDAL_DLL Charbuf : public std::streambuf
+class PDAL_EXPORT Charbuf : public std::streambuf
 {
 public:
     /**

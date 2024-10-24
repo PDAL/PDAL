@@ -14,7 +14,7 @@ namespace pdal {
 // memory. Adjust appropriately the scale and offset in the header of the output
 // file.
     
-class PDAL_DLL FilterStreamer : public Filter, public Streamable
+class PDAL_EXPORT FilterStreamer : public Filter, public Streamable
 {
 public:
     std::string getName() const;

@@ -68,7 +68,7 @@ struct VlrOptionInfo
     std::string m_description;
 };
 
-class PDAL_DLL LasWriter : public FlexWriter, public Streamable
+class PDAL_EXPORT LasWriter : public FlexWriter, public Streamable
 {
     friend class LasTester;
     friend class NitfWriter;

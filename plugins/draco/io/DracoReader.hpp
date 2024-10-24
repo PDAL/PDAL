@@ -43,7 +43,7 @@
 namespace pdal
 {
 
-class PDAL_DLL DracoReader : public Reader
+class PDAL_EXPORT DracoReader : public Reader
 {
 public:
 

@@ -53,7 +53,7 @@ namespace pdal
 {
 
 
-class PDAL_DLL ArrowReader : public pdal::Reader, public pdal::Streamable
+class PDAL_EXPORT ArrowReader : public pdal::Reader, public pdal::Streamable
 {
 public:
     ArrowReader();

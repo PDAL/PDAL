@@ -46,7 +46,7 @@ namespace pdal
 namespace copc
 {
 
-class PDAL_DLL Key
+class PDAL_EXPORT Key
 {
     // A depth/X/Y/Z key representing a data node, as well as the bounds of the contained data.
 public:

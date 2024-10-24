@@ -42,7 +42,7 @@ class OLeStream;
 
 typedef std::shared_ptr<std::ostream> FileStreamPtr;
 
-class PDAL_DLL GltfWriter : public Writer
+class PDAL_EXPORT GltfWriter : public Writer
 {
     struct ViewData;
 

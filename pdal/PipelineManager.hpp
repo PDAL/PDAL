@@ -58,7 +58,7 @@ struct StageCreationOptions
     std::string m_tag;
 };
 
-class PDAL_DLL PipelineManager
+class PDAL_EXPORT PipelineManager
 {
     FRIEND_TEST(json, tags);
 public:

@@ -43,7 +43,7 @@ namespace pdal
 
 class ProgramArgs;
 
-class PDAL_DLL ClusterFilter : public Filter
+class PDAL_EXPORT ClusterFilter : public Filter
 {
 public:
     ClusterFilter() : Filter()

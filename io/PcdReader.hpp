@@ -43,7 +43,7 @@
 namespace pdal
 {
 
-class PDAL_DLL PcdReader : public Reader, public Streamable
+class PDAL_EXPORT PcdReader : public Reader, public Streamable
 {
 public:
     std::string getName() const;

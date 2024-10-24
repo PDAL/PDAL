@@ -42,7 +42,7 @@
 namespace pdal
 {
 
-class PDAL_DLL MatlabFilter : public Filter
+class PDAL_EXPORT MatlabFilter : public Filter
 {
 public:
     MatlabFilter() : Filter()

@@ -62,7 +62,7 @@ namespace ept
     using AddonList = std::vector<Addon>;
 }
 
-class PDAL_DLL EptAddonWriter : public NoFilenameWriter
+class PDAL_EXPORT EptAddonWriter : public NoFilenameWriter
 {
 public:
     EptAddonWriter();

@@ -45,7 +45,7 @@ namespace pdal
 class PointLayout;
 class PointView;
 
-class PDAL_DLL VoxelCenterNearestNeighborFilter : public Filter
+class PDAL_EXPORT VoxelCenterNearestNeighborFilter : public Filter
 {
 public:
     VoxelCenterNearestNeighborFilter() : Filter()

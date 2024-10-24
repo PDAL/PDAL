@@ -49,7 +49,7 @@ namespace gdal { class Raster; }
 // for a given dimension
 // specified dimensions. It also supports scaling the data by a multiplier
 // on a per-dimension basis.
-class PDAL_DLL ColorinterpFilter : public Filter, public Streamable
+class PDAL_EXPORT ColorinterpFilter : public Filter, public Streamable
 {
 public:
 

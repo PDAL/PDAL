@@ -41,7 +41,7 @@
 namespace pdal
 {
 
-class PDAL_DLL PcdWriter : public Writer
+class PDAL_EXPORT PcdWriter : public Writer
 {
     struct DimSpec
     {

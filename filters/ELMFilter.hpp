@@ -45,7 +45,7 @@ namespace pdal
 class PointLayout;
 class PointView;
 
-class PDAL_DLL ELMFilter : public Filter
+class PDAL_EXPORT ELMFilter : public Filter
 {
 public:
     ELMFilter() : Filter()

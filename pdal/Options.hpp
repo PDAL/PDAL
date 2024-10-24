@@ -48,9 +48,9 @@ namespace pdal
 class Options;
 class Option;
 
-class PDAL_DLL Option
+class PDAL_EXPORT Option
 {
-    PDAL_DLL friend std::ostream&
+    PDAL_EXPORT friend std::ostream&
         operator<<(std::ostream& ostr, const Option&);
 public:
 
@@ -123,9 +123,9 @@ private:
 };
 
 
-class PDAL_DLL Options
+class PDAL_EXPORT Options
 {
-    PDAL_DLL friend std::ostream&
+    PDAL_EXPORT friend std::ostream&
         operator<<(std::ostream& ostr, const Options&);
 public:
     Options()
