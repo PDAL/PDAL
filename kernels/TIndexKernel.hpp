@@ -92,7 +92,7 @@ private:
     pdal::Polygon prepareGeometry(const FileInfo& fileInfo);
     void createFields();
     void fastBoundary(Stage& reader, FileInfo& fileInfo);
-    void slowBoundary(PipelineManager& manager, FileInfo& fileInfo);
+    void slowBoundary(PipelineManager& manager);
     std::string makeMultiPolygon(const std::string& wkt);
 
     bool isFileIndexed( const FieldIndexes& indexes, const FileInfo& fileInfo);
@@ -112,6 +112,7 @@ private:
     int32_t m_density;
     double m_edgeLength;
     uint32_t m_sampleSize;
+    std::string m_boundaryExpr;
 
     void *m_dataset;
     void *m_layer;

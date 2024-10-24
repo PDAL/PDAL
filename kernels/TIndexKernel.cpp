@@ -204,6 +204,8 @@ void TIndexKernel::addSubSwitches(ProgramArgs& args,
         args.addSynonym("resolution", "edge_length");
         args.add("sample_size", "Sample size for auto-edge length calculation in "
             "internal hexbin filter (exact boundary)", m_sampleSize, 5000U);
+        args.add("where", "Expression describing points to be processed for exact "
+            "boundary creation", m_boundaryExpr);
     }
     else if (subcommand == "merge")
     {
@@ -568,9 +570,8 @@ void TIndexKernel::fastBoundary(Stage& reader, FileInfo& fileInfo)
 }
 
 
-void TIndexKernel::slowBoundary(PipelineManager& manager, FileInfo& fileInfo)
+void TIndexKernel::slowBoundary(PipelineManager& manager)
 {
-    manager.prepare();
     manager.execute(ExecMode::PreferStream);
 }
 
@@ -592,10 +593,15 @@ void TIndexKernel::getFileInfo(FileInfo& fileInfo)
         if (!fast)
         {
             TindexBoundary hexer{m_density, m_edgeLength, m_sampleSize};
-
+            if (m_boundaryExpr.size())
+            {
+                Options opts;
+                opts.add("where", m_boundaryExpr);
+                hexer.addOptions(opts);
+            }
             hexer.setInput(reader);
             manager.addStage(&hexer);
-            slowBoundary(manager, fileInfo);
+            slowBoundary(manager);
 
             fileInfo.m_boundary = hexer.toWKT();
             fileInfo.m_srs = hexer.getSpatialReference().getWKT();

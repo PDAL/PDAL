@@ -34,6 +34,8 @@ $ pdal tindex create <tindex> <filespec>
 --resolution           Cell edge length to be used when creating exact boundaries
 --sample_size          Sample size for auto-edge length calculation in internal
                        hexbin filter (exact boundary)
+--where                Expression describing points to be processed for exact
+                       boundary creation
 ```
 
 This command will index the files referred to by `filespec` and place the
