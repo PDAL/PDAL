@@ -162,6 +162,8 @@ void BpfWriter::readyFile(const std::string& filename,
 {
     m_curFilename = filename;
     m_stream.open(filename);
+    if (!m_stream.isOpen())
+        throwError("Unable to open stream for " + filename);
     m_header.m_version = 3;
     m_header.m_numDim = m_dims.size();
     m_header.m_numPts = 0;
