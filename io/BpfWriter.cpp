@@ -171,9 +171,11 @@ void BpfWriter::readyFile(const std::string& filename,
 
     if (m_coordId.m_auto)
     {
-        m_header.m_coordId = 0;
-        if (m_header.trySetSpatialReference(srs))
-            m_header.m_coordType = Utils::toNative(BpfCoordType::UTM);
+        if (!m_header.m_coordId)
+        {
+            if (m_header.trySetSpatialReference(srs))
+                m_header.m_coordType = Utils::toNative(BpfCoordType::UTM);
+        }
     }
 
     // We will re-write the header and dimensions to account for the point
