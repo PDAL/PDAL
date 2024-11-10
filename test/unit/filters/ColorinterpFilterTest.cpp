@@ -47,15 +47,7 @@ namespace
 
 std::string makeColor()
 {
-    // Red is specified.  Green and blue are 0.
-    static uint8_t rgb[12] = { 1, 2, 3, 4 };
-
-    std::string ptr = Utils::toString(&rgb);
-    if (ptr[0] != '0' || ptr[1] != 'x')
-        ptr = "0x" + ptr;
-    std::ostringstream ss;
-    ss << "MEM:::PIXELS=4,LINES=1,BANDS=3,DATAPOINTER=" << ptr;
-    return ss.str();
+    return Support::datapath("gdal/1234_red_0_green_0_blue.tif");
 }
 
 } // unnamed namespace
