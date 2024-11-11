@@ -3,7 +3,7 @@
 .. |ASPRSLAS| replace:: `ASPRS LAS <http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html>`__
 .. |PCL| replace:: `PCL <http://pointclouds.org>`__
 .. |PDAL| replace:: `PDAL <https://pdal.io/>`__
-.. |Proj.4| replace:: `Proj.4 <http://proj4.org>`__
+.. |PROJ| replace:: `PROJ <https://proj.org>`__
 .. |GeoTIFF| replace:: `GeoTIFF <https://trac.osgeo.org/geotiff/>`__
 .. |libLAS| replace:: `libLAS <http://liblas.org/>`__
 .. |QGIS| replace:: `QGIS <http://qgis.org>`__
