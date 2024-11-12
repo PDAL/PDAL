@@ -1,8 +1,8 @@
 FROM condaforge/mambaforge:latest AS build
 LABEL org.opencontainers.image.authors="howard@hobu.co"
 
-ENV LANG C.UTF-8
-ENV LC_ALL C.UTF-8
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
 
 RUN conda create -n pdal -y
 ARG GITHUB_SHA
@@ -58,7 +58,7 @@ RUN conda-pack -n pdal --dest-prefix=/opt/conda/envs/pdal -o  /tmp/env.tar && \
 
 FROM condaforge/miniforge3
 
-ENV CONDAENV "/opt/conda/envs/pdal"
+ENV CONDAENV="/opt/conda/envs/pdal"
 COPY --from=build /venv "/opt/conda/envs/pdal"
 
 ENV PROJ_NETWORK=TRUE
@@ -67,7 +67,7 @@ ENV GDAL_DATA="${CONDAENV}/share/gdal"
 ENV PDAL_DRIVER_PATH="${CONDAENV}/lib:${CONDAENV}/lib/python3.12/site-packages/pdal/"
 ENV GEOTIFF_CSV="${CONDAENV}/share/epsg_csv"
 ENV GDAL_DRIVER_PATH="${CONDAENV}/lib/gdalplugins"
-ENV PATH $PATH:${CONDAENV}/bin
+ENV PATH="$PATH:${CONDAENV}/bin"
 ENV GTIFF_REPORT_COMPD_CS=TRUE
 ENV REPORT_COMPD_CS=TRUE
 ENV OAMS_TRADITIONAL_GIS_ORDER=TRUE
