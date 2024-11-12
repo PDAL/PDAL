@@ -164,7 +164,7 @@ $ pdal info ./exercises/translation/csite-dd.laz --all \
    option. This is useful in situations where the coordinate system is not
    correct, not completely specified, or your system doesn't have all of the
    required supporting coordinate system dictionaries.
-2. PDAL uses {{ Proj.4 }} library for reprojection. This library includes the
+2. PDAL uses {{ PROJ }} library for reprojection. This library includes the
    capability to do both vertical and horizontal datum transformations.
 
 [asprs las]: http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
