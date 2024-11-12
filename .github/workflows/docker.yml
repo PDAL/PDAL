@@ -56,8 +56,8 @@ jobs:
             VERSION=${GITHUB_REF/refs\/tags\//}
           fi
           BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-          echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_OUTPUT
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
       - name: Build image
         uses: docker/build-push-action@v6
         with:
