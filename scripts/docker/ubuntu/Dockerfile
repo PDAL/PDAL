@@ -1,7 +1,8 @@
-FROM condaforge/mambaforge:latest as build
-MAINTAINER Howard Butler <howard@hobu.co>
+FROM condaforge/mambaforge:latest AS build
+LABEL org.opencontainers.image.authors="howard@hobu.co"
 
-ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
 
 RUN conda create -n pdal -y
 ARG GITHUB_SHA
@@ -10,7 +11,9 @@ ARG GITHUB_SERVER_URL="https://github.com"
 
 SHELL ["conda", "run", "-n", "pdal", "/bin/bash", "-c"]
 
-RUN mamba install -c conda-forge git compilers conda-pack cmake make ninja sysroot_linux-64=2.17 && \
+RUN mamba install -c conda-forge git compilers conda-pack \
+    python=3.12 numpy=2.1 scikit-build-core \
+    cmake make ninja && \
     mamba install --yes -c conda-forge pdal --only-deps
 
 RUN git clone "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" pdal && \
@@ -21,14 +24,15 @@ RUN mkdir -p pdal/build && \
     cd pdal/build  && \
     CXXFLAGS="-Werror=strict-aliasing" LDFLAGS="-Wl,-rpath-link,$CONDA_PREFIX/lib" cmake -G Ninja  \
         -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_LIBRARY_PATH:FILEPATH="$CONDA_PREFIX/lib" \
-        -DCMAKE_INCLUDE_PATH:FILEPATH="$CONDA_PREFIX/include" \
+        -DCMAKE_PREFIX_PATH:FILEPATH="$CONDA_PREFIX/lib" \
         -DCMAKE_INSTALL_PREFIX="$CONDA_PREFIX" \
-        -DBUILD_PLUGIN_CPD=OFF \
+        -DBUILD_PLUGIN_CPD=ON \
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
         -DBUILD_PLUGIN_HDF=ON \
+        -DBUILD_PLUGIN_ARROW=ON \
+        -DBUILD_PLUGIN_DRACO=ON \
         -DBUILD_PLUGIN_TILEDB=ON \
         -DBUILD_PLUGIN_E57=ON \
         -DBUILD_PGPOINTCLOUD_TESTS=OFF \
@@ -44,6 +48,10 @@ RUN cd pdal/build  && \
 RUN cd pdal/build  && \
     ninja install
 
+RUN git clone https://github.com/PDAL/python-plugins.git pdal-python && \
+    cd pdal-python && git checkout 1.6.2  && \
+    pip install -vv . --no-deps
+
 RUN conda-pack -n pdal --dest-prefix=/opt/conda/envs/pdal -o  /tmp/env.tar && \
      mkdir /venv && cd /venv && tar xf /tmp/env.tar  && \
      rm /tmp/env.tar
@@ -56,6 +64,7 @@ COPY --from=build /venv "/opt/conda/envs/pdal"
 ENV PROJ_NETWORK=TRUE
 ENV PROJ_DATA="${CONDAENV}/share/proj"
 ENV GDAL_DATA="${CONDAENV}/share/gdal"
+ENV PDAL_DRIVER_PATH="${CONDAENV}/lib:${CONDAENV}/lib/python3.12/site-packages/pdal/"
 ENV GEOTIFF_CSV="${CONDAENV}/share/epsg_csv"
 ENV GDAL_DRIVER_PATH="${CONDAENV}/lib/gdalplugins"
 ENV PATH $PATH:${CONDAENV}/bin
