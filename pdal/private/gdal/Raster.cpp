@@ -349,8 +349,10 @@ GDALError Raster::open(StringList options)
     }
     opts.push_back(NULL);
 
+    CPLSetThreadLocalConfigOption("GDAL_MEM_ENABLE_OPEN", "ON" );
     m_ds = (GDALDataset *)GDALOpenEx(m_filename.c_str(),
         GDAL_OF_READONLY | GDAL_OF_RASTER, driverP, nullptr, const_cast<char **>(opts.data()));
+    CPLSetThreadLocalConfigOption("GDAL_MEM_ENABLE_OPEN", "OFF" );
     return wake();
 }
 
