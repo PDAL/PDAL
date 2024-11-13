@@ -323,7 +323,7 @@ std::vector<uint8_t> Utils::base64_decode(std::string const& encoded_string)
 FILE* Utils::portable_popen(const std::string& command, const std::string& mode)
 {
 #ifdef _WIN32
-    return _popen(dos_command.c_str(), mode.c_str());
+    return _popen(command.c_str(), mode.c_str());
 #else
     return popen(command.c_str(), mode.c_str());
 #endif
