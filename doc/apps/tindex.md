@@ -23,10 +23,20 @@ $ pdal tindex create <tindex> <filespec>
 --lyr_name             OGR layer name to write into datasource
 --tindex_name          Tile index column name
 --ogrdriver, -f        OGR driver name to use
+--absolute_path        Convert the tile index filename to absolute path when 
+                       creating a new file with OGR
 --t_srs                Target SRS of tile index
 --a_srs                Assign SRS of tile with no SRS to this value
---write_absolute_path  Write absolute rather than relative file paths
 --stdin, -s            Read filespec pattern from standard input
+--threads              Number of threads to use for file boundary creation
+--simplify             Simplify the file's exact boundary
+--threshold            Number of points a cell must contain to be declared 
+                       positive space, when creating exact boundaries
+--resolution           Cell edge length to be used when creating exact boundaries
+--sample_size          Sample size for auto-edge length calculation in internal
+                       hexbin filter (exact boundary)
+--where                Expression describing points to be processed for exact
+                       boundary creation
 ```
 
 This command will index the files referred to by `filespec` and place the
@@ -41,6 +51,14 @@ Shapefile".  Any filetype that can be handled by
 In vector file-speak, each file specified by `filespec` is stored as a
 feature in a layer in the index file. The `filespec` is a [glob pattern](http://man7.org/linux/man-pages/man7/glob.7.html).  and normally needs to be
 quoted to prevent shell expansion of wildcard characters.
+
+Exact file boundaries (used when `--fast_boundary` is not set to `true`)
+are created with a grid of tessellated hexagons, in a modified version of
+{ref}`filters.hexbin`. This is controlled with the `simplify`, `threshold`,
+`resolution` and `sample_size` options.
+
+Creation mode also supports parallel file processing by specifying the `threads`
+option.
 
 ## tindex Merge Mode
 
