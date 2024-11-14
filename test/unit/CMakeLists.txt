@@ -34,7 +34,7 @@ PDAL_ADD_TEST(pdal_eigen_test
         ${PDAL_SRC_DIR}/private/MathUtils.cpp
 
     INCLUDES
-        ${PDAL_VENDOR_DIR}/eigen
+        ${PDAL_VENDOR_EIGEN_DIR}
 )
 PDAL_ADD_TEST(pdal_file_utils_test FILES FileUtilsTest.cpp)
 PDAL_ADD_TEST(pdal_georeference_test FILES GeoreferenceTest.cpp)
@@ -43,7 +43,7 @@ PDAL_ADD_TEST(pdal_kdindex_test
         KDIndexTest.cpp
     INCLUDES
         ${PDAL_VENDOR_DIR}
-        ${PDAL_VENDOR_DIR}/eigen
+        ${PDAL_VENDOR_EIGEN_DIR}
 )
 PDAL_ADD_TEST(pdal_kernel_test FILES KernelTest.cpp)
 PDAL_ADD_TEST(pdal_log_test FILES LogTest.cpp)
@@ -52,7 +52,7 @@ PDAL_ADD_TEST(pdal_math_utils_test
         MathUtilsTest.cpp
         ${PDAL_SRC_DIR}/private/MathUtils.cpp
     INCLUDES
-        ${PDAL_VENDOR_DIR}/eigen
+        ${PDAL_VENDOR_EIGEN_DIR}
 )
 PDAL_ADD_TEST(pdal_metadata_test FILES MetadataTest.cpp)
 PDAL_ADD_TEST(pdal_oldpclblock_test FILES OldPCLBlockTest.cpp)
@@ -84,7 +84,7 @@ PDAL_ADD_TEST(pdal_point_view_test
     FILES
         PointViewTest.cpp
     INCLUDES
-        ${PDAL_VENDOR_DIR}/eigen
+        ${PDAL_VENDOR_EIGEN_DIR}
 )
 PDAL_ADD_TEST(pdal_point_table_test FILES PointTableTest.cpp)
 
@@ -227,13 +227,13 @@ PDAL_ADD_TEST(pdal_io_pcd_reader_test
     FILES
         io/PcdReaderTest.cpp
     INCLUDES
-        ${PDAL_VENDOR_DIR}/eigen
+        ${PDAL_VENDOR_EIGEN_DIR}
 )
 PDAL_ADD_TEST(pdal_io_pcd_writer_test
     FILES
         io/PcdWriterTest.cpp
     INCLUDES
-        ${PDAL_VENDOR_DIR}/eigen
+        ${PDAL_VENDOR_EIGEN_DIR}
 )
 PDAL_ADD_TEST(pdal_io_ply_reader_test
     FILES
@@ -279,7 +279,7 @@ PDAL_ADD_TEST(pdal_i3s_obb_test
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
         ${PDAL_INCLUDE_DIR}
-        ${PDAL_VENDOR_DIR}/eigen
+        ${PDAL_VENDOR_EIGEN_DIR}
 )
 
 if (BUILD_I3S_TESTS)
@@ -300,7 +300,7 @@ PDAL_ADD_TEST(pdal_filters_chipper_test
         filters/ChipperTest.cpp
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
-        ${PDAL_VENDOR_DIR}/eigen
+        ${PDAL_VENDOR_EIGEN_DIR}
 )
 PDAL_ADD_TEST(pdal_filters_nndistance_test
     FILES
@@ -360,7 +360,7 @@ PDAL_ADD_TEST(pdal_filters_icp_test
     FILES
         filters/IcpFilterTest.cpp
     INCLUDES
-        ${PDAL_VENDOR_DIR}/eigen
+        ${PDAL_VENDOR_EIGEN_DIR}
 )
 PDAL_ADD_TEST(pdal_filters_info_test FILES filters/InfoFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_lloydkmeans_test FILES filters/LloydKMeansFilterTest.cpp)
@@ -382,7 +382,7 @@ PDAL_ADD_TEST(pdal_filters_planefit_test
     FILES
         filters/PlaneFitFilterTest.cpp
     INCLUDES
-        ${PDAL_VENDOR_DIR}/eigen)
+        ${PDAL_VENDOR_EIGEN_DIR})
 PDAL_ADD_TEST(pdal_filters_pmf_test FILES filters/PMFFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_reprojection_test FILES
     filters/ReprojectionFilterTest.cpp)
@@ -410,11 +410,23 @@ PDAL_ADD_TEST(pdal_filters_splitter_test
     FILES
         filters/SplitterTest.cpp
     INCLUDES
-        ${PDAL_VENDOR_DIR}/eigen)
+        ${PDAL_VENDOR_EIGEN_DIR})
 PDAL_ADD_TEST(pdal_filters_stats_test FILES filters/StatsFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_transformation_test FILES
     filters/TransformationFilterTest.cpp)
-PDAL_ADD_TEST(pdal_filters_hexbin_test FILES filters/HexbinFilterTest.cpp)
+    PDAL_ADD_TEST(pdal_filters_hexbin_test
+    FILES
+        filters/HexbinFilterTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_DIR}/h3/include
+    LINK_WITH
+        ${PDAL_H3_LIB_NAME}
+)
+target_compile_definitions(pdal_filters_hexbin_test
+    PRIVATE
+        H3_PREFIX=PDALH3
+)
+
 PDAL_ADD_TEST(pdal_filters_voxel_test FILES filters/VoxelTest.cpp)
 PDAL_ADD_TEST(pdal_filters_voxel_downsize_test FILES filters/VoxelDownsizeFilterTest.cpp)
 

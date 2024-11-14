@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 3.13)
 
-project(PDAL VERSION 2.7.0 LANGUAGES CXX C)
+project(PDAL VERSION 2.8.0 LANGUAGES CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
@@ -217,9 +217,12 @@ add_library(PDAL::PDAL ALIAS ${PDAL_LIB_NAME})
 # Interface include directories allow downstream project to get the directory
 # without specification.
 #
+
+
+
 target_include_directories(${PDAL_LIB_NAME}
     SYSTEM BEFORE PRIVATE
-        ${PDAL_VENDOR_DIR}/eigen
+        ${PDAL_VENDOR_EIGEN_DIR}
         ${PDAL_VENDOR_DIR}/kazhdan
         ${PDAL_VENDOR_DIR}/h3/include
 )

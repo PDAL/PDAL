@@ -1,0 +1,12 @@
+channels:
+  - conda-forge
+dependencies:
+  - python-pdal
+  - jupyter-book
+  - proj
+  - breathe
+  - sphinx > 6
+  - sphinxcontrib-jquery
+  - sphinxcontrib-bibtex
+  - sphinx-notfound-page
+  - sphinx-inline-tabs

@@ -515,3 +515,43 @@ TEST(BpfTestBase, autoutm)
     SpatialReference srs = reader2.getSpatialReference();
     EXPECT_EQ(srs.getUTMZone(), 10);
 }
+
+TEST(BpfTestBase, setauto)
+{
+    std::string sourcefile(
+        Support::datapath("bpf/autzen-utm-chipped-25-v3.bpf"));
+    std::string outfile(Support::temppath("tmp.bpf"));
+
+    BpfWriter writer;
+    PointTable table;
+
+    Options readerOps;
+    readerOps.add("filename",sourcefile);
+
+    BpfReader reader;
+    reader.setOptions(readerOps);
+
+    // Make sure that we can set coord_id
+    Options o2;
+    o2.add("filename", outfile);
+    o2.add("coord_id", "10");
+    writer.setOptions(o2);
+
+    writer.setInput(reader);
+
+    FileUtils::deleteFile(outfile);
+    writer.prepare(table);
+    writer.execute(table);
+
+    Options readerOps2;
+    readerOps2.replace("filename",outfile);
+    BpfReader reader2;
+    reader2.setOptions(readerOps2);
+
+    PointTable table2;
+    reader2.prepare(table2);
+    PointViewSet views = reader2.execute(table2);
+    SpatialReference srs = reader2.getSpatialReference();
+    EXPECT_EQ(srs.getUTMZone(), 10);
+
+}
