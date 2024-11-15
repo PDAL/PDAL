@@ -23,10 +23,9 @@ $ pdal tindex create <tindex> <filespec>
 --lyr_name             OGR layer name to write into datasource
 --tindex_name          Tile index column name
 --ogrdriver, -f        OGR driver name to use
---absolute_path        Convert the tile index filename to absolute path when 
-                       creating a new file with OGR
 --t_srs                Target SRS of tile index
 --a_srs                Assign SRS of tile with no SRS to this value
+--write_absolute_path  Write absolute rather than relative file paths
 --stdin, -s            Read filespec pattern from standard input
 --threads              Number of threads to use for file boundary creation
 --simplify             Simplify the file's exact boundary

@@ -182,12 +182,12 @@ void TIndexKernel::addSubSwitches(ProgramArgs& args,
             "location");
         args.add("ogrdriver,f", "OGR driver name to use ", m_driverName,
             "ESRI Shapefile");
-        args.add("absolute_path", "Convert the tile index filename to "
-            "absolute path when creating a new file with OGR", m_absPath, true);
         args.add("t_srs", "Target SRS of tile index", m_tgtSrsString,
             "EPSG:4326");
         args.add("a_srs", "Assign SRS of tile with no SRS to this value",
             m_assignSrsString, "EPSG:4326");
+        args.add("write_absolute_path",
+            "Write absolute rather than relative file paths", m_absPath);
         args.add("stdin,s", "Read filespec pattern from standard input",
             m_usestdin);
         args.add("path_prefix", "Prefix to be added to file paths when writing "
@@ -246,6 +246,9 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
         if (m_filespec.size() && m_usestdin)
             throw pdal_error("Can't specify both --filespec and --stdin "
                 "options.");
+        if (m_prefix.size() && m_absPath)
+            throw pdal_error("Can't specify both --write_absolute_path and "
+                "--path_prefix options.");
         if (args.set("a_srs"))
             m_overrideASrs = true;
     }
@@ -324,6 +327,10 @@ void TIndexKernel::createFile()
         m_files = FileUtils::glob(m_filespec);
     else
         m_files = readSTDIN();
+
+    if (m_absPath)
+        for (auto& s : m_files)
+            s = FileUtils::toAbsolutePath(s);
 
     if (m_files.empty())
     {
@@ -636,12 +643,7 @@ bool TIndexKernel::createDataset(const std::string& filename)
         throw pdal_error(oss.str());
     }
 
-    if (m_absPath) {
-        std::string dsname = FileUtils::toAbsolutePath(filename);
-        m_dataset = OGR_Dr_CreateDataSource(hDriver, dsname.c_str(), NULL);
-    }
-    else
-       m_dataset = OGR_Dr_CreateDataSource(hDriver, filename.c_str(), NULL); 
+    m_dataset = OGR_Dr_CreateDataSource(hDriver, filename.c_str(), NULL); 
     return (bool)m_dataset;
 }
 

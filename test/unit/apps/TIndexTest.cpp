@@ -103,6 +103,13 @@ TEST(TIndex, test2)
     Utils::run_shell_command(cmd, output);
     pos = output.find("Can't specify both");
     EXPECT_NE(pos, std::string::npos);
+
+    cmd = Support::binpath("pdal") + " tindex create " + outSpec + 
+        " --path_prefix=\"a\" --write_absolute_path=true " +
+        "--filespec=\"" + inSpec + "\" 2>&1";
+    Utils::run_shell_command(cmd, output);
+    pos = output.find("Can't specify both");
+    EXPECT_NE(pos, std::string::npos);
 }
 
 // Indentical to test1, but filespec input comes from find command.
@@ -170,7 +177,7 @@ TEST(TIndex, test4)
 
     // specifying some hexbin boundary options
     std::string cmd = Support::binpath("pdal") + " tindex create " +
-        "--tindex=\"/vsistdout/\" -f GeoJSON --absolute_path=\"false\" --threshold=1 " +
+        "--tindex=\"/vsistdout/\" -f GeoJSON --threshold=1 " +
         "--resolution=1.0 --simplify=\"false\" --filespec=\"" + inSpec + "\"";
     std::string output;
     Utils::run_shell_command(cmd, output);
@@ -180,7 +187,7 @@ TEST(TIndex, test4)
 
     // simplify = true
     cmd = Support::binpath("pdal") + " tindex create --tindex=\"/vsistdout/\"" +
-        " -f \"GeoJSON\" --absolute_path=\"false\" --threshold=1 --resolution=1.0" + 
+        " -f \"GeoJSON\" --threshold=1 --resolution=1.0" + 
         " --filespec=\"" + inSpec + "\"";
     Utils::run_shell_command(cmd, output);
 
@@ -189,7 +196,7 @@ TEST(TIndex, test4)
 
     // where expression
     cmd = Support::binpath("pdal") + " tindex create --tindex=\"/vsistdout/\""+ 
-        " -f \"GeoJSON\"  --absolute_path=\"false\" --threshold=1 --resolution=1.0" + 
+        " -f \"GeoJSON\" --threshold=1 --resolution=1.0" + 
         " --where=\"X>1\" --simplify=\"false\" --filespec=\"" + inSpec + "\"";
     Utils::run_shell_command(cmd, output);
 
