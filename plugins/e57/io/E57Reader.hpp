@@ -41,7 +41,7 @@
 
 namespace pdal
 {
-class PDAL_DLL E57Reader : public Reader, public Streamable
+class PDAL_EXPORT E57Reader : public Reader, public Streamable
 {
 public:
     E57Reader();

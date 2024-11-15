@@ -42,7 +42,7 @@
 namespace pdal
 {
 
-class PDAL_DLL TileKernel : public Kernel
+class PDAL_EXPORT TileKernel : public Kernel
 {
     using Coord = std::pair<int, int>;
     using Readers = std::map<std::string, Streamable *>;

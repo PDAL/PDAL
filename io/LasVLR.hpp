@@ -59,7 +59,7 @@ namespace las
 class LasVLR;
 typedef std::vector<LasVLR> VlrList;
 
-class PDAL_DLL LasVLR
+class PDAL_EXPORT LasVLR
 {
 public:
     std::string userId() const;

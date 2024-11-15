@@ -44,7 +44,7 @@ namespace pdal
 class PointLayout;
 class PointView;
 
-class PDAL_DLL EstimateRankFilter : public Filter
+class PDAL_EXPORT EstimateRankFilter : public Filter
 {
 public:
     EstimateRankFilter() : Filter()

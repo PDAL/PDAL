@@ -46,7 +46,7 @@ namespace pdal
 class PgWriter;
 class OciWriter;
 
-class PDAL_DLL DbWriter : public NoFilenameWriter
+class PDAL_EXPORT DbWriter : public NoFilenameWriter
 {
 protected:
     DbWriter()

@@ -39,7 +39,7 @@ namespace pdal
 
 class SpatialReference;
 
-class PDAL_DLL SrsTransform
+class PDAL_EXPORT SrsTransform
 {
 public:
     /// Object that performs transformation from a \src spatial reference

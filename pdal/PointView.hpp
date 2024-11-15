@@ -64,7 +64,7 @@ using Rasterd = Raster<double>;
 typedef std::shared_ptr<PointView> PointViewPtr;
 typedef std::set<PointViewPtr, PointViewLess> PointViewSet;
 
-class PDAL_DLL PointView
+class PDAL_EXPORT PointView
 {
     FRIEND_TEST(VoxelTest, center);
     friend class Stage;
@@ -562,7 +562,7 @@ inline void PointView::appendPoint(const PointView& buffer, PointId id)
 }
 
 
-PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const PointView&);
+PDAL_EXPORT std::ostream& operator<<(std::ostream& ostr, const PointView&);
 
 // PointViewIter
 

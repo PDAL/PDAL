@@ -47,7 +47,7 @@ namespace pdal
 /**
   BOX2D represents a two-dimensional box with double-precision bounds.
 */
-class PDAL_DLL BOX2D
+class PDAL_EXPORT BOX2D
 {
 public:
     struct error : public std::runtime_error
@@ -308,7 +308,7 @@ public:
 /**
   BOX3D represents a three-dimensional box with double-precision bounds.
 */
-class PDAL_DLL BOX3D : private BOX2D
+class PDAL_EXPORT BOX3D : private BOX2D
 {
 public:
     struct error : public std::runtime_error
@@ -616,7 +616,7 @@ public:
   Wrapper for BOX3D and BOX2D to allow extraction as either.  Typically used
   to facilitate streaming either a BOX2D or BOX3D
 */
-class PDAL_DLL Bounds
+class PDAL_EXPORT Bounds
 {
 public:
     struct error : public std::runtime_error
@@ -643,9 +643,9 @@ public:
     void grow(double x, double y, double z);
     void parse(const std::string& s, std::string::size_type& pos);
 
-    friend PDAL_DLL std::istream& operator >> (std::istream& in,
+    friend PDAL_EXPORT std::istream& operator >> (std::istream& in,
         Bounds& bounds);
-    friend PDAL_DLL std::ostream& operator << (std::ostream& out,
+    friend PDAL_EXPORT std::ostream& operator << (std::ostream& out,
         const Bounds& bounds);
 
 private:
@@ -708,7 +708,7 @@ inline std::ostream& operator << (std::ostream& ostr, const BOX3D& bounds)
   \param istr  Stream to read from.
   \param bounds  Bounds box to populate.
 */
-extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX2D& bounds);
+extern PDAL_EXPORT std::istream& operator>>(std::istream& istr, BOX2D& bounds);
 
 /**
   Read a 3D bounds box from a stream in a format provided by PDAL options.
@@ -716,7 +716,7 @@ extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX2D& bounds);
   \param istr  Stream to read from.
   \param bounds  Bounds box to populate.
 */
-extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX3D& bounds);
+extern PDAL_EXPORT std::istream& operator>>(std::istream& istr, BOX3D& bounds);
 
 /**
   Read a Bounds (2D/3D) box from a stream in a format provided by PDAL options.
@@ -724,12 +724,12 @@ extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX3D& bounds);
   \param istr  in to read from.
   \param bounds  Bounds box to populate.
 */
-PDAL_DLL std::istream& operator >> (std::istream& in, Bounds& bounds);
+PDAL_EXPORT std::istream& operator >> (std::istream& in, Bounds& bounds);
 
 /**
   Write a Bounds (2D/3D) box from a string in PDAL format.
 */
-PDAL_DLL std::ostream& operator << (std::ostream& out, const Bounds& bounds);
+PDAL_EXPORT std::ostream& operator << (std::ostream& out, const Bounds& bounds);
 
 namespace Utils
 {

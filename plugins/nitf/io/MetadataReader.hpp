@@ -60,7 +60,7 @@ namespace pdal
 //
 // helper class for processing all the metadata fields
 //
-class PDAL_DLL MetadataReader
+class PDAL_EXPORT MetadataReader
 {
 public:
     struct error : public std::runtime_error

@@ -45,7 +45,7 @@ class ProgramArgs;
   Scaling provides support for transforming X/Y/Z values from double to
   scaled integers and vice versa.
 */
-class PDAL_DLL Scaling
+class PDAL_EXPORT Scaling
 {
 public:
     XForm m_xXform;          ///< X-dimension transform (scale/offset)

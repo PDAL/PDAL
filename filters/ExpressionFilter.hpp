@@ -44,7 +44,7 @@
 namespace pdal
 {
 
-class PDAL_DLL ExpressionFilter : public Filter,  public Streamable
+class PDAL_EXPORT ExpressionFilter : public Filter,  public Streamable
 {
 public:
     ExpressionFilter();

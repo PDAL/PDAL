@@ -42,7 +42,7 @@
 namespace pdal
 {
 
-class PDAL_DLL TextReader : public Reader, public Streamable
+class PDAL_EXPORT TextReader : public Reader, public Streamable
 {
 public:
     std::string getName() const;

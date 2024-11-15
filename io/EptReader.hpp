@@ -63,7 +63,7 @@ namespace ept
     using Hierarchy = std::unordered_set<Overlap>;
 }
 
-class PDAL_DLL EptReader : public Reader, public Streamable
+class PDAL_EXPORT EptReader : public Reader, public Streamable
 {
     FRIEND_TEST(EptReaderTest, getRemoteType);
     FRIEND_TEST(EptReaderTest, getCoercedType);

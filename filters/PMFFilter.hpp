@@ -43,7 +43,7 @@ namespace pdal
 
 struct PMFArgs;
 
-class PDAL_DLL PMFFilter : public Filter
+class PDAL_EXPORT PMFFilter : public Filter
 {
 public:
     PMFFilter();

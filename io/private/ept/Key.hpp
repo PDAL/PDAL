@@ -41,7 +41,7 @@ namespace pdal
 namespace ept
 {
 
-class PDAL_DLL Key
+class PDAL_EXPORT Key
 {
     // An EPT key representation (see https://git.io/fAiBh).  A depth/X/Y/Z key
     // representing a data node, as well as the bounds of the contained data.

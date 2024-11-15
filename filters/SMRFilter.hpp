@@ -44,7 +44,7 @@ namespace pdal
 
 struct SMRArgs;
 
-class PDAL_DLL SMRFilter : public Filter
+class PDAL_EXPORT SMRFilter : public Filter
 {
 public:
     SMRFilter();

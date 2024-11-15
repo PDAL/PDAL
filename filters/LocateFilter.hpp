@@ -45,7 +45,7 @@ namespace pdal
 class PointView;
 class ProgramArgs;
 
-class PDAL_DLL LocateFilter : public Filter
+class PDAL_EXPORT LocateFilter : public Filter
 {
 public:
     LocateFilter() : Filter()

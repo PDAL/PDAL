@@ -43,7 +43,7 @@
 namespace pdal
 {
 
-class PDAL_DLL SbetReader : public Reader, public Streamable
+class PDAL_EXPORT SbetReader : public Reader, public Streamable
 {
 public:
     SbetReader() : Reader()

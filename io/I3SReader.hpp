@@ -38,7 +38,7 @@
 namespace pdal
 {
 
-class PDAL_DLL I3SReader : public EsriReader
+class PDAL_EXPORT I3SReader : public EsriReader
 {
 public:
     std::string getName() const override;

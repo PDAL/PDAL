@@ -45,7 +45,7 @@
 namespace pdal
 {
 
-class PDAL_DLL MatlabReader : public Reader, public Streamable
+class PDAL_EXPORT MatlabReader : public Reader, public Streamable
 {
 public:
     MatlabReader()

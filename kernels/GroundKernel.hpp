@@ -48,7 +48,7 @@ namespace pdal
 class Options;
 class Stage;
 
-class PDAL_DLL GroundKernel : public Kernel
+class PDAL_EXPORT GroundKernel : public Kernel
 {
     struct Args;
 

@@ -45,7 +45,7 @@ namespace pdal
 class PointLayout;
 class PointView;
 
-class PDAL_DLL VoxelCentroidNearestNeighborFilter : public Filter
+class PDAL_EXPORT VoxelCentroidNearestNeighborFilter : public Filter
 {
 public:
     VoxelCentroidNearestNeighborFilter() : Filter()

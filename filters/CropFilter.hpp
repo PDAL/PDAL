@@ -54,7 +54,7 @@ namespace filter
 
 // removes any points outside of the given range
 // updates the header accordingly
-class PDAL_DLL CropFilter : public Filter, public Streamable
+class PDAL_EXPORT CropFilter : public Filter, public Streamable
 {
 public:
     CropFilter();

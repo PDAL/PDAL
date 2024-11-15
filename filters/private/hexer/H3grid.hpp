@@ -14,7 +14,7 @@ namespace hexer
 
 using DirEdge = H3Index;
 
-class PDAL_DLL H3Grid : public BaseGrid
+class PDAL_EXPORT H3Grid : public BaseGrid
 {
 public:
     H3Grid(int dense_limit)

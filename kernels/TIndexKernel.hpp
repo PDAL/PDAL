@@ -49,7 +49,9 @@ namespace gdal
     class SpatialRef;
 }
 
-class PDAL_DLL TIndexKernel : public SubcommandKernel
+class StageFactory;
+
+class PDAL_EXPORT TIndexKernel : public SubcommandKernel
 {
     struct FileInfo
     {

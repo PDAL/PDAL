@@ -48,7 +48,7 @@
 namespace pdal
 {
 
-class PDAL_DLL BpfWriter : public FlexWriter
+class PDAL_EXPORT BpfWriter : public FlexWriter
 {
 public:
     struct CoordId
