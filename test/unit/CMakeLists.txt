@@ -435,7 +435,11 @@ PDAL_ADD_TEST(pdal_app_plugin_test FILES apps/AppPluginTest.cpp)
 PDAL_ADD_TEST(pdal_info_test FILES apps/InfoTest.cpp)
 PDAL_ADD_TEST(pdal_tile_test FILES apps/TileTest.cpp)
 
-PDAL_ADD_TEST(pdal_tindex_test FILES apps/TIndexTest.cpp)
+PDAL_ADD_TEST(pdal_tindex_test
+    FILES 
+        apps/TIndexTest.cpp
+    INCLUDES
+        ${NLOHMANN_INCLUDE_DIR})
 PDAL_ADD_TEST(pdal_merge_test FILES apps/MergeTest.cpp)
 PDAL_ADD_TEST(pc2pc_test FILES apps/pc2pcTest.cpp)
 

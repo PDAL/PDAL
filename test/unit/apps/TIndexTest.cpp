@@ -35,8 +35,10 @@
 #include <string>
 
 #include <pdal/pdal_test_main.hpp>
-
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/Polygon.hpp>
+
+#include <nlohmann/json.hpp>
 
 #include "Support.hpp"
 
@@ -101,6 +103,13 @@ TEST(TIndex, test2)
     Utils::run_shell_command(cmd, output);
     pos = output.find("Can't specify both");
     EXPECT_NE(pos, std::string::npos);
+
+    cmd = Support::binpath("pdal") + " tindex create " + outSpec + 
+        " --path_prefix=\"a\" --write_absolute_path=true " +
+        "--filespec=\"" + inSpec + "\" 2>&1";
+    Utils::run_shell_command(cmd, output);
+    pos = output.find("Can't specify both");
+    EXPECT_NE(pos, std::string::npos);
 }
 
 // Indentical to test1, but filespec input comes from find command.
@@ -145,5 +154,53 @@ TEST(TIndex, test3)
     pos = output.find("Merge filecount: 1");
     EXPECT_NE(pos, std::string::npos);
 #endif
+}
+
+std::string getGeometry(std::string& json)
+{
+    NL::basic_json<> a = nlohmann::json::parse(json);
+    auto tree = a.find("features");
+
+    std::ostringstream oss;
+    for (size_t i = 0; i < tree->size(); ++i)
+    {
+        NL::json& node = tree->at(i);
+        auto geom = node.find("geometry");
+        oss << geom->dump();
+    }
+    return oss.str();
+}
+
+// testing the internal filter
+TEST(TIndex, test4)
+{   std::string inSpec(Support::datapath("tindex/t1.txt"));
+
+    // specifying some hexbin boundary options
+    std::string cmd = Support::binpath("pdal") + " tindex create " +
+        "--tindex=\"/vsistdout/\" -f GeoJSON --threshold=1 " +
+        "--resolution=1.0 --simplify=\"false\" --filespec=\"" + inSpec + "\"";
+    std::string output;
+    Utils::run_shell_command(cmd, output);
+
+    pdal::Polygon p(getGeometry(output));
+    EXPECT_NEAR(7.79423, p.area(), 0.001);
+
+    // simplify = true
+    cmd = Support::binpath("pdal") + " tindex create --tindex=\"/vsistdout/\"" +
+        " -f \"GeoJSON\" --threshold=1 --resolution=1.0" + 
+        " --filespec=\"" + inSpec + "\"";
+    Utils::run_shell_command(cmd, output);
+
+    p = getGeometry(output);
+    EXPECT_NEAR(6.49519, p.area(), 0.001);
+
+    // where expression
+    cmd = Support::binpath("pdal") + " tindex create --tindex=\"/vsistdout/\""+ 
+        " -f \"GeoJSON\" --threshold=1 --resolution=1.0" + 
+        " --where=\"X>1\" --simplify=\"false\" --filespec=\"" + inSpec + "\"";
+    Utils::run_shell_command(cmd, output);
+
+    p = getGeometry(output);
+    EXPECT_NEAR(2.59808, p.area(), 0.001);
 }
 
