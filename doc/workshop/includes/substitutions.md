@@ -3,11 +3,11 @@
 .. |ASPRSLAS| replace:: `ASPRS LAS <http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html>`__
 .. |PCL| replace:: `PCL <http://pointclouds.org>`__
 .. |PDAL| replace:: `PDAL <https://pdal.io/>`__
-.. |Proj.4| replace:: `Proj.4 <http://proj4.org>`__
+.. |PROJ| replace:: `PROJ <https://proj.org>`__
 .. |GeoTIFF| replace:: `GeoTIFF <https://trac.osgeo.org/geotiff/>`__
 .. |libLAS| replace:: `libLAS <http://liblas.org/>`__
-.. |QGIS| replace:: `QGIS <http://qgis.org>`__
-.. |GDAL| replace:: `GDAL <http://gdal.org/>`__
+.. |QGIS| replace:: `QGIS <https://qgis.org>`__
+.. |GDAL| replace:: `GDAL <https://gdal.org/>`__
 .. |JSON| replace:: `JSON <https://en.wikipedia.org/wiki/JSON>`__
 .. |XML| replace:: `XML <https://en.wikipedia.org/wiki/XML>`__
 .. |jq| replace:: `jq <https://stedolan.github.io/jq/>`__
