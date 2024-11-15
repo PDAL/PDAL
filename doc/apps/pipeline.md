@@ -47,22 +47,20 @@ have their `dimensions` option overridden to the value
 "Red:1:1.0, Blue, Green::256.0" by the command shown below:
 
 ```
-{
-    "pipeline" : [
-        "input.las",
-        {
-            "type" : "filters.colorization",
-            "raster" : "raster1.tiff"
-            "dimensions": "Red"
-        },
-        {
-            "type" : "filters.colorization",
-            "raster" : "raster2.tiff"
-            "dimensions": "Blue"
-        },
-        "placeholder.laz"
-    ]
-}
+[
+    "input.las",
+    {
+        "type" : "filters.colorization",
+        "raster" : "raster1.tiff"
+        "dimensions": "Red"
+    },
+    {
+        "type" : "filters.colorization",
+        "raster" : "raster2.tiff"
+        "dimensions": "Blue"
+    },
+    "placeholder.laz"
+]
 
 $ pdal pipeline colorize.json --filters.colorization.dimensions= \
     "Red:1:1.0, Blue, Green::256.0"
@@ -93,5 +91,8 @@ command would allow assignment of different filenames to each stage:
 $ pdal pipeline translate.json --writers.las.filename=output.laz \
     --stage.las1.filename=file1.las --stage.las2.filename=file2.las
 ```
+
+The above uses the older syntax where the array of stages needed to be the
+value of a key named "pipeline".
 
 Options specified by tag names override options specified by stage types.

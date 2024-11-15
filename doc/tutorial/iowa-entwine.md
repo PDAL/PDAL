@@ -324,7 +324,7 @@ print(f"Processed point cloud contains {len(pipeline.arrays[0])} points")
    ```
 
 [conda]: https://conda.io
-[conda environment]: https://docs.conda.io/projects/conda/en/latest/user-guide/concepts.html
+[conda environment]: https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/index.html
 [dimension]: https://pdal.io/dimensions.html
 [entwine]: https://entwine.io
 [entwine point tile]: https://entwine.io/entwine-point-tile.html
@@ -337,6 +337,6 @@ print(f"Processed point cloud contains {len(pipeline.arrays[0])} points")
 [pdal pipeline]: https://pdal.io/pipeline.html
 [pipelines]: https://pdal.io/pipeline.html
 [readers.ept]: https://pdal.io/stages/readers.ept.html
-[usgs 3dep aws public dataset]: https://www.usgs.gov/news/usgs-3dep-lidar-point-cloud-now-available-amazon-public-dataset
+[usgs 3dep aws public dataset]: https://www.usgs.gov/news/technical-announcement/usgs-3dep-lidar-point-cloud-now-available-amazon-public-dataset
 [web mercator]: https://en.wikipedia.org/wiki/Web_Mercator_projection
 [writers.gdal]: https://pdal.io/stages/writers.gdal.html

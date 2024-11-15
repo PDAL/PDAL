@@ -48,7 +48,7 @@ invalid points.
 
 ## Options
 
-`` _`filename` ``
+filename
 
 : E57 file to write \[Required\]
 

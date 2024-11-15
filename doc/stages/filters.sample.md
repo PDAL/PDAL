@@ -81,15 +81,15 @@ dimension
 : Instead of culling points, create a new `uint8_t` dimension with this name and
   write a `1` if the point was sampled and a `0` if it was not sampled.
 
-`` _`origin_x` ``
+origin_x
 
 : X origin of the voxelization for sampling.  \[Default: X of first point\]
 
-`` _`origin_y` ``
+origin_y
 
 : Y origin of the voxelization for sampling.  \[Default: Y of first point\]
 
-`` _`origin_z` ``
+origin_z
 
 : Z origin of the voxelization for sampling.  \[Default: Z of first point\]
 

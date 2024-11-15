@@ -14,7 +14,7 @@ in order to use this writer.
 
 You must download and install the Autodesk SDK
 and then compile the PDAL FBX plugin against it. Visit
-<https://www.autodesk.com/developer-network/platform-technologies/fbx-sdk-2019-0>
+<https://aps.autodesk.com/developer/overview/fbx-sdk>
 to obtain a current copy of the SDK.
 
 Example Windows CMake configuration

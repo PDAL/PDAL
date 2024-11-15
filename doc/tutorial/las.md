@@ -557,6 +557,6 @@ in the VLRs will not fit in that space.
 [base64]: https://en.wikipedia.org/wiki/Base64
 [egm08]: http://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/egm08_wgs84.html
 [navd88]: http://epsg.io/5703
-[setfromuserinput]: http://www.gdal.org/ogr__srs__api_8h.html#a927749db01cec3af8aa5e577d032956bk
-[utm zone 15n nad83]: http://epsg.io/26915
+[setfromuserinput]: https://gdal.org/en/latest/api/ogrspatialref.html#classOGRSpatialReference_1aec3c6a49533fe457ddc763d699ff8796
+[utm zone 15n nad83]: http://spatialreference.org/ref/epsg/26915
 [vlr key]: http://www.asprs.org/misc/las-key-list.html

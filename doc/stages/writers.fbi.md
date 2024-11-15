@@ -35,6 +35,6 @@ possible for reading software to read only those attributes it is interested in.
 
 ## Options
 
-`` _`filename` ``
+filename
 
 : FBI file to write \[Required\]

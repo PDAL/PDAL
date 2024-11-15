@@ -42,11 +42,11 @@ length
 : Length of the sides of the tiles that are created to hold points.
   \[Default: 1000\]
 
-`` _`origin_x` ``
+origin_x
 
 : X Origin of the tiles.  \[Default: none (chosen arbitrarily)\]
 
-`` _`origin_y` ``
+origin_y
 
 : Y Origin of the tiles.  \[Default: none (chosen arbitrarily)\]
 

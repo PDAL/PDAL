@@ -136,7 +136,7 @@ You can create your own GTX file using the relationship grids available on the L
 
 ## Step 2: Prepare a JSON Pipeline file
 
-We will be using a [PDAL pipeline] to transmit a chain of processing elements into PDAL. These elements will be represented in a JSON file.
+We will be using a {ref}`PDAL pipeline <pipeline>` to transmit a chain of processing elements into PDAL. These elements will be represented in a JSON file.
 
 Using a text editor, create a JSON file named pipeline.json containing the contents as below.
 
@@ -209,7 +209,6 @@ To accommodate this change in PDAL, you need to alter the following text in the 
 [nz quasigeoid 2016]: https://data.linz.govt.nz/layer/53447-nz-quasigeoid-2016-raster/
 [on-location blog]: https://medium.com/on-location
 [pdal]: https://pdal.io
-[pdal pipeline]: https://pdal.io/pipeline.html
 [readers.las]: https://pdal.io/stages/readers.las.html
 [relationship grids]: https://data.linz.govt.nz/search/category/geodetic/vertical-datum-2016/?q=NZVD2016+Conversion+Raster
 [writers.las]: https://pdal.io/stages/writers.las.html

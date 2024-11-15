@@ -35,7 +35,7 @@ returns.
 
 ## Options
 
-`` _`groups` ``
+groups
 
 : Comma-separated list of return number groupings. Valid options are "first",
   "last", "intermediate" or "only". \[Default: "last"\]

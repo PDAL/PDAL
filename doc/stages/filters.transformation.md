@@ -36,21 +36,6 @@ This example rotates the points around the z-axis while translating them.
 ]
 ```
 
-## Options
-
-invert
-
-: If set to true, applies the inverse of the provided transformation matrix.
-  \[Default: false\]
-
-`` _`matrix` ``
-
-: A whitespace-delimited transformation matrix.
-  The matrix is assumed to be presented in row-major order.
-  Only matrices with sixteen elements are allowed.
-
-```{include} filter_opts.md
-```
 
 ## Further details
 
@@ -197,4 +182,21 @@ and the JSON string for a rotation of 10 degrees ($\theta=0.175$ radians) become
         "matrix":"0.985  0  0.174  0  0  1  0  0  -0.174  0  0.985  0  0  0  0  1"
     }
 ]
+```
+
+
+## Options
+
+invert
+
+: If set to true, applies the inverse of the provided transformation matrix.
+  \[Default: false\]
+
+matrix
+
+: A whitespace-delimited transformation matrix.
+  The matrix is assumed to be presented in row-major order.
+  Only matrices with sixteen elements are allowed.
+
+```{include} filter_opts.md
 ```

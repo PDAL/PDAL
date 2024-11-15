@@ -112,44 +112,44 @@ and it will be used. Otherwise, provide a [GDAL]-readable raster filename.
 
 ## Options
 
-`` _`ramp` ``
+ramp
 
 : The raster file to use for the color ramp. Any format supported by [GDAL]
   may be read.  Alternatively, one of the default color ramp names can be
   used. \[Default: "pestel_shades"\]
 
-`` _`dimension` ``
+dimension
 
 : A dimension name to use for the values to interpolate colors. \[Default: "Z"\]
 
-`` _`minimum` ``
+minimum
 
 : The minimum value to use to scale the data. If none is specified, one is
   computed from the data. If one is specified but a [k] value is also
   provided, the [k] value will be used.
 
-`` _`maximum` ``
+maximum
 
 : The maximum value to use to scale the data. If none is specified, one is
   computed from the data. If one is specified but a [k] value is also
   provided, the [k] value will be used.
 
-`` _`invert` ``
+invert
 
 : Invert the direction of the ramp? \[Default: false\]
 
-`` _`k` ``
+k
 
 : Color based on the given number of standard deviations from the median. If
   set, [minimum] and [maximum] will be computed from the median and setting
   them will have no effect.
 
-`` _`mad` ``
+mad
 
 : If true, [minimum] and [maximum] will be computed by the median absolute
   deviation. See {ref}`filters.mad` for discussion. \[Default: false\]
 
-`` _`mad_multiplier` ``
+mad_multiplier
 
 : MAD threshold multiplier. Used in conjunction with [k] to threshold the
   differencing. \[Default: 1.4862\]

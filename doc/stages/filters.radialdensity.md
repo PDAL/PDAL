@@ -39,7 +39,7 @@ The radius $r$ can be adjusted by changing the [radius] option.
 
 ## Options
 
-`` _`radius` ``
+radius
 
 : Radius. \[Default: 1.0\]
 

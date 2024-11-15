@@ -39,7 +39,7 @@ features and capabilities to the PDAL project, including {ref}`Poisson sampling
 ## Funding Contributors
 
 ```{image} ../development/rsgis_logo.png
-:target: http://www.erdc.usace.army.mil/Locations/CRREL.aspx
+:target: https://www.erdc.usace.army.mil/Locations/CRREL/
 ```
 
 The US Army Corps of Engineers Remote Sensing / GIS Center of Expertise at
@@ -49,23 +49,23 @@ data for a multitude of U.S. Army Corps missions. Find out more about GRiD in
 this [LiDAR Magazine article].
 
 ```{image} ../development/nsf1.png
-:target: http://www.nsf.gov
+:target: https://www.nsf.gov
 ```
 
 ```{image} ../development/uoh.png
 :target: http://www.uh.edu
 ```
 
-[NSF](http://www.nsf.gov), in collaboration with [Dr. Craig Glennie](http://www.cive.uh.edu/faculty/glennie) at the [University of Houston](http://www.uh.edu) supports PDAL with funding support to develop and enhance
+[NSF](http://www.nsf.gov), in collaboration with [Dr. Craig Glennie](https://www.cive.uh.edu/faculty/glennie) at the [University of Houston](https://www.uh.edu) supports PDAL with funding support to develop and enhance
 statistical methods, transformation operations, tutorial and example
-development, and [PCL](http://pointclouds.org) integration.
+development, and [PCL](https://pointclouds.org) integration.
 
 [andrew bell]: https://github.com/abellgithub
 [bradley chambers]: https://github.com/chambbj
 [crrel]: http://www.erdc.usace.army.mil/Locations/CRREL.aspx
 [grid]: http://lidar.io/about.html
 [grover consulting services]: https://grovercsllc.com/
-[hobu]: http://hobu.co
+[hobu]: https://hobu.co
 [howard butler]: https://github.com/hobu
 [lidar magazine article]: http://www.lidarmag.com/content/view/11343/198/
 [michael gerlek]: http://github.com/mpgerlek

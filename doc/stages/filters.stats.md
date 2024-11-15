@@ -45,7 +45,7 @@ dimensions
 : A comma-separated list of dimensions whose statistics should be
   processed.  If not provided, statistics for all dimensions are calculated.
 
-`` _`enumerate` ``
+enumerate
 
 : A comma-separated list of dimensions whose values should be enumerated.
   Note that this list does not add to the list of dimensions that may be
