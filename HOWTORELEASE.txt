@@ -24,7 +24,7 @@ Release Process
 2) Build and run the tests. Turn on all the optional bits that you have support for in
    your cmake options..
 
-    :: 
+    ::
 
         mkdir build
         cd build
@@ -50,11 +50,9 @@ Release Process
 
   - doc/download.rst point to new release
 
-  - Increment the doc build branch of .github/workflows/docs.yml:
+  - Update the ``STABLE_BRANCH`` pointer in the GitHub variables at
+    https://github.com/PDAL/PDAL/settings/variables/actions
 
-    if: github.ref == 'refs/heads/2.4-maintenance'
-
-  - Make DockerHub build entry for new release branch.
 
 5) Write the `release notes. <https://github.com/PDAL/PDAL/releases/new>`_
 
@@ -63,17 +61,7 @@ Release Process
      for a template and a starting point. If you find issues after making the release
      branch, add them to the release notes.
 
-   - Manually store a copy of the release notes in ./doc/development/release-notes/2.4.0.md
-     for future reference.
-
-   - Convert it to reStructuredText using pandoc and add the output to the
-     RELEASENOTES.txt document
-
-     ::
-
-        pandoc --from markdown --to rst --output=2.4.rst doc/development/release-notes/2.4.0.md
-
-6) Make the source distribution. If you are doing a release candidate
+6) Make the source distribution. This requires docker. If you are doing a release candidate
    add an RC tag to the invocation. The version number is automatically picked out of the PDAL
    release. The package is based on the current HEAD commit.
 
