@@ -33,7 +33,23 @@ options, please let us know.
 [
     "dense.las",
     {
+      "type":"filters.assign"
+      "value": [
+          "Red = Red / 256",
+          "Green = Green / 256",
+          "Blue = Blue / 256"
+        ]
+    },
+    {
         "type":"filters.poisson"
+    },
+    {
+      "type":"filters.assign"
+      "value": [
+          "Red = Red * 256",
+          "Green = Green * 256",
+          "Blue = Blue * 256"
+        ]
     },
     {
         "type":"writers.ply",
@@ -47,6 +63,17 @@ options, please let us know.
 The algorithm is slow.  On a reasonable desktop machine, the surface
 reconstruction shown below took about 15 minutes.
 ```
+
+
+```{note}
+  The filter only supports 8-bit color. It does not scale input or output at this
+  time. If your input is something other than 8-bit color, you must scale it
+  using filters.assign before running the filter. You may also want to scale
+  the 8-bit output depending on your needs. See the example below that scales
+  from and to 16-bit color.
+```
+
+
 
 ```{figure} ../images/poisson_points.png
 Point cloud (800,000 points)
@@ -71,3 +98,4 @@ depth
 
 ```{include} filter_opts.md
 ```
+
