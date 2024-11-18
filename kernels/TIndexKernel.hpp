@@ -108,7 +108,6 @@ private:
     std::string m_srsColumnName;
     std::string m_wkt;
     BOX2D m_bounds;
-    bool m_tindexAbsPath;
     bool m_absPath;
     std::string m_prefix;
     int m_threads;
