@@ -82,14 +82,14 @@ void generateTags(Stage *stage, PipelineWriter::TagMap& tags)
 namespace PipelineWriter
 {
 
-PDAL_DLL void writePipeline(Stage *stage, const std::string& filename)
+PDAL_EXPORT void writePipeline(Stage *stage, const std::string& filename)
 {
     std::ostream *out = Utils::createFile(filename, false);
     writePipeline(stage, *out);
     Utils::closeFile(out);
 }
 
-PDAL_DLL void writePipeline(Stage *stage, std::ostream& strm)
+PDAL_EXPORT void writePipeline(Stage *stage, std::ostream& strm)
 {
     TagMap tags;
     generateTags(stage, tags);

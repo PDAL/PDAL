@@ -39,7 +39,7 @@
 namespace pdal
 {
 
-class PDAL_DLL SrsBounds : public Bounds
+class PDAL_EXPORT SrsBounds : public Bounds
 {
 public:
     SrsBounds()
@@ -54,7 +54,7 @@ public:
     SpatialReference spatialReference()
         { return m_srs; }
 
-    friend PDAL_DLL std::ostream& operator << (std::ostream& out,
+    friend PDAL_EXPORT std::ostream& operator << (std::ostream& out,
         const SrsBounds& bounds);
 
 private:
@@ -73,7 +73,7 @@ namespace Utils
     }
 }
 
-PDAL_DLL std::ostream& operator << (std::ostream& out, const SrsBounds& bounds);
+PDAL_EXPORT std::ostream& operator << (std::ostream& out, const SrsBounds& bounds);
 
 } // namespace pdal
 

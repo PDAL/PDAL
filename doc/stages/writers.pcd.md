@@ -57,12 +57,12 @@ compression
 : Level of PCD compression to use (ascii, binary, compressed) \[Default:
   "ascii"\]
 
-`` _`precision` ``
+precision
 
 : Decimal Precision for output of values. This can be overridden for individual
   dimensions using the order option. \[Default: 2\]
 
-`` _`order` ``
+order
 
 : Comma-separated list of dimension names in the desired output order. For
   example "X,Y,Z,Red,Green,Blue". Dimension names can optionally be followed

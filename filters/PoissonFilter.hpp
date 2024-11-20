@@ -39,7 +39,7 @@
 namespace pdal
 {
 
-class PDAL_DLL PoissonFilter : public Filter
+class PDAL_EXPORT PoissonFilter : public Filter
 {
 public:
     PoissonFilter() : Filter(), m_normalsProvided(false)

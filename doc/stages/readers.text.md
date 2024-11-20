@@ -107,17 +107,17 @@ filename
 ```{include} reader_opts.md
 ```
 
-`` _`header` ``
+header
 
 : String to use as the file header.  All lines in the file are assumed to be
   records containing point data unless skipped with the [skip] option.
   \[Default: None\]
 
-`` _`separator` ``
+separator
 
 : Separator character to override that found in header line. \[Default: None\]
 
-`` _`skip` ``
+skip
 
 : Number of lines to ignore at the beginning of the file. \[Default: 0\]
 

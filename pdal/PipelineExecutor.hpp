@@ -53,7 +53,7 @@ namespace pdal
 
 
 /* Don't use this anymore. Use PipelineManager directly yourself */
-class PDAL_DLL_DEPRECATED PipelineExecutor {
+class PDAL_EXPORT_DEPRECATED PipelineExecutor {
 public:
 
     /**

@@ -51,7 +51,7 @@ std::unique_ptr<T> make_unique(Args&&... args)
 }
 
 
-class PDAL_DLL TeaserFilter : public Filter
+class PDAL_EXPORT TeaserFilter : public Filter
 {
 public:
     TeaserFilter() : Filter(), m_fixed(nullptr), m_complete(false) {}

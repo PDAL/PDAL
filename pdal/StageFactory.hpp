@@ -55,7 +55,7 @@ class Options;
 
   \note  Stage creation is thread-safe.
 */
-class PDAL_DLL StageFactory
+class PDAL_EXPORT StageFactory
 {
 public:
     /**

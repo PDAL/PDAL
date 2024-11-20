@@ -50,7 +50,7 @@ namespace gdal
 //
 // We lock the log/debug so that it doesn't
 // get changed while another thread is using or setting.
-class PDAL_DLL ErrorHandler
+class PDAL_EXPORT ErrorHandler
 {
 public:
     ErrorHandler();
@@ -116,7 +116,7 @@ private:
 };
 
 // Exported for test support
-class PDAL_DLL ErrorHandlerSuspender
+class PDAL_EXPORT ErrorHandlerSuspender
 {
 public:
     ErrorHandlerSuspender();

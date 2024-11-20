@@ -43,7 +43,7 @@ namespace pdal
 {
 using namespace Eigen;
 
-class PDAL_DLL LabelStats
+class PDAL_EXPORT LabelStats
 {
 public:
     LabelStats(int dim) : m_dim(dim)
@@ -173,7 +173,7 @@ private:
     int m_dim;
 };
 
-class PDAL_DLL EvalKernel : public Kernel
+class PDAL_EXPORT EvalKernel : public Kernel
 {
 public:
     std::string getName() const;

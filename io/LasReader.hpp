@@ -58,7 +58,7 @@ class PointDimensions;
 class LazPerfVlrDecompressor;
 class LasHeader;
 
-class PDAL_DLL LasReader : public Reader, public Streamable
+class PDAL_EXPORT LasReader : public Reader, public Streamable
 {
     friend class LasTester;
 

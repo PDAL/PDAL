@@ -22,7 +22,7 @@ This tutorial utilizes the Autzen dataset. In addition to typical PDAL
 software (fetch it from {ref}`download`), you will need to download the
 following two files:
 
-- <https://github.com/PDAL/data/autzen/autzen.laz>
+- <https://github.com/PDAL/data/blob/master/autzen/autzen-classified.copc.laz>
 - <https://github.com/PDAL/PDAL/raw/master/test/data/autzen/attributes.json>
 
 ## Stage Operations

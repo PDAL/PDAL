@@ -54,7 +54,7 @@ filename
 ```{include} reader_opts.md
 ```
 
-`` _`lyr_name` ``
+lyr_name
 
 : The OGR layer name for the data source to use to
   fetch the tile index information.
@@ -88,12 +88,12 @@ sql
 
 : [OGR SQL] to use to define the tile index layer.
 
-`` _`bounds` ``
+bounds
 
 : A 2D box to pre-filter the tile index. If it is set,
   it will override any [wkt] option.
 
-`` _`wkt` ``
+wkt
 
 : A geometry to pre-filter the tile index using
   OGR.
@@ -120,7 +120,7 @@ dialect
 : [OGR SQL] dialect to use when querying tile index layer
   \[Default: OGRSQL\]
 
-[gdal]: http://gdal.org
-[gdal tile index]: http://www.gdal.org/gdaltindex.html
-[ogr]: http://gdal.org/ogr/
-[ogr sql]: http://www.gdal.org/ogr_sql.html
+[gdal]: https://gdal.org
+[gdal tile index]: https://gdal.org/en/latest/programs/gdaltindex.html
+[ogr]: https://gdal.org/ogr/
+[ogr sql]: https://gdal.org/en/latest/user/ogr_sql_dialect.html

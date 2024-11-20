@@ -39,7 +39,7 @@
 namespace pdal
 {
 
-class PDAL_DLL MortonOrderFilter : public pdal::Filter
+class PDAL_EXPORT MortonOrderFilter : public pdal::Filter
 {
 public:
     MortonOrderFilter()

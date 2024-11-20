@@ -34,6 +34,8 @@
 
 #pragma once
 
+#include <pdal/Filter.hpp>
+#include <pdal/Streamable.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/SubcommandKernel.hpp>
 #include <pdal/util/FileUtils.hpp>
@@ -49,13 +51,14 @@ namespace gdal
 
 class StageFactory;
 
-class PDAL_DLL TIndexKernel : public SubcommandKernel
+class PDAL_EXPORT TIndexKernel : public SubcommandKernel
 {
     struct FileInfo
     {
         std::string m_filename;
         std::string m_srs;
         std::string m_boundary;
+        double m_gridHeight;
         struct tm m_ctime;
         struct tm m_mtime;
     };
@@ -86,13 +89,13 @@ private:
     bool openLayer(const std::string& layerName);
     bool createLayer(const std::string& layerName);
     FieldIndexes getFields();
-    bool getFileInfo(StageFactory& factory, const std::string& filename,
-        FileInfo& info);
+    void getFileInfo(FileInfo& info);
     bool createFeature(const FieldIndexes& indexes, FileInfo& info);
     pdal::Polygon prepareGeometry(const FileInfo& fileInfo);
     void createFields();
-    bool fastBoundary(Stage& reader, FileInfo& fileInfo);
-    bool slowBoundary(Stage& hexer, FileInfo& fileInfo);
+    void fastBoundary(Stage& reader, FileInfo& fileInfo);
+    void slowBoundary(PipelineManager& manager);
+    std::string makeMultiPolygon(const std::string& wkt);
 
     bool isFileIndexed( const FieldIndexes& indexes, const FileInfo& fileInfo);
 
@@ -106,6 +109,13 @@ private:
     std::string m_wkt;
     BOX2D m_bounds;
     bool m_absPath;
+    std::string m_prefix;
+    int m_threads;
+    bool m_doSmooth;
+    int32_t m_density;
+    double m_edgeLength;
+    uint32_t m_sampleSize;
+    std::string m_boundaryExpr;
 
     void *m_dataset;
     void *m_layer;

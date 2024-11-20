@@ -26,7 +26,7 @@ Alpine developers can frequently be found on the IRC channel #alpine-devel.
 We currently run our Travis CI builds by first pulling `alpine:3.6` and then
 running a script within the Alpine container. Any new dependencies that are
 required for PDAL to be built and tested will need to be added to
-<https://github.com/PDAL/PDAL/blob/master/scripts/ci/script.sh>.
+<https://github.com/PDAL/PDAL/tree/master/scripts/ci/alpine>.
 
 ## Docker
 

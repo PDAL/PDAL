@@ -49,7 +49,7 @@ class Options;
 class PointLayout;
 class PointView;
 
-class PDAL_DLL GeomDistanceFilter : public Filter, public Streamable
+class PDAL_EXPORT GeomDistanceFilter : public Filter, public Streamable
 {
 public:
     GeomDistanceFilter();

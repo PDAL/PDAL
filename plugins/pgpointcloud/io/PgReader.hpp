@@ -47,7 +47,7 @@
 namespace pdal
 {
 
-class PDAL_DLL PgReader : public DbReader, public Streamable
+class PDAL_EXPORT PgReader : public DbReader, public Streamable
 {
     class Patch
     {

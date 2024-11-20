@@ -68,7 +68,7 @@ struct VlrOptionInfo
     std::string m_description;
 };
 
-class PDAL_DLL LasWriter : public FlexWriter, public Streamable
+class PDAL_EXPORT LasWriter : public FlexWriter, public Streamable
 {
     friend class LasTester;
     friend class NitfWriter;
@@ -123,6 +123,7 @@ private:
         const MetadataNode& base);
     void handleHeaderForwards(MetadataNode& forward);
     void fillHeader();
+    void validateHeader();
     bool fillPointBuf(PointRef& point, LeInserter& ostream);
     point_count_t fillWriteBuf(const PointView& view, PointId startId,
         std::vector<char>& buf);

@@ -76,14 +76,14 @@ This example sets the Intensity attribute to `CLS` values read from the
 bounds
 
 : A bounds to pre-filter the OGR datasource that is passed to
-  [OGR_L_SetSpatialFilter](https://gdal.org/doxygen/ogr__api_8h.html#a678d1735bc82533614ac005691d1138c)
+  [OGR_L_SetSpatialFilter](https://gdal.org/en/latest/doxygen/classOGRLayer.html#a0b4ab45cf97cbc470f0d60474d3e4169)
   in the form `([xmin, xmax], [ymin, ymax])`.
 
 dimension
 
 : Name of the dimension whose value should be altered.  \[Required\]
 
-`` _`datasource` ``
+datasource
 
 : OGR-readable datasource for Polygon or MultiPolygon data.  \[Required\]
 
@@ -92,7 +92,7 @@ column
 : The OGR datasource column from which to read the attribute.
   \[Default: first column\]
 
-`` _`query` ``
+query
 
 : OGR SQL query to execute on the datasource to fetch geometry and attributes.
   The entire layer is fetched if no query is provided.  \[Default: none\]
@@ -108,5 +108,5 @@ threads
 ```{include} filter_opts.md
 ```
 
-[executesql]: http://www.gdal.org/ogr__api_8h.html#a9892ecb0bf61add295bd9decdb13797a
-[ogr sql]: http://www.gdal.org/ogr_sql_sqlite.html
+[executesql]: https://gdal.org/en/latest/doxygen/classGDALDataset.html#a5b65948b1e15fa63e96c0640eb6c5d7c
+[ogr sql]: https://gdal.org/en/latest/user/ogr_sql_sqlite_dialect.html

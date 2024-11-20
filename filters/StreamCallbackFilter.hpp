@@ -42,7 +42,7 @@
 namespace pdal
 {
 
-class PDAL_DLL StreamCallbackFilter : public Filter, public Streamable
+class PDAL_EXPORT StreamCallbackFilter : public Filter, public Streamable
 {
 public:
     std::string getName() const

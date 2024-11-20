@@ -67,19 +67,19 @@ in more detail and is the canonical resource on the topic.
 
 ## Options
 
-`` _`cell_size` ``
+cell_size
 
 : Cell Size. \[Default: 1\]
 
-`` _`exponential` ``
+exponential
 
 : Use exponential growth for window sizes? \[Default: true\]
 
-`` _`ignore` ``
+ignore
 
 : Range of values to ignore. \[Optional\]
 
-`` _`initial_distance` ``
+initial_distance
 
 : Initial distance. \[Default: 0.15\]
 
@@ -89,15 +89,15 @@ returns
   Valid groups are "last", "first", "intermediate" and "only". \[Default:
   "last, only"\]
 
-`` _`max_distance` ``
+max_distance
 
 : Maximum distance. \[Default: 2.5\]
 
-`` _`max_window_size` ``
+max_window_size
 
 : Maximum window size. \[Default: 33\]
 
-`` _`slope` ``
+slope
 
 : Slope. \[Default: 1.0\]
 

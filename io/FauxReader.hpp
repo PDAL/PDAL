@@ -123,7 +123,7 @@ inline std::ostream& operator<<(std::ostream& out, const Mode& m)
 // activated by passing a numeric value as "number_of_returns" to the
 // reader constructor.
 //
-class PDAL_DLL FauxReader : public Reader, public Streamable
+class PDAL_EXPORT FauxReader : public Reader, public Streamable
 {
 public:
     FauxReader()

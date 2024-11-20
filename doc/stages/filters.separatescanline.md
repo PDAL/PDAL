@@ -28,7 +28,7 @@ only 10 scan lines.
 
 ## Options
 
-`` _`groupby` ``
+groupby
 
 : The number of lines to be grouped by. \[Default : 1\]
 

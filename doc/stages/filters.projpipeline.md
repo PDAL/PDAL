@@ -2,7 +2,7 @@
 
 # filters.projpipeline
 
-The projpipeline filter applies a coordinates transformation pipeline. The pipeline could be specified as PROJ string (single step operation or multiple step string starting with +proj=pipeline), a WKT2 string describing a CoordinateOperation, or a “<urn:ogc:def:coordinateOperation:EPSG::XXXX>” URN.
+The projpipeline filter applies a coordinates transformation pipeline. The pipeline could be specified as PROJ string (single step operation or multiple step string starting with +proj=pipeline), a WKT2 string describing a CoordinateOperation, or a `<urn:ogc:def:coordinateOperation:EPSG::XXXX>` URN.
 
 ```{note}
 The projpipeline filter does not consider any spatial reference information.
@@ -63,7 +63,7 @@ apply a unit conversion step.
 
 ## Options
 
-`` _`coord_op` ``
+coord_op
 
 : The coordinate operation string.
   Could be specified as PROJ string (single step operation or
@@ -71,12 +71,12 @@ apply a unit conversion step.
   a WKT2 string describing a CoordinateOperation,
   or a “<urn:ogc:def:coordinateOperation:EPSG::XXXX>” URN.
 
-`` _`reverse_transfo` ``
+reverse_transfo
 
 : Boolean, Whether the coordinate operation should be evaluated
   in the reverse path \[Default: false\]
 
-`` _`out_srs` ``
+out_srs
 
 : The spatial reference system of the file to be written.
   Can be an EPSG string (e.g. “EPSG:26910”) or a WKT string.

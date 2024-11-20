@@ -70,21 +70,21 @@ inspection.
 
 ## Options
 
-`` _`knn` ``
+knn
 
 : The number of k-nearest neighbors. \[Default: 8\]
 
-`` _`viewpoint` ``
+viewpoint
 
 : A single WKT or GeoJSON 3D point. Normals will be inverted such that they are
   all oriented towards the viewpoint.
 
-`` _`always_up` ``
+always_up
 
 : A flag indicating whether or not normals should be inverted only when the Z
   component is negative. \[Default: true\]
 
-`` _`refine` ``
+refine
 
 : A flag indicating whether or not to reorient normals using minimum spanning
   tree propagation. \[Default: false\]

@@ -44,7 +44,7 @@ namespace pdal
 {
 
 
-class PDAL_DLL NitfReader : public LasReader
+class PDAL_EXPORT NitfReader : public LasReader
 {
     template <class CharT, class Traits = std::char_traits<CharT>>
     class Shiftbuf : public std::basic_filebuf<CharT, Traits>

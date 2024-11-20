@@ -49,7 +49,7 @@ namespace Utils
 
       \return  List of functions at the point of the call.
     */
-    PDAL_DLL std::vector<std::string> backtrace();
+    PDAL_EXPORT std::vector<std::string> backtrace();
 
 
 } // namespace Utils

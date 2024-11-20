@@ -83,7 +83,7 @@ inline RotationMatrix createIdentityMatrix()
 }
 
 // Returns Latitude, Longitude, Height triplet with angles in radians
-PDAL_DLL Xyz georeferenceWgs84(double range, double scanAngle,
+PDAL_EXPORT Xyz georeferenceWgs84(double range, double scanAngle,
                       const RotationMatrix& boresightMatrix,
                       const RotationMatrix& imuMatrix, const Xyz& gpsPoint);
 

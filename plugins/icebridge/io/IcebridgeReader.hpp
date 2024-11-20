@@ -61,7 +61,7 @@ namespace pdal
 namespace pdal
 {
 
-class PDAL_DLL IcebridgeReader : public pdal::Reader
+class PDAL_EXPORT IcebridgeReader : public pdal::Reader
 {
 public:
     IcebridgeReader() : pdal::Reader()

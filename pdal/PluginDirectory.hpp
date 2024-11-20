@@ -69,7 +69,7 @@ public:
 
 private:
     static PluginDirectory *m_instance;
-    PDAL_DLL static std::string test_validPlugin(const std::string& path,
+    PDAL_EXPORT static std::string test_validPlugin(const std::string& path,
         const StringList& types);
 };
 

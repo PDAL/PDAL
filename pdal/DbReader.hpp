@@ -39,7 +39,7 @@
 namespace pdal
 {
 
-class PDAL_DLL DbReader : public Reader
+class PDAL_EXPORT DbReader : public Reader
 {
 protected:
     DbReader() : m_orientation(Orientation::PointMajor), m_packedPointSize(0)

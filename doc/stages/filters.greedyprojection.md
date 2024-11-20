@@ -63,4 +63,4 @@ eps_angle
 ```{include} filter_opts.md
 ```
 
-[pcl]: http://www.pointclouds.org/documentation/tutorials/greedy_projection.php
+[pcl]: https://pcl.readthedocs.io/projects/tutorials/en/master/greedy_projection.html

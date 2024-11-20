@@ -5,7 +5,7 @@
 namespace hexer
 {
 
-class PDAL_DLL HexGrid : public BaseGrid
+class PDAL_EXPORT HexGrid : public BaseGrid
 {
 public:
     HexGrid(double height, int denseLimit) : BaseGrid(denseLimit)
@@ -28,8 +28,8 @@ public:
         { return m_height; }
     bool sampling() const
         { return m_width < 0; }
-    bool isH3()
-        { return false; }
+    uint64_t getID(HexId ij)
+        { return (((uint64_t)ij.i << 32) | (uint32_t)ij.j); }
     Point findPoint(Segment& s);
 
 private:

@@ -40,7 +40,7 @@ filename
 ```{include} reader_opts.md
 ```
 
-`` _`discard_missing_points` ``
+discard_missing_points
 
 : Each point cloud in a PTX file is "fully populated", in that the point cloud
   will contain missing points with XYZ values of "0 0 0". When this option is

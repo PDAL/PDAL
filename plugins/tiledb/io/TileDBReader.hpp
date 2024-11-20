@@ -52,7 +52,7 @@ namespace pdal
 
 class TileDBDimBuffer;
 
-class PDAL_DLL TileDBReader : public Reader, public Streamable
+class PDAL_EXPORT TileDBReader : public Reader, public Streamable
 {
 public:
     TileDBReader();

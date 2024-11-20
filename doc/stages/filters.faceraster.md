@@ -58,19 +58,19 @@ mesh
 : Name of the triangulation to use for interpolation.  If not provided, the first
   triangulation associated with the input points will be used. \[Default: None\]
 
-`` _`origin_x` ``
+origin_x
 
 : X origin (lower left corner) of the grid. \[Default: None\]
 
-`` _`origin_y` ``
+origin_y
 
 : Y origin (lower left corner) of the grid. \[Default: None\]
 
-`` _`width` ``
+width
 
 : Number of cells in the X direction. \[Default: None\]
 
-`` _`height` ``
+height
 
 : Number of cells in the Y direction. \[Default: None\]
 

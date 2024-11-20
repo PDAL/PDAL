@@ -122,7 +122,7 @@ namespace Utils
      * \return the value to clamped to the given bounds.
      */
     template <class T>
-    PDAL_DLL const T& clamp(const T& t, const T& minimum, const T& maximum)
+    PDAL_EXPORT const T& clamp(const T& t, const T& minimum, const T& maximum)
     {
         return ((t < minimum) ? minimum : ((t > maximum) ? maximum : t));
     }
@@ -132,7 +132,7 @@ namespace Utils
 
       \param seed  Seed value.
     */
-    PDAL_DLL void random_seed(unsigned int seed);
+    PDAL_EXPORT void random_seed(unsigned int seed);
 
     /**
       Generate a random value in the range [minimum, maximum].
@@ -140,7 +140,7 @@ namespace Utils
       \param minimum  Lower value of range for random number generation.
       \param maximum  Upper value of range for random number generation.
     */
-    PDAL_DLL double random(double minimum, double maximum);
+    PDAL_EXPORT double random(double minimum, double maximum);
 
     /**
       Determine if two values are within a particular range of each other.
@@ -149,7 +149,7 @@ namespace Utils
       \param v2  Second value to compare.
       \param tolerance  Maximum difference between \ref v1 and \ref v2
     */
-    PDAL_DLL inline bool compare_approx(double v1, double v2, double tolerance)
+    PDAL_EXPORT inline bool compare_approx(double v1, double v2, double tolerance)
     {
         double diff = std::abs(v1 - v2);
         return diff <= std::abs(tolerance);
@@ -260,7 +260,7 @@ namespace Utils
         otherwise.
       \return  0 on success, -1 on failure
     */
-    PDAL_DLL int getenv(std::string const& name, std::string& val);
+    PDAL_EXPORT int getenv(std::string const& name, std::string& val);
 
     /**
       Set the value of an environment variable.
@@ -269,7 +269,7 @@ namespace Utils
       \param val  Value of environment variable.
       \return  0 on success, -1 on failure
     */
-    PDAL_DLL int setenv(const std::string& env, const std::string& val);
+    PDAL_EXPORT int setenv(const std::string& env, const std::string& val);
 
     /**
       Clear the value of an environment variable.
@@ -277,28 +277,28 @@ namespace Utils
       \param env  Name of the environment variable to clear.
       \return  0 on success, -1 on failure
     */
-    PDAL_DLL int unsetenv(const std::string& env);
+    PDAL_EXPORT int unsetenv(const std::string& env);
 
     /**
       Skip stream input until a non-space character is found.
 
       \param s  Stream to process.
     */
-    PDAL_DLL void eatwhitespace(std::istream& s);
+    PDAL_EXPORT void eatwhitespace(std::istream& s);
 
     /**
       Remove whitespace from the beginning of a string.
 
       \param s  String to be trimmed.
     */
-    PDAL_DLL void trimLeading(std::string& s);
+    PDAL_EXPORT void trimLeading(std::string& s);
 
     /**
       Remove whitespace from the end of a string.
 
       \param s  String to be trimmed.
     */
-    PDAL_DLL void trimTrailing(std::string& s);
+    PDAL_EXPORT void trimTrailing(std::string& s);
 
     /**
       Remove whitespace from the beginning and end of a string.
@@ -320,7 +320,7 @@ namespace Utils
       \return \c true if the character is at the current stream position,
         \c false otherwise.
     */
-    PDAL_DLL bool eatcharacter(std::istream& s, char x);
+    PDAL_EXPORT bool eatcharacter(std::istream& s, char x);
 
     /**
       Convert a buffer to a string using base64 encoding.
@@ -329,7 +329,7 @@ namespace Utils
       \param size  Size of buffer.
       \return  Encoded buffer.
     */
-    PDAL_DLL std::string base64_encode(const unsigned char *buf, size_t size);
+    PDAL_EXPORT std::string base64_encode(const unsigned char *buf, size_t size);
 
     /**
       Convert a buffer to a string using base64 encoding.
@@ -346,7 +346,7 @@ namespace Utils
       \param input  String to decode.
       \return  Buffer containing decoded string.
     */
-    PDAL_DLL std::vector<uint8_t>
+    PDAL_EXPORT std::vector<uint8_t>
     base64_decode(std::string const& input);
 
     /**
@@ -358,7 +358,7 @@ namespace Utils
         as read-only, write-only or read-write.
       \return  Pointer to FILE for input/output from the subprocess.
     */
-    PDAL_DLL FILE* portable_popen(const std::string& command,
+    PDAL_EXPORT FILE* portable_popen(const std::string& command,
         const std::string& mode);
     /**
       Close file opened with \ref portable_popen.
@@ -366,7 +366,7 @@ namespace Utils
       \param fp  Pointer to file to close.
       \return  0 on success, -1 on failure.
     */
-    PDAL_DLL int portable_pclose(FILE* fp);
+    PDAL_EXPORT int portable_pclose(FILE* fp);
 
     /**
       Create a subprocess and set the standard output of the command into the
@@ -375,7 +375,7 @@ namespace Utils
       \param cmd  Command to run.
       \param output  String to which output from the command should be written,
     */
-    PDAL_DLL int run_shell_command(const std::string& cmd, std::string& output);
+    PDAL_EXPORT int run_shell_command(const std::string& cmd, std::string& output);
 
     /**
       Replace all instances of one string found in the input with another value.
@@ -385,7 +385,7 @@ namespace Utils
       \param replaceWithWhat  Replacement for found tokens.
       \return  Modified version of input string.
     */
-    PDAL_DLL std::string replaceAll(std::string input,
+    PDAL_EXPORT std::string replaceAll(std::string input,
         const std::string& replaceWhat , const std::string& replaceWithWhat);
 
     /**
@@ -401,7 +401,7 @@ namespace Utils
         provided in lineLength.
       \return  List of substrings generated from the input string.
     */
-    PDAL_DLL std::vector<std::string> wordWrap(std::string const& inputString,
+    PDAL_EXPORT std::vector<std::string> wordWrap(std::string const& inputString,
         size_t lineLength, size_t firstLength = 0);
 
     /**
@@ -417,7 +417,7 @@ namespace Utils
         provided in lineLength.
       \return  List of substrings generated from the input string.
     */
-    PDAL_DLL std::vector<std::string> wordWrap2(std::string const& inputString,
+    PDAL_EXPORT std::vector<std::string> wordWrap2(std::string const& inputString,
         size_t lineLength, size_t firstLength = 0);
 
     /**
@@ -427,7 +427,7 @@ namespace Utils
       \param s  Input string.
       \return  Valid JSON version of input string.
     */
-    PDAL_DLL std::string escapeJSON(const std::string &s);
+    PDAL_EXPORT std::string escapeJSON(const std::string &s);
 
     /**
       Demangle a C++ symbol into readable form.
@@ -435,7 +435,7 @@ namespace Utils
       \param s  String to demangle.
       \return  Demangled symbol.
     */
-    PDAL_DLL std::string demangle(const std::string& s);
+    PDAL_EXPORT std::string demangle(const std::string& s);
 
     /**
       Return the screen width of an associated tty.
@@ -443,7 +443,7 @@ namespace Utils
       \return  The tty screen width or 80 if on Windows or it can't be
         determined.
     */
-    PDAL_DLL int screenWidth();
+    PDAL_EXPORT int screenWidth();
 
     /**
       Escape non-printing characters by using standard notation (i.e. \n)
@@ -453,7 +453,7 @@ namespace Utils
       \return  Copy of input string with non-printing characters converted
         to printable notation.
     */
-    PDAL_DLL std::string escapeNonprinting(const std::string& s);
+    PDAL_EXPORT std::string escapeNonprinting(const std::string& s);
 
     /**
       Normalize longitude so that it's between (-180, 180].
@@ -461,7 +461,7 @@ namespace Utils
       \param longitude  Longitude to normalize.
       \return  Normalized longitude.
     */
-    PDAL_DLL double normalizeLongitude(double longitude);
+    PDAL_EXPORT double normalizeLongitude(double longitude);
 
     /**
       Count the number of characters in a string that meet a predicate.
@@ -472,7 +472,7 @@ namespace Utils
       \return  Then number of characters matching the predicate.
     */
     template<typename PREDICATE>
-    PDAL_DLL std::string::size_type
+    PDAL_EXPORT std::string::size_type
     extract(const std::string& s, std::string::size_type p, PREDICATE pred)
     {
         std::string::size_type count = 0;
@@ -488,7 +488,7 @@ namespace Utils
       \param p  Position in input string at which to start counting.
       \return  Then number of space-y characters matching the predicate.
     */
-    PDAL_DLL inline std::string::size_type
+    PDAL_EXPORT inline std::string::size_type
     extractSpaces(const std::string& s, std::string::size_type p)
         { return extract(s, p, (int(*)(int))std::isspace); }
 
@@ -502,7 +502,7 @@ namespace Utils
       \return  Substrings.
     */
     template<typename PREDICATE>
-    PDAL_DLL std::vector<std::string> split(const std::string& s, PREDICATE p)
+    PDAL_EXPORT std::vector<std::string> split(const std::string& s, PREDICATE p)
     {
         std::vector<std::string> result;
 
@@ -535,7 +535,7 @@ namespace Utils
       \return  Vector of substrings.
     */
     template<typename PREDICATE>
-    PDAL_DLL std::vector<std::string> split2(const std::string& s, PREDICATE p)
+    PDAL_EXPORT std::vector<std::string> split2(const std::string& s, PREDICATE p)
     {
         std::vector<std::string> result;
 
@@ -567,7 +567,7 @@ namespace Utils
       \param p  Character indicating split positions.
       \return  Substrings.
     */
-    inline PDAL_DLL std::vector<std::string>
+    inline PDAL_EXPORT std::vector<std::string>
     split(const std::string& s, char tChar)
     {
         auto pred = [tChar](char c){ return(c == tChar); };
@@ -583,7 +583,7 @@ namespace Utils
       \param p  Character indicating split positions.
       \return  Substrings.
     */
-    inline PDAL_DLL std::vector<std::string>
+    inline PDAL_EXPORT std::vector<std::string>
     split2(const std::string& s, char tChar)
     {
         auto pred = [tChar](char c){ return(c == tChar); };
@@ -601,7 +601,7 @@ namespace Utils
       \param s  Input string to parse.
       \return  List of arguments.
     */
-    PDAL_DLL std::vector<std::string>
+    PDAL_EXPORT std::vector<std::string>
     simpleWordexp(const std::string& s);
 
     /**

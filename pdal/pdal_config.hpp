@@ -54,16 +54,16 @@ enum class Feature
     LIBXML2
 };
 
-PDAL_DLL bool hasFeature(Feature f);
-PDAL_DLL std::string fullVersionString();
-PDAL_DLL std::string versionString();
-PDAL_DLL int versionInteger();
-PDAL_DLL std::string sha1();
-PDAL_DLL int versionMajor();
-PDAL_DLL int versionMinor();
-PDAL_DLL int versionPatch();
-PDAL_DLL std::string debugInformation();
-PDAL_DLL std::string pluginInstallPath();
+PDAL_EXPORT bool hasFeature(Feature f);
+PDAL_EXPORT std::string fullVersionString();
+PDAL_EXPORT std::string versionString();
+PDAL_EXPORT int versionInteger();
+PDAL_EXPORT std::string sha1();
+PDAL_EXPORT int versionMajor();
+PDAL_EXPORT int versionMinor();
+PDAL_EXPORT int versionPatch();
+PDAL_EXPORT std::string debugInformation();
+PDAL_EXPORT std::string pluginInstallPath();
 
 } // namespace Config
 } // namespace pdal
