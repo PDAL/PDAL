@@ -38,6 +38,7 @@ jobs:
     - name: CMake
       run: |
           source ../scripts/ci/linux/cmake.sh
+      working-directory: ./build
 
     - name: Generate source distribution
       shell: bash -l {0}
