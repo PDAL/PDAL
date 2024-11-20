@@ -18,12 +18,12 @@ dependencies:
   - mamba
   - conda-build
   - libarrow
+  - libparquet
   - compilers
   - ninja
   - cmake
   - pkg-config
   - make  # [not win]
   - re2  # [linux]
-  - abseil-cpp  # [linux]
   - ccache
 
