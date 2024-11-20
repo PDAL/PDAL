@@ -6,9 +6,15 @@
 :depth: 2
 ```
 
-This tutorial describes the use of PDAL's {ref}`tindex <tindex_command>`
-command and {ref}`readers.tindex` to index and query a large point cloud 
-dataset.
+This tutorial will introduce some workflows that use PDAL's {ref}`tindex <tindex_command>`
+functionality:
+* Creating a new tile index with `pdal tindex create` 
+    * Make the index using a large, cloud-hosted lidar dataset
+    * Fine-tune the creation options
+* Querying a PDAL tile index using {ref}`readers.tindex`
+    * Read a tile index stored on the web
+    * Chain shell commands to feed polygon geometries into a {ref}`pipeline`
+    * Read point clouds within a specific area, and output data products
 
 ## Introduction
 
@@ -52,7 +58,7 @@ conda install -c conda-forge pdal
 The data used in this tutorial is a 2019 lidar survey of Adams County,
 Wisconsin. Rather than saving the files locally, we will be fetching them
 from an S3 bucket. For the "Creating a New Index" section, you can download the 
-list of S3 URLs [here](https://github.com/PDAL/PDAL/blob/master/test/data/tindex/files.txt),
+list of S3 URLs [here](https://github.com/PDAL/PDAL/blob/master/doc/tutorial/tindex/S3files.txt),
 or save them when we run the command to create our index.
 
 If you want to skip the creation of the tile index, move to the ["Merging the Index"
@@ -103,12 +109,12 @@ This command saves the list of S3 URLs in your current working directory, and
 creates a new tile index for the entire dataset. Copy the following into your 
 conda shell: it might take a while to run.
 ```
-$ curl https://raw.githubusercontent.com/PDAL/PDAL/refs/heads/master/test/data/tindex/files.txt \
+$ curl https://raw.githubusercontent.com/PDAL/PDAL/refs/heads/master/doc/tutorial/tindex/S3files.txt \
     -o files.txt \
 | pdal tindex create -s --tindex "WI_Adams_2019.parquet" -f Parquet \
     --readers.copc.threads=10 --readers.copc.resolution=10 \
     --lyr_name "WI_Adams_2019" --threads=8 --edge_length=20 \
-    < curl files.txt
+    < files.txt
 ```
 ```{note}
 In this example, We're using 80 threads (8 `tindex` threads * 10 `readers.copc` threads) and a 
@@ -129,6 +135,10 @@ Viewing our completed tile index in QGIS.
 
 With our new tile index [GeoParquet], we are going to read the indexed [COPC] files within the 
 city limits of each town in the county, creating a raster model of height above ground for each.
+One advantage of this file type is the efficient random reading of data from the web 
+with GDAL's [virtual file system]; this allows us to read a file from HTTP by streaming
+it, rather than saving the entire thing. GeoParquet files are also queryable and can 
+[manage STAC items], making them well-suited to other types of large geospatial datasets.
 
 The ability to process multiple files and output a single product is one of the key advantages 
 of a tile index. Take the PDAL workshop {ref}`batch processing tutorial <workshop-batch-processing>`
@@ -174,9 +184,8 @@ these values are going to be substituted in when we run the `pdal pipeline` comm
 ```
 ```{note}
 In the pipeline above, we are pulling our tile index from an S3 bucket using GDAL's [virtual file system].
-This allows us to efficiently read a file from HTTP by streaming it, rather than saving the entire thing.
-If you have the index saved locally, feel free to replace the 'readers.tindex.filename' option with a path
-to the file on your machine.
+If you created the index [in the previous section](#creating-a-new-index), feel free to replace the 
+'readers.tindex.filename' option with a path to the file on your machine.
 ```
 
 Once that pipeline has been saved to a new .json file, it's time to construct commands that read 
@@ -255,11 +264,10 @@ PS > curl "https://overpass-api.de/api/interpreter?data=area%5B%22wikipedia%22%3
     pdal pipeline ./height_model.json `
         --readers.tindex.wkt=$($wkt_name[0].Trim('"')) `
         --writers.gdal.filename="$($wkt_name[1].Trim()).tif" }
-
 ```
 
 ```{figure} final_output.png
-:scale: 30%
+:scale: 45%
 
 The final product: centered on the towns of Friendly and Adams.
 ```
@@ -271,6 +279,7 @@ The final product: centered on the towns of Friendly and Adams.
 [GeoParquet]: https://getindata.com/blog/introducing-geoparquet-data-format/
 [COPC]: https://copc.io/
 [virtual file system]: https://gdal.org/en/latest/user/virtual_file_systems.html
+[manage STAC items]: https://cloudnativegeo.org/blog/2024/08/introduction-to-stac-geoparquet/
 [Overpass]: https://wiki.openstreetmap.org/wiki/Overpass_API
 [ogr2ogr]: https://gdal.org/en/latest/programs/ogr2ogr.html
 [Well Known Text]: https://en.wikipedia.org/wiki/Well-known_text_representation_of_coordinate_reference_systems
