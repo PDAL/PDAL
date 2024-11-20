@@ -84,27 +84,27 @@ jobs:
           source ../scripts/ci/linux/test.sh -E 'pdal_io_tiledb_(time_writer|time_reader|writer|reader|bit_fields)_test|pdal_io_e57_(write|read)_test|pdal_io_stac_reader_test'
       working-directory: ./build
 
-     - name: Generate source distribution
-       shell: bash -l {0}
-       run: |
-          ninja dist
-          extensions=".tar.gz .tar.bz2"
-          for ext in $extensions
-          do
-              for filename in $(ls *$ext)
-              do
+    - name: Generate source distribution
+      shell: bash -l {0}
+      run: |
+         ninja dist
+         extensions=".tar.gz .tar.bz2"
+         for ext in $extensions
+         do
+             for filename in $(ls *$ext)
+             do
 
-                  `md5sum $filename > $filename.md5`
-                  `sha256sum $filename > $filename.sha256sum`
-                  `sha512sum $filename > $filename.sha512sum`
-              done
-          done
-       working-directory: ./build
+                 `md5sum $filename > $filename.md5`
+                 `sha256sum $filename > $filename.sha256sum`
+                 `sha512sum $filename > $filename.sha512sum`
+             done
+         done
+      working-directory: ./build
 
-     - uses: actions/upload-artifact@v4
-       name: Gather source distribution artifact
-       with:
-         name: source-package-ubuntu-latest
-         if-no-files-found: error
-         path: |
-          ./build/PDAL*
+    - uses: actions/upload-artifact@v4
+      name: Gather source distribution artifact
+      with:
+        name: source-package-ubuntu-latest
+        if-no-files-found: error
+        path: |
+         ./build/PDAL*
