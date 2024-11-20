@@ -1,4 +1,4 @@
-name: Publish Draft ${{ github.ref_name }} Release
+name: Publish Draft Release
 
 on:
   push:
