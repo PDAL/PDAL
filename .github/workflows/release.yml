@@ -3,6 +3,7 @@ name: Publish Draft Release
 on:
   push:
     tags: # only publish draft for x.x.x tags
+      - '**'
       - "[0-9]+.[0-9]+.[0-9]+"
 
 concurrency:
