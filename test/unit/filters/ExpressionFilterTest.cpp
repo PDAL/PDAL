@@ -402,8 +402,31 @@ TEST(ExpressionFilterTest, nan)
     reader.setOptions(options);
 
     Options rangeOptions;
-//     rangeOptions.add("limits", "GpsTime[-1:1]");
     rangeOptions.add("expression", "GpsTime >= -1.0 && GpsTime <= 1");
+
+    ExpressionFilter filter;
+    filter.setOptions(rangeOptions);
+    filter.setInput(reader);
+
+    PointTable table;
+    filter.prepare(table);
+    PointViewSet viewSet = filter.execute(table);
+    PointViewPtr view = *viewSet.begin();
+
+    EXPECT_EQ(1u, viewSet.size());
+    EXPECT_EQ(0u, view->size());
+}
+
+TEST(ExpressionFilterTest, nan2)
+{
+    LasReader reader;
+
+    Options options;
+    options.add("filename", Support::datapath("las/gps-time-nan.las"));
+    reader.setOptions(options);
+
+    Options rangeOptions;
+    rangeOptions.add("expression", "GpsTime == nan()");
 
     ExpressionFilter filter;
     filter.setOptions(rangeOptions);

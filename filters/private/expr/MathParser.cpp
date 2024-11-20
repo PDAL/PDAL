@@ -187,6 +187,7 @@ bool MathParser::function0(Expression& expr)
     };
 
     std::string name = curToken().sval();
+    std::cerr << "Name = " << name << "!\n";
     auto it = std::find_if(funcs.begin(), funcs.end(),
         [&name](const Func0& f){ return f.name == name; });
 
