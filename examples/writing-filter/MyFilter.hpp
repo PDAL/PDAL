@@ -8,7 +8,7 @@
 namespace pdal
 {
 
-class PDAL_DLL MyFilter : public Filter
+class PDAL_EXPORT MyFilter : public Filter
 {
 public:
     MyFilter() : Filter()

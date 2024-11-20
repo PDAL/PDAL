@@ -43,7 +43,7 @@ class KD2Impl;
 class KD3Impl;
 class KDFlexImpl;
 
-class PDAL_DLL KD2Index
+class PDAL_EXPORT KD2Index
 {
 public:
     KD2Index(const PointView& buf);
@@ -72,7 +72,7 @@ private:
     std::unique_ptr<KD2Impl> m_impl;
 };
 
-class PDAL_DLL KD3Index
+class PDAL_EXPORT KD3Index
 {
 public:
     KD3Index(const PointView& buf);

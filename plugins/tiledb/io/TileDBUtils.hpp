@@ -193,10 +193,10 @@ public:
         return m_data[3][1];
     }
 
-    friend PDAL_DLL std::istream& operator>>(std::istream& in,
+    friend PDAL_EXPORT std::istream& operator>>(std::istream& in,
                                              DomainBounds& bounds);
 
-    friend PDAL_DLL std::ostream& operator<<(std::ostream& out,
+    friend PDAL_EXPORT std::ostream& operator<<(std::ostream& out,
                                              const DomainBounds& bounds);
 
 private:

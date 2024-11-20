@@ -49,7 +49,7 @@
 namespace pdal
 {
 
-class PDAL_DLL InfoKernel : public Kernel
+class PDAL_EXPORT InfoKernel : public Kernel
 {
 public:
     std::string getName() const;

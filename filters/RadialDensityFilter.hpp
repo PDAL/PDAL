@@ -43,7 +43,7 @@ class PointLayout;
 class PointView;
 class ProgramArgs;
 
-class PDAL_DLL RadialDensityFilter : public Filter
+class PDAL_EXPORT RadialDensityFilter : public Filter
 {
 public:
     RadialDensityFilter() : Filter()

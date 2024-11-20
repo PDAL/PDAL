@@ -39,7 +39,7 @@
 namespace pdal
 {
 
-class PDAL_DLL SkewnessBalancingFilter : public Filter
+class PDAL_EXPORT SkewnessBalancingFilter : public Filter
 {
 public:
     SkewnessBalancingFilter() : Filter()

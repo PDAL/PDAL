@@ -39,7 +39,7 @@
 namespace pdal
 {
 
-class PDAL_DLL SortKernel : public Kernel
+class PDAL_EXPORT SortKernel : public Kernel
 {
 public:
     std::string getName() const;

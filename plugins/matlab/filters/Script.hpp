@@ -47,7 +47,7 @@ namespace pdal
 namespace mlang
 {
 
-class PDAL_DLL Script
+class PDAL_EXPORT Script
 {
 public:
     Script() {};
@@ -70,7 +70,7 @@ private:
     Script& operator=(Script const& rhs); // nope
 };
 
-PDAL_DLL std::ostream& operator<<(std::ostream& os, Script const& d);
+PDAL_EXPORT std::ostream& operator<<(std::ostream& os, Script const& d);
 
 } // namespace mlang
 } // namespace pdal

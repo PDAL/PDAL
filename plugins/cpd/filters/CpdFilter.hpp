@@ -39,7 +39,7 @@
 namespace pdal
 {
 
-class PDAL_DLL CpdFilter : public Filter
+class PDAL_EXPORT CpdFilter : public Filter
 {
   public:
     static std::string defaultMethod();

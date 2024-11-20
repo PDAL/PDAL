@@ -52,7 +52,7 @@ public:
     // been enqueued to wait for an available worker thread, subsequent calls
     // to Pool::add will block until an enqueued task has been popped from the
     // queue.
-    PDAL_DLL ThreadPool(std::size_t numThreads, int64_t queueSize = -1,
+    PDAL_EXPORT ThreadPool(std::size_t numThreads, int64_t queueSize = -1,
             bool verbose = true) :
         m_queueSize(queueSize),
         m_numThreads(std::max<std::size_t>(numThreads, 1))
@@ -61,18 +61,18 @@ public:
         go();
     }
 
-    PDAL_DLL ~ThreadPool()
+    PDAL_EXPORT ~ThreadPool()
     { join(); }
 
     ThreadPool(const ThreadPool& other) = delete;
     ThreadPool& operator=(const ThreadPool& other) = delete;
 
     // Start worker threads.
-    PDAL_DLL void go();
+    PDAL_EXPORT void go();
 
     // Disallow the addition of new tasks and wait for all currently running
     // tasks to complete.
-    PDAL_DLL void join()
+    PDAL_EXPORT void join()
     {
         std::unique_lock<std::mutex> lock(m_mutex);
         if (!m_running) return;
@@ -86,7 +86,7 @@ public:
     }
 
     // join() and empty the queue of tasks that may have been waiting to run.
-    PDAL_DLL void stop()
+    PDAL_EXPORT void stop()
     {
         join();
 
@@ -97,7 +97,7 @@ public:
 
     // Wait for all current tasks to complete.  As opposed to join, tasks may
     // continue to be added while a thread is await()-ing the queue to empty.
-    PDAL_DLL void await()
+    PDAL_EXPORT void await()
     {
         std::unique_lock<std::mutex> lock(m_mutex);
         m_produceCv.wait(lock, [this]()
@@ -107,11 +107,11 @@ public:
     }
 
     // Join and restart.
-    PDAL_DLL void cycle()
+    PDAL_EXPORT void cycle()
     { join(); go(); }
 
     // Change the number of threads.  Current threads will be joined.
-    PDAL_DLL void resize(const std::size_t numThreads)
+    PDAL_EXPORT void resize(const std::size_t numThreads)
     {
         join();
         m_numThreads = numThreads;
@@ -120,7 +120,7 @@ public:
 
     // Add a threaded task, blocking until a thread is available.  If join() is
     // called, add() may not be called again until go() is called and completes.
-    PDAL_DLL void add(std::function<void()> task)
+    PDAL_EXPORT void add(std::function<void()> task)
     {
         std::unique_lock<std::mutex> lock(m_mutex);
         if (!m_running)
@@ -140,10 +140,10 @@ public:
         m_consumeCv.notify_all();
     }
 
-    PDAL_DLL std::size_t size() const
+    PDAL_EXPORT std::size_t size() const
     { return m_numThreads; }
 
-    PDAL_DLL std::size_t numThreads() const
+    PDAL_EXPORT std::size_t numThreads() const
     { return m_numThreads; }
 
 private:

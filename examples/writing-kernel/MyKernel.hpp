@@ -9,7 +9,7 @@
 namespace pdal
 {
 
-class PDAL_DLL MyKernel : public Kernel
+class PDAL_EXPORT MyKernel : public Kernel
 {
 public:
     MyKernel();

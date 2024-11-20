@@ -45,7 +45,7 @@ namespace pdal
 class PointView;
 class ProgramArgs;
 
-class PDAL_DLL GroupByFilter : public Filter
+class PDAL_EXPORT GroupByFilter : public Filter
 {
 public:
     GroupByFilter();

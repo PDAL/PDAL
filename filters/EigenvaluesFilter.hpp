@@ -45,7 +45,7 @@ class PointLayout;
 class PointView;
 struct EigenvalueArgs;
 
-class PDAL_DLL EigenvaluesFilter : public Filter
+class PDAL_EXPORT EigenvaluesFilter : public Filter
 {
 public:
     EigenvaluesFilter();

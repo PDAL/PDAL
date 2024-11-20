@@ -45,7 +45,7 @@
 namespace pdal
 {
 
-class PDAL_DLL XYZTimeFauxReader : public Reader, public Streamable
+class PDAL_EXPORT XYZTimeFauxReader : public Reader, public Streamable
 {
 public:
     XYZTimeFauxReader(){};

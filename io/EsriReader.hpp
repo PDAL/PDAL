@@ -60,7 +60,7 @@ namespace pdal
 class SrsTransform;
 class ThreadPool;
 
-class PDAL_DLL EsriReader : public Reader, public Streamable
+class PDAL_EXPORT EsriReader : public Reader, public Streamable
 {
 public:
     EsriReader();

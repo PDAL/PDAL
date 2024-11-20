@@ -43,7 +43,7 @@ namespace pdal
 
 class ProgramArgs;
 
-class PDAL_DLL LloydKMeansFilter : public Filter
+class PDAL_EXPORT LloydKMeansFilter : public Filter
 {
 public:
     LloydKMeansFilter();

@@ -43,7 +43,7 @@ namespace pdal
 
 class ProgramArgs;
 
-class PDAL_DLL DBSCANFilter : public Filter
+class PDAL_EXPORT DBSCANFilter : public Filter
 {
 public:
     DBSCANFilter();

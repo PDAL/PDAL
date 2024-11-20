@@ -45,7 +45,7 @@ namespace georeference
 class TransformationFilter;
 class LocalCartesian;
 } // namespace georeference
-class PDAL_DLL GeoreferenceFilter : public Filter, public Streamable
+class PDAL_EXPORT GeoreferenceFilter : public Filter, public Streamable
 {
 public:
     GeoreferenceFilter();

@@ -50,20 +50,20 @@ class Polygon;
 namespace gdal
 {
 
-PDAL_DLL void registerDrivers();
-PDAL_DLL void unregisterDrivers();
-PDAL_DLL bool reprojectBounds(Bounds& box, const SpatialReference& srcSrs,
+PDAL_EXPORT void registerDrivers();
+PDAL_EXPORT void unregisterDrivers();
+PDAL_EXPORT bool reprojectBounds(Bounds& box, const SpatialReference& srcSrs,
     const SpatialReference& dstSrs);
-PDAL_DLL bool reprojectBounds(BOX3D& box, const SpatialReference& srcSrs,
+PDAL_EXPORT bool reprojectBounds(BOX3D& box, const SpatialReference& srcSrs,
     const SpatialReference& dstSrs);
-PDAL_DLL bool reprojectBounds(BOX2D& box, const SpatialReference& srcSrs,
+PDAL_EXPORT bool reprojectBounds(BOX2D& box, const SpatialReference& srcSrs,
     const SpatialReference& dstSrs);
-PDAL_DLL bool reproject(double& x, double& y, double& z,
+PDAL_EXPORT bool reproject(double& x, double& y, double& z,
     const SpatialReference& srcSrs, const SpatialReference& dstSrs);
-PDAL_DLL std::string lastError();
+PDAL_EXPORT std::string lastError();
 
 // Exported for test support. Not sure why the above are exported.
-PDAL_DLL std::vector<Polygon> getPolygons(const NL::json& ogr);
+PDAL_EXPORT std::vector<Polygon> getPolygons(const NL::json& ogr);
 
 // New signatures to support extraction of SRS from the end of geometry
 // specifications.

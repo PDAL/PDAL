@@ -44,7 +44,7 @@
 namespace pdal
 {
 
-class PDAL_DLL ObjReader : public Reader
+class PDAL_EXPORT ObjReader : public Reader
 {
 public:
     std::string getName() const;

@@ -43,7 +43,7 @@ class PointLayout;
 class PointView;
 class ProgramArgs;
 
-class PDAL_DLL LabelDuplicatesFilter : public Filter
+class PDAL_EXPORT LabelDuplicatesFilter : public Filter
 {
 public:
     LabelDuplicatesFilter();

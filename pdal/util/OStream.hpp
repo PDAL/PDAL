@@ -50,20 +50,20 @@ namespace pdal
 class OStream
 {
 public:
-    PDAL_DLL OStream() : m_stream(NULL), m_fstream(NULL)
+    PDAL_EXPORT OStream() : m_stream(NULL), m_fstream(NULL)
         {}
-    PDAL_DLL OStream(const std::string& filename) :
+    PDAL_EXPORT OStream(const std::string& filename) :
             m_stream(NULL), m_fstream(NULL)
         { open(filename); }
-    PDAL_DLL OStream(std::ostream *stream) : m_stream(stream), m_fstream(NULL)
+    PDAL_EXPORT OStream(std::ostream *stream) : m_stream(stream), m_fstream(NULL)
         {}
-    PDAL_DLL ~OStream()
+    PDAL_EXPORT ~OStream()
         { 
             if (m_fstream != NULL)
                 FileUtils::closeFile(m_fstream);
          }
 
-    PDAL_DLL int open(const std::string& filename)
+    PDAL_EXPORT int open(const std::string& filename)
     {
         if (m_stream)
             return -1;
@@ -72,7 +72,7 @@ public:
 
         return 0;
     }
-    PDAL_DLL void close()
+    PDAL_EXPORT void close()
     {
         flush();
         if (m_fstream != NULL)
@@ -80,34 +80,34 @@ public:
         m_fstream = NULL;
         m_stream = NULL;
     }
-    PDAL_DLL bool isOpen() const
+    PDAL_EXPORT bool isOpen() const
         { return (bool)m_stream; }
-    PDAL_DLL void flush()
+    PDAL_EXPORT void flush()
         { m_stream->flush(); }
-    PDAL_DLL operator bool ()
+    PDAL_EXPORT operator bool ()
         { return (bool)(*m_stream); }
-    PDAL_DLL void seek(std::streampos pos)
+    PDAL_EXPORT void seek(std::streampos pos)
         { m_stream->seekp(pos, std::ostream::beg); }
-    PDAL_DLL void put(const std::string& s)
+    PDAL_EXPORT void put(const std::string& s)
         { put(s, s.size()); }
-    PDAL_DLL void put(const std::string& s, size_t len)
+    PDAL_EXPORT void put(const std::string& s, size_t len)
     {
         std::string os = s;
         os.resize(len);
         m_stream->write(os.c_str(), len);
     }
-    PDAL_DLL void put(const char *c, size_t len)
+    PDAL_EXPORT void put(const char *c, size_t len)
         { m_stream->write(c, len); }
-    PDAL_DLL void put(const unsigned char *c, size_t len)
+    PDAL_EXPORT void put(const unsigned char *c, size_t len)
         { m_stream->write((const char *)c, len); }
-    PDAL_DLL std::streampos position() const
+    PDAL_EXPORT std::streampos position() const
         { return m_stream->tellp(); }
-    PDAL_DLL void pushStream(std::ostream *strm)
+    PDAL_EXPORT void pushStream(std::ostream *strm)
     {
         m_streams.push(m_stream);
         m_stream = strm;
     }
-    PDAL_DLL std::ostream *popStream()
+    PDAL_EXPORT std::ostream *popStream()
     {
         // Can't pop the last stream for now.
         if (m_streams.empty())
@@ -132,68 +132,68 @@ private:
 class OLeStream : public OStream
 {
 public:
-    PDAL_DLL OLeStream()
+    PDAL_EXPORT OLeStream()
     {}
-    PDAL_DLL OLeStream(const std::string& filename) : OStream(filename)
+    PDAL_EXPORT OLeStream(const std::string& filename) : OStream(filename)
     {}
-    PDAL_DLL OLeStream(std::ostream *stream) : OStream(stream)
+    PDAL_EXPORT OLeStream(std::ostream *stream) : OStream(stream)
     {}
 
-    PDAL_DLL OLeStream& operator << (uint8_t v)
+    PDAL_EXPORT OLeStream& operator << (uint8_t v)
     {
         m_stream->put((char)v);
         return *this;
     }
 
-    PDAL_DLL OLeStream& operator << (int8_t v)
+    PDAL_EXPORT OLeStream& operator << (int8_t v)
     {
         m_stream->put((char)v);
         return *this;
     }
 
-    PDAL_DLL OLeStream& operator << (uint16_t v)
+    PDAL_EXPORT OLeStream& operator << (uint16_t v)
     {
         v = htole16(v);
         m_stream->write((char *)&v, sizeof(v));
         return *this;
     }
 
-    PDAL_DLL OLeStream& operator << (int16_t v)
+    PDAL_EXPORT OLeStream& operator << (int16_t v)
     {
         v = (int16_t)htole16((uint16_t)v);
         m_stream->write((char *)&v, sizeof(v));
         return *this;
     }
 
-    PDAL_DLL OLeStream& operator << (uint32_t v)
+    PDAL_EXPORT OLeStream& operator << (uint32_t v)
     {
         v = htole32(v);
         m_stream->write((char *)&v, sizeof(v));
         return *this;
     }
 
-    PDAL_DLL OLeStream& operator << (int32_t v)
+    PDAL_EXPORT OLeStream& operator << (int32_t v)
     {
         v = (int32_t)htole32((uint32_t)v);
         m_stream->write((char *)&v, sizeof(v));
         return *this;
     }
 
-    PDAL_DLL OLeStream& operator << (uint64_t v)
+    PDAL_EXPORT OLeStream& operator << (uint64_t v)
     {
         v = htole64(v);
         m_stream->write((char *)&v, sizeof(v));
         return *this;
     }
 
-    PDAL_DLL OLeStream& operator << (int64_t v)
+    PDAL_EXPORT OLeStream& operator << (int64_t v)
     {
         v = (int64_t)htole64((uint64_t)v);
         m_stream->write((char *)&v, sizeof(v));
         return *this;
     }
 
-    PDAL_DLL OLeStream& operator << (float v)
+    PDAL_EXPORT OLeStream& operator << (float v)
     {
         uint32_t tmp(0);
         std::memcpy(&tmp, &v, sizeof(v));
@@ -202,7 +202,7 @@ public:
         return *this;
     }
 
-    PDAL_DLL OLeStream& operator << (double v)
+    PDAL_EXPORT OLeStream& operator << (double v)
     {
         uint64_t tmp(0);
         std::memcpy(&tmp, &v, sizeof(v));
@@ -218,68 +218,68 @@ public:
 class OBeStream : public OStream
 {
 public:
-    PDAL_DLL OBeStream()
+    PDAL_EXPORT OBeStream()
     {}
-    PDAL_DLL OBeStream(const std::string& filename) : OStream(filename)
+    PDAL_EXPORT OBeStream(const std::string& filename) : OStream(filename)
     {}
-    PDAL_DLL OBeStream(std::ostream *stream) : OStream(stream)
+    PDAL_EXPORT OBeStream(std::ostream *stream) : OStream(stream)
     {}
 
-    PDAL_DLL OBeStream& operator << (uint8_t v)
+    PDAL_EXPORT OBeStream& operator << (uint8_t v)
     {
         m_stream->put((char)v);
         return *this;
     }
 
-    PDAL_DLL OBeStream& operator << (int8_t v)
+    PDAL_EXPORT OBeStream& operator << (int8_t v)
     {
         m_stream->put((char)v);
         return *this;
     }
 
-    PDAL_DLL OBeStream& operator << (uint16_t v)
+    PDAL_EXPORT OBeStream& operator << (uint16_t v)
     {
         v = htobe16(v);
         m_stream->write((char *)&v, sizeof(v));
         return *this;
     }
 
-    PDAL_DLL OBeStream& operator << (int16_t v)
+    PDAL_EXPORT OBeStream& operator << (int16_t v)
     {
         v = (int16_t)htobe16((uint16_t)v);
         m_stream->write((char *)&v, sizeof(v));
         return *this;
     }
 
-    PDAL_DLL OBeStream& operator << (uint32_t v)
+    PDAL_EXPORT OBeStream& operator << (uint32_t v)
     {
         v = htobe32(v);
         m_stream->write((char *)&v, sizeof(v));
         return *this;
     }
 
-    PDAL_DLL OBeStream& operator << (int32_t v)
+    PDAL_EXPORT OBeStream& operator << (int32_t v)
     {
         v = (int32_t)htobe32((uint32_t)v);
         m_stream->write((char *)&v, sizeof(v));
         return *this;
     }
 
-    PDAL_DLL OBeStream& operator << (uint64_t v)
+    PDAL_EXPORT OBeStream& operator << (uint64_t v)
     {
         v = htobe64(v);
         m_stream->write((char *)&v, sizeof(v));
         return *this;
     }
 
-    PDAL_DLL OBeStream& operator << (int64_t v)
+    PDAL_EXPORT OBeStream& operator << (int64_t v)
     {
         v = (int64_t)htobe64((uint64_t)v);
         m_stream->write((char *)&v, sizeof(v));
         return *this;
     }
 
-    PDAL_DLL OBeStream& operator << (float v)
+    PDAL_EXPORT OBeStream& operator << (float v)
     {
         uint32_t tmp(0);
         std::memcpy(&tmp, &v, sizeof(v));
@@ -288,7 +288,7 @@ public:
         return *this;
     }
 
-    PDAL_DLL OBeStream& operator << (double v)
+    PDAL_EXPORT OBeStream& operator << (double v)
     {
         uint64_t tmp(0);
         std::memcpy(&tmp, &v, sizeof(v));
@@ -302,7 +302,7 @@ public:
 class OStreamMarker
 {
 public:
-    PDAL_DLL OStreamMarker(OStream& stream) : m_stream(stream)
+    PDAL_EXPORT OStreamMarker(OStream& stream) : m_stream(stream)
     {
         if (m_stream.isOpen())
             m_pos = m_stream.position();
@@ -310,9 +310,9 @@ public:
             m_pos = 0;
     }
 
-    PDAL_DLL void mark()
+    PDAL_EXPORT void mark()
         { m_pos = m_stream.position(); }
-    PDAL_DLL void rewind()
+    PDAL_EXPORT void rewind()
         { m_stream.seek(m_pos); }
 
 private:

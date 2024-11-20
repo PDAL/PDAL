@@ -43,7 +43,7 @@
 namespace pdal
 {
 
-class PDAL_DLL FerryFilter : public Filter, public Streamable
+class PDAL_EXPORT FerryFilter : public Filter, public Streamable
 {
     struct Info
     {

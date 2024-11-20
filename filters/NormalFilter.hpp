@@ -70,7 +70,7 @@ struct CompareEdgeWeight
 
 typedef std::vector<Edge> EdgeList;
 
-class PDAL_DLL NormalFilter : public Filter
+class PDAL_EXPORT NormalFilter : public Filter
 {
 public:
     NormalFilter();

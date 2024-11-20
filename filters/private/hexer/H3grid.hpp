@@ -14,7 +14,7 @@ namespace hexer
 
 using DirEdge = H3Index;
 
-class PDAL_DLL H3Grid : public BaseGrid
+class PDAL_EXPORT H3Grid : public BaseGrid
 {
 public:
     H3Grid(int dense_limit)
@@ -73,8 +73,8 @@ public:
         }
     bool sampling() const
         { return m_res < 0; }
-    bool isH3()
-        { return true; }
+    uint64_t getID(HexId ij)
+        { return ij2h3(ij); }
 
     // test function: used when inserting pre-defined grids in tests, 
     // sets origin outside of findHexagon()

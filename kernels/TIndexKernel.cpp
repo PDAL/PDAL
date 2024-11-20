@@ -41,10 +41,10 @@
 
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Polygon.hpp>
-#include <pdal/StageFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/gdal/SpatialRef.hpp>
+#include <filters/private/hexer/HexGrid.hpp>
 
 #include "../io/LasWriter.hpp"
 
@@ -66,6 +66,78 @@ void setDate(OGRFeatureH feature, const tm& tyme, int fieldNumber)
 
 namespace pdal
 {
+
+class TindexBoundary : public Filter, public Streamable
+{
+public:
+    TindexBoundary(int32_t density, double edgeLength, uint32_t sampleSize)
+        : m_density(density), m_edgeLength(edgeLength),
+        m_sampleSize(sampleSize)
+    {}
+    ~TindexBoundary()
+    {}
+
+    std::string getName() const
+    { return "tindex-boundary"; }
+    double height()
+    { return m_grid->height(); }
+    std::string toWKT()
+    {
+        std::ostringstream out;
+        out.setf(std::ios_base::fixed, std::ios_base::floatfield);
+        out.precision(10);
+        m_grid->toWKT(out);
+        return out.str();
+    }
+private:
+    std::unique_ptr<hexer::HexGrid> m_grid;
+    int32_t m_density;
+    double m_edgeLength;
+    uint32_t m_sampleSize;
+
+    virtual void ready(PointTableRef table)
+    {
+        if (m_edgeLength == 0.0)
+        {
+            m_grid.reset(new hexer::HexGrid(m_density));
+            m_grid->setSampleSize(m_sampleSize);
+        }
+        else
+            m_grid.reset(new hexer::HexGrid(m_edgeLength * sqrt(3), m_density));
+    }
+    virtual void filter(PointView& view)
+    {
+        PointRef p(view, 0);
+
+        for (PointId idx = 0; idx < view.size(); ++idx)
+        {
+            p.setPointId(idx);
+            processOne(p);
+        }
+    }
+    virtual bool processOne(PointRef& point)
+    {
+        double x = point.getFieldAs<double>(Dimension::Id::X);
+        double y = point.getFieldAs<double>(Dimension::Id::Y);
+        m_grid->addXY(x, y);
+        return true;
+    }
+    virtual void spatialReferenceChanged(const SpatialReference& srs)
+    { setSpatialReference(srs); }
+    virtual void done(PointTableRef table)
+    {
+        try
+        {
+            m_grid->findShapes();
+            m_grid->findParentPaths();
+        }
+        catch (hexer::hexer_error& e)
+        {
+            throwError(e.what());
+            m_grid.reset(new hexer::HexGrid(m_density));
+        }
+    }
+};
 
 static StaticPluginInfo const s_info
 {
@@ -118,6 +190,24 @@ void TIndexKernel::addSubSwitches(ProgramArgs& args,
             "Write absolute rather than relative file paths", m_absPath);
         args.add("stdin,s", "Read filespec pattern from standard input",
             m_usestdin);
+        args.add("path_prefix", "Prefix to be added to file paths when writing "
+            "output", m_prefix);
+        args.add("threads", "Number of threads to use for file boundary creation",
+            m_threads, 1);
+        args.addSynonym("threads", "requests");
+        args.add("simplify", "Simplify the file's exact boundary", m_doSmooth,
+            true);
+        args.addSynonym("simplify", "smooth");
+        args.add("threshold", "Number of points a cell must contain to be "
+            "declared positive space, when creating exact boundaries", m_density,
+            15);
+        args.add("resolution", "cell edge length to be used when creating exact "
+            "boundaries", m_edgeLength);
+        args.addSynonym("resolution", "edge_length");
+        args.add("sample_size", "Sample size for auto-edge length calculation in "
+            "internal hexbin filter (exact boundary)", m_sampleSize, 5000U);
+        args.add("where", "Expression describing points to be processed for exact "
+            "boundary creation", m_boundaryExpr);
     }
     else if (subcommand == "merge")
     {
@@ -156,6 +246,9 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
         if (m_filespec.size() && m_usestdin)
             throw pdal_error("Can't specify both --filespec and --stdin "
                 "options.");
+        if (m_prefix.size() && m_absPath)
+            throw pdal_error("Can't specify both --write_absolute_path and "
+                "--path_prefix options.");
         if (args.set("a_srs"))
             m_overrideASrs = true;
     }
@@ -271,35 +364,36 @@ void TIndexKernel::createFile()
             throw pdal_error(out.str());
         }
 
-    FieldIndexes indexes = getFields();
-
-    size_t filecount(0);
-    StageFactory factory(false);
+    std::vector<FileInfo> infos;
     for (auto f : m_files)
     {
-        const std::chrono::time_point<std::chrono::steady_clock> start =
-            std::chrono::steady_clock::now();
-        //ABELL - Not sure why we need to get absolute path here.
-        f = FileUtils::toAbsolutePath(f);
         FileInfo info;
-        if (getFileInfo(factory, f, info))
-        {
-            filecount++;
-            if (!isFileIndexed(indexes, info))
-            {
-                if (createFeature(indexes, info))
-                    m_log->get(LogLevel::Info) << "Indexed file " << f <<
-                    std::endl;
-                else
-                    m_log->get(LogLevel::Error) << "Failed to create feature "
-                        "for file '" << f << "'" << std::endl;
-            }
-        }
-        const std::chrono::time_point<std::chrono::steady_clock> end =
-            std::chrono::steady_clock::now();
-        std::cout << "file processing took " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " milliseconds\n";
+        info.m_filename = f;
+        FileUtils::fileTimes(info.m_filename, &info.m_ctime, &info.m_mtime);
+        infos.push_back(info);
     }
-    if (!filecount)
+
+    ThreadPool pool(m_threads);
+
+    for (auto &info : infos)
+    {
+        pool.add([this, &info]()
+        {
+            getFileInfo(info);
+        });
+    }
+    pool.await();
+
+    bool indexedFile(false);
+    FieldIndexes indexes = getFields();
+    for (auto &info : infos)
+    {
+        if (m_prefix.size())
+            info.m_filename = m_prefix + FileUtils::getFilename(info.m_filename);
+        if (!info.m_boundary.empty() && !isFileIndexed(indexes, info))
+            indexedFile |= createFeature(indexes, info);
+    }
+    if (!indexedFile)
         throw pdal_error("Couldn't index any files.");
     OGR_DS_Destroy(m_dataset);
     m_dataset = nullptr;
@@ -458,55 +552,45 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
 
     const bool bRet = (OGR_L_CreateFeature(m_layer, hFeature) == OGRERR_NONE);
     OGR_F_Destroy(hFeature);
+
+    if (bRet)
+        m_log->get(LogLevel::Info) << "Indexed file " << fileInfo.m_filename <<
+            std::endl;
+    else
+        m_log->get(LogLevel::Error) << "Failed to create feature "
+            "for file '" << fileInfo.m_filename << "'" << std::endl;
+
     return bRet;
 }
 
 
-bool TIndexKernel::fastBoundary(Stage& reader, FileInfo& fileInfo)
+void TIndexKernel::fastBoundary(Stage& reader, FileInfo& fileInfo)
 {
     QuickInfo qi = reader.preview();
     if (!qi.valid())
-        return false;
+        return;
 
-    fileInfo.m_boundary = qi.m_bounds.to2d().toWKT();
+    fileInfo.m_boundary = makeMultiPolygon(qi.m_bounds.to2d().toWKT());
     if (!qi.m_srs.empty())
         fileInfo.m_srs = qi.m_srs.getWKT();
-    return true;
+    fileInfo.m_gridHeight = 0.0;
 }
 
 
-bool TIndexKernel::slowBoundary(PipelineManager& manager, FileInfo& fileInfo)
+void TIndexKernel::slowBoundary(PipelineManager& manager)
 {
-    std::cout << "running slow bounds\n";
-    manager.prepare();
-    manager.execute(ExecMode::Stream);
-    PointViewSet set = manager.views();
-    MetadataNode root = manager.getMetadata();
-
-    // If we had an error set, bail out
-    MetadataNode e = root.findChild("filters.hexbin:error");
-    if (e.valid())
-        return false;
-
-    MetadataNode m = root.findChild("filters.hexbin:boundary");
-    fileInfo.m_boundary = m.value();
-
-    PointViewPtr v = *set.begin();
-    if (!v->spatialReference().empty())
-        fileInfo.m_srs = v->spatialReference().getWKT();
-    return true;
+    manager.execute(ExecMode::PreferStream);
 }
 
 
-bool TIndexKernel::getFileInfo(StageFactory& factory,
-    const std::string& filename, FileInfo& fileInfo)
+void TIndexKernel::getFileInfo(FileInfo& fileInfo)
 {
     PipelineManager manager;
     manager.commonOptions() = m_manager.commonOptions();
     manager.stageOptions() = m_manager.stageOptions();
 
     // Need to make sure options get set.
-    Stage& reader = manager.makeReader(filename, "");
+    Stage& reader = manager.makeReader(fileInfo.m_filename, "");
 
     // If we aren't able to make a hexbin filter, we
     // will just do a simple fast_boundary.
@@ -515,24 +599,28 @@ bool TIndexKernel::getFileInfo(StageFactory& factory,
     {
         if (!fast)
         {
-            Stage& hexer = manager.makeFilter("filters.hexbin", reader);
-            fast = !slowBoundary(manager, fileInfo);
+            TindexBoundary hexer{m_density, m_edgeLength, m_sampleSize};
+            if (m_boundaryExpr.size())
+            {
+                Options opts;
+                opts.add("where", m_boundaryExpr);
+                hexer.addOptions(opts);
+            }
+            hexer.setInput(reader);
+            manager.addStage(&hexer);
+            slowBoundary(manager);
+
+            fileInfo.m_boundary = hexer.toWKT();
+            fileInfo.m_srs = hexer.getSpatialReference().getWKT();
+            fileInfo.m_gridHeight = hexer.height();
         }
     }
     catch (pdal_error&)
     {
         fast = true;
     }
-    if (fast && !fastBoundary(reader, fileInfo))
-    {
-        m_log->get(LogLevel::Error) << "Skipping file '" << filename <<
-            "': can't compute boundary." << std::endl;
-        return false;
-    }
-    FileUtils::fileTimes(filename, &fileInfo.m_ctime, &fileInfo.m_mtime);
-    fileInfo.m_filename = filename;
-
-    return true;
+    if (fast)
+        fastBoundary(reader, fileInfo);
 }
 
 
@@ -555,8 +643,7 @@ bool TIndexKernel::createDataset(const std::string& filename)
         throw pdal_error(oss.str());
     }
 
-    std::string dsname = FileUtils::toAbsolutePath(filename);
-    m_dataset = OGR_Dr_CreateDataSource(hDriver, dsname.c_str(), NULL);
+    m_dataset = OGR_Dr_CreateDataSource(hDriver, filename.c_str(), NULL); 
     return (bool)m_dataset;
 }
 
@@ -580,7 +667,7 @@ bool TIndexKernel::createLayer(std::string const& layername)
            "creation" << std::endl;
 
     m_layer = OGR_DS_CreateLayer(m_dataset, m_layerName.c_str(),
-        srs.get(), wkbPolygon, NULL);
+        srs.get(), wkbMultiPolygon, NULL);
 
     if (m_layer)
         createFields();
@@ -654,12 +741,33 @@ pdal::Polygon TIndexKernel::prepareGeometry(const FileInfo& fileInfo)
     using namespace gdal;
 
     Polygon g(fileInfo.m_boundary, fileInfo.m_srs);
+    if (fileInfo.m_gridHeight && m_doSmooth)
+    {
+        double tolerance = 1.1 * fileInfo.m_gridHeight / 2;
+        double cull = (6 * tolerance * tolerance);
+        g.simplify(tolerance, cull);
+        if (g.wkt()[0] == 'P')
+        {
+            std::string multi = makeMultiPolygon(g.wkt());
+            g = Polygon(multi, fileInfo.m_srs);
+        }
+    }
     if (m_tgtSrsString.size())
     {
         SpatialReference out(m_tgtSrsString);
         g.transform(out);
     }
+
     return g;
+}
+
+
+std::string TIndexKernel::makeMultiPolygon(const std::string& wkt)
+{
+    std::string multi = wkt + ')';
+    multi.insert(8, "(");
+    multi.insert(0, "MULTI");
+    return multi;
 }
 
 } // namespace pdal

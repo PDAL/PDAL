@@ -53,7 +53,7 @@ namespace hdf5
     class DimInfo;
 }
 
-class PDAL_DLL HdfReader : public pdal::Reader, public pdal::Streamable
+class PDAL_EXPORT HdfReader : public pdal::Reader, public pdal::Streamable
 {
 public:
     HdfReader();

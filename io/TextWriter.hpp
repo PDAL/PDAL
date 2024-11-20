@@ -42,7 +42,7 @@ namespace pdal
 
 typedef std::shared_ptr<std::ostream> FileStreamPtr;
 
-class PDAL_DLL TextWriter : public Writer, public Streamable
+class PDAL_EXPORT TextWriter : public Writer, public Streamable
 {
     struct DimSpec
     {

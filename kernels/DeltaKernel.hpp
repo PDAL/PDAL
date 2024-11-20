@@ -62,7 +62,7 @@ struct DimIndex
 };
 typedef std::map<std::string, DimIndex> DimIndexMap;
 
-class PDAL_DLL DeltaKernel : public Kernel
+class PDAL_EXPORT DeltaKernel : public Kernel
 {
 public:
     std::string getName() const;

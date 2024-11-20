@@ -109,7 +109,7 @@ void StageExtensions::load()
     }
 }
 
-PDAL_DLL void StageExtensions::set(const std::string& stage,
+PDAL_EXPORT void StageExtensions::set(const std::string& stage,
     const StringList& exts)
 {
     std::lock_guard<std::mutex> lock(m_mutex);

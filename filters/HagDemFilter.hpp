@@ -49,7 +49,7 @@ class Options;
 class PointLayout;
 class PointView;
 
-class PDAL_DLL HagDemFilter : public Filter, public Streamable
+class PDAL_EXPORT HagDemFilter : public Filter, public Streamable
 {
 public:
     HagDemFilter();
