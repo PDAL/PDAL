@@ -4,13 +4,65 @@ on:
   push:
     tags: # only publish draft for x.x.x tags
       - '**'
-      - "[0-9]+.[0-9]+.[0-9]+"
+#      - "[0-9]+.[0-9]+.[0-9]+"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
+
+  build:
+    name: Configure  source tree
+    defaults:
+      run:
+        shell: bash -l {0}
+    runs-on: 'ubuntu-latest'
+    strategy:
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: mamba-org/setup-micromamba@v2
+      with:
+        init-shell: bash
+        environment-file: "scripts/ci/current-environment.yml"
+        environment-name: "pdal-build"
+        cache-environment: true
+        cache-downloads: true
+
+    - name: Setup
+      run: |
+          source ./scripts/ci/linux/setup.sh
+
+    - name: CMake
+      run: |
+          source ../scripts/ci/linux/cmake.sh
+
+    - name: Generate source distribution
+      shell: bash -l {0}
+      run: |
+         ninja dist
+         extensions=".tar.gz .tar.bz2"
+         for ext in $extensions
+         do
+             for filename in $(ls *$ext)
+             do
+
+                 `md5sum $filename > $filename.md5`
+                 `sha256sum $filename > $filename.sha256sum`
+                 `sha512sum $filename > $filename.sha512sum`
+             done
+         done
+      working-directory: ./build
+
+    - uses: actions/upload-artifact@v4
+      name: Gather source distribution artifact
+      with:
+        name: source-package-ubuntu-latest
+        if-no-files-found: error
+        path: |
+         ./build/PDAL*
 
   release:
     name: Gather and attach release
