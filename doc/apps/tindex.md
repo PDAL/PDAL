@@ -27,6 +27,15 @@ $ pdal tindex create <tindex> <filespec>
 --a_srs                Assign SRS of tile with no SRS to this value
 --write_absolute_path  Write absolute rather than relative file paths
 --stdin, -s            Read filespec pattern from standard input
+--threads              Number of threads to use for file boundary creation
+--simplify             Simplify the file's exact boundary
+--threshold            Number of points a cell must contain to be declared 
+                       positive space, when creating exact boundaries
+--resolution           Cell edge length to be used when creating exact boundaries
+--sample_size          Sample size for auto-edge length calculation in internal
+                       hexbin filter (exact boundary)
+--where                Expression describing points to be processed for exact
+                       boundary creation
 ```
 
 This command will index the files referred to by `filespec` and place the
@@ -36,11 +45,19 @@ The type of the index
 file can be specified by specifying the OGR code for the format using the
 `--ogrdriver` option.  If no driver is specified, the format defaults to "ESRI
 Shapefile".  Any filetype that can be handled by
-[OGR](http://www.gdal.org/ogr_formats.html) is acceptable.
+[OGR](https://gdal.org/en/latest/drivers/vector/) is acceptable.
 
 In vector file-speak, each file specified by `filespec` is stored as a
 feature in a layer in the index file. The `filespec` is a [glob pattern](http://man7.org/linux/man-pages/man7/glob.7.html).  and normally needs to be
 quoted to prevent shell expansion of wildcard characters.
+
+Exact file boundaries (used when `--fast_boundary` is not set to `true`)
+are created with a grid of tessellated hexagons, in a modified version of
+{ref}`filters.hexbin`. This is controlled with the `simplify`, `threshold`,
+`resolution` and `sample_size` options.
+
+Creation mode also supports parallel file processing by specifying the `threads`
+option.
 
 ## tindex Merge Mode
 
@@ -85,6 +102,6 @@ $ pdal tindex create index.sqlite "*.las" -f "SQLite" --lyr_name "pdal" \
     --t_srs "EPSG:4326"
 ```
 
-[gdal]: http://www.gdal.org
-[gdaltindex]: http://www.gdal.org/gdaltindex.html
+[gdal]: https://gdal.org
+[gdaltindex]: https://gdal.org/en/latest/programs/gdaltindex.html
 [sqlite]: http://www.sqlite.org

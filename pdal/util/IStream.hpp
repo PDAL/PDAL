@@ -66,7 +66,7 @@ public:
     /**
       Default constructor.
     */
-    PDAL_DLL IStream() : m_stream(NULL), m_fstream(NULL)
+    PDAL_EXPORT IStream() : m_stream(NULL), m_fstream(NULL)
         {}
 
     /**
@@ -74,7 +74,7 @@ public:
 
       \param filename  File from which to read.
     */
-    PDAL_DLL IStream(const std::string& filename) :
+    PDAL_EXPORT IStream(const std::string& filename) :
         m_stream(NULL), m_fstream(NULL)
     { open(filename); }
 
@@ -83,10 +83,10 @@ public:
 
       \param stream  Stream from which to read.
     */
-    PDAL_DLL IStream(std::istream *stream) : m_stream(stream), m_fstream(NULL)
+    PDAL_EXPORT IStream(std::istream *stream) : m_stream(stream), m_fstream(NULL)
         {}
 
-    PDAL_DLL ~IStream()
+    PDAL_EXPORT ~IStream()
         { delete m_fstream; }
 
     /**
@@ -95,7 +95,7 @@ public:
       \param filename  Filename.
       \return  -1 if a stream is already assigned, 0 otherwise.
     */
-    PDAL_DLL int open(const std::string& filename)
+    PDAL_EXPORT int open(const std::string& filename)
     {
         if (m_stream)
              return -1;
@@ -108,7 +108,7 @@ public:
     /**
       Close the underlying stream.
     */
-    PDAL_DLL void close()
+    PDAL_EXPORT void close()
     {
         if(m_fstream != NULL)
           FileUtils::closeFile(m_fstream);
@@ -121,7 +121,7 @@ public:
 
       \return  The state of the underlying stream.
     */
-    PDAL_DLL operator bool ()
+    PDAL_EXPORT operator bool ()
         { return m_stream && *m_stream; }
 
     /**
@@ -129,7 +129,7 @@ public:
 
       \param pos  Position to seek to,
     */
-    PDAL_DLL void seek(std::streampos pos)
+    PDAL_EXPORT void seek(std::streampos pos)
         { m_stream->seekg(pos, std::istream::beg); }
 
 
@@ -139,7 +139,7 @@ public:
       \param off  Offset.
       \param way  Absolute position for offset (beg, end or cur)
     */
-    PDAL_DLL void seek(std::streampos off, std::ios_base::seekdir way)
+    PDAL_EXPORT void seek(std::streampos off, std::ios_base::seekdir way)
         { m_stream->seekg(off, way); }
 
     /**
@@ -147,7 +147,7 @@ public:
 
       \param offset  Offset from the current position.
     */
-    PDAL_DLL void skip(std::streamoff offset)
+    PDAL_EXPORT void skip(std::streamoff offset)
         { m_stream->seekg(offset, std::istream::cur); }
 
     /**
@@ -155,7 +155,7 @@ public:
 
       \return  Current get position.
     */
-    PDAL_DLL std::streampos position() const
+    PDAL_EXPORT std::streampos position() const
         { return m_stream->tellg(); }
 
     /**
@@ -163,7 +163,7 @@ public:
 
       \return  Whether the underlying stream is good.
     */
-    PDAL_DLL bool good() const
+    PDAL_EXPORT bool good() const
         { return m_stream->good(); }
 
     /**
@@ -171,7 +171,7 @@ public:
 
       \return  Pointer to the underlying stream.
     */
-    PDAL_DLL std::istream *stream()
+    PDAL_EXPORT std::istream *stream()
         { return m_stream; }
 
     /**
@@ -179,7 +179,7 @@ public:
 
       \param strm  New stream to read from.
     */
-    PDAL_DLL void pushStream(std::istream *strm)
+    PDAL_EXPORT void pushStream(std::istream *strm)
     {
         m_streams.push(m_stream);
         m_stream = strm;
@@ -191,7 +191,7 @@ public:
 
       \return  Pointer to the popped stream.
     */
-    PDAL_DLL std::istream *popStream()
+    PDAL_EXPORT std::istream *popStream()
     {
         // Can't pop the last stream for now.
         if (m_streams.empty())
@@ -210,7 +210,7 @@ public:
       \param s  String to fill.
       \param size  Maximum number of bytes to extract.
     */
-    PDAL_DLL void get(std::string& s, size_t size)
+    PDAL_EXPORT void get(std::string& s, size_t size)
     {
         // Could do this by appending to a string with a stream, but this
         // is probably fast enough for now (there's only a simple increment
@@ -228,7 +228,7 @@ public:
 
       \param buf  Buffer to fill.
     */
-    PDAL_DLL void get(std::vector<char>& buf)
+    PDAL_EXPORT void get(std::vector<char>& buf)
     {
         assert(buf.size() != 0);
         m_stream->read((char *)&buf[0], buf.size());
@@ -239,7 +239,7 @@ public:
 
       \param buf  Buffer to fill.
     */
-    PDAL_DLL void get(std::vector<unsigned char>& buf) {
+    PDAL_EXPORT void get(std::vector<unsigned char>& buf) {
         assert(buf.size() != 0);
         m_stream->read((char *)&buf[0], buf.size());
     }
@@ -250,7 +250,7 @@ public:
       \param buf  Buffer to fill.
       \param size  Number of bytes to extract.
     */
-    PDAL_DLL void get(char *buf, size_t size)
+    PDAL_EXPORT void get(char *buf, size_t size)
         { m_stream->read(buf, size); }
 
     /**
@@ -259,7 +259,7 @@ public:
       \param buf  Buffer to fill.
       \param size  Number of bytes to extract.
     */
-    PDAL_DLL void get(unsigned char *buf, size_t size)
+    PDAL_EXPORT void get(unsigned char *buf, size_t size)
         { m_stream->read((char *)buf, size); }
 
 protected:
@@ -280,7 +280,7 @@ public:
     /**
       Default constructor.
     */
-    PDAL_DLL ILeStream()
+    PDAL_EXPORT ILeStream()
     {}
 
     /**
@@ -288,7 +288,7 @@ public:
 
       \param filename  Filename.
     */
-    PDAL_DLL ILeStream(const std::string& filename) : IStream(filename)
+    PDAL_EXPORT ILeStream(const std::string& filename) : IStream(filename)
     {}
 
     /**
@@ -296,7 +296,7 @@ public:
 
       \param stream  Stream to extract from.
     */
-    PDAL_DLL ILeStream(std::istream *stream) : IStream(stream)
+    PDAL_EXPORT ILeStream(std::istream *stream) : IStream(stream)
     {}
 
     /**
@@ -305,7 +305,7 @@ public:
       \param v  unsigned byte to populate
       \return  This stream.
     */
-    PDAL_DLL ILeStream& operator >> (uint8_t& v)
+    PDAL_EXPORT ILeStream& operator >> (uint8_t& v)
     {
         v = (uint8_t)m_stream->get();
         return *this;
@@ -317,7 +317,7 @@ public:
       \param v  unsigned byte to populate
       \return  This stream.
     */
-    PDAL_DLL ILeStream& operator >> (int8_t& v)
+    PDAL_EXPORT ILeStream& operator >> (int8_t& v)
     {
         v = (int8_t)m_stream->get();
         return *this;
@@ -329,7 +329,7 @@ public:
       \param v  unsigned short to populate
       \return  This stream.
     */
-    PDAL_DLL ILeStream& operator >> (uint16_t& v)
+    PDAL_EXPORT ILeStream& operator >> (uint16_t& v)
     {
         m_stream->read((char *)&v, sizeof(v));
         v = le16toh(v);
@@ -342,7 +342,7 @@ public:
       \param v  short to populate
       \return  This stream.
     */
-    PDAL_DLL ILeStream& operator >> (int16_t& v)
+    PDAL_EXPORT ILeStream& operator >> (int16_t& v)
     {
         m_stream->read((char *)&v, sizeof(v));
         v = (int16_t)le16toh((uint16_t)v);
@@ -355,7 +355,7 @@ public:
       \param v  unsigned int to populate
       \return  This stream.
     */
-    PDAL_DLL ILeStream& operator >> (uint32_t& v)
+    PDAL_EXPORT ILeStream& operator >> (uint32_t& v)
     {
         m_stream->read((char *)&v, sizeof(v));
         v = le32toh(v);
@@ -368,7 +368,7 @@ public:
       \param v  int to populate
       \return  This stream.
     */
-    PDAL_DLL ILeStream& operator >> (int32_t& v)
+    PDAL_EXPORT ILeStream& operator >> (int32_t& v)
     {
         m_stream->read((char *)&v, sizeof(v));
         v = (int32_t)le32toh((uint32_t)v);
@@ -381,7 +381,7 @@ public:
       \param v  unsigned long int to populate
       \return  This stream.
     */
-    PDAL_DLL ILeStream& operator >> (uint64_t& v)
+    PDAL_EXPORT ILeStream& operator >> (uint64_t& v)
     {
         m_stream->read((char *)&v, sizeof(v));
         v = le64toh(v);
@@ -394,7 +394,7 @@ public:
       \param v  long int to populate
       \return  This stream.
     */
-    PDAL_DLL ILeStream& operator >> (int64_t& v)
+    PDAL_EXPORT ILeStream& operator >> (int64_t& v)
     {
         m_stream->read((char *)&v, sizeof(v));
         v = (int64_t)le64toh((uint64_t)v);
@@ -407,7 +407,7 @@ public:
       \param v  float to populate
       \return  This stream.
     */
-    PDAL_DLL ILeStream& operator >> (float& v)
+    PDAL_EXPORT ILeStream& operator >> (float& v)
     {
         m_stream->read((char *)&v, sizeof(v));
         uint32_t tmp = le32toh(*(uint32_t *)(&v));
@@ -421,7 +421,7 @@ public:
       \param v  double to populate
       \return  This stream.
     */
-    PDAL_DLL ILeStream& operator >> (double& v)
+    PDAL_EXPORT ILeStream& operator >> (double& v)
     {
         m_stream->read((char *)&v, sizeof(v));
         uint64_t tmp = le64toh(*(uint64_t *)(&v));
@@ -441,7 +441,7 @@ public:
     /**
       Default constructor.
     */
-    PDAL_DLL IBeStream()
+    PDAL_EXPORT IBeStream()
     {}
 
     /**
@@ -449,7 +449,7 @@ public:
 
       \param filename  Filename.
     */
-    PDAL_DLL IBeStream(const std::string& filename) : IStream(filename)
+    PDAL_EXPORT IBeStream(const std::string& filename) : IStream(filename)
     {}
 
     /**
@@ -457,7 +457,7 @@ public:
 
       \param stream  Stream to extract from.
     */
-    PDAL_DLL IBeStream(std::istream *stream) : IStream(stream)
+    PDAL_EXPORT IBeStream(std::istream *stream) : IStream(stream)
     {}
 
     /**
@@ -466,7 +466,7 @@ public:
       \param v  unsigned byte to populate
       \return  This stream.
     */
-    PDAL_DLL IBeStream& operator >> (uint8_t& v)
+    PDAL_EXPORT IBeStream& operator >> (uint8_t& v)
     {
         v = (uint8_t)m_stream->get();
         return *this;
@@ -478,7 +478,7 @@ public:
       \param v  unsigned byte to populate
       \return  This stream.
     */
-    PDAL_DLL IBeStream& operator >> (int8_t& v)
+    PDAL_EXPORT IBeStream& operator >> (int8_t& v)
     {
         v = (int8_t)m_stream->get();
         return *this;
@@ -490,7 +490,7 @@ public:
       \param v  unsigned short to populate
       \return  This stream.
     */
-    PDAL_DLL IBeStream& operator >> (uint16_t& v)
+    PDAL_EXPORT IBeStream& operator >> (uint16_t& v)
     {
         m_stream->read((char *)&v, sizeof(v));
         v = be16toh(v);
@@ -503,7 +503,7 @@ public:
       \param v  short to populate
       \return  This stream.
     */
-    PDAL_DLL IBeStream& operator >> (int16_t& v)
+    PDAL_EXPORT IBeStream& operator >> (int16_t& v)
     {
         m_stream->read((char *)&v, sizeof(v));
         v = (int16_t)be16toh((uint16_t)v);
@@ -516,7 +516,7 @@ public:
       \param v  unsigned int to populate
       \return  This stream.
     */
-    PDAL_DLL IBeStream& operator >> (uint32_t& v)
+    PDAL_EXPORT IBeStream& operator >> (uint32_t& v)
     {
         m_stream->read((char *)&v, sizeof(v));
         v = be32toh(v);
@@ -529,7 +529,7 @@ public:
       \param v  int to populate
       \return  This stream.
     */
-    PDAL_DLL IBeStream& operator >> (int32_t& v)
+    PDAL_EXPORT IBeStream& operator >> (int32_t& v)
     {
         m_stream->read((char *)&v, sizeof(v));
         v = (int32_t)be32toh((uint32_t)v);
@@ -542,7 +542,7 @@ public:
       \param v  unsigned long int to populate
       \return  This stream.
     */
-    PDAL_DLL IBeStream& operator >> (uint64_t& v)
+    PDAL_EXPORT IBeStream& operator >> (uint64_t& v)
     {
         m_stream->read((char *)&v, sizeof(v));
         v = be64toh(v);
@@ -555,7 +555,7 @@ public:
       \param v  long int to populate
       \return  This stream.
     */
-    PDAL_DLL IBeStream& operator >> (int64_t& v)
+    PDAL_EXPORT IBeStream& operator >> (int64_t& v)
     {
         m_stream->read((char *)&v, sizeof(v));
         v = (int64_t)be64toh((uint64_t)v);
@@ -568,7 +568,7 @@ public:
       \param v  float to populate
       \return  This stream.
     */
-    PDAL_DLL IBeStream& operator >> (float& v)
+    PDAL_EXPORT IBeStream& operator >> (float& v)
     {
         m_stream->read((char *)&v, sizeof(v));
         uint32_t tmp = be32toh(*(uint32_t *)(&v));
@@ -582,7 +582,7 @@ public:
       \param v  double to populate
       \return  This stream.
     */
-    PDAL_DLL IBeStream& operator >> (double& v)
+    PDAL_EXPORT IBeStream& operator >> (double& v)
     {
         m_stream->read((char *)&v, sizeof(v));
         uint64_t tmp = be64toh(*(uint64_t *)(&v));
@@ -602,46 +602,46 @@ class ISwitchableStream : public IStream
 public:
     static const bool DefaultIsLittleEndian = true;
 
-    PDAL_DLL ISwitchableStream() : m_isLittleEndian(DefaultIsLittleEndian)
+    PDAL_EXPORT ISwitchableStream() : m_isLittleEndian(DefaultIsLittleEndian)
     {}
 
-    PDAL_DLL ISwitchableStream(const std::string& filename)
+    PDAL_EXPORT ISwitchableStream(const std::string& filename)
         : IStream(filename)
         , m_isLittleEndian(DefaultIsLittleEndian)
     {}
 
-    PDAL_DLL ISwitchableStream(std::istream* stream)
+    PDAL_EXPORT ISwitchableStream(std::istream* stream)
         : IStream(stream)
         , m_isLittleEndian(DefaultIsLittleEndian)
     {}
 
-    PDAL_DLL bool isLittleEndian() const
+    PDAL_EXPORT bool isLittleEndian() const
         { return m_isLittleEndian; }
-    PDAL_DLL void switchToLittleEndian()
+    PDAL_EXPORT void switchToLittleEndian()
         { m_isLittleEndian = true; }
-    PDAL_DLL void switchToBigEndian()
+    PDAL_EXPORT void switchToBigEndian()
         { m_isLittleEndian = false; }
 
-    PDAL_DLL ISwitchableStream& operator>>(uint8_t& v)
+    PDAL_EXPORT ISwitchableStream& operator>>(uint8_t& v)
     {
         v = (uint8_t)m_stream->get();
         return *this;
     }
 
-    PDAL_DLL ISwitchableStream& operator>>(int8_t& v)
+    PDAL_EXPORT ISwitchableStream& operator>>(int8_t& v)
     {
         v = (int8_t)m_stream->get();
         return *this;
     }
 
-    PDAL_DLL ISwitchableStream& operator>>(uint16_t& v)
+    PDAL_EXPORT ISwitchableStream& operator>>(uint16_t& v)
     {
         m_stream->read((char*)&v, sizeof(v));
         v = isLittleEndian() ? le16toh(v) : be16toh(v);
         return *this;
     }
 
-    PDAL_DLL ISwitchableStream& operator>>(int16_t& v)
+    PDAL_EXPORT ISwitchableStream& operator>>(int16_t& v)
     {
         m_stream->read((char*)&v, sizeof(v));
         v = isLittleEndian() ? (int16_t)le16toh((uint16_t)v)
@@ -649,14 +649,14 @@ public:
         return *this;
     }
 
-    PDAL_DLL ISwitchableStream& operator>>(uint32_t& v)
+    PDAL_EXPORT ISwitchableStream& operator>>(uint32_t& v)
     {
         m_stream->read((char*)&v, sizeof(v));
         v = isLittleEndian() ? le32toh(v) : be32toh(v);
         return *this;
     }
 
-    PDAL_DLL ISwitchableStream& operator>>(int32_t& v)
+    PDAL_EXPORT ISwitchableStream& operator>>(int32_t& v)
     {
         m_stream->read((char*)&v, sizeof(v));
         v = isLittleEndian() ? (int32_t)le32toh((uint32_t)v)
@@ -664,14 +664,14 @@ public:
         return *this;
     }
 
-    PDAL_DLL ISwitchableStream& operator>>(uint64_t& v)
+    PDAL_EXPORT ISwitchableStream& operator>>(uint64_t& v)
     {
         m_stream->read((char*)&v, sizeof(v));
         v = isLittleEndian() ? le64toh(v) : be64toh(v);
         return *this;
     }
 
-    PDAL_DLL ISwitchableStream& operator>>(int64_t& v)
+    PDAL_EXPORT ISwitchableStream& operator>>(int64_t& v)
     {
         m_stream->read((char*)&v, sizeof(v));
         v = isLittleEndian() ? (int64_t)le64toh((uint64_t)v)
@@ -679,7 +679,7 @@ public:
         return *this;
     }
 
-    PDAL_DLL ISwitchableStream& operator>>(float& v)
+    PDAL_EXPORT ISwitchableStream& operator>>(float& v)
     {
         m_stream->read((char*)&v, sizeof(v));
         uint32_t tmp = isLittleEndian() ? le32toh(*(uint32_t*)(&v))
@@ -688,7 +688,7 @@ public:
         return *this;
     }
 
-    PDAL_DLL ISwitchableStream& operator>>(double& v)
+    PDAL_EXPORT ISwitchableStream& operator>>(double& v)
     {
         m_stream->read((char*)&v, sizeof(v));
         uint64_t tmp = isLittleEndian() ? be64toh(*(uint64_t*)(&v))
@@ -706,10 +706,10 @@ private:
 class IStreamMarker
 {
 public:
-    PDAL_DLL IStreamMarker(IStream& stream) : m_stream(stream)
+    PDAL_EXPORT IStreamMarker(IStream& stream) : m_stream(stream)
         { m_pos = m_stream.position(); }
 
-    PDAL_DLL void rewind()
+    PDAL_EXPORT void rewind()
         { m_stream.seek(m_pos); }
 
 private:

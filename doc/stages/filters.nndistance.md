@@ -29,14 +29,14 @@ metric described by the [mode] of the filter.
 
 ## Options
 
-`` _`mode` ``
+mode
 
 : The mode of operation.  Either "kth", in which the distance is the euclidian
   distance of the subject point from the kth remote point or "avg" in which
   the distance is the average euclidian distance from the [k] nearest points.
   \[Default: 'kth'\]
 
-`` _`k` ``
+k
 
 : The number of k nearest neighbors to consider. \[Default: **10**\]
 

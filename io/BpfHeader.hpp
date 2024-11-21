@@ -167,14 +167,14 @@ struct BpfHeader
     std::vector<BpfDimension> m_staticDims;
     LogPtr m_log;
 
-    PDAL_DLL void setLog(const LogPtr& log)
+    PDAL_EXPORT void setLog(const LogPtr& log)
          { m_log = log; }
-    PDAL_DLL bool read(ILeStream& stream);
+    PDAL_EXPORT bool read(ILeStream& stream);
     bool write(OLeStream& stream);
     bool readV3(ILeStream& stream);
     bool readV1(ILeStream& stream);
     bool trySetSpatialReference(const pdal::SpatialReference&);
-    PDAL_DLL bool readDimensions(ILeStream& stream,
+    PDAL_EXPORT bool readDimensions(ILeStream& stream,
         std::vector<BpfDimension>& dims, bool fixNames);
     void writeDimensions(OLeStream& stream, std::vector<BpfDimension>& dims);
     void dump();

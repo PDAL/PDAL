@@ -73,7 +73,7 @@ elevation is
 
 ## Options
 
-`` _`raster` ``
+raster
 
 : GDAL-readable raster to use for DEM.
 

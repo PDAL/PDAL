@@ -62,7 +62,7 @@ class DynamicLibrary;
  */
 
 template <typename T>
-class PDAL_DLL PluginManager
+class PDAL_EXPORT PluginManager
 {
     struct Info
     {

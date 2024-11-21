@@ -56,7 +56,7 @@ namespace expr
   to a file, but this isn't a requirement.  The class provides support for
   some operations common for producing point output.
 */
-class PDAL_DLL Writer : public virtual Stage
+class PDAL_EXPORT Writer : public virtual Stage
 {
     friend class WriterWrapper;
     friend class DbWriter;
@@ -107,7 +107,7 @@ private:
     std::unique_ptr<Args> m_args;
 };
 
-class PDAL_DLL NoFilenameWriter : public Writer
+class PDAL_EXPORT NoFilenameWriter : public Writer
 {
 public:
     using Writer::Writer;

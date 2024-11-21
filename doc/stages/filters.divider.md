@@ -36,18 +36,18 @@ This pipeline will create 10 output files from the input file readers.las.
 
 ## Options
 
-`` _`mode` ``
+mode
 
 : A mode of "partition" will write sequential points to an output view until
   the view meets its predetermined size. "round_robin" mode will iterate
   through the output views as it writes sequential points.
   \[Default: "partition"\]
 
-`` _`count` ``
+count
 
 : Number of output views.  \[Default: none\]
 
-`` _`capacity` ``
+capacity
 
 : Maximum number of points in each output view.  Views will contain
   approximately equal numbers of points.  \[Default: none\]

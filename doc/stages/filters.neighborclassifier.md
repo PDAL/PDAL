@@ -57,21 +57,26 @@ assigned based on the closest point in pred.txt.
 
 ## Options
 
-`` _`candidate` ``
+candidate
 
 : A filename which points to the point cloud containing the points which
   will do the voting.  If not specified, defaults to the input of the filter.
 
-`` _`domain` ``
+domain
 
 : A {ref}`range <ranges>` which selects points to be processed by the filter.
   Can be specified multiple times.  Points satisfying any range will be
   processed
 
-`` _`k` ``
+k
 
 : An integer which specifies the number of neighbors which vote on each
   selected point.
+
+dimension
+
+: A dimension that is treated as classification for voting purposes and whose value is
+  set after voting. It is treated as an integer value. [Default: Classification]
 
 ```{include} filter_opts.md
 ```

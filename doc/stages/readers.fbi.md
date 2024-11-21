@@ -37,6 +37,6 @@ and Fast Binary formats without any loss of point attribute information.
 
 ## Options
 
-`` _`filename` ``
+filename
 
 : FBI file to read \[Required\]

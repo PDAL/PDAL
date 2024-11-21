@@ -58,7 +58,7 @@ struct StageCreationOptions
     std::string m_tag;
 };
 
-class PDAL_DLL PipelineManager
+class PDAL_EXPORT PipelineManager
 {
     FRIEND_TEST(json, tags);
 public:
@@ -152,6 +152,8 @@ public:
     const std::vector<Stage *> stages() const
         { return m_stages; }
     void destroyStage(Stage *s = nullptr);
+    void addStage(Stage *s);
+    void setAllowedDims(const StringList& dimNames);
 
 private:
     void setOptions(Stage& stage, const Options& addOps);

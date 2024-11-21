@@ -42,7 +42,7 @@ namespace pdal
 class PointView;
 class ProgramArgs;
 
-class PDAL_DLL SeparateScanLineFilter : public Filter
+class PDAL_EXPORT SeparateScanLineFilter : public Filter
 {
 public:
     SeparateScanLineFilter();

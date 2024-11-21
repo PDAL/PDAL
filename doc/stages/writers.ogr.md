@@ -29,7 +29,7 @@ driver can be specified with the `ogrdriver` option.
 
 ## Options
 
-`` _`filename` ``
+filename
 
 : Output file to write.  The writer will accept a filename containing
   a single placeholder character (`#`).  If input to the writer consists
@@ -47,31 +47,31 @@ driver can be specified with the `ogrdriver` option.
   to represent a directory in which ESRI Shapefiles are written.  The
   driver can be explicitly specified by using the [ogrdriver] option.
 
-`` _`multicount` ``
+multicount
 
 : If 1, point features will be written.  If greater than 1, specifies the
   number of points to group into a feature with a multipoint geometry.  Not all
   OGR drivers support multipoint geometries. \[Default: 1\]
 
-`` _`measure_dim` ``
+measure_dim
 
 : If specified, points will be written with an extra data field, the dimension
   of which is specified by this option. Not all output formats support
   measure data. \[Default: None\]
 
-`` _`attr_dims` ``
+attr_dims
 
 : List of dimensions to write as feature attributes. Separate multiple values
   with `,` or repeat the option. Use `all` to write all dimensions.
   `X`, `Y`, `Z`, and any [measure_dim] are never written as attributes.
   This option is incompatible with the [multicount] option. \[Default: None\]
 
-`` _`ogrdriver` ``
+ogrdriver
 
 : The OGR driver to use for output.  This option overrides any inference made
   about output drivers from [filename].
 
-`` _`ogr_options` ``
+ogr_options
 
 : List of OGR driver-specific layer creation options, formatted as an
   `OPTION=VALUE` string. Separate multiple values with `,` or repeat the

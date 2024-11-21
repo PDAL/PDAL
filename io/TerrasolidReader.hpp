@@ -81,7 +81,7 @@ struct TerraSolidHeader
 
 typedef std::unique_ptr<TerraSolidHeader> TerraSolidHeaderPtr;
 
-class PDAL_DLL TerrasolidReader : public pdal::Reader
+class PDAL_EXPORT TerrasolidReader : public pdal::Reader
 {
 public:
     TerrasolidReader() : pdal::Reader(),

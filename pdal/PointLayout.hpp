@@ -46,7 +46,7 @@
 namespace pdal
 {
 
-class PDAL_DLL PointLayout
+class PDAL_EXPORT PointLayout
 {
 public:
     /**

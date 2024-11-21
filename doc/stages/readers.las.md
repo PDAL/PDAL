@@ -8,9 +8,6 @@ containing waveform data (4, 5, 9 and 10).
 
 The reader also supports compressed LAS files, known as LAZ files or
 [LASzip] files.
-In order to use compressed LAS (LAZ), your version of PDAL must be built
-with one of the two supported decompressors, [LASzip] or [LAZperf].
-See the {ref}`compression <las_compression>` option below for more information.
 
 ```{note}
 LAS stores X, Y and Z dimensions as scaled integers.  Users converting an
@@ -99,14 +96,9 @@ but the data associated with a dimension of datatype 0 will be ignored
   were in a 1.4 file. This option has no effect when reading a version 1.4 file.
   \[Default: false\]
 
-(las_compression)=
-
 compression
 
-: May be set to "lazperf" or "laszip" to choose either the LazPerf decompressor
-  or the LASzip decompressor for LAZ files.  PDAL must have been built with
-  support for the decompressor being requested.  The LazPerf decompressor
-  doesn't support version 1 LAZ files or version 1.4 of LAS. \[Default: 'none'\]
+: \[Deprecated\]
 
 ignore_vlr
 

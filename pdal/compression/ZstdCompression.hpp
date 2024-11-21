@@ -43,12 +43,12 @@ class ZstdCompressorImpl;
 class ZstdCompressor : public Compressor
 {
 public:
-    PDAL_DLL ZstdCompressor(BlockCb cb);
-    PDAL_DLL ZstdCompressor(BlockCb cb, int compressionLevel);
-    PDAL_DLL ~ZstdCompressor();
+    PDAL_EXPORT ZstdCompressor(BlockCb cb);
+    PDAL_EXPORT ZstdCompressor(BlockCb cb, int compressionLevel);
+    PDAL_EXPORT ~ZstdCompressor();
 
-    PDAL_DLL void compress(const char *buf, size_t bufsize);
-    PDAL_DLL void done();
+    PDAL_EXPORT void compress(const char *buf, size_t bufsize);
+    PDAL_EXPORT void done();
 
 private:
     std::unique_ptr<ZstdCompressorImpl> m_impl;
@@ -59,11 +59,11 @@ class ZstdDecompressorImpl;
 class ZstdDecompressor : public Decompressor
 {
 public:
-    PDAL_DLL ZstdDecompressor(BlockCb cb);
-    PDAL_DLL ~ZstdDecompressor();
+    PDAL_EXPORT ZstdDecompressor(BlockCb cb);
+    PDAL_EXPORT ~ZstdDecompressor();
 
-    PDAL_DLL void decompress(const char *buf, size_t bufsize);
-    PDAL_DLL void done()
+    PDAL_EXPORT void decompress(const char *buf, size_t bufsize);
+    PDAL_EXPORT void done()
     {}
 
 private:

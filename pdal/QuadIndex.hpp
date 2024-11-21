@@ -76,7 +76,7 @@ struct QuadPointRef
     QuadPointRef(const QuadPointRef&); // not implemented
 };
 
-class PDAL_DLL QuadIndex
+class PDAL_EXPORT QuadIndex
 {
 public:
     QuadIndex(const PointView& view, std::size_t topLevel = 0);

@@ -5,6 +5,7 @@ dependencies:
   - jupyter-book
   - proj
   - breathe
+  - sphinx > 6
   - sphinxcontrib-jquery
   - sphinxcontrib-bibtex
   - sphinx-notfound-page

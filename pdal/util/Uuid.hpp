@@ -72,7 +72,7 @@ namespace pdal
 
 #pragma pack(push)
 #pragma pack(1)
-struct PDAL_DLL uuid
+struct PDAL_EXPORT uuid
 {
     uuid()
     { clear(); }
@@ -112,7 +112,7 @@ struct PDAL_DLL uuid
 };
 #pragma pack(pop)
 
-PDAL_DLL inline bool operator < (const uuid& u1, const uuid& u2)
+PDAL_EXPORT inline bool operator < (const uuid& u1, const uuid& u2)
 {
     if (u1.time_low != u2.time_low)
         return u1.time_low < u2.time_low;
@@ -126,9 +126,9 @@ PDAL_DLL inline bool operator < (const uuid& u1, const uuid& u2)
     return false;
 }
 
-class PDAL_DLL Uuid
+class PDAL_EXPORT Uuid
 {
-    PDAL_DLL friend inline bool operator < (const Uuid& u1, const Uuid& u2);
+    PDAL_EXPORT friend inline bool operator < (const Uuid& u1, const Uuid& u2);
 public:
     Uuid()
         {}
@@ -232,7 +232,7 @@ protected:
     uuid m_data;
 };
 
-class PDAL_DLL RandomUuid : public Uuid
+class PDAL_EXPORT RandomUuid : public Uuid
 {
 public:
     RandomUuid()
@@ -241,23 +241,23 @@ public:
     }
 };
 
-PDAL_DLL inline bool operator == (const Uuid& u1, const Uuid& u2)
+PDAL_EXPORT inline bool operator == (const Uuid& u1, const Uuid& u2)
 {
     return !(u1 < u2) && !(u2 < u1);
 }
 
-PDAL_DLL inline bool operator < (const Uuid& u1, const Uuid& u2)
+PDAL_EXPORT inline bool operator < (const Uuid& u1, const Uuid& u2)
 {
     return u1.m_data < u2.m_data;
 }
 
-PDAL_DLL inline std::ostream& operator << (std::ostream& out, const Uuid& u)
+PDAL_EXPORT inline std::ostream& operator << (std::ostream& out, const Uuid& u)
 {
     out << u.toString();
     return out;
 }
 
-PDAL_DLL inline std::istream& operator >> (std::istream& in, Uuid& u)
+PDAL_EXPORT inline std::istream& operator >> (std::istream& in, Uuid& u)
 {
     std::string s;
     in >> s;

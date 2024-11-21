@@ -63,7 +63,7 @@ const float DEFAULT_MAX_REFLECTANCE = 5.0;
 std::string extractRivlibURI(const Options& options);
 Dimension::IdList getRxpDimensions(bool syncToPps);
 
-class PDAL_DLL RxpReader : public pdal::Reader, public pdal::Streamable
+class PDAL_EXPORT RxpReader : public pdal::Reader, public pdal::Streamable
 {
 public:
     RxpReader()

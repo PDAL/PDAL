@@ -15,7 +15,7 @@ namespace trajectory
     struct Args;
 }
 
-class PDAL_DLL Trajectory : public Filter
+class PDAL_EXPORT Trajectory : public Filter
 {
 public:
     Trajectory();

@@ -48,7 +48,7 @@ namespace pdal
 {
 
 
-class PDAL_DLL OptechReader : public Reader
+class PDAL_EXPORT OptechReader : public Reader
 {
 public:
     std::string getName() const;

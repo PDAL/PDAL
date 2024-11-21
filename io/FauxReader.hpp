@@ -48,7 +48,8 @@ enum class Mode
     Ramp,
     Uniform,
     Normal,
-    Grid
+    Grid,
+    Invalid
 };
 
 inline std::istream& operator>>(std::istream& in, Mode& m)
@@ -67,6 +68,8 @@ inline std::istream& operator>>(std::istream& in, Mode& m)
         m = Mode::Normal;
     else if (s == "grid")
         m = Mode::Grid;
+    else if (s == "invalid")
+        m = Mode::Invalid;
     else
         in.setstate(std::ios::failbit);
     return in;
@@ -86,6 +89,8 @@ inline std::ostream& operator<<(std::ostream& out, const Mode& m)
         out << "Normal";
     case Mode::Grid:
         out << "Grid";
+    case Mode::Invalid:
+        out << "Invalid";
     }
     return out;
 }
@@ -118,7 +123,7 @@ inline std::ostream& operator<<(std::ostream& out, const Mode& m)
 // activated by passing a numeric value as "number_of_returns" to the
 // reader constructor.
 //
-class PDAL_DLL FauxReader : public Reader, public Streamable
+class PDAL_EXPORT FauxReader : public Reader, public Streamable
 {
 public:
     FauxReader()

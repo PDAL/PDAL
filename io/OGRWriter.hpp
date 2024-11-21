@@ -43,7 +43,7 @@
 namespace pdal
 {
 
-class PDAL_DLL OGRWriter : public FlexWriter, public Streamable
+class PDAL_EXPORT OGRWriter : public FlexWriter, public Streamable
 {
 public:
     std::string getName() const;

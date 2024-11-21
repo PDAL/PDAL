@@ -44,7 +44,7 @@ namespace pdal
 class PointLayout;
 class PointView;
 
-class PDAL_DLL ReciprocityFilter : public Filter
+class PDAL_EXPORT ReciprocityFilter : public Filter
 {
 public:
     ReciprocityFilter() : Filter()

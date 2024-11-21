@@ -42,7 +42,7 @@
 namespace pdal
 {
 
-class PDAL_DLL ShellFilter : public Filter
+class PDAL_EXPORT ShellFilter : public Filter
 {
 public:
     std::string getName() const override;

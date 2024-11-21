@@ -89,15 +89,15 @@ outside
 : Invert the cropping logic and only take points outside the cropping
   bounds or polygon. \[Default: false\]
 
-`` _`point` ``
+point
 
 : An array of WKT or GeoJSON 2D or 3D points (eg: `"POINT(0 0 0)"`). Requires [distance].
 
-`` _`distance` ``
+distance
 
 : Distance (radius) in units of common X, Y, and Z {ref}`dimensions` in combination with [point]. Passing a 2D point will crop using a circle. Passing a 3D point will crop using a sphere.
 
-`` _`a_srs` ``
+a_srs
 
 : Indicates the spatial reference of the bounding regions.  If not provided,
   it is assumed that the spatial reference of the bounding region matches

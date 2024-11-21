@@ -56,6 +56,7 @@
     },
     {
     "name": "Classification",
+    "alt_names": ["class", "cls"],
     "type": "uint8",
     "description": "ASPRS classification.  0 for no classification.  See LAS specification for details."
     },

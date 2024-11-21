@@ -44,7 +44,7 @@ namespace pdal
 
 class SrsTransform;
 
-class PDAL_DLL ReprojectionFilter : public Filter, public Streamable
+class PDAL_EXPORT ReprojectionFilter : public Filter, public Streamable
 {
 public:
     ReprojectionFilter();
