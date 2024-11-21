@@ -10,8 +10,6 @@ namespace expr
 
 bool MathParser::expression(Expression& expr)
 {
-    // Only success if we've properly parsed the expression AND we're add the end of
-    // a math expression.
     return addexpr(expr);
 }
 
