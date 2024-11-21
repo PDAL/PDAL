@@ -12,7 +12,7 @@ bool MathParser::expression(Expression& expr)
 {
     // Only success if we've properly parsed the expression AND we're add the end of
     // a math expression.
-    return addexpr(expr) && checkEnd();
+    return addexpr(expr);
 }
 
 bool MathParser::addexpr(Expression& expr)
@@ -187,7 +187,6 @@ bool MathParser::function0(Expression& expr)
     };
 
     std::string name = curToken().sval();
-    std::cerr << "Name = " << name << "!\n";
     auto it = std::find_if(funcs.begin(), funcs.end(),
         [&name](const Func0& f){ return f.name == name; });
 
