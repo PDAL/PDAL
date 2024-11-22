@@ -206,6 +206,7 @@ bool ConditionalParser::compareexpr(Expression& expr)
 
 bool ConditionalParser::function1(Expression& expr)
 {
+/**
     auto checkMax = [](double d) -> bool
     {
         return d == std::numeric_limits<double>::max();
@@ -215,11 +216,14 @@ bool ConditionalParser::function1(Expression& expr)
     {
         return d == std::numeric_limits<double>::lowest();
     };
+**/
 
     static const std::vector<BoolFunc1> funcs {
-        { "isnan", std::isnan },
+        { "isnan", std::isnan }
+/**        ,
         { "ismax", checkMax },
         { "ismin", checkMin }
+**/
     };
 
     std::string name = peekToken().sval();
