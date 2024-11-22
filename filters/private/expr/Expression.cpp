@@ -463,7 +463,6 @@ Node *Expression::topNode()
 
 const Node *Expression::topNode() const
 {
-    print();
     return m_nodes.size() ? m_nodes.top().get() : nullptr;
 }
 
