@@ -7,7 +7,7 @@ conf_dir = os.path.dirname(os.path.abspath(__file__))
 json_path = os.path.join(conf_dir, '..', 'pdal', 'Dimension.json')
 csv_path = os.path.join(conf_dir, 'dimension-table.csv')
 print(json_path)
-print(csv_poath)
+print(csv_path)
 
 data = open(json_path, 'r').read()
 
