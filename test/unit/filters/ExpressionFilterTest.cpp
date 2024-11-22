@@ -288,35 +288,6 @@ TEST(ExpressionFilterTest, negativeValues)
     EXPECT_DOUBLE_EQ(0.0, view->getFieldAs<double>(Dimension::Id::Z, 1));
 }
 
-TEST(ExpressionFilterTest, NaNs)
-{
-    BOX3D srcBounds(0.0, 0.0, -10.0, 0.0, 0.0, 10.0);
-
-    Options ops;
-    ops.add("bounds", srcBounds);
-    ops.add("mode", "invalid");
-    ops.add("count", 21);
-
-    FauxReader reader;
-    reader.setOptions(ops);
-
-    Options rangeOps;
-    rangeOps.add("expression", "OffsetTime == nan");
-
-    ExpressionFilter filter;
-    filter.setOptions(rangeOps);
-    filter.setInput(reader);
-
-    PointTable table;
-    filter.prepare(table);
-    PointViewSet viewSet = filter.execute(table);
-    PointViewPtr view = *viewSet.begin();
-
-    EXPECT_EQ(1u, viewSet.size());
-    EXPECT_EQ(3u, view->size());
-    EXPECT_DOUBLE_EQ(std::numeric_limits<double>::quiet_NaN(), view->getFieldAs<double>(Dimension::Id::OffsetTime, 1));
-}
-
 TEST(ExpressionFilterTest, simple_logic)
 {
 
@@ -455,7 +426,7 @@ TEST(ExpressionFilterTest, nan2)
     reader.setOptions(options);
 
     Options rangeOptions;
-    rangeOptions.add("expression", "GpsTime == nan()");
+    rangeOptions.add("expression", "X == 0 && isnan(GpsTime + 3)");
 
     ExpressionFilter filter;
     filter.setOptions(rangeOptions);
@@ -467,7 +438,7 @@ TEST(ExpressionFilterTest, nan2)
     PointViewPtr view = *viewSet.begin();
 
     EXPECT_EQ(1u, viewSet.size());
-    EXPECT_EQ(0u, view->size());
+    EXPECT_EQ(1u, view->size());
 }
 
 TEST(ExpressionFilterTest, multipleExpressions)

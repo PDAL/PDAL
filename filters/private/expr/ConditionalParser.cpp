@@ -1,4 +1,5 @@
 #include "ConditionalParser.hpp"
+#include "MathParser.hpp"
 
 namespace pdal
 {
@@ -43,7 +44,7 @@ bool ConditionalParser::orexpr(Expression& expr)
 
 bool ConditionalParser::andexpr(Expression& expr)
 {
-    if (!compareexpr(expr))
+    if (!notexpr(expr))
         return false;
 
     while (true)
@@ -51,7 +52,7 @@ bool ConditionalParser::andexpr(Expression& expr)
         if (!match(TokenType::And))
             return true;
 
-        if (!compareexpr(expr))
+        if (!notexpr(expr))
         {
             setError("Expected expression following '&&'.");
             return false;
@@ -60,9 +61,14 @@ bool ConditionalParser::andexpr(Expression& expr)
         NodePtr right = expr.popNode();
         NodePtr left = expr.popNode();
 
-        if (left->isValue() || right->isValue())
+        if (left->isValue())
         {
-            setError("Can't apply '&&' to numeric expression.");
+            setError("Can't apply '&&' to numeric expression '" + left->print() + "'.");
+            return false;
+        }
+        if (right->isValue())
+        {
+            setError("Can't apply '&&' to numeric expression '" + right->print() + "'.");
             return false;
         }
         expr.pushNode(NodePtr(new BoolNode(NodeType::And, std::move(left), std::move(right))));
@@ -70,12 +76,73 @@ bool ConditionalParser::andexpr(Expression& expr)
     return true;
 }
 
+bool ConditionalParser::notexpr(Expression& expr)
+{
+    if (!match(TokenType::Not))
+        return primarylogexpr(expr);
+
+    if (!primarylogexpr(expr))
+    {
+        setError("Expected expression following '!'.");
+        return false;
+    }
+
+    NodePtr sub = expr.popNode();
+    if (sub->isValue())
+    {
+        setError("Can't apply '!' to numeric value.");
+        return false;
+    }
+    expr.pushNode(NodePtr(new NotNode(NodeType::Not, std::move(sub))));
+    return true;
+}
+
+bool ConditionalParser::primarylogexpr(Expression& expr)
+{
+    if (parexpr(expr))
+        return true;
+
+    if (function1(expr))
+        return true;
+
+    if (compareexpr(expr))
+        return true;
+
+    setError("Expected logical expression following '" + curToken().sval() + "'.");
+    return false;
+}
+
+bool ConditionalParser::parexpr(Expression& expr)
+{
+    if (!match(TokenType::Lparen))
+        return false;
+
+    if (!expression(expr))
+    {
+        setError("Expected expression following '('.");
+        return false;
+    }
+
+    if (!match(TokenType::Rparen))
+    {
+        setError("Expected ')' following expression at '" +
+            curToken().sval() + "'.");
+        return false;
+    }
+    return true;
+}
+
+
 //ABELL - This treats == and >= at the same precendence level.  In C++,
 // <, >, <=, >= come before ==, !=
 bool ConditionalParser::compareexpr(Expression& expr)
 {
-    if (!addexpr(expr))
+    MathParser mathparser(lexer());
+    if (!mathparser.expression(expr))
+    {
+        setError(mathparser.error());
         return false;
+    }
 
     while (true)
     {
@@ -96,10 +163,9 @@ bool ConditionalParser::compareexpr(Expression& expr)
         else
             return true;
 
-        if (!addexpr(expr))
+        if (!mathparser.expression(expr))
         {
-            setError("Expected expression following '" +
-                curToken().sval() + "'.");
+            setError(mathparser.error());
             return false;
         }
 
@@ -138,201 +204,54 @@ bool ConditionalParser::compareexpr(Expression& expr)
     return true;
 }
 
-bool ConditionalParser::addexpr(Expression& expr)
+bool ConditionalParser::function1(Expression& expr)
 {
-    if (!multexpr(expr))
+    auto checkMax = [](double d) -> bool
+    {
+        return d == std::numeric_limits<double>::max();
+    };
+
+    auto checkMin = [](double d) -> bool
+    {
+        return d == std::numeric_limits<double>::lowest();
+    };
+
+    static const std::vector<BoolFunc1> funcs {
+        { "isnan", std::isnan },
+        { "ismin", checkMax },
+        { "ismin", checkMin },
+    };
+
+    std::string name = peekToken().sval();
+    auto it = std::find_if(funcs.begin(), funcs.end(),
+        [&name](const BoolFunc1& f){ return f.name == name; });
+
+    if (it == funcs.end())
         return false;
 
-    while (true)
-    {
-        NodeType type;
+    match(TokenType::Identifier);  // Move past identifier token. Guaranteed to work.
 
-        if (match(TokenType::Plus))
-            type = NodeType::Add;
-        else if (match(TokenType::Dash))
-            type = NodeType::Subtract;
-        else
-            return true;
-
-        if (!multexpr(expr))
-        {
-            setError("Expected expression following '" +
-                curToken().sval() + "'.");
-            return false;
-        }
-
-        NodePtr right = expr.popNode();
-        NodePtr left = expr.popNode();
-
-        ConstValueNode *leftVal = dynamic_cast<ConstValueNode *>(left.get());
-        ConstValueNode *rightVal = dynamic_cast<ConstValueNode *>(right.get());
-        if (leftVal && rightVal)
-        {
-            double v = (type == NodeType::Add) ?
-                leftVal->value() + rightVal->value() :
-                leftVal->value() - rightVal->value();
-            expr.pushNode(NodePtr(new ConstValueNode(v)));
-        }
-        else
-        {
-            if (left->isBool() || right->isBool())
-            {
-                setError("Can't apply '" + curToken().sval() + "' to "
-                    "logical expression.");
-                return false;
-            }
-            expr.pushNode(NodePtr(new BinMathNode(type, std::move(left), std::move(right))));
-        }
-    }
-    return true;
-}
-
-bool ConditionalParser::multexpr(Expression& expr)
-{
-    if (!notexpr(expr))
-        return false;
-
-    while (true)
-    {
-        NodeType type;
-        if (match(TokenType::Asterisk))
-            type = NodeType::Multiply;
-        else if (match(TokenType::Slash))
-            type = NodeType::Divide;
-        else
-            return true;
-
-        if (!notexpr(expr))
-        {
-            setError("Expected expression following '" + curToken().sval() + "'.");
-            return false;
-        }
-
-        NodePtr right = expr.popNode();
-        NodePtr left = expr.popNode();
-
-        ConstValueNode *leftVal = dynamic_cast<ConstValueNode *>(left.get());
-        ConstValueNode *rightVal = dynamic_cast<ConstValueNode *>(right.get());
-
-        if (leftVal && rightVal)
-        {
-            double v;
-            if (type == NodeType::Multiply)
-                v = leftVal->value() * rightVal->value();
-            else
-            {
-                if (rightVal->value() == 0.0)
-                {
-                    setError("Divide by 0.");
-                    return false;
-                }
-                v = leftVal->value() / rightVal->value();
-            }
-            expr.pushNode(NodePtr(new ConstValueNode(v)));
-        }
-        else
-        {
-            if (left->isBool() || right->isBool())
-            {
-                setError("Can't apply '" + curToken().sval() + "' to "
-                    "logical expression.");
-                return false;
-            }
-            expr.pushNode(NodePtr(new BinMathNode(type, std::move(left), std::move(right))));
-        }
-    }
-    return true;
-}
-
-bool ConditionalParser::notexpr(Expression& expr)
-{
-    if (!match(TokenType::Not))
-        return uminus(expr);
-
-    if (!uminus(expr))
-    {
-        setError("Expected expression following '!'.");
-        return false;
-    }
-
-    NodePtr sub = expr.popNode();
-    if (sub->isValue())
-    {
-        setError("Can't apply '!' to numeric value.");
-        return false;
-    }
-    expr.pushNode(NodePtr(new NotNode(NodeType::Not, std::move(sub))));
-    return true;
-}
-
-bool ConditionalParser::uminus(Expression& expr)
-{
-    if (!match(TokenType::Dash))
-        return primary(expr);
-
-    if (!primary(expr))
-    {
-        setError("Expecting expression following '-'.");
-        return false;
-    }
-
-    NodePtr sub = expr.popNode();
-    assert(sub.get());
-    ConstValueNode *node = dynamic_cast<ConstValueNode *>(sub.get());
-    if (node)
-    {
-        double v = -(node->value());
-        expr.pushNode(NodePtr(new ConstValueNode(v)));
-    }
-    else
-    {
-        if (sub->isBool())
-        {
-            setError("Can't apply '-' to logical expression '" + sub->print() + "'.");
-            return false;
-        }
-        expr.pushNode(NodePtr(new UnMathNode(NodeType::Negative, std::move(sub))));
-    }
-    return true;
-}
-
-bool ConditionalParser::primary(Expression& expr)
-{
-    if (match(TokenType::Number))
-    {
-        expr.pushNode(NodePtr(new ConstValueNode(curToken().dval())));
-        return true;
-    }
-    else if (match(TokenType::Identifier))
-    {
-        expr.pushNode(NodePtr(new VarNode(curToken().sval())));
-        return true;
-    }
-
-    // Check if this is the start of a paren-expression.
     if (!match(TokenType::Lparen))
     {
-        setError("Expected identifier or value and instead found '" + peekToken().sval() + "'.");
+        setError("Expecting '(' to open function invocation of '" + name + "'.");
         return false;
     }
 
-    return parexpr(expr);
-}
-
-bool ConditionalParser::parexpr(Expression& expr)
-{
-    if (!expression(expr))
+    MathParser mathparser(lexer());
+    if (!mathparser.expression(expr))
     {
-        setError("Expected expression following '('.");
+        setError(mathparser.error());
         return false;
     }
 
     if (!match(TokenType::Rparen))
     {
-        setError("Expected ')' following expression at '" +
-            curToken().sval() + "'.");
+        setError("Expecting ')' following '" + name + "' argument.");
         return false;
     }
+
+    NodePtr sub = expr.popNode();  // Pop the value expression.
+    expr.pushNode(NodePtr(new BoolFuncNode(NodeType::Function, *it, std::move(sub))));
     return true;
 }
 

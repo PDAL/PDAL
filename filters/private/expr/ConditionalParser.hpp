@@ -15,15 +15,13 @@ public:
     bool expression(Expression& expr);
 
 protected:
-    bool notexpr(Expression& expr);
     bool orexpr(Expression& expr);
     bool andexpr(Expression& expr);
+    bool notexpr(Expression& expr);
+    bool primarylogexpr(Expression& expr);
     bool compareexpr(Expression& expr);
-    bool addexpr(Expression& expr);
-    bool multexpr(Expression& expr);
-    bool uminus(Expression& expr);
-    bool primary(Expression& expr);
     bool parexpr(Expression& expr);
+    bool function1(Expression& expr);
 };
 
 } // namespace expr

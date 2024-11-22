@@ -158,7 +158,8 @@ bool MathParser::primary(Expression& expr)
     }
     bool status = parexpr(expr);
     if (!status)
-        setError("Expecting value expression, instead found '" + peekToken().sval() + "'.");
+        setError("Expecting value expression following '" + curToken().sval() +
+            "', instead found '" + peekToken().sval() + "'.");
 
     return status;
 }
@@ -207,7 +208,6 @@ bool MathParser::function0(Expression& expr)
         return false;
     }
 
-    NodePtr sub = expr.popNode();  // Pop the primary.
     expr.pushNode(NodePtr(new ConstValueNode(it->value)));
 
     return true;
