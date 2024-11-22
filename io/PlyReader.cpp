@@ -328,6 +328,9 @@ QuickInfo PlyReader::inspect()
 
 void PlyReader::initialize()
 {
+    auto handle = m_connector->getLocalHandle(m_filename);
+    m_filename = handle.release();
+
     m_stream = Utils::openFile(m_filename, true);
     if (!m_stream)
         throwError("Couldn't open '" + m_filename + "'.");
@@ -342,6 +345,10 @@ void PlyReader::initialize()
         throw;
     }
     Utils::closeFile(m_stream);
+
+    if (Utils::isRemote(m_filename))
+        FileUtils::deleteFile(m_filename);
+
     m_stream = nullptr;
 }
 

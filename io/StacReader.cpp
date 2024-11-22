@@ -104,9 +104,6 @@ struct StacReader::Args
 
     bool validateSchema;
     int threads;
-
-    NL::json m_query;
-    NL::json m_headers;
 };
 
 static PluginInfo const stacinfo
@@ -155,10 +152,6 @@ void StacReader::addArgs(ProgramArgs& args)
     //Reader options
     args.add("validate_schema", "Use JSON schema to validate your STAC objects."
         " Default: false", m_args->validateSchema, false);
-    args.add("header", "Header fields to forward with HTTP requests",
-        m_args->m_headers);
-    args.add("query", "Query parameters to forward with HTTP requests",
-        m_args->m_query);
     args.add("reader_args", "Map of reader arguments to their values to pass"
         " through.", m_args->rawReaderArgs);
     args.add("requests", "Number of threads for fetching JSON files, Default: 8",
@@ -210,7 +203,7 @@ void StacReader::addItem(Item& item)
 
 void StacReader::handleItem(NL::json stacJson, std::string itemPath)
 {
-    Item item(stacJson, m_filename, *m_p->m_connector,
+    Item item(stacJson, m_filename, *m_connector,
         m_args->validateSchema, log());
     log()->get(LogLevel::Debug) << "Found STAC Item " << item.id() << ".";
     if (item.init(*m_p->m_itemFilters, m_args->rawReaderArgs, m_args->schemaUrls))
@@ -253,7 +246,7 @@ void StacReader::handleNested(Catalog& c)
 
 void StacReader::handleCatalog(NL::json stacJson, std::string catPath)
 {
-    Catalog c(stacJson, catPath, *m_p->m_connector, *m_p->m_pool,
+    Catalog c(stacJson, catPath, *m_connector, *m_p->m_pool,
         m_args->validateSchema, log());
 
     // if init returns false, the collection has no items in itself or in
@@ -274,7 +267,7 @@ void StacReader::handleCatalog(NL::json stacJson, std::string catPath)
 
 void StacReader::handleCollection(NL::json stacJson, std::string colPath)
 {
-    Collection c(stacJson, colPath, *m_p->m_connector,
+    Collection c(stacJson, colPath, *m_connector,
         *m_p->m_pool, m_args->validateSchema, log());
 
     // if init returns false, the collection has no items in itself or in
@@ -294,7 +287,7 @@ void StacReader::handleCollection(NL::json stacJson, std::string colPath)
 
 void StacReader::handleItemCollection(NL::json stacJson, std::string icPath)
 {
-    ItemCollection ic(stacJson, icPath, *m_p->m_connector,
+    ItemCollection ic(stacJson, icPath, *m_connector,
             m_args->validateSchema, log());
 
     if (ic.init(*m_p->m_icFilters, m_args->rawReaderArgs, m_args->schemaUrls))
@@ -429,29 +422,6 @@ void StacReader::initializeArgs()
 
 }
 
-void StacReader::setConnectionForwards(StringMap& headers, StringMap& query)
-{
-    try
-    {
-        if (!m_args->m_headers.is_null())
-            headers = m_args->m_headers.get<StringMap>();
-    }
-    catch (const std::exception& err)
-    {
-        throwError(std::string("Error parsing 'headers': ") + err.what());
-    }
-
-    try
-    {
-        if (!m_args->m_query.is_null())
-            query = m_args->m_query.get<StringMap>();
-    }
-    catch (const std::exception& err)
-    {
-        throwError(std::string("Error parsing 'query': ") + err.what());
-    }
-}
-
 void StacReader::addDimensions(PointLayoutPtr layout)
 {
     StageWrapper::addDimensions(m_merge, layout);
@@ -459,15 +429,12 @@ void StacReader::addDimensions(PointLayoutPtr layout)
 
 void StacReader::initialize()
 {
-    StringMap headers;
-    StringMap query;
-    setConnectionForwards(headers, query);
-    m_p->m_connector.reset(new connector::Connector(headers, query));
+    setConnector();
 
     m_p->m_pool.reset(new ThreadPool(m_args->threads));
     initializeArgs();
 
-    NL::json stacJson = m_p->m_connector->getJson(m_filename);
+    NL::json stacJson = m_connector->getJson(m_filename);
 
     std::string stacType = StacUtils::jsonValue<std::string>(stacJson, "type");
     if (stacType == "Feature")
@@ -575,7 +542,7 @@ PointViewSet StacReader::run(PointViewPtr view)
 void StacReader::done(PointTableRef)
 {
     m_p->m_pool->stop();
-    m_p->m_connector.reset();
+    m_connector.reset();
 }
 
 

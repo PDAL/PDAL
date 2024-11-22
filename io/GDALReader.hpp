@@ -104,7 +104,6 @@ private:
     std::vector<Dimension::Type> m_bandTypes;
     std::vector<Dimension::Id> m_bandIds;
     pdal::StringList m_GDAL_metadata;
-    std::string m_header;
     int m_width;
     int m_height;
     bool m_useMemoryCopy;

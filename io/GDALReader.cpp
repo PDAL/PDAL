@@ -87,9 +87,9 @@ void GDALReader::initialize()
     m_blockReader.initialize();
 
     m_dimNames.clear();
-    if (m_header.size())
+    if (m_headers.dump().size())
     {
-        m_dimNames = Utils::split(m_header, ',');
+        m_dimNames = Utils::split(m_headers.dump(), ',');
         if (m_dimNames.size() != m_bandTypes.size())
             throwError("Dimension names are not the same count as "
                 "raster bands.");
@@ -147,8 +147,6 @@ void GDALReader::addDimensions(PointLayoutPtr layout)
 
 void GDALReader::addArgs(ProgramArgs& args)
 {
-    args.add("header", "A comma-separated list of dimension IDs to map "
-        "raster bands to dimension id", m_header);
     args.add("memorycopy", "Load the given raster file "
         "entirely to memory", m_useMemoryCopy, false).setHidden();
     args.add("gdalopts", "GDAL driver options (name=value,name=value...)",

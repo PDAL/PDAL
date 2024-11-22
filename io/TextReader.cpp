@@ -198,8 +198,8 @@ void TextReader::initialize(PointTableRef table)
     }
 
     std::string header;
-    if (m_header.size())
-        header = m_header;
+    if (m_headers.dump().size())
+        header = m_headers.dump();
     else
     {
         std::getline(*m_istream, header);
@@ -224,7 +224,6 @@ void TextReader::addArgs(ProgramArgs& args)
 {
     m_separatorArg = &(args.add("separator", "Separator character that "
         "overrides special character found in header line", m_separator, ' '));
-    args.add("header", "Use this string as the header line.", m_header);
     args.add("skip", "Skip this number of lines before attempting to "
         "read the header.", m_skip);
 }

@@ -223,8 +223,6 @@ public:
     bool fixNames;
     bool doVlrs;
 
-    NL::json query;
-    NL::json headers;
     NL::json ogr;
 
     int keepAliveChunkCount = 10;
@@ -299,8 +297,6 @@ void CopcReader::addArgs(ProgramArgs& args)
     args.add("resolution", "Resolution limit", m_args->resolution);
     args.add("polygon", "Bounding polygon(s) to crop requests",
         m_args->polys).setErrorText("Invalid polygon specification. Must be valid GeoJSON/WKT");
-    args.add("header", "Header fields to forward with HTTP requests", m_args->headers);
-    args.add("query", "Query parameters to forward with HTTP requests", m_args->query);
     args.add("ogr", "OGR filter geometries", m_args->ogr);
     args.add("fix_dims", "Make invalid dimension names valid by changing invalid "
         "characters to '_'", m_args->fixNames, true);
@@ -313,30 +309,6 @@ void CopcReader::addArgs(ProgramArgs& args)
 }
 
 
-void CopcReader::setForwards(StringMap& headers, StringMap& query)
-{
-    try
-    {
-        if (!m_args->headers.is_null())
-            headers = m_args->headers.get<StringMap>();
-    }
-    catch (const std::exception& err)
-    {
-        throwError(std::string("Error parsing 'headers': ") + err.what());
-    }
-
-    try
-    {
-        if (!m_args->query.is_null())
-            query = m_args->query.get<StringMap>();
-    }
-    catch (const std::exception& err)
-    {
-        throwError(std::string("Error parsing 'query': ") + err.what());
-    }
-}
-
-
 void CopcReader::initialize(PointTableRef table)
 {
     if (m_args->threads > 100)
@@ -345,10 +317,7 @@ void CopcReader::initialize(PointTableRef table)
     // Make sure we allow at least as many chunks as we have threads.
     m_args->keepAliveChunkCount = (std::max)(m_args->threads, (size_t)m_args->keepAliveChunkCount);
 
-    StringMap headers;
-    StringMap query;
-    setForwards(headers, query);
-    m_p->connector.reset(new connector::Connector(m_filename, headers, query));
+    setConnector();
 
     MetadataNode forward = table.privateMetadata("lasforward");
     MetadataNode m = getMetadata();
@@ -420,7 +389,7 @@ void CopcReader::initialize(PointTableRef table)
 
 std::vector<char> CopcReader::fetch(uint64_t offset, int32_t size)
 {
-    return m_p->connector->getBinary(offset, size);
+    return m_connector->getBinary(offset, size);
 }
 
 
@@ -832,7 +801,7 @@ void CopcReader::load(const copc::Entry& entry)
     m_p->pool->add([this, entry]()
         {
             // Read the tile.
-            copc::Tile tile(entry, *m_p->connector, m_p->header);
+            copc::Tile tile(entry, *m_connector, m_p->header);
             tile.read();
 
             // Put the tile on the output queue.
@@ -1018,7 +987,7 @@ void CopcReader::done()
         m_p->done = true;
         m_p->consumedCv.notify_all();
         m_p->pool->stop();
-        m_p->connector.reset();
+        m_connector.reset();
     }
 }
 
