@@ -20,28 +20,6 @@ if os.environ.get('SOURCE_DATE_EPOCH'):
 else:
     year  = datetime.datetime.now().year
 
-
-
-def process_dimensions():
-    import json, csv
-
-    data = open('../pdal/Dimension.json','r').read()
-
-    data = json.loads(data)['dimensions']
-
-    output = []
-    for dim in data:
-        output.append([dim['name'], dim['type'], dim['description']])
-
-    output = sorted(output,key=lambda x: x[0])
-
-    with open('dimension-table.csv','w') as fp:
-        a = csv.writer(fp, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
-        a.writerows(output)
-
-
-process_dimensions()
-
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
