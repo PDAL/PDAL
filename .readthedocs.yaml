@@ -11,6 +11,7 @@ build:
     python: "mambaforge-latest"
   jobs:
     pre_build:
+      - python doc/generate_dimensions.py
       - doxygen ./doc/doxygen/doxygen.conf 1> /dev/null
       # Generate on-the-fly Sphinx configuration from Jupyter Book's _config.yml
       - "jupyter-book config sphinx doc/"
