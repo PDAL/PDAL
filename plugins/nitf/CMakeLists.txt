@@ -55,6 +55,8 @@ PDAL_ADD_PLUGIN(writer_libname writer nitf
         ${PDAL_ARBITER_LIB_NAME}
     INCLUDES
         ${GDAL_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}
 )
 if (WIN32)
     target_compile_definitions(${writer_libname}
@@ -70,6 +72,9 @@ if (WITH_TESTS AND NOT STANDALONE)
             test/NitfWriterTest.cpp
         LINK_WITH
             ${writer_libname}
+        INCLUDES
+            ${NLOHMANN_INCLUDE_DIR}
+            ${PDAL_VENDOR_DIR}
     )
 
     PDAL_ADD_TEST(pdal_io_nitf_reader_test

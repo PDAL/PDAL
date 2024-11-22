@@ -52,6 +52,8 @@ if (WITH_TESTS)
             E57Format
         INCLUDES
             libE57Format/include
+            ${NLOHMANN_INCLUDE_DIR}
+            ${PDAL_VENDOR_DIR}
     )
 
     PDAL_ADD_TEST(pdal_io_e57_write_test
@@ -64,5 +66,7 @@ if (WITH_TESTS)
             E57Format
         INCLUDES
             libE57Format/include
+            ${NLOHMANN_INCLUDE_DIR}
+            ${PDAL_VENDOR_DIR}
     )
 endif()

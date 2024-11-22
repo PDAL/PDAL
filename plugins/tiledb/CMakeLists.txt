@@ -32,6 +32,7 @@ PDAL_ADD_PLUGIN(reader_libname reader tiledb
     INCLUDES
         ${TileDB_INCLUDE_DIR}
         ${NLOHMANN_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}
 )
 
 #
@@ -47,6 +48,7 @@ PDAL_ADD_PLUGIN(writer_libname writer tiledb
     INCLUDES
         ${TileDB_INCLUDE_DIR}
         ${NLOHMANN_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}
 )
 
 if (WITH_TESTS AND NOT STANDALONE)
@@ -60,6 +62,7 @@ if (WITH_TESTS AND NOT STANDALONE)
         INCLUDES
             ${TileDB_INCLUDE_DIR}
             ${NLOHMANN_INCLUDE_DIR}
+            ${PDAL_VENDOR_DIR}
     )
 
     PDAL_ADD_TEST(pdal_io_tiledb_writer_test
@@ -71,6 +74,7 @@ if (WITH_TESTS AND NOT STANDALONE)
         INCLUDES
             ${TileDB_INCLUDE_DIR}
             ${NLOHMANN_INCLUDE_DIR}
+            ${PDAL_VENDOR_DIR}
     )
 
     PDAL_ADD_TEST(pdal_io_tiledb_reader_test
@@ -83,6 +87,7 @@ if (WITH_TESTS AND NOT STANDALONE)
         INCLUDES
             ${TileDB_INCLUDE_DIR}
             ${NLOHMANN_INCLUDE_DIR}
+            ${PDAL_VENDOR_DIR}
     )
 
     PDAL_ADD_TEST(pdal_io_tiledb_time_writer_test
@@ -96,6 +101,7 @@ if (WITH_TESTS AND NOT STANDALONE)
         INCLUDES
             ${TileDB_INCLUDE_DIR}
             ${NLOHMANN_INCLUDE_DIR}
+            ${PDAL_VENDOR_DIR}
     )
 
     PDAL_ADD_TEST(pdal_io_tiledb_time_reader_test
@@ -109,6 +115,7 @@ if (WITH_TESTS AND NOT STANDALONE)
         INCLUDES
             ${TileDB_INCLUDE_DIR}
             ${NLOHMANN_INCLUDE_DIR}
+            ${PDAL_VENDOR_DIR}
     )
 
     PDAL_ADD_TEST(pdal_io_tiledb_bit_fields_test
@@ -121,6 +128,7 @@ if (WITH_TESTS AND NOT STANDALONE)
         INCLUDES
             ${TileDB_INCLUDE_DIR}
             ${NLOHMANN_INCLUDE_DIR}
+            ${PDAL_VENDOR_DIR}
     )
 
 

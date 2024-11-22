@@ -237,11 +237,16 @@ point_count_t LasReader::getNumPoints() const
 
 void LasReader::initialize(PointTableRef table)
 {
+    tryLoadRemote();
+    initializeLocal(table, m_metadata);
+}
+
+void LasReader::tryLoadRemote()
+{
     setConnector();
     d->isRemote = Utils::isRemote(m_filename);
     auto handle = m_connector->getLocalHandle(m_filename);
     m_filename = handle.release();
-    initializeLocal(table, m_metadata);
 }
 
 QuickInfo LasReader::inspect()

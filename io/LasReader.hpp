@@ -128,6 +128,7 @@ private:
     void loadExtraDims(LeExtractor& istream, PointRef& data);
 
     void cleanup();
+    void tryLoadRemote();
     bool eof();
     void queueNextCompressedChunk();
     void queueNextStandardChunk();

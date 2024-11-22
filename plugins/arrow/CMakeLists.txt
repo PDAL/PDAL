@@ -24,6 +24,7 @@ PDAL_ADD_PLUGIN(arrow_writer_libname writer arrow
         Parquet::parquet_shared
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}
 )
 
 PDAL_ADD_PLUGIN(arrow_reader_libname reader arrow
@@ -35,6 +36,7 @@ PDAL_ADD_PLUGIN(arrow_reader_libname reader arrow
         Parquet::parquet_shared
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}
 )
 
 if (WIN32)
@@ -50,6 +52,9 @@ if (WITH_TESTS)
         ${PDAL_LIBRARIES}
         Arrow::arrow_shared
         ${arrow_writer_libname}
+    INCLUDES
+        ${NLOHMANN_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}
     )
 
     PDAL_ADD_TEST(pdal_io_arrow_reader_test
@@ -59,6 +64,9 @@ if (WITH_TESTS)
         ${PDAL_LIBRARIES}
         Arrow::arrow_shared
         ${arrow_reader_libname}
+    INCLUDES
+        ${NLOHMANN_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}
     )
 
 

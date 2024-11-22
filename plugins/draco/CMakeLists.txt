@@ -40,6 +40,7 @@ PDAL_ADD_PLUGIN(reader_libname reader draco
     INCLUDES
         ${DRACO_INCLUDE_DIRS}
         ${NLOHMANN_INCLUDE_DIR}
+        ${PDAL_VENDOR_DIR}
 )
 
 target_link_libraries(${reader_libname}  PRIVATE ${DRACO_LIBRARY})
@@ -84,6 +85,7 @@ if (WITH_TESTS AND NOT STANDALONE)
         INCLUDES
             ${DRACO_INCLUDE_DIRS}
             ${NLOHMANN_INCLUDE_DIR}
+            ${PDAL_VENDOR_DIR}
     )
     target_link_directories(pdal_io_draco_writer_test PRIVATE ${DRACO_LIBRARY_DIRS})
     target_link_libraries(pdal_io_draco_writer_test  PRIVATE ${DRACO_LIBRARIES})
@@ -101,6 +103,7 @@ if (WITH_TESTS AND NOT STANDALONE)
         INCLUDES
             ${DRACO_INCLUDE_DIRS}
             ${NLOHMANN_INCLUDE_DIR}
+            ${PDAL_VENDOR_DIR}
     )
     target_link_directories(pdal_io_draco_reader_test PRIVATE ${DRACO_LIBRARY_DIRS})
     target_link_libraries(pdal_io_draco_reader_test  PRIVATE ${DRACO_LIBRARIES})
