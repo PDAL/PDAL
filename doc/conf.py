@@ -20,12 +20,15 @@ if os.environ.get('SOURCE_DATE_EPOCH'):
 else:
     year  = datetime.datetime.now().year
 
-
-
 def process_dimensions():
     import json, csv
 
-    data = open('../pdal/Dimension.json','r').read()
+    # Get the directory of conf.py
+    conf_dir = os.path.dirname(os.path.abspath(__file__))
+    json_path = os.path.join(conf_dir, '..', pdal, 'Dimension.json')
+    csv_path = os.path.join(conf_dir, 'dimension-table.csv')
+
+    data = open(json_path, 'r').read()
 
     data = json.loads(data)['dimensions']
 
@@ -35,7 +38,7 @@ def process_dimensions():
 
     output = sorted(output,key=lambda x: x[0])
 
-    with open('dimension-table.csv','w') as fp:
+    with open(csv_path, 'w') as fp:
         a = csv.writer(fp, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
         a.writerows(output)
 
