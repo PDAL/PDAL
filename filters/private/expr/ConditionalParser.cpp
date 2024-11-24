@@ -219,11 +219,9 @@ bool ConditionalParser::function1(Expression& expr)
 **/
 
     static const std::vector<BoolFunc1> funcs {
-        { "isnan", std::isnan }
-/**        ,
+        { "isnan", (BoolFunc1::Ptr)std::isnan },
         { "ismax", checkMax },
         { "ismin", checkMin }
-**/
     };
 
     std::string name = peekToken().sval();
