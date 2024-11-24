@@ -210,12 +210,12 @@ bool ConditionalParser::function1(Expression& expr)
 {
     auto checkMax = [](double d) -> bool
     {
-        return d == std::numeric_limits<double>::max();
+        return d == (std::numeric_limits<double>::max)();
     };
 
     auto checkMin = [](double d) -> bool
     {
-        return d == std::numeric_limits<double>::lowest();
+        return d == (std::numeric_limits<double>::lowest)();
     };
 
     static const std::vector<BoolFunc1> funcs {

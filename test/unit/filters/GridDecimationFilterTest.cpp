@@ -27,7 +27,7 @@ TEST(DecimationFilterTest, GridDecimationFilterTest_test1)
 {
     Options ro;
     ro.add("filename", Support::datapath("las/4_6.las"));
-     
+
     StageFactory factory;
     Stage& r = *(factory.createStage("readers.las"));
     r.setOptions(ro);
@@ -46,11 +46,11 @@ TEST(DecimationFilterTest, GridDecimationFilterTest_test1)
 
     filter.prepare(table);
     PointViewSet viewSet = filter.execute(table);
-    
+
     EXPECT_EQ(viewSet.size(), 1u);
-    
+
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 198975);
+    EXPECT_EQ(view->size(), 198975UL);
 
     int nbThreadPts (0);
     for (PointId i = 0; i < view->size(); ++i)
