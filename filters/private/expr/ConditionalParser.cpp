@@ -218,8 +218,13 @@ bool ConditionalParser::function1(Expression& expr)
         return d == (std::numeric_limits<double>::lowest)();
     };
 
+    auto checkNan = [](double d) -> bool
+    {
+        return std::isnan(d);
+    };
+
     static const std::vector<BoolFunc1> funcs {
-        { "isnan", static_cast<BoolFunc1::Ptr>(std::isnan) },
+        { "isnan", checkNan },
         { "ismax", checkMax },
         { "ismin", checkMin }
     };
