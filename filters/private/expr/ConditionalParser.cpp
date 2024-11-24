@@ -219,7 +219,7 @@ bool ConditionalParser::function1(Expression& expr)
     };
 
     static const std::vector<BoolFunc1> funcs {
-        { "isnan", (BoolFunc1::Ptr)std::isnan },
+        { "isnan", static_cast<BoolFunc1::Ptr>(std::isnan) },
         { "ismax", checkMax },
         { "ismin", checkMin }
     };
