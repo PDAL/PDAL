@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "ConditionalParser.hpp"
 #include "MathParser.hpp"
 
