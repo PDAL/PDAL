@@ -368,14 +368,20 @@ void GpsTimeConvert::filter(PointView& view)
         if (m_outTime == "gst" || m_outTime == "gt")
             weekSeconds2GpsTime(view);
         else if (m_outTime == "gds")
-            weekSeconds2DaySeconds(view);
+        {
+            weekSeconds2GpsTime(view);
+            gpsTime2DaySeconds(view);
+        }
     }
     else if (m_inTime == "gds")
     {
         if (m_outTime == "gst" || m_outTime == "gt")
             daySeconds2GpsTime(view);
         if (m_outTime == "gws")
-            daySeconds2WeekSeconds(view);
+        {
+            daySeconds2GpsTime(view);
+            gpsTime2WeekSeconds(view);
+        }
 
     }
     else if (m_inTime == "gst" || m_inTime == "gt")

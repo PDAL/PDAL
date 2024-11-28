@@ -55,13 +55,23 @@ private:
     bool m_wrapped;
 
     void weekSeconds2GpsTime(PointView& view);
+    void daySeconds2GpsTime(PointView& view);
+
     void gpsTime2WeekSeconds(PointView& view);
+    void gpsTime2DaySeconds(PointView& view);
+
     void gpsTime2GpsTime(PointView& view);
 
     std::tm gpsTime2Date(int seconds);
+
     int weekStartGpsSeconds(std::tm date);
+    int dayStartGpsSeconds(std::tm date);
+
     void unwrapWeekSeconds(PointView& view);
     void wrapWeekSeconds(PointView& view);
+    
+    void unwrapDaySeconds(PointView& view);
+    void wrapDaySeconds(PointView& view);
 
     void testTimeType(std::string& type);
 
