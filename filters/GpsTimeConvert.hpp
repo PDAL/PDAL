@@ -47,6 +47,7 @@ public:
     std::string getName() const;
 
 private:
+    std::string m_conversion;
     std::string m_inTime;
     std::string m_outTime;
     std::string m_strDate;
