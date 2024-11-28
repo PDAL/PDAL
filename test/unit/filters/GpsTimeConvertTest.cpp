@@ -94,7 +94,7 @@ TEST(gws2gtTest, HandlesUnwrappedWeekSeconds)
 
     Options options;
     options.add("in_time", "gws");
-    options.add("out_time", "2gt");
+    options.add("out_time", "gt");
     options.add("start_date", "2020-12-12");
     options.add("wrapped", false);
 
@@ -126,7 +126,7 @@ TEST(gws2gstTest, HandlesWrappedWeekSeconds)
 
     Options options;
     options.add("in_time", "gws");
-    options.add("out_time", "2gst");
+    options.add("out_time", "gst");
     options.add("start_date", "2020-12-12");
     options.add("wrapped", true);
 
