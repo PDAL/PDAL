@@ -54,6 +54,8 @@ std::string GpsTimeConvert::getName() const
 
 void GpsTimeConvert::addArgs(ProgramArgs& args)
 {
+    args.add("conversion", "conversion (deprecated)",
+             m_conversion);
     args.add("in_time", "input time type",
              m_inTime).setPositional();
     args.add("out_time", "output time type",
@@ -83,6 +85,23 @@ void GpsTimeConvert::testTimeType(std::string& type)
 
 void GpsTimeConvert::initialize()
 {
+    if (!m_conversion.empty() && (m_inTime.empty()) && (m_outTime.empty()))
+    {
+        m_conversion = Utils::tolower(m_conversion);
+        s = Utils::split(m_conversion,'2');
+        m_inTime = s[0];
+        m_outTime = s[1];
+    }
+    else if (m_conversion.empty() && (!m_inTime.empty()) && (!m_outTime.empty()))
+    {
+        m_inTime = Utils::tolower(m_inTime);
+        m_outTime = Utils::tolower(m_outTime);
+    }
+    else
+    {
+        Stage::throwError("Use 'conversion' or 'in_time' and 'out_time'.");
+    }
+    
     testTimeType(m_inTime);
     testTimeType(m_outTime);
 

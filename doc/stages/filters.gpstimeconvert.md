@@ -92,13 +92,19 @@ Convert from wrapped GPS week seconds to GPS time.
 
 ## Options
 
+conversion (deprecated)
+
+: The time conversion. Must follow the pattern: "{in_time}2{out_time}". Can't be used with "in_time" and "out_time" \[Required\]
+
 in_time
 
-: The input time standard ("gt","gst","gws" or "gds"). \[Required\]
+: The input time standard ("gt","gst","gws" or "gds"). Must be used with
+ "out_time". Can't be used with "conversion" \[Required\]
 
 out_time
 
-: The output time standard ("gt","gst","gws" or "gds"). \[Required\]
+: The output time standard ("gt","gst","gws" or "gds"). Must be used with 
+"in_time". Can't be used with "conversion" \[Required\]
 
 start_date
 
