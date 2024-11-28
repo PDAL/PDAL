@@ -88,7 +88,7 @@ void GpsTimeConvert::initialize()
     if (!m_conversion.empty() && (m_inTime.empty()) && (m_outTime.empty()))
     {
         m_conversion = Utils::tolower(m_conversion);
-        s = Utils::split(m_conversion,'2');
+        std::vector<std::string> s = Utils::split(m_conversion,'2');
         m_inTime = s[0];
         m_outTime = s[1];
     }
