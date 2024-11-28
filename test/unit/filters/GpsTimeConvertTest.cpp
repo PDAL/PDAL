@@ -61,7 +61,8 @@ TEST(gws2gtTest, HandlesWrappedWeekSeconds)
     reader.addView(inView);
 
     Options options;
-    options.add("conversion", "gws2gt");
+    options.add("in_time", "gws");
+    options.add("out_time","gt");
     options.add("start_date", "2020-12-12");
     options.add("wrapped", true);
 
@@ -92,7 +93,8 @@ TEST(gws2gtTest, HandlesUnwrappedWeekSeconds)
     reader.addView(view);
 
     Options options;
-    options.add("conversion", "gws2gt");
+    options.add("in_time", "gws");
+    options.add("out_time", "2gt");
     options.add("start_date", "2020-12-12");
     options.add("wrapped", false);
 
@@ -123,7 +125,8 @@ TEST(gws2gstTest, HandlesWrappedWeekSeconds)
     reader.addView(inView);
 
     Options options;
-    options.add("conversion", "gws2gst");
+    options.add("in_time", "gws");
+    options.add("out_time", "2gst");
     options.add("start_date", "2020-12-12");
     options.add("wrapped", true);
 
@@ -154,7 +157,8 @@ TEST(gws2gstTest, HandlesUnwrappedWeekSeconds)
     reader.addView(view);
 
     Options options;
-    options.add("conversion", "gws2gst");
+    options.add("in_time", "gws");
+    options.add("out_time", "gst");
     options.add("start_date", "2020-12-12");
     options.add("wrapped", false);
 
@@ -185,7 +189,8 @@ TEST(gt2gwsTest, WrapsWeekSeconds)
     reader.addView(view);
 
     Options options;
-    options.add("conversion", "gt2gws");
+    options.add("in_time", "gt");
+    options.add("out_time", "gws");
     options.add("wrap", true);
 
     GpsTimeConvert filter;
@@ -215,7 +220,8 @@ TEST(gt2gwsTest, DoesNotWrapWeekSeconds)
     reader.addView(view);
 
     Options options;
-    options.add("conversion", "gt2gws");
+    options.add("in_time", "gt");
+    options.add("out_time", "gws");
     options.add("wrap", false);
 
     GpsTimeConvert filter;
@@ -245,7 +251,8 @@ TEST(gst2gwsTest, WrapsWeekSeconds)
     reader.addView(view);
 
     Options options;
-    options.add("conversion", "gst2gws");
+    options.add("in_time", "gst");
+    options.add("out_time", "gws");
     options.add("wrap", true);
 
     GpsTimeConvert filter;
@@ -275,7 +282,8 @@ TEST(gst2gwsTest, DoesNotWrapWeekSeconds)
     reader.addView(view);
 
     Options options;
-    options.add("conversion", "gst2gws");
+    options.add("in_time", "gst");
+    options.add("out_time", "gws");
     options.add("wrap", false);
 
     GpsTimeConvert filter;
@@ -305,7 +313,8 @@ TEST(gt2gstTest, ToGpsStandardTime)
     reader.addView(view);
 
     Options options;
-    options.add("conversion", "gt2gst");
+    options.add("in_time", "gt");
+    options.add("out_time", "gst");
 
     GpsTimeConvert filter;
     filter.setOptions(options);
@@ -334,7 +343,8 @@ TEST(gst2gtTest, FromGpsStandardTime)
     reader.addView(view);
 
     Options options;
-    options.add("conversion", "gst2gt");
+    options.add("in_time", "gst");
+    options.add("out_time", "gt");
 
     GpsTimeConvert filter;
     filter.setOptions(options);

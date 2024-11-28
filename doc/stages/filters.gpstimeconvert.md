@@ -8,9 +8,10 @@ lidar data:
 1. GPS time (gt)
 2. GPS standard time (gst), also known as GPS adjusted time
 3. GPS week seconds (gws)
+4. GPS day seconds (gds)
 
 Since GPS week seconds are ambiguous (they reset to 0 at the start of each new
-GPS week), care must be taken when they are the source or destination of a
+GPS week or each day), care must be taken when they are the source or destination of a
 conversion:
 
 - When converting from GPS week seconds, the GPS week number must be known. This
@@ -23,6 +24,10 @@ conversion:
   unwrapped week seconds are allowed to exceed 604800 (60x60x24x7) seconds.
 - When converting to GPS week seconds, the week second wrapping preference
   should be specified with the [wrap] option.
+- When converting from GPS day seconds and the times span a new day, the [wrapped] option
+  reset to 0 and midnight or are allowed to exceed 86400 (60x60x24) seconds.
+- When converting to GPS day seconds, the day second wrapping preference should
+  also be specified with the [wrap] option.
 
 ```{note}
 The filter assumes points are ordered by ascending time, which can be
@@ -60,7 +65,8 @@ Convert from GPS standard time to unwrapped GPS week seconds.
     },
     {
         "type":"filters.gpstimeconvert",
-        "conversion":"gst2gws",
+        "in_time":"gst",
+        "out_time": "gws",
         "wrap":false
     }
 ]
@@ -75,7 +81,8 @@ Convert from wrapped GPS week seconds to GPS time.
     "input.las",
     {
         "type":"filters.gpstimeconvert",
-        "conversion":"gws2gt",
+        "in_time":"gws",
+        "out_time": "gt",
         "start_date":"2020-12-12",
         "wrapped":true
     },
@@ -85,10 +92,13 @@ Convert from wrapped GPS week seconds to GPS time.
 
 ## Options
 
-conversion
+in_time
 
-: The time conversion. Must be one of the following: "gst2gt", "gst2gws",
-  "gt2gst", "gt2gws", "gws2gst", or "gws2gt". \[Required\]
+: The input time standard ("gt","gst","gws" or "gds"). \[Required\]
+
+out_time
+
+: The output time standard ("gt","gst","gws" or "gds"). \[Required\]
 
 start_date
 
@@ -98,10 +108,10 @@ start_date
 
 wrap
 
-: Whether to output wrapped (true) or unwrapped (false) GPS week seconds.
+: Whether to output wrapped (true) or unwrapped (false) GPS week\day seconds.
   \[Default: false\]
 
 wrapped
 
-: Specifies whether input GPS week seconds are wrapped (true) or unwrapped
+: Specifies whether input GPS week\day seconds are wrapped (true) or unwrapped
   (false). \[Default: false\]

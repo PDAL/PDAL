@@ -47,7 +47,8 @@ public:
     std::string getName() const;
 
 private:
-    std::string m_conversion;
+    std::string m_inTime;
+    std::string m_outTime;
     std::string m_strDate;
     std::tm m_tmDate;
     bool m_wrap;
@@ -61,6 +62,8 @@ private:
     int weekStartGpsSeconds(std::tm date);
     void unwrapWeekSeconds(PointView& view);
     void wrapWeekSeconds(PointView& view);
+
+    void testTimeType(std::string& type);
 
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
