@@ -343,7 +343,7 @@ void GpsTimeConvert::gpsTime2DaySeconds(PointView& view)
 
     // wrap week seconds
     if (m_wrap)
-        wrapWeekSeconds(view);
+        wrapDaySeconds(view);
 }
 
 
