@@ -80,6 +80,12 @@ jobs:
          name: source-package-ubuntu-latest
          path: release
 
+     - name: Verify checksums
+       shell: bash -l {0}
+       working-directory: ./release
+       run: |
+          sha256sum -c *.sha256sum
+
      - name: Unzip
        shell: bash -l {0}
        working-directory: ./release
@@ -87,7 +93,6 @@ jobs:
           set -e
           echo "Tagged version is $GITHUB_REF_NAME, checking that PDAL version is the same"
           ls *
-          sha256sum -c PDAL-$GITHUB_REF_NAME-src.tar.gz.sha256sum
           tar xvf PDAL-${{ github.ref_name }}-src.tar.bz2
           cd PDAL-$GITHUB_REF_NAME
           source ./scripts/ci/linux/setup.sh
