@@ -87,6 +87,14 @@ jobs:
           set -e
           sha256sum -c *.sha256sum
 
+    - uses: mamba-org/setup-micromamba@v2
+      with:
+        init-shell: bash
+        environment-file: "scripts/ci/current-environment.yml"
+        environment-name: "pdal-build"
+        cache-environment: true
+        cache-downloads: true
+
      - name: Unzip
        shell: bash -l {0}
        working-directory: ./release
