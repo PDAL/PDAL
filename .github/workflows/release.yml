@@ -84,6 +84,8 @@ jobs:
        shell: bash -l {0}
        working-directory: ./release
        run: |
+          set -e
+          echo "Tagged version is $GITHUB_REF_NAME, checking that PDAL version is the same"
           ls *
           sha256sum -c PDAL-$GITHUB_REF_NAME-src.tar.gz.sha256sum
           tar xvf PDAL-${{ github.ref_name }}-src.tar.bz2
