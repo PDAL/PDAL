@@ -87,13 +87,6 @@ jobs:
           set -e
           sha256sum -c *.sha256sum
 
-     - uses: mamba-org/setup-micromamba@v2
-       with:
-         init-shell: bash
-         environment-file: "scripts/ci/current-environment.yml"
-         environment-name: "pdal-build"
-         cache-environment: true
-         cache-downloads: true
 
      - name: Unzip
        shell: bash -l {0}
@@ -104,6 +97,22 @@ jobs:
           ls *
           tar xvf PDAL-${{ github.ref_name }}-src.tar.bz2
           cd PDAL-$GITHUB_REF_NAME-src
+
+     - uses: mamba-org/setup-micromamba@v2
+       name: Install mamba
+       with:
+         init-shell: bash
+         environment-file: "scripts/ci/current-environment.yml"
+         environment-name: "pdal-build"
+         cache-environment: true
+         cache-downloads: true
+       working-directory: ./release/${{ github.ref_name }}-src
+
+     - name: Confirm release
+       shell: bash -l {0}
+       working-directory: ./release/${{ github.ref_name }}-src
+       run: |
+          set -e
           source ./scripts/ci/linux/setup.sh
           cd build
           source ../scripts/ci/linux/cmake.sh
