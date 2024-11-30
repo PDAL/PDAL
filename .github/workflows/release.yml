@@ -123,7 +123,7 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=${CONDA_PREFIX} \
             -DWITH_TESTS=OFF
           source ../scripts/ci/linux/compile.sh
-          export PDAL_VERSION=$(pdal --version)
+          export PDAL_VERSION=$(pdal-config --version)
           if [ $GITHUB_REF_NAME == $PDAL_VERSION ]; then
             echo "Tagged version equals tree version. All good."
           else
