@@ -115,8 +115,15 @@ jobs:
           source ./scripts/ci/linux/setup.sh
           cd build
           source ../scripts/ci/linux/cmake.sh
+          cmake .. \
+            -G Ninja \
+            -DCMAKE_LIBRARY_PATH:FILEPATH="$CONDA_PREFIX/lib" \
+            -DCMAKE_INCLUDE_PATH:FILEPATH="$CONDA_PREFIX/include" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=${CONDA_PREFIX} \
+            -DWITH_TESTS=OFF
           source ../scripts/ci/linux/compile.sh
-          export PDAL_VERSION=./build/bin/pdal --version
+          export PDAL_VERSION=$(./build/bin/pdal --version)
           if [ $GITHUB_REF_NAME == $PDAL_VERSION ]; then
             echo "Tagged version equals tree version. All good."
           else
