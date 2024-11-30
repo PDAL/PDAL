@@ -84,6 +84,7 @@ jobs:
        shell: bash -l {0}
        working-directory: ./release
        run: |
+          set -e
           sha256sum -c *.sha256sum
 
      - name: Unzip
@@ -94,7 +95,7 @@ jobs:
           echo "Tagged version is $GITHUB_REF_NAME, checking that PDAL version is the same"
           ls *
           tar xvf PDAL-${{ github.ref_name }}-src.tar.bz2
-          cd PDAL-$GITHUB_REF_NAME
+          cd PDAL-$GITHUB_REF_NAME-src
           source ./scripts/ci/linux/setup.sh
           cd build
           source ../scripts/ci/linux/cmake.sh
