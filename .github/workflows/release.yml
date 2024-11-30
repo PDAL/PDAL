@@ -102,11 +102,10 @@ jobs:
        name: Install mamba
        with:
          init-shell: bash
-         environment-file: "scripts/ci/current-environment.yml"
+         environment-file: "./release/${{ github.ref_name }}-src/scripts/ci/current-environment.yml"
          environment-name: "pdal-build"
          cache-environment: true
          cache-downloads: true
-       working-directory: ./release/${{ github.ref_name }}-src
 
      - name: Confirm release
        shell: bash -l {0}
