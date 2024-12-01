@@ -5,8 +5,8 @@ on:
 
     # only publish draft for x.x.x tags
     tags:
-      - '**' # for testing
-#      - "[0-9]+.[0-9]+.[0-9]+"
+#      - '**' # for testing
+      - "[0-9]+.[0-9]+.[0-9]+"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
