@@ -203,14 +203,14 @@ conda update pdal
 
 Detailed installation instructions can be found [here](https://pixi.sh/latest/), but one of the following commands should work depending on your OS.
 
-````{tab-set}
-```{tab-item} Linux & macOS
+`````{tab-set}
+````{tab-item} Linux & macOS
 ```bash
 curl -fsSL https://pixi.sh/install.sh | bash
 ```
-```
+````
 
-```{tab-item} Windows
+````{tab-item} Windows
 Powershell:
 ```powershell
 iwr -useb https://pixi.sh/install.ps1 | iex
@@ -220,8 +220,8 @@ iwr -useb https://pixi.sh/install.ps1 | iex
 ```
 winget install prefix-dev.pixi
 ```
-```
 ````
+`````
 
 ### Install Pixi Environment
 
