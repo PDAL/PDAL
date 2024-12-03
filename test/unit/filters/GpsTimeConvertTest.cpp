@@ -61,7 +61,40 @@ TEST(gws2gtTest, HandlesWrappedWeekSeconds)
     reader.addView(inView);
 
     Options options;
-    options.add("conversion", "gws2gt");
+    options.add("in_time", "gws");
+    options.add("out_time","gt");
+    options.add("start_date", "2020-12-12");
+    options.add("wrapped", true);
+
+    GpsTimeConvert filter;
+    filter.setOptions(options);
+    filter.setInput(reader);
+    filter.prepare(table);
+
+    PointViewSet viewSet = filter.execute(table);
+    PointViewPtr outView = *viewSet.begin();
+
+    checkTime(outView, 0, 1291852799.5);
+    checkTime(outView, 1, 1291852800.5);
+}
+
+TEST(gds2gtTest, HandlesWrappedWeekSeconds)
+{
+    using namespace Dimension;
+
+    PointTable table;
+    table.layout()->registerDims({Id::GpsTime});
+
+    PointViewPtr inView(new PointView(table));
+    inView->setField(Id::GpsTime, 0, 86399.5);
+    inView->setField(Id::GpsTime, 1, 0.5);
+
+    BufferReader reader;
+    reader.addView(inView);
+
+    Options options;
+    options.add("in_time", "gds");
+    options.add("out_time","gt");
     options.add("start_date", "2020-12-12");
     options.add("wrapped", true);
 
@@ -92,7 +125,40 @@ TEST(gws2gtTest, HandlesUnwrappedWeekSeconds)
     reader.addView(view);
 
     Options options;
-    options.add("conversion", "gws2gt");
+    options.add("in_time", "gws");
+    options.add("out_time", "gt");
+    options.add("start_date", "2020-12-12");
+    options.add("wrapped", false);
+
+    GpsTimeConvert filter;
+    filter.setOptions(options);
+    filter.setInput(reader);
+    filter.prepare(table);
+
+    PointViewSet viewSet = filter.execute(table);
+    PointViewPtr outView = *viewSet.begin();
+
+    checkTime(outView, 0, 1291852799.5);
+    checkTime(outView, 1, 1291852800.5);
+}
+
+TEST(gds2gtTest, HandlesUnwrappedDaySeconds)
+{
+    using namespace Dimension;
+
+    PointTable table;
+    table.layout()->registerDims({Id::GpsTime});
+
+    PointViewPtr view(new PointView(table));
+    view->setField(Id::GpsTime, 0, 86399.5);
+    view->setField(Id::GpsTime, 1, 86400.5);
+
+    BufferReader reader;
+    reader.addView(view);
+
+    Options options;
+    options.add("in_time", "gds");
+    options.add("out_time", "gt");
     options.add("start_date", "2020-12-12");
     options.add("wrapped", false);
 
@@ -123,7 +189,8 @@ TEST(gws2gstTest, HandlesWrappedWeekSeconds)
     reader.addView(inView);
 
     Options options;
-    options.add("conversion", "gws2gst");
+    options.add("in_time", "gws");
+    options.add("out_time", "gst");
     options.add("start_date", "2020-12-12");
     options.add("wrapped", true);
 
@@ -138,6 +205,39 @@ TEST(gws2gstTest, HandlesWrappedWeekSeconds)
     checkTime(outView, 0, 291852799.5);
     checkTime(outView, 1, 291852800.5);
 }
+
+TEST(gds2gstTest, HandlesWrappedDaySeconds)
+{
+    using namespace Dimension;
+
+    PointTable table;
+    table.layout()->registerDims({Id::GpsTime});
+
+    PointViewPtr inView(new PointView(table));
+    inView->setField(Id::GpsTime, 0, 86399.5);
+    inView->setField(Id::GpsTime, 1, 0.5);
+
+    BufferReader reader;
+    reader.addView(inView);
+
+    Options options;
+    options.add("in_time", "gds");
+    options.add("out_time", "gst");
+    options.add("start_date", "2020-12-12");
+    options.add("wrapped", true);
+
+    GpsTimeConvert filter;
+    filter.setOptions(options);
+    filter.setInput(reader);
+    filter.prepare(table);
+
+    PointViewSet viewSet = filter.execute(table);
+    PointViewPtr outView = *viewSet.begin();
+
+    checkTime(outView, 0, 291852799.5);
+    checkTime(outView, 1, 291852800.5);
+}
+
 
 TEST(gws2gstTest, HandlesUnwrappedWeekSeconds)
 {
@@ -154,7 +254,40 @@ TEST(gws2gstTest, HandlesUnwrappedWeekSeconds)
     reader.addView(view);
 
     Options options;
-    options.add("conversion", "gws2gst");
+    options.add("in_time", "gws");
+    options.add("out_time", "gst");
+    options.add("start_date", "2020-12-12");
+    options.add("wrapped", false);
+
+    GpsTimeConvert filter;
+    filter.setOptions(options);
+    filter.setInput(reader);
+    filter.prepare(table);
+
+    PointViewSet viewSet = filter.execute(table);
+    PointViewPtr outView = *viewSet.begin();
+
+    checkTime(outView, 0, 291852799.5);
+    checkTime(outView, 1, 291852800.5);
+}
+
+TEST(gds2gstTest, HandlesUnwrappedDaySeconds)
+{
+    using namespace Dimension;
+
+    PointTable table;
+    table.layout()->registerDims({Id::GpsTime});
+
+    PointViewPtr view(new PointView(table));
+    view->setField(Id::GpsTime, 0, 86399.5);
+    view->setField(Id::GpsTime, 1, 86400.5);
+
+    BufferReader reader;
+    reader.addView(view);
+
+    Options options;
+    options.add("in_time", "gds");
+    options.add("out_time", "gst");
     options.add("start_date", "2020-12-12");
     options.add("wrapped", false);
 
@@ -185,7 +318,8 @@ TEST(gt2gwsTest, WrapsWeekSeconds)
     reader.addView(view);
 
     Options options;
-    options.add("conversion", "gt2gws");
+    options.add("in_time", "gt");
+    options.add("out_time", "gws");
     options.add("wrap", true);
 
     GpsTimeConvert filter;
@@ -197,6 +331,37 @@ TEST(gt2gwsTest, WrapsWeekSeconds)
     PointViewPtr outView = *viewSet.begin();
 
     checkTime(outView, 0, 604799.5);
+    checkTime(outView, 1, 0.5);
+}
+
+TEST(gt2gdsTest, WrapsWeekSeconds)
+{
+    using namespace Dimension;
+
+    PointTable table;
+    table.layout()->registerDims({Id::GpsTime});
+
+    PointViewPtr view(new PointView(table));
+    view->setField(Id::GpsTime, 0, 1291852799.5);
+    view->setField(Id::GpsTime, 1, 1291852800.5);
+
+    BufferReader reader;
+    reader.addView(view);
+
+    Options options;
+    options.add("in_time", "gt");
+    options.add("out_time", "gds");
+    options.add("wrap", true);
+
+    GpsTimeConvert filter;
+    filter.setOptions(options);
+    filter.setInput(reader);
+    filter.prepare(table);
+
+    PointViewSet viewSet = filter.execute(table);
+    PointViewPtr outView = *viewSet.begin();
+
+    checkTime(outView, 0, 86399.5);
     checkTime(outView, 1, 0.5);
 }
 
@@ -215,7 +380,8 @@ TEST(gt2gwsTest, DoesNotWrapWeekSeconds)
     reader.addView(view);
 
     Options options;
-    options.add("conversion", "gt2gws");
+    options.add("in_time", "gt");
+    options.add("out_time", "gws");
     options.add("wrap", false);
 
     GpsTimeConvert filter;
@@ -228,6 +394,37 @@ TEST(gt2gwsTest, DoesNotWrapWeekSeconds)
 
     checkTime(outView, 0, 604799.5);
     checkTime(outView, 1, 604800.5);
+}
+
+TEST(gt2gdsTest, DoesNotWrapWeekSeconds)
+{
+    using namespace Dimension;
+
+    PointTable table;
+    table.layout()->registerDims({Id::GpsTime});
+
+    PointViewPtr view(new PointView(table));
+    view->setField(Id::GpsTime, 0, 1291852799.5);
+    view->setField(Id::GpsTime, 1, 1291852800.5);
+
+    BufferReader reader;
+    reader.addView(view);
+
+    Options options;
+    options.add("in_time", "gt");
+    options.add("out_time", "gds");
+    options.add("wrap", false);
+
+    GpsTimeConvert filter;
+    filter.setOptions(options);
+    filter.setInput(reader);
+    filter.prepare(table);
+
+    PointViewSet viewSet = filter.execute(table);
+    PointViewPtr outView = *viewSet.begin();
+
+    checkTime(outView, 0, 86399.5);
+    checkTime(outView, 1, 86400.5);
 }
 
 TEST(gst2gwsTest, WrapsWeekSeconds)
@@ -245,7 +442,8 @@ TEST(gst2gwsTest, WrapsWeekSeconds)
     reader.addView(view);
 
     Options options;
-    options.add("conversion", "gst2gws");
+    options.add("in_time", "gst");
+    options.add("out_time", "gws");
     options.add("wrap", true);
 
     GpsTimeConvert filter;
@@ -275,7 +473,8 @@ TEST(gst2gwsTest, DoesNotWrapWeekSeconds)
     reader.addView(view);
 
     Options options;
-    options.add("conversion", "gst2gws");
+    options.add("in_time", "gst");
+    options.add("out_time", "gws");
     options.add("wrap", false);
 
     GpsTimeConvert filter;
@@ -305,7 +504,8 @@ TEST(gt2gstTest, ToGpsStandardTime)
     reader.addView(view);
 
     Options options;
-    options.add("conversion", "gt2gst");
+    options.add("in_time", "gt");
+    options.add("out_time", "gst");
 
     GpsTimeConvert filter;
     filter.setOptions(options);
@@ -334,7 +534,8 @@ TEST(gst2gtTest, FromGpsStandardTime)
     reader.addView(view);
 
     Options options;
-    options.add("conversion", "gst2gt");
+    options.add("in_time", "gst");
+    options.add("out_time", "gt");
 
     GpsTimeConvert filter;
     filter.setOptions(options);
