@@ -40,6 +40,11 @@ bool AssignParser::assignment(AssignStatement& expr)
         setError(parser.error());
         return false;
     }
+    if (!parser.checkEnd())
+    {
+        setError("Invalid token '" + peekToken().sval() + "' following valid math expression");
+        return false;
+    }
 
     return where(expr);
 }

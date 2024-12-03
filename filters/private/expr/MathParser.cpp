@@ -10,9 +10,7 @@ namespace expr
 
 bool MathParser::expression(Expression& expr)
 {
-    // Only success if we've properly parsed the expression AND we're add the end of
-    // a math expression.
-    return addexpr(expr) && checkEnd();
+    return addexpr(expr);
 }
 
 bool MathParser::addexpr(Expression& expr)
@@ -160,12 +158,62 @@ bool MathParser::primary(Expression& expr)
     }
     bool status = parexpr(expr);
     if (!status)
-        setError("Expecting value expression, instead found '" + peekToken().sval() + "'.");
+        setError("Expecting value expression following '" + curToken().sval() +
+            "', instead found '" + peekToken().sval() + "'.");
 
     return status;
 }
 
 bool MathParser::function(Expression& expr)
+{
+    if (function0(expr))
+        return true;
+    return function1(expr);
+}
+
+bool MathParser::function0(Expression& expr)
+{
+    struct Func0
+    {
+        std::string name;
+        double value;
+    };
+
+    static const std::vector<Func0> funcs {
+        { "nan", std::numeric_limits<double>::quiet_NaN() },
+        { "lowest", std::numeric_limits<double>::lowest() },
+        { "highest", (std::numeric_limits<double>::max)() }
+    };
+
+    std::string name = curToken().sval();
+    auto it = std::find_if(funcs.begin(), funcs.end(),
+        [&name](const Func0& f){ return f.name == name; });
+
+    if (it == funcs.end())
+    {
+        if (peekToken() == TokenType::Lparen)
+            setError("Invalid function name '" + name + "'");
+        return false;
+    }
+
+    if (!match(TokenType::Lparen))
+    {
+        setError("Expecting '(' to open function invocation of '" + name + "'.");
+        return false;
+    }
+
+    if (!match(TokenType::Rparen))
+    {
+        setError("Expecting ')' to close function invocation of '" + name + "'.");
+        return false;
+    }
+
+    expr.pushNode(NodePtr(new ConstValueNode(it->value)));
+
+    return true;
+}
+
+bool MathParser::function1(Expression& expr)
 {
     static const std::vector<Func1> funcs {
         { "floor", ::floor },

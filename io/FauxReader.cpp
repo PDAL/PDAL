@@ -148,6 +148,14 @@ void FauxReader::initialize()
         m_uniformY.reset(new urd(m_bounds.miny, m_bounds.maxy));
         m_uniformZ.reset(new urd(m_bounds.minz, m_bounds.maxz));
     }
+    else if (m_mode == Mode::Invalid)
+    {
+        //using urd = std::uniform_real_distribution<double>;
+
+        m_uniformX.reset(new urd(m_bounds.minx, m_bounds.maxx));
+        m_uniformY.reset(new urd(m_bounds.miny, m_bounds.maxy));
+        m_uniformZ.reset(new urd(m_bounds.minz, m_bounds.maxz));
+    }
     else
     {
         if (m_count > 1)
@@ -222,6 +230,11 @@ bool FauxReader::processOne(PointRef& point)
         y = (*m_uniformY)(m_generator);
         z = (*m_uniformZ)(m_generator);
         break;
+    case Mode::Invalid:
+        x = (*m_uniformX)(m_generator);
+        y = (*m_uniformY)(m_generator);
+        z = (*m_uniformZ)(m_generator);
+        break;
     case Mode::Grid:
     {
         if (m_delX)
@@ -251,7 +264,11 @@ bool FauxReader::processOne(PointRef& point)
     point.setField(Dimension::Id::X, x);
     point.setField(Dimension::Id::Y, y);
     point.setField(Dimension::Id::Z, z);
-    point.setField(Dimension::Id::OffsetTime, m_time++);
+
+    if (m_mode == Mode::Invalid)
+        point.setField(Dimension::Id::OffsetTime, std::numeric_limits<double>::quiet_NaN());
+    else
+        point.setField(Dimension::Id::OffsetTime, m_time++);
     if (m_numReturns > 0)
     {
         point.setField(Dimension::Id::ReturnNumber, m_returnNum);

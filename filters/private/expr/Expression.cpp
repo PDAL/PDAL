@@ -198,6 +198,28 @@ std::string FuncNode::print() const
 }
 
 //
+// BoolFuncNode
+//
+BoolFuncNode::BoolFuncNode(NodeType type, BoolFunc1 func, NodePtr sub) :
+    LogicalNode(type), m_func(func), m_sub(std::move(sub))
+{}
+
+Utils::StatusWithReason BoolFuncNode::prepare(PointLayoutPtr l)
+{
+    return m_sub->prepare(l);
+}
+
+Result BoolFuncNode::eval(PointRef& p) const
+{
+    return m_func.function(m_sub->eval(p).m_dval);
+}
+
+std::string BoolFuncNode::print() const
+{
+    return m_func.name + "(" + m_sub->print() + ")";
+}
+
+//
 // CompareNode
 //
 CompareNode::CompareNode(NodeType type, NodePtr left, NodePtr right) :

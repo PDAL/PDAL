@@ -100,7 +100,7 @@ void ExpressionFilter::prepared(PointTableRef table)
 
         auto status = expression.prepare(table.layout());
         if (!status)
-            throwError("Invalid 'where': " + status.what());
+            throwError(status.what());
     }
 }
 
