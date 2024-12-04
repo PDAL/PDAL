@@ -195,6 +195,55 @@ Finally, to update PDAL to the latest version, run the following.
 conda update pdal
 ```
 
+## Experimental Install via Pixi
+
+[Pixi](https://pixi.sh/latest/) is a fast software package manager built on top of Conda/Mamba that spins up development environments quickly on Windows, macOS and Linux.
+
+### Prerequisites
+
+Detailed installation instructions can be found [here](https://pixi.sh/latest/), but one of the following commands should work depending on your OS.
+
+`````{tab-set}
+````{tab-item} Linux & macOS
+```bash
+curl -fsSL https://pixi.sh/install.sh | bash
+```
+````
+
+````{tab-item} Windows
+Powershell:
+```powershell
+iwr -useb https://pixi.sh/install.ps1 | iex
+```
+
+`winget`:
+```
+winget install prefix-dev.pixi
+```
+````
+`````
+
+### Install Pixi Environment
+
+After Pixi is installed, you can run
+
+```
+git clone https://github.com/PDAL/PDAL.git
+cd PDAL
+pixi shell
+```
+
+This will fetch the latest PDAL code, install all environment dependencies and then activate a supercharged environment that we lovingly call `goldendoodle`. From now on, each time you want to run PDAL in a new shell, you have to navigate to the PDAL folder and run `pixi shell` again.
+
+Go ahead and test that PDAL is installed!
+
+```
+pdal --version
+--------------------------------------------------------------------------------
+pdal 2.8.2 (git-version: Release)
+--------------------------------------------------------------------------------
+```
+
 ## Fetch Sample Data
 
 We need some sample data to play with, so we're going to download the
