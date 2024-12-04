@@ -40,6 +40,7 @@
 
 #include <pdal/PointRef.hpp>
 
+#include <pdal/util/Algorithm.hpp>
 #include <pdal/util/Extractor.hpp>
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/Utils.hpp>
@@ -177,7 +178,13 @@ void addVlrMetadata(const Vlr& vlr, std::string name, MetadataNode& forward, Met
             name = "pdal_metadata";
         else if (vlr.recordId == las::PdalPipelineRecordId)
             name = "pdal_pipeline";
-        m.addWithType(name, std::string(vlr.data(), vlr.dataSize()), "json", vlr.description);
+
+        // This *should* be null-terminated JSON, but VLR sizes can lie.
+        // We will read up the json data and then go strip any nulls out of it
+        // instead of just reading vlr.dataSize() - 1
+        std::string json(vlr.data(), vlr.dataSize());
+        Utils::remove(json, '\0');
+        m.addWithType(name, json, "json", vlr.description);
         return;
     }
     MetadataNode vlrNode(name);
