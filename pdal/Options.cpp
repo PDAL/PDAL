@@ -166,21 +166,28 @@ StringList Options::toCommandLine() const
 
 Options Options::fromFile(const std::string& filename, bool throwOnOpenError)
 {
-    if (!FileUtils::fileExists(filename))
+    std::string optionsFile(filename);
+    bool isRemote = Utils::isRemote(optionsFile);
+    if (isRemote)
+    {
+        optionsFile = Utils::fetchRemote(filename);
+    }
+
+    if (!FileUtils::fileExists(optionsFile))
     {
         if (throwOnOpenError)
-            throw pdal_error("Can't read options file '" + filename + "'.");
+            throw pdal_error("Can't read options file '" + optionsFile + "'.");
         else
             return Options();
     }
 
-    std::string s = FileUtils::readFileIntoString(filename);
+    std::string s = FileUtils::readFileIntoString(optionsFile);
 
     size_t cnt = Utils::extractSpaces(s, 0);
     if (s[cnt] == '{')
-        return fromJsonFile(filename, s);
+        return fromJsonFile(optionsFile, s);
     else if (s[cnt] == '-')
-        return fromCmdlineFile(filename, s);
+        return fromCmdlineFile(optionsFile, s);
     else
         throw pdal_error("Option file '" + filename + "' not valid JSON or "
             "command-line format.");
