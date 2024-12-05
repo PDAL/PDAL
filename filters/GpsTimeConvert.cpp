@@ -90,6 +90,11 @@ void GpsTimeConvert::initialize()
     {
         m_conversion = Utils::tolower(m_conversion);
         std::vector<std::string> s = Utils::split(m_conversion, '2');
+        if (s.size() < 2)
+            Stage::throwError(
+                "Invalid 'conversion'. Please use the format {in}2{out}, where "
+                "{in} is the input time format and {out} is the output time "
+                "format or use or 'in_time' and 'out_time' parameters.");
         m_inTime = s[0];
         m_outTime = s[1];
     }
