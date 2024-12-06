@@ -82,6 +82,7 @@ private:
 
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
+    virtual PointViewSet run(PointViewPtr view);
     virtual bool processOne(PointRef& point);
     virtual void filter(PointView& view);
 

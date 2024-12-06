@@ -366,6 +366,14 @@ bool GpsTimeConvert::processOne(PointRef& point)
     return true;
 }
 
+PointViewSet GpsTimeConvert::run(PointViewPtr view)
+{
+    PointViewSet viewSet;
+    filter(*view);
+    viewSet.insert(view);
+    return viewSet;
+}
+
 void GpsTimeConvert::filter(PointView& view)
 {
     for (PointRef p : view)
