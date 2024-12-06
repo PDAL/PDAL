@@ -35,11 +35,12 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
+#include <pdal/Streamable.hpp>
 
 namespace pdal
 {
 
-class PDAL_EXPORT GpsTimeConvert : public Filter
+class PDAL_EXPORT GpsTimeConvert : public Filter, public Streamable
 {
 public:
     GpsTimeConvert() : Filter()
