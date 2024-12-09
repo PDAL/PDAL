@@ -81,6 +81,7 @@ if(WIN32)
   # ---[ Windows requires DLLs (shared libraries) to be installed in
   # ---[ the same directory as executables
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CMAKE_BUILD_TYPE} "${PDAL_OUTPUT_BIN_DIR}" )
+  add_definitions(-D_XKEYCHECK_H=1)
 endif(WIN32)
 
 
