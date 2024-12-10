@@ -46,7 +46,7 @@ shapely = ">=2.0.6,<3"
 matplotlib = ">=3.9.3,<4"
 tqdm = ">=4.67.1,<5"
 
-[feature.dev.tasks]
+[feature.dev.target.win-64.tasks]
 docs = "jb build doc"
 configure = { cmd = [ "cmake",
     "-G", "Ninja", 
@@ -67,7 +67,7 @@ configure = { cmd = [ "cmake",
     "-DBUILD_PLUGIN_ARROW=ON",
     "-DBUILD_PLUGIN_TILEDB=ON",
     "-DBUILD_PLUGIN_MRSID=OFF",
-    "-DBUILD_PLUGIN_NITF=OFF",
+    "-DBUILD_PLUGIN_NITF=ON",
     "-DBUILD_PLUGIN_TRAJECTORY=ON",
     "-DBUILD_PLUGIN_PGPOINTCLOUD=ON",
     "-DBUILD_PLUGIN_I3S=ON",
