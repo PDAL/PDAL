@@ -15,18 +15,32 @@ data. For example, if the workshop folder was located on your desktop:
 $ cd Desktop/PDAL
 ```
 
-Issue the following command in your `Conda Shell`.
+If you are using `pixi` and have not already, start the shell with the following command.
 
 ```console
-$ pdal info ./exercises/info/interesting.las -p 0
+$ pixi shell -e workshop
 ```
+
+The enter the following command.
+
+```console
+(pdal:workshop) $ pdal info test/data/las/interesting.las -p 0
+```
+
+````{note}
+We can also run the example with the following command.
+
+```console
+$ pixi run -e workshop ex01
+```
+````
 
 Here's a summary of what's going on with that command invocation
 
 1. `pdal`: The `pdal` application :)
 2. `info`: We want to run {ref}`info_command` on the data. All commands
    are run by the `pdal` application.
-3. `./exercises/info/interesting.las`: The file we are running the command
+3. `test/data/las/interesting.las`: The file we are running the command
    on. PDAL will be able to identify this file is an {{ ASPRSLAS }} file from the
    extension, `.las`, but not every file type is easily identified. You can
    use a {ref}`pipeline <pipeline_command>` to override which
@@ -38,10 +52,10 @@ Here's a summary of what's going on with that command invocation
    the first one (computer people count from 0).
 
 ```console
-$ pdal info ./exercises/info/interesting.las -p 0
+(pdal:workshop) $ pdal info test/data/las/interesting.las -p 0
 {
    "file_size": 37698,
-   "filename": "./exercises/info/interesting.las",
+   "filename": "test/data/las/interesting.las",
    "now": "2023-05-30T16:11:25-0700",
    "pdal_version": "2.5.4 (git-version: Release)",
    "points":

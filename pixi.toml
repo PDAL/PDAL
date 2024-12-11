@@ -46,6 +46,10 @@ shapely = ">=2.0.6,<3"
 matplotlib = ">=3.9.3,<4"
 tqdm = ">=4.67.1,<5"
 
+[feature.workshop.dependencies]
+pdal = ">=2.8.2,<3"
+python-pdal = ">=3.4.5,<4"
+
 [feature.dev.target.win-64.tasks]
 docs = "jb build doc"
 configure = { cmd = [ "cmake",
@@ -83,6 +87,13 @@ configure = { cmd = [ "cmake",
 build = { cmd = "cd .build && ninja -j8", depends-on = ["configure"] }
 test = { cmd = "cd .build && ctest -VV --output-on-failure", depends-on = ["build"] }
 
+[feature.workshop.tasks]
+ex01 = "pdal --version"
+ex02 = "pdal info test\\data\\las\\interesting.las -p 0"
+ex03 = "pdal info test\\data\\las\\interesting.las --metadata"
+ex04 = "pdal info test\\data\\las\\interesting.las --query '637301.20, 851217.57, 496.49 /3'"
+
 [environments]
 dev = ["dev"]
 goldendoodle = ["goldendoodle"]
+workshop = ["workshop"]

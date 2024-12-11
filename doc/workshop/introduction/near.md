@@ -7,6 +7,12 @@
 
 ## Exercise
 
+If you are using `pixi` and have not already, start the shell with the following command.
+
+```console
+$ pixi shell -e workshop
+```
+
 This exercise uses PDAL to find points near a given search location. Our
 scenario is a simple one -- we want to find the two points nearest the midpoint
 of the bounding cube of our `interesting.las` data file.
@@ -37,8 +43,21 @@ z = 406.59 + (586.38 - 406.59)/2 = 496.49
 With our "center point", issue the `--query` option to `pdal info`
 and return the three nearest points to it:
 
+The enter the following command.
+
 ```console
-$ pdal info ./exercises/info/interesting.las --query "637301.20, 851217.57, 496.49 /3"
+(pdal:workshop) $ pdal info test/data/las/interesting.las --query "637301.20, 851217.57, 496.49 /3"
+```
+
+````{note}
+We can also run the example with the following command.
+
+```console
+$ pixi run -e workshop ex03
+```
+
+```console
+(pdal:workshop) $ pdal info test/data/las/interesting.las --query "637301.20, 851217.57, 496.49 /3"
 {
 "file_size": 37698,
 "filename": "./exercises/info/interesting.las",

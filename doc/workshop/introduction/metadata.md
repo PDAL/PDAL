@@ -7,14 +7,33 @@
 
 ## Exercise
 
-This exercise uses PDAL to print metadata information. Issue the
-following command in your `Conda Shell`.
+This exercise uses PDAL to print metadata information.
+
+If you are using `pixi` and have not already, start the shell with the following command.
 
 ```console
-$ pdal info ./exercises/info/interesting.las --metadata
+$ pixi shell -e workshop
+```
+
+The enter the following command.
+
+```console
+(pdal:workshop) $ pdal info test/data/las/interesting.las --metadata
+```
+
+````{note}
+We can also run the example with the following command.
+
+```console
+$ pixi run -e workshop ex02
+```
+````
+
+```console
+(pdal:workshop) $ pdal info test/data/las/interesting.las --metadata
 {
 "file_size": 37698,
-"filename": "./exercises/info/interesting.las",
+"filename": "test/data/las/interesting.las",
 "metadata":
 {
     "comp_spatialreference": "PROJCS[\"NAD_1983_Oregon_Statewide_Lambert_Feet_Intl\",GEOGCS[\"GCS_North_American_1983\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS_1980\",6378137,298.257222101]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Lambert_Conformal_Conic_2SP\"],PARAMETER[\"latitude_of_origin\",41.75],PARAMETER[\"central_meridian\",-120.5],PARAMETER[\"standard_parallel_1\",43],PARAMETER[\"standard_parallel_2\",45.5],PARAMETER[\"false_easting\",400000],PARAMETER[\"false_northing\",0],UNIT[\"foot\",0.3048,AUTHORITY[\"EPSG\",\"9002\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
