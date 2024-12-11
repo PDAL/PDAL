@@ -1,10 +1,37 @@
 [project]
 channels = ["conda-forge"]
-name = "goldendoodle"
+name = "pdal"
 platforms = ["linux-64", "win-64", "osx-64", "osx-arm64"]
-version = "1.0.0"
+version = "2.8.2"
 
-[dependencies]
+[feature.dev.dependencies]
+gdal = ">=3.9.0,<4"
+jupyter-book = ">=1.0.3,<2"
+sphinx-notfound-page = ">=1.0.4,<2"
+sphinxcontrib-jquery = ">=4.1,<5"
+sphinxcontrib-bibtex = ">=2.6.3,<3"
+breathe = ">=4.35.0,<5"
+sphinx-inline-tabs = ">=2023.4.21,<2024"
+sphinx = ">=5,<8"
+cmake = ">=3.31.2,<4"
+compilers = ">=1.8.0,<2"
+ninja = ">=1.12.1,<2"
+libpq = ">=16.1,<17"
+curl = ">=8.5.0,<9"
+hdf5 = ">=1.14.1,<1.15"
+tiledb = ">=2.26.0,<2.27"
+draco = ">=1.5.6,<1.6"
+libxml2 = ">=2.13.5,<2.14"
+openssl = ">=3.4.0,<3.5"
+nitro = ">=2.7.dev8,<2.8"
+ceres-solver = ">=2.2.0,<2.3"
+python = ">=3.12,<3.13"
+libarrow = ">=18.1.0,<19"
+libparquet = ">=18.1.0,<19"
+pkg-config = ">=0.29.2,<0.30"
+ccache = ">=4.10.1,<5"
+
+[feature.goldendoodle.dependencies]
 jupyterlab = ">=4.3.1,<5"
 pdal = ">=2.8.2,<3"
 python-pdal = ">=3.4.5,<4"
@@ -18,3 +45,79 @@ rasterio = ">=1.4.3,<2"
 shapely = ">=2.0.6,<3"
 matplotlib = ">=3.9.3,<4"
 tqdm = ">=4.67.1,<5"
+
+[feature.dev.target.win-64.tasks]
+configure = { cmd = [ "cmake",
+    "-G", "Ninja", 
+    "-S", ".",
+    "-B", ".build",
+    "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+    "-DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX",
+    "-DWITH_TESTS=ON",
+    "-DCMAKE_VERBOSE_MAKEFILE=OFF",
+    "-DCMAKE_LIBRARY_PATH:FILEPATH=$CONDA_PREFIX/Library/lib",
+    "-DCMAKE_INCLUDE_PATH:FILEPATH=$CONDA_PREFIX/Library/include",
+    "-DOPENSSL_ROOT_DIR=$CONDA_PREFIX/Library",
+    "-DPython3_ROOT_DIR:FILEPATH=$CONDA_PREFIX",
+    "-DPython3_FIND_STRATEGY=LOCATION",
+    "-DBUILD_PLUGIN_CPD=OFF",
+    "-DBUILD_PLUGIN_ICEBRIDGE=ON",
+    "-DBUILD_PLUGIN_HDF=ON",
+    "-DBUILD_PLUGIN_ARROW=ON",
+    "-DBUILD_PLUGIN_TILEDB=ON",
+    "-DBUILD_PLUGIN_MRSID=OFF",
+    "-DBUILD_PLUGIN_NITF=ON",
+    "-DBUILD_PLUGIN_TRAJECTORY=ON",
+    "-DBUILD_PLUGIN_PGPOINTCLOUD=ON",
+    "-DBUILD_PLUGIN_I3S=ON",
+    "-DBUILD_PLUGIN_DRACO=ON",
+    "-DBUILD_PLUGIN_RIVLIB=OFF",
+    "-DENABLE_CTEST=OFF",
+    "-DWITH_LZMA=OFF",
+    "-DHDF5_DIR:FILEPATH=$CONDA_PREFIX/Library/cmake",
+    "-DWITH_ZLIB=ON",
+    "-Dgtest_force_shared_crt=ON",
+    "-DBUILD_PGPOINTCLOUD_TESTS=OFF",
+    "-DCMAKE_CXX_FLAGS=/D_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" ] }
+
+[feature.dev.target.linux-64.tasks]
+configure = { cmd = [ "cmake",
+    "-G", "Ninja", 
+    "-S", ".",
+    "-B", ".build",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX",
+    "-DWITH_TESTS=ON",
+    "-DCMAKE_VERBOSE_MAKEFILE=OFF",
+    "-DCMAKE_LIBRARY_PATH:FILEPATH=$CONDA_PREFIX/Library/lib",
+    "-DCMAKE_INCLUDE_PATH:FILEPATH=$CONDA_PREFIX/Library/include",
+    "-DOPENSSL_ROOT_DIR=$CONDA_PREFIX/Library",
+    "-DPython3_ROOT_DIR:FILEPATH=$CONDA_PREFIX",
+    "-DPython3_FIND_STRATEGY=LOCATION",
+    "-DBUILD_PLUGIN_CPD=OFF",
+    "-DBUILD_PLUGIN_ICEBRIDGE=ON",
+    "-DBUILD_PLUGIN_HDF=ON",
+    "-DBUILD_PLUGIN_ARROW=ON",
+    "-DBUILD_PLUGIN_TILEDB=ON",
+    "-DBUILD_PLUGIN_MRSID=OFF",
+    "-DBUILD_PLUGIN_NITF=ON",
+    "-DBUILD_PLUGIN_TRAJECTORY=ON",
+    "-DBUILD_PLUGIN_PGPOINTCLOUD=ON",
+    "-DBUILD_PLUGIN_I3S=ON",
+    "-DBUILD_PLUGIN_DRACO=ON",
+    "-DBUILD_PLUGIN_RIVLIB=OFF",
+    "-DENABLE_CTEST=OFF",
+    "-DWITH_LZMA=OFF",
+    "-DHDF5_DIR:FILEPATH=$CONDA_PREFIX/Library/cmake",
+    "-DWITH_ZLIB=ON",
+    "-Dgtest_force_shared_crt=ON",
+    "-DBUILD_PGPOINTCLOUD_TESTS=OFF" ] }
+
+[feature.dev.tasks]
+docs = "jb build doc"
+build = { cmd = "cd .build && ninja -j8", depends-on = ["configure"] }
+test = { cmd = "cd .build && ctest -VV --output-on-failure", depends-on = ["build"] }
+
+[environments]
+dev = ["dev"]
+goldendoodle = ["goldendoodle"]
