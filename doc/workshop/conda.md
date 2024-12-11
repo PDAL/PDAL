@@ -41,23 +41,25 @@ distributed as a pip package, you can read about it at the
 1. Once [mambaforge] is installed, open a terminal and navigate to the location of your USB drive
 2. Uncompress the environment, activate it, and use the `conda-unpack` command
 
-> - macOS Users
->
->   > ```bash
->   > $ mkdir -p "$HOME/mambaforge/envs/pdal-workshop"
->   > $ tar -xzf conda_environments/pdal-workshop_osx-arm64.tar.gz -C "$HOME/mambaforge/envs/pdal-workshop"
->   > $ source "$HOME/mambaforge/envs/pdal-workshop/bin/activate"
->   > (pdal-workshop) $ conda-unpack
->   > ```
->
-> - Windows Users
->
->   > ```doscon
->   > > mkdir "%userprofile%\mambaforge\envs\pdal-workshop"
->   > > tar -xvf ./conda_environments/pdal-workshop-win64.zip -C "%userprofile%\mambaforge\envs\pdal-workshop"
->   > > call "%userprofile%\mambaforge\envs\pdal-workshop\scripts\activate"
->   > (pdal-workshop) > conda-unpack
->   > ```
+`````{tab-set}
+````{tab-item} Linux & macOS
+```bash
+$ mkdir -p "$HOME/mambaforge/envs/pdal-workshop"
+$ tar -xzf conda_environments/pdal-workshop_osx-arm64.tar.gz -C "$HOME/mambaforge/envs/pdal-workshop"
+$ source "$HOME/mambaforge/envs/pdal-workshop/bin/activate"
+(pdal-workshop) $ conda-unpack
+```
+````
+
+````{tab-item} Windows
+```doscon
+> mkdir "%userprofile%\mambaforge\envs\pdal-workshop"
+> tar -xvf ./conda_environments/pdal-workshop-win64.zip -C "%userprofile%\mambaforge\envs\pdal-workshop"
+> call "%userprofile%\mambaforge\envs\pdal-workshop\scripts\activate"
+(pdal-workshop) > conda-unpack
+```
+````
+`````
 
 ## Installing Conda
 
