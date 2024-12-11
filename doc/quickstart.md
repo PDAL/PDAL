@@ -230,7 +230,7 @@ After Pixi is installed, you can run
 ```
 git clone https://github.com/PDAL/PDAL.git
 cd PDAL
-pixi shell
+pixi shell -e goldendoodle
 ```
 
 This will fetch the latest PDAL code, install all environment dependencies and then activate a supercharged environment that we lovingly call `goldendoodle`. From now on, each time you want to run PDAL in a new shell, you have to navigate to the PDAL folder and run `pixi shell` again.
@@ -243,6 +243,20 @@ pdal --version
 pdal 2.8.2 (git-version: Release)
 --------------------------------------------------------------------------------
 ```
+
+### Develop Using Pixi
+
+To develop using Pixi, you can run the following commands in the `dev` environment.
+
+```
+pixi run -e dev configure
+pixi run -d dev build
+pixi run -d dev test
+```
+
+It's that simple!
+
+Because this is all relatively new, you may encounter bugs. It has currently only been tested on Windows. If you do, please report them to the [PDAL issue tracker](https://github.com/PDAL/PDAL/issues). Of course, you can also contribute fixes!
 
 ## Fetch Sample Data
 
