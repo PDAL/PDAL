@@ -9,7 +9,9 @@ where_merge
 
 : A strategy for merging points skipped by a '`where'` option when running in standard mode.
   If `true`, the skipped points are added to the first point view returned by the skipped
-  filter. If `false`, skipped points are placed in their own point view. If `auto`,
+  filter or if no views are returned, placed in their own view. If `false`, skipped points are
+  placed in their own point view. If `auto`,
   skipped points are merged into the returned point view provided that only one point view
-  is returned and it has the same point count as it did when the writer was run.
+  is returned and it has the same point count as it did when the filter was run, otherwise
+  the skipped points are placed in their own view.
   \[Default: `auto`\]

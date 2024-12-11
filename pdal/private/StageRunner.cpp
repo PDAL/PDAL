@@ -63,8 +63,10 @@ void StageRunner::run()
     if (m_stage->mergeMode() == Filter::WhereMergeMode::True)
     {
         if (m_viewSet.size())
+        {
             (*m_viewSet.begin())->append(*m_skips);
-                return;
+            return;
+        }
     }
     else if (m_stage->mergeMode() == Filter::WhereMergeMode::Auto)
     {
