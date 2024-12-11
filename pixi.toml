@@ -51,7 +51,6 @@ pdal = ">=2.8.2,<3"
 python-pdal = ">=3.4.5,<4"
 
 [feature.dev.target.win-64.tasks]
-docs = "jb build doc"
 configure = { cmd = [ "cmake",
     "-G", "Ninja", 
     "-S", ".",
@@ -84,14 +83,50 @@ configure = { cmd = [ "cmake",
     "-Dgtest_force_shared_crt=ON",
     "-DBUILD_PGPOINTCLOUD_TESTS=OFF",
     "-DCMAKE_CXX_FLAGS=/D_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" ] }
-build = { cmd = "cd .build && ninja -j8", depends-on = ["configure"] }
-test = { cmd = "cd .build && ctest -VV --output-on-failure", depends-on = ["build"] }
 
 [feature.workshop.tasks]
 ex01 = "pdal --version"
 ex02 = "pdal info test\\data\\las\\interesting.las -p 0"
 ex03 = "pdal info test\\data\\las\\interesting.las --metadata"
 ex04 = "pdal info test\\data\\las\\interesting.las --query '637301.20, 851217.57, 496.49 /3'"
+
+[feature.dev.target.linux-64.tasks]
+configure = { cmd = [ "cmake",
+    "-G", "Ninja", 
+    "-S", ".",
+    "-B", ".build",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX",
+    "-DWITH_TESTS=ON",
+    "-DCMAKE_VERBOSE_MAKEFILE=OFF",
+    "-DCMAKE_LIBRARY_PATH:FILEPATH=$CONDA_PREFIX/Library/lib",
+    "-DCMAKE_INCLUDE_PATH:FILEPATH=$CONDA_PREFIX/Library/include",
+    "-DOPENSSL_ROOT_DIR=$CONDA_PREFIX/Library",
+    "-DPython3_ROOT_DIR:FILEPATH=$CONDA_PREFIX",
+    "-DPython3_FIND_STRATEGY=LOCATION",
+    "-DBUILD_PLUGIN_CPD=OFF",
+    "-DBUILD_PLUGIN_ICEBRIDGE=ON",
+    "-DBUILD_PLUGIN_HDF=ON",
+    "-DBUILD_PLUGIN_ARROW=ON",
+    "-DBUILD_PLUGIN_TILEDB=ON",
+    "-DBUILD_PLUGIN_MRSID=OFF",
+    "-DBUILD_PLUGIN_NITF=ON",
+    "-DBUILD_PLUGIN_TRAJECTORY=ON",
+    "-DBUILD_PLUGIN_PGPOINTCLOUD=ON",
+    "-DBUILD_PLUGIN_I3S=ON",
+    "-DBUILD_PLUGIN_DRACO=ON",
+    "-DBUILD_PLUGIN_RIVLIB=OFF",
+    "-DENABLE_CTEST=OFF",
+    "-DWITH_LZMA=OFF",
+    "-DHDF5_DIR:FILEPATH=$CONDA_PREFIX/Library/cmake",
+    "-DWITH_ZLIB=ON",
+    "-Dgtest_force_shared_crt=ON",
+    "-DBUILD_PGPOINTCLOUD_TESTS=OFF" ] }
+
+[feature.dev.tasks]
+docs = "jb build doc"
+build = { cmd = "cd .build && ninja -j8", depends-on = ["configure"] }
+test = { cmd = "cd .build && ctest -VV --output-on-failure", depends-on = ["build"] }
 
 [environments]
 dev = ["dev"]
