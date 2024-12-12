@@ -37,6 +37,32 @@ Some key points to remember when writing documentation.
     - sphinxcontrib-bibtex
     ```
 
+## Pixi Update
+
+PDAL has begun to adopt `pixi` for many tasks. This is awesome news for the documentation! Instead of following the steps outlined in step 6 above, you can now run the following command from the root of the PDAL repository.
+
+```
+pixi run -e doc build
+pixi run -e doc preview
+```
+
+If adding dependencies required for building the documentation, as in step 4, the process is slightly different. While it is convenient to add a new dependency using
+
+```
+pixi add mynewdependency
+```
+
+this will add the dependency to the default environment, whereas we build in a custom `doc` environment. The current solution will be to add a new line under
+
+```
+[feature.doc.dependencies]
+...existing dependencies...
+mynewdependency = "*"
+```
+
+in the `pixi.toml` manifest. Of course, if specific versions are required, this can be specified using the [VersionSpec](https://pixi.sh/latest/reference/pixi_manifest/#the-dependencies-tables).
+
+
 [Jupyter Book]: https://jupyterbook.org/en/stable/intro.html#
 [Read the Docs]: https://about.readthedocs.com/
 [MyST]: https://mystmd.org/
