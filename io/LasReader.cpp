@@ -617,24 +617,21 @@ void LasReader::queueNextStandardChunk()
 
 void LasReader::readExtraBytesVlr()
 {
-    const las::Vlr *vlr = las::findVlr(las::SpecUserId, las::ExtraBytesRecordId, d->vlrs);
-    if (!vlr)
-        return;
-
-    if (vlr->dataSize() % las::ExtraBytesSpecSize != 0)
-    {
-        log()->get(LogLevel::Warning) << "Bad size for extra bytes VLR.  Ignoring.\n";
-        return;
+    for (auto vlr : d->vlrs){
+        
+        if (vlr.userId!=las::SpecUserId && vlr.recordId!=las::ExtraBytesRecordId)
+            continue;
+        
+        if (vlr.dataSize() % las::ExtraBytesSpecSize != 0)
+        {
+            log()->get(LogLevel::Warning) << "Bad size for extra bytes VLR.  Ignoring.\n";
+            return;
+        }
+        
+        std::vector<las::ExtraDim> extraDims =
+            las::ExtraBytesIf::toExtraDims(vlr.data(), vlr.dataSize(), d->header.baseCount());
+        d->extraDims.insert(d->extraDims.end(), extraDims.begin(), extraDims.end()); //std::move(extraDims);
     }
-
-    std::vector<las::ExtraDim> extraDims =
-        las::ExtraBytesIf::toExtraDims(vlr->data(), vlr->dataSize(), d->header.baseCount());
-
-    if (d->extraDims.size() && d->extraDims != extraDims)
-        log()->get(LogLevel::Warning) << "Extra byte dimensions specified "
-            "in pipeline and VLR don't match.  Ignoring pipeline-specified "
-            "dimensions\n";
-    d->extraDims = std::move(extraDims);
 }
 
 
