@@ -6,13 +6,6 @@ version = "2.8.2"
 
 [feature.dev.dependencies]
 gdal = ">=3.9.0,<4"
-jupyter-book = ">=1.0.3,<2"
-sphinx-notfound-page = ">=1.0.4,<2"
-sphinxcontrib-jquery = ">=4.1,<5"
-sphinxcontrib-bibtex = ">=2.6.3,<3"
-breathe = ">=4.35.0,<5"
-sphinx-inline-tabs = ">=2023.4.21,<2024"
-sphinx = ">=5,<8"
 cmake = ">=3.31.2,<4"
 compilers = ">=1.8.0,<2"
 ninja = ">=1.12.1,<2"
@@ -30,6 +23,16 @@ libarrow = ">=18.1.0,<19"
 libparquet = ">=18.1.0,<19"
 pkg-config = ">=0.29.2,<0.30"
 ccache = ">=4.10.1,<5"
+
+[feature.doc.dependencies]
+jupyter-book = ">=1.0.3,<2"
+sphinx-notfound-page = ">=1.0.4,<2"
+sphinxcontrib-jquery = ">=4.1,<5"
+sphinxcontrib-bibtex = ">=2.6.3,<3"
+breathe = ">=4.35.0,<5"
+sphinx-inline-tabs = ">=2023.4.21,<2024"
+sphinx = ">=5,<8"
+python-pdal = "*"
 
 [feature.goldendoodle.dependencies]
 jupyterlab = ">=4.3.1,<5"
@@ -114,10 +117,22 @@ configure = { cmd = [ "cmake",
     "-DBUILD_PGPOINTCLOUD_TESTS=OFF" ] }
 
 [feature.dev.tasks]
-docs = "jb build doc"
 build = { cmd = "cd .build && ninja -j8", depends-on = ["configure"] }
 test = { cmd = "cd .build && ctest -VV --output-on-failure", depends-on = ["build"] }
+
+[feature.doc.tasks]
+build = "jb build doc"
+
+[feature.doc.target.win-64.tasks]
+preview = { cmd = "cmd /c start index.html", depends-on = ["build"], cwd = "doc/_build/html" }
+
+[feature.doc.target.linux-64.tasks]
+preview = { cmd = "xdg-open index.html", depends-on = ["build"], cwd = "doc/_build/html" }
+
+[feature.doc.target.osx-64.tasks]
+preview = { cmd = "open index.html", depends-on = ["build"], cwd = "doc/_build/html" }
 
 [environments]
 dev = ["dev"]
 goldendoodle = ["goldendoodle"]
+doc = ["doc"]
