@@ -122,12 +122,10 @@ void CropFilter::initialize()
         }
     }
     // Add geometry from OGR specification
-    if (m_args->m_ogr.size())
+
+    for (const Polygon& poly : m_args->m_ogr.getPolygons())
     {
-        for (Polygon& poly : m_args->m_ogr.getPolygons())
-        {
-            m_geoms.emplace_back(poly);
-        }
+        m_geoms.push_back(poly);
     }
 
     m_boxes.clear();

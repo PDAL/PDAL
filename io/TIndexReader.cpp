@@ -221,7 +221,7 @@ void TIndexReader::initialize()
     // in the future this method would need to be changed.
     if (m_args->m_ogr.size())
     {
-        Polygon ogrPoly = m_args->m_ogr.getPolygon();
+        Polygon ogrPoly = m_args->m_ogr.getPolygons()[0];
         m_args->m_wkt = ogrPoly.wkt();
     }
     // If the user set either explicit 'polygon' or 'boundary' options

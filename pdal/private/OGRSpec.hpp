@@ -31,21 +31,16 @@ public:
     OGRSpec(const NL::json& ogrJson);
     OGRSpec();
 
-    bool empty()
-    { return m_geom.empty(); }
-    // test function
-    int size()
-    { return m_geom.size(); }
     void update(const std::string& ogrJsonStr);
     void update(const NL::json& ogrJson);
 
     std::vector<Polygon> getPolygons()
     { return m_geom; }
-    Polygon getPolygon()
-    { return m_geom[0]; }
-    // potential alternative for stages like CopcReader
-    void insert(std::vector<Polygon>& plist)
-    { plist.insert(plist.end(), m_geom.begin(), m_geom.end()); }
+    bool empty()
+    { return m_geom.empty(); }
+    // test function
+    int size()
+    { return m_geom.size(); }
 
     struct error : public std::runtime_error
     {

@@ -117,9 +117,8 @@ void GeomDistanceFilter::prepared(PointTableRef table)
 
 void GeomDistanceFilter::ready(PointTableRef table)
 {
-    // this overwrites the "geometry" option - should throw something if both are entered
     if (!m_args->m_ogr.empty())
-        m_args->m_geometry = m_args->m_ogr.getPolygon();
+        m_args->m_geometry = m_args->m_ogr.getPolygons()[0];
 
     if (m_args->m_doRingMode)
         m_args->m_geometry = m_args->m_geometry.getRing();

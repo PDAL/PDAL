@@ -70,7 +70,7 @@ void OGRSpec::parse()
     else if (!(Utils::tolower(m_json.at("type").get<std::string>()) == "ogr"))
         throw error("'ogr' option must have 'type':'ogr' specified!");
 
-    // m_opts should maybe get cleared here
+    m_opts = {};
     for (auto& item : m_json.items())
     {
         std::string key = Utils::tolower(item.key());
@@ -110,7 +110,6 @@ void OGRSpec::parse()
         {           
             std::stringstream out;
             out << "unexpected field '" << key << "' in OGR JSON!";
-            // this is fatal - caught by fromString(). Should just log maybe, if that's possible
             throw error(out.str());
         }
     }

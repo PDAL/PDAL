@@ -296,21 +296,13 @@ std::vector<Polygon> getPolygons(const OGRData& ogr)
     registerDrivers();
 
     char** papszDriverOptions = nullptr;
-    if (ogr.drivers.size())
-    {
-        for (const auto& s: ogr.drivers)
-            papszDriverOptions = CSLAddString(papszDriverOptions, s.c_str());
-    }
-    std::vector<const char*> openoptions{};
+    for (const auto& s: ogr.drivers)
+        papszDriverOptions = CSLAddString(papszDriverOptions, s.c_str());
 
     char** papszOpenOptions = nullptr;
-    if (ogr.openOpts.size())
-    {
-        for(const auto& s: ogr.openOpts)
-            papszOpenOptions = CSLAddString(papszOpenOptions, s.c_str());
-    }
+    for(const auto& s: ogr.openOpts)
+        papszOpenOptions = CSLAddString(papszOpenOptions, s.c_str());
 
-    //std::string dsString = ogr.datasource;
     unsigned int openFlags =
         GDAL_OF_READONLY | GDAL_OF_VECTOR | GDAL_OF_VERBOSE_ERROR;
     GDALDataset* ds;
