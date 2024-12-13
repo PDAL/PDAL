@@ -191,10 +191,6 @@ bool PcdWriter::findDim(Id id, DimSpec& ds)
 
 void PcdWriter::ready(PointTableRef table)
 {
-    m_ostream = Utils::createFile(filename(), false);
-    if (!m_ostream)
-        throwError("Couldn't open '" + filename() + "' for output.");
-
     PcdField field;
     field.m_label = table.layout()->dimName(Id::X);
     field.m_id = Id::X;
@@ -246,134 +242,127 @@ void PcdWriter::ready(PointTableRef table)
 
 void PcdWriter::write(const PointViewPtr view)
 {
-    m_header.m_version = PcdVersion::PCD_V7;
-    m_header.m_height = 1;
+    std::unique_ptr<std::ostream> out(Utils::createFile(filename(), false));
+    if (!out)
+        throwError("Couldn't open '" + filename() + "' for output.");
+
+    PcdHeader header;
+
+    header.m_version = PcdVersion::PCD_V7;
+    header.m_height = 1;
     if (m_compression_string == "ascii")
-        m_header.m_dataStorage = PcdDataStorage::ASCII;
+        header.m_dataStorage = PcdDataStorage::ASCII;
     else if (m_compression_string == "binary")
-        m_header.m_dataStorage = PcdDataStorage::BINARY;
-    else if (m_compression_string == "compressed")
-        m_header.m_dataStorage = PcdDataStorage::COMPRESSED;
+        header.m_dataStorage = PcdDataStorage::BINARY;
     else
-        throwError("Unrecognized compression string");
+        throwError("Unrecognized compression string '" + m_compression_string + "'. "
+                   "Expected 'ASCII' or 'BINARY'.");
 
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+        header.m_fields.push_back(di->m_field);
+
+    header.m_width = view->size();
+    header.m_pointCount = view->size();
+
+    *out << header;
+
+    if (m_compression_string == "ascii")
+        writeAscii(view, *out);
+    else
     {
-        m_header.m_fields.push_back(di->m_field);
+        // Reopen as for binary output, seeking to the end of the header before writing data.
+        out.reset(FileUtils::openExisting(filename(), true));
+        out->seekp(0, std::ios::end);
+        writeBinary(view, *out);
     }
+}
 
-    m_header.m_width = view->size();
-    m_header.m_pointCount = view->size();
-
-    *m_ostream << m_header;
-
-    PointRef point(*view, 0);
-
-    for (PointId idx = 0; idx < view->size(); ++idx)
+void PcdWriter::writeAscii(const PointViewPtr view, std::ostream& out)
+{
+    for (PointRef point : *view)
     {
-        point.setPointId(idx);
-        if (m_compression_string == "ascii")
+        out << std::fixed;
+        for (DimSpec& dim : m_dims)
         {
-            *m_ostream << std::fixed;
-            for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-            {
-                if (di->m_field.m_type == PcdFieldType::F &&
-                    di->m_field.m_size == 8)
-                    *m_ostream << std::setprecision(di->m_precision)
-                               << point.getFieldAs<double>(di->m_field.m_id)
-                               << " ";
-                else if (di->m_field.m_type == PcdFieldType::F &&
-                         di->m_field.m_size == 4)
-                    *m_ostream << std::setprecision(di->m_precision)
-                               << point.getFieldAs<float>(di->m_field.m_id)
-                               << " ";
-                else if (di->m_field.m_type == PcdFieldType::U &&
-                         di->m_field.m_size == 8)
-                    *m_ostream << std::setprecision(di->m_precision)
-                               << point.getFieldAs<uint64_t>(di->m_field.m_id)
-                               << " ";
-                else if (di->m_field.m_type == PcdFieldType::U &&
-                         di->m_field.m_size == 4)
-                    *m_ostream << std::setprecision(di->m_precision)
-                               << point.getFieldAs<uint32_t>(di->m_field.m_id)
-                               << " ";
-                else if (di->m_field.m_type == PcdFieldType::U &&
-                         di->m_field.m_size == 2)
-                    *m_ostream << std::setprecision(di->m_precision)
-                               << point.getFieldAs<uint16_t>(di->m_field.m_id)
-                               << " ";
-                else if (di->m_field.m_type == PcdFieldType::I &&
-                         di->m_field.m_size == 1)
-                    *m_ostream << std::setprecision(di->m_precision)
-                               << point.getFieldAs<uint8_t>(di->m_field.m_id)
-                               << " ";
-                else if (di->m_field.m_type == PcdFieldType::I &&
-                         di->m_field.m_size == 8)
-                    *m_ostream << std::setprecision(di->m_precision)
-                               << point.getFieldAs<int64_t>(di->m_field.m_id)
-                               << " ";
-                else if (di->m_field.m_type == PcdFieldType::I &&
-                         di->m_field.m_size == 4)
-                    *m_ostream << std::setprecision(di->m_precision)
-                               << point.getFieldAs<int32_t>(di->m_field.m_id)
-                               << " ";
-                else if (di->m_field.m_type == PcdFieldType::I &&
-                         di->m_field.m_size == 2)
-                    *m_ostream << std::setprecision(di->m_precision)
-                               << point.getFieldAs<int16_t>(di->m_field.m_id)
-                               << " ";
-                else if (di->m_field.m_type == PcdFieldType::I &&
-                         di->m_field.m_size == 1)
-                    *m_ostream << std::setprecision(di->m_precision)
-                               << point.getFieldAs<int8_t>(di->m_field.m_id)
-                               << " ";
-            }
-            *m_ostream << "\n";
+            if (dim.m_field.m_type == PcdFieldType::F && dim.m_field.m_size == 8)
+                out << std::setprecision(dim.m_precision)
+                     << point.getFieldAs<double>(dim.m_field.m_id)
+                     << " ";
+            else if (dim.m_field.m_type == PcdFieldType::F && dim.m_field.m_size == 4)
+                out << std::setprecision(dim.m_precision)
+                    << point.getFieldAs<float>(dim.m_field.m_id)
+                    << " ";
+            else if (dim.m_field.m_type == PcdFieldType::U && dim.m_field.m_size == 8)
+                out << std::setprecision(dim.m_precision)
+                    << point.getFieldAs<uint64_t>(dim.m_field.m_id)
+                    << " ";
+            else if (dim.m_field.m_type == PcdFieldType::U && dim.m_field.m_size == 4)
+                out << std::setprecision(dim.m_precision)
+                    << point.getFieldAs<uint32_t>(dim.m_field.m_id)
+                    << " ";
+            else if (dim.m_field.m_type == PcdFieldType::U && dim.m_field.m_size == 2)
+                out << std::setprecision(dim.m_precision)
+                    << point.getFieldAs<uint16_t>(dim.m_field.m_id)
+                    << " ";
+            else if (dim.m_field.m_type == PcdFieldType::I && dim.m_field.m_size == 1)
+                out << std::setprecision(dim.m_precision)
+                    << point.getFieldAs<uint8_t>(dim.m_field.m_id)
+                    << " ";
+            else if (dim.m_field.m_type == PcdFieldType::I && dim.m_field.m_size == 8)
+                out << std::setprecision(dim.m_precision)
+                    << point.getFieldAs<int64_t>(dim.m_field.m_id)
+                    << " ";
+            else if (dim.m_field.m_type == PcdFieldType::I && dim.m_field.m_size == 4)
+                out << std::setprecision(dim.m_precision)
+                    << point.getFieldAs<int32_t>(dim.m_field.m_id)
+                    << " ";
+            else if (dim.m_field.m_type == PcdFieldType::I && dim.m_field.m_size == 2)
+                out << std::setprecision(dim.m_precision)
+                    << point.getFieldAs<int16_t>(dim.m_field.m_id)
+                    << " ";
+            else if (dim.m_field.m_type == PcdFieldType::I && dim.m_field.m_size == 1)
+                out << std::setprecision(dim.m_precision)
+                    << point.getFieldAs<int8_t>(dim.m_field.m_id)
+                    << " ";
         }
-        else if (m_compression_string == "binary")
+        out << "\n";
+    }
+}
+
+void PcdWriter::writeBinary(const PointViewPtr view, std::ostream& out)
+{
+    // Write little-endian binary.
+    OLeStream leOut(&out);
+    for (PointRef point : *view)
+    {
+        for (DimSpec& dim : m_dims)
         {
-            OLeStream out(m_ostream);
-            for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-            {
-                if (di->m_field.m_type == PcdFieldType::F &&
-                    di->m_field.m_size == 8)
-                    out << point.getFieldAs<double>(di->m_field.m_id);
-                else if (di->m_field.m_type == PcdFieldType::F &&
-                         di->m_field.m_size == 4)
-                    out << point.getFieldAs<float>(di->m_field.m_id);
-                else if (di->m_field.m_type == PcdFieldType::U &&
-                         di->m_field.m_size == 8)
-                    out << point.getFieldAs<uint64_t>(di->m_field.m_id);
-                else if (di->m_field.m_type == PcdFieldType::U &&
-                         di->m_field.m_size == 4)
-                    out << point.getFieldAs<uint32_t>(di->m_field.m_id);
-                else if (di->m_field.m_type == PcdFieldType::U &&
-                         di->m_field.m_size == 2)
-                    out << point.getFieldAs<uint16_t>(di->m_field.m_id);
-                else if (di->m_field.m_type == PcdFieldType::I &&
-                         di->m_field.m_size == 1)
-                    out << point.getFieldAs<uint8_t>(di->m_field.m_id);
-                else if (di->m_field.m_type == PcdFieldType::I &&
-                         di->m_field.m_size == 8)
-                    out << point.getFieldAs<int64_t>(di->m_field.m_id);
-                else if (di->m_field.m_type == PcdFieldType::I &&
-                         di->m_field.m_size == 4)
-                    out << point.getFieldAs<int32_t>(di->m_field.m_id);
-                else if (di->m_field.m_type == PcdFieldType::I &&
-                         di->m_field.m_size == 2)
-                    out << point.getFieldAs<int16_t>(di->m_field.m_id);
-                else if (di->m_field.m_type == PcdFieldType::I &&
-                         di->m_field.m_size == 1)
-                    out << point.getFieldAs<int8_t>(di->m_field.m_id);
-            }
+            if (dim.m_field.m_type == PcdFieldType::F && dim.m_field.m_size == 8)
+                leOut << point.getFieldAs<double>(dim.m_field.m_id);
+            else if (dim.m_field.m_type == PcdFieldType::F && dim.m_field.m_size == 4)
+                leOut << point.getFieldAs<float>(dim.m_field.m_id);
+            else if (dim.m_field.m_type == PcdFieldType::U && dim.m_field.m_size == 8)
+                leOut << point.getFieldAs<uint64_t>(dim.m_field.m_id);
+            else if (dim.m_field.m_type == PcdFieldType::U && dim.m_field.m_size == 4)
+                leOut << point.getFieldAs<uint32_t>(dim.m_field.m_id);
+            else if (dim.m_field.m_type == PcdFieldType::U && dim.m_field.m_size == 2)
+                leOut << point.getFieldAs<uint16_t>(dim.m_field.m_id);
+            else if (dim.m_field.m_type == PcdFieldType::I && dim.m_field.m_size == 1)
+                leOut << point.getFieldAs<uint8_t>(dim.m_field.m_id);
+            else if (dim.m_field.m_type == PcdFieldType::I && dim.m_field.m_size == 8)
+                leOut << point.getFieldAs<int64_t>(dim.m_field.m_id);
+            else if (dim.m_field.m_type == PcdFieldType::I && dim.m_field.m_size == 4)
+                leOut << point.getFieldAs<int32_t>(dim.m_field.m_id);
+            else if (dim.m_field.m_type == PcdFieldType::I && dim.m_field.m_size == 2)
+                leOut << point.getFieldAs<int16_t>(dim.m_field.m_id);
+            else if (dim.m_field.m_type == PcdFieldType::I && dim.m_field.m_size == 1)
+                leOut << point.getFieldAs<int8_t>(dim.m_field.m_id);
         }
     }
 }
 
 void PcdWriter::done(PointTableRef table)
 {
-    Utils::closeFile(m_ostream);
-    m_ostream = nullptr;
     getMetadata().addList("filename", filename());
 }
 

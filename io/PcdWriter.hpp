@@ -73,9 +73,9 @@ private:
 
     DimSpec extractDim(std::string dim, PointTableRef table);
     bool findDim(Dimension::Id id, DimSpec& ds);
+    void writeAscii(const PointViewPtr view, std::ostream& out);
+    void writeBinary(const PointViewPtr view, std::ostream& out);
 
-    PcdHeader m_header;
-    std::ostream* m_ostream;
     std::string m_compression_string;
     bool m_writeAllDims;
     std::string m_dimOrder;
