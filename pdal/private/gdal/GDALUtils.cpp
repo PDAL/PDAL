@@ -45,6 +45,7 @@
 
 #include <nlohmann/json.hpp>
 #include <pdal/Polygon.hpp>
+#include <pdal/private/OGRSpec.hpp>
 #include <pdal/private/SrsTransform.hpp>
 #include <pdal/private/gdal/SpatialRef.hpp>
 
@@ -290,102 +291,88 @@ OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs)
   \param ogr  JSON that specifies how to load data.
   \return  Vector of polygons read from datasource.
 */
-std::vector<Polygon> getPolygons(const NL::json& ogr)
+std::vector<Polygon> getPolygons(const OGRData& ogr)
 {
     registerDrivers();
-    const NL::json& datasource = ogr.at("datasource");
 
     char** papszDriverOptions = nullptr;
-    if (ogr.count("drivers"))
+    if (ogr.drivers.size())
     {
-
-        const NL::json& dops = ogr.at("drivers");
-        std::vector<std::string> driverOptions =
-            dops.get<std::vector<std::string>>();
-        for (const auto& s: driverOptions)
+        for (const auto& s: ogr.drivers)
             papszDriverOptions = CSLAddString(papszDriverOptions, s.c_str());
     }
     std::vector<const char*> openoptions{};
 
     char** papszOpenOptions = nullptr;
-    if (ogr.count("openoptions"))
+    if (ogr.openOpts.size())
     {
-        const NL::json& oops = ogr.at("openoptions");
-        std::vector<std::string> openOptions =
-            oops.get<std::vector<std::string>>();
-        for(const auto& s: openOptions)
+        for(const auto& s: ogr.openOpts)
             papszOpenOptions = CSLAddString(papszOpenOptions, s.c_str());
     }
 
-    std::string dsString = datasource.get<std::string>();
+    //std::string dsString = ogr.datasource;
     unsigned int openFlags =
         GDAL_OF_READONLY | GDAL_OF_VECTOR | GDAL_OF_VERBOSE_ERROR;
     GDALDataset* ds;
-    ds = (GDALDataset*) GDALOpenEx(dsString.c_str(), openFlags,
+    ds = (GDALDataset*) GDALOpenEx(ogr.datasource.c_str(), openFlags,
         papszDriverOptions, papszOpenOptions, NULL);
     CSLDestroy(papszDriverOptions);
     CSLDestroy(papszOpenOptions);
     if (!ds)
-        throw pdal_error("Unable to read OGR datasource: " + datasource.dump());
+        throw pdal_error("Unable to read OGR datasource: " + ogr.datasource);
 
     OGRLayer* poLayer(nullptr);
-    if (ogr.count("layer"))
+    if (!ogr.layer.empty())
     {
-        const NL::json& layer = ogr.at("layer");
-        std::string lyrString = layer.get<std::string>();
-        poLayer = ds->GetLayerByName( lyrString.c_str() );
+        poLayer = ds->GetLayerByName( ogr.layer.c_str() );
 
         if (!poLayer)
-            throw pdal_error("Unable to read OGR layer: " + layer.dump());
+            throw pdal_error("Unable to read OGR layer: " + ogr.layer);
     } else
     {
         int nLayer = ds->GetLayerCount();
         if (nLayer < 1)
         {
-            throw pdal_error("No layers available on datasource " + datasource.dump());
+            throw pdal_error("No layers available on datasource " + ogr.datasource);
         }
         // We just grab the first layer
         poLayer = ds->GetLayer(0);
     }
 
     OGRFeature *poFeature (nullptr);
-    if (ogr.count("sql"))
+    if (!ogr.sql.empty())
     {
         std::string dialect("OGRSQL");
-        std::string query = ogr.at("sql").get<std::string>();
+        if (!ogr.dialect.empty())
+            dialect = ogr.dialect;
+
+        std::string query = ogr.sql;
 
         Polygon poly;
         OGRGeometry *geom = nullptr;
-        if (ogr.count("options"))
+        if (!ogr.geometry.empty())
         {
-            const NL::json options = ogr.at("options");
-            if (options.count("dialect"))
-                dialect = options.at("dialect").get<std::string>();
+            // Determine the layer's SRS and assign it to the geometry
+            // or transform to that SRS.
+            poLayer = ds->ExecuteSQL(query.c_str(), NULL, dialect.c_str());
+            if (!poLayer)
+                throw pdal_error("Unable to execute OGR SQL query.");
 
-            if (options.count("geometry"))
+            SpatialRef sref;
+            sref.setFromLayer(poLayer);
+            ds->ReleaseResultSet(poLayer);
+
+            poly.update(ogr.geometry);
+            if (poly.srsValid())
             {
-                // Determine the layer's SRS and assign it to the geometry
-                // or transform to that SRS.
-                poLayer = ds->ExecuteSQL(query.c_str(), NULL, dialect.c_str());
-                if (!poLayer)
-                    throw pdal_error("Unable to execute OGR SQL query.");
-
-                SpatialRef sref;
-                sref.setFromLayer(poLayer);
-                ds->ReleaseResultSet(poLayer);
-
-                poly.update(options.at("geometry").get<std::string>());
-                if (poly.srsValid())
-                {
-                    auto ok = poly.transform(sref.wkt());
-                    if (!ok)
-                        throw pdal_error(ok.what());
-                }
-                else
-                    poly.setSpatialReference(sref.wkt());
-
-                geom = (OGRGeometry *)poly.getOGRHandle();
+                auto ok = poly.transform(sref.wkt());
+                if (!ok)
+                    throw pdal_error(ok.what());
             }
+            else
+                poly.setSpatialReference(sref.wkt());
+
+            geom = (OGRGeometry *)poly.getOGRHandle();
         }
         poLayer = ds->ExecuteSQL(query.c_str(), geom, dialect.c_str());
         if (!poLayer)
@@ -401,12 +388,13 @@ std::vector<Polygon> getPolygons(const NL::json& ogr)
 
     // if we used a SQL filter, we need to release the
     // dataset
-    if (ogr.count("sql"))
+    if (!ogr.sql.empty())
     {
         ds->ReleaseResultSet(poLayer);
     }
     return polys;
 }
+
 
 } // namespace gdal
 } // namespace pdal

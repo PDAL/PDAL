@@ -39,6 +39,7 @@
 
 #include <pdal/Geometry.hpp>
 #include <pdal/Polygon.hpp>
+#include <pdal/private/OGRSpec.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
@@ -64,7 +65,7 @@ struct GeomDistanceArgs
     std::string m_dimName;
     pdal::Geometry m_geometry;
     bool m_doRingMode;
-    NL::json m_ogr;
+    OGRSpec m_ogr;
 
 };
 
@@ -116,13 +117,9 @@ void GeomDistanceFilter::prepared(PointTableRef table)
 
 void GeomDistanceFilter::ready(PointTableRef table)
 {
-    if (!m_args->m_ogr.is_null())
-    {
-        std::vector<Polygon> polys = gdal::getPolygons(m_args->m_ogr);
-        if (!polys.size())
-            throwError("No polygons were selected from 'ogr'!");
-        m_args->m_geometry = polys[0];
-    }
+    // this overwrites the "geometry" option - should throw something if both are entered
+    if (!m_args->m_ogr.empty())
+        m_args->m_geometry = m_args->m_ogr.getPolygon();
 
     if (m_args->m_doRingMode)
         m_args->m_geometry = m_args->m_geometry.getRing();

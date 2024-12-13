@@ -42,6 +42,7 @@
 #include <io/LasReader.hpp>
 #include <filters/CropFilter.hpp>
 #include <filters/ReprojectionFilter.hpp>
+#include <pdal/private/OGRSpec.hpp>
 #include <pdal/SrsBounds.hpp>
 #include <pdal/Writer.hpp>
 #include <pdal/util/FileUtils.hpp>
@@ -894,10 +895,12 @@ TEST(EptReaderTest, ogrCrop)
     {
         Options options;
         options.add("filename", eptAutzenPath);
-        NL::json ogr;
-        ogr["drivers"] = {"GeoJSON"};
-        ogr["datasource"] = attributesPath;
-        ogr["sql"] = "select \"_ogr_geometry_\" from attributes";
+        NL::json json;
+        json["type"] = "ogr";
+        json["drivers"] = {"GeoJSON"};
+        json["datasource"] = attributesPath;
+        json["sql"] = "select \"_ogr_geometry_\" from attributes";
+        OGRSpec ogr(json);
 
         options.add("ogr", ogr);
 
