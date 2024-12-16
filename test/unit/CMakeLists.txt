@@ -75,11 +75,12 @@ PDAL_ADD_TEST(pdal_dimension_test
 PDAL_ADD_TEST(pdal_ogr_arg_test 
     FILES 
         OGRSpecTest.cpp
+        ${PDAL_SRC_DIR}/private/OGRSpec.cpp
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
-        ${GDAL_INCLUDE_DIR}
     LINK_WITH
-        ${GDAL_LIBRARY})
+        ${GDAL_LIBRARY}
+)
 PDAL_ADD_TEST(pdal_pipeline_manager_test FILES PipelineManagerTest.cpp)
 PDAL_ADD_TEST(pdal_pipeline_writer_test
     FILES
@@ -158,6 +159,7 @@ PDAL_ADD_TEST(pdal_io_stac_reader_test
 PDAL_ADD_TEST(pdal_io_ept_reader_test
     FILES
         io/EptReaderTest.cpp
+        ${PDAL_SRC_DIR}/private/OGRSpec.cpp
     LINK_WITH
         ${GDAL_LIBRARY}
     INCLUDES
@@ -173,6 +175,7 @@ PDAL_ADD_TEST(pdal_io_ept_addon_writer_test
 PDAL_ADD_TEST(pdal_io_copc_reader_test
     FILES
         io/CopcReaderTest.cpp
+        ${PDAL_SRC_DIR}/private/OGRSpec.cpp
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
@@ -329,6 +332,7 @@ PDAL_ADD_TEST(pdal_filters_colorization_test
 PDAL_ADD_TEST(pdal_filters_crop_test
     FILES
         filters/CropFilterTest.cpp
+        ${PDAL_SRC_DIR}/private/OGRSpec.cpp
     INCLUDES
         ${GDAL_INCLUDE_DIR}
         ${NLOHMANN_INCLUDE_DIR}

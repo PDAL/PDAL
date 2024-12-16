@@ -10,7 +10,7 @@
 namespace pdal
 {
 
-struct OGRData
+struct OGRSpecOptions
 {
     std::string datasource;
     std::string layer;
@@ -21,9 +21,9 @@ struct OGRData
     std::vector<std::string> openOpts;
 };
 
-class PDAL_EXPORT OGRSpec
+class OGRSpec
 {
-    PDAL_EXPORT friend std::ostream& operator<<(std::ostream& out,
+    friend std::ostream& operator<<(std::ostream& out,
         const OGRSpec& bounds);
 
 public:
@@ -59,7 +59,7 @@ private:
     {
         try
         {
-            to = field.get<T>();
+            field.get_to(to);
         }
         catch(const NL::json::exception& e)
         {
@@ -77,7 +77,7 @@ private:
     std::vector<Polygon> m_geom;
     // m_json mostly only exists for operator<< output
     NL::json m_json;
-    OGRData m_opts;
+    OGRSpecOptions m_opts;
 };
 
 namespace Utils

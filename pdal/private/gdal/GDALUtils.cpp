@@ -291,7 +291,7 @@ OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs)
   \param ogr  JSON that specifies how to load data.
   \return  Vector of polygons read from datasource.
 */
-std::vector<Polygon> getPolygons(const OGRData& ogr)
+std::vector<Polygon> getPolygons(const OGRSpecOptions& ogr)
 {
     registerDrivers();
 
