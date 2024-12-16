@@ -34,6 +34,8 @@ The filter assumes points are ordered by ascending time, which can be
 accomplished by running {ref}`filters.sort` prior to
 `filters.gpstimeconvert`. Note that GPS week second times that span a new
 GPS week should not be sorted unless they are unwrapped.
+One can use `wrapped_tolerance` if points `GpsTime` is not stricly increasing, i.e. 
+wrapping is detected only if `GpsTime` difference is higher than `wrapped_tolerance`.
 ```
 
 ```{streamable}
@@ -124,3 +126,9 @@ wrapped
 
 : Specifies whether input GPS week\day seconds are wrapped (true) or unwrapped
   (false). \[Default: false\]
+
+wrapped_tolerance
+
+: use `wrapped_tolerance` if points `GpsTime` is not stricly increasing, i.e. 
+  wrapping is detected only if `GpsTime` difference is higher than `wrapped_tolerance`.
+   \[Default: 1.0\]

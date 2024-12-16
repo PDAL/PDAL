@@ -64,6 +64,8 @@ void GpsTimeConvert::addArgs(ProgramArgs& args)
         "wrapped",
         "input weeks seconds reset to zero on Sundays, day second at midnight",
         m_wrapped, false);
+    args.add("wrapped_tolerance", "tolerance when unwrapping",
+             m_wrappedTolerance, 1.0);
 }
 
 void GpsTimeConvert::testTimeType(std::string& type)
@@ -219,7 +221,9 @@ int GpsTimeConvert::dayStartGpsSeconds(std::tm date)
 void GpsTimeConvert::unwrapWeekSeconds(PointRef& point)
 {
     // any decrease in time is interpreted as a week rollover
-    while (point.getFieldAs<double>(Dimension::Id::GpsTime) < m_lastTime)
+    while (point.getFieldAs<double>(Dimension::Id::GpsTime) +
+               m_wrappedTolerance <
+           m_lastTime)
     {
         double t = point.getFieldAs<double>(Dimension::Id::GpsTime);
         point.setField(Dimension::Id::GpsTime, t + 604800);
@@ -230,7 +234,9 @@ void GpsTimeConvert::unwrapWeekSeconds(PointRef& point)
 void GpsTimeConvert::unwrapDaySeconds(PointRef& point)
 {
     // any decrease in time is interpreted as a day rollover
-    while (point.getFieldAs<double>(Dimension::Id::GpsTime) < m_lastTime)
+    while (point.getFieldAs<double>(Dimension::Id::GpsTime) +
+               m_wrappedTolerance <
+           m_lastTime)
     {
         double t = point.getFieldAs<double>(Dimension::Id::GpsTime);
         point.setField(Dimension::Id::GpsTime, t + 86400);

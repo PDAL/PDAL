@@ -57,6 +57,7 @@ private:
     bool m_wrapped;
     bool m_first;
     double m_lastTime;
+    double m_wrappedTolerance;
     int m_numSeconds;
 
         void weekSeconds2GpsTime(PointRef& point);
