@@ -2,13 +2,12 @@
 
 # Community
 
-PDAL's community interacts through [Mailing List], [GitHub], [Gitter] and
-[IRC].  Please feel welcome to ask questions and participate in all of the
-venues.  The [Mailing List] communication channel is for general questions,
-development discussion, and feedback. The [GitHub] communication channel is
-for development activities, bug reports, and testing. The [IRC] and [Gitter]
-channels are for real-time chat activities such as meetings and interactive
-debugging sessions.
+PDAL's community interacts through [Mailing List], [GitHub], and [Matrix].
+Please feel welcome to ask questions and participate in all of the venues.  The
+[Mailing List] communication channel is for general questions, development
+discussion, and feedback. The [GitHub] communication channel is for development
+activities, bug reports, and testing. The [Matrix] channel is for
+real-time chat activities such as meetings and interactive debugging sessions.
 
 ## Mailing List
 
@@ -38,25 +37,14 @@ answering questions.
 development activities operate.
 ```
 
-## Gitter
+## Matrix
 
-Some PDAL developers are active on [Gitter] and you can use that mechanism
-for asking questions and interacting with the developers in a mode that is
-similar to [IRC]. Gitter uses your [GitHub] credentials for access, so
-you will need an account to get started.
+Some PDAL developers are active on [Matrix] and you can use that mechanism for
+asking questions and interacting with the developers in a mode that is similar
+to [IRC]. Matrix requires [OSGeo credentials] for access, so you will need an
+account to get started.  The [Mailing List] and [GitHub] avenues are going to
+be more productive communication channels in most situations.
 
-## Keybase
-
-Some PDAL developers are available via Keybase's `pdal` chat. See
-<https://keybase.io/blog/keybase-chat> for more details.
-
-## IRC
-
-You can find some PDAL developers on IRC on #pdal at [Freenode]. This mechanism
-is usually reserved for active meetings and other outreach with the community.
-The [Mailing List] and [GitHub] avenues are going to be more productive
-communication channels in most situations.
-
-[freenode]: http://freenode.net
 [git]: https://en.wikipedia.org/wiki/Git_(software)
-[gitter]: https://gitter.im/PDAL/PDAL
+[Matrix]: https://matrix.to/#/%23pdal:osgeo.org
+[OSGeo credentials]: https://www.osgeo.org/community/getting-started-osgeo/osgeo_userid/
