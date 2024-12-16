@@ -103,6 +103,13 @@ void exec2(const std::string& where, size_t expKeep, size_t expViews,
 
     class TestFilter : public Filter
     {
+    public:
+        TestFilter()
+        {
+            g_count = 0;
+        }
+
+    private:
         std::string getName() const
         { return "filters.test"; }
 
@@ -257,6 +264,62 @@ void exec5(const std::string& where, size_t expKeep)
     EXPECT_EQ(g_count, expKeep);
 }
 
+// Support for filter that returns no point views.
+void exec6(const std::string& where, size_t expKeep, size_t expViews,
+    Stage::WhereMergeMode mm = Stage::WhereMergeMode::Auto)
+{
+    StageFactory factory;
+
+    Stage *r = factory.createStage("readers.faux");
+    Options ro;
+    ro.add("count", 100);
+    ro.add("bounds", BOX3D(0, 0, 100, 99, 9.9, 199));
+    ro.add("mode", "ramp");
+    r->setOptions(ro);
+
+    class TestFilter : public Filter
+    {
+    public:
+    TestFilter()
+    {
+        g_count = 0;
+    }
+
+    private:
+        std::string getName() const
+        { return "filters.test"; }
+
+        PointViewSet run(PointViewPtr v)
+        {
+            PointViewSet s;
+            if (v->empty())
+                return s;
+
+            g_count = v->size();
+            s.insert(v);
+            return s;
+        }
+    };
+
+    TestFilter f;
+    Options fo;
+    fo.add("where", where);
+    fo.add("where_merge", mm);
+    f.setOptions(fo);
+    f.setInput(*r);
+
+    PointTable t;
+    f.prepare(t);
+    PointViewSet s = f.execute(t);
+    EXPECT_EQ(s.size(), expViews);
+    size_t total = 0;
+    for (auto vp : s)
+        total += vp->size();
+    EXPECT_EQ(total, 100);
+    EXPECT_EQ(g_count, expKeep);
+}
+
+
 TEST(WhereTest, filter)
 {
     exec1("X<50", 50, 1);
@@ -273,6 +336,18 @@ TEST(WhereTest, filter)
     exec3("X<50 && Y < (1 + 1.5)", 25, 3);
     exec3("X<50 && Y < 2 + 0.5", 25, 2, Stage::WhereMergeMode::True);
     exec3("X<50 && Y < 2.5", 25, 3, Stage::WhereMergeMode::False);
+}
+
+// Check cases where no point views may be returned from a filter.
+TEST(WhereTest, empty)
+{
+    exec6("X<50", 50, 1);
+    exec6("X>150", 0, 1);
+    exec6("X>150", 0, 1, Stage::WhereMergeMode::True);
+    exec6("X>150", 0, 1, Stage::WhereMergeMode::False);
+    exec6("X<50 && Y < (1 + 1.5)", 25, 1);
+    exec6("X<50 && Y < 2 + 0.5", 25, 1, Stage::WhereMergeMode::True);
+    exec6("X<50 && Y < 2.5", 25, 2, Stage::WhereMergeMode::False);
 }
 
 TEST(WhereTest, writer)
