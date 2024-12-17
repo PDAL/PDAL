@@ -1,0 +1,6 @@
+channels:
+  - conda-forge
+dependencies:
+  - sed
+  - graphviz
+  - doxygen
