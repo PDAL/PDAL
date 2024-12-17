@@ -384,8 +384,15 @@ void ArrowReader::addDimensions(PointLayoutPtr layout)
 
         }
 
-        pdal::Dimension::Id id = layout->registerOrAssignDim(name, computePDALTypeFromArrow(t));
-        m_arrayIds.insert({fieldPosition, id});
+        pdal::Dimension::Type pt = computePDALTypeFromArrow(t);
+
+        // If we're not a known Type, we're not adding the dimension to the
+        // layout
+        if (pt != pdal::Dimension::Type::None)
+        {
+            pdal::Dimension::Id id = layout->registerOrAssignDim(name, pt);
+            m_arrayIds.insert({fieldPosition, id});
+        }
         fieldPosition++;
     }
 }
@@ -567,7 +574,12 @@ bool ArrowReader::fillPoint(PointRef& point)
                 point.setField<double>(Dimension::Id::Z, pointValues->Value((nDim * m_currentBatchPointIndex) + 2));
                 break;
             }
-
+            case arrow::Type::STRING:
+            case arrow::Type::STRUCT:
+            {
+                // don't do anything for these
+                continue;
+            }
             default:
                 throw pdal_error("Unrecognized PDAL dimension type for dimension");
 
