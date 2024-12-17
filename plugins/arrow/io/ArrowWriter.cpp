@@ -85,8 +85,7 @@ void ArrowWriter::createBuilders(PointTableRef table)
 
     for (auto& field : m_schema->fields())
     {
-        auto id = layout->findDim(field->name());
-        std::string name = layout->dimName(id);
+        std::string name = field->name();
 
         std::unique_ptr<arrow::ArrayBuilder> builder;
         arrow::Status status = arrow::MakeBuilder(m_pool, field->type(), &builder);
@@ -96,10 +95,10 @@ void ArrowWriter::createBuilders(PointTableRef table)
             msg << "Unable to create builder for '" << name << "'";
             throwError(msg.str());
         }
-        auto found = m_builders.find(id);
+        auto found = m_builders.find(name);
         if (found != m_builders.end())
-            throwError("Map already contains id");
-        m_builders.insert({id, std::move(builder)});
+            throwError("Map already contains dimension '" + name + "'");
+        m_builders.insert({name, std::move(builder)});
     }
 }
 
@@ -138,29 +137,27 @@ void ArrowWriter::initialize()
 bool ArrowWriter::processOne(PointRef& point)
 {
     bool bAddedStruct(false);
-    for (auto& id: m_dimIds)
+    for (auto& name: m_dimensionOutputNames)
     {
-        arrow::ArrayBuilder* builder = m_builders[id].get();
-        if (!builder)
-        {
-            throwError("unable to fetch builder for dimension!");
-        }
 
-        if ((id == pdal::Dimension::Id::X ||
-             id == pdal::Dimension::Id::Y ||
-             id == pdal::Dimension::Id::Z ||
-             id == m_geoArrowDimId))
+        if (Utils::iequals(name, m_geoArrowDimensionName))
         {
             // Use the struct field instead
             if (bAddedStruct)
                 continue ; // only add once
-            arrow::ArrayBuilder* builder = m_builders[m_geoArrowDimId].get();
+            arrow::ArrayBuilder* builder = m_builders[m_geoArrowDimensionName].get();
             writeGeoArrow(point, builder);
             bAddedStruct = true;
         }
         else
         {
+            arrow::ArrayBuilder* builder = m_builders[name].get();
+            if (!builder)
+            {
+                throwError("unable to fetch builder for dimension '" + name + "'");
+            }
             arrow::Type::type at = builder->type()->id();
+            pdal::Dimension::Id id = point.table().layout()->findDim(name);
             pdal::Dimension::Type t = computePDALTypeFromArrow(at);
             writePointData(point, id, t, builder);
         }
@@ -168,7 +165,7 @@ bool ArrowWriter::processOne(PointRef& point)
     }
     if (m_formatType == arrowsupport::Parquet)
     {
-        arrow::ArrayBuilder* builder = m_builders[m_wkbDimId].get();
+        arrow::ArrayBuilder* builder = m_builders["wkb"].get();
         writeWkb(point, *m_ogrPoint.get(), builder);
     }
 
@@ -261,7 +258,7 @@ void ArrowWriter::ready(PointTableRef table)
             field = field->WithMetadata(kvMetadata);
             fields.push_back(field);
 
-            m_dimIds.push_back(m_geoArrowDimId);
+            m_dimensionOutputNames.push_back(m_geoArrowDimensionName);
 
             bAddedStruct = true;
             log()->get(LogLevel::Info) << "Adding GeoArrow point struct" << std::endl;
@@ -288,7 +285,7 @@ void ArrowWriter::ready(PointTableRef table)
 
             field = field->WithMetadata(kvMetadata);
             fields.push_back(field);
-            m_dimIds.push_back(id);
+            m_dimensionOutputNames.push_back(name);
             log()->get(LogLevel::Info) << "Adding dimension '" << name << "'" << std::endl;
         }
 
@@ -296,7 +293,7 @@ void ArrowWriter::ready(PointTableRef table)
 
     m_schema.reset(new arrow::Schema(fields));
 
-    if ((int)m_dimIds.size() != m_schema->num_fields())
+    if ((int)m_dimensionOutputNames.size() != m_schema->num_fields())
         throwError("Arrow schema size does not match PDAL schema size!");
 
     createBuilders(*m_pointTablePtr);
@@ -319,7 +316,7 @@ void ArrowWriter::addDimensions(PointLayoutPtr layout)
     if (m_formatType == arrowsupport::Parquet)
         m_wkbDimId = layout->assignDim("wkb", Dimension::Type::None);
 
-    m_geoArrowDimId = layout->assignDim("xyz", Dimension::Type::None);
+    m_geoArrowDimId = layout->assignDim(m_geoArrowDimensionName, Dimension::Type::None);
 }
 
 void ArrowWriter::write(const PointViewPtr view)
@@ -474,9 +471,9 @@ void ArrowWriter::FlushBatch(PointTableRef table)
 
     // Wipe off our arrays we're making a new batch
     m_arrays.clear();
-    for (auto& id: m_dimIds)
+    for (auto& name: m_dimensionOutputNames)
     {
-        arrow::ArrayBuilder* builder = m_builders[id].get();
+        arrow::ArrayBuilder* builder = m_builders[name].get();
         std::shared_ptr<arrow::Array> array;
         auto ok = builder->Finish(&array);
         if (!ok.ok())

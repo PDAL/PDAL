@@ -84,8 +84,9 @@ private:
     std::shared_ptr<arrow::Schema> m_schema;
     std::vector<std::shared_ptr<arrow::Array>> m_arrays;
 
-    std::map<pdal::Dimension::Id, std::unique_ptr<arrow::ArrayBuilder> > m_builders;
-    std::vector<pdal::Dimension::Id> m_dimIds;
+    std::map<std::string, std::unique_ptr<arrow::ArrayBuilder> > m_builders;
+    std::map<std::string, pdal::Dimension::Id> m_dimMap;
+    std::vector<std::string> m_dimensionOutputNames;
     arrow::MemoryPool* m_pool;
     int m_batchSize;
     std::string m_geoParquetVersion;
