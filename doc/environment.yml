@@ -6,9 +6,6 @@ dependencies:
   - proj
   - breathe > 4.34
   - sphinx > 6
-  - graphviz
-  - sed
-  - doxygen
   - sphinxcontrib-jquery
   - sphinxcontrib-bibtex
   - sphinx-notfound-page
