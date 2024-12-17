@@ -98,7 +98,6 @@ private:
     std::string makeMultiPolygon(const std::string& wkt);
 
     bool isFileIndexed( const FieldIndexes& indexes, const FileInfo& fileInfo);
-    bool arbiterPrefix();
     void globRemote();
 
     std::string m_idxFilename;

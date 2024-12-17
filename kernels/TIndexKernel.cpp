@@ -323,13 +323,6 @@ bool TIndexKernel::isFileIndexed(const FieldIndexes& indexes,
 }
 
 
-bool TIndexKernel::arbiterPrefix()
-{
-    // maybe should return true if >1 characters before '://' ?
-    return (m_filespec.find("s3://") != std::string::npos);
-}
-
-
 void TIndexKernel::globRemote()
 {
     std::string::size_type pos = m_filespec.find_last_of('*');
@@ -357,11 +350,10 @@ void TIndexKernel::createFile()
 {
     if (!m_usestdin)
     {
-        if (arbiterPrefix())
+        if (arbiter::getProtocol(m_filespec) != "file")
         {
             globRemote();
-            for (auto s : m_files)
-                std::cout << s << '\n';
+            m_absPath = false;
         }
         else
             m_files = FileUtils::glob(m_filespec);
