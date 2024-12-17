@@ -54,6 +54,7 @@ TEST(ArrowWriterTest, write_array_feather)
 
     Options writerOps;
     writerOps.add("filename", Support::temppath("simple.feather"));
+    writerOps.add("batch_size", 3);
     ArrowWriter writer;
     writer.setInput(reader);
     writer.setOptions(writerOps);
