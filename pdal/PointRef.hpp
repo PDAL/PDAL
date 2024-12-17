@@ -224,6 +224,11 @@ public:
         return m_view ? m_viewIdx : m_idx;
     }
 
+    ConstPointTableRef table() const
+    {
+        return *m_table;
+    }
+
     inline void getField(char *val, Dimension::Id d,
         Dimension::Type type) const;
     inline void setField(Dimension::Id dim,
