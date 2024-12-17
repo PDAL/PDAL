@@ -85,7 +85,6 @@ private:
     std::vector<std::shared_ptr<arrow::Array>> m_arrays;
 
     std::map<std::string, std::unique_ptr<arrow::ArrayBuilder> > m_builders;
-    std::map<std::string, pdal::Dimension::Id> m_dimMap;
     std::vector<std::string> m_dimensionOutputNames;
     arrow::MemoryPool* m_pool;
     int m_batchSize;
