@@ -46,7 +46,7 @@ format. Only points classified as "ground points" are read since option
     },
     {
         "type": "writers.las",
-        "filename": "autzen-thin-srs.rdbx"
+        "filename": "autzen-thin-srs.las"
     }
 ]
 ```
