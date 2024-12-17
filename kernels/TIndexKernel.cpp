@@ -39,6 +39,8 @@
 
 #include <ogr_api.h>
 
+#include <arbiter/arbiter.hpp>
+
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Polygon.hpp>
 #include <pdal/util/FileUtils.hpp>
@@ -321,10 +323,49 @@ bool TIndexKernel::isFileIndexed(const FieldIndexes& indexes,
 }
 
 
+bool TIndexKernel::arbiterPrefix()
+{
+    // maybe should return true if >1 characters before '://' ?
+    return (m_filespec.find("s3://") != std::string::npos);
+}
+
+
+void TIndexKernel::globRemote()
+{
+    std::string::size_type pos = m_filespec.find_last_of('*');
+    std::string suffix;
+    if (pos != std::string::npos)
+        suffix = m_filespec.substr(pos + 1);
+
+    arbiter::Arbiter a;
+    if (suffix.size())
+    {
+        std::string endStrip = m_filespec.substr(0, pos + 1);
+        StringList globResult = a.resolve(endStrip);
+        for (auto path : globResult)
+        {
+            if (Utils::endsWith(path, suffix))
+                m_files.push_back(path);
+        }
+    }
+    else
+        m_files = a.resolve(m_filespec);
+}
+
+
 void TIndexKernel::createFile()
 {
     if (!m_usestdin)
-        m_files = FileUtils::glob(m_filespec);
+    {
+        if (arbiterPrefix())
+        {
+            globRemote();
+            for (auto s : m_files)
+                std::cout << s << '\n';
+        }
+        else
+            m_files = FileUtils::glob(m_filespec);
+    }
     else
         m_files = readSTDIN();
 
