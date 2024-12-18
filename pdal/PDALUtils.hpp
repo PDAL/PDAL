@@ -275,11 +275,11 @@ void PDAL_EXPORT closeFile(std::ostream *out);
 std::string PDAL_EXPORT fetchRemote(const std::string& path);
 bool PDAL_EXPORT isRemote(const std::string& path);
 bool PDAL_EXPORT fileExists(const std::string& path);
-std::vector<std::string> PDAL_EXPORT maybeGlob(const std::string& path);
 double PDAL_EXPORT computeHausdorff(PointViewPtr srcView, PointViewPtr candView);
 std::pair<double, double> PDAL_EXPORT computeHausdorffPair(PointViewPtr srcView, PointViewPtr candView);
 double PDAL_EXPORT computeChamfer(PointViewPtr srcView, PointViewPtr candView);
 std::string PDAL_EXPORT tempFilename(const std::string& path);
+std::vector<std::string> PDAL_EXPORT glob(const std::string& path);
 
 
 } // namespace Utils

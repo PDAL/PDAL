@@ -516,5 +516,37 @@ double computeChamfer(PointViewPtr srcView, PointViewPtr candView)
     return sum1 + sum2;
 }
 
+// Glob remote or local filepaths. Remote paths only support a single '*' wildcard char.
+std::vector<std::string> glob(const std::string& path)
+{
+    if (arbiter::getProtocol(path) != "file")
+    {
+        // this should cover all non-local files. http URLs with no wildcards
+        // get returned fine in resolve(), and arbiter throws otherwise.
+
+        std::string::size_type pos = path.find_last_of('*');
+        std::string suffix;
+        if (pos != std::string::npos)
+            suffix = path.substr(pos + 1);
+
+        arbiter::Arbiter a;
+        if (suffix.size())
+        {
+            StringList globResult = a.resolve(path.substr(0, pos + 1));
+            StringList filtered;
+            for (auto p : globResult)
+            {
+                if (Utils::endsWith(p, suffix))
+                    filtered.push_back(p);
+            }
+            return filtered;
+        }
+        else
+            return a.resolve(path);
+    }
+    else
+        return FileUtils::glob(path);
+}
+
 } // namespace Utils
 } // namespace pdal

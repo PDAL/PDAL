@@ -37,7 +37,7 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/StageWrapper.hpp>
 #include <pdal/Writer.hpp>
-#include <pdal/util/FileUtils.hpp>
+#include <pdal/PDALUtils.hpp>
 
 namespace pdal
 {
@@ -89,7 +89,7 @@ void TileKernel::validateSwitches(ProgramArgs& args)
 
 int TileKernel::execute()
 {
-    const StringList& files = FileUtils::glob(m_inputFile);
+    const StringList& files = Utils::glob(m_inputFile);
     if (files.empty())
         throw pdal_error("No input files found for path '" +
             m_inputFile + "'.");

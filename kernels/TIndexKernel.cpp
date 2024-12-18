@@ -39,8 +39,6 @@
 
 #include <ogr_api.h>
 
-#include <arbiter/arbiter.hpp>
-
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Polygon.hpp>
 #include <pdal/util/FileUtils.hpp>
@@ -323,44 +321,14 @@ bool TIndexKernel::isFileIndexed(const FieldIndexes& indexes,
 }
 
 
-void TIndexKernel::globRemote()
-{
-    std::string::size_type pos = m_filespec.find_last_of('*');
-    std::string suffix;
-    if (pos != std::string::npos)
-        suffix = m_filespec.substr(pos + 1);
-
-    arbiter::Arbiter a;
-    if (suffix.size())
-    {
-        std::string endStrip = m_filespec.substr(0, pos + 1);
-        StringList globResult = a.resolve(endStrip);
-        for (auto path : globResult)
-        {
-            if (Utils::endsWith(path, suffix))
-                m_files.push_back(path);
-        }
-    }
-    else
-        m_files = a.resolve(m_filespec);
-}
-
-
 void TIndexKernel::createFile()
 {
     if (!m_usestdin)
-    {
-        if (arbiter::getProtocol(m_filespec) != "file")
-        {
-            globRemote();
-            m_absPath = false;
-        }
-        else
-            m_files = FileUtils::glob(m_filespec);
-    }
+        m_files = Utils::glob(m_filespec);
     else
         m_files = readSTDIN();
 
+    // we don't know if the path was remote or local -- should check somehow
     if (m_absPath)
         for (auto& s : m_files)
             s = FileUtils::toAbsolutePath(s);
