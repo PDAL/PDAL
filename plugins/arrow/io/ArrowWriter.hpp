@@ -46,6 +46,7 @@
 
 namespace pdal
 {
+    class BaseDimHandler;
 
     typedef std::map<pdal::Dimension::Id, std::unique_ptr<arrow::ArrayBuilder> > DimBuilderMap;
 
@@ -63,19 +64,18 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
     virtual void ready(PointTableRef table);
+    virtual void prepared(PointTableRef table);
     virtual bool processOne(PointRef& point);
     virtual void done(PointTableRef table);
     virtual void write(const PointViewPtr view);
-    virtual void addDimensions(PointLayoutPtr layout);
 
     void setupParquet(std::vector<std::shared_ptr<arrow::Array>> const& arrays,
         PointTableRef table);
     void setupFeather(std::vector<std::shared_ptr<arrow::Array>> const& arrays,
         PointTableRef table);
     void gatherParquetGeoMetadata(std::shared_ptr<arrow::KeyValueMetadata>& input,
-        SpatialReference& ref);
-    void createBuilders(PointTableRef table);
-    void FlushBatch(PointTableRef table);
+        const SpatialReference& ref);
+    void flushBatch();
 
     std::string m_formatString;
     arrowsupport::ArrowFormatType m_formatType;
@@ -84,7 +84,6 @@ private:
     std::shared_ptr<arrow::Schema> m_schema;
     std::vector<std::shared_ptr<arrow::Array>> m_arrays;
 
-    std::map<std::string, std::unique_ptr<arrow::ArrayBuilder> > m_builders;
     std::vector<std::string> m_dimensionOutputNames;
     arrow::MemoryPool* m_pool;
     int m_batchSize;
@@ -99,9 +98,9 @@ private:
     std::string m_geoArrowDimensionName;
     point_count_t m_batchIndex;
     bool m_writePipelineMetadata;
-    pdal::Dimension::Id m_wkbDimId;
     pdal::Dimension::Id m_geoArrowDimId;
 
+    std::vector<std::unique_ptr<BaseDimHandler>> m_dimHandlers;
     PointTable* m_pointTablePtr;
     std::unique_ptr<pdal::Geometry> m_ogrPoint;
 };

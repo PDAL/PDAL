@@ -82,7 +82,6 @@ TEST(ArrowWriterTest, write_array_parquet)
     PointTable table;
     writer.prepare(table);
     PointViewSet viewSet = writer.execute(table);
-
 }
 
 } // namespace arrow
