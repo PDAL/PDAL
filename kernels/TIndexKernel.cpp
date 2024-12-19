@@ -328,8 +328,7 @@ void TIndexKernel::createFile()
     else
         m_files = readSTDIN();
 
-    // we don't know if the path was remote or local -- should check somehow
-    if (m_absPath)
+    if (m_absPath && !(Utils::isRemote(m_files.front())))
         for (auto& s : m_files)
             s = FileUtils::toAbsolutePath(s);
 

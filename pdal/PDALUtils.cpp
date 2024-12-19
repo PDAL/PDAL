@@ -519,7 +519,7 @@ double computeChamfer(PointViewPtr srcView, PointViewPtr candView)
 // Glob remote or local filepaths. Remote paths only support a single '*' wildcard char.
 std::vector<std::string> glob(const std::string& path)
 {
-    if (arbiter::getProtocol(path) != "file")
+    if (isRemote(path))
     {
         // this should cover all non-local files. http URLs with no wildcards
         // get returned fine in resolve(), and arbiter throws otherwise.
