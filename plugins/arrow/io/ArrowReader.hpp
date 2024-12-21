@@ -48,6 +48,7 @@
 #include <arrow/type_fwd.h>
 #include <arrow/io/type_fwd.h>
 #include <arrow/ipc/type_fwd.h>
+#include <parquet/arrow/reader.h>
 
 namespace pdal
 {

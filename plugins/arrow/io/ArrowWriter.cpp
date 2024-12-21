@@ -34,6 +34,10 @@
 
 #include <memory>
 #include <vector>
+/**
+#include <algorithm>
+#include <random>
+**/
 
 #include "ArrowWriter.hpp"
 #include "ArrowCommon.hpp"
@@ -47,8 +51,12 @@
 
 #include <nlohmann/json.hpp>
 
-#include <algorithm>
-#include <random>
+#include <arrow/io/api.h>
+#include <arrow/ipc/writer.h>
+#include <arrow/util/base64.h>
+#include <parquet/arrow/schema.h>
+#include <parquet/arrow/writer.h>
+#include <parquet/file_writer.h>
 
 namespace pdal
 {
@@ -68,6 +76,7 @@ public:
     virtual ~BaseDimHandler()
     {}
 
+    virtual std::shared_ptr<arrow::Field> field() = 0;
     virtual Utils::StatusWithReason operator()(const PointRef& point) = 0;
     Utils::StatusWithReason finish(std::shared_ptr<arrow::Array>& array)
     {
@@ -85,8 +94,24 @@ template<typename DT, typename BT>  // Dimension type, Builder type
 class DimHandler : public BaseDimHandler
 {
 public:
-    DimHandler(arrow::MemoryPool *pool, Dimension::Id id) : m_builder(pool), m_id(id)
+    DimHandler(arrow::MemoryPool *pool, Dimension::Id id, const std::string& name) :
+        m_builder(pool), m_id(id), m_name(name)
     {}
+
+    std::shared_ptr<arrow::Field> field() override
+    {
+        NL::json metadata {
+            { "name", m_name },
+            { "description", Dimension::description(m_id) },
+            { "interpretation", Dimension::interpretationName<DT>() },
+            { "size", sizeof(DT) }
+        };
+
+        auto kvMetadata = std::make_shared<arrow::KeyValueMetadata>();
+        kvMetadata->Append("PDAL:dimension:metadata", metadata.dump(-1));
+
+        return toArrowType(m_name, Dimension::type<DT>())->WithMetadata(kvMetadata);
+    }
 
     Utils::StatusWithReason operator()(const PointRef& point) override
     {
@@ -103,15 +128,36 @@ private:
 private:
     BT m_builder;
     Dimension::Id m_id;
+    std::string m_name;
 };
 
-class XYZHandler : public BaseDimHandler
+class XyzHandler : public BaseDimHandler
 {
 public:
-    XYZHandler(arrow::MemoryPool *pool) :
+    XyzHandler(arrow::MemoryPool *pool, const std::string& dimName) :
+        m_dimName(dimName),
         m_doubleBuilder(std::make_shared<arrow::DoubleBuilder>(pool)),
         m_builder(pool, m_doubleBuilder, 3)
     {
+    }
+
+    std::shared_ptr<arrow::Field> field() override
+    {
+        NL::json metadata {
+            { "name", m_dimName },
+            { "description", "Packed XYZ" },
+            { "interpretation", "double[3]" },
+            { "size", 24 }
+        };
+
+        auto kvMetadata = std::make_shared<arrow::KeyValueMetadata>();
+        /**
+        if (m_writePipelineMetadata)
+            kvMetadata->Append("PDAL:pipeline:metadata", Utils::toJSON(table.metadata());
+        **/
+        kvMetadata->Append("PDAL:dimension:metadata", metadata.dump(-1));
+
+        return arrow::field("xyz", arrow::fixed_size_list(arrow::float64(), 3), kvMetadata);
     }
 
     Utils::StatusWithReason operator()(const PointRef& point) override
@@ -134,6 +180,7 @@ private:
     { return m_builder; }
 
 private:
+    std::string m_dimName;
     std::shared_ptr<arrow::DoubleBuilder> m_doubleBuilder;
     arrow::FixedSizeListBuilder m_builder;
 };
@@ -143,6 +190,21 @@ class WkbHandler : public BaseDimHandler
 public:
     WkbHandler(arrow::MemoryPool *pool) : m_builder(pool)
     {}
+
+    std::shared_ptr<arrow::Field> field() override
+    {
+        NL::json metadata {
+            { "name", "wkb" },
+            { "description", "WKB points" },
+            { "interpretation", "binary" },
+            { "size", 29 }
+        };
+
+        auto kvMetadata = std::make_shared<arrow::KeyValueMetadata>();
+        kvMetadata->Append("ARROW:extension:name", "geoarrow.wkb");
+
+        return arrow::field("wkb", arrow::fixed_size_binary(29), kvMetadata);
+    }
 
     // Write XYZ as little-endian encoded well-known binary.
     Utils::StatusWithReason operator()(const PointRef& point) override
@@ -192,8 +254,7 @@ std::string ArrowWriter::getName() const { return s_info.name; }
 ArrowWriter::ArrowWriter() :
     m_formatType(arrowsupport::Unknown),
     m_pool(arrow::default_memory_pool()),
-    m_batchIndex(0),
-    m_pointTablePtr(nullptr)
+    m_batchIndex(0)
 {
 }
 
@@ -226,8 +287,6 @@ void ArrowWriter::initialize()
             result.status().ToString();
         throwError(msg.str());
     }
-
-    m_ogrPoint.reset(new pdal::Geometry(0.0, 0.0, 0.0, getSpatialReference()));
 }
 
 
@@ -282,7 +341,7 @@ void ArrowWriter::prepared(PointTableRef table)
     m_dimHandlers.reserve(table.layout()->dims().size());
 
     //Always do XYZ.
-    m_dimHandlers.push_back(std::make_unique<XYZHandler>(m_pool));
+    m_dimHandlers.push_back(std::make_unique<XyzHandler>(m_pool, m_geoArrowDimensionName));
     if (m_formatType == arrowsupport::Parquet)
         m_dimHandlers.push_back(std::make_unique<WkbHandler>(m_pool));
     for (Id id : table.layout()->dims())
@@ -290,153 +349,70 @@ void ArrowWriter::prepared(PointTableRef table)
         // Aready taken care of.
         if (id == Id::X || id == Id::Y || id == Id::Z)
             continue;
+        std::string name = table.layout()->dimName(id);
         switch (table.layout()->dimType(id))
         {
         case Type::Unsigned8:
             m_dimHandlers.push_back(
-                std::make_unique<DimHandler<uint8_t, arrow::UInt8Builder>>(m_pool, id));
+                std::make_unique<DimHandler<uint8_t, arrow::UInt8Builder>>(m_pool, id, name));
             break;
         case Type::Unsigned16:
             m_dimHandlers.push_back(
-                std::make_unique<DimHandler<uint16_t, arrow::UInt16Builder>>(m_pool, id));
+                std::make_unique<DimHandler<uint16_t, arrow::UInt16Builder>>(m_pool, id, name));
             break;
         case Type::Unsigned32:
             m_dimHandlers.push_back(
-                std::make_unique<DimHandler<uint32_t, arrow::UInt32Builder>>(m_pool, id));
+                std::make_unique<DimHandler<uint32_t, arrow::UInt32Builder>>(m_pool, id, name));
             break;
         case Type::Unsigned64:
             m_dimHandlers.push_back(
-                std::make_unique<DimHandler<uint64_t, arrow::UInt64Builder>>(m_pool, id));
+                std::make_unique<DimHandler<uint64_t, arrow::UInt64Builder>>(m_pool, id, name));
             break;
         case Type::Signed8:
             m_dimHandlers.push_back(
-                std::make_unique<DimHandler<int8_t, arrow::Int8Builder>>(m_pool, id));
+                std::make_unique<DimHandler<int8_t, arrow::Int8Builder>>(m_pool, id, name));
             break;
         case Type::Signed16:
             m_dimHandlers.push_back(
-                std::make_unique<DimHandler<int16_t, arrow::Int16Builder>>(m_pool, id));
+                std::make_unique<DimHandler<int16_t, arrow::Int16Builder>>(m_pool, id, name));
             break;
         case Type::Signed32:
             m_dimHandlers.push_back(
-                std::make_unique<DimHandler<int32_t, arrow::Int32Builder>>(m_pool, id));
+                std::make_unique<DimHandler<int32_t, arrow::Int32Builder>>(m_pool, id, name));
             break;
         case Type::Signed64:
             m_dimHandlers.push_back(
-                std::make_unique<DimHandler<int64_t, arrow::Int64Builder>>(m_pool, id));
+                std::make_unique<DimHandler<int64_t, arrow::Int64Builder>>(m_pool, id, name));
             break;
         case Type::Float:
             m_dimHandlers.push_back(
-                std::make_unique<DimHandler<float, arrow::FloatBuilder>>(m_pool, id));
+                std::make_unique<DimHandler<float, arrow::FloatBuilder>>(m_pool, id, name));
             break;
         case Type::Double:
             m_dimHandlers.push_back(
-                std::make_unique<DimHandler<double, arrow::DoubleBuilder>>(m_pool, id));
+                std::make_unique<DimHandler<double, arrow::DoubleBuilder>>(m_pool, id, name));
             break;
         default:
-            throwError("Invalid type found for dimension '" + table.layout()->dimName(id) +
-                "'.");
+            throwError("Invalid type found for dimension '" + name + "'.");
         }
     }
 }
 
 void ArrowWriter::ready(PointTableRef table)
 {
-    m_pointTablePtr = static_cast<PointTable*>(&table);
-
     std::vector<std::shared_ptr<arrow::Field>> fields;
-
-    bool bAddedStruct(false);
-    const auto& layout = table.layout();
-    auto dims = layout->dims();
-    for (auto& id : dims)
-    {
-        if ((id == pdal::Dimension::Id::X ||
-             id == pdal::Dimension::Id::Y ||
-             id == pdal::Dimension::Id::Z ||
-             id == m_geoArrowDimId ))
-        {
-            // Use the struct field instead of adding XYZ dimensions
-            // to the output
-            if (bAddedStruct)
-                continue ; // only add once
-
-            auto dimensionField = arrow::field("dimension", arrow::float64(), false);
-            std::shared_ptr<arrow::DataType> dt = arrow::fixed_size_list(dimensionField, 3);
-            auto field = arrow::field(m_geoArrowDimensionName, dt, false);
-
-            auto kvMetadata = field->metadata()
-                               ? field->metadata()->Copy()
-                               : std::make_shared<arrow::KeyValueMetadata>();
-            kvMetadata->Append("ARROW:extension:name", "geoarrow.point");
-            kvMetadata->Append("ARROW:extension:metadata", getPROJJSON(table.spatialReference()).dump(-1));
-
-            NL::json dimDetail;
-            dimDetail["name"] = layout->dimName(id);
-            dimDetail["description"] = pdal::Dimension::description(id);
-            dimDetail["interpretation"] = pdal::Dimension::interpretationName(layout->dimType(id));
-            dimDetail["size"] = layout->dimSize(id);
-
-            if (m_writePipelineMetadata)
-            {
-                std::stringstream m;
-                Utils::toJSON(table.metadata(), m);
-                kvMetadata->Append("PDAL:pipeline:metadata", m.str());
-            }
-
-            kvMetadata->Append("PDAL:dimension:metadata", dimDetail.dump(-1));
-
-            field = field->WithMetadata(kvMetadata);
-            fields.push_back(field);
-
-            m_dimensionOutputNames.push_back(m_geoArrowDimensionName);
-
-            bAddedStruct = true;
-            log()->get(LogLevel::Info) << "Adding GeoArrow point struct" << std::endl;
-        }
-        else
-        {
-            auto dimType = layout->dimType(id);
-            std::string name = layout->dimName(id);
-            std::shared_ptr<arrow::Field> field = toArrowType(name, dimType);
-            auto kvMetadata = field->metadata()
-                                ? field->metadata()->Copy()
-                                : std::make_shared<arrow::KeyValueMetadata>();
-            if (Utils::iequals("wkb", name))
-            {
-                kvMetadata->Append("ARROW:extension:name", "geoarrow.wkb");
-            }
-
-            NL::json dimDetail;
-            dimDetail["name"] = layout->dimName(id);
-            dimDetail["description"] = pdal::Dimension::description(id);
-            dimDetail["interpretation"] = pdal::Dimension::interpretationName(layout->dimType(id));
-            dimDetail["size"] = layout->dimSize(id);
-            kvMetadata->Append("PDAL:dimension:metadata", dimDetail.dump(-1));
-
-            field = field->WithMetadata(kvMetadata);
-            fields.push_back(field);
-            m_dimensionOutputNames.push_back(name);
-            log()->get(LogLevel::Info) << "Adding dimension '" << name << "'" << std::endl;
-        }
-
-    }
+    for (auto& h : m_dimHandlers)
+        fields.push_back(h->field());
 
     m_schema.reset(new arrow::Schema(fields));
-
-    if ((int)m_dimensionOutputNames.size() != m_schema->num_fields())
-        throwError("Arrow schema size does not match PDAL schema size!");
 
     m_table = arrow::Table::Make(m_schema, m_arrays);
 
     if (m_formatType == arrowsupport::Parquet)
-    {
         setupParquet(m_arrays, table);
-    }
 
     if (m_formatType == arrowsupport::Feather)
-    {
         setupFeather(m_arrays, table);
-    }
 }
 
 void ArrowWriter::write(const PointViewPtr view)
@@ -445,7 +421,8 @@ void ArrowWriter::write(const PointViewPtr view)
         processOne(point);
 }
 
-void ArrowWriter::gatherParquetGeoMetadata(std::shared_ptr<arrow::KeyValueMetadata>& input, const SpatialReference& ref)
+void ArrowWriter::gatherParquetGeoMetadata(std::shared_ptr<arrow::KeyValueMetadata>& input,
+    const SpatialReference& ref)
 {
 
     NL::json metadata;
@@ -457,7 +434,6 @@ void ArrowWriter::gatherParquetGeoMetadata(std::shared_ptr<arrow::KeyValueMetada
     NL::json column;
     column["encoding"] = "WKB";
     column["geometry_types"] = std::vector<std::string> {"Point"};
-
     column.update(getPROJJSON(ref.empty() ? SpatialReference("EPSG:4326") : ref));
 
     NL::json wkb;
@@ -469,7 +445,6 @@ void ArrowWriter::gatherParquetGeoMetadata(std::shared_ptr<arrow::KeyValueMetada
     geo["columns"] = wkb;
 
     input->Append("geo", geo.dump(-1));
-
 }
 
 
@@ -500,9 +475,6 @@ void ArrowWriter::setupParquet(std::vector<std::shared_ptr<arrow::Array>> const&
         throwError(msg.str());
     }
 
-
-
-
     auto schema_node = std::static_pointer_cast<parquet::schema::GroupNode>(
         parquet_schema->schema_root());
 
@@ -510,8 +482,7 @@ void ArrowWriter::setupParquet(std::vector<std::shared_ptr<arrow::Array>> const&
                          ? m_schema->metadata()->Copy()
                          : std::make_shared<arrow::KeyValueMetadata>();
 
-    auto status =
-        ::arrow::ipc::SerializeSchema(*m_schema, m_pool);
+    auto status = ::arrow::ipc::SerializeSchema(*m_schema, m_pool);
     if (status.ok())
     {
         // The serialized schema is not UTF-8, which is required for
@@ -542,8 +513,6 @@ void ArrowWriter::setupParquet(std::vector<std::shared_ptr<arrow::Array>> const&
         throwError(msg.str());
     }
 
-    auto schema_ptr = std::make_shared<::arrow::Schema>(*m_schema);
-
     result = parquet::arrow::FileWriter::Make(m_pool,
                                               std::move(base_writer),
                                               m_schema,
@@ -570,12 +539,8 @@ void ArrowWriter::setupFeather(std::vector<std::shared_ptr<arrow::Array>> const&
     if (result.ok())
         m_arrowFileWriter = result.ValueOrDie();
     else
-    {
-        std::stringstream msg;
-        msg << "Unable to open '" << filename() << "' for arrow output with error " <<
-            result.status().ToString();
-        throwError(msg.str());
-    }
+        throwError("Unable to open '" + filename() + "' for arrow output with error " +
+            result.status().ToString());
 }
 
 
@@ -597,21 +562,13 @@ void ArrowWriter::flushBatch()
     {
         auto result = m_parquetFileWriter->NewRowGroup(m_batchSize);
         if (!result.ok())
-        {
-            std::stringstream msg;
-            msg << "Unable to make NewRowGroup" << result.ToString();
-            throwError(msg.str());
-        }
+            throwError("Unable to make NewRowGroup: " + result.ToString());
 
-        for(auto& array: arrays)
+        for (auto& array: arrays)
         {
             result = m_parquetFileWriter->WriteColumnChunk(*array);
             if (!result.ok())
-            {
-                std::stringstream msg;
-                msg << "Unable to make WriteColumnChunk" << result.ToString();
-                throwError(msg.str());
-            }
+                throwError("Unable to make WriteColumnChunk: " + result.ToString());
         }
 
     }
@@ -622,11 +579,7 @@ void ArrowWriter::flushBatch()
 
         auto result = m_arrowFileWriter->WriteRecordBatch(*batch);
         if (!result.ok())
-        {
-            std::stringstream msg;
-            msg << "Unable to write arrow batch" << result.ToString();
-            throwError(msg.str());
-        }
+            throwError("Unable to write arrow batch" + result.ToString());
     }
 }
 

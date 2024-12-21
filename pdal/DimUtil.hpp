@@ -139,6 +139,68 @@ inline std::string interpretationName(Type dimtype)
     return "unknown";
 }
 
+template <typename T>
+std::string interpretationName();
+
+template<>
+inline std::string interpretationName<int8_t>()
+{
+    return "int8_t";
+}
+
+template<>
+inline std::string interpretationName<int16_t>()
+{
+    return "int16_t";
+}
+
+template<>
+inline std::string interpretationName<int32_t>()
+{
+    return "int32_t";
+}
+
+template<>
+inline std::string interpretationName<int64_t>()
+{
+    return "int64_t";
+}
+
+template<>
+inline std::string interpretationName<uint8_t>()
+{
+    return "uint8_t";
+}
+
+template<>
+inline std::string interpretationName<uint16_t>()
+{
+    return "uint16_t";
+}
+
+template<>
+inline std::string interpretationName<uint32_t>()
+{
+    return "uint32_t";
+}
+
+template<>
+inline std::string interpretationName<uint64_t>()
+{
+    return "uint64_t";
+}
+
+template<>
+inline std::string interpretationName<float>()
+{
+    return "float";
+}
+
+template<>
+inline std::string interpretationName<double>()
+{
+    return "double";
+}
 
 /// Get the type corresponding to a type name.
 /// \param s  Name of type.
@@ -181,6 +243,69 @@ inline Type type(const std::string& baseType, size_t size)
         return Type::None;
 
     return static_cast<Type>((size_t)(base) | size);
+}
+
+template<typename T>
+Type type();
+
+template<>
+inline Type type<int8_t>()
+{
+    return Type::Signed8;
+}
+
+template<>
+inline Type type<int16_t>()
+{
+    return Type::Signed16;
+}
+
+template<>
+inline Type type<int32_t>()
+{
+    return Type::Signed32;
+}
+
+template<>
+inline Type type<int64_t>()
+{
+    return Type::Signed64;
+}
+
+template<>
+inline Type type<uint8_t>()
+{
+    return Type::Unsigned8;
+}
+
+template<>
+inline Type type<uint16_t>()
+{
+    return Type::Unsigned16;
+}
+
+template<>
+inline Type type<uint32_t>()
+{
+    return Type::Unsigned32;
+}
+
+template<>
+inline Type type<uint64_t>()
+{
+    return Type::Unsigned64;
+}
+
+template<>
+inline Type type<float>()
+{
+    return Type::Float;
+}
+
+template<>
+inline Type type<double>()
+{
+    return Type::Double;
 }
 
 /// Extract a dimension name of a string.  Dimension names start with an alpha

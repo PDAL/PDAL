@@ -37,14 +37,17 @@
 #include "ArrowCommon.hpp"
 
 #include <memory>
+
+#include <pdal/Geometry.hpp>
+#include <pdal/PDALUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/PDALUtils.hpp>
-
 
 #include <nlohmann/json.hpp>
 #include <ogr_geometry.h>
 
+#include <arrow/io/api.h>
+#include <arrow/ipc/api.h>
 
 namespace pdal
 {

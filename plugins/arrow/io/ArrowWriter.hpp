@@ -42,6 +42,7 @@
 
 #include <arrow/type_fwd.h>
 #include <arrow/io/type_fwd.h>
+#include <arrow/ipc/type_fwd.h>
 #include <parquet/type_fwd.h>
 
 namespace pdal
@@ -101,8 +102,6 @@ private:
     pdal::Dimension::Id m_geoArrowDimId;
 
     std::vector<std::unique_ptr<BaseDimHandler>> m_dimHandlers;
-    PointTable* m_pointTablePtr;
-    std::unique_ptr<pdal::Geometry> m_ogrPoint;
 };
 
 } // namespace pdal
