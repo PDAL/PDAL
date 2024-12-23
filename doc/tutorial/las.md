@@ -114,7 +114,7 @@ to prevent overdriving the precision of the data and disrupting
 
 Vertical coordinate control is important in {{ LiDAR }} and PDAL supports
 assignment
-and reprojection/transform of vertical coordinates using {{ Proj }} and {{ GDAL }}.
+and reprojection/transform of vertical coordinates using {{ PROJ }} and {{ GDAL }}.
 The coordinate system description magic happens in GDAL, and you assign a
 compound coordinate system (both vertical and horizontal definitions) using
 the following syntax:
@@ -178,7 +178,7 @@ coordinate system for a file to [UTM Zone 15N NAD83] for horizontal and
 Any coordinate system description format supported by GDAL's
 [SetFromUserInput]
 method can be used to assign or set the coordinate system in PDAL.
-This includes WKT, {{ Proj }} definitions, or OGC URNs. It is your
+This includes WKT, {{ PROJ }} definitions, or OGC URNs. It is your
 responsibility, however, to escape or massage any input data to
 make it be valid JSON.
 ```
