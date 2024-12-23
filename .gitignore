@@ -11,25 +11,32 @@ plugins/pgpointcloud/Pgtest-Support.hpp
 #
 # cmake stuff
 #
+# standard ones from
+# https://github.com/github/gitignore/blob/main/CMake.gitignore
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+CMakeUserPresets.json
+
+
+# PDAL custom CMake ignores
 PDALConfig.cmake
 PDALConfigVersion.cmake
 PDALTargets.cmake
-CMakeCache.txt
-CMakeFiles/
-CPackConfig.cmake
-CPackSourceConfig.cmake
-cmake_install.cmake
-CTestTestfile.cmake
 Testing/
 test/temp/
 apps/pdal-config
 apps/pdal-config.bat
 apps/pdal.pc
-src/CMakeScripts/
-apps/CMakeScripts/
-CMakeScripts/
 _CPack_Packages/
-install_manifest.txt
 
 #
 # visual studio cruft
@@ -106,6 +113,9 @@ test/unit/TestConfig.hpp
 # JupyterBook
 doc/_build
 doc/conf.py
+
+# Pixi
+.pixi/
 
 test/data/bpf/bpf.xml
 test/data/bpf/bpf2nitf.xml

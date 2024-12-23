@@ -67,6 +67,14 @@ struct Func1
     Ptr function;
 };
 
+struct BoolFunc1
+{
+    using Ptr = bool(*)(double);
+
+    std::string name;
+    Ptr function;
+};
+
 class Node
 {
 protected:
@@ -126,7 +134,6 @@ private:
     NodePtr m_right;
 };
 
-// We currently only support a couple of single-argument functions.
 class FuncNode : public ValueNode
 {
 public:
@@ -151,6 +158,20 @@ public:
     virtual Result eval(PointRef& p) const;
 
 private:
+    NodePtr m_sub;
+};
+
+class BoolFuncNode : public LogicalNode
+{
+public:
+    BoolFuncNode(NodeType type, BoolFunc1 func, NodePtr sub);
+
+    virtual std::string print() const;
+    virtual Utils::StatusWithReason prepare(PointLayoutPtr l);
+    virtual Result eval(PointRef& p) const;
+
+private:
+    BoolFunc1 m_func;
     NodePtr m_sub;
 };
 

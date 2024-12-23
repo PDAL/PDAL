@@ -4,7 +4,7 @@ dependencies:
   - python-pdal
   - jupyter-book
   - proj
-  - breathe
+  - breathe > 4.34
   - sphinx > 6
   - sphinxcontrib-jquery
   - sphinxcontrib-bibtex

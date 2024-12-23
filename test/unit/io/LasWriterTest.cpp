@@ -2293,7 +2293,7 @@ TEST(LasWriterTest, issue2235)
         writer41.execute(table41);
 
         const las::Header& h41 = tester.header(writer41);
-        EXPECT_EQ(h41.legacyPointCount, (int32_t)h41.pointCount());
+        EXPECT_EQ(h41.legacyPointCount, h41.pointCount());
 
         for (int i=0; i<h41.LegacyReturnCount; i++)
             EXPECT_EQ(h41.legacyPointsByReturn[i], h41.ePointsByReturn[i]);
@@ -2316,14 +2316,14 @@ TEST(LasWriterTest, issue2235)
 
         const las::Header& h46 = tester.header(writer46);
 
-        EXPECT_EQ(h46.legacyPointCount, 0);
-        EXPECT_NE(h46.pointCount(), 0);
+        EXPECT_EQ(h46.legacyPointCount, 0UL);
+        EXPECT_NE(h46.pointCount(), 0UL);
 
         for (int i=0; i<h46.LegacyReturnCount; i++)
         {
-            EXPECT_EQ(h46.legacyPointsByReturn[i], 0);
+            EXPECT_EQ(h46.legacyPointsByReturn[i], 0UL);
             if (i < returnsWithPoints)
-                EXPECT_NE(h46.ePointsByReturn[i], 0);
+                EXPECT_NE(h46.ePointsByReturn[i], 0UL);
         }
     }
 
@@ -2351,14 +2351,14 @@ TEST(LasWriterTest, issue2235)
 
         const las::Header& headerCopc = tester.header(readerCopc);
 
-        EXPECT_EQ(headerCopc.legacyPointCount, 0);
-        EXPECT_NE(headerCopc.pointCount(), 0);
+        EXPECT_EQ(headerCopc.legacyPointCount, 0UL);
+        EXPECT_NE(headerCopc.pointCount(), 0UL);
 
         for (int i=0; i<headerCopc.LegacyReturnCount; i++)
         {
-            EXPECT_EQ(headerCopc.legacyPointsByReturn[i], 0);
+            EXPECT_EQ(headerCopc.legacyPointsByReturn[i], 0UL);
             if (i < returnsWithPoints)
-                EXPECT_NE(headerCopc.ePointsByReturn[i], 0);
+                EXPECT_NE(headerCopc.ePointsByReturn[i], 0UL);
         }
     }
 }

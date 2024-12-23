@@ -28,7 +28,7 @@ inline StatusWithReason fromString(const std::string& from,
     expr::Lexer lexer(from);
     expr::ConditionalParser parser(lexer);
     bool ok = parser.expression(expr) && parser.checkEnd();
-    return { ok ? 0 : -1, expr.error() };
+    return { ok ? 0 : -1, parser.error() };
 }
 
 } // namespace Util

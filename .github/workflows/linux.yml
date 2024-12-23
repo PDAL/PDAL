@@ -39,7 +39,7 @@ jobs:
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
-        key: ${{ github.job }}-${{ matrix.os }}
+        key: ${{ github.job }}-ubuntu-latest
 
     - name: Setup
       run: |
@@ -83,3 +83,5 @@ jobs:
           # please, remove the exception rule here when fixed
           source ../scripts/ci/linux/test.sh -E 'pdal_io_tiledb_(time_writer|time_reader|writer|reader|bit_fields)_test|pdal_io_e57_(write|read)_test|pdal_io_stac_reader_test'
       working-directory: ./build
+
+

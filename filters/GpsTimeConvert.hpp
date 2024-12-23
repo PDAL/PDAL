@@ -35,11 +35,12 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
+#include <pdal/Streamable.hpp>
 
 namespace pdal
 {
 
-class PDAL_EXPORT GpsTimeConvert : public Filter
+class PDAL_EXPORT GpsTimeConvert : public Filter, public Streamable
 {
 public:
     GpsTimeConvert() : Filter()
@@ -48,22 +49,42 @@ public:
 
 private:
     std::string m_conversion;
+    std::string m_inTime;
+    std::string m_outTime;
     std::string m_strDate;
     std::tm m_tmDate;
     bool m_wrap;
     bool m_wrapped;
+    bool m_first;
+    double m_lastTime;
+    double m_wrappedTolerance;
+    int m_numSeconds;
 
-    void weekSeconds2GpsTime(PointView& view);
-    void gpsTime2WeekSeconds(PointView& view);
-    void gpsTime2GpsTime(PointView& view);
+        void weekSeconds2GpsTime(PointRef& point);
+    void daySeconds2GpsTime(PointRef& point);
+
+    void gpsTime2WeekSeconds(PointRef& point);
+    void gpsTime2DaySeconds(PointRef& point);
+
+    void gpsTime2GpsTime(PointRef& point);
 
     std::tm gpsTime2Date(int seconds);
+
     int weekStartGpsSeconds(std::tm date);
-    void unwrapWeekSeconds(PointView& view);
-    void wrapWeekSeconds(PointView& view);
+    int dayStartGpsSeconds(std::tm date);
+
+    void unwrapWeekSeconds(PointRef& point);
+    void wrapWeekSeconds(PointRef& point);
+    
+    void unwrapDaySeconds(PointRef& point);
+    void wrapDaySeconds(PointRef& point);
+
+    void testTimeType(std::string& type);
 
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
+    virtual PointViewSet run(PointViewPtr view);
+    virtual bool processOne(PointRef& point);
     virtual void filter(PointView& view);
 
     GpsTimeConvert& operator=(const GpsTimeConvert&); // not implemented
