@@ -61,6 +61,7 @@ class PDAL_EXPORT TIndexKernel : public SubcommandKernel
         double m_gridHeight;
         struct tm m_ctime;
         struct tm m_mtime;
+        bool m_isRemote = false;
     };
 
     struct FieldIndexes

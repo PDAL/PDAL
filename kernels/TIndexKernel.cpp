@@ -369,7 +369,9 @@ void TIndexKernel::createFile()
     {
         FileInfo info;
         info.m_filename = f;
-        FileUtils::fileTimes(info.m_filename, &info.m_ctime, &info.m_mtime);
+        info.m_isRemote = Utils::isRemote(f);
+        if (!info.m_isRemote)
+            FileUtils::fileTimes(info.m_filename, &info.m_ctime, &info.m_mtime);
         infos.push_back(info);
     }
 
@@ -388,7 +390,7 @@ void TIndexKernel::createFile()
     FieldIndexes indexes = getFields();
     for (auto &info : infos)
     {
-        if (m_prefix.size())
+        if (m_prefix.size() && ! info.m_isRemote)
             info.m_filename = m_prefix + FileUtils::getFilename(info.m_filename);
         if (!info.m_boundary.empty() && !isFileIndexed(indexes, info))
             indexedFile |= createFeature(indexes, info);
@@ -643,7 +645,7 @@ bool TIndexKernel::createDataset(const std::string& filename)
         throw pdal_error(oss.str());
     }
 
-    m_dataset = OGR_Dr_CreateDataSource(hDriver, filename.c_str(), NULL); 
+    m_dataset = OGR_Dr_CreateDataSource(hDriver, filename.c_str(), NULL);
     return (bool)m_dataset;
 }
 
