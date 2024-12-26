@@ -37,6 +37,7 @@
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/Polygon.hpp>
+#include <pdal/private/OGRSpec.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
@@ -67,6 +68,7 @@ struct CropArgs
     std::vector<filter::Point> m_centers;
     double m_distance;
     std::vector<Polygon> m_polys;
+    OGRSpec m_ogr;
 };
 
 CropFilter::ViewGeom::ViewGeom(const Polygon& poly) : m_poly(poly)
@@ -102,6 +104,7 @@ void CropFilter::addArgs(ProgramArgs& args)
     args.add("polygon", "Bounding polying for cropped points", m_args->m_polys).
         setErrorText("Invalid polygon specification.  "
             "Must be valid GeoJSON/WKT");
+    args.add("ogr", "OGR filter geometries", m_args->m_ogr);
 }
 
 
@@ -117,6 +120,12 @@ void CropFilter::initialize()
             poly.valid();
             m_geoms.emplace_back(poly);
         }
+    }
+    // Add geometry from OGR specification
+
+    for (const Polygon& poly : m_args->m_ogr.getPolygons())
+    {
+        m_geoms.push_back(poly);
     }
 
     m_boxes.clear();
