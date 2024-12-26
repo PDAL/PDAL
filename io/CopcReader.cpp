@@ -46,6 +46,7 @@
 #include <pdal/Polygon.hpp>
 #include <pdal/Scaling.hpp>
 #include <pdal/SrsBounds.hpp>
+#include <pdal/private/OGRSpec.hpp>
 #include <pdal/util/Charbuf.hpp>
 #include <pdal/util/ThreadPool.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
@@ -225,7 +226,7 @@ public:
 
     NL::json query;
     NL::json headers;
-    NL::json ogr;
+    OGRSpec ogr;
 
     int keepAliveChunkCount = 10;
     SrsOrderSpec srsVlrOrder;
@@ -573,13 +574,8 @@ void CopcReader::createSpatialFilters()
         }
     }
 
-    // Read polygons from OGR and add to the polygon list.
-    if (!m_args->ogr.is_null())
-    {
-        auto& plist = m_args->polys;
-        std::vector<Polygon> ogrPolys = gdal::getPolygons(m_args->ogr);
-        plist.insert(plist.end(), ogrPolys.begin(), ogrPolys.end());
-    }
+    std::vector<Polygon> ogrPolys = m_args->ogr.getPolygons();
+    m_args->polys.insert(m_args->polys.end(), ogrPolys.begin(), ogrPolys.end());
 
     // Create transform from the point source SRS to the poly SRS.
     for (Polygon& poly : m_args->polys)
