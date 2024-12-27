@@ -219,7 +219,7 @@ threads would be doing work instead of waiting on i/o.
 Viewing our completed tile index in QGIS.
 ```
 
-## Merging the Index
+## Using `readers.tindex` to merge data
 
 We can now filter our [GeoParquet] tile index to determine which [COPC] files
 to read within the city limits of each town in the county and create a raster
@@ -254,74 +254,35 @@ mechanism to point to the file by substituting the following for any
 ```
 ````
 
-### Using `readers.tindex` to merge data
+### Pipeline Operation Steps
 
-Once we have the tile index, we write a {ref}`pipeline` that uses a
-{ref}`readers.tindex` reader to point at it. Our tile index could
-be a local file or a remotely-accessible URL, but formats such as [GeoParquet]
-support efficient reading over HTTP.
+1. Fetch town boundary geometries for Adams County, WI.
+2. Confirming Overpass selection is correct
+3. Defining the `ogr` block for {ref}`readers.tindex`
 
-After reading the point clouds referenced in the tile index (with the same
-{ref}`readers.copc` options as the creation command used),
-{ref}`filters.hag_nn` creates a new height above ground dimension, which gets
-written to a new GeoTIFF raster using {ref}`writers.gdal`. You might notice
-that we don't supply some important options yet, like the boundary polygons for
-{ref}`readers.tindex` and the filenames for {ref}`writers.gdal`: these values
-are going to be substituted in when we run the `pdal pipeline` command.
+#### Fetching Town Boundaries
 
-```json
-[
-    {
-        "type":"readers.tindex",
-        "filename":"/vsicurl/https://s3.amazonaws.com/hobu-lidar/WI_Adams_2019.parquet",
-        "lyr_name":"WI_Adams_2019",
-        "reader_args":[{"type": "readers.copc", "threads": 10, "resolution": 10}]
-    },
-    {
-        "type":"filters.hag_nn"
-    },
-    {
-        "type":"writers.gdal",
-        "gdaldriver":"GTiff",
-        "dimension":"HeightAboveGround",
-        "data_type":"float32",
-        "output_type":"mean",
-        "resolution": 0.00003
-    }
-]
-```
-
-```{note}
-In the pipeline above, we are remotely reading our tile index from an S3 bucket
-using GDAL's [virtual file system].  If you created the index [in the previous
-section](#creating-a-new-index), feel free to replace the
-'readers.tindex.filename' option with a path to the file on your machine.
-```
-
-Once the pipeline is saved to a new `pipeline.json` file, we need to construct
-commands that fetch the town boundaries and substitute their polygons into our
-pipeline. **We are going to use these to create one long command at the end, so
-don't run any of them yet.** The following instructions will walk you through
-what each part is doing, so our final product makes a little more sense.
-
-1. First, we want to get the geometry of all administrative boundaries within
-   Adams County. This can be done through an OpenStreetMap [Overpass] API query
-   - in this case, we get all admin-level 8 (municipality) boundaries within
-   the county.
+First, we want to get the geometry of all administrative boundaries within
+Adams County. This can be done through the OpenStreetMap [Overpass] API. We will
+fetch all admin-level 8 (municipality) boundaries within the Adams County.
 
 ```
 area["wikipedia"="en:Adams County, Wisconsin"];(relation["boundary"="administrative"]["admin_level"="8"](area);>;);out meta;
 ```
 
-Here is the command we run which fetches the overpass XML data containing our features of interest:
+Expressed as a [curl] command, we can the overpass XML data containing our features of interest
+using the [Overpass] API:
 
 ```
 curl "https://overpass-api.de/api/interpreter?data=area%5B%22wikipedia%22%3D%22en%3AAdams+County%2C+Wisconsin%22%5D%3B%28relation%5B%22boundary%22%3D%22administrative%22%5D%5B%22admin_level%22%3D%228%22%5D%28area%29%3B%3E%3B%29%3Bout+meta%3B"
 ```
-2. We can use GDAL [ogr2ogr] to convert the OSM data to [GeoParquet]-formatted text with
-   only the "name" field and the multipolygon geometries. The SQL query also skips features without a name;
-   there are some weird inner ring geometries that get created, so we only want
-   the ones that have a town name associated with them.
+
+
+#### Confirming our Overpass URL is correct
+
+A convenient way to determine if the Overpass URL is correct is to
+use OGR to convert it to a shapefile and look at it via QGIS:
+
 
 `````{tab-set}
 ````{tab-item} Linux & macOS
@@ -329,8 +290,7 @@ curl "https://overpass-api.de/api/interpreter?data=area%5B%22wikipedia%22%3D%22e
 curl -s "https://overpass-api.de/api/interpreter?data=area%5B%22wikipedia%22%3D%22en%3AAdams+County%2C+Wisconsin%22%5D%3B%28relation%5B%22boundary%22%3D%22administrative%22%5D%5B%22admin_level%22%3D%228%22%5D%28area%29%3B%3E%3B%29%3Bout+meta%3B" \
 | ogr2ogr  \
     -sql "SELECT \"_ogr_geometry_\", \"name\" FROM \"multipolygons\" WHERE \"name\" != ''" \
-    -f Parquet \
-    municipalities.parquet /vsistdin/
+    municipalities.shp /vsistdin/
 ```
 ````
 
@@ -340,8 +300,7 @@ Powershell:
 curl -s "https://overpass-api.de/api/interpreter?data=area%5B%22wikipedia%22%3D%22en%3AAdams+County%2C+Wisconsin%22%5D%3B%28relation%5B%22boundary%22%3D%22administrative%22%5D%5B%22admin_level%22%3D%228%22%5D%28area%29%3B%3E%3B%29%3Bout+meta%3B" `
 | ogr2ogr  `
     -sql "SELECT \"_ogr_geometry_\", \"name\" FROM \"multipolygons\" WHERE \"name\" != ''" `
-    -f Parquet `
-    municipalities.parquet /vsistdin/
+    municipalities.shp /vsistdin/
 ```
 
 Batch:
@@ -349,97 +308,74 @@ Batch:
 curl -s "https://overpass-api.de/api/interpreter?data=area%5B%22wikipedia%22%3D%22en%3AAdams+County%2C+Wisconsin%22%5D%3B%28relation%5B%22boundary%22%3D%22administrative%22%5D%5B%22admin_level%22%3D%228%22%5D%28area%29%3B%3E%3B%29%3Bout+meta%3B" ^
 | ogr2ogr  ^
     -sql "SELECT \"_ogr_geometry_\", \"name\" FROM \"multipolygons\" WHERE \"name\" != ''" ^
-    -f Parquet ^
-    municipalities.parquet /vsistdin/
+    municipalities.shp /vsistdin/
 ```
 ````
 `````
 
+```{figure} ./municipalities.jpg
 
-3. Once we have the polygon geometries, the output contains a line of text
-   listing field names at the beginning, and has quotes surrounding the WKT. We
-   need to remove these from the output before it gets processed.
-
-
-`````{tab-set}
-````{tab-item} Linux & macOS
-```bash
-$ sed '1d' | tr -d '"'
-```
-````
-
-````{tab-item} Windows
-Powershell:
-```powershell
-PS > Select-Object -Skip 1
+Selecting municipalities in Adams County Wisconsin using the [Overpass] API and [GDAL].
 ```
 
-Batch:
-```batch
-ogr2ogr ^
-    -sql "SELECT `"_ogr_geometry_`", `"name`" FROM `"multipolygons`" WHERE `"name`" != ''" ^
-    -lco GEOMETRY=AS_WKT ^
-    -lco SEPARATOR=SEMICOLON ^
-    -f CSV ^
-    /vsistdout/ /vsistdin/
-```
-````
-`````
+#### Defining the `ogr` block
 
-```
-$ sed '1d' | tr -d '"'
-```
-In PowerShell, we can trim the quotes out later.
-```
-PS > Select-Object -Skip 1
-```
-4. Now, we make a loop that splits the WKT from the name, and runs a pipeline for each line.
-The `readers.tindex` stage adds the same `readers.copc` options our creation command used, and
-adds the WKT polygon. Next, `filters.hag_nn` writes a
-new HeightAboveGround dimension. In the `writers.gdal` stage, we rasterize the height above
-ground, and save the GeoTIFF in our current working directory.
+Once we can select the geometries we desire, we need to employ
+them for usage inside the {ref}`readers.tindex` stage. The `ogr` option of
+`readers.tindex` allows you to provide a polygon filter that is used by the
+readers defined in the tile index.
 
-```
-$ while IFS=';' read -r wkt name; do pdal pipeline ./height_model.json \
-    --readers.tindex.wkt=$wkt \
-    --writers.gdal.filename="${name// /}.tif"; \
-done;
-```
+In our case, we are going to select for the city of [Adams,
+Wisconsin](https://en.wikipedia.org/wiki/Adams,_Wisconsin), use OGR's [SQLite
+dialect](https://gdal.org/en/latest/user/sql_sqlite_dialect.html) to reproject
+the city polygon to a rectilinear coordinate system
+([EPSG:26916](https://spatialreference.org/ref/epsg/26916)), buffer that by
+`100` and reproject it back to the
+[EPSG:4326](https://spatialreference.org/ref/epsg/4236) coordinate system used
+by the tile index for filtering.
 
-```
-PS > ForEach-Object { `
-        $wkt_name=$_.split(';'); `
-        pdal pipeline ./height_model.json `
-            --readers.tindex.wkt=$($wkt_name[0].Trim('"')) `
-            --writers.gdal.filename="./rasters/$($wkt_name[1].Trim()).tif"" }
+* `datasource`: OGR-openable datasource
+* `sql`: SQL to apply to the polygons once selected
+* `options`: Tell OGR we're using the `SQLITE` [dialect](https://gdal.org/en/latest/user/sql_sqlite_dialect.html)
+
+```{eval-rst}
+.. code-block:: json
+    :linenos:
+
+    "ogr": {
+                "type": "ogr",
+                "datasource": "https://overpass-api.de/api/interpreter?data=area%5B%22wikipedia%22%3D%22en%3AAdams+County%2C+Wisconsin%22%5D%3B%28relation%5B%22boundary%22%3D%22administrative%22%5D%5B%22admin_level%22%3D%228%22%5D%28area%29%3B%3E%3B%29%3Bout+meta%3B",
+                "sql": "SELECT ST_Transform(ST_buffer(ST_Transform(geometry, 26916), 100), 4326) from multipolygons where name ==\"Adams\"",
+                "options": {
+                    "dialect": "SQLITE"
+                }
+            }
+        },
 ```
 
-All of these are piped together to create the fully completed command; paste it into your shell and run it!
-```
-$ curl "https://overpass-api.de/api/interpreter?data=area%5B%22wikipedia%22%3D%22en%3AAdams+County%2C+Wisconsin%22%5D%3B%28relation%5B%22boundary%22%3D%22administrative%22%5D%5B%22admin_level%22%3D%228%22%5D%28area%29%3B%3E%3B%29%3Bout+meta%3B" \
-| ogr2ogr -sql "SELECT \"_ogr_geometry_\", \"name\" FROM \"multipolygons\" WHERE \"name\" != ''" \
-    -lco GEOMETRY=AS_WKT -lco SEPARATOR=SEMICOLON -f CSV /vsistdout/ /vsistdin/ \
-| sed '1d' | tr -d '"' \
-| while IFS=';' read -r wkt name; do pdal pipeline ./height_model.json \
-    --readers.tindex.wkt=$wkt \
-    --writers.gdal.filename="${name// /}.tif"; \
-done;
-```
-```
-PS > curl "https://overpass-api.de/api/interpreter?data=area%5B%22wikipedia%22%3D%22en%3AAdams+County%2C+Wisconsin%22%5D%3B%28relation%5B%22boundary%22%3D%22administrative%22%5D%5B%22admin_level%22%3D%228%22%5D%28area%29%3B%3E%3B%29%3Bout+meta%3B" `
-| ogr2ogr -sql "SELECT `"_ogr_geometry_`", `"name`" FROM `"multipolygons`" WHERE `"name`" != ''" `
-    -lco GEOMETRY=AS_WKT -lco SEPARATOR=SEMICOLON -f CSV /vsistdout/ /vsistdin/ `
-| Select-Object -Skip 1 | ForEach-Object { `
-    $wkt_name=$_.split(';'); `
-    pdal pipeline ./height_model.json `
-        --readers.tindex.wkt=$($wkt_name[0].Trim('"')) `
-        --writers.gdal.filename="$($wkt_name[1].Trim()).tif" }
+```{note}
+The rationale for buffering the geometry in EPSG:26916 is expanding a polygon
+by a fixed in a geographic coordinate system by a linear unit is very difficult
+and non-uniform. Doing so in a rectilinear coordinate system returns the
+expected results.
 ```
 
-```{figure} final_output.png
-:scale: 45%
 
-The final product: centered on the towns of Friendly and Adams.
+### Final Pipeline
+
+
+```{eval-rst}
+.. literalinclude:: ./pipeline.json
+    :language: json
+    :linenos:
+```
+
+
+
+
+```{figure} final_output.jpg
+
+The final product: centered on the town of Adams, Wisconsin.
 ```
 
 [gdaltindex]: https://gdal.org/en/latest/programs/gdaltindex.html
