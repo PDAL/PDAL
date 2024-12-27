@@ -52,6 +52,8 @@
 namespace pdal
 {
 
+using namespace arrowsupport;
+
 static PluginInfo const s_info
 {
     "readers.arrow",
@@ -387,7 +389,7 @@ void ArrowReader::addDimensions(PointLayoutPtr layout)
 
         }
 
-        pdal::Dimension::Type pt = computePDALTypeFromArrow(t);
+        pdal::Dimension::Type pt = pdalType(t);
 
         // If we're not a known Type, we're not adding the dimension to the
         // layout

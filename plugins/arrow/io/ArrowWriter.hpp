@@ -85,7 +85,6 @@ private:
     std::shared_ptr<arrow::Schema> m_schema;
     std::vector<std::shared_ptr<arrow::Array>> m_arrays;
 
-    std::vector<std::string> m_dimensionOutputNames;
     arrow::MemoryPool* m_pool;
     int m_batchSize;
     std::string m_geoParquetVersion;
@@ -99,7 +98,6 @@ private:
     std::string m_geoArrowDimensionName;
     point_count_t m_batchIndex;
     bool m_writePipelineMetadata;
-    pdal::Dimension::Id m_geoArrowDimId;
 
     std::vector<std::unique_ptr<BaseDimHandler>> m_dimHandlers;
 };

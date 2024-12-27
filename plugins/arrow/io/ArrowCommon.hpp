@@ -35,26 +35,9 @@
 #pragma once
 
 #include <arrow/api.h>
-/**
-#include <arrow/io/api.h>
-#include <arrow/ipc/api.h>
-#include <arrow/ipc/reader.h>
-#include <arrow/adapters/orc/adapter.h>
-#include <arrow/util/key_value_metadata.h>
-#include <arrow/util/base64.h>
+#include <arrow/type_fwd.h>
 
-#include <parquet/arrow/reader.h>
-#include <parquet/exception.h>
-#include <parquet/arrow/writer.h>
-#include <parquet/types.h>
-#include <parquet/metadata.h>
-#include <parquet/file_writer.h>
-#include <parquet/schema.h>
-#include <parquet/arrow/writer.h>
-#include <parquet/arrow/schema.h>
-
-#include <pdal/pdal_types.hpp>
-**/
+#include <pdal/Dimension.hpp>
 
 namespace pdal
 {
@@ -67,13 +50,8 @@ enum ArrowFormatType {
     Unknown = 256
 };
 
-}
-}
-
-pdal::Dimension::Type computePDALTypeFromArrow(arrow::Type::type t)
+Dimension::Type pdalType(arrow::Type::type t)
 {
-    using namespace pdal;
-
     switch (t)
     {
         case arrow::Type::UINT8:
@@ -98,59 +76,104 @@ pdal::Dimension::Type computePDALTypeFromArrow(arrow::Type::type t)
             return Dimension::Type::Double;
         default:
             return Dimension::Type::None;
-
     }
-
-    return Dimension::Type::None;
-
 }
 
+template <typename T>
+struct TypeTraits {};
 
-std::shared_ptr<arrow::Field> toArrowType(std::string name, pdal::Dimension::Type t)
+using DataTypePtr = std::shared_ptr<arrow::DataType>;
+using FieldPtr = std::shared_ptr<arrow::Field>;
+
+template<>
+struct TypeTraits<uint8_t>
 {
-    using namespace pdal;
-    std::shared_ptr<arrow::Field> field;
-    switch (t)
-    {
+    using TypeClass = arrow::UInt8Type;
 
-    case Dimension::Type::Unsigned8:
-        field = arrow::field(name, arrow::uint8(), false);
-        break;
-    case Dimension::Type::Signed8:
-        field = arrow::field(name, arrow::int8(), false);
-        break;
-    case Dimension::Type::Unsigned16:
-        field = arrow::field(name, arrow::uint16(), false);
-        break;
-    case Dimension::Type::Signed16:
-        field = arrow::field(name, arrow::int16(), false);
-        break;
-    case Dimension::Type::Unsigned32:
-        field = arrow::field(name, arrow::uint32(), false);
-        break;
-    case Dimension::Type::Signed32:
-        field = arrow::field(name, arrow::int32(), false);
-        break;
-    case Dimension::Type::Float:
-        field = arrow::field(name, arrow::float32(), false);
-        break;
-    case Dimension::Type::Double:
-        field = arrow::field(name, arrow::float64(), false);
-        break;
-    case Dimension::Type::Unsigned64:
-        field = arrow::field(name, arrow::uint64(), false);
-        break;
-    case Dimension::Type::Signed64:
-        field = arrow::field(name, arrow::int64(), false);
-        break;
-    case Dimension::Type::None:
-        field = arrow::field(name, arrow::binary(), false);
-        break;
-    default:
-        throw pdal_error("Unrecognized PDAL dimension type for dimension " + name);
+    static DataTypePtr dataType()
+    { return arrow::uint8(); }  // Same as std::make_shared<TypeClass>(TypeClass);
+};
 
-    }
+template<>
+struct TypeTraits<uint16_t>
+{
+    using TypeClass = arrow::UInt16Type;
 
-    return field;
+    static DataTypePtr dataType()
+    { return arrow::uint16(); }
+};
 
-}
+template<>
+struct TypeTraits<uint32_t>
+{
+    using TypeClass = arrow::UInt32Type;
+
+    static DataTypePtr dataType()
+    { return arrow::uint32(); }
+};
+
+template<>
+struct TypeTraits<uint64_t>
+{
+    using TypeClass = arrow::UInt64Type;
+
+    static DataTypePtr dataType()
+    { return arrow::uint64(); }
+};
+
+template<>
+struct TypeTraits<int8_t>
+{
+    using TypeClass = arrow::Int8Type;
+
+    static DataTypePtr dataType()
+    { return arrow::int8(); }
+};
+
+template<>
+struct TypeTraits<int16_t>
+{
+    using TypeClass = arrow::Int16Type;
+
+    static DataTypePtr dataType()
+    { return arrow::int16(); }
+};
+
+template<>
+struct TypeTraits<int32_t>
+{
+    using TypeClass = arrow::Int32Type;
+
+    static DataTypePtr dataType()
+    { return arrow::int32(); }
+};
+
+template<>
+struct TypeTraits<int64_t>
+{
+    using TypeClass = arrow::Int64Type;
+
+    static DataTypePtr dataType()
+    { return arrow::int64(); }
+};
+
+template<>
+struct TypeTraits<float>
+{
+    using TypeClass = arrow::FloatType;
+
+    static DataTypePtr dataType()
+    { return arrow::float32(); }
+};
+
+template<>
+struct TypeTraits<double>
+{
+    using TypeClass = arrow::DoubleType;
+
+    static DataTypePtr dataType()
+    { return arrow::float64(); }
+};
+
+} // namespace arrowsupport
+} // namespace pdal
