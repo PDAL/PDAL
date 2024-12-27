@@ -43,7 +43,11 @@ namespace pdal
 namespace copcwriter
 {
 
-Reprocessor::Reprocessor(CellManager& mgr, PointViewPtr srcView, Grid grid) :
+Reprocessor::Reprocessor(CellManager& mgr,
+                         PointViewPtr srcView,
+                         Grid grid,
+                         int numLevels,
+                         int NodeCountThreshold) :
     m_mgr(mgr), m_srcView(srcView), m_grid(grid)
 {
     // We make an assumption that at most twice the number of points will be in a cell
@@ -57,7 +61,13 @@ Reprocessor::Reprocessor(CellManager& mgr, PointViewPtr srcView, Grid grid) :
     //  =>
     // log2(numPoints / MaxPointsPerNode) = 2n
 
-    m_levels = (int)std::ceil(log2((double)srcView->size() / MaxPointsPerNode) / 2);
+    if (!NodeCountThreshold)
+        NodeCountThreshold = MaxPointsPerNode;
+
+    if (!numLevels)
+        m_levels = (int)std::ceil(log2((double)srcView->size() / NodeCountThreshold) / 2);
+    else
+        m_levels = numLevels; // User set it. godspeed
 
     // We're going to steal points from the leaf nodes for sampling, so unless the
     // spatial distribution is really off, this should be fine and pretty conservative.

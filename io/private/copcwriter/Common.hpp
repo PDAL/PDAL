@@ -110,6 +110,8 @@ struct Options
     pdal::SpatialReference aSrs;
     int threadCount = 10;
     bool enhancedSrsVlrs = false;
+    int numLevels = 0;
+    int MaxPointsCountPerNode = 0;
 };
 
 struct BaseInfo

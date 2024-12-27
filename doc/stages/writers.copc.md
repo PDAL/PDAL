@@ -186,6 +186,15 @@ enhanced_srs_vlrs
 
 : Write WKT2 and PROJJSON as VLR \[Default: false\]
 
+node_threshold
+
+: Estimated max number of points per node
+
+levels
+
+: Number of octree levels
+
+
 ```{include} writer_opts.md
 ```
 

@@ -48,7 +48,11 @@ namespace copcwriter
 class Reprocessor
 {
 public:
-    Reprocessor(CellManager& mgr, PointViewPtr srcView, Grid grid);
+    Reprocessor(CellManager& mgr,
+                PointViewPtr srcView,
+                Grid grid,
+                int numLevels = 0,
+                int MaxPointsPerNode = 0);
 
     void run();
 

@@ -132,6 +132,8 @@ void CopcWriter::addArgs(ProgramArgs& args)
         decltype(b->opts.enhancedSrsVlrs)(false));
     args.add("extra_dims", "List of dimension names to write in addition to those of the "
         "point format or 'all' for all available dimensions", b->opts.extraDimSpec);
+    args.add("levels", "Number of octree levels", b->opts.numLevels);
+    args.add("node_threshold", "Node threshold", b->opts.MaxPointsCountPerNode);
 }
 
 void CopcWriter::fillForwardList()
@@ -392,7 +394,7 @@ void CopcWriter::write(const PointViewPtr v)
         PointViewPtr& v = it->second;
         if (v->size() >= MaxPointsPerNode)
         {
-            Reprocessor r(reprocessMgr, v, grid);
+            Reprocessor r(reprocessMgr, v, grid,b->opts.numLevels, b->opts.MaxPointsCountPerNode);
             r.run();
             // Remove the reprocessed cell from the manager.
             it = mgr.erase(it);
