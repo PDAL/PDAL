@@ -87,6 +87,12 @@ void CopcWriter::initialize(PointTableRef table)
         throwError(err.what());
     }
     fillForwardList();
+
+    if (b->opts.MaxPointsCountPerNode)
+    {
+        if (b->opts.MaxPointsCountPerNode > 131072 || b->opts.MaxPointsCountPerNode < 8092)
+            throwError("node_threshold must be between 8092 and 131072");
+    }
 }
 
 void CopcWriter::addArgs(ProgramArgs& args)
