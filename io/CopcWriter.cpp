@@ -90,7 +90,7 @@ void CopcWriter::initialize(PointTableRef table)
 
     if (b->opts.MaxPointsCountPerNode)
     {
-        if (b->opts.MaxPointsCountPerNode > 131072 || b->opts.MaxPointsCountPerNode < 8092)
+        if (b->opts.MaxPointsCountPerNode > 131072 || b->opts.MaxPointsCountPerNode < 8192)
             throwError("node_threshold must be between 8092 and 131072");
     }
 }
