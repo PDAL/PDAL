@@ -516,34 +516,44 @@ double computeChamfer(PointViewPtr srcView, PointViewPtr candView)
     return sum1 + sum2;
 }
 
-// Glob remote or local filepaths. Remote paths only support a single '*' wildcard char.
+
+std::vector<std::string> remoteGlob(const std::string& path)
+{
+    // Arbiter::resolve() globs for * or ** only if they are at the end of
+    // a path. To pattern match file endings, we need to split the string
+    // so it ends in *, then filter the results later.
+    std::string::size_type pos = path.find_last_of('*');
+    std::string suffix;
+    if (pos != std::string::npos)
+        suffix = path.substr(pos + 1);
+
+    arbiter::Arbiter a;
+    // If it has a suffix, resolve a substring that ends at the final wildcard
+    if (suffix.size())
+    {
+        StringList globResult = a.resolve(path.substr(0, pos + 1));
+        StringList filtered;
+        // filter for the suffix
+        for (auto p : globResult)
+            if (Utils::endsWith(p, suffix))
+                filtered.push_back(p);
+
+        return filtered;
+    }
+    else
+        return a.resolve(path);
+}
+
+
+// Glob remote or local filepaths. Remote paths only support '*' or '**'
+// wildcard characters.
 std::vector<std::string> glob(const std::string& path)
 {
-    if (isRemote(path))
-    {
-        // this should cover all non-local files. http URLs with no wildcards
-        // get returned fine in resolve(), and arbiter throws otherwise.
-
-        std::string::size_type pos = path.find_last_of('*');
-        std::string suffix;
-        if (pos != std::string::npos)
-            suffix = path.substr(pos + 1);
-
-        arbiter::Arbiter a;
-        if (suffix.size())
-        {
-            StringList globResult = a.resolve(path.substr(0, pos + 1));
-            StringList filtered;
-            for (auto p : globResult)
-            {
-                if (Utils::endsWith(p, suffix))
-                    filtered.push_back(p);
-            }
-            return filtered;
-        }
-        else
-            return a.resolve(path);
-    }
+    // need to make sure '/' doesn't appear before '://' so PipelineReader can accept
+    // filenames starting with GDAL vsi prefixes. Maybe move this somewhere else.
+    // The isRemote check isn't necessary but only keeping the second part would look weird
+    if (isRemote(path) && (path.find("://") < path.find('/')))
+        return remoteGlob(path);
     else
         return FileUtils::glob(path);
 }
