@@ -98,6 +98,16 @@ wkt
 : A geometry to pre-filter the tile index using
   OGR.
 
+ogr
+
+: A JSON object representing an OGR query to fetch a polygon for pre-filtering
+  the tile index. This will also override any [wkt] option if set. 
+  The JSON object is specified as follows:
+
+```{include} ogr_json.md
+```
+
+
 t_srs
 
 : Reproject the layer SRS, otherwise default to the

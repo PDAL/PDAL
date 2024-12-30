@@ -40,6 +40,7 @@
 
 #include <pdal/ArtifactManager.hpp>
 #include <pdal/Polygon.hpp>
+#include <pdal/private/OGRSpec.hpp>
 #include <pdal/SrsBounds.hpp>
 #include <pdal/pdal_features.hpp>
 #include <pdal/util/ThreadPool.hpp>
@@ -160,7 +161,7 @@ public:
 
     NL::json m_query;
     NL::json m_headers;
-    NL::json m_ogr;
+    OGRSpec m_ogr;
     bool m_ignoreUnreadable = false;
 };
 
@@ -258,12 +259,8 @@ void EptReader::initialize()
         throwError(err.what());
     }
 
-    if (!m_args->m_ogr.is_null())
-    {
-        auto& plist = m_args->m_polys;
-        std::vector<Polygon> ogrPolys = gdal::getPolygons(m_args->m_ogr);
-        plist.insert(plist.end(), ogrPolys.begin(), ogrPolys.end());
-    }
+    std::vector<Polygon> ogrPolys = m_args->m_ogr.getPolygons();
+    m_args->m_polys.insert(m_args->m_polys.end(), ogrPolys.begin(), ogrPolys.end());
 
     // Create transformations from our source data to the bounds SRS.
     if (m_args->m_bounds.valid())

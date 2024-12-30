@@ -37,6 +37,7 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/private/OGRSpec.hpp>
 #include <io/BufferReader.hpp>
 #include <io/FauxReader.hpp>
 #include <io/LasReader.hpp>
@@ -45,6 +46,8 @@
 #include <filters/StatsFilter.hpp>
 #include <filters/StreamCallbackFilter.hpp>
 #include "Support.hpp"
+
+#include <nlohmann/json.hpp>
 
 using namespace pdal;
 
@@ -263,6 +266,39 @@ TEST(CropFilterTest, test_crop_polygon_reprojection)
     EXPECT_LE(view->size(), 47u);
 
     FileUtils::closeFile(wkt_stream);
+}
+
+TEST(CropFilterTest, test_crop_ogr)
+{
+    Options ops1;
+    ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
+    LasReader reader;
+    reader.setOptions(ops1);
+
+    Options options;
+    Option debug("debug", true);
+    Option verbose("verbose", 9);
+
+    NL::json json;
+    json["type"] = "ogr";
+    json["drivers"] = {"GeoJSON"};
+    json["datasource"] = Support::datapath("autzen/autzen-selection.json");
+    OGRSpec ogr(json);
+
+    Option polygon("ogr", ogr);
+    options.add(polygon);
+
+    CropFilter crop;
+    crop.setInput(reader);
+    crop.setOptions(options);
+
+    PointTable table;
+
+    crop.prepare(table);
+    PointViewSet viewSet = crop.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 47u);
 }
 
 TEST(CropFilterTest, multibounds)
