@@ -265,7 +265,7 @@ We need some sample data to play with, so we're going to download the
 following command:
 
 ```
-explorer.exe https://github.com/PDAL/data/raw/master/autzen/autzen.laz
+explorer.exe https://github.com/PDAL/data/raw/main/autzen/autzen.laz
 ```
 
 In the download dialog, save the file to your `Downloads` folder, e.g.,
