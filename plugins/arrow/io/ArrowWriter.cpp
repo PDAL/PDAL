@@ -386,13 +386,10 @@ void ArrowWriter::ready(PointTableRef table)
 
     m_schema.reset(new arrow::Schema(fields));
 
-    m_table = arrow::Table::Make(m_schema, m_arrays);
-
     if (m_formatType == arrowsupport::Parquet)
-        setupParquet(m_arrays, table);
-
-    if (m_formatType == arrowsupport::Feather)
-        setupFeather(m_arrays, table);
+        setupParquet(table);
+    else if (m_formatType == arrowsupport::Feather)
+        setupFeather(table);
 }
 
 void ArrowWriter::write(const PointViewPtr view)
@@ -404,31 +401,26 @@ void ArrowWriter::write(const PointViewPtr view)
 void ArrowWriter::gatherParquetGeoMetadata(std::shared_ptr<arrow::KeyValueMetadata>& input,
     const SpatialReference& ref)
 {
-    NL::json metadata;
-    NL::json version;
-    arrow::BuildInfo info = arrow::GetBuildInfo();
-    version["arrow"] = info.version_string;
-    version["pdal"] = pdal::Config::fullVersionString();
-
-    NL::json column;
-    column["encoding"] = "WKB";
-    column["geometry_types"] = std::vector<std::string> {"Point"};
+    NL::json column = {
+        { "encoding", "WKB" },
+        { "geometry_types", { "Point" } }
+    };
     column.update(getPROJJSON(ref.empty() ? SpatialReference("EPSG:4326") : ref));
 
     NL::json wkb;
     wkb["wkb"] = column;
 
-    NL::json geo;
-    geo["version"] = m_geoParquetVersion; // GeoParquet version
-    geo["primary_column"] = "wkb";
-    geo["columns"] = wkb;
+    NL::json geo {
+        { "version", m_geoParquetVersion },
+        { "primary_column", "wkb" },
+        { "columns", wkb }
+    };
 
     input->Append("geo", geo.dump(-1));
 }
 
 
-void ArrowWriter::setupParquet(std::vector<std::shared_ptr<arrow::Array>> const& arrays,
-                               PointTableRef table)
+void ArrowWriter::setupParquet(PointTableRef table)
 {
 
     parquet::WriterProperties::Builder m_oWriterPropertiesBuilder{};
@@ -493,14 +485,9 @@ void ArrowWriter::setupParquet(std::vector<std::shared_ptr<arrow::Array>> const&
 }
 
 
-void ArrowWriter::setupFeather(std::vector<std::shared_ptr<arrow::Array>> const& arrays,
-                               PointTableRef table)
+void ArrowWriter::setupFeather(PointTableRef table)
 {
-    arrow::ipc::IpcWriteOptions writeOptions;
-    auto result = arrow::ipc::MakeFileWriter(m_file.get(),
-                                               m_schema,
-                                               writeOptions,
-                                               m_poKeyValueMetadata);
+    auto result = arrow::ipc::MakeFileWriter(m_file.get(), m_schema);
     if (result.ok())
         m_arrowFileWriter = result.ValueOrDie();
     else
@@ -514,13 +501,14 @@ void ArrowWriter::flushBatch()
     // Wipe off our arrays we're making a new batch
     std::vector<std::shared_ptr<arrow::Array>> arrays;
 
+    // Get the data from the builders into arrays.
     for (auto& handler : m_dimHandlers)
     {
         std::shared_ptr<arrow::Array> array;
         auto status = handler->finish(array);
         if (!status)
             throwError(status.what());
-        arrays.push_back(array);
+        arrays.push_back(std::move(array));
     }
 
     if (m_formatType == arrowsupport::Parquet)

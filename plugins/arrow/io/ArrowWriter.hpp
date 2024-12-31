@@ -47,9 +47,8 @@
 
 namespace pdal
 {
-    class BaseDimHandler;
 
-    typedef std::map<pdal::Dimension::Id, std::unique_ptr<arrow::ArrayBuilder> > DimBuilderMap;
+class BaseDimHandler;
 
 class PDAL_EXPORT ArrowWriter  : public Writer, public Streamable
 {
@@ -70,10 +69,8 @@ private:
     virtual void done(PointTableRef table);
     virtual void write(const PointViewPtr view);
 
-    void setupParquet(std::vector<std::shared_ptr<arrow::Array>> const& arrays,
-        PointTableRef table);
-    void setupFeather(std::vector<std::shared_ptr<arrow::Array>> const& arrays,
-        PointTableRef table);
+    void setupParquet(PointTableRef table);
+    void setupFeather(PointTableRef table);
     void gatherParquetGeoMetadata(std::shared_ptr<arrow::KeyValueMetadata>& input,
         const SpatialReference& ref);
     void flushBatch();
@@ -81,10 +78,7 @@ private:
     std::string m_formatString;
     arrowsupport::ArrowFormatType m_formatType;
 
-    std::shared_ptr<arrow::Table> m_table;
-    std::shared_ptr<arrow::Schema> m_schema;
-    std::vector<std::shared_ptr<arrow::Array>> m_arrays;
-
+    arrowsupport::SchemaPtr m_schema;
     arrow::MemoryPool* m_pool;
     int m_batchSize;
     std::string m_geoParquetVersion;

@@ -84,6 +84,8 @@ struct TypeTraits {};
 
 using DataTypePtr = std::shared_ptr<arrow::DataType>;
 using FieldPtr = std::shared_ptr<arrow::Field>;
+using SchemaPtr = std::shared_ptr<arrow::Schema>;
+using BufferPtr = std::shared_ptr<arrow::Buffer>;
 
 template<>
 struct TypeTraits<uint8_t>
