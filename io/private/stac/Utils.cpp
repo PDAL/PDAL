@@ -58,6 +58,9 @@ std::string handleRelativePath(std::string srcPath, std::string linkPath)
 {
     //Make absolute path of current item's directory, then create relative path from that
 
+    //If src item isn't an absolute path, we need to convert it to one for getDirectory to work
+    if (!FileUtils::isAbsolutePath(srcPath))
+        srcPath = FileUtils::toAbsolutePath(srcPath);
     //Get driectory of src item
     const std::string baseDir = FileUtils::getDirectory(srcPath);
     if (FileUtils::isAbsolutePath(linkPath))
