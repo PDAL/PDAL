@@ -64,6 +64,7 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
     {
         NL::json& node = tree.at(i);
 
+        FileSpec spec;
         std::string filename;
         std::string tag;
         std::string type;
@@ -78,7 +79,9 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
         else
         {
             type = extractType(node);
-            filename = extractFilename(node);
+            spec = extractFilename(node);
+            //ABELL
+            filename = spec.m_path;
             tag = extractTag(node, tags);
             specifiedInputs = extractInputs(node, tags);
             if (!specifiedInputs.empty())
@@ -226,27 +229,108 @@ std::string PipelineReaderJSON::extractType(NL::json& node)
 }
 
 
-std::string PipelineReaderJSON::extractFilename(NL::json& node)
+FileSpec PipelineReaderJSON::extractFilename(NL::json& node)
 {
-    std::string filename;
+    FileSpec spec;
 
     auto it = node.find("filename");
-    if (it != node.end())
+    if (it == node.end())
+        return spec;
+
+    NL::json& val = *it;
+    if (!val.is_null())
     {
-        NL::json& val = *it;
-        if (!val.is_null())
+        if (val.is_string())
+            spec.m_path = val.get<std::string>();
+        else if (val.is_object())
         {
-            if (val.is_string())
-                filename = val.get<std::string>();
-            else
-                throw pdal_error("JSON pipeline: 'filename' must be "
-                    "specified as a string.");
+            extractPath(val, spec);
+            extractHeaders(val, spec);
+            extractQuery(val, spec);
+            if (!val.empty())
+                throw pdal_error("JSON pipeline: Invalid item in filename object: " +
+                    val.dump());
         }
+        else
+            throw pdal_error("JSON pipeline: 'filename' must be specified as a string.");
         node.erase(it);
     }
-    return filename;
+    return spec;
 }
 
+void PipelineReaderJSON::extractPath(NL::json& node, FileSpec& spec)
+{
+    auto it = node.find("path");
+    if (it == node.end())
+          throw pdal_error("JSON pipeline: 'filename' object must contain 'path' member.");
+
+    NL::json& val = *it;
+    if (!val.is_null())
+    {
+        if (val.is_string())
+            spec.m_path = val.get<std::string>();
+        else
+            throw pdal_error("JSON pipeline: filename 'path' member must be specified "
+                "as a string.");
+        node.erase(it);
+    }
+}
+
+void PipelineReaderJSON::extractHeaders(NL::json& node, FileSpec& spec)
+{
+    auto it = node.find("headers");
+    if (it == node.end())
+        return;
+
+    NL::json& val = *it;
+    if (!val.is_null())
+    {
+        spec.m_headers = extractStringList("headers", val);
+        node.erase(it);
+    }
+}
+
+void PipelineReaderJSON::extractQuery(NL::json& node, FileSpec& spec)
+{
+    auto it = node.find("query");
+    if (it == node.end())
+        return;
+
+    NL::json& val = *it;
+    if (!val.is_null())
+    {
+        spec.m_query = extractStringList("query", val);
+        node.erase(it);
+    }
+}
+
+StringList PipelineReaderJSON::extractStringList(const std::string& name, NL::json& node)
+{
+    StringList slist;
+
+    auto error = [&name]()
+    {
+        throw pdal_error("JSON pipeline: '" + name + "' object must be a string or "
+            "array of strings.");
+    };
+
+    if (node.is_string())
+        slist.push_back(node.get<std::string>());
+    else if (node.is_array())
+    {
+        for (size_t i = 0; i < node.size(); ++i)
+        {
+            NL::json& val = node.at(i);
+            if (val.is_string())
+                slist.push_back(val.get<std::string>());
+            else
+                error();
+        }
+    }
+    else
+        error();
+    return slist;
+}
 
 std::string PipelineReaderJSON::extractTag(NL::json& node, TagMap& tags)
 {

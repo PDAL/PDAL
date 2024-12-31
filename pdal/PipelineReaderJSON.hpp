@@ -40,6 +40,7 @@
 #include <vector>
 #include <string>
 
+#include <pdal/FileSpec.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/StageFactory.hpp>
 
@@ -66,7 +67,11 @@ private:
     void readPipeline(const std::string& filename);
     void readPipeline(std::istream& input);
     std::string extractType(NL::json& node);
-    std::string extractFilename(NL::json& node);
+    FileSpec extractFilename(NL::json& node);
+    void extractPath(NL::json& node, FileSpec& spec);
+    void extractHeaders(NL::json& node, FileSpec& spec);
+    void extractQuery(NL::json& node, FileSpec& spec);
+    StringList extractStringList(const std::string& name, NL::json& node);
     std::string extractTag(NL::json& node, TagMap& tags);
     std::vector<Stage *> extractInputs(NL::json& node, TagMap& tags);
     Options extractOptions(NL::json& node);
