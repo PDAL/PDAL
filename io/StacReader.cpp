@@ -142,7 +142,7 @@ void StacReader::addArgs(ProgramArgs& args)
         , m_args->dates);
     args.add("bounds", "Bounding box to select stac items by. This will "
         "propogate down through all readers being used.", m_args->bounds);
-    args.add("ogr", "OGR filter geometriesmto select stac items by.",
+    args.add("ogr", "OGR filter geometries to select stac items by.",
         m_args->ogr);
     args.add("properties", "Map of STAC property names to regular expression "
         "values. ie. {\"pc:type\": \"(lidar|sonar)\"}. Selected items will "
@@ -398,6 +398,7 @@ void StacReader::initializeArgs()
         m_p->m_itemFilters->properties = m_args->properties;
     }
 
+    // There should be a check if both are specified
     if (!m_args->bounds.empty())
     {
 

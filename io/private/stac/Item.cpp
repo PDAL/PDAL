@@ -410,8 +410,7 @@ bool Item::filterBounds(Polygon bounds)
             "Polygon created from STAC 'geometry' key is invalid");
 
     // If the user didn't provide an SRS via option, we can only filter
-    // assuming it is 4326. Otherwise, we'll set or polygon's srs to
-    // the bounds as well.
+    // assuming it is 4326.
 
     if (!bounds.srsValid())
     {
@@ -427,6 +426,7 @@ bool Item::filterBounds(Polygon bounds)
         stacPolygon.transform(ref);
     }
 
+    // Could change the option to multiple polygons and loop thru them here
     if (!stacPolygon.disjoint(bounds))
         return true;
 
