@@ -37,6 +37,7 @@
 #include <ogr_api.h>
 
 #include <pdal/Polygon.hpp>
+#include <pdal/private/OGRSpec.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/gdal/SpatialRef.hpp>
@@ -67,6 +68,7 @@ struct TIndexReader::Args
     std::string m_tileIndexColumnName;
     std::string m_srsColumnName;
     std::string m_wkt;
+    OGRSpec m_ogr;
     std::string m_tgtSrsString;
     std::string m_filterSRS;
     std::string m_attributeFilter;
@@ -149,6 +151,7 @@ void TIndexReader::addArgs(ProgramArgs& args)
     args.add("polygon", "Well-known text description of bounds to limit query",
         m_args->m_wkt);
     args.addSynonym("polygon", "wkt");
+    args.add("ogr", "Specified OGR polygon to limit query", m_args->m_ogr);
     args.add("t_srs", "Transform SRS of tile index geometry", m_args->m_tgtSrsString,
         "EPSG:4326");
     args.add("filter_srs", "Transforms any wkt or boundary option to "
@@ -213,6 +216,14 @@ void TIndexReader::initialize()
     if (getSpatialReference().empty())
         setSpatialReference(SpatialReference(m_out_ref->wkt()));
 
+    // If an OGR specification was added, we overwrite the wkt polygon
+    // with it. If OGRSpec is going to contain non-polygon geometries
+    // in the future this method would need to be changed.
+    if (m_args->m_ogr.size())
+    {
+        Polygon ogrPoly = m_args->m_ogr.getPolygons()[0];
+        m_args->m_wkt = ogrPoly.wkt();
+    }
     // If the user set either explicit 'polygon' or 'boundary' options
     // we will filter by that geometry. The user can set a 'filter_srs'
     // option to override the SRS of the input geometry and we will

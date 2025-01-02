@@ -46,6 +46,7 @@ typedef void *OGRGeometryH;
 namespace pdal
 {
 class Polygon;
+struct OGRSpecOptions;
 
 namespace gdal
 {
@@ -63,7 +64,7 @@ PDAL_EXPORT bool reproject(double& x, double& y, double& z,
 PDAL_EXPORT std::string lastError();
 
 // Exported for test support. Not sure why the above are exported.
-PDAL_EXPORT std::vector<Polygon> getPolygons(const NL::json& ogr);
+PDAL_EXPORT std::vector<Polygon> getPolygons(const OGRSpecOptions& ogr);
 
 // New signatures to support extraction of SRS from the end of geometry
 // specifications.

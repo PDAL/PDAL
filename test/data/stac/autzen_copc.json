@@ -428,7 +428,7 @@
   "links": [],
   "assets": {
     "data": {
-      "href": "https://media.githubusercontent.com/media/PDAL/data/master/autzen/autzen-classified.copc.laz",
+      "href": "https://media.githubusercontent.com/media/PDAL/data/main/autzen/autzen-classified.copc.laz",
       "type": "application/vnd.laszip+copc",
       "title": "COPC data",
       "roles": [

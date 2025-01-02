@@ -44,6 +44,7 @@
 #include <filters/ReprojectionFilter.hpp>
 #include <filters/SortFilter.hpp>
 #include <pdal/SrsBounds.hpp>
+#include <pdal/private/OGRSpec.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
 
@@ -618,10 +619,12 @@ TEST(CopcReaderTest, ogrCrop)
 {
     const std::string srs = R"(PROJCS["NAD_1983_HARN_Lambert_Conformal_Conic",GEOGCS["GCS_North_American_1983_HARN",DATUM["NAD83_High_Accuracy_Reference_Network",SPHEROID["GRS 1980",6378137,298.2572221010002,AUTHORITY["EPSG","7019"]],AUTHORITY["EPSG","6152"]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]],PROJECTION["Lambert_Conformal_Conic_2SP"],PARAMETER["standard_parallel_1",43],PARAMETER["standard_parallel_2",45.5],PARAMETER["latitude_of_origin",41.75],PARAMETER["central_meridian",-120.5],PARAMETER["false_easting",1312335.958005249],PARAMETER["false_northing",0],UNIT["foot",0.3048,AUTHORITY["EPSG","9002"]]])";
 
-    NL::json ogr;
-    ogr["drivers"] = {"GeoJSON"};
-    ogr["datasource"] = Support::datapath("autzen/attributes.json");
-    ogr["sql"] = "select \"_ogr_geometry_\" from attributes";
+    NL::json json;
+    json["type"] = "ogr";
+    json["drivers"] = {"GeoJSON"};
+    json["datasource"] = Support::datapath("autzen/attributes.json");
+    json["sql"] = "select \"_ogr_geometry_\" from attributes";
+    OGRSpec ogr(json);
 
     CopcReader reader;
     {
@@ -648,7 +651,7 @@ TEST(CopcReaderTest, ogrCrop)
         source.setOptions(options);
     }
 
-    std::vector<Polygon> polys = gdal::getPolygons(ogr);
+    std::vector<Polygon> polys = ogr.getPolygons();
     for (Polygon& p : polys)
         p.transform(srs);
     PointTable sourceTable;

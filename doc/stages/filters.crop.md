@@ -84,6 +84,17 @@ polygon
   eg: `"POLYGON((0 0, 5000 10000, 10000 0, 0 0))"`.  This option can be
   specified more than once by placing values in an array.
 
+ogr
+
+: A JSON object representing an OGR query to fetch polygons to use for filtering. The polygons
+  fetched from the query are treated exactly like those specified in the `polygon` option.
+  The JSON object is specified as follows:
+
+```{include} ogr_json.md
+```
+
+
+
 outside
 
 : Invert the cropping logic and only take points outside the cropping
