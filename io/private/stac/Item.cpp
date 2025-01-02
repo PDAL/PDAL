@@ -391,8 +391,10 @@ SpatialReference extractSRS(NL::json& props)
 
 bool Item::filterBounds(Polygon bounds)
 {
-    // Should check this differently. No distinction between invalid and
-    // nonexistent polygons right now.
+    // Polygons are always "valid" even if they're default constructed.
+    // Same with bool(Polygon). maybe change this behavior
+    if (!bounds.valid())
+        throw pdal_error("User input polygon is invalid");
     if (!bounds.area())
         return true;
 

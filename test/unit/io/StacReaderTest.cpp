@@ -524,7 +524,7 @@ TEST(StacReaderTest, ogr_bounds_reject_test)
 }
 
 // adding this back when I get it to throw for invalid polygons
-/* TEST(StacReaderTest, ogr_bounds_invalid_test)
+TEST(StacReaderTest, ogr_bounds_invalid_test)
 {
     NL::json json;
     json["type"] = "ogr";
@@ -544,7 +544,7 @@ TEST(StacReaderTest, ogr_bounds_reject_test)
     reader.setOptions(options);
 
     EXPECT_THROW(QuickInfo qi = reader.preview(), pdal_error);
-} */
+}
 
 TEST(StacReaderTest, wrench_test)
 {
