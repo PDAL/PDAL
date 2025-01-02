@@ -45,6 +45,7 @@
 #include <pdal/SrsBounds.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
+#include <pdal/private/OGRSpec.hpp>
 
 #include "Support.hpp"
 
@@ -471,6 +472,79 @@ TEST(StacReaderTest, bounds_prune_reject_test)
 
     EXPECT_THROW(QuickInfo qi = reader.preview(), pdal_error);
 }
+
+TEST(StacReaderTest, ogr_bounds_accept_test)
+{
+    NL::json json;
+    json["type"] = "ogr";
+    json["drivers"] = {"GeoJSON"};
+    json["datasource"] = Support::datapath("stac/ogr_boundary.json");
+    // feature 1 is same as bounds in bounds_prune_accept_test 
+    json["sql"] = "select \"_ogr_geometry_\" from ogr_boundary WHERE id = 1";
+    OGRSpec ogr(json);
+
+    Options options;
+    options.add("filename", Support::datapath("stac/MD_GoldenBeach_2012.json"));
+    options.add("asset_names", "ept.json");
+    options.add("ogr", ogr);
+
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
+
+    QuickInfo qi = reader.preview();
+
+    NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
+    EXPECT_TRUE(jsonMetadata.contains("item_ids"));
+    std::vector<std::string> idList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
+    EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
+    EXPECT_EQ(qi.m_pointCount, 4860658);
+}
+
+TEST(StacReaderTest, ogr_bounds_reject_test)
+{
+    NL::json json;
+    json["type"] = "ogr";
+    json["drivers"] = {"GeoJSON"};
+    json["datasource"] = Support::datapath("stac/ogr_boundary.json");
+    // feature 2 is same as bounds in bounds_prune_reject_test 
+    json["sql"] = "select \"_ogr_geometry_\" from ogr_boundary WHERE id = 2";
+    OGRSpec ogr(json);
+
+    Options options;
+    options.add("filename", Support::datapath("stac/MD_GoldenBeach_2012.json"));
+    options.add("asset_names", "ept.json");
+    options.add("ogr", ogr);
+
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
+
+    EXPECT_THROW(QuickInfo qi = reader.preview(), pdal_error);
+}
+
+// adding this back when I get it to throw for invalid polygons
+/* TEST(StacReaderTest, ogr_bounds_invalid_test)
+{
+    NL::json json;
+    json["type"] = "ogr";
+    json["drivers"] = {"GeoJSON"};
+    json["datasource"] = Support::datapath("stac/ogr_boundary.json");
+    // feature 3 is an invalid polygon
+    json["sql"] = "select \"_ogr_geometry_\" from ogr_boundary WHERE id = 3";
+    OGRSpec ogr(json);
+
+    Options options;
+    options.add("filename", Support::datapath("stac/MD_GoldenBeach_2012.json"));
+    options.add("asset_names", "ept.json");
+    options.add("ogr", ogr);
+
+    StageFactory f;
+    Stage& reader = *f.createStage("readers.stac");
+    reader.setOptions(options);
+
+    EXPECT_THROW(QuickInfo qi = reader.preview(), pdal_error);
+} */
 
 TEST(StacReaderTest, wrench_test)
 {

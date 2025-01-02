@@ -412,9 +412,7 @@ void StacReader::initializeArgs()
         m_p->m_itemFilters->bounds = boundsPoly;
     }
     else if (m_args->ogr.size())
-    {
         m_p->m_itemFilters->bounds = m_args->ogr.getPolygons()[0];
-    }
 
     if (!m_args->assetNames.empty())
     {

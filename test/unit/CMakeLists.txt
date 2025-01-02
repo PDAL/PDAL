@@ -152,6 +152,7 @@ PDAL_ADD_TEST(pdal_io_buffer_test FILES io/BufferTest.cpp)
 PDAL_ADD_TEST(pdal_io_stac_reader_test
     FILES
         io/StacReaderTest.cpp
+        ${PDAL_SRC_DIR}/private/OGRSpec.cpp
     INCLUDES
         ${PDAL_VENDOR_DIR}
         ${NLOHMANN_INCLUDE_DIR}
