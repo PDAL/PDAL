@@ -102,7 +102,7 @@ public:
         NL::json metadata {
             { "name", m_name },
             { "description", Dimension::description(m_id) },
-            { "interpretation", Dimension::interpretationName<DT>() },
+            { "interpretation", Dimension::interpretationName(Dimension::type<DT>()) },
             { "size", sizeof(DT) }
         };
 
@@ -133,8 +133,9 @@ private:
 class XyzHandler : public BaseDimHandler
 {
 public:
-    XyzHandler(arrow::MemoryPool *pool, const std::string& dimName) :
-        m_dimName(dimName),
+    XyzHandler(arrow::MemoryPool *pool, const std::string& dimName,
+            const std::string& pipelineMetadata) :
+        m_dimName(dimName), m_pipelineMetadata(pipelineMetadata),
         m_doubleBuilder(std::make_shared<arrow::DoubleBuilder>(pool)),
         m_builder(pool, m_doubleBuilder, 3)
     {
@@ -150,10 +151,8 @@ public:
         };
 
         auto kvMetadata = std::make_shared<arrow::KeyValueMetadata>();
-        /**
-        if (m_writePipelineMetadata)
-            kvMetadata->Append("PDAL:pipeline:metadata", Utils::toJSON(table.metadata());
-        **/
+        if (m_pipelineMetadata.size())
+            kvMetadata->Append("PDAL:pipeline:metadata", m_pipelineMetadata);
         kvMetadata->Append("PDAL:dimension:metadata", metadata.dump(-1));
 
         return arrow::field("xyz", arrow::fixed_size_list(arrow::float64(), 3), kvMetadata);
@@ -180,6 +179,7 @@ private:
 
 private:
     std::string m_dimName;
+    std::string m_pipelineMetadata;
     std::shared_ptr<arrow::DoubleBuilder> m_doubleBuilder;
     arrow::FixedSizeListBuilder m_builder;
 };
@@ -331,7 +331,11 @@ void ArrowWriter::prepared(PointTableRef table)
     m_dimHandlers.reserve(table.layout()->dims().size());
 
     //Always do XYZ.
-    m_dimHandlers.push_back(std::make_unique<XyzHandler>(m_pool, m_geoArrowDimensionName));
+    std::string pipelineMetadata;
+    if (m_writePipelineMetadata)
+        pipelineMetadata = Utils::toJSON(table.metadata());
+    m_dimHandlers.push_back(std::make_unique<XyzHandler>(m_pool, m_geoArrowDimensionName,
+        pipelineMetadata));
     if (m_formatType == arrowsupport::Parquet)
         m_dimHandlers.push_back(std::make_unique<WkbHandler>(m_pool));
     for (Id id : table.layout()->dims())
