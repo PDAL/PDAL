@@ -40,11 +40,11 @@
         },
         {
             "rel": "item",
-            "href": "https://raw.githubusercontent.com/PDAL/data/master/stac/autzen_copc.json"
+            "href": "https://raw.githubusercontent.com/PDAL/data/main/stac/autzen_copc.json"
         },
         {
             "rel": "item",
-            "href": "https://raw.githubusercontent.com/PDAL/data/master/stac/autzen_laz.json"
+            "href": "https://raw.githubusercontent.com/PDAL/data/main/stac/autzen_laz.json"
         }
     ]
 }

@@ -404,7 +404,7 @@
   "links": [],
   "assets": {
     "data": {
-      "href": "https://media.githubusercontent.com/media/PDAL/data/master/autzen/autzen-classified.laz",
+      "href": "https://media.githubusercontent.com/media/PDAL/data/main/autzen/autzen-classified.laz",
       "type": "application/vnd.las",
       "title": "LAZ data",
       "roles": [
