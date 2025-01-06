@@ -80,8 +80,7 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
         {
             type = extractType(node);
             spec = extractFilename(node);
-            //ABELL
-            filename = spec.m_path;
+            filename = spec.m_path.string();
             tag = extractTag(node, tags);
             specifiedInputs = extractInputs(node, tags);
             if (!specifiedInputs.empty())
