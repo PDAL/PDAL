@@ -216,6 +216,8 @@ namespace Utils
     */
     inline bool startsWith(const std::string& s, const std::string& prefix)
     {
+        if (prefix.empty())
+            return true;
         if (prefix.size() > s.size())
             return false;
         return (strncmp(prefix.data(), s.data(), prefix.size()) == 0);
@@ -230,6 +232,8 @@ namespace Utils
     */
     inline bool endsWith(const std::string& s, const std::string& postfix)
     {
+        if (postfix.empty())
+            return true;
         if (postfix.size() > s.size())
             return false;
         return (strcmp(postfix.data(),
