@@ -39,9 +39,16 @@
 
 #include <memory>
 
+#include <gdal_version.h>
+
+// Forward decl
 class OGRGeometry;
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,11,0)
+#include <gdal_fwd.h>
+#else
 using OGRGeometryH = void *;
 using OGRSpatialReferenceH = void *;
+#endif
 
 namespace pdal
 {
