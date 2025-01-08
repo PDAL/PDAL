@@ -61,6 +61,13 @@ bounds
   Form: `([minx,maxx],[miny,maxy],[minz,maxz])`
   Example: `--readers.stac.bounds '([-79.0,-74.0],[38.0,39.0])'`
 
+ogr
+: JSON object describing an OGR query, selecting a polygon to prune Features by. Filters for STAC
+  Items that overlap any point of the specified polygon.
+  Form:
+```{include} ogr_json.md
+```
+
 items
 
 : List of [Regular Expression] strings to prune STAC Item IDs by.

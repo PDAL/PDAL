@@ -38,7 +38,7 @@
 #include <pdal/Reader.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/SrsBounds.hpp>
+#include <pdal/Polygon.hpp>
 #include <pdal/Log.hpp>
 
 #include "Utils.hpp"
@@ -78,7 +78,7 @@ public:
 
     struct Filters {
         std::vector<RegEx> ids;
-        SrsBounds bounds;
+        Polygon bounds;
         SpatialReference srs;
         NL::json properties;
         DatePairs datePairs;
@@ -121,7 +121,7 @@ private:
     bool filterCol(std::vector<RegEx> ids);
     bool filterDates(DatePairs dates);
     bool filterProperties(const NL::json& filterProps);
-    bool filterBounds(SrsBounds bounds);
+    bool filterBounds(Polygon bounds);
 
 
 };

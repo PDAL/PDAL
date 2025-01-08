@@ -38,6 +38,8 @@
 #include <pdal/SrsBounds.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/private/SrsTransform.hpp>
+#include <pdal/private/OGRSpec.hpp>
+#include <pdal/Polygon.hpp>
 
 #include <arbiter/arbiter.hpp>
 #include <nlohmann/json.hpp>
@@ -98,6 +100,7 @@ struct StacReader::Args
 
     NL::json::array_t dates;
     SrsBounds bounds;
+    OGRSpec ogr;
     std::vector<std::string> assetNames;
 
     SchemaUrls schemaUrls;
@@ -139,6 +142,8 @@ void StacReader::addArgs(ProgramArgs& args)
         , m_args->dates);
     args.add("bounds", "Bounding box to select stac items by. This will "
         "propogate down through all readers being used.", m_args->bounds);
+    args.add("ogr", "OGR filter geometries to select stac items by.",
+        m_args->ogr);
     args.add("properties", "Map of STAC property names to regular expression "
         "values. ie. {\"pc:type\": \"(lidar|sonar)\"}. Selected items will "
         "match all properties.", m_args->properties);
@@ -393,6 +398,7 @@ void StacReader::initializeArgs()
         m_p->m_itemFilters->properties = m_args->properties;
     }
 
+    // There should be a check if both are specified
     if (!m_args->bounds.empty())
     {
 
@@ -400,8 +406,14 @@ void StacReader::initializeArgs()
             throw pdal_error("Supplied bounds are not valid.");
         log()->get(LogLevel::Debug) << "Bounds: " << m_args->bounds << std::endl;
 
-        m_p->m_itemFilters->bounds = m_args->bounds;
+        Polygon boundsPoly(m_args->bounds.to2d());
+        if (!m_args->bounds.spatialReference().empty())
+            boundsPoly.setSpatialReference(m_args->bounds.spatialReference());
+        m_p->m_itemFilters->bounds = boundsPoly;
     }
+    else if (m_args->ogr.size())
+        m_p->m_itemFilters->bounds = m_args->ogr.getPolygons()[0];
+
     if (!m_args->assetNames.empty())
     {
         std::stringstream s;
