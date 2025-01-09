@@ -101,7 +101,10 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
 
             for (const std::string& path : files)
             {
-                StageCreationOptions ops { path, type, nullptr, options, tag };
+                // this is a really bad fix
+                spec.m_path = path;
+
+                ReaderCreationOptions ops { spec, type, nullptr, options, tag };
                 s = &m_manager.makeReader(ops);
 
                 if (specifiedInputs.size())
@@ -284,7 +287,7 @@ void PipelineReaderJSON::extractHeaders(NL::json& node, FileSpec& spec)
     NL::json& val = *it;
     if (!val.is_null())
     {
-        spec.m_headers = extractStringList("headers", val);
+        spec.m_headers = extractStringMap("headers", val);
         node.erase(it);
     }
 }
@@ -298,37 +301,34 @@ void PipelineReaderJSON::extractQuery(NL::json& node, FileSpec& spec)
     NL::json& val = *it;
     if (!val.is_null())
     {
-        spec.m_query = extractStringList("query", val);
+        spec.m_query = extractStringMap("query", val);
         node.erase(it);
     }
 }
 
-StringList PipelineReaderJSON::extractStringList(const std::string& name, NL::json& node)
+StringMap PipelineReaderJSON::extractStringMap(const std::string& name, NL::json& node)
 {
-    StringList slist;
+    StringMap smap;
 
     auto error = [&name]()
     {
-        throw pdal_error("JSON pipeline: '" + name + "' object must be a string or "
-            "array of strings.");
+        throw pdal_error("JSON pipeline: '" + name + "' must be an object of "
+            "string key-value pairs.");
     };
 
-    if (node.is_string())
-        slist.push_back(node.get<std::string>());
-    else if (node.is_array())
+    if (node.is_object())
     {
-        for (size_t i = 0; i < node.size(); ++i)
+        for (auto& [key, val] : node.items())
         {
-            NL::json& val = node.at(i);
             if (val.is_string())
-                slist.push_back(val.get<std::string>());
+                smap.insert({key, val});
             else
                 error();
         }
     }
     else
         error();
-    return slist;
+    return smap;
 }
 
 std::string PipelineReaderJSON::extractTag(NL::json& node, TagMap& tags)

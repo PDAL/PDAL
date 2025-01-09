@@ -57,6 +57,7 @@ void Reader::l_addArgs(ProgramArgs& args)
     m_countArg = &args.add("count", "Maximum number of points read", m_count,
         (std::numeric_limits<point_count_t>::max)());
 
+    args.add("filespec", "TEST", m_filespec);
     args.add("override_srs", "Spatial reference to apply to data",
             m_overrideSrs);
     args.addSynonym("override_srs", "spatialreference");

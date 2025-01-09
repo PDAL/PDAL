@@ -71,7 +71,7 @@ private:
     void extractPath(NL::json& node, FileSpec& spec);
     void extractHeaders(NL::json& node, FileSpec& spec);
     void extractQuery(NL::json& node, FileSpec& spec);
-    StringList extractStringList(const std::string& name, NL::json& node);
+    StringMap extractStringMap(const std::string& name, NL::json& node);
     std::string extractTag(NL::json& node, TagMap& tags);
     std::vector<Stage *> extractInputs(NL::json& node, TagMap& tags);
     Options extractOptions(NL::json& node);

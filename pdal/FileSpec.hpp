@@ -37,6 +37,8 @@
 
 #include <pdal/pdal_types.hpp>
 
+using StringMap = std::map<std::string, std::string>;
+
 namespace pdal
 {
 
@@ -47,16 +49,20 @@ public:
     {}
     FileSpec(const std::filesystem::path& path) : m_path(path)
     {}
+    FileSpec(const std::string& path) : m_path(path)
+    {}
 
     bool valid() const
     { return !m_path.empty(); }
+    bool onlyFilename() const
+    { return m_headers.empty() || m_query.empty(); }
 
     friend std::ostream& operator << (std::ostream& out, const FileSpec& spec);
 
 public:
     std::filesystem::path m_path;
-    StringList m_headers;
-    StringList m_query;
+    StringMap m_headers;
+    StringMap m_query;
 };
 
 namespace Utils
@@ -73,12 +79,12 @@ inline std::ostream& operator << (std::ostream& out, const FileSpec& spec)
 {
     std::cerr << "Path: " << spec.m_path << "!\n";
     std::cerr << "Headers: ";
-    for (std::string_view s : spec.m_headers)
-        std::cerr << s << ", ";
+    for (auto& elem : spec.m_headers)
+        std::cerr << elem.first << ": " << elem.second << ", ";
     std::cerr << "\n";
     std::cerr << "Query: ";
-    for (std::string_view s : spec.m_query)
-        std::cerr << s << ", ";
+    for (auto& elem : spec.m_query)
+        std::cerr << elem.first << ": " << elem.second << ", ";
     std::cerr << "\n";
 
     return out;

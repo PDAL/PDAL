@@ -316,7 +316,7 @@ MetadataNode PipelineManager::getMetadata() const
 Stage& PipelineManager::makeReader(const std::string& inputFile,
     std::string driver)
 {
-    StageCreationOptions ops { inputFile, driver };
+    ReaderCreationOptions ops { inputFile, driver };
 
     return makeReader(ops);
 }
@@ -325,12 +325,12 @@ Stage& PipelineManager::makeReader(const std::string& inputFile,
 Stage& PipelineManager::makeReader(const std::string& inputFile,
     std::string driver, Options options)
 {
-    StageCreationOptions ops { inputFile, driver, nullptr, options };
+    ReaderCreationOptions ops { inputFile, driver, nullptr, options };
 
     return makeReader(ops);
 }
 
-
+// not removing this so stuff doesn't break 
 Stage& PipelineManager::makeReader(StageCreationOptions& o)
 {
     if (o.m_driver.empty())
@@ -348,6 +348,29 @@ Stage& PipelineManager::makeReader(StageCreationOptions& o)
     setOptions(reader, o.m_options);
     return reader;
 }
+
+Stage& PipelineManager::makeReader(ReaderCreationOptions& o)
+{
+    if (o.m_driver.empty())
+    {
+        o.m_driver = StageFactory::inferReaderDriver(o.m_filespec.m_path.string());
+        if (o.m_driver.empty())
+            throw pdal_error("Cannot determine reader for input file: " +
+                o.m_filespec.m_path.string());
+    }
+    // Probably a way to make these work w/ the same arg but I couldn't figure it out
+    // also, what happens if it's empty?
+    if (o.m_filespec.valid())
+    {
+        o.m_options.replace("filename", o.m_filespec.m_path.string());
+        o.m_options.replace("filespec", o.m_filespec);
+    }
+
+    Stage& reader = addReader(o.m_driver);
+    reader.setTag(o.m_tag);
+    setOptions(reader, o.m_options);
+    return reader;
+} 
 
 
 Stage& PipelineManager::makeFilter(const std::string& driver)

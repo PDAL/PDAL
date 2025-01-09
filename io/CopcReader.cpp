@@ -346,6 +346,10 @@ void CopcReader::initialize(PointTableRef table)
     // Make sure we allow at least as many chunks as we have threads.
     m_args->keepAliveChunkCount = (std::max)(m_args->threads, (size_t)m_args->keepAliveChunkCount);
 
+    for (auto& elem : m_filespec.m_headers)
+        std::cout << elem.first << ": " << elem.second << '\n';
+    for (auto& elem : m_filespec.m_query)
+        std::cout << elem.first << ": " << elem.second << '\n';
     StringMap headers;
     StringMap query;
     setForwards(headers, query);
