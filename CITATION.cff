@@ -1,0 +1,60 @@
+cff-version: 1.2.0
+message: Please cite this software using these metadata or in the CITATION file.
+type: software
+title: PDAL
+version: 2.8.3
+date-released: 2024-12-27
+doi: 10.5281/zenodo.2616780
+abstract: PDAL is a C++ library for translating and manipulating
+geospatial point cloud data. It provides pipelines, filters, readers,
+and writers for manipulating point cloud data.
+url: https://pdal.io
+repository-code: https://github.com/PDAL/PDAL
+license: BSD
+authors:
+  - given-names: Howard
+    family-names: Butler
+    affiliation: Hobu Inc
+    orcid: https://orcid.org/0000-0002-5340-1380
+  - given-names: Andrew
+    family-names: Bell
+    affiliation: Hobu Inc
+  - given-names: Connor
+    family-names: Manning
+    affiliation: Hobu Inc
+  - given-names: Kyle
+    family-names: Mann
+    affiliation: Hobu Inc
+  - given-names: Ognyan
+    family-names: Moore
+    affiliation: Hobu Inc
+  - given-names: Isaac
+    family-names: Bell
+    affiliation: Hobu Inc
+  - given-names: Brad
+    family-names: Chambers
+    affiliation: GCS Geospatial
+    orcid: https://orcid.org/0000-0002-7686-9357
+  - given-names: Even
+    family-names: Rouault
+    affiliation: Spatialys
+    orcid: https://orcid.org/0000-0002-5068-0476
+  - given-names: Frank
+    family-names: Warmerdam
+    affiliation: Planet Labs Inc
+  - given-names: Mateusz
+    family-names: Łoskot
+    affiliation: Cadcorp
+  - given-names: Kristian
+    family-names: Evers
+    orcid: https://orcid.org/0000-0002-1310-4576
+  - given-names: Peter
+    family-names: Gadomski
+    orcid: https://orcid.org/0000-0003-4877-7217
+
+keywords:
+  - PDAL
+  - geospatial
+  - point clouds
+  - conversion
+  - processing

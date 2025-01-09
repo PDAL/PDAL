@@ -38,7 +38,8 @@ This document describes the process for releasing a new version of PDAL.
       >     set(PDAL_SOLIB_BUILD 0)
 
     - Update `doc/download.rst` point to new release
-    -  Update the `STABLE_BRANCH` pointer in the GitHub variables at <https://github.com/PDAL/PDAL/settings/variables/actions>
+    - Update the `STABLE_BRANCH` pointer in the GitHub variables at <https://github.com/PDAL/PDAL/settings/variables/actions>
+    - Update CITATION.cff with release date and version information
 
 3)  Ensure CI is ✅
 
