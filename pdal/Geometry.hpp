@@ -39,11 +39,12 @@
 
 #include <memory>
 
-#include <gdal_version.h>
-
 // Forward decl
 class OGRGeometry;
-#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,11,0)
+
+// Get GDAL's forward decls if availalbe
+// otherwise make our own
+#if __has_include(<gdal_fwd.h>)
 #include <gdal_fwd.h>
 #else
 using OGRGeometryH = void *;
