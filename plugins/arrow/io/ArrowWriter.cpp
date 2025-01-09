@@ -74,8 +74,12 @@ public:
     virtual ~BaseDimHandler()
     {}
 
+    // Get an arrow field approriate for handling a dimension.
     virtual std::shared_ptr<arrow::Field> field() = 0;
+    // Append a the dimension data from a point to an array builder.
     virtual Utils::StatusWithReason append(const PointRef& point) = 0;
+    // Finish building of point data for a builder. The builder is reused for the next
+    // data block.
     virtual Utils::StatusWithReason finish(std::shared_ptr<arrow::Array>& array)
     {
         arrow::Status status = builder().Finish(&array);
@@ -85,11 +89,11 @@ public:
     }
 
 private:
+    // Get a builder appropriate for the data type.
     virtual arrow::ArrayBuilder& builder() = 0;
 };
 
-//template<typename DT, typename BT>  // Dimension type, Builder type
-template<typename DT>
+template<typename DT>  // DT - Dimension type.
 class DimHandler : public BaseDimHandler
 {
 public:
@@ -101,17 +105,14 @@ public:
     {
         auto kvMetadata = std::make_shared<arrow::KeyValueMetadata>();
 
-        // Parquet doesn't support field-level metadata.
-        if (m_formatType == arrowsupport::Feather)
-        {
-            NL::json metadata {
+        // Note that field-level metadata is not stored in Parquet.
+        NL::json metadata {
                 { "name", m_name },
-                    { "description", Dimension::description(m_id) },
-                    { "interpretation", Dimension::interpretationName(Dimension::type<DT>()) },
-                    { "size", sizeof(DT) }
-            };
-            kvMetadata->Append("PDAL:dimension:metadata", metadata.dump(-1));
-        }
+                { "description", Dimension::description(m_id) },
+                { "interpretation", Dimension::interpretationName(Dimension::type<DT>()) },
+                { "size", sizeof(DT) }
+        };
+        kvMetadata->Append("PDAL:dimension:metadata", metadata.dump(-1));
 
         return arrow::field(m_name, TypeTraits<DT>::dataType(), kvMetadata);
     }
@@ -134,6 +135,7 @@ private:
     std::string m_name;
 };
 
+// Handler for packed XYZ data.
 class XyzHandler : public BaseDimHandler
 {
 public:
@@ -188,6 +190,7 @@ private:
     arrow::FixedSizeListBuilder m_builder;
 };
 
+// Handler for WKB-encoded XYZ data per GeoParquet specification.
 class WkbHandler : public BaseDimHandler
 {
 public:
@@ -207,6 +210,7 @@ public:
         kvMetadata->Append("ARROW:extension:name", "geoarrow.wkb");
         kvMetadata->Append("PDAL:dimension:metadata", metadata.dump(-1));
 
+        // Must be binary instead of fixed-length binary to conform to GeoParquet.
         return arrow::field("wkb", arrow::binary(), kvMetadata);
     }
 
