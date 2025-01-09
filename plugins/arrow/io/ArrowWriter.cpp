@@ -99,15 +99,19 @@ public:
 
     FieldPtr field() override
     {
-        NL::json metadata {
-            { "name", m_name },
-            { "description", Dimension::description(m_id) },
-            { "interpretation", Dimension::interpretationName(Dimension::type<DT>()) },
-            { "size", sizeof(DT) }
-        };
-
         auto kvMetadata = std::make_shared<arrow::KeyValueMetadata>();
-        kvMetadata->Append("PDAL:dimension:metadata", metadata.dump(-1));
+
+        // Parquet doesn't support field-level metadata.
+        if (m_formatType == arrowsupport::Feather)
+        {
+            NL::json metadata {
+                { "name", m_name },
+                    { "description", Dimension::description(m_id) },
+                    { "interpretation", Dimension::interpretationName(Dimension::type<DT>()) },
+                    { "size", sizeof(DT) }
+            };
+            kvMetadata->Append("PDAL:dimension:metadata", metadata.dump(-1));
+        }
 
         return arrow::field(m_name, TypeTraits<DT>::dataType(), kvMetadata);
     }
@@ -426,7 +430,6 @@ void ArrowWriter::gatherParquetGeoMetadata(std::shared_ptr<arrow::KeyValueMetada
 
 void ArrowWriter::setupParquet(PointTableRef table)
 {
-
     parquet::WriterProperties::Builder m_oWriterPropertiesBuilder{};
 
     m_oWriterPropertiesBuilder.max_row_group_length(m_batchSize);
@@ -439,10 +442,10 @@ void ArrowWriter::setupParquet(PointTableRef table)
         parquet::ArrowWriterProperties::Builder().store_schema()->build();
 
     std::shared_ptr<parquet::SchemaDescriptor> parquet_schema;
-    auto result = parquet::arrow::ToParquetSchema( m_schema.get(),
-                                                   *m_oWriterPropertiesBuilder.build(),
-                                                   *arrowWriterProperties,
-                                                   &parquet_schema);
+    auto result = parquet::arrow::ToParquetSchema(m_schema.get(),
+                                                  *m_oWriterPropertiesBuilder.build(),
+                                                  *arrowWriterProperties,
+                                                  &parquet_schema);
     if (!result.ok())
         throwError("Unable to convert ToParquetSchema with error: "+ result.ToString());
 
@@ -572,7 +575,6 @@ void ArrowWriter::done(PointTableRef table)
 
     log()->get(LogLevel::Debug) << "total memory allocated "
                                 << m_pool->bytes_allocated() << std::endl;
-
 }
 
 } // namespaces

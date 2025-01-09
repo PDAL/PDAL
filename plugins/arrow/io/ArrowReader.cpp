@@ -46,6 +46,7 @@
 #include <nlohmann/json.hpp>
 #include <ogr_geometry.h>
 
+#include <arrow/record_batch.h>
 #include <arrow/io/api.h>
 #include <arrow/ipc/api.h>
 
