@@ -42,7 +42,7 @@
 // Forward decl
 class OGRGeometry;
 
-// Get GDAL's forward decls if availalbe
+// Get GDAL's forward decls if available
 // otherwise make our own
 #if __has_include(<gdal_fwd.h>)
 #include <gdal_fwd.h>
