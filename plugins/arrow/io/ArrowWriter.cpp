@@ -509,7 +509,6 @@ void ArrowWriter::setupFeather(PointTableRef table)
 
 void ArrowWriter::flushBatch()
 {
-    // Wipe off our arrays we're making a new batch
     std::vector<std::shared_ptr<arrow::Array>> arrays;
 
     // Get the data from the builders into arrays.
