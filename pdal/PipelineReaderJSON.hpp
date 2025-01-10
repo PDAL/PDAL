@@ -68,10 +68,6 @@ private:
     void readPipeline(std::istream& input);
     std::string extractType(NL::json& node);
     FileSpec extractFilename(NL::json& node);
-    void extractPath(NL::json& node, FileSpec& spec);
-    void extractHeaders(NL::json& node, FileSpec& spec);
-    void extractQuery(NL::json& node, FileSpec& spec);
-    StringMap extractStringMap(const std::string& name, NL::json& node);
     std::string extractTag(NL::json& node, TagMap& tags);
     std::vector<Stage *> extractInputs(NL::json& node, TagMap& tags);
     Options extractOptions(NL::json& node);
