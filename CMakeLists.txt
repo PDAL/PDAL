@@ -215,7 +215,7 @@ PDAL_ADD_LIBRARY(${PDAL_LIB_NAME} ${SRCS})
 if (WIN32)
     # fix for "error C4005: '_XKEYCHECK_H': macro redefinition"
     # C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\
-    # include\xkeycheck.h(55): fatal error C1189: #error:  The C++ Standard Library forbids 
+    # include\xkeycheck.h(55): fatal error C1189: #error:  The C++ Standard Library forbids
     # macroizing the keyword "bool". Enable warning C4005 to find the forbidden define.
     target_compile_definitions(${PDAL_LIB_NAME} PRIVATE _XKEYCHECK_H=1)
 endif()
