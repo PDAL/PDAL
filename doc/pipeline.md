@@ -120,6 +120,27 @@ files from a single pipeline.  The crop filter creates two output point views
 ]
 ```
 
+### Multiple Writers and Output Types
+
+A pipeline can have multiple writers, but they must operate sequentially. 
+If tags and inputs create seperate end points (multiple leaf nodes), not 
+all stages will be executed. For example, you can have something like:
+
+`Reader -> Filter -> Writer -> Filter -> Writer`
+
+You can also chain writers to get two types of output:
+
+`Reader -> Writer -> Writer`
+
+But you can not split the pipeline and write to multiple end points:
+
+```
+Reader -> Filter -> Filter -> Filter -> Writer
+                      |           |         
+                      v           v
+                    Writer      Writer
+```
+
 (processing_modes)=
 
 ## Processing Modes
