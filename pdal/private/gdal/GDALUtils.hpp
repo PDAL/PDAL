@@ -39,7 +39,16 @@
 #include <pdal/util/Bounds.hpp>
 
 class OGRGeometry;
-typedef void *OGRGeometryH;
+
+// Get GDAL's forward decls if available
+// otherwise make our own
+#if __has_include(<gdal_fwd.h>)
+#include <gdal_fwd.h>
+#else
+using OGRGeometryH = void *;
+using OGRSpatialReferenceH = void *;
+#endif
+
 
 #include <vector>
 
