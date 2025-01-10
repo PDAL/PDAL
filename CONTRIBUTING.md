@@ -38,8 +38,7 @@ Fixes #123.
 * [PDAL's coding conventions](https://pdal.io/project/conventions.html)
 * [General GitHub documentation](http://help.github.com/)
 * [GitHub pull request documentation](http://help.github.com/send-pull-requests/)
-* #pdal IRC channel on freenode.org
-* [PDAL Gitter channel](https://gitter.im/PDAL/PDAL)
+* [PDAL Element Room](https://matrix.to/#/#pdal:osgeo.org)
 
 ## Acknowledgements
 
