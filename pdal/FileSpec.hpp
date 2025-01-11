@@ -35,8 +35,12 @@
 
 #include <filesystem>
 
-#include <pdal/JsonFwd.hpp>
+#include <nlohmann/json.hpp>
+
+#include <pdal/PDALUtils.hpp>
 #include <pdal/pdal_types.hpp>
+
+//#include <pdal/JsonFwd.hpp>
 
 using StringMap = std::map<std::string, std::string>;
 
@@ -56,15 +60,16 @@ public:
     bool valid() const
     { return !m_path.empty(); }
     bool onlyFilename() const
-    { return m_headers.empty() || m_query.empty(); }
+    { return m_headers.empty() && m_query.empty(); }
     Utils::StatusWithReason parse(NL::json& json);
 
     friend std::ostream& operator << (std::ostream& out, const FileSpec& spec);
 
 private:
-    Utils::StatusWithReason extractPath(NL::json& node);
-    Utils::StatusWithReason extractQuery(NL::json& node);
-    Utils::StatusWithReason extractHeaders(NL::json& node);
+    void extractPath(NL::json& node);
+    void extractQuery(NL::json& node);
+    void extractHeaders(NL::json& node);
+    StringMap extractStringMap(const std::string& name, NL::json& node);
 
 public:
     std::filesystem::path m_path;
@@ -75,7 +80,16 @@ public:
 namespace Utils
 {
     template<>
-    StatusWithReason fromString(const std::string& s, FileSpec& spec);
+    inline StatusWithReason fromString(const std::string& s, FileSpec& spec)
+    {
+        NL::json json;
+        // maybe too many functions returning StatusWithReason here
+        StatusWithReason status = parseJson(s, json);
+        if (!status)
+            return status;
+        
+        return spec.parse(json);
+    }
 }
 
 inline std::ostream& operator << (std::ostream& out, const FileSpec& spec)

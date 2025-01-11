@@ -53,11 +53,11 @@ Stage::WhereMergeMode Reader::mergeMode() const
 void Reader::l_addArgs(ProgramArgs& args)
 {
     Stage::l_addArgs(args);
-    m_filenameArg = &args.add("filename", "Name of file to read", m_filename);
+    m_filenameArg = &args.add("filename", "Name of file to read", m_filespec);
     m_countArg = &args.add("count", "Maximum number of points read", m_count,
         (std::numeric_limits<point_count_t>::max)());
 
-    args.add("filespec", "TEST", m_filespec);
+    //args.add("filespec", "TEST", m_filespec);
     args.add("override_srs", "Spatial reference to apply to data",
             m_overrideSrs);
     args.addSynonym("override_srs", "spatialreference");
@@ -94,6 +94,9 @@ void Reader::setSpatialReference(MetadataNode& m, const SpatialReference& srs)
 void Reader::l_initialize(PointTableRef table)
 {
     Stage::l_initialize(table);
+    // Temporary fix
+    // do something different with the filespec and filename here. not sure what
+    m_filename = m_filespec.m_path.string()
 
     if (m_overrideSrs.valid() && m_defaultSrs.valid())
         throwError("Cannot specify both 'override_srs' and 'default_srs'");
