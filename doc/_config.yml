@@ -3,7 +3,7 @@
 
 title: Point Data Abstraction Library (PDAL)
 author: ''
-copyright: "2024"
+copyright: "2025"
 # logo: _static/pdal_logo.png
 
 # Force re-execution of notebooks on each build.
@@ -37,7 +37,7 @@ html:
   html_short_title: PDAL
   html_title: PDAL2
   extra_footer: |
-    <a href="https://hobu.co/access.html"><img width="30px" src="./_static/logo/hobu-emblem-32x32.png" /></a> <a href="/copyright.html">Copyright</a> ©2024 <a href="https://github.com/abellgithub">Andrew Bell</a>, <a href="https://github.com/chambbj">Brad Chambers</a>, <a href="http://github.com/hobu">Howard Butler</a>, and <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>
+    <a href="https://hobu.co/access.html"><img width="30px" src="./_static/logo/hobu-emblem-32x32.png" /></a> <a href="/copyright.html">Copyright</a> ©2025 <a href="https://github.com/abellgithub">Andrew Bell</a>, <a href="https://github.com/chambbj">Brad Chambers</a>, <a href="http://github.com/hobu">Howard Butler</a>, and <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>
 
 
 sphinx:
