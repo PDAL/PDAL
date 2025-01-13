@@ -81,9 +81,21 @@ start
 extra_dims
 
 : Extra dimensions to be read as part of each point beyond those specified by
-  the LAS point format.  The format of the option is
-  `<dimension_name>=<type>[, ...]`.  Any valid PDAL {ref}`type <types>` can be
-  specified.
+  the LAS point format.  The format of the option is describe as a json table descring all dimensions contained in the las/laz file : 
+  
+  `[[
+		{
+			"description":"description name", 
+			"values":[{"name":dimension_name, "type":type},...]
+		},
+		{
+			...
+		}
+	]]`
+	
+ Any valid PDAL {ref}`type <types>` can be specified. 
+ 
+ Only one extra byte bloc is normaly allowed in the Las specification ; this bloc could contains severals added dimensions. But, because somes used severals bloc in their Las files, it's possible to discribe more than one (wich explains the table). If las contains more than one, the description of the extra_dims options should be exactly the same as the las content. 
 
   ```{note}
   The presence of an extra bytes VLR when reading a version
