@@ -83,24 +83,8 @@ namespace Utils
     template<>
     inline StatusWithReason fromString(const std::string& s, FileSpec& spec)
     {
-        //std::cout << "string value: " << s << '\n';
         return spec.parse(s);
     }
-}
-
-inline std::ostream& operator << (std::ostream& out, const FileSpec& spec)
-{
-    std::cerr << "Path: " << spec.m_path << "!\n";
-    std::cerr << "Headers: ";
-    for (auto& elem : spec.m_headers)
-        std::cerr << elem.first << ": " << elem.second << ", ";
-    std::cerr << "\n";
-    std::cerr << "Query: ";
-    for (auto& elem : spec.m_query)
-        std::cerr << elem.first << ": " << elem.second << ", ";
-    std::cerr << "\n";
-
-    return out;
 }
 
 } // namespace pdal

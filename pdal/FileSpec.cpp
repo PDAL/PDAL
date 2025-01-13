@@ -117,9 +117,20 @@ StringMap FileSpec::extractStringMap(const std::string& name, NL::json& node)
     return smap;
 }
 
-/* std::istream& operator >> (std::istream& in, FileSpec& spec)
+// needs to be converted back to a json string for an Option<T> object to be created.
+// This happens after it gets processed by PipelineReaderJSON -- it all feels a bit circular.
+std::ostream& operator << (std::ostream& out, const FileSpec& spec)
 {
-    std::string s;
-} */
+    NL::json json;
+    json["path"] = spec.m_path.string();
+    if (!spec.m_headers.empty())
+        json["headers"] = spec.m_headers;
+    if (!spec.m_query.empty())
+        json["query"] = spec.m_query;
+
+    out << json;
+    return out;
+}
+
 
 } // namespace pdal

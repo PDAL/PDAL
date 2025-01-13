@@ -79,6 +79,7 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
         else
         {
             type = extractType(node);
+            // only relevant for readers
             spec = extractFilename(node);
             filename = spec.m_path.string();
             tag = extractTag(node, tags);
