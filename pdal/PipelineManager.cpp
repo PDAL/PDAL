@@ -358,19 +358,15 @@ Stage& PipelineManager::makeReader(ReaderCreationOptions& o)
             throw pdal_error("Cannot determine reader for input file: " +
                 o.m_filespec.m_path.string());
     }
-    // Probably a way to make these work w/ the same arg but I couldn't figure it out
-    // also, what happens if it's empty?
+    // test if empty
     if (o.m_filespec.valid())
-    {
-        o.m_options.replace("filename", o.m_filespec.m_path.string());
-        o.m_options.replace("filespec", o.m_filespec);
-    }
+        o.m_options.replace("filename", o.m_filespec);
 
     Stage& reader = addReader(o.m_driver);
     reader.setTag(o.m_tag);
     setOptions(reader, o.m_options);
     return reader;
-} 
+}
 
 
 Stage& PipelineManager::makeFilter(const std::string& driver)

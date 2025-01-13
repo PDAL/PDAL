@@ -22,12 +22,16 @@ Utils::StatusWithReason FileSpec::parse(NL::json& json)
 }
 
 // making this so I don't have to expose any json stuff in the header
-Utils::StatusWithReason FileSpec::parse(const std::string& jsonStr)
+Utils::StatusWithReason FileSpec::parse(const std::string& jsonOrStr)
 {
     NL::json json;
-    Utils::StatusWithReason status = Utils::parseJson(jsonStr, json);
-    if (!status)
-        return status;
+    // easiest thing to do is just assume it's a filename string if invalid json.
+    // There's probably a better way
+    if (!Utils::parseJson(jsonOrStr, json))
+    {
+        m_path = jsonOrStr;
+        return true;
+    }
 
     try
     {

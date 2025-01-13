@@ -59,8 +59,6 @@ struct StageCreationOptions
     std::string m_tag;
 };
 
-// not making this inherited from StageCreationOptions since
-// we don't want m_filename
 struct ReaderCreationOptions
 {
     FileSpec m_filespec;

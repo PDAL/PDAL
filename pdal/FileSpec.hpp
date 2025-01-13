@@ -62,10 +62,9 @@ public:
     bool onlyFilename() const
     { return m_headers.empty() && m_query.empty(); }
     Utils::StatusWithReason parse(NL::json& json);
-    Utils::StatusWithReason parse(const std::string& jsonStr);
+    Utils::StatusWithReason parse(const std::string& jsonOrStr);
 
     friend std::ostream& operator << (std::ostream& out, const FileSpec& spec);
-    friend Utils::StatusWithReason Utils::fromString(const std::string& s, FileSpec& spec);
 
 private:
     void extractPath(NL::json& node);
@@ -84,10 +83,10 @@ namespace Utils
     template<>
     inline StatusWithReason fromString(const std::string& s, FileSpec& spec)
     {
+        //std::cout << "string value: " << s << '\n';
         return spec.parse(s);
     }
 }
-//std::istream& operator >> (std::istream& in, FileSpec& spec);
 
 inline std::ostream& operator << (std::ostream& out, const FileSpec& spec)
 {
