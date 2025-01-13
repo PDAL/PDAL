@@ -96,7 +96,7 @@ void Reader::l_initialize(PointTableRef table)
     Stage::l_initialize(table);
     // Temporary fix
     // do something different with the filespec and filename here. not sure what
-    m_filename = m_filespec.m_path.string()
+    m_filename = m_filespec.m_path.string();
 
     if (m_overrideSrs.valid() && m_defaultSrs.valid())
         throwError("Cannot specify both 'override_srs' and 'default_srs'");

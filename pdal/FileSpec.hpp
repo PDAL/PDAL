@@ -35,12 +35,12 @@
 
 #include <filesystem>
 
-#include <nlohmann/json.hpp>
+//#include <nlohmann/json.hpp>
 
 #include <pdal/PDALUtils.hpp>
 #include <pdal/pdal_types.hpp>
 
-//#include <pdal/JsonFwd.hpp>
+#include <pdal/JsonFwd.hpp>
 
 using StringMap = std::map<std::string, std::string>;
 
@@ -62,8 +62,10 @@ public:
     bool onlyFilename() const
     { return m_headers.empty() && m_query.empty(); }
     Utils::StatusWithReason parse(NL::json& json);
+    Utils::StatusWithReason parse(const std::string& jsonStr);
 
     friend std::ostream& operator << (std::ostream& out, const FileSpec& spec);
+    friend Utils::StatusWithReason Utils::fromString(const std::string& s, FileSpec& spec);
 
 private:
     void extractPath(NL::json& node);
@@ -82,15 +84,10 @@ namespace Utils
     template<>
     inline StatusWithReason fromString(const std::string& s, FileSpec& spec)
     {
-        NL::json json;
-        // maybe too many functions returning StatusWithReason here
-        StatusWithReason status = parseJson(s, json);
-        if (!status)
-            return status;
-        
-        return spec.parse(json);
+        return spec.parse(s);
     }
 }
+//std::istream& operator >> (std::istream& in, FileSpec& spec);
 
 inline std::ostream& operator << (std::ostream& out, const FileSpec& spec)
 {

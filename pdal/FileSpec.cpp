@@ -21,6 +21,27 @@ Utils::StatusWithReason FileSpec::parse(NL::json& json)
     return true;
 }
 
+// making this so I don't have to expose any json stuff in the header
+Utils::StatusWithReason FileSpec::parse(const std::string& jsonStr)
+{
+    NL::json json;
+    Utils::StatusWithReason status = Utils::parseJson(jsonStr, json);
+    if (!status)
+        return status;
+
+    try
+    {
+        extractPath(json);
+        extractHeaders(json);
+        extractQuery(json);
+    }
+    catch(const std::exception& e)
+    {
+        return Utils::StatusWithReason(-1, e.what());
+    }
+    return true;
+}
+
 void FileSpec::extractPath(NL::json& node)
 {
     auto it = node.find("path");
@@ -91,5 +112,10 @@ StringMap FileSpec::extractStringMap(const std::string& name, NL::json& node)
         error();
     return smap;
 }
+
+/* std::istream& operator >> (std::istream& in, FileSpec& spec)
+{
+    std::string s;
+} */
 
 } // namespace pdal
