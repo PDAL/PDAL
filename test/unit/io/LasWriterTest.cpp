@@ -508,7 +508,8 @@ TEST(LasWriterTest, extra_dims)
 
     Options reader2Ops;
     reader2Ops.add("filename", Support::temppath("simple.las"));
-    reader2Ops.add("extra_dims", "R1 =int32, B1= int16 ,G1=int32_t");
+    reader2Ops.add("extra_dims", "[{\"description\":\"\",\"values\":[{\"name\":\"R1\", \"type\":\"UInt32\"},{\"name\":\"B1\", \"type\":\"UInt16\"},\
+                   {\"name\":\"G1\", \"type\":\"UInt32\"}]}]");
 
     LasReader reader2;
     reader2.setOptions(reader2Ops);
