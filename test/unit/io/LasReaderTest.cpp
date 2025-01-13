@@ -395,8 +395,8 @@ TEST(LasReaderTest, noextra)
 {
     Options ro;
     ro.add("filename", Support::datapath("las/autzen_trim.las"));
-    ro.add("extra_dims", "Foo=uint32_t");
-
+    ro.add("extra_dims","[{\"description\":\"\",\"values\":[{\"name\":\"Foo\", \"type\":\"UInt32\"}]}]");
+    
     LasReader r;
     r.setOptions(ro);
 
@@ -754,4 +754,89 @@ TEST(LasReaderTest, Copc)
         m = m.findChild("copc");
         EXPECT_EQ(m.value<bool>(), false);
     }
+}
+
+
+TEST(LasReaderTest, Laz_with_extra_byte)
+{
+    Options ops1;
+    ops1.add("filename", Support::datapath("laz/las_with_extra_byte.laz"));
+
+    ops1.add("extra_dims", "[{\"description\":\"RIEGL Extra Bytes\",\"values\":[{\"name\":\"Deviation\",\"type\":\"UInt16\"}]},\
+                            {\"description\":\"\",\"values\":[{\"name\":\"confidence\", \"type\":\"UInt8\"}]}]");
+    
+    LasReader lazReader;
+    lazReader.setOptions(ops1);
+
+    PointTable table;
+    lazReader.prepare(table);
+    PointViewSet viewSet = lazReader.execute(table);
+    PointLayoutPtr layout(table.layout());
+    PointViewPtr view = *viewSet.begin();
+
+    ASSERT_TRUE(view->hasDim( layout->findDim("Deviation") ));
+    ASSERT_TRUE(view->hasDim( layout->findDim("confidence") ));
+}
+
+TEST(LasReaderTest, Laz_with_extra_byte_without_option)
+{
+    Options ops1;
+    ops1.add("filename", Support::datapath("laz/las_with_extra_byte.laz"));
+    
+    LasReader lazReader;
+    lazReader.setOptions(ops1);
+
+    PointTable table;
+    EXPECT_THROW( lazReader.prepare(table), pdal_error );
+}
+
+TEST(LasReaderTest, Laz_with_severals_extra_byte_with_wrong_options_name)
+{
+    Options ops1;
+    ops1.add("filename", Support::datapath("laz/las_with_extra_byte.laz"));
+
+    ops1.add("extra_dims", "[{\"description\":\"RIEGL Extra Bytes\",\"values\":[{\"name\":\"Bad_Name\",\"type\":\"UInt16\"}]},\
+                            {\"description\":\"\",\"values\":[{\"name\":\"confidence\", \"type\":\"UInt8\"}]}]");
+    
+    LasReader lazReader;
+    lazReader.setOptions(ops1);
+
+    PointTable table;
+    EXPECT_THROW( lazReader.prepare(table), pdal_error );
+}
+
+TEST(LasReaderTest, Laz_with_severals_extra_byte_with_wrong_options_type)
+{
+    Options ops1;
+    ops1.add("filename", Support::datapath("laz/las_with_extra_byte.laz"));
+
+    ops1.add("extra_dims", "[{\"description\":\"RIEGL Extra Bytes\",\"values\":[{\"name\":\"Deviation\",\"type\":\"bad_type\"}]},\
+                            {\"description\":\"\",\"values\":[{\"name\":\"confidence\", \"type\":\"UInt8\"}]}]");
+    
+    LasReader lazReader;
+    lazReader.setOptions(ops1);
+
+    PointTable table;
+    EXPECT_THROW( lazReader.prepare(table), pdal_error );
+}
+
+TEST(LasReaderTest, Laz_without_extra_byte_with_option)
+{
+    Options ops1;
+    ops1.add("filename", Support::datapath("las/4_6.las"));
+    
+    ops1.add("extra_dims", "[{\"description\":\"RIEGL Extra Bytes\",\"values\":[{\"name\":\"Deviation\",\
+                            \"type\":\"uint8\"}]},{\"description\":\"\",\"values\":[{\"name\":\"confidence\", \"type\":\"uint8\"}]}]");
+    
+    LasReader lazReader;
+    lazReader.setOptions(ops1);
+
+    PointTable table;
+    lazReader.prepare(table);
+    PointViewSet viewSet = lazReader.execute(table);
+    PointLayoutPtr layout(table.layout());
+    PointViewPtr view = *viewSet.begin();
+
+    ASSERT_FALSE(view->hasDim( layout->findDim("Deviation") ));
+    ASSERT_FALSE(view->hasDim( layout->findDim("confidence") ));
 }
