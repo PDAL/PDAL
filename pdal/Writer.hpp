@@ -103,6 +103,8 @@ private:
     */
     virtual void write(const PointViewPtr /*view*/)
         { std::cerr << "Can't write with stage = " << getName() << "!\n"; }
+    virtual void assignParsedOptions() final
+    {}
 
     std::unique_ptr<Args> m_args;
 };

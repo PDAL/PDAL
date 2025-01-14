@@ -92,6 +92,7 @@ private:
     virtual void l_addArgs(ProgramArgs& args) final;
     virtual void l_prepared(PointTableRef table) final;
 
+    virtual void assignParsedOptions() final;
     virtual const expr::ConditionalExpression* whereExpr() const;
     virtual WhereMergeMode mergeMode() const;
     virtual point_count_t read(PointViewPtr /*view*/, point_count_t /*num*/)

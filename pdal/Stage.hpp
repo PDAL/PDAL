@@ -387,6 +387,8 @@ private:
     void setupLog();
     void handleOptions();
     void countElements(const PointViewSet& views);
+    // set subclass-specific options after they've been processed
+    virtual void assignParsedOptions();
 
     virtual void l_addArgs(ProgramArgs& args);
     virtual void l_initialize(PointTableRef table);
