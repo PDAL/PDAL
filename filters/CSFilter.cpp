@@ -88,6 +88,9 @@ CSFilter::CSFilter() : m_args(new CSArgs)
 {
 }
 
+CSFilter::~CSFilter()
+{}
+
 std::string CSFilter::getName() const
 {
     return s_info.name;

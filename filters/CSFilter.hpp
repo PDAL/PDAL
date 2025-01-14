@@ -45,6 +45,7 @@ class PDAL_EXPORT CSFilter : public Filter
 {
 public:
     CSFilter();
+    ~CSFilter();
 
     CSFilter& operator=(const CSFilter&) = delete;
     CSFilter(const CSFilter&) = delete;
