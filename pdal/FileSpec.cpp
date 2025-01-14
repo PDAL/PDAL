@@ -6,121 +6,119 @@
 namespace pdal
 {
 
-Utils::StatusWithReason FileSpec::parse(NL::json& json)
+namespace
 {
-    try
+
+bool extractStringMap(NL::json& node, StringMap& map)
+{
+    if (!node.is_object())
+        return false;
+    for (auto& [key, val] : node.items())
     {
-        extractPath(json);
-        extractHeaders(json);
-        extractQuery(json);
-    }
-    catch(const std::exception& e)
-    {
-        return Utils::StatusWithReason(-1, e.what());
+        if (val.is_string())
+            map.insert({key, val});
+        else
+            return false;
     }
     return true;
 }
 
-// making this so I don't have to expose any json stuff in the header
+} // unnamed namespace
+
+Utils::StatusWithReason FileSpec::parse(NL::json& node)
+{
+    if (node.is_null())
+        return { -1, "'filename' argument contains no data" };
+    if (node.is_string())
+        m_path = node.get<std::string>();
+    else if (node.is_object())
+    {
+        auto status = extractPath(node);
+        if (!status)
+            return { -1, status.what() };
+        status = extractHeaders(node);
+        if (!status)
+            return { -1, status.what() };
+        status = extractQuery(node);
+        if (!status)
+            return { -1, status.what() };
+        if (!node.empty())
+            return { -1, "Invalid item in filename object: " + node.dump() };
+    }
+    else
+        return { -1, "'filename' must be specified as a string." };
+    return true;
+}
+
+// have to wrap it up here to not expose nlohmann in the header
 Utils::StatusWithReason FileSpec::parse(const std::string& jsonOrStr)
 {
-    NL::json json;
-    // easiest thing to do is just assume it's a filename string if invalid json.
-    // There's probably a better way
-    if (!Utils::parseJson(jsonOrStr, json))
-    {
-        m_path = jsonOrStr;
-        return true;
-    }
-
-    try
-    {
-        extractPath(json);
-        extractHeaders(json);
-        extractQuery(json);
-    }
-    catch(const std::exception& e)
-    {
-        return Utils::StatusWithReason(-1, e.what());
-    }
-    return true;
+    // catch json ctor errors?
+    NL::json json(jsonOrStr);
+    return parse(json);
 }
 
-void FileSpec::extractPath(NL::json& node)
+Utils::StatusWithReason FileSpec::extractPath(NL::json& node)
 {
     auto it = node.find("path");
     if (it == node.end())
-          throw pdal_error("JSON pipeline: 'filename' object must contain 'path' member.");
-
+        return { -1, "'filename' object must contain 'path' member." };
     NL::json& val = *it;
     if (!val.is_null())
     {
         if (val.is_string())
             m_path = val.get<std::string>();
         else
-            throw pdal_error("JSON pipeline: filename 'path' member must be specified "
-                "as a string.");
+            return { -1, "'filename' object 'path' member must be specified as a string." };
         node.erase(it);
     }
+    return true;
 }
 
-void FileSpec::extractQuery(NL::json& node)
-{
-    auto it = node.find("headers");
-    if (it == node.end())
-        return;
-
-    NL::json& val = *it;
-    if (!val.is_null())
-    {
-        m_headers = extractStringMap("headers", val);
-        node.erase(it);
-    }
-}
-
-void FileSpec::extractHeaders(NL::json& node)
+Utils::StatusWithReason FileSpec::extractQuery(NL::json& node)
 {
     auto it = node.find("query");
     if (it == node.end())
-        return;
-
+        return true;
     NL::json& val = *it;
     if (!val.is_null())
     {
-        m_query = extractStringMap("query", val);
-        node.erase(it);
+        if (!extractStringMap(val, m_query))
+            return { -1, "'filename' sub-argument 'query' must be an object of "
+                "string key-value pairs." };
     }
+    node.erase(it);
+    return true;
 }
 
-StringMap FileSpec::extractStringMap(const std::string& name, NL::json& node)
+Utils::StatusWithReason FileSpec::extractHeaders(NL::json& node)
 {
-    StringMap smap;
-
-    auto error = [&name]()
+    auto it = node.find("headers");
+    if (it == node.end())
+        return true;
+    NL::json& val = *it;
+    if (!val.is_null())
     {
-        throw pdal_error("JSON pipeline: '" + name + "' must be an object of "
-            "string key-value pairs.");
-    };
-
-    if (node.is_object())
-    {
-        for (auto& [key, val] : node.items())
-        {
-            if (val.is_string())
-                smap.insert({key, val});
-            else
-                error();
-        }
+        auto status = extractStringMap(val, m_headers);
+        if (!status)
+            return { -1, "'filename' sub-argument 'headers' must be an object of "
+                "string key-value pairs." };
     }
-    else
-        error();
-    return smap;
+    node.erase(it);
+    return true;
 }
 
 // needs to be converted back to a json string for an Option<T> object to be created.
 // This happens after it gets processed by PipelineReaderJSON -- it all feels a bit circular.
 std::ostream& operator << (std::ostream& out, const FileSpec& spec)
 {
+    // some weird stuff was happening in some stages w/o this
+    if (spec.onlyFilename())
+    {
+        out << spec.m_path.string();
+        return out;
+    }
+    
     NL::json json;
     json["path"] = spec.m_path.string();
     if (!spec.m_headers.empty())

@@ -67,10 +67,9 @@ public:
     friend std::ostream& operator << (std::ostream& out, const FileSpec& spec);
 
 private:
-    void extractPath(NL::json& node);
-    void extractQuery(NL::json& node);
-    void extractHeaders(NL::json& node);
-    StringMap extractStringMap(const std::string& name, NL::json& node);
+    Utils::StatusWithReason extractPath(NL::json& node);
+    Utils::StatusWithReason extractQuery(NL::json& node);
+    Utils::StatusWithReason extractHeaders(NL::json& node);
 
 public:
     std::filesystem::path m_path;
