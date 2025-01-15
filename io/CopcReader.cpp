@@ -346,7 +346,6 @@ void CopcReader::initialize(PointTableRef table)
     // Make sure we allow at least as many chunks as we have threads.
     m_args->keepAliveChunkCount = (std::max)(m_args->threads, (size_t)m_args->keepAliveChunkCount);
 
-    std::cout << "filename: " << m_filespec.m_path <<std::endl;
     if (m_filespec.onlyFilename())
     {
         // or we could assign these to m_filespec in setForwards

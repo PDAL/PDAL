@@ -65,7 +65,6 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
         NL::json& node = tree.at(i);
 
         FileSpec spec;
-        std::string filename;
         std::string tag;
         std::string type;
         std::vector<Stage*> specifiedInputs;
@@ -74,14 +73,12 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
         // strings are assumed to be filenames
         if (node.is_string())
         {
-            filename = node.get<std::string>();
+            spec.m_path = node.get<std::string>();
         }
         else
         {
             type = extractType(node);
-            // only relevant for readers
             spec = extractFilename(node);
-            filename = spec.m_path.string();
             tag = extractTag(node, tags);
             specifiedInputs = extractInputs(node, tags);
             if (!specifiedInputs.empty())
@@ -96,17 +93,14 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
         if ((type.empty() && (i == 0 || i != last)) ||
             Utils::startsWith(type, "readers."))
         {
-            StringList files = FileUtils::glob(filename);
+            StringList files = FileUtils::glob(spec.m_path.string());
             if (files.empty())
-                files.push_back(filename);
+                files.push_back(spec.m_path.string());
 
             for (const std::string& path : files)
             {
-                // this is a really bad fix
                 spec.m_path = path;
-
                 ReaderCreationOptions ops { spec, type, nullptr, options, tag };
-                std::cout << "ops filename: " << ops.m_filespec.m_path << '\n';
                 s = &m_manager.makeReader(ops);
 
                 if (specifiedInputs.size())
@@ -117,7 +111,7 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
         }
         else if (type.empty() || Utils::startsWith(type, "writers."))
         {
-            StageCreationOptions ops { filename, type, nullptr, options, tag };
+            StageCreationOptions ops { spec.m_path.string(), type, nullptr, options, tag };
             s = &m_manager.makeWriter(ops);
             for (Stage *ts : inputs)
                 s->setInput(*ts);
@@ -126,8 +120,8 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
         }
         else
         {
-            if (filename.size())
-                options.add("filename", filename);
+            if (spec.valid())
+                options.add("filename", spec.m_path.string());
             StageCreationOptions ops { "", type, nullptr, options, tag };
             s = &m_manager.makeFilter(ops);
             for (Stage *ts : inputs)
