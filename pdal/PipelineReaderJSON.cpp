@@ -106,6 +106,7 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
                 spec.m_path = path;
 
                 ReaderCreationOptions ops { spec, type, nullptr, options, tag };
+                std::cout << "ops filename: " << ops.m_filespec.m_path << '\n';
                 s = &m_manager.makeReader(ops);
 
                 if (specifiedInputs.size())

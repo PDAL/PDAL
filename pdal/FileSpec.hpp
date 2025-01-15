@@ -35,8 +35,6 @@
 
 #include <filesystem>
 
-//#include <nlohmann/json.hpp>
-
 #include <pdal/PDALUtils.hpp>
 #include <pdal/pdal_types.hpp>
 
@@ -52,17 +50,15 @@ class FileSpec
 public:
     FileSpec()
     {}
-    FileSpec(const std::filesystem::path& path) : m_path(path)
-    {}
-    FileSpec(const std::string& path) : m_path(path)
-    {}
+    //FileSpec(const std::filesystem::path& path) : m_path(path)
+    
+    FileSpec(const std::string& path);
 
     bool valid() const
     { return !m_path.empty(); }
     bool onlyFilename() const
     { return m_headers.empty() && m_query.empty(); }
     Utils::StatusWithReason parse(NL::json& json);
-    Utils::StatusWithReason parse(const std::string& jsonOrStr);
 
     friend std::ostream& operator << (std::ostream& out, const FileSpec& spec);
 
@@ -80,10 +76,7 @@ public:
 namespace Utils
 {
     template<>
-    inline StatusWithReason fromString(const std::string& s, FileSpec& spec)
-    {
-        return spec.parse(s);
-    }
+    StatusWithReason fromString(const std::string& s, FileSpec& spec);
 }
 
 } // namespace pdal

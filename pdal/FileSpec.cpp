@@ -58,6 +58,26 @@ bool extractStringMap(NL::json& node, StringMap& map)
 
 } // unnamed namespace
 
+namespace Utils
+{
+    template<>
+    StatusWithReason fromString(const std::string& s, FileSpec& spec)
+    {
+        // this should create a string node or json object. parse() throws
+        // if unexpected type
+        NL::json json(s);
+        return spec.parse(json);
+    }
+}
+
+
+FileSpec::FileSpec(const std::string& path)
+{
+    // same as fromString. This is used in PipelineManager
+    NL::json json(path);
+    parse(json);
+}
+
 Utils::StatusWithReason FileSpec::parse(NL::json& node)
 {
     if (node.is_null())
@@ -81,14 +101,6 @@ Utils::StatusWithReason FileSpec::parse(NL::json& node)
     else
         return { -1, "'filename' must be specified as a string." };
     return true;
-}
-
-// have to wrap it up here to not expose nlohmann in the header
-Utils::StatusWithReason FileSpec::parse(const std::string& jsonOrStr)
-{
-    // catch json ctor errors?
-    NL::json json(jsonOrStr);
-    return parse(json);
 }
 
 Utils::StatusWithReason FileSpec::extractPath(NL::json& node)
@@ -132,8 +144,7 @@ Utils::StatusWithReason FileSpec::extractHeaders(NL::json& node)
     NL::json& val = *it;
     if (!val.is_null())
     {
-        auto status = extractStringMap(val, m_headers);
-        if (!status)
+        if (!extractStringMap(val, m_headers))
             return { -1, "'filename' sub-argument 'headers' must be an object of "
                 "string key-value pairs." };
     }
@@ -141,8 +152,6 @@ Utils::StatusWithReason FileSpec::extractHeaders(NL::json& node)
     return true;
 }
 
-// needs to be converted back to a json string for an Option<T> object to be created.
-// This happens after it gets processed by PipelineReaderJSON -- it all feels a bit circular.
 std::ostream& operator << (std::ostream& out, const FileSpec& spec)
 {
     // some weird stuff was happening in some stages w/o this
@@ -151,7 +160,7 @@ std::ostream& operator << (std::ostream& out, const FileSpec& spec)
         out << spec.m_path.string();
         return out;
     }
-    
+
     NL::json json;
     json["path"] = spec.m_path.string();
     if (!spec.m_headers.empty())
