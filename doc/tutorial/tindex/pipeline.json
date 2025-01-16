@@ -1,0 +1,43 @@
+[
+    {
+        "type": "readers.tindex",
+        "filename": "/vsicurl/https://s3.amazonaws.com/hobu-lidar/WI_Adams_2019.parquet",
+        "lyr_name": "WI_Adams_2019",
+        "reader_args": [
+            {
+                "type": "readers.copc",
+                "resolution": "1",
+                "threads": 5
+            }
+        ],
+        "ogr": {
+            "type": "ogr",
+            "datasource": "https://overpass-api.de/api/interpreter?data=area%5B%22wikipedia%22%3D%22en%3AAdams+County%2C+Wisconsin%22%5D%3B%28relation%5B%22boundary%22%3D%22administrative%22%5D%5B%22admin_level%22%3D%228%22%5D%28area%29%3B%3E%3B%29%3Bout+meta%3B",
+            "sql": "SELECT ST_Transform(ST_buffer(ST_Transform(geometry, 26916), 100), 4326) from multipolygons where name ==\"Adams\"",
+            "options": {
+                "dialect": "SQLITE"
+            }
+        }
+    },
+    {
+        "type": "filters.reprojection",
+        "out_srs": "EPSG:3857"
+    },
+    {
+        "type":"filters.hag_nn"
+    },
+    {
+        "type":"writers.gdal",
+        "gdaldriver":"GTiff",
+        "dimension":"HeightAboveGround",
+        "data_type":"float32",
+        "output_type":"mean",
+        "filename":"#uuid#-hag.tif",
+        "resolution": 2.0
+    },
+    {
+        "type": "writers.copc",
+        "filename": "#uuid#-hag.copc.laz"
+    }
+]
+

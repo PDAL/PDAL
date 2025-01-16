@@ -9,11 +9,11 @@
 
 To cite PDAL in publications use:
 
-> PDAL Contributors, 2024. PDAL Point Data Abstraction Library.  <https://doi.org/10.5281/zenodo.10884408>
+> PDAL Contributors, 2025. PDAL Point Data Abstraction Library.  <https://doi.org/10.5281/zenodo.10884408>
 
 A BibTeX entry for LaTeX users is
 
-> @misc{pdal_contributors_2024_2616780,
+> @misc{pdal_contributors_2025_2616780,
 >
 > author       = {PDAL Contributors},
 >
@@ -21,7 +21,7 @@ A BibTeX entry for LaTeX users is
 >
 > month        = aug,
 >
-> year         = 2024,
+> year         = 2025,
 >
 > doi          = {10.5281/zenodo.10884408},
 >

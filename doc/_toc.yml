@@ -220,6 +220,7 @@ parts:
     - file: tutorial/clipping/index
     - file: tutorial/ground-filters
     - file: tutorial/grid-shift
+    - file: tutorial/tindex/index
   - file: workshop/index
     sections:
     - file: workshop/agenda

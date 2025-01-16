@@ -33,7 +33,6 @@
  ****************************************************************************/
 
 #include "Item.hpp"
-#include <pdal/Polygon.hpp>
 
 #include <nlohmann/json.hpp>
 #include <schema-validator/json-schema.hpp>
@@ -390,13 +389,14 @@ SpatialReference extractSRS(NL::json& props)
     return srs;
 }
 
-bool Item::filterBounds(SrsBounds bounds)
+bool Item::filterBounds(Polygon bounds)
 {
-    if (bounds.empty())
+    // Polygons are always "valid" even if they're default constructed.
+    // Same with bool(Polygon). maybe change this behavior
+    if (!bounds.valid())
+        throw pdal_error("User input polygon is invalid");
+    if (!bounds.area())
         return true;
-
-    //Skip bbox altogether and stick with geometry, which will be much
-    //more descriptive than bbox
 
     //If stac item has null geometry and bounds have been included
     //for filtering, then the Item will be excluded.
@@ -412,32 +412,24 @@ bool Item::filterBounds(SrsBounds bounds)
             "Polygon created from STAC 'geometry' key is invalid");
 
     // If the user didn't provide an SRS via option, we can only filter
-    // assuming it is 4326. Otherwise, we'll set or polygon's srs to
-    // the bounds as well.
-    BOX2D b3d = bounds.to2d();
+    // assuming it is 4326.
 
-    Polygon userPolygon(bounds.to2d());
-    if (bounds.spatialReference().empty())
+    if (!bounds.srsValid())
     {
-        userPolygon.setSpatialReference(stacSrs);
-    } else
-    {
-        userPolygon.setSpatialReference(bounds.spatialReference());
+        bounds.setSpatialReference(stacSrs);
     }
 
     // If the SRSs don't match, we'll project the STAC Item's boundary
     // to the same as the SRS given by the bounds and test accordingly
-    if (userPolygon.getSpatialReference() != stacPolygon.getSpatialReference())
+    if (bounds.getSpatialReference() != stacPolygon.getSpatialReference())
     {
         NL::json props = stacValue(m_json, "properties");
         SpatialReference ref = extractSRS(props);
         stacPolygon.transform(ref);
     }
 
-    if (!userPolygon.valid())
-        throw pdal_error("User input polygon is invalid, " + bounds.to2d().toBox());
-
-    if (!stacPolygon.disjoint(userPolygon))
+    // Could change the option to multiple polygons and loop thru them here
+    if (!stacPolygon.disjoint(bounds))
         return true;
 
     return false;

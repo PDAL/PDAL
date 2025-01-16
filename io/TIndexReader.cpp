@@ -75,7 +75,7 @@ struct TIndexReader::Args
     std::string m_dialect;
     BOX2D m_bounds;
     std::string m_sql;
-    NL::json m_rawReaderArgs;
+    std::vector<NL::json> m_rawReaderArgs;
     NL::json m_readerArgs;
 };
 
@@ -253,6 +253,10 @@ void TIndexReader::initialize()
     if (m_args->m_wkt.size())
         cropOptions.add("polygon", m_args->m_wkt);
 
+
+    if (m_args->m_rawReaderArgs.size())
+        m_args->m_readerArgs = handleReaderArgs(m_args->m_rawReaderArgs);
+
     for (auto f : getFiles())
     {
         log()->get(LogLevel::Debug) << "Adding file " << f.m_filename <<
@@ -263,6 +267,7 @@ void TIndexReader::initialize()
         if (!reader)
             throwError("Unable to create reader for file '" + f.m_filename +
                 "'.");
+        reader->setLog(log());
         Options readerOptions = setReaderOptions(m_args->m_readerArgs, driver);
 
         readerOptions.add("filename", f.m_filename);
@@ -294,7 +299,7 @@ void TIndexReader::initialize()
             crop->setOptions(cropOptions);
             crop->setInput(*premerge);
             log()->get(LogLevel::Debug3) << "Cropping data with wkt '"
-                                         << m_args->m_wkt << "'" << std::endl;
+                                         << m_args->m_wkt.substr(0, 400) << "......'" << std::endl;
             premerge = crop;
         }
 
@@ -355,28 +360,44 @@ PointViewSet TIndexReader::run(PointViewPtr view)
     return StageWrapper::run(m_merge, view);
 }
 
-void TIndexReader::handleReaderArgs()
+NL::json TIndexReader::handleReaderArgs(NL::json rawReaderArgs)
 {
-    for (NL::json& readerPipeline: m_args->m_rawReaderArgs)
+
+    if (rawReaderArgs.is_object())
     {
+        NL::json array_args = NL::json::array();
+        array_args.push_back(rawReaderArgs);
+        rawReaderArgs = array_args;
+    }
+    for (auto& opts: rawReaderArgs)
+        if (!opts.is_object())
+            throw pdal_error("Reader Args for each reader must be a valid JSON object");
+
+    NL::json readerArgs;
+    for (NL::json& readerPipeline: rawReaderArgs)
+    {
+
         if (!readerPipeline.contains("type"))
             throw pdal_error("No \"type\" key found in supplied reader arguments.");
 
         std::string driver = readerPipeline.at("type").get<std::string>();
-        if (m_args->m_rawReaderArgs.contains(driver))
+        log()->get(LogLevel::Debug2) << "Gathering reader_args for reader of type " << driver << std::endl;
+        if (rawReaderArgs.contains(driver))
             throw pdal_error("Multiple instances of the same driver in supplied reader arguments.");
-        m_args->m_readerArgs[driver] = { };
+        readerArgs[driver] = { };
 
         for (auto& arg: readerPipeline.items())
         {
+
             if (arg.key() == "type")
                 continue;
 
             std::string key = arg.key();
-            m_args->m_readerArgs[driver][key] = { };
-            m_args->m_readerArgs[driver][key] = arg.value();
+            readerArgs[driver][key] = { };
+            readerArgs[driver][key] = arg.value();
         }
     }
+    return readerArgs;
 }
 
 

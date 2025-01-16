@@ -36,6 +36,16 @@
 
 #include <memory>
 
+// Get GDAL's forward decls if available
+// otherwise make our own
+#if __has_include(<gdal_fwd.h>)
+#include <gdal_fwd.h>
+#else
+    using OGRLayerH = void *;
+#endif
+
+
+
 namespace pdal
 {
 namespace gdal
@@ -43,7 +53,6 @@ namespace gdal
 
 class SpatialRef
 {
-    using OGRLayerH = void *;
     typedef std::shared_ptr<void> RefPtr;
 public:
     SpatialRef();

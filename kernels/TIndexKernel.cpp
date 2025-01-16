@@ -366,7 +366,6 @@ void TIndexKernel::createFile()
         FileInfo info;
         info.m_filename = f;
         info.m_isRemote = Utils::isRemote(f);
-
         if (!info.m_isRemote)
             FileUtils::fileTimes(info.m_filename, &info.m_ctime, &info.m_mtime);
         infos.push_back(info);
@@ -644,7 +643,7 @@ bool TIndexKernel::createDataset(const std::string& filename)
         throw pdal_error(oss.str());
     }
 
-    m_dataset = OGR_Dr_CreateDataSource(hDriver, filename.c_str(), NULL); 
+    m_dataset = OGR_Dr_CreateDataSource(hDriver, filename.c_str(), NULL);
     return (bool)m_dataset;
 }
 
