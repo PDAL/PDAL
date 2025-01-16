@@ -49,9 +49,7 @@ class FileSpec
 {
 public:
     FileSpec()
-    {}
-    //FileSpec(const std::filesystem::path& path) : m_path(path)
-    
+    {}    
     FileSpec(const std::string& path);
 
     bool valid() const
@@ -59,6 +57,8 @@ public:
     bool onlyFilename() const
     { return m_headers.empty() && m_query.empty(); }
     Utils::StatusWithReason parse(NL::json& json);
+    // parse a user input string that could be a json spec or filename
+    Utils::StatusWithReason ingest(const std::string& pathOrJson);
 
     friend std::ostream& operator << (std::ostream& out, const FileSpec& spec);
 
@@ -76,7 +76,10 @@ public:
 namespace Utils
 {
     template<>
-    StatusWithReason fromString(const std::string& s, FileSpec& spec);
+    inline StatusWithReason fromString(const std::string& s, FileSpec& spec)
+    {
+        return spec.ingest(s);
+    }
 }
 
 } // namespace pdal

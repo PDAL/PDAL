@@ -56,7 +56,6 @@ public:
     Connector();
     Connector(const std::string& filename, const StringMap& headers, const StringMap& query);
     Connector(const StringMap& headers, const StringMap& query);
-    Connector(const FileSpec& spec);
 
     std::string get(const std::string& path) const;
     NL::json getJson(const std::string& path) const;

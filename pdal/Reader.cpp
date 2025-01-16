@@ -69,7 +69,6 @@ void Reader::l_addArgs(ProgramArgs& args)
 
 void Reader::assignParsedOptions()
 {
-    // maybe make this smarter?
     m_filename = m_filespec.m_path.string();
 }
 

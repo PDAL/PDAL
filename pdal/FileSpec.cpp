@@ -58,54 +58,31 @@ bool extractStringMap(NL::json& node, StringMap& map)
 
 } // unnamed namespace
 
-namespace Utils
-{
-    template<>
-    StatusWithReason fromString(const std::string& s, FileSpec& spec)
-    {
-        NL::json json;
-        // parseJson working with plain strings would be nice
-        if (s[0] == '{' || s[0] == '[')
-        {
-            auto status = Utils::parseJson(s, json);
-            if (!status)
-                return status;
-        }
-        else
-        {
-            // maybe there's a way to make a null json string type and add
-            // a value, but I didn't see it
-            // Or we can just assume it's the spec's filename and ingest it without
-            // doing anything w/ json, maybe?
-            NL::json stringJson(s);
-            json = stringJson;
-        }
-
-        return spec.parse(json);
-    }
-}
-
 
 FileSpec::FileSpec(const std::string& path)
 {
-    // same as fromString. This is used in PipelineManager to take a spec in ReaderCreationOpts
-    NL::json json;
-    Utils::StatusWithReason status;
+    Utils::StatusWithReason status = ingest(path);
+    if (!status)
+        throw pdal_error(status.what());
+}
 
-    if (path[0] == '{' || path[0] == '[')
+Utils::StatusWithReason FileSpec::ingest(const std::string& pathOrJson)
+{
+    NL::json json;
+    if (pathOrJson[0] == '{' || pathOrJson[0] == '[')
     {
-        status = Utils::parseJson(path, json);
+        auto status = Utils::parseJson(pathOrJson, json);
         if (!status)
-            throw pdal_error(status.what());
+            return status;
     }
     else
     {
-        NL::json stringJson(path);
+        // assuming input is a filename
+        NL::json stringJson(pathOrJson);
         json = stringJson;
     }
-    status = parse(json);
-    if (!status)
-        throw pdal_error(status.what());
+
+    return parse(json);
 }
 
 Utils::StatusWithReason FileSpec::parse(NL::json& node)

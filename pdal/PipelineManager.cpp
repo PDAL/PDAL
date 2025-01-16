@@ -333,20 +333,9 @@ Stage& PipelineManager::makeReader(const std::string& inputFile,
 // not removing this so stuff doesn't break 
 Stage& PipelineManager::makeReader(StageCreationOptions& o)
 {
-    if (o.m_driver.empty())
-    {
-        o.m_driver = StageFactory::inferReaderDriver(o.m_filename);
-        if (o.m_driver.empty())
-            throw pdal_error("Cannot determine reader for input file: " +
-                o.m_filename);
-    }
-    if (!o.m_filename.empty())
-        o.m_options.replace("filename", o.m_filename);
-
-    Stage& reader = addReader(o.m_driver);
-    reader.setTag(o.m_tag);
-    setOptions(reader, o.m_options);
-    return reader;
+    ReaderCreationOptions rOpts { o.m_filename, o.m_driver, o.m_parent, 
+                            o.m_options, o.m_tag };
+    return makeReader(rOpts);
 }
 
 Stage& PipelineManager::makeReader(ReaderCreationOptions& o)
