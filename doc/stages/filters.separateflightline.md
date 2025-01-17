@@ -17,7 +17,7 @@ be sorted by ascending `GpsTime`.
 
 ```json
 [
-    "input.text",
+    "input.las",
     {
         "type": "filters.sort",
         "dimension": "GpsTime",

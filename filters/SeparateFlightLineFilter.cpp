@@ -57,7 +57,7 @@ std::string SeparateFlightLineFilter::getName() const
 
 void SeparateFlightLineFilter::addArgs(ProgramArgs& args)
 {
-    args.add("time_gap", "Minimum amount of GpsTime that separates two flight lines", m_timeGap, 5.0f);
+    args.add("time_gap", "Minimum amount of GpsTime that separates two flight lines", m_timeGap, (double) 5.0);
 }
 
 void SeparateFlightLineFilter::prepared(PointTableRef table)
@@ -81,7 +81,7 @@ PointViewSet SeparateFlightLineFilter::run(PointViewPtr inView)
         gpsTime = inView->getFieldAs<double>(Dimension::Id::GpsTime, i);
         gpsTimeNext = inView->getFieldAs<double>(Dimension::Id::GpsTime, i+1);
         if (gpsTimeNext<gpsTime)
-        throwError("View must be sorted by ascending GpsTime")
+        throwError("View must be sorted by ascending GpsTime");
         if (gpsTimeNext - gpsTime >= m_timeGap)
         {
             v = inView->makeNew();
