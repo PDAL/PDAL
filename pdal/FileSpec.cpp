@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2020, Hobu Inc.
+* Copyright (c) 2025, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -61,26 +61,22 @@ bool extractStringMap(NL::json& node, StringMap& map)
 
 FileSpec::FileSpec(const std::string& path)
 {
-    Utils::StatusWithReason status = ingest(path);
-    if (!status)
-        throw pdal_error(status.what());
+    m_status = ingest(path);
 }
 
 Utils::StatusWithReason FileSpec::ingest(const std::string& pathOrJson)
 {
     NL::json json;
-    if (pathOrJson[0] == '{' || pathOrJson[0] == '[')
+    size_t pos = Utils::extractSpaces(pathOrJson, 0);
+    if (pathOrJson[pos] == '{' || pathOrJson[pos] == '[')
     {
         auto status = Utils::parseJson(pathOrJson, json);
         if (!status)
             return status;
     }
+    // assuming input is a filename
     else
-    {
-        // assuming input is a filename
-        NL::json stringJson(pathOrJson);
-        json = stringJson;
-    }
+        json = NL::json(pathOrJson);
 
     return parse(json);
 }
@@ -161,7 +157,7 @@ Utils::StatusWithReason FileSpec::extractHeaders(NL::json& node)
 
 std::ostream& operator << (std::ostream& out, const FileSpec& spec)
 {
-    // some weird stuff was happening in some stages w/o this
+    // ostream output should align with the input string
     if (spec.onlyFilename())
     {
         out << spec.m_path.string();

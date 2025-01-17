@@ -330,7 +330,7 @@ Stage& PipelineManager::makeReader(const std::string& inputFile,
     return makeReader(ops);
 }
 
-// not removing this so stuff doesn't break 
+// keeping for backward compatibility 
 Stage& PipelineManager::makeReader(StageCreationOptions& o)
 {
     ReaderCreationOptions rOpts { o.m_filename, o.m_driver, o.m_parent, 

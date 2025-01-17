@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2019, Hobu Inc. (info@hobu.co)
+* Copyright (c) 2025, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -48,12 +48,17 @@ namespace pdal
 class FileSpec
 {
 public:
-    FileSpec()
+    FileSpec() : m_status(true)
     {}    
     FileSpec(const std::string& path);
 
-    bool valid() const
-    { return !m_path.empty(); }
+    Utils::StatusWithReason valid() const
+    { 
+        if (m_path.empty())
+            return false;
+        else
+            return m_status;
+    }
     bool onlyFilename() const
     { return m_headers.empty() && m_query.empty(); }
     Utils::StatusWithReason parse(NL::json& json);
@@ -71,6 +76,7 @@ public:
     std::filesystem::path m_path;
     StringMap m_headers;
     StringMap m_query;
+    Utils::StatusWithReason m_status;
 };
 
 namespace Utils
