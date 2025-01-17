@@ -77,9 +77,9 @@ jobs:
         path: ./libpdal-feedstock/packages/
 
     - name: Deploy to pdal-master Conda channel
-      if: github.ref == 'refs/heads/master'
+      if: github.repository == 'PDAL/PDAL' && github.ref == 'refs/heads/master'
       env:
         ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
       run: |
-          source ../scripts/ci/conda/upload.sh || true
+          source ../scripts/ci/conda/upload.sh
       working-directory: ./libpdal-feedstock
