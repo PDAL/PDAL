@@ -131,7 +131,7 @@ std::string toString(const SrsOrderSpec& srsOrder)
 
 struct LasReader::Options
 {
-    NL::json::array_t extraDimSpec;
+    StringList extraDimSpec;
     //ABELL
     std::string compression;
     bool useEbVlr;
@@ -142,40 +142,6 @@ struct LasReader::Options
     bool nosrs;
     int numThreads;
     SrsOrderSpec srsVlrOrder;
-};
-
-const std::map<std::string, pdal::Dimension::Type> typeMapping
-{
-    {"UInt8", Dimension::Type::Unsigned8},
-    {"UInt16", Dimension::Type::Unsigned16},
-    {"UInt32", Dimension::Type::Unsigned32},
-    {"UInt64", Dimension::Type::Unsigned64},
-    {"Int8", Dimension::Type::Signed8},
-    {"Int16", Dimension::Type::Signed16},
-    {"Int32", Dimension::Type::Signed32},
-    {"Int64", Dimension::Type::Signed64},
-    {"Float64", Dimension::Type::Double},
-    {"Float32", Dimension::Type::Float}
-};
-
-struct ExtraByteVLR
-{
-    struct dimension {
-        std::string name;
-        pdal::Dimension::Type type;
-        dimension(NL::json jdim)
-        {
-            this->name = jdim["name"];
-            this->type = typeMapping.find( jdim["type"] )->second ;
-        }
-    };
-    std::vector<dimension> vDimension;
-    
-    ExtraByteVLR(NL::json::array_t ebVLR)
-    {
-        for (auto jdim : ebVLR)
-            vDimension.push_back( dimension(jdim) );
-    }
 };
 
 struct LasReader::Private
@@ -190,7 +156,7 @@ struct LasReader::Private
     las::TilePtr currentTile;
     las::ChunkInfo chunkInfo;
     std::vector<las::TilePtr> tiles;
-    las::desc_ExtraDims extraDims;
+    std::vector<las::ExtraDim> extraDims;
     ThreadPool pool;
     // One past the Index of the last point we want to fetch.
     PointId end;
@@ -331,7 +297,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 {
     try
     {
-        d->extraDims = las::parse(d->opts.extraDimSpec);
+        d->extraDims = las::parse(d->opts.extraDimSpec, false);
     }
     catch (const las::error& err)
     {
@@ -646,37 +612,8 @@ void LasReader::queueNextStandardChunk()
     d->nextFetchChunk++;
 }
 
-bool checkExtraDims(las::desc_ExtraDims extraDims_las, las::desc_ExtraDims extraDims_pipe, LogPtr log)
-{
-    if (extraDims_las.size() != extraDims_pipe.size()) return false;
-    
-    for (auto extra_las : extraDims_las)
-    {
-        auto extra_pip = extraDims_pipe.find(extra_las.first);
-        if (extra_pip == extraDims_pipe.end()) {
-            log->get(LogLevel::Error) << extra_las.first << " read in LAS is not mentionned in the \"extradimension\" options \n";
-            return false;
-        }
-        
-        for (auto dim_extra_las : extra_las.second)
-        {
-            const auto it = std::find_if(extra_pip->second.begin(), extra_pip->second.end(),
-                                         [dim_extra_las](las::ExtraDim& edim){return (edim == dim_extra_las);});
-            if (it == extra_pip->second.end())
-            {
-                log->get(LogLevel::Error) << extra_las.first << " dimension of " << extra_las.first << "read in LAS is not mentionned in the \"extradimension\" options \n";
-                return false;
-            }
-        }
-    }
-    
-    return true;
-}
-
-
 void LasReader::readExtraBytesVlr()
 {
-    // gest the las extra bytes block
     las::VlrList lVrlEB;
     for (auto vlr : d->vlrs)
     {
@@ -690,35 +627,26 @@ void LasReader::readExtraBytesVlr()
         
         lVrlEB.push_back(vlr);
     }
+
+    if (lVrlEB.size()>1)
+    {
+        std::string warningSeveralExtraDims = "Only one bloc of extra dimensions is normaly allowed in the las specification.";
+        if (d->extraDims.size()>0)
+            log()->get(LogLevel::Warning) << warningSeveralExtraDims << " The \"extra_dims\" options is relevent.\n";
+        else
+            throwError( warningSeveralExtraDims + " The \"extra_dims\" options should be specified \n");
+    }
+
+    // extra_dims ovveride extra_bytes by default
+    if ( d->extraDims.size() != 0 ) return;
     
-    // explode to extraDims by descriptions
-    las::desc_ExtraDims extraDims;
+    // if 'extra_dims' not specified : extract dims from extra byte vlr
+    std::vector<las::ExtraDim> extraDims;
     for (auto vlr : lVrlEB)
     {
         las::ExtraDims evlr = las::ExtraBytesIf::toExtraDims(vlr.data(), vlr.dataSize(), d->header.baseCount());
-        extraDims.insert(std::make_pair(vlr.description, evlr));
+        extraDims.insert(extraDims.end(), evlr.begin(), evlr.end());
     }
-    
-    //in normal way, only one VRL is expected,
-    if (extraDims.size()==1)
-    {
-        if (d->extraDims.size()>0 && !checkExtraDims(d->extraDims, extraDims, log())){
-            log()->get(LogLevel::Warning) << "Extra byte dimensions specified in pipeline and VLR doesn't match. Ignoring pipeline-specified dimensions and extra bytes included in the las/laz\n ";
-            d->extraDims.clear();
-            return;
-        }
-    }
-    //if not, extra dims should be same as extradims options
-    if (extraDims.size()>1)
-    {
-        log()->get(LogLevel::Warning) <<"Only one bloc of extra dimensions is normaly allowed in the las specification : if not, \"extradims\" options should be relevent \n";
-        
-        // if no coherence : error
-        if (!checkExtraDims(d->extraDims, extraDims, log())){
-            throwError("Extra byte dimensions specified in pipeline and VLR doesn't match : see \"extradims\" options \n");
-        }
-    }
-    
     d->extraDims = std::move(extraDims);
 }
 
@@ -736,24 +664,20 @@ void LasReader::addDimensions(PointLayoutPtr layout)
     layout->registerDims(las::pdrfDims(d->header.pointFormat()));
 
     size_t ebLen = d->header.ebCount();
-    for (auto& edims : d->extraDims)
+    for (auto& dim : d->extraDims)
     {
-        las::ExtraDims& dims = edims.second;
-        for (auto& dim : dims)
-        {
-            if (dim.m_size > ebLen)
-                throwError("Extra byte specification exceeds point length beyond base format length.");
-            ebLen -= dim.m_size;
-            
-            Dimension::Type type = dim.m_dimType.m_type;
-            if (type == Dimension::Type::None)
-                continue;
-            if (dim.m_dimType.m_xform.nonstandard())
-                type = Dimension::Type::Double;
-            if (d->opts.fixNames)
-                dim.m_name = Dimension::fixName(dim.m_name);
-            dim.m_dimType.m_id = layout->registerOrAssignDim(dim.m_name, type);
-        }
+        if (dim.m_size > ebLen)
+            throwError("Extra byte specification exceeds point length beyond base format length.");
+        ebLen -= dim.m_size;
+
+        Dimension::Type type = dim.m_dimType.m_type;
+        if (type == Dimension::Type::None)
+            continue;
+        if (dim.m_dimType.m_xform.nonstandard())
+            type = Dimension::Type::Double;
+        if (d->opts.fixNames)
+            dim.m_name = Dimension::fixName(dim.m_name);
+        dim.m_dimType.m_id = layout->registerOrAssignDim(dim.m_name, type);
     }
 }
 
@@ -977,29 +901,25 @@ void LasReader::loadPointV14(PointRef& point, const char *buf, size_t bufsize)
 
 void LasReader::loadExtraDims(LeExtractor& istream, PointRef& point)
 {
-    for (auto& edims : d->extraDims)
+    for (auto& dim : d->extraDims)
     {
-        las::ExtraDims& dims = edims.second;
-        for (auto& dim : dims)
+        // Dimension type of None is undefined and unprocessed
+        if (dim.m_dimType.m_type == Dimension::Type::None)
         {
-            // Dimension type of None is undefined and unprocessed
-            if (dim.m_dimType.m_type == Dimension::Type::None)
-            {
-                istream.skip(dim.m_size);
-                continue;
-            }
-            
-            Everything e = Utils::extractDim(istream, dim.m_dimType.m_type);
-            if (dim.m_dimType.m_xform.nonstandard())
-            {
-                double d = Utils::toDouble(e, dim.m_dimType.m_type);
-                d = d * dim.m_dimType.m_xform.m_scale.m_val +
-                dim.m_dimType.m_xform.m_offset.m_val;
-                point.setField(dim.m_dimType.m_id, d);
-            }
-            else
-                point.setField(dim.m_dimType.m_id, dim.m_dimType.m_type, &e);
+            istream.skip(dim.m_size);
+            continue;
         }
+
+        Everything e = Utils::extractDim(istream, dim.m_dimType.m_type);
+        if (dim.m_dimType.m_xform.nonstandard())
+        {
+            double d = Utils::toDouble(e, dim.m_dimType.m_type);
+            d = d * dim.m_dimType.m_xform.m_scale.m_val +
+                dim.m_dimType.m_xform.m_offset.m_val;
+            point.setField(dim.m_dimType.m_id, d);
+        }
+        else
+            point.setField(dim.m_dimType.m_id, dim.m_dimType.m_type, &e);
     }
 }
 

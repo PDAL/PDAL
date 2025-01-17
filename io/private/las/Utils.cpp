@@ -452,44 +452,6 @@ std::vector<ExtraDim> parse(const StringList& dimString, bool allOk)
     return extraDims;
 }
 
-const std::map<std::string, pdal::Dimension::Type> typeMapping
-{
-    {"UInt8", Dimension::Type::Unsigned8},
-    {"UInt16", Dimension::Type::Unsigned16},
-    {"UInt32", Dimension::Type::Unsigned32},
-    {"UInt64", Dimension::Type::Unsigned64},
-    {"Int8", Dimension::Type::Signed8},
-    {"Int16", Dimension::Type::Signed16},
-    {"Int32", Dimension::Type::Signed32},
-    {"Int64", Dimension::Type::Signed64},
-    {"Float64", Dimension::Type::Double},
-    {"Float32", Dimension::Type::Float}
-};
-
-desc_ExtraDims parse(const NL::json::array_t& ebVLR)
-{
-    desc_ExtraDims extraDims;
-    if (ebVLR.size()==0) return extraDims;
-    assert(ebVLR[0].is_array());
-    
-    for (auto& jebrvl: ebVLR[0])
-    {
-        std::string description = ( jebrvl.is_object() ? jebrvl["description"] : jebrvl[0]["description"] );
-        NL::json::array_t values = ( jebrvl.is_object() ? jebrvl["values"] : jebrvl[0]["values"] );
-        
-        ExtraDims jebrvl_extradims;
-        for (auto jdim : values)
-        {
-            std::string name = jdim["name"];
-            pdal::Dimension::Type type = typeMapping.find( jdim["type"] )->second ;
-            jebrvl_extradims.push_back(ExtraDim(name, type, 0));
-        }
-        
-        extraDims.insert(std::make_pair(description, jebrvl_extradims));
-    }
-    return extraDims;
-}
-
 // LAS loader driver
 
 LoaderDriver::LoaderDriver(int pdrf, const Scaling& scaling, const ExtraDims& dims)
