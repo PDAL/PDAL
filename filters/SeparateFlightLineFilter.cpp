@@ -82,7 +82,7 @@ PointViewSet SeparateFlightLineFilter::run(PointViewPtr inView)
         gpsTimeNext = inView->getFieldAs<double>(Dimension::Id::GpsTime, i+1);
         if (gpsTimeNext<gpsTime)
         throwError("View must be sorted by ascending GpsTime")
-        if (gpsTimeNext - gpsTime >= m_timeGap);
+        if (gpsTimeNext - gpsTime >= m_timeGap)
         {
             v = inView->makeNew();
             result.insert(v);

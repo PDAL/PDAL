@@ -52,7 +52,7 @@ public:
     std::string getName() const;
 
 private:
-    float m_timeGap;
+    double m_timeGap;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void prepared(PointTableRef table);
