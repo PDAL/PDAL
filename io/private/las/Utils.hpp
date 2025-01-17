@@ -38,8 +38,6 @@
 #include <mutex>
 #include <string>
 
-#include <nlohmann/json.hpp>
-
 #include <pdal/pdal_config.hpp>
 #include <pdal/Dimension.hpp>
 #include <pdal/DimType.hpp>
@@ -180,7 +178,6 @@ struct ExtraDim
     int32_t m_byteOffset;
 };
 using ExtraDims = std::vector<ExtraDim>;
-using desc_ExtraDims = std::map<std::string, ExtraDims>;
 
 inline bool operator == (const ExtraDim& ed1, const ExtraDim& ed2)
 {
@@ -262,7 +259,6 @@ void addVlrMetadata(const Vlr& vlr, std::string name, MetadataNode& forward, Met
 void setSummary(Header& header, const Summary& summary);
 std::string generateSoftwareId();
 ExtraDims parse(const StringList& dimString, bool allOk);
-desc_ExtraDims parse(const NL::json::array_t& ebVLR);
 const Dimension::IdList& pdrfDims(int pdrf);
 uint8_t lasType(Dimension::Type type, int fieldCnt);
 

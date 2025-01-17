@@ -134,7 +134,7 @@ private:
     void queueNextStandardChunk();
 
     const las::Header& lasHeader() const;
-
+    
     struct Options;
     struct Private;
     std::unique_ptr<Private> d;

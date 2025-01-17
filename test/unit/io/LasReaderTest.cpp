@@ -90,7 +90,6 @@ TEST(LasReaderTest, create)
     EXPECT_TRUE(s);
 }
 
-
 TEST(LasReaderTest, header)
 {
     auto testLasHeader = [](const std::string& filePath, bool compressed){
@@ -395,8 +394,8 @@ TEST(LasReaderTest, noextra)
 {
     Options ro;
     ro.add("filename", Support::datapath("las/autzen_trim.las"));
-    ro.add("extra_dims","[{\"description\":\"\",\"values\":[{\"name\":\"Foo\", \"type\":\"UInt32\"}]}]");
-    
+    ro.add("extra_dims", "Foo=uint32_t");
+
     LasReader r;
     r.setOptions(ro);
 
@@ -760,10 +759,8 @@ TEST(LasReaderTest, Copc)
 TEST(LasReaderTest, Laz_with_extra_byte)
 {
     Options ops1;
-    ops1.add("filename", Support::datapath("laz/las_with_extra_byte.laz"));
-
-    ops1.add("extra_dims", "[{\"description\":\"RIEGL Extra Bytes\",\"values\":[{\"name\":\"Deviation\",\"type\":\"UInt16\"}]},\
-                            {\"description\":\"\",\"values\":[{\"name\":\"confidence\", \"type\":\"UInt8\"}]}]");
+    ops1.add("filename", Support::datapath("laz/las_with_several_extra_byte_bloc.laz"));
+    ops1.add("extra_dims", "Deviation=uint16_t, confidence=uint8_t");
     
     LasReader lazReader;
     lazReader.setOptions(ops1);
@@ -781,7 +778,7 @@ TEST(LasReaderTest, Laz_with_extra_byte)
 TEST(LasReaderTest, Laz_with_extra_byte_without_option)
 {
     Options ops1;
-    ops1.add("filename", Support::datapath("laz/las_with_extra_byte.laz"));
+    ops1.add("filename", Support::datapath("laz/las_with_several_extra_byte_bloc.laz"));
     
     LasReader lazReader;
     lazReader.setOptions(ops1);
@@ -793,50 +790,20 @@ TEST(LasReaderTest, Laz_with_extra_byte_without_option)
 TEST(LasReaderTest, Laz_with_severals_extra_byte_with_wrong_options_name)
 {
     Options ops1;
-    ops1.add("filename", Support::datapath("laz/las_with_extra_byte.laz"));
-
-    ops1.add("extra_dims", "[{\"description\":\"RIEGL Extra Bytes\",\"values\":[{\"name\":\"Bad_Name\",\"type\":\"UInt16\"}]},\
-                            {\"description\":\"\",\"values\":[{\"name\":\"confidence\", \"type\":\"UInt8\"}]}]");
-    
-    LasReader lazReader;
-    lazReader.setOptions(ops1);
-
-    PointTable table;
-    EXPECT_THROW( lazReader.prepare(table), pdal_error );
-}
-
-TEST(LasReaderTest, Laz_with_severals_extra_byte_with_wrong_options_type)
-{
-    Options ops1;
-    ops1.add("filename", Support::datapath("laz/las_with_extra_byte.laz"));
-
-    ops1.add("extra_dims", "[{\"description\":\"RIEGL Extra Bytes\",\"values\":[{\"name\":\"Deviation\",\"type\":\"bad_type\"}]},\
-                            {\"description\":\"\",\"values\":[{\"name\":\"confidence\", \"type\":\"UInt8\"}]}]");
-    
-    LasReader lazReader;
-    lazReader.setOptions(ops1);
-
-    PointTable table;
-    EXPECT_THROW( lazReader.prepare(table), pdal_error );
-}
-
-TEST(LasReaderTest, Laz_without_extra_byte_with_option)
-{
-    Options ops1;
-    ops1.add("filename", Support::datapath("las/4_6.las"));
-    
-    ops1.add("extra_dims", "[{\"description\":\"RIEGL Extra Bytes\",\"values\":[{\"name\":\"Deviation\",\
-                            \"type\":\"uint8\"}]},{\"description\":\"\",\"values\":[{\"name\":\"confidence\", \"type\":\"uint8\"}]}]");
+    ops1.add("filename", Support::datapath("laz/las_with_several_extra_byte_bloc.laz"));
+    ops1.add("extra_dims", "Bad_Name=uint16_t, confidence=uint8_t");
     
     LasReader lazReader;
     lazReader.setOptions(ops1);
 
     PointTable table;
     lazReader.prepare(table);
+    
     PointViewSet viewSet = lazReader.execute(table);
     PointLayoutPtr layout(table.layout());
     PointViewPtr view = *viewSet.begin();
 
     ASSERT_FALSE(view->hasDim( layout->findDim("Deviation") ));
-    ASSERT_FALSE(view->hasDim( layout->findDim("confidence") ));
+    ASSERT_TRUE(view->hasDim( layout->findDim("confidence") ));
+    ASSERT_TRUE(view->hasDim( layout->findDim("Bad_Name") ));
 }
