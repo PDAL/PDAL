@@ -12,7 +12,7 @@ pwd
 find .
 
 set PACKAGE_PATTERN="*pdal*.conda"
-if [[ -n `find . -name $PACKAGE_PATTERN` ]]; then
+if [[ -n `find . -name "*pdal*.conda"` ]]; then
     echo "Found packages to upload"
 else
     echo "No packages matching $PACKAGE_PATTERN to upload were found"
