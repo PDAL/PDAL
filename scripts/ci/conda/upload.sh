@@ -11,7 +11,7 @@ ls
 pwd
 find .
 
-set PACKAGE_PATTERN="*pdal*.conda"
+export PACKAGE_PATTERN="*pdal*.conda"
 if [[ -n `find . -name "*pdal*.conda"` ]]; then
     echo "Found packages to upload"
 else
