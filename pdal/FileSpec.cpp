@@ -152,13 +152,6 @@ Utils::StatusWithReason FileSpec::extractHeaders(NL::json& node)
 
 std::ostream& operator << (std::ostream& out, const FileSpec& spec)
 {
-    // ostream output should align with the input string
-    if (spec.onlyFilename())
-    {
-        out << spec.m_path.string();
-        return out;
-    }
-
     NL::json json;
     json["path"] = spec.m_path.string();
     if (!spec.m_headers.empty())
