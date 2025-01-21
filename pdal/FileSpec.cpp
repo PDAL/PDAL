@@ -59,11 +59,6 @@ bool extractStringMap(NL::json& node, StringMap& map)
 } // unnamed namespace
 
 
-FileSpec::FileSpec(const std::string& path)
-{
-    m_status = ingest(path);
-}
-
 Utils::StatusWithReason FileSpec::ingest(const std::string& pathOrJson)
 {
     NL::json json;

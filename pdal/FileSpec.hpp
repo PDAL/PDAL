@@ -48,17 +48,11 @@ namespace pdal
 class FileSpec
 {
 public:
-    FileSpec() : m_status(true)
-    {}    
-    FileSpec(const std::string& path);
+    FileSpec()
+    {}
 
-    Utils::StatusWithReason valid() const
-    { 
-        if (m_path.empty())
-            return false;
-        else
-            return m_status;
-    }
+    bool valid() const
+    { return !m_path.empty(); }
     bool onlyFilename() const
     { return m_headers.empty() && m_query.empty(); }
     Utils::StatusWithReason parse(NL::json& json);
@@ -76,7 +70,6 @@ public:
     std::filesystem::path m_path;
     StringMap m_headers;
     StringMap m_query;
-    Utils::StatusWithReason m_status;
 };
 
 namespace Utils

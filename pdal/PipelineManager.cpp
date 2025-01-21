@@ -316,7 +316,12 @@ MetadataNode PipelineManager::getMetadata() const
 Stage& PipelineManager::makeReader(const std::string& inputFile,
     std::string driver)
 {
-    ReaderCreationOptions ops { inputFile, driver };
+    FileSpec spec;
+    Utils::StatusWithReason status = spec.ingest(inputFile);
+    if (!status)
+        throw pdal_error(status.what());
+
+    ReaderCreationOptions ops { spec, driver };
 
     return makeReader(ops);
 }
@@ -325,7 +330,12 @@ Stage& PipelineManager::makeReader(const std::string& inputFile,
 Stage& PipelineManager::makeReader(const std::string& inputFile,
     std::string driver, Options options)
 {
-    ReaderCreationOptions ops { inputFile, driver, nullptr, options };
+    FileSpec spec;
+    Utils::StatusWithReason status = spec.ingest(inputFile);
+    if (!status)
+        throw pdal_error(status.what());
+
+    ReaderCreationOptions ops { spec, driver, nullptr, options };
 
     return makeReader(ops);
 }
@@ -333,7 +343,12 @@ Stage& PipelineManager::makeReader(const std::string& inputFile,
 // keeping for backward compatibility 
 Stage& PipelineManager::makeReader(StageCreationOptions& o)
 {
-    ReaderCreationOptions rOpts { o.m_filename, o.m_driver, o.m_parent, 
+    FileSpec spec;
+    Utils::StatusWithReason status = spec.ingest(o.m_filename);
+    if (!status)
+        throw pdal_error(status.what());
+
+    ReaderCreationOptions rOpts { spec, o.m_driver, o.m_parent, 
                             o.m_options, o.m_tag };
     return makeReader(rOpts);
 }
