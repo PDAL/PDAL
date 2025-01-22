@@ -45,7 +45,7 @@ using StringMap = std::map<std::string, std::string>;
 namespace pdal
 {
 
-class PDAL_EXPORT FileSpec
+class FileSpec
 {
 public:
     FileSpec()

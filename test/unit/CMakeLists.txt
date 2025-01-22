@@ -84,6 +84,7 @@ PDAL_ADD_TEST(pdal_ogr_arg_test
 PDAL_ADD_TEST(pdal_filespec_test
     FILES
         FileSpecTest.cpp
+        ${PDAL_SRC_DIR}/FileSpec.cpp
     INCLUDES 
         ${NLOHMANN_INCLUDE_DIR}
 )
