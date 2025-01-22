@@ -81,6 +81,12 @@ PDAL_ADD_TEST(pdal_ogr_arg_test
     LINK_WITH
         ${GDAL_LIBRARY}
 )
+PDAL_ADD_TEST(pdal_filespec_test
+    FILES
+        FileSpecTest.cpp
+    INCLUDES 
+        ${NLOHMANN_INCLUDE_DIR}
+)
 PDAL_ADD_TEST(pdal_pipeline_manager_test FILES PipelineManagerTest.cpp)
 PDAL_ADD_TEST(pdal_pipeline_writer_test
     FILES
