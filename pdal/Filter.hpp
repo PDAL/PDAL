@@ -67,6 +67,8 @@ private:
     virtual PointViewSet run(PointViewPtr view);
     virtual void filter(PointView& /*view*/)
     {}
+    virtual void assignParsedOptions() final
+    {}
 
     friend PDAL_EXPORT std::istream& operator>>(std::istream& in, Filter::WhereMergeMode& mode);
     friend PDAL_EXPORT std::ostream& operator<<(std::ostream& out, const Filter::WhereMergeMode& mode);

@@ -316,7 +316,12 @@ MetadataNode PipelineManager::getMetadata() const
 Stage& PipelineManager::makeReader(const std::string& inputFile,
     std::string driver)
 {
-    StageCreationOptions ops { inputFile, driver };
+    FileSpec spec;
+    Utils::StatusWithReason status = spec.ingest(inputFile);
+    if (!status)
+        throw pdal_error(status.what());
+
+    ReaderCreationOptions ops { spec, driver };
 
     return makeReader(ops);
 }
@@ -325,23 +330,41 @@ Stage& PipelineManager::makeReader(const std::string& inputFile,
 Stage& PipelineManager::makeReader(const std::string& inputFile,
     std::string driver, Options options)
 {
-    StageCreationOptions ops { inputFile, driver, nullptr, options };
+    FileSpec spec;
+    Utils::StatusWithReason status = spec.ingest(inputFile);
+    if (!status)
+        throw pdal_error(status.what());
+
+    ReaderCreationOptions ops { spec, driver, nullptr, options };
 
     return makeReader(ops);
 }
 
-
+// keeping for backward compatibility 
 Stage& PipelineManager::makeReader(StageCreationOptions& o)
+{
+    FileSpec spec;
+    Utils::StatusWithReason status = spec.ingest(o.m_filename);
+    if (!status)
+        throw pdal_error(status.what());
+
+    ReaderCreationOptions rOpts { spec, o.m_driver, o.m_parent, 
+                            o.m_options, o.m_tag };
+    return makeReader(rOpts);
+}
+
+Stage& PipelineManager::makeReader(ReaderCreationOptions& o)
 {
     if (o.m_driver.empty())
     {
-        o.m_driver = StageFactory::inferReaderDriver(o.m_filename);
+        o.m_driver = StageFactory::inferReaderDriver(o.m_filespec.m_path.string());
         if (o.m_driver.empty())
             throw pdal_error("Cannot determine reader for input file: " +
-                o.m_filename);
+                o.m_filespec.m_path.string());
     }
-    if (!o.m_filename.empty())
-        o.m_options.replace("filename", o.m_filename);
+    // test if empty
+    if (o.m_filespec.valid())
+        o.m_options.replace("filename", o.m_filespec);
 
     Stage& reader = addReader(o.m_driver);
     reader.setTag(o.m_tag);

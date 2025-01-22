@@ -36,6 +36,7 @@
 
 #include <pdal/Stage.hpp>
 #include <pdal/Options.hpp>
+#include <pdal/FileSpec.hpp>
 
 #include <functional>
 
@@ -70,6 +71,7 @@ protected:
     PointReadFunc m_cb;
     Arg *m_filenameArg;
     Arg *m_countArg;
+    FileSpec m_filespec;
 
     SpatialReference m_overrideSrs;
     SpatialReference m_defaultSrs;
@@ -90,6 +92,7 @@ private:
     virtual void l_addArgs(ProgramArgs& args) final;
     virtual void l_prepared(PointTableRef table) final;
 
+    virtual void assignParsedOptions() final;
     virtual const expr::ConditionalExpression* whereExpr() const;
     virtual WhereMergeMode mergeMode() const;
     virtual point_count_t read(PointViewPtr /*view*/, point_count_t /*num*/)

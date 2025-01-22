@@ -142,8 +142,13 @@ void Stage::handleOptions()
     {
         throw pdal_error(getName() + ": " + error.what());
     }
+    assignParsedOptions();
     setupLog();
 }
+
+
+void Stage::assignParsedOptions()
+{}
 
 
 QuickInfo Stage::preview()

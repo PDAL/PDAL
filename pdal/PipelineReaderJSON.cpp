@@ -64,7 +64,7 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
     {
         NL::json& node = tree.at(i);
 
-        std::string filename;
+        FileSpec spec;
         std::string tag;
         std::string type;
         std::vector<Stage*> specifiedInputs;
@@ -73,12 +73,12 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
         // strings are assumed to be filenames
         if (node.is_string())
         {
-            filename = node.get<std::string>();
+            spec.m_path = node.get<std::string>();
         }
         else
         {
             type = extractType(node);
-            filename = extractFilename(node);
+            spec = extractFilename(node);
             tag = extractTag(node, tags);
             specifiedInputs = extractInputs(node, tags);
             if (!specifiedInputs.empty())
@@ -93,13 +93,14 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
         if ((type.empty() && (i == 0 || i != last)) ||
             Utils::startsWith(type, "readers."))
         {
-            StringList files = FileUtils::glob(filename);
+            StringList files = FileUtils::glob(spec.m_path.string());
             if (files.empty())
-                files.push_back(filename);
+                files.push_back(spec.m_path.string());
 
             for (const std::string& path : files)
             {
-                StageCreationOptions ops { path, type, nullptr, options, tag };
+                spec.m_path = path;
+                ReaderCreationOptions ops { spec, type, nullptr, options, tag };
                 s = &m_manager.makeReader(ops);
 
                 if (specifiedInputs.size())
@@ -110,7 +111,7 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
         }
         else if (type.empty() || Utils::startsWith(type, "writers."))
         {
-            StageCreationOptions ops { filename, type, nullptr, options, tag };
+            StageCreationOptions ops { spec.m_path.string(), type, nullptr, options, tag };
             s = &m_manager.makeWriter(ops);
             for (Stage *ts : inputs)
                 s->setInput(*ts);
@@ -119,8 +120,8 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
         }
         else
         {
-            if (filename.size())
-                options.add("filename", filename);
+            if (spec.valid())
+                options.add("filename", spec.m_path.string());
             StageCreationOptions ops { "", type, nullptr, options, tag };
             s = &m_manager.makeFilter(ops);
             for (Stage *ts : inputs)
@@ -226,27 +227,20 @@ std::string PipelineReaderJSON::extractType(NL::json& node)
 }
 
 
-std::string PipelineReaderJSON::extractFilename(NL::json& node)
+FileSpec PipelineReaderJSON::extractFilename(NL::json& node)
 {
-    std::string filename;
+    FileSpec spec;
 
     auto it = node.find("filename");
-    if (it != node.end())
-    {
-        NL::json& val = *it;
-        if (!val.is_null())
-        {
-            if (val.is_string())
-                filename = val.get<std::string>();
-            else
-                throw pdal_error("JSON pipeline: 'filename' must be "
-                    "specified as a string.");
-        }
-        node.erase(it);
-    }
-    return filename;
-}
+    if (it == node.end())
+        return spec;
 
+    Utils::StatusWithReason status = spec.parse(*it);
+    if (!status)
+        throw pdal_error(status.what());
+    node.erase(it);
+    return spec;
+}
 
 std::string PipelineReaderJSON::extractTag(NL::json& node, TagMap& tags)
 {

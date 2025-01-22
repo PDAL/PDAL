@@ -38,6 +38,7 @@
 #include <pdal/PointView.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/Log.hpp>
+#include <pdal/FileSpec.hpp>
 
 #include <vector>
 #include <string>
@@ -52,6 +53,15 @@ class StageFactory;
 struct StageCreationOptions
 {
     std::string m_filename;
+    std::string m_driver;
+    Stage *m_parent;
+    Options m_options;
+    std::string m_tag;
+};
+
+struct ReaderCreationOptions
+{
+    FileSpec m_filespec;
     std::string m_driver;
     Stage *m_parent;
     Options m_options;
@@ -94,6 +104,7 @@ public:
     Stage& makeReader(const std::string& inputFile, std::string driver,
         Options options);
     Stage& makeReader(StageCreationOptions& opts);
+    Stage& makeReader(ReaderCreationOptions& opts);
 
     Stage& makeFilter(const std::string& driver);
     Stage& makeFilter(const std::string& driver, Options options);
