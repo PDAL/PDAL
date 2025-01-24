@@ -297,6 +297,7 @@ PointViewSet PoissonFilter::run(PointViewPtr view)
         opts.m_hasColor = true;
     }
 
+    OctNode<TreeNodeData>::SetAllocator(MEMORY_ALLOCATOR_BLOCK_SIZE);
     PoissonRecon<double> recon(opts, *source);
     if (!recon.execute())
         throwError("Failure executing poisson algorithm.");
