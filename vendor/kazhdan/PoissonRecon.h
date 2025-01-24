@@ -497,7 +497,7 @@ bool PoissonRecon<Real>::execute()
         "(Version 9.01)");
 //    m_debug.dump(m_comments.back());
     m_tree.threads = m_opts.m_threads;
-	OctNode< TreeNodeData >::SetAllocator( MEMORY_ALLOCATOR_BLOCK_SIZE );
+
     readData();
 
     calcDensity();
