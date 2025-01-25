@@ -40,6 +40,7 @@
 #include "private/las/Tile.hpp"
 #include "private/las/Utils.hpp"
 #include "private/las/Vlr.hpp"
+#include "private/connector/Connector.hpp"
 
 #include <condition_variable>
 #include <mutex>
@@ -54,7 +55,7 @@
 #include <pdal/util/IStream.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <lazperf/readers.hpp>
-#include <arbiter/arbiter.hpp>
+
 
 namespace pdal
 {
@@ -170,6 +171,8 @@ struct LasReader::Private
     std::mutex mutex;
     std::condition_variable processedCv;
     bool isRemote;
+    std::unique_ptr<connector::Connector> connector;
+
 
     Private() : apiHeader(header, srs, vlrs), index(0), pool(DefaultNumThreads), isRemote(false)
     {}
@@ -244,18 +247,10 @@ void LasReader::initialize(PointTableRef table)
 
 void LasReader::tryLoadRemote()
 {
+    d->connector.reset(new connector::Connector(m_filespec));
     d->isRemote = Utils::isRemote(m_filename);
-    if (d->isRemote)
-    {
-        // Here, we're assigning the local filename to "remoteFilename".
-        // This is fixed by the swap on the next line.
-        std::string remoteFilename = Utils::tempFilename(m_filename);
-        std::swap(remoteFilename, m_filename);
-
-        // Fetch the remote file and write to the local file.
-        arbiter::Arbiter a;
-        a.put(m_filename, a.getBinary(remoteFilename));
-    }
+    auto handle = d->connector->getLocalHandle(m_filename);
+    m_filename = handle.release();
 }
 
 QuickInfo LasReader::inspect()

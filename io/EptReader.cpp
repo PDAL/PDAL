@@ -158,9 +158,6 @@ public:
     double m_resolution = 0;
     std::vector<Polygon> m_polys;
     NL::json m_addons;
-
-    NL::json m_query;
-    NL::json m_headers;
     OGRSpec m_ogr;
     bool m_ignoreUnreadable = false;
 };
@@ -202,36 +199,11 @@ void EptReader::addArgs(ProgramArgs& args)
     args.add("polygon", "Bounding polygon(s) to crop requests",
         m_args->m_polys).setErrorText("Invalid polygon specification. "
             "Must be valid GeoJSON/WKT");
-    args.add("header", "Header fields to forward with HTTP requests", m_args->m_headers);
-    args.add("query", "Query parameters to forward with HTTP requests", m_args->m_query);
     args.add("ogr", "OGR filter geometries", m_args->m_ogr);
     args.add("ignore_unreadable", "Ignore errors for missing point data nodes",
         m_args->m_ignoreUnreadable);
 }
 
-
-void EptReader::setForwards(StringMap& headers, StringMap& query)
-{
-    try
-    {
-        if (!m_args->m_headers.is_null())
-            headers = m_args->m_headers.get<StringMap>();
-    }
-    catch (const std::exception& err)
-    {
-        throwError(std::string("Error parsing 'headers': ") + err.what());
-    }
-
-    try
-    {
-        if (!m_args->m_query.is_null())
-            query = m_args->m_query.get<StringMap>();
-    }
-    catch (const std::exception& err)
-    {
-        throwError(std::string("Error parsing 'query': ") + err.what());
-    }
-}
 
 void EptReader::initialize()
 {
@@ -243,10 +215,8 @@ void EptReader::initialize()
             threads << " threads" << std::endl;
     m_p->pool.reset(new ThreadPool(threads));
 
-    StringMap headers;
-    StringMap query;
-    setForwards(headers, query);
-    m_p->connector.reset(new connector::Connector(headers, query));
+
+    m_p->connector.reset(new connector::Connector(m_filespec));
 
     try
     {
