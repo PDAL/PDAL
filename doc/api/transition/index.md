@@ -21,8 +21,8 @@ which will be useful later:
 #include <memory>
 #include <pdal/PointTable.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/LasReader.hpp>
-#include <pdal/LasHeader.hpp>
+#include <pdal/io/LasReader.hpp>
+#include <pdal/io/LasHeader.hpp>
 #include <pdal/Options.hpp>
 ```
 
