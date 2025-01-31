@@ -95,7 +95,7 @@ public:
     {
         return (std::string)(*this);
     }
-    
+
     operator std::string() const
     {
         return std::to_string(d) + '-' + std::to_string(x) + '-' +
@@ -114,15 +114,16 @@ public:
     {
         BOX3D cellBounds;
 
-        double cellWidth = (root.maxx - root.minx) / pow(2, d);
+        int width = pow(2, d);
+        double cellWidth = (root.maxx - root.minx) / width;
         // The test in each of these is to avoid unnecessary rounding errors when
         // we know the actual value.
         cellBounds.minx = (x == 0 ? root.minx : root.minx + (cellWidth * x));
-        cellBounds.maxx = (x == d ? root.maxx : root.minx + (cellWidth * (x + 1)));
+        cellBounds.maxx = (x == (width - 1) ? root.maxx : root.minx + (cellWidth * (x + 1)));
         cellBounds.miny = (y == 0 ? root.miny : root.miny + (cellWidth * y));
-        cellBounds.maxy = (y == d ? root.maxy : root.miny + (cellWidth * (y + 1)));
+        cellBounds.maxy = (y == (width - 1) ? root.maxy : root.miny + (cellWidth * (y + 1)));
         cellBounds.minz = (z == 0 ? root.minz : root.minz + (cellWidth * z));
-        cellBounds.maxz = (z == d ? root.maxz : root.minz + (cellWidth * (z + 1)));
+        cellBounds.maxz = (z == (width - 1) ? root.maxz : root.minz + (cellWidth * (z + 1)));
         return cellBounds;
     }
 
