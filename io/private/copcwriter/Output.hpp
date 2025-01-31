@@ -77,6 +77,8 @@ private:
     uint64_t m_pointPos;
     std::unordered_map<VoxelKey, Entry> m_hierarchy;
 
+
+
     void writeHeader();
     void writeVlrData();
     void writeChunkTable();
