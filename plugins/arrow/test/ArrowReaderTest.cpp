@@ -42,15 +42,11 @@
 #include "Support.hpp"
 #include <pdal/util/FileUtils.hpp>
 
-using namespace pdal;
-
 namespace pdal
 {
 
-
 namespace
 {
-
 
 void compareArrowLasStreaming(const std::string& pcdFilename,
                             const std::string& lasFilename)
@@ -110,6 +106,7 @@ void compareArrowLasStreaming(const std::string& pcdFilename,
     }
 }
 
+}  // unnamed namespace
 
 
 TEST(ArrowParquetReaderTest, ReadingPoints)
@@ -163,14 +160,9 @@ TEST(ArrowParquetReaderTest, SRS)
     PointViewPtr view = *viewSet.begin();
     EXPECT_EQ(view->size(), 1065);
 
-
     const SpatialReference utm10("EPSG:26910");
     EXPECT_EQ(m_reader.getSpatialReference(), utm10);
-
-
 }
 
-}
-
-}
+} // namespace pdal
 

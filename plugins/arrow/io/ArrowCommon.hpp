@@ -35,27 +35,9 @@
 #pragma once
 
 #include <arrow/api.h>
-#include <arrow/io/api.h>
-#include <arrow/ipc/api.h>
-#include <arrow/ipc/reader.h>
-#include <arrow/adapters/orc/adapter.h>
-#include <arrow/util/key_value_metadata.h>
-#include <arrow/util/base64.h>
+#include <arrow/type_fwd.h>
 
-#include <parquet/arrow/reader.h>
-#include <parquet/exception.h>
-#include <parquet/arrow/writer.h>
-#include <parquet/types.h>
-#include <parquet/metadata.h>
-#include <parquet/file_writer.h>
-#include <parquet/schema.h>
-#include <parquet/arrow/writer.h>
-#include <parquet/arrow/schema.h>
-
-#include <pdal/pdal_types.hpp>
-#include <pdal/Geometry.hpp>
-
-#include <ogr_geometry.h>
+#include <pdal/Dimension.hpp>
 
 namespace pdal
 {
@@ -68,16 +50,10 @@ enum ArrowFormatType {
     Unknown = 256
 };
 
-}
-}
-
-pdal::Dimension::Type computePDALTypeFromArrow(arrow::Type::type t)
+Dimension::Type pdalType(arrow::Type::type t)
 {
-    using namespace pdal;
-
     switch (t)
     {
-
         case arrow::Type::UINT8:
             return Dimension::Type::Unsigned8;
         case arrow::Type::UINT16:
@@ -100,300 +76,106 @@ pdal::Dimension::Type computePDALTypeFromArrow(arrow::Type::type t)
             return Dimension::Type::Double;
         default:
             return Dimension::Type::None;
-
-    }
-
-    return Dimension::Type::None;
-
-}
-
-
-std::shared_ptr<arrow::Field> toArrowType(std::string name, pdal::Dimension::Type t)
-{
-    using namespace pdal;
-    std::shared_ptr<arrow::Field> field;
-    switch (t)
-    {
-
-    case Dimension::Type::Unsigned8:
-        field = arrow::field(name, arrow::uint8(), false);
-        break;
-    case Dimension::Type::Signed8:
-        field = arrow::field(name, arrow::int8(), false);
-        break;
-    case Dimension::Type::Unsigned16:
-        field = arrow::field(name, arrow::uint16(), false);
-        break;
-    case Dimension::Type::Signed16:
-        field = arrow::field(name, arrow::int16(), false);
-        break;
-    case Dimension::Type::Unsigned32:
-        field = arrow::field(name, arrow::uint32(), false);
-        break;
-    case Dimension::Type::Signed32:
-        field = arrow::field(name, arrow::int32(), false);
-        break;
-    case Dimension::Type::Float:
-        field = arrow::field(name, arrow::float32(), false);
-        break;
-    case Dimension::Type::Double:
-        field = arrow::field(name, arrow::float64(), false);
-        break;
-    case Dimension::Type::Unsigned64:
-        field = arrow::field(name, arrow::uint64(), false);
-        break;
-    case Dimension::Type::Signed64:
-        field = arrow::field(name, arrow::int64(), false);
-        break;
-    case Dimension::Type::None:
-        field = arrow::field(name, arrow::binary(), false);
-        break;
-    default:
-        throw pdal_error("Unrecognized PDAL dimension type for dimension " + name);
-
-    }
-
-    return field;
-
-}
-
-
-
-void writeWkb(pdal::PointRef& point,
-             pdal::Geometry& ogr_point,
-             arrow::ArrayBuilder* builder)
-{
-    double x = point.getFieldAs<double>(pdal::Dimension::Id::X);
-    double y = point.getFieldAs<double>(pdal::Dimension::Id::Y);
-    double z = point.getFieldAs<double>(pdal::Dimension::Id::Z);
-    arrow::BinaryBuilder* bb = static_cast<arrow::BinaryBuilder*>(builder);
-    if (!bb)
-        throw pdal::pdal_error ("unable to cast builder!");
-
-
-    OGRGeometryH og = ogr_point.getOGRHandle();
-    OGRPoint* g = (OGRPoint*) og;
-    g->setX(x); g->setY(y); g->setZ(z);
-
-
-    auto ok = bb->Append(ogr_point.wkb());
-    if (!ok.ok())
-    {
-        std::stringstream msg;
-        msg << "Unable to write wkb binary value for point";
-        throw pdal::pdal_error(msg.str());
-    }
-
-}
-
-
-#define THROW_IF_ARROW_NOT_OK(status)                             \
-    do                                                                         \
-    {                                                                          \
-        if (!(status).ok())                                                    \
-        {                                                                      \
-            std::stringstream msg;                                             \
-            msg << "Arrow operation faild with error '";                       \
-            msg << ARROW_STRINGIFY(status) << "'";                             \
-            throw pdal::pdal_error(msg.str());                                 \
-                 \
-        }                                                                      \
-    } while (false)
-
-
-void writeGeoArrow(pdal::PointRef& point,
-             arrow::ArrayBuilder* builder)
-{
-    double x = point.getFieldAs<double>(pdal::Dimension::Id::X);
-    double y = point.getFieldAs<double>(pdal::Dimension::Id::Y);
-    double z = point.getFieldAs<double>(pdal::Dimension::Id::Z);
-
-    auto poPointBuilder = static_cast<arrow::FixedSizeListBuilder *>( builder);
-    auto poValueBuilder = static_cast<arrow::DoubleBuilder *>(
-        poPointBuilder->value_builder());
-
-    THROW_IF_ARROW_NOT_OK(poPointBuilder->Append());
-    THROW_IF_ARROW_NOT_OK(poValueBuilder->Append(x));
-    THROW_IF_ARROW_NOT_OK(poValueBuilder->Append(y));
-    THROW_IF_ARROW_NOT_OK(poValueBuilder->Append(z));
-
-}
-
-void writePointData(pdal::PointRef& point,
-                    pdal::Dimension::Id id,
-                    pdal::Dimension::Type t,
-                    arrow::ArrayBuilder* builder)
-{
-    using namespace pdal;
-
-    switch (t)
-    {
-
-    case Dimension::Type::Unsigned8:
-        {
-            arrow::UInt8Builder* uint8b = static_cast<arrow::UInt8Builder*>(builder);
-            if (uint8b)
-            {
-                uint8_t value = point.getFieldAs<uint8_t>(id);
-                auto ok = uint8b->Append(value);
-                if (!ok.ok())
-                {
-                    std::stringstream msg;
-                    msg << "Unable to write uint8_t value '" << value << "' to file";
-                    throw pdal_error(msg.str());
-                }
-            };
-            break;
-        }
-    case Dimension::Type::Signed8:
-        {
-            arrow::Int8Builder* int8b = static_cast<arrow::Int8Builder*>(builder);
-            if (int8b)
-            {
-                int8_t value = point.getFieldAs<int8_t>(id);
-                auto ok = int8b->Append(value);
-                if (!ok.ok())
-                {
-                    std::stringstream msg;
-                    msg << "Unable to write int8_t value '" << value << "' to file";
-                    throw pdal_error(msg.str());
-                }
-            };
-            break;
-        }
-    case Dimension::Type::Unsigned16:
-        {
-            arrow::UInt16Builder* uint16b = static_cast<arrow::UInt16Builder*>(builder);
-            if (uint16b)
-            {
-                uint16_t value = point.getFieldAs<uint16_t>(id);
-                auto ok = uint16b->Append(value);
-                if (!ok.ok())
-                {
-                    std::stringstream msg;
-                    msg << "Unable to write uint16_t value '" << value << "' to file";
-                    throw pdal_error(msg.str());
-                }
-            };
-            break;
-        }
-    case Dimension::Type::Signed16:
-        {
-            arrow::Int16Builder* int16b = static_cast<arrow::Int16Builder*>(builder);
-            if (int16b)
-            {
-                int16_t value = point.getFieldAs<int16_t>(id);
-                auto ok = int16b->Append(value);
-                if (!ok.ok())
-                {
-                    std::stringstream msg;
-                    msg << "Unable to write int16_t value '" << value << "' to file";
-                    throw pdal_error(msg.str());
-                }
-            };
-            break;
-        }
-    case Dimension::Type::Unsigned32:
-        {
-            arrow::UInt32Builder* uint32b = static_cast<arrow::UInt32Builder*>(builder);
-            if (uint32b)
-            {
-                uint32_t value = point.getFieldAs<uint32_t>(id);
-                auto ok = uint32b->Append(value);
-                if (!ok.ok())
-                {
-                    std::stringstream msg;
-                    msg << "Unable to write uint32_t value '" << value << "' to file";
-                    throw pdal_error(msg.str());
-                }
-            };
-            break;
-        }
-    case Dimension::Type::Signed32:
-        {
-            arrow::Int32Builder* int32b = static_cast<arrow::Int32Builder*>(builder);
-            if (int32b)
-            {
-                int32_t value = point.getFieldAs<int32_t>(id);
-                auto ok = int32b->Append(value);
-                if (!ok.ok())
-                {
-                    std::stringstream msg;
-                    msg << "Unable to write int32_t value '" << value << "' to file";
-                    throw pdal_error(msg.str());
-                }
-            }
-            break;
-        }
-    case Dimension::Type::Float:
-        {
-            arrow::FloatBuilder* float32b = static_cast<arrow::FloatBuilder*>(builder);
-            if (float32b)
-            {
-                float value = point.getFieldAs<float>(id);
-                auto ok = float32b->Append(value);
-                if (!ok.ok())
-                {
-                    std::stringstream msg;
-                    msg << "Unable to write float32 value '" << value << "' to file";
-                    throw pdal_error(msg.str());
-                }
-            }
-            break;
-        }
-    case Dimension::Type::Double:
-        {
-            arrow::DoubleBuilder* float64b = static_cast<arrow::DoubleBuilder*>(builder);
-            if (float64b)
-            {
-                double value = point.getFieldAs<double>(id);
-                auto ok = float64b->Append(value);
-                if (!ok.ok())
-                {
-                    std::stringstream msg;
-                    msg << "Unable to write float64 value '" << value << "' to file";
-                    throw pdal_error(msg.str());
-                }
-            }
-            break;
-        }
-    case Dimension::Type::Unsigned64:
-        {
-            arrow::UInt64Builder* uint64b = static_cast<arrow::UInt64Builder*>(builder);
-            if (uint64b)
-            {
-                uint64_t value = point.getFieldAs<uint64_t>(id);
-                auto ok = uint64b->Append(value);
-                if (!ok.ok())
-                {
-                    std::stringstream msg;
-                    msg << "Unable to write uint64_t value '" << value << "' to file";
-                    throw pdal_error(msg.str());
-                }
-            }
-            break;
-        }
-    case Dimension::Type::Signed64:
-        {
-            arrow::Int64Builder* int64b = static_cast<arrow::Int64Builder*>(builder);
-            if (int64b)
-            {
-                int64_t value = point.getFieldAs<int64_t>(id);
-                auto ok = int64b->Append(value);
-                if (!ok.ok())
-                {
-                    std::stringstream msg;
-                    msg << "Unable to write int64_t value '" << value << "' to file";
-                    throw pdal_error(msg.str());
-                }
-            }
-            break;
-        }
-    case Dimension::Type::None:
-        break;
-    default:
-        throw pdal_error("Unrecognized PDAL dimension type for dimension");
-
     }
 }
 
+template <typename T>
+struct TypeTraits {};
+
+using DataTypePtr = std::shared_ptr<arrow::DataType>;
+using FieldPtr = std::shared_ptr<arrow::Field>;
+using SchemaPtr = std::shared_ptr<arrow::Schema>;
+using BufferPtr = std::shared_ptr<arrow::Buffer>;
+
+template<>
+struct TypeTraits<uint8_t>
+{
+    using TypeClass = arrow::UInt8Type;
+
+    static DataTypePtr dataType()
+    { return arrow::uint8(); }  // Same as std::make_shared<TypeClass>(TypeClass);
+};
+
+template<>
+struct TypeTraits<uint16_t>
+{
+    using TypeClass = arrow::UInt16Type;
+
+    static DataTypePtr dataType()
+    { return arrow::uint16(); }
+};
+
+template<>
+struct TypeTraits<uint32_t>
+{
+    using TypeClass = arrow::UInt32Type;
+
+    static DataTypePtr dataType()
+    { return arrow::uint32(); }
+};
+
+template<>
+struct TypeTraits<uint64_t>
+{
+    using TypeClass = arrow::UInt64Type;
+
+    static DataTypePtr dataType()
+    { return arrow::uint64(); }
+};
+
+template<>
+struct TypeTraits<int8_t>
+{
+    using TypeClass = arrow::Int8Type;
+
+    static DataTypePtr dataType()
+    { return arrow::int8(); }
+};
+
+template<>
+struct TypeTraits<int16_t>
+{
+    using TypeClass = arrow::Int16Type;
+
+    static DataTypePtr dataType()
+    { return arrow::int16(); }
+};
+
+template<>
+struct TypeTraits<int32_t>
+{
+    using TypeClass = arrow::Int32Type;
+
+    static DataTypePtr dataType()
+    { return arrow::int32(); }
+};
+
+template<>
+struct TypeTraits<int64_t>
+{
+    using TypeClass = arrow::Int64Type;
+
+    static DataTypePtr dataType()
+    { return arrow::int64(); }
+};
+
+template<>
+struct TypeTraits<float>
+{
+    using TypeClass = arrow::FloatType;
+
+    static DataTypePtr dataType()
+    { return arrow::float32(); }
+};
+
+template<>
+struct TypeTraits<double>
+{
+    using TypeClass = arrow::DoubleType;
+
+    static DataTypePtr dataType()
+    { return arrow::float64(); }
+};
+
+} // namespace arrowsupport
+} // namespace pdal

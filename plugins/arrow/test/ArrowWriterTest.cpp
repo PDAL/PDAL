@@ -36,8 +36,8 @@
 
 #include "Support.hpp"
 #include <io/LasReader.hpp>
+#include <io/FauxReader.hpp>
 #include "../io/ArrowWriter.hpp"
-
 
 namespace pdal
 {
@@ -54,6 +54,7 @@ TEST(ArrowWriterTest, write_array_feather)
 
     Options writerOps;
     writerOps.add("filename", Support::temppath("simple.feather"));
+    writerOps.add("batch_size", 3);
     ArrowWriter writer;
     writer.setInput(reader);
     writer.setOptions(writerOps);
@@ -63,12 +64,14 @@ TEST(ArrowWriterTest, write_array_feather)
     PointViewSet viewSet = writer.execute(table);
 
 }
+
 TEST(ArrowWriterTest, write_array_parquet)
 {
-
     Options readerOps;
-    readerOps.add("filename", Support::datapath("las/1.2-with-color.las"));
-    LasReader reader;
+    readerOps.add("bounds", BOX3D(0, 200, 1000, 99, 299, 1099));
+    readerOps.add("mode", "ramp");
+    readerOps.add("count", 100);
+    FauxReader reader;
     reader.setOptions(readerOps);
 
     Options writerOps;
@@ -81,7 +84,6 @@ TEST(ArrowWriterTest, write_array_parquet)
     PointTable table;
     writer.prepare(table);
     PointViewSet viewSet = writer.execute(table);
-
 }
 
 } // namespace arrow
