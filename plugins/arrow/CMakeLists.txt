@@ -61,10 +61,9 @@ if (WITH_TESTS)
         ${arrow_reader_libname}
     )
 
-
-if (WIN32)
-    target_compile_definitions(pdal_io_arrow_writer_test PRIVATE NOMINMAX=1)
-    target_compile_definitions(pdal_io_arrow_reader_test PRIVATE NOMINMAX=1)
-endif(WIN32)
+    if (WIN32)
+        target_compile_definitions(pdal_io_arrow_writer_test PRIVATE NOMINMAX=1)
+        target_compile_definitions(pdal_io_arrow_reader_test PRIVATE NOMINMAX=1)
+    endif(WIN32)
 
 endif(WITH_TESTS)

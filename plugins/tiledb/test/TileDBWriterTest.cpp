@@ -692,6 +692,94 @@ TEST_F(TileDBWriterTest, sf_curve_stats)
     array.close();
 }
 
+TEST(AdditionalTileDBWriterTest, domain_from_quickinfo)
+{
+    // Set filename for output.
+    std::string uri = Support::temppath("tiledb_domain_from_quickinfo");
+    if (FileUtils::directoryExists(uri))
+        FileUtils::deleteDirectory(uri);
+
+    // Create the stage factory.
+    StageFactory factory;
+
+    // Create faux reader for input data.
+    Options reader_options;
+    reader_options.add("filename", Support::datapath("las/autzen_trim.las"));
+    reader_options.add("count", 0);
+    Stage* reader = factory.createStage("readers.las");
+    reader->setOptions(reader_options);
+
+    Stage* writer = factory.createStage("writers.tiledb");
+    Options writer_options;
+    writer_options.add("filename", uri);
+    writer->setOptions(writer_options);
+    writer->setInput(*reader);
+
+    // Execute
+    PointTable table;
+    writer->prepare(table);
+    writer->execute(table);
+
+    // Check schema is created
+    {
+        tiledb::Context ctx{};
+        tiledb::ArraySchema schema(ctx, uri);
+        auto domain = schema.domain();
+        EXPECT_EQ(domain.ndim(), 3);
+        tiledb::FilterList fl =
+            schema.domain().dimension("X").filter_list();
+
+        tiledb::Array array(ctx, uri, TILEDB_READ);
+        tiledb::Query q(ctx, array, TILEDB_READ);
+
+        std::vector<double> xs(count);
+        std::vector<double> ys(count);
+        std::vector<double> zs(count);
+
+        q.set_data_buffer("X", xs).set_data_buffer("Y", ys).set_data_buffer("Z",
+                                                                            zs);
+
+        q.submit();
+        array.close();
+
+        auto resultNum = (int)q.result_buffer_elements()["X"].second;
+        EXPECT_EQ(0, resultNum);
+
+        // Check X domain.
+        std::pair<double, double> x_domain =
+            domain.dimension(0).domain<double>();
+        EXPECT_NEAR(x_domain.first, 636000.76, 0.1);
+        EXPECT_NEAR(x_domain.second,  637180.21, 0.1);
+
+        // Check Y domain.
+        std::pair<double, double> y_domain =
+            domain.dimension(1).domain<double>();
+        EXPECT_NEAR(y_domain.first, 848934.19, 0.1);
+        EXPECT_NEAR(y_domain.second,  849498.9, 0.1);
+
+        // Check Z domain.
+        std::pair<double, double> z_domain =
+            domain.dimension(2).domain<double>();
+        EXPECT_NEAR(z_domain.first, 405.25, 0.1);
+        EXPECT_NEAR(z_domain.second,  521.5, 0.1);
+
+        // Check filters
+        EXPECT_EQ(fl.nfilters(), 4U);
+
+        tiledb::Filter f1 = fl.filter(0);
+        EXPECT_EQ(f1.filter_type(), TILEDB_FILTER_SCALE_FLOAT);
+        uint64_t byteWidth;
+        f1.get_option<uint64_t>(TILEDB_SCALE_FLOAT_BYTEWIDTH, &byteWidth);
+        EXPECT_EQ(byteWidth, 4);
+        double scale;
+        f1.get_option<double>(TILEDB_SCALE_FLOAT_FACTOR, &scale);
+        EXPECT_NEAR(scale, 0.01, 1.0e-9);
+        double offset;
+        f1.get_option<double>(TILEDB_SCALE_FLOAT_OFFSET, &offset);
+        EXPECT_NEAR(offset, 0.0, 1.0e-9);
+    }
+}
+
 TEST(AdditionalTileDBWriterTest, domain_from_stats)
 {
     // Set filename for output.
@@ -725,7 +813,7 @@ TEST(AdditionalTileDBWriterTest, domain_from_stats)
     writer->prepare(table);
     writer->execute(table);
 
-    // Check schema.
+    // Check schema and result count
     {
         tiledb::Context ctx{};
         tiledb::ArraySchema schema(ctx, uri);
@@ -750,6 +838,7 @@ TEST(AdditionalTileDBWriterTest, domain_from_stats)
         EXPECT_DOUBLE_EQ(z_domain.first, -1.0);
         EXPECT_DOUBLE_EQ(z_domain.second, 30.0);
     }
+
 }
 
 } // namespace pdal

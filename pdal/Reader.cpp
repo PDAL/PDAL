@@ -53,7 +53,7 @@ Stage::WhereMergeMode Reader::mergeMode() const
 void Reader::l_addArgs(ProgramArgs& args)
 {
     Stage::l_addArgs(args);
-    m_filenameArg = &args.add("filename", "Name of file to read", m_filename);
+    m_filenameArg = &args.add("filename", "Name of file to read", m_filespec);
     m_countArg = &args.add("count", "Maximum number of points read", m_count,
         (std::numeric_limits<point_count_t>::max)());
 
@@ -64,6 +64,12 @@ void Reader::l_addArgs(ProgramArgs& args)
     args.add("default_srs",
             "Spatial reference to apply to data if one cannot be inferred",
             m_defaultSrs);
+}
+
+
+void Reader::assignParsedOptions()
+{
+    m_filename = m_filespec.m_path.string();
 }
 
 

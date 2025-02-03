@@ -244,13 +244,13 @@ options.
 ````{note}
 If you skipped the ["Creating an Index"](#creating-an-index) section, download
 the tile index from
-[https://s3.amazonaws.com/hobu-lidar/WI_Adams_2019/WI_Adams_2019.parquet](https://s3.amazonaws.com/hobu-lidar/WI_Adams_2019/WI_Adams_2019.parquet)
+[https://s3.amazonaws.com/hobu-lidar/WI_Adams_2019.parquet](https://s3.amazonaws.com/hobu-lidar/WI_Adams_2019.parquet)
 and use it locally, or you can use it via [GDAL]'s
 [vsicurl](https://gdal.org/en/stable/user/virtual_file_systems.html#vsicurl-http-https-ftp-files-random-access)
 mechanism to point to the file by substituting the following for any
 
 ```
-/vsicurl/https://s3.amazonaws.com/hobu-lidar/WI_Adams_2019/WI_Adams_2019.parquet
+/vsicurl/https://s3.amazonaws.com/hobu-lidar/WI_Adams_2019.parquet
 ```
 ````
 

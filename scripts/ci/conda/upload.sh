@@ -4,17 +4,19 @@
 if [ -z "${ANACONDA_TOKEN+x}" ]
 then
     echo "Anaconda token is not set, not uploading"
-    exit 0;
+    exit 1;
 fi
 
 ls
 pwd
 find .
 
-if [ -z "${ANACONDA_TOKEN}" ]
-then
-    echo "Anaconda token is empty, not uploading"
-    exit 0;
+export PACKAGE_PATTERN="*pdal*.conda"
+if [[ -n `find . -name "*pdal*.conda"` ]]; then
+    echo "Found packages to upload"
+else
+    echo "No packages matching $PACKAGE_PATTERN to upload were found"
+    exit 1;
 fi
 
 export CI_PLAT=""
@@ -36,5 +38,5 @@ echo "Anaconda token is available, attempting to upload"
 
 conda install -c conda-forge anaconda-client -y
 
-find . -name "*pdal*.bz2" -exec anaconda -t "$ANACONDA_TOKEN" upload --force --no-progress --user pdal-master  {} \;
+find . -name $PACKAGE_PATTERN -exec anaconda -t "$ANACONDA_TOKEN" upload --force --no-progress --user pdal-master  {} \;
 

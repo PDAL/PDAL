@@ -1,4 +1,5 @@
-/****************************************************************************** * Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+/******************************************************************************
+* Copyright (c) 2025, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -12,10 +13,9 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
-*       names of its contributors may be used to endorse or promote
-*       products derived from this software without specific prior
-*       written permission.
+*     * Neither the name of Hobu, Inc. nor the names of its contributors
+*       may be used to endorse or promote products derived from this
+*       software without specific prior written permission.
 *
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -33,48 +33,53 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
+#include <filesystem>
+
+#include <pdal/PDALUtils.hpp>
+#include <pdal/pdal_types.hpp>
+
 #include <pdal/JsonFwd.hpp>
-#include <pdal/StageFactory.hpp>
 
-#include <vector>
-#include <string>
-
-#include <pdal/FileSpec.hpp>
-#include <pdal/Options.hpp>
-#include <pdal/StageFactory.hpp>
+using StringMap = std::map<std::string, std::string>;
 
 namespace pdal
 {
 
-class Stage;
-class PipelineManager;
-
-class PDAL_EXPORT PipelineReaderJSON
+class FileSpec
 {
-    friend class PipelineManager;
-
 public:
-    PipelineReaderJSON(PipelineManager&);
+    FileSpec()
+    {}
+
+    bool valid() const
+    { return !m_path.empty(); }
+    bool onlyFilename() const
+    { return m_headers.empty() && m_query.empty(); }
+    Utils::StatusWithReason parse(NL::json& json);
+    // parse a user input string that could be a json spec or filename
+    Utils::StatusWithReason ingest(const std::string& pathOrJson);
+
+    friend std::ostream& operator << (std::ostream& out, const FileSpec& spec);
 
 private:
-    PipelineReaderJSON& operator=(const PipelineReaderJSON&) = delete;
-    PipelineReaderJSON(const PipelineReaderJSON&) = delete;
+    Utils::StatusWithReason extractPath(NL::json& node);
+    Utils::StatusWithReason extractQuery(NL::json& node);
+    Utils::StatusWithReason extractHeaders(NL::json& node);
 
-    typedef std::map<std::string, Stage *> TagMap;
-
-    void parsePipeline(NL::json&);
-    void readPipeline(const std::string& filename);
-    void readPipeline(std::istream& input);
-    std::string extractType(NL::json& node);
-    FileSpec extractFilename(NL::json& node);
-    std::string extractTag(NL::json& node, TagMap& tags);
-    std::vector<Stage *> extractInputs(NL::json& node, TagMap& tags);
-    Options extractOptions(NL::json& node);
-    void handleInputTag(const std::string& tag, const TagMap& tags,
-        std::vector<Stage *>& inputs);
-
-    PipelineManager& m_manager;
+public:
+    std::filesystem::path m_path;
+    StringMap m_headers;
+    StringMap m_query;
 };
 
+namespace Utils
+{
+    template<>
+    inline StatusWithReason fromString(const std::string& s, FileSpec& spec)
+    {
+        return spec.ingest(s);
+    }
+}
+
 } // namespace pdal
+

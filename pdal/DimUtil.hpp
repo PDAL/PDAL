@@ -139,7 +139,6 @@ inline std::string interpretationName(Type dimtype)
     return "unknown";
 }
 
-
 /// Get the type corresponding to a type name.
 /// \param s  Name of type.
 /// \return  Corresponding type enumeration value.
@@ -181,6 +180,69 @@ inline Type type(const std::string& baseType, size_t size)
         return Type::None;
 
     return static_cast<Type>((size_t)(base) | size);
+}
+
+template<typename T>
+Type type();
+
+template<>
+inline Type type<int8_t>()
+{
+    return Type::Signed8;
+}
+
+template<>
+inline Type type<int16_t>()
+{
+    return Type::Signed16;
+}
+
+template<>
+inline Type type<int32_t>()
+{
+    return Type::Signed32;
+}
+
+template<>
+inline Type type<int64_t>()
+{
+    return Type::Signed64;
+}
+
+template<>
+inline Type type<uint8_t>()
+{
+    return Type::Unsigned8;
+}
+
+template<>
+inline Type type<uint16_t>()
+{
+    return Type::Unsigned16;
+}
+
+template<>
+inline Type type<uint32_t>()
+{
+    return Type::Unsigned32;
+}
+
+template<>
+inline Type type<uint64_t>()
+{
+    return Type::Unsigned64;
+}
+
+template<>
+inline Type type<float>()
+{
+    return Type::Float;
+}
+
+template<>
+inline Type type<double>()
+{
+    return Type::Double;
 }
 
 /// Extract a dimension name of a string.  Dimension names start with an alpha
