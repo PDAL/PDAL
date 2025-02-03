@@ -125,6 +125,8 @@ private:
     bool m_fastBoundary;
     bool m_usestdin;
     bool m_overrideASrs;
+    bool m_skipMultiSrs;
+    std::string m_originalSrs;
 };
 
 } // namespace pdal
