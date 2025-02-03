@@ -324,13 +324,9 @@ bool TIndexKernel::isFileIndexed(const FieldIndexes& indexes,
 void TIndexKernel::createFile()
 {
     if (!m_usestdin)
-        m_files = FileUtils::glob(m_filespec);
+        m_files = Utils::glob(m_filespec);
     else
         m_files = readSTDIN();
-
-    if (m_absPath)
-        for (auto& s : m_files)
-            s = FileUtils::toAbsolutePath(s);
 
     if (m_files.empty())
     {
@@ -392,6 +388,8 @@ void TIndexKernel::createFile()
     {
         if (m_prefix.size() && ! info.m_isRemote)
             info.m_filename = m_prefix + FileUtils::getFilename(info.m_filename);
+        else if (m_absPath && ! info.m_isRemote)
+            info.m_filename = FileUtils::toAbsolutePath(info.m_filename);
         if (!info.m_boundary.empty() && !isFileIndexed(indexes, info))
             indexedFile |= createFeature(indexes, info);
     }
