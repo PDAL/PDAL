@@ -204,3 +204,28 @@ TEST(TIndex, test4)
     EXPECT_NEAR(2.59808, p.area(), 0.001);
 }
 
+// testing input file SRS
+TEST(TIndex, test5)
+{
+    std::string inSpec(Support::datapath("tindex/autzen_clip_*.copc.laz"));
+    std::string outSpec(Support::temppath("tindex.out"));
+
+    std::string cmd = Support::binpath("pdal") + " tindex create " +
+        outSpec + " \"" + inSpec + "\" --log=stdout --fast_boundary=true";
+    FileUtils::deleteDirectory(outSpec);
+
+    std::string output;
+    Utils::run_shell_command(cmd, output);
+    std::string::size_type pos = output.find("does not match the SRS of other files in the tileindex");
+    EXPECT_NE(pos, std::string::npos);
+
+    cmd = Support::binpath("pdal") + " tindex create " +
+        outSpec + " \"" + inSpec + "\" --log=stdout --fast_boundary=true " +
+        "--skip_different_srs=true";
+    FileUtils::deleteDirectory(outSpec);
+
+    Utils::run_shell_command(cmd, output);
+    pos = output.find("does not match the SRS of other files in the tileindex. Skipping this file");
+    EXPECT_NE(pos, std::string::npos);
+}
+

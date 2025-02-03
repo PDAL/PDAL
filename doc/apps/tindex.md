@@ -26,6 +26,7 @@ $ pdal tindex create <tindex> <filespec>
 --t_srs                Target SRS of tile index
 --a_srs                Assign SRS of tile with no SRS to this value
 --write_absolute_path  Write absolute rather than relative file paths
+--skip_different_srs   Reject files to be indexed with different SRS values
 --stdin, -s            Read filespec pattern from standard input
 --threads              Number of threads to use for file boundary creation
 --simplify             Simplify the file's exact boundary

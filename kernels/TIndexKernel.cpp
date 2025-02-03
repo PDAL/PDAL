@@ -195,6 +195,8 @@ void TIndexKernel::addSubSwitches(ProgramArgs& args,
         args.add("threads", "Number of threads to use for file boundary creation",
             m_threads, 1);
         args.addSynonym("threads", "requests");
+        args.add("skip_different_srs", "Reject files to be indexed with "
+            "different SRS values", m_skipMultiSrs);
         args.add("simplify", "Simplify the file's exact boundary", m_doSmooth,
             true);
         args.addSynonym("simplify", "smooth");
@@ -382,6 +384,10 @@ void TIndexKernel::createFile()
     }
     pool.await();
 
+    m_originalSrs = infos[0].m_srs;
+    // Same thing that happens to assign SRS in createFeature
+    if (m_originalSrs.empty() || m_overrideASrs)
+        m_originalSrs = m_assignSrsString;
     bool indexedFile(false);
     FieldIndexes indexes = getFields();
     for (auto &info : infos)
@@ -541,7 +547,17 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
         OGR_F_Destroy(hFeature);
         throw pdal_error(oss.str());
     }
-
+    if (fileInfo.m_srs != m_originalSrs)
+    {
+        m_log->get(LogLevel::Warning) << "SRS value for " << fileInfo.m_filename <<
+            " does not match the SRS of other files in the tileindex." <<
+            (m_skipMultiSrs ? " Skipping this file" : "") << std::endl;
+        if (m_skipMultiSrs)
+        {
+            OGR_F_Destroy(hFeature);
+            return false;
+        }
+    }
     std::string wkt =
         SpatialReference(fileInfo.m_srs).getWKT();
     OGR_F_SetFieldString(hFeature, indexes.m_srs, wkt.data());
