@@ -93,7 +93,7 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
         if ((type.empty() && (i == 0 || i != last)) ||
             Utils::startsWith(type, "readers."))
         {
-            StringList files = Utils::glob(spec.m_path.string);
+            StringList files = Utils::glob(spec.m_path.string());
             if (files.empty())
                 files.push_back(spec.m_path.string());
 
