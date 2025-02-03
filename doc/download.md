@@ -4,10 +4,11 @@
 
 ## Current Release(s)
 
-- **2024-12-27** [PDAL-2.8.3-src.tar.bz2] [Release Notes] ([md5])
+- **2025-02-03** [PDAL-2.8.4-src.tar.bz2] [Release Notes] ([md5])
 
 ## Past Releases
 
+- **2024-12-27** [PDAL-2.8.3-src.tar.bz2]
 - **2024-12-01** [PDAL-2.8.2-src.tar.bz2]
 - **2024-10-25** [PDAL-2.8.1-src.tar.bz2]
 - **2024-09-05** [PDAL-2.8.0-src.tar.bz2]
@@ -166,4 +167,5 @@ environment). Instructions can be found on the Conda website.
 [pdal-2.8.1-src.tar.bz2]: https://github.com/PDAL/PDAL/releases/download/2.8.1/PDAL-2.8.1-src.tar.bz2
 [pdal-2.8.2-src.tar.bz2]: https://github.com/PDAL/PDAL/releases/download/2.8.2/PDAL-2.8.2-src.tar.bz2
 [pdal-2.8.3-src.tar.bz2]: https://github.com/PDAL/PDAL/releases/download/2.8.3/PDAL-2.8.3-src.tar.bz2
-[release notes]: https://github.com/PDAL/PDAL/releases/tag/2.8.3
+[pdal-2.8.4-src.tar.bz2]: https://github.com/PDAL/PDAL/releases/download/2.8.4/PDAL-2.8.4-src.tar.bz2
+[release notes]: https://github.com/PDAL/PDAL/releases/tag/2.8.4
