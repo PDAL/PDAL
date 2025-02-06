@@ -40,12 +40,8 @@
 namespace pdal
 {
 using namespace e57;
-static PluginInfo const s_info
-{
-    "readers.e57",
-    "Reader for E57 files",
-    "http://pdal.io/stages/reader.e57.html"
-};
+static PluginInfo const s_info{"readers.e57", "Reader for E57 files",
+                               "http://pdal.io/stages/reader.e57.html"};
 
 CREATE_SHARED_STAGE(E57Reader, s_info)
 
@@ -54,10 +50,7 @@ std::string E57Reader::getName() const
     return s_info.name;
 }
 
-E57Reader::E57Reader()
-    : Reader(), Streamable()
-{
-}
+E57Reader::E57Reader() : Reader(), Streamable() {}
 
 void E57Reader::addArgs(ProgramArgs& args)
 {
@@ -162,9 +155,13 @@ void E57Reader::addDimensions(PointLayoutPtr layout)
 
         if (i->m_id == Dimension::Id::Unknown)
         {
-            // Input E57 point point cloud do not have this dimension. It should be ignored.
-            log()->get(LogLevel::Warning) << "Extra dimension specified in pipeline don't match in E57 prototype."
-                                          " Ignoring pipeline-specified dimension : " << i->m_name << std::endl;
+            // Input E57 point point cloud do not have this dimension. It should
+            // be ignored.
+            log()->get(LogLevel::Warning)
+                << "Extra dimension specified in pipeline don't match in E57 "
+                   "prototype."
+                   " Ignoring pipeline-specified dimension : "
+                << i->m_name << std::endl;
             i = m_extraDims->deleteDim(i);
             continue;
         }
@@ -195,7 +192,6 @@ void E57Reader::initialize()
             m_imf->extensionsAdd("nor", normalsExtension);
 
         m_data3D.reset(new VectorNode(root.get("/data3D")));
-
     }
     catch (E57Exception& e)
     {
@@ -210,12 +206,12 @@ void E57Reader::initialize()
 void E57Reader::ready(PointTableRef& ref)
 {
     log()->get(LogLevel::Info) << "Reading : " << m_filename;
-    
+
     m_currentIndex = 0;
     m_pointsInCurrentBatch = 0;
     m_defaultChunkSize = 10000;
     m_currentScan = -1;
-    
+
     // Initial reader setup.
     setupReader();
 }
@@ -255,7 +251,7 @@ void E57Reader::setupReader()
         m_scan.reset(new Scan((StructureNode)m_data3D->get(m_currentScan)));
         initializeBuffers();
         m_reader.reset(new CompressedVectorReader(
-                           m_scan->getPoints().reader(m_destBuffers)));
+            m_scan->getPoints().reader(m_destBuffers)));
     }
     catch (E57Exception& e)
     {
@@ -314,7 +310,8 @@ bool E57Reader::fillPoint(PointRef& point)
 
         if (dim != Dimension::Id::Unknown)
         {
-            point.setField(dim, m_scan->rescale(dim, keyValue.second[m_currentIndex]));
+            point.setField(
+                dim, m_scan->rescale(dim, keyValue.second[m_currentIndex]));
         }
         else
         {
@@ -330,13 +327,21 @@ bool E57Reader::fillPoint(PointRef& point)
         point.hasDim(Dimension::Id::SphericalAzimuth) &&
         point.hasDim(Dimension::Id::SphericalElevation))
     {
-        const double range = point.getFieldAs<double>(Dimension::Id::SphericalRange);
-        const double azimuth = point.getFieldAs<double>(Dimension::Id::SphericalAzimuth);
-        const double elevation = point.getFieldAs<double>(Dimension::Id::SphericalElevation);
-        point.setField(Dimension::Id::X, range * std::cos(elevation) * std::cos(azimuth));
-        point.setField(Dimension::Id::Y, range * std::cos(elevation) * std::sin(azimuth));
+        const double range =
+            point.getFieldAs<double>(Dimension::Id::SphericalRange);
+        const double azimuth =
+            point.getFieldAs<double>(Dimension::Id::SphericalAzimuth);
+        const double elevation =
+            point.getFieldAs<double>(Dimension::Id::SphericalElevation);
+        point.setField(Dimension::Id::X,
+                       range * std::cos(elevation) * std::cos(azimuth));
+        point.setField(Dimension::Id::Y,
+                       range * std::cos(elevation) * std::sin(azimuth));
         point.setField(Dimension::Id::Z, range * std::sin(elevation));
     }
+
+    // NOTE(abhig): Tag every point in cloud with scan id.
+    point.setField(Dimension::Id::PointSourceId, m_currentScan);
 
     if (m_scan->hasPose())
         m_scan->transformPoint(point);
@@ -350,7 +355,7 @@ point_count_t E57Reader::read(PointViewPtr view, point_count_t count)
     point_count_t numPoints = e57plugin::numPoints(*m_data3D);
     PointRef point(*view);
     for (PointId counter = 0, nextId = view->size(); counter < numPoints;
-            ++counter, ++nextId)
+         ++counter, ++nextId)
     {
         point.setPointId(nextId);
         fillPoint(point);
