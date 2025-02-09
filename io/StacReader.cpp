@@ -107,9 +107,6 @@ struct StacReader::Args
 
     bool validateSchema;
     int threads;
-
-    NL::json m_query;
-    NL::json m_headers;
 };
 
 static PluginInfo const stacinfo
@@ -160,10 +157,6 @@ void StacReader::addArgs(ProgramArgs& args)
     //Reader options
     args.add("validate_schema", "Use JSON schema to validate your STAC objects."
         " Default: false", m_args->validateSchema, false);
-    args.add("header", "Header fields to forward with HTTP requests",
-        m_args->m_headers);
-    args.add("query", "Query parameters to forward with HTTP requests",
-        m_args->m_query);
     args.add("reader_args", "Map of reader arguments to their values to pass"
         " through.", m_args->rawReaderArgs);
     args.add("requests", "Number of threads for fetching JSON files, Default: 8",
@@ -441,29 +434,6 @@ void StacReader::initializeArgs()
 
 }
 
-void StacReader::setConnectionForwards(StringMap& headers, StringMap& query)
-{
-    try
-    {
-        if (!m_args->m_headers.is_null())
-            headers = m_args->m_headers.get<StringMap>();
-    }
-    catch (const std::exception& err)
-    {
-        throwError(std::string("Error parsing 'headers': ") + err.what());
-    }
-
-    try
-    {
-        if (!m_args->m_query.is_null())
-            query = m_args->m_query.get<StringMap>();
-    }
-    catch (const std::exception& err)
-    {
-        throwError(std::string("Error parsing 'query': ") + err.what());
-    }
-}
-
 void StacReader::addDimensions(PointLayoutPtr layout)
 {
     StageWrapper::addDimensions(m_merge, layout);
@@ -471,10 +441,7 @@ void StacReader::addDimensions(PointLayoutPtr layout)
 
 void StacReader::initialize()
 {
-    StringMap headers;
-    StringMap query;
-    setConnectionForwards(headers, query);
-    m_p->m_connector.reset(new connector::Connector(headers, query));
+    m_p->m_connector.reset(new connector::Connector(m_filespec));
 
     m_p->m_pool.reset(new ThreadPool(m_args->threads));
     initializeArgs();

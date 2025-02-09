@@ -215,7 +215,6 @@ void EptReader::initialize()
             threads << " threads" << std::endl;
     m_p->pool.reset(new ThreadPool(threads));
 
-
     m_p->connector.reset(new connector::Connector(m_filespec));
 
     try
