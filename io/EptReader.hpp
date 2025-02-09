@@ -44,8 +44,6 @@
 #include <pdal/Streamable.hpp>
 #include <pdal/util/Bounds.hpp>
 
-using StringMap = std::map<std::string, std::string>;
-
 namespace pdal
 {
 
