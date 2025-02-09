@@ -62,8 +62,6 @@ class PDAL_EXPORT StacReader : public Reader, public Streamable
 
         std::string getName() const override;
 
-        using StringMap = std::map<std::string, std::string>;
-
     private:
 
         struct Private;
@@ -82,7 +80,6 @@ class PDAL_EXPORT StacReader : public Reader, public Streamable
         void handleCollection(NL::json stacJson, std::string colPath);
         void handleItemCollection(NL::json stacJson, std::string icPath);
         void initializeArgs();
-        void setConnectionForwards(StringMap& headers, StringMap& query);
 
         virtual void initialize() override;
         virtual void addArgs(ProgramArgs& args) override;
