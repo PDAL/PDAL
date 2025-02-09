@@ -46,8 +46,6 @@
 namespace pdal
 {
 
-using StringMap = std::map<std::string, std::string>;
-
 namespace las
 {
     struct Header;
@@ -84,7 +82,6 @@ private:
     virtual bool processOne(PointRef& point) override;
     virtual void done(PointTableRef) override;
 
-    void setForwards(StringMap& headers, StringMap& query);
     std::vector<char> fetch(uint64_t offset, int32_t size);
     void fetchHeader();
     las::VlrList fetchSrsVlrs(const las::VlrCatalog& catalog);
