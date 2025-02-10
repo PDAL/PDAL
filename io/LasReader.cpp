@@ -614,6 +614,14 @@ void LasReader::queueNextStandardChunk()
 
 void LasReader::readExtraBytesVlr()
 {
+    // extra_dims ovveride extra_bytes by default
+    if ( d->extraDims.size() != 0 ) {
+        log()->get(LogLevel::Warning) << "extra_dims are specified : extra_bytes not mentionned in there will be ignored.\n";
+        return;
+    }
+    
+    // if 'extra_dims' not specified : extract dims from extra byte vlr
+    
     las::VlrList lVrlEB;
     for (auto vlr : d->vlrs)
     {
@@ -637,10 +645,6 @@ void LasReader::readExtraBytesVlr()
             throwError( warningSeveralExtraDims + " The \"extra_dims\" options should be specified \n");
     }
 
-    // extra_dims ovveride extra_bytes by default
-    if ( d->extraDims.size() != 0 ) return;
-    
-    // if 'extra_dims' not specified : extract dims from extra byte vlr
     std::vector<las::ExtraDim> extraDims;
     for (auto vlr : lVrlEB)
     {
