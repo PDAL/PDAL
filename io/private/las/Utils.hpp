@@ -258,7 +258,7 @@ void extractSrsMetadata(const Srs& srs, MetadataNode& m);
 void addVlrMetadata(const Vlr& vlr, std::string name, MetadataNode& forward, MetadataNode& m);
 void setSummary(Header& header, const Summary& summary);
 std::string generateSoftwareId();
-std::vector<ExtraDim> parse(const StringList& dimString, bool allOk);
+ExtraDims parse(const StringList& dimString, bool allOk);
 const Dimension::IdList& pdrfDims(int pdrf);
 uint8_t lasType(Dimension::Type type, int fieldCnt);
 

@@ -85,9 +85,7 @@ but the data associated with a dimension of datatype 0 will be ignored
   specified.
 
   ```{note}
-  The presence of an extra bytes VLR when reading a version
-  1.4 file or a version 1.0 - 1.3 file with **use_eb_vlr** set
-  causes this option to be ignored.
+  This option override potential extra bytes VLR, even if **use_eb_vlr** is specified while reading a version 1.0 - 1.3 file.
   ```
 
 `` _`use_eb_vlr` ``
