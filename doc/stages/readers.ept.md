@@ -64,9 +64,8 @@ would expect to come from EPT on any writers.
 
 filename
 
-: Path to the EPT resource from which to read, ending with `ept.json`.
-  For example, `/Users/connor/entwine/autzen/ept.json` or
-  `http://na.entwine.io/autzen/ept.json`. \[Required\]
+: Path to the EPT resource from which to read, ending with `ept.json`. 
+  Refer to {ref}`filespec` \[Required\]
 
 spatialreference
 
@@ -161,16 +160,6 @@ ogr
 requests
 
 : Maximum number of simultaneous requests for EPT data. \[Minimum: 4\] \[Default: 15\]
-
-header
-
-: HTTP headers to forward for remote EPT endpoints, specified as a JSON
-  object of key/value string pairs.
-
-query
-
-: HTTP query parameters to forward for remote EPT endpoints, specified as a
-  JSON object of key/value string pairs.
 
 ignore_unreadable
 

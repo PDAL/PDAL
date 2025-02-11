@@ -1,3 +1,4 @@
+(filespec)=
 
 In addition to a string filename, HTTP headers and query parameters to be forwarded to remote endpoints
 can be specified within the filename option. As shown below, a JSON object can be substituted, with the

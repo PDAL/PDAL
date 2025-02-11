@@ -44,6 +44,7 @@ pdal info --input https://s3-us-west-2.amazonaws.com/usgs-lidar-stac/ept/MD_Gold
 filename
 
 : STAC endpoint, local or remote, that corresponds to a Catalog, Feature or ItemCollection.
+  Refer to {ref}`filespec` \[Required\]
 
 asset_names
 

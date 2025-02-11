@@ -65,7 +65,7 @@ but the data associated with a dimension of datatype 0 will be ignored
 filename
 
 : COPC file to read. Remote file specifications (http, AWS, Google, Azure, Dropbox) are supported.
-  \[Required\]
+  Refer to {ref}`filespec` \[Required\]
 
 ```{include} reader_opts.md
 ```
