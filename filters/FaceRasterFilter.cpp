@@ -59,6 +59,8 @@ std::string FaceRasterFilter::getName() const
 FaceRasterFilter::FaceRasterFilter() : m_limits(new RasterLimits)
 {}
 
+FaceRasterFilter::~FaceRasterFilter() 
+{}
 
 void FaceRasterFilter::addArgs(ProgramArgs& args)
 {
