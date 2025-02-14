@@ -11,6 +11,7 @@ add_executable(lasdump
 
 target_link_libraries(lasdump PRIVATE
     ${PDAL_LAZPERF_LIB_NAME}
+    ${GDAL_LIBRARY}
 )
 target_include_directories(lasdump PRIVATE
     ${PDAL_VENDOR_DIR}

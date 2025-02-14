@@ -304,7 +304,11 @@ std::ostream *createFile(const std::string& path, bool asBinary)
 
 bool isRemote(const std::string& path)
 {
-    return path.find("://") != std::string::npos;
+    // if you are using GDAL VSI you know what you are doing
+    if (Utils::startsWith(Utils::toupper(path), "/VSI"))
+        return false;
+    else
+        return path.find("://") != std::string::npos;
 }
 
 
