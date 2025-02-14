@@ -37,6 +37,13 @@ PDAL_ADD_TEST(pdal_eigen_test
         ${PDAL_VENDOR_EIGEN_DIR}
 )
 PDAL_ADD_TEST(pdal_file_utils_test FILES FileUtilsTest.cpp)
+PDAL_ADD_TEST(pdal_io_vsi_test
+    FILES
+        VSITest.cpp
+        ${PDAL_SRC_DIR}/util/VSIIO.cpp
+    LINK_WITH
+        ${GDAL_LIBRARY}
+)
 PDAL_ADD_TEST(pdal_georeference_test FILES GeoreferenceTest.cpp)
 PDAL_ADD_TEST(pdal_kdindex_test
     FILES

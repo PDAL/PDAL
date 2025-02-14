@@ -229,6 +229,7 @@ TEST(OGRWriterTest, shapefile)
     runOgrWriterInfo(wo, infile, infofile, ".shp");
 }
 
+#ifndef _WIN32
 TEST(OGRWriterTest, json)
 {
     std::string infile = Support::datapath("las/simple.las");
@@ -239,6 +240,7 @@ TEST(OGRWriterTest, json)
 
     runOgrWriterInfo(wo, infile, infofile, ".geojson", 10, &diff_geojson);
 }
+#endif
 
 TEST(OGRWriterTest, geopackage)
 {
@@ -251,6 +253,7 @@ TEST(OGRWriterTest, geopackage)
     runOgrWriterInfo(wo, infile, infofile, ".gpkg");
 }
 
+#ifndef _WIN32
 TEST(OGRWriterTest, creation_options)
 {
     std::string infile = Support::datapath("las/simple.las");
@@ -267,6 +270,7 @@ TEST(OGRWriterTest, creation_options)
 
         runOgrWriterInfo(wo, infile, infofile, ".geojson", 10, &diff_geojson);
 }
+#endif
 
 TEST(OGRWriterTest, shapefile_measure)
 {

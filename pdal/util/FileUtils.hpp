@@ -55,6 +55,7 @@ namespace pdal
 
 namespace FileUtils
 {
+    static const int nDefaultBufferSize = 65536;
     /**
       Open an existing file for reading.
 
@@ -63,7 +64,7 @@ namespace FileUtils
       \return  Pointer to opened stream.
     */
     PDAL_EXPORT std::istream* openFile(std::string const& filename,
-        bool asBinary=true);
+        bool asBinary=true, size_t nBufferSize=nDefaultBufferSize);
 
     /**
       Create/truncate a file and open for writing.
@@ -73,7 +74,7 @@ namespace FileUtils
       \return  Point to opened stream.
     */
     PDAL_EXPORT std::ostream* createFile(std::string const& filename,
-        bool asBinary=true);
+        bool asBinary=true, size_t nBufferSize=nDefaultBufferSize);
 
     /**
       Open an existing file for write
@@ -83,7 +84,7 @@ namespace FileUtils
       \return  Point to opened stream.
     */
     PDAL_EXPORT std::ostream* openExisting(std::string const& filename,
-        bool asBinary=true);
+        bool asBinary=true, size_t nBufferSize=nDefaultBufferSize);
 
 
     /**
