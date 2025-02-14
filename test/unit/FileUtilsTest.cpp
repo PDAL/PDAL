@@ -86,6 +86,45 @@ TEST(FileUtilsTest, test_file_ops)
     EXPECT_NO_THROW(FileUtils::openFile("foo~1.glob"));
 }
 
+TEST(FileUtilsTest, test_vsi)
+{
+    // VSI write test
+    std::string vsiFile("/vsimem/vsi.txt");
+    std::ostream* oStrVsi = FileUtils::createFile(vsiFile);
+    EXPECT_TRUE(FileUtils::fileExists(vsiFile));
+    *oStrVsi << "yow";
+    FileUtils::closeFile(oStrVsi);
+    EXPECT_EQ(FileUtils::fileExists(vsiFile), true);
+    EXPECT_EQ(FileUtils::fileSize(vsiFile), 3U);
+
+    // VSI read test
+    std::istream* iStrVsi = FileUtils::openFile(vsiFile);
+    std::string yowVsi;
+    *iStrVsi >> yowVsi;
+    FileUtils::closeFile(iStrVsi);
+    EXPECT_TRUE(yowVsi=="yow");
+}
+
+TEST(FileUtilsTest, test_vsi_numeric)
+{
+    // VSI write test
+    std::string vsiFile("/vsimem/vsi.dat");
+    std::ostream* oStrVsi = FileUtils::createFile(vsiFile);
+    EXPECT_TRUE(FileUtils::fileExists(vsiFile));
+    *oStrVsi << (uint32_t)10000;
+    FileUtils::closeFile(oStrVsi);
+    EXPECT_EQ(FileUtils::fileExists(vsiFile), true);
+    EXPECT_EQ(FileUtils::fileSize(vsiFile), 4U);
+
+    // VSI read test
+    std::istream* iStrVsi = FileUtils::openFile(vsiFile);
+    uint32_t rVsi;
+    *iStrVsi >> rVsi;
+    FileUtils::closeFile(iStrVsi);
+    EXPECT_TRUE(rVsi==10000);
+}
+
+
 TEST(FileUtilsTest, test_readFileIntoString)
 {
     const std::string filename = Support::datapath("text/text.txt");
