@@ -48,6 +48,7 @@ class PDAL_DLL FaceRasterFilter : public pdal::Filter
 {
 public:
     FaceRasterFilter();
+    ~FaceRasterFilter();
     FaceRasterFilter& operator=(const FaceRasterFilter&) = delete;
     FaceRasterFilter(const FaceRasterFilter&) = delete;
 
