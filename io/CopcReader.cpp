@@ -224,8 +224,6 @@ public:
     bool fixNames;
     bool doVlrs;
 
-    NL::json query;
-    NL::json headers;
     OGRSpec ogr;
 
     int keepAliveChunkCount = 10;
@@ -300,8 +298,6 @@ void CopcReader::addArgs(ProgramArgs& args)
     args.add("resolution", "Resolution limit", m_args->resolution);
     args.add("polygon", "Bounding polygon(s) to crop requests",
         m_args->polys).setErrorText("Invalid polygon specification. Must be valid GeoJSON/WKT");
-    args.add("header", "Header fields to forward with HTTP requests", m_args->headers);
-    args.add("query", "Query parameters to forward with HTTP requests", m_args->query);
     args.add("ogr", "OGR filter geometries", m_args->ogr);
     args.add("fix_dims", "Make invalid dimension names valid by changing invalid "
         "characters to '_'", m_args->fixNames, true);
@@ -314,30 +310,6 @@ void CopcReader::addArgs(ProgramArgs& args)
 }
 
 
-void CopcReader::setForwards(StringMap& headers, StringMap& query)
-{
-    try
-    {
-        if (!m_args->headers.is_null())
-            headers = m_args->headers.get<StringMap>();
-    }
-    catch (const std::exception& err)
-    {
-        throwError(std::string("Error parsing 'headers': ") + err.what());
-    }
-
-    try
-    {
-        if (!m_args->query.is_null())
-            query = m_args->query.get<StringMap>();
-    }
-    catch (const std::exception& err)
-    {
-        throwError(std::string("Error parsing 'query': ") + err.what());
-    }
-}
-
-
 void CopcReader::initialize(PointTableRef table)
 {
     if (m_args->threads > 100)
@@ -346,10 +318,7 @@ void CopcReader::initialize(PointTableRef table)
     // Make sure we allow at least as many chunks as we have threads.
     m_args->keepAliveChunkCount = (std::max)(m_args->threads, (size_t)m_args->keepAliveChunkCount);
 
-    StringMap headers;
-    StringMap query;
-    setForwards(headers, query);
-    m_p->connector.reset(new connector::Connector(m_filename, headers, query));
+    m_p->connector.reset(new connector::Connector(m_filespec));
 
     MetadataNode forward = table.privateMetadata("lasforward");
     MetadataNode m = getMetadata();

@@ -65,19 +65,20 @@ but the data associated with a dimension of datatype 0 will be ignored
 
 ## Options
 
-`` _`filename` ``
+filename
 
 : LAS file to read \[Required\]
+  Refer to {ref}`filespec` \[Required\]
 
 ```{include} reader_opts.md
 ```
 
-`` _`start` ``
+start
 
 : Point at which reading should start (0-indexed). Useful in combination
   with 'count' option to read a subset of points. \[Default: 0\]
 
-`` _`extra_dims` ``
+extra_dims
 
 : Extra dimensions to be read as part of each point beyond those specified by
   the LAS point format.  The format of the option is
@@ -90,7 +91,7 @@ but the data associated with a dimension of datatype 0 will be ignored
   causes this option to be ignored.
   ```
 
-`` _`use_eb_vlr` ``
+use_eb_vlr
 
 : If an extra bytes VLR is found in a version 1.0 - 1.3 file, use it as if it
   were in a 1.4 file. This option has no effect when reading a version 1.4 file.

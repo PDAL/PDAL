@@ -70,6 +70,7 @@ parts:
       - file: stages/readers.text
       - file: stages/readers.tiledb
       - file: stages/readers.tindex
+      - file: stages/filespec
     - file: stages/writers
       sections:
       - file: stages/writers.arrow
