@@ -13,8 +13,8 @@ namespace pdal
 // loading it fully in memory. The points are printed to the screen,
 // but this can be replaced with any other processing. See the LasWriter
 // class for a more detailed example.
- 
-class PDAL_EXPORT StreamProcessor: public NoFilenameWriter, public Streamable
+
+class StreamProcessor: public NoFilenameWriter, public Streamable
 {
 
 public:
@@ -52,11 +52,11 @@ void StreamProcessor::initialize()
 bool StreamProcessor::processOne(PointRef& point)
 {
    // Print the point coordinates
-   std::cout << "Process point: " 
-             << point.getFieldAs<double>(Dimension::Id::X) <<  ", " 
-             << point.getFieldAs<double>(Dimension::Id::Y) << ", " 
+   std::cout << "Process point: "
+             << point.getFieldAs<double>(Dimension::Id::X) <<  ", "
+             << point.getFieldAs<double>(Dimension::Id::Y) << ", "
              << point.getFieldAs<double>(Dimension::Id::Z) << std::endl;
-    return true;  
+    return true;
 }
 
 void StreamProcessor::done(PointTableRef table) {
@@ -71,17 +71,17 @@ void StreamProcessor::writeView(const PointViewPtr view)
 
 int main(int argc, char* argv[])
 {
- 
+
     using namespace pdal;
-    
-    // Set the input point cloud    
+
+    // Set the input point cloud
     Options read_options;
     read_options.add("filename", "input.las");
     LasReader reader;
     reader.setOptions(read_options);
 
     // buf_size is the number of points that will be
-    // processed and kept in this table at the same time. 
+    // processed and kept in this table at the same time.
     // A somewhat bigger value may result in some efficiencies.
     int buf_size = 100;
     FixedPointTable t(buf_size);
@@ -94,6 +94,6 @@ int main(int argc, char* argv[])
     writer.setInput(reader);
     writer.prepare(t);
     writer.execute(t);
-    
+
     return 0;
 }
