@@ -8,12 +8,12 @@
 #include <vector>
 
 namespace pdal {
-    
+
 // A class to produce a point cloud point-by-point, rather than
 // having it all in memory at the same time. It will be streamed to
 // disk. See the GDALReader class for how to add more fields
 // and read from disk.
-class PDAL_EXPORT StreamedPointCloud : public Reader, public Streamable
+class StreamedPointCloud : public Reader, public Streamable
 {
 public:
     std::string getName() const;
@@ -31,7 +31,7 @@ private:
 
     point_count_t m_count, m_size;
 };
-    
+
 std::string StreamedPointCloud::getName() const
 {
     return "streamed_point_cloud";
@@ -86,7 +86,7 @@ bool StreamedPointCloud::processOne(PointRef& point)
     double x = m_count * 0.1;
     double y = m_count * 0.2;
     double z = m_count * 0.3;
-    
+
     point.setField(Dimension::Id::X, x);
     point.setField(Dimension::Id::Y, y);
     point.setField(Dimension::Id::Z, z);
@@ -104,12 +104,12 @@ void StreamedPointCloud::done(PointTableRef table)
 int main(int argc, char* argv[])
 {
     using namespace pdal;
-    
+
     // Streamed cloud structure
     StreamedPointCloud stream_cloud;
 
     // buf_size is the number of points that will be
-    // processed and kept in this table at the same time. 
+    // processed and kept in this table at the same time.
     // A somewhat bigger value may result in some efficiencies.
     int buf_size = 5;
     FixedPointTable t(buf_size);
@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
     // Set the output filename
     Options write_options;
     write_options.add("filename", "output.las");
-    
+
     // StageFactory always "owns" stages it creates. They'll be destroyed with
     // the factory.
     StageFactory factory;
@@ -129,6 +129,6 @@ int main(int argc, char* argv[])
     writer->setOptions(write_options);
     writer->prepare(t);
     writer->execute(t);
- 
-    return 0;   
+
+    return 0;
 }

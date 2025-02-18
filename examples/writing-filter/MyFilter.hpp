@@ -8,7 +8,7 @@
 namespace pdal
 {
 
-class PDAL_EXPORT MyFilter : public Filter
+class MyFilter : public Filter
 {
 public:
     MyFilter() : Filter()
