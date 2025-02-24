@@ -659,7 +659,7 @@ void CopcReader::ready(PointTableRef table)
         totalPoints += entry.m_pointCount;
 
     if (totalPoints > 1e8)
-        log()->get(LogLevel::Warning) << totalPoints << " will be downloaded" << std::endl;
+        log()->get(LogLevel::Warning) << totalPoints << " points will be downloaded" << std::endl;
 
     m_p->tileCount = m_p->hierarchy.size();
     log()->get(LogLevel::Debug) << m_p->tileCount << " overlapping nodes" << std::endl;
