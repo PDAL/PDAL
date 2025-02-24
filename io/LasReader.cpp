@@ -308,7 +308,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     d->ignoreVlrs = las::parseIgnoreVlrs(d->opts.ignoreVLROption, error);
     if (error.size())
         throwError(error);
-    
+
     // This will throw if the stream can't be opened.
     LasStreamPtr lasStream = createStream();
     std::istream& stream(*lasStream);
@@ -385,7 +385,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
         }
         vlr.dataVec.resize(vlr.promisedDataSize);
         stream.read(vlr.data(), vlr.promisedDataSize);
-        
+
         if (stream.gcount() != (std::streamsize)vlr.promisedDataSize)
         {
             if (d->opts.ignoreMissingVLRs)
@@ -614,41 +614,38 @@ void LasReader::queueNextStandardChunk()
 
 void LasReader::readExtraBytesVlr()
 {
-    // extra_dims ovveride extra_bytes by default
-    if ( d->extraDims.size() != 0 ) {
-        log()->get(LogLevel::Warning) << "extra_dims are specified : extra_bytes not mentionned in there will be ignored.\n";
-        return;
-    }
-    
-    // if 'extra_dims' not specified : extract dims from extra byte vlr
-    
     las::VlrList lVrlEB;
     for (auto vlr : d->vlrs)
     {
-        if (vlr.userId!=las::SpecUserId || vlr.recordId!=las::ExtraBytesRecordId)
+        if (vlr.userId != las::SpecUserId || vlr.recordId != las::ExtraBytesRecordId)
             continue;
 
-        if (vlr.dataSize() % las::ExtraBytesSpecSize != 0){
+        if (vlr.dataSize() % las::ExtraBytesSpecSize != 0)
+        {
             log()->get(LogLevel::Warning) << "Bad size for extra bytes VLR.  Ignoring.\n";
             continue;
         }
-        
         lVrlEB.push_back(vlr);
     }
 
-    if (lVrlEB.size()>1)
+    // Ignore EB VLRs if we the extra_dims option was provided.
+    if (d->extraDims.size())
     {
-        std::string warningSeveralExtraDims = "Only one bloc of extra dimensions is normaly allowed in the las specification.";
-        if (d->extraDims.size()>0)
-            log()->get(LogLevel::Warning) << warningSeveralExtraDims << " The \"extra_dims\" options is relevent.\n";
-        else
-            throwError( warningSeveralExtraDims + " The \"extra_dims\" options should be specified \n");
+        if (lVrlEB.size())
+            log()->get(LogLevel::Warning) << "Ignoring extra bytes VLR(s) - `extra_dims` option "
+                "was specified.\n";
+        return;
     }
+
+    if (lVrlEB.size() > 1)
+        log()->get(LogLevel::Warning) << "Found " << lVrlEB.size() << " extra byte VLRs. "
+            "Concatanating all extra byte records into one.\n";
 
     std::vector<las::ExtraDim> extraDims;
     for (auto vlr : lVrlEB)
     {
-        las::ExtraDims evlr = las::ExtraBytesIf::toExtraDims(vlr.data(), vlr.dataSize(), d->header.baseCount());
+        las::ExtraDims evlr = las::ExtraBytesIf::toExtraDims(vlr.data(), vlr.dataSize(),
+            d->header.baseCount());
         extraDims.insert(extraDims.end(), evlr.begin(), evlr.end());
     }
     d->extraDims = std::move(extraDims);

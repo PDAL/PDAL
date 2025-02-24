@@ -761,7 +761,7 @@ TEST(LasReaderTest, Laz_with_extra_byte)
     Options ops1;
     ops1.add("filename", Support::datapath("laz/las_with_several_extra_byte_bloc.laz"));
     ops1.add("extra_dims", "Deviation=uint16_t, confidence=uint8_t");
-    
+
     LasReader lazReader;
     lazReader.setOptions(ops1);
 
@@ -775,16 +775,20 @@ TEST(LasReaderTest, Laz_with_extra_byte)
     ASSERT_TRUE(view->hasDim( layout->findDim("confidence") ));
 }
 
-TEST(LasReaderTest, Laz_with_extra_byte_without_option)
+TEST(LasReaderTest, multi_eb)
 {
     Options ops1;
     ops1.add("filename", Support::datapath("laz/las_with_several_extra_byte_bloc.laz"));
-    
+
     LasReader lazReader;
     lazReader.setOptions(ops1);
 
     PointTable table;
-    EXPECT_THROW( lazReader.prepare(table), pdal_error );
+    lazReader.prepare(table);
+    DimType dt = table.layout()->findDimType("Deviation");
+    EXPECT_EQ(dt.m_type, Dimension::Type::Unsigned16);
+    dt = table.layout()->findDimType("confidence");
+    EXPECT_EQ(dt.m_type, Dimension::Type::Unsigned8);
 }
 
 TEST(LasReaderTest, Laz_with_severals_extra_byte_with_wrong_options_name)
@@ -792,13 +796,13 @@ TEST(LasReaderTest, Laz_with_severals_extra_byte_with_wrong_options_name)
     Options ops1;
     ops1.add("filename", Support::datapath("laz/las_with_several_extra_byte_bloc.laz"));
     ops1.add("extra_dims", "Bad_Name=uint16_t, confidence=uint8_t");
-    
+
     LasReader lazReader;
     lazReader.setOptions(ops1);
 
     PointTable table;
     lazReader.prepare(table);
-    
+
     PointViewSet viewSet = lazReader.execute(table);
     PointLayoutPtr layout(table.layout());
     PointViewPtr view = *viewSet.begin();
