@@ -675,5 +675,29 @@
     "name": "Duplicate",
     "type": "uint8",
     "description": "Indicator of whether or not a point is a labeled duplicate"
+    },
+    {
+    "name": "RedF",
+    "alt_names": "f_dc_0",
+    "type": "float",
+    "description": "Red channel represented as 0-1 decimal value"
+    },
+    {
+    "name": "GreenF",
+    "alt_names": "f_dc_1",
+    "type": "float",
+    "description": "Green channel represented as 0-1 decimal value"
+    },
+    {
+    "name": "BlueF",
+    "alt_names": "f_dc_2",
+    "type": "float",
+    "description": "Blue channel represented as 0-1 decimal value"
+    },
+    {
+    "name": "AlphaF",
+    "alt_names": "opacity",
+    "type": "float",
+    "description": "Alpha represented as 0-1 decimal value"
     }
 ] }
