@@ -112,7 +112,7 @@ point_count_t SpzReader::read(PointViewPtr view, point_count_t count)
         view->setField(Dimension::Id::Z, idx, unpacked.position[2]);
 
         // set RGB
-        for (int i =0; i < 3; ++i)
+        for (int i = 0; i < 3; ++i)
             view->setField(m_colorDims[i], idx, unpacked.color[i]);
 
         view->setField(m_alphaDim, idx, unpacked.alpha);
@@ -126,13 +126,14 @@ point_count_t SpzReader::read(PointViewPtr view, point_count_t count)
             view->setField(m_scaleDims[i], idx, unpacked.scale[i]);
         }
 
-        // spherical harmonics
+        // Spherical harmonics -- assign from UnpackedGaussian so first 1/3 = R,
+        //second 1/3 = G, etc
         for (int i = 0; i < m_numSh; ++i)
+        {
             view->setField(m_shDims[i], idx, unpacked.shR[i]);
-        for (int i = 0; i < m_numSh; ++i)
             view->setField(m_shDims[m_numSh + i], idx, unpacked.shG[i]);
-        for (int i = 0; i < m_numSh; ++i)
             view->setField(m_shDims[2 * m_numSh + i], idx, unpacked.shB[i]);
+        }
 
         numRead++;
         idx++;

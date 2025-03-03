@@ -22,11 +22,11 @@ private:
     virtual void done(PointTableRef table);
 
     void checkDimensions(PointLayoutPtr layout);
+    Dimension::Id tryFindDim(PointLayoutPtr layout, const std::string& dimName);
 
     bool m_antialiased;
     int m_shDegree;
     std::string m_remoteFilename;
-    DimTypeList m_dims;
     std::unique_ptr<spz::PackedGaussians> m_cloud;
     //!! again, maybe keep these grouped together
     Dimension::IdList m_shDims;
@@ -34,8 +34,6 @@ private:
     Dimension::IdList m_scaleDims;
     Dimension::IdList m_plyColorDims;
     Dimension::Id m_plyAlphaDim;
-    std::vector<PointViewPtr> m_views;
-    std::string m_curFilename;
 };
 
 } // namespace pdal

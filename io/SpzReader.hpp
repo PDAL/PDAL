@@ -37,9 +37,6 @@ private:
     virtual void done(PointTableRef table);
 
     void extractHeaderData();
-    double extractPositions(size_t pos);
-    float unpackSh(size_t pos);
-    float unpackScale(size_t pos);
 };
 
 } // namespace pdal

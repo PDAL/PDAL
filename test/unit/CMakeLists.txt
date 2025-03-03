@@ -302,9 +302,6 @@ PDAL_ADD_TEST(pdal_io_spz_writer_test
         io/SpzWriterTest.cpp
     INCLUDES
         ${PDAL_VENDOR_DIR}
-    LINK_WITH
-        ${PDAL_SPZ_LIB_NAME}
-        ${ZLIB_LIBRARIES}
 )
 
 PDAL_ADD_TEST(pdal_i3s_obb_test

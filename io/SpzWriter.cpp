@@ -39,6 +39,14 @@ void SpzWriter::initialize()
     }
 }
 
+Dimension::Id SpzWriter::tryFindDim(PointLayoutPtr layout, const std::string& dimName)
+{
+    Dimension::Id id = layout->findDim(dimName);
+    if (id == Dimension::Id::Unknown)
+        log()->get(LogLevel::Warning) << "Dimension " << dimName << " not found." << std::endl;
+    return id;
+}
+
 void SpzWriter::checkDimensions(PointLayoutPtr layout)
 {
     // looking for our spz-specific dims.
@@ -46,13 +54,13 @@ void SpzWriter::checkDimensions(PointLayoutPtr layout)
     // we expect 3 scale/color and 4 rotation dimensions with PLY-style labels
     for (int i = 0; i < 3; ++i)
     {
-        m_scaleDims.push_back(layout->findDim("scale_" + std::to_string(i)));
-        m_plyColorDims.push_back(layout->findDim("f_dc_" + std::to_string(i)));
-        m_rotDims.push_back(layout->findDim("rot_" + std::to_string(i + 1)));
+        m_scaleDims.push_back(tryFindDim(layout, "scale_" + std::to_string(i)));
+        m_plyColorDims.push_back(tryFindDim(layout, "f_dc_" + std::to_string(i)));
+        m_rotDims.push_back(tryFindDim(layout, "rot_" + std::to_string(i + 1)));
     }
     // rotation W component (rot_0) is added as the last item
-    m_rotDims.push_back(layout->findDim("rot_0"));
-    m_plyAlphaDim = layout->findDim("opacity");
+    m_rotDims.push_back(tryFindDim(layout, "rot_0"));
+    m_plyAlphaDim = tryFindDim(layout, "opacity");
 
     // find spherical harmonics dimensions, if there are any
     for (const auto& dim : layout->dimTypes())
