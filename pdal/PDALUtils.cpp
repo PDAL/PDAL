@@ -248,7 +248,9 @@ public:
 uintmax_t fileSize(const std::string& path)
 {
     uintmax_t size = 0;
-    if (isRemote(path))
+    std::string disabled;
+    int set = Utils::getenv("PDAL_NO_HEAD", disabled);
+    if (isRemote(path) and set != -1)
     {
         std::unique_ptr<std::size_t> pSize = arbiter::Arbiter().tryGetSize(path);
         if (pSize)
