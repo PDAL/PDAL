@@ -677,27 +677,69 @@
     "description": "Indicator of whether or not a point is a labeled duplicate"
     },
     {
-    "name": "RedF",
+    "name": "RedD",
     "alt_names": "f_dc_0",
-    "type": "float",
+    "type": "float32",
     "description": "Red channel represented as 0-1 decimal value"
     },
     {
-    "name": "GreenF",
+    "name": "GreenD",
     "alt_names": "f_dc_1",
-    "type": "float",
+    "type": "float32",
     "description": "Green channel represented as 0-1 decimal value"
     },
     {
-    "name": "BlueF",
+    "name": "BlueD",
     "alt_names": "f_dc_2",
-    "type": "float",
+    "type": "float32",
     "description": "Blue channel represented as 0-1 decimal value"
     },
     {
-    "name": "AlphaF",
+    "name": "AlphaD",
     "alt_names": "opacity",
-    "type": "float",
+    "type": "float32",
     "description": "Alpha represented as 0-1 decimal value"
+    },
+    {
+    "name": "RotationW",
+    "alt_names": "rot_0",
+    "type": "float32",
+    "description": "W component of rotation quaternion for this point"
+    },
+    {
+    "name": "RotationX",
+    "alt_names": "rot_1",
+    "type": "float32",
+    "description": "X component of rotation quaternion for this point"
+    },
+    {
+    "name": "RotationY",
+    "alt_names": "rot_2",
+    "type": "float32",
+    "description": "Y component of rotation quaternion for this point"
+    },
+    {
+    "name": "RotationZ",
+    "alt_names": "rot_3",
+    "type": "float32",
+    "description": "Z component of rotation quaternion for this point"
+    },
+    {
+    "name": "ScaleX",
+    "alt_names": "scale_0",
+    "type": "float32",
+    "description": "X component of scale for gaussians"
+    },
+    {
+    "name": "ScaleY",
+    "alt_names": "scale_1",
+    "type": "float32",
+    "description": "Y component of scale for gaussians"
+    },
+    {
+    "name": "scaleZ",
+    "alt_names": "scale_2",
+    "type": "float32",
+    "description": "Z component of scale for gaussians"
     }
 ] }
