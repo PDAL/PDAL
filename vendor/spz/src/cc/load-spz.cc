@@ -83,7 +83,11 @@ float unquantizeSH(uint8_t x) { return (static_cast<float>(x) - 128.0f) / 128.0f
 
 float sigmoid(float x) { return 1 / (1 + std::exp(-x)); }
 
-float invSigmoid(float x) { return std::log(x / (1.0f - x)); }
+float invSigmoid(float x) { 
+  // if x is 1.0f, guard for divide by zero. Returning any number larger than ~5.0f is fine 
+  // because sigmoid(5) == ~1
+  return (x == 1.0f) ? 5.0f : std::log(x / (1.0f - x));
+}
 
 template <typename T>
 size_t countBytes(std::vector<T> vec) {
