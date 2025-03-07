@@ -83,11 +83,7 @@ float unquantizeSH(uint8_t x) { return (static_cast<float>(x) - 128.0f) / 128.0f
 
 float sigmoid(float x) { return 1 / (1 + std::exp(-x)); }
 
-float invSigmoid(float x) { 
-  // if x is 1.0f, guard for divide by zero. Returning any number larger than ~5.0f is fine 
-  // because sigmoid(5) == ~1
-  return (x == 1.0f) ? 5.0f : std::log(x / (1.0f - x));
-}
+float invSigmoid(float x) { return std::log(x / (1.0f - x)); }
 
 template <typename T>
 size_t countBytes(std::vector<T> vec) {
@@ -326,7 +322,7 @@ UnpackedGaussian PackedGaussian::unpack(bool usesFloat16, int fractionalBits) co
   // Compute the real component - we know the quaternion is normalized and w is non-negative
   result.rotation[3] = std::sqrt(std::max(0.0f, 1.0f - squaredNorm(xyz)));
 
-  result.alpha = invSigmoid(alpha / 255.0f);
+  result.alpha = invSigmoid(std::clamp((alpha / 255.0f), 0.0001f, 0.9999f));
 
   for (size_t i = 0; i < 3; i++) {
     result.color[i] = ((color[i] / 255.0f) - 0.5f) / colorScale;
@@ -481,7 +477,7 @@ GaussianCloud unpackGaussians(const PackedGaussians &packed) {
   }
 
   for (size_t i = 0; i < (size_t)numPoints; i++) {
-    result.alphas[i] = invSigmoid(packed.alphas[i] / 255.0f);
+    result.alphas[i] = invSigmoid(std::clamp((packed.alphas[i] / 255.0f), 0.0001f, 0.9999f));
   }
 
   for (size_t i = 0; i < (size_t)numPoints * 3; i++) {
