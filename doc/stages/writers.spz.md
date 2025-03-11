@@ -18,7 +18,7 @@ are as follows:
 - **X, Y, Z**
 - **f_dc_0, f_dc_1, f_dc_2**: Red, Green and Blue colors (zeroth order spherical harmonics).
 - **opacity**: scalar representation of Opacity/Alpha. 
-- **scale_0, scale_1, scale_2**: X/Y/Z scale transform applied to each gaussian.
+- **scale_0, scale_1, scale_2**: X/Y/Z scale transform applied to each gaussian when rendering.
 - **rot_0, rot_1, rot_2, rot_3**: W (real component)/X/Y/Z normalized rotation quaternion.
 - Optional: **Spherical Harmonics** -- 0, 9, 24 or 45 dimensions labeled `f_dc_*`, with SH
 coefficients as the fastest-changing axis and color as the slower-changing axis.
