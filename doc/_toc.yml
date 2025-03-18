@@ -65,6 +65,7 @@ parts:
       - file: stages/readers.sbet
       - file: stages/readers.smrmsg
       - file: stages/readers.slpk
+      - file: stages/readers.spz
       - file: stages/readers.stac
       - file: stages/readers.terrasolid
       - file: stages/readers.text
@@ -93,6 +94,7 @@ parts:
       - file: stages/writers.ply
       - file: stages/writers.raster
       - file: stages/writers.sbet
+      - file: stages/writers.spz
       - file: stages/writers.text
       - file: stages/writers.tiledb
     - file: stages/filters
