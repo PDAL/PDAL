@@ -1,7 +1,7 @@
 [project]
 channels = ["conda-forge"]
 name = "pdal"
-platforms = ["linux-64", "win-64", "osx-64", "osx-arm64"]
+platforms = ["linux-64", "win-64", "osx-64", "osx-arm64", "linux-aarch64"]
 version = "2.8.2"
 
 [feature.dev.dependencies]
@@ -58,18 +58,14 @@ configure = { cmd = [ "cmake",
     "-DCMAKE_LIBRARY_PATH:FILEPATH=$CONDA_PREFIX/Library/lib",
     "-DCMAKE_INCLUDE_PATH:FILEPATH=$CONDA_PREFIX/Library/include",
     "-DOPENSSL_ROOT_DIR=$CONDA_PREFIX/Library",
-    "-DPython3_ROOT_DIR:FILEPATH=$CONDA_PREFIX",
-    "-DPython3_FIND_STRATEGY=LOCATION",
     "-DBUILD_PLUGIN_CPD=OFF",
     "-DBUILD_PLUGIN_ICEBRIDGE=ON",
     "-DBUILD_PLUGIN_HDF=ON",
     "-DBUILD_PLUGIN_ARROW=ON",
     "-DBUILD_PLUGIN_TILEDB=ON",
-    "-DBUILD_PLUGIN_MRSID=OFF",
     "-DBUILD_PLUGIN_NITF=ON",
     "-DBUILD_PLUGIN_TRAJECTORY=ON",
     "-DBUILD_PLUGIN_PGPOINTCLOUD=ON",
-    "-DBUILD_PLUGIN_I3S=ON",
     "-DBUILD_PLUGIN_DRACO=ON",
     "-DBUILD_PLUGIN_RIVLIB=OFF",
     "-DENABLE_CTEST=OFF",
@@ -80,7 +76,7 @@ configure = { cmd = [ "cmake",
     "-DBUILD_PGPOINTCLOUD_TESTS=OFF",
     "-DCMAKE_CXX_FLAGS=/D_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" ] }
 
-[feature.dev.target.linux-64.tasks]
+[feature.dev.target.linux.tasks]
 configure = { cmd = [ "cmake",
     "-G", "Ninja",
     "-S", ".",
@@ -92,18 +88,14 @@ configure = { cmd = [ "cmake",
     "-DCMAKE_LIBRARY_PATH:FILEPATH=$CONDA_PREFIX/Library/lib",
     "-DCMAKE_INCLUDE_PATH:FILEPATH=$CONDA_PREFIX/Library/include",
     "-DOPENSSL_ROOT_DIR=$CONDA_PREFIX/Library",
-    "-DPython3_ROOT_DIR:FILEPATH=$CONDA_PREFIX",
-    "-DPython3_FIND_STRATEGY=LOCATION",
     "-DBUILD_PLUGIN_CPD=OFF",
     "-DBUILD_PLUGIN_ICEBRIDGE=ON",
     "-DBUILD_PLUGIN_HDF=ON",
     "-DBUILD_PLUGIN_ARROW=ON",
     "-DBUILD_PLUGIN_TILEDB=ON",
-    "-DBUILD_PLUGIN_MRSID=OFF",
     "-DBUILD_PLUGIN_NITF=ON",
     "-DBUILD_PLUGIN_TRAJECTORY=ON",
     "-DBUILD_PLUGIN_PGPOINTCLOUD=ON",
-    "-DBUILD_PLUGIN_I3S=ON",
     "-DBUILD_PLUGIN_DRACO=ON",
     "-DBUILD_PLUGIN_RIVLIB=OFF",
     "-DENABLE_CTEST=OFF",
@@ -113,7 +105,7 @@ configure = { cmd = [ "cmake",
     "-Dgtest_force_shared_crt=ON",
     "-DBUILD_PGPOINTCLOUD_TESTS=OFF" ] }
 
-[feature.dev.target.osx-arm64.tasks]
+[feature.dev.target.osx.tasks]
 configure = { cmd = [ "cmake",
     "-G", "Ninja",
     "-S", ".",
@@ -133,7 +125,6 @@ configure = { cmd = [ "cmake",
     "-DBUILD_PLUGIN_NITF=ON",
     "-DBUILD_PLUGIN_TRAJECTORY=ON",
     "-DBUILD_PLUGIN_PGPOINTCLOUD=ON",
-    "-DBUILD_PLUGIN_I3S=ON",
     "-DBUILD_PLUGIN_DRACO=ON",
     "-DENABLE_CTEST=OFF",
     "-DWITH_LZMA=OFF",
