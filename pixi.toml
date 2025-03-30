@@ -5,24 +5,21 @@ platforms = ["linux-64", "win-64", "osx-64", "osx-arm64"]
 version = "2.8.2"
 
 [feature.dev.dependencies]
-gdal = ">=3.9.0,<4"
-cmake = ">=3.31.2,<4"
-compilers = ">=1.8.0,<2"
-ninja = ">=1.12.1,<2"
-libpq = ">=16.1,<17"
-curl = ">=8.5.0,<9"
-hdf5 = ">=1.14.1,<1.15"
-tiledb = ">=2.26.0,<2.27"
-draco = ">=1.5.6,<1.6"
-libxml2 = ">=2.13.5,<2.14"
-openssl = ">=3.4.0,<3.5"
-nitro = ">=2.7.dev8,<2.8"
-ceres-solver = ">=2.2.0,<2.3"
-python = ">=3.12,<3.13"
-libarrow = ">=18.1.0,<19"
-libparquet = ">=18.1.0,<19"
-pkg-config = ">=0.29.2,<0.30"
-ccache = ">=4.10.1,<5"
+libgdal-core = "*"
+cmake = "*"
+compilers = "*"
+ninja = "*"
+libpq = "*"
+hdf5 = "*"
+cpd = "*"
+fgt = "*"
+tiledb = "*"
+draco = "*"
+nitro = "*"
+ceres-solver = "*"
+python = "*"
+libarrow = "*"
+libparquet = "*"
 
 [feature.doc.dependencies]
 jupyter-book = ">=1.0.3,<2"
@@ -51,7 +48,7 @@ tqdm = ">=4.67.1,<5"
 
 [feature.dev.target.win-64.tasks]
 configure = { cmd = [ "cmake",
-    "-G", "Ninja", 
+    "-G", "Ninja",
     "-S", ".",
     "-B", ".build",
     "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
@@ -85,10 +82,10 @@ configure = { cmd = [ "cmake",
 
 [feature.dev.target.linux-64.tasks]
 configure = { cmd = [ "cmake",
-    "-G", "Ninja", 
+    "-G", "Ninja",
     "-S", ".",
     "-B", ".build",
-    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
     "-DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX",
     "-DWITH_TESTS=ON",
     "-DCMAKE_VERBOSE_MAKEFILE=OFF",
@@ -115,6 +112,33 @@ configure = { cmd = [ "cmake",
     "-DWITH_ZLIB=ON",
     "-Dgtest_force_shared_crt=ON",
     "-DBUILD_PGPOINTCLOUD_TESTS=OFF" ] }
+
+[feature.dev.target.osx-arm64.tasks]
+configure = { cmd = [ "cmake",
+    "-G", "Ninja",
+    "-S", ".",
+    "-B", ".build",
+    "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+    "-DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX",
+    "-DWITH_TESTS=ON",
+    "-DCMAKE_VERBOSE_MAKEFILE=OFF",
+    "-DCMAKE_LIBRARY_PATH:FILEPATH=$CONDA_PREFIX/Library/lib",
+    "-DCMAKE_INCLUDE_PATH:FILEPATH=$CONDA_PREFIX/Library/include",
+    "-DOPENSSL_ROOT_DIR=$CONDA_PREFIX/Library",
+    "-DBUILD_PLUGIN_CPD=ON",
+    "-DBUILD_PLUGIN_ICEBRIDGE=ON",
+    "-DBUILD_PLUGIN_HDF=ON",
+    "-DBUILD_PLUGIN_ARROW=ON",
+    "-DBUILD_PLUGIN_TILEDB=ON",
+    "-DBUILD_PLUGIN_NITF=ON",
+    "-DBUILD_PLUGIN_TRAJECTORY=ON",
+    "-DBUILD_PLUGIN_PGPOINTCLOUD=ON",
+    "-DBUILD_PLUGIN_I3S=ON",
+    "-DBUILD_PLUGIN_DRACO=ON",
+    "-DENABLE_CTEST=OFF",
+    "-DWITH_LZMA=OFF",
+    "-DBUILD_PGPOINTCLOUD_TESTS=OFF" ] }
+
 
 [feature.dev.tasks]
 build = { cmd = "cd .build && ninja -j8", depends-on = ["configure"] }

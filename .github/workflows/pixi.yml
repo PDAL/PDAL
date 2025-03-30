@@ -1,0 +1,36 @@
+name: Pixi
+
+on:
+    push:
+        paths-ignore:
+            - 'doc/**'
+    pull_request:
+        paths-ignore:
+            - 'doc/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Pixi
+    defaults:
+      run:
+        shell: bash -l {0}
+    runs-on: 'ubuntu-24.04-arm'
+    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
+    strategy:
+      fail-fast: false
+    steps:
+    - uses: actions/checkout@v4
+    - uses: prefix-dev/setup-pixi@v0.8.3
+
+    - name: Build
+      run: |
+          pixi run -e dev build
+
+    - name: Test
+      run: |
+          pixi run -e dev test
+
