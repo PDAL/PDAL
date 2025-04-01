@@ -4,6 +4,15 @@ if (MSVC)
     option(gtest_force_shared_crt "Always use shared Visual C++ run-time DLL" ON)
 endif()
 
+find_package(GTest CONFIG GLOBAL)
+
+
+# If we don't find a global GTest, use our vendored version
+if (NOT GTest_FOUND)
+
+     include_directories(${ROOT_DIR}/vendor/gtest/include
+      ${ROOT_DIR}/vendor/gtest)
+
 set(GOOGLETEST_VERSION 1.12.1)
 add_subdirectory(vendor/gtest)
 
@@ -36,4 +45,6 @@ if (WITH_ABSEIL)
                                             absl::failure_signal_handler)
         target_link_libraries(gtest PUBLIC re2::re2)
     endif()
+endif()
+
 endif()
