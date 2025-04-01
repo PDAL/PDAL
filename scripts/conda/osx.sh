@@ -53,6 +53,7 @@ cmake   -G "Ninja"  \
         -DBUILD_I3S_TESTS=ON \
         -DBUILD_PLUGIN_TILEDB=OFF \
         -DWITH_ZSTD=ON \
+        -DWITH_LZMA=ON \
         -DWITH_TESTS=ON \
         ..
 

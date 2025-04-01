@@ -240,25 +240,17 @@ target_include_directories(${PDAL_LIB_NAME}
         ${ROOT_DIR}
         ${PROJECT_BINARY_DIR}/include
         ${PDAL_VENDOR_DIR}
-        ${LIBXML2_INCLUDE_DIR}
-        ${ZSTD_INCLUDE_DIRS}
         ${NLOHMANN_INCLUDE_DIR}
         ${UTFCPP_INCLUDE_DIR}
-        ${GDAL_INCLUDE_DIR}
-        ${PROJ_INCLUDE_DIR}
 )
 
 target_link_libraries(${PDAL_LIB_NAME}
     PRIVATE
         ${CMAKE_THREAD_LIBS_INIT}
         ${CMAKE_DL_LIBS}
-        ${GDAL_LIBRARY}
-        ${PROJ_LIBRARIES}
-        ${GEOTIFF_LIBRARY}
-        ${LIBXML2_LIBRARIES}
-        ${ZLIB_LIBRARIES}
-        ${LIBLZMA_LIBRARIES}
-        ${ZSTD_LIBRARIES}
+        GDAL::GDAL
+        PROJ::proj
+        geotiff_library
         ${PDAL_REEXPORT}
         ${PDAL_ARBITER_LIB_NAME}
         ${PDAL_H3_LIB_NAME}
@@ -276,6 +268,32 @@ target_link_libraries(${PDAL_LIB_NAME}
         ${PDAL_LIBDIR}
         ${WINSOCK_LIBRARY}
 )
+
+if (ZSTD_FOUND)
+    target_link_libraries(${PDAL_LIB_NAME}
+        PRIVATE
+        zstd::libzstd)
+endif()
+
+if (ZLIB_FOUND)
+    target_link_libraries(${PDAL_LIB_NAME}
+        PRIVATE
+        ZLIB::ZLIB)
+endif()
+
+if (LIBLZMA_FOUND)
+    target_link_libraries(${PDAL_LIB_NAME}
+        PRIVATE
+        LibLZMA::LibLZMA)
+endif()
+
+if (LibXml2_FOUND)
+    target_link_libraries(${PDAL_LIB_NAME}
+        PRIVATE
+        LibXml2::LibXml2)
+endif()
+
+
 
 #
 # Allow downstream cmake projects to find PDAL header files without
