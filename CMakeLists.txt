@@ -41,6 +41,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(PDAL_LIB_NAME pdalcpp)
 
 set(PDAL_KAZHDAN_LIB_NAME pdal_kazhdan)
+set(PDAL_SPZ_LIB_NAME pdal_spz)
 set(PDAL_LEPCC_LIB_NAME pdal_lepcc)
 set(PDAL_TEST_SUPPORT_OBJS pdal_test_support)
 
@@ -164,6 +165,7 @@ add_subdirectory(vendor/lazperf)
 add_subdirectory(vendor/utfcpp)
 add_subdirectory(vendor/lepcc)
 add_subdirectory(vendor/h3)
+add_subdirectory(vendor/spz)
 add_subdirectory(tools)
 add_subdirectory(apps)
 
@@ -266,6 +268,7 @@ target_link_libraries(${PDAL_LIB_NAME}
         ${PDAL_LAZPERF_LIB_NAME}
         ${UTFCPP_LIB_NAME}
         ${BACKTRACE_LIBRARIES}
+        ${PDAL_SPZ_LIB_NAME}
        "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:-lstdc++fs>"
     PUBLIC
         ${WINSOCK_LIBRARY}
