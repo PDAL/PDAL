@@ -123,7 +123,7 @@ forward
 
 minor_version
 
-: All LAS files are version 1, but the minor version (0 - 4) can be specified
+: All LAS files are version 1, but the minor version (1 - 4) can be specified
   with this option. \[Default: 4 (was 2 for PDAL 1.0 - 2.7)\]
 
 software_id
