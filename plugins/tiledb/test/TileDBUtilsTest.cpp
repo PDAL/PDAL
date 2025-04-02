@@ -333,6 +333,8 @@ TEST(FilterFactory, user_set_bit_width_reduction)
     }
 }
 
+
+#ifdef TILEDB_WEBP
 TEST(FilterFactory, user_set_webp)
 {
     NL::json jsonOptions({});
@@ -361,7 +363,7 @@ TEST(FilterFactory, user_set_webp)
         EXPECT_EQ(lossless, 0);
     }
 }
-
+#endif
 TEST(FilterFactory, user_set_positive_delta)
 {
     NL::json jsonOptions({});
