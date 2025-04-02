@@ -33,7 +33,7 @@ html: jupyterbook
 
 jupyterbook: ./doxygen/xml/index.xml
 	pushd .. && jupyter-book config sphinx doc/ && popd
-	gsed -i "1i\import os, sys; sys.path.append(os.path.abspath(\"./_ext\"))" conf.py
+	sed -i "1i\import os, sys; sys.path.append(os.path.abspath(\"./_ext\"))" conf.py
 	@echo
 	@echo "Built jupyter-book"
 
