@@ -241,6 +241,7 @@ target_include_directories(${PDAL_LIB_NAME}
         ${PROJECT_BINARY_DIR}/include
         ${PDAL_VENDOR_DIR}
         ${NLOHMANN_INCLUDE_DIR}
+        ${GEOTIFF_INCLUDE_DIR}
         ${UTFCPP_INCLUDE_DIR}
 )
 
@@ -250,7 +251,7 @@ target_link_libraries(${PDAL_LIB_NAME}
         ${CMAKE_DL_LIBS}
         GDAL::GDAL
         PROJ::proj
-        geotiff_library
+        ${GEOTIFF_LIBRARY}
         ${PDAL_REEXPORT}
         ${PDAL_ARBITER_LIB_NAME}
         ${PDAL_H3_LIB_NAME}
