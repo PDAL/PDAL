@@ -74,7 +74,7 @@ public:
     virtual ~Geometry();
 
     OGRGeometryH getOGRHandle()
-    { return m_geom.get(); }
+    { return reinterpret_cast<OGRGeometryH>(m_geom.get()); }
 
     virtual void update(const std::string& wkt_or_json);
     virtual bool valid() const;
