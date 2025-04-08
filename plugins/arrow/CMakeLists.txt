@@ -22,8 +22,7 @@ PDAL_ADD_PLUGIN(arrow_writer_libname writer arrow
         ${PDAL_LIBRARIES}
         Arrow::arrow_shared
         Parquet::parquet_shared
-    INCLUDES
-        ${NLOHMANN_INCLUDE_DIR}
+        nlohmann_json::nlohmann_json
 )
 
 PDAL_ADD_PLUGIN(arrow_reader_libname reader arrow
@@ -33,8 +32,7 @@ PDAL_ADD_PLUGIN(arrow_reader_libname reader arrow
         ${PDAL_LIBRARIES}
         Arrow::arrow_shared
         Parquet::parquet_shared
-    INCLUDES
-        ${NLOHMANN_INCLUDE_DIR}
+        nlohmann_json::nlohmann_json
 )
 
 if (WIN32)
@@ -50,6 +48,7 @@ if (WITH_TESTS)
         ${PDAL_LIBRARIES}
         Arrow::arrow_shared
         ${arrow_writer_libname}
+        nlohmann_json::nlohmann_json
     )
 
     PDAL_ADD_TEST(pdal_io_arrow_reader_test
@@ -59,6 +58,7 @@ if (WITH_TESTS)
         ${PDAL_LIBRARIES}
         Arrow::arrow_shared
         ${arrow_reader_libname}
+        nlohmann_json::nlohmann_json
     )
 
     if (WIN32)

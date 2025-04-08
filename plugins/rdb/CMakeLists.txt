@@ -19,8 +19,8 @@ PDAL_ADD_PLUGIN(libname reader rdb
     LINK_WITH
         rdbcpp
         ${PDAL_LIBRARIES}
+        nlohmann_json::nlohmann_json
     INCLUDES
-        ${NLOHMANN_INCLUDE_DIR}
         ${RDB_INCLUDE_CPP_DIR}
         ${RDB_INCLUDE_C_DIR}
         ${PDAL_INCLUDE_DIRS}
@@ -49,6 +49,8 @@ if (BUILD_RDBLIB_TESTS)
             test/RdbReaderTest.cpp
         LINK_WITH
             ${libname} ${RDB_LIBRARY}
+            nlohmann_json::nlohmann_json
+
         INCLUDES
             ${PROJECT_BINARY_DIR}/plugins/rdb/test
             ${PROJECT_SOURCE_DIR}/plugins/rdb/io
