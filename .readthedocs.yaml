@@ -16,6 +16,7 @@ build:
       # Generate on-the-fly Sphinx configuration from Jupyter Book's _config.yml
       - "jupyter-book config sphinx doc/"
       - sed -i "1i\import os, sys; sys.path.append(os.path.abspath(\"./_ext\"))" doc/conf.py
+      - sed -i "\$ahtml_baseurl = os.environ.get(\"READTHEDOCS_CANONICAL_URL\", \"\")" doc/conf.py
 
   apt_packages:
     - graphviz
