@@ -54,7 +54,7 @@ PipelineReaderJSON::PipelineReaderJSON(PipelineManager& manager) :
 {}
 
 
-void PipelineReaderJSON::parsePipeline(NL::json& tree)
+void PipelineReaderJSON::parsePipeline(nlohmann::json& tree)
 {
     TagMap tags;
     std::vector<Stage*> inputs;
@@ -62,7 +62,7 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
     size_t last = tree.size() - 1;
     for (size_t i = 0; i < tree.size(); ++i)
     {
-        NL::json& node = tree.at(i);
+        nlohmann::json& node = tree.at(i);
 
         FileSpec spec;
         std::string tag;
@@ -153,15 +153,15 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
 
 void PipelineReaderJSON::readPipeline(std::istream& input)
 {
-    NL::json root;
+    nlohmann::json root;
 
     try
     {
-        root = NL::json::parse(input, /* callback */ nullptr,
+        root = nlohmann::json::parse(input, /* callback */ nullptr,
                                       /* allow exceptions */ true,
                                       /* ignore_comments */ true);
     }
-    catch (NL::json::parse_error& err)
+    catch (nlohmann::json::parse_error& err)
     {
         // Look for a right bracket -- this indicates the start of the
         // actual message from the parse error.
@@ -205,14 +205,14 @@ void PipelineReaderJSON::readPipeline(const std::string& filename)
 }
 
 
-std::string PipelineReaderJSON::extractType(NL::json& node)
+std::string PipelineReaderJSON::extractType(nlohmann::json& node)
 {
     std::string type;
 
     auto it = node.find("type");
     if (it != node.end())
     {
-        NL::json& val = *it;
+        nlohmann::json& val = *it;
         if (!val.is_null())
         {
             if (val.is_string())
@@ -227,7 +227,7 @@ std::string PipelineReaderJSON::extractType(NL::json& node)
 }
 
 
-FileSpec PipelineReaderJSON::extractFilename(NL::json& node)
+FileSpec PipelineReaderJSON::extractFilename(nlohmann::json& node)
 {
     FileSpec spec;
 
@@ -242,14 +242,14 @@ FileSpec PipelineReaderJSON::extractFilename(NL::json& node)
     return spec;
 }
 
-std::string PipelineReaderJSON::extractTag(NL::json& node, TagMap& tags)
+std::string PipelineReaderJSON::extractTag(nlohmann::json& node, TagMap& tags)
 {
     std::string tag;
 
     auto it = node.find("tag");
     if (it != node.end())
     {
-        NL::json& val = *it;
+        nlohmann::json& val = *it;
         if (!val.is_null())
         {
             if (val.is_string())
@@ -286,7 +286,7 @@ void PipelineReaderJSON::handleInputTag(const std::string& tag,
 }
 
 
-std::vector<Stage *> PipelineReaderJSON::extractInputs(NL::json& node,
+std::vector<Stage *> PipelineReaderJSON::extractInputs(nlohmann::json& node,
     TagMap& tags)
 {
     std::vector<Stage *> inputs;
@@ -295,7 +295,7 @@ std::vector<Stage *> PipelineReaderJSON::extractInputs(NL::json& node,
     auto it = node.find("inputs");
     if (it != node.end())
     {
-        NL::json& val = *it;
+        nlohmann::json& val = *it;
         if (val.is_string())
             handleInputTag(val.get<std::string>(), tags, inputs);
         else if (val.is_array())
@@ -320,7 +320,7 @@ namespace
 {
 
 bool extractOption(Options& options, const std::string& name,
-    const NL::json& node)
+    const nlohmann::json& node)
 {
     if (node.is_string())
         options.add(name, node.get<std::string>());
@@ -333,7 +333,7 @@ bool extractOption(Options& options, const std::string& name,
     else if (node.is_boolean())
         options.add(name, node.get<bool>());
     else if (node.is_array())
-        options.add(name, node.get<NL::json::array_t>());
+        options.add(name, node.get<nlohmann::json::array_t>());
     else if (node.is_null())
         options.add(name, "");
     else
@@ -343,13 +343,13 @@ bool extractOption(Options& options, const std::string& name,
 
 } // unnamed namespace
 
-Options PipelineReaderJSON::extractOptions(NL::json& node)
+Options PipelineReaderJSON::extractOptions(nlohmann::json& node)
 {
     Options options;
 
     for (auto& it : node.items())
     {
-        NL::json& subnode = it.value();
+        nlohmann::json& subnode = it.value();
         const std::string& name = it.key();
 
         if (name == "plugin")
@@ -363,7 +363,7 @@ Options PipelineReaderJSON::extractOptions(NL::json& node)
 
         if (subnode.is_array())
         {
-            for (const NL::json& val : subnode)
+            for (const nlohmann::json& val : subnode)
                 if (val.is_object())
                     options.add(name, val);
                 else if (!extractOption(options, name, val))

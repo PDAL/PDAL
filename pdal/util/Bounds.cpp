@@ -42,8 +42,7 @@
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/Utils.hpp>
 
-#include <pdal/JsonFwd.hpp>
-
+#include <nlohmann/json.hpp>
 
 namespace pdal
 {
@@ -287,10 +286,10 @@ void BOX2D::parse(const std::string& s, std::string::size_type& pos)
     bool isArray(false);
     bool isObject(false);
     std::string jsonParseMessage("");
-    NL::json b;
+    nlohmann::json b;
     try
     {
-        b = NL::json::parse(s);
+        b = nlohmann::json::parse(s);
         isJson = true;
         isArray = b.is_array();
         isObject = b.is_object();
@@ -379,10 +378,10 @@ void BOX3D::parse(const std::string& s, std::string::size_type& pos)
     bool isArray(false);
     bool isObject(false);
     std::string jsonParseMessage("");
-    NL::json b;
+    nlohmann::json b;
     try
     {
-        b = NL::json::parse(s);
+        b = nlohmann::json::parse(s);
         isJson = true;
         isArray = b.is_array();
         isObject = b.is_object();
