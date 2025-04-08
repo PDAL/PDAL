@@ -249,6 +249,7 @@ target_link_libraries(${PDAL_LIB_NAME}
         ${CMAKE_THREAD_LIBS_INIT}
         ${CMAKE_DL_LIBS}
         PROJ::proj
+        GDAL::GDAL
         nlohmann_json::nlohmann_json
         ${GEOTIFF_LIBRARY}
         ${PDAL_REEXPORT}
@@ -264,7 +265,6 @@ target_link_libraries(${PDAL_LIB_NAME}
        "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:-lstdc++fs>"
     PUBLIC
         ${WINSOCK_LIBRARY}
-        GDAL::GDAL
     INTERFACE
         ${PDAL_LIBDIR}
         ${WINSOCK_LIBRARY}
@@ -272,25 +272,25 @@ target_link_libraries(${PDAL_LIB_NAME}
 
 if (ZSTD_FOUND)
     target_link_libraries(${PDAL_LIB_NAME}
-        PUBLIC
+        PRIVATE
         zstd::libzstd)
 endif()
 
 if (ZLIB_FOUND)
     target_link_libraries(${PDAL_LIB_NAME}
-        PUBLIC
+        PRIVATE
         ZLIB::ZLIB)
 endif()
 
 if (LIBLZMA_FOUND)
     target_link_libraries(${PDAL_LIB_NAME}
-        PUBLIC
+        PRIVATE
         LibLZMA::LibLZMA)
 endif()
 
 if (LibXml2_FOUND)
     target_link_libraries(${PDAL_LIB_NAME}
-        PUBLIC
+        PRIVATE
         LibXml2::LibXml2)
 endif()
 
