@@ -81,7 +81,7 @@ private:
     virtual void write(const PointViewPtr view) override;
 
     void writeOne(const PointViewPtr view, const ept::Addon& addon) const;
-    void writeHierarchy(const std::string& hierarchyDir, NL::json& hier,
+    void writeHierarchy(const std::string& hierarchyDir, nlohmann::json& hier,
         const ept::Key& key) const;
     std::string getTypeString(Dimension::Type t) const;
 

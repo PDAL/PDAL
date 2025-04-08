@@ -281,7 +281,7 @@ std::pair<double, double> PDAL_EXPORT computeHausdorffPair(PointViewPtr srcView,
 double PDAL_EXPORT computeChamfer(PointViewPtr srcView, PointViewPtr candView);
 std::string PDAL_EXPORT tempFilename(const std::string& path);
 std::vector<std::string> PDAL_EXPORT glob(const std::string& path);
-StatusWithReason PDAL_EXPORT parseJson(const std::string& s, NL::json& json);
+StatusWithReason PDAL_EXPORT parseJson(const std::string& s, nlohmann::json& json);
 
 } // namespace Utils
 } // namespace pdal

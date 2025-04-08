@@ -46,7 +46,7 @@ namespace stac
 
 using namespace StacUtils;
 
-Catalog::Catalog(const NL::json& json,
+Catalog::Catalog(const nlohmann::json& json,
         const std::string& catPath,
         const connector::Connector& connector,
         ThreadPool& pool,
@@ -59,7 +59,7 @@ Catalog::Catalog(const NL::json& json,
 Catalog::~Catalog()
 {}
 
-bool Catalog::init(const Filters& filters, NL::json rawReaderArgs,
+bool Catalog::init(const Filters& filters, nlohmann::json rawReaderArgs,
         SchemaUrls schemaUrls, bool isRoot=false)
 {
     m_root = isRoot;
@@ -82,7 +82,7 @@ bool Catalog::init(const Filters& filters, NL::json rawReaderArgs,
     if (m_validate)
         validate();
 
-    NL::json itemLinks = stacValue(m_json, "links");
+    nlohmann::json itemLinks = stacValue(m_json, "links");
 
     for (auto link: itemLinks)
     {
@@ -155,9 +155,9 @@ void Catalog::collectErrors()
     }
 }
 
-void Catalog::handleItem(const Item::Filters& f, NL::json readerArgs, std::string path)
+void Catalog::handleItem(const Item::Filters& f, nlohmann::json readerArgs, std::string path)
 {
-        NL::json itemJson = m_connector.getJson(path);
+        nlohmann::json itemJson = m_connector.getJson(path);
         Item item(itemJson, path, m_connector, m_validate, m_log);
 
         bool valid = item.init(f, readerArgs, m_schemaUrls);
@@ -168,9 +168,9 @@ void Catalog::handleItem(const Item::Filters& f, NL::json readerArgs, std::strin
         }
 }
 
-void Catalog::handleCol(const Filters& f, NL::json readerArgs, std::string path)
+void Catalog::handleCol(const Filters& f, nlohmann::json readerArgs, std::string path)
 {
-    NL::json collectionJson = m_connector.getJson(path);
+    nlohmann::json collectionJson = m_connector.getJson(path);
     std::unique_ptr<Collection> collection(new Collection(
         collectionJson, path, m_connector, m_pool, m_validate, m_log));
 
@@ -183,9 +183,9 @@ void Catalog::handleCol(const Filters& f, NL::json readerArgs, std::string path)
     }
 }
 
-void Catalog::handleCat(const Filters& f, NL::json readerArgs, std::string path)
+void Catalog::handleCat(const Filters& f, nlohmann::json readerArgs, std::string path)
 {
-    NL::json catalogJson = m_connector.getJson(path);
+    nlohmann::json catalogJson = m_connector.getJson(path);
     std::unique_ptr<Catalog> catalog(new Catalog(
         catalogJson, path, m_connector, m_pool, m_validate, m_log));
 
@@ -234,7 +234,7 @@ void Catalog::validate()
         [](const std::string &, const std::string &) {}
     );
 
-    NL::json schemaJson = m_connector.getJson(m_schemaUrls.catalog);
+    nlohmann::json schemaJson = m_connector.getJson(m_schemaUrls.catalog);
     val.set_root_schema(schemaJson);
     try {
         val.validate(m_json);

@@ -34,7 +34,7 @@
 
 #include "Vlr.hpp"
 
-#include <pdal/JsonFwd.hpp>
+#include <nlohmann/json.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/Extractor.hpp>
@@ -233,7 +233,7 @@ struct MetadataFunc
 
 std::istream& operator>>(std::istream& in, las::Evlr& v)
 {
-    NL::json j;
+    nlohmann::json j;
     in >> j;
 
     // Make sure there isn't stuff in the input stream after the JSON

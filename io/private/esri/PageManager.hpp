@@ -47,8 +47,8 @@ namespace pdal
 namespace i3s
 {
 
-using Page = NL::json;
-using PagePtr = std::shared_ptr<NL::json>;
+using Page = nlohmann::json;
+using PagePtr = std::shared_ptr<nlohmann::json>;
 using FetchFunction = std::function<std::string(std::string)>;
 
 class PageManager
@@ -79,4 +79,4 @@ private:
 };
 
 } //namespace i3s
-} // namespace pdal 
+} // namespace pdal

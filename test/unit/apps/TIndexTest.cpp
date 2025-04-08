@@ -104,7 +104,7 @@ TEST(TIndex, test2)
     pos = output.find("Can't specify both");
     EXPECT_NE(pos, std::string::npos);
 
-    cmd = Support::binpath("pdal") + " tindex create " + outSpec + 
+    cmd = Support::binpath("pdal") + " tindex create " + outSpec +
         " --path_prefix=\"a\" --write_absolute_path=true " +
         "--filespec=\"" + inSpec + "\" 2>&1";
     Utils::run_shell_command(cmd, output);
@@ -158,13 +158,13 @@ TEST(TIndex, test3)
 
 std::string getGeometry(std::string& json)
 {
-    NL::basic_json<> a = nlohmann::json::parse(json);
+    nlohmann::basic_json<> a = nlohmann::json::parse(json);
     auto tree = a.find("features");
 
     std::ostringstream oss;
     for (size_t i = 0; i < tree->size(); ++i)
     {
-        NL::json& node = tree->at(i);
+        nlohmann::json& node = tree->at(i);
         auto geom = node.find("geometry");
         oss << geom->dump();
     }
@@ -187,7 +187,7 @@ TEST(TIndex, test4)
 
     // simplify = true
     cmd = Support::binpath("pdal") + " tindex create --tindex=\"/vsistdout/\"" +
-        " -f \"GeoJSON\" --threshold=1 --resolution=1.0" + 
+        " -f \"GeoJSON\" --threshold=1 --resolution=1.0" +
         " --filespec=\"" + inSpec + "\"";
     Utils::run_shell_command(cmd, output);
 
@@ -195,8 +195,8 @@ TEST(TIndex, test4)
     EXPECT_NEAR(6.49519, p.area(), 0.001);
 
     // where expression
-    cmd = Support::binpath("pdal") + " tindex create --tindex=\"/vsistdout/\""+ 
-        " -f \"GeoJSON\" --threshold=1 --resolution=1.0" + 
+    cmd = Support::binpath("pdal") + " tindex create --tindex=\"/vsistdout/\""+
+        " -f \"GeoJSON\" --threshold=1 --resolution=1.0" +
         " --where=\"X>1\" --simplify=\"false\" --filespec=\"" + inSpec + "\"";
     Utils::run_shell_command(cmd, output);
 

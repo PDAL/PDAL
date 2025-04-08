@@ -57,7 +57,7 @@ private:
     virtual void prepared(PointTableRef table) override;
     virtual PointViewSet run(PointViewPtr view) override;
 
-    NL::json m_json;
+    nlohmann::json m_json;
     std::unique_ptr<Expression> m_expression;
 };
 

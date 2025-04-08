@@ -306,7 +306,7 @@ void TileDBReader::localReady()
     m_query->set_subarray(subarray);
 
     // read spatial reference
-    NL::json meta = nullptr;
+    nlohmann::json meta = nullptr;
 
     tiledb_datatype_t v_type = TILEDB_UINT8;
     const void* v_r;
@@ -314,7 +314,7 @@ void TileDBReader::localReady()
     m_array->get_metadata("_pdal", &v_type, &v_num, &v_r);
 
     if (v_r != NULL)
-        meta = NL::json::parse(static_cast<const char*>(v_r));
+        meta = nlohmann::json::parse(static_cast<const char*>(v_r));
 
     if ((meta != nullptr) && (meta.count("root") > 0) &&
         (meta["root"].count("writers.tiledb") > 0) &&

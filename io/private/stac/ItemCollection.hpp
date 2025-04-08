@@ -46,7 +46,7 @@ class ItemCollection
 {
 
 public:
-    ItemCollection(const NL::json& json,
+    ItemCollection(const nlohmann::json& json,
         const std::string& icPath,
         const connector::Connector& connector,
         bool validate,
@@ -58,11 +58,11 @@ public:
         Item::Filters* itemFilters;
     };
 
-    bool init(const Filters& filters, NL::json rawReaderArgs, SchemaUrls schemaUrls);
+    bool init(const Filters& filters, nlohmann::json rawReaderArgs, SchemaUrls schemaUrls);
     ItemList items();
 
 private:
-    NL::json m_json;
+    nlohmann::json m_json;
     std::string m_path;
     const connector::Connector& m_connector;
     bool m_validate;

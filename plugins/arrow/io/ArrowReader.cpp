@@ -98,15 +98,15 @@ void ArrowReader::loadArrowGeoMetadata(const std::shared_ptr<const arrow::KeyVal
     if (!kv_metadata)
         return;
     auto geo = kv_metadata->Get("ARROW:extension:metadata");
-    NL::json metadata;
+    nlohmann::json metadata;
 
     if (geo.ok())
     {
         // load up the JSON and set our stuff
         try
         {
-            metadata = NL::json::parse(*geo);
-            } catch (NL::json::parse_error& e)
+            metadata = nlohmann::json::parse(*geo);
+            } catch (nlohmann::json::parse_error& e)
             {
                 log()->get(LogLevel::Warning) << "unable to parse GeoArrow metadata with error '"
                                               << e.what() << "'" << std::endl;
@@ -129,7 +129,7 @@ void ArrowReader::loadArrowGeoMetadata(const std::shared_ptr<const arrow::KeyVal
                                               << std::endl;
                 return;
             }
-            NL::json crs = metadata["crs"];
+            nlohmann::json crs = metadata["crs"];
 
             SpatialReference ref;
             if (crs.is_object())
@@ -156,15 +156,15 @@ void ArrowReader::loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyV
     if (!kv_metadata)
         return;
     auto geo = kv_metadata->Get("geo");
-    NL::json metadata;
+    nlohmann::json metadata;
 
     if (geo.ok())
     {
         // load up the JSON and set our stuff
         try
         {
-            metadata = NL::json::parse(*geo);
-            } catch (NL::json::parse_error& e)
+            metadata = nlohmann::json::parse(*geo);
+            } catch (nlohmann::json::parse_error& e)
             {
                 log()->get(LogLevel::Warning) << "unable to parse GeoParquet 'geo' metadata with error '"
                                               << e.what() << "'" << std::endl;
@@ -185,10 +185,10 @@ void ArrowReader::loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyV
                                               << std::endl;
                 return;
             }
-            NL::json columns = metadata["columns"];
+            nlohmann::json columns = metadata["columns"];
 
             std::string primary_column = metadata["primary_column"];
-            NL::json column = metadata["columns"][primary_column];
+            nlohmann::json column = metadata["columns"][primary_column];
 
             log()->get(LogLevel::Info) << "primary column is " << primary_column << std::endl;
 
@@ -200,7 +200,7 @@ void ArrowReader::loadParquetGeoMetadata(const std::shared_ptr<const arrow::KeyV
             }
 
             SpatialReference ref;
-            NL::json crs = column["crs"];
+            nlohmann::json crs = column["crs"];
             if (crs.is_object())
             {
                 ref.set(crs.dump());

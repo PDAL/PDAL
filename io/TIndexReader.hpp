@@ -80,8 +80,8 @@ private:
     virtual point_count_t read(PointViewPtr view, point_count_t num) override;
     virtual bool processOne(PointRef& point) override;
 
-    NL::json handleReaderArgs(NL::json rawReaderArgs);
-    Options setReaderOptions(const NL::json& readerArgs,
+    nlohmann::json handleReaderArgs(nlohmann::json rawReaderArgs);
+    Options setReaderOptions(const nlohmann::json& readerArgs,
                              const std::string& driver) const;
 
     struct Args;

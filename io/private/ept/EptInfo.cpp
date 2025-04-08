@@ -48,9 +48,9 @@ EptInfo::EptInfo(const std::string& info)
 {
     try
     {
-        m_info = NL::json::parse(info);
+        m_info = nlohmann::json::parse(info);
     }
-    catch(NL::json::parse_error&)
+    catch(nlohmann::json::parse_error&)
     {
         throw pdal_error("Unable to parse EPT info as JSON.");
     }
@@ -144,7 +144,7 @@ void EptInfo::initialize()
     else
         throw pdal_error("Unrecognized EPT dataType: " + dt);
 
-    NL::json& schema = m_info["schema"];
+    nlohmann::json& schema = m_info["schema"];
 
     // There are 2 cases where we do some special things regarding flags:
     //  - If the ClassFlags dimension exists, we will instead use the constituent flags
@@ -165,7 +165,7 @@ void EptInfo::initialize()
         m_dims["KeyPoint"] = DimType(Dimension::Id::KeyPoint, Dimension::Type::Unsigned8, 1.0, 0);
     });
 
-    for (NL::json element: schema)
+    for (nlohmann::json element: schema)
     {
         std::string name = element["name"].get<std::string>();
         std::string typestring = element["type"].get<std::string>();

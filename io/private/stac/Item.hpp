@@ -62,12 +62,12 @@ class Item
 {
 
 public:
-    Item(const NL::json& json,
+    Item(const nlohmann::json& json,
         const std::string& itemPath,
         const connector::Connector& connector,
         bool validate);
 
-    Item(const NL::json& json,
+    Item(const nlohmann::json& json,
         const std::string& itemPath,
         const connector::Connector& connector,
         bool validate,
@@ -80,13 +80,13 @@ public:
         std::vector<RegEx> ids;
         Polygon bounds;
         SpatialReference srs;
-        NL::json properties;
+        nlohmann::json properties;
         DatePairs datePairs;
         std::vector<std::string> assetNames;
         std::vector<RegEx> collections;
     };
 
-    bool init(const Filters& filters, NL::json rawReaderArgs, SchemaUrls schemaUrls);
+    bool init(const Filters& filters, nlohmann::json rawReaderArgs, SchemaUrls schemaUrls);
 
     std::string id();
     std::string driver();
@@ -95,7 +95,7 @@ public:
 
 private:
 
-    const NL::json m_json;
+    const nlohmann::json m_json;
     const std::string m_path;
 
     const connector::Connector& m_connector;
@@ -109,10 +109,10 @@ private:
     std::string m_assetPath;
     std::string m_id;
 
-    std::string extractDriverFromItem(const NL::json& asset) const;
-    Options setReaderOptions(const NL::json& readerArgs, const std::string& driver) const;
+    std::string extractDriverFromItem(const nlohmann::json& asset) const;
+    Options setReaderOptions(const nlohmann::json& readerArgs, const std::string& driver) const;
 
-    NL::json handleReaderArgs(NL::json rawReaderArgs);
+    nlohmann::json handleReaderArgs(nlohmann::json rawReaderArgs);
     void validate();
 
     bool filter(const Filters& filters);
@@ -120,7 +120,7 @@ private:
     bool filterIds(std::vector<RegEx> ids);
     bool filterCol(std::vector<RegEx> ids);
     bool filterDates(DatePairs dates);
-    bool filterProperties(const NL::json& filterProps);
+    bool filterProperties(const nlohmann::json& filterProps);
     bool filterBounds(Polygon bounds);
 
 

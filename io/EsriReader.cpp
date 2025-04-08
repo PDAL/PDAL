@@ -178,7 +178,7 @@ void EsriReader::initialize(PointTableRef table)
     }
 
     //create const for looking into
-    const NL::json jsonBody = m_info;
+    const nlohmann::json jsonBody = m_info;
 
     //find version
     if (jsonBody["store"].contains("version"))
@@ -215,7 +215,7 @@ void EsriReader::initialize(PointTableRef table)
     }
 
     //create spatial reference objects
-    NL::json wkid = m_info["spatialReference"]["wkid"];
+    nlohmann::json wkid = m_info["spatialReference"]["wkid"];
     int system(0);
     if (wkid.is_string())
     {
@@ -256,7 +256,7 @@ void EsriReader::addDimensions(PointLayoutPtr layout)
 
     if (!m_info.contains("attributeStorageInfo"))
         throwError("Attributes do not exist for this object");
-    const NL::json& attributes = m_info["attributeStorageInfo"];
+    const nlohmann::json& attributes = m_info["attributeStorageInfo"];
 
     layout->registerDims({Id::X, Id::Y, Id::Z});
 
@@ -551,7 +551,7 @@ void EsriReader::traverseTree(PagePtr page, int node)
     int index = node % m_nodeCap;
 
     // find node information
-    NL::json& j = *page;
+    nlohmann::json& j = *page;
     int firstNode = j["nodes"][0]["resourceId"].get<int>();
     int name = j["nodes"][index]["resourceId"].get<int>();
     int firstChild = j["nodes"][index]["firstChild"].get<int>();
@@ -581,7 +581,7 @@ void EsriReader::traverseTree(PagePtr page, int node)
     {
         throwError(err.what());
     }
-    catch (const NL::json::exception& err)
+    catch (const nlohmann::json::exception& err)
     {
         throwError(err.what());
     }

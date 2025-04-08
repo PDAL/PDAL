@@ -91,7 +91,7 @@ private:
     // points from a walk through the hierarchy.  Each of these keys will be
     // downloaded during the 'read' section.
     void overlaps();
-    void overlaps(ept::Hierarchy& target, const NL::json& current, const ept::Key& key);
+    void overlaps(ept::Hierarchy& target, const nlohmann::json& current, const ept::Key& key);
     bool hasSpatialFilter() const;
     bool passesSpatialFilter(const BOX3D& tileBounds) const;
     void process(PointViewPtr dstView, const ept::TileContents& tile, point_count_t count);

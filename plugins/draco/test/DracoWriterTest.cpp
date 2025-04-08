@@ -188,7 +188,7 @@ namespace pdal
         compareFiles(inFile, outFile);
     }
 
-    void testDimensions(NL::json dimensions, bool pass)
+    void testDimensions(nlohmann::json dimensions, bool pass)
     {
         std::string inFile = Support::datapath("las/1.2-with-color.las");
         std::string outFile = Support::temppath("draco_test_dims.drc");
@@ -242,7 +242,7 @@ namespace pdal
 
     TEST_F(DracoWriterTest, dimensions)
     {
-        NL::json dims;
+        nlohmann::json dims;
         //test position
         dims = { {"X", "float"}, {"Y", "float"}, {"Z", "double"} };
         testDimensions(dims, false);

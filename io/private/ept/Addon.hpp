@@ -85,9 +85,9 @@ public:
     point_count_t points(const Key& key) const;
     std::string dataDir() const;
     std::string hierarchyDir() const;
-    static AddonList store(const connector::Connector& connector, const NL::json& spec,
+    static AddonList store(const connector::Connector& connector, const nlohmann::json& spec,
         const PointLayout& layout);
-    static AddonList load(const connector::Connector& connector, const NL::json& spec);
+    static AddonList load(const connector::Connector& connector, const nlohmann::json& spec);
 
 private:
     std::string m_name;

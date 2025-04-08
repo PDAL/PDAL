@@ -191,13 +191,13 @@ Options Options::fromJsonFile(const std::string& filename, const std::string& s)
 {
     Options options;
 
-    NL::json node;
+    nlohmann::json node;
     try
     {
         std::ifstream in(filename);
         in >> node;
     }
-    catch (NL::json::parse_error& err)
+    catch (nlohmann::json::parse_error& err)
     {
         throw pdal_error("Unable to parse options file '" + filename +
             "' as JSON: \n" + err.what());
@@ -206,7 +206,7 @@ Options Options::fromJsonFile(const std::string& filename, const std::string& s)
     for (auto& element : node.items())
     {
         const std::string& name = element.key();
-        const NL::json& n = element.value();
+        const nlohmann::json& n = element.value();
 
         if (n.is_string())
             options.add(name, n.get<std::string>());

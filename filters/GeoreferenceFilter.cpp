@@ -55,7 +55,7 @@ struct GeoreferenceFilter::Config
 public:
     TransformationFilter::Transform m_matrix;
     std::string m_trajectoryFile;
-    NL::json m_trajectoryOptions;
+    nlohmann::json m_trajectoryOptions;
     std::string m_coordinateSystem;
     double m_timeOffset;
     bool m_reverse;

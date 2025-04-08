@@ -69,7 +69,7 @@ public:
 protected:
     std::unique_ptr<arbiter::Arbiter> m_arbiter;
 
-    virtual NL::json initInfo() = 0;
+    virtual nlohmann::json initInfo() = 0;
     virtual std::vector<char> fetchBinary(std::string url, std::string attNum,
             std::string ext) const = 0;
     virtual std::string fetchJson(std::string) = 0;
@@ -80,7 +80,7 @@ private:
     class TileContents;
 
     std::unique_ptr<Args> m_args;
-    NL::json m_info;
+    nlohmann::json m_info;
     int m_nodeCap;
     i3s::Version m_version;
     SpatialReference m_nativeSrs;

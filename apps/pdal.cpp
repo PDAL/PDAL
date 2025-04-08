@@ -161,7 +161,7 @@ void App::outputDrivers()
     }
     else
     {
-        NL::json j;
+        nlohmann::json j;
         StageExtensions& extensions = PluginManager<Stage>::extensions();
         for (auto name : stages)
         {
@@ -224,15 +224,15 @@ void App::outputOptions(std::string const& stageName, std::ostream& strm)
         std::ostringstream ostr;
         args.dump3(ostr);
 
-        NL::json array;
+        nlohmann::json array;
         try
         {
-            array = NL::json::parse(ostr.str());
+            array = nlohmann::json::parse(ostr.str());
         }
-        catch (NL::json::parse_error&)
+        catch (nlohmann::json::parse_error&)
         {}
 
-        NL::json object = { stageName, array };
+        nlohmann::json object = { stageName, array };
         strm  << object;
     }
 }
@@ -256,16 +256,16 @@ void App::outputOptions()
     else
     {
         std::stringstream strm;
-        NL::json options;
+        nlohmann::json options;
         for (auto const& n : nv)
         {
             outputOptions(n, strm);
-            NL::json j;
+            nlohmann::json j;
             try
             {
                 strm >> j;
             }
-            catch (NL::json::parse_error&)
+            catch (nlohmann::json::parse_error&)
             {}
             options.push_back(j);
             strm.str("");

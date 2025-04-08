@@ -68,13 +68,13 @@ TEST(OptionsTest, json)
 {
     // Test that a JSON option will be stringified into the option's underlying
     // value.
-    NL::json inJson = { { "key", 42 } };
+    nlohmann::json inJson = { { "key", 42 } };
     const Option option_j("my_json", inJson);
     EXPECT_TRUE(option_j.getName() == "my_json");
 
     // Don't string-compare, test JSON-equality, since we don't care exactly
     // how it's stringified.
-    NL::json outJson = NL::json::parse(option_j.getValue());
+    nlohmann::json outJson = nlohmann::json::parse(option_j.getValue());
     EXPECT_EQ(inJson, outJson) << inJson << " != " << outJson;
 }
 

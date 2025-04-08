@@ -71,12 +71,12 @@ namespace StacUtils
 
     std::string handleRelativePath(std::string srcPath, std::string linkPath);
     std::time_t getStacTime(std::string in);
-    std::string stacId(const NL::json& stac);
-    std::string stacType(const NL::json& stac);
-    std::string icSelfPath(const NL::json& json);
+    std::string stacId(const nlohmann::json& stac);
+    std::string stacType(const nlohmann::json& stac);
+    std::string icSelfPath(const nlohmann::json& json);
 
-    template <class T = NL::json>
-    inline T jsonValue(const NL::json& json, std::string key = "")
+    template <class T = nlohmann::json>
+    inline T jsonValue(const nlohmann::json& json, std::string key = "")
     {
         try
         {
@@ -84,7 +84,7 @@ namespace StacUtils
                 return json.get<T>();
             return json.at(key).get<T>();
         }
-        catch (NL::detail::exception& e)
+        catch (nlohmann::detail::exception& e)
         {
             std::stringstream msg;
             msg << "Error: " << e.what() << ", for object " << json.dump();
@@ -92,9 +92,9 @@ namespace StacUtils
         }
     }
 
-    template <class U = NL::json>
-    inline U stacValue(const NL::json& stac, std::string key = "",
-        const NL::json& rootJson = {})
+    template <class U = nlohmann::json>
+    inline U stacValue(const nlohmann::json& stac, std::string key = "",
+        const nlohmann::json& rootJson = {})
     {
 
         try
@@ -103,10 +103,10 @@ namespace StacUtils
                 return stac.get<U>();
             return stac.at(key).get<U>();
         }
-        catch (NL::detail::exception& e)
+        catch (nlohmann::detail::exception& e)
         {
             try {
-                NL::json stacCheck = stac;
+                nlohmann::json stacCheck = stac;
                 if (!rootJson.empty())
                     stacCheck = rootJson;
                 std::string type = stacType(stacCheck);

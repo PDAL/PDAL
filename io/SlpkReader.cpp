@@ -59,7 +59,7 @@ SlpkReader::~SlpkReader()
 }
 
 
-NL::json SlpkReader::initInfo()
+nlohmann::json SlpkReader::initInfo()
 {
     // un-archive the slpk archive
     unarchive();
@@ -73,7 +73,7 @@ NL::json SlpkReader::initInfo()
             "': " + m_ctx.what() + ".");
 
     std::string json = fetchJson("3dSceneLayer");
-    NL::json info = i3s::parse(json, "Invalid JSON in '3dSceneLayer.json.gz'.");
+    nlohmann::json info = i3s::parse(json, "Invalid JSON in '3dSceneLayer.json.gz'.");
 
     if (info.empty())
         throwError(std::string("Incorrect Json object"));

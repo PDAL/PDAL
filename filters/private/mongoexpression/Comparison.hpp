@@ -105,7 +105,7 @@ inline bool isMultiple(ComparisonType co)
 class Operand
 {
 public:
-    Operand(const PointLayout& layout, NL::json json)
+    Operand(const PointLayout& layout, nlohmann::json json)
     {
         if (json.is_string())
         {
@@ -155,7 +155,7 @@ public:
     Comparison(Dimension::Id dimId) : m_dimId(dimId) { }
 
     static std::unique_ptr<Comparison> create(const PointLayout& layout,
-            std::string dimName, const NL::json& json);
+            std::string dimName, const nlohmann::json& json);
 
 protected:
     virtual ComparisonType type() const = 0;

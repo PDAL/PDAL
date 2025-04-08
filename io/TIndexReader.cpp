@@ -75,8 +75,8 @@ struct TIndexReader::Args
     std::string m_dialect;
     BOX2D m_bounds;
     std::string m_sql;
-    std::vector<NL::json> m_rawReaderArgs;
-    NL::json m_readerArgs;
+    std::vector<nlohmann::json> m_rawReaderArgs;
+    nlohmann::json m_readerArgs;
 };
 
 TIndexReader::TIndexReader() :
@@ -360,12 +360,12 @@ PointViewSet TIndexReader::run(PointViewPtr view)
     return StageWrapper::run(m_merge, view);
 }
 
-NL::json TIndexReader::handleReaderArgs(NL::json rawReaderArgs)
+nlohmann::json TIndexReader::handleReaderArgs(nlohmann::json rawReaderArgs)
 {
 
     if (rawReaderArgs.is_object())
     {
-        NL::json array_args = NL::json::array();
+        nlohmann::json array_args = nlohmann::json::array();
         array_args.push_back(rawReaderArgs);
         rawReaderArgs = array_args;
     }
@@ -373,8 +373,8 @@ NL::json TIndexReader::handleReaderArgs(NL::json rawReaderArgs)
         if (!opts.is_object())
             throw pdal_error("Reader Args for each reader must be a valid JSON object");
 
-    NL::json readerArgs;
-    for (NL::json& readerPipeline: rawReaderArgs)
+    nlohmann::json readerArgs;
+    for (nlohmann::json& readerPipeline: rawReaderArgs)
     {
 
         if (!readerPipeline.contains("type"))
@@ -401,32 +401,32 @@ NL::json TIndexReader::handleReaderArgs(NL::json rawReaderArgs)
 }
 
 
-Options TIndexReader::setReaderOptions(const NL::json& readerArgs, const std::string& driver) const
+Options TIndexReader::setReaderOptions(const nlohmann::json& readerArgs, const std::string& driver) const
 {
     Options readerOptions;
     if (readerArgs.contains(driver)) {
-        NL::json args = readerArgs.at(driver).get<NL::json>();
+        nlohmann::json args = readerArgs.at(driver).get<nlohmann::json>();
         for (auto& arg : args.items()) {
-            NL::detail::value_t type = readerArgs.at(driver).at(arg.key()).type();
+            nlohmann::detail::value_t type = readerArgs.at(driver).at(arg.key()).type();
             switch(type)
             {
-                case NL::detail::value_t::string:
+                case nlohmann::detail::value_t::string:
                 {
                     std::string val = arg.value().get<std::string>();
                     readerOptions.add(arg.key(), arg.value().get<std::string>());
                     break;
                 }
-                case NL::detail::value_t::number_float:
+                case nlohmann::detail::value_t::number_float:
                 {
                     readerOptions.add(arg.key(), arg.value().get<float>());
                     break;
                 }
-                case NL::detail::value_t::number_integer:
+                case nlohmann::detail::value_t::number_integer:
                 {
                     readerOptions.add(arg.key(), arg.value().get<int>());
                     break;
                 }
-                case NL::detail::value_t::boolean:
+                case nlohmann::detail::value_t::boolean:
                 {
                     readerOptions.add(arg.key(), arg.value().get<bool>());
                     break;

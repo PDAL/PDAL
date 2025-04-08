@@ -233,17 +233,17 @@ OGRGeometry *createFromWkb(const std::string& s, std::string& srs)
 */
 OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs)
 {
-    NL::json root;
+    nlohmann::json root;
 
     std::string json(s);
     json.erase(std::remove(json.begin(), json.end(), '\\'), json.end());
     try
     {
-        root = NL::json::parse(json, /* callback */ nullptr,
+        root = nlohmann::json::parse(json, /* callback */ nullptr,
                                   /* allow exceptions */ true,
                                   /* ignore_comments */ false);
     }
-    catch (NL::json::parse_error& err)
+    catch (nlohmann::json::parse_error& err)
     {
         // Look for a right bracket -- this indicates the start of the
         // actual message from the parse error.
@@ -266,7 +266,7 @@ OGRGeometry *createFromGeoJson(const std::string& s, std::string& srs)
 
     if (root.contains("crs") || root.contains("srs"))
     {
-        NL::json node;
+        nlohmann::json node;
 
         // We have an 'srs' object
         if (root.contains("crs"))
