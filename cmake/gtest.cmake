@@ -1,13 +1,13 @@
-# CMake configuration for PROJ unit tests
+# CMake configuration stolen from PROJ unit tests
 # External GTest provided by (e.g.) libgtest-dev
 
-set(MIN_GTest_VERSION "1.8.1")
+set(MIN_GTest_VERSION "1.15.0")
 
 if(NOT CMAKE_REQUIRED_QUIET)
   # CMake 3.17+ use CHECK_START/CHECK_PASS/CHECK_FAIL
   message(STATUS "Looking for GTest")
 endif()
-find_package(GTest QUIET)
+find_package(GTest QUIET CONFIG)
 set(USE_EXTERNAL_GTEST_DEFAULT OFF)
 if(GTest_FOUND)
   if(NOT CMAKE_REQUIRED_QUIET)

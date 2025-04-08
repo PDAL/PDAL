@@ -48,6 +48,16 @@
 # The "generate_dimension_hpp" ensures that Dimension.hpp is built before
 #  attempting to build anything else in the library.
 #
+
+
+# If we don't have GTest and nlohmann_json, go activate them first
+if(NOT TARGET GTest::gtest)
+    include (${PDAL_CMAKE_DIR}/gtest.cmake)
+endif()
+if(NOT TARGET nlohmann_json::nlohmann_json)
+    include (${PDAL_CMAKE_DIR}/nlohmann.cmake)
+endif()
+
 macro(PDAL_ADD_LIBRARY _name)
     add_library(${_name} ${PDAL_LIB_TYPE} ${ARGN})
     add_dependencies(${_name} generate_dimension_hpp)
