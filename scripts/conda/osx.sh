@@ -46,7 +46,7 @@ cmake   -G "Ninja"  \
         -DCMAKE_CXX_FLAGS="$SANITIZE" \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_HDF=ON \
-        -DBUILD_PLUGIN_ARROW=ON \
+        -DBUILD_PLUGIN_ARROW=OFF \
         -DBUILD_PLUGIN_DRACO=ON \
         -DBUILD_PLUGIN_E57=ON \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \

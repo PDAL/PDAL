@@ -28,9 +28,9 @@ PDAL_ADD_PLUGIN(reader_libname reader nitf
     INCLUDES
         ${GDAL_INCLUDE_DIR}
         ${PDAL_VENDOR_DIR}
-        ${NLOHMANN_INCLUDE_DIR}
     LINK_WITH
         ${NITRO_LIBRARIES}
+        nlohmann_json::nlohmann_json
         ${PDAL_ARBITER_LIB_NAME}
         ${PDAL_LIBRARIES}
 )
@@ -53,6 +53,7 @@ PDAL_ADD_PLUGIN(writer_libname writer nitf
         ${GDAL_LIBRARY}
         ${PDAL_LIBRARIES}
         ${PDAL_ARBITER_LIB_NAME}
+        nlohmann_json::nlohmann_json
     INCLUDES
         ${GDAL_INCLUDE_DIR}
 )
@@ -70,6 +71,7 @@ if (WITH_TESTS AND NOT STANDALONE)
             test/NitfWriterTest.cpp
         LINK_WITH
             ${writer_libname}
+            nlohmann_json::nlohmann_json
     )
 
     PDAL_ADD_TEST(pdal_io_nitf_reader_test
@@ -77,5 +79,6 @@ if (WITH_TESTS AND NOT STANDALONE)
             test/NitfReaderTest.cpp
         LINK_WITH
             ${reader_libname}
+            nlohmann_json::nlohmann_json
     )
 endif()

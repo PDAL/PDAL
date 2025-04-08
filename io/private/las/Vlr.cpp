@@ -34,7 +34,7 @@
 
 #include "Vlr.hpp"
 
-#include <nlohmann/json.hpp>
+#include <pdal/JsonFwd.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/Extractor.hpp>

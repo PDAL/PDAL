@@ -42,7 +42,8 @@
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/Utils.hpp>
 
-#include <nlohmann/json.hpp>
+#include <pdal/JsonFwd.hpp>
+
 
 namespace pdal
 {

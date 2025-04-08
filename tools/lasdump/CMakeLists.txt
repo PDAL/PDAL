@@ -11,11 +11,11 @@ add_executable(lasdump
 
 target_link_libraries(lasdump PRIVATE
     ${PDAL_LAZPERF_LIB_NAME}
+    nlohmann_json::nlohmann_json
 )
 target_include_directories(lasdump PRIVATE
     ${PDAL_VENDOR_DIR}
     ${PDAL_INCLUDE_DIR}
-    ${NLOHMANN_INCLUDE_DIR}
     ${UTFCPP_INCLUDE_DIR}
 )
 

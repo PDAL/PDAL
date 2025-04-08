@@ -25,7 +25,6 @@ add_executable(dimbuilder
 )
 target_include_directories(dimbuilder PRIVATE
     ${PDAL_INCLUDE_DIR}
-    ${NLOHMANN_INCLUDE_DIR}
     ${UTFCPP_INCLUDE_DIR}
 )
 PDAL_TARGET_COMPILE_SETTINGS(dimbuilder)
@@ -33,6 +32,7 @@ target_link_libraries(dimbuilder
     PRIVATE
         ${EXECINFO_LIBRARY}
         ${CMAKE_DL_LIBS}
+        nlohmann_json::nlohmann_json
 )
 
 

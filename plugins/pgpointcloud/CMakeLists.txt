@@ -26,6 +26,7 @@ PDAL_ADD_PLUGIN(reader_libname reader pgpointcloud
         PostgreSQL::PostgreSQL
         ${LIBXML2_LIBRARIES}
         ${PDAL_LIBRARIES}
+        nlohmann_json::nlohmann_json
     INCLUDES
         ${LIBXML2_INCLUDE_DIR}
 )
@@ -40,6 +41,7 @@ PDAL_ADD_PLUGIN(writer_libname writer pgpointcloud
         PostgreSQL::PostgreSQL
         ${LIBXML2_LIBRARIES}
         ${PDAL_LIBRARIES}
+        nlohmann_json::nlohmann_json
     INCLUDES
         ${LIBXML2_INCLUDE_DIR}
 )
@@ -70,6 +72,7 @@ if (BUILD_PGPOINTCLOUD_TESTS)
             ${reader_libname}
             ${writer_libname}
             PostgreSQL::PostgreSQL
+            nlohmann_json::nlohmann_json
         INCLUDES
             ${CMAKE_CURRENT_BINARY_DIR}/include
     )

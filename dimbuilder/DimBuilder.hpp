@@ -38,6 +38,7 @@
 
 #include <pdal/DimUtil.hpp>
 
+namespace NL = nlohmann;
 namespace pdal
 {
 

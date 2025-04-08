@@ -26,5 +26,5 @@ target_include_directories(${JSON_SCHEMA_LIB_NAME}
 #     SOVERSION "${PDAL_API_VERSION}"
 #     CLEAN_DIRECT_OUTPUT 1)
 
-target_link_libraries(${JSON_SCHEMA_LIB_NAME})
+target_link_libraries(${JSON_SCHEMA_LIB_NAME} PRIVATE  nlohmann_json::nlohmann_json)
 set_property(GLOBAL PROPERTY _PDALJSON_SCHEMA_INCLUDED TRUE)

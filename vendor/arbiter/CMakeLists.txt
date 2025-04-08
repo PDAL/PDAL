@@ -8,10 +8,6 @@ if (EXISTS)
 endif()
 
 PDAL_ADD_FREE_LIBRARY(${PDAL_ARBITER_LIB_NAME} STATIC arbiter.cpp)
-target_include_directories(${PDAL_ARBITER_LIB_NAME}
-    PRIVATE
-        ${NLOHMANN_INCLUDE_DIR}
-)
 
 if (NOT TARGET CURL::libcurl)
     add_library(CURL::libcurl UNKNOWN IMPORTED)
@@ -23,6 +19,7 @@ endif ()
 target_link_libraries(${PDAL_ARBITER_LIB_NAME}
     PRIVATE
         CURL::libcurl
+        nlohmann_json::nlohmann_json
 )
 target_compile_definitions(${PDAL_ARBITER_LIB_NAME}
     PRIVATE

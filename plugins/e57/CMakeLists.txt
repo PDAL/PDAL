@@ -15,10 +15,10 @@ PDAL_ADD_PLUGIN(e57plugin_reader reader e57
         io/Scan.cpp
         io/Utils.cpp
     INCLUDES
-        ${NLOHMANN_INCLUDE_DIR}
         ${PDAL_VENDOR_DIR}
     LINK_WITH
         E57Format
+        nlohmann_json::nlohmann_json
         ${PDAL_LIBRARIES}
     INCLUDES
         libE57Format/include
@@ -37,6 +37,7 @@ PDAL_ADD_PLUGIN(e57plugin_writer writer e57
     LINK_WITH
         E57Format
         ${PDAL_LIBRARIES}
+        nlohmann_json::nlohmann_json
     INCLUDES
         libE57Format/include
 )
@@ -50,6 +51,7 @@ if (WITH_TESTS)
         LINK_WITH
             ${e57plugin_reader}
             E57Format
+            nlohmann_json::nlohmann_json
         INCLUDES
             libE57Format/include
     )
@@ -62,6 +64,7 @@ if (WITH_TESTS)
             ${e57plugin_reader}
             ${e57plugin_writer}
             E57Format
+            nlohmann_json::nlohmann_json
         INCLUDES
             libE57Format/include
     )

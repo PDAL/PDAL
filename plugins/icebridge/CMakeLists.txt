@@ -27,6 +27,7 @@ else()
         LINK_WITH
             ${HDF5_LIBRARIES}
             ${PDAL_LIBRARIES}
+            nlohmann_json::nlohmann_json
         INCLUDES
             ${ROOT_DIR}
             ${LIBXML2_INCLUDE_DIR}
@@ -35,6 +36,6 @@ else()
     if (WITH_TESTS)
         PDAL_ADD_TEST(pdal_io_icebridge_reader_test
             FILES test/IcebridgeReaderTest.cpp
-            LINK_WITH ${libname})
+            LINK_WITH ${libname} nlohmann_json::nlohmann_json)
     endif()
 endif()

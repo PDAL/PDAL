@@ -21,10 +21,10 @@ target_link_libraries(${PDAL_APP}
     PRIVATE
         ${PDAL_LIB_NAME}
         GDAL::GDAL
+        nlohmann_json::nlohmann_json
         ${WINSOCK_LIBRARY}
 )
 target_include_directories(${PDAL_APP} PRIVATE
-    ${NLOHMANN_INCLUDE_DIR}
     ${PDAL_INCLUDE_DIR}
     ${PROJECT_BINARY_DIR}/include)
 

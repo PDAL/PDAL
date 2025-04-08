@@ -28,15 +28,16 @@ PDAL_ADD_PLUGIN(libname reader hdf
     LINK_WITH
         ${HDF5_LIBRARIES}
         ${PDAL_LIBRARIES}
+        nlohmann_json::nlohmann_json
     INCLUDES
         ${ROOT_DIR}
-        ${NLOHMANN_INCLUDE_DIR}
 )
 
 if (WITH_TESTS AND NOT STANDALONE)
     PDAL_ADD_TEST(pdal_io_hdf_reader_test
         FILES test/HdfReadertest.cpp
-        LINK_WITH ${libname}
-        INCLUDES
-            ${NLOHMANN_INCLUDE_DIR})
+        LINK_WITH
+            ${libname}
+            nlohmann_json::nlohmann_json
+        )
 endif()

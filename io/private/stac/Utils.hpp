@@ -38,6 +38,7 @@
 #include <arbiter/arbiter.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/pdal_types.hpp>
+#include <pdal/JsonFwd.hpp>
 
 namespace pdal
 {

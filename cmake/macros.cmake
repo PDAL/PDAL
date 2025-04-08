@@ -158,6 +158,8 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
             ${PDAL_LIB_NAME}
             ${PDAL_ADD_PLUGIN_LINK_WITH}
             ${WINSOCK_LIBRARY}
+        PUBLIC
+            nlohmann_json::nlohmann_json
     )
 
     set_property(TARGET ${${_name}} PROPERTY FOLDER "Plugins/${_type}")
@@ -216,6 +218,8 @@ macro(PDAL_ADD_TEST _name)
         PRIVATE
             ${PDAL_LIB_NAME}
             GTest::gtest
+            GTest::gtest_main
+            nlohmann_json::nlohmann_json
             ${PDAL_ADD_TEST_LINK_WITH}
             ${WINSOCK_LIBRARY}
     )

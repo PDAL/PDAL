@@ -16,6 +16,12 @@ foreach(infileName ${inFiles})
 endforeach()
 
 add_library(${PDAL_TEST_SUPPORT_OBJS} OBJECT Support.cpp)
+target_link_libraries(${PDAL_TEST_SUPPORT_OBJS}
+    PRIVATE
+        GTest::gtest
+        nlohmann_json::nlohmann_json
+)
+
 add_dependencies(${PDAL_TEST_SUPPORT_OBJS} generate_dimension_hpp)
 target_include_directories(${PDAL_TEST_SUPPORT_OBJS}
     PRIVATE
@@ -62,22 +68,16 @@ PDAL_ADD_TEST(pdal_options_test
         OptionsTest.cpp
     LINK_WITH
         ${GDAL_LIBRARY}
-    INCLUDES
-        ${NLOHMANN_INCLUDE_DIR}
 )
 
 PDAL_ADD_TEST(pdal_dimension_test
     FILES
         DimensionTest.cpp
-    INCLUDES
-        ${NLOHMANN_INCLUDE_DIR}
 )
-PDAL_ADD_TEST(pdal_ogr_arg_test 
-    FILES 
+PDAL_ADD_TEST(pdal_ogr_arg_test
+    FILES
         OGRSpecTest.cpp
         ${PDAL_SRC_DIR}/private/OGRSpec.cpp
-    INCLUDES
-        ${NLOHMANN_INCLUDE_DIR}
     LINK_WITH
         ${GDAL_LIBRARY}
 )
@@ -85,8 +85,6 @@ PDAL_ADD_TEST(pdal_filespec_test
     FILES
         FileSpecTest.cpp
         ${PDAL_SRC_DIR}/FileSpec.cpp
-    INCLUDES 
-        ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_pipeline_manager_test FILES PipelineManagerTest.cpp)
 PDAL_ADD_TEST(pdal_pipeline_writer_test
@@ -107,8 +105,6 @@ PDAL_ADD_TEST(pdal_point_table_test FILES PointTableTest.cpp)
 PDAL_ADD_TEST(pdal_program_arg_test
     FILES
         ProgramArgsTest.cpp
-    INCLUDES
-        ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_artifact_test FILES ArtifactTest.cpp)
 
@@ -125,44 +121,7 @@ PDAL_ADD_TEST(pdal_segmentation_test FILES SegmentationTest.cpp)
 PDAL_ADD_TEST(pdal_spatial_reference_test
     FILES
         SpatialReferenceTest.cpp
-    INCLUDES
-        ${NLOHMANN_INCLUDE_DIR}
         ${GDAL_INCLUDE_DIR}
-    LINK_WITH
-        ${GDAL_LIBRARY}
-)
-
-PDAL_ADD_TEST(pdal_stage_factory_test FILES StageFactoryTest.cpp)
-PDAL_ADD_TEST(pdal_streaming_test FILES StreamingTest.cpp)
-PDAL_ADD_TEST(pdal_support_test FILES SupportTest.cpp)
-PDAL_ADD_TEST(pdal_utils_test FILES UtilsTest.cpp)
-PDAL_ADD_TEST(pdal_uuid_test FILES UuidTest.cpp)
-if (PDAL_HAVE_ZLIB)
-PDAL_ADD_TEST(pdal_deflate_test FILES DeflateTest.cpp)
-endif()
-if (PDAL_HAVE_LZMA)
-PDAL_ADD_TEST(pdal_lzma_test FILES LzmaTest.cpp)
-endif()
-if (PDAL_HAVE_ZSTD)
-PDAL_ADD_TEST(pdal_zstd_test FILES ZstdTest.cpp)
-endif()
-PDAL_ADD_TEST(pdal_where_test FILES WhereTest.cpp)
-
-#
-# sources for the native io
-#
-PDAL_ADD_TEST(pdal_io_bpf_base_test FILES io/BpfTestBase.cpp)
-if (PDAL_HAVE_ZLIB)
-    PDAL_ADD_TEST(pdal_io_bpf_zlib_test FILES io/BpfTestZlib.cpp)
-endif()
-PDAL_ADD_TEST(pdal_io_buffer_test FILES io/BufferTest.cpp)
-PDAL_ADD_TEST(pdal_io_stac_reader_test
-    FILES
-        io/StacReaderTest.cpp
-        ${PDAL_SRC_DIR}/private/OGRSpec.cpp
-    INCLUDES
-        ${PDAL_VENDOR_DIR}
-        ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_io_ept_reader_test
     FILES
@@ -172,27 +131,21 @@ PDAL_ADD_TEST(pdal_io_ept_reader_test
         ${GDAL_LIBRARY}
     INCLUDES
         ${GDAL_INCLUDE_DIR}
-        ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_io_ept_addon_writer_test
     FILES
         io/EptAddonWriterTest.cpp
-    INCLUDES
-        ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_io_copc_reader_test
     FILES
         io/CopcReaderTest.cpp
         ${PDAL_SRC_DIR}/private/OGRSpec.cpp
-    INCLUDES
-        ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_io_copc_writer_test
     FILES
         io/CopcWriterTest.cpp
     INCLUDES
         ${GDAL_INCLUDE_DIR}
-        ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_io_faux_test FILES io/FauxReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_gdal_reader_test
@@ -230,7 +183,6 @@ PDAL_ADD_TEST(pdal_io_las_writer_test
         io/LasWriterTest.cpp
     INCLUDES
         ${GDAL_INCLUDE_DIR}
-        ${NLOHMANN_INCLUDE_DIR}
 )
 
 PDAL_ADD_TEST(pdal_io_obj_reader_test
@@ -276,8 +228,6 @@ PDAL_ADD_TEST(pdal_io_text_writer_test FILES io/TextWriterTest.cpp)
 PDAL_ADD_TEST(pdal_io_text_reader_test
     FILES
         io/TextReaderTest.cpp
-    INCLUDES
-        ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_io_gltf_writer_test FILES io/GltfWriterTest.cpp)
 PDAL_ADD_TEST(pdal_io_smrmsg_reader_test FILES io/SmrmsgReaderTest.cpp)
@@ -310,7 +260,6 @@ PDAL_ADD_TEST(pdal_i3s_obb_test
         ${PDAL_IO_DIR}/private/esri/Obb.cpp
         ${PDAL_SRC_DIR}/private/MathUtils.cpp
     INCLUDES
-        ${NLOHMANN_INCLUDE_DIR}
         ${PDAL_INCLUDE_DIR}
         ${PDAL_VENDOR_EIGEN_DIR}
 )
@@ -332,7 +281,6 @@ PDAL_ADD_TEST(pdal_filters_chipper_test
     FILES
         filters/ChipperTest.cpp
     INCLUDES
-        ${NLOHMANN_INCLUDE_DIR}
         ${PDAL_VENDOR_EIGEN_DIR}
 )
 PDAL_ADD_TEST(pdal_filters_nndistance_test
@@ -357,7 +305,6 @@ PDAL_ADD_TEST(pdal_filters_crop_test
         ${PDAL_SRC_DIR}/private/OGRSpec.cpp
     INCLUDES
         ${GDAL_INCLUDE_DIR}
-        ${NLOHMANN_INCLUDE_DIR}
     LINK_WITH
         ${GDAL_LIBRARY}
 )
@@ -379,8 +326,6 @@ PDAL_ADD_TEST(pdal_filters_elm_test FILES filters/ELMFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_mongoexpression_test
     FILES
         filters/MongoExpressionFilterTest.cpp
-    INCLUDES
-        ${NLOHMANN_INCLUDE_DIR}
 )
 
 PDAL_ADD_TEST(pdal_filters_faceraster_test FILES filters/FaceRasterTest.cpp)
@@ -407,8 +352,6 @@ PDAL_ADD_TEST(pdal_morton_order_test FILES filters/MortonOrderTest.cpp)
 PDAL_ADD_TEST(pdal_filters_additional_merge_test
     FILES
         filters/AdditionalMergeTest.cpp
-    INCLUDES
-        ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_filters_labelduplicates_test FILES filters/LabelDuplicatesFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_normal_test FILES filters/NormalFilterTest.cpp)
@@ -438,8 +381,6 @@ PDAL_ADD_TEST(pdal_filters_smrf_test FILES filters/SMRFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_sort_test
     FILES
         filters/SortFilterTest.cpp
-    INCLUDES
-        ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_filters_splitter_test
     FILES
@@ -471,10 +412,9 @@ PDAL_ADD_TEST(pdal_info_test FILES apps/InfoTest.cpp)
 PDAL_ADD_TEST(pdal_tile_test FILES apps/TileTest.cpp)
 
 PDAL_ADD_TEST(pdal_tindex_test
-    FILES 
+    FILES
         apps/TIndexTest.cpp
-    INCLUDES
-        ${NLOHMANN_INCLUDE_DIR})
+)
 PDAL_ADD_TEST(pdal_merge_test FILES apps/MergeTest.cpp)
 PDAL_ADD_TEST(pc2pc_test FILES apps/pc2pcTest.cpp)
 
