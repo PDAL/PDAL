@@ -223,14 +223,17 @@ bool createDirectory(const std::string& dirname)
     std::string pth = CPLCleanTrailingSlash(dirname.c_str());
     if (VSIMkdir(pth.c_str(), 0755) != 0)
     {
-        std::stringstream ss;
-        ss << "Unable to create directory " << dirname << std::endl << VSIStrerror(errno);
-        throw std::runtime_error(ss.str());
+        if (errno == EEXIST)
+            return false;
+        else
+        {
+            std::stringstream ss;
+            ss << "Unable to create directory " << dirname << std::endl << VSIStrerror(errno);
+            throw std::runtime_error(ss.str());
+        }
     }
     else
         return true;
-
-    return false;
 }
 
 
@@ -239,14 +242,17 @@ bool createDirectories(const std::string& dirname)
     std::string pth = CPLCleanTrailingSlash(dirname.c_str());
     if (VSIMkdirRecursive(pth.c_str(), 0755) != 0)
     {
-        std::stringstream ss;
-        ss << "Unable to create directories " << dirname << std::endl << VSIStrerror(errno);
-        throw std::runtime_error(ss.str());
+        if (errno == EEXIST)
+            return false;
+        else
+        {
+            std::stringstream ss;
+            ss << "Unable to create directories " << dirname << std::endl << VSIStrerror(errno);
+            throw std::runtime_error(ss.str());
+        }
     }
     else
         return true;
-    
-    return false;
 }
 
 
