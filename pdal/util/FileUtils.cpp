@@ -221,14 +221,32 @@ bool directoryExists(const std::string& dirname)
 bool createDirectory(const std::string& dirname)
 {
     std::string pth = CPLCleanTrailingSlash(dirname.c_str());
-    return (VSIMkdir(pth.c_str(), 0755) == 0) ? true : false;
+    if (VSIMkdir(pth.c_str(), 0755) != 0)
+    {
+        std::stringstream ss;
+        ss << "Unable to create directory " << dirname << std::endl << VSIStrerror(errno);
+        throw std::runtime_error(ss.str());
+    }
+    else
+        return true;
+
+    return false;
 }
 
 
 bool createDirectories(const std::string& dirname)
 {
     std::string pth = CPLCleanTrailingSlash(dirname.c_str());
-    return (VSIMkdirRecursive(pth.c_str(), 0755) == 0) ? true : false;
+    if (VSIMkdirRecursive(pth.c_str(), 0755) != 0)
+    {
+        std::stringstream ss;
+        ss << "Unable to create directories " << dirname << std::endl << VSIStrerror(errno);
+        throw std::runtime_error(ss.str());
+    }
+    else
+        return true;
+    
+    return false;
 }
 
 
@@ -256,14 +274,22 @@ std::vector<std::string> directoryList(const std::string& dir)
 void closeFile(std::ostream *out)
 {
     if (out)
+    {
+        std::ofstream *ofs = dynamic_cast<std::ofstream *>(out);
+        ofs->close();
         delete out;
+    }
 }
 
 
 void closeFile(std::istream* in)
 {
     if (in)
+    {
+        std::ifstream *ifs = dynamic_cast<std::ifstream *>(in);
+        ifs->close();
         delete in;
+    }
 }
 
 
