@@ -108,12 +108,12 @@ VSIStreamBuffer::VSIStreamBuffer(std::string filename, std::ios_base::openmode m
         nBufferSize(bufferSize != 0 ? bufferSize : defaultBufferSize),
         nBufferStart(0)
 {
-    std::stringstream ss;
+    std::string fm;
     buffer.resize(nBufferSize);
 
     if ((mode & std::ios_base::in) && (mode & std::ios_base::out))
     {
-        ss << "r+";
+        fm = "r+";
         // FileUtils::OpenExisting returns an ostream
         setp(buffer.data(), buffer.data() + nBufferSize);
     }
@@ -121,22 +121,22 @@ VSIStreamBuffer::VSIStreamBuffer(std::string filename, std::ios_base::openmode m
     {
         if (mode & std::ios_base::in)
         {
-            ss << "r";
+            fm = "r";
             setg(nullptr, nullptr, nullptr);
         }
 
         if (mode & std::ios_base::out)
         {
-            ss << "w";
+            fm = "w";
             setp(buffer.data(), buffer.data() + nBufferSize);
         }
     }
 
     if (mode & std::ios::binary)
-        ss << "b";
+    fm += "b";
 
     fp.reset(reinterpret_cast<VSIVirtualHandle*>(
-        VSIFOpenL(filename.c_str(), ss.str().c_str())));
+        VSIFOpenL(filename.c_str(), fm.c_str())));
 
     // can either set a bad bit in underflow/overflow or throw a PDAL error here
     if (fp == nullptr)
