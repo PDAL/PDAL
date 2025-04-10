@@ -10,3 +10,5 @@ dependencies:
   - sphinxcontrib-bibtex
   - sphinx-notfound-page
   - sphinx-inline-tabs
+  - cmake
+
