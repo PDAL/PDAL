@@ -41,9 +41,11 @@
 #pragma once
 
 // Don't complain about DLL interface. If you want to use this out of the MS DLL, make sure
-// everthing is built consistently.
+// everything is built consistently.
+#ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable: 4251)
+#endif
 
 namespace pdal
 {
@@ -156,7 +158,9 @@ struct Header
         { return pointFormat() == 8; }
 };
 
+#ifdef _MSC_VER
 #pragma warning (pop)
+#endif
 
 } // namespace las
 } // namespace pdal

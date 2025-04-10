@@ -34,14 +34,20 @@
 
 #include <mutex>
 
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4251)
+#endif
+
 #include <gdal.h>
 #include <gdal_priv.h>
 #include <ogr_api.h>
 #include <ogr_geometry.h>
 #include <ogrsf_frmts.h>
+
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif
 
 #include <nlohmann/json.hpp>
 #include <pdal/Polygon.hpp>

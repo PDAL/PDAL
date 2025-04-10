@@ -46,8 +46,10 @@ namespace pdal
 /**
   Allow a data buffer to be used at a std::streambuf.
 */
+#ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable: 4251)
+#endif
 class PDAL_EXPORT Charbuf : public std::streambuf
 {
 public:
@@ -121,6 +123,8 @@ private:
     */
     char *m_buf;
 };
+#ifdef _MSC_VER
 #pragma warning (pop)
+#endif
 
 } //namespace pdal
