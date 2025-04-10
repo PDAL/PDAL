@@ -32,11 +32,17 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4251)
+#endif
+
 #include <gdal.h>
 #include <gdal_priv.h>
+
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif
 
 #include <pdal/util/Algorithm.hpp>
 

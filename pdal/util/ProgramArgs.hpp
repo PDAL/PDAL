@@ -31,8 +31,10 @@
 
 namespace pdal
 {
+#ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable: 4251)
+#endif
 class PDAL_EXPORT arg_error
 {
 public:
@@ -53,7 +55,9 @@ public:
     {}
 };
 
+#ifdef _MSC_VER
 #pragma warning (pop)
+#endif
 
 namespace
 {

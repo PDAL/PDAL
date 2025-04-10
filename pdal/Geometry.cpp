@@ -32,11 +32,17 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4251)
+#endif
+
 #include <ogr_api.h>
 #include <ogr_geometry.h>
+
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif
 
 #include <pdal/Geometry.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
