@@ -37,7 +37,7 @@ if(USE_EXTERNAL_GTEST)
     # exit the remainder of this file
     return()
   endif()
-  message(STATUS "Using external GTest")
+  message(STATUS "Using external GTest from build environment")
 
   # CMake < 3.20.0 uses GTest::GTest
   # CMake >= 3.20 uses GTest::gtest, and deprecates GTest::GTest
