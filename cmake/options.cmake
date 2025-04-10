@@ -101,7 +101,7 @@ option(WITH_TESTS
 add_feature_info("Unit tests" WITH_TESTS "PDAL unit tests")
 
 option(WITH_DOCS
-    "Choose if PDAL builds documentation. BUILD_API_DOCS controls doxygen generation" FALSE)
+    "Choose if PDAL creates targets for building documentation. BUILD_API_DOCS controls doxygen generation" FALSE)
 
 # Enable CTest and submissions to PDAL dashboard at CDash
 # http://my.cdash.org/index.php?project=PDAL
