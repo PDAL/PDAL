@@ -17,6 +17,12 @@ endforeach()
 
 add_library(${PDAL_TEST_SUPPORT_OBJS} OBJECT Support.cpp)
 add_dependencies(${PDAL_TEST_SUPPORT_OBJS} generate_dimension_hpp)
+target_link_libraries(${PDAL_TEST_SUPPORT_OBJS}
+    PRIVATE
+        ${PDAL_LIB_NAME}
+        GTest::gtest
+        GTest::gtest_main
+)
 target_include_directories(${PDAL_TEST_SUPPORT_OBJS}
     PRIVATE
         ${ROOT_DIR}
@@ -72,8 +78,8 @@ PDAL_ADD_TEST(pdal_dimension_test
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
-PDAL_ADD_TEST(pdal_ogr_arg_test 
-    FILES 
+PDAL_ADD_TEST(pdal_ogr_arg_test
+    FILES
         OGRSpecTest.cpp
         ${PDAL_SRC_DIR}/private/OGRSpec.cpp
     INCLUDES
@@ -85,7 +91,7 @@ PDAL_ADD_TEST(pdal_filespec_test
     FILES
         FileSpecTest.cpp
         ${PDAL_SRC_DIR}/FileSpec.cpp
-    INCLUDES 
+    INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_pipeline_manager_test FILES PipelineManagerTest.cpp)
@@ -471,7 +477,7 @@ PDAL_ADD_TEST(pdal_info_test FILES apps/InfoTest.cpp)
 PDAL_ADD_TEST(pdal_tile_test FILES apps/TileTest.cpp)
 
 PDAL_ADD_TEST(pdal_tindex_test
-    FILES 
+    FILES
         apps/TIndexTest.cpp
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR})
