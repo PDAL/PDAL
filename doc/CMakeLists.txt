@@ -26,7 +26,7 @@ if (NOT JUPYTERBOOK)
     message(FATAL_ERROR "Building documentation requires jupyter-book")
 endif()
 
-#### From GDAL. I feel like this probably doesn't need to be here.
+# From GDAL. I feel like this probably doesn't need to be here.
 if ((NOT "${CMAKE_BINARY_DIR}" STREQUAL "${ROOT_DIR}")
     AND DOXYGEN_FOUND)
     set(BUILD_API_DOCS_DEFAULT ON)
@@ -41,9 +41,8 @@ option(BUILD_API_DOCS "Build API documentation with Doxygen" ${BUILD_DOCS_DEFAUL
 ### Sphinx & Jupyter Book setup
 ###
 
-
 # Builder options -- can set "--builder <builder>" for sphinx or jupyter-book targets
-set(BUILDER "" CACHE STRING "Sphinx builder to use")
+set(BUILDER "" CACHE STRING "Sphinx builder to use, e.g. html (--builder=<builder>)")
 
 # Output directory - if we're building standalone, this already got created.
 # If we're building from pdal source, specify our own.
@@ -103,77 +102,73 @@ if (BUILD_API_DOCS)
         DEPENDS dims ${CMAKE_CURRENT_BINARY_DIR}/doxygen.stamp
         COMMENT "Built Doxygen")
 
-    ###
-    ### Jupyterbook config
-    ###
-
-    # Added this as a way to avoid appending to conf.py with sed or similar commands.
-    # writing an entire new cmake file just to add one line is silly, but it works.
-
-    add_custom_command(
-        WORKING_DIRECTORY ${ROOT_DIR}
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/jupyterbook.stamp
-        DEPENDS doxygen
-        COMMAND ${JUPYTERBOOK} config sphinx doc/
-        COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/jupyterbook.stamp
-    )
-
-    add_custom_target(jupyterbook_config
-        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/jupyterbook.stamp
-        COMMENT "Configured jupyter-book")
-        
-    set(JB_CONF_PATH "${PDAL_DOC_DIR}/conf.py")
-
-    # Right now you need to double-escape the quotes and newlines for the strings you're adding.
-    # Maybe there's a better way to do this?
-
-    set(JB_CONF_PREPEND "import os, sys; sys.path.append(os.path.abspath(\\\"./_ext\\\"))\\n" 
-        CACHE STRING "Lines to prepend to conf.py.")
-    set(JB_CONF_APPEND "" 
-        CACHE STRING "Lines to append to conf.py.")
-
-    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/prepend.cmake 
-        "file(READ \"${JB_CONF_PATH}\" JB_CONF_CONTENTS)\n"
-        "string(PREPEND JB_CONF_CONTENTS \"${JB_CONF_PREPEND}\")\n"
-        "string(APPEND JB_CONF_CONTENTS \"${JB_CONF_APPEND}\")\n"
-        "file(WRITE \"${JB_CONF_PATH}\" \"$\{JB_CONF_CONTENTS\}\")\n"
-        )
-
-    add_custom_target(modify_jb_conf
-        DEPENDS jupyterbook_config
-        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/prepend.cmake)
-
-    ###
-    ### Sphinx build setup
-    ###
-    
-    # Build options to pass to Sphinx
-    set(SPHINX_BUILD_OPTS "-E -W --keep-going" CACHE STRING "Additional options to pass to Sphinx")
-    #set(PAPER "latex paper size to forward to sphinx (a4, letter)" "")
-    # Sphinx options
-    set(ALL_SPHINX_OPTS "-d ${SPHINX_BUILDDIR}/doctrees ${SPHINX_BUILD_OPTS}")
-    
-    ###
-    ### Final targets for api docs
-    ###
-
-    add_custom_target(generate_docs
-        DEPENDS jupyterbook_config modify_jb_conf
-        COMMENT "Configured Doxygen and jupyter-book")
-
-    # From the docs makefile - pretty much does the same thing as the jupyter-book
-    # target. Probably not needed here, and doesn't require API docs
-    add_custom_target(sphinx-build
-        WORKING_DIRECTORY ${PDAL_DOC_DIR}
-        DEPENDS generate_docs
-        COMMAND ${SPHINX_BUILD} ${BUILDER} ${ALL_SPHINX_OPTS} ${PDAL_DOC_DIR} ${SPHINX_BUILDDIR}/html)
-
 endif()
 
 ###
-### Our final jupyter-book target
+### Jupyterbook config
 ###
+
+add_custom_command(
+    WORKING_DIRECTORY ${ROOT_DIR}
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/jupyterbook.stamp
+    COMMAND ${JUPYTERBOOK} config sphinx doc/
+    COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/jupyterbook.stamp
+)
+
+add_custom_target(jupyterbook_config
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/jupyterbook.stamp
+    COMMENT "Configured jupyter-book")
+    
+set(JB_CONF_PATH "${PDAL_DOC_DIR}/conf.py")
+
+# Added this as a way to avoid appending to conf.py with sed or similar commands.
+# writing an entire new cmake file just to add one line is silly, but it works.
+
+# Right now you need to double-escape the quotes and newlines for the strings you're adding.
+# Maybe there's a better way to do this?
+
+set(JB_CONF_PREPEND "import os, sys; sys.path.append(os.path.abspath(\\\"./_ext\\\"))\\n" 
+    CACHE STRING "Lines to prepend to conf.py.")
+set(JB_CONF_APPEND "" 
+    CACHE STRING "Lines to append to conf.py.")
+
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/prepend.cmake 
+    "file(READ \"${JB_CONF_PATH}\" JB_CONF_CONTENTS)\n"
+    "string(PREPEND JB_CONF_CONTENTS \"${JB_CONF_PREPEND}\")\n"
+    "string(APPEND JB_CONF_CONTENTS \"${JB_CONF_APPEND}\")\n"
+    "file(WRITE \"${JB_CONF_PATH}\" \"$\{JB_CONF_CONTENTS\}\")\n"
+    )
+
+add_custom_target(modify_jb_conf
+    DEPENDS jupyterbook_config
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/prepend.cmake)
+
+###
+### Sphinx build setup
+###
+
+# Build options to pass to Sphinx
+set(SPHINX_BUILD_OPTS "-E -W --keep-going" CACHE STRING "Additional options to pass to Sphinx")
+#set(PAPER "latex paper size to forward to sphinx (a4, letter)" "")
+# Sphinx options
+set(ALL_SPHINX_OPTS "-d ${SPHINX_BUILDDIR}/doctrees ${SPHINX_BUILD_OPTS}")
+
+###
+### Final targets
+###
+
+add_custom_target(generate_docs
+    DEPENDS jupyterbook_config modify_jb_conf
+    COMMENT "Configured Doxygen and jupyter-book")
+
+# From the docs makefile - pretty much does the same thing as the jupyter-book
+# target. Probably not needed here
+add_custom_target(sphinx-build
+    WORKING_DIRECTORY ${PDAL_DOC_DIR}
+    DEPENDS generate_docs
+    COMMAND ${SPHINX_BUILD} ${BUILDER} ${ALL_SPHINX_OPTS} ${PDAL_DOC_DIR} ${SPHINX_BUILDDIR}/html)
 
 add_custom_target(jupyter-book
     WORKING_DIRECTORY ${ROOT_DIR}
-    COMMAND ${JUPYTERBOOK} build ${BUILDER} doc/)
+    COMMAND ${JUPYTERBOOK} build ${BUILDER} doc/
+    COMMENT "Built Jupyter Book")

@@ -14,6 +14,8 @@ cmake \
 	 -DBUILD_API_DOCS=ON \
 	 -DJB_CONF_APPEND="html_baseurl = os.environ.get(\\\"READTHEDOCS_CANONICAL_URL\\\", \\\"\\\")" \
 	 ..
-# Target makes dimension-table.csv, runs doxygen, runs jupyter-book config
+# Target makes dimension-table.csv, runs doxygen
+cmake --build . --target doxygen
+# Target runs jupyter-book config
 cmake --build . --target generate_docs
 
