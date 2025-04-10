@@ -5,7 +5,7 @@ if(NOT ROOT_DIR)
     # Could also do ${CMAKE_CURRENT_LIST_DIR}/..
     set(ROOT_DIR "${PROJECT_SOURCE_DIR}/..")
     # If we're building from the doc directory, set the sphinx build dir as our current build dir.
-    set(BUILDDIR ${CMAKE_CURRENT_BINARY_DIR})
+    set(SPHINX_BUILDDIR ${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
 set(PDAL_DOC_DIR ${ROOT_DIR}/doc)
@@ -41,18 +41,19 @@ option(BUILD_API_DOCS "Build API documentation with Doxygen" ${BUILD_DOCS_DEFAUL
 ### Sphinx & Jupyter Book setup
 ###
 
-# Output directory - if we're building standalone, this already got created.
-# If we're building from pdal source, specify our own.
-if (NOT BUILDDIR)
-    set(BUILDDIR ${PDAL_DOC_DIR}/_build)
-    file(MAKE_DIRECTORY ${BUILDDIR})
-endif()
 
 # Builder options -- can set "--builder <builder>" for sphinx or jupyter-book targets
 set(BUILDER "" CACHE STRING "Sphinx builder to use")
 
+# Output directory - if we're building standalone, this already got created.
+# If we're building from pdal source, specify our own.
+if (NOT SPHINX_BUILDDIR)
+    set(SPHINX_BUILDDIR ${PDAL_DOC_DIR}/_build)
+    file(MAKE_DIRECTORY ${SPHINX_BUILDDIR})
+endif()
+
 #!! Unused for now
-set(JB_BUILD_OPTS "--output-dir ${BUILDDIR}")
+set(JB_BUILD_OPTS "--output-dir ${SPHINX_BUILDDIR}")
 
 if (BUILD_API_DOCS)
 
@@ -150,14 +151,14 @@ if (BUILD_API_DOCS)
     set(SPHINX_BUILD_OPTS "-E -W --keep-going" CACHE STRING "Additional options to pass to Sphinx")
     #set(PAPER "latex paper size to forward to sphinx (a4, letter)" "")
     # Sphinx options
-    set(ALL_SPHINX_OPTS "-d ${BUILDDIR}/doctrees ${SPHINX_BUILD_OPTS}")
+    set(ALL_SPHINX_OPTS "-d ${SPHINX_BUILDDIR}/doctrees ${SPHINX_BUILD_OPTS}")
     
     ###
     ### Final targets for api docs
     ###
 
     add_custom_target(generate_docs
-        DEPENDS doxygen jupyterbook_config modify_jb_conf
+        DEPENDS jupyterbook_config modify_jb_conf
         COMMENT "Configured Doxygen and jupyter-book")
 
     # From the docs makefile - pretty much does the same thing as the jupyter-book
@@ -165,7 +166,7 @@ if (BUILD_API_DOCS)
     add_custom_target(sphinx-build
         WORKING_DIRECTORY ${PDAL_DOC_DIR}
         DEPENDS generate_docs
-        COMMAND ${SPHINX_BUILD} ${BUILDER} ${ALL_SPHINX_OPTS} ${PDAL_DOC_DIR} ${BUILDDIR}/html)
+        COMMAND ${SPHINX_BUILD} ${BUILDER} ${ALL_SPHINX_OPTS} ${PDAL_DOC_DIR} ${SPHINX_BUILDDIR}/html)
 
 endif()
 
