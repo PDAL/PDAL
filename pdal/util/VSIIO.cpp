@@ -133,7 +133,7 @@ VSIStreamBuffer::VSIStreamBuffer(std::string filename, std::ios_base::openmode m
     }
 
     if (mode & std::ios::binary)
-    fm += "b";
+        fm += "b";
 
     fp.reset(reinterpret_cast<VSIVirtualHandle*>(
         VSIFOpenL(filename.c_str(), fm.c_str())));

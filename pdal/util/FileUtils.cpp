@@ -279,23 +279,17 @@ std::vector<std::string> directoryList(const std::string& dir)
 
 void closeFile(std::ostream *out)
 {
-    if (out)
-    {
-        std::ofstream *ofs = dynamic_cast<std::ofstream *>(out);
-        ofs->close();
-        delete out;
-    }
+    if (!out)
+        return;
+    delete out;
 }
 
 
 void closeFile(std::istream* in)
 {
-    if (in)
-    {
-        std::ifstream *ifs = dynamic_cast<std::ifstream *>(in);
-        ifs->close();
-        delete in;
-    }
+    if (!in)
+        return;
+    delete in;
 }
 
 
