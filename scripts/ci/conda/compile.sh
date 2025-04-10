@@ -19,7 +19,7 @@ if grep -q "macos" <<< "$PDAL_PLATFORM"; then
 fi
 
 conda config --set conda_build.pkg_format 2
-conda mambabuild recipe --clobber-file recipe/recipe_clobber.yaml --output-folder packages -m ".ci_support/${CI_PLAT}_${ARCH}_.yaml"
+conda build recipe --clobber-file recipe/recipe_clobber.yaml --output-folder packages -m ".ci_support/${CI_PLAT}_${ARCH}_.yaml"
 conda create -y -n test -c ./packages/${CI_PLAT}-${ARCH} python pdal
 conda deactivate
 

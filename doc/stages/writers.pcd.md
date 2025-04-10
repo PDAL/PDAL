@@ -12,10 +12,6 @@ formatted data.
 .. embed::
 ```
 
-```{eval-rst}
-.. streamable::
-```
-
 ```{note}
 X, Y, and Z dimensions will be written as single-precision floats by
 default to be compatible with most of the existing PCL point types. These

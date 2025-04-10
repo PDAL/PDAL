@@ -41,6 +41,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(PDAL_LIB_NAME pdalcpp)
 
 set(PDAL_KAZHDAN_LIB_NAME pdal_kazhdan)
+set(PDAL_SPZ_LIB_NAME pdal_spz)
 set(PDAL_LEPCC_LIB_NAME pdal_lepcc)
 set(PDAL_TEST_SUPPORT_OBJS pdal_test_support)
 
@@ -167,6 +168,7 @@ add_subdirectory(vendor/lazperf)
 add_subdirectory(vendor/utfcpp)
 add_subdirectory(vendor/lepcc)
 add_subdirectory(vendor/h3)
+add_subdirectory(vendor/spz)
 add_subdirectory(tools)
 add_subdirectory(apps)
 
@@ -241,25 +243,18 @@ target_include_directories(${PDAL_LIB_NAME}
         ${ROOT_DIR}
         ${PROJECT_BINARY_DIR}/include
         ${PDAL_VENDOR_DIR}
-        ${LIBXML2_INCLUDE_DIR}
-        ${ZSTD_INCLUDE_DIRS}
         ${NLOHMANN_INCLUDE_DIR}
+        ${GEOTIFF_INCLUDE_DIR}
         ${UTFCPP_INCLUDE_DIR}
-        ${GDAL_INCLUDE_DIR}
-        ${PROJ_INCLUDE_DIR}
 )
 
 target_link_libraries(${PDAL_LIB_NAME}
     PRIVATE
         ${CMAKE_THREAD_LIBS_INIT}
         ${CMAKE_DL_LIBS}
-        ${GDAL_LIBRARY}
-        ${PROJ_LIBRARIES}
+        GDAL::GDAL
+        PROJ::proj
         ${GEOTIFF_LIBRARY}
-        ${LIBXML2_LIBRARIES}
-        ${ZLIB_LIBRARIES}
-        ${LIBLZMA_LIBRARIES}
-        ${ZSTD_LIBRARIES}
         ${PDAL_REEXPORT}
         ${PDAL_ARBITER_LIB_NAME}
         ${PDAL_H3_LIB_NAME}
@@ -269,6 +264,7 @@ target_link_libraries(${PDAL_LIB_NAME}
         ${PDAL_LAZPERF_LIB_NAME}
         ${UTFCPP_LIB_NAME}
         ${BACKTRACE_LIBRARIES}
+        ${PDAL_SPZ_LIB_NAME}
        "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:-lstdc++fs>"
     PUBLIC
         ${WINSOCK_LIBRARY}
@@ -276,6 +272,32 @@ target_link_libraries(${PDAL_LIB_NAME}
         ${PDAL_LIBDIR}
         ${WINSOCK_LIBRARY}
 )
+
+if (ZSTD_FOUND)
+    target_link_libraries(${PDAL_LIB_NAME}
+        PRIVATE
+        zstd::libzstd)
+endif()
+
+if (ZLIB_FOUND)
+    target_link_libraries(${PDAL_LIB_NAME}
+        PRIVATE
+        ZLIB::ZLIB)
+endif()
+
+if (LIBLZMA_FOUND)
+    target_link_libraries(${PDAL_LIB_NAME}
+        PRIVATE
+        LibLZMA::LibLZMA)
+endif()
+
+if (LibXml2_FOUND)
+    target_link_libraries(${PDAL_LIB_NAME}
+        PRIVATE
+        LibXml2::LibXml2)
+endif()
+
+
 
 #
 # Allow downstream cmake projects to find PDAL header files without

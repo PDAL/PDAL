@@ -12,7 +12,7 @@ ARG GITHUB_SERVER_URL="https://github.com"
 SHELL ["conda", "run", "-n", "pdal", "/bin/bash", "-c"]
 
 RUN mamba install -c conda-forge git compilers conda-pack \
-    python=3.12 numpy=2.1 scikit-build-core \
+    python numpy scikit-build-core \
     cmake make ninja && \
     mamba install --yes -c conda-forge pdal --only-deps
 
