@@ -35,6 +35,8 @@
 #include "SbetReader.hpp"
 #include "SbetCommon.hpp"
 
+#include "private/connector/Connector.hpp"
+
 #include <pdal/PointRef.hpp>
 #include <pdal/util/FileUtils.hpp>
 
@@ -42,6 +44,27 @@
 
 namespace pdal
 {
+
+struct SbetReader::Private
+{
+    std::unique_ptr<ILeStream> stream;
+    // Number of points in the file.
+    point_count_t numPts;
+    point_count_t index;
+    Dimension::IdList dims;
+    bool anglesAsDegrees;
+    
+    std::unique_ptr<connector::Connector> connector;
+    bool isRemote = false;
+};
+
+SbetReader::SbetReader() : m_private(new Private)
+{}
+
+SbetReader::~SbetReader()
+{ 
+    cleanup(); 
+}
 
 static StaticPluginInfo const s_info
 {
@@ -57,7 +80,7 @@ std::string SbetReader::getName() const { return s_info.name; }
 
 void SbetReader::addArgs(ProgramArgs& args)
 {
-    args.add("angles_as_degrees", "Convert all angles to degrees", m_anglesAsDegrees, true);
+    args.add("angles_as_degrees", "Convert all angles to degrees", m_private->anglesAsDegrees, true);
 }
 
 void SbetReader::addDimensions(PointLayoutPtr layout)
@@ -68,15 +91,17 @@ void SbetReader::addDimensions(PointLayoutPtr layout)
 
 void SbetReader::ready(PointTableRef)
 {
+    tryLoadRemote();
+
     size_t fileSize = FileUtils::fileSize(m_filename);
     size_t pointSize = sbet::fileDimensions().size() * sizeof(double);
     if ((fileSize == 0)|| (fileSize % pointSize != 0))
         throwError("Invalid file size.");
-    m_numPts = fileSize / pointSize;
-    m_index = 0;
-    m_stream.reset(new ILeStream(m_filename));
-    m_dims = sbet::fileDimensions();
-    seek(m_index);
+    m_private->numPts = fileSize / pointSize;
+    m_private->index = 0;
+    m_private->stream.reset(new ILeStream(m_filename));
+    m_private->dims = sbet::fileDimensions();
+    seek(m_private->index);
 }
 
 
@@ -85,27 +110,27 @@ bool SbetReader::processOne(PointRef& point)
     auto radiansToDegrees = [](double radians) {
         return radians * 180.0 / M_PI;
     };
-    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+    for (auto di = m_private->dims.begin(); di != m_private->dims.end(); ++di)
     {
         double d;
-        *m_stream >> d;
+        *(m_private->stream) >> d;
         Dimension::Id dim = *di;
-        if (m_anglesAsDegrees && sbet::isAngularDimension(dim)) {
+        if (m_private->anglesAsDegrees && sbet::isAngularDimension(dim)) {
             d = radiansToDegrees(d);
         }
         point.setField(dim, d);
     }
-    return (m_stream->good());
+    return (m_private->stream->good());
 }
 
 
 point_count_t SbetReader::read(PointViewPtr view, point_count_t count)
 {
     PointId nextId = view->size();
-    PointId idx = m_index;
+    PointId idx = m_private->index;
     point_count_t numRead = 0;
     seek(idx);
-    while (numRead < count && idx < m_numPts)
+    while (numRead < count && idx < m_private->numPts)
     {
         PointRef point = view->point(nextId);
         processOne(point);
@@ -116,20 +141,39 @@ point_count_t SbetReader::read(PointViewPtr view, point_count_t count)
         nextId++;
         numRead++;
     }
-    m_index = idx;
+    m_private->index = idx;
     return numRead;
 }
 
 
 bool SbetReader::eof()
 {
-    return m_index >= m_numPts;
+    return m_private->index >= m_private->numPts;
 }
 
 
 void SbetReader::seek(PointId idx)
 {
-    m_stream->seek(idx * sizeof(double) * sbet::fileDimensions().size());
+    m_private->stream->seek(idx * sizeof(double) * sbet::fileDimensions().size());
+}
+
+void SbetReader::done(PointTableRef table)
+{
+    cleanup();
+}
+
+void SbetReader::cleanup()
+{
+    if (m_private->isRemote)
+        FileUtils::deleteFile(m_filename);
+}
+
+void SbetReader::tryLoadRemote()
+{
+    m_private->connector.reset(new connector::Connector(m_filespec));
+    m_private->isRemote = Utils::isRemote(m_filename);
+    auto handle = m_private->connector->getLocalHandle(m_filename);
+    m_filename = handle.release();
 }
 
 } // namespace pdal
