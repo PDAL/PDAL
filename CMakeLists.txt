@@ -153,7 +153,7 @@ endif()
 
 add_subdirectory(plugins)
 
-if (WITH_DOCS)
+if (BUILD_DOCS)
     add_subdirectory(doc)
 endif()
 if (WITH_TESTS)

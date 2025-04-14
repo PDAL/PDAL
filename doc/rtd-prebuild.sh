@@ -11,8 +11,9 @@ cd doc/_build
 # JB_CONF_PREPEND replaces the sed command to prepend conf.py, set to
 # "import os, sys; sys.path.append(os.path.abspath("./_ext"))" by default
 cmake \
+	 -DCMAKE_INSTALL_PREFIX=${CONDA_PREFIX} \
 	 -DBUILD_API_DOCS=ON \
-	 -DJB_CONF_APPEND="html_baseurl = os.environ.get(\\\"READTHEDOCS_CANONICAL_URL\\\", \\\"\\\")" \
+	 -DJB_CONF_APPEND=[==[html_baseurl = os.environ.get(\"READTHEDOCS_CANONICAL_URL\", \"\")]==] \
 	 ..
 # Target makes dimension-table.csv, runs doxygen
 cmake --build . --target doxygen
