@@ -51,7 +51,6 @@ if (DOXYGEN_FOUND)
 
     # Path to doxygen config file
     set(DOXYFILE_PATH ${PDAL_DOC_DIR}/doxygen/doxygen.conf)
-    # Tried to default to 1> /dev/null but that isn't working
     set(DOXYGEN_BUILD_OPTS "" CACHE STRING "Additional options to pass to Doxygen")
 
     ###
@@ -107,7 +106,7 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/prepend.cmake
     "file(WRITE \"${JB_CONF_FILE}\" \"$\{JB_CONF_CONTENTS\}\")\n"
 )
 
-add_custom_target(docs_config
+add_custom_target(jupyterbook_config
     DEPENDS ${JB_CONF_FILE}
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/prepend.cmake
     COMMENT "Configured sphinx and jupyter-book")
