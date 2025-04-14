@@ -53,7 +53,6 @@ if (DOXYGEN_FOUND)
     set(DOXYFILE_PATH ${PDAL_DOC_DIR}/doxygen/doxygen.conf)
     # Tried to default to 1> /dev/null but that isn't working
     set(DOXYGEN_BUILD_OPTS "" CACHE STRING "Additional options to pass to Doxygen")
-    #option(DOXYGEN_FAIL_ON_WARNINGS "Set to ON to fail the build if Doxygen produces warnings" OFF)
 
     ###
     ### Doxygen generation
@@ -63,14 +62,9 @@ if (DOXYGEN_FOUND)
     set(PYTHON_DIMS_SCRIPT ${PDAL_DOC_DIR}/generate_dimensions.py)
     add_custom_command(
         WORKING_DIRECTORY ${PDAL_DOC_DIR}
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/pydims.stamp
+        OUTPUT ${PDAL_DOC_DIR}/dimension_table.csv
         COMMAND ${Python_EXECUTABLE} ${PYTHON_DIMS_SCRIPT}
-        COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/pydims.stamp
     )
-    add_custom_target(dims
-        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/pydims.stamp
-        COMMENT "Built Dimension Table CSV for Doxygen")
-
     add_custom_command(
         WORKING_DIRECTORY ${ROOT_DIR}
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/doxygen.stamp
@@ -80,7 +74,7 @@ if (DOXYGEN_FOUND)
     # requiring the dimension generation script to get run before doxygen.
     # readthedocs.yml does this currently, but not the docs makefile. Idk
     add_custom_target(doxygen
-        DEPENDS dims ${CMAKE_CURRENT_BINARY_DIR}/doxygen.stamp
+        DEPENDS ${PDAL_DOC_DIR}/dimension_table.csv ${CMAKE_CURRENT_BINARY_DIR}/doxygen.stamp
         COMMENT "Built Doxygen")
 
 endif()
@@ -89,18 +83,14 @@ endif()
 ### Jupyterbook config
 ###
 
+set(JB_CONF_FILE "${PDAL_DOC_DIR}/conf.py")
+
 add_custom_command(
     WORKING_DIRECTORY ${ROOT_DIR}
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/jupyterbook.stamp
+    OUTPUT ${JB_CONF_FILE}
     COMMAND ${JUPYTERBOOK} config sphinx doc/
     COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/jupyterbook.stamp
 )
-
-add_custom_target(jupyterbook_config
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/jupyterbook.stamp
-    COMMENT "Configured jupyter-book")
-    
-set(JB_CONF_PATH "${PDAL_DOC_DIR}/conf.py")
 
 # Added this as a way to avoid appending to conf.py with sed or similar commands.
 # writing an entire new cmake file just to add one line is silly, but it works.
@@ -111,24 +101,20 @@ set(JB_CONF_APPEND ""
     CACHE STRING "Lines to append to conf.py.")
 
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/prepend.cmake 
-    "file(READ \"${JB_CONF_PATH}\" JB_CONF_CONTENTS)\n"
+    "file(READ \"${JB_CONF_FILE}\" JB_CONF_CONTENTS)\n"
     "string(PREPEND JB_CONF_CONTENTS \"${JB_CONF_PREPEND}\")\n"
     "string(APPEND JB_CONF_CONTENTS \"${JB_CONF_APPEND}\")\n"
-    "file(WRITE \"${JB_CONF_PATH}\" \"$\{JB_CONF_CONTENTS\}\")\n"
+    "file(WRITE \"${JB_CONF_FILE}\" \"$\{JB_CONF_CONTENTS\}\")\n"
 )
 
-add_custom_target(modify_jb_conf
-    DEPENDS jupyterbook_config
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/prepend.cmake)
-
+add_custom_target(docs_config
+    DEPENDS ${JB_CONF_FILE}
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/prepend.cmake
+    COMMENT "Configured sphinx and jupyter-book")
 
 ###
 ### Final targets
 ###
-
-add_custom_target(docs
-    DEPENDS jupyterbook_config modify_jb_conf
-    COMMENT "Configured Doxygen and jupyter-book")
 
 add_custom_target(jupyter-book
     WORKING_DIRECTORY ${ROOT_DIR}

@@ -18,5 +18,5 @@ cmake \
 # Target makes dimension-table.csv, runs doxygen
 cmake --build . --target doxygen
 # Target runs jupyter-book config
-cmake --build . --target generate_docs
+cmake --build . --target jupyterbook_config
 
