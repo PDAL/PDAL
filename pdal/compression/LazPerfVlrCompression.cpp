@@ -32,12 +32,18 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable: 4251)
+#endif
+
 #include <lazperf/lazperf.hpp>
 #include <lazperf/filestream.hpp>
 #include <lazperf/vlr.hpp>
+
+#ifdef _MSC_VER
 #pragma warning (pop)
+#endif
 
 // This only exist in version 1.3+, so is an acceptable version test for now.
 #ifndef LAZPERF_VERSION
@@ -269,7 +275,7 @@ public:
         m_fileStream.reset();
     }
 
-    
+
     bool seek(uint64_t record)
     {
         if (record >= m_pointCount || m_chunks.empty())
