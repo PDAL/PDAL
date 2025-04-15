@@ -73,7 +73,7 @@ hexer::BaseGrid *HexBin::grid() const
 
 void HexBin::addArgs(ProgramArgs& args)
 {
-    args.add("sample_size", "Sample size for auto-edge length calculation",
+    args.add("sample_size", "Maximum sample size for auto-edge length calculation",
         m_sampleSize, 5000U);
     args.add("threshold", "Required cell density", m_density, 15);
     args.add("output_tesselation", "Write tesselation to output metadata",
@@ -157,7 +157,7 @@ void HexBin::filter(PointView& view)
     if (m_grid->sampling())
     {
         // Make sure the sample size set in addArgs isn't larger than the number of points
-        m_sampleSize = std::min((point_count_t)m_sampleSize, view.size());
+        m_sampleSize = (std::min)((point_count_t)m_sampleSize, view.size());
         m_grid->setSampleSize(m_sampleSize);
     }
 
