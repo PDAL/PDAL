@@ -94,16 +94,16 @@ add_custom_command(
 # Added this as a way to avoid appending to conf.py with sed or similar commands.
 # writing an entire new cmake file just to add one line is silly, but it works.
 
-set(JB_CONF_PREPEND [==[import os, sys; sys.path.append(os.path.abspath(\"./_ext\"))\n]==]
+set(JB_CONF_PREPEND "[==[import os, sys; sys.path.append(os.path.abspath(\"./_ext\"))\n]==]"
     CACHE STRING "Lines to prepend to conf.py.")
 set(JB_CONF_APPEND "" 
     CACHE STRING "Lines to append to conf.py.")
 
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/prepend.cmake 
     "file(READ \"${JB_CONF_FILE}\" JB_CONF_CONTENTS)\n"
-    "string(PREPEND JB_CONF_CONTENTS \"${JB_CONF_PREPEND}\")\n"
-    "string(APPEND JB_CONF_CONTENTS \"${JB_CONF_APPEND}\")\n"
-    "file(WRITE \"${JB_CONF_FILE}\" \"$\{JB_CONF_CONTENTS\}\")\n"
+    "string(PREPEND JB_CONF_CONTENTS ${JB_CONF_PREPEND})\n"
+    "string(APPEND JB_CONF_CONTENTS ${JB_CONF_APPEND})\n"
+    "file(WRITE \"${JB_CONF_FILE}\" \"$\{JB_CONF_CONTENTS\}\")"
 )
 
 add_custom_target(jupyterbook_config
