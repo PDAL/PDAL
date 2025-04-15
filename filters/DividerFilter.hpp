@@ -44,16 +44,20 @@ class PDAL_EXPORT DividerFilter : public Filter
 public:
 
 public:
-    DividerFilter()
-        {}
+
+    DividerFilter();
+    ~DividerFilter();
 
     std::string getName() const;
+
+    struct Args;
 
 private:
     enum class Mode
     {
         Partition,
-        RoundRobin
+        RoundRobin,
+        Expression
     };
 
     enum class SizeMode
@@ -62,15 +66,19 @@ private:
         Capacity
     };
 
-    Arg *m_cntArg;
-    Arg *m_capArg;
-    Mode m_mode;
-    SizeMode m_sizeMode;
-    point_count_t m_size;
+    std::unique_ptr<Args> m_args;
+
+//     Arg *m_cntArg;
+//     Arg *m_capArg;
+//     Arg *m_splitExpressionArg;
+//     Mode m_mode;
+//     SizeMode m_sizeMode;
+//     point_count_t m_size;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
     virtual PointViewSet run(PointViewPtr view);
+    virtual void prepared(PointTableRef table);
 
     DividerFilter& operator=(const DividerFilter&); // not implemented
     DividerFilter(const DividerFilter&); // not implemented

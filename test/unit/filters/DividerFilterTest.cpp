@@ -36,6 +36,9 @@
 
 #include <io/FauxReader.hpp>
 #include <filters/DividerFilter.hpp>
+#include <io/LasReader.hpp>
+#include <filters/SortFilter.hpp>
+#include "Support.hpp"
 
 using namespace pdal;
 
@@ -206,3 +209,71 @@ TEST(DividerFilterTest, round_robin_capacity)
     }
 }
 
+
+TEST(DividerFilterTest, break_on_expression)
+{
+    point_count_t count = 1000;
+
+    Options readerOps;
+    readerOps.add("bounds", BOX3D(1, 1, 1,
+        (double)count, (double)count, (double)count));
+    readerOps.add("mode", "ramp");
+    readerOps.add("count", count);
+
+    FauxReader r;
+    r.setOptions(readerOps);
+
+    Options filterOps;
+    filterOps.add("expression", "X == 500");
+    filterOps.add("mode", "expression");
+    DividerFilter f;
+    f.setInput(r);
+    f.setOptions(filterOps);
+
+    PointTable t;
+    f.prepare(t);
+    PointViewSet s = f.execute(t);
+
+    EXPECT_EQ(s.size(), 2u);
+
+    auto it = std::begin(s);
+    PointViewPtr v1 = *it;
+    EXPECT_EQ(v1->size(), 499u);
+
+    ++it;
+    PointViewPtr v2 = *it;
+    EXPECT_EQ(v2->size(), 501u);
+
+}
+
+
+TEST(DividerFilterTest, break_on_userdata)
+{
+
+    LasReader r;
+    Options ro;
+    ro.add("filename", Support::datapath("autzen/autzen-utm.las"));
+    r.setOptions(ro);
+
+    SortFilter s;
+    Options sOps;
+
+    sOps.add("dimension", "UserData");
+    sOps.add("algorithm", "stable");
+    s.setOptions(sOps);
+    s.setInput(r);
+
+    Options dOps;
+    dOps.add("expression", "UserData == 122");
+    DividerFilter d;
+    d.setInput(r);
+    d.setOptions(dOps);
+
+    PointTable t;
+    d.prepare(t);
+    PointViewSet vs = d.execute(t);
+
+    EXPECT_EQ(vs.size(), 88u);
+
+
+}
