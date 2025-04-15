@@ -28,7 +28,7 @@ void BaseGrid::addPoint(Point& p)
 
     // if the hexagon of interest has reached the density threshold, we see if it
     // has neighbors at edge 0. If not, it's added to our list of possible starting points
-    // for path finding (m_possibleRoots). If the hexagon at edge 3 was in m_possibleRoots we 
+    // for path finding (m_possibleRoots). If the hexagon at edge 3 was in m_possibleRoots we
     // remove it since it no longer has a non-dense neighbor at edge 0.
     if (count == m_denseLimit)
     {
@@ -141,6 +141,7 @@ void BaseGrid::findShape(HexId root)
 // Finds the possibilities for the next boundary segment, moving clockwise
 std::pair<Segment, Segment> BaseGrid::nextSegments(const Segment& s) const
 {
+    /*
     //             (example with HexGrid coordinates)
     //    ____
     //   /    \  <---- Current segment: edge 4 of (0,0)
@@ -152,6 +153,7 @@ std::pair<Segment, Segment> BaseGrid::nextSegments(const Segment& s) const
     //  \      /    \
     //   \____/      \
     //
+    */
     static const int next[] { 1, 2, 3, 4, 5, 0 };
     static const int prev[] { 5, 0, 1, 2, 3, 4 };
 
@@ -164,7 +166,7 @@ std::pair<Segment, Segment> BaseGrid::nextSegments(const Segment& s) const
 void BaseGrid::findParentPaths()
 {
     for (auto& p : m_paths) {
-        // the only real difference between parentOrChild in the two grid 
+        // the only real difference between parentOrChild in the two grid
         // types is whether they look down i or j.
         parentOrChild(p);
 
@@ -228,7 +230,7 @@ double BaseGrid::computeHexSize()
 
 void BaseGrid::sortPaths()
 {
-    std::sort(m_roots.begin(), m_roots.end(), [](const Path* p1, const Path* p2) 
+    std::sort(m_roots.begin(), m_roots.end(), [](const Path* p1, const Path* p2)
         { return p1->rootHex() < p2->rootHex(); });
     for (Path* p : m_roots)
     {
