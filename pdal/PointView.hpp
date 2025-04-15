@@ -66,7 +66,7 @@ typedef std::set<PointViewPtr, PointViewLess> PointViewSet;
 
 class PDAL_DLL PointView
 {
-    FRIEND_TEST(VoxelTest, center);
+    FRIEND_TEST(VoxelCenterNearestNeighborFilterTest, center);
     friend class Stage;
     friend class PointRef;
     friend class PointViewIter;

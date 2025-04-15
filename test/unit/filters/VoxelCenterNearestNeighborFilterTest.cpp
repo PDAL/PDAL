@@ -41,7 +41,7 @@
 namespace pdal
 {
 
-TEST(VoxelTest, center)
+TEST(VoxelCenterNearestNeighborFilterTest, center)
 {
     StageFactory fac;
 
@@ -83,7 +83,7 @@ TEST(VoxelTest, center)
     EXPECT_EQ(sums[iter], sum);
 }
 
-TEST(VoxelTest, center_value)
+TEST(VoxelCenterNearestNeighborFilterTest, center_value)
 {
     StageFactory fac;
 
