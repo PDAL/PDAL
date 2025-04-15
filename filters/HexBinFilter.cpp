@@ -135,20 +135,14 @@ void HexBin::ready(PointTableRef table)
     if (m_isH3)
     {
         if (m_h3Res == -1)
-        {
             m_grid.reset(new H3Grid(m_density));
-            m_grid->setSampleSize(m_sampleSize);
-        }
         else
             m_grid.reset(new H3Grid(m_h3Res, m_density));
     }
     else
     {
         if (m_edgeLength == 0.0)
-        {
             m_grid.reset(new HexGrid(m_density));
-            m_grid->setSampleSize(m_sampleSize);
-        }
         else
             m_grid.reset(new HexGrid(m_edgeLength * sqrt(3), m_density));
     }
@@ -158,6 +152,14 @@ void HexBin::ready(PointTableRef table)
 void HexBin::filter(PointView& view)
 {
     PointRef p(view, 0);
+
+    // If we still need to calculate the edge length/resolution, set the sample size.
+    if (m_grid->sampling())
+    {
+        // Make sure the sample size set in addArgs isn't larger than the number of points
+        m_sampleSize = std::min((point_count_t)m_sampleSize, view.size());
+        m_grid->setSampleSize(m_sampleSize);
+    }
 
     for (PointId idx = 0; idx < view.size(); ++idx)
     {
@@ -192,14 +194,7 @@ void HexBin::spatialReferenceChanged(const SpatialReference& srs)
 void HexBin::done(PointTableRef table)
 {
     if (m_grid->sampling())
-    {
-        std::ostringstream oss;
-        oss << "Sampling for hexbin auto-edge length calculation failed! ";
-        if (m_sampleSize > m_count)
-            oss << "Decrease sample size: sample size of " << m_sampleSize 
-                << " with " << m_count << " points.";
-        throwError(oss.str());
-    }
+        throwError("Sampling for hexbin auto-edge length calculation failed!");
 
     try
     {
@@ -217,9 +212,9 @@ void HexBin::done(PointTableRef table)
 
     m_metadata.add("threshold", m_grid->denseLimit(),
         "Minimum number of points inside a hexagon to be considered full");
-    m_metadata.add("sample_size", m_sampleSize, "Number of samples to use "
-        "when estimating hexagon edge size. Specify 0.0 or omit options "
-        "for edge_size if you want to compute one.");
+    m_metadata.add("sample_size", m_sampleSize, "Number of samples used for "
+        "estimating hexagon edge size. Only used if 'edge_length' or "
+        "'h3_resolution' is not set.");
 
     Utils::OStringStreamClassicLocale polygon;
     polygon.setf(std::ios_base::fixed, std::ios_base::floatfield);
