@@ -41,13 +41,13 @@ namespace pdal
 struct DividerFilter::Args
 {
     expr::ConditionalExpression m_splitExpression;
-    Mode m_mode;
-    SizeMode m_sizeMode;
-    point_count_t m_size;
+    Mode m_mode = DividerFilter::Mode::Partition;
+    SizeMode m_sizeMode = SizeMode::Count;
+    point_count_t m_size = 1;
 
-    Arg *m_cntArg;
-    Arg *m_capArg;
-    Arg *m_splitExpressionArg;
+    Arg *m_cntArg = nullptr;
+    Arg *m_capArg = nullptr;
+    Arg *m_splitExpressionArg = nullptr;
 };
 
 
@@ -120,8 +120,8 @@ void DividerFilter::addArgs(ProgramArgs& args)
     m_args->m_cntArg = &args.add("count", "Number of output views", m_args->m_size);
     m_args->m_capArg = &args.add("capacity", "Maximum number of points in each "
         "output view", m_args->m_size);
-    m_args->m_splitExpressionArg = &args.add("expression", "Maximum number of points in each "
-        "output view", m_args->m_splitExpression);
+    m_args->m_splitExpressionArg = &args.add("expression", "Expression to cause split",
+        m_args->m_splitExpression);
 }
 
 
@@ -229,6 +229,8 @@ PointViewSet DividerFilter::run(PointViewPtr inView)
 
         for (PointRef point : *inView)
         {
+            if (countPassed > 100000)
+                throwError("big problems chief!");
             bool status = m_args->m_splitExpression.eval(point);
             if (status)
             {

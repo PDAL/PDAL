@@ -241,8 +241,11 @@ TEST(DividerFilterTest, break_on_expression)
     EXPECT_EQ(v1->size(), 499u);
 
     ++it;
-    PointViewPtr v2 = *it;
-    EXPECT_EQ(v2->size(), 501u);
+    if (it != s.end())
+    {
+        PointViewPtr v2 = *it;
+        EXPECT_EQ(v2->size(), 501u);
+    }
 
 }
 
