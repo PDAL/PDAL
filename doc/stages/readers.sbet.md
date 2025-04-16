@@ -28,6 +28,7 @@ Set `angles_as_degrees` to `false` to disable this conversion.
 filename
 
 : File to read from \[Required\]
+  Refer to {ref}`filespec` \[Required\]
 
 ```{include} reader_opts.md
 ```

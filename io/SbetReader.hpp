@@ -46,18 +46,12 @@ namespace pdal
 class PDAL_EXPORT SbetReader : public Reader, public Streamable
 {
 public:
-    SbetReader() : Reader()
-        {}
+    SbetReader();
+    ~SbetReader();
 
     std::string getName() const;
 
 private:
-    std::unique_ptr<ILeStream> m_stream;
-    // Number of points in the file.
-    point_count_t m_numPts;
-    point_count_t m_index;
-    Dimension::IdList m_dims;
-    bool m_anglesAsDegrees;
 
     virtual bool processOne(PointRef& point);
     virtual void addArgs(ProgramArgs& args);
@@ -65,8 +59,15 @@ private:
     virtual void ready(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual bool eof();
+    virtual void done(PointTableRef table);
 
     void seek(PointId idx);
+
+    void cleanup();
+    void tryLoadRemote();
+
+    struct Private;
+    std::unique_ptr<Private> m_private;
 };
 
 } // namespace pdal

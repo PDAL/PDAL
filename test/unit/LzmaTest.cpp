@@ -59,9 +59,9 @@ TEST(Compression, lzma)
     std::vector<char> compressed;
     auto cb = [&compressed](char *buf, size_t bufsize)
     {
-        static size_t total = 0;
+//         static size_t total = 0;
         compressed.insert(compressed.end(), buf, buf + bufsize);
-        total += bufsize;
+//         total += bufsize;
     };
 
     size_t s = orig.size() * sizeof(int);
