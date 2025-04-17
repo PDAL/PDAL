@@ -135,14 +135,20 @@ void HexBin::ready(PointTableRef table)
     if (m_isH3)
     {
         if (m_h3Res == -1)
+        {
             m_grid.reset(new H3Grid(m_density));
+            m_grid->setSampleSize(m_sampleSize);
+        }
         else
             m_grid.reset(new H3Grid(m_h3Res, m_density));
     }
     else
     {
         if (m_edgeLength == 0.0)
+        {
             m_grid.reset(new HexGrid(m_density));
+            m_grid->setSampleSize(m_sampleSize);
+        }
         else
             m_grid.reset(new HexGrid(m_edgeLength * sqrt(3), m_density));
     }
@@ -152,14 +158,6 @@ void HexBin::ready(PointTableRef table)
 void HexBin::filter(PointView& view)
 {
     PointRef p(view, 0);
-
-    // If we still need to calculate the edge length/resolution, set the sample size.
-    if (m_grid->sampling())
-    {
-        // Make sure the sample size set in addArgs isn't larger than the number of points
-        m_sampleSize = (std::min)((point_count_t)m_sampleSize, view.size());
-        m_grid->setSampleSize(m_sampleSize);
-    }
 
     for (PointId idx = 0; idx < view.size(); ++idx)
     {
@@ -194,7 +192,18 @@ void HexBin::spatialReferenceChanged(const SpatialReference& srs)
 void HexBin::done(PointTableRef table)
 {
     if (m_grid->sampling())
-        throwError("Sampling for hexbin auto-edge length calculation failed!");
+    {
+        // If we ran out of points while sampling, process the points in the sample buffer:
+        // in stream mode, we can't check this until we've gone through all the points
+        if (m_sampleSize > m_count)
+        {
+            m_grid->flushSamples();
+            // Setting this so it gets written to metadata correctly
+            m_sampleSize = m_count;
+        }
+        else
+            throwError("Sampling for hexbin auto-edge length calculation failed!");
+    }
 
     try
     {

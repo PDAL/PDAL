@@ -54,17 +54,21 @@ void BaseGrid::setHexes(const std::vector<HexId>& ids)
     }
 }
 
+void BaseGrid::flushSamples()
+{
+    double height = computeHexSize();
+    processHeight(height);
+    for (Point p : m_sample) {
+        addPoint(p);
+    }
+    m_sample.clear();
+}
+
 void BaseGrid::handleSamplePoint(Point& p)
 {
     m_sample.push_back(p);
-    if (m_sample.size() >= (size_t)m_maxSample) {
-        double height = computeHexSize();
-        processHeight(height);
-        for (Point p : m_sample) {
-            addPoint(p);
-        }
-        m_sample.clear();
-    }
+    if (m_sample.size() >= (size_t)m_maxSample)
+        flushSamples();
 }
 
 void BaseGrid::addRoot(HexId h)
