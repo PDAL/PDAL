@@ -135,8 +135,12 @@ VSIStreamBuffer::VSIStreamBuffer(std::string filename, std::ios_base::openmode m
     if (mode & std::ios::binary)
         fm += "b";
 
-    fp.reset(reinterpret_cast<VSIVirtualHandle*>(
-        VSIFOpenL(filename.c_str(), fm.c_str())));
+    if (Utils::startsWith(Utils::toupper(filename), "/VSI") || (mode & std::ios_base::out))
+        fp.reset(reinterpret_cast<VSIVirtualHandle*>(
+            VSIFOpenL(filename.c_str(), fm.c_str())));
+    else
+        fp.reset(reinterpret_cast<VSIVirtualHandle*>(
+            VSICreateBufferedReaderHandle(VSIFOpenL(filename.c_str(), fm.c_str()))));
 
     // can either set a bad bit in underflow/overflow or throw a PDAL error here
     if (fp == nullptr)
