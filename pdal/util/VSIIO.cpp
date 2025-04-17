@@ -77,7 +77,7 @@ typedef std::streambuf::traits_type traits_type;
 class VSIStreamBuffer : public std::streambuf
 {
 public:
-    static const int defaultBufferSize = 1;
+    static const int defaultBufferSize = 65536;
 
     VSIStreamBuffer(std::string filename, std::ios_base::openmode mode,
                     std::size_t bufferSize = 0);
@@ -249,8 +249,19 @@ pos_type VSIStreamBuffer::seekoff(off_type off,
         // delegate to VSI for backends that know the file size
         vsi_l_offset currOffset = fp->Tell();
         fp->Seek(off, SEEK_END);
-        off = fp->Tell();
-        fp->Seek(currOffset, SEEK_SET);
+
+        if (off == 0)
+        {
+            size_t nEnd = fp->Tell();
+            nBufferStart = nEnd;
+            setg(nullptr, nullptr, nullptr);
+            return nEnd;
+        }
+        else
+        {
+            off = fp->Tell();
+            fp->Seek(currOffset, SEEK_SET);
+        }
     }
 
     std::streampos nChunkPos = (off / nBufferSize) * nBufferSize;
