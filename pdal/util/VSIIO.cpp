@@ -77,7 +77,7 @@ typedef std::streambuf::traits_type traits_type;
 class VSIStreamBuffer : public std::streambuf
 {
 public:
-    static const int defaultBufferSize = 65536;
+    static const int defaultBufferSize = 1;
 
     VSIStreamBuffer(std::string filename, std::ios_base::openmode mode,
                     std::size_t bufferSize = 0);

@@ -139,7 +139,7 @@ std::string fromNative(const std::string& in)
 #endif
 
 
-std::istream *openFile(std::string const& filename, bool asBinary, size_t nBufferSize)
+std::istream *openFile(std::string const& filename, bool asBinary)
 {
     if (filename[0] == '~')
         throw pdal::pdal_error("PDAL does not support shell expansion");
@@ -157,7 +157,7 @@ std::istream *openFile(std::string const& filename, bool asBinary, size_t nBuffe
     if (asBinary)
         mode |= std::ios::binary;
 
-    ifs = new Utils::ClassicLocaleStream<VSI::VSIIStream>(name, mode, nBufferSize);
+    ifs = new Utils::ClassicLocaleStream<VSI::VSIIStream>(name, mode);
 
     if (!ifs->good())
     {
@@ -168,7 +168,7 @@ std::istream *openFile(std::string const& filename, bool asBinary, size_t nBuffe
 }
 
 
-std::ostream *createFile(std::string const& name, bool asBinary, size_t nBufferSize)
+std::ostream *createFile(std::string const& name, bool asBinary)
 {
     std::string vsi_name(name);
     if (isStdout(name))
@@ -178,7 +178,7 @@ std::ostream *createFile(std::string const& name, bool asBinary, size_t nBufferS
     if (asBinary)
         mode |= std::ios::binary;
 
-    VSI::VSIOStream *ofs = new Utils::ClassicLocaleStream<VSI::VSIOStream>(vsi_name, mode, nBufferSize);
+    VSI::VSIOStream *ofs = new Utils::ClassicLocaleStream<VSI::VSIOStream>(vsi_name, mode);
     if (!ofs->good())
     {
         delete ofs;
@@ -188,13 +188,13 @@ std::ostream *createFile(std::string const& name, bool asBinary, size_t nBufferS
 }
 
 
-std::ostream *openExisting(const std::string& name, bool asBinary, size_t nBufferSize)
+std::ostream *openExisting(const std::string& name, bool asBinary)
 {
     std::ios::openmode mode = std::ios::out | std::ios::in;
     if (asBinary)
         mode |= std::ios::binary;
 
-    VSI::VSIOStream *ofs = new Utils::ClassicLocaleStream<VSI::VSIOStream>(name, mode, nBufferSize);
+    VSI::VSIOStream *ofs = new Utils::ClassicLocaleStream<VSI::VSIOStream>(name, mode);
     if (!ofs->good())
     {
         delete ofs;
