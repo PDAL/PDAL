@@ -19,7 +19,7 @@ Python dependencies should be installed from [PyPI] with `pip` or
 `easy_install`.
 
 ```bash
-(sudo) pip install sphinx sphinxconfig-bibtex breathe
+(sudo) pip install sphinx sphinxcontrib-bibtex breathe
 ```
 
 ```{note}
