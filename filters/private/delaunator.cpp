@@ -207,6 +207,8 @@ Delaunator::Delaunator(std::vector<double> const& in_coords)
             min_dist = d;
         }
     }
+    if (i1 == INVALID_INDEX)
+        throw std::runtime_error("All points are duplicates of one another");
 
     double i1x = coords[2 * i1];
     double i1y = coords[2 * i1 + 1];
@@ -225,10 +227,8 @@ Delaunator::Delaunator(std::vector<double> const& in_coords)
             min_radius = r;
         }
     }
-
-    if (!(min_radius < (std::numeric_limits<double>::max()))) {
-        throw std::runtime_error("All points collinear");
-    }
+    if (i2 == INVALID_INDEX)
+        throw std::runtime_error("All points are collinear");
 
     double i2x = coords[2 * i2];
     double i2y = coords[2 * i2 + 1];
