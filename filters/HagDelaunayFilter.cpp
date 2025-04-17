@@ -215,7 +215,16 @@ void HagDelaunayFilter::filter(PointView& view)
         }
         else
         {
-            z1 = delaunay_interp_ground(x0, y0, gView, ids);
+            try
+            {
+                z1 = delaunay_interp_ground(x0, y0, gView, ids);
+            }
+            // In degenerate cases (ids are collinear or duplicates), the above will throw,
+            // so treat x0/y0 as outside and assign the current value.
+            catch (...)
+            {
+                z1 = z0;
+            }
         }
         ngView->setField(Dimension::Id::HeightAboveGround, i, z0 - z1);
     }
