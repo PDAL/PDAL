@@ -31,9 +31,10 @@ public:
     void findShapes();
     void findParentPaths();
     void toWKT(std::ostream& output) const;
+    void flushSamples();
 
     void setSampleSize(int num)
-        {m_maxSample = num; }
+        { m_maxSample = num; }
     std::vector<Path *> const& rootPaths() const
         { return m_roots; }
     // returns all hexagons in the grid and their counts

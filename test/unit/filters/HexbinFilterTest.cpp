@@ -100,6 +100,54 @@ TEST(HexbinFilterTest, HexbinFilterTest_test_1)
     FileUtils::deleteFile(filename);
 }
 
+// testing sample size for calculating grid size
+TEST(HexbinFilterTest, HexbinFilterTest_test_2)
+{ 
+    LasReader reader;
+    Options readOpts;
+    // Using a file with less points than the default sample size
+    // (10 pts vs default 5000 sample size)
+    readOpts.add("filename", Support::datapath("las/test_epsg_4326.las"));
+    reader.setOptions(readOpts);
+
+    HexBin filter;
+    Options hexOpts;
+    hexOpts.add("h3_grid", true);
+    hexOpts.add("threshold", 1);
+    filter.setOptions(hexOpts);
+    filter.setInput(reader);
+
+    PointTable table;
+    filter.prepare(table);
+    PointViewSet viewSet = filter.execute(table);
+
+    MetadataNode m = table.metadata();
+    m = m.findChild(filter.getName());
+    // Checking that the sample size and h3 resolution are correct
+    EXPECT_FALSE(filter.grid()->sampling());
+    EXPECT_EQ(m.findChild("sample_size").value<int>(), 10);
+    EXPECT_EQ(m.findChild("h3_resolution").value<int>(), 13);
+
+    // Now testing with a non-h3 grid
+    HexBin filter2;
+    Options hexOpts2;
+    hexOpts2.add("h3_grid", false);
+    hexOpts2.add("threshold", 1);
+    filter2.setOptions(hexOpts2);
+    filter2.setInput(reader);
+
+    PointTable table2;
+    filter2.prepare(table2);
+    PointViewSet viewSet2 = filter2.execute(table2);
+
+    MetadataNode m2 = table2.metadata();
+    m2 = m2.findChild(filter2.getName());
+
+    EXPECT_FALSE(filter2.grid()->sampling());
+    EXPECT_EQ(m2.findChild("sample_size").value<int>(), 10);
+    EXPECT_FLOAT_EQ(m2.findChild("estimated_edge").value<float>(), 1e-05);
+}
+
 // Test that we create proper WKT for geometry with islands.
 TEST(HexbinFilterTest, HexGrid_issue_2507)
 {

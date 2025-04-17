@@ -73,7 +73,7 @@ hexer::BaseGrid *HexBin::grid() const
 
 void HexBin::addArgs(ProgramArgs& args)
 {
-    args.add("sample_size", "Sample size for auto-edge length calculation",
+    args.add("sample_size", "Maximum sample size for auto-edge length calculation",
         m_sampleSize, 5000U);
     args.add("threshold", "Required cell density", m_density, 15);
     args.add("output_tesselation", "Write tesselation to output metadata",
@@ -193,12 +193,16 @@ void HexBin::done(PointTableRef table)
 {
     if (m_grid->sampling())
     {
-        std::ostringstream oss;
-        oss << "Sampling for hexbin auto-edge length calculation failed! ";
+        // If we ran out of points while sampling, process the points in the sample buffer:
+        // in stream mode, we can't check this until we've gone through all the points
         if (m_sampleSize > m_count)
-            oss << "Decrease sample size: sample size of " << m_sampleSize 
-                << " with " << m_count << " points.";
-        throwError(oss.str());
+        {
+            m_grid->flushSamples();
+            // Setting this so it gets written to metadata correctly
+            m_sampleSize = m_count;
+        }
+        else
+            throwError("Sampling for hexbin auto-edge length calculation failed!");
     }
 
     try
@@ -217,9 +221,9 @@ void HexBin::done(PointTableRef table)
 
     m_metadata.add("threshold", m_grid->denseLimit(),
         "Minimum number of points inside a hexagon to be considered full");
-    m_metadata.add("sample_size", m_sampleSize, "Number of samples to use "
-        "when estimating hexagon edge size. Specify 0.0 or omit options "
-        "for edge_size if you want to compute one.");
+    m_metadata.add("sample_size", m_sampleSize, "Number of samples used for "
+        "estimating hexagon edge size. Only used if 'edge_length' or "
+        "'h3_resolution' is not set.");
 
     Utils::OStringStreamClassicLocale polygon;
     polygon.setf(std::ios_base::fixed, std::ios_base::floatfield);
