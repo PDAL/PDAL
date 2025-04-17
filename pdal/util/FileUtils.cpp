@@ -50,10 +50,13 @@
 namespace fs = std::filesystem;
 
 
+#include <cpl_string.h>
+#include <cpl_vsi.h>
 
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
 #include <pdal/pdal_types.hpp>
+#include <pdal/util/VSIIO.hpp>
 
 #include "pdal_util_internal.hpp"
 
@@ -141,11 +144,11 @@ std::istream *openFile(std::string const& filename, bool asBinary)
     if (filename[0] == '~')
         throw pdal::pdal_error("PDAL does not support shell expansion");
 
-    std::ifstream *ifs = nullptr;
+    VSI::VSIIStream *ifs = nullptr;
 
     std::string name(filename);
     if (isStdin(name))
-        return &std::cin;
+        name = "/vsistdin/";
 
     if (!FileUtils::fileExists(name))
         return nullptr;
@@ -154,7 +157,8 @@ std::istream *openFile(std::string const& filename, bool asBinary)
     if (asBinary)
         mode |= std::ios::binary;
 
-    ifs = new Utils::ClassicLocaleStream<std::ifstream>(toNative(name), mode);
+    ifs = new Utils::ClassicLocaleStream<VSI::VSIIStream>(name, mode);
+
     if (!ifs->good())
     {
         delete ifs;
@@ -166,14 +170,15 @@ std::istream *openFile(std::string const& filename, bool asBinary)
 
 std::ostream *createFile(std::string const& name, bool asBinary)
 {
+    std::string vsi_name(name);
     if (isStdout(name))
-        return &std::cout;
+        vsi_name = "/vsistdout/";
 
     std::ios::openmode mode = std::ios::out;
     if (asBinary)
         mode |= std::ios::binary;
 
-    std::ostream *ofs = new Utils::ClassicLocaleStream<std::ofstream>(toNative(name), mode);
+    VSI::VSIOStream *ofs = new Utils::ClassicLocaleStream<VSI::VSIOStream>(vsi_name, mode);
     if (!ofs->good())
     {
         delete ofs;
@@ -189,7 +194,7 @@ std::ostream *openExisting(const std::string& name, bool asBinary)
     if (asBinary)
         mode |= std::ios::binary;
 
-    std::ostream *ofs = new Utils::ClassicLocaleStream<std::ofstream>(toNative(name), mode);
+    VSI::VSIOStream *ofs = new Utils::ClassicLocaleStream<VSI::VSIOStream>(name, mode);
     if (!ofs->good())
     {
         delete ofs;
@@ -201,96 +206,102 @@ std::ostream *openExisting(const std::string& name, bool asBinary)
 
 bool directoryExists(const std::string& dirname)
 {
-    //ABELL - Seems we should be calling is_directory
-    return fs::exists(toNative(dirname));
+    VSIStatBufL sStat;
+    if (VSIStatL(dirname.c_str(), &sStat) == 0)
+    {
+        return VSI_ISDIR(sStat.st_mode);
+    }
+    else
+    {
+        return false;
+    }
 }
 
 
 bool createDirectory(const std::string& dirname)
 {
-    return fs::create_directory(toNative(dirname));
+    std::string pth = CPLCleanTrailingSlash(dirname.c_str());
+    if (VSIMkdir(pth.c_str(), 0755) != 0)
+    {
+        if (errno == EEXIST)
+            return false;
+        else
+        {
+            std::stringstream ss;
+            ss << "Unable to create directory " << dirname << std::endl << VSIStrerror(errno);
+            throw std::runtime_error(ss.str());
+        }
+    }
+    else
+        return true;
 }
 
 
 bool createDirectories(const std::string& dirname)
 {
-    // Need to strip any /'s off the end because windows and unix
-    // create_directories seem to behave differently
-    std::string s(dirname);
-    if('/' == s.back())
-        s.pop_back();
-
-    return fs::create_directories(toNative(s));
+    std::string pth = CPLCleanTrailingSlash(dirname.c_str());
+    if (VSIMkdirRecursive(pth.c_str(), 0755) != 0)
+    {
+        if (errno == EEXIST)
+            return false;
+        else
+        {
+            std::stringstream ss;
+            ss << "Unable to create directories " << dirname << std::endl << VSIStrerror(errno);
+            throw std::runtime_error(ss.str());
+        }
+    }
+    else
+        return true;
 }
 
 
 void deleteDirectory(const std::string& dirname)
 {
-    fs::remove_all(toNative(dirname));
+    VSIRmdirRecursive(dirname.c_str());
 }
 
 
 std::vector<std::string> directoryList(const std::string& dir)
 {
     std::vector<std::string> files;
+    CPLStringList aosFileList(VSIReadDir(dir.c_str()));
+    for (int i = 0; i < aosFileList.size(); i++)
+    {
+        std::string osPath =
+            CPLFormFilename(dir.c_str(), aosFileList[i], nullptr);
+        files.push_back(osPath);
+    }
 
-    try
-    {
-        fs::directory_iterator it(toNative(dir));
-        fs::directory_iterator end;
-        while (it != end)
-        {
-            files.push_back(it->path().u8string());
-            it++;
-        }
-    }
-    catch (fs::filesystem_error& )
-    {
-        files.clear();
-    }
     return files;
 }
 
 
 void closeFile(std::ostream *out)
 {
-    // An ofstream is closeable and deletable, but
-    // an ostream like &cout isn't.
     if (!out)
         return;
-    std::ofstream *ofs = dynamic_cast<std::ofstream *>(out);
-    if (ofs)
-    {
-        ofs->close();
-        delete ofs;
-    }
+    delete out;
 }
 
 
 void closeFile(std::istream* in)
 {
-    // An ifstream is closeable and deletable, but
-    // an istream like &cin isn't.
     if (!in)
         return;
-    std::ifstream *ifs = dynamic_cast<std::ifstream *>(in);
-    if (ifs)
-    {
-        ifs->close();
-        delete ifs;
-    }
+    delete in;
 }
 
 
 bool deleteFile(const std::string& file)
 {
-    return fs::remove(toNative(file));
+    return (VSIUnlink(file.c_str()) == 0) ? true : false;
 }
 
 
 void renameFile(const std::string& dest, const std::string& src)
 {
-    fs::rename(toNative(src), toNative(dest));
+    VSIRename(src.c_str(), dest.c_str());
 }
 
 
@@ -299,25 +310,21 @@ bool fileExists(const std::string& name)
     if (isStdin(name))
         return true;
 
-    try
-    {
-        return fs::exists(toNative(name));
-    }
-    catch (fs::filesystem_error&)
-    {
-    }
-    return false;
+    VSIStatBufL sStat;
+    return (VSIStatExL(name.c_str(), &sStat,
+        VSI_STAT_EXISTS_FLAG) == 0) ? true : false;
 }
 
 
 /// \return  0 on error or invalid file type.
 uintmax_t fileSize(const std::string& file)
 {
-    std::error_code ec;
-    uintmax_t size = fs::file_size(toNative(file), ec);
-    if (ec)
-        size = 0;
-    return size;
+    VSIStatBufL sStat;
+    if (VSIStatL(file.c_str(), &sStat) == 0)
+    {
+        return sStat.st_size;
+    }
+    return 0;
 }
 
 
@@ -338,8 +345,11 @@ std::string readFileIntoString(const std::string& filename)
 
 std::string getcwd()
 {
-    const fs::path p = fs::current_path();
-    return addTrailingSlash(p.u8string());
+    char* pszCurDir = CPLGetCurrentDir();
+    std::string cwd = addTrailingSlash(
+        std::string(pszCurDir));
+    CPLFree(pszCurDir);
+    return cwd;
 }
 
 
@@ -390,9 +400,8 @@ std::string getFilename(const std::string& path)
 // Get the directory part of a filename.
 std::string getDirectory(const std::string& path)
 {
-    const fs::path dir =
-         fs::path(toNative(path)).parent_path();
-    return addTrailingSlash(dir.u8string());
+    std::string pth(CPLGetPath(path.c_str()));
+    return addTrailingSlash(pth);
 }
 
 
@@ -412,7 +421,12 @@ std::string stem(const std::string& path)
 // Determine if the path represents a directory.
 bool isDirectory(const std::string& path)
 {
-    return fs::is_directory(toNative(path));
+    VSIStatBufL sStat;
+    if (VSIStatL(path.c_str(), &sStat) == 0)
+    {
+        return VSI_ISDIR(sStat.st_mode);
+    }
+    return false;
 }
 
 // Determine if the path is an absolute path
@@ -428,29 +442,14 @@ bool isAbsolutePath(const std::string& path)
 void fileTimes(const std::string& filename, struct tm *createTime,
     struct tm *modTime)
 {
-#ifdef _WIN32
-    struct _stat statbuf;
-#ifdef PDAL_WIN32_STL
-    std::wstring const wfilename(toNative(filename));
-    _wstat(wfilename.c_str(), &statbuf);
-#else
-    std::string const wfilename(toNative(filename));
-    _stat(wfilename.c_str(), &statbuf);
-#endif
-
-    if (createTime)
-        *createTime = *gmtime(&statbuf.st_ctime);
-    if (modTime)
-        *modTime = *gmtime(&statbuf.st_mtime);
-#else
-    struct stat statbuf;
-    stat(filename.c_str(), &statbuf);
-
-    if (createTime)
-        gmtime_r(&statbuf.st_ctime, createTime);
-    if (modTime)
-        gmtime_r(&statbuf.st_mtime, modTime);
-#endif
+    VSIStatBufL sStat;
+    if (VSIStatL(filename.c_str(), &sStat) == 0)
+    {
+        if (createTime)
+            VSIGMTime(const_cast<time_t *>(&sStat.st_ctime), createTime);
+        if (modTime)
+            VSIGMTime(const_cast<time_t *>(&sStat.st_mtime), modTime);
+    }
 }
 
 
@@ -465,6 +464,7 @@ std::string extension(const std::string& filename)
 
 std::vector<std::string> glob(std::string path)
 {
+    // replace with VSIGlob in GDAL 3.11
     std::vector<std::string> filenames;
 
     if (path[0] == '~')

@@ -1,6 +1,6 @@
 (filespec)=
 
-In addition to a string filename, HTTP headers and query parameters to be forwarded to remote endpoints
+In addition to a string or [GDAL VSI](https://gdal.org/en/stable/user/virtual_file_systems.html) filename, HTTP headers and query parameters to be forwarded to remote endpoints
 can be specified within the filename option. As shown below, a JSON object can be substituted, with the
 'headers' and 'query' fields as JSON objects of key/value string pairs.
 
