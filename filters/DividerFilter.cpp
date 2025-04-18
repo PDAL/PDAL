@@ -161,16 +161,16 @@ void DividerFilter::initialize()
             throwError("Can't specify both option 'count' and option 'capacity.");
         if (!m_args->m_cntArg->set() && !m_args->m_capArg->set())
             throwError("Must specify either option 'count' or option 'capacity'.");
-    }
 
-    if (m_args->m_cntArg->set())
-    {
-        m_args->m_sizeMode = SizeMode::Count;
-        if (m_args->m_size < 2 || m_args->m_size > 1000)
-            throwError("Option 'count' must be in the range [2, 1000].");
+        if (m_args->m_cntArg->set())
+        {
+            m_args->m_sizeMode = SizeMode::Count;
+            if (m_args->m_size < 2 || m_args->m_size > 1000)
+                throwError("Option 'count' must be in the range [2, 1000].");
+        }
+        if (m_args->m_capArg->set())
+            m_args->m_sizeMode = SizeMode::Capacity;
     }
-    if (m_args->m_capArg->set())
-        m_args->m_sizeMode = SizeMode::Capacity;
 }
 
 
@@ -215,6 +215,17 @@ PointViewSet DividerFilter::run(PointViewPtr inView)
                 viewNum++;
         }
     }
+    else if (m_args->m_mode == Mode::RoundRobin)
+    {
+        unsigned viewNum = 0;
+        for (PointId i = 0; i < inView->size(); ++i)
+        {
+            views[viewNum]->appendPoint(*inView, i);
+            viewNum++;
+            if (viewNum == m_args->m_size)
+                viewNum = 0;
+        }
+    }
     else if (m_args->m_mode == Mode::Expression)
     {
         // Go make our first view to insert points into. If none of the points
@@ -225,59 +236,20 @@ PointViewSet DividerFilter::run(PointViewPtr inView)
         result.insert(firstView);
 
         unsigned viewNum (0);
-        unsigned countPassed(m_args->m_size);
 
         for (PointRef point : *inView)
         {
-            if (countPassed > 100000)
-                throwError("big problems chief!");
-            bool status = m_args->m_splitExpression.eval(point);
-            if (status)
+            bool passed = m_args->m_splitExpression.eval(point);
+            if (passed)
             {
-                countPassed--;
-
-                // If we have seen the required number of points that
-                // pass the expression, go make a new view
-                if (countPassed == 0)
-                {
-                    PointViewPtr v(inView->makeNew());
-                    views.push_back(v);
-                    result.insert(v);
-                    viewNum++;
-                    views[viewNum]->appendPoint(*inView.get(), point.pointId());
-
-                    countPassed = m_args->m_size;
-                } else
-                {
-                    // if we still haven't met the passedCount
-                    // threshhold, add this point to our active view
-                    views[viewNum]->appendPoint(*inView.get(), point.pointId());
-                }
-            } else
-            {
-                // If we didn't pass the expression, stick
-                // the point on the currently active view
-                views[viewNum]->appendPoint(*inView.get(), point.pointId());
+                // Make a new view
+                PointViewPtr tempView(inView->makeNew());
+                views.push_back(tempView);
+                result.insert(tempView);
+                viewNum++;
             }
-        }
 
-        if (log()->getLevel() > LogLevel::Warning)
-        {
-            for(auto& v: views)
-            {
-                log()->get(LogLevel::Debug) << "view size: " << v->size() << std::endl;
-            }
-        }
-    }
-    else if (m_args->m_mode == Mode::RoundRobin)
-    {
-        unsigned viewNum = 0;
-        for (PointId i = 0; i < inView->size(); ++i)
-        {
-            views[viewNum]->appendPoint(*inView, i);
-            viewNum++;
-            if (viewNum == m_args->m_size)
-                viewNum = 0;
+            views[viewNum]->appendPoint(*inView.get(), point.pointId());
         }
     }
     else

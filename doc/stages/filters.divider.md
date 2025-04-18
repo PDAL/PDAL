@@ -57,9 +57,8 @@ inserted into a new view.
 ## `expression` Example
 
 This pipeline will create a new view every time a point that satisfies the
-expression `UserData == 122`. It can be used in combination with `count` to
-enforce a _run_ of points that must satisfy the expression before splitting
-the view.
+expression `UserData == 122` is encountered. Use in combination with
+{ref}`filters.sort` to control ordering of points to determine split locations.
 
 ```json
 [

@@ -253,30 +253,46 @@ TEST(DividerFilterTest, break_on_expression)
 TEST(DividerFilterTest, break_on_userdata)
 {
 
-    LasReader r;
+    LasReader read;
     Options ro;
     ro.add("filename", Support::datapath("autzen/autzen-utm.las"));
-    r.setOptions(ro);
+    read.setOptions(ro);
 
-    SortFilter s;
+    SortFilter sort;
     Options sOps;
 
-    sOps.add("dimension", "UserData");
+    sOps.add("dimension", "PointSourceId");
     sOps.add("algorithm", "stable");
-    s.setOptions(sOps);
-    s.setInput(r);
+    sort.setOptions(sOps);
+    sort.setInput(read);
 
     Options dOps;
-    dOps.add("expression", "UserData == 122");
-    DividerFilter d;
-    d.setInput(r);
-    d.setOptions(dOps);
+
+    // There are 44 points with PointSourceId of 7326
+    // When we break on 7327, we are going to get the first 44
+    // points in one view and then a bunch of views of 1 point
+    // for each expression that succeeds
+    dOps.add("expression", "PointSourceId == 7327");
+
+    DividerFilter divide;
+    divide.setInput(sort);
+    divide.setOptions(dOps);
 
     PointTable t;
-    d.prepare(t);
-    PointViewSet vs = d.execute(t);
+    divide.prepare(t);
+    PointViewSet vs = divide.execute(t);
 
-    EXPECT_EQ(vs.size(), 88u);
+    EXPECT_EQ(vs.size(), 129u);
 
+    auto it = std::begin(vs);
+    PointViewPtr v1 = *it;
+    EXPECT_EQ(v1->size(), 44u);
+
+    ++it;
+    if (it != vs.end())
+    {
+        PointViewPtr v2 = *it;
+        EXPECT_EQ(v2->size(), 1u);
+    }
 
 }
