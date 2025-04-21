@@ -41,6 +41,17 @@ html:
 
 
 sphinx:
+  local_extensions:
+    embed: ./_ext
+    rtd_deploy: ./_ext
+  extra_extensions:
+    - breathe
+    - sphinx.ext.autodoc
+    - sphinx.ext.mathjax
+    - sphinx.ext.intersphinx
+    - sphinxcontrib.bibtex
+    - notfound.extension
+    - sphinxcontrib.jquery
   config:
     html_show_copyright: false
     bibtex_bibfiles:
@@ -85,16 +96,6 @@ sphinx:
 #      - "PDAL: Point cloud Data Abstraction Library"
 #      - 'Andrew Bell\\Brad Chambers\\Howard Butler\\Michael Gerlek\\PDAL Contributors'
 #      - "manual"
-  local_extensions:
-    embed: ./_ext
-  extra_extensions:
-    - breathe
-    - sphinx.ext.autodoc
-    - sphinx.ext.mathjax
-    - sphinx.ext.intersphinx
-    - sphinxcontrib.bibtex
-    - notfound.extension
-    - sphinxcontrib.jquery
 
 parse:
   myst_substitutions:

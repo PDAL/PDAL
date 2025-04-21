@@ -5,6 +5,7 @@ sphinx.locale.admonitionlabels['plugin'] = u''# u'Non-default Dynamic Plugin Sta
 sphinx.locale.admonitionlabels['streamable'] = u''# u'Streamable Stage'
 
 def setup(app):
+    print('\n\n\nembed\n\n\n')
     app.add_node(embed,
                  html=(visit_embed_node, depart_node),
                  latex=(visit_admonition, depart_node),

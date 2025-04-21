@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.13)
 if(NOT ROOT_DIR)
     project(pdal-docs)
     set(ROOT_DIR "${PROJECT_SOURCE_DIR}/..")
+    set(PDAL_CMAKE_DIR ${ROOT_DIR}/cmake)
     # If we're building from the doc directory, set the sphinx build dir as our current build dir.
     set(SPHINX_BUILDDIR ${CMAKE_CURRENT_BINARY_DIR})
 endif()
@@ -13,19 +14,7 @@ set(PDAL_DOC_DIR ${ROOT_DIR}/doc)
 ### Dependencies
 ###
 
-find_package(Doxygen)
-find_package(Python COMPONENTS Interpreter REQUIRED)
-find_program(JUPYTERBOOK jupyter-book)
-find_program(SPHINX_BUILD sphinx-build)
-
-if (NOT SPHINX_BUILD)
-    message(FATAL_ERROR "Building documentation requires sphinx-build")
-endif()
-if (NOT JUPYTERBOOK)
-    message(FATAL_ERROR "Building documentation requires jupyter-book")
-endif()
-
-option(BUILD_API_DOCS "Build API documentation with Doxygen" ${BUILD_DOCS_DEFAULT})
+include(${PDAL_CMAKE_DIR}/docs.cmake)
 
 ### 
 ### Sphinx & Jupyter Book setup

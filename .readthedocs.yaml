@@ -12,6 +12,9 @@ build:
   jobs:
     pre_build:
       - ./doc/rtd-prebuild.sh
+    build:
+      html:
+        - jupyter-book build --path-output=$READTHEDOCS_OUTPUT/html .
   apt_packages:
     - graphviz
 
