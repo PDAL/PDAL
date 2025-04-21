@@ -201,6 +201,12 @@ uint32_t diff_geojson(const std::string& file1, const std::string& file2, int32_
         else if (buf2.rfind("GEOGCRS[", 0) == 0)
             buf2ignore = true;
 
+        // remove line endings from test comparisons
+        buf1.erase(std::remove(buf1.begin(), buf1.end(), '\r' ), buf1.end());
+        buf1.erase(std::remove(buf1.begin(), buf1.end(), '\n' ), buf1.end());
+        buf2.erase(std::remove(buf2.begin(), buf2.end(), '\r' ), buf2.end());
+        buf2.erase(std::remove(buf2.begin(), buf2.end(), '\n' ), buf2.end());
+
         if (!buf1ignore && !buf2ignore && buf1 != buf2)
             ++numdiffs;
 
@@ -229,7 +235,6 @@ TEST(OGRWriterTest, shapefile)
     runOgrWriterInfo(wo, infile, infofile, ".shp");
 }
 
-#ifndef _WIN32
 TEST(OGRWriterTest, json)
 {
     std::string infile = Support::datapath("las/simple.las");
@@ -240,7 +245,6 @@ TEST(OGRWriterTest, json)
 
     runOgrWriterInfo(wo, infile, infofile, ".geojson", 10, &diff_geojson);
 }
-#endif
 
 TEST(OGRWriterTest, geopackage)
 {
@@ -253,7 +257,6 @@ TEST(OGRWriterTest, geopackage)
     runOgrWriterInfo(wo, infile, infofile, ".gpkg");
 }
 
-#ifndef _WIN32
 TEST(OGRWriterTest, creation_options)
 {
     std::string infile = Support::datapath("las/simple.las");
@@ -270,7 +273,6 @@ TEST(OGRWriterTest, creation_options)
 
         runOgrWriterInfo(wo, infile, infofile, ".geojson", 10, &diff_geojson);
 }
-#endif
 
 TEST(OGRWriterTest, shapefile_measure)
 {
