@@ -55,14 +55,13 @@ if (DOXYGEN_FOUND)
     )
     add_custom_command(
         WORKING_DIRECTORY ${ROOT_DIR}
+        DEPENDS ${PDAL_DOC_DIR}/dimension_table.csv
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/doxygen.stamp
         COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE_PATH} ${DOXYGEN_BUILD_OPTS}
         COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/doxygen.stamp
     )
-    # requiring the dimension generation script to get run before doxygen.
-    # readthedocs.yml does this currently, but not the docs makefile. Idk
     add_custom_target(doxygen
-        DEPENDS ${PDAL_DOC_DIR}/dimension_table.csv ${CMAKE_CURRENT_BINARY_DIR}/doxygen.stamp
+        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/doxygen.stamp
         COMMENT "Built Doxygen")
 
 endif()
@@ -73,32 +72,12 @@ endif()
 
 set(JB_CONF_FILE "${PDAL_DOC_DIR}/conf.py")
 
-add_custom_command(
-    WORKING_DIRECTORY ${ROOT_DIR}
-    OUTPUT ${JB_CONF_FILE}
-    COMMAND ${JUPYTERBOOK} config sphinx doc/
-    COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/jupyterbook.stamp
-)
-
-# Added this as a way to avoid appending to conf.py with sed or similar commands.
-# writing an entire new cmake file just to add one line is silly, but it works.
-
-set(JB_CONF_PREPEND "[==[import os, sys; sys.path.append(os.path.abspath(\"./_ext\"))\n]==]"
-    CACHE STRING "Lines to prepend to conf.py.")
-set(JB_CONF_APPEND "" 
-    CACHE STRING "Lines to append to conf.py.")
-
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/prepend.cmake 
-    "file(READ \"${JB_CONF_FILE}\" JB_CONF_CONTENTS)\n"
-    "string(PREPEND JB_CONF_CONTENTS ${JB_CONF_PREPEND})\n"
-    "string(APPEND JB_CONF_CONTENTS ${JB_CONF_APPEND})\n"
-    "file(WRITE \"${JB_CONF_FILE}\" \"$\{JB_CONF_CONTENTS\}\")"
-)
-
 add_custom_target(jupyterbook_config
-    DEPENDS ${JB_CONF_FILE}
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/prepend.cmake
-    COMMENT "Configured sphinx and jupyter-book")
+    WORKING_DIRECTORY ${ROOT_DIR}
+    BYPRODUCTS ${JB_CONF_FILE}
+    COMMAND ${JUPYTERBOOK} config sphinx doc/
+    COMMENT "Configured jupyter-book"
+)
 
 ###
 ### Final targets
@@ -106,5 +85,6 @@ add_custom_target(jupyterbook_config
 
 add_custom_target(jupyter-book
     WORKING_DIRECTORY ${ROOT_DIR}
+    DEPENDS ${JB_CONF_FILE}
     COMMAND ${JUPYTERBOOK} build ${BUILDER} doc/
     COMMENT "Built Jupyter Book")

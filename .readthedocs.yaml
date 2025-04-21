@@ -14,7 +14,7 @@ build:
       - ./doc/rtd-prebuild.sh
     build:
       html:
-        - jupyter-book build --path-output=$READTHEDOCS_OUTPUT/html .
+        - jupyter-book build --path-output=$READTHEDOCS_OUTPUT/html doc/
   apt_packages:
     - graphviz
 

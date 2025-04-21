@@ -7,13 +7,9 @@
 mkdir -p doc/_build
 cd doc/_build
 
-# JB_CONF_APPEND variable replaces the sed command to append conf.py.
-# JB_CONF_PREPEND replaces the sed command to prepend conf.py, set to
-# "import os, sys; sys.path.append(os.path.abspath("./_ext"))" by default
 cmake \
-	 -DCMAKE_INSTALL_PREFIX=${CONDA_PREFIX} \
-	 -DJB_CONF_APPEND="[==[html_baseurl = os.environ.get(\"READTHEDOCS_CANONICAL_URL\", \"\")]==]" \
-	 ..
+	-DCMAKE_INSTALL_PREFIX=${CONDA_PREFIX} \
+	..
 # Target makes dimension-table.csv, runs doxygen
 cmake --build . --target doxygen
 # Target runs jupyter-book config
