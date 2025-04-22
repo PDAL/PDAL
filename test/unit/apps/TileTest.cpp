@@ -83,7 +83,7 @@ TEST(Tile, test1)
     std::string cmd = baseCmd + " --origin_x=0 --origin_y=0 --length=10";
     Utils::run_shell_command(cmd, output);
 
-    EXPECT_EQ(FileUtils::directoryList(Support::temppath("tile")).size(), 9U);
+    EXPECT_EQ(FileUtils::directoryList(Support::temppath("tile")).size(), 11U);
     for (int i = 0; i < 3; ++i)
         for (int j = 0; j < 3; ++j)
             checkFile(i, j, 3);

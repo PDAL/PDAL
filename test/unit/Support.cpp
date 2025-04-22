@@ -144,6 +144,12 @@ uint32_t diff_text_files(std::istream& str1, std::istream& str2, int32_t ignoreL
             continue;
         }
 
+        // remove line endings from test comparisons
+        buf1.erase(std::remove(buf1.begin(), buf1.end(), '\r' ), buf1.end());
+        buf1.erase(std::remove(buf1.begin(), buf1.end(), '\n' ), buf1.end());
+        buf2.erase(std::remove(buf2.begin(), buf2.end(), '\r' ), buf2.end());
+        buf2.erase(std::remove(buf2.begin(), buf2.end(), '\n' ), buf2.end());
+
         if (str1.eof() && str2.eof())
         {
             // hit end on both together
