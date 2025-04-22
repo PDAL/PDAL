@@ -14,7 +14,18 @@ build:
       - ./doc/rtd-prebuild.sh
     build:
       html:
-        - jupyter-book build --path-output=$READTHEDOCS_OUTPUT/html doc/
+        - jupyter-book build doc/
+        - cp -R doc/_build/html $READTHEDOCS_OUTPUT/html
+      # not sure how this compares to --builder=latex + latexmk (rtd default)
+      pdf:
+        - jupyter-book build --builder pdflatex doc/
+        - cp -R doc/_build/latex $READTHEDOCS_OUTPUT/pdf
+      htmlzip:
+        - jupyter-book build --builder singlehtml doc/
+        - cp -R doc/_build/singlehtml $READTHEDOCS_OUTPUT/htmlzip
+      epub:
+        - jupyter-book build --builder custom --custom-builder epub doc/
+        - cp -R doc/_build/epub $READTHEDOCS_OUTPUT/epub
   apt_packages:
     - graphviz
 
