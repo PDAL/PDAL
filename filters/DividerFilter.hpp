@@ -68,13 +68,6 @@ private:
 
     std::unique_ptr<Args> m_args;
 
-//     Arg *m_cntArg;
-//     Arg *m_capArg;
-//     Arg *m_splitExpressionArg;
-//     Mode m_mode;
-//     SizeMode m_sizeMode;
-//     point_count_t m_size;
-
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
     virtual PointViewSet run(PointViewPtr view);

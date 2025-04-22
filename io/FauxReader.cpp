@@ -269,7 +269,6 @@ bool FauxReader::processOne(PointRef& point)
         point.setField(Dimension::Id::OffsetTime, std::numeric_limits<double>::quiet_NaN());
     else
         point.setField(Dimension::Id::OffsetTime, m_time++);
-
     if (m_numReturns > 0)
     {
         point.setField(Dimension::Id::ReturnNumber, m_returnNum);
