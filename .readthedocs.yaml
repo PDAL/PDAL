@@ -15,7 +15,8 @@ build:
     build:
       html:
         - jupyter-book build doc/
-        - cp -R doc/_build/html/* $READTHEDOCS_OUTPUT/html
+        - mkdir -p $READTHEDOCS_OUTPUT/html/
+        - cp -R doc/_build/html/* $READTHEDOCS_OUTPUT/html/
       # not sure how this compares to --builder=latex + latexmk (rtd default)
       pdf:
         - jupyter-book build --builder pdflatex doc/
