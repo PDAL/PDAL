@@ -89,7 +89,7 @@ TIndexReader::FieldIndexes TIndexReader::getFields()
 {
     FieldIndexes indexes;
 
-    void *fDefn = OGR_L_GetLayerDefn(m_layer);
+    OGRFeatureDefnH fDefn = OGR_L_GetLayerDefn(m_layer);
 
     indexes.m_filename = OGR_FD_GetFieldIndex(fDefn,
         m_args->m_tileIndexColumnName.c_str());

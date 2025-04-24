@@ -35,6 +35,15 @@
 
 #include <string>
 
+// Get GDAL's forward decls if available
+// otherwise make our own
+#if __has_include(<gdal_fwd.h>)
+#include <gdal_fwd.h>
+#else
+using OGRDataSourceH = void *;
+using OGRLayerH = void *;
+#endif
+
 namespace hexer
 {
     class BaseGrid;
@@ -45,9 +54,6 @@ namespace pdal
 
 class OGR
 {
-    using OGRDataSourceH = void *;
-    using OGRLayerH = void *;
-
 public:
     OGR(std::string const& filename, const std::string& srs,
         std::string driver = "ESRI Shapefile", std::string layerName ="");

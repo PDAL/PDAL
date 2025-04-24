@@ -40,6 +40,15 @@
 #include <pdal/SubcommandKernel.hpp>
 #include <pdal/util/FileUtils.hpp>
 
+// Get GDAL's forward decls if available
+// otherwise make our own
+#if __has_include(<gdal_fwd.h>)
+#include <gdal_fwd.h>
+#else
+using OGRDataSourceH = void *;
+using OGRLayerH = void *;
+#endif
+
 namespace pdal
 {
     class Polygon;
@@ -118,8 +127,8 @@ private:
     uint32_t m_sampleSize;
     std::string m_boundaryExpr;
 
-    void *m_dataset;
-    void *m_layer;
+    OGRDataSourceH m_dataset;
+    OGRLayerH m_layer;
     std::string m_tgtSrsString;
     std::string m_assignSrsString;
     bool m_fastBoundary;
