@@ -4,8 +4,6 @@ if(NOT ROOT_DIR)
     project(pdal-docs)
     set(ROOT_DIR "${PROJECT_SOURCE_DIR}/..")
     set(PDAL_CMAKE_DIR ${ROOT_DIR}/cmake)
-    # If we're building from the doc directory, set the sphinx build dir as our current build dir.
-    set(SPHINX_BUILDDIR ${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
 set(PDAL_DOC_DIR ${ROOT_DIR}/doc)
@@ -20,18 +18,8 @@ include(${PDAL_CMAKE_DIR}/docs.cmake)
 ### Sphinx & Jupyter Book setup
 ###
 
-# Builder options -- can set "--builder <builder>" for sphinx or jupyter-book targets
-set(BUILDER "" CACHE STRING "Sphinx builder to use, e.g. html (--builder=<builder>)")
-
-# Output directory - if we're building standalone, this already got created.
-# If we're building from pdal source, specify our own.
-if (NOT SPHINX_BUILDDIR)
-    set(SPHINX_BUILDDIR ${PDAL_DOC_DIR}/_build)
-    file(MAKE_DIRECTORY ${SPHINX_BUILDDIR})
-endif()
-
-#!! Unused for now
-set(JB_BUILD_OPTS "--output-dir ${SPHINX_BUILDDIR}")
+set(CUSTOM_SPHINX_BUILDER "" CACHE STRING "Custom Sphinx builder to pass to jupyter-book")
+set(JB_BUILD_LOCATION "${PDAL_DOC_DIR}/" CACHE STRING "Directory to create jupyter-book `_build` directory in")
 
 if (DOXYGEN_FOUND)
     ### 
@@ -62,29 +50,56 @@ if (DOXYGEN_FOUND)
     )
     add_custom_target(doxygen
         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/doxygen.stamp
-        COMMENT "Built Doxygen")
+        COMMENT "Building Doxygen")
 
 endif()
 
 ###
-### Jupyterbook config
+### Jupyterbook config - unused
 ###
 
 set(JB_CONF_FILE "${PDAL_DOC_DIR}/conf.py")
 
+# If we aren't using the sphinx-build command, we don't need to configure
+# Jupyter Book -- everything will be created from _config.yml.
 add_custom_target(jupyterbook_config
     WORKING_DIRECTORY ${ROOT_DIR}
     BYPRODUCTS ${JB_CONF_FILE}
     COMMAND ${JUPYTERBOOK} config sphinx doc/
-    COMMENT "Configured jupyter-book"
-)
+    COMMENT "Configuring Jupyter Book for Sphinx")
 
 ###
 ### Final targets
 ###
 
-add_custom_target(jupyter-book
-    WORKING_DIRECTORY ${ROOT_DIR}
-    DEPENDS ${JB_CONF_FILE}
-    COMMAND ${JUPYTERBOOK} build ${BUILDER} doc/
-    COMMENT "Built Jupyter Book")
+set(BUILDERS 
+    "html" 
+    "singlehtml" 
+    "pdflatex" 
+    "latex" 
+    "dirhtml" 
+    "pdfhtml" 
+    "linkcheck" 
+    "custom")
+
+foreach(BUILDER ${BUILDERS})
+    if(${BUILDER} STREQUAL "custom" AND CUSTOM_SPHINX_BUILDER)
+        add_custom_target(${CUSTOM_SPHINX_BUILDER}
+            WORKING_DIRECTORY ${ROOT_DIR}
+            COMMAND 
+                ${JUPYTERBOOK} build 
+                    --builder ${BUILDER} 
+                    --custom-builder ${CUSTOM_SPHINX_BUILDER} 
+                    --path-output ${JB_BUILD_LOCATION} 
+                    doc/
+            COMMENT "Building Jupyter Book ${CUSTOM_SPHINX_BUILDER}")
+    else()
+        add_custom_target(${BUILDER}
+            WORKING_DIRECTORY ${ROOT_DIR}
+            COMMAND ${JUPYTERBOOK} build 
+                --builder ${BUILDER} 
+                --path-output ${JB_BUILD_LOCATION} 
+                doc/
+            COMMENT "Building Jupyter Book ${BUILDER}")
+    endif()
+endforeach()

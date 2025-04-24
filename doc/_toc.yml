@@ -275,7 +275,7 @@ parts:
       - file: development/compilation/unix
       - file: development/compilation/windows
       - file: development/compilation/dependencies
-    - file: development/documentation-quickstart
+    - file: development/docs
     - file: development/errorhandling
     - file: development/metadata
     - file: development/writing
@@ -289,7 +289,6 @@ parts:
     sections:
     - file: project/conventions
     - file: project/contributors
-    - file: project/docs
     - file: project/docker
     - file: project/alpine
     - file: project/testing
