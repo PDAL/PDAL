@@ -63,7 +63,7 @@ CMake can also be used to build standalone in the {file}`doc/` directory, which 
 ```{note}
 For a full build of the {ref}`cppapi` documentation, you need to
 `make doxygen` to have it build its XML output which is consumed
-by [Breathe] before `make html` can be issued.
+by [Breathe] before `html` can be built.
 ```
 
 ### Latex
@@ -100,11 +100,9 @@ mynewdependency = "*"
 
 in the `pixi.toml` manifest. Of course, if specific versions are required, this can be specified using the [VersionSpec](https://pixi.sh/latest/reference/pixi_manifest/#the-dependencies-tables).
 
-## Website
 
-
-
-[Jupyter Book]: https://jupyterbook.org/en/stable/intro.html#
+[Jupyter Book]: https://jupyterbook.org/en/stable/intro.html#\
+[cmake]: http://www.cmake.org
 [Read the Docs]: https://about.readthedocs.com/
 [MyST]: https://mystmd.org/
 [Mamba]: https://mamba.readthedocs.io/en/latest/index.html
