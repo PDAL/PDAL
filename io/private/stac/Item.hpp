@@ -67,12 +67,6 @@ public:
         const connector::Connector& connector,
         bool validate);
 
-    Item(const NL::json& json,
-        const std::string& itemPath,
-        const connector::Connector& connector,
-        bool validate,
-        LogPtr log);
-
     ~Item();
     Item(const Item& item);
 
@@ -100,7 +94,6 @@ private:
 
     const connector::Connector& m_connector;
     bool m_validate;
-    const LogPtr m_log;
 
     StageFactory m_factory;
     std::string m_driver;
@@ -122,8 +115,6 @@ private:
     bool filterDates(DatePairs dates);
     bool filterProperties(const NL::json& filterProps);
     bool filterBounds(Polygon bounds);
-
-
 };
 
 
