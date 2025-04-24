@@ -153,6 +153,9 @@ endif()
 
 add_subdirectory(plugins)
 
+if (BUILD_DOCS)
+    add_subdirectory(doc)
+endif()
 if (WITH_TESTS)
     include (${PDAL_CMAKE_DIR}/gtest.cmake)
     add_subdirectory(test)

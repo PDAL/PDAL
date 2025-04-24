@@ -25,10 +25,10 @@ libparquet = "*"
 jupyter-book = ">=1.0.3,<2"
 sphinx-notfound-page = ">=1.0.4,<2"
 sphinxcontrib-jquery = ">=4.1,<5"
-sphinxcontrib-bibtex = ">=2.6.3,<3"
 breathe = ">=4.35.0,<5"
 sphinx-inline-tabs = ">=2023.4.21,<2024"
-sphinx = ">=5,<8"
+doxygen = "*"
+cmake = "*"
 python-pdal = "*"
 
 [feature.goldendoodle.dependencies]
@@ -136,7 +136,11 @@ build = { cmd = "cd .build && ninja", depends-on = ["configure"] }
 test = { cmd = "cd .build && ctest -VV --output-on-failure", depends-on = ["build"] }
 
 [feature.doc.tasks]
-build = "jb build doc"
+configure = { cmd = [ "cmake",
+    "-S", ".",
+    "-B", "_build" ], cwd = "doc" }
+doxygen = { cmd = "cmake --build . --target doxygen", depends-on = ["configure"], cwd = "doc/_build" }
+build = { cmd = "cmake --build . --target html", depends-on = ["configure"], cwd = "doc/_build" }
 
 [feature.doc.target.win-64.tasks]
 preview = { cmd = "cmd /c start index.html", depends-on = ["build"], cwd = "doc/_build/html" }

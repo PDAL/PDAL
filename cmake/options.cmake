@@ -100,6 +100,9 @@ option(WITH_TESTS
     "Choose if PDAL unit tests should be built" TRUE)
 add_feature_info("Unit tests" WITH_TESTS "PDAL unit tests")
 
+option(BUILD_DOCS
+    "Choose if PDAL creates targets for building documentation" FALSE)
+
 # Enable CTest and submissions to PDAL dashboard at CDash
 # http://my.cdash.org/index.php?project=PDAL
 option(ENABLE_CTEST

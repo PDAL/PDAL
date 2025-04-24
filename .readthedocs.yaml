@@ -11,13 +11,25 @@ build:
     python: "mambaforge-latest"
   jobs:
     pre_build:
-      - python doc/generate_dimensions.py
-      - doxygen ./doc/doxygen/doxygen.conf 1> /dev/null
-      # Generate on-the-fly Sphinx configuration from Jupyter Book's _config.yml
-      - "jupyter-book config sphinx doc/"
-      - sed -i "1i\import os, sys; sys.path.append(os.path.abspath(\"./_ext\"))" doc/conf.py
-      - sed -i "\$ahtml_baseurl = os.environ.get(\"READTHEDOCS_CANONICAL_URL\", \"\")" doc/conf.py
-
+      - ./doc/rtd-prebuild.sh
+    build:
+      html:
+        - jupyter-book build doc/
+        - mkdir -p $READTHEDOCS_OUTPUT/html/
+        - cp -R doc/_build/html/* $READTHEDOCS_OUTPUT/html/
+      # not sure how this compares to --builder=latex + latexmk (rtd default)
+      pdf:
+        - jupyter-book build --builder pdflatex doc/
+        - mkdir -p $READTHEDOCS_OUTPUT/pdf/
+        - cp -R doc/_build/latex/* $READTHEDOCS_OUTPUT/pdf/
+      htmlzip:
+        - jupyter-book build --builder singlehtml doc/
+        - mkdir -p $READTHEDOCS_OUTPUT/htmlzip/
+        - cp -R doc/_build/singlehtml/* $READTHEDOCS_OUTPUT/htmlzip/
+      epub:
+        - jupyter-book build --builder custom --custom-builder epub doc/
+        - mkdir -p $READTHEDOCS_OUTPUT/epub/
+        - cp -R doc/_build/epub/* $READTHEDOCS_OUTPUT/epub/
   apt_packages:
     - graphviz
 
