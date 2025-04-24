@@ -54,14 +54,6 @@ Item::Item(const NL::json& json,
 {}
 
 
-Item::Item(const NL::json& json,
-        const std::string& itemPath,
-        const connector::Connector& connector,
-        bool validate, LogPtr log):
-    m_json(json), m_path(itemPath), m_connector(connector),
-    m_validate(validate), m_log(log)
-{}
-
 Item::~Item()
 {}
 
@@ -81,8 +73,6 @@ bool Item::init(const Filters& filters, NL::json rawReaderArgs,
     m_schemaUrls = schemaUrls;
     if (m_validate)
         validate();
-
-    m_log->get(LogLevel::Debug) << "Selected Item: " << id() << std::endl;
 
     NL::json readerArgs = handleReaderArgs(rawReaderArgs);
     m_readerOptions = setReaderOptions(readerArgs, m_driver);

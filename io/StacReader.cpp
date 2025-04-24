@@ -208,8 +208,7 @@ void StacReader::addItem(Item& item)
 
 void StacReader::handleItem(NL::json stacJson, std::string itemPath)
 {
-    Item item(stacJson, m_filename, *m_p->m_connector,
-        m_args->validateSchema, log());
+    Item item(stacJson, m_filename, *m_p->m_connector, m_args->validateSchema);
     log()->get(LogLevel::Debug) << "Found STAC Item " << item.id() << ".";
     if (item.init(*m_p->m_itemFilters, m_args->rawReaderArgs, m_args->schemaUrls))
     {
@@ -292,8 +291,7 @@ void StacReader::handleCollection(NL::json stacJson, std::string colPath)
 
 void StacReader::handleItemCollection(NL::json stacJson, std::string icPath)
 {
-    ItemCollection ic(stacJson, icPath, *m_p->m_connector,
-            m_args->validateSchema, log());
+    ItemCollection ic(stacJson, icPath, *m_p->m_connector, m_args->validateSchema);
 
     if (ic.init(*m_p->m_icFilters, m_args->rawReaderArgs, m_args->schemaUrls))
     {
