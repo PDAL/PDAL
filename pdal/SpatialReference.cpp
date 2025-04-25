@@ -358,7 +358,7 @@ bool SpatialReference::equals(const SpatialReference& input) const
     if (!current || !other)
         return false;
 
-    int output = current.get()->IsSame(other.get());
+    int output = current->IsSame(other.get());
 
     return (output == 1);
 }
@@ -389,7 +389,7 @@ bool SpatialReference::isGeographic() const
     if (!current)
         return false;
 
-    bool output = current.get()->IsGeographic();
+    bool output = current->IsGeographic();
     return output;
 }
 
@@ -400,7 +400,7 @@ bool SpatialReference::isGeocentric() const
     if (!current)
         return false;
 
-    bool output = current.get()->IsGeocentric();
+    bool output = current->IsGeocentric();
     return output;
 }
 
@@ -411,7 +411,7 @@ bool SpatialReference::isProjected() const
     if (!current)
         return false;
 
-    bool output = current.get()->IsProjected();
+    bool output = current->IsProjected();
     return output;
 }
 
@@ -420,7 +420,7 @@ std::vector<int> SpatialReference::getAxisOrdering() const
     std::vector<int> output;
     OGRScopedSpatialReference current = ogrCreateSrs(m_wkt, m_epoch);
     if (current)
-        output = current.get()->GetDataAxisToSRSAxisMapping();
+        output = current->GetDataAxisToSRSAxisMapping();
     return output;
 }
 
@@ -564,7 +564,7 @@ int SpatialReference::getUTMZone() const
         throw pdal_error("Could not fetch current SRS");
 
     int north(0);
-    int zone = current.get()->GetUTMZone(&north);
+    int zone = current->GetUTMZone(&north);
     return (north ? 1 : -1) * zone;
 }
 
