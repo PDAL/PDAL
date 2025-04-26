@@ -41,6 +41,15 @@
 
 #include <pdal/JsonFwd.hpp>
 
+// Get GDAL's forward decls if available
+// otherwise make our own
+#if __has_include(<gdal_fwd.h>)
+#include <gdal_fwd.h>
+#else
+using OGRDataSourceH = void *;
+using OGRLayerH = void *;
+#endif
+
 namespace pdal
 {
 
@@ -88,8 +97,8 @@ private:
 
     std::unique_ptr<Args> m_args;
     std::unique_ptr<gdal::SpatialRef> m_out_ref;
-    void *m_dataset;
-    void *m_layer;
+    OGRDataSourceH m_dataset;
+    OGRLayerH m_layer;
 
     StageFactory m_factory;
     MergeFilter m_merge;

@@ -41,8 +41,15 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <type_traits>
 
-typedef void *OGRLayerH;
+// Get GDAL's forward decls if available
+// otherwise make our own
+#if __has_include(<gdal_fwd.h>)
+#include <gdal_fwd.h>
+#else
+using OGRLayerH = void *;
+#endif
 
 namespace pdal
 {
@@ -52,9 +59,13 @@ namespace gdal
     class ErrorHandler;
 }
 
+#if __has_include(<gdal_fwd.h>)
+typedef std::shared_ptr<std::remove_pointer<OGRDataSourceH>::type> OGRDSPtr;
+typedef std::shared_ptr<std::remove_pointer<OGRFeatureH>::type> OGRFeaturePtr;
+#else
 typedef std::shared_ptr<void> OGRDSPtr;
 typedef std::shared_ptr<void> OGRFeaturePtr;
-typedef std::shared_ptr<void> OGRGeometryPtr;
+#endif
 
 class Arg;
 
@@ -83,8 +94,6 @@ private:
 
     OverlayFilter& operator=(const OverlayFilter&) = delete;
     OverlayFilter(const OverlayFilter&) = delete;
-
-    typedef std::shared_ptr<void> OGRDSPtr;
 
     OGRDSPtr m_ds;
     OGRLayerH m_lyr;

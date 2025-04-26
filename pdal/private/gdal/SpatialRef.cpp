@@ -106,9 +106,9 @@ bool SpatialRef::empty() const
     return wkt().empty();
 }
 
-void SpatialRef::newRef(void *v)
+void SpatialRef::newRef(OGRSpatialReferenceH v)
 {
-    m_ref = RefPtr(v, [](void* t){ OSRDestroySpatialReference(t); } );
+    m_ref = RefPtr(v, [](OGRSpatialReferenceH t){ OSRDestroySpatialReference(t); } );
 }
 
 } // namespace gdal

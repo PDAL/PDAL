@@ -357,7 +357,7 @@ std::vector<Polygon> getPolygons(const OGRSpecOptions& ogr)
                 throw pdal_error("Unable to execute OGR SQL query.");
 
             SpatialRef sref;
-            sref.setFromLayer(poLayer);
+            sref.setFromLayer(reinterpret_cast<OGRLayerH>(poLayer));
             ds->ReleaseResultSet(poLayer);
 
             poly.update(ogr.geometry);
@@ -380,7 +380,7 @@ std::vector<Polygon> getPolygons(const OGRSpecOptions& ogr)
     std::vector<Polygon> polys;
     while ((poFeature = poLayer->GetNextFeature()) != NULL)
     {
-        polys.emplace_back(poFeature->GetGeometryRef());
+        polys.emplace_back(reinterpret_cast<OGRGeometryH>(poFeature->GetGeometryRef()));
         OGRFeature::DestroyFeature( poFeature );
     }
 

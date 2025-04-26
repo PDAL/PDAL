@@ -275,11 +275,11 @@ Geometry Geometry::getRing() const
 {
     throwNoGeos();
 
-    int count = OGR_G_GetGeometryCount(m_geom.get());
+    int count = OGR_G_GetGeometryCount(gdal::toHandle(m_geom.get()));
     if (count)
     {
 
-        OGRGeometryH ring = OGR_G_Clone(OGR_G_GetGeometryRef(m_geom.get(), 0));
+        OGRGeometryH ring = OGR_G_Clone(OGR_G_GetGeometryRef(gdal::toHandle(m_geom.get()), 0));
         OGRGeometryH linestring = OGR_G_ForceToLineString(ring);
 
         return Geometry(linestring, getSpatialReference());

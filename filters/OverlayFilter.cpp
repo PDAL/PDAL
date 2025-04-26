@@ -93,7 +93,7 @@ void OverlayFilter::prepared(PointTableRef table)
 void OverlayFilter::ready(PointTableRef table)
 {
     m_ds = OGRDSPtr(OGROpen(m_datasource.c_str(), 0, 0),
-            [](void *p){ if (p) ::OGR_DS_Destroy(p); });
+            [](OGRDSPtr::element_type *p){ if (p) ::OGR_DS_Destroy(p); });
     if (!m_ds)
         throwError("Unable to open data source '" + m_datasource + "'");
 
@@ -114,7 +114,7 @@ void OverlayFilter::ready(PointTableRef table)
         OGR_L_SetSpatialFilter(m_lyr, g.getOGRHandle());
     }
 
-    auto featureDeleter = [](void *p)
+    auto featureDeleter = [](OGRFeaturePtr::element_type *p)
     {
         if (p)
             ::OGR_F_Destroy(p);

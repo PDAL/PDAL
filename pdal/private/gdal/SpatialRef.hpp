@@ -35,6 +35,7 @@
 #pragma once
 
 #include <memory>
+#include <type_traits>
 
 // Get GDAL's forward decls if available
 // otherwise make our own
@@ -42,6 +43,7 @@
 #include <gdal_fwd.h>
 #else
     using OGRLayerH = void *;
+    using OGRSpatialReferenceH = void *;
 #endif
 
 
@@ -53,7 +55,7 @@ namespace gdal
 
 class SpatialRef
 {
-    typedef std::shared_ptr<void> RefPtr;
+    typedef std::shared_ptr<std::remove_pointer<OGRSpatialReferenceH>::type> RefPtr;
 public:
     SpatialRef();
     SpatialRef(const std::string& srs);
@@ -65,7 +67,7 @@ public:
     bool empty() const;
 
 private:
-    void newRef(void *v);
+    void newRef(OGRSpatialReferenceH v);
 
     RefPtr m_ref;
 };
