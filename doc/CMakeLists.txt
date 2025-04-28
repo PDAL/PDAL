@@ -55,18 +55,28 @@ if (DOXYGEN_FOUND)
 endif()
 
 ###
-### Jupyterbook config - unused
+### Jupyterbook config
 ###
 
-set(JB_CONF_FILE "${PDAL_DOC_DIR}/conf.py")
+if(SED_EXECUTABLE)
+    set(JB_CONF_FILE "${PDAL_DOC_DIR}/conf.py")
 
-# If we aren't using the sphinx-build command, we don't need to configure
-# Jupyter Book -- everything will be created from _config.yml.
-add_custom_target(jupyterbook_config
-    WORKING_DIRECTORY ${ROOT_DIR}
-    BYPRODUCTS ${JB_CONF_FILE}
-    COMMAND ${JUPYTERBOOK} config sphinx doc/
-    COMMENT "Configuring Jupyter Book for Sphinx")
+    # If we aren't using the sphinx-build command, we don't need to configure
+    # Jupyter Book -- everything will be created from _config.yml.
+    add_custom_command(
+        WORKING_DIRECTORY ${ROOT_DIR}
+        OUTPUT ${JB_CONF_FILE}
+        COMMAND ${JUPYTERBOOK} config sphinx doc/
+        )
+
+    set(PREPEND_STRING [==[1i\import os, sys; sys.path.append(os.path.abspath(\"./_ext\"))]==])
+
+    add_custom_target(jupyterbook_config
+        WORKING_DIRECTORY ${ROOT_DIR}
+        DEPENDS ${JB_CONF_FILE}
+        COMMAND ${SED_EXECUTABLE} -i \"${PREPEND_STRING}\" ${JB_CONF_FILE}
+        COMMENT "Configuring Jupyter Book for Sphinx")
+endif()
 
 ###
 ### Final targets

@@ -8,6 +8,13 @@ if (NOT JUPYTERBOOK)
     )
 endif()
 
+# Find sed command for jupter-book config - only really necessary for readthedocs
+if(UNIX AND NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_program(SED_EXECUTABLE gsed)
+else()
+    find_program(SED_EXECUTABLE sed)
+endif()
+
 find_package(Doxygen)
 if (NOT DOXYGEN_FOUND)
     message("Could not find Doxygen. API documentation will not be built.")

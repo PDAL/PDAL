@@ -13,5 +13,3 @@ cmake \
 cmake --build . --target doxygen
 # Target creates conf.py
 cmake --build . --target jupyterbook_config
-# Makes sphinx extensions available
-sed -i "1i\import os, sys; sys.path.append(os.path.abspath(\"./_ext\"))" ../conf.py
