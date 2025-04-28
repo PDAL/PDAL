@@ -69,7 +69,7 @@ if(SED_EXECUTABLE)
         COMMAND ${JUPYTERBOOK} config sphinx doc/
         )
 
-    set(PREPEND_STRING [==[1i\import os, sys; sys.path.append(os.path.abspath(\"./_ext\"))]==])
+    set(PREPEND_STRING [==[1i\import os, sys\; sys.path.append(os.path.abspath(\"./_ext\"))]==])
 
     add_custom_target(jupyterbook_config
         WORKING_DIRECTORY ${ROOT_DIR}
