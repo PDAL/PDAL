@@ -134,6 +134,7 @@ configure = { cmd = [ "cmake",
 [feature.dev.tasks]
 build = { cmd = "cd .build && ninja", depends-on = ["configure"] }
 test = { cmd = "cd .build && ctest -VV --output-on-failure", depends-on = ["build"] }
+install = { cmd = "cd .build && ninja install", depends-on = ["build"] }
 
 [feature.doc.tasks]
 configure = { cmd = [ "cmake",
