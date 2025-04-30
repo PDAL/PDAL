@@ -136,6 +136,7 @@ private:
     bool m_overrideASrs;
     bool m_skipMultiSrs;
     std::string m_originalSrs;
+    size_t m_maxFieldSize;
 };
 
 } // namespace pdal

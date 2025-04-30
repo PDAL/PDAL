@@ -156,6 +156,7 @@ TIndexKernel::TIndexKernel() : SubcommandKernel()
     , m_dataset(NULL)
     , m_layer(NULL)
     , m_overrideASrs(false)
+    , m_maxFieldSize(0)
 {}
 
 
@@ -253,6 +254,8 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
                 "--path_prefix options.");
         if (args.set("a_srs"))
             m_overrideASrs = true;
+        if (m_driverName == "ESRI Shapefile")
+            m_maxFieldSize = 254;
     }
 }
 
@@ -562,9 +565,11 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
     std::string wkt =
         SpatialReference(fileInfo.m_srs).getWKT();
 
-    // IBELL: shapefile is the only driver with a hard limit on field width, AFAICT.
-    // There isn't a way to get the max supported field size programatically w/ OGR.
-    if (wkt.size() >= 255 && m_driverName == "ESRI Shapefile")
+    if (m_maxFieldSize == 0 || wkt.size() <= m_maxFieldSize)
+    {
+        OGR_F_SetFieldString(hFeature, indexes.m_srs, wkt.data());
+    }
+    else
     {
         std::ostringstream oss;
 
@@ -573,7 +578,6 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
         OGR_F_Destroy(hFeature);
         throw pdal_error(oss.str());
     }
-    OGR_F_SetFieldString(hFeature, indexes.m_srs, wkt.data());
 
     // Set the geometry in the feature
     Polygon g = prepareGeometry(fileInfo);
