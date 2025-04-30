@@ -520,7 +520,8 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
 {
     using namespace gdal;
 
-    OGRFeatureH hFeature = OGR_F_Create(OGR_L_GetLayerDefn(m_layer));
+    OGRFeatureDefnH hDefn = OGR_L_GetLayerDefn(m_layer);
+    OGRFeatureH hFeature = OGR_F_Create(hDefn);
 
     // Set the creation time into the feature.
     setDate(hFeature, fileInfo.m_ctime, indexes.m_ctime);
@@ -560,6 +561,18 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
     }
     std::string wkt =
         SpatialReference(fileInfo.m_srs).getWKT();
+
+    // IBELL: shapefile is the only driver with a hard limit on field width, AFAICT.
+    // There isn't a way to get the max supported field size programatically w/ OGR.
+    if (wkt.size() >= 255 && m_driverName == "ESRI Shapefile")
+    {
+        std::ostringstream oss;
+
+        oss << "value for field '" << m_srsColumnName << "' has " << wkt.size() <<
+            " characters; ESRI Shapefile driver supports a maximum of 254.";
+        OGR_F_Destroy(hFeature);
+        throw pdal_error(oss.str());
+    }
     OGR_F_SetFieldString(hFeature, indexes.m_srs, wkt.data());
 
     // Set the geometry in the feature
@@ -701,7 +714,6 @@ void TIndexKernel::createFields()
 {
     OGRFieldDefnH hFieldDefn = OGR_Fld_Create(
         m_tileIndexColumnName.c_str(), OFTString);
-    OGR_Fld_SetWidth(hFieldDefn, 254);
     OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
     OGR_Fld_Destroy(hFieldDefn);
 
