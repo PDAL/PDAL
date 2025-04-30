@@ -523,8 +523,7 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
 {
     using namespace gdal;
 
-    OGRFeatureDefnH hDefn = OGR_L_GetLayerDefn(m_layer);
-    OGRFeatureH hFeature = OGR_F_Create(hDefn);
+    OGRFeatureH hFeature = OGR_F_Create(OGR_L_GetLayerDefn(m_layer));
 
     // Set the creation time into the feature.
     setDate(hFeature, fileInfo.m_ctime, indexes.m_ctime);
