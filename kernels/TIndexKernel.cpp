@@ -532,7 +532,7 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
     setDate(hFeature, fileInfo.m_mtime, indexes.m_mtime);
 
     // Set the filename into the feature.
-    OGR_F_SetFieldString(hFeature, indexes.m_filename,
+    setStringField(hFeature, indexes.m_filename,
         fileInfo.m_filename.c_str());
 
     // Set the SRS into the feature.
@@ -564,19 +564,7 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
     std::string wkt =
         SpatialReference(fileInfo.m_srs).getWKT();
 
-    if (m_maxFieldSize == 0 || wkt.size() <= m_maxFieldSize)
-    {
-        OGR_F_SetFieldString(hFeature, indexes.m_srs, wkt.data());
-    }
-    else
-    {
-        std::ostringstream oss;
-
-        oss << "value for field '" << m_srsColumnName << "' has " << wkt.size() <<
-            " characters; ESRI Shapefile driver supports a maximum of 254.";
-        OGR_F_Destroy(hFeature);
-        throw pdal_error(oss.str());
-    }
+    setStringField(hFeature, indexes.m_srs, wkt.data());
 
     // Set the geometry in the feature
     Polygon g = prepareGeometry(fileInfo);
@@ -593,6 +581,27 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
             "for file '" << fileInfo.m_filename << "'" << std::endl;
 
     return bRet;
+}
+
+
+void TIndexKernel::setStringField(OGRFeatureH hFeature, int idx,
+    const char* value)
+{
+    if (m_maxFieldSize == 0 || strlen(value) <= m_maxFieldSize)
+    {
+        OGR_F_SetFieldString(hFeature, idx, value);
+    }
+    else
+    {
+        std::ostringstream oss;
+        OGRFieldDefnH hFieldDefn = OGR_F_GetFieldDefnRef(hFeature, idx);
+
+        oss << "value for field'" << OGR_Fld_GetNameRef(hFieldDefn) << "' has " << strlen(value) <<
+            " characters; ESRI Shapefile driver supports a maximum of 254.";
+
+        OGR_F_Destroy(hFeature);
+        throw pdal_error(oss.str());
+    }
 }
 
 

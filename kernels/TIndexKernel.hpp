@@ -47,6 +47,7 @@
 #else
 using OGRDataSourceH = void *;
 using OGRLayerH = void *;
+using OGRFeatureH = void *;
 #endif
 
 namespace pdal
@@ -103,6 +104,7 @@ private:
     bool createFeature(const FieldIndexes& indexes, FileInfo& info);
     pdal::Polygon prepareGeometry(const FileInfo& fileInfo);
     void createFields();
+    void setStringField(OGRFeatureH hFeature, int idx, const char* value);
     void fastBoundary(Stage& reader, FileInfo& fileInfo);
     void slowBoundary(PipelineManager& manager);
     std::string makeMultiPolygon(const std::string& wkt);
