@@ -162,7 +162,8 @@ void CovarianceFeaturesFilter::prepared(PointTableRef table)
     if (std::count(m_extraDims.begin(), m_extraDims.end(), Id::Density))
     {
         if (!(layout->hasDim(Id::OptimalKNN) && layout->hasDim(Id::OptimalRadius)))
-            throwError("Missing OptimalKNN and OptimalRadius dimensions in input PointView.");
+            throwError("Density feature requires OptimalKNN and OptimalRadius "
+                       "dimensions, which are missing in the input PointView.");
     }
     if (m_optimal)
     {
