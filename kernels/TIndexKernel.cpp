@@ -156,6 +156,7 @@ TIndexKernel::TIndexKernel() : SubcommandKernel()
     , m_dataset(NULL)
     , m_layer(NULL)
     , m_overrideASrs(false)
+    , m_maxFieldSize(0)
 {}
 
 
@@ -253,6 +254,8 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
                 "--path_prefix options.");
         if (args.set("a_srs"))
             m_overrideASrs = true;
+        if (m_driverName == "ESRI Shapefile")
+            m_maxFieldSize = 254;
     }
 }
 
@@ -529,7 +532,7 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
     setDate(hFeature, fileInfo.m_mtime, indexes.m_mtime);
 
     // Set the filename into the feature.
-    OGR_F_SetFieldString(hFeature, indexes.m_filename,
+    setStringField(hFeature, indexes.m_filename,
         fileInfo.m_filename.c_str());
 
     // Set the SRS into the feature.
@@ -560,7 +563,8 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
     }
     std::string wkt =
         SpatialReference(fileInfo.m_srs).getWKT();
-    OGR_F_SetFieldString(hFeature, indexes.m_srs, wkt.data());
+
+    setStringField(hFeature, indexes.m_srs, wkt.data());
 
     // Set the geometry in the feature
     Polygon g = prepareGeometry(fileInfo);
@@ -577,6 +581,27 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
             "for file '" << fileInfo.m_filename << "'" << std::endl;
 
     return bRet;
+}
+
+
+void TIndexKernel::setStringField(OGRFeatureH hFeature, int idx,
+    const char* value)
+{
+    if (m_maxFieldSize == 0 || strlen(value) <= m_maxFieldSize)
+    {
+        OGR_F_SetFieldString(hFeature, idx, value);
+    }
+    else
+    {
+        std::ostringstream oss;
+        OGRFieldDefnH hFieldDefn = OGR_F_GetFieldDefnRef(hFeature, idx);
+
+        oss << "value for field'" << OGR_Fld_GetNameRef(hFieldDefn) << "' has " << strlen(value) <<
+            " characters; ESRI Shapefile driver supports a maximum of 254.";
+
+        OGR_F_Destroy(hFeature);
+        throw pdal_error(oss.str());
+    }
 }
 
 
@@ -701,7 +726,6 @@ void TIndexKernel::createFields()
 {
     OGRFieldDefnH hFieldDefn = OGR_Fld_Create(
         m_tileIndexColumnName.c_str(), OFTString);
-    OGR_Fld_SetWidth(hFieldDefn, 254);
     OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
     OGR_Fld_Destroy(hFieldDefn);
 
