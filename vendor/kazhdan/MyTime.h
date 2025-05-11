@@ -30,10 +30,9 @@ DAMAGE.
 #define MY_TIME_INCLUDED
 
 #include <string.h>
-#ifndef __OpenBSD__
+#ifdef WIN32
 #include <sys/timeb.h>
-#endif
-#ifndef WIN32
+#else // WIN32
 #include <sys/time.h>
 #endif // WIN32
 
