@@ -72,7 +72,7 @@ private:
     std::string m_output;
     std::vector<DimSpec> m_dims;
 
-    void extractDim(NL::json& dim);
+    void extractDim(nlohmann::json& dim);
     void writeOutput(std::ostream& out);
     void writeHeader(std::ostream& out);
     void writeFooter(std::ostream& out);

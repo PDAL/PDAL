@@ -54,9 +54,9 @@ CREATE_STATIC_STAGE(I3SReader, i3sInfo)
 
 std::string I3SReader::getName() const { return i3sInfo.name; }
 
-NL::json I3SReader::initInfo()
+nlohmann::json I3SReader::initInfo()
 {
-    NL::json info;
+    nlohmann::json info;
     try
     {
         std::string s = fetchJson("");

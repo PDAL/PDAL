@@ -562,13 +562,13 @@ std::vector<std::string> glob(const std::string& path)
         return FileUtils::glob(path);
 }
 
-StatusWithReason parseJson(const std::string& s, NL::json& json)
+StatusWithReason parseJson(const std::string& s, nlohmann::json& json)
 {
     try
     {
-        json = NL::json::parse(s);
+        json = nlohmann::json::parse(s);
     }
-    catch (NL::json::parse_error& err)
+    catch (nlohmann::json::parse_error& err)
     {
         // Look for a right bracket -- this indicates the start of the
         // actual message from the parse error.

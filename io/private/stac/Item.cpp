@@ -45,7 +45,7 @@ namespace stac
 
 using namespace StacUtils;
 
-Item::Item(const NL::json& json,
+Item::Item(const nlohmann::json& json,
         const std::string& itemPath,
         const connector::Connector& connector,
         bool validate):
@@ -63,7 +63,7 @@ Item::Item(const Item& item):
     m_readerOptions(item.m_readerOptions)
 {}
 
-bool Item::init(const Filters& filters, NL::json rawReaderArgs,
+bool Item::init(const Filters& filters, nlohmann::json rawReaderArgs,
         SchemaUrls schemaUrls)
 {
 
@@ -74,7 +74,7 @@ bool Item::init(const Filters& filters, NL::json rawReaderArgs,
     if (m_validate)
         validate();
 
-    NL::json readerArgs = handleReaderArgs(rawReaderArgs);
+    nlohmann::json readerArgs = handleReaderArgs(rawReaderArgs);
     m_readerOptions = setReaderOptions(readerArgs, m_driver);
     m_readerOptions.add("filename", m_assetPath);
     return true;
@@ -100,11 +100,11 @@ Options Item::options()
     return m_readerOptions;
 }
 
-NL::json Item::handleReaderArgs(NL::json rawReaderArgs)
+nlohmann::json Item::handleReaderArgs(nlohmann::json rawReaderArgs)
 {
     if (rawReaderArgs.is_object())
     {
-        NL::json array_args = NL::json::array();
+        nlohmann::json array_args = nlohmann::json::array();
         array_args.push_back(rawReaderArgs);
         rawReaderArgs = array_args;
     }
@@ -113,8 +113,8 @@ NL::json Item::handleReaderArgs(NL::json rawReaderArgs)
             throw pdal_error("Reader Args for reader '" + m_driver +
                 "' must be a valid JSON object");
 
-    NL::json readerArgs;
-    for (const NL::json& readerPipeline: rawReaderArgs)
+    nlohmann::json readerArgs;
+    for (const nlohmann::json& readerPipeline: rawReaderArgs)
     {
         std::string driver =
             jsonValue<std::string>(readerPipeline, "type");
@@ -136,16 +136,16 @@ NL::json Item::handleReaderArgs(NL::json rawReaderArgs)
     return readerArgs;
 }
 
-Options Item::setReaderOptions(const NL::json& readerArgs,
+Options Item::setReaderOptions(const nlohmann::json& readerArgs,
     const std::string& driver) const
 {
     Options readerOptions;
     if (readerArgs.contains(driver)) {
-        NL::json args = jsonValue(readerArgs, driver);
+        nlohmann::json args = jsonValue(readerArgs, driver);
         for (auto& arg : args.items())
         {
             std::string key = arg.key();
-            NL::json val = arg.value();
+            nlohmann::json val = arg.value();
             NL::detail::value_t type = val.type();
 
             // if value is of type string, dump() returns string with
@@ -162,7 +162,7 @@ Options Item::setReaderOptions(const NL::json& readerArgs,
     return readerOptions;
 }
 
-std::string Item::extractDriverFromItem(const NL::json& asset) const
+std::string Item::extractDriverFromItem(const nlohmann::json& asset) const
 {
     std::string output;
 
@@ -226,7 +226,7 @@ void Item::validate()
     );
 
     // Validate against base Item schema first
-    NL::json schemaJson = m_connector.getJson(m_schemaUrls.item);
+    nlohmann::json schemaJson = m_connector.getJson(m_schemaUrls.item);
     val.set_root_schema(schemaJson);
     try {
         val.validate(m_json);
@@ -241,13 +241,13 @@ void Item::validate()
     // Validate against stac extensions if present
     if (m_json.contains("stac_extensions"))
     {
-        NL::json extensions = stacValue(m_json, "stac_extensions");
+        nlohmann::json extensions = stacValue(m_json, "stac_extensions");
         for (auto& extSchemaUrl: extensions)
         {
             std::string url = stacValue<std::string>(extSchemaUrl, "", m_json);
 
             try {
-                NL::json schemaJson = m_connector.getJson(url);
+                nlohmann::json schemaJson = m_connector.getJson(url);
                 val.set_root_schema(schemaJson);
                 val.validate(m_json);
             }
@@ -262,7 +262,7 @@ void Item::validate()
     }
 }
 
-void validateForFilter(NL::json json)
+void validateForFilter(nlohmann::json json)
 {
     stacId(json);
     stacValue(json, "assets");
@@ -270,7 +270,7 @@ void validateForFilter(NL::json json)
     stacValue(json, "geometry");
 }
 
-bool matchProperty(std::string key, NL::json val, NL::json properties,
+bool matchProperty(std::string key, nlohmann::json val, nlohmann::json properties,
     NL::detail::value_t type)
 {
     switch (type)
@@ -349,7 +349,7 @@ bool Item::filter(const Filters& filters)
 }
 
 
-SpatialReference extractSRS(NL::json& props)
+SpatialReference extractSRS(nlohmann::json& props)
 {
 
     bool havePROJJSON = props.contains("proj:projjson");
@@ -360,7 +360,7 @@ SpatialReference extractSRS(NL::json& props)
     SpatialReference srs;
     if (havePROJJSON)
     {
-        NL::json projjson = jsonValue(props, "proj:projjson");
+        nlohmann::json projjson = jsonValue(props, "proj:projjson");
         srs.set(projjson.dump());
     } else if (haveWKT2)
     {
@@ -390,7 +390,7 @@ bool Item::filterBounds(Polygon bounds)
 
     //If stac item has null geometry and bounds have been included
     //for filtering, then the Item will be excluded.
-    NL::json geometry = stacValue(m_json, "geometry");
+    nlohmann::json geometry = stacValue(m_json, "geometry");
     if (geometry.type() == NL::detail::value_t::null)
         return false;
 
@@ -413,7 +413,7 @@ bool Item::filterBounds(Polygon bounds)
     // to the same as the SRS given by the bounds and test accordingly
     if (bounds.getSpatialReference() != stacPolygon.getSpatialReference())
     {
-        NL::json props = stacValue(m_json, "properties");
+        nlohmann::json props = stacValue(m_json, "properties");
         SpatialReference ref = extractSRS(props);
         stacPolygon.transform(ref);
     }
@@ -426,18 +426,18 @@ bool Item::filterBounds(Polygon bounds)
 
 }
 
-bool Item::filterProperties(const NL::json& filterProps)
+bool Item::filterProperties(const nlohmann::json& filterProps)
 {
-    NL::json itemProperties = stacValue(m_json, "properties");
+    nlohmann::json itemProperties = stacValue(m_json, "properties");
     if (!filterProps.empty())
     {
         for (auto &it: filterProps.items())
         {
             std::string key = it.key();
-            NL::json stacVal = stacValue(itemProperties, key, m_json);
+            nlohmann::json stacVal = stacValue(itemProperties, key, m_json);
             NL::detail::value_t stacType = stacVal.type();
 
-            NL::json filterVal = it.value();
+            nlohmann::json filterVal = it.value();
             NL::detail::value_t filterType = filterVal.type();
 
             //Array of possibilities are Or'd together
@@ -460,7 +460,7 @@ bool Item::filterProperties(const NL::json& filterProps)
 
 bool Item::filterDates(DatePairs dates)
 {
-    NL::json properties = stacValue(m_json, "properties");
+    nlohmann::json properties = stacValue(m_json, "properties");
 
     // DateTime
     // If STAC datetime fits in *any* of the supplied ranges,
@@ -524,8 +524,8 @@ bool Item::filterDates(DatePairs dates)
 
 bool Item::filterAssets(std::vector<std::string> assetNames)
 {
-    NL::json asset;
-    NL::json assetList = stacValue(m_json, "assets");
+    nlohmann::json asset;
+    nlohmann::json assetList = stacValue(m_json, "assets");
     for (auto& name: assetNames)
     {
         if (assetList.contains(name))

@@ -116,13 +116,13 @@ std::string Connector::get(const std::string& path) const
         return m_arbiter->get(path, m_headers, m_query);
 }
 
-NL::json Connector::getJson(const std::string& path) const
+nlohmann::json Connector::getJson(const std::string& path) const
 {
     try
     {
-        return NL::json::parse(get(path));
+        return nlohmann::json::parse(get(path));
     }
-    catch (NL::json::parse_error& err)
+    catch (nlohmann::json::parse_error& err)
     {
         throw pdal_error("File '" + path + "' contained invalid JSON: " +
             err.what());

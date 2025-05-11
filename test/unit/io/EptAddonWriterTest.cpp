@@ -98,7 +98,7 @@ TEST(EptAddonWriterTest, fullLoop)
 
         EptAddonWriter writer;
         {
-            NL::json addons;
+            nlohmann::json addons;
             addons[addonDir + "class"] = "Classification";
             addons[addonDir + "other"] = "Other";
 
@@ -117,7 +117,7 @@ TEST(EptAddonWriterTest, fullLoop)
     // with the addon values.
     EptReader reader;
     {
-        NL::json addons;
+        nlohmann::json addons;
         addons["Classification"] = addonDir + "class";
         addons["Other"] = addonDir + "other";
 
@@ -174,7 +174,7 @@ TEST(EptAddonWriterTest, boundedWrite)
 
         EptAddonWriter writer;
         {
-            NL::json addons;
+            nlohmann::json addons;
             addons[addonDir + "bounded"] = "Classification";
 
             Options o;
@@ -193,7 +193,7 @@ TEST(EptAddonWriterTest, boundedWrite)
 
     EptReader reader;
     {
-        NL::json addons;
+        nlohmann::json addons;
         addons["Classification"] = addonDir + "bounded";
 
         Options o;
@@ -266,7 +266,7 @@ TEST(EptAddonWriterTest, boundedRead)
 
         EptAddonWriter writer;
         {
-            NL::json addons;
+            nlohmann::json addons;
             addons[addonDir + "bounded"] = "Classification";
 
             Options o;
@@ -286,7 +286,7 @@ TEST(EptAddonWriterTest, boundedRead)
     BOX2D bounds(515380, 4918300, 515450, 4918370);
     EptReader reader;
     {
-        NL::json addons;
+        nlohmann::json addons;
         addons["Classification"] = addonDir + "bounded";
 
         Options o;
@@ -349,7 +349,7 @@ TEST(EptAddonWriterTest, mustDescendFromEptReader)
     EptAddonWriter writer;
     {
         Options o;
-        NL::json addons;
+        nlohmann::json addons;
         addons[Support::datapath("ept/addon/bad")] = "ReturnNumber";
         o.add("addons", addons);
         writer.setOptions(o);

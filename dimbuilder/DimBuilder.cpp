@@ -125,17 +125,17 @@ bool DimBuilder::execute()
     if (!in)
         throw dimbuilder_error("Can't open input file.");
 
-    NL::json root;
+    nlohmann::json root;
     try
     {
         in >> root;
     }
-    catch (NL::json::parse_error& err)
+    catch (nlohmann::json::parse_error& err)
     {
         throw dimbuilder_error(err.what());
     }
 
-    NL::json dims;
+    nlohmann::json dims;
     auto it = root.find("dimensions");
     if (it != root.end())
         dims = *it;
@@ -172,7 +172,7 @@ bool DimBuilder::execute()
 }
 
 
-void DimBuilder::extractDim(NL::json& dim)
+void DimBuilder::extractDim(nlohmann::json& dim)
 {
     DimSpec d;
 
@@ -180,7 +180,7 @@ void DimBuilder::extractDim(NL::json& dim)
     auto it = dim.find("name");
     if (it == dim.end())
         throw dimbuilder_error("Dimension missing name.");
-    NL::json name = *it;
+    nlohmann::json name = *it;
     if (!name.is_string())
         throw dimbuilder_error("Dimension name must be a string.");
     d.m_name = name.get<std::string>();
@@ -210,7 +210,7 @@ void DimBuilder::extractDim(NL::json& dim)
         oss << "Dimension '" << d.m_name << "' must have a description.";
         throw dimbuilder_error(oss.str());
     }
-    NL::json description = *it;
+    nlohmann::json description = *it;
     if (!description.is_string())
     {
         std::ostringstream oss;
@@ -231,7 +231,7 @@ void DimBuilder::extractDim(NL::json& dim)
         oss << "Dimension '" << d.m_name << "' must have a type.";
         throw dimbuilder_error(oss.str());
     }
-    NL::json dimType = *it;
+    nlohmann::json dimType = *it;
     if (!dimType.is_string())
     {
         std::ostringstream oss;
@@ -251,7 +251,7 @@ void DimBuilder::extractDim(NL::json& dim)
     }
     dim.erase(it);
 
-    NL::json altNames;
+    nlohmann::json altNames;
     it = dim.find("alt_names");
     if (it != dim.end())
     {
@@ -270,7 +270,7 @@ void DimBuilder::extractDim(NL::json& dim)
                 std::string s = altNames.get<std::string>();
                 d.m_altNames = Utils::split2(s, ',');
             }
-            catch (NL::json::parse_error&)
+            catch (nlohmann::json::parse_error&)
             {
                 typeError = true;
             }

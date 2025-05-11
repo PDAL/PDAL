@@ -224,7 +224,7 @@ void GltfWriter::writeJsonChunk()
 {
     OLeStream& out = *m_stream;
 
-    NL::json j;
+    nlohmann::json j;
 
     j["asset"]["version"] = "2.0";
 
@@ -240,12 +240,12 @@ void GltfWriter::writeJsonChunk()
     if (m_colorVertices)
         elementSize += sizeof(float) * 3; // R, G, B
 
-    NL::json mesh;
+    nlohmann::json mesh;
     uint16_t nextAccessorIdx = 0;
     uint16_t nextBufferViewIdx = 0;
     for (const ViewData& vd : m_viewData)
     {
-        NL::json meshAttributes({});
+        nlohmann::json meshAttributes({});
 
         // Buffer views
         // Vertex indices (faces)

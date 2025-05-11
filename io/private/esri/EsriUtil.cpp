@@ -48,23 +48,23 @@ namespace i3s
 {
 
 /*Return value of data in json format*/
-NL::json parse(const std::string& data)
+nlohmann::json parse(const std::string& data)
 {
     return parse(data, "Error during parsing: ");
 }
 
 
-NL::json parse(const std::string& data, const std::string& error)
+nlohmann::json parse(const std::string& data, const std::string& error)
 {
-    NL::json j;
+    nlohmann::json j;
 
     if (data.size())
     {
         try
         {
-            j = NL::json::parse(data);
+            j = nlohmann::json::parse(data);
         }
-        catch (const NL::json::exception& err)
+        catch (const nlohmann::json::exception& err)
         {
             throw EsriError(error + err.what());
         }

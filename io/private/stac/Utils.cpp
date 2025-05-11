@@ -84,7 +84,7 @@ std::time_t getStacTime(std::string in)
     return std::mktime(&date);
 }
 
-std::string stacId(const NL::json& stac)
+std::string stacId(const nlohmann::json& stac)
 {
     std::stringstream msg;
     try
@@ -103,7 +103,7 @@ std::string stacId(const NL::json& stac)
     }
 }
 
-std::string stacType(const NL::json& stac)
+std::string stacType(const nlohmann::json& stac)
 {
     try
     {
@@ -123,12 +123,12 @@ std::string stacType(const NL::json& stac)
     }
 }
 
-std::string icSelfPath(const NL::json& json)
+std::string icSelfPath(const nlohmann::json& json)
 {
     try
     {
-        NL::json links = jsonValue(json, "links");
-        for (const NL::json& link: links)
+        nlohmann::json links = jsonValue(json, "links");
+        for (const nlohmann::json& link: links)
         {
             std::string target = jsonValue<std::string>(link, "rel");
             if (target == "self")

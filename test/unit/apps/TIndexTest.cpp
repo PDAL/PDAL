@@ -169,7 +169,7 @@ std::string getGeometry(std::string& json)
     std::ostringstream oss;
     for (size_t i = 0; i < tree->size(); ++i)
     {
-        NL::json& node = tree->at(i);
+        nlohmann::json& node = tree->at(i);
         auto geom = node.find("geometry");
         oss << geom->dump();
     }

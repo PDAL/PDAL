@@ -895,7 +895,7 @@ TEST(EptReaderTest, ogrCrop)
     {
         Options options;
         options.add("filename", eptAutzenPath);
-        NL::json json;
+        nlohmann::json json;
         json["type"] = "ogr";
         json["drivers"] = {"GeoJSON"};
         json["datasource"] = attributesPath;

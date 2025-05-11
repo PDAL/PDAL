@@ -39,7 +39,7 @@
 #include <pdal/util/ThreadPool.hpp>
 #include "../connector/Connector.hpp"
 #include "Item.hpp"
-#include <pdal/JsonFwd.hpp>
+#include <nlohmann/json.hpp>
 
 
 
@@ -53,7 +53,7 @@ class Catalog
 {
 
 public:
-    Catalog(const NL::json& json,
+    Catalog(const nlohmann::json& json,
         const std::string& catPath,
         const connector::Connector& connector,
         ThreadPool& pool,
@@ -73,7 +73,7 @@ public:
     ErrorList errors();
     GroupType type();
 
-    bool init(const Filters& filters, NL::json rawReaderArgs, SchemaUrls schemaUrls,
+    bool init(const Filters& filters, nlohmann::json rawReaderArgs, SchemaUrls schemaUrls,
             bool isRoot);
     bool filter(Filters filters);
 
@@ -81,7 +81,7 @@ public:
 
 protected:
 
-    const NL::json m_json;
+    const nlohmann::json m_json;
     const std::string m_path;
     const connector::Connector& m_connector;
     std::mutex m_mutex;
@@ -101,9 +101,9 @@ protected:
 
     void hoistNested();
     void collectErrors();
-    void handleItem(const Item::Filters& f, NL::json readerArgs, std::string path);
-    void handleCat(const Filters& f, NL::json readerArgs, std::string path);
-    void handleCol(const Filters& f, NL::json readerArgs, std::string path);
+    void handleItem(const Item::Filters& f, nlohmann::json readerArgs, std::string path);
+    void handleCat(const Filters& f, nlohmann::json readerArgs, std::string path);
+    void handleCol(const Filters& f, nlohmann::json readerArgs, std::string path);
 
 };
 

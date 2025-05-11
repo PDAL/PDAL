@@ -58,7 +58,7 @@ TEST(HdfReaderTest, testRead)
 
     Option filename("filename", getFilePath());
 
-    NL::json j = {
+    nlohmann::json j = {
         // double types
         {"X", "autzen/X"},
         {"Y", "autzen/Y"},
@@ -104,7 +104,7 @@ TEST(HdfReaderTest, testOptions)
 
     Option filename("filename", getFilePath());
 
-    NL::json j = {{ "X" ,"autzen/X"}, {"Y" , 1234}};
+    nlohmann::json j = {{ "X" ,"autzen/X"}, {"Y" , 1234}};
     Option dataset("dimensions", j.dump());
 
     Options options(filename);

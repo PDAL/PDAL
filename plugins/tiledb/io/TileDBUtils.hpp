@@ -225,7 +225,7 @@ public:
             filter.
 
      */
-    FilterFactory(const NL::json& userProvidedFilters,
+    FilterFactory(const nlohmann::json& userProvidedFilters,
                   const std::string& filterProfile,
                   const std::array<double, 3>& scaleFactor,
                   const std::array<double, 3>& addOffset,
@@ -239,7 +239,7 @@ public:
       \param options JSON options to get the Filter definition from.
     */
     static tiledb::Filter filter(const tiledb::Context& ctx,
-                                 const NL::json& options);
+                                 const nlohmann::json& options);
 
     /**
      Returns a TileDB filter type from an input string.
@@ -309,7 +309,7 @@ private:
         aggressive
     };
 
-    NL::json m_user_filters{};
+    nlohmann::json m_user_filters{};
     std::optional<tiledb_filter_type_t> m_default_filter_type{std::nullopt};
     std::optional<int32_t> m_default_compression_level{std::nullopt};
 

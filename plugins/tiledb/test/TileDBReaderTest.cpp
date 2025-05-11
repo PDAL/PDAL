@@ -341,7 +341,7 @@ TEST(TileDBRoundTripTest, delta_filter_test)
         writerOptions.add("x_tile_size", 6);
         writerOptions.add("y_tile_size", 6);
         writerOptions.add("z_tile_size", 6);
-        NL::json filters({});
+        nlohmann::json filters({});
         filters["Intensity"] = {
             {{"compression", "delta"}},
             {{"compression", "zstd"}, {"compression_level", 5}}};

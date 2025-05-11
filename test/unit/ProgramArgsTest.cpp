@@ -460,13 +460,13 @@ TEST(ProgramArgsTest, parseSimple)
 
 TEST(ProgramArgsTest, json)
 {
-    // Test JSON arguments.  If the arg refers to an underlying NL::json,
+    // Test JSON arguments.  If the arg refers to an underlying nlohmann::json,
     // it should be parsed into that Json::Value.  If a string, then that
     // string should contain the stringified JSON (which should be parsable
     // into equivalent JSON).
-    NL::json m_json;
+    nlohmann::json m_json;
     std::string m_string;
-    NL::json verify;
+    nlohmann::json verify;
     verify["key"] = 42;
 
     const std::string stringified("\"{ \\\"key\\\": 42 }\"");
@@ -492,8 +492,8 @@ TEST(ProgramArgsTest, json)
         EXPECT_EQ(m_json, verify) << m_json << " != " << verify;
 
         // Verify that the string value parses into the proper JSON value.
-        NL::json fromString;
-        EXPECT_NO_THROW(fromString = NL::json::parse(m_string));
+        nlohmann::json fromString;
+        EXPECT_NO_THROW(fromString = nlohmann::json::parse(m_string));
         EXPECT_EQ(fromString, verify) << fromString << " != " << verify;
     }
 
@@ -502,7 +502,7 @@ TEST(ProgramArgsTest, json)
         args.reset();
         StringList s = toStringList("--json [1,2,3]");
         EXPECT_NO_THROW(args.parse(s));
-        verify = NL::json::parse("[1, 2, 3]");
+        verify = nlohmann::json::parse("[1, 2, 3]");
         EXPECT_EQ(m_json, verify);
 
         args.reset();
@@ -523,9 +523,9 @@ TEST(ProgramArgsTest, json)
 
 TEST(ProgramArgsTest, invalidJson)
 {
-    NL::json m_json;
+    nlohmann::json m_json;
     std::string m_string;
-    NL::json verify;
+    nlohmann::json verify;
     verify["key"] = 42;
 
     ProgramArgs args;
@@ -541,10 +541,10 @@ TEST(ProgramArgsTest, invalidJson)
     // The string was successfully parsed, but contains invalid JSON.
     auto parseJson = [](const std::string& s)
     {
-        return NL::json::parse(s);
+        return nlohmann::json::parse(s);
     };
 
-    EXPECT_THROW(parseJson(m_string), NL::json::parse_error);
+    EXPECT_THROW(parseJson(m_string), nlohmann::json::parse_error);
 
     // If the underlying is a Json::Value, then argument parsing should fail
     // up front.

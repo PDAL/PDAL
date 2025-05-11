@@ -34,7 +34,7 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
-#include <pdal/JsonFwd.hpp>
+#include <nlohmann/json.hpp>
 #include <pdal/StageFactory.hpp>
 
 #include <vector>
@@ -63,14 +63,14 @@ private:
 
     typedef std::map<std::string, Stage *> TagMap;
 
-    void parsePipeline(NL::json&);
+    void parsePipeline(nlohmann::json&);
     void readPipeline(const std::string& filename);
     void readPipeline(std::istream& input);
-    std::string extractType(NL::json& node);
-    FileSpec extractFilename(NL::json& node);
-    std::string extractTag(NL::json& node, TagMap& tags);
-    std::vector<Stage *> extractInputs(NL::json& node, TagMap& tags);
-    Options extractOptions(NL::json& node);
+    std::string extractType(nlohmann::json& node);
+    FileSpec extractFilename(nlohmann::json& node);
+    std::string extractTag(nlohmann::json& node, TagMap& tags);
+    std::vector<Stage *> extractInputs(nlohmann::json& node, TagMap& tags);
+    Options extractOptions(nlohmann::json& node);
     void handleInputTag(const std::string& tag, const TagMap& tags,
         std::vector<Stage *>& inputs);
 

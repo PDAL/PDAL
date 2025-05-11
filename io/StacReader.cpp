@@ -94,11 +94,11 @@ struct StacReader::Args
     std::vector<RegEx> catalogs;
     std::vector<RegEx> collections;
 
-    NL::json properties;
-    NL::json readerArgs;
-    NL::json rawReaderArgs;
+    nlohmann::json properties;
+    nlohmann::json readerArgs;
+    nlohmann::json rawReaderArgs;
 
-    NL::json::array_t dates;
+    nlohmann::json::array_t dates;
     SrsBounds bounds;
     OGRSpec ogr;
     std::vector<std::string> assetNames;
@@ -206,7 +206,7 @@ void StacReader::addItem(Item& item)
     m_p->m_readerList.push_back(reader);
 }
 
-void StacReader::handleItem(NL::json stacJson, std::string itemPath)
+void StacReader::handleItem(nlohmann::json stacJson, std::string itemPath)
 {
     Item item(stacJson, m_filename, *m_p->m_connector, m_args->validateSchema);
     log()->get(LogLevel::Debug) << "Found STAC Item " << item.id() << ".";
@@ -248,7 +248,7 @@ void StacReader::handleNested(Catalog& c)
 }
 
 
-void StacReader::handleCatalog(NL::json stacJson, std::string catPath)
+void StacReader::handleCatalog(nlohmann::json stacJson, std::string catPath)
 {
     Catalog c(stacJson, catPath, *m_p->m_connector, *m_p->m_pool,
         m_args->validateSchema, log());
@@ -269,7 +269,7 @@ void StacReader::handleCatalog(NL::json stacJson, std::string catPath)
     printErrors(c);
 }
 
-void StacReader::handleCollection(NL::json stacJson, std::string colPath)
+void StacReader::handleCollection(nlohmann::json stacJson, std::string colPath)
 {
     Collection c(stacJson, colPath, *m_p->m_connector,
         *m_p->m_pool, m_args->validateSchema, log());
@@ -289,7 +289,7 @@ void StacReader::handleCollection(NL::json stacJson, std::string colPath)
     printErrors(c);
 }
 
-void StacReader::handleItemCollection(NL::json stacJson, std::string icPath)
+void StacReader::handleItemCollection(nlohmann::json stacJson, std::string icPath)
 {
     ItemCollection ic(stacJson, icPath, *m_p->m_connector, m_args->validateSchema);
 
@@ -444,7 +444,7 @@ void StacReader::initialize()
     m_p->m_pool.reset(new ThreadPool(m_args->threads));
     initializeArgs();
 
-    NL::json stacJson = m_p->m_connector->getJson(m_filename);
+    nlohmann::json stacJson = m_p->m_connector->getJson(m_filename);
 
     std::string stacType = StacUtils::jsonValue<std::string>(stacJson, "type");
     if (stacType == "Feature")

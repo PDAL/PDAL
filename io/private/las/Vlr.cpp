@@ -233,7 +233,7 @@ struct MetadataFunc
 
 std::istream& operator>>(std::istream& in, las::Evlr& v)
 {
-    NL::json j;
+    nlohmann::json j;
     in >> j;
 
     // Make sure there isn't stuff in the input stream after the JSON

@@ -49,7 +49,7 @@ namespace georeference
 {
 using DimId = Dimension::Id;
 
-Trajectory::Trajectory(const std::string& filename, const NL::json& opts)
+Trajectory::Trajectory(const std::string& filename, const nlohmann::json& opts)
 {
     std::string driver("");
     if (opts.contains("type"))

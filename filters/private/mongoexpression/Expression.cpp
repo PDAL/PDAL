@@ -37,7 +37,7 @@
 namespace pdal
 {
 
-void Expression::build(LogicGate& gate, const NL::json& json)
+void Expression::build(LogicGate& gate, const nlohmann::json& json)
 {
     if (json.is_array())
     {
@@ -63,7 +63,7 @@ void Expression::build(LogicGate& gate, const NL::json& json)
 
     for (auto& it : json.items())
     {
-        const NL::json& val(it.value());
+        const nlohmann::json& val(it.value());
         const std::string& key(it.key());
 
         if (isLogicalOperator(key))
@@ -94,7 +94,7 @@ void Expression::build(LogicGate& gate, const NL::json& json)
             // within val, since we've already selected a dimension.
             for (auto inner : val.items())
             {
-                NL::json nest;
+                nlohmann::json nest;
                 nest[inner.key()] = inner.value();
                 active->push(Comparison::create(m_layout, key, nest));
             }

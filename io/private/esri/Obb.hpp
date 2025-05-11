@@ -35,7 +35,7 @@
 #pragma once
 
 #include <Eigen/Geometry>
-#include <pdal/JsonFwd.hpp>
+#include <nlohmann/json.hpp>
 #include <pdal/util/Utils.hpp>
 
 #include "EsriUtil.hpp"
@@ -54,8 +54,8 @@ class Obb
 public:
     // Can throw EsriError.
     Obb();
-    Obb(const NL::json& spec);
-    void parse(NL::json spec);
+    Obb(const nlohmann::json& spec);
+    void parse(nlohmann::json spec);
     bool intersect(Obb clip);
     void transform(const SrsTransform& xform);
     bool valid() const;
@@ -64,7 +64,7 @@ public:
     BOX3D bounds() const;
 
 private:
-    void verifyArray(const NL::json& spec, const std::string& name, size_t cnt);
+    void verifyArray(const nlohmann::json& spec, const std::string& name, size_t cnt);
     bool intersectNormalized(const Segment& seg) const;
     Eigen::Vector3d corner(size_t pos);
     static bool halfIntersect(const Obb& a, Obb b);
@@ -91,12 +91,12 @@ template<>
 inline StatusWithReason fromString(const std::string& from,
     pdal::i3s::Obb& obb)
 {
-    NL::json spec;
+    nlohmann::json spec;
     try
     {
-        spec = NL::json::parse(from);
+        spec = nlohmann::json::parse(from);
     }
-    catch (const NL::json::exception& ex)
+    catch (const nlohmann::json::exception& ex)
     {
         return { -1, ex.what() };
     }

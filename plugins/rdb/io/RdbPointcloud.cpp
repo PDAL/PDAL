@@ -176,19 +176,19 @@ RdbPointcloud::RdbPointcloud(
     // query spatial reference system
     if (m_pointcloud.metaData().exists("riegl.geo_tag"))
     {
-        NL::json node;
+        nlohmann::json node;
 
         try
         {
             std::string s = m_pointcloud.metaData().get("riegl.geo_tag");
-            node = NL::json::parse(s);
+            node = nlohmann::json::parse(s);
             if (node["crs"]["epsg"].is_number_integer())
                 m_crs_epsg = node["crs"]["epsg"].get<int>();
             if (node["crs"]["wkt"].is_string())
                 m_crs_wkt = node["crs"]["wkt"].get<std::string>();
             if (node["pose"].is_array())
             {
-                const NL::json pose = node["pose"];
+                const nlohmann::json pose = node["pose"];
                 if ( (pose.size() == 4) &&
                     (pose[0].size() == 4) &&
                     (pose[1].size() == 4) &&
@@ -206,7 +206,7 @@ RdbPointcloud::RdbPointcloud(
                 }
             }
         }
-        catch (const NL::json::parse_error&)
+        catch (const nlohmann::json::parse_error&)
         {}
     }
 
