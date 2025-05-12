@@ -84,8 +84,6 @@ if(WIN32)
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CMAKE_BUILD_TYPE} "${PDAL_OUTPUT_BIN_DIR}" )
 endif(WIN32)
 
-find_package(nlohmann_json REQUIRED)
-
 # Choose package components
 
 include(${PDAL_CMAKE_DIR}/options.cmake)

@@ -1,1 +1,0 @@
-add_library(nlohmann_json::nlohmann_json INTERFACE)
