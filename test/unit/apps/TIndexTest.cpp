@@ -163,7 +163,7 @@ TEST(TIndex, test3)
 
 std::string getGeometry(std::string& json)
 {
-    NL::basic_json<> a = nlohmann::json::parse(json);
+    nlohmann::basic_json<> a = nlohmann::json::parse(json);
     auto tree = a.find("features");
 
     std::ostringstream oss;

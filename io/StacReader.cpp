@@ -353,7 +353,7 @@ void StacReader::initializeArgs()
         for (auto& datepair: m_args->dates)
         {
             if (datepair.size() != 2 ||
-                datepair.type() != NL::detail::value_t::array)
+                datepair.type() != nlohmann::detail::value_t::array)
             {
                 throw pdal_error("User defined dates (" + datepair.dump() +
                     ") must be a range of [min, max].");
@@ -371,7 +371,7 @@ void StacReader::initializeArgs()
                         ") is greater than Max date (" << maxDate << ").";
                 m_p->m_itemFilters->datePairs.push_back({ minTime, maxTime });
             }
-            catch(NL::detail::type_error&)
+            catch(nlohmann::detail::type_error&)
             {
                 throw pdal_error("User defined date range ("+ datepair.dump() +
                     ") is invalid. It must be of type string and comply " +

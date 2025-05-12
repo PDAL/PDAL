@@ -91,12 +91,12 @@ std::string stacId(const nlohmann::json& stac)
     {
         return stac.at("id").get<std::string>();
     }
-    catch (NL::detail::out_of_range& e)
+    catch (nlohmann::detail::out_of_range& e)
     {
         msg << "Missing required key 'id'. " << e.what();
         throw pdal_error(msg.str());
     }
-    catch (NL::detail::type_error& e)
+    catch (nlohmann::detail::type_error& e)
     {
         msg << "Required key 'id' is not of type 'string'. " << e.what();
         throw pdal_error(msg.str());
@@ -109,13 +109,13 @@ std::string stacType(const nlohmann::json& stac)
     {
         return stac.at("type").get<std::string>();
     }
-    catch (NL::detail::out_of_range& e)
+    catch (nlohmann::detail::out_of_range& e)
     {
         std::stringstream msg;
         msg << "Missing required key 'type'. " << e.what();
         throw pdal_error(msg.str());
     }
-    catch (NL::detail::type_error& e)
+    catch (nlohmann::detail::type_error& e)
     {
         std::stringstream msg;
         msg << "Invalid key value 'type'. " << e.what();

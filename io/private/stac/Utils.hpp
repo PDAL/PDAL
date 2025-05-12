@@ -83,7 +83,7 @@ namespace StacUtils
                 return json.get<T>();
             return json.at(key).get<T>();
         }
-        catch (NL::detail::exception& e)
+        catch (nlohmann::detail::exception& e)
         {
             std::stringstream msg;
             msg << "Error: " << e.what() << ", for object " << json.dump();
@@ -102,7 +102,7 @@ namespace StacUtils
                 return stac.get<U>();
             return stac.at(key).get<U>();
         }
-        catch (NL::detail::exception& e)
+        catch (nlohmann::detail::exception& e)
         {
             try {
                 nlohmann::json stacCheck = stac;

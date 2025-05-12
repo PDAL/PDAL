@@ -407,26 +407,26 @@ Options TIndexReader::setReaderOptions(const nlohmann::json& readerArgs, const s
     if (readerArgs.contains(driver)) {
         nlohmann::json args = readerArgs.at(driver).get<nlohmann::json>();
         for (auto& arg : args.items()) {
-            NL::detail::value_t type = readerArgs.at(driver).at(arg.key()).type();
+            nlohmann::detail::value_t type = readerArgs.at(driver).at(arg.key()).type();
             switch(type)
             {
-                case NL::detail::value_t::string:
+                case nlohmann::detail::value_t::string:
                 {
                     std::string val = arg.value().get<std::string>();
                     readerOptions.add(arg.key(), arg.value().get<std::string>());
                     break;
                 }
-                case NL::detail::value_t::number_float:
+                case nlohmann::detail::value_t::number_float:
                 {
                     readerOptions.add(arg.key(), arg.value().get<float>());
                     break;
                 }
-                case NL::detail::value_t::number_integer:
+                case nlohmann::detail::value_t::number_integer:
                 {
                     readerOptions.add(arg.key(), arg.value().get<int>());
                     break;
                 }
-                case NL::detail::value_t::boolean:
+                case nlohmann::detail::value_t::boolean:
                 {
                     readerOptions.add(arg.key(), arg.value().get<bool>());
                     break;

@@ -146,12 +146,12 @@ Options Item::setReaderOptions(const nlohmann::json& readerArgs,
         {
             std::string key = arg.key();
             nlohmann::json val = arg.value();
-            NL::detail::value_t type = val.type();
+            nlohmann::detail::value_t type = val.type();
 
             // if value is of type string, dump() returns string with
             // escaped string inside and kills pdal program args
             std::string v;
-            if (type == NL::detail::value_t::string)
+            if (type == nlohmann::detail::value_t::string)
                 v = jsonValue<std::string>(val);
             else
                 v = arg.value().dump();
@@ -271,39 +271,39 @@ void validateForFilter(nlohmann::json json)
 }
 
 bool matchProperty(std::string key, nlohmann::json val, nlohmann::json properties,
-    NL::detail::value_t type)
+    nlohmann::detail::value_t type)
 {
     switch (type)
     {
-        case NL::detail::value_t::string:
+        case nlohmann::detail::value_t::string:
         {
             std::string desired = jsonValue<std::string>(val);
             std::string value = jsonValue<std::string>(properties, key);
             return value == desired;
             break;
         }
-        case NL::detail::value_t::number_unsigned:
+        case nlohmann::detail::value_t::number_unsigned:
         {
             uint64_t value = jsonValue<uint64_t>(properties, key);
             uint64_t desired = jsonValue<uint64_t>(val);
             return value == desired;
             break;
         }
-        case NL::detail::value_t::number_integer:
+        case nlohmann::detail::value_t::number_integer:
         {
             int value = jsonValue<int>(properties,key);
             int desired = jsonValue<int>(val);
             return value == desired;
             break;
         }
-        case NL::detail::value_t::number_float:
+        case nlohmann::detail::value_t::number_float:
         {
             double value = jsonValue<double>(properties, key);
             double desired = jsonValue<double>(val);
             return value == desired;
             break;
         }
-        case NL::detail::value_t::boolean:
+        case nlohmann::detail::value_t::boolean:
         {
             bool value = jsonValue<bool>(properties, key);
             bool desired = jsonValue<bool>(val);
@@ -391,7 +391,7 @@ bool Item::filterBounds(Polygon bounds)
     //If stac item has null geometry and bounds have been included
     //for filtering, then the Item will be excluded.
     nlohmann::json geometry = stacValue(m_json, "geometry");
-    if (geometry.type() == NL::detail::value_t::null)
+    if (geometry.type() == nlohmann::detail::value_t::null)
         return false;
 
     //STAC's base geometries will always be represented in 4326.
@@ -435,13 +435,13 @@ bool Item::filterProperties(const nlohmann::json& filterProps)
         {
             std::string key = it.key();
             nlohmann::json stacVal = stacValue(itemProperties, key, m_json);
-            NL::detail::value_t stacType = stacVal.type();
+            nlohmann::detail::value_t stacType = stacVal.type();
 
             nlohmann::json filterVal = it.value();
-            NL::detail::value_t filterType = filterVal.type();
+            nlohmann::detail::value_t filterType = filterVal.type();
 
             //Array of possibilities are Or'd together
-            if (filterType == NL::detail::value_t::array)
+            if (filterType == nlohmann::detail::value_t::array)
             {
                 bool arrFlag (true);
                 for (auto& val: filterVal)
@@ -468,7 +468,7 @@ bool Item::filterDates(DatePairs dates)
     if (!dates.empty())
     {
         if (properties.contains("datetime") &&
-            properties.at("datetime").type() != NL::detail::value_t::null)
+            properties.at("datetime").type() != nlohmann::detail::value_t::null)
         {
             std::string stacDateStr = stacValue(properties,
                 "datetime", m_json);
