@@ -98,6 +98,7 @@ PDAL_ADD_TEST(pdal_filespec_test
     FILES
         FileSpecTest.cpp
         ${PDAL_SRC_DIR}/FileSpec.cpp
+        ${PDAL_SRC_DIR}/private/Utils.cpp
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )

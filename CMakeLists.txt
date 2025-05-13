@@ -225,12 +225,6 @@ if (WIN32)
     target_compile_definitions(${PDAL_LIB_NAME} PRIVATE _XKEYCHECK_H=1)
 endif()
 add_library(PDAL::PDAL ALIAS ${PDAL_LIB_NAME})
-#
-# Interface include directories allow downstream project to get the directory
-# without specification.
-#
-
-
 
 target_include_directories(${PDAL_LIB_NAME}
     SYSTEM BEFORE PRIVATE

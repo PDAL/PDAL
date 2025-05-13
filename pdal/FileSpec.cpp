@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include "FileSpec.hpp"
+#include "private/Utils.hpp"
 
 #include <nlohmann/json.hpp>
 
