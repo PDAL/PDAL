@@ -514,7 +514,7 @@ TEST(GDALWriterTest, btbad)
     std::string outfile = Support::temppath("tmp.tif");
 
     Options wo;
-    wo.add("gdaldriver", "BT");
+    wo.add("gdaldriver", "ENVI");
     wo.add("output_type", "min");
     wo.add("resolution", 1);
     wo.add("radius", .7071);
@@ -544,7 +544,7 @@ TEST(GDALWriterTest, btint)
 
     GDALWriter w;
     Options wo;
-    wo.add("gdaldriver", "BT");
+    wo.add("gdaldriver", "ENVI");
     wo.add("output_type", "min");
     wo.add("resolution", 1);
     wo.add("radius", .7071);
@@ -578,7 +578,7 @@ TEST(GDALWriterTest, btint)
         arr.push_back(d);
     }
 
-    gdal::Raster raster(outfile, "BT");
+    gdal::Raster raster(outfile, "ENVI");
     if (raster.open() != gdal::GDALError::None)
     {
         throw pdal_error(raster.errorMsg());
