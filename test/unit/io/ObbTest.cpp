@@ -15,7 +15,7 @@ TEST(ObbTest, obb)
 {
     auto doesIntersect = [](Obb c)
     {
-        NL::json base = R"(
+        nlohmann::json base = R"(
             {
                 "center" : [ 0, 0, 0 ],
                 "halfSize" : [ 2, 1, 1.5 ],
@@ -27,7 +27,7 @@ TEST(ObbTest, obb)
         return b.intersect(c);
     };
 
-    NL::json clip = R"(
+    nlohmann::json clip = R"(
         {
             "center" : [ 2, 1, 0 ],
             "halfSize" : [

@@ -157,7 +157,7 @@ public:
     std::size_t m_threads = 0;
     double m_resolution = 0;
     std::vector<Polygon> m_polys;
-    NL::json m_addons;
+    nlohmann::json m_addons;
     OGRSpec m_ogr;
     bool m_ignoreUnreadable = false;
 };
@@ -346,7 +346,7 @@ void EptReader::handleOriginQuery()
     // grab either file and can use the same logic thereafter.  Prefer manifest,
     // if it exists, since it's the newer one.
 
-    NL::json sources;
+    nlohmann::json sources;
     try
     {
         sources = m_p->connector->getJson(
@@ -390,7 +390,7 @@ void EptReader::handleOriginQuery()
         // uniquely enough to select only one file.
         for (size_t i = 0; i < sources.size(); ++i)
         {
-            const NL::json& el = sources.at(i);
+            const nlohmann::json& el = sources.at(i);
             if (
                 el.count("path") &&
                 el.at("path").get<std::string>().find(search) !=
@@ -416,7 +416,7 @@ void EptReader::handleOriginQuery()
     // Now that we have our OriginId value, clamp the bounds to select only the
     // data sources that overlap the selected origin.
 
-    const NL::json found(sources.at(m_queryOriginId));
+    const nlohmann::json found(sources.at(m_queryOriginId));
 
     try
     {
@@ -712,7 +712,7 @@ bool EptReader::passesSpatialFilter(const BOX3D& tileBounds) const
 }
 
 
-void EptReader::overlaps(ept::Hierarchy& target, const NL::json& hier, const ept::Key& key)
+void EptReader::overlaps(ept::Hierarchy& target, const nlohmann::json& hier, const ept::Key& key)
 {
     // If our key isn't in the hierarchy, we've totally traversed this tree
     // branch (there are no lower nodes).

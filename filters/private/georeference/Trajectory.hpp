@@ -55,7 +55,7 @@ class Trajectory
     pdal::PointViewSet m_set;
 
 public:
-    Trajectory(const std::string& trajFile, const NL::json& opts);
+    Trajectory(const std::string& trajFile, const nlohmann::json& opts);
 
     bool getTrajPoint(double time, TrajPoint& trajPoint) const;
 };

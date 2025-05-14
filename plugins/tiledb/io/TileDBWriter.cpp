@@ -84,7 +84,7 @@ struct TileDBWriter::Args
     std::string m_filter_profile;
     std::string m_compressor;
     int m_compressionLevel;
-    NL::json m_filters;
+    nlohmann::json m_filters;
     bool m_append;
     bool m_use_time;
     bool m_time_first;
@@ -167,7 +167,7 @@ void TileDBWriter::addArgs(ProgramArgs& args)
     args.add("compression_level", "TileDB compression level",
              m_args->m_compressionLevel, -1);
     args.add("filters", "Specify filter and level per dimension/attribute",
-             m_args->m_filters, NL::json({}));
+             m_args->m_filters, nlohmann::json({}));
     args.add("append", "Append to existing TileDB array", m_args->m_append,
              false);
     args.add("use_time_dim", "Use GpsTime coordinate data as array dimension",

@@ -84,7 +84,7 @@ TEST(StacReaderTest, local_catalog_test)
     reader.setOptions(options);
 
     QuickInfo qi = reader.preview();
-    NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
+    nlohmann::json jsonMetadata = nlohmann::json::parse(Utils::toJSON(qi.m_metadata));
     EXPECT_TRUE(jsonMetadata.contains("item_ids"));
     std::vector<std::string> idList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
 
@@ -208,7 +208,7 @@ TEST(StacReaderTest, item_collection_test)
 
     QuickInfo qi = reader.preview();
 
-    NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
+    nlohmann::json jsonMetadata = nlohmann::json::parse(Utils::toJSON(qi.m_metadata));
     EXPECT_TRUE(jsonMetadata.contains("item_ids"));
     std::vector<std::string> idList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
 
@@ -277,7 +277,7 @@ TEST(StacReaderTest, nested_catalog_test)
 
     QuickInfo qi = reader.preview();
 
-    NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
+    nlohmann::json jsonMetadata = nlohmann::json::parse(Utils::toJSON(qi.m_metadata));
     EXPECT_TRUE(jsonMetadata.contains("catalog_ids"));
     EXPECT_TRUE(jsonMetadata.contains("collection_ids"));
     EXPECT_TRUE(jsonMetadata.contains("item_ids"));
@@ -349,7 +349,7 @@ TEST(StacReaderTest, id_prune_test)
     QuickInfo qi = reader.preview();
 
 
-    NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
+    nlohmann::json jsonMetadata = nlohmann::json::parse(Utils::toJSON(qi.m_metadata));
     EXPECT_TRUE(jsonMetadata.contains("item_ids"));
     std::vector<std::string> idList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
 
@@ -388,7 +388,7 @@ TEST(StacReaderTest, date_prune_accept_test)
 
     QuickInfo qi = reader.preview();
 
-    NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
+    nlohmann::json jsonMetadata = nlohmann::json::parse(Utils::toJSON(qi.m_metadata));
     EXPECT_TRUE(jsonMetadata.contains("item_ids"));
     std::vector<std::string> idList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
@@ -411,7 +411,7 @@ TEST(StacReaderTest, date_start_end_time_accept_test)
 
     QuickInfo qi = reader.preview();
 
-    NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
+    nlohmann::json jsonMetadata = nlohmann::json::parse(Utils::toJSON(qi.m_metadata));
     EXPECT_TRUE(jsonMetadata.contains("item_ids"));
     std::vector<std::string> idList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
@@ -449,7 +449,7 @@ TEST(StacReaderTest, bounds_prune_accept_test)
 
     QuickInfo qi = reader.preview();
 
-    NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
+    nlohmann::json jsonMetadata = nlohmann::json::parse(Utils::toJSON(qi.m_metadata));
     EXPECT_TRUE(jsonMetadata.contains("item_ids"));
     std::vector<std::string> idList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
@@ -475,7 +475,7 @@ TEST(StacReaderTest, bounds_prune_reject_test)
 
 TEST(StacReaderTest, ogr_bounds_accept_test)
 {
-    NL::json json;
+    nlohmann::json json;
     json["type"] = "ogr";
     json["drivers"] = {"GeoJSON"};
     json["datasource"] = Support::datapath("stac/ogr_boundary.json");
@@ -494,7 +494,7 @@ TEST(StacReaderTest, ogr_bounds_accept_test)
 
     QuickInfo qi = reader.preview();
 
-    NL::json jsonMetadata = NL::json::parse(Utils::toJSON(qi.m_metadata));
+    nlohmann::json jsonMetadata = nlohmann::json::parse(Utils::toJSON(qi.m_metadata));
     EXPECT_TRUE(jsonMetadata.contains("item_ids"));
     std::vector<std::string> idList = jsonMetadata["item_ids"].get<std::vector<std::string>>();
     EXPECT_TRUE(std::find(idList.begin(), idList.end(), "MD_GoldenBeach_2012") != idList.end());
@@ -503,7 +503,7 @@ TEST(StacReaderTest, ogr_bounds_accept_test)
 
 TEST(StacReaderTest, ogr_bounds_reject_test)
 {
-    NL::json json;
+    nlohmann::json json;
     json["type"] = "ogr";
     json["drivers"] = {"GeoJSON"};
     json["datasource"] = Support::datapath("stac/ogr_boundary.json");
@@ -526,7 +526,7 @@ TEST(StacReaderTest, ogr_bounds_reject_test)
 // adding this back when I get it to throw for invalid polygons
 TEST(StacReaderTest, ogr_bounds_invalid_test)
 {
-    NL::json json;
+    nlohmann::json json;
     json["type"] = "ogr";
     json["drivers"] = {"GeoJSON"};
     json["datasource"] = Support::datapath("stac/ogr_boundary.json");
