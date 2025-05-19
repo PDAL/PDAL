@@ -50,13 +50,14 @@
 
 #include <nlohmann/json.hpp>
 
+namespace pdal
+{
+
 namespace arbiter
 {
     class Arbiter;
 }
 
-namespace pdal
-{
 class SrsTransform;
 class ThreadPool;
 
