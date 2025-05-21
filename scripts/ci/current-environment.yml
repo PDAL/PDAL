@@ -13,7 +13,7 @@ dependencies:
   - openssl
   - nitro
   - ceres-solver
-  - python=3.12
+  - python=3.13
   - conda
   - mamba
   - conda-build
@@ -21,6 +21,7 @@ dependencies:
   - libparquet
   - compilers
   - ninja
+  - liblzma-devel
   - cmake
   - pkg-config
   - make  # [not win]

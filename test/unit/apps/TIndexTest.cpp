@@ -47,13 +47,13 @@ using namespace pdal;
 TEST(TIndex, test1)
 {
     std::string inSpec(Support::datapath("tindex/*.txt"));
-    std::string outSpec(Support::temppath("tindex.out"));
+    std::string outSpec(Support::temppath("tindex.json"));
     std::string outPoints(Support::temppath("points.txt"));
 
     std::string cmd = Support::binpath("pdal") + " tindex create " +
-        outSpec + " \"" + inSpec + "\"";
+        outSpec + " \"" + inSpec + "\" -f GeoJSON";
 
-    FileUtils::deleteDirectory(outSpec);
+    FileUtils::deleteFile(outSpec);
 
     std::string output;
     Utils::run_shell_command(cmd, output);
@@ -82,16 +82,18 @@ TEST(TIndex, test1)
     Utils::run_shell_command(cmd, output);
     pos = output.find("Merge filecount: 1");
     EXPECT_NE(pos, std::string::npos);
+
+    FileUtils::deleteFile(outPoints);
+    FileUtils::deleteFile(outSpec);
 }
 
 TEST(TIndex, test2)
 {
     std::string inSpec(Support::datapath("tindex/*.txt"));
-    std::string outSpec(Support::temppath("tindex.out"));
+    std::string outSpec(Support::temppath("tindex.json"));
 
-    FileUtils::deleteDirectory(outSpec);
-    std::string cmd = Support::binpath("pdal") + " tindex create --stdin " +
-        outSpec + " \"" + inSpec + "\" 2>&1";
+     std::string cmd = Support::binpath("pdal") + " tindex create --stdin " +
+        outSpec + " \"" + inSpec + "\" -f GeoJSON 2>&1";
 
     std::string output;
     Utils::run_shell_command(cmd, output);
@@ -99,17 +101,19 @@ TEST(TIndex, test2)
     EXPECT_NE(pos, std::string::npos);
 
     cmd = Support::binpath("pdal") + " tindex create --stdin " +
-        outSpec + " --filespec=\"" + inSpec + "\" 2>&1";
+        outSpec + " -f GeoJSON --filespec=\"" + inSpec + "\" 2>&1";
     Utils::run_shell_command(cmd, output);
     pos = output.find("Can't specify both");
     EXPECT_NE(pos, std::string::npos);
 
     cmd = Support::binpath("pdal") + " tindex create " + outSpec + 
-        " --path_prefix=\"a\" --write_absolute_path=true " +
+        " -f GeoJSON --path_prefix=\"a\" --write_absolute_path=true " +
         "--filespec=\"" + inSpec + "\" 2>&1";
     Utils::run_shell_command(cmd, output);
     pos = output.find("Can't specify both");
     EXPECT_NE(pos, std::string::npos);
+
+    FileUtils::deleteFile(outSpec);
 }
 
 // Indentical to test1, but filespec input comes from find command.
@@ -117,14 +121,12 @@ TEST(TIndex, test3)
 {
 // No find on Windows.
 #ifndef _WIN32
-    std::string outSpec(Support::temppath("tindex.out"));
+    std::string outSpec(Support::temppath("tindex.json"));
     std::string outPoints(Support::temppath("points.txt"));
 
     std::string cmd = "find " + Support::datapath("tindex") +
         " -name \"*.txt\" | " + Support::binpath("pdal") +
-        " tindex create --stdin " + outSpec;
-
-    FileUtils::deleteDirectory(outSpec);
+        " tindex create --stdin " + outSpec + " -f GeoJSON";
 
     std::string output;
     Utils::run_shell_command(cmd, output);
@@ -153,6 +155,9 @@ TEST(TIndex, test3)
     Utils::run_shell_command(cmd, output);
     pos = output.find("Merge filecount: 1");
     EXPECT_NE(pos, std::string::npos);
+
+    FileUtils::deleteFile(outPoints);
+    FileUtils::deleteFile(outSpec);
 #endif
 }
 
@@ -208,24 +213,36 @@ TEST(TIndex, test4)
 TEST(TIndex, test5)
 {
     std::string inSpec(Support::datapath("tindex/autzen_clip_*.copc.laz"));
-    std::string outSpec(Support::temppath("tindex.out"));
+    std::string outSpec(Support::temppath("tindex.json"));
 
     std::string cmd = Support::binpath("pdal") + " tindex create " +
-        outSpec + " \"" + inSpec + "\" --log=stdout --fast_boundary=true";
-    FileUtils::deleteDirectory(outSpec);
+        outSpec + " \"" + inSpec + "\" -f GeoJSON --log=stdout --fast_boundary=true";
 
     std::string output;
     Utils::run_shell_command(cmd, output);
     std::string::size_type pos = output.find("does not match the SRS of other files in the tileindex");
     EXPECT_NE(pos, std::string::npos);
+    FileUtils::deleteFile(outSpec);
 
     cmd = Support::binpath("pdal") + " tindex create " +
-        outSpec + " \"" + inSpec + "\" --log=stdout --fast_boundary=true " +
+        outSpec + " \"" + inSpec + "\" -f GeoJSON --log=stdout --fast_boundary=true " +
         "--skip_different_srs=true";
-    FileUtils::deleteDirectory(outSpec);
 
     Utils::run_shell_command(cmd, output);
     pos = output.find("does not match the SRS of other files in the tileindex. Skipping this file");
     EXPECT_NE(pos, std::string::npos);
+    FileUtils::deleteFile(outSpec);
+
+    // Testing rejection of long SRS w/ shapefile driver
+    outSpec = Support::temppath("tindexOut");
+
+    cmd = Support::binpath("pdal") + " tindex create " +
+    outSpec + " \"" + inSpec + "\" -f \"ESRI Shapefile\" --log=stdout " +
+    "--fast_boundary=true 2>&1";
+
+    Utils::run_shell_command(cmd, output);
+    pos = output.find("supports a maximum of 254");
+    EXPECT_NE(pos, std::string::npos);
+    FileUtils::deleteDirectory(outSpec);
 }
 
