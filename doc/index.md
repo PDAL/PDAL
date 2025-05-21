@@ -26,40 +26,13 @@ The entire website is available as a single PDF at <http://pdal.io/_/downloads/e
 
 ## News
 
-### **09-05-2024**
+### **05-22-2025**
 
-PDAL 2.8.0 was released. Visit {ref}`download` to grab a copy.
+PDAL 2.9.0 was released. Visit {ref}`download` to grab a copy.
 
-### **06-28-2024**
+### **02-03-2025**
 
-PDAL 2.7.2 was released. Visit {ref}`download` to grab a copy.
-
-### **02-05-2024**
-
-PDAL 2.6.3 was released. Visit {ref}`download` to grab a copy.
-
-### **08-18-2023**
-
-PDAL 2.5.6 was released. Visit {ref}`download` to grab a copy.
-
-### **01-13-2023**
-
-PDAL 2.5.0 was released. Visit {ref}`download` to grab a copy. See it in
-action in Jupyter by visiting Google Colab at <https://colab.research.google.com/drive/1JQpcVFFJYMrJCfodqP4Nc_B0_w6p5WOV?usp=sharing>
-
-### **06-28-2021**
-
-Howard Butler of [Hobu, Inc.](https://hobu.co) was recently interviewed by the
-[MapScaping Podcast](https://mapscaping.com). Listen to the episode where he
-talks about PDAL and point cloud processing.
-
-<https://mapscaping.com/blogs/the-mapscaping-podcast/pdal-point-data-abstraction-library>
-
-### **05-19-2021**
-
-PDAL 2.2.1 has been released. You can {ref}`download <download>` the source
-code or follow the {ref}`quickstart <quickstart>` to get going in a
-hurry with Conda.
+PDAL 2.8.4 was released. Visit {ref}`download` to grab a copy.
 
 ## Indices and tables
 
