@@ -2,8 +2,7 @@ name: pdal-build
 channels:
   - conda-forge
 dependencies:
-  - libgdal=3.8
-  - boa
+  - libgdal=3.9
   - libpq
   - curl
   - hdf5
@@ -13,7 +12,7 @@ dependencies:
   - openssl
   - nitro
   - ceres-solver
-  - python=3.10
+  - python=3.12
   - conda
   - mamba
   - conda-build

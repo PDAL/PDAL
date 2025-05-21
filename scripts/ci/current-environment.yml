@@ -2,8 +2,8 @@ name: pdal-build
 channels:
   - conda-forge
 dependencies:
-  - libgdal
-  - boa
+  - libgdal-core
+  - geotiff
   - libpq
   - curl
   - hdf5
