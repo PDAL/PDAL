@@ -127,8 +127,12 @@ void EigenvaluesFilter::filter(PointView& view)
             // if insufficient number of neighbors, eigen solver will fail
             // anyway, it may be okay to silently return without setting any of
             // the computed features?
-            if (ids.size() < (size_t)m_args->m_minK)
+            if (ids.size() < (size_t)m_args->m_minK) {
+                log()->get(LogLevel::Info)
+                    << "Skipping point " << p.pointId() << ". Found " << ids.size()
+                    << " neighbors but required " << m_args->m_minK << ".\n";
                 continue;
+            }
         }
         else
         {
@@ -137,6 +141,17 @@ void EigenvaluesFilter::filter(PointView& view)
 
         // compute covariance of the neighborhood
         Matrix3d B = math::computeCovariance(view, ids);
+
+        // Check if the covariance matrix is all zeros
+        if (B.isZero())
+        {
+            log()->get(LogLevel::Info)
+                << "Skipping point " << p.pointId()
+                << ". Covariance matrix is all zeros. This suggests a large "
+                   "number of redundant points. Consider using filters.sample "
+                   "with a small radius to remove redundant points.\n";
+            continue;
+        }
 
         // perform the eigen decomposition
         Eigen::SelfAdjointEigenSolver<Matrix3d> solver(B);

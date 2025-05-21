@@ -133,6 +133,18 @@ void NormalFilter::compute(PointView& view, KD3Index& kdi)
         // neighborhood composed of k-nearest neighbors.
         PointIdList neighbors = kdi.neighbors(p.pointId(), m_args->m_knn);
         auto B = math::computeCovariance(view, neighbors);
+
+        // Check if the covariance matrix is all zeros
+        if (B.isZero())
+        {
+            log()->get(LogLevel::Info)
+                << "Skipping point " << p.pointId()
+                << ". Covariance matrix is all zeros. This suggests a large "
+                   "number of redundant points. Consider using filters.sample "
+                   "with a small radius to remove redundant points.\n";
+            continue;
+        }
+
         SelfAdjointEigenSolver<Matrix3d> solver(B);
         if (solver.info() != Success)
             throwError("Cannot perform eigen decomposition.");
