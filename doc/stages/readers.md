@@ -2,12 +2,17 @@
 
 # Readers
 
+PDAL processes files in a variety of formats, listed below, with each
+tied to a reader.
+
 Readers provide {ref}`dimensions` to {ref}`pipeline`. PDAL attempts to
 normalize common dimension types, like X, Y, Z, or Intensity, which are often
 found in LiDAR point clouds. Not all dimension types need to be fixed, however.
 Database drivers typically return unstructured lists of dimensions.  A reader
 might provide a simple file type, like {ref}`readers.text`, a complex database
 like {ref}`readers.pgpointcloud`, or a network service like {ref}`readers.ept`.
+
+PDAL supports streaming a file from a remote server with {ref}`VSI`.
 
 <!-- ```{toctree}
 :glob: true
