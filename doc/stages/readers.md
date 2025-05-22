@@ -2,7 +2,7 @@
 
 # Readers
 
-PDAL supports reading files in a variety of formats, listed below, with each
+PDAL processes files in a variety of formats, listed below, with each
 tied to a reader.
 
 Readers provide {ref}`dimensions` to {ref}`pipeline`. PDAL attempts to

@@ -2,8 +2,7 @@
 
 # VSI
 
-PDAL supports reading a file over a network, fetching only the portion of
-the data that is needed for processing. 
+PDAL can read a file over a network, fetching only the portion that is needed for processing.
 
 Here is an example.
 
