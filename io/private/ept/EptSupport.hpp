@@ -40,7 +40,7 @@
 namespace pdal
 {
 
-inline BOX3D toBox3d(const NL::json& b)
+inline BOX3D toBox3d(const nlohmann::json& b)
 {
     if (!b.is_array() || b.size() != 6)
     {

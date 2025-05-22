@@ -16,7 +16,7 @@ TEST(FileSpecTest, create)
     EXPECT_EQ(spec.m_path.string(), inFile);
 
     // create from json
-    NL::json json{};
+    nlohmann::json json{};
     json["path"] = inFile;
     json["headers"] = {{"some_header_key","some_header_val"}};
     json["query"] = {{"some_query_key","some_query_val"}};
@@ -26,7 +26,7 @@ TEST(FileSpecTest, create)
 
     spec = FileSpec();
     // copying this here so the json object can be reused: it gets consumed in parse()
-    NL::json testJson = json;
+    nlohmann::json testJson = json;
     status = spec.parse(testJson);
     EXPECT_EQ(status, true);
     EXPECT_EQ(spec.m_path.string(), inFile);
@@ -36,13 +36,13 @@ TEST(FileSpecTest, create)
 
 TEST(FileSpecTest, parse_errors)
 {
-    NL::json json{};
+    nlohmann::json json{};
     json["path"] = "foo.laz";
     json["headers"] = {{"some_header_key","some_header_val"}};
     json["query"] = {{"some_query_key","some_query_val"}};
 
     FileSpec spec;
-    NL::json testJson = json;
+    nlohmann::json testJson = json;
     testJson["query"] = {"some_query_key","some_query_val"};
     Utils::StatusWithReason status = spec.parse(testJson);
     EXPECT_EQ(status.what(), "'filename' sub-argument 'query' must be an object of string key-value pairs.");

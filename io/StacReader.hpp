@@ -39,7 +39,7 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
-#include <pdal/JsonFwd.hpp>
+#include <nlohmann/json.hpp>
 #include <pdal/StageFactory.hpp>
 #include <filters/MergeFilter.hpp>
 
@@ -75,10 +75,10 @@ class PDAL_EXPORT StacReader : public Reader, public Streamable
         void printErrors(stac::Catalog& c);
         void handleNested(stac::Catalog& c);
         void addItem(stac::Item& item);
-        void handleItem(NL::json stacJson, std::string itemPath);
-        void handleCatalog(NL::json stacJson, std::string catPath);
-        void handleCollection(NL::json stacJson, std::string colPath);
-        void handleItemCollection(NL::json stacJson, std::string icPath);
+        void handleItem(nlohmann::json stacJson, std::string itemPath);
+        void handleCatalog(nlohmann::json stacJson, std::string catPath);
+        void handleCollection(nlohmann::json stacJson, std::string colPath);
+        void handleItemCollection(nlohmann::json stacJson, std::string icPath);
         void initializeArgs();
 
         virtual void initialize() override;

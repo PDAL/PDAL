@@ -27,4 +27,5 @@ dependencies:
   - make  # [not win]
   - re2  # [linux]
   - ccache
+  - nlohmann-json3-dev
 

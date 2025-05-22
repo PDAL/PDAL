@@ -106,7 +106,7 @@ public:
         auto kvMetadata = std::make_shared<arrow::KeyValueMetadata>();
 
         // Note that field-level metadata is not stored in Parquet.
-        NL::json metadata {
+        nlohmann::json metadata {
                 { "name", m_name },
                 { "description", Dimension::description(m_id) },
                 { "interpretation", Dimension::interpretationName(Dimension::type<DT>()) },
@@ -149,7 +149,7 @@ public:
 
     std::shared_ptr<arrow::Field> field() override
     {
-        NL::json metadata {
+        nlohmann::json metadata {
             { "name", m_dimName },
             { "description", "Packed XYZ" },
             { "interpretation", "double[3]" },
@@ -199,7 +199,7 @@ public:
 
     FieldPtr field() override
     {
-        NL::json metadata {
+        nlohmann::json metadata {
             { "name", "wkb" },
             { "description", "WKB points" },
             { "interpretation", "binary" },
@@ -304,13 +304,13 @@ bool ArrowWriter::processOne(PointRef& point)
     return true;
 }
 
-NL::json getPROJJSON(const pdal::SpatialReference& ref)
+nlohmann::json getPROJJSON(const pdal::SpatialReference& ref)
 {
-    NL::json column;
+    nlohmann::json column;
     try
     {
-        column["crs"] = NL::json::parse(ref.getPROJJSON());
-    } catch (NL::json::parse_error& e)
+        column["crs"] = nlohmann::json::parse(ref.getPROJJSON());
+    } catch (nlohmann::json::parse_error& e)
     {
         column["error"] = e.what();
     }
@@ -413,16 +413,16 @@ void ArrowWriter::write(const PointViewPtr view)
 void ArrowWriter::gatherParquetGeoMetadata(std::shared_ptr<arrow::KeyValueMetadata>& input,
     const SpatialReference& ref)
 {
-    NL::json column = {
+    nlohmann::json column = {
         { "encoding", "WKB" },
         { "geometry_types", { "Point" } }
     };
     column.update(getPROJJSON(ref.empty() ? SpatialReference("EPSG:4326") : ref));
 
-    NL::json wkb;
+    nlohmann::json wkb;
     wkb["wkb"] = column;
 
-    NL::json geo {
+    nlohmann::json geo {
         { "version", m_geoParquetVersion },
         { "primary_column", "wkb" },
         { "columns", wkb }

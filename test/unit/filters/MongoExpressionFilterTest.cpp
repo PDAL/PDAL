@@ -61,7 +61,7 @@ std::unique_ptr<FixedPointTable> makeTable()
 }
 
 std::unique_ptr<MongoExpressionFilter> makeFilter(BasePointTable& table,
-    NL::json expression)
+    nlohmann::json expression)
 {
     Options o;
     o.add("expression", expression.dump());
@@ -94,13 +94,13 @@ TEST(MongoExpressionFilterTest, missingDimension)
 
     {
         // Missing LHS dimension.
-        NL::json e {"Red", 42};
+        nlohmann::json e {"Red", 42};
         EXPECT_THROW(makeFilter(*table, e), pdal_error);
     }
 
     {
         // Missing RHS dimension.
-        NL::json e {"X", "Red"};
+        nlohmann::json e {"X", "Red"};
         EXPECT_THROW(makeFilter(*table, e), pdal_error);
     }
 }
@@ -112,13 +112,13 @@ TEST(MongoExpressionFilterTest, invalidSingleComparisons)
 
     {
         // Comparison operators must take values, not arrays.
-        NL::json e {"X", {"$eq", {1}} };
+        nlohmann::json e {"X", {"$eq", {1}} };
         EXPECT_THROW(makeFilter(*table, e), pdal_error);
     }
 
     {
         // Comparison operators must take values, not objects.
-        NL::json e {"X", {"$eq", {"asdf", 42} } };
+        nlohmann::json e {"X", {"$eq", {"asdf", 42} } };
         EXPECT_THROW(makeFilter(*table, e), pdal_error);
     }
 }
@@ -129,7 +129,7 @@ TEST(MongoExpressionFilterTest, singleComparisons)
 
     {
         // Implicit $eq.
-        NL::json e { { "X", 0 } };
+        nlohmann::json e { { "X", 0 } };
 
         auto f(makeFilter(*table, e));
         PointRef pr(*table, 0);
@@ -145,7 +145,7 @@ TEST(MongoExpressionFilterTest, singleComparisons)
     }
     {
         // Across dimensions.
-        NL::json e { {"X", "Y"} };
+        nlohmann::json e { {"X", "Y"} };
         auto f(makeFilter(*table, e));
         PointRef pr(*table, 0);
 
@@ -167,7 +167,7 @@ TEST(MongoExpressionFilterTest, singleComparisons)
     {
         PointRef pr(*table, 0);
 
-        NL::json e {{"X", {{comp, 0}} }};
+        nlohmann::json e {{"X", {{comp, 0}} }};
         auto f(makeFilter(*table, e));
 
         pr.setField(Dimension::Id::X, -1);
@@ -195,7 +195,7 @@ TEST(MongoExpressionFilterTest, singleComparisons)
     {
         PointRef pr(*table, 0);
 
-        NL::json e {{"X", {{comp, "Y"}} }};
+        nlohmann::json e {{"X", {{comp, "Y"}} }};
         auto f(makeFilter(*table, e));
 
         pr.setField(Dimension::Id::Y, 0);
@@ -228,17 +228,17 @@ TEST(MongoExpressionFilterTest, invalidMultiComparisons)
 
     {
         // Comparison operators must take arrays, not values.
-        NL::json e {"X", {"$in", 42} };
+        nlohmann::json e {"X", {"$in", 42} };
         EXPECT_THROW(makeFilter(*table, e), pdal_error);
     }
     {
         // Comparison operators must take arrays, not objects.
-        NL::json e {"X", {"$in", {"asdf", 42} } };
+        nlohmann::json e {"X", {"$in", {"asdf", 42} } };
         EXPECT_THROW(makeFilter(*table, e), pdal_error);
     }
     {
         // Dimensions must exist.
-        NL::json e {"X", {"$in", {"Red"}} };
+        nlohmann::json e {"X", {"$in", {"Red"}} };
         EXPECT_THROW(makeFilter(*table, e), pdal_error);
     }
 }
@@ -250,7 +250,7 @@ TEST(MongoExpressionFilterTest, multiComparisons)
 
     // $in.
     {
-        NL::json e {{ "X", {{"$in", {0, 1, 2} }} }};
+        nlohmann::json e {{ "X", {{"$in", {0, 1, 2} }} }};
         auto f(makeFilter(*table, e));
 
         pr.setField(Dimension::Id::X, 0);
@@ -265,7 +265,7 @@ TEST(MongoExpressionFilterTest, multiComparisons)
 
     // $in across dimensions.
     {
-        NL::json e {{ "X", {{"$in", {0, 1, "Y"} }} }};
+        nlohmann::json e {{ "X", {{"$in", {0, 1, "Y"} }} }};
         auto f(makeFilter(*table, e));
 
         pr.setField(Dimension::Id::Y, 2);
@@ -282,7 +282,7 @@ TEST(MongoExpressionFilterTest, multiComparisons)
 
     // $nin.
     {
-        NL::json e {{ "X", {{"$nin", {0, 1, 2} }} }};
+        nlohmann::json e {{ "X", {{"$nin", {0, 1, 2} }} }};
         auto f(makeFilter(*table, e));
 
         pr.setField(Dimension::Id::X, 0);
@@ -297,7 +297,7 @@ TEST(MongoExpressionFilterTest, multiComparisons)
 
     // $nin across dimensions.
     {
-        NL::json e {{ "X", {{"$nin", {0, 1, "Y"} }} }};
+        nlohmann::json e {{ "X", {{"$nin", {0, 1, "Y"} }} }};
         auto f(makeFilter(*table, e));
 
         pr.setField(Dimension::Id::Y, 2);
@@ -320,13 +320,13 @@ TEST(MongoExpressionFilterTest, invalidLogicalOperators)
 
     // Logical operators cannot point to values.
     {
-        NL::json e {"$and", 42};
+        nlohmann::json e {"$and", 42};
         EXPECT_THROW(makeFilter(*table, e), pdal_error);
     }
 
     // Logical operators cannot point to objects.
     {
-        NL::json e {"$and", "X"};
+        nlohmann::json e {"$and", "X"};
         EXPECT_THROW(makeFilter(*table, e), pdal_error);
     }
 
@@ -335,13 +335,13 @@ TEST(MongoExpressionFilterTest, invalidLogicalOperators)
 
     // Logical NOT cannot point to values.
     {
-        NL::json e {"$not", 42};
+        nlohmann::json e {"$not", 42};
         EXPECT_THROW(makeFilter(*table, e), pdal_error);
     }
 
     // Logical NOT must accept only a single expression.
     {
-        NL::json e {"$not", {{"X", 0}, {"Y", 1}} };
+        nlohmann::json e {"$not", {{"X", 0}, {"Y", 1}} };
 
         EXPECT_THROW(makeFilter(*table, e), pdal_error);
     }
@@ -354,7 +354,7 @@ TEST(MongoExpressionFilterTest, logicalOperators)
 
     // Implicit $and.
     {
-        NL::json e {{"X", {{"$gt", 0}, {"$lt", 2}} }};
+        nlohmann::json e {{"X", {{"$gt", 0}, {"$lt", 2}} }};
         auto f(makeFilter(*table, e));
 
         pr.setField(Dimension::Id::X, 0);
@@ -369,7 +369,7 @@ TEST(MongoExpressionFilterTest, logicalOperators)
 
     // Implicit $and across dimensions.
     {
-        NL::json e {{"X", {{"$gt", 0}, {"$lt", "Y"}} }};
+        nlohmann::json e {{"X", {{"$gt", 0}, {"$lt", "Y"}} }};
         auto f(makeFilter(*table, e));
 
         pr.setField(Dimension::Id::Y, 2);
@@ -386,7 +386,7 @@ TEST(MongoExpressionFilterTest, logicalOperators)
 
     // $and.
     {
-        NL::json e {{"$and", { {{"X", 0}}, {{"Y", 1}}, {{"Z", 2}} } }};
+        nlohmann::json e {{"$and", { {{"X", 0}}, {{"Y", 1}}, {{"Z", 2}} } }};
 
         auto f(makeFilter(*table, e));
 
@@ -410,7 +410,7 @@ TEST(MongoExpressionFilterTest, logicalOperators)
 
     // $or.
     {
-        NL::json e {{"$or", { {{"X", 0}}, {{"Y", 1}}, {{"Z", 2}} } }};
+        nlohmann::json e {{"$or", { {{"X", 0}}, {{"Y", 1}}, {{"Z", 2}} } }};
         auto f(makeFilter(*table, e));
 
         for (PointId x(0); x < 3; ++x)
@@ -433,7 +433,7 @@ TEST(MongoExpressionFilterTest, logicalOperators)
 
     // $nor.
     {
-        NL::json e {{"$nor", { {{"X", 0}}, {{"Y", 1}}, {{"Z", 2}} } }};
+        nlohmann::json e {{"$nor", { {{"X", 0}}, {{"Y", 1}}, {{"Z", 2}} } }};
 
         auto f(makeFilter(*table, e));
 
@@ -457,7 +457,7 @@ TEST(MongoExpressionFilterTest, logicalOperators)
 
     // $not
     {
-        NL::json e {{"$not", {{"X", {{"$gt", 0}} }} }};
+        nlohmann::json e {{"$not", {{"X", {{"$gt", 0}} }} }};
         auto f(makeFilter(*table, e));
 
         pr.setField(Dimension::Id::X, -1);
@@ -472,7 +472,7 @@ TEST(MongoExpressionFilterTest, logicalOperators)
 
     // $not with inner multi-comparison
     {
-        NL::json e {{"$not", {{"X", {{"$in", {0, 1, 2} }} }} }};
+        nlohmann::json e {{"$not", {{"X", {{"$in", {0, 1, 2} }} }} }};
         auto f(makeFilter(*table, e));
 
         pr.setField(Dimension::Id::X, 0);
