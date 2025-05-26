@@ -677,4 +677,25 @@ TEST(CopcReaderTest, ogrCrop)
     EXPECT_LE(v->size(), 90u);
 }
 
+
+TEST(CopcReaderTest, boundedpreview)
+{
+
+
+    BOX2D bounds(515380, 4918350, 515400, 4918370);
+
+    CopcReader reader;
+    {
+        Options options;
+        options.add("filename", copcPath);
+        options.add("bounds", bounds);
+        reader.setOptions(options);
+    }
+
+    pdal::QuickInfo qi(reader.preview());
+    pdal::BOX3D bounds3d = qi.m_bounds;
+
+    EXPECT_EQ(pdal::Bounds(bounds).to2d(), pdal::Bounds(bounds3d).to2d());
+}
+
 } // namespace pdal
