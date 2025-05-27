@@ -58,7 +58,7 @@ of tasks. This pipeline will collect the sample data set and convert it to a {re
 3) Verify that the COPC data look ok:
 
    > ```console
-   > $ pdal info dublin.copc.laz | jq .stats.bbox.native.bbox
+   > $ pdal info dublin.laz | jq .stats.bbox.native.bbox
    > {
    >     "maxx": -694128.96,
    >     "maxy": 7049938.84,
@@ -67,10 +67,10 @@ of tasks. This pipeline will collect the sample data set and convert it to a {re
    >     "miny": 7044490.98,
    >     "minz": -144.24
    > }
-   > $ pdal info dublin.copc.laz -p 0
+   > $ pdal info dublin.laz -p 0
    > {
    >     "file_size": 90310030,
-   >     "filename": "dublin.copc.laz",
+   >     "filename": "dublin.laz",
    >     "now": "2023-06-02T13:40:36-0500",
    >     "pdal_version": "2.5.3 (git-version: Release)",
    >     "points":
