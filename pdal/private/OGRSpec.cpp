@@ -16,7 +16,7 @@ OGRSpec::OGRSpec(const std::string& ogrJsonStr)
     initialize();
 }
 
-OGRSpec::OGRSpec(const NL::json& ogrJson)
+OGRSpec::OGRSpec(const nlohmann::json& ogrJson)
 {
     validateInput(ogrJson);
     initialize();
@@ -29,7 +29,7 @@ void OGRSpec::update(const std::string& ogrJsonStr)
     initialize();
 }
 
-void OGRSpec::update(const NL::json& ogrJson)
+void OGRSpec::update(const nlohmann::json& ogrJson)
 {
     m_geom.clear();
     validateInput(ogrJson);
@@ -40,9 +40,9 @@ void OGRSpec::validateInput(const std::string& ogrJsonStr)
 {
     try
     {
-        m_json = NL::json::parse(ogrJsonStr);
+        m_json = nlohmann::json::parse(ogrJsonStr);
     }
-    catch(NL::json::parse_error& e)
+    catch(nlohmann::json::parse_error& e)
     {
         std::string s(e.what());
         auto pos = s.find("]");
@@ -56,7 +56,7 @@ void OGRSpec::validateInput(const std::string& ogrJsonStr)
     parse();
 }
 
-void OGRSpec::validateInput(const NL::json& ogrJson)
+void OGRSpec::validateInput(const nlohmann::json& ogrJson)
 {
     m_json = ogrJson;
     parse();

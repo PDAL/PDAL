@@ -38,7 +38,7 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/pdal_types.hpp>
 
-#include <pdal/JsonFwd.hpp>
+#include <nlohmann/json.hpp>
 
 using StringMap = std::map<std::string, std::string>;
 
@@ -55,16 +55,16 @@ public:
     { return !m_path.empty(); }
     bool onlyFilename() const
     { return m_headers.empty() && m_query.empty(); }
-    Utils::StatusWithReason parse(NL::json& json);
+    Utils::StatusWithReason parse(nlohmann::json& json);
     // parse a user input string that could be a json spec or filename
     Utils::StatusWithReason ingest(const std::string& pathOrJson);
 
     friend std::ostream& operator << (std::ostream& out, const FileSpec& spec);
 
 private:
-    Utils::StatusWithReason extractPath(NL::json& node);
-    Utils::StatusWithReason extractQuery(NL::json& node);
-    Utils::StatusWithReason extractHeaders(NL::json& node);
+    Utils::StatusWithReason extractPath(nlohmann::json& node);
+    Utils::StatusWithReason extractQuery(nlohmann::json& node);
+    Utils::StatusWithReason extractHeaders(nlohmann::json& node);
 
 public:
     std::filesystem::path m_path;

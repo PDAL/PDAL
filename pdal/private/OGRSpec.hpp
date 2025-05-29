@@ -28,11 +28,11 @@ class OGRSpec
 
 public:
     OGRSpec(const std::string& ogrJsonStr);
-    OGRSpec(const NL::json& ogrJson);
+    OGRSpec(const nlohmann::json& ogrJson);
     OGRSpec();
 
     void update(const std::string& ogrJsonStr);
-    void update(const NL::json& ogrJson);
+    void update(const nlohmann::json& ogrJson);
 
     std::vector<Polygon> getPolygons()
     { return m_geom; }
@@ -51,17 +51,17 @@ public:
 private:
     void initialize();
     void validateInput(const std::string& ogrJsonStr);
-    void validateInput(const NL::json& ogrJson);
+    void validateInput(const nlohmann::json& ogrJson);
     void parse();
 
     template <typename T>
-    void assignJSON(const NL::json& field, T& to)
+    void assignJSON(const nlohmann::json& field, T& to)
     {
         try
         {
             field.get_to(to);
         }
-        catch(const NL::json::exception& e)
+        catch(const nlohmann::json::exception& e)
         {
             std::string s(e.what());
             auto pos = s.find("]");
@@ -76,7 +76,7 @@ private:
 
     std::vector<Polygon> m_geom;
     // m_json mostly only exists for operator<< output
-    NL::json m_json;
+    nlohmann::json m_json;
     OGRSpecOptions m_opts;
 };
 

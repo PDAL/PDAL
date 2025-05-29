@@ -84,10 +84,10 @@ private:
     DimensionInfo *findDimInfo(Dimension::Id pt);
 
     std::vector<DimensionInfo> m_dims;
-    NL::json m_userDimJson;
+    nlohmann::json m_userDimJson;
     //these are the default quanitization levels. They will be overridden by any
     //quantization levels specified in the json argument "quantization"
-    NL::json m_userQuant;
+    nlohmann::json m_userQuant;
     std::map<std::string, int> m_quant =
     {
         { "POSITION",  11 },

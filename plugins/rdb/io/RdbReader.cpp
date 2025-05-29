@@ -195,10 +195,10 @@ void RdbReader::readMetadata(RdbPointcloud &reader, MetadataNode root)
         {
             try
             {
-                NL::json node = NL::json::parse(value);
+                nlohmann::json node = nlohmann::json::parse(value);
                 add(parent, name, node);
             }
-            catch (const NL::json::parse_error&)
+            catch (const nlohmann::json::parse_error&)
             {
                 parent.add(name, value);
             }
@@ -207,7 +207,7 @@ void RdbReader::readMetadata(RdbPointcloud &reader, MetadataNode root)
         static void add(
             MetadataNode&      parent,
             const std::string& name,
-            const NL::json& node
+            const nlohmann::json& node
         )
         {
             if (node.is_null())

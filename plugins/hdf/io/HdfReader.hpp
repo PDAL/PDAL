@@ -71,7 +71,7 @@ private:
     virtual bool processOne(PointRef& point) override;
     virtual void done(PointTableRef table) override;
 
-    NL::json m_pathDimJson;
+    nlohmann::json m_pathDimJson;
     std::map<std::string,std::string> m_pathDimMap;
     Dimension::IdList m_idlist;
     void parseDimensions();

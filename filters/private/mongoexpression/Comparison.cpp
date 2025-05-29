@@ -38,12 +38,12 @@ namespace pdal
 {
 
 std::unique_ptr<Comparison> Comparison::create(const PointLayout& layout,
-        const std::string dimName, const NL::json& json)
+        const std::string dimName, const nlohmann::json& json)
 {
     if (!json.is_object())
     {
         // If it's a value specified without the $eq operator, convert it.
-        NL::json converted;
+        nlohmann::json converted;
         converted["$eq"] = json;
         return create(layout, dimName, converted);
     }
@@ -58,7 +58,7 @@ std::unique_ptr<Comparison> Comparison::create(const PointLayout& layout,
 
     //const auto key(json.getMemberNames().at(0));
     const ComparisonType co(toComparisonType(it.key()));
-    const NL::json& val(it.value());
+    const nlohmann::json& val(it.value());
 
     const Dimension::Id dimId(layout.findDim(dimName));
     if (dimId == pdal::Dimension::Id::Unknown)

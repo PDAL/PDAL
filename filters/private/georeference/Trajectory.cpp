@@ -49,7 +49,7 @@ namespace georeference
 {
 using DimId = Dimension::Id;
 
-Trajectory::Trajectory(const std::string& filename, const NL::json& opts)
+Trajectory::Trajectory(const std::string& filename, const nlohmann::json& opts)
 {
     std::string driver("");
     if (opts.contains("type"))
@@ -66,26 +66,26 @@ Trajectory::Trajectory(const std::string& filename, const NL::json& opts)
         if (arg.key() == "type")
             continue;
 
-        NL::detail::value_t type = opts.at(arg.key()).type();
+        nlohmann::detail::value_t type = opts.at(arg.key()).type();
         switch (type)
         {
-        case NL::detail::value_t::string:
+        case nlohmann::detail::value_t::string:
         {
             std::string val = arg.value().get<std::string>();
             readerOptions.add(arg.key(), arg.value().get<std::string>());
             break;
         }
-        case NL::detail::value_t::number_float:
+        case nlohmann::detail::value_t::number_float:
         {
             readerOptions.add(arg.key(), arg.value().get<float>());
             break;
         }
-        case NL::detail::value_t::number_integer:
+        case nlohmann::detail::value_t::number_integer:
         {
             readerOptions.add(arg.key(), arg.value().get<int>());
             break;
         }
-        case NL::detail::value_t::boolean:
+        case nlohmann::detail::value_t::boolean:
         {
             readerOptions.add(arg.key(), arg.value().get<bool>());
             break;

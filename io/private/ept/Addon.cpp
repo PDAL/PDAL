@@ -60,7 +60,7 @@ std::string Addon::hierarchyDir() const
     return FileUtils::getDirectory(m_filename) + "ept-hierarchy/";
 }
 
-AddonList Addon::store(const connector::Connector& connector, const NL::json& spec,
+AddonList Addon::store(const connector::Connector& connector, const nlohmann::json& spec,
     const PointLayout& layout)
 {
     AddonList addons;
@@ -84,7 +84,7 @@ AddonList Addon::store(const connector::Connector& connector, const NL::json& sp
 
             Addon addon(dimName, filename, type);
 
-            NL::json meta;
+            nlohmann::json meta;
             meta["type"] = typestring;
             meta["size"] = size;
             meta["version"] = "1.0.0";
@@ -97,14 +97,14 @@ AddonList Addon::store(const connector::Connector& connector, const NL::json& sp
             addons.back().setExternalId(id);
         }
     }
-    catch (NL::json::parse_error&)
+    catch (nlohmann::json::parse_error&)
     {
         throw pdal_error("Unable to parse EPT addon file '" + filename + "'.");
     }
     return addons;
 }
 
-AddonList Addon::load(const connector::Connector& connector, const NL::json& spec)
+AddonList Addon::load(const connector::Connector& connector, const nlohmann::json& spec)
 {
     AddonList addons;
     std::string filename;
@@ -120,7 +120,7 @@ AddonList Addon::load(const connector::Connector& connector, const NL::json& spe
             addons.push_back(loadAddon(connector, dimName, filename));
         }
     }
-    catch (NL::json::parse_error&)
+    catch (nlohmann::json::parse_error&)
     {
         throw pdal_error("Unable to parse EPT addon file '" + filename + "'.");
     }
@@ -131,7 +131,7 @@ AddonList Addon::load(const connector::Connector& connector, const NL::json& spe
 Addon Addon::loadAddon(const connector::Connector& connector,
     const std::string& dimName, const std::string& filename)
 {
-    NL::json info = connector.getJson(filename);
+    nlohmann::json info = connector.getJson(filename);
     std::string typestring = info["type"].get<std::string>();
     uint64_t size = info["size"].get<uint64_t>();
     Dimension::Type type = Dimension::type(typestring, size);

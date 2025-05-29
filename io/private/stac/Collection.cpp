@@ -56,7 +56,7 @@ void Collection::validate() {
     );
 
     // Validate against base Collection schema first
-    NL::json schemaJson = m_connector.getJson(m_schemaUrls.collection);
+    nlohmann::json schemaJson = m_connector.getJson(m_schemaUrls.collection);
     val.set_root_schema(schemaJson);
     try {
         val.validate(m_json);
@@ -71,14 +71,14 @@ void Collection::validate() {
     // Validate against stac extensions if present
     if (m_json.contains("stac_extensions"))
     {
-        NL::json extensions = stacValue(m_json, "stac_extensions");
+        nlohmann::json extensions = stacValue(m_json, "stac_extensions");
         for (auto& extSchemaUrl: extensions)
         {
             std::string url = stacValue<std::string>(extSchemaUrl,
                 "", m_json);
 
             try {
-                NL::json schemaJson = m_connector.getJson(url);
+                nlohmann::json schemaJson = m_connector.getJson(url);
                 val.set_root_schema(schemaJson);
                 val.validate(m_json);
             }

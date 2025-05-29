@@ -136,7 +136,7 @@ TEST_F(TileDBWriterTest, write)
     const void* v_r;
     uint32_t v_num;
     array.get_metadata("_pdal", &v_type, &v_num, &v_r);
-    NL::json meta = NL::json::parse(static_cast<const char*>(v_r));
+    nlohmann::json meta = nlohmann::json::parse(static_cast<const char*>(v_r));
     EXPECT_TRUE(meta["root"].count("writers.tiledb") > 0);
 
     tiledb::Query q(ctx, array, TILEDB_READ);
@@ -192,7 +192,7 @@ TEST_F(TileDBWriterTest, write_append)
     const void* v_r;
     uint32_t v_num;
     array.get_metadata("_pdal", &v_type, &v_num, &v_r);
-    NL::json meta = NL::json::parse(static_cast<const char*>(v_r));
+    nlohmann::json meta = nlohmann::json::parse(static_cast<const char*>(v_r));
     EXPECT_TRUE(meta["root"].count("writers.tiledb") > 0);
 
     tiledb::Query q(ctx, array, TILEDB_READ);
@@ -253,7 +253,7 @@ TEST_F(TileDBWriterTest, write_options)
     std::string pth = Support::temppath("tiledb_test_write_options");
 
     Options options = getTileDBOptions();
-    NL::json jsonOptions;
+    nlohmann::json jsonOptions;
 
     // add an array filter
     jsonOptions["X"] = {{{"compression", "bit-shuffle"}},
@@ -301,7 +301,7 @@ TEST_F(TileDBWriterTest, dup_options)
     std::string pth = Support::temppath("tiledb_test_write_options");
 
     Options options = getTileDBOptions();
-    NL::json jsonOptions;
+    nlohmann::json jsonOptions;
 
     // add an array filter
     jsonOptions["X"] = {{{"compression", "bit-shuffle"}},
@@ -684,7 +684,7 @@ TEST_F(TileDBWriterTest, sf_curve_stats)
     const void* v_r;
     uint32_t v_num;
     array.get_metadata("_pdal", &v_type, &v_num, &v_r);
-    NL::json metaDoc = NL::json::parse(static_cast<const char*>(v_r));
+    nlohmann::json metaDoc = nlohmann::json::parse(static_cast<const char*>(v_r));
 
     EXPECT_TRUE(metaDoc["root"].contains("filters.stats"));
     EXPECT_TRUE(metaDoc["root"].contains("writers.tiledb"));
