@@ -811,3 +811,30 @@ TEST(LasReaderTest, Laz_with_severals_extra_byte_with_wrong_options_name)
     ASSERT_TRUE(view->hasDim( layout->findDim("confidence") ));
     ASSERT_TRUE(view->hasDim( layout->findDim("Bad_Name") ));
 }
+
+TEST(LasReaderTest, remote_vsi)
+{
+    Options ops1;
+    ops1.add("filename", "/vsicurl/http://localhost/simple.laz");
+
+    LasReader reader;
+    reader.setOptions(ops1);
+
+    PointTable table;
+
+    // check we get past looking up the arbiter driver
+    EXPECT_THROW({
+        try
+        {
+            reader.prepare(table);
+        }
+        catch(const pdal_error& e)
+        {
+            auto errMsg = "Unable to open stream for "
+                          "'/vsicurl/http://localhost/simple.laz' "
+                          "with error 'Connection refused'";
+            EXPECT_STREQ(errMsg, e.what());
+            throw;
+        }
+    }, pdal_error);
+}
