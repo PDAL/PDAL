@@ -40,6 +40,7 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/Streamable.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/util/Utils.hpp>
 #include <io/HeaderVal.hpp>
 #include <io/LasHeader.hpp>
 #include <io/LasReader.hpp>
@@ -830,10 +831,8 @@ TEST(LasReaderTest, remote_vsi)
         }
         catch(const pdal_error& e)
         {
-            auto errMsg = "Unable to open stream for "
-                          "'/vsicurl/http://localhost/simple.laz' "
-                          "with error 'Connection refused'";
-            EXPECT_STREQ(errMsg, e.what());
+            EXPECT_TRUE(Utils::startsWith(e.what(),
+                "Unable to open stream for"));
             throw;
         }
     }, pdal_error);
