@@ -80,9 +80,8 @@ private:
     virtual void ready(PointTableRef table) override;
     virtual void write(const PointViewPtr view) override;
 
-    void writeOne(const PointViewPtr view, const ept::Addon& addon) const;
-    void writeHierarchy(const std::string& hierarchyDir, NL::json& hier,
-        const ept::Key& key) const;
+    struct HierarchyWriter;
+    void writeOne(const PointViewPtr view, const ept::Addon& addon, HierarchyWriter& writer) const;
     std::string getTypeString(Dimension::Type t) const;
 
     Dimension::Id m_nodeIdDim = Dimension::Id::Unknown;
