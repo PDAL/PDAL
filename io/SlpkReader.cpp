@@ -33,10 +33,12 @@
 ****************************************************************************/
 
 #include "SlpkReader.hpp"
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/util/IStream.hpp>
 #include <pdal/compression/GzipCompression.hpp>
 
 #include "private/esri/EsriUtil.hpp"
+#include "private/esri/Interface.hpp"
 
 namespace pdal
 {
@@ -50,38 +52,67 @@ static PluginInfo const slpkInfo
 
 CREATE_STATIC_STAGE(SlpkReader, slpkInfo)
 
-std::string SlpkReader::getName() const { return slpkInfo.name; }
-
-SlpkReader::~SlpkReader()
+namespace
 {
-    if (m_ctx.addr())
-        FileUtils::unmapFile(m_ctx);
+
+struct Location
+{
+    size_t m_pos;
+    size_t m_length;
+};
+using LocationMap = std::map<std::string, Location>;
+
+struct SlpkInterface : public i3s::Interface
+{
+    SlpkInterface(const std::string& filename) : m_filename(filename)
+    {}
+    ~SlpkInterface() override
+    { FileUtils::unmapFile(m_ctx); }
+
+    void initInfo() override;
+    std::vector<char> fetchBinary(std::string url, std::string attNum,
+        std::string ext) const override;
+    std::string fetchJson(std::string) override;
+    NL::json getInfo() override
+        { return m_info; }
+
+    void unarchive();
+
+    const std::string& m_filename;
+    NL::json m_info;
+    LocationMap m_locMap;
+    FileUtils::MapContext m_ctx;
+};
+
 }
 
+std::string SlpkReader::getName() const { return slpkInfo.name; }
 
-NL::json SlpkReader::initInfo()
+SlpkReader::SlpkReader() : EsriReader(std::make_unique<SlpkInterface>(m_filename))
+{}
+
+void SlpkInterface::initInfo()
 {
     // un-archive the slpk archive
     unarchive();
 
     size_t fileSize = FileUtils::fileSize(m_filename);
     if (fileSize == 0)
-        throwError("Empty or invalid SLPK file '" + m_filename + "'.");
+         throw pdal_error("Empty or invalid SLPK file '" + m_filename + "'.");
     m_ctx = FileUtils::mapFile(m_filename, true, 0 , fileSize);
     if (m_ctx.addr() == nullptr)
-        throwError("Error mapping file SLPK file '" + m_filename +
+        throw pdal_error("Error mapping file SLPK file '" + m_filename +
             "': " + m_ctx.what() + ".");
 
     std::string json = fetchJson("3dSceneLayer");
-    NL::json info = i3s::parse(json, "Invalid JSON in '3dSceneLayer.json.gz'.");
+    m_info = i3s::parse(json, "Invalid JSON in '3dSceneLayer.json.gz'.");
 
-    if (info.empty())
-        throwError(std::string("Incorrect Json object"));
-    return info;
+    if (m_info.empty())
+        throw pdal_error(std::string("Incorrect Json object"));
 }
 
 
-void SlpkReader::unarchive()
+void SlpkInterface::unarchive()
 {
     #pragma pack(1)
 struct zheader
@@ -100,7 +131,7 @@ struct zheader
 
     ILeStream in(m_filename);
     if (!in)
-        throwError("Couldn't open file '" + m_filename + "'.");
+        throw pdal_error("Couldn't open file '" + m_filename + "'.");
 
     zheader h;
     std::string name;
@@ -139,12 +170,12 @@ struct zheader
 }
 
 
-std::string SlpkReader::fetchJson(std::string filepath)
+std::string SlpkInterface::fetchJson(std::string filepath)
 {
     filepath += ".json.gz";
     auto li = m_locMap.find(filepath);
     if (li == m_locMap.end())
-        throwError("Couldn't find file '" + filepath + "' in SLPK file '" +
+        throw pdal_error("Couldn't find file '" + filepath + "' in SLPK file '" +
             m_filename + "'.");
 
     Location& loc = li->second;
@@ -159,7 +190,7 @@ std::string SlpkReader::fetchJson(std::string filepath)
 }
 
 // fetch data using arbiter to get a char vector
-std::vector<char> SlpkReader::fetchBinary(std::string url, std::string attNum,
+std::vector<char> SlpkInterface::fetchBinary(std::string url, std::string attNum,
     std::string ext) const
 {
     std::vector<char> output;

@@ -587,7 +587,7 @@ MapContext unmapFile(MapContext ctx)
 {
     if (!ctx.m_addr)
     {
-    ctx.m_error = "File not mapped.";
+        ctx.m_error = "File not mapped.";
         return ctx;
     }
 #ifndef _WIN32

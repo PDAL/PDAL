@@ -35,6 +35,7 @@
 #include <arbiter/arbiter.hpp>
 #include "I3SReader.hpp"
 #include "private/esri/EsriUtil.hpp"
+#include "private/esri/Interface.hpp"
 
 #include <thread>
 
@@ -52,52 +53,75 @@ static PluginInfo const i3sInfo
 
 CREATE_STATIC_STAGE(I3SReader, i3sInfo)
 
+namespace
+{
+
+struct I3SInterface : public i3s::Interface
+{
+    I3SInterface(const std::string& filename) : m_filename(filename)
+    {}
+    ~I3SInterface() override
+    {}
+
+    void initInfo() override;
+    std::vector<char> fetchBinary(std::string url, std::string attNum,
+        std::string ext) const override;
+    std::string fetchJson(std::string) override;
+    NL::json getInfo() override
+        { return m_info; }
+
+    NL::json m_info;
+    const std::string& m_filename;
+    arbiter::Arbiter m_arbiter;
+};
+
+}
+
 std::string I3SReader::getName() const { return i3sInfo.name; }
 
-NL::json I3SReader::initInfo()
+I3SReader::I3SReader() : EsriReader(std::make_unique<I3SInterface>(m_filename))
+{}
+
+void I3SInterface::initInfo()
 {
-    NL::json info;
     try
     {
-        std::string s = fetchJson("");
-        info = i3s::parse(s, "Invalid JSON in file '" + m_filename + "'.");
+        std::string s = m_arbiter.get(m_filename);
+        NL::json info = i3s::parse(s, "Invalid JSON in file '" + m_filename + "'.");
 
         if (info.empty())
-            throwError(std::string("Incorrect Json object"));
+            throw pdal_error(std::string("Incorrect Json object"));
         if (!info.contains("layers"))
-            throwError(std::string("Json object contains no layers"));
+            throw pdal_error(std::string("Json object contains no layers"));
 
-        info = info["layers"][0];
+        m_info = info["layers"][0];
     }
     catch(i3s::EsriError& e)
     {
-        throwError(std::string("Error parsing Json object: ") + e.what());
+        throw pdal_error(std::string("Error parsing Json object: ") + e.what());
     }
-
-    m_filename += "/layers/0";
-    return info;
 }
 
 
-std::string I3SReader::fetchJson(std::string filepath)
+std::string I3SInterface::fetchJson(std::string filepath)
 {
-    filepath = m_filename + "/" + filepath;
-    return m_arbiter->get(filepath);
+    filepath = m_filename + "/layers/0/" + filepath;
+    return m_arbiter.get(filepath);
 }
 
 
-std::vector<char> I3SReader::fetchBinary(std::string url,
+std::vector<char> I3SInterface::fetchBinary(std::string url,
     std::string attNum, std::string ext) const
 {
     const int NumRetries(5);
     int retry = 0;
 
-    std::string filepath = m_filename + "/" + url + attNum;
+    std::string filepath = m_filename + "/layers/0/" + url + attNum;
     // For the REST I3S endpoint there are no file extensions.
     std::vector<char> result;
     while (true)
     {
-        auto data = m_arbiter->tryGetBinary(filepath);
+        auto data = m_arbiter.tryGetBinary(filepath);
         if (data)
         {
             result = std::move(*data);

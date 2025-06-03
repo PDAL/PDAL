@@ -48,40 +48,30 @@
 #include "private/esri/EsriUtil.hpp"
 #include "private/esri/PageManager.hpp"
 
-#include <nlohmann/json.hpp>
-
 namespace pdal
 {
-
-namespace arbiter
-{
-    class Arbiter;
-}
 
 class SrsTransform;
 class ThreadPool;
 
+namespace i3s
+{
+    struct Interface;
+};
+
 class PDAL_EXPORT EsriReader : public Reader, public Streamable
 {
 public:
-    EsriReader();
+    EsriReader(std::unique_ptr<i3s::Interface> interface);
     ~EsriReader();
-
-protected:
-    std::unique_ptr<arbiter::Arbiter> m_arbiter;
-
-    virtual NL::json initInfo() = 0;
-    virtual std::vector<char> fetchBinary(std::string url, std::string attNum,
-            std::string ext) const = 0;
-    virtual std::string fetchJson(std::string) = 0;
 
 private:
     struct Args;
     struct DimData;
     class TileContents;
 
+    std::unique_ptr<i3s::Interface> m_interface;
     std::unique_ptr<Args> m_args;
-    NL::json m_info;
     int m_nodeCap;
     i3s::Version m_version;
     SpatialReference m_nativeSrs;
