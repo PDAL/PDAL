@@ -63,7 +63,7 @@ CREATE_STATIC_STAGE(EptAddonWriter, s_info)
 
 struct EptAddonWriter::Args
 {
-    NL::json m_addons;
+    nlohmann::json m_addons;
     std::size_t m_numThreads;
 };
 
@@ -189,7 +189,7 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const ept::Addon& addon) 
     m_pool->await();
 
     // Write the addon hierarchy data.
-    NL::json h;
+    nlohmann::json h;
     ept::Key key;
     key.b = m_info->bounds();
 
@@ -203,7 +203,7 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const ept::Addon& addon) 
     m_pool->await();
 
     // Write the top-level addon metadata.
-    NL::json meta;
+    nlohmann::json meta;
     meta["type"] = Dimension::toName(Dimension::base(addon.type()));
     meta["size"] = Dimension::size(addon.type());
     meta["version"] = "1.0.0";
@@ -213,7 +213,7 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const ept::Addon& addon) 
 }
 
 void EptAddonWriter::writeHierarchy(const std::string& directory,
-    NL::json& curr, const ept::Key& key) const
+    nlohmann::json& curr, const ept::Key& key) const
 {
     auto it = m_hierarchy->find(key);
     if (it == m_hierarchy->end())
@@ -229,7 +229,7 @@ void EptAddonWriter::writeHierarchy(const std::string& directory,
         curr[keyName] = -1;
 
         // Create a new hierarchy subtree.
-        NL::json next {{ keyName, overlap.m_count }};
+        nlohmann::json next {{ keyName, overlap.m_count }};
 
         for (uint64_t dir(0); dir < 8; ++dir)
             writeHierarchy(directory, next, key.bisect(dir));

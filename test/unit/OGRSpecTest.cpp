@@ -9,13 +9,13 @@ using namespace pdal;
 
 TEST(OGRSpecTest, createFromFile)
 {
-    NL::json json;
+    nlohmann::json json;
     json["type"] = "ogr";
     json["datasource"] = Support::datapath("autzen/attributes.json");
     json["drivers"] = {"GeoJSON"};
     json["openoptions"] = {"FLATTEN_NESTED_ATTRIBUTES=YES","NATIVE_DATA=YES"};
     json["sql"] = "select \"_ogr_geometry_\" from attributes";
-    NL::json subJson;
+    nlohmann::json subJson;
     subJson["dialect"] = "OGRSQL";
     json["options"] = subJson;
     OGRSpec ogr(json);
@@ -29,7 +29,7 @@ TEST(OGRSpecTest, createFromFile)
     EXPECT_NEAR(polys[4].area(), 1.026e-06, 0.001);
 
     // sql selection
-    NL::json updateJson = json;
+    nlohmann::json updateJson = json;
     updateJson["sql"] = "select \"_ogr_geometry_\" from attributes WHERE id = 1";
     ogr.update(updateJson);
     EXPECT_EQ(ogr.size(), 1);
@@ -44,13 +44,13 @@ TEST(OGRSpecTest, createFromFile)
 
 TEST(OGRSpecTest, parseErrors)
 {
-    NL::json json;
+    nlohmann::json json;
     json["type"] = "ogr";
     json["datasource"] = "no_path";
     json["sql"] ="select \"_ogr_geometry_\" from attributes"; 
 
     // removing datasource field
-    NL::json updateJson = json;
+    nlohmann::json updateJson = json;
     updateJson.erase("datasource");
     try
     {

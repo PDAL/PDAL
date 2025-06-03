@@ -42,7 +42,7 @@ namespace pdal
 namespace
 {
 
-bool extractStringMap(NL::json& node, StringMap& map)
+bool extractStringMap(nlohmann::json& node, StringMap& map)
 {
     if (!node.is_object())
         return false;
@@ -61,7 +61,7 @@ bool extractStringMap(NL::json& node, StringMap& map)
 
 Utils::StatusWithReason FileSpec::ingest(const std::string& pathOrJson)
 {
-    NL::json json;
+    nlohmann::json json;
     size_t pos = Utils::extractSpaces(pathOrJson, 0);
     if (pathOrJson[pos] == '{' || pathOrJson[pos] == '[')
     {
@@ -71,12 +71,12 @@ Utils::StatusWithReason FileSpec::ingest(const std::string& pathOrJson)
     }
     // assuming input is a filename
     else
-        json = NL::json(pathOrJson);
+        json = nlohmann::json(pathOrJson);
 
     return parse(json);
 }
 
-Utils::StatusWithReason FileSpec::parse(NL::json& node)
+Utils::StatusWithReason FileSpec::parse(nlohmann::json& node)
 {
     if (node.is_null())
         return { -1, "'filename' argument contains no data" };
@@ -101,12 +101,12 @@ Utils::StatusWithReason FileSpec::parse(NL::json& node)
     return true;
 }
 
-Utils::StatusWithReason FileSpec::extractPath(NL::json& node)
+Utils::StatusWithReason FileSpec::extractPath(nlohmann::json& node)
 {
     auto it = node.find("path");
     if (it == node.end())
         return { -1, "'filename' object must contain 'path' member." };
-    NL::json& val = *it;
+    nlohmann::json& val = *it;
     if (!val.is_null())
     {
         if (val.is_string())
@@ -118,12 +118,12 @@ Utils::StatusWithReason FileSpec::extractPath(NL::json& node)
     return true;
 }
 
-Utils::StatusWithReason FileSpec::extractQuery(NL::json& node)
+Utils::StatusWithReason FileSpec::extractQuery(nlohmann::json& node)
 {
     auto it = node.find("query");
     if (it == node.end())
         return true;
-    NL::json& val = *it;
+    nlohmann::json& val = *it;
     if (!val.is_null())
     {
         if (!extractStringMap(val, m_query))
@@ -134,12 +134,12 @@ Utils::StatusWithReason FileSpec::extractQuery(NL::json& node)
     return true;
 }
 
-Utils::StatusWithReason FileSpec::extractHeaders(NL::json& node)
+Utils::StatusWithReason FileSpec::extractHeaders(nlohmann::json& node)
 {
     auto it = node.find("headers");
     if (it == node.end())
         return true;
-    NL::json& val = *it;
+    nlohmann::json& val = *it;
     if (!val.is_null())
     {
         if (!extractStringMap(val, m_headers))
@@ -152,7 +152,7 @@ Utils::StatusWithReason FileSpec::extractHeaders(NL::json& node)
 
 std::ostream& operator << (std::ostream& out, const FileSpec& spec)
 {
-    NL::json json;
+    nlohmann::json json;
     json["path"] = spec.m_path.string();
     if (!spec.m_headers.empty())
         json["headers"] = spec.m_headers;

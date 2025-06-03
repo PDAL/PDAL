@@ -279,7 +279,7 @@ TEST(CropFilterTest, test_crop_ogr)
     Option debug("debug", true);
     Option verbose("verbose", 9);
 
-    NL::json json;
+    nlohmann::json json;
     json["type"] = "ogr";
     json["drivers"] = {"GeoJSON"};
     json["datasource"] = Support::datapath("autzen/autzen-selection.json");

@@ -129,7 +129,7 @@ std::ostream& operator<<(std::ostream& out, const DomainBounds& bounds)
     return out;
 }
 
-FilterFactory::FilterFactory(const NL::json& userProvidedFilters,
+FilterFactory::FilterFactory(const nlohmann::json& userProvidedFilters,
                              const std::string& filterProfile,
                              const std::array<double, 3>& scaleFactor,
                              const std::array<double, 3>& addOffset,
@@ -157,7 +157,7 @@ FilterFactory::FilterFactory(const NL::json& userProvidedFilters,
 }
 
 tiledb::Filter FilterFactory::filter(const tiledb::Context& ctx,
-                                     const NL::json& options)
+                                     const nlohmann::json& options)
 {
     if (options.empty())
         return tiledb::Filter(ctx, TILEDB_FILTER_NONE);
@@ -294,7 +294,7 @@ tiledb::FilterList FilterFactory::filterList(const tiledb::Context& ctx,
 {
     if (m_user_filters.count(dimName) > 0)
     {
-        NL::json options = m_user_filters[dimName];
+        nlohmann::json options = m_user_filters[dimName];
         tiledb::FilterList filterList{ctx};
         if (options.is_array())
         {

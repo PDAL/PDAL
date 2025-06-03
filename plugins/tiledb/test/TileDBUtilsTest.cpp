@@ -207,7 +207,7 @@ TEST(FilterFactory, filter_type_from_string)
 
 TEST(FilterFactory, dim_with_unset_default_filter)
 {
-    NL::json jsonOptions({});
+    nlohmann::json jsonOptions({});
     tiledb::Context ctx{};
     FilterFactory factory{jsonOptions,        "none", {{0.01, 0.01, 0.01}},
                           {{1.0f, 1.0, 1.0}}, "",     0};
@@ -218,7 +218,7 @@ TEST(FilterFactory, dim_with_unset_default_filter)
 
 TEST(FilterFactory, dim_with_set_default_filter)
 {
-    NL::json jsonOptions({});
+    nlohmann::json jsonOptions({});
     tiledb::Context ctx{};
     FilterFactory factory{jsonOptions,       "none", {{0.01, 0.01, 0.01}},
                           {{1.0, 1.0, 1.0}}, "zstd", 9};
@@ -237,7 +237,7 @@ TEST(FilterFactory, dim_with_set_default_filter)
 
 TEST(FilterFactory, user_set_scale_float)
 {
-    NL::json jsonOptions({});
+    nlohmann::json jsonOptions({});
     jsonOptions["Z"] = {{{"compression", "scale-float"},
                          {"scale_float_bytewidth", 2},
                          {"scale_float_factor", 2.0},
@@ -268,7 +268,7 @@ TEST(FilterFactory, user_set_scale_float)
 
 TEST(FilterFactory, user_set_delta)
 {
-    NL::json jsonOptions({});
+    nlohmann::json jsonOptions({});
     jsonOptions["GpsTime"] = {
         {{"compression", "delta"}, {"reinterpret_datatype", "UINT64"}}};
     FilterFactory factory{jsonOptions,       "balanced", {{0.01, 0.01, 0.01}},
@@ -292,7 +292,7 @@ TEST(FilterFactory, user_set_delta)
 
 TEST(FilterFactory, user_set_bzip2)
 {
-    NL::json jsonOptions({});
+    nlohmann::json jsonOptions({});
     jsonOptions["Z"] = {{{"compression", "bzip2"}, {"compression_level", 9}}};
     FilterFactory factory{jsonOptions,       "balanced", {{0.01, 0.01, 0.01}},
                           {{1.0, 1.0, 1.0}}, "zstd",     7};
@@ -313,7 +313,7 @@ TEST(FilterFactory, user_set_bzip2)
 
 TEST(FilterFactory, user_set_bit_width_reduction)
 {
-    NL::json jsonOptions({});
+    nlohmann::json jsonOptions({});
     jsonOptions["Z"] = {
         {{"compression", "bit-width-reduction"}, {"bit_width_max_window", 10}}};
     FilterFactory factory{jsonOptions,       "balanced", {{0.01, 0.01, 0.01}},
@@ -337,7 +337,7 @@ TEST(FilterFactory, user_set_bit_width_reduction)
 #ifdef TILEDB_WEBP
 TEST(FilterFactory, user_set_webp)
 {
-    NL::json jsonOptions({});
+    nlohmann::json jsonOptions({});
     jsonOptions["Z"] = {{{"compression", "webp"},
                          {"webp_quality", 90.0},
                          {"webp_input_format", "bgr"},
@@ -366,7 +366,7 @@ TEST(FilterFactory, user_set_webp)
 #endif
 TEST(FilterFactory, user_set_positive_delta)
 {
-    NL::json jsonOptions({});
+    nlohmann::json jsonOptions({});
     jsonOptions["Z"] = {
         {{"compression", "positive-delta"}, {"positive_delta_max_window", 10}}};
     FilterFactory factory{jsonOptions,       "balanced", {{0.01, 0.01, 0.01}},
@@ -389,7 +389,7 @@ TEST(FilterFactory, user_set_positive_delta)
 
 TEST(FilterFactory, user_set_two_filter_list)
 {
-    NL::json jsonOptions({});
+    nlohmann::json jsonOptions({});
     jsonOptions["X"] = {{{"compression", "bit-shuffle"}},
                         {{"compression", "gzip"}, {"compression_level", 9}}};
     FilterFactory factory{jsonOptions,       "balanced", {{0.01, 0.01, 0.01}},

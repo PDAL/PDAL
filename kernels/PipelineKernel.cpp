@@ -122,7 +122,7 @@ int PipelineKernel::execute()
 
     if (m_validate)
     {
-        NL::json root;
+        nlohmann::json root;
         // Validate the options of the pipeline we were
         // given, and once we succeed, we're done
         try

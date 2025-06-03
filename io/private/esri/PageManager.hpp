@@ -39,7 +39,7 @@
 #include <mutex>
 #include <condition_variable>
 
-#include <pdal/JsonFwd.hpp>
+#include <nlohmann/json.hpp>
 #include <pdal/util/ThreadPool.hpp>
 
 namespace pdal
@@ -47,8 +47,8 @@ namespace pdal
 namespace i3s
 {
 
-using Page = NL::json;
-using PagePtr = std::shared_ptr<NL::json>;
+using Page = nlohmann::json;
+using PagePtr = std::shared_ptr<nlohmann::json>;
 using FetchFunction = std::function<std::string(std::string)>;
 
 class PageManager

@@ -50,7 +50,7 @@ namespace i3s
 Obb::Obb() : m_valid(false)
 {}
 
-Obb::Obb(const NL::json& spec)
+Obb::Obb(const nlohmann::json& spec)
 {
     parse(spec);
 }
@@ -80,12 +80,12 @@ BOX3D Obb::bounds() const
 }
 
 
-void Obb::verifyArray(const NL::json& spec, const std::string& name, size_t cnt)
+void Obb::verifyArray(const nlohmann::json& spec, const std::string& name, size_t cnt)
 {
     if (spec.count(name) != 1)
         throw EsriError("Invalid OBB - missing '" + name + "' entry.");
 
-    NL::json arr = spec[name];
+    nlohmann::json arr = spec[name];
     if (!arr.is_array())
         throw EsriError("Invalid OBB - '" + name + "' is not an array.");
     if (arr.size() != cnt)
@@ -93,14 +93,14 @@ void Obb::verifyArray(const NL::json& spec, const std::string& name, size_t cnt)
                 "three values.");
     for (size_t i = 0; i < cnt; ++i)
     {
-        NL::json o = arr[i];
+        nlohmann::json o = arr[i];
         if (!o.is_number())
             throw EsriError("Invalid OBB - '" + name +
                 "[" + std::to_string(i) + "]' " "is not numeric.");
     }
 }
 
-void Obb::parse(NL::json spec)
+void Obb::parse(nlohmann::json spec)
 {
     verifyArray(spec, "center", 3);
     verifyArray(spec, "halfSize", 3);
@@ -316,7 +316,7 @@ void Obb::setCenter(const Eigen::Vector3d& center)
 
 std::ostream& operator<<(std::ostream& out, const Obb& obb)
 {
-    NL::json j;
+    nlohmann::json j;
     j["center"] = { obb.m_p.x(), obb.m_p.y(), obb.m_p.z() };
     j["halfSize"] = { obb.m_hx, obb.m_hy, obb.m_hz };
     const Eigen::Vector3d& v = obb.m_quat.vec();

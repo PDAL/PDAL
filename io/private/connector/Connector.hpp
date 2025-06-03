@@ -59,7 +59,7 @@ public:
     Connector(const FileSpec& spec);
 
     std::string get(const std::string& path) const;
-    NL::json getJson(const std::string& path) const;
+    nlohmann::json getJson(const std::string& path) const;
     std::vector<char> getBinary(const std::string& path) const;
     arbiter::LocalHandle getLocalHandle(const std::string& path) const;
     void put(const std::string& path, const std::vector<char>& data) const;
