@@ -140,6 +140,10 @@ std::vector<char> Connector::getBinary(const std::string& path) const
 
 arbiter::LocalHandle Connector::getLocalHandle(const std::string& path) const
 {
+    if (Utils::startsWith(Utils::toupper(path), "/VSI"))
+        // workaround so that arbiter path is not used to read/write with VSI
+        return arbiter::LocalHandle(path, false);
+
     if (m_arbiter->isLocal(path))
         return m_arbiter->getLocalHandle(path);
     else
