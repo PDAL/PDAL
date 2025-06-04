@@ -72,17 +72,17 @@ std::unique_ptr<Comparison> Comparison::create(const PointLayout& layout,
         switch (co)
         {
         case ComparisonType::eq:
-            return makeUnique<ComparisonEqual>(dimId, op);
+            return std::make_unique<ComparisonEqual>(dimId, op);
         case ComparisonType::gt:
-            return makeUnique<ComparisonGreater>(dimId, op);
+            return std::make_unique<ComparisonGreater>(dimId, op);
         case ComparisonType::gte:
-            return makeUnique<ComparisonGreaterEqual>(dimId, op);
+            return std::make_unique<ComparisonGreaterEqual>(dimId, op);
         case ComparisonType::lt:
-            return makeUnique<ComparisonLess>(dimId, op);
+            return std::make_unique<ComparisonLess>(dimId, op);
         case ComparisonType::lte:
-            return makeUnique<ComparisonLessEqual>(dimId, op);
+            return std::make_unique<ComparisonLessEqual>(dimId, op);
         case ComparisonType::ne:
-            return makeUnique<ComparisonNotEqual>(dimId, op);
+            return std::make_unique<ComparisonNotEqual>(dimId, op);
         default:
             throw pdal_error("Invalid single comparison operator");
         }
@@ -100,9 +100,9 @@ std::unique_ptr<Comparison> Comparison::create(const PointLayout& layout,
         switch (co)
         {
         case ComparisonType::in:
-            return makeUnique<ComparisonAny>(dimId, ops);
+            return std::make_unique<ComparisonAny>(dimId, ops);
         case ComparisonType::nin:
-            return makeUnique<ComparisonNone>(dimId, ops);
+            return std::make_unique<ComparisonNone>(dimId, ops);
         default:
             throw pdal_error("Invalid multi comparison operator");
         }

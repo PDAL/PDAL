@@ -50,12 +50,24 @@ static const StaticPluginInfo s_info
 
 CREATE_STATIC_STAGE(MongoExpressionFilter, s_info);
 
+struct MongoExpressionFilter::Args
+{
+    NL::json m_json;
+};
+
+struct MongoExpressionFilter::Private
+{
+    Expression m_expression;
+};
+
 std::string MongoExpressionFilter::getName() const
 {
     return s_info.name;
 }
 
-MongoExpressionFilter::MongoExpressionFilter()
+MongoExpressionFilter::MongoExpressionFilter() :
+    m_args(new Args()),
+    m_p(new Private())
 {}
 
 MongoExpressionFilter::~MongoExpressionFilter()
@@ -63,18 +75,17 @@ MongoExpressionFilter::~MongoExpressionFilter()
 
 void MongoExpressionFilter::addArgs(ProgramArgs& args)
 {
-    args.add("expression", "Logical query expression", m_json).setPositional();
+    args.add("expression", "Logical query expression", m_args->m_json).setPositional();
 }
 
 void MongoExpressionFilter::prepared(PointTableRef table)
 {
-    log()->get(LogLevel::Debug) << "Building expression from: " << m_json <<
+    log()->get(LogLevel::Debug) << "Building expression from: " << m_args->m_json <<
         std::endl;
 
-    m_expression = makeUnique<Expression>(*table.layout(), m_json);
+    m_p->m_expression = Expression(table.layout(), m_args->m_json);
 
-    log()->get(LogLevel::Debug) << "Built expression: " << *m_expression <<
-        std::endl;
+    log()->get(LogLevel::Debug) << "Built expression: " << m_p->m_expression << std::endl;
 }
 
 PointViewSet MongoExpressionFilter::run(PointViewPtr inView)
@@ -97,7 +108,7 @@ PointViewSet MongoExpressionFilter::run(PointViewPtr inView)
 
 bool MongoExpressionFilter::processOne(PointRef& pr)
 {
-    return m_expression->check(pr);
+    return m_p->m_expression.check(pr);
 }
 
 } // namespace pdal
