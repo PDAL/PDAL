@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2018, Kyle Mann (kyle@hobu.co)
+* Copyright (c) 2020, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -31,19 +31,29 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+
 #pragma once
 
-#include "EsriReader.hpp"
+#include <string>
+
+#include <nlohmann/json.hpp>
 
 namespace pdal
 {
-
-class PDAL_EXPORT I3SReader : public EsriReader
+namespace i3s
 {
-public:
-    I3SReader();
 
-    std::string getName() const override;
+struct Interface
+{
+    virtual ~Interface()
+    {}
+
+    virtual void initInfo() = 0;
+    virtual std::vector<char> fetchBinary(std::string url, std::string attNum,
+        std::string ext) const = 0;
+    virtual std::string fetchJson(std::string) = 0;
+    virtual NL::json getInfo() = 0;
 };
 
+} //namespace i3s
 } // namespace pdal
