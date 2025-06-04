@@ -49,12 +49,20 @@
 namespace pdal
 {
 
-PipelineReaderJSON::PipelineReaderJSON(PipelineManager& manager) :
-    m_manager(manager)
-{}
+using TagMap = std::map<std::string, Stage *>;
 
+namespace
+{
 
-void PipelineReaderJSON::parsePipeline(NL::json& tree)
+std::string extractType(NL::json& node);
+std::string extractTag(NL::json& node, TagMap& tags);
+FileSpec extractFilename(NL::json& node);
+std::vector<Stage *> extractInputs(NL::json& node, TagMap& tags);
+Options extractOptions(NL::json& node);
+bool extractOption(Options& options, const std::string& name, const NL::json& node);
+void handleInputTag(const std::string& tag, const TagMap& tags, std::vector<Stage *>& inputs);
+
+void parsePipeline(NL::json& tree, PipelineManager& manager)
 {
     TagMap tags;
     std::vector<Stage*> inputs;
@@ -101,7 +109,7 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
             {
                 spec.m_path = path;
                 ReaderCreationOptions ops { spec, type, nullptr, options, tag };
-                s = &m_manager.makeReader(ops);
+                s = &manager.makeReader(ops);
 
                 if (specifiedInputs.size())
                     throw pdal_error("JSON pipeline: Inputs not permitted for "
@@ -112,7 +120,7 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
         else if (type.empty() || Utils::startsWith(type, "writers."))
         {
             StageCreationOptions ops { spec.m_path.string(), type, nullptr, options, tag };
-            s = &m_manager.makeWriter(ops);
+            s = &manager.makeWriter(ops);
             for (Stage *ts : inputs)
                 s->setInput(*ts);
             inputs.clear();
@@ -123,7 +131,7 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
             if (spec.valid())
                 options.add("filename", spec.m_path.string());
             StageCreationOptions ops { "", type, nullptr, options, tag };
-            s = &m_manager.makeFilter(ops);
+            s = &manager.makeFilter(ops);
             for (Stage *ts : inputs)
                 s->setInput(*ts);
             inputs.clear();
@@ -136,10 +144,10 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
     }
 
     // Tell user if the pipeline seems wacky.
-    const std::vector<Stage *> llist = m_manager.leaves();
+    const std::vector<Stage *> llist = manager.leaves();
     if (llist.size() > 1)
     {
-        const LogPtr& log = m_manager.log();
+        const LogPtr& log = manager.log();
         log->get(LogLevel::Error) << "Pipeline has multiple leaf nodes.\n";
         log->get(LogLevel::Error) << "Only the first of the following leaf nodes will be run.\n";
         for (Stage *s : llist)
@@ -150,99 +158,7 @@ void PipelineReaderJSON::parsePipeline(NL::json& tree)
     }
 }
 
-
-void PipelineReaderJSON::readPipeline(std::istream& input)
-{
-    NL::json root;
-
-    try
-    {
-        root = NL::json::parse(input, /* callback */ nullptr,
-                                      /* allow exceptions */ true,
-                                      /* ignore_comments */ true);
-    }
-    catch (NL::json::parse_error& err)
-    {
-        // Look for a right bracket -- this indicates the start of the
-        // actual message from the parse error.
-        std::string s(err.what());
-        auto pos = s.find("]");
-        if (pos != std::string::npos)
-            s = s.substr(pos + 1);
-        throw pdal_error("Pipeline:" + s);
-    }
-
-    auto it = root.find("pipeline");
-    if (root.is_object() && it != root.end())
-        parsePipeline(*it);
-    else if (root.is_array())
-        parsePipeline(root);
-    else
-        throw pdal_error("Pipeline: root element is not a pipeline.");
-}
-
-
-void PipelineReaderJSON::readPipeline(const std::string& filename)
-{
-    std::istream* input = Utils::openFile(filename);
-    if (!input)
-    {
-        throw pdal_error("Pipeline: Unable to open stream for "
-            "file \"" + filename + "\"");
-    }
-
-    try
-    {
-        readPipeline(*input);
-    }
-    catch (...)
-    {
-        Utils::closeFile(input);
-        throw;
-    }
-
-    Utils::closeFile(input);
-}
-
-
-std::string PipelineReaderJSON::extractType(NL::json& node)
-{
-    std::string type;
-
-    auto it = node.find("type");
-    if (it != node.end())
-    {
-        NL::json& val = *it;
-        if (!val.is_null())
-        {
-            if (val.is_string())
-                type = val.get<std::string>();
-            else
-                throw pdal_error("JSON pipeline: 'type' must be specified as "
-                    "a string.");
-        }
-        node.erase(it);
-    }
-    return type;
-}
-
-
-FileSpec PipelineReaderJSON::extractFilename(NL::json& node)
-{
-    FileSpec spec;
-
-    auto it = node.find("filename");
-    if (it == node.end())
-        return spec;
-
-    Utils::StatusWithReason status = spec.parse(*it);
-    if (!status)
-        throw pdal_error(status.what());
-    node.erase(it);
-    return spec;
-}
-
-std::string PipelineReaderJSON::extractTag(NL::json& node, TagMap& tags)
+std::string extractTag(NL::json& node, TagMap& tags)
 {
     std::string tag;
 
@@ -273,21 +189,22 @@ std::string PipelineReaderJSON::extractTag(NL::json& node, TagMap& tags)
     return tag;
 }
 
-
-void PipelineReaderJSON::handleInputTag(const std::string& tag,
-    const TagMap& tags, std::vector<Stage *>& inputs)
+FileSpec extractFilename(NL::json& node)
 {
-    auto ii = tags.find(tag);
-    if (ii == tags.end())
-        throw pdal_error("JSON pipeline: Invalid pipeline: "
-            "undefined stage tag '" + tag + "'.");
-    else
-        inputs.push_back(ii->second);
+    FileSpec spec;
+
+    auto it = node.find("filename");
+    if (it == node.end())
+        return spec;
+
+    Utils::StatusWithReason status = spec.parse(*it);
+    if (!status)
+        throw pdal_error(status.what());
+    node.erase(it);
+    return spec;
 }
 
-
-std::vector<Stage *> PipelineReaderJSON::extractInputs(NL::json& node,
-    TagMap& tags)
+std::vector<Stage *> extractInputs(NL::json& node, TagMap& tags)
 {
     std::vector<Stage *> inputs;
     std::string filename;
@@ -316,34 +233,7 @@ std::vector<Stage *> PipelineReaderJSON::extractInputs(NL::json& node,
     return inputs;
 }
 
-namespace
-{
-
-bool extractOption(Options& options, const std::string& name,
-    const NL::json& node)
-{
-    if (node.is_string())
-        options.add(name, node.get<std::string>());
-    else if (node.is_number_unsigned())
-        options.add(name, node.get<uint64_t>());
-    else if (node.is_number_integer())
-        options.add(name, node.get<int64_t>());
-    else if (node.is_number_float())
-        options.add(name, node.get<double>());
-    else if (node.is_boolean())
-        options.add(name, node.get<bool>());
-    else if (node.is_array())
-        options.add(name, node.get<NL::json::array_t>());
-    else if (node.is_null())
-        options.add(name, "");
-    else
-        return false;
-    return true;
-}
-
-} // unnamed namespace
-
-Options PipelineReaderJSON::extractOptions(NL::json& node)
+Options extractOptions(NL::json& node)
 {
     Options options;
 
@@ -378,6 +268,117 @@ Options PipelineReaderJSON::extractOptions(NL::json& node)
     }
     node.clear();
     return options;
+}
+
+std::string extractType(NL::json& node)
+{
+    std::string type;
+
+    auto it = node.find("type");
+    if (it != node.end())
+    {
+        NL::json& val = *it;
+        if (!val.is_null())
+        {
+            if (val.is_string())
+                type = val.get<std::string>();
+            else
+                throw pdal_error("JSON pipeline: 'type' must be specified as "
+                    "a string.");
+        }
+        node.erase(it);
+    }
+    return type;
+}
+
+bool extractOption(Options& options, const std::string& name, const NL::json& node)
+{
+    if (node.is_string())
+        options.add(name, node.get<std::string>());
+    else if (node.is_number_unsigned())
+        options.add(name, node.get<uint64_t>());
+    else if (node.is_number_integer())
+        options.add(name, node.get<int64_t>());
+    else if (node.is_number_float())
+        options.add(name, node.get<double>());
+    else if (node.is_boolean())
+        options.add(name, node.get<bool>());
+    else if (node.is_array())
+        options.add(name, node.get<NL::json::array_t>());
+    else if (node.is_null())
+        options.add(name, "");
+    else
+        return false;
+    return true;
+}
+
+void handleInputTag(const std::string& tag, const TagMap& tags, std::vector<Stage *>& inputs)
+{
+    auto ii = tags.find(tag);
+    if (ii == tags.end())
+        throw pdal_error("JSON pipeline: Invalid pipeline: "
+            "undefined stage tag '" + tag + "'.");
+    else
+        inputs.push_back(ii->second);
+}
+
+
+} // unnamed namespace
+
+PipelineReaderJSON::PipelineReaderJSON(PipelineManager& manager) :
+    m_manager(manager)
+{}
+
+void PipelineReaderJSON::readPipeline(const std::string& filename)
+{
+    std::istream* input = Utils::openFile(filename);
+    if (!input)
+    {
+        throw pdal_error("Pipeline: Unable to open stream for "
+            "file \"" + filename + "\"");
+    }
+
+    try
+    {
+        readPipeline(*input);
+    }
+    catch (...)
+    {
+        Utils::closeFile(input);
+        throw;
+    }
+
+    Utils::closeFile(input);
+}
+
+void PipelineReaderJSON::readPipeline(std::istream& input)
+{
+    NL::json root;
+
+    try
+    {
+        root = NL::json::parse(input, /* callback */ nullptr,
+                                      /* allow exceptions */ true,
+                                      /* ignore_comments */ true);
+    }
+    catch (NL::json::parse_error& err)
+    {
+        // Look for a right bracket -- this indicates the start of the
+        // actual message from the parse error.
+        std::string s(err.what());
+        auto pos = s.find("]");
+        if (pos != std::string::npos)
+            s = s.substr(pos + 1);
+        throw pdal_error("Pipeline:" + s);
+    }
+
+    auto it = root.find("pipeline");
+    if (root.is_object() && it != root.end())
+        parsePipeline(*it, m_manager);
+    else if (root.is_array())
+        parsePipeline(root, m_manager);
+    else
+        throw pdal_error("Pipeline: root element is not a pipeline.");
 }
 
 } // namespace pdal

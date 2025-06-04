@@ -61,18 +61,8 @@ private:
     PipelineReaderJSON& operator=(const PipelineReaderJSON&) = delete;
     PipelineReaderJSON(const PipelineReaderJSON&) = delete;
 
-    typedef std::map<std::string, Stage *> TagMap;
-
-    void parsePipeline(NL::json&);
     void readPipeline(const std::string& filename);
     void readPipeline(std::istream& input);
-    std::string extractType(NL::json& node);
-    FileSpec extractFilename(NL::json& node);
-    std::string extractTag(NL::json& node, TagMap& tags);
-    std::vector<Stage *> extractInputs(NL::json& node, TagMap& tags);
-    Options extractOptions(NL::json& node);
-    void handleInputTag(const std::string& tag, const TagMap& tags,
-        std::vector<Stage *>& inputs);
 
     PipelineManager& m_manager;
 };
