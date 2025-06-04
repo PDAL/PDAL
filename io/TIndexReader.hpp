@@ -39,8 +39,6 @@
 #include <pdal/StageFactory.hpp>
 #include <filters/MergeFilter.hpp>
 
-#include <pdal/JsonFwd.hpp>
-
 // Get GDAL's forward decls if available
 // otherwise make our own
 #if __has_include(<gdal_fwd.h>)
@@ -89,13 +87,9 @@ private:
     virtual point_count_t read(PointViewPtr view, point_count_t num) override;
     virtual bool processOne(PointRef& point) override;
 
-    NL::json handleReaderArgs(NL::json rawReaderArgs);
-    Options setReaderOptions(const NL::json& readerArgs,
-                             const std::string& driver) const;
-
     struct Args;
-
     std::unique_ptr<Args> m_args;
+
     std::unique_ptr<gdal::SpatialRef> m_out_ref;
     OGRDataSourceH m_dataset;
     OGRLayerH m_layer;
