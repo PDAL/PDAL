@@ -66,13 +66,13 @@ const StaticPluginInfo s_info
     { "ept" }
 };
 
-void reprogrow(BOX3D& b, SrsTransform& xform, double x, double y, double z)
+void reprogrow(BOX3D& b, const SrsTransform& xform, double x, double y, double z)
 {
     xform.transform(x, y, z);
     b.grow(x, y, z);
 }
 
-BOX3D reprojectBoundsViaCorner(BOX3D src, SrsTransform& xform)
+BOX3D reprojectBoundsViaCorner(BOX3D src, const SrsTransform& xform)
 {
     if (!xform.valid())
         return src;
@@ -91,7 +91,7 @@ BOX3D reprojectBoundsViaCorner(BOX3D src, SrsTransform& xform)
     return b;
 }
 
-BOX3D reprojectBoundsBcbfToLonLat(BOX3D src, SrsTransform& xform)
+BOX3D reprojectBoundsBcbfToLonLat(BOX3D src, const SrsTransform& xform)
 {
     if (!xform.valid())
         return src;
@@ -172,11 +172,21 @@ public:
     std::unique_ptr<ept::Hierarchy> hierarchy;
     std::queue<ept::TileContents> contents;
     ept::AddonList addons;
-    std::mutex mutex;
+    mutable std::mutex mutex;
     std::condition_variable contentsCv;
     std::vector<PolyXform> polys;
     BoxXform bounds;
     SrsTransform llToBcbfTransform;
+    uint64_t depthEnd {0};    // Zero indicates selection of all depths.
+    uint64_t hierarchyStep {0};
+    uint64_t nodeId;
+
+    void overlaps(ept::Hierarchy& target, const NL::json& hier, const ept::Key& key);
+    bool passesSpatialFilter(const BOX3D& tileBounds) const;
+    bool hasSpatialFilter() const
+    {
+        return !polys.empty() || bounds.box.valid();
+    }
 };
 
 EptReader::EptReader() : m_args(new EptReader::Args), m_p(new EptReader::Private),
@@ -289,7 +299,7 @@ void EptReader::initialize()
     // Figure out our max depth.
     const double queryResolution(m_args->m_resolution);
     //reseting depthEnd if initialize() has been called before
-    m_depthEnd = 0;
+    m_p->depthEnd = 0;
     if (queryResolution)
     {
         double currentResolution =
@@ -299,17 +309,17 @@ void EptReader::initialize()
 
         // To select the current resolution level, we need depthEnd to be one
         // beyond it - this is a non-inclusive parameter.
-        ++m_depthEnd;
+        ++m_p->depthEnd;
 
         while (currentResolution > queryResolution)
         {
             currentResolution /= 2;
-            ++m_depthEnd;
+            ++m_p->depthEnd;
         }
 
         debug << "Query resolution:  " << queryResolution << "\n";
         debug << "Actual resolution: " << currentResolution << "\n";
-        debug << "Depth end: " << m_depthEnd << "\n";
+        debug << "Depth end: " << m_p->depthEnd << "\n";
     }
 
     debug << "Query bounds: " << m_p->bounds.box << "\n";
@@ -461,7 +471,7 @@ QuickInfo EptReader::inspect()
     // If there is a spatial filter from an explicit --bounds, an origin query,
     // or polygons, then we'll limit our number of points to be an upper bound,
     // and clip our bounds to the selected region.
-    if (hasSpatialFilter())
+    if (m_p->hasSpatialFilter())
     {
         log()->get(LogLevel::Debug) <<
             "Determining overlapping point count" << std::endl;
@@ -643,58 +653,50 @@ void EptReader::overlaps()
     key.b = m_p->info->bounds();
 
     {
-        m_nodeId = 1;
+        m_p->nodeId = 1;
         std::string filename = m_p->info->hierarchyDir() + key.toString() + ".json";
 
         // First, determine the overlapping nodes from the EPT resource.
-        overlaps(*m_p->hierarchy, m_p->connector->getJson(filename), key);
+        m_p->overlaps(*m_p->hierarchy, m_p->connector->getJson(filename), key);
     }
     m_p->pool->await();
 
     // Determine the addons that exist to correspond to tiles.
     for (auto& addon : m_p->addons)
     {
-        m_nodeId = 1;
+        m_p->nodeId = 1;
         std::string filename = addon.hierarchyDir() + key.toString() + ".json";
-        overlaps(addon.hierarchy(), m_p->connector->getJson(filename), key);
+        m_p->overlaps(addon.hierarchy(), m_p->connector->getJson(filename), key);
         m_p->pool->await();
     }
 }
 
 
-bool EptReader::hasSpatialFilter() const
-{
-    return !m_p->polys.empty() || m_p->bounds.box.valid();
-}
-
-
 // Determine if an EPT tile overlaps our query boundary
-bool EptReader::passesSpatialFilter(const BOX3D& tileBounds) const
+bool EptReader::Private::passesSpatialFilter(const BOX3D& tileBounds) const
 {
     auto boxOverlaps = [this, &tileBounds]() -> bool
     {
-        if (!m_p->bounds.box.valid())
+        if (!bounds.box.valid())
             return true;
 
-        if (m_p->llToBcbfTransform.valid())
+        if (llToBcbfTransform.valid())
         {
-            return reprojectBoundsBcbfToLonLat(m_p->bounds.box, m_p->llToBcbfTransform)
-                .overlaps(tileBounds);
+            return reprojectBoundsBcbfToLonLat(bounds.box, llToBcbfTransform).overlaps(tileBounds);
         }
 
         // If the reprojected source bounds doesn't overlap our query bounds, we're done.
-        return reprojectBoundsViaCorner(tileBounds, m_p->bounds.xform)
-            .overlaps(m_p->bounds.box);
+        return reprojectBoundsViaCorner(tileBounds, bounds.xform).overlaps(bounds.box);
     };
 
     // Check the box of the key against our query polygon(s). If it doesn't overlap,
     // we can skip
     auto polysOverlap = [this, &tileBounds]() -> bool
     {
-        if (m_p->polys.empty())
+        if (polys.empty())
             return true;
 
-        for (auto& ps : m_p->polys)
+        for (auto& ps : polys)
             if (!ps.poly.disjoint(reprojectBoundsViaCorner(tileBounds, ps.xform)))
                 return true;
         return false;
@@ -707,12 +709,12 @@ bool EptReader::passesSpatialFilter(const BOX3D& tileBounds) const
     // This lock is here because if a bunch of threads are using the transform
     // at the same time, it seems to get corrupted. There may be other instances
     // that need to be locked.
-    std::lock_guard<std::mutex> lock(m_p->mutex);
+    std::lock_guard<std::mutex> lock(mutex);
     return boxOverlaps() && polysOverlap();
 }
 
 
-void EptReader::overlaps(ept::Hierarchy& target, const NL::json& hier, const ept::Key& key)
+void EptReader::Private::overlaps(ept::Hierarchy& target, const NL::json& hier, const ept::Key& key)
 {
     // If our key isn't in the hierarchy, we've totally traversed this tree
     // branch (there are no lower nodes).
@@ -722,7 +724,7 @@ void EptReader::overlaps(ept::Hierarchy& target, const NL::json& hier, const ept
 
     // If our query geometry doesn't overlap the tile or we're past the end of the requested
     // depth, return.
-    if (!passesSpatialFilter(key.b) || (m_depthEnd && key.d >= m_depthEnd))
+    if (!passesSpatialFilter(key.b) || (depthEnd && key.d >= depthEnd))
         return;
 
 
@@ -736,28 +738,28 @@ void EptReader::overlaps(ept::Hierarchy& target, const NL::json& hier, const ept
 
     if (numPoints == -1)
     {
-        if (!m_hierarchyStep)
-            m_hierarchyStep = key.d;
+        if (!hierarchyStep)
+            hierarchyStep = key.d;
 
         // If the hierarchy points value here is -1, then we need to fetch the
         // hierarchy subtree corresponding to this root.
-        m_p->pool->add([this, &target, key]()
+        pool->add([this, &target, key]()
         {
             try
             {
-                std::string filename = m_p->info->hierarchyDir() + key.toString() + ".json";
-                const auto subRoot(m_p->connector->getJson(filename));
+                std::string filename = info->hierarchyDir() + key.toString() + ".json";
+                const auto subRoot(connector->getJson(filename));
                 overlaps(target, subRoot, key);
             }
             catch (const arbiter::ArbiterError& err)
             {
-                throwError(err.what());
+                throw pdal_error(err.what());
             }
         });
     }
     else if (numPoints < 0)
     {
-        throwError("Invalid point count for key '" + key.toString() + "'.");
+        throw pdal_error("Invalid point count for key '" + key.toString() + "'.");
     }
     else
     {
@@ -765,8 +767,8 @@ void EptReader::overlaps(ept::Hierarchy& target, const NL::json& hier, const ept
         // not match the base hierarchy, but it doesn't matter since
         // they are never used.
         {
-            std::lock_guard<std::mutex> lock(m_p->mutex);
-            target.emplace(key, (point_count_t)numPoints, m_nodeId++);
+            std::lock_guard<std::mutex> lock(mutex);
+            target.emplace(key, (point_count_t)numPoints, nodeId++);
         }
 
         for (uint64_t dir(0); dir < 8; ++dir)
@@ -837,7 +839,7 @@ bool EptReader::processPoint(PointRef& dst, const ept::TileContents& tile)
     double z = p.getFieldAs<double>(Id::Z);
 
     // If there is a spatial filter, make sure it passes.
-    if (hasSpatialFilter())
+    if (m_p->hasSpatialFilter())
         if (!passesBoundsFilter(x, y, z) || !passesPolyFilter(x, y, z))
             return false;
 
@@ -916,7 +918,7 @@ point_count_t EptReader::read(PointViewPtr view, point_count_t count)
     {
         ept::ArtifactPtr artifact
             (new ept::Artifact(std::move(m_p->info), std::move(m_p->hierarchy),
-                std::move(m_p->connector), m_hierarchyStep));
+                std::move(m_p->connector), m_p->hierarchyStep));
         m_artifactMgr->put("ept", artifact);
     }
 

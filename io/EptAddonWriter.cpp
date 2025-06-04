@@ -57,6 +57,61 @@ namespace
         "http://pdal.io/stages/writers.ept.html",
         { "ept_addon", "ept-addon" }
     };
+
+} // unnamed namespace
+
+struct EptAddonWriter::HierarchyWriter
+{
+public:
+    HierarchyWriter(const ept::Hierarchy& hierarchy, uint64_t step,
+        ThreadPool& pool, connector::Connector& conn) :
+        m_hierarchy(hierarchy), m_step(step), m_pool(pool), m_connector(conn)
+    {}
+
+    void write(const std::string& hierarchyDir, NL::json& curr, const ept::Key& key) const;
+
+private:
+    const ept::Hierarchy& m_hierarchy;
+    uint64_t m_step;
+    ThreadPool& m_pool;
+    connector::Connector& m_connector;
+};
+
+void EptAddonWriter::HierarchyWriter::write(const std::string& hierarchyDir, NL::json& curr,
+    const ept::Key& key) const
+{
+    auto it = m_hierarchy.find(key);
+    if (it == m_hierarchy.end())
+        return;
+
+    const ept::Overlap& overlap = *it;
+    if (!overlap.m_count)
+        return;
+
+    const std::string keyName = key.toString();
+    if (m_step && key.d && (key.d % m_step == 0))
+    {
+        curr[keyName] = -1;
+
+        // Create a new hierarchy subtree.
+        NL::json next {{ keyName, overlap.m_count }};
+
+        for (uint64_t dir(0); dir < 8; ++dir)
+            write(hierarchyDir, next, key.bisect(dir));
+
+        std::string filename = hierarchyDir + keyName + ".json";
+        std::string data = next.dump();
+        m_pool.add([this, filename, data]()
+        {
+            m_connector.put(filename, data);
+        });
+    }
+    else
+    {
+        curr[keyName] = overlap.m_count;
+        for (uint64_t dir(0); dir < 8; ++dir)
+            write(hierarchyDir, curr, key.bisect(dir));
+    }
 }
 
 CREATE_STATIC_STAGE(EptAddonWriter, s_info)
@@ -130,13 +185,15 @@ void EptAddonWriter::write(const PointViewPtr view)
         log()->get(LogLevel::Debug) << "Writing addon dimension " <<
             addon.name() << " to " << addon.filename() << std::endl;
 
-        writeOne(view, addon);
+        HierarchyWriter writer(*m_hierarchy, m_hierarchyStep, *m_pool, *m_connector);
+        writeOne(view, addon, writer);
 
         log()->get(LogLevel::Debug) << "\tWritten" << std::endl;
     }
 }
 
-void EptAddonWriter::writeOne(const PointViewPtr view, const ept::Addon& addon) const
+void EptAddonWriter::writeOne(const PointViewPtr view, const ept::Addon& addon,
+    HierarchyWriter& writer) const
 {
     std::vector<std::vector<char>> buffers(m_hierarchy->size());
 
@@ -196,7 +253,8 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const ept::Addon& addon) 
     std::string hierarchyDir = addon.hierarchyDir();
     m_connector->makeDir(hierarchyDir);
 
-    writeHierarchy(hierarchyDir, h, key);
+    writer.write(hierarchyDir, h, key);
+
     std::string filename = hierarchyDir + key.toString() + ".json";
     m_connector->put(filename, h.dump());
 
@@ -210,43 +268,6 @@ void EptAddonWriter::writeOne(const PointViewPtr view, const ept::Addon& addon) 
     meta["dataType"] = "binary";
 
     m_connector->put("ept-addon.json", meta.dump());
-}
-
-void EptAddonWriter::writeHierarchy(const std::string& directory,
-    NL::json& curr, const ept::Key& key) const
-{
-    auto it = m_hierarchy->find(key);
-    if (it == m_hierarchy->end())
-        return;
-
-    const ept::Overlap& overlap = *it;
-    if (!overlap.m_count)
-        return;
-
-    const std::string keyName = key.toString();
-    if (m_hierarchyStep && key.d && (key.d % m_hierarchyStep == 0))
-    {
-        curr[keyName] = -1;
-
-        // Create a new hierarchy subtree.
-        NL::json next {{ keyName, overlap.m_count }};
-
-        for (uint64_t dir(0); dir < 8; ++dir)
-            writeHierarchy(directory, next, key.bisect(dir));
-
-        std::string filename = directory + keyName + ".json";
-        std::string data = next.dump();
-        m_pool->add([this, filename, data]()
-        {
-            m_connector->put(filename, data);
-        });
-    }
-    else
-    {
-        curr[keyName] = overlap.m_count;
-        for (uint64_t dir(0); dir < 8; ++dir)
-            writeHierarchy(directory, curr, key.bisect(dir));
-    }
 }
 
 }
