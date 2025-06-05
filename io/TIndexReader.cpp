@@ -79,6 +79,90 @@ struct TIndexReader::Args
     NL::json m_readerArgs;
 };
 
+namespace
+{
+
+NL::json handleReaderArgs(NL::json rawReaderArgs)
+{
+    if (rawReaderArgs.is_object())
+    {
+        NL::json array_args = NL::json::array();
+        array_args.push_back(rawReaderArgs);
+        rawReaderArgs = array_args;
+    }
+    for (auto& opts: rawReaderArgs)
+        if (!opts.is_object())
+            throw pdal_error("Reader Args for each reader must be a valid JSON object");
+
+    NL::json readerArgs;
+    for (NL::json& readerPipeline: rawReaderArgs)
+    {
+
+        if (!readerPipeline.contains("type"))
+            throw pdal_error("No \"type\" key found in supplied reader arguments.");
+
+        std::string driver = readerPipeline.at("type").get<std::string>();
+        if (rawReaderArgs.contains(driver))
+            throw pdal_error("Multiple instances of the same driver in supplied reader arguments.");
+        readerArgs[driver] = { };
+
+        for (auto& arg: readerPipeline.items())
+        {
+            if (arg.key() == "type")
+                continue;
+
+            std::string key = arg.key();
+            readerArgs[driver][key] = { };
+            readerArgs[driver][key] = arg.value();
+        }
+    }
+    return readerArgs;
+}
+
+Options setReaderOptions(const NL::json& readerArgs, const std::string& driver)
+{
+    Options readerOptions;
+    if (readerArgs.contains(driver)) {
+        NL::json args = readerArgs.at(driver).get<NL::json>();
+        for (auto& arg : args.items()) {
+            NL::detail::value_t type = readerArgs.at(driver).at(arg.key()).type();
+            switch(type)
+            {
+                case NL::detail::value_t::string:
+                {
+                    std::string val = arg.value().get<std::string>();
+                    readerOptions.add(arg.key(), arg.value().get<std::string>());
+                    break;
+                }
+                case NL::detail::value_t::number_float:
+                {
+                    readerOptions.add(arg.key(), arg.value().get<float>());
+                    break;
+                }
+                case NL::detail::value_t::number_integer:
+                {
+                    readerOptions.add(arg.key(), arg.value().get<int>());
+                    break;
+                }
+                case NL::detail::value_t::boolean:
+                {
+                    readerOptions.add(arg.key(), arg.value().get<bool>());
+                    break;
+                }
+                default:
+                {
+                    readerOptions.add(arg.key(), arg.value());
+                    break;
+                }
+            }
+        }
+    }
+
+    return readerOptions;
+}
+
+} // unnamed namespace
+
 TIndexReader::TIndexReader() :
     m_args(new TIndexReader::Args),
     m_dataset(nullptr),
@@ -354,97 +438,10 @@ void TIndexReader::ready(PointTableRef table)
     StageWrapper::ready(m_merge, table);
 }
 
-
 PointViewSet TIndexReader::run(PointViewPtr view)
 {
     return StageWrapper::run(m_merge, view);
 }
-
-NL::json TIndexReader::handleReaderArgs(NL::json rawReaderArgs)
-{
-
-    if (rawReaderArgs.is_object())
-    {
-        NL::json array_args = NL::json::array();
-        array_args.push_back(rawReaderArgs);
-        rawReaderArgs = array_args;
-    }
-    for (auto& opts: rawReaderArgs)
-        if (!opts.is_object())
-            throw pdal_error("Reader Args for each reader must be a valid JSON object");
-
-    NL::json readerArgs;
-    for (NL::json& readerPipeline: rawReaderArgs)
-    {
-
-        if (!readerPipeline.contains("type"))
-            throw pdal_error("No \"type\" key found in supplied reader arguments.");
-
-        std::string driver = readerPipeline.at("type").get<std::string>();
-        log()->get(LogLevel::Debug2) << "Gathering reader_args for reader of type " << driver << std::endl;
-        if (rawReaderArgs.contains(driver))
-            throw pdal_error("Multiple instances of the same driver in supplied reader arguments.");
-        readerArgs[driver] = { };
-
-        for (auto& arg: readerPipeline.items())
-        {
-
-            if (arg.key() == "type")
-                continue;
-
-            std::string key = arg.key();
-            readerArgs[driver][key] = { };
-            readerArgs[driver][key] = arg.value();
-        }
-    }
-    return readerArgs;
-}
-
-
-Options TIndexReader::setReaderOptions(const NL::json& readerArgs, const std::string& driver) const
-{
-    Options readerOptions;
-    if (readerArgs.contains(driver)) {
-        NL::json args = readerArgs.at(driver).get<NL::json>();
-        for (auto& arg : args.items()) {
-            NL::detail::value_t type = readerArgs.at(driver).at(arg.key()).type();
-            switch(type)
-            {
-                case NL::detail::value_t::string:
-                {
-                    std::string val = arg.value().get<std::string>();
-                    readerOptions.add(arg.key(), arg.value().get<std::string>());
-                    break;
-                }
-                case NL::detail::value_t::number_float:
-                {
-                    readerOptions.add(arg.key(), arg.value().get<float>());
-                    break;
-                }
-                case NL::detail::value_t::number_integer:
-                {
-                    readerOptions.add(arg.key(), arg.value().get<int>());
-                    break;
-                }
-                case NL::detail::value_t::boolean:
-                {
-                    readerOptions.add(arg.key(), arg.value().get<bool>());
-                    break;
-                }
-                default:
-                {
-                    readerOptions.add(arg.key(), arg.value());
-                    break;
-                }
-            }
-        }
-    }
-
-    return readerOptions;
-}
-
-
-
 
 } // namespace pdal
 
