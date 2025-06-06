@@ -36,8 +36,23 @@
 
 #include <nlohmann/json.hpp>
 
+#include <pdal/util/private/JsonSupport.hpp>
+#include <pdal/private/FileSpecHelper.hpp>
+
 namespace pdal
 {
+
+struct FileSpec::Private
+{
+    std::filesystem::path m_path;
+    StringMap m_headers;
+    StringMap m_query;
+
+    Utils::StatusWithReason parse(NL::json& node);
+    Utils::StatusWithReason extractPath(NL::json& node);
+    Utils::StatusWithReason extractHeaders(NL::json& node);
+    Utils::StatusWithReason extractQuery(NL::json& node);
+};
 
 namespace
 {
@@ -58,12 +73,94 @@ bool extractStringMap(NL::json& node, StringMap& map)
 
 } // unnamed namespace
 
+FileSpec::FileSpec() : m_p(new Private)
+{}
+
+FileSpec::FileSpec(const std::string& pathOrJson) : m_p(new Private)
+{
+    (void)ingest(pathOrJson);
+}
+
+FileSpec::~FileSpec()
+{}
+
+FileSpec::FileSpec(const FileSpec& other) : m_p(new Private)
+{
+    *m_p = *other.m_p;
+}
+
+FileSpec& FileSpec::operator=(const FileSpec& other)
+{
+    *m_p = *other.m_p;
+    return *this;
+}
+
+FileSpec::FileSpec(FileSpec&& other)
+{
+    m_p = std::move(other.m_p);
+}
+
+FileSpec& FileSpec::operator=(FileSpec&& other)
+{
+    m_p = std::move(other.m_p);
+    return *this;
+}
+
+bool FileSpec::valid() const
+{
+    return !m_p->m_path.empty();
+}
+
+bool FileSpec::onlyFilename() const
+{
+    return m_p->m_headers.empty() && m_p->m_query.empty();
+}
+
+std::filesystem::path FileSpec::filePath() const
+{
+    return m_p->m_path;
+}
+
+void FileSpec::setFilePath(const std::string& path)
+{
+    m_p->m_path = path;
+}
+
+void FileSpec::setFilePath(const std::filesystem::path& path)
+{
+    m_p->m_path = path;
+}
+
+StringMap FileSpec::query() const
+{
+    return m_p->m_query;
+}
+
+StringMap FileSpec::headers() const
+{
+    return m_p->m_headers;
+}
 
 Utils::StatusWithReason FileSpec::ingest(const std::string& pathOrJson)
 {
+    auto isJson = [](const std::string& s) -> bool
+    {
+        static constexpr std::array<std::pair<char, char>, 3> delims
+            { { { '{', '}' }, { '[', ']' }, { '"', '"' } } };
+
+        std::string t = s;
+        Utils::trim(t);
+
+        if (t.size() < 2)
+            return false;
+        for (const std::pair<char, char>& d : delims)
+            if (t.front() == d.first && t.back() == d.second)
+                return true;
+        return false;
+    };
+
     NL::json json;
-    size_t pos = Utils::extractSpaces(pathOrJson, 0);
-    if (pathOrJson[pos] == '{' || pathOrJson[pos] == '[')
+    if (isJson(pathOrJson))
     {
         auto status = Utils::parseJson(pathOrJson, json);
         if (!status)
@@ -73,10 +170,10 @@ Utils::StatusWithReason FileSpec::ingest(const std::string& pathOrJson)
     else
         json = NL::json(pathOrJson);
 
-    return parse(json);
+    return m_p->parse(json);
 }
 
-Utils::StatusWithReason FileSpec::parse(NL::json& node)
+Utils::StatusWithReason FileSpec::Private::parse(NL::json& node)
 {
     if (node.is_null())
         return { -1, "'filename' argument contains no data" };
@@ -101,7 +198,8 @@ Utils::StatusWithReason FileSpec::parse(NL::json& node)
     return true;
 }
 
-Utils::StatusWithReason FileSpec::extractPath(NL::json& node)
+
+Utils::StatusWithReason FileSpec::Private::extractPath(NL::json& node)
 {
     auto it = node.find("path");
     if (it == node.end())
@@ -118,23 +216,7 @@ Utils::StatusWithReason FileSpec::extractPath(NL::json& node)
     return true;
 }
 
-Utils::StatusWithReason FileSpec::extractQuery(NL::json& node)
-{
-    auto it = node.find("query");
-    if (it == node.end())
-        return true;
-    NL::json& val = *it;
-    if (!val.is_null())
-    {
-        if (!extractStringMap(val, m_query))
-            return { -1, "'filename' sub-argument 'query' must be an object of "
-                "string key-value pairs." };
-    }
-    node.erase(it);
-    return true;
-}
-
-Utils::StatusWithReason FileSpec::extractHeaders(NL::json& node)
+Utils::StatusWithReason FileSpec::Private::extractHeaders(NL::json& node)
 {
     auto it = node.find("headers");
     if (it == node.end())
@@ -150,18 +232,39 @@ Utils::StatusWithReason FileSpec::extractHeaders(NL::json& node)
     return true;
 }
 
+Utils::StatusWithReason FileSpec::Private::extractQuery(NL::json& node)
+{
+    auto it = node.find("query");
+    if (it == node.end())
+        return true;
+    NL::json& val = *it;
+    if (!val.is_null())
+    {
+        if (!extractStringMap(val, m_query))
+            return { -1, "'filename' sub-argument 'query' must be an object of "
+                "string key-value pairs." };
+    }
+    node.erase(it);
+    return true;
+}
+
+// Provide access to the private 'parse' function.
+Utils::StatusWithReason FileSpecHelper::parse(FileSpec& spec, NL::json& node)
+{
+    return spec.m_p->parse(node);
+}
+
 std::ostream& operator << (std::ostream& out, const FileSpec& spec)
 {
     NL::json json;
-    json["path"] = spec.m_path.string();
-    if (!spec.m_headers.empty())
-        json["headers"] = spec.m_headers;
-    if (!spec.m_query.empty())
-        json["query"] = spec.m_query;
+    json["path"] = spec.m_p->m_path.string();
+    if (!spec.m_p->m_headers.empty())
+        json["headers"] = spec.m_p->m_headers;
+    if (!spec.m_p->m_query.empty())
+        json["query"] = spec.m_p->m_query;
 
     out << json;
     return out;
 }
-
 
 } // namespace pdal

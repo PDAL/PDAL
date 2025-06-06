@@ -34,7 +34,6 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
-#include <pdal/JsonFwd.hpp>
 #include <pdal/StageFactory.hpp>
 
 #include <vector>

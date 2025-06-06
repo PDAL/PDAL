@@ -38,6 +38,7 @@
 #include <cstdlib>
 #include <istream>
 #include <locale>
+#include <map>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -54,6 +55,7 @@ typedef uint64_t PointId;
 typedef uint64_t point_count_t;
 typedef std::vector<std::string> StringList;
 typedef std::vector<PointId> PointIdList;
+typedef std::map<std::string, std::string> StringMap;
 
 typedef union
 {

@@ -39,10 +39,6 @@
 #include <curl/curl.h>
 #include <pdal/util/FileUtils.hpp>
 
-
-
-
-
 namespace pdal
 {
 namespace connector
@@ -97,9 +93,9 @@ Connector::Connector(const std::string& filename, const StringMap& headers,
 
 Connector::Connector(const FileSpec& spec) :
     m_arbiter(new arbiter::Arbiter),
-    m_headers(spec.m_headers),
-    m_query(spec.m_query),
-    m_filename(spec.m_path.string())
+    m_headers(spec.headers()),
+    m_query(spec.query()),
+    m_filename(spec.filePath().string())
 {
     if (m_headers.find("User-Agent") == m_headers.end())
     {
