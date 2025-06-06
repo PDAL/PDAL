@@ -39,7 +39,6 @@
 #include <unordered_set>
 #include <vector>
 
-#include <pdal/JsonFwd.hpp>
 #include <pdal/Writer.hpp>
 
 namespace pdal
