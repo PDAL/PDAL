@@ -35,12 +35,13 @@
 
 #include <filesystem>
 
+#include <pdal/pdal_export.hpp>
 #include <pdal/pdal_types.hpp>
 
 namespace pdal
 {
 
-class PDAL_DLL FileSpec
+class PDAL_EXPORT FileSpec
 {
     friend class FileSpecHelper;
 
