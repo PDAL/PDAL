@@ -19,6 +19,7 @@ target_include_directories(lasdump PRIVATE
     ${PDAL_INCLUDE_DIR}
     ${NLOHMANN_INCLUDE_DIR}
     ${UTFCPP_INCLUDE_DIR}
+    ${GDAL_INCLUDE_DIR}
 )
 
 #
