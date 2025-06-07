@@ -35,47 +35,48 @@
 
 #include <filesystem>
 
-#include <pdal/PDALUtils.hpp>
+#include <pdal/pdal_export.hpp>
 #include <pdal/pdal_types.hpp>
-
-#include <pdal/JsonFwd.hpp>
-
-using StringMap = std::map<std::string, std::string>;
 
 namespace pdal
 {
 
-class FileSpec
+class PDAL_EXPORT FileSpec
 {
-public:
-    FileSpec()
-    {}
+    friend class FileSpecHelper;
 
-    bool valid() const
-    { return !m_path.empty(); }
-    bool onlyFilename() const
-    { return m_headers.empty() && m_query.empty(); }
-    Utils::StatusWithReason parse(NL::json& json);
+public:
+    FileSpec();
+    FileSpec(const std::string& pathOrJson);
+    ~FileSpec();
+
+    FileSpec(const FileSpec&);
+    FileSpec& operator=(const FileSpec&);
+    FileSpec(FileSpec&&);
+    FileSpec& operator=(FileSpec&&);
+
+    bool valid() const;
+    bool onlyFilename() const;
+    std::filesystem::path filePath() const;
+    StringMap query() const;
+    StringMap headers() const;
+    void setFilePath(const std::string& path);
+    void setFilePath(const std::filesystem::path& path);
+
     // parse a user input string that could be a json spec or filename
     Utils::StatusWithReason ingest(const std::string& pathOrJson);
 
     friend std::ostream& operator << (std::ostream& out, const FileSpec& spec);
 
 private:
-    Utils::StatusWithReason extractPath(NL::json& node);
-    Utils::StatusWithReason extractQuery(NL::json& node);
-    Utils::StatusWithReason extractHeaders(NL::json& node);
-
-public:
-    std::filesystem::path m_path;
-    StringMap m_headers;
-    StringMap m_query;
+    struct Private;
+    std::unique_ptr<Private> m_p;
 };
 
 namespace Utils
 {
     template<>
-    inline StatusWithReason fromString(const std::string& s, FileSpec& spec)
+    PDAL_EXPORT inline StatusWithReason fromString(const std::string& s, FileSpec& spec)
     {
         return spec.ingest(s);
     }

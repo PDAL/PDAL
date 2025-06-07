@@ -1,4 +1,5 @@
-/****************************************************************************** * Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+/******************************************************************************
+* Copyright (c) 2020, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -33,37 +34,20 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
-#include <pdal/StageFactory.hpp>
+#include <nlohmann/json.hpp>
 
-#include <vector>
-#include <string>
-
-#include <pdal/FileSpec.hpp>
-#include <pdal/Options.hpp>
-#include <pdal/StageFactory.hpp>
+#include <pdal/pdal_types.hpp>
 
 namespace pdal
 {
 
-class Stage;
-class PipelineManager;
+class FileSpec;
 
-class PDAL_EXPORT PipelineReaderJSON
+class FileSpecHelper
 {
-    friend class PipelineManager;
-
 public:
-    PipelineReaderJSON(PipelineManager&);
-
-private:
-    PipelineReaderJSON& operator=(const PipelineReaderJSON&) = delete;
-    PipelineReaderJSON(const PipelineReaderJSON&) = delete;
-
-    void readPipeline(const std::string& filename);
-    void readPipeline(std::istream& input);
-
-    PipelineManager& m_manager;
+    static Utils::StatusWithReason parse(FileSpec& spec, NL::json& node);
 };
 
 } // namespace pdal
+

@@ -42,6 +42,7 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/Utils.hpp>
+#include <pdal/private/FileSpecHelper.hpp>
 
 #include <memory>
 #include <vector>
@@ -81,7 +82,7 @@ void parsePipeline(NL::json& tree, PipelineManager& manager)
         // strings are assumed to be filenames
         if (node.is_string())
         {
-            spec.m_path = node.get<std::string>();
+            spec.ingest(node.get<std::string>());
         }
         else
         {
@@ -101,13 +102,13 @@ void parsePipeline(NL::json& tree, PipelineManager& manager)
         if ((type.empty() && (i == 0 || i != last)) ||
             Utils::startsWith(type, "readers."))
         {
-            StringList files = Utils::glob(spec.m_path.string());
+            StringList files = Utils::glob(spec.filePath().string());
             if (files.empty())
-                files.push_back(spec.m_path.string());
+                files.push_back(spec.filePath().string());
 
             for (const std::string& path : files)
             {
-                spec.m_path = path;
+                spec.setFilePath(path);
                 ReaderCreationOptions ops { spec, type, nullptr, options, tag };
                 s = &manager.makeReader(ops);
 
@@ -119,7 +120,7 @@ void parsePipeline(NL::json& tree, PipelineManager& manager)
         }
         else if (type.empty() || Utils::startsWith(type, "writers."))
         {
-            StageCreationOptions ops { spec.m_path.string(), type, nullptr, options, tag };
+            StageCreationOptions ops { spec.filePath().string(), type, nullptr, options, tag };
             s = &manager.makeWriter(ops);
             for (Stage *ts : inputs)
                 s->setInput(*ts);
@@ -129,7 +130,7 @@ void parsePipeline(NL::json& tree, PipelineManager& manager)
         else
         {
             if (spec.valid())
-                options.add("filename", spec.m_path.string());
+                options.add("filename", spec.filePath().string());
             StageCreationOptions ops { "", type, nullptr, options, tag };
             s = &manager.makeFilter(ops);
             for (Stage *ts : inputs)
@@ -197,7 +198,7 @@ FileSpec extractFilename(NL::json& node)
     if (it == node.end())
         return spec;
 
-    Utils::StatusWithReason status = spec.parse(*it);
+    Utils::StatusWithReason status = FileSpecHelper::parse(spec, *it);
     if (!status)
         throw pdal_error(status.what());
     node.erase(it);

@@ -1,4 +1,5 @@
-/****************************************************************************** * Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+/******************************************************************************
+* Copyright (c) 2024, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -33,37 +34,34 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
-#include <pdal/StageFactory.hpp>
-
-#include <vector>
 #include <string>
 
-#include <pdal/FileSpec.hpp>
-#include <pdal/Options.hpp>
-#include <pdal/StageFactory.hpp>
+#include <nlohmann/json.hpp>
 
 namespace pdal
 {
-
-class Stage;
-class PipelineManager;
-
-class PDAL_EXPORT PipelineReaderJSON
+namespace Utils
 {
-    friend class PipelineManager;
 
-public:
-    PipelineReaderJSON(PipelineManager&);
+inline StatusWithReason parseJson(const std::string& s, NL::json& json)
+{
+    try
+    {
+        json = NL::json::parse(s);
+    }
+    catch (NL::json::parse_error& err)
+    {
+        // Look for a right bracket -- this indicates the start of the
+        // actual message from the parse error.
+        std::string s(err.what());
+        auto pos = s.find(']');
+        if (pos != std::string::npos)
+            s = s.substr(pos + 1);
+        return { -1, s };
+    }
+    return true;
+}
 
-private:
-    PipelineReaderJSON& operator=(const PipelineReaderJSON&) = delete;
-    PipelineReaderJSON(const PipelineReaderJSON&) = delete;
-
-    void readPipeline(const std::string& filename);
-    void readPipeline(std::istream& input);
-
-    PipelineManager& m_manager;
-};
-
+} // namespace Utils
 } // namespace pdal
+
