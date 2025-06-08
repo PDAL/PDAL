@@ -186,7 +186,9 @@ dimension
 bounds
 
 : The bounds of the data to be written.  Points not in bounds are discarded.
-  The format is (\[minx, maxx\],\[miny,maxy\]). \[Optional\]
+
+  ```{include} bounds_opts.md
+  ```
 
 origin_x
 

@@ -72,10 +72,11 @@ filename
 
 bounds
 
-: The extent of the data to select in 2 or 3 dimensions, expressed as a string,
-  e.g.: `([xmin, xmax], [ymin, ymax], [zmin, zmax])`.  If omitted, the entire dataset
-  will be selected. The bounds specification can be followed by a slash ('/') and a
-  spatial reference specification to apply to the bounds specification.
+: The extent of the to select in 2 or 3 dimensions. If omitted, the
+  entire dataset will be selected.
+
+  ```{include} bounds_opts.md
+  ```
 
 polygon
 

@@ -76,8 +76,10 @@ This example sets the Intensity attribute to `CLS` values read from the
 bounds
 
 : A bounds to pre-filter the OGR datasource that is passed to
-  [OGR_L_SetSpatialFilter](https://gdal.org/en/latest/doxygen/classOGRLayer.html#a0b4ab45cf97cbc470f0d60474d3e4169)
-  in the form `([xmin, xmax], [ymin, ymax])`.
+  [OGR_L_SetSpatialFilter](https://gdal.org/en/latest/doxygen/classOGRLayer.html#a0b4ab45cf97cbc470f0d60474d3e4169).
+
+  ```{include} bounds_opts.md
+  ```
 
 dimension
 

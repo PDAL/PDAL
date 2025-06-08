@@ -93,6 +93,9 @@ bounds
 : A 2D box to pre-filter the tile index. If it is set,
   it will override any [wkt] option.
 
+  ```{include} bounds_opts.md
+  ```
+
 wkt
 
 : A geometry to pre-filter the tile index using
@@ -101,7 +104,7 @@ wkt
 ogr
 
 : A JSON object representing an OGR query to fetch a polygon for pre-filtering
-  the tile index. This will also override any [wkt] option if set. 
+  the tile index. This will also override any [wkt] option if set.
   The JSON object is specified as follows:
 
 ```{include} ogr_json.md
