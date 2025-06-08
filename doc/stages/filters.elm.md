@@ -57,8 +57,8 @@ returns that are not marked as noise.
         "threshold":2.0
     },
     {
-        "type":"filters.range",
-        "limits":"Classification![7:7]"
+        "type":"filters.expression",
+        "expression":"Classification != 7"
     },
     "output.las"
 ]

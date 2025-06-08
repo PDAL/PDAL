@@ -153,6 +153,12 @@ select data for processing or removal. The {ref}`filters.mongo`
 filter can be used for even more complex logic operations.
 ```
 
+```{note}
+Use {ref}`filters.expression` for more convenient and capable expression filtering
+than {ref}`filters.range`.
+```
+
+
 ```{code-cell}
 pipeline |= pdal.Filter.expression(expression="Classification != 7")
 ```

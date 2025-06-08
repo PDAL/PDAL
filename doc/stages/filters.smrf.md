@@ -50,8 +50,8 @@ json = """
         "type":"filters.smrf"
     },
     {
-        "type":"filters.range",
-        "limits":"Classification[2:2]"
+        "type":"filters.expression",
+        "expression":"Classification == 2"
     },
     "output.laz"
 ]
@@ -84,8 +84,8 @@ json = """
         "window":16.0
     },
     {
-        "type":"filters.range",
-        "limits":"Classification[2:2]"
+        "type":"filters.expression",
+        "expression":"Classification == 2"
     },
     "output.laz"
 ]

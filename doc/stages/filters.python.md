@@ -127,7 +127,7 @@ def filter(ins,outs):
 ```
 
 ```{note}
-{ref}`filters.range` is a specialized filter that implements the exact
+{ref}`filters.expression` is a specialized filter that implements the exact
 functionality described in this Python operation. It is likely to be much
 faster than Python, but not as flexible. {ref}`filters.python` is the tool
 you can use for prototyping point stream processing operations.

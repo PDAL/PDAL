@@ -28,8 +28,8 @@ returns to the output file.
         "type":"filters.skewnessbalancing"
     },
     {
-        "type":"filters.range",
-        "limits":"Classification[2:2]"
+        "type":"filters.expression",
+        "expression":"Classification == 2"
     },
     "output.laz"
 ]

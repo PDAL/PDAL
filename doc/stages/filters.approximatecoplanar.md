@@ -29,7 +29,7 @@ coplanar (1) or not (0).
 
 The sample pipeline presented below estimates the planarity of a point based on
 its eight nearest neighbors using the approximate coplanar filter. A
-{ref}`filters.range` stage then filters out any points that were not
+{ref}`filters.expression` stage then filters out any points that were not
 deemed to be coplanar before writing the result in compressed LAZ.
 
 ```json
@@ -42,8 +42,8 @@ deemed to be coplanar before writing the result in compressed LAZ.
         "thresh2":6
     },
     {
-        "type":"filters.range",
-        "limits":"Coplanar[1:1]"
+        "type":"filters.expression",
+        "expression":"Coplanar == 1"
     },
     "output.laz"
 ]

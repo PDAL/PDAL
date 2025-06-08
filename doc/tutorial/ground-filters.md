@@ -195,7 +195,7 @@ structuring element.
 
 Any time we have points classified as ground, we may wish to extract just these
 points, e.g., to create a *digital terrain model* (DTM). In this case, we use a
-{ref}`range filter <filters.range>` as shown.
+{ref}`<filters.expression>` as shown.
 
 ```{literalinclude} ground-filters-pipeline.json
 :language: json
@@ -204,10 +204,10 @@ points, e.g., to create a *digital terrain model* (DTM). In this case, we use a
 :lines: 26-29
 ```
 
-The {ref}`range filter <filters.range>` accepts a `limits` option that
-identifies the dimension(s) on which to filter and the {ref}`range <ranges>` of
-values to passthrough. In this case, we are indicating that the filter should
-only pass points whose `Classification` value is equal to 2.
+The {ref}`expression filter <filters.expression>` accepts a `expression` option
+that identifies the dimension(s) on which to filter and the values to pass
+through. In this case, we are indicating that the filter should only pass
+points whose `Classification` value is equal to 2.
 
 ```{note}
 The default behavior of both {ref}`PMF <filters.pmf>` and {ref}`SMRF
@@ -215,7 +215,8 @@ The default behavior of both {ref}`PMF <filters.pmf>` and {ref}`SMRF
 versions of PDAL. The `extract` and `classify` options have been removed
 in PDAL v1.5. These filters now **only** classify points, such that ground
 points can be identified and filtered downstream, as we have shown with the
-range filter above.
+range filter above. Use {ref}`filters.expression` in combination with {ref}`filters.assign`
+to control how to manipulate the points.
 ```
 
 ## Running the Pipeline

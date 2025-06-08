@@ -30,7 +30,7 @@ following two files:
 This operation depends on two stages PDAL provides.
 The first is the {ref}`filters.overlay` stage, which allows you to assign
 point values based on polygons read from [OGR]. The second is
-{ref}`filters.range`, which allows you to keep or reject points from the
+{ref}`filters.expression`, which allows you to keep or reject points from the
 set that match given criteria.
 
 ```{seealso}
@@ -105,8 +105,8 @@ apply to data as they are read, filtered, and written.
       "column":"CLS"
     },
     {
-      "type":"filters.range",
-      "limits":"Classification[5:5]"
+      "type":"filters.expression",
+      "expression":"Classification == 5"
     },
     "output.las"
 ]
@@ -117,9 +117,9 @@ apply to data as they are read, filtered, and written.
 - {ref}`filters.overlay`: Using the VRT we defined in [Data Preparation],
   read attribute polygons out of the data source and assign the values from the
   `CLS` column to the `Classification` field.
-- {ref}`filters.range`: Given that we have set the `Classification` values
+- {ref}`filters.expression`: Given that we have set the `Classification` values
   for the points that have coincident polygons to 2, 5, and 6, only keep
-  `Classification` values in the range of `5:5`. This functionally means
+  `Classification` values equal to `5`. This functionally means
   we're only keeping those points with a classification value of 5.
 - {ref}`writers.las`: write our content out using an [ASPRS LAS] writer.
 
@@ -152,7 +152,7 @@ scenario.
 ## Conclusion
 
 PDAL allows the composition of point cloud operations. This tutorial demonstrated
-how to use the {ref}`filters.overlay` and {ref}`filters.range` stages to clip
+how to use the {ref}`filters.overlay` and {ref}`filters.expression` stages to clip
 points with shapefiles.
 
 [asprs las]: http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
