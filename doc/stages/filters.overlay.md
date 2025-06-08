@@ -3,7 +3,9 @@
 # filters.overlay
 
 The **overlay filter** allows you to set the values of a selected dimension
-based on an OGR-readable polygon or multi-polygon.
+based on an OGR-readable polygon or multi-polygon. This could be used in
+combination with {ref}`filters.expression` to cull or modify the attributes
+of points.
 
 ```{eval-rst}
 .. embed::
@@ -73,13 +75,6 @@ This example sets the Intensity attribute to `CLS` values read from the
 
 ## Options
 
-bounds
-
-: A bounds to pre-filter the OGR datasource that is passed to
-  [OGR_L_SetSpatialFilter](https://gdal.org/en/latest/doxygen/classOGRLayer.html#a0b4ab45cf97cbc470f0d60474d3e4169).
-
-  ```{include} bounds_opts.md
-  ```
 
 dimension
 
@@ -101,11 +96,19 @@ query
 
 layer
 
-: The data source's layer to use. \[Default: first layer\]
+: The datasource's layer to use. \[Default: first layer\]
 
 threads
 
 : The number of threads to use. Only valid in {ref}`standard mode <processing_modes>`. \[Default: 1\]
+
+bounds
+
+: A bounds to pre-filter the OGR datasource that is passed to
+  [OGR_L_SetSpatialFilter](https://gdal.org/en/latest/doxygen/classOGRLayer.html#a0b4ab45cf97cbc470f0d60474d3e4169).
+
+  ```{include} bounds_opts.md
+  ```
 
 ```{include} filter_opts.md
 ```

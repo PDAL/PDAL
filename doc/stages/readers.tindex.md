@@ -49,7 +49,7 @@ merge the data.
 
 filename
 
-: OGROpen'able raster file to read \[Required\]
+: [OGROpen](https://gdal.org/en/stable/api/vector_c_api.html#_CPPv47OGROpenPKciP12OGRSFDriverH)'able raster file to read \[Required\]
 
 ```{include} reader_opts.md
 ```

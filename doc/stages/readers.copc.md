@@ -60,6 +60,11 @@ but the data associated with a dimension of datatype 0 will be ignored
 ]
 ```
 
+```{note}
+You can use <viewer.copc.io> to view [EPT], [COPC], and [COG] data directly in
+your browser.
+```
+
 ## Options
 
 filename
@@ -144,3 +149,6 @@ nosrs
 [copc format]: https://copc.io/
 [las specification]: https://www.asprs.org/wp-content/uploads/2019/03/LAS_1_4_r14.pdf
 [laszip]: http://laszip.org
+[EPT]: https://entwine.io/entwine-point-tile.html
+[COPC]: https://copc.io
+[COG]: https://cogeo.org

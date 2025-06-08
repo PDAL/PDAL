@@ -21,13 +21,13 @@ with [Potree].
 
 ## Example
 
-This example downloads a small area around the the Statue of Liberty from the New York City data set (4.7 billion points) which can be viewed in its entirety in [Potree].
+This example downloads a small area around the Statue of Liberty from the New York City data set (4.7 billion points) which can be viewed in its entirety in [Potree].
 
 ```json
 [
    {
       "type": "readers.ept",
-      "filename": "http://na.entwine.io/nyc/ept.json",
+      "filename": "https://na-c.entwine.io/nyc/ept.json",
       "bounds": "([-8242669, -8242529], [4966549, 4966674])"
    },
    "statue-of-liberty.las"
@@ -41,7 +41,7 @@ Additional attributes created by the
 [
     {
         "type": "readers.ept",
-        "filename": "http://na.entwine.io/autzen/ept.json",
+        "filename": "https://na-c.entwine.io/autzen/ept.json",
         "addons": { "Classification": "~/entwine/addons/autzen/smrf" }
     },
     {
@@ -58,6 +58,11 @@ The `forward` option of {ref}`writers.copc` or {ref}`writers.las` cannot work
 with EPT due to how EPT can mix content and files. There is no single unified metadata
 value to forward. You will have to explicitly set any output options that you
 would expect to come from EPT on any writers.
+```
+
+``{note}
+You can use <viewer.copc.io> to view [EPT], [COPC], and [COG] data directly in
+your browser.
 ```
 
 ## Options
@@ -168,5 +173,8 @@ ignore_unreadable
 
 [entwine]: https://entwine.io/
 [entwine point tile]: https://entwine.io/entwine-point-tile.html
+[EPT]: https://entwine.io/entwine-point-tile.html
+[COPC]: https://copc.io
+[COG]: https://cogeo.org
 [potree]: http://potree.entwine.io/data/nyc.html
 [schema]: https://entwine.io/entwine-point-tile.html#schema
