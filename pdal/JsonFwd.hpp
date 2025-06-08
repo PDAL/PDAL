@@ -1,6 +1,13 @@
 #ifndef INCLUDE_NLOHMANN_JSON_FWD_HPP_
 #define INCLUDE_NLOHMANN_JSON_FWD_HPP_
 
+// PDAL no longer exposes nlohmann in its public
+// headers due to it changing its type definitions. See
+// https://github.com/PDAL/PDAL/pull/4706 for more details. If you have
+// this file included in your pdal::Stage definition, you should update
+// your code so you no longer need the forward definitions.
+#warning "PDAL no longer exposes nlohmann types in its public headers. You can stop including this file and use the nlohmann complete definitions if you need them"
+
 #include <cstdint> // int64_t, uint64_t
 #include <map> // map
 #include <memory> // allocator
