@@ -34,8 +34,10 @@
 
 #pragma once
 
+#include <nlohmann/json.hpp>
+
 #include <Eigen/Geometry>
-#include <pdal/JsonFwd.hpp>
+
 #include <pdal/util/Utils.hpp>
 
 #include "EsriUtil.hpp"
@@ -76,7 +78,7 @@ private:
     Eigen::Vector3d m_p;
     double m_hx;
     double m_hy;
-    double m_hz;    
+    double m_hz;
     Eigen::Quaterniond m_quat;
 
     friend std::ostream& operator<<(std::ostream&, const Obb&);
@@ -112,4 +114,4 @@ inline StatusWithReason fromString(const std::string& from,
 }
 
 } // namespace Utils
-} // namespace pdal 
+} // namespace pdal

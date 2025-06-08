@@ -36,7 +36,7 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <pdal/JsonFwd.hpp>
+#include <nlohmann/json.hpp>
 
 namespace lepcc
 {

@@ -39,7 +39,8 @@
 #include <mutex>
 #include <condition_variable>
 
-#include <pdal/JsonFwd.hpp>
+#include <nlohmann/json.hpp>
+
 #include <pdal/util/ThreadPool.hpp>
 
 namespace pdal
@@ -79,4 +80,4 @@ private:
 };
 
 } //namespace i3s
-} // namespace pdal 
+} // namespace pdal

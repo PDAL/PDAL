@@ -34,14 +34,13 @@
 
 #pragma once
 
+#include <nlohmann/json.hpp>
+
 #include <pdal/PointView.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/util/ThreadPool.hpp>
 #include "../connector/Connector.hpp"
 #include "Item.hpp"
-#include <pdal/JsonFwd.hpp>
-
-
 
 namespace pdal
 {
@@ -80,7 +79,6 @@ public:
     virtual void validate();
 
 protected:
-
     const NL::json m_json;
     const std::string m_path;
     const connector::Connector& m_connector;
@@ -104,8 +102,7 @@ protected:
     void handleItem(const Item::Filters& f, NL::json readerArgs, std::string path);
     void handleCat(const Filters& f, NL::json readerArgs, std::string path);
     void handleCol(const Filters& f, NL::json readerArgs, std::string path);
-
 };
 
-}
-}
+} // namespace stac
+} // namespace pdal
