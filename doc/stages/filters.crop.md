@@ -119,4 +119,4 @@ a_srs
 
 ## Notes
 
-1. See {ref}`workshop-clipping`: and {ref}`clipping` for example usage scenarios for {ref}`filters.crop`.
+1. See {ref}`workshop-clipping`: and {ref}`clipping` for example usage scenarios for {ref}`filters.overlay`.
