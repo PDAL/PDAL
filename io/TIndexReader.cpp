@@ -225,6 +225,8 @@ void TIndexReader::addArgs(ProgramArgs& args)
 {
     args.add("lyr_name", "OGR layer name from which to read tile index layer",
         m_args->m_layerName, "pdal");
+    args.addSynonym("lyr_name", "layer");
+
     args.add("srs_column", "Column to use to override a file's SRS", m_args->m_srsColumnName, "");
     args.add("tindex_name", "OGR column name from which to read tile "
         "index location", m_args->m_tileIndexColumnName, "location");
