@@ -21,8 +21,8 @@ using default options, and writing only the ground returns to the output file.
         "type":"filters.csf"
     },
     {
-        "type":"filters.range",
-        "limits":"Classification[2:2]"
+        "type":"filters.expression",
+        "expression":"Classification == 2"
     },
     "output.laz"
 ]

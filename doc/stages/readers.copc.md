@@ -60,6 +60,11 @@ but the data associated with a dimension of datatype 0 will be ignored
 ]
 ```
 
+```{note}
+You can use <viewer.copc.io> to view [EPT], [COPC], and [COG] data directly in
+your browser.
+```
+
 ## Options
 
 filename
@@ -72,10 +77,11 @@ filename
 
 bounds
 
-: The extent of the data to select in 2 or 3 dimensions, expressed as a string,
-  e.g.: `([xmin, xmax], [ymin, ymax], [zmin, zmax])`.  If omitted, the entire dataset
-  will be selected. The bounds specification can be followed by a slash ('/') and a
-  spatial reference specification to apply to the bounds specification.
+: The extent of the to select in 2 or 3 dimensions. If omitted, the
+  entire dataset will be selected.
+
+  ```{include} bounds_opts.md
+  ```
 
 polygon
 
@@ -143,3 +149,6 @@ nosrs
 [copc format]: https://copc.io/
 [las specification]: https://www.asprs.org/wp-content/uploads/2019/03/LAS_1_4_r14.pdf
 [laszip]: http://laszip.org
+[EPT]: https://entwine.io/entwine-point-tile.html
+[COPC]: https://copc.io
+[COG]: https://cogeo.org

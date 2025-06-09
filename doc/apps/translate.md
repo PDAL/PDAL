@@ -81,12 +81,12 @@ $ pdal translate \
 
 Given these tools, we can now construct a custom pipeline on-the-fly. The
 example below uses a simple LAS reader and writer, but stages a voxel
-grid filter, followed by the SMRF filter and a range filter. We can even set
+grid filter, followed by the SMRF filter and a {ref}`filters.expression` filter. We can even set
 stage-specific parameters as shown.
 
 ```
-$ pdal translate input.las output.las voxelcenternearestneighbor smrf range \
-    --filters.range.limits="Classification[2:2]"
+$ pdal translate input.las output.las voxelcenternearestneighbor smrf expression \
+    --filters.expression.expression="Classification == 2"
 ```
 
 ## Example 3:

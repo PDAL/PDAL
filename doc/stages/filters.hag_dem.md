@@ -32,8 +32,8 @@ Using the autzen dataset (here shown colored by elevation)
 we generate a DEM based on the points already classified as ground
 
 ```
-$ pdal translate autzen.laz autzen_dem.tif range \
-    --filters.range.limits="Classification[2:2]" \
+$ pdal translate autzen.laz autzen_dem.tif expression \
+    --filters.expression.expression="Classification == 2" \
     --writers.gdal.output_type="idw" \
     --writers.gdal.resolution=6 \
     --writers.gdal.window_size=24

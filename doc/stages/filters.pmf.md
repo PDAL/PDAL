@@ -11,6 +11,11 @@ of the method described in
 .. embed::
 ```
 
+```{warning}
+{ref}`filters.smrf` performs much better, with fewer degenerate behaviors. You should
+prefer this over `filters.pmf` in most cases.
+```
+
 ## Example
 
 ```json
@@ -51,12 +56,12 @@ of the method described in
   of iterations.
 - This filter will mark all returns deemed to be ground returns with a
   classification value of 2 (per the LAS specification). To extract only these
-  returns, users can add a {ref}`range filter<filters.range>` to the pipeline.
+  returns, users can add a {ref}`expression filter<filters.expression>` to the pipeline.
 
 ```json
 {
-  "type":"filters.range",
-  "limits":"Classification[2:2]"
+  "type":"filters.expression",
+  "expression":"Classification == 2"
 }
 ```
 

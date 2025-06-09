@@ -7,8 +7,8 @@
 "tag": "readdata"
         },
         {
-            "limits": "Classification![7:7]",
-            "type": "filters.range",
+            "expression": "Classification != 7",
+            "type": "filters.expression",
             "tag": "nonoise"
         },
         {
@@ -26,8 +26,8 @@
             "type": "filters.smrf"
         },
         {
-            "limits": "Classification[2:2]",
-            "type": "filters.range",
+            "expression": "Classification == 2",
+            "type": "filters.expression",
             "tag": "classify"
         },
         {

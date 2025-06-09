@@ -39,8 +39,8 @@ precision in the output coordinates.
         "spatialreference":"EPSG:26916"
     },
     {
-        "type":"filters.range",
-        "limits":"Z[0:100],Classification[2:2]"
+        "type":"filters.expression",
+        "expression":"0 <= Z <= 100 && Classification == 2"
     },
     {
         "type":"filters.reprojection",

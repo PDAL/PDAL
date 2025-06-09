@@ -42,8 +42,8 @@ and then filters out those points where the rank is three using
         "thresh":0.01
     },
     {
-        "type":"filters.range",
-        "limits":"Rank![3:3]"
+        "type":"filters.expression",
+        "expression":"Rank != 3"
     },
     "output.laz"
 ]

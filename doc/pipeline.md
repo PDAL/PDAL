@@ -122,8 +122,8 @@ files from a single pipeline.  The crop filter creates two output point views
 
 ### Multiple Writers and Output Types
 
-A pipeline can have multiple writers, but they must operate sequentially. 
-If tags and inputs create seperate end points (multiple leaf nodes), not 
+A pipeline can have multiple writers, but they must operate sequentially.
+If tags and inputs create seperate end points (multiple leaf nodes), not
 all stages will be executed. For example, you can have something like:
 
 `Reader -> Filter -> Writer -> Filter -> Writer`
@@ -136,7 +136,7 @@ But you can not split the pipeline and write to multiple end points:
 
 ```
 Reader -> Filter -> Filter -> Filter -> Writer
-                      |           |         
+                      |           |
                       v           v
                     Writer      Writer
 ```
@@ -337,7 +337,7 @@ this job in more detail.
 A common task is to create a digital terrain model (DTM) from the input point
 cloud. This pipeline infers the reader type, applies an approximate ground
 segmentation filter using {ref}`filters.smrf`, filters out all points but the
-ground returns (classification value of 2) using the {ref}`filters.range`, and
+ground returns (classification value of 2) using the {ref}`filters.expression`, and
 then creates the DTM using the {ref}`writers.gdal`.
 
 ```json
@@ -351,8 +351,8 @@ then creates the DTM using the {ref}`writers.gdal`.
         "cell":1.0
     },
     {
-        "type":"filters.range",
-        "limits":"Classification[2:2]"
+        "type":"filters.expression",
+        "expression":"Classification == 2"
     },
     {
         "type":"writers.gdal",

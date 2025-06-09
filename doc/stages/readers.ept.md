@@ -21,13 +21,13 @@ with [Potree].
 
 ## Example
 
-This example downloads a small area around the the Statue of Liberty from the New York City data set (4.7 billion points) which can be viewed in its entirety in [Potree].
+This example downloads a small area around the Statue of Liberty from the New York City data set (4.7 billion points) which can be viewed in its entirety in [Potree].
 
 ```json
 [
    {
       "type": "readers.ept",
-      "filename": "http://na.entwine.io/nyc/ept.json",
+      "filename": "https://na-c.entwine.io/nyc/ept.json",
       "bounds": "([-8242669, -8242529], [4966549, 4966674])"
    },
    "statue-of-liberty.las"
@@ -41,7 +41,7 @@ Additional attributes created by the
 [
     {
         "type": "readers.ept",
-        "filename": "http://na.entwine.io/autzen/ept.json",
+        "filename": "https://na-c.entwine.io/autzen/ept.json",
         "addons": { "Classification": "~/entwine/addons/autzen/smrf" }
     },
     {
@@ -60,11 +60,16 @@ value to forward. You will have to explicitly set any output options that you
 would expect to come from EPT on any writers.
 ```
 
+``{note}
+You can use <viewer.copc.io> to view [EPT], [COPC], and [COG] data directly in
+your browser.
+```
+
 ## Options
 
 filename
 
-: Path to the EPT resource from which to read, ending with `ept.json`. 
+: Path to the EPT resource from which to read, ending with `ept.json`.
   Refer to {ref}`filespec` \[Required\]
 
 spatialreference
@@ -74,10 +79,11 @@ spatialreference
 
 bounds
 
-: The extents of the resource to select in 2 or 3 dimensions, expressed as a string,
-  e.g.: `([xmin, xmax], [ymin, ymax], [zmin, zmax])`.  If omitted, the entire dataset
-  will be selected. The bounds can be followed by a slash ('/') and a spatial reference
-  specification to apply to the bounds.
+: The extent of the to select in 2 or 3 dimensions. If omitted, the
+  entire dataset will be selected.
+
+  ```{include} bounds_opts.md
+  ```
 
 resolution
 
@@ -167,5 +173,8 @@ ignore_unreadable
 
 [entwine]: https://entwine.io/
 [entwine point tile]: https://entwine.io/entwine-point-tile.html
+[EPT]: https://entwine.io/entwine-point-tile.html
+[COPC]: https://copc.io
+[COG]: https://cogeo.org
 [potree]: http://potree.entwine.io/data/nyc.html
 [schema]: https://entwine.io/entwine-point-tile.html#schema

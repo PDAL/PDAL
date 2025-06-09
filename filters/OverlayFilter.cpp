@@ -69,6 +69,7 @@ void OverlayFilter::addArgs(ProgramArgs& args)
     args.add("query", "OGR SQL query to execute on the "
         "datasource to fetch geometry and attributes", m_query);
     args.add("layer", "Datasource layer to use", m_layer);
+    args.addSynonym("layer", "lyr_name");
     args.add("bounds", "Bounds to limit query using with OGR_L_SetSpatialFilter", m_bounds);
     args.add("threads", "Number of threads used to run this filter", m_threads, 1);
 }

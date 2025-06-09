@@ -83,6 +83,8 @@ void ExpressionFilter::addArgs(ProgramArgs& args)
     m_args->m_whereArg = &args.add("expression",
         "Conditional expression describing points to be passed to this filter",
         m_args->m_expressions).setPositional();
+
+    args.addSynonym("expression", "limits");
 }
 
 
