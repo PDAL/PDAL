@@ -123,6 +123,7 @@ parts:
       - file: stages/filters.dbscan
       - file: stages/filters.litree
       - file: stages/filters.lloydkmeans
+      - file: stages/filters.supervoxel
       # create features
       - file: stages/filters.approximatecoplanar
       - file: stages/filters.covariancefeatures
