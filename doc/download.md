@@ -4,7 +4,7 @@
 
 ## Current Release(s)
 
-- **2025-XX-XX** [PDAL-2.9.0-src.tar.bz2] [Release Notes] ([md5])
+- **2025-06-16** [PDAL-2.9.0-src.tar.bz2] [Release Notes] ([md5])
 
 ## Past Releases
 
