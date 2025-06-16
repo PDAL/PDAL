@@ -126,7 +126,6 @@ size_t SupervoxelFilter::estimateClusterCount(PointView &view)
         Voxel v = std::make_tuple((int)(std::floor(x / m_R)),
             (int)(std::floor(y / m_R)), (int)(std::floor(z / m_R)));
 
-        populatedVoxels.insert(v).second;
     }
     return populatedVoxels.size();
 }
