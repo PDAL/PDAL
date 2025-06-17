@@ -103,7 +103,8 @@ private:
     std::string m_id;
 
     std::string extractDriverFromItem(const NL::json& asset) const;
-    Options setReaderOptions(const NL::json& readerArgs, const std::string& driver) const;
+    Options setReaderOptions(const NL::json& readerArgs, const std::string& driver,
+        const std::string& filename) const;
 
     NL::json handleReaderArgs(NL::json rawReaderArgs);
     void validate();
