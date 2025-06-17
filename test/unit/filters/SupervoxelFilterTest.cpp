@@ -129,8 +129,8 @@ TEST(SuperVoxelFilterTest, BasicTest)
 
     for (PointId idx = 0; idx < outView->size(); idx += 2)
     {
-        double cid1 = outView->getFieldAs<uint64_t>(Id::ClusterID, idx);
-        double cid2 = outView->getFieldAs<uint64_t>(Id::ClusterID, idx+1);
+        uint64_t cid1 = outView->getFieldAs<uint64_t>(Id::ClusterID, idx);
+        uint64_t cid2 = outView->getFieldAs<uint64_t>(Id::ClusterID, idx+1);
         EXPECT_EQ(cid1, cid2);
     }
 }
