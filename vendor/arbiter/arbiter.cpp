@@ -353,16 +353,13 @@ std::shared_ptr<Driver> Arbiter::getDriver(const std::string path) const
 {
     const auto type(getProtocol(path));
 
-    {
-        std::lock_guard<std::mutex> lock(m_mutex);
-        auto it = m_drivers.find(type);
-        if (it != m_drivers.end()) return it->second;
-    }
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_drivers.find(type);
+    if (it != m_drivers.end()) return it->second;
 
     const json config = getConfig(m_config);
     if (auto driver = Driver::create(*m_pool, type, config.dump()))
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
         m_drivers[type] = driver;
         return driver;
     }
@@ -1372,6 +1369,7 @@ LocalHandle::~LocalHandle()
 #include <algorithm>
 #include <cstring>
 #include <iostream>
+#include <sstream>
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
@@ -1470,7 +1468,12 @@ std::vector<char> Http::getBinary(
     std::vector<char> data;
     if (!get(path, data, headers, query))
     {
-        throw ArbiterError("Could not read from " + path);
+        std::stringstream oss;
+        oss << "Could not read from '" << path << "'.";
+
+        if (data.size())
+            oss << " Response message returned '" << std::string(data.data()) << "'";
+        throw ArbiterError(oss.str());
     }
     return data;
 }
@@ -1509,11 +1512,10 @@ bool Http::get(
     auto http(m_pool.acquire());
     Response res(http.get(typedPath(path), headers, query));
 
+
+    data = res.data();
     if (res.ok())
-    {
-        data = res.data();
         good = true;
-    }
 
     return good;
 }
@@ -1867,9 +1869,58 @@ std::unique_ptr<S3::Auth> S3::Auth::create(
     drivers::Http httpDriver(pool);
 
     // Nothing found in the environment or on the filesystem.  However we may
-    // be running in an EC2 instance with an instance profile set up.
+    // be running in an EC2 instance with a service account or an instance profile set up.
     try
     {
+        // Try to "assume role with web identity" - see https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRoleWithWebIdentity.html
+        try
+        {
+            const auto roleArn = env("AWS_ROLE_ARN");
+            const auto webIdentityTokenFile = env("AWS_WEB_IDENTITY_TOKEN_FILE");
+            std::unique_ptr<std::string> webIdentityToken;
+
+            if (roleArn && webIdentityTokenFile && (webIdentityToken = fsDriver.tryGet(*webIdentityTokenFile)))
+            {
+                // Decide on the STS root URL, defaults to https://sts.<AWS_REGION>.amazonaws.com
+                std::string stsRootUrl;
+                if (env("AWS_STS_ROOT_URL"))
+                {
+                    stsRootUrl = *env("AWS_STS_ROOT_URL");
+                }
+                else
+                {
+                    bool useRegionalEndpoint = env("AWS_STS_REGIONAL_ENDPOINTS")
+                        ? (*env("AWS_STS_REGIONAL_ENDPOINTS") == "regional")
+                        : true;
+                    if (useRegionalEndpoint)
+                    {
+                        stsRootUrl = "https://sts." + S3::Config::extractRegion(s, profile) + ".amazonaws.com";
+                    }
+                    else
+                    {
+                        stsRootUrl = "https://sts.amazonaws.com";
+                    }
+                }
+
+                const std::string roleSessionName = env("AWS_ROLE_SESSION_NAME") ? *env("AWS_ROLE_SESSION_NAME") : "pdal";
+
+                const std::string stsAssumeRoleWithWebIdentityUrl = stsRootUrl
+                    + "/?Action=AssumeRoleWithWebIdentity&Version=2011-06-15"
+                    + "&RoleSessionName=" + roleSessionName
+                    + "&RoleArn=" + *roleArn
+                    + "&WebIdentityToken=" + *webIdentityToken;
+
+                const auto res = httpDriver.internalGet(stsAssumeRoleWithWebIdentityUrl);
+                if (!res.ok())
+                {
+                    throw ArbiterError("Failed to assume role with web identity");
+                }
+
+                return makeUnique<Auth>(stsAssumeRoleWithWebIdentityUrl, ReauthMethod::ASSUME_ROLE_WITH_WEB_IDENTITY);
+            }
+        }
+        catch (...) { }
+
         std::string token;
 
         try
@@ -1911,8 +1962,8 @@ std::unique_ptr<S3::Auth> S3::Auth::create(
 
         if (!iamRole.empty())
         {
-            const bool imdsv2 = !token.empty();
-            return makeUnique<Auth>(ec2CredBase + "/" + iamRole, imdsv2);
+            const ReauthMethod reauthMethod = !token.empty() ? ReauthMethod::IMDS_V2 : ReauthMethod::IMDS_V1;
+            return makeUnique<Auth>(ec2CredBase + "/" + iamRole, reauthMethod);
         }
     }
     catch (...) { }
@@ -1921,7 +1972,7 @@ std::unique_ptr<S3::Auth> S3::Auth::create(
     // different IP.
     if (const auto relUri = env("AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"))
     {
-        return makeUnique<Auth>(fargateCredIp + "/" + *relUri);
+        return makeUnique<Auth>(fargateCredIp + "/" + *relUri, ReauthMethod::IMDS_V2);
     }
 #endif
 
@@ -2038,7 +2089,7 @@ std::string S3::Config::extractBaseUrl(
         for (const auto& partition : ep["partitions"])
         {
             if (
-                !partition.count("regions") || 
+                !partition.count("regions") ||
                 !partition.at("regions").count(region))
             {
                 continue;
@@ -2046,7 +2097,7 @@ std::string S3::Config::extractBaseUrl(
 
             // Look for an explicit hostname for this region/service.
             if (
-                partition.count("services") && 
+                partition.count("services") &&
                 partition["services"].count("s3") &&
                 partition["services"]["s3"].count("endpoints"))
             {
@@ -2090,7 +2141,7 @@ S3::AuthFields S3::Auth::fields() const
 
             std::string token;
 
-            if (m_imdsv2)
+            if (m_reauthMethod == ReauthMethod::IMDS_V2)
             {
                 try
                 {
@@ -2116,16 +2167,67 @@ S3::AuthFields S3::Auth::fields() const
             http::Headers headers;
             if (!token.empty()) headers["X-aws-ec2-metadata-token"] = token;
 
-            const json creds = json::parse(
-                httpDriver.get(*m_credUrl, headers));
+            const auto res = httpDriver.internalGet(*m_credUrl, headers);
+            if (!res.ok())
+            {
+                throw ArbiterError("Failed to get token");
+            }
+            std::vector<char> data(res.data());
+            data.push_back('\0');
 
-            m_access = creds.at("AccessKeyId").get<std::string>();
-            m_hidden = creds.at("SecretAccessKey").get<std::string>();
-            m_token = creds.at("Token").get<std::string>();
-            m_expiration.reset(
-                    new Time(
-                        creds.at("Expiration").get<std::string>(),
-                        arbiter::Time::iso8601));
+            if (m_reauthMethod == ReauthMethod::ASSUME_ROLE_WITH_WEB_IDENTITY)
+            {
+                // Parse XML response.
+                Xml::xml_document<> xml;
+                try
+                {
+                    xml.parse<0>(data.data());
+                }
+                catch (Xml::parse_error&)
+                {
+                    throw ArbiterError("Could not parse S3 response.");
+                }
+                bool parsed = false;
+                if (XmlNode* topNode = xml.first_node("AssumeRoleWithWebIdentityResponse"))
+                {
+                    if (XmlNode* resultNode = topNode->first_node("AssumeRoleWithWebIdentityResult"))
+                    {
+                        if (XmlNode* credsNode = resultNode->first_node("Credentials"))
+                        {
+                            XmlNode* accessNode = credsNode->first_node("AccessKeyId");
+                            XmlNode* hiddenNode = credsNode->first_node("SecretAccessKey");
+                            XmlNode* tokenNode = credsNode->first_node("SessionToken");
+                            XmlNode* expirationNode = credsNode->first_node("Expiration");
+                            if (accessNode && hiddenNode && tokenNode && expirationNode)
+                            {
+                                m_access = accessNode->value();
+                                m_hidden = hiddenNode->value();
+                                m_token = tokenNode->value();
+                                m_expiration.reset(new Time(expirationNode->value(), arbiter::Time::iso8601));
+                                parsed = true;
+                            }
+                        }
+                    }
+                }
+                if (!parsed)
+                {
+                    throw ArbiterError("Could not parse S3 response.");
+                }
+
+            }
+            else
+            {
+                // Parse JSON response.
+                const json creds = json::parse(res.data());
+
+                m_access = creds.at("AccessKeyId").get<std::string>();
+                m_hidden = creds.at("SecretAccessKey").get<std::string>();
+                m_token = creds.at("Token").get<std::string>();
+                m_expiration.reset(
+                        new Time(
+                            creds.at("Expiration").get<std::string>(),
+                            arbiter::Time::iso8601));
+            }
 
             if (*m_expiration - now < reauthSeconds)
             {
@@ -2205,9 +2307,10 @@ bool S3::get(
                 apiV4.query(),
                 size ? *size : 0));
 
+    data = res.data();
+
     if (res.ok())
     {
-        data = res.data();
         return true;
     }
 

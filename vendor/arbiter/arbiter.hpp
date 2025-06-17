@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: 4d61535996946414317c6617724c20a2bc4d9bbf
+// Git SHA: 9671686bd5cc1a5f2d56075f93d77d80c0c72a06
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -45,7 +45,6 @@ SOFTWARE.
 /// If defined, indicates that the source file is amalgamated
 /// to prevent private header inclusion.
 #define ARBITER_IS_AMALGAMATION
-#define ARBITER_CUSTOM_NAMESPACE pdal
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: arbiter/third/xml/rapidxml.hpp
@@ -4225,6 +4224,12 @@ namespace arbiter
 namespace drivers
 {
 
+enum class ReauthMethod {
+    ASSUME_ROLE_WITH_WEB_IDENTITY,
+    IMDS_V1,
+    IMDS_V2,
+};
+
 /** @brief Amazon %S3 driver. */
 class S3 : public Http
 {
@@ -4245,6 +4250,7 @@ public:
      *      - JSON configuration
      *      - Well-known files or their environment overrides, like
      *          `~/.aws/credentials` or the file at AWS_CREDENTIAL_FILE.
+     *      - STS assume role with web identity.
      *      - EC2 instance profile.
      */
     static std::unique_ptr<S3> create(
@@ -4316,9 +4322,9 @@ public:
         , m_token(token)
     { }
 
-    Auth(std::string credUrl, bool imdsv2 = true)
+    Auth(std::string credUrl, ReauthMethod reauthMethod)
         : m_credUrl(internal::makeUnique<std::string>(credUrl))
-        , m_imdsv2(imdsv2)
+        , m_reauthMethod(reauthMethod)
     { }
 
     static std::unique_ptr<Auth> create(std::string profile, std::string s);
@@ -4331,7 +4337,7 @@ private:
     mutable std::string m_token;
 
     std::unique_ptr<std::string> m_credUrl;
-    bool m_imdsv2 = true;
+    ReauthMethod m_reauthMethod;
     mutable std::unique_ptr<Time> m_expiration;
     mutable std::mutex m_mutex;
 };
@@ -4354,6 +4360,8 @@ private:
     const std::string m_baseUrl;
     http::Headers m_baseHeaders;
     bool m_precheck;
+
+    friend class S3;
 };
 
 
