@@ -119,13 +119,30 @@ NL::json handleReaderArgs(NL::json rawReaderArgs)
     return readerArgs;
 }
 
-Options setReaderOptions(const NL::json& readerArgs, const std::string& driver)
+Options setReaderOptions(const NL::json& readerArgs, const std::string& driver,
+    const std::string& filename)
 {
     Options readerOptions;
+    readerOptions.add("filename", filename);
     if (readerArgs.contains(driver)) {
         NL::json args = readerArgs.at(driver).get<NL::json>();
         for (auto& arg : args.items()) {
             NL::detail::value_t type = readerArgs.at(driver).at(arg.key()).type();
+
+            // We treat the partial FileSpec as a special case
+            if (arg.key() == "file_spec" || arg.key() == "filespec")
+            {
+                NL::json filespecArg = arg.value();
+                if (!filespecArg.is_object())
+                    throw pdal_error("value for " + driver + "'file_spec' argument " +
+                        " must be a valid JSON object.");
+                filespecArg += {"path", filename};
+
+                // This doesn't check if the driver supports headers/queries: if not,
+                // the reader will only use the filename
+                readerOptions.replace("filename", filespecArg.dump());
+                continue;
+            }
             switch(type)
             {
                 case NL::detail::value_t::string:
@@ -354,9 +371,9 @@ void TIndexReader::initialize()
             throwError("Unable to create reader for file '" + f.m_filename +
                 "'.");
         reader->setLog(log());
-        Options readerOptions = setReaderOptions(m_args->m_readerArgs, driver);
 
-        readerOptions.add("filename", f.m_filename);
+        Options readerOptions = setReaderOptions(m_args->m_readerArgs, driver, f.m_filename);
+
         reader->setOptions(readerOptions);
         Stage *premerge = reader;
 

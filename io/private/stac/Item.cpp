@@ -75,8 +75,7 @@ bool Item::init(const Filters& filters, NL::json rawReaderArgs,
         validate();
 
     NL::json readerArgs = handleReaderArgs(rawReaderArgs);
-    m_readerOptions = setReaderOptions(readerArgs, m_driver);
-    m_readerOptions.add("filename", m_assetPath);
+    m_readerOptions = setReaderOptions(readerArgs, m_driver, m_assetPath);
     return true;
 }
 
@@ -137,9 +136,10 @@ NL::json Item::handleReaderArgs(NL::json rawReaderArgs)
 }
 
 Options Item::setReaderOptions(const NL::json& readerArgs,
-    const std::string& driver) const
+    const std::string& driver, const std::string& filename) const
 {
     Options readerOptions;
+    readerOptions.add("filename", filename);
     if (readerArgs.contains(driver)) {
         NL::json args = jsonValue(readerArgs, driver);
         for (auto& arg : args.items())
@@ -147,6 +147,19 @@ Options Item::setReaderOptions(const NL::json& readerArgs,
             std::string key = arg.key();
             NL::json val = arg.value();
             NL::detail::value_t type = val.type();
+            // We treat a partial FileSpec as a special case
+            if (key == "file_spec" || key == "filespec")
+            {
+                if (!val.is_object())
+                    throw pdal_error("value for " + driver + "'file_spec' argument " +
+                        " must be a valid JSON object.");
+                val += {"path", filename};
+
+                // This doesn't check if the driver supports headers/queries: if not,
+                // the reader will only use the filename
+                readerOptions.replace("filename", val.dump());
+                continue;
+            }
 
             // if value is of type string, dump() returns string with
             // escaped string inside and kills pdal program args

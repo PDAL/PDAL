@@ -114,6 +114,14 @@ reader_args
 '[{"type": "readers.ept", "resolution": 100}, {"type": "readers.las", "nosrs": true}]'
 ```
 
+  HTTP headers & queries can be forwarded to the reader using a partial {ref}`filespec`
+  JSON object, omitting the `path` component:
+
+```bash
+--readers.stac.reader_args \
+'{"type": "readers.copc", "filespec": {"headers": {"your_header_key": "header_val"}, "query": {"your_query_key": "query_val"}}}'
+```
+
 catalog_schema_url
 
 : URL of JSON schema you'd like to use for JSON schema validation of STAC Catalogs.
