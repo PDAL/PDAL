@@ -119,41 +119,42 @@ NL::json handleReaderArgs(NL::json rawReaderArgs)
     return readerArgs;
 }
 
-Options setReaderOptions(const NL::json& readerArgs, const std::string& driver)
+Options setReaderOptions(const NL::json& args)
 {
     Options readerOptions;
-    if (readerArgs.contains(driver)) {
-        NL::json args = readerArgs.at(driver).get<NL::json>();
-        for (auto& arg : args.items()) {
-            NL::detail::value_t type = readerArgs.at(driver).at(arg.key()).type();
-            switch(type)
+    for (auto& arg : args.items()) {
+        std::cout << arg.key() << std::endl;
+        // We treat the FileSpec as a special case to be dealt with later
+        if (arg.key() == "file_spec" || arg.key() == "filespec")
+            continue;
+        NL::detail::value_t type = args.at(arg.key()).type();
+        switch(type)
+        {
+            case NL::detail::value_t::string:
             {
-                case NL::detail::value_t::string:
-                {
-                    std::string val = arg.value().get<std::string>();
-                    readerOptions.add(arg.key(), arg.value().get<std::string>());
-                    break;
-                }
-                case NL::detail::value_t::number_float:
-                {
-                    readerOptions.add(arg.key(), arg.value().get<float>());
-                    break;
-                }
-                case NL::detail::value_t::number_integer:
-                {
-                    readerOptions.add(arg.key(), arg.value().get<int>());
-                    break;
-                }
-                case NL::detail::value_t::boolean:
-                {
-                    readerOptions.add(arg.key(), arg.value().get<bool>());
-                    break;
-                }
-                default:
-                {
-                    readerOptions.add(arg.key(), arg.value());
-                    break;
-                }
+                std::string val = arg.value().get<std::string>();
+                readerOptions.add(arg.key(), arg.value().get<std::string>());
+                break;
+            }
+            case NL::detail::value_t::number_float:
+            {
+                readerOptions.add(arg.key(), arg.value().get<float>());
+                break;
+            }
+            case NL::detail::value_t::number_integer:
+            {
+                readerOptions.add(arg.key(), arg.value().get<int>());
+                break;
+            }
+            case NL::detail::value_t::boolean:
+            {
+                readerOptions.add(arg.key(), arg.value().get<bool>());
+                break;
+            }
+            default:
+            {
+                readerOptions.add(arg.key(), arg.value());
+                break;
             }
         }
     }
@@ -354,9 +355,32 @@ void TIndexReader::initialize()
             throwError("Unable to create reader for file '" + f.m_filename +
                 "'.");
         reader->setLog(log());
-        Options readerOptions = setReaderOptions(m_args->m_readerArgs, driver);
 
-        readerOptions.add("filename", f.m_filename);
+        Options readerOptions;
+        NL::json currentArgs;
+        if (m_args->m_readerArgs.contains(driver))
+        {
+            currentArgs = m_args->m_readerArgs.at(driver).get<NL::json>();
+            readerOptions = setReaderOptions(currentArgs);
+        }
+        // We need to handle partial FileSpecs here, since they aren't
+        // a valid reader option as-is
+        auto it = currentArgs.find("file_spec");
+        if (it != currentArgs.end())
+        {
+            NL::json filespecArg = currentArgs["file_spec"];
+            if (!filespecArg.is_object())
+                throwError("value for " + driver + "'file_spec' argument " +
+                    " must be a valid JSON object.");
+            filespecArg += {"path", f.m_filename};
+
+            // This doesn't check if the driver supports headers/queries: if not,
+            // the reader will only use the filename
+            readerOptions.add("filename", filespecArg.dump());
+        }
+        else
+            readerOptions.add("filename", f.m_filename);
+
         reader->setOptions(readerOptions);
         Stage *premerge = reader;
 
