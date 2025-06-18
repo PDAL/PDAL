@@ -180,19 +180,20 @@ std::vector<char> Connector::getBinary(uint64_t offset, int32_t size) const
     if (size <= 0)
         return std::vector<char>();
 
-    if (m_arbiter->isLocal(m_filename))
+    if (Utils::startsWith(Utils::toupper(m_filename), "/VSI") || m_arbiter->isLocal(m_filename))
     {
         std::vector<char> buf(size);
-        std::ifstream in(m_filename, std::ios::binary);
-        if (in.fail() )
+        std::istream* in = FileUtils::openFile(m_filename);
+        if (in->fail() )
         {
             std::string message = "Unable to open '" + m_filename + "'.";
             if (!pdal::FileUtils::fileExists(m_filename))
                 message += " File does not exist.";
             throw pdal_error(message);
         }
-        in.seekg(offset);
-        in.read(buf.data(), size);
+        in->seekg(offset);
+        in->read(buf.data(), size);
+        delete in;
         return buf;
     }
     else
