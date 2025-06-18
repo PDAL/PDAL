@@ -139,7 +139,7 @@ Options Item::setReaderOptions(const NL::json& readerArgs,
     const std::string& driver, const std::string& filename) const
 {
     Options readerOptions;
-    readerOptions.add("filename", filename);
+    bool filenameSet = false;
     if (readerArgs.contains(driver)) {
         NL::json args = jsonValue(readerArgs, driver);
         for (auto& arg : args.items())
@@ -148,16 +148,19 @@ Options Item::setReaderOptions(const NL::json& readerArgs,
             NL::json val = arg.value();
             NL::detail::value_t type = val.type();
             // We treat a partial FileSpec as a special case
-            if (key == "file_spec" || key == "filespec")
+            if (key == "filename")
             {
                 if (!val.is_object())
-                    throw pdal_error("value for " + driver + "'file_spec' argument " +
-                        " must be a valid JSON object.");
+                    throw pdal_error("Value for " + driver + " 'filename' argument " +
+                        "expected to be a 'FileSpec' JSON object.");
+                if (val.contains("path"))
+                    val.erase("path");
                 val += {"path", filename};
 
                 // This doesn't check if the driver supports headers/queries: if not,
                 // the reader will only use the filename
-                readerOptions.replace("filename", val.dump());
+                readerOptions.add("filename", val.dump());
+                filenameSet = true;
                 continue;
             }
 
@@ -171,6 +174,8 @@ Options Item::setReaderOptions(const NL::json& readerArgs,
             readerOptions.add(key, v);
         }
     }
+    if (!filenameSet)
+        readerOptions.add("filename", filename);
 
     return readerOptions;
 }

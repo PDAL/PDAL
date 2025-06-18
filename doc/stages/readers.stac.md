@@ -119,7 +119,7 @@ reader_args
 
 ```bash
 --readers.stac.reader_args \
-'{"type": "readers.copc", "filespec": {"headers": {"your_header_key": "header_val"}, "query": {"your_query_key": "query_val"}}}'
+'{"type": "readers.copc", "filename": {"headers": {"your_header_key": "header_val"}, "query": {"your_query_key": "query_val"}}}'
 ```
 
 catalog_schema_url
