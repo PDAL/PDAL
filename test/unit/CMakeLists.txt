@@ -417,6 +417,7 @@ PDAL_ADD_TEST(pdal_filters_locate_test FILES filters/LocateFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_merge_test FILES filters/MergeTest.cpp)
 PDAL_ADD_TEST(pdal_filters_miniball_test FILES filters/MiniballFilterTest.cpp)
 PDAL_ADD_TEST(pdal_morton_order_test FILES filters/MortonOrderTest.cpp)
+PDAL_ADD_TEST(pdal_filters_supervoxel_test FILES filters/SupervoxelFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_additional_merge_test
     FILES
         filters/AdditionalMergeTest.cpp
