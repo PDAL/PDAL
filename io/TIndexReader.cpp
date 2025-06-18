@@ -123,26 +123,28 @@ Options setReaderOptions(const NL::json& readerArgs, const std::string& driver,
     const std::string& filename)
 {
     Options readerOptions;
-    readerOptions.add("filename", filename);
+    bool filenameSet = false;
     if (readerArgs.contains(driver)) {
         NL::json args = readerArgs.at(driver).get<NL::json>();
         for (auto& arg : args.items()) {
-            NL::detail::value_t type = readerArgs.at(driver).at(arg.key()).type();
-
-            // We treat the partial FileSpec as a special case
-            if (arg.key() == "file_spec" || arg.key() == "filespec")
+            if (arg.key() == "filename")
             {
-                NL::json filespecArg = arg.value();
+                NL::json filespecArg = arg.value().get<NL::json>();
                 if (!filespecArg.is_object())
-                    throw pdal_error("value for " + driver + "'file_spec' argument " +
-                        " must be a valid JSON object.");
+                    throw pdal_error("Value for " + driver + " 'filename' argument " +
+                        "expected to be a 'FileSpec' JSON object.");
+                if (filespecArg.contains("path"))
+                    filespecArg.erase("path");
                 filespecArg += {"path", filename};
 
                 // This doesn't check if the driver supports headers/queries: if not,
                 // the reader will only use the filename
-                readerOptions.replace("filename", filespecArg.dump());
+                readerOptions.add("filename", filespecArg.dump());
+                filenameSet = true;
                 continue;
             }
+
+            NL::detail::value_t type = readerArgs.at(driver).at(arg.key()).type();
             switch(type)
             {
                 case NL::detail::value_t::string:
@@ -174,6 +176,9 @@ Options setReaderOptions(const NL::json& readerArgs, const std::string& driver,
             }
         }
     }
+    if (!filenameSet)
+        readerOptions.add("filename", filename);
+
 
     return readerOptions;
 }
