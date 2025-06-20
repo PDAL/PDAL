@@ -37,6 +37,7 @@
 #include <string>
 
 #include <nlohmann/json.hpp>
+#include <pdal/Options.hpp>
 
 namespace pdal
 {
@@ -60,6 +61,106 @@ inline StatusWithReason parseJson(const std::string& s, NL::json& json)
         return { -1, s };
     }
     return true;
+}
+
+template <class T = NL::json>
+inline T jsonValue(const NL::json& json, std::string key = "")
+{
+    try
+    {
+        if (key.empty())
+            return json.get<T>();
+        return json.at(key).get<T>();
+    }
+    catch (NL::detail::exception& e)
+    {
+        std::stringstream msg;
+        msg << "Error: " << e.what() << ", for object " << json.dump();
+        throw pdal_error(msg.str());
+    }
+}
+
+// Functions for parsing StacReader & TindexReader reader args
+
+inline NL::json handleReaderArgs(NL::json rawReaderArgs)
+{
+    if (rawReaderArgs.is_object())
+    {
+        NL::json array_args = NL::json::array();
+        array_args.push_back(rawReaderArgs);
+        rawReaderArgs = array_args;
+    }
+    for (auto& opts: rawReaderArgs)
+        if (!opts.is_object())
+            throw pdal_error("Reader Args for each reader must be a valid JSON object");
+
+    NL::json readerArgs;
+    for (const NL::json& readerPipeline: rawReaderArgs)
+    {
+        if (!readerPipeline.contains("type"))
+            throw pdal_error("No \"type\" key found in supplied reader arguments.");
+
+        std::string driver = jsonValue<std::string>(readerPipeline, "type");
+        if (rawReaderArgs.contains(driver))
+            throw pdal_error("Multiple instances of the same driver in supplied reader arguments.");
+        readerArgs[driver] = { };
+
+        for (auto& arg: readerPipeline.items())
+        {
+            if (arg.key() == "type")
+                continue;
+
+            std::string key = arg.key();
+            readerArgs[driver][key] = { };
+            readerArgs[driver][key] = arg.value();
+        }
+    }
+    return readerArgs;
+}
+
+inline Options setReaderOptions(const NL::json& readerArgs,
+    const std::string& driver, const std::string& filename)
+{
+    Options readerOptions;
+    bool filenameSet = false;
+    if (readerArgs.contains(driver)) {
+        NL::json args = jsonValue(readerArgs, driver);
+        for (auto& arg : args.items())
+        {
+            std::string key = arg.key();
+            NL::json val = arg.value();
+            NL::detail::value_t type = val.type();
+            // We treat a partial FileSpec as a special case
+            if (key == "filename")
+            {
+                if (!val.is_object())
+                    throw pdal_error("value for " + driver + " 'filename' argument " +
+                        "must be a valid JSON object.");
+                if (val.contains("path"))
+                    val.erase("path");
+                val += {"path", filename};
+
+                // This doesn't check if the driver supports headers/queries: if not,
+                // the reader will only use the filename
+                readerOptions.replace("filename", val.dump());
+                filenameSet = true;
+                continue;
+            }
+
+            // if value is of type string, dump() returns string with
+            // escaped string inside and kills pdal program args
+            std::string v;
+            if (type == NL::detail::value_t::string)
+                v = jsonValue<std::string>(val);
+            else
+                v = arg.value().dump();
+            readerOptions.add(key, v);
+        }
+    }
+    if (!filenameSet)
+        readerOptions.add("filename", filename);
+
+    return readerOptions;
 }
 
 } // namespace Utils

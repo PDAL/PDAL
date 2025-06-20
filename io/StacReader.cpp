@@ -466,7 +466,7 @@ void StacReader::initialize()
 
     NL::json stacJson = m_p->m_connector->getJson(m_filename);
 
-    std::string stacType = StacUtils::jsonValue<std::string>(stacJson, "type");
+    std::string stacType = Utils::jsonValue<std::string>(stacJson, "type");
     if (stacType == "Feature")
         m_p->handleItem(stacJson, m_filename);
     else if (stacType == "Catalog")

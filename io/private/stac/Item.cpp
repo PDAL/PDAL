@@ -37,6 +37,8 @@
 #include <nlohmann/json.hpp>
 #include <schema-validator/json-schema.hpp>
 
+#include <pdal/util/private/JsonSupport.hpp>
+
 namespace pdal
 {
 
@@ -74,8 +76,8 @@ bool Item::init(const Filters& filters, NL::json rawReaderArgs,
     if (m_validate)
         validate();
 
-    NL::json readerArgs = handleReaderArgs(rawReaderArgs);
-    m_readerOptions = setReaderOptions(readerArgs, m_driver, m_assetPath);
+    NL::json readerArgs = Utils::handleReaderArgs(rawReaderArgs);
+    m_readerOptions = Utils::setReaderOptions(readerArgs, m_driver, m_assetPath);
     return true;
 }
 
@@ -97,87 +99,6 @@ std::string Item::assetPath()
 Options Item::options()
 {
     return m_readerOptions;
-}
-
-NL::json Item::handleReaderArgs(NL::json rawReaderArgs)
-{
-    if (rawReaderArgs.is_object())
-    {
-        NL::json array_args = NL::json::array();
-        array_args.push_back(rawReaderArgs);
-        rawReaderArgs = array_args;
-    }
-    for (auto& opts: rawReaderArgs)
-        if (!opts.is_object())
-            throw pdal_error("Reader Args for reader '" + m_driver +
-                "' must be a valid JSON object");
-
-    NL::json readerArgs;
-    for (const NL::json& readerPipeline: rawReaderArgs)
-    {
-        std::string driver =
-            jsonValue<std::string>(readerPipeline, "type");
-        if (rawReaderArgs.contains(driver))
-            throw pdal_error("Multiple instances of the same driver in"
-                " supplied reader arguments.");
-        readerArgs[driver] = { };
-
-        for (auto& arg: readerPipeline.items())
-        {
-            if (arg.key() == "type")
-                continue;
-
-            std::string key = arg.key();
-            readerArgs[driver][key] = { };
-            readerArgs[driver][key] = arg.value();
-        }
-    }
-    return readerArgs;
-}
-
-Options Item::setReaderOptions(const NL::json& readerArgs,
-    const std::string& driver, const std::string& filename) const
-{
-    Options readerOptions;
-    bool filenameSet = false;
-    if (readerArgs.contains(driver)) {
-        NL::json args = jsonValue(readerArgs, driver);
-        for (auto& arg : args.items())
-        {
-            std::string key = arg.key();
-            NL::json val = arg.value();
-            NL::detail::value_t type = val.type();
-            // We treat a partial FileSpec as a special case
-            if (key == "filename")
-            {
-                if (!val.is_object())
-                    throw pdal_error("Value for " + driver + " 'filename' argument " +
-                        "expected to be a 'FileSpec' JSON object.");
-                if (val.contains("path"))
-                    val.erase("path");
-                val += {"path", filename};
-
-                // This doesn't check if the driver supports headers/queries: if not,
-                // the reader will only use the filename
-                readerOptions.add("filename", val.dump());
-                filenameSet = true;
-                continue;
-            }
-
-            // if value is of type string, dump() returns string with
-            // escaped string inside and kills pdal program args
-            std::string v;
-            if (type == NL::detail::value_t::string)
-                v = jsonValue<std::string>(val);
-            else
-                v = arg.value().dump();
-            readerOptions.add(key, v);
-        }
-    }
-    if (!filenameSet)
-        readerOptions.add("filename", filename);
-
-    return readerOptions;
 }
 
 std::string Item::extractDriverFromItem(const NL::json& asset) const
@@ -295,36 +216,36 @@ bool matchProperty(std::string key, NL::json val, NL::json properties,
     {
         case NL::detail::value_t::string:
         {
-            std::string desired = jsonValue<std::string>(val);
-            std::string value = jsonValue<std::string>(properties, key);
+            std::string desired = Utils::jsonValue<std::string>(val);
+            std::string value = Utils::jsonValue<std::string>(properties, key);
             return value == desired;
             break;
         }
         case NL::detail::value_t::number_unsigned:
         {
-            uint64_t value = jsonValue<uint64_t>(properties, key);
-            uint64_t desired = jsonValue<uint64_t>(val);
+            uint64_t value = Utils::jsonValue<uint64_t>(properties, key);
+            uint64_t desired = Utils::jsonValue<uint64_t>(val);
             return value == desired;
             break;
         }
         case NL::detail::value_t::number_integer:
         {
-            int value = jsonValue<int>(properties,key);
-            int desired = jsonValue<int>(val);
+            int value = Utils::jsonValue<int>(properties,key);
+            int desired = Utils::jsonValue<int>(val);
             return value == desired;
             break;
         }
         case NL::detail::value_t::number_float:
         {
-            double value = jsonValue<double>(properties, key);
-            double desired = jsonValue<double>(val);
+            double value = Utils::jsonValue<double>(properties, key);
+            double desired = Utils::jsonValue<double>(val);
             return value == desired;
             break;
         }
         case NL::detail::value_t::boolean:
         {
-            bool value = jsonValue<bool>(properties, key);
-            bool desired = jsonValue<bool>(val);
+            bool value = Utils::jsonValue<bool>(properties, key);
+            bool desired = Utils::jsonValue<bool>(val);
             return value == desired;
             break;
         }
@@ -378,19 +299,19 @@ SpatialReference extractSRS(NL::json& props)
     SpatialReference srs;
     if (havePROJJSON)
     {
-        NL::json projjson = jsonValue(props, "proj:projjson");
+        NL::json projjson = Utils::jsonValue(props, "proj:projjson");
         srs.set(projjson.dump());
     } else if (haveWKT2)
     {
-        std::string wkt = jsonValue(props, "proj:wkt2");
+        std::string wkt = Utils::jsonValue(props, "proj:wkt2");
         srs.set(wkt);
     } else if (haveEPSG)
     {
-        int projepsg = jsonValue(props, "proj:epsg");
+        int projepsg = Utils::jsonValue(props, "proj:epsg");
         srs.set("EPSG:" + std::to_string(projepsg));
     } else if (haveWKT)
     {
-        std::string wkt = jsonValue(props, "proj:wkt");
+        std::string wkt = Utils::jsonValue(props, "proj:wkt");
         srs.set(wkt);
     }
 

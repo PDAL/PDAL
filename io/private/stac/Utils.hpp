@@ -38,6 +38,7 @@
 #include <arbiter/arbiter.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/pdal_types.hpp>
+#include <pdal/util/private/JsonSupport.hpp>
 
 namespace pdal
 {
@@ -73,23 +74,6 @@ namespace StacUtils
     std::string stacId(const NL::json& stac);
     std::string stacType(const NL::json& stac);
     std::string icSelfPath(const NL::json& json);
-
-    template <class T = NL::json>
-    inline T jsonValue(const NL::json& json, std::string key = "")
-    {
-        try
-        {
-            if (key.empty())
-                return json.get<T>();
-            return json.at(key).get<T>();
-        }
-        catch (NL::detail::exception& e)
-        {
-            std::stringstream msg;
-            msg << "Error: " << e.what() << ", for object " << json.dump();
-            throw pdal_error(msg.str());
-        }
-    }
 
     template <class U = NL::json>
     inline U stacValue(const NL::json& stac, std::string key = "",
