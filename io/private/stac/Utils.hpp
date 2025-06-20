@@ -74,23 +74,6 @@ namespace StacUtils
     std::string stacType(const NL::json& stac);
     std::string icSelfPath(const NL::json& json);
 
-    template <class T = NL::json>
-    inline T jsonValue(const NL::json& json, std::string key = "")
-    {
-        try
-        {
-            if (key.empty())
-                return json.get<T>();
-            return json.at(key).get<T>();
-        }
-        catch (NL::detail::exception& e)
-        {
-            std::stringstream msg;
-            msg << "Error: " << e.what() << ", for object " << json.dump();
-            throw pdal_error(msg.str());
-        }
-    }
-
     template <class U = NL::json>
     inline U stacValue(const NL::json& stac, std::string key = "",
         const NL::json& rootJson = {})
