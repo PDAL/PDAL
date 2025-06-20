@@ -82,7 +82,7 @@ inline T jsonValue(const NL::json& json, std::string key = "")
 
 // Functions for parsing StacReader & TindexReader reader args
 
-NL::json handleReaderArgs(NL::json rawReaderArgs)
+inline NL::json handleReaderArgs(NL::json rawReaderArgs)
 {
     if (rawReaderArgs.is_object())
     {
@@ -100,7 +100,7 @@ NL::json handleReaderArgs(NL::json rawReaderArgs)
         if (!readerPipeline.contains("type"))
             throw pdal_error("No \"type\" key found in supplied reader arguments.");
 
-        std::string driver = readerPipeline.at("type").get<std::string>();
+        std::string driver = jsonValue<std::string>(readerPipeline, "type");
         if (rawReaderArgs.contains(driver))
             throw pdal_error("Multiple instances of the same driver in supplied reader arguments.");
         readerArgs[driver] = { };
@@ -118,7 +118,7 @@ NL::json handleReaderArgs(NL::json rawReaderArgs)
     return readerArgs;
 }
 
-Options setReaderOptions(const NL::json& readerArgs,
+inline Options setReaderOptions(const NL::json& readerArgs,
     const std::string& driver, const std::string& filename)
 {
     Options readerOptions;
@@ -134,8 +134,8 @@ Options setReaderOptions(const NL::json& readerArgs,
             if (key == "filename")
             {
                 if (!val.is_object())
-                    throw pdal_error("value for " + driver + "'filename' argument " +
-                        " must be a valid JSON object.");
+                    throw pdal_error("value for " + driver + " 'filename' argument " +
+                        "must be a valid JSON object.");
                 if (val.contains("path"))
                     val.erase("path");
                 val += {"path", filename};
