@@ -78,7 +78,7 @@ HexId H3Grid::edgeHex(HexId hex, int edge) const
     //               (+ I)
     //                __0_
     // (+ I, + J)  5 /    \ 1  (- J)
-    //              /      \
+    //              /      \ 
     //              \      /
     //      (+ J)  4 \____/ 2   (- I, - J)
     //                  3
