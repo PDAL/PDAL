@@ -432,7 +432,13 @@ std::cerr << "Area total = " << areaTotal << "!\n";
     double area12 = (x2-x1) * (y-y1) - (y2-y1) * (x-x1);
 std::cerr << "Area12 = " << area12 << "!\n";
     if (area12 && std::signbit(area12) != signtotal)
+    {
+        double magnitude1 = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+        double magnitude2 = (x - x1) * (x - x1) + (y - y1) * (y - y1);
+        std::cerr << "Mag 1/Mag 2/Sum = " << magnitude1 << "/" << magnitude2 << "/" <<
+            (magnitude1 + magnitude2) << "!\n";
         return std::numeric_limits<double>::infinity();
+    }
     double area23 = (x3-x2) * (y-y2) - (y3-y2) * (x-x2);
 std::cerr << "Area23 = " << area23 << "!\n";
     if (area23 && std::signbit(area23) != signtotal)
