@@ -36,6 +36,7 @@
 #include <cfloat>
 #include <numeric>
 #include <vector>
+#include <iostream>
 
 #include <pdal/PointView.hpp>
 #include <pdal/SpatialReference.hpp>
@@ -416,6 +417,7 @@ double barycentricInterpolation(double x1, double y1, double z1,
     // Find the sign of the area so that we can account for the winding order of the
     // points that make up the triangle.
     bool signtotal = std::signbit(areaTotal);
+std::cerr << "Area total = " << areaTotal << "!\n";
 
     // Find twice the area of each triangle formed by a triangle edge and the test point.
     // Things are arranged such that if the point is inside the triangle, the sign of the
@@ -428,12 +430,15 @@ double barycentricInterpolation(double x1, double y1, double z1,
     // the triangle where one point is (0,0), one is (1, 0) and the other is (0, 1)
     // and points in or on the triangle take on X and Y values [0, 1].
     double area12 = (x2-x1) * (y-y1) - (y2-y1) * (x-x1);
+std::cerr << "Area12 = " << area12 << "!\n";
     if (area12 && std::signbit(area12) != signtotal)
         return std::numeric_limits<double>::infinity();
     double area23 = (x3-x2) * (y-y2) - (y3-y2) * (x-x2);
+std::cerr << "Area23 = " << area23 << "!\n";
     if (area23 && std::signbit(area23) != signtotal)
         return std::numeric_limits<double>::infinity();
     double area31 = (x1-x3) * (y-y3) - (y1-y3) * (x-x3);
+std::cerr << "Area31 = " << area31 << "!\n";
     if (area31 && std::signbit(area31) != signtotal)
         return std::numeric_limits<double>::infinity();
 

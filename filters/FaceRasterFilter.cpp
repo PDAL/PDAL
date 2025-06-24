@@ -59,7 +59,7 @@ std::string FaceRasterFilter::getName() const
 FaceRasterFilter::FaceRasterFilter() : m_limits(new RasterLimits)
 {}
 
-FaceRasterFilter::~FaceRasterFilter() 
+FaceRasterFilter::~FaceRasterFilter()
 {}
 
 void FaceRasterFilter::addArgs(ProgramArgs& args)
@@ -161,15 +161,48 @@ void FaceRasterFilter::filter(PointView& v)
         for (int xi = ax; xi < bx; ++xi)
             for (int yi = ay; yi < by; ++yi)
             {
+                double v = raster->at(xi, yi);
+                if (std::isnan(m_noData))
+                {
+                    if (!std::isnan(v))
+                        continue;
+                }
+                else if (v != m_noData)
+                    continue;
+
+if (xi == 74 && yi == 96)
+    std::cerr << "Setting value for " << 74 << "/" << 96 << "!\n";
                 double x = raster->xCellPos(xi);
                 double y = raster->yCellPos(yi);
 
-                double val = math::barycentricInterpolation(x1, y1, z1,
+                double val;
+if (xi == 74 && yi == 96)
+{
+                val = math::barycentricInterpolation(x1, y1, z1,
                     x2, y2, z2, x3, y3, z3, x, y);
+std::cerr << std::setprecision(10) <<
+    "P1 = (" << x1 << "," << y1 << "," << z1 << ")\n" <<
+    "P2 = (" << x2 << "," << y2 << "," << z2 << ")\n" <<
+    "P3 = (" << x3 << "," << y3 << "," << z3 << ")\n" <<
+    "  - T = (" << x << "," << y << ") - " << val << "!\n";
                 if (val != std::numeric_limits<double>::infinity())
                     raster->at(xi, yi) = val;
+}
             }
     }
+
+    std::cerr << "Width/Height = " << m_limits->width << "/" << m_limits->height << "!\n";
+    for (int xi = 0; xi < m_limits->width; ++xi)
+        for (int yi = 0; yi < m_limits->height; ++yi)
+        {
+            double v = raster->at(xi, yi);
+//            std::cerr << "Raster value at " << xi << "/" << yi << " = " << v << "!\n";
+            if (std::isnan(v))
+            {
+                std::cerr << "No Data at " << xi << "/" << yi << "!\n";
+            }
+        }
+    std::cerr << "Face raster filter!\n";
 }
 
 } // namespace pdal
