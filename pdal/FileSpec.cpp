@@ -256,6 +256,9 @@ Utils::StatusWithReason FileSpecHelper::parse(FileSpec& spec, NL::json& node)
 
 std::ostream& operator << (std::ostream& out, const FileSpec& spec)
 {
+    if (spec.onlyFilename())
+        return out << spec.filePath().string();
+
     NL::json json;
     json["path"] = spec.m_p->m_path.string();
     if (!spec.m_p->m_headers.empty())
