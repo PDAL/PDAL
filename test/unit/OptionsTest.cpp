@@ -179,4 +179,26 @@ TEST(OptionsTest, doublepreicison)
     EXPECT_EQ(value, testVal);
 }
 
+// Test that JSON metadata gets output correctly. Separate functions for
+// Option and Options are used for this.
+TEST(OptionsTest, json_metadata)
+{
+    ProgramArgs args;
+    NL::json json;
+    args.add("test", "json test", json);
+
+    Options ops;
+    NL::json inJson = { { "key", "test" } };
+    ops.add("test", inJson);
+
+    MetadataNode m;
+    Option opt = ops.getOptions()[0];
+    opt.toMetadata(m);
+    EXPECT_EQ(m.findChild("test").value(), inJson.dump());
+
+    MetadataNode m2;
+    ops.toMetadata(m2);
+    EXPECT_EQ(m2.findChild("test").value(), inJson.dump());
+}
+
 } // namespace pdal
