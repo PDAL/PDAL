@@ -52,11 +52,12 @@ std::string Option::toArg() const
 
 void Option::toMetadata(MetadataNode& parent) const
 {
-    // 'user_data' nodes on Stages are JSON
-    if (!Utils::iequals(getName(), "user_data"))
-        parent.add(getName(), getValue());
+    std::string value = getValue();
+    bool isJson = value.find("{") != value.npos || value.find("}") != value.npos;
+    if (!isJson)
+        parent.add(getName(), value);
     else
-        parent.addWithType(getName(), getValue(), "json", "User JSON");
+        parent.addWithType(getName(), value, "json");
 
 }
 
