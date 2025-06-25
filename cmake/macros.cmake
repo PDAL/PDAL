@@ -185,7 +185,7 @@ endmacro(PDAL_ADD_PLUGIN)
 #    INCLUDES header file directories
 #
 # If we don't have GTest go activate it first
-if(NOT TARGET GTest::gtest)
+if(WITH_TESTS AND NOT TARGET GTest::gtest)
     include (${PDAL_CMAKE_DIR}/gtest.cmake)
 endif()
 
