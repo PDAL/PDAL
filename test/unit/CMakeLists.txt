@@ -47,6 +47,8 @@ PDAL_ADD_TEST(pdal_io_vsi_test
     FILES
         VSITest.cpp
         ${PDAL_SRC_DIR}/util/VSIIO.cpp
+    INCLUDES
+        ${GDAL_INCLUDE_DIR}
     LINK_WITH
         ${GDAL_LIBRARY}
 )
