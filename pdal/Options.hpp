@@ -155,12 +155,7 @@ public:
             StringList l = getValues(k);
             for(const auto& vs: l)
             {
-                bool isJson = vs.find("{") != vs.npos || vs.find("}") != vs.npos;
-                // JSON values (UserData, FileSpec, etc) are handled separately
-                if (!isJson)
-                    parent.add(k, vs);
-                else
-                    parent.addWithType(k, vs, "json");
+                parent.addWithType(k, vs, Metadata::inferType(vs));
             }
         }
     }

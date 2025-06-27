@@ -53,12 +53,7 @@ std::string Option::toArg() const
 void Option::toMetadata(MetadataNode& parent) const
 {
     std::string value = getValue();
-    bool isJson = value.find("{") != value.npos || value.find("}") != value.npos;
-    if (!isJson)
-        parent.add(getName(), value);
-    else
-        parent.addWithType(getName(), value, "json");
-
+    parent.addWithType(getName(), value, Metadata::inferType(value));
 }
 
 
