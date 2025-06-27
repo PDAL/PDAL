@@ -145,7 +145,7 @@ StringMap FileSpec::headers() const
 Utils::StatusWithReason FileSpec::ingest(const std::string& pathOrJson)
 {
     NL::json json;
-    if (Utils::isJson(pathOrJson))
+    if (Utils::isJSON(pathOrJson))
     {
         auto status = Utils::parseJson(pathOrJson, json);
         if (!status)
