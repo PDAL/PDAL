@@ -36,7 +36,6 @@
 #include <cfloat>
 #include <numeric>
 #include <vector>
-#include <iostream>
 
 #include <pdal/PointView.hpp>
 #include <pdal/SpatialReference.hpp>
@@ -417,7 +416,6 @@ double barycentricInterpolation(double x1, double y1, double z1,
     // Find the sign of the area so that we can account for the winding order of the
     // points that make up the triangle.
     bool signtotal = std::signbit(areaTotal);
-std::cerr << "Area total = " << areaTotal << "!\n";
 
     // Find twice the area of each triangle formed by a triangle edge and the test point.
     // Things are arranged such that if the point is inside the triangle, the sign of the
@@ -430,23 +428,35 @@ std::cerr << "Area total = " << areaTotal << "!\n";
     // the triangle where one point is (0,0), one is (1, 0) and the other is (0, 1)
     // and points in or on the triangle take on X and Y values [0, 1].
     double area12 = (x2-x1) * (y-y1) - (y2-y1) * (x-x1);
-std::cerr << "Area12 = " << area12 << "!\n";
     if (area12 && std::signbit(area12) != signtotal)
     {
         double magnitude1 = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
         double magnitude2 = (x - x1) * (x - x1) + (y - y1) * (y - y1);
-        std::cerr << "Mag 1/Mag 2/Sum = " << magnitude1 << "/" << magnitude2 << "/" <<
-            (magnitude1 + magnitude2) << "!\n";
-        return std::numeric_limits<double>::infinity();
+        double sum = magnitude1 + magnitude2;
+        if (std::abs(area12 / sum) > 1e-14)
+            return std::numeric_limits<double>::infinity();
+        area12 = 0;
     }
     double area23 = (x3-x2) * (y-y2) - (y3-y2) * (x-x2);
-std::cerr << "Area23 = " << area23 << "!\n";
     if (area23 && std::signbit(area23) != signtotal)
-        return std::numeric_limits<double>::infinity();
+    {
+        double magnitude1 = (x2 - x3) * (x2 - x3) + (y2 - y3) * (y2 - y3);
+        double magnitude2 = (x - x3) * (x - x3) + (y - y3) * (y - y3);
+        double sum = magnitude1 + magnitude2;
+        if (std::abs(area23 / sum) > 1e-14)
+            return std::numeric_limits<double>::infinity();
+        area23 = 0;
+    }
     double area31 = (x1-x3) * (y-y3) - (y1-y3) * (x-x3);
-std::cerr << "Area31 = " << area31 << "!\n";
     if (area31 && std::signbit(area31) != signtotal)
-        return std::numeric_limits<double>::infinity();
+    {
+        double magnitude1 = (x1 - x3) * (x1 - x3) + (y1 - y3) * (y1 - y3);
+        double magnitude2 = (x - x3) * (x - x3) + (y - y3) * (y - y3);
+        double sum = magnitude1 + magnitude2;
+        if (std::abs(area31 / sum) > 1e-14)
+            return std::numeric_limits<double>::infinity();
+        area31 = 0;
+    }
 
     // Compute the z value of the test point as a weighted sum of each of corner z values,
     // dividing by the total triangle area so that area of each sub-triangle is a fraction

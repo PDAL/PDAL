@@ -170,28 +170,23 @@ void FaceRasterFilter::filter(PointView& v)
                 else if (v != m_noData)
                     continue;
 
-if (xi == 74 && yi == 96)
-    std::cerr << "Setting value for " << 74 << "/" << 96 << "!\n";
                 double x = raster->xCellPos(xi);
                 double y = raster->yCellPos(yi);
 
-                double val;
-if (xi == 74 && yi == 96)
-{
-                val = math::barycentricInterpolation(x1, y1, z1,
+                double val = math::barycentricInterpolation(x1, y1, z1,
                     x2, y2, z2, x3, y3, z3, x, y);
+/**
 std::cerr << std::setprecision(10) <<
     "P1 = (" << x1 << "," << y1 << "," << z1 << ")\n" <<
     "P2 = (" << x2 << "," << y2 << "," << z2 << ")\n" <<
     "P3 = (" << x3 << "," << y3 << "," << z3 << ")\n" <<
     "  - T = (" << x << "," << y << ") - " << val << "!\n";
+**/
                 if (val != std::numeric_limits<double>::infinity())
                     raster->at(xi, yi) = val;
-}
             }
     }
 
-    std::cerr << "Width/Height = " << m_limits->width << "/" << m_limits->height << "!\n";
     for (int xi = 0; xi < m_limits->width; ++xi)
         for (int yi = 0; yi < m_limits->height; ++yi)
         {
