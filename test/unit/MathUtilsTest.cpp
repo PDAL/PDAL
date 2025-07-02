@@ -135,7 +135,6 @@ TEST(MathUtilsTest, bary_issue_4694)
 
     EXPECT_FALSE(std::isinf(z));
     EXPECT_DOUBLE_EQ(z, 5575.71);
-    std::cerr << "Interp result = " << z << "!\n";
 }
 
 } // namespace pdal

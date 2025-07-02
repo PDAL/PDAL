@@ -175,29 +175,10 @@ void FaceRasterFilter::filter(PointView& v)
 
                 double val = math::barycentricInterpolation(x1, y1, z1,
                     x2, y2, z2, x3, y3, z3, x, y);
-/**
-std::cerr << std::setprecision(10) <<
-    "P1 = (" << x1 << "," << y1 << "," << z1 << ")\n" <<
-    "P2 = (" << x2 << "," << y2 << "," << z2 << ")\n" <<
-    "P3 = (" << x3 << "," << y3 << "," << z3 << ")\n" <<
-    "  - T = (" << x << "," << y << ") - " << val << "!\n";
-**/
                 if (val != std::numeric_limits<double>::infinity())
                     raster->at(xi, yi) = val;
             }
     }
-
-    for (int xi = 0; xi < m_limits->width; ++xi)
-        for (int yi = 0; yi < m_limits->height; ++yi)
-        {
-            double v = raster->at(xi, yi);
-//            std::cerr << "Raster value at " << xi << "/" << yi << " = " << v << "!\n";
-            if (std::isnan(v))
-            {
-                std::cerr << "No Data at " << xi << "/" << yi << "!\n";
-            }
-        }
-    std::cerr << "Face raster filter!\n";
 }
 
 } // namespace pdal
