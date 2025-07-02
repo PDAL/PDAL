@@ -91,4 +91,51 @@ TEST(MathUtilsTest, barycentric)
     }
 }
 
+TEST(MathUtilsTest, bary_issue_4694)
+{
+    using namespace math;
+
+    double x1 = 960074.21999999997206;
+    double y1 = 231095.5800000000163;
+    double z1 = 5575.8299999999999272;
+
+    double x2 = 960074.10999999998603;
+    double y2 = 231096.27000000001863;
+    double z2 = 5575.7600000000002183;
+
+    double x3 = 960073.89000000001397;
+    double y3 = 231096.20999999999185;
+    double z3 = 5575.6500000000005457;
+
+    struct point
+    {
+        double x;
+        double y;
+    };
+
+    point p { 960074, 231096 };
+    double z = barycentricInterpolation(x1, y1, z1, x2, y2, z2, x3, y3, z3, p.x, p.y);
+
+    EXPECT_FALSE(std::isinf(z));
+    EXPECT_DOUBLE_EQ(z, 5575.71);
+
+    x1 = 960073.71999999997206;
+    y1 = 231095.48000000001048;
+    z1 = 5575.4700000000002547;
+
+    x2 = 960074.21999999997206;
+    y2 = 231095.5800000000163;
+    z2 = 5575.8299999999999272;
+
+    x3 = 960073.89000000001397;
+    y3 = 231096.20999999999185;
+    z3 = 5575.6500000000005457;
+
+    z = barycentricInterpolation(x1, y1, z1, x2, y2, z2, x3, y3, z3, p.x, p.y);
+
+    EXPECT_FALSE(std::isinf(z));
+    EXPECT_DOUBLE_EQ(z, 5575.71);
+    std::cerr << "Interp result = " << z << "!\n";
+}
+
 } // namespace pdal
