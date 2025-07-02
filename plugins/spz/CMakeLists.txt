@@ -16,6 +16,7 @@ PDAL_ADD_PLUGIN(spz_reader reader spz
         ${PDAL_LIBRARIES}
     INCLUDES
         ${PDAL_VENDOR_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
         spz/src/cc
 )
 
@@ -27,6 +28,7 @@ PDAL_ADD_PLUGIN(spz_writer writer spz
         ${PDAL_LIBRARIES}
     INCLUDES
         ${PDAL_VENDOR_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
         spz/src/cc
 )
 
