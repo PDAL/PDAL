@@ -6,18 +6,16 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/PipelineManager.hpp>
 
-#include <io/SpzReader.hpp>
+#include "SpzReader.hpp"
 
 using namespace pdal;
 
 TEST(SpzReaderTest, test1)
 {
-    StageFactory f;
     Options opts;
     opts.add("filename", Support::datapath("spz/fourth_st.spz"));
-    PipelineManager mgr;
     
-    Stage& reader = *f.createStage("readers.spz");
+    SpzReader reader;
     reader.setOptions(opts);
 
     PointTable table;

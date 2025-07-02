@@ -36,7 +36,7 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/Writer.hpp>
-#include <spz/src/cc/load-spz.h>
+#include <load-spz.h>
 
 namespace pdal
 {
