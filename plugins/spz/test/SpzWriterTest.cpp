@@ -8,8 +8,8 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/util/FileUtils.hpp>
 
-#include <io/SpzWriter.hpp>
-#include <io/SpzReader.hpp>
+#include "SpzWriter.hpp"
+#include "SpzReader.hpp"
 
 using namespace pdal;
 

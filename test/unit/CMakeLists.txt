@@ -305,20 +305,6 @@ PDAL_ADD_TEST(pdal_io_slpk_reader_test
         io/SlpkReaderTest.cpp
 )
 
-PDAL_ADD_TEST(pdal_io_spz_reader_test
-    FILES
-        io/SpzReaderTest.cpp
-    INCLUDES
-        ${PDAL_VENDOR_DIR}
-)
-
-PDAL_ADD_TEST(pdal_io_spz_writer_test
-    FILES
-        io/SpzWriterTest.cpp
-    INCLUDES
-        ${PDAL_VENDOR_DIR}
-)
-
 PDAL_ADD_TEST(pdal_i3s_obb_test
     FILES
         io/ObbTest.cpp
