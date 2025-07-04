@@ -36,6 +36,7 @@ function(pdal_target_compile_settings target)
         -Wno-error=cast-qual
         -Wredundant-decls
 
+        -Wnrvo
         -Wno-unused-parameter
         -Wno-unused-variable
         -Wno-long-long
