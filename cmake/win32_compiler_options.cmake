@@ -44,6 +44,10 @@ function(pdal_target_compile_settings target)
 
                 # _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
                 /wd4996
+
+                # shut off mandatory copy/move elison
+                # https://learn.microsoft.com/en-us/cpp/build/reference/zc-nrvo?view=msvc-170
+                /Zc:nrvo-
                 )
 
         endif()
