@@ -61,6 +61,8 @@ private:
     Dimension::IdList m_colorDims;
     Dimension::Id m_alphaDim;
     std::unique_ptr<spz::PackedGaussians> m_data;
+    spz::CoordinateConverter m_converter;
+    std::string m_coordTransform;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();

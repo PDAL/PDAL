@@ -60,7 +60,9 @@ private:
     bool m_antialiased;
     int m_shDegree;
     std::string m_remoteFilename;
-    std::unique_ptr<spz::PackedGaussians> m_cloud;
+    std::string m_coordTransform;
+    spz::PackOptions m_packOptions;
+    std::unique_ptr<spz::GaussianCloud> m_cloud;
     //!! again, maybe keep these grouped together
     Dimension::IdList m_shDims;
     Dimension::IdList m_rotDims;

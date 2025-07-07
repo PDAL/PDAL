@@ -1,7 +1,9 @@
 #pragma once
 #include <array>
+#include <cstdint>
 #include <string>
 #include <vector>
+
 #include "splat-types.h"
 
 namespace spz {
@@ -31,16 +33,17 @@ struct PackedGaussian {
   std::array<uint8_t, 15> shG{};
   std::array<uint8_t, 15> shB{};
 
-  UnpackedGaussian unpack(bool usesFloat16, int fractionalBits) const;
+  UnpackedGaussian unpack(
+    bool usesFloat16, int32_t fractionalBits, const CoordinateConverter &c) const;
 };
 
 // Represents a full splat with lower precision. Each splat has at most 64 bytes, although splats
 // with fewer spherical harmonics degrees will have less. The data is stored non-interleaved.
 struct PackedGaussians {
-  int numPoints = 0;        // Total number of points (gaussians)
-  int shDegree = 0;         // Degree of spherical harmonics
-  int fractionalBits = 0;   // Number of bits used for fractional part of fixed-point coords
-  bool antialiased = false; // Whether gaussians should be rendered with mip-splat antialiasing
+  int32_t numPoints = 0;       // Total number of points (gaussians)
+  int32_t shDegree = 0;        // Degree of spherical harmonics
+  int32_t fractionalBits = 0;  // Number of bits used for fractional part of fixed-point coords
+  bool antialiased = false;    // Whether gaussians should be rendered with mip-splat antialiasing
 
   std::vector<uint8_t> positions;
   std::vector<uint8_t> scales;
@@ -50,36 +53,45 @@ struct PackedGaussians {
   std::vector<uint8_t> sh;
 
   bool usesFloat16() const;
-  PackedGaussian at(int i) const;
-  UnpackedGaussian unpack(int i) const;
-  void pack(const UnpackedGaussian& g);
+  PackedGaussian at(int32_t i) const;
+  UnpackedGaussian unpack(int32_t i, const CoordinateConverter &c) const;
+};
+
+struct PackOptions {
+  CoordinateSystem from = CoordinateSystem::UNSPECIFIED;
+};
+
+struct UnpackOptions {
+  CoordinateSystem to = CoordinateSystem::UNSPECIFIED;
 };
 
 // Saves Gaussian splat in packed format, returning a vector of bytes.
-bool saveSpz(const GaussianCloud &g, std::vector<uint8_t> *output);
+bool saveSpz(
+  const GaussianCloud &gaussians, const PackOptions &options, std::vector<uint8_t> *output);
 
 // Loads Gaussian splat from a vector of bytes in packed format.
-GaussianCloud loadSpz(const std::vector<uint8_t> &data);
+GaussianCloud loadSpz(const std::vector<uint8_t> &data, const UnpackOptions &options);
 
 // Loads Gaussian splat from a vector of bytes in packed format.
 PackedGaussians loadSpzPacked(const std::string &filename);
-PackedGaussians loadSpzPacked(const uint8_t* data, int size);
+PackedGaussians loadSpzPacked(const uint8_t *data, int32_t size);
 PackedGaussians loadSpzPacked(const std::vector<uint8_t> &data);
 
-// PDAL: add for write support. Put this in another header?
-bool saveSpzPacked(const PackedGaussians &g, std::vector<uint8_t> *output);
-bool saveSpzPacked(const PackedGaussians &g, const std::string &filename);
-
 // Saves Gaussian splat in packed format to a file
-bool saveSpz(const GaussianCloud &g, const std::string &filename);
+bool saveSpz(
+  const GaussianCloud &gaussians, const PackOptions &options, const std::string &filename);
 
 // Loads Gaussian splat from a file in packed format
-GaussianCloud loadSpz(const std::string &filename);
+GaussianCloud loadSpz(const std::string &filename, const UnpackOptions &o);
 
 // Saves Gaussian splat data in .ply format
-bool saveSplatToPly(const spz::GaussianCloud &data, const std::string &filename);
+bool saveSplatToPly(
+  const spz::GaussianCloud &gaussians, const PackOptions &options, const std::string &filename);
 
 // Loads Gaussian splat data in .ply format
-GaussianCloud loadSplatFromPly(const std::string &filename);
+GaussianCloud loadSplatFromPly(const std::string &filename, const UnpackOptions &options);
 
+void serializePackedGaussians(const PackedGaussians &packed, std::ostream *out);
+
+bool compressGzipped(const uint8_t *data, size_t size, std::vector<uint8_t> *out);
 }  // namespace spz
