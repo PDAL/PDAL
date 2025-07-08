@@ -127,12 +127,12 @@ std::string icSelfPath(const NL::json& json)
 {
     try
     {
-        NL::json links = jsonValue(json, "links");
+        NL::json links = Utils::jsonValue(json, "links");
         for (const NL::json& link: links)
         {
-            std::string target = jsonValue<std::string>(link, "rel");
+            std::string target = Utils::jsonValue<std::string>(link, "rel");
             if (target == "self")
-                return jsonValue<std::string>(link, "href");
+                return Utils::jsonValue<std::string>(link, "href");
         }
     }
     catch(std::runtime_error& )
