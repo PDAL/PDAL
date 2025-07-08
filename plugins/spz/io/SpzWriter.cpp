@@ -41,15 +41,14 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
+static PluginInfo const s_info
 {
         "writers.spz",
         "SPZ writer",
-        "http://pdal.io/stages/writers.spz.html",
-        { "spz" }
+        "http://pdal.io/stages/writers.spz.html"
 };
 
-CREATE_STATIC_STAGE(SpzWriter, s_info)
+CREATE_SHARED_STAGE(SpzWriter, s_info)
 
 SpzWriter::SpzWriter() : m_cloud(new spz::PackedGaussians)
 {}

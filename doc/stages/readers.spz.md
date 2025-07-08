@@ -7,7 +7,7 @@ storing compressed [3D gaussian splat] data. The format stores compressed
 points, with their associated scale, rotation, color and spherical harmonics.
 
 ```{eval-rst}
-.. embed::
+.. plugin::
 ```
 
 Reading an SPZ file will output the following dimensions:
