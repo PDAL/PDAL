@@ -183,6 +183,22 @@ void toJSON(const MetadataNode& m, std::ostream& o)
     o << std::endl;
 }
 
+bool isJSON(const std::string& value)
+{
+    static constexpr std::array<std::pair<char, char>, 3> delims
+    { { { '{', '}' }, { '[', ']' }, { '"', '"' } } };
+
+    std::string t = value;
+    Utils::trim(t);
+
+    if (t.size() < 2)
+        return false;
+    for (const std::pair<char, char>& d : delims)
+        if (t.front() == d.first && t.back() == d.second)
+            return true;
+    return false;
+}
+
 std::string tempFilename(const std::string& path)
 {
     const std::string tempdir(arbiter::getTempPath());
