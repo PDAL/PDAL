@@ -177,42 +177,6 @@ void InfoKernel::addSwitches(ProgramArgs& args)
 }
 
 
-// Note that the same information can come from the info filter, but
-// this avoids point reads.
-MetadataNode InfoKernel::dumpSummary(const QuickInfo& qi)
-{
-    MetadataNode summary;
-    summary.add("num_points", qi.m_pointCount);
-    if (qi.m_srs.valid())
-    {
-        MetadataNode srs = qi.m_srs.toMetadata();
-        summary.add(srs);
-    }
-    if (qi.m_bounds.valid())
-    {
-        MetadataNode bounds = Utils::toMetadata(qi.m_bounds);
-        summary.add(bounds.clone("bounds"));
-    }
-
-    std::string dims;
-    auto di = qi.m_dimNames.begin();
-    while (di != qi.m_dimNames.end())
-    {
-        dims += *di;
-        ++di;
-        if (di != qi.m_dimNames.end())
-           dims += ", ";
-    }
-    if (dims.size())
-        summary.add("dimensions", dims);
-
-    if (!qi.m_metadata.empty() && qi.m_metadata.valid())
-    {
-        summary.add(qi.m_metadata.clone("metadata"));
-    }
-
-    return summary;
-}
 
 void InfoKernel::makeReader(const std::string& filename)
 {
@@ -309,7 +273,7 @@ MetadataNode InfoKernel::run(const std::string& filename)
             m_reader->getMetadata().addOrUpdate("count", pointCountOverride);
             qi.m_pointCount = pointCountOverride;
         }
-        root.add(dumpSummary(qi).clone("summary"));
+        root.add(qi.dumpSummary().clone("summary"));
     }
     else
     {
