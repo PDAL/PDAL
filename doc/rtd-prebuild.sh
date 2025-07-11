@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 # Making a build directory for cmake - if we name it _build it will also be
 # the output location for jupyterbook. This can be customizable if we want
 mkdir -p doc/_build
