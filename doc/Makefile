@@ -33,11 +33,8 @@ html: jupyterbook
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
 pdf: jupyterbook
-	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/pdf
-	cd $(BUILDDIR)/pdf
-	make
-	cd build/pdf
-	latexmk -r latexmkrc -pdf -f -dvi- -ps- -jobname=pdal -interaction=nonstopmode
+	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/pdf || exit 0
+	cd $(BUILDDIR)/pdf && latexmk -r latexmkrc -pdf -f -dvi- -ps- -jobname=pdal -interaction=nonstopmode
 	cd ..
 	@echo
 	@echo "Build finished. The PDF pages are in $(BUILDDIR)/pdf."
