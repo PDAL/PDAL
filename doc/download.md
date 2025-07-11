@@ -4,7 +4,9 @@
 
 ## Current Release(s)
 
-- **2025-06-19** [PDAL-2.9.0-src.tar.bz2] [Release Notes] ([md5])
+[dynamically set the release version and date from _config.yml]::
+
+- {{ '**{the_date}**'.format(the_date=release_date) }} {{ '[PDAL-{ver}-src.tar.bz2](https://github.com/PDAL/PDAL/releases/download/{ver}/PDAL-{ver}-src.tar.bz2)'.format(ver=version) }} {{ '[Release Notes](https://github.com/PDAL/PDAL/releases/tag/{ver})'.format(ver=version) }} {{ '([md5](https://github.com/PDAL/PDAL/releases/download/{ver}/PDAL-{ver}-src.tar.bz2.md5))'.format(ver=version) }}
 
 ## Past Releases
 
@@ -140,7 +142,6 @@ environment). Instructions can be found on the Conda website.
 
 [alpine linux]: https://www.alpinelinux.org/
 [conda forge]: https://anaconda.org/conda-forge/pdal
-[md5]: https://github.com/PDAL/PDAL/releases/download/2.8.0/PDAL-2.8.0-src.tar.bz2.md5
 [pdal-1.9.1-src.tar.bz2]: https://github.com/PDAL/PDAL/releases/download/1.9.1/PDAL-1.9.1-src.tar.bz2
 [pdal-2.0.1-src.tar.bz2]: https://github.com/PDAL/PDAL/releases/download/2.0.1/PDAL-2.0.1-src.tar.bz2
 [pdal-2.1.0-src.tar.bz2]: https://github.com/PDAL/PDAL/releases/download/2.1.0/PDAL-2.1.0-src.tar.bz2
@@ -163,5 +164,4 @@ environment). Instructions can be found on the Conda website.
 [pdal-2.7.1-src.tar.bz2]: https://github.com/PDAL/PDAL/releases/download/2.7.1/PDAL-2.7.1-src.tar.bz2
 [pdal-2.8.0-src.tar.bz2]: https://github.com/PDAL/PDAL/releases/download/2.8.0/PDAL-2.8.0-src.tar.bz2
 [pdal-2.8.4-src.tar.bz2]: https://github.com/PDAL/PDAL/releases/download/2.8.4/PDAL-2.8.4-src.tar.bz2
-[pdal-2.9.0-src.tar.bz2]: https://github.com/PDAL/PDAL/releases/download/2.9.0/PDAL-2.9.0-src.tar.bz2
-[release notes]: https://github.com/PDAL/PDAL/releases/tag/2.9.0
+

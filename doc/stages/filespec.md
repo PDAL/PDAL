@@ -1,5 +1,7 @@
 (filespec)=
 
+# Filespec
+
 In addition to a string or [GDAL VSI](https://gdal.org/en/stable/user/virtual_file_systems.html) filename, HTTP headers and query parameters to be forwarded to remote endpoints
 can be specified within the filename option. As shown below, a JSON object can be substituted, with the
 'headers' and 'query' fields as JSON objects of key/value string pairs.
@@ -46,11 +48,10 @@ If using a direct HTTPS link, include the SAS token as query parameters:
 ```json
 {
     "filename": {
-        "path": "https://<AZURE_STORAGE_ACCOUNT>.blob.core.windows.net/<PATH_TO_EPT>/ept.json",
+        "path": "https://AZURE_STORAGE_ACCOUNT.blob.core.windows.net/PATH_TO_EPT/ept.json",
         "query":{
             "sp": "r",
             "st": "2024-03-03T17:30:06Z",
-            ...
             "sig": "dQkX7R%2BXHrQLP9qiNdS0zMhYNpmQwLW0D86UUrEgGao%3D"
         }
     }
