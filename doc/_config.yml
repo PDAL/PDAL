@@ -15,8 +15,15 @@ execute:
 
 # Define the name of the latex output file for PDF builds
 latex:
+#  use_jupyterbook_latex: true # use sphinx-jupyterbook-latex for pdf builds as default
+#  latex_engine: pdflatex
   latex_documents:
-    targetname: pdal.tex
+    targetname: "pdal.tex"
+    startdocname: "index"
+    title: "PDAL: Point cloud Data Abstraction Library"
+    author: 'Andrew Bell\\Brad Chambers\\Howard Butler\\Michael Gerlek\\PDAL Contributors'
+    theme: "manual"
+
 
 # Information about where the book exists on the web
 repository:
@@ -35,9 +42,9 @@ html:
   short_title: "Documentation"
   html_show_copyright: false
   html_short_title: PDAL
-  html_title: PDAL2
+  html_title: PDAL
   extra_footer: |
-    <a href="https://hobu.co/access.html"><img width="30px" src="./_static/logo/hobu-emblem-32x32.png" /></a> <a href="/copyright.html">Copyright</a> ©2025 <a href="https://github.com/abellgithub">Andrew Bell</a>, <a href="https://github.com/chambbj">Brad Chambers</a>, <a href="http://github.com/hobu">Howard Butler</a>, and <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>
+    <a href="https://hobu.co/access.html"><img width="30px" src="/_static/logo/hobu-emblem-32x32.png" /></a> <a href="/copyright.html">Copyright</a> ©2025 <a href="https://github.com/abellgithub">Andrew Bell</a>, <a href="https://github.com/chambbj">Brad Chambers</a>, <a href="http://github.com/hobu">Howard Butler</a>, and <a href="https://github.com/PDAL/PDAL/graphs/contributors">others</a>
 
 
 sphinx:
@@ -90,15 +97,18 @@ sphinx:
       pointsize: '12pt'
       papersize: 'letterpaper'
     pygments_style: "sphinx"
-#    latex_documents:
-#      - "index"
-#      - "pdal.tex"
-#      - "PDAL: Point cloud Data Abstraction Library"
-#      - 'Andrew Bell\\Brad Chambers\\Howard Butler\\Michael Gerlek\\PDAL Contributors'
-#      - "manual"
+    latex_documents:
+      - "index.md"
+      - "pdal.tex"
+      - "PDAL: Point cloud Data Abstraction Library"
+      - 'Andrew Bell\\Brad Chambers\\Howard Butler\\Michael Gerlek\\PDAL Contributors'
+      - "manual"
+      - "False"
 
 parse:
   myst_substitutions:
+    version: '2.9.0'
+    release_date: '2025-06-19'
     ASPRSLAS: '[ASPRS LAS](https://www.asprs.org/divisions-committees/lidar-division/laser-las-file-format-exchange-activities)'
     Bash: '[Bash](https://en.wikipedia.org/wiki/Bash_(Unix_shell))'
     CRREL: '[CRREL](https://www.erdc.usace.army.mil/Locations/CRREL/)'
@@ -114,10 +124,10 @@ parse:
     Julia: '[Julia](https://julialand.org)'
     LASzip: '[LASzip](http://laszip.org)'
     LiDAR: '[LiDAR](https://en.wikipedia.org/wiki/Lidar)'
-    NCALM: '[NCALM](http://ncalm.cive.uh.edu/)'
-    NumPy: '[NumPy](http://www.numpy.org/)'
-    Optech: '[Optech](http://www.teledyneoptech.com/)'
-    PCL: '[PCL](http://pointclouds.org)'
+    NCALM: '[NCALM](https://ncalm.cive.uh.edu/)'
+    NumPy: '[NumPy](https://www.numpy.org/)'
+    Optech: '[Optech](https://www.teledyneoptech.com/)'
+    PCL: '[PCL](https://pointclouds.org)'
     PDAL: '[PDAL](https://pdal.io/)'
     PROJ: '[PROJ](https://proj.org)'
     Python: '[Python](https://python.org/)'

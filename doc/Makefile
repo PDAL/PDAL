@@ -25,20 +25,31 @@ clean:
 	-rm -rf $(BUILDDIR)/*
 	-rm -rf doxygen/xml*;
 	-rm -rf doxygen/html*;
+	-rm conf.py
 
 html: jupyterbook
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
-jupyterbook: ./doxygen/xml/index.xml
-	pushd .. && jupyter-book config sphinx doc/ && popd
+pdf: jupyterbook
+	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/pdf
+	cd $(BUILDDIR)/pdf
+	make
+	cd build/pdf
+	latexmk -r latexmkrc -pdf -f -dvi- -ps- -jobname=pdal -interaction=nonstopmode
+	cd ..
+	@echo
+	@echo "Build finished. The PDF pages are in $(BUILDDIR)/pdf."
+
+jupyterbook: ./doxygen/xml/index.xml _config.yml
+	cd .. && jupyter-book config sphinx doc/ && cd doc
 	sed -i "1i\import os, sys; sys.path.append(os.path.abspath(\"./_ext\"))" conf.py
 	@echo
 	@echo "Built jupyter-book"
 
 ./doxygen/xml/index.xml:
-	pushd .. && doxygen ./doc/doxygen/doxygen.conf 1> /dev/null && popd
+	cd .. && doxygen ./doc/doxygen/doxygen.conf 1> /dev/null && cd doc
 	@echo
 	@echo "Built doxygen"
 
