@@ -21,11 +21,11 @@ struct UnpackedGaussian {
   std::array<float, 15> shB;
 };
 
-// Represents a single low precision gaussian. Each gaussian has exactly 64 bytes, even if it does
+// Represents a single low precision gaussian. Each gaussian has exactly 65 bytes, even if it does
 // not have full spherical harmonics.
 struct PackedGaussian {
   std::array<uint8_t, 9> position{};
-  std::array<uint8_t, 3> rotation{};
+  std::array<uint8_t, 4> rotation{};
   std::array<uint8_t, 3> scale{};
   std::array<uint8_t, 3> color{};
   uint8_t alpha = 0;
@@ -34,7 +34,7 @@ struct PackedGaussian {
   std::array<uint8_t, 15> shB{};
 
   UnpackedGaussian unpack(
-    bool usesFloat16, int32_t fractionalBits, const CoordinateConverter &c) const;
+    bool usesFloat16,  bool usesQuaternionSmallestThree, int32_t fractionalBits, const CoordinateConverter &c) const;
 };
 
 // Represents a full splat with lower precision. Each splat has at most 64 bytes, although splats
@@ -44,6 +44,7 @@ struct PackedGaussians {
   int32_t shDegree = 0;        // Degree of spherical harmonics
   int32_t fractionalBits = 0;  // Number of bits used for fractional part of fixed-point coords
   bool antialiased = false;    // Whether gaussians should be rendered with mip-splat antialiasing
+  bool usesQuaternionSmallestThree = true; // Whether gaussians use the smallest three method to store quaternions
 
   std::vector<uint8_t> positions;
   std::vector<uint8_t> scales;

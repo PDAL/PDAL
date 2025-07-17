@@ -51,7 +51,7 @@ TEST(SpzWriterTest, xyz_only_test)
 
     writer.prepare(t);
     writer.execute(t);
-    ASSERT_EQ(FileUtils::fileSize(path), 53);
+    ASSERT_EQ(FileUtils::fileSize(path), 52);
 
     SpzReader reader;
     // using same options, just the filename

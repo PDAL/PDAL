@@ -12,7 +12,7 @@ PDAL_ADD_PLUGIN(spz_reader reader spz
     FILES
         io/SpzReader.cpp
     LINK_WITH
-        libspz
+        spz::spz
         ${PDAL_LIBRARIES}
     INCLUDES
         ${PDAL_VENDOR_DIR}
@@ -24,7 +24,7 @@ PDAL_ADD_PLUGIN(spz_writer writer spz
     FILES
         io/SpzWriter.cpp
     LINK_WITH
-        libspz
+        spz::spz
         ${PDAL_LIBRARIES}
     INCLUDES
         ${PDAL_VENDOR_DIR}
