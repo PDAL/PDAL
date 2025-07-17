@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include "SpzReader.hpp"
+#include "Util.hpp"
 
 #include <pdal/PointView.hpp>
 #include <pdal/util/IStream.hpp>
@@ -56,7 +57,10 @@ SpzReader::SpzReader()
 {}
 
 void SpzReader::addArgs(ProgramArgs& args)
-{}
+{
+    args.add("out_orientation", "Coordinate transformation to apply to points; default is 'RUB'",
+        m_coordTransform, "RUB");
+}
 
 void SpzReader::extractHeaderData()
 {
@@ -93,6 +97,13 @@ void SpzReader::initialize()
     m_data.reset(new spz::PackedGaussians(spz::loadSpzPacked(data)));
     if (m_data->usesFloat16())
         throwError("SPZ float16 point encoding not supported!");
+
+    // we always have to assume the coordinates are RUB
+    spz::CoordinateSystem coordinateSystem = spz::getCoordinateSystem(m_coordTransform);
+    if (coordinateSystem == spz::CoordinateSystem::UNSPECIFIED)
+        throwError("Unknown SPZ coordinate system: '" + m_coordTransform + "'");
+    m_converter = spz::coordinateConverter(spz::CoordinateSystem::RUB,
+        coordinateSystem);
 
     extractHeaderData();
 }
@@ -137,7 +148,7 @@ point_count_t SpzReader::read(PointViewPtr view, point_count_t count)
     point_count_t numRead = m_index;
     while (numRead < count)
     {
-        spz::UnpackedGaussian unpacked = m_data->unpack(numRead);
+        spz::UnpackedGaussian unpacked = m_data->unpack(numRead, m_converter);
 
         view->setField(Dimension::Id::X, idx, unpacked.position[0]);
         view->setField(Dimension::Id::Y, idx, unpacked.position[1]);
@@ -147,7 +158,9 @@ point_count_t SpzReader::read(PointViewPtr view, point_count_t count)
         for (int i = 0; i < 3; ++i)
             view->setField(m_colorDims[i], idx, unpacked.color[i]);
 
-        view->setField(m_alphaDim, idx, unpacked.alpha);
+        // clamp alpha between -10 and 10; the numbers are somewhat arbitrary but
+        // it writes -inf/inf to the pointview otherwise
+        view->setField(m_alphaDim, idx, std::clamp(unpacked.alpha, -10.0f, 10.0f));
 
         // rotation W - xyzw in unpacked, needs to be stored as wxyz for PLY
         view->setField(m_rotDims[0], idx, unpacked.rotation[3]);

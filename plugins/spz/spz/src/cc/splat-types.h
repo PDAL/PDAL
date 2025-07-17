@@ -1,16 +1,12 @@
 #pragma once
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
 #include <array>
 #include <cmath>
-#include <cstring>
 #include <cstdint>
+#include <cstring>
 #include <vector>
-#include <algorithm>
-#include "splat-c-types.h"
 
+#include "splat-c-types.h"
 
 namespace spz {
 
@@ -24,6 +20,66 @@ inline SpzFloatBuffer copyFloatBuffer(const std::vector<float> &vector) {
   return buffer;
 }
 
+enum class CoordinateSystem {
+  UNSPECIFIED = 0,
+  LDB = 1,  // Left Down Back
+  RDB = 2,  // Right Down Back
+  LUB = 3,  // Left Up Back
+  RUB = 4,  // Right Up Back, Three.js coordinate system
+  LDF = 5,  // Left Down Front
+  RDF = 6,  // Right Down Front, PLY coordinate system
+  LUF = 7,  // Left Up Front, GLB coordinate system
+  RUF = 8,  // Right Up Front, Unity coordinate system
+};
+
+struct CoordinateConverter {
+  std::array<float, 3> flipP = {1.0f, 1.0f, 1.0f};  // x, y, z flips.
+  std::array<float, 3> flipQ = {1.0f, 1.0f, 1.0f};  // x, y, z flips, w is never flipped.
+  std::array<float, 15> flipSh =  // Flips for the 15 spherical harmonics coefficients.
+    {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+};
+
+constexpr std::array<bool, 3> axesMatch(CoordinateSystem a, CoordinateSystem b) {
+  auto aNum = static_cast<int>(a) - 1;
+  auto bNum = static_cast<int>(b) - 1;
+  if (aNum < 0 || bNum < 0) {
+    return {true, true, true};
+  }
+  return {
+    ((aNum >> 0) & 1) == ((bNum >> 0) & 1),
+    ((aNum >> 1) & 1) == ((bNum >> 1) & 1),
+    ((aNum >> 2) & 1) == ((bNum >> 2) & 1)};
+}
+
+constexpr CoordinateConverter coordinateConverter(CoordinateSystem from, CoordinateSystem to) {
+  auto [xMatch, yMatch, zMatch] = axesMatch(from, to);
+  float x = xMatch ? 1.0f : -1.0f;
+  float y = yMatch ? 1.0f : -1.0f;
+  float z = zMatch ? 1.0f : -1.0f;
+  return {
+    .flipP = {x, y, z},
+    .flipQ = {y * z, x * z, x * y},
+    .flipSh =
+      {
+        y,          // 0
+        z,          // 1
+        x,          // 2
+        x * y,      // 3
+        y * z,      // 4
+        1.0f,       // 5
+        x * z,      // 6
+        1.0f,       // 7
+        y,          // 8
+        x * y * z,  // 9
+        y,          // 10
+        z,          // 11
+        x,          // 12
+        z,          // 13
+        x,          // 14
+      },
+  };
+}
+
 // A point cloud composed of Gaussians. Each gaussian is represented by:
 //   - xyz position
 //   - xyz scales (on log scale, compute exp(x) to get scale factor)
@@ -33,10 +89,10 @@ inline SpzFloatBuffer copyFloatBuffer(const std::vector<float> &vector) {
 //   - 0 to 45 spherical harmonics coefficients (see comment below)
 struct GaussianCloud {
   // Total number of points (gaussians) in this splat.
-  int numPoints = 0;
+  int32_t numPoints = 0;
 
   // Degree of spherical harmonics for this splat.
-  int shDegree = 0;
+  int32_t shDegree = 0;
 
   // Whether the gaussians should be rendered in antialiased mode (mip splatting)
   bool antialiased = false;
@@ -73,36 +129,39 @@ struct GaussianCloud {
     return data;
   }
 
-  // Rotates the GaussianCloud by 180 degrees about the x axis (converts from RUB to RDF coordinates
-  // and vice versa. This is performed in-place.
-  void rotate180DegAboutX() {
+  // Convert between two coordinate systems, for example from RDF (ply format) to RUB (used by spz).
+  // This is performed in-place.
+  void convertCoordinates(CoordinateSystem from, CoordinateSystem to) {
+    CoordinateConverter c = coordinateConverter(from, to);
     for (size_t i = 0; i < positions.size(); i += 3) {
-      positions[i+1] = -positions[i+1];
-      positions[i+2] = -positions[i+2];
+      positions[i + 0] *= c.flipP[0];
+      positions[i + 1] *= c.flipP[1];
+      positions[i + 2] *= c.flipP[2];
     }
     for (size_t i = 0; i < rotations.size(); i += 4) {
-      const float x = rotations[i], y = rotations[i + 1], z = rotations[i + 2], w = rotations[i + 3];
-      const float s = x < 0.0f ? -1.0f : 1.0f;
-      rotations[i] = -s * w;
-      rotations[i + 1] = s * z;
-      rotations[i + 2] = -s * y;
-      rotations[i + 3] = s * x;
+      rotations[i + 0] *= c.flipQ[0];
+      rotations[i + 1] *= c.flipQ[1];
+      rotations[i + 2] *= c.flipQ[2];
+      // Don't modify rotations[i + 3] (w component)
     }
     // Rotate spherical harmonics by inverting coefficients that reference the y and z axes, for
     // each RGB channel. See spherical_harmonics_kernel_impl.h for spherical harmonics formulas.
-    constexpr std::array<size_t, 8> coeffsToInvert = {0, 1, 3, 6, 8, 10, 11, 13};
     const size_t numCoeffs = sh.size() / 3;
     const size_t numCoeffsPerPoint = numCoeffs / numPoints;
+    size_t idx = 0;
     for (size_t i = 0; i < numCoeffs; i += numCoeffsPerPoint) {
-      for (size_t j : coeffsToInvert) {
-        if (j >= numCoeffsPerPoint) break;
-        const size_t idx = (i + j) * 3;
-        sh[idx + 0] = -sh[idx + 0];
-        sh[idx + 1] = -sh[idx + 1];
-        sh[idx + 2] = -sh[idx + 2];
+      for (size_t j = 0; j < numCoeffsPerPoint; ++j, idx += 3) {
+        auto flip = c.flipSh[j];
+        sh[idx + 0] *= flip;
+        sh[idx + 1] *= flip;
+        sh[idx + 2] *= flip;
       }
     }
   }
+
+  // Rotates the GaussianCloud by 180 degrees about the x axis (converts from RUB to RDF coordinates
+  // and vice versa. This is performed in-place.
+  void rotate180DegAboutX() { convertCoordinates(CoordinateSystem::RUB, CoordinateSystem::RDF); }
 
   float medianVolume() const {
     if (numPoints == 0) {
@@ -112,18 +171,18 @@ struct GaussianCloud {
     // axis. Scales are stored on a log scale, and exp(x) * exp(y) * exp(z) = exp(x + y + z). So we
     // can sort by value = (x + y + z) and compute volume = 4/3 * pi * exp(value) later.
     std::vector<float> scaleSums;
-    for(int i = 0; i < (int)scales.size(); i += 3) {
+    for (int32_t i = 0; i < scales.size(); i += 3) {
       float sum = scales[i] + scales[i + 1] + scales[i + 2];
       scaleSums.push_back(sum);
     }
     std::sort(scaleSums.begin(), scaleSums.end());
-    float median = scaleSums[(int) (scaleSums.size() / 2)];
+    float median = scaleSums[(int32_t)(scaleSums.size() / 2)];
     return (M_PI * 4 / 3) * exp(median);
   }
 };
 
 // SPZ Splat math helpers, lightweight implementations of vector and quaternion math.
-using Vec3f = std::array<float, 3>;  // x, y, z
+using Vec3f = std::array<float, 3>;   // x, y, z
 using Quat4f = std::array<float, 4>;  // w, x, y, z
 using Half = uint16_t;
 
@@ -172,7 +231,7 @@ constexpr Vec3f times(const Quat4f &q, const Vec3f &p) {
     vx * (xz2 - wy2) + vy * (yz2 + wx2) + vz * (1.0f - (xx2 + yy2))};
 }
 
-inline Quat4f times(const Quat4f &a, const Quat4f &b) {
+constexpr Quat4f times(const Quat4f &a, const Quat4f &b) {
   auto [w, x, y, z] = a;
   auto [qw, qx, qy, qz] = b;
   return normalized(std::array<float, 4>{
@@ -194,6 +253,10 @@ constexpr Vec3f times(const Vec3f &v, float s) { return {v[0] * s, v[1] * s, v[2
 
 constexpr Vec3f plus(const Vec3f &a, const Vec3f &b) {
   return {a[0] + b[0], a[1] + b[1], a[2] + b[2]};
+}
+
+constexpr Vec3f times(const Vec3f &a, const Vec3f &b) {
+  return {a[0] * b[0], a[1] * b[1], a[2] * b[2]};
 }
 
 }  // namespace spz
