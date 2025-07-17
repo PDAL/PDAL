@@ -5,6 +5,12 @@ project(spz
   LANGUAGES C CXX
   VERSION 1.1.0)
 
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    set(IS_ROOT_PROJECT ON)
+else()
+    set(IS_ROOT_PROJECT OFF)
+endif()
+
 include(GNUInstallDirs)
 
 # zlib is required to build the project
@@ -39,35 +45,37 @@ set_target_properties(spz PROPERTIES
   CXX_STANDARD_REQUIRED ON
 )
 
-# Installation
+if (IS_ROOT_PROJECT)
+  # Installation
 
-## Install spzConfig.cmake spz::spz target can be found when calling find_package(spz)
-include(CMakePackageConfigHelpers)
-configure_package_config_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/spzConfig.cmake.in"
-  "${CMAKE_BINARY_DIR}/cmake/spzConfig.cmake"
-  INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/spz")
-write_basic_package_version_file(
-  "${CMAKE_BINARY_DIR}/cmake/spzConfigVersion.cmake"
-  VERSION "${spz_VERSION}"
-  COMPATIBILITY SameMajorVersion)
-install(
-  FILES
+  ## Install spzConfig.cmake spz::spz target can be found when calling find_package(spz)
+  include(CMakePackageConfigHelpers)
+  configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/spzConfig.cmake.in"
     "${CMAKE_BINARY_DIR}/cmake/spzConfig.cmake"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/spz")
+  write_basic_package_version_file(
     "${CMAKE_BINARY_DIR}/cmake/spzConfigVersion.cmake"
-  DESTINATION
-    "${CMAKE_INSTALL_LIBDIR}/cmake/spz"
-)
+    VERSION "${spz_VERSION}"
+    COMPATIBILITY SameMajorVersion)
+  install(
+    FILES
+      "${CMAKE_BINARY_DIR}/cmake/spzConfig.cmake"
+      "${CMAKE_BINARY_DIR}/cmake/spzConfigVersion.cmake"
+    DESTINATION
+      "${CMAKE_INSTALL_LIBDIR}/cmake/spz"
+  )
 
-install(TARGETS spz
-  EXPORT spzTargets
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
+  install(TARGETS spz
+    EXPORT spzTargets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  )
 
-install(EXPORT spzTargets
-  NAMESPACE spz::
-  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/spz"
-)
+  install(EXPORT spzTargets
+    NAMESPACE spz::
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/spz"
+  )
+endif()
