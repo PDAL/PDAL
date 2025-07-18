@@ -29,10 +29,9 @@ float halfToFloat(Half h) {
 Half floatToHalf(float f) {
   uint32_t f32;
   memcpy(&f32, &f, sizeof(f32));
-//   uint32_t f32 = *reinterpret_cast<uint32_t *>(&f);
-  int sign = (f32 >> 31) & 0x01;        // 1 bit   -> 1 bit
-  int exponent = ((f32 >> 23) & 0xff);  // 8 bits  -> 5 bits
-  int mantissa = f32 & 0x7fffff;        // 23 bits -> 10 bits
+  int32_t sign = (f32 >> 31) & 0x01;        // 1 bit   -> 1 bit
+  int32_t exponent = ((f32 >> 23) & 0xff);  // 8 bits  -> 5 bits
+  int32_t mantissa = f32 & 0x7fffff;        // 23 bits -> 10 bits
 
   // Handle inf and nan from float.
   if (exponent == 0xFF) {
@@ -44,7 +43,7 @@ Half floatToHalf(float f) {
   }
 
   // If the exponent is greater than the range of half, return +/- Inf.
-  int centeredExp = exponent - 127;
+  int32_t centeredExp = exponent - 127;
   if (centeredExp > 15) {
     return (sign << 15) | 0x7C00;
   }
@@ -55,9 +54,9 @@ Half floatToHalf(float f) {
   }
 
   // Subnormal numbers.
-  int fullMantissa = 0x800000 | mantissa;
-  int shift = -(centeredExp + 14);  // Shift is in [-1 to -113]
-  int newMantissa = fullMantissa >> shift;
+  int32_t fullMantissa = 0x800000 | mantissa;
+  int32_t shift = -(centeredExp + 14);  // Shift is in [-1 to -113]
+  int32_t newMantissa = fullMantissa >> shift;
   return (sign << 15) | (newMantissa >> 13);
 }
 

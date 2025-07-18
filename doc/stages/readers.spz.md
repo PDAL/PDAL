@@ -7,7 +7,7 @@ storing compressed [3D gaussian splat] data. The format stores compressed
 points, with their associated scale, rotation, color and spherical harmonics.
 
 ```{eval-rst}
-.. embed::
+.. plugin::
 ```
 
 Reading an SPZ file will output the following dimensions:
@@ -71,6 +71,11 @@ filename
 
 ```{include} reader_opts.md
 ```
+
+out_orientation
+
+: Coordinate transformation to apply to points. SPZ data is saved in RUB coordinate system by default, but other formats
+  may expect coordinates in a different orientation (like RDF for PLY format). \[Default: RUB\]
 
 [spz]: https://github.com/nianticlabs/spz
 [3D gaussian splat]: https://en.wikipedia.org/wiki/Gaussian_splatting#3D_Gaussian_splatting

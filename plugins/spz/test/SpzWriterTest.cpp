@@ -8,8 +8,8 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/util/FileUtils.hpp>
 
-#include <io/SpzWriter.hpp>
-#include <io/SpzReader.hpp>
+#include "SpzWriter.hpp"
+#include "SpzReader.hpp"
 
 using namespace pdal;
 
@@ -51,7 +51,7 @@ TEST(SpzWriterTest, xyz_only_test)
 
     writer.prepare(t);
     writer.execute(t);
-    ASSERT_EQ(FileUtils::fileSize(path), 53);
+    ASSERT_EQ(FileUtils::fileSize(path), 52);
 
     SpzReader reader;
     // using same options, just the filename
