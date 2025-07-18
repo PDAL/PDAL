@@ -40,6 +40,7 @@ target_include_directories(spz
 )
 
 set_target_properties(spz PROPERTIES
+  POSITION_INDEPENDENT_CODE ON
   PUBLIC_HEADER "${spz_headers}"
   CXX_STANDARD 17
   CXX_STANDARD_REQUIRED ON
