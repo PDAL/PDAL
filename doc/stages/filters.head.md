@@ -22,6 +22,7 @@ Thin a point cloud by first shuffling the point order with
 
 ```json
 [
+    "input.las",
     {
         "type":"filters.randomize"
     },
@@ -38,6 +39,7 @@ Compute height above ground and extract the ten highest points.
 
 ```json
 [
+    "input.las",
     {
         "type":"filters.smrf"
     },
