@@ -55,7 +55,7 @@ we execute the following pipeline
         "type":"filters.hag_delaunay"
     },
     {
-        "type":"writers.laz",
+        "type":"writers.las",
         "filename":"autzen_hag_delaunay.laz",
         "extra_dims":"HeightAboveGround=float32"
     }

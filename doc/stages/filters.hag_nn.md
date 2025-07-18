@@ -48,7 +48,7 @@ we execute the following pipeline
         "type":"filters.hag_nn"
     },
     {
-        "type":"writers.laz",
+        "type":"writers.las",
         "filename":"autzen_hag_nn.laz",
         "extra_dims":"HeightAboveGround=float32"
     }

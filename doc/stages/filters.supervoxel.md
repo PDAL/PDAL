@@ -34,7 +34,7 @@ using default options, and writing only the ground returns to the output file.
     },
     {
         "type":"writers.las",
-        "filename": "output.laz"
+        "filename": "output.laz",
         "minor_version": 4,
         "extra_dims": "ClusterID=uint64"
     }
