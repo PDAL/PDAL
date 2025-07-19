@@ -37,6 +37,14 @@ void RadiusAssignFilter::addArgs(ProgramArgs& args)
     args.add("update_expression", "Value to assign to dimension of points of src_domain "
             "that have at least one neighbor in reference domain based on expression.",
         m_updateExpr);
+    args.add("is3d", "Search in 3d", m_search3d, false );
+    args.add("max2d_above", "if search in 2d : upward maximum distance in Z for potential neighbors "
+        "(corresponds to a search in a cylinder with a height = max2d_above above the source point). "
+        "Values < 0 mean infinite height", m_max2dAbove, -1.);
+    args.add("max2d_below", "if search in 2d : downward maximum distance in Z for potential neighbors ("
+        "corresponds to a search in a cylinder with a height = max2d_below below the source point). "
+        "Values < 0 mean infinite height", m_max2dBelow, -1.);
+
 }
 
 
@@ -104,27 +112,49 @@ void RadiusAssignFilter::ready(PointTableRef)
 }
 
 
-void RadiusAssignFilter::doOneNoDomain(PointRef &point, KD2Index &kdi)
+void RadiusAssignFilter::doOneNoDomain(PointRef &pointSrc)
 {
-    PointIdList iNeighbors = kdi.radius(point, m_radius);
+    PointIdList iNeighbors;
+    if (m_search3d) iNeighbors = refView->build3dIndex().radius(pointSrc, m_radius);
+    else iNeighbors = refView->build2dIndex().radius(pointSrc, m_radius);
+
+
     if (iNeighbors.size() == 0)
         return;
 
-    m_ptsToUpdate.push_back(point.pointId());
+    if (!m_search3d && (m_max2dBelow>=0 || m_max2dAbove>=0))
+    {
+        double Zsrc = pointSrc.getFieldAs<double>(Dimension::Id::Z);
+
+        bool take (false);
+        for (PointId ptId : iNeighbors)
+        {
+            double Zref = refView->point(ptId).getFieldAs<double>(Dimension::Id::Z);
+            if (m_max2dAbove>=0 && Zref>Zsrc && (Zref-Zsrc)>m_max2dAbove) continue;
+            if (m_max2dBelow>=0 && Zsrc>Zref && (Zsrc-Zref)>m_max2dBelow) continue;
+            take = true;
+            break;
+        }
+
+        if (!take) return;
+    }
+
+
+    m_ptsToUpdate.push_back(pointSrc.pointId());
 
 }
 
 // update point.  kdi and temp both reference the NN point cloud
-bool RadiusAssignFilter::doOne(PointRef& point, KD2Index &kdi)
+bool RadiusAssignFilter::doOne(PointRef& pointSrc)
 {
     if (m_srcDomain.empty())  // No domain, process all points
-        doOneNoDomain(point, kdi);
+        doOneNoDomain(pointSrc);
 
     for (DimRange& r : m_srcDomain)
     {   // process only points that satisfy a domain condition
-        if (r.valuePasses(point.getFieldAs<double>(r.m_id)))
+        if (r.valuePasses(pointSrc.getFieldAs<double>(r.m_id)))
         {
-            doOneNoDomain(point, kdi);
+            doOneNoDomain(pointSrc);
             break;
         }
     }
@@ -133,22 +163,21 @@ bool RadiusAssignFilter::doOne(PointRef& point, KD2Index &kdi)
 
 void RadiusAssignFilter::filter(PointView& view)
 {
-    PointRef point_src(view, 0);
-    // Create a kd tree only with the points in the reference domain (to make the search faster)
-    PointViewPtr refView;
-    PointRef temp(view, 0);
+    PointRef pointTemp(view, 0);
+
+    // Create reference domain view
+    refView = view.makeNew();
     if (m_referenceDomain.empty())
         for (PointId id = 0; id < view.size(); ++id)
             refView->appendPoint(view, id);
     else
     {
-        refView = view.makeNew();
         for (PointId id = 0; id < view.size(); ++id)
         {
             for (DimRange& r : m_referenceDomain)
-            {   // process only points that satisfy a domain condition
-                temp.setPointId(id);
-                if (r.valuePasses(temp.getFieldAs<double>(r.m_id)))
+            {
+                pointTemp.setPointId(id);
+                if (r.valuePasses(pointTemp.getFieldAs<double>(r.m_id)))
                 {
                     refView->appendPoint(view, id);
                     break;
@@ -157,20 +186,23 @@ void RadiusAssignFilter::filter(PointView& view)
         }
     }
 
-    KD2Index& kdiRef = refView->build2dIndex();
+    // Process all points (mark them if they need to be updated)
     for (PointId id = 0; id < view.size(); ++id)
     {
-        point_src.setPointId(id);
-        doOne(point_src, kdiRef);
+        pointTemp.setPointId(id);
+        doOne(pointTemp);
     }
+
+
     for (auto id: m_ptsToUpdate)
     {
-        temp.setPointId(id);
+        pointTemp.setPointId(id);
         for (expr::AssignStatement& expr : m_updateExpr)
-            // if (expr.conditionalExpr().eval(temp))
-                temp.setField(expr.identExpr().eval(), expr.valueExpr().eval(temp));
+            if (expr.conditionalExpr().eval(pointTemp))
+                pointTemp.setField(expr.identExpr().eval(), expr.valueExpr().eval(pointTemp));
     }
 }
+
 
 } // namespace pdal
 
