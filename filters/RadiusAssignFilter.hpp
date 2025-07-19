@@ -14,7 +14,7 @@ namespace pdal
 
 struct DimRange;
 
-class PDAL_DLL RadiusAssignFilter : public Filter
+class PDAL_EXPORT RadiusAssignFilter : public Filter
 {
 public:
     RadiusAssignFilter();
