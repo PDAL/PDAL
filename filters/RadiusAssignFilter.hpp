@@ -28,8 +28,8 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual void preparedDomain(std::vector<DimRange> &domain, PointLayoutPtr layout);
     virtual void prepared(PointTableRef table);
-    bool doOne(PointRef& point, KD2Index &kdi);
-    void doOneNoDomain(PointRef &point, KD2Index &kdi);
+    bool doOne(PointRef& point);
+    void doOneNoDomain(PointRef &point);
     virtual void filter(PointView& view);
     virtual void initializeDomain(StringList domainSpec, std::vector<DimRange> &domain);
     virtual void initialize();
@@ -43,6 +43,11 @@ private:
     std::vector<DimRange> m_srcDomain;
     double m_radius;
     std::vector<expr::AssignStatement> m_updateExpr;
+    bool m_search3d;
+    double m_max2dAbove;
+    double m_max2dBelow;
+
+    PointViewPtr refView;
     PointIdList m_ptsToUpdate;
 };
 
