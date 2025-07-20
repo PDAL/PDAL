@@ -16,6 +16,7 @@ elevation model.
 
 ```json
 [
+    "input.las",
     {
         "type":"filters.dem",
         "raster":"dem.tif",
