@@ -8,6 +8,7 @@ on:
         paths-ignore:
             - 'doc/**'
 
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
@@ -30,6 +31,18 @@ jobs:
           echo "are we pushing packages" ${{ env.PUSH_PACKAGES }}
           echo "event_name" ${{ github.event_name }}
           echo "ref" ${{ github.ref }}
+
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v4
+        with:
+          daemon-config: |
+            {
+              "debug": false,
+              "features": {
+                "containerd-snapshotter": true
+              }
+            }
+
       - name: Setup Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3
@@ -48,6 +61,22 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Extract metadata (tags, labels) for Docker
+      # https://github.com/docker/metadata-action
+      - name: Extract container metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/pdal/pdal
+            docker.io/pdal/pdal
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
       - name: Prepare
         id: prep
         run: |
@@ -58,6 +87,10 @@ jobs:
           BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
           echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_OUTPUT
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Build image
         uses: docker/build-push-action@v6
         with:
@@ -65,7 +98,7 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           file: "./scripts/docker/ubuntu/Dockerfile"
           context: .
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
 
           # We need to pass in the SHA to the Dockerfile so it can checkout
           # our code. It is a different active SHA depending on whether it is a
@@ -86,3 +119,11 @@ jobs:
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.version=${{ steps.prep.outputs.VERSION }}
             org.opencontainers.image.created=${{ steps.prep.outputs.BUILD_DATE }}
+
+      - name: Generate artifact attestation
+        if: ${{ env.PUSH_PACKAGES == 'true' }}
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ghcr.io/pdal/pdal
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: ${{ env.PUSH_PACKAGES == 'true' }}
