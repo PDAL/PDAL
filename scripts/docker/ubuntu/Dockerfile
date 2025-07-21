@@ -49,7 +49,7 @@ RUN cd pdal/build  && \
     ninja install
 
 RUN git clone https://github.com/PDAL/python-plugins.git pdal-python && \
-    cd pdal-python && git checkout 1.6.2  && \
+    cd pdal-python && git checkout 1.6.5  && \
     pip install -vv . --no-deps
 
 RUN conda-pack -n pdal --dest-prefix=/opt/conda/envs/pdal -o  /tmp/env.tar && \
