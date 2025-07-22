@@ -9,10 +9,12 @@ ARG GITHUB_SHA
 ARG GITHUB_REPOSITORY="PDAL/PDAL"
 ARG GITHUB_SERVER_URL="https://github.com"
 
+ARG PY_VER="3.13"
+
 SHELL ["conda", "run", "-n", "pdal", "/bin/bash", "-c"]
 
 RUN mamba install -y git compilers conda-pack \
-    python numpy scikit-build-core pybind11 \
+    python=${PY_VER} numpy scikit-build-core pybind11 \
     cmake make ninja && \
     mamba install -y libpdal --only-deps
 
@@ -79,7 +81,7 @@ COPY --from=build /venv "/opt/conda/envs/pdal"
 ENV PROJ_NETWORK=TRUE
 ENV PROJ_DATA="${CONDAENV}/share/proj"
 ENV GDAL_DATA="${CONDAENV}/share/gdal"
-ENV PDAL_DRIVER_PATH="${CONDAENV}/lib:${CONDAENV}/lib/python3.12/site-packages/pdal/"
+ENV PDAL_DRIVER_PATH="${CONDAENV}/lib:${CONDAENV}/lib/python${PY_VER}/site-packages/pdal/"
 ENV GEOTIFF_CSV="${CONDAENV}/share/epsg_csv"
 ENV GDAL_DRIVER_PATH="${CONDAENV}/lib/gdalplugins"
 ENV PATH="$PATH:${CONDAENV}/bin"
