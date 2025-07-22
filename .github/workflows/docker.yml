@@ -22,7 +22,10 @@ jobs:
     env:
       PUSH_PACKAGES: ${{ github.repository_owner == 'PDAL' && github.event_name != 'pull_request'  }}
     permissions:
+      contents: read
       packages: write
+      attestations: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - name: Lint
