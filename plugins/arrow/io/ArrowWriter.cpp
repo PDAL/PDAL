@@ -523,7 +523,7 @@ void ArrowWriter::flushBatch()
 
     if (m_formatType == arrowsupport::Parquet)
     {
-        auto result = m_parquetFileWriter->NewRowGroup(m_batchSize);
+        auto result = m_parquetFileWriter->NewRowGroup();
         if (!result.ok())
             throwError("Unable to make NewRowGroup: " + result.ToString());
 
