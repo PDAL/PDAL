@@ -11,10 +11,10 @@ ARG GITHUB_SERVER_URL="https://github.com"
 
 SHELL ["conda", "run", "-n", "pdal", "/bin/bash", "-c"]
 
-RUN mamba install -c conda-forge git compilers conda-pack \
-    python numpy scikit-build-core \
+RUN mamba install -y git compilers conda-pack \
+    python numpy scikit-build-core pybind11 \
     cmake make ninja && \
-    mamba install --yes -c conda-forge pdal --only-deps
+    mamba install -y libpdal --only-deps
 
 RUN git clone "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" pdal && \
     cd pdal ; \
@@ -48,9 +48,24 @@ RUN cd pdal/build  && \
 RUN cd pdal/build  && \
     ninja install
 
-RUN git clone https://github.com/PDAL/python-plugins.git pdal-python && \
-    cd pdal-python && git checkout 1.6.5  && \
-    pip install -vv . --no-deps
+RUN git clone https://github.com/PDAL/python-plugins.git pdal-python-plugins && \
+    cd pdal-python-plugins && git checkout 1.6.5  && \
+    python -m pip install \
+        -Cbuild-dir=build \
+        . \
+        --config-settings=cmake.build-type="Release" \
+        -vv \
+        --no-deps \
+        --no-build-isolation
+RUN git clone https://github.com/PDAL/python.git pdal-python && \
+    cd pdal-python && git checkout 3.5.0  && \
+    python -m pip install \
+        -Cbuild-dir=build \
+        . \
+        --config-settings=cmake.build-type="Release" \
+        -vv \
+        --no-deps \
+        --no-build-isolation
 
 RUN conda-pack -n pdal --dest-prefix=/opt/conda/envs/pdal -o  /tmp/env.tar && \
      mkdir /venv && cd /venv && tar xf /tmp/env.tar  && \
