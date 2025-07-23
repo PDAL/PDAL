@@ -42,7 +42,7 @@ namespace pdal
 static StaticPluginInfo const s_info
 {
     "filters.voxeldownsize",
-    "First Entry Voxel Filter", 
+    "First Entry Voxel Filter",
     "http://pdal.io/stages/filters.voxeldownsize.html"
 };
 
@@ -104,6 +104,11 @@ void VoxelDownsizeFilter::ready(PointTableRef)
 
 PointViewSet VoxelDownsizeFilter::run(PointViewPtr view)
 {
+    // We are done if there's nothing in the view
+    PointViewSet viewSet;
+    if (view->empty())
+        return viewSet;
+
     PointViewPtr output = view->makeNew();
     PointRef point(*view);
     for (PointId id = 0; id < view->size(); ++id)
@@ -113,7 +118,6 @@ PointViewSet VoxelDownsizeFilter::run(PointViewPtr view)
             output->appendPoint(*view, id);
     }
 
-    PointViewSet viewSet;
     viewSet.insert(output);
     return viewSet;
 }

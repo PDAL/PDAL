@@ -124,7 +124,7 @@ void HexBin::initialize()
                 "processing. Set 'edge_length' option to specify cell size.");
         else
             log()->get(LogLevel::Warning) << "'h3_resolution' not implemented "
-                "for standard processing. Using 'edge_length'\n"; 
+                "for standard processing. Using 'edge_length'\n";
     }
 }
 
@@ -157,6 +157,10 @@ void HexBin::ready(PointTableRef table)
 
 void HexBin::filter(PointView& view)
 {
+    // We are done if there's nothing in the view
+    if (view.empty())
+        return;
+
     PointRef p(view, 0);
 
     for (PointId idx = 0; idx < view.size(); ++idx)
@@ -245,7 +249,7 @@ void HexBin::done(PointTableRef table)
     if (m_boundaryOutput.size())
     {
         OGR writer(m_boundaryOutput, m_srs.getWKT(), m_driver, "hexbins");
-        writer.writeBoundary(*m_grid); 
+        writer.writeBoundary(*m_grid);
     }
 
     pdal::Polygon p(polygon.str(), m_srs);
@@ -343,7 +347,7 @@ void HexBin::done(PointTableRef table)
             "of the grid. See https://h3geo.org/docs/core-library/restable "
             "for more information" );
     }
-    
+
     m_metadata.add("boundary", p.wkt(m_precision),
         "Approximated MULTIPOLYGON of domain");
     m_metadata.addWithType("boundary_json", p.json(), "json",

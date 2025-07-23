@@ -107,6 +107,10 @@ void NNDistanceFilter::filter(PointView& view)
 {
     using namespace Dimension;
 
+    // We are done if there's nothing in the view
+    if (view.empty())
+        return;
+
     // Build the 3D KD-tree.
     KD3Index& index = view.build3dIndex();
 

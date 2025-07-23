@@ -93,7 +93,7 @@ void GridDecimationFilter::processOne(BOX2D bounds, PointRef& point, PointViewPt
         this->grid[ std::make_pair(width,height) ] = (long) point.pointId();
         return;
     }
-    
+
     PointRef ptRef = view->point(ptRefid);
 
     double z = point.getFieldAs<double>(Dimension::Id::Z);
@@ -109,15 +109,15 @@ void GridDecimationFilter::createGrid(BOX2D bounds)
 {
     double d_width = std::floor((bounds.maxx - bounds.minx) / m_args->m_edgeLength) + 1;
     double d_height = std::floor((bounds.maxy - bounds.miny) / m_args->m_edgeLength) + 1;
-    
+
     if (d_width < 0.0 || d_width > (std::numeric_limits<int>::max)())
         throwError("Grid width out of range.");
     if (d_height < 0.0 || d_height > (std::numeric_limits<int>::max)())
         throwError("Grid height out of range.");
-    
+
     int width = static_cast<int>(d_width);
     int height = static_cast<int>(d_height);
-    
+
     for (size_t l(0); l<d_height; l++)
         for (size_t c(0); c<d_width; c++)
             this->grid.insert( std::make_pair( std::make_pair(c,l), -1)  );
@@ -125,6 +125,13 @@ void GridDecimationFilter::createGrid(BOX2D bounds)
 
 PointViewSet GridDecimationFilter::run(PointViewPtr view)
 {
+    // We are done if there's nothing in the view
+    PointViewSet viewSet;
+    if (view->empty())
+    {
+        return viewSet;
+    }
+
     BOX2D bounds;
     view->calculateBounds(bounds);
     createGrid(bounds);
@@ -134,12 +141,12 @@ PointViewSet GridDecimationFilter::run(PointViewPtr view)
         PointRef point = view->point(i);
         processOne(bounds,point,view);
     }
-    
+
     std::set<PointId> keepPoint;
     for (auto it : this->grid)
         if (it.second != -1)
             keepPoint.insert(it.second);
-    
+
     for (PointId i = 0; i < view->size(); ++i)
     {
         if (keepPoint.find(view->point(i).pointId()) != keepPoint.end())
@@ -150,8 +157,7 @@ PointViewSet GridDecimationFilter::run(PointViewPtr view)
                     point.setField(expr.identExpr().eval(), expr.valueExpr().eval(point));
         }
     }
-    
-    PointViewSet viewSet;
+
     viewSet.insert(view);
     return viewSet;
 }

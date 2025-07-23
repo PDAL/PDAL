@@ -272,6 +272,11 @@ void PoissonFilter::addArgs(ProgramArgs& args)
 
 PointViewSet PoissonFilter::run(PointViewPtr view)
 {
+    // We are done if there's nothing in the view
+    PointViewSet viewSet;
+    if (view->empty())
+        return viewSet;
+
     if (!m_normalsProvided)
     {
         NormalFilter f;
@@ -303,9 +308,8 @@ PointViewSet PoissonFilter::run(PointViewPtr view)
         throwError("Failure executing poisson algorithm.");
     recon.evaluate();
 
-    PointViewSet s;
     PointViewPtr outView = view->makeNew();
-    s.insert(outView);
+    viewSet.insert(outView);
     PointViewMesh mesh(*outView, m_doColor);
     recon.extractMesh(mesh);
 
@@ -328,7 +332,7 @@ PointViewSet PoissonFilter::run(PointViewPtr view)
         f.doFilter(*outView);
     }
 
-    return s;
+    return viewSet;
 }
 
 } // namespace pdal

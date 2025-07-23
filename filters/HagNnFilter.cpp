@@ -126,6 +126,10 @@ void HagNnFilter::filter(PointView& view)
 {
     using namespace pdal::Dimension;
 
+    // We are done if there's nothing in the view
+    if (view.empty())
+        return;
+
     PointViewPtr gView = view.makeNew();
     PointViewPtr ngView = view.makeNew();
 
