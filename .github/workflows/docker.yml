@@ -79,6 +79,8 @@ jobs:
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
 
       - name: Prepare
         id: prep
@@ -96,6 +98,7 @@ jobs:
 
       - name: Build image
         uses: docker/build-push-action@v6
+        id: push
         with:
           push: ${{ env.PUSH_PACKAGES == 'true' }}
           builder: ${{ steps.buildx.outputs.name }}
