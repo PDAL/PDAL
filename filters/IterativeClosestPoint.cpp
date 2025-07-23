@@ -98,6 +98,9 @@ void IterativeClosestPoint::prepared(PointTableRef table)
 PointViewSet IterativeClosestPoint::run(PointViewPtr view)
 {
     PointViewSet viewSet;
+    if (!view->size())
+        return viewSet;
+
     if (this->m_fixed)
     {
         log()->get(LogLevel::Debug2) << "Calculating ICP\n";

@@ -156,8 +156,9 @@ Indices OutlierFilter::processStatistical(PointViewPtr inView)
 
 PointViewSet OutlierFilter::run(PointViewPtr inView)
 {
+    // We are done if there's nothing in the view
     PointViewSet viewSet;
-    if (!inView->size())
+    if (inView->empty())
         return viewSet;
 
     Indices indices;

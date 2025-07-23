@@ -173,7 +173,13 @@ double SupervoxelFilter::dist(const PointRef& pi, const PointRef& pj)
     return d;
 }
 
-void SupervoxelFilter::filter(PointView& view) {
+void SupervoxelFilter::filter(PointView& view)
+{
+
+    // We are done if there's nothing in the view
+    if (view.empty())
+        return;
+
     const point_count_t n_points = view.size();
     KD3Index& kdi = view.build3dIndex();
     size_t ncluster = estimateClusterCount(view);
