@@ -1,4 +1,7 @@
-FROM condaforge/mambaforge:latest AS build
+# Need this one to be global so multiple stages can use it
+ARG PYTHON_VERSION="3.13"
+
+FROM condaforge/miniforge3:latest AS build
 LABEL org.opencontainers.image.authors="howard@hobu.co"
 
 ENV LANG=C.UTF-8
@@ -9,13 +12,13 @@ ARG GITHUB_SHA
 ARG GITHUB_REPOSITORY="PDAL/PDAL"
 ARG GITHUB_SERVER_URL="https://github.com"
 
-ARG PY_VER="3.13"
-
 SHELL ["conda", "run", "-n", "pdal", "/bin/bash", "-c"]
 
-RUN mamba install -y git compilers conda-pack \
-    python=${PY_VER} numpy scikit-build-core pybind11 \
-    cmake make ninja && \
+RUN mamba install -y \
+    git compilers cmake ninja make \
+    conda-pack \
+    python=${PYTHON_VERSION} numpy scikit-build-core pybind11 \
+    && \
     mamba install -y libpdal --only-deps
 
 RUN git clone "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" pdal && \
@@ -59,6 +62,7 @@ RUN git clone https://github.com/PDAL/python-plugins.git pdal-python-plugins && 
         -vv \
         --no-deps \
         --no-build-isolation
+
 RUN git clone https://github.com/PDAL/python.git pdal-python && \
     cd pdal-python && git checkout 3.5.0  && \
     python -m pip install \
@@ -75,20 +79,23 @@ RUN conda-pack -n pdal --dest-prefix=/opt/conda/envs/pdal -o  /tmp/env.tar && \
 
 FROM condaforge/miniforge3
 
+ARG PYTHON_VERSION
+
 ENV CONDAENV="/opt/conda/envs/pdal"
-COPY --from=build /venv "/opt/conda/envs/pdal"
+
+COPY --from=build /venv "${CONDAENV}"
 
 ENV PROJ_NETWORK=TRUE
 ENV PROJ_DATA="${CONDAENV}/share/proj"
 ENV GDAL_DATA="${CONDAENV}/share/gdal"
-ENV PDAL_DRIVER_PATH="${CONDAENV}/lib:${CONDAENV}/lib/python${PY_VER}/site-packages/pdal/"
 ENV GEOTIFF_CSV="${CONDAENV}/share/epsg_csv"
+
+ENV PDAL_DRIVER_PATH="${CONDAENV}/lib:${CONDAENV}/lib/python${PYTHON_VERSION}/site-packages/pdal/"
 ENV GDAL_DRIVER_PATH="${CONDAENV}/lib/gdalplugins"
+
 ENV PATH="$PATH:${CONDAENV}/bin"
+
 ENV GTIFF_REPORT_COMPD_CS=TRUE
 ENV REPORT_COMPD_CS=TRUE
-ENV OAMS_TRADITIONAL_GIS_ORDER=TRUE
-
 
 SHELL ["conda", "run", "--no-capture-output", "-n", "pdal", "/bin/sh", "-c"]
-
