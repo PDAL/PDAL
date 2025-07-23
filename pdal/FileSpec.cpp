@@ -38,6 +38,7 @@
 
 #include <pdal/util/private/JsonSupport.hpp>
 #include <pdal/private/FileSpecHelper.hpp>
+#include <pdal/PDALUtils.hpp>
 
 namespace pdal
 {
@@ -143,24 +144,8 @@ StringMap FileSpec::headers() const
 
 Utils::StatusWithReason FileSpec::ingest(const std::string& pathOrJson)
 {
-    auto isJson = [](const std::string& s) -> bool
-    {
-        static constexpr std::array<std::pair<char, char>, 3> delims
-            { { { '{', '}' }, { '[', ']' }, { '"', '"' } } };
-
-        std::string t = s;
-        Utils::trim(t);
-
-        if (t.size() < 2)
-            return false;
-        for (const std::pair<char, char>& d : delims)
-            if (t.front() == d.first && t.back() == d.second)
-                return true;
-        return false;
-    };
-
     NL::json json;
-    if (isJson(pathOrJson))
+    if (Utils::isJSON(pathOrJson))
     {
         auto status = Utils::parseJson(pathOrJson, json);
         if (!status)
@@ -256,6 +241,9 @@ Utils::StatusWithReason FileSpecHelper::parse(FileSpec& spec, NL::json& node)
 
 std::ostream& operator << (std::ostream& out, const FileSpec& spec)
 {
+    if (spec.onlyFilename())
+        return out << spec.filePath().string();
+
     NL::json json;
     json["path"] = spec.m_p->m_path.string();
     if (!spec.m_p->m_headers.empty())
