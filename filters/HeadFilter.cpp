@@ -83,10 +83,6 @@ PointViewSet HeadFilter::run(PointViewPtr inView)
 {
     m_index = 0;
 
-    PointViewSet viewSet;
-    if (!inView->size())
-        return viewSet;
-
     PointViewPtr outView = inView->makeNew();
 
     for (PointRef point : *inView)

@@ -178,12 +178,6 @@ PointViewSet DividerFilter::run(PointViewPtr inView)
 {
     PointViewSet result;
 
-    if (inView->empty())
-    {
-        result.insert(inView);
-        return result;
-    }
-
     if (m_args->m_sizeMode == SizeMode::Capacity)
         m_args->m_size = ((inView->size() - 1) / m_args->m_size) + 1;
 

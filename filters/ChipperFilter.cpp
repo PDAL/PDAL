@@ -87,8 +87,6 @@ void ChipperFilter::addArgs(ProgramArgs& args)
 
 PointViewSet ChipperFilter::run(PointViewPtr view)
 {
-    if (view->size() == 0)
-        return m_outViews;
 
     m_inView = view;
     m_partitions.resize(0);

@@ -104,10 +104,6 @@ bool RangeFilter::processOne(PointRef& point)
 
 PointViewSet RangeFilter::run(PointViewPtr inView)
 {
-    PointViewSet viewSet;
-    if (!inView->size())
-        return viewSet;
-
     PointViewPtr outView = inView->makeNew();
 
     for (PointId i = 0; i < inView->size(); ++i)
