@@ -55,7 +55,16 @@ PointViewPtr StageRunner::keeps()
 void StageRunner::run()
 {
     point_count_t keepSize = m_keeps->size();
-    m_viewSet = m_stage->run(m_keeps);
+
+    // Don't run the stage if we're a filter and we're empty
+    bool bDoRunStage(true);
+    Filter* isFilterType = dynamic_cast<Filter*>(m_stage);
+    if (isFilterType)
+        if (m_keeps->empty())
+            bDoRunStage = false;
+
+    if (bDoRunStage)
+        m_viewSet = m_stage->run(m_keeps);
 
     if (m_skips->size() == 0)
         return;

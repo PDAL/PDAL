@@ -57,7 +57,7 @@ PointViewSet Filter::run(PointViewPtr view)
     PointViewSet viewSet;
 
     // don't filter if we know we're empty
-    if (!view.empty())
+    if (!view->empty())
         filter(*view);
     viewSet.insert(view);
     return viewSet;
