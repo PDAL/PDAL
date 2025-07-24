@@ -141,6 +141,7 @@ void SplitterFilter::setOrigin(double xOrigin, double yOrigin)
 
 PointViewSet SplitterFilter::run(PointViewPtr inView)
 {
+    PointViewSet viewSet;
     auto addPoint = [this, &inView](PointRef& point, int xpos, int ypos) {
         Coord loc(xpos, ypos);
         PointViewPtr& outView = m_viewMap[loc];

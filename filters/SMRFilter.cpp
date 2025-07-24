@@ -173,6 +173,8 @@ void SMRFilter::ready(PointTableRef table)
 
 PointViewSet SMRFilter::run(PointViewPtr view)
 {
+    PointViewSet viewSet;
+
     // Segment input view into ignored/kept views.
     PointViewPtr ignoredView = view->makeNew();
     PointViewPtr keptView = view->makeNew();

@@ -71,6 +71,8 @@ void GroupByFilter::prepared(PointTableRef table)
 
 PointViewSet GroupByFilter::run(PointViewPtr inView)
 {
+    PointViewSet viewSet;
+
     for (PointId idx = 0; idx < inView->size(); idx++)
     {
         int64_t val = inView->getFieldAs<int64_t>(m_dimId, idx);
