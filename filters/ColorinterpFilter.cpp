@@ -174,11 +174,6 @@ void ColorinterpFilter::ready(PointTableRef table)
 
 void ColorinterpFilter::filter(PointView& view)
 {
-
-    // We are done if there's nothing in the view
-    if (view.empty())
-        return;
-
     double median(0.0);
     double mad(0.0);
 

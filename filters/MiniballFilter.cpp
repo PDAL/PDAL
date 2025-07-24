@@ -82,11 +82,6 @@ void MiniballFilter::addDimensions(PointLayoutPtr layout)
 
 void MiniballFilter::filter(PointView& view)
 {
-
-    // We are done if there's nothing in the view
-    if (view.empty())
-        return;
-
     point_count_t npoints = view.size();
     point_count_t chunk_size = npoints / m_threads;
     if (npoints % m_threads) chunk_size++;
