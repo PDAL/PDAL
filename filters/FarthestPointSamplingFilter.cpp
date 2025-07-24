@@ -72,7 +72,7 @@ PointViewSet FarthestPointSamplingFilter::run(PointViewPtr inView)
 {
     // Return empty PointViewSet if the input PointView has no points.
     PointViewSet viewSet;
-    if (inView->empty())
+    if (!inView->size())
         return viewSet;
 
     // Return inView if input PointView has fewer than count points.

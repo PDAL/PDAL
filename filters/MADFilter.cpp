@@ -72,11 +72,6 @@ void MADFilter::prepared(PointTableRef table)
 
 PointViewSet MADFilter::run(PointViewPtr view)
 {
-    // We are done if there's nothing in the view
-    PointViewSet viewSet;
-    if (view->empty())
-        return viewSet;
-
     using namespace Dimension;
 
     PointViewPtr output = view->makeNew();
@@ -113,6 +108,7 @@ PointViewSet MADFilter::run(PointViewPtr view)
                                 << " in the range (" << low_fence
                                 << "," << hi_fence << ")" << std::endl;
 
+    PointViewSet viewSet;
     viewSet.insert(output);
     return viewSet;
 }

@@ -72,11 +72,6 @@ void LOFFilter::addDimensions(PointLayoutPtr layout)
 
 void LOFFilter::filter(PointView& view)
 {
-
-    // We are done if there's nothing in the view
-    if (view.empty())
-        return;
-
     const KD3Index& index = view.build3dIndex();
 
     // Increment the minimum number of points, as knnSearch will be returning

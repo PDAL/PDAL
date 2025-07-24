@@ -67,12 +67,6 @@ void VoxelCentroidNearestNeighborFilter::addArgs(ProgramArgs& args)
 
 PointViewSet VoxelCentroidNearestNeighborFilter::run(PointViewPtr view)
 {
-
-    // We are done if there's nothing in the view
-    PointViewSet viewSet;
-    if (view->empty())
-        return viewSet;
-
     typedef std::make_signed<std::size_t>::type ssize_t;
     double x0 = view->getFieldAs<double>(Dimension::Id::X, 0);
     double y0 = view->getFieldAs<double>(Dimension::Id::Y, 0);
@@ -161,6 +155,7 @@ PointViewSet VoxelCentroidNearestNeighborFilter::run(PointViewPtr view)
         }
     }
 
+    PointViewSet viewSet;
     viewSet.insert(output);
     return viewSet;
 }

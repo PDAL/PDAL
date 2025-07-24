@@ -82,11 +82,6 @@ void FaceRasterFilter::prepared(PointTableRef)
 
 void FaceRasterFilter::filter(PointView& v)
 {
-
-    // We are done if there's nothing in the view
-    if (v.empty())
-        return;
-
     double halfEdge = m_limits->edgeLength / 2;
     double edgeBit = m_limits->edgeLength * .000001;
 

@@ -271,11 +271,6 @@ void LiTreeFilter::segmentTree(PointView& view, PointIdList& Ui,
 
 void LiTreeFilter::filter(PointView& view)
 {
-
-    // We are done if there's nothing in the view
-    if (view.empty())
-        return;
-
     // Preprocess cloud to determine which points are locally maximal with
     // respect to HeightAboveGround.
     computeLocalMax(view);
