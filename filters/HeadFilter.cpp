@@ -81,6 +81,8 @@ bool HeadFilter::processOne(PointRef& point)
 
 PointViewSet HeadFilter::run(PointViewPtr inView)
 {
+    PointViewSet viewSet;
+
     m_index = 0;
 
     PointViewPtr outView = inView->makeNew();

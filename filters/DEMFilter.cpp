@@ -132,6 +132,8 @@ bool DEMFilter::processOne(PointRef& point)
 
 PointViewSet DEMFilter::run(PointViewPtr inView)
 {
+    PointViewSet viewSet;
+
     PointViewPtr outView = inView->makeNew();
 
     for (PointId i = 0; i < inView->size(); ++i)
