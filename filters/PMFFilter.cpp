@@ -137,10 +137,6 @@ void PMFFilter::prepared(PointTableRef table)
 
 PointViewSet PMFFilter::run(PointViewPtr input)
 {
-    PointViewSet viewSet{input};
-    if (!input->size())
-        return viewSet;
-
     // Segment input view into ignored/kept views.
     PointViewPtr ignoredView = input->makeNew();
     PointViewPtr keptView = input->makeNew();
