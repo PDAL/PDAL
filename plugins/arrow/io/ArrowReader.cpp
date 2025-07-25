@@ -312,7 +312,27 @@ void ArrowReader::initialize()
 
 
 
+#if ARROW_VERSION_MAJOR >= 21
+        auto reader_result = parquet::arrow::OpenFile(m_file, m_pool);
+        if (!reader_result.ok())
+        {
+            std::stringstream msg;
+            msg << "Unable to open file '" << m_filename << "' with message '"
+                << reader_result.status().ToString() << "'";
+            throwError(msg.str());
+        }
+        m_arrow_reader = std::move(reader_result).ValueOrDie();
+#else
         auto pOpenStatus = parquet::arrow::OpenFile(m_file, m_pool, &m_arrow_reader);
+        if (!pOpenStatus.ok())
+        {
+            std::stringstream msg;
+            msg << "Unable to open file '" << m_filename << "' with message '"
+                << pOpenStatus.ToString() <<"'";
+            throwError(msg.str());
+        }
+#endif
+
 
         const auto metadata = m_arrow_reader->parquet_reader()->metadata();
         loadParquetGeoMetadata(metadata->key_value_metadata());
