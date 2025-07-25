@@ -8,8 +8,8 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/util/FileUtils.hpp>
 
-#include <io/SpzWriter.hpp>
-#include <io/SpzReader.hpp>
+#include "SpzWriter.hpp"
+#include "SpzReader.hpp"
 
 using namespace pdal;
 
@@ -51,7 +51,7 @@ TEST(SpzWriterTest, xyz_only_test)
 
     writer.prepare(t);
     writer.execute(t);
-    ASSERT_EQ(FileUtils::fileSize(path), 53);
+    ASSERT_EQ(FileUtils::fileSize(path), 52);
 
     SpzReader reader;
     // using same options, just the filename
@@ -68,6 +68,42 @@ TEST(SpzWriterTest, xyz_only_test)
     EXPECT_FLOAT_EQ(readView->getFieldAs<float>(Dimension::Id::X, 0), 1.0);
     EXPECT_FLOAT_EQ(readView->getFieldAs<float>(Dimension::Id::X, 1), 2.0);
     EXPECT_FLOAT_EQ(readView->getFieldAs<float>(Dimension::Id::X, 2), 1.0);
+}
+
+TEST(SpzWriterTest, orientation_test)
+{
+    BufferReader r;
+    PointTable t;
+    PointViewPtr v = setXYZ(t);
+    r.addView(v);
+
+    SpzWriter writer;
+    Options opts;
+    std::string path = Support::temppath("out.spz");
+    opts.replace("filename", path);
+    opts.add("input_orientation", "RDF");
+    writer.setInput(r);
+    writer.setOptions(opts);
+
+    writer.prepare(t);
+    writer.execute(t);
+
+    SpzReader reader;
+    Options opts2;
+    opts2.add("filename", path);
+    reader.setOptions(opts2);
+
+    PointTable readTable;
+    reader.prepare(readTable);
+    PointViewSet viewSet = reader.execute(readTable);
+    PointViewPtr readView = *viewSet.begin();
+    EXPECT_EQ(readView->size(), 3);
+
+    // Checking Y values; when converting from RUB to RDF, the signs
+    //flip on the Y dimension.
+    EXPECT_FLOAT_EQ(readView->getFieldAs<float>(Dimension::Id::Y, 0), -1.0);
+    EXPECT_FLOAT_EQ(readView->getFieldAs<float>(Dimension::Id::Y, 1), -1.0);
+    EXPECT_FLOAT_EQ(readView->getFieldAs<float>(Dimension::Id::Y, 2), -2.0);
 }
 
 TEST(SpzWriterTest, all_dimensions_test)
