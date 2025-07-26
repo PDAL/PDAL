@@ -64,7 +64,13 @@ void StageRunner::run()
             bDoRunStage = false;
 
     if (bDoRunStage)
+    {
         m_viewSet = m_stage->run(m_keeps);
+    } else
+    {
+        m_stage->log()->get(LogLevel::Debug) << "where filtering removed all points or the reader is empty."
+            << " Filter '" << m_stage->tag() << "' was not applied";
+    }
 
     if (m_skips->size() == 0)
         return;
