@@ -73,8 +73,6 @@ void ReturnsFilter::prepared(PointTableRef table)
 PointViewSet ReturnsFilter::run(PointViewPtr inView)
 {
     PointViewSet viewSet;
-    if (!inView->size())
-        return viewSet;
 
     m_outputTypes = 0;
     for (auto& r : m_returnsString)

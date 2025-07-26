@@ -71,10 +71,8 @@ void LocateFilter::prepared(PointTableRef table)
 
 PointViewSet LocateFilter::run(PointViewPtr inView)
 {
-    PointViewSet viewSet;
-    if (!inView->size())
-        return viewSet;
 
+    PointViewSet viewSet;
     PointId minidx(0);
     PointId maxidx(0);
     double minval = (std::numeric_limits<double>::max)();

@@ -108,8 +108,6 @@ void SkewnessBalancingFilter::processGround(PointViewPtr view)
 PointViewSet SkewnessBalancingFilter::run(PointViewPtr input)
 {
     PointViewSet viewSet;
-    if (!input->size())
-        return viewSet;
     viewSet.insert(input);
 
     bool logOutput = log()->getLevel() > LogLevel::Debug1;

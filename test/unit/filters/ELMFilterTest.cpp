@@ -116,8 +116,6 @@ TEST(ELMFilterTest, emptyView)
     filter->prepare(table);
 
     PointViewSet s = filter->execute(table);
-    EXPECT_EQ(s.size(), 1u);
+    EXPECT_EQ(s.size(), 0u);
 
-    PointViewPtr v = *s.begin();
-    EXPECT_EQ(v->size(), 0u);
 }

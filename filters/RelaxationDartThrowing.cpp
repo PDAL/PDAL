@@ -71,12 +71,10 @@ void RelaxationDartThrowing::addArgs(ProgramArgs& args)
 
 PointViewSet RelaxationDartThrowing::run(PointViewPtr inView)
 {
-    point_count_t np = inView->size();
-    
-    // Return empty PointViewSet if the input PointView has no points.
     PointViewSet viewSet;
-    if (!np)
-        return viewSet;
+
+    point_count_t np = inView->size();
+
     // Return inView if the PointView is already smaller than m_maxSize.
     if (np < m_maxSize)
     {

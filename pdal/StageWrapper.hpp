@@ -28,7 +28,12 @@ public:
     static void done(Stage& s, PointTableRef table)
         { s.done(table); }
     static PointViewSet run(Stage& s, PointViewPtr view)
-        { return s.run(view); }
+        {
+            if (view->size())
+                return s.run(view);
+            else
+                return PointViewSet();
+        }
 };
 
 // Provide access to private members of Filter.

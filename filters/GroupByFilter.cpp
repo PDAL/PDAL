@@ -72,8 +72,6 @@ void GroupByFilter::prepared(PointTableRef table)
 PointViewSet GroupByFilter::run(PointViewPtr inView)
 {
     PointViewSet viewSet;
-    if (!inView->size())
-        return viewSet;
 
     for (PointId idx = 0; idx < inView->size(); idx++)
     {

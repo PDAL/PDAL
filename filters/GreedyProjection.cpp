@@ -130,11 +130,6 @@ void GreedyProjection::filter(PointView& view)
     nf.setLog(log());
     nf.doFilter(view);
 
-    // no points in the view, nothing we
-    // can do
-    if (!view.size())
-        return;
-
     KD3Index& tree = view.build3dIndex();
 
     view_ = &view;

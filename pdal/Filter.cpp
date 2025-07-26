@@ -55,7 +55,10 @@ Filter::~Filter()
 PointViewSet Filter::run(PointViewPtr view)
 {
     PointViewSet viewSet;
-    filter(*view);
+
+    // don't filter if we know we're empty
+    if (!view->empty())
+        filter(*view);
     viewSet.insert(view);
     return viewSet;
 }
