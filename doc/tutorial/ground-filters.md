@@ -195,7 +195,7 @@ structuring element.
 
 Any time we have points classified as ground, we may wish to extract just these
 points, e.g., to create a *digital terrain model* (DTM). In this case, we use a
-{ref}`<filters.expression>` as shown.
+{ref}`expression filter <filters.expression>` as shown.
 
 ```{literalinclude} ground-filters-pipeline.json
 :language: json

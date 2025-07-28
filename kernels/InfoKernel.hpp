@@ -70,7 +70,6 @@ private:
     void makeReader(const std::string& filename);
     void makePipeline();
     void dump(MetadataNode& root);
-    MetadataNode dumpSummary(const QuickInfo& qi);
 
     std::string m_inputFile;
     bool m_showStats;
