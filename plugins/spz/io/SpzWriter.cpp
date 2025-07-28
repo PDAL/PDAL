@@ -149,7 +149,7 @@ void SpzWriter::write(const PointViewPtr data)
 
     m_cloud->positions.reserve(pointCount * 3);
     m_cloud->scales.reserve(pointCount * 3);
-    m_cloud->rotations.reserve(pointCount * 3);
+    m_cloud->rotations.reserve(pointCount * 4);
     m_cloud->alphas.reserve(pointCount);
     m_cloud->colors.reserve(pointCount * 3);
     m_cloud->sh.reserve(pointCount * m_shDims.size());

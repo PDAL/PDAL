@@ -25,4 +25,5 @@ dependencies:
   - make  # [not win]
   - re2  # [linux]
   - ccache
+  - spz
 

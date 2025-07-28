@@ -6,7 +6,10 @@ if (STANDALONE)
     include("${PROJECT_SOURCE_DIR}/../../cmake/standalone.cmake" )
 endif(STANDALONE)
 
-add_subdirectory(spz)
+include(${PDAL_CMAKE_DIR}/spz.cmake)
+if (NOT PDAL_HAVE_SPZ)
+    message("Can't find SPZ support required by SPZ plugin.")
+endif()
 
 PDAL_ADD_PLUGIN(spz_reader reader spz
     FILES
