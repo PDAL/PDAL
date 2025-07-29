@@ -35,7 +35,7 @@ RUN mkdir -p pdal/build && \
         -DBUILD_PLUGIN_DRACO=ON \
         -DBUILD_PLUGIN_TILEDB=ON \
         -DBUILD_PLUGIN_E57=ON \
-        -DBUILD_PLUGIN_SPZ=ON \
+        -DBUILD_PLUGIN_SPZ=OFF \
         -DBUILD_PGPOINTCLOUD_TESTS=OFF \
         -DWITH_ZSTD=ON \
         ..
