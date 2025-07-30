@@ -33,7 +33,6 @@
 ****************************************************************************/
 
 #include "SpzWriter.hpp"
-#include "Util.hpp"
 
 #include <pdal/util/OStream.hpp>
 
@@ -42,11 +41,12 @@
 namespace pdal
 {
 
-static PluginInfo const s_info
+static StaticPluginInfo const s_info
 {
         "writers.spz",
         "SPZ writer",
-        "http://pdal.io/stages/writers.spz.html"
+        "http://pdal.io/stages/writers.spz.html",
+        { "spz" }
 };
 
 CREATE_SHARED_STAGE(SpzWriter, s_info)
@@ -59,8 +59,6 @@ std::string SpzWriter::getName() const { return s_info.name; }
 void SpzWriter::addArgs(ProgramArgs& args)
 {
     args.add("antialiased", "Mark the data as antialiased", m_antialiased);
-    args.add("input_orientation", "Coordinate system of points being written; default is 'RUB'. "
-        "Note that SPZ will always write RUB", m_coordTransform, "RUB");
 }
 
 void SpzWriter::initialize()
@@ -72,7 +70,6 @@ void SpzWriter::initialize()
         m_remoteFilename = filename();
         setFilename(tmpname);
     }
-    m_packOptions.from = spz::getCoordinateSystem(m_coordTransform);
 }
 
 Dimension::Id SpzWriter::tryFindDim(PointLayoutPtr layout, const std::string& dimName)
@@ -195,7 +192,12 @@ void SpzWriter::write(const PointViewPtr data)
 
 void SpzWriter::done(PointTableRef table)
 {
-    if (!spz::saveSpz(*m_cloud.get(), m_packOptions, filename()))
+    // We always assume the points are in RUB orientation.
+    // Using the default 'unspecified' value would work the same.
+    spz::PackOptions packOptions;
+    packOptions.from = spz::CoordinateSystem::RUB;
+
+    if (!spz::saveSpz(*m_cloud.get(), packOptions, filename()))
         throwError("Unable to save SPZ data to " + filename());
 
     if (m_remoteFilename.size())

@@ -54,11 +54,6 @@ antialiased
 : Whether to mark the output file as containing antialiased data.
   \[Default: false\]
 
-input_orientation
-
-: Orientation of incoming points. SPZ data is saved in RUB coordinate system by default, but points from other formats
-  may use coordinates in a different orientation (like RDF for PLY format). \[Default: RUB\]
-
 ```{include} writer_opts.md
 ```
 

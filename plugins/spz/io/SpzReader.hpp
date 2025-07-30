@@ -45,7 +45,11 @@ namespace pdal
 class PDAL_EXPORT SpzReader : public Reader
 {
 public:
-    SpzReader();
+    SpzReader()
+    {
+        m_converter = spz::coordinateConverter(spz::CoordinateSystem::RUB,
+            spz::CoordinateSystem::RUB);
+    }
 
     std::string getName() const;
 private:
@@ -62,7 +66,6 @@ private:
     Dimension::Id m_alphaDim;
     std::unique_ptr<spz::PackedGaussians> m_data;
     spz::CoordinateConverter m_converter;
-    std::string m_coordTransform;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
