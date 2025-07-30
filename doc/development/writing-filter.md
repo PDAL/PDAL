@@ -15,10 +15,18 @@ implemented as *static* filters and are statically linked into the PDAL
 library. Filters that require extra/optional dependencies, or are external to
 the core PDAL codebase altogether, such as {ref}`filters.python`, are
 implemented as *shared* filters, and are built as individual shared libraries,
-discoverable by PDAL at runtime.
+discoverable by PDAL at runtime through DLL/.so's named by a convention and found
+in the path(s) defined by `PDAL_DRIVER_PATH` environment variable.
 
 In this tutorial, we will give a brief example of a filter, with notes on how
 to make it static or shared.
+
+```{warning}
+If no points are passed to a filter, it will not be executed. For example, if a
+``where`` clause were to remove all of the points, or a reader returns an empty
+PointView, the filter will not be executed.
+```
+
 
 ## The header
 
