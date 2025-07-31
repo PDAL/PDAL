@@ -1,7 +1,6 @@
 
 cmake_minimum_required(VERSION 3.13)
 
-# Adapt for GCC/GXX 8.x
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -18,8 +17,8 @@ add_executable(lasdump
 target_link_libraries(lasdump PRIVATE
     ${PDAL_LAZPERF_LIB_NAME}
     ${GDAL_LIBRARY}
-    stdc++
-    stdc++fs   
+    "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:-lstdc++fs>"
+    "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:-lstdc++>"
 )
 
 target_include_directories(lasdump PRIVATE
