@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include "SpzWriter.hpp"
+#include "SpzUtil.hpp"
 
 #include <pdal/util/OStream.hpp>
 
@@ -96,11 +97,13 @@ void SpzWriter::checkDimensions(PointLayoutPtr layout)
     m_plyAlphaDim = tryFindDim(layout, "opacity");
 
     // find spherical harmonics dimensions, if there are any
-    for (const auto& dim : layout->dimTypes())
+    for (int i = 0; i < 45; ++i)
     {
-        std::string dimName = Utils::tolower(layout->dimName(dim.m_id));
-        if (Utils::startsWith(dimName, "f_rest_"))
-            m_shDims.push_back(dim.m_id);
+        std::string dimName = "f_rest_" + std::to_string(i);
+        Dimension::Id id = tryFindDim(layout, dimName);
+        if (id == Dimension::Id::Unknown)
+            break;
+        m_shDims.push_back(id);
     }
 
     // check spherical harmonics dimensions
@@ -133,6 +136,12 @@ void SpzWriter::checkDimensions(PointLayoutPtr layout)
 void SpzWriter::prepared(PointTableRef table)
 {
     checkDimensions(table.layout());
+
+    // See if we have an SPZ-supported coordinate system specified for our point table.
+    // readers.spz sets this as RUB, or can be set by user.
+    MetadataNode m = table.metadata();
+    m_coordinateOrientation = 
+        spz::getCoordinateSystem(m.findChild("coordinate_orientation").value());
 }
 
 void SpzWriter::write(const PointViewPtr data)
@@ -192,10 +201,8 @@ void SpzWriter::write(const PointViewPtr data)
 
 void SpzWriter::done(PointTableRef table)
 {
-    // We always assume the points are in RUB orientation.
-    // Using the default 'unspecified' value would work the same.
     spz::PackOptions packOptions;
-    packOptions.from = spz::CoordinateSystem::RUB;
+    packOptions.from = m_coordinateOrientation;
 
     if (!spz::saveSpz(*m_cloud.get(), packOptions, filename()))
         throwError("Unable to save SPZ data to " + filename());

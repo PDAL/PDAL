@@ -31,3 +31,19 @@ TEST(SpzReaderTest, test1)
     ASSERT_TRUE(table.layout()->hasDim(rot0));
     ASSERT_TRUE(table.layout()->hasDim(sh2));
 }
+
+TEST(SpzReaderTest, orientation_metadata)
+{
+    Options opts;
+    opts.add("filename", Support::datapath("spz/fourth_st.spz"));
+    
+    SpzReader reader;
+    reader.setOptions(opts);
+
+    PointTable table;
+    reader.prepare(table);
+    PointViewSet set = reader.execute(table);
+
+    std::string val = table.metadata().findChild("coordinate_orientation").value();
+    EXPECT_EQ(val, "RUB");
+}

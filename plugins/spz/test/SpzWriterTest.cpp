@@ -164,3 +164,41 @@ TEST(SpzWriterTest, all_dimensions_test)
     for (int i = 0; i < 4; ++i)
         EXPECT_NEAR(readView->getFieldAs<float>(rotIds[i], 0), quat[i], tolerance);
 }
+
+TEST(SpzWriterTest, orientation_metadata_test)
+{
+    BufferReader r;
+    PointTable t;
+    PointViewPtr v = setXYZ(t);
+    r.addView(v);
+
+    MetadataNode m = t.metadata();
+    m.addOrUpdate("coordinate_orientation", "RDF");
+
+    SpzWriter writer;
+    Options opts;
+    std::string path = Support::temppath("out.spz");
+    opts.add("filename", path);
+    writer.setInput(r);
+    writer.setOptions(opts);
+
+    writer.prepare(t);
+    writer.execute(t);
+
+    SpzReader reader;
+    Options opts2;
+    opts2.add("filename", path);
+    reader.setOptions(opts2);
+
+    PointTable readTable;
+    reader.prepare(readTable);
+    PointViewSet viewSet = reader.execute(readTable);
+    PointViewPtr readView = *viewSet.begin();
+    EXPECT_EQ(readView->size(), 3);
+
+    // Checking Y values; when converting from RUB to RDF, the signs
+    //flip on the Y dimension.
+    EXPECT_FLOAT_EQ(readView->getFieldAs<float>(Dimension::Id::Y, 0), -1.0);
+    EXPECT_FLOAT_EQ(readView->getFieldAs<float>(Dimension::Id::Y, 1), -1.0);
+    EXPECT_FLOAT_EQ(readView->getFieldAs<float>(Dimension::Id::Y, 2), -2.0);
+}

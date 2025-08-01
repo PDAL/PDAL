@@ -62,6 +62,8 @@ private:
     std::string m_remoteFilename;
     std::string m_coordTransform;
     std::unique_ptr<spz::GaussianCloud> m_cloud;
+    // the input point table's coordinate system ('RUB', 'LDF', etc.)
+    spz::CoordinateSystem m_coordinateOrientation;
     //!! again, maybe keep these grouped together
     Dimension::IdList m_shDims;
     Dimension::IdList m_rotDims;

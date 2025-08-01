@@ -122,6 +122,9 @@ void SpzReader::addDimensions(PointLayoutPtr layout)
 
 void SpzReader::ready(PointTableRef table)
 {
+    // We extract this in the writer. Make this nested in an SPZ-specific node?
+    MetadataNode m = table.metadata();
+    m.add("coordinate_orientation", "RUB");
     m_index = 0;
 }
 
