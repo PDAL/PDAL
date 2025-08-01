@@ -52,6 +52,7 @@ cmake   -G "Ninja"  \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
         -DBUILD_I3S_TESTS=ON \
         -DBUILD_PLUGIN_TILEDB=OFF \
+        -DBUILD_PLUGIN_SPZ=ON \
         -DWITH_ZSTD=ON \
         -DWITH_LZMA=ON \
         -DWITH_TESTS=ON \

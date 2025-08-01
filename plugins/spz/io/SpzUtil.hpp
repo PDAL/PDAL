@@ -34,39 +34,30 @@
 
 #pragma once
 
-#include <pdal/PointView.hpp>
-#include <pdal/Writer.hpp>
-#include <spz/src/cc/load-spz.h>
+#include <map>
 
-namespace pdal
+#include <pdal/util/Utils.hpp>
+#include <load-spz.h>
+
+namespace spz {
+
+CoordinateSystem getCoordinateSystem(const std::string &name)
 {
+    std::map<std::string, spz::CoordinateSystem> names = {
+        {"LDB", CoordinateSystem::LDB},
+        {"RDB", CoordinateSystem::RDB},
+        {"LUB", CoordinateSystem::LUB},
+        {"RUB", CoordinateSystem::RUB},
+        {"LDF", CoordinateSystem::LDF},
+        {"RDF", CoordinateSystem::RDF},
+        {"LUF", CoordinateSystem::LUF},
+        {"RUF", CoordinateSystem::RUF},
+    };
+    auto it = names.find(pdal::Utils::toupper(name));
+    if (it != names.end()) {
+        return it->second;
+    }
+    return CoordinateSystem::UNSPECIFIED;
+}
 
-class PDAL_EXPORT SpzWriter : public Writer
-{
-public:
-    SpzWriter();
-    std::string getName() const;
-
-private:
-    virtual void addArgs(ProgramArgs& args);
-    virtual void initialize();
-    virtual void prepared(PointTableRef table);
-    virtual void write(const PointViewPtr view);
-    virtual void done(PointTableRef table);
-
-    void checkDimensions(PointLayoutPtr layout);
-    Dimension::Id tryFindDim(PointLayoutPtr layout, const std::string& dimName);
-
-    bool m_antialiased;
-    int m_shDegree;
-    std::string m_remoteFilename;
-    std::unique_ptr<spz::PackedGaussians> m_cloud;
-    //!! again, maybe keep these grouped together
-    Dimension::IdList m_shDims;
-    Dimension::IdList m_rotDims;
-    Dimension::IdList m_scaleDims;
-    Dimension::IdList m_plyColorDims;
-    Dimension::Id m_plyAlphaDim;
-};
-
-} // namespace pdal
+}  // namespace spz

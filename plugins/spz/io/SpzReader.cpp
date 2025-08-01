@@ -50,11 +50,8 @@ static StaticPluginInfo const s_info
     { "spz" }
 };
 
-CREATE_STATIC_STAGE(SpzReader, s_info)
+CREATE_SHARED_STAGE(SpzReader, s_info)
 std::string SpzReader::getName() const { return s_info.name; }
-
-SpzReader::SpzReader()
-{}
 
 void SpzReader::addArgs(ProgramArgs& args)
 {}
@@ -92,8 +89,6 @@ void SpzReader::initialize()
     stream.close();
 
     m_data.reset(new spz::PackedGaussians(spz::loadSpzPacked(data)));
-    if (m_data->usesFloat16())
-        throwError("SPZ float16 point encoding not supported!");
 
     extractHeaderData();
 }
@@ -127,6 +122,9 @@ void SpzReader::addDimensions(PointLayoutPtr layout)
 
 void SpzReader::ready(PointTableRef table)
 {
+    // We extract this in the writer. Make this nested in an SPZ-specific node?
+    MetadataNode m = table.metadata();
+    m.add("coordinate_orientation", "RUB");
     m_index = 0;
 }
 
@@ -138,7 +136,7 @@ point_count_t SpzReader::read(PointViewPtr view, point_count_t count)
     point_count_t numRead = m_index;
     while (numRead < count)
     {
-        spz::UnpackedGaussian unpacked = m_data->unpack(numRead);
+        spz::UnpackedGaussian unpacked = m_data->unpack(numRead, m_converter);
 
         view->setField(Dimension::Id::X, idx, unpacked.position[0]);
         view->setField(Dimension::Id::Y, idx, unpacked.position[1]);

@@ -6,18 +6,16 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/PipelineManager.hpp>
 
-#include <io/SpzReader.hpp>
+#include "SpzReader.hpp"
 
 using namespace pdal;
 
 TEST(SpzReaderTest, test1)
 {
-    StageFactory f;
     Options opts;
     opts.add("filename", Support::datapath("spz/fourth_st.spz"));
-    PipelineManager mgr;
     
-    Stage& reader = *f.createStage("readers.spz");
+    SpzReader reader;
     reader.setOptions(opts);
 
     PointTable table;
@@ -32,4 +30,20 @@ TEST(SpzReaderTest, test1)
     Dimension::Id sh2 = table.layout()->findProprietaryDim("f_dc_2");
     ASSERT_TRUE(table.layout()->hasDim(rot0));
     ASSERT_TRUE(table.layout()->hasDim(sh2));
+}
+
+TEST(SpzReaderTest, orientation_metadata)
+{
+    Options opts;
+    opts.add("filename", Support::datapath("spz/fourth_st.spz"));
+    
+    SpzReader reader;
+    reader.setOptions(opts);
+
+    PointTable table;
+    reader.prepare(table);
+    PointViewSet set = reader.execute(table);
+
+    std::string val = table.metadata().findChild("coordinate_orientation").value();
+    EXPECT_EQ(val, "RUB");
 }
