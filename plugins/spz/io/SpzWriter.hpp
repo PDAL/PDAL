@@ -57,6 +57,9 @@ private:
     void checkDimensions(PointLayoutPtr layout);
     Dimension::Id tryFindDim(PointLayoutPtr layout, const std::string& dimName);
 
+    // maximum number of spherical harmonics dimensions supported by SPZ
+    static const int MAX_SH = 45;
+
     bool m_antialiased;
     int m_shDegree;
     std::string m_remoteFilename;

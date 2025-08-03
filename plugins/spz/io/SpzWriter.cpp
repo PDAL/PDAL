@@ -97,7 +97,7 @@ void SpzWriter::checkDimensions(PointLayoutPtr layout)
     m_plyAlphaDim = tryFindDim(layout, "opacity");
 
     // find spherical harmonics dimensions, if there are any
-    for (int i = 0; i < 45; ++i)
+    for (int i = 0; i < MAX_SH; ++i)
     {
         std::string dimName = "f_rest_" + std::to_string(i);
         Dimension::Id id = tryFindDim(layout, dimName);
@@ -180,7 +180,7 @@ void SpzWriter::write(const PointViewPtr data)
         }
 
         for (int i = 0; i < 3; ++i)
-        m_cloud->colors.push_back(point.getFieldAs<float>(m_plyColorDims[i]));
+            m_cloud->colors.push_back(point.getFieldAs<float>(m_plyColorDims[i]));
 
         m_cloud->alphas.push_back(point.getFieldAs<float>(m_plyAlphaDim));
 
