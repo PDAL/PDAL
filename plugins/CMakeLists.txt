@@ -72,3 +72,6 @@ if(BUILD_PLUGIN_ARROW)
     add_subdirectory(arrow)
 endif()
 
+if(BUILD_PLUGIN_SPZ)
+    add_subdirectory(spz)
+endif()

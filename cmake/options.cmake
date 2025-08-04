@@ -94,6 +94,11 @@ option(BUILD_PLUGIN_ARROW
 add_feature_info("Arrow plugin" BUILD_PLUGIN_ARROW
     "read/write data to and from Arrow format")
 
+option(BUILD_PLUGIN_SPZ
+    "Choose if SPZ support should be built" FALSE)
+add_feature_info("SPZ plugin" BUILD_PLUGIN_SPZ
+    "read/write 3D gaussian splat data to and from SPZ format")
+
 option(BUILD_TOOLS_NITFWRAP "Choose if nitfwrap tool should be built" FALSE)
 
 option(WITH_TESTS
