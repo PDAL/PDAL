@@ -37,7 +37,7 @@
 #include <pdal/Reader.hpp>
 #include <pdal/Dimension.hpp>
 
-#include <spz/src/cc/load-spz.h>
+#include <load-spz.h>
 
 namespace pdal
 {
@@ -45,7 +45,11 @@ namespace pdal
 class PDAL_EXPORT SpzReader : public Reader
 {
 public:
-    SpzReader();
+    SpzReader()
+    {
+        m_converter = spz::coordinateConverter(spz::CoordinateSystem::RUB,
+            spz::CoordinateSystem::RUB);
+    }
 
     std::string getName() const;
 private:
@@ -61,6 +65,7 @@ private:
     Dimension::IdList m_colorDims;
     Dimension::Id m_alphaDim;
     std::unique_ptr<spz::PackedGaussians> m_data;
+    spz::CoordinateConverter m_converter;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
