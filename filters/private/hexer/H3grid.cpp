@@ -21,7 +21,7 @@ void H3Grid::processHeight(double height)
     //       location. Some way of scaling this by latitude would be more accurate)
     // - does not automatically make very large (>1km^2) or very small (<6m^2) hexagons
     // We ignore resolutions 1 through 7, so add 8 to the entry we find..
-    static const double resHeights[] { 2.0, 2.62e-4, 6.28e-5, 2.09e-5, 
+    static const double resHeights[] { 2.0, 2.62e-4, 6.28e-5, 2.09e-5,
                                         8.73e-6, 3.32e-6, 1.4e-6 };
 
     for (size_t i = 0; i < 6; ++i) {
@@ -43,9 +43,9 @@ HexId H3Grid::findHexagon(Point p)
                 ", " << ll.lng <<") to H3Index.";
             throw hexer_error(oss.str());
     }
-    if (!m_origin) 
+    if (!m_origin)
         m_origin = index;
-    
+
     return h32ij(index);
 }
 
@@ -73,17 +73,19 @@ Point H3Grid::findPoint(Segment& s)
 
 HexId H3Grid::edgeHex(HexId hex, int edge) const
 {
-    // Relative to H3 IJ coordinates, hexagon sides are labeled:
-    //
-    //               (+ I)
-    //                __0_
-    // (+ I, + J)  5 /    \ 1  (- J)
-    //              /      \ 
-    //              \      /
-    //      (+ J)  4 \____/ 2   (- I, - J)
-    //                  3
-    //               (- I)
-    //
+    /**
+     Relative to H3 IJ coordinates, hexagon sides are labeled:
+
+                   (+ I)
+                    __0_
+     (+ I, + J)  5 /    \ 1  (- J)
+                  /      \
+                  \      /
+          (+ J)  4 \____/ 2   (- I, - J)
+                      3
+                   (- I)
+    **/
+
     static const HexId offsets[] {{1, 0}, {0, -1}, {-1, -1}, {-1, 0}, {0, 1}, {1, 1}};
     return hex + offsets[edge];
 }
