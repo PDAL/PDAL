@@ -41,10 +41,11 @@
 #include <pdal/PointTable.hpp>
 #include <pdal/PointRef.hpp>
 
+#include <deque>
+#include <functional>
 #include <memory>
 #include <queue>
 #include <set>
-#include <deque>
 
 namespace pdal
 {
