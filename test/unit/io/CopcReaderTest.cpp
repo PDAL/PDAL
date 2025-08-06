@@ -185,7 +185,7 @@ TEST(CopcReaderTest, boundedRead2d)
 {
     BOX2D bounds(515380, 4918350, 515400, 4918370);
 
-    // First we'll query the EptReader for these bounds.
+    // First we'll query the CopcReader for these bounds.
     CopcReader reader;
     {
         Options options;
@@ -244,7 +244,7 @@ TEST(CopcReaderTest, boundedRead3d)
 {
     BOX3D bounds(515380, 4918350, 2320, 515400, 4918370, 2325);
 
-    // First we'll query the EptReader for these bounds.
+    // First we'll query the CopcReader for these bounds.
     CopcReader reader;
     {
         Options options;
@@ -371,12 +371,8 @@ TEST(CopcReaderTest, stream)
     const std::size_t numPoints(normalView.size());
     const std::size_t pointSize(normalTable.layout()->pointSize());
 
-    const auto cmp = [](const PointRef& a, const PointRef& b)
-    {
-        return (a.compare(Dimension::Id::GpsTime, b));
-    };
-    std::sort(normalView.begin(), normalView.end(), cmp);
-    std::sort(streamView.begin(), streamView.end(), cmp);
+    normalView.sort(Dimension::Id::GpsTime);
+    streamView.sort(Dimension::Id::GpsTime);
 
     for (PointId i(0); i < normalView.size(); ++i)
         for (const auto& dim : normalTable.layout()->dims())
@@ -389,12 +385,12 @@ TEST(CopcReaderTest, stream)
         }
 }
 
-TEST(EptReaderTest, boundedCrop)
+TEST(CopcReaderTest, boundedCrop)
 {
     std::string wkt = FileUtils::readFileIntoString(
         Support::datapath("autzen/autzen-selection.wkt"));
 
-    // First we'll query the EptReader for these bounds.
+    // First we'll query the CopcReader for these bounds.
     CopcReader reader;
     {
         Options options;
@@ -436,12 +432,12 @@ TEST(EptReaderTest, boundedCrop)
 }
 
 
-TEST(EptReaderTest, boundedCropGeoJSON)
+TEST(CopcReaderTest, boundedCropGeoJSON)
 {
     std::string wkt = FileUtils::readFileIntoString(
         Support::datapath("autzen/autzen-selection.json"));
 
-    // First we'll query the EptReader for these bounds.
+    // First we'll query the CopcReader for these bounds.
     CopcReader reader;
     {
         Options options;

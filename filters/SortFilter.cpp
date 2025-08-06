@@ -75,40 +75,38 @@ void SortFilter::prepared(PointTableRef table)
 
     if (!m_dimNames.size())
         throwError("At least one valid dimension name must be provided!");
-    m_activeDim = &m_dims[0];
 }
 
 void SortFilter::filter(PointView& view)
 {
-
-    auto cmp = [this](const PointRef& p1, const PointRef& p2)
-    {
-        if (m_order == SortOrder::ASC)
-            return p1.compare(*m_activeDim, p2);
-        return p2.compare(*m_activeDim, p1);
-    };
-
-
     for (Dimension::IdList::size_type i=0; i < m_dims.size(); ++i)
     {
-
-
-        m_activeDim = &m_dims[i];
+        PointView::Compare cmp;
+        cmp = [&view, dim=m_dims[i]](PointId id1, PointId id2)
+        {
+            return view.compare(dim, id1, id2);
+        };
+        if (m_order == SortOrder::DESC)
+            cmp = [&view, dim=m_dims[i]](PointId id1, PointId id2)
+            {
+                return view.compare(dim, id2, id1);
+            };
 
         if (m_dims.size() > 1)
         {
             // If we have multiple dimensions, sort the first one
             // and then stable_sort the rest
             if (i == 0)
-                std::sort(view.begin(), view.end(), cmp);
+                view.sort(cmp);
             else
-                std::stable_sort(view.begin(), view.end(), cmp);
-        } else
+                view.stableSort(cmp);
+        }
+        else
         {
             if (m_algorithm == SortAlgorithm::Stable)
-                std::stable_sort(view.begin(), view.end(), cmp);
+                view.stableSort(cmp);
             else if (m_algorithm == SortAlgorithm::Normal)
-                std::sort(view.begin(), view.end(), cmp);
+                view.sort(cmp);
         }
     }
 }

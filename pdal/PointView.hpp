@@ -260,6 +260,11 @@ public:
     void calculateBounds(BOX2D& box) const;
     void calculateBounds(BOX3D& box) const;
 
+    using Compare = std::function<bool(PointId id1, PointId id2)>;
+    void sort(Dimension::Id id);
+    void sort(Compare comp);
+    void stableSort(Dimension::Id id);
+    void stableSort(Compare comp);
     void dump(std::ostream& ostr) const;
     bool hasDim(Dimension::Id id) const
         { return layout()->hasDim(id); }
@@ -409,6 +414,9 @@ private:
     // For testing only.
     PointId index(PointId id) const
         { return m_index[id]; }
+
+    template<typename Sorter>
+    void basic_sort(Sorter sort, Compare comp);
 };
 
 struct PointViewLess
