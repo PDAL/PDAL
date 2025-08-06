@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <algorithm>
 #include <iomanip>
+#include <numeric>
 
 #include <pdal/KDIndex.hpp>
 #include <pdal/PointView.hpp>
