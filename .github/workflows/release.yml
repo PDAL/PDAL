@@ -74,7 +74,7 @@ jobs:
     permissions:
       contents: write
     steps:
-     - uses: actions/download-artifact@v4
+     - uses: actions/download-artifact@v5
        name: Download release artifact
        with:
          name: source-package-ubuntu-latest
@@ -138,7 +138,7 @@ jobs:
     permissions:
       contents: write
     steps:
-     - uses: actions/download-artifact@v4
+     - uses: actions/download-artifact@v5
        name: Download release artifact
        with:
          name: source-package-ubuntu-latest
