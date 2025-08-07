@@ -309,6 +309,7 @@ TEST(CopcReaderTest, boundedRead3d)
     EXPECT_EQ(np, sourceNp);
     EXPECT_EQ(np, 45930u);
 }
+**/
 
 TEST(CopcReaderTest, stream)
 {
@@ -385,8 +386,9 @@ TEST(CopcReaderTest, stream)
                 " don't match. Values normal/stream = " << nval << "/" << sval << ".";
         }
 }
-**/
 
+//These OK - down from here
+//ABELL
 TEST(CopcReaderTest, boundedCrop)
 {
     std::string wkt = FileUtils::readFileIntoString(
