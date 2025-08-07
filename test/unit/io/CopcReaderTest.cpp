@@ -162,7 +162,6 @@ TEST(CopcReaderTest, resolutionLimit)
     reader.prepare(table);
     const auto set(reader.execute(table));
 
-/**
     double x, y, z;
     uint64_t o;
     uint64_t np(0);
@@ -176,13 +175,12 @@ TEST(CopcReaderTest, resolutionLimit)
             y = view->getFieldAs<double>(Dimension::Id::Y, i);
             z = view->getFieldAs<double>(Dimension::Id::Z, i);
             o = view->getFieldAs<uint64_t>(Dimension::Id::OriginId, i);
-            ASSERT_TRUE(pointBounds.contains(x, y, z));
-            ASSERT_TRUE(o < 4);
+//            ASSERT_TRUE(pointBounds.contains(x, y, z));
+//            ASSERT_TRUE(o < 4);
         }
     }
 
-    EXPECT_EQ(np, expectedCount);
-**/
+//    EXPECT_EQ(np, expectedCount);
 }
 
 
