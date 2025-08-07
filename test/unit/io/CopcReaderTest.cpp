@@ -240,6 +240,7 @@ TEST(CopcReaderTest, boundedRead2d)
     EXPECT_EQ(np, v->size());
     EXPECT_EQ(np, 354211u);
 }
+**/
 
 TEST(CopcReaderTest, boundedRead3d)
 {
@@ -309,8 +310,8 @@ TEST(CopcReaderTest, boundedRead3d)
     EXPECT_EQ(np, sourceNp);
     EXPECT_EQ(np, 45930u);
 }
-**/
 
+//copctest2
 TEST(CopcReaderTest, stream)
 {
     Options ops;
