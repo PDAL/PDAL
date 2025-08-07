@@ -180,8 +180,10 @@ TEST(CopcReaderTest, resolutionLimit)
 
     EXPECT_EQ(np, expectedCount);
 }
+**/
 
 
+//copctest3
 TEST(CopcReaderTest, boundedRead2d)
 {
     BOX2D bounds(515380, 4918350, 515400, 4918370);
@@ -240,7 +242,6 @@ TEST(CopcReaderTest, boundedRead2d)
     EXPECT_EQ(np, v->size());
     EXPECT_EQ(np, 354211u);
 }
-**/
 
 TEST(CopcReaderTest, boundedRead3d)
 {
