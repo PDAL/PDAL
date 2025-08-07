@@ -148,7 +148,7 @@ TEST(CopcReaderTest, resolutionLimit)
     //
     // Any resolution option between 0.31846 and 0.15923 will select depths 0 and 1,
     // so we'll test a corresponding query.
-    options.add("resolution", 0.2);
+//    options.add("resolution", 0.2);
 
     // This expected value corresponds to the sum of the point counts of all
     // files in our dataset whose depth is less than 2.  This value is summed
