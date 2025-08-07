@@ -133,7 +133,9 @@ TEST(CopcReaderTest, fullRead)
 
     EXPECT_EQ(np, numPoints);
 }
+**/
 
+// copctest4
 TEST(CopcReaderTest, resolutionLimit)
 {
     Options options;
@@ -180,7 +182,6 @@ TEST(CopcReaderTest, resolutionLimit)
 
     EXPECT_EQ(np, expectedCount);
 }
-**/
 
 
 //copctest3
