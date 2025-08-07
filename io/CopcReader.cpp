@@ -382,6 +382,7 @@ void CopcReader::initialize(PointTableRef table)
     m_p->depthEnd = m_args->resolution ?
         (std::max)(1, (int)ceil(log2(m_p->copc_info.spacing / m_args->resolution)) + 1) :
         0;
+std::cerr << "Depth end = " << m_p->depthEnd << "!\n";
 
     if (m_args->resolution)
         log()->get(LogLevel::Debug) << "Maximum depth: " << m_p->depthEnd << std::endl;
@@ -683,6 +684,7 @@ void CopcReader::loadHierarchy()
     m_p->hierarchyPointCount = count();
     if (!passesFilter(key))
         return;
+    std::cerr << "Passed first check!\n";
 
     copc::HierarchyPage page(fetch(m_p->copc_info.root_hier_offset,
         (uint32_t)m_p->copc_info.root_hier_size));
@@ -691,7 +693,9 @@ void CopcReader::loadHierarchy()
     if (!entry.valid())
         throwError("Root hierarchy page missing root entry.");
     loadHierarchy(m_p->hierarchy, page, entry);
+    std::cerr << "Awaiting pool!\n";
     m_p->pool->await();
+    std::cerr << "Pool done!\n";
 }
 
 
@@ -727,10 +731,14 @@ void CopcReader::loadHierarchy(copc::Hierarchy& hierarchy, const copc::Hierarchy
     {
         m_p->pool->add([this, &hierarchy, entry]()
         {
+            std::cerr << "New thread for " << entry.m_key << "!\n";
             copc::HierarchyPage page(fetch(entry.m_offset, entry.m_byteSize));
             copc::Entry rootDataEntry = page.find(entry.m_key);
             if (!rootDataEntry.valid())
+            {
+                std::cerr << "Throw error #2!\n";
                 throwError("Hierarchy page " + entry.m_key.toString() + " missing root entry.");
+            }
             loadHierarchy(hierarchy, page, rootDataEntry);
         });
     }
@@ -745,6 +753,7 @@ bool CopcReader::passesFilter(const copc::Key& key) const
 
 bool CopcReader::passesSpatialFilter(const copc::Key& key) const
 {
+    std::cerr << "Spatial filter for " << key << "!\n";
     const BOX3D& tileBounds = key.bounds(m_p->rootNodeExtent);
 
     auto boxOverlaps = [this, &tileBounds]() -> bool
@@ -780,6 +789,7 @@ bool CopcReader::passesSpatialFilter(const copc::Key& key) const
     // If there's no spatial filter, we always overlap.
     if (!hasSpatialFilter())
         return true;
+    std::cerr << "\tSpatial filter for " << key << "!\n";
 
     // This lock is here because if a bunch of threads are using the transform
     // at the same time, it seems to get corrupted. There may be other instances
