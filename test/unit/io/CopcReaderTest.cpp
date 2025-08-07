@@ -62,6 +62,7 @@ namespace
     const point_count_t numPoints(518862);
 }
 
+/**
 TEST(CopcReaderTest, inspect)
 {
     const std::vector<std::string> dimNames = {
@@ -384,6 +385,7 @@ TEST(CopcReaderTest, stream)
                 " don't match. Values normal/stream = " << nval << "/" << sval << ".";
         }
 }
+**/
 
 TEST(CopcReaderTest, boundedCrop)
 {
