@@ -9,13 +9,15 @@ endif(STANDALONE)
 include(${PDAL_CMAKE_DIR}/spz.cmake)
 if (NOT PDAL_HAVE_SPZ)
     message("Can't find SPZ support required by SPZ plugin.")
+else()
+    set(SPZ_LIBRARIES spz::spz)
 endif()
 
 PDAL_ADD_PLUGIN(spz_reader reader spz
     FILES
         io/SpzReader.cpp
     LINK_WITH
-        spz
+        ${SPZ_LIBRARIES}
         ${PDAL_LIBRARIES}
     INCLUDES
         ${PDAL_VENDOR_DIR}
@@ -27,7 +29,7 @@ PDAL_ADD_PLUGIN(spz_writer writer spz
     FILES
         io/SpzWriter.cpp
     LINK_WITH
-        spz
+        ${SPZ_LIBRARIES}
         ${PDAL_LIBRARIES}
     INCLUDES
         ${PDAL_VENDOR_DIR}
