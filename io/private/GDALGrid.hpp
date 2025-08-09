@@ -84,13 +84,13 @@ public:
     int numBands() const;
 
     // Return a pointer to the data in a raster band, row-major ordered.
-    double *data(const std::string& name);
+    PDAL_EXPORT double *data(const std::string& name);
 
     // Add a point to the raster grid.
-    void addPoint(double x, double y, double z);
+    PDAL_EXPORT void addPoint(double x, double y, double z);
 
     // Compute final values after all points have been added.
-    void finalize();
+    PDAL_EXPORT void finalize();
 
     int width() const;
     int height() const;
