@@ -114,7 +114,7 @@ public:
     {
         BOX3D cellBounds;
 
-        int width = pow(2, d);
+        int width = (int)pow(2, d);
         double cellWidth = (root.maxx - root.minx) / width;
         // The test in each of these is to avoid unnecessary rounding errors when
         // we know the actual value.
