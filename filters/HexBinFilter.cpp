@@ -199,7 +199,7 @@ void HexBin::done(PointTableRef table)
         {
             m_grid->flushSamples();
             // Setting this so it gets written to metadata correctly
-            m_sampleSize = m_count;
+            m_sampleSize = static_cast<uint32_t>(m_count);
         }
         else
             throwError("Sampling for hexbin auto-edge length calculation failed!");
@@ -227,7 +227,7 @@ void HexBin::done(PointTableRef table)
 
     Utils::OStringStreamClassicLocale polygon;
     polygon.setf(std::ios_base::fixed, std::ios_base::floatfield);
-    polygon.precision(m_precision);
+    polygon.precision(static_cast<std::streamsize>(m_precision));
     m_grid->toWKT(polygon);
 
     if (m_outputTesselation)
