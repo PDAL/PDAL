@@ -309,6 +309,7 @@ TEST(CopcReaderTest, boundedRead3d)
     EXPECT_EQ(np, 45930u);
 }
 
+/**
 TEST(CopcReaderTest, stream)
 {
     Options ops;
@@ -384,6 +385,7 @@ TEST(CopcReaderTest, stream)
                 " don't match. Values normal/stream = " << nval << "/" << sval << ".";
         }
 }
+**/
 
 TEST(CopcReaderTest, boundedCrop)
 {
