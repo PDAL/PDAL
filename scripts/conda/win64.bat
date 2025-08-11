@@ -26,7 +26,6 @@ cmake -G %GENERATOR% ^
       -DCMAKE_VERBOSE_MAKEFILE=OFF ^
       -DWITH_ZSTD=ON ^
       -DWITH_LZMA=ON ^
-      -DLIBLZMA_LIBRARY:FILEPATH=%CONDA_PREFIX%\Library\lib\liblzma.lib ^
-      -DZSTD_LIBRARY:FILEPATH=%CONDA_PREFIX%\Library\lib\libzstd.lib ^
+      -DLIBLZMA_LIBRARY:FILEPATH=%CONDA_PREFIX%\Library\lib\lzma.lib ^
       ..
 
