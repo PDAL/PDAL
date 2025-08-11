@@ -145,7 +145,7 @@ TEST(HexbinFilterTest, HexbinFilterTest_test_2)
 
     EXPECT_FALSE(filter2.grid()->sampling());
     EXPECT_EQ(m2.findChild("sample_size").value<int>(), 10);
-    EXPECT_FLOAT_EQ(m2.findChild("estimated_edge").value<float>(), 1e-05);
+    EXPECT_FLOAT_EQ(m2.findChild("estimated_edge").value<float>(), 1e-05f);
 }
 
 // Test that we create proper WKT for geometry with islands.

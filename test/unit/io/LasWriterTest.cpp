@@ -489,7 +489,7 @@ TEST(LasWriterTest, extra_dims)
     writer.prepare(table);
     PointViewSet viewSet = writer.execute(table);
 
-    LasTester tester;
+
     PointViewPtr pb = *viewSet.begin();
 
     uint16_t colors[][3] = {
