@@ -309,8 +309,7 @@ TEST(CopcReaderTest, boundedRead3d)
     EXPECT_EQ(np, 45930u);
 }
 
-/**
-TEST(CopcReaderTest, stream)
+void foobar()
 {
     Options ops;
     ops.add("filename", copcPath);
@@ -354,6 +353,7 @@ TEST(CopcReaderTest, stream)
     CopcReader streamReader;
     streamReader.setOptions(ops);
     std::vector<char> streamBuffer;
+
     PointTable streamTable;
     PointView streamView(streamTable);
     TestPointTable testTable(streamView);
@@ -369,9 +369,6 @@ TEST(CopcReaderTest, stream)
         streamTable.layout()->pointSize(),
         normalTable.layout()->pointSize());
 
-    const std::size_t numPoints(normalView.size());
-    const std::size_t pointSize(normalTable.layout()->pointSize());
-
     normalView.sort(Dimension::Id::GpsTime);
     streamView.sort(Dimension::Id::GpsTime);
 
@@ -385,7 +382,14 @@ TEST(CopcReaderTest, stream)
                 " don't match. Values normal/stream = " << nval << "/" << sval << ".";
         }
 }
-**/
+TEST(CopcReaderTest, stream)
+{
+    for (int i = 0; i < 100; ++i)
+    {
+        std::cerr << "I = " << i << "!\n";
+        foobar();
+    }
+}
 
 TEST(CopcReaderTest, boundedCrop)
 {
