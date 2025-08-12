@@ -754,8 +754,8 @@ namespace Utils
         if (std::is_integral<T_OUT>::value)
             in = static_cast<T_IN>(sround((double)in));
         if ((std::is_same<T_OUT, double>::value) ||
-            (in <= static_cast<double>((std::numeric_limits<T_OUT>::max)()) &&
-             in >= static_cast<double>(std::numeric_limits<T_OUT>::lowest())))
+            ((double)in <= static_cast<double>((std::numeric_limits<T_OUT>::max)()) &&
+             (double)in >= static_cast<double>(std::numeric_limits<T_OUT>::lowest())))
         {
             out = static_cast<T_OUT>(in);
             return true;
