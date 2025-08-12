@@ -35,7 +35,7 @@
 #pragma once
 
 #include <cassert>
-#include <memory> // shared_ptr
+#include <memory>
 #include <stack>
 #include <chrono>
 
