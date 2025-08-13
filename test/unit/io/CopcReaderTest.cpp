@@ -309,7 +309,7 @@ TEST(CopcReaderTest, boundedRead3d)
     EXPECT_EQ(np, 45930u);
 }
 
-void foobar()
+TEST(CopcReaderTest, stream)
 {
     Options ops;
     ops.add("filename", copcPath);
@@ -381,14 +381,6 @@ void foobar()
                 "Point ID: " << i << " dim: " << normalView.layout()->dimName(dim) <<
                 " don't match. Values normal/stream = " << nval << "/" << sval << ".";
         }
-}
-TEST(CopcReaderTest, stream)
-{
-    for (int i = 0; i < 100; ++i)
-    {
-        std::cerr << "I = " << i << "!\n";
-        foobar();
-    }
 }
 
 TEST(CopcReaderTest, boundedCrop)
