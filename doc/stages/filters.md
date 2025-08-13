@@ -198,6 +198,7 @@ filters.nndistance
 filters.normal
 filters.optimalneighborhood
 filters.planefit
+filters.radiusassign
 filters.radialdensity
 filters.reciprocity
 filters.zsmooth
@@ -254,6 +255,11 @@ filters.griddecimation
 
 : Compute a deviation of a point from a manifold approximating its neighbors.
 
+{ref}`filters.radiusassign`
+
+: Update the value of a dimension (using an assignment expression) for specific points
+  depending on their neighbors in a given radius.
+
 {ref}`filters.radialdensity`
 
 : Compute pointwise density of points within a given radius.
@@ -272,7 +278,7 @@ filters.griddecimation
 : Assign values for one point (the highest or lowest) per cell of a 2d regular grid.
 
 ### Assignment
-<!-- 
+<!--
 ```{toctree}
 :glob: true
 :hidden: true
