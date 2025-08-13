@@ -14,7 +14,7 @@ IF ERRORLEVEL 1 GOTO CLEANUP
 call conda activate %CONDA_ENVIRO%
 IF ERRORLEVEL 1 GOTO CLEANUP
 
-call conda install -y -c conda-forge ninja geotiff laszip nitro curl gdal cmake eigen ninja zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 tiledb 
+call conda install -y -c conda-forge ninja geotiff laszip nitro curl gdal cmake eigen ninja zstd numpy xz libxml2 laz-perf qhull sqlite hdf5 tiledb spz
 IF ERRORLEVEL 1 GOTO CLEANUP
 
 call conda install 	geotiff ^
@@ -34,7 +34,8 @@ call conda install 	geotiff ^
 					sqlite ^
 					hdf5 ^
 					libxml2 ^
-					tiledb
+					tiledb ^
+					spz
 
 REM IF ERRORLEVEL 1 GOTO CLEANUP
 

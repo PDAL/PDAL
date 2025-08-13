@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include "SpzWriter.hpp"
+#include "SpzUtil.hpp"
 
 #include <pdal/util/OStream.hpp>
 
@@ -49,9 +50,9 @@ static StaticPluginInfo const s_info
         { "spz" }
 };
 
-CREATE_STATIC_STAGE(SpzWriter, s_info)
+CREATE_SHARED_STAGE(SpzWriter, s_info)
 
-SpzWriter::SpzWriter() : m_cloud(new spz::PackedGaussians)
+SpzWriter::SpzWriter() : m_cloud(new spz::GaussianCloud)
 {}
 
 std::string SpzWriter::getName() const { return s_info.name; }
@@ -96,11 +97,13 @@ void SpzWriter::checkDimensions(PointLayoutPtr layout)
     m_plyAlphaDim = tryFindDim(layout, "opacity");
 
     // find spherical harmonics dimensions, if there are any
-    for (const auto& dim : layout->dimTypes())
+    for (int i = 0; i < MAX_SH; ++i)
     {
-        std::string dimName = Utils::tolower(layout->dimName(dim.m_id));
-        if (Utils::startsWith(dimName, "f_rest_"))
-            m_shDims.push_back(dim.m_id);
+        std::string dimName = "f_rest_" + std::to_string(i);
+        Dimension::Id id = tryFindDim(layout, dimName);
+        if (id == Dimension::Id::Unknown)
+            break;
+        m_shDims.push_back(id);
     }
 
     // check spherical harmonics dimensions
@@ -133,6 +136,12 @@ void SpzWriter::checkDimensions(PointLayoutPtr layout)
 void SpzWriter::prepared(PointTableRef table)
 {
     checkDimensions(table.layout());
+
+    // See if we have an SPZ-supported coordinate system specified for our point table.
+    // readers.spz sets this as RUB, or can be set by user.
+    MetadataNode m = table.metadata();
+    m_coordinateOrientation = 
+        spz::getCoordinateSystem(m.findChild("coordinate_orientation").value());
 }
 
 void SpzWriter::write(const PointViewPtr data)
@@ -143,12 +152,10 @@ void SpzWriter::write(const PointViewPtr data)
     m_cloud->numPoints = int(pointCount);
     m_cloud->shDegree = m_shDegree;
     m_cloud->antialiased = m_antialiased;
-    // SPZ lib currently uses 12 fractional bits when packing.
-    m_cloud->fractionalBits = 12;
 
-    m_cloud->positions.reserve(pointCount * 9);
+    m_cloud->positions.reserve(pointCount * 3);
     m_cloud->scales.reserve(pointCount * 3);
-    m_cloud->rotations.reserve(pointCount * 3);
+    m_cloud->rotations.reserve(pointCount * 4);
     m_cloud->alphas.reserve(pointCount);
     m_cloud->colors.reserve(pointCount * 3);
     m_cloud->sh.reserve(pointCount * m_shDims.size());
@@ -158,43 +165,46 @@ void SpzWriter::write(const PointViewPtr data)
     for (PointId idx = 0; idx < pointCount; ++idx)
     {
         point.setPointId(idx);
-        spz::UnpackedGaussian gaussian;
 
-        gaussian.position[0] = point.getFieldAs<float>(Dimension::Id::X);
-        gaussian.position[1] = point.getFieldAs<float>(Dimension::Id::Y);
-        gaussian.position[2] = point.getFieldAs<float>(Dimension::Id::Z);
+        m_cloud->positions.push_back(point.getFieldAs<float>(Dimension::Id::X));
+        m_cloud->positions.push_back(point.getFieldAs<float>(Dimension::Id::Y));
+        m_cloud->positions.push_back(point.getFieldAs<float>(Dimension::Id::Z));
 
         for (int i = 0; i < 3; ++i)
         {
-            gaussian.scale[i] = point.getFieldAs<float>(m_scaleDims[i]);
+            m_cloud->scales.push_back(point.getFieldAs<float>(m_scaleDims[i]));
         }
         for (int i = 0; i < 4; ++i)
         {
-            gaussian.rotation[i] = point.getFieldAs<float>(m_rotDims[i]);
+            m_cloud->rotations.push_back(point.getFieldAs<float>(m_rotDims[i]));
         }
 
-        // We always expect colors and alpha to be floats.
         for (int i = 0; i < 3; ++i)
-            gaussian.color[i] = point.getFieldAs<float>(m_plyColorDims[i]);
+            m_cloud->colors.push_back(point.getFieldAs<float>(m_plyColorDims[i]));
 
-        gaussian.alpha = point.getFieldAs<float>(m_plyAlphaDim);
+        m_cloud->alphas.push_back(point.getFieldAs<float>(m_plyAlphaDim));
 
         if (m_shDegree)
         {
             for (int i = 0; i < numSh; i++) 
             {
-                gaussian.shR[i] = point.getFieldAs<float>(m_shDims[i]);
-                gaussian.shG[i] = point.getFieldAs<float>(m_shDims[i + numSh]);
-                gaussian.shB[i] = point.getFieldAs<float>(m_shDims[i + 2 * numSh]);
+                // R sh component
+                m_cloud->sh.push_back(point.getFieldAs<float>(m_shDims[i]));
+                // G sh component
+                m_cloud->sh.push_back(point.getFieldAs<float>(m_shDims[i + numSh]));
+                // B sh component
+                m_cloud->sh.push_back(point.getFieldAs<float>(m_shDims[i + 2 * numSh]));
             }
         }
-        m_cloud->pack(gaussian);
     }
 }
 
 void SpzWriter::done(PointTableRef table)
 {
-    if (!spz::saveSpzPacked(*m_cloud.get(), filename()))
+    spz::PackOptions packOptions;
+    packOptions.from = m_coordinateOrientation;
+
+    if (!spz::saveSpz(*m_cloud.get(), packOptions, filename()))
         throwError("Unable to save SPZ data to " + filename());
 
     if (m_remoteFilename.size())
