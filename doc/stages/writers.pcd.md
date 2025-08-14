@@ -50,7 +50,7 @@ filename
 
 compression
 
-: Level of PCD compression to use (ascii, binary, compressed) \[Default:
+: Level of PCD compression to use (ascii, binary) \[Default:
   "ascii"\]
 
 precision
