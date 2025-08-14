@@ -628,15 +628,20 @@ void streamTest(const std::string src)
     const std::size_t numPoints(normalView.size());
     const std::size_t pointSize(normalTable.layout()->pointSize());
 
-    const auto sort([nodeIdDim, pointIdDim]
-        (const PointRef& a, const PointRef& b)
-    {
-        if (a.compare(nodeIdDim, b)) return true;
-        return !b.compare(nodeIdDim, a) && a.compare(pointIdDim, b);
-    });
-
-    std::sort(normalView.begin(), normalView.end(), sort);
-    std::sort(streamView.begin(), streamView.end(), sort);
+    normalView.sort([&v = normalView, nodeIdDim, pointIdDim](PointId id1, PointId id2)
+        {
+            if (v.compare(nodeIdDim, id1, id2))
+                return true;
+            return !v.compare(nodeIdDim, id1, id2) && v.compare(pointIdDim, id1, id2);
+        }
+    );
+    streamView.sort([&v = streamView, nodeIdDim, pointIdDim](PointId id1, PointId id2)
+        {
+            if (v.compare(nodeIdDim, id1, id2))
+                return true;
+            return !v.compare(nodeIdDim, id1, id2) && v.compare(pointIdDim, id1, id2);
+        }
+    );
 
     for (PointId i(0); i < normalView.size(); ++i)
     {
