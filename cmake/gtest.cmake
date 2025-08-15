@@ -60,7 +60,7 @@ else()
     cmake_policy(SET CMP0135 NEW)  # for DOWNLOAD_EXTRACT_TIMESTAMP option
   endif()
 
-  set(GTEST_VERSION "1.15.2")
+  set(GTEST_VERSION "1.17.0")
 
   include(FetchContent)
   FetchContent_Declare(
