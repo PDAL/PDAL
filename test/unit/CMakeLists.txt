@@ -17,18 +17,13 @@ endforeach()
 
 add_library(${PDAL_TEST_SUPPORT_OBJS} OBJECT Support.cpp)
 add_dependencies(${PDAL_TEST_SUPPORT_OBJS} generate_dimension_hpp)
-target_link_libraries(${PDAL_TEST_SUPPORT_OBJS}
-    PRIVATE
-        ${PDAL_LIB_NAME}
-        GTest::gtest
-        GTest::gtest_main
-)
 target_include_directories(${PDAL_TEST_SUPPORT_OBJS}
     PRIVATE
         ${ROOT_DIR}
         ${PROJECT_BINARY_DIR}/include
         ${PROJECT_BINARY_DIR}/test/unit
         ${PDAL_INCLUDE_DIR}
+        ${googletest_SOURCE_DIR}/googletest/include
 )
 PDAL_TARGET_COMPILE_SETTINGS(${PDAL_TEST_SUPPORT_OBJS})
 
