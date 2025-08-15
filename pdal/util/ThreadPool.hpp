@@ -89,10 +89,17 @@ public:
     PDAL_EXPORT void stop()
     {
         join();
+        clearTasks();
+    }
 
+    // Empty the queue of tasks that may have been waiting to run.
+    PDAL_EXPORT void clearTasks()
+    {
         // Effectively clear the queue.
+        std::unique_lock<std::mutex> lock(m_mutex);
         std::queue<std::function<void()>> q;
         m_tasks.swap(q);
+        lock.unlock();
     }
 
     // Wait for all current tasks to complete.  As opposed to join, tasks may
@@ -145,6 +152,9 @@ public:
 
     PDAL_EXPORT std::size_t numThreads() const
     { return m_numThreads; }
+
+    PDAL_EXPORT bool running() const
+    { return m_running; }
 
 private:
     // Worker thread function.  Wait for a task and run it.
