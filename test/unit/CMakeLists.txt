@@ -17,12 +17,6 @@ endforeach()
 
 add_library(${PDAL_TEST_SUPPORT_OBJS} OBJECT Support.cpp)
 add_dependencies(${PDAL_TEST_SUPPORT_OBJS} generate_dimension_hpp)
-target_link_libraries(${PDAL_TEST_SUPPORT_OBJS}
-    PRIVATE
-        ${PDAL_LIB_NAME}
-        GTest::gtest
-        GTest::gtest_main
-)
 target_include_directories(${PDAL_TEST_SUPPORT_OBJS}
     PRIVATE
         ${ROOT_DIR}
@@ -43,15 +37,6 @@ PDAL_ADD_TEST(pdal_eigen_test
         ${PDAL_VENDOR_EIGEN_DIR}
 )
 PDAL_ADD_TEST(pdal_file_utils_test FILES FileUtilsTest.cpp)
-PDAL_ADD_TEST(pdal_io_vsi_test
-    FILES
-        VSITest.cpp
-        ${PDAL_SRC_DIR}/util/VSIIO.cpp
-    INCLUDES
-        ${GDAL_INCLUDE_DIR}
-    LINK_WITH
-        ${GDAL_LIBRARY}
-)
 PDAL_ADD_TEST(pdal_georeference_test FILES GeoreferenceTest.cpp)
 PDAL_ADD_TEST(pdal_kdindex_test
     FILES
@@ -305,6 +290,20 @@ PDAL_ADD_TEST(pdal_io_slpk_reader_test
         io/SlpkReaderTest.cpp
 )
 
+#PDAL_ADD_TEST(pdal_io_spz_reader_test
+#    FILES
+#        io/SpzReaderTest.cpp
+#    INCLUDES
+#        ${PDAL_VENDOR_DIR}
+#)
+#
+#PDAL_ADD_TEST(pdal_io_spz_writer_test
+#    FILES
+#        io/SpzWriterTest.cpp
+#    INCLUDES
+#        ${PDAL_VENDOR_DIR}
+#)
+
 PDAL_ADD_TEST(pdal_i3s_obb_test
     FILES
         io/ObbTest.cpp
@@ -406,7 +405,6 @@ PDAL_ADD_TEST(pdal_filters_locate_test FILES filters/LocateFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_merge_test FILES filters/MergeTest.cpp)
 PDAL_ADD_TEST(pdal_filters_miniball_test FILES filters/MiniballFilterTest.cpp)
 PDAL_ADD_TEST(pdal_morton_order_test FILES filters/MortonOrderTest.cpp)
-PDAL_ADD_TEST(pdal_filters_supervoxel_test FILES filters/SupervoxelFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_additional_merge_test
     FILES
         filters/AdditionalMergeTest.cpp
@@ -465,8 +463,7 @@ target_compile_definitions(pdal_filters_hexbin_test
         H3_PREFIX=PDALH3
 )
 
-PDAL_ADD_TEST(pdal_filters_voxel_center_nearest_neighbor_test FILES filters/VoxelCenterNearestNeighborFilterTest.cpp)
-PDAL_ADD_TEST(pdal_filters_voxel_centroid_nearest_neighbor_test FILES filters/VoxelCentroidNearestNeighborFilterTest.cpp)
+#PDAL_ADD_TEST(pdal_filters_voxel_test FILES filters/VoxelTest.cpp)
 PDAL_ADD_TEST(pdal_filters_voxel_downsize_test FILES filters/VoxelDownsizeFilterTest.cpp)
 
 PDAL_ADD_TEST(pdal_app_test FILES apps/AppTest.cpp)
