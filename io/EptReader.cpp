@@ -551,13 +551,21 @@ void EptReader::load(const ept::Overlap& overlap)
                 // an error and ignoreUnreadable isn't set, this will be fatal
                 // but that will occur downstream outside of this pool thread.
 
-                std::unique_lock<std::mutex> l(m_p->mutex);
-                m_p->contentsCv.wait(l, [this] { 
-                    return (m_p->done || 
-                        m_p->contents.size() < m_p->pool->numThreads());
-                    });
-                m_p->contents.push(std::move(tile));
-                l.unlock();
+                while (!m_p->done)
+                {
+                    {
+                        std::lock_guard<std::mutex> l(m_p->mutex);
+                        if (m_p->contents.size() < m_p->pool->numThreads())
+                        {
+                            m_p->contents.push(std::move(tile));
+                            break;
+                        }
+                    }
+                    // No room on queue, sleep. Could do a condition variable but that's
+                    // more complex and probably makes no difference in most cases where
+                    // this would come up.
+                    std::this_thread::sleep_for(50ms);
+                }
             }
             else
             {
