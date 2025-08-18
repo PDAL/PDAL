@@ -706,12 +706,12 @@ void streamTest(const std::string src)
 
 TEST(EptReaderTest, binaryStream)
 {
-    //streamTest(ellipsoidEptBinaryPath);
+    streamTest(ellipsoidEptBinaryPath);
 }
 
 TEST(EptReaderTest, laszipStream)
 {
-    //streamTest(eptLaszipPath);
+    streamTest(eptLaszipPath);
 }
 
 TEST(EptReaderTest, zstandardStream)
