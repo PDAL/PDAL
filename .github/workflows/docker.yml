@@ -30,6 +30,11 @@ jobs:
           echo "are we pushing packages" ${{ env.PUSH_PACKAGES }}
           echo "event_name" ${{ github.event_name }}
           echo "ref" ${{ github.ref }}
+      - name: Set up QEMU
+        id: qemu
+        uses: docker/setup-qemu-action@v3
+        with:
+          version: latest
       - name: Setup Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3
