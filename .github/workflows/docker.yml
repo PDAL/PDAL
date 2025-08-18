@@ -65,7 +65,7 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           file: "./scripts/docker/ubuntu/Dockerfile"
           context: .
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
 
           # We need to pass in the SHA to the Dockerfile so it can checkout
           # our code. It is a different active SHA depending on whether it is a
