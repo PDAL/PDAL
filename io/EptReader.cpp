@@ -35,6 +35,7 @@
 #include "EptReader.hpp"
 
 #include <limits>
+#include <atomic>
 
 #include <nlohmann/json.hpp>
 
