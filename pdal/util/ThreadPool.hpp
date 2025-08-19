@@ -96,10 +96,9 @@ public:
     PDAL_EXPORT void clearTasks()
     {
         // Effectively clear the queue.
-        std::unique_lock<std::mutex> lock(m_mutex);
+        std::lock_guard<std::mutex> lock(m_mutex);
         std::queue<std::function<void()>> q;
         m_tasks.swap(q);
-        lock.unlock();
     }
 
     // Wait for all current tasks to complete.  As opposed to join, tasks may
