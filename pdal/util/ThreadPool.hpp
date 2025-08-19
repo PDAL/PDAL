@@ -153,9 +153,6 @@ public:
     PDAL_EXPORT std::size_t numThreads() const
     { return m_numThreads; }
 
-    PDAL_EXPORT bool running() const
-    { return m_running; }
-
 private:
     // Worker thread function.  Wait for a task and run it.
     void work();
