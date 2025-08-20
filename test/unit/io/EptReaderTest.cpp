@@ -33,6 +33,7 @@
  ****************************************************************************/
 
 #include <algorithm>
+#include <future>
 
 #include <nlohmann/json.hpp>
 
@@ -213,14 +214,22 @@ TEST(EptReaderTest, unreadableTileFailure)
 {
     Options options;
     options.add("filename", invalidTilePath);
+    options.add("requests", 4);
 
-    PointTable table;
-
-    EptReader reader;
+    PipelineManager mgr;
+    Stage& reader = mgr.addReader("readers.ept");
     reader.setOptions(options);
-    reader.prepare(table);
 
-    EXPECT_THROW(reader.execute(table), pdal_error);
+    Stage& writer = mgr.addWriter("writers.null");
+    writer.setInput(reader);
+
+    auto timeoutRunner = std::async(std::launch::async, [&mgr] {
+        EXPECT_THROW(mgr.execute(), pdal_error);
+    });
+
+    EXPECT_TRUE(timeoutRunner.wait_for(std::chrono::seconds(5)) 
+        != std::future_status::timeout);
+    mgr.destroyStage(&reader);
 }
 
 TEST(EptReaderTest, unreadableTileFailureStreaming)
@@ -250,6 +259,7 @@ TEST(EptReaderTest, unreadableTileFailureStreaming)
 
     Options options;
     options.add("filename", invalidTilePath);
+    options.add("requests", 4);
 
     EptReader reader;
     reader.setOptions(options);
@@ -258,7 +268,11 @@ TEST(EptReaderTest, unreadableTileFailureStreaming)
     TestPointTable table(streamView);
 
     reader.prepare(table);
-    EXPECT_THROW(reader.execute(table), pdal_error);
+    auto timeoutRunner = std::async(std::launch::async, [&reader, &table] {
+        EXPECT_THROW(reader.execute(table), pdal_error);
+    });
+
+    EXPECT_TRUE(timeoutRunner.wait_for(std::chrono::seconds(5)) != std::future_status::timeout);
 }
 
 TEST(EptReaderTest, unreadableDataIgnored)
