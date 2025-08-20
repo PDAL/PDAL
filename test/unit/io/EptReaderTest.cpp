@@ -263,7 +263,6 @@ TEST(EptReaderTest, unreadableTileFailureStreaming)
     options.add("filename", invalidTilePath);
     options.add("requests", 4);
 
-    EptReader reader;
     PipelineManager mgr;
     Stage& reader = mgr.addReader("readers.ept");
     reader.setOptions(options);
