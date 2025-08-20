@@ -264,14 +264,19 @@ TEST(EptReaderTest, unreadableTileFailureStreaming)
     options.add("requests", 4);
 
     EptReader reader;
+    PipelineManager mgr;
+    Stage& reader = mgr.addReader("readers.ept");
     reader.setOptions(options);
+
+    Stage& writer = mgr.addWriter("writers.null");
+    writer.setInput(reader);
+
     PointTable streamTable;
     PointView streamView(streamTable);
     TestPointTable table(streamView);
 
-    reader.prepare(table);
-    auto timeoutRunner = std::async(std::launch::async, [&reader, &table] {
-        EXPECT_THROW(reader.execute(table), pdal_error);
+    auto timeoutRunner = std::async(std::launch::async, [&mgr, &table] {
+        EXPECT_THROW(mgr.executeStream(table), pdal_error);
     });
 
     EXPECT_TRUE(timeoutRunner.wait_for(std::chrono::seconds(5)) 
