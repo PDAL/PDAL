@@ -88,7 +88,7 @@ namespace
 
     const std::string bcbfPath(
             Support::datapath("ept/bcbf/ept.json"));
-    // This dataset has an invalid tile (zeros written to 2-2-2-2.laz)
+    // This dataset has an invalid tile (random bits written to 2-2-2-2.laz)
     const std::string invalidTilePath(
             Support::datapath("ept/lone-star-invalid-tile/ept.json"));
 
@@ -229,6 +229,8 @@ TEST(EptReaderTest, unreadableTileFailure)
 
     EXPECT_TRUE(timeoutRunner.wait_for(std::chrono::seconds(5)) 
         != std::future_status::timeout);
+    // This will abort the whole EPT test on failure. Need to think of a better
+    // way to do this.
     mgr.destroyStage(&reader);
 }
 
@@ -272,7 +274,11 @@ TEST(EptReaderTest, unreadableTileFailureStreaming)
         EXPECT_THROW(reader.execute(table), pdal_error);
     });
 
-    EXPECT_TRUE(timeoutRunner.wait_for(std::chrono::seconds(5)) != std::future_status::timeout);
+    EXPECT_TRUE(timeoutRunner.wait_for(std::chrono::seconds(5)) 
+        != std::future_status::timeout);
+    // This will abort the whole EPT test on failure. Need to think of a better
+    // way to do this.
+    mgr.destroyStage(&reader);
 }
 
 TEST(EptReaderTest, unreadableDataIgnored)
