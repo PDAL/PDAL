@@ -235,6 +235,11 @@ macro(PDAL_ADD_TEST _name)
     if (WIN32)
         set_property(TEST ${_name} PROPERTY ENVIRONMENT
             "PDAL_DRIVER_PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+        target_link_libraries(${_name}
+            PRIVATE
+                ${PDAL_LIB_NAME}
+                #                GTest::gtest_main
+        )
     else()
         set_property(TEST ${_name} PROPERTY ENVIRONMENT
             "PDAL_DRIVER_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
