@@ -16,7 +16,7 @@ concurrency:
 #
 jobs:
   containers:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
     env:
       PUSH_PACKAGES: ${{ github.repository_owner == 'PDAL' && github.event_name != 'pull_request'  }}
@@ -30,6 +30,11 @@ jobs:
           echo "are we pushing packages" ${{ env.PUSH_PACKAGES }}
           echo "event_name" ${{ github.event_name }}
           echo "ref" ${{ github.ref }}
+      - name: Set up QEMU
+        id: qemu
+        uses: docker/setup-qemu-action@v3
+        with:
+          version: latest
       - name: Setup Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3
@@ -65,7 +70,7 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           file: "./scripts/docker/ubuntu/Dockerfile"
           context: .
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
 
           # We need to pass in the SHA to the Dockerfile so it can checkout
           # our code. It is a different active SHA depending on whether it is a
