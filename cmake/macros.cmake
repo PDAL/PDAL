@@ -221,7 +221,6 @@ macro(PDAL_ADD_TEST _name)
         PRIVATE
             ${PDAL_LIB_NAME}
             GTest::gtest
-            GTest::gtest_main
             ${PDAL_ADD_TEST_LINK_WITH}
             ${WINSOCK_LIBRARY}
     )
