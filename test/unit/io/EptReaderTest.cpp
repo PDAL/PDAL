@@ -33,6 +33,7 @@
  ****************************************************************************/
 
 #include <algorithm>
+#include <future>
 
 #include <nlohmann/json.hpp>
 
@@ -87,6 +88,9 @@ namespace
 
     const std::string bcbfPath(
             Support::datapath("ept/bcbf/ept.json"));
+    // This dataset has an invalid tile (random bits written to 2-2-2-2.laz)
+    const std::string invalidTilePath(
+            Support::datapath("ept/lone-star-invalid-tile/ept.json"));
 
     const point_count_t ellipsoidNumPoints(100000);
     const BOX3D ellipsoidBoundsConforming(-8242746, 4966506, -50,
@@ -204,6 +208,81 @@ TEST(EptReaderTest, unreadableDataFailure)
 
     // This dataset is missing its root point data node, so we should fail here.
     EXPECT_THROW(reader.execute(table), pdal_error);
+}
+
+TEST(EptReaderTest, unreadableTileFailure)
+{
+    Options options;
+    options.add("filename", invalidTilePath);
+    options.add("requests", 4);
+
+    PipelineManager mgr;
+    Stage& reader = mgr.addReader("readers.ept");
+    reader.setOptions(options);
+
+    Stage& writer = mgr.addWriter("writers.null");
+    writer.setInput(reader);
+
+    auto timeoutRunner = std::async(std::launch::async, [&mgr] {
+        EXPECT_THROW(mgr.execute(), pdal_error);
+    });
+
+    EXPECT_TRUE(timeoutRunner.wait_for(std::chrono::seconds(5)) 
+        != std::future_status::timeout);
+    // This will abort the whole EPT test on failure. Need to think of a better
+    // way to do this.
+    mgr.destroyStage(&reader);
+}
+
+TEST(EptReaderTest, unreadableTileFailureStreaming)
+{
+    class TestPointTable : public StreamPointTable
+    {
+    public:
+        TestPointTable(PointView& view)
+            : StreamPointTable(*view.table().layout(), 1024)
+            , m_view(view)
+        { }
+
+    protected:
+        virtual void reset() override
+        {
+            m_offset += numPoints();
+        }
+
+        virtual char* getPoint(PointId index) override
+        {
+            return m_view.getOrAddPoint(m_offset + index);
+        }
+
+        PointView& m_view;
+        PointId m_offset = 0;
+    };
+
+    Options options;
+    options.add("filename", invalidTilePath);
+    options.add("requests", 4);
+
+    PipelineManager mgr;
+    Stage& reader = mgr.addReader("readers.ept");
+    reader.setOptions(options);
+
+    Stage& writer = mgr.addWriter("writers.null");
+    writer.setInput(reader);
+
+    PointTable streamTable;
+    PointView streamView(streamTable);
+    TestPointTable table(streamView);
+
+    auto timeoutRunner = std::async(std::launch::async, [&mgr, &table] {
+        EXPECT_THROW(mgr.executeStream(table), pdal_error);
+    });
+
+    EXPECT_TRUE(timeoutRunner.wait_for(std::chrono::seconds(5)) 
+        != std::future_status::timeout);
+    // This will abort the whole EPT test on failure. Need to think of a better
+    // way to do this.
+    mgr.destroyStage(&reader);
 }
 
 TEST(EptReaderTest, unreadableDataIgnored)

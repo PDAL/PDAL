@@ -35,6 +35,7 @@
 #include "EptReader.hpp"
 
 #include <limits>
+#include <atomic>
 
 #include <nlohmann/json.hpp>
 
@@ -180,6 +181,7 @@ public:
     uint64_t depthEnd {0};    // Zero indicates selection of all depths.
     uint64_t hierarchyStep {0};
     uint64_t nodeId;
+    std::atomic<bool> done;
 
     void overlaps(ept::Hierarchy& target, const NL::json& hier, const ept::Key& key);
     bool passesSpatialFilter(const BOX3D& tileBounds) const;
@@ -550,8 +552,7 @@ void EptReader::load(const ept::Overlap& overlap)
                 // an error and ignoreUnreadable isn't set, this will be fatal
                 // but that will occur downstream outside of this pool thread.
 
-                // Loop to push the tile on the queue until there is room.
-                while (true)
+                while (!m_p->done)
                 {
                     {
                         std::lock_guard<std::mutex> l(m_p->mutex);
@@ -634,6 +635,7 @@ void EptReader::ready(PointTableRef table)
     // show up at once. Others requests will be queued as the results
     // are handled.
     m_p->pool.reset(new ThreadPool(m_p->pool->numThreads()));
+    m_p->done = false;
     for (const ept::Overlap& overlap : *m_p->hierarchy)
         load(overlap);
     if (table.supportsView())
@@ -780,6 +782,10 @@ void EptReader::checkTile(const ept::TileContents& tile)
 {
     if (tile.error().size())
     {
+        m_p->done = true;
+        // Since tasks for all tiles were added to the queue, clear them
+        // before stopping the pool.
+        m_p->pool->clearTasks();
         m_p->pool->stop();
         log()->get(LogLevel::Warning) <<
             "Use readers.ept.ignore_unreadable to ignore this error" <<
