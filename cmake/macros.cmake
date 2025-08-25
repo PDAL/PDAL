@@ -184,10 +184,6 @@ endmacro(PDAL_ADD_PLUGIN)
 #    LINK_WITH link test executable with libraries
 #    INCLUDES header file directories
 #
-# If we don't have GTest go activate it first
-if(WITH_TESTS AND NOT TARGET GTest::gtest)
-    include (${PDAL_CMAKE_DIR}/gtest.cmake)
-endif()
 
 macro(PDAL_ADD_TEST _name)
 
@@ -221,7 +217,6 @@ macro(PDAL_ADD_TEST _name)
         PRIVATE
             ${PDAL_LIB_NAME}
             GTest::gtest
-            GTest::gtest_main
             ${PDAL_ADD_TEST_LINK_WITH}
             ${WINSOCK_LIBRARY}
     )
