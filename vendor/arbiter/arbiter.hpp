@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: 9671686bd5cc1a5f2d56075f93d77d80c0c72a06
+// Git SHA: 1091b0608888dd33c4f13724ed372148de2668aa
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -45,6 +45,7 @@ SOFTWARE.
 /// If defined, indicates that the source file is amalgamated
 /// to prevent private header inclusion.
 #define ARBITER_IS_AMALGAMATION
+#define ARBITER_CUSTOM_NAMESPACE pdal
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: arbiter/third/xml/rapidxml.hpp
@@ -3597,6 +3598,10 @@ inline std::string join(std::string path, Paths&&... paths)
  * platform.
  */
 ARBITER_DLL std::unique_ptr<std::string> env(const std::string& var);
+
+/** Parses a boolean value from an environment variable.
+ * Values are like "TRUE"/"FALSE"/"0"/"1" */
+ARBITER_DLL bool parseBoolFromEnv(const std::string& var, bool defaultValue);
 
 /** @brief Split a string on a token. */
 ARBITER_DLL std::vector<std::string> split(
