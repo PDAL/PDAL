@@ -2650,7 +2650,7 @@ S3::Resource::Resource(std::string base, std::string fullPath)
     : m_baseUrl(base)
     , m_bucket()
     , m_object()
-    , m_virtualHosted(true)
+    , m_virtualHosted()
 {
     fullPath = sanitize(fullPath);
     const std::size_t split(fullPath.find("/"));
@@ -2658,6 +2658,10 @@ S3::Resource::Resource(std::string base, std::string fullPath)
     m_bucket = fullPath.substr(0, split);
     if (split != std::string::npos) m_object = fullPath.substr(split + 1);
 
+    // By default, we use virtual-hosted URLs if the bucket name contains no dots.
+    // This can be overridden with the AWS_VIRTUAL_HOSTING environment variable
+    // (set to "TRUE" or "FALSE")
+    //
     // We would prefer to use virtual-hosted URLs all the time since path-style
     // URLs are being deprecated in 2020.  We also want to use HTTPS all the
     // time, which is required for KMS-managed server-side encryption.  However,
@@ -2676,7 +2680,10 @@ S3::Resource::Resource(std::string base, std::string fullPath)
     // 2021 note: the deprecation date got delayed, and buckets containing
     // dots still has no fix - see the note at the top of the first link above.
     // So for the time being, we'll keep this forked logic below.
-    m_virtualHosted = m_bucket.find_first_of('.') == std::string::npos;
+    m_virtualHosted = parseBoolFromEnv(
+        "AWS_VIRTUAL_HOSTING",
+        m_bucket.find_first_of('.') == std::string::npos
+    );
 }
 
 std::string S3::Resource::canonicalUri() const
@@ -6022,6 +6029,29 @@ std::unique_ptr<std::string> env(const std::string& var)
 #endif
 
     return result;
+}
+
+bool parseBoolFromEnv(const std::string& var, bool defaultValue)
+{
+    auto value = env(var);
+    if (!value)
+    {
+        // env var is not set
+        return defaultValue;
+    }
+    if (value->empty())
+    {
+        // env var is set to the empty string; interpret as true (variable is present)
+        return true;
+    }
+
+    const char firstChar = std::tolower((*value)[0]);
+    if (firstChar == 't' || firstChar == '1')
+        return true;
+    else if (firstChar == 'f' || firstChar == '0')
+        return false;
+    else
+        return defaultValue;
 }
 
 std::vector<std::string> split(const std::string& in, const char delimiter)
