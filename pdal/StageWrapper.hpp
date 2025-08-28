@@ -29,10 +29,21 @@ public:
         { s.done(table); }
     static PointViewSet run(Stage& s, PointViewPtr view)
         {
-            if (view->size())
+            bool bDoRunStage(true);
+            Filter* isFilterType = dynamic_cast<Filter*>(&s);
+
+            if (isFilterType)
+                if (view->empty())
+                    bDoRunStage = false;
+            if (bDoRunStage)
                 return s.run(view);
             else
+            {
+                s.log()->get(LogLevel::Debug)
+                    << " Filter '" << s.tag()
+                    << "' was passed an empty view and not executed";
                 return PointViewSet();
+            }
         }
 };
 
