@@ -207,6 +207,7 @@ int VSIStreamBuffer::sync()
             nBufferStart += nWritten;
             setp(buffer.data(), buffer.data() + nBufferSize);
         }
+        fp->Flush();
     }
     else
     {
