@@ -110,8 +110,8 @@ sphinx:
     pygments_style: "sphinx"
 parse:
   myst_substitutions:
-    version: "2.9.1"
-    release_date: "2025-08-25"
+    version: "2.9.2"
+    release_date: "2025-09-01"
     ASPRSLAS: "[ASPRS LAS](https://www.asprs.org/divisions-committees/lidar-division/laser-las-file-format-exchange-activities)"
     Bash: "[Bash](https://en.wikipedia.org/wiki/Bash_(Unix_shell))"
     CRREL: "[CRREL](https://www.erdc.usace.army.mil/Locations/CRREL/)"
