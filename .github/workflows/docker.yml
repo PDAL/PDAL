@@ -1,27 +1,32 @@
+# adapted from https://raw.githubusercontent.com/stefanprodan/podinfo/master/.github/workflows/release.yml
 name: Docker
 
 on:
-    push:
-        paths-ignore:
-            - 'doc/**'
-    pull_request:
-        paths-ignore:
-            - 'doc/**'
+  push:
+      paths-ignore:
+          - 'doc/**'
+  pull_request:
+      paths-ignore:
+          - 'doc/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
-# adapted from https://raw.githubusercontent.com/stefanprodan/podinfo/master/.github/workflows/release.yml
-#
 jobs:
-  containers:
-    runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
+  build_individual_images:
+    strategy:
+      fail-fast: true
+      matrix:
+        runners: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runners }}
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
     env:
       PUSH_PACKAGES: ${{ github.repository_owner == 'PDAL' && github.event_name != 'pull_request'  }}
-    permissions:
-      packages: write
     steps:
       - uses: actions/checkout@v5
       - name: Lint
@@ -30,6 +35,16 @@ jobs:
           echo "are we pushing packages" ${{ env.PUSH_PACKAGES }}
           echo "event_name" ${{ github.event_name }}
           echo "ref" ${{ github.ref }}
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v4
+        with:
+          daemon-config: |
+            {
+              "debug": false,
+              "features": {
+                "containerd-snapshotter": true  
+              }
+            }
       - name: Setup Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3
@@ -42,12 +57,28 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      # Extract metadata (tags, labels) for Docker
+      # https://github.com/docker/metadata-action
       - if: ${{ env.PUSH_PACKAGES == 'true' }}
         name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Extract container metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/pdal/pdal
+            docker.io/pdal/pdal
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
       - name: Prepare
         id: prep
         run: |
@@ -58,14 +89,23 @@ jobs:
           BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
           echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_OUTPUT
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          
+          runner=${{ matrix.runners }}
+          if [[ "$runner" == *"-arm" ]]; then
+            ARCH=arm64
+          else
+            ARCH=amd64
+          fi
+          echo "ARCH=$ARCH" >> $GITHUB_OUTPUT
       - name: Build image
         uses: docker/build-push-action@v6
+        id: push
         with:
           push: ${{ env.PUSH_PACKAGES == 'true' }}
           builder: ${{ steps.buildx.outputs.name }}
           file: "./scripts/docker/ubuntu/Dockerfile"
           context: .
-          platforms: linux/amd64
+          platforms: linux/${{ steps.prep.outputs.ARCH }}
 
           # We need to pass in the SHA to the Dockerfile so it can checkout
           # our code. It is a different active SHA depending on whether it is a
@@ -74,10 +114,10 @@ jobs:
             GITHUB_SHA=${{ github.event.pull_request.head.sha != '' && github.event.pull_request.head.sha || github.sha }}
             GITHUB_REPOSITORY=${{ github.event.pull_request.head.repo.full_name != '' && github.event.pull_request.head.repo.full_name || github.repository }}
           tags: |
-            docker.io/pdal/pdal:${{ steps.prep.outputs.VERSION }}
-            docker.io/pdal/pdal:latest
-            ghcr.io/pdal/pdal:${{ steps.prep.outputs.VERSION }}
-            ghcr.io/pdal/pdal:latest
+            docker.io/pdal/pdal:${{ steps.prep.outputs.VERSION }}-${{ steps.prep.outputs.ARCH }}
+            docker.io/pdal/pdal:latest-${{ steps.prep.outputs.ARCH }}
+            ghcr.io/pdal/pdal:${{ steps.prep.outputs.VERSION }}-${{ steps.prep.outputs.ARCH }}
+            ghcr.io/pdal/pdal:latest-${{ steps.prep.outputs.ARCH }}
           labels: |
             org.opencontainers.image.title=${{ github.event.repository.name }}
             org.opencontainers.image.description=${{ github.event.repository.description }}
@@ -86,3 +126,51 @@ jobs:
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.version=${{ steps.prep.outputs.VERSION }}
             org.opencontainers.image.created=${{ steps.prep.outputs.BUILD_DATE }}
+      
+      - name: Generate artifact attestation
+        if: ${{ vars.PUSH_PACKAGES == 'true' }}
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ghcr.io/pdal/pdal
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: ${{ env.PUSH_PACKAGES == 'true' }}
+
+  create-manifest:
+
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    runs-on: ubuntu-latest
+    env:
+      PUSH_PACKAGES: ${{ github.repository_owner == 'PDAL' && github.event_name != 'pull_request' }}  
+    needs: build_individual_images
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        if: env.PUSH_PACKAGES == 'true'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        if: env.PUSH_PACKAGES == 'true'
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Create and push multi-platform manifest
+        if: env.PUSH_PACKAGES == 'true'
+        run: |
+          docker buildx imagetools create \
+          -t ghcr.io/pdal/pdal:latest \
+          ghcr.io/pdal/pdal:latest-amd64 \
+          ghcr.io/pdal/pdal:latest-arm64
+
+          docker buildx imagetools create \
+          -t pdal/pdal:latest \
+          pdal/pdal:latest-amd64 \
+          pdal/pdal:latest-arm64
