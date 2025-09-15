@@ -81,7 +81,7 @@ PointId PointView::addPoint()
     return tableId;
 }
 
-void PointView::basic_sort(Sorter sort, Compare comp)
+void PointView::basic_sort(SortFunc sort, Compare comp)
 {
     std::vector<PointId> order(size());
 
@@ -101,12 +101,12 @@ void PointView::sort(Dimension::Id dim)
     {
         return compare(dim, id1, id2);
     };
-    basic_sort(std::sort<std::vector<PointId>::iterator, PointView::Compare>, comp);
+    basic_sort(static_cast<SortFunc>(&std::sort), comp);
 }
 
 void PointView::sort(Compare comp)
 {
-    basic_sort(std::sort<std::vector<PointId>::iterator, PointView::Compare>, comp);
+    basic_sort(static_cast<SortFunc>(&std::sort), comp);
 }
 
 void PointView::stableSort(Dimension::Id dim)
@@ -115,12 +115,12 @@ void PointView::stableSort(Dimension::Id dim)
     {
         return compare(dim, id1, id2);
     };
-    basic_sort(std::stable_sort<std::vector<PointId>::iterator, PointView::Compare>, comp);
+    basic_sort(static_cast<SortFunc>(&std::stable_sort), comp);
 }
 
 void PointView::stableSort(Compare comp)
 {
-    basic_sort(std::stable_sort<std::vector<PointId>::iterator, PointView::Compare>, comp);
+    basic_sort(static_cast<SortFunc>(&std::stable_sort), comp);
 }
 
 void PointView::calculateBounds(BOX2D& output) const
