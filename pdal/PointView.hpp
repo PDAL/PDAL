@@ -262,6 +262,10 @@ public:
     void calculateBounds(BOX3D& box) const;
 
     using Compare = std::function<bool(PointId id1, PointId id2)>;
+    // This is necessary due to a bug in older OSX compilers.
+    using Sorter = std::function<void(std::vector<PointId>::iterator,
+                                      std::vector<PointId>::iterator,
+                                      Compare)>;
     void sort(Dimension::Id id);
     void sort(Compare comp);
     void stableSort(Dimension::Id id);
@@ -416,7 +420,6 @@ private:
     PointId index(PointId id) const
         { return m_index[id]; }
 
-    template<typename Sorter>
     void basic_sort(Sorter sort, Compare comp);
 };
 

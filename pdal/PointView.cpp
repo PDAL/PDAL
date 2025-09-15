@@ -81,7 +81,6 @@ PointId PointView::addPoint()
     return tableId;
 }
 
-template<typename Sorter>
 void PointView::basic_sort(Sorter sort, Compare comp)
 {
     std::vector<PointId> order(size());
