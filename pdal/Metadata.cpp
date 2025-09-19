@@ -37,6 +37,8 @@
 #include <pdal/util/Bounds.hpp>
 #include <pdal/PDALUtils.hpp>
 
+#include <pdal/private/gdal/ErrorHandler.hpp>
+
 namespace pdal
 {
 
@@ -104,6 +106,8 @@ std::string Metadata::inferType(const std::string& val)
 
     try
     {
+        gdal::ErrorHandlerSuspender();
+
         SpatialReference s(val);
         return "spatialreference";
     }
