@@ -54,7 +54,7 @@ RUN cd pdal/build  && \
     ninja install
 
 RUN git clone https://github.com/PDAL/python-plugins.git pdal-python-plugins && \
-    cd pdal-python-plugins && git checkout 1.6.5  && \
+    cd pdal-python-plugins && git checkout 1.6.6  && \
     python -m pip install \
     -Cbuild-dir=build \
     . \
@@ -64,7 +64,7 @@ RUN git clone https://github.com/PDAL/python-plugins.git pdal-python-plugins && 
     --no-build-isolation
 
 RUN git clone https://github.com/PDAL/python.git pdal-python && \
-    cd pdal-python && git checkout 3.5.0  && \
+    cd pdal-python && git checkout 3.5.3  && \
     python -m pip install \
     -Cbuild-dir=build \
     . \
