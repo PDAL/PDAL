@@ -82,6 +82,16 @@ void HagDemFilter::ready(PointTableRef table)
 {
     m_raster.reset(new gdal::Raster(m_rasterName));
 
+    if (!std::isnan(m_noData))
+        log()->get(LogLevel::Debug) << "Nodata was set to " << m_noData;
+    if (m_zeroGround)
+        log()->get(LogLevel::Debug) << "Setting ground-classified points to 0 HAG";
+    if (m_minClamp != (std::numeric_limits<double>::max)())
+        log()->get(LogLevel::Debug) << "min_clamp set to " << m_minClamp;
+
+    if (m_maxClamp != (std::numeric_limits<double>::min)())
+        log()->get(LogLevel::Debug) << "max_clamp set to " << m_maxClamp;
+
     gdal::GDALError response = m_raster->open();
     if (response != gdal::GDALError::NotOpen)
     {
@@ -93,16 +103,6 @@ void HagDemFilter::prepared(PointTableRef table)
 {
     if (m_band <= 0)
         throwError("Band must be greater than 0");
-
-    if (!std::isnan(m_noData))
-        log()->get(LogLevel::Debug) << "Nodata was set to " << m_noData;
-    if (m_zeroGround)
-        log()->get(LogLevel::Debug) << "Setting ground-classified points to 0 HAG";
-    if (m_minClamp != (std::numeric_limits<double>::max)())
-        log()->get(LogLevel::Debug) << "min_clamp set to " << m_minClamp;
-
-    if (m_maxClamp != (std::numeric_limits<double>::min)())
-        log()->get(LogLevel::Debug) << "max_clamp set to " << m_maxClamp;
 
 }
 
