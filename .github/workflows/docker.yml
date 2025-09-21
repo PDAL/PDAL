@@ -129,7 +129,7 @@ jobs:
             org.opencontainers.image.created=${{ steps.prep.outputs.BUILD_DATE }}
       
       - name: Generate artifact attestation
-        if: ${{ vars.PUSH_PACKAGES == 'true' }}
+        if: ${{ env.PUSH_PACKAGES == 'true' }}
         uses: actions/attest-build-provenance@v3
         with:
           subject-name: ghcr.io/pdal/pdal
