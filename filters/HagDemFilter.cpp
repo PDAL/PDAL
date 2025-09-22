@@ -83,18 +83,21 @@ void HagDemFilter::ready(PointTableRef table)
     m_raster.reset(new gdal::Raster(m_rasterName));
 
     if (!std::isnan(m_noData))
-        log()->get(LogLevel::Debug) << "Nodata was set to " << m_noData;
+        log()->get(LogLevel::Debug) << "Nodata was set to " << m_noData << std::endl;
+
     if (m_zeroGround)
-        log()->get(LogLevel::Debug) << "Setting ground-classified points to 0 HAG";
+        log()->get(LogLevel::Debug) << "Setting ground-classified points to 0 HAG" << std::endl;
+
     if (m_minClamp != (std::numeric_limits<double>::max)())
-        log()->get(LogLevel::Debug) << "min_clamp set to " << m_minClamp;
+        log()->get(LogLevel::Debug) << "min_clamp set to " << m_minClamp << std::endl;
 
     if (m_maxClamp != (std::numeric_limits<double>::min)())
-        log()->get(LogLevel::Debug) << "max_clamp set to " << m_maxClamp;
+        log()->get(LogLevel::Debug) << "max_clamp set to " << m_maxClamp << std::endl;
 
     gdal::GDALError response = m_raster->open();
-    if (response != gdal::GDALError::NotOpen)
+    if (response == gdal::GDALError::NotOpen)
     {
+        log()->get(LogLevel::Error) << "Unable to open raster " << m_rasterName << std::endl;
         throwError(m_raster->errorMsg());
     }
 }
@@ -134,7 +137,7 @@ bool HagDemFilter::processOne(PointRef& point)
         double y = point.getFieldAs<double>(Id::Y);
         double z;
         double val;
-        double hag;
+        double hag(0.0);
 
         // If raster has a point at X, Y of pointcloud point, use it.
         // Otherwise the HAG value is not set.
