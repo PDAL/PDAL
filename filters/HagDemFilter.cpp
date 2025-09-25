@@ -34,6 +34,7 @@
 
 #include "HagDemFilter.hpp"
 
+#include <algorithm>
 #include <pdal/private/gdal/Raster.hpp>
 
 namespace pdal
@@ -66,6 +67,9 @@ void HagDemFilter::addArgs(ProgramArgs& args)
     args.add("zero_ground", "If true, set HAG of ground-classified points "
         "to 0 rather than comparing Z value to raster DEM",
         m_zeroGround, true);
+    args.add("min_clamp", "Minimum HAG value", m_minClamp, (std::numeric_limits<double>::min)());
+    args.add("max_clamp", "Maximum HAG value", m_maxClamp, (std::numeric_limits<double>::max)());
+    args.add("nodata_hag", "HAG value to use for nodata pixels", m_noDataHeight, 0.0);
 }
 
 
@@ -78,13 +82,31 @@ void HagDemFilter::addDimensions(PointLayoutPtr layout)
 void HagDemFilter::ready(PointTableRef table)
 {
     m_raster.reset(new gdal::Raster(m_rasterName));
-    m_raster->open();
+
+    log()->get(LogLevel::Debug) << "Nodata HAG override was set to " << m_noDataHeight << std::endl;
+
+    if (m_zeroGround)
+        log()->get(LogLevel::Debug) << "Setting ground-classified points to 0 HAG" << std::endl;
+
+    if (m_minClamp != (std::numeric_limits<double>::min)())
+        log()->get(LogLevel::Debug) << "min_clamp set to " << m_minClamp << std::endl;
+
+    if (m_maxClamp != (std::numeric_limits<double>::max)())
+        log()->get(LogLevel::Debug) << "max_clamp set to " << m_maxClamp << std::endl;
+
+    gdal::GDALError response = m_raster->open();
+    if (response == gdal::GDALError::NotOpen)
+    {
+        log()->get(LogLevel::Error) << "Unable to open raster " << m_rasterName << std::endl;
+        throwError(m_raster->errorMsg());
+    }
 }
 
 void HagDemFilter::prepared(PointTableRef table)
 {
     if (m_band <= 0)
         throwError("Band must be greater than 0");
+
 }
 
 void HagDemFilter::filter(PointView& view)
@@ -103,26 +125,50 @@ bool HagDemFilter::processOne(PointRef& point)
     static std::vector<double> data;
     static std::array<double, 2> pix;
 
-    // If "zero_ground" option is set, all ground points get HAG of 0
-    if (m_zeroGround &&
-        point.getFieldAs<uint8_t>(Id::Classification) == ClassLabel::Ground)
-    {
-        point.setField(Id::HeightAboveGround, 0);
-    }
-    else
-    {
-        double x = point.getFieldAs<double>(Id::X);
-        double y = point.getFieldAs<double>(Id::Y);
+    double x = point.getFieldAs<double>(Id::X);
+    double y = point.getFieldAs<double>(Id::Y);
+    double z;
+    double val;
+    double hag(m_noDataHeight);
 
-        // If raster has a point at X, Y of pointcloud point, use it.
-        // Otherwise the HAG value is not set.
-        if (m_raster->read(x, y, data, pix ) == gdal::GDALError::None)
+    if (m_zeroGround)
+    {
+        if (point.getFieldAs<uint8_t>(Id::Classification) == ClassLabel::Ground)
         {
-            double z = point.getFieldAs<double>(Id::Z);
-            double hag = z - data[m_band - 1];
-            point.setField(Dimension::Id::HeightAboveGround, hag);
+            point.setField(Dimension::Id::HeightAboveGround, 0);
+            return true;
         }
     }
+
+    // If raster has a point at X, Y of pointcloud point, use it.
+    // Otherwise the HAG value is not set.
+    gdal::GDALError readStatus = m_raster->read(x, y, data, pix);
+    if (readStatus == gdal::GDALError::None)
+    {
+        double z = point.getFieldAs<double>(Id::Z);
+        val = data[m_band - 1];
+        hag = z - val;
+
+        if (val == m_bandNoData)
+            hag = m_noDataHeight;
+
+        else if (hag < m_minClamp)
+            hag = m_minClamp;
+
+        else if (hag > m_maxClamp)
+            hag = m_maxClamp;
+
+    }
+    else if (readStatus == gdal::GDALError::NoData)
+    {
+        hag = m_noDataHeight;
+    } else
+    {
+        // skip any other errors
+        return true;
+    }
+
+    point.setField(Dimension::Id::HeightAboveGround, hag);
     return true;
 }
 
