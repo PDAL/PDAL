@@ -70,6 +70,10 @@ private:
     std::string m_rasterName;
     bool m_zeroGround;
     int32_t m_band;
+    double m_minClamp;
+    double m_maxClamp;
+    double m_noDataHeight;
+    double m_bandNoData;
 };
 
 } // namespace pdal
