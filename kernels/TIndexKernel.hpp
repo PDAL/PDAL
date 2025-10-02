@@ -106,7 +106,6 @@ private:
     void createFields();
     void setStringField(OGRFeatureH hFeature, int idx, const char* value);
     void fastBoundary(Stage& reader, FileInfo& fileInfo);
-    void slowBoundary(PipelineManager& manager);
     std::string makeMultiPolygon(const std::string& wkt);
 
     bool isFileIndexed( const FieldIndexes& indexes, const FileInfo& fileInfo);

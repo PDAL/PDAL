@@ -618,12 +618,6 @@ void TIndexKernel::fastBoundary(Stage& reader, FileInfo& fileInfo)
 }
 
 
-void TIndexKernel::slowBoundary(PipelineManager& manager)
-{
-    manager.execute(ExecMode::PreferStream);
-}
-
-
 void TIndexKernel::getFileInfo(FileInfo& fileInfo)
 {
     PipelineManager manager;
@@ -649,7 +643,7 @@ void TIndexKernel::getFileInfo(FileInfo& fileInfo)
         manager.addStage(&hexer);
         try
         {
-            slowBoundary(manager);
+            manager.execute(ExecMode::PreferStream);
 
             fileInfo.m_boundary = hexer.toWKT();
             fileInfo.m_srs = hexer.getSpatialReference().getWKT();
