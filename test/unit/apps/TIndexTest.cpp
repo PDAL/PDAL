@@ -51,7 +51,7 @@ TEST(TIndex, test1)
     std::string outPoints(Support::temppath("points.txt"));
 
     std::string cmd = Support::binpath("pdal") + " tindex create " +
-        outSpec + " \"" + inSpec + "\" -f GeoJSON";
+        outSpec + " \"" + inSpec + "\" -f GeoJSON --log=stdout";
 
     FileUtils::deleteFile(outSpec);
 
@@ -126,7 +126,7 @@ TEST(TIndex, test3)
 
     std::string cmd = "find " + Support::datapath("tindex") +
         " -name \"*.txt\" | " + Support::binpath("pdal") +
-        " tindex create --stdin " + outSpec + " -f GeoJSON";
+        " tindex create --stdin " + outSpec + " -f GeoJSON --log=stdout";
 
     std::string output;
     Utils::run_shell_command(cmd, output);
@@ -244,5 +244,25 @@ TEST(TIndex, test5)
     pos = output.find("supports a maximum of 254");
     EXPECT_NE(pos, std::string::npos);
     FileUtils::deleteDirectory(outSpec);
+}
+
+// testing warnings from failed boundary creation
+TEST(TIndex, test6)
+{
+    std::string inSpec(Support::datapath("tindex/*.txt"));
+    std::string outSpec(Support::temppath("tindex.json"));
+
+    std::string cmd = Support::binpath("pdal") + " tindex create " +
+        outSpec + " \"" + inSpec + "\" -f GeoJSON --log=stdout " +
+        "--filters.hexbin.smooth=false";
+
+    FileUtils::deleteFile(outSpec);
+    std::string output;
+    Utils::run_shell_command(cmd, output);
+
+    std::string::size_type pos = output.find("Argument references invalid/unused stage");
+    EXPECT_NE(pos, std::string::npos);
+
+    FileUtils::deleteFile(outSpec);
 }
 
