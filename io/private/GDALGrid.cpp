@@ -81,6 +81,14 @@ GDALGrid::GDALGrid(double xOrigin, double yOrigin, size_t width, size_t height, 
         m_mean.reset(new Rasterd(limits));
     if (m_outputTypes & statStdDev)
         m_stdDev.reset(new Rasterd(limits));
+    // temporary hack so percentiles aren't included in "all"
+    if ((m_outputTypes & statPercentiles) && m_binMode && (m_outputTypes != -1))
+    {
+        // using static values for now, will be configurable later
+        std::vector<int> percentiles = { 5, 95 };
+        for (auto& p : percentiles)
+            m_pctls.emplace(p, new Rasterd(limits));
+    }
 }
 
 int GDALGrid::width() const
@@ -158,6 +166,8 @@ int GDALGrid::numBands() const
         num++;
     if (m_outputTypes & statStdDev)
         num++;
+    if (m_outputTypes & statPercentiles)
+        num += m_pctls.size();
     return num;
 }
 
@@ -397,6 +407,11 @@ void GDALGrid::update(size_t i, size_t j, double val, double dist)
     double& count = m_count->at(i, j);
     count++;
 
+    if (m_percentiles.size())
+    {
+        m_valBins[{i, j}].push_back(val);
+    }
+
     if (m_min)
     {
         double& min = m_min->at(i, j);
@@ -445,6 +460,20 @@ void GDALGrid::update(size_t i, size_t j, double val, double dist)
     }
 }
 
+
+// could potentially just use member vars
+void GDALGrid::fillPercentile(int percentile, DataPtr raster)
+{
+    const double fac = percentile / 100.0;
+    //!! wrong indexing for the map - should align with Raster idx instead of cell hash
+    for (auto& it : m_valBins)
+        if (it->second.size() > 0)
+        {
+            //(*raster)[i] = 
+        }
+}
+
+
 void GDALGrid::finalize()
 {
     // See
@@ -463,6 +492,10 @@ void GDALGrid::finalize()
                 if (!std::isnan(distSum))
                     (*m_idw)[i] /= distSum;
             }
+    
+    if (m_pctls.size())
+        for (auto& it : m_pctls)
+            fillPercentile(it->first, it->second);
 
     if (m_windowSize > 0)
         windowFill();

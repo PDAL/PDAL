@@ -103,6 +103,7 @@ void GDALWriter::addArgs(ProgramArgs& args)
         m_binMode, false);
     args.add("allow_empty", "Allow writing GDAL output that do not have any pixel values (no points)",
         m_allowEmpty, false);
+    //args.add("percentile", "Write percentile bands for each raster cell; specified as [<value>,<value>,...]", m_percentiles);
 }
 
 
@@ -170,7 +171,6 @@ void GDALWriter::initialize()
     // don't expand by point if we're running in standard mode.  That's
     // set later in writeView.
     m_expandByPoint = !m_fixedGrid;
-
 }
 
 

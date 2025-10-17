@@ -58,6 +58,14 @@ class GDALGrid
         int i;
         int j;
     };
+    inline bool operator<(Cell const& c1, Cell const& c2)
+    {
+        return (c1.i < c2.i) || ((c1.i == c2.i) && (c1.j < c2.j));
+    }
+    inline bool operator == (const Cell& c1, const Cell& c2)
+    {
+        return c1.i == c2.i && c1.j == c2.j;
+    }
 
 public:
     static const int statCount = 1;
@@ -66,6 +74,7 @@ public:
     static const int statMean = 8;
     static const int statStdDev = 16;
     static const int statIdw = 32;
+    static const int statPercentiles = 64;
 
     struct error : public std::runtime_error
     {
@@ -111,8 +120,10 @@ private:
     DataPtr m_mean;
     DataPtr m_stdDev;
     DataPtr m_idw;
-    DataPtr m_idwDist;
+    DataPtr m_idwDist; 
+    std::unordered_map<int, DataPtr> m_pctls;
 
+    std::unordered_map<Cell, <std::vector<double>>> m_valBins;
     int m_outputTypes;
 
     bool m_binMode;
@@ -160,3 +171,18 @@ private:
 };
 
 } //namespace pdal
+
+namespace std
+{
+    template<>
+    struct hash<pdal::GDALGrid::Cell>
+    {
+        std::size_t operator()(pdal::GDALGrid::Cell const & id) const noexcept
+        {
+            hash<uint32_t> h;
+
+            return h(id.i) ^ (h(id.j) << 1);
+        }
+    };
+} // namespace std
+
