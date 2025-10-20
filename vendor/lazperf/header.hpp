@@ -40,7 +40,6 @@ class LeInserter;
 class LeExtractor;
 
 const uint32_t DefaultChunkSize = 50000;
-const uint32_t VariableChunkSize = (std::numeric_limits<uint32_t>::max)();
 
 LAZPERF_EXPORT int baseCount(int format);
 

@@ -227,14 +227,13 @@ public:
             throw pdal_error("Invalid version " + std::to_string(version) +
                 " found in LAZ chunk table.");
 
-        bool variable = (m_vlr.chunk_size == lazperf::VariableChunkSize);
-
         if (numChunks)
-            m_chunks = lazperf::decompress_chunk_table(m_fileStream.cb(), numChunks, variable);
+            m_chunks = lazperf::decompress_chunk_table(m_fileStream.cb(), numChunks,
+                m_vlr.variableChunks());
 
         // If the chunk size is fixed, set the counts to the chunk size since
         // they aren't stored in the chunk table..
-        if (!variable)
+        if (!m_vlr.variableChunks())
         {
             uint64_t remaining = m_pointCount;
             for (lazperf::chunk& chunk : m_chunks)

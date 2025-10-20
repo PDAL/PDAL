@@ -337,7 +337,7 @@ void basic_file::Private::parseChunkTable()
     {
         uint32_t count;
 
-        if (laz.chunk_size == VariableChunkSize)
+        if (laz.variableChunks())
         {
             count = decomp.decompress(decoder, prev_count, 0);
             prev_count = count;
