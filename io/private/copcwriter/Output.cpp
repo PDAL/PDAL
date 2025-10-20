@@ -145,7 +145,7 @@ void Output::addCopcVlr()
 
 void Output::addLazVlr()
 {
-    lazperf::laz_vlr laz(b.pointFormatId, b.numExtraBytes, lazperf::VariableChunkSize);
+    lazperf::laz_vlr laz(b.pointFormatId, b.numExtraBytes, lazperf::laz_vlr::VariableChunkSize);
 
     std::vector<char> buf = laz.header().data();
     m_vlrBuf.insert(m_vlrBuf.end(), buf.begin(), buf.end());
