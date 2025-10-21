@@ -262,14 +262,14 @@ void GDALWriter::writeView(const PointViewPtr view)
         point.setPointId(idx);
         processOne(point);
         if (m_outputTypes & GDALGrid::statPctls)
-            addValueForPercentile(point);
+            processValue(point);
     }
 }
 
 
 //!! this is nasty, but no other way I could think of to only write the pct value map
 //!! in standard mode
-void GDALWriter::addValueForPercentile(PointRef& point) 
+void GDALWriter::processValue(PointRef& point) 
 {
     double x = point.getFieldAs<double>(Dimension::Id::X);
     double y = point.getFieldAs<double>(Dimension::Id::Y);

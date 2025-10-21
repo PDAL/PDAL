@@ -66,7 +66,7 @@ private:
     void expandGrid(BOX2D bounds);
     int width() const;
     int height() const;
-    void addValueForPercentile(PointRef& point);
+    void processValue(PointRef& point);
 
     std::string m_outputFilename;
     std::string m_drivername;

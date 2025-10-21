@@ -37,6 +37,7 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <unordered_map>
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/private/Raster.hpp>
