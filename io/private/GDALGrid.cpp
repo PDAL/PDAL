@@ -83,7 +83,7 @@ GDALGrid::GDALGrid(double xOrigin, double yOrigin, size_t width, size_t height, 
     if (m_outputTypes & statStdDev)
         m_stdDev.reset(new Rasterd(limits));
     //!! should probably do the binmode check elsewhere or throw an error here
-    if ((m_outputTypes & statPercentiles) && m_binMode)
+    if ((m_outputTypes & statPctls) && m_binMode)
     {
         for (auto& p : percentileValues)
         {
@@ -95,7 +95,6 @@ GDALGrid::GDALGrid(double xOrigin, double yOrigin, size_t width, size_t height, 
                 oss << "Invalid percentile value: " << p << ". Percentiles are limited to " << 
                     "0-100 integer values.";
                 throw error(oss.str());
-        
             }
         }
     }
@@ -176,7 +175,7 @@ int GDALGrid::numBands() const
         num++;
     if (m_outputTypes & statStdDev)
         num++;
-    if (m_outputTypes & statPercentiles)
+    if (m_outputTypes & statPctls)
         num += m_pctls.size();
     return num;
 }
@@ -205,7 +204,7 @@ double *GDALGrid::data(const std::string& name)
 double *GDALGrid::pctlData(int pct) const
 {
     auto it = m_pctls.find(pct);
-    if (it != m_pctls.end())
+    if ((it != m_pctls.end()) && m_valBins.size())
         return it->second->data();
     return nullptr;
 }
@@ -429,9 +428,6 @@ void GDALGrid::update(size_t i, size_t j, double val, double dist)
     double& count = m_count->at(i, j);
     count++;
 
-    if (m_pctls.size())
-        m_valBins[m_count->indexAt(i, j)].push_back(val);
-
     if (m_min)
     {
         double& min = m_min->at(i, j);
@@ -478,6 +474,16 @@ void GDALGrid::update(size_t i, size_t j, double val, double dist)
             }
         }
     }
+}
+
+
+void GDALGrid::accumulateValue(double x, double y, double z)
+{
+    Cell origin = pointToCell({x, y});
+
+    if (((m_outputTypes & statPctls) && m_binMode) && origin.i >= 0 
+        && origin.j >= 0 && origin.i < width() && origin.j < height())
+        m_valBins[m_count->indexAt(origin.i, origin.j)].push_back(z);
 }
 
 

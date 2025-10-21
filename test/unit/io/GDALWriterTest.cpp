@@ -122,7 +122,6 @@ void runGdalWriter(const Options& wo, const std::string& infile,
     run(false);
     if (!noStream)
         run(true);
-    run(true);
 }
 
 void runGdalWriter2(const Options& wo, const std::string& outfile,

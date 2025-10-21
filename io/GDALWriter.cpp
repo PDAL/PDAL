@@ -132,7 +132,7 @@ void GDALWriter::initialize()
         else if (ts == "stdev")
             m_outputTypes |= GDALGrid::statStdDev;
         else if (ts == "pctls")
-            m_outputTypes |= GDALGrid::statPercentiles;
+            m_outputTypes |= GDALGrid::statPctls;
         else
             throwError("Invalid output type: '" + ts + "'.");
     }
@@ -261,7 +261,20 @@ void GDALWriter::writeView(const PointViewPtr view)
     {
         point.setPointId(idx);
         processOne(point);
+        if (m_outputTypes & GDALGrid::statPctls)
+            addValueForPercentile(point);
     }
+}
+
+
+//!! this is nasty, but no other way I could think of to only write the pct value map
+//!! in standard mode
+void GDALWriter::addValueForPercentile(PointRef& point) 
+{
+    double x = point.getFieldAs<double>(Dimension::Id::X);
+    double y = point.getFieldAs<double>(Dimension::Id::Y);
+    double z = point.getFieldAs<double>(m_interpDim);
+    m_grid->accumulateValue(x, y, z);
 }
 
 

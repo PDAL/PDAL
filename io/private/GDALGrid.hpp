@@ -66,7 +66,7 @@ public:
     static const int statMean = 8;
     static const int statStdDev = 16;
     static const int statIdw = 32;
-    static const int statPercentiles = 64;
+    static const int statPctls = 64;
 
     struct error : public std::runtime_error
     {
@@ -89,6 +89,9 @@ public:
 
     // Return a pointer to the data in a percentile raster band, if it exists.
     double *pctlData(int pct) const;
+
+    // Add a point to the bins being used to calculate percentiles.
+    void accumulateValue(double x, double y, double z);
 
     // Add a point to the raster grid.
     void addPoint(double x, double y, double z);
