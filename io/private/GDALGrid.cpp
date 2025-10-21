@@ -97,9 +97,7 @@ GDALGrid::GDALGrid(double xOrigin, double yOrigin, size_t width, size_t height, 
                 throw error(oss.str());
         
             }
-                std::cerr << "Invalid percentile value: " << p << std::endl;
         }
-        std::cout << "m_pctls.size(): " << m_pctls.size() << std::endl;
     }
 }
 
