@@ -54,7 +54,7 @@ namespace
 {
 
 void runGdalWriter(const Options& wo, const std::string& infile,
-    const std::string& outfile, const std::string& values)
+    const std::string& outfile, const std::string& values, bool noStream=false)
 {
     auto run = [=](bool streamMode)
     {
@@ -120,6 +120,8 @@ void runGdalWriter(const Options& wo, const std::string& infile,
     };
 
     run(false);
+    if (!noStream)
+        run(true);
     run(true);
 }
 
@@ -433,17 +435,17 @@ TEST(GDALWriterTest, percentile)
     wo.add("output_type", "pctls");
     wo.add("resolution", 1);
     wo.add("binmode", true);
-    //wo.add("radius", .7071);
+    wo.add("percentiles", 50);
     wo.add("filename", outfile);
 
     const std::string output =
     "5.000     0.000     7.000     8.000     8.900 "
     "4.000     0.000     6.000     7.000     8.000 "
-    "3.000     4.000     5.000     5.430     6.430 "
+    "3.000     4.000     5.000     5.700     6.700 "
     "2.000     3.000     4.000     4.400     5.400 "
-    "0.050     2.000     3.000     4.000     5.000 ";
+    "0.500     2.000     3.000     4.000     5.000 ";
 
-    runGdalWriter(wo, infile, outfile, output);
+    runGdalWriter(wo, infile, outfile, output, true);
 }
 
 TEST(GDALWriterTest, stdev)
