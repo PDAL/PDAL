@@ -72,7 +72,7 @@ void GDALWriter::addArgs(ProgramArgs& args)
     args.add("gdalopts", "GDAL driver options (name=value,name=value...)",
         m_options);
     args.add("output_type", "Statistics produced ('min', 'max', 'mean', "
-        "'idw', 'count', 'stdev' or 'all')", m_outputTypeString, {"all"} );
+        "'idw', 'count', 'stdev', 'pctls' or 'all')", m_outputTypeString, {"all"} );
     args.add("data_type", "Data type for output grid ('int8', 'uint64', "
         "'float', etc.)", m_dataType, Dimension::Type::Double);
     args.add("window_size", "Cell distance for fallback interpolation",
@@ -103,7 +103,8 @@ void GDALWriter::addArgs(ProgramArgs& args)
         m_binMode, false);
     args.add("allow_empty", "Allow writing GDAL output that do not have any pixel values (no points)",
         m_allowEmpty, false);
-    //args.add("percentile", "Write percentile bands for each raster cell; specified as [<value>,<value>,...]", m_percentiles);
+    args.add("percentiles", "Write percentile bands for each raster cell; specified as <value>,<value>,...", 
+        m_percentiles, {5, 25, 50, 75, 95});
 }
 
 
@@ -130,6 +131,8 @@ void GDALWriter::initialize()
             m_outputTypes |= GDALGrid::statIdw;
         else if (ts == "stdev")
             m_outputTypes |= GDALGrid::statStdDev;
+        else if (ts == "pctls")
+            m_outputTypes |= GDALGrid::statPercentiles;
         else
             throwError("Invalid output type: '" + ts + "'.");
     }
@@ -171,6 +174,7 @@ void GDALWriter::initialize()
     // don't expand by point if we're running in standard mode.  That's
     // set later in writeView.
     m_expandByPoint = !m_fixedGrid;
+
 }
 
 
@@ -223,7 +227,7 @@ void GDALWriter::createGrid(BOX2D bounds)
     try
     {
         m_grid.reset(new GDALGrid(bounds.minx, bounds.miny, width, height, m_edgeLength,
-            m_radius, m_outputTypes, m_windowSize, m_power, m_binMode));
+            m_radius, m_outputTypes, m_windowSize, m_power, m_binMode, m_percentiles));
     }
     catch (GDALGrid::error& err)
     {
@@ -326,6 +330,12 @@ void GDALWriter::doneFile()
     src = m_grid->data("stdev");
     if (src && err == gdal::GDALError::None)
         err = raster.writeBand(src, srcNoData, bandNum++, "stdev");
+    for (auto& pct : m_percentiles)
+    {
+        src = m_grid->pctlData(pct);
+        if (src && err == gdal::GDALError::None)
+            err = raster.writeBand(src, srcNoData, bandNum++, "p" + std::to_string(pct));
+    }
     if (err != gdal::GDALError::None)
         throwError(raster.errorMsg());
 

@@ -100,8 +100,7 @@ private:
     bool m_writePDALMetadata;
     bool m_binMode;
     bool m_allowEmpty;
-    //NL:json m_percentiles;
-    int m_percentiles;
+    std::vector<int> m_percentiles;
 };
 
 }

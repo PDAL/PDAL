@@ -58,14 +58,6 @@ class GDALGrid
         int i;
         int j;
     };
-    inline bool operator<(Cell const& c1, Cell const& c2)
-    {
-        return (c1.i < c2.i) || ((c1.i == c2.i) && (c1.j < c2.j));
-    }
-    inline bool operator == (const Cell& c1, const Cell& c2)
-    {
-        return c1.i == c2.i && c1.j == c2.j;
-    }
 
 public:
     static const int statCount = 1;
@@ -85,7 +77,7 @@ public:
     // Exported for testing.
     PDAL_EXPORT GDALGrid(double xOrigin, double yOrigin, size_t width, size_t height,
         double edgeLength, double radius, int outputTypes, size_t windowSize,
-        double power, bool binMode=false);
+        double power, bool binMode=false, std::vector<int> percentileValues={});
 
     void expandToInclude(double x, double y);
 
@@ -95,11 +87,17 @@ public:
     // Return a pointer to the data in a raster band, row-major ordered.
     double *data(const std::string& name);
 
+    // Return a pointer to the data in a percentile raster band, if it exists.
+    double *pctlData(int pct) const;
+
     // Add a point to the raster grid.
     void addPoint(double x, double y, double z);
 
     // Compute final values after all points have been added.
     void finalize();
+
+    bool usesPctls() const 
+        { return !m_pctls.empty(); }
 
     int width() const;
     int height() const;
@@ -120,10 +118,11 @@ private:
     DataPtr m_mean;
     DataPtr m_stdDev;
     DataPtr m_idw;
-    DataPtr m_idwDist; 
+    DataPtr m_idwDist;
     std::unordered_map<int, DataPtr> m_pctls;
 
-    std::unordered_map<Cell, <std::vector<double>>> m_valBins;
+    // Cell index and all associated values
+    std::unordered_map<size_t, std::vector<double>> m_valBins;
     int m_outputTypes;
 
     bool m_binMode;
@@ -168,21 +167,9 @@ private:
     // Cumulate data from a source cell to a destination cell when doing
     // a window fill.
     void windowFillCell(int srcI, int srcJ, int dstI, int dstJ, double distance);
+
+
+    void fillPercentiles(const size_t& idx, std::vector<double>& values);
 };
 
 } //namespace pdal
-
-namespace std
-{
-    template<>
-    struct hash<pdal::GDALGrid::Cell>
-    {
-        std::size_t operator()(pdal::GDALGrid::Cell const & id) const noexcept
-        {
-            hash<uint32_t> h;
-
-            return h(id.i) ^ (h(id.j) << 1);
-        }
-    };
-} // namespace std
-

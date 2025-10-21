@@ -52,7 +52,8 @@ namespace pdal
 //  moving data around every time the grid is resized.
 
 GDALGrid::GDALGrid(double xOrigin, double yOrigin, size_t width, size_t height, double edgeLength,
-        double radius, int outputTypes, size_t windowSize, double power, bool binMode) :
+        double radius, int outputTypes, size_t windowSize, double power, bool binMode, 
+        std::vector<int> percentileValues) :
     m_windowSize(windowSize), m_edgeLength(edgeLength), m_radius(radius), m_power(power),
     m_outputTypes(outputTypes), m_binMode(binMode)
 {
@@ -81,13 +82,24 @@ GDALGrid::GDALGrid(double xOrigin, double yOrigin, size_t width, size_t height, 
         m_mean.reset(new Rasterd(limits));
     if (m_outputTypes & statStdDev)
         m_stdDev.reset(new Rasterd(limits));
-    // temporary hack so percentiles aren't included in "all"
-    if ((m_outputTypes & statPercentiles) && m_binMode && (m_outputTypes != -1))
+    //!! should probably do the binmode check elsewhere or throw an error here
+    if ((m_outputTypes & statPercentiles) && m_binMode)
     {
-        // using static values for now, will be configurable later
-        std::vector<int> percentiles = { 5, 95 };
-        for (auto& p : percentiles)
-            m_pctls.emplace(p, new Rasterd(limits));
+        for (auto& p : percentileValues)
+        {
+            if (p > 0 && p < 100)
+                m_pctls.emplace(p, new Rasterd(limits));
+            else
+            {
+                std::ostringstream oss;
+                oss << "Invalid percentile value: " << p << ". Percentiles are limited to " << 
+                    "0-100 integer values.";
+                throw error(oss.str());
+        
+            }
+                std::cerr << "Invalid percentile value: " << p << std::endl;
+        }
+        std::cout << "m_pctls.size(): " << m_pctls.size() << std::endl;
     }
 }
 
@@ -188,6 +200,18 @@ double *GDALGrid::data(const std::string& name)
         return m_stdDev->data();
     return nullptr;
 }
+
+
+//!! could maybe run something equivalent to fillPercentiles to calculate on the fly, but that would
+//!! entail looping thru m_valBins multiple times. Not sure which is better
+double *GDALGrid::pctlData(int pct) const
+{
+    auto it = m_pctls.find(pct);
+    if (it != m_pctls.end())
+        return it->second->data();
+    return nullptr;
+}
+
 
 GDALGrid::Cell GDALGrid::pointToCell(const Point& p)
 {
@@ -407,10 +431,8 @@ void GDALGrid::update(size_t i, size_t j, double val, double dist)
     double& count = m_count->at(i, j);
     count++;
 
-    if (m_percentiles.size())
-    {
-        m_valBins[{i, j}].push_back(val);
-    }
+    if (m_pctls.size())
+        m_valBins[m_count->indexAt(i, j)].push_back(val);
 
     if (m_min)
     {
@@ -461,16 +483,29 @@ void GDALGrid::update(size_t i, size_t j, double val, double dist)
 }
 
 
-// could potentially just use member vars
-void GDALGrid::fillPercentile(int percentile, DataPtr raster)
+void GDALGrid::fillPercentiles(const size_t& idx, std::vector<double>& values)
 {
-    const double fac = percentile / 100.0;
-    //!! wrong indexing for the map - should align with Raster idx instead of cell hash
-    for (auto& it : m_valBins)
-        if (it->second.size() > 0)
-        {
-            //(*raster)[i] = 
-        }
+    std::sort(values.begin(), values.end());
+    //!! This check is mostly for testing
+    if (values.size() != static_cast<size_t>(m_count->at(idx)))
+    {
+        throw error("Mismatch in size of accumulated values and count raster; "
+            "expected " + std::to_string(m_count->at(idx)) + " values, got " +
+            std::to_string(values.size()));
+        return;
+    }
+    //!! Could use nth_element?
+    for (auto& [pct, raster] : m_pctls)
+    {
+        const double pctIdxExact = (pct / 100.0) * (m_count->at(idx) - 1);
+        const size_t pctIdxFloor = static_cast<size_t>(pctIdxExact);
+        double fraction = pctIdxExact - pctIdxFloor;
+        if (!fraction)
+            (*raster)[idx] = values[pctIdxFloor];
+        else
+            (*raster)[idx] = values[pctIdxFloor] + fraction *
+                (values[pctIdxFloor + 1] - values[pctIdxFloor]);
+    }
 }
 
 
@@ -492,10 +527,14 @@ void GDALGrid::finalize()
                 if (!std::isnan(distSum))
                     (*m_idw)[i] /= distSum;
             }
-    
+
     if (m_pctls.size())
-        for (auto& it : m_pctls)
-            fillPercentile(it->first, it->second);
+        for (auto& it : m_valBins)
+        {
+            size_t idx = it.first;
+            if (!empty(idx))
+                fillPercentiles(idx, it.second);
+        }
 
     if (m_windowSize > 0)
         windowFill();

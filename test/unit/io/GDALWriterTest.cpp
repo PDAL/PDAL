@@ -423,6 +423,29 @@ TEST(GDALWriterTest, count)
     runGdalWriter(wo, infile, outfile, output);
 }
 
+TEST(GDALWriterTest, percentile)
+{
+    std::string infile = Support::datapath("gdal/grid.txt");
+    std::string outfile = Support::temppath("tmp.tif");
+
+    Options wo;
+    wo.add("gdaldriver", "GTiff");
+    wo.add("output_type", "pctls");
+    wo.add("resolution", 1);
+    wo.add("binmode", true);
+    //wo.add("radius", .7071);
+    wo.add("filename", outfile);
+
+    const std::string output =
+    "5.000     0.000     7.000     8.000     8.900 "
+    "4.000     0.000     6.000     7.000     8.000 "
+    "3.000     4.000     5.000     5.430     6.430 "
+    "2.000     3.000     4.000     4.400     5.400 "
+    "0.050     2.000     3.000     4.000     5.000 ";
+
+    runGdalWriter(wo, infile, outfile, output);
+}
+
 TEST(GDALWriterTest, stdev)
 {
     std::string infile = Support::datapath("gdal/grid.txt");
