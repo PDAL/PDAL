@@ -236,6 +236,16 @@ bool laz_vlr::valid() const
     return items.size();
 }
 
+bool laz_vlr::variableChunks() const
+{
+    return variableChunks(chunk_size);
+}
+
+bool laz_vlr::variableChunks(uint32_t chunk_size)
+{
+    return chunk_size == 0 || chunk_size == VariableChunkSize;
+}
+
 laz_vlr laz_vlr::create(std::istream& in)
 {
     laz_vlr lazVlr;
