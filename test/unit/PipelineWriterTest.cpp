@@ -67,3 +67,22 @@ TEST(PipelineManagerTest, issue_2458)
     EXPECT_TRUE(out.find("readers_las2") != std::string::npos);
     EXPECT_TRUE(out.find("writers_las1") != std::string::npos);
 }
+
+// Make sure options with Bounds & SpatialReference types are serialized correctly
+TEST(PipelineManagerTest, serialize)
+{
+    std::string inPipeline(Support::configuredpath("pipeline/serialize.json"));
+    std::string outPipeline(Support::temppath("serialized_output.json"));
+
+    // We need to read the pipeline, then serialize it before executing
+    PipelineManager mgr;
+    mgr.readPipeline(inPipeline);
+    Stage* stage = mgr.getStage();
+
+    PipelineWriter::writePipeline(stage, outPipeline);
+    EXPECT_EQ(mgr.execute(), 4775);
+
+    PipelineManager mgr2;
+    mgr2.readPipeline(outPipeline);
+    EXPECT_EQ(mgr2.execute(), 4775);
+}
