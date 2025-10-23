@@ -599,7 +599,8 @@ public:
             if (v == "NaN" || v == "Infinity" || v == "-Infinity")
                 v = "\"" + v + "\"";
         if (m_impl->m_type == "string" || m_impl->m_type == "base64Binary" ||
-            m_impl->m_type == "uuid" || m_impl->m_type == "matrix")
+            m_impl->m_type == "uuid" || m_impl->m_type == "matrix" ||
+            m_impl->m_type == "spatialreference" || m_impl->m_type == "bounds")
         {
             std::string val("\"");
             val += escapeQuotes(v) + "\"";
