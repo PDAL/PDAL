@@ -85,7 +85,7 @@ GDALGrid::GDALGrid(double xOrigin, double yOrigin, size_t width, size_t height, 
     //!! We do binmode checks in the writer, so probably not needed here
     for (auto& p : percentileValues)
     {
-        if (p >= 0 && p <= 100)
+        if (p > 0 && p < 100)
             m_pctls.emplace(p, new Rasterd(limits));
         else
         {
@@ -200,7 +200,6 @@ double *GDALGrid::data(const std::string& name)
 //!! entail looping thru m_valBins multiple times. Not sure which is better
 double *GDALGrid::pctlData(int pct) const
 {
-    std::cout << "writing pctl " << pct << std::endl;
     auto it = m_pctls.find(pct);
     if ((it != m_pctls.end()) && m_valBins.size())
         return it->second->data();

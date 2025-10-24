@@ -72,7 +72,7 @@ void GDALWriter::addArgs(ProgramArgs& args)
     args.add("gdalopts", "GDAL driver options (name=value,name=value...)",
         m_options);
     args.add("output_type", "Statistics produced ('min', 'max', 'mean', "
-        "'idw', 'count', 'stdev' or 'all')", m_outputTypeString, {"all"} );
+        "'idw', 'count', 'stdev', 'p<percentile>' or 'all')", m_outputTypeString, {"all"} );
     args.add("data_type", "Data type for output grid ('int8', 'uint64', "
         "'float', etc.)", m_dataType, Dimension::Type::Double);
     args.add("window_size", "Cell distance for fallback interpolation",
@@ -103,8 +103,6 @@ void GDALWriter::addArgs(ProgramArgs& args)
         m_binMode, false);
     args.add("allow_empty", "Allow writing GDAL output that do not have any pixel values (no points)",
         m_allowEmpty, false);
-    args.add("percentiles", "Write percentile bands for each raster cell; specified as <value>,<value>,...", 
-        m_percentiles);
 }
 
 
@@ -131,6 +129,13 @@ void GDALWriter::initialize()
             m_outputTypes |= GDALGrid::statIdw;
         else if (ts == "stdev")
             m_outputTypes |= GDALGrid::statStdDev;
+        else if (Utils::tolower(ts[0]) == 'p' && ts.size() > 1)
+        {
+            int p = std::stoi(ts.substr(1));
+            if (p < 1 || p > 100)
+                throwError("Percentile values must be integers between 1 and 100.");
+            m_percentiles.push_back(p);
+        }
         else
             throwError("Invalid output type: '" + ts + "'.");
     }
@@ -139,7 +144,7 @@ void GDALWriter::initialize()
         throwError("Can't set both 'override_srs' and 'default_srs'.");
     
     if (!m_percentiles.empty() && !m_binMode)
-        throwError("Can't set 'percentiles' without 'binmode=true'.");
+        throwError("Can't output percentiles without 'binmode=true'.");
 
     if (!m_radiusArg->set())
         m_radius = m_edgeLength * sqrt(2.0);

@@ -432,10 +432,9 @@ TEST(GDALWriterTest, percentile)
 
     Options wo;
     wo.add("gdaldriver", "GTiff");
-    wo.add("output_type", "count");
+    wo.add("output_type", "p50");
     wo.add("resolution", 1);
     wo.add("binmode", true);
-    wo.add("percentiles", 50);
     wo.add("filename", outfile);
 
     const std::string output =
@@ -445,9 +444,12 @@ TEST(GDALWriterTest, percentile)
     "2.000     3.000     4.000     4.400     5.400 "
     "0.500     2.000     3.000     4.000     5.000 ";
 
-    // Since we have to write other output_types when creating a percentile raster,
-    // we have to use the second band.
-    runGdalWriter(wo, infile, outfile, output, true, 2);
+    runGdalWriter(wo, infile, outfile, output, true);
+
+    Options wo2 = wo;
+    wo2.replace("binmode", false);
+
+    EXPECT_THROW(runGdalWriter(wo2, infile, outfile, output), pdal_error);
 }
 
 TEST(GDALWriterTest, stdev)
