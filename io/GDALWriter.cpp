@@ -111,7 +111,7 @@ void GDALWriter::initialize()
 {
     for (auto& ts : m_outputTypeString)
     {
-       Utils::trim(ts);
+        Utils::trim(ts);
         if (ts == "all")
         {
             m_outputTypes = ~0;
@@ -129,7 +129,7 @@ void GDALWriter::initialize()
             m_outputTypes |= GDALGrid::statIdw;
         else if (ts == "stdev")
             m_outputTypes |= GDALGrid::statStdDev;
-        else if (Utils::tolower(ts[0]) == 'p' && ts.size() > 1)
+        else if (std::tolower(ts[0]) == 'p' && ts.size() > 1)
         {
             int p = std::stoi(ts.substr(1));
             if (p < 1 || p > 100)
