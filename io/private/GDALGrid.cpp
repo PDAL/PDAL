@@ -82,20 +82,17 @@ GDALGrid::GDALGrid(double xOrigin, double yOrigin, size_t width, size_t height, 
         m_mean.reset(new Rasterd(limits));
     if (m_outputTypes & statStdDev)
         m_stdDev.reset(new Rasterd(limits));
-    //!! should probably do the binmode check elsewhere or throw an error here
-    if ((m_outputTypes & statPctls) && m_binMode)
+    //!! We do binmode checks in the writer, so probably not needed here
+    for (auto& p : percentileValues)
     {
-        for (auto& p : percentileValues)
+        if (p >= 0 && p <= 100)
+            m_pctls.emplace(p, new Rasterd(limits));
+        else
         {
-            if (p > 0 && p < 100)
-                m_pctls.emplace(p, new Rasterd(limits));
-            else
-            {
-                std::ostringstream oss;
-                oss << "Invalid percentile value: " << p << ". Percentiles are limited to " << 
-                    "0-100 integer values.";
-                throw error(oss.str());
-            }
+            std::ostringstream oss;
+            oss << "Invalid percentile value: " << p << ". Percentiles are limited to " << 
+                "0-100 integer values.";
+            throw error(oss.str());
         }
     }
 }
@@ -175,7 +172,7 @@ int GDALGrid::numBands() const
         num++;
     if (m_outputTypes & statStdDev)
         num++;
-    if (m_outputTypes & statPctls)
+    if (!m_pctls.empty())
         num += m_pctls.size();
     return num;
 }
@@ -203,6 +200,7 @@ double *GDALGrid::data(const std::string& name)
 //!! entail looping thru m_valBins multiple times. Not sure which is better
 double *GDALGrid::pctlData(int pct) const
 {
+    std::cout << "writing pctl " << pct << std::endl;
     auto it = m_pctls.find(pct);
     if ((it != m_pctls.end()) && m_valBins.size())
         return it->second->data();
@@ -428,6 +426,9 @@ void GDALGrid::update(size_t i, size_t j, double val, double dist)
     double& count = m_count->at(i, j);
     count++;
 
+    if (m_pctls.size())
+        m_valBins[m_count->indexAt(i, j)].push_back(val);
+
     if (m_min)
     {
         double& min = m_min->at(i, j);
@@ -474,16 +475,6 @@ void GDALGrid::update(size_t i, size_t j, double val, double dist)
             }
         }
     }
-}
-
-
-void GDALGrid::accumulateValue(double x, double y, double z)
-{
-    Cell origin = pointToCell({x, y});
-
-    if (((m_outputTypes & statPctls) && m_binMode) && origin.i >= 0 
-        && origin.j >= 0 && origin.i < width() && origin.j < height())
-        m_valBins[m_count->indexAt(origin.i, origin.j)].push_back(z);
 }
 
 
@@ -564,6 +555,9 @@ void GDALGrid::fillNodata(int i, int j)
         m_idw->at(i, j) = std::numeric_limits<double>::quiet_NaN();
     if (m_stdDev)
         m_stdDev->at(i, j) = std::numeric_limits<double>::quiet_NaN();
+    if (m_pctls.size())
+        for (auto& it : m_pctls)
+            it.second->at(i, j) = std::numeric_limits<double>::quiet_NaN();
 }
 
 

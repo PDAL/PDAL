@@ -72,7 +72,7 @@ void GDALWriter::addArgs(ProgramArgs& args)
     args.add("gdalopts", "GDAL driver options (name=value,name=value...)",
         m_options);
     args.add("output_type", "Statistics produced ('min', 'max', 'mean', "
-        "'idw', 'count', 'stdev', 'pctls' or 'all')", m_outputTypeString, {"all"} );
+        "'idw', 'count', 'stdev' or 'all')", m_outputTypeString, {"all"} );
     args.add("data_type", "Data type for output grid ('int8', 'uint64', "
         "'float', etc.)", m_dataType, Dimension::Type::Double);
     args.add("window_size", "Cell distance for fallback interpolation",
@@ -104,7 +104,7 @@ void GDALWriter::addArgs(ProgramArgs& args)
     args.add("allow_empty", "Allow writing GDAL output that do not have any pixel values (no points)",
         m_allowEmpty, false);
     args.add("percentiles", "Write percentile bands for each raster cell; specified as <value>,<value>,...", 
-        m_percentiles, {5, 25, 50, 75, 95});
+        m_percentiles);
 }
 
 
@@ -131,14 +131,15 @@ void GDALWriter::initialize()
             m_outputTypes |= GDALGrid::statIdw;
         else if (ts == "stdev")
             m_outputTypes |= GDALGrid::statStdDev;
-        else if (ts == "pctls")
-            m_outputTypes |= GDALGrid::statPctls;
         else
             throwError("Invalid output type: '" + ts + "'.");
     }
 
     if (m_overrideSrs.valid() && m_defaultSrs.valid())
         throwError("Can't set both 'override_srs' and 'default_srs'.");
+    
+    if (!m_percentiles.empty() && !m_binMode)
+        throwError("Can't set 'percentiles' without 'binmode=true'.");
 
     if (!m_radiusArg->set())
         m_radius = m_edgeLength * sqrt(2.0);
@@ -184,6 +185,10 @@ void GDALWriter::prepared(PointTableRef table)
     if (m_interpDim == Dimension::Id::Unknown)
         throwError("Specified dimension '" + m_interpDimString +
             "' does not exist.");
+
+    if (!table.supportsView() && m_percentiles.size())
+            throwError("Percentile band calculations are not supported with "
+                "streaming point tables.");
 }
 
 
@@ -261,20 +266,7 @@ void GDALWriter::writeView(const PointViewPtr view)
     {
         point.setPointId(idx);
         processOne(point);
-        if (m_outputTypes & GDALGrid::statPctls)
-            processValue(point);
     }
-}
-
-
-//!! this is nasty, but no other way I could think of to only write the pct value map
-//!! in standard mode
-void GDALWriter::processValue(PointRef& point) 
-{
-    double x = point.getFieldAs<double>(Dimension::Id::X);
-    double y = point.getFieldAs<double>(Dimension::Id::Y);
-    double z = point.getFieldAs<double>(m_interpDim);
-    m_grid->accumulateValue(x, y, z);
 }
 
 

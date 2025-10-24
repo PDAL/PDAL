@@ -67,7 +67,6 @@ public:
     static const int statMean = 8;
     static const int statStdDev = 16;
     static const int statIdw = 32;
-    static const int statPctls = 64;
 
     struct error : public std::runtime_error
     {

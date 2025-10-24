@@ -54,7 +54,8 @@ namespace
 {
 
 void runGdalWriter(const Options& wo, const std::string& infile,
-    const std::string& outfile, const std::string& values, bool noStream=false)
+    const std::string& outfile, const std::string& values, bool noStream=false,
+    int bandNum=1)
 {
     auto run = [=](bool streamMode)
     {
@@ -103,7 +104,7 @@ void runGdalWriter(const Options& wo, const std::string& infile,
             throw pdal_error(raster.errorMsg());
         }
         std::vector<double> data;
-        raster.readBand(data, 1);
+        raster.readBand(data, bandNum);
         int row = 0;
         int col = 0;
 
@@ -431,20 +432,22 @@ TEST(GDALWriterTest, percentile)
 
     Options wo;
     wo.add("gdaldriver", "GTiff");
-    wo.add("output_type", "pctls");
+    wo.add("output_type", "count");
     wo.add("resolution", 1);
     wo.add("binmode", true);
     wo.add("percentiles", 50);
     wo.add("filename", outfile);
 
     const std::string output =
-    "5.000     0.000     7.000     8.000     8.900 "
-    "4.000     0.000     6.000     7.000     8.000 "
+    "5.000     -9999.000     7.000     8.000     8.900 "
+    "4.000     -9999.000     6.000     7.000     8.000 "
     "3.000     4.000     5.000     5.700     6.700 "
     "2.000     3.000     4.000     4.400     5.400 "
     "0.500     2.000     3.000     4.000     5.000 ";
 
-    runGdalWriter(wo, infile, outfile, output, true);
+    // Since we have to write other output_types when creating a percentile raster,
+    // we have to use the second band.
+    runGdalWriter(wo, infile, outfile, output, true, 2);
 }
 
 TEST(GDALWriterTest, stdev)
