@@ -102,10 +102,12 @@ TEST(PipelineManagerTest, serialize)
     EXPECT_TRUE(projJson.is_object());
     EXPECT_EQ(projJson.at("$schema").get<std::string>(), 
         "https://proj.org/schemas/v0.7/projjson.schema.json");
-    PipelineWriter::writePipeline(stage, outPipeline);
+    
     EXPECT_EQ(mgr.execute(), 4775);
 
+    // Make sure the serialized pipeline is valid JSON & creates an identical result
     PipelineManager mgr2;
-    mgr2.readPipeline(outPipeline);
+    std::istringstream iss(oss.str());
+    mgr2.readPipeline(iss);
     EXPECT_EQ(mgr2.execute(), 4775);
 }
