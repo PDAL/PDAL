@@ -42,6 +42,8 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/util/FileUtils.hpp>
 
+#include <nlohmann/json.hpp>
+
 using namespace pdal;
 
 // Make sure we handle duplicate stages properly.
@@ -79,6 +81,27 @@ TEST(PipelineManagerTest, serialize)
     mgr.readPipeline(inPipeline);
     Stage* stage = mgr.getStage();
 
+    std::ostringstream oss;
+    PipelineWriter::writePipeline(stage, oss);
+    NL::json root = NL::json::parse(oss.str());
+
+    // reader stage should be at idx 0
+    NL::json readerStage = root["pipeline"][0];
+    EXPECT_EQ(readerStage.at("type").get<std::string>(), "readers.las");
+
+    NL::json filespecJson = readerStage["filename"];
+    EXPECT_TRUE(filespecJson.is_object());
+    EXPECT_EQ(filespecJson.at("path").get<std::string>(), 
+        Support::datapath("las/epsg_4326.las"));
+
+    // reprojection filter should be at idx 2
+    NL::json reproStage = root["pipeline"][2];
+    EXPECT_EQ(reproStage.at("type").get<std::string>(), "filters.reprojection");
+
+    NL::json projJson = reproStage["out_srs"];
+    EXPECT_TRUE(projJson.is_object());
+    EXPECT_EQ(projJson.at("$schema").get<std::string>(), 
+        "https://proj.org/schemas/v0.7/projjson.schema.json");
     PipelineWriter::writePipeline(stage, outPipeline);
     EXPECT_EQ(mgr.execute(), 4775);
 

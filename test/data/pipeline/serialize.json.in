@@ -1,6 +1,9 @@
 {
     "pipeline": [
-        "@CMAKE_SOURCE_DIR@/test/data/las/epsg_4326.las",
+        {
+            "type": "readers.las",
+            "filename": "{\n \"path\": \"@CMAKE_SOURCE_DIR@/test/data/las/epsg_4326.las\", \n         \"headers\": { \n \"header_key\":\"header_value\"} \n }"
+        },
         {
             "type": "filters.crop",
             "bounds":"([-94.68, -94.66],[31.039, 31.048])"
