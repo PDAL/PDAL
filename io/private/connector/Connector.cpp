@@ -184,7 +184,7 @@ std::vector<char> Connector::getBinary(uint64_t offset, int32_t size) const
     {
         std::vector<char> buf(size);
         std::istream* in = FileUtils::openFile(m_filename);
-        if (in->fail() )
+        if (!in || in->fail())
         {
             std::string message = "Unable to open '" + m_filename + "'.";
             if (!pdal::FileUtils::fileExists(m_filename))
