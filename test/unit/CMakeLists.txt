@@ -108,6 +108,7 @@ PDAL_ADD_TEST(pdal_pipeline_writer_test
         PipelineWriterTest.cpp
     INCLUDES
         ${PDAL_JSONCPP_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_plugin_manager_test FILES PluginManagerTest.cpp)
 PDAL_ADD_TEST(pdal_point_view_test

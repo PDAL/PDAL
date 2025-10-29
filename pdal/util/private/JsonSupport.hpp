@@ -63,6 +63,28 @@ inline StatusWithReason parseJson(const std::string& s, NL::json& json)
     return true;
 }
 
+inline std::string inferJsonType(const std::string& s)
+{
+    NL::json val;
+    StatusWithReason status = parseJson(s, val);
+    // Not a big deal if this fails.
+    if (!status)
+        return "string";
+
+    if (val.is_object() || val.is_array())
+        return "json";
+    else if (val.is_number_float())
+        return "double";
+    else if (val.is_number_unsigned())
+        return "nonNegativeInteger";
+    else if (val.is_number_integer())
+        return "integer";
+    else if (val.is_boolean())
+        return "boolean";
+    else
+        return "string";
+}
+
 template <class T = NL::json>
 inline T jsonValue(const NL::json& json, std::string key = "")
 {

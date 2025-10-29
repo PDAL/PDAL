@@ -148,17 +148,7 @@ public:
         add(option);
     }
 
-    void toMetadata(MetadataNode& parent) const
-    {
-        for (std::string& k : getKeys())
-        {
-            StringList l = getValues(k);
-            for(const auto& vs: l)
-            {
-                parent.addWithType(k, vs, Metadata::inferType(vs));
-            }
-        }
-    }
+    void toMetadata(MetadataNode& parent) const;
 
     // add an option (shortcut version, bypass need for an Option object)
     template<typename T> void add(const std::string& name, T value)
