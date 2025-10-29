@@ -201,9 +201,26 @@ typedef struct PlyFace
 	int *vertices;
 	int segment;
 } PlyFace;
+
+// Static storage for property names to avoid leaking duplicated strings.
+static char ply_prop_vertex_indices[] = "vertex_indices";
+static char ply_prop_x[] = "x";
+static char ply_prop_y[] = "y";
+static char ply_prop_z[] = "z";
+static char ply_prop_value[] = "value";
+static char ply_prop_nx[] = "nx";
+static char ply_prop_ny[] = "ny";
+static char ply_prop_nz[] = "nz";
+static char ply_prop_red[] = "red";
+static char ply_prop_green[] = "green";
+static char ply_prop_blue[] = "blue";
+static char ply_prop_r[] = "r";
+static char ply_prop_g[] = "g";
+static char ply_prop_b[] = "b";
+
 static PlyProperty face_props[] =
 {
-	{ _strdup( "vertex_indices" ) , PLY_INT , PLY_INT , offsetof( PlyFace , vertices ) , 1 , PLY_UCHAR, PLY_UCHAR , offsetof(PlyFace,nr_vertices) },
+	{ ply_prop_vertex_indices , PLY_INT , PLY_INT , offsetof( PlyFace , vertices ) , 1 , PLY_UCHAR, PLY_UCHAR , offsetof(PlyFace,nr_vertices) },
 };
 
 ///////////////////
@@ -244,15 +261,15 @@ public:
 template< class Real , class _Real > PlyVertex< Real > operator * ( XForm4x4< _Real > xForm , PlyVertex< Real > v ) { return PlyVertex< Real >( xForm * v.point ); }
 template< class Real > PlyProperty PlyVertex< Real >::ReadProperties[]=
 {
-	{ _strdup( "x" ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyVertex , point.coords[0] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "y" ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyVertex , point.coords[1] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "z" ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyVertex , point.coords[2] ) ) , 0 , 0 , 0 , 0 }
+	{ ply_prop_x , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyVertex , point.coords[0] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_y , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyVertex , point.coords[1] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_z , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyVertex , point.coords[2] ) ) , 0 , 0 , 0 , 0 }
 };
 template< class Real > PlyProperty PlyVertex< Real >::WriteProperties[]=
 {
-	{ _strdup( "x" ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyVertex , point.coords[0] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "y" ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyVertex , point.coords[1] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "z" ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyVertex , point.coords[2] ) ) , 0 , 0 , 0 , 0 }
+	{ ply_prop_x , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyVertex , point.coords[0] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_y , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyVertex , point.coords[1] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_z , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyVertex , point.coords[2] ) ) , 0 , 0 , 0 , 0 }
 };
 template< class Real >
 class PlyValueVertex
@@ -289,17 +306,17 @@ public:
 template< class Real , class _Real > PlyValueVertex< Real > operator * ( XForm4x4< _Real > xForm , PlyValueVertex< Real > v ) { return PlyValueVertex< Real >( xForm * v.point , v.value ); }
 template< class Real > PlyProperty PlyValueVertex< Real >::ReadProperties[]=
 {
-	{ _strdup( "x"     ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyValueVertex , point.coords[0] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "y"     ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyValueVertex , point.coords[1] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "z"     ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyValueVertex , point.coords[2] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "value" ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyValueVertex , value           ) ) , 0 , 0 , 0 , 0 }
+	{ ply_prop_x     , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyValueVertex , point.coords[0] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_y     , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyValueVertex , point.coords[1] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_z     , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyValueVertex , point.coords[2] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_value , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyValueVertex , value           ) ) , 0 , 0 , 0 , 0 }
 };
 template< class Real > PlyProperty PlyValueVertex< Real >::WriteProperties[]=
 {
-	{ _strdup( "x"     ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyValueVertex , point.coords[0] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "y"     ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyValueVertex , point.coords[1] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "z"     ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyValueVertex , point.coords[2] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "value" ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyValueVertex , value           ) ) , 0 , 0 , 0 , 0 }
+	{ ply_prop_x     , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyValueVertex , point.coords[0] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_y     , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyValueVertex , point.coords[1] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_z     , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyValueVertex , point.coords[2] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_value , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyValueVertex , value           ) ) , 0 , 0 , 0 , 0 }
 };
 template< class Real >
 class PlyOrientedVertex
@@ -328,21 +345,21 @@ public:
 template< class Real , class _Real > PlyOrientedVertex< Real > operator * ( XForm4x4< _Real > xForm , PlyOrientedVertex< Real > v ) { return PlyOrientedVertex< Real >( xForm * v.point , xForm.inverse().transpose() * v.normal ); }
 template< class Real > PlyProperty PlyOrientedVertex< Real >::ReadProperties[]=
 {
-	{ _strdup( "x"  ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex ,  point.coords[0] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "y"  ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex ,  point.coords[1] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "z"  ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex ,  point.coords[2] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "nx" ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex , normal.coords[0] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "ny" ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex , normal.coords[1] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "nz" ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex , normal.coords[2] ) ) , 0 , 0 , 0 , 0 }
+	{ ply_prop_x  , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex ,  point.coords[0] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_y  , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex ,  point.coords[1] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_z  , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex ,  point.coords[2] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_nx , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex , normal.coords[0] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_ny , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex , normal.coords[1] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_nz , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex , normal.coords[2] ) ) , 0 , 0 , 0 , 0 }
 };
 template< class Real > PlyProperty PlyOrientedVertex< Real >::WriteProperties[]=
 {
-	{ _strdup( "x"  ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex ,  point.coords[0] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "y"  ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex ,  point.coords[1] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "z"  ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex ,  point.coords[2] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "nx" ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex , normal.coords[0] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "ny" ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex , normal.coords[1] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "nz" ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex , normal.coords[2] ) ) , 0 , 0 , 0 , 0 }
+	{ ply_prop_x  , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex ,  point.coords[0] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_y  , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex ,  point.coords[1] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_z  , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex ,  point.coords[2] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_nx , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex , normal.coords[0] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_ny , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex , normal.coords[1] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_nz , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex , normal.coords[2] ) ) , 0 , 0 , 0 , 0 }
 };
 template< class Real >
 class PlyColorVertex
@@ -402,24 +419,24 @@ template< class Real , class _Real > PlyColorVertex< Real > operator * ( XForm4x
 
 template< class Real > PlyProperty PlyColorVertex< Real >::ReadProperties[]=
 {
-	{ _strdup( "x"     ) , PLYType<          Real >() , PLYType<          Real >(), int( offsetof( PlyColorVertex , point.coords[0] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "y"     ) , PLYType<          Real >() , PLYType<          Real >(), int( offsetof( PlyColorVertex , point.coords[1] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "z"     ) , PLYType<          Real >() , PLYType<          Real >(), int( offsetof( PlyColorVertex , point.coords[2] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "red"   ) , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[0] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "green" ) , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[1] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "blue"  ) , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[2] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "r"     ) , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[0] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "g"     ) , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[1] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "b"     ) , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[2] ) ) , 0 , 0 , 0 , 0 }
+	{ ply_prop_x     , PLYType<          Real >() , PLYType<          Real >(), int( offsetof( PlyColorVertex , point.coords[0] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_y     , PLYType<          Real >() , PLYType<          Real >(), int( offsetof( PlyColorVertex , point.coords[1] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_z     , PLYType<          Real >() , PLYType<          Real >(), int( offsetof( PlyColorVertex , point.coords[2] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_red   , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[0] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_green , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[1] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_blue  , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[2] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_r     , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[0] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_g     , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[1] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_b     , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[2] ) ) , 0 , 0 , 0 , 0 }
 };
 template< class Real > PlyProperty PlyColorVertex< Real >::WriteProperties[]=
 {
-	{ _strdup( "x"     ) , PLYType<          Real >() , PLYType<          Real >(), int( offsetof( PlyColorVertex , point.coords[0] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "y"     ) , PLYType<          Real >() , PLYType<          Real >(), int( offsetof( PlyColorVertex , point.coords[1] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "z"     ) , PLYType<          Real >() , PLYType<          Real >(), int( offsetof( PlyColorVertex , point.coords[2] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "red"   ) , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[0] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "green" ) , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[1] ) ) , 0 , 0 , 0 , 0 },
-	{ _strdup( "blue"  ) , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[2] ) ) , 0 , 0 , 0 , 0 }
+	{ ply_prop_x     , PLYType<          Real >() , PLYType<          Real >(), int( offsetof( PlyColorVertex , point.coords[0] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_y     , PLYType<          Real >() , PLYType<          Real >(), int( offsetof( PlyColorVertex , point.coords[1] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_z     , PLYType<          Real >() , PLYType<          Real >(), int( offsetof( PlyColorVertex , point.coords[2] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_red   , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[0] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_green , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[1] ) ) , 0 , 0 , 0 , 0 },
+	{ ply_prop_blue  , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[2] ) ) , 0 , 0 , 0 , 0 }
 };
 template< class Real >
 class PlyColorAndValueVertex
@@ -482,26 +499,26 @@ public:
 template< class Real , class _Real > PlyColorAndValueVertex< Real > operator * ( XForm4x4< _Real > xForm , PlyColorAndValueVertex< Real > v ) { return PlyColorAndValueVertex< Real >( xForm * v.point , v.color , v.value ); }
 template< class Real > PlyProperty PlyColorAndValueVertex< Real >::ReadProperties[]=
 {
-	{ _strdup( "x"     ) , PLYType<          Real >() , PLYType<          Real >() , int( offsetof( PlyColorAndValueVertex , point.coords[0] ) ) , 0 , 0 , 0 , 0 } ,
-	{ _strdup( "y"     ) , PLYType<          Real >() , PLYType<          Real >() , int( offsetof( PlyColorAndValueVertex , point.coords[1] ) ) , 0 , 0 , 0 , 0 } ,
-	{ _strdup( "z"     ) , PLYType<          Real >() , PLYType<          Real >() , int( offsetof( PlyColorAndValueVertex , point.coords[2] ) ) , 0 , 0 , 0 , 0 } ,
-	{ _strdup( "value" ) , PLYType<          Real >() , PLYType<          Real >() , int( offsetof( PlyColorAndValueVertex ,        value    ) ) , 0 , 0 , 0 , 0 } ,
-	{ _strdup( "red"   ) , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[0] ) ) , 0 , 0 , 0 , 0 } ,
-	{ _strdup( "green" ) , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[1] ) ) , 0 , 0 , 0 , 0 } ,
-	{ _strdup( "blue"  ) , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[2] ) ) , 0 , 0 , 0 , 0 } ,
-	{ _strdup( "r"     ) , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[0] ) ) , 0 , 0 , 0 , 0 } ,
-	{ _strdup( "g"     ) , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[1] ) ) , 0 , 0 , 0 , 0 } ,
-	{ _strdup( "b"     ) , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[2] ) ) , 0 , 0 , 0 , 0 }
+	{ ply_prop_x     , PLYType<          Real >() , PLYType<          Real >() , int( offsetof( PlyColorAndValueVertex , point.coords[0] ) ) , 0 , 0 , 0 , 0 } ,
+	{ ply_prop_y     , PLYType<          Real >() , PLYType<          Real >() , int( offsetof( PlyColorAndValueVertex , point.coords[1] ) ) , 0 , 0 , 0 , 0 } ,
+	{ ply_prop_z     , PLYType<          Real >() , PLYType<          Real >() , int( offsetof( PlyColorAndValueVertex , point.coords[2] ) ) , 0 , 0 , 0 , 0 } ,
+	{ ply_prop_value , PLYType<          Real >() , PLYType<          Real >() , int( offsetof( PlyColorAndValueVertex ,        value    ) ) , 0 , 0 , 0 , 0 } ,
+	{ ply_prop_red   , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[0] ) ) , 0 , 0 , 0 , 0 } ,
+	{ ply_prop_green , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[1] ) ) , 0 , 0 , 0 , 0 } ,
+	{ ply_prop_blue  , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[2] ) ) , 0 , 0 , 0 , 0 } ,
+	{ ply_prop_r     , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[0] ) ) , 0 , 0 , 0 , 0 } ,
+	{ ply_prop_g     , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[1] ) ) , 0 , 0 , 0 , 0 } ,
+	{ ply_prop_b     , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[2] ) ) , 0 , 0 , 0 , 0 }
 };
 template< class Real > PlyProperty PlyColorAndValueVertex< Real >::WriteProperties[]=
 {
-	{ _strdup( "x"     ) , PLYType<          Real >() , PLYType<          Real >() , int( offsetof( PlyColorAndValueVertex , point.coords[0] ) ) , 0 , 0 , 0 , 0 } ,
-	{ _strdup( "y"     ) , PLYType<          Real >() , PLYType<          Real >() , int( offsetof( PlyColorAndValueVertex , point.coords[1] ) ) , 0 , 0 , 0 , 0 } ,
-	{ _strdup( "z"     ) , PLYType<          Real >() , PLYType<          Real >() , int( offsetof( PlyColorAndValueVertex , point.coords[2] ) ) , 0 , 0 , 0 , 0 } ,
-	{ _strdup( "value" ) , PLYType<          Real >() , PLYType<          Real >() , int( offsetof( PlyColorAndValueVertex ,        value    ) ) , 0 , 0 , 0 , 0 } ,
-	{ _strdup( "red"   ) , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[0] ) ) , 0 , 0 , 0 , 0 } ,
-	{ _strdup( "green" ) , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[1] ) ) , 0 , 0 , 0 , 0 } ,
-	{ _strdup( "blue"  ) , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[2] ) ) , 0 , 0 , 0 , 0 }
+	{ ply_prop_x     , PLYType<          Real >() , PLYType<          Real >() , int( offsetof( PlyColorAndValueVertex , point.coords[0] ) ) , 0 , 0 , 0 , 0 } ,
+	{ ply_prop_y     , PLYType<          Real >() , PLYType<          Real >() , int( offsetof( PlyColorAndValueVertex , point.coords[1] ) ) , 0 , 0 , 0 , 0 } ,
+	{ ply_prop_z     , PLYType<          Real >() , PLYType<          Real >() , int( offsetof( PlyColorAndValueVertex , point.coords[2] ) ) , 0 , 0 , 0 , 0 } ,
+	{ ply_prop_value , PLYType<          Real >() , PLYType<          Real >() , int( offsetof( PlyColorAndValueVertex ,        value    ) ) , 0 , 0 , 0 , 0 } ,
+	{ ply_prop_red   , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[0] ) ) , 0 , 0 , 0 , 0 } ,
+	{ ply_prop_green , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[1] ) ) , 0 , 0 , 0 , 0 } ,
+	{ ply_prop_blue  , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[2] ) ) , 0 , 0 , 0 , 0 }
 };
 
 template< class Vertex , class Real >
