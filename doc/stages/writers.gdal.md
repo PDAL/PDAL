@@ -179,7 +179,7 @@ output_type
 : A comma separated list of statistics for which to produce raster layers.
   The supported values are "min", "max", "mean", "idw", "count", "stdev"
   and "all". Calculating percentile values is supported by specifying 
-  "p\<percentile>" (not included in "all"). The option may be specified 
+  a list of "p\<percentile>" (not included in "all"). The option may be specified 
   more than once. \[Default: "all"\]
 
 (window-size)=

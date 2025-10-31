@@ -131,8 +131,10 @@ void GDALWriter::initialize()
             m_outputTypes |= GDALGrid::statStdDev;
         else if (std::tolower(ts[0]) == 'p' && ts.size() > 1)
         {
-            int p = std::stoi(ts.substr(1));
-            if (p < 1 || p > 100)
+            int p;
+            if (!Utils::fromString(ts.substr(1), p))
+                throwError("Invalid percentile value: '" + ts + "'.");
+            if (p < 0 || p > 100)
                 throwError("Percentile values must be integers between 1 and 100.");
             m_percentiles.push_back(p);
         }
