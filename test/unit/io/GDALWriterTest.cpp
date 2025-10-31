@@ -54,7 +54,8 @@ namespace
 {
 
 void runGdalWriter(const Options& wo, const std::string& infile,
-    const std::string& outfile, const std::string& values)
+    const std::string& outfile, const std::string& values, bool noStream=false,
+    int bandNum=1)
 {
     auto run = [=](bool streamMode)
     {
@@ -103,7 +104,7 @@ void runGdalWriter(const Options& wo, const std::string& infile,
             throw pdal_error(raster.errorMsg());
         }
         std::vector<double> data;
-        raster.readBand(data, 1);
+        raster.readBand(data, bandNum);
         int row = 0;
         int col = 0;
 
@@ -120,7 +121,8 @@ void runGdalWriter(const Options& wo, const std::string& infile,
     };
 
     run(false);
-    run(true);
+    if (!noStream)
+        run(true);
 }
 
 void runGdalWriter2(const Options& wo, const std::string& outfile,
@@ -421,6 +423,33 @@ TEST(GDALWriterTest, count)
         "1.000     1.000     1.000     2.000     2.000 ";
 
     runGdalWriter(wo, infile, outfile, output);
+}
+
+TEST(GDALWriterTest, percentile)
+{
+    std::string infile = Support::datapath("gdal/grid.txt");
+    std::string outfile = Support::temppath("tmp.tif");
+
+    Options wo;
+    wo.add("gdaldriver", "GTiff");
+    wo.add("output_type", "p50");
+    wo.add("resolution", 1);
+    wo.add("binmode", true);
+    wo.add("filename", outfile);
+
+    const std::string output =
+    "5.000     -9999.000     7.000     8.000     8.900 "
+    "4.000     -9999.000     6.000     7.000     8.000 "
+    "3.000     4.000     5.000     5.700     6.700 "
+    "2.000     3.000     4.000     4.400     5.400 "
+    "0.500     2.000     3.000     4.000     5.000 ";
+
+    runGdalWriter(wo, infile, outfile, output, true);
+
+    Options wo2 = wo;
+    wo2.replace("binmode", false);
+
+    EXPECT_THROW(runGdalWriter(wo2, infile, outfile, output), pdal_error);
 }
 
 TEST(GDALWriterTest, stdev)

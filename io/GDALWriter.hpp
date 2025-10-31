@@ -66,6 +66,7 @@ private:
     void expandGrid(BOX2D bounds);
     int width() const;
     int height() const;
+    void processValue(PointRef& point);
 
     std::string m_outputFilename;
     std::string m_drivername;
@@ -100,6 +101,7 @@ private:
     bool m_writePDALMetadata;
     bool m_binMode;
     bool m_allowEmpty;
+    std::vector<int> m_percentiles;
 };
 
 }

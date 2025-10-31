@@ -37,6 +37,7 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <unordered_map>
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/private/Raster.hpp>
@@ -76,7 +77,7 @@ public:
     // Exported for testing.
     PDAL_EXPORT GDALGrid(double xOrigin, double yOrigin, size_t width, size_t height,
         double edgeLength, double radius, int outputTypes, size_t windowSize,
-        double power, bool binMode=false);
+        double power, bool binMode=false, std::vector<int> percentileValues={});
 
     void expandToInclude(double x, double y);
 
@@ -86,11 +87,20 @@ public:
     // Return a pointer to the data in a raster band, row-major ordered.
     double *data(const std::string& name);
 
+    // Return a pointer to the data in a percentile raster band, if it exists.
+    double *pctlData(int pct) const;
+
+    // Add a point to the bins being used to calculate percentiles.
+    void accumulateValue(double x, double y, double z);
+
     // Add a point to the raster grid.
     void addPoint(double x, double y, double z);
 
     // Compute final values after all points have been added.
     void finalize();
+
+    bool usesPctls() const 
+        { return !m_pctls.empty(); }
 
     int width() const;
     int height() const;
@@ -112,7 +122,10 @@ private:
     DataPtr m_stdDev;
     DataPtr m_idw;
     DataPtr m_idwDist;
+    std::unordered_map<int, DataPtr> m_pctls;
 
+    // Cell index and all associated values
+    std::unordered_map<size_t, std::vector<double>> m_valBins;
     int m_outputTypes;
 
     bool m_binMode;
@@ -157,6 +170,9 @@ private:
     // Cumulate data from a source cell to a destination cell when doing
     // a window fill.
     void windowFillCell(int srcI, int srcJ, int dstI, int dstJ, double distance);
+
+
+    void fillPercentiles(const size_t& idx, std::vector<double>& values);
 };
 
 } //namespace pdal
