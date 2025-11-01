@@ -12,7 +12,7 @@ function(gdal_find_version _version)
     set(${_version} ${MAJOR}.${MINOR}.${REV} PARENT_SCOPE)
 endfunction(gdal_find_version)
 
-find_package(GDAL 3.4 REQUIRED)
+find_package(GDAL 3.8 REQUIRED)
 set_package_properties(GDAL PROPERTIES TYPE REQUIRED
     PURPOSE "Provides general purpose raster, vector, and reference system support")
 if (GDAL_FOUND)
@@ -20,9 +20,9 @@ if (GDAL_FOUND)
     #
     # Older versions of FindGDAL.cmake don't properly set GDAL_VERSION
     #
-    if (GDAL_VERSION VERSION_LESS 3.4.0)
+    if (GDAL_VERSION VERSION_LESS 3.8.0)
         message(FATAL_ERROR
-            "Found GDAL version ${GDAL_VERSION}.  Version 3.4+ is required")
+            "Found GDAL version ${GDAL_VERSION}.  Version 3.8+ is required")
     endif()
     mark_as_advanced(CLEAR GDAL_INCLUDE_DIR)
     mark_as_advanced(CLEAR GDAL_LIBRARY)
