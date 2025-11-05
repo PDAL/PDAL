@@ -74,6 +74,7 @@ private:
     double m_maxClamp;
     double m_noDataHeight;
     double m_bandNoData;
+    uint8_t m_class;
 };
 
 } // namespace pdal
