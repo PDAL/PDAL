@@ -135,7 +135,7 @@ channel, the command to install both the PDAL application and the Python
 extension is
 
 ```
-conda install -c conda-forge pdal python-pdal pdal
+conda install -c conda-forge python-pdal libpdal
 ```
 
 It is strongly recommended that you make use of Conda's environment management
