@@ -64,6 +64,7 @@ private:
 
     bool m_allowExtrapolation;
     point_count_t m_count;
+    uint8_t m_class;
 };
 
 } // namespace pdal
