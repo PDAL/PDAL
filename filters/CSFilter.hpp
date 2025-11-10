@@ -54,6 +54,9 @@ public:
 
 private:
     std::unique_ptr<CSArgs> m_args;
+    uint8_t m_groundClass;
+    uint8_t m_otherClass;
+    bool m_onlyGround;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
