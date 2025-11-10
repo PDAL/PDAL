@@ -92,6 +92,13 @@ void PMFFilter::addArgs(ProgramArgs& args)
     args.add("max_window_size", "Maximum window size", m_args->m_maxWindowSize,
              33.0);
     args.add("slope", "Slope", m_args->m_slope, 1.0);
+    args.add("ground_class", "Classification value of ground points."
+        " [Default: 2]", m_groundClass, ClassLabel::Ground);
+    args.add("other_class", "Classification value of non-ground points."
+        " [Default: 1]", m_otherClass, ClassLabel::Unclassified);
+    args.add("only_ground", "Set to true to only modify the CLassification"
+        " value of detected ground points. [Default: false]",
+        m_onlyGround, false);
 }
 
 void PMFFilter::addDimensions(PointLayoutPtr layout)
@@ -102,6 +109,12 @@ void PMFFilter::addDimensions(PointLayoutPtr layout)
 void PMFFilter::prepared(PointTableRef table)
 {
     const PointLayoutPtr layout(table.layout());
+
+    if ((m_groundClass == m_otherClass) && !m_onlyGround)
+    {
+        throwError("Ground and non-ground class cannot be"
+            "equal when only_ground is false.");
+    }
 
     for (auto& r : m_args->m_ignored)
     {
@@ -191,10 +204,11 @@ PointViewSet PMFFilter::run(PointViewPtr input)
     if (!inlierView->size())
         throwError("No returns to process.");
 
-    // Classify remaining points with value of 1. processGround will mark ground
-    // returns as 2.
-    for (PointRef p : *inlierView)
-        p.setField(Id::Classification, ClassLabel::Unclassified);
+    if (!m_onlyGround)
+    {
+        for (PointRef p : *inlierView)
+            p.setField(Id::Classification, m_otherClass);
+    }
 
     // Run the actual PMF algorithm.
     processGround(inlierView);
@@ -347,10 +361,8 @@ void PMFFilter::processGround(PointViewPtr view)
     log()->get(LogLevel::Debug2)
         << "Labeled " << groundIdx.size() << " ground returns!\n";
 
-    // set the classification label of ground returns as 2
-    // (corresponding to ASPRS LAS specification)
     for (PointId const& i : groundIdx)
-        view->setField(Id::Classification, i, ClassLabel::Ground);
+        view->setField(Id::Classification, i, m_groundClass);
 }
 
 } // namespace pdal
