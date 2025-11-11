@@ -245,10 +245,11 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     if (!inlierView->size())
         throwError("No returns to process.");
 
-    // Classify remaining points with value of 1. SMRF processing will mark
-    // ground returns as 2.
-    for (PointRef p : *inlierView)
-        p.setField(Id::Classification, ClassLabel::Unclassified);
+    if (!m_onlyGround)
+    {
+        for (PointRef p : *inlierView)
+            p.setField(Id::Classification, m_otherClass);
+    }
 
     m_srs = inlierView->spatialReference();
 
