@@ -267,7 +267,8 @@ PointViewSet CSFilter::run(PointViewPtr view)
 
     for (auto const& i : groundIdx)
         firstView->setField(Id::Classification, i, m_groundClass);
-    if (!m_onlyGround) {
+    if (!m_onlyGround)
+    {
         for (auto const& i : offGroundIdx)
             firstView->setField(Id::Classification, i, m_otherClass);
     }
