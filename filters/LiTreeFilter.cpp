@@ -49,7 +49,7 @@ namespace pdal
 using namespace Dimension;
 
 static PluginInfo const s_info{"filters.litree", "Li Tree Filter",
-                               "http://pdal.io/stages/filters.litree.html"};
+                               "https://pdal.org/stages/filters.litree.html"};
 
 CREATE_STATIC_STAGE(LiTreeFilter, s_info)
 

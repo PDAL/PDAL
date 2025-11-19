@@ -43,7 +43,7 @@ static StaticPluginInfo const s_info
 {
     "kernels.random",
     "Random Kernel [DEPRECATED]",
-    "http://pdal.io/apps/random.html"
+    "https://pdal.org/apps/random.html"
 };
 
 CREATE_STATIC_KERNEL(RandomKernel, s_info)

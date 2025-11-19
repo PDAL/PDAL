@@ -149,7 +149,7 @@ std::string PluginManager<T>::link(const std::string& name)
     // For versioned (Release) builds, we point to the version number
     // https://pdal.dev/en/2.4.3/stages/filters.reprojection.html
     //
-    std::string root("https://pdal.io/en/");
+    std::string root("https://pdal.org/en/");
 
     std::string version("master");
     std::string sha = Config::sha1();

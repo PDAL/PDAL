@@ -45,7 +45,7 @@ using namespace Dimension;
 static StaticPluginInfo const s_info{
     "filters.lloydkmeans",
     "Extract and label clusters using K-means (Lloyd's algorithm).",
-    "http://pdal.io/stages/filters.lloydkmeans.html"};
+    "https://pdal.org/stages/filters.lloydkmeans.html"};
 
 CREATE_STATIC_STAGE(LloydKMeansFilter, s_info)
 

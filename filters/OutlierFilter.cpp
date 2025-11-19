@@ -48,7 +48,7 @@ static StaticPluginInfo const s_info
 {
     "filters.outlier",
     "Outlier removal",
-    "http://pdal.io/stages/filters.outlier.html"
+    "https://pdal.org/stages/filters.outlier.html"
 };
 
 CREATE_STATIC_STAGE(OutlierFilter, s_info)

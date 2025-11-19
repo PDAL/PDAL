@@ -52,7 +52,7 @@ static StaticPluginInfo const s_info
 {
     "filters.eigenvalues",
     "Returns the eigenvalues for a given point, based on its k-nearest neighbors.",
-    "http://pdal.io/stages/filters.eigenvalues.html"
+    "https://pdal.org/stages/filters.eigenvalues.html"
 };
 
 CREATE_STATIC_STAGE(EigenvaluesFilter, s_info)

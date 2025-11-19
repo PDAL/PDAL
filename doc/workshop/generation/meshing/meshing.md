@@ -6,7 +6,7 @@
 ```
 
 This exercise uses PDAL to create surface meshes. PDAL is able to use a number
-of meshing filters: <https://pdal.io/en/latest/stages/filters.html>. Three of these
+of meshing filters: <https://pdal.org/en/latest/stages/filters.html>. Three of these
 are 'in the box', without needing plugins compiled. These are 2D Delaunay
 triangulation, Greedy projection meshing and Poisson surface meshing.
 

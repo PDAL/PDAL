@@ -1,10 +1,10 @@
 # PDAL
 
-PDAL is GDAL for point cloud data. Main website is [https://pdal.io/](https://pdal.io).
+PDAL is GDAL for point cloud data. Main website is [https://pdal.org/](https://pdal.org).
 
 ## Contributing
 
-* [Mailing list](https://pdal.io/en/stable/community.html#mailing-list)
+* [Mailing list](https://pdal.org/en/stable/community.html#mailing-list)
 * [Contributing](https://github.com/PDAL/PDAL/blob/master/CONTRIBUTING.md)
 * [Join the chat at https://matrix.to/#/#pdal:osgeo.org](https://matrix.to/#/#pdal:osgeo.org) (mirrored in #pdal on [osgeo.slack.com](http://osgeo.slack.com)
 

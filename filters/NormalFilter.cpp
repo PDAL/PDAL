@@ -60,7 +60,7 @@ using namespace Dimension;
 
 static StaticPluginInfo const s_info{
     "filters.normal", "Normal Filter",
-    "http://pdal.io/stages/filters.normal.html"};
+    "https://pdal.org/stages/filters.normal.html"};
 
 CREATE_STATIC_STAGE(NormalFilter, s_info)
 

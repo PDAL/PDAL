@@ -78,7 +78,7 @@ static StaticPluginInfo const s_info
     "filters.hag_nn",
     "Computes height above ground using nearest-neighbor ground-classified "
         "returns.",
-    "http://pdal.io/stages/filters.hag_nn.html"
+    "https://pdal.org/stages/filters.hag_nn.html"
 };
 
 CREATE_STATIC_STAGE(HagNnFilter, s_info)

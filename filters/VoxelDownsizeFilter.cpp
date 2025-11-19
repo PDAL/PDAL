@@ -43,7 +43,7 @@ static StaticPluginInfo const s_info
 {
     "filters.voxeldownsize",
     "First Entry Voxel Filter", 
-    "http://pdal.io/stages/filters.voxeldownsize.html"
+    "https://pdal.org/stages/filters.voxeldownsize.html"
 };
 
 CREATE_STATIC_STAGE(VoxelDownsizeFilter, s_info)

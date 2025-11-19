@@ -54,7 +54,7 @@ static StaticPluginInfo const s_info
 {
     "writers.gltf",
     "Gltf Writer",
-    "http://pdal.io/stages/writers.gltf.html",
+    "https://pdal.org/stages/writers.gltf.html",
     { "gltf", "glb" }
 };
 

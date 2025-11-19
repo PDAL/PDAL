@@ -45,7 +45,7 @@ static StaticPluginInfo const s_info
 {
     "filters.faceraster",
     "Face Raster Filter",
-    "http://pdal.io/stages/filters.faceraster.html"
+    "https://pdal.org/stages/filters.faceraster.html"
 };
 
 CREATE_STATIC_STAGE(FaceRasterFilter, s_info)
