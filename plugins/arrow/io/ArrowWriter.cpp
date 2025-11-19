@@ -63,7 +63,7 @@ static PluginInfo const s_info
 {
     "writers.arrow",
     "Arrow Writer",
-    "http://pdal.io/stages/writers.arrow.html"
+    "http://pdal.org/stages/writers.arrow.html"
 };
 
 CREATE_SHARED_STAGE(ArrowWriter, s_info)

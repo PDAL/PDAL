@@ -71,7 +71,7 @@ static StaticPluginInfo const s_info
 {
     "filters.chipper",
     "Organize points into spatially contiguous, squarish, and non-overlapping chips.",
-    "http://pdal.io/stages/filters.chipper.html"
+    "http://pdal.org/stages/filters.chipper.html"
 };
 
 CREATE_STATIC_STAGE(ChipperFilter, s_info)

@@ -131,7 +131,7 @@ parse:
     NumPy: "[NumPy](https://www.numpy.org/)"
     Optech: "[Optech](https://www.teledyneoptech.com/)"
     PCL: "[PCL](https://pointclouds.org)"
-    PDAL: "[PDAL](https://pdal.io/)"
+    PDAL: "[PDAL](https://pdal.org/)"
     PROJ: "[PROJ](https://proj.org)"
     Python: "[Python](https://python.org/)"
     QGIS: "[QGIS](https://qgis.org)"

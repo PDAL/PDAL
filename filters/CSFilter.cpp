@@ -65,7 +65,7 @@ using namespace Eigen;
 
 static StaticPluginInfo const s_info{
     "filters.csf", "Cloth Simulation Filter (Zhang et al., 2016)",
-    "https://pdal.io/stages/filters.csf.html"};
+    "https://pdal.org/stages/filters.csf.html"};
 
 CREATE_STATIC_STAGE(CSFilter, s_info)
 

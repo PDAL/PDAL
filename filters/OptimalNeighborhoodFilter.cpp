@@ -47,7 +47,7 @@ using namespace Eigen;
 
 static StaticPluginInfo const s_info{
     "filters.optimalneighborhood", "OptimalNeighborhood Filter",
-    "http://pdal.io/stages/filters.optimalneighborhood.html"};
+    "http://pdal.org/stages/filters.optimalneighborhood.html"};
 
 CREATE_STATIC_STAGE(OptimalNeighborhood, s_info)
 

@@ -49,7 +49,7 @@ static StaticPluginInfo const s_info
 {
     "filters.greedyprojection",
     "Greedy Triangulation filter",
-    "http://pdal.io/stages/filters.greedyprojection.html"
+    "http://pdal.org/stages/filters.greedyprojection.html"
 };
 
 CREATE_STATIC_STAGE(GreedyProjection, s_info)

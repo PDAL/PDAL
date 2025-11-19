@@ -47,7 +47,7 @@ static StaticPluginInfo const s_info
 {
     "filters.projpipeline",
     "Transform coordinates using Proj pipeline string, WKT2 coordinate operations or URN definition",
-    "http://pdal.io/stages/filters.projpipeline.html"
+    "http://pdal.org/stages/filters.projpipeline.html"
 };
 
 CREATE_STATIC_STAGE(ProjPipelineFilter, s_info)

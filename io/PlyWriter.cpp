@@ -47,7 +47,7 @@ static StaticPluginInfo const s_info
 {
         "writers.ply",
         "ply writer",
-        "http://pdal.io/stages/writers.ply.html",
+        "http://pdal.org/stages/writers.ply.html",
         { "ply" }
 };
 

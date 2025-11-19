@@ -57,7 +57,7 @@ static StaticPluginInfo const s_info
 {
     "kernels.info",
     "Info Kernel",
-    "http://pdal.io/apps/info.html"
+    "http://pdal.org/apps/info.html"
 };
 
 CREATE_STATIC_KERNEL(InfoKernel, s_info)

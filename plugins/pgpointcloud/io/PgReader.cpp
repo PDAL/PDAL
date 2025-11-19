@@ -48,7 +48,7 @@ static PluginInfo const s_info
     "readers.pgpointcloud",
     "Read data from pgpointcloud format. \"query\" option needs to be a \n" \
         "SQL statement selecting the data.",
-    "http://pdal.io/stages/readers.pgpointcloud.html"
+    "http://pdal.org/stages/readers.pgpointcloud.html"
 };
 
 CREATE_SHARED_STAGE(PgReader, s_info)

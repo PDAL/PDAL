@@ -52,7 +52,7 @@ namespace pdal
 
 static PluginInfo const s_info{"readers.tiledb",
                                "Read data from a TileDB array.",
-                               "http://pdal.io/stages/readers.tiledb.html"};
+                               "http://pdal.org/stages/readers.tiledb.html"};
 
 struct TileDBReader::Args
 {

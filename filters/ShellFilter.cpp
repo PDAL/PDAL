@@ -53,7 +53,7 @@ static StaticPluginInfo const s_info
 {
     "filters.shell",
     "Execute a shell operation inline with PDAL pipeline steps",
-    "http://pdal.io/stages/filters.shell.html"
+    "http://pdal.org/stages/filters.shell.html"
 };
 
 CREATE_STATIC_STAGE(ShellFilter, s_info)

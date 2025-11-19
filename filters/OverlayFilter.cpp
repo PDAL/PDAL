@@ -52,7 +52,7 @@ static StaticPluginInfo const s_info
     "filters.overlay",
     "Assign values to a dimension based on the extent of an OGR-readable data "
         " source or an OGR SQL query.",
-    "https://pdal.io/stages/filters.overlay.html"
+    "https://pdal.org/stages/filters.overlay.html"
 };
 
 CREATE_STATIC_STAGE(OverlayFilter, s_info)

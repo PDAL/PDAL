@@ -46,7 +46,7 @@ static StaticPluginInfo const s_info
 {
     "readers.spz",
     "SPZ Reader",
-    "http://pdal.io/stages/readers.spz.html",
+    "http://pdal.org/stages/readers.spz.html",
     { "spz" }
 };
 

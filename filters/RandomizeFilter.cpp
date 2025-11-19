@@ -39,7 +39,7 @@ namespace pdal
 
 static StaticPluginInfo const s_info{
     "filters.randomize", "Randomize points in a view.",
-    "http://pdal.io/stages/filters.randomize.html"};
+    "http://pdal.org/stages/filters.randomize.html"};
 
 CREATE_STATIC_STAGE(RandomizeFilter, s_info)
 

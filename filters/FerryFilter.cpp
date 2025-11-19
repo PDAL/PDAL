@@ -44,7 +44,7 @@ static StaticPluginInfo const s_info
 {
     "filters.ferry",
     "Copy data from one dimension to another.",
-    "http://pdal.io/stages/filters.ferry.html"
+    "http://pdal.org/stages/filters.ferry.html"
 };
 
 CREATE_STATIC_STAGE(FerryFilter, s_info)

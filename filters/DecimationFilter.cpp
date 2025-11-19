@@ -44,7 +44,7 @@ static StaticPluginInfo const s_info
 {
     "filters.decimation",
     "Rank decimation filter. Keep every Nth point",
-    "http://pdal.io/stages/filters.decimation.html"
+    "http://pdal.org/stages/filters.decimation.html"
 };
 
 CREATE_STATIC_STAGE(DecimationFilter, s_info)

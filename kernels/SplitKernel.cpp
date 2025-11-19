@@ -45,7 +45,7 @@ static StaticPluginInfo const s_info
 {
     "kernels.split",
     "Split Kernel",
-    "http://pdal.io/apps/split.html"
+    "http://pdal.org/apps/split.html"
 };
 
 CREATE_STATIC_KERNEL(SplitKernel, s_info)

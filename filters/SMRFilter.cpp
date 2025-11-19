@@ -65,7 +65,7 @@ using namespace Eigen;
 
 static StaticPluginInfo const s_info{
     "filters.smrf", "Simple Morphological Filter (Pingel et al., 2013)",
-    "http://pdal.io/stages/filters.smrf.html"};
+    "http://pdal.org/stages/filters.smrf.html"};
 
 // Without the cast, MSVC complains, which is ridiculous when the output
 // is, by definition, an int.

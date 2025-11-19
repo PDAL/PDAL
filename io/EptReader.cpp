@@ -63,7 +63,7 @@ const StaticPluginInfo s_info
 {
     "readers.ept",
     "EPT Reader",
-    "http://pdal.io/stages/reader.ept.html",
+    "http://pdal.org/stages/reader.ept.html",
     { "ept" }
 };
 

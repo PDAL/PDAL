@@ -60,7 +60,7 @@ static PluginInfo const s_info
 {
     "writers.nitf",
     "NITF Writer",
-    "http://pdal.io/stages/writers.nitf.html"
+    "http://pdal.org/stages/writers.nitf.html"
 };
 
 CREATE_SHARED_STAGE(NitfWriter, s_info)

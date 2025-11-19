@@ -50,7 +50,7 @@ static PluginInfo const s_info
 {
     "readers.rxp",
     "RXP Reader",
-    "http://pdal.io/stages/readers.rxp.html"
+    "http://pdal.org/stages/readers.rxp.html"
 };
 
 CREATE_SHARED_STAGE(RxpReader, s_info)

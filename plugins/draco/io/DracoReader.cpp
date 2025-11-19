@@ -46,7 +46,7 @@ static PluginInfo const s_info
 {
         "readers.draco",
         "Read data from a Draco array.",
-        "http://pdal.io/stages/readers.draco.html"
+        "http://pdal.org/stages/readers.draco.html"
 };
 
 CREATE_SHARED_STAGE(DracoReader, s_info)

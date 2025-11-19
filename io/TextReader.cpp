@@ -45,7 +45,7 @@ static StaticPluginInfo const s_info
 {
     "readers.text",
     "Text Reader",
-    "http://pdal.io/stages/readers.text.html",
+    "http://pdal.org/stages/readers.text.html",
     { "txt", "csv" }
 };
 

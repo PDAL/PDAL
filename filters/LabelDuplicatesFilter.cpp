@@ -46,7 +46,7 @@ static PluginInfo const s_info
 {
     "filters.label_duplicates",
     "Label duplicate points",
-    "http://pdal.io/stages/filters.label_duplicates.html"
+    "http://pdal.org/stages/filters.label_duplicates.html"
 };
 
 CREATE_STATIC_STAGE(LabelDuplicatesFilter, s_info)

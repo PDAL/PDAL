@@ -47,7 +47,7 @@ static StaticPluginInfo const s_info
 {
     "readers.ilvis2",
     "ILVIS2 Reader",
-    "http://pdal.io/stages/readers.ilvis2.html"
+    "http://pdal.org/stages/readers.ilvis2.html"
 };
 
 CREATE_STATIC_STAGE(Ilvis2Reader, s_info)

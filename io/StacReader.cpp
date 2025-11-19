@@ -139,7 +139,7 @@ static PluginInfo const stacinfo
 {
     "readers.stac",
     "STAC Reader",
-    "http://pdal.io/stages/readers.stac.html",
+    "http://pdal.org/stages/readers.stac.html",
 };
 
 namespace
