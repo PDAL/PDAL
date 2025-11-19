@@ -27,6 +27,8 @@ public:
         { s.ready(table); }
     static void done(Stage& s, PointTableRef table)
         { s.done(table); }
+    static QuickInfo inspect(Stage& s)
+        { return s.inspect(); }
     static PointViewSet run(Stage& s, PointViewPtr view)
         {
             bool bDoRunStage(true);
