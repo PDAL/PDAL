@@ -55,6 +55,7 @@ private:
     virtual bool processOne(PointRef& point)
         { return true; }
     virtual PointViewSet run(PointViewPtr in);
+    virtual QuickInfo inspect();
 
     MergeFilter& operator=(const MergeFilter&); // not implemented
     MergeFilter(const MergeFilter&); // not implemented

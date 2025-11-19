@@ -33,6 +33,7 @@
  ****************************************************************************/
 
 #include "MergeFilter.hpp"
+#include <pdal/StageWrapper.hpp>
 
 namespace pdal
 {
@@ -71,6 +72,18 @@ PointViewSet MergeFilter::run(PointViewPtr in)
     m_view->append(*in.get());
     viewSet.insert(m_view);
     return viewSet;
+}
+
+QuickInfo MergeFilter::inspect()
+{
+    QuickInfo qi;
+    std::vector<Stage*>& inputs = getInputs();
+    if (inputs.size())
+    {
+        std::cout << "stage name " << inputs[0]->getName() << std::endl;
+        qi = StageWrapper::inspect(*inputs[0]);
+    }
+    return qi;
 }
 
 } // namespace pdal

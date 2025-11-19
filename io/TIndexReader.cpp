@@ -178,7 +178,7 @@ void TIndexReader::addDimensions(PointLayoutPtr layout)
 }
 
 
-void TIndexReader::initialize()
+void TIndexReader::initialize(PointTableRef table)
 {
     if (!m_args->m_bounds.empty())
         m_args->m_wkt = m_args->m_bounds.toWKT();
@@ -361,6 +361,38 @@ PointViewSet TIndexReader::run(PointViewPtr view)
 {
     return StageWrapper::run(m_merge, view);
 }
+
+QuickInfo TIndexReader::inspect()
+{
+    QuickInfo qi;
+    std::unique_ptr<PointLayout> layout(new PointLayout());
+
+    RowPointTable table;
+    initialize(table);
+    addDimensions(layout.get());
+
+    qi = StageWrapper::inspect(m_merge);
+
+//     Dimension::IdList dims = layout->dims();
+//     for (auto di = dims.begin(); di != dims.end(); ++di)
+//         qi.m_dimNames.push_back(layout->dimName(*di));
+//     if (!Utils::numericCast(d->header.pointCount(), qi.m_pointCount))
+//         qi.m_pointCount = (std::numeric_limits<point_count_t>::max)();
+//     qi.m_bounds = d->header.bounds;
+    qi.m_srs = getSpatialReference();
+    qi.m_valid = true;
+    qi.m_metadata = m_metadata;
+
+    done(table);
+
+    return qi;
+}
+
+void TIndexReader::done(PointTableRef)
+{
+    // any shutdown stuff?
+}
+
 
 } // namespace pdal
 
