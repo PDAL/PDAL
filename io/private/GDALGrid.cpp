@@ -52,7 +52,8 @@ namespace pdal
 //  moving data around every time the grid is resized.
 
 GDALGrid::GDALGrid(double xOrigin, double yOrigin, size_t width, size_t height, double edgeLength,
-        double radius, int outputTypes, size_t windowSize, double power, bool binMode) :
+        double radius, int outputTypes, size_t windowSize, double power, bool binMode, 
+        std::vector<int> percentileValues) :
     m_windowSize(windowSize), m_edgeLength(edgeLength), m_radius(radius), m_power(power),
     m_outputTypes(outputTypes), m_binMode(binMode)
 {
@@ -81,6 +82,19 @@ GDALGrid::GDALGrid(double xOrigin, double yOrigin, size_t width, size_t height, 
         m_mean.reset(new Rasterd(limits));
     if (m_outputTypes & statStdDev)
         m_stdDev.reset(new Rasterd(limits));
+    //!! We do binmode checks in the writer, so probably not needed here
+    for (auto& p : percentileValues)
+    {
+        if (p > 0 && p < 100)
+            m_pctls.emplace(p, new Rasterd(limits));
+        else
+        {
+            std::ostringstream oss;
+            oss << "Invalid percentile value: " << p << ". Percentiles are limited to " << 
+                "0-100 integer values.";
+            throw error(oss.str());
+        }
+    }
 }
 
 int GDALGrid::width() const
@@ -158,6 +172,8 @@ int GDALGrid::numBands() const
         num++;
     if (m_outputTypes & statStdDev)
         num++;
+    if (!m_pctls.empty())
+        num += m_pctls.size();
     return num;
 }
 
@@ -178,6 +194,18 @@ double *GDALGrid::data(const std::string& name)
         return m_stdDev->data();
     return nullptr;
 }
+
+
+//!! could maybe run something equivalent to fillPercentiles to calculate on the fly, but that would
+//!! entail looping thru m_valBins multiple times. Not sure which is better
+double *GDALGrid::pctlData(int pct) const
+{
+    auto it = m_pctls.find(pct);
+    if ((it != m_pctls.end()) && m_valBins.size())
+        return it->second->data();
+    return nullptr;
+}
+
 
 GDALGrid::Cell GDALGrid::pointToCell(const Point& p)
 {
@@ -397,6 +425,9 @@ void GDALGrid::update(size_t i, size_t j, double val, double dist)
     double& count = m_count->at(i, j);
     count++;
 
+    if (m_pctls.size())
+        m_valBins[m_count->indexAt(i, j)].push_back(val);
+
     if (m_min)
     {
         double& min = m_min->at(i, j);
@@ -445,6 +476,33 @@ void GDALGrid::update(size_t i, size_t j, double val, double dist)
     }
 }
 
+
+void GDALGrid::fillPercentiles(const size_t& idx, std::vector<double>& values)
+{
+    std::sort(values.begin(), values.end());
+    //!! This check is mostly for testing
+    if (values.size() != static_cast<size_t>(m_count->at(idx)))
+    {
+        throw error("Mismatch in size of accumulated values and count raster; "
+            "expected " + std::to_string(m_count->at(idx)) + " values, got " +
+            std::to_string(values.size()));
+        return;
+    }
+    //!! Could use nth_element?
+    for (auto& [pct, raster] : m_pctls)
+    {
+        const double pctIdxExact = (pct / 100.0) * (m_count->at(idx) - 1);
+        const size_t pctIdxFloor = static_cast<size_t>(pctIdxExact);
+        double fraction = pctIdxExact - pctIdxFloor;
+        if (!fraction)
+            (*raster)[idx] = values[pctIdxFloor];
+        else
+            (*raster)[idx] = values[pctIdxFloor] + fraction *
+                (values[pctIdxFloor + 1] - values[pctIdxFloor]);
+    }
+}
+
+
 void GDALGrid::finalize()
 {
     // See
@@ -463,6 +521,14 @@ void GDALGrid::finalize()
                 if (!std::isnan(distSum))
                     (*m_idw)[i] /= distSum;
             }
+
+    if (m_pctls.size())
+        for (auto& it : m_valBins)
+        {
+            size_t idx = it.first;
+            if (!empty(idx))
+                fillPercentiles(idx, it.second);
+        }
 
     if (m_windowSize > 0)
         windowFill();
@@ -488,6 +554,9 @@ void GDALGrid::fillNodata(int i, int j)
         m_idw->at(i, j) = std::numeric_limits<double>::quiet_NaN();
     if (m_stdDev)
         m_stdDev->at(i, j) = std::numeric_limits<double>::quiet_NaN();
+    if (m_pctls.size())
+        for (auto& it : m_pctls)
+            it.second->at(i, j) = std::numeric_limits<double>::quiet_NaN();
 }
 
 

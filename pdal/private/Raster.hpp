@@ -193,6 +193,9 @@ public:
     T& at(size_t idx)
         { return m_data[idx]; }
 
+    size_t indexAt(int x, int y) const
+        { return index(x, height() - y - 1); }
+
     const T& operator[](size_t idx) const
         { return m_data[idx]; }
 
