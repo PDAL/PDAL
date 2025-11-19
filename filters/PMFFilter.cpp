@@ -53,7 +53,7 @@ using namespace Dimension;
 
 static StaticPluginInfo const s_info{"filters.pmf",
                                      "Progressive morphological filter",
-                                     "http://pdal.io/stages/filters.pmf.html"};
+                                     "http://pdal.org/stages/filters.pmf.html"};
 
 struct PMFArgs
 {

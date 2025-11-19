@@ -47,7 +47,7 @@ static PluginInfo const slpkInfo
 {
     "readers.slpk",
     "SLPK Reader",
-    "http://pdal.io/stages/readers.slpk.html"
+    "http://pdal.org/stages/readers.slpk.html"
 };
 
 CREATE_STATIC_STAGE(SlpkReader, slpkInfo)

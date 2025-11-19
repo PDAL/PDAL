@@ -45,7 +45,7 @@ namespace
     {
         "writers.fbi",
         "FBI Writer",
-        "http://pdal.io/stages/writers.fbi.html"
+        "http://pdal.org/stages/writers.fbi.html"
     };
 }
 

@@ -44,7 +44,7 @@ static StaticPluginInfo const s_info
 {
     "readers.pts",
     "Pts Reader",
-    "http://pdal.io/stages/readers.pts.html",
+    "http://pdal.org/stages/readers.pts.html",
     { "pts" }
 };
 

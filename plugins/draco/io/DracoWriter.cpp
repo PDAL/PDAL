@@ -77,7 +77,7 @@ static PluginInfo const s_info
 {
     "writers.draco",
     "Write data using Draco.",
-    "http://pdal.io/stages/writers.draco.html"
+    "http://pdal.org/stages/writers.draco.html"
 };
 
 CREATE_SHARED_STAGE(DracoWriter, s_info)

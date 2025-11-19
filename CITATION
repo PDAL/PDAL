@@ -1,7 +1,7 @@
 To cite PDAL in publications use:
 
   PDAL contributors (2025). PDAL: The Point Data Abstraction Library
-  URL https://pdal.io/.
+  URL https://pdal.org/.
 
 A BibTeX entry for LaTeX users is
 
@@ -10,5 +10,5 @@ A BibTeX entry for LaTeX users is
     author = {{PDAL contributors}},
     year = {2025},
     doi = {10.5281/zenodo.10884408},
-    url = {https://pdal.io/},
+    url = {https://pdal.org/},
   }

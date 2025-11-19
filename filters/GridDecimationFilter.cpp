@@ -25,7 +25,7 @@ static StaticPluginInfo const s_info
 {
     "filters.gridDecimation",
     "keep max or min points in a grid",
-    "http://pdal.io/stages/filters.GridDecimation.html"
+    "http://pdal.org/stages/filters.GridDecimation.html"
 };
 
 CREATE_STATIC_STAGE(GridDecimationFilter, s_info)

@@ -46,7 +46,7 @@ static StaticPluginInfo const s_info
 {
         "writers.spz",
         "SPZ writer",
-        "http://pdal.io/stages/writers.spz.html",
+        "http://pdal.org/stages/writers.spz.html",
         { "spz" }
 };
 

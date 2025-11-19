@@ -52,7 +52,7 @@ static StaticPluginInfo const s_info
 {
     "filters.range",
     "Pass only points given a dimension/range.",
-    "http://pdal.io/stages/filters.range.html"
+    "http://pdal.org/stages/filters.range.html"
 };
 
 CREATE_STATIC_STAGE(RangeFilter, s_info)

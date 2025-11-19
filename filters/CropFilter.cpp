@@ -55,7 +55,7 @@ static StaticPluginInfo const s_info
 {
     "filters.crop",
     "Filter points inside or outside a bounding box or a polygon",
-    "http://pdal.io/stages/filters.crop.html"
+    "http://pdal.org/stages/filters.crop.html"
 };
 
 CREATE_STATIC_STAGE(CropFilter, s_info)

@@ -49,7 +49,7 @@ static StaticPluginInfo const s_info
 {
     "filters.estimaterank",
     "Computes the rank of a neighborhood of points.",
-    "http://pdal.io/stages/filters.estimaterank.html"
+    "http://pdal.org/stages/filters.estimaterank.html"
 };
 
 CREATE_STATIC_STAGE(EstimateRankFilter, s_info)

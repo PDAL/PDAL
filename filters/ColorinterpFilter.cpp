@@ -58,7 +58,7 @@ static StaticPluginInfo const s_info
 {
     "filters.colorinterp",
     "Assigns RGB colors based on a dimension and a ramp",
-    "http://pdal.io/stages/filters.colorinterp.html"
+    "http://pdal.org/stages/filters.colorinterp.html"
 };
 
 CREATE_STATIC_STAGE(ColorinterpFilter, s_info)

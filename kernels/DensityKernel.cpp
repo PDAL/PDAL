@@ -46,7 +46,7 @@ static PluginInfo const s_info
 {
     "kernels.density",
     "Density Kernel [DEPRECATED]",
-    "http://pdal.io/apps/density.html"
+    "http://pdal.org/apps/density.html"
 };
 
 CREATE_STATIC_KERNEL(DensityKernel, s_info)

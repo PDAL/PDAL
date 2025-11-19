@@ -58,7 +58,7 @@ static StaticPluginInfo const s_info
 {
     "filters.miniball",
     "Miniball (Kutz et al., 2003)",
-    "http://pdal.io/stages/filters.miniball.html"
+    "http://pdal.org/stages/filters.miniball.html"
 };
 
 CREATE_STATIC_STAGE(MiniballFilter, s_info)

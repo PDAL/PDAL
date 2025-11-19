@@ -36,9 +36,9 @@ Docs are always built and doc artifacts are attached to the build:
 - PDF
 - Misspelled words
 
-### Push to pdal.io
+### Push to pdal.org
 
-Docs are pushed to pdal.io under the following conditions:
+Docs are pushed to pdal.org under the following conditions:
 
 - Doc building succeeds
 - The push branch denoted in `./github/workflows/docs.yaml` matches the current

@@ -47,7 +47,7 @@ static StaticPluginInfo const s_info
 {
     "filters.colorization",
     "Fetch and assign RGB color information from a GDAL-readable datasource.",
-    "http://pdal.io/stages/filters.colorization.html"
+    "http://pdal.org/stages/filters.colorization.html"
 };
 
 CREATE_STATIC_STAGE(ColorizationFilter, s_info)

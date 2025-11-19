@@ -49,7 +49,7 @@ static PluginInfo const s_info
 {
     "readers.rdb",
     "RIEGL RDB Reader",
-    "http://pdal.io/stages/readers.rdb.html"
+    "http://pdal.org/stages/readers.rdb.html"
 };
 
 CREATE_SHARED_STAGE(RdbReader, s_info)

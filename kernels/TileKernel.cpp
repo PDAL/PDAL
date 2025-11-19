@@ -46,7 +46,7 @@ static StaticPluginInfo const s_info
 {
     "kernels.tile",
     "Tile Kernel",
-    "http://pdal.io/apps/tile.html"
+    "http://pdal.org/apps/tile.html"
 };
 
 CREATE_STATIC_KERNEL(TileKernel, s_info)

@@ -49,7 +49,7 @@ static StaticPluginInfo const s_info
 {
     "filters.stats",
     "Compute statistics about each dimension (mean, min, max, etc.)",
-    "http://pdal.io/stages/filters.stats.html"
+    "http://pdal.org/stages/filters.stats.html"
 };
 
 CREATE_STATIC_STAGE(StatsFilter, s_info)

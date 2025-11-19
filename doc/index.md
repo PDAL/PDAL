@@ -22,7 +22,7 @@ Finally, PDAL speaks Python by both embedding and extending it. Visit
 {ref}`python` to find out how you can use PDAL with Python to process point
 cloud data.
 
-The entire website is available as a single PDF at <http://pdal.io/_/downloads/en/latest/pdf/>
+The entire website is available as a single PDF at <http://pdal.org/_/downloads/en/latest/pdf/>
 
 ## News
 

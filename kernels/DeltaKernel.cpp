@@ -44,7 +44,7 @@ static StaticPluginInfo const s_info
 {
     "kernels.delta",
     "Delta Kernel [DEPRECATED]",
-    "http://pdal.io/apps/delta.html"
+    "http://pdal.org/apps/delta.html"
 };
 
 CREATE_STATIC_KERNEL(DeltaKernel, s_info)

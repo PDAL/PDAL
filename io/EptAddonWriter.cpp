@@ -54,7 +54,7 @@ namespace
     {
         "writers.ept_addon",
         "EPT Writer",
-        "http://pdal.io/stages/writers.ept.html",
+        "http://pdal.org/stages/writers.ept.html",
         { "ept_addon", "ept-addon" }
     };
 

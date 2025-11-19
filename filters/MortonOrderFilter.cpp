@@ -46,7 +46,7 @@ static StaticPluginInfo const s_info
     "filters.mortonorder",
     "Morton or z-order sorting of points. See "
         "http://en.wikipedia.org/wiki/Z-order_curve for more detail.",
-    "http://pdal.io/stages/filters.mortonorder.html"
+    "http://pdal.org/stages/filters.mortonorder.html"
 };
 
 CREATE_STATIC_STAGE(MortonOrderFilter, s_info)

@@ -40,7 +40,7 @@ static StaticPluginInfo const s_info
 {
     "filters.head",
     "Return N points from beginning of the point cloud.",
-    "http://pdal.io/stages/filters.head.html"
+    "http://pdal.org/stages/filters.head.html"
 };
 
 CREATE_STATIC_STAGE(HeadFilter, s_info)

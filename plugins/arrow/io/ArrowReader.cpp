@@ -59,7 +59,7 @@ static PluginInfo const s_info
 {
     "readers.arrow",
     "Arrow Reader",
-    "http://pdal.io/stages/readers.arrow.html"
+    "http://pdal.org/stages/readers.arrow.html"
 };
 
 CREATE_SHARED_STAGE(ArrowReader, s_info)

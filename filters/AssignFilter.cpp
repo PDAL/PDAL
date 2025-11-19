@@ -47,7 +47,7 @@ static StaticPluginInfo const s_info
 {
     "filters.assign",
     "Assign values for a dimension range to a specified value.",
-    "http://pdal.io/stages/filters.assign.html"
+    "http://pdal.org/stages/filters.assign.html"
 };
 
 CREATE_STATIC_STAGE(AssignFilter, s_info)

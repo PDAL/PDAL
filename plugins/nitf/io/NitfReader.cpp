@@ -42,7 +42,7 @@ static PluginInfo const s_info
 {
     "readers.nitf",
     "NITF Reader",
-    "http://pdal.io/stages/readers.nitf.html"
+    "http://pdal.org/stages/readers.nitf.html"
 };
 
 CREATE_SHARED_STAGE(NitfReader, s_info)

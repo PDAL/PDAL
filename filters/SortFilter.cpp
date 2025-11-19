@@ -41,7 +41,7 @@ static StaticPluginInfo const s_info
 {
     "filters.sort",
     "Sort data based on a given dimension.",
-    "http://pdal.io/stages/filters.sort.html"
+    "http://pdal.org/stages/filters.sort.html"
 };
 
 CREATE_STATIC_STAGE(SortFilter, s_info)
