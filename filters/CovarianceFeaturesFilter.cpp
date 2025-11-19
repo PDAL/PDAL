@@ -58,7 +58,7 @@ static StaticPluginInfo const s_info
     "filters.covariancefeatures",
     "Filter that calculates local features based on the covariance matrix of a "
     "point's neighborhood.",
-    "http://pdal.io/stages/filters.covariancefeatures.html"
+    "https://pdal.org/stages/filters.covariancefeatures.html"
 };
 
 CREATE_STATIC_STAGE(CovarianceFeaturesFilter, s_info)

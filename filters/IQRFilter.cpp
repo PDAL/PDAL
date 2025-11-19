@@ -44,7 +44,7 @@ static StaticPluginInfo const s_info
 {
     "filters.iqr",
     "Interquartile Range Filter",
-    "http://pdal.io/stages/filters.iqr.html"
+    "https://pdal.org/stages/filters.iqr.html"
 };
 
 CREATE_STATIC_STAGE(IQRFilter, s_info)

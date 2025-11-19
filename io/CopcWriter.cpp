@@ -60,7 +60,7 @@ const StaticPluginInfo s_info
 {
     "writers.copc",
     "COPC Writer",
-    "http://pdal.io/stages/writer.copc.html",
+    "https://pdal.org/stages/writer.copc.html",
     {}
 };
 

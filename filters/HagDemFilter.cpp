@@ -44,7 +44,7 @@ static StaticPluginInfo const s_info
 {
     "filters.hag_dem",
     "Computes height above ground using a DEM raster.",
-    "http://pdal.io/stages/filters.hag_dem.html"
+    "https://pdal.org/stages/filters.hag_dem.html"
 };
 
 CREATE_STATIC_STAGE(HagDemFilter, s_info)

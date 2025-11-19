@@ -45,7 +45,7 @@ static StaticPluginInfo const s_info
 {
     "writers.raster",
     "Write a raster.",
-    "http://pdal.io/stages/writers.raster.html",
+    "https://pdal.org/stages/writers.raster.html",
     {}
 };
 

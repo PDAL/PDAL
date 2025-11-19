@@ -40,7 +40,7 @@ namespace pdal
 static PluginInfo const s_info{
     "filters.gpstimeconvert",
     "Convert between GPS Time, GPS Standard Time, and GPS Week Seconds",
-    "http://pdal.io/stages/filters.gpstimeconvert.html"};
+    "https://pdal.org/stages/filters.gpstimeconvert.html"};
 
 CREATE_STATIC_STAGE(GpsTimeConvert, s_info)
 

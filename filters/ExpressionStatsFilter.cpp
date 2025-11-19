@@ -53,7 +53,7 @@ static StaticPluginInfo const s_info
 {
     "filters.expressionstats",
     "Accumulate count statistics for a given dimension for an array of expressions",
-    "http://pdal.io/stages/filters.expressionstats.html"
+    "https://pdal.org/stages/filters.expressionstats.html"
 };
 
 CREATE_STATIC_STAGE(ExpressionStatsFilter, s_info)

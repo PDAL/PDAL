@@ -50,7 +50,7 @@ static PluginInfo const s_info
 {
     "readers.hdf",
     "HDF Reader",
-    "http://pdal.io/stages/readers.hdf.html"
+    "https://pdal.org/stages/readers.hdf.html"
 };
 
 CREATE_SHARED_STAGE(HdfReader, s_info)

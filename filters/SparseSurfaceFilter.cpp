@@ -42,7 +42,7 @@ namespace pdal
 using namespace Dimension;
 
 static PluginInfo const s_info{"filters.sparsesurface", "Sparse Surface Filter",
-                               "http://pdal.io/stages/filters.sparsesurface.html"};
+                               "https://pdal.org/stages/filters.sparsesurface.html"};
 
 CREATE_STATIC_STAGE(SparseSurfaceFilter, s_info)
 

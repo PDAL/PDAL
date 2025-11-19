@@ -47,7 +47,7 @@ static StaticPluginInfo const s_info
 {
     "readers.gdal",
     "Read GDAL rasters as point clouds.",
-    "http://pdal.io/stages/reader.gdal.html",
+    "https://pdal.org/stages/reader.gdal.html",
     { "tif", "tiff", "jpeg", "jpg", "png" }
 
 };

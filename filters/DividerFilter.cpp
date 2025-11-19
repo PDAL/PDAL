@@ -56,7 +56,7 @@ static PluginInfo const s_info
     "filters.divider",
     "Divide points into approximately equal sized groups based on a simple "
       "scheme",
-    "http://pdal.io/stages/filters.divider.html"
+    "https://pdal.org/stages/filters.divider.html"
 };
 
 CREATE_STATIC_STAGE(DividerFilter, s_info)

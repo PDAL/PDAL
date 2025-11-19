@@ -44,7 +44,7 @@ static StaticPluginInfo const s_info
 {
     "filters.locate",
     "Return a single point with min/max value in the named dimension.",
-    "http://pdal.io/stages/filters.locate.html"
+    "https://pdal.org/stages/filters.locate.html"
 };
 
 CREATE_STATIC_STAGE(LocateFilter, s_info)

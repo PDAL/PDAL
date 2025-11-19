@@ -59,7 +59,7 @@ static StaticPluginInfo const s_info
 {
     "filters.planefit",
     "Plane Fit (Kutz et al., 2003)",
-    "http://pdal.io/stages/filters.planefit.html"
+    "https://pdal.org/stages/filters.planefit.html"
 };
 
 CREATE_STATIC_STAGE(PlaneFitFilter, s_info)

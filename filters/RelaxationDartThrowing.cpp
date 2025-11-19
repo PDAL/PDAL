@@ -49,7 +49,7 @@ namespace pdal
 
 static StaticPluginInfo const s_info{
     "filters.relaxationdartthrowing", "Subsampling filter",
-    "http://pdal.io/stages/filters.relaxationdartthrowing.html"};
+    "https://pdal.org/stages/filters.relaxationdartthrowing.html"};
 
 CREATE_STATIC_STAGE(RelaxationDartThrowing, s_info)
 

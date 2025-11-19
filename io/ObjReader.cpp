@@ -41,7 +41,7 @@ static StaticPluginInfo const s_info
 {
     "readers.obj",
     "Obj Reader",
-    "http://pdal.io/stages/readers.obj.html",
+    "https://pdal.org/stages/readers.obj.html",
     { "obj" }
 };
 
