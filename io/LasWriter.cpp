@@ -65,7 +65,7 @@ static StaticPluginInfo const s_info
 {
     "writers.las",
     "ASPRS LAS 1.0 - 1.4 writer",
-    "http://pdal.org/stages/writers.las.html",
+    "https://pdal.org/stages/writers.las.html",
     { "las", "laz" }
 };
 

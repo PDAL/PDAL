@@ -67,7 +67,7 @@ static PluginInfo const s_info
     "NASA HDF5-based IceBridge ATM reader. \n" \
         "See http://nsidc.org/data/docs/daac/icebridge/ilatm1b/index.html \n" \
         "for more information.",
-    "http://pdal.org/stages/readers.icebridge.html"
+    "https://pdal.org/stages/readers.icebridge.html"
 };
 
 CREATE_SHARED_STAGE(IcebridgeReader, s_info)

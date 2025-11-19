@@ -47,7 +47,7 @@ static StaticPluginInfo const s_info
 {
     "filters.cluster",
     "Extract and label clusters using Euclidean distance.",
-    "http://pdal.org/stages/filters.cluster.html"
+    "https://pdal.org/stages/filters.cluster.html"
 };
 
 CREATE_STATIC_STAGE(ClusterFilter, s_info)

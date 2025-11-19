@@ -56,7 +56,7 @@ static StaticPluginInfo const s_info
     "filters.reciprocity",
     "Returns the percentage of neighbors that do NOT have the query point as a "
     "neighbor",
-    "http://pdal.org/stages/filters.reciprocity.html"
+    "https://pdal.org/stages/filters.reciprocity.html"
 };
 
 CREATE_STATIC_STAGE(ReciprocityFilter, s_info)

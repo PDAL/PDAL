@@ -56,7 +56,7 @@ using namespace Dimension;
 using namespace Eigen;
 
 static PluginInfo const s_info{"filters.teaser", "TEASER++ registration.",
-                               "http://pdal.org/stages/filters.teaser.html"};
+                               "https://pdal.org/stages/filters.teaser.html"};
 
 CREATE_SHARED_STAGE(TeaserFilter, s_info)
 

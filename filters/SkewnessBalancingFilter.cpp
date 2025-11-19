@@ -41,7 +41,7 @@ namespace pdal
 
 static PluginInfo const s_info{
     "filters.skewnessbalancing", "Bartels & Wei Skewness Balancing",
-    "http://pdal.org/stages/filters.skewnessbalancing.html"};
+    "https://pdal.org/stages/filters.skewnessbalancing.html"};
 
 CREATE_STATIC_STAGE(SkewnessBalancingFilter, s_info)
 

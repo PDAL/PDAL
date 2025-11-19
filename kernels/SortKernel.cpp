@@ -43,7 +43,7 @@ static StaticPluginInfo const s_info
 {
     "kernels.sort",
     "Sort Kernel",
-    "http://pdal.org/apps/sort.html"
+    "https://pdal.org/apps/sort.html"
 };
 
 CREATE_STATIC_KERNEL(SortKernel, s_info)

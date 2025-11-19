@@ -74,7 +74,7 @@ static StaticPluginInfo const s_info
 {
     "kernels.ground",
     "Ground Kernel [DEPRECATED]",
-    "http://pdal.org/apps/ground.html"
+    "https://pdal.org/apps/ground.html"
 };
 
 CREATE_STATIC_KERNEL(GroundKernel, s_info)

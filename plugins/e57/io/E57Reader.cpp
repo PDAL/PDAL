@@ -44,7 +44,7 @@ static PluginInfo const s_info
 {
     "readers.e57",
     "Reader for E57 files",
-    "http://pdal.org/stages/reader.e57.html"
+    "https://pdal.org/stages/reader.e57.html"
 };
 
 CREATE_SHARED_STAGE(E57Reader, s_info)

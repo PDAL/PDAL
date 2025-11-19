@@ -232,7 +232,7 @@ static StaticPluginInfo const s_info
 {
     "filters.poisson",
     "Poisson Surface Reconstruction Filter",
-    "http://pdal.org/stages/filters.poisson.html"
+    "https://pdal.org/stages/filters.poisson.html"
 };
 
 CREATE_STATIC_STAGE(PoissonFilter, s_info)

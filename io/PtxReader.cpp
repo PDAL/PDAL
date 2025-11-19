@@ -41,7 +41,7 @@ static const StaticPluginInfo sc_info
 {
     "readers.ptx",
     "Ptx Reader",
-    "http://pdal.org/stages/readers.ptx.html",
+    "https://pdal.org/stages/readers.ptx.html",
     { "ptx" }
 };
 

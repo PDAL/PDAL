@@ -53,7 +53,7 @@ static StaticPluginInfo const s_info
 {
     "readers.tindex",
     "TileIndex Reader",
-    "http://pdal.org/stages/readers.tindex.html",
+    "https://pdal.org/stages/readers.tindex.html",
     { "tindex" }
 };
 

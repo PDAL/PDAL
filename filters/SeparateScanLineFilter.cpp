@@ -43,7 +43,7 @@ static StaticPluginInfo const s_info
 {
     "filters.separatescanline",
     "Split data by scan line.",
-    "http://pdal.org/stages/filters.separatescanline.html"
+    "https://pdal.org/stages/filters.separatescanline.html"
 };
 CREATE_STATIC_STAGE(SeparateScanLineFilter, s_info)
 

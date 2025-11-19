@@ -43,7 +43,7 @@ static PluginInfo const s_info
 {
     "filters.delaunay",
     "Perform Delaunay triangulation of a pointcloud",
-    "http://pdal.org/stages/filters.delaunay.html"
+    "https://pdal.org/stages/filters.delaunay.html"
 };
 
 CREATE_STATIC_STAGE(DelaunayFilter, s_info)

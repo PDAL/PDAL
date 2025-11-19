@@ -117,7 +117,7 @@ void App::outputHelp(const ProgramArgs& args)
     PluginManager<Kernel>::loadAll();
     outputCommands("  - ");
     m_out << std::endl;
-    m_out << "See http://pdal.org/apps/ for more detail" << std::endl;
+    m_out << "See https://pdal.org/apps/ for more detail" << std::endl;
 }
 
 

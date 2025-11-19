@@ -59,7 +59,7 @@ using namespace std::chrono;
 
 static StaticPluginInfo const s_info{
     "filters.supervoxel", "Supervoxel segmentation.",
-    "http://pdal.org/stages/filters.supervoxel.html"};
+    "https://pdal.org/stages/filters.supervoxel.html"};
 
 CREATE_STATIC_STAGE(SupervoxelFilter, s_info)
 

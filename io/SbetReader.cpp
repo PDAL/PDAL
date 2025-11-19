@@ -70,7 +70,7 @@ static StaticPluginInfo const s_info
 {
     "readers.sbet",
     "SBET Reader",
-    "http://pdal.org/stages/readers.sbet.html",
+    "https://pdal.org/stages/readers.sbet.html",
     { "sbet" }
 };
 

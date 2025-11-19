@@ -47,7 +47,7 @@ static PluginInfo const s_info
 {
     "readers.mbio",
     "MBSystem Reader",
-    "http://pdal.org/stages/readers.mbio.html"
+    "https://pdal.org/stages/readers.mbio.html"
 };
 
 CREATE_SHARED_STAGE(MbReader, s_info)

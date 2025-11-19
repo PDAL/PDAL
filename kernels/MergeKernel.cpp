@@ -44,7 +44,7 @@ static StaticPluginInfo const s_info
 {
     "kernels.merge",
     "Merge Kernel",
-    "http://pdal.org/apps/merge.html"
+    "https://pdal.org/apps/merge.html"
 };
 
 CREATE_STATIC_KERNEL(MergeKernel, s_info)

@@ -46,7 +46,7 @@ static StaticPluginInfo const s_info
 {
     "filters.info",
     "Gather basic info about points.",
-    "http://pdal.org/stages/filters.info.html"
+    "https://pdal.org/stages/filters.info.html"
 };
 
 CREATE_STATIC_STAGE(InfoFilter, s_info)

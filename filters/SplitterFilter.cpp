@@ -47,7 +47,7 @@ static StaticPluginInfo const s_info
 {
     "filters.splitter",
     "Split data based on a X/Y box length.",
-    "http://pdal.org/stages/filters.splitter.html"
+    "https://pdal.org/stages/filters.splitter.html"
 };
 
 CREATE_STATIC_STAGE(SplitterFilter, s_info)

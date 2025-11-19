@@ -41,7 +41,7 @@ namespace pdal
 
 static StaticPluginInfo const s_info{
     "filters.returns", "Split data by return order",
-    "http://pdal.org/stages/filters.returns.html"};
+    "https://pdal.org/stages/filters.returns.html"};
 
 CREATE_STATIC_STAGE(ReturnsFilter, s_info)
 

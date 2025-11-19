@@ -47,7 +47,7 @@ static StaticPluginInfo const s_info
 {
     "filters.radialdensity",
     "RadialDensity Filter",
-    "http://pdal.org/stages/filters.radialdensity.html"
+    "https://pdal.org/stages/filters.radialdensity.html"
 };
 
 CREATE_STATIC_STAGE(RadialDensityFilter, s_info)

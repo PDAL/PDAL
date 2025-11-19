@@ -46,7 +46,7 @@ static PluginInfo const s_info
 {
     "readers.matlab",
     "Matlab Reader",
-    "http://pdal.org/stages/readers.matlab.html"
+    "https://pdal.org/stages/readers.matlab.html"
 };
 
 CREATE_SHARED_STAGE(MatlabReader, s_info)

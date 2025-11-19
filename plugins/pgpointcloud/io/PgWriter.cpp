@@ -48,7 +48,7 @@ static PluginInfo const s_info
 {
     "writers.pgpointcloud",
     "Write points to PostgreSQL pgpointcloud output",
-    "http://pdal.org/stages/writers.pgpointcloud.html"
+    "https://pdal.org/stages/writers.pgpointcloud.html"
 };
 
 CREATE_SHARED_STAGE(PgWriter, s_info)

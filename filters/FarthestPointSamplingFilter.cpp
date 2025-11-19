@@ -49,7 +49,7 @@ namespace pdal
 {
 
 static PluginInfo const s_info{"filters.fps", "Farthest point sampling filter",
-                               "http://pdal.org/stages/filters.fps.html"};
+                               "https://pdal.org/stages/filters.fps.html"};
 
 CREATE_STATIC_STAGE(FarthestPointSamplingFilter, s_info)
 

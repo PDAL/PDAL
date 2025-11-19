@@ -143,7 +143,7 @@ static StaticPluginInfo const s_info
 {
     "kernels.tindex",
     "TIndex Kernel",
-    "http://pdal.org/apps/tindex.html"
+    "https://pdal.org/apps/tindex.html"
 };
 
 CREATE_STATIC_KERNEL(TIndexKernel, s_info)

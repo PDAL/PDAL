@@ -47,7 +47,7 @@ static StaticPluginInfo const s_info
 {
     "filters.dem",
     "Filter points about an elevation surface",
-    "http://pdal.org/stages/filters.dem.html"
+    "https://pdal.org/stages/filters.dem.html"
 };
 
 CREATE_STATIC_STAGE(DEMFilter, s_info)

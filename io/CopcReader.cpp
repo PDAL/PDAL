@@ -71,7 +71,7 @@ const StaticPluginInfo s_info
 {
     "readers.copc",
     "COPC Reader",
-    "http://pdal.org/stages/reader.copc.html",
+    "https://pdal.org/stages/reader.copc.html",
     { "copc" }
 };
 
