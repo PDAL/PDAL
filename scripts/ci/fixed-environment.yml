@@ -4,6 +4,7 @@ channels:
 dependencies:
   - libgdal=3.11
   - libpq
+  - geotiff
   - curl
   - hdf5
   - tiledb
