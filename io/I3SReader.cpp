@@ -48,7 +48,7 @@ static PluginInfo const i3sInfo
 {
     "readers.i3s",
     "I3S Reader",
-    "http://pdal.org/stages/readers.i3s.html"
+    "https://pdal.org/stages/readers.i3s.html"
 };
 
 CREATE_STATIC_STAGE(I3SReader, i3sInfo)

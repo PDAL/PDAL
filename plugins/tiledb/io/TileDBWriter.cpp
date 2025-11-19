@@ -57,7 +57,7 @@ namespace pdal
 
 static PluginInfo const s_info{
     "writers.tiledb", "Write data using TileDB.",
-    "http://pdal.org/stages/drivers.tiledb.writer.html"};
+    "https://pdal.org/stages/drivers.tiledb.writer.html"};
 
 struct TileDBWriter::Args
 {

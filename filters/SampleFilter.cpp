@@ -45,7 +45,7 @@ using namespace Dimension;
 
 static StaticPluginInfo const s_info{
     "filters.sample", "Subsampling filter",
-    "http://pdal.org/stages/filters.sample.html"};
+    "https://pdal.org/stages/filters.sample.html"};
 
 CREATE_STATIC_STAGE(SampleFilter, s_info)
 

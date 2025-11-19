@@ -49,7 +49,7 @@ static StaticPluginInfo const s_info
 {
     "readers.optech",
     "Optech reader support.",
-    "http://pdal.org/stages/readers.optech.html",
+    "https://pdal.org/stages/readers.optech.html",
     { "csd" }
 };
 

@@ -57,7 +57,7 @@ static StaticPluginInfo const s_info
 {
     "writers.ogr",
     "Write a point cloud as a set of OGR points/multipoints",
-    "http://pdal.org/stages/writers.ogr.html",
+    "https://pdal.org/stages/writers.ogr.html",
     { "shp", "geojson" }
 };
 

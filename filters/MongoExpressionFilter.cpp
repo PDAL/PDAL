@@ -45,7 +45,7 @@ static const StaticPluginInfo s_info
 {
     "filters.mongo",
     "Pass only points that pass a logic filter.",
-    "http://pdal.org/stages/filters.mongo.html"
+    "https://pdal.org/stages/filters.mongo.html"
 };
 
 CREATE_STATIC_STAGE(MongoExpressionFilter, s_info);

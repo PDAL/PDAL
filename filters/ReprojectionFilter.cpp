@@ -47,7 +47,7 @@ static StaticPluginInfo const s_info
 {
     "filters.reprojection",
     "Reproject data using GDAL from one coordinate system to another.",
-    "http://pdal.org/stages/filters.reprojection.html"
+    "https://pdal.org/stages/filters.reprojection.html"
 };
 
 CREATE_STATIC_STAGE(ReprojectionFilter, s_info)

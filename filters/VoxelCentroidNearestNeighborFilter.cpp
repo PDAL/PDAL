@@ -50,7 +50,7 @@ static StaticPluginInfo const s_info
 {
     "filters.voxelcentroidnearestneighbor",
     "Voxel Centroid Nearest Neighbor Filter",
-    "http://pdal.org/stages/filters.voxelcentroidnearestneighbor.html"
+    "https://pdal.org/stages/filters.voxelcentroidnearestneighbor.html"
 };
 
 CREATE_STATIC_STAGE(VoxelCentroidNearestNeighborFilter, s_info)

@@ -66,7 +66,7 @@ static PluginInfo const s_info
 {
     "filters.cpd",
     "CPD filter",
-    "http://pdal.org/stages/filters.cpd.html"
+    "https://pdal.org/stages/filters.cpd.html"
 };
 
 CREATE_SHARED_STAGE(CpdFilter, s_info)

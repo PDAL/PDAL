@@ -43,7 +43,7 @@ static StaticPluginInfo const s_info
 {
     "filters.groupby",
     "Split data categorically by dimension.",
-    "http://pdal.org/stages/filters.groupby.html"
+    "https://pdal.org/stages/filters.groupby.html"
 };
 CREATE_STATIC_STAGE(GroupByFilter, s_info)
 

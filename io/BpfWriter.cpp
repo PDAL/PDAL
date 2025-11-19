@@ -54,7 +54,7 @@ static StaticPluginInfo const s_info
     "\"Binary Point Format\" (BPF) writer support. BPF is a simple \n" \
         "DoD and research format that is used by some sensor and \n" \
         "processing chains.",
-    "http://pdal.org/stages/writers.bpf.html",
+    "https://pdal.org/stages/writers.bpf.html",
     { "bpf" }
 };
 

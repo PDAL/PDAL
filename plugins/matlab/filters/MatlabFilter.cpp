@@ -48,7 +48,7 @@ static PluginInfo const s_info
 {
     "filters.matlab",
     "Manipulate data using inline Matlab",
-    "http://pdal.org/stages/filters.matlab.html"
+    "https://pdal.org/stages/filters.matlab.html"
 };
 
 CREATE_SHARED_STAGE(MatlabFilter, s_info)

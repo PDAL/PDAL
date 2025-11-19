@@ -45,7 +45,7 @@ namespace pdal
 using namespace Dimension;
 
 static StaticPluginInfo const s_info{
-    "kernels.eval", "Eval Kernel [DEPRECATED]", "http://pdal.org/kernels/kernels.eval.html"};
+    "kernels.eval", "Eval Kernel [DEPRECATED]", "https://pdal.org/kernels/kernels.eval.html"};
 
 CREATE_STATIC_KERNEL(EvalKernel, s_info)
 

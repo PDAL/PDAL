@@ -14,7 +14,7 @@ namespace pdal
 static PluginInfo const s_info = PluginInfo(
     "filters.radiusassign",
     "Re-assign some point attributes based KNN voting",
-    "http://pdal.org/stages/filters.radiusassign.html" );
+    "https://pdal.org/stages/filters.radiusassign.html" );
 
 CREATE_STATIC_STAGE(RadiusAssignFilter, s_info)
 

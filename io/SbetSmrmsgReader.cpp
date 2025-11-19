@@ -47,7 +47,7 @@ static StaticPluginInfo const s_info
 {
     "readers.smrmsg",
     "SBET smrmsg Reader",
-    "http://pdal.org/stages/readers.smrmsg.html",
+    "https://pdal.org/stages/readers.smrmsg.html",
     { "smrmsg" }
 };
 

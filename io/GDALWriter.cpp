@@ -48,7 +48,7 @@ static StaticPluginInfo const s_info
 {
     "writers.gdal",
     "Write a point cloud as a GDAL raster.",
-    "http://pdal.org/stages/writers.gdal.html",
+    "https://pdal.org/stages/writers.gdal.html",
     { "tif", "tiff", "vrt" }
 };
 

@@ -52,7 +52,7 @@ static StaticPluginInfo const s_info
 {
     "filters.approximatecoplanar",
     "Estimates the planarity of a neighborhood of points using eigenvalues.",
-    "http://pdal.org/stages/filters.approximatecoplanar.html"
+    "https://pdal.org/stages/filters.approximatecoplanar.html"
 };
 
 CREATE_STATIC_STAGE(ApproximateCoplanarFilter, s_info)

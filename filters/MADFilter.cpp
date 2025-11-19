@@ -44,7 +44,7 @@ static StaticPluginInfo const s_info
 {
     "filters.mad",
     "Median Absolute Deviation Filter",
-    "http://pdal.org/stages/filters.mad.html"
+    "https://pdal.org/stages/filters.mad.html"
 };
 
 CREATE_STATIC_STAGE(MADFilter, s_info)

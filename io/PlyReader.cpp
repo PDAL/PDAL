@@ -47,7 +47,7 @@ static StaticPluginInfo const s_info
 {
         "readers.ply",
         "Read ply files.",
-        "http://pdal.org/stages/reader.ply.html",
+        "https://pdal.org/stages/reader.ply.html",
         { "ply" }
 };
 

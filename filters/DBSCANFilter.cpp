@@ -49,7 +49,7 @@ using namespace Dimension;
 
 static StaticPluginInfo const s_info{
     "filters.dbscan", "DBSCAN Clustering.",
-    "http://pdal.org/stages/filters.dbscan.html"};
+    "https://pdal.org/stages/filters.dbscan.html"};
 
 CREATE_STATIC_STAGE(DBSCANFilter, s_info)
 

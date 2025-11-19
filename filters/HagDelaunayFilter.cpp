@@ -105,7 +105,7 @@ static StaticPluginInfo const s_info
     "filters.hag_delaunay",
     "Computes height above ground using delaunay interpolation of "
         "ground returns.",
-    "http://pdal.org/stages/filters.hag_delaunay.html"
+    "https://pdal.org/stages/filters.hag_delaunay.html"
 };
 
 CREATE_STATIC_STAGE(HagDelaunayFilter, s_info)

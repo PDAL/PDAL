@@ -44,7 +44,7 @@ namespace pdal
 {
 
 static StaticPluginInfo const s_info{"kernels.chamfer", "Chamfer Kernel [DEPRECATED]",
-                                     "http://pdal.org/apps/chamfer.html"};
+                                     "https://pdal.org/apps/chamfer.html"};
 
 CREATE_STATIC_KERNEL(ChamferKernel, s_info)
 

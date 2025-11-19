@@ -48,7 +48,7 @@ static StaticPluginInfo const s_info
 {
     "filters.lof",
     "LOF Filter",
-    "http://pdal.org/stages/filters.lof.html"
+    "https://pdal.org/stages/filters.lof.html"
 };
 
 CREATE_STATIC_STAGE(LOFFilter, s_info)
