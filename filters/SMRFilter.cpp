@@ -118,6 +118,13 @@ void SMRFilter::addArgs(ProgramArgs& args)
         "classification bits?", m_args->m_classbits);
     m_args->m_windowArg = &args.add("window", "Max window size?",
         m_args->m_window);
+    args.add("ground_class", "Classification value of ground points."
+        " [Default: 2]", m_groundClass, ClassLabel::Ground);
+    args.add("other_class", "Classification value of non-ground points."
+        " [Default: 1]", m_otherClass, ClassLabel::Unclassified);
+    args.add("only_ground", "Set to true to only modify the CLassification"
+        " value of detected ground points. [Default: false]",
+        m_onlyGround, false);
 }
 
 void SMRFilter::addDimensions(PointLayoutPtr layout)
@@ -128,6 +135,12 @@ void SMRFilter::addDimensions(PointLayoutPtr layout)
 void SMRFilter::prepared(PointTableRef table)
 {
     const PointLayoutPtr layout(table.layout());
+
+    if ((m_groundClass == m_otherClass) && !m_onlyGround)
+    {
+        throwError("Ground and non-ground class cannot be"
+            "equal when only_ground is false.");
+    }
 
     for (auto& r : m_args->m_ignored)
     {
@@ -232,10 +245,11 @@ PointViewSet SMRFilter::run(PointViewPtr view)
     if (!inlierView->size())
         throwError("No returns to process.");
 
-    // Classify remaining points with value of 1. SMRF processing will mark
-    // ground returns as 2.
-    for (PointRef p : *inlierView)
-        p.setField(Id::Classification, ClassLabel::Unclassified);
+    if (!m_onlyGround)
+    {
+        for (PointRef p : *inlierView)
+            p.setField(Id::Classification, m_otherClass);
+    }
 
     m_srs = inlierView->spatialReference();
 
@@ -367,12 +381,13 @@ void SMRFilter::classifyGround(PointViewPtr view, std::vector<double>& ZIpro)
         if (std::fabs(ZIpro[cell] - z) > thresh(r, c))
         {
             ng++;
-            p.setField(Id::Classification, ClassLabel::Unclassified);
+            if (!m_onlyGround)
+                p.setField(Id::Classification, m_otherClass);
         }
         else
         {
             g++;
-            p.setField(Id::Classification, ClassLabel::Ground);
+            p.setField(Id::Classification, m_groundClass);
         }
     }
     double p(100.0 * double(ng) / double(view->size()));

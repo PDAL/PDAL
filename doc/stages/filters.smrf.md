@@ -141,5 +141,8 @@ window
 
 : Max window size. \[Default: **18.0**\]
 
+```{include} ground_cls_opts.md
+```
+
 ```{include} filter_opts.md
 ```

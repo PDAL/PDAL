@@ -67,5 +67,8 @@ iterations
 
 : Maximum number of iterations. \[Default: **500**\]
 
+```{include} ground_cls_opts.md
+```
+
 ```{include} filter_opts.md
 ```

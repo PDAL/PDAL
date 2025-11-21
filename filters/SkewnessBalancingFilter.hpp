@@ -49,7 +49,13 @@ public:
     std::string getName() const;
 
 private:
+    uint8_t m_groundClass;
+    uint8_t m_otherClass;
+    bool m_onlyGround;    
+
+    virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
+    virtual void prepared(PointTableRef table);
     void processGround(PointViewPtr view);
     virtual PointViewSet run(PointViewPtr view);
 
