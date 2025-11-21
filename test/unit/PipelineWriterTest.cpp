@@ -42,6 +42,8 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/util/FileUtils.hpp>
 
+#include <nlohmann/json.hpp>
+
 using namespace pdal;
 
 // Make sure we handle duplicate stages properly.
@@ -66,4 +68,46 @@ TEST(PipelineManagerTest, issue_2458)
     EXPECT_TRUE(out.find("readers_las1") != std::string::npos);
     EXPECT_TRUE(out.find("readers_las2") != std::string::npos);
     EXPECT_TRUE(out.find("writers_las1") != std::string::npos);
+}
+
+// Make sure options with Bounds & SpatialReference types are serialized correctly
+TEST(PipelineManagerTest, serialize)
+{
+    std::string inPipeline(Support::configuredpath("pipeline/serialize.json"));
+    std::string outPipeline(Support::temppath("serialized_output.json"));
+
+    // We need to read the pipeline, then serialize it before executing
+    PipelineManager mgr;
+    mgr.readPipeline(inPipeline);
+    Stage* stage = mgr.getStage();
+
+    std::ostringstream oss;
+    PipelineWriter::writePipeline(stage, oss);
+    NL::json root = NL::json::parse(oss.str());
+
+    // reader stage should be at idx 0
+    NL::json readerStage = root["pipeline"][0];
+    EXPECT_EQ(readerStage.at("type").get<std::string>(), "readers.las");
+
+    NL::json filespecJson = readerStage["filename"];
+    EXPECT_TRUE(filespecJson.is_object());
+    EXPECT_EQ(filespecJson.at("path").get<std::string>(), 
+        Support::datapath("las/epsg_4326.las"));
+
+    // reprojection filter should be at idx 2
+    NL::json reproStage = root["pipeline"][2];
+    EXPECT_EQ(reproStage.at("type").get<std::string>(), "filters.reprojection");
+
+    NL::json projJson = reproStage["out_srs"];
+    EXPECT_TRUE(projJson.is_object());
+    EXPECT_EQ(projJson.at("$schema").get<std::string>(), 
+        "https://proj.org/schemas/v0.7/projjson.schema.json");
+    
+    EXPECT_EQ(mgr.execute(), 4775);
+
+    // Make sure the serialized pipeline is valid JSON & creates an identical result
+    PipelineManager mgr2;
+    std::istringstream iss(oss.str());
+    mgr2.readPipeline(iss);
+    EXPECT_EQ(mgr2.execute(), 4775);
 }
