@@ -33,7 +33,7 @@ jobs:
       BUILD_TYPE: ${{ matrix.type }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - uses: ilammy/msvc-dev-cmd@v1
     - uses: mamba-org/setup-micromamba@v2
       with:
