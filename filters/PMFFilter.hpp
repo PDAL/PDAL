@@ -53,6 +53,9 @@ public:
 
 private:
     std::unique_ptr<PMFArgs> m_args;
+    uint8_t m_groundClass;
+    uint8_t m_otherClass;
+    bool m_onlyGround;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs& args);

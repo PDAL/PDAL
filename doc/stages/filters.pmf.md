@@ -106,5 +106,8 @@ slope
 
 : Slope. \[Default: 1.0\]
 
+```{include} ground_cls_opts.md
+```
+
 ```{include} filter_opts.md
 ```
