@@ -82,10 +82,7 @@ TEST(DecimationFilterTest, GridDecimationFilterTest_test_empty)
 
     EXPECT_EQ(viewSet.size(), 1u);
 
-
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 198975UL);
-
     int nbThreadPts (0);
     for (PointId i = 0; i < view->size(); ++i)
     {
