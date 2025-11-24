@@ -110,6 +110,13 @@ void CSFilter::addArgs(ProgramArgs& args)
              {"last", "only"});
     args.add("debug", "Enable debugging output and use the dir argument", m_args->m_debug, false);
     args.add("dir", "Optional output directory for debugging", m_args->m_dir);
+    args.add("ground_class", "Classification value of ground points."
+        " [Default: 2]", m_groundClass, ClassLabel::Ground);
+    args.add("other_class", "Classification value of non-ground points."
+        " [Default: 1]", m_otherClass, ClassLabel::Unclassified);
+    args.add("only_ground", "Set to true to only modify the CLassification"
+        " value of detected ground points. [Default: false]",
+        m_onlyGround, false);
 }
 
 void CSFilter::addDimensions(PointLayoutPtr layout)
@@ -129,6 +136,12 @@ void CSFilter::ready(PointTableRef table)
 void CSFilter::prepared(PointTableRef table)
 {
     const PointLayoutPtr layout(table.layout());
+
+    if ((m_groundClass == m_otherClass) && !m_onlyGround)
+    {
+        throwError("Ground and non-ground class cannot be"
+            "equal when only_ground is false.");
+    }
 
     for (auto& r : m_args->m_ignored)
     {
@@ -253,9 +266,12 @@ PointViewSet CSFilter::run(PointViewPtr view)
     }
 
     for (auto const& i : groundIdx)
-        firstView->setField(Id::Classification, i, 2);
-    for (auto const& i : offGroundIdx)
-        firstView->setField(Id::Classification, i, 1);
+        firstView->setField(Id::Classification, i, m_groundClass);
+    if (!m_onlyGround)
+    {
+        for (auto const& i : offGroundIdx)
+            firstView->setField(Id::Classification, i, m_otherClass);
+    }
 
     return viewSet;
 }
