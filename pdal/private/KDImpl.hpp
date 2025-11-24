@@ -142,8 +142,7 @@ public:
 
         // Our distance metric is square distance, so we use the square of
         // the radius.
-        const std::size_t count =
-            m_index.radiusSearch(&pt[0], r * r, ret_matches, params);
+        m_index.radiusSearch(&pt[0], r * r, ret_matches, params);
     }
 
 private:
@@ -287,8 +286,7 @@ public:
 
         // Our distance metric is square distance, so we use the square of
         // the radius.
-        const std::size_t count =
-            m_index.radiusSearch(&pt[0], r * r, ret_matches, params);
+        m_index.radiusSearch(&pt[0], r * r, ret_matches, params);
     }
 
 private:
