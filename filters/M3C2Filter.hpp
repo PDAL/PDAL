@@ -34,13 +34,13 @@
 
 #pragma once
 
+#include <Eigen/Dense>
+
 #include <pdal/Filter.hpp>
 
 namespace pdal
 {
 
-class Options;
-class PointLayout;
 class PointView;
 
 class PDAL_EXPORT M3C2Filter : public Filter
@@ -56,9 +56,18 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void filter(PointView& view);
+    void calcStats(PointView& v1, PointView& v2, PointView& cores);
+    void calcStats(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
+        PointView& v1, PointView& v2);
+    PointIdList filterPoints(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
+        const PointIdList& ids, const PointView& view);
+    bool pointPasses(Eigen::Vector3d point, Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal);
 
     struct Args;
     std::unique_ptr<Args> m_args;
+
+    struct Private;
+    std::unique_ptr<Private> m_p;
 };
 
 } // namespace pdal

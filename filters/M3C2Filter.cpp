@@ -34,6 +34,8 @@
 
 #include "M3C2Filter.hpp"
 
+#include <Eigen/Geometry>
+
 #include <pdal/KDIndex.hpp>
 
 namespace pdal
@@ -41,6 +43,16 @@ namespace pdal
 
 struct M3C2Filter::Args
 {
+    double normRadius;
+    double cylRadius;
+    double cylHalfLen;
+};
+
+struct M3C2Filter::Private
+{
+    double cylRadius2;
+    double cylBallRadius;
+    double minPoints;
 };
 
 static StaticPluginInfo const s_info
@@ -58,99 +70,94 @@ std::string M3C2Filter::getName() const
 }
 
 
-M3C2Filter::M3C2Filter()
+M3C2Filter::M3C2Filter() : m_args(new M3C2Filter::Args), m_p(new M3C2Filter::Private)
 {}
 
 
 void M3C2Filter::addArgs(ProgramArgs& args)
 {
-/**
-    args.add("count", "The number of points to fetch to determine the "
-        "ground point [Default: 1].", m_count, point_count_t(1));
-    args.add("max_distance", "Ground points beyond this distance will not "
-        "influence nearest neighbor interpolation of height above ground."
-        "[Default: None]", m_maxDistance);
-    args.add("allow_extrapolation", "If true and count > 1, allow "
-        "extrapolation [Default: true].", m_allowExtrapolation, true);
-**/
+    args.add("normal_radius", "The radius to use for finding neighbors in the "
+        "calculation of normals [Default: 2].", m_args->normRadius, 2.0);
+    args.add("cyl_radius", "The radius of the cylinder of neighbors used for calculating change "
+        "[Default: 2].", m_args->cylRadius, 2.0);
+    args.add("cyl_halflen", "The half-length of the cylinder of neighbors used used for "
+        "calculating change [Default: 5].", m_args->cylHalfLen, 5.0);
 }
 
 
 void M3C2Filter::addDimensions(PointLayoutPtr layout)
 {
-/**
-    layout->registerDim(Dimension::Id::HeightAboveGround);
-**/
 }
 
 
 void M3C2Filter::filter(PointView& view)
 {
     // Compute the radius of a ball that fits around the cylinder.
-    m_ballRadius = std::sqrt(m_cylRadius2 + m_cylHalfLen * m_cylHalfLen);
+    m_p->cylBallRadius = std::sqrt(m_p->cylRadius2 + m_args->cylHalfLen * m_args->cylHalfLen);
 }
 
 void M3C2Filter::calcStats(PointView& v1, PointView& v2, PointView& cores)
 {
-    for (PointRef core : *cores)
+    for (PointRef core : cores)
     {
-        Vector3d pos(core.getFieldAs<double>(Dimension::Id::X),
+        Eigen::Vector3d pos(core.getFieldAs<double>(Dimension::Id::X),
             core.getFieldAs<double>(Dimension::Id::Y),
             core.getFieldAs<double>(Dimension::Id::Z));
-        Vector3d normal(core.getFieldAs<double>(Dimension::Id::NormalX),
+        Eigen::Vector3d normal(core.getFieldAs<double>(Dimension::Id::NormalX),
             core.getFieldAs<double>(Dimension::Id::NormalY),
             core.getFieldAs<double>(Dimension::Id::NormalZ));
-        normal *= m_cylHalfLength;
         calcStats(pos, normal, v1, v2);
     }
 }
 
-void M3C2Filter::calcStats(Eigen3d cylCenter, Eigen3d cylNormal,
-    const PointViewPtr& v1, const PointViewPtr& v2)
+void M3C2Filter::calcStats(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
+    PointView& v1, PointView& v2)
 {
-    PointIdList pts1 = v1->build3dIndex().radius(cylCenter(0), cylCenter(1), cylCenter(2),
-        m_ballRadius);
+    PointIdList pts1 = v1.build3dIndex().radius(cylCenter(0), cylCenter(1), cylCenter(2),
+        m_p->cylBallRadius);
     pts1 = filterPoints(cylCenter, cylNormal, pts1, v1);
 
-    if (pts1.size() < MinPoints)
+    if (pts1.size() < m_p->minPoints)
         return;
 
-    PointIdList pts2 = v2->build3dIndex().radius(cylCenter(0), cylCenter(1), cylCenter(2),
-        m_ballRadius);
+    // Should test doing this all in 2D.
+    PointIdList pts2 = v2.build3dIndex().radius(cylCenter(0), cylCenter(1), cylCenter(2),
+        m_p->cylBallRadius);
     pts2 = filterPoints(cylCenter, cylNormal, pts2, v2);
 
-    if (pts2.size < MinPoints)
+    if (pts2.size() < m_p->minPoints)
         return;
 }
 
-PointIdList M3C2Filter::filterPoints(Vector3d cylCenter, Vector3d cylNormal,
-    const PointIdList& ids, const PointViewPtr& view)
+PointIdList M3C2Filter::filterPoints(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
+    const PointIdList& ids, const PointView& view)
 {
     PointIdList validated;
-    for (PointId id : idx)
+    for (PointId id : ids)
     {
-        Vector3d point(view->getFieldAs(id, Dimension::Id::X),
-            view->getFieldAs(id, Dimension::Id::Y),
-            view->getFieldAs(id, Dimension::Id::Z));
+        Eigen::Vector3d point(view.getFieldAs<double>(Dimension::Id::X, id),
+            view.getFieldAs<double>(Dimension::Id::Y, id),
+            view.getFieldAs<double>(Dimension::Id::Z, id));
         if (pointPasses(point, cylCenter, cylNormal))
             validated.push_back(id);
     }
     return validated;
 }
 
-bool M3C2Filter::pointPasses(Eigen::Vector3d point, Vector3d cylCenter, Vector3d cylNormal)
+bool M3C2Filter::pointPasses(Eigen::Vector3d point, Eigen::Vector3d cylCenter,
+    Eigen::Vector3d cylNormal)
 {
     // Calculate the distance from the point to the line that goes through the cylinder normal
     // vector. Make sure it's less than the cylinder radius.
-    Eigen::ParameterizedLine line(cylCenter, cylNormal);
-    if (line.squaredDistance(point) > m_cylRadius2)
+    Eigen::ParametrizedLine<double, 3> line(cylCenter, cylNormal);
+    if (line.squaredDistance(point) > m_p->cylRadius2)
         return false;
 
     // Calculate the distance from the point to the plane that's parallel to the cylinder's end
     // and goes through the cylinder "center" (our core point). Make sure that's less than
     // the half length of the cylinder.
-    Eigen::Hyperplane plane(cylNormal, cylCenter);
-    if (plane.absDistance(point) > m_cylHalfLen)
+    Eigen::Hyperplane<double, 3> plane(cylNormal, cylCenter);
+    if (plane.absDistance(point) > m_args->cylHalfLen)
         return false;
 
     return true;
