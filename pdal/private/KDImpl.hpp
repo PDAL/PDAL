@@ -42,6 +42,8 @@ namespace pdal
 class KD2Impl
 {
 public:
+    using RadiusResults = std::vector<std::pair<size_t, double>>;
+
     KD2Impl(const PointView& buf) : m_buf(buf),
         m_index(2, *this, nanoflann::KDTreeSingleIndexAdaptorParams(100))
     {}
@@ -57,7 +59,7 @@ public:
         std::array<Id, 2> ids { Id::X, Id::Y };
         return m_buf.getFieldAs<double>(ids[dim], idx);
     }
-    
+
     double kdtree_distance(const double *p1, const PointId p2_idx,
         size_t /*numDims*/) const
     {
@@ -113,7 +115,7 @@ public:
         m_index.findNeighbors(resultSet, &pt[0], nanoflann::SearchParams(10));
     }
 
-    PointIdList radius(double const& x, double const& y, double const& r) const
+    PointIdList radius(double x, double y, double r) const
     {
         PointIdList output;
         std::vector<std::pair<std::size_t, double>> ret_matches;
@@ -132,6 +134,17 @@ public:
         return output;
     }
 
+    void radius(double x, double y, double r, RadiusResults& ret_matches) const
+    {
+        nanoflann::SearchParams params;
+
+        std::array<double, 2> pt { x, y };
+
+        // Our distance metric is square distance, so we use the square of
+        // the radius.
+        m_index.radiusSearch(&pt[0], r * r, ret_matches, params);
+    }
+
 private:
     const PointView& m_buf;
 
@@ -144,6 +157,8 @@ private:
 class KD3Impl
 {
 public:
+    using RadiusResults = std::vector<std::pair<size_t, double>>;
+
     KD3Impl(const PointView& buf) : m_buf(buf),
         m_index(3, *this, nanoflann::KDTreeSingleIndexAdaptorParams(100))
     {}
@@ -176,7 +191,7 @@ public:
 
         return (d0 * d0 + d1 * d1 + d2 * d2);
     }
-        
+
     template <class BBOX>
     bool kdtree_get_bbox(BBOX& bb) const
     {
@@ -261,6 +276,17 @@ public:
         for (std::size_t i = 0; i < count; ++i)
             output.push_back(ret_matches[i].first);
         return output;
+    }
+
+    void radius(double x, double y, double z, double r, RadiusResults& ret_matches) const
+    {
+        nanoflann::SearchParams params;
+
+        std::vector<double> pt { x, y, z };
+
+        // Our distance metric is square distance, so we use the square of
+        // the radius.
+        m_index.radiusSearch(&pt[0], r * r, ret_matches, params);
     }
 
 private:
