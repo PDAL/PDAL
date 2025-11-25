@@ -301,7 +301,7 @@ void Kernel::outputHelp()
     args.dump(std::cout, 2, Utils::screenWidth());
 
     std::cout <<"\nFor more information, see the full documentation for "
-        "PDAL at http://pdal.io/\n" << std::endl;
+        "PDAL at https://pdal.org/\n" << std::endl;
 }
 
 

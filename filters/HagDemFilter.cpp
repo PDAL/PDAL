@@ -44,7 +44,7 @@ static StaticPluginInfo const s_info
 {
     "filters.hag_dem",
     "Computes height above ground using a DEM raster.",
-    "http://pdal.io/stages/filters.hag_dem.html"
+    "https://pdal.org/stages/filters.hag_dem.html"
 };
 
 CREATE_STATIC_STAGE(HagDemFilter, s_info)
@@ -70,6 +70,8 @@ void HagDemFilter::addArgs(ProgramArgs& args)
     args.add("min_clamp", "Minimum HAG value", m_minClamp, (std::numeric_limits<double>::min)());
     args.add("max_clamp", "Maximum HAG value", m_maxClamp, (std::numeric_limits<double>::max)());
     args.add("nodata_hag", "HAG value to use for nodata pixels", m_noDataHeight, 0.0);
+    args.add("class", "Class to use for ground points. [Default: 2]",
+        m_class, ClassLabel::Ground);
 }
 
 
@@ -133,7 +135,7 @@ bool HagDemFilter::processOne(PointRef& point)
 
     if (m_zeroGround)
     {
-        if (point.getFieldAs<uint8_t>(Id::Classification) == ClassLabel::Ground)
+        if (point.getFieldAs<uint8_t>(Id::Classification) == m_class)
         {
             point.setField(Dimension::Id::HeightAboveGround, 0);
             return true;

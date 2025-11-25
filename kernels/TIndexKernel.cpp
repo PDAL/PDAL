@@ -143,7 +143,7 @@ static StaticPluginInfo const s_info
 {
     "kernels.tindex",
     "TIndex Kernel",
-    "http://pdal.io/apps/tindex.html"
+    "https://pdal.org/apps/tindex.html"
 };
 
 CREATE_STATIC_KERNEL(TIndexKernel, s_info)
@@ -618,12 +618,6 @@ void TIndexKernel::fastBoundary(Stage& reader, FileInfo& fileInfo)
 }
 
 
-void TIndexKernel::slowBoundary(PipelineManager& manager)
-{
-    manager.execute(ExecMode::PreferStream);
-}
-
-
 void TIndexKernel::getFileInfo(FileInfo& fileInfo)
 {
     PipelineManager manager;
@@ -636,30 +630,33 @@ void TIndexKernel::getFileInfo(FileInfo& fileInfo)
     // If we aren't able to make a hexbin filter, we
     // will just do a simple fast_boundary.
     bool fast(m_fastBoundary);
-    try
+    if (!fast)
     {
-        if (!fast)
+        TindexBoundary hexer{m_density, m_edgeLength, m_sampleSize};
+        if (m_boundaryExpr.size())
         {
-            TindexBoundary hexer{m_density, m_edgeLength, m_sampleSize};
-            if (m_boundaryExpr.size())
-            {
-                Options opts;
-                opts.add("where", m_boundaryExpr);
-                hexer.addOptions(opts);
-            }
-            hexer.setInput(reader);
-            manager.addStage(&hexer);
-            slowBoundary(manager);
+            Options opts;
+            opts.add("where", m_boundaryExpr);
+            hexer.addOptions(opts);
+        }
+        hexer.setInput(reader);
+        manager.addStage(&hexer);
+        try
+        {
+            manager.execute(ExecMode::PreferStream);
 
             fileInfo.m_boundary = hexer.toWKT();
             fileInfo.m_srs = hexer.getSpatialReference().getWKT();
             fileInfo.m_gridHeight = hexer.height();
         }
+        catch(pdal_error& e)
+        {
+            fast = true;
+            m_log->get(LogLevel::Warning) << "Unable to create exact boundary for tile " << 
+                fileInfo.m_filename << " with error: '" << e.what() << std::endl;
+        }
     }
-    catch (pdal_error&)
-    {
-        fast = true;
-    }
+
     if (fast)
         fastBoundary(reader, fileInfo);
 }

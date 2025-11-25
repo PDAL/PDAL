@@ -44,7 +44,7 @@ namespace pdal
 {
 static PluginInfo const s_info{
     "filters.georeference", "Georeferencing filter",
-    "http://pdal.io/stages/filters.georeference.html"};
+    "https://pdal.org/stages/filters.georeference.html"};
 
 CREATE_STATIC_STAGE(GeoreferenceFilter, s_info)
 

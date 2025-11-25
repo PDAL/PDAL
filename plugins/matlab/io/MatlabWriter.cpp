@@ -44,7 +44,7 @@ static PluginInfo const s_info
 {
     "writers.matlab",
     "Matlab .mat file writer.",
-    "http://pdal.io/stages/writers.matlab.html"
+    "https://pdal.org/stages/writers.matlab.html"
 };
 
 CREATE_SHARED_STAGE(MatlabWriter, s_info)

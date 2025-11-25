@@ -46,6 +46,9 @@ class KDFlexImpl;
 class PDAL_EXPORT KD2Index
 {
 public:
+    using RadiusResult = std::pair<size_t, double>;
+    using RadiusResults = std::vector<RadiusResult>;
+
     KD2Index(const PointView& buf);
     ~KD2Index();
 
@@ -62,10 +65,10 @@ public:
         std::vector<double> *sqr_dists) const;
     void knnSearch(PointRef& point, point_count_t k, PointIdList *indices,
         std::vector<double> *sqr_dists) const;
-    PointIdList radius(double const& x, double const& y,
-        double const& r) const;
-    PointIdList radius(PointId idx, double const& r) const;
-    PointIdList radius(PointRef &point, double const& r) const;
+    PointIdList radius(double x, double y, double r) const;
+    void radius(double x, double y, double r, KD2Index::RadiusResults& results) const;
+    PointIdList radius(PointId idx, double r) const;
+    PointIdList radius(PointRef &point, double r) const;
 
 private:
     const PointView& m_buf;
@@ -75,6 +78,9 @@ private:
 class PDAL_EXPORT KD3Index
 {
 public:
+    using RadiusResult = std::pair<size_t, double>;
+    using RadiusResults = std::vector<RadiusResult>;
+
     KD3Index(const PointView& buf);
     ~KD3Index();
 
@@ -95,6 +101,7 @@ public:
     void knnSearch(PointRef &point, point_count_t k,
         PointIdList *indices, std::vector<double> *sqr_dists) const;
     PointIdList radius(double x, double y, double z, double r) const;
+    void radius(double x, double y, double z, double r, KD3Index::RadiusResults& results) const;
     PointIdList radius(PointId idx, double r) const;
     PointIdList radius(PointRef &point, double r) const;
 

@@ -48,6 +48,15 @@ stdev
 : Give the cell the population standard deviation of the points that lie
   within the given radius.
 
+If the GDAL writer is run in [binmode] (only considering points inside a 
+given raster pixel), additional percentile bands can be written to the last 
+layers of a dataset.
+
+p\<i>
+
+: Give the cell the i-th percentile of values for points that lie within it.
+  Calculated using linear interpolation.
+
 If no points fall within the circle about a raster cell, a secondary
 algorithm can be used to attempt to provide a value after the standard
 interpolation is complete.  If the [window_size] option is non-zero, the
@@ -102,6 +111,8 @@ filename
   aggregated into a single file for output.  Multiple PointViews are usually
   the result of using {ref}`filters.splitter`, {ref}`filters.chipper` or
   {ref}`filters.divider`.\[Required\]
+
+(binmode)=
 
 binmode:
 
@@ -167,7 +178,9 @@ output_type
 
 : A comma separated list of statistics for which to produce raster layers.
   The supported values are "min", "max", "mean", "idw", "count", "stdev"
-  and "all".  The option may be specified more than once. \[Default: "all"\]
+  and "all". Calculating percentile values is supported by specifying 
+  a list of "p\<percentile>" (not included in "all"). The option may be specified 
+  more than once. \[Default: "all"\]
 
 (window-size)=
 

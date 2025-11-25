@@ -105,7 +105,7 @@ static StaticPluginInfo const s_info
     "filters.hag_delaunay",
     "Computes height above ground using delaunay interpolation of "
         "ground returns.",
-    "http://pdal.io/stages/filters.hag_delaunay.html"
+    "https://pdal.org/stages/filters.hag_delaunay.html"
 };
 
 CREATE_STATIC_STAGE(HagDelaunayFilter, s_info)
@@ -127,6 +127,8 @@ void HagDelaunayFilter::addArgs(ProgramArgs& args)
     args.add("allow_extrapolation", "Allow extrapolation for points "
         "outside of the local triangulations. [Default: true].",
         m_allowExtrapolation, true);
+    args.add("class", "Class to use for ground points. [Default: 2]",
+        m_class, ClassLabel::Ground);
 }
 
 
@@ -158,7 +160,7 @@ void HagDelaunayFilter::filter(PointView& view)
     for (PointId i = 0; i < view.size(); ++i)
     {
         if (view.getFieldAs<uint8_t>(Id::Classification, i) ==
-            ClassLabel::Ground)
+            m_class)
         {
             view.setField(Id::HeightAboveGround, i, 0);
             gView->appendPoint(view, i);

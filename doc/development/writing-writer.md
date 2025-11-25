@@ -197,4 +197,4 @@ The [LAS tutorial] has a high-level overview of how reading and writing a LAS fi
 [interesting.las]: https://github.com/PDAL/PDAL/raw/refs/heads/master/test/data/las/interesting.las
 [pipeline-mywriter.json]: https://github.com/PDAL/PDAL/blob/master/examples/writing-writer/pipeline-mywriter.json?raw=true
 [Dimension.json]: https://github.com/PDAL/PDAL/blob/master/pdal/Dimension.json
-[LAS tutorial]: https://pdal.io/en/latest/tutorial/las.html
+[LAS tutorial]: https://pdal.org/en/latest/tutorial/las.html

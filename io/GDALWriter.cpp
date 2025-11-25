@@ -48,7 +48,7 @@ static StaticPluginInfo const s_info
 {
     "writers.gdal",
     "Write a point cloud as a GDAL raster.",
-    "http://pdal.io/stages/writers.gdal.html",
+    "https://pdal.org/stages/writers.gdal.html",
     { "tif", "tiff", "vrt" }
 };
 
@@ -72,7 +72,7 @@ void GDALWriter::addArgs(ProgramArgs& args)
     args.add("gdalopts", "GDAL driver options (name=value,name=value...)",
         m_options);
     args.add("output_type", "Statistics produced ('min', 'max', 'mean', "
-        "'idw', 'count', 'stdev' or 'all')", m_outputTypeString, {"all"} );
+        "'idw', 'count', 'stdev', 'p<percentile>' or 'all')", m_outputTypeString, {"all"} );
     args.add("data_type", "Data type for output grid ('int8', 'uint64', "
         "'float', etc.)", m_dataType, Dimension::Type::Double);
     args.add("window_size", "Cell distance for fallback interpolation",
@@ -111,7 +111,7 @@ void GDALWriter::initialize()
 {
     for (auto& ts : m_outputTypeString)
     {
-       Utils::trim(ts);
+        Utils::trim(ts);
         if (ts == "all")
         {
             m_outputTypes = ~0;
@@ -129,12 +129,24 @@ void GDALWriter::initialize()
             m_outputTypes |= GDALGrid::statIdw;
         else if (ts == "stdev")
             m_outputTypes |= GDALGrid::statStdDev;
+        else if (std::tolower(ts[0]) == 'p' && ts.size() > 1)
+        {
+            int p;
+            if (!Utils::fromString(ts.substr(1), p))
+                throwError("Invalid percentile value: '" + ts + "'.");
+            if (p < 0 || p > 100)
+                throwError("Percentile values must be integers between 1 and 100.");
+            m_percentiles.push_back(p);
+        }
         else
             throwError("Invalid output type: '" + ts + "'.");
     }
 
     if (m_overrideSrs.valid() && m_defaultSrs.valid())
         throwError("Can't set both 'override_srs' and 'default_srs'.");
+    
+    if (!m_percentiles.empty() && !m_binMode)
+        throwError("Can't output percentiles without 'binmode=true'.");
 
     if (!m_radiusArg->set())
         m_radius = m_edgeLength * sqrt(2.0);
@@ -180,6 +192,10 @@ void GDALWriter::prepared(PointTableRef table)
     if (m_interpDim == Dimension::Id::Unknown)
         throwError("Specified dimension '" + m_interpDimString +
             "' does not exist.");
+
+    if (!table.supportsView() && m_percentiles.size())
+            throwError("Percentile band calculations are not supported with "
+                "streaming point tables.");
 }
 
 
@@ -223,7 +239,7 @@ void GDALWriter::createGrid(BOX2D bounds)
     try
     {
         m_grid.reset(new GDALGrid(bounds.minx, bounds.miny, width, height, m_edgeLength,
-            m_radius, m_outputTypes, m_windowSize, m_power, m_binMode));
+            m_radius, m_outputTypes, m_windowSize, m_power, m_binMode, m_percentiles));
     }
     catch (GDALGrid::error& err)
     {
@@ -326,6 +342,12 @@ void GDALWriter::doneFile()
     src = m_grid->data("stdev");
     if (src && err == gdal::GDALError::None)
         err = raster.writeBand(src, srcNoData, bandNum++, "stdev");
+    for (auto& pct : m_percentiles)
+    {
+        src = m_grid->pctlData(pct);
+        if (src && err == gdal::GDALError::None)
+            err = raster.writeBand(src, srcNoData, bandNum++, "p" + std::to_string(pct));
+    }
     if (err != gdal::GDALError::None)
         throwError(raster.errorMsg());
 

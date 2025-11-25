@@ -108,6 +108,7 @@ PDAL_ADD_TEST(pdal_pipeline_writer_test
         PipelineWriterTest.cpp
     INCLUDES
         ${PDAL_JSONCPP_INCLUDE_DIR}
+        ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_plugin_manager_test FILES PluginManagerTest.cpp)
 PDAL_ADD_TEST(pdal_point_view_test
@@ -387,6 +388,7 @@ PDAL_ADD_TEST(pdal_filters_faceraster_test FILES filters/FaceRasterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_ferry_test FILES filters/FerryFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_groupby_test FILES filters/GroupByFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_gpstimeconvert_test FILES filters/GpsTimeConvertTest.cpp)
+PDAL_ADD_TEST(pdal_filters_groundfilter_test FILES filters/GroundFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_hag_test FILES filters/HAGFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_separatescanline_test FILES filters/SeparatescanlineFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_h3_test FILES filters/H3FilterTest.cpp)

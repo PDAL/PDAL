@@ -48,7 +48,7 @@ static StaticPluginInfo const s_info
 {
     "filters.voxelcenternearestneighbor",
     "Voxel Center Nearest Neighbor Filter",
-    "http://pdal.io/stages/filters.voxelcenternearestneighbor.html"
+    "https://pdal.org/stages/filters.voxelcenternearestneighbor.html"
 };
 
 CREATE_STATIC_STAGE(VoxelCenterNearestNeighborFilter, s_info)

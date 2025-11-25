@@ -47,7 +47,7 @@ static StaticPluginInfo const s_info
 {
     "readers.fbi",
     "Fbi Reader",
-    "http://pdal.io/stages/readers.fbi.html",
+    "https://pdal.org/stages/readers.fbi.html",
     { "bin", "fbi" }
 };
 

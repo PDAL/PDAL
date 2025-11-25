@@ -147,7 +147,7 @@ Using a text editor, create a JSON file named pipeline.json containing the conte
 Update the srs details for `in_srs`, `out_srs` and `a_srs` to the EPSG code of the horizontal map projection your source LAS files are in. In the example above we are using New Zealand Transverse Mercator 2000 (EPSG:2193).
 
 ```{warning}
-Be aware `"forward": "all"` under the writers.las section represents the header fields whose values should be preserved from the source LAS file. `all` will transfer all header fields, including scale and offset values, as well as VLRs. If you desire to transfer only specific header fields, refer to <https://pdal.io/stages/writers.las.html> for more information about this option.
+Be aware `"forward": "all"` under the writers.las section represents the header fields whose values should be preserved from the source LAS file. `all` will transfer all header fields, including scale and offset values, as well as VLRs. If you desire to transfer only specific header fields, refer to <https://pdal.org/stages/writers.las.html> for more information about this option.
 ```
 
 ## Step 3: Use PDAL to reproject
@@ -202,13 +202,13 @@ To accommodate this change in PDAL, you need to alter the following text in the 
 
 [conda]: https://conda.io
 [conda environment]: https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html
-[filters.reprojection]: https://pdal.io/stages/filters.reprojection.html
+[filters.reprojection]: https://pdal.org/stages/filters.reprojection.html
 [gdal]: https://gdal.org
 [linz data service]: https://data.linz.govt.nz
 [miniconda]: https://docs.conda.io/en/latest/miniconda.html
 [nz quasigeoid 2016]: https://data.linz.govt.nz/layer/53447-nz-quasigeoid-2016-raster/
 [on-location blog]: https://medium.com/on-location
-[pdal]: https://pdal.io
-[readers.las]: https://pdal.io/stages/readers.las.html
+[pdal]: https://pdal.org
+[readers.las]: https://pdal.org/stages/readers.las.html
 [relationship grids]: https://data.linz.govt.nz/search/category/geodetic/vertical-datum-2016/?q=NZVD2016+Conversion+Raster
-[writers.las]: https://pdal.io/stages/writers.las.html
+[writers.las]: https://pdal.org/stages/writers.las.html

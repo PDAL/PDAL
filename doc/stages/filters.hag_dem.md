@@ -103,5 +103,9 @@ zero_ground
   `Z` value to raster DEM.
   \[Default: true\]
 
+class
+
+: Classification value of ground points. Used when `zero_ground` is set to true.  \[Default: 2\]
+
 ```{include} filter_opts.md
 ```

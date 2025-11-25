@@ -45,7 +45,7 @@ static StaticPluginInfo const s_info
 {
     "readers.pcd",
     "Read data in the Point Cloud Library (PCL) format.",
-    "http://pdal.io/stages/readers.pcd.html",
+    "https://pdal.org/stages/readers.pcd.html",
     {"pcd"}
 };
 

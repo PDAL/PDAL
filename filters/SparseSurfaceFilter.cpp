@@ -42,7 +42,7 @@ namespace pdal
 using namespace Dimension;
 
 static PluginInfo const s_info{"filters.sparsesurface", "Sparse Surface Filter",
-                               "http://pdal.io/stages/filters.sparsesurface.html"};
+                               "https://pdal.org/stages/filters.sparsesurface.html"};
 
 CREATE_STATIC_STAGE(SparseSurfaceFilter, s_info)
 
@@ -55,13 +55,33 @@ void SparseSurfaceFilter::addArgs(ProgramArgs& args)
 {
     args.add("radius", "Mask neighbor points as low noise",
              m_radius, 1.0);
+    args.add("ground_class", "Classification value of ground points."
+        " [Default: 2]", m_groundClass, ClassLabel::Ground);
+    args.add("low_point_class", "Classification value of non-ground points."
+        " [Default: 7]", m_lowPointClass, ClassLabel::LowPoint);
 }
+
+
+void SparseSurfaceFilter::prepared(PointTableRef table)
+{
+    if (m_groundClass == m_lowPointClass)
+    {
+        throwError("Ground and low point class cannot be equal.");
+    }
+}
+
 
 void SparseSurfaceFilter::filter(PointView& view)
 {
+    uint8_t lower = std::min(m_groundClass, m_lowPointClass);
+    uint8_t higher = std::max(m_groundClass, m_lowPointClass);
+    const uint8_t unclassifiedLabel =
+        (higher - lower > 1) ? lower + 1
+        : (lower > 0) ? lower - 1 : higher + 1;
+
     // Step 1: Relabel all points as unclassified
     for (auto point : view)
-        point.setField(Id::Classification, ClassLabel::Unclassified);
+        point.setField(Id::Classification, unclassifiedLabel);
 
     // Step 2: Generate a sorted Z index
     PointIdList zIndex(view.size());
@@ -81,18 +101,18 @@ void SparseSurfaceFilter::filter(PointView& view)
     for (PointId idx : zIndex) {
         // Check if the point is already labeled
         uint8_t classification = view.getFieldAs<uint8_t>(Id::Classification, idx);
-        if (classification != ClassLabel::Unclassified)
+        if (classification != unclassifiedLabel)
             continue;
 
         // Label the point as ground
-        view.setField(Id::Classification, idx, ClassLabel::Ground);
+        view.setField(Id::Classification, idx, m_groundClass);
 
         // Find neighbors within radius R and label them as low noise
         PointIdList neighbors = index.radius(idx, m_radius);
         for (PointId neighborIdx : neighbors) {
             uint8_t neighborClass = view.getFieldAs<uint8_t>(Id::Classification, neighborIdx);
-            if (neighborClass == ClassLabel::Unclassified) {
-                view.setField(Id::Classification, neighborIdx, ClassLabel::LowPoint);
+            if (neighborClass == unclassifiedLabel) {
+                view.setField(Id::Classification, neighborIdx, m_lowPointClass);
             }
         }
     }

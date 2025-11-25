@@ -49,7 +49,7 @@ static StaticPluginInfo const s_info
 {
     "writers.text",
     "Text Writer",
-    "http://pdal.io/stages/writers.text.html",
+    "https://pdal.org/stages/writers.text.html",
     { "csv", "txt", "json", "xyz", "" }
 };
 

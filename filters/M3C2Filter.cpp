@@ -86,6 +86,74 @@ void M3C2Filter::addDimensions(PointLayoutPtr layout)
 
 void M3C2Filter::filter(PointView& view)
 {
+    // Compute the radius of a ball that fits around the cylinder.
+    m_ballRadius = std::sqrt(m_cylRadius2 + m_cylHalfLen * m_cylHalfLen);
+}
+
+void M3C2Filter::calcStats(PointView& v1, PointView& v2, PointView& cores)
+{
+    for (PointRef core : *cores)
+    {
+        Vector3d pos(core.getFieldAs<double>(Dimension::Id::X),
+            core.getFieldAs<double>(Dimension::Id::Y),
+            core.getFieldAs<double>(Dimension::Id::Z));
+        Vector3d normal(core.getFieldAs<double>(Dimension::Id::NormalX),
+            core.getFieldAs<double>(Dimension::Id::NormalY),
+            core.getFieldAs<double>(Dimension::Id::NormalZ));
+        normal *= m_cylHalfLength;
+        calcStats(pos, normal, v1, v2);
+    }
+}
+
+void M3C2Filter::calcStats(Eigen3d cylCenter, Eigen3d cylNormal,
+    const PointViewPtr& v1, const PointViewPtr& v2)
+{
+    PointIdList pts1 = v1->build3dIndex().radius(cylCenter(0), cylCenter(1), cylCenter(2),
+        m_ballRadius);
+    pts1 = filterPoints(cylCenter, cylNormal, pts1, v1);
+
+    if (pts1.size() < MinPoints)
+        return;
+
+    PointIdList pts2 = v2->build3dIndex().radius(cylCenter(0), cylCenter(1), cylCenter(2),
+        m_ballRadius);
+    pts2 = filterPoints(cylCenter, cylNormal, pts2, v2);
+
+    if (pts2.size < MinPoints)
+        return;
+}
+
+PointIdList M3C2Filter::filterPoints(Vector3d cylCenter, Vector3d cylNormal,
+    const PointIdList& ids, const PointViewPtr& view)
+{
+    PointIdList validated;
+    for (PointId id : idx)
+    {
+        Vector3d point(view->getFieldAs(id, Dimension::Id::X),
+            view->getFieldAs(id, Dimension::Id::Y),
+            view->getFieldAs(id, Dimension::Id::Z));
+        if (pointPasses(point, cylCenter, cylNormal))
+            validated.push_back(id);
+    }
+    return validated;
+}
+
+bool M3C2Filter::pointPasses(Eigen::Vector3d point, Vector3d cylCenter, Vector3d cylNormal)
+{
+    // Calculate the distance from the point to the line that goes through the cylinder normal
+    // vector. Make sure it's less than the cylinder radius.
+    Eigen::ParameterizedLine line(cylCenter, cylNormal);
+    if (line.squaredDistance(point) > m_cylRadius2)
+        return false;
+
+    // Calculate the distance from the point to the plane that's parallel to the cylinder's end
+    // and goes through the cylinder "center" (our core point). Make sure that's less than
+    // the half length of the cylinder.
+    Eigen::Hyperplane plane(cylNormal, cylCenter);
+    if (plane.absDistance(point) > m_cylHalfLen)
+        return false;
+
+    return true;
 }
 
 } // namespace pdal

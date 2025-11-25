@@ -8,7 +8,7 @@ doi: 10.5281/zenodo.2616780
 abstract: PDAL is a C++ library for translating and manipulating
 geospatial point cloud data. It provides pipelines, filters, readers,
 and writers for manipulating point cloud data.
-url: https://pdal.io
+url: https://pdal.org
 repository-code: https://github.com/PDAL/PDAL
 license: BSD
 authors:

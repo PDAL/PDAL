@@ -78,7 +78,7 @@ static StaticPluginInfo const s_info
     "filters.hag_nn",
     "Computes height above ground using nearest-neighbor ground-classified "
         "returns.",
-    "http://pdal.io/stages/filters.hag_nn.html"
+    "https://pdal.org/stages/filters.hag_nn.html"
 };
 
 CREATE_STATIC_STAGE(HagNnFilter, s_info)
@@ -102,6 +102,8 @@ void HagNnFilter::addArgs(ProgramArgs& args)
         "[Default: None]", m_maxDistance);
     args.add("allow_extrapolation", "If true and count > 1, allow "
         "extrapolation [Default: true].", m_allowExtrapolation, true);
+    args.add("class", "Class to use for ground points. [Default: 2]",
+        m_class, ClassLabel::Ground);
 }
 
 
@@ -133,7 +135,7 @@ void HagNnFilter::filter(PointView& view)
     for (PointId i = 0; i < view.size(); ++i)
     {
         if (view.getFieldAs<uint8_t>(Id::Classification, i) ==
-            ClassLabel::Ground)
+            m_class)
         {
             view.setField(Id::HeightAboveGround, i, 0);
             gView->appendPoint(view, i);

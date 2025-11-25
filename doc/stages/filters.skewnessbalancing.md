@@ -37,6 +37,9 @@ returns to the output file.
 
 ## Options
 
+```{include} ground_cls_opts.md
+```
+
 ```{include} filter_opts.md
 ```
 

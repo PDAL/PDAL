@@ -41,7 +41,7 @@ namespace pdal
 
 static PluginInfo const s_info{
     "filters.skewnessbalancing", "Bartels & Wei Skewness Balancing",
-    "http://pdal.io/stages/filters.skewnessbalancing.html"};
+    "https://pdal.org/stages/filters.skewnessbalancing.html"};
 
 CREATE_STATIC_STAGE(SkewnessBalancingFilter, s_info)
 
@@ -50,11 +50,31 @@ std::string SkewnessBalancingFilter::getName() const
     return s_info.name;
 }
 
+void SkewnessBalancingFilter::addArgs(ProgramArgs& args)
+{
+    args.add("ground_class", "Classification value of ground points."
+        " [Default: 2]", m_groundClass, ClassLabel::Ground);
+    args.add("other_class", "Classification value of non-ground points."
+        " [Default: 1]", m_otherClass, ClassLabel::Unclassified);
+    args.add("only_ground", "Set to true to only modify the CLassification"
+        " value of detected ground points. [Default: false]",
+        m_onlyGround, false);
+}
+
 void SkewnessBalancingFilter::addDimensions(PointLayoutPtr layout)
 {
     layout->registerDim(Dimension::Id::Classification);
 }
 
+
+void SkewnessBalancingFilter::prepared(PointTableRef table)
+{
+    if ((m_groundClass == m_otherClass) && !m_onlyGround)
+    {
+        throwError("Ground and non-ground class cannot be"
+            "equal when only_ground is false.");
+    }
+}
 
 void SkewnessBalancingFilter::processGround(PointViewPtr view)
 {
@@ -89,7 +109,7 @@ void SkewnessBalancingFilter::processGround(PointViewPtr view)
         skewness = std::sqrt(n) * M3 / std::pow(M2, 1.5);
         if (skewness > 0 && lastSkewness <= 0)
         {
-            setClass(lastPositive, i - 1, ClassLabel::Ground);
+            setClass(lastPositive, i - 1, m_groundClass);
             lastPositive = i;
         }
         lastSkewness = skewness;
@@ -98,9 +118,9 @@ void SkewnessBalancingFilter::processGround(PointViewPtr view)
     // we've never had an opportunity to set the ground state.  Do so now.
     // Otherwise, set the remaining points to non-ground.
     if (lastPositive == 0 && skewness <= 0)
-        setClass(lastPositive, view->size() - 1, ClassLabel::Ground);
-    else
-        setClass(lastPositive, view->size() - 1, ClassLabel::Unclassified);
+        setClass(lastPositive, view->size() - 1, m_groundClass);
+    else if (!m_onlyGround)
+        setClass(lastPositive, view->size() - 1, m_otherClass);
 }
 
 
