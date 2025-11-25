@@ -163,12 +163,12 @@ TEST(DecimationFilterTest, GridDecimationFilterTest_test1)
                         double z_pt = point.getFieldAs<double>(Dimension::Id::Z);
                         if (it==0)
                         {
-                            if((Zref==0) or (z_pt > Zref))
+                            if(Zref==0 || z_pt > Zref)
                                 Zref = z_pt;
                         }
                         else
                         {
-                            if((Zref==0) or (z_pt < Zref))
+                            if(Zref==0 || z_pt < Zref)
                                 Zref = z_pt;
                         }
 
