@@ -59,7 +59,7 @@ bool contains(BOX2D box, double x, double y)
 TEST(DecimationFilterTest, GridDecimationFilterTest_test_empty)
 {
     Options ro;
-    ro.add("filename", Support::datapath("text/file_grid.txt"));
+    ro.add("filename", Support::datapath("text/decimage_file_grid.txt"));
 
     StageFactory factory;
     Stage& r = *(factory.createStage("readers.text"));
