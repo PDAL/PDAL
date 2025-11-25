@@ -162,9 +162,6 @@ PointViewSet GridDecimationFilter::run(PointViewPtr view)
 {
     PointViewSet viewSet;
 
-    if (view->empty())
-        return viewSet;
-
     BOX2D bounds;
     view->calculateBounds(bounds);
     createGrid(bounds);
