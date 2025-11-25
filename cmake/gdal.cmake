@@ -12,7 +12,7 @@ function(gdal_find_version _version)
     set(${_version} ${MAJOR}.${MINOR}.${REV} PARENT_SCOPE)
 endfunction(gdal_find_version)
 
-find_package(GDAL 3.8 REQUIRED)
+find_package(GDAL 3.8 CONFIG REQUIRED)
 set_package_properties(GDAL PROPERTIES TYPE REQUIRED
     PURPOSE "Provides general purpose raster, vector, and reference system support")
 if (GDAL_FOUND)
