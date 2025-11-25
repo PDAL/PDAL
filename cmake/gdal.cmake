@@ -16,7 +16,7 @@ find_package(GDAL 3.8 CONFIG REQUIRED)
 set_package_properties(GDAL PROPERTIES TYPE REQUIRED
     PURPOSE "Provides general purpose raster, vector, and reference system support")
 if (GDAL_FOUND)
-    gdal_find_version(GDAL_VERSION)
+    #    gdal_find_version(GDAL_VERSION)
     #
     # Older versions of FindGDAL.cmake don't properly set GDAL_VERSION
     #

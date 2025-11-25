@@ -49,7 +49,7 @@ PDAL_ADD_TEST(pdal_io_vsi_test
     INCLUDES
         ${GDAL_INCLUDE_DIR}
     LINK_WITH
-        ${GDAL_LIBRARY}
+        GDAL::GDAL
 )
 PDAL_ADD_TEST(pdal_georeference_test FILES GeoreferenceTest.cpp)
 PDAL_ADD_TEST(pdal_kdindex_test
@@ -75,7 +75,7 @@ PDAL_ADD_TEST(pdal_options_test
     FILES
         OptionsTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARY}
+        GDAL::GDAL
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
@@ -93,7 +93,7 @@ PDAL_ADD_TEST(pdal_ogr_arg_test
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
     LINK_WITH
-        ${GDAL_LIBRARY}
+        GDAL::GDAL
 )
 PDAL_ADD_TEST(pdal_filespec_test
     FILES
@@ -131,7 +131,7 @@ PDAL_ADD_TEST(pdal_polygon_test
     FILES
         PolygonTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARY}
+        GDAL::GDAL
 )
 target_include_directories(pdal_polygon_test
     PRIVATE
@@ -144,7 +144,7 @@ PDAL_ADD_TEST(pdal_spatial_reference_test
         ${NLOHMANN_INCLUDE_DIR}
         ${GDAL_INCLUDE_DIR}
     LINK_WITH
-        ${GDAL_LIBRARY}
+        GDAL::GDAL
 )
 
 PDAL_ADD_TEST(pdal_stage_factory_test FILES StageFactoryTest.cpp)
@@ -184,7 +184,7 @@ PDAL_ADD_TEST(pdal_io_ept_reader_test
         io/EptReaderTest.cpp
         ${PDAL_SRC_DIR}/private/OGRSpec.cpp
     LINK_WITH
-        ${GDAL_LIBRARY}
+        GDAL::GDAL
     INCLUDES
         ${GDAL_INCLUDE_DIR}
         ${NLOHMANN_INCLUDE_DIR}
@@ -214,7 +214,7 @@ PDAL_ADD_TEST(pdal_io_gdal_reader_test
     FILES
         io/GDALReaderTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARY}
+        GDAL::GDAL
 )
     target_include_directories(pdal_io_gdal_reader_test
         PRIVATE
@@ -224,7 +224,7 @@ PDAL_ADD_TEST(pdal_io_gdal_writer_test
     FILES
         io/GDALWriterTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARY}
+        GDAL::GDAL
     INCLUDES
         ${GDAL_INCLUDE_DIR}
 )
@@ -232,7 +232,7 @@ PDAL_ADD_TEST(pdal_io_ogr_writer_test
     FILES
         io/OGRWriterTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARY}
+        GDAL::GDAL
     INCLUDES
         ${GDAL_INCLUDE_DIR}
 )
@@ -344,13 +344,13 @@ PDAL_ADD_TEST(pdal_filters_colorinterp_test
     FILES
         filters/ColorinterpFilterTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARY}
+        GDAL::GDAL
 )
 PDAL_ADD_TEST(pdal_filters_colorization_test
     FILES
         filters/ColorizationFilterTest.cpp
     LINK_WITH
-        ${GDAL_LIBRARY}
+        GDAL::GDAL
 )
 PDAL_ADD_TEST(pdal_filters_crop_test
     FILES
@@ -360,7 +360,7 @@ PDAL_ADD_TEST(pdal_filters_crop_test
         ${GDAL_INCLUDE_DIR}
         ${NLOHMANN_INCLUDE_DIR}
     LINK_WITH
-        ${GDAL_LIBRARY}
+        GDAL::GDAL
 )
 PDAL_ADD_TEST(pdal_filters_geomdistance_test
     FILES
@@ -368,7 +368,7 @@ PDAL_ADD_TEST(pdal_filters_geomdistance_test
     INCLUDES
         ${GDAL_INCLUDE_DIR}
     LINK_WITH
-        ${GDAL_LIBRARY}
+        GDAL::GDAL
 )
 PDAL_ADD_TEST(pdal_filters_csf_test FILES filters/CSFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_decimation_test FILES
