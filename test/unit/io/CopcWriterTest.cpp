@@ -309,10 +309,10 @@ TEST(CopcWriterTest, extradim)
         r2.prepare(t2);
         PointLayoutPtr layout = t2.layout();
 
+        FileUtils::deleteFile(outFilename);
         return ((q == (layout->findDim("Q") != Dimension::Id::Unknown)) &&
                 (r == (layout->findDim("R") != Dimension::Id::Unknown)) &&
                 (s == (layout->findDim("S") != Dimension::Id::Unknown)));
-        FileUtils::deleteFile(outFilename);
     };
 
 
