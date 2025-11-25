@@ -161,8 +161,16 @@ TEST(DecimationFilterTest, GridDecimationFilterTest_test1)
                         nbPtsCrop++;
 
                         double z_pt = point.getFieldAs<double>(Dimension::Id::Z);
-                        if (it==0){ if(Zref==0 or z_pt > Zref) Zref = z_pt; }
-                        else { if(Zref==0 or z_pt < Zref) Zref = z_pt;  }
+                        if (it==0)
+                        {
+                            if((Zref==0) or (z_pt > Zref))
+                                Zref = z_pt;
+                        }
+                        else
+                        {
+                            if((Zref==0) or (z_pt < Zref))
+                                Zref = z_pt;
+                        }
 
                         uint8_t classification = point.getFieldAs<uint8_t>(Dimension::Id::Classification);
                         if (classification==5) {nbThreadPtsCrop++; ZrefGrid=z_pt;}
