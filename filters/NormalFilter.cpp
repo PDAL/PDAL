@@ -131,17 +131,12 @@ void NormalFilter::prepared(PointTableRef table)
         m_args->m_up = false;
     }
 
-    if (m_radiusArg->set())
+    if (m_radiusArg->set() && m_args->m_knn)
     {
-        if (m_args->m_knn)
-        {
-            log()->get(LogLevel::Warning)
+        log()->get(LogLevel::Warning)
             << "Radius provided. Ignoring knn = " << m_args->m_knn << "."
             << std::endl;
-            m_args->m_knn = 0;
-        }
-        if (m_args->m_refine)
-            throwError("Refining normals not supported with radius search.");
+        m_args->m_knn = 0;
     }
     else 
     {
@@ -244,7 +239,12 @@ void NormalFilter::update(
     // spanning tree. The first neighbor is the query point which is
     // already part of the minimum spanning tree and can safely be
     // skipped.
-    PointIdList neighbors = kdi.neighbors(updateIdx, m_args->m_knn);
+    PointIdList neighbors;
+    if (m_radiusArg->set())
+        neighbors = kdi.radius(updateIdx, m_args->m_radius);
+    else
+        neighbors = kdi.neighbors(updateIdx, m_args->m_knn);
+
     neighbors.erase(neighbors.begin());
     PointRef p = view.point(updateIdx);
     Vector3d N0(p.getFieldAs<double>(Id::NormalX),
