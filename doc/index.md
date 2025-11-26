@@ -26,13 +26,9 @@ The entire website is available as a single PDF at <https://pdal.org/_/downloads
 
 ## News
 
-### **06-19-2025**
+### **11-26-2025**
 
-PDAL 2.9.0 was released. Visit {ref}`download` to grab a copy.
-
-### **02-03-2025**
-
-PDAL 2.8.4 was released. Visit {ref}`download` to grab a copy.
+PDAL 2.9.3 was released. Visit {ref}`download` to grab a copy.
 
 ## Indices and tables
 
