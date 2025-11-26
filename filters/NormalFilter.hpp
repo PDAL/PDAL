@@ -80,6 +80,7 @@ public:
     NormalFilter(const NormalFilter&) = delete;
 
     void doFilter(PointView& view, int knn = 8);
+    void doRadiusFilter(PointView& view, double radius);
 
     std::string getName() const;
 
@@ -87,6 +88,7 @@ private:
     std::unique_ptr<NormalArgs> m_args;
     point_count_t m_count;
     Arg* m_viewpointArg;
+    Arg* m_radiusArg;
 
     void compute(PointView& view, KD3Index& kdi);
     void refine(PointView& view, KD3Index& kdi);

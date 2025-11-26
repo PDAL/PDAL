@@ -68,6 +68,7 @@ struct NormalArgs
 {
     int m_knn;
     filter::Point m_viewpoint;
+    double m_radius;
     bool m_up;
     bool m_refine;
 };
@@ -84,6 +85,8 @@ std::string NormalFilter::getName() const
 void NormalFilter::addArgs(ProgramArgs& args)
 {
     args.add("knn", "k-Nearest Neighbors", m_args->m_knn, 8);
+    m_radiusArg = &args.add("radius", "Radius to use for neighbor search",
+        m_args->m_radius);
     m_viewpointArg = &args.add("viewpoint", "Viewpoint as WKT or GeoJSON",
                                m_args->m_viewpoint);
     args.add("always_up", "Normals always oriented with positive Z?",
@@ -110,6 +113,15 @@ void NormalFilter::doFilter(PointView& view, int knn)
     filter(view);
 }
 
+// public method to use filter with radius. Used by M3C2
+void NormalFilter::doRadiusFilter(PointView& view, double radius)
+{
+    m_args->m_radius = radius;
+    ProgramArgs args;
+    addArgs(args);
+    filter(view);
+}
+
 void NormalFilter::prepared(PointTableRef table)
 {
     if (m_args->m_up && m_viewpointArg->set())
@@ -119,9 +131,20 @@ void NormalFilter::prepared(PointTableRef table)
         m_args->m_up = false;
     }
 
-    // The query point is returned as a neighbor of itself, so we must increase
-    // k by one to get the desired number of neighbors.
-    ++m_args->m_knn;
+    if (m_radiusArg->set() && m_args->m_knn)
+    {
+        log()->get(LogLevel::Warning)
+            << "Radius provided. Ignoring knn = " << m_args->m_knn << "."
+            << std::endl;
+        m_args->m_knn = 0;
+    }
+    else 
+    {
+        // The query point is returned as a neighbor of itself, so we must increase
+        // k by one to get the desired number of neighbors.
+        ++m_args->m_knn;
+    }
+
 }
 
 void NormalFilter::compute(PointView& view, KD3Index& kdi)
@@ -130,8 +153,22 @@ void NormalFilter::compute(PointView& view, KD3Index& kdi)
     for (auto&& p : view)
     {
         // Perform eigen decomposition of covariance matrix computed from
-        // neighborhood composed of k-nearest neighbors.
-        PointIdList neighbors = kdi.neighbors(p.pointId(), m_args->m_knn);
+        // neighborhood composed of k-nearest neighbors, or within radius.
+        PointIdList neighbors;
+        if (m_radiusArg->set())
+        {
+            neighbors = kdi.radius(p.pointId(), m_args->m_radius);
+            if (3 > neighbors.size())
+            {
+                log()->get(LogLevel::Info)
+                    << "Skipping point " << p.pointId()
+                    << ". Not enough neighbors in radius. Try a larger radius.\n";
+                continue;
+            }
+        }
+        else
+            neighbors = kdi.neighbors(p.pointId(), m_args->m_knn);
+
         auto B = math::computeCovariance(view, neighbors);
 
         // Check if the covariance matrix is all zeros
@@ -202,7 +239,12 @@ void NormalFilter::update(
     // spanning tree. The first neighbor is the query point which is
     // already part of the minimum spanning tree and can safely be
     // skipped.
-    PointIdList neighbors = kdi.neighbors(updateIdx, m_args->m_knn);
+    PointIdList neighbors;
+    if (m_radiusArg->set())
+        neighbors = kdi.radius(updateIdx, m_args->m_radius);
+    else
+        neighbors = kdi.neighbors(updateIdx, m_args->m_knn);
+
     neighbors.erase(neighbors.begin());
     PointRef p = view.point(updateIdx);
     Vector3d N0(p.getFieldAs<double>(Id::NormalX),
