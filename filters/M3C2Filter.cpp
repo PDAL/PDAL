@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include "M3C2Filter.hpp"
+#include "NormalFilter.hpp"
 
 #include <Eigen/Geometry>
 
@@ -85,6 +86,7 @@ void M3C2Filter::addArgs(ProgramArgs& args)
 
 void M3C2Filter::addDimensions(PointLayoutPtr layout)
 {
+    // do we want to recompute normals no matter what?
 }
 
 
@@ -92,6 +94,9 @@ void M3C2Filter::filter(PointView& view)
 {
     // Compute the radius of a ball that fits around the cylinder.
     m_p->cylBallRadius = std::sqrt(m_p->cylRadius2 + m_args->cylHalfLen * m_args->cylHalfLen);
+
+    NormalFilter nf;
+    nf.doRadiusFilter(view, m_args->normRadius);
 }
 
 void M3C2Filter::calcStats(PointView& v1, PointView& v2, PointView& cores)
