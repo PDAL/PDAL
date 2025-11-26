@@ -37,6 +37,7 @@
 #include <Eigen/Dense>
 
 #include <pdal/Filter.hpp>
+#include <pdal/KDIndex.hpp>
 
 namespace pdal
 {
@@ -59,8 +60,8 @@ private:
     void calcStats(PointView& v1, PointView& v2, PointView& cores);
     void calcStats(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
         PointView& v1, PointView& v2);
-    PointIdList filterPoints(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
-        const PointIdList& ids, const PointView& view);
+    KD3Index::RadiusResults filterPoints(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
+        const KD3Index::RadiusResults& ids, const PointView& view);
     bool pointPasses(Eigen::Vector3d point, Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal);
 
     struct Args;

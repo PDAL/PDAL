@@ -36,8 +36,6 @@
 
 #include <Eigen/Geometry>
 
-#include <pdal/KDIndex.hpp>
-
 namespace pdal
 {
 
@@ -113,33 +111,36 @@ void M3C2Filter::calcStats(PointView& v1, PointView& v2, PointView& cores)
 void M3C2Filter::calcStats(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
     PointView& v1, PointView& v2)
 {
-    PointIdList pts1 = v1.build3dIndex().radius(cylCenter(0), cylCenter(1), cylCenter(2),
-        m_p->cylBallRadius);
+    KD3Index::RadiusResults pts1;
+    v1.build3dIndex().radius(cylCenter(0), cylCenter(1), cylCenter(2),
+        m_p->cylBallRadius, pts1);
     pts1 = filterPoints(cylCenter, cylNormal, pts1, v1);
 
     if (pts1.size() < m_p->minPoints)
         return;
 
-    // Should test doing this all in 2D.
-    PointIdList pts2 = v2.build3dIndex().radius(cylCenter(0), cylCenter(1), cylCenter(2),
-        m_p->cylBallRadius);
+    KD3Index::RadiusResults pts2;
+    v2.build3dIndex().radius(cylCenter(0), cylCenter(1), cylCenter(2),
+        m_p->cylBallRadius, pts2);
     pts2 = filterPoints(cylCenter, cylNormal, pts2, v2);
 
     if (pts2.size() < m_p->minPoints)
         return;
 }
 
-PointIdList M3C2Filter::filterPoints(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
-    const PointIdList& ids, const PointView& view)
+KD3Index::RadiusResults M3C2Filter::filterPoints(Eigen::Vector3d cylCenter,
+    Eigen::Vector3d cylNormal, const KD3Index::RadiusResults& pts, const PointView& view)
 {
-    PointIdList validated;
-    for (PointId id : ids)
+    KD3Index::RadiusResults validated;
+    for (KD3Index::RadiusResult res : pts)
     {
+        PointId id = res.first;
+
         Eigen::Vector3d point(view.getFieldAs<double>(Dimension::Id::X, id),
             view.getFieldAs<double>(Dimension::Id::Y, id),
             view.getFieldAs<double>(Dimension::Id::Z, id));
         if (pointPasses(point, cylCenter, cylNormal))
-            validated.push_back(id);
+            validated.push_back(res);
     }
     return validated;
 }
