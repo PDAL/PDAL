@@ -47,6 +47,7 @@ class Options;
 class PointLayout;
 class PointView;
 struct NormalArgs;
+struct NormalResult;
 
 struct Edge
 {
@@ -82,6 +83,9 @@ public:
     void doFilter(PointView& view, int knn = 8);
     void doRadiusFilter(PointView& view, double radius);
 
+    NormalResult calcNormal(double x, double y, double z, PointView& v, double radius);
+    NormalResult calcNormal(double x, double y, double z, PointView& v, int knn);
+
     std::string getName() const;
 
 private:
@@ -96,6 +100,7 @@ private:
     update(PointView& view, KD3Index& kdi, std::vector<bool> inMST,
            std::priority_queue<Edge, EdgeList, CompareEdgeWeight> edge_queue,
            PointId updateIdx);
+    NormalResult calcNormal(PointView& v, PointIdList neighbors);
 
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);

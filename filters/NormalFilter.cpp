@@ -73,6 +73,78 @@ struct NormalArgs
     bool m_refine;
 };
 
+struct NormalResult
+{
+    struct error : std::runtime_error
+    {
+        error(const std::string& err) : std::runtime_error(err)
+        {}
+    };
+
+    NormalResult() : m_normal(Vector3d::Zero()), m_curvature(0.0)
+    {}
+
+    Vector3d m_normal;
+    double m_curvature;
+
+    void calcNormal(PointView& v, PointIdList neighbors);
+    void calcNormal(double x, double y, double z, PointView& v, double radius);
+    void calcNormal(double x, double y, double z, PointView& v, int knn);
+
+    // If normals are expected to be upward facing, invert them when the
+    // Z component is negative.
+    void orientUp()
+    {
+        if (m_normal[2] < 0)
+            m_normal *= -1;
+    }
+    void orientViewpoint(const Vector3d& vp)
+    {
+        if (vp.dot(m_normal) < 0)
+            m_normal *= -1;
+    }
+};
+
+void NormalResult::calcNormal(PointView& view, PointIdList neighbors) 
+{
+    // Check if the covariance matrix is all zeros
+    auto B = math::computeCovariance(view, neighbors);
+    if (B.isZero())
+        return;
+
+    SelfAdjointEigenSolver<Matrix3d> solver(B);
+    // Need to be able to separate warnings & errors here
+    if (solver.info() != Success)
+        throw error("Cannot perform eigen decomposition.");
+
+    // The curvature is computed as the ratio of the first (smallest)
+    // eigenvalue to the sum of all eigenvalues.
+    auto eval = solver.eigenvalues();
+    double sum = eval[0] + eval[1] + eval[2];
+
+    m_curvature = sum ? std::fabs(eval[0] / sum) : 0;
+
+    // The normal is defined by the eigenvector corresponding to the
+    // smallest eigenvalue.
+    m_normal = solver.eigenvectors().col(0);
+}
+
+void NormalResult::calcNormal(double x, double y, double z, PointView& v, double radius)
+{
+    KD3Index& kdi = v.build3dIndex();
+    PointIdList neighbors = kdi.radius(x, y, z, radius);
+    if (neighbors.size() < 3)
+        return;
+    calcNormal(v, neighbors);
+}
+
+void NormalResult::calcNormal(double x, double y, double z, PointView& v, int knn)
+{
+    calcNormal(v, v.build3dIndex().neighbors(x, y, z, knn));
+}
+
+
+
 NormalFilter::NormalFilter() : m_args(new NormalArgs), m_count(0) {}
 
 NormalFilter::~NormalFilter() {}
@@ -113,15 +185,6 @@ void NormalFilter::doFilter(PointView& view, int knn)
     filter(view);
 }
 
-// public method to use filter with radius. Used by M3C2
-void NormalFilter::doRadiusFilter(PointView& view, double radius)
-{
-    m_args->m_radius = radius;
-    ProgramArgs args;
-    addArgs(args);
-    filter(view);
-}
-
 void NormalFilter::prepared(PointTableRef table)
 {
     if (m_args->m_up && m_viewpointArg->set())
@@ -158,6 +221,7 @@ void NormalFilter::compute(PointView& view, KD3Index& kdi)
         if (m_radiusArg->set())
         {
             neighbors = kdi.radius(p.pointId(), m_args->m_radius);
+            // This gets checked in calcNormal, but we give a better warning here.
             if (3 > neighbors.size())
             {
                 log()->get(LogLevel::Info)
@@ -169,10 +233,17 @@ void NormalFilter::compute(PointView& view, KD3Index& kdi)
         else
             neighbors = kdi.neighbors(p.pointId(), m_args->m_knn);
 
-        auto B = math::computeCovariance(view, neighbors);
-
-        // Check if the covariance matrix is all zeros
-        if (B.isZero())
+        NormalResult result;
+        try 
+        {
+            result.calcNormal(view, neighbors);
+        }
+        catch (NormalResult::error& e)
+        {
+            throwError(e.what());
+        }
+        
+        if (result.m_normal.isZero())
         {
             log()->get(LogLevel::Info)
                 << "Skipping point " << p.pointId()
@@ -181,20 +252,6 @@ void NormalFilter::compute(PointView& view, KD3Index& kdi)
                    "with a small radius to remove redundant points.\n";
             continue;
         }
-
-        SelfAdjointEigenSolver<Matrix3d> solver(B);
-        if (solver.info() != Success)
-            throwError("Cannot perform eigen decomposition.");
-
-        // The curvature is computed as the ratio of the first (smallest)
-        // eigenvalue to the sum of all eigenvalues.
-        auto eval = solver.eigenvalues();
-        double sum = eval[0] + eval[1] + eval[2];
-        double curvature = sum ? std::fabs(eval[0] / sum) : 0;
-
-        // The normal is defined by the eigenvector corresponding to the
-        // smallest eigenvalue.
-        Vector3d normal = solver.eigenvectors().col(0);
 
         if (m_viewpointArg->set())
         {
@@ -206,22 +263,16 @@ void NormalFilter::compute(PointView& view, KD3Index& kdi)
             double dy = m_args->m_viewpoint.y() - p.getFieldAs<double>(Id::Y);
             double dz = m_args->m_viewpoint.z() - p.getFieldAs<double>(Id::Z);
             Vector3d vp(dx, dy, dz);
-            if (vp.dot(normal) < 0)
-                normal *= -1.0;
+            result.orientViewpoint(vp);
         }
         else if (m_args->m_up)
-        {
-            // If normals are expected to be upward facing, invert them when the
-            // Z component is negative.
-            if (normal[2] < 0)
-                normal *= -1.0;
-        }
+            result.orientUp();
 
         // Set the computed normal and curvature dimensions.
-        p.setField(Id::NormalX, normal[0]);
-        p.setField(Id::NormalY, normal[1]);
-        p.setField(Id::NormalZ, normal[2]);
-        p.setField(Id::Curvature, curvature);
+        p.setField(Id::NormalX, result.m_normal[0]);
+        p.setField(Id::NormalY, result.m_normal[1]);
+        p.setField(Id::NormalZ, result.m_normal[2]);
+        p.setField(Id::Curvature, result.m_curvature);
     }
 }
 
