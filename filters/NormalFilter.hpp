@@ -81,10 +81,6 @@ public:
     NormalFilter(const NormalFilter&) = delete;
 
     void doFilter(PointView& view, int knn = 8);
-    void doRadiusFilter(PointView& view, double radius);
-
-    NormalResult calcNormal(double x, double y, double z, PointView& v, double radius);
-    NormalResult calcNormal(double x, double y, double z, PointView& v, int knn);
 
     std::string getName() const;
 
@@ -100,7 +96,6 @@ private:
     update(PointView& view, KD3Index& kdi, std::vector<bool> inMST,
            std::priority_queue<Edge, EdgeList, CompareEdgeWeight> edge_queue,
            PointId updateIdx);
-    NormalResult calcNormal(PointView& v, PointIdList neighbors);
 
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
