@@ -47,7 +47,7 @@ class Options;
 class PointLayout;
 class PointView;
 struct NormalArgs;
-struct NormalResult;
+struct NormalProcessor;
 
 struct Edge
 {

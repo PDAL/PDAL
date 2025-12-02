@@ -72,7 +72,7 @@ TEST(NormalFilterTest, XYPlane)
     Dimension::Id nz = table.layout()->findDim("NormalZ");
     Dimension::Id c = table.layout()->findDim("Curvature");
 
-    for (auto const& p : *outView)
+    for (const PointRef& p : *outView)
     {
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), 0.0);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), 0.0);
@@ -109,7 +109,7 @@ TEST(NormalFilterTest, XZPlane)
     Dimension::Id nz = table.layout()->findDim("NormalZ");
     Dimension::Id c = table.layout()->findDim("Curvature");
 
-    for (auto const& p : *outView)
+    for (const PointRef& p : *outView)
     {
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), 0.0);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), 1.0);
@@ -146,7 +146,7 @@ TEST(NormalFilterTest, YZPlane)
     Dimension::Id nz = table.layout()->findDim("NormalZ");
     Dimension::Id c = table.layout()->findDim("Curvature");
 
-    for (auto const& p : *outView)
+    for (const PointRef& p : *outView)
     {
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), 1.0);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), 0.0);
@@ -194,7 +194,7 @@ TEST(NormalFilterTest, RampPlane)
     Dimension::Id c = table.layout()->findDim("Curvature");
 
     double expected = std::sqrt(2.0) / 2.0;
-    for (auto const& p : *outView)
+    for (const PointRef& p : *outView)
     {
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), (float)-expected);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), 0.0f);
@@ -242,7 +242,7 @@ TEST(NormalFilterTest, RampPlane2)
     Dimension::Id c = table.layout()->findDim("Curvature");
 
     double expected = std::sqrt(2.0) / 2.0;
-    for (auto const& p : *outView)
+    for (const PointRef& p : *outView)
     {
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), 0.0f);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), (float)-expected);
@@ -302,7 +302,7 @@ TEST(NormalFilterTest, RadiusSearch)
     Dimension::Id c = table.layout()->findDim("Curvature");
 
     double expected = std::sqrt(2.0) / 2.0;
-    for (auto const& p : *outView)
+    for (const PointRef& p : *outView)
     {
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), 0.0f);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), (float)-expected);

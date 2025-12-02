@@ -46,7 +46,7 @@
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/private/MathUtils.hpp>
-#include <filters/private/NormalResult.hpp>
+#include <filters/private/NormalProcessor.hpp>
 
 #include <Eigen/Dense>
 
@@ -150,7 +150,7 @@ void NormalFilter::compute(PointView& view, KD3Index& kdi)
         if (m_radiusArg->set())
         {
             neighbors = kdi.radius(p.pointId(), m_args->m_radius);
-            // This gets checked in calcNormal, but we give a better warning here.
+            // This gets checked in findNormal, but we give a better warning here.
             if (3 > neighbors.size())
             {
                 log()->get(LogLevel::Info)
@@ -162,15 +162,8 @@ void NormalFilter::compute(PointView& view, KD3Index& kdi)
         else
             neighbors = kdi.neighbors(p.pointId(), m_args->m_knn);
 
-        NormalResult result;
-        try 
-        {
-            result.calcNormal(view, neighbors);
-        }
-        catch (NormalResult::error& e)
-        {
-            throwError(e.what());
-        }
+        NormalProcessor result;
+        result.findNormal(view, neighbors);
         
         if (result.m_normal.isZero())
         {

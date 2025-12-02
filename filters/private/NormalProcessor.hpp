@@ -7,23 +7,16 @@ namespace pdal
 
 using namespace Eigen;
 
-struct NormalResult
+struct NormalProcessor
 {
-    struct error : std::runtime_error
-    {
-        error(const std::string& err) : std::runtime_error(err)
-        {}
-    };
 
-    NormalResult() : m_normal(Vector3d::Zero()), m_curvature(0.0)
+    NormalProcessor() : m_normal(Vector3d::Zero()), m_curvature(0.0)
     {}
 
     Vector3d m_normal;
     double m_curvature;
 
-    bool empty() const { return m_normal.isZero(); }
-
-    void calcNormal(PointView& view, PointIdList neighbors)
+    void findNormal(PointView& view, PointIdList neighbors)
     {
         // Check if the covariance matrix is all zeros
         auto B = math::computeCovariance(view, neighbors);
@@ -31,9 +24,8 @@ struct NormalResult
             return;
     
         SelfAdjointEigenSolver<Matrix3d> solver(B);
-        // Need to be able to separate warnings & errors here
         if (solver.info() != Success)
-            throw error("Cannot perform eigen decomposition.");
+            throw pdal_error("Cannot perform eigen decomposition during normal calculation.");
     
         // The curvature is computed as the ratio of the first (smallest)
         // eigenvalue to the sum of all eigenvalues.
@@ -48,18 +40,18 @@ struct NormalResult
     }
 
     // Compute the normal at a particular point, using points within a radius.
-    void calcNormal(double x, double y, double z, PointView& v, double radius)
+    void findNormal(double x, double y, double z, PointView& v, double radius)
     {
         KD3Index& kdi = v.build3dIndex();
         PointIdList neighbors = kdi.radius(x, y, z, radius);
         if (neighbors.size() < 3)
             return;
-        calcNormal(v, neighbors);
+        findNormal(v, neighbors);
     }
 
     // Compute the normal at a particular point, using k-nearest neighbors.
-    void calcNormal(double x, double y, double z, PointView& v, int knn)
-    { calcNormal(v, v.build3dIndex().neighbors(x, y, z, knn)); }
+    void findNormal(double x, double y, double z, PointView& v, int knn)
+    { findNormal(v, v.build3dIndex().neighbors(x, y, z, knn)); }
     
     // If normals are expected to be upward facing, invert them when the
     // Z component is negative.
