@@ -46,6 +46,7 @@
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/private/MathUtils.hpp>
+#include <filters/private/NormalResult.hpp>
 
 #include <Eigen/Dense>
 
@@ -72,78 +73,6 @@ struct NormalArgs
     bool m_up;
     bool m_refine;
 };
-
-struct NormalResult
-{
-    struct error : std::runtime_error
-    {
-        error(const std::string& err) : std::runtime_error(err)
-        {}
-    };
-
-    NormalResult() : m_normal(Vector3d::Zero()), m_curvature(0.0)
-    {}
-
-    Vector3d m_normal;
-    double m_curvature;
-
-    void calcNormal(PointView& v, PointIdList neighbors);
-    void calcNormal(double x, double y, double z, PointView& v, double radius);
-    void calcNormal(double x, double y, double z, PointView& v, int knn);
-
-    // If normals are expected to be upward facing, invert them when the
-    // Z component is negative.
-    void orientUp()
-    {
-        if (m_normal[2] < 0)
-            m_normal *= -1;
-    }
-    void orientViewpoint(const Vector3d& vp)
-    {
-        if (vp.dot(m_normal) < 0)
-            m_normal *= -1;
-    }
-};
-
-void NormalResult::calcNormal(PointView& view, PointIdList neighbors) 
-{
-    // Check if the covariance matrix is all zeros
-    auto B = math::computeCovariance(view, neighbors);
-    if (B.isZero())
-        return;
-
-    SelfAdjointEigenSolver<Matrix3d> solver(B);
-    // Need to be able to separate warnings & errors here
-    if (solver.info() != Success)
-        throw error("Cannot perform eigen decomposition.");
-
-    // The curvature is computed as the ratio of the first (smallest)
-    // eigenvalue to the sum of all eigenvalues.
-    auto eval = solver.eigenvalues();
-    double sum = eval[0] + eval[1] + eval[2];
-
-    m_curvature = sum ? std::fabs(eval[0] / sum) : 0;
-
-    // The normal is defined by the eigenvector corresponding to the
-    // smallest eigenvalue.
-    m_normal = solver.eigenvectors().col(0);
-}
-
-void NormalResult::calcNormal(double x, double y, double z, PointView& v, double radius)
-{
-    KD3Index& kdi = v.build3dIndex();
-    PointIdList neighbors = kdi.radius(x, y, z, radius);
-    if (neighbors.size() < 3)
-        return;
-    calcNormal(v, neighbors);
-}
-
-void NormalResult::calcNormal(double x, double y, double z, PointView& v, int knn)
-{
-    calcNormal(v, v.build3dIndex().neighbors(x, y, z, knn));
-}
-
-
 
 NormalFilter::NormalFilter() : m_args(new NormalArgs), m_count(0) {}
 
