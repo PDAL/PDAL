@@ -46,7 +46,7 @@
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/private/MathUtils.hpp>
-#include <filters/private/NormalProcessor.hpp>
+#include <filters/private/NormalUtils.hpp>
 
 #include <Eigen/Dense>
 
@@ -85,7 +85,7 @@ std::string NormalFilter::getName() const
 
 void NormalFilter::addArgs(ProgramArgs& args)
 {
-    args.add("knn", "k-Nearest Neighbors", m_args->m_knn, 8);
+    m_knnArg = &args.add("knn", "k-Nearest Neighbors", m_args->m_knn, 8);
     m_radiusArg = &args.add("radius", "Radius to use for neighbor search",
         m_args->m_radius);
     m_viewpointArg = &args.add("viewpoint", "Viewpoint as WKT or GeoJSON",
@@ -123,11 +123,10 @@ void NormalFilter::prepared(PointTableRef table)
         m_args->m_up = false;
     }
 
-    if (m_radiusArg->set() && m_args->m_knn)
+    if (m_radiusArg->set())
     {
-        log()->get(LogLevel::Warning)
-            << "Radius provided. Ignoring knn = " << m_args->m_knn << "."
-            << std::endl;
+        if (m_knnArg->set())
+            throwError("Cannot set both knn and radius.");
         m_args->m_knn = 0;
     }
     else 
@@ -144,34 +143,20 @@ void NormalFilter::compute(PointView& view, KD3Index& kdi)
     log()->get(LogLevel::Debug) << "Computing normal vectors\n";
     for (auto&& p : view)
     {
+        NormalResult result;
+
         // Perform eigen decomposition of covariance matrix computed from
         // neighborhood composed of k-nearest neighbors, or within radius.
-        PointIdList neighbors;
         if (m_radiusArg->set())
-        {
-            neighbors = kdi.radius(p.pointId(), m_args->m_radius);
-            // This gets checked in findNormal, but we give a better warning here.
-            if (3 > neighbors.size())
-            {
-                log()->get(LogLevel::Info)
-                    << "Skipping point " << p.pointId()
-                    << ". Not enough neighbors in radius. Try a larger radius.\n";
-                continue;
-            }
-        }
+            result = math::findNormal(view, kdi.radius(p.pointId(), m_args->m_radius));
         else
-            neighbors = kdi.neighbors(p.pointId(), m_args->m_knn);
-
-        NormalProcessor result;
-        result.findNormal(view, neighbors);
+            result = math::findNormal(view, kdi.neighbors(p.pointId(), m_args->m_knn));
         
-        if (result.m_normal.isZero())
+        if (result.normal.isZero())
         {
             log()->get(LogLevel::Info)
                 << "Skipping point " << p.pointId()
-                << ". Covariance matrix is all zeros. This suggests a large "
-                   "number of redundant points. Consider using filters.sample "
-                   "with a small radius to remove redundant points.\n";
+                << ": " << result.msg << "\n";
             continue;
         }
 
@@ -191,10 +176,10 @@ void NormalFilter::compute(PointView& view, KD3Index& kdi)
             result.orientUp();
 
         // Set the computed normal and curvature dimensions.
-        p.setField(Id::NormalX, result.m_normal[0]);
-        p.setField(Id::NormalY, result.m_normal[1]);
-        p.setField(Id::NormalZ, result.m_normal[2]);
-        p.setField(Id::Curvature, result.m_curvature);
+        p.setField(Id::NormalX, result.normal[0]);
+        p.setField(Id::NormalY, result.normal[1]);
+        p.setField(Id::NormalZ, result.normal[2]);
+        p.setField(Id::Curvature, result.curvature);
     }
 }
 

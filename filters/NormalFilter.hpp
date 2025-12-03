@@ -47,7 +47,6 @@ class Options;
 class PointLayout;
 class PointView;
 struct NormalArgs;
-struct NormalProcessor;
 
 struct Edge
 {
@@ -89,6 +88,7 @@ private:
     point_count_t m_count;
     Arg* m_viewpointArg;
     Arg* m_radiusArg;
+    Arg* m_knnArg;
 
     void compute(PointView& view, KD3Index& kdi);
     void refine(PointView& view, KD3Index& kdi);
