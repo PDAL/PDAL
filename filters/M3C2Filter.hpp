@@ -46,6 +46,17 @@ class PointView;
 
 class PDAL_EXPORT M3C2Filter : public Filter
 {
+    struct Stats
+    {
+        double distance;
+        double uncertainty;
+        double significant;
+        double stdDev1;
+        double stdDev2;
+        int n1;
+        int n2;
+    };
+
 public:
     M3C2Filter();
     M3C2Filter& operator=(const M3C2Filter&) = delete;
@@ -56,10 +67,14 @@ public:
 private:
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
-    virtual void filter(PointView& view);
+    virtual void initialize();
+    virtual PointViewSet run(PointViewPtr view);
+    virtual void done(PointTableRef table);
+
+    void createSample(PointView& source, PointView& dest);
     void calcStats(PointView& v1, PointView& v2, PointView& cores);
-    void calcStats(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
-        PointView& v1, PointView& v2);
+    bool calcStats(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
+        PointView& v1, PointView& v2, Stats& stats);
     KD3Index::RadiusResults filterPoints(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
         const KD3Index::RadiusResults& ids, const PointView& view);
     bool pointPasses(Eigen::Vector3d point, Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal);

@@ -33,9 +33,9 @@
 ****************************************************************************/
 
 #include "M3C2Filter.hpp"
-#include "NormalFilter.hpp"
 
 #include <Eigen/Geometry>
+#include <algorithm>
 
 namespace pdal
 {
@@ -45,13 +45,25 @@ struct M3C2Filter::Args
     double normRadius;
     double cylRadius;
     double cylHalfLen;
+    int samplePct;
+    double regError;
 };
 
 struct M3C2Filter::Private
 {
+    PointViewPtr v1;
+    PointViewPtr v2;
+    PointViewPtr cores;
     double cylRadius2;
     double cylBallRadius;
     double minPoints;
+    Dimension::Id distanceDim;
+    Dimension::Id uncertaintyDim;
+    Dimension::Id significantDim;
+    Dimension::Id stdDev1Dim;
+    Dimension::Id stdDev2Dim;
+    Dimension::Id n1Dim;
+    Dimension::Id n2Dim;
 };
 
 static StaticPluginInfo const s_info
@@ -81,40 +93,107 @@ void M3C2Filter::addArgs(ProgramArgs& args)
         "[Default: 2].", m_args->cylRadius, 2.0);
     args.add("cyl_halflen", "The half-length of the cylinder of neighbors used used for "
         "calculating change [Default: 5].", m_args->cylHalfLen, 5.0);
+    args.add("sample_pct", "Sampling percentage for first point view. Ignored if a core view "
+        "is provided.", m_args->samplePct, 10);
+    args.add("reg_error", "Registration error [Default: 0].", m_args->regError, 0.0);
 }
 
 
 void M3C2Filter::addDimensions(PointLayoutPtr layout)
 {
-    // do we want to recompute normals no matter what?
+    m_p->distanceDim = layout->assignDim("m3c2_distance", Dimension::Type::Double);
+    m_p->uncertaintyDim = layout->assignDim("m3c2_uncertainty", Dimension::Type::Double);
+    m_p->significantDim = layout->assignDim("m3c2_significant", Dimension::Type::Unsigned8);
+    m_p->stdDev1Dim = layout->assignDim("m3c2_std_dev1", Dimension::Type::Double);
+    m_p->stdDev2Dim = layout->assignDim("m3c2_std_dev2", Dimension::Type::Double);
+    m_p->n1Dim = layout->assignDim("m3c2_count1", Dimension::Type::Unsigned16);
+    m_p->n2Dim = layout->assignDim("m3c2_count2", Dimension::Type::Unsigned16);
 }
 
 
-void M3C2Filter::filter(PointView& view)
+void M3C2Filter::initialize()
 {
+    m_p->cylRadius2 = std::pow(m_args->cylRadius, 2.0);
+
     // Compute the radius of a ball that fits around the cylinder.
     m_p->cylBallRadius = std::sqrt(m_p->cylRadius2 + m_args->cylHalfLen * m_args->cylHalfLen);
+}
 
-    NormalFilter nf;
-    nf.doRadiusFilter(view, m_args->normRadius);
+PointViewSet M3C2Filter::run(PointViewPtr view)
+{
+    if (!m_p->v1)
+        m_p->v1 = view;
+    else if (!m_p->v2)
+        m_p->v2 = view;
+    else if (!m_p->cores)
+        m_p->cores = view;
+    else
+        throwError("Too many views provided. Only two or three views are supported.");
+
+    PointViewSet set;
+    set.insert(view);
+    return set;
+}
+
+void M3C2Filter::done(PointTableRef _)
+{
+    if (!m_p->v1)
+        throwError("Missing first view.");
+    if (!m_p->v2)
+        throwError("Missing second view.");
+    if (!m_p->cores)
+    {
+        m_p->cores = m_p->v1->makeNew();
+        createSample(*m_p->v1, *m_p->cores);
+    }
+    calcStats(*m_p->v1, *m_p->v2, *m_p->cores);
+}
+
+// Super simple sampling.  We just take random points up to the percentage requested.
+void M3C2Filter::createSample(PointView& source, PointView& dest)
+{
+    PointIdList ids(source.size());
+    std::iota(ids.begin(), ids.end(), 0);
+    std::random_device gen;
+    std::shuffle(ids.begin(), ids.end(), std::mt19937(gen()));
+
+    // Get the sample from the front of the shuffled list.
+    ids.resize(static_cast<point_count_t>(source.size() * (m_args->samplePct / 100.0)));
+    for (PointId id : ids)
+        dest.appendPoint(source, id);
 }
 
 void M3C2Filter::calcStats(PointView& v1, PointView& v2, PointView& cores)
 {
+    Stats stats;
+
     for (PointRef core : cores)
     {
         Eigen::Vector3d pos(core.getFieldAs<double>(Dimension::Id::X),
             core.getFieldAs<double>(Dimension::Id::Y),
             core.getFieldAs<double>(Dimension::Id::Z));
-        Eigen::Vector3d normal(core.getFieldAs<double>(Dimension::Id::NormalX),
-            core.getFieldAs<double>(Dimension::Id::NormalY),
-            core.getFieldAs<double>(Dimension::Id::NormalZ));
-        calcStats(pos, normal, v1, v2);
+
+        Eigen::Vector3d normal =
+            math::findNormal(pos(0), pos(1), pos(2), v1, m_args->normRadius).normal;
+
+        if (normal == Eigen::Vector3d::Zero())
+            continue;
+
+        if (calcStats(pos, normal, v1, v2, stats))
+        {
+            core.setField(m_p->distanceDim, stats.distance);
+            core.setField(m_p->uncertaintyDim, stats.uncertainty);
+            core.setField(m_p->significantDim, stats.significant);
+            core.setField(m_p->stdDev1Dim, stats.stdDev1);
+            core.setField(m_p->stdDev2Dim, stats.stdDev2);
+            core.setField(m_p->n1Dim, stats.n1);
+            core.setField(m_p->n2Dim, stats.n2);
+        }
     }
 }
 
-void M3C2Filter::calcStats(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
-    PointView& v1, PointView& v2)
+bool M3C2Filter::calcStats(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
+    PointView& v1, PointView& v2, Stats& stats)
 {
     KD3Index::RadiusResults pts1;
     v1.build3dIndex().radius(cylCenter(0), cylCenter(1), cylCenter(2),
@@ -122,7 +201,7 @@ void M3C2Filter::calcStats(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
     pts1 = filterPoints(cylCenter, cylNormal, pts1, v1);
 
     if (pts1.size() < m_p->minPoints)
-        return;
+        return false;
 
     KD3Index::RadiusResults pts2;
     v2.build3dIndex().radius(cylCenter(0), cylCenter(1), cylCenter(2),
@@ -130,7 +209,42 @@ void M3C2Filter::calcStats(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
     pts2 = filterPoints(cylCenter, cylNormal, pts2, v2);
 
     if (pts2.size() < m_p->minPoints)
-        return;
+        return false;
+
+    // Set square distances to distances
+    double sum = 0;
+    double sum2 = 0;
+    for (KD3Index::RadiusResult& r : pts1)
+    {
+        sum += std::sqrt(r.second);
+        sum2 += r.second;
+    }
+    double mean1 = sum / pts1.size();
+    // This is a bad variance calcuation from a computational standpoint.
+    double var1 = sum2 / pts1.size() - mean1 * mean1;
+
+    sum = 0;
+    sum2 = 0;
+    for (KD3Index::RadiusResult& r : pts2)
+    {
+        sum += std::sqrt(r.second);
+        sum2 += r.second;
+    }
+    double mean2 = sum / pts2.size();
+    double var2 = sum2 / pts2.size() - mean2 * mean2;
+
+    double lodVar = var1 / pts1.size() + var2 / pts2.size();
+    double lod = 1.96 * (std::sqrt(lodVar) + m_args->regError);
+
+    stats.distance = mean2 - mean1;
+    stats.uncertainty = lod;
+    stats.significant = std::abs(stats.distance) > lod;
+    stats.stdDev1 = std::sqrt(var1);
+    stats.stdDev2 = std::sqrt(var2);
+    stats.n1 = pts1.size();
+    stats.n2 = pts2.size();
+
+    return true;
 }
 
 KD3Index::RadiusResults M3C2Filter::filterPoints(Eigen::Vector3d cylCenter,
