@@ -37,6 +37,8 @@
 #include <Eigen/Geometry>
 #include <algorithm>
 
+#include "private/NormalUtils.hpp"
+
 namespace pdal
 {
 
