@@ -1,7 +1,6 @@
-#ifndef PACKET_H
-#define PACKET_H
 /*
- * Copyright 2009 - 2010 Kevin Ackley (kackley@gwi.net)
+ * Original work Copyright 2009 - 2010 Kevin Ackley (kackley@gwi.net)
+ * Modified work Copyright 2018 - 2020 Andy Maloney <asmaloney@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person or organization
  * obtaining a copy of the software and accompanying documentation covered by
@@ -26,18 +25,19 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#pragma once
+
 #include <cstdint>
 #include <vector>
 
 #include "Common.h"
-
 
 namespace e57
 {
    class CheckedFile;
    class PacketLock;
 
-   /// Packet types (in a compressed vector section)
+   // Packet types (in a compressed vector section)
    enum
    {
       INDEX_PACKET = 0,
@@ -45,97 +45,141 @@ namespace e57
       EMPTY_PACKET,
    };
 
-   /// maximum size of CompressedVector binary data packet
-   constexpr int   DATA_PACKET_MAX = (64*1024);
+   // Maximum size of CompressedVector binary data packet
+   constexpr int DATA_PACKET_MAX = ( 64 * 1024 );
 
    class PacketReadCache
    {
-      public:
-         PacketReadCache(CheckedFile* cFile, unsigned packetCount);
+   public:
+      PacketReadCache( CheckedFile *cFile, unsigned packetCount );
 
-         std::unique_ptr<PacketLock> lock(uint64_t packetLogicalOffset, char* &pkt);  //??? pkt could be const
+      std::unique_ptr<PacketLock> lock( uint64_t packetLogicalOffset,
+                                        char *&pkt ); //??? pkt could be const
 
-#ifdef E57_DEBUG
-         void                dump(int indent = 0, std::ostream& os = std::cout);
+#ifdef E57_ENABLE_DIAGNOSTIC_OUTPUT
+      void dump( int indent = 0, std::ostream &os = std::cout );
 #endif
 
-      protected:
-         /// Only PacketLock can unlock the cache
-         friend class PacketLock;
-         void                unlock(unsigned cacheIndex);
+   protected:
+      friend class PacketLock;
 
-         void                readPacket(unsigned oldestEntry, uint64_t packetLogicalOffset);
+      // Only PacketLock can unlock the cache
+      void unlock( unsigned cacheIndex );
 
-         struct CacheEntry
-         {
-               uint64_t    logicalOffset_ = 0;
-               char        buffer_[DATA_PACKET_MAX];  //! No need to init since it's a data buffer
-               unsigned    lastUsed_ = 0;
-         };
+      void readPacket( unsigned oldestEntry, uint64_t packetLogicalOffset );
 
-         unsigned    lockCount_ = 0;
-         unsigned    useCount_ = 0;
-         CheckedFile *cFile_ = nullptr;
+      struct CacheEntry
+      {
+         uint64_t logicalOffset_ = 0;
+         char buffer_[DATA_PACKET_MAX]; // No need to init since it's a data buffer
+         unsigned lastUsed_ = 0;
+      };
 
-         std::vector<CacheEntry>  entries_;
+      unsigned lockCount_ = 0;
+      unsigned useCount_ = 0;
+      CheckedFile *cFile_ = nullptr;
+
+      std::vector<CacheEntry> entries_;
    };
 
    class PacketLock
    {
-      public:
-         ~PacketLock();
+   public:
+      ~PacketLock();
 
-      private:
-         /// Can't be copied or assigned
-         PacketLock(const PacketLock& plock);
-         PacketLock&     operator=(const PacketLock& plock);
+      PacketLock( const PacketLock &plock ) = delete;
+      PacketLock &operator=( const PacketLock &plock ) = delete;
 
-      protected:
-         friend class PacketReadCache;
-         /// Only PacketReadCache can construct
-         PacketLock(PacketReadCache* cache, unsigned cacheIndex);
+   protected:
+      friend class PacketReadCache;
 
-         PacketReadCache* cache_ = nullptr;
-         unsigned int     cacheIndex_ = 0;
+      /// Only PacketReadCache can construct
+      PacketLock( PacketReadCache *cache, unsigned cacheIndex );
+
+      PacketReadCache *cache_ = nullptr;
+      unsigned int cacheIndex_ = 0;
    };
 
    class DataPacketHeader
    {
-      public:
-         DataPacketHeader();
+   public:
+      DataPacketHeader();
 
-         void  reset();
+      void reset();
 
-         void  verify(unsigned bufferLength = 0) const; //???use
+      void verify( unsigned bufferLength = 0 ) const;
 
-#ifdef E57_DEBUG
-         void  dump(int indent = 0, std::ostream& os = std::cout) const;
+      // Does this packet have any records?
+      bool hasRecords() const
+      {
+         // If the packet does not have records, the logical length will be 8 bytes (the length of
+         // the header padded to 8-byte boundary).
+         return packetLogicalLengthMinus1 > 7;
+      }
+
+#ifdef E57_ENABLE_DIAGNOSTIC_OUTPUT
+      void dump( int indent = 0, std::ostream &os = std::cout ) const;
 #endif
-         const uint8_t     packetType = DATA_PACKET;
 
-         uint8_t     packetFlags = 0;
-         uint16_t    packetLogicalLengthMinus1 = 0;
-         uint16_t    bytestreamCount = 0;
+      const uint8_t packetType = DATA_PACKET;
+
+      uint8_t packetFlags = 0;
+      uint16_t packetLogicalLengthMinus1 = 0;
+      uint16_t bytestreamCount = 0;
    };
 
    class DataPacket
    {
-      public:
-         DataPacket();
+   public:
+      DataPacket();
 
-         void        verify(unsigned bufferLength = 0) const;
-         char*       getBytestream(unsigned bytestreamNumber, unsigned& bufferLength);
-         unsigned    getBytestreamBufferLength(unsigned bytestreamNumber);
+      void verify( unsigned bufferLength = 0 ) const;
+      char *getBytestream( unsigned bytestreamNumber, unsigned &byteCount );
+      unsigned getBytestreamBufferLength( unsigned bytestreamNumber );
 
-#ifdef E57_DEBUG
-         void        dump(int indent = 0, std::ostream& os = std::cout) const;
+#ifdef E57_ENABLE_DIAGNOSTIC_OUTPUT
+      void dump( int indent = 0, std::ostream &os = std::cout ) const;
 #endif
 
-         static constexpr int  PayloadSize = DATA_PACKET_MAX - sizeof(DataPacketHeader);
+      static constexpr int PayloadSize = DATA_PACKET_MAX - sizeof( DataPacketHeader );
 
-         DataPacketHeader  header;
+      DataPacketHeader header;
 
-         uint8_t     payload[PayloadSize];  //! No need to init since it's a data buffer
+      uint8_t payload[PayloadSize]; // No need to init since it's a data buffer
+   };
+
+   class IndexPacketHeader
+   {
+   public:
+      const uint8_t packetType = INDEX_PACKET;
+
+      uint8_t packetFlags = 0; // flag bitfields
+      uint16_t packetLogicalLengthMinus1 = 0;
+      uint16_t entryCount = 0;
+      uint8_t indexLevel = 0;
+      uint8_t reserved1[9] = {}; // must be zero
+   };
+
+   class IndexPacket
+   {
+   public:
+      IndexPacket();
+
+      void verify( unsigned bufferLength = 0, uint64_t totalRecordCount = 0,
+                   uint64_t fileSize = 0 ) const;
+
+#ifdef E57_ENABLE_DIAGNOSTIC_OUTPUT
+      void dump( int indent = 0, std::ostream &os = std::cout ) const;
+#endif
+
+      IndexPacketHeader header;
+
+      static constexpr unsigned MAX_ENTRIES = 2048;
+
+      struct Entry
+      {
+         uint64_t chunkRecordNumber = 0;
+         uint64_t chunkPhysicalOffset = 0;
+      } entries[MAX_ENTRIES];
    };
 }
-#endif

@@ -1,7 +1,10 @@
-# $Id: CMakeLists.txt 332 2013-04-03 14:24:08Z roland_schwarz $
-# This is the CMake project file for the libe57 reference implementation
+# This is a rewrite over time of the CMake file from the libe57 reference implementation
+#   https://en.wikipedia.org/wiki/Ship_of_Theseus
 #
-# Copyright 2010-2012 Roland Schwarz, Riegl LMS GmbH
+# Use git blame to see all the changes and who has contributed.
+#
+# Copyright 2018-2023 Andy Maloney <asmaloney@gmail.com>
+# Original work Copyright 2010-2012 Roland Schwarz, Riegl LMS GmbH
 #
 # Permission is hereby granted, free of charge, to any person or organization
 # obtaining a copy of the software and accompanying documentation covered by
@@ -24,79 +27,233 @@
 # FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
-#
-# Requirements:
-#     Xerces library: http://xerces.apache.org/
-# If you find any errors or have suggestion to improve the build script:
-# patches are most welcome! Please send them to the development mailing list.
 
-project(E57Format)
+cmake_minimum_required( VERSION 3.15 )
 
-# developer adjustable version numbers
-set(${PROJECT_NAME}_MAJOR_VERSION 2)
-set(${PROJECT_NAME}_MINOR_VERSION 0)
-set(${PROJECT_NAME}_PATCH_VERSION 1)
+# Set a private module find path
+set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" )
 
-find_package(XercesC REQUIRED)
+message( STATUS "Using CMake ${CMAKE_VERSION}" )
 
-#
-# The reference implementation
-#
-
-add_library(E57Format STATIC
-    src/CheckedFile.h
-    src/CheckedFile.cpp
-    src/Common.h
-    src/Decoder.h
-    src/Decoder.cpp
-    src/Encoder.h
-    src/Encoder.cpp
-    src/NodeImpl.h
-    src/NodeImpl.cpp
-    src/Packet.h
-    src/Packet.cpp
-    src/ImageFileImpl.cpp
-    src/ImageFileImpl.h
-    src/SourceDestBufferImpl.h
-    src/SourceDestBufferImpl.cpp
-    src/StructureNodeImpl.h
-    src/StructureNodeImpl.cpp
-    src/E57Exception.cpp
-    src/E57Format.cpp
-    src/E57FormatImpl.cpp
-    src/E57FormatImpl.h
-    src/E57Version.h
-    src/E57XmlParser.h
-    src/E57XmlParser.cpp
-    include/E57Exception.h
-    include/E57Format.h
-    contrib/CRCpp/inc/CRC.h
+project( E57Format
+    DESCRIPTION
+        "E57Format is a library to read and write E57 files"
+    LANGUAGES
+        CXX
+    VERSION
+        3.3.0
 )
-pdal_target_compile_settings(E57Format)
-if (WIN32)
-target_compile_options(E57Format PRIVATE
-    /wd4244
-    )
+
+string( TOUPPER ${PROJECT_NAME} PROJECT_NAME_UPPERCASE )
+
+# Creates a build tag which is used in the REVISION_ID
+#	e.g. "x86_64-darwin-AppleClang140"
+include( Tags )
+include( GitInfo )
+
+# Collect all our current git info using:
+#  https://github.com/cppmf/GitInfo.cmake
+GitInfo( ${CMAKE_CURRENT_SOURCE_DIR} )
+# GitInfoReport()
+
+# Check if we are building ourself or being included and use this to set some defaults
+if ( ${PROJECT_NAME} STREQUAL ${CMAKE_PROJECT_NAME} )
+    set( E57_BUILDING_SELF ON )
 endif()
-target_link_libraries(E57Format
-    PRIVATE
-        ${XercesC_LIBRARIES}
+
+# propose a default installation directory
+if ( E57_BUILDING_SELF )
+    if( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
+        string( REGEX REPLACE "/${PROJECT_NAME}" "" CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} )
+        set( T_ ${PROJECT_NAME} )
+        set( T_ ${T_}-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR} )
+        set( T_ ${T_}-${${PROJECT_NAME}_BUILD_TAG} )
+        set( CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/${T_}
+                CACHE PATH
+                "Install path prefix, prepended onto install directories."
+                FORCE
+        )
+    endif()
+endif()
+
+find_package( Threads REQUIRED )
+find_package( XercesC 3.2 REQUIRED )
+
+option( E57_BUILD_SHARED
+	"Compile E57Format as a shared library"
+	OFF
 )
 
-# CRCpp from here: https://github.com/d-bahr/CRCpp
-target_include_directories(E57Format
-    PRIVATE
-        include
-        contrib/CRCpp/inc
-        ${XercesC_INCLUDE_DIR}
+if( BUILD_SHARED_LIBS )
+	set( E57_BUILD_SHARED ON )
+endif()
+
+#########################################################################################
+# Cross checking and runtime verification in the code.
+# The extra code does not change the file contents.
+#	E57_VALIDATION_LEVEL=0	off
+#	E57_VALIDATION_LEVEL=1	basic
+#	E57_VALIDATION_LEVEL=2	deep (implies basic) - checks at the packet level, so it will be slower
+set( E57_VALIDATION_LEVEL "1" CACHE STRING "Runtime validation level (0 = OFF, 1 = basic, 2 = deep)" )
+
+# Output detailed logging while processing.
+option( E57_VERBOSE "Compile library with verbose logging" OFF )
+
+# Enable/disable code which dumps detailed node info to std::ostream. (See NodeImpl::dump())
+# Instead of always including this code, it is an option for backwards compatibility.
+# The only real reason to turn this off would be for slightly smaller binaries.
+option( E57_ENABLE_DIAGNOSTIC_OUTPUT "Include code for diagnostic output using dump() on nodes" ON )
+
+# Enable writing packets that are correct but will stress the reader.
+option( E57_WRITE_CRAZY_PACKET_MODE "Compile library to enable reader-stressing packets" OFF )
+
+# Other compile options
+
+# Link-time optiomization
+# CMake forces "thin" LTO (see https://gitlab.kitware.com/cmake/cmake/-/issues/23136)
+# which is a problem if compiling statically for distribution (e.g. in a package manager).
+# Generally you will only want to turn this off for distributing static release builds.
+option( E57_RELEASE_LTO "Compile release library with link-time optimization" ON )
+
+#########################################################################################
+
+set( REVISION_ID "${PROJECT_NAME}-${PROJECT_VERSION}-${${PROJECT_NAME}_BUILD_TAG}" )
+if ( GIT_LATEST_TAG )
+	set( REVISION_ID "${REVISION_ID} (git ${GIT_LATEST_TAG})" )
+endif()
+message( STATUS "[${PROJECT_NAME}] Revision ID: ${REVISION_ID}" )
+
+# Target
+if ( E57_BUILD_SHARED )
+	message( STATUS "[${PROJECT_NAME}] Building shared library" )
+	add_library( E57Format SHARED )
+else()
+	message( STATUS "[${PROJECT_NAME}] Building static library" )
+	add_library( E57Format STATIC )
+endif()
+
+include( E57ExportHeader )
+include( GitUpdate )
+
+# Main sources and includes
+add_subdirectory( extern/CRCpp )
+add_subdirectory( include )
+add_subdirectory( src )
+
+# Target properties
+set_target_properties( E57Format
+	PROPERTIES
+	    CXX_EXTENSIONS NO
+		EXPORT_COMPILE_COMMANDS ON
+		POSITION_INDEPENDENT_CODE ON
+		INTERPROCEDURAL_OPTIMIZATION ${E57_RELEASE_LTO}
+		INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF
 )
 
-target_compile_definitions(E57Format
+if ( NOT DEFINED CMAKE_DEBUG_POSTFIX )
+	set_target_properties( E57Format
+		PROPERTIES
+		    DEBUG_POSTFIX "-d"
+	)
+endif()
+
+if ( E57_BUILD_SHARED )
+	set_target_properties( E57Format
+		PROPERTIES
+		    VERSION   ${PROJECT_VERSION}
+			SOVERSION ${PROJECT_VERSION_MAJOR}
+	)
+endif()
+
+target_compile_features( ${PROJECT_NAME}
     PRIVATE
-        CRCPP_USE_CPP11
-        CRCPP_BRANCHLESS
+        cxx_std_14
 )
 
-set_target_properties( E57Format PROPERTIES
-    POSITION_INDEPENDENT_CODE ON
+# Warnings
+include( CompilerWarnings )
+
+# Check our validation level
+string( STRIP "${E57_VALIDATION_LEVEL}" E57_VALIDATION_LEVEL )
+if ( NOT E57_VALIDATION_LEVEL MATCHES "^[0-2]$" )
+    message( FATAL_ERROR "[${PROJECT_NAME}] E57_VALIDATION_LEVEL should be 0-2: '${E57_VALIDATION_LEVEL}'" )
+else()
+    message( STATUS "[${PROJECT_NAME}] Setting validation level to ${E57_VALIDATION_LEVEL}" )
+endif ()
+
+# Target definitions
+target_compile_definitions( E57Format
+    PRIVATE
+        REVISION_ID="${REVISION_ID}"
+        E57_VALIDATION_LEVEL=${E57_VALIDATION_LEVEL}
+        $<$<BOOL:${E57_ENABLE_DIAGNOSTIC_OUTPUT}>:E57_ENABLE_DIAGNOSTIC_OUTPUT>
+        $<$<BOOL:${E57_VERBOSE}>:E57_VERBOSE>
+        $<$<BOOL:${E57_WRITE_CRAZY_PACKET_MODE}>:E57_WRITE_CRAZY_PACKET_MODE>
+)
+
+# sanitizers
+include( Sanitizers )
+
+# Target Libraries
+target_link_libraries( E57Format PRIVATE XercesC::XercesC )
+
+# Install
+install(
+    TARGETS
+        E57Format
+    EXPORT
+        E57Format-export
+)
+
+# ccache
+# Turns on ccache if found
+include( ccache )
+
+# Formatting
+include( ClangFormat )
+
+# Testing
+option( E57_BUILD_TEST
+    "Build tests"
+    ${E57_BUILDING_SELF}
+)
+
+if ( E57_BUILD_TEST )
+    message( STATUS "[${PROJECT_NAME}] Testing enabled" )
+
+    enable_testing()
+
+    add_subdirectory( test )
+endif()
+
+# CMake package files
+include( GNUInstallDirs )
+set( E57_INSTALL_CMAKEDIR
+    "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
+     CACHE STRING
+     "Install path for ${PROJECT_NAME} CMake files"
+)
+
+message( STATUS "[${PROJECT_NAME}] CMake files install to ${CMAKE_INSTALL_PREFIX}/${E57_INSTALL_CMAKEDIR}" )
+
+install(
+    EXPORT
+        E57Format-export
+    DESTINATION
+        "${E57_INSTALL_CMAKEDIR}"
+)
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file (
+    e57format-config-version.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+install(
+    FILES
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/e57format-config.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/e57format-config-version.cmake
+    DESTINATION
+        "${E57_INSTALL_CMAKEDIR}"
 )

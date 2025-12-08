@@ -1,8 +1,6 @@
-#ifndef CHECKED_FILE_P_H
-#define CHECKED_FILE_P_H
-
 /*
- * Copyright 2009 - 2010 Kevin Ackley (kackley@gwi.net)
+ * Original work Copyright 2009 - 2010 Kevin Ackley (kackley@gwi.net)
+ * Modified work Copyright 2018 - 2020 Andy Maloney <asmaloney@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person or organization
  * obtaining a copy of the software and accompanying documentation covered by
@@ -27,98 +25,105 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#pragma once
+
 #include <algorithm>
 
 #include "Common.h"
 
-namespace e57 {
+namespace e57
+{
+   // Tool class to read buffer efficiently without
+   // multiplying copy operations.
+   //
+   // WARNING: pointer input is handled by user!
+   class BufferView;
 
    class CheckedFile
    {
-      public:
-         static constexpr size_t   physicalPageSizeLog2 = 10;  // physical page size is 2 raised to this power
-         static constexpr size_t   physicalPageSize = 1 << physicalPageSizeLog2;
-         static constexpr FileOffset physicalPageSizeMask = physicalPageSize - 1;
-         static constexpr size_t   logicalPageSize = physicalPageSize - 4;
+   public:
+      // physical page size is 2 raised to this power
+      static constexpr size_t physicalPageSizeLog2 = 10;
+      static constexpr size_t physicalPageSize = 1 << physicalPageSizeLog2;
+      static constexpr uint64_t physicalPageSizeMask = physicalPageSize - 1;
+      static constexpr size_t logicalPageSize = physicalPageSize - 4;
 
-      public:
-         enum Mode
-         {
-            ReadOnly,
-            WriteCreate,
-            WriteExisting
-         };
+   public:
+      enum Mode
+      {
+         Read,
+         Write,
+      };
 
-         enum OffsetMode
-         {
-            Logical,
-            Physical
-         };
+      enum OffsetMode
+      {
+         Logical,
+         Physical
+      };
 
-         CheckedFile( const e57::ustring &fileName, Mode mode, ReadChecksumPolicy policy );
-         ~CheckedFile();
+      CheckedFile( const e57::ustring &fileName, Mode mode, ReadChecksumPolicy policy );
+      CheckedFile( const char *input, uint64_t size, ReadChecksumPolicy policy );
+      ~CheckedFile();
 
-         void            read(char* buf, size_t nRead, size_t bufSize = 0);
-         void            write(const char* buf, size_t nWrite);
-         CheckedFile&    operator<<(const e57::ustring& s);
-         CheckedFile&    operator<<(int64_t i);
-         CheckedFile&    operator<<(uint64_t i);
-         CheckedFile&    operator<<(float f);
-         CheckedFile&    operator<<(double d);
-         void            seek(FileOffset offset, OffsetMode omode = Logical);
-         FileOffset      position(OffsetMode omode = Logical);
-         FileOffset      length(OffsetMode omode = Logical);
-         void            extend(FileOffset newLength,
-            OffsetMode omode = Logical);
-         e57::ustring    fileName() const { return fileName_; }
-         void            close();
-         void            unlink();
+      void read( char *buf, size_t nRead, size_t bufSize = 0 );
+      void write( const char *buf, size_t nWrite );
+      CheckedFile &operator<<( const e57::ustring &s );
+      CheckedFile &operator<<( int64_t i );
+      CheckedFile &operator<<( uint64_t i );
+      CheckedFile &operator<<( float f );
+      CheckedFile &operator<<( double d );
+      void seek( uint64_t offset, OffsetMode omode = Logical );
+      uint64_t position( OffsetMode omode = Logical );
+      uint64_t length( OffsetMode omode = Logical );
+      void extend( uint64_t newLength, OffsetMode omode = Logical );
 
-         static inline FileOffset logicalToPhysical(FileOffset logicalOffset);
-         static inline FileOffset physicalToLogical(FileOffset physicalOffset);
+      e57::ustring fileName() const
+      {
+         return fileName_;
+      }
 
-      private:
-         uint32_t    checksum(char* buf, size_t size) const;
-         void        verifyChecksum( char *page_buffer, size_t page );
+      void close();
+      void unlink();
 
-         template<class FTYPE>
-         CheckedFile&    writeFloatingPoint(FTYPE value, int precision);
+      static inline uint64_t logicalToPhysical( uint64_t logicalOffset );
+      static inline uint64_t physicalToLogical( uint64_t physicalOffset );
 
-         void        getCurrentPageAndOffset(FileOffset& page,
-            size_t& pageOffset, OffsetMode omode = Logical);
-         void        readPhysicalPage(char* page_buffer, FileOffset page);
-         void        writePhysicalPage(char* page_buffer, FileOffset page);
-         int         portableOpen( const e57::ustring &fileName,
-             int flags, int mode );
-         FileOffset portableSeek(FileOffset offset, int whence);
+   private:
+      void verifyChecksum( char *page_buffer, uint64_t page );
 
+      template <class FTYPE> CheckedFile &writeFloatingPoint( FTYPE value, int precision );
 
-         e57::ustring    fileName_;
-         FileOffset logicalLength_ = 0;
-         FileOffset physicalLength_ = 0;
+      void getCurrentPageAndOffset( uint64_t &page, size_t &pageOffset,
+                                    OffsetMode omode = Logical );
+      void readPhysicalPage( char *page_buffer, uint64_t page );
+      void writePhysicalPage( char *page_buffer, uint64_t page );
+      int open64( const e57::ustring &fileName, int flags, int mode );
+      uint64_t lseek64( int64_t offset, int whence );
 
-         ReadChecksumPolicy checkSumPolicy_ = CHECKSUM_POLICY_ALL;
+      e57::ustring fileName_;
+      uint64_t logicalLength_ = 0;
+      uint64_t physicalLength_ = 0;
 
-         int             fd_ = -1;
-         bool            readOnly_ = false;
+      ReadChecksumPolicy checkSumPolicy_ = ChecksumPolicy::ChecksumAll;
+
+      int fd_ = -1;
+      BufferView *bufView_ = nullptr;
+      bool readOnly_ = false;
    };
 
-   inline FileOffset CheckedFile::logicalToPhysical(FileOffset logicalOffset)
+   inline uint64_t CheckedFile::logicalToPhysical( uint64_t logicalOffset )
    {
-      const FileOffset page = logicalOffset / logicalPageSize;
-      const FileOffset remainder = logicalOffset - page*logicalPageSize;
+      const uint64_t page = logicalOffset / logicalPageSize;
+      const uint64_t remainder = logicalOffset - page * logicalPageSize;
 
-      return page*physicalPageSize + remainder;
+      return page * physicalPageSize + remainder;
    }
 
-   inline FileOffset CheckedFile::physicalToLogical(FileOffset physicalOffset)
+   inline uint64_t CheckedFile::physicalToLogical( uint64_t physicalOffset )
    {
-      const FileOffset page = physicalOffset >> physicalPageSizeLog2;
-      const size_t remainder = static_cast<size_t> (physicalOffset & physicalPageSizeMask);
+      const uint64_t page = physicalOffset >> physicalPageSizeLog2;
+      const auto remainder = static_cast<size_t>( physicalOffset & physicalPageSizeMask );
 
-      return page*logicalPageSize + (std::min)(remainder, logicalPageSize);
+      return page * logicalPageSize + std::min( remainder, logicalPageSize );
    }
-
 }
-
-#endif
