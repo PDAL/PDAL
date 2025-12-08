@@ -5,7 +5,7 @@
 
 #include <io/LasReader.hpp>
 #include <io/BufferReader.hpp>
-#include <io/TextWriter.hpp>
+#include <io/TextReader.hpp>
 
 #include "Support.hpp"
 
@@ -20,49 +20,42 @@ TEST(M3C2FilterTest, test1)
 
     Options ro1;
     Options ro2;
+    Options ro3;
     LasReader r1;
     LasReader r2;
-    BufferReader r3;
+    TextReader r3;
     ro1.add("filename", Support::datapath("autzen/autzen-bmx-2010.las"));
     ro2.add("filename", Support::datapath("autzen/autzen-bmx-2023.las"));
+    // contains 3 points picked from the first file to use as core points
+    ro3.add("filename", Support::datapath("autzen/autzen-bmx-cores.txt"));
     r1.setOptions(ro1);
     r2.setOptions(ro2);
+    r3.setOptions(ro3);
 
     M3C2Filter filter;
     Options fo;
     fo.add("normal_radius", 10);
     fo.add("cyl_radius", 20);
     fo.add("cyl_halflen", 10);
-    fo.add("sample_pct", 100);
 
     filter.setOptions(fo);
-
-    // 3 points picked from the first file to use as core points
-    PointViewPtr inView(new PointView(table));
-    inView->setField(Id::X, 0, 194496.64);
-    inView->setField(Id::Y, 0, 259241.37);
-    inView->setField(Id::Z, 0, 434.12);
-    inView->setField(Id::X, 1, 194478.38);
-    inView->setField(Id::Y, 1, 259249.33);
-    inView->setField(Id::Z, 1, 423.75);
-    inView->setField(Id::X, 2, 194486.95);
-    inView->setField(Id::Y, 2, 259234.12);
-    inView->setField(Id::Z, 2, 430.74);
-    r3.addView(inView);
-
-    filter.prepare(table);
 
     filter.setInput(r1);
     filter.setInput(r2);
     filter.setInput(r3);
+
+    filter.prepare(table);
     
     PointViewSet viewSet = filter.execute(table);
-    /*
-    PointViewPtr viewOut = *viewSet.begin();
 
+    EXPECT_EQ(3u, viewSet.size());
+    // The 3 core points should be in the 3rd view
+    PointViewPtr viewOut = *std::next(viewSet.begin(), 2);
+
+    // Values don't look right. working on it
     Dimension::Id distance = viewOut->layout()->findDim("m3c2_distance");
-    for (int i = 0; i < viewOut->size(); ++i)
-        std::cout << viewOut->getFieldAs<float>(distance, i) << std::endl;*/
+    for (size_t i = 0; i < viewOut->size(); ++i)
+        std::cout << viewOut->getFieldAs<float>(distance, i) << std::endl;
 }
 
 } // namespace pdal

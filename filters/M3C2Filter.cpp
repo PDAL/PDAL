@@ -122,9 +122,6 @@ void M3C2Filter::done(PointTableRef _)
         m_p->cores = m_p->v1->makeNew();
         createSample(*m_p->v1, *m_p->cores);
     }
-    std::cout << "v1 has " << m_p->v1->size() << " points." << std::endl;
-    std::cout << "v2 has " << m_p->v2->size() << " points." << std::endl;
-    std::cout << "cores has " << m_p->cores->size() << " points." << std::endl;
     calcStats(*m_p->v1, *m_p->v2, *m_p->cores);
 }
 
