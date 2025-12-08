@@ -57,6 +57,32 @@ class PDAL_EXPORT M3C2Filter : public Filter
         int n2;
     };
 
+    struct Args
+    {
+        double normRadius;
+        double cylRadius;
+        double cylHalfLen;
+        int samplePct;
+        double regError;
+    };
+    
+    struct Private
+    {
+        PointViewPtr v1;
+        PointViewPtr v2;
+        PointViewPtr cores;
+        double cylRadius2;
+        double cylBallRadius;
+        double minPoints;
+        Dimension::Id distanceDim;
+        Dimension::Id uncertaintyDim;
+        Dimension::Id significantDim;
+        Dimension::Id stdDev1Dim;
+        Dimension::Id stdDev2Dim;
+        Dimension::Id n1Dim;
+        Dimension::Id n2Dim;
+    };
+
 public:
     M3C2Filter();
     M3C2Filter& operator=(const M3C2Filter&) = delete;
@@ -79,10 +105,8 @@ private:
         const KD3Index::RadiusResults& ids, const PointView& view);
     bool pointPasses(Eigen::Vector3d point, Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal);
 
-    struct Args;
     std::unique_ptr<Args> m_args;
 
-    struct Private;
     std::unique_ptr<Private> m_p;
 };
 

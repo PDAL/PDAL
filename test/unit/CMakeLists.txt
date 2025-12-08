@@ -415,6 +415,11 @@ PDAL_ADD_TEST(pdal_filters_additional_merge_test
         ${NLOHMANN_INCLUDE_DIR}
 )
 PDAL_ADD_TEST(pdal_filters_labelduplicates_test FILES filters/LabelDuplicatesFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_m3c2_test 
+    FILES 
+        filters/M3C2FilterTest.cpp
+    INCLUDES
+        ${PDAL_VENDOR_EIGEN_DIR})
 PDAL_ADD_TEST(pdal_filters_normal_test FILES filters/NormalFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_overlay_test FILES filters/OverlayFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_planefit_test

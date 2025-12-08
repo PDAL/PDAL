@@ -42,32 +42,6 @@
 namespace pdal
 {
 
-struct M3C2Filter::Args
-{
-    double normRadius;
-    double cylRadius;
-    double cylHalfLen;
-    int samplePct;
-    double regError;
-};
-
-struct M3C2Filter::Private
-{
-    PointViewPtr v1;
-    PointViewPtr v2;
-    PointViewPtr cores;
-    double cylRadius2;
-    double cylBallRadius;
-    double minPoints;
-    Dimension::Id distanceDim;
-    Dimension::Id uncertaintyDim;
-    Dimension::Id significantDim;
-    Dimension::Id stdDev1Dim;
-    Dimension::Id stdDev2Dim;
-    Dimension::Id n1Dim;
-    Dimension::Id n2Dim;
-};
-
 static StaticPluginInfo const s_info
 {
     "filters.m3c2",
@@ -148,6 +122,9 @@ void M3C2Filter::done(PointTableRef _)
         m_p->cores = m_p->v1->makeNew();
         createSample(*m_p->v1, *m_p->cores);
     }
+    std::cout << "v1 has " << m_p->v1->size() << " points." << std::endl;
+    std::cout << "v2 has " << m_p->v2->size() << " points." << std::endl;
+    std::cout << "cores has " << m_p->cores->size() << " points." << std::endl;
     calcStats(*m_p->v1, *m_p->v2, *m_p->cores);
 }
 
