@@ -34,9 +34,9 @@ TEST(M3C2FilterTest, test1)
 
     M3C2Filter filter;
     Options fo;
-    fo.add("normal_radius", 10);
-    fo.add("cyl_radius", 20);
-    fo.add("cyl_halflen", 10);
+    fo.add("normal_radius", 5.24414);
+    fo.add("cyl_radius", 10.4882815);
+    fo.add("cyl_halflen", 2.763006);
 
     filter.setOptions(fo);
 
@@ -45,7 +45,7 @@ TEST(M3C2FilterTest, test1)
     filter.setInput(r3);
 
     filter.prepare(table);
-    
+
     PointViewSet viewSet = filter.execute(table);
 
     EXPECT_EQ(3u, viewSet.size());

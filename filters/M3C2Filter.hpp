@@ -65,7 +65,7 @@ class PDAL_EXPORT M3C2Filter : public Filter
         int samplePct;
         double regError;
     };
-    
+
     struct Private
     {
         PointViewPtr v1;
@@ -103,7 +103,7 @@ private:
         PointView& v1, PointView& v2, Stats& stats);
     KD3Index::RadiusResults filterPoints(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
         const KD3Index::RadiusResults& ids, const PointView& view);
-    bool pointPasses(Eigen::Vector3d point, Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal);
+    double pointPasses(Eigen::Vector3d point, Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal);
 
     std::unique_ptr<Args> m_args;
 
