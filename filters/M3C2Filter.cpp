@@ -42,6 +42,32 @@
 namespace pdal
 {
 
+struct M3C2Filter::Args
+{
+    double normRadius;
+    double cylRadius;
+    double cylHalfLen;
+    int samplePct;
+    double regError;
+};
+
+struct M3C2Filter::Private
+{
+    PointViewPtr v1;
+    PointViewPtr v2;
+    PointViewPtr cores;
+    double cylRadius2;
+    double cylBallRadius;
+    double minPoints;
+    Dimension::Id distanceDim;
+    Dimension::Id uncertaintyDim;
+    Dimension::Id significantDim;
+    Dimension::Id stdDev1Dim;
+    Dimension::Id stdDev2Dim;
+    Dimension::Id n1Dim;
+    Dimension::Id n2Dim;
+};
+
 static StaticPluginInfo const s_info
 {
     "filters.m3c2",
@@ -59,6 +85,8 @@ std::string M3C2Filter::getName() const
 
 M3C2Filter::M3C2Filter() : m_args(new M3C2Filter::Args), m_p(new M3C2Filter::Private)
 {}
+
+M3C2Filter::~M3C2Filter() {}
 
 
 void M3C2Filter::addArgs(ProgramArgs& args)
