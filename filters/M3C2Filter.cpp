@@ -38,6 +38,7 @@
 #include <algorithm>
 
 #include "private/NormalUtils.hpp"
+#include "private/Comparison.hpp"
 
 namespace pdal
 {
@@ -220,8 +221,8 @@ bool M3C2Filter::calcStats(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
     double sum2 = 0;
     for (KD3Index::RadiusResult& r : pts1)
     {
-        sum += std::sqrt(r.second);
-        sum2 += r.second;
+        sum += r.second;
+        sum2 += std::pow(r.second, 2);
     }
     double mean1 = sum / pts1.size();
     // This is a bad variance calcuation from a computational standpoint.
@@ -231,8 +232,8 @@ bool M3C2Filter::calcStats(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
     sum2 = 0;
     for (KD3Index::RadiusResult& r : pts2)
     {
-        sum += std::sqrt(r.second);
-        sum2 += r.second;
+        sum += r.second;
+        sum2 += std::pow(r.second, 2);
     }
     double mean2 = sum / pts2.size();
     double var2 = sum2 / pts2.size() - mean2 * mean2;
@@ -255,36 +256,54 @@ KD3Index::RadiusResults M3C2Filter::filterPoints(Eigen::Vector3d cylCenter,
     Eigen::Vector3d cylNormal, const KD3Index::RadiusResults& pts, const PointView& view)
 {
     KD3Index::RadiusResults validated;
-    for (KD3Index::RadiusResult res : pts)
+    if (!pts.size())
+        return validated;
+    size_t start = 0;
+    Eigen::Vector3d point(view.getFieldAs<double>(Dimension::Id::X, 0),
+        view.getFieldAs<double>(Dimension::Id::Y, 0),
+        view.getFieldAs<double>(Dimension::Id::Z, 0));
+
+    // If the first point is the test point, ignore it.
+    if (Comparison::closeEnough(cylCenter(0), point(0)) &&
+        Comparison::closeEnough(cylCenter(1), point(1)) &&
+        Comparison::closeEnough(cylCenter(2), point(2)))
+        start++;
+    for (size_t pos = start; pos < pts.size(); ++pos)
     {
+        const KD3Index::RadiusResult& res = pts[pos];
         PointId id = res.first;
 
         Eigen::Vector3d point(view.getFieldAs<double>(Dimension::Id::X, id),
             view.getFieldAs<double>(Dimension::Id::Y, id),
             view.getFieldAs<double>(Dimension::Id::Z, id));
-        if (pointPasses(point, cylCenter, cylNormal))
-            validated.push_back(res);
+
+        // Replace the distance to the point with the signed distance of the point
+        // projected onto the centerline (distance from the normal plane).
+        double dist = pointPasses(point, cylCenter, cylNormal);
+        if (!std::isnan(dist))
+            validated.push_back({res.first, dist});
     }
     return validated;
 }
 
-bool M3C2Filter::pointPasses(Eigen::Vector3d point, Eigen::Vector3d cylCenter,
+double M3C2Filter::pointPasses(Eigen::Vector3d point, Eigen::Vector3d cylCenter,
     Eigen::Vector3d cylNormal)
 {
     // Calculate the distance from the point to the line that goes through the cylinder normal
     // vector. Make sure it's less than the cylinder radius.
     Eigen::ParametrizedLine<double, 3> line(cylCenter, cylNormal);
     if (line.squaredDistance(point) > m_p->cylRadius2)
-        return false;
+        return std::numeric_limits<double>::quiet_NaN();
 
     // Calculate the distance from the point to the plane that's parallel to the cylinder's end
     // and goes through the cylinder "center" (our core point). Make sure that's less than
     // the half length of the cylinder.
     Eigen::Hyperplane<double, 3> plane(cylNormal, cylCenter);
-    if (plane.absDistance(point) > m_args->cylHalfLen)
-        return false;
+    double dist = plane.signedDistance(point);
+    if (std::abs(dist) > m_args->cylHalfLen)
+        return std::numeric_limits<double>::quiet_NaN();
 
-    return true;
+    return dist;
 }
 
 } // namespace pdal
