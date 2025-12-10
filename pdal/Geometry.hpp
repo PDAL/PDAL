@@ -103,7 +103,7 @@ public:
     Geometry getRing() const;
 
 protected:
-    struct OGRGeometryDeleter
+    struct PDAL_EXPORT OGRGeometryDeleter
     {
         void operator()(OGRGeometry *geom);
     };
