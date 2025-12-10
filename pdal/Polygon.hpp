@@ -93,7 +93,7 @@ private:
     void removeSmallRings(double tolerance);
     void removeSmallHoles(double tolerance);
 
-    struct PrivateDataDeleter
+    struct PDAL_EXPORT PrivateDataDeleter
     {
         void operator()(PrivateData *pd);
     };
