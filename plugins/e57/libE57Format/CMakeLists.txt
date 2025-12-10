@@ -212,20 +212,6 @@ include( ccache )
 # Formatting
 include( ClangFormat )
 
-# Testing
-option( E57_BUILD_TEST
-    "Build tests"
-    ${E57_BUILDING_SELF}
-)
-
-if ( E57_BUILD_TEST )
-    message( STATUS "[${PROJECT_NAME}] Testing enabled" )
-
-    enable_testing()
-
-    add_subdirectory( test )
-endif()
-
 # CMake package files
 include( GNUInstallDirs )
 set( E57_INSTALL_CMAKEDIR
