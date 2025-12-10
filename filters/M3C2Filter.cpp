@@ -72,7 +72,7 @@ struct M3C2Filter::Private
 static StaticPluginInfo const s_info
 {
     "filters.m3c2",
-    "Fill me in",
+    "Compute the 3D distance between two sets of points based on the M3C2 algorithm",
     "http://pdal.io/stages/filters.m3c2.html"
 };
 
