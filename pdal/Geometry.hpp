@@ -62,16 +62,20 @@ class PDAL_EXPORT Geometry
 public:
     Geometry(const std::string& wkt_or_wkb_or_json,
            SpatialReference ref = SpatialReference());
-    Geometry();
+    Geometry() = default;
     Geometry(const Geometry&);
     Geometry(double x, double y, double z, SpatialReference ref = SpatialReference());
     Geometry(Geometry&&);
-    Geometry(OGRGeometryH g);
-    Geometry(OGRGeometryH g, const SpatialReference& srs);
 
-public:
+    // The redirection to the construct function is to deal with GDAL types changing
+    // depending on debug.
+    Geometry(OGRGeometryH g)
+        { construct(reinterpret_cast<void *>(g)); }
+    Geometry(OGRGeometryH g, const SpatialReference& srs)
+        { construct(reinterpret_cast<void *>(g), srs); }
+
     Geometry& operator=(const Geometry&);
-    virtual ~Geometry();
+    virtual ~Geometry() = default;
 
     OGRGeometryH getOGRHandle()
     { return reinterpret_cast<OGRGeometryH>(m_geom.get()); }
@@ -98,9 +102,15 @@ public:
     double distance(double x, double y, double z) const;
     Geometry getRing() const;
 
-
 protected:
-    std::unique_ptr<OGRGeometry> m_geom;
+    struct OGRGeometryDeleter
+    {
+        void operator()(OGRGeometry *geom);
+    };
+    std::unique_ptr<OGRGeometry, OGRGeometryDeleter> m_geom;
+
+    void construct(void *geom);  // geom is an OGRGeometry handle.
+    void construct(void *geom, const SpatialReference& srs);  // geom is an OGRGeometry handle.
 
     friend PDAL_EXPORT std::ostream& operator<<(std::ostream& ostr,
         const Geometry& p);
