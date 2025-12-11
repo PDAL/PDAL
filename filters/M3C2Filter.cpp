@@ -36,6 +36,7 @@
 
 #include <Eigen/Geometry>
 #include <algorithm>
+#include <numeric>
 
 #include "private/NormalUtils.hpp"
 #include "private/Comparison.hpp"
