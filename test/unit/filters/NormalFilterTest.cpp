@@ -302,7 +302,7 @@ TEST(NormalFilterTest, RadiusSearch)
     Dimension::Id c = table.layout()->findDim("Curvature");
 
     double expected = std::sqrt(2.0) / 2.0;
-    for (auto const& p : *outView)
+    for (const PointRef& p : *outView)
     {
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(nx), 0.0f);
         ASSERT_FLOAT_EQ(p.getFieldAs<float>(ny), (float)-expected);
