@@ -699,48 +699,4 @@ TEST(CopcReaderTest, boundedpreview)
     EXPECT_EQ(pdal::Bounds(bounds).to2d(), pdal::Bounds(bounds3d).to2d());
 }
 
-void testURLs(const std::string& url, const BOX2D& bounds)
-{
-
-    CopcReader reader;
-    {
-        Options options;
-        options.add("bounds", bounds);
-        options.add("filename", url);
-        options.add("resolution", 1000);
-
-        reader.setOptions(options);
-    }
-
-    pdal::QuickInfo qi(reader.preview());
-    EXPECT_EQ(61201, qi.m_pointCount);
-
-    pdal::BOX3D bounds3d = qi.m_bounds;
-    EXPECT_EQ(pdal::Bounds(bounds).to2d(), pdal::Bounds(bounds3d).to2d());
-
-}
-
-
-TEST(CopcReaderTest, vsi)
-{
-
-    /*
-          "maxx": 639003.73,
-          "maxy": 853534.37,
-          "maxz": 615.26,
-          "minx": 635579.2,
-          "miny": 848887.49,
-          "minz": 406.56
-    */
-
-    BOX2D bounds(635700,848900, 637000, 853300);
-    std::string url( "https://github.com/PDAL/data/raw/refs/heads/main/autzen/autzen-classified.copc.laz");
-    std::string vsi ("/vsicurl/"+url);
-
-    testURLs(url, bounds);
-    testURLs(vsi, bounds);
-
-
-}
-
 } // namespace pdal

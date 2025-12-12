@@ -202,6 +202,13 @@ PDAL_ADD_TEST(pdal_io_copc_reader_test
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
+PDAL_ADD_TEST(pdal_io_copc_remote_reader_test
+    FILES
+        io/CopcRemoteReaderTest.cpp
+        ${PDAL_SRC_DIR}/private/OGRSpec.cpp
+    INCLUDES
+        ${NLOHMANN_INCLUDE_DIR}
+)
 PDAL_ADD_TEST(pdal_io_copc_writer_test
     FILES
         io/CopcWriterTest.cpp
