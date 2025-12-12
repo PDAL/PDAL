@@ -77,7 +77,6 @@ public:
         if (!variable)
         {
             uint64_t remaining = m_numPoints;
-std::cerr << "Chunk size = " << chunkSize << "!\n";
             for (lazperf::chunk& chunk : m_chunks)
             {
                 chunk.count = (std::min)((uint64_t)chunkSize, remaining);
