@@ -64,7 +64,11 @@ Point::Point(
         double beamDirectionY,
         double beamDirectionZ,
         float roll,
-        float pitch)
+        float pitch,
+        double shotTimestamp,
+        unsigned int facet,
+        unsigned int segment,
+        double unambiguousRange)
     : target(target)
     , returnNumber(returnNumber)
     , numberOfReturns(numberOfReturns)
@@ -77,6 +81,10 @@ Point::Point(
     , beamDirectionZ(beamDirectionZ)
     , roll(roll)
     , pitch(pitch)
+    , shotTimestamp(shotTimestamp)
+    , facet(facet)
+    , segment(segment)
+    , unambiguousRange(unambiguousRange)
 {}
 
 
@@ -84,17 +92,21 @@ RxpPointcloud::RxpPointcloud(
         const std::string& uri,
         bool syncToPps,
         bool reflectanceAsIntensity,
+        bool emitEmptyShots,
         float minReflectance,
         float maxReflectance,
-        PointTableRef table)
+    PointTableRef table)
     : scanlib::pointcloud(syncToPps)
     , m_syncToPps(syncToPps)
     , m_reflectanceAsIntensity(reflectanceAsIntensity)
+    , m_emitEmptyShots(emitEmptyShots)
     , m_minReflectance(minReflectance)
     , m_maxReflectance(maxReflectance)
     , m_rc(scanlib::basic_rconnection::create(uri))
     , m_dec(m_rc)
     , m_edge(false)
+    , m_lastSegment(0)
+    , m_rotationId(0)
 {}
 
 
@@ -140,27 +152,18 @@ void RxpPointcloud::savePoints() {
 
 void RxpPointcloud::copyPoint(const Point& from, PointRef& to) const {
     using namespace Dimension;
+
+
     to.setField(Id::X, from.target.vertex[0]);
     to.setField(Id::Y, from.target.vertex[1]);
     to.setField(Id::Z, from.target.vertex[2]);
-    to.setField(getTimeDimensionId(m_syncToPps), from.target.time);
+    to.setField(Id::EchoRange, from.target.echo_range);
     to.setField(Id::Amplitude, from.target.amplitude);
     to.setField(Id::Reflectance, from.target.reflectance);
-    to.setField(Id::ReturnNumber, from.returnNumber);
-    to.setField(Id::NumberOfReturns, from.numberOfReturns);
-    to.setField(Id::EchoRange, from.target.echo_range);
     to.setField(Id::Deviation, from.target.deviation);
     to.setField(Id::BackgroundRadiation, from.target.background_radiation);
     to.setField(Id::IsPpsLocked, from.target.is_pps_locked);
-    to.setField(Id::EdgeOfFlightLine, from.edgeOfFlightLine ? 1 : 0);
-    to.setField(Id::BeamDirectionX, from.beamDirectionX);
-    to.setField(Id::BeamDirectionY, from.beamDirectionY);
-    to.setField(Id::BeamDirectionZ, from.beamDirectionZ);
-    to.setField(Id::BeamOriginX, from.beamOriginX);
-    to.setField(Id::BeamOriginY, from.beamOriginY);
-    to.setField(Id::BeamOriginZ, from.beamOriginZ);
-    to.setField(Id::Roll, from.roll);
-    to.setField(Id::Pitch, from.pitch);
+    to.setField(getTimeDimensionId(m_syncToPps), from.target.time);
 
     if (m_reflectanceAsIntensity) {
         uint16_t intensity;
@@ -174,33 +177,31 @@ void RxpPointcloud::copyPoint(const Point& from, PointRef& to) const {
         }
         to.setField(Id::Intensity, intensity);
     }
+    
+    // Shot metadata (always valid)
+    to.setField(Id::ShotTimestamp, from.shotTimestamp);
+    to.setField(Id::Segment, from.segment);
+    to.setField(Id::Facet, from.facet);
+    to.setField(Id::UnambiguousRange, from.unambiguousRange);
+    to.setField(Id::ReturnNumber, from.returnNumber);
+    to.setField(Id::NumberOfReturns, from.numberOfReturns);
+    to.setField(Id::EdgeOfFlightLine, from.edgeOfFlightLine ? 1 : 0);
+
+    to.setField(Id::BeamDirectionX, from.beamDirectionX);
+    to.setField(Id::BeamDirectionY, from.beamDirectionY);
+    to.setField(Id::BeamDirectionZ, from.beamDirectionZ);
+    to.setField(Id::BeamOriginX, from.beamOriginX);
+    to.setField(Id::BeamOriginY, from.beamOriginY);
+    to.setField(Id::BeamOriginZ, from.beamOriginZ);
+    to.setField(Id::Roll, from.roll);
+    to.setField(Id::Pitch, from.pitch);
+
 }
 
 
 bool RxpPointcloud::endOfInput() const
 {
     return m_dec.eoi();
-}
-
-
-void RxpPointcloud::on_echo_transformed(echo_type echo)
-{
-    if (!(scanlib::pointcloud::single == echo || scanlib::pointcloud::last == echo))
-    {
-        // Come back later, when we've got all the echos
-        return;
-    }
-
-    unsigned int returnNumber = 1;
-    for (scanlib::pointcloud::target_count_type i = 0; i < target_count; ++i, ++returnNumber)
-    {
-        //Only first return is marked as edge of flight line
-        m_points.emplace_back(targets[i], returnNumber, target_count, m_edge, beam_origin[0],
-        beam_origin[1], beam_origin[2], beam_direction[0], beam_direction[1], beam_direction[2],
-        m_roll, m_pitch);
-        if (m_edge)
-            m_edge = false;
-    }
 }
 
 void RxpPointcloud::on_line_start_up(const scanlib::line_start_up<iterator_type> & arg)
@@ -215,10 +216,79 @@ void RxpPointcloud::on_line_start_dn(const scanlib::line_start_dn<iterator_type>
     m_edge = true;
 }
 
+void RxpPointcloud::on_line_stop(const scanlib::line_stop<iterator_type> & arg)
+{
+    scanlib::pointcloud::on_line_stop(arg);
+    m_edge = true;
+}
+
 void RxpPointcloud::on_hk_incl(const scanlib::hk_incl<iterator_type>& arg) {
     scanlib::pointcloud::on_hk_incl(arg);
     m_roll = (float)arg.ROLL * 0.001;
     m_pitch = (float)arg.PITCH * 0.001;
+}
+
+void RxpPointcloud::on_shot_end()
+{
+    if (segment < m_lastSegment)
+    {
+        m_rotationId++;
+        m_edge = true;
+    }
+    m_lastSegment = segment;
+    
+    unsigned int returnNumber = 1;
+    for (scanlib::pointcloud::target_count_type i = 0; i < target_count; ++i, ++returnNumber)
+    {
+        m_points.emplace_back(
+            targets[i], returnNumber, target_count, m_edge,
+            beam_origin[0], beam_origin[1], beam_origin[2],
+            beam_direction[0], beam_direction[1], beam_direction[2],
+            m_roll, m_pitch,
+            time, facet, segment, unambiguous_range);
+        if (m_edge)
+            m_edge = false;
+    }
+}
+
+void RxpPointcloud::on_gap()
+{
+    
+    if (segment < m_lastSegment)
+    {
+        m_rotationId++;
+        m_edge = true;
+    }
+    m_lastSegment = segment;
+    
+    if (!m_emitEmptyShots)
+        return;
+    
+    // Create empty target with NaN for invalid measurements
+    // Keep valid metadata (timestamps, beam geometry) for shot identification
+    scanlib::target emptyTarget;
+    emptyTarget.vertex[0] = std::numeric_limits<double>::quiet_NaN();
+    emptyTarget.vertex[1] = std::numeric_limits<double>::quiet_NaN();
+    emptyTarget.vertex[2] = std::numeric_limits<double>::quiet_NaN();
+    emptyTarget.echo_range = std::numeric_limits<double>::quiet_NaN();
+    emptyTarget.amplitude = std::numeric_limits<float>::quiet_NaN();
+    emptyTarget.reflectance = std::numeric_limits<float>::quiet_NaN();
+    emptyTarget.deviation = std::numeric_limits<float>::quiet_NaN();
+    emptyTarget.background_radiation = std::numeric_limits<float>::quiet_NaN();
+    emptyTarget.is_pps_locked = 0;
+    emptyTarget.time = time; 
+    emptyTarget.time_sorg = time_sorg;
+    emptyTarget.segment = segment;
+    emptyTarget.facet = facet;
+    
+    m_points.emplace_back(
+        emptyTarget, 0, 0, m_edge,
+        beam_origin[0], beam_origin[1], beam_origin[2],
+        beam_direction[0], beam_direction[1], beam_direction[2],
+        m_roll, m_pitch,
+        time, facet, segment, unambiguous_range);
+    if (m_edge)
+        m_edge = false;
 }
 
 } //pdal
