@@ -240,6 +240,8 @@ void RxpPointcloud::on_shot_end()
     unsigned int returnNumber = 1;
     for (scanlib::pointcloud::target_count_type i = 0; i < target_count; ++i, ++returnNumber)
     {
+        if (m_syncToPps && !targets[i].is_pps_locked)
+            continue; // skip points that are not PPS locked when sync is required
         m_points.emplace_back(
             targets[i], returnNumber, target_count, m_edge,
             beam_origin[0], beam_origin[1], beam_origin[2],
