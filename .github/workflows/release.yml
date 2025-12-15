@@ -59,7 +59,7 @@ jobs:
          done
       working-directory: ./build
 
-    - uses: actions/upload-artifact@v5
+    - uses: actions/upload-artifact@v6
       name: Gather source distribution artifact
       with:
         name: source-package-ubuntu-latest
