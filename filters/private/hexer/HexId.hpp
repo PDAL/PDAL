@@ -11,7 +11,7 @@ struct HexId : public CoordIJ
 
 inline bool operator<(HexId const& c1, HexId const& c2)
 {
-    return (c1.i < c2.i) || ((c1.i == c2.i) && (c1.j < c2.j));
+    return ((c1.j < c2.j) || ((c1.j == c2.j) && c1.i < c2.i));
 }
 
 inline bool operator == (const HexId& h1, const HexId& h2)
