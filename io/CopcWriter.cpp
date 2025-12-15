@@ -125,6 +125,8 @@ void CopcWriter::addArgs(ProgramArgs& args)
     args.add("vlrs", "List of VLRs to set", b->opts.userVlrs);
     args.add("pipeline", "Emit a JSON-represetation of the pipeline as a VLR",
         b->opts.emitPipeline);
+    args.add("pdal_metadata", "Emit a JSON-represetation of the pipeline's metadata as a VLR",
+        b->opts.emitPipeline);
     args.add("fixed_seed", "Fix the random seed", b->opts.fixedSeed).setHidden();
     args.add("a_srs", "Spatial reference to use to write output", b->opts.aSrs);
     args.add("threads", "", b->opts.threadCount).setHidden();
@@ -331,6 +333,15 @@ void CopcWriter::handlePipelineVlr()
     las::Evlr v(las::PdalUserId, las::PdalPipelineRecordId, "PDAL pipeline", std::move(data));
     b->vlrs.push_back(v);
 }
+
+void CopcWriter::handleMetadataVLR(MetadataNode& forward)
+{
+    std::string json = Utils::toJSON(forward);
+    std::vector<char> data(json.begin(), json.end());
+    las::Evlr v(las::PdalUserId, las::PdalMetadataRecordId, "PDAL metadata", std::move(data));
+    b->vlrs.push_back(v);
+}
+
 
 void CopcWriter::handleUserVlrs(MetadataNode m)
 {

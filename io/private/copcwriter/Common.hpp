@@ -106,6 +106,7 @@ struct Options
     StringHeaderVal<0> offsetZ;
     std::vector<las::Evlr> userVlrs;
     bool emitPipeline;
+    bool emitMetadata;
     bool fixedSeed;
     pdal::SpatialReference aSrs;
     int threadCount = 10;
