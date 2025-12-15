@@ -135,14 +135,14 @@ void BaseGrid::findShape(HexId root)
             setMinCoord(pathHex);
         }
         // adds the first point of the segment to the path
-        Point p = findPoint(cur);
-        path.addPoint(p);
+        path.addPoint(findPoint(cur));
         cur = nextSegment(cur);
 
         // left.hex: the hexagon we would "walk into" moving clockwise from the
         // current segment.
     } while (cur != first);
 
+    // The first point and last point must be the same.
     path.addPoint(findPoint(cur));
 }
 
