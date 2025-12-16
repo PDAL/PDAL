@@ -682,16 +682,6 @@
     "description": "Precise timestamp of laser shot in seconds (GpsTime or InternalTime depending on sync_to_pps)."
     },
     {
-    "name": "Segment",
-    "type": "uint16",
-    "description": "The current segment, usually some partitioning of the angle range covered by the scanner mirror."
-    },
-    {
-    "name": "Facet",
-    "type": "uint16",
-    "description": "The current facet of the polygonal mirror."
-    },
-    {
     "name": "UnambiguousRange",
     "type": "double",
     "description": "MTA zone width (unambiguous range) in meters. Required for zone correction calculation."

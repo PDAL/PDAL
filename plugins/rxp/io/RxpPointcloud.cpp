@@ -66,8 +66,6 @@ Point::Point(
         float roll,
         float pitch,
         double shotTimestamp,
-        unsigned int facet,
-        unsigned int segment,
         double unambiguousRange)
     : target(target)
     , returnNumber(returnNumber)
@@ -82,8 +80,6 @@ Point::Point(
     , roll(roll)
     , pitch(pitch)
     , shotTimestamp(shotTimestamp)
-    , facet(facet)
-    , segment(segment)
     , unambiguousRange(unambiguousRange)
 {}
 
@@ -98,6 +94,7 @@ RxpPointcloud::RxpPointcloud(
     PointTableRef table)
     : scanlib::pointcloud(syncToPps)
     , m_syncToPps(syncToPps)
+    , m_ppsSynced(false)
     , m_reflectanceAsIntensity(reflectanceAsIntensity)
     , m_emitEmptyShots(emitEmptyShots)
     , m_minReflectance(minReflectance)
@@ -105,8 +102,6 @@ RxpPointcloud::RxpPointcloud(
     , m_rc(scanlib::basic_rconnection::create(uri))
     , m_dec(m_rc)
     , m_edge(false)
-    , m_lastSegment(0)
-    , m_rotationId(0)
 {}
 
 
@@ -135,7 +130,7 @@ bool RxpPointcloud::readSavedPoint(PointRef& point)
     } else {
         return false;
     }
-};
+}
 
 
 void RxpPointcloud::savePoints() {
@@ -147,6 +142,17 @@ void RxpPointcloud::savePoints() {
         dispatch(m_rxpbuf.begin(), m_rxpbuf.end());
         if (!m_points.empty()) return;
     }
+}
+
+
+void RxpPointcloud::on_pps_synchronized()
+{
+    m_ppsSynced = true;
+}
+
+void RxpPointcloud::on_pps_sync_lost()
+{
+    m_ppsSynced = false;
 }
 
 
@@ -180,8 +186,6 @@ void RxpPointcloud::copyPoint(const Point& from, PointRef& to) const {
     
     // Shot metadata (always valid)
     to.setField(Id::ShotTimestamp, from.shotTimestamp);
-    to.setField(Id::Segment, from.segment);
-    to.setField(Id::Facet, from.facet);
     to.setField(Id::UnambiguousRange, from.unambiguousRange);
     to.setField(Id::ReturnNumber, from.returnNumber);
     to.setField(Id::NumberOfReturns, from.numberOfReturns);
@@ -204,11 +208,13 @@ bool RxpPointcloud::endOfInput() const
     return m_dec.eoi();
 }
 
+
 void RxpPointcloud::on_line_start_up(const scanlib::line_start_up<iterator_type> & arg)
 {
     scanlib::pointcloud::on_line_start_up(arg);
     m_edge = true;
 }
+
 
 void RxpPointcloud::on_line_start_dn(const scanlib::line_start_dn<iterator_type> & arg)
 {
@@ -216,11 +222,13 @@ void RxpPointcloud::on_line_start_dn(const scanlib::line_start_dn<iterator_type>
     m_edge = true;
 }
 
+
 void RxpPointcloud::on_line_stop(const scanlib::line_stop<iterator_type> & arg)
 {
     scanlib::pointcloud::on_line_stop(arg);
     m_edge = true;
 }
+
 
 void RxpPointcloud::on_hk_incl(const scanlib::hk_incl<iterator_type>& arg) {
     scanlib::pointcloud::on_hk_incl(arg);
@@ -228,69 +236,57 @@ void RxpPointcloud::on_hk_incl(const scanlib::hk_incl<iterator_type>& arg) {
     m_pitch = (float)arg.PITCH * 0.001;
 }
 
+
 void RxpPointcloud::on_shot_end()
-{
-    if (segment < m_lastSegment)
+{   
+    // Detect empty shots (no returns) when enabled
+    // Only emit if time is valid (not NaN) - NaN time indicates sync loss
+    if (m_emitEmptyShots && target_count == 0)
     {
-        m_rotationId++;
-        m_edge = true;
-    }
-    m_lastSegment = segment;
-    
-    unsigned int returnNumber = 1;
-    for (scanlib::pointcloud::target_count_type i = 0; i < target_count; ++i, ++returnNumber)
-    {
-        if (m_syncToPps && !targets[i].is_pps_locked)
-            continue; // skip points that are not PPS locked when sync is required
+        if (m_syncToPps && !m_ppsSynced)
+            return; // skip empty shots when PPS sync is required but not achieved
+        // Create empty target with NaN for invalid measurements
+        // Keep valid metadata (timestamps, beam geometry) for shot identification
+        scanlib::target emptyTarget;
+        emptyTarget.vertex[0] = beam_origin[0];
+        emptyTarget.vertex[1] = beam_origin[1];
+        emptyTarget.vertex[2] = beam_origin[2];
+        emptyTarget.echo_range = 0;
+        emptyTarget.amplitude = 0;
+        emptyTarget.reflectance = 0;
+        emptyTarget.deviation = 0;
+        emptyTarget.background_radiation = 0;
+        emptyTarget.is_pps_locked = false;
+        emptyTarget.time = time;
+        emptyTarget.time_sorg = time_sorg;
         m_points.emplace_back(
-            targets[i], returnNumber, target_count, m_edge,
+            emptyTarget, 0, 0, m_edge,
             beam_origin[0], beam_origin[1], beam_origin[2],
             beam_direction[0], beam_direction[1], beam_direction[2],
             m_roll, m_pitch,
-            time, facet, segment, unambiguous_range);
+            time, unambiguous_range);
+        
         if (m_edge)
             m_edge = false;
     }
+    else
+    {
+        unsigned int returnNumber = 1;
+        for (scanlib::pointcloud::target_count_type i = 0; i < target_count; ++i, ++returnNumber)
+        {
+            if (m_syncToPps && !targets[i].is_pps_locked)
+                continue; // skip points that are not PPS locked when sync is required
+            m_points.emplace_back(
+                targets[i], returnNumber, target_count, m_edge,
+                beam_origin[0], beam_origin[1], beam_origin[2],
+                beam_direction[0], beam_direction[1], beam_direction[2],
+                m_roll, m_pitch,
+                time, unambiguous_range);
+            if (m_edge)
+                m_edge = false;
+        }
+    }
 }
 
-void RxpPointcloud::on_gap()
-{
-    
-    if (segment < m_lastSegment)
-    {
-        m_rotationId++;
-        m_edge = true;
-    }
-    m_lastSegment = segment;
-    
-    if (!m_emitEmptyShots)
-        return;
-    
-    // Create empty target with NaN for invalid measurements
-    // Keep valid metadata (timestamps, beam geometry) for shot identification
-    scanlib::target emptyTarget;
-    emptyTarget.vertex[0] = std::numeric_limits<double>::quiet_NaN();
-    emptyTarget.vertex[1] = std::numeric_limits<double>::quiet_NaN();
-    emptyTarget.vertex[2] = std::numeric_limits<double>::quiet_NaN();
-    emptyTarget.echo_range = std::numeric_limits<double>::quiet_NaN();
-    emptyTarget.amplitude = std::numeric_limits<float>::quiet_NaN();
-    emptyTarget.reflectance = std::numeric_limits<float>::quiet_NaN();
-    emptyTarget.deviation = std::numeric_limits<float>::quiet_NaN();
-    emptyTarget.background_radiation = std::numeric_limits<float>::quiet_NaN();
-    emptyTarget.is_pps_locked = 0;
-    emptyTarget.time = time; 
-    emptyTarget.time_sorg = time_sorg;
-    emptyTarget.segment = segment;
-    emptyTarget.facet = facet;
-    
-    m_points.emplace_back(
-        emptyTarget, 0, 0, m_edge,
-        beam_origin[0], beam_origin[1], beam_origin[2],
-        beam_direction[0], beam_direction[1], beam_direction[2],
-        m_roll, m_pitch,
-        time, facet, segment, unambiguous_range);
-    if (m_edge)
-        m_edge = false;
-}
 
 } //pdal

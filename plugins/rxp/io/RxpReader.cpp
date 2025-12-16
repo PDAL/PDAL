@@ -84,8 +84,6 @@ Dimension::IdList getRxpDimensions(bool syncToPps, bool reflectanceAsIntensity)
     ids.push_back(Id::Roll);
     ids.push_back(Id::Pitch);
     ids.push_back(Id::ShotTimestamp);
-    ids.push_back(Id::Facet);
-    ids.push_back(Id::Segment);
     ids.push_back(Id::UnambiguousRange);
     if (reflectanceAsIntensity) {
         ids.push_back(Id::Intensity);
