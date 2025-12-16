@@ -56,7 +56,6 @@ namespace pdal
 const bool DEFAULT_SYNC_TO_PPS = true;
 const bool DEFAULT_IS_RDTP = false;
 const bool DEFAULT_EMPIT_EMPTY_SHOTS = false;
-const bool DEFAULT_MINIMAL = false;
 const bool DEFAULT_REFLECTANCE_AS_INTENSITY = true;
 const float DEFAULT_MIN_REFLECTANCE = -25.0;
 const float DEFAULT_MAX_REFLECTANCE = 5.0;

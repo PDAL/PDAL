@@ -68,8 +68,6 @@ struct Point {
         float roll,
         float pitch,
         double shotTimestamp,
-        unsigned int facet,
-        unsigned int segment,
         double unambiguousRange);
 
     scanlib::target target;
@@ -80,8 +78,6 @@ struct Point {
     double beamDirectionX, beamDirectionY, beamDirectionZ;
     float roll, pitch;
     double shotTimestamp;
-    unsigned int facet;      // Mirror facet index
-    unsigned int segment;    // Mirror segment partition index
     double unambiguousRange;
 };
 
@@ -109,7 +105,8 @@ public:
 
 protected:
     void on_shot_end();
-    void on_gap();
+    void on_pps_synchronized();
+    void on_pps_sync_lost();
     void on_line_start_up(const scanlib::line_start_up<iterator_type> & arg);
     void on_line_start_dn(const scanlib::line_start_dn<iterator_type> & arg);
     void on_line_stop(const scanlib::line_stop<iterator_type> & arg);
@@ -121,7 +118,9 @@ private:
     void savePoints();
 
     bool m_syncToPps;
+    bool m_ppsSynced;
     bool m_reflectanceAsIntensity;
+    bool m_emitEmptyShots;
     float m_minReflectance;
     float m_maxReflectance;
     std::shared_ptr<scanlib::basic_rconnection> m_rc;
@@ -131,10 +130,6 @@ private:
     std::deque<Point> m_points;
     float m_pitch;
     float m_roll;
-    bool m_emitEmptyShots;
-    unsigned int m_lastSegment;
-    uint32_t m_rotationId;
-
 };
 
 
