@@ -675,5 +675,15 @@
     "name": "Duplicate",
     "type": "uint8",
     "description": "Indicator of whether or not a point is a labeled duplicate"
+    },
+    {
+    "name": "ShotTimestamp",
+    "type": "double",
+    "description": "Precise timestamp of laser shot in seconds (GpsTime or InternalTime depending on sync_to_pps)."
+    },
+    {
+    "name": "UnambiguousRange",
+    "type": "double",
+    "description": "MTA zone width (unambiguous range) in meters. Required for zone correction calculation."
     }
 ] }
