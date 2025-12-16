@@ -224,7 +224,8 @@ TEST(HexbinFilterTest, H3Grid_issue_2507)
     EXPECT_EQ(s, test);
 }
 
-TEST(HexbinFilterTest, smooth_alignment_test)
+// Checks that boundary vertices are correct for a smoothed hexbin
+TEST(HexbinFilterTest, issue_4899)
 {
     LasReader r;
     Options ro;
