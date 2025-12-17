@@ -46,8 +46,6 @@ namespace georeference
 class LocalCartesian
 {
     PJ_CONTEXT* m_ctx;
-    PJ* m_source2ecef;
-    PJ* m_deg2rad;
     PJ* m_ecef2enu;
 
 public:
