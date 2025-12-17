@@ -65,6 +65,10 @@ time_offset
 
 : timestamp offset between trajectory and scanner GpsTime. \[Default: 0\]
 
+transform_beam 
+
+: transform `BeamOrigin*` and `BeamDirection*` dimensions. \[Default: false\]
+
 coordinate_system
 
 : Two right-handed variants exist for Local tangent plane coordinates: east, north, up (ENU) coordinates and north, east, down (NED). \[Default : NED\]
