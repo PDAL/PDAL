@@ -55,8 +55,10 @@ public:
     ~LocalCartesian();
 
     void reset(double lat0, double lon0, double h0 = 0.0);
-    void forward(PointRef& point);
-    void reverse(PointRef& point);
+    void forward(double& x, double& y, double& z) const;
+    void forward(PointRef& point) const;
+    void reverse(double& x, double& y, double& z) const;
+    void reverse(PointRef& point) const;
 };
 }; // namespace georeference
 }; // namespace pdal
