@@ -4,7 +4,7 @@
 
 The **georeference filter** georeferences point cloud expressed in scanner coordinates,
 using `GpsTime` Dimension as a synchronisation reference with a given trajectory, into 
-ECEF (in ECEF coordiantes) coordinates. See [proj article](https://proj.org/en/stable/operations/conversions/topocentric.html).
+ECEF (Earth Centered Earth Fixed) coordinates. See [proj article](https://proj.org/en/stable/operations/conversions/topocentric.html).
 
 ```{eval-rst}
 .. streamable::
