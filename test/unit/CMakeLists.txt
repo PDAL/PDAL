@@ -51,6 +51,7 @@ PDAL_ADD_TEST(pdal_io_vsi_test
     LINK_WITH
         GDAL::GDAL
 )
+PDAL_ADD_TEST(pdal_georeference_test FILES GeoreferenceTest.cpp)
 PDAL_ADD_TEST(pdal_kdindex_test
     FILES
         KDIndexTest.cpp
@@ -334,7 +335,7 @@ endif()
 #
 # sources for the native filters
 #
-PDAL_ADD_TEST(pdal_georeference_test FILES filters/GeoreferenceTest.cpp)
+PDAL_ADD_TEST(pdal_georeference_test FILES filters/GeoreferenceFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_assign_test FILES filters/AssignFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_chipper_test
     FILES

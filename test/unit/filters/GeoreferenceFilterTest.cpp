@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Peter J. Gadomski <pete.gadomski@gmail.com>
+* Copyright (c) 2025, Guilhem Villemin <guilhem.villemin@altametris.com>
 *
 * All rights reserved.
 *
@@ -46,94 +46,6 @@
 #include "Support.hpp"
 
 #include <cmath>
-
-namespace pdal
-{
-namespace georeference
-{
-
-
-TEST(RotationMatrix, Constructor)
-{
-    RotationMatrix matrix(1, 0, 0, 0, 1, 0, 0, 0, 1);
-    EXPECT_DOUBLE_EQ(1, matrix.m00);
-    EXPECT_DOUBLE_EQ(0, matrix.m01);
-    EXPECT_DOUBLE_EQ(0, matrix.m01);
-    EXPECT_DOUBLE_EQ(0, matrix.m10);
-    EXPECT_DOUBLE_EQ(1, matrix.m11);
-    EXPECT_DOUBLE_EQ(0, matrix.m12);
-    EXPECT_DOUBLE_EQ(0, matrix.m20);
-    EXPECT_DOUBLE_EQ(0, matrix.m21);
-    EXPECT_DOUBLE_EQ(1, matrix.m22);
-}
-
-
-TEST(RotationMatrix, IdentityMatrix)
-{
-    RotationMatrix matrix = createIdentityMatrix();
-    EXPECT_DOUBLE_EQ(1, matrix.m00);
-    EXPECT_DOUBLE_EQ(0, matrix.m01);
-    EXPECT_DOUBLE_EQ(0, matrix.m01);
-    EXPECT_DOUBLE_EQ(0, matrix.m10);
-    EXPECT_DOUBLE_EQ(1, matrix.m11);
-    EXPECT_DOUBLE_EQ(0, matrix.m12);
-    EXPECT_DOUBLE_EQ(0, matrix.m20);
-    EXPECT_DOUBLE_EQ(0, matrix.m21);
-    EXPECT_DOUBLE_EQ(1, matrix.m22);
-}
-
-
-TEST(Georeference, Zeros)
-{
-    Xyz point = georeferenceWgs84(0, 0, createIdentityMatrix(),
-                                  createIdentityMatrix(), Xyz(0, 0, 0));
-    EXPECT_DOUBLE_EQ(0, point.X);
-    EXPECT_DOUBLE_EQ(0, point.Y);
-    EXPECT_DOUBLE_EQ(0, point.Z);
-}
-
-
-TEST(Georeference, LatLonElev)
-{
-    Xyz point = georeferenceWgs84(0, 0, createIdentityMatrix(),
-                                  createIdentityMatrix(), Xyz(1, 2, 3));
-    EXPECT_DOUBLE_EQ(1, point.X);
-    EXPECT_DOUBLE_EQ(2, point.Y);
-    EXPECT_DOUBLE_EQ(3, point.Z);
-}
-
-
-TEST(Georeference, Range)
-{
-    Xyz point = georeferenceWgs84(3, 0, createIdentityMatrix(),
-                                  createIdentityMatrix(), Xyz(1, 2, 3));
-    EXPECT_DOUBLE_EQ(1, point.X);
-    EXPECT_DOUBLE_EQ(2, point.Y);
-    EXPECT_DOUBLE_EQ(0, point.Z);
-}
-
-
-TEST(Georeference, RangeAndAngle)
-{
-    Xyz point = georeferenceWgs84(3, M_PI / 2, createIdentityMatrix(),
-                                  createIdentityMatrix(), Xyz(1, 2, 3));
-    EXPECT_DOUBLE_EQ(0.9999988728659957, point.X);
-    EXPECT_DOUBLE_EQ(2, point.Y);
-    EXPECT_DOUBLE_EQ(3, point.Z);
-}
-
-
-TEST(Georeference, WithImu)
-{
-    RotationMatrix imuMatrix(0, 1, 0, 0, 0, -1, -1, 0, 0);
-    Xyz point =
-        georeferenceWgs84(3, 0, imuMatrix, createIdentityMatrix(), Xyz(1, 2, 3));
-    EXPECT_DOUBLE_EQ(1, point.X);
-    EXPECT_DOUBLE_EQ(2.0000004696006983, point.Y);
-    EXPECT_DOUBLE_EQ(3, point.Z);
-}
-} // namespace georeference
-} // namespace pdal
 
 namespace pdal
 {
