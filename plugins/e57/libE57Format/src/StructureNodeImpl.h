@@ -1,7 +1,6 @@
-#ifndef STRUCTURENODEIMPL_H
-#define STRUCTURENODEIMPL_H
 /*
- * Copyright 2009 - 2010 Kevin Ackley (kackley@gwi.net)
+ * Original work Copyright 2009 - 2010 Kevin Ackley (kackley@gwi.net)
+ * Modified work Copyright 2018 - 2020 Andy Maloney <asmaloney@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person or organization
  * obtaining a copy of the software and accompanying documentation covered by
@@ -26,46 +25,50 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#pragma once
+
 #include "NodeImpl.h"
 
-namespace e57 {
-
-class StructureNodeImpl : public NodeImpl
+namespace e57
 {
-public:
-    StructureNodeImpl(ImageFileImplWeakPtr destImageFile);
-    ~StructureNodeImpl()  override = default;
 
-    NodeType    type() const override;
-    bool        isTypeEquivalent(NodeImplSharedPtr ni) override;
-    bool        isDefined(const ustring& pathName) override;
-    void        setAttachedRecursive() override;
+   class StructureNodeImpl : public NodeImpl
+   {
+   public:
+      explicit StructureNodeImpl( ImageFileImplWeakPtr destImageFile );
+      ~StructureNodeImpl() override = default;
 
-    virtual int64_t     childCount() const;
+      NodeType type() const override;
+      bool isTypeEquivalent( NodeImplSharedPtr ni ) override;
+      bool isDefined( const ustring &pathName ) override;
+      void setAttachedRecursive() override;
 
-    virtual NodeImplSharedPtr  get(int64_t index);
-    NodeImplSharedPtr          get(const ustring& pathName) override;
+      virtual int64_t childCount() const;
 
-    virtual void  set(int64_t index, NodeImplSharedPtr ni);
-    void          set(const ustring& pathName, NodeImplSharedPtr ni, bool autoPathCreate = false) override;
-    void          set(const StringList &fields, unsigned level, NodeImplSharedPtr ni, bool autoPathCreate = false) override;
-    virtual void  append(NodeImplSharedPtr ni);
+      virtual NodeImplSharedPtr get( int64_t index );
+      NodeImplSharedPtr get( const ustring &pathName ) override;
 
-    void        checkLeavesInSet(const StringSet &pathNames, NodeImplSharedPtr origin) override;
+      virtual void set( int64_t index, NodeImplSharedPtr ni );
+      void set( const ustring &pathName, NodeImplSharedPtr ni,
+                bool autoPathCreate = false ) override;
+      void set( const StringList &fields, unsigned level, NodeImplSharedPtr ni,
+                bool autoPathCreate = false ) override;
+      virtual void append( NodeImplSharedPtr ni );
 
-    void        writeXml(ImageFileImplSharedPtr imf, CheckedFile& cf, int indent, const char* forcedFieldName=nullptr) override;
+      void checkLeavesInSet( const StringSet &pathNames, NodeImplSharedPtr origin ) override;
 
-#ifdef E57_DEBUG
-    void    dump(int indent = 0, std::ostream& os = std::cout) const override;
+      void writeXml( ImageFileImplSharedPtr imf, CheckedFile &cf, int indent,
+                     const char *forcedFieldName = nullptr ) override;
+
+#ifdef E57_ENABLE_DIAGNOSTIC_OUTPUT
+      void dump( int indent = 0, std::ostream &os = std::cout ) const override;
 #endif
 
-protected:
-    friend class CompressedVectorReaderImpl;
-    NodeImplSharedPtr lookup(const ustring& pathName) override;
+   protected:
+      friend class CompressedVectorReaderImpl;
 
-    std::vector<NodeImplSharedPtr> children_;
-};
+      NodeImplSharedPtr lookup( const ustring &pathName ) override;
 
+      std::vector<NodeImplSharedPtr> children_;
+   };
 }
-
-#endif

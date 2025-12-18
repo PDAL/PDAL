@@ -46,7 +46,6 @@
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/private/MathUtils.hpp>
-#include <filters/private/NormalUtils.hpp>
 
 #include <Eigen/Dense>
 
@@ -152,7 +151,7 @@ void NormalFilter::compute(PointView& view, KD3Index& kdi)
     log()->get(LogLevel::Debug) << "Computing normal vectors\n";
     for (auto&& p : view)
     {
-        NormalResult result;
+        math::NormalResult result;
 
         // Perform eigen decomposition of covariance matrix computed from
         // neighborhood composed of k-nearest neighbors, or within radius.
@@ -178,11 +177,10 @@ void NormalFilter::compute(PointView& view, KD3Index& kdi)
             double dx = m_args->m_viewpoint.x() - p.getFieldAs<double>(Id::X);
             double dy = m_args->m_viewpoint.y() - p.getFieldAs<double>(Id::Y);
             double dz = m_args->m_viewpoint.z() - p.getFieldAs<double>(Id::Z);
-            Vector3d vp(dx, dy, dz);
-            result.orientViewpoint(vp);
+            result.normal = math::orientToViewpoint({ dx, dy, dz }, result.normal);
         }
         else if (m_args->m_up)
-            result.orientUp();
+            result.normal = math::orientUp(result.normal);
 
         // Set the computed normal and curvature dimensions.
         p.setField(Id::NormalX, result.normal[0]);

@@ -202,6 +202,13 @@ PDAL_ADD_TEST(pdal_io_copc_reader_test
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
+PDAL_ADD_TEST(pdal_io_copc_remote_reader_test
+    FILES
+        io/CopcRemoteReaderTest.cpp
+        ${PDAL_SRC_DIR}/private/OGRSpec.cpp
+    INCLUDES
+        ${NLOHMANN_INCLUDE_DIR}
+)
 PDAL_ADD_TEST(pdal_io_copc_writer_test
     FILES
         io/CopcWriterTest.cpp
@@ -328,6 +335,7 @@ endif()
 #
 # sources for the native filters
 #
+PDAL_ADD_TEST(pdal_filters_georeference_test FILES filters/GeoreferenceFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_assign_test FILES filters/AssignFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_chipper_test
     FILES

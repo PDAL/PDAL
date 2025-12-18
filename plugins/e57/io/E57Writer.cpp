@@ -37,6 +37,7 @@
 #include "E57Writer.hpp"
 #include "Utils.hpp"
 #include "Uuid.hpp"
+#include "E57Version.h"
 
 namespace pdal
 {
@@ -323,7 +324,7 @@ void E57Writer::setupFileHeader()
     // We are using the E57 v1.0 data format standard fieldnames.
     // The standard fieldnames are used without an extension prefix
     // (in the default namespace).
-    m_imageFile->extensionsAdd("", E57_V1_0_URI);
+    m_imageFile->extensionsAdd("", e57::E57_V1_0_URI);
     m_imageFile->extensionsAdd("nor",
                                "http://www.libe57.org/E57_NOR_surface_normals.txt");
 
@@ -336,10 +337,10 @@ void E57Writer::setupFileHeader()
                     e57::StringNode(*m_imageFile, uuidGenerator::generate_uuid()));
 
     // Get ASTM version number supported by library, so can write it into file
-    int astmMajor;
-    int astmMinor;
-    e57::ustring libraryId;
-    e57::Utilities::getVersions(astmMajor, astmMinor, libraryId);
+    uint32_t astmMajor;
+    uint32_t astmMinor;
+    std::string libraryId;
+    e57::Version::get(astmMajor, astmMinor, libraryId);
 
     m_rootNode->set("versionMajor", e57::IntegerNode(*m_imageFile, astmMajor));
     m_rootNode->set("versionMinor", e57::IntegerNode(*m_imageFile, astmMinor));

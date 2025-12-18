@@ -9,7 +9,7 @@ endif()
 # Must be changed if there is an ABI change.  This builds the SONAME
 # that's embedded in the library itself.
 #
-set(PDAL_SOLIB_MAJOR 19)
+set(PDAL_SOLIB_MAJOR 20)
 #
 # Change if there's a new release with no ABI change
 #

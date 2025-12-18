@@ -37,6 +37,7 @@
 #include <numeric>
 #include <vector>
 
+#include <pdal/KDIndex.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/util/Bounds.hpp>
@@ -479,6 +480,58 @@ double barycentricInterpolation(double x1, double y1, double z1,
     // of the total area.
     return (area12 * z3 + area23 * z1 + area31 * z2) / areaTotal;
 }
+
+NormalResult findNormal(PointView& view, PointIdList neighbors)
+{
+    using namespace Eigen;
+
+    NormalResult result;
+    if (neighbors.size() < 3)
+    {
+        result.msg = "Not enough neighbors to compute normal.";
+        return result;
+    }
+
+    // Check if the covariance matrix is all zeros
+    auto B = math::computeCovariance(view, neighbors);
+    if (B.isZero())
+    {
+        result.msg = "Covariance matrix is all zeros. This suggests a large "
+            "number of redundant points.";
+        return result;
+    }
+
+    SelfAdjointEigenSolver<Matrix3d> solver(B);
+    if (solver.info() != Success)
+    {
+        result.msg = "Cannot perform eigen decomposition during normal calculation.";
+        return result;
+    }
+
+    // The curvature is computed as the ratio of the first (smallest)
+    // eigenvalue to the sum of all eigenvalues.
+    auto eval = solver.eigenvalues();
+    double sum = eval[0] + eval[1] + eval[2];
+
+    result.curvature = sum ? std::fabs(eval[0] / sum) : 0;
+
+    // The normal is defined by the eigenvector corresponding to the
+    // smallest eigenvalue.
+    result.normal = solver.eigenvectors().col(0);
+
+    return result;
+}
+
+NormalResult findNormal(double x, double y, double z, PointView& v, double radius)
+{
+    return findNormal(v, v.build3dIndex().radius(x, y, z, radius));
+}
+
+NormalResult findNormal(double x, double y, double z, PointView& v, int knn)
+{
+    return findNormal(v, v.build3dIndex().neighbors(x, y, z, knn));;
+}
+
 
 } // namespace math
 } // namespace pdal
