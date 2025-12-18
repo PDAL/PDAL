@@ -128,6 +128,8 @@ void GeoreferenceFilter::addArgs(ProgramArgs& args)
 void GeoreferenceFilter::initialize()
 {
     m_config->init();
+    SpatialReference srs("EPSG:4978");
+    setSpatialReference(srs);
 }
 
 void GeoreferenceFilter::prepared(PointTableRef table)

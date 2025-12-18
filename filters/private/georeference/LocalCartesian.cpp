@@ -45,20 +45,13 @@ LocalCartesian::LocalCartesian(const double lat0, const double lon0,
                                const double h0)
     : m_ctx(proj_context_create()), m_ecef2enu(nullptr)
 {
-    std::string deg2rad("+proj=unitconvert +xy_in=deg +xy_out=rad");
-    m_deg2rad = proj_create(m_ctx, deg2rad.c_str());
-    std::string source2ecef("+proj=cart +ellps=WGS84");
-    m_source2ecef = proj_create(m_ctx, source2ecef.c_str());
     reset(lat0, lon0, h0);
 }
 
 LocalCartesian::~LocalCartesian()
 {
 
-    proj_destroy(m_deg2rad);
-    proj_destroy(m_source2ecef);
     proj_destroy(m_ecef2enu);
-
     proj_context_destroy(m_ctx);
 }
 
@@ -77,9 +70,7 @@ void LocalCartesian::reset(const double lat0, const double lon0,
 void LocalCartesian::forward(double& x, double& y, double& z) const
 {
     PJ_COORD c = {{x, y, z, HUGE_VAL}};
-    c = proj_trans(
-        m_ecef2enu, PJ_FWD,
-        proj_trans(m_source2ecef, PJ_FWD, proj_trans(m_deg2rad, PJ_FWD, c)));
+    c = proj_trans(m_ecef2enu, PJ_FWD, c);
     x = c.v[0];
     y = c.v[1];
     z = c.v[2];
@@ -88,9 +79,7 @@ void LocalCartesian::forward(double& x, double& y, double& z) const
 void LocalCartesian::reverse(double& x, double& y, double& z) const
 {
     PJ_COORD c = {{x, y, z, HUGE_VAL}};
-    c = proj_trans(
-        m_deg2rad, PJ_INV,
-        proj_trans(m_source2ecef, PJ_INV, proj_trans(m_ecef2enu, PJ_INV, c)));
+    c = proj_trans(m_ecef2enu, PJ_INV, c);
     x = c.v[0];
     y = c.v[1];
     z = c.v[2];

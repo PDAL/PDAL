@@ -33,7 +33,6 @@
 ****************************************************************************/
 
 #include <filters/GeoreferenceFilter.hpp>
-#include <filters/ReprojectionFilter.hpp>
 #include <filters/TransformationFilter.hpp>
 #include <io/BpfWriter.hpp>
 #include <io/BufferReader.hpp>
@@ -311,47 +310,14 @@ TEST(GeoreferenceFilterTest, PreservesDistancesBetweenPoints)
 
     // Get georeferenced coordinates of both points
     PointRef p1(*result, 0);
-    double lon1 = p1.getFieldAs<double>(DimId::X);
-    double lat1 = p1.getFieldAs<double>(DimId::Y);
-    double alt1 = p1.getFieldAs<double>(DimId::Z);
+    double ecef1X = p1.getFieldAs<double>(DimId::X);
+    double ecef1Y = p1.getFieldAs<double>(DimId::Y);
+    double ecef1Z = p1.getFieldAs<double>(DimId::Z);
     
     PointRef p2(*result, 1);
-    double lon2 = p2.getFieldAs<double>(DimId::X);
-    double lat2 = p2.getFieldAs<double>(DimId::Y);
-    double alt2 = p2.getFieldAs<double>(DimId::Z);
-
-    EXPECT_TRUE(std::isfinite(lon1) && std::isfinite(lat1) && std::isfinite(alt1));
-    EXPECT_TRUE(std::isfinite(lon2) && std::isfinite(lat2) && std::isfinite(alt2));
-
-    // Convert WGS84 → ECEF for both points
-    // Use filters.reprojection to convert from WGS84 geographic (EPSG:4979) to ECEF (EPSG:4978)
-    BufferReader wgs84Reader;
-    wgs84Reader.addView(result);
-
-    ReprojectionFilter reprojFilter;
-    Options reprojOpts;
-    reprojOpts.add("in_srs", "EPSG:4979");
-    reprojOpts.add("out_srs", "EPSG:4978");
-    reprojFilter.setOptions(reprojOpts);
-    reprojFilter.setInput(wgs84Reader);
-
-    PointTable ecefTable;
-    reprojFilter.prepare(ecefTable);
-    PointViewSet ecefViews = reprojFilter.execute(ecefTable);
-    ASSERT_EQ(ecefViews.size(), 1u);
-    PointViewPtr ecefView = *ecefViews.begin();
-    ASSERT_EQ(ecefView->size(), 2u);
-
-    // Get ECEF coordinates for both points
-    PointRef ecefP1(*ecefView, 0);
-    double ecef1X = ecefP1.getFieldAs<double>(DimId::X);
-    double ecef1Y = ecefP1.getFieldAs<double>(DimId::Y);
-    double ecef1Z = ecefP1.getFieldAs<double>(DimId::Z);
-
-    PointRef ecefP2(*ecefView, 1);
-    double ecef2X = ecefP2.getFieldAs<double>(DimId::X);
-    double ecef2Y = ecefP2.getFieldAs<double>(DimId::Y);
-    double ecef2Z = ecefP2.getFieldAs<double>(DimId::Z);
+    double ecef2X = p2.getFieldAs<double>(DimId::X);
+    double ecef2Y = p2.getFieldAs<double>(DimId::Y);
+    double ecef2Z = p2.getFieldAs<double>(DimId::Z);
     
     // Calculate distance between the two points in ECEF
     double dx_ecef = ecef2X - ecef1X;
