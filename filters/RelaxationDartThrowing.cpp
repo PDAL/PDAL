@@ -105,7 +105,7 @@ PointViewSet RelaxationDartThrowing::run(PointViewPtr inView)
         std::shuffle(shuffledIds.begin(), shuffledIds.end(), std::mt19937(m_seed));
     }
 
-    using PointIdNeighborMap = std::map<PointId, KD3Index::RadiusResults>;
+    using PointIdNeighborMap = std::unordered_map<PointId, KD3Index::RadiusResults>;
     PointIdNeighborMap neighborMap;
     while (finalIds.size() < m_maxSize)
     {
