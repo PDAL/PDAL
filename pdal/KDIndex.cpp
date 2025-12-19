@@ -133,6 +133,14 @@ void KD2Index::radius(double x, double y, double r, KD2Index::RadiusResults& res
     return m_impl->radius(x, y, r, result);
 }
 
+void KD2Index::radius(PointId idx, double r, KD2Index::RadiusResults& result) const
+{
+    double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
+    double y = m_buf.getFieldAs<double>(Dimension::Id::Y, idx);
+
+    return radius(x, y, r, result);
+}
+
 PointIdList KD2Index::radius(PointId idx, double r) const
 {
     double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
@@ -251,6 +259,15 @@ void KD3Index::radius(double x, double y, double z, double r,
     KD3Index::RadiusResults& results) const
 {
     m_impl->radius(x, y, z, r, results);
+}
+
+void KD3Index::radius(PointId idx, double r, KD3Index::RadiusResults& results) const
+{
+    double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
+    double y = m_buf.getFieldAs<double>(Dimension::Id::Y, idx);
+    double z = m_buf.getFieldAs<double>(Dimension::Id::Z, idx);
+
+    radius(x, y, z, r, results);
 }
 
 PointIdList KD3Index::radius(PointId idx, double r) const
