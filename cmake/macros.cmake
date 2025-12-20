@@ -220,6 +220,14 @@ macro(PDAL_ADD_TEST _name)
             ${PDAL_ADD_TEST_LINK_WITH}
             ${WINSOCK_LIBRARY}
     )
+    foreach(_include IN LISTS PDAL_ADD_TEST_INCLUDES)
+        if(TARGET ${_include})
+            target_include_directories(${_name} PRIVATE $<TARGET_PROPERTY:${_include},INTERFACE_INCLUDE_DIRECTORIES>)
+        else()
+            target_include_directories(${_name} PRIVATE "${include}")
+        endif()
+    endforeach()
+
     add_test(NAME ${_name}
         COMMAND
             "${PROJECT_BINARY_DIR}/bin/${_name}"
