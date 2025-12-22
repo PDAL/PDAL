@@ -66,7 +66,9 @@ struct Point {
         double beamDirectionY,
         double beamDirectionZ,
         float roll,
-        float pitch);
+        float pitch,
+        double shotTimestamp,
+        double unambiguousRange);
 
     scanlib::target target;
     unsigned int returnNumber;
@@ -75,6 +77,8 @@ struct Point {
     double beamOriginX, beamOriginY, beamOriginZ;
     double beamDirectionX, beamDirectionY, beamDirectionZ;
     float roll, pitch;
+    double shotTimestamp;
+    double unambiguousRange;
 };
 
 
@@ -84,9 +88,10 @@ public:
     RxpPointcloud(
             const std::string& uri,
             bool isSyncToPps,
-            bool m_reflectanceAsIntensity,
-            float m_minReflectance,
-            float m_maxReflectance,
+            bool reflectanceAsIntensity,
+            bool emitEmptyShots,
+            float minReflectance,
+            float maxReflectance,
             PointTableRef table);
     virtual ~RxpPointcloud();
 
@@ -99,9 +104,12 @@ public:
     }
 
 protected:
-    void on_echo_transformed(echo_type echo);
+    void on_shot_end();
+    void on_pps_synchronized();
+    void on_pps_sync_lost();
     void on_line_start_up(const scanlib::line_start_up<iterator_type> & arg);
     void on_line_start_dn(const scanlib::line_start_dn<iterator_type> & arg);
+    void on_line_stop(const scanlib::line_stop<iterator_type> & arg);
     void on_hk_incl(const scanlib::hk_incl<iterator_type>& arg);
 
 private:
@@ -110,7 +118,9 @@ private:
     void savePoints();
 
     bool m_syncToPps;
+    bool m_ppsSynced;
     bool m_reflectanceAsIntensity;
+    bool m_emitEmptyShots;
     float m_minReflectance;
     float m_maxReflectance;
     std::shared_ptr<scanlib::basic_rconnection> m_rc;
@@ -120,7 +130,6 @@ private:
     std::deque<Point> m_points;
     float m_pitch;
     float m_roll;
-
 };
 
 

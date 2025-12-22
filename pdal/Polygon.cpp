@@ -51,28 +51,29 @@ struct Polygon::PrivateData
     std::vector<GridPnp> m_grids;
 };
 
-
 Polygon::Polygon()
 {
     init();
 }
 
 
-Polygon::~Polygon()
-{}
-
-
-Polygon::Polygon(OGRGeometryH g) : Geometry(g)
+void Polygon::construct(void *geom)
 {
+    Geometry::construct(geom);
     init();
 }
 
 
-Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs) : Geometry(g, srs)
+void Polygon::construct(void *geom, const SpatialReference& srs)
 {
+    Geometry::construct(geom, srs);
     init();
 }
 
+void Polygon::PrivateDataDeleter::operator()(PrivateData *pd)
+{
+    delete pd;
+}
 
 void Polygon::init()
 {
@@ -96,6 +97,7 @@ void Polygon::init()
             "because OGR geometry is not Polygon or MultiPolygon.");
     }
 }
+
 void Polygon::initGrids() const
 {
     for (const Polygon& p : polygons())

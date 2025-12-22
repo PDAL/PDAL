@@ -7,11 +7,22 @@ namespace hexer
 {
 
 struct HexId : public CoordIJ
-{};
+{
+    bool iodd() const { return i % 2 != 0; }
+    bool ieven() const { return !iodd(); }
+};
 
 inline bool operator<(HexId const& c1, HexId const& c2)
 {
-    return (c1.i < c2.i) || ((c1.i == c2.i) && (c1.j < c2.j));
+    if (c1.j < c2.j)
+        return true;
+    if (c1.j > c2.j)
+        return false;
+    if (c1.ieven() && c2.iodd())
+        return true;
+    if (c1.iodd() && c2.ieven())
+        return false;
+    return c1.i < c2.i;
 }
 
 inline bool operator == (const HexId& h1, const HexId& h2)

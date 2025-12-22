@@ -3,7 +3,8 @@
 # filters.georeference
 
 The **georeference filter** georeferences point cloud expressed in scanner coordinates,
-using `GpsTime` Dimension as a synchronisation reference with a given trajectory.
+using `GpsTime` Dimension as a synchronisation reference with a given trajectory, into 
+ECEF (Earth Centered Earth Fixed) coordinates. See [proj article](https://proj.org/en/stable/operations/conversions/topocentric.html).
 
 ```{eval-rst}
 .. streamable::
@@ -36,7 +37,7 @@ This filter expects trajectory to :
     },
     {
       "type" : "filters.reprojection",
-      "in_srs" : "EPSG:4979",
+      "in_srs" : "EPSG:4978",
       "out_srs" : "EPSG:2154+5720"
     },
     "georeference.las"
@@ -64,6 +65,10 @@ reverse
 time_offset
 
 : timestamp offset between trajectory and scanner GpsTime. \[Default: 0\]
+
+transform_beam 
+
+: transform `BeamOrigin*` and `BeamDirection*` dimensions. \[Default: false\]
 
 coordinate_system
 

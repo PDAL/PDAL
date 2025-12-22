@@ -83,6 +83,8 @@ Dimension::IdList getRxpDimensions(bool syncToPps, bool reflectanceAsIntensity)
     ids.push_back(Id::BeamOriginZ);
     ids.push_back(Id::Roll);
     ids.push_back(Id::Pitch);
+    ids.push_back(Id::ShotTimestamp);
+    ids.push_back(Id::UnambiguousRange);
     if (reflectanceAsIntensity) {
         ids.push_back(Id::Intensity);
     }
@@ -98,6 +100,7 @@ void RxpReader::addArgs(ProgramArgs& args)
     args.add("reflectance_as_intensity", "Reflectance as intensity", m_reflectanceAsIntensity, DEFAULT_REFLECTANCE_AS_INTENSITY);
     args.add("min_reflectance", "Minimum reflectance", m_minReflectance, DEFAULT_MIN_REFLECTANCE);
     args.add("max_reflectance", "Maximum reflectance", m_maxReflectance, DEFAULT_MAX_REFLECTANCE);
+    args.add("empty_shots", "Emit empty shots", m_emitEmptyShots, DEFAULT_EMPIT_EMPTY_SHOTS);
 }
 
 void RxpReader::initialize()
@@ -118,7 +121,7 @@ void RxpReader::addDimensions(PointLayoutPtr layout)
 
 void RxpReader::ready(PointTableRef table)
 {
-    m_pointcloud.reset(new RxpPointcloud(m_uri, m_syncToPps, m_reflectanceAsIntensity, m_minReflectance, m_maxReflectance, table));
+    m_pointcloud.reset(new RxpPointcloud(m_uri, m_syncToPps, m_reflectanceAsIntensity, m_emitEmptyShots, m_minReflectance, m_maxReflectance, table));
 }
 
 

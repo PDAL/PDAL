@@ -90,4 +90,28 @@ HexId H3Grid::edgeHex(HexId hex, int edge) const
     return hex + offsets[edge];
 }
 
+// Finds the possibilities for the next boundary segment, moving clockwise
+Segment H3Grid::nextSegment(const Segment& s) const
+{
+    /*
+    //             (example with HexGrid coordinates)
+    //    ____
+    //   /    \  <---- Current segment: edge 4 of (0,0)
+    //  / 0,0  \__v----------- Possible next segment, left: edge 3 of (1,-1)
+    //  \      /<---\----- Possible next segment, right: edge 5 of (0,0)
+    //   \____/ 1,-1 \
+    //   /    \      /
+    //  / 0,-1 \____/
+    //  \      /    \
+    //   \____/      \
+    //
+    */
+    static const int next[] { 1, 2, 3, 4, 5, 0 };
+    static const int prev[] { 5, 0, 1, 2, 3, 4 };
+
+    Segment right(s.hex, next[s.edge]);
+    Segment left(edgeHex(s.hex, right.edge), prev[s.edge]);
+    return isDense(left.hex) ? left : right;
+}
+
 } // namespace hexer

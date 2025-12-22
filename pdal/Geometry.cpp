@@ -60,10 +60,6 @@ void Geometry::throwNoGeos()
 }
 
 
-Geometry::Geometry()
-{}
-
-
 Geometry::Geometry(const std::string& wkt_or_json, SpatialReference ref)
 {
     update(wkt_or_json);
@@ -83,28 +79,6 @@ Geometry::Geometry(Geometry&& input) : m_geom(std::move(input.m_geom))
 {}
 
 
-Geometry::Geometry(OGRGeometryH g)
-{
-    OGRGeometry* geom(nullptr);
-    geom = reinterpret_cast<OGRGeometry *>(g);
-
-    if (geom)
-        m_geom.reset(geom->clone());
-}
-
-
-Geometry::Geometry(OGRGeometryH g, const SpatialReference& srs)
-{
-    OGRGeometry* geom(nullptr);
-    geom = reinterpret_cast<OGRGeometry *>(g);
-
-    if (geom)
-        m_geom.reset(geom->clone());
-
-    setSpatialReference(srs);
-}
-
-
 Geometry::Geometry(double x, double y, double z, SpatialReference ref)
 {
     OGRGeometry* geom(nullptr);
@@ -117,10 +91,31 @@ Geometry::Geometry(double x, double y, double z, SpatialReference ref)
     setSpatialReference(ref);
 }
 
+void Geometry::OGRGeometryDeleter::operator()(OGRGeometry *geom)
+{
+    delete geom;
+}
+
+void Geometry::construct(void *g)
+{
+    OGRGeometry* geom(nullptr);
+    geom = reinterpret_cast<OGRGeometry *>(g);
+
+    if (geom)
+        m_geom.reset(geom->clone());
+}
 
 
-Geometry::~Geometry()
-{}
+void Geometry::construct(void *g, const SpatialReference& srs)
+{
+    OGRGeometry* geom(nullptr);
+    geom = reinterpret_cast<OGRGeometry *>(g);
+
+    if (geom)
+        m_geom.reset(geom->clone());
+
+    setSpatialReference(srs);
+}
 
 
 void Geometry::modified()

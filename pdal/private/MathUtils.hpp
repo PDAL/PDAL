@@ -291,6 +291,32 @@ Derived gradY(const Eigen::MatrixBase<Derived>& A)
     return out;
 }
 
+struct NormalResult
+{
+    Eigen::Vector3d normal { Eigen::Vector3d::Zero() };
+    double curvature { 0.0 };
+    std::string msg;
+};
+
+NormalResult findNormal(PointView& v, PointIdList neighbors);
+
+// Compute the normal at a particular point, using neighbors within a radius.
+NormalResult findNormal(double x, double y, double z, PointView& v, double radius);
+
+// Compute the normal at a particular point, using k-nearest neighbors.
+NormalResult findNormal(double x, double y, double z, PointView& v, int knn);
+
+/// Reverse a vector so that it points in the positive Z direction.
+inline Eigen::Vector3d orientUp(Eigen::Vector3d v)
+{
+    return ((v(2) < 0) ? -v : v);
+}
+
+inline Eigen::Vector3d orientToViewpoint(Eigen::Vector3d viewpoint, Eigen::Vector3d v)
+{
+    return (viewpoint.dot(v) < 0 ? -v : v);
+}
+
 } // namespace math
 
 namespace Utils

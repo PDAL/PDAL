@@ -36,7 +36,7 @@ jobs:
       if: matrix.platform == 'windows-latest'
 
     - name: Cache Conda Environment
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/conda_pkgs_dir
         key: ${{ runner.os }}-${{ steps.get-date.outputs.today }}-conda-${{ env.CACHE_NUMBER }}
@@ -72,7 +72,7 @@ jobs:
       run: |
           source ./scripts/ci/conda/examples.sh
 
-    - uses: actions/upload-artifact@v5
+    - uses: actions/upload-artifact@v6
       with:
         name: ${{ matrix.platform }}-conda-package
         path: ./libpdal-feedstock/packages/

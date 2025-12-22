@@ -59,13 +59,14 @@ public:
     std::string m_coordinateSystem;
     double m_timeOffset;
     bool m_reverse;
+    bool m_transformBeam;
     std::unique_ptr<georeference::Trajectory> m_trajectory;
     Eigen::Affine3d m_scan2imu;
     bool m_ned;
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     Config()
         : m_trajectoryFile(""), m_coordinateSystem("NED"), m_timeOffset(0.0),
-          m_reverse(false), m_trajectory(nullptr)
+          m_reverse(false), m_transformBeam(false), m_trajectory(nullptr)
     {
     }
     void init()
@@ -119,14 +120,36 @@ void GeoreferenceFilter::addArgs(ProgramArgs& args)
              m_config->m_timeOffset, m_config->m_timeOffset);
     args.add("coordinate_system", "scan2imu coordinate system",
              m_config->m_coordinateSystem, m_config->m_coordinateSystem);
+    args.add("transform_beam",
+             "Transform BeamOrigin and BeamDirection dimensions",
+             m_config->m_transformBeam, m_config->m_transformBeam);
 }
 
 void GeoreferenceFilter::initialize()
 {
     m_config->init();
+    SpatialReference srs("EPSG:4978");
+    setSpatialReference(srs);
 }
 
-void GeoreferenceFilter::prepared(PointTableRef table) {}
+void GeoreferenceFilter::prepared(PointTableRef table)
+{
+    if (m_config->m_transformBeam)
+    {
+        // Verify all beam dimensions are present
+        if (!table.layout()->hasDim(DimId::BeamOriginX) ||
+            !table.layout()->hasDim(DimId::BeamOriginY) ||
+            !table.layout()->hasDim(DimId::BeamOriginZ) ||
+            !table.layout()->hasDim(DimId::BeamDirectionX) ||
+            !table.layout()->hasDim(DimId::BeamDirectionY) ||
+            !table.layout()->hasDim(DimId::BeamDirectionZ))
+        {
+            throwError("transform_beam option requires BeamOriginX/Y/Z and "
+                       "BeamDirectionX/Y/Z dimensions to be present in the "
+                       "point data.");
+        }
+    }
+}
 
 bool GeoreferenceFilter::processOne(PointRef& point)
 {
@@ -161,6 +184,41 @@ bool GeoreferenceFilter::processOne(PointRef& point)
         point.setField(DimId::X, scan.x());
         point.setField(DimId::Y, scan.y());
         point.setField(DimId::Z, scan.z());
+
+        // Transform BeamOrigin (point) - same as X/Y/Z
+        if (m_config->m_transformBeam)
+        {
+            // Create temp point for BeamOrigin transformation
+            double origX = point.getFieldAs<double>(DimId::BeamOriginX);
+            double origY = point.getFieldAs<double>(DimId::BeamOriginY);
+            double origZ = point.getFieldAs<double>(DimId::BeamOriginZ);
+            double dirX =
+                origX + point.getFieldAs<double>(DimId::BeamDirectionX);
+            double dirY =
+                origY + point.getFieldAs<double>(DimId::BeamDirectionY);
+            double dirZ =
+                origZ + point.getFieldAs<double>(DimId::BeamDirectionZ);
+            m_localCartesian->forward(origX, origY, origZ);
+            m_localCartesian->forward(dirX, dirY, dirZ);
+
+            // Apply same transformation as for X/Y/Z
+            const Eigen::Vector3d scanOrig(
+                transform.inverse() *
+                (m_config->m_ned ? Eigen::Vector3d(origY, origX, -origZ)
+                                 : Eigen::Vector3d(origX, origY, origZ)));
+
+            const Eigen::Vector3d scanDir(
+                transform.inverse() *
+                (m_config->m_ned ? Eigen::Vector3d(dirY, dirX, -dirZ)
+                                 : Eigen::Vector3d(dirX, dirY, dirZ)));
+            point.setField(DimId::BeamOriginX, scanOrig.x());
+            point.setField(DimId::BeamOriginY, scanOrig.y());
+            point.setField(DimId::BeamOriginZ, scanOrig.z());
+            const Eigen::Vector3d direction = (scanDir - scanOrig).normalized();
+            point.setField(DimId::BeamDirectionX, direction.x());
+            point.setField(DimId::BeamDirectionY, direction.y());
+            point.setField(DimId::BeamDirectionZ, direction.z());
+        }
     }
     else
     {
@@ -181,6 +239,53 @@ bool GeoreferenceFilter::processOne(PointRef& point)
             point.setField(DimId::Z, ned.z());
         }
         m_localCartesian->reverse(point);
+
+        // Transform BeamOrigin (point) - same as X/Y/Z
+        if (m_config->m_transformBeam)
+        {
+            // Apply same transformation as for X/Y/Z
+            const Eigen::Vector3d nedOrig(
+                transform *
+                Eigen::Vector3d(point.getFieldAs<double>(DimId::BeamOriginX),
+                                point.getFieldAs<double>(DimId::BeamOriginY),
+                                point.getFieldAs<double>(DimId::BeamOriginZ)));
+
+            const Eigen::Vector3d nedDir(
+                transform *
+                Eigen::Vector3d(
+                    point.getFieldAs<double>(DimId::BeamOriginX) +
+                        point.getFieldAs<double>(DimId::BeamDirectionX),
+                    point.getFieldAs<double>(DimId::BeamOriginY) +
+                        point.getFieldAs<double>(DimId::BeamDirectionY),
+                    point.getFieldAs<double>(DimId::BeamOriginZ) +
+                        point.getFieldAs<double>(DimId::BeamDirectionZ)));
+            double originX(nedOrig.x()), originY(nedOrig.y()),
+                originZ(nedOrig.z());
+            double directionX(nedDir.x()), directionY(nedDir.y()),
+                directionZ(nedDir.z());
+            if (m_config->m_ned)
+            {
+                directionX = nedDir.y();
+                directionY = nedDir.x();
+                directionZ = -nedDir.z();
+                originX = nedOrig.y();
+                originY = nedOrig.x();
+                originZ = -nedOrig.z();
+            }
+            m_localCartesian->reverse(originX, originY, originZ);
+            m_localCartesian->reverse(directionX, directionY, directionZ);
+            point.setField(DimId::BeamOriginX, originX);
+            point.setField(DimId::BeamOriginY, originY);
+            point.setField(DimId::BeamOriginZ, originZ);
+
+            const Eigen::Vector3d normalized =
+                Eigen::Vector3d(directionX - originX, directionY - originY,
+                                directionZ - originZ)
+                    .normalized();
+            point.setField(DimId::BeamDirectionX, normalized.x());
+            point.setField(DimId::BeamDirectionY, normalized.y());
+            point.setField(DimId::BeamDirectionZ, normalized.z());
+        }
     }
     return true;
 }
