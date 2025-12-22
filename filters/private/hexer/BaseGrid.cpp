@@ -88,9 +88,12 @@ int BaseGrid::increment(HexId h)
     return i;
 }
 
-bool BaseGrid::isDense(HexId h)
+bool BaseGrid::isDense(HexId h) const
 {
-    return m_counts[h] >= m_denseLimit;
+    auto it = m_counts.find(h);
+    if (it == m_counts.end())
+        return false;
+    return it->second >= m_denseLimit;
 }
 
 // Find the full boundary around our dense hexagons
@@ -133,37 +136,14 @@ void BaseGrid::findShape(HexId root)
         }
         // adds the first point of the segment to the path
         path.addPoint(findPoint(cur));
-        const auto& [left, right] = nextSegments(cur);
+        cur = nextSegment(cur);
+
         // left.hex: the hexagon we would "walk into" moving clockwise from the
         // current segment.
-        cur = isDense(left.hex) ? left : right;
     } while (cur != first);
 
+    // The first point and last point must be the same.
     path.addPoint(findPoint(cur));
-}
-
-// Finds the possibilities for the next boundary segment, moving clockwise
-std::pair<Segment, Segment> BaseGrid::nextSegments(const Segment& s) const
-{
-    /*
-    //             (example with HexGrid coordinates)
-    //    ____
-    //   /    \  <---- Current segment: edge 4 of (0,0)
-    //  / 0,0  \__v----------- Possible next segment, left: edge 3 of (1,-1)
-    //  \      /<---\----- Possible next segment, right: edge 5 of (0,0)
-    //   \____/ 1,-1 \
-    //   /    \      /
-    //  / 0,-1 \____/
-    //  \      /    \
-    //   \____/      \
-    //
-    */
-    static const int next[] { 1, 2, 3, 4, 5, 0 };
-    static const int prev[] { 5, 0, 1, 2, 3, 4 };
-
-    Segment right(s.hex, next[s.edge]);
-    Segment left(edgeHex(s.hex, right.edge), prev[s.edge]);
-    return { left, right };
 }
 
 // Determine whether a path is enclosed within another

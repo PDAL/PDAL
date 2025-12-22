@@ -140,7 +140,6 @@ HexId HexGrid::edgeHex(HexId hex, int edge) const
     //                  0
     //               (- Y)
 */
-
     static const HexId even[] = {{0, -1}, {-1, -1}, {-1, 0}, {0, 1}, {1, 0}, {1, -1}};
     static const HexId odd[] = {{0, -1}, {-1, 0}, {-1, 1}, {0, 1}, {1, 1}, {1, 0}};
 
@@ -148,20 +147,34 @@ HexId HexGrid::edgeHex(HexId hex, int edge) const
         return hex + odd[edge];
     else
         return hex + even[edge];
+}
 
+// Finds the possibilities for the next boundary segment, moving counter-clockwise
+Segment HexGrid::nextSegment(const Segment& s) const
+{
+    static const int next[] { 5, 0, 1, 2, 3, 4 };
+    static const int prev[] { 1, 2, 3, 4, 5, 0 };
+
+    Segment left(s.hex, next[s.edge]);
+    Segment right(edgeHex(s.hex, left.edge), prev[s.edge]);
+    return isDense(right.hex) ? right : left;
 }
 
 Point HexGrid::findPoint(Segment& s)
 {
     HexId hex = s.hex;
-    Point pos;
 
+    // This arrangement of choosing a point for a side matches historic code.
+    int side = s.edge - 1;
+    side = side < 0 ? 5 : side;
+
+    Point pos;
     pos.m_x = hex.i * m_width;
     pos.m_y = hex.j * m_height;
     if (hex.i % 2)
         pos.m_y += (m_height / 2);
 
-    return pos + offset(s.edge) + m_origin;
+    return pos + offset(side) + m_origin;
 }
 
 } // namespace hexer
