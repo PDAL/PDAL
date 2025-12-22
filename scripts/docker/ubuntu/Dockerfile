@@ -17,7 +17,7 @@ SHELL ["conda", "run", "-n", "pdal", "/bin/bash", "-c"]
 RUN mamba install -y \
     git compilers cmake ninja make \
     conda-pack \
-    python=${PYTHON_VERSION} numpy scikit-build-core pybind11 \
+    python=${PYTHON_VERSION} pip numpy scikit-build-core pybind11 \
     && \
     mamba install -y libpdal --only-deps
 
