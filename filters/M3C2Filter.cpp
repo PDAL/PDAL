@@ -38,7 +38,7 @@
 #include <algorithm>
 #include <numeric>
 
-#include "private/NormalUtils.hpp"
+#include "../pdal/private/MathUtils.hpp"
 #include "private/Comparison.hpp"
 
 namespace pdal
