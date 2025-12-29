@@ -67,6 +67,7 @@ public:
         std::vector<double> *sqr_dists) const;
     PointIdList radius(double x, double y, double r) const;
     void radius(double x, double y, double r, KD2Index::RadiusResults& results) const;
+    void radius(PointId idx, double r, KD2Index::RadiusResults& results) const;
     PointIdList radius(PointId idx, double r) const;
     PointIdList radius(PointRef &point, double r) const;
 
@@ -102,6 +103,7 @@ public:
         PointIdList *indices, std::vector<double> *sqr_dists) const;
     PointIdList radius(double x, double y, double z, double r) const;
     void radius(double x, double y, double z, double r, KD3Index::RadiusResults& results) const;
+    void radius(PointId idx, double r, KD3Index::RadiusResults& results) const;
     PointIdList radius(PointId idx, double r) const;
     PointIdList radius(PointRef &point, double r) const;
 
