@@ -156,20 +156,22 @@ void M3C2Filter::done(PointTableRef _)
     BOX3D v1Bounds;
     m_p->v1->calculateBounds(v1Bounds);
 
-    PointGrid g1(v1Bounds.to2d(), *m_p->v1);
-    for (PointRef pt : *m_p->v1)
-        g1.add(pt.getFieldAs<double>(Dimension::Id::X),
-            pt.getFieldAs<double>(Dimension::Id::Y),
-            pt.getFieldAs<double>(Dimension::Id::Z));
+    PointView& v1 = *m_p->v1;
+    PointGrid g1(v1Bounds.to2d(), v1);
+    for (PointId id = 0; id < v1.size(); ++id)
+        g1.add(v1.getFieldAs<double>(Dimension::Id::X, id),
+            v1.getFieldAs<double>(Dimension::Id::Y, id), id);
 
     BOX3D v2Bounds;
     m_p->v2->calculateBounds(v2Bounds);
 
-    PointGrid g2(v2Bounds.to2d(), *m_p->v2);
-    for (PointRef pt : *m_p->v2)
-        g2.add(pt.getFieldAs<double>(Dimension::Id::X),
-            pt.getFieldAs<double>(Dimension::Id::Y),
-            pt.getFieldAs<double>(Dimension::Id::Z));
+    PointView& v2 = *m_p->v2;
+    PointGrid g2(v2Bounds.to2d(), v2);
+    for (PointId id = 0; id < v2.size(); ++id)
+        g2.add(v2.getFieldAs<double>(Dimension::Id::X, id),
+            v2.getFieldAs<double>(Dimension::Id::Y, id), id);
+
+    int i = 0;
 
     for (PointRef ref : *m_p->cores)
     {

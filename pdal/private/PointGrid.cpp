@@ -65,7 +65,6 @@ PointIdList PointGrid::findNeighbors3d(Eigen::Vector3d pos, double radius) const
                     neighbors.push_back(id);
             }
         }
-
     return neighbors;
 }
 

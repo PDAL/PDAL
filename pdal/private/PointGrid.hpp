@@ -95,7 +95,7 @@ public:
     const BOX2D bounds(int i, int j) const
     {
         return BOX2D(m_bounds.minx + m_xlen * i, m_bounds.miny + m_ylen * j,
-            m_bounds.minx + m_xlen * (i + 1), m_bounds.minx + m_ylen * (j + 1));;
+            m_bounds.minx + m_xlen * (i + 1), m_bounds.miny + m_ylen * (j + 1));;
     }
 
     const PointView& view() const
