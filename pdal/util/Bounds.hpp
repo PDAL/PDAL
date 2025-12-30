@@ -188,11 +188,15 @@ public:
     */
     void clip(const BOX2D& other)
     {
-        if (other.minx > minx && other.minx < maxx) minx = other.minx;
-        if (other.maxx < maxx && other.maxx > minx) maxx = other.maxx;
+        if (minx < other.minx)
+            minx = other.minx;
+        if (maxx > other.maxx)
+            maxx = other.maxx;
 
-        if (other.miny > miny && other.miny < maxy) miny = other.miny;
-        if (other.maxy < maxy && other.maxy > miny) maxy = other.maxy;
+        if (miny < other.miny)
+            miny = other.miny;
+        if (maxy > other.maxy)
+            maxy = other.maxy;
     }
 
     /**

@@ -37,7 +37,7 @@
 #include <Eigen/Dense>
 
 #include <pdal/Filter.hpp>
-#include <pdal/KDIndex.hpp>
+#include <pdal/private/PointGrid.hpp>
 
 namespace pdal
 {
@@ -76,11 +76,12 @@ private:
     virtual void done(PointTableRef table);
 
     void createSample(PointView& source, PointView& dest);
-    void calcStats(PointView& v1, PointView& v2, PointView& cores);
-    bool calcStats(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
-        PointView& v1, PointView& v2, Stats& stats);
-    KD3Index::RadiusResults filterPoints(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
-        const KD3Index::RadiusResults& ids, const PointView& view);
+    Eigen::Vector3d findNormal(Eigen::Vector3d pos, const PointGrid& grid);
+
+    bool calcStats(const std::vector<double>& dists1, const std::vector<double>& dists2,
+        Stats& stats);
+    std::vector<double> filterPoints(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
+        const PointView& ids, const PointIdList& neighbors);
     double pointPasses(Eigen::Vector3d point, Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal);
 
     std::unique_ptr<M3C2Filter::Args> m_args;
