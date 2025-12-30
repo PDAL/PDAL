@@ -298,7 +298,7 @@ struct NormalResult
     std::string msg;
 };
 
-NormalResult findNormal(PointView& v, PointIdList neighbors);
+NormalResult findNormal(const PointView& v, PointIdList neighbors);
 
 // Compute the normal at a particular point, using neighbors within a radius.
 NormalResult findNormal(double x, double y, double z, PointView& v, double radius);
