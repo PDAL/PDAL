@@ -160,11 +160,15 @@ void M3C2Filter::createSample(PointView& source, PointView& dest)
 {
     PointIdList ids(source.size());
     std::iota(ids.begin(), ids.end(), 0);
-    std::random_device gen;
-    std::shuffle(ids.begin(), ids.end(), std::mt19937(gen()));
 
-    // Get the sample from the front of the shuffled list.
-    ids.resize(static_cast<point_count_t>(source.size() * (m_args->samplePct / 100.0)));
+    // Don't shuffle or resize if using 100% of the first view
+    if (m_args->samplePct < 100.0)
+    {
+        std::random_device gen;
+        std::shuffle(ids.begin(), ids.end(), std::mt19937(gen()));
+        // Get the sample from the front of the shuffled list.
+        ids.resize(static_cast<point_count_t>(source.size() * (m_args->samplePct / 100.0)));
+    }
     for (PointId id : ids)
         dest.appendPoint(source, id);
 }

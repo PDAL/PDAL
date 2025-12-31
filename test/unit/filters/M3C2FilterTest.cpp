@@ -117,7 +117,28 @@ TEST(M3C2FilterTest, test2)
 
     Dimension::Id distance = viewOut->layout()->findDim("m3c2_distance");
     EXPECT_TRUE(viewOut->hasDim(distance));
-    EXPECT_NEAR(viewOut->getFieldAs<float>(distance, 0), 0.370, 0.01);
+    EXPECT_NEAR(viewOut->getFieldAs<float>(distance, 0), 0.371, 0.01);
+
+    // verifying we get the correct number of points in a sample
+    M3C2Filter filter2;
+    Options fo2;
+    fo2.add("sample_pct", 10);
+    filter2.setOptions(fo2);
+    filter2.setInput(r1);
+    filter2.setInput(r2);
+    PointTable table2;
+    filter2.prepare(table2);
+    PointViewSet viewSet2 = filter2.execute(table2);
+    PointViewPtr viewOut2 = *viewSet2.begin();
+
+    // Checking that we only get 83 points in the output 
+    // (10% of the # of input (829), rounds down from 82.9 currently)
+    int nonZero = 0;
+    for (size_t i = 0; i < viewOut2->size(); ++i)
+        if (viewOut2->getFieldAs<float>(distance, i) != 0)
+            nonZero++;
+
+    EXPECT_EQ(nonZero, 82);
 }
 
 } // namespace pdal
