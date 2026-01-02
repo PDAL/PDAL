@@ -131,6 +131,7 @@ parts:
       - file: stages/filters.estimaterank
       - file: stages/filters.label_duplicates
       - file: stages/filters.lof
+      - file: stages/filters.m3c2
       - file: stages/filters.miniball
       - file: stages/filters.nndistance
       - file: stages/filters.normal
