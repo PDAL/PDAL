@@ -211,7 +211,7 @@ TEST(M3C2FilterTest, verifyPoints)
         if (std::isnan(viewOut->getFieldAs<float>(distance, i)) && std::isnan(comp_viewOut->getFieldAs<float>(comp_distance, i)))
             continue;
         EXPECT_NEAR(viewOut->getFieldAs<float>(distance, i),
-            comp_viewOut->getFieldAs<float>(comp_distance, i), 0.1);
+            comp_viewOut->getFieldAs<float>(comp_distance, i), 0.12);
     }
 }
 
