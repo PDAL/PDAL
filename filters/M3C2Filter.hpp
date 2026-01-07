@@ -57,6 +57,13 @@ class PDAL_EXPORT M3C2Filter : public Filter
         int n2;
     };
 
+    enum class NormalOrientation
+    {
+        Up,
+        Origin,
+        None
+    };
+
     struct Args;
     struct Private;
 
@@ -86,6 +93,8 @@ private:
     std::unique_ptr<M3C2Filter::Args> m_args;
 
     std::unique_ptr<M3C2Filter::Private> m_p;
+
+    NormalOrientation m_orientation;
 };
 
 } // namespace pdal

@@ -51,6 +51,7 @@ struct M3C2Filter::Args
     double cylHalfLen;
     int samplePct;
     double regError;
+    std::string orientation;
 };
 
 struct M3C2Filter::Private
@@ -102,6 +103,7 @@ void M3C2Filter::addArgs(ProgramArgs& args)
     args.add("sample_pct", "Sampling percentage for first point view. Ignored if a core view "
         "is provided.", m_args->samplePct, 10);
     args.add("reg_error", "Registration error [Default: 0].", m_args->regError, 0.0);
+    args.add("orientation", "Orientation of the cylinder & normal", m_args->orientation, "up");
 }
 
 
@@ -123,6 +125,15 @@ void M3C2Filter::initialize()
 
     // Compute the radius of a ball that fits around the cylinder.
     m_p->cylBallRadius = std::sqrt(m_p->cylRadius2 + m_args->cylHalfLen * m_args->cylHalfLen);
+    std::string orientation = Utils::tolower(m_args->orientation);
+    if (orientation == "up")
+        m_orientation = NormalOrientation::Up;
+    else if (orientation == "origin")
+        m_orientation = NormalOrientation::Origin;
+    else if (orientation == "none")
+        m_orientation = NormalOrientation::None;
+    else
+        throwError("Unknown orientation argument provided: " + orientation);
 }
 
 PointViewSet M3C2Filter::run(PointViewPtr view)
@@ -189,6 +200,12 @@ void M3C2Filter::calcStats(PointView& v1, PointView& v2, PointView& cores)
         if (normal == Eigen::Vector3d::Zero())
             continue;
 
+        if (m_orientation == NormalOrientation::Up)
+            normal = math::orientUp(normal);
+        if (m_orientation == NormalOrientation::Origin)
+            normal = math::orientToViewpoint({v1.getFieldAs<float>(Dimension::Id::X, 0),
+                v1.getFieldAs<float>(Dimension::Id::Y, 0), v1.getFieldAs<float>(Dimension::Id::Z, 0)}, normal);
+ 
         if (calcStats(pos, normal, v1, v2, stats))
         {
             core.setField(m_p->distanceDim, stats.distance);

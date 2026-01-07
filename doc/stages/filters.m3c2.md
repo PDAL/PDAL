@@ -61,3 +61,8 @@ reg_error
 
 : Registration error. \[Default: 0\]
 
+orientation
+
+: Which direction to orient the cylinder/normal vector used for comparison between the two point clouds. 
+ Can be in the direction of "up", "origin", or "none". \[Default: "up"\]
+
