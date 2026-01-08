@@ -111,13 +111,14 @@ TEST(M3C2FilterTest, test2)
     filter.prepare(table);
     PointViewSet viewSet = filter.execute(table);
 
-    EXPECT_EQ(2u, viewSet.size());
+    EXPECT_EQ(3u, viewSet.size());
 
-    PointViewPtr viewOut = *viewSet.begin();
+    PointViewPtr viewOut = *std::next(viewSet.begin(), 2);
 
     Dimension::Id distance = viewOut->layout()->findDim("m3c2_distance");
     EXPECT_TRUE(viewOut->hasDim(distance));
     EXPECT_NEAR(viewOut->getFieldAs<float>(distance, 0), 0.371, 0.01);
+    EXPECT_EQ(viewOut->size(), 829);
 
     // verifying we get the correct number of points in a sample
     M3C2Filter filter2;
@@ -129,16 +130,10 @@ TEST(M3C2FilterTest, test2)
     PointTable table2;
     filter2.prepare(table2);
     PointViewSet viewSet2 = filter2.execute(table2);
-    PointViewPtr viewOut2 = *viewSet2.begin();
+    PointViewPtr viewOut2 = *std::next(viewSet2.begin(), 2);
 
-    // Checking that we only get 83 points in the output 
-    // (10% of the # of input (829), rounds down from 82.9 currently)
-    int nonZero = 0;
-    for (size_t i = 0; i < viewOut2->size(); ++i)
-        if (viewOut2->getFieldAs<float>(distance, i) != 0)
-            nonZero++;
-
-    EXPECT_EQ(nonZero, 82);
+    EXPECT_EQ(viewOut2->size(), 82);
+    EXPECT_NE(viewOut2->getFieldAs<float>(distance, 0), 0);
 }
 
 // Comparing core points to those created by CloudCompare
@@ -146,7 +141,7 @@ TEST(M3C2FilterTest, verifyPoints)
 {
     LasReader r1;
     LasReader r2;
-    LasReader r3;
+    TextReader r3;
 
     Options ro1;
     Options ro2;
@@ -154,7 +149,7 @@ TEST(M3C2FilterTest, verifyPoints)
 
     ro1.add("filename", Support::datapath("autzen/autzen-bmx-2010.las"));
     ro2.add("filename", Support::datapath("autzen/autzen-bmx-2023.las"));
-    ro3.add("filename", Support::datapath("autzen/autzen-bmx-largersample.las"));
+    ro3.add("filename", Support::datapath("autzen/autzen-bmx-largersample.txt"));
     r1.setOptions(ro1);
     r2.setOptions(ro2);
     r3.setOptions(ro3);
@@ -179,9 +174,9 @@ TEST(M3C2FilterTest, verifyPoints)
     PointViewPtr viewOut = *std::next(viewSet.begin(), 2);
 
     // exported CC comparison cloud
-    LasReader comp_reader;
+    TextReader comp_reader;
     Options comp_ro;
-    comp_ro.add("filename", Support::datapath("autzen/autzen-bmx-cc.las"));
+    comp_ro.add("filename", Support::datapath("autzen/autzen-bmx-cc.txt"));
     comp_reader.setOptions(comp_ro);
 
     PointTable comp_table;

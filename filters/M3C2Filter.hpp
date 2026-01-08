@@ -79,6 +79,7 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void initialize();
+    virtual void prerun(const PointViewSet& pvSet);
     virtual PointViewSet run(PointViewPtr view);
     virtual void done(PointTableRef table);
 

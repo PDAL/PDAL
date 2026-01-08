@@ -62,6 +62,7 @@ struct M3C2Filter::Private
     double cylRadius2;
     double cylBallRadius;
     double minPoints;
+    int viewCount;
     Dimension::Id distanceDim;
     Dimension::Id uncertaintyDim;
     Dimension::Id significantDim;
@@ -136,33 +137,53 @@ void M3C2Filter::initialize()
         throwError("Unknown orientation argument provided: " + orientation);
 }
 
+void M3C2Filter::prerun(const PointViewSet& pvSet) 
+{
+    m_p->viewCount = pvSet.size();
+    if (m_p->viewCount > 3)
+        throwError("Too many views provided. Only two or three views are supported.");
+}
+
 PointViewSet M3C2Filter::run(PointViewPtr view)
 {
     if (!m_p->v1)
         m_p->v1 = view;
     else if (!m_p->v2)
+    {
         m_p->v2 = view;
+        // this is getting done after the second view is provided
+        // so that we can return the set correctly at the end.
+        if (m_p->viewCount == 2)
+        {
+            m_p->cores = m_p->v1->makeNew();
+            createSample(*m_p->v1, *m_p->cores);
+        }
+    }
     else if (!m_p->cores)
         m_p->cores = view;
-    else
-        throwError("Too many views provided. Only two or three views are supported.");
 
     PointViewSet set;
-    set.insert(view);
+    //!! do we want to have one view as output?
+    if (m_p->cores)
+    {
+        set.insert(m_p->v1);
+        set.insert(m_p->v2);
+        set.insert(m_p->cores);
+    }
     return set;
 }
 
 void M3C2Filter::done(PointTableRef _)
 {
+    //!! the first two of these could be checked in prerun,
+    // and the third should never happen.
     if (!m_p->v1)
         throwError("Missing first view.");
     if (!m_p->v2)
         throwError("Missing second view.");
     if (!m_p->cores)
-    {
-        m_p->cores = m_p->v1->makeNew();
-        createSample(*m_p->v1, *m_p->cores);
-    }
+        throwError("Missing core points.");
+
     calcStats(*m_p->v1, *m_p->v2, *m_p->cores);
 }
 
