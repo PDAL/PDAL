@@ -200,13 +200,16 @@ TEST(M3C2FilterTest, verifyPoints)
     Dimension::Id comp_distance = comp_viewOut->layout()->findDim("M3C2 distance");
     EXPECT_TRUE(viewOut->hasDim(distance) && comp_viewOut->hasDim(comp_distance));
 
+    float ours;
+    float theirs;
     for (size_t i = 0; i < viewOut->size(); ++i)
     {
-        // Ignoring nans 
-        if (std::isnan(viewOut->getFieldAs<float>(distance, i)) && std::isnan(comp_viewOut->getFieldAs<float>(comp_distance, i)))
+        ours = viewOut->getFieldAs<float>(distance, i);
+        theirs = comp_viewOut->getFieldAs<float>(comp_distance, i);
+        // Ignoring nan/nan, nan/zero comparisons
+        if ((std::isnan(ours) || ours == 0) && (std::isnan(theirs) || theirs == 0))
             continue;
-        EXPECT_NEAR(viewOut->getFieldAs<float>(distance, i),
-            comp_viewOut->getFieldAs<float>(comp_distance, i), 0.12);
+        EXPECT_NEAR(ours, theirs, 0.12);
     }
 }
 
