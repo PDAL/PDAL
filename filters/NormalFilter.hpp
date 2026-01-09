@@ -80,6 +80,7 @@ public:
     NormalFilter(const NormalFilter&) = delete;
 
     void doFilter(PointView& view, int knn = 8);
+    void doRadiusFilter(PointView& view, double radius);
 
     std::string getName() const;
 
