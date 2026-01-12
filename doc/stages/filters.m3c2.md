@@ -13,8 +13,8 @@ point view is not specified, the filter automatically samples the first points
 (controlled by the `sample_pct` option).
 
 M3C2 creates seven new dimensions: `m3c2_distance`, `m3c2_uncertainty`, `m3c2_significant`, 
-`m3c2_std_dev1`, `m3c2_std_dev2`, `m3c2_count1` & `m3c2_count2`. These dimensions are added to all 
-point views on output, but are only calculated for core points. 
+`m3c2_std_dev1`, `m3c2_std_dev2`, `m3c2_count1` & `m3c2_count2`. The filter always returns three
+PointViews, with the third containg core points.
 
 ```{note}
 For best results, the input point sets can be aligned using a registration algorithm like 
@@ -65,4 +65,8 @@ orientation
 
 : Which direction to orient the cylinder/normal vector used for comparison between the two point clouds. 
  Can be in the direction of "up", "origin", or "none". \[Default: "up"\]
+
+min_points
+
+: The minimum number of points in a neighborhood to use for calculating statistics. \[Default: 1\]
 

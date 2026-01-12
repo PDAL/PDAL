@@ -64,6 +64,11 @@ class PDAL_EXPORT M3C2Filter : public Filter
         None
     };
 
+    friend std::istream& operator>>(std::istream& in,
+        M3C2Filter::NormalOrientation& mode);
+    friend std::ostream& operator<<(std::ostream& in,
+        const M3C2Filter::NormalOrientation& mode);
+
     struct Args;
     struct Private;
 
@@ -94,8 +99,6 @@ private:
     std::unique_ptr<M3C2Filter::Args> m_args;
 
     std::unique_ptr<M3C2Filter::Private> m_p;
-
-    NormalOrientation m_orientation;
 };
 
 } // namespace pdal

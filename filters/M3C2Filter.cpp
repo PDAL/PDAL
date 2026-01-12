@@ -51,7 +51,8 @@ struct M3C2Filter::Args
     double cylHalfLen;
     int samplePct;
     double regError;
-    std::string orientation;
+    NormalOrientation orientation;
+    int minPoints;
 };
 
 struct M3C2Filter::Private
@@ -61,7 +62,6 @@ struct M3C2Filter::Private
     PointViewPtr cores;
     double cylRadius2;
     double cylBallRadius;
-    double minPoints;
     int viewCount;
     Dimension::Id distanceDim;
     Dimension::Id uncertaintyDim;
@@ -93,6 +93,39 @@ M3C2Filter::M3C2Filter() : m_args(new M3C2Filter::Args), m_p(new M3C2Filter::Pri
 M3C2Filter::~M3C2Filter() {}
 
 
+std::istream& operator>>(std::istream& in, M3C2Filter::NormalOrientation& mode)
+{
+    std::string s;
+    in >> s;
+
+    s = Utils::tolower(s);
+    if (s == "up")
+        mode = M3C2Filter::NormalOrientation::Up;
+    else if (s == "origin")
+        mode = M3C2Filter::NormalOrientation::Origin;
+    else if (s == "none")
+        mode = M3C2Filter::NormalOrientation::None;
+    else
+        in.setstate(std::ios_base::failbit);
+    return in;
+}
+
+
+std::ostream& operator<<(std::ostream& out, const M3C2Filter::NormalOrientation& mode)
+{
+    switch (mode)
+    {
+    case M3C2Filter::NormalOrientation::Up:
+        out << "up";
+    case M3C2Filter::NormalOrientation::Origin:
+        out << "origin";
+    case M3C2Filter::NormalOrientation::None:
+        out << "none";
+    }
+    return out;
+}
+
+
 void M3C2Filter::addArgs(ProgramArgs& args)
 {
     args.add("normal_radius", "The radius to use for finding neighbors in the "
@@ -104,7 +137,9 @@ void M3C2Filter::addArgs(ProgramArgs& args)
     args.add("sample_pct", "Sampling percentage for first point view. Ignored if a core view "
         "is provided.", m_args->samplePct, 10);
     args.add("reg_error", "Registration error [Default: 0].", m_args->regError, 0.0);
-    args.add("orientation", "Orientation of the cylinder & normal", m_args->orientation, "up");
+    args.add("orientation", "Orientation of the cylinder & normal", m_args->orientation, NormalOrientation::Up);
+    args.add("min_points", "Minimum number of points within a neighborhood to use for calculating "
+        "statistics [Default: 1].", m_args->minPoints, 1);
 }
 
 
@@ -126,15 +161,6 @@ void M3C2Filter::initialize()
 
     // Compute the radius of a ball that fits around the cylinder.
     m_p->cylBallRadius = std::sqrt(m_p->cylRadius2 + m_args->cylHalfLen * m_args->cylHalfLen);
-    std::string orientation = Utils::tolower(m_args->orientation);
-    if (orientation == "up")
-        m_orientation = NormalOrientation::Up;
-    else if (orientation == "origin")
-        m_orientation = NormalOrientation::Origin;
-    else if (orientation == "none")
-        m_orientation = NormalOrientation::None;
-    else
-        throwError("Unknown orientation argument provided: " + orientation);
 }
 
 void M3C2Filter::prerun(const PointViewSet& pvSet) 
@@ -221,9 +247,9 @@ void M3C2Filter::calcStats(PointView& v1, PointView& v2, PointView& cores)
         if (normal == Eigen::Vector3d::Zero())
             continue;
 
-        if (m_orientation == NormalOrientation::Up)
+        if (m_args->orientation == NormalOrientation::Up)
             normal = math::orientUp(normal);
-        if (m_orientation == NormalOrientation::Origin)
+        if (m_args->orientation == NormalOrientation::Origin)
             normal = math::orientToViewpoint({v1.getFieldAs<float>(Dimension::Id::X, 0),
                 v1.getFieldAs<float>(Dimension::Id::Y, 0), v1.getFieldAs<float>(Dimension::Id::Z, 0)}, normal);
  
@@ -248,7 +274,7 @@ bool M3C2Filter::calcStats(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
         m_p->cylBallRadius, pts1);
     pts1 = filterPoints(cylCenter, cylNormal, pts1, v1);
 
-    if (pts1.size() < m_p->minPoints)
+    if ((int)pts1.size() < m_args->minPoints)
         return false;
 
     KD3Index::RadiusResults pts2;
@@ -256,7 +282,7 @@ bool M3C2Filter::calcStats(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
         m_p->cylBallRadius, pts2);
     pts2 = filterPoints(cylCenter, cylNormal, pts2, v2);
 
-    if (pts2.size() < m_p->minPoints)
+    if ((int)pts2.size() < m_args->minPoints)
         return false;
 
     // Set square distances to distances
