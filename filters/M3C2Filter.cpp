@@ -49,7 +49,6 @@ struct M3C2Filter::Args
     double normRadius;
     double cylRadius;
     double cylHalfLen;
-    int samplePct;
     double regError;
     NormalOrientation orientation;
     int minPoints;
@@ -62,7 +61,6 @@ struct M3C2Filter::Private
     PointViewPtr cores;
     double cylRadius2;
     double cylBallRadius;
-    int viewCount;
     Dimension::Id distanceDim;
     Dimension::Id uncertaintyDim;
     Dimension::Id significantDim;
@@ -134,8 +132,6 @@ void M3C2Filter::addArgs(ProgramArgs& args)
         "[Default: 2].", m_args->cylRadius, 2.0);
     args.add("cyl_halflen", "The half-length of the cylinder of neighbors used used for "
         "calculating change [Default: 5].", m_args->cylHalfLen, 5.0);
-    args.add("sample_pct", "Sampling percentage for first point view. Ignored if a core view "
-        "is provided.", m_args->samplePct, 10);
     args.add("reg_error", "Registration error [Default: 0].", m_args->regError, 0.0);
     args.add("orientation", "Orientation of the cylinder & normal", m_args->orientation, NormalOrientation::Up);
     args.add("min_points", "Minimum number of points within a neighborhood to use for calculating "
@@ -163,46 +159,23 @@ void M3C2Filter::initialize()
     m_p->cylBallRadius = std::sqrt(m_p->cylRadius2 + m_args->cylHalfLen * m_args->cylHalfLen);
 }
 
-void M3C2Filter::prerun(const PointViewSet& pvSet) 
-{
-    m_p->viewCount = pvSet.size();
-    if (m_p->viewCount > 3)
-        throwError("Too many views provided. Only two or three views are supported.");
-}
-
 PointViewSet M3C2Filter::run(PointViewPtr view)
 {
     if (!m_p->v1)
         m_p->v1 = view;
     else if (!m_p->v2)
-    {
         m_p->v2 = view;
-        // this is getting done after the second view is provided
-        // so that we can return the set correctly at the end.
-        if (m_p->viewCount == 2)
-        {
-            m_p->cores = m_p->v1->makeNew();
-            createSample(*m_p->v1, *m_p->cores);
-        }
-    }
     else if (!m_p->cores)
         m_p->cores = view;
 
     PointViewSet set;
-    //!! do we want to have one view as output?
     if (m_p->cores)
-    {
-        set.insert(m_p->v1);
-        set.insert(m_p->v2);
         set.insert(m_p->cores);
-    }
     return set;
 }
 
 void M3C2Filter::done(PointTableRef _)
 {
-    //!! the first two of these could be checked in prerun,
-    // and the third should never happen.
     if (!m_p->v1)
         throwError("Missing first view.");
     if (!m_p->v2)
@@ -213,23 +186,6 @@ void M3C2Filter::done(PointTableRef _)
     calcStats(*m_p->v1, *m_p->v2, *m_p->cores);
 }
 
-// Super simple sampling.  We just take random points up to the percentage requested.
-void M3C2Filter::createSample(PointView& source, PointView& dest)
-{
-    PointIdList ids(source.size());
-    std::iota(ids.begin(), ids.end(), 0);
-
-    // Don't shuffle or resize if using 100% of the first view
-    if (m_args->samplePct < 100.0)
-    {
-        std::random_device gen;
-        std::shuffle(ids.begin(), ids.end(), std::mt19937(gen()));
-        // Get the sample from the front of the shuffled list.
-        ids.resize(static_cast<point_count_t>(source.size() * (m_args->samplePct / 100.0)));
-    }
-    for (PointId id : ids)
-        dest.appendPoint(source, id);
-}
 
 void M3C2Filter::calcStats(PointView& v1, PointView& v2, PointView& cores)
 {

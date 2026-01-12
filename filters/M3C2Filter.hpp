@@ -84,11 +84,9 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void initialize();
-    virtual void prerun(const PointViewSet& pvSet);
     virtual PointViewSet run(PointViewPtr view);
     virtual void done(PointTableRef table);
 
-    void createSample(PointView& source, PointView& dest);
     void calcStats(PointView& v1, PointView& v2, PointView& cores);
     bool calcStats(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
         PointView& v1, PointView& v2, Stats& stats);

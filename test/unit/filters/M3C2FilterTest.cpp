@@ -46,9 +46,8 @@ TEST(M3C2FilterTest, test1)
     filter.prepare(table);
     PointViewSet viewSet = filter.execute(table);
 
-    EXPECT_EQ(3u, viewSet.size());
-    // The 3 core points should be in the 3rd view
-    PointViewPtr viewOut = *std::next(viewSet.begin(), 2);
+    EXPECT_EQ(1u, viewSet.size());
+    PointViewPtr viewOut = *viewSet.begin();
 
     Dimension::Id distance = viewOut->layout()->findDim("m3c2_distance");
     Dimension::Id uncertainty = viewOut->layout()->findDim("m3c2_uncertainty");
@@ -83,59 +82,6 @@ TEST(M3C2FilterTest, test1)
 
 }
 
-// 2 view input (first view is core points)
-TEST(M3C2FilterTest, test2)
-{
-    LasReader r1;
-    LasReader r2;
-
-    Options ro1;
-    Options ro2;
-    ro1.add("filename", Support::datapath("autzen/autzen-bmx-2010.las"));
-    ro2.add("filename", Support::datapath("autzen/autzen-bmx-2023.las"));
-    r1.setOptions(ro1);
-    r2.setOptions(ro2);
-
-    M3C2Filter filter;
-    Options fo;
-    fo.add("normal_radius", 2);
-    fo.add("cyl_radius", 5);
-    fo.add("cyl_halflen", 2.5);
-    fo.add("sample_pct", 100);
-
-    filter.setOptions(fo);
-    filter.setInput(r1);
-    filter.setInput(r2);
-
-    PointTable table;
-    filter.prepare(table);
-    PointViewSet viewSet = filter.execute(table);
-
-    EXPECT_EQ(3u, viewSet.size());
-
-    PointViewPtr viewOut = *std::next(viewSet.begin(), 2);
-
-    Dimension::Id distance = viewOut->layout()->findDim("m3c2_distance");
-    EXPECT_TRUE(viewOut->hasDim(distance));
-    EXPECT_NEAR(viewOut->getFieldAs<float>(distance, 0), 0.371, 0.01);
-    EXPECT_EQ(viewOut->size(), 829);
-
-    // verifying we get the correct number of points in a sample
-    M3C2Filter filter2;
-    Options fo2;
-    fo2.add("sample_pct", 10);
-    filter2.setOptions(fo2);
-    filter2.setInput(r1);
-    filter2.setInput(r2);
-    PointTable table2;
-    filter2.prepare(table2);
-    PointViewSet viewSet2 = filter2.execute(table2);
-    PointViewPtr viewOut2 = *std::next(viewSet2.begin(), 2);
-
-    EXPECT_EQ(viewOut2->size(), 82);
-    EXPECT_NE(viewOut2->getFieldAs<float>(distance, 0), 0);
-}
-
 // Comparing core points to those created by CloudCompare
 TEST(M3C2FilterTest, verifyPoints)
 {
@@ -168,10 +114,7 @@ TEST(M3C2FilterTest, verifyPoints)
     PointTable table;
     filter.prepare(table);
     PointViewSet viewSet = filter.execute(table);
-
-    EXPECT_EQ(3u, viewSet.size());
-
-    PointViewPtr viewOut = *std::next(viewSet.begin(), 2);
+    PointViewPtr viewOut = *viewSet.begin();
 
     // exported CC comparison cloud
     TextReader comp_reader;
