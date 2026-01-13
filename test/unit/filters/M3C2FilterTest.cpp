@@ -139,19 +139,9 @@ TEST(M3C2FilterTest, verifyPoints)
     }
 
     Dimension::Id distance = viewOut->layout()->findDim("m3c2_distance");
-    EXPECT_TRUE(viewOut->hasDim(distance) && comp_viewOut->hasDim(distance));
-
-    float ours;
-    float comparison;
     for (size_t i = 0; i < viewOut->size(); ++i)
-    {
-        ours = viewOut->getFieldAs<double>(distance, i);
-        comparison = comp_viewOut->getFieldAs<double>(distance, i);
-        // Ignoring nan/nan, nan/zero comparisons
-        if ((std::isnan(ours) || ours == 0) && (std::isnan(comparison) || comparison == 0))
-            continue;
-        EXPECT_NEAR(ours, comparison, 0.01);
-    }
+        EXPECT_NEAR(viewOut->getFieldAs<float>(distance, i), 
+            comp_viewOut->getFieldAs<float>(distance, i), 0.01);
 }
 
 } // namespace pdal

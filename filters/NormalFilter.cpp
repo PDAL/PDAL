@@ -113,15 +113,6 @@ void NormalFilter::doFilter(PointView& view, int knn)
     filter(view);
 }
 
-// public method to use filter with radius. Used by M3C2
-void NormalFilter::doRadiusFilter(PointView& view, double radius)
-{
-    m_args->m_radius = radius;
-    ProgramArgs args;
-    addArgs(args);
-    filter(view);
-}
-
 void NormalFilter::prepared(PointTableRef table)
 {
     if (m_args->m_up && m_viewpointArg->set())
