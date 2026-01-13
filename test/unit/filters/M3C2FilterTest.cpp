@@ -12,7 +12,6 @@
 namespace pdal
 {
 
-// 3 view input (fixed, comparison, core points)
 TEST(M3C2FilterTest, test1)
 {
     using namespace Dimension;
@@ -82,7 +81,7 @@ TEST(M3C2FilterTest, test1)
 
 }
 
-// Comparing core points to those created by CloudCompare
+// Comparing to a set of pre-processed points
 TEST(M3C2FilterTest, verifyPoints)
 {
     LasReader r1;
@@ -102,8 +101,8 @@ TEST(M3C2FilterTest, verifyPoints)
 
     M3C2Filter filter;
     Options fo;
-    fo.add("normal_radius", 1.39);
-    fo.add("cyl_radius", 2.89);
+    fo.add("normal_radius", 1.390432);
+    fo.add("cyl_radius", 2.890432);
     fo.add("cyl_halflen", 5.5);
 
     filter.setOptions(fo);
@@ -116,10 +115,10 @@ TEST(M3C2FilterTest, verifyPoints)
     PointViewSet viewSet = filter.execute(table);
     PointViewPtr viewOut = *viewSet.begin();
 
-    // exported CC comparison cloud
+    // predefined comparison cloud
     TextReader comp_reader;
     Options comp_ro;
-    comp_ro.add("filename", Support::datapath("autzen/autzen-bmx-cc.txt"));
+    comp_ro.add("filename", Support::datapath("autzen/autzen-bmx-m3c2.txt"));
     comp_reader.setOptions(comp_ro);
 
     PointTable comp_table;
@@ -140,19 +139,18 @@ TEST(M3C2FilterTest, verifyPoints)
     }
 
     Dimension::Id distance = viewOut->layout()->findDim("m3c2_distance");
-    Dimension::Id comp_distance = comp_viewOut->layout()->findDim("M3C2 distance");
-    EXPECT_TRUE(viewOut->hasDim(distance) && comp_viewOut->hasDim(comp_distance));
+    EXPECT_TRUE(viewOut->hasDim(distance) && comp_viewOut->hasDim(distance));
 
     float ours;
-    float theirs;
+    float comparison;
     for (size_t i = 0; i < viewOut->size(); ++i)
     {
-        ours = viewOut->getFieldAs<float>(distance, i);
-        theirs = comp_viewOut->getFieldAs<float>(comp_distance, i);
+        ours = viewOut->getFieldAs<double>(distance, i);
+        comparison = comp_viewOut->getFieldAs<double>(distance, i);
         // Ignoring nan/nan, nan/zero comparisons
-        if ((std::isnan(ours) || ours == 0) && (std::isnan(theirs) || theirs == 0))
+        if ((std::isnan(ours) || ours == 0) && (std::isnan(comparison) || comparison == 0))
             continue;
-        EXPECT_NEAR(ours, theirs, 0.12);
+        EXPECT_NEAR(ours, comparison, 0.01);
     }
 }
 
