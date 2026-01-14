@@ -38,6 +38,10 @@
 #include <algorithm>
 #include <numeric>
 
+<<<<<<< HEAD
+=======
+#include "../pdal/private/MathUtils.hpp"
+>>>>>>> upstream/m3c2
 #include "private/Comparison.hpp"
 #include <pdal/private/MathUtils.hpp>
 
@@ -49,8 +53,9 @@ struct M3C2Filter::Args
     double normalRadius;
     double cylRadius;
     double cylHalfLen;
-    int samplePct;
     double regError;
+    NormalOrientation orientation;
+    int minPoints;
 };
 
 struct M3C2Filter::Private
@@ -60,7 +65,6 @@ struct M3C2Filter::Private
     PointViewPtr cores;
     double cylRadius2;
     double cylBallRadius;
-    double minPoints;
     Dimension::Id distanceDim;
     Dimension::Id uncertaintyDim;
     Dimension::Id significantDim;
@@ -91,6 +95,39 @@ M3C2Filter::M3C2Filter() : m_args(new M3C2Filter::Args), m_p(new M3C2Filter::Pri
 M3C2Filter::~M3C2Filter() {}
 
 
+std::istream& operator>>(std::istream& in, M3C2Filter::NormalOrientation& mode)
+{
+    std::string s;
+    in >> s;
+
+    s = Utils::tolower(s);
+    if (s == "up")
+        mode = M3C2Filter::NormalOrientation::Up;
+    else if (s == "origin")
+        mode = M3C2Filter::NormalOrientation::Origin;
+    else if (s == "none")
+        mode = M3C2Filter::NormalOrientation::None;
+    else
+        in.setstate(std::ios_base::failbit);
+    return in;
+}
+
+
+std::ostream& operator<<(std::ostream& out, const M3C2Filter::NormalOrientation& mode)
+{
+    switch (mode)
+    {
+    case M3C2Filter::NormalOrientation::Up:
+        out << "up";
+    case M3C2Filter::NormalOrientation::Origin:
+        out << "origin";
+    case M3C2Filter::NormalOrientation::None:
+        out << "none";
+    }
+    return out;
+}
+
+
 void M3C2Filter::addArgs(ProgramArgs& args)
 {
     args.add("normal_radius", "The radius to use for finding neighbors in the "
@@ -99,9 +136,10 @@ void M3C2Filter::addArgs(ProgramArgs& args)
         "[Default: 2].", m_args->cylRadius, 2.0);
     args.add("cyl_halflen", "The half-length of the cylinder of neighbors used used for "
         "calculating change [Default: 5].", m_args->cylHalfLen, 5.0);
-    args.add("sample_pct", "Sampling percentage for first point view. Ignored if a core view "
-        "is provided.", m_args->samplePct, 10);
     args.add("reg_error", "Registration error [Default: 0].", m_args->regError, 0.0);
+    args.add("orientation", "Orientation of the cylinder & normal", m_args->orientation, NormalOrientation::Up);
+    args.add("min_points", "Minimum number of points within a neighborhood to use for calculating "
+        "statistics [Default: 1].", m_args->minPoints, 1);
 }
 
 
@@ -133,11 +171,10 @@ PointViewSet M3C2Filter::run(PointViewPtr view)
         m_p->v2 = view;
     else if (!m_p->cores)
         m_p->cores = view;
-    else
-        throwError("Too many views provided. Only two or three views are supported.");
 
     PointViewSet set;
-    set.insert(view);
+    if (m_p->cores)
+        set.insert(m_p->cores);
     return set;
 }
 
@@ -148,6 +185,7 @@ void M3C2Filter::done(PointTableRef _)
     if (!m_p->v2)
         throwError("Missing second view.");
     if (!m_p->cores)
+<<<<<<< HEAD
     {
         m_p->cores = m_p->v1->makeNew();
         createSample(*m_p->v1, *m_p->cores);
@@ -223,26 +261,71 @@ Eigen::Vector3d M3C2Filter::findNormal(Eigen::Vector3d pos, const PointGrid& gri
     PointIdList neighbors = grid.findNeighbors3d(pos, m_args->normalRadius);
     math::NormalResult res = math::findNormal(grid.view(), neighbors);
     return res.normal;
+=======
+        throwError("Missing core points.");
+
+    calcStats(*m_p->v1, *m_p->v2, *m_p->cores);
+>>>>>>> upstream/m3c2
 }
 
-// Super simple sampling.  We just take random points up to the percentage requested.
-void M3C2Filter::createSample(PointView& source, PointView& dest)
-{
-    PointIdList ids(source.size());
-    std::iota(ids.begin(), ids.end(), 0);
-    std::random_device gen;
-    std::shuffle(ids.begin(), ids.end(), std::mt19937(gen()));
-
-    // Get the sample from the front of the shuffled list.
-    ids.resize(static_cast<point_count_t>(source.size() * (m_args->samplePct / 100.0)));
-    for (PointId id : ids)
-        dest.appendPoint(source, id);
-}
 
 bool M3C2Filter::calcStats(const std::vector<double>& pts1, const std::vector<double>& pts2,
     Stats& stats)
 {
+<<<<<<< HEAD
     if (pts1.size() < m_p->minPoints || pts2.size() < m_p->minPoints)
+=======
+    Stats stats;
+
+    for (PointRef core : cores)
+    {
+        Eigen::Vector3d pos(core.getFieldAs<double>(Dimension::Id::X),
+            core.getFieldAs<double>(Dimension::Id::Y),
+            core.getFieldAs<double>(Dimension::Id::Z));
+
+        Eigen::Vector3d normal =
+            math::findNormal(pos(0), pos(1), pos(2), v1, m_args->normRadius).normal;
+
+        if (normal == Eigen::Vector3d::Zero())
+            continue;
+
+        if (m_args->orientation == NormalOrientation::Up)
+            normal = math::orientUp(normal);
+        if (m_args->orientation == NormalOrientation::Origin)
+            normal = math::orientToViewpoint({v1.getFieldAs<float>(Dimension::Id::X, 0),
+                v1.getFieldAs<float>(Dimension::Id::Y, 0), v1.getFieldAs<float>(Dimension::Id::Z, 0)}, normal);
+ 
+        if (calcStats(pos, normal, v1, v2, stats))
+        {
+            core.setField(m_p->distanceDim, stats.distance);
+            core.setField(m_p->uncertaintyDim, stats.uncertainty);
+            core.setField(m_p->significantDim, stats.significant);
+            core.setField(m_p->stdDev1Dim, stats.stdDev1);
+            core.setField(m_p->stdDev2Dim, stats.stdDev2);
+            core.setField(m_p->n1Dim, stats.n1);
+            core.setField(m_p->n2Dim, stats.n2);
+        }
+    }
+}
+
+bool M3C2Filter::calcStats(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
+    PointView& v1, PointView& v2, Stats& stats)
+{
+    KD3Index::RadiusResults pts1;
+    v1.build3dIndex().radius(cylCenter(0), cylCenter(1), cylCenter(2),
+        m_p->cylBallRadius, pts1);
+    pts1 = filterPoints(cylCenter, cylNormal, pts1, v1);
+
+    if ((int)pts1.size() < m_args->minPoints)
+        return false;
+
+    KD3Index::RadiusResults pts2;
+    v2.build3dIndex().radius(cylCenter(0), cylCenter(1), cylCenter(2),
+        m_p->cylBallRadius, pts2);
+    pts2 = filterPoints(cylCenter, cylNormal, pts2, v2);
+
+    if ((int)pts2.size() < m_args->minPoints)
+>>>>>>> upstream/m3c2
         return false;
 
     // Set square distances to distances

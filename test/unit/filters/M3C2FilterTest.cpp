@@ -12,7 +12,6 @@
 namespace pdal
 {
 
-// 3 view input (fixed, comparison, core points)
 TEST(M3C2FilterTest, test1)
 {
     using namespace Dimension;
@@ -46,9 +45,8 @@ TEST(M3C2FilterTest, test1)
     filter.prepare(table);
     PointViewSet viewSet = filter.execute(table);
 
-    EXPECT_EQ(3u, viewSet.size());
-    // The 3 core points should be in the 3rd view
-    PointViewPtr viewOut = *std::next(viewSet.begin(), 2);
+    EXPECT_EQ(1u, viewSet.size());
+    PointViewPtr viewOut = *viewSet.begin();
 
     Dimension::Id distance = viewOut->layout()->findDim("m3c2_distance");
     Dimension::Id uncertainty = viewOut->layout()->findDim("m3c2_uncertainty");
@@ -83,41 +81,67 @@ TEST(M3C2FilterTest, test1)
 
 }
 
-// 2 view input (first view is core points)
-TEST(M3C2FilterTest, test2)
+// Comparing to a set of pre-processed points
+TEST(M3C2FilterTest, verifyPoints)
 {
     LasReader r1;
     LasReader r2;
+    TextReader r3;
 
     Options ro1;
     Options ro2;
+    Options ro3;
+
     ro1.add("filename", Support::datapath("autzen/autzen-bmx-2010.las"));
     ro2.add("filename", Support::datapath("autzen/autzen-bmx-2023.las"));
+    ro3.add("filename", Support::datapath("autzen/autzen-bmx-largersample.txt"));
     r1.setOptions(ro1);
     r2.setOptions(ro2);
+    r3.setOptions(ro3);
 
     M3C2Filter filter;
     Options fo;
-    fo.add("normal_radius", 2);
-    fo.add("cyl_radius", 5);
-    fo.add("cyl_halflen", 2.5);
-    fo.add("sample_pct", 100);
+    fo.add("normal_radius", 1.390432);
+    fo.add("cyl_radius", 2.890432);
+    fo.add("cyl_halflen", 5.5);
 
     filter.setOptions(fo);
     filter.setInput(r1);
     filter.setInput(r2);
+    filter.setInput(r3);
 
     PointTable table;
     filter.prepare(table);
     PointViewSet viewSet = filter.execute(table);
-
-    EXPECT_EQ(2u, viewSet.size());
-
     PointViewPtr viewOut = *viewSet.begin();
 
+    // predefined comparison cloud
+    TextReader comp_reader;
+    Options comp_ro;
+    comp_ro.add("filename", Support::datapath("autzen/autzen-bmx-m3c2.txt"));
+    comp_reader.setOptions(comp_ro);
+
+    PointTable comp_table;
+    comp_reader.prepare(comp_table);
+    PointViewSet comp_viewSet = comp_reader.execute(comp_table);
+    PointViewPtr comp_viewOut = *comp_viewSet.begin();
+
+    EXPECT_EQ(viewOut->size(), comp_viewOut->size());
+
+    for (size_t i = 0; i < viewOut->size(); ++i)
+    {
+        EXPECT_EQ(viewOut->getFieldAs<float>(Dimension::Id::X, i),
+            comp_viewOut->getFieldAs<float>(Dimension::Id::X, i));
+        EXPECT_EQ(viewOut->getFieldAs<float>(Dimension::Id::Y, i),
+            comp_viewOut->getFieldAs<float>(Dimension::Id::Y, i));
+        EXPECT_EQ(viewOut->getFieldAs<float>(Dimension::Id::Z, i),
+            comp_viewOut->getFieldAs<float>(Dimension::Id::Z, i));
+    }
+
     Dimension::Id distance = viewOut->layout()->findDim("m3c2_distance");
-    EXPECT_TRUE(viewOut->hasDim(distance));
-    EXPECT_NEAR(viewOut->getFieldAs<float>(distance, 0), 0.370, 0.01);
+    for (size_t i = 0; i < viewOut->size(); ++i)
+        EXPECT_NEAR(viewOut->getFieldAs<float>(distance, i), 
+            comp_viewOut->getFieldAs<float>(distance, i), 0.01);
 }
 
 } // namespace pdal
