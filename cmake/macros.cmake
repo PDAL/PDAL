@@ -159,6 +159,13 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
             ${PDAL_ADD_PLUGIN_LINK_WITH}
             ${WINSOCK_LIBRARY}
     )
+    foreach(_include IN LISTS PDAL_ADD_PLUGIN_INCLUDES)
+        if(TARGET ${_include})
+            target_include_directories(${${_name}} PRIVATE $<TARGET_PROPERTY:${_include},INTERFACE_INCLUDE_DIRECTORIES>)
+        else()
+            target_include_directories(${${_name}} PRIVATE "${include}")
+        endif()
+    endforeach()
 
     set_property(TARGET ${${_name}} PROPERTY FOLDER "Plugins/${_type}")
     set_target_properties(${${_name}} PROPERTIES
@@ -220,6 +227,14 @@ macro(PDAL_ADD_TEST _name)
             ${PDAL_ADD_TEST_LINK_WITH}
             ${WINSOCK_LIBRARY}
     )
+    foreach(_include IN LISTS PDAL_ADD_TEST_INCLUDES)
+        if(TARGET ${_include})
+            target_include_directories(${_name} PRIVATE $<TARGET_PROPERTY:${_include},INTERFACE_INCLUDE_DIRECTORIES>)
+        else()
+            target_include_directories(${_name} PRIVATE "${include}")
+        endif()
+    endforeach()
+
     add_test(NAME ${_name}
         COMMAND
             "${PROJECT_BINARY_DIR}/bin/${_name}"

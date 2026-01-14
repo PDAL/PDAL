@@ -60,7 +60,7 @@ value to forward. You will have to explicitly set any output options that you
 would expect to come from EPT on any writers.
 ```
 
-``{note}
+```{note}
 You can use <viewer.copc.io> to view [EPT], [COPC], and [COG] data directly in
 your browser.
 ```

@@ -18,6 +18,8 @@ include(${PDAL_CMAKE_DIR}/arbiter.cmake)
 if (NOT NITRO_FOUND)
     message(FATAL_ERROR "Can't find NITRO support required by NITF.")
 endif()
+include(${PDAL_CMAKE_DIR}/gdal.cmake)
+
 
 PDAL_ADD_PLUGIN(reader_libname reader nitf
     FILES
@@ -26,11 +28,11 @@ PDAL_ADD_PLUGIN(reader_libname reader nitf
         io/tre_plugins.cpp
         io/NitfReader.cpp
     INCLUDES
-        ${GDAL_INCLUDE_DIR}
         ${PDAL_VENDOR_DIR}
         ${NLOHMANN_INCLUDE_DIR}
     LINK_WITH
         ${NITRO_LIBRARIES}
+        GDAL::GDAL
         ${PDAL_ARBITER_LIB_NAME}
         ${PDAL_LIBRARIES}
 )
@@ -50,11 +52,9 @@ PDAL_ADD_PLUGIN(writer_libname writer nitf
         io/tre_plugins.cpp
     LINK_WITH
         ${NITRO_LIBRARIES}
-        ${GDAL_LIBRARY}
+        GDAL::GDAL
         ${PDAL_LIBRARIES}
         ${PDAL_ARBITER_LIB_NAME}
-    INCLUDES
-        ${GDAL_INCLUDE_DIR}
 )
 if (WIN32)
     target_compile_definitions(${writer_libname}

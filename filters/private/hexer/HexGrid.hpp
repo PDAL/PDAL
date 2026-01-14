@@ -17,7 +17,7 @@ public:
 
 
     void addXY(double& x, double& y)
-        { 
+        {
           Point p{x, y};
           addPoint(p);
         }
@@ -36,6 +36,7 @@ private:
     void processHeight(double height);
     HexId findHexagon(Point p);
     HexId edgeHex(HexId hex, int edge) const;
+    Segment nextSegment(const Segment& s) const;
 
     bool inGrid(HexId& h)
         { return h.j >= m_minY; }

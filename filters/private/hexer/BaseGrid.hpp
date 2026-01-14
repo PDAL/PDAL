@@ -27,7 +27,7 @@ public:
     virtual ~BaseGrid();
 
     void addPoint(Point& p);
-    bool isDense(HexId hex);
+    bool isDense(HexId hex) const;
     void findShapes();
     void findParentPaths();
     void toWKT(std::ostream& output) const;
@@ -93,7 +93,7 @@ private:
     void findShape(HexId root);
     double computeHexSize();
     void parentOrChild(Path& p);
-    std::pair<Segment, Segment> nextSegments(const Segment& s) const;
+    virtual Segment nextSegment(const Segment& s) const = 0;
 
     /// Vector of points to use to determine hex height
     std::vector<Point> m_sample;

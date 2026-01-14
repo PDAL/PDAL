@@ -26,14 +26,14 @@ The assignment expression syntax is an expansion on the {ref}`PDAL expression <p
 that provides for assignment of values to points. The generic expression is:
 
 ```
-"value" : "Dimension = ValueExpression [WHERE ConditionalExpression)]"
+"value" : "Dimension = ValueExpression [WHERE ConditionalExpression]"
 ```
 
 `Dimension` is the name of a PDAL dimension.
 
 A `ValueExpression` consists of constants, dimension names and mathematical operators
 that evaluates to a numeric value.  The supported mathematical operations are addition(`+`),
-subtraction(`-`), multiplication(`*`) and division(`\\`).
+subtraction(`-`), multiplication(`*`) and division(`/`).
 
 A {ref}`ConditionalExpression <pdal_expression>` is an optional boolean value that must
 evaluate to `true` for the `ValueExpression` to be applied.

@@ -155,6 +155,10 @@ filesource_id
 : The file source id number to use for this file (a value between
   0 and 65535 - 0 implies "unassigned") \[Default: 0\]
 
+pdal_metadata
+
+: Write a VLR containing [JSON] output with the {ref}`metadata` serialization. \[Default: false\]
+
 pipeline
 
 : Write a JSON representation of the running pipeline as a VLR.

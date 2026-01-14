@@ -18,11 +18,11 @@ class PDAL_EXPORT H3Grid : public BaseGrid
 {
 public:
     H3Grid(int dense_limit)
-        : BaseGrid{dense_limit}, m_res{-1}, 
+        : BaseGrid{dense_limit}, m_res{-1},
             m_minI{std::numeric_limits<int>::max()}, m_origin{0}
     {}
     H3Grid(int res, int dense_limit)
-        : BaseGrid{dense_limit}, m_res{res}, 
+        : BaseGrid{dense_limit}, m_res{res},
             m_minI{std::numeric_limits<int>::max()}, m_origin{0}
     {}
     ~H3Grid();
@@ -53,7 +53,7 @@ public:
     void addXY(double& x, double& y)
         {
           Point p{PDALH3degsToRads(x), PDALH3degsToRads(y)};
-          addPoint(p);        
+          addPoint(p);
         }
     double height()
         {
@@ -65,18 +65,18 @@ public:
             return (SQRT_3 * distance(p1, p2));
         }
     bool checkSRS(pdal::SpatialReference& srs)
-        {   
+        {
             if (srs.identifyHorizontalEPSG() == "4326")
                 return true;
             else
-                return false; 
+                return false;
         }
     bool sampling() const
         { return m_res < 0; }
     uint64_t getID(HexId ij)
         { return ij2h3(ij); }
 
-    // test function: used when inserting pre-defined grids in tests, 
+    // test function: used when inserting pre-defined grids in tests,
     // sets origin outside of findHexagon()
     void setOrigin(H3Index idx)
         { m_origin = idx; }
@@ -87,6 +87,7 @@ public:
 private:
     void processHeight(double height);
     HexId findHexagon(Point p);
+    Segment nextSegment(const Segment& s) const;
     HexId edgeHex(HexId hex, int edge) const;
 
     bool inGrid(HexId& h)
