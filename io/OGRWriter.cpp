@@ -187,12 +187,9 @@ void OGRWriter::readyTable(PointTableRef table)
                 throwError("Unknown type for dimension '" + name + "' (attr_dims).");
                 continue;
         }
-        auto ogrField = new OGRFieldDefn(name.c_str(), ogrType);
-        m_attrs.emplace_back(dim, dimType, ogrField);
+        m_attrs.emplace_back(dim, dimType, OGRFieldDefn(name.c_str(), ogrType));
     }
-
 }
-
 
 void OGRWriter::readyFile(const std::string& filename, const SpatialReference& srs)
 {
@@ -218,7 +215,8 @@ void OGRWriter::readyFile(const std::string& filename, const SpatialReference& s
     ogr_create_options.push_back(nullptr);
 
     // Layer
-    m_layer = m_ds->CreateLayer("points", &m_srs, m_geomType, const_cast<char**>(ogr_create_options.data()));
+    m_layer = m_ds->CreateLayer("points", &m_srs, m_geomType,
+        const_cast<char**>(ogr_create_options.data()));
     if (!m_layer)
         throwError(std::string("Can't create OGR layer: ") + CPLGetLastErrorMsg());
 
@@ -317,11 +315,7 @@ bool OGRWriter::processOne(PointRef& point)
         if (m_layer->CreateFeature(m_feature))
             throwError(std::string("Can't create OGR feature: ") + CPLGetLastErrorMsg());
 
-#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,5,0)
         m_feature->Reset();
-#else
-        m_feature->SetFID(OGRNullFID);
-#endif
     }
     return true;
 }
@@ -330,11 +324,7 @@ bool OGRWriter::processOne(PointRef& point)
 void OGRWriter::doneFile()
 {
     if (m_curCount % m_multiCount > 0) {
-#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3,5,0)
         m_feature->Reset();
-#else
-        m_feature->SetFID(OGRNullFID);
-#endif
 
         m_feature->SetGeometry(&m_multiPoint);
 
