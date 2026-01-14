@@ -38,10 +38,7 @@
 #include <algorithm>
 #include <numeric>
 
-<<<<<<< HEAD
-=======
-#include "../pdal/private/MathUtils.hpp"
->>>>>>> upstream/m3c2
+#include "private/NormalUtils.hpp"
 #include "private/Comparison.hpp"
 #include <pdal/private/MathUtils.hpp>
 
@@ -185,11 +182,8 @@ void M3C2Filter::done(PointTableRef _)
     if (!m_p->v2)
         throwError("Missing second view.");
     if (!m_p->cores)
-<<<<<<< HEAD
-    {
-        m_p->cores = m_p->v1->makeNew();
-        createSample(*m_p->v1, *m_p->cores);
-    }
+        throwError("Missing core points.");
+
 
     BOX3D v1Bounds;
     m_p->v1->calculateBounds(v1Bounds);
@@ -261,71 +255,13 @@ Eigen::Vector3d M3C2Filter::findNormal(Eigen::Vector3d pos, const PointGrid& gri
     PointIdList neighbors = grid.findNeighbors3d(pos, m_args->normalRadius);
     math::NormalResult res = math::findNormal(grid.view(), neighbors);
     return res.normal;
-=======
-        throwError("Missing core points.");
-
-    calcStats(*m_p->v1, *m_p->v2, *m_p->cores);
->>>>>>> upstream/m3c2
 }
 
 
 bool M3C2Filter::calcStats(const std::vector<double>& pts1, const std::vector<double>& pts2,
     Stats& stats)
 {
-<<<<<<< HEAD
     if (pts1.size() < m_p->minPoints || pts2.size() < m_p->minPoints)
-=======
-    Stats stats;
-
-    for (PointRef core : cores)
-    {
-        Eigen::Vector3d pos(core.getFieldAs<double>(Dimension::Id::X),
-            core.getFieldAs<double>(Dimension::Id::Y),
-            core.getFieldAs<double>(Dimension::Id::Z));
-
-        Eigen::Vector3d normal =
-            math::findNormal(pos(0), pos(1), pos(2), v1, m_args->normRadius).normal;
-
-        if (normal == Eigen::Vector3d::Zero())
-            continue;
-
-        if (m_args->orientation == NormalOrientation::Up)
-            normal = math::orientUp(normal);
-        if (m_args->orientation == NormalOrientation::Origin)
-            normal = math::orientToViewpoint({v1.getFieldAs<float>(Dimension::Id::X, 0),
-                v1.getFieldAs<float>(Dimension::Id::Y, 0), v1.getFieldAs<float>(Dimension::Id::Z, 0)}, normal);
- 
-        if (calcStats(pos, normal, v1, v2, stats))
-        {
-            core.setField(m_p->distanceDim, stats.distance);
-            core.setField(m_p->uncertaintyDim, stats.uncertainty);
-            core.setField(m_p->significantDim, stats.significant);
-            core.setField(m_p->stdDev1Dim, stats.stdDev1);
-            core.setField(m_p->stdDev2Dim, stats.stdDev2);
-            core.setField(m_p->n1Dim, stats.n1);
-            core.setField(m_p->n2Dim, stats.n2);
-        }
-    }
-}
-
-bool M3C2Filter::calcStats(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
-    PointView& v1, PointView& v2, Stats& stats)
-{
-    KD3Index::RadiusResults pts1;
-    v1.build3dIndex().radius(cylCenter(0), cylCenter(1), cylCenter(2),
-        m_p->cylBallRadius, pts1);
-    pts1 = filterPoints(cylCenter, cylNormal, pts1, v1);
-
-    if ((int)pts1.size() < m_args->minPoints)
-        return false;
-
-    KD3Index::RadiusResults pts2;
-    v2.build3dIndex().radius(cylCenter(0), cylCenter(1), cylCenter(2),
-        m_p->cylBallRadius, pts2);
-    pts2 = filterPoints(cylCenter, cylNormal, pts2, v2);
-
-    if ((int)pts2.size() < m_args->minPoints)
->>>>>>> upstream/m3c2
         return false;
 
     // Set square distances to distances
@@ -337,7 +273,7 @@ bool M3C2Filter::calcStats(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
         sum2 += val * val;
     }
     double mean1 = sum / pts1.size();
-    // This is a bad variance calcuation from a computational standpoint but it's simple.
+    // This is a bad variance calcuation from a computational standpoint.
     double var1 = sum2 / pts1.size() - mean1 * mean1;
 
     sum = 0;
