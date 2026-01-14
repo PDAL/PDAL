@@ -38,6 +38,7 @@
 #include <algorithm>
 #include <numeric>
 
+#include "private/NormalUtils.hpp"
 #include "private/Comparison.hpp"
 #include <pdal/private/MathUtils.hpp>
 
@@ -49,8 +50,9 @@ struct M3C2Filter::Args
     double normalRadius;
     double cylRadius;
     double cylHalfLen;
-    int samplePct;
     double regError;
+    NormalOrientation orientation;
+    int minPoints;
 };
 
 struct M3C2Filter::Private
@@ -60,7 +62,6 @@ struct M3C2Filter::Private
     PointViewPtr cores;
     double cylRadius2;
     double cylBallRadius;
-    double minPoints;
     Dimension::Id distanceDim;
     Dimension::Id uncertaintyDim;
     Dimension::Id significantDim;
@@ -91,6 +92,39 @@ M3C2Filter::M3C2Filter() : m_args(new M3C2Filter::Args), m_p(new M3C2Filter::Pri
 M3C2Filter::~M3C2Filter() {}
 
 
+std::istream& operator>>(std::istream& in, M3C2Filter::NormalOrientation& mode)
+{
+    std::string s;
+    in >> s;
+
+    s = Utils::tolower(s);
+    if (s == "up")
+        mode = M3C2Filter::NormalOrientation::Up;
+    else if (s == "origin")
+        mode = M3C2Filter::NormalOrientation::Origin;
+    else if (s == "none")
+        mode = M3C2Filter::NormalOrientation::None;
+    else
+        in.setstate(std::ios_base::failbit);
+    return in;
+}
+
+
+std::ostream& operator<<(std::ostream& out, const M3C2Filter::NormalOrientation& mode)
+{
+    switch (mode)
+    {
+    case M3C2Filter::NormalOrientation::Up:
+        out << "up";
+    case M3C2Filter::NormalOrientation::Origin:
+        out << "origin";
+    case M3C2Filter::NormalOrientation::None:
+        out << "none";
+    }
+    return out;
+}
+
+
 void M3C2Filter::addArgs(ProgramArgs& args)
 {
     args.add("normal_radius", "The radius to use for finding neighbors in the "
@@ -99,9 +133,10 @@ void M3C2Filter::addArgs(ProgramArgs& args)
         "[Default: 2].", m_args->cylRadius, 2.0);
     args.add("cyl_halflen", "The half-length of the cylinder of neighbors used used for "
         "calculating change [Default: 5].", m_args->cylHalfLen, 5.0);
-    args.add("sample_pct", "Sampling percentage for first point view. Ignored if a core view "
-        "is provided.", m_args->samplePct, 10);
     args.add("reg_error", "Registration error [Default: 0].", m_args->regError, 0.0);
+    args.add("orientation", "Orientation of the cylinder & normal", m_args->orientation, NormalOrientation::Up);
+    args.add("min_points", "Minimum number of points within a neighborhood to use for calculating "
+        "statistics [Default: 1].", m_args->minPoints, 1);
 }
 
 
@@ -133,11 +168,10 @@ PointViewSet M3C2Filter::run(PointViewPtr view)
         m_p->v2 = view;
     else if (!m_p->cores)
         m_p->cores = view;
-    else
-        throwError("Too many views provided. Only two or three views are supported.");
 
     PointViewSet set;
-    set.insert(view);
+    if (m_p->cores)
+        set.insert(m_p->cores);
     return set;
 }
 
@@ -148,28 +182,28 @@ void M3C2Filter::done(PointTableRef _)
     if (!m_p->v2)
         throwError("Missing second view.");
     if (!m_p->cores)
-    {
-        m_p->cores = m_p->v1->makeNew();
-        createSample(*m_p->v1, *m_p->cores);
-    }
+        throwError("Missing core points.");
+
 
     BOX3D v1Bounds;
     m_p->v1->calculateBounds(v1Bounds);
 
-    PointGrid g1(v1Bounds.to2d(), *m_p->v1);
-    for (PointRef pt : *m_p->v1)
-        g1.add(pt.getFieldAs<double>(Dimension::Id::X),
-            pt.getFieldAs<double>(Dimension::Id::Y),
-            pt.getFieldAs<double>(Dimension::Id::Z));
+    PointView& v1 = *m_p->v1;
+    PointGrid g1(v1Bounds.to2d(), v1);
+    for (PointId id = 0; id < v1.size(); ++id)
+        g1.add(v1.getFieldAs<double>(Dimension::Id::X, id),
+            v1.getFieldAs<double>(Dimension::Id::Y, id), id);
 
     BOX3D v2Bounds;
     m_p->v2->calculateBounds(v2Bounds);
 
-    PointGrid g2(v2Bounds.to2d(), *m_p->v2);
-    for (PointRef pt : *m_p->v2)
-        g2.add(pt.getFieldAs<double>(Dimension::Id::X),
-            pt.getFieldAs<double>(Dimension::Id::Y),
-            pt.getFieldAs<double>(Dimension::Id::Z));
+    PointView& v2 = *m_p->v2;
+    PointGrid g2(v2Bounds.to2d(), v2);
+    for (PointId id = 0; id < v2.size(); ++id)
+        g2.add(v2.getFieldAs<double>(Dimension::Id::X, id),
+            v2.getFieldAs<double>(Dimension::Id::Y, id), id);
+
+    int i = 0;
 
     for (PointRef ref : *m_p->cores)
     {
@@ -223,19 +257,6 @@ Eigen::Vector3d M3C2Filter::findNormal(Eigen::Vector3d pos, const PointGrid& gri
     return res.normal;
 }
 
-// Super simple sampling.  We just take random points up to the percentage requested.
-void M3C2Filter::createSample(PointView& source, PointView& dest)
-{
-    PointIdList ids(source.size());
-    std::iota(ids.begin(), ids.end(), 0);
-    std::random_device gen;
-    std::shuffle(ids.begin(), ids.end(), std::mt19937(gen()));
-
-    // Get the sample from the front of the shuffled list.
-    ids.resize(static_cast<point_count_t>(source.size() * (m_args->samplePct / 100.0)));
-    for (PointId id : ids)
-        dest.appendPoint(source, id);
-}
 
 bool M3C2Filter::calcStats(const std::vector<double>& pts1, const std::vector<double>& pts2,
     Stats& stats)
@@ -252,7 +273,7 @@ bool M3C2Filter::calcStats(const std::vector<double>& pts1, const std::vector<do
         sum2 += val * val;
     }
     double mean1 = sum / pts1.size();
-    // This is a bad variance calcuation from a computational standpoint but it's simple.
+    // This is a bad variance calcuation from a computational standpoint.
     double var1 = sum2 / pts1.size() - mean1 * mean1;
 
     sum = 0;
