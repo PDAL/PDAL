@@ -38,7 +38,6 @@
 #include <algorithm>
 #include <numeric>
 
-#include "private/NormalUtils.hpp"
 #include "private/Comparison.hpp"
 #include <pdal/private/MathUtils.hpp>
 
@@ -100,8 +99,6 @@ std::istream& operator>>(std::istream& in, M3C2Filter::NormalOrientation& mode)
     s = Utils::tolower(s);
     if (s == "up")
         mode = M3C2Filter::NormalOrientation::Up;
-    else if (s == "origin")
-        mode = M3C2Filter::NormalOrientation::Origin;
     else if (s == "none")
         mode = M3C2Filter::NormalOrientation::None;
     else
@@ -116,8 +113,6 @@ std::ostream& operator<<(std::ostream& out, const M3C2Filter::NormalOrientation&
     {
     case M3C2Filter::NormalOrientation::Up:
         out << "up";
-    case M3C2Filter::NormalOrientation::Origin:
-        out << "origin";
     case M3C2Filter::NormalOrientation::None:
         out << "none";
     }
@@ -184,7 +179,6 @@ void M3C2Filter::done(PointTableRef _)
     if (!m_p->cores)
         throwError("Missing core points.");
 
-
     BOX3D v1Bounds;
     m_p->v1->calculateBounds(v1Bounds);
 
@@ -215,6 +209,8 @@ void M3C2Filter::done(PointTableRef _)
             ref.getFieldAs<double>(Dimension::Id::Z));
 
         Eigen::Vector3d normal = findNormal(core, g1);
+        if (m_args->orientation == NormalOrientation::Up)
+            normal = math::orientUp(normal);
 
         // Find search box around cylinder
         Eigen::Vector3d radius(m_args->cylRadius, m_args->cylRadius, m_args->cylRadius);
@@ -261,7 +257,7 @@ Eigen::Vector3d M3C2Filter::findNormal(Eigen::Vector3d pos, const PointGrid& gri
 bool M3C2Filter::calcStats(const std::vector<double>& pts1, const std::vector<double>& pts2,
     Stats& stats)
 {
-    if (pts1.size() < m_p->minPoints || pts2.size() < m_p->minPoints)
+    if ((int)pts1.size() < m_args->minPoints || (int)pts2.size() < m_args->minPoints)
         return false;
 
     // Set square distances to distances

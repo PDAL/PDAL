@@ -60,7 +60,6 @@ class PDAL_EXPORT M3C2Filter : public Filter
     enum class NormalOrientation
     {
         Up,
-        Origin,
         None
     };
 
