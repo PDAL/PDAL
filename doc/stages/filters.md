@@ -233,6 +233,10 @@ filters.griddecimation
 : Compute pointwise Local Outlier Factor (along with K-Distance and Local
   Reachability Distance).
 
+{ref}`filters.m3c2`
+
+; Compute the 3D distance between two sets of points based on the M3C2 algorithm.
+
 {ref}`filters.miniball`
 
 : Compute a criterion for point neighbors based on the miniball algorithm.
