@@ -57,20 +57,11 @@ void StageRunner::run()
     point_count_t keepSize = m_keeps->size();
 
     // Don't run the stage if we're a filter and we're empty
-    bool bDoRunStage(true);
-    Filter* isFilterType = dynamic_cast<Filter*>(m_stage);
-    if (isFilterType)
-        if (m_keeps->empty())
-            bDoRunStage = false;
-
-    if (bDoRunStage)
-    {
+    if (dynamic_cast<Filter *>(m_stage) && keepSize == 0)
+        m_stage->log()->get(LogLevel::Debug) << "'where' filtering removed all points or "
+            "the reader is empty. Filter '" << m_stage->tag() << "' was not applied.";
+    else
         m_viewSet = m_stage->run(m_keeps);
-    } else
-    {
-        m_stage->log()->get(LogLevel::Debug) << "where filtering removed all points or the reader is empty."
-            << " Filter '" << m_stage->tag() << "' was not applied";
-    }
 
     if (m_skips->size() == 0)
         return;
