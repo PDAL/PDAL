@@ -589,9 +589,6 @@ QuickInfo CopcReader::inspect()
     // and clip our bounds to the selected region.
     if (hasSpatialFilter())
     {
-        // need to start up the threadpool to get the hierarchy
-        m_p->pool.reset(new ThreadPool(m_args->threads));
-
         loadHierarchy();
 
         qi.m_pointCount = m_p->hierarchy.pointCount();
@@ -645,10 +642,10 @@ void CopcReader::addDimensions(PointLayoutPtr layout)
 
 void CopcReader::ready(PointTableRef table)
 {
-    m_p->connector.reset(new connector::Connector(m_filespec));
-
-    // Initialize our threadpool
-    m_p->pool.reset(new ThreadPool(m_args->threads));
+    // We need to reset this again after initialize(), since the reader may be being run
+    // multiple times without re-initializing.
+    if (m_p->done)
+        m_p->connector.reset(new connector::Connector(m_filespec));
 
     // Determine all overlapping data files we'll need to fetch.
     try
@@ -680,6 +677,9 @@ void CopcReader::ready(PointTableRef table)
 
 void CopcReader::loadHierarchy()
 {
+    // Initialize our threadpool if necessary
+    m_p->pool.reset(new ThreadPool(m_args->threads));
+
     // Determine all the keys that overlap the queried area by traversing the
     // hierarchy:
     copc::Key key;
