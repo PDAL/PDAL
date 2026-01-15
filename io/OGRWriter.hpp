@@ -76,7 +76,8 @@ private:
     Dimension::Id m_measureDim;
     std::vector<std::string> m_attrDimNames;
     std::vector<std::string> m_ogrOptions;
-    std::deque<std::tuple<Dimension::Id, Dimension::Type, OGRFieldDefn> > m_attrs;
+    using Attribute = std::tuple<Dimension::Id, Dimension::Type, OGRFieldDefn>;
+    std::deque<Attribute> m_attrs;
     bool m_inTransaction;
 };
 
