@@ -386,6 +386,9 @@ void CopcReader::initialize(PointTableRef table)
     if (m_args->resolution)
         log()->get(LogLevel::Debug) << "Maximum depth: " << m_p->depthEnd << std::endl;
 
+    // Initialize our threadpool
+    m_p->pool.reset(new ThreadPool(m_args->threads));
+
 }
 
 
@@ -642,10 +645,13 @@ void CopcReader::addDimensions(PointLayoutPtr layout)
 
 void CopcReader::ready(PointTableRef table)
 {
-    // We need to reset this again after initialize(), since the reader may be being run
+    // We may need to reset these after initialize(), since the reader could be being run
     // multiple times without re-initializing.
     if (m_p->done)
+    {
+        m_p->pool.reset(new ThreadPool(m_args->m_threads));
         m_p->connector.reset(new connector::Connector(m_filespec));
+    }
 
     // Determine all overlapping data files we'll need to fetch.
     try
@@ -677,9 +683,6 @@ void CopcReader::ready(PointTableRef table)
 
 void CopcReader::loadHierarchy()
 {
-    // Initialize our threadpool if necessary
-    m_p->pool.reset(new ThreadPool(m_args->threads));
-
     // Determine all the keys that overlap the queried area by traversing the
     // hierarchy:
     copc::Key key;
