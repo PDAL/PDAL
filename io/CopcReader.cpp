@@ -386,9 +386,6 @@ void CopcReader::initialize(PointTableRef table)
     if (m_args->resolution)
         log()->get(LogLevel::Debug) << "Maximum depth: " << m_p->depthEnd << std::endl;
 
-    // Initialize our threadpool
-    m_p->pool.reset(new ThreadPool(m_args->threads));
-
 }
 
 
@@ -592,6 +589,9 @@ QuickInfo CopcReader::inspect()
     // and clip our bounds to the selected region.
     if (hasSpatialFilter())
     {
+        // need to start up the threadpool to get the hierarchy
+        m_p->pool.reset(new ThreadPool(m_args->threads));
+
         loadHierarchy();
 
         qi.m_pointCount = m_p->hierarchy.pointCount();
@@ -645,6 +645,11 @@ void CopcReader::addDimensions(PointLayoutPtr layout)
 
 void CopcReader::ready(PointTableRef table)
 {
+    m_p->connector.reset(new connector::Connector(m_filespec));
+
+    // Initialize our threadpool
+    m_p->pool.reset(new ThreadPool(m_args->threads));
+
     // Determine all overlapping data files we'll need to fetch.
     try
     {
