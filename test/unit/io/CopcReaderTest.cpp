@@ -40,9 +40,11 @@
 
 #include <io/CopcReader.hpp>
 #include <io/LasReader.hpp>
+#include <io/NullWriter.hpp>
 #include <filters/CropFilter.hpp>
 #include <filters/ReprojectionFilter.hpp>
 #include <filters/SortFilter.hpp>
+#include <filters/MergeFilter.hpp>
 #include <pdal/SrsBounds.hpp>
 #include <pdal/private/OGRSpec.hpp>
 #include <pdal/util/FileUtils.hpp>
@@ -697,6 +699,35 @@ TEST(CopcReaderTest, boundedpreview)
     pdal::BOX3D bounds3d = qi.m_bounds;
 
     EXPECT_EQ(pdal::Bounds(bounds).to2d(), pdal::Bounds(bounds3d).to2d());
+}
+
+TEST(CopcReaderTest, multipleInputs)
+{
+    CopcReader reader;
+    {
+        Options options;
+        options.add("filename", copcPath);
+        reader.setOptions(options);
+    }
+    SortFilter sortCopc;
+    {
+        Options options;
+        options.add("dimension", "GpsTime");
+        sortCopc.setOptions(options);
+        sortCopc.setInput(reader);
+    }
+
+    MergeFilter f;
+    {
+        f.setInput(reader);
+        f.setInput(sortCopc);
+    }
+
+    PointTable table;
+    f.prepare(table);
+    PointViewSet s = f.execute(table);
+    PointViewPtr v = *s.begin();
+    EXPECT_EQ(v->size(), 1037724u);
 }
 
 } // namespace pdal

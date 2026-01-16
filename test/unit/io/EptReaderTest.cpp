@@ -43,6 +43,8 @@
 #include <io/LasReader.hpp>
 #include <filters/CropFilter.hpp>
 #include <filters/ReprojectionFilter.hpp>
+#include <filters/HeadFilter.hpp>
+#include <filters/MergeFilter.hpp>
 #include <pdal/private/OGRSpec.hpp>
 #include <pdal/SrsBounds.hpp>
 #include <pdal/Writer.hpp>
@@ -1084,6 +1086,34 @@ TEST(EptReaderTest, bcbfToLonLat)
     }
 
     EXPECT_EQ(np, 5);
+}
+
+TEST(CopcReaderTest, duplicateInputs)
+{
+    EptReader reader;
+    {
+        Options options;
+        options.add("filename", eptLaszipPath);
+        reader.setOptions(options);
+    }
+    HeadFilter f;
+    {
+        Options options;
+        options.add("count", 1500);
+        f.setOptions(options);
+        f.setInput(reader);
+    }
+    MergeFilter merge;
+    {
+        merge.setInput(reader);
+        merge.setInput(f);
+    }
+
+    PointTable eptTable;
+    merge.prepare(eptTable);
+    PointViewSet viewSet = merge.execute(eptTable);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 520362u);
 }
 
 } // namespace pdal
