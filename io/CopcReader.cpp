@@ -645,6 +645,14 @@ void CopcReader::addDimensions(PointLayoutPtr layout)
 
 void CopcReader::ready(PointTableRef table)
 {
+    // We may need to reset these after initialize(), since the reader could be being run
+    // multiple times without re-initializing.
+    if (m_p->done)
+    {
+        m_p->pool.reset(new ThreadPool(m_args->threads));
+        m_p->connector.reset(new connector::Connector(m_filespec));
+    }
+
     // Determine all overlapping data files we'll need to fetch.
     try
     {

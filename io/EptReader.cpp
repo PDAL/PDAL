@@ -589,6 +589,14 @@ void EptReader::ready(PointTableRef table)
     m_nodeIdDim = table.layout()->findDim("EptNodeId");
     m_pointIdDim = table.layout()->findDim("EptPointId");
 
+    // We may be running multiple times without re-initializing. reset the
+    // connector & threadpool if so.
+    if (m_p->done)
+    {
+        m_p->connector.reset(new connector::Connector(m_filespec));
+        m_p->pool.reset(new ThreadPool(m_args->m_threads));
+    }
+
     if (
         m_queryOriginId != -1 &&
         !table.layout()->hasDim(Dimension::Id::OriginId))
@@ -949,6 +957,7 @@ void EptReader::process(PointViewPtr dstView, const ept::TileContents& tile,
 
 void EptReader::done(PointTableRef)
 {
+    m_p->done = true;
     m_p->pool->await();
     m_p->connector.reset();
 }

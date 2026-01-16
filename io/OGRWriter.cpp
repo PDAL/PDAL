@@ -38,6 +38,7 @@
 #include "OGRWriter.hpp"
 
 #include <sstream>
+#include <tuple>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wredundant-decls"
@@ -187,7 +188,18 @@ void OGRWriter::readyTable(PointTableRef table)
                 throwError("Unknown type for dimension '" + name + "' (attr_dims).");
                 continue;
         }
-        m_attrs.emplace_back(dim, dimType, OGRFieldDefn(name.c_str(), ogrType));
+
+        // This is strange code. The attributes stored in m_attrs are a tuple and the
+        // third element is an OGRFieldDefn, NOT an OGRFieldDefn*. However, there is a
+        // constructor for an OGRFieldDefn that takes OGRFieldDefn* and that's
+        // what's invoked in emplace_back() below.
+        // Despite the existince of this copying via a pointer, older versions of GDAL
+        // disallowed the normal copy constructor for OGRFieldDefn.  This changed with
+        // GDAL version 3.10.2, where regular copy ctors were enabled. So if PDAL
+        // requries GDAL of at least that version, this dynamic allocation can
+        // be replaced with a stack-based construction.
+        std::unique_ptr<OGRFieldDefn> fieldDef(new OGRFieldDefn(name.c_str(), ogrType));
+        m_attrs.emplace_back(dim, dimType, fieldDef.get());
     }
 }
 
