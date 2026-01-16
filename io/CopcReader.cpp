@@ -649,7 +649,7 @@ void CopcReader::ready(PointTableRef table)
     // multiple times without re-initializing.
     if (m_p->done)
     {
-        m_p->pool.reset(new ThreadPool(m_args->m_threads));
+        m_p->pool.reset(new ThreadPool(m_args->threads));
         m_p->connector.reset(new connector::Connector(m_filespec));
     }
 
