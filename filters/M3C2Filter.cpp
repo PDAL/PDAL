@@ -212,24 +212,10 @@ void M3C2Filter::done(PointTableRef _)
         if (m_args->orientation == NormalOrientation::Up)
             normal = math::orientUp(normal);
 
-        // Find search box around cylinder
-        Eigen::Vector3d radius(m_args->cylRadius, m_args->cylRadius, m_args->cylRadius);
-        Eigen::Vector3d end1 = core + (normal * m_args->cylHalfLen);
-        Eigen::Vector3d end2 = core - (normal * m_args->cylHalfLen);
-        Eigen::Vector3d c1 = end1 + radius;
-        Eigen::Vector3d c2 = end1 - radius;
-        Eigen::Vector3d c3 = end2 + radius;
-        Eigen::Vector3d c4 = end2 - radius;
-        BOX2D box;
-        box.grow(c1(0), c1(1));
-        box.grow(c2(0), c2(1));
-        box.grow(c3(0), c3(1));
-        box.grow(c4(0), c4(1));
-
-        PointIdList pts = g1.findNeighbors(box);
+        PointIdList pts = g1.findNeighbors(ref, m_p->cylBallRadius);
         std::vector<double> dists1 = filterPoints(core, normal, g1.view(), pts);
 
-        pts = g2.findNeighbors(box);
+        pts = g2.findNeighbors(ref, m_p->cylBallRadius);
         std::vector<double> dists2 = filterPoints(core, normal, g2.view(), pts);
 
         Stats stats;
@@ -303,11 +289,22 @@ std::vector<double> M3C2Filter::filterPoints(Eigen::Vector3d cylCenter, Eigen::V
 
     if (!neighbors.size())
         return dists;
-
     dists.reserve(neighbors.size());
+
+    Eigen::Vector3d point(view.getFieldAs<double>(Dimension::Id::X, 0),
+        view.getFieldAs<double>(Dimension::Id::Y, 0),
+        view.getFieldAs<double>(Dimension::Id::Z, 0));
+
     size_t start = 0;
-    for (PointId id : neighbors)
+    // If the first point is the test point, ignore it.
+    if (Comparison::closeEnough(cylCenter(0), point(0)) &&
+    Comparison::closeEnough(cylCenter(1), point(1)) &&
+    Comparison::closeEnough(cylCenter(2), point(2)))
+        start++;
+    
+    for (size_t i = start; i < neighbors.size(); i++)
     {
+        PointId id = neighbors[i];
         Eigen::Vector3d point(view.getFieldAs<double>(Dimension::Id::X, id),
             view.getFieldAs<double>(Dimension::Id::Y, id),
             view.getFieldAs<double>(Dimension::Id::Z, id));

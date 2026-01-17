@@ -104,7 +104,10 @@ public:
     }
 
     PointIdList findNeighbors3d(Eigen::Vector3d pos, double radius) const;
+    //std::vector<std::pair<PointId, double>> findRadiusNeighbors3d(Eigen::Vector3d pos, double radius) const;
+    //PointIdList findNeighbors(BOX3D extent) const;
     PointIdList findNeighbors(BOX2D extent) const;
+    PointIdList findNeighbors(PointRef& point, double radius) const;
 
 private:
     std::vector<Cell> m_cells;
