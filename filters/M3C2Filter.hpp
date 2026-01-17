@@ -86,7 +86,6 @@ private:
     virtual PointViewSet run(PointViewPtr view);
     virtual void done(PointTableRef table);
 
-    void createSample(PointView& source, PointView& dest);
     Eigen::Vector3d findNormal(Eigen::Vector3d pos, const PointGrid& grid);
 
     bool calcStats(const std::vector<double>& dists1, const std::vector<double>& dists2,

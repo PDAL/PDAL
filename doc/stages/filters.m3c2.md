@@ -40,16 +40,16 @@ For best results, the input point sets can be aligned using a registration algor
 [
     {
         "filename": "fixed.las",
-        "tag": "1"
+        "tag": "A"
     },
     {
         "type": "filters.sample",
         "cell": 5.0,
-        "tag": "1A"
+        "tag": "Sampled"
     },
     {
         "filename": "compare.las",
-        "tag": "2"
+        "tag": "B"
     },
     {
         "type": "filters.m3c2",
@@ -57,9 +57,9 @@ For best results, the input point sets can be aligned using a registration algor
         "cyl_radius": 10,
         "cyl_halflen": 5,
         "inputs": [
-            "1",
-            "2",
-            "1A"
+            "A",
+            "B",
+            "Sampled"
         ]
     },
         "output.las"
