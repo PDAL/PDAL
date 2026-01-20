@@ -133,6 +133,13 @@ StringList Header::validate(uint64_t fileSize) const
     if (!pointFormatSupported(pointFormat()))
         errors.push_back("Unsupported LAS input point format: " +
             Utils::toString((int)pointFormat()) + ".");
+    if (pointSize < baseCount())
+        errors.push_back("Invalid point size of " + std::to_string(pointSize) +
+            ". Less than minimum required for point format " +
+            std::to_string((int)pointFormat()) + ".");
+    if (versionMajor != 1 || versionMinor > 4)
+        errors.push_back("Unsupported LAS version '" + std::to_string(versionMajor) + "." +
+            std::to_string(versionMinor) + "'.");
     return errors;
 }
 
