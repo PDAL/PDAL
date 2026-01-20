@@ -197,8 +197,6 @@ void M3C2Filter::done(PointTableRef _)
         g2.add(v2.getFieldAs<double>(Dimension::Id::X, id),
             v2.getFieldAs<double>(Dimension::Id::Y, id), id);
 
-    int i = 0;
-
     for (PointRef ref : *m_p->cores)
     {
         PointIdList pts1;
@@ -301,7 +299,7 @@ std::vector<double> M3C2Filter::filterPoints(Eigen::Vector3d cylCenter, Eigen::V
     Comparison::closeEnough(cylCenter(1), point(1)) &&
     Comparison::closeEnough(cylCenter(2), point(2)))
         start++;
-    
+
     for (size_t i = start; i < neighbors.size(); i++)
     {
         PointId id = neighbors[i];
