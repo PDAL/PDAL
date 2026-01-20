@@ -99,6 +99,8 @@ std::istream& operator>>(std::istream& in, M3C2Filter::NormalOrientation& mode)
     s = Utils::tolower(s);
     if (s == "up")
         mode = M3C2Filter::NormalOrientation::Up;
+    else if (s == "down")
+        mode = M3C2Filter::NormalOrientation::Down;
     else if (s == "none")
         mode = M3C2Filter::NormalOrientation::None;
     else
@@ -113,8 +115,13 @@ std::ostream& operator<<(std::ostream& out, const M3C2Filter::NormalOrientation&
     {
     case M3C2Filter::NormalOrientation::Up:
         out << "up";
+        break;
+    case M3C2Filter::NormalOrientation::Down:
+        out << "down";
+        break;
     case M3C2Filter::NormalOrientation::None:
         out << "none";
+        break;
     }
     return out;
 }
@@ -209,6 +216,8 @@ void M3C2Filter::done(PointTableRef _)
         Eigen::Vector3d normal = findNormal(core, g1);
         if (m_args->orientation == NormalOrientation::Up)
             normal = math::orientUp(normal);
+        else if (m_args->orientation == NormalOrientation::Down)
+            if (normal(2) > 0) normal = -normal;
 
         PointIdList pts = g1.findNeighbors(ref, m_p->cylBallRadius);
         std::vector<double> dists1 = filterPoints(core, normal, g1.view(), pts);
