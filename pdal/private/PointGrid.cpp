@@ -36,15 +36,7 @@
 
 namespace pdal
 {
-/*
-PointIdList PointGrid::findKnn3d(Eigen::Vector3d pos, uint32_t k) const
-{
-    BOX2D extent;
-    extent.grow(pos(0), pos(1));  // Start with center point
-    extent.grow(k);               // Expand by radius
-    extent.clip(bounds());        // Clip to grid bounds.
-}
-*/
+
 PointIdList PointGrid::findNeighbors3d(Eigen::Vector3d pos, double radius) const
 {
     BOX2D extent;
