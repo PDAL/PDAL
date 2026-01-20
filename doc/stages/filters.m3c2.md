@@ -83,12 +83,13 @@ cyl_halflen
 
 reg_error
 
-: Registration error. \[Default: 0\]
+: Registration error; used for calculating the confidence interval (`m3c2_uncertainty` dimension), 
+  where a higher registration error gives higher uncertainty. \[Default: 0\]
 
 orientation
 
 : Which direction to orient the cylinder/normal vector used for comparison between the two point clouds. 
- Can be in the direction of "up", "origin", or "none". \[Default: "up"\]
+  Can be in the direction of "up" (+Z), "down" (-Z) or "none". \[Default: "up"\]
 
 min_points
 
