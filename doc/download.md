@@ -135,8 +135,22 @@ Because the PDAL package (and it's dependencies) live in the [Conda Forge]
 channel, the command to install both the PDAL application and the Python
 extension is
 
+#### Install Everything and GDAL too
+
 ```
-conda install -c conda-forge python-pdal libpdal
+conda install -c conda-forge python-pdal gdal
+```
+
+#### Just the ``pdal`` Command Line
+
+```
+conda install -c conda-forge pdal
+```
+
+#### Install the base library and dynamic extensions
+
+```
+conda install -c conda-forge libpdal
 ```
 
 It is strongly recommended that you make use of Conda's environment management
