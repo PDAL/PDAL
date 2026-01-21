@@ -652,6 +652,8 @@ void TIndexKernel::getFileInfo(FileInfo& fileInfo)
 
     // Need to make sure options get set.
     Stage& reader = manager.makeReader(fileInfo.m_filename, "");
+    LogPtr log(Log::makeLog("", "stderr"));
+    reader.setLog(log);
 
     // If we aren't able to make a hexbin filter, we
     // will just do a simple fast_boundary.
