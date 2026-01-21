@@ -18,10 +18,9 @@ $ pdal tindex create <tindex> <glob>
 
 ```
 --tindex               OGR-readable/writeable tile index output
---glob                 Glob pattern of files to index, or a single text file from which 
-                       to read a list of files to index (if `filelist` is specified).
+--glob                 Glob pattern of files to index
 --stdin, -s            Read list of input files from standard input
---filelist             Read list of input files from text file input (newline delimited)
+--filelist             Text file to read list of input files from (newline delimited)
 --fast_boundary        Use extent instead of exact boundary
 --lyr_name             OGR layer name to write into datasource
 --tindex_name          Tile index column name
@@ -102,8 +101,8 @@ using `--filelist`, and write a SQLite tile index file with a layer named `pdal`
 
 ```
 $ find las/ -iname "*.las" > files.txt
-$ pdal tindex create index.sqlite files.txt -f "SQLite" \
-    --filelist --lyr_name pdal
+$ pdal tindex create index.sqlite --filelist files.txt -f "SQLite" \
+    --lyr_name pdal
 ```
 
 ## Example 3:

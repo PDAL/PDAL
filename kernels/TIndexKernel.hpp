@@ -113,6 +113,7 @@ private:
     std::string m_idxFilename;
     std::string m_filespec;
     StringList m_files;
+    std::string m_filelist;
     std::string m_layerName;
     std::string m_driverName;
     std::string m_tileIndexColumnName;
@@ -134,7 +135,6 @@ private:
     std::string m_assignSrsString;
     bool m_fastBoundary;
     bool m_usestdin;
-    bool m_useFilelist;
     bool m_overrideASrs;
     bool m_skipMultiSrs;
     std::string m_originalSrs;

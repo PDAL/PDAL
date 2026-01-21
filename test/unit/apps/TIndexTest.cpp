@@ -106,10 +106,16 @@ TEST(TIndex, test2)
     pos = output.find("Can't specify both");
     EXPECT_NE(pos, std::string::npos);
 
-    cmd = Support::binpath("pdal") + " tindex create --filelist " + 
-        "--stdin " + outSpec + " -f GeoJSON 2>&1";
+    cmd = Support::binpath("pdal") + " tindex create --filelist \"" + 
+        inSpec + "\" --stdin " + outSpec + " -f GeoJSON 2>&1";
     Utils::run_shell_command(cmd, output);
-    pos = output.find("Can't specify --filelist without");
+    pos = output.find("Can't specify both");
+    EXPECT_NE(pos, std::string::npos);
+
+    cmd = Support::binpath("pdal") + " tindex create --glob \"" + inSpec + 
+        "\" --filelist \"" + inSpec + "\" --tindex=" + outSpec + " -f GeoJSON 2>&1";
+    Utils::run_shell_command(cmd, output);
+    pos = output.find("Can't specify both");
     EXPECT_NE(pos, std::string::npos);
 
     cmd = Support::binpath("pdal") + " tindex create " + outSpec + 
@@ -285,7 +291,7 @@ TEST(TIndex, test7)
     Utils::run_shell_command(cmd, output);
 
     cmd = Support::binpath("pdal") + " tindex create --tindex=\"/vsistdout/\"" +
-        " --glob=\"" + inList + "\" --filelist -f GeoJSON --threshold=1 --resolution=1.0";
+        " --filelist=\"" + inList + "\" -f GeoJSON --threshold=1 --resolution=1.0";
     Utils::run_shell_command(cmd, output);
     StringList geoms = getGeometry(output);
 

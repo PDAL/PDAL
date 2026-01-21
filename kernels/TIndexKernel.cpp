@@ -176,7 +176,7 @@ void TIndexKernel::addSubSwitches(ProgramArgs& args,
         args.add("glob", "Pattern of files to index",
             m_filespec).setOptionalPositional();
         args.addSynonym("glob", "filespec");
-        args.add("filelist", "Treat file input as a text list of files", m_useFilelist);
+        args.add("filelist", "Text file containing list of files to index", m_filelist);
         args.add("fast_boundary", "Use extent instead of exact boundary",
             m_fastBoundary);
         args.add("lyr_name", "OGR layer name to write into datasource",
@@ -246,11 +246,15 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
     }
     else
     {
-        if (m_filespec.empty() && !m_usestdin)
-            throw pdal_error("Must specify either --glob or --stdin.");
-        if (m_filespec.empty() && m_useFilelist)
-            throw pdal_error("Can't specify --filelist without providing "
-               " a text file to read.");
+        if (m_filespec.empty() && !m_usestdin && !m_filelist.size())
+            throw pdal_error("Must specify either --glob, --filelist or"
+                " --stdin.");
+        if (m_filespec.size() && m_filelist.size())
+            throw pdal_error("Can't specify both --filelist and --glob "
+                "options.");
+        if (m_filelist.size() && m_usestdin)
+            throw pdal_error("Can't specify both --filelist and --stdin "
+                "options.");
         if (m_filespec.size() && m_usestdin)
             throw pdal_error("Can't specify both --glob and --stdin "
                 "options.");
@@ -346,10 +350,10 @@ bool TIndexKernel::isFileIndexed(const FieldIndexes& indexes,
 
 void TIndexKernel::createFile()
 {
-    if (!m_usestdin && !m_useFilelist)
+    if (!m_usestdin && m_filelist.empty())
         m_files = Utils::glob(m_filespec);
-    else if (m_useFilelist && !m_usestdin)
-        m_files = readFileList(m_filespec);
+    else if (m_filelist.size())
+        m_files = readFileList(m_filelist);
     else
         m_files = readSTDIN();
 
