@@ -41,7 +41,7 @@ $ pdal tindex create <tindex> <glob>
                        boundary creation
 ```
 
-This command will index the files referred to by `glob` or `filelist` and place the
+This command will index the files referred to by `glob` and place the
 result in `tindex`.  The `tindex` is a vector file or database that
 will be created by `pdal` as necessary to store the file index.
 The type of the index
