@@ -91,6 +91,7 @@ private:
 
     bool calcStats(const std::vector<double>& dists1, const std::vector<double>& dists2,
         Stats& stats);
+    BOX2D calcCylinderBounds(Eigen::Vector3d center, Eigen::Vector3d normal);
     std::vector<double> filterPoints(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
         const PointView& ids, const PointIdList& neighbors);
     double pointPasses(Eigen::Vector3d point, Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal);
