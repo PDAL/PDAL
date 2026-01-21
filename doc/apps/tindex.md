@@ -13,7 +13,7 @@ spatial index file that meet some criteria (usually a geographic region filter).
 ## tindex Creation Mode
 
 ```
-$ pdal tindex create <tindex> <infile>
+$ pdal tindex create <tindex> <glob>
 ```
 
 ```
