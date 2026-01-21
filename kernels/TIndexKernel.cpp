@@ -305,7 +305,9 @@ StringList readSTDIN()
 
 StringList readFileList(const std::string& filename)
 {
-    std::istream* in = FileUtils::openFile(filename);
+    std::istream* in = Utils::openFile(filename);
+    if (!in)
+        throw pdal_error("Unable to open file '" + filename + "'");
     std::string line;
     StringList output;
     while (std::getline(*in, line))
