@@ -219,10 +219,23 @@ void M3C2Filter::done(PointTableRef _)
         else if (m_args->orientation == NormalOrientation::Down)
             if (normal(2) > 0) normal = -normal;
 
-        PointIdList pts = g1.findNeighbors(ref, m_p->cylBallRadius);
+        Eigen::Vector3d radius(m_args->cylRadius, m_args->cylRadius, m_args->cylRadius);
+        Eigen::Vector3d end1 = core + (normal * m_args->cylHalfLen);
+        Eigen::Vector3d end2 = core - (normal * m_args->cylHalfLen);
+        Eigen::Vector3d c1 = end1 + radius;
+        Eigen::Vector3d c2 = end1 - radius;
+        Eigen::Vector3d c3 = end2 + radius;
+        Eigen::Vector3d c4 = end2 - radius;
+        BOX2D box;
+        box.grow(c1(0), c1(1));
+        box.grow(c2(0), c2(1));
+        box.grow(c3(0), c3(1));
+        box.grow(c4(0), c4(1));
+
+        PointIdList pts = g1.findNeighbors(box);
         std::vector<double> dists1 = filterPoints(core, normal, g1.view(), pts);
 
-        pts = g2.findNeighbors(ref, m_p->cylBallRadius);
+        pts = g2.findNeighbors(box);
         std::vector<double> dists2 = filterPoints(core, normal, g2.view(), pts);
 
         Stats stats;
