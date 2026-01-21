@@ -173,8 +173,10 @@ void TIndexKernel::addSubSwitches(ProgramArgs& args,
     {
         args.add("tindex", "OGR-readable/writeable tile index output",
             m_idxFilename).setPositional();
-        args.add("filespec", "Pattern of files to index",
+        args.add("glob", "Pattern of files to index",
             m_filespec).setOptionalPositional();
+        args.addSynonym("glob", "filespec");
+        args.add("filelist", "Treat file input as a text list of files", m_useFilelist);
         args.add("fast_boundary", "Use extent instead of exact boundary",
             m_fastBoundary);
         args.add("lyr_name", "OGR layer name to write into datasource",
@@ -245,9 +247,12 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
     else
     {
         if (m_filespec.empty() && !m_usestdin)
-            throw pdal_error("Must specify either --filespec or --stdin.");
+            throw pdal_error("Must specify either --glob or --stdin.");
+        if (m_filespec.empty() && m_useFilelist)
+            throw pdal_error("Can't specify --filelist without providing "
+               " a text file to read.");
         if (m_filespec.size() && m_usestdin)
-            throw pdal_error("Can't specify both --filespec and --stdin "
+            throw pdal_error("Can't specify both --glob and --stdin "
                 "options.");
         if (m_prefix.size() && m_absPath)
             throw pdal_error("Can't specify both --write_absolute_path and "
@@ -294,6 +299,19 @@ StringList readSTDIN()
     return output;
 }
 
+StringList readFileList(const std::string& filename)
+{
+    std::istream* in = FileUtils::openFile(filename);
+    std::string line;
+    StringList output;
+    while (std::getline(*in, line))
+    {
+        output.push_back(line);
+    }
+    FileUtils::closeFile(in);
+    return output;
+}
+
 
 bool TIndexKernel::isFileIndexed(const FieldIndexes& indexes,
     const FileInfo& fileInfo)
@@ -328,8 +346,10 @@ bool TIndexKernel::isFileIndexed(const FieldIndexes& indexes,
 
 void TIndexKernel::createFile()
 {
-    if (!m_usestdin)
+    if (!m_usestdin && !m_useFilelist)
         m_files = Utils::glob(m_filespec);
+    else if (m_useFilelist && !m_usestdin)
+        m_files = readFileList(m_filespec);
     else
         m_files = readSTDIN();
 

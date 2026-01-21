@@ -134,6 +134,7 @@ private:
     std::string m_assignSrsString;
     bool m_fastBoundary;
     bool m_usestdin;
+    bool m_useFilelist;
     bool m_overrideASrs;
     bool m_skipMultiSrs;
     std::string m_originalSrs;
