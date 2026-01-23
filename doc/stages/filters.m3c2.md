@@ -40,16 +40,16 @@ For best results, the input point sets can be aligned using a registration algor
 [
     {
         "filename": "fixed.las",
-        "tag": "1"
+        "tag": "A"
     },
     {
         "type": "filters.sample",
         "cell": 5.0,
-        "tag": "1A"
+        "tag": "Sampled"
     },
     {
         "filename": "compare.las",
-        "tag": "2"
+        "tag": "B"
     },
     {
         "type": "filters.m3c2",
@@ -57,9 +57,9 @@ For best results, the input point sets can be aligned using a registration algor
         "cyl_radius": 10,
         "cyl_halflen": 5,
         "inputs": [
-            "1",
-            "2",
-            "1A"
+            "A",
+            "B",
+            "Sampled"
         ]
     },
         "output.las"
@@ -83,12 +83,13 @@ cyl_halflen
 
 reg_error
 
-: Registration error. \[Default: 0\]
+: Registration error; used for calculating the confidence interval (`m3c2_uncertainty` dimension), 
+  where a higher registration error gives higher uncertainty. \[Default: 0\]
 
 orientation
 
 : Which direction to orient the cylinder/normal vector used for comparison between the two point clouds. 
- Can be in the direction of "up", "origin", or "none". \[Default: "up"\]
+  Can be in the direction of "up" (+Z), "down" (-Z) or "none". \[Default: "up"\]
 
 min_points
 

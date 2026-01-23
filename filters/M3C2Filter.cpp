@@ -38,15 +38,15 @@
 #include <algorithm>
 #include <numeric>
 
-#include "../pdal/private/MathUtils.hpp"
 #include "private/Comparison.hpp"
+#include <pdal/private/MathUtils.hpp>
 
 namespace pdal
 {
 
 struct M3C2Filter::Args
 {
-    double normRadius;
+    double normalRadius;
     double cylRadius;
     double cylHalfLen;
     double regError;
@@ -99,8 +99,8 @@ std::istream& operator>>(std::istream& in, M3C2Filter::NormalOrientation& mode)
     s = Utils::tolower(s);
     if (s == "up")
         mode = M3C2Filter::NormalOrientation::Up;
-    else if (s == "origin")
-        mode = M3C2Filter::NormalOrientation::Origin;
+    else if (s == "down")
+        mode = M3C2Filter::NormalOrientation::Down;
     else if (s == "none")
         mode = M3C2Filter::NormalOrientation::None;
     else
@@ -115,10 +115,13 @@ std::ostream& operator<<(std::ostream& out, const M3C2Filter::NormalOrientation&
     {
     case M3C2Filter::NormalOrientation::Up:
         out << "up";
-    case M3C2Filter::NormalOrientation::Origin:
-        out << "origin";
+        break;
+    case M3C2Filter::NormalOrientation::Down:
+        out << "down";
+        break;
     case M3C2Filter::NormalOrientation::None:
         out << "none";
+        break;
     }
     return out;
 }
@@ -127,7 +130,7 @@ std::ostream& operator<<(std::ostream& out, const M3C2Filter::NormalOrientation&
 void M3C2Filter::addArgs(ProgramArgs& args)
 {
     args.add("normal_radius", "The radius to use for finding neighbors in the "
-        "calculation of normals [Default: 2].", m_args->normRadius, 2.0);
+        "calculation of normals [Default: 2].", m_args->normalRadius, 2.0);
     args.add("cyl_radius", "The radius of the cylinder of neighbors used for calculating change "
         "[Default: 2].", m_args->cylRadius, 2.0);
     args.add("cyl_halflen", "The half-length of the cylinder of neighbors used used for "
@@ -183,71 +186,93 @@ void M3C2Filter::done(PointTableRef _)
     if (!m_p->cores)
         throwError("Missing core points.");
 
-    calcStats(*m_p->v1, *m_p->v2, *m_p->cores);
-}
+    BOX3D v1Bounds;
+    m_p->v1->calculateBounds(v1Bounds);
 
+    PointView& v1 = *m_p->v1;
+    PointGrid g1(v1Bounds.to2d(), v1);
+    for (PointId id = 0; id < v1.size(); ++id)
+        g1.add(v1.getFieldAs<double>(Dimension::Id::X, id),
+            v1.getFieldAs<double>(Dimension::Id::Y, id), id);
 
-void M3C2Filter::calcStats(PointView& v1, PointView& v2, PointView& cores)
-{
-    Stats stats;
+    BOX3D v2Bounds;
+    m_p->v2->calculateBounds(v2Bounds);
 
-    for (PointRef core : cores)
+    PointView& v2 = *m_p->v2;
+    PointGrid g2(v2Bounds.to2d(), v2);
+    for (PointId id = 0; id < v2.size(); ++id)
+        g2.add(v2.getFieldAs<double>(Dimension::Id::X, id),
+            v2.getFieldAs<double>(Dimension::Id::Y, id), id);
+
+    for (PointRef ref : *m_p->cores)
     {
-        Eigen::Vector3d pos(core.getFieldAs<double>(Dimension::Id::X),
-            core.getFieldAs<double>(Dimension::Id::Y),
-            core.getFieldAs<double>(Dimension::Id::Z));
+        PointIdList pts1;
+        PointIdList pts2;
 
-        Eigen::Vector3d normal =
-            math::findNormal(pos(0), pos(1), pos(2), v1, m_args->normRadius).normal;
+        Eigen::Vector3d core(ref.getFieldAs<double>(Dimension::Id::X),
+            ref.getFieldAs<double>(Dimension::Id::Y),
+            ref.getFieldAs<double>(Dimension::Id::Z));
 
-        if (normal == Eigen::Vector3d::Zero())
-            continue;
-
+        Eigen::Vector3d normal = findNormal(core, g1);
         if (m_args->orientation == NormalOrientation::Up)
             normal = math::orientUp(normal);
-        if (m_args->orientation == NormalOrientation::Origin)
-            normal = math::orientToViewpoint({v1.getFieldAs<float>(Dimension::Id::X, 0),
-                v1.getFieldAs<float>(Dimension::Id::Y, 0), v1.getFieldAs<float>(Dimension::Id::Z, 0)}, normal);
- 
-        if (calcStats(pos, normal, v1, v2, stats))
+        else if (m_args->orientation == NormalOrientation::Down)
+            if (normal(2) > 0) normal = -normal;
+
+        Eigen::Vector3d radius(m_args->cylRadius, m_args->cylRadius, m_args->cylRadius);
+        Eigen::Vector3d end1 = core + (normal * m_args->cylHalfLen);
+        Eigen::Vector3d end2 = core - (normal * m_args->cylHalfLen);
+        Eigen::Vector3d c1 = end1 + radius;
+        Eigen::Vector3d c2 = end1 - radius;
+        Eigen::Vector3d c3 = end2 + radius;
+        Eigen::Vector3d c4 = end2 - radius;
+        BOX2D box;
+        box.grow(c1(0), c1(1));
+        box.grow(c2(0), c2(1));
+        box.grow(c3(0), c3(1));
+        box.grow(c4(0), c4(1));
+
+        PointIdList pts = g1.findNeighbors(box);
+        std::vector<double> dists1 = filterPoints(core, normal, g1.view(), pts);
+
+        pts = g2.findNeighbors(box);
+        std::vector<double> dists2 = filterPoints(core, normal, g2.view(), pts);
+
+        Stats stats;
+        if (calcStats(dists1, dists2, stats))
         {
-            core.setField(m_p->distanceDim, stats.distance);
-            core.setField(m_p->uncertaintyDim, stats.uncertainty);
-            core.setField(m_p->significantDim, stats.significant);
-            core.setField(m_p->stdDev1Dim, stats.stdDev1);
-            core.setField(m_p->stdDev2Dim, stats.stdDev2);
-            core.setField(m_p->n1Dim, stats.n1);
-            core.setField(m_p->n2Dim, stats.n2);
+            ref.setField(m_p->distanceDim, stats.distance);
+            ref.setField(m_p->uncertaintyDim, stats.uncertainty);
+            ref.setField(m_p->significantDim, stats.significant);
+            ref.setField(m_p->stdDev1Dim, stats.stdDev1);
+            ref.setField(m_p->stdDev2Dim, stats.stdDev2);
+            ref.setField(m_p->n1Dim, stats.n1);
+            ref.setField(m_p->n2Dim, stats.n2);
         }
     }
 }
 
-bool M3C2Filter::calcStats(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
-    PointView& v1, PointView& v2, Stats& stats)
+Eigen::Vector3d M3C2Filter::findNormal(Eigen::Vector3d pos, const PointGrid& grid)
 {
-    KD3Index::RadiusResults pts1;
-    v1.build3dIndex().radius(cylCenter(0), cylCenter(1), cylCenter(2),
-        m_p->cylBallRadius, pts1);
-    pts1 = filterPoints(cylCenter, cylNormal, pts1, v1);
+    PointIdList neighbors = grid.findNeighbors3d(pos, m_args->normalRadius);
+    math::NormalResult res = math::findNormal(grid.view(), neighbors);
+    return res.normal;
+}
 
-    if ((int)pts1.size() < m_args->minPoints)
-        return false;
 
-    KD3Index::RadiusResults pts2;
-    v2.build3dIndex().radius(cylCenter(0), cylCenter(1), cylCenter(2),
-        m_p->cylBallRadius, pts2);
-    pts2 = filterPoints(cylCenter, cylNormal, pts2, v2);
-
-    if ((int)pts2.size() < m_args->minPoints)
+bool M3C2Filter::calcStats(const std::vector<double>& pts1, const std::vector<double>& pts2,
+    Stats& stats)
+{
+    if ((int)pts1.size() < m_args->minPoints || (int)pts2.size() < m_args->minPoints)
         return false;
 
     // Set square distances to distances
     double sum = 0;
     double sum2 = 0;
-    for (KD3Index::RadiusResult& r : pts1)
+    for (double val : pts1)
     {
-        sum += r.second;
-        sum2 += std::pow(r.second, 2);
+        sum += val;
+        sum2 += val * val;
     }
     double mean1 = sum / pts1.size();
     // This is a bad variance calcuation from a computational standpoint.
@@ -255,10 +280,10 @@ bool M3C2Filter::calcStats(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
 
     sum = 0;
     sum2 = 0;
-    for (KD3Index::RadiusResult& r : pts2)
+    for (double val : pts2)
     {
-        sum += r.second;
-        sum2 += std::pow(r.second, 2);
+        sum += val;
+        sum2 += val * val;
     }
     double mean2 = sum / pts2.size();
     double var2 = sum2 / pts2.size() - mean2 * mean2;
@@ -277,38 +302,38 @@ bool M3C2Filter::calcStats(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
     return true;
 }
 
-KD3Index::RadiusResults M3C2Filter::filterPoints(Eigen::Vector3d cylCenter,
-    Eigen::Vector3d cylNormal, const KD3Index::RadiusResults& pts, const PointView& view)
+std::vector<double> M3C2Filter::filterPoints(Eigen::Vector3d cylCenter, Eigen::Vector3d cylNormal,
+    const PointView& view, const PointIdList& neighbors)
 {
-    KD3Index::RadiusResults validated;
-    if (!pts.size())
-        return validated;
-    size_t start = 0;
+    std::vector<double> dists;
+
+    if (!neighbors.size())
+        return dists;
+    dists.reserve(neighbors.size());
+
     Eigen::Vector3d point(view.getFieldAs<double>(Dimension::Id::X, 0),
         view.getFieldAs<double>(Dimension::Id::Y, 0),
         view.getFieldAs<double>(Dimension::Id::Z, 0));
 
+    size_t start = 0;
     // If the first point is the test point, ignore it.
     if (Comparison::closeEnough(cylCenter(0), point(0)) &&
-        Comparison::closeEnough(cylCenter(1), point(1)) &&
-        Comparison::closeEnough(cylCenter(2), point(2)))
+    Comparison::closeEnough(cylCenter(1), point(1)) &&
+    Comparison::closeEnough(cylCenter(2), point(2)))
         start++;
-    for (size_t pos = start; pos < pts.size(); ++pos)
-    {
-        const KD3Index::RadiusResult& res = pts[pos];
-        PointId id = res.first;
 
+    for (size_t i = start; i < neighbors.size(); i++)
+    {
+        PointId id = neighbors[i];
         Eigen::Vector3d point(view.getFieldAs<double>(Dimension::Id::X, id),
             view.getFieldAs<double>(Dimension::Id::Y, id),
             view.getFieldAs<double>(Dimension::Id::Z, id));
 
-        // Replace the distance to the point with the signed distance of the point
-        // projected onto the centerline (distance from the normal plane).
         double dist = pointPasses(point, cylCenter, cylNormal);
         if (!std::isnan(dist))
-            validated.push_back({res.first, dist});
+            dists.push_back(dist);
     }
-    return validated;
+    return dists;
 }
 
 double M3C2Filter::pointPasses(Eigen::Vector3d point, Eigen::Vector3d cylCenter,

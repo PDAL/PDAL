@@ -481,7 +481,7 @@ double barycentricInterpolation(double x1, double y1, double z1,
     return (area12 * z3 + area23 * z1 + area31 * z2) / areaTotal;
 }
 
-NormalResult findNormal(PointView& view, PointIdList neighbors)
+NormalResult findNormal(const PointView& view, PointIdList neighbors)
 {
     using namespace Eigen;
 
