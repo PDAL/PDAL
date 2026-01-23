@@ -1,8 +1,6 @@
 #include <cmath>
 #include <vector>
 
-#include <iostream>
-
 #include "MathParser.hpp"
 
 namespace pdal
