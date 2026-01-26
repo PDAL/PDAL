@@ -113,7 +113,7 @@ private:
     std::string m_idxFilename;
     std::string m_filespec;
     StringList m_files;
-    std::string m_filelist;
+    std::string m_listfile;
     std::string m_layerName;
     std::string m_driverName;
     std::string m_tileIndexColumnName;

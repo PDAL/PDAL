@@ -135,7 +135,6 @@ std::ostream& Log::get(LogLevel level)
              '\t');
         return *m_log;
     }
-    std::unique_lock<std::mutex> lock(m_mutex);
     return m_nullStream;
 }
 

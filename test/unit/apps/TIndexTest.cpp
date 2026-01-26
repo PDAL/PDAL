@@ -97,25 +97,25 @@ TEST(TIndex, test2)
 
     std::string output;
     Utils::run_shell_command(cmd, output);
-    std::string::size_type pos = output.find("Can't specify both");
+    std::string::size_type pos = output.find("Can't specify more than one");
     EXPECT_NE(pos, std::string::npos);
 
     cmd = Support::binpath("pdal") + " tindex create --stdin " +
         outSpec + " -f GeoJSON --filespec=\"" + inSpec + "\" 2>&1";
     Utils::run_shell_command(cmd, output);
-    pos = output.find("Can't specify both");
+    pos = output.find("Can't specify more than one");
     EXPECT_NE(pos, std::string::npos);
 
     cmd = Support::binpath("pdal") + " tindex create --filelist \"" + 
         inSpec + "\" --stdin " + outSpec + " -f GeoJSON 2>&1";
     Utils::run_shell_command(cmd, output);
-    pos = output.find("Can't specify both");
+    pos = output.find("Can't specify more than one");
     EXPECT_NE(pos, std::string::npos);
 
     cmd = Support::binpath("pdal") + " tindex create --glob \"" + inSpec + 
         "\" --filelist \"" + inSpec + "\" --tindex=" + outSpec + " -f GeoJSON 2>&1";
     Utils::run_shell_command(cmd, output);
-    pos = output.find("Can't specify both");
+    pos = output.find("Can't specify more than one");
     EXPECT_NE(pos, std::string::npos);
 
     cmd = Support::binpath("pdal") + " tindex create " + outSpec + 

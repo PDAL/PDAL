@@ -162,7 +162,6 @@ private:
     bool m_timing;
     std::chrono::steady_clock m_clock;
     std::chrono::steady_clock::time_point m_start;
-    std::mutex m_mutex;
 };
 
 } // namespace pdal
