@@ -1,7 +1,6 @@
 #include <cmath>
 
 #include "ConditionalParser.hpp"
-#include "MathParser.hpp"
 
 namespace pdal
 {
@@ -10,9 +9,7 @@ namespace expr
 
 bool ConditionalParser::expression(Expression& expr)
 {
-    if (!orexpr(expr))
-        return false;
-    return true;
+    return orexpr(expr);
 }
 
 bool ConditionalParser::orexpr(Expression& expr)
@@ -83,6 +80,7 @@ bool ConditionalParser::notexpr(Expression& expr)
     if (!match(TokenType::Not))
         return primarylogexpr(expr);
 
+    // Matched !
     if (!primarylogexpr(expr))
     {
         setError("Expected expression following '!'.");
@@ -101,9 +99,8 @@ bool ConditionalParser::notexpr(Expression& expr)
 
 bool ConditionalParser::primarylogexpr(Expression& expr)
 {
-    if (parexpr(expr))
-        return true;
-
+    // Need to check for logical functions before we check compare expressions
+    // or the parser will think it has found a math function that it doesn't know about.
     if (function1(expr))
         return true;
 
@@ -114,37 +111,12 @@ bool ConditionalParser::primarylogexpr(Expression& expr)
     return false;
 }
 
-bool ConditionalParser::parexpr(Expression& expr)
-{
-    if (!match(TokenType::Lparen))
-        return false;
-
-    if (!expression(expr))
-    {
-        setError("Expected expression following '('.");
-        return false;
-    }
-
-    if (!match(TokenType::Rparen))
-    {
-        setError("Expected ')' following expression at '" +
-            curToken().sval() + "'.");
-        return false;
-    }
-    return true;
-}
-
-
 //ABELL - This treats == and >= at the same precendence level.  In C++,
 // <, >, <=, >= come before ==, !=
 bool ConditionalParser::compareexpr(Expression& expr)
 {
-    MathParser mathparser(lexer());
-    if (!mathparser.expression(expr))
-    {
-        setError(mathparser.error());
+    if (!addexpr(expr))
         return false;
-    }
 
     while (true)
     {
@@ -165,11 +137,8 @@ bool ConditionalParser::compareexpr(Expression& expr)
         else
             return true;
 
-        if (!mathparser.expression(expr))
-        {
-            setError(mathparser.error());
+        if (!addexpr(expr))
             return false;
-        }
 
         NodePtr right = expr.popNode();
         NodePtr left = expr.popNode();
@@ -244,12 +213,8 @@ bool ConditionalParser::function1(Expression& expr)
         return false;
     }
 
-    MathParser mathparser(lexer());
-    if (!mathparser.expression(expr))
-    {
-        setError(mathparser.error());
+    if (!addexpr(expr))
         return false;
-    }
 
     if (!match(TokenType::Rparen))
     {
