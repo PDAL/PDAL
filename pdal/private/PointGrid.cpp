@@ -86,8 +86,7 @@ PointGrid::NeighborResults PointGrid::findKnn(Eigen::Vector2d pos, point_count_t
     return results;
 }
 
-// Basically doing the radius method. returning all these cells is bad 
-// but returning ij would be annoying.
+// Basically doing the radius method.
 std::vector<uint32_t> PointGrid::nextCells(Eigen::Vector2d pos,
     double maxDist, std::vector<uint32_t>& skip) const 
 {
