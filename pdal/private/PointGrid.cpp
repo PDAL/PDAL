@@ -42,21 +42,28 @@ PointGrid::NeighborResults PointGrid::findKnn(Eigen::Vector2d pos, point_count_t
     NeighborResults results;
     results.reserve(k);
 
+    // Find the starting cell
     auto [iStart, jStart] = toIJ(pos(0), pos(1));
     const Cell& cStart = cell(iStart, jStart);
     if (k > m_view.size()) // edge case
         k = m_view.size();
 
-    // Setting the max distance to the size of a cell so all points are checked to start.
+    // Setting the max distance to the diagonal of a cell so all points within are checked to start, 
+    // and if we need to move outwards, this radius will always select a cell. Maybe should be bigger
+    // to encompass more cells by default.
     double curMaxDist = std::sqrt(m_xlen * m_xlen + m_ylen * m_ylen);
+    // Keep track of cells we've already checked
     std::vector<uint32_t> skip;
+    // This will contain all cells on the queue as keys for simpler lookups than Cell or ij
     std::vector<uint32_t> keys = { key(iStart, jStart) };
+    // Start with the first cell, then move outwards if we need to.
     while (keys.size())
     {
         for (auto key : keys)
         {
             skip.push_back(key);
             const Cell& c = m_cells[key];
+            // Check each point is below our current max distance
             for (PointId id : c)
             {
                 Eigen::Vector2d pos2(m_view.getFieldAs<double>(Dimension::Id::X, id),
@@ -68,25 +75,32 @@ PointGrid::NeighborResults PointGrid::findKnn(Eigen::Vector2d pos, point_count_t
                     results.emplace_back(id, dist2);
                 }
             }
+            // Sort by distance
             std::sort(results.begin(), results.end(), [](const std::pair<PointId, double>& a,
                 const std::pair<PointId, double>& b) {
                 return a.second < b.second;
             });
+            // If we've found enough, we can use a more precise max distance as our radius
+            // in nextCells(). If not, use the one that was set at the start (assuming this is the
+            // first iteration). If it's not the first iteration and it still fails, just get everything
+            // (probably not a perfect solution)
             if (results.size() >= k) // resize is dumb if size == k but whatever
             {
                 results.resize(k);
                 curMaxDist = results.back().second;
             }
-            else if (skip.size() > 1) // Probably impossible edge case if we find nothing; Just get everything
+            else if (skip.size() > 1) // Probably impossible edge case if we find nothing
                 curMaxDist = std::sqrt(std::pow((m_bounds.maxx - m_bounds.minx), 2) + 
                     std::pow((m_bounds.maxy - m_bounds.miny), 2));
         }
+        // Get the next cells. If there are none, we're done
         keys = nextCells(pos, curMaxDist, skip);
     }
     return results;
 }
 
-// Basically doing the radius method.
+// Basically doing the radius method, placing a bounding box around the point
+// using a radius created from the current max distance
 std::vector<uint32_t> PointGrid::nextCells(Eigen::Vector2d pos,
     double maxDist, std::vector<uint32_t>& skip) const 
 {
