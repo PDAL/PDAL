@@ -54,7 +54,7 @@ public:
         m_bounds(bounds), m_view(view), m_approxPerCell(approxPerCell)
     {
         // Silently accepting these. Stuff breaks if we don't
-        if (approxPerCell < view.size())
+        if (approxPerCell > view.size())
             m_approxPerCell = view.size();
         double cells = std::floor(std::sqrt(view.size() / m_approxPerCell));
         assert(cells > 0);
