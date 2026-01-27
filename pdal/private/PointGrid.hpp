@@ -47,10 +47,16 @@ class PointGrid
     using Cell = std::vector<PointId>;
 
 public:
+    //!! This is the same as `RadiusResults` in KDIndex. Should consolidate.
+    using NeighborResults = std::vector<std::pair<PointId, double>>;
+
     PointGrid(BOX2D bounds, const PointView& view, int approxPerCell = 200) :
         m_bounds(bounds), m_view(view), m_approxPerCell(approxPerCell)
     {
-        double cells = std::floor(std::sqrt(view.size() / approxPerCell));
+        // Silently accepting these. Stuff breaks if we don't
+        if (approxPerCell < view.size())
+            m_approxPerCell = view.size();
+        double cells = std::floor(std::sqrt(view.size() / m_approxPerCell));
         assert(cells > 0);
         assert(cells < std::numeric_limits<uint16_t>::max());
         m_cells1d = static_cast<uint16_t>(cells);
@@ -103,11 +109,16 @@ public:
         return m_view;
     }
 
+    //!! Need to think about return type here
+    NeighborResults findKnn(Eigen::Vector2d pos, point_count_t k) const;
     PointIdList findNeighbors3d(Eigen::Vector3d pos, double radius) const;
     PointIdList findNeighbors(BOX2D extent) const;
     PointIdList findNeighbors(PointRef& point, double radius) const;
 
 private:
+    std::vector<uint32_t> nextCells(Eigen::Vector2d pos, double maxDist, 
+        std::vector<uint32_t>& skip) const;
+
     std::vector<Cell> m_cells;
     BOX2D m_bounds;
     const PointView& m_view;

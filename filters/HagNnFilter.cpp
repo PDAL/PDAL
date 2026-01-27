@@ -35,6 +35,7 @@
 #include "HagNnFilter.hpp"
 
 #include <pdal/KDIndex.hpp>
+#include <pdal/private/PointGrid.hpp>
 
 #include <string>
 #include <vector>
@@ -46,16 +47,15 @@ namespace pdal
 namespace
 {
 
-double neighbor_interp_ground(PointViewPtr gView, const PointIdList& ids,
-    const std::vector<double>& sqr_dists, double maxDistance2, double zDefault)
+double neighbor_interp_ground(PointViewPtr gView, 
+    const PointGrid::NeighborResults& res, double maxDistance2, double zDefault)
 {
     double weights = 0;
     double z_accumulator = 0;
 
-    for (size_t j = 0; j < ids.size(); ++j)
+    for (auto [id, sqr_dist] : res)
     {
-        auto z = gView->getFieldAs<double>(Dimension::Id::Z, ids[j]);
-        double sqr_dist = sqr_dists[j];
+        auto z = gView->getFieldAs<double>(Dimension::Id::Z, id);
         if (maxDistance2 > 0 && sqr_dist > maxDistance2)
             break;
         else {
@@ -154,7 +154,10 @@ void HagNnFilter::filter(PointView& view)
     }
 
     // Build the 2D KD-tree.
-    const KD2Index& kdi = gView->build2dIndex();
+    PointGrid kdi(gBounds, *gView);
+    for (PointId i = 0; i < gView->size(); ++i)
+        kdi.add(gView->getFieldAs<double>(Id::X, i),
+            gView->getFieldAs<double>(Id::Y, i), i);
 
     double maxDistance2 = std::pow(m_maxDistance, 2.0);
     // Find Z difference between non-ground points and the nearest
@@ -169,20 +172,20 @@ void HagNnFilter::filter(PointView& view)
         double y0 = point.getFieldAs<double>(Id::Y);
         double z0 = point.getFieldAs<double>(Id::Z);
 
-        PointIdList ids(m_count);
-        std::vector<double> sqr_dists(m_count);
-        kdi.knnSearch(x0, y0, m_count, &ids, &sqr_dists);
+        //PointIdList ids(m_count);
+        //std::vector<double> sqr_dists(m_count);
+        PointGrid::NeighborResults kdiResults = kdi.findKnn({x0, y0}, m_count);
 
         // Closest ground point.
-        double x = gView->getFieldAs<double>(Id::X, ids[0]);
-        double y = gView->getFieldAs<double>(Id::Y, ids[0]);
-        double z = gView->getFieldAs<double>(Id::Z, ids[0]);
+        double x = gView->getFieldAs<double>(Id::X, kdiResults[0].first);
+        double y = gView->getFieldAs<double>(Id::Y, kdiResults[0].first);
+        double z = gView->getFieldAs<double>(Id::Z, kdiResults[0].first);
 
         double z1;
         // If the close ground point is at the same X/Y as the non-ground
         // point, we're done.  Also, if there's only one ground point, we
         // just use that.
-        if ((x0 == x && y0 == y) || ids.size() == 1)
+        if ((x0 == x && y0 == y) || kdiResults.size() == 1)
         {
             z1 = z;
         }
@@ -195,7 +198,7 @@ void HagNnFilter::filter(PointView& view)
         }
         else
         {
-            z1 = neighbor_interp_ground(gView, ids, sqr_dists,
+            z1 = neighbor_interp_ground(gView, kdiResults,
                 maxDistance2, z0);
         }
         ngView->setField(Dimension::Id::HeightAboveGround, i, z0 - z1);

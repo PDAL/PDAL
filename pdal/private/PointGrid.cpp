@@ -37,6 +37,80 @@
 namespace pdal
 {
 
+PointGrid::NeighborResults PointGrid::findKnn(Eigen::Vector2d pos, point_count_t k) const
+{
+    NeighborResults results;
+    results.reserve(k);
+
+    auto [iStart, jStart] = toIJ(pos(0), pos(1));
+    const Cell& cStart = cell(iStart, jStart);
+    if (k > m_view.size()) // edge case
+        k = m_view.size();
+
+    // Setting the max distance to the size of a cell so all points are checked to start.
+    double curMaxDist = std::sqrt(m_xlen * m_xlen + m_ylen * m_ylen);
+    std::vector<uint32_t> skip;
+    std::vector<uint32_t> keys = { key(iStart, jStart) };
+    while (keys.size())
+    {
+        for (auto key : keys)
+        {
+            skip.push_back(key);
+            const Cell& c = m_cells[key];
+            for (PointId id : c)
+            {
+                Eigen::Vector2d pos2(m_view.getFieldAs<double>(Dimension::Id::X, id),
+                    m_view.getFieldAs<double>(Dimension::Id::Y, id));
+                double dist2 = (pos2 - pos).squaredNorm();
+                if (dist2 < curMaxDist)
+                {
+                    //std::cout << "found neighbor: " << id << std::endl;
+                    results.emplace_back(id, dist2);
+                }
+            }
+            std::sort(results.begin(), results.end(), [](const std::pair<PointId, double>& a,
+                const std::pair<PointId, double>& b) {
+                return a.second < b.second;
+            });
+            if (results.size() >= k) // resize is dumb if size == k but whatever
+            {
+                results.resize(k);
+                curMaxDist = results.back().second;
+            }
+            else if (skip.size() > 1) // Probably impossible edge case if we find nothing; Just get everything
+                curMaxDist = std::sqrt(std::pow((m_bounds.maxx - m_bounds.minx), 2) + 
+                    std::pow((m_bounds.maxy - m_bounds.miny), 2));
+        }
+        keys = nextCells(pos, curMaxDist, skip);
+    }
+    return results;
+}
+
+// Basically doing the radius method. returning all these cells is bad 
+// but returning ij would be annoying.
+std::vector<uint32_t> PointGrid::nextCells(Eigen::Vector2d pos,
+    double maxDist, std::vector<uint32_t>& skip) const 
+{
+    BOX2D box;
+    box.grow(pos(0), pos(1));
+    box.grow(maxDist);
+    box.clip(bounds());
+
+    auto [imin, jmin] = toIJ(box.minx, box.miny);
+    auto [imax, jmax] = toIJ(box.maxx, box.maxy);
+
+    std::vector<uint32_t> cells;
+    //cells.reserve((imax - imin + 1) * (jmax - jmin + 1));
+    for (uint16_t i = imin; i <= imax; ++i)
+        for (uint16_t j = jmin; j <= jmax; ++j)
+            {
+                uint32_t curKey = key(i, j);
+                if (std::find(skip.begin(), skip.end(), curKey) == skip.end())
+                    cells.emplace_back(curKey);
+            }
+    return cells;
+}
+
 PointIdList PointGrid::findNeighbors3d(Eigen::Vector3d pos, double radius) const
 {
     BOX2D extent;
