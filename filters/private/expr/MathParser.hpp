@@ -12,7 +12,7 @@ class MathParser : public BaseParser
 public:
     using BaseParser::BaseParser;
 
-    bool expression(Expression& expr);
+    virtual bool expression(Expression& expr);
 
 protected:
     bool valueexpr(Expression& expr);

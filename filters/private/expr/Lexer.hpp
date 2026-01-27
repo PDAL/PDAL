@@ -27,6 +27,10 @@ public:
     Token get();
     void put(Token t);
     void putEnd(Token t);
+    std::string::size_type pos()
+    {
+        return m_pos;
+    }
 
 private:
     char getChar();
