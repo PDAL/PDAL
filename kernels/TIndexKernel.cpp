@@ -173,8 +173,10 @@ void TIndexKernel::addSubSwitches(ProgramArgs& args,
     {
         args.add("tindex", "OGR-readable/writeable tile index output",
             m_idxFilename).setPositional();
-        args.add("filespec", "Pattern of files to index",
+        args.add("glob", "Pattern of files to index",
             m_filespec).setOptionalPositional();
+        args.addSynonym("glob", "filespec");
+        args.add("filelist", "Text file containing list of files to index", m_listfile);
         args.add("fast_boundary", "Use extent instead of exact boundary",
             m_fastBoundary);
         args.add("lyr_name", "OGR layer name to write into datasource",
@@ -244,11 +246,14 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
     }
     else
     {
-        if (m_filespec.empty() && !m_usestdin)
-            throw pdal_error("Must specify either --filespec or --stdin.");
-        if (m_filespec.size() && m_usestdin)
-            throw pdal_error("Can't specify both --filespec and --stdin "
-                "options.");
+        int argc = static_cast<int>(!m_filespec.empty()) +
+            static_cast<int>(!m_listfile.empty()) + static_cast<int>(m_usestdin);
+        if (argc > 1)
+            throw pdal_error("Can't specify more than one of --glob, "
+                "--filelist or --stdin.");
+        if (!argc)
+            throw pdal_error("Must specify either --glob, --filelist or"
+                " --stdin.");
         if (m_prefix.size() && m_absPath)
             throw pdal_error("Can't specify both --write_absolute_path and "
                 "--path_prefix options.");
@@ -294,6 +299,23 @@ StringList readSTDIN()
     return output;
 }
 
+StringList readFileList(const std::string& filename)
+{
+    std::istream* in = Utils::openFile(filename);
+    if (!in)
+        throw pdal_error("Unable to open filelist '" + filename + "'");
+    std::string line;
+    StringList output;
+    while (std::getline(*in, line))
+    {
+        Utils::trim(line);
+        if (!line.empty())
+            output.push_back(line);
+    }
+    FileUtils::closeFile(in);
+    return output;
+}
+
 
 bool TIndexKernel::isFileIndexed(const FieldIndexes& indexes,
     const FileInfo& fileInfo)
@@ -328,8 +350,10 @@ bool TIndexKernel::isFileIndexed(const FieldIndexes& indexes,
 
 void TIndexKernel::createFile()
 {
-    if (!m_usestdin)
+    if (!m_usestdin && m_listfile.empty())
         m_files = Utils::glob(m_filespec);
+    else if (m_listfile.size())
+        m_files = readFileList(m_listfile);
     else
         m_files = readSTDIN();
 

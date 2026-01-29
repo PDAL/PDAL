@@ -38,6 +38,8 @@
 #include <memory> // shared_ptr
 #include <stack>
 #include <chrono>
+#include <atomic>
+#include <mutex>
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/util/NullOStream.hpp>
