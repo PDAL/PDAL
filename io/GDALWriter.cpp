@@ -243,7 +243,10 @@ void GDALWriter::writeView(const PointViewPtr view)
     {
         BOX2D bounds;
         view->calculateBounds(bounds);
-        if (!m_grid)
+        // If the view has no points, skip to avoid an error in createGrid
+        if (!bounds.valid())
+            return;
+        else if (!m_grid)
             createGrid(bounds);
         else
         {
@@ -285,6 +288,8 @@ void GDALWriter::doneFile()
     if (!m_grid && !m_allowEmpty)
         throw pdal_error("Unable to write GDAL data with no points "
             "for output.");
+    else if (!m_grid)
+        return;
 
     std::array<double, 6> pixelToPos;
 
