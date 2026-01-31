@@ -53,27 +53,23 @@ public:
     PointGrid(BOX2D bounds, const PointView& view, int approxPerCell = 200) :
         m_bounds(bounds), m_view(view), m_approxPerCell(approxPerCell)
     {
-        // Silently accepting these. Stuff breaks if we don't
-        if (approxPerCell > view.size())
-            m_approxPerCell = view.size();
-        double cells = std::floor(std::sqrt(view.size() / m_approxPerCell));
-        assert(cells > 0);
-        assert(cells < std::numeric_limits<uint16_t>::max());
-        m_cells1d = static_cast<uint16_t>(cells);
-        // Adding a small amount to make sure the max value is in a cell.
-        m_xlen = (m_bounds.maxx - m_bounds.minx) / m_cells1d + .0001;
-        m_ylen = (m_bounds.maxy - m_bounds.miny) / m_cells1d + .0001;
-        m_cells.resize(m_cells1d * m_cells1d);
+        init();
+        buildIndex();
     }
 
-    void add(double x, double y, PointId id)
+    PointGrid(const PointView& view, int approxPerCell = 200) :
+        m_view(view), m_approxPerCell(approxPerCell)
     {
-        auto [i, j] = toIJ(x, y);
+        m_view.calculateBounds(m_bounds);
+        init();
+        buildIndex();
+    }
 
-        Cell& c = m_cells[key(i, j)];
-        if (c.empty())
-            c.reserve(m_approxPerCell);
-        c.push_back(id);
+    void buildIndex()
+    {
+        for (PointId i = 0; i < m_view.size(); ++i)
+            add(m_view.getFieldAs<double>(Dimension::Id::X, i),
+                m_view.getFieldAs<double>(Dimension::Id::Y, i), i);
     }
 
     uint32_t key(uint16_t xi, uint16_t yi) const
@@ -109,13 +105,45 @@ public:
         return m_view;
     }
 
-    //!! Need to think about return type here
-    NeighborResults findKnn(Eigen::Vector2d pos, point_count_t k) const;
+    //!! Need to think about return types here. And make better names.
+    NeighborResults knnSearch(Eigen::Vector2d pos, point_count_t k) const;
+    NeighborResults knnSearch(Eigen::Vector2d pos, point_count_t k, 
+        double maxSqDistance) const;
+    PointIdList findNeighbors(Eigen::Vector2d pos, point_count_t k) const;
+    PointIdList findNeighbors(Eigen::Vector2d pos, point_count_t k, 
+        double maxSqDistance) const;
     PointIdList findNeighbors3d(Eigen::Vector3d pos, double radius) const;
     PointIdList findNeighbors(BOX2D extent) const;
     PointIdList findNeighbors(PointRef& point, double radius) const;
 
 private:
+    void init()
+    {
+        // Silently accepting these. Stuff breaks if we don't
+        if (m_approxPerCell > (int)m_view.size())
+            m_approxPerCell = m_view.size();
+        double cells = std::floor(std::sqrt(view.size() / m_approxPerCell));
+        assert(cells > 0);
+        assert(cells < std::numeric_limits<uint16_t>::max());
+        m_cells1d = static_cast<uint16_t>(cells);
+        // Adding a small amount to make sure the max value is in a cell.
+        m_xlen = (m_bounds.maxx - m_bounds.minx) / m_cells1d + .0001;
+        m_ylen = (m_bounds.maxy - m_bounds.miny) / m_cells1d + .0001;
+        m_cells.resize(m_cells1d * m_cells1d);
+    }
+
+    // This could be public again if we do a check for key < m_cells.size().
+    // Otherwise adding a point out of range will make the bounds inaccurate.
+    void add(double x, double y, PointId id)
+    {
+        auto [i, j] = toIJ(x, y);
+
+        Cell& c = m_cells[key(i, j)];
+        if (c.empty())
+            c.reserve(m_approxPerCell);
+        c.push_back(id);
+    }
+
     std::vector<uint32_t> nextCells(Eigen::Vector2d pos, double maxDist, 
         std::vector<uint32_t>& skip) const;
 

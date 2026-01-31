@@ -37,7 +37,39 @@
 namespace pdal
 {
 
-PointGrid::NeighborResults PointGrid::findKnn(Eigen::Vector2d pos, point_count_t k) const
+PointGrid::NeighborResults PointGrid::knnSearch(Eigen::Vector2d pos, point_count_t k) const
+{
+    // Setting the max sq distance to the diagonal of the entire bounds so all points are 
+    // considered, and if we need to move outwards, this radius will always select a cell.
+    double curMaxDist = std::pow(m_bounds.maxx - m_bounds.minx, 2) + 
+        std::pow(m_bounds.maxy - m_bounds.miny, 2);
+    //!! maybe somewhat less efficient to do the bounded search than what we had originally
+    return knnSearchBounded(pos, k, curMaxDist);
+}
+
+PointIdList PointGrid::findNeighbors(Eigen::Vector2d pos, point_count_t k) const
+{
+    NeighborResults results = knnSearch(pos, k);
+    PointIdList pts;
+    for (auto& r : results)
+        pts.push_back(r.first);
+
+    return pts;
+}
+
+PointIdList PointGrid::findNeighbors(Eigen::Vector2d pos, point_count_t k, 
+    const double maxSqDistance) const
+{
+    NeighborResults results = knnSearchBounded(pos, k, maxSqDistance);
+    PointIdList pts;
+    for (auto& r : results)
+        pts.push_back(r.first);
+
+    return pts;
+}
+
+PointGrid::NeighborResults PointGrid::knnSearch(Eigen::Vector2d pos, point_count_t k, 
+    const double maxSqDistance) const
 {
     NeighborResults results;
     results.reserve(k);
@@ -47,10 +79,8 @@ PointGrid::NeighborResults PointGrid::findKnn(Eigen::Vector2d pos, point_count_t
     if (k > m_view.size()) // edge case
         k = m_view.size();
 
-    // Setting the max sq distance to the diagonal of a cell so all points within are checked to start, 
-    // and if we need to move outwards, this radius will always select a cell. Maybe should be bigger
-    // (or smaller) to encompass more (or fewer) cells by default.
-    double curMaxDist = m_xlen * m_xlen + m_ylen * m_ylen;
+    // Always <= maxSqDistance. Starting off as (at most) the diagonal of a single cell.
+    double curMaxDist = std::min((m_xlen * m_xlen + m_ylen * m_ylen), maxSqDistance);
     // Keep track of cells we've already checked
     std::vector<uint32_t> skip;
     // This will contain all cells on the queue as keys for simpler lookups than Cell or ij
@@ -69,10 +99,7 @@ PointGrid::NeighborResults PointGrid::findKnn(Eigen::Vector2d pos, point_count_t
                     m_view.getFieldAs<double>(Dimension::Id::Y, id));
                 double dist2 = (pos2 - pos).squaredNorm();
                 if (dist2 < curMaxDist)
-                {
-                    //std::cout << "found neighbor: " << id << std::endl;
                     results.emplace_back(id, dist2);
-                }
             }
             // Sort by distance
             std::sort(results.begin(), results.end(), [](const std::pair<PointId, double>& a,
@@ -85,17 +112,21 @@ PointGrid::NeighborResults PointGrid::findKnn(Eigen::Vector2d pos, point_count_t
             if (results.size() >= k) // resize is dumb if size == k but whatever
             {
                 results.resize(k);
-                curMaxDist = results.back().second;
+                curMaxDist = std::min(results.back().second, maxSqDistance);
             }
-            // If it's not the first iteration and still fails to find k, just get everything
-            // (probably should grow by some factor instead)
+            // If it's not the first iteration and still fails to find k, grow the radius
+            // by a bit. If we already tried and we reached the max distance, we're done
             else if (skip.size() > 1)
-                curMaxDist = std::pow((m_bounds.maxx - m_bounds.minx), 2) + 
-                    std::pow((m_bounds.maxy - m_bounds.miny), 2);
+            {
+                if (curMaxDist == maxSqDistance)
+                    break;
+                curMaxDist = std::min((curMaxDist * 1.5), maxSqDistance);
+            }
         }
         // Get the next cells. If there are none, we're done
         keys = nextCells(pos, curMaxDist, skip);
     }
+    // Warn if we didn't find enough?
     return results;
 }
 
@@ -195,6 +226,13 @@ PointIdList PointGrid::findNeighbors(PointRef& point, double radius) const
     extent.grow(radius);
 
     return findNeighbors(extent);
+}
+
+PointIdList PointGrid::findNeighbors(PointId id, double radius) const
+{
+    double x = m_view.getFieldAs<double>(Dimension::Id::X, id);
+    double y = m_view.getFieldAs<double>(Dimension::Id::Y, id);
+    return findNeighbors(x, y, radius);
 }
 
 } // namespace pdal

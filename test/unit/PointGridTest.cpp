@@ -31,6 +31,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <chrono>
+
 #include <pdal/pdal_test_main.hpp>
 #include "Support.hpp"
 
@@ -67,27 +69,30 @@ void gridTest(std::string filename, int knn, int viewPos, Stage* prefilter = nul
 
         void filter(PointView& view)
         {
+            const auto t1 = std::chrono::high_resolution_clock::now();
             if (m_mode == "pointgrid")
             {
                 BOX2D box;
                 view.calculateBounds(box);
                 PointGrid grid(box, view, 30);
+                grid.buildIndex();
                 PointGrid::NeighborResults neighbors = 
-                    grid.findKnn({view.getFieldAs<double>(Dimension::Id::X, m_pos), 
+                    grid.knnSearch({view.getFieldAs<double>(Dimension::Id::X, m_pos), 
                         view.getFieldAs<double>(Dimension::Id::Y, m_pos)}, m_knn);
-
                 for (PointId i = 0; i < neighbors.size(); ++i)
                     view.setField(distDim, i, neighbors[i].second);
             }
             else if (m_mode == "kdtree")
             {
                 const KD2Index& index = view.build2dIndex();
-                PointIdList ids;
-                std::vector<double> sqr_dists;
+                PointIdList ids(m_knn);
+                std::vector<double> sqr_dists(m_knn);
                 index.knnSearch(m_pos, m_knn, &ids, &sqr_dists);
                 for (PointId i = 0; i < ids.size(); ++i)
                     view.setField(distDim, i, sqr_dists[i]);
             }
+            const auto t2 = std::chrono::high_resolution_clock::now();
+            std::cout << "Time " << m_mode << ": " << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() << std::endl;
         }
     };
     
@@ -127,7 +132,7 @@ void gridTest(std::string filename, int knn, int viewPos, Stage* prefilter = nul
     }
 }
 
-TEST(PointGridTest, largeSet)
+TEST(PointGridTest, outsidePolygon)
 {
     CropFilter f;
     Options fo;
@@ -135,5 +140,10 @@ TEST(PointGridTest, largeSet)
     fo.add("outside", true);
     f.setOptions(fo);
 
-    gridTest(Support::datapath("las/autzen_trim.las"), 100, 0, &f);
+    gridTest(Support::datapath("las/4_6_crop.las"), 100, 0, &f);
+}
+
+TEST(PointGridTest, largeFile)
+{
+    gridTest(Support::datapath("las/4_1.las"), 100, 0);
 }
