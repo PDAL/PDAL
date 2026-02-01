@@ -315,9 +315,12 @@ if(WIN32)
     )
 endif(WIN32)
 
+set(PDALCPP_LIB_OUTPUT_NAME "pdalcpp" CACHE STRING "Name of the PDALCPP library")
+
 set_target_properties(${PDAL_LIB_NAME} PROPERTIES
     VERSION ${PDAL_BUILD_VERSION}
     SOVERSION ${PDAL_API_VERSION}
+    OUTPUT_NAME ${PDALCPP_LIB_OUTPUT_NAME}
     CLEAN_DIRECT_OUTPUT 1)
 
 # shut off -Wpedantic selectively
