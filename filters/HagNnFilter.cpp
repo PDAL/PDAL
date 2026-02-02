@@ -153,11 +153,9 @@ void HagNnFilter::filter(PointView& view)
         return;
     }
 
-    // Build the 2D KD-tree.
+    // Build the 2D quadtree.
     PointGrid kdi(gBounds, *gView);
-    for (PointId i = 0; i < gView->size(); ++i)
-        kdi.add(gView->getFieldAs<double>(Id::X, i),
-            gView->getFieldAs<double>(Id::Y, i), i);
+    kdi.buildIndex();
 
     double maxDistance2 = std::pow(m_maxDistance, 2.0);
     // Find Z difference between non-ground points and the nearest
@@ -172,9 +170,7 @@ void HagNnFilter::filter(PointView& view)
         double y0 = point.getFieldAs<double>(Id::Y);
         double z0 = point.getFieldAs<double>(Id::Z);
 
-        //PointIdList ids(m_count);
-        //std::vector<double> sqr_dists(m_count);
-        PointGrid::NeighborResults kdiResults = kdi.findKnn({x0, y0}, m_count);
+        PointGrid::NeighborResults kdiResults = kdi.knnSearch({x0, y0}, m_count);
 
         // Closest ground point.
         double x = gView->getFieldAs<double>(Id::X, kdiResults[0].first);
