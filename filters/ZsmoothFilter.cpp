@@ -28,7 +28,7 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <pdal/private/PointGrid.hpp>
+#include <pdal/KDIndex.hpp>
 
 #include "ZsmoothFilter.hpp"
 
@@ -92,17 +92,14 @@ void ZsmoothFilter::prepared(PointTableRef)
 
 void ZsmoothFilter::filter(PointView& view)
 {
-    BOX2D bounds;
-    view.calculateBounds(bounds);
-    PointGrid grid(bounds, view);
-    grid.buildIndex();
+    const KD2Index& kdi = view.build2dIndex();
 
     for (PointId idx = 0; idx < view.size(); ++idx)
     {
         double d = view.getFieldAs<double>(Dimension::Id::Z, idx);
 
         std::vector<double> valList;
-        PointIdList nears = grid.findNeighbors(idx, m_p->radius);
+        PointIdList nears = kdi.radius(idx, m_p->radius);
         for (PointId n = 1; n < nears.size(); ++n)
         {
             double z = view.getFieldAs<double>(Dimension::Id::Z, nears[n]);

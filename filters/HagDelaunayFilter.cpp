@@ -33,7 +33,6 @@
 
 #include <pdal/KDIndex.hpp>
 #include <pdal/private/MathUtils.hpp>
-#include <pdal/private/PointGrid.hpp>
 
 #include "private/delaunator.hpp"
 
@@ -53,7 +52,7 @@ namespace
 // (I suppose the point could be on a edge of two triangles, but the
 //  result is the same, so this is still good.)
 double delaunay_interp_ground(double x0, double y0, PointViewPtr gView,
-    const PointGrid::NeighborResults& ids)
+    const PointIdList& ids)
 {
     using namespace pdal::Dimension;
 
@@ -177,9 +176,8 @@ void HagDelaunayFilter::filter(PointView& view)
         log()->get(LogLevel::Error) << "Input PointView does not have any "
             "points classified as ground.\n";
 
-    // Build the 2D quadtree.
-    PointGrid grid(gBounds, *gView);
-    grid.buildIndex();
+    // Build the 2D KD-tree.
+    const KD2Index& kdi = gView->build2dIndex();
 
     // Find Z difference between non-ground points and the nearest
     // neighbor (2D) in the ground view or between non-ground points and the
@@ -193,12 +191,14 @@ void HagDelaunayFilter::filter(PointView& view)
         double y0 = point.getFieldAs<double>(Id::Y);
         double z0 = point.getFieldAs<double>(Id::Z);
 
-        PointIdList ids = grid.findNeighbors({x0, y0}, m_count);
+        PointIdList ids(m_count);
+        std::vector<double> sqr_dists(m_count);
+        kdi.knnSearch(x0, y0, m_count, &ids, &sqr_dists);
 
         // Closest ground point.
-        double x = gView->getFieldAs<double>(Id::X, knnResults[0].first);
-        double y = gView->getFieldAs<double>(Id::Y, knnResults[0].first);
-        double z = gView->getFieldAs<double>(Id::Z, knnResults[0].first);
+        double x = gView->getFieldAs<double>(Id::X, ids[0]);
+        double y = gView->getFieldAs<double>(Id::Y, ids[0]);
+        double z = gView->getFieldAs<double>(Id::Z, ids[0]);
 
         double z1;
         // If the close ground point is at the same X/Y as the non-ground

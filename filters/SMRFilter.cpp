@@ -43,7 +43,6 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/private/MathUtils.hpp>
-#include <pdal/private/PointGrid.hpp>
 
 #include "private/DimRange.hpp"
 #include "private/Segmentation.hpp"
@@ -633,10 +632,7 @@ void SMRFilter::knnfill(PointViewPtr view, std::vector<double>& cz)
     if (!temp->size())
         return;
 
-    BOX2D bounds;
-    temp->calculateBounds(bounds);
-    PointGrid grid(bounds, *temp);
-    grid.buildIndex();
+    KD2Index& kdi = temp->build2dIndex();
 
     // Where the raster has voids (i.e., NaN), we search for that cell's eight
     // nearest neighbors, and fill the void with the average value of the
@@ -652,7 +648,7 @@ void SMRFilter::knnfill(PointViewPtr view, std::vector<double>& cz)
             double x = m_bounds.minx + (c + 0.5) * m_args->m_cell;
             double y = m_bounds.miny + (r + 0.5) * m_args->m_cell;
             const int k = 8;
-            PointIdList neighbors = grid.findNeighbors({x, y}, k);
+            PointIdList neighbors = kdi.neighbors(x, y, k);
 
             double M1(0.0);
             size_t j(0);
