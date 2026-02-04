@@ -73,7 +73,7 @@ RUN git clone https://github.com/PDAL/python.git pdal-python && \
     --no-deps \
     --no-build-isolation
 
-RUN conda-pack -n pdal --dest-prefix=/opt/conda/envs/pdal -o  /tmp/env.tar && \
+RUN conda-pack -n pdal --dest-prefix=/opt/conda/envs/pdal -o  /tmp/env.tar --ignore-missing-files && \
     mkdir /venv && cd /venv && tar xf /tmp/env.tar  && \
     rm /tmp/env.tar
 
