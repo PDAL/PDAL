@@ -95,7 +95,9 @@ void TileContents::readLaszip()
     reader.setOptions(options);
 
     reader.prepare(*m_table);
-    reader.execute(*m_table);
+    PointViewSet viewset = reader.execute(*m_table);
+    if ((*viewset.begin())->size() != size())
+        throw pdal_error("Invalid number of points in tile " + key().toString());
 }
 
 void TileContents::readBinary()
@@ -179,6 +181,8 @@ void TileContents::transform()
         p.setField(D::Z, p.getFieldAs<double>(D::Z) * zf.m_scale.m_val +
             zf.m_offset.m_val);
     }
+    if (p.pointId() != size() - 1)
+        throw pdal_error("Invalid number of points in tile " + key().toString());
 }
 
 } // namespace ept
