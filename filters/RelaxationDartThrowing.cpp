@@ -105,7 +105,7 @@ PointViewSet RelaxationDartThrowing::run(PointViewPtr inView)
         std::shuffle(shuffledIds.begin(), shuffledIds.end(), std::mt19937(m_seed));
     }
 
-    using PointIdNeighborMap = std::unordered_map<PointId, KD3Index::RadiusResults>;
+    using PointIdNeighborMap = std::unordered_map<PointId, DistanceResults>;
     PointIdNeighborMap neighborMap;
     while (finalIds.size() < m_maxSize)
     {
@@ -131,7 +131,7 @@ PointViewSet RelaxationDartThrowing::run(PointViewPtr inView)
             // All PointIds in finalIds have an entry in the neighborMap, which
             // provides neighboring PointIds and square distances, up to the
             // initial radius.
-            KD3Index::RadiusResults res = neighborMap[i];
+            DistanceResults res = neighborMap[i];
 
             // Find the upper bound on the neighboring square distances, using
             // the current radius squared.
@@ -165,7 +165,7 @@ PointViewSet RelaxationDartThrowing::run(PointViewPtr inView)
                 index.radius(i, radius, neighborMap[i]);
 
             // The map entry either already existed or was just computed.
-            KD3Index::RadiusResults res = neighborMap[i];
+            DistanceResults res = neighborMap[i];
 
             // Find the upper bound on the neighboring square distances, using
             // the current radius squared.

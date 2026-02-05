@@ -300,17 +300,17 @@ TEST(KDIndex, radius2D)
     EXPECT_EQ(ids[3], 0u);
     EXPECT_EQ(ids[4], 4u);
 
-    KD2Index::RadiusResults results;
+    DistanceResults results;
     index.radius(3.1, 3.1, 10, results);
     EXPECT_EQ(results.size(), 5u);
     // Round results for easy comparison.
-    for (KD2Index::RadiusResult& r : results)
+    for (DistanceResult& r : results)
         r.second = ((int)(r.second * 100)) / 100.0;
-    EXPECT_EQ(results[0], KD2Index::RadiusResult(2, .02));
-    EXPECT_EQ(results[1], KD2Index::RadiusResult(1, 8.82));
-    EXPECT_EQ(results[2], KD2Index::RadiusResult(3, 16.82));
-    EXPECT_EQ(results[3], KD2Index::RadiusResult(0, 19.22));
-    EXPECT_EQ(results[4], KD2Index::RadiusResult(4, 95.22));
+    EXPECT_EQ(results[0], DistanceResult(2, .02));
+    EXPECT_EQ(results[1], DistanceResult(1, 8.82));
+    EXPECT_EQ(results[2], DistanceResult(3, 16.82));
+    EXPECT_EQ(results[3], DistanceResult(0, 19.22));
+    EXPECT_EQ(results[4], DistanceResult(4, 95.22));
 
     // Search by PointId
     ids = index.radius(0, 4.25);
@@ -381,17 +381,17 @@ TEST(KDIndex, radius3D)
     EXPECT_EQ(ids[3], 0u);
     EXPECT_EQ(ids[4], 4u);
 
-    KD2Index::RadiusResults results;
+    DistanceResults results;
     index.radius(3.1, 3.1, 3.1, 12.2, results);
     EXPECT_EQ(results.size(), 5u);
     // Round results for easy comparison.
-    for (KD2Index::RadiusResult& r : results)
+    for (DistanceResult& r : results)
         r.second = ((int)(r.second * 100)) / 100.0;
-    EXPECT_EQ(results[0], KD2Index::RadiusResult(2, .03));
-    EXPECT_EQ(results[1], KD2Index::RadiusResult(1, 13.23));
-    EXPECT_EQ(results[2], KD2Index::RadiusResult(3, 25.23));
-    EXPECT_EQ(results[3], KD2Index::RadiusResult(0, 28.83));
-    EXPECT_EQ(results[4], KD2Index::RadiusResult(4, 142.83));
+    EXPECT_EQ(results[0], DistanceResult(2, .03));
+    EXPECT_EQ(results[1], DistanceResult(1, 13.23));
+    EXPECT_EQ(results[2], DistanceResult(3, 25.23));
+    EXPECT_EQ(results[3], DistanceResult(0, 28.83));
+    EXPECT_EQ(results[4], DistanceResult(4, 142.83));
 
     // Search by PointId
     ids = index.radius(0, 5.2);

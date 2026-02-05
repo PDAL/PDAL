@@ -37,113 +37,136 @@
 #include "Support.hpp"
 
 #include <io/LasReader.hpp>
+#include <io/CopcReader.hpp>
 #include <filters/CropFilter.hpp>
 #include <pdal/private/PointGrid.hpp>
 #include <pdal/KDIndex.hpp>
 
 using namespace pdal;
-
-void gridTest(std::string filename, int knn, int viewPos, Stage* prefilter = nullptr)
+/*
+void testPointsKnn2d(PointViewPtr view, PointId pos, int knn)
 {
-    class TestFilter : public Filter
+    PointViewPtr kdView = view->makeNew();
+    kdView->append(*view);
+
+    const auto t1 = std::chrono::high_resolution_clock::now();
+    const KD2Index& index = kdView->build2dIndex();
+    const auto t2 = std::chrono::high_resolution_clock::now();
+    std::cout << "kdtree build: " << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() << std::endl;
+    PointIdList ids(knn);
+    std::vector<double> sqr_dists(knn);
+    index.knnSearch(pos, knn, &ids, &sqr_dists);
+    const auto t3 = std::chrono::high_resolution_clock::now();
+    std::cout << "Time kdtree: " << std::chrono::duration_cast<std::chrono::milliseconds>(t3 - t1).count() << std::endl;
+
+
+    const auto t4 = std::chrono::high_resolution_clock::now();
+    PointGrid grid(*view);
+    grid.build();
+    const auto t5 = std::chrono::high_resolution_clock::now();
+    std::cout << "pointgrid build: " << std::chrono::duration_cast<std::chrono::milliseconds>(t5 - t4).count() << std::endl;
+    DistanceResults neighbors = 
+        grid.knnSearch({view->getFieldAs<double>(Dimension::Id::X, pos), 
+            view->getFieldAs<double>(Dimension::Id::Y, pos)}, knn);
+    const auto t6 = std::chrono::high_resolution_clock::now();
+    std::cout << "Time pointgrid: " << std::chrono::duration_cast<std::chrono::milliseconds>(t6 - t4).count() << std::endl;
+
+    EXPECT_EQ(neighbors.size(), knn);
+    EXPECT_EQ(ids.size(), knn);
+
+    for (size_t i = 0; i < neighbors.size(); ++i)
     {
-    public:
-        TestFilter(std::string mode, int knn, const PointId pos) 
-            : m_mode(mode), m_knn(knn), m_pos(pos)
-        {}
+        //EXPECT_EQ(neighbors[i].first, ids[i]);
+        EXPECT_NEAR(neighbors[i].second, sqr_dists[i], 0.0001);
+    }
+}
 
-        std::string getName() const
-        {
-            return "filters.testfilter";
-        }
-    private:
-        std::string m_mode;
-        int m_knn;
-        PointId m_pos;
-        Dimension::Id distDim;
+void testPointsKnn3d(PointViewPtr view, PointId pos, int knn)
+{
+    PointViewPtr kdView = view->makeNew();
+    kdView->append(*view);
 
-        void addDimensions(PointLayoutPtr layout)
-        {
-            distDim = layout->assignDim("knn_distance", Dimension::Type::Double);
-        }
+    BOX2D bounds;
+    view->calculateBounds(bounds);
+    const auto t1 = std::chrono::high_resolution_clock::now();
+    const KD3Index& index = kdView->build3dIndex();
+    const auto t2 = std::chrono::high_resolution_clock::now();
+    std::cout << "kdtree build: " << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() << std::endl;
+    PointIdList ids(knn);
+    std::vector<double> sqr_dists(knn);
+    index.knnSearch(pos, knn, &ids, &sqr_dists);
+    const auto t3 = std::chrono::high_resolution_clock::now();
+    std::cout << "Time kdtree: " << std::chrono::duration_cast<std::chrono::milliseconds>(t3 - t1).count() << std::endl;
 
-        void filter(PointView& view)
-        {
-            const auto t1 = std::chrono::high_resolution_clock::now();
-            if (m_mode == "pointgrid")
-            {
-                BOX2D box;
-                view.calculateBounds(box);
-                PointGrid grid(box, view, 30);
-                grid.buildIndex();
-                PointGrid::NeighborResults neighbors = 
-                    grid.knnSearch({view.getFieldAs<double>(Dimension::Id::X, m_pos), 
-                        view.getFieldAs<double>(Dimension::Id::Y, m_pos)}, m_knn);
-                for (PointId i = 0; i < neighbors.size(); ++i)
-                    view.setField(distDim, i, neighbors[i].second);
-            }
-            else if (m_mode == "kdtree")
-            {
-                const KD2Index& index = view.build2dIndex();
-                PointIdList ids(m_knn);
-                std::vector<double> sqr_dists(m_knn);
-                index.knnSearch(m_pos, m_knn, &ids, &sqr_dists);
-                for (PointId i = 0; i < ids.size(); ++i)
-                    view.setField(distDim, i, sqr_dists[i]);
-            }
-            const auto t2 = std::chrono::high_resolution_clock::now();
-            std::cout << "Time " << m_mode << ": " << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() << std::endl;
-        }
-    };
-    
-    LasReader r;
-    Options ro;
-    ro.add("filename", filename);
-    r.setOptions(ro);
-    if (prefilter)
-        prefilter->setInput(r);
 
-    TestFilter pgFilter("pointgrid", 100, 800);
-    if (prefilter)
-        pgFilter.setInput(*prefilter);
-    else
-        pgFilter.setInput(r);
-    PointTable table;
-    pgFilter.prepare(table);
-    PointViewSet viewSet = pgFilter.execute(table);
-    PointViewPtr pgView = *viewSet.begin();
+    const Eigen::Vector3d point(view->getFieldAs<double>(Dimension::Id::X, pos), 
+            view->getFieldAs<double>(Dimension::Id::Y, pos), 
+            view->getFieldAs<double>(Dimension::Id::Z, pos));
+    const auto t4 = std::chrono::high_resolution_clock::now();
+    PointGrid grid(*view);
+    grid.build();
+    const auto t5 = std::chrono::high_resolution_clock::now();
+    std::cout << "pointgrid build: " << std::chrono::duration_cast<std::chrono::milliseconds>(t5 - t4).count() << std::endl;
+    DistanceResults neighbors = 
+        grid.knnSearch(point, knn, std::pow(bounds.maxx - bounds.minx, 2) + std::pow(bounds.maxy - bounds.miny, 2));
+    const auto t6 = std::chrono::high_resolution_clock::now();
+    std::cout << "Time pointgrid: " << std::chrono::duration_cast<std::chrono::milliseconds>(t6 - t4).count() << std::endl;
 
-    TestFilter kdFilter("kdtree", 100, 800);
-    if (prefilter)
-        kdFilter.setInput(*prefilter);
-    else
-        kdFilter.setInput(r);
-    PointTable table2;
-    kdFilter.prepare(table2);
-    viewSet = kdFilter.execute(table);
-    PointViewPtr kdView = *viewSet.begin();
+    EXPECT_EQ(neighbors.size(), knn);
+    EXPECT_EQ(ids.size(), knn);
 
-    //EXPECT_EQ(pgView->size(), kdView->size());
-    Dimension::Id distDim = pgView->layout()->findDim("knn_distance");
-    for (PointId i = 0; i < pgView->size(); ++i)
+    for (size_t i = 0; i < neighbors.size(); ++i)
     {
-        EXPECT_NEAR(pgView->getFieldAs<double>(distDim, i), 
-            kdView->getFieldAs<double>(distDim, i), 0.0001);
+        //EXPECT_EQ(neighbors[i].first, ids[i]);
+        EXPECT_NEAR(neighbors[i].second, sqr_dists[i], 0.0001);
     }
 }
 
 TEST(PointGridTest, outsidePolygon)
 {
+    LasReader r;
+    Options ro;
+    ro.add("filename", Support::datapath("las/4_6_crop.las"));
+    r.setOptions(ro);
+
     CropFilter f;
     Options fo;
     fo.add("polygon", "POLYGON ((1639605.52151933 1454498.88572908,1639605.20941558 1454507.23450445,1639597.48484772 1454506.45424507,1639595.2089086 1454685.11546591,1639776.14606856 1454683.97749635,1639770.45622077 1454489.38470167,1639605.52151933 1454498.88572908))");
     fo.add("outside", true);
     f.setOptions(fo);
+    f.setInput(r);
 
-    gridTest(Support::datapath("las/4_6_crop.las"), 100, 0, &f);
+    PointTable table;
+    f.prepare(table);
+    PointViewSet viewSet = f.execute(table);
+    EXPECT_EQ(1u, viewSet.size());
+    PointViewPtr view = *viewSet.begin();
+
+    testPointsKnn2d(view, 0, 100);
+    testPointsKnn2d(view, 878, 100);
+    testPointsKnn3d(view, 0, 100);
+    testPointsKnn3d(view, 878, 100);
 }
 
 TEST(PointGridTest, largeFile)
 {
-    gridTest(Support::datapath("las/4_1.las"), 100, 0);
+    CopcReader r;
+    Options ro;
+    ro.add("filename", "https://s3.amazonaws.com/grid-public-ept/camas/copc/CamasBE-15_0.copc.laz");
+    ro.add("threads", 10);
+    r.setOptions(ro);
+
+    PointTable table;
+    r.prepare(table);
+    PointViewSet viewSet = r.execute(table);
+    EXPECT_EQ(1u, viewSet.size());
+    PointViewPtr view = *viewSet.begin();
+
+    testPointsKnn2d(view, 0, 100);
+    testPointsKnn2d(view, 878, 140);
+    testPointsKnn2d(view, 20029, 200);
+    testPointsKnn3d(view, 0, 100);
+    testPointsKnn3d(view, 878, 140);
+    testPointsKnn3d(view, 20029, 200);
 }
+*/

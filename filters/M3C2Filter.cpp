@@ -191,14 +191,14 @@ void M3C2Filter::done(PointTableRef _)
 
     PointView& v1 = *m_p->v1;
     PointGrid g1(v1Bounds.to2d(), v1);
-    g1.buildIndex();
+    g1.build();
 
     BOX3D v2Bounds;
     m_p->v2->calculateBounds(v2Bounds);
 
     PointView& v2 = *m_p->v2;
     PointGrid g2(v2Bounds.to2d(), v2);
-    g2.buildIndex();
+    g2.build();
 
     for (PointRef ref : *m_p->cores)
     {
@@ -228,10 +228,10 @@ void M3C2Filter::done(PointTableRef _)
         box.grow(c3(0), c3(1));
         box.grow(c4(0), c4(1));
 
-        PointIdList pts = g1.findNeighbors(box);
+        PointIdList pts = g1.boxEncloses(box);
         std::vector<double> dists1 = filterPoints(core, normal, g1.view(), pts);
 
-        pts = g2.findNeighbors(box);
+        pts = g2.boxEncloses(box);
         std::vector<double> dists2 = filterPoints(core, normal, g2.view(), pts);
 
         Stats stats;
@@ -250,7 +250,7 @@ void M3C2Filter::done(PointTableRef _)
 
 Eigen::Vector3d M3C2Filter::findNormal(Eigen::Vector3d pos, const PointGrid& grid)
 {
-    PointIdList neighbors = grid.findNeighbors3d(pos, m_args->normalRadius);
+    PointIdList neighbors = grid.radius(pos(0), pos(1), pos(2), m_args->normalRadius);
     math::NormalResult res = math::findNormal(grid.view(), neighbors);
     return res.normal;
 }
