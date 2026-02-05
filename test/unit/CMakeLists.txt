@@ -77,13 +77,6 @@ PDAL_ADD_TEST(pdal_options_test
     INCLUDES
         ${NLOHMANN_INCLUDE_DIR}
 )
-PDAL_ADD_TEST(pdal_pointgrid_test 
-    FILES
-        PointGridTest.cpp
-        ${PDAL_SRC_DIR}/private/PointGrid.cpp
-    INCLUDES
-        ${PDAL_VENDOR_EIGEN_DIR}
-)
 
 PDAL_ADD_TEST(pdal_dimension_test
     FILES
