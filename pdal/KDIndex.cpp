@@ -34,6 +34,7 @@
 
 #include "KDIndex.hpp"
 #include "private/KDImpl.hpp"
+#include "private/PointGrid.hpp"
 
 namespace pdal
 {
@@ -43,7 +44,7 @@ namespace pdal
 //
 
 KD2Index::KD2Index(const PointView& buf) :
-    m_buf(buf), m_impl(new KD2Impl(m_buf))
+    m_buf(buf), m_impl(new PointGrid(m_buf))
 {
     if (!m_buf.hasDim(Dimension::Id::X))
         throw pdal_error("KD2Index: point view missing 'X' dimension.");
@@ -100,11 +101,40 @@ PointIdList KD2Index::neighbors(PointRef &point, point_count_t k) const
 }
 
 void KD2Index::knnSearch(double x, double y, point_count_t k,
-    PointIdList *indices, std::vector<double> *sqr_dists) const
+    DistanceResults& results) const
 {
-    m_impl->knnSearch(x, y, k, indices, sqr_dists);
+    results = m_impl->knnSearch(x, y, k);
 }
 
+void KD2Index::knnSearch(PointId idx, point_count_t k, DistanceResults& results) const
+{
+    double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
+    double y = m_buf.getFieldAs<double>(Dimension::Id::Y, idx);
+
+    knnSearch(x, y, k, results);
+}
+
+void KD2Index::knnSearch(PointRef& point, point_count_t k, DistanceResults& results) const
+{
+    double x = point.getFieldAs<double>(Dimension::Id::X);
+    double y = point.getFieldAs<double>(Dimension::Id::Y);
+
+    knnSearch(x, y, k, results);
+}
+
+// deprecated
+void KD2Index::knnSearch(double x, double y, point_count_t k,
+    PointIdList *indices, std::vector<double> *sqr_dists) const
+{
+    DistanceResults results = m_impl->knnSearch(x, y, k);
+    for (point_count_t i = 0; i < results.size(); ++i)
+    {
+        indices->push_back(results[i].first);
+        sqr_dists->push_back(results[i].second);
+    }
+}
+
+// deprecated
 void KD2Index::knnSearch(PointId idx, point_count_t k, PointIdList *indices,
     std::vector<double> *sqr_dists) const
 {
@@ -114,6 +144,7 @@ void KD2Index::knnSearch(PointId idx, point_count_t k, PointIdList *indices,
     knnSearch(x, y, k, indices, sqr_dists);
 }
 
+// deprecated
 void KD2Index::knnSearch(PointRef& point, point_count_t k, PointIdList *indices,
     std::vector<double> *sqr_dists) const
 {
@@ -128,12 +159,12 @@ PointIdList KD2Index::radius(double x, double y, double r) const
     return m_impl->radius(x, y, r);
 }
 
-void KD2Index::radius(double x, double y, double r, KD2Index::RadiusResults& result) const
+void KD2Index::radius(double x, double y, double r, DistanceResults& result) const
 {
-    return m_impl->radius(x, y, r, result);
+    result = m_impl->radiusSearch(x, y, r);
 }
 
-void KD2Index::radius(PointId idx, double r, KD2Index::RadiusResults& result) const
+void KD2Index::radius(PointId idx, double r, DistanceResults& result) const
 {
     double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
     double y = m_buf.getFieldAs<double>(Dimension::Id::Y, idx);
@@ -157,12 +188,17 @@ PointIdList KD2Index::radius(PointRef &point, double r) const
     return radius(x, y, r);
 }
 
+PointIdList KD2Index::boxNeighborhood(const BOX2D extent) const
+{
+    return m_impl->boxEncloses(extent);
+}
+
 //
 // KD3Index
 //
 
 KD3Index::KD3Index(const PointView& buf) :
-    m_buf(buf), m_impl(new KD3Impl(m_buf))
+    m_buf(buf), m_impl(new PointGrid(m_buf))
 {
     if (!m_buf.hasDim(Dimension::Id::X))
         throw pdal_error("KD3Index: point view missing 'X' dimension.");
@@ -224,12 +260,20 @@ PointIdList KD3Index::neighbors(PointRef &point, point_count_t k,
     return neighbors(x, y, z, k, stride);
 }
 
+// deprecated
 void KD3Index::knnSearch(double x, double y, double z, point_count_t k,
     PointIdList *indices, std::vector<double> *sqr_dists) const
 {
-    m_impl->knnSearch(x, y, z, k, indices, sqr_dists);
+    DistanceResults results;
+    results = m_impl->knnSearch(x, y, z, k);
+    for (size_t i = 0; i < results.size(); ++i)
+    {
+        indices->push_back(results[i].first);
+        sqr_dists->push_back(results[i].second);
+    }
 }
 
+// deprecated
 void KD3Index::knnSearch(PointId idx, point_count_t k, PointIdList *indices,
     std::vector<double> *sqr_dists) const
 {
@@ -240,6 +284,7 @@ void KD3Index::knnSearch(PointId idx, point_count_t k, PointIdList *indices,
     knnSearch(x, y, z, k, indices, sqr_dists);
 }
 
+// deprecated
 void KD3Index::knnSearch(PointRef &point, point_count_t k,
     PointIdList *indices, std::vector<double> *sqr_dists) const
 {
@@ -250,18 +295,44 @@ void KD3Index::knnSearch(PointRef &point, point_count_t k,
     knnSearch(x, y, z, k, indices, sqr_dists);
 }
 
+void KD3Index::knnSearch(double x, double y, double z, point_count_t k,
+    DistanceResults& results) const
+{
+    results = m_impl->knnSearch(x, y, z, k);
+}
+
+void KD3Index::knnSearch(PointId idx, point_count_t k,
+    DistanceResults& results) const
+{
+    double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
+    double y = m_buf.getFieldAs<double>(Dimension::Id::Y, idx);
+    double z = m_buf.getFieldAs<double>(Dimension::Id::Z, idx);
+
+    knnSearch(x, y, z, k, results);
+}
+
+void KD3Index::knnSearch(PointRef &point, point_count_t k,
+    DistanceResults& results) const
+{
+    double x = point.getFieldAs<double>(Dimension::Id::X);
+    double y = point.getFieldAs<double>(Dimension::Id::Y);
+    double z = point.getFieldAs<double>(Dimension::Id::Z);
+
+    knnSearch(x, y, z, k, results);
+}
+
 PointIdList KD3Index::radius(double x, double y, double z, double r) const
 {
     return m_impl->radius(x, y, z, r);
 }
 
 void KD3Index::radius(double x, double y, double z, double r,
-    KD3Index::RadiusResults& results) const
+    DistanceResults& results) const
 {
-    m_impl->radius(x, y, z, r, results);
+    results = m_impl->radiusSearch(x, y, z, r);
 }
 
-void KD3Index::radius(PointId idx, double r, KD3Index::RadiusResults& results) const
+void KD3Index::radius(PointId idx, double r, DistanceResults& results) const
 {
     double x = m_buf.getFieldAs<double>(Dimension::Id::X, idx);
     double y = m_buf.getFieldAs<double>(Dimension::Id::Y, idx);

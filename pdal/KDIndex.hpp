@@ -39,15 +39,12 @@
 namespace pdal
 {
 
-class KD2Impl;
-class KD3Impl;
+class PointGrid;
 class KDFlexImpl;
 
 class PDAL_EXPORT KD2Index
 {
 public:
-    using RadiusResult = std::pair<size_t, double>;
-    using RadiusResults = std::vector<RadiusResult>;
 
     KD2Index(const PointView& buf);
     ~KD2Index();
@@ -59,28 +56,32 @@ public:
     PointIdList neighbors(double x, double y, point_count_t k) const;
     PointIdList neighbors(PointId idx, point_count_t k) const;
     PointIdList neighbors(PointRef &point, point_count_t k) const;
+    void knnSearch(double x, double y, point_count_t k, DistanceResults& results) const;
+    void knnSearch(PointId idx, point_count_t k, DistanceResults& results) const;
+    void knnSearch(PointRef& point, point_count_t k, DistanceResults& results) const;
+    PointIdList radius(double x, double y, double r) const;
+    void radius(double x, double y, double r, DistanceResults& results) const;
+    void radius(PointId idx, double r, DistanceResults& results) const;
+    PointIdList radius(PointId idx, double r) const;
+    PointIdList radius(PointRef &point, double r) const;
+    PointIdList boxNeighborhood(const BOX2D extent) const;
+
+    /// Keeping these around for backwards compatibility at the moment. Maybe can remove
     void knnSearch(double x, double y, point_count_t k,
         PointIdList *indices, std::vector<double> *sqr_dists) const;
     void knnSearch(PointId idx, point_count_t k, PointIdList *indices,
         std::vector<double> *sqr_dists) const;
     void knnSearch(PointRef& point, point_count_t k, PointIdList *indices,
         std::vector<double> *sqr_dists) const;
-    PointIdList radius(double x, double y, double r) const;
-    void radius(double x, double y, double r, KD2Index::RadiusResults& results) const;
-    void radius(PointId idx, double r, KD2Index::RadiusResults& results) const;
-    PointIdList radius(PointId idx, double r) const;
-    PointIdList radius(PointRef &point, double r) const;
 
 private:
     const PointView& m_buf;
-    std::unique_ptr<KD2Impl> m_impl;
+    std::unique_ptr<PointGrid> m_impl;
 };
 
 class PDAL_EXPORT KD3Index
 {
 public:
-    using RadiusResult = std::pair<size_t, double>;
-    using RadiusResults = std::vector<RadiusResult>;
 
     KD3Index(const PointView& buf);
     ~KD3Index();
@@ -96,20 +97,26 @@ public:
     PointIdList neighbors(PointRef &point, point_count_t k,
         size_t stride=1) const;
     void knnSearch(double x, double y, double z, point_count_t k,
+        DistanceResults& results) const;
+    void knnSearch(PointId idx, point_count_t k, DistanceResults& results) const;
+    void knnSearch(PointRef &point, point_count_t k, DistanceResults& results) const;
+    PointIdList radius(double x, double y, double z, double r) const;
+    void radius(double x, double y, double z, double r, DistanceResults& results) const;
+    void radius(PointId idx, double r, DistanceResults& results) const;
+    PointIdList radius(PointId idx, double r) const;
+    PointIdList radius(PointRef &point, double r) const;
+
+    // also deprecated
+    void knnSearch(double x, double y, double z, point_count_t k,
         PointIdList *indices, std::vector<double> *sqr_dists) const;
     void knnSearch(PointId idx, point_count_t k, PointIdList *indices,
         std::vector<double> *sqr_dists) const;
     void knnSearch(PointRef &point, point_count_t k,
         PointIdList *indices, std::vector<double> *sqr_dists) const;
-    PointIdList radius(double x, double y, double z, double r) const;
-    void radius(double x, double y, double z, double r, KD3Index::RadiusResults& results) const;
-    void radius(PointId idx, double r, KD3Index::RadiusResults& results) const;
-    PointIdList radius(PointId idx, double r) const;
-    PointIdList radius(PointRef &point, double r) const;
 
 private:
     const PointView& m_buf;
-    std::unique_ptr<KD3Impl> m_impl;
+    std::unique_ptr<PointGrid> m_impl;
 };
 
 class KDFlexIndex
