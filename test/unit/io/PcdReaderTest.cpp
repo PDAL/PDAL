@@ -44,7 +44,7 @@
 using namespace pdal;
 
 void comparePcdLas(const std::string& pcdFilename, Options& pcdOptions,
-                   const std::string& lasFilename)
+                   const std::string& lasFilename, bool checkGpsTime = false)
 {
     PcdReader t;
     pcdOptions.add("filename", pcdFilename);
@@ -79,6 +79,10 @@ void comparePcdLas(const std::string& pcdFilename, Options& pcdOptions,
         EXPECT_DOUBLE_EQ(tv->getFieldAs<float>(Dimension::Id::Z, i),
                          lv->getFieldAs<float>(Dimension::Id::Z, i));
     }
+    if (checkGpsTime)
+        for (PointId i = 0; i < lv->size(); ++i)
+            EXPECT_DOUBLE_EQ(tv->getFieldAs<float>(Dimension::Id::GpsTime, i),
+                    lv->getFieldAs<float>(Dimension::Id::GpsTime, i));
 }
 
 void comparePcdLas(const std::string& pcdFilename,
@@ -199,9 +203,12 @@ TEST(PcdReaderTest, throwMissingHeader)
     EXPECT_THROW(t.prepare(tt), pdal_error);
 }
 
+// This tests binary PCD
 TEST(PcdReaderTest, canReadDoubles)
 {
-    comparePcdLas(Support::datapath("pcd/autzen-utm.pcd"),
-                  Support::datapath("autzen/autzen-utm.las"));
+    Options pcdOptions;
+    bool readGpstime = true;
+    comparePcdLas(Support::datapath("pcd/autzen-utm.pcd"), pcdOptions,
+                  Support::datapath("autzen/autzen-utm.las"), readGpstime);
 }
 
