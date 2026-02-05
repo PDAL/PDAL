@@ -47,57 +47,28 @@ class PointGrid
     using Cell = std::vector<PointId>;
 
 public:
-    //!! This is the same as `RadiusResults` in KDIndex. Should consolidate.
-    using NeighborResults = std::vector<std::pair<PointId, double>>;
 
     PointGrid(BOX2D bounds, const PointView& view, int approxPerCell = 200) :
         m_bounds(bounds), m_view(view), m_approxPerCell(approxPerCell)
-    {
-        init();
-        buildIndex();
-    }
+    {}
 
     PointGrid(const PointView& view, int approxPerCell = 200) :
         m_view(view), m_approxPerCell(approxPerCell)
     {
         m_view.calculateBounds(m_bounds);
-        init();
-        buildIndex();
     }
 
-    void buildIndex()
+    void build()
     {
+        init();
         for (PointId i = 0; i < m_view.size(); ++i)
             add(m_view.getFieldAs<double>(Dimension::Id::X, i),
                 m_view.getFieldAs<double>(Dimension::Id::Y, i), i);
     }
 
-    uint32_t key(uint16_t xi, uint16_t yi) const
+    const BOX2D bounds() const
     {
-        return xi * m_cells1d + yi;
-    }
-
-    std::pair<uint16_t, uint16_t> toIJ(double x, double y) const
-    {
-        uint16_t xi = static_cast<uint16_t>((x - m_bounds.minx) / m_xlen);
-        uint16_t yi = static_cast<uint16_t>((y - m_bounds.miny) / m_ylen);
-        return { xi, yi };
-    }
-
-    const Cell& cell(uint16_t i, uint16_t j) const
-    {
-        return m_cells[key(i, j)];
-    }
-
-    const BOX2D& bounds() const
-    {
-        return m_bounds;
-    }
-
-    const BOX2D bounds(int i, int j) const
-    {
-        return BOX2D(m_bounds.minx + m_xlen * i, m_bounds.miny + m_ylen * j,
-            m_bounds.minx + m_xlen * (i + 1), m_bounds.minx + m_ylen * (j + 1));;
+        return m_bounds.to2d();
     }
 
     const PointView& view() const
@@ -106,15 +77,28 @@ public:
     }
 
     //!! Need to think about return types here. And make better names.
-    NeighborResults knnSearch(Eigen::Vector2d pos, point_count_t k) const;
-    NeighborResults knnSearch(Eigen::Vector2d pos, point_count_t k, 
-        double maxSqDistance) const;
-    PointIdList findNeighbors(Eigen::Vector2d pos, point_count_t k) const;
-    PointIdList findNeighbors(Eigen::Vector2d pos, point_count_t k, 
-        double maxSqDistance) const;
-    PointIdList findNeighbors3d(Eigen::Vector3d pos, double radius) const;
-    PointIdList findNeighbors(BOX2D extent) const;
-    PointIdList findNeighbors(PointRef& point, double radius) const;
+
+    // 2D
+    DistanceResults knnSearch(double x, double y, point_count_t k) const;
+    PointIdList neighbors(double x, double y, point_count_t k) const;
+    //PointIdList findNeighbors(Eigen::Vector2d pos, point_count_t k, 
+      //  double maxSqDistance) const;
+    PointIdList boxEncloses(BOX2D extent) const;
+    PointIdList radius(double x, double y, double radius) const;
+    DistanceResults radiusSearch(double x, double y, double radius) const;
+
+    // 3D
+    PointIdList radius(double x, double y, double z, double radius) const;
+    DistanceResults radiusSearch(double x, double y, double z, double radius) const;
+    PointIdList neighbors(double x, double y, double z, point_count_t k,
+        int stride) const;
+    DistanceResults knnSearch(double x, double y, double z, point_count_t k) const;
+    //PointIdList boxEncloses(BOX3D extent) const;
+
+    // Flex
+    //!! trying to get this to work later
+    //DistanceResults knnSearch(Eigen::Matrix<double, Eigen::Dynamic, 1> pos,
+       // point_count_t k) const;
 
 private:
     void init()
@@ -122,7 +106,7 @@ private:
         // Silently accepting these. Stuff breaks if we don't
         if (m_approxPerCell > (int)m_view.size())
             m_approxPerCell = m_view.size();
-        double cells = std::floor(std::sqrt(view.size() / m_approxPerCell));
+        double cells = std::floor(std::sqrt(m_view.size() / m_approxPerCell));
         assert(cells > 0);
         assert(cells < std::numeric_limits<uint16_t>::max());
         m_cells1d = static_cast<uint16_t>(cells);
@@ -144,11 +128,36 @@ private:
         c.push_back(id);
     }
 
+    uint32_t key(uint16_t xi, uint16_t yi) const
+    {
+        return xi * m_cells1d + yi;
+    }
+
+    std::pair<uint16_t, uint16_t> toIJ(double x, double y) const
+    {
+        uint16_t xi = static_cast<uint16_t>((x - m_bounds.minx) / m_xlen);
+        uint16_t yi = static_cast<uint16_t>((y - m_bounds.miny) / m_ylen);
+        return { xi, yi };
+    }
+
+    const BOX2D bounds(int i, int j) const
+    {
+        return BOX2D(m_bounds.minx + m_xlen * i, m_bounds.miny + m_ylen * j,
+            m_bounds.minx + m_xlen * (i + 1), m_bounds.minx + m_ylen * (j + 1));;
+    }
+
+    const Cell& cell(uint16_t i, uint16_t j) const
+    {
+        return m_cells[key(i, j)];
+    }
+
+    std::vector<uint32_t> radiusCells(Eigen::Vector2d pos, double radius) const;
     std::vector<uint32_t> nextCells(Eigen::Vector2d pos, double maxDist, 
         std::vector<uint32_t>& skip) const;
 
     std::vector<Cell> m_cells;
-    BOX2D m_bounds;
+    // 3D bounds so we can have a more accurate 3D max search distance
+    BOX3D m_bounds;
     const PointView& m_view;
     int m_approxPerCell;
     uint16_t m_cells1d;
