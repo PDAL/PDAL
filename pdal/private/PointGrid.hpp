@@ -60,6 +60,8 @@ public:
 
     void build()
     {
+        if (m_cells.size())
+            return;
         init();
         for (PointId i = 0; i < m_view.size(); ++i)
             add(m_view.getFieldAs<double>(Dimension::Id::X, i),

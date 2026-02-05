@@ -129,8 +129,8 @@ void KD2Index::knnSearch(double x, double y, point_count_t k,
     DistanceResults results = m_impl->knnSearch(x, y, k);
     for (point_count_t i = 0; i < results.size(); ++i)
     {
-        indices->push_back(results[i].first);
-        sqr_dists->push_back(results[i].second);
+        (*indices)[i] = results[i].first;
+        (*sqr_dists)[i]= results[i].second;
     }
 }
 
@@ -268,8 +268,8 @@ void KD3Index::knnSearch(double x, double y, double z, point_count_t k,
     results = m_impl->knnSearch(x, y, z, k);
     for (size_t i = 0; i < results.size(); ++i)
     {
-        indices->push_back(results[i].first);
-        sqr_dists->push_back(results[i].second);
+        (*indices)[i] = results[i].first;
+        (*sqr_dists)[i] = results[i].second;
     }
 }
 
