@@ -201,9 +201,12 @@ DistanceResults PointGrid::knnSearch(double x, double y, point_count_t k) const
 
 PointIdList PointGrid::boxEncloses(BOX2D extent) const
 {
-    extent.clip(bounds());
-
     PointIdList neighbors;
+
+    if (!extent.overlaps(bounds()))
+        return neighbors;
+
+    extent.clip(bounds());
 
     // Find IJ bounding box.
     auto [imin, jmin] = toIJ(extent.minx, extent.miny);
@@ -217,7 +220,7 @@ PointIdList PointGrid::boxEncloses(BOX2D extent) const
             // If the entire cell is in the extent, append all points.
             if (extent.contains(bounds(i, j)))
                 neighbors.insert(neighbors.end(), c.begin(), c.end());
-            // Otherwise, check each point to make sure it's in the xtent.
+            // Otherwise, check each point to make sure it's in the extent.
             else
                 for (PointId id : c)
                 {
@@ -422,7 +425,7 @@ std::vector<uint32_t> PointGrid::radiusCells(Eigen::Vector2d pos,
     cells.reserve((imax - imin + 1) * (jmax - jmin + 1));
     for (uint16_t i = imin; i <= imax; ++i)
         for (uint16_t j = jmin; j <= jmax; ++j)
-                cells.push_back(key(i, j));
+            cells.push_back(key(i, j));
     return cells;
 }
 
