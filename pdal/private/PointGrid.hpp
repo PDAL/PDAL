@@ -47,6 +47,19 @@ class PointGrid
     using Cell = std::vector<PointId>;
 
 public:
+    struct DistanceResult
+    {
+        PointId index = 0;
+        double sqr_dist = 0.0;
+
+        DistanceResult() = default;
+        DistanceResult(PointId index, double sqr_dist) : index(index), sqr_dist(sqr_dist)
+        {}
+
+        bool operator<(const DistanceResult& other) const
+        { return sqr_dist < other.sqr_dist; }
+    };
+    using DistanceResults = std::vector<DistanceResult>;
 
     PointGrid(BOX2D bounds, const PointView& view, int approxPerCell = 200) :
         m_bounds(bounds), m_view(view), m_approxPerCell(approxPerCell)
@@ -83,8 +96,6 @@ public:
     // 2D
     DistanceResults knnSearch(double x, double y, point_count_t k) const;
     PointIdList neighbors(double x, double y, point_count_t k) const;
-    //PointIdList findNeighbors(Eigen::Vector2d pos, point_count_t k, 
-      //  double maxSqDistance) const;
     PointIdList boxEncloses(BOX2D extent) const;
     PointIdList radius(double x, double y, double radius) const;
     DistanceResults radiusSearch(double x, double y, double radius) const;
@@ -95,12 +106,6 @@ public:
     PointIdList neighbors(double x, double y, double z, point_count_t k,
         int stride) const;
     DistanceResults knnSearch(double x, double y, double z, point_count_t k) const;
-    //PointIdList boxEncloses(BOX3D extent) const;
-
-    // Flex
-    //!! trying to get this to work later
-    //DistanceResults knnSearch(Eigen::Matrix<double, Eigen::Dynamic, 1> pos,
-       // point_count_t k) const;
 
 private:
     void init()
@@ -118,8 +123,6 @@ private:
         m_cells.resize(m_cells1d * m_cells1d);
     }
 
-    // This could be public again if we do a check for key < m_cells.size().
-    // Otherwise adding a point out of range will make the bounds inaccurate.
     void add(double x, double y, PointId id)
     {
         auto [i, j] = toIJ(x, y);
@@ -154,7 +157,7 @@ private:
     }
 
     std::vector<uint32_t> radiusCells(Eigen::Vector2d pos, double radius) const;
-    std::vector<uint32_t> nextCells(Eigen::Vector2d pos, double maxDist, 
+    std::vector<uint32_t> nextCells(Eigen::Vector2d pos, double maxDist,
         std::vector<uint32_t>& skip) const;
 
     std::vector<Cell> m_cells;

@@ -40,99 +40,9 @@ namespace pdal
 
 /// 2D ///
 
-
-/*
-
-DistanceResults PointGrid::knnSearch(Eigen::Matrix<double, Eigen::Dynamic, 1> pos, point_count_t k) const
-{
-    // throw instead?
-    if (pos.rows() < 2 || pos.rows() > 3)
-        return;
-
-    DistanceResults results;
-    results.reserve(k);
-
-    // Find the starting cell
-    auto [iStart, jStart] = toIJ(pos(0), pos(1));
-    if (k > m_view.size()) // edge case
-        k = m_view.size();
-
-    // Maximum possible distance between 2 points. A bit extreme but it's the most accurate.
-    // Maybe should be different for 2d and 3d
-    const double maxSqDistance = std::pow(m_bounds.maxx - m_bounds.minx, 2) +
-        std::pow(m_bounds.maxy - m_bounds.miny, 2) + std::pow(m_bounds.maxz - m_bounds.minz, 2);
-    // Setting this arbitrarily large for the first iteration
-    double curMaxDist = maxSqDistance;
-    // Keep track of cells we've already checked
-    std::vector<uint32_t> skip;
-    // This will contain all cells on the queue as keys for simpler lookups than Cell or ij
-    std::vector<uint32_t> keys = { key(iStart, jStart) };
-    // Start with the first cell, then move outwards if we need to.
-    while (keys.size())
-    {
-        for (auto key : keys)
-        {
-            skip.push_back(key);
-            const Cell& c = m_cells[key];
-            // Check each point is below our current max distance
-            for (PointId id : c)
-            {
-                Eigen::Matrix<double, pos.rows(), 1> pos2or3;
-                //!! is this construction efficient?
-                pos2or3 << m_view.getFieldAs<double>(Dimension::Id::X, id),
-                    m_view.getFieldAs<double>(Dimension::Id::Y, id);
-                if (pos2or3.rows() == 3)
-                    pos2or3 << m_view.getFieldAs<double>(Dimension::Id::Z, id);
-
-                double dist2 = (pos2or3 - pos).squaredNorm();
-                if (dist2 < curMaxDist)
-                    results.emplace_back(id, dist2);
-            }
-            // Sort by distance
-            std::sort(results.begin(), results.end(), [](const std::pair<PointId, double>& a,
-                const std::pair<PointId, double>& b) {
-                return a.second < b.second;
-            });
-            // If we've found enough, we can use a more precise max distance as our radius
-            // in nextCells(). If not, use the one that was set at the start (assuming this is the
-            // first iteration).
-            if (results.size() >= k) // resize is dumb if size == k but whatever
-            {
-                results.resize(k);
-                //!! Shouldn't need the min check. Remove
-                curMaxDist = results.back().second;
-            }
-            // If it's not the first iteration and still fails to find k, grow the radius
-            // by a bit. If we already tried and we reached the max distance, we're done
-            else if (skip.size() > 1)
-            {
-                if (curMaxDist == maxSqDistance)
-                    break;
-                curMaxDist = std::min((curMaxDist * 1.5), maxSqDistance);
-                std::cout << "key " << key << ": Growing radius to " << curMaxDist << std::endl;
-            }
-        }
-        // Get the next cells. If there are none, we're done
-        keys = nextCells(pos, curMaxDist, skip);
-    }
-    //!! Warn if we didn't find enough?
-    return results;
-}
-*/
-
-PointIdList PointGrid::neighbors(double x, double y, point_count_t k) const
-{
-    DistanceResults results = knnSearch(x, y, k);
-    PointIdList pts;
-    for (auto& r : results)
-        pts.push_back(r.first);
-
-    return pts;
-}
-
 // Always potentially bounded by maxSqDistance, which can be set to an arbitrararily large value
 // to include all points.
-DistanceResults PointGrid::knnSearch(double x, double y, point_count_t k) const
+PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, point_count_t k) const
 {
     Eigen::Vector2d pos(x, y);
     DistanceResults results;
@@ -169,17 +79,14 @@ DistanceResults PointGrid::knnSearch(double x, double y, point_count_t k) const
                     results.emplace_back(id, dist2);
             }
             // Sort by distance
-            std::sort(results.begin(), results.end(), [](const std::pair<PointId, double>& a,
-                const std::pair<PointId, double>& b) {
-                return a.second < b.second;
-            });
+            std::sort(results.begin(), results.end());
             // If we've found enough, we can use a more precise max distance as our radius
             // in nextCells(). If not, use the one that was set at the start (assuming this is the
             // first iteration).
-            if (results.size() >= k) // resize is dumb if size == k but whatever
+            if (results.size() >= k)
             {
                 results.resize(k);
-                curMaxDist = results.back().second;
+                curMaxDist = results.back().sqr_dist;
             }
             // If it's not the first iteration and still fails to find k, grow the radius
             // by a bit. If we already tried and we reached the max distance, we're done
@@ -239,12 +146,12 @@ PointIdList PointGrid::radius(double x, double y, double radius) const
     PointIdList neighbors;
     DistanceResults results = radiusSearch(x, y, radius);
     for (size_t i = 0; i < results.size(); ++i)
-        neighbors.push_back(results[i].first);
+        neighbors.push_back(results[i].index);
     return neighbors;
 }
 
 
-DistanceResults PointGrid::radiusSearch(double x, double y, double radius) const
+PointGrid::DistanceResults PointGrid::radiusSearch(double x, double y, double radius) const
 {
     Eigen::Vector2d pos(x, y);
     DistanceResults results;
@@ -260,10 +167,7 @@ DistanceResults PointGrid::radiusSearch(double x, double y, double radius) const
                 results.emplace_back(id, dist);
         }
 
-    std::sort(results.begin(), results.end(), [](const std::pair<PointId, double>& a,
-        const std::pair<PointId, double>& b) {
-        return a.second < b.second;
-    });
+    std::sort(results.begin(), results.end());
 
     return results;
 }
@@ -273,7 +177,8 @@ DistanceResults PointGrid::radiusSearch(double x, double y, double radius) const
 
 
 // 3D version of knnSearch. Should consolidate if possible
-DistanceResults PointGrid::knnSearch(double x, double y, double z, point_count_t k) const
+PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, double z,
+    point_count_t k) const
 {
     Eigen::Vector3d pos(x, y, z);
     DistanceResults results;
@@ -287,6 +192,7 @@ DistanceResults PointGrid::knnSearch(double x, double y, double z, point_count_t
     // Maximum possible distance between 2 points
     const double maxSqDistance = std::pow(m_bounds.maxx - m_bounds.minx, 2) +
         std::pow(m_bounds.maxy - m_bounds.miny, 2) + std::pow(m_bounds.maxz - m_bounds.minz, 2);
+
     //!! Compared to 2D, this could expand our queue by too much if < k neighbors since the
     //!! nextCells() search is 2D. Could remove the Z padding later but I need to be careful
     //!! (plus it doesn't matter that much)
@@ -316,17 +222,14 @@ DistanceResults PointGrid::knnSearch(double x, double y, double z, point_count_t
                     results.emplace_back(id, dist2);
             }
             // Sort by distance
-            std::sort(results.begin(), results.end(), [](const std::pair<PointId, double>& a,
-                const std::pair<PointId, double>& b) {
-                return a.second < b.second;
-            });
+            std::sort(results.begin(), results.end());
             // If we've found enough, we can use a more precise max distance as our radius
             // in nextCells(). If not, use the one that was set at the start (assuming this is the
             // first iteration).
             if (results.size() >= k) // resize is dumb if size == k but whatever
             {
                 results.resize(k);
-                curMaxDist = results.back().second;
+                curMaxDist = results.back().sqr_dist;
             }
             // If it's not the first iteration and still fails to find k, grow the radius
             // by a bit. If we already tried and we reached the max distance, we're done
@@ -361,7 +264,7 @@ PointIdList PointGrid::neighbors(double x, double y, double z, point_count_t k, 
 
     // We can always multiply by stride, since we are looping over results anyway.
     for (size_t i = 0; i < k; ++i)
-        output[i] = results[i * stride].first;
+        output[i] = results[i * stride].index;
 
     return output;
 }
@@ -372,12 +275,13 @@ PointIdList PointGrid::radius(double x, double y, double z, double radius) const
     PointIdList neighbors;
     DistanceResults results = radiusSearch(x, y, z, radius);
     for (size_t i = 0; i < results.size(); ++i)
-        neighbors.push_back(results[i].first);
+        neighbors.push_back(results[i].index);
     return neighbors;
 }
 
 
-DistanceResults PointGrid::radiusSearch(double x, double y, double z, double radius) const
+PointGrid::DistanceResults PointGrid::radiusSearch(double x, double y, double z,
+    double radius) const
 {
     Eigen::Vector3d pos(x, y, z);
     DistanceResults results;
@@ -394,10 +298,7 @@ DistanceResults PointGrid::radiusSearch(double x, double y, double z, double rad
                 results.emplace_back(id, dist);
         }
 
-    std::sort(results.begin(), results.end(), [](const std::pair<PointId, double>& a,
-        const std::pair<PointId, double>& b) {
-        return a.second < b.second;
-    });
+    std::sort(results.begin(), results.end());
 
     return results;
 }

@@ -62,10 +62,6 @@ struct RasterLimits;
 template <class T> class Raster;
 using Rasterd = Raster<double>;
 
-// For PointGrid index search results
-using DistanceResult = std::pair<PointId, double>;
-using DistanceResults = std::vector<DistanceResult>;
-
 typedef std::shared_ptr<PointView> PointViewPtr;
 typedef std::set<PointViewPtr, PointViewLess> PointViewSet;
 

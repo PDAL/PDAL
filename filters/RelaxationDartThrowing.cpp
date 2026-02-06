@@ -49,7 +49,7 @@ namespace pdal
 
 static StaticPluginInfo const s_info{
     "filters.relaxationdartthrowing", "Subsampling filter",
-    "https://pdal.org/stages/filters.relaxationdartthrowing.html"};
+    "http://pdal.io/stages/filters.relaxationdartthrowing.html"};
 
 CREATE_STATIC_STAGE(RelaxationDartThrowing, s_info)
 
@@ -71,10 +71,12 @@ void RelaxationDartThrowing::addArgs(ProgramArgs& args)
 
 PointViewSet RelaxationDartThrowing::run(PointViewPtr inView)
 {
-    PointViewSet viewSet;
-
     point_count_t np = inView->size();
-
+    
+    // Return empty PointViewSet if the input PointView has no points.
+    PointViewSet viewSet;
+    if (!np)
+        return viewSet;
     // Return inView if the PointView is already smaller than m_maxSize.
     if (np < m_maxSize)
     {
@@ -105,7 +107,9 @@ PointViewSet RelaxationDartThrowing::run(PointViewPtr inView)
         std::shuffle(shuffledIds.begin(), shuffledIds.end(), std::mt19937(m_seed));
     }
 
-    using PointIdNeighborMap = std::unordered_map<PointId, DistanceResults>;
+    using SqrDistList = std::vector<double>;
+    using PointIdSqrDistPair = std::pair<PointIdList, SqrDistList>;
+    using PointIdNeighborMap = std::map<PointId, PointIdSqrDistPair>;
     PointIdNeighborMap neighborMap;
     while (finalIds.size() < m_maxSize)
     {
@@ -131,16 +135,18 @@ PointViewSet RelaxationDartThrowing::run(PointViewPtr inView)
             // All PointIds in finalIds have an entry in the neighborMap, which
             // provides neighboring PointIds and square distances, up to the
             // initial radius.
-            DistanceResults res = neighborMap[i];
+            PointIdSqrDistPair p = neighborMap[i];
 
             // Find the upper bound on the neighboring square distances, using
             // the current radius squared.
-            auto upper = std::upper_bound(res.begin(), res.end(), sqr_radius, 
-                [](double val, const auto& p) { return val < p.second; });
+            auto upper =
+                std::upper_bound(p.second.begin(), p.second.end(), sqr_radius);
+            size_t num = std::distance(p.second.begin(), upper);
 
-            // All neighbors below the upper bound are masked.
-            for (auto it = res.begin(); it != upper; ++it)
-                keep[it->first] = 0;
+            // All neighbors less than num are within the current masking
+            // radius.
+            for (size_t id = 0; id < num; ++id)
+                keep[p.first[id]] = 0;
         }
 
         // We are able to subsample in a single pass over the shuffled indices.
@@ -157,24 +163,35 @@ PointViewSet RelaxationDartThrowing::run(PointViewPtr inView)
                 break;
 
             // We now proceed to mask all neighbors within radius of the
-            // kept point.
-
-            // If there is no entry in the neighborMap, we populate it with all 
-            // neighbor PointIds and square distances up to the current radius.
+            // kept point. If there is no entry in the neighborMap, we populate
+            // it with all neighbor PointIds and square distances up to the
+            // current radius.
             if (neighborMap.find(i) == neighborMap.end())
-                index.radius(i, radius, neighborMap[i]);
+            {
+                // This is a hack; we should modify radius search to return the
+                // sqr_dists directly, instead of searching twice. But for now,
+                // we perform a radius search to find the number of k nearest
+                // neighbors, then call knnSearch using k to also obtain square
+                // distances to said neighbors.
+                PointIdList ids = index.radius(i, radius);
+                SqrDistList sqr_dists(ids.size());
+                index.knnSearch(i, ids.size(), &ids, &sqr_dists);
+                neighborMap[i] = std::make_pair(ids, sqr_dists);
+            }
 
             // The map entry either already existed or was just computed.
-            DistanceResults res = neighborMap[i];
+            PointIdSqrDistPair p = neighborMap[i];
 
             // Find the upper bound on the neighboring square distances, using
             // the current radius squared.
-            auto upper = std::upper_bound(res.begin(), res.end(), sqr_radius, 
-                [](double val, const auto& p) { return val < p.second; });
+            auto upper =
+                std::upper_bound(p.second.begin(), p.second.end(), sqr_radius);
+            size_t num = std::distance(p.second.begin(), upper);
 
-            // All neighbors below the upper bound are masked.
-            for (auto it = res.begin(); it != upper; ++it)
-                keep[it->first] = 0;
+            // All neighbors less than num are within the current masking
+            // radius.
+            for (size_t id = 0; id < num; ++id)
+                keep[p.first[id]] = 0;
         }
 
         if (finalIds.size() < m_maxSize)
