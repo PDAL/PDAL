@@ -108,6 +108,10 @@ void TileContents::readBinary()
     VectorPointTable *vpt = new VectorPointTable(m_info.remoteLayout());
     vpt->buffer() = std::move(data);
     m_table.reset(vpt);
+    // Have to check seperately in readBinary and readZstandard because m_table
+    // (BasePointTable) doesn't have a numPoints attribute, but VectorPointTable does
+    if (vpt->numPoints() != size())
+        throw pdal_error("Invalid number of points in tile " + key().toString());
 
     transform();
 }
@@ -128,6 +132,8 @@ void TileContents::readZstandard()
     VectorPointTable *vpt = new VectorPointTable(m_info.remoteLayout());
     vpt->buffer() = std::move(data);
     m_table.reset(vpt);
+    if (vpt->numPoints() != size())
+        throw pdal_error("Invalid number of points in tile " + key().toString());
 
     transform();
 }
@@ -181,8 +187,6 @@ void TileContents::transform()
         p.setField(D::Z, p.getFieldAs<double>(D::Z) * zf.m_scale.m_val +
             zf.m_offset.m_val);
     }
-    if (p.pointId() != size() - 1)
-        throw pdal_error("Invalid number of points in tile " + key().toString());
 }
 
 } // namespace ept
