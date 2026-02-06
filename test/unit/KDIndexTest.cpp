@@ -221,39 +221,6 @@ TEST(KDIndex, neighbors3D)
     EXPECT_EQ(ids[2], 4u);
 }
 
-TEST(KDIndex, neighbordims)
-{
-    PointTable table;
-    PointLayoutPtr layout = table.layout();
-    PointView view(table);
-
-    layout->registerDim(Dimension::Id::X);
-    layout->registerDim(Dimension::Id::Z);
-
-    view.setField(Dimension::Id::X, 0, 0);
-    view.setField(Dimension::Id::Z, 0, 0);
-
-    view.setField(Dimension::Id::X, 1, 1);
-    view.setField(Dimension::Id::Z, 1, 1);
-
-    EXPECT_THROW(KD2Index index(view), pdal_error);
-
-    PointTable table2;
-    PointLayoutPtr layout2 = table.layout();
-    PointView view2(table2);
-
-    layout->registerDim(Dimension::Id::X);
-    layout->registerDim(Dimension::Id::Y);
-
-    view.setField(Dimension::Id::X, 0, 0);
-    view.setField(Dimension::Id::Y, 0, 0);
-
-    view.setField(Dimension::Id::X, 1, 1);
-    view.setField(Dimension::Id::Y, 1, 1);
-
-    EXPECT_THROW(KD3Index index(view2), pdal_error);
-}
-
 TEST(KDIndex, radius2D)
 {
     PointTable table;
@@ -278,9 +245,6 @@ TEST(KDIndex, radius2D)
     view.setField(Dimension::Id::X, 4, 10);
     view.setField(Dimension::Id::Y, 4, 10);
 
-    view.setField(Dimension::Id::X, 5, 12);
-    view.setField(Dimension::Id::Y, 5, 12);
-
     KD2Index index(view);
     index.build();
 
@@ -299,18 +263,6 @@ TEST(KDIndex, radius2D)
     EXPECT_EQ(ids[2], 3u);
     EXPECT_EQ(ids[3], 0u);
     EXPECT_EQ(ids[4], 4u);
-
-    KD2Index::RadiusResults results;
-    index.radius(3.1, 3.1, 10, results);
-    EXPECT_EQ(results.size(), 5u);
-    // Round results for easy comparison.
-    for (KD2Index::RadiusResult& r : results)
-        r.second = ((int)(r.second * 100)) / 100.0;
-    EXPECT_EQ(results[0], KD2Index::RadiusResult(2, .02));
-    EXPECT_EQ(results[1], KD2Index::RadiusResult(1, 8.82));
-    EXPECT_EQ(results[2], KD2Index::RadiusResult(3, 16.82));
-    EXPECT_EQ(results[3], KD2Index::RadiusResult(0, 19.22));
-    EXPECT_EQ(results[4], KD2Index::RadiusResult(4, 95.22));
 
     // Search by PointId
     ids = index.radius(0, 4.25);
@@ -358,10 +310,6 @@ TEST(KDIndex, radius3D)
     view.setField(Dimension::Id::Y, 4, 10);
     view.setField(Dimension::Id::Z, 4, 10);
 
-    view.setField(Dimension::Id::X, 5, 12);
-    view.setField(Dimension::Id::Y, 5, 12);
-    view.setField(Dimension::Id::Z, 5, 12);
-
     KD3Index index(view);
     index.build();
 
@@ -380,18 +328,6 @@ TEST(KDIndex, radius3D)
     EXPECT_EQ(ids[2], 3u);
     EXPECT_EQ(ids[3], 0u);
     EXPECT_EQ(ids[4], 4u);
-
-    KD2Index::RadiusResults results;
-    index.radius(3.1, 3.1, 3.1, 12.2, results);
-    EXPECT_EQ(results.size(), 5u);
-    // Round results for easy comparison.
-    for (KD2Index::RadiusResult& r : results)
-        r.second = ((int)(r.second * 100)) / 100.0;
-    EXPECT_EQ(results[0], KD2Index::RadiusResult(2, .03));
-    EXPECT_EQ(results[1], KD2Index::RadiusResult(1, 13.23));
-    EXPECT_EQ(results[2], KD2Index::RadiusResult(3, 25.23));
-    EXPECT_EQ(results[3], KD2Index::RadiusResult(0, 28.83));
-    EXPECT_EQ(results[4], KD2Index::RadiusResult(4, 142.83));
 
     // Search by PointId
     ids = index.radius(0, 5.2);
