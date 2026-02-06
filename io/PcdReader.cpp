@@ -103,7 +103,7 @@ void PcdReader::ready(PointTableRef table)
 void PcdReader::addDimensions(PointLayoutPtr layout)
 {
     m_dims.clear();
-    for (auto i : m_header.m_fields)
+    for (PcdField& i : m_header.m_fields)
     {
         Dimension::BaseType base = Dimension::BaseType::None;
         if (i.m_type == PcdFieldType::U)
@@ -118,11 +118,11 @@ void PcdReader::addDimensions(PointLayoutPtr layout)
         i.m_label = Utils::toupper(i.m_label);
         if (i.m_label == "X" || i.m_label == "Y" || i.m_label == "Z")
             t = Dimension::Type::Double;
-        Dimension::Id id = layout->registerOrAssignDim(i.m_label, t);
-        if (Utils::contains(m_dims, id) && id != pdal::Dimension::Id::Unknown)
+        i.m_id = layout->registerOrAssignDim(i.m_label, t);
+        if (Utils::contains(m_dims, i.m_id) && i.m_id != pdal::Dimension::Id::Unknown)
             throwError("Duplicate dimension '" + i.m_label +
                        "' detected in input file '" + m_filename + "'.");
-        m_dims.push_back(id);
+        m_dims.push_back(i.m_id);
     }
 }
 

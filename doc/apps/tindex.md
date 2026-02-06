@@ -13,12 +13,14 @@ spatial index file that meet some criteria (usually a geographic region filter).
 ## tindex Creation Mode
 
 ```
-$ pdal tindex create <tindex> <filespec>
+$ pdal tindex create <tindex> <glob>
 ```
 
 ```
 --tindex               OGR-readable/writeable tile index output
---filespec             Build: Pattern of files to index. Merge: Output filename
+--glob                 Glob pattern of files to index
+--stdin, -s            Read list of input files from standard input
+--filelist             Text file to read list of input files from (newline delimited)
 --fast_boundary        Use extent instead of exact boundary
 --lyr_name             OGR layer name to write into datasource
 --tindex_name          Tile index column name
@@ -27,7 +29,6 @@ $ pdal tindex create <tindex> <filespec>
 --a_srs                Assign SRS of tile with no SRS to this value
 --write_absolute_path  Write absolute rather than relative file paths
 --skip_different_srs   Reject files to be indexed with different SRS values
---stdin, -s            Read filespec pattern from standard input
 --threads              Number of threads to use for file boundary creation
 --simplify             Simplify the file's exact boundary
 --threshold            Number of points a cell must contain to be declared 
@@ -39,7 +40,7 @@ $ pdal tindex create <tindex> <filespec>
                        boundary creation
 ```
 
-This command will index the files referred to by `filespec` and place the
+This command will index the files referred to by `glob` and place the
 result in `tindex`.  The `tindex` is a vector file or database that
 will be created by `pdal` as necessary to store the file index.
 The type of the index
@@ -48,9 +49,9 @@ file can be specified by specifying the OGR code for the format using the
 Shapefile".  Any filetype that can be handled by
 [OGR](https://gdal.org/en/latest/drivers/vector/) is acceptable.
 
-In vector file-speak, each file specified by `filespec` is stored as a
-feature in a layer in the index file. The `filespec` is a [glob pattern](http://man7.org/linux/man-pages/man7/glob.7.html).  and normally needs to be
-quoted to prevent shell expansion of wildcard characters.
+In vector file-speak, each file specified by `glob` is stored as a
+feature in a layer in the index file. The [glob pattern](http://man7.org/linux/man-pages/man7/glob.7.html) 
+normally needs to be quoted to prevent shell expansion of wildcard characters.
 
 Exact file boundaries (used when `--fast_boundary` is not set to `true`)
 are created with a grid of tessellated hexagons, in a modified version of
@@ -66,15 +67,9 @@ option.
 $ pdal tindex merge <tindex> <filespec>
 ```
 
-This command will read the existing index file `tindex` and merge the
-points in the indexed files that pass any filter that might be specified,
-writing the output to the point cloud file specified in `filespec`.
-The type of the output file is determined automatically from the filename
-extension.
-
 ```
 --tindex         OGR-readable/writeable tile index output
---filespec       Build: Pattern of files to index. Merge: Output filename
+--filespec       Output filename
 --lyr_name       OGR layer name to write into datasource
 --tindex_name    Tile index column name
 --ogrdriver, -f  OGR driver name to use
@@ -82,6 +77,12 @@ extension.
 --polygon        Well-known text of polygon to clip output
 --t_srs          Spatial reference of the clipping geometry.
 ```
+
+This command will read the existing index file `tindex` and merge the
+points in the indexed files that pass any filter that might be specified,
+writing the output to the point cloud file specified in `filespec`.
+The type of the output file is determined automatically from the filename
+extension.
 
 ## Example 1:
 
@@ -94,6 +95,17 @@ $ find las/ -iname "*.las" | pdal tindex create index.sqlite -f "SQLite" \
 ```
 
 ## Example 2:
+
+With a list of LAS files created via `find`, write that file list to `pdal tindex` 
+using `--filelist`, and write a SQLite tile index file with a layer named `pdal`:
+
+```
+$ find las/ -iname "*.las" > files.txt
+$ pdal tindex create index.sqlite --filelist files.txt -f "SQLite" \
+    --lyr_name pdal
+```
+
+## Example 3:
 
 Glob a list of LAS files, output the SRS for the index entries to EPSG:4326, and
 write out an [SQLite] file.

@@ -97,13 +97,25 @@ TEST(TIndex, test2)
 
     std::string output;
     Utils::run_shell_command(cmd, output);
-    std::string::size_type pos = output.find("Can't specify both");
+    std::string::size_type pos = output.find("Can't specify more than one");
     EXPECT_NE(pos, std::string::npos);
 
     cmd = Support::binpath("pdal") + " tindex create --stdin " +
         outSpec + " -f GeoJSON --filespec=\"" + inSpec + "\" 2>&1";
     Utils::run_shell_command(cmd, output);
-    pos = output.find("Can't specify both");
+    pos = output.find("Can't specify more than one");
+    EXPECT_NE(pos, std::string::npos);
+
+    cmd = Support::binpath("pdal") + " tindex create --filelist \"" + 
+        inSpec + "\" --stdin " + outSpec + " -f GeoJSON 2>&1";
+    Utils::run_shell_command(cmd, output);
+    pos = output.find("Can't specify more than one");
+    EXPECT_NE(pos, std::string::npos);
+
+    cmd = Support::binpath("pdal") + " tindex create --glob \"" + inSpec + 
+        "\" --filelist \"" + inSpec + "\" --tindex=" + outSpec + " -f GeoJSON 2>&1";
+    Utils::run_shell_command(cmd, output);
+    pos = output.find("Can't specify more than one");
     EXPECT_NE(pos, std::string::npos);
 
     cmd = Support::binpath("pdal") + " tindex create " + outSpec + 
@@ -161,19 +173,19 @@ TEST(TIndex, test3)
 #endif
 }
 
-std::string getGeometry(std::string& json)
+StringList getGeometry(std::string& json)
 {
     NL::basic_json<> a = nlohmann::json::parse(json);
     auto tree = a.find("features");
 
-    std::ostringstream oss;
+    StringList list;
     for (size_t i = 0; i < tree->size(); ++i)
     {
         NL::json& node = tree->at(i);
         auto geom = node.find("geometry");
-        oss << geom->dump();
+        list.push_back(geom->dump());
     }
-    return oss.str();
+    return list;
 }
 
 // testing the internal filter
@@ -187,7 +199,7 @@ TEST(TIndex, test4)
     std::string output;
     Utils::run_shell_command(cmd, output);
 
-    pdal::Polygon p(getGeometry(output));
+    pdal::Polygon p(getGeometry(output)[0]);
     EXPECT_NEAR(7.79423, p.area(), 0.001);
 
     // simplify = true
@@ -196,7 +208,7 @@ TEST(TIndex, test4)
         " --filespec=\"" + inSpec + "\"";
     Utils::run_shell_command(cmd, output);
 
-    p = getGeometry(output);
+    p = getGeometry(output)[0];
     EXPECT_NEAR(6.49519, p.area(), 0.001);
 
     // where expression
@@ -205,7 +217,7 @@ TEST(TIndex, test4)
         " --where=\"X>1\" --simplify=\"false\" --filespec=\"" + inSpec + "\"";
     Utils::run_shell_command(cmd, output);
 
-    p = getGeometry(output);
+    p = getGeometry(output)[0];
     EXPECT_NEAR(2.59808, p.area(), 0.001);
 }
 
@@ -264,5 +276,32 @@ TEST(TIndex, test6)
     EXPECT_NE(pos, std::string::npos);
 
     FileUtils::deleteFile(outSpec);
+}
+
+// Testing input from filelist
+TEST(TIndex, test7)
+{
+#ifndef _WIN32
+    std::string inList(Support::temppath("input_files_list.txt"));
+    std::string outSpec("/vsistdout/");
+
+    std::string cmd = "find " + Support::datapath("tindex") +
+        " -name \"*.txt\" > " + inList;
+    std::string output;
+    Utils::run_shell_command(cmd, output);
+
+    cmd = Support::binpath("pdal") + " tindex create --tindex=\"/vsistdout/\"" +
+        " --filelist=\"" + inList + "\" -f GeoJSON --threshold=1 --resolution=1.0";
+    Utils::run_shell_command(cmd, output);
+    StringList geoms = getGeometry(output);
+
+    pdal::Polygon p1(geoms[0]);
+    pdal::Polygon p2(geoms[1]);
+    pdal::Polygon p3(geoms[2]);
+
+    EXPECT_NEAR(6.49519, p1.area(), 0.001);
+    EXPECT_NEAR(6.49519, p2.area(), 0.001);
+    EXPECT_NEAR(6.49519, p3.area(), 0.001);
+#endif
 }
 
