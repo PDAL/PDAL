@@ -181,7 +181,6 @@ void TileContents::transform()
         p.setField(D::Z, p.getFieldAs<double>(D::Z) * zf.m_scale.m_val +
             zf.m_offset.m_val);
     }
-    std::cout << "final pointid for " << key().toString() << ": " << p.pointId() << std::endl;
     if (p.pointId() != size() - 1)
         throw pdal_error("Invalid number of points in tile " + key().toString());
 }
