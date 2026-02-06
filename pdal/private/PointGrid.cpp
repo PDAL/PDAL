@@ -95,7 +95,7 @@ DistanceResults PointGrid::knnSearch(Eigen::Matrix<double, Eigen::Dynamic, 1> po
             });
             // If we've found enough, we can use a more precise max distance as our radius
             // in nextCells(). If not, use the one that was set at the start (assuming this is the
-            // first iteration). 
+            // first iteration).
             if (results.size() >= k) // resize is dumb if size == k but whatever
             {
                 results.resize(k);
@@ -175,7 +175,7 @@ DistanceResults PointGrid::knnSearch(double x, double y, point_count_t k) const
             });
             // If we've found enough, we can use a more precise max distance as our radius
             // in nextCells(). If not, use the one that was set at the start (assuming this is the
-            // first iteration). 
+            // first iteration).
             if (results.size() >= k) // resize is dumb if size == k but whatever
             {
                 results.resize(k);
@@ -284,8 +284,8 @@ DistanceResults PointGrid::knnSearch(double x, double y, double z, point_count_t
     // Maximum possible distance between 2 points
     const double maxSqDistance = std::pow(m_bounds.maxx - m_bounds.minx, 2) +
         std::pow(m_bounds.maxy - m_bounds.miny, 2) + std::pow(m_bounds.maxz - m_bounds.minz, 2);
-    //!! Compared to 2D, this could expand our queue by too much if < k neighbors since the 
-    //!! nextCells() search is 2D. Could remove the Z padding later but I need to be careful  
+    //!! Compared to 2D, this could expand our queue by too much if < k neighbors since the
+    //!! nextCells() search is 2D. Could remove the Z padding later but I need to be careful
     //!! (plus it doesn't matter that much)
     // Starting off as the diagonal of a single cell, with some padding in the Z direction
     // for the first iteration.
@@ -319,7 +319,7 @@ DistanceResults PointGrid::knnSearch(double x, double y, double z, point_count_t
             });
             // If we've found enough, we can use a more precise max distance as our radius
             // in nextCells(). If not, use the one that was set at the start (assuming this is the
-            // first iteration). 
+            // first iteration).
             if (results.size() >= k) // resize is dumb if size == k but whatever
             {
                 results.resize(k);
@@ -403,17 +403,22 @@ DistanceResults PointGrid::radiusSearch(double x, double y, double z, double rad
 
 
 std::vector<uint32_t> PointGrid::radiusCells(Eigen::Vector2d pos,
-    const double radius) const 
+    const double radius) const
 {
     BOX2D box;
     box.grow(pos(0), pos(1));
     box.grow(radius);
     box.clip(bounds());
 
+    // If the bounds of the grid and the box containing the circle with center pos don't
+    // overlap, there are no relevant cells.
+    std::vector<uint32_t> cells;
+    if (!bounds().overlaps(box))
+        return cells;
+
     auto [imin, jmin] = toIJ(box.minx, box.miny);
     auto [imax, jmax] = toIJ(box.maxx, box.maxy);
 
-    std::vector<uint32_t> cells;
     cells.reserve((imax - imin + 1) * (jmax - jmin + 1));
     for (uint16_t i = imin; i <= imax; ++i)
         for (uint16_t j = jmin; j <= jmax; ++j)
@@ -423,7 +428,7 @@ std::vector<uint32_t> PointGrid::radiusCells(Eigen::Vector2d pos,
 
 
 std::vector<uint32_t> PointGrid::nextCells(Eigen::Vector2d pos,
-    double maxDistSq, std::vector<uint32_t>& skip) const 
+    double maxDistSq, std::vector<uint32_t>& skip) const
 {
     std::vector<uint32_t> cells;
     for (uint32_t key : radiusCells(pos, std::sqrt(maxDistSq)))
