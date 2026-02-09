@@ -145,6 +145,14 @@ private:
         return { xi, yi };
     }
 
+    std::pair<uint16_t, uint16_t> toIJBounded(double x, double y) const
+    {
+        uint16_t gridMax = m_cells1d - 1;
+        uint16_t xi = std::min(static_cast<uint16_t>((x - m_bounds.minx) / m_xlen), gridMax);
+        uint16_t yi = std::min(static_cast<uint16_t>((y - m_bounds.miny) / m_ylen), gridMax);
+        return { xi, yi };
+    }
+
     const BOX2D bounds(int i, int j) const
     {
         return BOX2D(m_bounds.minx + m_xlen * i, m_bounds.miny + m_ylen * j,

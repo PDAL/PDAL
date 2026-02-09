@@ -49,7 +49,7 @@ PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, point_count_
     results.reserve(k);
 
     // Find the starting cell
-    auto [iStart, jStart] = toIJ(x, y);
+    auto [iStart, jStart] = toIJBounded(x, y);
     if (k > m_view.size()) // edge case
         k = m_view.size();
 
@@ -95,7 +95,6 @@ PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, point_count_
                 if (curMaxDist == maxSqDistance)
                     break;
                 curMaxDist = (std::min)((curMaxDist * 1.5), maxSqDistance);
-                std::cout << "key " << key << ": Growing radius to " << curMaxDist << std::endl;
             }
         }
         // Get the next cells. If there are none, we're done
@@ -185,7 +184,7 @@ PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, double z,
     results.reserve(k);
 
     // Find the starting cell
-    auto [iStart, jStart] = toIJ(x, y);
+    auto [iStart, jStart] = toIJBounded(x, y);
     if (k > m_view.size()) // edge case
         k = m_view.size();
 
@@ -238,7 +237,6 @@ PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, double z,
                 if (curMaxDist == maxSqDistance)
                     break;
                 curMaxDist = (std::min)((curMaxDist * 1.5), maxSqDistance);
-                std::cout << "key " << key << ": Growing radius to " << curMaxDist << std::endl;
             }
         }
         // Get the next cells. If there are none, we're done
