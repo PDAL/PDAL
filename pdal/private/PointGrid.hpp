@@ -113,6 +113,10 @@ private:
         // Silently accepting these. Stuff breaks if we don't
         if (m_approxPerCell > (int)m_view.size())
             m_approxPerCell = m_view.size();
+        // If we only have one point, grow our bounds by an arbitrary amount since we
+        // need to use the bounds to determine search distance, etc.
+        if (m_view.size() == 1)
+            m_bounds.grow(1.0);
         double cells = std::floor(std::sqrt(m_view.size() / m_approxPerCell));
         assert(cells > 0);
         assert(cells < std::numeric_limits<uint16_t>::max());
