@@ -148,9 +148,9 @@ private:
     std::pair<uint16_t, uint16_t> toIJBounded(double x, double y) const
     {
         double xStart = (x - m_bounds.minx) / m_xlen;
-        int xIndex = std::min(std::max(0, static_cast<int>(xStart)), m_cells1d - 1);
+        int xIndex = std::clamp(static_cast<int>(xStart), 0, m_cells1d - 1);
         double yStart = (y - m_bounds.miny) / m_ylen;
-        int yIndex = std::min(std::max(0, static_cast<int>(yStart)), m_cells1d - 1);
+        int yIndex = std::clamp(static_cast<int>(yStart), 0, m_cells1d - 1);
         return { static_cast<uint16_t>(xIndex), static_cast<uint16_t>(yIndex) };
     }
 

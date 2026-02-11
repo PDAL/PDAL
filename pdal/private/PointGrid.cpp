@@ -54,10 +54,21 @@ PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, point_count_
         k = m_view.size();
 
     // Maximum possible distance between 2 points.
-    const double maxSqDistance = std::pow(m_bounds.maxx - m_bounds.minx, 2) +
+    double maxSqDistance = std::pow(m_bounds.maxx - m_bounds.minx, 2) +
         std::pow(m_bounds.maxy - m_bounds.miny, 2);
     // Starting off as the diagonal of a single cell.
     double curMaxDist = m_xlen * m_xlen + m_ylen * m_ylen;
+    // If the point of interest is outside the grid, make all our distances in relation to a dummy 
+    // point at the center of our first cell.
+    if (!bounds().contains(x, y))
+    {
+        BOX2D cellBounds = bounds(iStart, jStart);
+        Eigen::Vector2d cellCenter((cellBounds.maxx - cellBounds.minx) / 2, 
+            (cellBounds.maxy - cellBounds.miny) / 2);
+        double dist = (cellCenter - pos).squaredNorm();
+        curMaxDist += dist;
+        maxSqDistance += dist;
+    }
     // Keep track of cells we've already checked
     std::vector<uint32_t> skip;
     // This will contain all cells on the queue as keys for simpler lookups than Cell or ij
@@ -189,16 +200,26 @@ PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, double z,
         k = m_view.size();
 
     // Maximum possible distance between 2 points
-    const double maxSqDistance = std::pow(m_bounds.maxx - m_bounds.minx, 2) +
+    double maxSqDistance = std::pow(m_bounds.maxx - m_bounds.minx, 2) +
         std::pow(m_bounds.maxy - m_bounds.miny, 2) + std::pow(m_bounds.maxz - m_bounds.minz, 2);
 
     //!! Compared to 2D, this could expand our queue by too much if < k neighbors since the
-    //!! nextCells() search is 2D. Could remove the Z padding later but I need to be careful
-    //!! (plus it doesn't matter that much)
+    //!! nextCells() search is 2D.
     // Starting off as the diagonal of a single cell, with some padding in the Z direction
     // for the first iteration.
     double curMaxDist = m_xlen * m_xlen + m_ylen * m_ylen +
         std::pow(m_bounds.maxz - m_bounds.minz, 2);
+    // If the point of interest is outside the grid, make all our distances in relation to a dummy 
+    // point at the center of our first cell.
+    if (!bounds().contains(x, y))
+    {
+        BOX2D cellBounds = bounds(iStart, jStart);
+        Eigen::Vector3d cellCenter((cellBounds.maxx - cellBounds.minx) / 2, 
+            (cellBounds.maxy - cellBounds.miny) / 2, (m_bounds.maxz - m_bounds.minz) / 2);
+        double dist = (cellCenter - pos).squaredNorm();
+        curMaxDist += dist;
+        maxSqDistance += dist;
+    }
     // Keep track of cells we've already checked
     std::vector<uint32_t> skip;
     // This will contain all cells on the queue as keys for simpler lookups than Cell or ij
