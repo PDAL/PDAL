@@ -38,5 +38,5 @@ echo "Anaconda token is available, attempting to upload"
 
 conda install -c conda-forge anaconda-client -y
 
-find . -name $PACKAGE_PATTERN -exec anaconda -t "$ANACONDA_TOKEN" upload --force --no-progress --user pdal-master  {} \;
+find . -name $PACKAGE_PATTERN -exec anaconda -t "$ANACONDA_TOKEN" upload --force --no-progress --user pdal-master  --verbose {} \;
 
