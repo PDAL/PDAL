@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include "PointGrid.hpp"
+#include <chrono>
 
 namespace pdal
 {
@@ -40,8 +41,6 @@ namespace pdal
 
 /// 2D ///
 
-// Always potentially bounded by maxSqDistance, which can be set to an arbitrararily large value
-// to include all points.
 PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, point_count_t k) const
 {
     Eigen::Vector2d pos(x, y);
@@ -102,11 +101,7 @@ PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, point_count_
             // If it's not the first iteration and still fails to find k, grow the radius
             // by a bit. If we already tried and we reached the max distance, we're done
             else if (skip.size() > 1)
-            {
-                if (curMaxDist == maxSqDistance)
-                    break;
-                curMaxDist = (std::min)((curMaxDist * 1.5), maxSqDistance);
-            }
+                curMaxDist = curMaxDist * 1.5;
         }
         // Get the next cells. If there are none, we're done
         keys = nextCells(pos, curMaxDist, skip);
@@ -199,16 +194,12 @@ PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, double z,
     if (k > m_view.size()) // edge case
         k = m_view.size();
 
-    // Maximum possible distance between 2 points
-    double maxSqDistance = std::pow(m_bounds.maxx - m_bounds.minx, 2) +
-        std::pow(m_bounds.maxy - m_bounds.miny, 2) + std::pow(m_bounds.maxz - m_bounds.minz, 2);
-
-    //!! Compared to 2D, this could expand our queue by too much if < k neighbors since the
-    //!! nextCells() search is 2D.
     // Starting off as the diagonal of a single cell, with some padding in the Z direction
     // for the first iteration.
     double curMaxDist = m_xlen * m_xlen + m_ylen * m_ylen +
         std::pow(m_bounds.maxz - m_bounds.minz, 2);
+    // Setting a separate starting distance for the nextCells search
+    double curSearchDist = (m_xlen * m_xlen + m_ylen * m_ylen) / 2.0;
     // If the point of interest is outside the grid, make all our distances in relation to a dummy 
     // point at the center of our first cell.
     if (!bounds().contains(x, y))
@@ -218,7 +209,9 @@ PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, double z,
             (cellBounds.maxy - cellBounds.miny) / 2, (m_bounds.maxz - m_bounds.minz) / 2);
         double dist = (cellCenter - pos).squaredNorm();
         curMaxDist += dist;
-        maxSqDistance += dist;
+        // Make the x and y we use for nextCells into the origin cell's center.
+        x = cellCenter(0);
+        y = cellCenter(1);
     }
     // Keep track of cells we've already checked
     std::vector<uint32_t> skip;
@@ -250,18 +243,18 @@ PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, double z,
             {
                 results.resize(k);
                 curMaxDist = results.back().sqr_dist;
+                curSearchDist = (std::min)(curSearchDist, curMaxDist);
             }
             // If it's not the first iteration and still fails to find k, grow the radius
-            // by a bit. If we already tried and we reached the max distance, we're done
+            // by a bit.
             else if (skip.size() > 1)
             {
-                if (curMaxDist == maxSqDistance)
-                    break;
-                curMaxDist = (std::min)((curMaxDist * 1.5), maxSqDistance);
+                curMaxDist = curMaxDist * 1.5;
+                curSearchDist = curSearchDist + (m_xlen * m_xlen + m_ylen * m_ylen) / 2.0;
             }
         }
         // Get the next cells. If there are none, we're done
-        keys = nextCells({pos(0), pos(1)}, curMaxDist, skip);
+        keys = nextCells({x, y}, curSearchDist, skip);
     }
     //!! Warn if we didn't find enough?
     return results;
