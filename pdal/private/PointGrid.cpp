@@ -52,21 +52,17 @@ PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, point_count_
     if (k > m_view.size()) // edge case
         k = m_view.size();
 
-    // Maximum possible distance between 2 points.
-    double maxSqDistance = std::pow(m_bounds.maxx - m_bounds.minx, 2) +
-        std::pow(m_bounds.maxy - m_bounds.miny, 2);
     // Starting off as the diagonal of a single cell.
     double curMaxDist = m_xlen * m_xlen + m_ylen * m_ylen;
-    // If the point of interest is outside the grid, make all our distances in relation to a dummy 
+    // If the point of interest is outside the grid, make all our distances in relation to a dummy
     // point at the center of our first cell.
     if (!bounds().contains(x, y))
     {
         BOX2D cellBounds = bounds(iStart, jStart);
-        Eigen::Vector2d cellCenter((cellBounds.maxx - cellBounds.minx) / 2, 
+        Eigen::Vector2d cellCenter((cellBounds.maxx - cellBounds.minx) / 2,
             (cellBounds.maxy - cellBounds.miny) / 2);
         double dist = (cellCenter - pos).squaredNorm();
         curMaxDist += dist;
-        maxSqDistance += dist;
     }
     // Keep track of cells we've already checked
     std::vector<uint32_t> skip;
@@ -200,12 +196,12 @@ PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, double z,
         std::pow(m_bounds.maxz - m_bounds.minz, 2);
     // Setting a separate starting distance for the nextCells search
     double curSearchDist = (m_xlen * m_xlen + m_ylen * m_ylen) / 2.0;
-    // If the point of interest is outside the grid, make all our distances in relation to a dummy 
+    // If the point of interest is outside the grid, make all our distances in relation to a dummy
     // point at the center of our first cell.
     if (!bounds().contains(x, y))
     {
         BOX2D cellBounds = bounds(iStart, jStart);
-        Eigen::Vector3d cellCenter((cellBounds.maxx - cellBounds.minx) / 2, 
+        Eigen::Vector3d cellCenter((cellBounds.maxx - cellBounds.minx) / 2,
             (cellBounds.maxy - cellBounds.miny) / 2, (m_bounds.maxz - m_bounds.minz) / 2);
         double dist = (cellCenter - pos).squaredNorm();
         curMaxDist += dist;
