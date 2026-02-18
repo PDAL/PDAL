@@ -143,7 +143,6 @@ void PointView::calculateBounds(BOX3D& output) const
         double x = getFieldAs<double>(Dimension::Id::X, idx);
         double y = getFieldAs<double>(Dimension::Id::Y, idx);
         double z = getFieldAs<double>(Dimension::Id::Z, idx);
-
         output.grow(x, y, z);
     }
 }

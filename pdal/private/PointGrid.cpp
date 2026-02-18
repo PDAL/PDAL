@@ -176,7 +176,61 @@ PointGrid::DistanceResults PointGrid::radiusSearch(double x, double y, double ra
 
 /// 3D ///
 
+PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, double z,
+    point_count_t k) const
+{
+    Eigen::Vector3d pos(x, y, z);
+    SearchSet results(k);
 
+    // Find the starting cell
+    auto [iStart, jStart] = toIJBounded(x, y);
+    if (k > m_view.size()) // edge case
+        k = m_view.size();
+
+    // Setting a separate starting distance for the nextClosestCell search
+    double curSearchDist = m_xlen * m_xlen + m_ylen * m_ylen;
+    // If the point of interest is outside the grid, make all our distances in relation to a dummy
+    // point at the center of our first cell.
+    if (!bounds().contains(x, y))
+    {
+        BOX2D cellBounds = bounds(iStart, jStart);
+        Eigen::Vector3d cellCenter((cellBounds.maxx - cellBounds.minx) / 2,
+            (cellBounds.maxy - cellBounds.miny) / 2, (m_bounds.maxz - m_bounds.minz) / 2);
+        double dist = (cellCenter - pos).squaredNorm();
+        // Make the x and y we use for nextCells into the origin cell's center.
+        x = cellCenter(0);
+        y = cellCenter(1);
+    }
+
+    // Keep track of cells we've already checked
+    std::vector<uint32_t> skip;
+    // The closest cell to the point of interest
+    std::optional<uint32_t> curKey = key(iStart, jStart);
+    while (curKey != std::nullopt)
+    {
+        skip.push_back(*curKey);
+        const Cell& c = m_cells[*curKey];
+        // check each point to make sure it's below the current max distance.
+        for (PointId id : c)
+        {
+            Eigen::Vector3d pos2(m_view.getFieldAs<double>(Dimension::Id::X, id),
+                m_view.getFieldAs<double>(Dimension::Id::Y, id),
+                m_view.getFieldAs<double>(Dimension::Id::Z, id));
+            double dist = (pos - pos2).squaredNorm();
+            results.tryInsert(id, dist);
+        }
+        if (results.full())
+            curSearchDist = std::min(curSearchDist, results.maxDistance());
+        // If it's gone through all the neighboring cells, increase the search distance
+        else if (skip.size() == 8)
+        {
+            curSearchDist = std::min(results.maxDistance(), curSearchDist + (m_xlen * m_xlen + m_ylen * m_ylen) / 2.0);
+        }
+        curKey = nextClosestCell({x, y}, curSearchDist, skip);
+    }
+    return results.sortedResults();
+}
+/*
 // 3D version of knnSearch. Should consolidate if possible
 PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, double z,
     point_count_t k) const
@@ -255,7 +309,7 @@ PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, double z,
     //!! Warn if we didn't find enough?
     return results;
 }
-
+*/
 
 PointIdList PointGrid::neighbors(double x, double y, double z, point_count_t k, int stride) const
 {
@@ -313,6 +367,23 @@ PointGrid::DistanceResults PointGrid::radiusSearch(double x, double y, double z,
 
 /// Internal ///
 
+// This might iterate over too many cells & it only returns one.
+std::optional<uint32_t> PointGrid::nextClosestCell(Eigen::Vector2d pos, double maxDistSq,
+    std::vector<uint32_t>& skip) const
+{
+    std::optional<uint32_t> closest{std::nullopt};
+    for (auto [i, j] : radiusIJs(pos, std::sqrt(maxDistSq)))
+        if ((std::find(skip.begin(), skip.end(), key(i, j)) == skip.end()))
+        {
+            double cellDist = boundsDistanceSq(pos(0), pos(1), bounds(i, j));
+            if (cellDist <= maxDistSq)
+            {
+                maxDistSq = cellDist;
+                closest = key(i, j);
+            }
+        }
+    return closest;
+}
 
 std::vector<uint32_t> PointGrid::radiusCells(Eigen::Vector2d pos,
     const double radius) const
@@ -335,6 +406,33 @@ std::vector<uint32_t> PointGrid::radiusCells(Eigen::Vector2d pos,
     for (uint16_t i = imin; i <= imax; ++i)
         for (uint16_t j = jmin; j <= jmax; ++j)
             cells.push_back(key(i, j));
+    return cells;
+}
+
+// Works differently than radiusCells. actual radius, not a box. Should change name 
+// or something to make that clearer
+std::vector<std::pair<uint16_t, uint16_t>> PointGrid::radiusIJs(Eigen::Vector2d pos,
+    const double radius) const
+{
+    BOX2D box;
+    box.grow(pos(0), pos(1));
+    box.grow(radius);
+    box.clip(bounds());
+
+    // If the bounds of the grid and the box containing the circle with center pos don't
+    // overlap, there are no relevant cells.
+    std::vector<std::pair<uint16_t, uint16_t>> cells;
+    if (!bounds().overlaps(box))
+        return cells;
+    auto [imin, jmin] = toIJ(box.minx, box.miny);
+    auto [imax, jmax] = toIJ(box.maxx, box.maxy);
+
+    cells.reserve((imax - imin + 1) * (jmax - jmin + 1));
+    double radiusSq = radius * radius;
+    for (uint16_t i = imin; i <= imax; ++i)
+        for (uint16_t j = jmin; j <= jmax; ++j)
+            if (boundsDistanceSq(pos(0), pos(1), bounds(i, j)) <= radiusSq)
+                cells.push_back({i, j});
     return cells;
 }
 

@@ -35,6 +35,7 @@
 #pragma once
 
 #include <Eigen/Dense>
+#include <array>
 
 #include <pdal/PointView.hpp>
 #include <pdal/util/Bounds.hpp>
@@ -60,6 +61,60 @@ public:
         { return sqr_dist < other.sqr_dist; }
     };
     using DistanceResults = std::vector<DistanceResult>;
+
+    class SearchSet
+    {
+    public:
+        SearchSet(size_t knn) : m_knn(knn) {}
+        
+        bool tryInsert(PointId index, double dist)
+        {
+            if (m_results.size() == m_knn)
+            {
+                if (dist > m_results.top().sqr_dist)
+                    return false;
+                m_results.pop();
+            }
+            m_results.push({index, dist});
+            return true;
+        }
+        double maxDistance() const
+        {
+            return m_results.size() == m_knn ? 
+                m_results.top().sqr_dist : std::numeric_limits<double>::max();
+        }
+        size_t size() const
+        {
+            return m_results.size();
+        }
+        bool full() const { return m_results.size() == m_knn; }
+        std::vector<DistanceResult> sortedResults()
+        {
+            std::vector<DistanceResult> out;
+            while (!m_results.empty())
+            {
+                out.push_back(m_results.top());
+                m_results.pop();
+            }
+            std::reverse(out.begin(), out.end());
+            return out;
+        }
+        void sortedResults(std::vector<PointId>& ids, std::vector<double>& dists)
+        {
+            while (!m_results.empty())
+            {
+                ids.push_back(m_results.top().index);
+                dists.push_back(m_results.top().sqr_dist);
+                m_results.pop();
+            }
+            std::reverse(ids.begin(), ids.end());
+            std::reverse(dists.begin(), dists.end());
+        }
+    private:
+        std::priority_queue<DistanceResult> m_results;
+        size_t m_knn;
+        //double m_maxDist = std::numeric_limits<double>::max();
+    };
 
     PointGrid(BOX2D bounds, const PointView& view, int approxPerCell = 200) :
         m_bounds(bounds), m_view(view), m_approxPerCell(approxPerCell)
@@ -137,6 +192,14 @@ private:
         c.push_back(id);
     }
 
+    // this could be a util function outside this class somewhere.
+    double boundsDistanceSq(double x, double y, BOX2D bounds) const
+    {
+        double xDist = std::max(std::max(bounds.minx - x, 0.0), x - bounds.maxx);
+        double yDist = std::max(std::max(bounds.miny - y, 0.0), y - bounds.maxy);
+        return xDist * xDist + yDist * yDist;
+    }
+
     uint32_t key(uint16_t xi, uint16_t yi) const
     {
         return xi * m_cells1d + yi;
@@ -172,6 +235,10 @@ private:
     std::vector<uint32_t> radiusCells(Eigen::Vector2d pos, double radius) const;
     std::vector<uint32_t> nextCells(Eigen::Vector2d pos, double maxDist,
         std::vector<uint32_t>& skip) const;
+    std::optional<uint32_t> nextClosestCell(Eigen::Vector2d pos,
+        double maxDistSq, std::vector<uint32_t>& skip) const;
+    std::vector<std::pair<uint16_t, uint16_t>> radiusIJs(Eigen::Vector2d pos,
+        const double radius) const;
 
     std::vector<Cell> m_cells;
     // 3D bounds so we can have a more accurate 3D max search distance

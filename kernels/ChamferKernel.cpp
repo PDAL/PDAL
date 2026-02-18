@@ -74,6 +74,7 @@ PointViewPtr ChamferKernel::loadSet(const std::string& filename,
 
 int ChamferKernel::execute()
 {
+    std::cout << "computing chamfer distance" << std::endl;
     ColumnPointTable srcTable;
     PointViewPtr srcView = loadSet(m_sourceFile, srcTable);
 

@@ -510,29 +510,39 @@ std::string dllDir()
 
 double computeChamfer(PointViewPtr srcView, PointViewPtr candView)
 {
+    std::cout << "computing chamfer distance" << std::endl;
     using namespace Dimension;
 
     KD3Index &srcIndex = srcView->build3dIndex();
     KD3Index &candIndex = candView->build3dIndex();
 
     double sum1(0.0);
+    std::cout << "srcView->size() = " << srcView->size() << std::endl;
+    std::cout << "candView->size() = " << candView->size() << std::endl;
     for (PointRef p : *srcView)
     {
+        //std::cout << "processing " << p.pointId() << std::endl;
         PointIdList indices(1);
         std::vector<double> sqr_dists(1);
         candIndex.knnSearch(p, 1, &indices, &sqr_dists);
+        //std::cout << "sqr_dists[0] = " << sqr_dists[0] << std::endl;
+        if (std::isinf(sqr_dists[0]) || std::isnan(sqr_dists[0]))
+            std::cout << "iteration " << p.pointId() << " sqr_dists[0] = " << sqr_dists[0] << std::endl;
         sum1 += sqr_dists[0];
     }
 
     double sum2(0.0);
     for (PointRef q : *candView)
     {
+        //std::cout << "processing " << q.pointId() << std::endl;
         PointIdList indices(1);
         std::vector<double> sqr_dists(1);
         srcIndex.knnSearch(q, 1, &indices, &sqr_dists);
+        //std::cout << "sqr_dists[0] = " << sqr_dists[0] << std::endl;
         sum2 += sqr_dists[0];
     }
-
+    std::cout << "sum1 = " << sum1 << std::endl;
+    //std::cout << "sum2 = " << sum2 << std::endl;
     return sum1 + sum2;
 }
 
