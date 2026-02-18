@@ -60,8 +60,10 @@ public:
         bool operator<(const DistanceResult& other) const
         { return sqr_dist < other.sqr_dist; }
     };
+
     using DistanceResults = std::vector<DistanceResult>;
 
+    // Put this somewhere else
     class SearchSet
     {
     public:
@@ -78,16 +80,23 @@ public:
             m_results.push({index, dist});
             return true;
         }
+
         double maxDistance() const
         {
             return m_results.size() == m_knn ? 
                 m_results.top().sqr_dist : std::numeric_limits<double>::max();
         }
+
         size_t size() const
         {
             return m_results.size();
         }
-        bool full() const { return m_results.size() == m_knn; }
+
+        bool full() const 
+        {
+            return m_results.size() == m_knn;
+        }
+
         std::vector<DistanceResult> sortedResults()
         {
             std::vector<DistanceResult> out;
@@ -99,6 +108,7 @@ public:
             std::reverse(out.begin(), out.end());
             return out;
         }
+
         void sortedResults(std::vector<PointId>& ids, std::vector<double>& dists)
         {
             while (!m_results.empty())
@@ -138,7 +148,7 @@ public:
 
     const BOX2D bounds() const
     {
-        return m_bounds.to2d();
+        return m_bounds;
     }
 
     const PointView& view() const
@@ -146,11 +156,8 @@ public:
         return m_view;
     }
 
-    //!! Need to think about return types here. And make better names.
-
     // 2D
     DistanceResults knnSearch(double x, double y, point_count_t k) const;
-    PointIdList neighbors(double x, double y, point_count_t k) const;
     PointIdList boxEncloses(BOX2D extent) const;
     PointIdList radius(double x, double y, double radius) const;
     DistanceResults radiusSearch(double x, double y, double radius) const;
@@ -195,8 +202,8 @@ private:
     // this could be a util function outside this class somewhere.
     double boundsDistanceSq(double x, double y, BOX2D bounds) const
     {
-        double xDist = std::max(std::max(bounds.minx - x, 0.0), x - bounds.maxx);
-        double yDist = std::max(std::max(bounds.miny - y, 0.0), y - bounds.maxy);
+        double xDist = (std::max)((std::max)(bounds.minx - x, 0.0), x - bounds.maxx);
+        double yDist = (std::max)((std::max)(bounds.miny - y, 0.0), y - bounds.maxy);
         return xDist * xDist + yDist * yDist;
     }
 
@@ -241,8 +248,7 @@ private:
         const double radius) const;
 
     std::vector<Cell> m_cells;
-    // 3D bounds so we can have a more accurate 3D max search distance
-    BOX3D m_bounds;
+    BOX2D m_bounds;
     const PointView& m_view;
     int m_approxPerCell;
     uint16_t m_cells1d;

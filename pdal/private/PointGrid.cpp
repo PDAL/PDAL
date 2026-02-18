@@ -176,6 +176,7 @@ PointGrid::DistanceResults PointGrid::radiusSearch(double x, double y, double ra
 
 /// 3D ///
 
+
 PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, double z,
     point_count_t k) const
 {
@@ -187,19 +188,16 @@ PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, double z,
     if (k > m_view.size()) // edge case
         k = m_view.size();
 
-    // Setting a separate starting distance for the nextClosestCell search
+    // Setting a starting distance for the nextClosestCell search
     double curSearchDist = m_xlen * m_xlen + m_ylen * m_ylen;
     // If the point of interest is outside the grid, make all our distances in relation to a dummy
     // point at the center of our first cell.
     if (!bounds().contains(x, y))
     {
         BOX2D cellBounds = bounds(iStart, jStart);
-        Eigen::Vector3d cellCenter((cellBounds.maxx - cellBounds.minx) / 2,
-            (cellBounds.maxy - cellBounds.miny) / 2, (m_bounds.maxz - m_bounds.minz) / 2);
-        double dist = (cellCenter - pos).squaredNorm();
-        // Make the x and y we use for nextCells into the origin cell's center.
-        x = cellCenter(0);
-        y = cellCenter(1);
+        // Make the x and y we use for nextClosestCell into the origin cell's center.
+        x = (cellBounds.maxx - cellBounds.minx) / 2.0;
+        y = (cellBounds.maxy - cellBounds.miny) / 2.0;
     }
 
     // Keep track of cells we've already checked
@@ -230,86 +228,7 @@ PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, double z,
     }
     return results.sortedResults();
 }
-/*
-// 3D version of knnSearch. Should consolidate if possible
-PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, double z,
-    point_count_t k) const
-{
-    Eigen::Vector3d pos(x, y, z);
-    DistanceResults results;
-    results.reserve(k);
 
-    // Find the starting cell
-    auto [iStart, jStart] = toIJBounded(x, y);
-    if (k > m_view.size()) // edge case
-        k = m_view.size();
-
-    // Starting off as the diagonal of a single cell, with some padding in the Z direction
-    // for the first iteration.
-    double curMaxDist = m_xlen * m_xlen + m_ylen * m_ylen +
-        std::pow(m_bounds.maxz - m_bounds.minz, 2);
-    // Setting a separate starting distance for the nextCells search
-    double curSearchDist = (m_xlen * m_xlen + m_ylen * m_ylen) / 2.0;
-    // If the point of interest is outside the grid, make all our distances in relation to a dummy
-    // point at the center of our first cell.
-    if (!bounds().contains(x, y))
-    {
-        BOX2D cellBounds = bounds(iStart, jStart);
-        Eigen::Vector3d cellCenter((cellBounds.maxx - cellBounds.minx) / 2,
-            (cellBounds.maxy - cellBounds.miny) / 2, (m_bounds.maxz - m_bounds.minz) / 2);
-        double dist = (cellCenter - pos).squaredNorm();
-        curMaxDist += dist;
-        // Make the x and y we use for nextCells into the origin cell's center.
-        x = cellCenter(0);
-        y = cellCenter(1);
-    }
-    // Keep track of cells we've already checked
-    std::vector<uint32_t> skip;
-    // This will contain all cells on the queue as keys for simpler lookups than Cell or ij
-    std::vector<uint32_t> keys = { key(iStart, jStart) };
-    // Start with the first cell, then move outwards if we need to.
-    while (keys.size())
-    {
-        for (auto key : keys)
-        {
-            skip.push_back(key);
-            const Cell& c = m_cells[key];
-            // Check each point is below our current max distance
-            for (PointId id : c)
-            {
-                Eigen::Vector3d pos3(m_view.getFieldAs<double>(Dimension::Id::X, id),
-                    m_view.getFieldAs<double>(Dimension::Id::Y, id),
-                    m_view.getFieldAs<double>(Dimension::Id::Z, id));
-                double dist2 = (pos3 - pos).squaredNorm();
-                if (dist2 < curMaxDist)
-                    results.emplace_back(id, dist2);
-            }
-            // Sort by distance
-            std::sort(results.begin(), results.end());
-            // If we've found enough, we can use a more precise max distance as our radius
-            // in nextCells(). If not, use the one that was set at the start (assuming this is the
-            // first iteration).
-            if (results.size() >= k) // resize is dumb if size == k but whatever
-            {
-                results.resize(k);
-                curMaxDist = results.back().sqr_dist;
-                curSearchDist = (std::min)(curSearchDist, curMaxDist);
-            }
-            // If it's not the first iteration and still fails to find k, grow the radius
-            // by a bit.
-            else if (skip.size() > 1)
-            {
-                curMaxDist = curMaxDist * 1.5;
-                curSearchDist = curSearchDist + (m_xlen * m_xlen + m_ylen * m_ylen) / 2.0;
-            }
-        }
-        // Get the next cells. If there are none, we're done
-        keys = nextCells({x, y}, curSearchDist, skip);
-    }
-    //!! Warn if we didn't find enough?
-    return results;
-}
-*/
 
 PointIdList PointGrid::neighbors(double x, double y, double z, point_count_t k, int stride) const
 {
