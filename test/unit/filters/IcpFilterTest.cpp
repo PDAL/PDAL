@@ -38,7 +38,6 @@
 #include <io/BufferReader.hpp>
 #include <io/LasReader.hpp>
 #include <memory>
-#include <chrono>
 #include <pdal/pdal_test_main.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/private/MathUtils.hpp>
@@ -464,27 +463,4 @@ TEST(IcpFilterTest, ThreeInputs)
     PointViewSet pointViewSet = filter->execute(table);
     EXPECT_EQ(2ul, pointViewSet.size());
 }
-
-TEST(IcpFilterTest, bigfile)
-{
-    Options options;
-    options.add("filename", Support::datapath("las/autzen_trim.las"));
-    std::unique_ptr<LasReader> reader(new LasReader());
-    reader->setOptions(options);
-    Options options2;
-    options2.add("filename", Support::datapath("autzen/autzen-thin.las"));
-    std::unique_ptr<LasReader> reader2(new LasReader());
-    reader2->setOptions(options2);
-    auto filter = newFilter();
-    filter->setInput(*reader);
-    filter->setInput(*reader2);
-    PointTable table;
-    filter->prepare(table);
-    auto start = std::chrono::high_resolution_clock::now();
-    PointViewSet pointViewSet = filter->execute(table);
-    auto end = std::chrono::high_resolution_clock::now();
-    std::cout << "Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms" << std::endl;
-    //EXPECT_EQ(2ul, pointViewSet.size());
-}
-
 }

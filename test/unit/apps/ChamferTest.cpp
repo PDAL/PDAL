@@ -50,10 +50,8 @@ TEST(Chamfer, kernel)
 
     const std::string cmd =
         Support::binpath(Support::exename("pdal")) + " chamfer " + A + " " + B;
-    std::cout << cmd << std::endl;
 
     EXPECT_EQ(Utils::run_shell_command(cmd, output), 0);
-    std::cout << output << std::endl;
     EXPECT_TRUE(output.find("\"chamfer\": 5.907628766e+10") !=
                 std::string::npos);
 }
