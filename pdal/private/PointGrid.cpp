@@ -33,7 +33,6 @@
 ****************************************************************************/
 
 #include "PointGrid.hpp"
-#include <chrono>
 
 namespace pdal
 {

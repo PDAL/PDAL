@@ -34,8 +34,10 @@
 
 #pragma once
 
+#include <optional>
+#include <queue>
+
 #include <Eigen/Dense>
-#include <array>
 
 #include <pdal/PointView.hpp>
 #include <pdal/util/Bounds.hpp>
