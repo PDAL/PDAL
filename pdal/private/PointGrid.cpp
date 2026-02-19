@@ -179,30 +179,35 @@ PointGrid::DistanceResults PointGrid::radiusSearch(double x, double y, double ra
 PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, double z,
     point_count_t k) const
 {
-    Eigen::Vector3d pos(x, y, z);
-    SearchSet results(k);
-
-    // Find the starting cell
-    auto [iStart, jStart] = toIJBounded(x, y);
     if (k > m_view.size()) // edge case
         k = m_view.size();
 
-    // Setting a starting distance for the nextClosestCell search
-    double curSearchDist = m_xlen * m_xlen + m_ylen * m_ylen;
+    Eigen::Vector3d pos(x, y, z);
+    KnnResults results(k);
+
+    // Find the starting cell
+    auto [iStart, jStart] = toIJBounded(x, y);
+
     // If the point of interest is outside the grid, make all our distances in relation to a dummy
     // point at the center of our first cell.
-    if (!bounds().contains(x, y))
+    if (!m_bounds.contains(x, y))
     {
         BOX2D cellBounds = bounds(iStart, jStart);
         // Make the x and y we use for nextClosestCell into the origin cell's center.
-        x = (cellBounds.maxx - cellBounds.minx) / 2.0;
-        y = (cellBounds.maxy - cellBounds.miny) / 2.0;
+        x = ((cellBounds.maxx - cellBounds.minx) / 2.0) + cellBounds.minx;
+        y = ((cellBounds.maxy - cellBounds.miny) / 2.0) + cellBounds.miny;
     }
 
     // Keep track of cells we've already checked
     std::vector<uint32_t> skip;
+    // Setting a starting distance for the nextClosestCell search
+    double curSearchDist = (m_xlen * m_xlen + m_ylen * m_ylen);
     // The closest cell to the point of interest
     std::optional<uint32_t> curKey = key(iStart, jStart);
+    //!! ew
+    int curSearchCount = 0;
+    //!! this goto is nasty. Definitely a better way
+loop:
     while (curKey != std::nullopt)
     {
         skip.push_back(*curKey);
@@ -213,17 +218,20 @@ PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, double z,
             Eigen::Vector3d pos2(m_view.getFieldAs<double>(Dimension::Id::X, id),
                 m_view.getFieldAs<double>(Dimension::Id::Y, id),
                 m_view.getFieldAs<double>(Dimension::Id::Z, id));
-            double dist = (pos - pos2).squaredNorm();
-            results.tryInsert(id, dist);
+            results.tryInsert(id, (pos - pos2).squaredNorm());
         }
         if (results.full())
-            curSearchDist = std::min(curSearchDist, results.maxDistance());
-        // If it's gone through all the neighboring cells, increase the search distance
-        else if (skip.size() == 8)
-        {
-            curSearchDist = std::min(results.maxDistance(), curSearchDist + (m_xlen * m_xlen + m_ylen * m_ylen) / 2.0);
-        }
+            curSearchDist = results.maxDistance();
+
         curKey = nextClosestCell({x, y}, curSearchDist, skip);
+    }
+    if (!results.full())
+    {
+        //std::cout << "curSearchCount = " << curSearchCount << std::endl;
+        curSearchCount++;
+        curSearchDist = curSearchDist + (m_xlen * m_xlen + m_ylen * m_ylen) * curSearchCount;
+        curKey = nextClosestCell({x, y}, curSearchDist, skip);
+        goto loop;
     }
     return results.sortedResults();
 }
@@ -289,15 +297,34 @@ PointGrid::DistanceResults PointGrid::radiusSearch(double x, double y, double z,
 std::optional<uint32_t> PointGrid::nextClosestCell(Eigen::Vector2d pos, double maxDistSq,
     std::vector<uint32_t>& skip) const
 {
+    BOX2D box;
+    box.grow(pos(0), pos(1));
+    box.grow(std::sqrt(maxDistSq));
+    box.clip(m_bounds);
+
+    // If the bounds of the grid and the box containing the circle with center pos don't
+    // overlap, there are no relevant cells.
+    if (!m_bounds.overlaps(box))
+        return std::nullopt;
+
+    auto [imin, jmin] = toIJBounded(box.minx, box.miny);
+    auto [imax, jmax] = toIJBounded(box.maxx, box.maxy);
+
     std::optional<uint32_t> closest{std::nullopt};
-    for (auto [i, j] : radiusIJs(pos, std::sqrt(maxDistSq)))
-        if ((std::find(skip.begin(), skip.end(), key(i, j)) == skip.end()))
+
+    for (uint16_t i = imin; i <= imax; ++i)
+        for (uint16_t j = jmin; j <= jmax; ++j)
         {
             double cellDist = boundsDistanceSq(pos(0), pos(1), bounds(i, j));
             if (cellDist <= maxDistSq)
             {
-                maxDistSq = cellDist;
-                closest = key(i, j);
+                uint32_t curKey = key(i, j);
+                if ((std::find(skip.begin(), skip.end(), curKey) == skip.end())
+                    && m_cells[curKey].size())
+                {
+                    maxDistSq = cellDist;
+                    closest = curKey;
+                }
             }
         }
     return closest;
@@ -324,33 +351,6 @@ std::vector<uint32_t> PointGrid::radiusCells(Eigen::Vector2d pos,
     for (uint16_t i = imin; i <= imax; ++i)
         for (uint16_t j = jmin; j <= jmax; ++j)
             cells.push_back(key(i, j));
-    return cells;
-}
-
-// Works differently than radiusCells. actual radius, not a box. Should change name 
-// or something to make that clearer
-std::vector<std::pair<uint16_t, uint16_t>> PointGrid::radiusIJs(Eigen::Vector2d pos,
-    const double radius) const
-{
-    BOX2D box;
-    box.grow(pos(0), pos(1));
-    box.grow(radius);
-    box.clip(bounds());
-
-    // If the bounds of the grid and the box containing the circle with center pos don't
-    // overlap, there are no relevant cells.
-    std::vector<std::pair<uint16_t, uint16_t>> cells;
-    if (!bounds().overlaps(box))
-        return cells;
-    auto [imin, jmin] = toIJ(box.minx, box.miny);
-    auto [imax, jmax] = toIJ(box.maxx, box.maxy);
-
-    cells.reserve((imax - imin + 1) * (jmax - jmin + 1));
-    double radiusSq = radius * radius;
-    for (uint16_t i = imin; i <= imax; ++i)
-        for (uint16_t j = jmin; j <= jmax; ++j)
-            if (boundsDistanceSq(pos(0), pos(1), bounds(i, j)) <= radiusSq)
-                cells.push_back({i, j});
     return cells;
 }
 

@@ -65,12 +65,13 @@ public:
 
     using DistanceResults = std::vector<DistanceResult>;
 
-    // Put this somewhere else
-    class SearchSet
+    // Put this somewhere else and probably rename
+    class KnnResults
     {
     public:
-        SearchSet(size_t knn) : m_knn(knn) {}
-        
+        KnnResults(size_t knn) : m_knn(knn) {}
+
+        // could (should?) be void
         bool tryInsert(PointId index, double dist)
         {
             if (m_results.size() == m_knn)
@@ -244,10 +245,8 @@ private:
     std::vector<uint32_t> radiusCells(Eigen::Vector2d pos, double radius) const;
     std::vector<uint32_t> nextCells(Eigen::Vector2d pos, double maxDist,
         std::vector<uint32_t>& skip) const;
-    std::optional<uint32_t> nextClosestCell(Eigen::Vector2d pos,
-        double maxDistSq, std::vector<uint32_t>& skip) const;
-    std::vector<std::pair<uint16_t, uint16_t>> radiusIJs(Eigen::Vector2d pos,
-        const double radius) const;
+    std::optional<uint32_t> nextClosestCell(Eigen::Vector2d pos, double maxDistSq,
+        std::vector<uint32_t>& skip) const;
 
     std::vector<Cell> m_cells;
     BOX2D m_bounds;
