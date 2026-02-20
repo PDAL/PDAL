@@ -69,64 +69,65 @@ public:
     class KnnResults
     {
     public:
-        KnnResults(size_t knn) : m_knn(knn) {}
-
-        // could (should?) be void
-        bool tryInsert(PointId index, double dist)
+        KnnResults(size_t knn)
         {
-            if (m_results.size() == m_knn)
-            {
-                if (dist > m_results.top().sqr_dist)
-                    return false;
-                m_results.pop();
-            }
+            for (size_t i = 0; i < knn; ++i)
+                m_results.push({0, std::numeric_limits<double>::max()});
+        }
+
+        void tryInsert(PointId index, double dist)
+        {
+            m_validCount++;
+            if (dist > m_results.top().sqr_dist)
+                return;
+
+            m_results.pop();
             m_results.push({index, dist});
-            return true;
         }
 
         double maxDistance() const
         {
-            return m_results.size() == m_knn ? 
-                m_results.top().sqr_dist : std::numeric_limits<double>::max();
+            return m_results.top().sqr_dist;
         }
 
         size_t size() const
         {
-            return m_results.size();
+            return (std::min)(m_results.size(), m_validCount);
         }
 
-        bool full() const 
+        bool full() const
         {
-            return m_results.size() == m_knn;
+            return m_validCount >= m_results.size();
         }
 
         std::vector<DistanceResult> sortedResults()
         {
-            std::vector<DistanceResult> out;
+            std::vector<DistanceResult> out(m_results.size());
+
+            size_t pos = m_results.size() - 1;
             while (!m_results.empty())
             {
-                out.push_back(m_results.top());
+                out[pos--] = m_results.top();
                 m_results.pop();
             }
-            std::reverse(out.begin(), out.end());
             return out;
         }
 
         void sortedResults(std::vector<PointId>& ids, std::vector<double>& dists)
         {
+            ids.resize(m_results.size());
+            dists.resize(m_results.size());
+            size_t pos = m_results.size() - 1;
             while (!m_results.empty())
             {
-                ids.push_back(m_results.top().index);
-                dists.push_back(m_results.top().sqr_dist);
+                ids[pos] = m_results.top().index;
+                dists[pos] = m_results.top().sqr_dist;
                 m_results.pop();
             }
-            std::reverse(ids.begin(), ids.end());
-            std::reverse(dists.begin(), dists.end());
         }
     private:
         std::priority_queue<DistanceResult> m_results;
-        size_t m_knn;
-        //double m_maxDist = std::numeric_limits<double>::max();
+        std::size_t m_validCount = 0;
     };
 
     PointGrid(BOX2D bounds, const PointView& view, int approxPerCell = 200) :
