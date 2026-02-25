@@ -93,6 +93,10 @@ namespace
     // This dataset has an invalid tile (random bits written to 2-2-2-2.laz)
     const std::string invalidTilePath(
             Support::datapath("ept/lone-star-invalid-tile/ept.json"));
+    const std::string badPointCountLazPath(
+            Support::datapath("ept/bad-pointcount/laszip/ept.json"));
+    const std::string badPointCountBinaryPath(
+            Support::datapath("ept/bad-pointcount/binary/ept.json"));
 
     const point_count_t ellipsoidNumPoints(100000);
     const BOX3D ellipsoidBoundsConforming(-8242746, 4966506, -50,
@@ -1086,6 +1090,32 @@ TEST(EptReaderTest, bcbfToLonLat)
     }
 
     EXPECT_EQ(np, 5);
+}
+
+TEST(EptReaderTest, badTilePointCountLaszip)
+{
+    EptReader reader;
+    {
+        Options options;
+        options.add("filename", badPointCountLazPath);
+        reader.setOptions(options);
+    }
+    PointTable eptTable;
+    reader.prepare(eptTable);
+    EXPECT_THROW(reader.execute(eptTable), pdal_error);
+}
+
+TEST(EptReaderTest, badTilePointCountBinary)
+{
+    EptReader reader;
+    {
+        Options options;
+        options.add("filename", badPointCountBinaryPath);
+        reader.setOptions(options);
+    }
+    PointTable eptTable;
+    reader.prepare(eptTable);
+    EXPECT_THROW(reader.execute(eptTable), pdal_error);
 }
 
 TEST(CopcReaderTest, duplicateInputs)

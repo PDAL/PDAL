@@ -3,7 +3,7 @@
 
 title: Point Data Abstraction Library (PDAL)
 author: ""
-copyright: "2025"
+copyright: "2026"
 logo: "_static/pdal-logo-600.png"
 
 # Force re-execution of notebooks on each build.
@@ -111,7 +111,7 @@ sphinx:
 parse:
   myst_substitutions:
     version: "2.10.0"
-    release_date: "2026-31-31"
+    release_date: "2026-02-13"
     ASPRSLAS: "[ASPRS LAS](https://www.asprs.org/divisions-committees/lidar-division/laser-las-file-format-exchange-activities)"
     Bash: "[Bash](https://en.wikipedia.org/wiki/Bash_(Unix_shell))"
     CRREL: "[CRREL](https://www.erdc.usace.army.mil/Locations/CRREL/)"

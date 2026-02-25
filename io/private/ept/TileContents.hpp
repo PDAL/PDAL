@@ -71,10 +71,6 @@ public:
         { return m_overlap.m_key; }
     point_count_t nodeId() const
         { return m_overlap.m_nodeId; }
-    //ABELL - This is bad. We're assuming that the actual number of points we have matches
-    // what our index information told us. This may not be the case because of some
-    // issue. Downstream handling may depend on this being the actual number of points
-    // in the tile, rather than the number that were *supposed to be* in the tile.
     point_count_t size() const
         { return m_overlap.m_count; }
     const std::string& error() const
