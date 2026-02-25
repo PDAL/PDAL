@@ -194,7 +194,6 @@ PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, double z,
 
     double maxDistSq = 0;
 
-    int cnt = 0;
     // Keey trying until we find full results or we've checked all the cells.
     while (skip.size() < m_cells1d * m_cells1d)
     {
@@ -214,7 +213,6 @@ PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, double z,
             maxDistSq = results.maxDistance();
         else
         {
-            std::cerr << "Unfull expansion = xlen/ylen = " << m_xlen << "/" << m_ylen << "!\n";
             double smallCellEdge = (std::min)(m_xlen, m_ylen);
             maxDistSq += smallCellEdge * smallCellEdge;
         }
@@ -222,8 +220,6 @@ PointGrid::DistanceResults PointGrid::knnSearch(double x, double y, double z,
         if (!curKey)
             break;
     }
-    if (cnt > 1)
-        std::cerr << "Checked " << cnt << " cells. Valid count = " << results.validCount() << "!\n";
     return results.sortedResults();
 }
 
@@ -292,7 +288,6 @@ PointGrid::OptionalKey PointGrid::findCell(Eigen::Vector2d pos, double maxDistSq
     auto [imin, jmin] = toIJ(box.minx, box.miny);
     auto [imax, jmax] = toIJ(box.maxx, box.maxy);
 
-    std::cerr << "imin/jmin - imax/jmax = " << imin << "/" << jmin << " - " << imax << "/" << jmax << "!\n";
     for (uint16_t i = imin; i <= imax; ++i)
         for (uint16_t j = jmin; j <= jmax; ++j)
         {
@@ -318,7 +313,6 @@ PointGrid::OptionalKey PointGrid::nextClosestCell(Eigen::Vector2d pos, double ma
     BOX2D box;
     box.grow(pos(0), pos(1));
     box.grow(std::sqrt(maxDistSq));
-std::cerr << "Expand dist = " << std::sqrt(maxDistSq) << " - " << box << "!\n";
     box.clip(m_bounds);
 
     OptionalKey closest;

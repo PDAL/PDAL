@@ -517,18 +517,15 @@ double computeChamfer(PointViewPtr srcView, PointViewPtr candView)
 
     double sum1(0.0);
 
-int cnt = 0;
     for (PointRef p : *srcView)
     {
         PointIdList indices(1);
         std::vector<double> sqr_dists(1);
         candIndex.knnSearch(p, 1, &indices, &sqr_dists);
         sum1 += sqr_dists[0];
-std::cerr << "Point/Sum1 = " << ++cnt << "/" << sum1 << "!\n";
     }
 
     double sum2(0.0);
-    /**
     for (PointRef q : *candView)
     {
         PointIdList indices(1);
@@ -536,7 +533,6 @@ std::cerr << "Point/Sum1 = " << ++cnt << "/" << sum1 << "!\n";
         srcIndex.knnSearch(q, 1, &indices, &sqr_dists);
         sum2 += sqr_dists[0];
     }
-**/
 
     return sum1 + sum2;
 }
