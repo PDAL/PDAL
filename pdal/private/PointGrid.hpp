@@ -48,7 +48,6 @@ namespace pdal
 class PointGrid
 {
     using Cell = std::vector<PointId>;
-    using OptionalKey = std::optional<uint32_t>;
 
 public:
     struct DistanceResult
@@ -209,12 +208,16 @@ private:
         c.push_back(id);
     }
 
-    // this could be a util function outside this class somewhere.
     double boundsDistanceSq(double x, double y, BOX2D bounds) const
     {
         double xDist = x - std::clamp(x, bounds.minx, bounds.maxx);
         double yDist = y - std::clamp(y, bounds.miny, bounds.maxy);
         return xDist * xDist + yDist * yDist;
+    }
+
+    double boundsDistance(double x, double y, BOX2D bounds) const
+    {
+        return std::sqrt(boundsDistanceSq(x, y, bounds));
     }
 
     uint32_t key(uint16_t xi, uint16_t yi) const
@@ -252,9 +255,12 @@ private:
     std::vector<uint32_t> radiusCells(Eigen::Vector2d pos, double radius) const;
     std::vector<uint32_t> nextCells(Eigen::Vector2d pos, double maxDist,
         std::vector<uint32_t>& skip) const;
-    OptionalKey nextClosestCell(Eigen::Vector2d pos, double maxDistSq,
+
+    void processCellPoints(Eigen::Vector3d pos, const DistanceResults& possibleCells,
+        KnnResults& results) const;
+    DistanceResults nextClosestCells(Eigen::Vector2d pos, double maxDistSq,
         std::vector<uint32_t>& skip) const;
-    OptionalKey findCell(Eigen::Vector2d pos, double maxDistSq,
+    DistanceResults findCells(Eigen::Vector2d pos, double maxDistSq,
         std::vector<uint32_t>& skip, BOX2D box) const;
 
     std::vector<Cell> m_cells;
