@@ -192,6 +192,8 @@ void PointGrid::processCellPoints(Eigen::Vector3d pos,
                 m_view.getFieldAs<double>(Dimension::Id::Z, id));
             results.tryInsert(id, (pos - pos2).squaredNorm());
         }
+        // Need to bail here if the results are full and the distance is less than that
+        // of the next possibleCell.
     }
 }
 
