@@ -207,7 +207,6 @@ private:
         m_xlen = (m_bounds.maxx - m_bounds.minx) / m_cells1d + .0001;
         m_ylen = (m_bounds.maxy - m_bounds.miny) / m_cells1d + .0001;
         m_cells.resize(m_cells1d * m_cells1d);
-        std::cout << "Grid: " << m_cells1d << " xlen: " << m_xlen << " , ylen: " << m_ylen << std::endl;
     }
 
     void add(double x, double y, PointId id)
