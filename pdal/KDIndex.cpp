@@ -43,7 +43,8 @@ namespace pdal
 // KD2Index
 //
 
-KD2Index::KD2Index(const PointView& buf) : m_buf(buf), m_impl(new PointGrid(m_buf))
+KD2Index::KD2Index(const PointView& buf) 
+    : m_buf(buf), m_impl(new PointGrid(m_buf, {Dimension::Id::X, Dimension::Id::Y}))
 {}
 
 KD2Index::~KD2Index()
@@ -171,7 +172,8 @@ PointIdList KD2Index::boxNeighborhood(const BOX2D& extent) const
 // KD3Index
 //
 
-KD3Index::KD3Index(const PointView& buf) : m_buf(buf), m_impl(new PointGrid(m_buf))
+KD3Index::KD3Index(const PointView& buf) 
+    : m_buf(buf), m_impl(new PointGrid(m_buf, {Dimension::Id::X, Dimension::Id::Y, Dimension::Id::Z}))
 {}
 
 KD3Index::~KD3Index()
@@ -300,8 +302,17 @@ PointIdList KD3Index::radius(PointRef &point, double r) const
 //
 
 KDFlexIndex::KDFlexIndex(const PointView& buf, const Dimension::IdList& dims) :
-    m_buf(buf), m_dims(dims), m_impl(new KDFlexImpl(m_buf, m_dims))
-{}
+    m_buf(buf), m_dims(dims)
+{
+    BOX2D bounds;
+    for (PointId idx = 0; idx < m_buf.size(); idx++)
+    {
+        double q = m_buf.getFieldAs<double>(m_dims[0], idx);
+        double r = m_buf.getFieldAs<double>(m_dims[1], idx);
+        bounds.grow(q, r);
+    }
+    m_impl.reset(new PointGrid(bounds, buf, dims));
+}
 
 KDFlexIndex::~KDFlexIndex()
 {}
@@ -322,9 +333,13 @@ PointIdList KDFlexIndex::neighbors(PointRef &point, point_count_t k, size_t stri
     return m_impl->neighbors(point, k, stride);
 }
 
-PointIdList KDFlexIndex::radius(PointId idx, double r) const
+PointIdList KDFlexIndex::radius(PointRef &point, double r) const
 {
-    return m_impl->radius(idx, r);
+    PointGrid::DistanceResults results = m_impl->radiusSearch(point, r);
+    PointIdList neighbors(results.size());
+    for (size_t i = 0; i < results.size(); ++i)
+        neighbors.push_back(results[i].index);
+    return neighbors;
 }
 
 } // namespace pdal

@@ -190,14 +190,14 @@ void M3C2Filter::done(PointTableRef _)
     m_p->v1->calculateBounds(v1Bounds);
 
     PointView& v1 = *m_p->v1;
-    PointGrid g1(v1Bounds.to2d(), v1);
+    PointGrid g1(v1Bounds.to2d(), v1, {Dimension::Id::X, Dimension::Id::Y, Dimension::Id::Z});
     g1.build();
 
     BOX3D v2Bounds;
     m_p->v2->calculateBounds(v2Bounds);
 
     PointView& v2 = *m_p->v2;
-    PointGrid g2(v2Bounds.to2d(), v2);
+    PointGrid g2(v2Bounds.to2d(), v2, {Dimension::Id::X, Dimension::Id::Y, Dimension::Id::Z});
     g2.build();
 
     for (PointRef ref : *m_p->cores)

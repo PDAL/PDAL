@@ -112,12 +112,12 @@ public:
     void build();
     PointId neighbor(PointRef &point) const;
     PointIdList neighbors(PointRef &point, point_count_t k, size_t stride = 1) const;
-    PointIdList radius(PointId idx, double r) const;
+    PointIdList radius(PointRef &point, double r) const;
 
 private:
     const PointView& m_buf;
     const Dimension::IdList& m_dims;
-    std::unique_ptr<KDFlexImpl> m_impl;
+    std::unique_ptr<PointGrid> m_impl;
 };
 
 } // namespace pdal

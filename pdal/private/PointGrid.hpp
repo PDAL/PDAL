@@ -135,12 +135,15 @@ public:
         std::size_t m_validCount = 0;
     };
 
-    PointGrid(BOX2D bounds, const PointView& view, int approxPerCell = 200) :
-        m_bounds(bounds), m_view(view), m_approxPerCell(approxPerCell)
+    PointGrid(BOX2D bounds, const PointView& view, Dimension::IdList ids,
+        int approxPerCell = 200) :
+        m_bounds(bounds), m_view(view), m_dims(ids), m_approxPerCell(approxPerCell)
     {}
 
-    PointGrid(const PointView& view, int approxPerCell = 200) :
-        m_view(view), m_approxPerCell(approxPerCell)
+    // This won't work for flex indexes, since the bbox needs to match the first 2 dims 
+    // (not necessarily x & y)
+    PointGrid(const PointView& view, Dimension::IdList ids, int approxPerCell = 200) :
+        m_view(view), m_dims(ids), m_approxPerCell(approxPerCell)
     {
         m_view.calculateBounds(m_bounds);
     }
@@ -151,8 +154,8 @@ public:
             return;
         init();
         for (PointId i = 0; i < m_view.size(); ++i)
-            add(m_view.getFieldAs<double>(Dimension::Id::X, i),
-                m_view.getFieldAs<double>(Dimension::Id::Y, i), i);
+            add(m_view.getFieldAs<double>(m_dims[0], i),
+                m_view.getFieldAs<double>(m_dims[1], i), i);
     }
 
     const BOX2D bounds() const
@@ -178,9 +181,17 @@ public:
         int stride) const;
     DistanceResults knnSearch(double x, double y, double z, point_count_t k) const;
 
+    // Flex
+    KnnResults knnSearch(Eigen::VectorXd pos, point_count_t k) const;
+    KnnResults knnSearch(PointRef& p, point_count_t k) const;
+    DistanceResults radiusSearch(Eigen::VectorXd pos, double radius) const;
+    DistanceResults radiusSearch(PointRef& p, double radius) const;
+    PointIdList neighbors(PointRef& p, point_count_t k, int stride) const;
+
 private:
     void init()
     {
+        assert(m_dims.size() > 1);
         // Silently accepting these. Stuff breaks if we don't
         if (m_approxPerCell > (int)m_view.size())
             m_approxPerCell = m_view.size();
@@ -196,6 +207,7 @@ private:
         m_xlen = (m_bounds.maxx - m_bounds.minx) / m_cells1d + .0001;
         m_ylen = (m_bounds.maxy - m_bounds.miny) / m_cells1d + .0001;
         m_cells.resize(m_cells1d * m_cells1d);
+        std::cout << "Grid: " << m_cells1d << " xlen: " << m_xlen << " , ylen: " << m_ylen << std::endl;
     }
 
     void add(double x, double y, PointId id)
@@ -208,16 +220,11 @@ private:
         c.push_back(id);
     }
 
-    double boundsDistanceSq(double x, double y, BOX2D bounds) const
+    double boundsDistance(double x, double y, BOX2D bounds) const
     {
         double xDist = x - std::clamp(x, bounds.minx, bounds.maxx);
         double yDist = y - std::clamp(y, bounds.miny, bounds.maxy);
-        return xDist * xDist + yDist * yDist;
-    }
-
-    double boundsDistance(double x, double y, BOX2D bounds) const
-    {
-        return std::sqrt(boundsDistanceSq(x, y, bounds));
+        return std::sqrt(xDist * xDist + yDist * yDist);
     }
 
     uint32_t key(uint16_t xi, uint16_t yi) const
@@ -258,6 +265,8 @@ private:
 
     void processCellPoints(Eigen::Vector3d pos, const DistanceResults& possibleCells,
         KnnResults& results) const;
+    void processCellPointsXd(Eigen::VectorXd pos, const DistanceResults& possibleCells,
+        KnnResults& results) const;
     DistanceResults nextClosestCells(Eigen::Vector2d pos, double maxDistSq,
         std::vector<uint32_t>& skip) const;
     DistanceResults findCells(Eigen::Vector2d pos, double maxDistSq,
@@ -266,6 +275,7 @@ private:
     std::vector<Cell> m_cells;
     BOX2D m_bounds;
     const PointView& m_view;
+    Dimension::IdList m_dims;
     int m_approxPerCell;
     uint16_t m_cells1d;
     double m_xlen;
