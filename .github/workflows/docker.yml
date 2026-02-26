@@ -130,7 +130,7 @@ jobs:
       
       - name: Generate artifact attestation
         if: ${{ env.PUSH_PACKAGES == 'true' }}
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@v4
         with:
           subject-name: ghcr.io/pdal/pdal
           subject-digest: ${{ steps.push.outputs.digest }}
