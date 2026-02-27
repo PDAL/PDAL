@@ -306,7 +306,7 @@ PointGrid::KnnResults PointGrid::knnSearch(PointRef& p, point_count_t k) const
 {
     Eigen::VectorXd pos(m_dims.size());
     for (size_t i = 0; i < m_dims.size(); ++i)
-        pos(i, 0) = p.getFieldAs<double>(m_dims[i]);
+        pos(0, i) = p.getFieldAs<double>(m_dims[i]);
     return knnSearch(pos, k);
 }
 
@@ -314,7 +314,7 @@ PointGrid::DistanceResults PointGrid::radiusSearch(PointRef& p, double radius) c
 {
     Eigen::VectorXd pos(m_dims.size());
     for (size_t i = 0; i < m_dims.size(); ++i)
-        pos(i, 0) = p.getFieldAs<double>(m_dims[i]);
+        pos(0, i) = p.getFieldAs<double>(m_dims[i]);
     return radiusSearch(pos, radius);
 }
 
@@ -329,7 +329,7 @@ PointIdList PointGrid::neighbors(PointRef& p, point_count_t k, int stride) const
     Eigen::VectorXd pos(m_dims.size());
 
     for (size_t i = 0; i < m_dims.size(); ++i)
-        pos(i, 0) = p.getFieldAs<double>(m_dims[i]);
+        pos(0, i) = p.getFieldAs<double>(m_dims[i]);
 
     // Extract k*stride neighbors, then return only k, selecting every nth
     // neighbor at the given stride.
@@ -349,9 +349,6 @@ PointIdList PointGrid::neighbors(PointRef& p, point_count_t k, int stride) const
 
 PointGrid::KnnResults PointGrid::knnSearch(Eigen::VectorXd pos, point_count_t k) const
 {
-    std::cerr << "cols: " << pos.cols() << std::endl;
-    std::cerr << "rows: " << pos.rows() << std::endl;
-    std::cerr << "size: " << pos.size() << std::endl;
     // could check this elsewhere
     assert(pos.size() == m_dims.size());
     KnnResults results(k);
@@ -399,8 +396,8 @@ void PointGrid::processCellPointsXd(Eigen::VectorXd pos,
         const Cell& c = m_cells[k];
         for (PointId id : c)
         {
-            Eigen::VectorXd pos2(pos.cols());
-            for (size_t i = 0; i < pos.cols(); ++i)
+            Eigen::VectorXd pos2(pos.rows());
+            for (size_t i = 0; i < pos.rows(); ++i)
                 pos2 << m_view.getFieldAs<double>(m_dims[i], id);
             results.tryInsert(id, (pos - pos2).squaredNorm());
         }
@@ -416,8 +413,8 @@ PointGrid::DistanceResults PointGrid::radiusSearch(Eigen::VectorXd pos, double r
     for (uint32_t key : radiusCells({pos(0), pos(1)}, radius))
         for (PointId id : m_cells[key])
         {
-            Eigen::VectorXd pos2(pos.cols());
-            for (size_t i = 0; i < pos.cols(); ++i)
+            Eigen::VectorXd pos2(pos.rows());
+            for (size_t i = 0; i < pos.rows(); ++i)
                 pos2 << m_view.getFieldAs<double>(m_dims[i], id);
             double dist = (pos - pos2).squaredNorm();
             if (dist < radius2)
@@ -502,39 +499,5 @@ std::vector<uint32_t> PointGrid::nextCells(Eigen::Vector2d pos,
             cells.push_back(key);
     return cells;
 }
-
-/*
-// don't know if this needs to exist.
-PointIdList PointGrid::boxEncloses(BOX3D extent) const
-{
-    BOX3D boundsExtent(bounds());
-    boundsExtent.minz = extent.minz;
-    boundsExtent.maxz = extent.maxz;
-    extent.clip(boundsExtent);
-
-    PointIdList neighbors;
-
-    // Find IJ bounding box.
-    auto [imin, jmin] = toIJ(extent.minx, extent.miny);
-    auto [imax, jmax] = toIJ(extent.maxx, extent.maxy);
-
-    for (uint16_t i = imin; i <= imax; ++i)
-        for (uint16_t j = jmin; j <= jmax; ++j)
-        {
-            const Cell& c = cell(i, j);
-
-            // Check every point to make sure it's in the extent.
-            for (PointId id : c)
-            {
-                double x = m_view.getFieldAs<double>(Dimension::Id::X, id);
-                double y = m_view.getFieldAs<double>(Dimension::Id::Y, id);
-                double z = m_view.getFieldAs<double>(Dimension::Id::Z, id);
-                if (extent.contains(x, y, z))
-                    neighbors.push_back(id);
-            }
-        }
-    return neighbors;
-}
-*/
 
 } // namespace pdal
