@@ -306,15 +306,15 @@ PointGrid::KnnResults PointGrid::knnSearch(PointRef& p, point_count_t k) const
 {
     Eigen::VectorXd pos(m_dims.size());
     for (size_t i = 0; i < m_dims.size(); ++i)
-        pos(0, i) = p.getFieldAs<double>(m_dims[i]);
-    return knnSearch(pos, k);
+        pos(i) = p.getFieldAs<double>(m_dims[i]);
+     return knnSearch(pos, k);
 }
 
 PointGrid::DistanceResults PointGrid::radiusSearch(PointRef& p, double radius) const
 {
     Eigen::VectorXd pos(m_dims.size());
     for (size_t i = 0; i < m_dims.size(); ++i)
-        pos(0, i) = p.getFieldAs<double>(m_dims[i]);
+        pos(i) = p.getFieldAs<double>(m_dims[i]);
     return radiusSearch(pos, radius);
 }
 
@@ -329,7 +329,7 @@ PointIdList PointGrid::neighbors(PointRef& p, point_count_t k, int stride) const
     Eigen::VectorXd pos(m_dims.size());
 
     for (size_t i = 0; i < m_dims.size(); ++i)
-        pos(0, i) = p.getFieldAs<double>(m_dims[i]);
+        pos(i) = p.getFieldAs<double>(m_dims[i]);
 
     // Extract k*stride neighbors, then return only k, selecting every nth
     // neighbor at the given stride.
@@ -350,7 +350,7 @@ PointIdList PointGrid::neighbors(PointRef& p, point_count_t k, int stride) const
 PointGrid::KnnResults PointGrid::knnSearch(Eigen::VectorXd pos, point_count_t k) const
 {
     // could check this elsewhere
-    assert(pos.size() == m_dims.size());
+    assert(pos.rows() == m_dims.size());
     KnnResults results(k);
 
     // Find the starting cell
@@ -396,9 +396,9 @@ void PointGrid::processCellPointsXd(Eigen::VectorXd pos,
         const Cell& c = m_cells[k];
         for (PointId id : c)
         {
-            Eigen::VectorXd pos2(pos.rows());
-            for (size_t i = 0; i < pos.rows(); ++i)
-                pos2 << m_view.getFieldAs<double>(m_dims[i], id);
+            Eigen::VectorXd pos2(m_dims.size());
+            for (size_t i = 0; i < m_dims.size(); ++i)
+                pos2(i) = m_view.getFieldAs<double>(m_dims[i], id);
             results.tryInsert(id, (pos - pos2).squaredNorm());
         }
         // Need to bail here if the results are full and the distance is less than that
@@ -413,9 +413,9 @@ PointGrid::DistanceResults PointGrid::radiusSearch(Eigen::VectorXd pos, double r
     for (uint32_t key : radiusCells({pos(0), pos(1)}, radius))
         for (PointId id : m_cells[key])
         {
-            Eigen::VectorXd pos2(pos.rows());
-            for (size_t i = 0; i < pos.rows(); ++i)
-                pos2 << m_view.getFieldAs<double>(m_dims[i], id);
+            Eigen::VectorXd pos2(m_dims.size());
+            for (size_t i = 0; i < m_dims.size(); ++i)
+                pos2(i) = m_view.getFieldAs<double>(m_dims[i], id);
             double dist = (pos - pos2).squaredNorm();
             if (dist < radius2)
                 results.emplace_back(id, dist);
