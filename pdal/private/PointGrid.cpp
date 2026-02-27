@@ -306,7 +306,7 @@ PointGrid::KnnResults PointGrid::knnSearch(PointRef& p, point_count_t k) const
 {
     Eigen::VectorXd pos(m_dims.size());
     for (size_t i = 0; i < m_dims.size(); ++i)
-        pos << p.getFieldAs<double>(m_dims[i]);
+        pos(i, 0) = p.getFieldAs<double>(m_dims[i]);
     return knnSearch(pos, k);
 }
 
@@ -314,7 +314,7 @@ PointGrid::DistanceResults PointGrid::radiusSearch(PointRef& p, double radius) c
 {
     Eigen::VectorXd pos(m_dims.size());
     for (size_t i = 0; i < m_dims.size(); ++i)
-        pos << p.getFieldAs<double>(m_dims[i]);
+        pos(i, 0) = p.getFieldAs<double>(m_dims[i]);
     return radiusSearch(pos, radius);
 }
 
@@ -349,8 +349,11 @@ PointIdList PointGrid::neighbors(PointRef& p, point_count_t k, int stride) const
 
 PointGrid::KnnResults PointGrid::knnSearch(Eigen::VectorXd pos, point_count_t k) const
 {
+    std::cerr << "cols: " << pos.cols() << std::endl;
+    std::cerr << "rows: " << pos.rows() << std::endl;
+    std::cerr << "size: " << pos.size() << std::endl;
     // could check this elsewhere
-    assert(pos.cols() == m_dims.size() && m_dims.size() >= 2);
+    assert(pos.size() == m_dims.size());
     KnnResults results(k);
 
     // Find the starting cell
