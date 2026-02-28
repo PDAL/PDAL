@@ -182,9 +182,7 @@ public:
     DistanceResults knnSearch(double x, double y, double z, point_count_t k) const;
 
     // Flex
-    KnnResults knnSearch(Eigen::VectorXd pos, point_count_t k) const;
     KnnResults knnSearch(PointRef& p, point_count_t k) const;
-    DistanceResults radiusSearch(Eigen::VectorXd pos, double radius) const;
     DistanceResults radiusSearch(PointRef& p, double radius) const;
     PointIdList neighbors(PointRef& p, point_count_t k, int stride) const;
 
@@ -264,12 +262,10 @@ private:
 
     void processCellPoints(Eigen::Vector3d pos, const DistanceResults& possibleCells,
         KnnResults& results) const;
+    void processCellPoints(Eigen::Vector2d pos, const DistanceResults& possibleCells,
+        KnnResults& results) const;
     void processCellPointsXd(Eigen::VectorXd pos, const DistanceResults& possibleCells,
         KnnResults& results) const;
-    DistanceResults nextClosestCells(Eigen::Vector2d pos, double maxDistSq,
-        std::vector<uint32_t>& skip) const;
-    DistanceResults findCells(Eigen::Vector2d pos, double maxDistSq,
-        std::vector<uint32_t>& skip, BOX2D box) const;
 
     std::vector<Cell> m_cells;
     BOX2D m_bounds;
