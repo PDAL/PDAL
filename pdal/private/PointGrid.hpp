@@ -234,10 +234,10 @@ private:
 
     std::pair<uint16_t, uint16_t> toIJBounded(double x, double y) const
     {
-        double xStart = (x - m_bounds.minx) / m_xlen;
-        int xIndex = std::clamp(static_cast<int>(xStart), 0, m_cells1d - 1);
-        double yStart = (y - m_bounds.miny) / m_ylen;
-        int yIndex = std::clamp(static_cast<int>(yStart), 0, m_cells1d - 1);
+        double xIndex = (x - m_bounds.minx) / m_xlen;
+        xIndex = std::clamp(xIndex, 0.0, (double)(m_cells1d - 1));
+        double yIndex = (y - m_bounds.miny) / m_ylen;
+        yIndex = std::clamp(yIndex, 0.0, (double)(m_cells1d - 1));
         return { static_cast<uint16_t>(xIndex), static_cast<uint16_t>(yIndex) };
     }
 
@@ -260,8 +260,6 @@ private:
         KnnResults& results) const;
     DistanceResults nextClosestCells(Eigen::Vector2d pos, double maxDistSq,
         std::vector<uint32_t>& skip) const;
-    DistanceResults findCells(Eigen::Vector2d pos, double maxDistSq,
-        std::vector<uint32_t>& skip, BOX2D box) const;
 
     std::vector<Cell> m_cells;
     BOX2D m_bounds;

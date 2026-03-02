@@ -301,9 +301,14 @@ PointGrid::DistanceResults PointGrid::radiusSearch(double x, double y, double z,
 
 /// Internal ///
 
-PointGrid::DistanceResults PointGrid::findCells(Eigen::Vector2d pos, double maxDist,
-    std::vector<uint32_t>& skip, BOX2D box) const
+PointGrid::DistanceResults PointGrid::nextClosestCells(Eigen::Vector2d pos, double maxDist,
+    std::vector<uint32_t>& skip) const
 {
+    BOX2D box;
+    box.grow(pos(0), pos(1));
+    box.grow(maxDist);
+    box.clip(m_bounds);
+
     DistanceResults cells;
 
     auto [imin, jmin] = toIJ(box.minx, box.miny);
@@ -326,18 +331,6 @@ PointGrid::DistanceResults PointGrid::findCells(Eigen::Vector2d pos, double maxD
         }
     std::sort(cells.begin(), cells.end());
     return cells;
-}
-
-// This might iterate over too many cells & it only returns one.
-PointGrid::DistanceResults PointGrid::nextClosestCells(Eigen::Vector2d pos, double maxDist,
-    std::vector<uint32_t>& skip) const
-{
-    BOX2D box;
-    box.grow(pos(0), pos(1));
-    box.grow(maxDist);
-    box.clip(m_bounds);
-
-    return findCells(pos, maxDist, skip, box);
 }
 
 std::vector<uint32_t> PointGrid::radiusCells(Eigen::Vector2d pos,
