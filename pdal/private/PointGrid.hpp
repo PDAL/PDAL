@@ -257,8 +257,10 @@ private:
     }
 
     std::vector<uint32_t> radiusCells(Eigen::Vector2d pos, double radius) const;
-    std::vector<uint32_t> nextCells(Eigen::Vector2d pos, double maxDist,
+    DistanceResults nextClosestCells(Eigen::Vector2d pos, double maxDistSq,
         std::vector<uint32_t>& skip) const;
+    DistanceResults findCells(Eigen::Vector2d pos, double maxDistSq,
+        std::vector<uint32_t>& skip, BOX2D box) const;
 
     void processCellPoints(Eigen::Vector3d pos, const DistanceResults& possibleCells,
         KnnResults& results) const;

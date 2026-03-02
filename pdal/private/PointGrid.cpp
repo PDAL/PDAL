@@ -290,16 +290,11 @@ PointIdList PointGrid::neighbors(PointRef& p, point_count_t k, int stride) const
     k = (std::min)(m_view.size(), k);
     point_count_t k2 = stride * k;
 
-    Eigen::VectorXd pos(m_dims.size());
-
-    for (size_t i = 0; i < m_dims.size(); ++i)
-        pos(i) = p.getFieldAs<double>(m_dims[i]);
-
     // Extract k*stride neighbors, then return only k, selecting every nth
     // neighbor at the given stride.
     PointIdList output(k);
     std::vector<double> out_dist_sqr(k2);
-    knnSearch(pos, k2).sortedResults(output, out_dist_sqr);
+    knnSearch(p, k2).sortedResults(output, out_dist_sqr);
 
     if (stride > 1)
     {
@@ -375,7 +370,7 @@ void PointGrid::processCellPointsXd(Eigen::VectorXd pos,
     }
 }
 
-PointGrid::DistanceResults PointGrid::radiusSearch(PointRef& pos, double radius) const
+PointGrid::DistanceResults PointGrid::radiusSearch(PointRef& p, double radius) const
 {
     Eigen::VectorXd pos(m_dims.size());
     for (size_t i = 0; i < m_dims.size(); ++i)
@@ -399,6 +394,44 @@ PointGrid::DistanceResults PointGrid::radiusSearch(PointRef& pos, double radius)
 
 
 /// Internal ///
+
+PointGrid::DistanceResults PointGrid::findCells(Eigen::Vector2d pos, double maxDist,
+    std::vector<uint32_t>& skip, BOX2D box) const
+{
+    DistanceResults cells;
+
+    auto [imin, jmin] = toIJ(box.minx, box.miny);
+    auto [imax, jmax] = toIJ(box.maxx, box.maxy);
+
+    for (uint16_t i = imin; i <= imax; ++i)
+        for (uint16_t j = jmin; j <= jmax; ++j)
+        {
+            uint32_t curKey = key(i, j);
+            if (std::find(skip.begin(), skip.end(), curKey) != skip.end())
+                continue;
+
+            double cellDist = boundsDistance(pos(0), pos(1), bounds(i, j));
+
+            if (cellDist <= maxDist)
+            {
+                cells.emplace_back(curKey, cellDist);
+                skip.push_back(curKey);
+            }
+        }
+    std::sort(cells.begin(), cells.end());
+    return cells;
+}
+
+PointGrid::DistanceResults PointGrid::nextClosestCells(Eigen::Vector2d pos, double maxDist,
+    std::vector<uint32_t>& skip) const
+{
+    BOX2D box;
+    box.grow(pos(0), pos(1));
+    box.grow(maxDist);
+    box.clip(m_bounds);
+
+    return findCells(pos, maxDist, skip, box);
+}
 
 
 std::vector<uint32_t> PointGrid::radiusCells(Eigen::Vector2d pos,
@@ -425,15 +458,5 @@ std::vector<uint32_t> PointGrid::radiusCells(Eigen::Vector2d pos,
     return cells;
 }
 
-
-std::vector<uint32_t> PointGrid::nextCells(Eigen::Vector2d pos,
-    double maxDistSq, std::vector<uint32_t>& skip) const
-{
-    std::vector<uint32_t> cells;
-    for (uint32_t key : radiusCells(pos, std::sqrt(maxDistSq)))
-        if (std::find(skip.begin(), skip.end(), key) == skip.end())
-            cells.push_back(key);
-    return cells;
-}
 
 } // namespace pdal
