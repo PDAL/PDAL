@@ -308,9 +308,6 @@ PointIdList PointGrid::neighbors(PointRef& p, point_count_t k, int stride) const
 
 PointGrid::KnnResults PointGrid::knnSearch(PointRef& p, point_count_t k) const
 {
-    // could check this elsewhere
-    assert(pos.rows() == m_dims.size());
-
     Eigen::VectorXd pos(m_dims.size());
     for (size_t i = 0; i < m_dims.size(); ++i)
         pos(i) = p.getFieldAs<double>(m_dims[i]);
