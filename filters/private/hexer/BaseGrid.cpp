@@ -56,6 +56,9 @@ void BaseGrid::setHexes(const std::vector<HexId>& ids)
 
 void BaseGrid::flushSamples()
 {
+    if (m_sample.empty())
+        throw hexer_error("Can't determine hex size - no points.");
+
     double height = computeHexSize();
     processHeight(height);
     for (Point p : m_sample) {

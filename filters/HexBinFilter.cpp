@@ -124,7 +124,7 @@ void HexBin::initialize()
                 "processing. Set 'edge_length' option to specify cell size.");
         else
             log()->get(LogLevel::Warning) << "'h3_resolution' not implemented "
-                "for standard processing. Using 'edge_length'\n"; 
+                "for standard processing. Using 'edge_length'\n";
     }
 }
 
@@ -189,24 +189,24 @@ void HexBin::spatialReferenceChanged(const SpatialReference& srs)
 }
 
 
-void HexBin::done(PointTableRef table)
+bool HexBin::createGrid()
 {
-    if (m_grid->sampling())
-    {
-        // If we ran out of points while sampling, process the points in the sample buffer:
-        // in stream mode, we can't check this until we've gone through all the points
-        if (m_sampleSize > m_count)
-        {
-            m_grid->flushSamples();
-            // Setting this so it gets written to metadata correctly
-            m_sampleSize = m_count;
-        }
-        else
-            throwError("Sampling for hexbin auto-edge length calculation failed!");
-    }
-
     try
     {
+        if (m_grid->sampling())
+        {
+            // If we ran out of points while sampling, process the points in the sample buffer:
+            // in stream mode, we can't check this until we've gone through all the points
+            if (m_sampleSize > m_count)
+            {
+                m_grid->flushSamples();
+                // Setting this so it gets written to metadata correctly
+                m_sampleSize = m_count;
+            }
+            else
+                throwError("Sampling for hexbin auto-edge length calculation failed!");
+        }
+
         m_grid->findShapes();
         m_grid->findParentPaths();
     }
@@ -216,8 +216,15 @@ void HexBin::done(PointTableRef table)
             "Hexer threw an error and was unable to compute a boundary");
         m_metadata.add("boundary", "MULTIPOLYGON EMPTY",
             "Empty polygon -- unable to compute boundary");
-        return;
+        return false;
     }
+    return true;
+}
+
+void HexBin::done(PointTableRef table)
+{
+    if (!createGrid())
+        return;
 
     m_metadata.add("threshold", m_grid->denseLimit(),
         "Minimum number of points inside a hexagon to be considered full");
@@ -245,7 +252,7 @@ void HexBin::done(PointTableRef table)
     if (m_boundaryOutput.size())
     {
         OGR writer(m_boundaryOutput, m_srs.getWKT(), m_driver, "hexbins");
-        writer.writeBoundary(*m_grid); 
+        writer.writeBoundary(*m_grid);
     }
 
     pdal::Polygon p(polygon.str(), m_srs);
@@ -343,7 +350,7 @@ void HexBin::done(PointTableRef table)
             "of the grid. See https://h3geo.org/docs/core-library/restable "
             "for more information" );
     }
-    
+
     m_metadata.add("boundary", p.wkt(m_precision),
         "Approximated MULTIPOLYGON of domain");
     m_metadata.addWithType("boundary_json", p.json(), "json",
