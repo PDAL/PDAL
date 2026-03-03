@@ -65,6 +65,10 @@ sphinx:
   config:
     suppress_warnings: ["etoc.toctree"]
     html_show_copyright: false
+    html_css_files:
+      - css/prev-next-cta.css
+    html_js_files:
+      - js/prev-next-cta.js
     bibtex_bibfiles:
       - references.bib
     bibtex_reference_style: author_year
