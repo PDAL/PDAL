@@ -152,6 +152,9 @@ preview = { cmd = "xdg-open index.html", depends-on = ["build"], cwd = "doc/_bui
 [feature.doc.target.osx-64.tasks]
 preview = { cmd = "open index.html", depends-on = ["build"], cwd = "doc/_build/html" }
 
+[feature.doc.target.osx-arm64.tasks]
+preview = { cmd = "open index.html", depends-on = ["build"], cwd = "doc/_build/html" }
+
 [environments]
 dev = ["dev"]
 goldendoodle = ["goldendoodle"]
