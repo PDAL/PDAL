@@ -29,6 +29,7 @@
 #include "ReaderImpl.h"
 #include "Common.h"
 #include "StringFunctions.h"
+#include <limits>
 
 namespace e57
 {
