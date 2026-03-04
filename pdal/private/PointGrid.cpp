@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #include "PointGrid.hpp"
-
+#include <chrono>
 
 namespace pdal
 {
@@ -84,6 +84,9 @@ void PointGrid::processCellPoints(Eigen::Vector2d pos,
 {
     for (const DistanceResult& possibleCell : possibleCells)
     {
+        if (results.full() && results.maxDistance() < possibleCell.sqr_dist)
+            return;
+
         uint32_t k = static_cast<uint32_t>(possibleCell.index);
         const Cell& c = m_cells[k];
         for (PointId id : c)
@@ -170,6 +173,10 @@ void PointGrid::processCellPoints(Eigen::Vector3d pos,
 {
     for (const DistanceResult& possibleCell : possibleCells)
     {
+        // Need to bail here if the results are full and the distance is less than that
+        // of the next possibleCell. possibleCells is sorted
+        if (results.full() && (results.maxDistance() < possibleCell.sqr_dist))
+            return;
         uint32_t k = static_cast<uint32_t>(possibleCell.index);
         const Cell& c = m_cells[k];
         for (PointId id : c)
@@ -179,8 +186,6 @@ void PointGrid::processCellPoints(Eigen::Vector3d pos,
                 m_view.getFieldAs<double>(Dimension::Id::Z, id));
             results.tryInsert(id, (pos - pos2).squaredNorm());
         }
-        // Need to bail here if the results are full and the distance is less than that
-        // of the next possibleCell.
     }
 }
 
@@ -425,7 +430,7 @@ PointGrid::DistanceResults PointGrid::nextClosestCells(Eigen::Vector2d pos, doub
     BOX2D box;
     box.grow(pos(0), pos(1));
     box.grow(maxDist);
-    box.clip(m_bounds);
+    box.clip(bounds());
 
     return findCells(pos, maxDist, skip, box);
 }
