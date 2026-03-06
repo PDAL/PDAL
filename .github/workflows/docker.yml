@@ -99,7 +99,7 @@ jobs:
           fi
           echo "ARCH=$ARCH" >> $GITHUB_OUTPUT
       - name: Build image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         id: push
         with:
           push: ${{ env.PUSH_PACKAGES == 'true' }}
