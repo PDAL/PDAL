@@ -104,6 +104,7 @@ std::vector<lepcc::Point3D> decompressXYZ(std::vector<char>* compData)
         if (stat != (lepcc_status) lepcc::ErrCode::Ok)
             throw EsriError("LEPCC decompression failed");
     }
+    lepcc_deleteContext(&ctx);
     return decVec;
 }
 
@@ -141,6 +142,7 @@ std::vector<lepcc::RGB_t> decompressRGB(std::vector<char>* compData)
         if (stat != (lepcc_status) lepcc::ErrCode::Ok)
             throw EsriError("RGB decompression failed");
     }
+    lepcc_deleteContext(&ctx);
     return rgbVec;
 }
 
@@ -175,6 +177,7 @@ std::vector<uint16_t> decompressIntensity(std::vector<char>* compData)
         if (stat != (lepcc_status) lepcc::ErrCode::Ok)
             throw EsriError("Intensity decompression failed");
     }
+    lepcc_deleteContext(&ctx);
     return intVec;
 }
 
