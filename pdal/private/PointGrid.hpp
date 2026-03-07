@@ -53,12 +53,12 @@ public:
         m_bounds(bounds), m_view(view), m_approxPerCell(approxPerCell)
     {
         int pointsPerCell = (approxPerCell > 0 ? approxPerCell : 1);
-        double cells = std::floor(std::sqrt(
-            static_cast<double>(view.size()) / pointsPerCell));
-        cells = std::max(cells, 1.0);
-        assert(cells > 0);
-        assert(cells < std::numeric_limits<uint16_t>::max());
-        m_cells1d = static_cast<uint16_t>(cells);
+double cells = std::floor(std::sqrt(
+    static_cast<double>(view.size()) / pointsPerCell));
+cells = std::max(cells, 1.0);
+if (cells >= std::numeric_limits<uint16_t>::max())
+    throw pdal_error("PointGrid: Too many cells requested.");
+m_cells1d = static_cast<uint16_t>(cells);
         // Adding a small amount to make sure the max value is in a cell.
         m_xlen = (m_bounds.maxx - m_bounds.minx) / m_cells1d + .0001;
         m_ylen = (m_bounds.maxy - m_bounds.miny) / m_cells1d + .0001;
