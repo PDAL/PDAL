@@ -177,10 +177,6 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-    if (APPLE)
-        set_target_properties(${${_name}} PROPERTIES
-            INSTALL_NAME_DIR "@rpath")
-    endif()
 endmacro(PDAL_ADD_PLUGIN)
 
 ###############################################################################
