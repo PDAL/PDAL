@@ -57,10 +57,11 @@ public:
 
     bool valid() const;
     bool onlyFilename() const;
-    std::filesystem::path filePath() const;
+    [[deprecated]] std::filesystem::path filePath() const;
+    std::string u8string() const;
     StringMap query() const;
     StringMap headers() const;
-    void setFilePath(const std::string& path);
+    void setFilePath(const std::string& u8path);
     void setFilePath(const std::filesystem::path& path);
 
     // parse a user input string that could be a json spec or filename
