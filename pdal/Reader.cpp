@@ -69,7 +69,7 @@ void Reader::l_addArgs(ProgramArgs& args)
 
 void Reader::assignParsedOptions()
 {
-    m_filename = m_filespec.filePath().string();
+    m_filename = m_filespec.u8string();
 }
 
 

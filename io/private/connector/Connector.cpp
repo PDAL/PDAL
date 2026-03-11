@@ -95,7 +95,7 @@ Connector::Connector(const FileSpec& spec) :
     m_arbiter(new arbiter::Arbiter),
     m_headers(spec.headers()),
     m_query(spec.query()),
-    m_filename(spec.filePath().string())
+    m_filename(spec.u8string())
 {
     if (m_headers.find("User-Agent") == m_headers.end())
     {

@@ -14,7 +14,7 @@ TEST(FileSpecTest, create)
     FileSpec spec;
     Utils::StatusWithReason status = spec.ingest(inFile);
     EXPECT_EQ(status, true);
-    EXPECT_EQ(spec.filePath().string(), inFile);
+    EXPECT_EQ(spec.u8string(), inFile);
 
     // create from json
     NL::json json{};
@@ -27,7 +27,7 @@ TEST(FileSpecTest, create)
 
     spec = FileSpec(json.dump());
     EXPECT_EQ(status, true);
-    EXPECT_EQ(spec.filePath().string(), inFile);
+    EXPECT_EQ(spec.u8string(), inFile);
     EXPECT_EQ(spec.headers(), headersMap);
     EXPECT_EQ(spec.query(), queryMap);
 }
