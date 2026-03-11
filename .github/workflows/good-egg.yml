@@ -6,6 +6,7 @@ on:
 
 permissions:
   pull-requests: write
+  checks: write
 
 jobs:
   score:
@@ -14,3 +15,4 @@ jobs:
       - uses: 2ndSetAI/good-egg@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          skip-known-contributors: 'true'
