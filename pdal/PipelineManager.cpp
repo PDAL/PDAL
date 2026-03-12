@@ -357,10 +357,10 @@ Stage& PipelineManager::makeReader(ReaderCreationOptions& o)
 {
     if (o.m_driver.empty())
     {
-        o.m_driver = StageFactory::inferReaderDriver(o.m_filespec.filePath().string());
+        o.m_driver = StageFactory::inferReaderDriver(o.m_filespec.u8string());
         if (o.m_driver.empty())
             throw pdal_error("Cannot determine reader for input file: " +
-                o.m_filespec.filePath().string());
+                o.m_filespec.u8string());
     }
 
     // test if empty
