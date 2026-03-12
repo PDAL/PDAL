@@ -102,9 +102,9 @@ void parsePipeline(NL::json& tree, PipelineManager& manager)
         if ((type.empty() && (i == 0 || i != last)) ||
             Utils::startsWith(type, "readers."))
         {
-            StringList files = Utils::glob(spec.filePath().string());
+            StringList files = Utils::glob(spec.u8string());
             if (files.empty())
-                files.push_back(spec.filePath().string());
+                files.push_back(spec.u8string());
 
             for (const std::string& path : files)
             {
@@ -120,7 +120,7 @@ void parsePipeline(NL::json& tree, PipelineManager& manager)
         }
         else if (type.empty() || Utils::startsWith(type, "writers."))
         {
-            StageCreationOptions ops { spec.filePath().string(), type, nullptr, options, tag };
+            StageCreationOptions ops { spec.u8string(), type, nullptr, options, tag };
             s = &manager.makeWriter(ops);
             for (Stage *ts : inputs)
                 s->setInput(*ts);
@@ -130,7 +130,7 @@ void parsePipeline(NL::json& tree, PipelineManager& manager)
         else
         {
             if (spec.valid())
-                options.add("filename", spec.filePath().string());
+                options.add("filename", spec.u8string());
             StageCreationOptions ops { "", type, nullptr, options, tag };
             s = &manager.makeFilter(ops);
             for (Stage *ts : inputs)
