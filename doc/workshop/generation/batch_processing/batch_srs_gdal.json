@@ -4,14 +4,15 @@
             "type":"readers.las"
         },
         {
-            "type": "filters.reprojection"
+            "type": "filters.reprojection", "in_srs": "EPSG:32615", "out_srs": "EPSG:32615", "out_srs": "EPSG:32615"
         },
         {  
             "type": "filters.smrf"
         },
         {
-            "type":"filters.expression",
-            "expression":"Classification == 2"
+            "type":"filters.range",
+            "limits":"Classification[2:2]"
+
         },
         {
             "gdaldriver":"GTiff",
