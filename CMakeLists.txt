@@ -30,11 +30,6 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 # Must be changed if there is an ABI change.  This builds the SONAME
 # that's embedded in the library and any plugins.
 include(${ROOT_DIR}/cmake/libraries.cmake NO_POLICY_SCOPE)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
 #
 # Name of C++ library
 #
