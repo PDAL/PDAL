@@ -185,7 +185,8 @@ void TIndexKernel::addSubSwitches(ProgramArgs& args,
             "location");
         args.add("ogrdriver,f", "OGR driver name to use ", m_driverName,
             "ESRI Shapefile");
-        args.add("lco", "Driver-specific OGR layer creation options", m_lcOptions);
+        args.add("lco", "Driver-specific NAME=VALUE OGR layer creation options",
+            m_lcOptions);
         args.add("t_srs", "Target SRS of tile index", m_tgtSrsString,
             "EPSG:4326");
         args.add("a_srs", "Assign SRS of tile with no SRS to this value",

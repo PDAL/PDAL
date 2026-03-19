@@ -25,7 +25,7 @@ $ pdal tindex create <tindex> <glob>
 --lyr_name             OGR layer name to write into datasource
 --tindex_name          Tile index column name
 --ogrdriver, -f        OGR driver name to use
---lco                  Driver-specific OGR layer creation options
+--lco                  Driver-specific NAME=VALUE OGR layer creation options
 --t_srs                Target SRS of tile index
 --a_srs                Assign SRS of tile with no SRS to this value
 --write_absolute_path  Write absolute rather than relative file paths
