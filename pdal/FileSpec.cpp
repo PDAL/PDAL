@@ -53,6 +53,7 @@ struct FileSpec::Private
     Utils::StatusWithReason extractPath(NL::json& node);
     Utils::StatusWithReason extractHeaders(NL::json& node);
     Utils::StatusWithReason extractQuery(NL::json& node);
+    void setFilePath(const std::string& u8path);
 };
 
 namespace
@@ -117,14 +118,19 @@ bool FileSpec::onlyFilename() const
     return m_p->m_headers.empty() && m_p->m_query.empty();
 }
 
+std::string FileSpec::u8string() const
+{
+    return m_p->m_path.u8string();
+}
+
 std::filesystem::path FileSpec::filePath() const
 {
     return m_p->m_path;
 }
 
-void FileSpec::setFilePath(const std::string& path)
+void FileSpec::setFilePath(const std::string& u8path)
 {
-    m_p->m_path = path;
+    m_p->setFilePath(u8path);
 }
 
 void FileSpec::setFilePath(const std::filesystem::path& path)
@@ -158,12 +164,22 @@ Utils::StatusWithReason FileSpec::ingest(const std::string& pathOrJson)
     return m_p->parse(json);
 }
 
+void FileSpec::Private::setFilePath(const std::string& u8path)
+{
+#ifdef __cpp_lib_char8_t  // C++20
+    char8_t *pU8path = reinterpret_cast<const char8_t *>(u8path.data());
+    m_path = std::filesystem::path(std::u8string_view(pU8path, u8path.size()));
+#else                     // C++17
+    m_path = std::filesystem::u8path(u8path);
+#endif
+}
+
 Utils::StatusWithReason FileSpec::Private::parse(NL::json& node)
 {
     if (node.is_null())
         return { -1, "'filename' argument contains no data" };
     if (node.is_string())
-        m_path = node.get<std::string>();
+        setFilePath(node.get<std::string>());
     else if (node.is_object())
     {
         auto status = extractPath(node);
@@ -193,7 +209,7 @@ Utils::StatusWithReason FileSpec::Private::extractPath(NL::json& node)
     if (!val.is_null())
     {
         if (val.is_string())
-            m_path = val.get<std::string>();
+            setFilePath(val.get<std::string>());
         else
             return { -1, "'filename' object 'path' member must be specified as a string." };
         node.erase(it);
@@ -242,10 +258,10 @@ Utils::StatusWithReason FileSpecHelper::parse(FileSpec& spec, NL::json& node)
 std::ostream& operator << (std::ostream& out, const FileSpec& spec)
 {
     if (spec.onlyFilename())
-        return out << spec.filePath().string();
+        return out << spec.u8string();
 
     NL::json json;
-    json["path"] = spec.m_p->m_path.string();
+    json["path"] = spec.u8string();
     if (!spec.m_p->m_headers.empty())
         json["headers"] = spec.m_p->m_headers;
     if (!spec.m_p->m_query.empty())
