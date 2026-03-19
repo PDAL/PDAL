@@ -737,6 +737,8 @@ bool TIndexKernel::createLayer(std::string const& layername)
     m_layer = OGR_DS_CreateLayer(m_dataset, m_layerName.c_str(),
         srs.get(), wkbMultiPolygon, papszOptions);
 
+    CSLDestroy(papszOptions);
+
     if (m_layer)
         createFields();
 
