@@ -8,6 +8,7 @@ set(CDIR "${CMAKE_CURRENT_LIST_DIR}")
 include(${CDIR}/directories.cmake)
 
 include(GNUInstallDirs)
+include(FindPackageHandleStandardArgs)
 
 #
 # This must come before macros, but I don't understand why the policies
