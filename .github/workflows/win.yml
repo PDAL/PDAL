@@ -35,7 +35,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - uses: ilammy/msvc-dev-cmd@v1
-    - uses: mamba-org/setup-micromamba@v2
+    - uses: mamba-org/setup-micromamba@v3
       with:
         init-shell: bash
         environment-file: "scripts/ci/${{ matrix.type }}-environment.yml"
