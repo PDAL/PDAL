@@ -25,7 +25,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v6
-    - uses: mamba-org/setup-micromamba@v2
+    - uses: mamba-org/setup-micromamba@v3
       with:
         init-shell: bash
         environment-file: "scripts/ci/current-environment.yml"
@@ -98,7 +98,7 @@ jobs:
           tar xvf PDAL-${{ github.ref_name }}-src.tar.bz2
           cd PDAL-$GITHUB_REF_NAME-src
 
-     - uses: mamba-org/setup-micromamba@v2
+     - uses: mamba-org/setup-micromamba@v3
        name: Install mamba
        with:
          init-shell: bash
