@@ -7,7 +7,7 @@ if (EXISTS)
     return()
 endif()
 
-PDAL_ADD_FREE_LIBRARY(${PDAL_ARBITER_LIB_NAME} STATIC arbiter.cpp)
+PDAL_ADD_FREE_LIBRARY(${PDAL_ARBITER_LIB_NAME} STATIC ${PDAL_LIB_TYPE} arbiter.cpp)
 target_include_directories(${PDAL_ARBITER_LIB_NAME}
     PRIVATE
         ${NLOHMANN_INCLUDE_DIR}

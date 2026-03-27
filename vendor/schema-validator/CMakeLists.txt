@@ -3,7 +3,7 @@ if (EXISTS)
     return()
 endif()
 
-PDAL_ADD_FREE_LIBRARY(${JSON_SCHEMA_LIB_NAME} STATIC
+PDAL_ADD_FREE_LIBRARY(${JSON_SCHEMA_LIB_NAME} STATIC ${PDAL_LIB_TYPE}
     json-schema-draft7.json.cpp
     json-validator.cpp
     string-format-check.cpp
