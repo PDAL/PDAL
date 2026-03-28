@@ -116,6 +116,7 @@ private:
             return t;
         };
         Info info {pi.name, pi.link, pi.description, f};
+        std::cout<<"Plugin: " << pi.name<<std::endl;
         std::lock_guard<std::mutex> lock(m_pluginMutex);
         m_plugins.insert(std::make_pair(pi.name, info));
         return true;
@@ -124,6 +125,7 @@ private:
     bool l_registerPlugin(const StaticPluginInfo& pi)
     {
         l_registerPlugin<C>((const PluginInfo&)pi);
+        std::cout<<"Static: " << pi.name<<std::endl;
         m_extensions.set(pi.name, pi.extensions);
         return true;
     }

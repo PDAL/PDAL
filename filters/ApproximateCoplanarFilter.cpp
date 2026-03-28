@@ -56,6 +56,7 @@ static StaticPluginInfo const s_info
 };
 
 CREATE_STATIC_STAGE(ApproximateCoplanarFilter, s_info)
+ENSURE_STATIC_STAGE(ApproximateCoplanarFilter)
 
 std::string ApproximateCoplanarFilter::getName() const
 {

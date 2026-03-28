@@ -39,7 +39,6 @@
 # POSSIBILITY OF SUCH DAMAGE.                                            #
 ##########################################################################
 
-
 ###############################################################################
 # Add a library target.
 # _name The library name.
@@ -107,10 +106,11 @@ macro(PDAL_ADD_FREE_LIBRARY _name _library_type _pdal_lib_type)
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-    else()
-        set_target_properties(${_name} PROPERTIES
-            POSITION_INDEPENDENT_CODE TRUE)
     endif()
+
+    set_target_properties(${_name} PROPERTIES
+      POSITION_INDEPENDENT_CODE TRUE)
+
 endmacro(PDAL_ADD_FREE_LIBRARY)
 
 ###############################################################################
