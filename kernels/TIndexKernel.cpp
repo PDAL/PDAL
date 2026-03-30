@@ -185,6 +185,8 @@ void TIndexKernel::addSubSwitches(ProgramArgs& args,
             "location");
         args.add("ogrdriver,f", "OGR driver name to use ", m_driverName,
             "ESRI Shapefile");
+        args.add("lco", "Driver-specific NAME=VALUE OGR layer creation options",
+            m_lcOptions);
         args.add("t_srs", "Target SRS of tile index", m_tgtSrsString,
             "EPSG:4326");
         args.add("a_srs", "Assign SRS of tile with no SRS to this value",
@@ -728,8 +730,14 @@ bool TIndexKernel::createLayer(std::string const& layername)
         m_log->get(LogLevel::Error) << "Unable to import srs for layer "
            "creation" << std::endl;
 
+    char** papszOptions = NULL;
+    for (std::string& s : m_lcOptions)
+        papszOptions = CSLAddString(papszOptions, s.c_str());
+
     m_layer = OGR_DS_CreateLayer(m_dataset, m_layerName.c_str(),
-        srs.get(), wkbMultiPolygon, NULL);
+        srs.get(), wkbMultiPolygon, papszOptions);
+
+    CSLDestroy(papszOptions);
 
     if (m_layer)
         createFields();
