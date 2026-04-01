@@ -810,10 +810,6 @@ void TIndexKernel::createFields()
         OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
         OGR_Fld_Destroy(hFieldDefn);
 
-        hFieldDefn = OGR_Fld_Create("assets.data.title", OFTString);
-        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
-        OGR_Fld_Destroy(hFieldDefn);
-
         hFieldDefn = OGR_Fld_Create("stac_extensions", OFTStringList);
         OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
         OGR_Fld_Destroy(hFieldDefn);
@@ -857,7 +853,6 @@ TIndexKernel::FieldIndexes TIndexKernel::getFields()
         indexes.m_stacLinkStruct = OGR_FD_GetFieldIndex(fDefn, "links");
         indexes.m_stacId = OGR_FD_GetFieldIndex(fDefn, "id");
         indexes.m_stacExtensions = OGR_FD_GetFieldIndex(fDefn, "stac_extensions");
-        //indexes.m_stacAssetHref = OGR_FD_GetFieldIndex(fDefn, "assets.data.title");
     }
 
     return indexes;
