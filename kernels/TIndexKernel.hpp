@@ -80,7 +80,19 @@ class PDAL_EXPORT TIndexKernel : public SubcommandKernel
         int m_srs;
         int m_ctime;
         int m_mtime;
+        // could be moved. and better names
+        int m_stacExtensions;
+        int m_stacLinkStruct;
+        int m_stacId;
     };
+/*
+    //!! could make some macros for some of these, or define them
+    // outside of the class or something
+    struct StacExtras
+    {
+        StringList m_lco
+    };
+    */
 
 public:
     std::string getName() const;
@@ -110,6 +122,8 @@ private:
 
     bool isFileIndexed( const FieldIndexes& indexes, const FileInfo& fileInfo);
 
+    std::string makeStacLinks(const std::string& href);
+
     std::string m_idxFilename;
     std::string m_filespec;
     StringList m_files;
@@ -119,6 +133,7 @@ private:
     std::string m_tileIndexColumnName;
     std::string m_srsColumnName;
     std::string m_wkt;
+    std::string m_profile;
     StringList m_lcOptions;
     BOX2D m_bounds;
     bool m_absPath;
@@ -129,6 +144,8 @@ private:
     double m_edgeLength;
     uint32_t m_sampleSize;
     std::string m_boundaryExpr;
+    //!! move?
+    StringList m_stacExtensions;
 
     OGRDataSourceH m_dataset;
     OGRLayerH m_layer;
@@ -138,6 +155,7 @@ private:
     bool m_usestdin;
     bool m_overrideASrs;
     bool m_skipMultiSrs;
+    bool m_writeStacGeoparquet;
     std::string m_originalSrs;
     size_t m_maxFieldSize;
 };

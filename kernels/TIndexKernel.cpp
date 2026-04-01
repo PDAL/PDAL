@@ -45,6 +45,7 @@
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/gdal/SpatialRef.hpp>
 #include <filters/private/hexer/HexGrid.hpp>
+#include <nlohmann/json.hpp>
 
 #include "../io/LasWriter.hpp"
 
@@ -183,6 +184,8 @@ void TIndexKernel::addSubSwitches(ProgramArgs& args,
             m_layerName);
         args.add("tindex_name", "Tile index column name", m_tileIndexColumnName,
             "location");
+        args.add("stac-geoparquet", "Whether to write tile index as a STAC "
+            "GeoParquet file", m_writeStacGeoparquet);
         args.add("ogrdriver,f", "OGR driver name to use ", m_driverName,
             "ESRI Shapefile");
         args.add("lco", "Driver-specific NAME=VALUE OGR layer creation options",
@@ -259,6 +262,19 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
         if (m_prefix.size() && m_absPath)
             throw pdal_error("Can't specify both --write_absolute_path and "
                 "--path_prefix options.");
+        if (m_writeStacGeoparquet)
+        {
+            //!! add more stuff here if needed. See if we should throw for conflicts
+            //!! maybe a_srs, t_srs need to be 4326?
+            m_driverName = "Parquet";
+            m_tileIndexColumnName = "assets.data.href";
+            m_srsColumnName = "proj:wkt2";
+            m_stacExtensions = { "https://stac-extensions.github.io/projection/v2.0.0/" };
+            //!! Not sure if we should add to the list or overwrite. Some user values 
+            //could potentially make the file invalid (i think only SORT_BY_BBOX=YES).
+            //!! require gdal >=3.9, or don't do this via lco
+            m_lcOptions.push_back("WRITE_COVERING_BBOX=YES");
+        }
         if (args.set("a_srs"))
             m_overrideASrs = true;
         if (m_driverName == "ESRI Shapefile")
@@ -324,7 +340,7 @@ bool TIndexKernel::isFileIndexed(const FieldIndexes& indexes,
 {
     std::ostringstream qstring;
 
-    qstring << Utils::toupper(m_tileIndexColumnName) << "=" <<
+    qstring << "\"" <<  Utils::toupper(m_tileIndexColumnName) << "\"=" <<
         "'" << fileInfo.m_filename << "'";
     std::string query = qstring.str();
     OGRErr err = OGR_L_SetAttributeFilter(m_layer, query.c_str());
@@ -592,6 +608,19 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
 
     setStringField(hFeature, indexes.m_srs, wkt.data());
 
+    if (m_writeStacGeoparquet)
+    {
+        std::string linksJson = makeStacLinks(fileInfo.m_filename);
+        setStringField(hFeature, indexes.m_stacLinkStruct, linksJson.c_str());
+        setStringField(hFeature, indexes.m_stacId, 
+            FileUtils::getFilename(fileInfo.m_filename).c_str());
+
+        char** cslExtensions = NULL;
+        for (std::string& s : m_stacExtensions)
+            cslExtensions = CSLAddString(cslExtensions, s.c_str());
+        OGR_F_SetFieldStringList(hFeature, indexes.m_stacExtensions, cslExtensions);
+        CSLDestroy(cslExtensions);
+    }
     // Set the geometry in the feature
     Polygon g = prepareGeometry(fileInfo);
     OGR_F_SetGeometry(hFeature, g.getOGRHandle());
@@ -629,7 +658,6 @@ void TIndexKernel::setStringField(OGRFeatureH hFeature, int idx,
         throw pdal_error(oss.str());
     }
 }
-
 
 void TIndexKernel::fastBoundary(Stage& reader, FileInfo& fileInfo)
 {
@@ -769,6 +797,29 @@ void TIndexKernel::createFields()
     hFieldDefn = OGR_Fld_Create("created", OFTDateTime);
     OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
     OGR_Fld_Destroy(hFieldDefn);
+
+    if (m_writeStacGeoparquet)
+    {
+/*
+        hFieldDefn = OGR_Fld_Create("links", OFTString);
+        OGR_Fld_SetSubType(hFieldDefn, OFSTJSON);
+        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
+        OGR_Fld_Destroy(hFieldDefn);
+*/
+        hFieldDefn = OGR_Fld_Create("id", OFTString);
+        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
+        OGR_Fld_Destroy(hFieldDefn);
+
+        hFieldDefn = OGR_Fld_Create("assets.data.title", OFTString);
+        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
+        OGR_Fld_Destroy(hFieldDefn);
+
+        hFieldDefn = OGR_Fld_Create("stac_extensions", OFTStringList);
+        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
+        OGR_Fld_Destroy(hFieldDefn);
+
+        //!! think about the date format (modified/created v datetime)
+    }
 }
 
 
@@ -801,6 +852,14 @@ TIndexKernel::FieldIndexes TIndexKernel::getFields()
     indexes.m_ctime = OGR_FD_GetFieldIndex(fDefn, "created");
     indexes.m_mtime = OGR_FD_GetFieldIndex(fDefn, "modified");
 
+    if (m_writeStacGeoparquet)
+    {
+        indexes.m_stacLinkStruct = OGR_FD_GetFieldIndex(fDefn, "links");
+        indexes.m_stacId = OGR_FD_GetFieldIndex(fDefn, "id");
+        indexes.m_stacExtensions = OGR_FD_GetFieldIndex(fDefn, "stac_extensions");
+        //indexes.m_stacAssetHref = OGR_FD_GetFieldIndex(fDefn, "assets.data.title");
+    }
+
     return indexes;
 }
 
@@ -830,6 +889,14 @@ pdal::Polygon TIndexKernel::prepareGeometry(const FileInfo& fileInfo)
     return g;
 }
 
+std::string TIndexKernel::makeStacLinks(const std::string& href)
+{
+    // add more or just make this a string literal
+    NL::json linkArray;
+    linkArray.push_back(NL::json::object({{"href", href}, {"rel", "self"}}));
+
+    return linkArray.dump();
+}
 
 std::string TIndexKernel::makeMultiPolygon(const std::string& wkt)
 {
