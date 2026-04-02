@@ -51,6 +51,31 @@ private:
     std::string m_key;
 };
 
+class StacFields
+{
+    struct stacProjection
+    {
+        //static const std::map<std::string, int> stacProjection;
+    };
+    struct stacPointCloud
+    {
+        //static const std::string stacPointCloud;
+    };
+    struct stacBase
+    {
+
+        std::string linkRel;
+        std::string linkHref;
+        std::string assetHref;
+        std::string assetTitle;
+        std::time_t datetime;
+        StringList extensions;
+    };
+public:
+    static const std::map<std::string, int> stacProjection;
+    static const std::string stacPointCloud;
+};
+
 inline MetadataNode getChild(MetadataNode& m, std::string key)
 {
     StacKey sk(key);
@@ -147,27 +172,50 @@ inline void stacProjection(MetadataNode& root, MetadataNode& statsMeta,
     }
 }
 
+// Used by TIndex. Should make this more generic.
+inline void minimalStac(std::string filename, MetadataNode& readerMeta,
+    MetadataNode& stac)
+{
+    std::string stem = FileUtils::stem(filename);
+    std::string absPath = FileUtils::toAbsolutePath(filename);
+
+    MetadataNode id = stac.add("id", stem);
+    MetadataNode props = stac.add("properties");
+
+    // simply don't add a datetime if it doesn't exist
+    if (readerMeta.findChild("creation_doy") && readerMeta.findChild("creation_year"))
+    {
+        std::string doy = getChild(readerMeta, "creation_doy").value();
+        std::string year = getChild(readerMeta, "creation_year").value();
+        props.add("datetime", getDateStr(year, doy));
+    }
+
+    //links
+    MetadataNode self = stac.addList("links");
+    self.add("rel", "derived_from");
+    self.add("href", absPath);
+
+    //assets - add source file to data asset
+    MetadataNode assets = stac.add("assets");
+    MetadataNode data;
+    data.add("href", absPath);
+    data.add("title", "Pointcloud data");
+    assets.add(data.clone("data")); 
+}
+
 inline void addStacMetadata(MetadataNode& root, MetadataNode& statsMeta,
     MetadataNode& readerMeta, MetadataNode& infoMeta, std::string pcType)
 {
     try {
         MetadataNode stac;
         std::string filename = getChild(root, "filename").value();
-        std::string stem = FileUtils::stem(filename);
-        std::string absPath = FileUtils::toAbsolutePath(filename);
+        minimalStac(filename, readerMeta, stac);
 
-        //Base STAC object
-        MetadataNode id = stac.add("id", stem);
-        MetadataNode properties = stac.add("properties");
+        MetadataNode properties = getChild(stac, "properties");
 
         //TODO make sure these are available
         //For now, if there isn't date similar to laz/las/copc then use now.
-        try
-        {
-            std::string doy = getChild(readerMeta, "creation_doy").value();
-            std::string year = getChild(readerMeta, "creation_year").value();
-            properties.add("datetime", getDateStr(year, doy));
-        } catch (std::exception &)
+        if (properties.findChild("datetime").empty())
         {
             auto&& datetime = getChild(infoMeta, "now");
             properties.add("datetime", datetime);
@@ -175,18 +223,6 @@ inline void addStacMetadata(MetadataNode& root, MetadataNode& statsMeta,
 
         stac.add("type", "Feature");
         stac.add("stac_version", "1.0.0");
-
-        //links
-        MetadataNode self = stac.addList("links");
-        self.add("rel", "derived_from");
-        self.add("href", absPath);
-
-        //assets - add source file to data asset
-        MetadataNode assets = stac.add("assets");
-        MetadataNode data;
-        data.add("href", absPath);
-        data.add("title", "Pointcloud data");
-        assets.add(data.clone("data"));
 
         stac.add("stac_extensions", "https://stac-extensions.github.io/pointcloud/v1.0.0/schema.json");
         stacPointcloud(root, statsMeta, infoMeta, properties, pcType);

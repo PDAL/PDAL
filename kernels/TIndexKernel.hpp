@@ -34,6 +34,8 @@
 
 #pragma once
 
+#include "private/stac/StacInfo.hpp"
+
 #include <pdal/Filter.hpp>
 #include <pdal/Streamable.hpp>
 #include <pdal/Stage.hpp>
@@ -63,6 +65,40 @@ class StageFactory;
 
 class PDAL_EXPORT TIndexKernel : public SubcommandKernel
 {
+    const struct StacFields
+    {
+        static const std::map<std::string, int> stacProjection;
+        static const std::string stacPointCloud;
+    };
+    struct StacInfo
+    {
+        void init(std::string const& filename)
+        {
+            // stacProjection & stacPointCloud need these set in the root metadata 
+            // for it to work. Should refactor to be less metadata dependent
+            m_metadata.add("filename", filename);
+            m_metadata.add("properties");
+            m_extensions = { "https://stac-extensions.github.io/projection/v1.1.0/",
+                "https://stac-extensions.github.io/pointcloud/v1.0.0/" };
+        }
+
+        void addMetadata(MetadataNode& statsMeta, MetadataNode& readerMeta,
+            MetadataNode& infoMeta, std::string pcType)
+        {
+            stacPointcloud(m_metadata, statsMeta, infoMeta, m_metadata.findChild("properties"),
+                pcType);
+            stacProjection(m_metadata, statsMeta, readerMeta, m_metadata);
+        }
+
+        bool empty() const { return m_metadata.findChild("properties").empty(); }
+
+        operator MetadataNode&() { return m_metadata; }
+
+        // Pulled from StacInfo. Could be moved to individual variables
+        MetadataNode m_metadata;
+        StringList m_extensions;
+    }
+
     struct FileInfo
     {
         std::string m_filename;
@@ -72,6 +108,7 @@ class PDAL_EXPORT TIndexKernel : public SubcommandKernel
         struct tm m_ctime;
         struct tm m_mtime;
         bool m_isRemote = false;
+        StacInfo m_stacInfo;
     };
 
     struct FieldIndexes
@@ -119,6 +156,8 @@ private:
     void setStringField(OGRFeatureH hFeature, int idx, const char* value);
     void fastBoundary(Stage& reader, FileInfo& fileInfo);
     std::string makeMultiPolygon(const std::string& wkt);
+    void setStacInfo(FileInfo& fileInfo, const MetadataNode& readerMeta,
+        const MetadataNode& statsMeta, const MetadataNode& infoMeta);
 
     bool isFileIndexed( const FieldIndexes& indexes, const FileInfo& fileInfo);
 

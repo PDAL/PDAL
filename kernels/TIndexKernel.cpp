@@ -46,6 +46,7 @@
 #include <pdal/private/gdal/SpatialRef.hpp>
 #include <filters/private/hexer/HexGrid.hpp>
 #include <nlohmann/json.hpp>
+//#include "private/stac/StacInfo.hpp"
 
 #include "../io/LasWriter.hpp"
 
@@ -61,6 +62,15 @@ void setDate(OGRFeatureH feature, const tm& tyme, int fieldNumber)
         tyme.tm_min, tyme.tm_sec, 100);
 }
 
+static const struct StacFields
+    {
+        static const std::map<std::string, int> stacProjectionFields
+        {
+            { "stac:projection", OFTInteger },
+            { "stac:pointcloud", 1 }
+        };
+        static const std::string stacPointCloud;
+    };
 
 } // anonymous namespace
 
@@ -415,6 +425,8 @@ void TIndexKernel::createFile()
         info.m_isRemote = Utils::isRemote(f);
         if (!info.m_isRemote)
             FileUtils::fileTimes(info.m_filename, &info.m_ctime, &info.m_mtime);
+        if (m_writeStacGeoparquet)
+            info.m_stacInfo.init(info.m_filename);
         infos.push_back(info);
     }
 
@@ -679,11 +691,18 @@ void TIndexKernel::getFileInfo(FileInfo& fileInfo)
     manager.stageOptions() = m_manager.stageOptions();
 
     // Need to make sure options get set.
-    Stage& reader = manager.makeReader(fileInfo.m_filename, "");
+    Stage* reader = &(manager.makeReader(fileInfo.m_filename, ""));
+    Stage* info = nullptr;
+    Stage* stats = nullptr;
+    if (m_writeStacGeoparquet)
+    {
+        reader = info = &(manager.makeFilter("filters.info", *reader));
+        reader = stats = &(manager.makeFilter("filters.stats", *reader));
+    }
 
     // If we aren't able to make a hexbin filter, we
     // will just do a simple fast_boundary.
-    bool fast(m_fastBoundary);
+    bool fast(m_fastBoundary); 
     if (!fast)
     {
         TindexBoundary hexer{m_density, m_edgeLength, m_sampleSize};
@@ -693,7 +712,7 @@ void TIndexKernel::getFileInfo(FileInfo& fileInfo)
             opts.add("where", m_boundaryExpr);
             hexer.addOptions(opts);
         }
-        hexer.setInput(reader);
+        hexer.setInput(*reader);
         manager.addStage(&hexer);
         try
         {
@@ -712,7 +731,33 @@ void TIndexKernel::getFileInfo(FileInfo& fileInfo)
     }
 
     if (fast)
-        fastBoundary(reader, fileInfo);
+        fastBoundary(*reader, fileInfo);
+
+    // Dumping stuff from stacInfo
+    if (m_writeStacGeoparquet)
+    {
+        MetadataNode readerMeta = reader->getMetadata();
+        MetadataNode statsMeta = stats->getMetadata();
+        MetadataNode infoMeta = info->getMetadata();
+        fileInfo.m_stacInfo.addMetadata(statsMeta, readerMeta, infoMeta, "lidar");
+        //setStacInfo(fileInfo, readerMeta, statsMeta, infoMeta);
+    }
+}
+
+
+void TIndexKernel::setStacInfo(FileInfo& fileInfo, const MetadataNode& readerMeta,
+    const MetadataNode& statsMeta, const MetadataNode& infoMeta)
+{
+    MetadataNode root = 
+    std::cout << "readermeta: ";
+    for (auto& s : readerMeta.childNames())
+        std::cout << s << std::endl;
+    std::cout << "statsmeta: ";
+    for (auto& s : statsMeta.childNames())
+        std::cout << s << std::endl;
+    std::cout << "infometa: ";
+    for (auto& s : infoMeta.childNames())
+        std::cout << s << std::endl;
 }
 
 
@@ -814,6 +859,45 @@ void TIndexKernel::createFields()
         OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
         OGR_Fld_Destroy(hFieldDefn);
 
+        hFieldDefn = OGR_Fld_Create("stac_version", OFTString);
+        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
+        OGR_Fld_Destroy(hFieldDefn);
+
+        hFieldDefn = OGR_Fld_Create("proj:bbox", OFTString);
+        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
+        OGR_Fld_Destroy(hFieldDefn);
+
+        hFieldDefn = OGR_Fld_Create("proj:geometry", OFTString);
+        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
+        OGR_Fld_Destroy(hFieldDefn);
+
+        hFieldDefn = OGR_Fld_Create("proj:projjson", OFTString);
+        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
+        OGR_Fld_Destroy(hFieldDefn);
+
+        hFieldDefn = OGR_Fld_Create("proj:wkt2", OFTString);
+        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
+        OGR_Fld_Destroy(hFieldDefn);
+
+        hFieldDefn = OGR_Fld_Create("pc:statistics", OFTString);
+        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
+        OGR_Fld_Destroy(hFieldDefn);
+
+        hFieldDefn = OGR_Fld_Create("pc:schemas", OFTString);
+        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
+        OGR_Fld_Destroy(hFieldDefn);
+
+        hFieldDefn = OGR_Fld_Create("pc:count", OFTInteger);
+        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
+        OGR_Fld_Destroy(hFieldDefn);
+
+        hFieldDefn = OGR_Fld_Create("pc:encoding", OFTString);
+        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
+        OGR_Fld_Destroy(hFieldDefn);
+
+        hFieldDefn = OGR_Fld_Create("pc:type", OFTString);
+        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
+        OGR_Fld_Destroy(hFieldDefn);
         //!! think about the date format (modified/created v datetime)
     }
 }
@@ -888,7 +972,7 @@ std::string TIndexKernel::makeStacLinks(const std::string& href)
 {
     // add more or just make this a string literal
     NL::json linkArray;
-    linkArray.push_back(NL::json::object({{"href", href}, {"rel", "self"}}));
+    linkArray.push_back(NL::json::object({{"href", href}, {"rel", "derived_from"}}));
 
     return linkArray.dump();
 }
