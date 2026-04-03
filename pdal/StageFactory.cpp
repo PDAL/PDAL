@@ -98,6 +98,7 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
 
 StageFactory::StageFactory(bool /* legacy */)
 {
+  PluginManager<Stage>::loadAll();
 }
 
 

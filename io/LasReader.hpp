@@ -105,6 +105,7 @@ public:
     uint64_t vlrData(const std::string& userId, uint16_t recordId, char const * & data);
     point_count_t getNumPoints() const;
 
+    static void EnsureStaticStage();
 protected:
     virtual LasStreamPtr createStream();
 

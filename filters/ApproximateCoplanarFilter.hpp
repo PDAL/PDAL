@@ -55,6 +55,8 @@ public:
 
     std::string getName() const;
 
+    static void EnsureStaticStage();
+
 private:
     int m_knn;
     double m_thresh1;

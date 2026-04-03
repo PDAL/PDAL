@@ -66,6 +66,11 @@
         pdal::PluginManager<pdal::Kernel>::registerPlugin<T>(info);
 
 #define CREATE_STATIC_STAGE(T, info) \
-    static bool T ## _b =  \
+    static const bool T ## _b =  \
         pdal::PluginManager<pdal::Stage>::registerPlugin<T>(info);
 
+#define ENSURE_STATIC_STAGE(T)  \
+    void T::EnsureStaticStage() \
+    {                           \
+      (void)T ## _b;            \
+    }

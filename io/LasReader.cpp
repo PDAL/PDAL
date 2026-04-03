@@ -209,6 +209,7 @@ static StaticPluginInfo const s_info {
 };
 
 CREATE_STATIC_STAGE(LasReader, s_info)
+ENSURE_STATIC_STAGE(LasReader)
 
 std::string LasReader::getName() const { return s_info.name; }
 

@@ -37,6 +37,8 @@
 // http://www.drdobbs.com/cpp/building-your-own-plugin-framework-part/206503957
 // The original work was released under the Apache License v2.
 
+#include <filters/ApproximateCoplanarFilter.hpp>
+#include <io/LasReader.hpp>
 #include <pdal/PluginDirectory.hpp>
 #include <pdal/PluginManager.hpp>
 
@@ -116,6 +118,9 @@ void PluginManager<T>::l_loadAll()
 template<>
 void PluginManager<Stage>::l_loadAll()
 {
+    ApproximateCoplanarFilter::EnsureStaticStage();
+    LasReader::EnsureStaticStage();
+
     PluginDirectory& dir = PluginDirectory::get();
     for (auto& di: dir.m_drivers)
         l_loadDynamic(di.first);

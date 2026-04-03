@@ -260,7 +260,6 @@ target_link_libraries(${PDAL_LIB_NAME}
         ${PDAL_KAZHDAN_LIB_NAME}
         ${PDAL_LEPCC_LIB_NAME}
         ${PDAL_LAZPERF_LIB_NAME}
-        ${UTFCPP_LIB_NAME}
         ${BACKTRACE_LIBRARIES}
        "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:-lstdc++fs>"
     PUBLIC
@@ -416,6 +415,12 @@ add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 export(
     TARGETS
         ${PDAL_LIB_NAME}
+        ${JSON_SCHEMA_LIB_NAME}
+        ${PDAL_ARBITER_LIB_NAME}
+        ${PDAL_H3_LIB_NAME}
+        ${PDAL_KAZHDAN_LIB_NAME}
+        ${PDAL_LAZPERF_LIB_NAME}
+        ${PDAL_LEPCC_LIB_NAME}
     FILE
         "${PDAL_BINARY_DIR}/PDALTargets.cmake")
 

@@ -39,7 +39,6 @@
 # POSSIBILITY OF SUCH DAMAGE.                                            #
 ##########################################################################
 
-
 ###############################################################################
 # Add a library target.
 # _name The library name.
@@ -57,6 +56,8 @@ macro(PDAL_ADD_LIBRARY _name)
     pdal_lib_compile_settings(${_name})
     if (NOT ${_library_type} STREQUAL "STATIC")
         target_compile_definitions(${_name} PRIVATE PDAL_DLL_EXPORT)
+    else ()
+       set_target_properties(${_name} PROPERTIES POSITION_INDEPENDENT_CODE ON)
     endif()
 
     target_compile_features (${_name}
@@ -84,7 +85,7 @@ endmacro(PDAL_ADD_LIBRARY)
 # _library_type Shared or static
 # ARGN The source files for the library.
 #
-macro(PDAL_ADD_FREE_LIBRARY _name _library_type)
+macro(PDAL_ADD_FREE_LIBRARY _name _library_type _pdal_lib_type)
     add_library(${_name} ${_library_type} ${ARGN})
     set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
     target_include_directories(${_name} PRIVATE
@@ -97,17 +98,19 @@ macro(PDAL_ADD_FREE_LIBRARY _name _library_type)
     )
 
     # Don't install static libraries - they're already built into libpdalXXX
-    if (NOT ${_library_type} STREQUAL "STATIC")
+    # Unless pdal is built statically
+    if (NOT ${_library_type} STREQUAL "STATIC" OR ${_pdal_lib_type} STREQUAL "STATIC")
         target_compile_definitions(${_name} PRIVATE PDAL_DLL_EXPORT)
         install(TARGETS ${_name}
             EXPORT PDALTargets
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-    else()
-        set_target_properties(${_name} PROPERTIES
-            POSITION_INDEPENDENT_CODE TRUE)
     endif()
+
+    set_target_properties(${_name} PROPERTIES
+      POSITION_INDEPENDENT_CODE TRUE)
+
 endmacro(PDAL_ADD_FREE_LIBRARY)
 
 ###############################################################################
@@ -136,7 +139,7 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
         list(APPEND ${PDAL_ADD_PLUGIN_FILES} ${PDAL_TARGET_OBJECTS})
     endif()
 
-    add_library(${${_name}} SHARED ${PDAL_ADD_PLUGIN_FILES})
+    add_library(${${_name}} ${PDAL_LIB_TYPE} ${PDAL_ADD_PLUGIN_FILES})
     pdal_target_compile_settings(${${_name}})
     target_include_directories(${${_name}} PRIVATE
         ${PROJECT_BINARY_DIR}/include
