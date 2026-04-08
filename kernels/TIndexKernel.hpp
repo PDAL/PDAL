@@ -65,11 +65,6 @@ class StageFactory;
 
 class PDAL_EXPORT TIndexKernel : public SubcommandKernel
 {
-    const struct StacFields
-    {
-        static const std::map<std::string, int> stacProjection;
-        static const std::string stacPointCloud;
-    };
     struct StacInfo
     {
         void init(std::string const& filename)
@@ -85,8 +80,9 @@ class PDAL_EXPORT TIndexKernel : public SubcommandKernel
         void addMetadata(MetadataNode& statsMeta, MetadataNode& readerMeta,
             MetadataNode& infoMeta, std::string pcType)
         {
-            stacPointcloud(m_metadata, statsMeta, infoMeta, m_metadata.findChild("properties"),
-                pcType);
+            // props plus root is redundant anyway
+            MetadataNode props = m_metadata.findChild("properties");
+            stacPointcloud(m_metadata, statsMeta, infoMeta, props, pcType);
             stacProjection(m_metadata, statsMeta, readerMeta, m_metadata);
         }
 
@@ -97,7 +93,8 @@ class PDAL_EXPORT TIndexKernel : public SubcommandKernel
         // Pulled from StacInfo. Could be moved to individual variables
         MetadataNode m_metadata;
         StringList m_extensions;
-    }
+        std::string m_srs;
+    };
 
     struct FileInfo
     {
@@ -111,25 +108,31 @@ class PDAL_EXPORT TIndexKernel : public SubcommandKernel
         StacInfo m_stacInfo;
     };
 
+    struct StacIndexes
+    {
+        int extensions;
+        int links;
+        //int assets;
+        int id;
+        int projBbox;
+        int projGeom;
+        int projJson;
+        int pcStats;
+        int pcSchema;
+        int pcCount;
+        int pcEncoding;
+        int pcType;
+    };
+
     struct FieldIndexes
     {
         int m_filename;
         int m_srs;
         int m_ctime;
         int m_mtime;
-        // could be moved. and better names
-        int m_stacExtensions;
-        int m_stacLinkStruct;
-        int m_stacId;
+        // could be stored in the same struct
+        StacIndexes m_stac;
     };
-/*
-    //!! could make some macros for some of these, or define them
-    // outside of the class or something
-    struct StacExtras
-    {
-        StringList m_lco
-    };
-    */
 
 public:
     std::string getName() const;
@@ -151,17 +154,17 @@ private:
     FieldIndexes getFields();
     void getFileInfo(FileInfo& info);
     bool createFeature(const FieldIndexes& indexes, FileInfo& info);
-    pdal::Polygon prepareGeometry(const FileInfo& fileInfo);
+    pdal::Polygon prepareGeometry(const FileInfo& fileInfo, bool native = false);
     void createFields();
     void setStringField(OGRFeatureH hFeature, int idx, const char* value);
     void fastBoundary(Stage& reader, FileInfo& fileInfo);
     std::string makeMultiPolygon(const std::string& wkt);
     void setStacInfo(FileInfo& fileInfo, const MetadataNode& readerMeta,
         const MetadataNode& statsMeta, const MetadataNode& infoMeta);
+    void setStacFields(OGRFeatureH hFeature, const FieldIndexes& indexes,
+        const FileInfo& fileInfo);
 
     bool isFileIndexed( const FieldIndexes& indexes, const FileInfo& fileInfo);
-
-    std::string makeStacLinks(const std::string& href);
 
     std::string m_idxFilename;
     std::string m_filespec;
