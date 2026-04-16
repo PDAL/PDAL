@@ -36,6 +36,8 @@
 
 #include "private/stac/StacInfo.hpp"
 
+#define STAC_VERSION "1.1.0"
+
 #include <pdal/Filter.hpp>
 #include <pdal/Streamable.hpp>
 #include <pdal/Stage.hpp>
@@ -65,14 +67,20 @@ class StageFactory;
 
 class PDAL_EXPORT TIndexKernel : public SubcommandKernel
 {
-    struct StacInfo
+    class StacInfo
     {
+    public:
+        StacInfo() {}
+
         void init(std::string const& filename)
         {
             // stacProjection & stacPointCloud need these set in the root metadata 
             // for it to work. Should refactor to be less metadata dependent
-            m_metadata.add("filename", filename);
-            m_metadata.add("properties");
+            m_root.add("filename", filename);
+            MetadataNode self = m_root.addList("links");
+            self.add("rel", "derived_from");
+            self.add("href", filename);
+            m_properties = m_root.add("properties");
             m_extensions = { "https://stac-extensions.github.io/projection/v1.1.0/",
                 "https://stac-extensions.github.io/pointcloud/v1.0.0/" };
         }
@@ -80,20 +88,35 @@ class PDAL_EXPORT TIndexKernel : public SubcommandKernel
         void addMetadata(MetadataNode& statsMeta, MetadataNode& readerMeta,
             MetadataNode& infoMeta, std::string pcType)
         {
-            // props plus root is redundant anyway
-            MetadataNode props = m_metadata.findChild("properties");
-            stacPointcloud(m_metadata, statsMeta, infoMeta, props, pcType);
-            stacProjection(m_metadata, statsMeta, readerMeta, m_metadata);
+            stacPointcloud(m_root, statsMeta, infoMeta, m_properties, pcType);
         }
 
-        bool empty() const { return m_metadata.findChild("properties").empty(); }
+        MetadataNode propertiesChild(std::string key) 
+        {
+            return getChild(m_properties, key); 
+        }
 
-        operator MetadataNode&() { return m_metadata; }
+        MetadataNodeList propertiesChildren(std::string key) 
+        {
+            return m_properties.children(key); 
+        }
 
-        // Pulled from StacInfo. Could be moved to individual variables
-        MetadataNode m_metadata;
+        MetadataNode rootChild(std::string key) 
+        {
+            return getChild(m_root, key);
+        }
+
+        MetadataNodeList rootChildren(std::string key) 
+        {
+            return m_root.children(key);
+        }
+
+        StringList extensions() const { return m_extensions; }
+
+    private:
+        MetadataNode m_root;
+        MetadataNode m_properties;
         StringList m_extensions;
-        std::string m_srs;
     };
 
     struct FileInfo
@@ -111,8 +134,8 @@ class PDAL_EXPORT TIndexKernel : public SubcommandKernel
     struct StacIndexes
     {
         int extensions;
+        int version;
         int links;
-        //int assets;
         int id;
         int projBbox;
         int projGeom;
@@ -159,10 +182,9 @@ private:
     void setStringField(OGRFeatureH hFeature, int idx, const char* value);
     void fastBoundary(Stage& reader, FileInfo& fileInfo);
     std::string makeMultiPolygon(const std::string& wkt);
-    void setStacInfo(FileInfo& fileInfo, const MetadataNode& readerMeta,
-        const MetadataNode& statsMeta, const MetadataNode& infoMeta);
+    std::string writeStacListToJSON(const MetadataNodeList& list);
     void setStacFields(OGRFeatureH hFeature, const FieldIndexes& indexes,
-        const FileInfo& fileInfo);
+        FileInfo& fileInfo);
 
     bool isFileIndexed( const FieldIndexes& indexes, const FileInfo& fileInfo);
 
@@ -186,8 +208,7 @@ private:
     double m_edgeLength;
     uint32_t m_sampleSize;
     std::string m_boundaryExpr;
-    //!! move?
-    StringList m_stacExtensions;
+    std::string m_pcType;
 
     OGRDataSourceH m_dataset;
     OGRLayerH m_layer;

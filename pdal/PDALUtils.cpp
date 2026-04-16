@@ -167,6 +167,27 @@ std::string toJSON(const MetadataNode& m)
     return output;
 }
 
+std::string toJSON(const MetadataNodeList& mList)
+{
+    Utils::OStringStreamClassicLocale o;
+
+    o << "[" << std::endl;
+    for (auto mi = mList.begin(); mi != mList.end(); ++mi)
+    {
+        const MetadataNode& m = *mi;
+
+        //!! need to make sure subnodesToJSON works okay for all list cases
+        pdal::subnodesToJSON(m, o, 1);
+        if (mi != mList.rbegin().base() - 1)
+            o << "," << std::endl;
+    }
+    o << std::endl << "]";
+    std::string input(o.str());
+    std::string output;
+    utf8::replace_invalid(input.begin(), input.end(), std::back_inserter(output));
+    return output;
+}
+
 void toJSON(const MetadataNode& m, std::ostream& o)
 {
     if (m.name().empty())
@@ -516,6 +537,7 @@ double computeChamfer(PointViewPtr srcView, PointViewPtr candView)
     KD3Index &candIndex = candView->build3dIndex();
 
     double sum1(0.0);
+
     for (PointRef p : *srcView)
     {
         PointIdList indices(1);

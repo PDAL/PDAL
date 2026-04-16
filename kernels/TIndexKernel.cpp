@@ -186,6 +186,8 @@ void TIndexKernel::addSubSwitches(ProgramArgs& args,
             "location");
         args.add("stac-geoparquet", "Whether to write tile index as a STAC "
             "GeoParquet file", m_writeStacGeoparquet);
+        args.add("pc_type", "Pointcloud type for STAC generation (lidar, "
+            "eopc, radar, sonar, other).", m_pcType, "lidar");
         args.add("ogrdriver,f", "OGR driver name to use ", m_driverName,
             "ESRI Shapefile");
         args.add("lco", "Driver-specific NAME=VALUE OGR layer creation options",
@@ -269,11 +271,8 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
             m_driverName = "Parquet";
             m_tileIndexColumnName = "assets.data.href";
             m_srsColumnName = "proj:wkt2";
-            m_stacExtensions = { "https://stac-extensions.github.io/projection/v2.0.0/",
-                "https://stac-extensions.github.io/pointcloud/v2.0.0/" };
             //!! Not sure if we should add to the list or overwrite. Some user values 
             //could potentially make the file invalid (i think only SORT_BY_BBOX=YES).
-            //!! require gdal >=3.9, or don't do this via lco
             m_lcOptions.push_back("WRITE_COVERING_BBOX=YES");
         }
         if (args.set("a_srs"))
@@ -632,55 +631,51 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
 }
 
 void TIndexKernel::setStacFields(OGRFeatureH hFeature, const FieldIndexes& indexes,
-    const FileInfo& fileInfo) 
+    FileInfo& fileInfo) 
 {
-    std::string linksJson = fileInfo.m_stacInfo.m_metadata.findChild("links").value();
-    OGR_F_SetFieldString(hFeature, indexes.m_stac.links, linksJson.c_str());
+    // removing newlines to get rid of dead space in the parquet file. Not strictly necessary
+    auto stripNewline = [](std::string& s) {
+        s.erase(std::remove_if(s.begin(), s.end(), 
+            [](char c) { return c == '\n' || c == '\r'; }), s.end());
+        return s;
+    };
+
+    std::string linksJson = Utils::toJSON(fileInfo.m_stacInfo.rootChildren("links"));
+    OGR_F_SetFieldString(hFeature, indexes.m_stac.links, stripNewline(linksJson).c_str());
 
     OGR_F_SetFieldString(hFeature, indexes.m_stac.id, 
         FileUtils::getFilename(fileInfo.m_filename).c_str());
 
+    OGR_F_SetFieldString(hFeature, indexes.m_stac.version, (const char*)STAC_VERSION);
+
     char** cslExtensions = NULL;
-    for (auto& s : fileInfo.m_stacInfo.m_extensions)
+    for (auto& s : fileInfo.m_stacInfo.extensions())
         cslExtensions = CSLAddString(cslExtensions, s.c_str());
     OGR_F_SetFieldStringList(hFeature, indexes.m_stac.extensions, cslExtensions);
     CSLDestroy(cslExtensions);
 
-    //!! Not added: proj:bbox - can't be extracted as a list from metadata (and
-    // other issues with it being a list of int vs list of double depending on srs)
+    // Not added: proj:bbox, proj:geometry
 
-    Polygon projGeom = prepareGeometry(fileInfo, true);
-    OGR_F_SetGeomField(hFeature, indexes.m_stac.projGeom, projGeom.getOGRHandle());
+    std::string projJson = SpatialReference(fileInfo.m_srs).getPROJJSON();
+    OGR_F_SetFieldString(hFeature, indexes.m_stac.projJson, projJson.c_str());
 
-    std::string json = SpatialReference(fileInfo.m_srs).getPROJJSON();
-    OGR_F_SetFieldString(hFeature, indexes.m_stac.projJson, json.c_str());
-/*
-    int pointCount = 
-        fileInfo.m_stacInfo.m_metadata.findChild("properties").findChild("pc:count").value<int>();
+    int pointCount = fileInfo.m_stacInfo.propertiesChild("pc:count").value<int>();
     OGR_F_SetFieldInteger(hFeature, indexes.m_stac.pcCount, pointCount);
-*/
-    for (auto& s : fileInfo.m_stacInfo.m_metadata.findChild("properties").childNames())
-        std::cout <<"child name: "<< s << std::endl;
-    std::cout << "pointcount type: " << fileInfo.m_stacInfo.m_metadata.findChild("properties").findChild("pc:count").type() << std::endl;
-    std::cout << "count empty? " << fileInfo.m_stacInfo.m_metadata.findChild("properties").findChild("pc:count").empty() << std::endl;
-    std::cout << "pointcount value: " << fileInfo.m_stacInfo.m_metadata.findChild("properties").findChild("pc:count").value() << std::endl;
-    std::string encoding = 
-        fileInfo.m_stacInfo.m_metadata.findChild("properties").findChild("pc:encoding").value();
+
+    std::string encoding = fileInfo.m_stacInfo.propertiesChild("pc:encoding").value();
     OGR_F_SetFieldString(hFeature, indexes.m_stac.pcEncoding, encoding.c_str());
 
-    //!! this one definitely needs to be made a tindex variable
-    std::string type = 
-        fileInfo.m_stacInfo.m_metadata.findChild("properties").findChild("pc:type").value();
-    OGR_F_SetFieldString(hFeature, indexes.m_stac.pcType, type.c_str());
+    OGR_F_SetFieldString(hFeature, indexes.m_stac.pcType, m_pcType.c_str());
 
     // Not sure if schema and statistics need to be native parquet lists or if json is ok
-    std::string schema =
-        fileInfo.m_stacInfo.m_metadata.findChild("properties").findChild("pc:schema").value();
-    OGR_F_SetFieldString(hFeature, indexes.m_stac.pcSchema, schema.c_str());
+    std::string schema = Utils::toJSON(fileInfo.m_stacInfo.propertiesChildren("pc:schemas"));
+    schema.erase(std::remove_if(schema.begin(), schema.end(), [](unsigned char c) {
+        return c == '\n' || c == '\r'; }), schema.end());
+    OGR_F_SetFieldString(hFeature, indexes.m_stac.pcSchema, stripNewline(schema).c_str());
 
-    std::string statistics =
-        fileInfo.m_stacInfo.m_metadata.findChild("properties").findChild("pc:statistics").value();
-    OGR_F_SetFieldString(hFeature, indexes.m_stac.pcStats, statistics.c_str());
+    std::string statistics = 
+        Utils::toJSON(fileInfo.m_stacInfo.propertiesChildren("pc:statistics"));
+    OGR_F_SetFieldString(hFeature, indexes.m_stac.pcStats, stripNewline(statistics).c_str());
 }
 
 void TIndexKernel::setStringField(OGRFeatureH hFeature, int idx,
@@ -774,17 +769,8 @@ void TIndexKernel::getFileInfo(FileInfo& fileInfo)
         MetadataNode readerMeta = reader->getMetadata();
         MetadataNode statsMeta = stats->getMetadata();
         MetadataNode infoMeta = info->getMetadata();
-        //!! will make pctype a tindex option or something
-        fileInfo.m_stacInfo.addMetadata(statsMeta, readerMeta, infoMeta, "lidar");
-        //setStacInfo(fileInfo, readerMeta, statsMeta, infoMeta);
+        fileInfo.m_stacInfo.addMetadata(statsMeta, readerMeta, infoMeta, m_pcType);
     }
-}
-
-
-void TIndexKernel::setStacInfo(FileInfo& fileInfo, const MetadataNode& readerMeta,
-    const MetadataNode& statsMeta, const MetadataNode& infoMeta)
-{
-
 }
 
 
@@ -862,10 +848,10 @@ void TIndexKernel::createFields()
     OGR_L_CreateField(m_layer, hFieldDefn, TRUE );
     OGR_Fld_Destroy(hFieldDefn);
 
-    // Better to do the proj stuff here so it stays together
+    // Doing the proj 5 here so it stays together
     if (m_writeStacGeoparquet)
     {
-        hFieldDefn = OGR_Fld_Create("proj:bbox", OFTString);
+        hFieldDefn = OGR_Fld_Create("proj:bbox", OFTRealList);
         OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
         OGR_Fld_Destroy(hFieldDefn);
 
@@ -873,14 +859,8 @@ void TIndexKernel::createFields()
         OGR_Fld_SetSubType(hFieldDefn, OFSTJSON);
         OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
         OGR_Fld_Destroy(hFieldDefn);
-/*
-        OGRGeomFieldDefnH geomFieldDefn = OGR_GFld_Create(
-            "proj:geometry", wkbPolygon);
-        OGR_L_CreateGeomField(m_layer, geomFieldDefn, TRUE);
-        OGR_Fld_Destroy(geomFieldDefn);
-*/
+
         // proj wkt2 is our defalult srs column
-        //!! add more proj fields?
     }
 
     hFieldDefn = OGR_Fld_Create("modified", OFTDateTime);
@@ -912,10 +892,12 @@ void TIndexKernel::createFields()
         OGR_Fld_Destroy(hFieldDefn);
 
         hFieldDefn = OGR_Fld_Create("pc:statistics", OFTString);
+        OGR_Fld_SetSubType(hFieldDefn, OFSTJSON);
         OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
         OGR_Fld_Destroy(hFieldDefn);
 
         hFieldDefn = OGR_Fld_Create("pc:schemas", OFTString);
+        OGR_Fld_SetSubType(hFieldDefn, OFSTJSON);
         OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
         OGR_Fld_Destroy(hFieldDefn);
 
@@ -968,6 +950,15 @@ TIndexKernel::FieldIndexes TIndexKernel::getFields()
         indexes.m_stac.links = OGR_FD_GetFieldIndex(fDefn, "links");
         indexes.m_stac.id = OGR_FD_GetFieldIndex(fDefn, "id");
         indexes.m_stac.extensions = OGR_FD_GetFieldIndex(fDefn, "stac_extensions");
+        indexes.m_stac.version = OGR_FD_GetFieldIndex(fDefn, "stac_version");
+
+        indexes.m_stac.projJson = OGR_FD_GetFieldIndex(fDefn, "proj:projjson");
+
+        indexes.m_stac.pcCount = OGR_FD_GetFieldIndex(fDefn, "pc:count");
+        indexes.m_stac.pcEncoding = OGR_FD_GetFieldIndex(fDefn, "pc:encoding");
+        indexes.m_stac.pcSchema = OGR_FD_GetFieldIndex(fDefn, "pc:schemas");
+        indexes.m_stac.pcStats = OGR_FD_GetFieldIndex(fDefn, "pc:statistics");
+        indexes.m_stac.pcType = OGR_FD_GetFieldIndex(fDefn, "pc:type");
     }
 
     return indexes;
