@@ -3016,6 +3016,7 @@ private:
     bool m_followRedirect = true;
     bool m_verifyPeer = true;
     std::unique_ptr<std::string> m_caPath;
+    std::unique_ptr<std::string> m_caBundle;
     std::unique_ptr<std::string> m_caInfo;
     std::unique_ptr<std::string> m_proxy;
 
