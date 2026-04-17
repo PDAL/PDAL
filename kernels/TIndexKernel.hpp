@@ -137,8 +137,6 @@ class PDAL_EXPORT TIndexKernel : public SubcommandKernel
         int version;
         int links;
         int id;
-        int projBbox;
-        int projGeom;
         int projJson;
         int pcStats;
         int pcSchema;

@@ -851,9 +851,6 @@ void TIndexKernel::createFields()
     // Doing the proj 5 here so it stays together
     if (m_writeStacGeoparquet)
     {
-        hFieldDefn = OGR_Fld_Create("proj:bbox", OFTRealList);
-        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
-        OGR_Fld_Destroy(hFieldDefn);
 
         hFieldDefn = OGR_Fld_Create("proj:projjson", OFTString);
         OGR_Fld_SetSubType(hFieldDefn, OFSTJSON);
