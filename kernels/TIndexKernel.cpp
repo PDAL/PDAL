@@ -267,10 +267,11 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
         if (m_writeStacGeoparquet)
         {
             //!! add more stuff here if needed. See if we should throw for conflicts
-            //!! maybe a_srs, t_srs need to be 4326?
             m_driverName = "Parquet";
             m_tileIndexColumnName = "assets.data.href";
             m_srsColumnName = "proj:wkt2";
+            m_assignSrsString = "EPSG:4326";
+            m_tgtSrsString = "EPSG:4326";
             //!! Not sure if we should add to the list or overwrite. Some user values 
             //could potentially make the file invalid (i think only SORT_BY_BBOX=YES).
             m_lcOptions.push_back("WRITE_COVERING_BBOX=YES");
