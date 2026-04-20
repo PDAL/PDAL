@@ -25,7 +25,7 @@ Contributors:  Thomas Maurer
 #define INTENSITY_H
 
 #include <vector>
-#include "lepcc_types.h"
+#include "include/lepcc_types.h"
 
 namespace lepcc
 {

@@ -79,38 +79,6 @@ macro(PDAL_ADD_LIBRARY _name)
 endmacro(PDAL_ADD_LIBRARY)
 
 ###############################################################################
-# Add a free library target (one that doesn't depend on PDAL).
-# _name The library name.
-# _library_type Shared or static
-# ARGN The source files for the library.
-#
-macro(PDAL_ADD_FREE_LIBRARY _name _library_type)
-    add_library(${_name} ${_library_type} ${ARGN})
-    set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
-    target_include_directories(${_name} PRIVATE
-        ${PDAL_INCLUDE_DIR})
-    pdal_lib_compile_settings(${_name})
-    set_property (TARGET ${_name}
-      PROPERTY
-        # Enable C++17 standard compliance
-        CXX_STANDARD 17
-    )
-
-    # Don't install static libraries - they're already built into libpdalXXX
-    if (NOT ${_library_type} STREQUAL "STATIC")
-        target_compile_definitions(${_name} PRIVATE PDAL_DLL_EXPORT)
-        install(TARGETS ${_name}
-            EXPORT PDALTargets
-            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-    else()
-        set_target_properties(${_name} PROPERTIES
-            POSITION_INDEPENDENT_CODE TRUE)
-    endif()
-endmacro(PDAL_ADD_FREE_LIBRARY)
-
-###############################################################################
 # Add a plugin target.
 # _name The plugin name.
 # ARGN :

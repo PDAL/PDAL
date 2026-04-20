@@ -1,4 +1,3 @@
-#
 # top-level CMake configuration file for PDAL
 #
 # (based originally on the libLAS files copyright Mateusz Loskot)
@@ -40,8 +39,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 #
 set(PDAL_LIB_NAME pdalcpp)
 
-set(PDAL_KAZHDAN_LIB_NAME pdal_kazhdan)
-set(PDAL_LEPCC_LIB_NAME pdal_lepcc)
 set(PDAL_TEST_SUPPORT_OBJS pdal_test_support)
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
@@ -111,7 +108,6 @@ include(${PDAL_CMAKE_DIR}/ctest.cmake)
 include(${PDAL_CMAKE_DIR}/libxml2.cmake)
 include(${PDAL_CMAKE_DIR}/dimension.cmake)
 include(${PDAL_CMAKE_DIR}/arbiter.cmake)
-include(${PDAL_CMAKE_DIR}/h3.cmake)
 include(${PDAL_CMAKE_DIR}/nlohmann.cmake)
 include(${PDAL_CMAKE_DIR}/schema-validator.cmake)
 include(${PDAL_CMAKE_DIR}/lazperf.cmake)
@@ -155,10 +151,6 @@ add_subdirectory(plugins)
 if (BUILD_DOCS)
     add_subdirectory(doc)
 endif()
-if (WITH_TESTS)
-    include (${PDAL_CMAKE_DIR}/gtest.cmake)
-    add_subdirectory(test)
-endif()
 add_subdirectory(dimbuilder)
 add_subdirectory(vendor/arbiter)
 add_subdirectory(vendor/schema-validator)
@@ -167,8 +159,12 @@ add_subdirectory(vendor/lazperf)
 add_subdirectory(vendor/utfcpp)
 add_subdirectory(vendor/lepcc)
 add_subdirectory(vendor/h3)
-add_subdirectory(tools)
 add_subdirectory(apps)
+
+if (WITH_TESTS)
+    include (${PDAL_CMAKE_DIR}/gtest.cmake)
+    add_subdirectory(test)
+endif()
 
 file(GLOB BASE_SRCS
     ${PDAL_FILTERS_DIR}/*.cpp
@@ -183,7 +179,13 @@ file(GLOB_RECURSE PRIVATE_SRCS
     ${PDAL_KERNELS_DIR}/private/*.cpp
     ${PDAL_SRC_DIR}/private/*.cpp
     ${BACKTRACE_SOURCE})
-list(APPEND SRCS ${BASE_SRCS} ${PRIVATE_SRCS})
+list(APPEND SRCS ${BASE_SRCS} ${PRIVATE_SRCS}
+    ${ARBITER_SRCS}
+    ${H3_SRCS}
+    ${KAZHDAN_SRCS}
+    ${LAZPERF_SRCS}
+    ${LEPCC_SRCS}
+    ${JSON_SCHEMA_SRCS})
 
 #
 # Remove stuff we don't want to build.
@@ -228,8 +230,6 @@ add_library(PDAL::PDAL ALIAS ${PDAL_LIB_NAME})
 # without specification.
 #
 
-
-
 target_include_directories(${PDAL_LIB_NAME}
     SYSTEM BEFORE PRIVATE
         ${PDAL_VENDOR_EIGEN_DIR}
@@ -250,16 +250,11 @@ target_link_libraries(${PDAL_LIB_NAME}
     PRIVATE
         ${CMAKE_THREAD_LIBS_INIT}
         ${CMAKE_DL_LIBS}
+        CURL::libcurl
         GDAL::GDAL
         PROJ::proj
         ${GEOTIFF_LIBRARY}
         ${PDAL_REEXPORT}
-        ${PDAL_ARBITER_LIB_NAME}
-        ${PDAL_H3_LIB_NAME}
-        ${JSON_SCHEMA_LIB_NAME}
-        ${PDAL_KAZHDAN_LIB_NAME}
-        ${PDAL_LEPCC_LIB_NAME}
-        ${PDAL_LAZPERF_LIB_NAME}
         ${UTFCPP_LIB_NAME}
         ${BACKTRACE_LIBRARIES}
        "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:-lstdc++fs>"

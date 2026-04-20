@@ -3762,7 +3762,7 @@ public:
      * @param path Path with the type-specifying prefix information stripped.
      */
     virtual std::vector<char> put(
-        std::string path, 
+        std::string path,
         const std::vector<char>& data) const = 0;
 
     /** True for remote paths, otherwise false.  If `true`, a fs::LocalHandle
@@ -4327,9 +4327,8 @@ public:
         , m_token(token)
     { }
 
-    Auth(std::string credUrl, ReauthMethod reauthMethod)
+    Auth(std::string credUrl, ReauthMethod)
         : m_credUrl(internal::makeUnique<std::string>(credUrl))
-        , m_reauthMethod(reauthMethod)
     { }
 
     static std::unique_ptr<Auth> create(std::string profile, std::string s);
@@ -4342,7 +4341,6 @@ private:
     mutable std::string m_token;
 
     std::unique_ptr<std::string> m_credUrl;
-    ReauthMethod m_reauthMethod;
     mutable std::unique_ptr<Time> m_expiration;
     mutable std::mutex m_mutex;
 };
@@ -5278,7 +5276,7 @@ public:
 
     /** Write data to path. */
     std::vector<char> put(
-            std::string path, 
+            std::string path,
             const std::vector<char>& data) const;
 
     /** Get data with additional HTTP-specific parameters.  Throws if
