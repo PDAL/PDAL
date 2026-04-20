@@ -45,8 +45,6 @@
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/gdal/SpatialRef.hpp>
 #include <filters/private/hexer/HexGrid.hpp>
-#include <nlohmann/json.hpp>
-//#include "private/stac/StacInfo.hpp"
 
 #include "../io/LasWriter.hpp"
 
@@ -670,8 +668,6 @@ void TIndexKernel::setStacFields(OGRFeatureH hFeature, const FieldIndexes& index
 
     // Not sure if schema and statistics need to be native parquet lists or if json is ok
     std::string schema = Utils::toJSON(fileInfo.m_stacInfo.propertiesChildren("pc:schemas"));
-    schema.erase(std::remove_if(schema.begin(), schema.end(), [](unsigned char c) {
-        return c == '\n' || c == '\r'; }), schema.end());
     OGR_F_SetFieldString(hFeature, indexes.m_stac.pcSchema, stripNewline(schema).c_str());
 
     std::string statistics = 
