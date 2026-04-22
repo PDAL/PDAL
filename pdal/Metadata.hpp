@@ -69,10 +69,11 @@ class PDAL_EXPORT MetadataNodeImpl
     friend class MetadataNode;
 
 private:
-    MetadataNodeImpl(const std::string& name) : m_kind(MetadataType::Instance)
-        { m_name = name; }
+    MetadataNodeImpl(const std::string& name, MetadataType kind = MetadataType::Instance) :
+        m_kind(kind)
+    { m_name = name; }
 
-    MetadataNodeImpl() : m_kind(MetadataType::Instance)
+    MetadataNodeImpl(MetadataType kind = MetadataType::Instance) : m_kind(kind)
     {}
 
     void makeArray(MetadataImplList& l)
@@ -416,10 +417,11 @@ class PDAL_EXPORT MetadataNode
         bool operator != (const MetadataNode& m1, const MetadataNode& m2);
 
 public:
-    MetadataNode() : m_impl(new MetadataNodeImpl())
+    MetadataNode(MetadataType kind = MetadataType::Instance) : m_impl(new MetadataNodeImpl(kind))
         {}
 
-    MetadataNode(const std::string& name) : m_impl(new MetadataNodeImpl(name))
+    MetadataNode(const std::string& name, MetadataType kind = MetadataType::Instance) :
+        m_impl(new MetadataNodeImpl(name, kind))
         {}
 
     MetadataNode add(const std::string& name)
