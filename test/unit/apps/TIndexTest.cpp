@@ -305,3 +305,21 @@ TEST(TIndex, test7)
 #endif
 }
 
+// Making sure OGR layer creation options work
+TEST(TIndex, test8)
+{
+    std::string inSpec(Support::datapath("tindex/*.txt"));
+
+    std::string cmd = Support::binpath("pdal") + " tindex create " +
+        "--tindex=\"/vsistdout/\" -f GeoJSON --threshold=1 " +
+        "--resolution=1.0 --lco=\"DESCRIPTION=foo\" " +
+        "--filespec=\"" + inSpec + "\"";
+    std::string output;
+    Utils::run_shell_command(cmd, output);
+
+    NL::basic_json<> a = nlohmann::json::parse(output);
+    auto it = a.find("description");
+    std::string desc = it->get<std::string>();
+
+    EXPECT_EQ(desc, "foo");
+}
