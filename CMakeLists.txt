@@ -308,6 +308,7 @@ target_include_directories(${PDAL_LIB_NAME}
 
 target_compile_definitions(${PDAL_LIB_NAME}
     PRIVATE
+    ARBITER_CURL
     H3_PREFIX=PDALH3)
 
 if (PDAL_HAVE_ZLIB)

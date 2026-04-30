@@ -4327,8 +4327,9 @@ public:
         , m_token(token)
     { }
 
-    Auth(std::string credUrl, ReauthMethod)
+    Auth(std::string credUrl, ReauthMethod reauthMethod)
         : m_credUrl(internal::makeUnique<std::string>(credUrl))
+        , m_reauthMethod(reauthMethod)
     { }
 
     static std::unique_ptr<Auth> create(std::string profile, std::string s);
@@ -4341,6 +4342,7 @@ private:
     mutable std::string m_token;
 
     std::unique_ptr<std::string> m_credUrl;
+    ReauthMethod m_reauthMethod;
     mutable std::unique_ptr<Time> m_expiration;
     mutable std::mutex m_mutex;
 };
