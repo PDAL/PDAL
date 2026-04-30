@@ -262,9 +262,9 @@ target_link_libraries(${PDAL_LIB_NAME}
        "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:-lstdc++fs>"
     PUBLIC
         ${WINSOCK_LIBRARY}
+        ${SHLWAPI_LIBRARY}
     INTERFACE
         ${PDAL_LIBDIR}
-        ${WINSOCK_LIBRARY}
 )
 
 if (ZSTD_FOUND)
