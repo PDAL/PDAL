@@ -159,6 +159,7 @@ add_subdirectory(vendor/lazperf)
 add_subdirectory(vendor/utfcpp)
 add_subdirectory(vendor/lepcc)
 add_subdirectory(vendor/h3)
+add_subdirectory(tools)
 add_subdirectory(apps)
 
 if (WITH_TESTS)
@@ -257,6 +258,7 @@ target_link_libraries(${PDAL_LIB_NAME}
         ${PDAL_REEXPORT}
         ${UTFCPP_LIB_NAME}
         ${BACKTRACE_LIBRARIES}
+        ${OPENSSL_LIBRARIES}
        "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:-lstdc++fs>"
     PUBLIC
         ${WINSOCK_LIBRARY}
@@ -289,6 +291,11 @@ if (LibXml2_FOUND)
         LibXml2::LibXml2)
 endif()
 
+if (OPENSSL_FOUND)
+    target_link_libraries(${PDAL_LIB_NAME}
+        PRIVATE
+        ${OPENSSL_LIBRARIES})
+endif()
 
 
 #
@@ -302,6 +309,12 @@ target_include_directories(${PDAL_LIB_NAME}
 target_compile_definitions(${PDAL_LIB_NAME}
     PRIVATE
     H3_PREFIX=PDALH3)
+
+if (PDAL_HAVE_ZLIB)
+    target_compile_definitions(${PDAL_LIB_NAME}
+    PRIVATE
+    ARBITER_ZLIB)
+endif()
 
 if(WIN32)
     target_compile_definitions(${PDAL_LIB_NAME}
