@@ -180,7 +180,6 @@ private:
     void setStringField(OGRFeatureH hFeature, int idx, const char* value);
     void fastBoundary(Stage& reader, FileInfo& fileInfo);
     std::string makeMultiPolygon(const std::string& wkt);
-    std::string writeStacListToJSON(const MetadataNodeList& list);
     void setStacFields(OGRFeatureH hFeature, const FieldIndexes& indexes,
         FileInfo& fileInfo);
 
@@ -195,7 +194,6 @@ private:
     std::string m_tileIndexColumnName;
     std::string m_srsColumnName;
     std::string m_wkt;
-    std::string m_profile;
     StringList m_lcOptions;
     BOX2D m_bounds;
     bool m_absPath;
