@@ -18,7 +18,6 @@
 #include <gdal_fwd.h>
 #else
 using OGRDataSourceH = void *;
-using OGRFeatureDefnH = void *;
 using OGRLayerH = void *;
 using OGRFeatureH = void *;
 #endif
@@ -37,7 +36,7 @@ class StageFactory;
 namespace tindex
 {
 
-class FieldInfo;
+struct FieldInfo;
 using FieldMap = std::map<std::string, FieldInfo>;
 
 // messy - only includes some args because we need to have defaults for stac
@@ -67,22 +66,6 @@ struct Args
 
     // stac-specific
     //std::string pcType;
-};
-
-struct FileInfo
-{
-    std::string m_filename;
-    std::string m_srs;
-    std::string m_boundary;
-    struct tm m_ctime;
-    struct tm m_mtime;
-    double m_gridHeight;
-    bool m_isRemote = false;
-};
-
-struct StacFileInfo : FileInfo
-{
-    StacInfo m_stacInfo;
 };
 
 class StacInfo
@@ -137,6 +120,22 @@ private:
     StringList m_extensions;
 };
 
+struct FileInfo
+{
+    std::string m_filename;
+    std::string m_srs;
+    std::string m_boundary;
+    struct tm m_ctime;
+    struct tm m_mtime;
+    double m_gridHeight;
+    bool m_isRemote = false;
+};
+
+struct StacFileInfo : FileInfo
+{
+    StacInfo m_stacInfo;
+};
+
 class TIndexBuilder
 {
 public:
@@ -151,6 +150,14 @@ protected:
         const std::string& tgtSrs, const std::string& assignSrs);
     ~TIndexBuilder();
 
+    bool runBoundary(Stage& stage, FileInfo& fileInfo,
+        PipelineManager& manager);
+
+    std::vector<std::unique_ptr<FileInfo>> m_infos;
+    FieldMap m_fields;
+    Options m_commonOptions;
+    OptionsMap m_stageOptions;
+
 private:
     virtual void processFile(const std::string& filename) = 0;
     virtual std::unique_ptr<FileInfo> makeFileInfo(const std::string& filename) = 0;
@@ -161,7 +168,9 @@ private:
     bool fastBoundary(Stage& reader, FileInfo& fileInfo);
     bool createFeature(const std::unique_ptr<FileInfo>& fileInfo);
     bool isFileIndexed(const std::unique_ptr<FileInfo>& fileInfo);
+    void setStringField(OGRFeatureH hFeature, int idx, const char* value);
     pdal::Polygon prepareGeometry(const std::unique_ptr<FileInfo>& fileInfo);
+    std::string makeMultiPolygon(const std::string& wkt);
     bool openDataset();
     bool createDataset();
     bool openLayer();
@@ -169,16 +178,15 @@ private:
     void createFields();
 
     const Args& m_args;
-    std::string m_layerName;
-    std::string m_driverName;
     std::string m_tileIndexColumnName;
     std::string m_srsColumnName;
+    std::string m_driverName;
     std::string m_tgtSrsString;
     std::string m_assignSrsString;
+    std::string m_layerName;
     std::string m_originalSrs;
-    int m_maxFieldSize;
+    size_t m_maxFieldSize;
 
-    OGRFeatureDefnH m_layerDefn;
     OGRDataSourceH m_dataset;
     OGRLayerH m_layer;
 
@@ -187,10 +195,6 @@ private:
     //
     LogPtr m_log;
     //StringList m_files;
-    std::vector<std::unique_ptr<FileInfo>> m_infos;
-    OptionsMap m_commonOptions;
-    OptionsMap m_stageOptions;
-    FieldMap m_fields;
 };
 
 class TileIndex : public TIndexBuilder
@@ -203,7 +207,7 @@ public:
 private:
     std::unique_ptr<FileInfo> makeFileInfo(const std::string& filename) override;
     void getFileInfo(std::unique_ptr<FileInfo>& fileInfo) override;
-    void createExtraFields(std::unique_ptr<FileInfo>& fileInfo, OGRFeatureH hFeature) override;
+    void createExtraFields(const std::unique_ptr<FileInfo>& fileInfo, OGRFeatureH hFeature) override;
 };
 
 class StacIndex : public TIndexBuilder
@@ -214,7 +218,7 @@ public:
 private:
     std::unique_ptr<FileInfo> makeFileInfo(const std::string& filename) override;
     void getFileInfo(std::unique_ptr<FileInfo>& fileInfo) override;
-    void createExtraFields(std::unique_ptr<FileInfo>& fileInfo, OGRFeatureH hFeature) override;
+    void createExtraFields(const std::unique_ptr<FileInfo>& fileInfo, OGRFeatureH hFeature) override;
 
     StringList m_extensions;
     std::string m_pcType;

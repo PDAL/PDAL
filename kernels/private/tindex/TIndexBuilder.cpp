@@ -30,7 +30,7 @@ struct FieldInfo
 {
     FieldInfo(const OGRFieldType fieldType) : m_fieldType(fieldType) 
     {}
-    FieldInfo(const OGRFieldType fieldType, OGRFieldSubType subtype) 
+    FieldInfo(const OGRFieldType fieldType, const OGRFieldSubType subtype) 
         : m_fieldType(fieldType), m_subtype(subtype) 
     {}
     void setIdx(int idx) { m_fieldIdx = idx; }
@@ -54,6 +54,9 @@ TIndexBuilder::TIndexBuilder(const Args& args, const std::string& tileIndexColum
 {
     m_fields.emplace(m_tileIndexColumnName, OFTString);
     m_fields.emplace(m_srsColumnName, OFTString);
+
+    if (m_driverName == "ESRI Shapefile")
+        m_maxFieldSize = 254;
 }
 
 TIndexBuilder::~TIndexBuilder() 
@@ -70,17 +73,17 @@ bool TIndexBuilder::openDataset()
 
 bool TIndexBuilder::createDataset()
 {
-    OGRSFDriverH hDriver = OGRGetDriverByName(m_args.driverName.c_str());
+    OGRSFDriverH hDriver = OGRGetDriverByName(m_driverName.c_str());
     if (!hDriver)
     {
         std::ostringstream oss;
 
-        oss << "Can't create dataset using driver '" << m_args.driverName <<
+        oss << "Can't create dataset using driver '" << m_driverName <<
             "'. Driver is not available.";
         throw TIndexError(oss.str());
     }
 
-    m_dataset = OGR_Dr_CreateDataSource(hDriver, m_args.filename.c_str(), NULL);
+    m_dataset = OGR_Dr_CreateDataSource(hDriver, m_args.idxFilename.c_str(), NULL);
     return (bool)m_dataset;
 }
 
@@ -89,7 +92,7 @@ bool TIndexBuilder::openLayer()
 {
     if (OGR_DS_GetLayerCount(m_dataset) == 1)
         m_layer = OGR_DS_GetLayer(m_dataset, 0);
-    else if (layerName.size())
+    else if (m_layerName.size())
         m_layer = OGR_DS_GetLayerByName(m_dataset, m_args.layerName.c_str());
 
     return (bool)m_layer;
@@ -176,9 +179,9 @@ void TIndexBuilder::create(const StringList& files, PipelineManager& mgr)
     for (auto& file : files)
     {
         // Sets filename, initializes STAC metadata
-        auto& info = makeFileInfo(file);
+        auto info = makeFileInfo(file);
         info->m_isRemote = Utils::isRemote(file);
-        if (!info.m_isRemote)
+        if (!info->m_isRemote)
             FileUtils::fileTimes(info->m_filename, &info->m_ctime, &info->m_mtime);
         m_infos.push_back(std::move(info));
     }
@@ -186,14 +189,14 @@ void TIndexBuilder::create(const StringList& files, PipelineManager& mgr)
 
     for (auto &info : m_infos)
     {
-        pool.add([this, info = std::move(info)]()
+        pool.add([this, &info]()
         {
             getFileInfo(info);
         });
     }
     pool.await();
 
-    m_originalSrs = infos[0].m_srs;
+    m_originalSrs = m_infos[0]->m_srs;
     if (m_originalSrs.empty() || m_args.overrideASrs)
         m_originalSrs = m_assignSrsString;
     bool indexedFile(false);
@@ -288,11 +291,11 @@ bool TIndexBuilder::createFeature(const std::unique_ptr<FileInfo>& fileInfo)
     OGR_F_Destroy(hFeature);
 
     if (bRet)
-        m_log->get(LogLevel::Info) << "Indexed file " << fileInfo.m_filename <<
+        m_log->get(LogLevel::Info) << "Indexed file " << fileInfo->m_filename <<
             std::endl;
     else
         m_log->get(LogLevel::Error) << "Failed to create feature "
-            "for file '" << fileInfo.m_filename << "'" << std::endl;
+            "for file '" << fileInfo->m_filename << "'" << std::endl;
 
     return bRet;
 }
@@ -374,8 +377,8 @@ void TIndexBuilder::createFields()
     {
         OGRFieldDefnH hFieldDefn = OGR_Fld_Create(
             field.first.c_str(), field.second.m_fieldType);
-        if (field.second.m_subType != OFSTNone)
-            OGR_Fld_SetSubType(hFieldDefn, field.second.m_subType);
+        if (field.second.m_subtype != OFSTNone)
+            OGR_Fld_SetSubType(hFieldDefn, field.second.m_subtype);
         OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
         OGR_Fld_Destroy(hFieldDefn);
     }
@@ -405,6 +408,15 @@ pdal::Polygon TIndexBuilder::prepareGeometry(const std::unique_ptr<FileInfo>& fi
 
     return g;
 }
+
+std::string TIndexBuilder::makeMultiPolygon(const std::string& wkt)
+{
+    std::string multi = wkt + ')';
+    multi.insert(8, "(");
+    multi.insert(0, "MULTI");
+    return multi;
+}
+
 //
 // Standard class
 //
@@ -416,9 +428,6 @@ TileIndex::TileIndex(const Args& args, const std::string& tileIndexColumnName,
 {
     m_fields.emplace("modified", OFTDateTime);
     m_fields.emplace("created", OFTDateTime);
-
-    if (m_driverName == "ESRI Shapefile")
-        m_maxFieldSize = 254;
 }
 
 std::unique_ptr<FileInfo> TileIndex::makeFileInfo(const std::string& filename)
@@ -435,13 +444,13 @@ void TileIndex::getFileInfo(std::unique_ptr<FileInfo>& fileInfo)
     manager.stageOptions() = m_stageOptions;
 
     Stage& reader = manager.makeReader(fileInfo->m_filename, "");
-    runBoundary(reader, fileInfo, manager);  
+    runBoundary(reader, *fileInfo, manager);  
 }
 
-void TileIndex::createExtraFields(std::unique_ptr<FileInfo>& fileInfo, OGRFeatureH hFeature)
+void TileIndex::createExtraFields(const std::unique_ptr<FileInfo>& fileInfo, OGRFeatureH hFeature)
 {
-    setDate(hFeature, fileInfo->m_ctime, "created");
-    setDate(hFeature, fileInfo->m_mtime, "modified");
+    setDate(hFeature, fileInfo->m_ctime, m_fields.at("created"));
+    setDate(hFeature, fileInfo->m_mtime, m_fields.at("modified"));
 }
 
 //
@@ -452,17 +461,17 @@ StacIndex::StacIndex(const Args& args, const std::string& pcType)
     : TIndexBuilder(args, "assets.data.href", "proj:wkt2", "Parquet", "EPSG:4326", "EPSG:4326"),
       m_pcType(pcType)
 {
-    m_fields.emplace("proj:projjson", OFTString, OFSTJSON);
+    m_fields.try_emplace("proj:projjson", OFTString, OFSTJSON);
     m_fields.emplace("datetime", OFTDateTime);
-    m_fields.emplace("links", OFTString, OFSTJSON);
+    m_fields.try_emplace("links", OFTString, OFSTJSON);
     m_fields.emplace("id", OFTString);
     m_fields.emplace("stac_extensions", OFTStringList);
     m_fields.emplace("stac_version", OFTString);
     m_fields.emplace("pc:count", OFTInteger);
     m_fields.emplace("pc:encoding", OFTString);
     m_fields.emplace("pc:type", OFTString);
-    m_fields.emplace("pc:schemas", OFTString, OFSTJSON);
-    m_fields.emplace("pc:statistics", OFTString, OFSTJSON);
+    m_fields.try_emplace("pc:schemas", OFTString, OFSTJSON);
+    m_fields.try_emplace("pc:statistics", OFTString, OFSTJSON);
 
     m_extensions = { "https://stac-extensions.github.io/projection/v1.1.0/",
         "https://stac-extensions.github.io/pointcloud/v1.0.0/" };
@@ -484,7 +493,7 @@ void StacIndex::getFileInfo(std::unique_ptr<FileInfo>& fileInfo)
     manager.commonOptions() = m_commonOptions;
     manager.stageOptions() = m_stageOptions;
 
-    Stage& reader = manager.makeReader(stacFileInfo->m_filename, "");
+    Stage& reader = manager.makeReader(stacFileInfo.m_filename, "");
     Stage& info = manager.makeFilter("filters.info", reader);
     Stage& stats = manager.makeFilter("filters.stats", info);
 
@@ -493,11 +502,11 @@ void StacIndex::getFileInfo(std::unique_ptr<FileInfo>& fileInfo)
         MetadataNode readerMeta = reader.getMetadata();
         MetadataNode statsMeta = stats.getMetadata();
         MetadataNode infoMeta = info.getMetadata();
-        stacFileInfo.m_stacInfo.addMetadata(statsMeta, readerMeta, infoMeta);
+        stacFileInfo.m_stacInfo.addMetadata(statsMeta, readerMeta, infoMeta, m_pcType);
     }
 }
 
-void StacIndex::createExtraFields(std::unique_ptr<FileInfo>& fileInfo, OGRFeatureH hFeature)
+void StacIndex::createExtraFields(const std::unique_ptr<FileInfo>& fileInfo, OGRFeatureH hFeature)
 {
     // removing newlines to get rid of dead space in the parquet file. Not strictly necessary
     auto stripNewline = [](std::string& s) {
@@ -537,11 +546,10 @@ void StacIndex::createExtraFields(std::unique_ptr<FileInfo>& fileInfo, OGRFeatur
     OGR_F_SetFieldString(hFeature, m_fields.at("pc:type"), m_pcType.c_str());
 
     // Not sure if schema and statistics need to be native parquet lists or if json is ok
-    std::string schema = Utils::toJSON(fileInfo.m_stacInfo.propertiesChildren("pc:schemas"));
+    std::string schema = Utils::toJSON(stacInfo.propertiesChildren("pc:schemas"));
     OGR_F_SetFieldString(hFeature, m_fields.at("pc:schemas"), stripNewline(schema).c_str());
 
-    std::string statistics = 
-        Utils::toJSON(fileInfo.m_stacInfo.propertiesChildren("pc:statistics"));
+    std::string statistics = Utils::toJSON(stacInfo.propertiesChildren("pc:statistics"));
     OGR_F_SetFieldString(hFeature, m_fields.at("pc:statistics"), stripNewline(statistics).c_str());
 }
 
