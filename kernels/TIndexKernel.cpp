@@ -401,7 +401,14 @@ void TIndexKernel::createFile()
     else
         m_tindex.reset(new tindex::TileIndex(*m_args, m_tileIndexColumnName,
             m_srsColumnName, m_driverName, m_tgtSrsString, m_assignSrsString));
-    m_tindex->create(m_files, m_manager);
+    try
+    {
+        m_tindex->create(m_files, m_manager);
+    }
+    catch(const tindex::TIndexError& e)
+    {
+        throw pdal_error(e.what());
+    }    
 }
 
 bool TIndexKernel::openDataset(const std::string& filename)

@@ -226,7 +226,7 @@ bool TIndexBuilder::isFileIndexed(const std::unique_ptr<FileInfo>& fileInfo)
         std::ostringstream oss;
         oss << "Unable to set attribute filter for file '" <<
              fileInfo->m_filename << "'";
-        throw pdal_error(oss.str());
+        throw TIndexError(oss.str());
     }
 
     bool output(false);
@@ -313,7 +313,7 @@ void TIndexBuilder::setStringField(OGRFeatureH hFeature, int idx,
             " characters; ESRI Shapefile driver supports a maximum of 254.";
 
         OGR_F_Destroy(hFeature);
-        throw pdal_error(oss.str());
+        throw TIndexError(oss.str());
     }
 }
 
