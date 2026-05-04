@@ -44,7 +44,7 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/gdal/SpatialRef.hpp>
-#include <filters/private/hexer/HexGrid.hpp>
+#include <kernels/private/tindex/TIndexBuilder.hpp>
 
 #include "../io/LasWriter.hpp"
 
@@ -66,78 +66,6 @@ void setDate(OGRFeatureH feature, const tm& tyme, int fieldNumber)
 namespace pdal
 {
 
-class TindexBoundary : public Filter, public Streamable
-{
-public:
-    TindexBoundary(int32_t density, double edgeLength, uint32_t sampleSize)
-        : m_density(density), m_edgeLength(edgeLength),
-        m_sampleSize(sampleSize)
-    {}
-    ~TindexBoundary()
-    {}
-
-    std::string getName() const
-    { return "tindex-boundary"; }
-    double height()
-    { return m_grid->height(); }
-    std::string toWKT()
-    {
-        std::ostringstream out;
-        out.setf(std::ios_base::fixed, std::ios_base::floatfield);
-        out.precision(10);
-        m_grid->toWKT(out);
-        return out.str();
-    }
-private:
-    std::unique_ptr<hexer::HexGrid> m_grid;
-    int32_t m_density;
-    double m_edgeLength;
-    uint32_t m_sampleSize;
-
-    virtual void ready(PointTableRef table)
-    {
-        if (m_edgeLength == 0.0)
-        {
-            m_grid.reset(new hexer::HexGrid(m_density));
-            m_grid->setSampleSize(m_sampleSize);
-        }
-        else
-            m_grid.reset(new hexer::HexGrid(m_edgeLength * sqrt(3), m_density));
-    }
-    virtual void filter(PointView& view)
-    {
-        PointRef p(view, 0);
-
-        for (PointId idx = 0; idx < view.size(); ++idx)
-        {
-            p.setPointId(idx);
-            processOne(p);
-        }
-    }
-    virtual bool processOne(PointRef& point)
-    {
-        double x = point.getFieldAs<double>(Dimension::Id::X);
-        double y = point.getFieldAs<double>(Dimension::Id::Y);
-        m_grid->addXY(x, y);
-        return true;
-    }
-    virtual void spatialReferenceChanged(const SpatialReference& srs)
-    { setSpatialReference(srs); }
-    virtual void done(PointTableRef table)
-    {
-        try
-        {
-            m_grid->findShapes();
-            m_grid->findParentPaths();
-        }
-        catch (hexer::hexer_error& e)
-        {
-            throwError(e.what());
-            m_grid.reset(new hexer::HexGrid(m_density));
-        }
-    }
-};
-
 static StaticPluginInfo const s_info
 {
     "kernels.tindex",
@@ -152,9 +80,9 @@ std::string TIndexKernel::getName() const { return s_info.name; }
 TIndexKernel::TIndexKernel() : SubcommandKernel()
 //ABELL - need to option this.
     , m_srsColumnName("srs")
+    , m_args(new tindex::Args())
     , m_dataset(NULL)
     , m_layer(NULL)
-    , m_overrideASrs(false)
     , m_maxFieldSize(0)
 {}
 
@@ -171,15 +99,15 @@ void TIndexKernel::addSubSwitches(ProgramArgs& args,
     if (subcommand == "create")
     {
         args.add("tindex", "OGR-readable/writeable tile index output",
-            m_idxFilename).setPositional();
+            m_args->idxFilename).setPositional();
         args.add("glob", "Pattern of files to index",
             m_filespec).setOptionalPositional();
         args.addSynonym("glob", "filespec");
         args.add("filelist", "Text file containing list of files to index", m_listfile);
         args.add("fast_boundary", "Use extent instead of exact boundary",
-            m_fastBoundary);
+            m_args->fastBoundary);
         args.add("lyr_name", "OGR layer name to write into datasource",
-            m_layerName);
+            m_args->layerName);
         args.add("tindex_name", "Tile index column name", m_tileIndexColumnName,
             "location");
         args.add("stac-geoparquet", "Whether to write tile index as a STAC "
@@ -189,50 +117,50 @@ void TIndexKernel::addSubSwitches(ProgramArgs& args,
         args.add("ogrdriver,f", "OGR driver name to use ", m_driverName,
             "ESRI Shapefile");
         args.add("lco", "Driver-specific NAME=VALUE OGR layer creation options",
-            m_lcOptions);
+            m_args->lcOptions);
         args.add("t_srs", "Target SRS of tile index", m_tgtSrsString,
             "EPSG:4326");
         args.add("a_srs", "Assign SRS of tile with no SRS to this value",
             m_assignSrsString, "EPSG:4326");
         args.add("write_absolute_path",
-            "Write absolute rather than relative file paths", m_absPath);
+            "Write absolute rather than relative file paths", m_args->absPath);
         args.add("stdin,s", "Read filespec pattern from standard input",
             m_usestdin);
         args.add("path_prefix", "Prefix to be added to file paths when writing "
-            "output", m_prefix);
+            "output", m_args->pathPrefix);
         args.add("threads", "Number of threads to use for file boundary creation",
-            m_threads, 1);
+            m_args->numThreads, 1);
         args.addSynonym("threads", "requests");
         args.add("skip_different_srs", "Reject files to be indexed with "
-            "different SRS values", m_skipMultiSrs);
-        args.add("simplify", "Simplify the file's exact boundary", m_doSmooth,
+            "different SRS values", m_args->skipMultiSrs);
+        args.add("simplify", "Simplify the file's exact boundary", m_args->doSmooth,
             true);
         args.addSynonym("simplify", "smooth");
         args.add("threshold", "Number of points a cell must contain to be "
-            "declared positive space, when creating exact boundaries", m_density,
+            "declared positive space, when creating exact boundaries", m_args->density,
             15);
         args.add("resolution", "cell edge length to be used when creating exact "
-            "boundaries", m_edgeLength);
+            "boundaries", m_args->edgeLength);
         args.addSynonym("resolution", "edge_length");
         args.add("sample_size", "Sample size for auto-edge length calculation in "
-            "internal hexbin filter (exact boundary)", m_sampleSize, 5000U);
+            "internal hexbin filter (exact boundary)", m_args->sampleSize, 5000U);
         args.add("where", "Expression describing points to be processed for exact "
-            "boundary creation", m_boundaryExpr);
+            "boundary creation", m_args->boundaryExpr);
     }
     else if (subcommand == "merge")
     {
         args.add("tindex", "OGR-readable/writeable tile index output",
-            m_idxFilename).setPositional();
+            m_args->idxFilename).setPositional();
         args.add("filespec", "Output filename",
             m_filespec).setPositional();
         args.add("lyr_name", "OGR layer name to write into datasource",
-            m_layerName);
+            m_args->layerName);
         args.add("tindex_name", "Tile index column name", m_tileIndexColumnName,
             "location");
         args.add("ogrdriver,f", "OGR driver name to use ", m_driverName,
             "ESRI Shapefile");
         args.add("bounds", "Extent (in XYZ) to clip output to", m_bounds);
-        args.add("polygon", "Well-known text of polygon to clip output", m_wkt);
+        args.add("polygon", "Well-known text of polygon to clip output", m_args->wkt);
         args.add("t_srs", "Spatial reference of the clipping geometry",
             m_tgtSrsString, "EPSG:4326");
     }
@@ -243,11 +171,11 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
 {
     if (m_subcommand == "merge")
     {
-        if (!m_wkt.empty() && !m_bounds.empty())
+        if (!m_args->wkt.empty() && !m_bounds.empty())
             throw pdal_error("Can't specify both 'polygon' and "
                 "'bounds' options.");
         if (!m_bounds.empty())
-            m_wkt = m_bounds.toWKT();
+            m_args->wkt = m_bounds.toWKT();
     }
     else
     {
@@ -259,23 +187,17 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
         if (!argc)
             throw pdal_error("Must specify either --glob, --filelist or"
                 " --stdin.");
-        if (m_prefix.size() && m_absPath)
+        if (m_args->pathPrefix.size() && m_args->absPath)
             throw pdal_error("Can't specify both --write_absolute_path and "
                 "--path_prefix options.");
         if (m_writeStacGeoparquet)
         {
-            //!! add more stuff here if needed. See if we should throw for conflicts
-            m_driverName = "Parquet";
-            m_tileIndexColumnName = "assets.data.href";
-            m_srsColumnName = "proj:wkt2";
-            m_assignSrsString = "EPSG:4326";
-            m_tgtSrsString = "EPSG:4326";
             //!! Not sure if we should add to the list or overwrite. Some user values 
             //could potentially make the file invalid (i think only SORT_BY_BBOX=YES).
-            m_lcOptions.push_back("WRITE_COVERING_BBOX=YES");
+            m_args->lcOptions.push_back("WRITE_COVERING_BBOX=YES");
         }
         if (args.set("a_srs"))
-            m_overrideASrs = true;
+            m_args->overrideASrs = true;
         if (m_driverName == "ESRI Shapefile")
             m_maxFieldSize = 254;
     }
@@ -365,119 +287,31 @@ bool TIndexKernel::isFileIndexed(const FieldIndexes& indexes,
 }
 
 
-void TIndexKernel::createFile()
-{
-    if (!m_usestdin && m_listfile.empty())
-        m_files = Utils::glob(m_filespec);
-    else if (m_listfile.size())
-        m_files = readFileList(m_listfile);
-    else
-        m_files = readSTDIN();
-
-    if (m_files.empty())
-    {
-        std::ostringstream out;
-        out << "Couldn't find files to index: " << m_filespec << ".";
-        throw pdal_error(out.str());
-    }
-
-//ABELL - Remove CPLGetBasename use.
-    const std::string filename = m_files.front();
-    if (m_layerName.empty())
-       m_layerName = CPLGetBasename(filename.c_str());
-
-    // Open or create the dataset.
-    if (!openDataset(m_idxFilename))
-        if (!createDataset(m_idxFilename))
-        {
-            std::ostringstream out;
-            out << "Couldn't open or create index dataset file '" <<
-                m_idxFilename << "'.";
-            throw pdal_error(out.str());
-        }
-
-    // Open or create a layer
-    if (!openLayer(m_layerName))
-        if (!createLayer(m_layerName))
-        {
-            std::ostringstream out;
-            out << "Couldn't open or create layer '" << m_layerName <<
-                "' in output file '" << m_idxFilename << "'.";
-            throw pdal_error(out.str());
-        }
-
-    std::vector<FileInfo> infos;
-    for (auto f : m_files)
-    {
-        FileInfo info;
-        info.m_filename = f;
-        info.m_isRemote = Utils::isRemote(f);
-        if (!info.m_isRemote)
-            FileUtils::fileTimes(info.m_filename, &info.m_ctime, &info.m_mtime);
-        if (m_writeStacGeoparquet)
-            info.m_stacInfo.init(info.m_filename);
-        infos.push_back(info);
-    }
-
-    ThreadPool pool(m_threads);
-
-    for (auto &info : infos)
-    {
-        pool.add([this, &info]()
-        {
-            getFileInfo(info);
-        });
-    }
-    pool.await();
-
-    m_originalSrs = infos[0].m_srs;
-    // Same thing that happens to assign SRS in createFeature
-    if (m_originalSrs.empty() || m_overrideASrs)
-        m_originalSrs = m_assignSrsString;
-    bool indexedFile(false);
-    FieldIndexes indexes = getFields();
-    for (auto &info : infos)
-    {
-        if (m_prefix.size() && ! info.m_isRemote)
-            info.m_filename = m_prefix + FileUtils::getFilename(info.m_filename);
-        else if (m_absPath && ! info.m_isRemote)
-            info.m_filename = FileUtils::toAbsolutePath(info.m_filename);
-        if (!info.m_boundary.empty() && !isFileIndexed(indexes, info))
-            indexedFile |= createFeature(indexes, info);
-    }
-    if (!indexedFile)
-        throw pdal_error("Couldn't index any files.");
-    OGR_DS_Destroy(m_dataset);
-    m_dataset = nullptr;
-    m_layer = nullptr;
-}
-
-
 void TIndexKernel::mergeFile()
 {
     using namespace gdal;
 
     std::ostringstream out;
 
-    if (!openDataset(m_idxFilename))
+    if (!openDataset(m_args->idxFilename))
     {
         std::ostringstream out;
-        out << "Couldn't open index dataset file '" << m_idxFilename << "'.";
+        out << "Couldn't open index dataset file '" << m_args->idxFilename << "'.";
         throw pdal_error(out.str());
     }
-    if (!openLayer(m_layerName))
+    if (!openLayer(m_args->layerName))
     {
         std::ostringstream out;
-        out << "Couldn't open layer '" << m_layerName <<
-            "' in output file '" << m_idxFilename << "'.";
+        out << "Couldn't open layer '" << m_args->layerName <<
+            "' in output file '" << m_args->idxFilename << "'.";
         throw pdal_error(out.str());
     }
 
     FieldIndexes indexes = getFields();
 
-    if (!m_wkt.empty())
+    if (!m_args->wkt.empty())
     {
-        pdal::Polygon g(m_wkt, m_tgtSrsString);
+        pdal::Polygon g(m_args->wkt, m_tgtSrsString);
         OGR_L_SetSpatialFilter(m_layer, g.getOGRHandle());
     }
 
@@ -513,7 +347,7 @@ void TIndexKernel::mergeFile()
     if (!m_bounds.empty())
         cropOptions.add("bounds", m_bounds);
     else
-        cropOptions.add("polygon", m_wkt);
+        cropOptions.add("polygon", m_args->wkt);
 
     Stage& merge = makeFilter("filters.merge");
     size_t filecount(0);
@@ -534,7 +368,7 @@ void TIndexKernel::mergeFile()
 
         // WKT is set, even if we're using a bounding box for fitering, so
         // can be used as a test here.
-        if (!m_wkt.empty())
+        if (!m_args->wkt.empty())
         {
             Stage& crop = makeFilter("filters.crop", *premerge, cropOptions);
             premerge = &crop;
@@ -560,237 +394,19 @@ void TIndexKernel::mergeFile()
     writer.execute(table);
 }
 
-
-bool TIndexKernel::createFeature(const FieldIndexes& indexes,
-    FileInfo& fileInfo)
+void TIndexKernel::createFile()
 {
-    using namespace gdal;
-
-    OGRFeatureH hFeature = OGR_F_Create(OGR_L_GetLayerDefn(m_layer));
-
-    // Set the creation time into the feature.
-    setDate(hFeature, fileInfo.m_ctime, indexes.m_ctime);
-
-    // Set the file mod time into the feature.
-    setDate(hFeature, fileInfo.m_mtime, indexes.m_mtime);
-
-    // Set the filename into the feature.
-    setStringField(hFeature, indexes.m_filename,
-        fileInfo.m_filename.c_str());
-
-    // Set the SRS into the feature.
-    // We override if m_assignSrsString is set
-    if (fileInfo.m_srs.empty() || m_overrideASrs)
-        fileInfo.m_srs = m_assignSrsString;
-
-    if (fileInfo.m_srs.empty())
-    {
-        std::ostringstream oss;
-
-        oss << "Unable to import source spatial reference '" <<
-            fileInfo.m_srs << "' for file '" <<
-            fileInfo.m_filename << "'.";
-        OGR_F_Destroy(hFeature);
-        throw pdal_error(oss.str());
-    }
-    if (fileInfo.m_srs != m_originalSrs)
-    {
-        m_log->get(LogLevel::Warning) << "SRS value for " << fileInfo.m_filename <<
-            " does not match the SRS of other files in the tileindex." <<
-            (m_skipMultiSrs ? " Skipping this file" : "") << std::endl;
-        if (m_skipMultiSrs)
-        {
-            OGR_F_Destroy(hFeature);
-            return false;
-        }
-    }
-    std::string wkt =
-        SpatialReference(fileInfo.m_srs).getWKT();
-
-    setStringField(hFeature, indexes.m_srs, wkt.data());
-
     if (m_writeStacGeoparquet)
-        setStacFields(hFeature, indexes, fileInfo);
-
-    // Set the geometry in the feature
-    Polygon g = prepareGeometry(fileInfo);
-    OGR_F_SetGeometry(hFeature, g.getOGRHandle());
-
-    const bool bRet = (OGR_L_CreateFeature(m_layer, hFeature) == OGRERR_NONE);
-    OGR_F_Destroy(hFeature);
-
-    if (bRet)
-        m_log->get(LogLevel::Info) << "Indexed file " << fileInfo.m_filename <<
-            std::endl;
+        m_tindex.reset(new tindex::StacIndex(*m_args, m_pcType));
     else
-        m_log->get(LogLevel::Error) << "Failed to create feature "
-            "for file '" << fileInfo.m_filename << "'" << std::endl;
-
-    return bRet;
+        m_tindex.reset(new tindex::TileIndex(*m_args, m_tileIndexColumnName,
+            m_srsColumnName, m_driverName, m_tgtSrsString, m_assignSrsString));
+    m_tindex->create(m_files, m_manager);
 }
-
-void TIndexKernel::setStacFields(OGRFeatureH hFeature, const FieldIndexes& indexes,
-    FileInfo& fileInfo) 
-{
-    // removing newlines to get rid of dead space in the parquet file. Not strictly necessary
-    auto stripNewline = [](std::string& s) {
-        s.erase(std::remove_if(s.begin(), s.end(), 
-            [](char c) { return c == '\n' || c == '\r'; }), s.end());
-        return s;
-    };
-
-    std::string linksJson = Utils::toJSON(fileInfo.m_stacInfo.rootChildren("links"));
-    OGR_F_SetFieldString(hFeature, indexes.m_stac.links, stripNewline(linksJson).c_str());
-
-    OGR_F_SetFieldString(hFeature, indexes.m_stac.id, 
-        FileUtils::getFilename(fileInfo.m_filename).c_str());
-
-    OGR_F_SetFieldString(hFeature, indexes.m_stac.version, (const char*)STAC_VERSION);
-
-    char** cslExtensions = NULL;
-    for (auto& s : fileInfo.m_stacInfo.extensions())
-        cslExtensions = CSLAddString(cslExtensions, s.c_str());
-    OGR_F_SetFieldStringList(hFeature, indexes.m_stac.extensions, cslExtensions);
-    CSLDestroy(cslExtensions);
-
-    // Not added: proj:bbox, proj:geometry
-
-    std::string projJson = SpatialReference(fileInfo.m_srs).getPROJJSON();
-    OGR_F_SetFieldString(hFeature, indexes.m_stac.projJson, projJson.c_str());
-
-    int pointCount = fileInfo.m_stacInfo.propertiesChild("pc:count").value<int>();
-    OGR_F_SetFieldInteger(hFeature, indexes.m_stac.pcCount, pointCount);
-
-    std::string encoding = fileInfo.m_stacInfo.propertiesChild("pc:encoding").value();
-    OGR_F_SetFieldString(hFeature, indexes.m_stac.pcEncoding, encoding.c_str());
-
-    OGR_F_SetFieldString(hFeature, indexes.m_stac.pcType, m_pcType.c_str());
-
-    // Not sure if schema and statistics need to be native parquet lists or if json is ok
-    std::string schema = Utils::toJSON(fileInfo.m_stacInfo.propertiesChildren("pc:schemas"));
-    OGR_F_SetFieldString(hFeature, indexes.m_stac.pcSchema, stripNewline(schema).c_str());
-
-    std::string statistics = 
-        Utils::toJSON(fileInfo.m_stacInfo.propertiesChildren("pc:statistics"));
-    OGR_F_SetFieldString(hFeature, indexes.m_stac.pcStats, stripNewline(statistics).c_str());
-}
-
-void TIndexKernel::setStringField(OGRFeatureH hFeature, int idx,
-    const char* value)
-{
-    if (m_maxFieldSize == 0 || strlen(value) <= m_maxFieldSize)
-    {
-        OGR_F_SetFieldString(hFeature, idx, value);
-    }
-    else
-    {
-        std::ostringstream oss;
-        OGRFieldDefnH hFieldDefn = OGR_F_GetFieldDefnRef(hFeature, idx);
-
-        oss << "value for field'" << OGR_Fld_GetNameRef(hFieldDefn) << "' has " << strlen(value) <<
-            " characters; ESRI Shapefile driver supports a maximum of 254.";
-
-        OGR_F_Destroy(hFeature);
-        throw pdal_error(oss.str());
-    }
-}
-
-void TIndexKernel::fastBoundary(Stage& reader, FileInfo& fileInfo)
-{
-    QuickInfo qi = reader.preview();
-    if (!qi.valid())
-        return;
-
-    fileInfo.m_boundary = makeMultiPolygon(qi.m_bounds.to2d().toWKT());
-    if (!qi.m_srs.empty())
-        fileInfo.m_srs = qi.m_srs.getWKT();
-    fileInfo.m_gridHeight = 0.0;
-}
-
-
-void TIndexKernel::getFileInfo(FileInfo& fileInfo)
-{
-    PipelineManager manager;
-    manager.commonOptions() = m_manager.commonOptions();
-    manager.stageOptions() = m_manager.stageOptions();
-
-    // Need to make sure options get set.
-    //!! messy stuff from infokernel so we can execute with either the reader
-    // or multiple stages while getting metadata from them all. Probably a better way
-    Stage* reader = &(manager.makeReader(fileInfo.m_filename, ""));
-    Stage* info = nullptr;
-    Stage* stats = nullptr;
-    Stage* stage = reader;
-    if (m_writeStacGeoparquet)
-    {
-        stage = info = &(manager.makeFilter("filters.info", *stage));
-        stage = stats = &(manager.makeFilter("filters.stats", *stage));
-    }
-
-    // If we aren't able to make a hexbin filter, we
-    // will just do a simple fast_boundary.
-    bool fast(m_fastBoundary); 
-    if (!fast)
-    {
-        TindexBoundary hexer{m_density, m_edgeLength, m_sampleSize};
-        if (m_boundaryExpr.size())
-        {
-            Options opts;
-            opts.add("where", m_boundaryExpr);
-            hexer.addOptions(opts);
-        }
-        hexer.setInput(*stage);
-        manager.addStage(&hexer);
-        try
-        {
-            manager.execute(ExecMode::PreferStream);
-
-            fileInfo.m_boundary = hexer.toWKT();
-            fileInfo.m_srs = hexer.getSpatialReference().getWKT();
-            fileInfo.m_gridHeight = hexer.height();
-        }
-        catch(pdal_error& e)
-        {
-            fast = true;
-            m_log->get(LogLevel::Warning) << "Unable to create exact boundary for tile " << 
-                fileInfo.m_filename << " with error: '" << e.what() << std::endl;
-        }
-    }
-
-    if (fast)
-        fastBoundary(*stage, fileInfo);
-
-    // Dumping stuff from stacInfo
-    if (m_writeStacGeoparquet)
-    {
-        MetadataNode readerMeta = reader->getMetadata();
-        MetadataNode statsMeta = stats->getMetadata();
-        MetadataNode infoMeta = info->getMetadata();
-        fileInfo.m_stacInfo.addMetadata(statsMeta, readerMeta, infoMeta, m_pcType);
-    }
-}
-
 
 bool TIndexKernel::openDataset(const std::string& filename)
 {
     m_dataset = OGROpen(filename.c_str(), TRUE, NULL);
-    return (bool)m_dataset;
-}
-
-
-bool TIndexKernel::createDataset(const std::string& filename)
-{
-    OGRSFDriverH hDriver = OGRGetDriverByName(m_driverName.c_str());
-    if (!hDriver)
-    {
-        std::ostringstream oss;
-
-        oss << "Can't create dataset using driver '" << m_driverName <<
-            "'. Driver is not available.";
-        throw pdal_error(oss.str());
-    }
-
-    m_dataset = OGR_Dr_CreateDataSource(hDriver, filename.c_str(), NULL);
     return (bool)m_dataset;
 }
 
@@ -800,115 +416,10 @@ bool TIndexKernel::openLayer(const std::string& layerName)
     if (OGR_DS_GetLayerCount(m_dataset) == 1)
         m_layer = OGR_DS_GetLayer(m_dataset, 0);
     else if (layerName.size())
-        m_layer = OGR_DS_GetLayerByName(m_dataset, m_layerName.c_str());
+        m_layer = OGR_DS_GetLayerByName(m_dataset, m_args->layerName.c_str());
 
     return (bool)m_layer;
 }
-
-
-bool TIndexKernel::createLayer(std::string const& layername)
-{
-    gdal::SpatialRef srs(m_tgtSrsString);
-    if (!srs)
-        m_log->get(LogLevel::Error) << "Unable to import srs for layer "
-           "creation" << std::endl;
-
-    char** papszOptions = NULL;
-    for (std::string& s : m_lcOptions)
-        papszOptions = CSLAddString(papszOptions, s.c_str());
-
-    m_layer = OGR_DS_CreateLayer(m_dataset, m_layerName.c_str(),
-        srs.get(), wkbMultiPolygon, papszOptions);
-
-    CSLDestroy(papszOptions);
-
-    if (m_layer)
-        createFields();
-
-    //ABELL - At this point we should essentially "sync" things so that
-    //  index file gets created with the proper fields.  If this doesn't
-    //  and a failure occurs, the file may be left with a layer that doesn't
-    //  have the requisite fields.  Note that OGR_DS_SyncToDisk doesn't seem
-    //  to work reliably enough to warrant use.
-    return (bool)m_layer;
-}
-
-
-void TIndexKernel::createFields()
-{
-    OGRFieldDefnH hFieldDefn = OGR_Fld_Create(
-        m_tileIndexColumnName.c_str(), OFTString);
-    OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
-    OGR_Fld_Destroy(hFieldDefn);
-
-    hFieldDefn = OGR_Fld_Create(m_srsColumnName.c_str(), OFTString);
-    OGR_L_CreateField(m_layer, hFieldDefn, TRUE );
-    OGR_Fld_Destroy(hFieldDefn);
-
-    // Doing the proj 5 here so it stays together
-    if (m_writeStacGeoparquet)
-    {
-
-        hFieldDefn = OGR_Fld_Create("proj:projjson", OFTString);
-        OGR_Fld_SetSubType(hFieldDefn, OFSTJSON);
-        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
-        OGR_Fld_Destroy(hFieldDefn);
-
-        // proj wkt2 is our defalult srs column
-    }
-
-    hFieldDefn = OGR_Fld_Create("modified", OFTDateTime);
-    OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
-    OGR_Fld_Destroy(hFieldDefn);
-
-    hFieldDefn = OGR_Fld_Create("created", OFTDateTime);
-    OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
-    OGR_Fld_Destroy(hFieldDefn);
-
-    if (m_writeStacGeoparquet)
-    {
-        //!! think about adding a different date format (modified/created v datetime)
-        hFieldDefn = OGR_Fld_Create("links", OFTString);
-        OGR_Fld_SetSubType(hFieldDefn, OFSTJSON);
-        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
-        OGR_Fld_Destroy(hFieldDefn);
-
-        hFieldDefn = OGR_Fld_Create("id", OFTString);
-        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
-        OGR_Fld_Destroy(hFieldDefn);
-
-        hFieldDefn = OGR_Fld_Create("stac_extensions", OFTStringList);
-        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
-        OGR_Fld_Destroy(hFieldDefn);
-
-        hFieldDefn = OGR_Fld_Create("stac_version", OFTString);
-        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
-        OGR_Fld_Destroy(hFieldDefn);
-
-        hFieldDefn = OGR_Fld_Create("pc:statistics", OFTString);
-        OGR_Fld_SetSubType(hFieldDefn, OFSTJSON);
-        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
-        OGR_Fld_Destroy(hFieldDefn);
-
-        hFieldDefn = OGR_Fld_Create("pc:schemas", OFTString);
-        OGR_Fld_SetSubType(hFieldDefn, OFSTJSON);
-        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
-        OGR_Fld_Destroy(hFieldDefn);
-
-        hFieldDefn = OGR_Fld_Create("pc:count", OFTInteger);
-        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
-        OGR_Fld_Destroy(hFieldDefn);
-
-        hFieldDefn = OGR_Fld_Create("pc:encoding", OFTString);
-        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
-        OGR_Fld_Destroy(hFieldDefn);
-
-        hFieldDefn = OGR_Fld_Create("pc:type", OFTString);
-        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
-        OGR_Fld_Destroy(hFieldDefn);
-    }
-}
-
 
 TIndexKernel::FieldIndexes TIndexKernel::getFields()
 {
@@ -939,57 +450,9 @@ TIndexKernel::FieldIndexes TIndexKernel::getFields()
     indexes.m_ctime = OGR_FD_GetFieldIndex(fDefn, "created");
     indexes.m_mtime = OGR_FD_GetFieldIndex(fDefn, "modified");
 
-    if (m_writeStacGeoparquet)
-    {
-        indexes.m_stac.links = OGR_FD_GetFieldIndex(fDefn, "links");
-        indexes.m_stac.id = OGR_FD_GetFieldIndex(fDefn, "id");
-        indexes.m_stac.extensions = OGR_FD_GetFieldIndex(fDefn, "stac_extensions");
-        indexes.m_stac.version = OGR_FD_GetFieldIndex(fDefn, "stac_version");
-
-        indexes.m_stac.projJson = OGR_FD_GetFieldIndex(fDefn, "proj:projjson");
-
-        indexes.m_stac.pcCount = OGR_FD_GetFieldIndex(fDefn, "pc:count");
-        indexes.m_stac.pcEncoding = OGR_FD_GetFieldIndex(fDefn, "pc:encoding");
-        indexes.m_stac.pcSchema = OGR_FD_GetFieldIndex(fDefn, "pc:schemas");
-        indexes.m_stac.pcStats = OGR_FD_GetFieldIndex(fDefn, "pc:statistics");
-        indexes.m_stac.pcType = OGR_FD_GetFieldIndex(fDefn, "pc:type");
-    }
-
     return indexes;
 }
 
 
-pdal::Polygon TIndexKernel::prepareGeometry(const FileInfo& fileInfo, bool native)
-{
-    using namespace gdal;
-
-    Polygon g(fileInfo.m_boundary, fileInfo.m_srs);
-    if (fileInfo.m_gridHeight && m_doSmooth)
-    {
-        double tolerance = 1.1 * fileInfo.m_gridHeight / 2;
-        double cull = (6 * tolerance * tolerance);
-        g.simplify(tolerance, cull);
-        if (g.wkt()[0] == 'P')
-        {
-            std::string multi = makeMultiPolygon(g.wkt());
-            g = Polygon(multi, fileInfo.m_srs);
-        }
-    }
-    if (m_tgtSrsString.size() && !native)
-    {
-        SpatialReference out(m_tgtSrsString);
-        g.transform(out);
-    }
-
-    return g;
-}
-
-std::string TIndexKernel::makeMultiPolygon(const std::string& wkt)
-{
-    std::string multi = wkt + ')';
-    multi.insert(8, "(");
-    multi.insert(0, "MULTI");
-    return multi;
-}
 
 } // namespace pdal

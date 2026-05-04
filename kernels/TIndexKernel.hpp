@@ -34,10 +34,6 @@
 
 #pragma once
 
-#include "private/stac/StacInfo.hpp"
-
-#define STAC_VERSION "1.1.0"
-
 #include <pdal/Filter.hpp>
 #include <pdal/Streamable.hpp>
 #include <pdal/Stage.hpp>
@@ -58,6 +54,12 @@ namespace pdal
 {
     class Polygon;
 
+namespace tindex
+{
+    class TIndexBuilder;
+    struct Args;
+}
+
 namespace gdal
 {
     class SpatialRef;
@@ -67,58 +69,6 @@ class StageFactory;
 
 class PDAL_EXPORT TIndexKernel : public SubcommandKernel
 {
-    class StacInfo
-    {
-    public:
-        StacInfo() {}
-
-        void init(std::string const& filename)
-        {
-            // stacProjection & stacPointCloud need these set in the root metadata 
-            // for it to work. Should refactor to be less metadata dependent
-            m_root.add("filename", filename);
-            MetadataNode self = m_root.addList("links");
-            self.add("rel", "derived_from");
-            self.add("href", filename);
-            m_properties = m_root.add("properties");
-            m_extensions = { "https://stac-extensions.github.io/projection/v1.1.0/",
-                "https://stac-extensions.github.io/pointcloud/v1.0.0/" };
-        }
-
-        void addMetadata(MetadataNode& statsMeta, MetadataNode& readerMeta,
-            MetadataNode& infoMeta, std::string pcType)
-        {
-            stacPointcloud(m_root, statsMeta, infoMeta, m_properties, pcType);
-        }
-
-        MetadataNode propertiesChild(std::string key) 
-        {
-            return getChild(m_properties, key); 
-        }
-
-        MetadataNodeList propertiesChildren(std::string key) 
-        {
-            return m_properties.children(key); 
-        }
-
-        MetadataNode rootChild(std::string key) 
-        {
-            return getChild(m_root, key);
-        }
-
-        MetadataNodeList rootChildren(std::string key) 
-        {
-            return m_root.children(key);
-        }
-
-        StringList extensions() const { return m_extensions; }
-
-    private:
-        MetadataNode m_root;
-        MetadataNode m_properties;
-        StringList m_extensions;
-    };
-
     struct FileInfo
     {
         std::string m_filename;
@@ -128,21 +78,6 @@ class PDAL_EXPORT TIndexKernel : public SubcommandKernel
         struct tm m_ctime;
         struct tm m_mtime;
         bool m_isRemote = false;
-        StacInfo m_stacInfo;
-    };
-
-    struct StacIndexes
-    {
-        int extensions;
-        int version;
-        int links;
-        int id;
-        int projJson;
-        int pcStats;
-        int pcSchema;
-        int pcCount;
-        int pcEncoding;
-        int pcType;
     };
 
     struct FieldIndexes
@@ -151,8 +86,6 @@ class PDAL_EXPORT TIndexKernel : public SubcommandKernel
         int m_srs;
         int m_ctime;
         int m_mtime;
-        // could be stored in the same struct
-        StacIndexes m_stac;
     };
 
 public:
@@ -169,19 +102,8 @@ private:
     void createFile();
     void mergeFile();
     bool openDataset(const std::string& filename);
-    bool createDataset(const std::string& filename);
     bool openLayer(const std::string& layerName);
-    bool createLayer(const std::string& layerName);
     FieldIndexes getFields();
-    void getFileInfo(FileInfo& info);
-    bool createFeature(const FieldIndexes& indexes, FileInfo& info);
-    pdal::Polygon prepareGeometry(const FileInfo& fileInfo, bool native = false);
-    void createFields();
-    void setStringField(OGRFeatureH hFeature, int idx, const char* value);
-    void fastBoundary(Stage& reader, FileInfo& fileInfo);
-    std::string makeMultiPolygon(const std::string& wkt);
-    void setStacFields(OGRFeatureH hFeature, const FieldIndexes& indexes,
-        FileInfo& fileInfo);
 
     bool isFileIndexed( const FieldIndexes& indexes, const FileInfo& fileInfo);
 
@@ -194,26 +116,17 @@ private:
     std::string m_tileIndexColumnName;
     std::string m_srsColumnName;
     std::string m_wkt;
-    StringList m_lcOptions;
     BOX2D m_bounds;
-    bool m_absPath;
-    std::string m_prefix;
-    int m_threads;
-    bool m_doSmooth;
-    int32_t m_density;
-    double m_edgeLength;
-    uint32_t m_sampleSize;
-    std::string m_boundaryExpr;
     std::string m_pcType;
+
+    std::unique_ptr<tindex::Args> m_args;
+    std::unique_ptr<tindex::TIndexBuilder> m_tindex;
 
     OGRDataSourceH m_dataset;
     OGRLayerH m_layer;
     std::string m_tgtSrsString;
     std::string m_assignSrsString;
-    bool m_fastBoundary;
     bool m_usestdin;
-    bool m_overrideASrs;
-    bool m_skipMultiSrs;
     bool m_writeStacGeoparquet;
     std::string m_originalSrs;
     size_t m_maxFieldSize;

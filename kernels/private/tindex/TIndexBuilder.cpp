@@ -33,6 +33,7 @@ struct FieldInfo
     FieldInfo(const OGRFieldType fieldType, const OGRFieldSubType subtype) 
         : m_fieldType(fieldType), m_subtype(subtype) 
     {}
+    ~FieldInfo() {}
     void setIdx(int idx) { m_fieldIdx = idx; }
     operator int() const { return m_fieldIdx; }
 
@@ -59,11 +60,7 @@ TIndexBuilder::TIndexBuilder(const Args& args, const std::string& tileIndexColum
         m_maxFieldSize = 254;
 }
 
-TIndexBuilder::~TIndexBuilder() 
-{
-    if (m_dataset)
-        OGR_DS_Destroy(m_dataset);
-}
+TIndexBuilder::~TIndexBuilder() {}
 
 bool TIndexBuilder::openDataset()
 {
@@ -430,6 +427,12 @@ TileIndex::TileIndex(const Args& args, const std::string& tileIndexColumnName,
     m_fields.emplace("created", OFTDateTime);
 }
 
+TileIndex::~TileIndex() 
+{
+    if (m_dataset)
+        OGR_DS_Destroy(m_dataset);
+}
+
 std::unique_ptr<FileInfo> TileIndex::makeFileInfo(const std::string& filename)
 {
     auto info = std::make_unique<FileInfo>();
@@ -475,6 +478,12 @@ StacIndex::StacIndex(const Args& args, const std::string& pcType)
 
     m_extensions = { "https://stac-extensions.github.io/projection/v1.1.0/",
         "https://stac-extensions.github.io/pointcloud/v1.0.0/" };
+}
+
+StacIndex::~StacIndex()
+{
+    if (m_dataset)
+        OGR_DS_Destroy(m_dataset);
 }
 
 std::unique_ptr<FileInfo> StacIndex::makeFileInfo(const std::string& filename)
@@ -524,7 +533,7 @@ void StacIndex::createExtraFields(const std::unique_ptr<FileInfo>& fileInfo, OGR
     OGR_F_SetFieldString(hFeature, m_fields.at("id"),
         FileUtils::getFilename(stacFileInfo.m_filename).c_str());
 
-    OGR_F_SetFieldString(hFeature, m_fields.at("stac_version"), (const char*)STAC_VERSION);
+    OGR_F_SetFieldString(hFeature, m_fields.at("stac_version"), STAC_VERSION.c_str());
 
     char** cslExtensions = NULL;
     for (auto& s : m_extensions)

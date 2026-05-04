@@ -10,8 +10,6 @@
 #include "../stac/StacInfo.hpp"
 #include "TIndexBoundary.hpp"
 
-#define STAC_VERSION "1.1.0"
-
 // Get GDAL's forward decls if available
 // otherwise make our own
 #if __has_include(<gdal_fwd.h>)
@@ -38,6 +36,8 @@ namespace tindex
 
 struct FieldInfo;
 using FieldMap = std::map<std::string, FieldInfo>;
+
+static const std::string STAC_VERSION = "1.1.0";
 
 // messy - only includes some args because we need to have defaults for stac
 // (column names, SRS) & don't want to override them if they come from here
@@ -139,6 +139,8 @@ struct StacFileInfo : FileInfo
 class TIndexBuilder
 {
 public:
+    virtual ~TIndexBuilder();
+
     void getFieldIndexes(const OGRFeatureDefnH layerDefn);
     //std::vector<FileInfo> merge(const StringList& files);
     void create(const StringList& files, PipelineManager& mgr);
@@ -148,7 +150,6 @@ protected:
     TIndexBuilder(const Args& args, const std::string& tileIndexColumnName,
         const std::string& srsColumnName, const std::string& driverName, 
         const std::string& tgtSrs, const std::string& assignSrs);
-    ~TIndexBuilder();
 
     bool runBoundary(Stage& stage, FileInfo& fileInfo,
         PipelineManager& manager);
@@ -157,9 +158,9 @@ protected:
     FieldMap m_fields;
     Options m_commonOptions;
     OptionsMap m_stageOptions;
+    OGRDataSourceH m_dataset;
 
 private:
-    virtual void processFile(const std::string& filename) = 0;
     virtual std::unique_ptr<FileInfo> makeFileInfo(const std::string& filename) = 0;
     virtual void getFileInfo(std::unique_ptr<FileInfo>& fileInfo) = 0;
     virtual void createExtraFields(const std::unique_ptr<FileInfo>& fileInfo, 
@@ -187,7 +188,6 @@ private:
     std::string m_originalSrs;
     size_t m_maxFieldSize;
 
-    OGRDataSourceH m_dataset;
     OGRLayerH m_layer;
 
     //
@@ -203,6 +203,7 @@ public:
     TileIndex(const Args& args, const std::string& tileIndexColumnName,
         const std::string& srsColumnName, const std::string& driverName, const std::string& tgtSrs,
         const std::string& assignSrs);
+    ~TileIndex();
     //void create(const StringList& files) override;
 private:
     std::unique_ptr<FileInfo> makeFileInfo(const std::string& filename) override;
@@ -214,6 +215,7 @@ class StacIndex : public TIndexBuilder
 {
 public:
     StacIndex(const Args& args, const std::string& pcType);
+    ~StacIndex();
     //void create(const StringList& files) override;
 private:
     std::unique_ptr<FileInfo> makeFileInfo(const std::string& filename) override;
