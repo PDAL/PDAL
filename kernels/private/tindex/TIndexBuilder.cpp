@@ -20,9 +20,16 @@ namespace tindex
 TIndexBuilder::TIndexBuilder(const Args& args, const std::string& tileIndexColumnName,
         const std::string& srsColumnName, const std::string& driverName, const std::string& tgtSrs,
         const std::string& assignSrs)
-    : m_args(std::move(args)), m_tileIndexColumnName(tileIndexColumnName), m_srsColumnName(srsColumnName), 
-      m_driverName(driverName), m_tgtSrsString(tgtSrs), m_assignSrsString(assignSrs), m_layerName(m_args.layerName),
-      m_maxFieldSize(0)
+    : m_dataset(NULL),
+      m_args(std::move(args)), 
+      m_tileIndexColumnName(tileIndexColumnName),
+      m_srsColumnName(srsColumnName), 
+      m_driverName(driverName),
+      m_tgtSrsString(tgtSrs),
+      m_assignSrsString(assignSrs), 
+      m_layerName(m_args.layerName),
+      m_maxFieldSize(0),
+      m_layer(NULL)
 {
     // Add necessary fields
     m_fields.emplace(m_tileIndexColumnName, OFTString);
@@ -99,7 +106,7 @@ void TIndexBuilder::getFieldIndexes(const OGRFeatureDefnH layerDefn)
 {
     for (auto& [name, info]: m_fields)
     {
-        info.m_fieldIdx =  OGR_FD_GetFieldIndex(layerDefn, name.c_str());
+        info.setIdx(OGR_FD_GetFieldIndex(layerDefn, name.c_str()));
         //!! expand this to all fields?
         if ((name == m_tileIndexColumnName || name == m_srsColumnName)
             && info.m_fieldIdx < 0)
@@ -169,6 +176,7 @@ void TIndexBuilder::create(const StringList& files, PipelineManager& mgr)
     if (m_originalSrs.empty() || m_args.overrideASrs)
         m_originalSrs = m_assignSrsString;
     bool indexedFile(false);
+    getFieldIndexes(OGR_L_GetLayerDefn(m_layer));
     for (auto& info : m_infos)
     {
         if (m_args.pathPrefix.size() && !info->m_isRemote)

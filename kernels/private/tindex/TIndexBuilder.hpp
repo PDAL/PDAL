@@ -35,7 +35,6 @@ class StageFactory;
 namespace tindex
 {
 
-struct FieldInfo;
 using FieldMap = std::map<std::string, FieldInfo>;
 
 struct FieldInfo

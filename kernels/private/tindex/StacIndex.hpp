@@ -33,17 +33,17 @@ public:
         stacPointcloud(m_root, statsMeta, infoMeta, m_properties, pcType);
     }
 
-    MetadataNode propertiesChild(std::string key) 
+    MetadataNode propertiesChild(std::string key)
     {
-        return getChild(m_properties, key); 
+        return getChild(m_properties, key);
     }
 
-    MetadataNodeList propertiesChildren(std::string key) 
+    MetadataNodeList propertiesChildren(std::string key)
     {
-        return m_properties.children(key); 
+        return m_properties.children(key);
     }
 
-    MetadataNode rootChild(std::string key) 
+    MetadataNode rootChild(std::string key)
     {
         return getChild(m_root, key);
     }
