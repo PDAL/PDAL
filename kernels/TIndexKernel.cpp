@@ -44,7 +44,8 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/gdal/SpatialRef.hpp>
-#include <kernels/private/tindex/TIndexBuilder.hpp>
+#include <kernels/private/tindex/TileIndex.hpp>
+#include <kernels/private/tindex/StacIndex.hpp>
 
 #include "../io/LasWriter.hpp"
 
@@ -441,7 +442,7 @@ TIndexKernel::FieldIndexes TIndexKernel::getFields()
         std::ostringstream out;
 
         out << "Unable to find field '" << m_tileIndexColumnName <<
-            "' in file '" << m_idxFilename << "'.";
+            "' in file '" << m_args->idxFilename << "'.";
         throw pdal_error(out.str());
     }
     indexes.m_srs = OGR_FD_GetFieldIndex(fDefn, m_srsColumnName.c_str());
@@ -450,7 +451,7 @@ TIndexKernel::FieldIndexes TIndexKernel::getFields()
         std::ostringstream out;
 
         out << "Unable to find field '" << m_srsColumnName << "' in file '" <<
-            m_idxFilename << "'.";
+            m_args->idxFilename << "'.";
         throw pdal_error(out.str());
     }
 

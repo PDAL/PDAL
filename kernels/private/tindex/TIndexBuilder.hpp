@@ -7,7 +7,6 @@
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/Options.hpp>
 
-#include "../stac/StacInfo.hpp"
 #include "TIndexBoundary.hpp"
 
 // Get GDAL's forward decls if available
@@ -18,6 +17,8 @@
 using OGRDataSourceH = void *;
 using OGRLayerH = void *;
 using OGRFeatureH = void *;
+using OGRFieldType = int;
+using OGRFieldSubType = int;
 #endif
 
 namespace pdal
@@ -37,7 +38,21 @@ namespace tindex
 struct FieldInfo;
 using FieldMap = std::map<std::string, FieldInfo>;
 
-static const std::string STAC_VERSION = "1.1.0";
+struct FieldInfo
+{
+    FieldInfo(const OGRFieldType fieldType) : m_fieldType(fieldType) 
+    {}
+    FieldInfo(const OGRFieldType fieldType, const OGRFieldSubType subtype) 
+        : m_fieldType(fieldType), m_subtype(subtype) 
+    {}
+    ~FieldInfo() {}
+    void setIdx(int idx) { m_fieldIdx = idx; }
+    operator int() const { return m_fieldIdx; }
+
+    OGRFieldType m_fieldType;
+    OGRFieldSubType m_subtype = OFSTNone;
+    int m_fieldIdx = -1;
+};
 
 // messy - only includes some args because we need to have defaults for stac
 // (column names, SRS) & don't want to override them if they come from here
@@ -68,58 +83,6 @@ struct Args
     //std::string pcType;
 };
 
-class StacInfo
-{
-public:
-    StacInfo() {}
-
-    void init(std::string const& filename)
-    {
-        // stacProjection & stacPointCloud need these set in the root metadata 
-        // for it to work. Should refactor to be less metadata dependent
-        m_root.add("filename", filename);
-        MetadataNode self = m_root.addList("links");
-        self.add("rel", "derived_from");
-        self.add("href", filename);
-        m_properties = m_root.add("properties");
-        m_extensions = { "https://stac-extensions.github.io/projection/v1.1.0/",
-            "https://stac-extensions.github.io/pointcloud/v1.0.0/" };
-    }
-
-    void addMetadata(MetadataNode& statsMeta, MetadataNode& readerMeta,
-        MetadataNode& infoMeta, std::string pcType)
-    {
-        stacPointcloud(m_root, statsMeta, infoMeta, m_properties, pcType);
-    }
-
-    MetadataNode propertiesChild(std::string key) 
-    {
-        return getChild(m_properties, key); 
-    }
-
-    MetadataNodeList propertiesChildren(std::string key) 
-    {
-        return m_properties.children(key); 
-    }
-
-    MetadataNode rootChild(std::string key) 
-    {
-        return getChild(m_root, key);
-    }
-
-    MetadataNodeList rootChildren(std::string key) 
-    {
-        return m_root.children(key);
-    }
-
-    StringList extensions() const { return m_extensions; }
-
-private:
-    MetadataNode m_root;
-    MetadataNode m_properties;
-    StringList m_extensions;
-};
-
 struct FileInfo
 {
     std::string m_filename;
@@ -129,11 +92,6 @@ struct FileInfo
     struct tm m_mtime;
     double m_gridHeight;
     bool m_isRemote = false;
-};
-
-struct StacFileInfo : FileInfo
-{
-    StacInfo m_stacInfo;
 };
 
 class TIndexBuilder
@@ -195,36 +153,6 @@ private:
     //
     LogPtr m_log;
     //StringList m_files;
-};
-
-class TileIndex : public TIndexBuilder
-{
-public:
-    TileIndex(const Args& args, const std::string& tileIndexColumnName,
-        const std::string& srsColumnName, const std::string& driverName, const std::string& tgtSrs,
-        const std::string& assignSrs);
-    ~TileIndex();
-    //void create(const StringList& files) override;
-private:
-    std::unique_ptr<FileInfo> makeFileInfo(const std::string& filename) override;
-    void getFileInfo(std::unique_ptr<FileInfo>& fileInfo) override;
-    void createExtraFields(const std::unique_ptr<FileInfo>& fileInfo, OGRFeatureH hFeature) override;
-};
-
-class StacIndex : public TIndexBuilder
-{
-public:
-    StacIndex(const Args& args, const std::string& pcType);
-    ~StacIndex();
-    //void create(const StringList& files) override;
-private:
-    std::unique_ptr<FileInfo> makeFileInfo(const std::string& filename) override;
-    void getFileInfo(std::unique_ptr<FileInfo>& fileInfo) override;
-    void createExtraFields(const std::unique_ptr<FileInfo>& fileInfo, OGRFeatureH hFeature) override;
-
-    StringList m_extensions;
-    std::string m_pcType;
-    //std::vector<StacInfo> m_stacInfos;
 };
 
 class TIndexError : public std::runtime_error
