@@ -397,6 +397,20 @@ void TIndexKernel::mergeFile()
 
 void TIndexKernel::createFile()
 {
+    if (!m_usestdin && m_listfile.empty())
+        m_files = Utils::glob(m_filespec);
+    else if (m_listfile.size())
+        m_files = readFileList(m_listfile);
+    else
+        m_files = readSTDIN();
+
+    if (m_files.empty())
+    {
+        std::ostringstream out;
+        out << "Couldn't find files to index: " << m_filespec << ".";
+        throw pdal_error(out.str());
+    }
+
     if (m_writeStacGeoparquet)
         m_tindex.reset(new tindex::StacIndex(*m_args, m_pcType));
     else
