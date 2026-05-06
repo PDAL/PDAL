@@ -2,6 +2,8 @@
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/gdal/SpatialRef.hpp>
 
+#include <ogr_api.h>
+
 #if __has_include(<gdal_fwd.h>)
 #include <gdal_fwd.h>
 #else
@@ -9,8 +11,6 @@ using OGRDataSourceH = void *;
 using OGRLayerH = void *;
 using OGRFeatureH = void *;
 using OGRFeatureDefnH = void *;
-using OGRFieldType = int;
-using OGRFieldSubType = int;
 #endif
 
 namespace pdal
@@ -40,7 +40,26 @@ struct FieldInfo
     OGRFieldSubType m_subtype = OFSTNone;
     int m_fieldIdx = -1;
 };
+
 using FieldMap = std::map<std::string, FieldInfo>;
+
+class TIndexFeature
+{
+public:
+    TIndexFeature(OGRFeatureDefnH layerDefn, int maxFieldSize);
+    ~TIndexFeature();
+
+    OGRFeatureH getFeature() { return m_feature; }
+
+    void setField(int fieldIdx, const std::string& value);
+    void setField(int fieldIdx, const StringList& values);
+    void setField(int fieldIdx, const int value);
+    bool setGeometry(pdal::Polygon& polygon);
+    // add other types
+private:
+    OGRFeatureH m_feature;
+    int m_maxFieldSize;
+};
 
 class TIndexDataset
 {
@@ -63,7 +82,11 @@ public:
     bool createLayer(const std::string& layerName, const std::string& srsString, 
         const StringList& lcOptions);
     void createField(const std::string& name, const OGRFieldType fieldType, 
-        const OGRFieldSubType subtype = OFSTNone);
+        const OGRFieldSubType subtype);
+    TIndexFeature buildFeature();
+    bool createFeature(TIndexFeature& feature);
+    int getFieldIdx(const std::string& fieldName);
+    bool queryLayer(const std::string& query);
 
 private:
     OGRLayerH m_layer;

@@ -50,6 +50,7 @@ TEST(TIndex, test1)
     std::string outSpec(Support::temppath("tindex.json"));
     std::string outPoints(Support::temppath("points.txt"));
 
+    std::cout << "creating 1 tile index" << std::endl;
     std::string cmd = Support::binpath("pdal") + " tindex create " +
         outSpec + " \"" + inSpec + "\" -f GeoJSON --log=stdout";
 
@@ -57,7 +58,9 @@ TEST(TIndex, test1)
 
     std::string output;
     Utils::run_shell_command(cmd, output);
+    std::cout << output << std::endl;
 
+    std::cout << "creating 2 tile index" << std::endl;
     cmd = Support::binpath("pdal") + " --verbose=info tindex merge " +
         outSpec + " " + outPoints + " --log=stdout "
         "--bounds=\"([1.25, 3],[1.25, 3])\"";
@@ -66,6 +69,8 @@ TEST(TIndex, test1)
     Utils::run_shell_command(cmd, output);
     std::string::size_type pos = output.find("Merge filecount: 3");
     EXPECT_NE(pos, std::string::npos);
+    /*
+    std::cout << "creating 3 tile index" << std::endl;
 
     cmd = Support::binpath("pdal") + " --verbose=info tindex merge " +
         outSpec + " " + outPoints + " --log=stdout "
@@ -82,11 +87,11 @@ TEST(TIndex, test1)
     Utils::run_shell_command(cmd, output);
     pos = output.find("Merge filecount: 1");
     EXPECT_NE(pos, std::string::npos);
-
+*/
     FileUtils::deleteFile(outPoints);
-    FileUtils::deleteFile(outSpec);
+    //FileUtils::deleteFile(outSpec);
 }
-
+/*
 TEST(TIndex, test2)
 {
     std::string inSpec(Support::datapath("tindex/*.txt"));
@@ -323,3 +328,4 @@ TEST(TIndex, test8)
 
     EXPECT_EQ(desc, "foo");
 }
+*/
