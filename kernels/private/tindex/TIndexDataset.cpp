@@ -56,6 +56,13 @@ void TIndexFeature::setField(int fieldIdx, const int value)
     OGR_F_SetFieldInteger(m_feature, fieldIdx, value);
 }
 
+void TIndexFeature::setField(int fieldIdx, const tm& tyme)
+{
+    OGR_F_SetFieldDateTime(m_feature, fieldIdx,
+        tyme.tm_year + 1900, tyme.tm_mon + 1, tyme.tm_mday, tyme.tm_hour,
+        tyme.tm_min, tyme.tm_sec, 100);
+}
+
 bool TIndexFeature::setGeometry(pdal::Polygon& polygon)
 {
     OGRGeometryH geometry = polygon.getOGRHandle();

@@ -64,7 +64,7 @@ void StacIndex::getFileInfo(std::unique_ptr<FileInfo>& fileInfo)
     }
 }
 
-void StacIndex::createExtraFields(const std::unique_ptr<FileInfo>& fileInfo, OGRFeatureH hFeature)
+void StacIndex::createExtraFields(const std::unique_ptr<FileInfo>& fileInfo, TIndexFeature& feature)
 {
     // removing newlines to get rid of dead space in the parquet file. Not strictly necessary
     auto stripNewline = [](std::string& s) {
@@ -77,38 +77,33 @@ void StacIndex::createExtraFields(const std::unique_ptr<FileInfo>& fileInfo, OGR
     StacInfo& stacInfo = stacFileInfo.m_stacInfo;
 
     std::string linksJson = Utils::toJSON(stacInfo.rootChildren("links"));
-    OGR_F_SetFieldString(hFeature, m_fields.at("links"), stripNewline(linksJson).c_str());
+    feature.setField(m_fields.at("links"), stripNewline(linksJson));
 
-    OGR_F_SetFieldString(hFeature, m_fields.at("id"),
-        FileUtils::getFilename(stacFileInfo.m_filename).c_str());
+    feature.setField(m_fields.at("id"), FileUtils::getFilename(stacFileInfo.m_filename));
 
-    OGR_F_SetFieldString(hFeature, m_fields.at("stac_version"), STAC_VERSION.c_str());
+    feature.setField(m_fields.at("stac_version"), STAC_VERSION);
 
-    char** cslExtensions = NULL;
-    for (auto& s : m_extensions)
-        cslExtensions = CSLAddString(cslExtensions, s.c_str());
-    OGR_F_SetFieldStringList(hFeature, m_fields.at("stac_extensions"), cslExtensions);
-    CSLDestroy(cslExtensions);
+    feature.setField(m_fields.at("stac_extensions"), m_extensions);
 
     // Not added: proj:bbox, proj:geometry
 
     std::string projJson = SpatialReference(stacFileInfo.m_srs).getPROJJSON();
-    OGR_F_SetFieldString(hFeature, m_fields.at("proj:projjson"), projJson.c_str());
-
+    feature.setField(m_fields.at("proj:projjson"), projJson);
+ 
     int pointCount = stacInfo.propertiesChild("pc:count").value<int>();
-    OGR_F_SetFieldInteger(hFeature, m_fields.at("pc:count"), pointCount);
+    feature.setField(m_fields.at("pc:count"), pointCount);
 
     std::string encoding = stacInfo.propertiesChild("pc:encoding").value();
-    OGR_F_SetFieldString(hFeature, m_fields.at("pc:encoding"), encoding.c_str());
+    feature.setField(m_fields.at("pc:encoding"), encoding);
 
-    OGR_F_SetFieldString(hFeature, m_fields.at("pc:type"), m_pcType.c_str());
+    feature.setField(m_fields.at("pc:type"), m_pcType);
 
     // Not sure if schema and statistics need to be native parquet lists or if json is ok
     std::string schema = Utils::toJSON(stacInfo.propertiesChildren("pc:schemas"));
-    OGR_F_SetFieldString(hFeature, m_fields.at("pc:schemas"), stripNewline(schema).c_str());
+    feature.setField(m_fields.at("pc:schemas"), stripNewline(schema));
 
     std::string statistics = Utils::toJSON(stacInfo.propertiesChildren("pc:statistics"));
-    OGR_F_SetFieldString(hFeature, m_fields.at("pc:statistics"), stripNewline(statistics).c_str());
+    feature.setField(m_fields.at("pc:statistics"), stripNewline(statistics));
 }
 
 } // namespace pdal

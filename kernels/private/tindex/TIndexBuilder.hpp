@@ -100,7 +100,7 @@ private:
     virtual std::unique_ptr<FileInfo> makeFileInfo(const std::string& filename) = 0;
     virtual void getFileInfo(std::unique_ptr<FileInfo>& fileInfo) = 0;
     virtual void createExtraFields(const std::unique_ptr<FileInfo>& fileInfo, 
-        OGRFeatureH feature) = 0;
+        TIndexFeature& feature) = 0;
 
     void getFieldIndexes();
     bool fastBoundary(Stage& reader, FileInfo& fileInfo);

@@ -53,10 +53,11 @@ void TileIndex::getFileInfo(std::unique_ptr<FileInfo>& fileInfo)
     runBoundary(reader, *fileInfo, manager);  
 }
 
-void TileIndex::createExtraFields(const std::unique_ptr<FileInfo>& fileInfo, OGRFeatureH hFeature)
+void TileIndex::createExtraFields(const std::unique_ptr<FileInfo>& fileInfo,
+    TIndexFeature& feature)
 {
-    setDate(hFeature, fileInfo->m_ctime, m_fields.at("created"));
-    setDate(hFeature, fileInfo->m_mtime, m_fields.at("modified"));
+    feature.setField(m_fields.at("created"), fileInfo->m_ctime);
+    feature.setField(m_fields.at("modified"), fileInfo->m_mtime);
 }
 
 } // namespace tindex

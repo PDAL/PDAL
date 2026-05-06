@@ -17,7 +17,8 @@ public:
 private:
     std::unique_ptr<FileInfo> makeFileInfo(const std::string& filename) override;
     void getFileInfo(std::unique_ptr<FileInfo>& fileInfo) override;
-    void createExtraFields(const std::unique_ptr<FileInfo>& fileInfo, OGRFeatureH hFeature) override;
+    void createExtraFields(const std::unique_ptr<FileInfo>& fileInfo,
+        TIndexFeature& feature) override;
 };
 
 } // namespace tindex

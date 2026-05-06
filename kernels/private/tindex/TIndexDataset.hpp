@@ -54,6 +54,7 @@ public:
     void setField(int fieldIdx, const std::string& value);
     void setField(int fieldIdx, const StringList& values);
     void setField(int fieldIdx, const int value);
+    void setField(int fieldIdx, const tm& tyme);
     bool setGeometry(pdal::Polygon& polygon);
     // add other types
 private:
