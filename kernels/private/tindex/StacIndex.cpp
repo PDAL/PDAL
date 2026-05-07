@@ -30,10 +30,7 @@ StacIndex::StacIndex(const Args& args, const std::string& pcType)
 }
 
 StacIndex::~StacIndex()
-{
-    if (m_dataset)
-        OGR_DS_Destroy(m_dataset);
-}
+{}
 
 std::unique_ptr<FileInfo> StacIndex::makeFileInfo(const std::string& filename)
 {

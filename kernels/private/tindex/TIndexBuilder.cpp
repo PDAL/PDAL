@@ -4,6 +4,7 @@
 #include <pdal/util/ThreadPool.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/gdal/SpatialRef.hpp>
+#include <pdal/Polygon.hpp>
 
 #include <ogr_api.h>
 #include <cpl_string.h>
@@ -44,7 +45,7 @@ void TIndexBuilder::getFieldIndexes()
 {
     for (auto& [name, info]: m_fields)
     {
-        info.m_fieldIdx = m_dataset->getFieldIndex(name);
+        info.m_fieldIdx = m_dataset->getFieldIdx(name);
         //!! expand this to all fields?
         if ((name == m_tileIndexColumnName || name == m_srsColumnName)
             && info.m_fieldIdx < 0)
@@ -92,7 +93,7 @@ void TIndexBuilder::create(const StringList& files, PipelineManager& mgr)
         }
 
     for (auto& [name, info]: m_fields)
-        m_dataset->createField(name, info.m_fieldType, info.m_fieldSubType);
+        m_dataset->createField(name, info.m_fieldType, info.m_subtype);
 
     for (auto& file : files)
     {

@@ -27,16 +27,17 @@ TIndexFeature::~TIndexFeature()
 
 void TIndexFeature::setField(int fieldIdx, const std::string& value)
 {
-    if (m_maxFieldSize == 0 || strlen(value) <= m_maxFieldSize)
+    const char* valueCStr = value.c_str();
+    if (m_maxFieldSize == 0 || strlen(valueCStr) <= m_maxFieldSize)
     {
-        OGR_F_SetFieldString(m_feature, fieldIdx, value.c_str());
+        OGR_F_SetFieldString(m_feature, fieldIdx, valueCStr);
     }
     else
     {
         std::ostringstream oss;
         OGRFieldDefnH hFieldDefn = OGR_F_GetFieldDefnRef(m_feature, fieldIdx);
 
-        oss << "value for field'" << OGR_Fld_GetNameRef(hFieldDefn) << "' has " << strlen(value) <<
+        oss << "value for field'" << OGR_Fld_GetNameRef(hFieldDefn) << "' has " << strlen(valueCStr) <<
             " characters; ESRI Shapefile driver supports a maximum of 254.";
 
         throw TIndexError(oss.str());
@@ -158,7 +159,7 @@ int TIndexDataset::getFieldIdx(const std::string& fieldName)
 {
     if (!m_layerDefn)
         m_layerDefn = OGR_L_GetLayerDefn(m_layer);
-    return OGR_L_GetFieldIndex(m_layerDefn, name.c_str());
+    return OGR_FD_GetFieldIndex(m_layerDefn, fieldName.c_str());
 }
 
 TIndexFeature TIndexDataset::buildFeature() 

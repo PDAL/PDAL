@@ -96,7 +96,7 @@ private:
 
     std::string m_idxFilename;
     std::string m_driverName;
-    int m_maxFieldSize;
+    size_t m_maxFieldSize;
     FieldMap m_fields;
 };
 

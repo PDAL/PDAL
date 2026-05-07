@@ -31,10 +31,7 @@ TileIndex::TileIndex(const Args& args, const std::string& tileIndexColumnName,
 }
 
 TileIndex::~TileIndex()
-{
-    if (m_dataset)
-        OGR_DS_Destroy(m_dataset);
-}
+{}
 
 std::unique_ptr<FileInfo> TileIndex::makeFileInfo(const std::string& filename)
 {
