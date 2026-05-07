@@ -146,7 +146,6 @@ bool TIndexDataset::createLayer(const std::string& layerName, const std::string&
 
     m_layer = OGR_DS_CreateLayer(m_dataset, layerName.c_str(),
         srs.get(), wkbMultiPolygon, papszOptions);
-    m_layerDefn = OGR_L_GetLayerDefn(m_layer);
 
     CSLDestroy(papszOptions);
 
@@ -161,8 +160,13 @@ void TIndexDataset::createFields()
         OGR_Fld_SetSubType(hFieldDefn, field.m_subtype);
         OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
         OGR_Fld_Destroy(hFieldDefn);
-
-        field.m_index = OGR_F_GetFieldIndex(m_layerDefn, field.m_name.c_str());
+    }
+    // Once all the fields have been created, the final layerDefn is ready
+    // & we can get the field indices
+    m_layerDefn = OGR_L_GetLayerDefn(m_layer);
+    for (Field& field : m_fields)
+    {
+        field.m_index = OGR_FD_GetFieldIndex(m_layerDefn, field.m_name.c_str());
     }
 }
 
