@@ -1,6 +1,9 @@
 #include "TIndexBuilder.hpp"
 #include "TIndexBoundary.hpp"
+#include "TIndexDataset.hpp"
+#include "TIndexError.hpp"
 
+#include <pdal/Polygon.hpp>
 #include <pdal/util/ThreadPool.hpp>
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/gdal/SpatialRef.hpp>
@@ -21,43 +24,22 @@ TIndexBuilder::TIndexBuilder(const Args& args, const std::string& tileIndexColum
         const std::string& srsColumnName, const std::string& driverName, const std::string& tgtSrs,
         const std::string& assignSrs)
     : m_dataset(new TIndexDataset(args.idxFilename, driverName)),
-      m_args(std::move(args)), 
+      m_args(std::move(args)),
       m_tileIndexColumnName(tileIndexColumnName),
-      m_srsColumnName(srsColumnName), 
+      m_srsColumnName(srsColumnName),
       m_driverName(driverName),
       m_tgtSrsString(tgtSrs),
-      m_assignSrsString(assignSrs), 
-      m_layerName(m_args.layerName),
-      m_maxFieldSize(0)
+      m_assignSrsString(assignSrs),
+      m_layerName(m_args.layerName)
 {
-    // Add necessary fields
-    m_fields.emplace(m_tileIndexColumnName, OFTString);
-    m_fields.emplace(m_srsColumnName, OFTString);
-
-    if (m_driverName == "ESRI Shapefile")
-        m_maxFieldSize = 254;
+    m_tindexColumnNameField = m_dataset->defineField(m_tileIndexColumnName, OFTString);
+    m_srsColumnNameField = m_dataset->defineField(m_srsColumnName, OFTString);
 }
 
-TIndexBuilder::~TIndexBuilder() {}
+TIndexBuilder::~TIndexBuilder()
+{}
 
-void TIndexBuilder::getFieldIndexes()
-{
-    for (auto& [name, info]: m_fields)
-    {
-        info.m_fieldIdx = m_dataset->getFieldIndex(name);
-        //!! expand this to all fields?
-        if ((name == m_tileIndexColumnName || name == m_srsColumnName)
-            && info.m_fieldIdx < 0)
-        {
-            std::ostringstream out;
-            out << "Unable to find field '" << name << "' in file '" 
-                << m_args.idxFilename << "'.";
-            throw TIndexError(out.str());
-        }
-    }
-}
-
-void TIndexBuilder::create(const StringList& files, PipelineManager& mgr) 
+void TIndexBuilder::create(const StringList& files, PipelineManager& mgr)
 {
     const std::string filename = files.front();
     m_infos.reserve(files.size());
@@ -69,7 +51,7 @@ void TIndexBuilder::create(const StringList& files, PipelineManager& mgr)
     m_log = mgr.log();
 
     if (m_layerName.empty())
-       m_layerName = CPLGetBasename(filename.c_str());
+       m_layerName = FileUtils::stem(filename);
 
     // Open or create the dataset.
     if (!m_dataset->openDataset())
@@ -90,19 +72,11 @@ void TIndexBuilder::create(const StringList& files, PipelineManager& mgr)
                 "' in output file '" << m_args.idxFilename << "'.";
             throw TIndexError(out.str());
         }
+    m_dataset->createFields();
 
-    for (auto& [name, info]: m_fields)
-        m_dataset->createField(name, info.m_fieldType, info.m_fieldSubType);
+    for (const std::string& file : files)
+        m_infos.push_back(makeFileInfo(file));
 
-    for (auto& file : files)
-    {
-        // Sets filename, initializes STAC metadata
-        auto info = makeFileInfo(file);
-        info->m_isRemote = Utils::isRemote(file);
-        if (!info->m_isRemote)
-            FileUtils::fileTimes(info->m_filename, &info->m_ctime, &info->m_mtime);
-        m_infos.push_back(std::move(info));
-    }
     ThreadPool pool(m_args.numThreads);
 
     for (auto &info : m_infos)
@@ -119,8 +93,6 @@ void TIndexBuilder::create(const StringList& files, PipelineManager& mgr)
         m_originalSrs = m_assignSrsString;
 
     bool indexedFile(false);
-    getFieldIndexes();
-
     for (auto& info : m_infos)
     {
         if (m_args.pathPrefix.size() && !info->m_isRemote)
@@ -136,11 +108,6 @@ void TIndexBuilder::create(const StringList& files, PipelineManager& mgr)
 
 bool TIndexBuilder::createFeature(const std::unique_ptr<FileInfo>& fileInfo)
 {
-    using namespace gdal;
-
-    TIndexFeature feature = m_dataset->buildFeature();
-
-    feature.setField(m_fields.at(m_tileIndexColumnName), fileInfo->m_filename);
 
     if (fileInfo->m_srs.empty() || m_args.overrideASrs)
         fileInfo->m_srs = m_assignSrsString;
@@ -163,16 +130,13 @@ bool TIndexBuilder::createFeature(const std::unique_ptr<FileInfo>& fileInfo)
             return false;
     }
 
-    std::string wkt = SpatialReference(fileInfo->m_srs).getWKT();
-    feature.setField(m_fields.at(m_srsColumnName), wkt);
-
+    TIndexFeature feature = m_dataset->buildFeature();
+    feature.setField(m_tindexColumnNameField, fileInfo->m_filename);
+    feature.setField(m_srsColumnNameField, SpatialReference(fileInfo->m_srs).getWKT());
     createExtraFields(fileInfo, feature);
+    feature.setGeometry(prepareGeometry(*fileInfo));
 
-    Polygon g = prepareGeometry(fileInfo);
-    feature.setGeometry(g);
-
-    const bool bRet = m_dataset->createFeature(feature);
-
+    bool bRet = m_dataset->createFeature(feature);
     if (bRet)
         m_log->get(LogLevel::Info) << "Indexed file " << fileInfo->m_filename <<
             std::endl;
@@ -200,7 +164,7 @@ bool TIndexBuilder::isFileIndexed(const std::unique_ptr<FileInfo>& fileInfo)
     catch(TIndexError& e)
     {
         std::ostringstream out;
-        out << "Unable to query layer for file '" << fileInfo->m_filename << "': " 
+        out << "Unable to query layer for file '" << fileInfo->m_filename << "': "
             << e.what();
         throw TIndexError(out.str());
     }
@@ -212,7 +176,7 @@ bool TIndexBuilder::runBoundary(Stage& stage, FileInfo& fileInfo,
 {
     // If we aren't able to make a hexbin filter, we
     // will just do a simple fast_boundary.
-    bool fast(m_args.fastBoundary); 
+    bool fast(m_args.fastBoundary);
     if (!fast)
     {
         TindexBoundary hexer{m_args.density, m_args.edgeLength, m_args.sampleSize};
@@ -235,7 +199,7 @@ bool TIndexBuilder::runBoundary(Stage& stage, FileInfo& fileInfo,
         catch(pdal_error& e)
         {
             fast = true;
-            m_log->get(LogLevel::Warning) << "Unable to create exact boundary for tile " << 
+            m_log->get(LogLevel::Warning) << "Unable to create exact boundary for tile " <<
                 fileInfo.m_filename << " with error: '" << e.what() << std::endl;
         }
     }
@@ -251,44 +215,34 @@ bool TIndexBuilder::fastBoundary(Stage& reader, FileInfo& fileInfo)
     if (!qi.valid())
         return false;
 
-    fileInfo.m_boundary = makeMultiPolygon(qi.m_bounds.to2d().toWKT());
+    fileInfo.m_boundary = qi.m_bounds.to2d().toWKT();
     if (!qi.m_srs.empty())
         fileInfo.m_srs = qi.m_srs.getWKT();
     fileInfo.m_gridHeight = 0.0;
     return true;
 }
 
-pdal::Polygon TIndexBuilder::prepareGeometry(const std::unique_ptr<FileInfo>& fileInfo)
+pdal::Polygon TIndexBuilder::prepareGeometry(const FileInfo& fileInfo)
 {
-    using namespace gdal;
-
-    Polygon g(fileInfo->m_boundary, fileInfo->m_srs);
-    if (fileInfo->m_gridHeight && m_args.doSmooth)
+    auto makeMultiPolygon = [](std::string poly) -> std::string
     {
-        double tolerance = 1.1 * fileInfo->m_gridHeight / 2;
+        // Erase "POLYGON" and wrap with "MULTIPOLYGON(..)"
+        if (Utils::startsWith(poly, "POLYGON"))
+            return poly.replace(0, 7, "MULTIPOLYGON(") + ")";
+        return poly;
+    };
+
+    Polygon g(fileInfo.m_boundary, fileInfo.m_srs);
+    if (fileInfo.m_gridHeight && m_args.doSmooth)
+    {
+        double tolerance = 1.1 * fileInfo.m_gridHeight / 2;
         double cull = (6 * tolerance * tolerance);
         g.simplify(tolerance, cull);
-        if (g.wkt()[0] == 'P')
-        {
-            std::string multi = makeMultiPolygon(g.wkt());
-            g = Polygon(multi, fileInfo->m_srs);
-        }
     }
-    if (m_tgtSrsString.size())
-    {
-        SpatialReference out(m_tgtSrsString);
-        g.transform(out);
-    }
+    g = Polygon(makeMultiPolygon(g.wkt()), fileInfo.m_srs);
+    g.transform(SpatialReference(m_tgtSrsString));
 
     return g;
-}
-
-std::string TIndexBuilder::makeMultiPolygon(const std::string& wkt)
-{
-    std::string multi = wkt + ')';
-    multi.insert(8, "(");
-    multi.insert(0, "MULTI");
-    return multi;
 }
 
 } // namespace tindex

@@ -1,5 +1,6 @@
 
 #include "TIndexDataset.hpp"
+#include "TIndexError.hpp"
 
 #include <pdal/Polygon.hpp>
 
@@ -14,69 +15,66 @@ namespace tindex
 /// TIndexFeature
 ///
 
-TIndexFeature::TIndexFeature(OGRFeatureDefnH layerDefn, int maxFieldSize) 
+TIndexFeature::TIndexFeature(OGRFeatureDefnH layerDefn, int maxFieldSize)
     : m_maxFieldSize(maxFieldSize)
 {
     m_feature = OGR_F_Create(layerDefn);
 }
 
-TIndexFeature::~TIndexFeature() 
+TIndexFeature::~TIndexFeature()
 {
     OGR_F_Destroy(m_feature);
 }
 
-void TIndexFeature::setField(int fieldIdx, const std::string& value)
+void TIndexFeature::setField(Field *field, const std::string& value)
 {
-    if (m_maxFieldSize == 0 || strlen(value) <= m_maxFieldSize)
+    if (m_maxFieldSize == 0 || value.size() <= (size_t)m_maxFieldSize)
     {
-        OGR_F_SetFieldString(m_feature, fieldIdx, value.c_str());
+        OGR_F_SetFieldString(m_feature, field->m_index, value.c_str());
     }
     else
     {
-        std::ostringstream oss;
-        OGRFieldDefnH hFieldDefn = OGR_F_GetFieldDefnRef(m_feature, fieldIdx);
+        OGRFieldDefnH hFieldDefn = OGR_F_GetFieldDefnRef(m_feature, field->m_index);
 
-        oss << "value for field'" << OGR_Fld_GetNameRef(hFieldDefn) << "' has " << strlen(value) <<
-            " characters; ESRI Shapefile driver supports a maximum of 254.";
-
-        throw TIndexError(oss.str());
+        throw TIndexError("Value for field'" + std::string(OGR_Fld_GetNameRef(hFieldDefn)) +
+            "' exceeds supported length of " + std::to_string(m_maxFieldSize) + ".");
     }
 }
 
-void TIndexFeature::setField(int fieldIdx, const StringList& values)
+void TIndexFeature::setField(Field *field, const StringList& values)
 {
     char** csl = NULL;
     for (const std::string& s : values)
         csl = CSLAddString(csl, s.c_str());
-    OGR_F_SetFieldStringList(m_feature, fieldIdx, csl);
+    OGR_F_SetFieldStringList(m_feature, field->m_index, csl);
 }
 
-void TIndexFeature::setField(int fieldIdx, const int value)
+void TIndexFeature::setField(Field *field, const int value)
 {
-    OGR_F_SetFieldInteger(m_feature, fieldIdx, value);
+    OGR_F_SetFieldInteger(m_feature, field->m_index, value);
 }
 
-void TIndexFeature::setField(int fieldIdx, const tm& tyme)
+void TIndexFeature::setField(Field *field, const tm& tyme)
 {
-    OGR_F_SetFieldDateTime(m_feature, fieldIdx,
+    OGR_F_SetFieldDateTime(m_feature, field->m_index,
         tyme.tm_year + 1900, tyme.tm_mon + 1, tyme.tm_mday, tyme.tm_hour,
         tyme.tm_min, tyme.tm_sec, 100);
 }
 
-bool TIndexFeature::setGeometry(pdal::Polygon& polygon)
+bool TIndexFeature::setGeometry(const Polygon& polygon)
 {
-    OGRGeometryH geometry = polygon.getOGRHandle();
-    return (OGR_F_SetGeometry(m_feature, geometry) == OGRERR_NONE);
+    return OGR_F_SetGeometry(m_feature, const_cast<Polygon &>(polygon).getOGRHandle()) ==
+        OGRERR_NONE;
 }
 
 ///
 /// TIndexDataset
 ///
 
-TIndexDataset::TIndexDataset(const std::string& idxFilename, const std::string& driverName) 
-    : m_layer(nullptr), 
-      m_dataset(nullptr), 
-      m_layerDefn(nullptr), 
+TIndexDataset::TIndexDataset(const std::string& idxFilename, const std::string& driverName)
+    : m_layer(nullptr),
+      m_dataset(nullptr),
+      m_layerDefn(nullptr),
       m_idxFilename(idxFilename),
       m_driverName(driverName),
       m_maxFieldSize(0)
@@ -85,16 +83,27 @@ TIndexDataset::TIndexDataset(const std::string& idxFilename, const std::string& 
         m_maxFieldSize = 254;
 }
 
-TIndexDataset::~TIndexDataset() 
+TIndexDataset::~TIndexDataset()
 {
     if (m_dataset)
         OGR_DS_Destroy(m_dataset);
 }
 
+Field *TIndexDataset::defineField(const std::string& name, const OGRFieldType fieldType)
+{
+    return &m_fields.emplace_back(name, fieldType);
+}
+
+Field *TIndexDataset::defineField(const std::string& name, const OGRFieldType fieldType,
+        const OGRFieldSubType subtype)
+{
+    return &m_fields.emplace_back(name, fieldType, subtype);
+}
+
 bool TIndexDataset::openDataset()
 {
     m_dataset = OGROpen(m_idxFilename.c_str(), TRUE, NULL);
-    return (bool)m_dataset;   
+    return (bool)m_dataset;
 }
 
 bool TIndexDataset::openLayer(const std::string& layerName)
@@ -137,43 +146,37 @@ bool TIndexDataset::createLayer(const std::string& layerName, const std::string&
 
     m_layer = OGR_DS_CreateLayer(m_dataset, layerName.c_str(),
         srs.get(), wkbMultiPolygon, papszOptions);
+    m_layerDefn = OGR_L_GetLayerDefn(m_layer);
 
     CSLDestroy(papszOptions);
 
     return (bool)m_layer;
 }
 
-void TIndexDataset::createField(const std::string& name, const OGRFieldType fieldType,
-    const OGRFieldSubType subtype) 
+void TIndexDataset::createFields()
 {
-    OGRFieldDefnH hFieldDefn = 
-        OGR_Fld_Create(name.c_str(), fieldType);
-    if (subtype != OFSTNone)
-        OGR_Fld_SetSubType(hFieldDefn, subtype);
-    OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
-    OGR_Fld_Destroy(hFieldDefn);
+    for (Field& field : m_fields)
+    {
+        OGRFieldDefnH hFieldDefn = OGR_Fld_Create(field.m_name.c_str(), field.m_fieldType);
+        OGR_Fld_SetSubType(hFieldDefn, field.m_subtype);
+        OGR_L_CreateField(m_layer, hFieldDefn, TRUE);
+        OGR_Fld_Destroy(hFieldDefn);
+
+        field.m_index = OGR_F_GetFieldIndex(m_layerDefn, field.m_name.c_str());
+    }
 }
 
-int TIndexDataset::getFieldIdx(const std::string& fieldName) 
+TIndexFeature TIndexDataset::buildFeature()
 {
-    if (!m_layerDefn)
-        m_layerDefn = OGR_L_GetLayerDefn(m_layer);
-    return OGR_L_GetFieldIndex(m_layerDefn, name.c_str());
-}
-
-TIndexFeature TIndexDataset::buildFeature() 
-{
-    if (!m_layerDefn)
-        m_layerDefn = OGR_L_GetLayerDefn(m_layer);
     return TIndexFeature(m_layerDefn, m_maxFieldSize);
 }
 
-bool TIndexDataset::createFeature(TIndexFeature& feature) 
+bool TIndexDataset::createFeature(TIndexFeature& feature)
 {
     return (OGR_L_CreateFeature(m_layer, feature.getFeature()) == OGRERR_NONE);
 }
 
-bool TIndexDataset::queryLayer(const std::string& query) 
+bool TIndexDataset::queryLayer(const std::string& query)
 {
     OGRErr err = OGR_L_SetAttributeFilter(m_layer, query.c_str());
     if (err != OGRERR_NONE)

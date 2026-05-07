@@ -7,16 +7,15 @@ namespace pdal
 namespace tindex
 {
 
+struct Field;
+
 static const std::string STAC_VERSION = "1.1.0";
 
-class StacInfo
+struct StacFileInfo : FileInfo
 {
-public:
-    StacInfo() {}
-
-    void init(std::string const& filename)
+    StacFileInfo(const std::string& filename) : FileInfo(filename)
     {
-        // stacProjection & stacPointCloud need these set in the root metadata 
+        // stacProjection & stacPointCloud need these set in the root metadata
         // for it to work. Should refactor to be less metadata dependent
         m_root.add("filename", filename);
         MetadataNode self = m_root.addList("links");
@@ -48,7 +47,7 @@ public:
         return getChild(m_root, key);
     }
 
-    MetadataNodeList rootChildren(std::string key) 
+    MetadataNodeList rootChildren(std::string key)
     {
         return m_root.children(key);
     }
@@ -61,26 +60,30 @@ private:
     StringList m_extensions;
 };
 
-struct StacFileInfo : FileInfo
-{
-    StacInfo m_stacInfo;
-};
-
-class StacIndex : public TIndexBuilder
+class StacIndexBuilder : public TIndexBuilder
 {
 public:
-    StacIndex(const Args& args, const std::string& pcType);
-    ~StacIndex();
-    //void create(const StringList& files) override;
+    StacIndexBuilder(const Args& args, const std::string& pcType);
+
 private:
-    std::unique_ptr<FileInfo> makeFileInfo(const std::string& filename) override;
+    FileInfoPtr makeFileInfo(const std::string& filename) override;
     void getFileInfo(std::unique_ptr<FileInfo>& fileInfo) override;
     void createExtraFields(const std::unique_ptr<FileInfo>& fileInfo,
         TIndexFeature& feature) override;
 
     StringList m_extensions;
     std::string m_pcType;
-    //std::vector<StacInfo> m_stacInfos;
+    Field *m_srsField;
+    Field *m_datetimeField;
+    Field *m_linksField;
+    Field *m_idField;
+    Field *m_stacExtensionsField;
+    Field *m_stacVersionField;
+    Field *m_pcCountField;
+    Field *m_pcEncodingField;
+    Field *m_pcTypeField;
+    Field *m_pcSchemasField;
+    Field *m_pcStatsField;
 };
 
 } // namespace tindex

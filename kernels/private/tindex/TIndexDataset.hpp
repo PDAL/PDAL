@@ -2,6 +2,8 @@
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/gdal/SpatialRef.hpp>
 
+#include <deque>
+
 #include <ogr_api.h>
 
 #if __has_include(<gdal_fwd.h>)
@@ -25,12 +27,13 @@ namespace gdal
 namespace tindex
 {
 
+/**
 struct FieldInfo
 {
-    FieldInfo(const OGRFieldType fieldType) : m_fieldType(fieldType) 
+    FieldInfo(const OGRFieldType fieldType) : m_fieldType(fieldType)
     {}
-    FieldInfo(const OGRFieldType fieldType, const OGRFieldSubType subtype) 
-        : m_fieldType(fieldType), m_subtype(subtype) 
+    FieldInfo(const OGRFieldType fieldType, const OGRFieldSubType subtype)
+        : m_fieldType(fieldType), m_subtype(subtype)
     {}
     ~FieldInfo() {}
     void setIdx(int idx) { m_fieldIdx = idx; }
@@ -40,8 +43,20 @@ struct FieldInfo
     OGRFieldSubType m_subtype = OFSTNone;
     int m_fieldIdx = -1;
 };
-
 using FieldMap = std::map<std::string, FieldInfo>;
+**/
+
+struct Field
+{
+    Field(const std::string& name, OGRFieldType fieldType, OGRFieldSubType subtype = OFSTNone) :
+        m_name(name), m_fieldType(fieldType), m_subtype(subtype)
+    {}
+
+    std::string m_name;
+    OGRFieldType m_fieldType;
+    OGRFieldSubType m_subtype = OFSTNone;
+    int m_index = -1;  // Integer value proxy for field.
+};
 
 class TIndexFeature
 {
@@ -51,12 +66,12 @@ public:
 
     OGRFeatureH getFeature() { return m_feature; }
 
-    void setField(int fieldIdx, const std::string& value);
-    void setField(int fieldIdx, const StringList& values);
-    void setField(int fieldIdx, const int value);
-    void setField(int fieldIdx, const tm& tyme);
-    bool setGeometry(pdal::Polygon& polygon);
-    // add other types
+    void setField(Field *field, const std::string& value);
+    void setField(Field *field, const StringList& values);
+    void setField(Field *field, const int value);
+    void setField(Field *field, const tm& tyme);
+    bool setGeometry(const Polygon& polygon);
+
 private:
     OGRFeatureH m_feature;
     int m_maxFieldSize;
@@ -67,27 +82,20 @@ class TIndexDataset
 public:
     TIndexDataset(const std::string& idxFilename, const std::string& driverName);
     ~TIndexDataset();
-/*
-    void defineField(const std::string& name, const OGRFieldType fieldType)
-    {
-        
-    }
-    void defineField(const std::string& name, const OGRFieldType fieldType, 
-        const OGRFieldSubType subtype)
-    {
-        m_fields.try_emplace(name, fieldType, subtype);
-    }*/
+
     bool openDataset();
     bool createDataset();
     bool openLayer(const std::string& layerName);
-    bool createLayer(const std::string& layerName, const std::string& srsString, 
+    bool createLayer(const std::string& layerName, const std::string& srsString,
         const StringList& lcOptions);
-    void createField(const std::string& name, const OGRFieldType fieldType, 
-        const OGRFieldSubType subtype);
+    void createFields();
     TIndexFeature buildFeature();
     bool createFeature(TIndexFeature& feature);
     int getFieldIdx(const std::string& fieldName);
     bool queryLayer(const std::string& query);
+    Field *defineField(const std::string& name, const OGRFieldType fieldType);
+    Field *defineField(const std::string& name, const OGRFieldType fieldType,
+        const OGRFieldSubType subtype);
 
 private:
     OGRLayerH m_layer;
@@ -97,15 +105,7 @@ private:
     std::string m_idxFilename;
     std::string m_driverName;
     int m_maxFieldSize;
-    FieldMap m_fields;
-};
-
-//!! define this elsewhere, or use pdal_error or gdal::GDALError or something
-class TIndexError : public std::runtime_error
-{
-public:
-    TIndexError(const std::string txt) : std::runtime_error(txt)
-    {}
+    std::deque<Field> m_fields;
 };
 
 } // namespace tindex

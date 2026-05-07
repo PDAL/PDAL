@@ -7,7 +7,6 @@
 #include <pdal/Options.hpp>
 
 #include "TIndexBoundary.hpp"
-#include "TIndexDataset.hpp"
 
 // Get GDAL's forward decls if available
 // otherwise make our own
@@ -32,6 +31,10 @@ class StageFactory;
 
 namespace tindex
 {
+
+struct Field;
+class TIndexDataset;
+class TIndexFeature;
 
 // messy - only includes some args because we need to have defaults for stac
 // (column names, SRS) & don't want to override them if they come from here
@@ -71,43 +74,46 @@ struct FileInfo
     struct tm m_mtime;
     double m_gridHeight;
     bool m_isRemote = false;
+
+    FileInfo(const std::string& filename) : m_filename(filename)
+    {
+        m_isRemote = Utils::isRemote(filename);
+        if (!m_isRemote)
+            FileUtils::fileTimes(m_filename, &m_ctime, &m_mtime);
+    }
 };
+using FileInfoPtr = std::unique_ptr<FileInfo>;
 
 class TIndexBuilder
 {
 public:
     virtual ~TIndexBuilder();
 
-    //std::vector<FileInfo> merge(const StringList& files);
     void create(const StringList& files, PipelineManager& mgr);
-    const FieldMap& getFields() { return m_fields; }
 
 protected:
     TIndexBuilder(const Args& args, const std::string& tileIndexColumnName,
-        const std::string& srsColumnName, const std::string& driverName, 
+        const std::string& srsColumnName, const std::string& driverName,
         const std::string& tgtSrs, const std::string& assignSrs);
 
     bool runBoundary(Stage& stage, FileInfo& fileInfo,
         PipelineManager& manager);
 
-    std::vector<std::unique_ptr<FileInfo>> m_infos;
+    std::vector<FileInfoPtr> m_infos;
     std::unique_ptr<TIndexDataset> m_dataset;
-    FieldMap m_fields;
     Options m_commonOptions;
     OptionsMap m_stageOptions;
 
 private:
     virtual std::unique_ptr<FileInfo> makeFileInfo(const std::string& filename) = 0;
     virtual void getFileInfo(std::unique_ptr<FileInfo>& fileInfo) = 0;
-    virtual void createExtraFields(const std::unique_ptr<FileInfo>& fileInfo, 
+    virtual void createExtraFields(const std::unique_ptr<FileInfo>& fileInfo,
         TIndexFeature& feature) = 0;
 
-    void getFieldIndexes();
     bool fastBoundary(Stage& reader, FileInfo& fileInfo);
     bool createFeature(const std::unique_ptr<FileInfo>& fileInfo);
     bool isFileIndexed(const std::unique_ptr<FileInfo>& fileInfo);
-    pdal::Polygon prepareGeometry(const std::unique_ptr<FileInfo>& fileInfo);
-    std::string makeMultiPolygon(const std::string& wkt);
+    Polygon prepareGeometry(const FileInfo& fileInfo);
 
     const Args& m_args;
     std::string m_tileIndexColumnName;
@@ -117,20 +123,15 @@ private:
     std::string m_assignSrsString;
     std::string m_layerName;
     std::string m_originalSrs;
-    size_t m_maxFieldSize;
+
+    Field *m_tindexColumnNameField;
+    Field *m_srsColumnNameField;
 
     //
     // Only used in create()
     //
     LogPtr m_log;
     //StringList m_files;
-};
-
-class TIndexError : public std::runtime_error
-{
-public:
-    TIndexError(const std::string txt) : std::runtime_error(txt)
-    {}
 };
 
 } // namespace tindex

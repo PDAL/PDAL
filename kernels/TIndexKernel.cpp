@@ -45,12 +45,15 @@
 #include <pdal/private/gdal/GDALUtils.hpp>
 #include <pdal/private/gdal/SpatialRef.hpp>
 #include <kernels/private/tindex/TileIndex.hpp>
+#include <kernels/private/tindex/TIndexError.hpp>
 #include <kernels/private/tindex/StacIndex.hpp>
 
 #include "../io/LasWriter.hpp"
 
 #include <cpl_string.h>
 
+//ABELL - Does this need to be called somewhere?
+/**
 namespace
 {
 
@@ -62,7 +65,7 @@ void setDate(OGRFeatureH feature, const tm& tyme, int fieldNumber)
 }
 
 } // anonymous namespace
-
+**/
 
 namespace pdal
 {
@@ -193,7 +196,7 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
                 "--path_prefix options.");
         if (m_writeStacGeoparquet)
         {
-            //!! Not sure if we should add to the list or overwrite. Some user values 
+            //!! Not sure if we should add to the list or overwrite. Some user values
             //could potentially make the file invalid (i think only SORT_BY_BBOX=YES).
             m_args->lcOptions.push_back("WRITE_COVERING_BBOX=YES");
         }
@@ -412,9 +415,9 @@ void TIndexKernel::createFile()
     }
 
     if (m_writeStacGeoparquet)
-        m_tindex.reset(new tindex::StacIndex(*m_args, m_pcType));
+        m_tindex.reset(new tindex::StacIndexBuilder(*m_args, m_pcType));
     else
-        m_tindex.reset(new tindex::TileIndex(*m_args, m_tileIndexColumnName,
+        m_tindex.reset(new tindex::TileIndexBuilder(*m_args, m_tileIndexColumnName,
             m_srsColumnName, m_driverName, m_tgtSrsString, m_assignSrsString));
     try
     {
@@ -423,7 +426,7 @@ void TIndexKernel::createFile()
     catch(const tindex::TIndexError& e)
     {
         throw pdal_error(e.what());
-    }    
+    }
 }
 
 bool TIndexKernel::openDataset(const std::string& filename)
