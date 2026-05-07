@@ -1,46 +1,41 @@
 #include "StacIndex.hpp"
+#include "TIndexDataset.hpp"
 
 #include <ogr_api.h>
 #include <cpl_string.h>
 
 namespace pdal
 {
-namespace tindex   
+namespace tindex
 {
 
-StacIndex::StacIndex(const Args& args, const std::string& pcType)
+StacIndexBuilder::StacIndexBuilder(const Args& args, const std::string& pcType)
     : TIndexBuilder(args, "assets.data.href", "proj:wkt2", "Parquet", "EPSG:4326", "EPSG:4326"),
       m_pcType(pcType)
 {
     // Add STAC-specific fields
-    m_fields.try_emplace("proj:projjson", OFTString, OFSTJSON);
-    m_fields.emplace("datetime", OFTDateTime);
-    m_fields.try_emplace("links", OFTString, OFSTJSON);
-    m_fields.emplace("id", OFTString);
-    m_fields.emplace("stac_extensions", OFTStringList);
-    m_fields.emplace("stac_version", OFTString);
-    m_fields.emplace("pc:count", OFTInteger);
-    m_fields.emplace("pc:encoding", OFTString);
-    m_fields.emplace("pc:type", OFTString);
-    m_fields.try_emplace("pc:schemas", OFTString, OFSTJSON);
-    m_fields.try_emplace("pc:statistics", OFTString, OFSTJSON);
+    m_srsField = m_dataset->defineField("proj:projjson", OFTString, OFSTJSON);
+    m_datetimeField = m_dataset->defineField("datetime", OFTDateTime);
+    m_linksField = m_dataset->defineField("links", OFTString, OFSTJSON);
+    m_idField = m_dataset->defineField("id", OFTString);
+    m_stacExtensionsField = m_dataset->defineField("stac_extensions", OFTStringList);
+    m_stacVersionField = m_dataset->defineField("stac_version", OFTString);
+    m_pcCountField = m_dataset->defineField("pc:count", OFTInteger);
+    m_pcEncodingField = m_dataset->defineField("pc:encoding", OFTString);
+    m_pcTypeField = m_dataset->defineField("pc:type", OFTString);
+    m_pcSchemasField = m_dataset->defineField("pc:schemas", OFTString, OFSTJSON);
+    m_pcStatsField = m_dataset->defineField("pc:statistics", OFTString, OFSTJSON);
 
     m_extensions = { "https://stac-extensions.github.io/projection/v1.1.0/",
         "https://stac-extensions.github.io/pointcloud/v1.0.0/" };
 }
 
-StacIndex::~StacIndex()
-{}
-
-std::unique_ptr<FileInfo> StacIndex::makeFileInfo(const std::string& filename)
+FileInfoPtr StacIndexBuilder::makeFileInfo(const std::string& filename)
 {
-    auto info = std::make_unique<StacFileInfo>();
-    info->m_filename = filename;
-    info->m_stacInfo.init(filename);
-    return info;
+    return std::make_unique<StacFileInfo>(filename);
 }
 
-void StacIndex::getFileInfo(std::unique_ptr<FileInfo>& fileInfo)
+void StacIndexBuilder::getFileInfo(FileInfoPtr& fileInfo)
 {
     StacFileInfo& stacFileInfo = static_cast<StacFileInfo&>(*fileInfo);
 
@@ -57,50 +52,42 @@ void StacIndex::getFileInfo(std::unique_ptr<FileInfo>& fileInfo)
         MetadataNode readerMeta = reader.getMetadata();
         MetadataNode statsMeta = stats.getMetadata();
         MetadataNode infoMeta = info.getMetadata();
-        stacFileInfo.m_stacInfo.addMetadata(statsMeta, readerMeta, infoMeta, m_pcType);
+        stacFileInfo.addMetadata(statsMeta, readerMeta, infoMeta, m_pcType);
     }
 }
 
-void StacIndex::createExtraFields(const std::unique_ptr<FileInfo>& fileInfo, TIndexFeature& feature)
+void StacIndexBuilder::createExtraFields(const std::unique_ptr<FileInfo>& fileInfo,
+    TIndexFeature& feature)
 {
     // removing newlines to get rid of dead space in the parquet file. Not strictly necessary
-    auto stripNewline = [](std::string& s) {
-        s.erase(std::remove_if(s.begin(), s.end(), 
-            [](char c) { return c == '\n' || c == '\r'; }), s.end());
-        return s;
+    auto stripNewline = [](const std::string& s) -> std::string
+    {
+        std::string out;
+
+        for (char c : s)
+            if (c != '\n' && c != '\r')
+                out.push_back(c);
+        return out;
     };
 
     StacFileInfo& stacFileInfo = static_cast<StacFileInfo&>(*fileInfo);
-    StacInfo& stacInfo = stacFileInfo.m_stacInfo;
 
-    std::string linksJson = Utils::toJSON(stacInfo.rootChildren("links"));
-    feature.setField(m_fields.at("links"), stripNewline(linksJson));
+    std::string linksJson = stripNewline(Utils::toJSON(stacFileInfo.rootChildren("links")));
+    std::string schema = stripNewline(Utils::toJSON(stacFileInfo.propertiesChildren("pc:schemas")));
+    std::string stats = stripNewline(Utils::toJSON(
+        stacFileInfo.propertiesChildren("pc:statistics")));
 
-    feature.setField(m_fields.at("id"), FileUtils::getFilename(stacFileInfo.m_filename));
-
-    feature.setField(m_fields.at("stac_version"), STAC_VERSION);
-
-    feature.setField(m_fields.at("stac_extensions"), m_extensions);
-
-    // Not added: proj:bbox, proj:geometry
-
-    std::string projJson = SpatialReference(stacFileInfo.m_srs).getPROJJSON();
-    feature.setField(m_fields.at("proj:projjson"), projJson);
- 
-    int pointCount = stacInfo.propertiesChild("pc:count").value<int>();
-    feature.setField(m_fields.at("pc:count"), pointCount);
-
-    std::string encoding = stacInfo.propertiesChild("pc:encoding").value();
-    feature.setField(m_fields.at("pc:encoding"), encoding);
-
-    feature.setField(m_fields.at("pc:type"), m_pcType);
-
+    feature.setField(m_linksField, linksJson);
+    feature.setField(m_idField, FileUtils::getFilename(stacFileInfo.m_filename));
+    feature.setField(m_stacVersionField, STAC_VERSION);
+    feature.setField(m_stacExtensionsField, m_extensions);
+    feature.setField(m_srsField, SpatialReference(stacFileInfo.m_srs).getPROJJSON());
+    feature.setField(m_pcCountField, stacFileInfo.propertiesChild("pc:count").value<int>());
+    feature.setField(m_pcEncodingField, stacFileInfo.propertiesChild("pc:encoding").value());
+    feature.setField(m_pcTypeField, m_pcType);
     // Not sure if schema and statistics need to be native parquet lists or if json is ok
-    std::string schema = Utils::toJSON(stacInfo.propertiesChildren("pc:schemas"));
-    feature.setField(m_fields.at("pc:schemas"), stripNewline(schema));
-
-    std::string statistics = Utils::toJSON(stacInfo.propertiesChildren("pc:statistics"));
-    feature.setField(m_fields.at("pc:statistics"), stripNewline(statistics));
+    feature.setField(m_pcSchemasField, schema);
+    feature.setField(m_pcStatsField, stats);
 }
 
 } // namespace pdal
