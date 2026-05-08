@@ -8,9 +8,21 @@ endif(STANDALONE)
 
 include(${PDAL_CMAKE_DIR}/spz.cmake)
 if (NOT PDAL_HAVE_SPZ)
-    message("Can't find SPZ support required by SPZ plugin.")
+    message(FATAL_ERROR "Can't find SPZ support required by SPZ plugin.")
 else()
     set(SPZ_LIBRARIES spz::spz)
+endif()
+
+get_target_property(SPZ_INCLUDE_DIR spz::spz INTERFACE_INCLUDE_DIRECTORIES)
+
+# version < 3.0.0: do nothing
+if (EXISTS "${SPZ_INCLUDE_DIR}/load-spz.h")
+    set(SPZ_INCLUDE_DIR "${SPZ_INCLUDE_DIR}")
+# version >= 3.0.0: new include location
+elseif (EXISTS "${SPZ_INCLUDE_DIR}/spz/load-spz.h")
+    set(SPZ_INCLUDE_DIR "${SPZ_INCLUDE_DIR}/spz")
+else()
+    message(FATAL_ERROR "Could not find expected include layout for SPZ library.")
 endif()
 
 PDAL_ADD_PLUGIN(spz_reader reader spz
@@ -22,7 +34,7 @@ PDAL_ADD_PLUGIN(spz_reader reader spz
     INCLUDES
         ${PDAL_VENDOR_DIR}
         ${NLOHMANN_INCLUDE_DIR}
-        spz/src/cc
+        ${SPZ_INCLUDE_DIR}
 )
 
 PDAL_ADD_PLUGIN(spz_writer writer spz
@@ -34,7 +46,7 @@ PDAL_ADD_PLUGIN(spz_writer writer spz
     INCLUDES
         ${PDAL_VENDOR_DIR}
         ${NLOHMANN_INCLUDE_DIR}
-        spz/src/cc
+        ${SPZ_INCLUDE_DIR}
 )
 
 if (WITH_TESTS)
@@ -46,7 +58,7 @@ if (WITH_TESTS)
             ${spz_reader}
         INCLUDES
             ${PROJECT_SOURCE_DIR}/plugins/spz/io
-            spz/src/cc
+            ${SPZ_INCLUDE_DIR}
     )
 
     PDAL_ADD_TEST(pdal_io_spz_writer_test
@@ -58,6 +70,6 @@ if (WITH_TESTS)
             ${spz_reader}
         INCLUDES
             ${PROJECT_SOURCE_DIR}/plugins/spz/io
-            spz/src/cc
+            ${SPZ_INCLUDE_DIR}
         )
 endif()
