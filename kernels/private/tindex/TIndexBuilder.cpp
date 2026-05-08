@@ -1,6 +1,6 @@
 #include "TIndexBuilder.hpp"
 #include "TIndexBoundary.hpp"
-#include "TIndexDataset.hpp"
+#include "Dataset.hpp"
 #include "TIndexError.hpp"
 
 #include <pdal/Polygon.hpp>
@@ -24,7 +24,7 @@ namespace tindex
 TIndexBuilder::TIndexBuilder(const Args& args, const std::string& tileIndexColumnName,
         const std::string& srsColumnName, const std::string& driverName, const std::string& tgtSrs,
         const std::string& assignSrs)
-    : m_dataset(new TIndexDataset(args.idxFilename, driverName)),
+    : m_dataset(new Dataset(args.idxFilename, driverName)),
       m_args(std::move(args)),
       m_tileIndexColumnName(tileIndexColumnName),
       m_srsColumnName(srsColumnName),
@@ -107,7 +107,7 @@ void TIndexBuilder::create(const StringList& files, PipelineManager& mgr)
         throw TIndexError("Couldn't index any files.");
 }
 
-bool TIndexBuilder::createFeature(const std::unique_ptr<FileInfo>& fileInfo)
+bool TIndexBuilder::createFeature(const FileInfoPtr& fileInfo)
 {
 
     if (fileInfo->m_srs.empty() || m_args.overrideASrs)
@@ -131,7 +131,7 @@ bool TIndexBuilder::createFeature(const std::unique_ptr<FileInfo>& fileInfo)
             return false;
     }
 
-    TIndexFeature feature = m_dataset->buildFeature();
+    Feature feature = m_dataset->buildFeature();
     feature.setField(m_tindexColumnNameField, fileInfo->m_filename);
     feature.setField(m_srsColumnNameField, SpatialReference(fileInfo->m_srs).getWKT());
     createExtraFields(fileInfo, feature);
@@ -149,7 +149,7 @@ bool TIndexBuilder::createFeature(const std::unique_ptr<FileInfo>& fileInfo)
 }
 
 
-bool TIndexBuilder::isFileIndexed(const std::unique_ptr<FileInfo>& fileInfo)
+bool TIndexBuilder::isFileIndexed(const FileInfoPtr& fileInfo)
 {
     std::ostringstream qstring;
 
@@ -206,7 +206,10 @@ bool TIndexBuilder::runBoundary(Stage& stage, FileInfo& fileInfo,
     }
 
     if (fast)
-        return fastBoundary(stage, fileInfo);
+    {
+        Stage* reader = manager.stages().front();
+        return fastBoundary(*reader, fileInfo);
+    }
     return true;
 }
 

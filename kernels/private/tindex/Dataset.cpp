@@ -1,5 +1,5 @@
 
-#include "TIndexDataset.hpp"
+#include "Dataset.hpp"
 #include "TIndexError.hpp"
 
 #include <pdal/Polygon.hpp>
@@ -12,21 +12,21 @@ namespace pdal
 namespace tindex
 {
 ///
-/// TIndexFeature
+/// Feature
 ///
 
-TIndexFeature::TIndexFeature(OGRFeatureDefnH layerDefn, int maxFieldSize)
+Feature::Feature(OGRFeatureDefnH layerDefn, int maxFieldSize)
     : m_maxFieldSize(maxFieldSize)
 {
     m_feature = OGR_F_Create(layerDefn);
 }
 
-TIndexFeature::~TIndexFeature()
+Feature::~Feature()
 {
     OGR_F_Destroy(m_feature);
 }
 
-void TIndexFeature::setField(Field *field, const std::string& value)
+void Feature::setField(Field *field, const std::string& value)
 {
     if (m_maxFieldSize == 0 || value.size() <= (size_t)m_maxFieldSize)
     {
@@ -41,7 +41,7 @@ void TIndexFeature::setField(Field *field, const std::string& value)
     }
 }
 
-void TIndexFeature::setField(Field *field, const StringList& values)
+void Feature::setField(Field *field, const StringList& values)
 {
     char** csl = NULL;
     for (const std::string& s : values)
@@ -49,29 +49,29 @@ void TIndexFeature::setField(Field *field, const StringList& values)
     OGR_F_SetFieldStringList(m_feature, field->m_index, csl);
 }
 
-void TIndexFeature::setField(Field *field, const int value)
+void Feature::setField(Field *field, const int value)
 {
     OGR_F_SetFieldInteger(m_feature, field->m_index, value);
 }
 
-void TIndexFeature::setField(Field *field, const tm& tyme)
+void Feature::setField(Field *field, const tm& tyme)
 {
     OGR_F_SetFieldDateTime(m_feature, field->m_index,
         tyme.tm_year + 1900, tyme.tm_mon + 1, tyme.tm_mday, tyme.tm_hour,
         tyme.tm_min, tyme.tm_sec, 100);
 }
 
-bool TIndexFeature::setGeometry(const Polygon& polygon)
+bool Feature::setGeometry(const Polygon& polygon)
 {
     return OGR_F_SetGeometry(m_feature, const_cast<Polygon &>(polygon).getOGRHandle()) ==
         OGRERR_NONE;
 }
 
 ///
-/// TIndexDataset
+/// Dataset
 ///
 
-TIndexDataset::TIndexDataset(const std::string& idxFilename, const std::string& driverName)
+Dataset::Dataset(const std::string& idxFilename, const std::string& driverName)
     : m_layer(nullptr),
       m_dataset(nullptr),
       m_layerDefn(nullptr),
@@ -83,30 +83,30 @@ TIndexDataset::TIndexDataset(const std::string& idxFilename, const std::string& 
         m_maxFieldSize = 254;
 }
 
-TIndexDataset::~TIndexDataset()
+Dataset::~Dataset()
 {
     if (m_dataset)
         OGR_DS_Destroy(m_dataset);
 }
 
-Field *TIndexDataset::defineField(const std::string& name, const OGRFieldType fieldType)
+Field *Dataset::defineField(const std::string& name, const OGRFieldType fieldType)
 {
     return &m_fields.emplace_back(name, fieldType);
 }
 
-Field *TIndexDataset::defineField(const std::string& name, const OGRFieldType fieldType,
+Field *Dataset::defineField(const std::string& name, const OGRFieldType fieldType,
         const OGRFieldSubType subtype)
 {
     return &m_fields.emplace_back(name, fieldType, subtype);
 }
 
-bool TIndexDataset::openDataset()
+bool Dataset::openDataset()
 {
     m_dataset = OGROpen(m_idxFilename.c_str(), TRUE, NULL);
     return (bool)m_dataset;
 }
 
-bool TIndexDataset::openLayer(const std::string& layerName)
+bool Dataset::openLayer(const std::string& layerName)
 {
     if (OGR_DS_GetLayerCount(m_dataset) == 1)
         m_layer = OGR_DS_GetLayer(m_dataset, 0);
@@ -116,7 +116,7 @@ bool TIndexDataset::openLayer(const std::string& layerName)
     return (bool)m_layer;
 }
 
-bool TIndexDataset::createDataset()
+bool Dataset::createDataset()
 {
     OGRSFDriverH hDriver = OGRGetDriverByName(m_driverName.c_str());
     if (!hDriver)
@@ -132,7 +132,7 @@ bool TIndexDataset::createDataset()
     return (bool)m_dataset;
 }
 
-bool TIndexDataset::createLayer(const std::string& layerName, const std::string& srsString,
+bool Dataset::createLayer(const std::string& layerName, const std::string& srsString,
     const StringList& lcOptions)
 {
     gdal::SpatialRef srs(srsString);
@@ -152,7 +152,7 @@ bool TIndexDataset::createLayer(const std::string& layerName, const std::string&
     return (bool)m_layer;
 }
 
-void TIndexDataset::createFields()
+void Dataset::createFields()
 {
     for (Field& field : m_fields)
     {
@@ -170,17 +170,17 @@ void TIndexDataset::createFields()
     }
 }
 
-TIndexFeature TIndexDataset::buildFeature()
+Feature Dataset::buildFeature()
 {
-    return TIndexFeature(m_layerDefn, m_maxFieldSize);
+    return Feature(m_layerDefn, m_maxFieldSize);
 }
 
-bool TIndexDataset::createFeature(TIndexFeature& feature)
+bool Dataset::createFeature(Feature& feature)
 {
     return (OGR_L_CreateFeature(m_layer, feature.getFeature()) == OGRERR_NONE);
 }
 
-bool TIndexDataset::queryLayer(const std::string& query)
+bool Dataset::queryLayer(const std::string& query)
 {
     OGRErr err = OGR_L_SetAttributeFilter(m_layer, query.c_str());
     if (err != OGRERR_NONE)

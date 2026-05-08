@@ -1,5 +1,5 @@
 #include "TileIndex.hpp"
-#include "TIndexDataset.hpp"
+#include "Dataset.hpp"
 
 #include <ogr_api.h>
 
@@ -17,12 +17,12 @@ TileIndexBuilder::TileIndexBuilder(const Args& args, const std::string& tileInde
     m_ctimeField = m_dataset->defineField("created", OFTDateTime);
 }
 
-std::unique_ptr<FileInfo> TileIndexBuilder::makeFileInfo(const std::string& filename)
+FileInfoPtr TileIndexBuilder::makeFileInfo(const std::string& filename)
 {
     return std::make_unique<FileInfo>(filename);
 }
 
-void TileIndexBuilder::getFileInfo(std::unique_ptr<FileInfo>& fileInfo)
+void TileIndexBuilder::getFileInfo(FileInfoPtr& fileInfo)
 {
     PipelineManager manager;
     manager.commonOptions() = m_commonOptions;
@@ -32,8 +32,8 @@ void TileIndexBuilder::getFileInfo(std::unique_ptr<FileInfo>& fileInfo)
     runBoundary(reader, *fileInfo, manager);
 }
 
-void TileIndexBuilder::createExtraFields(const std::unique_ptr<FileInfo>& fileInfo,
-    TIndexFeature& feature)
+void TileIndexBuilder::createExtraFields(const FileInfoPtr& fileInfo,
+    Feature& feature)
 {
     feature.setField(m_mtimeField, fileInfo->m_ctime);
     feature.setField(m_ctimeField, fileInfo->m_mtime);

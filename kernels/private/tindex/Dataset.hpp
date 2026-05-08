@@ -27,25 +27,6 @@ namespace gdal
 namespace tindex
 {
 
-/**
-struct FieldInfo
-{
-    FieldInfo(const OGRFieldType fieldType) : m_fieldType(fieldType)
-    {}
-    FieldInfo(const OGRFieldType fieldType, const OGRFieldSubType subtype)
-        : m_fieldType(fieldType), m_subtype(subtype)
-    {}
-    ~FieldInfo() {}
-    void setIdx(int idx) { m_fieldIdx = idx; }
-    operator int() const { return m_fieldIdx; }
-
-    OGRFieldType m_fieldType;
-    OGRFieldSubType m_subtype = OFSTNone;
-    int m_fieldIdx = -1;
-};
-using FieldMap = std::map<std::string, FieldInfo>;
-**/
-
 struct Field
 {
     Field(const std::string& name, OGRFieldType fieldType, OGRFieldSubType subtype = OFSTNone) :
@@ -58,11 +39,11 @@ struct Field
     int m_index = -1;  // Integer value proxy for field.
 };
 
-class TIndexFeature
+class Feature
 {
 public:
-    TIndexFeature(OGRFeatureDefnH layerDefn, int maxFieldSize);
-    ~TIndexFeature();
+    Feature(OGRFeatureDefnH layerDefn, int maxFieldSize);
+    ~Feature();
 
     OGRFeatureH getFeature() { return m_feature; }
 
@@ -77,11 +58,11 @@ private:
     int m_maxFieldSize;
 };
 
-class TIndexDataset
+class Dataset
 {
 public:
-    TIndexDataset(const std::string& idxFilename, const std::string& driverName);
-    ~TIndexDataset();
+    Dataset(const std::string& idxFilename, const std::string& driverName);
+    ~Dataset();
 
     bool openDataset();
     bool createDataset();
@@ -89,8 +70,8 @@ public:
     bool createLayer(const std::string& layerName, const std::string& srsString,
         const StringList& lcOptions);
     void createFields();
-    TIndexFeature buildFeature();
-    bool createFeature(TIndexFeature& feature);
+    Feature buildFeature();
+    bool createFeature(Feature& feature);
     int getFieldIdx(const std::string& fieldName);
     bool queryLayer(const std::string& query);
     Field *defineField(const std::string& name, const OGRFieldType fieldType);

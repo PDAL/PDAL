@@ -33,8 +33,8 @@ namespace tindex
 {
 
 struct Field;
-class TIndexDataset;
-class TIndexFeature;
+class Dataset;
+class Feature;
 
 // messy - only includes some args because we need to have defaults for stac
 // (column names, SRS) & don't want to override them if they come from here
@@ -100,19 +100,19 @@ protected:
         PipelineManager& manager);
 
     std::vector<FileInfoPtr> m_infos;
-    std::unique_ptr<TIndexDataset> m_dataset;
+    std::unique_ptr<Dataset> m_dataset;
     Options m_commonOptions;
     OptionsMap m_stageOptions;
 
 private:
-    virtual std::unique_ptr<FileInfo> makeFileInfo(const std::string& filename) = 0;
-    virtual void getFileInfo(std::unique_ptr<FileInfo>& fileInfo) = 0;
-    virtual void createExtraFields(const std::unique_ptr<FileInfo>& fileInfo,
-        TIndexFeature& feature) = 0;
+    virtual FileInfoPtr makeFileInfo(const std::string& filename) = 0;
+    virtual void getFileInfo(FileInfoPtr& fileInfo) = 0;
+    virtual void createExtraFields(const FileInfoPtr& fileInfo,
+        Feature& feature) = 0;
 
     bool fastBoundary(Stage& reader, FileInfo& fileInfo);
-    bool createFeature(const std::unique_ptr<FileInfo>& fileInfo);
-    bool isFileIndexed(const std::unique_ptr<FileInfo>& fileInfo);
+    bool createFeature(const FileInfoPtr& fileInfo);
+    bool isFileIndexed(const FileInfoPtr& fileInfo);
     Polygon prepareGeometry(const FileInfo& fileInfo);
 
     const Args& m_args;

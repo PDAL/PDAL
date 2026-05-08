@@ -1,5 +1,5 @@
 #include "StacIndex.hpp"
-#include "TIndexDataset.hpp"
+#include "Dataset.hpp"
 
 #include <ogr_api.h>
 #include <cpl_string.h>
@@ -56,8 +56,8 @@ void StacIndexBuilder::getFileInfo(FileInfoPtr& fileInfo)
     }
 }
 
-void StacIndexBuilder::createExtraFields(const std::unique_ptr<FileInfo>& fileInfo,
-    TIndexFeature& feature)
+void StacIndexBuilder::createExtraFields(const FileInfoPtr& fileInfo,
+    Feature& feature)
 {
     // removing newlines to get rid of dead space in the parquet file. Not strictly necessary
     auto stripNewline = [](const std::string& s) -> std::string
@@ -73,15 +73,17 @@ void StacIndexBuilder::createExtraFields(const std::unique_ptr<FileInfo>& fileIn
     StacFileInfo& stacFileInfo = static_cast<StacFileInfo&>(*fileInfo);
 
     std::string linksJson = stripNewline(Utils::toJSON(stacFileInfo.rootChildren("links")));
-    std::string schema = stripNewline(Utils::toJSON(stacFileInfo.propertiesChildren("pc:schemas")));
+    std::string schema = stripNewline(Utils::toJSON(
+        stacFileInfo.propertiesChildren("pc:schemas")));
     std::string stats = stripNewline(Utils::toJSON(
         stacFileInfo.propertiesChildren("pc:statistics")));
+    std::string projJson = stripNewline(SpatialReference(stacFileInfo.m_srs).getPROJJSON());
 
     feature.setField(m_linksField, linksJson);
     feature.setField(m_idField, FileUtils::getFilename(stacFileInfo.m_filename));
     feature.setField(m_stacVersionField, STAC_VERSION);
     feature.setField(m_stacExtensionsField, m_extensions);
-    feature.setField(m_srsField, SpatialReference(stacFileInfo.m_srs).getPROJJSON());
+    feature.setField(m_srsField, projJson);
     feature.setField(m_pcCountField, stacFileInfo.propertiesChild("pc:count").value<int>());
     feature.setField(m_pcEncodingField, stacFileInfo.propertiesChild("pc:encoding").value());
     feature.setField(m_pcTypeField, m_pcType);

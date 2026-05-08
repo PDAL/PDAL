@@ -52,21 +52,6 @@
 
 #include <cpl_string.h>
 
-//ABELL - Does this need to be called somewhere?
-/**
-namespace
-{
-
-void setDate(OGRFeatureH feature, const tm& tyme, int fieldNumber)
-{
-    OGR_F_SetFieldDateTime(feature, fieldNumber,
-        tyme.tm_year + 1900, tyme.tm_mon + 1, tyme.tm_mday, tyme.tm_hour,
-        tyme.tm_min, tyme.tm_sec, 100);
-}
-
-} // anonymous namespace
-**/
-
 namespace pdal
 {
 

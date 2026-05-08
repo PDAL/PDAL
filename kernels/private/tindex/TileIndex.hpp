@@ -16,10 +16,10 @@ public:
         const std::string& assignSrs);
     //void create(const StringList& files) override;
 private:
-    std::unique_ptr<FileInfo> makeFileInfo(const std::string& filename) override;
-    void getFileInfo(std::unique_ptr<FileInfo>& fileInfo) override;
-    void createExtraFields(const std::unique_ptr<FileInfo>& fileInfo,
-        TIndexFeature& feature) override;
+    FileInfoPtr makeFileInfo(const std::string& filename) override;
+    void getFileInfo(FileInfoPtr& fileInfo) override;
+    void createExtraFields(const FileInfoPtr& fileInfo,
+        Feature& feature) override;
 
     Field *m_mtimeField;
     Field *m_ctimeField;

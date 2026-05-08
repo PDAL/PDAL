@@ -67,9 +67,9 @@ public:
 
 private:
     FileInfoPtr makeFileInfo(const std::string& filename) override;
-    void getFileInfo(std::unique_ptr<FileInfo>& fileInfo) override;
-    void createExtraFields(const std::unique_ptr<FileInfo>& fileInfo,
-        TIndexFeature& feature) override;
+    void getFileInfo(FileInfoPtr& fileInfo) override;
+    void createExtraFields(const FileInfoPtr& fileInfo,
+        Feature& feature) override;
 
     StringList m_extensions;
     std::string m_pcType;

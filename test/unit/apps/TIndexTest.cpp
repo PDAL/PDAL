@@ -69,7 +69,6 @@ TEST(TIndex, test1)
     Utils::run_shell_command(cmd, output);
     std::string::size_type pos = output.find("Merge filecount: 3");
     EXPECT_NE(pos, std::string::npos);
-    /*
     std::cout << "creating 3 tile index" << std::endl;
 
     cmd = Support::binpath("pdal") + " --verbose=info tindex merge " +
@@ -87,11 +86,11 @@ TEST(TIndex, test1)
     Utils::run_shell_command(cmd, output);
     pos = output.find("Merge filecount: 1");
     EXPECT_NE(pos, std::string::npos);
-*/
+
     FileUtils::deleteFile(outPoints);
     //FileUtils::deleteFile(outSpec);
 }
-/*
+
 TEST(TIndex, test2)
 {
     std::string inSpec(Support::datapath("tindex/*.txt"));
@@ -327,5 +326,22 @@ TEST(TIndex, test8)
     std::string desc = it->get<std::string>();
 
     EXPECT_EQ(desc, "foo");
+}
+
+/*
+// Testing stac-geoparquet
+TEST(TIndex, test9)
+{
+    std::string inSpec(Support::datapath("tindex/*.txt"));
+    std::string outSpec(Support::temppath("tindex.parquet"));
+
+    std::string cmd = Support::binpath("pdal") + " tindex create " +
+        outSpec + " \"" + inSpec + "\" --log=stdout " +
+        "--stac-geoparquet=true";
+
+    FileUtils::deleteFile(outSpec);
+    std::string output;
+    Utils::run_shell_command(cmd, output);
+    std::cout << output << std::endl;
 }
 */
