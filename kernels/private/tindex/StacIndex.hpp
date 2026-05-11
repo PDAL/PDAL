@@ -32,29 +32,42 @@ struct StacFileInfo : FileInfo
         stacPointcloud(m_root, statsMeta, infoMeta, m_properties, pcType);
     }
 
-    MetadataNode propertiesChild(std::string key)
+    std::string schemas()
     {
-        return getChild(m_properties, key);
+        return jsonElement(m_properties.children("pc:schemas"));
+    }
+    
+    std::string statistics()
+    {
+        return jsonElement(m_properties.children("pc:statistics"));
     }
 
-    MetadataNodeList propertiesChildren(std::string key)
+    int count()
     {
-        return m_properties.children(key);
+        return getChild(m_properties, "pc:count").value<int>();
     }
 
-    MetadataNode rootChild(std::string key)
+    std::string encoding()
     {
-        return getChild(m_root, key);
+        return getChild(m_properties, "pc:encoding").value();
     }
 
-    MetadataNodeList rootChildren(std::string key)
+    std::string links()
     {
-        return m_root.children(key);
+        return jsonElement(m_root.children("links"));
     }
 
     StringList extensions() const { return m_extensions; }
 
 private:
+    std::string jsonElement(MetadataNodeList node)
+    {
+        std::string jsonStr = Utils::toJSON(node);
+        jsonStr.erase(std::remove_if(jsonStr.begin(), jsonStr.end(), 
+            [](char c) { return c == '\n' || c == '\r'; }), jsonStr.end());
+
+        return jsonStr;
+    }
     MetadataNode m_root;
     MetadataNode m_properties;
     StringList m_extensions;

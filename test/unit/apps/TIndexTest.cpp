@@ -57,7 +57,6 @@ TEST(TIndex, test1)
 
     std::string output;
     Utils::run_shell_command(cmd, output);
-    std::cout << output << std::endl;
 
     cmd = Support::binpath("pdal") + " --verbose=info tindex merge " +
         outSpec + " " + outPoints + " --log=stdout "
@@ -325,7 +324,7 @@ TEST(TIndex, test8)
     EXPECT_EQ(desc, "foo");
 }
 
-/*
+
 // Testing stac-geoparquet
 TEST(TIndex, test9)
 {
@@ -341,4 +340,3 @@ TEST(TIndex, test9)
     Utils::run_shell_command(cmd, output);
     std::cout << output << std::endl;
 }
-*/

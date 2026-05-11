@@ -2,6 +2,7 @@
 #include "Dataset.hpp"
 
 #include <ogr_api.h>
+#include <gdal_version.h>
 #include <cpl_string.h>
 
 namespace pdal
@@ -13,6 +14,10 @@ StacIndexBuilder::StacIndexBuilder(const Args& args, const std::string& pcType)
     : TIndexBuilder(args, "assets.data.href", "proj:wkt2", "Parquet", "EPSG:4326", "EPSG:4326"),
       m_pcType(pcType)
 {
+#if GDAL_VERSION_NUM <= GDAL_COMPUTE_VERSION(3,9,0)
+    throw TIndexError("STAC GeoParquet support requires GDAL 3.9.0 or later");
+#endif
+
     // Add STAC-specific fields
     m_srsField = m_dataset->defineField("proj:projjson", OFTString, OFSTJSON);
     m_datetimeField = m_dataset->defineField("datetime", OFTDateTime);
@@ -59,37 +64,19 @@ void StacIndexBuilder::getFileInfo(FileInfoPtr& fileInfo)
 void StacIndexBuilder::createExtraFields(const FileInfoPtr& fileInfo,
     Feature& feature)
 {
-    // removing newlines to get rid of dead space in the parquet file. Not strictly necessary
-    auto stripNewline = [](const std::string& s) -> std::string
-    {
-        std::string out;
-
-        for (char c : s)
-            if (c != '\n' && c != '\r')
-                out.push_back(c);
-        return out;
-    };
-
     StacFileInfo& stacFileInfo = static_cast<StacFileInfo&>(*fileInfo);
 
-    std::string linksJson = stripNewline(Utils::toJSON(stacFileInfo.rootChildren("links")));
-    std::string schema = stripNewline(Utils::toJSON(
-        stacFileInfo.propertiesChildren("pc:schemas")));
-    std::string stats = stripNewline(Utils::toJSON(
-        stacFileInfo.propertiesChildren("pc:statistics")));
-    std::string projJson = stripNewline(SpatialReference(stacFileInfo.m_srs).getPROJJSON());
-
-    feature.setField(m_linksField, linksJson);
+    feature.setField(m_linksField, stacFileInfo.links());
     feature.setField(m_idField, FileUtils::getFilename(stacFileInfo.m_filename));
     feature.setField(m_stacVersionField, STAC_VERSION);
     feature.setField(m_stacExtensionsField, m_extensions);
-    feature.setField(m_srsField, projJson);
-    feature.setField(m_pcCountField, stacFileInfo.propertiesChild("pc:count").value<int>());
-    feature.setField(m_pcEncodingField, stacFileInfo.propertiesChild("pc:encoding").value());
+    feature.setField(m_srsField, SpatialReference(stacFileInfo.m_srs).getPROJJSON());
+    feature.setField(m_pcCountField, stacFileInfo.count());
+    feature.setField(m_pcEncodingField, stacFileInfo.encoding());
     feature.setField(m_pcTypeField, m_pcType);
     // Not sure if schema and statistics need to be native parquet lists or if json is ok
-    feature.setField(m_pcSchemasField, schema);
-    feature.setField(m_pcStatsField, stats);
+    feature.setField(m_pcSchemasField, stacFileInfo.schemas());
+    feature.setField(m_pcStatsField, stacFileInfo.statistics());
 }
 
 } // namespace pdal
