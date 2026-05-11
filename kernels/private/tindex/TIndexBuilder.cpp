@@ -107,6 +107,50 @@ void TIndexBuilder::create(const StringList& files, PipelineManager& mgr)
         throw TIndexError("Couldn't index any files.");
 }
 
+std::vector<FileInfo> TIndexBuilder::readIndex()
+{
+    if (!m_dataset->openDataset())
+    {
+        std::ostringstream out;
+        out << "Couldn't open index dataset file '" << m_args.idxFilename << "'.";
+        throw TIndexError(out.str());
+    }
+    if (!m_dataset->openLayer(m_args.layerName))
+    {
+        std::ostringstream out;
+        out << "Couldn't open layer '" << m_args.layerName <<
+            "' in output file '" << m_args.idxFilename << "'.";
+        throw TIndexError(out.str());
+    }
+
+    m_dataset->getFieldIndexes();
+
+    if (!m_args.wkt.empty())
+    {
+        pdal::Polygon g(m_args.wkt, m_tgtSrsString);
+        m_dataset->setSpatialFilter(g);
+    }
+
+    std::vector<FileInfo> files;
+
+    // Docs are bad here.  You need this call even if you haven't read anything
+    // or nothing happens.
+    m_dataset->resetReading();
+    while (true)
+    {
+        Feature feature = m_dataset->getNextFeature();
+        if (!feature.getFeature())
+            break;
+
+        FileInfo fileInfo(feature.getField(m_tindexColumnNameField));
+        fileInfo.m_srs =
+            feature.getField(m_srsColumnNameField);
+        files.push_back(fileInfo);
+    }
+
+    return files;
+}
+
 bool TIndexBuilder::createFeature(const FileInfoPtr& fileInfo)
 {
 

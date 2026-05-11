@@ -21,9 +21,19 @@ Feature::Feature(OGRFeatureDefnH layerDefn, int maxFieldSize)
     m_feature = OGR_F_Create(layerDefn);
 }
 
+//!! Max field size doesn't matter since this is for reading
+Feature::Feature(OGRFeatureH feature) 
+    : m_feature(feature), m_maxFieldSize(0)
+{}
+
 Feature::~Feature()
 {
     OGR_F_Destroy(m_feature);
+}
+
+std::string Feature::getField(Field *field)
+{
+    return OGR_F_GetFieldAsString(m_feature, field->m_index);
 }
 
 void Feature::setField(Field *field, const std::string& value)
@@ -79,6 +89,8 @@ Dataset::Dataset(const std::string& idxFilename, const std::string& driverName)
       m_driverName(driverName),
       m_maxFieldSize(0)
 {
+    gdal::registerDrivers();
+
     if (m_driverName == "ESRI Shapefile")
         m_maxFieldSize = 254;
 }
@@ -163,7 +175,13 @@ void Dataset::createFields()
     }
     // Once all the fields have been created, the final layerDefn is ready
     // & we can get the field indices
-    m_layerDefn = OGR_L_GetLayerDefn(m_layer);
+    getFieldIndexes();
+}
+
+void Dataset::getFieldIndexes()
+{
+    if (!m_layerDefn)
+        m_layerDefn = OGR_L_GetLayerDefn(m_layer);
     for (Field& field : m_fields)
     {
         field.m_index = OGR_FD_GetFieldIndex(m_layerDefn, field.m_name.c_str());
@@ -175,9 +193,24 @@ Feature Dataset::buildFeature()
     return Feature(m_layerDefn, m_maxFieldSize);
 }
 
+Feature Dataset::getNextFeature()
+{
+    return Feature(OGR_L_GetNextFeature(m_layer));
+}
+
+void Dataset::resetReading()
+{
+    OGR_L_ResetReading(m_layer);
+}
+
 bool Dataset::createFeature(Feature& feature)
 {
     return (OGR_L_CreateFeature(m_layer, feature.getFeature()) == OGRERR_NONE);
+}
+
+void Dataset::setSpatialFilter(const Polygon& polygon)
+{
+    OGR_L_SetSpatialFilter(m_layer, const_cast<Polygon &>(polygon).getOGRHandle());
 }
 
 bool Dataset::queryLayer(const std::string& query)

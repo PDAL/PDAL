@@ -90,6 +90,7 @@ public:
     virtual ~TIndexBuilder();
 
     void create(const StringList& files, PipelineManager& mgr);
+    std::vector<FileInfo> readIndex();
 
 protected:
     TIndexBuilder(const Args& args, const std::string& tileIndexColumnName,

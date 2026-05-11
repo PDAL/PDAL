@@ -37,8 +37,6 @@
 #include <memory>
 #include <vector>
 
-#include <ogr_api.h>
-
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Polygon.hpp>
 #include <pdal/util/FileUtils.hpp>
@@ -49,8 +47,6 @@
 #include <kernels/private/tindex/StacIndex.hpp>
 
 #include "../io/LasWriter.hpp"
-
-#include <cpl_string.h>
 
 namespace pdal
 {
@@ -70,8 +66,6 @@ TIndexKernel::TIndexKernel() : SubcommandKernel()
 //ABELL - need to option this.
     , m_srsColumnName("srs")
     , m_args(new tindex::Args())
-    , m_dataset(NULL)
-    , m_layer(NULL)
     , m_maxFieldSize(0)
 {}
 
@@ -195,23 +189,11 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
 
 int TIndexKernel::execute()
 {
-    gdal::registerDrivers();
-
     if (m_subcommand == "merge")
         mergeFile();
     else
-    {
-        try
-        {
-            createFile();
-        }
-        catch (pdal_error&)
-        {
-            if (m_dataset)
-                OGR_DS_Destroy(m_dataset);
-            throw;
-        }
-    }
+        createFile();
+
     return 0;
 }
 
@@ -244,90 +226,24 @@ StringList readFileList(const std::string& filename)
     return output;
 }
 
-
-bool TIndexKernel::isFileIndexed(const FieldIndexes& indexes,
-    const FileInfo& fileInfo)
-{
-    std::ostringstream qstring;
-
-    qstring << "\"" <<  Utils::toupper(m_tileIndexColumnName) << "\"=" <<
-        "'" << fileInfo.m_filename << "'";
-    std::string query = qstring.str();
-    OGRErr err = OGR_L_SetAttributeFilter(m_layer, query.c_str());
-    if (err != OGRERR_NONE)
-    {
-        std::ostringstream oss;
-        oss << "Unable to set attribute filter for file '" <<
-             fileInfo.m_filename << "'";
-        throw pdal_error(oss.str());
-    }
-
-    bool output(false);
-    OGR_L_ResetReading(m_layer);
-    auto hFeat = OGR_L_GetNextFeature(m_layer);
-    if( hFeat )
-    {
-        OGR_F_Destroy(hFeat);
-        output = true;
-    }
-    OGR_L_ResetReading(m_layer);
-    OGR_L_SetAttributeFilter(m_layer, NULL);
-    return output;
-}
-
-
 void TIndexKernel::mergeFile()
 {
     using namespace gdal;
 
     std::ostringstream out;
 
-    if (!openDataset(m_args->idxFilename))
+    std::vector<tindex::FileInfo> files;
+    try
     {
-        std::ostringstream out;
-        out << "Couldn't open index dataset file '" << m_args->idxFilename << "'.";
-        throw pdal_error(out.str());
+        // this should just be the base class but it's pure virtual
+        m_tindex.reset(new tindex::TileIndexBuilder(*m_args, m_tileIndexColumnName,
+            m_srsColumnName, m_driverName, m_tgtSrsString, m_assignSrsString));
+        files = m_tindex->readIndex();
     }
-    if (!openLayer(m_args->layerName))
+    catch (tindex::TIndexError& e)
     {
-        std::ostringstream out;
-        out << "Couldn't open layer '" << m_args->layerName <<
-            "' in output file '" << m_args->idxFilename << "'.";
-        throw pdal_error(out.str());
+        throw pdal_error(e.what());    
     }
-
-    FieldIndexes indexes = getFields();
-
-    if (!m_args->wkt.empty())
-    {
-        pdal::Polygon g(m_args->wkt, m_tgtSrsString);
-        OGR_L_SetSpatialFilter(m_layer, g.getOGRHandle());
-    }
-
-    std::vector<FileInfo> files;
-
-    // Docs are bad here.  You need this call even if you haven't read anything
-    // or nothing happens.
-    OGR_L_ResetReading(m_layer);
-    while (true)
-    {
-        OGRFeatureH feature = OGR_L_GetNextFeature(m_layer);
-        if (!feature)
-            break;
-
-        FileInfo fileInfo;
-        fileInfo.m_filename =
-            OGR_F_GetFieldAsString(feature, indexes.m_filename);
-        fileInfo.m_srs =
-            OGR_F_GetFieldAsString(feature, indexes.m_srs);
-        files.push_back(fileInfo);
-
-        OGR_F_Destroy(feature);
-    }
-
-    OGR_DS_Destroy(m_dataset);
-    m_dataset = nullptr;
-    m_layer = nullptr;
 
     m_log->get(LogLevel::Info) << "Merge filecount: " <<
         files.size() << std::endl;
@@ -413,56 +329,6 @@ void TIndexKernel::createFile()
         throw pdal_error(e.what());
     }
 }
-
-bool TIndexKernel::openDataset(const std::string& filename)
-{
-    m_dataset = OGROpen(filename.c_str(), TRUE, NULL);
-    return (bool)m_dataset;
-}
-
-
-bool TIndexKernel::openLayer(const std::string& layerName)
-{
-    if (OGR_DS_GetLayerCount(m_dataset) == 1)
-        m_layer = OGR_DS_GetLayer(m_dataset, 0);
-    else if (layerName.size())
-        m_layer = OGR_DS_GetLayerByName(m_dataset, m_args->layerName.c_str());
-
-    return (bool)m_layer;
-}
-
-TIndexKernel::FieldIndexes TIndexKernel::getFields()
-{
-    FieldIndexes indexes;
-
-    OGRFeatureDefnH fDefn = OGR_L_GetLayerDefn(m_layer);
-
-    indexes.m_filename = OGR_FD_GetFieldIndex(fDefn,
-        m_tileIndexColumnName.c_str());
-    if (indexes.m_filename < 0)
-    {
-        std::ostringstream out;
-
-        out << "Unable to find field '" << m_tileIndexColumnName <<
-            "' in file '" << m_args->idxFilename << "'.";
-        throw pdal_error(out.str());
-    }
-    indexes.m_srs = OGR_FD_GetFieldIndex(fDefn, m_srsColumnName.c_str());
-    if (indexes.m_srs < 0)
-    {
-        std::ostringstream out;
-
-        out << "Unable to find field '" << m_srsColumnName << "' in file '" <<
-            m_args->idxFilename << "'.";
-        throw pdal_error(out.str());
-    }
-
-    indexes.m_ctime = OGR_FD_GetFieldIndex(fDefn, "created");
-    indexes.m_mtime = OGR_FD_GetFieldIndex(fDefn, "modified");
-
-    return indexes;
-}
-
 
 
 } // namespace pdal

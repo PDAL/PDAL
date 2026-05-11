@@ -40,16 +40,6 @@
 #include <pdal/SubcommandKernel.hpp>
 #include <pdal/util/FileUtils.hpp>
 
-// Get GDAL's forward decls if available
-// otherwise make our own
-#if __has_include(<gdal_fwd.h>)
-#include <gdal_fwd.h>
-#else
-using OGRDataSourceH = void *;
-using OGRLayerH = void *;
-using OGRFeatureH = void *;
-#endif
-
 namespace pdal
 {
     class Polygon;
@@ -69,24 +59,6 @@ class StageFactory;
 
 class PDAL_EXPORT TIndexKernel : public SubcommandKernel
 {
-    struct FileInfo
-    {
-        std::string m_filename;
-        std::string m_srs;
-        std::string m_boundary;
-        double m_gridHeight;
-        struct tm m_ctime;
-        struct tm m_mtime;
-        bool m_isRemote = false;
-    };
-
-    struct FieldIndexes
-    {
-        int m_filename;
-        int m_srs;
-        int m_ctime;
-        int m_mtime;
-    };
 
 public:
     std::string getName() const;
@@ -101,11 +73,6 @@ private:
 
     void createFile();
     void mergeFile();
-    bool openDataset(const std::string& filename);
-    bool openLayer(const std::string& layerName);
-    FieldIndexes getFields();
-
-    bool isFileIndexed( const FieldIndexes& indexes, const FileInfo& fileInfo);
 
     std::string m_idxFilename;
     std::string m_filespec;
@@ -122,8 +89,6 @@ private:
     std::unique_ptr<tindex::Args> m_args;
     std::unique_ptr<tindex::TIndexBuilder> m_tindex;
 
-    OGRDataSourceH m_dataset;
-    OGRLayerH m_layer;
     std::string m_tgtSrsString;
     std::string m_assignSrsString;
     bool m_usestdin;

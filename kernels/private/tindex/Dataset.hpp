@@ -43,6 +43,7 @@ class Feature
 {
 public:
     Feature(OGRFeatureDefnH layerDefn, int maxFieldSize);
+    Feature(OGRFeatureH feature);
     ~Feature();
 
     OGRFeatureH getFeature() { return m_feature; }
@@ -51,6 +52,7 @@ public:
     void setField(Field *field, const StringList& values);
     void setField(Field *field, const int value);
     void setField(Field *field, const tm& tyme);
+    std::string getField(Field *field);
     bool setGeometry(const Polygon& polygon);
 
 private:
@@ -71,9 +73,12 @@ public:
         const StringList& lcOptions);
     void createFields();
     Feature buildFeature();
+    Feature getNextFeature();
+    void resetReading();
     bool createFeature(Feature& feature);
-    int getFieldIdx(const std::string& fieldName);
+    void getFieldIndexes();
     bool queryLayer(const std::string& query);
+    void setSpatialFilter(const Polygon& polygon);
     Field *defineField(const std::string& name, const OGRFieldType fieldType);
     Field *defineField(const std::string& name, const OGRFieldType fieldType,
         const OGRFieldSubType subtype);
