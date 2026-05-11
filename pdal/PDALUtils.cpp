@@ -190,10 +190,10 @@ std::string toJSON(const MetadataNodeList& mList)
 
 void toJSON(const MetadataNode& m, std::ostream& o)
 {
-    if (m.name().empty())
-        pdal::subnodesToJSON(m, o, 0);
-    else if (m.kind() == MetadataType::Array)
+    if (m.kind() == MetadataType::Array)
         pdal::arrayToJSON(m.children(), o, 0);
+    else if (m.name().empty())
+        pdal::subnodesToJSON(m, o, 0);
     else
     {
         o << "{" << std::endl;
