@@ -254,7 +254,7 @@ TEST(TIndex, test5)
     "--fast_boundary=true 2>&1";
 
     Utils::run_shell_command(cmd, output);
-    pos = output.find("supports a maximum of 254");
+    pos = output.find("exceeds supported length of 254.");
     EXPECT_NE(pos, std::string::npos);
     FileUtils::deleteDirectory(outSpec);
 }
