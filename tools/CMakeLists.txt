@@ -1,4 +1,6 @@
-add_subdirectory(lasdump)
+if (BUILD_TOOLS_LASDUMP)
+    add_subdirectory(lasdump)
+endif()
 if (BUILD_TOOLS_NITFWRAP)
     add_subdirectory(nitfwrap)
 endif()

@@ -119,6 +119,7 @@ private:
     std::string m_tileIndexColumnName;
     std::string m_srsColumnName;
     std::string m_wkt;
+    StringList m_lcOptions;
     BOX2D m_bounds;
     bool m_absPath;
     std::string m_prefix;

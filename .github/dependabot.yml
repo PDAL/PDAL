@@ -8,3 +8,7 @@ updates:
     directory: "/doc"
     schedule:
       interval: daily
+    groups:
+      all-actions:
+        patterns:
+          - "*"
