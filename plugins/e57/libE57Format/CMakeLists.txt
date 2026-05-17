@@ -206,8 +206,9 @@ install(
 )
 
 # ccache
-# Turns on ccache if found
-include( ccache )
+if ( E57_WITH_CCACHE )
+    include( ccache )
+endif()
 
 # Formatting
 include( ClangFormat )
