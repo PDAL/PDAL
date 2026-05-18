@@ -35,14 +35,11 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - uses: ilammy/msvc-dev-cmd@v1
-    - uses: mamba-org/setup-micromamba@v3
+    - uses: conda-incubator/setup-miniconda@v4
       with:
-        init-shell: bash
+        miniforge-version: latest
         environment-file: "scripts/ci/${{ matrix.type }}-environment.yml"
-        environment-name: "pdal-build"
-        cache-environment: true
-        cache-downloads: true
-
+        activate-environment: "pdal-build"
 
     - name: Setup
       run: |
