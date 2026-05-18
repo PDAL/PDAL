@@ -86,8 +86,6 @@ option(BUILD_PLUGIN_E57
     "Choose if e57 support should be built" FALSE)
 add_feature_info("E57 plugin" BUILD_PLUGIN_E57
     "read/write data to and from e57 format")
-option(WITH_CCACHE_E57
-    "Build libE57Format with Ccache" OFF)
 
 option(BUILD_PLUGIN_ARROW
     "Choose if Arrow support should be built" FALSE)

@@ -205,11 +205,6 @@ install(
         E57Format-export
 )
 
-# ccache
-if ( E57_WITH_CCACHE )
-    include( ccache )
-endif()
-
 # Formatting
 include( ClangFormat )
 
